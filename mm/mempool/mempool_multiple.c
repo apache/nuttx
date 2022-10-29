@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mm/mempool.h
+ * mm/mempool/mempool_multiple.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,202 +18,56 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MM_MEMPOOL_H
-#define __INCLUDE_NUTTX_MM_MEMPOOL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-
-#include <nuttx/queue.h>
-#include <nuttx/fs/procfs.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mm/mempool.h>
 
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
  ****************************************************************************/
 
-struct mempool_s;
-typedef CODE void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
-                                      size_t size);
-typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
-                                    FAR void *addr);
+#define SIZEOF_HEAD sizeof(FAR struct mempool_s *)
+#define MAX(a, b)   ((a) > (b) ? (a) : (b))
+#define MIN(a, b)   ((a) < (b) ? (a) : (b))
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
-struct mempool_procfs_entry_s
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static inline struct mempool_s *
+mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
 {
-  FAR const char *name;
-  FAR struct mempool_procfs_entry_s *next;
-};
-#endif
+  size_t right = mpool->npools;
+  size_t left = 0;
+  size_t mid;
 
-/* This structure describes memory buffer pool */
+  while (left < right)
+    {
+      mid = (left + right) >> 1;
+      if (mpool->pools[mid].bsize > size)
+        {
+          right = mid;
+        }
+      else
+        {
+          left = mid + 1;
+        }
+    }
 
-struct mempool_s
-{
-  size_t     bsize;      /* The size for every block in mempool */
-  size_t     ninitial;   /* The initialize number of block in normal mempool */
-  size_t     ninterrupt; /* The number of block in interrupt mempool */
-  size_t     nexpand;    /* The number of expand block every time for mempool */
-  bool       wait;       /* The flag of need to wait when mempool is empty */
-  mempool_alloc_t alloc; /* The alloc function for mempool */
-  mempool_free_t  free;  /* The free function for mempool */
+  if (left == mpool->npools)
+    {
+      return NULL;
+    }
 
-  /* Private data for memory pool */
-
-  sq_queue_t list;       /* The free block list in normal mempool */
-  sq_queue_t ilist;      /* The free block list in interrupt mempool */
-  sq_queue_t elist;      /* The expand block list for normal mempool */
-  size_t     nused;      /* The number of used block in mempool */
-  spinlock_t lock;       /* The protect lock to mempool */
-  sem_t      waitsem;    /* The semaphore of waiter get free block */
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
-  struct mempool_procfs_entry_s procfs; /* The entry of procfs */
-#endif
-};
-
-struct mempool_multiple_s
-{
-  FAR struct mempool_s *pools;  /* The memory pool array */
-  size_t                npools; /* The number of memory pool array elements */
-};
-
-struct mempoolinfo_s
-{
-  unsigned long arena;    /* This is the total size of mempool */
-  unsigned long ordblks;  /* This is the number of free blocks for normal mempool */
-  unsigned long iordblks; /* This is the number of free blocks for interrupt mempool */
-  unsigned long aordblks; /* This is the number of used blocks */
-  unsigned long sizeblks; /* This is the size of a mempool blocks */
-  unsigned long nwaiter;  /* This is the number of waiter for mempool */
-};
+  return &mpool->pools[left];
+}
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: mempool_init
- *
- * Description:
- *   Initialize a memory pool.
- *   The user needs to specify the initialization information of mempool
- *   including bsize, ninitial, nexpand, ninterrupt.
- *
- * Input Parameters:
- *   pool - Address of the memory pool to be used.
- *   name - The name of memory pool.
- *
- * Returned Value:
- *   Zero on success; A negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
-
-/****************************************************************************
- * Name: mempool_alloc
- *
- * Description:
- *   Allocate an block from a specific memory pool.
- *
- *   If there isn't enough memory blocks, This function will expand memory
- *   pool if nexpand isn't zero.
- *
- * Input Parameters:
- *   pool - Address of the memory pool to be used.
- *
- * Returned Value:
- *   The pointer to the allocated block on success; NULL on any failure.
- *
- ****************************************************************************/
-
-FAR void *mempool_alloc(FAR struct mempool_s *pool);
-
-/****************************************************************************
- * Name: mempool_free
- *
- * Description:
- *   Release an memory block to the pool.
- *
- * Input Parameters:
- *   pool - Address of the memory pool to be used.
- *   blk  - The pointer of memory block.
- ****************************************************************************/
-
-void mempool_free(FAR struct mempool_s *pool, FAR void *blk);
-
-/****************************************************************************
- * Name: mempool_info
- *
- * Description:
- *   mempool_info returns a copy of updated current mempool information.
- *
- * Input Parameters:
- *   pool    - Address of the memory pool to be used.
- *   info    - The pointer of mempoolinfo.
- *
- * Returned Value:
- *   OK on success; A negated errno value on any failure.
- ****************************************************************************/
-
-int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info);
-
-/****************************************************************************
- * Name: mempool_deinit
- *
- * Description:
- *   Deallocate a memory pool.
- *
- * Input Parameters:
- *   pool    - Address of the memory pool to be used.
- ****************************************************************************/
-
-int mempool_deinit(FAR struct mempool_s *pool);
-
-/****************************************************************************
- * Name: mempool_procfs_register
- *
- * Description:
- *   Add a new mempool entry to the procfs file system.
- *
- * Input Parameters:
- *   entry - Describes the entry to be registered.
- *   name  - The name of mempool.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
-void mempool_procfs_register(FAR struct mempool_procfs_entry_s *entry,
-                             FAR const char *name);
-#endif
-
-/****************************************************************************
- * Name: mempool_procfs_unregister
- *
- * Description:
- *   Remove a mempool entry from the procfs file system.
- *
- * Input Parameters:
- *   entry - Describes the entry to be unregistered.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
-void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
-#endif
 
 /****************************************************************************
  * Name: mempool_multiple_init
@@ -235,7 +89,28 @@ void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
  ****************************************************************************/
 
 int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
-                          FAR const char *name);
+                          FAR const char *name)
+{
+  int i;
+
+  DEBUGASSERT(mpool != NULL && mpool->pools != NULL);
+
+  for (i = 0; i < mpool->npools; i++)
+    {
+      int ret = mempool_init(mpool->pools + i, name);
+      if (ret < 0)
+        {
+          while (--i >= 0)
+            {
+              mempool_deinit(mpool->pools + i);
+            }
+
+          return ret;
+        }
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: mempool_multiple_alloc
@@ -256,7 +131,30 @@ int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
  ****************************************************************************/
 
 FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
-                                 size_t size);
+                                 size_t size)
+{
+  FAR struct mempool_s *end = mpool->pools + mpool->npools;
+  FAR struct mempool_s *pool;
+
+  pool = mempool_multiple_find(mpool, size + SIZEOF_HEAD);
+  if (pool == NULL)
+    {
+      return NULL;
+    }
+
+  do
+    {
+      FAR void *blk = mempool_alloc(pool);
+      if (blk != NULL)
+        {
+          *(FAR struct mempool_s **)blk = pool;
+          return (FAR char *)blk + SIZEOF_HEAD;
+        }
+    }
+  while (++pool < end);
+
+  return NULL;
+}
 
 /****************************************************************************
  * Name: mempool_multiple_realloc
@@ -275,7 +173,29 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
  ****************************************************************************/
 
 FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
-                                   FAR void *oldblk, size_t size);
+                                   FAR void *oldblk, size_t size)
+{
+  FAR void *blk;
+
+  if (size < 1)
+    {
+      mempool_multiple_free(mpool, oldblk);
+      return NULL;
+    }
+
+  blk = mempool_multiple_alloc(mpool, size);
+  if (blk != NULL && oldblk != NULL)
+    {
+      FAR struct mempool_s *oldpool;
+
+      oldpool = *(FAR struct mempool_s **)
+                ((FAR char *)oldblk - SIZEOF_HEAD);
+      memcpy(blk, oldblk, MIN(oldpool->bsize, size));
+      mempool_multiple_free(mpool, oldblk);
+    }
+
+  return blk;
+}
 
 /****************************************************************************
  * Name: mempool_multiple_free
@@ -290,7 +210,17 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
  ****************************************************************************/
 
 void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
-                           FAR void *blk);
+                           FAR void *blk)
+{
+  FAR struct mempool_s *pool;
+  FAR void *mem;
+
+  DEBUGASSERT(mpool != NULL && blk != NULL);
+
+  mem = (FAR char *)blk - SIZEOF_HEAD;
+  pool = *(FAR struct mempool_s **)mem;
+  mempool_free(pool, mem);
+}
 
 /****************************************************************************
  * Name: mempool_multiple_alloc_size
@@ -306,7 +236,17 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
  *
  ****************************************************************************/
 
-size_t mempool_multiple_alloc_size(FAR void *blk);
+size_t mempool_multiple_alloc_size(FAR void *blk)
+{
+  FAR struct mempool_s *pool;
+  FAR void *mem;
+
+  DEBUGASSERT(blk != NULL);
+
+  mem = (FAR char *)blk - SIZEOF_HEAD;
+  pool = *(FAR struct mempool_s **)mem;
+  return pool->bsize;
+}
 
 /****************************************************************************
  * Name: mempool_multiple_fixed_alloc
@@ -326,7 +266,18 @@ size_t mempool_multiple_alloc_size(FAR void *blk);
  ****************************************************************************/
 
 FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
-                                       size_t size);
+                                       size_t size)
+{
+  FAR struct mempool_s *pool;
+
+  pool = mempool_multiple_find(mpool, size);
+  if (pool == NULL)
+    {
+      return NULL;
+    }
+
+  return mempool_alloc(pool);
+}
 
 /****************************************************************************
  * Name: mempool_multiple_fixed_realloc
@@ -347,8 +298,25 @@ FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
 
 FAR void *
 mempool_multiple_fixed_realloc(FAR struct mempool_multiple_s *mpool,
-                               FAR void *oldblk, size_t oldsize,
-                               size_t size);
+                               FAR void *oldblk, size_t oldsize, size_t size)
+{
+  FAR void *blk;
+
+  if (size < 1)
+    {
+      mempool_multiple_fixed_free(mpool, oldblk, oldsize);
+      return NULL;
+    }
+
+  blk = mempool_multiple_fixed_alloc(mpool, size);
+  if (blk != NULL && oldblk != NULL)
+    {
+      memcpy(blk, oldblk, MIN(oldsize, size));
+      mempool_multiple_fixed_free(mpool, oldblk, oldsize);
+    }
+
+  return blk;
+}
 
 /****************************************************************************
  * Name: mempool_multiple_fixed_free
@@ -364,7 +332,16 @@ mempool_multiple_fixed_realloc(FAR struct mempool_multiple_s *mpool,
  ****************************************************************************/
 
 void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
-                                 FAR void *blk, size_t size);
+                                 FAR void *blk, size_t size)
+{
+  FAR struct mempool_s *pool;
+
+  DEBUGASSERT(mpool != NULL && blk != NULL);
+
+  pool = mempool_multiple_find(mpool, size);
+  DEBUGASSERT(pool != NULL);
+  mempool_free(pool, blk);
+}
 
 /****************************************************************************
  * Name: mempool_multiple_deinit
@@ -380,10 +357,24 @@ void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
  *
  ****************************************************************************/
 
-int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
+int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
+{
+  int i;
 
-#undef EXTERN
-#if defined(__cplusplus)
+  DEBUGASSERT(mpool != NULL);
+
+  for (i = 0; i < mpool->npools; i++)
+    {
+      if (mpool->pools[i].nused != 0)
+        {
+          return -EBUSY;
+        }
+    }
+
+  for (i = 0; i < mpool->npools; i++)
+    {
+      mempool_deinit(mpool->pools + i);
+    }
+
+  return 0;
 }
-#endif
-#endif

@@ -221,7 +221,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
            * the allocated flag.
            */
 
-          next->preceding = remaining | (next->preceding & MM_ALLOC_BIT);
+          next->preceding = remaining | (next->preceding & MM_MASK_BIT);
 
           /* Add the remainder back into the nodelist */
 

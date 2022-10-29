@@ -151,7 +151,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
     }
 
   prev = (FAR struct mm_freenode_s *)
-    ((FAR char *)oldnode - (oldnode->preceding & ~MM_ALLOC_BIT));
+    ((FAR char *)oldnode - (oldnode->preceding & ~MM_MASK_BIT));
   if ((prev->preceding & MM_ALLOC_BIT) == 0)
     {
       prevsize = prev->size;
@@ -253,7 +253,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               newnode->size      = oldsize + takeprev;
               newnode->preceding = prev->size | MM_ALLOC_BIT;
               next->preceding    = newnode->size |
-                                   (next->preceding & MM_ALLOC_BIT);
+                                   (next->preceding & MM_MASK_BIT);
 
               /* Return the previous free node to the nodelist
                * (with the new size)
@@ -268,7 +268,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               newnode->size      += oldsize;
               newnode->preceding |= MM_ALLOC_BIT;
               next->preceding     = newnode->size |
-                                    (next->preceding & MM_ALLOC_BIT);
+                                    (next->preceding & MM_MASK_BIT);
             }
 
           newmem = (FAR void *)((FAR char *)newnode + SIZEOF_MM_ALLOCNODE);
@@ -321,7 +321,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               DEBUGASSERT(newnode->size >= SIZEOF_MM_FREENODE);
               newnode->preceding   = oldnode->size;
               andbeyond->preceding = newnode->size |
-                                     (andbeyond->preceding & MM_ALLOC_BIT);
+                                     (andbeyond->preceding & MM_MASK_BIT);
 
               /* Add the new free node to the nodelist (with the new size) */
 
@@ -332,7 +332,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               /* Yes, just update some pointers. */
 
               andbeyond->preceding = oldnode->size |
-                                     (andbeyond->preceding & MM_ALLOC_BIT);
+                                     (andbeyond->preceding & MM_MASK_BIT);
             }
         }
 

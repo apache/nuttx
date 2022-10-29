@@ -95,7 +95,7 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
       newnode->preceding   = size;
       node->size           = size;
       andbeyond->preceding = newnode->size |
-                             (andbeyond->preceding & MM_ALLOC_BIT);
+                             (andbeyond->preceding & MM_MASK_BIT);
 
       /* Add the new node to the freenodelist */
 
@@ -121,7 +121,8 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
       newnode->size        = node->size - size;
       newnode->preceding   = size;
       node->size           = size;
-      next->preceding      = newnode->size | MM_ALLOC_BIT;
+      next->preceding      = newnode->size |
+                             (next->preceding & MM_MASK_BIT);
 
       /* Add the new node to the freenodelist */
 

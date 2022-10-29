@@ -181,6 +181,12 @@ config MPFS_EMMCSD_MUX_EMMC
 
 endchoice
 
+config MPFS_EMMCSD_CD
+	bool "Board supports card detect"
+	default y
+	---help---
+		Set to n if SD-card detect line is not connected
+
 config MPFS_ROMFS_MOUNT
 	bool "Mount the ROMFS file system"
 	depends on FS_ROMFS

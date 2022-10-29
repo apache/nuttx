@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_wait.c
+ * mm/umm_heap/umm_memdump.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,54 +23,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mm/mm.h>
 
-#include <sys/wait.h>
-#include <signal.h>
-#include <errno.h>
-
-#include <nuttx/sched.h>
-
-#include "sched/sched.h"
-
-#if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)
+#include "umm_heap/umm_heap.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wait
+ * Name: umm_memdump
  *
  * Description:
- *   The wait() function will suspend execution of the calling thread until
- *   status information for one of its terminated child processes is
- *   available, or until delivery of a signal whose action is either to
- *   execute a signal-catching function or to terminate the process. If more
- *   than one thread is suspended in wait() or waitpid() awaiting termination
- *   of the same process, exactly one thread will return the process status
- *   at the time of the target process termination. If status information is
- *   available prior to the call to wait(), return will be immediate.
- *
- *   The waitpid() function will behave identically to wait(), if the pid
- *   argument is INVALID_PROCESS_ID and the options argument is 0. Otherwise,
- *   its behaviour will be modified by the values of the pid and options
- *   arguments.
- *
- * Input Parameters:
- *   stat_loc - The location to return the exit status
- *
- * Returned Value:
- *   See waitpid();
+ *   Dump the memory block allocated by this task
  *
  ****************************************************************************/
 
-pid_t wait(FAR int *stat_loc)
+void umm_memdump(pid_t pid)
 {
-  /* wait() is a cancellation point, but nothings needs to be done for this
-   * trivial case.
-   */
-
-  return waitpid(INVALID_PROCESS_ID, stat_loc, 0);
+  mm_memdump(USR_HEAP, pid);
 }
-
-#endif /* CONFIG_SCHED_WAITPID && CONFIG_SCHED_HAVE_PARENT */
