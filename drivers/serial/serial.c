@@ -1604,21 +1604,20 @@ static void uart_launch_worker(void *arg)
   nxsched_foreach(uart_launch_foreach, &found);
   if (!found)
     {
-#ifdef CONFIG_TTY_LAUNCH_ENTRY
-      nxtask_create(CONFIG_TTY_LAUNCH_ENTRYNAME,
-                    CONFIG_TTY_LAUNCH_PRIORITY,
-                    NULL, CONFIG_TTY_LAUNCH_STACKSIZE,
-                    CONFIG_TTY_LAUNCH_ENTRYPOINT,
-                    argv, NULL);
-#else
       posix_spawnattr_t attr;
 
       posix_spawnattr_init(&attr);
-
       attr.priority  = CONFIG_TTY_LAUNCH_PRIORITY;
       attr.stacksize = CONFIG_TTY_LAUNCH_STACKSIZE;
-      exec_spawn(CONFIG_TTY_LAUNCH_FILEPATH, argv, NULL, 0, &attr);
+
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+      task_spawn(CONFIG_TTY_LAUNCH_ENTRYNAME,
+                 CONFIG_TTY_LAUNCH_ENTRYPOINT,
+                 NULL, &attr, argv, NULL);
+#else
+      exec_spawn(CONFIG_TTY_LAUNCH_FILEPATH, argv, NULL, NULL, 0, &attr);
 #endif
+      posix_spawnattr_destroy(&attr);
     }
 }
 

@@ -234,9 +234,7 @@ static inline void nx_start_application(void)
 #  endif
     NULL,
   };
-#endif
 
-#ifdef CONFIG_INIT_FILE
   posix_spawnattr_t attr;
 #endif
   int ret;
@@ -248,6 +246,10 @@ static inline void nx_start_application(void)
 
   board_late_initialize();
 #endif
+
+  posix_spawnattr_init(&attr);
+  attr.priority  = CONFIG_INIT_PRIORITY;
+  attr.stacksize = CONFIG_INIT_STACKSIZE;
 
 #if defined(CONFIG_INIT_ENTRY)
 
@@ -261,16 +263,14 @@ static inline void nx_start_application(void)
 
 #  ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  ret = nxtask_create(CONFIG_INIT_ENTRYNAME, CONFIG_INIT_PRIORITY,
-                      NULL, CONFIG_INIT_STACKSIZE,
-                      USERSPACE->us_entrypoint, argv, NULL);
+  ret = task_spawn(CONFIG_INIT_ENTRYNAME,
+                   USERSPACE->us_entrypoint,
+                   NULL, &attr, argv, NULL);
 #  else
-  ret = nxtask_create(CONFIG_INIT_ENTRYNAME, CONFIG_INIT_PRIORITY,
-                      NULL, CONFIG_INIT_STACKSIZE,
-                      CONFIG_INIT_ENTRYPOINT, argv, NULL);
+  ret = task_spawn(CONFIG_INIT_ENTRYNAME,
+                   CONFIG_INIT_ENTRYPOINT,
+                   NULL, &attr, argv, NULL);
 #  endif
-  DEBUGASSERT(ret > 0);
-
 #elif defined(CONFIG_INIT_FILE)
 
 #  ifdef CONFIG_INIT_MOUNT
@@ -296,10 +296,9 @@ static inline void nx_start_application(void)
 
   ret = exec_spawn(CONFIG_INIT_FILEPATH, argv, NULL,
                    CONFIG_INIT_SYMTAB, CONFIG_INIT_NEXPORTS, &attr);
-  DEBUGASSERT(ret >= 0);
 #endif
-
-  UNUSED(ret);
+  posix_spawnattr_destroy(&attr);
+  DEBUGASSERT(ret > 0);
 }
 
 /****************************************************************************
