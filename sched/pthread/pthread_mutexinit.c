@@ -108,7 +108,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 
       /* Initialize the mutex like a semaphore with initial count = 1 */
 
-      status = nxsem_init((FAR sem_t *)&mutex->sem, pshared, 1);
+      status = nxsem_init(&mutex->sem, pshared, 1);
       if (status < 0)
         {
           ret = -ret;
@@ -117,7 +117,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #ifdef CONFIG_PRIORITY_INHERITANCE
       /* Initialize the semaphore protocol */
 
-      status = nxsem_set_protocol((FAR sem_t *)&mutex->sem, proto);
+      status = nxsem_set_protocol(&mutex->sem, proto);
       if (status < 0)
         {
           ret = -status;

@@ -65,7 +65,7 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
     {
       /* Get the current value of the semaphore */
 
-      if (nxsem_get_value((FAR sem_t *)&cond->sem, &sval) != OK)
+      if (nxsem_get_value(&cond->sem, &sval) != OK)
         {
           ret = EINVAL;
         }
@@ -91,7 +91,7 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
           if (sval < 0)
             {
               sinfo("Signalling...\n");
-              ret = pthread_sem_give((FAR sem_t *)&cond->sem);
+              ret = pthread_sem_give(&cond->sem);
             }
         }
     }
