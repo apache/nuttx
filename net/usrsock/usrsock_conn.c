@@ -224,7 +224,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 
       if ((flags & USRSOCK_EVENT_REQ_COMPLETE) != 0)
         {
-          nxsem_wait_uninterruptible(&conn->resp.sem);
+          net_sem_wait_uninterruptible(&conn->resp.sem);
           pstate->unlock = true;
         }
 
