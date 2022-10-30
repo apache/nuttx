@@ -26,4 +26,12 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
+ifeq ($(CONFIG_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7565),y)
+CSRCS += stm32_lcd_st7565.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
