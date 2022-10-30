@@ -27,7 +27,7 @@
 
 #include <sys/types.h>
 
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -64,12 +64,12 @@ struct mempool_s
 
   /* Private data for memory pool */
 
-  sq_queue_t list;       /* The free block list in normal mempool */
-  sq_queue_t ilist;      /* The free block list in interrupt mempool */
-  sq_queue_t elist;      /* The expand block list for normal mempool */
-  size_t     nused;      /* The number of used block in mempool */
-  spinlock_t lock;       /* The protect lock to mempool */
-  sem_t      waitsem;    /* The semaphore of waiter get free block */
+  struct list_node list;    /* The free block list in normal mempool */
+  struct list_node ilist;   /* The free block list in interrupt mempool */
+  struct list_node elist;   /* The expand block list for normal mempool */
+  size_t           nused;   /* The number of used block in mempool */
+  spinlock_t       lock;    /* The protect lock to mempool */
+  sem_t            waitsem; /* The semaphore of waiter get free block */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
