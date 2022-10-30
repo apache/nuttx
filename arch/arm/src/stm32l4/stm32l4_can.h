@@ -44,8 +44,7 @@
 #  undef CONFIG_STM32L4_CAN1
 #endif
 
-#if defined(CONFIG_CAN) && defined(CONFIG_STM32L4_CAN1)
-
+#if defined(CONFIG_CAN) && (defined(CONFIG_STM32L4_CAN1) || defined(CONFIG_STM32L4_CAN2))
 /* CAN BAUD */
 
 #if defined(CONFIG_STM32L4_CAN1) && !defined(CONFIG_STM32L4_CAN1_BAUD)
