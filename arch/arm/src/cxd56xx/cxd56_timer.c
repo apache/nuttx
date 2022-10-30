@@ -379,8 +379,8 @@ static int cxd56_settimeout(struct timer_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > TIMER_MAXTIMEOUT)
     {
-      tmrerr("ERROR: Cannot represent timeout=%lu > %lu\n", timeout,
-             TIMER_MAXTIMEOUT);
+      tmrerr("ERROR: Cannot represent timeout=%" PRIu32 " > %lu\n",
+             timeout, TIMER_MAXTIMEOUT);
       return -ERANGE;
     }
 
