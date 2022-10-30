@@ -35,6 +35,12 @@
 #include "kasan/kasan.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -87,6 +93,36 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       mm_free(heap, oldmem);
       return NULL;
     }
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (MM_IS_FROM_MEMPOOL(oldmem))
+    {
+      newmem = mempool_multiple_realloc(&heap->mm_mpool, oldmem, size);
+      if (newmem != NULL)
+        {
+          return newmem;
+        }
+
+      newmem = mm_malloc(heap, size);
+      if (newmem != NULL)
+        {
+          memcpy(newmem, oldmem, mempool_multiple_alloc_size(oldmem));
+          mempool_multiple_free(&heap->mm_mpool, oldmem);
+        }
+
+      return newmem;
+    }
+  else
+    {
+      newmem = mempool_multiple_alloc(&heap->mm_mpool, size);
+      if (newmem != NULL)
+        {
+          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(oldmem)));
+          mm_free(heap, oldmem);
+          return newmem;
+        }
+    }
+#endif
 
   /* Adjust the size to account for (1) the size of the allocated node and
    * (2) to make sure that it is an even multiple of our granule size.

@@ -46,6 +46,13 @@ size_t mm_malloc_size(FAR void *mem)
       return 0;
     }
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (MM_IS_FROM_MEMPOOL(mem))
+    {
+      return mempool_multiple_alloc_size(mem);
+    }
+#endif
+
   /* Map the memory chunk into a free node */
 
   node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
