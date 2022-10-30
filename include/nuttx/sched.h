@@ -31,12 +31,13 @@
 #include <stdint.h>
 #include <sched.h>
 #include <signal.h>
-#include <semaphore.h>
 #include <pthread.h>
 #include <time.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
+#include <nuttx/mutex.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
@@ -460,7 +461,7 @@ struct task_group_s
 
                               /* Pthread join Info:                         */
 
-  sem_t tg_joinlock;              /* Mutually exclusive access to join data */
+  mutex_t tg_joinlock;            /* Mutually exclusive access to join data */
   FAR struct join_s *tg_joinhead; /* Head of a list of join data            */
   FAR struct join_s *tg_jointail; /* Tail of a list of join data            */
 #endif

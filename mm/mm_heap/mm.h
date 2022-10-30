@@ -197,7 +197,7 @@ struct mm_heap_s
    * the following un-named mutex.
    */
 
-  sem_t mm_lock;
+  mutex_t mm_lock;
 
   /* This is the size of the heap provided to mm */
 
