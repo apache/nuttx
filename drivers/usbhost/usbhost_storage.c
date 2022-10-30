@@ -197,7 +197,9 @@ static inline uint16_t usbhost_getle16(const uint8_t *val);
 static inline uint16_t usbhost_getbe16(const uint8_t *val);
 static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
 static inline void usbhost_putbe16(uint8_t *dest, uint16_t val);
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
 static inline uint32_t usbhost_getle32(const uint8_t *val);
+#endif
 static inline uint32_t usbhost_getbe32(const uint8_t *val);
 static void usbhost_putle32(uint8_t *dest, uint32_t val);
 static void usbhost_putbe32(uint8_t *dest, uint32_t val);
@@ -1468,6 +1470,7 @@ static void usbhost_putbe16(uint8_t *dest, uint16_t val)
  *
  ****************************************************************************/
 
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
 static inline uint32_t usbhost_getle32(const uint8_t *val)
 {
   /* Little endian means LS halfword first in byte stream */
@@ -1475,6 +1478,7 @@ static inline uint32_t usbhost_getle32(const uint8_t *val)
   return (uint32_t)usbhost_getle16(&val[2]) << 16 |
          (uint32_t)usbhost_getle16(val);
 }
+#endif
 
 /****************************************************************************
  * Name: usbhost_getbe32
