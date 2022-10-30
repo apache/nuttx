@@ -110,15 +110,10 @@ static void amebaz_state_deinit(struct amebaz_state_s *state)
   wd_cancel(&state->timeout);
 }
 
-static int amebaz_state_init(struct amebaz_state_s *state)
+static void amebaz_state_init(struct amebaz_state_s *state)
 {
-  if (nxsem_init(&state->sem, 0, 0) != OK)
-    {
-      return -ENOMEM;
-    }
-
   state->status = AMEBAZ_STATUS_DISABLED;
-  return 0;
+  nxsem_init(&state->sem, 0, 0);
 }
 
 void amebaz_wl_scan_handler(int index, union iwreq_data *wrqu, char *extra)
@@ -1083,20 +1078,15 @@ int amebaz_wl_get_freq(struct amebaz_dev_s *priv, struct iwreq *iwr)
 static struct amebaz_dev_s *amebaz_allocate_device(int devnum)
 {
   struct amebaz_dev_s *priv;
-  int ret;
+
   priv = (struct amebaz_dev_s *)kmm_zalloc(sizeof(*priv));
   if (!priv)
     {
       return NULL;
     }
 
-  ret = amebaz_state_init(&priv->scan);
-  ret |= amebaz_state_init(&priv->conn);
-  if (ret)
-    {
-      kmm_free(priv);
-      return NULL;
-    }
+  amebaz_state_init(&priv->scan);
+  amebaz_state_init(&priv->conn);
 
   memcpy(priv->country, AMEBAZ_DEFAULT_COUNTRY, 2);
   priv->devnum = devnum;
