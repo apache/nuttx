@@ -123,7 +123,7 @@ begin_packed_struct struct apicmd_sms_msg_s
     {
       /* SMS-DELIVER */
 
-      struct
+      begin_packed_struct struct
         {
           uint8_t valid_indicator;
           struct apicmd_sms_addr_s src_addr;
@@ -134,17 +134,19 @@ begin_packed_struct struct apicmd_sms_msg_s
           /* Variable length array */
 
           uint16_t user_data[0];
-        } recv;
+        }
+      end_packed_struct recv;
 
       /* SMS-STATUS-REPORT */
 
-      struct
+      begin_packed_struct struct
         {
           uint8_t status;
           struct apicmd_sms_time_s sc_time;
           uint8_t ref_id;
           struct apicmd_sms_time_s discharge_time;
-        } delivery_report;
+        }
+      end_packed_struct delivery_report;
     } u;
 } end_packed_struct;
 
