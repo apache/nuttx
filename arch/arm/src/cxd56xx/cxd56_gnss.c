@@ -2603,11 +2603,7 @@ static int cxd56_gnss_open(struct file *filep)
 
   if (priv->num_open == 0)
     {
-      ret = nxsem_init(&priv->syncsem, 0, 0);
-      if (ret < 0)
-        {
-          goto err0;
-        }
+      nxsem_init(&priv->syncsem, 0, 0);
 
       /* Prohibit the clock change during loading image */
 
@@ -2621,13 +2617,13 @@ static int cxd56_gnss_open(struct file *filep)
 
       if (ret < 0)
         {
-          goto err1;
+          goto err0;
         }
 
       ret = fw_pm_startcpu(CXD56_GNSS_GPS_CPUID, 1);
       if (ret < 0)
         {
-          goto err2;
+          goto err1;
         }
 
 #ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
@@ -2642,14 +2638,14 @@ static int cxd56_gnss_open(struct file *filep)
       ret = cxd56_gnss_wait_notify(&priv->syncsem, 5);
       if (ret < 0)
         {
-          goto err2;
+          goto err1;
         }
 
       ret = fw_gd_writebuffer(CXD56_CPU1_DATA_TYPE_INFO, 0,
                               &priv->shared_info, sizeof(priv->shared_info));
       if (ret < 0)
         {
-          goto err2;
+          goto err1;
         }
 
       nxsem_destroy(&priv->syncsem);
@@ -2658,14 +2654,13 @@ static int cxd56_gnss_open(struct file *filep)
   priv->num_open++;
   goto success;
 
-err2:
+err1:
 #ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
   fw_pm_sleepcpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_HOT_ENABLE);
 #endif
   fw_pm_sleepcpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_COLD);
-err1:
-  nxsem_destroy(&priv->syncsem);
 err0:
+  nxsem_destroy(&priv->syncsem);
 success:
   nxmutex_unlock(&priv->devlock);
   return ret;
@@ -3011,26 +3006,9 @@ static int cxd56_gnss_register(const char *devpath)
       return -ENOMEM;
     }
 
-  ret = nxmutex_init(&priv->devlock);
-  if (ret < 0)
-    {
-      gnsserr("Failed to initialize gnss devlock!\n");
-      goto err0;
-    }
-
-  ret = nxsem_init(&priv->apiwait, 0, 0);
-  if (ret < 0)
-    {
-      gnsserr("Failed to initialize gnss apiwait!\n");
-      goto err0;
-    }
-
-  ret = nxmutex_init(&priv->ioctllock);
-  if (ret < 0)
-    {
-      gnsserr("Failed to initialize gnss ioctllock!\n");
-      goto err0;
-    }
+  nxmutex_init(&priv->devlock);
+  nxsem_init(&priv->apiwait, 0, 0);
+  nxmutex_init(&priv->ioctllock);
 
   ret = cxd56_gnss_initialize(priv);
   if (ret < 0)
