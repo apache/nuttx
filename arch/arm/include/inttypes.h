@@ -29,91 +29,142 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#define signed      +0
+#define unsigned    +0
+#define int         +2
+#define long        +4
+
 #define PRId8       "d"
 #define PRId16      "d"
-#define PRId32      "ld"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define PRId32    "d"
+#else
+#  define PRId32    "ld"
+#endif
 #define PRId64      "lld"
-
 #define PRIdPTR     "d"
 
 #define PRIi8       "i"
 #define PRIi16      "i"
-#define PRIi32      "li"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define PRIi32    "i"
+#else
+#  define PRIi32    "li"
+#endif
 #define PRIi64      "lli"
-
 #define PRIiPTR     "i"
 
 #define PRIo8       "o"
 #define PRIo16      "o"
-#define PRIo32      "lo"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define PRIo32    "o"
+#else
+#  define PRIo32    "lo"
+#endif
 #define PRIo64      "llo"
-
 #define PRIoPTR     "o"
 
 #define PRIu8       "u"
 #define PRIu16      "u"
-#define PRIu32      "lu"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define PRIu32    "u"
+#else
+#  define PRIu32    "lu"
+#endif
 #define PRIu64      "llu"
-
 #define PRIuPTR     "u"
 
 #define PRIx8       "x"
 #define PRIx16      "x"
-#define PRIx32      "lx"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define PRIx32    "x"
+#else
+#  define PRIx32    "lx"
+#endif
 #define PRIx64      "llx"
-
 #define PRIxPTR     "x"
 
 #define PRIX8       "X"
 #define PRIX16      "X"
-#define PRIX32      "lX"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define PRIX32    "X"
+#else
+#  define PRIX32    "lX"
+#endif
 #define PRIX64      "llX"
-
 #define PRIXPTR     "X"
 
 #define SCNd8       "hhd"
 #define SCNd16      "hd"
-#define SCNd32      "ld"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define SCNd32    "d"
+#else
+#  define SCNd32    "ld"
+#endif
 #define SCNd64      "lld"
-
 #define SCNdPTR     "d"
 
 #define SCNi8       "hhi"
 #define SCNi16      "hi"
-#define SCNi32      "li"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define SCNi32    "i"
+#else
+#  define SCNi32    "li"
+#endif
 #define SCNi64      "lli"
-
 #define SCNiPTR     "i"
 
 #define SCNo8       "hho"
 #define SCNo16      "ho"
-#define SCNo32      "lo"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define SCNo32    "o"
+#else
+#  define SCNo32    "lo"
+#endif
 #define SCNo64      "llo"
-
 #define SCNoPTR     "o"
 
 #define SCNu8       "hhu"
 #define SCNu16      "hu"
-#define SCNu32      "lu"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define SCNu32    "u"
+#else
+#  define SCNu32    "lu"
+#endif
 #define SCNu64      "llu"
-
 #define SCNuPTR     "u"
 
 #define SCNx8       "hhx"
 #define SCNx16      "hx"
-#define SCNx32      "lx"
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define SCNx32    "x"
+#else
+#  define SCNx32    "lx"
+#endif
 #define SCNx64      "llx"
-
 #define SCNxPTR     "x"
 
 #define INT8_C(x)   x
 #define INT16_C(x)  x
-#define INT32_C(x)  x ## l
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define INT32_C(x) x
+#else
+#  define INT32_C(x) x ## l
+#endif
 #define INT64_C(x)  x ## ll
 
 #define UINT8_C(x)  x
 #define UINT16_C(x) x
-#define UINT32_C(x) x ## ul
+#if defined(__INT32_TYPE__) && __INT32_TYPE__ == int
+#  define UINT32_C(x) x ## u
+#else
+#  define UINT32_C(x) x ## ul
+#endif
 #define UINT64_C(x) x ## ull
+
+#undef signed
+#undef unsigned
+#undef int
+#undef long
 
 #endif /* __ARCH_ARM_INCLUDE_INTTYPES_H */
