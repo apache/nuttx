@@ -120,6 +120,14 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       return NULL;
     }
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  ret = mempool_multiple_alloc(&heap->mm_mpool, size);
+  if (ret != NULL)
+    {
+      return ret;
+    }
+#endif
+
   /* Adjust the size to account for (1) the size of the allocated node and
    * (2) to make sure that it is an even multiple of our granule size.
    */

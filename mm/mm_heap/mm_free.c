@@ -82,6 +82,14 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (MM_IS_FROM_MEMPOOL(mem))
+    {
+      mempool_multiple_free(&heap->mm_mpool, mem);
+      return;
+    }
+#endif
+
   if (mm_lock(heap) < 0)
     {
       /* Meet -ESRCH return, which means we are in situations

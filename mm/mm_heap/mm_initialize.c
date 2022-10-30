@@ -226,6 +226,20 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #  endif
 #endif
 
+  /* Initialize the multiple mempool in heap */
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  heap->mm_mpool.pools = heap->mm_pools;
+  heap->mm_mpool.npools = sizeof(heap->mm_pools) / sizeof(heap->mm_pools[0]);
+  for (i = 0; i < heap->mm_mpool.npools; i++)
+    {
+      heap->mm_pools[i].blocksize = (i + 1) * sizeof(uintptr_t);
+      heap->mm_pools[i].expandsize = CONFIG_MM_HEAP_MEMPOOL_EXPAND;
+    }
+
+  mempool_multiple_init(&heap->mm_mpool, name);
+#endif
+
   /* Add the initial region of memory to the heap */
 
   mm_addregion(heap, heapstart, heapsize);
