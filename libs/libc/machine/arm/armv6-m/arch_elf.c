@@ -423,8 +423,8 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 
         /* And perform the relocation */
 
-        binfo("  offset=%08lx branch target=%08lx\n",
-              (long)offset, offset + sym->st_value);
+        binfo("  offset=%08" PRIx32 " branch target=%08" PRIx32 "\n",
+              offset, offset + sym->st_value);
 
         offset += sym->st_value;
 
