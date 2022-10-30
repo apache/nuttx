@@ -172,6 +172,22 @@ config MM_SHM
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().
 
+config MM_HEAP_MEMPOOL_THRESHOLD
+	int "The size of threshold to avoid using multiple mempool in heap"
+	default 0
+	---help---
+		If the size of the memory requested by the user is less
+		than the threshold, the memory will be requested from the
+		multiple mempool by default.
+
+config MM_HEAP_MEMPOOL_EXPAND
+	int "The expand size for each mempool in multiple mempool"
+	default 1024
+	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
+	---help---
+		This size describes the size of each expansion of each memory
+		pool with insufficient memory in the multi-level memory pool.
+
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
 	default DEFAULT_SMALL

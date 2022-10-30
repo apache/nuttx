@@ -31,6 +31,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/lib/math32.h>
+#include <nuttx/mm/mempool.h>
 
 #include <assert.h>
 #include <execinfo.h>
@@ -133,6 +134,11 @@
 
 #define SIZEOF_MM_FREENODE sizeof(struct mm_freenode_s)
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#  define MM_IS_FROM_MEMPOOL(mem) \
+  ((*((FAR mmsize_t *)mem - 1) & MM_ALLOC_BIT) == 0)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -224,6 +230,14 @@ struct mm_heap_s
    */
 
   FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+
+  /* The is a multiple mempool of the heap */
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  struct mempool_multiple_s mm_mpool;
+  struct mempool_s mm_pools[CONFIG_MM_HEAP_MEMPOOL_THRESHOLD /
+                            sizeof(uintptr_t)];
+#endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
