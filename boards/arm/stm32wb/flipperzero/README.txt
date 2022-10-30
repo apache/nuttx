@@ -36,7 +36,7 @@ Device features
 Status
 ======
 
-  Oct 2022: initial nsh configuration.
+  Oct 2022: initial nsh configuration. LCD seems working.
 
 Programming
 ===========
@@ -58,3 +58,5 @@ Configurations
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
     configuration is focused on low level, command-line driver testing.
+
+        nsh> nxhello

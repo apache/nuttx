@@ -50,6 +50,17 @@
 
 void stm32wb_board_initialize(void)
 {
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function stm32_spidev_initialize() has been brought into the link.
+   */
+
+#ifdef CONFIG_SPI
+  if (stm32wb_spidev_initialize)
+    {
+      stm32wb_spidev_initialize();
+    }
+#endif
+
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS

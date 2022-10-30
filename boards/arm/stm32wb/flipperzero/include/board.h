@@ -45,6 +45,12 @@
 #define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6 */
 #define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
 
+/* SPI */
+
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_3      /* PD1 */
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_2     /* PC2 */
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1     /* PB15 */
+
 /* LEDs */
 
 /* LED index values for use with board_userled() */
@@ -73,6 +79,17 @@
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
+
+/* LCD */
+
+#define STM32WB_LCD_SPINO 2 /* SPI2 */
+
+#define STM32WB_LCD_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+                           GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN11)
+#define STM32WB_LCD_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
+#define STM32WB_LCD_A0    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
 
 /****************************************************************************
  * Public Data

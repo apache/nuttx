@@ -155,6 +155,14 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_LCD
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+    }
+#endif
+
 #ifdef CONFIG_STM32WB_BLE
   /* Initialize and register BLE HCI driver */
 

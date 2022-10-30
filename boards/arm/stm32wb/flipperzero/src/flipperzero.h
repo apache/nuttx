@@ -79,5 +79,17 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: stm32wb_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI
+void weak_function stm32wb_spidev_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32WB_FLIPPERZERO_SRC_FLIPPERZERO_H */
