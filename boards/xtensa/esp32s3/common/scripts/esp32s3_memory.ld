@@ -1,16 +1,12 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-eye/scripts/esp32s3.template.ld
+ * boards/xtensa/esp32s3/common/scripts/esp32s3_memory.ld
  * ESP32-S3 Linker Script Memory Layout
  *
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
  *
- * esp32s3.common.ld contains output sections to link compiler output
+ * esp32s3_sections.ld contains output sections to link compiler output
  * into these memory blocks.
- *
- * NOTE: That this is not the actual linker script but rather a "template"
- * for the esp32s3_out.ld script.  This template script is passed through
- * the C preprocessor to include selected configuration options.
  *
  ****************************************************************************/
 
