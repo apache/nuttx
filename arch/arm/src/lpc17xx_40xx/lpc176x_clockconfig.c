@@ -223,7 +223,7 @@ void lpc17_40_clockconfig(void)
           regval |= BOARD_FLASHCFG_VALUE;
         }
 
-      putreg32(BOARD_FLASHCFG_VALUE, LPC17_40_SYSCON_FLASHCFG);
+      putreg32(regval, LPC17_40_SYSCON_FLASHCFG);
     }
 #endif
 }
