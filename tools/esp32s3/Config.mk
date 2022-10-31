@@ -80,6 +80,10 @@ endif
 
 ESPTOOL_BINS += $(FLASH_APP)
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+	ESPTOOL_BINS += $(CONFIG_ESP32S3_USER_IMAGE_OFFSET) nuttx_user.bin
+endif
+
 # MERGEBIN -- Merge raw binary files into a single file
 
 define MERGEBIN

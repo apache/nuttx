@@ -32,13 +32,21 @@ ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_rom.ld
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_memory.ld),)
   ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_memory.ld
 else
-  ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_memory.ld
+  ifeq ($(CONFIG_BUILD_PROTECTED),y)
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected_memory.ld
+  else
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat_memory.ld
+  endif
 endif
 
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld),)
   ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld
 else
-  ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld
+  ifeq ($(CONFIG_BUILD_PROTECTED),y)
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
+  else
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld
+  endif
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
