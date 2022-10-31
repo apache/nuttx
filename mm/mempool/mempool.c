@@ -45,15 +45,19 @@ static inline void mempool_add_list(FAR struct list_node *list,
 }
 
 static inline FAR void *mempool_malloc(FAR struct mempool_s *pool,
-                                       size_t size)
+                                       size_t alignment, size_t size)
 {
   if (pool->alloc != NULL)
     {
-      return pool->alloc(pool, size);
+      return pool->alloc(pool, alignment, size);
+    }
+  else if (alignment == 0)
+    {
+      return kmm_malloc(size);
     }
   else
     {
-      return kmm_malloc(size);
+      return kmm_memalign(alignment, size);
     }
 }
 
@@ -92,7 +96,6 @@ static inline void mempool_mfree(FAR struct mempool_s *pool, FAR void *addr)
 
 int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 {
-  FAR struct list_node *base;
   size_t ninterrupt;
   size_t ninitial;
   size_t count;
@@ -109,20 +112,27 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   count = ninitial + ninterrupt;
   if (count != 0)
     {
-      base = mempool_malloc(pool, sizeof(*base) +
-                            pool->blocksize * count);
+      size_t alignment = 0;
+      FAR char *base;
+
+      if ((pool->blocksize & (pool->blocksize - 1)) == 0)
+        {
+          alignment = pool->blocksize;
+        }
+
+      base = mempool_malloc(pool, alignment, pool->blocksize * count +
+                                             sizeof(struct list_node));
       if (base == NULL)
         {
           return -ENOMEM;
         }
 
-      list_add_head(&pool->elist, base);
-      mempool_add_list(&pool->ilist, base + 1,
-                       ninterrupt, pool->blocksize);
-      mempool_add_list(&pool->list, (FAR char *)(base + 1) +
-                       ninterrupt * pool->blocksize,
+      mempool_add_list(&pool->ilist, base, ninterrupt, pool->blocksize);
+      mempool_add_list(&pool->list, base + ninterrupt * pool->blocksize,
                        ninitial, pool->blocksize);
-      kasan_poison(base + 1, pool->blocksize * count);
+      list_add_head(&pool->elist, (FAR struct list_node *)
+                                  (base + count * pool->blocksize));
+      kasan_poison(base, pool->blocksize * count);
     }
 
   if (pool->wait && pool->expandsize == 0)
@@ -180,18 +190,25 @@ retry:
           if (pool->expandsize != 0)
             {
               size_t nexpand = pool->expandsize / pool->blocksize;
-              blk = mempool_malloc(pool, sizeof(*blk) + pool->blocksize *
-                                   nexpand);
+              size_t alignment = 0;
+
+              if ((pool->blocksize & (pool->blocksize - 1)) == 0)
+                {
+                  alignment = pool->blocksize;
+                }
+
+              blk = mempool_malloc(pool, alignment,
+                                   pool->blocksize * nexpand + sizeof(*blk));
               if (blk == NULL)
                 {
                   return NULL;
                 }
 
-              kasan_poison(blk + 1, pool->blocksize * nexpand);
+              kasan_poison(blk, pool->blocksize * nexpand);
               flags = spin_lock_irqsave(&pool->lock);
-              list_add_head(&pool->elist, blk);
-              mempool_add_list(&pool->list, blk + 1, nexpand,
-                               pool->blocksize);
+              mempool_add_list(&pool->list, blk, nexpand, pool->blocksize);
+              list_add_head(&pool->elist, (FAR struct list_node *)
+                            ((FAR char *)blk + nexpand * pool->blocksize));
               blk = list_remove_head(&pool->list);
             }
           else if (!pool->wait ||
@@ -324,6 +341,9 @@ int mempool_info(FAR struct mempool_s *pool, struct mempoolinfo_s *info)
 int mempool_deinit(FAR struct mempool_s *pool)
 {
   FAR struct list_node *blk;
+  size_t ninterrupt;
+  size_t ninitial;
+  size_t count;
 
   DEBUGASSERT(pool != NULL);
 
@@ -336,10 +356,21 @@ int mempool_deinit(FAR struct mempool_s *pool)
   mempool_procfs_unregister(&pool->procfs);
 #endif
 
+  ninitial = pool->initialsize / pool->blocksize;
+  ninterrupt = pool->interruptsize / pool->blocksize;
+  count = ninitial + ninterrupt;
+  if (count == 0)
+    {
+      count = pool->expandsize / pool->blocksize;
+    }
+
   while ((blk = list_remove_head(&pool->elist)) != NULL)
     {
+      blk = (FAR struct list_node *)((FAR char *)blk -
+                                     count * pool->blocksize);
       kasan_unpoison(blk, mm_malloc_size(blk));
       mempool_mfree(pool, blk);
+      count = pool->expandsize / pool->blocksize;
     }
 
   if (pool->wait && pool->expandsize == 0)
