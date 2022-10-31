@@ -223,6 +223,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
       if (done)
         {
+          ret = OK;
           break;
         }
     }
@@ -232,7 +233,6 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
 void usrsock_register(void)
 {
-
   rpmsg_register_callback(&g_usrsock_rpmsg,
                           usrsock_rpmsg_device_created,
                           usrsock_rpmsg_device_destroy,
