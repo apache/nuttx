@@ -326,7 +326,6 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 /* (Little Endian) Data helpers */
 
 static inline uint16_t usbhost_getle16(const uint8_t *val);
-static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
 
 /* Transfer descriptor memory management */
 
@@ -1673,27 +1672,6 @@ errout:
 static inline uint16_t usbhost_getle16(const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
-}
-
-/****************************************************************************
- * Name: usbhost_putle16
- *
- * Description:
- *   Put a (possibly unaligned) 16-bit little endian value.
- *
- * Input Parameters:
- *   dest - A pointer to the first byte to save the little endian value.
- *   val - The 16-bit value to be saved.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void usbhost_putle16(uint8_t *dest, uint16_t val)
-{
-  dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
-  dest[1] = val >> 8;
 }
 
 /****************************************************************************
