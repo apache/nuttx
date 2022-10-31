@@ -30,10 +30,20 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
+#include "icmp/icmp.h"
 #include "nat/nat.h"
 #include "tcp/tcp.h"
 
 #if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* TODO: Why we limit to 32000 in net stack? */
+
+#define NAT_PORT_REASSIGN_MAX 32000
+#define NAT_PORT_REASSIGN_MIN 4096
 
 /****************************************************************************
  * Private Data
@@ -72,9 +82,9 @@ static uint16_t ipv4_nat_select_port_without_stack(
   uint16_t hport = NTOHS(portno);
   while (ipv4_nat_port_inuse(protocol, ip, portno))
     {
-      if (++hport >= 32000) /* TODO: Why we limit to 32000 in net stack? */
+      if (++hport >= NAT_PORT_REASSIGN_MAX)
         {
-          hport = 4096;
+          hport = NAT_PORT_REASSIGN_MIN;
         }
 
       portno = HTONS(hport);
@@ -139,7 +149,29 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_ICMP
-#     warning Missing logic
+      case IP_PROTO_ICMP:
+        {
+#ifdef CONFIG_NET_ICMP_SOCKET
+          uint16_t id = local_port;
+          uint16_t hid = NTOHS(id);
+          while (icmp_findconn(dev, id) ||
+                 ipv4_nat_port_inuse(IP_PROTO_ICMP, dev->d_draddr, id))
+            {
+              if (++hid >= NAT_PORT_REASSIGN_MAX)
+                {
+                  hid = NAT_PORT_REASSIGN_MIN;
+                }
+
+              id = HTONS(hid);
+            }
+
+          return id;
+#else
+          return ipv4_nat_select_port_without_stack(IP_PROTO_ICMP,
+                                                    dev->d_draddr,
+                                                    local_port);
+#endif
+        }
 #endif
     }
 
@@ -184,7 +216,10 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
 #endif
 
 #ifdef CONFIG_NET_ICMP
-#     warning Missing logic
+      case IP_PROTO_ICMP:
+        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
+                             CONFIG_NET_NAT_ICMP_EXPIRE_SEC;
+        break;
 #endif
   }
 }
