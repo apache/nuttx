@@ -214,7 +214,7 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
 
       oldpool = *(FAR struct mempool_s **)
                 ((FAR char *)oldblk - SIZEOF_HEAD);
-      memcpy(blk, oldblk, MIN(oldpool->blocksize, size));
+      memcpy(blk, oldblk, MIN(oldpool->blocksize - SIZEOF_HEAD, size));
       mempool_multiple_free(mpool, oldblk);
     }
 
