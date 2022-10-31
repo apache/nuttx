@@ -51,10 +51,11 @@
 #  error "IMAGER_SLEEP must be defined in board.h !!"
 #endif
 
-#define STANDBY_TIME                (600*1000) /* TODO: (max100ms/30fps)*/
-#define DEVICE_STARTUP_TIME           (6*1000) /* ms */
-#define SLEEP_CANCEL_TIME            (13*1000) /* ms */
-#define POWER_CHECK_TIME             (1*1000)  /* ms */
+#define STANDBY_TIME                (600 * 1000) /* TODO: (max100ms/30fps)*/
+#define DEVICE_STARTUP_TIME         (6 * 1000)   /* ms */
+#define SLEEP_CANCEL_TIME           (13 * 1000)  /* ms */
+#define POWER_CHECK_TIME            (1 * 1000)   /* ms */
+#define POWER_OFF_TIME              (50 * 1000)  /* ms */
 
 #define POWER_CHECK_RETRY           (10)
 
@@ -102,6 +103,10 @@ int board_isx012_power_off(void)
       _err("ERROR: Failed to power off ImageSensor. %d\n", ret);
       return -ENODEV;
     }
+
+  /* Need to wait for power-off to be reflected */
+
+  nxsig_usleep(POWER_OFF_TIME);
 
   ret = -ETIMEDOUT;
   for (i = 0; i < POWER_CHECK_RETRY; i++)
