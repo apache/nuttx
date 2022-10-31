@@ -200,16 +200,15 @@ int sockfd_socket(int sockfd, FAR struct socket **socketp)
 {
   FAR struct file *filep;
 
-  *socketp = NULL;
-
   if (fs_getfilep(sockfd, &filep) < 0)
     {
+      *socketp = NULL;
       return -EBADF;
     }
 
   *socketp = file_socket(filep);
 
-  return *socketp != NULL ? OK: -ENOTSOCK;
+  return *socketp != NULL ? OK : -ENOTSOCK;
 }
 
 /****************************************************************************
