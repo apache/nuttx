@@ -70,7 +70,7 @@
 
 int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 {
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
+  FAR struct posix_timer_s *timer = timer_gethandle(timerid);
   sclock_t ticks;
 
   if (!timer || !value)

@@ -156,7 +156,7 @@
   while (0)
 
 #define sq_for_every(q, p) \
-  for((p) = (q)->head; (p) != NULL; (p) = (p)->flink)
+  for ((p) = (q)->head; (p) != NULL; (p) = (p)->flink)
 
 #define sq_for_every_safe(q, p, tmp) \
   for((p) = (q)->head, (tmp) = (p) ? (p)->flink : NULL; \
