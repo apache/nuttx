@@ -135,6 +135,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heap->mm_heapstart[IDX]->preceding = MM_ALLOC_BIT;
   node                               = (FAR struct mm_freenode_s *)
                                        (heapbase + SIZEOF_MM_ALLOCNODE);
+  DEBUGASSERT((((uintptr_t)node + SIZEOF_MM_ALLOCNODE) % MM_MIN_CHUNK) == 0);
   node->size                         = heapsize - 2*SIZEOF_MM_ALLOCNODE;
   node->preceding                    = SIZEOF_MM_ALLOCNODE;
   heap->mm_heapend[IDX]              = (FAR struct mm_allocnode_s *)
