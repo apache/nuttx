@@ -299,7 +299,6 @@ static void lpc17_40_configwaitints(struct lpc17_40_dev_s *priv,
 static void lpc17_40_configxfrints(struct lpc17_40_dev_s *priv,
               uint32_t xfrmask);
 static void lpc17_40_setpwrctrl(uint32_t pwrctrl);
-static inline uint32_t lpc17_40_getpwrctrl(void);
 
 /* DMA Helpers **************************************************************/
 
@@ -593,29 +592,6 @@ static void lpc17_40_setpwrctrl(uint32_t pwrctrl)
   regval &= ~(SDCARD_PWR_CTRL_MASK | SDCARD_PWR_OPENDRAIN | SDCARD_PWR_ROD);
   regval |= pwrctrl;
   putreg32(regval, LPC17_40_SDCARD_PWR);
-}
-
-/****************************************************************************
- * Name: lpc17_40_getpwrctrl
- *
- * Description:
- *   Return the current value of the  the PWRCTRL field of the SD card P
- *   register.  This function can be used to see if the SD card is powered ON
- *   or OFF
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The current value of the  the PWRCTRL field of the SD card PWR register.
- *
- ****************************************************************************/
-
-static inline uint32_t lpc17_40_getpwrctrl(void)
-{
-  /* Extract and return the PWRCTRL field of the PWR register. */
-
-  return getreg32(LPC17_40_SDCARD_PWR) & SDCARD_PWR_CTRL_MASK;
 }
 
 /****************************************************************************
