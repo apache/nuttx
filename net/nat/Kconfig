@@ -19,3 +19,13 @@ config NET_NAT_TCP_EXPIRE_SEC
 
 		Note: The default value 86400 is suggested by RFC2663, Section 2.6,
 		Page 5.
+
+config NET_NAT_ICMP_EXPIRE_SEC
+	int "ICMP NAT entry expiration seconds"
+	default 60
+	depends on NET_NAT
+	---help---
+		The expiration time for idle ICMP entry in NAT.
+
+		Note: The default value 60 is suggested by RFC5508, Section 3.2,
+		Page 8.
