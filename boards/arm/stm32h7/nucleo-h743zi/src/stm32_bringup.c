@@ -28,6 +28,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <arch/board/board.h>
+
 #include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_USBMONITOR
@@ -51,6 +53,10 @@
 
 #ifdef CONFIG_STM32_ROMFS
 #  include "stm32_romfs.h"
+#endif
+
+#ifdef CONFIG_STM32H7_IWDG
+#  include "stm32_wdg.h"
 #endif
 
 #include "stm32_gpio.h"
@@ -332,6 +338,12 @@ int stm32_bringup(void)
     }
 #endif /* HAVE_PROGMEM_CHARDEV */
 #endif /* CONFIG_MTD */
+
+#ifdef CONFIG_STM32H7_IWDG
+  /* Initialize the watchdog timer */
+
+  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
 
   return OK;
 }
