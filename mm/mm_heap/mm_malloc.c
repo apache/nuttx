@@ -271,5 +271,6 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 #endif
 
+  DEBUGASSERT(ret == NULL || ((uintptr_t)ret) % MM_MIN_CHUNK == 0);
   return ret;
 }
