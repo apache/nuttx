@@ -65,10 +65,10 @@
 #define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16_t */
 #define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16_t */
 
-#define GETUINT16(p)                            (((uint16_t)p[1] << 8) | (uint16_t)p[0])
-#define GETUINT32(p)                            (((uint32_t)p[3] << 24) | \
-                                                 ((uint32_t)p[2] << 16) | \
-                                                 ((uint32_t)p[1] << 8) | (uint32_t)p[0])
+#define GETUINT16(p)                            ((uint16_t)((uint16_t)(p[1] << 8) | (uint16_t)p[0]))
+#define GETUINT32(p)                            ((uint32_t)((uint32_t)p[3] << 24) | \
+                                                           ((uint32_t)p[2] << 16) | \
+                                                           ((uint32_t)p[1] << 8) | (uint32_t)p[0])
 
 /* USB directions (in endpoint addresses) */
 
