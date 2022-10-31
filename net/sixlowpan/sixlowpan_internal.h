@@ -103,7 +103,7 @@
 /* GET 16-bit data:  source in network order */
 
 #define GETUINT16(ptr,index) \
-  ((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1]))))
+  ((uint16_t)((((uint16_t)((ptr)[index])) << 8) | ((uint16_t)(((ptr)[(index) + 1])))))
 
 /* PUT 16-bit data:  source in host order, result in network order */
 
