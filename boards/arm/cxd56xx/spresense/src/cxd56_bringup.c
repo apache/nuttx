@@ -463,6 +463,14 @@ int cxd56_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_MODEM_ALT1250) && !defined(CONFIG_CXD56_LTE_LATE_INITIALIZE)
+  ret = board_alt1250_initialize("/dev/alt1250");
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize ALT1250.\n");
+    }
+#endif
+
 #ifdef CONFIG_CXD56_GNSS
   ret = cxd56_gnssinitialize("/dev/gps");
   if (ret < 0)
