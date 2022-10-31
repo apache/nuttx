@@ -43,6 +43,16 @@
 
 #define HANDLER_SECTION .iram1
 
+#if defined(CONFIG_BUILD_PROTECTED)
+
+#define xtensa_saveprivilege(regs,var)
+#define xtensa_restoreprivilege(regs,var)
+
+#define xtensa_lowerprivilege(regs)
+#define xtensa_raiseprivilege(regs)
+
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

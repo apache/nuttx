@@ -37,6 +37,10 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += esp32s3_idle.c
 endif
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += esp32s3_userspace.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
 CHIP_ASRCS  = esp32s3_cpuindex.S
 CHIP_CSRCS += esp32s3_cpuidlestack.c esp32s3_cpustart.c esp32s3_intercpu_interrupt.c
