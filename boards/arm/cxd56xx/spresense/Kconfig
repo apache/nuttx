@@ -765,4 +765,12 @@ config CXD56_BINARY
 		Create nuttx.spk binary format used on spresense board and boards
 		based on cxd56xx arch.
 
+config CXD56_CAMERA_LATE_INITIALIZE
+	bool "Camera drivers late initialization"
+	default n
+	depends on CXD56_CISIF
+	---help---
+		The camera drivers can be initialized on an application code after system booted up
+		by enabling this configuration switch.
+
 endif
