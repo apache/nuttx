@@ -507,11 +507,13 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *ier)
  * Name: up_restoreuartint
  ****************************************************************************/
 
+#ifdef HAVE_CONSOLE
 static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ier)
 {
   priv->ier |= ier & UART_IER_ALLIE;
   up_serialout(priv, LPC17_40_UART_IER_OFFSET, priv->ier);
 }
+#endif
 
 /****************************************************************************
  * Name: up_enablebreaks
