@@ -239,6 +239,28 @@ uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len);
 uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
 
 /****************************************************************************
+ * Name: net_chksum_adjust
+ *
+ * Description:
+ *   Adjusts the checksum of a packet without having to completely
+ *   recalculate it, as described in RFC 3022, Section 4.2, Page 9.
+ *
+ * Input Parameters:
+ *   chksum - points to the chksum in the packet
+ *   optr   - points to the old data in the packet
+ *   olen   - length of old data
+ *   nptr   - points to the new data in the packet
+ *   nlen   - length of new data
+ *
+ * Limitations:
+ *   The algorithm is applicable only for even offsets and even lengths.
+ ****************************************************************************/
+
+void net_chksum_adjust(FAR uint16_t *chksum,
+                       FAR const uint16_t *optr, ssize_t olen,
+                       FAR const uint16_t *nptr, ssize_t nlen);
+
+/****************************************************************************
  * Name: ipv4_upperlayer_chksum
  *
  * Description:

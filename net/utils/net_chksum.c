@@ -123,4 +123,69 @@ uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 
+/****************************************************************************
+ * Name: net_chksum_adjust
+ *
+ * Description:
+ *   Adjusts the checksum of a packet without having to completely
+ *   recalculate it, as described in RFC 3022, Section 4.2, Page 9.
+ *
+ * Input Parameters:
+ *   chksum - points to the chksum in the packet
+ *   optr   - points to the old data in the packet
+ *   olen   - length of old data
+ *   nptr   - points to the new data in the packet
+ *   nlen   - length of new data
+ *
+ * Limitations:
+ *   The algorithm is applicable only for even offsets and even lengths.
+ ****************************************************************************/
+
+void net_chksum_adjust(FAR uint16_t *chksum,
+                       FAR const uint16_t *optr, ssize_t olen,
+                       FAR const uint16_t *nptr, ssize_t nlen)
+{
+#ifdef CONFIG_ENDIAN_BIG
+#  warning "Not verified on big-endian yet."
+#endif
+
+  int32_t x;
+  int32_t oldval;
+  int32_t newval;
+
+  x = NTOHS(*chksum);
+  x = ~x & 0xffff;
+  while (olen > 0)
+    {
+      oldval = NTOHS(*optr);
+
+      x -= oldval & 0xffff;
+      if (x <= 0)
+        {
+          x--;
+          x &= 0xffff;
+        }
+
+      optr++;
+      olen -= 2;
+    }
+  while (nlen > 0)
+    {
+      newval = NTOHS(*nptr);
+
+      x += newval & 0xffff;
+      if ((x & 0x10000) != 0)
+        {
+          x++;
+          x &= 0xffff;
+        }
+
+      nptr++;
+      nlen -= 2;
+    }
+
+  x = ~x & 0xffff;
+  *chksum = HTONS(x);
+}
+
 #endif /* CONFIG_NET */
