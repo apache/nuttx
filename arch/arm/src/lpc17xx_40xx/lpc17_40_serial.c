@@ -810,7 +810,7 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LPC17_40_UART0
+#if defined(CONFIG_LPC17_40_UART0) && !defined(CONFIG_UART0_SERIAL_CONSOLE)
 static inline void lpc17_40_uart0config(void)
 {
   uint32_t   regval;
