@@ -703,7 +703,7 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
  *
  ****************************************************************************/
 
-#  ifdef LPC176x
+#  if defined(LPC176x) && defined(USE_EARLYSERIALINIT)
 static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
 {
   /* Ignoring the fractional divider, the BAUD is given by:
@@ -790,7 +790,7 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
       return SYSCON_PCLKSEL_CCLK8;
     }
 }
-#  endif /* LPC176x */
+#  endif /* LPC176x && USE_EARLYSERIALINIT */
 #endif /* CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER */
 
 /****************************************************************************
