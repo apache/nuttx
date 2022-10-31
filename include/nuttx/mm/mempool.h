@@ -38,7 +38,7 @@
 
 struct mempool_s;
 typedef CODE void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
-                                      size_t size);
+                                      size_t alignment, size_t size);
 typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
                                     FAR void *addr);
 
@@ -321,6 +321,36 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
  ****************************************************************************/
 
 size_t mempool_multiple_alloc_size(FAR void *blk);
+
+/****************************************************************************
+ * Name: mempool_multiple_memalign
+ *
+ * Description:
+ *   This function requests more than enough space from malloc, finds a
+ *   region within that chunk that meets the alignment request.
+ *
+ *   The alignment argument must be a power of two.
+ *
+ *   The memalign is special to multiple mempool because multiple mempool
+ *   doesn't support split and shrink chunk operate. So When you alloc a
+ *   memory block and find an aligned address in this block, you need to
+ *   occupy 8 bytes before the address to save the address of the padding
+ *   size and pool to ensure correct use in realloc and free operations.
+ *   So we will use bit1 in the previous address of the address to represent
+ *   that it is applied by memalign.
+ *
+ * Input Parameters:
+ *   mpool     - The handle of multiple memory pool to be used.
+ *   alignment - The alignment request of memory block.
+ *   size      - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The size of memory block.
+ *
+ ****************************************************************************/
+
+FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
+                                    size_t alignment, size_t size);
 
 /****************************************************************************
  * Name: mempool_multiple_fixed_alloc
