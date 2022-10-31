@@ -665,6 +665,10 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
       net_sem_wait_uninterruptible(&req->acksem);
       --req->nbusy; /* net_lock held. */
     }
+  else
+    {
+      nerr("error: usrsock request failed with %d\n", ret);
+    }
 
   /* Free request line for next command. */
 
