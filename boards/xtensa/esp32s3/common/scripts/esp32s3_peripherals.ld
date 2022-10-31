@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/scripts/esp32s3_peripherals.ld
+ * boards/xtensa/esp32s3/common/scripts/esp32s3_peripherals.ld
  ****************************************************************************/
 
 PROVIDE ( UART0 = 0x60000000 );

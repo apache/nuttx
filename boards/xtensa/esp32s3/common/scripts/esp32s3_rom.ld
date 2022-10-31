@@ -1,4 +1,8 @@
-/* ROM version variables for esp32s3
+/****************************************************************************
+ * boards/xtensa/esp32s3/common/scripts/esp32s3_rom.ld
+ ****************************************************************************/
+
+/* ROM version variables for ESP32-S3.
  *
  * These addresses should be compatible with any ROM version for this chip.
  *
@@ -7,7 +11,7 @@
 _rom_chip_id = 0x40000570;
 _rom_eco_version = 0x40000574;
 
-/* ROM function interface esp32s3.rom.ld for esp32s3
+/* ROM function interface esp32s3_rom.ld for esp32s3
  *
  *
  * Generated from ./interface-esp32s3.yml md5sum 39c4ce259b11323b9404c192b01b712b

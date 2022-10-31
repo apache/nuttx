@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/scripts/esp32s3_flash.ld
+ * boards/xtensa/esp32s3/common/scripts/esp32s3_sections.ld
  ****************************************************************************/
 
 /* Default entry point: */
@@ -50,7 +50,7 @@ SECTIONS
     *(.entry.text)
     *(.init.literal)
     *(.init)
-  } > iram0_0_seg
+  } >iram0_0_seg
 
   .iram0.text :
   {
@@ -63,7 +63,7 @@ SECTIONS
     . = ALIGN(4) + 16;
 
     _iram_text = ABSOLUTE(.);
-  } > iram0_0_seg
+  } >iram0_0_seg
 
   .dram0.dummy (NOLOAD) :
   {
@@ -72,7 +72,7 @@ SECTIONS
      */
 
     . = ORIGIN(dram0_0_seg) + MAX(_iram_end, _diram_i_start) - _diram_i_start;
-  } > dram0_0_seg
+  } >dram0_0_seg
 
   /* Shared RAM */
 
@@ -99,7 +99,7 @@ SECTIONS
 
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
-  } > dram0_0_seg
+  } >dram0_0_seg
 
   .noinit (NOLOAD) :
   {
@@ -112,7 +112,7 @@ SECTIONS
     *(.noinit .noinit.*)
 
     . = ALIGN(4);
-  } > dram0_0_seg
+  } >dram0_0_seg
 
   .dram0.data :
   {
@@ -138,7 +138,7 @@ SECTIONS
     /* Heap starts at the end of .data */
 
     _sheap = ABSOLUTE(.);
-  } > dram0_0_seg
+  } >dram0_0_seg
 
   .flash.text :
   {
@@ -158,7 +158,7 @@ SECTIONS
     . += 16;
 
     _etext = .;
-  } > default_code_seg
+  } >default_code_seg
 
   .flash_rodata_dummy (NOLOAD) :
   {
@@ -180,7 +180,7 @@ SECTIONS
 
     . = ALIGN(0x10000) + 0x20;
     _rodata_reserved_start = .;
-  } > default_rodata_seg
+  } >default_rodata_seg
 
   .flash.rodata : ALIGN(0x10)
   {
@@ -234,7 +234,7 @@ SECTIONS
     _lit4_end = ABSOLUTE(.);
     _rodata_reserved_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } > default_rodata_seg
+  } >default_rodata_seg
 
   /* Marks the end of IRAM code segment */
 
@@ -246,7 +246,7 @@ SECTIONS
 
     . += 16;
     . = ALIGN(256);
-  } > iram0_0_seg
+  } >iram0_0_seg
 
   .iram0.data :
   {
@@ -254,7 +254,7 @@ SECTIONS
 
     *(.iram.data)
     *(.iram.data.*)
-  } > iram0_0_seg
+  } >iram0_0_seg
 
   .iram0.bss (NOLOAD) :
   {
@@ -265,5 +265,5 @@ SECTIONS
 
     . = ALIGN(4);
     _iram_end = ABSOLUTE(.);
-  } > iram0_0_seg
+  } >iram0_0_seg
 }
