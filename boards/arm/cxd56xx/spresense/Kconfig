@@ -756,6 +756,13 @@ config CXD56_LTE_SPI5_DMAC
 
 endif # CXD56_LTE_SPI5
 
+config CXD56_LTE_LATE_INITIALIZE
+	bool "Alt1250 driver late initialize"
+	default n
+	---help---
+		LTE driver can be initialized on an application code after system booted up
+		by enabling this configuration switch.
+
 endif # CXD56_LTE
 
 config CXD56_BINARY
