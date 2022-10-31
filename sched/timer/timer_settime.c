@@ -122,7 +122,12 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
 
 static void timer_timeout(wdparm_t itimer)
 {
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
+  FAR struct posix_timer_s *timer = timer_gethandle((timer_t)itimer);
+
+  if (timer == NULL)
+    {
+      return;
+    }
 
   /* Send the specified signal to the specified task.   Increment the
    * reference count on the timer first so that will not be deleted until
@@ -216,7 +221,7 @@ int timer_settime(timer_t timerid, int flags,
                   FAR const struct itimerspec *value,
                   FAR struct itimerspec *ovalue)
 {
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
+  FAR struct posix_timer_s *timer = timer_gethandle(timerid);
   irqstate_t intflags;
   sclock_t delay;
   int ret = OK;
@@ -301,8 +306,6 @@ int timer_settime(timer_t timerid, int flags,
 
   if (ret < 0)
     {
-      set_errno(-ret);
-      ret = ERROR;
       goto errout;
     }
 
@@ -320,19 +323,17 @@ int timer_settime(timer_t timerid, int flags,
   if (delay >= 0)
     {
       ret = wd_start(&timer->pt_wdog, delay, timer_timeout, (wdparm_t)timer);
-      if (ret < 0)
-        {
-          set_errno(-ret);
-          ret = ERROR;
-        }
-      else
-        {
-          ret = OK;
-        }
     }
 
 errout:
   leave_critical_section(intflags);
+
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   return ret;
 }
 

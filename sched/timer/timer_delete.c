@@ -62,7 +62,7 @@
 
 int timer_delete(timer_t timerid)
 {
-  int ret = timer_release((FAR struct posix_timer_s *)timerid);
+  int ret = timer_release(timer_gethandle(timerid));
   if (ret < 0)
     {
       set_errno(-ret);

@@ -143,4 +143,45 @@ void timer_deleteall(pid_t pid)
   leave_critical_section(flags);
 }
 
+/****************************************************************************
+ * Name: timer_gethandle
+ *
+ * Description:
+ *   Returns the posix timer in the activity from the corresponding timerid
+ *
+ * Input Parameters:
+ *   timerid - The pre-thread timer, previously created by the call to
+ *     timer_create(), to be be set.
+ *
+ * Returned Value:
+ *   On success, timer_gethandle() returns pointer to the posix_timer_s;
+ *   On error, NULL is returned.
+ *
+ ****************************************************************************/
+
+FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
+{
+  FAR struct posix_timer_s *timer = NULL;
+  FAR sq_entry_t *entry;
+  irqstate_t intflags;
+
+  if (timerid != NULL)
+    {
+      intflags = enter_critical_section();
+
+      sq_for_every(&g_alloctimers, entry)
+        {
+          if (entry == timerid)
+            {
+              timer = (FAR struct posix_timer_s *)timerid;
+              break;
+            }
+        }
+
+      leave_critical_section(intflags);
+    }
+
+  return timer;
+}
+
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */
