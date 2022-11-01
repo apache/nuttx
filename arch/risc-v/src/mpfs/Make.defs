@@ -87,6 +87,10 @@ ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += mpfs_usb.c
 endif
 
-ifeq ($(CONFIG_MPFS_IHC),y)
+ifeq ($(CONFIG_MPFS_IHC_CLIENT),y)
 CHIP_CSRCS += mpfs_ihc.c
+endif
+
+ifeq ($(CONFIG_MPFS_IHC_SBI),y)
+CHIP_CSRCS += mpfs_ihc_sbi.c
 endif

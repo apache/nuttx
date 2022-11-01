@@ -26,8 +26,8 @@
 #include <hardware/mpfs_memorymap.h>
 #include <hardware/mpfs_clint.h>
 #include <hardware/mpfs_sysreg.h>
-#ifdef CONFIG_MPFS_IHC
-#include <hardware/mpfs_ihc.h>
+#ifdef CONFIG_MPFS_IHC_SBI
+#include <hardware/mpfs_ihc_sbi.h>
 #endif
 
 #include <sbi/riscv_io.h>
@@ -41,7 +41,7 @@
 #include <sbi_utils/ipi/aclint_mswi.h>
 #include <sbi_utils/timer/aclint_mtimer.h>
 
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
 #include <mpfs_ihc.h>
 #endif
 
@@ -98,7 +98,7 @@ static int  mpfs_opensbi_console_init(void);
 static int  mpfs_irqchip_init(bool cold_boot);
 static int  mpfs_ipi_init(bool cold_boot);
 static int  mpfs_timer_init(bool cold_boot);
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
 static int  mpfs_opensbi_vendor_ext_check(long extid);
 static int  mpfs_opensbi_ecall_handler(long extid, long funcid,
                                        const struct sbi_trap_regs *regs,
@@ -167,7 +167,7 @@ static const struct sbi_platform_operations platform_ops =
   .ipi_exit            = NULL,
   .timer_init          = mpfs_timer_init,
   .timer_exit          = NULL,
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
   .vendor_ext_check    = mpfs_opensbi_vendor_ext_check,
   .vendor_ext_provider = mpfs_opensbi_ecall_handler,
 #endif
@@ -523,7 +523,7 @@ static void mpfs_opensbi_pmp_setup(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
 static int mpfs_opensbi_vendor_ext_check(long extid)
 {
   return (SBI_EXT_MICROCHIP_TECHNOLOGY == extid);

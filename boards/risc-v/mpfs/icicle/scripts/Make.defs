@@ -37,8 +37,12 @@ else ifeq ($(CONFIG_BUILD_PROTECTED),y)
 else ifeq ($(CONFIG_BUILD_KERNEL),y)
   LDSCRIPT = ld-kernel.script
 else
-  ifeq ($(CONFIG_MPFS_IHC),y)
-    LDSCRIPT = ld-ihc.script
+  ifeq ($(CONFIG_MPFS_IHC_CLIENT),y)
+    ifeq ($(CONFIG_MPFS_IHC_RPMSG_CH2),y)
+      LDSCRIPT = ld-ihc-ch2.script
+    else
+      LDSCRIPT = ld-ihc.script
+    endif
   else
     LDSCRIPT = ld.script
   endif

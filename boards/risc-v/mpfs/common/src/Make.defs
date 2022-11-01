@@ -46,7 +46,7 @@ ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += mpfs_composite.c
 endif
 
-ifeq ($(CONFIG_MPFS_IHC),y)
+ifeq ($(CONFIG_MPFS_IHC_CLIENT),y)
 CSRCS += mpfs_ihc.c
 endif
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/scripts/ld-ihc.script
+ * boards/risc-v/mpfs/icicle/scripts/ld-ihc-ch2.script
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,10 +20,10 @@
 
 MEMORY
 {
-    progmem (rx) : ORIGIN = 0xa2000000, LENGTH = 1M    /* w/ cache */
-    filler  (rx) : ORIGIN = 0xa2100000, LENGTH = 524k
-    sram   (rwx) : ORIGIN = 0xa2200000, LENGTH = 1M    /* w/ cache */
-    shared (rwx) : ORIGIN = 0xa4000000, LENGTH = 256k
+    progmem (rx) : ORIGIN = 0xa3000000, LENGTH = 1M    /* w/ cache */
+    filler  (rx) : ORIGIN = 0xa3100000, LENGTH = 524k
+    sram   (rwx) : ORIGIN = 0xa3200000, LENGTH = 1M    /* w/ cache */
+    shared (rwx) : ORIGIN = 0xa3000000, LENGTH = 256k
 }
 
 OUTPUT_ARCH("riscv")
