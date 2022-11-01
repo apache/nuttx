@@ -602,6 +602,7 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
               {
                 audwarn("WARNING: MCLK could not be set on lower half\n");
                 priv->mclk_freq = 0;
+                ret = OK;
               }
           }
 
