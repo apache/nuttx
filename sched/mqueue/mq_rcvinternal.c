@@ -279,13 +279,15 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
 
   if (msgq->cmn.nwaitnotfull > 0)
     {
+      FAR struct tcb_s *rtcb = this_task();
+
       /* Find the highest priority task that is waiting for
        * this queue to be not-full in waitfornotfull list.
        * This must be performed in a critical section because
        * messages can be sent from interrupt handlers.
        */
 
-      btcb = (FAR struct tcb_s *)dq_peek(MQ_WNFLIST(msgq->cmn));
+      btcb = (FAR struct tcb_s *)dq_remfirst(MQ_WNFLIST(msgq->cmn));
 
       /* If one was found, unblock it.  NOTE:  There is a race
        * condition here:  the queue might be full again by the
@@ -300,7 +302,19 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
         }
 
       msgq->cmn.nwaitnotfull--;
-      up_unblock_task(btcb);
+
+      /* Indicate that the wait is over. */
+
+      btcb->waitobj = NULL;
+
+      /* Add the task to ready-to-run task list and
+       * perform the context switch if one is needed
+       */
+
+      if (nxsched_add_readytorun(btcb))
+        {
+          up_unblock_task(btcb, rtcb);
+        }
     }
 
   /* Return the length of the message transferred to the user buffer */

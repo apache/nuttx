@@ -38,91 +38,59 @@
  * Name: up_unblock_task
  *
  * Description:
- *   A task is currently in an inactive task list
- *   but has been prepped to execute.  Move the TCB to the
- *   ready-to-run list, restore its context, and start execution.
+ *   A task is currently in the ready-to-run list but has been prepped
+ *   to execute. Restore its context, and start execution.
  *
- * Inputs:
- *   tcb: Refers to the tcb to be unblocked.  This tcb is
- *     in one of the waiting tasks lists.  It must be moved to
- *     the ready-to-run list and, if it is the highest priority
- *     ready to run taks, executed.
+ * Input Parameters:
+ *   tcb: Refers to the head task of the ready-to-run list
+ *     which will be executed.
+ *   rtcb: Refers to the running task which will be blocked.
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb)
+void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  struct tcb_s *rtcb = this_task();
+  /* Update scheduler parameters */
 
-  /* Verify that the context switch can be performed */
+  sched_suspend_scheduler(rtcb);
 
-  DEBUGASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
-         (tcb->task_state <= LAST_BLOCKED_STATE));
+  /* Are we in an interrupt handler? */
 
-  /* Remove the task from the blocked task list */
-
-  sched_removeblocked(tcb);
-
-  /* Add the task in the correct location in the prioritized
-   * ready-to-run task list
-   */
-
-  if (sched_addreadytorun(tcb))
+  if (CURRENT_REGS)
     {
-      /* The currently active task has changed! We need to do
-       * a context switch to the new task.
+      /* Yes, then we have to do things differently.
+       * Just copy the CURRENT_REGS into the OLD rtcb.
        */
+
+      rtcb->xcp.regs = CURRENT_REGS;
 
       /* Update scheduler parameters */
 
-      sched_suspend_scheduler(rtcb);
+      sched_resume_scheduler(tcb);
 
-      /* Are we in an interrupt handler? */
+      /* Then switch contexts */
 
-      if (CURRENT_REGS)
-        {
-          /* Yes, then we have to do things differently.
-           * Just copy the CURRENT_REGS into the OLD rtcb.
-           */
+      CURRENT_REGS = tcb->xcp.regs;
+    }
 
-          rtcb->xcp.regs = CURRENT_REGS;
+  /* No, then we will need to perform the user context switch */
 
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
+  else
+    {
+      /* Update scheduler parameters */
 
-          rtcb = this_task();
+      sched_resume_scheduler(tcb);
 
-          /* Update scheduler parameters */
+      /* Switch context to the context of the task at the head of the
+       * ready to run list.
+       */
 
-          sched_resume_scheduler(rtcb);
+      up_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
 
-          /* Then switch contexts */
-
-          CURRENT_REGS = rtcb->xcp.regs;
-        }
-
-      /* No, then we will need to perform the user context switch */
-
-      else
-        {
-          struct tcb_s *nexttcb = this_task();
-
-          /* Update scheduler parameters */
-
-          sched_resume_scheduler(nexttcb);
-
-          /* Switch context to the context of the task at the head of the
-           * ready to run list.
-           */
-
-          up_switchcontext(&rtcb->xcp.regs, nexttcb->xcp.regs);
-
-          /* up_switchcontext forces a context switch to the task at the
-           * head of the ready-to-run list.  It does not 'return' in the
-           * normal sense.  When it does return, it is because the blocked
-           * task is again ready to run and has execution priority.
-           */
-        }
+      /* up_switchcontext forces a context switch to the task at the
+       * head of the ready-to-run list.  It does not 'return' in the
+       * normal sense.  When it does return, it is because the blocked
+       * task is again ready to run and has execution priority.
+       */
     }
 }

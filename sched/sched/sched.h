@@ -186,6 +186,14 @@ extern dq_queue_t g_waitingforsignal;
 extern dq_queue_t g_waitingforfill;
 #endif
 
+/* This is the list of all tasks that have been stopped
+ * via SIGSTOP or SIGTSTP
+ */
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+extern dq_queue_t g_stoppedtasks;
+#endif
+
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
