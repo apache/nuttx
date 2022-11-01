@@ -29,8 +29,12 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+/* The below definition convert __INT32_TYPE__ from 'int'/'signed int' or
+ * 'long int'/signed long int' to '+2'/'+0 +2' or '+4 +2'/'+0 +4 +2', and
+ * then make the expression of '__INT32_TYPE__ == int' valid.
+ */
+
 #define signed      +0
-#define unsigned    +0
 #define int         +2
 #define long        +4
 
