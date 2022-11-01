@@ -250,7 +250,7 @@ int up_backtrace(struct tcb_s *tcb,
 #  ifdef CONFIG_SMP
           top = arm_intstack_top();
 #  else
-          top = g_intstacktop;
+          top = (unsigned long)g_intstacktop;
 #  endif /* CONFIG_SMP */
 #else
           top = (unsigned long)rtcb->stack_base_ptr +
