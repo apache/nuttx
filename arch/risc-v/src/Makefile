@@ -80,7 +80,7 @@ KBIN = libkarch$(LIBEXT)
 BIN  = libarch$(LIBEXT)
 
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
-LDFLAGS += $(addprefix -T,$(ARCHSCRIPT).tmp) $(EXTRALINKCMDS)
+LDFLAGS += $(addprefix -T,$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
 ifeq ($(LD),$(CC))
   LDSTARTGROUP ?= -Wl,--start-group
