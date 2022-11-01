@@ -9,3 +9,13 @@ config NET_NAT
 	depends on NET_IPFORWARD
 	---help---
 		Enable or disable Network Address Translation (NAT) function.
+
+config NET_NAT_TCP_EXPIRE_SEC
+	int "TCP NAT entry expiration seconds"
+	default 86400
+	depends on NET_NAT
+	---help---
+		The expiration time for idle TCP entry in NAT.
+
+		Note: The default value 86400 is suggested by RFC2663, Section 2.6,
+		Page 5.
