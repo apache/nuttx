@@ -36,6 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
+#include <nuttx/queue.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -296,6 +297,7 @@ static void nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 
 int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
+  FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   int masked;
   int ret = OK;
@@ -369,7 +371,19 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
               wd_cancel(&stcb->waitdog);
             }
 
-          up_unblock_task(stcb);
+          /* Remove the task from waitting list */
+
+          dq_rem((FAR dq_entry_t *)stcb, &g_waitingforsignal);
+
+          /* Add the task to ready-to-run task list and
+           * perform the context switch if one is needed
+           */
+
+          if (nxsched_add_readytorun(stcb))
+            {
+              up_unblock_task(stcb, rtcb);
+            }
+
           leave_critical_section(flags);
         }
 
@@ -411,7 +425,18 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
               wd_cancel(&stcb->waitdog);
             }
 
-          up_unblock_task(stcb);
+          /* Remove the task from waitting list */
+
+          dq_rem((FAR dq_entry_t *)stcb, &g_waitingforsignal);
+
+          /* Add the task to ready-to-run task list and
+           * perform the context switch if one is needed
+           */
+
+          if (nxsched_add_readytorun(stcb))
+            {
+              up_unblock_task(stcb, rtcb);
+            }
         }
 
       leave_critical_section(flags);
@@ -464,7 +489,18 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #ifdef HAVE_GROUP_MEMBERS
           group_continue(stcb);
 #else
-          up_unblock_task(stcb);
+          /* Remove the task from waitting list */
+
+          dq_rem((FAR dq_entry_t *)stcb, &g_stoppedtasks);
+
+          /* Add the task to ready-to-run task list and
+           * perform the context switch if one is needed
+           */
+
+          if (nxsched_add_readytorun(stcb))
+            {
+              up_unblock_task(stcb, rtcb);
+            }
 #endif
         }
 #endif

@@ -216,6 +216,8 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
 
       if (msgq->cmn.nwaitnotempty > 0)
         {
+          FAR struct tcb_s *rtcb = this_task();
+
           /* Find the highest priority task that is waiting for
            * this queue to be non-empty in g_waitingformqnotempty
            * list. enter_critical_section() should give us sufficient
@@ -223,7 +225,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
            * in this list
            */
 
-          btcb = (FAR struct tcb_s *)dq_peek(MQ_WNELIST(msgq->cmn));
+          btcb = (FAR struct tcb_s *)dq_remfirst(MQ_WNELIST(msgq->cmn));
 
           /* If one was found, unblock it */
 
@@ -235,7 +237,19 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
             }
 
           msgq->cmn.nwaitnotempty--;
-          up_unblock_task(btcb);
+
+          /* Indicate that the wait is over. */
+
+          btcb->waitobj = NULL;
+
+          /* Add the task to ready-to-run task list and
+           * perform the context switch if one is needed
+           */
+
+          if (nxsched_add_readytorun(btcb))
+            {
+              up_unblock_task(btcb, rtcb);
+            }
         }
     }
 

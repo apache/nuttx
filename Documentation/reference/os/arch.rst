@@ -174,19 +174,17 @@ APIs Exported by Architecture-Specific Logic to NuttX
      and threads must have come from memory that is accessible to
      user
 
-.. c:function:: void up_unblock_task(FAR struct tcb_s *tcb)
+.. c:function:: void up_unblock_task(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
 
-  A task is currently in an inactive task list but
-  has been prepped to execute. Move the TCB to the ready-to-run
-  list, restore its context, and start execution.
+  A task is currently in the ready-to-run list but has been preppe
+  to execute. Restore its context, and start execution.
 
   This function is called only from the NuttX scheduling logic.
   Interrupts will always be disabled when this function is called.
 
-  :param tcb: Refers to the tcb to be unblocked. This tcb is in one
-    of the waiting tasks lists. It must be moved to the
-    ready-to-run list and, if it is the highest priority ready to
-    run tasks, executed.
+  :param tcb: Refers to the head task of the ready-to-run list
+     which will be executed.
+  :param rtcb: Refers to the running task which will be blocked.
 
 .. c:function:: void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 
