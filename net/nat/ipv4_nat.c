@@ -79,7 +79,7 @@ static int ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4)
   FAR struct tcp_hdr_s *tcp =
       (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
   FAR struct ipv4_nat_entry *entry =
-      ipv4_nat_inbound_entry_find(IP_PROTO_TCP, tcp->destport);
+      ipv4_nat_inbound_entry_find(IP_PROTO_TCP, tcp->destport, true);
   if (!entry)
     {
       /* Inbound without entry is OK (e.g. towards NuttX itself), skip NAT. */
@@ -340,7 +340,7 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
 bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port)
 {
   FAR struct ipv4_nat_entry *entry =
-      ipv4_nat_inbound_entry_find(protocol, port);
+      ipv4_nat_inbound_entry_find(protocol, port, false);
 
   /* Not checking ip is enough for single NAT device, may save external_ip in
    * entry for multiple device support in future.

@@ -26,6 +26,7 @@
 
 #include <debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
@@ -37,7 +38,7 @@
  * Private Data
  ****************************************************************************/
 
-static sq_queue_t g_entries;
+static dq_queue_t g_entries;
 
 /****************************************************************************
  * Private Functions
@@ -67,6 +68,45 @@ static uint16_t ipv4_nat_select_port(uint8_t protocol, uint16_t local_port)
 # warning Missing logic
 
   return local_port;
+}
+
+/****************************************************************************
+ * Name: ipv4_nat_entry_refresh
+ *
+ * Description:
+ *   Refresh a NAT entry, update its expiration time.
+ *
+ * Input Parameters:
+ *   entry      - The entry to refresh.
+ *
+ ****************************************************************************/
+
+static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
+{
+  switch (entry->protocol)
+    {
+#ifdef CONFIG_NET_TCP
+      case IP_PROTO_TCP:
+        /* NOTE: According to RFC2663, Section 2.6, Page 5, we can reduce the
+         * time to 4min if we have received FINs from both side of one
+         * connection, and keep 24h for other TCP connections. However, full
+         * cone NAT may have multiple connections on one entry, so this
+         * optimization may not work and we only use one expiration time.
+         */
+
+        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
+                             CONFIG_NET_NAT_TCP_EXPIRE_SEC;
+        break;
+#endif
+
+#ifdef CONFIG_NET_UDP
+#     warning Missing logic
+#endif
+
+#ifdef CONFIG_NET_ICMP
+#     warning Missing logic
+#endif
+  }
 }
 
 /****************************************************************************
@@ -103,8 +143,31 @@ ipv4_nat_entry_create(uint8_t protocol, uint16_t external_port,
   entry->local_ip      = local_ip;
   entry->local_port    = local_port;
 
-  sq_addfirst((FAR sq_entry_t *)entry, &g_entries);
+  ipv4_nat_entry_refresh(entry);
+
+  dq_addfirst((FAR dq_entry_t *)entry, &g_entries);
   return entry;
+}
+
+/****************************************************************************
+ * Name: ipv4_nat_entry_delete
+ *
+ * Description:
+ *   Delete a NAT entry and remove from entry list.
+ *
+ * Input Parameters:
+ *   entry      - The entry to remove.
+ *
+ ****************************************************************************/
+
+void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
+{
+  ninfo("INFO: Removing NAT entry proto=%d, local=%x:%d, external=:%d\n",
+        entry->protocol, entry->local_ip, entry->local_port,
+        entry->external_port);
+
+  dq_rem((FAR dq_entry_t *)entry, &g_entries);
+  kmm_free(entry);
 }
 
 /****************************************************************************
@@ -120,6 +183,7 @@ ipv4_nat_entry_create(uint8_t protocol, uint16_t external_port,
  * Input Parameters:
  *   protocol      - The L4 protocol of the packet.
  *   external_port - The external port of the packet.
+ *   refresh       - Whether to refresh the selected entry.
  *
  * Returned Value:
  *   Pointer to entry on success; null on failure
@@ -127,16 +191,34 @@ ipv4_nat_entry_create(uint8_t protocol, uint16_t external_port,
  ****************************************************************************/
 
 FAR struct ipv4_nat_entry *
-ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port)
+ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
+                            bool refresh)
 {
   FAR sq_entry_t *p;
-  sq_for_every(&g_entries, p)
+  FAR sq_entry_t *tmp;
+  uint32_t current_time = TICK2SEC(clock_systime_ticks());
+
+  sq_for_every_safe((FAR sq_queue_t *)&g_entries, p, tmp)
     {
       FAR struct ipv4_nat_entry *entry = (FAR struct ipv4_nat_entry *)p;
+
+      /* Remove expired entries. */
+
+      if (entry->expire_time < current_time)
+        {
+          ipv4_nat_entry_delete(entry);
+          continue;
+        }
+
       if (entry->protocol == protocol &&
           entry->external_port == external_port)
         {
           /* TODO: Use hash table, or move recent node to head. */
+
+          if (refresh)
+            {
+              ipv4_nat_entry_refresh(entry);
+            }
 
           return entry;
         }
@@ -169,15 +251,28 @@ ipv4_nat_outbound_entry_find(uint8_t protocol, in_addr_t local_ip,
                              uint16_t local_port)
 {
   FAR sq_entry_t *p;
-  sq_for_every(&g_entries, p)
+  FAR sq_entry_t *tmp;
+  uint32_t current_time = TICK2SEC(clock_systime_ticks());
+
+  sq_for_every_safe((FAR sq_queue_t *)&g_entries, p, tmp)
     {
       FAR struct ipv4_nat_entry *entry = (FAR struct ipv4_nat_entry *)p;
+
+      /* Remove expired entries. */
+
+      if (entry->expire_time < current_time)
+        {
+          ipv4_nat_entry_delete(entry);
+          continue;
+        }
+
       if (entry->protocol == protocol &&
           net_ipv4addr_cmp(entry->local_ip, local_ip) &&
           entry->local_port == local_port)
         {
           /* TODO: Use hash table, or move recent node to head. */
 
+          ipv4_nat_entry_refresh(entry);
           return entry;
         }
     }

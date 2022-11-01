@@ -43,13 +43,14 @@
 
 struct ipv4_nat_entry
 {
-  /* Support for single-linked lists.
+  /* Support for doubly-linked lists.
    *
    * TODO: Implement a general hash table, and use it to optimize performance
    * here.
    */
 
   FAR struct ipv4_nat_entry *flink;
+  FAR struct ipv4_nat_entry *blink;
 
   /*  Local Network                             External Network
    *                |----------------|
@@ -67,7 +68,7 @@ struct ipv4_nat_entry
   uint16_t   external_port;  /* The external port of local (private) host. */
   uint8_t    protocol;       /* L4 protocol (TCP, UDP etc). */
 
-  /* TODO: Timeout check and remove outdated entry. */
+  uint32_t   expire_time;    /* The expiration time of this entry. */
 };
 
 /****************************************************************************
@@ -184,6 +185,7 @@ bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
  * Input Parameters:
  *   protocol      - The L4 protocol of the packet.
  *   external_port - The external port of the packet.
+ *   refresh       - Whether to refresh the selected entry.
  *
  * Returned Value:
  *   Pointer to entry on success; null on failure
@@ -191,7 +193,8 @@ bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
  ****************************************************************************/
 
 FAR struct ipv4_nat_entry *
-ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port);
+ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
+                            bool refresh);
 
 /****************************************************************************
  * Name: ipv4_nat_outbound_entry_find
