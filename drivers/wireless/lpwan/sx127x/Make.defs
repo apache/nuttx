@@ -28,6 +28,6 @@ CSRCS += sx127x.c
 
 DEPPATH += --dep-path wireless$(DELIM)lpwan$(DELIM)sx127x
 VPATH += :wireless$(DELIM)lpwan$(DELIM)sx127x
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)lpwan$(DELIM)sx127x}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)lpwan$(DELIM)sx127x
 
 endif # CONFIG_LPWAN_SX127X

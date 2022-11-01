@@ -38,7 +38,7 @@ include tls/Make.defs
 include wdog/Make.defs
 include wqueue/Make.defs
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

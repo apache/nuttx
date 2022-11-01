@@ -34,5 +34,5 @@ endif
 
 DEPPATH += --dep-path usbmisc
 VPATH += :usbmisc
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbmisc}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)usbmisc
 endif

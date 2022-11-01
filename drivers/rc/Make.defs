@@ -32,6 +32,6 @@ endif
 
 DEPPATH += --dep-path rc
 VPATH += :rc
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)rc}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)rc
 
 endif # CONFIG_REMOTE_CONTROL

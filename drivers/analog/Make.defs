@@ -114,22 +114,22 @@ endif
 ifeq ($(CONFIG_DAC),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)analog
 else
 ifeq ($(CONFIG_ADC),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)analog
 else
 ifeq ($(CONFIG_COMP),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)analog
 else
 ifeq ($(CONFIG_OPAMP),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)analog}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)analog
 endif
 endif
 endif

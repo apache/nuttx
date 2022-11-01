@@ -46,6 +46,6 @@ endif
 
 DEPPATH += --dep-path iob
 VPATH += :iob
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)mm$(DELIM)iob}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)mm$(DELIM)iob
 
 endif # CONFIG_MM_IOB

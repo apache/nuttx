@@ -34,11 +34,11 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
     CFLAGS += ${DEFINE_PREFIX}SEGGER_RTT_BUFFER_SECTION=CONFIG_SEGGER_RTT_BUFFER_SECTION
   endif
 
-  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)config}
-  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)RTT$(DELIM)RTT}
+  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)config
+  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)RTT$(DELIM)RTT
 
   ifeq ($(CONFIG_ARCH_ARMV7M),y)
-    AFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)config}
+    AFLAGS += ${INCDIR_PREFIX}segger$(DELIM)config
     ASRCS += segger/RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
   endif
 
@@ -62,9 +62,9 @@ ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
   CSRCS += segger/note_sysview.c
   CSRCS += segger/SystemView/SYSVIEW/SEGGER_SYSVIEW.c
 
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
-  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)SystemView$(DELIM)SEGGER}
-  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)SystemView$(DELIM)SYSVIEW}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
+  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)SystemView$(DELIM)SEGGER
+  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)SystemView$(DELIM)SYSVIEW
 
   SYSVIEW_VERSION ?= 3.30
 

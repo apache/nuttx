@@ -64,6 +64,6 @@ include video/vnc/Make.defs
 
 DEPPATH += --dep-path video
 VPATH += :video
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)video}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)video
 
 endif
