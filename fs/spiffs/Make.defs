@@ -28,6 +28,6 @@ CSRCS += spiffs_cache.c spiffs_check.c spiffs_mtd.c
 
 DEPPATH += --dep-path spiffs/src
 VPATH += :spiffs/src
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)spiffs$(DELIM)src}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)fs$(DELIM)spiffs$(DELIM)src
 
 endif

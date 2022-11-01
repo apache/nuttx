@@ -28,7 +28,7 @@ CSRCS += spirit_netdev.c
 
 DEPPATH += --dep-path wireless$(DELIM)spirit$(DELIM)drivers
 VPATH += :wireless$(DELIM)spirit$(DELIM)drivers
-CFLAGS += ${shell $(INCDIR) "$(CC)" \
-  $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)spirit$(DELIM)drivers}
+CFLAGS += ${INCDIR_PREFIX}\
+  $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)spirit$(DELIM)drivers
 
 endif # CONFIG_SPIRIT_NETDEV

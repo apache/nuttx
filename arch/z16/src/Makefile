@@ -24,9 +24,9 @@ include chip/Make.defs
 COMPILER = ${shell basename "$(CC)"}
 ARCHSRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 
-INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCHSRCDIR)$(DELIM)chip}
-INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCHSRCDIR)$(DELIM)common}
-INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+INCLUDES += ${INCDIR_PREFIX}$(ARCHSRCDIR)$(DELIM)chip
+INCLUDES += ${INCDIR_PREFIX}$(ARCHSRCDIR)$(DELIM)common
+INCLUDES += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 
 CFLAGS += $(INCLUDES)
 CPPFLAGS += $(INCLUDES)

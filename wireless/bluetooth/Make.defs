@@ -36,6 +36,6 @@ endif
 
 DEPPATH += --dep-path bluetooth
 VPATH += :bluetooth
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)bluetooth}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)wireless$(DELIM)bluetooth
 
 endif # CONFIG_WIRELESS_BLUETOOTH

@@ -28,6 +28,6 @@ CSRCS += at86rf23x.c
 
 DEPPATH += --dep-path wireless$(DELIM)ieee802154$(DELIM)at86rf23x
 VPATH += :wireless$(DELIM)ieee802154$(DELIM)at86rf23x
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)at86rf23x}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)at86rf23x
 
 endif # CONFIG_IEEE802154_AT86RF233

@@ -38,7 +38,7 @@ CSRCS += src_zoh.c
 
 CFLAGS += -DPACKAGE=\"$(PACKAGE)\" -DVERSION=\"$(VERSION)\"
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio
 
 ifeq ($(CONFIG_SINC_FAST_CONVERTER),y)
 CFLAGS += -DENABLE_SINC_FAST_CONVERTER

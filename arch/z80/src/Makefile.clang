@@ -25,9 +25,9 @@ BOARDDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
 # Tools
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+CFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
+CFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 CFLAGS += -I.
 
 CPPFLAGS += -D__ASSEMBLY__

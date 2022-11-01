@@ -32,6 +32,6 @@ endif
 
 DEPPATH += --dep-path clk
 VPATH += :clk
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)clk}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)clk
 
 endif

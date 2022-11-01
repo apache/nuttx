@@ -30,6 +30,6 @@ CSRCS += bchdev_driver.c
 
 DEPPATH += --dep-path bch
 VPATH += :bch
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)bch}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)bch
 
 endif

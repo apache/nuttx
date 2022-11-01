@@ -28,6 +28,6 @@ CSRCS += xbee_ioctl.c xbee_mac.c xbee_netdev.c xbee.c
 
 DEPPATH += --dep-path wireless$(DELIM)ieee802154$(DELIM)xbee
 VPATH += :wireless$(DELIM)ieee802154$(DELIM)xbee
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)xbee}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)xbee
 
 endif # CONFIG_IEEE802154_XBEE

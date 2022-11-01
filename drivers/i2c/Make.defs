@@ -46,6 +46,6 @@ endif
 
 DEPPATH += --dep-path i2c
 VPATH += :i2c
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)i2c}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)i2c
 
 endif  # CONFIG_I2C

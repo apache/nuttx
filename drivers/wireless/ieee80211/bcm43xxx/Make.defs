@@ -67,6 +67,6 @@ endif
 
 DEPPATH += --dep-path wireless$(DELIM)ieee80211$(DELIM)bcm43xxx
 VPATH += :wireless$(DELIM)ieee80211$(DELIM)bcm43xxx
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee80211$(DELIM)bcm43xxx}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee80211$(DELIM)bcm43xxx
 
 endif # CONFIG_IEEE80211_BROADCOM_FULLMAC

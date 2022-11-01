@@ -33,7 +33,7 @@ CSRCS += nxterm_kbdin.c
 endif
 
 DEPPATH += --dep-path nxterm
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/nxterm}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/graphics/nxterm
 VPATH += :nxterm
 
 endif

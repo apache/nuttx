@@ -34,6 +34,6 @@ include wireless/ieee802154/xbee/Make.defs
 
 DEPPATH += --dep-path wireless$(DELIM)ieee802154
 VPATH += :wireless$(DELIM)ieee802154
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154
 
 endif # CONFIG_DRIVERS_IEEE802154

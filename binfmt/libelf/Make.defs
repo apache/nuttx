@@ -33,7 +33,7 @@ CSRCS += libelf_uninit.c libelf_unload.c libelf_verify.c
 ifeq ($(CONFIG_ELF_COREDUMP),y)
 CSRCS += libelf_coredump.c
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 endif
 
 ifeq ($(CONFIG_BINFMT_CONSTRUCTORS),y)

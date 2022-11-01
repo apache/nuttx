@@ -333,7 +333,7 @@ endef
 
 define COMPILEZIG
 	@echo "ZIG: $1"
-	$(Q) $(ZIG) build-obj $(ZIGFLAGS) $($(strip $1)_ZIGFLAGS) --name $(basename $2) $1 
+	$(Q) $(ZIG) build-obj $(ZIGFLAGS) $($(strip $1)_ZIGFLAGS) --name $(basename $2) $1
 endef
 
 # ASSEMBLE - Default macro to assemble one assembly language file
@@ -578,6 +578,8 @@ $(1)_$(2):
 endef
 
 export DEFINE_PREFIX := $(subst X,,${shell $(DEFINE) "$(CC)" "X"})
+export INCDIR_PREFIX := $(subst "X",,${shell $(INCDIR) "$(CC)" "X"})
+export INCSYSDIR_PREFIX := $(subst "X",,${shell $(INCDIR) -s "$(CC)" "X"})
 
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 ARCHDEFINES += ${DEFINE_PREFIX}__NuttX__
@@ -587,19 +589,19 @@ endif
 
 # The default C/C++ search path
 
-ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include
 
 ifeq ($(CONFIG_LIBCXX),y)
-  ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)libcxx}
+  ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)libcxx
 else ifeq ($(CONFIG_UCLIBCXX),y)
-  ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)uClibc++}
+  ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)uClibc++
 else
-  ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+  ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)cxx
   ifeq ($(CONFIG_ETL),y)
-    ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)etl}
+    ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)etl
   endif
 endif
-ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include
 
 # Convert filepaths to their proper system format (i.e. Windows/Unix)
 

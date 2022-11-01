@@ -30,6 +30,6 @@ endif
 
 DEPPATH += --dep-path pktradio
 VPATH += :pktradio
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)pktradio}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)wireless$(DELIM)pktradio
 
 endif # CONFIG_WIRELESS_PKTRADIO
