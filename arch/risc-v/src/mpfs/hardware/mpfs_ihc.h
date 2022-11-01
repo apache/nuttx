@@ -25,6 +25,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+enum mpfs_irq_type_e
+{
+  MP_IRQ  = 0x0,
+  ACK_IRQ = 0x1,
+};
+
+#define IHC_MAX_MESSAGE_SIZE   2
+
+struct mpfs_ihc_msg_s
+{
+  uint32_t msg[IHC_MAX_MESSAGE_SIZE];
+};
+
+/* Used to store information for the remote via ecall (eg. Linux) */
+
+struct ihc_sbi_rx_msg_s
+{
+  uint8_t irq_type;
+  struct mpfs_ihc_msg_s ihc_msg;
+};
+
 #define MPFS_NUM_HARTS               5
 #define UNDEFINED_HART_ID            99
 
@@ -67,6 +88,13 @@
 #else
 #  error Context B is required
 #endif
+
+/* We currently support only C = B + 1, eg.  NuttX or other RPMSG slaves on
+ * consecutive harts n and (n + 1).  This only has to do with more than one
+ * RPMSG channel.
+ */
+
+#define CONTEXTC_HARTID (CONTEXTB_HARTID + 1)
 
 #if (CONTEXTA_HARTID == CONTEXTB_HARTID)
 #  error Context A cannot be the same as Context B
@@ -203,6 +231,11 @@
                                     (1 << (CONTEXTB_HARTID * 2)) | \
                                     (1 << (CONTEXTB_HARTID * 2 + 1)))
 
+#define IHCIA_CONTEXTA2_INTS       (HSS_HART_MP_INT_EN           | \
+                                    HSS_HART_ACK_INT_EN          | \
+                                    (1 << (CONTEXTC_HARTID * 2)) | \
+                                    (1 << (CONTEXTC_HARTID * 2 + 1)))
+
 #define IHCIA_CONTEXTB_INTS        (HSS_HART_MP_INT_EN           | \
                                     HSS_HART_ACK_INT_EN          | \
                                     (1 << (CONTEXTA_HARTID * 2)) | \
@@ -212,48 +245,52 @@
 
 #if CONTEXTB_HARTID == 1
 #define IHCIA_H1_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
-#else
-#define IHCIA_H1_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
 #endif
 
 #if CONTEXTB_HARTID == 2
 #define IHCIA_H2_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
-#else
-#define IHCIA_H2_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
 #endif
 
 #if CONTEXTB_HARTID == 3
 #define IHCIA_H3_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
-#else
-#define IHCIA_H3_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
 #endif
 
 #if CONTEXTB_HARTID == 4
 #define IHCIA_H4_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
-#else
-#define IHCIA_H4_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
 #endif
 
 /* Context A interrupts */
 
 #if CONTEXTA_HARTID == 1
-#undef IHCIA_H1_REMOTE_HARTS_INTS
 #define IHCIA_H1_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
 #endif
 
 #if CONTEXTA_HARTID == 2
-#undef IHCIA_H2_REMOTE_HARTS_INTS
 #define IHCIA_H2_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
 #endif
 
 #if CONTEXTA_HARTID == 3
-#undef IHCIA_H3_REMOTE_HARTS_INTS
 #define IHCIA_H3_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
 #endif
 
 #if CONTEXTA_HARTID == 4
-#undef IHCIA_H4_REMOTE_HARTS_INTS
 #define IHCIA_H4_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
+#endif
+
+#ifndef IHCIA_H1_REMOTE_HARTS_INTS
+#define IHCIA_H1_REMOTE_HARTS_INTS HSS_HART_DEFAULT_INT_EN
+#endif
+
+#ifndef IHCIA_H2_REMOTE_HARTS_INTS
+#define IHCIA_H2_REMOTE_HARTS_INTS HSS_HART_DEFAULT_INT_EN
+#endif
+
+#ifndef IHCIA_H3_REMOTE_HARTS_INTS
+#define IHCIA_H3_REMOTE_HARTS_INTS HSS_HART_DEFAULT_INT_EN
+#endif
+
+#ifndef IHCIA_H4_REMOTE_HARTS_INTS
+#define IHCIA_H4_REMOTE_HARTS_INTS HSS_HART_DEFAULT_INT_EN
 #endif
 
 /* MiV-IHCC register bit definitions */
@@ -272,12 +309,6 @@
 #define MPIE_MASK              (1 << 2)
 #define ACK_INT_MASK           (1 << 3)
 
-#define IHC_MAX_MESSAGE_SIZE    2
-
-#define SBI_EXT_IHC_CTX_INIT    0
-#define SBI_EXT_IHC_SEND        1
-#define SBI_EXT_IHC_RECEIVE     2
-
 enum ihc_channel_e
 {
   IHC_CHANNEL_TO_HART0    = 0x00, /* Your hart to hart 0 */
@@ -287,6 +318,7 @@ enum ihc_channel_e
   IHC_CHANNEL_TO_HART4    = 0x04, /* Your hart to hart 4 */
   IHC_CHANNEL_TO_CONTEXTA = 0x05, /* Your hart to context A */
   IHC_CHANNEL_TO_CONTEXTB = 0x06, /* Your hart to context B */
+  IHC_CHANNEL_TO_CONTEXTC = 0x07, /* Your hart to context C */
 };
 
 typedef enum ihc_channel_e ihc_channel_t;

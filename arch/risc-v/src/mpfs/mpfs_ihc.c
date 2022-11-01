@@ -70,7 +70,11 @@
 
 /* This name is picked by the master */
 
+#ifdef CONFIG_MPFS_IHC_RPMSG_CH2
+#define MPFS_RPTUN_PING_EPT_NAME "rpmsg-amp-demo-channel2"
+#else
 #define MPFS_RPTUN_PING_EPT_NAME "rpmsg-amp-demo-channel"
+#endif
 
 /* rptun initialization names */
 
@@ -79,13 +83,28 @@
 
 /* Vring configuration parameters */
 
-#define VRING_SHMEM              0xa2410000  /* Vring shared memory start */
-#define VRING0_DESCRIPTORS       0xa2400000  /* Vring0 descriptor area    */
-#define VRING1_DESCRIPTORS       0xa2408000  /* Vring1 descriptor area    */
 #define VRINGS                   0x02        /* Number of vrings          */
 #define VRING_ALIGN              0x1000      /* Vring alignment           */
 #define VRING_NR                 256         /* Number of descriptors     */
 #define VRING_SIZE               512         /* Size of one descriptor    */
+
+#ifndef CONFIG_MPFS_IHC_RPMSG_CH2
+/* This is the RPMSG default channel used with only one RPMSG channel */
+
+#define VRING_SHMEM              0xa2410000  /* Vring shared memory start */
+#define VRING0_DESCRIPTORS       0xa2400000  /* Vring0 descriptor area    */
+#define VRING1_DESCRIPTORS       0xa2408000  /* Vring1 descriptor area    */
+#define VRING0_NOTIFYID          0           /* Vring0 id                 */
+#define VRING1_NOTIFYID          1           /* Vring1 id                 */
+#else
+/* This is the RPMSG channel 2, enabled separately */
+
+#define VRING_SHMEM              0xa2460000  /* Vring shared memory start */
+#define VRING0_DESCRIPTORS       0xa2450000  /* Vring0 descriptor area    */
+#define VRING1_DESCRIPTORS       0xa2458000  /* Vring1 descriptor area    */
+#define VRING0_NOTIFYID          2           /* Vring0 id                 */
+#define VRING1_NOTIFYID          3           /* Vring1 id                 */
+#endif
 
 /****************************************************************************
  * Private Types
@@ -117,25 +136,6 @@ struct mpfs_rptun_dev_s
 struct mpfs_queue_table_s
 {
   void *data;
-};
-
-enum mpfs_irq_type_e
-{
-  MP_IRQ  = 0x0,
-  ACK_IRQ = 0x1,
-};
-
-struct mpfs_ihc_msg_s
-{
-  uint32_t msg[IHC_MAX_MESSAGE_SIZE];
-};
-
-/* Used to store information for the remote via ecall (eg. Linux) */
-
-struct ihc_sbi_rx_msg_s
-{
-  uint8_t irq_type;
-  struct mpfs_ihc_msg_s ihc_msg;
 };
 
 /****************************************************************************
@@ -177,15 +177,13 @@ static struct mpfs_rptun_shmem_s    g_shmem;
 static struct rpmsg_device         *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device  *g_mpfs_virtio_device;
 
-#ifndef CONFIG_MPFS_OPENSBI
-static sem_t  g_mpfs_ack_sig  = SEM_INITIALIZER(0);
-static sem_t  g_mpfs_rx_sig   = SEM_INITIALIZER(0);
-#endif
+static sem_t  g_mpfs_ack_sig       = SEM_INITIALIZER(0);
+static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(0);
 static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 static uint32_t g_connected_hart_ints;
 static uint32_t g_connected_harts;
-static int      g_vq_idx;
+static uint16_t g_vq_idx;
 static int      g_plic_irq;
 static bool     g_rptun_initialized;
 
@@ -321,9 +319,13 @@ static uint32_t mpfs_ihc_context_to_remote_hart_id(ihc_channel_t channel)
         {
           harts_in_context = LIBERO_SETTING_CONTEXT_A_HART_EN;
         }
-      else
+      else if (channel == IHC_CHANNEL_TO_CONTEXTB)
         {
           harts_in_context = LIBERO_SETTING_CONTEXT_B_HART_EN;
+        }
+      else
+        {
+          DEBUGPANIC();
         }
 
       hart_idx = 0;
@@ -431,67 +433,17 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
     {
       /* Received the ack */
 
-#ifndef CONFIG_MPFS_OPENSBI
       nxsem_post(&g_mpfs_ack_sig);
-#endif
     }
   else
     {
       g_vq_idx = (message[0] >> 16);
 
-      DEBUGASSERT(g_vq_idx < VRINGS);
+      DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
+                  (g_vq_idx == VRING1_NOTIFYID));
 
-#ifndef CONFIG_MPFS_OPENSBI
       nxsem_post(&g_mpfs_rx_sig);
-#endif
     }
-}
-
-/****************************************************************************
- * Name: mpfs_ihc_message_present_handler
- *
- * Description:
- *   This function fills up a structure that gets into the remote end, such
- *   as Linux kernel.  The structure may contain data from the
- *   MPFS_IHC_MSG_IN -register, or in case of an ack, just the irq_type.
- *
- * Input Parameters:
- *   message  - Pointer for storing data, must not be NULL
- *   mhartid  - The primary hart id of a set of hartids.  Not necessarily
- *              the absolute mhartid if multiple harts are incorporated
- *              within the remote (eg. Linux kernel used on 2 harts).
- *   rhartid  - Remote hart id
- *   is_ack   - Boolean indicating an ack message
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void mpfs_ihc_message_present_handler(uint32_t *message,
-                                             uint32_t mhartid,
-                                             uint32_t rhartid,
-                                             bool is_ack)
-{
-  struct ihc_sbi_rx_msg_s *msg;
-  uintptr_t message_ihc     = (uintptr_t)MPFS_IHC_MSG_IN(mhartid, rhartid);
-  uint32_t message_size_ihc = getreg32(MPFS_IHC_MSG_SIZE(mhartid, rhartid));
-
-  msg = (struct ihc_sbi_rx_msg_s *)message;
-
-  if (is_ack)
-    {
-      msg->irq_type = ACK_IRQ;
-
-      /* msg->ihc_msg content doesn't matter here */
-    }
-  else
-    {
-      msg->irq_type = MP_IRQ;
-      msg->ihc_msg = *(struct mpfs_ihc_msg_s *)message_ihc;
-    }
-
-    DEBUGASSERT(sizeof(msg->ihc_msg) >= message_size_ihc);
 }
 
 /****************************************************************************
@@ -531,8 +483,7 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
         {
           /* This path is meant for the OpenSBI vendor extension only */
 
-          DEBUGASSERT(msg != NULL);
-          mpfs_ihc_message_present_handler(msg, mhartid, rhartid, is_ack);
+          DEBUGPANIC();
         }
     }
   else if (MP_MESSAGE_PRESENT == (ctrl_reg & MP_MASK))
@@ -549,8 +500,7 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
         {
           /* This path is meant for the OpenSBI vendor extension only */
 
-          DEBUGASSERT(msg != NULL);
-          mpfs_ihc_message_present_handler(msg, mhartid, rhartid, is_ack);
+          DEBUGPANIC();
         }
 
       /* Set MP to 0. Note this generates an interrupt on the other hart
@@ -655,47 +605,6 @@ static int mpfs_ihc_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: mpfs_ihc_sbi_message_present_indirect_isr
- *
- * Description:
- *   This is used by OpenSBI.  This is handled as an OpenSBI extension.
- *   The S-mode kernel uses this in its extended OpenSBI vendor call.
- *
- * Input Parameters:
- *   channel   - Enum that describes the channel used.
- *   msg       - The msg pointer from sbi_trap_regs->a1 register for data
- *               exchange.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MPFS_OPENSBI
-void mpfs_ihc_sbi_message_present_indirect_isr(ihc_channel_t channel,
-                                               uint32_t *msg)
-{
-  bool is_ack;
-  uint32_t mhartid     = mpfs_ihc_context_to_local_hart_id(channel);
-  uint32_t origin_hart = mpfs_ihc_parse_incoming_hartid(mhartid, &is_ack);
-
-  if (origin_hart != UNDEFINED_HART_ID)
-    {
-      /* Process incoming packet */
-
-      mpfs_ihc_rx_message(origin_hart, mhartid, is_ack, msg);
-
-      if (is_ack)
-        {
-          /* Clear the ack */
-
-          modifyreg32(MPFS_IHC_CTRL(mhartid, origin_hart), ACK_CLR, 0);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
  * Name: mpfs_ihc_local_context_init
  *
  * Description:
@@ -724,15 +633,8 @@ static void mpfs_ihc_local_context_init(uint32_t hart_to_configure)
       rhartid++;
     }
 
-#ifdef CONFIG_MPFS_OPENSBI
-  /* With OpenSBI we act the opposite direction */
-
-  g_connected_harts     = (HSS_HART_MASK | (1 << CONTEXTB_HARTID));
-  g_connected_hart_ints = IHCIA_CONTEXTA_INTS;
-#else
   g_connected_harts     = ihcia_remote_harts[hart_to_configure];
   g_connected_hart_ints = ihcia_remote_hart_ints[hart_to_configure];
-#endif
 }
 
 /****************************************************************************
@@ -825,9 +727,7 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
         {
           /* Only applicable for the CONTEXTB_HART */
 
-#ifndef CONFIG_MPFS_OPENSBI
           nxsem_wait_uninterruptible(&g_mpfs_ack_sig);
-#endif
         }
     }
 
@@ -959,11 +859,11 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring0.align       = VRING_ALIGN;
       rsc->rpmsg_vring0.num         = VRING_NR;
       rsc->rpmsg_vring0.da          = VRING0_DESCRIPTORS;
-      rsc->rpmsg_vring0.notifyid    = 0;
+      rsc->rpmsg_vring0.notifyid    = VRING0_NOTIFYID;
       rsc->rpmsg_vring1.align       = VRING_ALIGN;
       rsc->rpmsg_vring1.num         = VRING_NR;
       rsc->rpmsg_vring1.da          = VRING1_DESCRIPTORS;
-      rsc->rpmsg_vring1.notifyid    = 1;
+      rsc->rpmsg_vring1.notifyid    = VRING1_NOTIFYID;
       rsc->config.r2h_buf_size      = VRING_SIZE;
       rsc->config.h2r_buf_size      = VRING_SIZE;
     }
@@ -1078,14 +978,14 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
 {
   uint32_t tx_msg[IHC_MAX_MESSAGE_SIZE];
 
-  /* We only care about the queue with id 0 */
+  /* We only care about the queue with notifyid VRING0 */
 
-  if (notifyid == 0)
+  if (notifyid == VRING0_NOTIFYID)
     {
-      tx_msg[0] = 0; /* (notifyid << 16) which is zero */
+      tx_msg[0] = (notifyid << 16);
       tx_msg[1] = 0;
 
-      return mpfs_ihc_tx_message(IHC_CHANNEL_TO_CONTEXTA, tx_msg);
+      return mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
     }
 
   return OK;
@@ -1274,12 +1174,11 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 
   while (1)
     {
-      info = &g_mpfs_virtqueue_table[g_vq_idx];
+      DEBUGASSERT((g_vq_idx - VRING0_NOTIFYID) < VRINGS);
+      info = &g_mpfs_virtqueue_table[g_vq_idx - VRING0_NOTIFYID];
       virtqueue_notification((struct virtqueue *)info->data);
 
-#ifndef CONFIG_MPFS_OPENSBI
       nxsem_wait(&g_mpfs_rx_sig);
-#endif
     }
 
   return 0;
@@ -1288,66 +1187,6 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: mpfs_ihc_sbi_ecall_handler
- *
- * Description:
- *   This is sbi_platform_operations / vendor_ext_provider ecall handler.
- *   Related Linux ecalls end up here.
- *
- * Input Parameters:
- *   funcid          - SBI_EXT_IHC_CTX_INIT, SBI_EXT_IHC_SEND or
- *                     SBI_EXT_IHC_RECEIVE.  Others are invalid.
- *   remote_channel  - The remote we're communicating with
- *   message_ptr     - Local storage for data exchange
- *
- * Returned Value:
- *   OK on success, a negated error code otherwise
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MPFS_OPENSBI
-int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
-                               uint32_t *message_ptr)
-{
-  uint32_t mhartid;
-  uint32_t rhartid;
-  int result = OK;
-
-  /* Check the channel is bound to a valid context */
-
-  if ((remote_channel < IHC_CHANNEL_TO_CONTEXTA) ||
-      (remote_channel > IHC_CHANNEL_TO_CONTEXTB))
-    {
-      return -EINVAL;
-    }
-
-  switch (funcid)
-    {
-      case SBI_EXT_IHC_CTX_INIT:
-        mhartid = mpfs_ihc_context_to_local_hart_id(remote_channel);
-        rhartid = mpfs_ihc_context_to_remote_hart_id(remote_channel);
-        mpfs_ihc_local_context_init(mhartid);
-        mpfs_ihc_local_remote_config(mhartid, rhartid);
-        break;
-
-      case SBI_EXT_IHC_SEND:
-        result = mpfs_ihc_tx_message(remote_channel, message_ptr);
-        break;
-
-      case SBI_EXT_IHC_RECEIVE:
-        mpfs_ihc_sbi_message_present_indirect_isr(remote_channel,
-                                                  message_ptr);
-        break;
-
-      default:
-        result = -ENOTSUP;
-  }
-
-  return result;
-}
-#endif
 
 /****************************************************************************
  * Name: mpfs_ihc_init
