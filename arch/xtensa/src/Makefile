@@ -81,7 +81,7 @@ BIN  = libarch$(LIBEXT)
 # Override in Make.defs if linker is not 'ld'
 
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
-LDFLAGS += $(addprefix -T,$(ARCHSCRIPT).tmp) $(EXTRALINKCMDS)
+LDFLAGS += $(addprefix -T,$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
 ifeq ($(LD),$(CC))
   LDSTARTGROUP ?= -Wl,--start-group
