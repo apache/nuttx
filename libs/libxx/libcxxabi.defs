@@ -40,7 +40,7 @@ context:: libcxxabi
 endif
 
 ifeq ($(CONFIG_LIBCXXABI), y)
-CXXFLAGS += ${shell $(DEFINE) "$(CC)" LIBCXX_BUILDING_LIBCXXABI}
+CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
 CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/include
 endif
 
@@ -53,7 +53,7 @@ CPPSRCS += stdlib_exception.cpp stdlib_new_delete.cpp stdlib_stdexcept.cpp stdli
 CPPSRCS += abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp
 
 ifeq ($(CONFIG_CXX_EXCEPTION), y)
-CXXFLAGS += ${shell $(DEFINE) "$(CC)" LIBCXXABI_ENABLE_EXCEPTIONS}
+CXXFLAGS += ${DEFINE_PREFIX}LIBCXXABI_ENABLE_EXCEPTIONS
 CPPSRCS += cxa_exception.cpp cxa_personality.cpp
 else
 CPPSRCS += cxa_noexception.cpp

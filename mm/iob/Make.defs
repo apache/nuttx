@@ -39,7 +39,7 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 endif
 
 ifneq ($(CONFIG_IOB_SECTION),"")
-  CFLAGS += ${shell $(DEFINE) "$(CC)" IOB_SECTION=CONFIG_IOB_SECTION}
+  CFLAGS += ${DEFINE_PREFIX}IOB_SECTION=CONFIG_IOB_SECTION
 endif
 
 # Include iob build support

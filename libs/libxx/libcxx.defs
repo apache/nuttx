@@ -50,10 +50,11 @@ ifeq ($(wildcard libcxx/.git),)
 	$(call DELDIR, libcxx)
 endif
 
-CXXFLAGS += -std=c++17 ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
+CXXFLAGS += -std=c++17
+CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_BUILDING_LIBRARY
 
 ifeq ($(CONFIG_LIBSUPCXX), y)
-CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
+CXXFLAGS += ${DEFINE_PREFIX}__GLIBCXX__
 endif
 
 # Workaround the following warning with "c++ (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
