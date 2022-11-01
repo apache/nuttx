@@ -39,6 +39,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
+#include <nuttx/queue.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -96,6 +97,8 @@ static void nxsig_timeout(wdparm_t arg)
 
   if (wtcb->task_state == TSTATE_WAIT_SIG)
     {
+      FAR struct tcb_s *rtcb = this_task();
+
       wtcb->sigunbinfo.si_signo           = SIG_WAIT_TIMEOUT;
       wtcb->sigunbinfo.si_code            = SI_TIMER;
       wtcb->sigunbinfo.si_errno           = ETIMEDOUT;
@@ -104,7 +107,19 @@ static void nxsig_timeout(wdparm_t arg)
       wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
       wtcb->sigunbinfo.si_status          = OK;
 #endif
-      up_unblock_task(wtcb);
+
+      /* Remove the task from waitting list */
+
+      dq_rem((FAR dq_entry_t *)wtcb, &g_waitingforsignal);
+
+      /* Add the task to ready-to-run task list, and
+       * perform the context switch if one is needed
+       */
+
+      if (nxsched_add_readytorun(wtcb))
+        {
+          up_unblock_task(wtcb, rtcb);
+        }
     }
 
 #ifdef CONFIG_SMP
@@ -149,6 +164,8 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   if (wtcb->task_state == TSTATE_WAIT_SIG)
     {
+      FAR struct tcb_s *rtcb = this_task();
+
       wtcb->sigunbinfo.si_signo           = SIG_CANCEL_TIMEOUT;
       wtcb->sigunbinfo.si_code            = SI_USER;
       wtcb->sigunbinfo.si_errno           = errcode;
@@ -157,7 +174,19 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
       wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
       wtcb->sigunbinfo.si_status          = OK;
 #endif
-      up_unblock_task(wtcb);
+
+      /* Remove the task from waitting list */
+
+      dq_rem((FAR dq_entry_t *)wtcb, &g_waitingforsignal);
+
+      /* Add the task to ready-to-run task list, and
+       * perform the context switch if one is needed
+       */
+
+      if (nxsched_add_readytorun(wtcb))
+        {
+          up_unblock_task(wtcb, rtcb);
+        }
     }
 
 #ifdef CONFIG_SMP

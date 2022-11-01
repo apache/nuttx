@@ -43,106 +43,69 @@
  * Name: up_unblock_task
  *
  * Description:
- *   A task is currently in an inactive task list
- *   but has been prepped to execute.  Move the TCB to the
- *   ready-to-run list, restore its context, and start execution.
+ *   A task is currently in the ready-to-run list but has been prepped
+ *   to execute. Restore its context, and start execution.
  *
  * Input Parameters:
- *   tcb: Refers to the tcb to be unblocked.  This tcb is
- *     in one of the waiting tasks lists.  It must be moved to
- *     the ready-to-run list and, if it is the highest priority
- *     ready to run task, executed.
+ *   tcb: Refers to the head task of the ready-to-run list
+ *     which will be executed.
+ *   rtcb: Refers to the running task which will be blocked.
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb)
+void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  struct tcb_s *rtcb = this_task();
+  /* Update scheduler parameters */
 
-  /* Verify that the context switch can be performed */
+  nxsched_suspend_scheduler(rtcb);
 
-  DEBUGASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
-         (tcb->task_state <= LAST_BLOCKED_STATE));
+  /* Are we in an interrupt handler? */
 
-  /* Remove the task from the blocked task list */
-
-  nxsched_remove_blocked(tcb);
-
-  /* Add the task in the correct location in the prioritized
-   * ready-to-run task list
-   */
-
-  if (nxsched_add_readytorun(tcb))
+  if (g_current_regs)
     {
-      /* The currently active task has changed! We need to do
-       * a context switch to the new task.
+      /* Yes, then we have to do things differently.
+       * Just copy the g_current_regs into the OLD rtcb.
        */
+
+      up_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(rtcb);
+      nxsched_resume_scheduler(tcb);
 
-      /* Are we in an interrupt handler? */
+      /* Then switch contexts.  Any new address environment needed by
+       * the new thread will be instantiated before the return from
+       * interrupt.
+       */
 
-      if (g_current_regs)
-        {
-          /* Yes, then we have to do things differently.
-           * Just copy the g_current_regs into the OLD rtcb.
-           */
+      up_restorestate(tcb->xcp.regs);
+    }
 
-          up_savestate(rtcb->xcp.regs);
+  /* No, then we will need to perform the user context switch */
 
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
-
-          rtcb = this_task();
-
-          /* Update scheduler parameters */
-
-          nxsched_resume_scheduler(rtcb);
-
-          /* Then switch contexts.  Any new address environment needed by
-           * the new thread will be instantiated before the return from
-           * interrupt.
-           */
-
-          up_restorestate(rtcb->xcp.regs);
-        }
-
-      /* No, then we will need to perform the user context switch */
-
-      else
-        {
-          /* Restore the exception context of the new task that is ready to
-           * run (probably tcb).  This is the new rtcb at the head of the
-           * ready-to-run task list.
-           */
-
-          struct tcb_s *nexttcb = this_task();
-
+  else
+    {
 #ifdef CONFIG_ARCH_ADDRENV
-          /* Make sure that the address environment for the previously
-           * running task is closed down gracefully (data caches dump,
-           * MMU flushed) and set up the address environment for the new
-           * thread at the head of the ready-to-run list.
-           */
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
 
-          group_addrenv(nexttcb);
+      group_addrenv(tcb);
 #endif
-          /* Update scheduler parameters */
+      /* Update scheduler parameters */
 
-          nxsched_resume_scheduler(nexttcb);
+      nxsched_resume_scheduler(tcb);
 
-          /* Then switch contexts */
+      /* Then switch contexts */
 
-          up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+      up_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
 
-          /* up_switchcontext forces a context switch to the task at the
-           * head of the ready-to-run list.  It does not 'return' in the
-           * normal sense.  When it does return, it is because the blocked
-           * task is again ready to run and has execution priority.
-           */
-        }
+      /* up_switchcontext forces a context switch to the task at the
+       * head of the ready-to-run list.  It does not 'return' in the
+       * normal sense.  When it does return, it is because the blocked
+       * task is again ready to run and has execution priority.
+       */
     }
 }

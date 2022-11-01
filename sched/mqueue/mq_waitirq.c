@@ -33,6 +33,7 @@
 #include <nuttx/mqueue.h>
 
 #include "mqueue/mqueue.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -61,6 +62,7 @@
 
 void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
+  FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
 
   /* It is possible that an interrupt/context switch beat us to the punch and
@@ -80,18 +82,29 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
     {
       DEBUGASSERT(msgq->cmn.nwaitnotempty > 0);
       msgq->cmn.nwaitnotempty--;
+      dq_rem((FAR dq_entry_t *)wtcb, MQ_WNELIST(msgq->cmn));
     }
   else
     {
       DEBUGASSERT(msgq->cmn.nwaitnotfull > 0);
       msgq->cmn.nwaitnotfull--;
+      dq_rem((FAR dq_entry_t *)wtcb, MQ_WNFLIST(msgq->cmn));
     }
+
+  /* Indicate that the wait is over. */
+
+  wtcb->waitobj = NULL;
 
   /* Mark the error value for the thread. */
 
   wtcb->errcode = errcode;
 
-  /* Restart the task. */
+  /* Add the task to ready-to-run task list and
+   * perform the context switch if one is needed
+   */
 
-  up_unblock_task(wtcb);
+  if (nxsched_add_readytorun(wtcb))
+    {
+      up_unblock_task(wtcb, rtcb);
+    }
 }
