@@ -144,3 +144,23 @@ It is important to note that your Ethernet controller driver of your
 MCU needs to support CONFIG_ARCH_PHY_INTERRUPT (and implement
 ``arch_phy_irq()``).
 
+How to define the MTU and MSS for the network packets?
+------------------------------------------------------
+
+As you probably know the "MSS = MTU - 40", so you just need to setup the MTU.
+If you search for MTU in the menuconfig you will not find it, but you can
+setup the MTU using the ``CONFIG_NET_ETH_PKTSIZE`` here::
+
+    Networking Support  --->
+        Driver buffer configuration  --->
+            (590) Ethernet packet buffer size
+
+Then just figure it out using this formula:
+
+  MTU = NET_ETH_PKTSIZE - 14
+
+  MSS = MTU - 40
+
+In this case you have MTU = 590 - 14 => MTU = 576!
+
+And the MSS = 576 - 40 => MSS = 536.
