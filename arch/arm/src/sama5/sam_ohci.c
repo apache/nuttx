@@ -469,7 +469,11 @@ static struct sam_ohci_s g_ohci =
 
 /* This is the connection/enumeration interface */
 
-static struct usbhost_connection_s g_ohciconn;
+static struct usbhost_connection_s g_ohciconn =
+{
+  .wait = sam_wait,
+  .enumerate = sam_enumerate,
+};
 
 /* This is a free list of EDs and TD buffers */
 
@@ -4201,10 +4205,6 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   usbhost_vtrace1(OHCI_VTRACE1_INITIALIZED, 0);
 
-  /* Initialize and return the connection interface */
-
-  g_ohciconn.wait      = sam_wait;
-  g_ohciconn.enumerate = sam_enumerate;
   return &g_ohciconn;
 }
 
