@@ -352,7 +352,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       regval &= ~SPI_CR_BITS_MASK;
       regval |= (nbits << SPI_CR_BITS_SHIFT) & SPI_CR_BITS_MASK;
       regval |= SPI_CR_BITENABLE;
-      regval = getreg32(LPC17_40_SPI_CR);
+      putreg32(regval, LPC17_40_SPI_CR);
 
       /* Save the selection so that subsequent re-configurations will be
        * faster.
