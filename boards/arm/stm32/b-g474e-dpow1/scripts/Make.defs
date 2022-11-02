@@ -30,8 +30,6 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-ARCHCFLAGS += -funwind-tables
-ARCHCXXFLAGS += -funwind-tables
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
