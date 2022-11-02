@@ -931,7 +931,7 @@ static inline void lpc17_40_uart2config(void)
 };
 #endif
 
-#ifdef CONFIG_LPC17_40_UART3
+#if defined(CONFIG_LPC17_40_UART3) && !defined(CONFIG_UART3_SERIAL_CONSOLE)
 static inline void lpc17_40_uart3config(void)
 {
   uint32_t   regval;
