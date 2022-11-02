@@ -597,7 +597,11 @@ static struct kinetis_ehci_s g_ehci =
 
 /* This is the connection/enumeration interface */
 
-static struct usbhost_connection_s g_ehciconn;
+static struct usbhost_connection_s g_ehciconn =
+{
+  .wait = kinetis_wait,
+  .enumerate = kinetis_enumerate,
+};
 
 /* Maps USB chapter 9 speed to EHCI speed */
 
@@ -5398,10 +5402,6 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 
   usbhost_vtrace1(EHCI_VTRACE1_INIITIALIZED, 0);
 
-  /* Initialize and return the connection interface */
-
-  g_ehciconn.wait = kinetis_wait;
-  g_ehciconn.enumerate = kinetis_enumerate;
   return &g_ehciconn;
 }
 
