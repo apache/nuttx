@@ -146,12 +146,24 @@
 
 #define betoh16               be16toh
 #define letoh16               le16toh
+#define bemtoh16(x)           betoh16(*(FAR uint16_t *)(x))
+#define htobem16(x, v)        (*(FAR uint16_t *)(x) = htobe16(v))
+#define lemtoh16(x)           letoh16(*(FAR uint16_t *)(x))
+#define htolem16(x, v)        (*(FAR uint16_t *)(x) = htole16(v))
 #define betoh32               be32toh
 #define letoh32               le32toh
+#define bemtoh32(x)           htobe32(*(FAR uint32_t *)(x))
+#define htobem32(x, v)        (*(FAR uint32_t *)(x) = htobe32(v))
+#define lemtoh32(x)           letoh32(*(FAR uint32_t *)(x))
+#define htolem32(x, v)        (*(FAR uint32_t *)(x) = htole32(v))
 
 #ifdef CONFIG_HAVE_LONG_LONG
 #define betoh64               be64toh
 #define letoh64               le64toh
+#define bemtoh64(x)           htobe64(*(FAR uint64_t *)(x))
+#define htobem64(x, v)        (*(FAR uint64_t *)(x) = htobe64(v))
+#define lemtoh64(x)           letoh64(*(FAR uint64_t *)(x))
+#define htolem64(x, v)        (*(FAR uint64_t *)(x) = htole64(v))
 #endif
 
 #endif /* __INCLUDE_ENDIAN_H */
