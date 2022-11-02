@@ -45,11 +45,9 @@
 
 #include "riscv_internal.h"
 #include "mpfs_dma.h"
-#include "mpfs_plic.h"
 #include "hardware/mpfs_sysreg.h"
 #include "hardware/mpfs_ddr.h"
 #include "hardware/mpfs_sgmii.h"
-#include "hardware/mpfs_plic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -3862,44 +3860,6 @@ static int mpfs_ddr_test_32bit_nc(struct mpfs_ddr_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: mpfs_training_stop
- *
- * Description:
- *   This stops the DDR training process, resetting the training IP.
- *
- * Input Parameters:
- *   priv    - Instance of the ddr private state structure
- *
- ****************************************************************************/
-
-static void mpfs_training_stop(struct mpfs_ddr_priv_s *priv)
-{
-  uintptr_t claim_address;
-  uint32_t irq;
-
-  /* Not needed for now */
-
-  UNUSED(priv);
-
-  /* Stop training, i.e. reset the training block */
-
-  putreg32(0, MPFS_DDR_CSR_APB_PHY_DFI_INIT_START);
-  putreg32(0x02, MPFS_CFG_DDR_SGMII_PHY_TRAINING_RESET);
-
-  /* Eat a way any lingering DDRC interrupt */
-
-  claim_address = mpfs_plic_get_claimbase();
-  irq = MPFS_IRQ_EXT_START + getreg32(claim_address);
-
-  if (irq == MPFS_IRQ_DDRC_TRAIN)
-    {
-      /* Claim this interrupt, clearing the source */
-
-      putreg32(irq - MPFS_IRQ_EXT_START, claim_address);
-    }
-}
-
-/****************************************************************************
  * Name: mpfs_ddr_setup
  *
  * Description:
@@ -4038,10 +3998,6 @@ static int mpfs_ddr_setup(struct mpfs_ddr_priv_s *priv)
   /* Configure Segments, address mapping, CFG0/CFG1 */
 
   mpfs_setup_ddr_segments(LIBERO_SEG_SETUP);
-
-  /* Stop the training */
-
-  mpfs_training_stop(priv);
 
   return 0;
 }
