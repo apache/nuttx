@@ -181,26 +181,6 @@ static struct kinetis_edmatcd_s g_tcd_pool[CONFIG_KINETIS_EDMA_NTCD]
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kinetis_takedsem() and kinetis_givedsem()
- *
- * Description:
- *   Used to wait for availability of descriptors in the descriptor table.
- *
- ****************************************************************************/
-
-#if CONFIG_KINETIS_EDMA_NTCD > 0
-static void kinetis_takedsem(void)
-{
-  nxsem_wait_uninterruptible(&g_edma.dsem);
-}
-
-static inline void kinetis_givedsem(void)
-{
-  nxsem_post(&g_edma.dsem);
-}
-#endif
-
-/****************************************************************************
  * Name: kinetis_tcd_alloc
  *
  * Description:
@@ -223,7 +203,7 @@ static struct kinetis_edmatcd_s *kinetis_tcd_alloc(void)
    */
 
   flags = enter_critical_section();
-  kinetis_takedsem();
+  nxsem_wait_uninterruptible(&g_edma.dsem);
 
   /* Now there should be a TCD in the free list reserved just for us */
 
@@ -255,7 +235,7 @@ static void kinetis_tcd_free(struct kinetis_edmatcd_s *tcd)
 
   flags = spin_lock_irqsave(NULL);
   sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  kinetis_givedsem();
+  nxsem_post(&g_edma.dsem);
   spin_unlock_irqrestore(NULL, flags);
 }
 #endif

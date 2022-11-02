@@ -179,26 +179,6 @@ static struct imxrt_edmatcd_s g_tcd_pool[CONFIG_IMXRT_EDMA_NTCD]
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imxrt_takedsem() and imxrt_givedsem()
- *
- * Description:
- *   Used to wait for availability of descriptors in the descriptor table.
- *
- ****************************************************************************/
-
-#if CONFIG_IMXRT_EDMA_NTCD > 0
-static void imxrt_takedsem(void)
-{
-  nxsem_wait_uninterruptible(&g_edma.dsem);
-}
-
-static inline void imxrt_givedsem(void)
-{
-  nxsem_post(&g_edma.dsem);
-}
-#endif
-
-/****************************************************************************
  * Name: imxrt_tcd_alloc
  *
  * Description:
@@ -221,7 +201,7 @@ static struct imxrt_edmatcd_s *imxrt_tcd_alloc(void)
    */
 
   flags = enter_critical_section();
-  imxrt_takedsem();
+  nxsem_wait_uninterruptible(&g_edma.dsem);
 
   /* Now there should be a TCD in the free list reserved just for us */
 
@@ -253,7 +233,7 @@ static void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd)
 
   flags = spin_lock_irqsave(NULL);
   sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  imxrt_givedsem();
+  nxsem_post(&g_edma.dsem);
   spin_unlock_irqrestore(NULL, flags);
 }
 #endif

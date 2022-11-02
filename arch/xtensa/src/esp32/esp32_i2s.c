@@ -304,11 +304,6 @@ struct esp32_i2s_s
 #  define       i2s_dump_buffer(m,b,s)
 #endif
 
-/* Semaphore helpers */
-
-static int      i2s_bufsem_take(struct esp32_i2s_s *priv);
-#define         i2s_bufsem_give(priv) nxsem_post(&priv->bufsem)
-
 /* Buffer container helpers */
 
 static struct esp32_buffer_s *
@@ -485,26 +480,6 @@ static struct esp32_i2s_s esp32_i2s1_priv =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: i2s_bufsem_take
- *
- * Description:
- *   Take the buffer semaphore handling any exceptional conditions
- *
- * Input Parameters:
- *   priv - A reference to the i2s peripheral state
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int i2s_bufsem_take(struct esp32_i2s_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->bufsem);
-}
-
-/****************************************************************************
  * Name: i2s_buf_allocate
  *
  * Description:
@@ -534,7 +509,7 @@ static struct esp32_buffer_s *i2s_buf_allocate(struct esp32_i2s_s *priv)
    * have at least one free buffer container.
    */
 
-  ret = i2s_bufsem_take(priv);
+  ret = nxsem_wait_uninterruptible(&priv->bufsem);
   if (ret < 0)
     {
       return NULL;
@@ -590,7 +565,7 @@ static void i2s_buf_free(struct esp32_i2s_s *priv,
 
   /* Wake up any threads waiting for a buffer container */
 
-  i2s_bufsem_give(priv);
+  nxsem_post(&priv->bufsem);
 }
 
 /****************************************************************************

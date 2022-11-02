@@ -2682,11 +2682,15 @@ static int stm32l4_i2c_transfer(struct i2c_master_s *dev,
                                 struct i2c_msg_s *msgs,
                                 int count)
 {
+  struct stm32l4_i2c_priv_s *priv;
   int ret;
+
+  DEBUGASSERT(dev);
+  priv = ((struct stm32l4_i2c_inst_s *)dev)->priv;
 
   /* Ensure that address or flags don't change meanwhile */
 
-  ret = nxmutex_lock(&((struct stm32l4_i2c_inst_s *)dev)->priv->lock);
+  ret = nxmutex_lock(&priv->lock);
   if (ret >= 0)
     {
       ret = stm32l4_i2c_process(dev, msgs, count);
