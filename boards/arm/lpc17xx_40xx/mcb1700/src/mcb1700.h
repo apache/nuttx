@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDSS_ARM_LPC17XX_40XX_MCB1700_SRC_MCB1700_H
-#define __BOARDSS_ARM_LPC17XX_40XX__MCB1700_SRC_MCB1700_H
+#define __BOARDSS_ARM_LPC17XX_40XX_MCB1700_SRC_MCB1700_H
 
 /****************************************************************************
  * Included Files
@@ -106,4 +106,4 @@ int mcb1700_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDSS_ARM_LPC17XX_40XX__MCB1700_SRC_MCB1700_H */
+#endif /* __BOARDSS_ARM_LPC17XX_40XX_MCB1700_SRC_MCB1700_H */
