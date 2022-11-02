@@ -1039,6 +1039,10 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->tcpstateflags = TCP_SYN_RCVD;
 
       tcp_initsequence(conn->sndseq);
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+      conn->rexmit_seq = tcp_getsequence(conn->sndseq);
+#endif
+
       conn->tx_unacked    = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->expired       = 0;
@@ -1312,6 +1316,12 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   conn->tcpstateflags = TCP_SYN_SENT;
   tcp_initsequence(conn->sndseq);
+
+  /* Save initial sndseq to rexmit_seq, otherwise it will be zero */
+
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  conn->rexmit_seq = tcp_getsequence(conn->sndseq);
+#endif
 
   conn->tx_unacked = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
