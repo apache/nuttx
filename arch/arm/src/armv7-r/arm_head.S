@@ -161,6 +161,7 @@ __start:
 	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
 	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
 	mcr		CP15_DCIALLU(r0)	/* Invalidate D-cache */
+	isb
 
 	/* Configure the system control register (see sctrl.h) */
 
@@ -313,6 +314,7 @@ __start:
 	/* Then write the configured control register */
 
 	mcr		CP15_SCTLR(r0)			/* Write control reg */
+	isb
 	.rept		12				/* Some CPUs want want lots of NOPs here */
 	nop
 	.endr
