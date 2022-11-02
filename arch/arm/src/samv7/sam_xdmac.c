@@ -354,24 +354,6 @@ static struct sam_xdmac_s g_xdmac =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_takedsem() and sam_givedsem()
- *
- * Description:
- *   Used to wait for availability of descriptors in the descriptor table.
- *
- ****************************************************************************/
-
-static int sam_takedsem(struct sam_xdmac_s *xdmac)
-{
-  return nxsem_wait_uninterruptible(&xdmac->dsem);
-}
-
-static inline void sam_givedsem(struct sam_xdmac_s *xdmac)
-{
-  nxsem_post(&xdmac->dsem);
-}
-
-/****************************************************************************
  * Name: sam_getdmac
  *
  * Description:
@@ -979,7 +961,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
        * there is at least one free descriptor in the table and it is ours.
        */
 
-      ret = sam_takedsem(xdmac);
+      ret = nxsem_wait_uninterruptible(&xdmac->dsem);
       if (ret < 0)
         {
           return NULL;
@@ -994,7 +976,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
       ret = nxmutex_lock(&xdmac->chlock);
       if (ret < 0)
         {
-          sam_givedsem(xdmac);
+          nxsem_post(&xdmac->dsem);
           return NULL;
         }
 
@@ -1109,7 +1091,7 @@ static void sam_freelinklist(struct sam_xdmach_s *xdmach)
        */
 
       memset(descr, 0, sizeof(struct chnext_view1_s));
-      sam_givedsem(xdmac);
+      nxsem_post(&xdmac->dsem);
 
       /* Get the virtual address of the next descriptor in the list */
 
