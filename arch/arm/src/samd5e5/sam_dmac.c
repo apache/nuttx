@@ -100,10 +100,6 @@ struct sam_dmach_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#if CONFIG_SAMD5E5_DMAC_NDESC > 0
-static void   sam_takedsem(void);
-static inline void sam_givedsem(void);
-#endif
 static void   sam_dmaterminate(struct sam_dmach_s *dmach, int result);
 static int    sam_dmainterrupt(int irq, void *context, void *arg);
 static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach);
@@ -156,26 +152,6 @@ static struct dma_desc_s g_dma_desc[CONFIG_SAMD5E5_DMAC_NDESC]
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_takedsem() and sam_givedsem()
- *
- * Description:
- *   Used to wait for availability of descriptors in the descriptor table.
- *
- ****************************************************************************/
-
-#if CONFIG_SAMD5E5_DMAC_NDESC > 0
-static void sam_takedsem(void)
-{
-  nxsem_wait_uninterruptible(&g_dsem);
-}
-
-static inline void sam_givedsem(void)
-{
-  nxsem_post(&g_dsem);
-}
-#endif
 
 /****************************************************************************
  * Name: sam_dmaterminate
@@ -328,7 +304,7 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
        * it is ours.
        */
 
-      sam_takedsem();
+      nxsem_wait_uninterruptible(&g_dsem);
 
       /* Examine each list entry to find an available one -- i.e., one
        * with srcaddr == 0.  That srcaddr field is set to zero by the DMA
@@ -484,7 +460,7 @@ static void sam_free_desc(struct sam_dmach_s *dmach)
 
       next = (struct dma_desc_s *)desc->descaddr;
       memset(desc, 0, sizeof(struct dma_desc_s));
-      sam_givedsem();
+      nxsem_post(&g_dsem);
     }
 #endif
 }
