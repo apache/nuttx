@@ -26,8 +26,8 @@
  ****************************************************************************/
 
 #include <stdint.h>
-#include <sys/ioctl.h>
-#include "video_controls.h"
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/video/video_controls.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -37,10 +37,6 @@ extern "C"
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define _VIDIOCBASE   (0x1000)
-
-#define _VIDIOC(nr)       _IOC(_VIDIOCBASE,nr)
 
 /* Enumerate the formats supported by device */
 
