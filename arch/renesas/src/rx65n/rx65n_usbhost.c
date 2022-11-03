@@ -8363,7 +8363,7 @@ struct usbhost_connection_s *rx65n_usbhost_initialize(int controller)
   /* Initialize semaphores & mutex */
 
   nxsem_init(&priv->pscsem,  0, 0);
-  nxmutex_lock(&priv->lock);
+  nxmutex_init(&priv->lock);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;
