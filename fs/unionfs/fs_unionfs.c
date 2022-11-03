@@ -2679,7 +2679,7 @@ errout_with_fs1:
   inode_release(ui->ui_fs[0].um_node);
 
 errout_with_uinode:
-  nxmutex_lock(&ui->ui_lock);
+  nxmutex_destroy(&ui->ui_lock);
   kmm_free(ui);
   return ret;
 }
