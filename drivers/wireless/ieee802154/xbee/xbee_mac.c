@@ -320,6 +320,7 @@ int xbee_req_data(XBEEHANDLE xbee,
     }
   else
     {
+      nxmutex_unlock(&priv->tx_lock);
       return -EINVAL;
     }
 
