@@ -23,20 +23,31 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32s2/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx7/Toolchain.defs
 
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_out.ld
+# Pick the linker scripts from the board level if they exist, if not
+# pick the common linker scripts.
 
-ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s2_rom.ld
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s2_peripherals.ld
+
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_memory.ld),)
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_memory.ld
 else
-  ifeq ($(CONFIG_ESP32S2_RUN_IRAM),y)
-    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_iram.ld
-  else
-    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_flash.ld
-  endif
+  ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s2_memory.ld
 endif
 
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_rom.ld
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_peripherals.ld
+ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
+  ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld),)
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
+  else
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
+  endif
+else
+  ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_sections.ld),)
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_sections.ld
+  else
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s2_sections.ld
+  endif
+endif
 
 ARCHPICFLAGS = -fpic
 
