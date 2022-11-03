@@ -31,6 +31,7 @@
 
 #include <nuttx/net/icmp.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/net/udp.h>
 
 #include "nat/nat.h"
 #include "utils/utils.h"
@@ -96,6 +97,65 @@ static int ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4)
   /* Modify address and checksum. */
 
   chksum_adjust(tcp->tcpchksum, ipv4->destipaddr, entry->local_ip);
+  chksum_adjust(ipv4->ipchksum, ipv4->destipaddr, entry->local_ip);
+  net_ipv4addr_hdrcopy(ipv4->destipaddr, &entry->local_ip);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: ipv4_nat_inbound_udp
+ *
+ * Description:
+ *   Check if a received UDP packet belongs to a NAT entry. If so, translate
+ *   it.
+ *
+ * Input Parameters:
+ *   ipv4  - Points to the IPv4 header with dev->d_buf.
+ *
+ * Returned Value:
+ *   Zero is returned if NAT is successfully applied, or is not enabled for
+ *   this packet;
+ *   A negated errno value is returned if error occured.
+ *
+ * Assumptions:
+ *   Packet is received on NAT device and is targeting at the address
+ *   assigned to the device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+static int ipv4_nat_inbound_udp(FAR struct ipv4_hdr_s *ipv4)
+{
+  uint16_t iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+  FAR struct udp_hdr_s *udp =
+      (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
+  FAR struct ipv4_nat_entry *entry =
+      ipv4_nat_inbound_entry_find(IP_PROTO_UDP, udp->destport, true);
+  if (!entry)
+    {
+      /* Inbound without entry is OK (e.g. towards NuttX itself), skip NAT. */
+
+      return OK;
+    }
+
+  /* Modify port and checksum. */
+
+  if (udp->udpchksum != 0) /* UDP checksum has special case 0 (no checksum) */
+    {
+      chksum_adjust(udp->udpchksum, udp->destport, entry->local_port);
+    }
+
+  udp->destport = entry->local_port;
+
+  /* Modify address and checksum. */
+
+  if (udp->udpchksum != 0) /* UDP checksum has special case 0 (no checksum) */
+    {
+      chksum_adjust(udp->udpchksum, ipv4->destipaddr, entry->local_ip);
+    }
+
   chksum_adjust(ipv4->ipchksum, ipv4->destipaddr, entry->local_ip);
   net_ipv4addr_hdrcopy(ipv4->destipaddr, &entry->local_ip);
 
@@ -206,6 +266,66 @@ static int ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
   /* Modify address and checksum. */
 
   chksum_adjust(tcp->tcpchksum, ipv4->srcipaddr, dev->d_ipaddr);
+  chksum_adjust(ipv4->ipchksum, ipv4->srcipaddr, dev->d_ipaddr);
+  net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: ipv4_nat_outbound_udp
+ *
+ * Description:
+ *   Check if we want to perform NAT with this outbound UDP packet before
+ *   sending it. If so, translate it.
+ *
+ * Input Parameters:
+ *   dev   - The device to sent the packet.
+ *   ipv4  - Points to the IPv4 header to be filled into dev->d_buf later.
+ *
+ * Returned Value:
+ *   Zero is returned if NAT is successfully applied, or is not enabled for
+ *   this packet;
+ *   A negated errno value is returned if error occured.
+ *
+ * Assumptions:
+ *   Packet will be sent on NAT device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+static int ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
+                                 FAR struct ipv4_hdr_s *ipv4)
+{
+  uint16_t iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+  FAR struct udp_hdr_s *udp =
+      (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
+  FAR struct ipv4_nat_entry *entry = ipv4_nat_outbound_entry_find(
+      dev, IP_PROTO_UDP, net_ip4addr_conv32(ipv4->srcipaddr), udp->srcport);
+  if (!entry)
+    {
+      /* Outbound entry creation failed, should have corresponding entry. */
+
+      return -ENOMEM;
+    }
+
+  /* Modify port and checksum. */
+
+  if (udp->udpchksum != 0) /* UDP checksum has special case 0 (no checksum) */
+    {
+      chksum_adjust(udp->udpchksum, udp->srcport, entry->external_port);
+    }
+
+  udp->srcport = entry->external_port;
+
+  /* Modify address and checksum. */
+
+  if (udp->udpchksum != 0) /* UDP checksum has special case 0 (no checksum) */
+    {
+      chksum_adjust(udp->udpchksum, ipv4->srcipaddr, dev->d_ipaddr);
+    }
+
   chksum_adjust(ipv4->ipchksum, ipv4->srcipaddr, dev->d_ipaddr);
   net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
 
@@ -379,7 +499,8 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_UDP
-#         warning Missing logic
+          case IP_PROTO_UDP:
+            return ipv4_nat_inbound_udp(ipv4);
 #endif
 
 #ifdef CONFIG_NET_ICMP
@@ -430,7 +551,8 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_UDP
-#         warning Missing logic
+          case IP_PROTO_UDP:
+            return ipv4_nat_outbound_udp(dev, ipv4);
 #endif
 
 #ifdef CONFIG_NET_ICMP

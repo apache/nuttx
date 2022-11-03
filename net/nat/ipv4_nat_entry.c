@@ -33,6 +33,7 @@
 #include "icmp/icmp.h"
 #include "nat/nat.h"
 #include "tcp/tcp.h"
+#include "udp/udp.h"
 
 #if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
 
@@ -145,7 +146,22 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_UDP
-#     warning Missing logic
+      case IP_PROTO_UDP:
+        {
+#ifndef CONFIG_NET_UDP_NO_STACK
+          union ip_binding_u u;
+          u.ipv4.laddr = dev->d_draddr;
+          u.ipv4.raddr = INADDR_ANY;
+
+          /* TODO: Try keep origin port as possible. */
+
+          return HTONS(udp_select_port(PF_INET, &u));
+#else
+          return ipv4_nat_select_port_without_stack(IP_PROTO_UDP,
+                                                    dev->d_draddr,
+                                                    local_port);
+#endif
+        }
 #endif
 
 #ifdef CONFIG_NET_ICMP
@@ -212,7 +228,10 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
 #endif
 
 #ifdef CONFIG_NET_UDP
-#     warning Missing logic
+      case IP_PROTO_UDP:
+        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
+                             CONFIG_NET_NAT_UDP_EXPIRE_SEC;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMP
