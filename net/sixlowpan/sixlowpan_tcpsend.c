@@ -242,33 +242,19 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   memcpy(ipv6tcp->tcp.ackno, conn->rcvseq, 4);    /* ACK number */
   memcpy(ipv6tcp->tcp.seqno, conn->sndseq, 4);    /* Sequence number */
 
-  /* Set the TCP window */
+  /* Update the TCP received window based on I/O buffer availability */
 
-  if (conn->tcpstateflags & TCP_STOPPED)
-    {
-      /* If the connection has issued TCP_STOPPED, we advertise a zero
-       * window so that the remote host will stop sending data.
-       */
+  uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
+  uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
 
-      ipv6tcp->tcp.wnd[0] = 0;
-      ipv6tcp->tcp.wnd[1] = 0;
-    }
-  else
-    {
-      /* Update the TCP received window based on I/O buffer availability */
+  /* Set the TCP Window */
 
-      uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
-      uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
+  ipv6tcp->tcp.wnd[0] = recvwndo >> 8;
+  ipv6tcp->tcp.wnd[1] = recvwndo & 0xff;
 
-      /* Set the TCP Window */
+  /* Update the Receiver Window */
 
-      ipv6tcp->tcp.wnd[0] = recvwndo >> 8;
-      ipv6tcp->tcp.wnd[1] = recvwndo & 0xff;
-
-      /* Update the Receiver Window */
-
-      conn->rcv_adv = rcvseq + recvwndo;
-    }
+  conn->rcv_adv = rcvseq + recvwndo;
 
   /* Calculate TCP checksum. */
 

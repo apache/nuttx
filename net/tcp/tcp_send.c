@@ -337,37 +337,23 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   tcp->srcport  = conn->lport;
   tcp->destport = conn->rport;
 
-  /* Set the TCP window */
+  /* Update the TCP received window based on I/O buffer availability */
 
-  if (conn->tcpstateflags & TCP_STOPPED)
-    {
-      /* If the connection has issued TCP_STOPPED, we advertise a zero
-       * window so that the remote host will stop sending data.
-       */
+  uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
+  uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
 
-      tcp->wnd[0] = 0;
-      tcp->wnd[1] = 0;
-    }
-  else
-    {
-      /* Update the TCP received window based on I/O buffer availability */
+  /* Update the Receiver Window */
 
-      uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
-      uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
-
-      /* Update the Receiver Window */
-
-      conn->rcv_adv = rcvseq + recvwndo;
+  conn->rcv_adv = rcvseq + recvwndo;
 
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
-      recvwndo >>= conn->rcv_scale;
+  recvwndo >>= conn->rcv_scale;
 #endif
 
-      /* Set the TCP Window */
+  /* Set the TCP Window */
 
-      tcp->wnd[0] = recvwndo >> 8;
-      tcp->wnd[1] = recvwndo & 0xff;
-    }
+  tcp->wnd[0] = recvwndo >> 8;
+  tcp->wnd[1] = recvwndo & 0xff;
 
   /* Finish the IP portion of the message and calculate checksums */
 

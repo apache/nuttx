@@ -95,8 +95,7 @@
 #  define TCP_CLOSING     0x07
 #  define TCP_TIME_WAIT   0x08
 #  define TCP_LAST_ACK    0x09
-#  define TCP_STOPPED     0x10 /* Bit 4: stopped */
-                               /* Bit 5-7: Unused, but not available */
+                               /* Bit 4-7: Unused, but not available */
 
 /* TCP header sizes
  *
