@@ -139,6 +139,12 @@
 #  define SCHED_NOTE_END()
 #endif
 
+#if CONFIG_TASK_NAME_SIZE > 0
+#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n) - 1)
+#else
+#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -227,6 +233,14 @@ struct note_start_s
   struct note_common_s nst_cmn; /* Common note parameters */
 #if CONFIG_TASK_NAME_SIZE > 0
   char    nst_name[1];          /* Start of the name of the thread/task */
+#endif
+};
+
+struct note_startalloc_s
+{
+  struct note_common_s nsa_cmn; /* Common note parameters */
+#if CONFIG_TASK_NAME_SIZE > 0
+  char nsa_name[CONFIG_TASK_NAME_SIZE + 1];
 #endif
 };
 
@@ -449,6 +463,38 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: note_common
+ *
+ * Description:
+ *   Fill in some of the common fields in the note structure.
+ *
+ * Input Parameters:
+ *   tcb    - The TCB containing the information
+ *   note   - The common note structure to use
+ *   length - The total lengthof the note structure
+ *   type   - The type of the note
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void note_common(FAR struct tcb_s *tcb,
+                 FAR struct note_common_s *note,
+                 uint8_t length, uint8_t type);
+
+/****************************************************************************
+ * Name: sched_note_flatten
+ *
+ * Description:
+ *   Copy the data in the little endian layout
+ *
+ ****************************************************************************/
+
+void sched_note_flatten(FAR uint8_t *dst,
+                        FAR void *src, size_t len);
+
+/****************************************************************************
  * Name: sched_note_*
  *
  * Description:
@@ -566,28 +612,74 @@ void sched_note_end(uintptr_t ip);
 #  define sched_note_end(ip)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
-#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
-
 /****************************************************************************
- * Name: sched_note_add
+ * Name: sched_ramnote_*
  *
  * Description:
- *   Add the variable length note to the transport layer
+ *   If instrumentation of the scheduler is enabled, then some outboard
+ *   logic must provide the following interfaces.  These interfaces are not
+ *   available to application code.
  *
  * Input Parameters:
- *   note    - The note buffer
- *   notelen - The buffer length
+ *   tcb - The TCB of the thread.
  *
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   We are within a critical section.
- *
  ****************************************************************************/
 
-void sched_note_add(FAR const void *note, size_t notelen);
+void sched_ramnote_start(FAR struct tcb_s *tcb);
+void sched_ramnote_stop(FAR struct tcb_s *tcb);
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+void sched_ramnote_suspend(FAR struct tcb_s *tcb);
+void sched_ramnote_resume(FAR struct tcb_s *tcb);
+#endif
+
+#ifdef CONFIG_SMP
+void sched_ramnote_cpu_start(FAR struct tcb_s *tcb, int cpu);
+void sched_ramnote_cpu_started(FAR struct tcb_s *tcb);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+void sched_ramnote_cpu_pause(FAR struct tcb_s *tcb, int cpu);
+void sched_ramnote_cpu_paused(FAR struct tcb_s *tcb);
+void sched_ramnote_cpu_resume(FAR struct tcb_s *tcb, int cpu);
+void sched_ramnote_cpu_resumed(FAR struct tcb_s *tcb);
+#endif
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+void sched_ramnote_premption(FAR struct tcb_s *tcb, bool locked);
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+void sched_ramnote_csection(FAR struct tcb_s *tcb, bool enter);
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+void sched_ramnote_spinlock(FAR struct tcb_s *tcb,
+                         FAR volatile void *spinlock);
+void sched_ramnote_spinlocked(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock);
+void sched_ramnote_spinunlock(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock);
+void sched_ramnote_spinabort(FAR struct tcb_s *tcb,
+                          FAR volatile void *spinlock);
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_ramnote_syscall_enter(int nr, int argc, va_list ap);
+void sched_ramnote_syscall_leave(int nr, uintptr_t result);
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_ramnote_irqhandler(int irq, FAR void *handler, bool enter);
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+void sched_ramnote_write(FAR const void *data, size_t size);
+#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
+
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 /****************************************************************************
  * Name: sched_note_filter_mode
  *

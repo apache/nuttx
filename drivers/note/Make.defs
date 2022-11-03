@@ -34,5 +34,7 @@ ifeq ($(CONFIG_DRIVER_NOTECTL),y)
   CSRCS += notectl_driver.c
 endif
 
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
+
 DEPPATH += --dep-path note
 VPATH += :note

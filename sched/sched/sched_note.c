@@ -57,20 +57,6 @@ struct note_filter_s
 };
 #endif
 
-struct note_startalloc_s
-{
-  struct note_common_s nsa_cmn; /* Common note parameters */
-#if CONFIG_TASK_NAME_SIZE > 0
-  char nsa_name[CONFIG_TASK_NAME_SIZE + 1];
-#endif
-};
-
-#if CONFIG_TASK_NAME_SIZE > 0
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n) - 1)
-#else
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -94,77 +80,6 @@ static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sched_note_flatten
- *
- * Description:
- *   Copy the data in the little endian layout
- *
- ****************************************************************************/
-
-static inline void sched_note_flatten(FAR uint8_t *dst,
-                                      FAR void *src, size_t len)
-{
-#ifdef CONFIG_ENDIAN_BIG
-  FAR uint8_t *end = (FAR uint8_t *)src + len - 1;
-  while (len-- > 0)
-    {
-      *dst++ = *end--;
-    }
-#else
-  memcpy(dst, src, len);
-#endif
-}
-
-/****************************************************************************
- * Name: note_common
- *
- * Description:
- *   Fill in some of the common fields in the note structure.
- *
- * Input Parameters:
- *   tcb    - The TCB containing the information
- *   note   - The common note structure to use
- *   length - The total lengthof the note structure
- *   type   - The type of the note
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void note_common(FAR struct tcb_s *tcb,
-                        FAR struct note_common_s *note,
-                        uint8_t length, uint8_t type)
-{
-#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
-  struct timespec ts;
-
-  clock_systime_timespec(&ts);
-#else
-  clock_t systime = clock_systime_ticks();
-#endif
-
-  /* Save all of the common fields */
-
-  note->nc_length   = length;
-  note->nc_type     = type;
-  note->nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note->nc_cpu      = tcb->cpu;
-#endif
-  sched_note_flatten(note->nc_pid, &tcb->pid, sizeof(tcb->pid));
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
-  sched_note_flatten(note->nc_systime_nsec, &ts.tv_nsec, sizeof(ts.tv_nsec));
-  sched_note_flatten(note->nc_systime_sec, &ts.tv_sec, sizeof(ts.tv_sec));
-#else
-  /* Save the LS 32-bits of the system timer in little endian order */
-
-  sched_note_flatten(note->nc_systime, &systime, sizeof(systime));
-#endif
-}
 
 /****************************************************************************
  * Name: note_isenabled
@@ -389,374 +304,79 @@ static inline int note_isenabled_dump(void)
 #endif
 
 /****************************************************************************
- * Name: note_spincommon
- *
- * Description:
- *   Common logic for NOTE_SPINLOCK, NOTE_SPINLOCKED, and NOTE_SPINUNLOCK
- *
- * Input Parameters:
- *   tcb  - The TCB containing the information
- *   note - The common note structure to use
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-static void note_spincommon(FAR struct tcb_s *tcb,
-                            FAR volatile spinlock_t *spinlock,
-                            int type)
-{
-  struct note_spinlock_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
-
-  sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spinlock));
-  note.nsp_value = *(uint8_t *)spinlock;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_spinlock_s));
-}
-#endif
-
-/****************************************************************************
- * Name: sched_ramnote_*
- *
- * Description:
- *   These are the hooks into the scheduling instrumentation logic.  Each
- *   simply formats the note associated with the schedule event and adds
- *   that note to the circular buffer.
- *
- * Input Parameters:
- *   tcb - The TCB of the thread.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-static void sched_ramnote_start(FAR struct tcb_s *tcb)
-{
-  struct note_startalloc_s note;
-  unsigned int length;
-#if CONFIG_TASK_NAME_SIZE > 0
-  int namelen;
-#endif
-
-  /* Copy the task name (if possible) and get the length of the note */
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  namelen = strlen(tcb->name);
-
-  DEBUGASSERT(namelen <= CONFIG_TASK_NAME_SIZE);
-  strlcpy(note.nsa_name, tcb->name, sizeof(note.nsa_name));
-
-  length = SIZEOF_NOTE_START(namelen + 1);
-#else
-  length = SIZEOF_NOTE_START(0);
-#endif
-
-  /* Finish formatting the note */
-
-  note_common(tcb, &note.nsa_cmn, length, NOTE_START);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, length);
-}
-
-static void sched_ramnote_stop(FAR struct tcb_s *tcb)
-{
-  struct note_stop_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.nsp_cmn, sizeof(struct note_stop_s), NOTE_STOP);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_stop_s));
-}
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-static void sched_ramnote_suspend(FAR struct tcb_s *tcb)
-{
-  struct note_suspend_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.nsu_cmn, sizeof(struct note_suspend_s),
-              NOTE_SUSPEND);
-  note.nsu_state           = tcb->task_state;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_suspend_s));
-}
-
-static void sched_ramnote_resume(FAR struct tcb_s *tcb)
-{
-  struct note_resume_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.nre_cmn, sizeof(struct note_resume_s), NOTE_RESUME);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_resume_s));
-}
-#endif
-
-#ifdef CONFIG_SMP
-static void sched_ramnote_cpu_start(FAR struct tcb_s *tcb, int cpu)
-{
-  struct note_cpu_start_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_start_s),
-              NOTE_CPU_START);
-  note.ncs_target = (uint8_t)cpu;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_cpu_start_s));
-}
-
-static void sched_ramnote_cpu_started(FAR struct tcb_s *tcb)
-{
-  struct note_cpu_started_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_started_s),
-              NOTE_CPU_STARTED);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_cpu_started_s));
-}
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-static void sched_ramnote_cpu_pause(FAR struct tcb_s *tcb, int cpu)
-{
-  struct note_cpu_pause_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_pause_s),
-              NOTE_CPU_PAUSE);
-  note.ncp_target = (uint8_t)cpu;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_cpu_pause_s));
-}
-
-static void sched_ramnote_cpu_paused(FAR struct tcb_s *tcb)
-{
-  struct note_cpu_paused_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_paused_s),
-              NOTE_CPU_PAUSED);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_cpu_paused_s));
-}
-
-static void sched_ramnote_cpu_resume(FAR struct tcb_s *tcb, int cpu)
-{
-  struct note_cpu_resume_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resume_s),
-              NOTE_CPU_RESUME);
-  note.ncr_target = (uint8_t)cpu;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_cpu_resume_s));
-}
-
-static void sched_ramnote_cpu_resumed(FAR struct tcb_s *tcb)
-{
-  struct note_cpu_resumed_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resumed_s),
-              NOTE_CPU_RESUMED);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_cpu_resumed_s));
-}
-#endif
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void sched_ramnote_premption(FAR struct tcb_s *tcb, bool locked)
-{
-  struct note_preempt_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.npr_cmn, sizeof(struct note_preempt_s),
-              locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK);
-  sched_note_flatten(note.npr_count,
-                     &tcb->lockcount, sizeof(tcb->lockcount));
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_preempt_s));
-}
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-static void sched_ramnote_csection(FAR struct tcb_s *tcb, bool enter)
-{
-  struct note_csection_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.ncs_cmn, sizeof(struct note_csection_s),
-              enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE);
-#ifdef CONFIG_SMP
-  sched_note_flatten(note.ncs_count, &tcb->irqcount, sizeof(tcb->irqcount));
-#endif
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_csection_s));
-}
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_ramnote_spinlock(FAR struct tcb_s *tcb,
-                            FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK);
-}
-
-void sched_ramnote_spinlocked(FAR struct tcb_s *tcb,
-                           FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED);
-}
-
-void sched_ramnote_spinunlock(FAR struct tcb_s *tcb,
-                           FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
-}
-
-void sched_ramnote_spinabort(FAR struct tcb_s *tcb,
-                             FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT);
-}
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-static void sched_ramnote_syscall_enter(int nr, int argc, va_list ap)
-{
-  struct note_syscall_enter_s note;
-  FAR struct tcb_s *tcb = this_task();
-  unsigned int length;
-  uintptr_t arg;
-  uint8_t *args;
-  int i;
-
-  /* Format the note */
-
-  length = SIZEOF_NOTE_SYSCALL_ENTER(argc);
-  note_common(tcb, &note.nsc_cmn, length, NOTE_SYSCALL_ENTER);
-  DEBUGASSERT(nr <= UCHAR_MAX);
-  note.nsc_nr = nr;
-  DEBUGASSERT(argc <= MAX_SYSCALL_ARGS);
-  note.nsc_argc = argc;
-
-  /* If needed, retrieve the given syscall arguments */
-
-  va_start(ap, argc);
-
-  args = note.nsc_args;
-  for (i = 0; i < argc; i++)
-    {
-      arg = (uintptr_t)va_arg(ap, uintptr_t);
-      sched_note_flatten(args, &arg, sizeof(arg));
-      args += sizeof(uintptr_t);
-    }
-
-  va_end(ap);
-
-  /* Add the note to circular buffer */
-
-  sched_note_add((FAR const uint8_t *)&note, length);
-}
-
-static void sched_ramnote_syscall_leave(int nr, uintptr_t result)
-{
-  struct note_syscall_leave_s note;
-  FAR struct tcb_s *tcb = this_task();
-
-  /* Format the note */
-
-  note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_leave_s),
-              NOTE_SYSCALL_LEAVE);
-  DEBUGASSERT(nr <= UCHAR_MAX);
-  note.nsc_nr = nr;
-
-  sched_note_flatten(note.nsc_result, &result, sizeof(result));
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_syscall_leave_s));
-}
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-static void sched_ramnote_irqhandler(int irq, FAR void *handler, bool enter)
-{
-  struct note_irqhandler_s note;
-  FAR struct tcb_s *tcb = this_task();
-
-  /* Format the note */
-
-  note_common(tcb, &note.nih_cmn, sizeof(struct note_irqhandler_s),
-              enter ? NOTE_IRQ_ENTER : NOTE_IRQ_LEAVE);
-  DEBUGASSERT(irq <= UCHAR_MAX);
-  note.nih_irq = irq;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add((FAR const uint8_t *)&note,
-                 sizeof(struct note_irqhandler_s));
-}
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-static void sched_ramnote_write(FAR void *data, size_t length)
-{
-  sched_note_add(data, length);
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: note_common
+ *
+ * Description:
+ *   Fill in some of the common fields in the note structure.
+ *
+ * Input Parameters:
+ *   tcb    - The TCB containing the information
+ *   note   - The common note structure to use
+ *   length - The total lengthof the note structure
+ *   type   - The type of the note
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void note_common(FAR struct tcb_s *tcb,
+                FAR struct note_common_s *note,
+                uint8_t length, uint8_t type)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  struct timespec ts;
+
+  clock_systime_timespec(&ts);
+#else
+  clock_t systime = clock_systime_ticks();
+#endif
+
+  /* Save all of the common fields */
+
+  note->nc_length   = length;
+  note->nc_type     = type;
+  note->nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+  note->nc_cpu      = tcb->cpu;
+#endif
+  sched_note_flatten(note->nc_pid, &tcb->pid, sizeof(tcb->pid));
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  sched_note_flatten(note->nc_systime_nsec, &ts.tv_nsec, sizeof(ts.tv_nsec));
+  sched_note_flatten(note->nc_systime_sec, &ts.tv_sec, sizeof(ts.tv_sec));
+#else
+  /* Save the LS 32-bits of the system timer in little endian order */
+
+  sched_note_flatten(note->nc_systime, &systime, sizeof(systime));
+#endif
+}
+
+/****************************************************************************
+ * Name: sched_note_flatten
+ *
+ * Description:
+ *   Copy the data in the little endian layout
+ *
+ ****************************************************************************/
+
+void sched_note_flatten(FAR uint8_t *dst,
+                        FAR void *src, size_t len)
+{
+#ifdef CONFIG_ENDIAN_BIG
+  FAR uint8_t *end = (FAR uint8_t *)src + len - 1;
+  while (len-- > 0)
+    {
+      *dst++ = *end--;
+    }
+#else
+  memcpy(dst, src, len);
+#endif
+}
 
 /****************************************************************************
  * Name: sched_note_*
