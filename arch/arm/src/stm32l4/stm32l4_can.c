@@ -37,10 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/can/can.h>
 
-#include "arm_internal.h"
-#include "chip.h"
 #include "stm32l4.h"
-#include "stm32l4_can.h"
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32L4_CAN1) || defined(CONFIG_STM32L4_CAN2))
 
@@ -206,7 +203,7 @@ static struct stm32l4_can_s g_can2priv =
                       STM32L4_IRQ_CAN2RX1,
   },
   .cantx            = STM32L4_IRQ_CAN2TX,
-  .filter           = 0,
+  .filter           = CAN_NFILTERS / 2,
   .base             = STM32L4_CAN2_BASE,
   .fbase            = STM32L4_CAN2_BASE,
   .baud             = CONFIG_STM32L4_CAN2_BAUD,
@@ -553,6 +550,13 @@ static void stm32l4can_reset(struct can_dev_s *dev)
   if (priv->port == 1)
     {
       regbit = RCC_APB1RSTR1_CAN1RST;
+    }
+  else
+#endif
+#ifdef CONFIG_STM32L4_CAN2
+  if (priv->port == 2)
+    {
+      regbit = RCC_APB1RSTR1_CAN2RST;
     }
   else
 #endif
@@ -1417,7 +1421,9 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 
 #ifdef CONFIG_STM32L4_CAN1
   dev = &g_can1dev;
-#elif CONFIG_STM32L4_CAN2
+#endif
+
+#ifdef CONFIG_STM32L4_CAN2
   dev = &g_can2dev;
 #endif
   priv = dev->cd_priv;
@@ -1575,7 +1581,9 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
 #ifdef CONFIG_STM32L4_CAN1
   dev = &g_can1dev;
-#elif CONFIG_STM32L4_CAN2
+#endif
+
+#ifdef CONFIG_STM32L4_CAN2
   dev = &g_can2dev;
 #endif
 
@@ -2185,7 +2193,8 @@ struct can_dev_s *stm32l4can_initialize(int port)
       stm32l4_configgpio(GPIO_CAN1_TX);
     }
   else
-#elif CONFIG_STM32L4_CAN2
+#endif
+#ifdef CONFIG_STM32L4_CAN2
   if (port == 2)
     {
       /* Select the CAN2 device structure */
