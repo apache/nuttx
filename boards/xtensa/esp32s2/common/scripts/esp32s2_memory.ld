@@ -1,16 +1,12 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/esp32s2-saola-1/scripts/esp32s2.template.ld
- * ESP32S2 Linker Script Memory Layout
+ * boards/xtensa/esp32s2/common/scripts/esp32s2_memory.ld
+ * ESP32-S2 Linker Script Memory Layout
  *
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
  *
- * esp32s2.common.ld contains output sections to link compiler output
+ * esp32s2_sections.ld contains output sections to link compiler output
  * into these memory blocks.
- *
- * NOTE: That this is not the actual linker script but rather a "template"
- * for the elf32_out.ld script.  This template script is passed through
- * the C preprocessor to include selected configuration options.
  *
  ****************************************************************************/
 
@@ -135,3 +131,10 @@ MEMORY
   rtc_data_seg(RW)  :                 org = 0x3ff9e000, len = 0x2000
 }
 
+#if CONFIG_ESP32S2_RUN_IRAM
+  REGION_ALIAS("default_rodata_seg", dram0_0_seg);
+  REGION_ALIAS("default_code_seg", iram0_0_seg);
+#else
+  REGION_ALIAS("default_rodata_seg", drom0_0_seg);
+  REGION_ALIAS("default_code_seg", irom0_0_seg);
+#endif /* CONFIG_ESP32S2_RUN_IRAM */

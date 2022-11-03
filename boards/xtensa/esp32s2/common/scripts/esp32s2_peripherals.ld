@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/esp32s2-saola-1/scripts/esp32s2_peripherals.ld
+ * boards/xtensa/esp32s2/common/scripts/esp32s2_peripherals.ld
  ****************************************************************************/
 
 PROVIDE ( UART0 = 0x3f400000 );

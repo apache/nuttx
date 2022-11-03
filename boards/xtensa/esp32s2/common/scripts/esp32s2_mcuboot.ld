@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/esp32s2-saola-1/scripts/esp32s2_mcuboot.ld
+ * boards/xtensa/esp32s2/common/scripts/esp32s2_mcuboot.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

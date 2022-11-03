@@ -20,10 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-SCRIPTDIR = $(BOARD_DIR)$(DELIM)scripts
-
-CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
-
 CSRCS = esp32s2_boot.c esp32s2_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
@@ -52,19 +48,6 @@ endif
 ifeq ($(CONFIG_ESP32S2_SPI),y)
 CSRCS += esp32s2_board_spi.c
 endif
-
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32s2.template.ld
-SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32s2_out.ld
-
-.PHONY = context distclean
-
-$(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
-
-context:: $(SCRIPTOUT)
-
-distclean::
-	$(call DELFILE, $(SCRIPTOUT))
 
 DEPPATH += --dep-path board
 VPATH += :board

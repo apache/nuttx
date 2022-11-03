@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/esp32s2-saola-1/scripts/esp32s2s2_iram.ld
+ * boards/xtensa/esp32s2/common/scripts/esp32s2_sections.ld
  ****************************************************************************/
 
 /* Default entry point: */
@@ -12,7 +12,9 @@ SECTIONS
 
   .iram0.vectors :
   {
-    /* Vectors go to IRAM */
+    _iram_start = ABSOLUTE(.);
+
+    /* Vectors go to IRAM. */
 
     _init_start = ABSOLUTE(.);
 
@@ -45,8 +47,7 @@ SECTIONS
     *(.entry.text)
     *(.init.literal)
     *(.init)
-    _init_end = ABSOLUTE(.);
-  } > iram0_0_seg
+  } >iram0_0_seg
 
   .iram0.text :
   {
@@ -54,18 +55,16 @@ SECTIONS
 
     *(.iram1 .iram1.*)
 
-    _stext = .;
-    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
-    *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
-    *(.fini.literal)
-    *(.fini)
-    *(.gnu.version)
-
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
     . = ALIGN(4) + 16;
-    _etext = .;
-  } > iram0_0_seg
+    _iram_text = ABSOLUTE(.);
+  } >iram0_0_seg
+
+  .dram0_reserved_for_iram (NOLOAD):
+  {
+    . = ORIGIN(dram0_0_seg) + _iram_text - _iram_start;
+  } >dram0_0_seg
 
   /* Shared RAM */
 
@@ -91,8 +90,13 @@ SECTIONS
     *(COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
+  } >dram0_0_seg
 
-    /* Uninitialized .bss */
+  .noinit (NOLOAD):
+  {
+    /* This section contains data that is not initialized during load,
+     * or during the application's initialization sequence.
+     */
 
     . = ALIGN(4);
     *(.noinit)
@@ -119,6 +123,13 @@ SECTIONS
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
 
+    /* Heap starts at the end of .data */
+
+    _sheap = ABSOLUTE(.);
+  } >dram0_0_seg
+
+  .flash.rodata :
+  {
     _srodata = ABSOLUTE(.);
     *(.rodata)
     *(.rodata.*)
@@ -128,6 +139,7 @@ SECTIONS
     __XT_EXCEPTION_TABLE_ = ABSOLUTE(.);
     *(.xt_except_table)
     *(.gcc_except_table)
+    *(.gcc_except_table.*)
     *(.gnu.linkonce.e.*)
     *(.gnu.version_r)
     *(.eh_frame)
@@ -157,18 +169,36 @@ SECTIONS
     *(.dynamic)
     *(.gnu.version_d)
     _erodata = ABSOLUTE(.);
+
     /* Literals are also RO data. */
+
     _lit4_start = ABSOLUTE(.);
     *(*.lit4)
     *(.lit4.*)
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
+  } >default_rodata_seg
 
-    /* Heap starts at the end of .data */
+  .flash.text :
+  {
+    _stext = .;
+    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+    *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
+    *(.fini.literal)
+    *(.fini)
+    *(.gnu.version)
 
-    _sheap = ABSOLUTE(.);
-  } >dram0_0_seg
+    /* CPU will try to prefetch up to 16 bytes of instructions.
+     * This means that any configuration (e.g. MMU, PMS) must allow
+     * safe access to up to 16 bytes after the last real instruction, add
+     * dummy bytes to ensure this
+     */
+
+    . += 16;
+
+    _etext = .;
+  } >default_code_seg
 
   .rtc.text :
   {
@@ -180,5 +210,5 @@ SECTIONS
   {
     *(.rtc.data)
     *(.rtc.rodata)
-  } > rtc_slow_seg
+  } >rtc_slow_seg
 }
