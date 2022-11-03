@@ -345,6 +345,7 @@ static void mac802154_scantimeout(FAR void *arg)
           mac802154_scanfinish(priv, IEEE802154_STATUS_NO_BEACON);
         }
 
+      nxmutex_unlock(&priv->lock);
       return;
     }
 
