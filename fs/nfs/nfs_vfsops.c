@@ -2045,7 +2045,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   if (!rpc)
     {
       ferr("ERROR: Failed to allocate rpc structure\n");
-      return -ENOMEM;
+      goto bad;
     }
 
   finfo("Connecting\n");
