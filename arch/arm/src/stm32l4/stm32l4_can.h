@@ -40,12 +40,13 @@
 
 /* Up to 2 CAN interfaces are supported */
 
-#if STM32L4_NCAN < 1
-#  undef CONFIG_STM32L4_CAN1
+#if STM32L4_NCAN < 2
 #  undef CONFIG_STM32L4_CAN2
 #endif
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32L4_CAN1) || defined(CONFIG_STM32L4_CAN2))
+#if STM32L4_NCAN < 1
+#  undef CONFIG_STM32L4_CAN1
+#endif
 
 /* CAN BAUD */
 
@@ -122,9 +123,12 @@ struct can_dev_s *stm32l4can_initialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)
-}
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_CAN && (defined(CONFIG_STM32L4_CAN1) || defined(CONFIG_STM32L4_CAN2)) */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_CAN_H */
