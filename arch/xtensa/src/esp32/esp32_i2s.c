@@ -213,10 +213,6 @@ struct esp32_i2s_config_s
   /* WS signal polarity, set true to enable high lever first */
 
   bool ws_pol;
-
-  /* The associated DMA outlink */
-
-  struct esp32_dmadesc_s dma_outlink[I2S_DMADESC_NUM];
 };
 
 struct esp32_buffer_s
@@ -714,8 +710,8 @@ static int i2s_txdma_start(struct esp32_i2s_s *priv)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static int i2s_txdma_setup(struct esp32_i2s_s *priv,
-                           struct esp32_buffer_s *bfcontainer)
+static IRAM_ATTR int i2s_txdma_setup(struct esp32_i2s_s *priv,
+                                     struct esp32_buffer_s *bfcontainer)
 {
   struct ap_buffer_s *apb;
   struct esp32_dmadesc_s *outlink;
@@ -1316,8 +1312,6 @@ static uint32_t i2s_set_clock(struct esp32_i2s_s *priv)
   uint16_t bclk_div;
   uint32_t sclk;
   uint32_t mclk_div;
-  int ma;
-  int mb;
   int denominator;
   int numerator;
   uint32_t regval;
@@ -1363,8 +1357,6 @@ static uint32_t i2s_set_clock(struct esp32_i2s_s *priv)
 
   freq_diff = abs((int)sclk - (int)(mclk * mclk_div));
 
-  ma = 0;
-  mb = 0;
   denominator = 1;
   numerator = 0;
 
@@ -1387,8 +1379,8 @@ static uint32_t i2s_set_clock(struct esp32_i2s_s *priv)
           for (int a = 2; a <= I2S_LL_MCLK_DIVIDER_MAX; a++)
             {
               int b = (int)(a * (freq_diff / (double)mclk) + 0.5);
-              ma = freq_diff * a;
-              mb = mclk * b;
+              int ma = freq_diff * a;
+              int mb = mclk * b;
               if (ma == mb)
                 {
                   denominator = a;
