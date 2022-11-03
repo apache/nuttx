@@ -64,6 +64,7 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
+#include "nat/nat.h"
 #include "netdev/netdev.h"
 #include "inet/inet.h"
 #include "udp/udp.h"
@@ -533,7 +534,13 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
           g_last_udp_port = 4096;
         }
     }
-  while (udp_find_conn(domain, u, HTONS(g_last_udp_port)) != NULL);
+  while (udp_find_conn(domain, u, HTONS(g_last_udp_port)) != NULL
+#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+         || (domain == PF_INET &&
+             ipv4_nat_port_inuse(IP_PROTO_UDP, u->ipv4.laddr,
+                                 HTONS(g_last_udp_port)))
+#endif
+  );
 
   /* Initialize and return the connection structure, bind it to the
    * port number
@@ -816,7 +823,13 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        * and port ?
        */
 
-      if (udp_find_conn(conn->domain, &conn->u, portno) == NULL)
+      if (udp_find_conn(conn->domain, &conn->u, portno) == NULL
+#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+          && !(conn->domain == PF_INET &&
+               ipv4_nat_port_inuse(IP_PROTO_UDP, conn->u.ipv4.laddr,
+                                   portno))
+#endif
+      )
         {
           /* No.. then bind the socket to the port */
 
