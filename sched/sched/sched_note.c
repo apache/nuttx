@@ -410,11 +410,6 @@ static void note_spincommon(FAR struct tcb_s *tcb,
 {
   struct note_spinlock_s note;
 
-  if (!note_isenabled())
-    {
-      return;
-    }
-
   /* Format the note */
 
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
@@ -429,11 +424,7 @@ static void note_spincommon(FAR struct tcb_s *tcb,
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sched_note_*
+ * Name: sched_ramnote_*
  *
  * Description:
  *   These are the hooks into the scheduling instrumentation logic.  Each
@@ -451,18 +442,13 @@ static void note_spincommon(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-void sched_note_start(FAR struct tcb_s *tcb)
+static void sched_ramnote_start(FAR struct tcb_s *tcb)
 {
   struct note_startalloc_s note;
   unsigned int length;
 #if CONFIG_TASK_NAME_SIZE > 0
   int namelen;
 #endif
-
-  if (!note_isenabled())
-    {
-      return;
-    }
 
   /* Copy the task name (if possible) and get the length of the note */
 
@@ -486,14 +472,9 @@ void sched_note_start(FAR struct tcb_s *tcb)
   sched_note_add(&note, length);
 }
 
-void sched_note_stop(FAR struct tcb_s *tcb)
+static void sched_ramnote_stop(FAR struct tcb_s *tcb)
 {
   struct note_stop_s note;
-
-  if (!note_isenabled())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -505,14 +486,9 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-void sched_note_suspend(FAR struct tcb_s *tcb)
+static void sched_ramnote_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
-
-  if (!note_isenabled_switch())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -525,14 +501,9 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
   sched_note_add(&note, sizeof(struct note_suspend_s));
 }
 
-void sched_note_resume(FAR struct tcb_s *tcb)
+static void sched_ramnote_resume(FAR struct tcb_s *tcb)
 {
   struct note_resume_s note;
-
-  if (!note_isenabled_switch())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -545,14 +516,9 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SMP
-void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
+static void sched_ramnote_cpu_start(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_start_s note;
-
-  if (!note_isenabled())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -565,14 +531,9 @@ void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
   sched_note_add(&note, sizeof(struct note_cpu_start_s));
 }
 
-void sched_note_cpu_started(FAR struct tcb_s *tcb)
+static void sched_ramnote_cpu_started(FAR struct tcb_s *tcb)
 {
   struct note_cpu_started_s note;
-
-  if (!note_isenabled())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -585,14 +546,9 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
+static void sched_ramnote_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
-
-  if (!note_isenabled_switch())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -605,14 +561,9 @@ void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
   sched_note_add(&note, sizeof(struct note_cpu_pause_s));
 }
 
-void sched_note_cpu_paused(FAR struct tcb_s *tcb)
+static void sched_ramnote_cpu_paused(FAR struct tcb_s *tcb)
 {
   struct note_cpu_paused_s note;
-
-  if (!note_isenabled_switch())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -624,14 +575,9 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
   sched_note_add(&note, sizeof(struct note_cpu_paused_s));
 }
 
-void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
+static void sched_ramnote_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_resume_s note;
-
-  if (!note_isenabled_switch())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -644,14 +590,9 @@ void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
   sched_note_add(&note, sizeof(struct note_cpu_resume_s));
 }
 
-void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
+static void sched_ramnote_cpu_resumed(FAR struct tcb_s *tcb)
 {
   struct note_cpu_resumed_s note;
-
-  if (!note_isenabled_switch())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -666,14 +607,9 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
+static void sched_ramnote_premption(FAR struct tcb_s *tcb, bool locked)
 {
   struct note_preempt_s note;
-
-  if (!note_isenabled())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -689,14 +625,9 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
+static void sched_ramnote_csection(FAR struct tcb_s *tcb, bool enter)
 {
   struct note_csection_s note;
-
-  if (!note_isenabled())
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -713,51 +644,40 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+void sched_ramnote_spinlock(FAR struct tcb_s *tcb,
+                            FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK);
 }
 
-void sched_note_spinlocked(FAR struct tcb_s *tcb,
+void sched_ramnote_spinlocked(FAR struct tcb_s *tcb,
                            FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED);
 }
 
-void sched_note_spinunlock(FAR struct tcb_s *tcb,
+void sched_ramnote_spinunlock(FAR struct tcb_s *tcb,
                            FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
 }
 
-void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+void sched_ramnote_spinabort(FAR struct tcb_s *tcb,
+                             FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT);
 }
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-void sched_note_syscall_enter(int nr, int argc, ...)
+static void sched_ramnote_syscall_enter(int nr, int argc, va_list ap)
 {
   struct note_syscall_enter_s note;
   FAR struct tcb_s *tcb = this_task();
   unsigned int length;
   uintptr_t arg;
   uint8_t *args;
-  va_list ap;
   int i;
-
-  if (!note_isenabled_syscall(nr))
-    {
-      return;
-    }
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
-  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS))
-    {
-      argc = 0;
-    }
-#endif
 
   /* Format the note */
 
@@ -787,15 +707,10 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   sched_note_add((FAR const uint8_t *)&note, length);
 }
 
-void sched_note_syscall_leave(int nr, uintptr_t result)
+static void sched_ramnote_syscall_leave(int nr, uintptr_t result)
 {
   struct note_syscall_leave_s note;
   FAR struct tcb_s *tcb = this_task();
-
-  if (!note_isenabled_syscall(nr))
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -813,15 +728,10 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
+static void sched_ramnote_irqhandler(int irq, FAR void *handler, bool enter)
 {
   struct note_irqhandler_s note;
   FAR struct tcb_s *tcb = this_task();
-
-  if (!note_isenabled_irq(irq, enter))
-    {
-      return;
-    }
 
   /* Format the note */
 
@@ -834,6 +744,256 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 
   sched_note_add((FAR const uint8_t *)&note,
                  sizeof(struct note_irqhandler_s));
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+static void sched_ramnote_write(FAR void *data, size_t length)
+{
+  sched_note_add(data, length);
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sched_note_*
+ *
+ * Description:
+ *   These are the hooks into the scheduling instrumentation logic.  Each
+ *   simply formats the note associated with the schedule event and adds
+ *   that note to the circular buffer.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+void sched_note_start(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+    sched_ramnote_start(tcb);
+}
+
+void sched_note_stop(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+}
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+
+void sched_note_suspend(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled_switch())
+    {
+      return;
+    }
+
+  sched_ramnote_suspend(tcb);
+}
+
+void sched_note_resume(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled_switch())
+    {
+      return;
+    }
+
+  sched_ramnote_resume(tcb);
+}
+#endif
+
+#ifdef CONFIG_SMP
+void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_cpu_start(tcb, cpu);
+}
+
+void sched_note_cpu_started(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_cpu_started(tcb);
+}
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
+{
+  if (!note_isenabled_switch())
+    {
+      return;
+    }
+
+  sched_ramnote_cpu_pause(tcb, cpu);
+}
+
+void sched_note_cpu_paused(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled_switch())
+    {
+      return;
+    }
+
+  sched_ramnote_cpu_paused(tcb);
+}
+
+void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
+{
+  if (!note_isenabled_switch())
+    {
+      return;
+    }
+
+  sched_ramnote_cpu_resume(tcb, cpu);
+}
+
+void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
+{
+  if (!note_isenabled_switch())
+    {
+      return;
+    }
+
+  sched_ramnote_cpu_resumed(tcb);
+}
+#endif
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_premption(tcb, locked);
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
+{
+  struct note_csection_s note;
+
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_csection(tcb, enter);
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_spinlock(tcb, spinlock);
+}
+
+void sched_note_spinlocked(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_spinlocked(tcb, spinlock);
+}
+
+void sched_note_spinunlock(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_spinunlock(tcb, spinlock);
+}
+
+void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+{
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  sched_ramnote_spinabort(tcb, spinlock);
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_syscall_enter(int nr, int argc, ...)
+{
+  va_list ap;
+
+  if (!note_isenabled_syscall(nr))
+    {
+      return;
+    }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS))
+    {
+      argc = 0;
+    }
+#endif
+
+  va_start(ap, argc);
+  sched_ramnote_syscall_enter(nr, argc, ap);
+  va_end(ap);
+}
+
+void sched_note_syscall_leave(int nr, uintptr_t result)
+{
+  if (!note_isenabled_syscall(nr))
+    {
+      return;
+    }
+
+  sched_ramnote_syscall_leave(nr, result);
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
+{
+  if (!note_isenabled_irq(irq, enter))
+    {
+      return;
+    }
+
+  sched_ramnote_irqhandler(irq, handler, enter);
 }
 #endif
 
@@ -868,11 +1028,11 @@ void sched_note_string(uintptr_t ip, FAR const char *buf)
 
   /* Add the note to circular buffer */
 
-  sched_note_add(note, length);
+  sched_ramnote_write(note, length);
 }
 
 void sched_note_dump(uintptr_t ip, uint8_t event,
-                     FAR const void *buf, size_t len)
+                                 FAR const void *buf, size_t len)
 {
   FAR struct note_binary_s *note;
   char data[255];
@@ -902,7 +1062,7 @@ void sched_note_dump(uintptr_t ip, uint8_t event,
 
   /* Add the note to circular buffer */
 
-  sched_note_add(note, length);
+  sched_ramnote_write(note, length);
 }
 
 void sched_note_vprintf(uintptr_t ip,
@@ -938,7 +1098,7 @@ void sched_note_vprintf(uintptr_t ip,
 
   /* Add the note to circular buffer */
 
-  sched_note_add(note, length);
+  sched_ramnote_write(note, length);
 }
 
 void sched_note_vbprintf(uintptr_t ip, uint8_t event,
@@ -1140,7 +1300,7 @@ void sched_note_vbprintf(uintptr_t ip, uint8_t event,
 
   /* Add the note to circular buffer */
 
-  sched_note_add(note, length);
+  sched_ramnote_write(note, length);
 }
 
 void sched_note_printf(uintptr_t ip,
