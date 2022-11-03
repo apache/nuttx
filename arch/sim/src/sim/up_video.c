@@ -330,6 +330,10 @@ static uint32_t imgsensor_fmt_to_v4l2(uint32_t pixelformat)
   uint32_t fourcc;
   switch (pixelformat)
     {
+      case IMGSENSOR_PIX_FMT_YUYV:
+        fourcc = V4L2_PIX_FMT_YUYV;
+        break;
+
       case IMGSENSOR_PIX_FMT_JPEG_WITH_SUBIMG:
         fourcc = V4L2_PIX_FMT_JPEG;
         break;
