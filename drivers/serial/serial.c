@@ -469,6 +469,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
               elapsed = clock_systime_ticks() - start;
               if (elapsed >= timeout)
                 {
+                  nxmutex_unlock(&dev->xmit.lock);
                   return -ETIMEDOUT;
                 }
             }
