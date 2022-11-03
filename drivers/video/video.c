@@ -1046,6 +1046,7 @@ static int video_close(FAR struct file *filep)
   nxmutex_lock(&priv->lock_open_num);
   if (priv->open_num == 0)
     {
+      nxmutex_unlock(&priv->lock_open_num);
       return OK;
     }
 
