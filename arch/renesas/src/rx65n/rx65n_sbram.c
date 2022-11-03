@@ -216,6 +216,7 @@ static int rx65n_sbram_open(FAR struct file *filep)
   nxmutex_lock(&bbr->lock);
   if (bbr->refs == MAX_OPENCNT)
     {
+      nxmutex_unlock(&bbr->lock);
       return -EMFILE;
     }
   else
