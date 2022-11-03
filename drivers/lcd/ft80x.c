@@ -531,6 +531,7 @@ static int ft80x_close(FAR struct file *filep)
       priv->crefs = 0;
       if (priv->unlinked)
         {
+          nxmutex_unlock(&priv->lock);
           ft80x_destroy(priv);
           return OK;
         }
