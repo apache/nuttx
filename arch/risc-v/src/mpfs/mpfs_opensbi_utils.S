@@ -103,7 +103,6 @@ mpfs_opensbi_prepare_hart:
   mul  t0, a0, t1
   la   sp, g_scratches
   add  sp, sp, t0
-  add  sp, sp, t1
   jal  mpfs_opensbi_setup
 
 /****************************************************************************
