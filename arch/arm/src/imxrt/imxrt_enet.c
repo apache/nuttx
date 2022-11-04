@@ -247,6 +247,19 @@
 #  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83825I_PHYSTS_SPEED) != 0)
 #  define BOARD_PHY_100BASET(s) (((s) & MII_DP83825I_PHYSTS_SPEED) == 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83825I_PHYSTS_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_TJA1103)
+#  define BOARD_PHY_NAME        "TJA1103"
+#  define BOARD_PHYID1          MII_PHYID1_TJA1103
+#  define BOARD_PHYID2          MII_PHYID2_TJA1103
+#  define BOARD_PHY_STATUS      MII_TJA110X_BSR
+#  define BOARD_PHY_10BASET(s)  0 /* PHY only supports 100BASE-T1 */
+#  define BOARD_PHY_100BASET(s) 1 /* PHY only supports 100BASE-T1 */
+#  define BOARD_PHY_ISDUPLEX(s) 1 /* PHY only supports fullduplex */
+
+#  define CLAUSE45              1
+#  define MMD1                  1
+#  define MMD1_PMA_STATUS1      1
+#  define MMD1_PS1_RECEIVE_LINK_STATUS (1 << 2)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -424,7 +437,14 @@ static int imxrt_writemii(struct imxrt_driver_s *priv, uint8_t phyaddr,
 static int imxrt_readmii(struct imxrt_driver_s *priv, uint8_t phyaddr,
              uint8_t regaddr, uint16_t *data);
 static int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy);
-
+#if defined(CLAUSE45)
+static int imxrt_readmmd(struct imxrt_driver_s *priv, uint8_t phyaddr,
+                         uint8_t mmd, uint16_t regaddr, uint16_t *data);
+#if 0
+static int imxrt_writemmd(struct imxrt_driver_s *priv, uint8_t phyaddr,
+                          uint8_t mmd, uint16_t regaddr, uint16_t data);
+#endif
+#endif
 /* Initialization */
 
 static void imxrt_initbuffers(struct imxrt_driver_s *priv);
@@ -1842,8 +1862,18 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = imxrt_readmii(priv, req->phy_id,
+#if defined(CLAUSE45)
+          if (MII_MSR == req->reg_num)
+            {
+              ret = imxrt_readmmd(priv, req->phy_id, MMD1, MMD1_PMA_STATUS1,
+                                  &req->val_out);
+            }
+          else
+#endif
+            {
+              ret = imxrt_readmii(priv, req->phy_id,
                               req->reg_num, &req->val_out);
+            }
         }
         break;
 
@@ -2065,6 +2095,206 @@ static int imxrt_readmii(struct imxrt_driver_s *priv, uint8_t phyaddr,
   return OK;
 }
 
+#if 0
+#if defined(CLAUSE45)
+/****************************************************************************
+ * Function: imxrt_writemmd
+ *
+ * Description:
+ *   Write a 16-bit value to a the selected MMD PHY register.
+ *
+ * Input Parameters:
+ *   priv - Reference to the private ENET driver state structure
+ *   phyaddr - The PHY address
+ *   mmd     - The Selected MMD Space
+ *   regaddr - The PHY register address
+ *   data    - The data to write to the PHY register
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int imxrt_writemmd(struct imxrt_driver_s *priv, uint8_t phyaddr,
+                          uint8_t mmd, uint16_t regaddr, uint16_t data)
+{
+  int timeout;
+
+  /* Clear the MII interrupt bit */
+
+  imxrt_enet_putreg32(priv, ENET_INT_MII, IMXRT_ENET_EIR_OFFSET);
+
+  /* Initiate the MMD Management write  - Address Phase */
+
+  imxrt_enet_putreg32(priv,
+                      0 << ENET_MMFR_ST_SHIFT |
+                      ENET_MMFR_OP_WRNOTMII |
+                      (uint32_t)mmd << ENET_MMFR_RA_SHIFT |
+                      (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
+                      2 << ENET_MMFR_TA_SHIFT |
+                      regaddr,
+                      IMXRT_ENET_MMFR_OFFSET);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
+    {
+      if ((imxrt_enet_getreg32(priv, IMXRT_ENET_EIR_OFFSET) &
+                               ENET_INT_MII) != 0)
+        {
+          break;
+        }
+    }
+
+  imxrt_enet_putreg32(priv, ENET_INT_MII, IMXRT_ENET_EIR_OFFSET);
+
+  /* Check for a timeout */
+
+  if (timeout == MII_MAXPOLLS)
+    {
+      return -ETIMEDOUT;
+    }
+
+  /* Initiate the MMD Management write  - Data Phase */
+
+  imxrt_enet_putreg32(priv,
+                      0 << ENET_MMFR_ST_SHIFT |
+                      ENET_MMFR_OP_WRMII |
+                      (uint32_t)mmd << ENET_MMFR_RA_SHIFT |
+                      (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
+                      2 << ENET_MMFR_TA_SHIFT |
+                      data,
+                      IMXRT_ENET_MMFR_OFFSET);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
+    {
+      if ((imxrt_enet_getreg32(priv, IMXRT_ENET_EIR_OFFSET) &
+                               ENET_INT_MII) != 0)
+        {
+          break;
+        }
+    }
+
+  /* Clear the MII interrupt bit */
+
+  imxrt_enet_putreg32(priv, ENET_INT_MII, IMXRT_ENET_EIR_OFFSET);
+
+  /* Check for a timeout */
+
+  if (timeout == MII_MAXPOLLS)
+    {
+      return -ETIMEDOUT;
+    }
+
+  return OK;
+}
+#endif
+#endif
+
+#if defined(CLAUSE45)
+/****************************************************************************
+ * Function: imxrt_reademmd
+ *
+ * Description:
+ *   Read a 16-bit value from a PHY register.
+ *
+ * Input Parameters:
+ *   priv - Reference to the private ENET driver state structure
+ *   phyaddr - The PHY address
+ *   mmd     - The Selected MMD Space
+ *   regaddr - The PHY register address
+ *   data    - A pointer to the location to return the data
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int imxrt_readmmd(struct imxrt_driver_s *priv, uint8_t phyaddr,
+                         uint8_t mmd, uint16_t regaddr, uint16_t *data)
+{
+  int timeout;
+
+  /* Clear the MII interrupt bit */
+
+  imxrt_enet_putreg32(priv, ENET_INT_MII, IMXRT_ENET_EIR_OFFSET);
+
+  /* Initiate the MMD Management read  - Address Phase */
+
+  imxrt_enet_putreg32(priv,
+                      0 << ENET_MMFR_ST_SHIFT |
+                      ENET_MMFR_OP_WRNOTMII   |
+                      (uint32_t)mmd << ENET_MMFR_RA_SHIFT |
+                      (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
+                      2 << ENET_MMFR_TA_SHIFT |
+                      regaddr,
+                      IMXRT_ENET_MMFR_OFFSET);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
+    {
+      if ((imxrt_enet_getreg32(priv, IMXRT_ENET_EIR_OFFSET) &
+                               ENET_INT_MII) != 0)
+        {
+          break;
+        }
+    }
+
+  /* Clear the MII interrupt bit */
+
+  imxrt_enet_putreg32(priv, ENET_INT_MII, IMXRT_ENET_EIR_OFFSET);
+
+  /* Check for a timeout */
+
+  if (timeout >= MII_MAXPOLLS)
+    {
+      nerr("ERROR: Timed out waiting for transfer to complete\n");
+      return -ETIMEDOUT;
+    }
+
+  /* Initiate the MMD Management read - Data Phase */
+
+  imxrt_enet_putreg32(priv,
+                      0 << ENET_MMFR_ST_SHIFT |
+                      ENET_MMFR_OP_RdNOTMII |
+                      (uint32_t)mmd << ENET_MMFR_RA_SHIFT |
+                      (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
+                      2 << ENET_MMFR_TA_SHIFT,
+                      IMXRT_ENET_MMFR_OFFSET);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
+    {
+      if ((imxrt_enet_getreg32(priv, IMXRT_ENET_EIR_OFFSET) &
+                               ENET_INT_MII) != 0)
+        {
+          break;
+        }
+    }
+
+  /* Clear the MII interrupt bit */
+
+  imxrt_enet_putreg32(priv, ENET_INT_MII, IMXRT_ENET_EIR_OFFSET);
+
+  /* Check for a timeout */
+
+  if (timeout == MII_MAXPOLLS)
+    {
+      return -ETIMEDOUT;
+    }
+
+  /* And return the MII data */
+
+  *data = (uint16_t)(imxrt_enet_getreg32(priv, IMXRT_ENET_MMFR_OFFSET) &
+                                    ENET_MMFR_DATA_MASK);
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Function: imxrt_initphy
  *
@@ -2240,6 +2470,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
                      MII_ADVERTISE_CSMA);
 
 #endif
+#if !defined(CONFIG_ETH0_PHY_TJA1103)
 
       /* Start auto negotiation */
 
@@ -2288,8 +2519,10 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
           imxrt_writemii(priv, phyaddr, MII_MCR, 0);
         }
+#endif
     }
 
+#if !defined(CONFIG_ETH0_PHY_TJA1103)
   /* When we get here we have a (negotiated) speed and duplex. This is also
    * the point we enter if renegotiation is turned off, so have multiple
    * attempts at reading the status register in case the PHY isn't awake
@@ -2327,6 +2560,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
     }
 
   ninfo("%s: BOARD_PHY_STATUS: %04x\n", BOARD_PHY_NAME, phydata);
+#endif
 
   /* Set up the transmit and receive control registers based on the
    * configuration and the auto negotiation results.
