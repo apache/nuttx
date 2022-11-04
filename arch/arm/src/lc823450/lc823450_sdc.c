@@ -279,7 +279,7 @@ int lc823450_sdc_finalize(uint32_t ch)
 {
   int ret;
 
-  mcinfo("++++ start ch=%ld\n", ch);
+  mcinfo("++++ start ch=%" PRId32 "\n", ch);
 
   ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
@@ -331,8 +331,8 @@ int lc823450_sdc_setclock(uint32_t ch, uint32_t limitclk, uint32_t sysclk)
 {
   int ret;
 
-  mcinfo("++++ start ch=%ld limitClk=%ld sysClk=%ld\n",
-         ch, limitclk, sysclk);
+  mcinfo("++++ start ch=%" PRId32 " limitClk=%" PRId32
+         " sysClk=%" PRId32 "\n", ch, limitclk, sysclk);
 
   ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
