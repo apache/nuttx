@@ -110,7 +110,8 @@
 
 /* Minimum alignment requirement for any section of memory is 2MB */
 
-#define RV_MMU_SECTION_ALIGN    (RV_MMU_L2_PAGE_SIZE)
+#define RV_MMU_SECTION_ALIGN        (RV_MMU_L2_PAGE_SIZE)
+#define RV_MMU_SECTION_ALIGN_MASK   (RV_MMU_SECTION_ALIGN - 1)
 #else
 #error "Unsupported RISC-V MMU implementation selected"
 #endif /* CONFIG_ARCH_MMU_TYPE_SV39 */
