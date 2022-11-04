@@ -1196,7 +1196,7 @@ static int lpc54_receive(struct uart_dev_s *dev, unsigned int *status)
 
   if (status)
     {
-      *status = fiford && ~USART_FIFORD_RXDATA_MASK;
+      *status = fiford & ~USART_FIFORD_RXDATA_MASK;
     }
 
   /* Then return the actual received data. */
