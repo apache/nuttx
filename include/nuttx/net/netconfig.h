@@ -444,21 +444,6 @@
 
 /* TCP configuration options */
 
-/* The maximum number of simultaneously open TCP connections.
- *
- * Since the TCP connections are statically allocated, turning this
- * configuration knob down results in less RAM used. Each TCP
- * connection requires approximately 30 bytes of memory.
- */
-
-#ifndef CONFIG_NET_TCP_CONNS
-#  ifdef CONFIG_NET_TCP
-#   define CONFIG_NET_TCP_CONNS 10
-#  else
-#   define CONFIG_NET_TCP_CONNS  0
-#  endif
-#endif
-
 /* The maximum number of simultaneously listening TCP ports.
  *
  * Each listening TCP port requires 2 bytes of memory.
@@ -474,7 +459,8 @@
  */
 
 #ifndef CONFIG_NET_NACTIVESOCKETS
-#  define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_CONNS + CONFIG_NET_UDP_CONNS)
+#  define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_PREALLOC_CONNS + \
+                                     CONFIG_NET_UDP_CONNS)
 #endif
 
 /* The initial retransmission timeout counted in timer pulses.
