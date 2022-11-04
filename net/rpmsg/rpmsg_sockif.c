@@ -91,6 +91,7 @@ struct rpmsg_socket_conn_s
   uint16_t                       crefs;
 
   FAR struct pollfd              *fds[CONFIG_NET_RPMSG_NPOLLWAITERS];
+  mutex_t                        polllock;
 
   sem_t                          sendsem;
   mutex_t                        sendlock;
@@ -196,6 +197,15 @@ static inline void rpmsg_socket_post(FAR sem_t *sem)
     }
 }
 
+static inline void rpmsg_socket_poll_notify(
+                        FAR struct rpmsg_socket_conn_s *conn,
+                        pollevent_t eventset)
+{
+  nxmutex_lock(&conn->polllock);
+  poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, eventset);
+  nxmutex_unlock(&conn->polllock);
+}
+
 static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 {
   FAR struct rpmsg_socket_conn_s *conn;
@@ -208,6 +218,7 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 
   circbuf_init(&conn->recvbuf, NULL, 0);
 
+  nxmutex_init(&conn->polllock);
   nxmutex_init(&conn->sendlock);
   nxmutex_init(&conn->recvlock);
   nxsem_init(&conn->sendsem, 0, 0);
@@ -221,6 +232,7 @@ static void rpmsg_socket_free(FAR struct rpmsg_socket_conn_s *conn)
 {
   circbuf_uninit(&conn->recvbuf);
 
+  nxmutex_destroy(&conn->polllock);
   nxmutex_destroy(&conn->recvlock);
   nxmutex_destroy(&conn->sendlock);
   nxsem_destroy(&conn->sendsem);
@@ -282,7 +294,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
         }
 
       rpmsg_socket_post(&conn->sendsem);
-      poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLOUT);
+      rpmsg_socket_poll_notify(conn, POLLOUT);
       nxmutex_unlock(&conn->recvlock);
     }
   else
@@ -297,7 +309,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       if (rpmsg_socket_get_space(conn) > 0)
         {
           rpmsg_socket_post(&conn->sendsem);
-          poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLOUT);
+          rpmsg_socket_poll_notify(conn, POLLOUT);
         }
 
       nxmutex_unlock(&conn->sendlock);
@@ -347,7 +359,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
                   nerr("circbuf_write overflow, %zu, %zu\n", written, len);
                 }
 
-              poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLIN);
+              rpmsg_socket_poll_notify(conn, POLLIN);
             }
 
           nxmutex_unlock(&conn->recvlock);
@@ -379,8 +391,7 @@ static inline void rpmsg_socket_destroy_ept(
       rpmsg_destroy_ept(&conn->ept);
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_post(&conn->recvsem);
-      poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS,
-                  POLLIN | POLLOUT);
+      rpmsg_socket_poll_notify(conn, POLLIN | POLLOUT);
     }
 
   nxmutex_unlock(&conn->recvlock);
@@ -522,7 +533,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   rpmsg_socket_ns_bound(&new->ept);
 
   rpmsg_socket_post(&server->recvsem);
-  poll_notify(server->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLIN);
+  rpmsg_socket_poll_notify(server, POLLIN);
 }
 
 static int rpmsg_socket_getaddr(FAR struct rpmsg_socket_conn_s *conn,
@@ -804,6 +815,8 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
   if (setup)
     {
+      nxmutex_lock(&conn->polllock);
+
       for (i = 0; i < CONFIG_NET_RPMSG_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
@@ -817,6 +830,8 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
               break;
             }
         }
+
+      nxmutex_unlock(&conn->polllock);
 
       if (i >= CONFIG_NET_RPMSG_NPOLLWAITERS)
         {
@@ -877,19 +892,26 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
           eventset |= POLLERR;
         }
 
-      poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, eventset);
+      rpmsg_socket_poll_notify(conn, eventset);
     }
-  else if (fds->priv != NULL)
+  else
     {
-      for (i = 0; i < CONFIG_NET_RPMSG_NPOLLWAITERS; i++)
+      nxmutex_lock(&conn->polllock);
+
+      if (fds->priv != NULL)
         {
-          if (fds == conn->fds[i])
+          for (i = 0; i < CONFIG_NET_RPMSG_NPOLLWAITERS; i++)
             {
-              conn->fds[i] = NULL;
-              fds->priv = NULL;
-              break;
+              if (fds == conn->fds[i])
+                {
+                  conn->fds[i] = NULL;
+                  fds->priv = NULL;
+                  break;
+                }
             }
         }
+
+      nxmutex_unlock(&conn->polllock);
     }
 
 errout:
