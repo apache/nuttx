@@ -215,9 +215,9 @@ void mpfs_kernel_mappings(void)
    * handle unaligned L3 sections.
    */
 
-  ASSERT((KFLASH_START & RV_MMU_SECTION_ALIGN) == 0);
-  ASSERT((KSRAM_START & RV_MMU_SECTION_ALIGN) == 0);
-  ASSERT((PGPOOL_START & RV_MMU_SECTION_ALIGN) == 0);
+  ASSERT((KFLASH_START & RV_MMU_SECTION_ALIGN_MASK) == 0);
+  ASSERT((KSRAM_START & RV_MMU_SECTION_ALIGN_MASK) == 0);
+  ASSERT((PGPOOL_START & RV_MMU_SECTION_ALIGN_MASK) == 0);
 
   /* Check that the L3 table is of sufficient size */
 
