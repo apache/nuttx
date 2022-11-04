@@ -343,6 +343,7 @@ struct ifreq
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   ifru_can_state;      /* CAN/LIN controller state */
     struct can_ioctl_errors_s  ifru_can_errors;     /* CAN error counters */
+    uint32_t                   ifru_can_listenonly; /* CAN listen-only state data */
     FAR void                  *ifru_data;           /* For use by interface */
   } ifr_ifru;
 };

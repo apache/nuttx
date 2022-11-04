@@ -129,6 +129,8 @@
 #define SIOCSCANSTATE      _SIOC(0x0042)  /* Set the LIN/CAN controller state */
 #define SIOCGCANERRORS     _SIOC(0x0045)  /* Get CAN error counters and fault
                                            * confinement state */
+#define SIOCGCANLISTENONLY _SIOC(0x0046)  /* Get bus monitoring mode */
+#define SIOCSCANLISTENONLY _SIOC(0x0047)  /* Set bus monitoring mode */
 
 /* Network socket control ***************************************************/
 
