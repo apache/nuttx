@@ -292,7 +292,13 @@ static int rptun_thread(int argc, FAR char *argv[])
 
 static void rptun_wakeup_rx(FAR struct rptun_priv_s *priv)
 {
-  nxsem_post(&priv->semrx);
+  int semcount;
+
+  nxsem_get_value(&priv->semrx, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(&priv->semrx);
+    }
 }
 
 static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
