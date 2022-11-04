@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MAX_BUFFER  (8192)
+#define MAX_BUFFER  (10240)
 #define MAX_EXPAND  (2048)
 #define MAX_SHQUOTE (4096)
 
