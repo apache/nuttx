@@ -700,6 +700,9 @@
 #define MII_PHYID1_TJA1101                0x0180  /* ID1 value for NXP TJA1101 */
 #define MII_PHYID2_TJA1101                0xdd00  /* ID2 value for NXP TJA1101 */
 
+#define MII_PHYID1_TJA1103                0x01b   /* ID1 value for NXP TJA1103 */
+#define MII_PHYID2_TJA1103                0xB013  /* ID2 value for NXP TJA1103 */
+
 #define MII_TJA110X_BCR                   0x0     /* Basic Control register */
 #define MII_TJA110X_BSR                   0x1     /* Basic Status register */
 #define MII_TJA110X_EXT_CNTRL             0x11    /* Extra control register */
