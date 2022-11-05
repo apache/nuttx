@@ -40,7 +40,7 @@
  * Private Functions
  ****************************************************************************/
 
-static void mm_free_delaylist(FAR struct mm_heap_s *heap)
+static void free_delaylist(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp;
@@ -111,7 +111,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Free the delay list first */
 
-  mm_free_delaylist(heap);
+  free_delaylist(heap);
 
   /* Ignore zero-length allocations */
 
