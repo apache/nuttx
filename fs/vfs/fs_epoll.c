@@ -32,11 +32,11 @@
 #include <errno.h>
 #include <string.h>
 #include <debug.h>
-#include <semaphore.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 
 #include "inode/inode.h"
 
@@ -49,7 +49,7 @@ struct epoll_head
   int size;
   int occupied;
   int crefs;
-  sem_t sem;
+  mutex_t lock;
   struct file fp;
   struct inode in;
   FAR epoll_data_t *data;
@@ -129,14 +129,14 @@ static int epoll_do_open(FAR struct file *filep)
   FAR struct epoll_head *eph = filep->f_priv;
   int ret;
 
-  ret = nxsem_wait(&eph->sem);
+  ret = nxmutex_lock(&eph->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   eph->crefs++;
-  nxsem_post(&eph->sem);
+  nxmutex_unlock(&eph->lock);
   return ret;
 }
 
@@ -145,16 +145,17 @@ static int epoll_do_close(FAR struct file *filep)
   FAR struct epoll_head *eph = filep->f_priv;
   int ret;
 
-  ret = nxsem_wait(&eph->sem);
+  ret = nxmutex_lock(&eph->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   eph->crefs--;
-  nxsem_post(&eph->sem);
+  nxmutex_unlock(&eph->lock);
   if (eph->crefs <= 0)
     {
+      nxmutex_destroy(&eph->lock);
       kmm_free(eph);
     }
 
@@ -183,7 +184,8 @@ static int epoll_do_create(int size, int flags)
       return -1;
     }
 
-  nxsem_init(&eph->sem, 0, 0);
+  nxmutex_init(&eph->lock);
+
   eph->size = size;
   eph->data = (FAR epoll_data_t *)(eph + 1);
   eph->poll = (FAR struct pollfd *)(eph->data + reserve);
@@ -201,13 +203,12 @@ static int epoll_do_create(int size, int flags)
   fd = file_allocate(&g_epoll_inode, flags, 0, eph, 0, true);
   if (fd < 0)
     {
-      nxsem_destroy(&eph->sem);
+      nxmutex_destroy(&eph->lock);
       kmm_free(eph);
       set_errno(-fd);
       return -1;
     }
 
-  nxsem_post(&eph->sem);
   return fd;
 }
 
