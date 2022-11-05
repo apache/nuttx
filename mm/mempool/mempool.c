@@ -140,7 +140,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       nxsem_init(&pool->waitsem, 0, 0);
     }
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   mempool_procfs_register(&pool->procfs, name);
 #endif
 
@@ -352,7 +352,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
       return -EBUSY;
     }
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   mempool_procfs_unregister(&pool->procfs);
 #endif
 
