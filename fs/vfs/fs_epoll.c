@@ -50,8 +50,6 @@ struct epoll_head
   int occupied;
   int crefs;
   mutex_t lock;
-  struct file fp;
-  struct inode in;
   FAR epoll_data_t *data;
   FAR struct pollfd *poll;
 };
@@ -190,14 +188,6 @@ static int epoll_do_create(int size, int flags)
   eph->data = (FAR epoll_data_t *)(eph + 1);
   eph->poll = (FAR struct pollfd *)(eph->data + reserve);
 
-  INODE_SET_DRIVER(&eph->in);
-  eph->in.u.i_ops = &g_epoll_ops;
-  eph->fp.f_inode = &eph->in;
-  eph->in.i_private = eph;
-
-  eph->poll[0].ptr = &eph->fp;
-  eph->poll[0].events = POLLIN | POLLFILE;
-
   /* Alloc the file descriptor */
 
   fd = file_allocate(&g_epoll_inode, flags, 0, eph, 0, true);
@@ -208,6 +198,11 @@ static int epoll_do_create(int size, int flags)
       set_errno(-fd);
       return ERROR;
     }
+
+  /* Setup the first pollfd for internal use */
+
+  eph->poll[0].fd = fd;
+  eph->poll[0].events = POLLIN;
 
   return fd;
 }
