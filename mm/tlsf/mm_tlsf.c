@@ -151,10 +151,10 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
 #endif
 
 /****************************************************************************
- * Name: mm_add_delaylist
+ * Name: add_delaylist
  ****************************************************************************/
 
-static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
+static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp = mem;
@@ -172,10 +172,10 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 }
 
 /****************************************************************************
- * Name: mm_free_delaylist
+ * Name: free_delaylist
  ****************************************************************************/
 
-static void mm_free_delaylist(FAR struct mm_heap_s *heap)
+static void free_delaylist(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp;
@@ -211,11 +211,11 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 }
 
 /****************************************************************************
- * Name: mm_mallinfo_walker
+ * Name: mallinfo_handler
  ****************************************************************************/
 
-static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
-                               FAR void *user)
+static void mallinfo_handler(FAR void *ptr, size_t size, int used,
+                             FAR void *user)
 {
   FAR struct mallinfo *info = user;
 
@@ -237,11 +237,11 @@ static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
 #if CONFIG_MM_BACKTRACE >= 0
 
 /****************************************************************************
- * Name: mallinfo_task_walker
+ * Name: mallinfo_task_handler
  ****************************************************************************/
 
-static void mallinfo_task_walker(FAR void *ptr, size_t size, int used,
-                                 FAR void *user)
+static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
+                                  FAR void *user)
 {
   FAR struct memdump_backtrace_s *dump = ptr;
   FAR struct mallinfo_task *info = user;
@@ -334,11 +334,11 @@ static void mm_unlock(FAR struct mm_heap_s *heap)
 }
 
 /****************************************************************************
- * Name: mm_memdump_walker
+ * Name: memdump_handler
  ****************************************************************************/
 
-static void mm_memdump_walker(FAR void *ptr, size_t size, int used,
-                              FAR void *user)
+static void memdump_handler(FAR void *ptr, size_t size, int used,
+                            FAR void *user)
 {
   FAR struct memdump_info_s *info = user;
 #if CONFIG_MM_BACKTRACE >= 0
@@ -641,7 +641,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       /* Add to the delay list(see the comment in mm_lock) */
 
-      mm_add_delaylist(heap, mem);
+      add_delaylist(heap, mem);
     }
 }
 
@@ -797,7 +797,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
       DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
-                     mm_mallinfo_walker, info);
+                     mallinfo_handler, info);
       mm_unlock(heap);
     }
 #undef region
@@ -829,7 +829,7 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
 
       DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
-                     mallinfo_task_walker, info);
+                     mallinfo_task_handler, info);
       mm_unlock(heap);
     }
 #undef region
@@ -883,7 +883,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
     {
       DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
-                     mm_memdump_walker, &info);
+                     memdump_handler, &info);
       mm_unlock(heap);
     }
 #undef region
@@ -924,7 +924,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Free the delay list first */
 
-  mm_free_delaylist(heap);
+  free_delaylist(heap);
 
 #if CONFIG_MM_BACKTRACE >= 0
   size += sizeof(struct memdump_backtrace_s);
@@ -976,7 +976,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Free the delay list first */
 
-  mm_free_delaylist(heap);
+  free_delaylist(heap);
 
   /* Allocate from the tlsf pool */
 
@@ -1056,7 +1056,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #else
   /* Free the delay list first */
 
-  mm_free_delaylist(heap);
+  free_delaylist(heap);
 
 #if CONFIG_MM_BACKTRACE >= 0
   if (oldmem)
