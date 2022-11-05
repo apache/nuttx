@@ -165,12 +165,6 @@ config MM_SHM
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().
 
-config MM_CIRCBUF
-	bool "Circular buffer support"
-	default n
-	---help---
-		Build in support for the circular buffer management.
-
 config MM_MEMPOOL
 	bool "Enable memory buffer pool"
 	default n

@@ -714,7 +714,6 @@ endif # PSEUDOTERM
 menuconfig UART_BTH4
 	bool "BT H4 uart pseudo device"
 	default n
-	select MM_CIRCBUF
 	---help---
 		Enable support for Bluetooth H4 UART Pseudo Device(eg. /dev/ttyHCI).
 		This instantiates a serial-like interface over an existing bluetooth

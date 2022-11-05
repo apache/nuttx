@@ -5,7 +5,6 @@
 
 menuconfig DRIVERS_RC
 	bool "Remote Control Device Support"
-	select MM_CIRCBUF
 	default n
 	---help---
 		Drivers for various remote control

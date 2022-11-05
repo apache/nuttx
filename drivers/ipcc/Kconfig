@@ -1,6 +1,5 @@
 menuconfig IPCC
 	bool "IPCC (Inter Processor Communication Controller) driver"
-	select MM_CIRCBUF
 	depends on EXPERIMENTAL
 	default n
 	---help---
