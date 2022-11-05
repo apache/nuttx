@@ -108,7 +108,6 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   size_t alignsize;
   FAR void *ret = NULL;
   int ndx;
-  bool val;
 
   /* Free the delay list first */
 
@@ -138,8 +137,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
-  val = mm_lock(heap);
-  DEBUGASSERT(val);
+  DEBUGVERIFY(mm_lock(heap));
 
   /* Convert the request size into a nodelist index */
 
