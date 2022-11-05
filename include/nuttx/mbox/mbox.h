@@ -21,14 +21,14 @@
 #ifndef __INCLUDE_NUTTX_MBOX_MBOX_H
 #define __INCLUDE_NUTTX_MBOX_MBOX_H
 
-#ifdef CONFIG_MBOX
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <stdbool.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -127,5 +127,4 @@ extern "C"
 }
 #endif
 
-#endif /* CONFIG_MBOX */
 #endif /* __INCLUDE_NUTTX_MBOX_MBOX_H */
