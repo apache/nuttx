@@ -21,6 +21,13 @@
 export SHELL=cmd
 
 export TOPDIR := ${shell echo %CD%}
+
+# Build any necessary tools needed early in the build.
+# incdir - Is needed immediately by all Make.defs file.
+
+DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
+          INCDIR="$(TOPDIR)\tools\incdir.bat"}
+
 include $(TOPDIR)\Make.defs
 -include $(TOPDIR)\.version
 
@@ -53,7 +60,7 @@ APPDIR := $(realpath ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFI
 # so that main Kconfig can find it. Otherwise, we redirect it to a dummy Kconfig
 # This is due to kconfig inability to do conditional inclusion.
 
-EXTERNALDIR := $(shell if [ -r $(TOPDIR)\external\Kconfig ]; then echo 'external'; else echo 'dummy'; fi)
+EXTERNALDIR := ${shell if exist "$(TOPDIR)\external\Kconfig" (echo external) else (echo dummy)}
 
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
