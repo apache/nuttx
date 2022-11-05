@@ -1,7 +1,7 @@
-From 415f9cdcf5a93cd018fa920e53a9090d5ec94c37 Mon Sep 17 00:00:00 2001
+From 931cd95ab99550befa75703cc36d5e6f6964b63e Mon Sep 17 00:00:00 2001
 From: Guiding Li <liguiding@pinecone.net>
 Date: Wed, 20 Feb 2019 11:36:57 +0800
-Subject: [PATCH 04/12] rpmsg: wait endpoint ready in rpmsg_send and
+Subject: [PATCH 3/9] rpmsg: wait endpoint ready in rpmsg_send and
  rpmsg_send_nocopy
 
 because the remote need time to return the destination address
@@ -9,11 +9,11 @@ because the remote need time to return the destination address
 Signed-off-by: Guiding Li <liguiding@pinecone.net>
 ---
  lib/include/openamp/rpmsg.h | 59 ++++++++++++++++++++++++++-----------
- lib/rpmsg/rpmsg_virtio.c    |  8 -----
- 2 files changed, 42 insertions(+), 25 deletions(-)
+ lib/rpmsg/rpmsg_virtio.c    |  7 -----
+ 2 files changed, 42 insertions(+), 24 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index 3560bb5..11c3ccb 100644
+index ff3ff8fb..dbe42ea6 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
 @@ -15,6 +15,7 @@
@@ -37,7 +37,7 @@ index 3560bb5..11c3ccb 100644
  /* Error macros. */
  #define RPMSG_SUCCESS			0
  #define RPMSG_ERROR_BASE		-2000
-@@ -142,6 +149,19 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+@@ -147,6 +154,19 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
  			      uint32_t dst, const void *data, int len,
  			      int wait);
  
@@ -57,14 +57,17 @@ index 3560bb5..11c3ccb 100644
  /**
   * rpmsg_send() - send a message across to the remote processor
   * @ept: the rpmsg endpoint
-@@ -160,8 +180,17 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+@@ -165,11 +185,20 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
  static inline int rpmsg_send(struct rpmsg_endpoint *ept, const void *data,
  			     int len)
  {
--	return rpmsg_send_offchannel_raw(ept, ept->addr, ept->dest_addr, data,
--					 len, true);
 +	int tc = 0;
 +
+ 	if (!ept)
+ 		return RPMSG_ERR_PARAM;
+ 
+-	return rpmsg_send_offchannel_raw(ept, ept->addr, ept->dest_addr, data,
+-					 len, true);
 +	for (; tc < RPMSG_TICK_COUNT; tc += RPMSG_TICKS_PER_INTERVAL) {
 +		if (is_rpmsg_ept_ready(ept))
 +			return rpmsg_send_offchannel_raw(ept, ept->addr,
@@ -77,14 +80,17 @@ index 3560bb5..11c3ccb 100644
  }
  
  /**
-@@ -434,8 +463,17 @@ static inline int rpmsg_sendto_nocopy(struct rpmsg_endpoint *ept,
+@@ -476,11 +505,20 @@ static inline int rpmsg_sendto_nocopy(struct rpmsg_endpoint *ept,
  static inline int rpmsg_send_nocopy(struct rpmsg_endpoint *ept,
  				    const void *data, int len)
  {
--	return rpmsg_send_offchannel_nocopy(ept, ept->addr,
--					    ept->dest_addr, data, len);
 +	int tc = 0;
 +
+ 	if (!ept)
+ 		return RPMSG_ERR_PARAM;
+ 
+-	return rpmsg_send_offchannel_nocopy(ept, ept->addr,
+-					    ept->dest_addr, data, len);
 +	for (; tc < RPMSG_TICK_COUNT; tc += RPMSG_TICKS_PER_INTERVAL) {
 +		if (is_rpmsg_ept_ready(ept))
 +			return rpmsg_send_offchannel_nocopy(ept, ept->addr,
@@ -97,7 +103,7 @@ index 3560bb5..11c3ccb 100644
  }
  
  /**
-@@ -508,19 +546,6 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+@@ -524,19 +562,6 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
   */
  void rpmsg_destroy_ept(struct rpmsg_endpoint *ept);
  
@@ -118,7 +124,7 @@ index 3560bb5..11c3ccb 100644
  }
  #endif
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 186f23f..d19d3b1 100644
+index 69537399..c56e0cea 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -10,7 +10,6 @@
@@ -129,7 +135,7 @@ index 186f23f..d19d3b1 100644
  #include <metal/utilities.h>
  #include <openamp/rpmsg_virtio.h>
  #include <openamp/virtqueue.h>
-@@ -19,13 +18,6 @@
+@@ -19,12 +18,6 @@
  
  #define RPMSG_NUM_VRINGS                        2
  
@@ -139,10 +145,9 @@ index 186f23f..d19d3b1 100644
 -/* Time to wait - In multiple of 1 msecs. */
 -#define RPMSG_TICKS_PER_INTERVAL                1000
 -
--
- /* Default configuration */
- #ifndef VIRTIO_DEVICE_ONLY
- #define RPMSG_VIRTIO_DEFAULT_CONFIG                \
+ /**
+  * struct vbuff_reclaimer_t - vring buffer recycler
+  *
 -- 
 2.25.1
 
