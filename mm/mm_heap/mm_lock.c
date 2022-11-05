@@ -51,11 +51,11 @@
  *   heap  - heap instance want to take mutex
  *
  * Returned Value:
- *   true if the lock can be taken, otherwise false.
+ *   0 if the lock can be taken, otherwise negative errno.
  *
  ****************************************************************************/
 
-bool mm_lock(FAR struct mm_heap_s *heap)
+int mm_lock(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
@@ -67,11 +67,11 @@ bool mm_lock(FAR struct mm_heap_s *heap)
        * Or, touch the heap internal data directly.
        */
 
-      return !nxmutex_is_locked(&heap->mm_lock);
+      return nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
 #else
       /* Can't take mutex in SMP interrupt handler */
 
-      return false;
+      return -EAGAIN;
 #endif
     }
   else
@@ -89,11 +89,11 @@ bool mm_lock(FAR struct mm_heap_s *heap)
 
   if (getpid() < 0)
     {
-      return false;
+      return -ESRCH;
     }
   else
     {
-      return nxmutex_lock(&heap->mm_lock) >= 0;
+      return nxmutex_lock(&heap->mm_lock);
     }
 }
 

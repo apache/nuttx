@@ -241,7 +241,7 @@ typedef CODE void (*mmchunk_handler_t)(FAR struct mm_allocnode_s *node,
 
 /* Functions contained in mm_lock.c *****************************************/
 
-bool mm_lock(FAR struct mm_heap_s *heap);
+int mm_lock(FAR struct mm_heap_s *heap);
 void mm_unlock(FAR struct mm_heap_s *heap);
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
