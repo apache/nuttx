@@ -67,6 +67,14 @@ config NET_TCP_RTO
 	---help---
 		RTO of TCP/IP connections (all tasks)
 
+config NET_TCP_MAXRTX
+	int "Maximum retransmitted number of TCP/IP data packet"
+	default 8
+
+config NET_TCP_MAXSYNRTX
+	int "Maximum retransmitted number of TCP/IP SYN packet"
+	default 5
+
 config NET_TCP_WAIT_TIMEOUT
 	int "TIME_WAIT Length of TCP/IP connections"
 	default 120
