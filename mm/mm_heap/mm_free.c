@@ -84,7 +84,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-  if (mm_lock(heap) == false)
+  if (mm_lock(heap) < 0)
     {
       /* Meet -ESRCH return, which means we are in situations
        * during context switching(See mm_lock() & getpid()).
