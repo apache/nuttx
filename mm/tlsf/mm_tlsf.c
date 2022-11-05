@@ -36,7 +36,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/mm/mm.h>
 
 #include "tlsf/tlsf.h"
@@ -68,10 +68,10 @@ struct mm_delaynode_s
 struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
-   * the following un-named semaphore.
+   * the following un-named mutex.
    */
 
-  sem_t mm_semaphore;
+  mutex_t mm_lock;
 
   /* This is the size of the heap provided to mm */
 
@@ -255,55 +255,46 @@ static void mallinfo_task_walker(FAR void *ptr, size_t size, int used,
 #endif
 
 /****************************************************************************
- * Name: mm_seminitialize
- *
- * Description:
- *   Initialize the MM mutex
- *
- ****************************************************************************/
-
-static void mm_seminitialize(FAR struct mm_heap_s *heap)
-{
-  /* Initialize the MM semaphore to one (to support one-at-a-time access to
-   * private data sets).
-   */
-
-  _SEM_INIT(&heap->mm_semaphore, 0, 1);
-}
-
-/****************************************************************************
- * Name: mm_takesemaphore
+ * Name: mm_lock
  *
  * Description:
  *   Take the MM mutex. This may be called from the OS in certain conditions
- *   when it is impossible to wait on a semaphore:
+ *   when it is impossible to wait on a mutex:
  *     1.The idle process performs the memory corruption check.
  *     2.The task/thread free the memory in the exiting process.
  *
  * Input Parameters:
- *   heap  - heap instance want to take semaphore
+ *   heap  - heap instance want to take mutex
  *
  * Returned Value:
- *   true if the semaphore can be taken, otherwise false.
+ *   0 if the lock can be taken, otherwise negative errno.
  *
  ****************************************************************************/
 
-static bool mm_takesemaphore(FAR struct mm_heap_s *heap)
+static int mm_lock(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
 
   if (up_interrupt_context())
     {
-      /* Can't take semaphore in the interrupt handler */
+#if !defined(CONFIG_SMP)
+      /* Check the mutex value, if held by someone, then return false.
+       * Or, touch the heap internal data directly.
+       */
 
-      return false;
+      return nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
+#else
+      /* Can't take mutex in SMP interrupt handler */
+
+      return -EAGAIN;
+#endif
     }
   else
 #endif
 
   /* getpid() returns the task ID of the task at the head of the ready-to-
-   * run task list.  mm_takesemaphore() may be called during context
+   * run task list.  mm_lock() may be called during context
    * switches.  There are certain situations during context switching when
    * the OS data structures are in flux and then can't be freed immediately
    * (e.g. the running thread stack).
@@ -314,53 +305,32 @@ static bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 
   if (getpid() < 0)
     {
-      return false;
+      return -ESRCH;
     }
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  else if (sched_idletask())
-    {
-      /* Try to take the semaphore */
-
-      return _SEM_TRYWAIT(&heap->mm_semaphore) >= 0;
-    }
-#endif
   else
     {
-      int ret;
-
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = _SEM_WAIT(&heap->mm_semaphore);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          if (ret < 0)
-            {
-              ret = _SEM_ERRVAL(ret);
-              DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-            }
-        }
-      while (ret < 0);
-
-      return true;
+      return nxmutex_lock(&heap->mm_lock);
     }
 }
 
 /****************************************************************************
- * Name: mm_givesemaphore
+ * Name: mm_unlock
  *
  * Description:
  *   Release the MM mutex when it is not longer needed.
  *
  ****************************************************************************/
 
-static void mm_givesemaphore(FAR struct mm_heap_s *heap)
+static void mm_unlock(FAR struct mm_heap_s *heap)
 {
-  DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  if (up_interrupt_context())
+    {
+      return;
+    }
+#endif
+
+  DEBUGVERIFY(nxmutex_unlock(&heap->mm_lock));
 }
 
 /****************************************************************************
@@ -466,7 +436,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   kasan_register(heapstart, &heapsize);
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  DEBUGVERIFY(mm_lock(heap));
 
   minfo("Region %d: base=%p size=%zu\n", idx + 1, heapstart, heapsize);
 
@@ -488,7 +458,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Add memory to the tlsf pool */
 
   tlsf_add_pool(heap->mm_tlsf, heapstart, heapsize);
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 }
 
 /****************************************************************************
@@ -565,9 +535,9 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
-      /* Retake the semaphore for each region to reduce latencies */
+      /* Retake the mutex for each region to reduce latencies */
 
-      if (mm_takesemaphore(heap) == false)
+      if (mm_lock(heap) < 0)
         {
           return;
         }
@@ -583,9 +553,9 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       tlsf_check_pool(heap->mm_heapstart[region]);
 
-      /* Release the semaphore */
+      /* Release the mutex */
 
-      mm_givesemaphore(heap);
+      mm_unlock(heap);
     }
 #undef region
 }
@@ -614,9 +584,9 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 #endif
   DEBUGASSERT(mem == heap->mm_heapend[region]);
 
-  /* Take the memory manager semaphore */
+  /* Take the memory manager mutex */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  DEBUGVERIFY(mm_lock(heap));
 
   /* Extend the tlsf pool */
 
@@ -628,7 +598,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   heap->mm_heapsize += size;
   heap->mm_heapend[region] += size;
 
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 }
 
 /****************************************************************************
@@ -656,7 +626,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   kasan_poison(mem, mm_malloc_size(mem));
 
-  if (mm_takesemaphore(heap))
+  if (mm_lock(heap) == 0)
     {
 #if CONFIG_MM_BACKTRACE >= 0
       mem -= *(FAR size_t *)(mem - sizeof(size_t));
@@ -665,13 +635,13 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       /* Pass, return to the tlsf pool */
 
       tlsf_free(heap->mm_tlsf, mem);
-      mm_givesemaphore(heap);
+      mm_unlock(heap);
     }
   else
     {
       kasan_unpoison(mem, mm_malloc_size(mem));
 
-      /* Add to the delay list(see the comment in mm_takesemaphore) */
+      /* Add to the delay list(see the comment in mm_lock) */
 
       mm_add_delaylist(heap, mem);
     }
@@ -775,11 +745,11 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   heapstart += tlsf_size();
   heapsize -= tlsf_size();
 
-  /* Initialize the malloc semaphore to one (to support one-at-
+  /* Initialize the malloc mutex (to support one-at-
    * a-time access to private data sets).
    */
 
-  mm_seminitialize(heap);
+  nxmutex_init(&heap->mm_lock);
 
   /* Add the initial region of memory to the heap */
 
@@ -825,12 +795,12 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
-      /* Retake the semaphore for each region to reduce latencies */
+      /* Retake the mutex for each region to reduce latencies */
 
-      DEBUGVERIFY(mm_takesemaphore(heap));
+      DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
                      mm_mallinfo_walker, info);
-      mm_givesemaphore(heap);
+      mm_unlock(heap);
     }
 #undef region
 
@@ -857,12 +827,12 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
-      /* Retake the semaphore for each region to reduce latencies */
+      /* Retake the mutex for each region to reduce latencies */
 
-      DEBUGVERIFY(mm_takesemaphore(heap));
+      DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
                      mallinfo_task_walker, info);
-      mm_givesemaphore(heap);
+      mm_unlock(heap);
     }
 #undef region
 
@@ -913,10 +883,10 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
-      DEBUGVERIFY(mm_takesemaphore(heap));
+      DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
                      mm_memdump_walker, &info);
-      mm_givesemaphore(heap);
+      mm_unlock(heap);
     }
 #undef region
 
@@ -964,9 +934,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Allocate from the tlsf pool */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  DEBUGVERIFY(mm_lock(heap));
   ret = tlsf_malloc(heap->mm_tlsf, size);
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 
   if (ret)
     {
@@ -1012,9 +982,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Allocate from the tlsf pool */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  DEBUGVERIFY(mm_lock(heap));
   ret = tlsf_memalign(heap->mm_tlsf, alignment, size);
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 
   if (ret)
     {
@@ -1105,9 +1075,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Allocate from the tlsf pool */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  DEBUGVERIFY(mm_lock(heap));
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 
 #if CONFIG_MM_BACKTRACE >= 0
   if (newmem)
