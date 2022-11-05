@@ -1,0 +1,27 @@
+From 3af4aed5e9f7d0299ded056adcdd1259fc44f64c Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Sun, 6 Nov 2022 00:51:35 +0800
+Subject: [PATCH 9/9] Fix warn: declaration of 'vring_rsc' shadows a previous
+ local
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ lib/remoteproc/rsc_table_parser.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/lib/remoteproc/rsc_table_parser.c open-amp/lib/remoteproc/rsc_table_parser.c
+index 80879380..4cccf4f1 100644
+--- a/lib/remoteproc/rsc_table_parser.c
++++ open-amp/lib/remoteproc/rsc_table_parser.c
+@@ -144,8 +144,6 @@ int handle_vdev_rsc(struct remoteproc *rproc, void *rsc)
+ 
+ 	num_vrings = vdev_rsc->num_of_vrings;
+ 	for (i = 0; i < num_vrings; i++) {
+-		struct fw_rsc_vdev_vring *vring_rsc;
+-
+ 		vring_rsc = &vdev_rsc->vring[i];
+ 		notifyid = vring_rsc->notifyid;
+ 		notifyid = remoteproc_allocate_id(rproc,
+-- 
+2.25.1
+

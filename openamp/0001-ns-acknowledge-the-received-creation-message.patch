@@ -1,7 +1,7 @@
-From 73d9754ab14a2b5c3e25574ec860489031e32f00 Mon Sep 17 00:00:00 2001
+From 1e43e60aa7ae118309cf256c50bd17f313540eba Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Mon, 7 Jan 2019 02:15:42 +0800
-Subject: [PATCH 02/12] ns: acknowledge the received creation message
+Subject: [PATCH 1/9] ns: acknowledge the received creation message
 
 the two phase handsake make the client could initiate the transfer
 immediately without the server side send any dummy message first.
@@ -12,14 +12,14 @@ Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
  lib/include/openamp/rpmsg_virtio.h |  1 +
  lib/rpmsg/rpmsg.c                  |  5 ++++-
  lib/rpmsg/rpmsg_internal.h         |  4 ++--
- lib/rpmsg/rpmsg_virtio.c           | 16 ++++++++++++----
- 5 files changed, 20 insertions(+), 7 deletions(-)
+ lib/rpmsg/rpmsg_virtio.c           | 15 ++++++++++++---
+ 5 files changed, 20 insertions(+), 6 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index e6acce8..3560bb5 100644
+index 64678cfc..ff3ff8fb 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
-@@ -121,6 +121,7 @@ struct rpmsg_device {
+@@ -126,6 +126,7 @@ struct rpmsg_device {
  	rpmsg_ns_bind_cb ns_unbind_cb;
  	struct rpmsg_device_ops ops;
  	bool support_ns;
@@ -28,7 +28,7 @@ index e6acce8..3560bb5 100644
  
  /**
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index ff1e171..255396c 100644
+index 80ce9981..874c9723 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
 @@ -28,6 +28,7 @@ extern "C" {
@@ -40,10 +40,10 @@ index ff1e171..255396c 100644
  /**
   * struct rpmsg_virtio_shm_pool - shared memory pool used for rpmsg buffers
 diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
-index 214b2a9..ba2b7a8 100644
+index 0d3e1d03..e8757d80 100644
 --- a/lib/rpmsg/rpmsg.c
 +++ open-amp/lib/rpmsg/rpmsg.c
-@@ -302,10 +302,13 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+@@ -317,10 +317,13 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
  	rpmsg_register_endpoint(rdev, ept, name, addr, dest, cb, unbind_cb);
  	metal_mutex_release(&rdev->lock);
  
@@ -59,7 +59,7 @@ index 214b2a9..ba2b7a8 100644
  	if (status)
  		rpmsg_unregister_endpoint(ept);
 diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
-index ab6e0f2..3e6ae37 100644
+index ab6e0f29..3e6ae37f 100644
 --- a/lib/rpmsg/rpmsg_internal.h
 +++ open-amp/lib/rpmsg/rpmsg_internal.h
 @@ -39,12 +39,12 @@ extern "C" {
@@ -78,10 +78,10 @@ index ab6e0f2..3e6ae37 100644
  
  /**
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index d5f168c..0868f71 100644
+index cab72e68..5726c2ca 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -579,7 +579,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -638,7 +638,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  	metal_mutex_acquire(&rdev->lock);
  	_ept = rpmsg_get_endpoint(rdev, name, RPMSG_ADDR_ANY, dest);
  
@@ -90,17 +90,16 @@ index d5f168c..0868f71 100644
  		if (_ept)
  			_ept->dest_addr = RPMSG_ADDR_ANY;
  		metal_mutex_release(&rdev->lock);
-@@ -587,8 +587,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -646,7 +646,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  			_ept->ns_unbind_cb(_ept);
  		if (rdev->ns_unbind_cb)
  			rdev->ns_unbind_cb(rdev, name, dest);
--
 -	} else {
 +	} else if (ns_msg->flags == RPMSG_NS_CREATE) {
  		if (!_ept) {
  			/*
  			 * send callback to application, that can
-@@ -602,7 +601,15 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -660,7 +660,15 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  		} else {
  			_ept->dest_addr = dest;
  			metal_mutex_release(&rdev->lock);
@@ -116,7 +115,7 @@ index d5f168c..0868f71 100644
  	}
  
  	return RPMSG_SUCCESS;
-@@ -683,6 +690,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -745,6 +753,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  #endif /*!VIRTIO_DRIVER_ONLY*/
  	vdev->features = rpmsg_virtio_get_features(rvdev);
  	rdev->support_ns = !!(vdev->features & (1 << VIRTIO_RPMSG_F_NS));
@@ -124,7 +123,7 @@ index d5f168c..0868f71 100644
  
  #ifndef VIRTIO_DEVICE_ONLY
  	if (role == RPMSG_HOST) {
-@@ -778,7 +786,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -841,7 +850,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  	 * Create name service announcement endpoint if device supports name
  	 * service announcement feature.
  	 */

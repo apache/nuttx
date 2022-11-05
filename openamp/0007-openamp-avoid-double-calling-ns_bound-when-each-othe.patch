@@ -1,7 +1,7 @@
-From 8405b71cb738096a223c5f7ca02b9fa0de5ae0d6 Mon Sep 17 00:00:00 2001
+From 0e77783658066c02903cc6693460f3bb577e3030 Mon Sep 17 00:00:00 2001
 From: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
 Date: Mon, 11 Apr 2022 13:31:35 +0800
-Subject: [PATCH 11/12] openamp: avoid double calling ns_bound when each other
+Subject: [PATCH 7/9] openamp: avoid double calling ns_bound when each other
  calls create_ept
 
 VELAPLATFO-1522
@@ -13,10 +13,10 @@ Signed-off-by: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
  1 file changed, 11 insertions(+), 6 deletions(-)
 
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index e55e135..cd3a13d 100644
+index efbcd68d..49817799 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -594,7 +594,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -652,7 +652,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  			metal_mutex_release(&rdev->lock);
  			if (rdev->ns_bind_cb)
  				rdev->ns_bind_cb(rdev, name, dest);
@@ -25,7 +25,7 @@ index e55e135..cd3a13d 100644
  			_ept->dest_addr = dest;
  			metal_mutex_release(&rdev->lock);
  			if (_ept->name[0] && rdev->support_ack)
-@@ -603,14 +603,19 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -662,14 +662,19 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  			if (_ept->ns_bound_cb)
  				_ept->ns_bound_cb(_ept);
  		}

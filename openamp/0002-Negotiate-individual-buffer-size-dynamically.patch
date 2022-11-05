@@ -1,14 +1,13 @@
-From c3949d3b4a8883ec54f5db9ae55acac5ada75b81 Mon Sep 17 00:00:00 2001
+From 285e4d359458ef09d397a41de04ada9a6b8d48e7 Mon Sep 17 00:00:00 2001
 From: Chao An <anchao@pinecone.net>
 Date: Mon, 10 Dec 2018 16:26:39 +0800
-Subject: [PATCH 03/12] Negotiate individual buffer size dynamically
+Subject: [PATCH 2/9] Negotiate individual buffer size dynamically
 
 If slave support VIRTIO_RPMSG_F_BUFSZ(0x04) feature, master
 determine the buffer size from config space(first 8 bytes),
 otherwise the default size(512 bytes) will be used.
 
 Signed-off-by: Chao An <anchao@pinecone.net>
-Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---
  lib/include/openamp/remoteproc.h   | 17 +++++++++++++++++
  lib/include/openamp/rpmsg_virtio.h |  4 +++-
@@ -16,7 +15,7 @@ Signed-off-by: ligd <liguiding1@xiaomi.com>
  3 files changed, 29 insertions(+), 2 deletions(-)
 
 diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
-index 41f5d57..e9111ff 100644
+index 7c79a292..d1efab85 100644
 --- a/lib/include/openamp/remoteproc.h
 +++ open-amp/lib/include/openamp/remoteproc.h
 @@ -303,6 +303,23 @@ struct fw_rsc_vdev {
@@ -44,7 +43,7 @@ index 41f5d57..e9111ff 100644
   * struct fw_rsc_vendor - remote processor vendor specific resource
   * @len: length of the resource
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index 255396c..aaba7e1 100644
+index 874c9723..0b22e840 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
 @@ -16,6 +16,7 @@
@@ -63,7 +62,7 @@ index 255396c..aaba7e1 100644
  
  /**
   * struct rpmsg_virtio_shm_pool - shared memory pool used for rpmsg buffers
-@@ -68,7 +70,7 @@ struct rpmsg_virtio_config {
+@@ -72,7 +74,7 @@ struct rpmsg_virtio_config {
   */
  struct rpmsg_virtio_device {
  	struct rpmsg_device rdev;
@@ -73,10 +72,10 @@ index 255396c..aaba7e1 100644
  	struct virtqueue *rvq;
  	struct virtqueue *svq;
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 0868f71..186f23f 100644
+index 5726c2ca..69537399 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -674,7 +674,8 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -737,7 +737,8 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  		if (config == NULL) {
  			return RPMSG_ERR_PARAM;
  		}
@@ -86,7 +85,7 @@ index 0868f71..186f23f 100644
  	}
  #else /*!VIRTIO_DEVICE_ONLY*/
  	/* Ignore passed config in the virtio-device-only configuration. */
-@@ -692,6 +693,13 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -755,6 +756,13 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  	rdev->support_ns = !!(vdev->features & (1 << VIRTIO_RPMSG_F_NS));
  	rdev->support_ack = !!(vdev->features & (1 << VIRTIO_RPMSG_F_ACK));
  
