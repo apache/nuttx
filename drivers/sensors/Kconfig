@@ -5,7 +5,6 @@
 
 menuconfig SENSORS
 	bool "Sensor Device Support"
-	select MM_CIRCBUF
 	default n
 	---help---
 		Drivers for various sensors

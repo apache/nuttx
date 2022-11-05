@@ -32,12 +32,10 @@ endif # INPUT_MOUSE
 
 config INPUT_TOUCHSCREEN
 	bool
-	select MM_CIRCBUF
 	default n
 
 config INPUT_KEYBOARD
 	bool
-	select MM_CIRCBUF
 	default n
 
 config INPUT_UINPUT
