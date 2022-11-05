@@ -51,6 +51,7 @@ config MM_KERNEL_HEAPSIZE
 config MM_SMALL
 	bool "Small memory model"
 	default n
+	depends on MM_DEFAULT_MANAGER
 	---help---
 		Each memory allocation has a small allocation overhead.  The size
 		of that overhead is normally determined by the "width" of the
