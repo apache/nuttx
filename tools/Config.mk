@@ -62,7 +62,7 @@ endif
 # Define HOSTCC on the make command line if it differs from these defaults
 # Define HOSTCFLAGS with -g on the make command line to build debug versions
 
-ifeq ($(CONFIG_WINDOWS_MSYS),y)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
 # In the Windows native environment, the MinGW GCC compiler is used
 
