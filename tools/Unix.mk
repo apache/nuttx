@@ -702,12 +702,12 @@ ifeq ($(CONFIG_ARCH_HAVE_BOOTLOADER),y)
 	$(Q) $(MAKE) clean_bootloader
 endif
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) -C tools -f Makefile.host clean
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)
-	$(Q) $(MAKE) -C tools -f Makefile.host clean
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,
