@@ -78,13 +78,12 @@ else ifeq ($(CONFIG_MM_KASAN_ALL),y)
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
+  ARCHOPTIMIZATION += -fsanitize=undefined
 else ifeq ($(CONFIG_MM_UBSAN_ALL),y)
   ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
-endif
-
-ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
-  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+  ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+    ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+  endif
 endif
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
