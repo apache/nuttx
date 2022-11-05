@@ -624,10 +624,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-  kasan_poison(mem, mm_malloc_size(mem));
-
   if (mm_lock(heap) == 0)
     {
+      kasan_poison(mem, mm_malloc_size(mem));
+
 #if CONFIG_MM_BACKTRACE >= 0
       mem -= *(FAR size_t *)(mem - sizeof(size_t));
 #endif
@@ -639,8 +639,6 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     }
   else
     {
-      kasan_unpoison(mem, mm_malloc_size(mem));
-
       /* Add to the delay list(see the comment in mm_lock) */
 
       mm_add_delaylist(heap, mem);
