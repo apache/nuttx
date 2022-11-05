@@ -523,12 +523,18 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+
+define NEWLINE
+
+
+endef
+
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
 	$(Q) if exist *$(LIBEXT) (del /f /q *$(LIBEXT))
 	$(Q) if exist *~ (del /f /q *~)
 	$(Q) if exist (del /f /q  .*.swp)
-	$(Q) if exist $(OBJS) (del /f /q $(OBJS))
+	$(foreach OBJ, $(OBJS), $(NEWLINE) $(call DELFILE,$(OBJ)))
 	$(Q) if exist $(BIN) (del /f /q  $(BIN))
 	$(Q) if exist $(EXTRA) (del /f /q  $(EXTRA))
 endef
