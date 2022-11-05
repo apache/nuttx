@@ -1,11 +1,12 @@
-From 00d0f99b49a5647107bc16249a141d1c727ec11e Mon Sep 17 00:00:00 2001
-From: Guiding Li <liguiding1@xiaomi.com>
-Date: Thu, 18 Nov 2021 20:54:45 +0800
-Subject: [PATCH 2/9] openamp: add new ops notify_wait() support
+From ddc209c9475a2822ffe5d18441bd01718acdbc11 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Fri, 29 Jul 2022 22:57:23 +0800
+Subject: [PATCH 4/9] openamp: add new ops notify_wait() support
 
 This can avoid looping check tx buffer
 
-Signed-off-by: Guiding Li <liguiding1@xiaomi.com>
+Change-Id: Ie340ed06c306ce978ff165aacaf5b830e3645af8
+Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---
  lib/include/openamp/remoteproc.h        | 12 ++++++++++++
  lib/include/openamp/remoteproc_virtio.h |  2 ++
@@ -14,11 +15,11 @@ Signed-off-by: Guiding Li <liguiding1@xiaomi.com>
  lib/include/openamp/virtio.h            |  1 +
  lib/remoteproc/remoteproc.c             | 11 +++++++++++
  lib/remoteproc/remoteproc_virtio.c      | 14 ++++++++++++++
- lib/rpmsg/rpmsg_virtio.c                |  5 +++++
- 8 files changed, 55 insertions(+)
+ lib/rpmsg/rpmsg_virtio.c                |  7 +++++++
+ 8 files changed, 57 insertions(+)
 
 diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
-index e9111ff..d276550 100644
+index d1efab85..f6554404 100644
 --- a/lib/include/openamp/remoteproc.h
 +++ open-amp/lib/include/openamp/remoteproc.h
 @@ -428,6 +428,18 @@ struct remoteproc_ops {
@@ -41,10 +42,10 @@ index e9111ff..d276550 100644
  	 * get_mem
  	 *
 diff --git a/lib/include/openamp/remoteproc_virtio.h open-amp/lib/include/openamp/remoteproc_virtio.h
-index 70cff97..eaca76a 100644
+index 6609a1fd..e65488d5 100644
 --- a/lib/include/openamp/remoteproc_virtio.h
 +++ open-amp/lib/include/openamp/remoteproc_virtio.h
-@@ -22,6 +22,7 @@ extern "C" {
+@@ -25,6 +25,7 @@ extern "C" {
  
  /* define vdev notification function user should implement */
  typedef int (*rpvdev_notify_func)(void *priv, uint32_t id);
@@ -52,7 +53,7 @@ index 70cff97..eaca76a 100644
  
  /**
   * struct remoteproc_virtio
-@@ -37,6 +38,7 @@ struct remoteproc_virtio {
+@@ -40,6 +41,7 @@ struct remoteproc_virtio {
  	void *vdev_rsc;
  	struct metal_io_region *vdev_rsc_io;
  	rpvdev_notify_func notify;
@@ -61,22 +62,22 @@ index 70cff97..eaca76a 100644
  	struct metal_list node;
  };
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index 11c3ccb..6f546e5 100644
+index dbe42ea6..14440e20 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
-@@ -49,6 +49,7 @@ extern "C" {
- #define RPMSG_ERR_BUFF_SIZE		(RPMSG_ERROR_BASE - 5)
+@@ -50,6 +50,7 @@ extern "C" {
  #define RPMSG_ERR_INIT			(RPMSG_ERROR_BASE - 6)
  #define RPMSG_ERR_ADDR			(RPMSG_ERROR_BASE - 7)
-+#define RPMSG_ERR_NXIO			(RPMSG_ERROR_BASE - 8)
+ #define RPMSG_ERR_PERM			(RPMSG_ERROR_BASE - 8)
++#define RPMSG_ERR_NXIO			(RPMSG_ERROR_BASE - 9)
  
  struct rpmsg_endpoint;
  struct rpmsg_device;
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index aaba7e1..3ec0b0f 100644
+index 0b22e840..11cb6df9 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
-@@ -143,6 +143,15 @@ rpmsg_virtio_create_virtqueues(struct rpmsg_virtio_device *rvdev,
+@@ -148,6 +148,15 @@ rpmsg_virtio_create_virtqueues(struct rpmsg_virtio_device *rvdev,
  					callbacks);
  }
  
@@ -93,7 +94,7 @@ index aaba7e1..3ec0b0f 100644
   * rpmsg_virtio_get_buffer_size - get rpmsg virtio buffer size
   *
 diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
-index 916132b..0303a5b 100644
+index 916132b4..0303a5b3 100644
 --- a/lib/include/openamp/virtio.h
 +++ open-amp/lib/include/openamp/virtio.h
 @@ -162,6 +162,7 @@ struct virtio_dispatch {
@@ -105,10 +106,10 @@ index 916132b..0303a5b 100644
  
  int virtio_create_virtqueues(struct virtio_device *vdev, unsigned int flags,
 diff --git a/lib/remoteproc/remoteproc.c open-amp/lib/remoteproc/remoteproc.c
-index 9a0cf3e..4c101db 100644
+index f7f9f2df..001b11bf 100644
 --- a/lib/remoteproc/remoteproc.c
 +++ open-amp/lib/remoteproc/remoteproc.c
-@@ -880,6 +880,16 @@ static int remoteproc_virtio_notify(void *priv, uint32_t id)
+@@ -899,6 +899,16 @@ static int remoteproc_virtio_notify(void *priv, uint32_t id)
  	return 0;
  }
  
@@ -125,7 +126,7 @@ index 9a0cf3e..4c101db 100644
  struct virtio_device *
  remoteproc_create_virtio(struct remoteproc *rproc,
  			 int vdev_id, unsigned int role,
-@@ -927,6 +937,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
+@@ -957,6 +967,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
  	rproc_virtio_wait_remote_ready(vdev);
  
  	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
@@ -134,7 +135,7 @@ index 9a0cf3e..4c101db 100644
  	num_vrings = vdev_rsc->num_of_vrings;
  
 diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
-index cbfd966..ef5eef3 100644
+index 169e5b5f..4375c4c3 100644
 --- a/lib/remoteproc/remoteproc_virtio.c
 +++ open-amp/lib/remoteproc/remoteproc_virtio.c
 @@ -30,6 +30,19 @@ static void rproc_virtio_virtqueue_notify(struct virtqueue *vq)
@@ -166,10 +167,10 @@ index cbfd966..ef5eef3 100644
  	/*
  	 * We suppose here that the vdev is in a shared memory so that can
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index d19d3b1..80bfbf7 100644
+index c56e0cea..4960aa8a 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -339,6 +339,11 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
+@@ -373,6 +373,13 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
  		metal_mutex_release(&rdev->lock);
  		if (rp_hdr || !tick_count)
  			break;
@@ -177,6 +178,8 @@ index d19d3b1..80bfbf7 100644
 +		status = rpmsg_virtio_notify_wait(rvdev, rvdev->rvq);
 +		if (status == RPMSG_SUCCESS)
 +			continue;
++		else if (status != RPMSG_ERR_NXIO)
++			break;
 +
  		metal_sleep_usec(RPMSG_TICKS_PER_INTERVAL);
  		tick_count--;

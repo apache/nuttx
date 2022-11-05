@@ -1,7 +1,7 @@
-From fb046d85d5e098f58af037322f0de2f663e8f460 Mon Sep 17 00:00:00 2001
+From bcd10078fe4266cadbc437b130832dd90c00df33 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 15 Nov 2019 19:01:49 +0800
-Subject: [PATCH 12/12] remoteproc: make all elf_* functions static except
+Subject: [PATCH 8/9] remoteproc: make all elf_* functions static except
  elf_identify
 
 it's the best practice to reduce the name scope as small as possible
@@ -13,7 +13,7 @@ Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
  2 files changed, 14 insertions(+), 107 deletions(-)
 
 diff --git a/lib/include/openamp/elf_loader.h open-amp/lib/include/openamp/elf_loader.h
-index e7dda74..916a23f 100644
+index e7dda748..916a23f9 100644
 --- a/lib/include/openamp/elf_loader.h
 +++ open-amp/lib/include/openamp/elf_loader.h
 @@ -323,99 +323,6 @@ extern const struct loader_ops elf_ops;
@@ -117,7 +117,7 @@ index e7dda74..916a23f 100644
  #if defined __cplusplus
  }
 diff --git a/lib/remoteproc/elf_loader.c open-amp/lib/remoteproc/elf_loader.c
-index c90b8d4..ffb253f 100644
+index c90b8d46..ffb253fb 100644
 --- a/lib/remoteproc/elf_loader.c
 +++ open-amp/lib/remoteproc/elf_loader.c
 @@ -392,9 +392,9 @@ int elf_identify(const void *img_data, size_t len)
