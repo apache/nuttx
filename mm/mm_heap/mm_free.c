@@ -37,7 +37,7 @@
  * Private Functions
  ****************************************************************************/
 
-static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
+static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp = mem;
@@ -91,7 +91,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        * Then add to the delay list.
        */
 
-      mm_add_delaylist(heap, mem);
+      add_delaylist(heap, mem);
       return;
     }
 
