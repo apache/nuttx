@@ -165,13 +165,6 @@ config MM_SHM
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().
 
-config MM_MEMPOOL
-	bool "Enable memory buffer pool"
-	default n
-	---help---
-		Memory buffer pool support. Such pools are mostly used
-		for guaranteed, deadlock-free memory allocations.
-
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
 	default DEFAULT_SMALL
