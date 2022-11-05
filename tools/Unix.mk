@@ -19,6 +19,13 @@
 ############################################################################
 
 export TOPDIR := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
+
+# Build any necessary tools needed early in the build.
+# incdir - Is needed immediately by all Make.defs file.
+
+DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
+          INCDIR="$(TOPDIR)/tools/incdir.sh"}
+
 include $(TOPDIR)/Make.defs
 
 # GIT directory present

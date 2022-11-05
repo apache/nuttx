@@ -127,7 +127,7 @@ static enum os_e get_os(char *ccname)
 #else
   struct utsname buf;
   int ret;
-  
+
   /* Get the context names */
 
   ret = uname(&buf);
@@ -169,6 +169,7 @@ static enum os_e get_os(char *ccname)
       fprintf(stderr, "ERROR:  Unknown operating system: %s\n",
               buf.sysname);
     }
+
 #endif
   return OS_UNKNOWN;
 }
