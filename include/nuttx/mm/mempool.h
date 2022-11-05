@@ -42,7 +42,7 @@ typedef CODE void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
 typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
                                     FAR void *addr);
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 struct mempool_procfs_entry_s
 {
   FAR const char *name;
@@ -70,7 +70,7 @@ struct mempool_s
   size_t     nused;      /* The number of used block in mempool */
   spinlock_t lock;       /* The protect lock to mempool */
   sem_t      waitsem;    /* The semaphore of waiter get free block */
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
 };
@@ -195,7 +195,7 @@ int mempool_deinit(FAR struct mempool_s *pool);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 void mempool_procfs_register(FAR struct mempool_procfs_entry_s *entry,
                              FAR const char *name);
 #endif
@@ -211,7 +211,7 @@ void mempool_procfs_register(FAR struct mempool_procfs_entry_s *entry,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
 #endif
 
