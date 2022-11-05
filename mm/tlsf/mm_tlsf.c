@@ -1095,6 +1095,31 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 }
 
 /****************************************************************************
+ * Name: mm_uninitialize
+ *
+ * Description:
+ *   Uninitialize the selected heap data structures.
+ *
+ * Input Parameters:
+ *   heap - The heap to uninitialize
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mm_uninitialize(FAR struct mm_heap_s *heap)
+{
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  procfs_unregister_meminfo(&heap->mm_procfs);
+#  endif
+#endif
+  nxmutex_destroy(&heap->mm_lock);
+  tlsf_destroy(&heap->mm_tlsf);
+}
+
+/****************************************************************************
  * Name: mm_zalloc
  *
  * Description:
