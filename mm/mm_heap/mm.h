@@ -121,9 +121,6 @@
 # define MMSIZE_MAX      UINT32_MAX
 #endif
 
-#define MM_IS_ALLOCATED(n) \
-  ((int)((FAR struct mm_allocnode_s *)(n)->preceding) < 0)
-
 /* What is the size of the allocnode? */
 
 #define SIZEOF_MM_ALLOCNODE sizeof(struct mm_allocnode_s)
