@@ -66,13 +66,8 @@ driver or a specific audio codec driver
 available at the moment). Also, it's possible to use the I2S character device
 driver to bypass audio systems and write directly to the I2S peripheral.
 
-.. note:: The I2S peripheral is able to work on two functional modes
-  internally: 16 and 32-bit width.
-  That limits using the I2S peripheral to play audio files other than 16/32
-  bit-widths as the internal buffer allocated for the audio content does not
-  consider the operation modes of the peripheral. This limitation is planned
-  to be removed soon by copying the buffers internally and making the
-  necessary adjustments.
+.. note:: When using the audio system, sample rate and data width are
+  automatically set by the upper half audio driver.
 
 .. note:: The above statement is not valid when using the I2S character
   device driver.
@@ -86,9 +81,6 @@ driver to bypass audio systems and write directly to the I2S peripheral.
                 -> I2S0/1
                     -> Bit Witdh
 
-  And make sure the data stream buffer being written to the I2S peripheral is
-  aligned to the next boundary i.e. 16 bits for the 8 and 16-bit-widths and
-  32 bits for 24 and 32-bit-widths.
 
 Configurations
 ==============
@@ -99,7 +91,7 @@ audio
 This configuration uses the I2S0 peripheral and an externally connected audio
 codec to play an audio file. The easiest way of playing an uncompressed file
 is embedding into the firmware. This configuration selects
-`romfs example <https://github.com/apache/incubator-nuttx-apps/tree/master/examples/romfs>`_`
+`romfs example <https://github.com/apache/incubator-nuttx-apps/tree/master/examples/romfs>`__
 to allow that.
 
 **Audio Codec Setup**
@@ -122,7 +114,7 @@ Prepare and build the `audio` defconfig::
   $ make -j distclean && ./tools/configure.sh esp32s2-saola-1:audio && make
 
 This will create a temporary folder in `apps/examples/romfs/testdir`. Move
-a PCM-encoded (`.wav`) audio file with 16 bits/sample (sampled at 8~48kHz)
+a PCM-encoded (`.wav`) audio file with 16 or 24 bits/sample (sampled at 16~48kHz)
 to this folder.
 
 .. note:: You can use :download:`this 440 Hz sinusoidal tone <tone.wav>`.

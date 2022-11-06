@@ -115,16 +115,13 @@ driver to bypass audio systems and write directly to the I2S peripheral.
 
 .. note:: The I2S peripheral is able to work on two functional modes
   internally: 16 and 32-bit width.
-  That limits using the I2S peripheral to play audio files other than 16/32
-  bit-widths as the internal buffer allocated for the audio content does not
-  consider the operation modes of the peripheral. This limitation is planned
-  to be removed soon by copying the buffers internally and making the
-  necessary adjustments.
+  ESP32's I2S driver, however, uses an internal buffer to enable inserting
+  padding bytes and provide the ability to play 8, 16, 24 or 32-bits/sample
+  audio files. Sample rate and data width are automatically set by the upper
+  half audio driver.
 
-.. note:: The above statement is not valid when using the I2S character
-  device driver.
-  It's possible to use 8, 16, 24, and 32-bit-widths writing directly to the
-  I2S character device. Just make sure to set the bit-width::
+.. note:: Also, it's possible to use 8, 16, 24, and 32-bit-widths writing
+  directly to the I2S character device. Just make sure to set the bit-width::
 
     $ make menuconfig
     -> System Type
@@ -173,8 +170,8 @@ ESP32 Pin  CS4344 Pin Description
 
 **Simple HTTP server**
 
-Prepare a PCM-encoded (`.wav`) audio file with 16 bits/sample (sampled at
-8~48kHz). This file must be placed into a folder in a computer that could
+Prepare a PCM-encoded (`.wav`) audio file with 16 or 24 bits/sample (sampled at
+16~48kHz). This file must be placed into a folder in a computer that could
 be accessed on the same Wi-Fi network the ESP32 will be connecting to.
 
 Python provides a simple HTTP server. `cd` to the audio file folder on the
