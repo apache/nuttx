@@ -25,6 +25,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <malloc.h>
 #include <sys/types.h>
 
 #include <nuttx/list.h>
@@ -47,6 +48,14 @@ struct mempool_procfs_entry_s
 {
   FAR const char *name;
   FAR struct mempool_procfs_entry_s *next;
+#if CONFIG_MM_BACKTRACE >= 0
+
+  /* This is dynamic control flag whether to turn on backtrace in the heap,
+   * you can set it by /proc/mempool.
+   */
+
+  bool backtrace;
+#endif
 };
 #endif
 
@@ -67,6 +76,9 @@ struct mempool_s
   struct list_node list;    /* The free block list in normal mempool */
   struct list_node ilist;   /* The free block list in interrupt mempool */
   struct list_node elist;   /* The expand block list for normal mempool */
+#if CONFIG_MM_BACKTRACE >= 0
+  struct list_node alist;   /* The used block list in mempool */
+#endif
   size_t           nused;   /* The number of used block in mempool */
   spinlock_t       lock;    /* The protect lock to mempool */
   sem_t            waitsem; /* The semaphore of waiter get free block */
@@ -101,6 +113,8 @@ struct mempoolinfo_s
   unsigned long sizeblks; /* This is the size of a mempool blocks */
   unsigned long nwaiter;  /* This is the number of waiter for mempool */
 };
+
+#define mempoolinfo_task mallinfo_task
 
 /****************************************************************************
  * Public Function Prototypes
@@ -183,6 +197,27 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk);
 int mempool_info(FAR struct mempool_s *pool, struct mempoolinfo_s *info);
 
 /****************************************************************************
+ * Name: mempool_memdump
+ *
+ * Description:
+ *   mempool_memdump returns a memory info about specified pid of
+ *   task/thread. if pid equals -1, this function will dump all allocated
+ *   node and output backtrace for every allocated node for this mempool,
+ *   if pid equals -2, this function will dump all free node for this
+ *   mempool, and if pid is greater than or equal to 0, will dump pid
+ *   allocated node and output backtrace.
+ *
+ * Input Parameters:
+ *   pool    - Address of the memory pool to be used.
+ *   info    - The pointer of mempoolinfo.
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on any failure.
+ ****************************************************************************/
+
+void mempool_memdump(FAR struct mempool_s *pool, pid_t pid);
+
+/****************************************************************************
  * Name: mempool_deinit
  *
  * Description:
@@ -193,6 +228,20 @@ int mempool_info(FAR struct mempool_s *pool, struct mempoolinfo_s *info);
  ****************************************************************************/
 
 int mempool_deinit(FAR struct mempool_s *pool);
+
+/****************************************************************************
+ * Name: mempool_info_task
+ *
+ * Description:
+ *   Get memory pool's memory used info.
+ *
+ * Input Parameters:
+ *   pool    - Address of the memory pool to be used.
+ *   info    - Memory info.
+ ****************************************************************************/
+
+int mempool_info_task(FAR struct mempool_s *pool,
+                      FAR struct mempoolinfo_task *info);
 
 /****************************************************************************
  * Name: mempool_procfs_register
@@ -353,6 +402,26 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
                                     size_t alignment, size_t size);
 
 /****************************************************************************
+ * Name: mempool_multiple_memdump
+ *
+ * Description:
+ *   mempool_multiple_memdump returns a memory info about specified pid of
+ *   task/thread. if pid equals -1, this function will dump all allocated
+ *   node and output backtrace for every allocated node for this multiple
+ *   mempool, if pid equals -2, this function will dump all free node for
+ *   this multiple mempool, and if pid is greater than or equal to 0, will
+ *   dump pid allocated node and output backtrace.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   pid   - The pid of task.
+ *
+ ****************************************************************************/
+
+void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
+                              pid_t pid);
+
+/****************************************************************************
  * Name: mempool_multiple_fixed_alloc
  *
  * Description:
@@ -425,6 +494,19 @@ void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
  ****************************************************************************/
 
 int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
+
+/****************************************************************************
+ * Name: mempool_multiple_info_task
+ * Description:
+ *   Get multiple memory pool's memory used info.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   info  - Memory info.
+ ****************************************************************************/
+
+void mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
+                                FAR struct mempoolinfo_task *info);
 
 #undef EXTERN
 #if defined(__cplusplus)

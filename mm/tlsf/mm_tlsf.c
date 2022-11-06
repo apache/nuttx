@@ -861,6 +861,11 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
   DEBUGASSERT(info);
   info->uordblks = 0;
   info->aordblks = 0;
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  mempool_multiple_info_task(&heap->mm_mpool, info);
+#endif
+
 #if CONFIG_MM_REGIONS > 1
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
@@ -912,6 +917,10 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
       syslog(LOG_INFO, "Dump all free memory node info:\n");
       syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
     }
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  mempool_multiple_memdump(&heap->mm_mpool, pid);
+#endif
 
 #if CONFIG_MM_REGIONS > 1
   for (region = 0; region < heap->mm_nregions; region++)
