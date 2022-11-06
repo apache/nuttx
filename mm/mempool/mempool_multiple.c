@@ -362,6 +362,49 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
 }
 
 /****************************************************************************
+ * Name: mempool_multiple_info_task
+ ****************************************************************************/
+
+void mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
+                                FAR struct mempoolinfo_task *info)
+{
+  size_t i;
+
+  for (i = 0; i < mpool->npools; i++)
+    {
+      mempool_info_task(mpool->pools + i, info);
+    }
+}
+
+/****************************************************************************
+ * Name: mempool_multiple_memdump
+ *
+ * Description:
+ *   mempool_multiple_memdump returns a memory info about specified pid of
+ *   task/thread. if pid equals -1, this function will dump all allocated
+ *   node and output backtrace for every allocated node for this multiple
+ *   mempool, if pid equals -2, this function will dump all free node for
+ *   this multiple mempool, and if pid is greater than or equal to 0, will
+ *   dump pid allocated node and output backtrace.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   pid   - The pid of task.
+ *
+ ****************************************************************************/
+
+void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
+                              pid_t pid)
+{
+  size_t i;
+
+  for (i = 0; i < mpool->npools; i++)
+    {
+      mempool_memdump(mpool->pools + i, pid);
+    }
+}
+
+/****************************************************************************
  * Name: mempool_multiple_fixed_alloc
  *
  * Description:
