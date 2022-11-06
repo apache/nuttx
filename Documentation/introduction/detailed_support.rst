@@ -3052,10 +3052,10 @@ Please, refer to the :doc:`ESP32 </platforms/xtensa/esp32/index>` on NuttX for
 further information.
 
 ESP32-S2 (Single Xtensa LX7)
-=======================
+============================
 
 Xtensa LX7 ESP32-S2
-----------------
+-------------------
 
 Initial architectural support for Xtensa LX7 processor for the Espressif
 ESP32-S2 was added in NuttX-10.2.
@@ -3067,10 +3067,10 @@ Please, refer to the :doc:`ESP32-S2 </platforms/xtensa/esp32s2/index>` on NuttX 
 further information.
 
 ESP32-S3 (Dual Xtensa LX7)
-=======================
+==========================
 
 Xtensa LX7 ESP32-S3
-----------------
+-------------------
 
 Initial architectural support for dual Xtensa LX7 processors for the Espressif
 ESP32-S3 was added in NuttX-10.3.
