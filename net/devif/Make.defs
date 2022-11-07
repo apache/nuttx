@@ -55,6 +55,12 @@ ifeq ($(CONFIG_NET_CAN),y)
 NET_CSRCS += devif_cansend.c
 endif
 
+# iptlite packet filter support
+
+ifeq ($(CONFIG_NETUTILS_IPTLITE),y)
+NET_CSRCS += devif_pktfilter.c
+endif
+
 # Include network device interface build support
 
 DEPPATH += --dep-path devif

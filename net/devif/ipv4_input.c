@@ -210,6 +210,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
 
+#ifdef CONFIG_NETUTILS_IPTLITE
+  /* Check if packet needs to be dropped */
+
+  bool is_valid_packet = nflite_verify_ipv4(dev);
+  if (!is_valid_packet) goto drop;
+#endif
+
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   /* If IP broadcast support is configured, we check for a broadcast
    * UDP packet, which may be destined to us (even if there is no IP
