@@ -942,7 +942,7 @@ errout:
    */
 
   sx127x_opmode_set(dev, dev->idle);
-  nxsem_post(&dev->dev_lock);
+  nxmutex_unlock(&dev->dev_lock);
 
   return ret;
 #endif
