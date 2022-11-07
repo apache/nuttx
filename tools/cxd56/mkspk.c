@@ -344,7 +344,7 @@ int main(int argc, char **argv)
 
   size += 16;                   /* Extend CMAC size */
 
-  snprintf(footer, 16, "MKSPK_BN_HOOTER");
+  snprintf(footer, 16, "MKSPK_BN_FOOTER");
   footer[15] = '\0';
 
   fp = fopen(args->outputfile, "wb");
