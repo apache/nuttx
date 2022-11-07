@@ -14,14 +14,23 @@
 
 #define SRAM_IRAM_START     0x40370000
 #define SRAM_DIRAM_I_START  0x40378000
+
+/* The memory region starting from SRAM_IRAM_END up to 0x403dffff is
+ * reserved to the 2nd stage bootloader for actually loading the NuttX
+ * Application Image code and data into IRAM and DRAM. Otherwise the
+ * Bootloader could end up overwriting itself and failing to load the NuttX
+ * Application Image properly.
+ *
+ * For more information, refer to the bootloader linker scripts:
+ * https://github.com/espressif/esp-idf/blob/v4.4.2/components/bootloader/subproject/main/ld/esp32s3/bootloader.ld#L41-L47
+ */
+
 #define SRAM_IRAM_END       0x403cc700
 #define I_D_SRAM_OFFSET     (SRAM_DIRAM_I_START - SRAM_DRAM_START)
 
 #define SRAM_DRAM_START     0x3fc88000
 
-/* 2nd stage bootloader iram_loader_seg start address */
-
-#define SRAM_DRAM_END       (SRAM_IRAM_END - I_D_SRAM_OFFSET)
+#define SRAM_DRAM_END       (SRAM_IRAM_END - I_D_SRAM_OFFSET) /* 2nd stage bootloader iram_loader_seg start address */
 #define I_D_SRAM_SIZE       (SRAM_DRAM_END - SRAM_DRAM_START)
 
 #define ICACHE_SIZE         0x8000
