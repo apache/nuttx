@@ -694,6 +694,7 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
   ret = __mpu_write_pwr_mgmt_1(dev, PWR_MGMT_1__DEVICE_RESET);
   if (ret != OK)
     {
+      mpu_unlock(dev);
       snerr("Could not find mpu60x0!\n");
       return ret;
     }
