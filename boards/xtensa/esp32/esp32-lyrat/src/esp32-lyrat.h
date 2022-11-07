@@ -39,6 +39,10 @@
 
 #define GPIO_LED1  22
 
+/* Audio Amplifier */
+
+#define SPEAKER_ENABLE_GPIO   21
+
 /* Buttons */
 
 /* As BOOT_BUTTON shares pins with I2S and the SD card it cannot be used
@@ -91,6 +95,52 @@
  ****************************************************************************/
 
 int esp32_bringup(void);
+
+/****************************************************************************
+ * Name: esp32_es8388_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the ES8388 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
+ *
+ * Input Parameters:
+ *   i2c_port  - The I2C port used for the device
+ *   i2c_addr  - The I2C address used by the device
+ *   i2c_freq  - The I2C frequency used for the device
+ *   i2s_port  - The I2S port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
+                            int i2s_port);
+
+/****************************************************************************
+ * Name: board_i2sdev_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the generic I2S audio driver.  This function will register
+ *   the driver as /dev/audio/pcm[x] where x is determined by the I2S port
+ *   number.
+ *
+ * Input Parameters:
+ *   port  - The I2S port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined CONFIG_ESP32_I2S0 && !defined CONFIG_AUDIO_ES8388 || \
+    defined CONFIG_ESP32_I2S1
+int board_i2sdev_initialize(int port);
+#endif
 
 /****************************************************************************
  * Name: esp32_mmcsd_initialize

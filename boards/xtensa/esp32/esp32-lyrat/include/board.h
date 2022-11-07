@@ -56,13 +56,14 @@
 
 /* ES8388 CODEC */
 
-#define ES8388_CCLK       23
-#define ES8388_CDATA      18
-#define ES8388_MCLK       0
-#define ES8388_SCLK       5
-#define ES8388_LRCK       25
-#define ES8388_DSDIN      26
-#define ES8388_ASDOUT     35
+#define ES8388_I2C_CCLK       23     /* SCL */
+#define ES8388_I2C_CDATA      18     /* SDA */
+
+#define ES8388_I2S_MCLK       0      /* Master clock */
+#define ES8388_I2S_SCLK       5      /* Audio data bit clock */
+#define ES8388_I2S_LRCK       25     /* Audio data left and right clock */
+#define ES8388_I2S_DSDIN      26     /* DAC audio data (to speakers) */
+#define ES8388_I2S_ASDOUT     35     /* ADC audio data (from microphone) */
 
 /* LED definitions **********************************************************/
 
@@ -75,5 +76,12 @@
 #define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+/* Peripherals definitions **************************************************/
+
+/* ES8388 CODEC */
+
+#define ES8388_I2C_FREQ       400000
+#define ES8388_I2C_ADDR       0x10
 
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_LYRAT_INCLUDE_BOARD_H */
