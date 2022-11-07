@@ -126,6 +126,10 @@ between speakers and headphones is under software control instead of using
 mechanical contacts that would disconnect speakers once a headphone jack is
 inserted.
 
+.. note::
+    The codec implementation on the LyraT board was validated using 16-bit,
+    44.1kHz WAV files. Other configurations might not work as expected.
+
 SD card
 =======
 
@@ -385,6 +389,49 @@ JTAG Header / JP7
 
 Configurations
 ==============
+
+audio
+-----
+
+This configuration uses the I2S0 peripheral and the ES8388 audio codec
+present on the LyraT board to play an audio file streamed over HTTP
+while connected to a Wi-Fi network.
+
+**Simple HTTP server**
+
+Prepare a PCM-encoded (`.wav`) audio file with 16 bits/sample (sampled at
+44.1kHz). This file must be placed into a folder in a computer that could
+be accessed on the same Wi-Fi network the ESP32 will be connecting to.
+
+Python provides a simple HTTP server. `cd` to the audio file folder on the
+PC and run::
+
+  $ python3 -m http.server
+
+  Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/)
+
+Look for your PC IP address and test playing the prepared audio on your
+browser:
+
+.. figure:: esp32-lyrat-v4.3-audio-config-file.png
+          :align: center
+
+After successfully built and flashed, connect the board to the Wi-Fi network::
+
+  $ nsh> wapi psk wlan0 mypasswd 1
+  $ nsh> wapi essid wlan0 myssid 1
+  $ nsh> renew wlan0
+
+Once connected, open NuttX's player and play the file according to its file
+name and the IP address of the HTTP server (For example `tones.wav` and
+`192.168.1.239:8000`, respectively)::
+
+  $ nsh> nxplayer
+  $ nxplayer> play http://192.168.1.239:8000/tones.wav
+
+.. note::
+    The codec implementation on the LyraT board was validated using 16-bit,
+    44.1kHz WAV files. Other configurations might not work as expected.
 
 nsh
 ---

@@ -40,6 +40,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
 
+#include "esp32_i2c.h"
+#include "esp32_gpio.h"
 #include "esp32_partition.h"
 
 #include <arch/board/board.h>
@@ -74,6 +76,10 @@
 
 #ifdef CONFIG_ESP32_I2C
 #  include "esp32_board_i2c.h"
+#endif
+
+#ifdef CONFIG_ESP32_I2S
+#  include "esp32_i2s.h"
 #endif
 
 #ifdef CONFIG_SENSORS_BMP180
@@ -330,6 +336,54 @@ int esp32_bringup(void)
 #endif
 
 #endif
+
+#ifdef CONFIG_ESP32_I2S
+
+#ifdef CONFIG_ESP32_I2S0
+
+  /* Configure I2S0 */
+
+#ifdef CONFIG_AUDIO_ES8388
+
+  /* Configure ES8388 audio on I2C0 and I2S0 */
+
+  esp32_configgpio(SPEAKER_ENABLE_GPIO, OUTPUT);
+  esp32_gpiowrite(SPEAKER_ENABLE_GPIO, true);
+
+  ret = esp32_es8388_initialize(ESP32_I2C0, ES8388_I2C_ADDR,
+                                ES8388_I2C_FREQ, ESP32_I2S0);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize ES8388 audio: %d\n", ret);
+    }
+#else
+
+  /* Configure I2S generic audio on I2S0 */
+
+  ret = board_i2sdev_initialize(ESP32_I2S0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
+             CONFIG_ESP32_I2S0, ret);
+    }
+#endif /* CONFIG_AUDIO_ES8388 */
+
+#endif  /* CONFIG_ESP32_I2S0 */
+
+#ifdef CONFIG_ESP32_I2S1
+
+  /* Configure I2S generic audio on I2S1 */
+
+  ret = board_i2sdev_initialize(ESP32_I2S1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
+             CONFIG_ESP32_I2S0, ret);
+    }
+
+#endif  /* CONFIG_ESP32_I2S1 */
+
+#endif /* CONFIG_ESP32_I2S */
 
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */
