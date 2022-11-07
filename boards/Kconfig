@@ -326,6 +326,15 @@ config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 		This board includes the ESP32-C3-MINI-1 module, a 6DoF IMU, a temperature
 		and humidity sensor, a Li-Ion battery charger, and a Type-C USB.
 
+config ARCH_BOARD_ESP32S2_KALUGA_1
+	bool "Espressif ESP32-S2-Kaluga-1 V1.3"
+	depends on ARCH_CHIP_ESP32S2WROVER
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
+	---help---
+		This is the ESP32-S2-Kaluga-1 board
+
 config ARCH_BOARD_ESP32S2_SAOLA_1
 	bool "Espressif ESP32-S2-Saola-1 V1.2"
 	depends on ARCH_CHIP_ESP32S2WROVER
@@ -2653,6 +2662,7 @@ config ARCH_BOARD
 	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"           if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"    if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
+	default "esp32s2-kaluga-1"         if ARCH_BOARD_ESP32S2_KALUGA_1
 	default "esp32s2-saola-1"          if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "esp32s3-devkit"           if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"              if ARCH_BOARD_ESP32S3_EYE
@@ -3605,6 +3615,9 @@ source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 source "boards/risc-v/esp32c3/esp32c3-devkit-rust-1/Kconfig"
+endif
+if ARCH_BOARD_ESP32S2_KALUGA_1
+source "boards/xtensa/esp32s2/esp32s2-kaluga-1/Kconfig"
 endif
 if ARCH_BOARD_ESP32S2_SAOLA_1
 source "boards/xtensa/esp32s2/esp32s2-saola-1/Kconfig"
