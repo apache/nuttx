@@ -38,6 +38,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/mempool.h>
 
 #include "tlsf/tlsf.h"
 #include "kasan/kasan.h"
@@ -50,6 +51,14 @@
 #  define MM_PTR_FMT_WIDTH 11
 #elif UINTPTR_MAX <= UINT64_MAX
 #  define MM_PTR_FMT_WIDTH 19
+#endif
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#  define MM_MPOOL_BIT (1 << 0)
+#  define MM_IS_FROM_MEMPOOL(mem) \
+          ((*((FAR size_t *)(mem) - 1)) & MM_MPOOL_BIT) == 0
 #endif
 
 /****************************************************************************
@@ -83,6 +92,14 @@ struct mm_heap_s
 #endif
 
   tlsf_t mm_tlsf; /* The tlfs context */
+
+  /* The is a multiple mempool of the heap */
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  struct mempool_multiple_s mm_mpool;
+  struct mempool_s mm_pools[CONFIG_MM_HEAP_MEMPOOL_THRESHOLD /
+                            sizeof(uintptr_t)];
+#endif
 
   /* Free delay list, for some situation can't do free immdiately */
 
@@ -617,6 +634,14 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (MM_IS_FROM_MEMPOOL(mem))
+    {
+      mempool_multiple_free(&heap->mm_mpool, mem);
+      return;
+    }
+#endif
+
   if (mm_lock(heap) == 0)
     {
       kasan_poison(mem, mm_malloc_size(mem));
@@ -714,6 +739,9 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
                                     FAR void *heapstart, size_t heapsize)
 {
   FAR struct mm_heap_s *heap;
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  int i;
+#endif
 
   minfo("Heap: name=%s start=%p size=%zu\n", name, heapstart, heapsize);
 
@@ -724,6 +752,20 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   memset(heap, 0, sizeof(struct mm_heap_s));
   heapstart += sizeof(struct mm_heap_s);
   heapsize -= sizeof(struct mm_heap_s);
+
+  /* Initialize the multiple mempool in heap */
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  heap->mm_mpool.pools = heap->mm_pools;
+  heap->mm_mpool.npools = sizeof(heap->mm_pools) / sizeof(heap->mm_pools[0]);
+  for (i = 0; i < heap->mm_mpool.npools; i++)
+    {
+      heap->mm_pools[i].blocksize = (i + 1) * sizeof(uintptr_t);
+      heap->mm_pools[i].expandsize = CONFIG_MM_HEAP_MEMPOOL_EXPAND;
+    }
+
+  mempool_multiple_init(&heap->mm_mpool, name);
+#endif
 
   /* Allocate and create TLSF context */
 
@@ -887,6 +929,13 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 
 size_t mm_malloc_size(FAR void *mem)
 {
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (MM_IS_FROM_MEMPOOL(mem))
+    {
+      return mempool_multiple_alloc_size(mem);
+    }
+#endif
+
 #if CONFIG_MM_BACKTRACE >= 0
   return tlsf_block_size(mem) - sizeof(struct memdump_backtrace_s);
 #else
@@ -908,6 +957,14 @@ size_t mm_malloc_size(FAR void *mem)
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR void *ret;
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  ret = mempool_multiple_alloc(&heap->mm_mpool, size);
+  if (ret != NULL)
+    {
+      return ret;
+    }
+#endif
 
   /* Free the delay list first */
 
@@ -955,6 +1012,14 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
   FAR void *ret;
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  ret = mempool_multiple_memalign(&heap->mm_mpool, alignment, size);
+  if (ret != NULL)
+    {
+      return ret;
+    }
+#endif
 
   /* Free the delay list first */
 
@@ -1012,7 +1077,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 {
   FAR void *newmem;
 
-#ifdef CONFIG_MM_KASAN
   if (oldmem == NULL)
     {
       return mm_malloc(heap, size);
@@ -1023,6 +1087,38 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       mm_free(heap, oldmem);
       return NULL;
     }
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  if (MM_IS_FROM_MEMPOOL(oldmem))
+    {
+      newmem = mempool_multiple_realloc(&heap->mm_mpool, oldmem, size);
+      if (newmem != NULL)
+        {
+          return newmem;
+        }
+
+      newmem = mm_malloc(heap, size);
+      if (newmem != NULL)
+        {
+          memcpy(newmem, oldmem, size);
+          mempool_multiple_free(&heap->mm_mpool, oldmem);
+        }
+
+      return newmem;
+    }
+  else
+    {
+      newmem = mempool_multiple_alloc(&heap->mm_mpool, size);
+      if (newmem != NULL)
+        {
+          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(oldmem)));
+          mm_free(heap, oldmem);
+          return newmem;
+        }
+    }
+#endif
+
+#ifdef CONFIG_MM_KASAN
 
   newmem = mm_malloc(heap, size);
   if (newmem)
