@@ -121,6 +121,12 @@ else
   DELIM ?= $(strip /)
 endif
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  EMPTYFILE := "NUL"
+else
+  EMPTYFILE := "/dev/null"
+endif
+
 # Process chip-specific directories
 
 ifeq ($(CONFIG_ARCH_CHIP_CUSTOM),y)
@@ -583,9 +589,9 @@ $(1)_$(2):
 
 endef
 
-export DEFINE_PREFIX := $(subst X,,${shell $(DEFINE) "$(CC)" "X"})
-export INCDIR_PREFIX := $(subst "X",,${shell $(INCDIR) "$(CC)" "X"})
-export INCSYSDIR_PREFIX := $(subst "X",,${shell $(INCDIR) -s "$(CC)" "X"})
+export DEFINE_PREFIX ?= $(subst X,,${shell $(DEFINE) "$(CC)" "X" 2> ${EMPTYFILE}})
+export INCDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) "$(CC)" "X" 2> ${EMPTYFILE}})
+export INCSYSDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) -s "$(CC)" "X" 2> ${EMPTYFILE}})
 
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 ARCHDEFINES += ${DEFINE_PREFIX}__NuttX__
