@@ -152,6 +152,26 @@ void dns_lock(void);
 void dns_unlock(void);
 
 /****************************************************************************
+ * Name: dns_breaklock
+ *
+ * Description:
+ *   Break the DNS lock
+ *
+ ****************************************************************************/
+
+void dns_breaklock(FAR unsigned int *count);
+
+/****************************************************************************
+ * Name: dns_restorelock
+ *
+ * Description:
+ *   Restore the DNS lock
+ *
+ ****************************************************************************/
+
+void dns_restorelock(unsigned int count);
+
+/****************************************************************************
  * Name: dns_bind
  *
  * Description:
