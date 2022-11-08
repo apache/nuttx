@@ -27,6 +27,7 @@
 SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(getpid,                     0)
 SYSCALL_LOOKUP(gettid,                     0)
+SYSCALL_LOOKUP(prctl,                      2)
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
   SYSCALL_LOOKUP(getppid,                  0)
@@ -366,12 +367,6 @@ SYSCALL_LOOKUP(futimens,                   2)
   SYSCALL_LOOKUP(setsockopt,               5)
   SYSCALL_LOOKUP(socket,                   3)
   SYSCALL_LOOKUP(socketpair,               4)
-#endif
-
-/* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  SYSCALL_LOOKUP(prctl,                    2)
 #endif
 
 /* The following is defined only if entropy pool random number generator

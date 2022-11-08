@@ -80,7 +80,7 @@
 "poll","poll.h","","int","FAR struct pollfd *","nfds_t","int"
 "posix_spawn","spawn.h","!defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)","int","FAR pid_t *","FAR const char *","FAR const posix_spawn_file_actions_t *","FAR const posix_spawnattr_t *","FAR char * const []|FAR char * const *","FAR char * const []|FAR char * const *"
 "ppoll","poll.h","","int","FAR struct pollfd *","nfds_t","FAR const struct timespec *","FAR const sigset_t *"
-"prctl","sys/prctl.h", "CONFIG_TASK_NAME_SIZE > 0","int","int","...","uintptr_t","uintptr_t"
+"prctl","sys/prctl.h","","int","int","...","uintptr_t","uintptr_t"
 "pread","unistd.h","","ssize_t","int","FAR void *","size_t","off_t"
 "pselect","sys/select.h","","int","int","FAR fd_set *","FAR fd_set *","FAR fd_set *","FAR const struct timespec *","FAR const sigset_t *"
 "pthread_cancel","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t"
