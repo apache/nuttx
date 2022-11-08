@@ -115,7 +115,7 @@ static int cap_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&priv->lock);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       goto errout;
@@ -158,7 +158,7 @@ static int cap_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_lock:
-  nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&upper->lock);
 
 errout:
   return ret;
@@ -180,7 +180,7 @@ static int cap_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&priv->lock);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       goto errout;
@@ -209,7 +209,7 @@ static int cap_close(FAR struct file *filep)
       lower->ops->stop(lower);
     }
 
-  nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&upper->lock);
   ret = OK;
 
 errout:
@@ -274,7 +274,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&priv->lock);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -319,7 +319,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&upper->lock);
   return ret;
 }
 
