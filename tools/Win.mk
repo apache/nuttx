@@ -123,7 +123,7 @@ MKEXPORT_ARGS += -u
 endif
 
 ifneq ($(APPDIR),)
-ifneq ($(shell [ -e $(APPDIR)/Makefile ] && echo yes),)
+ifneq ($(shell if exist "$(APPDIR)/Makefile" echo yes),)
 MKEXPORT_ARGS += -a "$(APPDIR)"
 MKEXPORT_ARGS += -m "$(MAKE)"
 endif
