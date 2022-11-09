@@ -52,10 +52,6 @@
 #  define MM_PTR_FMT_WIDTH 19
 #endif
 
-#if CONFIG_MM_BACKTRACE >= 0
-#  define ROUND_UP(x, y)    ((((x) + (y) - 1) / (y)) * (y))
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -115,11 +111,6 @@ struct memdump_backtrace_s
 #if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
 #endif
-  size_t size;                              /* It should include padding plus
-                                             * memdump_backtrace_s self.
-                                             * Must be the last member of
-                                             * the struct.
-                                             */
 };
 #endif
 
@@ -243,13 +234,15 @@ static void mallinfo_handler(FAR void *ptr, size_t size, int used,
 static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
                                   FAR void *user)
 {
-  FAR struct memdump_backtrace_s *dump = ptr;
+  FAR struct memdump_backtrace_s *dump;
   FAR struct mallinfo_task *info = user;
 
+  size -= sizeof(struct memdump_backtrace_s);
+  dump = ptr + size;
   if (used && dump->pid == info->pid)
     {
       info->aordblks++;
-      info->uordblks += size - dump->size;
+      info->uordblks += size;
     }
 }
 #endif
@@ -342,10 +335,10 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 {
   FAR struct memdump_info_s *info = user;
 #if CONFIG_MM_BACKTRACE >= 0
-  FAR struct memdump_backtrace_s *dump = ptr;
+  FAR struct memdump_backtrace_s *dump;
 
-  size -= dump->size;
-  ptr += dump->size;
+  size -= sizeof(struct memdump_backtrace_s);
+  dump = ptr + size;
 #endif
 
   if (used)
@@ -628,10 +621,6 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       kasan_poison(mem, mm_malloc_size(mem));
 
-#if CONFIG_MM_BACKTRACE >= 0
-      mem -= *(FAR size_t *)(mem - sizeof(size_t));
-#endif
-
       /* Pass, return to the tlsf pool */
 
       tlsf_free(heap->mm_tlsf, mem);
@@ -899,9 +888,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 size_t mm_malloc_size(FAR void *mem)
 {
 #if CONFIG_MM_BACKTRACE >= 0
-  size_t dumpsize = *(FAR size_t *)(mem - sizeof(size_t));
-
-  return tlsf_block_size(mem - dumpsize) - dumpsize;
+  return tlsf_block_size(mem) - sizeof(struct memdump_backtrace_s);
 #else
   return tlsf_block_size(mem);
 #endif
@@ -926,24 +913,24 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   free_delaylist(heap);
 
-#if CONFIG_MM_BACKTRACE >= 0
-  size += sizeof(struct memdump_backtrace_s);
-#endif
-
   /* Allocate from the tlsf pool */
 
   DEBUGVERIFY(mm_lock(heap));
+#if CONFIG_MM_BACKTRACE >= 0
+  ret = tlsf_malloc(heap->mm_tlsf, size +
+                    sizeof(struct memdump_backtrace_s));
+#else
   ret = tlsf_malloc(heap->mm_tlsf, size);
+#endif
+
   mm_unlock(heap);
 
   if (ret)
     {
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *dump = ret;
+      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(ret);
 
-      dump->size = sizeof(struct memdump_backtrace_s);
       memdump_backtrace(heap, dump);
-      ret += dump->size;
 #endif
       kasan_unpoison(ret, mm_malloc_size(ret));
     }
@@ -968,11 +955,6 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
   FAR void *ret;
-#if CONFIG_MM_BACKTRACE >= 0
-  size_t dumpsize = ROUND_UP(sizeof(struct memdump_backtrace_s), alignment);
-
-  size += dumpsize;
-#endif
 
   /* Free the delay list first */
 
@@ -981,19 +963,19 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   /* Allocate from the tlsf pool */
 
   DEBUGVERIFY(mm_lock(heap));
+#if CONFIG_MM_BACKTRACE >= 0
+  ret = tlsf_memalign(heap->mm_tlsf, alignment, size +
+                      sizeof(struct memdump_backtrace_s));
+#else
   ret = tlsf_memalign(heap->mm_tlsf, alignment, size);
+#endif
   mm_unlock(heap);
 
   if (ret)
     {
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *dump = ret;
-      FAR size_t *p;
+      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(ret);
 
-      dump->size = dumpsize;
-      ret += dumpsize;
-      p = ret - sizeof(size_t);
-      *p = dump->size;
       memdump_backtrace(heap, dump);
 #endif
       kasan_unpoison(ret, mm_malloc_size(ret));
@@ -1058,34 +1040,23 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   free_delaylist(heap);
 
-#if CONFIG_MM_BACKTRACE >= 0
-  if (oldmem)
-    {
-      oldmem -= *(FAR size_t *)(oldmem - sizeof(size_t));
-    }
-
-  if (size)
-    {
-      size += sizeof(struct memdump_backtrace_s);
-    }
-
-#endif
-
   /* Allocate from the tlsf pool */
 
   DEBUGVERIFY(mm_lock(heap));
+#if CONFIG_MM_BACKTRACE >= 0
+  newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size +
+                        sizeof(struct memdump_backtrace_s));
+#else
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
+#endif
   mm_unlock(heap);
 
 #if CONFIG_MM_BACKTRACE >= 0
   if (newmem)
     {
-      FAR struct memdump_backtrace_s *dump;
+      FAR struct memdump_backtrace_s *dump = newmem + mm_malloc_size(newmem);
 
-      dump = newmem;
-      dump->size = sizeof(struct memdump_backtrace_s);
       memdump_backtrace(heap, dump);
-      newmem += dump->size;
     }
 #endif
 
