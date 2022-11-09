@@ -632,7 +632,7 @@ static int cxd56_geofence_register(const char *devpath)
   struct cxd56_geofence_dev_s *priv;
   int                          ret;
 
-  priv = (struct cxd56_geofence_dev_s *)kmm_malloc(
+  priv = (struct cxd56_geofence_dev_s *)kmm_zalloc(
     sizeof(struct cxd56_geofence_dev_s));
   if (!priv)
     {
@@ -640,7 +640,6 @@ static int cxd56_geofence_register(const char *devpath)
       return -ENOMEM;
     }
 
-  memset(priv, 0, sizeof(struct cxd56_geofence_dev_s));
   nxmutex_init(&priv->devlock);
 
   ret = cxd56_geofence_initialize(priv);
