@@ -59,7 +59,7 @@ int lib_flushall(FAR struct streamlist *list)
 
       /* Process each stream in the thread's stream list */
 
-      lib_stream_semtake(list);
+      nxmutex_lock(&list->sl_lock);
 
       for (i = 0; i < 3; i++)
         {
@@ -90,7 +90,7 @@ int lib_flushall(FAR struct streamlist *list)
             }
         }
 
-      lib_stream_semgive(list);
+      nxmutex_unlock(&list->sl_lock);
     }
 
   /* If any flush failed, return the errorcode of the last failed flush */
