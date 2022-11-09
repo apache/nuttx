@@ -1399,6 +1399,7 @@ int pic32mx_tsc_setup(int minor)
 
 errout_with_priv:
   nxmutex_destroy(&priv->devlock);
+  nxsem_destroy(&priv->waitsem);
 #ifdef CONFIG_TOUCHSCREEN_MULTIPLE
   kmm_free(priv);
 #endif
