@@ -96,7 +96,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
       return ret;
     }
 
-  dns_semtake();
+  dns_lock();
 
   keylen = strlen(NETDB_DNS_KEYWORD);
   while (fgets(line, DNS_MAX_LINE, stream) != NULL)
@@ -225,7 +225,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
         }
     }
 
-  dns_semgive();
+  dns_unlock();
   fclose(stream);
   return ret;
 }
@@ -238,7 +238,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   int ret = OK;
   int i;
 
-  dns_semtake();
+  dns_lock();
   for (i = 0; i < g_dns_nservers; i++)
     {
 #ifdef CONFIG_NET_IPv4
@@ -290,7 +290,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
         }
     }
 
-  dns_semgive();
+  dns_unlock();
   return ret;
 }
 
