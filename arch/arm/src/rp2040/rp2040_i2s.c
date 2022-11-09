@@ -1333,6 +1333,7 @@ struct i2s_dev_s *rp2040_i2sbus_initialize(int port)
 
 errout_with_alloc:
   nxmutex_destroy(&priv->lock);
+  nxsem_destroy(&priv->bufsem);
   kmm_free(priv);
   return NULL;
 }

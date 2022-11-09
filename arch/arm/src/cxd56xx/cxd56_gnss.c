@@ -3175,6 +3175,9 @@ err1:
   unregister_driver(devpath);
 
 err0:
+  nxmutex_destroy(&priv->ioctllock);
+  nxsem_destroy(&priv->apiwait);
+  nxmutex_destroy(&priv->devlock);
   kmm_free(priv);
   return ret;
 }
