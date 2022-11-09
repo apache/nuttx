@@ -493,12 +493,10 @@ struct adc_dev_s *lc823450_adcinitialize(void)
     {
       ainfo("Initializing ADC driver\n");
 
-      if ((inst = kmm_malloc(sizeof(struct lc823450_adc_inst_s))) == NULL)
+      if ((inst = kmm_zalloc(sizeof(struct lc823450_adc_inst_s))) == NULL)
         {
           return NULL;
         }
-
-      memset(inst, 0, sizeof(struct lc823450_adc_inst_s));
 
       /* Initialize driver instance */
 

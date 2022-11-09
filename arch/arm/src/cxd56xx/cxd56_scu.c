@@ -1785,17 +1785,14 @@ static struct seq_s *seq_new(void)
 
   leave_critical_section(flags);
 
-  seq = (struct seq_s *)kmm_malloc(sizeof(struct seq_s));
+  seq = (struct seq_s *)kmm_zalloc(sizeof(struct seq_s));
   if (!seq)
     {
       seq_free(sid);
       return NULL;
     }
 
-  memset(seq, 0, sizeof(struct seq_s));
-
   seq->id = sid;
-
   return seq;
 }
 
@@ -1828,17 +1825,14 @@ static struct seq_s *deci_new(void)
 
   leave_critical_section(flags);
 
-  deci = (struct decimator_s *)kmm_malloc(sizeof(struct decimator_s));
+  deci = (struct decimator_s *)kmm_zalloc(sizeof(struct decimator_s));
   if (!deci)
     {
       deci_free(sid);
       return NULL;
     }
 
-  memset(deci, 0, sizeof(struct decimator_s));
-
   deci->seq.id = sid;
-
   return &deci->seq;
 }
 
@@ -1886,13 +1880,11 @@ static int seq_fifoinit(struct seq_s *seq, int fifoid, uint16_t fsize)
         }
     }
 
-  fifo = (struct scufifo_s *)kmm_malloc(sizeof(struct scufifo_s));
+  fifo = (struct scufifo_s *)kmm_zalloc(sizeof(struct scufifo_s));
   if (!fifo)
     {
       return -ENOMEM;
     }
-
-  memset(fifo, 0, sizeof(struct scufifo_s));
 
   /* Setup FIFO, normal FIFO wid and rid are based on 8 and 4 respectively. */
 
