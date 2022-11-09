@@ -2259,7 +2259,7 @@ static int imxrt_readmmd(struct imxrt_driver_s *priv, uint8_t phyaddr,
 
   imxrt_enet_putreg32(priv,
                       0 << ENET_MMFR_ST_SHIFT |
-                      ENET_MMFR_OP_RdNOTMII |
+                      ENET_MMFR_OP_RDNOTMII |
                       (uint32_t)mmd << ENET_MMFR_RA_SHIFT |
                       (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
                       2 << ENET_MMFR_TA_SHIFT,
