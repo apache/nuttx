@@ -57,9 +57,9 @@ int dns_default_nameserver(void)
 #else /* CONFIG_NETDB_RESOLVCONF */
 int dns_default_nameserver(void)
 {
-  dns_semtake();
+  dns_lock();
   g_dns_nservers = 0;
-  dns_semgive();
+  dns_unlock();
   return OK;
 }
 #endif /* CONFIG_NETDB_RESOLVCONF */

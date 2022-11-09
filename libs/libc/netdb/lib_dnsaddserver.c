@@ -134,7 +134,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       return ret;
     }
 
-  dns_semtake();
+  dns_lock();
 
 #ifdef CONFIG_NET_IPv4
   /* Check for an IPv4 address */
@@ -243,7 +243,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   ret = OK;
 
 errout:
-  dns_semgive();
+  dns_unlock();
   fclose(stream);
 
   if (ret == OK)
@@ -269,7 +269,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   /* Get the index of the next free nameserver slot. */
 
-  dns_semtake();
+  dns_lock();
   if (g_dns_nservers == CONFIG_NETDB_DNSSERVER_NAMESERVERS)
     {
       idx = 0;
@@ -308,7 +308,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 #endif
     {
       nerr("ERROR: Unsupported family: %d\n", addr->sa_family);
-      dns_semgive();
+      dns_unlock();
       return -ENOSYS;
     }
 
@@ -318,7 +318,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
     {
       nerr("ERROR: Invalid addrlen %ld for family %d\n",
             (long)addrlen, addr->sa_family);
-      dns_semgive();
+      dns_unlock();
       return -EINVAL;
     }
 
@@ -334,7 +334,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   ret = dns_foreach_nameserver(dns_check_nameserver, &dns_addr.addr);
   if (ret < 0)
     {
-      dns_semgive();
+      dns_unlock();
       return ret;
     }
 
@@ -343,7 +343,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   /* We now have a valid DNS address */
 
   g_dns_nservers = nservers;
-  dns_semgive();
+  dns_unlock();
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
   dns_clear_answer();
 #endif
