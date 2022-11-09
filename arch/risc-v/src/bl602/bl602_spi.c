@@ -1671,7 +1671,7 @@ struct spi_dev_s *bl602_spibus_initialize(int port)
   nxmutex_lock(&priv->lock);
   if (priv->refs != 0)
     {
-      priv->refs--;
+      priv->refs++;
       nxmutex_unlock(&priv->lock);
 
       return spi_dev;
@@ -1711,6 +1711,8 @@ int bl602_spibus_uninitialize(struct spi_dev_s *dev)
     }
 
   bl602_spi_deinit(dev);
+  nxmutex_unlock(&priv->lock);
+
   return OK;
 }
 
