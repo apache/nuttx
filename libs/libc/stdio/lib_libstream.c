@@ -149,13 +149,3 @@ void lib_stream_release(FAR struct task_group_s *group)
 }
 
 #endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
-
-void lib_stream_semtake(FAR struct streamlist *list)
-{
-  nxmutex_lock(&list->sl_lock);
-}
-
-void lib_stream_semgive(FAR struct streamlist *list)
-{
-  nxmutex_unlock(&list->sl_lock);
-}
