@@ -165,8 +165,8 @@ NEED_MATH_H = y
 endif
 
 ifeq ($(NEED_MATH_H),y)
-include\math.h: include\nuttx\math.h
-	$(Q) cp -f include\nuttx\math.h include\math.h
+include\math.h: include\nuttx\lib\math.h
+	$(Q) cp -f include\nuttx\lib\math.h include\math.h
 else
 include\math.h:
 endif
@@ -178,8 +178,8 @@ endif
 # the settings in this float.h are actually correct for your platform!
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
-include\float.h: include\nuttx\float.h
-	$(Q) cp -f include\nuttx\float.h include\float.h
+include\float.h: include\nuttx\lib\float.h
+	$(Q) cp -f include\nuttx\lib\float.h include\float.h
 else
 include\float.h:
 endif
@@ -190,8 +190,8 @@ endif
 # have to copy stdarg.h from include\nuttx\. to include\.
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
-include\stdarg.h: include\nuttx\stdarg.h
-	$(Q) cp -f include\nuttx\stdarg.h include\stdarg.h
+include\stdarg.h: include\nuttx\lib\stdarg.h
+	$(Q) cp -f include\nuttx\lib\stdarg.h include\stdarg.h
 else
 include\stdarg.h:
 endif
@@ -202,8 +202,8 @@ endif
 # have to copy setjmp.h from include\nuttx\. to include\.
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-include\setjmp.h: include\nuttx\setjmp.h
-	$(Q) cp -f include\nuttx\setjmp.h include\setjmp.h
+include\setjmp.h: include\nuttx\lib\setjmp.h
+	$(Q) cp -f include\nuttx\lib\setjmp.h include\setjmp.h
 else
 include\setjmp.h:
 endif
@@ -459,6 +459,8 @@ clean_context:
 # libraries, one per configured source file directory.  The final NuttX
 # execution will then be built from those libraries.  The following targets
 # build those libraries.
+
+include tools/LibTargets.mk
 
 # pass1 and pass2
 #
