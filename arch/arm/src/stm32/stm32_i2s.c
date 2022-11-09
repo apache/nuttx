@@ -2600,6 +2600,7 @@ struct i2s_dev_s *stm32_i2sbus_initialize(int port)
 errout_with_alloc:
   leave_critical_section(flags);
   nxmutex_destroy(&priv->lock);
+  nxsem_destroy(&priv->bufsem);
   kmm_free(priv);
   return NULL;
 }

@@ -514,7 +514,9 @@ struct adc_dev_s *lc823450_adcinitialize(void)
       if (ret < 0)
         {
           aerr("adc_register failed: %d\n", ret);
-          kmm_free(g_inst);
+          nxmutex_destroy(&inst->lock);
+          nxsem_destroy(&inst->sem_isr);
+          kmm_free(inst);
           return NULL;
         }
 
@@ -541,12 +543,13 @@ struct adc_dev_s *lc823450_adcinitialize(void)
       /* Register the ADC driver at "/dev/adc0" */
 
       ret = adc_register("/dev/adc0", &inst->dev);
-
       if (ret < 0)
         {
           aerr("adc_register failed: %d\n", ret);
           nxmutex_unlock(&inst->lock);
-          kmm_free(g_inst);
+          nxmutex_destroy(&inst->lock);
+          nxsem_destroy(&inst->sem_isr);
+          kmm_free(inst);
           return NULL;
         }
 
