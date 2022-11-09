@@ -3111,15 +3111,13 @@ static int cxd56_gnss_register(const char *devpath)
     }
   };
 
-  priv = (struct cxd56_gnss_dev_s *)kmm_malloc(
+  priv = (struct cxd56_gnss_dev_s *)kmm_zalloc(
     sizeof(struct cxd56_gnss_dev_s));
   if (!priv)
     {
       gnsserr("Failed to allocate instance\n");
       return -ENOMEM;
     }
-
-  memset(priv, 0, sizeof(struct cxd56_gnss_dev_s));
 
   ret = nxmutex_init(&priv->devlock);
   if (ret < 0)
