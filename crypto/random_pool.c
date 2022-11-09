@@ -550,3 +550,27 @@ void arc4random_buf(FAR void *bytes, size_t nbytes)
   rng_buf_internal(bytes, nbytes);
   nxmutex_unlock(&g_rng.rd_lock);
 }
+
+/****************************************************************************
+ * Name: arc4random
+ *
+ * Description:
+ *   Returns a single 32-bit value. This is the preferred interface for
+ *   getting random numbers. The traditional /dev/random approach is
+ *   susceptible for things like the attacker exhausting file
+ *   descriptors on purpose.
+ *
+ *   Note that this function cannot fail, other than by asserting.
+ *
+ * Returned Value:
+ *   a random 32-bit value.
+ *
+ ****************************************************************************/
+
+uint32_t arc4random(void)
+{
+  uint32_t ret;
+
+  arc4random_buf(&ret, sizeof(ret));
+  return ret;
+}
