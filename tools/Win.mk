@@ -446,14 +446,14 @@ clean_context:
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
 	$(call DELFILE, arch\dummy\Kconfig)
-	$(call DELFILE, $(CONTEXTDIRS_DEPS))
-	$(call DIRUNLINK, include\arch\board)
-	$(call DIRUNLINK, include\arch\chip)
-	$(call DIRUNLINK, include\arch)
-	$(call DIRUNLINK, $(ARCH_SRC)\board\board)
-	$(call DIRUNLINK, $(ARCH_SRC)\board)
-	$(call DIRUNLINK, $(ARCH_SRC)\chip)
-	$(call DIRUNLINK, $(TOPDIR)\drivers\platform)
+	$(call DELFILE, $(subst /,\,$(CONTEXTDIRS_DEPS)))
+	$(Q) $(DIRUNLINK) include\arch\board
+	$(Q) $(DIRUNLINK) include\arch\chip
+	$(Q) $(DIRUNLINK) include\arch
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)\board\board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)\board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)\chip
+	$(Q) $(DIRUNLINK) $(TOPDIR)\drivers\platform
 
 # Archive targets.  The target build sequence will first create a series of
 # libraries, one per configured source file directory.  The final NuttX
