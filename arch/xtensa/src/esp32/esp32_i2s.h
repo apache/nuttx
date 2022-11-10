@@ -41,13 +41,8 @@ extern "C"
 
 #ifdef CONFIG_ESP32_I2S
 
-#ifdef CONFIG_ESP32_I2S0
-  #define ESP32_I2S0 0
-#endif /* CONFIG_ESP32_I2S0 */
-
-#ifdef CONFIG_ESP32_I2S1
-  #define ESP32_I2S1 1
-#endif /* CONFIG_ESP32_I2S1 */
+#define ESP32_I2S0 0
+#define ESP32_I2S1 1
 
 /****************************************************************************
  * Public Function Prototypes

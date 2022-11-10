@@ -369,9 +369,9 @@ config ESP32_I2S0_WSPIN
 	range 0 39 if ESP32_I2S0_ROLE_SLAVE
 
 config ESP32_I2S0_DINPIN
-	int "I2S0 DOUT pin"
+	int "I2S0 DIN pin"
 	depends on ESP32_I2S0_RX
-	default 12
+	default 19
 	range 0 39
 
 config ESP32_I2S0_DOUTPIN
@@ -471,7 +471,6 @@ endchoice
 
 config ESP32_I2S1_DATA_BIT_WIDTH
 	int
-	default 16
 	default 8 if ESP32_I2S1_DATA_BIT_WIDTH_8BIT
 	default 16 if ESP32_I2S1_DATA_BIT_WIDTH_16BIT
 	default 24 if ESP32_I2S1_DATA_BIT_WIDTH_24BIT
@@ -488,26 +487,26 @@ config ESP32_I2S1_SAMPLE_RATE
 
 config ESP32_I2S1_BCLKPIN
 	int "I2S1 BCLK pin"
-	default 19
+	default 22
 	range 0 33 if ESP32_I2S1_ROLE_MASTER
 	range 0 39 if ESP32_I2S1_ROLE_SLAVE
 
 config ESP32_I2S1_WSPIN
 	int "I2S1 WS pin"
-	default 18
+	default 23
 	range 0 33 if ESP32_I2S1_ROLE_MASTER
 	range 0 39 if ESP32_I2S1_ROLE_SLAVE
 
-config ESP32_I2S1_DOUTPIN
-	int "I2S1 DOUT pin"
+config ESP32_I2S1_DINPIN
+	int "I2S1 DIN pin"
 	depends on ESP32_I2S1_RX
-	default 17
+	default 26
 	range 0 39
 
 config ESP32_I2S1_DOUTPIN
 	int "I2S1 DOUT pin"
 	depends on ESP32_I2S1_TX
-	default 16
+	default 25
 	range 0 33
 
 config ESP32_I2S1_MCLK

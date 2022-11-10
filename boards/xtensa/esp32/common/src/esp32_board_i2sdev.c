@@ -37,8 +37,8 @@
 
 #include "esp32_i2s.h"
 
-#if defined(CONFIG_ESP32_I2S0) && !defined(CONFIG_AUDIO_CS4344) && \
-!defined(CONFIG_AUDIO_ES8388) || defined(CONFIG_ESP32_I2S1)
+#if defined(CONFIG_ESP32_I2S0) && !defined(CONFIG_AUDIO_CS4344) || \
+    defined(CONFIG_ESP32_I2S1)
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +54,9 @@
  *   number.
  *
  * Input Parameters:
- *   port  - The I2S port used for the device
+ *   port       - The I2S port used for the device
+ *   enable_tx  - Register device as TX if true
+ *   enable_rx  - Register device as RX if true
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -62,12 +64,11 @@
  *
  ****************************************************************************/
 
-int board_i2sdev_initialize(int port)
+int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx)
 {
   struct audio_lowerhalf_s *audio_i2s;
-  struct audio_lowerhalf_s *pcm;
   struct i2s_dev_s *i2s;
-  char devname[12];
+  char devname[8];
   int ret;
 
   ainfo("Initializing I2S\n");
@@ -75,7 +76,7 @@ int board_i2sdev_initialize(int port)
   i2s = esp32_i2sbus_initialize(port);
 
 #ifdef CONFIG_AUDIO_I2SCHAR
-  ret = i2schar_register(i2s, 0);
+  ret = i2schar_register(i2s, port);
   if (ret < 0)
     {
       aerr("ERROR: i2schar_register failed: %d\n", ret);
@@ -83,29 +84,71 @@ int board_i2sdev_initialize(int port)
     }
 #endif
 
-  audio_i2s = audio_i2s_initialize(i2s, true);
-
-  if (!audio_i2s)
+  if (enable_tx)
     {
-      auderr("ERROR: Failed to initialize I2S\n");
-      return -ENODEV;
+      /* Initialize audio output */
+
+      audio_i2s = audio_i2s_initialize(i2s, true);
+
+      if (audio_i2s == NULL)
+        {
+          auderr("ERROR: Failed to initialize I2S audio output\n");
+          return -ENODEV;
+        }
+
+      snprintf(devname, sizeof(devname), "pcm%d", port);
+
+      /* If nxlooper is selected, the playback buffer is not rendered as
+       * a WAV file. Therefore, PCM decode will fail while processing such
+       * output buffer. In such a case, we bypass the PCM decode.
+       */
+
+#ifdef CONFIG_SYSTEM_NXLOOPER
+      ret = audio_register(devname, audio_i2s);
+#else
+      struct audio_lowerhalf_s *pcm;
+
+      pcm = pcm_decode_initialize(audio_i2s);
+
+      if (pcm == NULL)
+        {
+          auderr("ERROR: Failed create the PCM decoder\n");
+          return -ENODEV;
+        }
+
+      ret = audio_register(devname, pcm);
+#endif /* CONFIG_SYSTEM_NXLOOPER */
+
+      if (ret < 0)
+        {
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
+          return ret;
+        }
     }
 
-  pcm = pcm_decode_initialize(audio_i2s);
-
-  if (!pcm)
+  if (enable_rx)
     {
-      auderr("ERROR: Failed create the PCM decoder\n");
-      return  -ENODEV;
-    }
+      /* Initialize audio input */
 
-  snprintf(devname, 12, "pcm%d", port);
+      audio_i2s = audio_i2s_initialize(i2s, false);
 
-  ret = audio_register(devname, pcm);
+      if (audio_i2s == NULL)
+        {
+          auderr("ERROR: Failed to initialize I2S audio input\n");
+          return -ENODEV;
+        }
 
-  if (ret < 0)
-    {
-      auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+      snprintf(devname, sizeof(devname), "pcm_in%d", port);
+
+      ret = audio_register(devname, audio_i2s);
+
+      if (ret < 0)
+        {
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
+          return ret;
+        }
     }
 
   return ret;
