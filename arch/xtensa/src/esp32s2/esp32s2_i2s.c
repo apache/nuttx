@@ -347,7 +347,7 @@ static const struct esp32s2_i2s_config_s esp32s2_i2s0_config =
   .data_width       = CONFIG_ESP32S2_I2S_DATA_BIT_WIDTH,
   .rate             = CONFIG_ESP32S2_I2S_SAMPLE_RATE,
   .total_slot       = 2,
-  .mclk_multiple    = I2S_MCLK_MULTIPLE_256,
+  .mclk_multiple    = I2S_MCLK_MULTIPLE_384,
   .tx_en            = I2S_TX_ENABLED,
   .rx_en            = I2S_RX_ENABLED,
 #ifdef CONFIG_ESP32S2_I2S_MCLK
@@ -939,13 +939,13 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
           esp32s2_gpiowrite(priv->config->ws_pin, 1);
           esp32s2_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->ws_pin,
-                                  priv->config->ws_out_insig, 0, 0);
+          esp32s2_gpio_matrix_in(priv->config->ws_pin,
+                                 priv->config->ws_out_insig, 0);
 
           esp32s2_gpiowrite(priv->config->bclk_pin, 1);
           esp32s2_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->bclk_pin,
-                                  priv->config->bclk_out_insig, 0, 0);
+          esp32s2_gpio_matrix_in(priv->config->bclk_pin,
+                                 priv->config->bclk_out_insig, 0);
         }
       else
         {
@@ -955,13 +955,13 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
           esp32s2_gpiowrite(priv->config->ws_pin, 1);
           esp32s2_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->ws_pin,
-                                  priv->config->ws_in_insig, 0, 0);
+          esp32s2_gpio_matrix_in(priv->config->ws_pin,
+                                 priv->config->ws_in_insig, 0);
 
           esp32s2_gpiowrite(priv->config->bclk_pin, 1);
           esp32s2_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->bclk_pin,
-                                  priv->config->bclk_in_insig, 0, 0);
+          esp32s2_gpio_matrix_in(priv->config->bclk_pin,
+                                 priv->config->bclk_in_insig, 0);
         }
     }
   else
