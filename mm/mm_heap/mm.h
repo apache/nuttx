@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/sched.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/lib/math32.h>
 
@@ -82,8 +83,10 @@
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          kasan_unpoison(tmp, SIZEOF_MM_ALLOCNODE); \
+         FAR strcut tcb_s *tcb; \
          tmp->pid = gettid(); \
-         if ((heap)->mm_procfs.backtrace) \
+         tcb = nxsched_get_tcb(tmp->pid); \
+         if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \
              memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
              backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
