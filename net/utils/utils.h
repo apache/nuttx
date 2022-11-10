@@ -389,6 +389,31 @@ uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len);
 uint16_t icmpv6_chksum(FAR struct net_driver_s *dev, unsigned int iplen);
 #endif
 
+/****************************************************************************
+ * Name: net_bound_device
+ *
+ * Description:
+ *   If the socket is bound to a device, return the reference to the
+ *   bound device.
+ *
+ * Input Parameters:
+ *   sconn - Socket connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A reference to the bound device.  If the retained interface index no
+ *   longer refers to a valid device, this function will unbind the device
+ *   and return an arbitrary network device at the head of the list of
+ *   registered devices.  This supports legacy IPv4 DHCPD behavior when
+ *   there is only a single registered network device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_BINDTODEVICE
+FAR struct net_driver_s *net_bound_device(FAR struct socket_conn_s *sconn);
+#else
+#  define net_bound_device(c) netdev_default();
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

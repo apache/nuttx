@@ -33,63 +33,7 @@
 #include "netdev/netdev.h"
 #include "inet/inet.h"
 #include "udp/udp.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: upd_bound_device
- *
- * Description:
- *   If the UDP socket is bound to a device, return the reference to the
- *   bound device.
- *
- * Input Parameters:
- *   conn - UDP connection structure (not currently used).
- *
- * Returned Value:
- *   A reference to the bound device.  If the retained interface index no
- *   longer refers to a valid device, this function will unbind the device
- *   and return an arbitrary network device at the head of the list of
- *   registered devices.  This supports legacy IPv4 DHCPD behavior when
- *   there is only a single registered network device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_BINDTODEVICE
-static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
-{
-  FAR struct net_driver_s *dev = NULL;
-
-  /* Is the UDP socket bound to a device? */
-
-  if (conn->sconn.s_boundto != 0)
-    {
-      /* Yes..This socket has been bound to an interface.  Convert the
-       * interface index into a device structure reference.
-       */
-
-      dev = netdev_findbyindex(conn->sconn.s_boundto);
-      if (dev == NULL)
-        {
-          /* No device?  It must have been unregistered.  Un-bind the UDP
-           * socket.
-           */
-
-          conn->sconn.s_boundto = 0;
-        }
-    }
-
-  /* If no device was bound or the bound device is no longer valid,
-   * then let's try the default network device.
-   */
-
-  return dev == NULL ? netdev_default() : dev;
-}
-#else
-#  define upd_bound_device(c) netdev_default();
-#endif
+#include "utils/utils.h"
 
 /****************************************************************************
  * Public Functions
@@ -226,7 +170,7 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
                 {
                   /* Return the device bound to this UDP socket, if any */
 
-                  return upd_bound_device(conn);
+                  return net_bound_device(&conn->sconn);
                 }
               else
                 {
@@ -252,7 +196,7 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
                * Return the device bound to this UDP socket, if any.
                */
 
-              return upd_bound_device(conn);
+              return net_bound_device(&conn->sconn);
             }
         }
 #endif
@@ -292,7 +236,7 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
                 {
                   /* Return the device bound to this UDP socket, if any */
 
-                  return upd_bound_device(conn);
+                  return net_bound_device(&conn->sconn);
                 }
               else
                 {
@@ -318,7 +262,7 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
                * Return the device bound to this UDP socket, if any.
                */
 
-              return upd_bound_device(conn);
+              return net_bound_device(&conn->sconn);
             }
         }
 #endif
