@@ -410,6 +410,8 @@ uint16_t icmpv6_chksum(FAR struct net_driver_s *dev, unsigned int iplen);
 
 #ifdef CONFIG_NET_BINDTODEVICE
 FAR struct net_driver_s *net_bound_device(FAR struct socket_conn_s *sconn);
+#else
+#  define net_bound_device(c) netdev_default();
 #endif
 
 #undef EXTERN

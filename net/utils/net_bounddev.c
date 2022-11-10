@@ -81,6 +81,4 @@ FAR struct net_driver_s *net_bound_device(FAR struct socket_conn_s *sconn)
 
   return dev == NULL ? netdev_default() : dev;
 }
-#else
-#  define net_bound_device(c) netdev_default();
 #endif
