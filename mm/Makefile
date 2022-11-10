@@ -37,8 +37,8 @@ BINDIR ?= bin
 
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)mm
 
-AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)%$(OBJEXT), $(ASRCS))
-COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)%$(OBJEXT), $(CSRCS))
+AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT), $(ASRCS))
+COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT), $(CSRCS))
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
@@ -49,10 +49,12 @@ BIN ?= libmm$(LIBEXT)
 all: $(BIN)
 .PHONY: clean distclean
 
-$(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
+$(AOBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
+# REVISIT: Backslash causes problems in $(COBJS) target
+
+$(COBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 # Memory manager for the flat build and
@@ -101,9 +103,9 @@ clean:
 distclean: clean
 	$(Q) $(MAKE) -C bin  distclean
 	$(Q) $(MAKE) -C kbin distclean
-	$(call DELFILE, bin/Make.dep)
-	$(call DELFILE, kbin/Make.dep)
+	$(call DELFILE, bin$(DELIM)Make.dep)
+	$(call DELFILE, kbin$(DELIM)Make.dep)
 	$(call DELFILE, .depend)
 
--include bin/Make.dep
--include kbin/Make.dep
+-include bin$(DELIM)Make.dep
+-include kbin$(DELIM)Make.dep
