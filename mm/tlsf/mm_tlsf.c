@@ -38,6 +38,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/sched.h>
 #include <nuttx/mm/mempool.h>
 
 #include "tlsf/tlsf.h"
@@ -144,9 +145,15 @@ struct memdump_backtrace_s
 static void memdump_backtrace(FAR struct mm_heap_s *heap,
                               FAR struct memdump_backtrace_s *dump)
 {
+#  if CONFIG_MM_BACKTRACE > 0
+  FAR struct tcb_s *tcb;
+#  endif
+
   dump->pid = getpid();
 #  if CONFIG_MM_BACKTRACE > 0
-  if (heap->mm_procfs.backtrace)
+  tcb = nxsched_get_tcb(dump->pid);
+  if (heap->mm_procfs.backtrace ||
+      (tcb && tcb->flags & TCB_FLAG_HEAPDUMP))
     {
       int ret = backtrace(dump->backtrace, CONFIG_MM_BACKTRACE);
       while (ret < CONFIG_MM_BACKTRACE)
