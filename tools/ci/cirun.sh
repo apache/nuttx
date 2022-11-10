@@ -29,7 +29,21 @@ image=`find ${nuttx} -type f -name 'nuttx'`
 path=${image%/*}
 cd ${nuttx}/tools/ci/testrun/script
 python3 -m pytest -m "${mark}" ./ -B ${BOARD} -P ${path} -L ${logs}/${BOARD}/${core} -R ${target} -C --json=${logs}/${BOARD}/${core}/pytest.json
-ret="$?"
+ret_tmp="$?"
+
+if [ "${BOARD}" == "sim" ]; then
+    cd ${nuttx}/tools/ci/testrun/utils/ltp_test/
+    buildinPath=${image%/*/*}
+    python3 generate_ltp_test.py -b ${BOARD} -c ${core} -l ${logs}/${BOARD}/${core} -p ${buildinPath}
+    cd ${nuttx}/tools/ci/testrun/script/
+    pytest test_open_posix/test_openposix_${core}.py -L ${logs}/${BOARD}/${core} -P ${path} -R ${target}
+    ret_tmp1="$?"
+fi
+
+#judge the result
+if [ "$ret_tmp" != "0" ] || [ "$ret_tmp1" != "0" ]; then
+    ret=1
+fi
 
 #clean
 find ${nuttx}/tools/ci/testrun -name '__pycache__' |xargs rm -rf
