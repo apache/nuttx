@@ -316,7 +316,17 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Get the device that will be used to route this ICMP ECHO request */
 
-  dev = netdev_findby_ripv4addr(INADDR_ANY, inaddr->sin_addr.s_addr);
+#ifdef CONFIG_NET_BINDTODEVICE
+  if (conn->sconn.s_boundto != 0)
+    {
+      dev = net_bound_device(&conn->sconn);
+    }
+  else
+#endif
+    {
+      dev = netdev_findby_ripv4addr(INADDR_ANY, inaddr->sin_addr.s_addr);
+    }
+
   if (dev == NULL)
     {
       nerr("ERROR: Not reachable\n");
