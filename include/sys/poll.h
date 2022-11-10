@@ -78,11 +78,6 @@
 #define POLLRDHUP    (0x10)  /* NuttX does not support shutdown(fd, SHUT_RD) */
 #define POLLNVAL     (0x20)
 
-#define POLLFD       (0x00)
-#define POLLFILE     (0x40)
-#define POLLSOCK     (0x80)
-#define POLLMASK     (0xC0)
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
