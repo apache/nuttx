@@ -41,7 +41,6 @@ static void init_buf_chain(video_framebuff_t *fbuf)
 
   fbuf->vbuf_empty = fbuf->vbuf_alloced;
   fbuf->vbuf_next  = NULL;
-  fbuf->vbuf_curr  = NULL;
   fbuf->vbuf_top   = NULL;
   fbuf->vbuf_tail  = NULL;
 
@@ -218,7 +217,7 @@ video_framebuff_get_vacant_container(video_framebuff_t *fbuf)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  ret = fbuf->vbuf_curr = fbuf->vbuf_next;
+  ret = fbuf->vbuf_next;
   leave_critical_section(flags);
 
   return ret;
@@ -226,7 +225,6 @@ video_framebuff_get_vacant_container(video_framebuff_t *fbuf)
 
 void video_framebuff_capture_done(video_framebuff_t *fbuf)
 {
-  fbuf->vbuf_curr = NULL;
   if (fbuf->vbuf_next != NULL)
     {
       fbuf->vbuf_next = fbuf->vbuf_next->next;
