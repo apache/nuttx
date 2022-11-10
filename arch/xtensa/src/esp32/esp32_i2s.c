@@ -1031,13 +1031,13 @@ static void i2s_configure(struct esp32_i2s_s *priv)
 
           esp32_gpiowrite(priv->config->ws_pin, 1);
           esp32_configgpio(priv->config->ws_pin, INPUT_FUNCTION_3);
-          esp32_gpio_matrix_out(priv->config->ws_pin,
-                                priv->config->ws_out_insig, 0, 0);
+          esp32_gpio_matrix_in(priv->config->ws_pin,
+                               priv->config->ws_out_insig, 0);
 
           esp32_gpiowrite(priv->config->bclk_pin, 1);
           esp32_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_3);
-          esp32_gpio_matrix_out(priv->config->bclk_pin,
-                                priv->config->bclk_out_insig, 0, 0);
+          esp32_gpio_matrix_in(priv->config->bclk_pin,
+                               priv->config->bclk_out_insig, 0);
         }
       else
         {
@@ -1047,13 +1047,13 @@ static void i2s_configure(struct esp32_i2s_s *priv)
 
           esp32_gpiowrite(priv->config->ws_pin, 1);
           esp32_configgpio(priv->config->ws_pin, INPUT_FUNCTION_3);
-          esp32_gpio_matrix_out(priv->config->ws_pin,
-                                priv->config->ws_in_insig, 0, 0);
+          esp32_gpio_matrix_in(priv->config->ws_pin,
+                               priv->config->ws_in_insig, 0);
 
           esp32_gpiowrite(priv->config->bclk_pin, 1);
           esp32_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_3);
-          esp32_gpio_matrix_out(priv->config->bclk_pin,
-                                priv->config->bclk_in_insig, 0, 0);
+          esp32_gpio_matrix_in(priv->config->bclk_pin,
+                               priv->config->bclk_in_insig, 0);
         }
     }
   else
