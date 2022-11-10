@@ -424,7 +424,7 @@ context: include\setjmp.h
 endif
 
 staging:
-	$(Q) mkdir -p $@
+	$(Q) mkdir $@
 
 # Pattern rule for $(CONTEXTDIRS_DEPS)
 
