@@ -114,11 +114,6 @@ void video_framebuff_uninit(video_framebuff_t *fbuf)
 
 int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
 {
-  if (sz > V4L2_REQBUFS_COUNT_MAX)
-    {
-      return -EINVAL;
-    }
-
   if (fbuf->vbuf_alloced == NULL || fbuf->container_size != sz)
     {
       if (fbuf->container_size != sz)
