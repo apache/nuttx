@@ -342,37 +342,29 @@ static void           i2s_rx_schedule(struct esp32_i2s_s *priv,
 
 static uint32_t i2s_set_datawidth(struct esp32_i2s_s *priv);
 static uint32_t i2s_set_clock(struct esp32_i2s_s *priv);
-static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
-                                        uint32_t frequency);
-static int      esp32_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
-                                unsigned long arg);
+static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev, uint32_t frequency);
+static int      i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg);
 
 #ifdef I2S_HAVE_TX
 static void     i2s_tx_channel_start(struct esp32_i2s_s *priv);
 static void     i2s_tx_channel_stop(struct esp32_i2s_s *priv);
-static int      esp32_i2s_txchannels(struct i2s_dev_s *dev,
-                                     uint8_t channels);
-static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev,
-                                       uint32_t rate);
-static uint32_t esp32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
-static int      esp32_i2s_send(struct i2s_dev_s *dev,
-                               struct ap_buffer_s *apb,
-                               i2s_callback_t callback, void *arg,
-                               uint32_t timeout);
+static int      i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels);
+static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
+static int      i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                         i2s_callback_t callback, void *arg,
+                         uint32_t timeout);
 #endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
 static void     i2s_rx_channel_start(struct esp32_i2s_s *priv);
 static void     i2s_rx_channel_stop(struct esp32_i2s_s *priv);
-static int      esp32_i2s_rxchannels(struct i2s_dev_s *dev,
-                                     uint8_t channels);
-static uint32_t esp32_i2s_rxsamplerate(struct i2s_dev_s *dev,
-                                       uint32_t rate);
-static uint32_t esp32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
-static int      esp32_i2s_receive(struct i2s_dev_s *dev,
-                                  struct ap_buffer_s *apb,
-                                  i2s_callback_t callback, void *arg,
-                                  uint32_t timeout);
+static int      i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels);
+static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static int      i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                            i2s_callback_t callback, void *arg,
+                            uint32_t timeout);
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
@@ -382,21 +374,21 @@ static int      esp32_i2s_receive(struct i2s_dev_s *dev,
 static const struct i2s_ops_s g_i2sops =
 {
 #ifdef I2S_HAVE_TX
-  .i2s_txchannels     = esp32_i2s_txchannels,
-  .i2s_txsamplerate   = esp32_i2s_txsamplerate,
-  .i2s_txdatawidth    = esp32_i2s_txdatawidth,
-  .i2s_send           = esp32_i2s_send,
+  .i2s_txchannels     = i2s_txchannels,
+  .i2s_txsamplerate   = i2s_txsamplerate,
+  .i2s_txdatawidth    = i2s_txdatawidth,
+  .i2s_send           = i2s_send,
 #endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
-  .i2s_rxchannels     = esp32_i2s_rxchannels,
-  .i2s_rxsamplerate   = esp32_i2s_rxsamplerate,
-  .i2s_rxdatawidth    = esp32_i2s_rxdatawidth,
-  .i2s_receive        = esp32_i2s_receive,
+  .i2s_rxchannels     = i2s_rxchannels,
+  .i2s_rxsamplerate   = i2s_rxsamplerate,
+  .i2s_rxdatawidth    = i2s_rxdatawidth,
+  .i2s_receive        = i2s_receive,
 #endif /* I2S_HAVE_RX */
 
-  .i2s_ioctl          = esp32_i2s_ioctl,
-  .i2s_mclkfrequency  = esp32_i2s_mclkfrequency,
+  .i2s_ioctl          = i2s_ioctl,
+  .i2s_mclkfrequency  = i2s_mclkfrequency,
 };
 
 #ifdef CONFIG_ESP32_I2S0
@@ -1677,8 +1669,8 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
         }
 
-      esp32_i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
-                              priv->mclk_multiple));
+      i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
+                        priv->mclk_multiple));
 
       priv->rate = priv->config->rate;
       i2s_set_clock(priv);
@@ -1797,8 +1789,8 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
         }
 
-      esp32_i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
-                              priv->mclk_multiple));
+      i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
+                        priv->mclk_multiple));
 
       priv->rate = priv->config->rate;
       i2s_set_clock(priv);
@@ -2258,7 +2250,7 @@ static void i2s_rx_channel_stop(struct esp32_i2s_s *priv)
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
- * Name: esp32_i2s_interrupt
+ * Name: i2s_interrupt
  *
  * Description:
  *   Common I2S DMA interrupt handler
@@ -2273,7 +2265,7 @@ static void i2s_rx_channel_stop(struct esp32_i2s_s *priv)
  *
  ****************************************************************************/
 
-static int esp32_i2s_interrupt(int irq, void *context, void *arg)
+static int i2s_interrupt(int irq, void *context, void *arg)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)arg;
   struct esp32_dmadesc_s *cur = NULL;
@@ -2316,7 +2308,7 @@ static int esp32_i2s_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: esp32_i2s_mclkfrequency
+ * Name: i2s_mclkfrequency
  *
  * Description:
  *   Set the master clock frequency. Usually, the MCLK is a multiple of the
@@ -2332,8 +2324,7 @@ static int esp32_i2s_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
-                                        uint32_t frequency)
+static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev, uint32_t frequency)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2352,7 +2343,7 @@ static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: esp32_i2s_txchannels
+ * Name: i2s_txchannels
  *
  * Description:
  *   Set the I2S TX number of channels.
@@ -2367,7 +2358,7 @@ static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static int esp32_i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
+static int i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2387,7 +2378,7 @@ static int esp32_i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
 #endif /* I2S_HAVE_TX */
 
 /****************************************************************************
- * Name: esp32_i2s_rxchannels
+ * Name: i2s_rxchannels
  *
  * Description:
  *   Set the I2S RX number of channels.
@@ -2402,7 +2393,7 @@ static int esp32_i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_RX
-static int esp32_i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
+static int i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2422,7 +2413,7 @@ static int esp32_i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
- * Name: esp32_i2s_txsamplerate
+ * Name: i2s_txsamplerate
  *
  * Description:
  *   Set the I2S TX sample rate.  NOTE:  This will have no effect if (1) the
@@ -2440,7 +2431,7 @@ static int esp32_i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2462,7 +2453,7 @@ static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 #endif /* I2S_HAVE_TX */
 
 /****************************************************************************
- * Name: esp32_i2s_rxsamplerate
+ * Name: i2s_rxsamplerate
  *
  * Description:
  *   Set the I2S RX sample rate.
@@ -2477,7 +2468,7 @@ static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_RX
-static uint32_t esp32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2499,7 +2490,7 @@ static uint32_t esp32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
- * Name: esp32_i2s_txdatawidth
+ * Name: i2s_txdatawidth
  *
  * Description:
  *   Set the I2S TX data width.  The TX bitrate is determined by
@@ -2515,7 +2506,7 @@ static uint32_t esp32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static uint32_t esp32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
+static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2537,7 +2528,7 @@ static uint32_t esp32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 #endif /* I2S_HAVE_TX */
 
 /****************************************************************************
- * Name: esp32_i2s_rxdatawidth
+ * Name: i2s_rxdatawidth
  *
  * Description:
  *   Set the I2S RX data width.  The RX bitrate is determined by
@@ -2553,7 +2544,7 @@ static uint32_t esp32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_RX
-static uint32_t esp32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
+static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2575,7 +2566,7 @@ static uint32_t esp32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
- * Name: esp32_i2s_send
+ * Name: i2s_send
  *
  * Description:
  *   Send a block of data on I2S.
@@ -2598,9 +2589,8 @@ static uint32_t esp32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                          i2s_callback_t callback, void *arg,
-                          uint32_t timeout)
+static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                    i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2695,7 +2685,7 @@ errout_with_buf:
 #endif /* I2S_HAVE_TX */
 
 /****************************************************************************
- * Name: esp32_i2s_receive
+ * Name: i2s_receive
  *
  * Description:
  *   Receive a block of data on I2S.
@@ -2718,9 +2708,8 @@ errout_with_buf:
  ****************************************************************************/
 
 #ifdef I2S_HAVE_RX
-static int esp32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                             i2s_callback_t callback, void *arg,
-                             uint32_t timeout)
+static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                       i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
@@ -2805,15 +2794,14 @@ errout_with_buf:
 #endif /* I2S_HAVE_RX */
 
 /****************************************************************************
- * Name: esp32_i2s_ioctl
+ * Name: i2s_ioctl
  *
  * Description:
  *   Perform a device ioctl
  *
  ****************************************************************************/
 
-static int esp32_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
-                            unsigned long arg)
+static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
 {
   struct audio_buf_desc_s  *bufdesc;
   int ret = -ENOTTY;
@@ -2905,7 +2893,7 @@ static int i2s_dma_setup(struct esp32_i2s_s *priv)
       return priv->cpuint;
     }
 
-  ret = irq_attach(priv->config->irq, esp32_i2s_interrupt, priv);
+  ret = irq_attach(priv->config->irq, i2s_interrupt, priv);
   if (ret != OK)
     {
       i2serr("Couldn't attach IRQ to handler.\n");
