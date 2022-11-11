@@ -130,6 +130,12 @@ int sem_trywait(FAR sem_t *sem)
 {
   int ret;
 
+  if (sem == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
   /* Let nxsem_trywait do the real work */
 
   ret = nxsem_trywait(sem);

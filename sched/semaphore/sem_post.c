@@ -73,8 +73,6 @@ int nxsem_post(FAR sem_t *sem)
   irqstate_t flags;
   int16_t sem_count;
 
-  /* Make sure we were supplied with a valid semaphore. */
-
   DEBUGASSERT(sem != NULL);
 
   /* The following operations must be performed with interrupts
@@ -216,6 +214,14 @@ int nxsem_post(FAR sem_t *sem)
 int sem_post(FAR sem_t *sem)
 {
   int ret;
+
+  /* Make sure we were supplied with a valid semaphore. */
+
+  if (sem == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   ret = nxsem_post(sem);
   if (ret < 0)

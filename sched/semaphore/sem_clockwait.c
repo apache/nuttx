@@ -97,18 +97,8 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
   int status;
   int ret = ERROR;
 
-  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-
-  /* Verify the input parameters and, in case of an error, set
-   * errno appropriately.
-   */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!abstime || !sem)
-    {
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(sem != NULL && abstime != NULL);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* We will disable interrupts until we have completed the semaphore
    * wait.  We need to do this (as opposed to just disabling pre-emption)
@@ -269,6 +259,16 @@ int sem_clockwait(FAR sem_t *sem, clockid_t clockid,
                   FAR const struct timespec *abstime)
 {
   int ret;
+
+  /* Verify the input parameters and, in case of an error, set
+   * errno appropriately.
+   */
+
+  if (sem == NULL || abstime == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   /* sem_timedwait() is a cancellation point */
 

@@ -251,6 +251,12 @@ int sem_wait(FAR sem_t *sem)
   int errcode;
   int ret;
 
+  if (sem == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
   /* sem_wait() is a cancellation point */
 
   if (enter_cancellation_point())
