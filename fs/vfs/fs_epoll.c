@@ -366,8 +366,8 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
         goto err;
     }
 
-  nxmutex_unlock(&eph->lock);
   poll_notify(&eph->poll, 1, POLLIN);
+  nxmutex_unlock(&eph->lock);
   return OK;
 
 err:
