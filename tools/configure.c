@@ -800,7 +800,7 @@ static void enumerate_configs(void)
 
 static void check_configdir(void)
 {
-  if (verify_optiondir(g_configpath))
+  if (g_configpath && verify_optiondir(g_configpath))
     {
       /* Get the path to the custom board scripts directory */
 
@@ -849,7 +849,7 @@ static void check_configdir(void)
       snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%c%s%c%s%cscripts",
                g_topdir, g_delim, g_delim, g_archdir, g_delim,
                g_chipdir, g_delim, g_boarddir, g_delim);
-      debug("check_configdir: Checking scriptspath=%s\n", g_buffer);
+      debug("check_configdir: Checking scripts path=%s\n", g_buffer);
 
       g_scriptspath = NULL;
       if (verify_optiondir(g_buffer))
