@@ -33,6 +33,8 @@ set tooldir=%CD%
 rem Parse command line arguments
 
 set debug=
+set enforce_distclean=
+set distclean=
 set fmt=-b
 set posix=
 set help=
@@ -44,11 +46,15 @@ set hostopt=
 if "%1"=="" goto :NoConfig
 if "%1"=="-h" goto :ShowUsage
 if "%1"=="-d" goto :SetDebug
+if "%1"=="-E" goto :SetEnforceDistclean
+if "%1"=="-e" goto :SetDistclean
 if "%1"=="-f" goto :SetFormat
 if "%1"=="-b" goto :SetFormat
 if "%1"=="-l" goto :SetHostOption
+if "%1"=="-m" goto :SetHostOption
 if "%1"=="-c" goto :SetHostOption
 if "%1"=="-n" goto :SetHostOption
+if "%1"=="-B" goto :SetHostOption
 if "%1"=="-L" goto :SetList
 if "%1"=="-a" goto :SetAppDir
 
@@ -57,6 +63,14 @@ goto EndOfLoop
 
 :SetDebug
 set debug=%1
+goto :NextArg
+
+:SetEnforceDistclean
+set enforce_distclean=%1
+goto :NextArg
+
+:SetDistclean
+set distclean=%1
 goto :NextArg
 
 :SetFormat
@@ -91,13 +105,13 @@ echo %cc% %cflags% -o configure.exe configure.c cfgparser.c
 %cc% %cflags% -o configure.exe configure.c cfgparser.c
 if errorlevel 1 (
   echo ERROR: %cc% failed
-  echo Is ming32-gcc.exe installed?  Is it in the PATH variable?
+  echo Is mingw32-gcc.exe installed?  Is it in the PATH variable?
   goto End
 )
 
 :HaveConfigureExe
 cd ..
-tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config% %list%
+tools\configure.exe %debug% %enforce_distclean% %distclean% %fmt% %hostopt% %appdir% %config% %list%
 if errorlevel 1 echo configure.exe failed
 goto End
 
