@@ -894,28 +894,6 @@ static inline void lpc54_serialout(struct lpc54_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_modifyreg
- ****************************************************************************/
-
-static inline void lpc54_modifyreg(struct lpc54_dev_s *priv,
-                                   unsigned int offset, uint32_t setbits,
-                                   uint32_t clrbits)
-{
-  irqstate_t flags;
-  uintptr_t regaddr = priv->uartbase + offset;
-  uint32_t regval;
-
-  flags   = enter_critical_section();
-
-  regval  = getreg32(regaddr);
-  regval &= ~clrbits;
-  regval |= setbits;
-  putreg32(regval, regaddr);
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
  * Name: lpc54_fifoint_enable
  ****************************************************************************/
 
