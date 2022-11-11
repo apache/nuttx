@@ -226,6 +226,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       if (++info >= &conn->pollinfo[CONFIG_NET_TCP_NPOLLWAITERS])
         {
+          DEBUGPANIC();
           ret = -ENOMEM;
           goto errout_with_lock;
         }
