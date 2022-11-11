@@ -58,6 +58,10 @@ config VIDEO_STREAM
 
 if VIDEO_STREAM
 
+config VIDEO_HEAP_SIZE
+	int "Maximum Video heap size used by V4L2 mmap-ed buffer"
+	default 1843200
+
 config VIDEO_SCENE_BACKLIGHT
 	bool "Enable backlight scene"
 	default y
