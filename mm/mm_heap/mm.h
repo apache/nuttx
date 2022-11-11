@@ -74,7 +74,7 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         tmp->pid = getpid(); \
+         tmp->pid = gettid(); \
        } \
      while (0)
 #elif CONFIG_MM_BACKTRACE > 0
@@ -82,7 +82,7 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         tmp->pid = getpid(); \
+         tmp->pid = gettid(); \
          if ((heap)->mm_procfs.backtrace) \
            { \
              int result = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \

@@ -303,17 +303,17 @@ static int mm_lock(FAR struct mm_heap_s *heap)
   else
 #endif
 
-  /* getpid() returns the task ID of the task at the head of the ready-to-
+  /* gettid() returns the task ID of the task at the head of the ready-to-
    * run task list.  mm_lock() may be called during context
    * switches.  There are certain situations during context switching when
    * the OS data structures are in flux and then can't be freed immediately
    * (e.g. the running thread stack).
    *
-   * This is handled by getpid() to return the special value -ESRCH to
+   * This is handled by gettid() to return the special value -ESRCH to
    * indicate this special situation.
    */
 
-  if (getpid() < 0)
+  if (gettid() < 0)
     {
       return -ESRCH;
     }

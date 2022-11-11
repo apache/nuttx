@@ -66,9 +66,9 @@ void vwarn(FAR const char *fmt, va_list ap)
 #endif
 
 #ifdef CONFIG_FILE_STREAM
-  fprintf(stderr, "%d: %pV: %s\n", getpid(), &vaf, strerror(error));
+  fprintf(stderr, "%d: %pV: %s\n", gettid(), &vaf, strerror(error));
 #else
-  dprintf(STDERR_FILENO, "%d: %pV: %s\n", getpid(), &vaf, strerror(error));
+  dprintf(STDERR_FILENO, "%d: %pV: %s\n", gettid(), &vaf, strerror(error));
 #endif
 
 #ifdef va_copy
@@ -97,9 +97,9 @@ void vwarnx(FAR const char *fmt, va_list ap)
 #endif
 
 #ifdef CONFIG_FILE_STREAM
-  fprintf(stderr, "%d: %pV\n", getpid(), &vaf);
+  fprintf(stderr, "%d: %pV\n", gettid(), &vaf);
 #else
-  dprintf(STDERR_FILENO, "%d: %pV\n", getpid(), &vaf);
+  dprintf(STDERR_FILENO, "%d: %pV\n", gettid(), &vaf);
 #endif
 
 #ifdef va_copy

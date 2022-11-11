@@ -142,7 +142,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
        * thread owns the semaphore.
        */
 
-      if (mutex->pid != (int)getpid())
+      if (mutex->pid != (int)gettid())
 
 #elif defined(CONFIG_PTHREAD_MUTEX_UNSAFE) && defined(CONFIG_PTHREAD_MUTEX_TYPES)
       /* If mutex types are not supported, then all mutexes are NORMAL (or
@@ -150,7 +150,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
        * non-robust NORMAL mutex type.
        */
 
-      if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid != (int)getpid())
+      if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid != (int)gettid())
 
 #else /* CONFIG_PTHREAD_MUTEX_BOTH */
       /* Skip the error check if this is a non-robust NORMAL mutex */
@@ -164,7 +164,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
        * the EPERM error?
        */
 
-      if (errcheck && mutex->pid != (int)getpid())
+      if (errcheck && mutex->pid != (int)gettid())
 #endif
         {
           /* No... return an EPERM error.

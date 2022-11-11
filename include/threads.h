@@ -120,7 +120,7 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
  * thrd_t thrd_current(void);
  */
 
-#define thrd_current() ((thrd_t)getpid())
+#define thrd_current() ((thrd_t)gettid())
 
 /* thrd_sleep: suspends execution of the calling thread for the given
  * period of time

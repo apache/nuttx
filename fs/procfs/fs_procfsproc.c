@@ -1485,7 +1485,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strncmp(relpath, "self", 4) == 0)
     {
-      tmp = (unsigned long)getpid();    /* Get the PID of the calling task */
+      tmp = (unsigned long)gettid();    /* Get the PID of the calling task */
       ptr = (FAR char *)relpath + 4;    /* Discard const */
     }
   else
@@ -1793,7 +1793,7 @@ static int proc_opendir(FAR const char *relpath,
 
   if (strncmp(relpath, "self", 4) == 0)
     {
-      tmp = (unsigned long)getpid();    /* Get the PID of the calling task */
+      tmp = (unsigned long)gettid();    /* Get the PID of the calling task */
       ptr = (FAR char *)relpath + 4;    /* Discard const */
     }
   else
@@ -2033,7 +2033,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   if (strncmp(relpath, "self", 4) == 0)
     {
-      tmp = (unsigned long)getpid();    /* Get the PID of the calling task */
+      tmp = (unsigned long)gettid();    /* Get the PID of the calling task */
       ptr = (FAR char *)relpath + 4;    /* Discard const */
     }
   else
