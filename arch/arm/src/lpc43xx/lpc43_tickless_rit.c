@@ -124,11 +124,6 @@ static inline void lpc43_tl_set_mask(uint32_t value)
     }
 }
 
-static inline uint32_t lpc43_tl_get_mask(void)
-{
-  return mask_cache;
-}
-
 static inline bool lpc43_tl_get_ctrl_bit(uint32_t bit)
 {
   return ((ctrl_cache & bit)?true:false);
@@ -164,11 +159,6 @@ static inline bool lpc43_tl_get_reset_on_match(void)
 static inline void lpc43_tl_set_enable(bool value)
 {
   lpc43_tl_set_ctrl_bit(RIT_CTRL_EN, value);
-}
-
-static inline bool lpc43_tl_get_enable(void)
-{
-  return lpc43_tl_get_ctrl_bit(RIT_CTRL_EN);
 }
 
 static inline void lpc43_tl_clear_interrupt(void)
