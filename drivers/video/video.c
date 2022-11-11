@@ -123,6 +123,7 @@ struct video_type_inf_s
   struct v4l2_rect     clip;
   struct v4l2_fract    frame_interval;
   video_framebuff_t    bufinf;
+  FAR uint8_t          *bufheap;   /* for V4L2_MEMORY_MMAP buffers */
 };
 
 typedef struct video_type_inf_s video_type_inf_t;
@@ -219,6 +220,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
                                   FAR struct v4l2_fract *interval);
+static size_t get_bufsize(FAR video_format_t *vf);
 
 /* internal function for each cmds of ioctl */
 
@@ -653,7 +655,7 @@ static int start_capture(enum v4l2_buf_type type,
                          FAR video_format_t *fmt,
                          FAR struct v4l2_rect *clip,
                          FAR struct v4l2_fract *interval,
-                         uint32_t bufaddr, uint32_t bufsize)
+                         uintptr_t bufaddr, uint32_t bufsize)
 {
   video_format_t c_fmt[MAX_VIDEO_FMT];
   imgdata_format_t df[MAX_VIDEO_FMT];
@@ -940,6 +942,11 @@ static void cleanup_streamresources(FAR video_type_inf_t *type_inf)
   video_framebuff_uninit(&type_inf->bufinf);
   nxsem_destroy(&type_inf->wait_capture.dqbuf_wait_flg);
   nxmutex_destroy(&type_inf->lock_state);
+  if (type_inf->bufheap != NULL)
+    {
+      kumm_free(type_inf->bufheap);
+      type_inf->bufheap = NULL;
+    }
 }
 
 static void cleanup_scene_parameter(video_scene_params_t *sp)
@@ -1172,15 +1179,61 @@ static int video_reqbufs(FAR struct video_mng_s         *vmng,
     }
   else
     {
+      if (reqbufs->count > V4L2_REQBUFS_COUNT_MAX)
+        {
+          reqbufs->count = V4L2_REQBUFS_COUNT_MAX;
+        }
+
       video_framebuff_change_mode(&type_inf->bufinf, reqbufs->mode);
 
       ret = video_framebuff_realloc_container(&type_inf->bufinf,
                                               reqbufs->count);
+      if (ret == OK && reqbufs->memory == V4L2_MEMORY_MMAP)
+        {
+          if (type_inf->bufheap != NULL)
+            {
+              kumm_free(type_inf->bufheap);
+            }
+
+          type_inf->bufheap = kumm_memalign(32, reqbufs->count *
+            get_bufsize(&type_inf->fmt[VIDEO_FMT_MAIN]));
+          if (type_inf->bufheap == NULL)
+            {
+              ret = -ENOMEM;
+            }
+        }
     }
 
   leave_critical_section(flags);
 
   return ret;
+}
+
+static int video_querybuf(FAR struct video_mng_s *vmng,
+                          FAR struct v4l2_buffer *buf)
+{
+  FAR video_type_inf_t *type_inf;
+
+  if ((vmng == NULL) || (buf == NULL) || buf->memory != V4L2_MEMORY_MMAP)
+    {
+      return -EINVAL;
+    }
+
+  type_inf = get_video_type_inf(vmng, buf->type);
+  if (type_inf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (buf->index >= type_inf->bufinf.container_size)
+    {
+      return -EINVAL;
+    }
+
+  buf->length = get_bufsize(&type_inf->fmt[VIDEO_FMT_MAIN]);
+  buf->m.offset = buf->length * buf->index;
+
+  return OK;
 }
 
 static int video_qbuf(FAR struct video_mng_s *vmng,
@@ -1214,6 +1267,15 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
     }
 
   memcpy(&container->buf, buf, sizeof(struct v4l2_buffer));
+  if (buf->memory == V4L2_MEMORY_MMAP)
+    {
+      /* only use userptr inside the container */
+
+      container->buf.length = get_bufsize(&type_inf->fmt[VIDEO_FMT_MAIN]);
+      container->buf.m.userptr = (unsigned long)(type_inf->bufheap +
+                                 buf->length * buf->index);
+    }
+
   video_framebuff_queue_container(&type_inf->bufinf, container);
 
   nxmutex_lock(&type_inf->lock_state);
@@ -1520,6 +1582,22 @@ static int validate_frame_setting(enum v4l2_buf_type type,
     }
 
   return g_video_data_ops->validate_frame_setting(nr_fmt, df, &di);
+}
+
+static size_t get_bufsize(video_format_t *vf)
+{
+  size_t ret = vf->width * vf->height;
+  switch (vf->pixelformat)
+    {
+      case V4L2_PIX_FMT_YUV420:
+        return ret * 3 / 2;
+      case V4L2_PIX_FMT_YUYV:
+      case V4L2_PIX_FMT_UYVY:
+      case V4L2_PIX_FMT_RGB565:
+      case V4L2_PIX_FMT_JPEG:
+      default:
+        return ret * 2;
+    }
 }
 
 static int video_try_fmt(FAR struct video_mng_s *priv,
@@ -3019,6 +3097,11 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         break;
 
+      case VIDIOC_QUERYBUF:
+        ret = video_querybuf(priv, (FAR struct v4l2_buffer *)arg);
+
+        break;
+
       case VIDIOC_QBUF:
         ret = video_qbuf(priv, (FAR struct v4l2_buffer *)arg);
 
@@ -3159,6 +3242,13 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case V4SIOC_S_EXT_CTRLS_SCENE:
         ret = video_s_ext_ctrls_scene
                 ((FAR struct v4s_ext_controls_scene *)arg);
+
+        break;
+
+      case FIOC_MMAP:
+        DEBUGASSERT((FAR void **)(uintptr_t)arg != NULL);
+        *(FAR void **)((uintptr_t)arg) = priv->video_inf.bufheap;
+        ret = OK;
 
         break;
 
