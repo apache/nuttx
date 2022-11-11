@@ -115,15 +115,10 @@ static void show_help(const char *progname, int exitcode)
   exit(exitcode);
 }
 
-static enum os_e get_os(char *ccname)
+static enum os_e get_os(void)
 {
 #ifdef CONFIG_WINDOWS_NATIVE
-  /* Check for MinGW which implies a Windows native environment */
-
-  if (strstr(ccname, "mingw") != NULL)
-    {
-      return OS_WINDOWS;
-    }
+  return OS_WINDOWS;
 #else
   struct utsname buf;
   int ret;
@@ -168,13 +163,12 @@ static enum os_e get_os(char *ccname)
     {
       fprintf(stderr, "ERROR:  Unknown operating system: %s\n",
               buf.sysname);
+      return OS_UNKNOWN;
     }
-
 #endif
-  return OS_UNKNOWN;
 }
 
-static enum compiler_e get_compiler(char *ccname, enum os_e os)
+static enum compiler_e get_compiler(char *ccname)
 {
   /* Let's assume that all GCC compiler paths contain the string gcc or
    * g++ and no non-GCC compiler paths include these substrings.
@@ -330,14 +324,14 @@ int main(int argc, char **argv, char **envp)
    * files.
    */
 
-  os = get_os(ccname);
+  os = get_os();
   if (os == OS_UNKNOWN)
     {
       fprintf(stderr, "ERROR:  Operating system not recognized\n");
       show_advice(progname, EXIT_FAILURE);
     }
 
-  compiler = get_compiler(ccname, os);
+  compiler = get_compiler(ccname);
   if (compiler == COMPILER_UNKNOWN)
     {
       fprintf(stderr, "ERROR:  Compiler not recognized.\n");
