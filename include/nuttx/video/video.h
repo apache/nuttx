@@ -459,7 +459,7 @@ extern "C"
 
 /* MAX value of VIDIOC_REQBUFS count parameter */
 
-#define V4L2_REQBUFS_COUNT_MAX (256)
+#define V4L2_REQBUFS_COUNT_MAX CONFIG_VIDEO_REQBUFS_COUNT_MAX
 
 /* Buffer error flag */
 
@@ -751,7 +751,7 @@ struct v4l2_requestbuffers
 {
   uint32_t count;    /* The number of buffers requested.
                       * Supported maximum is
-                      * is V4L2_REQBUFS_COUNT_MAX(=256)
+                      * is V4L2_REQBUFS_COUNT_MAX
                       */
   uint32_t type;     /* enum #v4l2_buf_type */
   uint32_t memory;   /* enum #v4l2_memory */
