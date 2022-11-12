@@ -280,10 +280,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
         }
 #endif
 
-      /* Save the set of pending signals to wait for */
-
-      rtcb->sigwaitmask = *set;
-
       /* Check if we should wait for the timeout */
 
       if (timeout != NULL)
@@ -309,28 +305,44 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           waitticks = MSEC2TICK(waitmsec);
 #endif
 
-          /* Start the watchdog */
+          if (waitticks > 0)
+            {
+              /* Save the set of pending signals to wait for */
 
-          wd_start(&rtcb->waitdog, waitticks,
-                   nxsig_timeout, (uintptr_t)rtcb);
+              rtcb->sigwaitmask = *set;
 
-          /* Now wait for either the signal or the watchdog, but
-           * first, make sure this is not the idle task,
-           * descheduling that isn't going to end well.
-           */
+              /* Start the watchdog */
 
-          DEBUGASSERT(!is_idle_task(rtcb));
-          up_block_task(rtcb, TSTATE_WAIT_SIG);
+              wd_start(&rtcb->waitdog, waitticks,
+                       nxsig_timeout, (uintptr_t)rtcb);
 
-          /* We no longer need the watchdog */
+              /* Now wait for either the signal or the watchdog, but
+               * first, make sure this is not the idle task,
+               * descheduling that isn't going to end well.
+               */
 
-          wd_cancel(&rtcb->waitdog);
+              DEBUGASSERT(!is_idle_task(rtcb));
+              up_block_task(rtcb, TSTATE_WAIT_SIG);
+
+              /* We no longer need the watchdog */
+
+              wd_cancel(&rtcb->waitdog);
+            }
+          else
+            {
+              leave_critical_section(flags);
+              return -EAGAIN;
+            }
         }
 
       /* No timeout, just wait */
 
       else
         {
+          /* Save the set of pending signals to wait for */
+
+          rtcb->sigwaitmask = *set;
+
           /* And wait until one of the unblocked signals is posted,
            * but first make sure this is not the idle task,
            * descheduling that isn't going to end well.
@@ -356,6 +368,13 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
           if (nxsig_ismember(set, rtcb->sigunbinfo.si_signo))
             {
+              /* Return the signal info to the caller if so requested */
+
+              if (info != NULL)
+                {
+                  memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
+                }
+
               /* Yes.. the return value is the number of the signal that
                * awakened us.
                */
@@ -393,13 +412,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
               DEBUGASSERT(rtcb->sigunbinfo.si_signo == SIG_WAIT_TIMEOUT);
               ret = -EAGAIN;
             }
-        }
-
-      /* Return the signal info to the caller if so requested */
-
-      if (info)
-        {
-          memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
         }
 
       leave_critical_section(flags);
