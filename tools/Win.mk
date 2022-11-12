@@ -557,7 +557,9 @@ clean_bootloader:
 # pass2dep: Create pass2 build dependencies
 
 pass1dep: context tools\mkdeps$(HOSTEXEEXT)
+ifneq ($(USERDEPDIRS),)
 	$(Q) for %%G in ($(USERDEPDIRS)) do ( $(MAKE) -C %%G depend )
+endif
 
 pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 	$(Q) for %%G in ($(KERNDEPDIRS)) do ( $(MAKE) -C %%G EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend )
