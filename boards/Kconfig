@@ -266,6 +266,16 @@ config ARCH_BOARD_ESP32_WROVERKIT
   			LCD screen
   			MicroSD card slot
 
+config ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
+	bool "LilyGO TBeam V1.1 LoRa/GPS"
+	depends on ARCH_CHIP_ESP32WROOM32
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		LilyGO_TBeam_V1.1 LoRa/GPS is an ESP32 board with LoRa and GPS.
+		More info: https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series/
+
 config ARCH_BOARD_TTGO_LORA_ESP32
 	bool "TTGO LoRa SX1276 ESP32"
 	depends on ARCH_CHIP_ESP32WROOM32
@@ -2871,6 +2881,7 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "tm4c129e-launchpad"       if ARCH_BOARD_TM4C129E_LAUNCHPAD
 	default "tms570ls31x-usb-kit"      if ARCH_BOARD_TMS570LS31X_USB_KIT
+	default "lilygo_tbeam_lora_gps"    if ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 	default "ttgo_lora_esp32"          if ARCH_BOARD_TTGO_LORA_ESP32
 	default "ttgo_t_display_esp32"     if ARCH_BOARD_TTGO_T_DISPLAY_ESP32
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
@@ -3663,6 +3674,9 @@ source "boards/xtensa/esp32/esp32-lyrat/Kconfig"
 endif
 if ARCH_BOARD_ESP32_WROVERKIT
 source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
+endif
+if ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
+source "boards/xtensa/esp32/lilygo_tbeam_lora_gps/Kconfig"
 endif
 if ARCH_BOARD_TTGO_LORA_ESP32
 source "boards/xtensa/esp32/ttgo_lora_esp32/Kconfig"
