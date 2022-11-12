@@ -178,8 +178,8 @@ void irq_dispatch(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_DEBUG_MM
-  if ((rtcb->flags & TCB_FLAG_HEAPCHECK) || \
-       (this_task()->flags & TCB_FLAG_HEAPCHECK))
+  if ((rtcb->flags & TCB_FLAG_HEAP_CHECK) ||
+      (this_task()->flags & TCB_FLAG_HEAP_CHECK))
     {
       kmm_checkcorruption();
     }
