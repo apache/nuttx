@@ -434,6 +434,12 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CXD56_SDCARD_AUTOMOUNT
+  /* Initialize the auto-mounter */
+
+  board_automount_initialize();
+#endif
+
 #ifdef CONFIG_CPUFREQ_RELEASE_LOCK
   /* Enable dynamic clock control and CPU clock down for power saving */
 

@@ -1201,6 +1201,8 @@ menuconfig CXD56_SDIO
 	default n
 	select ARCH_HAVE_SDIO
 	select SDIO_BLOCKSETUP
+	select MMCSD
+	select MMCSD_SDIO
 	depends on SCHED_WORKQUEUE
 
 if CXD56_SDIO

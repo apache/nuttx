@@ -59,6 +59,10 @@ ifeq ($(CONFIG_CXD56_SDIO),y)
 CSRCS += cxd56_sdcard.c
 endif
 
+ifeq ($(CONFIG_CXD56_SDCARD_AUTOMOUNT),y)
+CSRCS += cxd56_automount.c
+endif
+
 ifeq ($(CONFIG_CXD56_GAUGE),y)
 CSRCS += cxd56_gauge.c
 endif
