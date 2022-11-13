@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <poll.h>
 #include <time.h>
 #include <assert.h>
@@ -44,67 +43,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: poll_fdsetup
- *
- * Description:
- *   Configure (or unconfigure) one file/socket descriptor for the poll
- *   operation.  If fds and sem are non-null, then the poll is being setup.
- *   if fds and sem are NULL, then the poll is being torn down.
- *
- ****************************************************************************/
-
-static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
-{
-  FAR struct file *filep;
-  int ret;
-
-  /* Get the file pointer corresponding to this file descriptor */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  DEBUGASSERT(filep != NULL);
-
-  /* Let file_poll() do the rest */
-
-  return file_poll(filep, fds, setup);
-}
-
-/****************************************************************************
- * Name: poll_default_cb
- *
- * Description:
- *   The default poll callback function, this function do the final step of
- *   poll notification.
- *
- * Input Parameters:
- *   fds - The fds
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void poll_default_cb(FAR struct pollfd *fds)
-{
-  int semcount = 0;
-  FAR sem_t *pollsem;
-
-  if (fds->arg != NULL)
-    {
-      pollsem = (FAR sem_t *)fds->arg;
-      nxsem_get_value(pollsem, &semcount);
-      if (semcount < 1)
-        {
-          nxsem_post(pollsem);
-        }
-    }
-}
 
 /****************************************************************************
  * Name: poll_setup
@@ -293,6 +231,67 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: poll_fdsetup
+ *
+ * Description:
+ *   Configure (or unconfigure) one file/socket descriptor for the poll
+ *   operation.  If fds and sem are non-null, then the poll is being setup.
+ *   if fds and sem are NULL, then the poll is being torn down.
+ *
+ ****************************************************************************/
+
+int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
+{
+  FAR struct file *filep;
+  int ret;
+
+  /* Get the file pointer corresponding to this file descriptor */
+
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  DEBUGASSERT(filep != NULL);
+
+  /* Let file_poll() do the rest */
+
+  return file_poll(filep, fds, setup);
+}
+
+/****************************************************************************
+ * Name: poll_default_cb
+ *
+ * Description:
+ *   The default poll callback function, this function do the final step of
+ *   poll notification.
+ *
+ * Input Parameters:
+ *   fds - The fds
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void poll_default_cb(FAR struct pollfd *fds)
+{
+  int semcount = 0;
+  FAR sem_t *pollsem;
+
+  if (fds->arg != NULL)
+    {
+      pollsem = (FAR sem_t *)fds->arg;
+      nxsem_get_value(pollsem, &semcount);
+      if (semcount < 1)
+        {
+          nxsem_post(pollsem);
+        }
+    }
+}
 
 /****************************************************************************
  * Name: poll_notify
