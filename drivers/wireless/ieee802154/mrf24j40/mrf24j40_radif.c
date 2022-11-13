@@ -135,7 +135,7 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
           remcnt  = (bi - (maincnt * dev->slpclkper)) / 50;
         }
 
-      wlinfo("MAINCNT: %lu, REMCNT: %lu\n", maincnt, remcnt);
+      wlinfo("MAINCNT: %" PRIu32 ", REMCNT: %" PRIu32 "\n", maincnt, remcnt);
 
       /* Program the Main Counter, MAINCNT (0x229<1:0>, 0x228, 0x227,
        * 0x226), and Remain Counter, REMCNT (0x225, 0x224), according to BO
