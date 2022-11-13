@@ -354,12 +354,14 @@ static inline void up_disableuartint(struct nuc_dev_s *priv, uint32_t *ier)
  * Name: up_restoreuartint
  ****************************************************************************/
 
+#ifdef HAVE_CONSOLE
 static inline void up_restoreuartint(struct nuc_dev_s *priv, uint32_t ier)
 {
   uint32_t setbits = ier & UART_IER_ALLIE;
   uint32_t clrbits = (~ier) & UART_IER_ALLIE;
   up_setier(priv, clrbits, setbits);
 }
+#endif
 
 /****************************************************************************
  * Name: up_rxto_disable
