@@ -180,13 +180,13 @@ static int my_open(struct file *filep)
     {
       /* We've already been initialized.  Keep on truckin' */
 
-      ledinfo("rp2040_ws2812 re-open dev: 0x%08lX\n", (uint32_t) dev_data);
+      ledinfo("rp2040_ws2812 re-open dev: 0x%p\n", dev_data);
 
       ret = OK;
       goto post_and_return;
     }
 
-  ledinfo("rp2040_ws2812 open dev: 0x%08lX\n", (uint32_t) dev_data);
+  ledinfo("rp2040_ws2812 open dev: 0x%p\n", dev_data);
 
   /* Allocate the pixel buffer */
 
@@ -344,7 +344,7 @@ static int my_close(struct file *filep)
 
   nxmutex_lock(&dev_data->lock);
 
-  ledinfo("rp2040_ws2812 close dev: 0x%08lX\n", (uint32_t) dev_data);
+  ledinfo("rp2040_ws2812 close dev: 0x%p\n", dev_data);
 
   priv->open_count -= 1;
 
@@ -390,7 +390,7 @@ static ssize_t my_write(struct file *filep,
 
   nxmutex_lock(&dev_data->lock);
 
-  ledinfo("rp2040_ws2812 write dev: 0x%08lX\n", (uint32_t) dev_data);
+  ledinfo("rp2040_ws2812 write dev: 0x%p\n", dev_data);
 
   if (len > 0)
     {
@@ -577,7 +577,7 @@ void * rp2040_ws2812_setup(const char *path,
 
   priv->power_pin     = power_pin;
 
-  ledinfo("register dev_data: 0x%08lX\n", (uint32_t) dev_data);
+  ledinfo("register dev_data: 0x%p\n", dev_data);
 
   err = ws2812_register(path, dev_data);
 
