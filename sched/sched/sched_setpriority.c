@@ -236,7 +236,7 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
        * It should not be at the head of the list.
        */
 
-      bool check = nxsched_remove_readytorun(tcb);
+      bool check = nxsched_remove_readytorun(tcb, false);
       DEBUGASSERT(check == false);
       UNUSED(check);
 

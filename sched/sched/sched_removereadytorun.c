@@ -45,6 +45,7 @@
  *
  * Input Parameters:
  *   rtcb - Points to the TCB that is ready-to-run
+ *   merge - Merge pending list or not
  *
  * Returned Value:
  *   true if the currently active task (the head of the ready-to-run list)
@@ -60,7 +61,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SMP
-bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
+bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
 {
   bool doswitch = false;
 
@@ -92,6 +93,12 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
   /* Since the TCB is not in any list, it is now invalid */
 
   rtcb->task_state = TSTATE_TASK_INVALID;
+
+  if (g_pendingtasks.head && merge)
+    {
+      doswitch |= nxsched_merge_pending();
+    }
+
   return doswitch;
 }
 #endif /* !CONFIG_SMP */
@@ -104,6 +111,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
  *
  * Input Parameters:
  *   rtcb - Points to the TCB that is ready-to-run
+ *   merge - Merge pending list or not
  *
  * Returned Value:
  *   true if the currently active task (the head of the ready-to-run list)
@@ -119,7 +127,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
+bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
 {
   FAR dq_queue_t *tasklist;
   bool doswitch = false;
@@ -275,6 +283,11 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
   /* Since the TCB is no longer in any list, it is now invalid */
 
   rtcb->task_state = TSTATE_TASK_INVALID;
+
+  if (g_pendingtasks.head && merge)
+    {
+      doswitch |= nxsched_merge_pending();
+    }
 
   return doswitch;
 }

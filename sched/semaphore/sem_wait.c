@@ -72,6 +72,7 @@ int nxsem_wait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
+  bool switch_needed;
   int ret;
 
   /* This API should not be called from interrupt handlers & idleloop */
@@ -150,7 +151,22 @@ int nxsem_wait(FAR sem_t *sem)
        */
 
       DEBUGASSERT(!is_idle_task(rtcb));
-      up_block_task(rtcb, TSTATE_WAIT_SEM);
+
+      /* Remove the tcb task from the ready-to-run list. */
+
+      switch_needed = nxsched_remove_readytorun(rtcb, true);
+
+      /* Add the task to the specified blocked task list */
+
+      rtcb->task_state = TSTATE_WAIT_SEM;
+      nxsched_add_prioritized(rtcb, SEM_WAITLIST(sem));
+
+      /* Now, perform the context switch if one is needed */
+
+      if (switch_needed)
+        {
+          up_block_task(rtcb);
+        }
 
       /* When we resume at this point, either (1) the semaphore has been
        * assigned to this thread of execution, or (2) the semaphore wait
