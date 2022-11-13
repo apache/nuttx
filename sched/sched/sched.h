@@ -306,7 +306,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 /* Task list manipulation functions */
 
 bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
-bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb);
+bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb, bool merge);
 bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
 void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                                uint8_t task_state);

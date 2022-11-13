@@ -214,6 +214,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   FAR sigpendq_t *sigpend;
   irqstate_t flags;
   int32_t waitticks;
+  bool switch_needed;
   int ret;
 
   DEBUGASSERT(set != NULL);
@@ -322,7 +323,22 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                */
 
               DEBUGASSERT(!is_idle_task(rtcb));
-              up_block_task(rtcb, TSTATE_WAIT_SIG);
+
+              /* Remove the tcb task from the ready-to-run list. */
+
+              switch_needed = nxsched_remove_readytorun(rtcb, true);
+
+              /* Add the task to the specified blocked task list */
+
+              rtcb->task_state = TSTATE_WAIT_SIG;
+              dq_addlast((FAR dq_entry_t *)rtcb, &g_waitingforsignal);
+
+              /* Now, perform the context switch if one is needed */
+
+              if (switch_needed)
+                {
+                  up_block_task(rtcb);
+                }
 
               /* We no longer need the watchdog */
 
@@ -349,7 +365,22 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            */
 
           DEBUGASSERT(!is_idle_task(rtcb));
-          up_block_task(rtcb, TSTATE_WAIT_SIG);
+
+          /* Remove the tcb task from the ready-to-run list. */
+
+          switch_needed = nxsched_remove_readytorun(rtcb, true);
+
+          /* Add the task to the specified blocked task list */
+
+          rtcb->task_state = TSTATE_WAIT_SIG;
+          dq_addlast((FAR dq_entry_t *)rtcb, &g_waitingforsignal);
+
+          /* Now, perform the context switch if one is needed */
+
+          if (switch_needed)
+            {
+              up_block_task(rtcb);
+            }
         }
 
       /* We are running again, clear the sigwaitmask */

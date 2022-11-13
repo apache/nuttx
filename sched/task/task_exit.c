@@ -100,16 +100,7 @@ int nxtask_exit(void)
    * ready-to-run with state == TSTATE_TASK_RUNNING
    */
 
-  nxsched_remove_readytorun(dtcb);
-
-  /* If there are any pending tasks, then add them to the ready-to-run
-   * task list now
-   */
-
-  if (g_pendingtasks.head != NULL)
-    {
-      nxsched_merge_pending();
-    }
+  nxsched_remove_readytorun(dtcb, true);
 
   /* Get the new task at the head of the ready to run list */
 

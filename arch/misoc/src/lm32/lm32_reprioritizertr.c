@@ -89,7 +89,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
        * remove the head of the ready to run list.
        */
 
-      switch_needed = nxsched_remove_readytorun(tcb);
+      switch_needed = nxsched_remove_readytorun(tcb, false);
 
       /* Setup up the new task priority */
 
