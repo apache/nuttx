@@ -56,32 +56,34 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
   irqstate_t flags;
   int hash_ndx;
 
+  if (pid < 0)
+    {
+      return this_task();
+    }
+
   flags = enter_critical_section();
 
-  /* Verify whether g_pidhash hash table has already been allocated and
-   * whether the PID is within range.
+  /* Verify whether g_pidhash hash table has already been allocated */
+
+  DEBUGASSERT(g_pidhash != NULL);
+
+  /* The test and the return setup should be atomic.  This still does
+   * not provide proper protection if the recipient of the TCB does not
+   * also protect against the task associated with the TCB from
+   * terminating asynchronously.
    */
 
-  if (g_pidhash != NULL && pid >= 0)
+  /* Get the hash_ndx associated with the pid */
+
+  hash_ndx = PIDHASH(pid);
+
+  /* Verify that the correct TCB was found. */
+
+  if (g_pidhash[hash_ndx] != NULL && pid == g_pidhash[hash_ndx]->pid)
     {
-      /* The test and the return setup should be atomic.  This still does
-       * not provide proper protection if the recipient of the TCB does not
-       * also protect against the task associated with the TCB from
-       * terminating asynchronously.
-       */
+      /* Return the TCB associated with this pid (if any) */
 
-      /* Get the hash_ndx associated with the pid */
-
-      hash_ndx = PIDHASH(pid);
-
-      /* Verify that the correct TCB was found. */
-
-      if (g_pidhash[hash_ndx] != NULL && pid == g_pidhash[hash_ndx]->pid)
-        {
-          /* Return the TCB associated with this pid (if any) */
-
-          ret = g_pidhash[hash_ndx];
-        }
+      ret = g_pidhash[hash_ndx];
     }
 
   leave_critical_section(flags);
