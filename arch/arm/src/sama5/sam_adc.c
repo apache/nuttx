@@ -1326,7 +1326,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   priv->tc = sam_tc_allocate(channel, mode);
   if (!priv->tc)
     {
-      aerr("ERROR: Failed to allocate channel %d mode %08x\n",
+      aerr("ERROR: Failed to allocate channel %d mode %08" PRIx32 "\n",
             channel, mode);
       return -EINVAL;
     }
