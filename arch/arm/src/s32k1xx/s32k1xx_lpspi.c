@@ -801,7 +801,6 @@ void s32k1xx_lpspi_set_delays(struct s32k1xx_lpspidev_s *priv,
 {
   uint32_t inclock;
   uint64_t real_delay;
-  uint64_t best_delay;
   uint32_t scaler;
   uint32_t best_scaler;
   uint32_t diff;
@@ -840,15 +839,6 @@ void s32k1xx_lpspi_set_delays(struct s32k1xx_lpspidev_s *priv,
       initial_delay_ns *= 2;
       initial_delay_ns /= clock_div_prescaler;
 
-      /* Calculate the maximum delay */
-
-      best_delay = 1000000000U;
-
-      /* based on DBT+2, or 255 + 2 */
-
-      best_delay *= 257;
-      best_delay /= clock_div_prescaler;
-
       additional_scaler = 1U;
     }
   else
@@ -861,15 +851,6 @@ void s32k1xx_lpspi_set_delays(struct s32k1xx_lpspidev_s *priv,
 
       initial_delay_ns = 1000000000U;
       initial_delay_ns /= clock_div_prescaler;
-
-      /* Calculate the maximum delay */
-
-      best_delay = 1000000000U;
-
-      /* Based on SCKPCS+1 or PCSSCK+1, or 255 + 1 */
-
-      best_delay *= 256;
-      best_delay /= clock_div_prescaler;
 
       additional_scaler = 0;
     }
@@ -913,7 +894,6 @@ void s32k1xx_lpspi_set_delays(struct s32k1xx_lpspidev_s *priv,
 
                   min_diff = diff;
                   best_scaler = scaler;
-                  best_delay = real_delay;
                 }
             }
         }
