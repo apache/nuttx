@@ -841,9 +841,9 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
       return NULL;
     }
 
-  wlinfo("setup complete. gspi = 0x%08lX\n", (uint32_t) gspi);
+  wlinfo("setup complete. gspi = 0x%p\n", gspi);
 
-  return (void *)gspi;
+  return gspi;
 }
 
 /****************************************************************************
