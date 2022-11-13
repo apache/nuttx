@@ -298,28 +298,6 @@ static inline void max326_serialout(struct max326_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: max326_modifyreg
- ****************************************************************************/
-
-static inline void max326_modifyreg(struct max326_dev_s *priv,
-                                    unsigned int offset, uint32_t setbits,
-                                    uint32_t clrbits)
-{
-  irqstate_t flags;
-  uintptr_t regaddr = priv->uartbase + offset;
-  uint32_t regval;
-
-  flags   = enter_critical_section();
-
-  regval  = getreg32(regaddr);
-  regval &= ~clrbits;
-  regval |= setbits;
-  putreg32(regval, regaddr);
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
  * Name: max326_int_enable
  ****************************************************************************/
 
