@@ -380,7 +380,6 @@ struct sam_usbdev_s
 #ifdef CONFIG_SAMD2L2_USB_REGDEBUG
 static void   sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
 static void   sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
-static uint32_t sam_getreg32(uintptr_t regaddr);
 static void   sam_putreg32(uint32_t regval, uintptr_t regaddr);
 static uint32_t sam_getreg16(uintptr_t regaddr);
 static void   sam_putreg16(uint16_t regval, uintptr_t regaddr);
@@ -388,7 +387,6 @@ static uint32_t sam_getreg8(uintptr_t regaddr);
 static void   sam_putreg8(uint8_t regval, uintptr_t regaddr);
 static void   sam_dumpep(struct sam_usbdev_s *priv, uint8_t epno);
 #else
-static inline uint32_t sam_getreg32(uintptr_t regaddr);
 static inline void sam_putreg32(uint32_t regval, uintptr_t regaddr);
 static inline uint32_t sam_getreg16(uintptr_t regaddr);
 static inline void sam_putreg16(uint16_t regval, uintptr_t regaddr);
@@ -710,33 +708,6 @@ static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite)
 
       sam_printreg(regaddr, regval, iswrite);
     }
-}
-#endif
-
-/****************************************************************************
- * Name: sam_getreg32
- *
- * Description:
- *   Get the contents of an 32-bit SAMD2L2 USB register
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMD2L2_USB_REGDEBUG
-static uint32_t sam_getreg32(uintptr_t regaddr)
-{
-  /* Read the value from the register */
-
-  uint32_t regval = getreg32(regaddr);
-
-  /* Check if we need to print this value */
-
-  sam_checkreg(regaddr, regval, false);
-  return regval;
-}
-#else
-static inline uint32_t sam_getreg32(uintptr_t regaddr)
-{
-  return getreg32(regaddr);
 }
 #endif
 
@@ -1239,7 +1210,6 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
                         uint16_t recvsize)
 {
   struct sam_req_s *privreq;
-  uint32_t packetsize;
   int epno;
 
   DEBUGASSERT(priv && privep && privep->epstate == USB_EPSTATE_IDLE);
@@ -1311,10 +1281,6 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   privreq->req.xfrd = 0;
   privreq->inflight = privreq->req.len;
   priv->eplist[epno].descb[0]->addr = (uint32_t) privreq->req.buf;
-  packetsize        = priv->eplist[epno].descb[0]->pktsize;
-  packetsize       &= ~USBDEV_PKTSIZE_BCNT_MASK;
-  packetsize       &= ~USBDEV_PKTSIZE_MPKTSIZE_MASK;
-  packetsize       |=  USBDEV_PKTSIZE_MPKTSIZE(privreq->inflight);
   sam_putreg8(USBDEV_EPSTATUS_BK0RDY, SAM_USBDEV_EPSTATUSCLR(epno));
 
   return OK;
