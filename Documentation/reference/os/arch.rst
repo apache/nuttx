@@ -186,21 +186,17 @@ APIs Exported by Architecture-Specific Logic to NuttX
      which will be executed.
   :param rtcb: Refers to the running task which will be blocked.
 
-.. c:function:: void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
+.. c:function:: void up_block_task(FAR struct tcb_s *rtcb)
 
-  The currently executing task at the head of the
-  ready to run list must be stopped. Save its context and move it to
-  the inactive list specified by task_state. This function is called
-  only from the NuttX scheduling logic. Interrupts will always be
-  disabled when this function is called.
+  The currently executing task has already removed from ready-to-run list.
+  Save its context and switch to the next running task at the head of the
+  ready-to-run list.
 
-  :param tcb: Refers to a task in the ready-to-run list (normally
-     the task at the head of the list). It must be stopped, its
-     context saved and moved into one of the waiting task lists. If
-     it was the task at the head of the ready-to-run list, then a
-     context switch to the new ready to run task must be performed.
-  :param task_state: Specifies which waiting task list should be
-     hold the blocked task TCB.
+  This function is called only from the NuttX scheduling logic.
+  Interrupts will always be disabled when this function is called.
+
+  :param rtcb: Reference to the running task which is different to the
+     task (next running task) at the head of the list.
 
 .. c:function:: void up_release_pending(void)
 

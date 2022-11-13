@@ -45,119 +45,78 @@
  * Name: up_block_task
  *
  * Description:
- *   The currently executing task at the head of the ready to run list must
- *   be stopped.  Save its context and move it to the inactive list
- *   specified by task_state.
+ *   The currently executing task has already removed from ready-to-run list.
+ *   Save its context and switch to the next running task at the head of the
+ *   ready-to-run list.
  *
  * Input Parameters:
- *   tcb: Refers to a task in the ready-to-run list (normally the task at
- *     the head of the list).  It must be stopped, its context saved and
- *     moved into one of the waiting task lists.  If it was the task at the
- *     head of the ready-to-run list, then a context switch to the new
- *     ready to run task must be performed.
- *   task_state: Specifies which waiting task list should hold the blocked
- *     task TCB.
+ *   rtcb: Reference to the running task which is different to the
+ *     task (next running task) at the head of the list.
  *
  ****************************************************************************/
 
-void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
+void up_block_task(FAR struct tcb_s *rtcb)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  bool switch_needed;
+  /* Update scheduler parameters */
 
-  /* Verify that the context switch can be performed */
+  nxsched_suspend_scheduler(rtcb);
 
-  DEBUGASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
-              (tcb->task_state <= LAST_READY_TO_RUN_STATE));
+  /* Are we in an interrupt handler? */
 
-  /* _info("Blocking TCB=%p\n", tcb); */
-
-  /* Remove the tcb task from the ready-to-run list.  If we are blocking the
-   * task at the head of the task list (the most likely case), then a
-   * context switch to the next ready-to-run task is needed. In this case,
-   * it should also be true that rtcb == tcb.
-   */
-
-  switch_needed = nxsched_remove_readytorun(tcb);
-
-  /* Add the task to the specified blocked task list */
-
-  nxsched_add_blocked(tcb, (tstate_t)task_state);
-
-  /* If there are any pending tasks, then add them to the ready-to-run
-   * task list now
-   */
-
-  if (g_pendingtasks.head)
+  if (IN_INTERRUPT())
     {
-      switch_needed |= nxsched_merge_pending();
-    }
-
-  /* Now, perform the context switch if one is needed */
-
-  if (switch_needed)
-    {
-      /* Update scheduler parameters */
-
-      nxsched_suspend_scheduler(rtcb);
-
-      /* Are we in an interrupt handler? */
-
-      if (IN_INTERRUPT())
-        {
-          /* Yes, then we have to do things differently.
-           * Just copy the current registers into the OLD rtcb.
-           */
-
-          SAVE_IRQCONTEXT(rtcb);
-
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
-
-          rtcb = this_task();
-
-          /* Reset scheduler parameters */
-
-          nxsched_resume_scheduler(rtcb);
-
-          /* Then setup so that the context will be performed on exit
-           * from the interrupt.  Any necessary address environment
-           * changes will be made when the interrupt returns.
-           */
-
-          SET_IRQCONTEXT(rtcb);
-        }
-
-      /* Copy the user C context into the TCB at the (old) head of the
-       * ready-to-run Task list. if SAVE_USERCONTEXT returns a non-zero
-       * value, then this is really the previously running task restarting!
+      /* Yes, then we have to do things differently.
+       * Just copy the current registers into the OLD rtcb.
        */
 
-      else if (!SAVE_USERCONTEXT(rtcb))
-        {
-          /* Restore the exception context of the rtcb at the (new) head
-           * of the ready-to-run task list.
-           */
+      SAVE_IRQCONTEXT(rtcb);
 
-          rtcb = this_task();
+      /* Restore the exception context of the rtcb at the (new) head
+       * of the ready-to-run task list.
+       */
+
+      rtcb = this_task();
+
+      /* Reset scheduler parameters */
+
+      nxsched_resume_scheduler(rtcb);
+
+      /* Then setup so that the context will be performed on exit
+       * from the interrupt.  Any necessary address environment
+       * changes will be made when the interrupt returns.
+       */
+
+      SET_IRQCONTEXT(rtcb);
+    }
+
+  /* Copy the user C context into the TCB at the (old) head of the
+   * ready-to-run Task list. if SAVE_USERCONTEXT returns a non-zero
+   * value, then this is really the previously running task restarting!
+   */
+
+  else if (!SAVE_USERCONTEXT(rtcb))
+    {
+      /* Restore the exception context of the rtcb at the (new) head
+       * of the ready-to-run task list.
+       */
+
+      rtcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
-          /* Make sure that the address environment for the previously
-           * running task is closed down gracefully (data caches dump,
-           * MMU flushed) and set up the address environment for the new
-           * thread at the head of the ready-to-run list.
-           */
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
 
-          group_addrenv(rtcb);
+      group_addrenv(rtcb);
 #endif
-          /* Reset scheduler parameters */
+      /* Reset scheduler parameters */
 
-          nxsched_resume_scheduler(rtcb);
+      nxsched_resume_scheduler(rtcb);
 
-          /* Then switch contexts */
+      /* Then switch contexts */
 
-          RESTORE_USERCONTEXT(rtcb);
-        }
+      RESTORE_USERCONTEXT(rtcb);
     }
 }
