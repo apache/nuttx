@@ -141,15 +141,12 @@ bool rp2040_clock_configure(int clk_index,
            * necessarily running, nor is timer... so, 3 cycles per loop:
            */
 
-          unsigned int delay_cyc = rp2040_clock_freq[RP2040_CLOCKS_NDX_SYS] /
-                                   rp2040_clock_freq[clk_index] + 1;
+          volatile unsigned int delay_cyc;
 
-          __asm__ volatile (
-            "1: \n\t"
-            "sub %0, #1 \n\t"
-            "bne 1b"
-            : "+r" (delay_cyc)
-          );
+          delay_cyc = rp2040_clock_freq[RP2040_CLOCKS_NDX_SYS] /
+                      rp2040_clock_freq[clk_index] + 1;
+
+          while (--delay_cyc > 0);
         }
     }
 
