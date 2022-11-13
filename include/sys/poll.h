@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <signal.h>
 #include <semaphore.h>
@@ -150,6 +151,8 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
           FAR const struct timespec *timeout_ts,
           FAR const sigset_t *sigmask);
 
+int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup);
+void poll_default_cb(FAR struct pollfd *fds);
 void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset);
 
 #undef EXTERN

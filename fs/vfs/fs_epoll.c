@@ -36,7 +36,9 @@
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/list.h>
 #include <nuttx/mutex.h>
+#include <nuttx/signal.h>
 
 #include "inode/inode.h"
 
@@ -44,15 +46,39 @@
  * Private Types
  ****************************************************************************/
 
-struct epoll_head
+struct epoll_node_s
 {
-  int size;
-  int occupied;
-  int crefs;
-  mutex_t lock;
-  FAR epoll_data_t *data;
-  FAR struct pollfd *poll;
+  struct list_node      node;
+  epoll_data_t          data;
+  struct pollfd         pfd;
 };
+
+typedef struct epoll_node_s epoll_node_t;
+
+struct epoll_head_s
+{
+  int                   size;
+  int                   crefs;
+  mutex_t               lock;
+  sem_t                 sem;
+  struct list_node      setup;    /* The setup list, store all the setuped
+                                   * epoll node.
+                                   */
+  struct list_node      teardown; /* The teardown list, store all the epoll
+                                   * node notified after epoll_wait finish,
+                                   * these epoll node should be setup again
+                                   * to check the pending poll notification.
+                                   */
+  struct list_node      free;     /* The free list, store all the freed epoll
+                                   * node.
+                                   */
+  struct list_node      extend;   /* The extend list, store all the malloced
+                                   * first node, used to free the malloced
+                                   * memory in epoll_do_close().
+                                   */
+};
+
+typedef struct epoll_head_s epoll_head_t;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -62,6 +88,9 @@ static int epoll_do_open(FAR struct file *filep);
 static int epoll_do_close(FAR struct file *filep);
 static int epoll_do_poll(FAR struct file *filep,
                          FAR struct pollfd *fds, bool setup);
+static int epoll_setup(FAR epoll_head_t *eph);
+static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
+                          int maxevents);
 
 /****************************************************************************
  * Private Data
@@ -97,7 +126,7 @@ static struct inode g_epoll_inode =
  * Private Functions
  ****************************************************************************/
 
-static FAR struct epoll_head *epoll_head_from_fd(int fd)
+static FAR epoll_head_t *epoll_head_from_fd(int fd)
 {
   FAR struct file *filep;
   int ret;
@@ -119,12 +148,12 @@ static FAR struct epoll_head *epoll_head_from_fd(int fd)
       return NULL;
     }
 
-  return (FAR struct epoll_head *)filep->f_priv;
+  return (FAR epoll_head_t *)filep->f_priv;
 }
 
 static int epoll_do_open(FAR struct file *filep)
 {
-  FAR struct epoll_head *eph = filep->f_priv;
+  FAR epoll_head_t *eph = filep->f_priv;
   int ret;
 
   ret = nxmutex_lock(&eph->lock);
@@ -140,7 +169,8 @@ static int epoll_do_open(FAR struct file *filep)
 
 static int epoll_do_close(FAR struct file *filep)
 {
-  FAR struct epoll_head *eph = filep->f_priv;
+  FAR epoll_head_t *eph = filep->f_priv;
+  FAR epoll_node_t *epn;
   int ret;
 
   ret = nxmutex_lock(&eph->lock);
@@ -154,6 +184,16 @@ static int epoll_do_close(FAR struct file *filep)
   if (eph->crefs <= 0)
     {
       nxmutex_destroy(&eph->lock);
+      list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
+        {
+          poll_fdsetup(epn->pfd.fd, &epn->pfd, false);
+        }
+
+      list_for_every_entry(&eph->extend, epn, epoll_node_t, node)
+        {
+          kmm_free(epn);
+        }
+
       kmm_free(eph);
     }
 
@@ -168,25 +208,34 @@ static int epoll_do_poll(FAR struct file *filep,
 
 static int epoll_do_create(int size, int flags)
 {
-  FAR struct epoll_head *eph;
-  int reserve = size + 1;
+  FAR epoll_head_t *eph;
+  FAR epoll_node_t *epn;
   int fd;
 
-  eph = (FAR struct epoll_head *)
-        kmm_zalloc(sizeof(struct epoll_head) +
-                   sizeof(epoll_data_t) * reserve +
-                   sizeof(struct pollfd) * reserve);
+  size = size <= 0 ? 1 : size;
+  eph = kmm_zalloc(sizeof(epoll_head_t) + sizeof(epoll_node_t) * size);
   if (eph == NULL)
     {
       set_errno(ENOMEM);
       return ERROR;
     }
 
-  nxmutex_init(&eph->lock);
-
   eph->size = size;
-  eph->data = (FAR epoll_data_t *)(eph + 1);
-  eph->poll = (FAR struct pollfd *)(eph->data + reserve);
+  nxmutex_init(&eph->lock);
+  nxsem_init(&eph->sem, 0, 0);
+
+  /* List initialize */
+
+  epn = (FAR epoll_node_t *)(eph + 1);
+
+  list_initialize(&eph->setup);
+  list_initialize(&eph->teardown);
+  list_initialize(&eph->extend);
+  list_initialize(&eph->free);
+  for (int i = 0; i < size; i++)
+    {
+      list_add_tail(&eph->free, &epn[i].node);
+    }
 
   /* Alloc the file descriptor */
 
@@ -199,12 +248,74 @@ static int epoll_do_create(int size, int flags)
       return ERROR;
     }
 
-  /* Setup the first pollfd for internal use */
-
-  eph->poll[0].fd = fd;
-  eph->poll[0].events = POLLIN;
-
   return fd;
+}
+
+static int epoll_setup(FAR epoll_head_t *eph)
+{
+  FAR epoll_node_t *tepn;
+  FAR epoll_node_t *epn;
+  int ret;
+
+  ret = nxmutex_lock(&eph->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  list_for_every_entry_safe(&eph->teardown, epn, tepn, epoll_node_t, node)
+    {
+      /* Setup again to check the notified pollfd last epoll_wait() to
+       * cover the situation several poll event pending on one fd.
+       */
+
+      epn->pfd.revents = 0;
+      ret = poll_fdsetup(epn->pfd.fd, &epn->pfd, true);
+      if (ret < 0)
+        {
+          ferr("epoll setup failed, fd=%d, events=%08" PRIx32 ", ret=%d\n",
+               epn->pfd.fd, epn->pfd.events, ret);
+          break;
+        }
+
+      list_delete(&epn->node);
+      list_add_tail(&eph->setup, &epn->node);
+    }
+
+  nxmutex_unlock(&eph->lock);
+  return ret;
+}
+
+static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
+                          int maxevents)
+{
+  FAR epoll_node_t *tepn;
+  FAR epoll_node_t *epn;
+  int i = 0;
+
+  nxmutex_lock(&eph->lock);
+
+  list_for_every_entry_safe(&eph->setup, epn, tepn, epoll_node_t, node)
+    {
+      if (epn->pfd.revents != 0 && i < maxevents)
+        {
+          evs[i].data     = epn->data;
+          evs[i++].events = epn->pfd.revents;
+          poll_fdsetup(epn->pfd.fd, &epn->pfd, false);
+          list_delete(&epn->node);
+          if ((epn->pfd.events & EPOLLONESHOT) != 0)
+            {
+              list_add_tail(&eph->free, &epn->node);
+            }
+          else
+            {
+              list_add_tail(&eph->teardown, &epn->node);
+            }
+        }
+    }
+
+  nxmutex_unlock(&eph->lock);
+  return i;
 }
 
 /****************************************************************************
@@ -272,7 +383,9 @@ void epoll_close(int epfd)
 
 int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 {
-  FAR struct epoll_head *eph;
+  FAR struct list_node *extend;
+  FAR epoll_head_t *eph;
+  FAR epoll_node_t *epn;
   int ret;
   int i;
 
@@ -291,72 +404,111 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
   switch (op)
     {
       case EPOLL_CTL_ADD:
-        finfo("%08x CTL ADD(%d): fd=%d ev=%08" PRIx32 "\n",
-              epfd, eph->occupied, fd, ev->events);
-        if (eph->occupied >= eph->size)
-          {
-            ret = -ENOMEM;
-            goto err;
-          }
+        finfo("%p CTL ADD: fd=%d ev=%08" PRIx32 "\n", eph, fd, ev->events);
 
-        for (i = 1; i <= eph->occupied; i++)
+        /* Check repetition */
+
+        list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
           {
-            if (eph->poll[i].fd == fd)
+            if (epn->pfd.fd == fd)
               {
                 ret = -EEXIST;
                 goto err;
               }
           }
 
-        eph->data[++eph->occupied]      = ev->data;
-        eph->poll[eph->occupied].events = ev->events;
-        eph->poll[eph->occupied].fd     = fd;
+        if (list_is_empty(&eph->free))
+          {
+            /* Malloc new epoll node, insert the first list_node to the
+             * extend list and insert the remaining epoll nodes to the free
+             * list.
+             */
 
+            extend = kmm_zalloc(sizeof(*extend) +
+                                sizeof(epoll_node_t) * eph->size);
+            if (extend == NULL)
+              {
+                ret = -ENOMEM;
+                goto err;
+              }
+
+            list_add_tail(&eph->extend, extend);
+            epn = (FAR epoll_node_t *)(extend + 1);
+            for (i = 0; i < eph->size; i++)
+              {
+                list_add_tail(&eph->free, &epn[i].node);
+              }
+
+            eph->size += eph->size;
+          }
+
+        epn = list_remove_head_type(&eph->free, epoll_node_t, node);
+        epn->data        = ev->data;
+        epn->pfd.events  = ev->events;
+        epn->pfd.fd      = fd;
+        epn->pfd.arg     = &eph->sem;
+        epn->pfd.cb      = poll_default_cb;
+        epn->pfd.revents = 0;
+
+        ret = poll_fdsetup(fd, &epn->pfd, true);
+        if (ret < 0)
+          {
+            list_add_tail(&eph->free, &epn->node);
+            goto err;
+          }
+
+        list_add_tail(&eph->setup, &epn->node);
         break;
 
       case EPOLL_CTL_DEL:
-        for (i = 1; i <= eph->occupied; i++)
+        finfo("%p CTL DEL: fd=%d\n", eph, fd);
+        list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
           {
-            if (eph->poll[i].fd == fd)
+            if (epn->pfd.fd == fd)
               {
-                if (i != eph->occupied)
+                poll_fdsetup(fd, &epn->pfd, false);
+                list_delete(&epn->node);
+                list_add_tail(&eph->free, &epn->node);
+                goto out;
+              }
+          }
+
+        list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                list_delete(&epn->node);
+                list_add_tail(&eph->free, &epn->node);
+                goto out;
+              }
+          }
+
+        break;
+
+      case EPOLL_CTL_MOD:
+        finfo("%p CTL MOD: fd=%d ev=%08" PRIx32 "\n", eph, fd, ev->events);
+        list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                if (epn->pfd.events != ev->events)
                   {
-                    memmove(&eph->data[i], &eph->data[i + 1],
-                            sizeof(epoll_data_t) * (eph->occupied - i));
-                    memmove(&eph->poll[i], &eph->poll[i + 1],
-                            sizeof(struct pollfd) * (eph->occupied - i));
+                    poll_fdsetup(fd, &epn->pfd, false);
+
+                    epn->data        = ev->data;
+                    epn->pfd.events  = ev->events;
+                    epn->pfd.fd      = fd;
+                    epn->pfd.revents = 0;
+
+                    ret = poll_fdsetup(fd, &epn->pfd, true);
+                    if (ret < 0)
+                      {
+                        goto err;
+                      }
                   }
 
                 break;
               }
-          }
-
-        if (i > eph->occupied)
-          {
-            ret = -ENOENT;
-            goto err;
-          }
-
-        eph->occupied--;
-        break;
-
-      case EPOLL_CTL_MOD:
-        finfo("%08x CTL MOD(%d): fd=%d ev=%08" PRIx32 "\n",
-              epfd, eph->occupied, fd, ev->events);
-        for (i = 1; i <= eph->occupied; i++)
-          {
-            if (eph->poll[i].fd == fd)
-              {
-                eph->data[i]        = ev->data;
-                eph->poll[i].events = ev->events;
-                break;
-              }
-          }
-
-        if (i > eph->occupied)
-          {
-            ret = -ENOENT;
-            goto err;
           }
 
         break;
@@ -366,10 +518,9 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
         goto err;
     }
 
-  poll_notify(&eph->poll, 1, POLLIN);
+out:
   nxmutex_unlock(&eph->lock);
   return OK;
-
 err:
   nxmutex_unlock(&eph->lock);
 err_without_lock:
@@ -384,13 +535,9 @@ err_without_lock:
 int epoll_pwait(int epfd, FAR struct epoll_event *evs,
                 int maxevents, int timeout, FAR const sigset_t *sigmask)
 {
-  FAR struct epoll_head *eph;
-  struct timespec expire;
-  struct timespec curr;
-  struct timespec diff;
-  int counter;
-  int rc;
-  int i;
+  FAR epoll_head_t *eph;
+  sigset_t oldsigmask;
+  int ret;
 
   eph = epoll_head_from_fd(epfd);
   if (eph == NULL)
@@ -398,61 +545,55 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
       return ERROR;
     }
 
-  if (timeout >= 0)
+  ret = epoll_setup(eph);
+  if (ret < 0)
     {
-      expire.tv_sec  = timeout / 1000;
-      expire.tv_nsec = timeout % 1000 * 1000;
-
-      clock_systime_timespec(&curr);
-      clock_timespec_add(&curr, &expire, &expire);
+      goto err;
     }
 
-again:
-  if (timeout < 0)
+  /* Wait the poll ready */
+
+  nxsig_procmask(SIG_SETMASK, sigmask, &oldsigmask);
+
+  if (timeout == 0)
     {
-      rc = ppoll(eph->poll, eph->occupied + 1, NULL, sigmask);
+      ret = OK;
+    }
+  else if (timeout > 0)
+    {
+      clock_t ticks;
+#if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
+    defined(CONFIG_HAVE_LONG_LONG)
+      ticks = (((unsigned long long)timeout * USEC_PER_MSEC) +
+                (USEC_PER_TICK - 1)) /
+              USEC_PER_TICK;
+#else
+      ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) /
+              MSEC_PER_TICK;
+#endif
+
+      ret = nxsem_tickwait(&eph->sem, ticks);
+      if (ret == -ETIMEDOUT)
+        {
+          ret = OK;
+        }
     }
   else
     {
-      clock_systime_timespec(&curr);
-      clock_timespec_subtract(&expire, &curr, &diff);
-
-      rc = ppoll(eph->poll, eph->occupied + 1, &diff, sigmask);
+      ret = nxsem_wait(&eph->sem);
     }
 
-  if (rc <= 0)
+  nxsig_procmask(SIG_SETMASK, &oldsigmask, NULL);
+  if (ret < 0)
     {
-      return rc;
-    }
-  else if (eph->poll[0].revents != 0)
-    {
-      if (--rc == 0)
-        {
-          goto again;
-        }
+      goto err;
     }
 
-  if (rc > maxevents)
-    {
-      rc = maxevents;
-    }
+  return epoll_teardown(eph, evs, maxevents);
 
-  /* Iterate over non NULL event fds */
-
-  for (i = 0, counter = 1; i < rc && counter <= eph->occupied; counter++)
-    {
-      if (eph->poll[counter].revents != 0)
-        {
-          evs[i].data     = eph->data[counter];
-          evs[i++].events = eph->poll[counter].revents;
-          if (eph->poll[counter].events & EPOLLONESHOT)
-            {
-              eph->poll[counter].events = 0; /* Disable oneshot internally */
-            }
-        }
-    }
-
-  return i;
+err:
+  set_errno(-ret);
+  return ERROR;
 }
 
 /****************************************************************************
@@ -469,5 +610,59 @@ again:
 int epoll_wait(int epfd, FAR struct epoll_event *evs,
                int maxevents, int timeout)
 {
-  return epoll_pwait(epfd, evs, maxevents, timeout, NULL);
+  FAR epoll_head_t *eph;
+  int ret;
+
+  eph = epoll_head_from_fd(epfd);
+  if (eph == NULL)
+    {
+      return ERROR;
+    }
+
+  ret = epoll_setup(eph);
+  if (ret < 0)
+    {
+      goto err;
+    }
+
+  /* Wait the poll ready */
+
+  if (timeout == 0)
+    {
+      ret = OK;
+    }
+  else if (timeout > 0)
+    {
+      clock_t ticks;
+#if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
+    defined(CONFIG_HAVE_LONG_LONG)
+      ticks = (((unsigned long long)timeout * USEC_PER_MSEC) +
+                (USEC_PER_TICK - 1)) /
+              USEC_PER_TICK;
+#else
+      ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) /
+              MSEC_PER_TICK;
+#endif
+
+      ret = nxsem_tickwait(&eph->sem, ticks);
+      if (ret == -ETIMEDOUT)
+        {
+          ret = OK;
+        }
+    }
+  else
+    {
+      ret = nxsem_wait(&eph->sem);
+    }
+
+  if (ret < 0)
+    {
+      goto err;
+    }
+
+  return epoll_teardown(eph, evs, maxevents);
+
+err:
+  set_errno(-ret);
+  return ERROR;
 }
