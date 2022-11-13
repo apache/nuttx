@@ -63,7 +63,13 @@
 
 /* Mode for pre-initialized terminal channel */
 
-#define SEGGER_RTT_MODE_DEFAULT         SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
+#if defined(CONFIG_SEGGER_RTT_MODE_NO_BLOCK_TRIM)
+#  define SEGGER_RTT_MODE_DEFAULT       SEGGER_RTT_MODE_NO_BLOCK_TRIM
+#elif defined(SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL)
+#  define SEGGER_RTT_MODE_DEFAULT       SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
+#else
+#  define SEGGER_RTT_MODE_DEFAULT       SEGGER_RTT_MODE_NO_BLOCK_SKIP
+#endif
 
 /* 0: Use memcpy/SEGGER_RTT_MEMCPY, 1: Use a simple byte-loop */
 
