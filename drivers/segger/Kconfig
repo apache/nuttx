@@ -62,6 +62,21 @@ config SEGGER_RTT_BUFFER_SIZE_DOWN
 	---help---
 		Size of the buffer for terminal input to target from host (Usually keyboard input)
 
+choice
+	prompt "SEGGER_RTT_MODE"
+	default SEGGER_RTT_MODE_NO_BLOCK_SKIP
+
+config SEGGER_RTT_MODE_NO_BLOCK_SKIP
+	bool "Skip. Do not block, output nothing. (Default)"
+
+config SEGGER_RTT_MODE_NO_BLOCK_TRIM
+	bool "Trim: Do not block, output as much as fits."
+
+config SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
+	bool "Block: Wait until there is space in the buffer."
+
+endchoice # SEGGER_RTT_MODE
+
 if SEGGER_SYSVIEW
 
 config SEGGER_SYSVIEW_RTT_BUFFER_SIZE
