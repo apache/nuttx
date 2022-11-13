@@ -897,6 +897,7 @@ static inline void sam_serialout(struct sam_dev_s *priv, int offset,
  * Name: sam_restoreusartint
  ****************************************************************************/
 
+#ifdef CONFIG_SERIAL_TERMIOS
 static inline void sam_restoreusartint(struct sam_dev_s *priv, uint32_t imr)
 {
   /* Restore the previous interrupt state (assuming all interrupts
@@ -905,6 +906,7 @@ static inline void sam_restoreusartint(struct sam_dev_s *priv, uint32_t imr)
 
   sam_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_disableallints
