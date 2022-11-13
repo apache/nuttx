@@ -1131,11 +1131,13 @@ s32k1xx_lpi2c_getstatus(struct s32k1xx_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_S32K1XX_LPI2C_DMA
 static inline uint32_t
 s32k1xx_lpi2c_getenabledints(struct s32k1xx_lpi2c_priv_s *priv)
 {
   return s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MIER_OFFSET);
 }
+#endif
 
 /****************************************************************************
  * Name: s32k1xx_lpi2c_isr_process
