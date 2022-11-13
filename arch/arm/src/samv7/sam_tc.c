@@ -919,7 +919,7 @@ static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
   uint32_t fnext;
   int ndx = 0;
 
-  tmrinfo("frequency=%ld\n", frequency);
+  tmrinfo("frequency=%" PRId32 "\n", frequency);
 
   /* Satisfy lower bound.  That is, the value of the divider such that:
    *
