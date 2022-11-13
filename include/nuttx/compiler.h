@@ -148,7 +148,11 @@
  * (even though -mlong-calls does not appear in the compilation options)
  */
 
-#  define farcall_function __attribute__ ((long_call))
+#  if defined(__clang__)
+#    define farcall_function
+#  else
+#    define farcall_function __attribute__ ((long_call))
+#  endif
 
 /* Code locate */
 
