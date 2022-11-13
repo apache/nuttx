@@ -1878,7 +1878,6 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
                         uint16_t recvsize)
 {
   struct sam_req_s *privreq;
-  uint32_t packetsize;
   int epno;
 
   DEBUGASSERT(priv && privep && privep->epstate == USB_EPSTATE_IDLE);
@@ -1951,10 +1950,6 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   privreq->inflight = privreq->req.len;
   priv->eplist[epno].descb[0]->addr = (uint32_t) privreq->req.buf;
   uinfo("addr=%p\n", privreq->req.buf);
-  packetsize        = priv->eplist[epno].descb[0]->pktsize;
-  packetsize       &= ~USBDEV_PKTSIZE_BCNT_MASK;
-  packetsize       &= ~USBDEV_PKTSIZE_MPKTSIZE_MASK;
-  packetsize       |=  USBDEV_PKTSIZE_MPKTSIZE(privreq->inflight);
   sam_putreg8(USBDEV_EPSTATUS_BK0RDY, SAM_USBDEV_EPSTATUSCLR(epno));
 
   return OK;
