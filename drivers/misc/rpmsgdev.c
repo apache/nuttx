@@ -56,7 +56,8 @@
 
 struct rpmsgdev_priv_s
 {
-  uint64_t filep; /* store server file pointer */
+  uint64_t filep;    /* store server file pointer */
+  bool     nonblock; /* true: open with O_NONBLOCK */
 };
 
 struct rpmsgdev_s
@@ -87,6 +88,8 @@ struct rpmsgdev_cookie_s
 
 static int     rpmsgdev_open(FAR struct file *filep);
 static int     rpmsgdev_close(FAR struct file *filep);
+static void    rpmsgdev_wait_cb(FAR struct pollfd *fds);
+static int     rpmsgdev_wait(FAR struct file *filep, pollevent_t events);
 static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t rpmsgdev_write(FAR struct file *filep, FAR const char *buffer,
@@ -210,9 +213,12 @@ static int rpmsgdev_open(FAR struct file *filep)
       return -ENOMEM;
     }
 
-  /* Try to open the device in the remote cpu */
+  /* Try to open the device in the remote cpu, open with O_NONBLOCK
+   * by default to avoid the server rptun thread blocked in read/write
+   * operations.
+   */
 
-  msg.flags = filep->f_oflags;
+  msg.flags = filep->f_oflags | O_NONBLOCK;
   ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg.header,
                            sizeof(msg), NULL);
   if (ret < 0)
@@ -222,7 +228,8 @@ static int rpmsgdev_open(FAR struct file *filep)
       return ret;
     }
 
-  priv->filep = msg.filep;
+  priv->filep    = msg.filep;
+  priv->nonblock = (filep->f_oflags & O_NONBLOCK) != 0;
 
   /* Attach the private date to the struct file instance */
 
@@ -280,6 +287,89 @@ static int rpmsgdev_close(FAR struct file *filep)
 }
 
 /****************************************************************************
+ * Name: rpmsgdev_wait_cb
+ *
+ * Description:
+ *   Rpmsg-device read/write operation wait callback function
+ *
+ * Parameters:
+ *   fds  - The structure describing the events to be monitored.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void rpmsgdev_wait_cb(FAR struct pollfd *fds)
+{
+  int semcount = 0;
+  FAR sem_t *pollsem = (FAR sem_t *)fds->arg;
+
+  nxsem_get_value(pollsem, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(pollsem);
+    }
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_wait
+ *
+ * Description:
+ *   Rpmsg-device read/write operation wait function, this function will be
+ *   called in the rpmsgdev_read()/rpmsgdev_write() when the open flags is
+ *   not NONBLOCKED to avoid the server rptun thread blocked in file_read()
+ *   or file_write(). By calling this function before sending the READ or
+ *   WRITE command to server, a simulated blocked read/write operation is
+ *   achived.
+ *
+ * Parameters:
+ *   filep  - the file instance
+ *   events - the events to be monitored
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int rpmsgdev_wait(FAR struct file *filep, pollevent_t events)
+{
+  int ret;
+  sem_t sem;
+  struct pollfd fds;
+
+  nxsem_init(&sem, 0, 0);
+
+  fds.events  = events;
+  fds.arg     = &sem;
+  fds.cb      = rpmsgdev_wait_cb;
+  events     |= POLLERR | POLLHUP;
+
+  while (1)
+    {
+      ret = rpmsgdev_poll(filep, &fds, true);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = nxsem_wait(&sem);
+      rpmsgdev_poll(filep, &fds, false);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      if ((fds.revents & events) != 0)
+        {
+          break;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: rpmsgdev_read
  *
  * Description:
@@ -319,6 +409,20 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   dev  = filep->f_inode->i_private;
   priv = filep->f_priv;
   DEBUGASSERT(dev != NULL && priv != NULL);
+
+  /* If the open flags is not nonblock, should poll the device for
+   * read ready first to avoid the server rptun thread blocked in
+   * device read operation.
+   */
+
+  if (priv->nonblock == false)
+    {
+      ret = rpmsgdev_wait(filep, POLLIN);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
 
   /* Call the host to perform the read */
 
@@ -376,6 +480,20 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
   dev  = filep->f_inode->i_private;
   priv = filep->f_priv;
   DEBUGASSERT(dev != NULL && priv != NULL);
+
+  /* If the open flags is not nonblock, should poll the device for
+   * write ready first to avoid the server rptun thread blocked in
+   * device write operation.
+   */
+
+  if (priv->nonblock == false)
+    {
+      ret = rpmsgdev_wait(filep, POLLOUT);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
 
   /* Perform the rpmsg write */
 
@@ -532,6 +650,7 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   uint32_t space;
   size_t arglen;
   size_t msglen;
+  int ret;
 
   /* Sanity checks */
 
@@ -564,8 +683,15 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
     }
 
-  return rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
-                            msglen, arglen > 0 ? (FAR void *)arg : NULL);
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
+                           msglen, arglen > 0 ? (FAR void *)arg : NULL);
+  if (cmd == FIONBIO && ret >= 0)
+    {
+      int *nonblock = (FAR int *)(uintptr_t)arg;
+      priv->nonblock = *nonblock;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
