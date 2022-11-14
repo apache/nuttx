@@ -1601,10 +1601,7 @@ static int unionfs_closedir(FAR struct inode *mountpt,
       kmm_free(udir->fu_relpath);
     }
 
-  udir->fu_ndx      = 0;
-  udir->fu_relpath  = NULL;
-  udir->fu_lower[0] = NULL;
-  udir->fu_lower[1] = NULL;
+  kmm_free(udir);
 
   /* Decrement the count of open reference.  If that count would go to zero
    * and if the file system has been unmounted, then destroy the file system
