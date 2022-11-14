@@ -111,7 +111,7 @@ static int sim_camera_data_stop_capture(void);
 static int sim_camera_data_validate_buf(uint8_t *addr, uint32_t size);
 static int sim_camera_data_set_buf(uint8_t *addr, uint32_t size);
 static int sim_camera_data_enq_buf(uint8_t *addr, uint32_t size);
-static int sim_camera_data_dq_buf(uint8_t **addr);
+static int sim_camera_data_dq_buf(uint8_t **addr, struct timeval *ts);
 
 static uint32_t imgsensor_fmt_to_v4l2(uint32_t pixelformat);
 
@@ -318,9 +318,9 @@ static int sim_camera_data_enq_buf(uint8_t *addr, uint32_t size)
   return 0;
 }
 
-static int sim_camera_data_dq_buf(uint8_t **addr)
+static int sim_camera_data_dq_buf(uint8_t **addr, struct timeval *ts)
 {
-  int ret = video_host_dq_buf(addr);
+  int ret = video_host_dq_buf(addr, ts);
   priv.capture_cb(0, priv.capture_size);
   return ret;
 }

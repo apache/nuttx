@@ -133,7 +133,7 @@ int video_host_set_buf(uint8_t *addr, uint32_t size)
   return 0;
 }
 
-int video_host_dq_buf(uint8_t **addr)
+int video_host_dq_buf(uint8_t **addr, struct timeval *ts)
 {
   struct v4l2_buffer buf;
   memset(&buf, 0, sizeof(buf));
@@ -163,6 +163,7 @@ int video_host_dq_buf(uint8_t **addr)
     }
 
   *addr = (uint8_t *)(uintptr_t)buf.m.userptr;
+  *ts = buf.timestamp;
 
   return 0;
 }

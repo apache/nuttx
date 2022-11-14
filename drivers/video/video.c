@@ -1364,7 +1364,7 @@ static int video_dqbuf(FAR struct video_mng_s *vmng,
 
   if (g_video_data_ops->dq_buf)
     {
-      ret = g_video_data_ops->dq_buf(&dq_buf_addr);
+      ret = g_video_data_ops->dq_buf(&dq_buf_addr, &buf->timestamp);
       if (ret < 0)
         {
           return ret;

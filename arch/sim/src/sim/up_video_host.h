@@ -40,7 +40,7 @@ int video_host_uninit(void);
 int video_host_data_init(void);
 int video_host_start_capture(int reqbuf_count);
 int video_host_stop_capture(void);
-int video_host_dq_buf(uint8_t **addr);
+int video_host_dq_buf(uint8_t **addr, struct timeval *ts);
 int video_host_enq_buf(uint8_t *addr, uint32_t size);
 int video_host_set_buf(uint8_t *addr, uint32_t size);
 int video_host_set_fmt(uint16_t width, uint16_t height, uint32_t fmt,
