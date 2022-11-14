@@ -37,6 +37,7 @@
 #include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "sixlowpan/sixlowpan.h"
+#include "icmp/icmp.h"
 #include "ipforward/ipforward.h"
 #include "nat/nat.h"
 #include "devif/devif.h"
@@ -148,12 +149,6 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
   ttl = (int)ipv4->ttl - 1;
   if (ttl <= 0)
     {
-#ifdef CONFIG_NET_ICMP
-      /* Return an ICMP error packet back to the sender. */
-
-#  warning Missing logic
-#endif
-
       /* Return zero which must cause the packet to be dropped */
 
       return 0;
@@ -317,7 +312,8 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
   /* Try NAT outbound, rule matching will be performed in NAT module. */
 
   ret = ipv4_nat_outbound(fwd->f_dev,
-                          (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data);
+                          (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data,
+                          NAT_MANIP_SRC);
   if (ret < 0)
     {
       nwarn("WARNING: Performing NAT outbound failed, dropping!\n");
@@ -444,6 +440,10 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   in_addr_t srcipaddr;
   FAR struct net_driver_s *fwddev;
   int ret;
+#ifdef CONFIG_NET_ICMP
+  int icmp_reply_type;
+  int icmp_reply_code;
+#endif /* CONFIG_NET_ICMP */
 
   /* Search for a device that can forward this packet. */
 
@@ -454,7 +454,8 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   if (fwddev == NULL)
     {
       nwarn("WARNING: Not routable\n");
-      return (ssize_t)-ENETUNREACH;
+      ret = -ENETUNREACH;
+      goto drop;
     }
 
   /* Check if we are forwarding on the same device that we received the
@@ -505,8 +506,48 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
 
 drop:
   ipv4_dropstats(ipv4);
+
+#ifdef CONFIG_NET_ICMP
+  /* Reply ICMP to the sender for particular errors. */
+
+  switch (ret)
+    {
+      case -ENETUNREACH:
+        icmp_reply_type = ICMP_DEST_UNREACHABLE;
+        icmp_reply_code = ICMP_NET_UNREACH;
+        goto reply;
+
+      case -EFBIG:
+        icmp_reply_type = ICMP_DEST_UNREACHABLE;
+        icmp_reply_code = ICMP_FRAG_NEEDED;
+        goto reply;
+
+      case -EMULTIHOP:
+        icmp_reply_type = ICMP_TIME_EXCEEDED;
+        icmp_reply_code = 0;
+        goto reply;
+
+      default:
+        break; /* We don't know how to reply, just go on (to drop). */
+    }
+#endif /* CONFIG_NET_ICMP */
+
   dev->d_len = 0;
   return ret;
+
+#ifdef CONFIG_NET_ICMP
+reply:
+#  ifdef CONFIG_NET_NAT
+  /* Before we reply ICMP, call NAT outbound to try to translate destination
+   * address & port back to original status.
+   */
+
+  ipv4_nat_outbound(dev, ipv4, NAT_MANIP_DST);
+#  endif /* CONFIG_NET_NAT */
+
+  icmp_reply(dev, icmp_reply_type, icmp_reply_code);
+  return OK;
+#endif /* CONFIG_NET_ICMP */
 }
 
 /****************************************************************************
