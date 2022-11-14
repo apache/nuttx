@@ -90,6 +90,7 @@ struct dns_query_s
   FAR const char *hostname;       /* Hostname to lookup */
   FAR union dns_addr_u *addr;     /* Location to return host address */
   FAR int *naddr;                 /* Number of returned addresses */
+  uint32_t ttl;                   /* Time to Live, unit:s */
 };
 
 /* Query info to check response against. */
@@ -325,7 +326,8 @@ static int dns_send_query(int sd, FAR const char *name,
  ****************************************************************************/
 
 static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
-                             FAR struct dns_query_info_s *qinfo)
+                             FAR struct dns_query_info_s *qinfo,
+                             uint32_t *ttl)
 {
   FAR uint8_t *nameptr;
   FAR uint8_t *namestart;
@@ -475,6 +477,10 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
             NTOHS(ans->type), NTOHS(ans->class),
             (NTOHS(ans->ttl[0]) << 16) | NTOHS(ans->ttl[1]),
             NTOHS(ans->len));
+      if (ttl)
+        {
+          *ttl = (NTOHS(ans->ttl[0]) << 16) | NTOHS(ans->ttl[1]);
+        }
 
       /* Check for IPv4/6 address type and Internet class. Others are
        * discarded.
@@ -612,7 +618,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           /* Obtain the IPv6 response */
 
           ret = dns_recv_response(sd, &query->addr[next],
-                                  *query->naddr - next, &qinfo);
+                                  *query->naddr - next, &qinfo, &query->ttl);
           if (ret >= 0)
             {
               next += ret;
@@ -641,7 +647,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           /* Obtain the IPv4 response */
 
           ret = dns_recv_response(sd, &query->addr[next],
-                                  *query->naddr - next, &qinfo);
+                                  *query->naddr - next, &qinfo, &query->ttl);
           if (ret >= 0)
             {
               next += ret;
@@ -659,7 +665,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
           /* Save the answer in the DNS cache */
 
-          dns_save_answer(query->hostname, query->addr, next);
+          dns_save_answer(query->hostname, query->addr, next, query->ttl);
 #endif
           /* Return 1 to indicate to (1) stop the traversal, and (2)
            * indicate that the address was found.
