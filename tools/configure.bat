@@ -119,11 +119,15 @@ goto End
 echo Missing ^<board-name^>:^<config-name^> argument
 
 :ShowUsage
-echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>:^<config-name^>
+echo USAGE: %0 [-d] [-E] [-e] [-b|f] [-a ^<app-dir^>] ^<board-name^>:^<config-name^>
 echo        %0 [-h]
 echo\nWhere:
 echo  -d:
 echo    Enables debug output
+echo  -E:
+echo    Enforces distclean if already configured.
+echo  -e:
+echo    Performs distclean if configuration changed.
 echo  -b:
 echo    Informs the tool that it should use Windows style paths like C:\\Program Files
 echo    instead of POSIX style paths are used like /usr/local/bin.  Windows
