@@ -77,20 +77,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* NAT IP/Port manipulate type, to indicate whether to manipulate source or
- * destination IP/Port in a packet.
- */
-
-enum nat_manip_type_e
-{
-  NAT_MANIP_SRC,
-  NAT_MANIP_DST
-};
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -790,6 +776,7 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
  * Input Parameters:
  *   dev   - The device on which the packet will be sent.
  *   ipv4  - Points to the IPv4 header to be filled into dev->d_buf later.
+ *   manip_type - Whether local IP/Port is in source or destination.
  *
  * Returned Value:
  *   Zero is returned if NAT is successfully applied, or is not enabled for
@@ -799,20 +786,22 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 int ipv4_nat_outbound(FAR struct net_driver_s *dev,
-                      FAR struct ipv4_hdr_s *ipv4)
+                      FAR struct ipv4_hdr_s *ipv4,
+                      enum nat_manip_type_e manip_type)
 {
   /* We only process packets targeting at NAT device but not targeting at the
    * address assigned to the device.
    */
 
   if (IFF_IS_NAT(dev->d_flags) &&
+      !net_ipv4addr_hdrcmp(ipv4->srcipaddr, &dev->d_ipaddr) &&
       !net_ipv4addr_hdrcmp(ipv4->destipaddr, &dev->d_ipaddr))
     {
       /* TODO: Skip broadcast? */
 
       FAR struct ipv4_nat_entry *entry =
-          ipv4_nat_outbound_internal(dev, ipv4, NAT_MANIP_SRC);
-      if (!entry)
+          ipv4_nat_outbound_internal(dev, ipv4, manip_type);
+      if (manip_type == NAT_MANIP_SRC && !entry)
         {
           /* Outbound entry creation failed, should have entry. */
 

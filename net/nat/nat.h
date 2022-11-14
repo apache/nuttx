@@ -71,6 +71,16 @@ struct ipv4_nat_entry
   uint32_t   expire_time;    /* The expiration time of this entry. */
 };
 
+/* NAT IP/Port manipulate type, to indicate whether to manipulate source or
+ * destination IP/Port in a packet.
+ */
+
+enum nat_manip_type_e
+{
+  NAT_MANIP_SRC,
+  NAT_MANIP_DST
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -147,6 +157,7 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
  * Input Parameters:
  *   dev   - The device on which the packet will be sent.
  *   ipv4  - Points to the IPv4 header to be filled into dev->d_buf later.
+ *   manip_type - Whether local IP/Port is in source or destination.
  *
  * Returned Value:
  *   Zero is returned if NAT is successfully applied, or is not enabled for
@@ -156,7 +167,8 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 int ipv4_nat_outbound(FAR struct net_driver_s *dev,
-                      FAR struct ipv4_hdr_s *ipv4);
+                      FAR struct ipv4_hdr_s *ipv4,
+                      enum nat_manip_type_e manip_type);
 
 /****************************************************************************
  * Name: ipv4_nat_port_inuse
