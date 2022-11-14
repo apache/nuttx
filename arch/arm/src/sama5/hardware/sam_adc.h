@@ -36,7 +36,7 @@
 
 /* General definitions ******************************************************/
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D3) || defined (ATSAMA5D2)
 #  define SAM_ADC_NCHANNELS          12     /* 12 ADC Channels */
 #elif defined(ATSAMA5D4)
 #  define SAM_ADC_NCHANNELS          5      /* 5 ADC Channels */
@@ -67,8 +67,9 @@
 
 #ifdef ATSAMA5D3
 #  define SAM_ADC_CGR_OFFSET       0x0048 /* Channel Gain Register */
-#  define SAM_ADC_COR_OFFSET       0x004c /* Channel Offset Register */
 #endif
+
+#define SAM_ADC_COR_OFFSET         0x004c /* Channel Offset Register */
 
 #define SAM_ADC_CDR_OFFSET(n)      (0x0050+((n)<<2))
 #define SAM_ADC_CDR0_OFFSET        0x0050 /* Channel Data Register 0 */
@@ -77,7 +78,7 @@
 #define SAM_ADC_CDR3_OFFSET        0x005c /* Channel Data Register 3 */
 #define SAM_ADC_CDR4_OFFSET        0x0060 /* Channel Data Register 4 */
 
-#ifdef ATSAMA5D3
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define SAM_ADC_CDR5_OFFSET      0x0064 /* Channel Data Register 5 */
 #  define SAM_ADC_CDR6_OFFSET      0x0068 /* Channel Data Register 6 */
 #  define SAM_ADC_CDR7_OFFSET      0x006c /* Channel Data Register 7 */
@@ -119,6 +120,9 @@
 
 #ifdef ATSAMA5D3
 #  define SAM_ADC_CGR              (SAM_TSADC_VBASE+SAM_ADC_CGR_OFFSET)
+#endif
+
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define SAM_ADC_COR              (SAM_TSADC_VBASE+SAM_ADC_COR_OFFSET)
 #endif
 
@@ -129,7 +133,7 @@
 #define SAM_ADC_CDR3               (SAM_TSADC_VBASE+SAM_ADC_CDR3_OFFSET)
 #define SAM_ADC_CDR4               (SAM_TSADC_VBASE+SAM_ADC_CDR4_OFFSET)
 
-#ifdef ATSAMA5D3
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define SAM_ADC_CDR5             (SAM_TSADC_VBASE+SAM_ADC_CDR5_OFFSET)
 #  define SAM_ADC_CDR6             (SAM_TSADC_VBASE+SAM_ADC_CDR6_OFFSET)
 #  define SAM_ADC_CDR7             (SAM_TSADC_VBASE+SAM_ADC_CDR7_OFFSET)
@@ -186,13 +190,13 @@
 #  define ADC_MR_PRESCAL(n)        ((uint32_t)(n) << ADC_MR_PRESCAL_SHIFT)
 #define ADC_MR_STARTUP_SHIFT       (16)      /* Bits 16-19: Start Up Time */
 #define ADC_MR_STARTUP_MASK        (15 << ADC_MR_STARTUP_SHIFT)
-#  define ADC_MR_STARTUP_0         (0 << ADC_MR_STARTUP_SHIFT)  /* 0 periods of ADCClock */
-#  define ADC_MR_STARTUP_8         (1 << ADC_MR_STARTUP_SHIFT)  /* 8 periods of ADCClock */
-#  define ADC_MR_STARTUP_16        (2 << ADC_MR_STARTUP_SHIFT)  /* 16 periods of ADCClock */
-#  define ADC_MR_STARTUP_24        (3 << ADC_MR_STARTUP_SHIFT)  /* 24 periods of ADCClock */
-#  define ADC_MR_STARTUP_64        (4 << ADC_MR_STARTUP_SHIFT)  /* 64 periods of ADCClock */
-#  define ADC_MR_STARTUP_80        (5 << ADC_MR_STARTUP_SHIFT)  /* 80 periods of ADCClock */
-#  define ADC_MR_STARTUP_96        (6 << ADC_MR_STARTUP_SHIFT)  /* 96 periods of ADCClock */
+#  define ADC_MR_STARTUP_0         (0 << ADC_MR_STARTUP_SHIFT)  /* 0 periods of ADCClock   */
+#  define ADC_MR_STARTUP_8         (1 << ADC_MR_STARTUP_SHIFT)  /* 8 periods of ADCClock   */
+#  define ADC_MR_STARTUP_16        (2 << ADC_MR_STARTUP_SHIFT)  /* 16 periods of ADCClock  */
+#  define ADC_MR_STARTUP_24        (3 << ADC_MR_STARTUP_SHIFT)  /* 24 periods of ADCClock  */
+#  define ADC_MR_STARTUP_64        (4 << ADC_MR_STARTUP_SHIFT)  /* 64 periods of ADCClock  */
+#  define ADC_MR_STARTUP_80        (5 << ADC_MR_STARTUP_SHIFT)  /* 80 periods of ADCClock  */
+#  define ADC_MR_STARTUP_96        (6 << ADC_MR_STARTUP_SHIFT)  /* 96 periods of ADCClock  */
 #  define ADC_MR_STARTUP_112       (7 << ADC_MR_STARTUP_SHIFT)  /* 112 periods of ADCClock */
 #  define ADC_MR_STARTUP_512       (8 << ADC_MR_STARTUP_SHIFT)  /* 512 periods of ADCClock */
 #  define ADC_MR_STARTUP_576       (9 << ADC_MR_STARTUP_SHIFT)  /* 576 periods of ADCClock */
@@ -204,13 +208,22 @@
 #  define ADC_MR_STARTUP_960       (15 << ADC_MR_STARTUP_SHIFT) /* 960 periods of ADCClock */
 
 #ifdef ATSAMA5D3
-#  define ADC_MR_SETTLING_SHIFT    (20)      /* Bits 20-21: Analog Settling Time */
+#  define ADC_MR_SETTLING_SHIFT    (20)      /* Bits 20-21: Analog Settling Time           */
 #  define ADC_MR_SETTLING_MASK     (15 << ADC_MR_SETTLING_SHIFT)
-#    define ADC_MR_SETTLING_3      (0 << ADC_MR_SETTLING_SHIFT) /* 3 periods of ADCClock */
-#    define ADC_MR_SETTLING_5      (1 << ADC_MR_SETTLING_SHIFT) /* 5 periods of ADCClock */
-#    define ADC_MR_SETTLING_9      (2 << ADC_MR_SETTLING_SHIFT) /* 9 periods of ADCClock */
-#    define ADC_MR_SETTLING_17     (3 << ADC_MR_SETTLING_SHIFT) /* 17 periods of ADCClock */
+#    define ADC_MR_SETTLING_3      (0 << ADC_MR_SETTLING_SHIFT) /* 3 periods of ADCClock   */
+#    define ADC_MR_SETTLING_5      (1 << ADC_MR_SETTLING_SHIFT) /* 5 periods of ADCClock   */
+#    define ADC_MR_SETTLING_9      (2 << ADC_MR_SETTLING_SHIFT) /* 9 periods of ADCClock   */
+#    define ADC_MR_SETTLING_17     (3 << ADC_MR_SETTLING_SHIFT) /* 17 periods of ADCClock  */
+#else
+#  define ADC_MR_SETTLING_SHIFT    (20)      /* Not present in SAMA5D2 or SAMA5D4          */
+#  define ADC_MR_SETTLING_MASK     (0)
+#    define ADC_MR_SETTLING_3      (0 << ADC_MR_SETTLING_SHIFT) /* n/a periods of ADCClock */
+#    define ADC_MR_SETTLING_5      (0 << ADC_MR_SETTLING_SHIFT) /* n/a periods of ADCClock */
+#    define ADC_MR_SETTLING_9      (0 << ADC_MR_SETTLING_SHIFT) /* n/a periods of ADCClock */
+#    define ADC_MR_SETTLING_17     (0 << ADC_MR_SETTLING_SHIFT) /* n/a periods of ADCClock */
+#endif
 
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define ADC_MR_ANACH             (1 << 23) /* Bit 23: Analog Change */
 #endif
 
@@ -218,7 +231,7 @@
 #define ADC_MR_TRACKTIM_MASK       (15 << ADC_MR_TRACKTIM_SHIFT)
 #  define ADC_MR_TRACKTIM(n)       ((uint32_t)(n) << ADC_MR_TRACKTIM_SHIFT)
 
-#ifdef ATSAMA5D3
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define ADC_MR_TRANSFER_SHIFT    (28)      /* Bits 28-29: Transfer Period */
 #  define ADC_MR_TRANSFER_MASK     (3 << ADC_MR_TRANSFER_SHIFT)
 #    define ADC_MR_TRANSFER        (2 << ADC_MR_TRANSFER_SHIFT) /* Must be 2 */
@@ -259,7 +272,7 @@
 #    define ADC_SEQR1_USCH8(v)     ((uint32_t)(v) << ADC_SEQR1_USCH8_SHIFT)
 #endif
 
-#ifdef ATSAMA5D3
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 /* Channel Sequence Register 2 */
 
 #  define ADC_SEQR2_USCH_SHIFT(n)  (((n)-9) << 2) /* n=9..11 */
@@ -289,7 +302,7 @@
 #define ADC_CH4                    (1 << 4)  /* Bit 4:  Channel 4 Enable */
 #define ADC_CH5                    (1 << 5)  /* Bit 5:  Channel 5 Enable */
 
-#ifdef ATSAMA5D3
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define ADC_CH6                  (1 << 6)  /* Bit 6:  Channel 6 Enable */
 #  define ADC_CH7                  (1 << 7)  /* Bit 7:  Channel 7 Enable */
 #  define ADC_CH8                  (1 << 8)  /* Bit 8:  Channel 8 Enable */
@@ -301,7 +314,7 @@
 #define TSD_4WIRE_ALL              (0x0000000f)
 #define TSD_5WIRE_ALL              (0x0000001f)
 
-#if defined(ATSAMA5D3)
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define ADC_CHALL                (0x00000fff)
 #elif defined(ATSAMA5D4)
 #  define ADC_CHALL                (0x0000001f)
@@ -327,7 +340,7 @@
 #define ADC_INT_EOC3               (1 << 3)  /* Bit 3:  End of Conversion 3 */
 #define ADC_INT_EOC4               (1 << 4)  /* Bit 4:  End of Conversion 4 */
 
-#if defined(ATSAMA5D3)
+#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
 #  define ADC_INT_EOC5             (1 << 5)  /* Bit 5:  End of Conversion 5 */
 #  define ADC_INT_EOC6             (1 << 6)  /* Bit 6:  End of Conversion 6 */
 #  define ADC_INT_EOC7             (1 << 7)  /* Bit 7:  End of Conversion 7 */
@@ -355,7 +368,11 @@
 #define ADC_INT_NOPEN              (1 << 30) /* Bit 30: No Pen Contact Interrupt */
 #define ADC_SR_PENS                (1 << 31) /* Bit 31: Pen detect Status (SR only) */
 
-#define ADC_INT_ALL                (0xe7f00fff)
+#if defined (ATSAMA5D3)
+#  define ADC_INT_ALL                (0xe7f00fff)
+#elif defined (ATSAMA5D2)
+#  define ADC_INT_ALL                (0x67780fff)
+#endif
 
 /* Overrun Status Register */
 
@@ -484,7 +501,12 @@
 /* Channel Data Register */
 
 #define ADC_CDR_DATA_SHIFT         (0)       /* Bits 0-11: Converted Data */
+
+#if defined (ATSAMA5D2)
+#define ADC_CDR_DATA_MASK          (0x3fff << ADC_CDR_DATA_SHIFT)
+#else
 #define ADC_CDR_DATA_MASK          (0xfff << ADC_CDR_DATA_SHIFT)
+#endif
 
 /* Compare Window Register */
 
@@ -500,6 +522,12 @@
 #define ADC_ACR_PENDETSENS_SHIFT   (0)       /* Bits 0-1: Pen Detection Sensitivity */
 #define ADC_ACR_PENDETSENS_MASK    (3 << ADC_ACR_PENDETSENS_SHIFT)
 #  define ADC_ACR_PENDETSENS(n)    ((uint32_t)(n) << ADC_ACR_PENDETSENS_SHIFT)
+
+#if defined (ATSAMA5D2)
+#define ADC_ACR_IBTL_SHIFT         (8) /* Bits 8-9: ADC Bias Current Control */
+#define ADC_ACR_IBCTL_MASK         (3 << ADC_ACR_IBTL_SHIFT)
+#  define ADC_ACR_IBCTL(n)         ((uint32_t)(n) << ADC_ACR_IBTL_SHIFT)
+#endif
 
 /* Touchscreen Mode Register */
 
