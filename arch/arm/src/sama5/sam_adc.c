@@ -475,6 +475,7 @@ static void sam_adc_gain(struct sam_adc_s *priv);
 static void sam_adc_analogchange(struct sam_adc_s *priv);
 static void sam_adc_sequencer(struct sam_adc_s *priv);
 static void sam_adc_channels(struct sam_adc_s *priv);
+static void sam_adc_trigperiod(struct sam_adc_s *priv, uint32_t period);
 #endif
 
 /****************************************************************************
@@ -835,6 +836,75 @@ static int sam_adc_dmasetup(struct sam_adc_s *priv, uint8_t *buffer,
 #endif
 
 /****************************************************************************
+ * Name: sam_tsd_trigperiod
+ *
+ * Description:
+ *   Set the TGPER field of the TRGR register in order to define a periodic
+ *   trigger perioc.
+ *
+ *     Trigger Period = (TRGPER+1) / ADCCLK
+ *
+ * Input Parameters:
+ *   priv - A reference to the touchscreen device structure
+ *   time - The new trigger period in microseconds
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_adc_trigperiod(struct sam_adc_s *priv, uint32_t period)
+{
+  uint32_t trigper;
+  uint32_t regval;
+  uint32_t div;
+
+  /* Divide trigger period avoid overflows.  Division by ten is awkard, but
+   * appropriate here because times are specified in decimal with lots of
+   * zeroes.
+   */
+
+  div = 100000;
+  while (period >= 10 && div >= 10)
+    {
+      period /= 10;
+      div    /= 10;
+    }
+
+  /* Calculate and adjust the scaled trigger period:
+   *
+   *   Trigger Period = (TRGPER+1) / ADCCLK
+   */
+
+  trigper = (period * BOARD_ADCCLK_FREQUENCY) / div;
+  if ((trigper % 10) != 0)
+    {
+      /* Handle partial values by not decrementing trigper.  This is
+       * basically a 'ceil' operation.
+       */
+
+      trigper /= 10;
+    }
+  else
+    {
+      /* The final value needs to be decrement by one */
+
+      trigper /= 10;
+      if (trigper > 0)
+        {
+          trigper--;
+        }
+    }
+
+  /* Set the calculated trigger period in the TRGR register */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGPER_MASK;
+  regval |=  ADC_TRGR_TRGPER(trigper);
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+}
+
+/****************************************************************************
  * ADC interrupt handling
  ****************************************************************************/
 
@@ -865,7 +935,7 @@ static void sam_adc_endconversion(void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-  ainfo("pending=%08x\n", priv->pending);
+  ainfo("pending=%08lx\n", priv->pending);
 
   /* Get the set of unmasked, pending ADC interrupts */
 
@@ -1027,9 +1097,7 @@ static int sam_adc_bind(struct adc_dev_s *dev,
 
 static void sam_adc_reset(struct adc_dev_s *dev)
 {
-#ifdef CONFIG_SAMA5_ADC_DMA
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
-#endif
   uint32_t regval;
 
   ainfo("Resetting..\n");
@@ -1069,10 +1137,13 @@ static void sam_adc_reset(struct adc_dev_s *dev)
 
   /* Reset gain, offset, differential modes */
 
+#if defined (ATSAMA5D3)
   sam_adc_putreg(priv, SAM_ADC_CGR, 0);
+  #endif
+
   sam_adc_putreg(priv, SAM_ADC_COR, 0);
 
-#ifndef CONFIG_SAMA5_ADC_SWTRIG
+#if !defined CONFIG_SAMA5_ADC_SWTRIG && !defined CONFIG_SAMA5_TSD
   /* Select software trigger (i.e., basically no trigger) */
 
   regval  = sam_adc_getreg(priv, SAM_ADC_MR);
@@ -1101,11 +1172,12 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 {
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
   uint32_t regval;
+  int ret;
 
   ainfo("Setup\n");
 
   /* Enable channel number tag.  This bit will force the channel number
-   * (CHNB) to be included in the LDCR register content.
+   * (CHNB) to be included in the LDCR register content
    */
 
   regval  = sam_adc_getreg(priv, SAM_ADC_EMR);
@@ -1121,7 +1193,7 @@ static int sam_adc_setup(struct adc_dev_s *dev)
   sam_adc_channels(priv);
 
   /* Enable/disable analog change.  This feature permits different settings
-   * per channel.
+   * per channel
    */
 
   sam_adc_analogchange(priv);
@@ -1153,6 +1225,10 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 
 #endif
 
+  /* Now we are initialized */
+
+  priv->initialized = true;
+
   /* Configure trigger mode and start conversion */
 
   return sam_adc_trigger(priv);
@@ -1179,6 +1255,11 @@ static void sam_adc_shutdown(struct adc_dev_s *dev)
 
   sam_adc_reset(dev);
 
+#ifndef CONFIG_SAMA5_TSD
+  /* doing this if the TSD is required will stop it working */
+
+  /* Needs revisit */
+
   /* Disable ADC interrupts at the level of the AIC */
 
   up_disable_irq(SAM_IRQ_ADC);
@@ -1186,6 +1267,7 @@ static void sam_adc_shutdown(struct adc_dev_s *dev)
   /* Then detach the ADC interrupt handler. */
 
   irq_detach(SAM_IRQ_ADC);
+#endif
 }
 
 /****************************************************************************
@@ -1335,7 +1417,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   priv->tc = sam_tc_allocate(channel, mode);
   if (!priv->tc)
     {
-      aerr("ERROR: Failed to allocate channel %d mode %08" PRIx32 "\n",
+      aerr("ERROR: Failed to allocate channel %d mode %08x\n",
             channel, mode);
       return -EINVAL;
     }
@@ -1413,15 +1495,31 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 
   /* Configure the software trigger */
 
-  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
-  regval &= ~ADC_MR_TRGSEL_MASK;
-  sam_adc_putreg(priv, SAM_ADC_MR, regval);
-
-  /* No trigger, only software trigger can start conversions */
-
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
   regval &= ~ADC_TRGR_TRGMOD_MASK;
   regval |= ADC_TRGR_TRGMOD_NOTRIG;
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+
+#elif defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG)
+  ainfo("Setup Periodic Trigger\n");
+
+  /* Configure the trigger to be periodic */
+
+  sam_adc_trigperiod(priv, CONFIG_SAMA5_ADC_TRIGGER_PERIOD);
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGMOD_MASK;
+  regval |= ADC_TRGR_TRGMOD_PERIOD;
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+
+#elif defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
+  ainfo("Setup Continuous Trigger\n");
+
+  /* Configure the trigger to be continuous */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGMOD_MASK;
+  regval |= ADC_TRGR_TRGMOD_CONT;
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
 
 #elif defined(CONFIG_SAMA5_ADC_ADTRG)
@@ -1431,7 +1529,70 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 
   regval  = sam_adc_getreg(priv, SAM_ADC_MR);
   regval &= ~ADC_MR_TRGSEL_MASK;
-  regval |= ADC_MR_TRGSEL_ADC_ADTRIG;
+  regval |= ADC_MR_TRGSEL_ADTRG;
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* External trigger edge selection */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGMOD_MASK;
+
+#if defined(CONFIG_SAMA5_ADC_ADTRG_RISING)
+  regval |= ADC_TRGR_TRGMOD_EXTRISE;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_FALLING)
+  regval |= ADC_TRGR_TRGMOD_EXTFALL;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_BOTH)
+  regval |= ADC_TRGR_TRGMOD_EXTBOTH;
+#else
+#  error External trigger edge not defined
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+
+#elif defined(CONFIG_SAMA5_ADC_PWMTRIG)
+  ainfo("Setup PWM trigger\n");
+
+  /* Configure the trigger via the PWM event lines */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_TRGSEL_MASK;
+
+#if defined(CONFIG_SAMA5_ADC_PWM_TRIG_LINE0)
+  regval |= ADC_MR_TRGSEL_PWM0;
+#elif defined(CONFIG_SAMA5_ADC_PWM_TRIG_LINE1)
+  regval |= ADC_MR_TRGSEL_PWM1;
+#else
+#  error PWM event line not defined
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* External trigger edge selection */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGMOD_MASK;
+
+#if defined(CONFIG_SAMA5_ADC_ADTRG_RISING)
+  regval |= ADC_TRGR_TRGMOD_EXTRISE;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_FALLING)
+  regval |= ADC_TRGR_TRGMOD_EXTFALL;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_BOTH)
+  regval |= ADC_TRGR_TRGMOD_EXTBOTH;
+#else
+#  error External trigger edge not defined
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+
+#elif defined(CONFIG_SAMA5_ADC_RTCOUT)
+  ainfo("Setup RTC trigger\n");
+
+  /* Configure the trigger via the PWM event lines */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_TRGSEL_MASK;
+  regval |= ADC_MR_TRGSEL_RTC;
+
   sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
   /* External trigger edge selection */
@@ -1674,7 +1835,8 @@ static void sam_adc_offset(struct sam_adc_s *priv)
 
 static void sam_adc_gain(struct sam_adc_s *priv)
 {
-#ifdef CONFIG_SAMA5_ADC_ANARCH
+#ifdef ATSAMA5D3
+#  ifdef CONFIG_SAMA5_ADC_ANARCH
   uint32_t regval;
 
   ainfo("Entry\n");
@@ -1728,7 +1890,8 @@ static void sam_adc_gain(struct sam_adc_s *priv)
   /* Set GAIN0 only.  GAIN0 will be used for all channels. */
 
   sam_adc_putreg(priv, SAM_ADC_CGR, ADC_CGR_GAIN0(CONFIG_SAMA5_ADC_GAIN));
-#endif
+#endif /* CONFIG_SAMA5_ADC_ANARCH */
+#endif /* ATSAMA5D3 */
 }
 
 /****************************************************************************
@@ -2050,8 +2213,16 @@ struct adc_dev_s *sam_adc_initialize(void)
       /* Initialize the public ADC device data structure */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
+      g_adcdev.ad_ops  = &g_adcops;
       priv->dev = &g_adcdev;
 #endif
+
+      g_adcdev.ad_priv = priv;
+
+      /* Initialize the private ADC device data structure */
+
+      nxmutex_init(&priv->lock);
+      priv->cb  = NULL;
 
 #ifdef CONFIG_SAMA5_ADC_DMA
       /* Allocate a DMA channel from DMAC1 */
@@ -2132,6 +2303,9 @@ struct adc_dev_s *sam_adc_initialize(void)
                 ADC_MR_SETTLING_MASK);
       regval |= (ADC_MR_STARTUP_512 | ADC_MR_TRACKTIM(0) |
                 ADC_MR_SETTLING_17);
+#if defined ATSAMA5D2
+      regval |= ADC_MR_TRANSFER;
+#endif
       sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
       /* Attach the ADC interrupt */
