@@ -104,6 +104,11 @@
 #define AN_MCP48XX_FIRST (AN_MAX1161X_FIRST + AN_MAX1161X_NCMDS)
 #define AN_MCP48XX_NCMDS 3
 
+/* See arch/arm/src/samv7/sam_afec.h */
+
+#define AN_SAMV7_AFEC_FIRST (AN_MCP48XX_FIRST + AN_MCP48XX_NCMDS)
+#define AN_SAMV7_AFEC_NCMDS 1
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
