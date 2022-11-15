@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/avr/src/avr32/avr_switchcontext.S
+ * arch/avr/src/avr32/avr_doswitch.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,7 +34,7 @@
  * Public Symbols
  ************************************************************************************/
 
-	.file		"avr_switchcontext.S"
+	.file		"avr_doswitch.S"
 
 /************************************************************************************
  * Macros

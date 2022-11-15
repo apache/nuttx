@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_blocktask.c
+ * arch/avr/src/avr32/avr_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,37 +24,36 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <sched.h>
 #include <assert.h>
 #include <debug.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
-#include "x86_64_internal.h"
+#include "clock/clock.h"
+#include "avr_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_block_task
+ * Name: up_switch_context
  *
  * Description:
- *   The currently executing task has already removed from ready-to-run list.
- *   Save its context and switch to the next running task at the head of the
- *   ready-to-run list.
+ *   A task is currently in the ready-to-run list but has been prepped
+ *   to execute. Restore its context, and start execution.
  *
  * Input Parameters:
- *   rtcb: Reference to the running task which is different to the
- *     task (next running task) at the head of the list.
+ *   tcb: Refers to the head task of the ready-to-run list
+ *     which will be executed.
+ *   rtcb: Refers to the running task which will be blocked.
  *
  ****************************************************************************/
 
-void up_block_task(struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -68,40 +67,24 @@ void up_block_task(struct tcb_s *rtcb)
        * Just copy the g_current_regs into the OLD rtcb.
        */
 
-      x86_64_savestate(rtcb->xcp.regs);
+      avr_savestate(rtcb->xcp.regs);
 
-      /* Restore the exception context of the rtcb at the (new) head
-       * of the ready-to-run task list.
+      /* Update scheduler parameters */
+
+      nxsched_resume_scheduler(tcb);
+
+      /* Then switch contexts.  Any new address environment needed by
+       * the new thread will be instantiated before the return from
+       * interrupt.
        */
 
-      rtcb = this_task();
-      x86_64_restore_auxstate(rtcb);
-
-      /* Reset scheduler parameters */
-
-      nxsched_resume_scheduler(rtcb);
-
-      /* Then switch contexts.  Any necessary address environment
-       * changes will be made when the interrupt returns.
-       */
-
-      x86_64_restorestate(rtcb->xcp.regs);
+      avr_restorestate(tcb->xcp.regs);
     }
 
-  /* Copy the user C context into the TCB at the (old) head of the
-   * ready-to-run Task list. if up_saveusercontext returns a non-zero
-   * value, then this is really the previously running task restarting!
-   */
+  /* No, then we will need to perform the user context switch */
 
-  else if (!up_saveusercontext(rtcb->xcp.regs))
+  else
     {
-      /* Restore the exception context of the rtcb at the (new) head
-       * of the ready-to-run task list.
-       */
-
-      rtcb = this_task();
-      x86_64_restore_auxstate(rtcb);
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -109,14 +92,20 @@ void up_block_task(struct tcb_s *rtcb)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(rtcb);
+      group_addrenv(tcb);
 #endif
-      /* Reset scheduler parameters */
+      /* Update scheduler parameters */
 
-      nxsched_resume_scheduler(rtcb);
+      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts */
 
-      x86_64_fullcontextrestore(rtcb->xcp.regs);
+      avr_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
+
+      /* avr_switchcontext forces a context switch to the task at the
+       * head of the ready-to-run list.  It does not 'return' in the
+       * normal sense.  When it does return, it is because the blocked
+       * task is again ready to run and has execution priority.
+       */
     }
 }

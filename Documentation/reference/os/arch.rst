@@ -174,7 +174,7 @@ APIs Exported by Architecture-Specific Logic to NuttX
      and threads must have come from memory that is accessible to
      user
 
-.. c:function:: void up_unblock_task(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
+.. c:function:: void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
 
   A task is currently in the ready-to-run list but has been preppe
   to execute. Restore its context, and start execution.
@@ -185,18 +185,6 @@ APIs Exported by Architecture-Specific Logic to NuttX
   :param tcb: Refers to the head task of the ready-to-run list
      which will be executed.
   :param rtcb: Refers to the running task which will be blocked.
-
-.. c:function:: void up_block_task(FAR struct tcb_s *rtcb)
-
-  The currently executing task has already removed from ready-to-run list.
-  Save its context and switch to the next running task at the head of the
-  ready-to-run list.
-
-  This function is called only from the NuttX scheduling logic.
-  Interrupts will always be disabled when this function is called.
-
-  :param rtcb: Reference to the running task which is different to the
-     task (next running task) at the head of the list.
 
 .. c:function:: void up_release_pending(void)
 

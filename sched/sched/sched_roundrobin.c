@@ -149,7 +149,7 @@ uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
 
               if (nxsched_reprioritize_rtr(tcb, tcb->sched_priority))
                 {
-                  up_block_task(rtcb);
+                  up_switch_context(this_task(), rtcb);
                 }
             }
         }

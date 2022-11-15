@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_unblocktask.c
+ * arch/renesas/src/common/renesas_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,19 +30,17 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include <stdio.h>
-
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
-#include "x86_64_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -55,7 +53,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -69,9 +67,7 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * Just copy the g_current_regs into the OLD rtcb.
        */
 
-      x86_64_savestate(rtcb->xcp.regs);
-
-      x86_64_restore_auxstate(tcb);
+      renesas_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
@@ -81,19 +77,17 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * changes will be made when the interrupt returns.
        */
 
-      x86_64_restorestate(tcb->xcp.regs);
+      g_current_regs = tcb->xcp.regs;
     }
 
   /* We are not in an interrupt handler.  Copy the user C context
    * into the TCB of the task that was previously active.  if
-   * up_saveusercontext returns a non-zero value, then this is really the
-   * previously running task restarting!
+   * up_saveusercontext returns a non-zero value, then this
+   * is really the previously running task restarting!
    */
 
   else if (!up_saveusercontext(rtcb->xcp.regs))
     {
-      x86_64_restore_auxstate(tcb);
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -109,6 +103,6 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      x86_64_fullcontextrestore(tcb->xcp.regs);
+      renesas_fullcontextrestore(tcb->xcp.regs);
     }
 }

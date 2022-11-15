@@ -138,7 +138,7 @@ int sigsuspend(FAR const sigset_t *set)
 
       if (switch_needed)
         {
-          up_block_task(rtcb);
+          up_switch_context(this_task(), rtcb);
         }
 
       /* We are running again, restore the original sigprocmask */

@@ -381,7 +381,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_unblock_task(stcb, rtcb);
+              up_switch_context(stcb, rtcb);
             }
 
           leave_critical_section(flags);
@@ -435,7 +435,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_unblock_task(stcb, rtcb);
+              up_switch_context(stcb, rtcb);
             }
         }
 
@@ -499,7 +499,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_unblock_task(stcb, rtcb);
+              up_switch_context(stcb, rtcb);
             }
 #endif
         }

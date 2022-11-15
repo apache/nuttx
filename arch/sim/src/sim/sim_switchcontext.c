@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_unblocktask.c
+ * arch/sim/src/sim/sim_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,22 +27,19 @@
 #include <sched.h>
 #include <assert.h>
 #include <debug.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <arch/chip/core-isa.h>
 
-#include "sched/sched.h"
-#include "group/group.h"
 #include "clock/clock.h"
-#include "xtensa.h"
+#include "sched/sched.h"
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -55,8 +52,10 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
+  sinfo("Unblocking TCB=%p\n", tcb);
+
   /* Update scheduler parameters */
 
   nxsched_suspend_scheduler(rtcb);
@@ -69,37 +68,49 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      xtensa_savestate(rtcb->xcp.regs);
+      sim_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
-      /* Then switch contexts.  Any necessary address environment
-       * changes will be made when the interrupt returns.
-       */
+      /* Restore the cpu lock */
 
-      xtensa_restorestate(tcb->xcp.regs);
+      restore_critical_section();
+
+      /* Then switch contexts */
+
+      sim_restorestate(tcb->xcp.regs);
     }
 
-  /* No, then we will need to perform the user context switch */
+  /* Copy the exception context into the TCB of the task that was
+   * previously active.  if setjmp returns a non-zero value, then
+   * this is really the previously running task restarting!
+   */
 
-  else
+  else if (!setjmp(rtcb->xcp.regs))
     {
-      /* Reset scheduler parameters */
+      sinfo("New Active Task TCB=%p\n", tcb);
+
+      /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
-      /* Switch context to the context of the task at the head of the
-       * ready to run list.
+      /* Restore the cpu lock */
+
+      restore_critical_section();
+
+      /* Then switch contexts */
+
+      longjmp(tcb->xcp.regs, 1);
+    }
+  else
+    {
+      /* The way that we handle signals in the simulation is kind of
+       * a kludge.  This would be unsafe in a truly multi-threaded,
+       * interrupt driven environment.
        */
 
-      xtensa_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
-
-      /* xtensa_switchcontext forces a context switch to the task at the
-       * head of the ready-to-run list.  It does not 'return' in the
-       * normal sense.  When it does return, it is because the blocked
-       * task is again ready to run and has execution priority.
-       */
+      sim_sigdeliver();
     }
 }

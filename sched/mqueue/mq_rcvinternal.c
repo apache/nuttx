@@ -197,7 +197,7 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
 
           if (switch_needed)
             {
-              up_block_task(rtcb);
+              up_switch_context(this_task(), rtcb);
             }
 
           /* When we resume at this point, either (1) the message queue
@@ -330,7 +330,7 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
 
       if (nxsched_add_readytorun(btcb))
         {
-          up_unblock_task(btcb, rtcb);
+          up_switch_context(btcb, rtcb);
         }
     }
 

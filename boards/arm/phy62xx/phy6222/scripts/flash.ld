@@ -138,7 +138,7 @@ SECTIONS
         *libarch.a:phy62xx_ble_hcitl.o(.text.phy62xx_ble_init)
         *libarch.a:phy62xx_ble_hcitl.o(.text.HCI_ProcessEvent1)
         *libarch.a:up_idle.o(.text .text.*)
-        *libarch.a:up_idle.o(.text.up_block_task)
+        *libarch.a:up_idle.o(.text.up_switch_context)
         *libarch.a:arm_switchcontext.o(.text .text.*)
         *libarch.a:arm_fullcontextrestore.o(.text .text.*)
         *libarch.a:arm_fullcontextrestore.o(.text .text.*)

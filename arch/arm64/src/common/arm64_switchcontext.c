@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86/src/common/x86_unblocktask.c
+ * arch/arm64/src/common/arm64_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,14 +33,14 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
-#include "x86_internal.h"
+#include "arm64_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -61,13 +61,13 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (g_current_regs)
+  if (CURRENT_REGS)
     {
       /* Yes, then we have to do things differently.
-       * Just copy the g_current_regs into the OLD rtcb.
+       * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      x86_savestate(rtcb->xcp.regs);
+      arm64_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
@@ -77,32 +77,27 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * changes will be made when the interrupt returns.
        */
 
-      x86_restorestate(tcb->xcp.regs);
+      arm64_restorestate(tcb->xcp.regs);
     }
 
-  /* We are not in an interrupt handler.  Copy the user C context
-   * into the TCB of the task that was previously active.  if
-   * up_saveusercontext returns a non-zero value, then this is really the
-   * previously running task restarting!
-   */
+  /* No, then we will need to perform the user context switch */
 
-  else if (!up_saveusercontext(rtcb->xcp.regs))
+  else
     {
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      group_addrenv(tcb);
-#endif
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
-      /* Then switch contexts */
+      /* Switch context to the context of the task at the head of the
+       * ready to run list.
+       */
 
-      x86_fullcontextrestore(tcb->xcp.regs);
+      arm64_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
+
+      /* arm_switchcontext forces a context switch to the task at the
+       * head of the ready-to-run list.  It does not 'return' in the
+       * normal sense.  When it does return, it is because the blocked
+       * task is again ready to run and has execution priority.
+       */
     }
 }

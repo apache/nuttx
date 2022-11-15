@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/avr/avr_unblocktask.c
+ * arch/sparc/src/sparc_v8/sparc_v8_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,21 +25,24 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <syscall.h>
 #include <assert.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "clock/clock.h"
-#include "avr_internal.h"
+#include "sparc_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -52,7 +55,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -60,21 +63,23 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (g_current_regs)
+  if (CURRENT_REGS)
     {
       /* Yes, then we have to do things differently.
-       * Just copy the g_current_regs into the OLD rtcb.
+       * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      avr_savestate(rtcb->xcp.regs);
+      sparc_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
-      /* Then switch contexts */
+      /* Then switch contexts.  Any necessary address environment
+       * changes will be made when the interrupt returns.
+       */
 
-      avr_restorestate(tcb->xcp.regs);
+      sparc_restorestate(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */
@@ -85,13 +90,11 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       nxsched_resume_scheduler(tcb);
 
-      /* Switch context to the context of the task at the head of the
-       * ready to run list.
-       */
+      /* Then switch contexts */
 
-      avr_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
+      sparc_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
 
-      /* avr_switchcontext forces a context switch to the task at the
+      /* sparc_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the
        * normal sense.  When it does return, it is because the blocked
        * task is again ready to run and has execution priority.

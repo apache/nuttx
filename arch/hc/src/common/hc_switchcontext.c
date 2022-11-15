@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/common/renesas_blocktask.c
+ * arch/hc/src/common/hc_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <sched.h>
 #include <assert.h>
 #include <debug.h>
@@ -33,27 +32,28 @@
 
 #include "sched/sched.h"
 #include "group/group.h"
-#include "renesas_internal.h"
+#include "clock/clock.h"
+#include "hc_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_block_task
+ * Name: up_switch_context
  *
  * Description:
- *   The currently executing task has already removed from ready-to-run list.
- *   Save its context and switch to the next running task at the head of the
- *   ready-to-run list.
+ *   A task is currently in the ready-to-run list but has been prepped
+ *   to execute. Restore its context, and start execution.
  *
  * Input Parameters:
- *   rtcb: Reference to the running task which is different to the
- *     task (next running task) at the head of the list.
+ *   tcb: Refers to the head task of the ready-to-run list
+ *     which will be executed.
+ *   rtcb: Refers to the running task which will be blocked.
  *
  ****************************************************************************/
 
-void up_block_task(struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -67,39 +67,27 @@ void up_block_task(struct tcb_s *rtcb)
        * Just copy the g_current_regs into the OLD rtcb.
        */
 
-      renesas_savestate(rtcb->xcp.regs);
+      hc_savestate(rtcb->xcp.regs);
 
-      /* Restore the exception context of the rtcb at the (new) head
-       * of the ready-to-run task list.
-       */
+      /* Update scheduler parameters */
 
-      rtcb = this_task();
-
-      /* Reset scheduler parameters */
-
-      nxsched_resume_scheduler(rtcb);
+      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts.  Any necessary address environment
        * changes will be made when the interrupt returns.
        */
 
-      g_current_regs = rtcb->xcp.regs;
+      hc_restorestate(tcb->xcp.regs);
     }
 
-  /* Copy the user C context into the TCB at the (old) head of the
-   * ready-to-run Task list. if up_saveusercontext returns a non-zero
-   * value, then this is really the previously running task
-   * restarting!
+  /* We are not in an interrupt handler.  Copy the user C context
+   * into the TCB of the task that was previously active.  if
+   * up_saveusercontext returns a non-zero value, then this is really the
+   * previously running task restarting!
    */
 
   else if (!up_saveusercontext(rtcb->xcp.regs))
     {
-      /* Restore the exception context of the rtcb at the (new) head
-       * of the ready-to-run task list.
-       */
-
-      rtcb = this_task();
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -107,14 +95,14 @@ void up_block_task(struct tcb_s *rtcb)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(rtcb);
+      group_addrenv(tcb);
 #endif
-      /* Reset scheduler parameters */
+      /* Update scheduler parameters */
 
-      nxsched_resume_scheduler(rtcb);
+      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts */
 
-      renesas_fullcontextrestore(rtcb->xcp.regs);
+      hc_fullcontextrestore(tcb->xcp.regs);
     }
 }

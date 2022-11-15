@@ -335,7 +335,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
       /* Raise the priority of the holder of the semaphore.  This
        * cannot cause a context switch because we have preemption
        * disabled.  The task will be marked "pending" and the switch
-       * will occur during up_block_task() processing.
+       * will occur during up_contex_switch() processing.
        */
 
       nxsched_set_priority(htcb, rtcb->sched_priority);

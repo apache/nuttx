@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/z80_unblocktask.c
+ * arch/misoc/src/lm32/lm32_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,25 +25,24 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <syscall.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "chip.h"
-#include "chip/switch.h"
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
-#include "z80_internal.h"
+#include "lm32.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -56,7 +55,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -64,49 +63,41 @@ void up_unblock_task(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (IN_INTERRUPT())
+  if (g_current_regs)
     {
       /* Yes, then we have to do things differently.
-       * Just copy the current context into the OLD rtcb.
+       * Just copy the g_current_regs into the OLD rtcb.
        */
 
-      SAVE_IRQCONTEXT(rtcb);
+      misoc_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
-      /* Then setup so that the context will be performed on exit
-       * from the interrupt.  Any necessary address environment
+      /* Then switch contexts.  Any necessary address environment
        * changes will be made when the interrupt returns.
        */
 
-      SET_IRQCONTEXT(tcb);
+      misoc_restorestate(tcb->xcp.regs);
     }
 
-  /* We are not in an interrupt handler.  Copy the user C context
-   * into the TCB of the task that was previously active.  if
-   * SAVE_USERCONTEXT returns a non-zero value, then this is really the
-   * previously running task restarting!
-   */
+  /* No, then we will need to perform the user context switch */
 
-  else if (!SAVE_USERCONTEXT(rtcb))
+  else
     {
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      group_addrenv(tcb);
-#endif
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts */
 
-      RESTORE_USERCONTEXT(tcb);
+      misoc_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
+
+      /* misoc_switchcontext forces a context switch to the task at the
+       * head of the ready-to-run list.  It does not 'return' in the
+       * normal sense.  When it does return, it is because the blocked
+       * task is again ready to run and has execution priority.
+       */
     }
 }

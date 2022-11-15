@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_blocktask.c
+ * arch/arm/src/common/arm_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,38 +24,36 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <sched.h>
 #include <assert.h>
 #include <debug.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <arch/chip/core-isa.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
-#include "xtensa.h"
+#include "clock/clock.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_block_task
+ * Name: up_switch_context
  *
  * Description:
- *   The currently executing task has already removed from ready-to-run list.
- *   Save its context and switch to the next running task at the head of the
- *   ready-to-run list.
+ *   A task is currently in the ready-to-run list but has been prepped
+ *   to execute. Restore its context, and start execution.
  *
  * Input Parameters:
- *   rtcb: Reference to the running task which is different to the
- *     task (next running task) at the head of the list.
+ *   tcb: Refers to the head task of the ready-to-run list
+ *     which will be executed.
+ *   rtcb: Refers to the running task which will be blocked.
  *
  ****************************************************************************/
 
-void up_block_task(struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -69,42 +67,34 @@ void up_block_task(struct tcb_s *rtcb)
        * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      xtensa_savestate(rtcb->xcp.regs);
+      arm_savestate(rtcb->xcp.regs);
 
-      /* Restore the exception context of the rtcb at the (new) head
-       * of the ready-to-run task list.
-       */
+      /* Update scheduler parameters */
 
-      rtcb = this_task();
-
-      /* Reset scheduler parameters */
-
-      nxsched_resume_scheduler(rtcb);
+      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts.  Any necessary address environment
        * changes will be made when the interrupt returns.
        */
 
-      xtensa_restorestate(rtcb->xcp.regs);
+      arm_restorestate(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */
 
   else
     {
-      struct tcb_s *nexttcb = this_task();
+      /* Update scheduler parameters */
+
+      nxsched_resume_scheduler(tcb);
 
       /* Switch context to the context of the task at the head of the
        * ready to run list.
        */
 
-      nxsched_resume_scheduler(nexttcb);
+      arm_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
 
-      /* Then switch contexts */
-
-      xtensa_switchcontext(&rtcb->xcp.regs, nexttcb->xcp.regs);
-
-      /* xtensa_switchcontext forces a context switch to the task at the
+      /* arm_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the
        * normal sense.  When it does return, it is because the blocked
        * task is again ready to run and has execution priority.
