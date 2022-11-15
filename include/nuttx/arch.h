@@ -442,31 +442,6 @@ void up_block_task(FAR struct tcb_s *rtcb);
 void up_release_pending(void);
 
 /****************************************************************************
- * Name: up_reprioritize_rtr
- *
- * Description:
- *   Called when the priority of a running or
- *   ready-to-run task changes and the reprioritization will
- *   cause a context switch.  Two cases:
- *
- *   1) The priority of the currently running task drops and the next
- *      task in the ready to run list has priority.
- *   2) An idle, ready to run task's priority has been raised above the
- *      priority of the current, running task and it now has the priority.
- *
- *   This function is called only from the NuttX scheduling
- *   logic.  Interrupts will always be disabled when this
- *   function is called.
- *
- * Input Parameters:
- *   tcb: The TCB of the task that has been reprioritized
- *   priority: The new task priority
- *
- ****************************************************************************/
-
-void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
-
-/****************************************************************************
  * Name: up_exit
  *
  * Description:
