@@ -132,7 +132,7 @@ struct romfs_mountpt_s
 #endif
   bool     rm_mounted;            /* true: The file system is ready */
   uint16_t rm_hwsectorsize;       /* HW: Sector size reported by block driver */
-  mutex_t  rm_lock;               /* Used to assume thread-safe access */
+  rmutex_t rm_lock;               /* Used to assume thread-safe access */
   uint32_t rm_refs;               /* The references for all files opened on this mountpoint */
   uint32_t rm_hwnsectors;         /* HW: The number of sectors reported by the hardware */
   uint32_t rm_volsize;            /* Size of the ROMFS volume */
