@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/ceva/src/common/ceva_unblocktask.c
+ * arch/xtensa/src/common/xtensa_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,18 +24,25 @@
 
 #include <nuttx/config.h>
 
+#include <sched.h>
+#include <assert.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
+#include <arch/chip/core-isa.h>
 
 #include "sched/sched.h"
-#include "ceva_internal.h"
+#include "group/group.h"
+#include "clock/clock.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -48,11 +55,11 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
-  sched_suspend_scheduler(rtcb);
+  nxsched_suspend_scheduler(rtcb);
 
   /* Are we in an interrupt handler? */
 
@@ -62,32 +69,34 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      rtcb->xcp.regs = CURRENT_REGS;
+      xtensa_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
-      sched_resume_scheduler(tcb);
+      nxsched_resume_scheduler(tcb);
 
-      /* Then switch contexts */
+      /* Then switch contexts.  Any necessary address environment
+       * changes will be made when the interrupt returns.
+       */
 
-      CURRENT_REGS = tcb->xcp.regs;
+      xtensa_restorestate(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */
 
   else
     {
-      /* Update scheduler parameters */
+      /* Reset scheduler parameters */
 
-      sched_resume_scheduler(tcb);
+      nxsched_resume_scheduler(tcb);
 
       /* Switch context to the context of the task at the head of the
        * ready to run list.
        */
 
-      ceva_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
+      xtensa_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
 
-      /* ceva_switchcontext forces a context switch to the task at the
+      /* xtensa_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the
        * normal sense.  When it does return, it is because the blocked
        * task is again ready to run and has execution priority.

@@ -140,7 +140,7 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
 
       if (switch_needed)
         {
-          up_block_task(rtcb);
+          up_switch_context(this_task(), rtcb);
         }
 
       /* When we resume at this point, either (1) the message queue
@@ -271,7 +271,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
 
       if (nxsched_add_readytorun(btcb))
         {
-          up_unblock_task(btcb, rtcb);
+          up_switch_context(btcb, rtcb);
         }
     }
 

@@ -57,9 +57,9 @@
  *        must be "locked" and always present in memory.
  *      - ASSERT if an interrupt was executing at the time of the exception.
  *   2) Block the currently executing task.
- *      - Call up_block_task() to block the task at the head of the ready-
- *        to-run list.  This should cause an interrupt level context switch
- *        to the next highest priority task.
+ *      - Call up_switch_context() to block the task at the head of the
+ *        ready-to-run list.  This should cause an interrupt level context
+ *        switch to the next highest priority task.
  *      - The blocked task will be marked with state TSTATE_WAIT_PAGEFILL
  *        and will be retained in the g_waitingforfill prioritized task
  *        list.
@@ -124,9 +124,9 @@ void pg_miss(void)
   DEBUGASSERT(g_pgworker != ftcb->pid);
 
   /* Block the currently executing task
-   * - Call up_block_task() to block the task at the head of the ready-
-   *   to-run list.  This should cause an interrupt level context switch
-   *   to the next highest priority task.
+   * - Call up_switch_context() to block the task at the head of the
+   *   ready-to-run list.  This should cause an interrupt level context
+   *   switch to the next highest priority task.
    * - The blocked task will be marked with state TSTATE_WAIT_PAGEFILL
    *   and will be retained in the g_waitingforfill prioritized task list.
    *
@@ -149,7 +149,7 @@ void pg_miss(void)
 
   if (switch_needed)
     {
-      up_block_task(ftcb);
+      up_switch_context(this_task(), ftcb);
     }
 
   /* Boost the page fill worker thread priority.

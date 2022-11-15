@@ -90,7 +90,7 @@ void nxtask_activate(FAR struct tcb_s *tcb)
 
   if (nxsched_add_readytorun(tcb))
     {
-      up_unblock_task(tcb, rtcb);
+      up_switch_context(tcb, rtcb);
     }
 
   leave_critical_section(flags);

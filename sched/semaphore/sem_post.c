@@ -161,7 +161,7 @@ int nxsem_post(FAR sem_t *sem)
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_unblock_task(stcb, rtcb);
+              up_switch_context(stcb, rtcb);
             }
         }
 #if 0 /* REVISIT:  This can fire on IOB throttle semaphore */

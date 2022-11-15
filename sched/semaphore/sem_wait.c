@@ -165,7 +165,7 @@ int nxsem_wait(FAR sem_t *sem)
 
       if (switch_needed)
         {
-          up_block_task(rtcb);
+          up_switch_context(this_task(), rtcb);
         }
 
       /* When we resume at this point, either (1) the semaphore has been
