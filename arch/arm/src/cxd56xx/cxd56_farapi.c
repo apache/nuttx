@@ -192,14 +192,14 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
     {
       /* Save the current cpuset */
 
-      sched_getaffinity(getpid(), sizeof(cpu_set_t), &cpuset0);
+      sched_getaffinity(gettid(), sizeof(cpu_set_t), &cpuset0);
 
       /* Assign the current task to cpu0 */
 
       cpu_set_t cpuset1;
       CPU_ZERO(&cpuset1);
       CPU_SET(0, &cpuset1);
-      sched_setaffinity(getpid(), sizeof(cpu_set_t), &cpuset1);
+      sched_setaffinity(gettid(), sizeof(cpu_set_t), &cpuset1);
 
       /* NOTE: a workaround to finish rescheduling */
 
@@ -267,7 +267,7 @@ err:
     {
       /* Restore the cpu affinity */
 
-      sched_setaffinity(getpid(), sizeof(cpu_set_t), &cpuset0);
+      sched_setaffinity(gettid(), sizeof(cpu_set_t), &cpuset0);
 
       /* NOTE: a workaround to finish rescheduling */
 

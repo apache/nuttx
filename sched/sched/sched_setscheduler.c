@@ -100,7 +100,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
   if (pid == 0)
     {
-      pid = getpid();
+      pid = gettid();
     }
 
   /* Verify that the pid corresponds to a real task */

@@ -202,7 +202,7 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
 
       /* Start the watchdog */
 
-      wd_start(&rtcb->waitdog, ticks, nxmq_rcvtimeout, getpid());
+      wd_start(&rtcb->waitdog, ticks, nxmq_rcvtimeout, gettid());
     }
 
   /* Get the message from the message queue */

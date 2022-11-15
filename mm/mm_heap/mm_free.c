@@ -87,7 +87,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   if (mm_lock(heap) < 0)
     {
       /* Meet -ESRCH return, which means we are in situations
-       * during context switching(See mm_lock() & getpid()).
+       * during context switching(See mm_lock() & gettid()).
        * Then add to the delay list.
        */
 

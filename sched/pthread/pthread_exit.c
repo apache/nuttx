@@ -79,7 +79,7 @@ void nx_pthread_exit(FAR void *exit_value)
 
   /* Complete pending join operations */
 
-  status = pthread_completejoin(getpid(), exit_value);
+  status = pthread_completejoin(gettid(), exit_value);
   if (status != OK)
     {
       /* Assume that the join completion failured because this

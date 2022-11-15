@@ -245,7 +245,7 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
 
   /* Start the watchdog and begin the wait for MQ not full */
 
-  wd_start(&rtcb->waitdog, ticks, nxmq_sndtimeout, getpid());
+  wd_start(&rtcb->waitdog, ticks, nxmq_sndtimeout, gettid());
 
   /* And wait for the message queue to be non-empty */
 

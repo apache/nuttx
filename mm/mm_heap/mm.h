@@ -73,7 +73,7 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         tmp->pid = getpid(); \
+         tmp->pid = gettid(); \
        } \
      while (0)
 #elif CONFIG_MM_BACKTRACE > 0
@@ -82,7 +82,7 @@
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          kasan_unpoison(tmp, SIZEOF_MM_ALLOCNODE); \
-         tmp->pid = getpid(); \
+         tmp->pid = gettid(); \
          if ((heap)->mm_procfs.backtrace) \
            { \
              memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
