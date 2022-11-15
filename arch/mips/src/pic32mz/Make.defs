@@ -30,7 +30,7 @@ CMN_CSRCS += mips_createstack.c mips_doirq.c mips_exit.c mips_initialize.c
 CMN_CSRCS += mips_initialstate.c mips_irq.c mips_lowputs.c
 CMN_CSRCS += mips_mdelay.c mips_modifyreg8.c mips_modifyreg16.c mips_modifyreg32.c
 CMN_CSRCS += mips_nputs.c mips_releasepending.c mips_releasestack.c
-CMN_CSRCS += mips_reprioritizertr.c mips_schedulesigaction.c mips_sigdeliver.c
+CMN_CSRCS += mips_schedulesigaction.c mips_sigdeliver.c
 CMN_CSRCS += mips_stackframe.c mips_swint0.c mips_udelay.c mips_unblocktask.c
 CMN_CSRCS += mips_usestack.c mips_vfork.c
 

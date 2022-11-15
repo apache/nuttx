@@ -32,6 +32,6 @@ CHIP_CSRCS += minerva_copystate.c minerva_createstack.c minerva_decodeirq.c
 CHIP_CSRCS += minerva_doirq.c minerva_dumpstate.c minerva_exit.c minerva_idle.c
 CHIP_CSRCS += minerva_initialstate.c minerva_irq.c minerva_releasepending.c
 CHIP_CSRCS += minerva_releasestack.c minerva_stackframe.c minerva_swint.c
-CHIP_CSRCS += minerva_unblocktask.c minerva_reprioritizertr.c
+CHIP_CSRCS += minerva_unblocktask.c
 CHIP_CSRCS += minerva_schedulesigaction.c minerva_sigdeliver.c
 CHIP_CSRCS += minerva_flushcache.c minerva_doexceptions.c minerva_usetack.c
