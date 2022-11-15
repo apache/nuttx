@@ -120,8 +120,10 @@
 struct pwm_chan_s
 {
   ub16_t duty;
+#ifdef CONFIG_SAMV7_PWM
   bool ch_outp_ovrwr;
   bool ch_outp_ovrwr_val;
+#endif
   int8_t channel;
 };
 #endif
