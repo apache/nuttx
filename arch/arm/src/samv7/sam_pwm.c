@@ -449,6 +449,7 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
+  uint32_t regval;
 
 #ifdef CONFIG_PWM_MULTICHAN
       for (int i = 0; i < PWM_NCHANNELS; i++)
@@ -472,6 +473,23 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                            info->frequency);
               pwm_set_output(dev, priv->channels[index - 1].channel,
                              info->channels[i].duty);
+
+          if (info->channels[i].ch_outp_ovrwr)
+            {
+              regval = pwm_getreg(priv, SAMV7_PWM_OOV);
+              regval &= ~(info->channels[i].ch_outp_ovrwr_val
+                  << priv->channels[i].channel);
+              pwm_putreg(priv, SAMV7_PWM_OOV, regval);
+
+              regval = (1 << priv->channels[i].channel);
+              pwm_putreg(priv, SAMV7_PWM_OSS, regval);
+            }
+          else
+            {
+              /* release overwrite of channel */
+              regval = (1 << priv->channels[i].channel);
+              pwm_putreg(priv, SAMV7_PWM_OSC, regval);
+            }
             }
         }
 #else
