@@ -159,7 +159,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 
   /* Start the watchdog */
 
-  wd_start(&rtcb->waitdog, ticks, nxsem_timeout, getpid());
+  wd_start(&rtcb->waitdog, ticks, nxsem_timeout, gettid());
 
   /* Now perform the blocking wait.  If nxsem_wait() fails, the
    * negated errno value will be returned below.

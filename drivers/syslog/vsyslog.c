@@ -155,9 +155,9 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
-  /* Prepend the Process ID */
+  /* Prepend the Thread ID */
 
-  ret += lib_sprintf(&stream.public, "[%2d] ", (int)getpid());
+  ret += lib_sprintf(&stream.public, "[%2d] ", gettid());
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
@@ -211,9 +211,9 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
-  /* Prepend the process name */
+  /* Prepend the thread name */
 
-  tcb = nxsched_get_tcb(getpid());
+  tcb = nxsched_get_tcb(gettid());
   ret += lib_sprintf(&stream.public, "%s: ",
                      (tcb != NULL) ? tcb->name : "(null)");
 #endif

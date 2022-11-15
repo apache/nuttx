@@ -38,22 +38,16 @@
  * Name: getpid
  *
  * Description:
- *   Get the task ID of the currently executing task.
+ *   Get the Process ID of the currently executing task.
  *
  * Input parameters:
  *   None
  *
  * Returned Value:
  *   Normally when called from user applications, getpid() will return the
- *   task ID of the currently executing task, that is, the task at the head
- *   of the ready-to-run list.  There is no specification for any errors
+ *   Process ID of the currently executing task. that is, the main task
+ *   for the task groups. There is no specification for any errors
  *   returned from getpid().
- *
- *   getpid(), however, may be called from within the OS in some cases.
- *   There are certain situations during context switching when the OS data
- *   structures are in flux and where the current task at the head of the
- *   ready-to-run task list is not actually running.  In that case,
- *   getpid() will return the error: -ESRCH
  *
  ****************************************************************************/
 
@@ -65,31 +59,17 @@ pid_t getpid(void)
    * will usually be the currently executing task.  There is are two
    * exceptions to this:
    *
-   * 1. Early in the start-up sequence, the ready-to-run list may be
-   *    empty!  In this case, of course, the CPU0 start-up/IDLE thread with
-   *    pid == 0 must be running, and
-   * 2. As described above, during certain context-switching conditions the
-   *    task at the head of the ready-to-run list may not actually be
-   *    running.
+   * Early in the start-up sequence, the ready-to-run list may be
+   * empty!  In this case, of course, the CPU0 start-up/IDLE thread with
+   * pid == 0 must be running, and
    */
 
   rtcb = this_task();
   if (rtcb != NULL)
     {
-      /* Check if the task is actually running */
+      /* Yes.. Return the Process ID */
 
-      if (rtcb->task_state == TSTATE_TASK_RUNNING)
-        {
-          /* Yes.. Return the task ID from the TCB at the head of the
-           * ready-to-run task list
-           */
-
-          return rtcb->pid;
-        }
-
-      /* No.. return -ESRCH to indicate this condition */
-
-      return (pid_t)-ESRCH;
+      return rtcb->group->tg_pid;
     }
 
   /* We must have been called earlier in the start up sequence from the

@@ -88,7 +88,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
    * ourself.
    */
 
-  if ((pid_t)thread == getpid())
+  if ((pid_t)thread == gettid())
     {
       leave_cancellation_point();
       return EDEADLK;

@@ -78,7 +78,7 @@
 int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
                             FAR const struct timespec *abs_timeout)
 {
-  pid_t mypid = getpid();
+  pid_t mypid = gettid();
   int ret = EINVAL;
 
   sinfo("mutex=%p\n", mutex);
