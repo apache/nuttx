@@ -79,6 +79,8 @@ int local_listen(FAR struct socket *psock, int backlog)
       return -EOPNOTSUPP;
     }
 
+  net_lock();
+
   server = (FAR struct local_conn_s *)psock->s_conn;
 
   /* Some sanity checks */
@@ -87,6 +89,7 @@ int local_listen(FAR struct socket *psock, int backlog)
       server->lc_state == LOCAL_STATE_UNBOUND ||
       server->lc_type != LOCAL_TYPE_PATHNAME)
     {
+      net_unlock();
       return -EOPNOTSUPP;
     }
 
@@ -116,6 +119,8 @@ int local_listen(FAR struct socket *psock, int backlog)
 
       server->lc_state = LOCAL_STATE_LISTENING;
     }
+
+  net_unlock();
 
   return OK;
 }
