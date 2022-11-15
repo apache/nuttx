@@ -375,6 +375,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
+ *   try_create - Try create the entry if no entry found.
  *
  * Returned Value:
  *   Pointer to entry on success; null on failure
@@ -383,7 +384,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
 
 FAR struct ipv4_nat_entry *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
-                             in_addr_t local_ip, uint16_t local_port)
+                             in_addr_t local_ip, uint16_t local_port,
+                             bool try_create)
 {
   FAR sq_entry_t *p;
   FAR sq_entry_t *tmp;
@@ -410,6 +412,11 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
           ipv4_nat_entry_refresh(entry);
           return entry;
         }
+    }
+
+  if (!try_create)
+    {
+      return NULL;
     }
 
   /* Failed to find the entry, create one. */
