@@ -78,9 +78,10 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn,
       if (local)
         {
           conn->dev = net_bound_device(&conn->sconn);
+          return OK;
         }
 
-      return local ? OK : -EINVAL;
+      return -ECONNREFUSED;
     }
 
   /* We need to select the device that is going to route the TCP packet
@@ -133,9 +134,10 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
       if (local)
         {
           conn->dev = net_bound_device(&conn->sconn);
+          return OK;
         }
 
-      return local ? OK : -EINVAL;
+      return -ECONNREFUSED;
     }
 
   /* We need to select the device that is going to route the TCP packet
