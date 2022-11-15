@@ -53,7 +53,8 @@
  *   number.
  *
  * Input Parameters:
- *   None
+ *   enable_tx  - Register device as TX if true
+ *   enable_rx  - Register device as RX if true
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -61,12 +62,11 @@
  *
  ****************************************************************************/
 
-int board_i2sdev_initialize(void)
+int board_i2sdev_initialize(bool enable_tx, bool enable_rx)
 {
   struct audio_lowerhalf_s *audio_i2s;
-  struct audio_lowerhalf_s *pcm;
   struct i2s_dev_s *i2s;
-  char devname[5];
+  char devname[8];
   int ret;
 
   ainfo("Initializing I2S\n");
@@ -82,29 +82,71 @@ int board_i2sdev_initialize(void)
     }
 #endif
 
-  audio_i2s = audio_i2s_initialize(i2s, true);
-
-  if (!audio_i2s)
+  if (enable_tx)
     {
-      auderr("ERROR: Failed to initialize the Generic I2S audio driver\n");
-      return -ENODEV;
+      /* Initialize audio output */
+
+      audio_i2s = audio_i2s_initialize(i2s, true);
+
+      if (audio_i2s == NULL)
+        {
+          auderr("ERROR: Failed to initialize I2S audio output\n");
+          return -ENODEV;
+        }
+
+      snprintf(devname, sizeof(devname), "pcm0");
+
+      /* If nxlooper is selected, the playback buffer is not rendered as
+       * a WAV file. Therefore, PCM decode will fail while processing such
+       * output buffer. In such a case, we bypass the PCM decode.
+       */
+
+#ifdef CONFIG_SYSTEM_NXLOOPER
+      ret = audio_register(devname, audio_i2s);
+#else
+      struct audio_lowerhalf_s *pcm;
+
+      pcm = pcm_decode_initialize(audio_i2s);
+
+      if (pcm == NULL)
+        {
+          auderr("ERROR: Failed create the PCM decoder\n");
+          return -ENODEV;
+        }
+
+      ret = audio_register(devname, pcm);
+#endif /* CONFIG_SYSTEM_NXLOOPER */
+
+      if (ret < 0)
+        {
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
+          return ret;
+        }
     }
 
-  pcm = pcm_decode_initialize(audio_i2s);
-
-  if (!pcm)
+  if (enable_rx)
     {
-      auderr("ERROR: Failed create the PCM decoder\n");
-      return  -ENODEV;
-    }
+      /* Initialize audio input */
 
-  snprintf(devname, 5, "pcm0");
+      audio_i2s = audio_i2s_initialize(i2s, false);
 
-  ret = audio_register(devname, pcm);
+      if (audio_i2s == NULL)
+        {
+          auderr("ERROR: Failed to initialize I2S audio input\n");
+          return -ENODEV;
+        }
 
-  if (ret < 0)
-    {
-      auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+      snprintf(devname, sizeof(devname), "pcm_in0");
+
+      ret = audio_register(devname, audio_i2s);
+
+      if (ret < 0)
+        {
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
+          return ret;
+        }
     }
 
   return ret;

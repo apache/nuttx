@@ -89,6 +89,7 @@
 
 #ifdef CONFIG_ESP32S2_I2S_RX
 #  define I2S_RX_ENABLED 1
+#  define I2S_HAVE_RX 1
 #else
 #  define I2S_RX_ENABLED 0
 #endif
@@ -154,7 +155,6 @@ struct esp32s2_i2s_config_s
   uint32_t total_slot;        /* Total slot number */
 
   bool is_apll;               /* Select APLL as the source clock */
-  uint32_t mclk_multiple;     /* The multiple of mclk to the sample rate */
 
   bool tx_en;                 /* Is TX enabled? */
   bool rx_en;                 /* Is RX enabled? */
@@ -202,17 +202,17 @@ struct esp32s2_buffer_s
 {
   struct esp32s2_buffer_s *flink; /* Supports a singly linked list */
 
-  /* The associated DMA outlink */
+  /* The associated DMA in/outlink */
 
-  struct esp32s2_dmadesc_s dma_outlink[I2S_DMADESC_NUM];
+  struct esp32s2_dmadesc_s dma_link[I2S_DMADESC_NUM];
 
-  i2s_callback_t callback;        /* DMA completion callback */
-  uint32_t timeout;               /* Timeout value of the DMA transfers */
-  void *arg;                      /* Callback's argument */
-  struct ap_buffer_s *apb;        /* The audio buffer */
-  uint8_t *buf;                   /* The DMA's descriptor buffer */
-  uint32_t nbytes;                /* The DMA's descriptor buffer size */
-  int result;                     /* The result of the transfer */
+  i2s_callback_t callback;      /* DMA completion callback */
+  uint32_t timeout;             /* Timeout value of the DMA transfers */
+  void *arg;                    /* Callback's argument */
+  struct ap_buffer_s *apb;      /* The audio buffer */
+  uint8_t *buf;                 /* The DMA's descriptor buffer */
+  uint32_t nbytes;              /* The DMA's descriptor buffer size */
+  int result;                   /* The result of the transfer */
 };
 
 /* Internal buffer must be aligned to the bytes_per_sample. Sometimes,
@@ -256,16 +256,23 @@ struct esp32s2_i2s_s
 
   const struct esp32s2_i2s_config_s *config;
 
-  uint32_t          mclk_freq;    /* I2S actual master clock */
-  uint32_t          channels;     /* Audio channels (1:mono or 2:stereo) */
-  uint32_t          rate;         /* I2S actual configured sample-rate */
-  uint32_t          data_width;   /* I2S actual configured data_width */
+  uint32_t    mclk_freq;      /* I2S actual master clock */
+  uint32_t    mclk_multiple;  /* The multiple of mclk to the sample rate */
+  uint32_t    channels;       /* Audio channels (1:mono or 2:stereo) */
+  uint32_t    rate;           /* I2S actual configured sample-rate */
+  uint32_t    data_width;     /* I2S actual configured data_width */
 
 #ifdef I2S_HAVE_TX
   struct esp32s2_transport_s tx;  /* TX transport state */
 
   bool tx_started;              /* TX channel started */
 #endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+  struct esp32s2_transport_s rx;  /* RX transport state */
+
+  bool rx_started;              /* RX channel started */
+#endif /* I2S_HAVE_RX */
 
   /* Pre-allocated pool of buffer containers */
 
@@ -304,23 +311,42 @@ static void i2s_tx_schedule(struct esp32s2_i2s_s *priv,
                             struct esp32s2_dmadesc_s *outlink);
 #endif /* I2S_HAVE_TX */
 
+#ifdef I2S_HAVE_RX
+static int  i2s_rxdma_setup(struct esp32s2_i2s_s *priv,
+                            struct esp32s2_buffer_s *bfcontainer);
+static void i2s_rx_worker(void *arg);
+static void i2s_rx_schedule(struct esp32s2_i2s_s *priv,
+                            struct esp32s2_dmadesc_s *outlink);
+#endif /* I2S_HAVE_RX */
+
 /* I2S methods (and close friends) */
 
 static uint32_t i2s_set_datawidth(struct esp32s2_i2s_s *priv);
 static uint32_t i2s_set_clock(struct esp32s2_i2s_s *priv);
+static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev, uint32_t frequency);
+static int      i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg);
+
+#ifdef I2S_HAVE_TX
 static void     i2s_tx_channel_start(struct esp32s2_i2s_s *priv);
 static void     i2s_tx_channel_stop(struct esp32s2_i2s_s *priv);
-static int      i2s_txchannels(struct i2s_dev_s *dev,
-                               uint8_t channels);
-static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev,
-                                  uint32_t frequency);
-static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev,
-                                 uint32_t rate);
+static int      i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels);
+static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
-static int      i2s_send(struct i2s_dev_s *dev,
-                         struct ap_buffer_s *apb,
+static int      i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                          i2s_callback_t callback, void *arg,
                          uint32_t timeout);
+#endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+static void     i2s_rx_channel_start(struct esp32s2_i2s_s *priv);
+static void     i2s_rx_channel_stop(struct esp32s2_i2s_s *priv);
+static int      i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels);
+static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static int      i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                            i2s_callback_t callback, void *arg,
+                            uint32_t timeout);
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Private Data
@@ -328,10 +354,21 @@ static int      i2s_send(struct i2s_dev_s *dev,
 
 static const struct i2s_ops_s g_i2sops =
 {
+  #ifdef I2S_HAVE_TX
   .i2s_txchannels     = i2s_txchannels,
   .i2s_txsamplerate   = i2s_txsamplerate,
   .i2s_txdatawidth    = i2s_txdatawidth,
   .i2s_send           = i2s_send,
+  #endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+  .i2s_rxchannels     = i2s_rxchannels,
+  .i2s_rxsamplerate   = i2s_rxsamplerate,
+  .i2s_rxdatawidth    = i2s_rxdatawidth,
+  .i2s_receive        = i2s_receive,
+#endif /* I2S_HAVE_RX */
+
+  .i2s_ioctl          = i2s_ioctl,
   .i2s_mclkfrequency  = i2s_mclkfrequency,
 };
 
@@ -347,7 +384,6 @@ static const struct esp32s2_i2s_config_s esp32s2_i2s0_config =
   .data_width       = CONFIG_ESP32S2_I2S_DATA_BIT_WIDTH,
   .rate             = CONFIG_ESP32S2_I2S_SAMPLE_RATE,
   .total_slot       = 2,
-  .mclk_multiple    = I2S_MCLK_MULTIPLE_384,
   .tx_en            = I2S_TX_ENABLED,
   .rx_en            = I2S_RX_ENABLED,
 #ifdef CONFIG_ESP32S2_I2S_MCLK
@@ -409,7 +445,7 @@ static struct esp32s2_i2s_s esp32s2_i2s0_priv =
  *   free list
  *
  * Input Parameters:
- *   priv - I2S state instance
+ *   priv - Initialized I2S device structure.
  *
  * Returned Value:
  *   A non-NULL pointer to the allocate buffer container on success; NULL if
@@ -457,7 +493,7 @@ static struct esp32s2_buffer_s *i2s_buf_allocate(struct esp32s2_i2s_s *priv)
  *   Free buffer container by adding it to the head of the free list
  *
  * Input Parameters:
- *   priv - I2S state instance
+ *   priv - Initialized I2S device structure.
  *   bfcontainer - The buffer container to be freed
  *
  * Returned Value:
@@ -498,7 +534,7 @@ static void i2s_buf_free(struct esp32s2_i2s_s *priv,
  *   pre-allocated buffer containers to the free list
  *
  * Input Parameters:
- *   priv - I2S state instance
+ *   priv - Initialized I2S device structure.
  *
  * Returned Value:
  *   OK on success; A negated errno value on failure.
@@ -511,8 +547,10 @@ static void i2s_buf_free(struct esp32s2_i2s_s *priv,
 
 static int i2s_buf_initialize(struct esp32s2_i2s_s *priv)
 {
+#ifdef I2S_HAVE_TX
   priv->tx.carry.bytes = 0;
   priv->tx.carry.value = 0;
+#endif /* I2S_HAVE_TX */
 
   priv->bf_freelist = NULL;
 
@@ -529,10 +567,10 @@ static int i2s_buf_initialize(struct esp32s2_i2s_s *priv)
  *
  * Description:
  *   Initiate the next TX DMA transfer. The DMA outlink was previously bound
- *   so it is safe to start the next DMA transfer at interruption level.
+ *   so it is safe to start the next DMA transfer at interrupt level.
  *
  * Input Parameters:
- *   priv - I2S state instance
+ *   priv - Initialized I2S device structure.
  *
  * Returned Value:
  *   OK on success; a negated errno value on failure
@@ -571,7 +609,7 @@ static int i2s_txdma_start(struct esp32s2_i2s_s *priv)
 
   modifyreg32(I2S_OUT_LINK_REG, I2S_OUTLINK_ADDR_M,
               FIELD_TO_VALUE(I2S_OUTLINK_ADDR,
-              (uintptr_t) bfcontainer->dma_outlink));
+              (uintptr_t) bfcontainer->dma_link));
 
   modifyreg32(I2S_OUT_LINK_REG, I2S_OUTLINK_STOP, I2S_OUTLINK_START);
 
@@ -584,13 +622,76 @@ static int i2s_txdma_start(struct esp32s2_i2s_s *priv)
 #endif /* I2S_HAVE_TX */
 
 /****************************************************************************
+ * Name: i2s_rxdma_start
+ *
+ * Description:
+ *   Initiate the next RX DMA transfer. Assuming the DMA inlink is already
+ *   bound, it's safe to start the next DMA transfer in an interrupt context.
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure
+ *
+ * Assumptions:
+ *   Interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static int i2s_rxdma_start(struct esp32s2_i2s_s *priv)
+{
+  struct esp32s2_buffer_s *bfcontainer;
+
+  /* If there is already an active transmission in progress, then bail
+   * returning success.
+   */
+
+  if (!sq_empty(&priv->rx.act))
+    {
+      return OK;
+    }
+
+  /* If there are no pending transfer, then bail returning success */
+
+  if (sq_empty(&priv->rx.pend))
+    {
+      return OK;
+    }
+
+  bfcontainer = (struct esp32s2_buffer_s *)sq_remfirst(&priv->rx.pend);
+
+  /* If there isn't already an active transmission in progress,
+   * then start it.
+   */
+
+  modifyreg32(I2S_RXEOF_NUM_REG, I2S_RX_EOF_NUM_M,
+              FIELD_TO_VALUE(I2S_RX_EOF_NUM, bfcontainer->nbytes));
+
+  modifyreg32(I2S_IN_LINK_REG, I2S_INLINK_ADDR_M,
+              FIELD_TO_VALUE(I2S_INLINK_ADDR,
+              (uintptr_t) bfcontainer->dma_link));
+
+  modifyreg32(I2S_IN_LINK_REG, I2S_INLINK_STOP, I2S_INLINK_START);
+
+  modifyreg32(I2S_CONF_REG, 0, I2S_RX_START);
+
+  sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.act);
+
+  return OK;
+}
+#endif /* I2S_HAVE_RX */
+
+/****************************************************************************
  * Name: i2s_txdma_setup
  *
  * Description:
  *   Setup the next TX DMA transfer
  *
  * Input Parameters:
- *   priv - I2S state instance
+ *   priv - Initialized I2S device structure.
+ *   bfcontainer - The buffer container to be set up
  *
  * Returned Value:
  *   OK on success; a negated errno value on failure
@@ -604,21 +705,21 @@ static int i2s_txdma_start(struct esp32s2_i2s_s *priv)
 static int i2s_txdma_setup(struct esp32s2_i2s_s *priv,
                            struct esp32s2_buffer_s *bfcontainer)
 {
-  struct ap_buffer_s *apb;
-  struct esp32s2_dmadesc_s *outlink;
-  uint8_t *samp;
-  apb_samp_t samp_size;
+  int ret = OK;
   size_t carry_size;
   uint32_t bytes_queued;
   uint32_t data_copied;
-  uint8_t *buf;
+  struct ap_buffer_s *apb;
+  struct esp32s2_dmadesc_s *outlink;
+  apb_samp_t samp_size;
   irqstate_t flags;
-  int ret = OK;
+  uint8_t *buf;
+  uint8_t *samp;
 
   DEBUGASSERT(bfcontainer && bfcontainer->apb);
 
   apb = bfcontainer->apb;
-  outlink = bfcontainer->dma_outlink;
+  outlink = bfcontainer->dma_link;
 
   /* Get the transfer information, accounting for any data offset */
 
@@ -679,6 +780,12 @@ static int i2s_txdma_setup(struct esp32s2_i2s_s *priv,
       memcpy(&priv->tx.carry.value, samp, priv->tx.carry.bytes);
     }
 
+  /* Release our reference on the audio buffer. This may very likely
+   * cause the audio buffer to be freed.
+   */
+
+  apb_free(bfcontainer->apb);
+
   /* Configure DMA stream */
 
   bytes_queued = esp32s2_dma_init(outlink, I2S_DMADESC_NUM,
@@ -709,6 +816,67 @@ static int i2s_txdma_setup(struct esp32s2_i2s_s *priv,
 #endif /* I2S_HAVE_TX */
 
 /****************************************************************************
+ * Name: i2s_rxdma_setup
+ *
+ * Description:
+ *   Setup the next RX DMA transfer
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *   bfcontainer - The buffer container to be set up
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure
+ *
+ * Assumptions:
+ *   Interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static int i2s_rxdma_setup(struct esp32s2_i2s_s *priv,
+                           struct esp32s2_buffer_s *bfcontainer)
+{
+  int ret = OK;
+  struct esp32s2_dmadesc_s *inlink;
+  uint32_t bytes_queued;
+  irqstate_t flags;
+
+  DEBUGASSERT(bfcontainer && bfcontainer->apb);
+
+  inlink = bfcontainer->dma_link;
+
+  /* Configure DMA stream */
+
+  bytes_queued = esp32s2_dma_init(inlink, I2S_DMADESC_NUM,
+                                  bfcontainer->apb->samp,
+                                  bfcontainer->nbytes);
+
+  if (bytes_queued != bfcontainer->nbytes)
+    {
+      i2serr("Failed to enqueue I2S buffer "
+             "(%" PRIu32 " bytes of %" PRIu32 ")\n",
+             bytes_queued, bfcontainer->nbytes);
+      return bytes_queued;
+    }
+
+  flags = enter_critical_section();
+
+  /* Add the buffer container to the end of the RX pending queue */
+
+  sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
+
+  /* Trigger DMA transfer if no transmission is in progress */
+
+  ret = i2s_rxdma_start(priv);
+
+  leave_critical_section(flags);
+
+  return ret;
+}
+#endif /* I2S_HAVE_RX */
+
+/****************************************************************************
  * Name: i2s_tx_schedule
  *
  * Description:
@@ -716,16 +884,14 @@ static int i2s_txdma_setup(struct esp32s2_i2s_s *priv,
  *   the working thread.
  *
  * Input Parameters:
- *   handle - The DMA handler
- *   arg - A pointer to the chip select struction
- *   result - The result of the DMA transfer
+ *   priv - Initialized I2S device structure.
+ *   outlink - DMA outlink descriptor that triggered the interrupt.
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
  *   - Interrupts are disabled
- *   - The TX timeout has been canceled.
  *
  ****************************************************************************/
 
@@ -758,7 +924,7 @@ static void i2s_tx_schedule(struct esp32s2_i2s_s *priv,
 
       /* Find the last descriptor of the current buffer container */
 
-      bfdesc = bfcontainer->dma_outlink;
+      bfdesc = bfcontainer->dma_link;
       while (!(bfdesc->ctrl & DMA_CTRL_EOF))
         {
           DEBUGASSERT(bfdesc->next);
@@ -808,6 +974,105 @@ static void i2s_tx_schedule(struct esp32s2_i2s_s *priv,
     }
 }
 #endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rx_schedule
+ *
+ * Description:
+ *   An RX DMA completion has occurred.  Schedule processing on
+ *   the working thread.
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *   inlink - DMA inlink descriptor that triggered the interrupt.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   - Interrupts are disabled
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static void i2s_rx_schedule(struct esp32s2_i2s_s *priv,
+                            struct esp32s2_dmadesc_s *inlink)
+{
+  struct esp32s2_buffer_s *bfcontainer;
+  struct esp32s2_dmadesc_s *bfdesc;
+  int ret;
+
+  /* Upon entry, the transfer(s) that just completed are the ones in the
+   * priv->rx.act queue.
+   */
+
+  /* Move all entries from the rx.act queue to the rx.done queue */
+
+  if (!sq_empty(&priv->rx.act))
+    {
+      /* Remove the next buffer container from the rx.act list */
+
+      bfcontainer = (struct esp32s2_buffer_s *)sq_peek(&priv->rx.act);
+
+      /* Check if the DMA descriptor that generated an EOF interrupt is the
+       * last descriptor of the current buffer container's DMA inlink.
+       * REVISIT: what to do if we miss syncronization and the descriptor
+       * that generated the interrupt is different from the expected (the
+       * oldest of the list containing active transmissions)?
+       */
+
+      /* Find the last descriptor of the current buffer container */
+
+      bfdesc = bfcontainer->dma_link;
+      while (!(bfdesc->ctrl & DMA_CTRL_EOF))
+        {
+          DEBUGASSERT(bfdesc->next);
+          bfdesc = bfdesc->next;
+        }
+
+      if (bfdesc == inlink)
+        {
+          sq_remfirst(&priv->rx.act);
+
+          /* Report the result of the transfer */
+
+          bfcontainer->result = OK;
+
+          /* Add the completed buffer container to the tail of the rx.done
+           * queue
+           */
+
+          sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.done);
+
+          /* Check if the DMA is IDLE */
+
+          if (sq_empty(&priv->rx.act))
+            {
+              /* Then start the next DMA. */
+
+              i2s_rxdma_start(priv);
+            }
+        }
+
+      /* If the worker has completed running, then reschedule the working
+       * thread.
+       */
+
+      if (work_available(&priv->rx.work))
+        {
+          /* Schedule the RX DMA done processing to occur on the worker
+           * thread.
+           */
+
+          ret = work_queue(HPWORK, &priv->rx.work, i2s_rx_worker, priv, 0);
+          if (ret != 0)
+            {
+              i2serr("ERROR: Failed to queue RX work: %d\n", ret);
+            }
+        }
+    }
+}
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_tx_worker
@@ -868,6 +1133,70 @@ static void i2s_tx_worker(void *arg)
 
       free(bfcontainer->buf);
 
+      /* And release the buffer container */
+
+      i2s_buf_free(priv, bfcontainer);
+    }
+}
+#endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rx_worker
+ *
+ * Description:
+ *   RX transfer done worker
+ *
+ * Input Parameters:
+ *   arg - the I2S device instance cast to void*
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static void i2s_rx_worker(void *arg)
+{
+  struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)arg;
+  struct esp32s2_buffer_s *bfcontainer;
+  irqstate_t flags;
+
+  DEBUGASSERT(priv);
+
+  /* When the transfer was started, the active buffer containers were removed
+   * from the rx.pend queue and saved in the rx.act queue. We get here when
+   * the DMA is finished.
+   *
+   * In any case, the buffer containers in rx.act will be moved to the end
+   * of the rx.done queue and rx.act will be emptied before this worker is
+   * started.
+   *
+   */
+
+  i2sinfo("rx.act.head=%p rx.done.head=%p\n",
+           priv->rx.act.head, priv->rx.done.head);
+
+  /* Process each buffer in the rx.done queue */
+
+  while (sq_peek(&priv->rx.done) != NULL)
+    {
+      /* Remove the buffer container from the rx.done queue.  NOTE that
+       * interrupts must be disabled to do this because the rx.done queue is
+       * also modified from the interrupt level.
+       */
+
+      flags = enter_critical_section();
+      bfcontainer = (struct esp32s2_buffer_s *)sq_remfirst(&priv->rx.done);
+      leave_critical_section(flags);
+
+      bfcontainer->apb->nbytes = (getreg32(I2S_RXEOF_NUM_REG));
+
+      /* Perform the RX transfer done callback */
+
+      DEBUGASSERT(bfcontainer && bfcontainer->callback);
+      bfcontainer->callback(&priv->dev, bfcontainer->apb,
+                            bfcontainer->arg, bfcontainer->result);
+
       /* Release our reference on the audio buffer. This may very likely
        * cause the audio buffer to be freed.
        */
@@ -879,7 +1208,7 @@ static void i2s_tx_worker(void *arg)
       i2s_buf_free(priv, bfcontainer);
     }
 }
-#endif /* I2S_HAVE_TX */
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_configure
@@ -929,7 +1258,14 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
                               priv->config->dout_outsig, 0, 0);
     }
 
-  /* TODO: repeat above function for RX channel */
+  /* Enable RX channel */
+
+  if (priv->config->din_pin != I2S_GPIO_UNUSED)
+    {
+      esp32s2_configgpio(priv->config->din_pin, INPUT_FUNCTION_2);
+      esp32s2_gpio_matrix_in(priv->config->din_pin,
+                             priv->config->din_insig, 0);
+    }
 
   if (priv->config->role == I2S_ROLE_SLAVE)
     {
@@ -981,25 +1317,9 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
                                   priv->config->mclk_out_sig, 0, 0);
         }
 
-      if (priv->config->rx_en && !priv->config->tx_en)
+      if (priv->config->tx_en && !priv->config->rx_en)
         {
-          /* For "rx + master" mode, select RX signal index for ws and bck */
-
-          esp32s2_gpiowrite(priv->config->ws_pin, 1);
-          esp32s2_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->ws_pin,
-                                  priv->config->ws_in_outsig, 0, 0);
-
-          esp32s2_gpiowrite(priv->config->bclk_pin, 1);
-          esp32s2_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->bclk_pin,
-                                  priv->config->bclk_in_outsig, 0, 0);
-        }
-      else
-        {
-          /* For "tx + rx + master" or "tx + master" mode, select TX signal
-           * index for ws and bck.
-           */
+          /* For "tx + master" mode, select TX signal index for ws and bck */
 
           esp32s2_gpiowrite(priv->config->ws_pin, 1);
           esp32s2_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
@@ -1011,11 +1331,36 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
           esp32s2_gpio_matrix_out(priv->config->bclk_pin,
                                   priv->config->bclk_out_outsig, 0, 0);
         }
+      else
+        {
+          /* For "tx + rx + master" or "rx + master" mode, select RX signal
+           * index for ws and bck.
+           */
+
+          esp32s2_gpiowrite(priv->config->ws_pin, 1);
+          esp32s2_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
+          esp32s2_gpio_matrix_out(priv->config->ws_pin,
+                                  priv->config->ws_in_outsig, 0, 0);
+
+          esp32s2_gpiowrite(priv->config->bclk_pin, 1);
+          esp32s2_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
+          esp32s2_gpio_matrix_out(priv->config->bclk_pin,
+                                  priv->config->bclk_in_outsig, 0, 0);
+        }
     }
 
-  /* TODO: share BCLK and WS if in full-duplex mode */
+  /* Share BCLK and WS if in full-duplex mode */
 
-  /* Configure the hardware to apply STD format */
+  if (priv->config->tx_en && priv->config->rx_en)
+    {
+      modifyreg32(I2S_CONF_REG, 0, I2S_SIG_LOOPBACK);
+    }
+  else
+    {
+      modifyreg32(I2S_CONF_REG, I2S_SIG_LOOPBACK, 0);
+    }
+
+  /* Configure the TX module */
 
   if (priv->config->tx_en)
     {
@@ -1034,11 +1379,22 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
         }
       else
         {
-          modifyreg32(I2S_CONF_REG, I2S_TX_SLAVE_MOD, 0);
+          /* Since BCLK and WS are shared, only TX or RX can be master. In
+           * this case, force TX as slave to avoid conflict of clock signal.
+           */
+
+          if (priv->config->rx_en)
+            {
+              modifyreg32(I2S_CONF_REG, 0, I2S_TX_SLAVE_MOD);
+            }
+          else
+            {
+              modifyreg32(I2S_CONF_REG, I2S_TX_SLAVE_MOD, 0);
+            }
         }
 
       /* Configure TX chan bit, audio data bit and mono mode.
-       * On ESP32-S2, sample_bit should equals to data_bit
+       * On ESP32-S2, sample_bit should equals to data_bit.
        */
 
       /* Set TX data width */
@@ -1093,22 +1449,138 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
       modifyreg32(I2S_FIFO_CONF_REG, 0, I2S_TX_FIFO_MOD_FORCE_EN);
 
-      i2s_mclkfrequency((struct i2s_dev_s *)priv,
-                                (priv->config->rate *
-                                priv->config->mclk_multiple));
+      /* The default value for the master clock frequency (MCLK frequency)
+       * can be set from the sample rate multiplied by a fixed value, known
+       * as MCLK multiplier. This multiplier, however, should be divisible
+       * by the number of bytes from a sample, i.e, for 24 bits, the
+       * multiplier should be divisible by 3. NOTE: the MCLK frequency can
+       * be adjusted on runtime, so this value remains valid only if the
+       * upper half does not implement the `i2s_mclkfrequency` method.
+       */
+
+      if (priv->config->data_width == I2S_DATA_BIT_WIDTH_24BIT)
+        {
+          priv->mclk_multiple = I2S_MCLK_MULTIPLE_384;
+        }
+      else
+        {
+          priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
+        }
+
+      i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
+                        priv->mclk_multiple));
 
       priv->rate = priv->config->rate;
       i2s_set_clock(priv);
     }
 
-  /* TODO: check for rx enabled flag */
+  /* Configure the RX module */
+
+  if (priv->config->rx_en)
+    {
+      /* Reset I2S RX module */
+
+      modifyreg32(I2S_CONF_REG, 0, I2S_RX_RESET);
+      modifyreg32(I2S_CONF_REG, I2S_RX_RESET, 0);
+      modifyreg32(I2S_LC_CONF_REG, 0, I2S_IN_RST);
+      modifyreg32(I2S_LC_CONF_REG, I2S_IN_RST, 0);
+
+      /* Enable/disable I2S RX slave mode */
+
+      if (priv->config->role == I2S_ROLE_SLAVE)
+        {
+          modifyreg32(I2S_CONF_REG, 0, I2S_RX_SLAVE_MOD);
+        }
+      else
+        {
+          modifyreg32(I2S_CONF_REG, I2S_RX_SLAVE_MOD, 0);
+        }
+
+      /* Congfigure RX chan bit, audio data bit and mono mode.
+       * On ESP32-S2, sample_bit should equals to data_bit.
+       */
+
+      /* Set RX data width */
+
+      priv->data_width = priv->config->data_width;
+      i2s_set_datawidth(priv);
+
+      /* Set I2S RX chan mode */
+
+      modifyreg32(I2S_CONF_CHAN_REG, I2S_RX_CHAN_MOD_M, 0);
+
+      /* Enable/disable RX MSB shift, the data will be read at the first
+       * BCK clock.
+       */
+
+      if (priv->config->bit_shift)
+        {
+          modifyreg32(I2S_CONF_REG, 0, I2S_RX_MSB_SHIFT);
+        }
+      else
+        {
+          modifyreg32(I2S_CONF_REG, I2S_RX_MSB_SHIFT, 0);
+        }
+
+      /* Configure RX WS signal width. Set to to enable receiver in PCM
+       * standard mode.
+       */
+
+      if (priv->config->ws_width == 1)
+        {
+          modifyreg32(I2S_CONF_REG, 0, I2S_RX_SHORT_SYNC);
+        }
+      else
+        {
+          modifyreg32(I2S_CONF_REG, I2S_RX_SHORT_SYNC, 0);
+        }
+
+      /* Set I2S RX right channel first */
+
+      if (priv->config->ws_pol == 1)
+        {
+          modifyreg32(I2S_CONF_REG, 0, I2S_RX_RIGHT_FIRST);
+        }
+      else
+        {
+          modifyreg32(I2S_CONF_REG, I2S_RX_RIGHT_FIRST, 0);
+        }
+
+      /* I2S RX fifo module force enable */
+
+      modifyreg32(I2S_FIFO_CONF_REG, 0, I2S_RX_FIFO_MOD_FORCE_EN);
+
+      /* The default value for the master clock frequency (MCLK frequency)
+       * can be set from the sample rate multiplied by a fixed value, known
+       * as MCLK multiplier. This multiplier, however, should be divisible
+       * by the number of bytes from a sample, i.e, for 24 bits, the
+       * multiplier should be divisible by 3. NOTE: the MCLK frequency can
+       * be adjusted on runtime, so this value remains valid only if the
+       * upper half does not implement the `i2s_mclkfrequency` method.
+       */
+
+      if (priv->config->data_width == I2S_DATA_BIT_WIDTH_24BIT)
+        {
+          priv->mclk_multiple = I2S_MCLK_MULTIPLE_384;
+        }
+      else
+        {
+          priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
+        }
+
+      i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
+                        priv->mclk_multiple));
+
+      priv->rate = priv->config->rate;
+      i2s_set_clock(priv);
+    }
 }
 
 /****************************************************************************
  * Name: i2s_set_datawidth
  *
  * Description:
- *   Set the I2S TX data width.
+ *   Set the I2S TX/RX data width.
  *
  * Input Parameters:
  *   priv - Initialized I2S device structure.
@@ -1120,19 +1592,47 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
 static uint32_t i2s_set_datawidth(struct esp32s2_i2s_s *priv)
 {
-  modifyreg32(I2S_SAMPLE_RATE_CONF_REG, I2S_TX_BITS_MOD_M,
-              FIELD_TO_VALUE(I2S_TX_BITS_MOD, priv->data_width));
+#ifdef I2S_HAVE_TX
+  if (priv->config->tx_en)
+    {
+      modifyreg32(I2S_SAMPLE_RATE_CONF_REG, I2S_TX_BITS_MOD_M,
+                  FIELD_TO_VALUE(I2S_TX_BITS_MOD, priv->data_width));
 
-  /* Set TX FIFO operation mode */
+      /* Set TX FIFO operation mode */
 
-  modifyreg32(I2S_FIFO_CONF_REG, I2S_TX_FIFO_MOD_M,
-              priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
-              FIELD_TO_VALUE(I2S_TX_FIFO_MOD, 0 + priv->config->mono_en) :
-              FIELD_TO_VALUE(I2S_TX_FIFO_MOD, 2 + priv->config->mono_en));
+      modifyreg32(I2S_FIFO_CONF_REG, I2S_TX_FIFO_MOD_M,
+                  priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
+                  FIELD_TO_VALUE(I2S_TX_FIFO_MOD,
+                                 0 + priv->config->mono_en) :
+                  FIELD_TO_VALUE(I2S_TX_FIFO_MOD,
+                                 2 + priv->config->mono_en));
 
-  /* I2S TX MSB right enable */
+      /* I2S TX MSB right enable */
 
-  modifyreg32(I2S_CONF_REG, 0, I2S_TX_MSB_RIGHT);
+      modifyreg32(I2S_CONF_REG, 0, I2S_TX_MSB_RIGHT);
+    }
+#endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+  if (priv->config->rx_en)
+    {
+      modifyreg32(I2S_SAMPLE_RATE_CONF_REG, I2S_RX_BITS_MOD_M,
+                  FIELD_TO_VALUE(I2S_RX_BITS_MOD, priv->data_width));
+
+      /* Set RX FIFO operation mode */
+
+      modifyreg32(I2S_FIFO_CONF_REG, I2S_RX_FIFO_MOD_M,
+                  priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
+                  FIELD_TO_VALUE(I2S_RX_FIFO_MOD,
+                                 0 + priv->config->mono_en) :
+                  FIELD_TO_VALUE(I2S_RX_FIFO_MOD,
+                                 2 + priv->config->mono_en));
+
+      /* I2S RX MSB right enable */
+
+      modifyreg32(I2S_CONF_REG, 0, I2S_RX_MSB_RIGHT);
+    }
+#endif /* I2S_HAVE_RX */
 
   return priv->data_width;
 }
@@ -1156,13 +1656,13 @@ static uint32_t i2s_set_clock(struct esp32s2_i2s_s *priv)
   uint32_t rate;
   uint32_t bclk;
   uint32_t mclk;
-  uint16_t bclk_div;
   uint32_t sclk;
   uint32_t mclk_div;
   int denominator;
   int numerator;
   uint32_t regval;
   uint32_t freq_diff;
+  uint16_t bclk_div;
 
   /* TODO: provide APLL clock support */
 
@@ -1252,10 +1752,17 @@ static uint32_t i2s_set_clock(struct esp32s2_i2s_s *priv)
   regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_A, denominator);
   putreg32(regval, I2S_CLKM_CONF_REG);
 
-  /* Set I2S tx bck div num */
+  /* Set I2S TX bck div num */
 
+#ifdef I2S_HAVE_TX
   modifyreg32(I2S_SAMPLE_RATE_CONF_REG, I2S_TX_BCK_DIV_NUM_M,
               FIELD_TO_VALUE(I2S_TX_BCK_DIV_NUM, bclk_div));
+#endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+  modifyreg32(I2S_SAMPLE_RATE_CONF_REG, I2S_RX_BCK_DIV_NUM_M,
+              FIELD_TO_VALUE(I2S_RX_BCK_DIV_NUM, bclk_div));
+#endif /* I2S_HAVE_RX */
 
   /* Returns the actual sample rate */
 
@@ -1283,50 +1790,110 @@ static uint32_t i2s_set_clock(struct esp32s2_i2s_s *priv)
 #ifdef I2S_HAVE_TX
 static void i2s_tx_channel_start(struct esp32s2_i2s_s *priv)
 {
-  if (priv->tx_started)
+  if (priv->config->tx_en)
     {
-      i2swarn("TX channel was previously started\n");
-      return;
+      if (priv->tx_started)
+        {
+          i2swarn("TX channel was previously started\n");
+          return;
+        }
+
+      /* Reset the TX channel */
+
+      modifyreg32(I2S_CONF_REG, 0, I2S_TX_RESET);
+      modifyreg32(I2S_CONF_REG, I2S_TX_RESET, 0);
+
+      /* Reset the DMA operation */
+
+      modifyreg32(I2S_LC_CONF_REG, 0, I2S_OUT_RST);
+      modifyreg32(I2S_LC_CONF_REG, I2S_OUT_RST, 0);
+
+      /* Reset TX FIFO */
+
+      modifyreg32(I2S_CONF_REG, 0, I2S_TX_FIFO_RESET);
+      modifyreg32(I2S_CONF_REG, I2S_TX_FIFO_RESET, 0);
+
+      /* Enable DMA interrupt */
+
+      up_enable_irq(priv->config->irq);
+
+      modifyreg32(I2S_INT_ENA_REG, 0, I2S_OUT_EOF_INT_ENA);
+
+      /* Enable DMA operation mode */
+
+      modifyreg32(I2S_FIFO_CONF_REG, 0, I2S_DSCR_EN);
+
+      /* Unset the DMA outlink */
+
+      putreg32(0, I2S_OUT_LINK_REG);
+
+      priv->tx_started = true;
+
+      i2sinfo("Started TX channel on I2S0\n");
     }
-
-  /* Reset the TX channel */
-
-  modifyreg32(I2S_CONF_REG, 0, I2S_TX_RESET);
-  modifyreg32(I2S_CONF_REG, I2S_TX_RESET, 0);
-
-  /* Reset the DMA operation */
-
-  modifyreg32(I2S_LC_CONF_REG, 0, I2S_OUT_RST);
-  modifyreg32(I2S_LC_CONF_REG, 0, I2S_AHBM_FIFO_RST);
-  modifyreg32(I2S_LC_CONF_REG, 0, I2S_AHBM_RST);
-  modifyreg32(I2S_LC_CONF_REG, I2S_OUT_RST, 0);
-  modifyreg32(I2S_LC_CONF_REG, I2S_AHBM_FIFO_RST, 0);
-  modifyreg32(I2S_LC_CONF_REG, I2S_AHBM_RST, 0);
-
-  /* Reset TX FIFO */
-
-  modifyreg32(I2S_CONF_REG, 0, I2S_TX_FIFO_RESET);
-  modifyreg32(I2S_CONF_REG, I2S_TX_FIFO_RESET, 0);
-
-  /* Enable DMA interrupt */
-
-  up_enable_irq(priv->config->irq);
-
-  modifyreg32(I2S_INT_ENA_REG, UINT32_MAX, I2S_OUT_EOF_INT_ENA);
-
-  /* Enable DMA operation mode */
-
-  modifyreg32(I2S_FIFO_CONF_REG, 0, I2S_DSCR_EN);
-
-  /* Unset the DMA outlink */
-
-  putreg32(0, I2S_OUT_LINK_REG);
-
-  priv->tx_started = true;
-
-  i2sinfo("Started TX channel on I2S0\n");
 }
 #endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rx_channel_start
+ *
+ * Description:
+ *   Start RX channel for the I2S port
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static void i2s_rx_channel_start(struct esp32s2_i2s_s *priv)
+{
+  if (priv->config->rx_en)
+    {
+      if (priv->rx_started)
+        {
+          i2swarn("RX channel was previously started\n");
+          return;
+        }
+
+      /* Reset the RX channel */
+
+      modifyreg32(I2S_CONF_REG, 0, I2S_RX_RESET);
+      modifyreg32(I2S_CONF_REG, I2S_RX_RESET, 0);
+
+      /* Reset the DMA operation */
+
+      modifyreg32(I2S_LC_CONF_REG, 0, I2S_IN_RST);
+      modifyreg32(I2S_LC_CONF_REG, I2S_IN_RST, 0);
+
+      /* Reset RX FIFO */
+
+      modifyreg32(I2S_CONF_REG, 0, I2S_RX_FIFO_RESET);
+      modifyreg32(I2S_CONF_REG, I2S_RX_FIFO_RESET, 0);
+
+      /* Enable DMA interrupt */
+
+      up_enable_irq(priv->config->irq);
+
+      modifyreg32(I2S_INT_ENA_REG, 0, I2S_IN_SUC_EOF_INT_ENA);
+
+      /* Enable DMA operation mode */
+
+      modifyreg32(I2S_FIFO_CONF_REG, 0, I2S_DSCR_EN);
+
+      /* Unset the DMA inlink */
+
+      putreg32(0, I2S_IN_LINK_REG);
+
+      priv->rx_started = true;
+
+      i2sinfo("Started RX channel on I2S0\n");
+    }
+}
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_tx_channel_stop
@@ -1345,35 +1912,88 @@ static void i2s_tx_channel_start(struct esp32s2_i2s_s *priv)
 #ifdef I2S_HAVE_TX
 static void i2s_tx_channel_stop(struct esp32s2_i2s_s *priv)
 {
-  if (!priv->tx_started)
+  if (priv->config->tx_en)
     {
-      i2swarn("TX channel was previously stopped\n");
-      return;
+      if (!priv->tx_started)
+        {
+          i2swarn("TX channel was previously stopped\n");
+          return;
+        }
+
+      /* Stop TX channel */
+
+      modifyreg32(I2S_CONF_REG, I2S_TX_START, 0);
+
+      /* Stop outlink */
+
+      modifyreg32(I2S_OUT_LINK_REG, I2S_OUTLINK_START, I2S_OUTLINK_STOP);
+
+      /* Disable DMA interrupt */
+
+      modifyreg32(I2S_INT_ENA_REG, I2S_OUT_EOF_INT_ENA, 0);
+
+      /* Disable DMA operation mode */
+
+      modifyreg32(I2S_FIFO_CONF_REG, I2S_DSCR_EN, 0);
+
+      up_disable_irq(priv->config->irq);
+
+      priv->tx_started = false;
+
+      i2sinfo("Stopped TX channel on I2S0\n");
     }
-
-  /* Stop TX channel */
-
-  modifyreg32(I2S_CONF_REG, I2S_TX_START, 0);
-
-  /* Stop outlink */
-
-  modifyreg32(I2S_OUT_LINK_REG, I2S_OUTLINK_START, I2S_OUTLINK_STOP);
-
-  /* Disable DMA interrupt */
-
-  modifyreg32(I2S_INT_ENA_REG, UINT32_MAX, 0);
-
-  /* Disable DMA operation mode */
-
-  modifyreg32(I2S_FIFO_CONF_REG, I2S_DSCR_EN, 0);
-
-  up_disable_irq(priv->config->irq);
-
-  priv->tx_started = false;
-
-  i2sinfo("Stopped TX channel on I2S0\n");
 }
 #endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rx_channel_stop
+ *
+ * Description:
+ *   Stop RX channel for the I2S port
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static void i2s_rx_channel_stop(struct esp32s2_i2s_s *priv)
+{
+  if (priv->config->rx_en)
+    {
+      if (!priv->rx_started)
+        {
+          i2swarn("RX channel was previously stopped\n");
+          return;
+        }
+
+      /* Stop RX channel */
+
+      modifyreg32(I2S_CONF_REG, I2S_RX_START, 0);
+
+      /* Stop outlink */
+
+      modifyreg32(I2S_IN_LINK_REG, I2S_INLINK_START, I2S_INLINK_STOP);
+
+      /* Disable DMA interrupt */
+
+      modifyreg32(I2S_INT_ENA_REG, I2S_IN_SUC_EOF_INT_ENA, 0);
+
+      /* Disable DMA operation mode */
+
+      modifyreg32(I2S_FIFO_CONF_REG, I2S_DSCR_EN, 0);
+
+      up_disable_irq(priv->config->irq);
+
+      priv->rx_started = false;
+
+      i2sinfo("Stopped RX channel on I2S0\n");
+    }
+}
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_interrupt
@@ -1382,7 +2002,9 @@ static void i2s_tx_channel_stop(struct esp32s2_i2s_s *priv)
  *   Common I2S DMA interrupt handler
  *
  * Input Parameters:
- *   arg - i2s controller private data
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info
+ *   arg     - I2S controller private data
  *
  * Returned Value:
  *   Standard interrupt return value.
@@ -1398,14 +2020,35 @@ static int i2s_interrupt(int irq, void *context, void *arg)
 
   putreg32(UINT32_MAX, I2S_INT_CLR_REG);
 
-  if (status & I2S_OUT_EOF_INT_ST)
+#ifdef I2S_HAVE_TX
+  if (priv->config->tx_en)
     {
-      cur = (struct esp32s2_dmadesc_s *)getreg32(I2S_OUT_EOF_DES_ADDR_REG);
+      if (status & I2S_OUT_EOF_INT_ST)
+        {
+          cur = (struct esp32s2_dmadesc_s *)
+                getreg32(I2S_OUT_EOF_DES_ADDR_REG);
 
-      /* Schedule completion of the transfer to occur on the worker thread */
+          /* Schedule completion of the transfer on the worker thread */
 
-      i2s_tx_schedule(priv, cur);
+          i2s_tx_schedule(priv, cur);
+        }
     }
+#endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+  if (priv->config->rx_en)
+    {
+      if (status & I2S_IN_SUC_EOF_INT_ST)
+        {
+          cur = (struct esp32s2_dmadesc_s *)
+                getreg32(I2S_IN_EOF_DES_ADDR_REG);
+
+          /* Schedule completion of the transfer on the worker thread */
+
+          i2s_rx_schedule(priv, cur);
+        }
+    }
+#endif /* I2S_HAVE_RX */
 
   return 0;
 }
@@ -1460,26 +2103,76 @@ static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
+#ifdef I2S_HAVE_TX
 static int i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
 {
   struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
 
-  if (channels != 1 && channels != 2)
+  if (priv->config->tx_en)
     {
-      return -EINVAL;
+      if (channels != 1 && channels != 2)
+        {
+          return -EINVAL;
+        }
+
+      i2s_tx_channel_stop(priv);
+
+      priv->channels = channels;
+
+      modifyreg32(I2S_CONF_REG, priv->channels == 1 ? 0 : I2S_TX_DMA_EQUAL,
+                  priv->channels == 1 ? I2S_TX_DMA_EQUAL : 0);
+
+      i2s_tx_channel_start(priv);
+
+      return OK;
     }
 
-  i2s_tx_channel_stop(priv);
-
-  priv->channels = channels;
-
-  modifyreg32(I2S_CONF_REG, priv->channels == 1 ? 0 : I2S_TX_DMA_EQUAL,
-              priv->channels == 1 ? I2S_TX_DMA_EQUAL : 0);
-
-  i2s_tx_channel_start(priv);
-
-  return OK;
+  return -ENOTTY;
 }
+#endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rxchannels
+ *
+ * Description:
+ *   Set the I2S RX number of channels.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   channels - The I2S numbers of channels
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static int i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
+{
+  struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
+
+  if (priv->config->rx_en)
+    {
+      if (channels != 1 && channels != 2)
+        {
+          return -EINVAL;
+        }
+
+      i2s_rx_channel_stop(priv);
+
+      priv->channels = channels;
+
+      modifyreg32(I2S_CONF_REG, priv->channels == 1 ? 0 : I2S_RX_DMA_EQUAL,
+                  priv->channels == 1 ? I2S_RX_DMA_EQUAL : 0);
+
+      i2s_rx_channel_start(priv);
+
+      return OK;
+    }
+
+  return -ENOTTY;
+}
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_txsamplerate
@@ -1499,20 +2192,64 @@ static int i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
  *
  ****************************************************************************/
 
+#ifdef I2S_HAVE_TX
 static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
 
-  i2s_tx_channel_stop(priv);
+  if (priv->config->tx_en)
+    {
+      i2s_tx_channel_stop(priv);
 
-  priv->rate = rate;
+      priv->rate = rate;
 
-  rate = i2s_set_clock(priv);
+      rate = i2s_set_clock(priv);
 
-  i2s_tx_channel_start(priv);
+      i2s_tx_channel_start(priv);
 
-  return rate;
+      return rate;
+    }
+
+  return 0;
 }
+#endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rxsamplerate
+ *
+ * Description:
+ *   Set the I2S RX sample rate.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   rate - The I2S sample rate in samples (not bits) per second
+ *
+ * Returned Value:
+ *   Returns the resulting bitrate
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+{
+  struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
+
+  if (priv->config->rx_en)
+    {
+      i2s_rx_channel_stop(priv);
+
+      priv->rate = rate;
+
+      rate = i2s_set_clock(priv);
+
+      i2s_rx_channel_start(priv);
+
+      return rate;
+    }
+
+  return 0;
+}
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_txdatawidth
@@ -1530,20 +2267,65 @@ static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
+#ifdef I2S_HAVE_TX
 static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
 
-  i2s_tx_channel_stop(priv);
+  if (priv->config->tx_en)
+    {
+      i2s_tx_channel_stop(priv);
 
-  priv->data_width = bits;
+      priv->data_width = bits;
 
-  i2s_set_datawidth(priv);
+      i2s_set_datawidth(priv);
 
-  i2s_tx_channel_start(priv);
+      i2s_tx_channel_start(priv);
 
-  return bits;
+      return bits;
+    }
+
+  return 0;
 }
+#endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_rxdatawidth
+ *
+ * Description:
+ *   Set the I2S RX data width.  The RX bitrate is determined by
+ *   sample_rate * data_width.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   width - The I2S data with in bits.
+ *
+ * Returned Value:
+ *   Returns the resulting data width
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
+{
+  struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
+
+  if (priv->config->rx_en)
+    {
+      i2s_rx_channel_stop(priv);
+
+      priv->data_width = bits;
+
+      i2s_set_datawidth(priv);
+
+      i2s_rx_channel_start(priv);
+
+      return bits;
+    }
+
+  return 0;
+}
+#endif /* I2S_HAVE_RX */
 
 /****************************************************************************
  * Name: i2s_send
@@ -1568,81 +2350,257 @@ static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
  *
  ****************************************************************************/
 
+#ifdef I2S_HAVE_TX
 static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                     i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
-  struct esp32s2_buffer_s *bfcontainer;
-  int ret = OK;
-  uint32_t nbytes;
 
-  /* Check audio buffer data size from the upper half. If the buffer
-   * size is not a multiple of the data width, the remaining bytes
-   * must be sent along with the next audio buffer.
-   */
-
-  nbytes = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
-
-  nbytes -= (nbytes % (priv->data_width / 8));
-
-  if (nbytes > (ESP32S2_DMA_DATALEN_MAX * I2S_DMADESC_NUM))
+  if (priv->config->tx_en)
     {
-      i2serr("Required buffer size can not be fitted into DMA outlink "
-             "(exceeds in %" PRIu32 " bytes). Try to increase the "
-             "number of the DMA descriptors (CONFIG_I2S_DMADESC_NUM).",
-             nbytes - (ESP32S2_DMA_DATALEN_MAX * I2S_DMADESC_NUM));
-      return -EFBIG;
-    }
+      struct esp32s2_buffer_s *bfcontainer;
+      int ret = OK;
+      uint32_t nbytes;
 
-  /* Allocate a buffer container in advance */
+      /* Check audio buffer data size from the upper half. If the buffer
+       * size is not a multiple of the data width, the remaining bytes
+       * must be sent along with the next audio buffer.
+       */
 
-  bfcontainer = i2s_buf_allocate(priv);
-  DEBUGASSERT(bfcontainer);
+      nbytes = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
 
-  /* Get exclusive access to the I2S driver data */
+      nbytes -= (nbytes % (priv->data_width / 8));
 
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      goto errout_with_buf;
-    }
+      if (nbytes > (ESP32S2_DMA_DATALEN_MAX * I2S_DMADESC_NUM))
+        {
+          i2serr("Required buffer size can't fit into DMA outlink "
+                "(exceeds in %" PRIu32 " bytes). Try to increase the "
+                "number of the DMA descriptors (CONFIG_I2S_DMADESC_NUM).",
+                nbytes - (ESP32S2_DMA_DATALEN_MAX * I2S_DMADESC_NUM));
+          return -EFBIG;
+        }
 
-  /* Add a reference to the audio buffer */
+      /* Allocate a buffer container in advance */
 
-  apb_reference(apb);
+      bfcontainer = i2s_buf_allocate(priv);
+      DEBUGASSERT(bfcontainer);
 
-  /* Initialize the buffer container structure */
+      /* Get exclusive access to the I2S driver data */
 
-  bfcontainer->callback = callback;
-  bfcontainer->timeout  = timeout;
-  bfcontainer->arg      = arg;
-  bfcontainer->apb      = apb;
-  bfcontainer->nbytes   = nbytes;
-  bfcontainer->result   = -EBUSY;
+      ret = nxmutex_lock(&priv->lock);
+      if (ret < 0)
+        {
+          goto errout_with_buf;
+        }
 
-  ret = i2s_txdma_setup(priv, bfcontainer);
+      /* Add a reference to the audio buffer */
 
-  if (ret != OK)
-    {
-      goto errout_with_buf;
-    }
+      apb_reference(apb);
 
-  i2sinfo("Queued %d bytes into DMA buffers\n", apb->nbytes);
-  i2s_dump_buffer("Audio pipeline buffer:", &apb->samp[apb->curbyte],
-                    apb->nbytes - apb->curbyte);
+      /* Initialize the buffer container structure */
 
-  nxmutex_unlock(&priv->lock);
+      bfcontainer->callback = callback;
+      bfcontainer->timeout  = timeout;
+      bfcontainer->arg      = arg;
+      bfcontainer->apb      = apb;
+      bfcontainer->nbytes   = nbytes;
+      bfcontainer->result   = -EBUSY;
 
-  return OK;
+      ret = i2s_txdma_setup(priv, bfcontainer);
+
+      if (ret != OK)
+        {
+          goto errout_with_buf;
+        }
+
+      i2sinfo("Queued %d bytes into DMA buffers\n", apb->nbytes);
+      i2s_dump_buffer("Audio pipeline buffer:", &apb->samp[apb->curbyte],
+                        apb->nbytes - apb->curbyte);
+
+      nxmutex_unlock(&priv->lock);
+
+      return OK;
 
 errout_with_buf:
-  nxmutex_unlock(&priv->lock);
-  i2s_buf_free(priv, bfcontainer);
+      nxmutex_unlock(&priv->lock);
+      i2s_buf_free(priv, bfcontainer);
+      return ret;
+    }
+
+  return -ENOTTY;
+}
+#endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_receive
+ *
+ * Description:
+ *   Receive a block of data on I2S.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   apb      - A pointer to the audio buffer in which to receive data
+ *   callback - A user provided callback function that will be called at
+ *              the completion of the transfer.
+ *   arg      - An opaque argument that will be provided to the callback
+ *              when the transfer complete
+ *   timeout  - The timeout value to use.  The transfer will be cancelled
+ *              and an ETIMEDOUT error will be reported if this timeout
+ *              elapsed without completion of the DMA transfer.  Units
+ *              are system clock ticks.  Zero means no timeout.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_RX
+static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                       i2s_callback_t callback, void *arg, uint32_t timeout)
+{
+  struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
+
+  if (priv->config->rx_en)
+    {
+      struct esp32s2_buffer_s *bfcontainer;
+      int ret = OK;
+      uint32_t nbytes;
+
+      /* Check max audio buffer data size from the upper half and align the
+       * receiving buffer according to the data width.
+       */
+
+      nbytes = apb->nmaxbytes;
+
+      nbytes -= (nbytes % (priv->data_width / 8));
+
+      if (nbytes > (ESP32S2_DMA_DATALEN_MAX * I2S_DMADESC_NUM))
+        {
+          i2serr("Required buffer size can't fit into DMA inlink "
+                "(exceeds in %" PRIu32 " bytes). Try to increase the "
+                "number of the DMA descriptors (CONFIG_I2S_DMADESC_NUM).",
+                nbytes - (ESP32S2_DMA_DATALEN_MAX * I2S_DMADESC_NUM));
+          return -EFBIG;
+        }
+
+      /* Allocate a buffer container in advance */
+
+      bfcontainer = i2s_buf_allocate(priv);
+      DEBUGASSERT(bfcontainer);
+
+      /* Get exclusive access to the I2S driver data */
+
+      ret = nxmutex_lock(&priv->lock);
+      if (ret < 0)
+        {
+          goto errout_with_buf;
+        }
+
+      /* Add a reference to the audio buffer */
+
+      apb_reference(apb);
+
+      /* Initialize the buffer container structure */
+
+      bfcontainer->callback = callback;
+      bfcontainer->timeout  = timeout;
+      bfcontainer->arg      = arg;
+      bfcontainer->apb      = apb;
+      bfcontainer->nbytes   = nbytes;
+      bfcontainer->result   = -EBUSY;
+
+      ret = i2s_rxdma_setup(priv, bfcontainer);
+
+      if (ret != OK)
+        {
+          goto errout_with_buf;
+        }
+
+      i2sinfo("Prepared %d bytes to receive DMA buffers\n", apb->nmaxbytes);
+      i2s_dump_buffer("Audio pipeline buffer:", &apb->samp[apb->curbyte],
+                      apb->nbytes - apb->curbyte);
+
+      nxmutex_unlock(&priv->lock);
+
+      return OK;
+
+errout_with_buf:
+      nxmutex_unlock(&priv->lock);
+      i2s_buf_free(priv, bfcontainer);
+      return ret;
+    }
+
+  return -ENOTTY;
+}
+#endif /* I2S_HAVE_RX */
+
+/****************************************************************************
+ * Name: i2s_ioctl
+ *
+ * Description:
+ *   Perform a device ioctl
+ *
+ ****************************************************************************/
+
+static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
+{
+  struct audio_buf_desc_s  *bufdesc;
+  int ret = -ENOTTY;
+
+  switch (cmd)
+    {
+      /* AUDIOIOC_START - Start the audio stream.
+       *
+       *   ioctl argument:  Audio session
+       */
+
+      case AUDIOIOC_START:
+        {
+          i2sinfo("AUDIOIOC_START\n");
+
+          ret = OK;
+        }
+        break;
+
+      /* AUDIOIOC_ALLOCBUFFER - Allocate an audio buffer
+       *
+       *   ioctl argument:  pointer to an audio_buf_desc_s structure
+       */
+
+      case AUDIOIOC_ALLOCBUFFER:
+        {
+          i2sinfo("AUDIOIOC_ALLOCBUFFER\n");
+
+          bufdesc = (struct audio_buf_desc_s *) arg;
+          ret = apb_alloc(bufdesc);
+        }
+        break;
+
+      /* AUDIOIOC_FREEBUFFER - Free an audio buffer
+       *
+       *   ioctl argument:  pointer to an audio_buf_desc_s structure
+       */
+
+      case AUDIOIOC_FREEBUFFER:
+        {
+          i2sinfo("AUDIOIOC_FREEBUFFER\n");
+
+          bufdesc = (struct audio_buf_desc_s *) arg;
+          DEBUGASSERT(bufdesc->u.buffer != NULL);
+          apb_free(bufdesc->u.buffer);
+          ret = sizeof(struct audio_buf_desc_s);
+        }
+        break;
+
+      default:
+        break;
+    }
+
   return ret;
 }
 
 /****************************************************************************
- * Name: i2sdma_setup
+ * Name: i2s_dma_setup
  *
  * Description:
  *   Configure the DMA for the I2S peripheral
@@ -1657,7 +2615,7 @@ errout_with_buf:
  *
  ****************************************************************************/
 
-static int i2sdma_setup(struct esp32s2_i2s_s *priv)
+static int i2s_dma_setup(struct esp32s2_i2s_s *priv)
 {
   int ret;
 
@@ -1711,8 +2669,6 @@ struct i2s_dev_s *esp32s2_i2sbus_initialize(void)
 
   priv = &esp32s2_i2s0_priv;
 
-  priv->tx_started = false;
-
   flags = enter_critical_section();
 
   i2s_configure(priv);
@@ -1725,7 +2681,7 @@ struct i2s_dev_s *esp32s2_i2sbus_initialize(void)
       goto err;
     }
 
-  ret = i2sdma_setup(priv);
+  ret = i2s_dma_setup(priv);
   if (ret < 0)
     {
       goto err;
@@ -1734,8 +2690,22 @@ struct i2s_dev_s *esp32s2_i2sbus_initialize(void)
 #ifdef I2S_HAVE_TX
   /* Start TX channel */
 
-  i2s_tx_channel_start(priv);
+  if (priv->config->tx_en)
+    {
+      priv->tx_started = false;
+      i2s_tx_channel_start(priv);
+    }
 #endif /* I2S_HAVE_TX */
+
+#ifdef I2S_HAVE_RX
+  /* Start RX channel */
+
+  if (priv->config->rx_en)
+    {
+      priv->rx_started = false;
+      i2s_rx_channel_start(priv);
+    }
+#endif /* I2S_HAVE_RX */
 
   leave_critical_section(flags);
 

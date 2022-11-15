@@ -33,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ESP32S2-DevKitC GPIOs ****************************************************/
+/* ESP32S2-Saola-1 GPIOs ****************************************************/
 
 /* BOOT Button */
 
@@ -162,7 +162,8 @@ int board_bmp180_initialize(int devno, int busno);
  *   number.
  *
  * Input Parameters:
- *   None.
+ *   enable_tx  - Register device as TX if true
+ *   enable_rx  - Register device as RX if true
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -171,7 +172,7 @@ int board_bmp180_initialize(int devno, int busno);
  ****************************************************************************/
 
 #if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344)
-int board_i2sdev_initialize(void);
+int board_i2sdev_initialize(bool enable_tx, bool enable_rx);
 #endif
 
 /****************************************************************************

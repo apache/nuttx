@@ -242,9 +242,24 @@ int esp32s2_bringup(void)
     }
 #else
 
+  bool i2s_enable_tx;
+  bool i2s_enable_rx;
+
+#ifdef CONFIG_ESP32S2_I2S_TX
+  i2s_enable_tx = true;
+#else
+  i2s_enable_tx = false;
+#endif /* CONFIG_ESP32S2_I2S_TX */
+
+#ifdef CONFIG_ESP32S2_I2S_RX
+    i2s_enable_rx = true;
+#else
+    i2s_enable_rx = false;
+#endif /* CONFIG_ESP32S2_I2S_RX */
+
   /* Configure I2S generic audio on I2S0 */
 
-  ret = board_i2sdev_initialize();
+  ret = board_i2sdev_initialize(i2s_enable_tx, i2s_enable_rx);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2S0 driver: %d\n", ret);

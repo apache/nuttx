@@ -301,7 +301,7 @@ config ESP32S2_I2S_WSPIN
 	range 0 46 if ESP32S2_I2S_ROLE_SLAVE
 
 config ESP32S2_I2S_DINPIN
-	int "I2S DOUT pin"
+	int "I2S DIN pin"
 	depends on ESP32S2_I2S_RX
 	default 37
 	range 0 46
