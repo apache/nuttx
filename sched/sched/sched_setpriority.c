@@ -146,7 +146,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 
       if (nxsched_reprioritize_rtr(tcb, sched_priority))
         {
-          up_block_task(rtcb);
+          up_switch_context(this_task(), rtcb);
         }
     }
 
@@ -230,7 +230,7 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
 
       if (nxsched_reprioritize_rtr(tcb, sched_priority))
         {
-          up_block_task(rtcb);
+          up_switch_context(this_task(), rtcb);
         }
     }
 

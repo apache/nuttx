@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/hc/src/common/hc_unblocktask.c
+ * arch/or1k/src/common/or1k_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,14 +33,14 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
-#include "hc_internal.h"
+#include "or1k_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -61,13 +61,17 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (g_current_regs)
+#if 0  /* REVISIT */
+  if (CURRENT_REGS)
+#else
+  if (0)
+#endif
     {
       /* Yes, then we have to do things differently.
-       * Just copy the g_current_regs into the OLD rtcb.
+       * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      hc_savestate(rtcb->xcp.regs);
+      or1k_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
@@ -77,7 +81,7 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * changes will be made when the interrupt returns.
        */
 
-      hc_restorestate(tcb->xcp.regs);
+      or1k_restorestate(tcb->xcp.regs);
     }
 
   /* We are not in an interrupt handler.  Copy the user C context
@@ -103,6 +107,6 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      hc_fullcontextrestore(tcb->xcp.regs);
+      or1k_fullcontextrestore(tcb->xcp.regs);
     }
 }

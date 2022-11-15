@@ -79,7 +79,7 @@ static void nxsig_timeout(wdparm_t arg)
 #ifdef CONFIG_SMP
   irqstate_t flags;
 
-  /* We must be in a critical section in order to call up_unblock_task()
+  /* We must be in a critical section in order to call up_switch_context()
    * below.  If we are running on a single CPU architecture, then we know
    * interrupts a disabled an there is no need to explicitly call
    * enter_critical_section().  However, in the SMP case,
@@ -118,7 +118,7 @@ static void nxsig_timeout(wdparm_t arg)
 
       if (nxsched_add_readytorun(wtcb))
         {
-          up_unblock_task(wtcb, rtcb);
+          up_switch_context(wtcb, rtcb);
         }
     }
 
@@ -146,7 +146,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 #ifdef CONFIG_SMP
   irqstate_t flags;
 
-  /* We must be in a critical section in order to call up_unblock_task()
+  /* We must be in a critical section in order to call up_switch_context()
    * below.  If we are running on a single CPU architecture, then we know
    * interrupts a disabled an there is no need to explicitly call
    * enter_critical_section().  However, in the SMP case,
@@ -185,7 +185,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
       if (nxsched_add_readytorun(wtcb))
         {
-          up_unblock_task(wtcb, rtcb);
+          up_switch_context(wtcb, rtcb);
         }
     }
 
@@ -366,7 +366,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
               if (switch_needed)
                 {
-                  up_block_task(rtcb);
+                  up_switch_context(this_task(), rtcb);
                 }
 
               /* We no longer need the watchdog */
@@ -408,7 +408,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
           if (switch_needed)
             {
-              up_block_task(rtcb);
+              up_switch_context(this_task(), rtcb);
             }
         }
 

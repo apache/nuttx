@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/mips32/mips_unblocktask.c
+ * arch/misoc/src/minerva/minerva_switchcontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,14 +35,14 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
-#include "mips_internal.h"
+#include "minerva.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -55,7 +55,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
+void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Update scheduler parameters */
 
@@ -63,23 +63,23 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (CURRENT_REGS)
+  if (g_current_regs)
     {
-      /* Yes, then we have to do things differently.
-       * Just copy the g_current_regs into the OLD rtcb.
+      /* Yes, then we have to do things differently. Just copy the
+       * g_current_regs into the OLD rtcb.
        */
 
-      mips_savestate(rtcb->xcp.regs);
+      misoc_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
 
-      /* Then switch contexts.  Any necessary address environment
-       * changes will be made when the interrupt returns.
+      /* Then switch contexts.  Any necessary address environment changes
+       * will be made when the interrupt returns.
        */
 
-      mips_restorestate(tcb->xcp.regs);
+      misoc_restorestate(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */
@@ -92,12 +92,12 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      mips_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
+      misoc_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
 
-      /* mips_switchcontext forces a context switch to the task at the
-       * head of the ready-to-run list.  It does not 'return' in the
-       * normal sense.  When it does return, it is because the blocked
-       * task is again ready to run and has execution priority.
+      /* misoc_switchcontext forces a context switch to the task at the head
+       * of the ready-to-run list.  It does not 'return' in the normal
+       * sense.  When it does return, it is because the blocked task is
+       * again ready to run and has execution priority.
        */
     }
 }

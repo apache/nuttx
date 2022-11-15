@@ -106,7 +106,7 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 
       if (switch_needed)
         {
-          up_block_task(rtcb);
+          up_switch_context(this_task(), rtcb);
         }
 
       /* When we resume at this point, either (1) the message queue
@@ -264,7 +264,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
 
           if (nxsched_add_readytorun(btcb))
             {
-              up_unblock_task(btcb, rtcb);
+              up_switch_context(btcb, rtcb);
             }
         }
     }

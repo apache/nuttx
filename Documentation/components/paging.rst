@@ -102,7 +102,7 @@ function will perform the following operations:
    with the page fill worker must be "`locked <#MemoryOrg>`__" and
    always present in memory.
 #. **Block the currently executing task**. This function will call
-   ``up_block_task()`` to block the task at the head of the ready-to-run
+   ``up_switch_context()`` to block the task at the head of the ready-to-run
    list. This should cause an interrupt level context switch to the next
    highest priority task. The blocked task will be marked with state
    ``TSTATE_WAIT_PAGEFILL`` and will be retained in the
@@ -373,8 +373,8 @@ Most standard, architecture-specific functions are declared in
 ``include/nuttx/arch.h``. However, for the case of this paging logic,
 the architecture specific functions are declared in
 ``include/nuttx/page.h``. Standard, architecture-specific functions that
-should already be provided in the architecture port are :c:func:`up_block_task`
-and :c:func:`up_unblock_task`. New, additional functions that must be
+should already be provided in the architecture port are
+:c:func:`up_switch_context`. New, additional functions that must be
 implemented just for on-demand paging support are:
 
 .. c:function:: int up_checkmapping(FAR struct tcb_s *tcb)

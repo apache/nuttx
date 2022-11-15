@@ -384,7 +384,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
 void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_switch_context
  *
  * Description:
  *   A task is currently in the ready-to-run list but has been prepped
@@ -401,26 +401,7 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
  *
  ****************************************************************************/
 
-void up_unblock_task(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb);
-
-/****************************************************************************
- * Name: up_block_task
- *
- * Description:
- *   The currently executing task has already removed from ready-to-run list.
- *   Save its context and switch to the next running task at the head of the
- *   ready-to-run list.
- *
- *   This function is called only from the NuttX scheduling logic.
- *   Interrupts will always be disabled when this function is called.
- *
- * Input Parameters:
- *   rtcb: Reference to the running task which is different to the
- *     task (next running task) at the head of the list.
- *
- ****************************************************************************/
-
-void up_block_task(FAR struct tcb_s *rtcb);
+void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb);
 
 /****************************************************************************
  * Name: up_release_pending
