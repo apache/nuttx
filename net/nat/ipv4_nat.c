@@ -24,9 +24,11 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include <nuttx/net/icmp.h>
@@ -62,6 +64,18 @@
 #define L4_HDR(ipv4) \
   (FAR void *)((FAR uint8_t *)(ipv4) + (((ipv4)->vhl & IPv4_HLMASK) << 2))
 
+#define L4_HDRLEN(proto) \
+  ((proto) == IP_PROTO_TCP ? TCP_HDRLEN : \
+       (proto) == IP_PROTO_UDP ? UDP_HDRLEN : ICMP_HDRLEN)
+
+#if defined(CONFIG_NET_TCP)
+#  define L4_MAXHDRLEN TCP_HDRLEN
+#elif defined(CONFIG_NET_UDP)
+#  define L4_MAXHDRLEN UDP_HDRLEN
+#elif defined(CONFIG_NET_ICMP)
+#  define L4_MAXHDRLEN ICMP_HDRLEN
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -75,6 +89,19 @@ enum nat_manip_type_e
   NAT_MANIP_SRC,
   NAT_MANIP_DST
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static FAR struct ipv4_nat_entry *
+ipv4_nat_inbound_internal(FAR struct ipv4_hdr_s *ipv4,
+                          enum nat_manip_type_e manip_type);
+
+static FAR struct ipv4_nat_entry *
+ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
+                           FAR struct ipv4_hdr_s *ipv4,
+                           enum nat_manip_type_e manip_type);
 
 /****************************************************************************
  * Private Functions
@@ -167,6 +194,11 @@ ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
       return NULL;
     }
 
+  /* Note: Field tcpchksum is not guaranteed exists in TCP header inside
+   * ICMP Error MSG, but we manually guarantee that it is inside valid memory
+   * address (IOB >= IP + ICMP + IP + TCP), so we can update it safely.
+   */
+
   ipv4_nat_port_adjust(&tcp->tcpchksum, external_port, entry->local_port);
   ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, entry->local_ip, manip_type);
 
@@ -250,8 +282,6 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
 
   switch (icmp->type)
     {
-      /* TODO: Support other ICMP types. */
-
       case ICMP_ECHO_REQUEST:
       case ICMP_ECHO_REPLY:
         entry = ipv4_nat_inbound_entry_find(IP_PROTO_ICMP, icmp->id, true);
@@ -264,6 +294,64 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
                              &icmp->id, entry->local_port);
         ipv4_nat_ip_adjust(ipv4, NULL, entry->local_ip, manip_type);
         return entry;
+
+      case ICMP_DEST_UNREACHABLE:
+      case ICMP_TIME_EXCEEDED:
+      case ICMP_PARAMETER_PROBLEM:
+        /* ICMP Error MSG inside another ICMP Error MSG is forbidden by
+         * RFC1122, Section 3.2.2, Page 38, so we only process the outermost
+         * ICMP Error MSG (manip type is DST).
+         */
+
+        if (manip_type == NAT_MANIP_DST)
+          {
+            /* The payload in the ICMP packet is the origin packet we sent. */
+
+            FAR struct ipv4_hdr_s *inner =
+                (FAR struct ipv4_hdr_s *)(icmp + 1);
+            FAR void *inner_l4 = L4_HDR(inner);
+            int16_t inner_l4len = ((ipv4->len[0] << 8) + ipv4->len[1]) -
+                                  ((intptr_t)inner_l4 - (intptr_t)ipv4);
+            uint16_t inner_l4hdrbak[L4_MAXHDRLEN / 2];
+            uint16_t inner_l4hdrlen;
+
+            if (inner_l4len < 8)
+              {
+                /* RFC792: The original L4 data should be at least 64 bits. */
+
+                return NULL;
+              }
+
+            /* Try backup origin L4 header for later checksum update. */
+
+            inner_l4hdrlen = MIN(inner_l4len, L4_HDRLEN(inner->proto));
+            DEBUGASSERT((intptr_t)inner_l4 - (intptr_t)ipv4 + inner_l4hdrlen
+                        <= CONFIG_IOB_BUFSIZE);
+            memcpy(inner_l4hdrbak, inner_l4, inner_l4hdrlen);
+
+            /* Find entry and translate inner. */
+
+            entry = ipv4_nat_inbound_internal(inner, NAT_MANIP_SRC);
+
+            if (!entry)
+              {
+                return NULL;
+              }
+
+            /* Adjust outer IP */
+
+            ipv4_nat_ip_adjust(ipv4, NULL, entry->local_ip, manip_type);
+
+            /* Recalculate ICMP checksum, we only need to re-calc data in L4
+             * header, because the inner IPv4 header's checksum is updated,
+             * and the overall checksum of IPv4 header will not change.
+             */
+
+            net_chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak,
+                              inner_l4hdrlen, inner_l4, inner_l4hdrlen);
+
+            return entry;
+          }
     }
 
   return NULL;
@@ -299,12 +387,22 @@ ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
   FAR struct tcp_hdr_s *tcp = L4_HDR(ipv4);
   FAR uint16_t (*local_ip)[2] = MANIP_IPADDR(ipv4, manip_type);
   FAR uint16_t *local_port = MANIP_PORT(tcp, manip_type);
-  FAR struct ipv4_nat_entry *entry = ipv4_nat_outbound_entry_find(
-      dev, IP_PROTO_TCP, net_ip4addr_conv32(*local_ip), *local_port);
+  FAR struct ipv4_nat_entry *entry;
+
+  /* Only create entry when it's the outermost packet (manip type is SRC). */
+
+  entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_TCP,
+              net_ip4addr_conv32(*local_ip), *local_port,
+              (manip_type == NAT_MANIP_SRC));
   if (!entry)
     {
       return NULL;
     }
+
+  /* Note: Field tcpchksum is not guaranteed exists in TCP header inside
+   * ICMP Error MSG, but we manually guarantee that it is inside valid memory
+   * address (IOB >= IP + ICMP + IP + TCP), so we can update it safely.
+   */
 
   ipv4_nat_port_adjust(&tcp->tcpchksum, local_port, entry->external_port);
   ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, dev->d_ipaddr, manip_type);
@@ -343,8 +441,13 @@ ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
   FAR uint16_t (*local_ip)[2] = MANIP_IPADDR(ipv4, manip_type);
   FAR uint16_t *local_port = MANIP_PORT(udp, manip_type);
   FAR uint16_t *udpchksum;
-  FAR struct ipv4_nat_entry *entry = ipv4_nat_outbound_entry_find(
-      dev, IP_PROTO_UDP, net_ip4addr_conv32(*local_ip), *local_port);
+  FAR struct ipv4_nat_entry *entry;
+
+  /* Only create entry when it's the outermost packet (manip type is SRC). */
+
+  entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_UDP,
+              net_ip4addr_conv32(*local_ip), *local_port,
+              (manip_type == NAT_MANIP_SRC));
   if (!entry)
     {
       return NULL;
@@ -393,13 +496,16 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
   switch (icmp->type)
     {
-      /* TODO: Support other ICMP types. */
-
       case ICMP_ECHO_REQUEST:
       case ICMP_ECHO_REPLY:
-        entry = ipv4_nat_outbound_entry_find(
-            dev, IP_PROTO_ICMP, net_ip4addr_conv32(*local_ip),
-            icmp->id);
+
+        /* Note: Only create new entry when it's the outermost packet (that
+         * is, manip type is SRC).
+         */
+
+        entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_ICMP,
+                    net_ip4addr_conv32(*local_ip), icmp->id,
+                    (manip_type == NAT_MANIP_SRC));
         if (!entry)
           {
             return NULL;
@@ -409,6 +515,64 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
                              &icmp->id, entry->external_port);
         ipv4_nat_ip_adjust(ipv4, NULL, dev->d_ipaddr, manip_type);
         return entry;
+
+      case ICMP_DEST_UNREACHABLE:
+      case ICMP_TIME_EXCEEDED:
+      case ICMP_PARAMETER_PROBLEM:
+        /* ICMP Error MSG inside another ICMP Error MSG is forbidden by
+         * RFC1122, Section 3.2.2, Page 38, so we only process the outermost
+         * ICMP Error MSG (manip type is SRC).
+         */
+
+        if (manip_type == NAT_MANIP_SRC)
+          {
+            /* The payload in the ICMP packet is the origin packet we got. */
+
+            FAR struct ipv4_hdr_s *inner =
+                (FAR struct ipv4_hdr_s *)(icmp + 1);
+            FAR void *inner_l4 = L4_HDR(inner);
+            int16_t inner_l4len = ((ipv4->len[0] << 8) + ipv4->len[1]) -
+                                  ((intptr_t)inner_l4 - (intptr_t)ipv4);
+            uint16_t inner_l4hdrbak[L4_MAXHDRLEN / 2];
+            uint16_t inner_l4hdrlen;
+
+            if (inner_l4len < 8)
+              {
+                /* RFC792: The original L4 data should be at least 64 bits. */
+
+                return NULL;
+              }
+
+            /* Try backup origin L4 header for later checksum update. */
+
+            inner_l4hdrlen = MIN(inner_l4len, L4_HDRLEN(inner->proto));
+            DEBUGASSERT((intptr_t)inner_l4 - (intptr_t)ipv4 + inner_l4hdrlen
+                        <= CONFIG_IOB_BUFSIZE);
+            memcpy(inner_l4hdrbak, inner_l4, inner_l4hdrlen);
+
+            /* Find entry and translate inner. */
+
+            entry = ipv4_nat_outbound_internal(dev, inner, NAT_MANIP_DST);
+
+            if (!entry)
+              {
+                return NULL;
+              }
+
+            /* Adjust outer IP */
+
+            ipv4_nat_ip_adjust(ipv4, NULL, dev->d_ipaddr, manip_type);
+
+            /* Recalculate ICMP checksum, we only need to re-calc data in L4
+             * header, because the inner IPv4 header's checksum is updated,
+             * and the overall checksum of IPv4 header will not change.
+             */
+
+            net_chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak,
+                              inner_l4hdrlen, inner_l4, inner_l4hdrlen);
+
+            return entry;
+          }
     }
 
   return NULL;
