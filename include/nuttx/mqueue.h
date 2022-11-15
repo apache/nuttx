@@ -78,9 +78,6 @@
 #  define _MQ_TIMEDRECEIVE(d,m,l,p,t) mq_timedreceive(d,m,l,p,t)
 #endif
 
-# define MQ_WNELIST(mq)               (&((mq)->waitfornotempty))
-# define MQ_WNFLIST(mq)               (&((mq)->waitfornotfull))
-
 #if CONFIG_FS_MQUEUE_NPOLLWAITERS > 0
 # define nxmq_pollnotify(msgq, eventset) \
   poll_notify(msgq->fds, CONFIG_FS_MQUEUE_NPOLLWAITERS, eventset)
