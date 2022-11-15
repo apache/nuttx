@@ -175,7 +175,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Check if the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -287,7 +287,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   rm->rm_refs++;
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -314,14 +314,14 @@ static int romfs_close(FAR struct file *filep)
 
   DEBUGASSERT(rm != NULL);
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
     }
 
   rm->rm_refs--;
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
 
   /* Do not check if the mount is healthy.  We must support closing of
    * the file even when there is healthy mount.
@@ -380,7 +380,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -484,7 +484,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
     }
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret < 0 ? ret : readsize;
 }
 
@@ -539,7 +539,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return (off_t)ret;
@@ -567,7 +567,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   finfo("New file position: %jd\n", (intmax_t)filep->f_pos);
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -645,7 +645,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Check if the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -696,7 +696,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   rm->rm_refs++;
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -731,7 +731,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Check if the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -746,7 +746,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
                               rm->rm_hwsectorsize, buf);
     }
 
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -784,7 +784,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       goto errout_with_rdir;
@@ -828,11 +828,11 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 #endif
 
   *dir = &rdir->base;
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return OK;
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
 
 errout_with_rdir:
   kmm_free(rdir);
@@ -888,7 +888,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -973,7 +973,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
     }
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -1004,7 +1004,7 @@ static int romfs_rewinddir(FAR struct inode *mountpt,
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1020,7 +1020,7 @@ static int romfs_rewinddir(FAR struct inode *mountpt,
 #endif
     }
 
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -1073,7 +1073,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    * have to addref() here (but does have to release in ubind().
    */
 
-  nxmutex_init(&rm->rm_lock);   /* Initialize the mutex that controls access */
+  nxrmutex_init(&rm->rm_lock);   /* Initialize the mutex that controls access */
   rm->rm_blkdriver = blkdriver; /* Save the block driver reference */
 
   /* Get the hardware configuration and setup buffering appropriately */
@@ -1108,7 +1108,7 @@ errout_with_buffer:
     }
 
 errout:
-  nxmutex_destroy(&rm->rm_lock);
+  nxrmutex_destroy(&rm->rm_lock);
   kmm_free(rm);
   return ret;
 }
@@ -1138,7 +1138,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Check if there are sill any files opened on the filesystem. */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1193,12 +1193,12 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
       romfs_freenode(rm->rm_root);
 #endif
-      nxmutex_destroy(&rm->rm_lock);
+      nxrmutex_destroy(&rm->rm_lock);
       kmm_free(rm);
       return OK;
     }
 
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -1226,7 +1226,7 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Check if the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1256,7 +1256,7 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   buf->f_namelen = NAME_MAX;
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
@@ -1343,7 +1343,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Check if the mount is still healthy */
 
-  ret = nxmutex_lock(&rm->rm_lock);
+  ret = nxrmutex_lock(&rm->rm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1374,7 +1374,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ret  = romfs_stat_common(type, nodeinfo.rn_size, rm->rm_hwsectorsize, buf);
 
 errout_with_lock:
-  nxmutex_unlock(&rm->rm_lock);
+  nxrmutex_unlock(&rm->rm_lock);
   return ret;
 }
 
