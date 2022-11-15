@@ -6,9 +6,14 @@
 config NET_NAT
 	bool "Network Address Translation (NAT)"
 	default n
-	depends on NET_IPFORWARD
+	depends on NET_IPFORWARD && IOB_BUFSIZE >= 68
 	---help---
 		Enable or disable Network Address Translation (NAT) function.
+
+		Note: When forwarding IPv4 packet and applying NAT, NAT may be
+		applied directly on a single I/O buffer containing L3 packet header,
+		and NAT may need a continuous buffer of at least 68 Bytes
+		(IPv4 20B + ICMP 8B + IPv4 20B + TCP 20B).
 
 config NET_NAT_TCP_EXPIRE_SEC
 	int "TCP NAT entry expiration seconds"
