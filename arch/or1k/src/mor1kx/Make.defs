@@ -34,7 +34,6 @@ CMN_CSRCS  = up_initialize.c \
              up_releasepending.c \
              up_schedulesigaction.c \
              up_copyfullstate.c \
-             up_reprioritizertr.c \
              up_assert.c \
              up_exit.c \
              up_udelay.c \

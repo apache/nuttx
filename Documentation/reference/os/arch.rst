@@ -211,24 +211,6 @@ APIs Exported by Architecture-Specific Logic to NuttX
   pre-emption is re-enabled. Interrupts will always be disabled when
   this function is called.
 
-.. c:function:: void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
-
-  Called when the priority of a running or
-  ready-to-run task changes and the reprioritization will cause a
-  context switch. Two cases:
-
-  #. The priority of the currently running task drops and the next
-     task in the ready to run list has priority.
-  #. An idle, ready to run task's priority has been raised above the
-     the priority of the current, running task and it now has the
-     priority.
-
-  This function is called only from the NuttX scheduling logic.
-  Interrupts will always be disabled when this function is called.
-
-  :param tcb: The TCB of the task that has been reprioritized
-  :param priority: The new task priority
-
 .. c:macro:: noreturn_function
 
 .. c:function:: void up_exit(int status) noreturn_function;
