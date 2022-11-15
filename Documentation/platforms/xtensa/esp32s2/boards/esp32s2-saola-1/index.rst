@@ -63,8 +63,10 @@ I2S
 ESP32-S2 has an I2S peripheral accessible using either the generic I2S audio
 driver or a specific audio codec driver
 (`CS4344 <https://www.cirrus.com/products/cs4344-45-48/>`__ bindings are
-available at the moment). Also, it's possible to use the I2S character device
-driver to bypass audio systems and write directly to the I2S peripheral.
+available at the moment). The generic I2S audio driver enables using both
+the receiver module (RX) and the transmitter module (TX) without using any
+specific codec. Also, it's possible to use the I2S character device driver
+to bypass the audio subsystem and write directly to the I2S peripheral.
 
 .. note:: When using the audio system, sample rate and data width are
   automatically set by the upper half audio driver.
@@ -78,9 +80,12 @@ driver to bypass audio systems and write directly to the I2S peripheral.
     -> System Type
         -> ESP32-S2 Peripheral Selection
             -> I2S
-                -> I2S0/1
-                    -> Bit Witdh
+                -> Bit Witdh
 
+The following configurations use the I2S peripheral::
+  * :ref:`platforms/xtensa/esp32s2/boards/esp32s2-saola-1/index:audio`
+  * :ref:`platforms/xtensa/esp32s2/boards/esp32s2-saola-1/index:i2schar`
+  * :ref:`platforms/xtensa/esp32s2/boards/esp32s2-saola-1/index:nxlooper`
 
 Configurations
 ==============
@@ -88,7 +93,7 @@ Configurations
 audio
 -----
 
-This configuration uses the I2S0 peripheral and an externally connected audio
+This configuration uses the I2S peripheral and an externally connected audio
 codec to play an audio file. The easiest way of playing an uncompressed file
 is embedding into the firmware. This configuration selects
 `romfs example <https://github.com/apache/incubator-nuttx-apps/tree/master/examples/romfs>`__
@@ -132,11 +137,24 @@ i2schar
 -------
 
 This configuration enables the I2S character device and the i2schar example
-app, which provides an easy-to-use way of testing the I2S peripheral.
+app, which provides an easy-to-use way of testing the I2S peripheral,
+enabling both the TX and the RX for those peripherals.
 
-After successfully built and flashed, run on the board's terminal::
+**I2S pinout**
 
-  $ i2schar
+============ ========== =========================================
+ESP32-S2 Pin Signal Pin Description
+============ ========== =========================================
+33           MCLK       Master Clock
+35           SCLK       Bit Clock (SCLK)
+34           LRCK       Word Select (LRCLK)
+36           DOUT       Data Out
+37           DIN        Data In
+============ ========== =========================================
+
+After successfully built and flashed, run on the boards's terminal::
+
+  nsh> i2schar
 
 The corresponding output should show related debug information.
 
@@ -145,6 +163,52 @@ nsh
 
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
+
+nxlooper
+--------
+
+This configuration uses the I2S peripheral as an I2S receiver and
+transmitter at the same time. The idea is to capture an I2S data frame
+using the RX module and reproduce the captured data on the TX module.
+
+**Receiving and transmitting data on I2S**
+
+The I2S will act as a receiver (master mode), capturing data from DIN, which
+needs to be connected to an external source as follows:
+
+============ ========== =========================================
+ESP32-S2 Pin Signal Pin Description
+============ ========== =========================================
+33           MCLK       Master Clock
+35           SCLK       Bit Clock (SCLK) Output
+34           LRCK       Word Select (LRCLK) Output
+36           DOUT       Data Out
+37           DIN        Data In
+============ ========== =========================================
+
+The DOUT pin will output the captured data frame.
+
+.. note:: The ESP32-S2 contains a single I2S peripheral, so the peripheral
+  works on "full-duplex" mode. The `SCLK` and `LRCK` signals are connected
+  internally and the TX module is set-up as slave and the RX as master.
+
+**nxlooper**
+
+The `nxlooper` application captures data from the audio device with receiving
+capabilities and forwards the audio data frame to the audio device with
+transmitting capabilities.
+
+After successfully built and flashed, run on the boards's terminal::
+
+  nsh> nxlooper
+  nxlooper> loopback
+
+.. note:: `loopback` command default arguments for the channel configuration,
+  the data width and the sample rate are, respectively, 2 channels,
+  16 bits/sample and 48KHz. These arguments can be supplied to select
+  different audio formats, for instance::
+
+    nxlooper> loopback 2 8 44100
 
 timer
 -----
