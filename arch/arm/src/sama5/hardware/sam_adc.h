@@ -525,7 +525,7 @@
 
 #if defined (ATSAMA5D2)
 #define ADC_ACR_IBTL_SHIFT         (8) /* Bits 8-9: ADC Bias Current Control */
-#define ADC_ACR_IBCTL_MASK         (3 << ADC_ACR_IBTL_SHIFT)
+#  define ADC_ACR_IBCTL_MASK       (3 << ADC_ACR_IBTL_SHIFT)
 #  define ADC_ACR_IBCTL(n)         ((uint32_t)(n) << ADC_ACR_IBTL_SHIFT)
 #endif
 
