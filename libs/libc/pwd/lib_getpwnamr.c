@@ -82,7 +82,7 @@ int getpwnam_r(FAR const char *name, FAR struct passwd *pwd, FAR char *buf,
       return 0;
     }
 
-  return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_DIR, ROOT_SHELL, pwd,
-                    buf, buflen, result);
+  return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_NAME, ROOT_DIR,
+                    ROOT_SHELL, pwd, buf, buflen, result);
 #endif
 }
