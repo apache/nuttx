@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/addrenv.h
+ * arch/risc-v/src/common/riscv_addrenv_utils.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,34 +18,27 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_COMMON_ADDRENV_H
-#define __ARCH_RISC_V_SRC_COMMON_ADDRENV_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
+#include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
+#include <nuttx/irq.h>
+#include <nuttx/pgalloc.h>
+#include <nuttx/sched.h>
 
-#include "riscv_internal.h"
+#include <arch/barriers.h>
 
-#ifdef CONFIG_ARCH_ADDRENV
+#include "pgalloc.h"
+#include "riscv_mmu.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Aligned size of the kernel stack */
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-#  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
-#endif
+#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,7 +58,37 @@
  *
  ****************************************************************************/
 
-uintptr_t riscv_get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr);
+uintptr_t riscv_get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr)
+{
+  uintptr_t paddr;
+  uintptr_t ptprev;
+  uint32_t  ptlevel;
 
-#endif /* CONFIG_ARCH_ADDRENV */
-#endif /* __ARCH_RISC_V_SRC_COMMON_ADDRENV_H */
+  /* Get the current level MAX_LEVELS-1 entry corresponding to this vaddr */
+
+  ptlevel = ARCH_SPGTS;
+  ptprev  = riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
+  paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+
+  if (!paddr)
+    {
+      /* No page table has been allocated... allocate one now */
+
+      paddr = mm_pgalloc(1);
+      if (paddr)
+        {
+          /* Wipe the page and assign it */
+
+          riscv_pgwipe(paddr);
+          mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, MMU_UPGT_FLAGS);
+        }
+    }
+
+  /* Flush the data cache, so the changes are committed to memory */
+
+  __DMB();
+
+  return paddr;
+}
+
+#endif /* CONFIG_BUILD_KERNEL */
