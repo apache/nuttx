@@ -145,7 +145,7 @@
 #ifdef CONFIG_MM_SMALL
 typedef uint16_t mmsize_t;
 #else
-typedef uint32_t mmsize_t;
+typedef size_t mmsize_t;
 #endif
 
 /* This describes an allocated chunk.  An allocated chunk is
