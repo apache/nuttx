@@ -36,6 +36,8 @@
 #include "arm64_gic.h"
 #include "arm64_fatal.h"
 
+#if CONFIG_ARM_GIC_VERSION == 3 || CONFIG_ARM_GIC_VERSION == 4
+
 /***************************************************************************
  * Pre-processor Definitions
  ***************************************************************************/
@@ -615,3 +617,5 @@ void arm64_gic_secondary_init(void)
 }
 
 #endif
+
+#endif /* CONFIG_ARM_GIC_VERSION == 3 || CONFIG_ARM_GIC_VERSION == 4 */
