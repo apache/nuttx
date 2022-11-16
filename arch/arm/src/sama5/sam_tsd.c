@@ -1735,7 +1735,6 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   /* Initialize the touchscreen device driver instance */
 
-  memset(priv, 0, sizeof(struct sam_tsd_s));
   priv->adc     = adc;               /* Save the ADC device handle    */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
