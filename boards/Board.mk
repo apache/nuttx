@@ -58,13 +58,13 @@ ifneq ($(CONFIG_ARCH_FAMILY),)
   ARCH_FAMILY = $(patsubst "%",%,$(CONFIG_ARCH_FAMILY))
 endif
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" "$(SCHEDSRCDIR)"}
-CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)chip"}
+CFLAGS += ${INCDIR_PREFIX}"$(SCHEDSRCDIR)"
+CFLAGS += ${INCDIR_PREFIX}"$(ARCHSRCDIR)$(DELIM)chip"
 ifneq ($(CONFIG_ARCH_SIM),y)
-  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)common"}
+  CFLAGS += ${INCDIR_PREFIX}"$(ARCHSRCDIR)$(DELIM)common"
 endif
 ifneq ($(ARCH_FAMILY),)
-  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)"}
+  CFLAGS += ${INCDIR_PREFIX}"$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)"
 endif
 
 all: libboard$(LIBEXT)

@@ -66,7 +66,7 @@ include wchar/Make.defs
 include wctype/Make.defs
 include wqueue/Make.defs
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)libs$(DELIM)libc}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc
 
 # Rule for the symbol table generation
 

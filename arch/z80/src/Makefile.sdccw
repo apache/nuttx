@@ -21,9 +21,9 @@
 # Tools
 # CFLAGS, CPPFLAGS, ASFLAGS, LDFLAGS are set in $(TOPDIR)\Make.defs
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+CFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
+CFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 
 CPPFLAGS += -D__ASSEMBLY__
 

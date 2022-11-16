@@ -29,6 +29,6 @@ CSRCS += mrf24j40_regops.c mrf24j40.c
 
 DEPPATH += --dep-path wireless$(DELIM)ieee802154$(DELIM)mrf24j40
 VPATH += :wireless$(DELIM)ieee802154$(DELIM)mrf24j40
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)mrf24j40}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee802154$(DELIM)mrf24j40
 
 endif # CONFIG_IEEE802154_MRF24J40

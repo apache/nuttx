@@ -40,5 +40,5 @@ CSRCS += nxbe_notify_rectangle.c
 endif
 
 DEPPATH += --dep-path nxbe
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/nxbe}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/graphics/nxbe
 VPATH += :nxbe

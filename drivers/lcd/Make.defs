@@ -175,13 +175,13 @@ endif
 ifeq ($(CONFIG_LCD),y)
   DEPPATH += --dep-path lcd
   VPATH += :lcd
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)lcd
 else ifeq ($(CONFIG_SLCD),y)
   DEPPATH += --dep-path lcd
   VPATH += :lcd
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)lcd
 else ifeq ($(CONFIG_LCD_OTHER),y)
   DEPPATH += --dep-path lcd
   VPATH += :lcd
-  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)lcd
 endif

@@ -345,6 +345,6 @@ endif
 
 DEPPATH += --dep-path sensors
 VPATH += :sensors
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)sensors}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)sensors
 
 endif # CONFIG_SENSORS

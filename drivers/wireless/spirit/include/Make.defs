@@ -20,5 +20,5 @@
 
 # Add path to include Spirit header files in CFLAGS
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" \
-  $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)spirit$(DELIM)include}
+CFLAGS += ${INCDIR_PREFIX}\
+  $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)spirit$(DELIM)include

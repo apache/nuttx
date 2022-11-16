@@ -52,6 +52,6 @@ endif
 
 DEPPATH += --dep-path wireless$(DELIM)bluetooth
 VPATH += :wireless$(DELIM)bluetooth
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)bluetooth}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)bluetooth
 
 endif # CONFIG_DRIVERS_BLUETOOTH

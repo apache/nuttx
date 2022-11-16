@@ -67,5 +67,5 @@ endif
 
 DEPPATH += --dep-path wireless
 VPATH += :wireless
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless
 endif

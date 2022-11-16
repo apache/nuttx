@@ -30,6 +30,6 @@ include modem/alt1250/Make.defs
 
 DEPPATH += --dep-path modem
 VPATH += :modem
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)modem
 
 endif

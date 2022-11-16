@@ -96,6 +96,6 @@ CSRCS += nxglib_cursor_backup_24bpp.c nxglib_cursor_backup_32bpp.c
 endif
 
 DEPPATH += --dep-path nxglib
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/nxglib}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/graphics/nxglib
 #VPATH += :nxglib
 VPATH = nxglib

@@ -32,7 +32,7 @@ CSRCS += vnc_kbd.c
 endif
 
 DEPPATH += --dep-path video/vnc
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)video$(DELIM)vnc}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)video$(DELIM)vnc
 VPATH += :video/vnc
 
 endif

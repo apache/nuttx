@@ -34,7 +34,7 @@ endif
 
 MOTOR_DEPPATH := --dep-path motor
 MOTOR_VPATH := :motor
-MOTOR_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)motor}
+MOTOR_CFLAGS := ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)motor
 
 DEPPATH += $(MOTOR_DEPPATH)
 VPATH += $(MOTOR_VPATH)

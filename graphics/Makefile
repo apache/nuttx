@@ -25,7 +25,7 @@ include nxbe/Make.defs
 include nxmu/Make.defs
 include nxterm/Make.defs
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)graphics}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)graphics
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

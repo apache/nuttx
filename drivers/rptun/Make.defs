@@ -30,6 +30,6 @@ endif
 
 DEPPATH += --dep-path rptun
 VPATH += :rptun
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)rptun}
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)rptun
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
 endif

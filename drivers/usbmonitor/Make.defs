@@ -30,6 +30,6 @@ CSRCS += usbmonitor.c
 
 DEPPATH += --dep-path usbmonitor
 VPATH += :usbmonitor
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbmonitor}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)usbmonitor
 
 endif

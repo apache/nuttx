@@ -33,6 +33,6 @@ endif
 
 DEPPATH += --dep-path modem$(DELIM)alt1250
 VPATH += :modem$(DELIM)alt1250
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)modem
 
 endif
