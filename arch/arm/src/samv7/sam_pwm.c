@@ -486,7 +486,8 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
             }
           else
             {
-              /* release overwrite of channel */
+              /* Release overwrite of channel */
+
               regval = (1 << priv->channels[i].channel);
               pwm_putreg(priv, SAMV7_PWM_OSC, regval);
             }
