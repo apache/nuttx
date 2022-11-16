@@ -4,7 +4,7 @@ README.txt
 This board configuration will use QEMU to emulate generic ARM64 v8-A series
 hardware platform and provides support for these devices:
 
- - GICv3 interrupt controller
+ - GICv2 and GICv3 interrupt controllers
  - ARM Generic Timer
  - PL011 UART controller
 
@@ -41,7 +41,7 @@ Getting Started
    $ qemu-system-aarch64 --help
 
 3. Configuring and running
-  3.1 Single Core
+  3.1 Single Core (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:nsh
    $ make
@@ -51,7 +51,7 @@ Getting Started
      -net none -chardev stdio,id=con,mux=on -serial chardev:con \
      -mon chardev=con,mode=readline -kernel ./nuttx
 
-  3.2 SMP
+  3.2 SMP (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:nsh_smp
    $ make
@@ -61,6 +61,16 @@ Getting Started
       -net none -chardev stdio,id=con,mux=on -serial chardev:con \
       -mon chardev=con,mode=readline -kernel ./nuttx
 
+  3.3 Single Core (GICv2)
+   Configuring NuttX and compile:
+   $ ./tools/configure.sh -l qemu-armv8a:nsh_gicv2
+   $ make
+   Running with qemu
+   $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
+     -machine virt,virtualization=on,gic-version=2 \
+     -net none -chardev stdio,id=con,mux=on -serial chardev:con \
+     -mon chardev=con,mode=readline -kernel ./nuttx
+
    Note:
    1. Make sure the aarch64-none-elf toolchain install PATH has been added to environment variable
    2. To quit QEMU, type Ctrl + X
@@ -69,6 +79,11 @@ Getting Started
 
 Status
 ======
+
+2022-11-18:
+1. Added support for GICv2.
+
+2. Added board configuration for nsh_gicv2.
 
 2022-10-13:
 1. Renamed the board configuration name from qemu-a53 to qemu-v8a.

@@ -51,7 +51,7 @@ CMN_CSRCS += arm64_sigdeliver.c
 
 # Common C source files ( hardware BSP )
 CMN_CSRCS += arm64_mmu.c arm64_arch_timer.c arm64_cache.c
-CMN_CSRCS += arm64_doirq.c arm64_gicv3.c arm64_fatal.c
+CMN_CSRCS += arm64_doirq.c arm64_gicv2.c arm64_gicv3.c arm64_fatal.c
 CMN_CSRCS += arm64_syscall.c arm64_cpu_psci.c
 
 # Use common heap allocation for now (may need to be customized later)

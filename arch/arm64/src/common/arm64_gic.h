@@ -99,6 +99,7 @@
  * [3:0] - IMPLEMENTATION DEFINED.
  */
 #define GICD_PIDR2_ARCH_MASK        0xf0
+#define GICD_PIDR2_ARCH_GICV2       0x20
 #define GICD_PIDR2_ARCH_GICV3       0x30
 #define GICD_PIDR2_ARCH_GICV4       0x40
 
