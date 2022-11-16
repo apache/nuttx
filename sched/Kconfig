@@ -1586,7 +1586,7 @@ endmenu # Signal Numbers
 endmenu # Signal Configuration
 
 menu "Message Queue Options"
-	depends on !DISABLE_MQUEUE && !DISABLE_MQUEUE_SYSV
+	depends on !DISABLE_MQUEUE || !DISABLE_MQUEUE_SYSV
 
 config PREALLOC_MQ_MSGS
 	int "Number of pre-allocated messages"
