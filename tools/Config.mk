@@ -100,7 +100,7 @@ endif
 # This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
-KDEFINE ?= ${shell $(DEFINE) "$(CC)" __KERNEL__}
+KDEFINE ?= ${DEFINE_PREFIX}__KERNEL__
 
 # DELIM - Path segment delimiter character
 #
@@ -551,11 +551,12 @@ $(1)_$(2):
 
 endef
 
-# ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
+export DEFINE_PREFIX := $(subst X,,${shell $(DEFINE) "$(CC)" "X"})
 
-ARCHDEFINES += ${shell $(DEFINE) "$(CC)" __NuttX__}
+# ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
+ARCHDEFINES += ${DEFINE_PREFIX}__NuttX__
 ifeq ($(CONFIG_NDEBUG),y)
-  ARCHDEFINES += ${shell $(DEFINE) "$(CC)" NDEBUG}
+  ARCHDEFINES += ${DEFINE_PREFIX}NDEBUG
 endif
 
 # The default C/C++ search path
