@@ -26,11 +26,13 @@
 
 #include <sys/shm.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/mm/shm.h>
+#include <nuttx/pgalloc.h>
 
 #include "shm/shm.h"
 
