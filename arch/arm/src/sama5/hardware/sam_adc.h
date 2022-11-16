@@ -371,7 +371,7 @@
 #if defined (ATSAMA5D3)
 #  define ADC_INT_ALL              (0xe7f00fff)
 #elif defined (ATSAMA5D2)
-#  define ADC_INT_ALL                (0x67780fff)
+#  define ADC_INT_ALL              (0x67780fff)
 #endif
 
 /* Overrun Status Register */
