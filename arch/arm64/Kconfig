@@ -95,6 +95,14 @@ config ARM_HAVE_NEON
 	---help---
 		Decide whether support NEON instruction
 
+config ARM_GIC_VERSION
+	int "GIC version"
+	default 3
+	range 2 4
+	---help---
+		Version of Generic Interrupt Controller (GIC) supported by the
+		architecture
+
 if ARCH_CHIP_QEMU
 source "arch/arm64/src/qemu/Kconfig"
 endif
