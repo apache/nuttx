@@ -36,7 +36,7 @@
 
 /* General definitions ******************************************************/
 
-#if defined(ATSAMA5D3) || defined (ATSAMA5D2)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define SAM_ADC_NCHANNELS          12     /* 12 ADC Channels */
 #elif defined(ATSAMA5D4)
 #  define SAM_ADC_NCHANNELS          5      /* 5 ADC Channels */
@@ -78,7 +78,7 @@
 #define SAM_ADC_CDR3_OFFSET        0x005c /* Channel Data Register 3 */
 #define SAM_ADC_CDR4_OFFSET        0x0060 /* Channel Data Register 4 */
 
-#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define SAM_ADC_CDR5_OFFSET      0x0064 /* Channel Data Register 5 */
 #  define SAM_ADC_CDR6_OFFSET      0x0068 /* Channel Data Register 6 */
 #  define SAM_ADC_CDR7_OFFSET      0x006c /* Channel Data Register 7 */
@@ -369,9 +369,9 @@
 #define ADC_SR_PENS                (1 << 31) /* Bit 31: Pen detect Status (SR only) */
 
 #if defined (ATSAMA5D3)
-#  define ADC_INT_ALL                (0xe7f00fff)
+#  define ADC_INT_ALL              (0xe7f00fff)
 #elif defined (ATSAMA5D2)
-#  define ADC_INT_ALL                (0x67780fff)
+#  define ADC_INT_ALL              (0x67780fff)
 #endif
 
 /* Overrun Status Register */
@@ -503,9 +503,9 @@
 #define ADC_CDR_DATA_SHIFT         (0)       /* Bits 0-11: Converted Data */
 
 #if defined (ATSAMA5D2)
-#define ADC_CDR_DATA_MASK          (0x3fff << ADC_CDR_DATA_SHIFT)
+#  define ADC_CDR_DATA_MASK        (0x3fff << ADC_CDR_DATA_SHIFT)
 #else
-#define ADC_CDR_DATA_MASK          (0xfff << ADC_CDR_DATA_SHIFT)
+#  define ADC_CDR_DATA_MASK        (0xfff << ADC_CDR_DATA_SHIFT)
 #endif
 
 /* Compare Window Register */
@@ -524,8 +524,8 @@
 #  define ADC_ACR_PENDETSENS(n)    ((uint32_t)(n) << ADC_ACR_PENDETSENS_SHIFT)
 
 #if defined (ATSAMA5D2)
-#define ADC_ACR_IBTL_SHIFT         (8) /* Bits 8-9: ADC Bias Current Control */
-#define ADC_ACR_IBCTL_MASK         (3 << ADC_ACR_IBTL_SHIFT)
+#  define ADC_ACR_IBTL_SHIFT       (8) /* Bits 8-9: ADC Bias Current Control */
+#  define ADC_ACR_IBCTL_MASK       (3 << ADC_ACR_IBTL_SHIFT)
 #  define ADC_ACR_IBCTL(n)         ((uint32_t)(n) << ADC_ACR_IBTL_SHIFT)
 #endif
 
