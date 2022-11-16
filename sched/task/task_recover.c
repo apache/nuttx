@@ -78,7 +78,7 @@ void nxtask_recover(FAR struct tcb_s *tcb)
 
   nxsem_recover(tcb);
 
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Handle cases where the thread was waiting for a message queue event */
 
   nxmq_recover(tcb);

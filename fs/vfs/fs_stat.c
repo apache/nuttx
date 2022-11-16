@@ -269,7 +269,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     }
   else
 #endif
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Check for a message queue */
 
   if (INODE_IS_MQUEUE(inode))

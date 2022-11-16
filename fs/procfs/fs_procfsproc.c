@@ -411,7 +411,7 @@ static FAR const char * const g_statenames[] =
   "Inactive",
   "Waiting,Semaphore",
   "Waiting,Signal"
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   , "Waiting,MQ empty"
   , "Waiting,MQ full"
 #endif

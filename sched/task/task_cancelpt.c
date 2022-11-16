@@ -392,7 +392,7 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
               nxsig_wait_irq(tcb, ECANCELED);
             }
 
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
           /* If the thread is blocked waiting on a message queue, then
            * the thread must be unblocked to handle the cancellation.
            */
