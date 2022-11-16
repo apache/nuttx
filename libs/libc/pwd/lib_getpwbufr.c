@@ -47,6 +47,7 @@
  *   uid    - Value to set the passwd structure's pw_uid field to.
  *   gid    - Value to set the passwd structure's pw_gid field to.
  *   name   - Value to set the passwd structure's pw_name field to.
+ *   gecos  - Value to set the passwd structure's pw_gecos field to.
  *   dir    - Value to set the passwd structure's pw_dir field to.
  *   shell  - Value to set the passwd structure's pw_shell field to.
  *   pwd    - Pointer to the space to store the retrieved passwd structure
@@ -63,13 +64,14 @@
  ****************************************************************************/
 
 int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
-               FAR const char *dir, FAR const char *shell,
-               FAR struct passwd *pwd, FAR char *buf, size_t buflen,
-               FAR struct passwd **result)
+               FAR const char *gecos, FAR const char *dir,
+               FAR const char *shell, FAR struct passwd *pwd,
+               FAR char *buf, size_t buflen, FAR struct passwd **result)
 {
   size_t reqdlen;
 
-  reqdlen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
+  reqdlen = strlen(name) + 1 + strlen(gecos) + 1 + strlen(dir) + 1 +
+            strlen(shell) + 1;
 
   if (buflen < reqdlen)
     {
@@ -80,12 +82,14 @@ int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
     }
 
   pwd->pw_name  = buf;
-  pwd->pw_dir   = &buf[strlen(name) + 1];
-  pwd->pw_shell = &buf[strlen(name) + 1 + strlen(dir) + 1];
+  pwd->pw_gecos = &buf[strlen(name) + 1];
+  pwd->pw_dir   = &buf[strlen(name) + strlen(gecos) + 2];
+  pwd->pw_shell = &buf[strlen(name) + strlen(gecos) + strlen(dir) + 3];
 
   pwd->pw_uid = uid;
   pwd->pw_gid = gid;
   strcpy(pwd->pw_name, name);
+  strcpy(pwd->pw_gecos, gecos);
   strcpy(pwd->pw_dir, dir);
   strcpy(pwd->pw_shell, shell);
 
