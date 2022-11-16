@@ -49,6 +49,7 @@ struct passwd
   FAR char *pw_name;
   uid_t     pw_uid;
   gid_t     pw_gid;
+  FAR char *pw_gecos;
   FAR char *pw_dir;
   FAR char *pw_shell;
 };

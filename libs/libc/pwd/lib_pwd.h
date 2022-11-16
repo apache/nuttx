@@ -63,11 +63,12 @@ EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
  ****************************************************************************/
 
 FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
-                            FAR const char *dir, FAR const char *shell);
+                            FAR const char *gecos, FAR const char *dir,
+                            FAR const char *shell);
 int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
-               FAR const char *dir, FAR const char *shell,
-               FAR struct passwd *pwd, FAR char *buf, size_t buflen,
-               FAR struct passwd **result);
+               FAR const char *gecos, FAR const char *dir,
+               FAR const char *shell, FAR struct passwd *pwd,
+               FAR char *buf, size_t buflen, FAR struct passwd **result);
 
 #ifdef CONFIG_LIBC_PASSWD_FILE
 int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,

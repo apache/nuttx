@@ -54,6 +54,7 @@ static FAR struct passwd *g_pwd;
  *   uid   - Value to set the passwd structure's pw_uid field to.
  *   gid   - Value to set the passwd structure's pw_gid field to.
  *   name  - Value to set the passwd structure's pw_name field to.
+ *   geocs - Value to set the passwd structure's pw_gecos field to.
  *   dir   - Value to set the passwd structure's pw_dir field to.
  *   shell - Value to set the passwd structure's pw_shell field to.
  *
@@ -64,14 +65,16 @@ static FAR struct passwd *g_pwd;
  ****************************************************************************/
 
 FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
-                            FAR const char *dir, FAR const char *shell)
+                            FAR const char *gecos, FAR const char *dir,
+                            FAR const char *shell)
 {
   FAR struct passwd *result;
   FAR char *newbuf;
   size_t buflen;
   int err;
 
-  buflen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
+  buflen = strlen(name) + 1 + strlen(gecos) + 1 + strlen(dir) + 1 +
+           strlen(shell) + 1;
 
   newbuf = (FAR char *)lib_realloc(g_buf, buflen);
 
@@ -94,7 +97,7 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
       goto error;
     }
 
-  err = getpwbuf_r(uid, gid, name, dir, shell,
+  err = getpwbuf_r(uid, gid, name, gecos, dir, shell,
                    g_pwd, g_buf, buflen, &result);
 
   if (err)

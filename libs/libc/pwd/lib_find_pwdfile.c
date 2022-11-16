@@ -219,7 +219,26 @@ static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
 
       *ptr++        = '\0';
       entry->pw_gid = (gid_t)atoi(save);
-      entry->pw_dir = ptr;
+      save          = ptr;
+
+      /* Skip to the end of the user information and properly terminate it.
+       * The user information must be terminated with the field delimiter ':'.
+       */
+
+      for (; *ptr != '\n' && *ptr != '\0' && *ptr != ':'; ptr++)
+        {
+        }
+
+      if (*ptr == '\n' || *ptr == '\0')
+        {
+          /* Bad line format? */
+
+          continue;
+        }
+
+      *ptr++          = '\0';
+      entry->pw_gecos = save;
+      entry->pw_dir   = ptr;
 
       /* Skip to the end of the home directory and properly terminate it.
        * The home directory must be the last thing on the line.
