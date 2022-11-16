@@ -505,7 +505,7 @@
 #if defined (ATSAMA5D2)
 #  define ADC_CDR_DATA_MASK        (0x3fff << ADC_CDR_DATA_SHIFT)
 #else
-#define ADC_CDR_DATA_MASK          (0xfff << ADC_CDR_DATA_SHIFT)
+#  define ADC_CDR_DATA_MASK        (0xfff << ADC_CDR_DATA_SHIFT)
 #endif
 
 /* Compare Window Register */
