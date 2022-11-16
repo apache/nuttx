@@ -142,11 +142,11 @@
 #endif
 
 #ifndef BOARD_TSD_PENDETSENS
-# define BOARD_TSD_PENDETSENS 0
+#  define BOARD_TSD_PENDETSENS 0
 #endif
 
 #if !defined BOARD_TSD_IBCTL && defined ATSAMA5D2
-# define BOARD_TSD_IBCTL 0
+#  define BOARD_TSD_IBCTL 0
 #endif
 
 /****************************************************************************
@@ -1349,7 +1349,7 @@ static void sam_tsd_tracking(struct sam_tsd_s *priv, uint32_t time)
   uint32_t tracktim;
   uint32_t regval;
 
-#if defined (ATSAMA5D4)
+#if defined(ATSAMA5D4)
 
   /* Formula for SHTIM is:
    *
@@ -1622,7 +1622,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
   regval = sam_adc_getreg(priv->adc, SAM_ADC_ACR);
   regval &= ~ADC_ACR_PENDETSENS_MASK;
   regval |= ADC_ACR_PENDETSENS(BOARD_TSD_PENDETSENS);
-#if defined ATSAMA5D2
+#if defined(ATSAMA5D2)
   regval &= ~ADC_ACR_IBCTL_MASK;
   regval |= ADC_ACR_IBCTL(BOARD_TSD_IBCTL);
 #endif
@@ -1735,7 +1735,6 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   /* Initialize the touchscreen device driver instance */
 
-  memset(priv, 0, sizeof(struct sam_tsd_s));
   priv->adc     = adc;               /* Save the ADC device handle    */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
