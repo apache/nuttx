@@ -364,6 +364,25 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
                     uintptr_t entry);
 
 /****************************************************************************
+ * Name: mmu_ln_clear
+ *
+ * Description:
+ *   Unmap a level n translation table entry.
+ *
+ * Input Parameters:
+ *   ptlevel - The translation table level, amount of levels is
+ *     MMU implementation specific
+ *   lnvaddr - The virtual address of the beginning of the page table at
+ *     level n
+ *   vaddr - The virtual address to get pte for. Must be aligned to a PPN
+ *     address boundary which is dependent on the level of the entry
+ *
+ ****************************************************************************/
+
+#define mmu_ln_clear(ptlevel, lnvaddr, vaddr) \
+  mmu_ln_restore(ptlevel, lnvaddr, vaddr, 0)
+
+/****************************************************************************
  * Name: mmu_ln_map_region
  *
  * Description:
