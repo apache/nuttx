@@ -517,9 +517,10 @@
 #define SAM_SFRBU_VBASE          (SAM_PERIPHC_VSECTION+SAM_SFRBU_OFFSET)
 #define SAM_CHIPID_VBASE         (SAM_PERIPHC_VSECTION+SAM_CHIPID_OFFSET)
 
-#define SAM_PIOA_VBASE           (SAM_PERIPHA_VSECTION+SAM_PIO_OFFSET)
-#define SAM_PIOB_VBASE           (SAM_PERIPHB_VSECTION+SAM_PIO_OFFSET)
-#define SAM_PIOC_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIO_OFFSET)
+#define SAM_PIOA_VBASE           SAM_PIO_IOGROUPA_VBASE
+#define SAM_PIOB_VBASE           SAM_PIO_IOGROUPB_VBASE
+#define SAM_PIOC_VBASE           SAM_PIO_IOGROUPC_VBASE
+#define SAM_PIOD_VBASE           SAM_PIO_IOGROUPD_VBASE
 
 /* NuttX virtual base address
  *
@@ -883,3 +884,4 @@
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_MEMORYMAP_H */
+
