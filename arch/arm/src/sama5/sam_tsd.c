@@ -1349,7 +1349,7 @@ static void sam_tsd_tracking(struct sam_tsd_s *priv, uint32_t time)
   uint32_t tracktim;
   uint32_t regval;
 
-#if defined (ATSAMA5D4)
+#if defined(ATSAMA5D4)
 
   /* Formula for SHTIM is:
    *
