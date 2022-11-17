@@ -3637,12 +3637,45 @@ config SAMA5_ADC_TIOATRIG
 		A-to-D Conversion is initiated the A output from one of
 		Timer/Counter 0 channels.
 
+config SAMA5_ADC_PWMTRIG
+  bool "PWM Event trigger"
+  depends on SAMA5_PWM
+  ---help---
+    A-to-D Conversion is initiated from the PWM event lines
+
+config SAMA5_ADC_RTCOUT
+  bool "RTC Out trigger"
+  depends on SAMA5_RTC
+  depends on ARCH_CHIP_SAMA5D2
+  ---help---
+    A-to-D Conversion is initiated from the RTC output
+
 endchoice # Trigger mode
+
+if SAMA5_ADC_PWMTRIG
+
+choice
+  prompt "PWM Event Line Selection"
+  default SAMA5_ADC_PWMTRIG_LINE0
+
+config SAMA5_ADC_PWM_TRIG_LINE0
+  bool "PWM event Line 0"
+  ---help---
+    Trigger A-to-D conversion on PWM event line 0
+
+config SAMA5_ADC_PWM_TRIG_LINE1
+  bool "PWM event Line 1"
+  ---help---
+    Trigger A-to-D conversion on PWM event line 1
+
+endchoice # PWM Event Line Selection
+endif # SAMA5_ADC_PWMTRIG
+
+if SAMA5_ADC_ADTRG || SAMA5_ADC_TIOATRIG || SAMA5_ADC_PWMTRIG || SAMA5_ADC_RTCOUT
 
 choice
 	prompt "ADTRG edge"
 	default SAMA5_ADC_ADTRG_BOTH
-	depends on SAMA5_ADC_ADTRG
 
 config SAMA5_ADC_ADTRG_RISING
 	bool "Rising edge"
@@ -3660,6 +3693,7 @@ config SAMA5_ADC_ADTRG_BOTH
 		Trigger A-to-D conversion on both edges of the ADTRG signal
 
 endchoice # ADTRG edge
+endif # SAMA5_ADC_ADTRG
 
 if SAMA5_ADC_TIOATRIG
 

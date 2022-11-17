@@ -498,11 +498,20 @@ static const struct adc_ops_s g_adcops =
 
 /* ADC internal state */
 
-static struct sam_adc_s g_adcpriv;
+static struct sam_adc_s g_adcpriv =
+{
+  .lock        = NXMUTEX_INITIALIZER,
+};
 
 /* ADC device instance */
 
-static struct adc_dev_s g_adcdev;
+static struct adc_dev_s g_adcdev =
+{
+#ifdef SAMA5_ADC_HAVE_CHANNELS
+  .ad_ops      = &g_adcops,
+#endif
+  .ad_priv     = &g_adcpriv,
+};
 
 /****************************************************************************
  * Private Functions
@@ -1088,9 +1097,7 @@ static int sam_adc_bind(struct adc_dev_s *dev,
 
 static void sam_adc_reset(struct adc_dev_s *dev)
 {
-#ifdef CONFIG_SAMA5_ADC_DMA
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
-#endif
   uint32_t regval;
 
   ainfo("Resetting..\n");
@@ -1488,12 +1495,6 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 
   /* Configure the software trigger */
 
-  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
-  regval &= ~ADC_MR_TRGSEL_MASK;
-  sam_adc_putreg(priv, SAM_ADC_MR, regval);
-
-  /* No trigger, only software trigger can start conversions */
-
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
   regval &= ~ADC_TRGR_TRGMOD_MASK;
   regval |= ADC_TRGR_TRGMOD_NOTRIG;
@@ -1504,10 +1505,6 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 
   /* Configure the trigger to be periodic */
 
-  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
-  regval &= ~ADC_MR_TRGSEL_MASK;
-  sam_adc_putreg(priv, SAM_ADC_MR, regval);
-
   sam_adc_trigperiod(priv, CONFIG_SAMA5_ADC_TRIGGER_PERIOD);
 
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
@@ -1517,10 +1514,6 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 
 #elif defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
   ainfo("Setup Continuous Trigger\n");
-
-  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
-  regval &= ~ADC_MR_TRGSEL_MASK;
-  sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
   /* Configure the trigger to be continuous */
 
@@ -1536,7 +1529,70 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
 
   regval  = sam_adc_getreg(priv, SAM_ADC_MR);
   regval &= ~ADC_MR_TRGSEL_MASK;
-  regval |= ADC_MR_TRGSEL_ADC_ADTRIG;
+  regval |= ADC_MR_TRGSEL_ADTRG;
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* External trigger edge selection */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGMOD_MASK;
+
+#if defined(CONFIG_SAMA5_ADC_ADTRG_RISING)
+  regval |= ADC_TRGR_TRGMOD_EXTRISE;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_FALLING)
+  regval |= ADC_TRGR_TRGMOD_EXTFALL;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_BOTH)
+  regval |= ADC_TRGR_TRGMOD_EXTBOTH;
+#else
+#  error External trigger edge not defined
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+
+#elif defined(CONFIG_SAMA5_ADC_PWMTRIG)
+  ainfo("Setup PWM trigger\n");
+
+  /* Configure the trigger via the PWM event lines */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_TRGSEL_MASK;
+
+#if defined(CONFIG_SAMA5_ADC_PWM_TRIG_LINE0)
+  regval |= ADC_MR_TRGSEL_PWM0;
+#elif defined(CONFIG_SAMA5_ADC_PWM_TRIG_LINE1)
+  regval |= ADC_MR_TRGSEL_PWM1;
+#else
+#  error PWM event line not defined
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* External trigger edge selection */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
+  regval &= ~ADC_TRGR_TRGMOD_MASK;
+
+#if defined(CONFIG_SAMA5_ADC_ADTRG_RISING)
+  regval |= ADC_TRGR_TRGMOD_EXTRISE;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_FALLING)
+  regval |= ADC_TRGR_TRGMOD_EXTFALL;
+#elif defined(CONFIG_SAMA5_ADC_ADTRG_BOTH)
+  regval |= ADC_TRGR_TRGMOD_EXTBOTH;
+#else
+#  error External trigger edge not defined
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+
+#elif defined(CONFIG_SAMA5_ADC_RTCOUT)
+  ainfo("Setup RTC trigger\n");
+
+  /* Configure the trigger via the PWM event lines */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_TRGSEL_MASK;
+  regval |= ADC_MR_TRGSEL_RTC;
+
   sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
   /* External trigger edge selection */
