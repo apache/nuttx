@@ -64,6 +64,12 @@
 #endif
 
 /****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct task_group_s; /* Forward declaration */
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -110,7 +116,6 @@ struct group_shm_s
  *
  ****************************************************************************/
 
-struct task_group_s; /* Forward reference */
 int shm_group_initialize(FAR struct task_group_s *group);
 
 /****************************************************************************
@@ -128,8 +133,43 @@ int shm_group_initialize(FAR struct task_group_s *group);
  *
  ****************************************************************************/
 
-struct task_group_s; /* Forward reference */
 void shm_group_release(FAR struct task_group_s *group);
+
+/****************************************************************************
+ * Name: shm_alloc
+ *
+ * Description:
+ *   Allocate virtual memory region from the shared memory pool.
+ *
+ * Input Parameters:
+ *   group - A reference to the group structure to be un-initialized.
+ *   vaddr - Virtual start address where the allocation starts, if NULL, will
+ *           seek and return an address that satisfies the 'size' parameter
+ *   size - Size of the area to allocate
+ *
+ * Returned Value:
+ *   Pointer to reserved vaddr, or NULL if out-of-memory
+ *
+ ****************************************************************************/
+
+FAR void *shm_alloc(FAR struct task_group_s *group, FAR void *vaddr,
+                    size_t size);
+
+/****************************************************************************
+ * Name: shm_free
+ *
+ * Description:
+ *   Free a previously allocated virtual memory region back to the shared
+ *   memory pool.
+ *
+ * Input Parameters:
+ *   group - A reference to the group structure to be un-initialized.
+ *   vaddr - Virtual start address where the allocation starts.
+ *   size - Size of the allocated area.
+ *
+ ****************************************************************************/
+
+void shm_free(FAR struct task_group_s *group, FAR void *vaddr, size_t size);
 
 #endif /* CONFIG_MM_SHM */
 #endif /* __INCLUDE_NUTTX_MM_SHM_H */
