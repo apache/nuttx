@@ -174,6 +174,8 @@
 #  define ADC_MR_TRGSEL_TIOA2      (3 << ADC_MR_TRGSEL_SHIFT) /* TIOA2 */
 #  define ADC_MR_TRGSEL_PWM0       (4 << ADC_MR_TRGSEL_SHIFT) /* PWM Event Line 0 */
 #  define ADC_MR_TRGSEL_PWM1       (5 << ADC_MR_TRGSEL_SHIFT) /* PWM Event Line 1 */
+#  define ADC_MR_TRGSEL_TIOA3      (6 << ADC_MR_TRGSEL_SHIFT) /* TIOA3 */
+#  define ADC_MR_TRGSEL_RTC        (7 << ADC_MR_TRGSEL_SHIFT) /* RTC Out */
 
 #ifdef ATSAMA5D4
 #  define ADC_MR_LOWRES            (1 << 4)  /* Bit 4:  LOWRES: Resolution */
