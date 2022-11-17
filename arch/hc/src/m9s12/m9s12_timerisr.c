@@ -32,7 +32,7 @@
 #include <arch/board/board.h>
 
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "hc_internal.h"
 #include "chip.h"
 #include "m9s12.h"
 #include "m9s12_crg.h"

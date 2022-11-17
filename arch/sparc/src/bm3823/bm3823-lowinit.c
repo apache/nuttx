@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include "bm3823-config.h"
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "bm3823.h"
 
 /****************************************************************************
@@ -83,7 +83,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) sparc_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -139,7 +139,7 @@ void up_lowinit(void)
 
   /* Initialize a console (probably a serial console) */
 
-  up_consoleinit();
+  sparc_consoleinit();
 
   showprogress('A');
 
@@ -158,7 +158,7 @@ void up_lowinit(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  sparc_earlyserialinit();
 #endif
 
   /* Perform board-level initialization */

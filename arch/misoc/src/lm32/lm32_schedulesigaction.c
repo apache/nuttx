@@ -136,7 +136,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * is the same as the interrupt return context.
                */
 
-              up_savestate(tcb->xcp.regs);
+              misoc_savestate(tcb->xcp.regs);
 
               sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                     tcb->xcp.saved_epc, tcb->xcp.saved_status,

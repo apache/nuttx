@@ -54,7 +54,7 @@ void ez80_registerdump(void)
 
   if (regs == NULL)
     {
-      ez80_saveusercontext(s_last_regs);
+      up_saveusercontext(s_last_regs);
       regs = s_last_regs;
     }
 

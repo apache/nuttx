@@ -32,7 +32,7 @@
 #include <arch/board/board.h>
 #include "arch/rx65n/irq.h"
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "arch/rx65n/iodefine.h"
 #include "chip.h"
 #include "rx65n_cmt.h"

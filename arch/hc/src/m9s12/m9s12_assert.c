@@ -38,7 +38,7 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "hc_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

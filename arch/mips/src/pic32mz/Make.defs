@@ -41,8 +41,8 @@ CMN_CSRCS += mips_idle.c
 endif
 
 # Use of common/mips_etherstub.c is deprecated.  The preferred mechanism is to
-# use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
-# up_initialize().  Then this stub would not be needed.
+# use CONFIG_NETDEV_LATEINIT=y to suppress the call to mips_netinitialize() in
+# mips_initialize().  Then this stub would not be needed.
 
 ifneq ($(CONFIG_PIC32MZ_ETHERNET),y)
 ifeq ($(CONFIG_NET),y)

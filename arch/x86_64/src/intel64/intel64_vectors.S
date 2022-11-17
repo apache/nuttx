@@ -347,13 +347,13 @@ irq_common:
 	/* A context swith will be performed. EAX holds the address of the new
 	 * register save structure.
 	 *
-	 * Jump to up_fullcontextrestore().  We perform a call here, but that function
+	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function
 	 * never returns.  The address of the new register save block is the argument
-	 * to the up_fullcontextrestore().
+	 * to the x86_64_fullcontextrestore().
 	 */
 
 	mov     %rax, %rdi
-	call	up_fullcontextrestore
+	call	x86_64_fullcontextrestore
 
 .Lnoswitch:
     fxrstorq (%rsp)

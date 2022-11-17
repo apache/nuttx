@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <nuttx/arch.h>
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Private Functions

@@ -37,7 +37,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "s698pm.h"
 #include "s698pm_tim.h"
 
@@ -590,7 +590,7 @@ static void s698pm_tim_clrint(struct s698pm_tim_dev_s *dev, int source)
         break;
     }
 
-  up_clrpend_irq(vectorno);
+  sparc_clrpend_irq(vectorno);
 }
 
 /****************************************************************************
@@ -634,7 +634,7 @@ static int s698pm_tim_checkint(struct s698pm_tim_dev_s *dev, int source)
         return -EINVAL;
     }
 
-  return up_pending_irq(vectorno);
+  return sparc_pending_irq(vectorno);
 }
 
 /****************************************************************************

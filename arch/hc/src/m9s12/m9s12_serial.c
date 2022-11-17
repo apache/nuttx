@@ -27,7 +27,7 @@
 
 #include <assert.h>
 
-#include "up_internal.h"
+#include "hc_internal.h"
 #include "m9s12_serial.h"
 
 /****************************************************************************
@@ -707,17 +707,17 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: hc_earlyserialinit
  *
  * Description:
  *   Performs the low level SCI initialization early in  debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before hc_serialinit.
  *
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
-void up_earlyserialinit(void)
+void hc_earlyserialinit(void)
 {
   /* Disable all UARTS */
 
@@ -736,15 +736,15 @@ void up_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: hc_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that hc_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void hc_serialinit(void)
 {
   /* Register the console */
 
@@ -807,7 +807,7 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef CONFIG_ARCH_LOWPUTC
-  up_lowputc(ch);
+  hc_lowputc(ch);
 
   /* Check for LF */
 
@@ -815,7 +815,7 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      hc_lowputc('\r');
     }
 
 #endif

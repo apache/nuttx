@@ -71,7 +71,7 @@
 #ifdef CONFIG_HCS12_SERIALMON
 	jsr		#PutChar
 #else
-	CALL	up_lowputc
+	CALL	hc_lowputc
 #endif
 #endif
 	.endm

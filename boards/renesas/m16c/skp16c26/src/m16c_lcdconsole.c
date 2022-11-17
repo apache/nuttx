@@ -26,7 +26,7 @@
 
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "skp16c26.h"
 
 /* Only use the LCD as a console if there are is no serial console */

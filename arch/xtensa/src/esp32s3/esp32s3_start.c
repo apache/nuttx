@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c)     up_lowputc(c)
+#  define showprogress(c)     xtensa_lowputc(c)
 #else
 #  define showprogress(c)
 #endif

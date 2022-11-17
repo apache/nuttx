@@ -242,7 +242,7 @@ void pic32mx_lowinit(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  mips_earlyserialinit();
 #endif
 
 #ifdef CONFIG_PIC32MX_JTAG_ENABLE

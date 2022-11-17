@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include "at32uc3_config.h"
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "at32uc3.h"
 
 /****************************************************************************
@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowinit
+ * Name: avr_lowinit
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-void up_lowinit(void)
+void avr_lowinit(void)
 {
   /* Initialize MCU clocking */
 
@@ -81,7 +81,7 @@ void up_lowinit(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  avr_earlyserialinit();
 #endif
 
   /* Perform board-level initialization */

@@ -28,7 +28,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include "arch/rx65n/iodefine.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Public Functions

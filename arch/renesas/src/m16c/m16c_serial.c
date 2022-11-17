@@ -38,7 +38,7 @@
 #include <nuttx/serial/serial.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "m16c_uart.h"
 
 /* Is there any serial support?  This might be the case if the board does
@@ -1022,16 +1022,16 @@ static bool up_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyconsoleinit
+ * Name: renesas_earlyconsoleinit
  *
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_consoleinit.
+ *   during bootup.  This must be called before renesas_consoleinit.
  *
  ****************************************************************************/
 
-void up_earlyconsoleinit(void)
+void renesas_earlyconsoleinit(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
    * up_lowsetup
@@ -1058,15 +1058,15 @@ void up_earlyconsoleinit(void)
 }
 
 /****************************************************************************
- * Name: up_consoleinit
+ * Name: renesas_consoleinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyconsoleinit was called previously.
+ *   that renesas_earlyconsoleinit was called previously.
  *
  ****************************************************************************/
 
-void up_consoleinit(void)
+void renesas_consoleinit(void)
 {
   /* Register the console */
 
@@ -1141,10 +1141,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      renesas_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  renesas_lowputc(ch);
 #endif
   return ch;
 }

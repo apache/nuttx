@@ -27,7 +27,7 @@
 #include <arch/irq.h>		/* IRQ definitions */
 
 #include "chip.h"		/* Chip-specific settings */
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /*****************************************************************************
  * Pre-processor Definitions
@@ -46,13 +46,13 @@
 
 	.globl	_up_lowsetup				/* Early initialization of UART */
 #ifdef USE_EARLYSERIALINIT
-	.globl	_up_earlyconsoleinit		/* Early initialization of console driver */
+	.globl	_renesas_earlyconsoleinit		/* Early initialization of console driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
 	.globl	_board_autoled_initialize	/* Boot LED setup */
 #endif
 #ifdef CONFIG_DEBUG_FEATURES
-	.globl	_up_lowputc					/* Low-level debug output */
+	.globl	_renesas_lowputc					/* Low-level debug output */
 #endif
 	.globl	_nx_start					/* NuttX entry point */
 
@@ -146,7 +146,7 @@
 
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG_FEATURES
-	mov.l	.Llowputc, r0				/* Address of up_earlyconsoleinit */
+	mov.l	.Llowputc, r0				/* Address of renesas_earlyconsoleinit */
 	jsr		@r0							/* Call it */
 	mov		#\code, r4					/* Delay slot */
 #endif
@@ -412,7 +412,7 @@ __start0:
 	/* Perform early console initialization */
 
 #ifdef USE_EARLYSERIALINIT
-	mov.l	.Learlyconsole, r0			/* Address of up_earlyconsoleinit */
+	mov.l	.Learlyconsole, r0			/* Address of renesas_earlyconsoleinit */
 	jsr		@r0							/* Call it */
 	or		r0, r0						/* Delay slot */
 #endif
@@ -468,13 +468,13 @@ __start0:
 	.long	_ebss
 #ifdef USE_EARLYSERIALINIT
 .Learlyconsole:
-	.long	_up_earlyconsoleinit
+	.long	_renesas_earlyconsoleinit
 #endif
 .Llowsetup:
 	.long	_up_lowsetup
 #ifdef CONFIG_DEBUG_FEATURES
 .Llowputc:
-	.long	_up_lowputc
+	.long	_renesas_lowputc
 #endif
 .Lledinit:
 	.long	_board_autoled_initialize

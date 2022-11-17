@@ -33,7 +33,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "irq/irq.h"
 #include "at32uc3.h"
 #include "at32uc3_gpio.h"

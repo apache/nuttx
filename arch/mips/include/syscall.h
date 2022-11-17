@@ -149,11 +149,11 @@
 
 /* SYS call 2:
  *
- * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * void mips_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  */
 
 #define SYS_switch_context (2)
-#define up_switchcontext(saveregs, restoreregs) \
+#define mips_switchcontext(saveregs, restoreregs) \
   sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
 
 #ifdef CONFIG_BUILD_KERNEL

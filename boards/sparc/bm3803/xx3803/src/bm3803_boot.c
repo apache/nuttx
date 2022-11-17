@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "bm3803.h"
 #include "xx3803.h"
 

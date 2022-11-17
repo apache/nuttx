@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include "s698pm-config.h"
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "s698pm.h"
 
 /****************************************************************************
@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) sparc_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -105,7 +105,7 @@ void up_lowinit(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  sparc_earlyserialinit();
 #endif
 
   /* Perform board-level initialization */

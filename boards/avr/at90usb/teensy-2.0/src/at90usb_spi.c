@@ -32,7 +32,7 @@
 #include <arch/board/board.h>
 #include <avr/io.h>
 
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "chip.h"
 #include "at90usb.h"
 #include "teensy-20.h"

@@ -468,7 +468,7 @@ void uart1_configure(void);
 void uart2_configure(void);
 void uart3_configure(void);
 /****************************************************************************
- * Name: up_consoleinit
+ * Name: sparc_consoleinit
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
@@ -478,9 +478,9 @@ void uart3_configure(void);
  ****************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
-void up_consoleinit(void);
+void sparc_consoleinit(void);
 #else
-#  define up_consoleinit()
+#  define sparc_consoleinit()
 #endif
 
 /****************************************************************************

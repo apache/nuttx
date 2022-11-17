@@ -89,7 +89,7 @@
  * because only those registers normally saved in a C called need be stored.
  */
 
-#define SAVE_USERCONTEXT(tcb)    ez80_saveusercontext((tcb)->xcp.regs)
+#define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 
 /* Restore the full context -- either a simple user state save or the full,
  * IRQ state save.
@@ -133,7 +133,7 @@ void ez80_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src);
 
 /* Defined in ez80_saveusercontext.asm */
 
-int ez80_saveusercontext(FAR chipreg_t *regs);
+int up_saveusercontext(FAR chipreg_t *regs);
 
 /* Defined in ez80_restorecontext.asm */
 

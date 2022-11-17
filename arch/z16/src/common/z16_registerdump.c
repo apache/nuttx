@@ -55,7 +55,7 @@ void z16_registerdump(void)
 
   if (regs32 == NULL)
     {
-      z16_saveusercontext(s_last_regs);
+      up_saveusercontext(s_last_regs);
       regs32 = (FAR volatile uint32_t *)s_last_regs;
     }
 

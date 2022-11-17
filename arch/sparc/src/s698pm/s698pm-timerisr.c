@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "s698pm.h"
 #include "s698pm_tim.h"
 #include "s698pm_irq.h"
@@ -90,7 +90,7 @@ static int s698pm_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending timer interrupt */
 
-  up_clrpend_irq(S698PM_IRQ_TIMER1);
+  sparc_clrpend_irq(S698PM_IRQ_TIMER1);
 
   /* Process timer interrupt */
 
@@ -136,7 +136,7 @@ void up_timer_initialize(void)
 
   /* Configure the timer interrupt */
 
-  up_clrpend_irq(S698PM_IRQ_TIMER1);
+  sparc_clrpend_irq(S698PM_IRQ_TIMER1);
 
   /* Attach the timer interrupt vector */
 
