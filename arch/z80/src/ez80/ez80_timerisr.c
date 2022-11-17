@@ -115,7 +115,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 #ifdef CONFIG_ARCH_TIMERHOOK
   /* Architecture specific hook into the timer interrupt handler */
 
-  up_timerhook();
+  z80_timerhook();
 #endif
 
   return 0;

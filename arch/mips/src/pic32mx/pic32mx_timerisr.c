@@ -161,7 +161,7 @@ void up_timer_initialize(void)
 
   /* Configure the timer interrupt */
 
-  up_clrpend_irq(PIC32MX_IRQSRC_T1);
+  mips_clrpend_irq(PIC32MX_IRQSRC_T1);
 #ifdef CONFIG_ARCH_IRQPRIO
   up_prioritize_irq(PIC32MX_IRQ_T1, CONFIG_PIC32MX_T1PRIO);
 #endif

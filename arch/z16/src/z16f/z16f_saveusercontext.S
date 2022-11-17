@@ -30,7 +30,7 @@
  * External References / External Definitions
  *************************************************************************/
 
-	xdef	_z16_saveusercontext
+	xdef	_up_saveusercontext
 
 /*************************************************************************
  * Data Allocation
@@ -44,7 +44,7 @@
  *************************************************************************/
 
 /*************************************************************************
- * Name: z16_saveusercontext
+ * Name: up_saveusercontext
  *
  * Description:
  *   Save the current user context.
@@ -59,7 +59,7 @@
  *
  *************************************************************************/
 
-_z16_saveusercontext:
+_up_saveusercontext:
 	/* Save the flags (needed to restore the interrupt state) */
 
 	ld.ub	r3, Z16F_CNTRL_FLAGS	/* Fetch the flags register (zero padded) */

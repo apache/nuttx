@@ -2018,7 +2018,7 @@ void esp32_lowsetup(void)
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before xtensa_serialinit.
  *
  ****************************************************************************/
 
@@ -2053,7 +2053,7 @@ void xtensa_earlyserialinit(void)
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that xtensa_earlyserialinit was called previously.
  *
  ****************************************************************************/
 

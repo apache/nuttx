@@ -31,7 +31,7 @@
 #include <nuttx/board.h>
 #include <arch/io.h>
 
-#include "up_internal.h"
+#include "x86_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

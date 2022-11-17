@@ -41,9 +41,9 @@
  * state from the TCB.
  */
 
-#define up_restorestate(regs) (CURRENT_REGS = regs)
+#define sparc_restorestate(regs) (CURRENT_REGS = regs)
 
-#define up_savestate(regs)   trap_flush_task(regs, (uint32_t*)CURRENT_REGS)
+#define sparc_savestate(regs)   trap_flush_task(regs, (uint32_t*)CURRENT_REGS)
 
 /****************************************************************************
  * Public Types
@@ -74,7 +74,7 @@ extern uint32_t g_idle_topstack;
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name:  up_copystate
+ * Name:  sparc_copystate
  *
  * Description:
  *  Copy the contents of a register state save structure from one location to
@@ -82,20 +82,20 @@ extern uint32_t g_idle_topstack;
  *
  ****************************************************************************/
 
-void up_copystate(uint32_t *dest, uint32_t *src);
+void sparc_copystate(uint32_t *dest, uint32_t *src);
 
 void task_flush_trap(uint32_t *trap, uint32_t *task);
 void trap_flush_task(uint32_t *task, uint32_t *trap);
 
 /****************************************************************************
- * Name:  up_doirq
+ * Name:  sparc_doirq
  *
  * Description:
  *   Dispatch an interrupt.
  *
  ****************************************************************************/
 
-uint32_t *up_doirq(int irq, uint32_t *regs);
+uint32_t *sparc_doirq(int irq, uint32_t *regs);
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_SPARC_SRC_SPARC_V8_SPARC_V8_H */

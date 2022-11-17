@@ -54,7 +54,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "chip.h"
 #include "rx65n_definitions.h"
 #include "rx65n_eth.h"
@@ -3985,13 +3985,13 @@ int rx65n_ethinitialize(int intf)
 }
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: renesas_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
  *   low-level initialization logic in up_initialize.c.  If RX65N_NETHERNET
  *   greater than one, then board specific logic will have to supply a
- *   version of up_netinitialize() that calls rx65n_ethinitialize() with
+ *   version of renesas_netinitialize() that calls rx65n_ethinitialize() with
  *   the appropriate interface number.
  *
  * Input Parameters:
@@ -4005,7 +4005,7 @@ int rx65n_ethinitialize(int intf)
  ****************************************************************************/
 
 #if defined (CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void renesas_netinitialize(void)
 {
   int ret;
 

@@ -546,7 +546,7 @@
    * interrupt_enable - return sequence.
    *
    * NOTE: since actual returning is handled by this macro it has been
-   * removed from up_fullcontextrestore function (up_switchcontext.S)
+   * removed from avr_fullcontextrestore function (avr_switchcontext.S)
    */
 
   /* If interrupts shall be enabled go to 'restore remaining and reti' code

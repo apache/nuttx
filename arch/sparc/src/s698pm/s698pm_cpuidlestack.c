@@ -30,7 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "s698pm.h"
 
 #ifdef CONFIG_SMP

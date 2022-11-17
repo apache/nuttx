@@ -343,7 +343,7 @@ static int pic32mz_cninterrupt(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(irq);
+  mips_clrpend_irq(irq);
   return ret;
 }
 
@@ -414,7 +414,7 @@ void pic32mz_gpioirqinitialize(void)
 
           /* Clear the CN interrupt flag. Same assumption as above. */
 
-          up_clrpend_irq(PIC32MZ_IRQ_PORTA + i);
+          mips_clrpend_irq(PIC32MZ_IRQ_PORTA + i);
         }
     }
 }

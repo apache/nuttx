@@ -29,7 +29,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "x86_internal.h"
 #include "qemu.h"
 #include "qemu_i486.h"
 

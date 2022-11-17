@@ -34,7 +34,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "bm3803.h"
 
 /****************************************************************************
@@ -82,8 +82,8 @@ void up_irqinitialize(void)
 
   /* Attach software interrupts */
 
-  irq_attach(BM3803_IRQ_SW_SYSCALL_TA0, up_swint0, NULL);
-  irq_attach(BM3803_IRQ_SW_SYSCALL_TA8, up_swint1, NULL);
+  irq_attach(BM3803_IRQ_SW_SYSCALL_TA0, sparc_swint0, NULL);
+  irq_attach(BM3803_IRQ_SW_SYSCALL_TA8, sparc_swint1, NULL);
 
   /* And finally, enable interrupts */
 
@@ -167,14 +167,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_pending_irq
+ * Name: sparc_pending_irq
  *
  * Description:
  *   Return true if the interrupt is pending and unmasked.
  *
  ****************************************************************************/
 
-bool up_pending_irq(int irq)
+bool sparc_pending_irq(int irq)
 {
   int bitno;
   uint16_t regval;
@@ -215,14 +215,14 @@ bool up_pending_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_clrpend_irq
+ * Name: sparc_clrpend_irq
  *
  * Description:
  *   Clear any pending interrupt
  *
  ****************************************************************************/
 
-void up_clrpend_irq(int irq)
+void sparc_clrpend_irq(int irq)
 {
   int bitno;
   /* Acknowledge the interrupt by clearing the associated bit in the ITP

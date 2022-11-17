@@ -49,7 +49,7 @@
 void z180_putc(uint8_t ch) __naked;
 
 /****************************************************************************
- * Name: up_putc/up_lowputc
+ * Name: up_putc/z80_lowputc
  *
  * Description:
  *   Low-level console output
@@ -57,10 +57,10 @@ void z180_putc(uint8_t ch) __naked;
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
-int up_lowputc(int ch);
+int z80_lowputc(int ch);
 #else
 int up_putc(int ch);
-#  define up_lowputc(ch) up_putc(ch)
+#  define z80_lowputc(ch) up_putc(ch)
 #endif
 
 #endif /* __ARCH_Z80_SRC_Z180_Z180_SERIAL_H */

@@ -106,7 +106,7 @@ void z8_registerdump(void)
 
       case Z8_IRQSTATE_NONE:
       default:
-        z8_saveusercontext(s_last_regs);
+        up_saveusercontext(s_last_regs);
         regs = s_last_regs;
         z8_dumpregs(regs);
         z8_dumpstate(regs[XCPT_SP], regs[XCPT_PC],

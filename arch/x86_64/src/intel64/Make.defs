@@ -20,16 +20,15 @@
 
 # Common x86_64 and intel64 files
 
-CMN_CSRCS += up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c up_restore_auxstate.c
-CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
-CMN_CSRCS += up_initialize.c up_initialstate.c
-CMN_CSRCS += up_irq.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_regdump.c up_releasepending.c up_releasestack.c
-CMN_CSRCS += up_savestate.c up_sigdeliver.c
-CMN_CSRCS += up_schedulesigaction.c up_stackframe.c up_unblocktask.c
-CMN_CSRCS += up_usestack.c up_nputs.c
-CMN_CSRCS += up_rtc.c
-CMN_CSRCS += up_map_region.c
+CMN_CSRCS += x86_64_allocateheap.c x86_64_assert.c x86_64_blocktask.c x86_64_copystate.c
+CMN_CSRCS += x86_64_mdelay.c x86_64_udelay.c x86_64_exit.c x86_64_initialize.c 
+CMN_CSRCS += x86_64_modifyreg8.c x86_64_modifyreg16.c x86_64_modifyreg32.c x86_64_nputs.c
+CMN_CSRCS += x86_64_releasepending.c x86_64_unblocktask.c
+CMN_CSRCS += intel64_restore_auxstate.c intel64_createstack.c intel64_initialstate.c
+CMN_CSRCS += intel64_regdump.c intel64_releasestack.c intel64_map_region.c
+CMN_CSRCS += intel64_savestate.c intel64_sigdeliver.c
+CMN_CSRCS += intel64_schedulesigaction.c intel64_stackframe.c 
+CMN_CSRCS += intel64_usestack.c intel64_irq.c intel64_rtc.c  
 
 # Required Intel64 files
 

@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_internal.h"
+#include "hc_internal.h"
 #include "m9s12.h"
 #include "m9s12_sci.h"
 #include "m9s12_serial.h"
@@ -163,13 +163,13 @@ up_lowsetup:
 	.size	up_lowsetup, . - up_lowsetup
 
 /**************************************************************************
- * Name: up_lowputc
+ * Name: hc_lowputc
  **************************************************************************/
 
 	.text
-	.global	up_lowputc
-	.type	up_lowputc, function
-up_lowputc:
+	.global	hc_lowputc
+	.type	hc_lowputc, function
+hc_lowputc:
 #ifdef HAVE_SERIAL_CONSOLE
 #ifdef CONFIG_HCS12_SERIALMON
 	jmp		PutChar
@@ -206,5 +206,5 @@ up_lowputc:
 #else
 	RETURN
 #endif /* HAVE_SERIAL_CONSOLE */
-	.size	up_lowputc, . - up_lowputc
+	.size	hc_lowputc, . - hc_lowputc
 	.end

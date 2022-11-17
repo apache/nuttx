@@ -2141,7 +2141,7 @@ error:
 }
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: xtensa_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
@@ -2156,7 +2156,7 @@ error:
  ****************************************************************************/
 
 #if !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void xtensa_netinitialize(void)
 {
   esp32_emac_init();
 }

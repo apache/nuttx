@@ -26,7 +26,7 @@
 ; Global Symbols Expported
 ;**************************************************************************
 
-	xdef	_ez80_saveusercontext
+	xdef	_up_saveusercontext
 
 ;*************************************************************************
 ; Constants
@@ -86,10 +86,10 @@ SP_OFFSET	equ	3*3
 	.assume ADL=1
 
 ;*************************************************************************
-; Name: z80_saveusercontext
+; Name: up_saveusercontext
 ;*************************************************************************
 
-_ez80_saveusercontext:
+_up_saveusercontext:
 	; Set up a stack frame
 
 	push	ix			; Save IX and IY

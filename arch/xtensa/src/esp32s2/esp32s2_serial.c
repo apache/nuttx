@@ -1084,10 +1084,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      xtensa_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  xtensa_lowputc(ch);
   esp32s2_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
   return ch;
@@ -1100,7 +1100,7 @@ int up_putc(int ch)
  *
  * Description:
  *   Stubs that may be needed.  These stubs will be used if all UARTs are
- *   disabled.  In that case, the logic in common/up_initialize() is not
+ *   disabled.  In that case, the logic in common/xtensa_initialize() is not
  *   smart enough to know that there are not UARTs and will still expect
  *   these interfaces to be provided.
  *   This may be a special case where the upper and lower half serial layers

@@ -119,7 +119,7 @@ static void dispatch_syscall(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_swint0
+ * Name: mips_swint0
  *
  * Description:
  *   This is software interrupt 0 exception handler that performs context
@@ -127,7 +127,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int up_swint0(int irq, void *context, void *arg)
+int mips_swint0(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   uint32_t cause;
@@ -173,7 +173,8 @@ int up_swint0(int irq, void *context, void *arg)
 
       /* R4=SYS_switch_context: This a switch context command:
        *
-       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       *   void mips_switchcontext(uint32_t *saveregs,
+       *                           uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -190,7 +191,7 @@ int up_swint0(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          up_copystate((uint32_t *)regs[REG_A1], regs);
+          mips_copystate((uint32_t *)regs[REG_A1], regs);
           CURRENT_REGS = (uint32_t *)regs[REG_A2];
         }
         break;
@@ -297,7 +298,7 @@ int up_swint0(int irq, void *context, void *arg)
 
   /* Clear the pending software interrupt 0 */
 
-  up_clrpend_sw0();
+  mips_clrpend_sw0();
 
   /* And reset the software interrupt bit in the MIPS CAUSE register */
 

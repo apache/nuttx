@@ -143,7 +143,7 @@ void up_assert(const char *filename, int lineno)
          filename, lineno);
 #endif
 
-  up_dumpstate();
+  mips_dumpstate();
 
   /* Flush any buffered SYSLOG data (from the above) */
 

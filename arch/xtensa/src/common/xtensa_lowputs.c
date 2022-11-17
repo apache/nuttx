@@ -31,17 +31,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowputs
+ * Name: xtensa_lowputs
  *
  * Description:
  *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void up_lowputs(const char *str)
+void xtensa_lowputs(const char *str)
 {
   while (*str)
     {
-      up_lowputc(*str++);
+      xtensa_lowputc(*str++);
     }
 }

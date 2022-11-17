@@ -31,7 +31,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "at32uc3.h"
 #include "at32uc3_pm.h"
 #include "at32uc3_usart.h"
@@ -356,7 +356,7 @@ void up_consoleinit(void)
   putreg32(regval, AVR32_PM_PBAMASK);
 
   /* Then configure the console here (if it is not going to be configured
-   * by up_earlyserialinit()).
+   * by avr_earlyserialinit()).
    */
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(USE_EARLYSERIALINIT)
@@ -367,14 +367,14 @@ void up_consoleinit(void)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: avr_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void avr_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX to become ready */

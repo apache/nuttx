@@ -29,7 +29,7 @@
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "hc_internal.h"
 
 /****************************************************************************
  * Public Functions

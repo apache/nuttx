@@ -35,7 +35,7 @@
 #include <syscall.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -170,7 +170,7 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
                "with error code %" PRId64 ":\n",
                irq, regs[REG_ERRCODE]);
 
-        up_registerdump(regs);
+        x86_64_registerdump(regs);
 
         up_trash_cpu();
         break;

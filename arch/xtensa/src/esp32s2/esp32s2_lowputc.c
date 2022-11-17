@@ -722,7 +722,7 @@ void esp32s2_lowputc_config_pins(const struct esp32s2_uart_s *priv)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: xtensa_lowputc
  *
  * Description:
  *   Output one byte on the serial console.
@@ -732,7 +732,7 @@ void esp32s2_lowputc_config_pins(const struct esp32s2_uart_s *priv)
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void xtensa_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
 

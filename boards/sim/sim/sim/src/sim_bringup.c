@@ -61,7 +61,7 @@
 #include <nuttx/input/buttons.h>
 #endif
 
-#include "up_internal.h"
+#include "sim_internal.h"
 #include "sim.h"
 
 /****************************************************************************
@@ -364,10 +364,10 @@ int sim_bringup(void)
 #ifdef CONFIG_SIM_HCISOCKET
   /* Register the Host Bluetooth network device via HCI socket */
 
-  ret = bthcisock_register(CONFIG_SIM_HCISOCKET_DEVID);
+  ret = sim_bthcisock_register(CONFIG_SIM_HCISOCKET_DEVID);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: bthcisock_register() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sim_bthcisock_register() failed: %d\n", ret);
     }
 #endif
 
@@ -447,9 +447,9 @@ int sim_bringup(void)
 
 #ifdef CONFIG_RPTUN
 #ifdef CONFIG_SIM_RPTUN_MASTER
-  up_rptun_init("server-proxy", "proxy", true);
+  sim_rptun_init("server-proxy", "proxy", true);
 #else
-  up_rptun_init("server-proxy", "server", false);
+  sim_rptun_init("server-proxy", "server", false);
 #endif
 
 #ifdef CONFIG_DEV_RPMSG

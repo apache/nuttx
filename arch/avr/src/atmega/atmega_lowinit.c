@@ -27,7 +27,7 @@
 #include <avr/power.h>
 
 #include "atmega_config.h"
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "atmega.h"
 
 /****************************************************************************
@@ -96,7 +96,7 @@ static inline void up_wdtinit(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowinit
+ * Name: avr_lowinit
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
@@ -105,7 +105,7 @@ static inline void up_wdtinit(void)
  *
  ****************************************************************************/
 
-void up_lowinit(void)
+void avr_lowinit(void)
 {
   /* Disable the watchdog timer */
 
@@ -133,7 +133,7 @@ void up_lowinit(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  avr_earlyserialinit();
 #endif
 
   /* Perform board-level initialization */

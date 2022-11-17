@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
-#include "up_internal.h"
+#include "x86_64_internal.h"
 
     .file    "intel64_fullcontextrestore.S"
 
@@ -67,16 +67,16 @@
     .text
 
 /**************************************************************************
- * Name: up_fullcontextrestore
+ * Name: x86_64_fullcontextrestore
  *
  * Full C prototype:
- *  void up_fullcontextrestore(uint32_t *regs) noreturn_function;
+ *  void x86_64_fullcontextrestore(uint32_t *regs) noreturn_function;
  *
  **************************************************************************/
 
-    .globl    up_fullcontextrestore
-    .type    up_fullcontextrestore, @function
-up_fullcontextrestore:
+    .globl    x86_64_fullcontextrestore
+    .type    x86_64_fullcontextrestore, @function
+x86_64_fullcontextrestore:
     /* The pointer to the register save array in RDI. */
 
     /* Disable interrupts now (the correct RFLAGS will be restored before we
@@ -153,5 +153,5 @@ up_fullcontextrestore:
 
     popq    %rdi
     iretq
-    .size up_fullcontextrestore, . - up_fullcontextrestore
+    .size x86_64_fullcontextrestore, . - x86_64_fullcontextrestore
     .end

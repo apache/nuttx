@@ -29,19 +29,19 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: renesas_copystate
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32_t *dest, uint32_t *src)
+void renesas_copystate(uint32_t *dest, uint32_t *src)
 {
   memcpy(dest, src, XCPTCONTEXT_SIZE);
 }

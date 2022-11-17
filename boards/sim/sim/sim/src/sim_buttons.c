@@ -26,7 +26,7 @@
 #include <nuttx/irq.h>
 #include <errno.h>
 #include <syslog.h>
-#include "up_internal.h"
+#include "sim_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

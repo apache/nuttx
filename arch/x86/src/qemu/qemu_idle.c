@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include "up_internal.h"
+#include "x86_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

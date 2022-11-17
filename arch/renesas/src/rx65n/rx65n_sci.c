@@ -27,7 +27,7 @@
 #include "rx65n_macrodriver.h"
 #include "rx65n_sci.h"
 #include "chip.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "rx65n_definitions.h"
 #include "arch/board/rx65n_gpio.h"
 
