@@ -109,11 +109,12 @@ void gran_leave_critical(FAR struct gran_s *priv);
  *   ngranules - The number of granules allocated
  *
  * Returned Value:
- *   None
+ *   On success, a non-NULL pointer to the allocated memory is returned;
+ *   NULL is returned on failure.
  *
  ****************************************************************************/
 
-void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
-                         unsigned int ngranules);
+FAR void *gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
+                              unsigned int ngranules);
 
 #endif /* __MM_MM_GRAN_MM_GRAN_H */
