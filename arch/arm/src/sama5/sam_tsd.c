@@ -1622,7 +1622,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
   regval = sam_adc_getreg(priv->adc, SAM_ADC_ACR);
   regval &= ~ADC_ACR_PENDETSENS_MASK;
   regval |= ADC_ACR_PENDETSENS(BOARD_TSD_PENDETSENS);
-#if defined ATSAMA5D2
+#if defined(ATSAMA5D2)
   regval &= ~ADC_ACR_IBCTL_MASK;
   regval |= ADC_ACR_IBCTL(BOARD_TSD_IBCTL);
 #endif
