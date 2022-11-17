@@ -54,7 +54,7 @@ void z80_registerdump(void)
 
   if (regs == NULL)
     {
-      z80_saveusercontext(s_last_regs);
+      up_saveusercontext(s_last_regs);
       regs = s_last_regs;
     }
 

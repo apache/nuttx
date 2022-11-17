@@ -42,8 +42,8 @@
  ************************************************************************************/
 
 	.globl		__start
-	.globl		up_doirq
-	.globl		up_fullcontextrestore
+	.globl		hc_doirq
+	.globl		hc_fullcontextrestore
 	.file		"m9s12_vectors.S"
 
 /************************************************************************************
@@ -219,7 +219,7 @@ handlers:
  *                PCH
  *   High Address PCL   <-- SP before interrupt
  *
- *   This function will create the following stack frame and will call up_doirq():
+ *   This function will create the following stack frame and will call hc_doirq():
  *
  *   Low Address        <-- SP after state save
  *                [PPAGE]
@@ -290,16 +290,16 @@ vcommon:
 	std		.Lspsave
 	std		2, -sp
 
-	/* Recover the IRQ number and call up_doirq() */
+	/* Recover the IRQ number and call hc_doirq() */
 
 	ldab	.Lbsave
-	CALL	up_doirq
+	CALL	hc_doirq
 	leas	2, sp
 
 	/* Check if the return value in d is the same as regs parameter passed in the TOS */
 
 	cpd		.Lspsave
-	bne		up_fullcontextrestore
+	bne		hc_fullcontextrestore
 
 	/* Restore registers and return */
 
@@ -331,7 +331,7 @@ vcommon:
 	.size	handlers, .-handlers
 
 /************************************************************************************
- * Name: up_fullcontextrestore
+ * Name: hc_fullcontextrestore
  *
  * Description:
  *   Given a pointer to a register save block that was previously created by either
@@ -364,7 +364,7 @@ vcommon:
  *
  ************************************************************************************/
 
-up_fullcontextrestore:
+hc_fullcontextrestore:
 	/* Make sure that interrupts are disabled */
 
 	orcc	#0x50
@@ -404,7 +404,7 @@ up_fullcontextrestore:
 	movw	2, -sp, 2, -x		/* Copy A:B */
 	movw	1, -sp, 1, -x		/* Copy CCR */
 	rti							/* And return from interrupt */
-	.size	up_fullcontextrestore, .-up_fullcontextrestore
+	.size	hc_fullcontextrestore, .-hc_fullcontextrestore
 
 /************************************************************************************
  * .bss

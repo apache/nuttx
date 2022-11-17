@@ -35,7 +35,7 @@
 #include <debug.h>
 #include <nuttx/irq.h>
 
-#include "up_internal.h"
+#include "hc_internal.h"
 #include "m9s12.h"
 #include "m9s12_pim.h"
 #include "m9s12_mebi.h"

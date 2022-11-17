@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "chip.h"
 #include "m16c_uart.h"
 
@@ -275,7 +275,7 @@ static inline void up_lowserialsetup(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: renesas_lowputc
  *
  * Description:
  *   Output one byte on the serial console.
@@ -283,7 +283,7 @@ static inline void up_lowserialsetup(void)
  ****************************************************************************/
 
 #if defined(HAVE_SERIAL) && !defined(CONFIG_SLCD_CONSOLE)
-void up_lowputc(char ch)
+void renesas_lowputc(char ch)
 {
 #ifdef HAVE_SERIALCONSOLE
   /* Wait until the transmit buffer is empty */
@@ -320,6 +320,6 @@ void up_lowsetup(void)
   /* The LCD is initialized here if the LCD is used for console output.  */
 
 #ifdef CONFIG_SLCD_CONSOLE
-  up_lcdinit();
+  renesas_lcdinit();
 #endif
 }

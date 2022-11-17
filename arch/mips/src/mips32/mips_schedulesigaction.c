@@ -133,7 +133,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              CURRENT_REGS[REG_EPC]      = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_EPC]      = (uint32_t)mips_sigdeliver;
               status                     = CURRENT_REGS[REG_STATUS];
               status                    &= ~CP0_STATUS_INT_MASK;
               status                    |= CP0_STATUS_INT_SW0;
@@ -143,7 +143,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * is the same as the interrupt return context.
                */
 
-              up_savestate(tcb->xcp.regs);
+              mips_savestate(tcb->xcp.regs);
 
               sinfo("PC/STATUS Saved: %08" PRIx32 "/%08" PRIx32
                     " New: %08" PRIx32 "/%08" PRIx32 "\n",
@@ -173,7 +173,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_EPC]     = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_EPC]     = (uint32_t)mips_sigdeliver;
           status                     = tcb->xcp.regs[REG_STATUS];
           status                    &= ~CP0_STATUS_INT_MASK;
           status                    |= CP0_STATUS_INT_SW0;

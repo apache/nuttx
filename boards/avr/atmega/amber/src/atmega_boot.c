@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "atmega.h"
 #include "amber.h"
 

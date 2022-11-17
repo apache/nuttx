@@ -46,12 +46,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: mips_copystate
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32_t *dest, uint32_t *src)
+void mips_copystate(uint32_t *dest, uint32_t *src)
 {
   int i;
 

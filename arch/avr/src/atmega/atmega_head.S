@@ -60,7 +60,7 @@
 	.global	_edata				/* End of .data section in RAM */
 	.global	_eronly				/* Start of .data section in FLASH */
 	.global	_enoinit			/* End of uninitilized data.  Defined by ld.script */
-	.global	up_lowinit			/* Perform low level initialization */
+	.global	avr_lowinit			/* Perform low level initialization */
 	.global	nx_start			/* NuttX entry point */
 
 	.global	vectortab
@@ -435,7 +435,7 @@ __do_clear_bss:
 
 	/* Perform any low-level initialization */
 
-	call	up_lowinit
+	call	avr_lowinit
 
 	/* Now start NuttX */
 

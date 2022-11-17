@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -46,12 +46,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: renesas_copystate
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32_t *dest, uint32_t *src)
+void renesas_copystate(uint32_t *dest, uint32_t *src)
 {
   int i;
   for (i = 0; i < XCPTCONTEXT_REGS; i++)

@@ -38,7 +38,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "rx65n_sbram.h"
 #include "rx65n_grrose.h"
 #ifdef CONFIG_RX65N_SBRAM

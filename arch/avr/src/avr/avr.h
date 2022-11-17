@@ -43,8 +43,8 @@
  * state from the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, (uint8_t*)g_current_regs)
-#define up_restorestate(regs) (g_current_regs = regs)
+#define avr_savestate(regs)    avr_copystate(regs, (uint8_t*)g_current_regs)
+#define avr_restorestate(regs) (g_current_regs = regs)
 
 /****************************************************************************
  * Public Types
@@ -77,7 +77,7 @@ extern uint16_t g_idle_topstack;
 struct spi_dev_s; /* Forward references */
 
 /****************************************************************************
- * Name:  up_copystate
+ * Name:  avr_copystate
  *
  * Description:
  *   Copy the contents of a register state save structure from one location
@@ -85,37 +85,37 @@ struct spi_dev_s; /* Forward references */
  *
  ****************************************************************************/
 
-void up_copystate(uint8_t *dest, uint8_t *src);
+void avr_copystate(uint8_t *dest, uint8_t *src);
 
 /****************************************************************************
- * Name:  up_fullcontextrestore
+ * Name:  avr_fullcontextrestore
  *
  * Description:
  *   Restore the full context of a saved thread/task.
  *
  ****************************************************************************/
 
-void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
+void avr_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
 
 /****************************************************************************
- * Name:  up_switchcontext
+ * Name:  avr_switchcontext
  *
  * Description:
  *   Switch from one thread/task context to another.
  *
  ****************************************************************************/
 
-void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
+void avr_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 
 /****************************************************************************
- * Name:  up_doirq
+ * Name:  avr_doirq
  *
  * Description:
  *   Dispatch an interrupt.
  *
  ****************************************************************************/
 
-uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
+uint8_t *avr_doirq(uint8_t irq, uint8_t *regs);
 
 /****************************************************************************
  * Name: avr_spibus_initialize

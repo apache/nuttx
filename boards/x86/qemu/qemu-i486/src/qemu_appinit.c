@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <debug.h>
 
-#include "up_internal.h"
+#include "x86_internal.h"
 
 /****************************************************************************
  * Public Functions

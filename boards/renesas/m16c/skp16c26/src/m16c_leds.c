@@ -29,7 +29,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "chip.h"
 
 #ifdef CONFIG_ARCH_LEDS

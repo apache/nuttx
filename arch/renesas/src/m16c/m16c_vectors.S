@@ -338,13 +338,13 @@ _m16c_commonvector:
 	ldipl	#M16C_INTERRUPT_IPL		/* Set interrupt level */
 #endif
 
-/* Then call _up_doirq with r1=IRQ number, r2=address of context info.  At this
+/* Then call _renesas_doirq with r1=IRQ number, r2=address of context info.  At this
  * point, the interrupt stack holds the address of the last byte of the context
  * info array
  */
 
  	stc	isp, r2				/* R2 = address of base of context info */
-	jsr.a	_up_doirq
+	jsr.a	_renesas_doirq
 
 #ifdef M16C_INTERRUPT_IPL
 	fclr	i				/* Disable interrupts */
@@ -441,7 +441,7 @@ _m16c_contextsave:
 	.size	_up_saveusercontext, .-_up_saveusercontext
 
 /************************************************************************************
- * Name: void up_fullcontextrestore(uint32_t *regs)
+ * Name: void renesas_fullcontextrestore(uint32_t *regs)
  *
  * Description:
  *   Restore the context of the using the provided register save array.
@@ -454,10 +454,10 @@ _m16c_contextsave:
  *
  ************************************************************************************/
 
-	.globl	_up_fullcontextrestore
-	.type	_up_fullcontextrestore, #function
+	.globl	_renesas_fullcontextrestore
+	.type	_renesas_fullcontextrestore, #function
 
-_up_fullcontextrestore:
+_renesas_fullcontextrestore:
 	int	#32		/* Execute S/W interrupt 32 */
 	rts			/* and return */
 
@@ -504,5 +504,5 @@ _m16c_contextrestore:
 /* The return from interrupt */
 
 	reit					/* Return from interrupt */
-	.size	_up_fullcontextrestore, .-_up_fullcontextrestore
+	.size	_renesas_fullcontextrestore, .-_renesas_fullcontextrestore
 	.end

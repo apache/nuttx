@@ -33,7 +33,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "chip.h"
 #include "bm3803.h"
 /****************************************************************************
@@ -68,7 +68,7 @@ static int bm3803_exti0_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(BM3803_IRQ_EXTERNAL_0);
+  sparc_clrpend_irq(BM3803_IRQ_EXTERNAL_0);
 
   /* And dispatch the interrupt to the handler */
 
@@ -99,7 +99,7 @@ static int bm3803_exti1_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(BM3803_IRQ_EXTERNAL_1);
+  sparc_clrpend_irq(BM3803_IRQ_EXTERNAL_1);
 
   return ret;
 }
@@ -120,7 +120,7 @@ static int bm3803_exti2_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(BM3803_IRQ_EXTERNAL_2);
+  sparc_clrpend_irq(BM3803_IRQ_EXTERNAL_2);
 
   return ret;
 }
@@ -141,7 +141,7 @@ static int bm3803_exti3_isr(int irq, void *context, void  * arg)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(BM3803_IRQ_EXTERNAL_3);
+  sparc_clrpend_irq(BM3803_IRQ_EXTERNAL_3);
 
   return ret;
 }

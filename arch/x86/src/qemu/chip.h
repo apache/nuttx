@@ -56,4 +56,7 @@
  * Public Functions Prototypes
  ************************************************************************************/
 
+void up_earlyserialinit(void);
+void up_serialinit(void);
+
 #endif /* __ARCH_X86_SRC_QEMU_CHIP_H */

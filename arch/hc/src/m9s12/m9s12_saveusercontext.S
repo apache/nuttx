@@ -26,7 +26,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "hc_internal.h"
 #include "m9s12.h"
 
 /**************************************************************************

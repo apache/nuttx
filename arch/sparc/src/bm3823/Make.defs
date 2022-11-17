@@ -18,21 +18,11 @@
 #
 ############################################################################
 
-include common/Make.defs
+include sparc_v8/Make.defs
 
 # The start-up, "head", file
 
 HEAD_ASRC += bm3823_head.S
-
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += up_dumpstate.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
-endif
 
 # Required bm3823 files
 

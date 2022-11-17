@@ -30,7 +30,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Public Functions

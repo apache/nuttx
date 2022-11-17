@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -44,9 +44,9 @@
 
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG_FEATURES
-	.globl	_up_lowputc
+	.globl	_renesas_lowputc
 	mov.b	r#\code1l					/* Character to print */
-	jsr.a	_up_lowputc					/* Print it */
+	jsr.a	_renesas_lowputc					/* Print it */
 #endif
 	.endm
 
@@ -230,8 +230,8 @@ __start:
 /* Perform early console initialization */
 
 #ifdef USE_EARLYSERIALINIT
-	.globl	_up_earlyconsoleinit		/* Early initialization of console driver */
-	jsr.a	_up_earlyconsoleinit		/* Call it */
+	.globl	_renesas_earlyconsoleinit		/* Early initialization of console driver */
+	jsr.a	_renesas_earlyconsoleinit		/* Call it */
 	showprogress 'D'
 #endif
 

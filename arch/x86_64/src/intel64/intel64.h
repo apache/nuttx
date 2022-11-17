@@ -32,7 +32,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 #include "chip.h"
 
 /************************************************************************************

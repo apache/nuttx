@@ -94,7 +94,7 @@ int xtensa_swint(int irq, void *context, void *arg)
     {
       /* A2=SYS_save_context:  This is a save context command:
        *
-       * int xtensa_saveusercontext(uint32_t *saveregs);
+       * int up_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -163,7 +163,7 @@ int xtensa_swint(int irq, void *context, void *arg)
 
       /* A2=SYS_syscall_return: This is a syscall return command:
        *
-       *   void up_syscall_return(void);
+       *   void xtensa_syscall_return(void);
        *
        * At this point, the following values are saved in context:
        *

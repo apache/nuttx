@@ -35,7 +35,7 @@
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "bm3803_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_BM3803_WDG)

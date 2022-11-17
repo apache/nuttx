@@ -174,7 +174,8 @@ int lm32_swint(int irq, void *context, void *arg)
 
       /* A0=SYS_switch_context: This a switch context command:
        *
-       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       *   void misoc_switchcontext(uint32_t *saveregs,
+       *                            uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *

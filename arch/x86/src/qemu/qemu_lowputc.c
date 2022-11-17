@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <arch/io.h>
-#include "up_internal.h"
+#include "x86_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,14 +69,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: x86_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void x86_lowputc(char ch)
 {
   /* Wait until the Transmitter Holding Register (THR) is empty. */
 

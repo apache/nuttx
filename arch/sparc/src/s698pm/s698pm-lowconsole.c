@@ -32,7 +32,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "s698pm-uart.h"
 #include "s698pm.h"
 
@@ -245,14 +245,14 @@ void s698pm_consoleinit(void)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: sparc_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void sparc_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   while ((s698pm_getreg(S698PM_CONSOLE_BASE, S698PM_UART_STATREG_OFFSET) &

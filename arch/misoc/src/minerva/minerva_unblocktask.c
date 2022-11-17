@@ -69,7 +69,7 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * g_current_regs into the OLD rtcb.
        */
 
-      up_savestate(rtcb->xcp.regs);
+      misoc_savestate(rtcb->xcp.regs);
 
       /* Update scheduler parameters */
 
@@ -79,7 +79,7 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
        * will be made when the interrupt returns.
        */
 
-      up_restorestate(tcb->xcp.regs);
+      misoc_restorestate(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */
@@ -92,9 +92,9 @@ void up_unblock_task(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      up_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
+      misoc_switchcontext(rtcb->xcp.regs, tcb->xcp.regs);
 
-      /* up_switchcontext forces a context switch to the task at the head
+      /* misoc_switchcontext forces a context switch to the task at the head
        * of the ready-to-run list.  It does not 'return' in the normal
        * sense.  When it does return, it is because the blocked task is
        * again ready to run and has execution priority.

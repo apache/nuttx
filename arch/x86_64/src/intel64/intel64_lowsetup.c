@@ -27,7 +27,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -104,7 +104,7 @@ void up_lowsetup(void)
 
   /* Early serial driver initialization */
 
-  up_earlyserialinit();
+  x86_64_earlyserialinit();
 
   x86_64_timer_calibrate_freq();
 

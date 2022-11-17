@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "x86_64_internal.h"
 
 #include <stdio.h>
 

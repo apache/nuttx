@@ -36,7 +36,7 @@
 
 #include <arch/io.h>
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 

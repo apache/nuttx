@@ -39,7 +39,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "chip.h"
 #include "rx65n_definitions.h"
 #include "rx65n_rspi.h"

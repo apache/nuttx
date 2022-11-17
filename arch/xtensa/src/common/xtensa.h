@@ -212,7 +212,7 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 /* Serial output */
 
-void up_lowputs(const char *str);
+void xtensa_lowputs(const char *str);
 
 /* Debug */
 
@@ -297,26 +297,26 @@ xtensa_oneshot_initialize(uint32_t irq, uint32_t freq);
 
 /* Serial output */
 
-void up_lowputc(char ch);
+void xtensa_lowputc(char ch);
 void xtensa_earlyserialinit(void);
 void xtensa_serialinit(void);
 
 /* Network */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void);
+void xtensa_netinitialize(void);
 #else
-# define up_netinitialize()
+# define xtensa_netinitialize()
 #endif
 
 /* USB */
 
 #ifdef CONFIG_USBDEV
-void up_usbinitialize(void);
-void up_usbuninitialize(void);
+void xtensa_usbinitialize(void);
+void xtensa_usbuninitialize(void);
 #else
-# define up_usbinitialize()
-# define up_usbuninitialize()
+# define xtensa_usbinitialize()
+# define xtensa_usbuninitialize()
 #endif
 
 /* Power management *********************************************************/

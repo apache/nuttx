@@ -125,7 +125,7 @@ static int pc32mz_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending timer interrupt */
 
-  up_clrpend_irq(PIC32MZ_IRQ_T1);
+  mips_clrpend_irq(PIC32MZ_IRQ_T1);
 
   /* Process timer interrupt */
 
@@ -160,7 +160,7 @@ void up_timer_initialize(void)
 
   /* Configure the timer interrupt */
 
-  up_clrpend_irq(PIC32MZ_IRQ_T1);
+  mips_clrpend_irq(PIC32MZ_IRQ_T1);
 
   /* Attach the timer interrupt vector */
 

@@ -87,7 +87,7 @@
 #define IN_INTERRUPT             (g_current_regs != NULL)
 #define SAVE_IRQCONTEXT(tcb)     z16_copystate((tcb)->xcp.regs, (FAR chipreg_t*)g_current_regs)
 #define SET_IRQCONTEXT(tcb)      do { g_current_regs = (tcb)->xcp.regs; } while (0)
-#define SAVE_USERCONTEXT(tcb)    z16_saveusercontext((tcb)->xcp.regs)
+#define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 #define RESTORE_USERCONTEXT(tcb) z16_restoreusercontext((tcb)->xcp.regs)
 #define SIGNAL_RETURN(regs)      z16_restoreusercontext(regs)
 
@@ -119,7 +119,6 @@ typedef void (*up_vector_t)(void);
 void z16_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
 FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs);
 void z16_restoreusercontext(FAR chipreg_t *regs);
-int  z16_saveusercontext(FAR chipreg_t *regs);
 void z16_sigdeliver(void);
 
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)

@@ -1035,7 +1035,7 @@ static bool esp32s3_rxflowcontrol(struct uart_dev_s *dev,
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before xtensa_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock
+ *   configuration performed in xtensa_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
@@ -1118,10 +1118,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      xtensa_lowputc('\r');
     }
 
-  up_lowputc((char)ch);
+  xtensa_lowputc((char)ch);
 
 #ifdef CONSOLE_UART
   esp32s3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
@@ -1155,10 +1155,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      xtensa_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  xtensa_lowputc(ch);
 
 #ifdef CONSOLE_UART
   esp32s3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);

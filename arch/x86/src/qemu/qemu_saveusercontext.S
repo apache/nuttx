@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/x86/src/qemu/up_saveusercontext.S
+ * arch/x86/src/qemu/x86_saveusercontext.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
-#include "up_internal.h"
+#include "x86_internal.h"
 
 	.file	"qemu_saveusercontext.S"
 

@@ -18,47 +18,47 @@
 #
 ############################################################################
 
-CMN_ASRCS  = up_vectortab.S \
-             up_saveusercontext.S \
-             up_fullcontextrestore.S
+CMN_ASRCS  = or1k_vectortab.S \
+             or1k_saveusercontext.S \
+             or1k_fullcontextrestore.S
 
-CMN_CSRCS  = up_initialize.c \
-             up_allocateheap.c \
-             up_createstack.c \
-             up_usestack.c \
-             up_releasestack.c \
-             up_stackframe.c \
-             up_initialstate.c \
-             up_blocktask.c \
-             up_unblocktask.c \
-             up_releasepending.c \
-             up_schedulesigaction.c \
-             up_copyfullstate.c \
-             up_assert.c \
-             up_exit.c \
-             up_udelay.c \
-             up_mdelay.c \
-             up_idle.c \
-             up_irq.c \
-             up_nputs.c \
-             up_uart.c \
-             up_timer.c \
-             up_doirq.c \
-             up_cpuinfo.c \
+CMN_CSRCS  = or1k_initialize.c \
+             or1k_allocateheap.c \
+             or1k_createstack.c \
+             or1k_usestack.c \
+             or1k_releasestack.c \
+             or1k_stackframe.c \
+             or1k_initialstate.c \
+             or1k_blocktask.c \
+             or1k_unblocktask.c \
+             or1k_releasepending.c \
+             or1k_schedulesigaction.c \
+             or1k_copyfullstate.c \
+             or1k_assert.c \
+             or1k_exit.c \
+             or1k_udelay.c \
+             or1k_mdelay.c \
+             or1k_idle.c \
+             or1k_irq.c \
+             or1k_nputs.c \
+             or1k_uart.c \
+             or1k_timer.c \
+             or1k_doirq.c \
+             or1k_cpuinfo.c \
              mor1kx_start.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c
-#CMN_CSRCS += up_signal_dispatch.c
-#CMN_UASRCS += up_signal_handler.S
+CMN_CSRCS += or1k_task_start.c or1k_pthread_start.c
+#CMN_CSRCS += or1k_signal_dispatch.c
+#CMN_UASRCS += or1k_signal_handler.S
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-#CMN_CSRCS += up_checkstack.c
+#CMN_CSRCS += or1k_checkstack.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
-#CMN_CSRCS += up_dumpnvic.c
+#CMN_CSRCS += or1k_dumpnvic.c
 endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)

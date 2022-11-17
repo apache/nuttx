@@ -1800,9 +1800,9 @@ static void pic32mx_interrupt_work(void *arg)
   /* Clear the pending interrupt */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
-  up_clrpend_irq(priv->pd_irqsrc);
+  mips_clrpend_irq(priv->pd_irqsrc);
 #else
-  up_clrpend_irq(PIC32MX_IRQSRC_ETH);
+  mips_clrpend_irq(PIC32MX_IRQSRC_ETH);
 #endif
   net_unlock();
 
@@ -3192,9 +3192,9 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv)
   /* Clear the Ethernet Interrupt Flag (ETHIF) bit in the Interrupts module */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
-  up_pending_irq(priv->pd_irqsrc);
+  mips_pending_irq(priv->pd_irqsrc);
 #else
-  up_pending_irq(PIC32MX_IRQSRC_ETH);
+  mips_pending_irq(PIC32MX_IRQSRC_ETH);
 #endif
 
   /* Disable any Ethernet Controller interrupt generation by clearing the IEN
@@ -3303,7 +3303,7 @@ static inline int pic32mx_ethinitialize(int intf)
 }
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: mips_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
@@ -3314,7 +3314,7 @@ static inline int pic32mx_ethinitialize(int intf)
  ****************************************************************************/
 
 #if CONFIG_PIC32MX_NINTERFACES == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void mips_netinitialize(void)
 {
   pic32mx_ethinitialize(0);
 }

@@ -32,7 +32,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "bm3823-uart.h"
 #include "bm3823.h"
 
@@ -258,7 +258,7 @@ void uart3_configure(void)
 #endif
 
 /****************************************************************************
- * Name: up_consoleinit
+ * Name: sparc_consoleinit
  *
  * Description:
  *  Initialize a console for debug output.  This function is called very
@@ -267,7 +267,7 @@ void uart3_configure(void)
  *
  ****************************************************************************/
 
-void up_consoleinit(void)
+void sparc_consoleinit(void)
 {
 #ifdef HAVE_SERIAL_CONSOLE
 #  if defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -281,14 +281,14 @@ void up_consoleinit(void)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: sparc_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void sparc_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
 #  if defined(CONFIG_UART1_SERIAL_CONSOLE)

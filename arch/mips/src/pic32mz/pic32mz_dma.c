@@ -505,7 +505,7 @@ static int pic32mz_dma_interrupt(int irq, void *context, void *arg)
 
   /* Clear the interrupt flags. */
 
-  up_clrpend_irq(dmach->irq);
+  mips_clrpend_irq(dmach->irq);
   pic32mz_dma_intclr(dmach);
 
   /* Invoke the callback. */
@@ -698,7 +698,7 @@ void pic32mz_dma_dump(DMA_HANDLE handle,
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function mips_dma_initialize(void)
 {
   struct pic32mz_dmach_s *dmach;
   int i;
@@ -726,7 +726,7 @@ void weak_function up_dma_initialize(void)
       /* Clear any pending interrupts */
 
       pic32mz_dma_intclr(dmach);
-      up_clrpend_irq(dmach->irq);
+      mips_clrpend_irq(dmach->irq);
 
       /* Enable the IRQ. */
 
@@ -780,7 +780,7 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg)
           /* Clear any pending interrupts on the channel */
 
           pic32mz_dma_intclr(dmach);
-          up_clrpend_irq(dmach->irq);
+          mips_clrpend_irq(dmach->irq);
 
           /* Disable the channel */
 
@@ -843,7 +843,7 @@ void pic32mz_dma_free(DMA_HANDLE handle)
   /* Clear any pending interrupt */
 
   pic32mz_dma_intclr(dmach);
-  up_clrpend_irq(dmach->irq);
+  mips_clrpend_irq(dmach->irq);
 }
 
 /****************************************************************************
@@ -955,7 +955,7 @@ void pic32mz_dma_stop(DMA_HANDLE handle)
   /* Clear any pending interrupts */
 
   pic32mz_dma_intclr(dmach);
-  up_clrpend_irq(dmach->irq);
+  mips_clrpend_irq(dmach->irq);
 }
 
 #endif /* CONFIG_PIC32MZ_DMA */

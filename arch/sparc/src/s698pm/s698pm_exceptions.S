@@ -49,7 +49,7 @@
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
         .global	        g_cpu_intstack_top
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
-	.global		up_doirq	/* Dispatch an IRQ                  */
+	.global		sparc_doirq	/* Dispatch an IRQ                  */
 	.align	8
 /*
  *  void _ISR_Handler()
@@ -247,7 +247,7 @@ do_irq:
                                        ! o1 = 2nd arg = address of the ISF
                                        !   WAS LOADED WHEN ISF WAS SAVED!!!
         mov     %l3, %o0               ! o0 = 1st arg = vector number
-        call	up_doirq			/* call ISR dispatcher */
+        call	sparc_doirq			/* call ISR dispatcher */
         nop
 /*==========================================================================*/
         mov     %l0, %psr              ! **** DISABLE TRAPS ****

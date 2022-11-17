@@ -40,7 +40,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "avr_internal.h"
 #include "atmega.h"
 
 /****************************************************************************
@@ -823,16 +823,16 @@ static bool usart1_txempty(struct uart_dev_s *dev)
 #ifdef USE_EARLYSERIALINIT
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: avr_earlyserialinit
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before avr_serialinit.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void avr_earlyserialinit(void)
 {
   /* Disable all USARTS */
 
@@ -857,15 +857,15 @@ void up_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: avr_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that avr_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void avr_serialinit(void)
 {
   /* Register the console */
 
@@ -906,10 +906,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      avr_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  avr_lowputc(ch);
 
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
   usart0_restoreusartint(imr);
@@ -940,10 +940,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      avr_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  avr_lowputc(ch);
 #endif
   return ch;
 }

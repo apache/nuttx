@@ -33,7 +33,7 @@
 #  include <nuttx/spi/spi.h>
 #endif
 
-#include "up_internal.h"
+#include "hc_internal.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -294,7 +294,7 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg);
  * Description:
  *   Initialize the Ethernet driver for one interface.  If the STM32 chip
  *   supports multiple Ethernet controllers, then bould specific logic
- *   must implement up_netinitialize() and call this function to initialize
+ *   must implement hc_netinitialize() and call this function to initialize
  *   the desiresed interfaces.
  *
  * Input Parameters:

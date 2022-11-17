@@ -34,7 +34,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "sparc_internal.h"
 #include "s698pm.h"
 
 /****************************************************************************
@@ -137,8 +137,8 @@ void up_irqinitialize(void)
 
   /* Attach software interrupts */
 
-  irq_attach(S698PM_IRQ_SW_SYSCALL_TA0, up_swint0, NULL);
-  irq_attach(S698PM_IRQ_SW_SYSCALL_TA8, up_swint1, NULL);
+  irq_attach(S698PM_IRQ_SW_SYSCALL_TA0, sparc_swint0, NULL);
+  irq_attach(S698PM_IRQ_SW_SYSCALL_TA8, sparc_swint1, NULL);
 
   /* And finally, enable cpu interrupts */
 
@@ -359,14 +359,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_pending_irq
+ * Name: sparc_pending_irq
  *
  * Description:
  *   Return true if the interrupt is pending and unmasked.
  *
  ****************************************************************************/
 
-bool up_pending_irq(int irq)
+bool sparc_pending_irq(int irq)
 {
   uintptr_t regaddr;
   uint16_t regval;
@@ -416,14 +416,14 @@ bool up_pending_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_clrpend_irq
+ * Name: sparc_clrpend_irq
  *
  * Description:
  *   Clear any pending interrupt
  *
  ****************************************************************************/
 
-void up_clrpend_irq(int irq)
+void sparc_clrpend_irq(int irq)
 {
   int cpuint = IRQ_GETCPUINT(g_irqmap[irq]);
 
@@ -510,7 +510,7 @@ int up_prioritize_irq(int irq, int priority)
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t up_intstack_top(void)
+uintptr_t sparc_intstack_top(void)
 {
 #if defined(CONFIG_SMP)
   return g_cpu_intstack_top[up_cpu_index()];
@@ -530,7 +530,7 @@ uintptr_t up_intstack_top(void)
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t up_intstack_alloc(void)
+uintptr_t sparc_intstack_alloc(void)
 {
 #if defined(CONFIG_SMP)
   return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;

@@ -325,14 +325,14 @@ void pic32mx_consoleinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: mips_lowputc
  *
  * Description:
  *   Output one byte on the serial console.
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void mips_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait for the transmit buffer not full */

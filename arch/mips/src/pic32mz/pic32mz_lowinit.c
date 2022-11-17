@@ -419,7 +419,7 @@ void pic32mz_lowinit(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  mips_earlyserialinit();
 #endif
 
   /* Perform board-level initialization */

@@ -2949,7 +2949,7 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
    */
 
 interrupt_exit:
-  up_clrpend_irq(PIC32MX_IRQSRC_USB);
+  mips_clrpend_irq(PIC32MX_IRQSRC_USB);
   usbtrace(TRACE_INTEXIT(PIC32MX_TRACEINTID_INTERRUPT), usbir | otgir);
   return OK;
 }
@@ -4319,7 +4319,7 @@ static void pic32mx_hwshutdown(struct pic32mx_usbdev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: mips_usbinitialize
  *
  * Description:
  *   Initialize the USB driver
@@ -4332,7 +4332,7 @@ static void pic32mx_hwshutdown(struct pic32mx_usbdev_s *priv)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void mips_usbinitialize(void)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -4364,12 +4364,12 @@ void up_usbinitialize(void)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_IRQREGISTRATION),
                (uint16_t)PIC32MX_IRQ_USB);
-      up_usbuninitialize();
+      mips_usbuninitialize();
     }
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: mips_usbuninitialize
  * Description:
  *   Initialize the USB driver
  * Input Parameters:
@@ -4380,7 +4380,7 @@ void up_usbinitialize(void)
  *
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void mips_usbuninitialize(void)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers

@@ -608,7 +608,7 @@ int up_putc(int ch)
   /* Disable [E]SCC interrupts and perform the low-level output */
 
   z180_disableuartint(priv);
-  up_lowputc(ch);
+  z80_lowputc(ch);
   z180_restoreuartint(priv);
   return ch;
 #endif

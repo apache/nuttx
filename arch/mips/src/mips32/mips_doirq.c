@@ -55,7 +55,7 @@
  * Public Functions
  ****************************************************************************/
 
-uint32_t *up_doirq(int irq, uint32_t *regs)
+uint32_t *mips_doirq(int irq, uint32_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

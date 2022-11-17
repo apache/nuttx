@@ -32,7 +32,7 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -122,14 +122,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              g_current_regs[REG_PC]  = (uint32_t)up_sigdeliver;
+              g_current_regs[REG_PC]  = (uint32_t)renesas_sigdeliver;
               g_current_regs[REG_PSW] |=  0x00030000;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
                */
 
-              up_copystate(tcb->xcp.regs, (uint32_t *)g_current_regs);
+              renesas_copystate(tcb->xcp.regs, (uint32_t *)g_current_regs);
             }
         }
 
@@ -154,7 +154,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]  = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]  = (uint32_t)renesas_sigdeliver;
           tcb->xcp.regs[REG_PSW]  |=  0x00030000;
         }
     }

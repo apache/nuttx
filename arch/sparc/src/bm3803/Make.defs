@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-include common/Make.defs
+include sparc_v8/Make.defs
 
 # The start-up, "head", file
 

@@ -881,7 +881,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
       else
         {
 #ifndef CONFIG_I2C_POLLED
-          up_clrpend_irq(priv->config->ev_irq);
+          mips_clrpend_irq(priv->config->ev_irq);
 #endif
         }
       break;
@@ -1192,20 +1192,20 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
   /* Clear the master interrupt flag. */
 
 #ifndef CONFIG_I2C_POLLED
-  if (up_pending_irq(priv->config->ev_irq))
+  if (mips_pending_irq(priv->config->ev_irq))
     {
-      up_clrpend_irq(priv->config->ev_irq);
+      mips_clrpend_irq(priv->config->ev_irq);
     }
 #endif
 
   /* If an error interrupt has accured. */
 
 #ifndef CONFIG_I2C_POLLED
-  if (up_pending_irq(priv->config->er_irq))
+  if (mips_pending_irq(priv->config->er_irq))
     {
       pic32mz_i2c_traceevent(priv, I2CEVENT_ERROR, 0);
 
-      up_clrpend_irq(priv->config->er_irq);
+      mips_clrpend_irq(priv->config->er_irq);
     }
 #endif
 
@@ -1546,7 +1546,7 @@ static int pic32mz_i2c_transfer(struct i2c_master_s *dev,
   /* Clear any pending error interrupts. */
 
 #ifndef CONFIG_I2C_POLLED
-  up_clrpend_irq(priv->config->er_irq);
+  mips_clrpend_irq(priv->config->er_irq);
 #endif
 
   /* Old transfers are done */

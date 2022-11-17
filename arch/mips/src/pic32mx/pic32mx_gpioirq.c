@@ -116,7 +116,7 @@ static int pic32mx_cninterrupt(int irq, void *context)
 
   /* Clear the pending interrupt */
 
-  up_clrpend_irq(PIC32MX_IRQ_CN);
+  mips_clrpend_irq(PIC32MX_IRQ_CN);
   return ret;
 }
 

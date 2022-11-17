@@ -43,8 +43,8 @@
  *
  * Description:
  *   Restore the task context that was previously saved via
- *   _z8_saveusercontext() or by interrupt handling.  Unlike the
- *   _z8_saveusercontext() counterpart, we do not know the context of the
+ *   _up_saveusercontext() or by interrupt handling.  Unlike the
+ *   _up_saveusercontext() counterpart, we do not know the context of the
  *   restored task and, hence, we must handle the worst case -- restore
  *   everythihng.
  *

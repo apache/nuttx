@@ -28,7 +28,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "chip.h"
 
 #ifdef CONFIG_SLCD

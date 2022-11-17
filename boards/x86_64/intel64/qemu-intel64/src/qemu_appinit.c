@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 #include "qemu_intel64.h"
 
 /****************************************************************************

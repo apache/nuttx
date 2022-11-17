@@ -30,7 +30,7 @@
 #include <nuttx/serial/uart_16550.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "x86_64_internal.h"
 #include "qemu_intel64.h"
 
 /****************************************************************************

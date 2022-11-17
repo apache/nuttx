@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
 
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "sched/sched.h"
 #include "chip.h"
 
@@ -120,10 +120,10 @@ static inline void m16c_registerdump(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dumpstate
+ * Name: renesas_dumpstate
  ****************************************************************************/
 
-void up_dumpstate(void)
+void renesas_dumpstate(void)
 {
   FAR struct tcb_s *rtcb = running_task();
   uint16_t sp = up_getsp();

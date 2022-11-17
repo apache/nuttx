@@ -37,8 +37,8 @@
  ********************************************************************************************/
 
 	.file	"at90usb_exceptions.S"
-	.global	up_doirq
-	.global	up_fullcontextrestore
+	.global	avr_doirq
+	.global	avr_fullcontextrestore
 
 /********************************************************************************************
  * Macros
@@ -109,7 +109,7 @@ excpt_common:
 
 	EXCPT_PROLOGUE
 
-	/* Call up_doirq with r24 = IRQ number, r22-23 = Pointer to the save structure.  The stack
+	/* Call avr_doirq with r24 = IRQ number, r22-23 = Pointer to the save structure.  The stack
 	 * pointer currently points to the save structure (or maybe the save structure -1 since
 	 * the push operation post-decrements -- need to REVISIT this).
 	 */
@@ -119,7 +119,7 @@ excpt_common:
 	adiw	r28, 1					/* Remembering that push post-decrements */
 	movw	r22, r28				/* Pass register save structure as the parameter 2 */
 	USE_INTSTACK rx, ry, rz			/* Switch to the interrupt stack */
-	call	up_doirq				/* Dispatch the interrupt */
+	call	avr_doirq				/* Dispatch the interrupt */
 	RESTORE_STACK rx, ry			/* Undo the operations of USE_INTSTACK */
 
 	/* up_doiq returns with r24-r25 equal to the new save structure.  If no context
@@ -132,11 +132,11 @@ excpt_common:
 	 cpc	r29, r25
 	 breq	.Lnoswitch
 
-	/* A context switch has occurred, jump to up_fullcontextrestore with r24, r25
+	/* A context switch has occurred, jump to avr_fullcontextrestore with r24, r25
 	 * equal to the address of the new register save area.
 	 */
 
-	jmp	up_fullcontextrestore
+	jmp	avr_fullcontextrestore
 
 	/* No context switch occurred.. just return off the stack */
 

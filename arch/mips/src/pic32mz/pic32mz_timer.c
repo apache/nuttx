@@ -1110,13 +1110,13 @@ static int  pic32mz_timer_setisr(struct pic32mz_timer_dev_s *dev,
 
 static void pic32mz_timer_ackint(struct pic32mz_timer_dev_s *dev)
 {
-  up_clrpend_irq(((struct pic32mz_timer_priv_s *)dev)->config->irq);
+  mips_clrpend_irq(((struct pic32mz_timer_priv_s *)dev)->config->irq);
 
   if (pic32mz_timer_mode32(dev))
     {
       /* In 32bit mode, the consecutive odd timer controls the interrupt. */
 
-      up_clrpend_irq(pic32mz_timer_nextirq(dev));
+      mips_clrpend_irq(pic32mz_timer_nextirq(dev));
     }
 }
 
@@ -1134,14 +1134,14 @@ static bool  pic32mz_timer_checkint(struct pic32mz_timer_dev_s *dev)
     {
       /* In 32bit mode, the consecutive odd timer controls the interrupt. */
 
-      return up_pending_irq(pic32mz_timer_nextirq(dev));
+      return mips_pending_irq(pic32mz_timer_nextirq(dev));
     }
   else
     {
       struct pic32mz_timer_priv_s *priv =
           (struct pic32mz_timer_priv_s *)dev;
 
-      return up_pending_irq(priv->config->irq);
+      return mips_pending_irq(priv->config->irq);
     }
 }
 

@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: mips_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void mips_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
@@ -66,7 +66,7 @@ void up_sigdeliver(void)
 
   /* Save the return state on the stack. */
 
-  up_copystate(regs, rtcb->xcp.regs);
+  mips_copystate(regs, rtcb->xcp.regs);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always

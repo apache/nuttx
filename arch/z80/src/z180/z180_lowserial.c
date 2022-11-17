@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_putc/up_lowputc
+ * Name: up_putc/z80_lowputc
  *
  * Description:
  *   Low-level console output
@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
-int up_lowputc(int ch)
+int z80_lowputc(int ch)
 #else
 int up_putc(int ch)
 #endif

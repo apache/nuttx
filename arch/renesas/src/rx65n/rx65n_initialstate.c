@@ -29,7 +29,7 @@
 #include <nuttx/arch.h>
 
 #include "chip/chip.h"
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "arch/rx65n/irq.h"
 
 /****************************************************************************

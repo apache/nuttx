@@ -41,9 +41,9 @@
  * only a referenced is passed to get the state from the TCB.
  */
 
-#define up_savestate(regs)      minerva_copystate(regs, (uint32_t*)g_current_regs)
+#define misoc_savestate(regs)      minerva_copystate(regs, (uint32_t*)g_current_regs)
 #define up_copystate(rega,regb) minerva_copystate(rega, regb)
-#define up_restorestate(regs)   (g_current_regs = regs)
+#define misoc_restorestate(regs)   (g_current_regs = regs)
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is

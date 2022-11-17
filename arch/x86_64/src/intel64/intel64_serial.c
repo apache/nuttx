@@ -29,7 +29,8 @@
 
 #include <arch/io.h>
 
-#include "up_internal.h"
+#include "chip.h"
+#include "x86_64_internal.h"
 
 /* This is a "stub" file to suppport up_putc if no real serial driver is
  * configured.  Normally, drivers/serial/uart_16550.c provides the serial
@@ -89,11 +90,21 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      x86_64_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  x86_64_lowputc(ch);
   return ch;
 }
 
 #endif /* USE_SERIALDRIVER */
+
+void x86_64_earlyserialinit(void)
+{
+  up_earlyserialinit();
+}
+
+void x86_64_serialinit(void)
+{
+  up_serialinit();
+}

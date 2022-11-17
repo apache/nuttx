@@ -25,7 +25,7 @@
 #include <nuttx/config.h>        /* NuttX configuration settings */
 #include <arch/board/board.h>   /* Board-specific settings */
 #include <arch/irq.h>           /* IRQ definitions */
-#include "up_internal.h"
+#include "renesas_internal.h"
 #include "arch/rx65n/iodefine.h"
 #include "rx65n_definitions.h"
 
@@ -38,7 +38,7 @@
  ***************************************************************************/
 
   .section .text
-  .globl  _up_doirq               /* C interrupt processing logic */
+  .globl  _renesas_doirq               /* C interrupt processing logic */
 
   .section .bss
   .globl  _up_num_irq
@@ -191,8 +191,8 @@ _up_vector:
 #endif
   MOV.L   #_up_num_irq, R2
   MOV.W   [R2], R1
-  MVFC    ISP, R2   /* stack pointer as 2nd args of _up_doirq */
-  BSR.A   _up_doirq /* remaining R1 register as 1st args of _up_doirq */
+  MVFC    ISP, R2   /* stack pointer as 2nd args of _renesas_doirq */
+  BSR.A   _renesas_doirq /* remaining R1 register as 1st args of _renesas_doirq */
   NOP
   MVFC    ISP, R2
   CMP     R2, R1
@@ -277,7 +277,7 @@ _uprx65_swint_handler:
   .size   _uprx65_swint_handler,  . - _uprx65_swint_handler
 
 /****************************************************************************
- * Name: void up_fullcontextrestore(uint32_t *regs)
+ * Name: void renesas_fullcontextrestore(uint32_t *regs)
  *
  * Description:
  *   Restore the context of the using the provided register save array.
@@ -289,17 +289,17 @@ _uprx65_swint_handler:
  *   None
  ***************************************************************************/
 
-  .global _up_fullcontextrestore
-  .type   _up_fullcontextrestore, #function
+  .global _renesas_fullcontextrestore
+  .type   _renesas_fullcontextrestore, #function
 
-_up_fullcontextrestore:
+_renesas_fullcontextrestore:
   INT  #VECT_ICU_SWINT2  /* #RX65N_SWINT2_VNDX */
   NOP
   NOP
   RTS
   NOP
   NOP
-  .size   _up_fullcontextrestore, . - _up_fullcontextrestore
+  .size   _renesas_fullcontextrestore, . - _renesas_fullcontextrestore
 
 _uprx65_swint2_handler:
   MOV.L   R1, R2

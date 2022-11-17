@@ -20,25 +20,19 @@
 
 # Common Sparc files (arch/sparc/src/common)
 
-CMN_ASRCS  = up_syscall.S
-CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c up_systemreset.c
-CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c  up_idle.c up_initialize.c
-CMN_CSRCS += up_initialstate.c up_irq.c up_lowputs.c
-CMN_CSRCS += up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_nputs.c up_releasepending.c up_releasestack.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c
-CMN_CSRCS += up_stackframe.c up_swint1.c up_udelay.c up_unblocktask.c up_usestack.c
+CMN_CSRCS += sparc_allocateheap.c sparc_assert.c
+CMN_CSRCS += sparc_createstack.c sparc_exit.c sparc_idle.c sparc_initialize.c
+CMN_CSRCS += sparc_lowputs.c sparc_mdelay.c
+CMN_CSRCS += sparc_modifyreg8.c sparc_modifyreg16.c sparc_modifyreg32.c
+CMN_CSRCS += sparc_nputs.c sparc_releasestack.c
+CMN_CSRCS += sparc_stackframe.c sparc_udelay.c sparc_usestack.c
 
 # Configuration-dependent common files
 
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += up_dumpstate.c
-endif
-
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+CMN_CSRCS += sparc_checkstack.c
 endif
 
 ifeq ($(CONFIG_SPINLOCK),y)
-  CMN_CSRCS += up_testset.c
+CMN_CSRCS += sparc_testset.c
 endif

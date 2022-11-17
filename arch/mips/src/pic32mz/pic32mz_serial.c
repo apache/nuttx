@@ -205,7 +205,7 @@
 
 /* Common initialization logic will not not know that the all of the UARTs
  * have been disabled.  So, as a result, we may still have to provide
- * stub implementations of up_earlyserialinit(), up_serialinit(), and
+ * stub implementations of mips_earlyserialinit(), mips_serialinit(), and
  * up_putc().
  */
 
@@ -720,11 +720,11 @@ static int up_interrupt(int irq, void *context, void *arg)
        */
 
 #ifdef CONFIG_DEBUG_ERROR
-      if (up_pending_irq(priv->irqe))
+      if (mips_pending_irq(priv->irqe))
         {
           /* Clear the pending error interrupt */
 
-          up_clrpend_irq(priv->irqe);
+          mips_clrpend_irq(priv->irqe);
           _err("ERROR: interrupt STA: %08x\n",
           up_serialin(priv, PIC32MZ_UART_STA_OFFSET));
           handled = true;
@@ -736,7 +736,7 @@ static int up_interrupt(int irq, void *context, void *arg)
        * FIFOs or 3 of 4 for 4-deep FIFOS.
        */
 
-      if (up_pending_irq(priv->irqrx))
+      if (mips_pending_irq(priv->irqrx))
         {
           /* Process incoming bytes */
 
@@ -754,7 +754,7 @@ static int up_interrupt(int irq, void *context, void *arg)
           if ((up_serialin(priv, PIC32MZ_UART_STA_OFFSET) &
                UART_STA_URXDA) == 0)
             {
-              up_clrpend_irq(priv->irqrx);
+              mips_clrpend_irq(priv->irqrx);
             }
         }
 
@@ -773,7 +773,7 @@ static int up_interrupt(int irq, void *context, void *arg)
        * full condition.
        */
 
-      if (up_pending_irq(priv->irqtx))
+      if (mips_pending_irq(priv->irqtx))
         {
           /* Process outgoing bytes */
 
@@ -791,7 +791,7 @@ static int up_interrupt(int irq, void *context, void *arg)
           if ((up_serialin(priv, PIC32MZ_UART_STA_OFFSET) &
                UART_STA_UTRMT) != 0)
             {
-              up_clrpend_irq(priv->irqtx);
+              mips_clrpend_irq(priv->irqtx);
             }
         }
     }
@@ -1063,18 +1063,18 @@ static bool up_txempty(struct uart_dev_s *dev)
 #ifdef USE_EARLYSERIALINIT
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: mips_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.  NOTE:  This function depends on GPIO pin
+ *   before mips_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void mips_earlyserialinit(void)
 {
   /* Disable interrupts from all UARTS.  The console is enabled in
    * pic32mz_consoleinit().
@@ -1110,15 +1110,15 @@ void up_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: mips_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that mips_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void mips_serialinit(void)
 {
   /* Register the console */
 
@@ -1171,31 +1171,31 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      mips_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  mips_lowputc(ch);
   up_restoreuartint(dev, imr);
 #endif
   return ch;
 }
 
 /****************************************************************************
- * Name: up_earlyserialinit, up_serialinit, and up_putc
+ * Name: mips_earlyserialinit, mips_serialinit, and up_putc
  *
  * Description:
  *   stubs that may be needed.  These stubs would be used if all UARTs are
- *   disabled.  In that case, the logic in common/up_initialize() is not
+ *   disabled.  In that case, the logic in common/mips_initialize() is not
  *   smart enough to know that there are not UARTs and will still expect
  *   these interfaces to be provided.
  *
  ****************************************************************************/
 #else /* HAVE_UART_DEVICE */
-void up_earlyserialinit(void)
+void mips_earlyserialinit(void)
 {
 }
 
-void up_serialinit(void)
+void mips_serialinit(void)
 {
 }
 
@@ -1224,10 +1224,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      mips_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  mips_lowputc(ch);
 #endif
   return ch;
 }
