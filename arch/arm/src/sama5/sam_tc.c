@@ -599,8 +599,8 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
  *
  ****************************************************************************/
 
-static inline void sam_tc_putreg(struct sam_chan_s *chan, unsigned int offset,
-                                 uint32_t regval)
+static inline void sam_tc_putreg(struct sam_chan_s *chan,
+                                unsigned int offset, uint32_t regval)
 {
   struct sam_tc_s *tc = chan->tc;
   uint32_t regaddr    = tc->base + offset;
