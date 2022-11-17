@@ -902,7 +902,14 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
             (FAR const struct sockaddr_in *)addr;
 
           conn->rport = inaddr->sin_port;
-          net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+          if (inaddr->sin_addr.s_addr == INADDR_ANY)
+            {
+              net_ipv4addr_copy(conn->u.ipv4.raddr, HTONL(INADDR_LOOPBACK));
+            }
+          else
+            {
+              net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+            }
         }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -915,7 +922,17 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
             (FAR const struct sockaddr_in6 *)addr;
 
           conn->rport = inaddr->sin6_port;
-          net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
+          if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
+            {
+              struct in6_addr loopback_sin6_addr = IN6ADDR_LOOPBACK_INIT;
+              net_ipv6addr_copy(conn->u.ipv6.raddr,
+                                loopback_sin6_addr.s6_addr16);
+            }
+          else
+            {
+              net_ipv6addr_copy(conn->u.ipv6.raddr,
+                                inaddr->sin6_addr.s6_addr16);
+            }
         }
 #endif /* CONFIG_NET_IPv6 */
     }
