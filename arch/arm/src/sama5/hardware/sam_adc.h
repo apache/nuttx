@@ -36,7 +36,7 @@
 
 /* General definitions ******************************************************/
 
-#if defined(ATSAMA5D3) || defined (ATSAMA5D2)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define SAM_ADC_NCHANNELS          12     /* 12 ADC Channels */
 #elif defined(ATSAMA5D4)
 #  define SAM_ADC_NCHANNELS          5      /* 5 ADC Channels */
