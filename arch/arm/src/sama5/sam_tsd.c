@@ -146,7 +146,7 @@
 #endif
 
 #if !defined BOARD_TSD_IBCTL && defined ATSAMA5D2
-# define BOARD_TSD_IBCTL 0
+#  define BOARD_TSD_IBCTL 0
 #endif
 
 /****************************************************************************
