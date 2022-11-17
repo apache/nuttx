@@ -78,7 +78,7 @@
 #define SAM_ADC_CDR3_OFFSET        0x005c /* Channel Data Register 3 */
 #define SAM_ADC_CDR4_OFFSET        0x0060 /* Channel Data Register 4 */
 
-#if defined (ATSAMA5D3) || defined (ATSAMA5D2)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define SAM_ADC_CDR5_OFFSET      0x0064 /* Channel Data Register 5 */
 #  define SAM_ADC_CDR6_OFFSET      0x0068 /* Channel Data Register 6 */
 #  define SAM_ADC_CDR7_OFFSET      0x006c /* Channel Data Register 7 */
