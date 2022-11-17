@@ -3244,6 +3244,7 @@ config SAMA5_ADC_SEQUENCER
 config SAMA5_ADC_ANARCH
 	bool "Analog changes"
 	default n
+  depends on ARCH_CHIP_SAMA5D3 || ARCH_CHIP_SAMA5D2
 	---help---
 		This option allows you to select different gain, offset, and single
 		vs. differential modes for each channel.
@@ -3251,6 +3252,7 @@ config SAMA5_ADC_ANARCH
 if SAMA5_ADC_ANARCH
 
 menu "Channel gain"
+depends on ARCH_CHIP_SAMA5D3
 
 config SAMA5_ADC_GAIN0
 	int "Channel 0 gain"
@@ -3387,6 +3389,7 @@ config SAMA5_ADC_GAIN11
 endmenu # Channel gain
 
 menu "Channel offsets"
+depends on ARCH_CHIP_SAMA5D3
 
 config SAMA5_ADC_OFFSET0
 	bool "Channel 0 offset"
@@ -3487,6 +3490,7 @@ config SAMA5_ADC_OFFSET11
 endmenu # Channel offsets
 
 menu "Channel differential mode"
+depends on ARCH_CHIP_SAMA5D3 || ARCH_CHIP_SAMA5D2
 
 config SAMA5_ADC_DIFFMODE0
 	bool "Channel 0 differential mode"
@@ -3573,11 +3577,11 @@ config SAMA5_ADC_DIFFMODE11
 		Selects differential (vs. single-ended mode) for ADC channel 11
 
 endmenu # Differential mode
+
 endif # SAMA5_ADC_ANARCH
 
-if !SAMA5_ADC_ANARCH
-
 config SAMA5_ADC_GAIN
+depends on ARCH_CHIP_SAMA5D3
 	int "Analog gain"
 	default 1
 	depends on SAMA5_ADC_CHAN0
@@ -3587,20 +3591,6 @@ config SAMA5_ADC_GAIN
 		either {1, 1, 2, 4} if the channels are configured for single ended
 		mode or as {0.5, 1, 2, 2} if the channels are configured for
 		differential mode.
-
-config SAMA5_ADC_OFFSET
-	bool "Offset"
-	default n
-	---help---
-		Center the analog signal on Vrefin/2 before the gain scaling.
-
-config SAMA5_ADC_DIFFMODE
-	bool "Differential mode"
-	default n
-	---help---
-		Selects differential (vs. single-ended mode)
-
-endif # !SAMA5_ADC_ANARCH
 
 menu "ADC Trigger Selection"
 
