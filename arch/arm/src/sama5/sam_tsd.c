@@ -142,7 +142,7 @@
 #endif
 
 #ifndef BOARD_TSD_PENDETSENS
-# define BOARD_TSD_PENDETSENS 0
+#  define BOARD_TSD_PENDETSENS 0
 #endif
 
 #if !defined BOARD_TSD_IBCTL && defined ATSAMA5D2
