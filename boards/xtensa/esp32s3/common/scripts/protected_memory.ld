@@ -51,17 +51,13 @@
 
 MEMORY
 {
-  metadata (RX) :   org = 0x0, len = 0x18
-  ROM (RX) :        org = 0x18, len = 0x100000
+  metadata (RX) :   org = 0x0, len = 0x30
+  ROM (RX) :        org = 0x30, len = 0x100000
 
-  /* Below values assume the flash cache is on, and have the blocks this
-   * uses subtracted from the length of the various regions. The 'data access
-   * port' dram/drom regions map to the same iram/irom regions but are
-   * connected to the data port of the CPU and e.g. allow bytewise access.
-   */
+  /* Instruction RAM */
 
-  KIRAM (RWX) :     org = SRAM_IRAM_ORG, len = 48K
-  UIRAM (RWX) :     org = ORIGIN(KIRAM) + LENGTH(KIRAM), len = 64K
+  UIRAM (RWX) :     org = SRAM_IRAM_ORG, len = 16K
+  KIRAM (RWX) :     org = ORIGIN(UIRAM) + LENGTH(UIRAM), len = 32K
 
   /* Flash mapped instruction data. */
 
@@ -78,21 +74,21 @@ MEMORY
 
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack. */
 
-  KDRAM (RW) :      org = SRAM_DRAM_ORG + 0x18000, len = 64K
-  UDRAM (RW) :      org = ORIGIN(KDRAM) + LENGTH(KDRAM), len = 192K
+  KDRAM (RW) :      org = ORIGIN(KIRAM) + LENGTH(KIRAM) - I_D_SRAM_OFFSET, len = 64K
+  UDRAM (RW) :      org = ORIGIN(KDRAM) + LENGTH(KDRAM), len = 256K
 
   /* Flash mapped constant data */
 
   /* See KIROM region documentation above for the meaning of the 0x20 offset.
    *
-   * The 0x18 offset for the UDROM region is a convenience for the User
+   * The 0x30 offset for the UDROM region is a convenience for the User
    * binary image generation following a custom image format, which defines
    * a "metadata" output section containing some information that the Kernel
-   * needs for properly configuring the External Flash MMU when loading the
-   * User application image.
+   * needs for properly configuring the External Flash MMU and initializing
+   * SRAM contents when loading the User application image.
    */
 
   KDROM (R)  :      org = 0x3c000020, len = 0x80000 - 0x20
-  UDROM (R)  :      org = 0x3c080018, len = 0x180000 - 0x18
+  UDROM (R)  :      org = 0x3c080030, len = 0x180000 - 0x30
 }
 

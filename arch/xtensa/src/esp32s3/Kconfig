@@ -400,6 +400,12 @@ config ESP32S3_RT_TIMER
 	---help---
 		Real-Time Timer is relying upon the Systimer 1.
 
+config ESP32S3_WCL
+	bool "World Controller"
+	default n
+	select ARCH_USE_MPU
+	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if BUILD_PROTECTED
+
 endmenu # ESP32-S3 Peripheral Selection
 
 menu "SPI RAM Configuration"

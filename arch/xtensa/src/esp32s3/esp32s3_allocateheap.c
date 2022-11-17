@@ -43,6 +43,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef ALIGN_DOWN
+#  define ALIGN_DOWN(num, align)  ((num) & ~((align) - 1))
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -66,7 +70,13 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   uintptr_t ubase = USERSPACE->us_dataend;
-  uintptr_t utop  = ets_rom_layout_p->dram0_rtos_reserved_start;
+
+  /* Align the heap top address to 256 bytes to match the PMS split address
+   * requirement.
+   */
+
+  uintptr_t utop  = ALIGN_DOWN(ets_rom_layout_p->dram0_rtos_reserved_start,
+                               256);
   size_t    usize = utop - ubase;
 
   minfo("Heap: start=%" PRIxPTR " end=%" PRIxPTR " size=%zu\n",

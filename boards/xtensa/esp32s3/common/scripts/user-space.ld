@@ -30,7 +30,17 @@ SECTIONS
 
     LONG(ADDR(.userspace))
     LONG(LOADADDR(.userspace))
-    LONG(SIZEOF(.userspace) + SIZEOF(.rodata))
+    LONG(LOADADDR(.rodata) + SIZEOF(.rodata) - LOADADDR(.userspace))
+
+    /* IRAM metadata:
+     * - Destination address (VMA) for IRAM region
+     * - Flash offset (LMA) for start of IRAM region
+     * - Size of IRAM region
+     */
+
+    LONG(ADDR(.iram0.vectors))
+    LONG(LOADADDR(.iram0.vectors))
+    LONG(LOADADDR(.iram0.text) + SIZEOF(.iram0.text) - LOADADDR(.iram0.vectors))
 
     /* IROM metadata:
      * - Destination address (VMA) for IROM region
@@ -44,6 +54,8 @@ SECTIONS
   } >metadata
 
   /* section info */
+
+  __kernel_vector_table = ORIGIN(KIRAM);
 
   __ld_uirom_start = ORIGIN(UIROM);
   __ld_uirom_size = LENGTH(UIROM);
@@ -128,24 +140,60 @@ SECTIONS
     . = ALIGN(4);
   } >UDROM AT>ROM
 
-  .iram0.text :
+  .iram0.vectors :
   {
     _iram_start = ABSOLUTE(.);
+
+    /* Vectors go to IRAM */
+
+    _init_start = ABSOLUTE(.);
+
+    __vectors_start = ABSOLUTE(.);
+
+    /* Vectors according to builds/RF-2015.2-win32/esp108_v1_2_s5_512int_2/config.html */
+
+    . = 0x0;
+    KEEP (*(.window_vectors.text));
+    . = 0x180;
+    KEEP (*(.xtensa_level2_vector.text));
+    . = 0x1c0;
+    KEEP (*(.xtensa_level3_vector.text));
+    . = 0x200;
+    KEEP (*(.xtensa_level4_vector.text));
+    . = 0x240;
+    KEEP (*(.xtensa_level5_vector.text));
+    . = 0x280;
+    KEEP (*(.debug_exception_vector.text));
+    . = 0x2c0;
+    KEEP (*(.nmi_exception_vector.text));
+    . = 0x300;
+    KEEP (*(.kernel_exception_vector.text));
+    . = 0x340;
+    KEEP (*(.user_exception_vector.text));
+    . = 0x3c0;
+    KEEP (*(.double_exception_vector.text));
+    . = 0x400;
+    *(.*_vector.literal)
+
+    . = ALIGN (16);
+
+    __vectors_end = ABSOLUTE(.);
+
+    *(.entry.text)
+    *(.init.literal)
+    *(.init)
+
+    _init_end = ABSOLUTE(.);
+  } >UIRAM AT>ROM
+
+  .iram0.text :
+  {
 
     *(.iram1)
     *(.iram1.*)
 
     _iram_end = ABSOLUTE(.);
   } >UIRAM AT>ROM
-
-  /* This section is required to skip .iram0.text area because iram0_0_seg
-   * and dram0_0_seg reflect the same address space on different buses.
-   */
-
-  .dram0.dummy (NOLOAD):
-  {
-    . = ORIGIN(UDRAM) + _iram_end - _iram_start;
-  } >UDRAM
 
   /* Shared RAM */
 
@@ -170,6 +218,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+
     . = ALIGN(8);
 
     _ebss = ABSOLUTE(.);

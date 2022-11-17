@@ -31,7 +31,6 @@ ENTRYPT = $(patsubst "%",%,$(CONFIG_INIT_ENTRYPOINT))
 USER_LIBPATHS = $(addprefix -L,$(call CONVERT_PATH,$(addprefix $(TOPDIR)$(DELIM),$(dir $(USERLIBS)))))
 USER_LDSCRIPT = $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected_memory.ld)
 USER_LDSCRIPT += $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
-USER_LDSCRIPT += $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_rom.ld)
 USER_HEXFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.hex)
 USER_BINFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.bin)
 
@@ -46,9 +45,12 @@ USER_LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
 
 # Source files
 
+ASRCS = esp32s3_user_vectors.S
 CSRCS = esp32s3_userspace.c
+
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
-OBJS  = $(COBJS)
+OBJS  = $(AOBJS) $(COBJS)
 
 ifeq ($(LD),$(CC))
   LDSTARTGROUP ?= -Wl,--start-group
@@ -64,6 +66,9 @@ endif
 
 all: $(TOPDIR)$(DELIM)nuttx_user.elf
 .PHONY: nuttx_user.elf depend clean distclean
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE,$<,$@)
 
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE,$<,$@)
