@@ -160,6 +160,9 @@
 #  define SAM_ADC_OFFSET         0x00030000 /* 0x00030000-0x00033fff: ADC */
                                             /* 0x00034000-0x00037fff: Reserved */
 #  define SAM_PIO_OFFSET         0x00038000 /* 0x00038000-0x0003bfff: PIOA-D */
+#  define SAM_PIOB_OFFSET        0x40       /* PIOB */
+#  define SAM_PIOC_OFFSET        0x80       /* PIOC */
+#  define SAM_PIOD_OFFSET        0xc0       /* PIOD */
 #  define SAM_MATRIX1_OFFSET     0x0003c000 /* 0x0003c000-0x0003ffff: MATRIX1 */
 #  define SAM_SECUMOD_OFFSET     0x00040000 /* 0x00040000-0x00043fff: SECUMOD */
 #  define SAM_TDES_OFFSET        0x00044000 /* 0x00044000-0x00047fff: TDES */
@@ -517,9 +520,10 @@
 #define SAM_SFRBU_VBASE          (SAM_PERIPHC_VSECTION+SAM_SFRBU_OFFSET)
 #define SAM_CHIPID_VBASE         (SAM_PERIPHC_VSECTION+SAM_CHIPID_OFFSET)
 
-#define SAM_PIOA_VBASE           (SAM_PERIPHA_VSECTION+SAM_PIO_OFFSET)
-#define SAM_PIOB_VBASE           (SAM_PERIPHB_VSECTION+SAM_PIO_OFFSET)
-#define SAM_PIOC_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIO_OFFSET)
+#define SAM_PIOA_VBASE           (SAM_PIO_VBASE)
+#define SAM_PIOB_VBASE           (SAM_PIO_VBASE+SAM_PIOB_OFFSET)
+#define SAM_PIOC_VBASE           (SAM_PIO_VBASE+SAM_PIOC_OFFSET)
+#define SAM_PIOD_VBASE           (SAM_PIO_VBASE+SAM_PIOD_OFFSET)
 
 /* NuttX virtual base address
  *
@@ -883,3 +887,4 @@
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_MEMORYMAP_H */
+
