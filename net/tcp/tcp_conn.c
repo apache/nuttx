@@ -1240,9 +1240,18 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       conn->mss    = MIN_IPv4_TCP_INITIAL_MSS;
       conn->rport  = inaddr->sin_port;
 
-      /* The sockaddr address is 32-bits in network order. */
+      /* The sockaddr address is 32-bits in network order.
+       * Note: 0.0.0.0 is mapped to 127.0.0.1 by convention.
+       */
 
-      net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+      if (inaddr->sin_addr.s_addr == INADDR_ANY)
+        {
+          net_ipv4addr_copy(conn->u.ipv4.raddr, HTONL(INADDR_LOOPBACK));
+        }
+      else
+        {
+          net_ipv4addr_copy(conn->u.ipv4.raddr, inaddr->sin_addr.s_addr);
+        }
 
       /* Find the device that can receive packets on the network associated
        * with this remote address.
@@ -1265,9 +1274,20 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       conn->mss     = MIN_IPv6_TCP_INITIAL_MSS;
       conn->rport   = inaddr->sin6_port;
 
-      /* The sockaddr address is 128-bits in network order. */
+      /* The sockaddr address is 128-bits in network order.
+       * Note: ::0 is mapped to ::1 by convention.
+       */
 
-      net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
+      if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
+        {
+          struct in6_addr loopback_sin6_addr = IN6ADDR_LOOPBACK_INIT;
+          net_ipv6addr_copy(conn->u.ipv6.raddr,
+                            loopback_sin6_addr.s6_addr16);
+        }
+      else
+        {
+          net_ipv6addr_copy(conn->u.ipv6.raddr, inaddr->sin6_addr.s6_addr16);
+        }
 
       /* Find the device that can receive packets on the network associated
        * with this local address.
