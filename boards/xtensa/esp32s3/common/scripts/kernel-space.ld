@@ -48,8 +48,6 @@ __kdram_end = ORIGIN(KDRAM) + LENGTH(KDRAM);
 
 ENTRY(_stext)
 
-_diram_i_start = 0x40378000;
-
 SECTIONS
 {
   /* Send .iram0 code to iram */
@@ -104,6 +102,7 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
+    esp32s3_userspace.*(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
     *libkarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
@@ -126,15 +125,6 @@ SECTIONS
 
     _iram_end = ABSOLUTE(.);
   } >KIRAM
-
-  .dram0.dummy (NOLOAD) :
-  {
-    /* This section is required to skip .iram0.text area because iram0_0_seg
-     * and dram0_0_seg reflect the same address space on different buses.
-     */
-
-    . = ORIGIN(KDRAM) + MAX(_iram_end, _diram_i_start) - _diram_i_start;
-  } >KDRAM
 
   /* Shared RAM */
 
@@ -203,6 +193,7 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     *libphy.a:(.rodata  .rodata.*)
+    esp32s3_userspace.*(.rodata  .rodata.*)
     *libkarch.a:esp32s3_spiflash.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_copystate.*(.rodata  .rodata.*)

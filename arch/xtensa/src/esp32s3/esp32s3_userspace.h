@@ -46,4 +46,24 @@
 void esp32s3_userspace(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32s3_pmsirqinitialize
+ *
+ * Description:
+ *   Initialize interrupt handler for the PMS violation ISR.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+void esp32s3_pmsirqinitialize(void);
+#else
+#  define esp32s3_pmsirqinitialize()
+#endif
+
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H */

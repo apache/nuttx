@@ -193,7 +193,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS
     .macro exception_entry_hook level reg_sp tmp
 
   /* Save PID information from interruptee when handling User (Level 1) and
@@ -221,7 +221,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS
     .macro exception_exit_hook level reg_sp tmp1 tmp2
 
   /* Configure the PID Controller for the new execution context before

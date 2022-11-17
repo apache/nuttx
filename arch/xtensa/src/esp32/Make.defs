@@ -25,7 +25,7 @@ include common/Make.defs
 
 HEAD_CSRC  = esp32_start.c esp32_wdt.c
 
-ifeq ($(CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS),y)
+ifeq ($(CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS),y)
 HEAD_ASRC += esp32_window_hooks.S
 endif
 
