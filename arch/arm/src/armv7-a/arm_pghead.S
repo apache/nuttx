@@ -453,6 +453,15 @@ __start:
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
+#ifdef CONFIG_ENDIAN_BIG
+	/* Big endian mode
+	 *
+	 *   SCTLR_EE   Bit 25: 1=Big endian.
+	 */
+
+	orr		r0, r0, #(SCTLR_EE)
+#endif
+
 #ifdef CPU_AFE_ENABLE
 	/* AP[0:2] Permissions model
 	 *
