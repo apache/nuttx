@@ -195,9 +195,9 @@ __start:
 
 	/* Clear all configurable bits */
 
-	bic		r0, r0, #(SCTLR_M | SCTLR_A  | SCTLR_C | SCTLR_CCP15BEN | SCTLR_B)
-	bic		r0, r0, #(SCTLR_SW | SCTLR_I | SCTLR_V   | SCTLR_RR)
-	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI | SCTLR_U)
+	bic		r0, r0, #(SCTLR_M  | SCTLR_A  | SCTLR_C    | SCTLR_CCP15BEN | SCTLR_B)
+	bic		r0, r0, #(SCTLR_SW | SCTLR_I  | SCTLR_V    | SCTLR_RR)
+	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI)
 	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE)
 
 	/* Set configured bits */
