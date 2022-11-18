@@ -35,7 +35,9 @@
  ****************************************************************************/
 
 #define strcoll_l(s1, s2, l)    strcoll(s1, s2)
+#define strdupa(x)              strcpy(alloca(strlen(x) + 1), x)
 #define strerror_l(e, l)        strerror(e)
+#define strndupa(x, len)        strncpy(alloca(strlen(x) + 1), x, len)
 #define strxfrm_l(s1, s2, n, l) strxfrm(s1, s2, n)
 
 /****************************************************************************
