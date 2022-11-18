@@ -191,7 +191,6 @@ __start:
 	 *   SCTLR_EE       Bit 25: 0=Little endian.
 	 *   SCTLR_NMFI     Bit 27: Non-maskable FIQ (NMFI) support
 	 *   SCTLR_TE       Bit 30: All exceptions handled in ARM state.
-	 *   SCTLR_IE       Bit 31: Instruction endian-ness.
 	 */
 
 	/* Clear all configurable bits */
@@ -199,7 +198,7 @@ __start:
 	bic		r0, r0, #(SCTLR_M | SCTLR_A  | SCTLR_C | SCTLR_CCP15BEN | SCTLR_B)
 	bic		r0, r0, #(SCTLR_SW | SCTLR_I | SCTLR_V   | SCTLR_RR)
 	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI | SCTLR_U)
-	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE | SCTLR_IE)
+	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI | SCTLR_TE)
 
 	/* Set configured bits */
 
