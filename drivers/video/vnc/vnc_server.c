@@ -185,7 +185,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   ginfo("Accepting connection for Display %d\n", session->display);
 
-  ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
+  ret = psock_accept(&session->listen, NULL, NULL, &session->connect, 0);
   if (ret < 0)
     {
       goto errout_with_listener;
