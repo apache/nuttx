@@ -328,6 +328,10 @@
 #  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
 #endif
 
+#define sigisemptyset(set)           (!*(set))
+#define sigorset(dest, left, right)  (!(*(dest) = *(left) | *(right)))
+#define sigandset(dest, left, right) (!(*(dest) = *(left) & *(right)))
+
 /********************************************************************************
  * Public Types
  ********************************************************************************/
