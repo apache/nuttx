@@ -159,7 +159,6 @@
 #define SCTLR_NMFI         (1 << 27) /* Bit 27: Non-maskable FIQ (NMFI) support */
                                      /* Bits 28-29: Reserved */
 #define SCTLR_TE           (1 << 30) /* Bit 30: Thumb exception enable */
-#define SCTLR_IE           (1 << 31) /* Bit 31: Instruction endian-ness */
 
 /* Auxiliary Control Register (ACTLR): CRn=c1, opc1=0, CRm=c0, opc2=1
  * Implementation defined
