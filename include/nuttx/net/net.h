@@ -697,6 +697,7 @@ int psock_listen(FAR struct socket *psock, int backlog);
  *   addrlen  Input: allocated size of 'addr', Return: returned size of
  *            'addr'
  *   newsock  Location to return the accepted socket information.
+ *   flags    The flags used for initialization
  *
  * Returned Value:
  *  Returns zero (OK) on success.  On failure, it returns a negated errno
@@ -731,7 +732,8 @@ int psock_listen(FAR struct socket *psock, int backlog);
  ****************************************************************************/
 
 int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                 FAR socklen_t *addrlen, FAR struct socket *newsock);
+                 FAR socklen_t *addrlen, FAR struct socket *newsock,
+                 int flags);
 
 /****************************************************************************
  * Name: psock_connect

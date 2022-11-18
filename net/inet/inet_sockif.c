@@ -1465,6 +1465,8 @@ static int inet_socketpair(FAR struct socket *psocks[2])
 #if defined(CONFIG_NET_TCP)
   if (psocks[0]->s_type == SOCK_STREAM)
     {
+      FAR struct socket_conn_s *conn = psocks[1]->s_conn;
+
       ret = psock_listen(pserver, 2);
       if (ret < 0)
         {
@@ -1483,7 +1485,8 @@ static int inet_socketpair(FAR struct socket *psocks[2])
 
       psock_close(psocks[1]);
 
-      ret = psock_accept(pserver, &addr[1].addr, &len, psocks[1]);
+      ret = psock_accept(pserver, &addr[1].addr, &len, psocks[1],
+                         conn->s_flags & _SF_NONBLOCK ? SOCK_NONBLOCK : 0);
     }
 #endif /* CONFIG_NET_TCP */
 

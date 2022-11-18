@@ -384,6 +384,8 @@ int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
 int listen(int sockfd, int backlog);
 int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+            int flags);
 
 ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
 ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
