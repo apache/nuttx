@@ -410,46 +410,6 @@ static struct imxrt_lpspidev_s g_lpspi4dev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imxrt_lpspi_getreg8
- *
- * Description:
- *   Get the contents of the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *
- * Returned Value:
- *   The contents of the 8-bit register
- *
- ****************************************************************************/
-
-static inline uint8_t imxrt_lpspi_getreg8(struct imxrt_lpspidev_s *priv,
-                                          uint8_t offset)
-{
-  return getreg8(priv->spibase + offset);
-}
-
-/****************************************************************************
- * Name: imxrt_lpspi_putreg8
- *
- * Description:
- *   Write a 8-bit value to the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *   value  - the 8-bit value to be written
- *
- ****************************************************************************/
-
-static inline void imxrt_lpspi_putreg8(struct imxrt_lpspidev_s *priv,
-                                       uint8_t offset, uint8_t value)
-{
-  putreg8(value, priv->spibase + offset);
-}
-
-/****************************************************************************
  * Name: imxrt_lpspi_getreg
  *
  * Description:
@@ -546,60 +506,6 @@ static inline void imxrt_lpspi_writeword(struct imxrt_lpspidev_s *priv,
   /* Then send the word */
 
   imxrt_lpspi_putreg32(priv, IMXRT_LPSPI_TDR_OFFSET, word);
-}
-
-/****************************************************************************
- * Name: imxrt_lpspi_readbyte
- *
- * Description:
- *   Read one byte from SPI
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *
- * Returned Value:
- *   Byte as read
- *
- ****************************************************************************/
-
-static inline uint8_t imxrt_lpspi_readbyte(struct imxrt_lpspidev_s *priv)
-{
-  /* Wait until the receive buffer is not empty */
-
-  while ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_SR_OFFSET)
-                       & LPSPI_SR_RDF) == 0);
-
-  /* Then return the received byte */
-
-  return imxrt_lpspi_getreg8(priv, IMXRT_LPSPI_RDR_OFFSET);
-}
-
-/****************************************************************************
- * Name: imxrt_lpspi_writebyte
- *
- * Description:
- *   Write one 8-bit frame to the SPI FIFO
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *   byte - Byte to send
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void imxrt_lpspi_writebyte(struct imxrt_lpspidev_s *priv,
-                                         uint8_t byte)
-{
-  /* Wait until the transmit buffer is empty */
-
-  while ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_SR_OFFSET)
-                           & LPSPI_SR_TDF) == 0);
-
-  /* Then send the byte */
-
-  imxrt_lpspi_putreg8(priv, IMXRT_LPSPI_TDR_OFFSET, byte);
 }
 
 /****************************************************************************
