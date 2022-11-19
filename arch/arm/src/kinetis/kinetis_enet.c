@@ -872,7 +872,7 @@ static void kinetis_interrupt_work(void *arg)
     {
       /* An error has occurred, update statistics */
 
-      nerr("pending %0" PRIx32 "d ints %0lxd\n", pending, priv->ints);
+      nerr("pending %0" PRIx32 "ints %0" PRIx32 "\n", pending, priv->ints);
 
       NETDEV_ERRORS(&priv->dev);
 
