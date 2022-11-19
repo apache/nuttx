@@ -42,7 +42,7 @@
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS1227ZWT)
 #  error No memory map for the TMS570LS1227ZWT
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
-#  include "hardware/tms570ls31xx_memorymap.h"
+#  include "hardware/tms570ls04x03x_memorymap.h"
 #else
 #  error "Unrecognized Hercules chip"
 #endif

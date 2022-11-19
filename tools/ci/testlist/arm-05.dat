@@ -1,5 +1,4 @@
 /arm/[m-r]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
--moxa:nsh
 
 /arm/s32k1xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
