@@ -530,10 +530,12 @@ static inline uint32_t imxrt_serialin(struct imxrt_uart_s *priv,
                                       uint32_t offset);
 static inline void imxrt_serialout(struct imxrt_uart_s *priv,
                                    uint32_t offset, uint32_t value);
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONSOLE_DEV)
 static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
                                         uint32_t *ie);
 static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
                                         uint32_t ie);
+#endif
 
 static int  imxrt_setup(struct uart_dev_s *dev);
 static void imxrt_shutdown(struct uart_dev_s *dev);
@@ -1380,6 +1382,7 @@ static int imxrt_dma_nextrx(struct imxrt_uart_s *priv)
  * Name: imxrt_disableuartint
  ****************************************************************************/
 
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONSOLE_DEV)
 static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
                                         uint32_t *ie)
 {
@@ -1400,11 +1403,13 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
   spin_unlock_irqrestore(NULL, flags);
 }
+#endif
 
 /****************************************************************************
  * Name: imxrt_restoreuartint
  ****************************************************************************/
 
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONSOLE_DEV)
 static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
                                         uint32_t ie)
 {
@@ -1422,6 +1427,7 @@ static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
   spin_unlock_irqrestore(NULL, flags);
 }
+#endif
 
 /****************************************************************************
  * Name: imxrt_dma_setup
