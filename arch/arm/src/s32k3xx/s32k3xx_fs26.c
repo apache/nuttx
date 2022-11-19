@@ -246,7 +246,7 @@ uint32_t fs26_setreg(struct fs26_dev_s *priv, uint8_t regaddr,
   retval = __builtin_bswap32(retval);
 #endif
 
-  spiinfo("Received %08lx\n", retval);
+  spiinfo("Received %08" PRIx32 "\n", retval);
 
   if (fs26_calcrc((uint8_t *)&retval, 3) != ((uint8_t *)&retval)[0])
     {
@@ -316,7 +316,7 @@ uint32_t fs26_getreg(struct fs26_dev_s *priv, uint8_t regaddr)
 
   /* DEBUG print */
 
-  spiinfo("%02x->%04lx\n", regaddr, retval);
+  spiinfo("%02x->%04" PRIx32 "\n", regaddr, retval);
 
   return retval;
 }
@@ -423,7 +423,7 @@ void fs26_initialize(struct spi_dev_s *spi)
   if ((FS26_GET_DATA(retval) & (ABIST1_PASS_MASK | LBIST_STATUS_MASK))
       != (ABIST1_PASS | LBIST_STATUS_OK))
     {
-      spierr("FS26 DIAG failed %08lx\n", retval);
+      spierr("FS26 DIAG failed %08" PRIx32 "\n", retval);
     }
 
   /* Get state machine state */
