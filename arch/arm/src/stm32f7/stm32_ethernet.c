@@ -3442,6 +3442,7 @@ static inline void stm32_selectmii(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32F7_RMII
 static inline void stm32_selectrmii(void)
 {
   uint32_t regval;
@@ -3450,6 +3451,7 @@ static inline void stm32_selectrmii(void)
   regval |= SYSCFG_PMC_MII_RMII_SEL;
   putreg32(regval, STM32_SYSCFG_PMC);
 }
+#endif
 
 /****************************************************************************
  * Function: stm32_ethgpioconfig
