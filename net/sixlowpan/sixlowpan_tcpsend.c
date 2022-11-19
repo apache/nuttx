@@ -907,7 +907,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
           if (hdrlen > dev->d_len)
             {
               nwarn("WARNING:  Dropping small TCP packet: %u < %u\n",
-                    buflen, hdrlen);
+                    dev->d_len, hdrlen);
             }
           else
             {
