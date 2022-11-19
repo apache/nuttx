@@ -128,8 +128,6 @@ static inline uint16_t spi_getreg16(struct kinetis_spidev_s *priv,
                                     uint8_t offset);
 static inline void     spi_putreg16(struct kinetis_spidev_s *priv,
                                     uint8_t offset, uint16_t value);
-static inline uint8_t  spi_getreg8(struct kinetis_spidev_s *priv,
-                                   uint8_t offset);
 static inline void     spi_putreg8(struct kinetis_spidev_s *priv,
                                    uint8_t offset, uint8_t value);
 static inline uint16_t spi_readword(struct kinetis_spidev_s *priv);
@@ -462,27 +460,6 @@ static inline void spi_putreg16(struct kinetis_spidev_s *priv,
                                 uint16_t value)
 {
   putreg16(value, priv->spibase + offset);
-}
-
-/****************************************************************************
- * Name: spi_getreg8
- *
- * Description:
- *   Get the 8 bit contents of the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *
- * Returned Value:
- *   The contents of the 8-bit register
- *
- ****************************************************************************/
-
-static inline uint8_t spi_getreg8(struct kinetis_spidev_s *priv,
-                                  uint8_t offset)
-{
-  return getreg8(priv->spibase + offset);
 }
 
 /****************************************************************************
