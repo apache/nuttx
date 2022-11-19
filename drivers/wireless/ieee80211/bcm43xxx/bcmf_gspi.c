@@ -141,22 +141,6 @@ static inline uint8_t bcmf_gspi_read_reg_8(FAR gspi_dev_t       *gspi,
 }
 
 /****************************************************************************
- * Name: bcmf_gspi_write_reg_32
- *
- * Description:
- *   Write a 32-bit register
- *
- ****************************************************************************/
-
-static inline void bcmf_gspi_write_reg_32(FAR gspi_dev_t       *gspi,
-                                          enum gspi_cmd_func_e  function,
-                                          uint32_t              address,
-                                          uint32_t              value)
-{
-  gspi->write(gspi, true, function, address, 4, &value);
-}
-
-/****************************************************************************
  * Name: bcmf_gspi_write_reg_16
  *
  * Description:
