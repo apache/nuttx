@@ -223,7 +223,7 @@
 
 #define ILI9225_VCI_REC_VCIR_SHIFT             (4)  /* Set CVI recycling period */
 #define ILI9225_VCI_REC_VCIR_MASK              (0x7 << ILI9225_VCI_REC_VCIR_SHIFT)
-#define ILI9225_VCI_REC_VCIR(n)                (((uint16_t)(n) << ILI9225_VCI_REC_VCIR_MASK) & ILI9225_VCI_REC_VCIR_SHIFT)
+#define ILI9225_VCI_REC_VCIR(n)                (((uint16_t)(n) << ILI9225_VCI_REC_VCIR_SHIFT) & ILI9225_VCI_REC_VCIR_MASK)
 
 /* ILI9225_HORIZONTAL_GRAM_ADDR_SET,
  * Horizontal GRAM Address Set, Offset: 0x20
