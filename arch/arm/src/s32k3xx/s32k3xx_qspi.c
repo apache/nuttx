@@ -926,7 +926,8 @@ static int qspi_transmit_blocking(struct s32k3xx_qspidev_s *priv,
       regval |= QSPI_MCR_CLR_TXF;
       putreg32(regval, S32K3XX_QSPI_MCR);
 
-      spiinfo("Transmit: %lu size: %lu\n", meminfo->addr, meminfo->buflen);
+      spiinfo("Transmit: %" PRIu32 " size: %" PRIu32 "\n",
+              meminfo->addr, meminfo->buflen);
 
       for (count = 0U; count < write_cycle; count++)
         {
