@@ -951,7 +951,7 @@ static int imxrt_setup(struct qe_lowerhalf_s *lower)
   imxrt_enc_putreg16(priv, IMXRT_ENC_TST_OFFSET, regval);
 #endif
 
-  if ((config->init_flags && XIE_SHIFT) == 1)
+  if (((config->init_flags >> XIE_SHIFT) & 1) != 0)
     {
       ret = irq_attach(config->irq, imxrt_enc_index, priv);
       if (ret < 0)
@@ -1011,10 +1011,9 @@ static int imxrt_shutdown(struct qe_lowerhalf_s *lower)
 
   /* Disable interrupts if used */
 
-  if ((priv->config->init_flags && XIE_SHIFT) == 1)
+  if (((priv->config->init_flags >> XIE_SHIFT) & 1) != 0)
     {
       up_disable_irq(priv->config->irq);
-
       irq_detach(priv->config->irq);
     }
 
