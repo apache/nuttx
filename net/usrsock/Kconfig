@@ -41,13 +41,13 @@ config NET_USRSOCK_NPOLLWAITERS
 config NET_USRSOCK_UDP
 	bool "User-space daemon provides UDP sockets"
 	default n
-	select NET_UDP
+	select NET_UDP_NO_STACK
 	---help---
 
 config NET_USRSOCK_TCP
 	bool "User-space daemon provides TCP sockets"
 	default n
-	select NET_TCP
+	select NET_TCP_NO_STACK
 
 config NET_USRSOCK_OTHER
 	bool "Enable other protocol families in addition of INET & INET6"
