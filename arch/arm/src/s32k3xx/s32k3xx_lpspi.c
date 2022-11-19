@@ -721,64 +721,6 @@ static inline void s32k3xx_lpspi_write_dword(struct s32k3xx_lpspidev_s *priv,
 #endif
 
 /****************************************************************************
- * Name: s32k3xx_lpspi_readbyte
- *
- * Description:
- *   Read one byte from SPI
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *
- * Returned Value:
- *   Byte as read
- *
- ****************************************************************************/
-
-static inline uint8_t s32k3xx_lpspi_readbyte(struct s32k3xx_lpspidev_s *priv)
-{
-  /* Wait until the receive buffer is not empty */
-
-  while ((s32k3xx_lpspi_getreg32(priv, S32K3XX_LPSPI_SR_OFFSET) &
-          LPSPI_SR_RDF) == 0)
-    {
-    }
-
-  /* Then return the received byte */
-
-  return s32k3xx_lpspi_getreg8(priv, S32K3XX_LPSPI_RDR_OFFSET);
-}
-
-/****************************************************************************
- * Name: s32k3xx_lpspi_writebyte
- *
- * Description:
- *   Write one 8-bit frame to the SPI FIFO
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *   byte - Byte to send
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void s32k3xx_lpspi_writebyte(struct s32k3xx_lpspidev_s *priv,
-                                           uint8_t byte)
-{
-  /* Wait until the transmit buffer is empty */
-
-  while ((s32k3xx_lpspi_getreg32(priv, S32K3XX_LPSPI_SR_OFFSET) &
-          LPSPI_SR_TDF) == 0)
-    {
-    }
-
-  /* Then send the byte */
-
-  s32k3xx_lpspi_putreg8(priv, S32K3XX_LPSPI_TDR_OFFSET, byte);
-}
-
-/****************************************************************************
  * Name: s32k3xx_lpspi_9to16bitmode
  *
  * Description:
