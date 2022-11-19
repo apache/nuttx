@@ -589,8 +589,6 @@ static inline struct khci_ep_s *
 static inline void
               khci_epunreserve(struct khci_usbdev_s *priv,
               struct khci_ep_s *privep);
-static inline bool
-              khci_epreserved(struct khci_usbdev_s *priv, int epno);
 static void  khci_ep0configure(struct khci_usbdev_s *priv);
 
 /* Endpoint operations ******************************************************/
@@ -3307,16 +3305,6 @@ khci_epunreserve(struct khci_usbdev_s *priv, struct khci_ep_s *privep)
   irqstate_t flags = enter_critical_section();
   priv->epavail   |= KHCI_ENDP_BIT(USB_EPNO(privep->ep.eplog));
   leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: khci_epreserved
- ****************************************************************************/
-
-static inline bool
-khci_epreserved(struct khci_usbdev_s *priv, int epno)
-{
-  return ((priv->epavail & KHCI_ENDP_BIT(epno)) == 0);
 }
 
 /****************************************************************************
