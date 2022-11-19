@@ -38,14 +38,6 @@ config NET_USRSOCK_NPOLLWAITERS
 	int "Number of usrsock poll waiters"
 	default 1
 
-config NET_USRSOCK_NO_INET
-	bool "Disable PF_INET for usrsock"
-	default n
-
-config NET_USRSOCK_NO_INET6
-	bool "Disable PF_INET6 for usrsock"
-	default n
-
 config NET_USRSOCK_UDP
 	bool "User-space daemon provides UDP sockets"
 	default n
