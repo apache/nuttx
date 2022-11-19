@@ -243,8 +243,6 @@ static uint32_t imxrt_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs);
 
 static inline int
 imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv);
-static inline void
-imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
 static void imxrt_lpi2c_tracereset(struct imxrt_lpi2c_priv_s *priv);
@@ -742,95 +740,6 @@ imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
   return ret;
 }
 #endif
-
-/****************************************************************************
- * Name: imxrt_lpi2c_sem_waitstop
- *
- * Description:
- *   Wait for a STOP to complete
- *
- ****************************************************************************/
-
-static inline void
-imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv)
-{
-  clock_t start;
-  clock_t elapsed;
-  clock_t timeout;
-  uint32_t regval;
-
-  /* Select a timeout */
-
-#ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-  timeout = USEC2TICK(CONFIG_IMXRT_LPI2C_DYNTIMEO_STARTSTOP);
-#else
-  timeout = CONFIG_IMXRT_LPI2C_TIMEOTICKS;
-#endif
-
-  /* Wait as stop might still be in progress; but stop might also
-   * be set because of a timeout error: "The [STOP] bit is set and
-   * cleared by software, cleared by hardware when a Stop condition is
-   * detected, set by hardware when a timeout error is detected."
-   */
-
-  start = clock_systime_ticks();
-  do
-    {
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systime_ticks() - start;
-
-      /* Check for STOP condition */
-
-      if (priv->config->mode == LPI2C_MASTER)
-        {
-          regval = imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MSR_OFFSET);
-          if ((regval & LPI2C_MSR_SDF) == LPI2C_MSR_SDF)
-            {
-              return;
-            }
-        }
-
-      /* Enable Interrupts when slave mode */
-
-      else
-        {
-          regval = imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_SSR_OFFSET);
-          if ((regval & LPI2C_SSR_SDF) == LPI2C_SSR_SDF)
-            {
-              return;
-            }
-        }
-
-      /* Check for NACK error */
-
-      if (priv->config->mode == LPI2C_MASTER)
-        {
-          regval = imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MSR_OFFSET);
-          if ((regval & LPI2C_MSR_NDF) == LPI2C_MSR_NDF)
-            {
-              return;
-            }
-        }
-
-      /* Enable Interrupts when slave mode */
-
-      else
-        {
-#warning Missing logic for I2C Slave
-        }
-    }
-
-  /* Loop until the stop is complete or a timeout occurs. */
-
-  while (elapsed < timeout);
-
-  /* If we get here then a timeout occurred with the STOP condition
-   * still pending.
-   */
-
-  i2cinfo("Timeout with Status Register: %" PRIx32 "\n", regval);
-}
 
 /****************************************************************************
  * Name: imxrt_dma_callback
