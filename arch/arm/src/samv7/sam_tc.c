@@ -164,8 +164,6 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
 #  define   sam_checkreg(tc,wr,regaddr,regval) (false)
 #endif
 
-static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
-                                     unsigned int offset);
 static inline void sam_tc_putreg(struct sam_chan_s *chan,
                                  unsigned int offset, uint32_t regval);
 
@@ -679,31 +677,6 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
   return true;
 }
 #endif
-
-/****************************************************************************
- * Name: sam_tc_getreg
- *
- * Description:
- *  Read an TC register
- *
- ****************************************************************************/
-
-static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
-                                     unsigned int offset)
-{
-  struct sam_tc_s *tc = chan->tc;
-  uint32_t regaddr    = tc->base + offset;
-  uint32_t regval     = getreg32(regaddr);
-
-#ifdef CONFIG_SAMV7_TC_REGDEBUG
-  if (sam_checkreg(tc, false, regaddr, regval))
-    {
-      tmrinfo("%08x->%08x\n", regaddr, regval);
-    }
-#endif
-
-  return regval;
-}
 
 /****************************************************************************
  * Name: sam_tc_putreg
