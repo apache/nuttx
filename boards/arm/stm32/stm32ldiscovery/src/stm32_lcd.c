@@ -581,7 +581,7 @@ static int slcd_setcontrast(uint8_t contrast)
     }
 
   regval = getreg32(STM32_LCD_FCR);
-  regval &= !LCD_FCR_CC_MASK;
+  regval &= ~LCD_FCR_CC_MASK;
   regval |= contrast << LCD_FCR_CC_SHIFT;
   putreg32(regval, STM32_LCD_FCR);
 
