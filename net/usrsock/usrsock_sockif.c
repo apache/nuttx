@@ -98,43 +98,6 @@ static int usrsock_sockif_setup(FAR struct socket *psock, int protocol)
   int type = psock->s_type;
   int ret;
 
-#ifdef CONFIG_NET_USRSOCK_NO_INET
-  if (domain == PF_INET)
-    {
-      return -ENETDOWN;
-    }
-#endif
-
-#ifdef CONFIG_NET_USRSOCK_NO_INET6
-  if (domain == PF_INET6)
-    {
-      return -ENETDOWN;
-    }
-#endif
-
-  if (domain == PF_INET || domain == PF_INET6)
-    {
-#ifndef CONFIG_NET_USRSOCK_UDP
-      if (type == SOCK_DGRAM)
-        {
-          return -ENETDOWN;
-        }
-#endif
-
-#ifndef CONFIG_NET_USRSOCK_TCP
-      if (type == SOCK_STREAM)
-        {
-          return -ENETDOWN;
-        }
-#endif
-    }
-  else
-    {
-#ifndef CONFIG_NET_USRSOCK_OTHER
-      return -ENETDOWN;
-#endif
-    }
-
   psock->s_type = PF_UNSPEC;
   psock->s_conn = NULL;
 
