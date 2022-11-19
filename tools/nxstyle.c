@@ -359,6 +359,140 @@ static const char *g_white_list[] =
   "RTOS_SetThreadRegList",
   "RTOS_UpdateThreads",
 
+  /* Ref:
+   * sim/posix/sim_x11eventloop.c
+   */
+
+  "Display",
+  "Button1Mask",
+  "Button2Mask",
+  "Button3Mask",
+  "Button1",
+  "Button2",
+  "Button3",
+  "XEvent",
+  "XPending",
+  "XNextEvent",
+  "KeyPress",
+  "KeyRelease",
+  "MotionNotify",
+  "ButtonPress",
+  "ButtonRelease",
+  "XLookupKeysym",
+
+  /* Ref:
+   * sim/posix/sim_x11framebuffer.c
+   */
+
+  "Window",
+  "XShmSegmentInfo",
+  "XImage",
+  "XGCValues",
+  "XTextProperty",
+  "XSizeHints",
+  "XOpenDisplay",
+  "XCreateSimpleWindow",
+  "DefaultRootWindow",
+  "XStringListToTextProperty",
+  "XSetWMProperties",
+  "XMapWindow",
+  "XSelectInput",
+  "XAllowEvents",
+  "XGrabButton",
+  "XCreateGC",
+  "XSetErrorHandler",
+  "XSync",
+  "XShmDetach",
+  "XDestroyImage",
+  "XUngrabButton",
+  "XCloseDisplay",
+  "XShmQueryExtension",
+  "XShmCreateImage",
+  "XShmAttach",
+  "DefaultVisual",
+  "XCreateImage",
+  "XGetWindowAttributes",
+  "DefaultColormap",
+  "XAllocColor",
+  "XShmPutImage",
+  "XPutImage",
+  "Colormap",
+  "DefaultScreen",
+  "BlackPixel",
+  "PSize",
+  "PMinSize",
+  "PMaxSize",
+  "ButtonPressMask",
+  "ButtonReleaseMask",
+  "PointerMotionMask",
+  "KeyPressMask",
+  "KeyReleaseMask",
+  "ButtonMotionMask",
+  "GrabModeAsync",
+  "GCGraphicsExposures",
+  "XErrorEvent",
+  "AnyModifier",
+  "None",
+  "Status",
+  "DoGreen",
+  "DoRed",
+  "DoBlue",
+  "ZPixmap",
+  "readOnly",
+  "XWindowAttributes",
+  "XColor",
+  "AsyncBoth",
+  "CurrentTime",
+
+  /* Ref:
+   * sim/posix/sim_deviceimage.c
+   */
+
+  "inflateInit",
+  "inflateEnd",
+  "Bytef",
+
+  /* Ref:
+   * sim/posix/sim_hostmemory.c
+   */
+
+  "CreateFileMapping",
+  "MapViewOfFile",
+  "CloseHandle",
+  "UnmapViewOfFile",
+
+  /* Ref:
+   * sim/posix/sim_hostmisc.c
+   */
+
+  "CaptureStackBackTrace",
+
+  /* Ref:
+   * sim/posix/sim_hosttime.c
+   */
+
+  "GetSystemTimeAsFileTime",
+  "QueryPerformanceFrequency",
+  "QueryPerformanceCounter",
+  "CreateWaitableTimer",
+  "SetWaitableTimer",
+  "WaitForSingleObject",
+  "dwHighDateTime",
+  "dwLowDateTime",
+  "QuadPart",
+
+  /* Ref:
+   * sim/posix/sim_simuart.c
+   */
+
+  "GetStdHandle",
+  "GetConsoleMode",
+  "SetConsoleMode",
+  "WriteConsole",
+  "ReadConsole",
+  "FlushConsoleInputBuffer",
+  "GetNumberOfConsoleInputEvents",
+
   NULL
 };
 
