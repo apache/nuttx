@@ -407,8 +407,6 @@ static inline void
 static inline void
               stm32_seteptxaddr(uint8_t epno, uint16_t addr);
 static inline void
-              stm32_setstatusout(uint8_t epno);
-static inline void
               stm32_clrstatusout(uint8_t epno);
 static void   stm32_clrrxdtog(uint8_t epno);
 static void   stm32_clrtxdtog(uint8_t epno);
@@ -919,26 +917,6 @@ static inline void stm32_seteptype(uint8_t epno, uint16_t type)
   regval &= EPR_NOTOG_MASK;
   regval &= ~USB_EPR_EPTYPE_MASK;
   regval |= type;
-  stm32_putreg(regval, epaddr);
-}
-
-/****************************************************************************
- * Name: stm32_setstatusout
- ****************************************************************************/
-
-static inline void stm32_setstatusout(uint8_t epno)
-{
-  uint32_t epaddr = STM32_USB_EPR(epno);
-  uint16_t regval;
-
-  /* For a BULK endpoint the EP_KIND bit is used to enabled double buffering;
-   * for a CONTROL endpoint, it is set to indicate that a status OUT
-   * transaction is expected.  The bit is not used with out endpoint types.
-   */
-
-  regval  = stm32_getreg(epaddr);
-  regval &= EPR_NOTOG_MASK;
-  regval |= USB_EPR_EP_KIND;
   stm32_putreg(regval, epaddr);
 }
 
