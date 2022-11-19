@@ -49,8 +49,14 @@ config NET_USRSOCK_TCP
 	default n
 	select NET_TCP_NO_STACK
 
-config NET_USRSOCK_OTHER
-	bool "Enable other protocol families in addition of INET & INET6"
+config NET_USRSOCK_ICMP
+	bool "User-space daemon provides ICMP sockets"
+	select NET_ICMP_NO_STACK
+	default n
+
+config NET_USRSOCK_ICMPv6
+	bool "User-space daemon provides ICMPv6 sockets"
+	select NET_ICMPv6_NO_STACK
 	default n
 
 endif # NET_USRSOCK
