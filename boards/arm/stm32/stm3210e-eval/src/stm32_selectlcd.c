@@ -115,8 +115,8 @@ void stm32_selectlcd(void)
 
   /* Bank4 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(1) | FSMC_BTR_ADDHLD(0) |
-           FSMC_BTR_DATAST(2) | FSMC_BTR_BUSTURN(0) |
+  putreg32(FSMC_BTR_ADDSET(1) | FSMC_BTR_ADDHLD(1) |
+           FSMC_BTR_DATAST(2) | FSMC_BTR_BUSTURN(1) |
            FSMC_BTR_CLKDIV(1) | FSMC_BTR_DATLAT(2) |
            FSMC_BTR_ACCMODA, STM32_FSMC_BTR4);
 
