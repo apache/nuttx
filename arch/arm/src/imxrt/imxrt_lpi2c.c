@@ -1159,11 +1159,13 @@ imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_IMXRT_LPI2C_DMA
 static inline uint32_t
 imxrt_lpi2c_getenabledints(struct imxrt_lpi2c_priv_s *priv)
 {
   return imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MIER_OFFSET);
 }
+#endif
 
 /****************************************************************************
  * Name: imxrt_lpi2c_isr_process
