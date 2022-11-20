@@ -242,8 +242,6 @@ static void mallinfo_handler(FAR void *ptr, size_t size, int used,
     }
 }
 
-#if CONFIG_MM_BACKTRACE >= 0
-
 /****************************************************************************
  * Name: mallinfo_task_handler
  ****************************************************************************/
@@ -251,18 +249,34 @@ static void mallinfo_handler(FAR void *ptr, size_t size, int used,
 static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
                                   FAR void *user)
 {
+#if CONFIG_MM_BACKTRACE >= 0
   FAR struct memdump_backtrace_s *dump;
+#endif
   FAR struct mallinfo_task *info = user;
 
+#if CONFIG_MM_BACKTRACE >= 0
   size -= sizeof(struct memdump_backtrace_s);
   dump = ptr + size;
-  if (used && dump->pid == info->pid)
+
+  if (used)
+    {
+#if CONFIG_MM_BACKTRACE < 0
+      if (info->pid = -1)
+#else
+      if (info->pid == -1 || info->pid == dump->pid)
+#endif
+        {
+          info->aordblks++;
+          info->uordblks += size;
+        }
+    }
+  else if (info->pid == -2)
     {
       info->aordblks++;
       info->uordblks += size;
     }
-}
 #endif
+}
 
 /****************************************************************************
  * Name: mm_lock
@@ -350,7 +364,7 @@ static void mm_unlock(FAR struct mm_heap_s *heap)
 static void memdump_handler(FAR void *ptr, size_t size, int used,
                             FAR void *user)
 {
-  FAR struct memdump_info_s *info = user;
+  pid_t pid = *(FAR pid_t *)user;
 #if CONFIG_MM_BACKTRACE >= 0
   FAR struct memdump_backtrace_s *dump;
 
@@ -361,9 +375,9 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (info->pid == -1)
+      if (pid == -1)
 #else
-      if (info->pid == -1 || dump->pid == info->pid)
+      if (pid == -1 || dump->pid == pid)
 #endif
         {
 #if CONFIG_MM_BACKTRACE < 0
@@ -388,14 +402,10 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
                 (int)dump->pid, size, MM_PTR_FMT_WIDTH,
                 ptr, buf);
 #endif
-          info->blks++;
-          info->size += size;
         }
     }
-  else if (info->pid <= -2)
+  else if (pid <= -2)
     {
-      info->blks++;
-      info->size += size;
       syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
     }
 }
@@ -839,7 +849,6 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   return OK;
 }
 
-#if CONFIG_MM_BACKTRACE >= 0
 int mm_mallinfo_task(FAR struct mm_heap_s *heap,
                      FAR struct mallinfo_task *info)
 {
@@ -867,7 +876,6 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: mm_memdump
@@ -905,20 +913,19 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
       syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
     }
 
-  info.blks = 0;
-  info.size = 0;
-  info.pid  = pid;
 #if CONFIG_MM_REGIONS > 1
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
       DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
-                     memdump_handler, &info);
+                     memdump_handler, &pid);
       mm_unlock(heap);
     }
 #undef region
 
+  info.pid = pid;
+  mm_mallinfo_task(heap, &info);
   syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
   syslog(LOG_INFO, "%12d%12d\n", info.blks, info.size);
 }
