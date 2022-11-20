@@ -476,8 +476,8 @@ static int stm32_settimeout(struct timer_lowerhalf_s *lower,
       period = (uint32_t) timeout;
     }
 
-  tmrinfo("  clock=%lu period=%lu maxtimeout=%lu\n", clock, period,
-          (uint32_t)maxtimeout);
+  tmrinfo("  clock=%" PRIu32 " period=%" PRIu32 " maxtimeout=%" PRIu32 "\n",
+          clock, period, (uint32_t)maxtimeout);
   STM32_TIM_SETCLOCK(priv->tim, clock);
   STM32_TIM_SETPERIOD(priv->tim, period);
 
