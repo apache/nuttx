@@ -143,6 +143,10 @@ FAR struct nxterm_state_s *
   return (NXTERM)priv;
 
 errout:
+  nxmutex_destroy(&priv->lock);
+#ifdef CONFIG_NXTERM_NXKBDIN
+  nxsem_destroy(&priv->waitsem);
+#endif
   kmm_free(priv);
   return NULL;
 }
