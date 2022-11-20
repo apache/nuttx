@@ -75,7 +75,6 @@ static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
     }
 }
 
-#if CONFIG_MM_BACKTRACE >= 0
 static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
                                   FAR void *arg)
 {
@@ -86,14 +85,22 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
   if ((node->preceding & MM_ALLOC_BIT) != 0)
     {
       DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
-      if (node->pid == info->pid)
+#if CONFIG_MM_BACKTRACE < 0
+      if (info->pid == -1)
+#else
+      if (info->pid == -1 || node->pid == info->pid)
+#endif
         {
           info->aordblks++;
           info->uordblks += node->size;
         }
     }
+  else if (info->pid == -2)
+    {
+      info->aordblks++;
+      info->uordblks += node->size;
+    }
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -137,7 +144,6 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
  *
  ****************************************************************************/
 
-#if CONFIG_MM_BACKTRACE >= 0
 int mm_mallinfo_task(FAR struct mm_heap_s *heap,
                      FAR struct mallinfo_task *info)
 {
@@ -148,4 +154,3 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
   mm_foreach(heap, mallinfo_task_handler, info);
   return OK;
 }
-#endif
