@@ -3,7 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if NET_IPv6
 menu "ICMPv6 Networking Support"
 
 config NET_ICMPv6
@@ -213,4 +212,3 @@ endif # NET_ICMPv6_SOCKET
 
 endif # NET_ICMPv6 && !NET_ICMPv6_NO_STACK
 endmenu # ICMPv6 Networking Support
-endif # NET_IPv6

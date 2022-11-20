@@ -3,7 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if NET_IPv4
 menu "ICMP Networking Support"
 
 config NET_ICMP
@@ -44,4 +43,3 @@ config NET_ICMP_NPOLLWAITERS
 endif # NET_ICMP_SOCKET
 endif # NET_ICMP && !NET_ICMP_NO_STACK
 endmenu # ICMP Networking Support
-endif # NET_IPv4
