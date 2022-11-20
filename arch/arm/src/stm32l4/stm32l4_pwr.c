@@ -47,13 +47,6 @@ static inline void stm32l4_pwr_putreg(uint8_t offset, uint16_t value)
   putreg32((uint32_t)value, STM32L4_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32l4_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
-                                         uint16_t setbits)
-{
-  modifyreg32(STM32L4_PWR_BASE + (uint32_t)offset,
-              (uint32_t)clearbits, (uint32_t)setbits);
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
