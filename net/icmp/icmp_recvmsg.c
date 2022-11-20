@@ -449,6 +449,8 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           icmp_callback_free(dev, conn, state.recv_cb);
         }
 
+      nxsem_destroy(&state.recv_sem);
+
       /* Return the negated error number in the event of a failure, or the
        * number of bytes received on success.
        */

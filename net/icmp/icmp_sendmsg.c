@@ -445,6 +445,8 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       icmp_callback_free(dev, conn, state.snd_cb);
     }
 
+  nxsem_destroy(&state.snd_sem);
+
   net_unlock();
 
   /* Return the negated error number in the event of a failure, or the
