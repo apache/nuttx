@@ -195,7 +195,7 @@ static uint32_t stm32_wm8994_sampleratecb(struct i2s_dev_s *dev,
         }
     }
 
-  audinfo("i2s PLL configured for samplerate %lu\n", rate);
+  audinfo("i2s PLL configured for samplerate %" PRIu32 "\n", rate);
   return frequency;
 }
 
