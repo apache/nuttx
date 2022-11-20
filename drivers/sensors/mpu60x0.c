@@ -576,11 +576,13 @@ static inline int __mpu_write_pwr_mgmt_2(FAR struct mpu_dev_s *dev,
   return __mpu_write_reg(dev, PWR_MGMT_2, &val, sizeof(val));
 }
 
+#ifdef CONFIG_MPU60X0_SPI
 static inline int __mpu_write_user_ctrl(FAR struct mpu_dev_s *dev,
                                         uint8_t val)
 {
   return __mpu_write_reg(dev, USER_CTRL, &val, sizeof(val));
 }
+#endif
 
 /* __mpu_write_gyro_config() :
  *
