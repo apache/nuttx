@@ -403,6 +403,7 @@ static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
                          rpmsgdev_ept_cb, rpmsgdev_ns_unbind);
   if (ret < 0)
     {
+      nxmutex_destroy(&server->lock);
       kmm_free(server);
     }
 }
