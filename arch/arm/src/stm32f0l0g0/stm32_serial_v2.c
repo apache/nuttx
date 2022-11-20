@@ -497,18 +497,6 @@ static inline void up_serialout(struct up_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: up_serialmod
- ****************************************************************************/
-
-static inline void up_serialmod(struct up_dev_s *priv, int offset,
-                                uint32_t clrbits, uint32_t setbits)
-{
-  uint32_t addr = priv->usartbase + offset;
-  uint32_t regval = (getreg32(addr) & ~clrbits) | setbits;
-  putreg32(regval, addr);
-}
-
-/****************************************************************************
  * Name: up_setusartint
  ****************************************************************************/
 
