@@ -42,6 +42,7 @@ typedef void (*boot_call_t)(void);
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
 static inline void rcc_reset(void)
 {
   uint32_t regval;
@@ -110,6 +111,7 @@ static inline void apb_reset(void)
   putreg32(0, STM32L4_RCC_AHB2RSTR);
   putreg32(0, STM32L4_RCC_AHB3RSTR);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
