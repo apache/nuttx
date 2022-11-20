@@ -1846,6 +1846,8 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
       bt_buf_release(buf->u.hci.sync);
     }
 
+  nxsem_destroy(&sync_sem);
+
   return ret;
 }
 
