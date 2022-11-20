@@ -816,6 +816,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
       if (!rwb->wrbuffer)
         {
           ferr("Write buffer kmm_malloc(%" PRIu32 ") failed\n", allocsize);
+          nxmutex_destroy(&rwb->wrlock);
           return -ENOMEM;
         }
 
@@ -844,6 +845,19 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
         {
           ferr("Read-ahead buffer kmm_malloc(%" PRIu32 ") failed\n",
           allocsize);
+          nxmutex_destroy(&rwb->rhlock);
+#ifdef CONFIG_DRVR_WRITEBUFFER
+          if (rwb->wrmaxblocks > 0)
+            {
+              nxmutex_destroy(&rwb->wrlock);
+            }
+
+          if (rwb->wrbuffer != NULL)
+            {
+              kmm_free(rwb->wrbuffer);
+            }
+#endif
+
           return -ENOMEM;
         }
 
