@@ -554,27 +554,6 @@ static inline void spi_rx_mode(struct stm32_spidev_s *priv, bool enable)
 }
 
 /****************************************************************************
- * Name: spi_getreg8
- *
- * Description:
- *   Get the contents of the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *
- * Returned Value:
- *   The contents of the 8-bit register
- *
- ****************************************************************************/
-
-static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
-                                  uint8_t offset)
-{
-  return getreg8(priv->spibase + offset);
-}
-
-/****************************************************************************
  * Name: spi_putreg8
  *
  * Description:
@@ -587,11 +566,13 @@ static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
  *
  ****************************************************************************/
 
+#ifdef HAVE_IP_SPI_V2
 static inline void spi_putreg8(struct stm32_spidev_s *priv,
                                uint8_t offset, uint8_t value)
 {
   putreg8(value, priv->spibase + offset);
 }
+#endif
 
 /****************************************************************************
  * Name: spi_readword
