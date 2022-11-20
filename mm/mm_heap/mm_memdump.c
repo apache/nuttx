@@ -47,28 +47,21 @@
  * Private Types
  ****************************************************************************/
 
-struct memdump_info_s
-{
-  pid_t pid;
-  int   blks;
-  int   size;
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 {
-  FAR struct memdump_info_s *info = arg;
+  pid_t pid = *(FAR pid_t *)arg;
 
   if ((node->preceding & MM_ALLOC_BIT) != 0)
     {
       DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
-      if (info->pid == -1)
+      if (pid == -1)
 #else
-      if (info->pid == -1 || node->pid == info->pid)
+      if (pid == -1 || node->pid == pid)
 #endif
         {
 #if CONFIG_MM_BACKTRACE < 0
@@ -95,8 +88,6 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                  (int)node->pid, (size_t)node->size, MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE), buf);
 #endif
-          info->blks++;
-          info->size += node->size;
         }
     }
   else
@@ -112,10 +103,8 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                   fnode->flink->size == 0 ||
                   fnode->flink->size >= fnode->size);
 
-      if (info->pid <= -2)
+      if (pid <= -2)
         {
-          info->blks++;
-          info->size += node->size;
           syslog(LOG_INFO, "%12zu%*p\n",
                  (size_t)node->size, MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
@@ -140,7 +129,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 
 void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 {
-  struct memdump_info_s info;
+  struct mallinfo_task info;
 
   if (pid >= -1)
     {
@@ -158,11 +147,10 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
       syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
     }
 
-  info.blks = 0;
-  info.size = 0;
-  info.pid  = pid;
-  mm_foreach(heap, memdump_handler, &info);
+  mm_foreach(heap, memdump_handler, &pid);
 
+  info.pid = pid;
+  mm_mallinfo_task(heap, &info);
   syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
-  syslog(LOG_INFO, "%12d%12d\n", info.blks, info.size);
+  syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
 }
