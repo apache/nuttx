@@ -482,7 +482,7 @@ static void wm8994_setvolume(FAR struct wm8994_dev_s *priv, uint16_t volume,
     {
       leftlevel = volume;
     }
-  else if (priv->balance == b16ONE)
+  else if (priv->balance == (b16ONE - 1))
     {
       leftlevel = 0;
     }
