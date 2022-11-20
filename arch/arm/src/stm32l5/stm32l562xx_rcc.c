@@ -68,50 +68,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rcc_reset
- *
- * Description:
- *   Reset the RCC clock configuration to the default reset state
- *
- ****************************************************************************/
-
-static inline void rcc_reset(void)
-{
-  uint32_t regval;
-
-  /* Enable the multispeed internal clock (MSI) @ 4MHz */
-
-  regval = getreg32(STM32L5_RCC_CR);
-  regval &= ~RCC_CR_MSIRANGE_MASK;
-  regval |= RCC_CR_MSION | RCC_CR_MSIRANGE_4M;
-  putreg32(regval, STM32L5_RCC_CR);
-
-  /* Reset CFGR register */
-
-  putreg32(0x00000000, STM32L5_RCC_CFGR);
-
-  /* Reset HSION, HSEON, CSSON and PLLON bits */
-
-  regval  = getreg32(STM32L5_RCC_CR);
-  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_CSSON | RCC_CR_PLLON);
-  putreg32(regval, STM32L5_RCC_CR);
-
-  /* Reset PLLCFGR register to reset default */
-
-  putreg32(RCC_PLLCFG_RESET, STM32L5_RCC_PLLCFG);
-
-  /* Reset HSEBYP bit */
-
-  regval  = getreg32(STM32L5_RCC_CR);
-  regval &= ~RCC_CR_HSEBYP;
-  putreg32(regval, STM32L5_RCC_CR);
-
-  /* Disable all interrupts */
-
-  putreg32(0x00000000, STM32L5_RCC_CIER);
-}
-
-/****************************************************************************
  * Name: rcc_enableahb1
  *
  * Description:
