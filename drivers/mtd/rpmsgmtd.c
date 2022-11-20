@@ -1109,6 +1109,7 @@ fail_with_rpmsg:
 
 fail:
   nxsem_destroy(&dev->wait);
+  nxmutex_destroy(&dev->geolock);
   kmm_free(dev);
   return ret;
 }
