@@ -44,9 +44,13 @@ endif
 # ICMP utilities
 
 ifeq ($(CONFIG_NET_ICMP),y)
-NET_CSRCS += net_icmpchksum.c
+  ifneq ($(CONFIG_NET_ICMP_NO_STACK),y)
+    NET_CSRCS += net_icmpchksum.c
+  endif
 else ifeq ($(CONFIG_NET_ICMPv6),y)
-NET_CSRCS += net_icmpchksum.c
+  ifneq ($(CONFIG_NET_ICMPv6_NO_STACK),y)
+    NET_CSRCS += net_icmpchksum.c
+  endif
 endif
 
 # Bound device find
