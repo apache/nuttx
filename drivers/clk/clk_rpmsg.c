@@ -485,18 +485,17 @@ static int64_t clk_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
   cookie.result  = -EIO;
 
   ret = rpmsg_send_nocopy(ept, msg, len);
-  if (ret < 0)
+  if (ret >= 0)
     {
-      return ret;
+      ret = nxsem_wait_uninterruptible(&cookie.sem);
+      if (ret >= 0)
+        {
+          ret = cookie.result;
+        }
     }
 
-  ret = nxsem_wait_uninterruptible(&cookie.sem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return cookie.result;
+  nxsem_destroy(&cookie.sem);
+  return ret;
 }
 
 static bool clk_rpmsg_server_match(FAR struct rpmsg_device *rdev,
