@@ -51,11 +51,11 @@
  ****************************************************************************/
 
 int pthread_attr_setstack(FAR pthread_attr_t *attr,
-                          FAR void *stackaddr, long stacksize)
+                          FAR void *stackaddr, size_t stacksize)
 {
   int ret;
 
-  linfo("attr=%p stackaddr=%p stacksize=%ld\n",
+  linfo("attr=%p stackaddr=%p stacksize=%zu\n",
         attr, stackaddr, stacksize);
 
   if (!attr || !stackaddr || stacksize < PTHREAD_STACK_MIN)
