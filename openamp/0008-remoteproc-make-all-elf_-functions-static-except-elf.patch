@@ -1,7 +1,7 @@
 From bcd10078fe4266cadbc437b130832dd90c00df33 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 15 Nov 2019 19:01:49 +0800
-Subject: [PATCH 8/9] remoteproc: make all elf_* functions static except
+Subject: [PATCH 08/10] remoteproc: make all elf_* functions static except
  elf_identify
 
 it's the best practice to reduce the name scope as small as possible
