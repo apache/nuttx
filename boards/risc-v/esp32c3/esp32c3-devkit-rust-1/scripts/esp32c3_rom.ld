@@ -2027,6 +2027,7 @@ __umoddi3 = 0x400008bc;
 __umodsi3 = 0x400008c0;
 __unorddf2 = 0x400008c4;
 __unordsf2 = 0x400008c8;
+syscall_table_ptr = 0x3fcdffe0;
 
 /***************************************
  Redefine functions

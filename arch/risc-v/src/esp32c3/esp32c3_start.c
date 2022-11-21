@@ -47,6 +47,7 @@
 #endif
 #include "hardware/esp32c3_cache_memory.h"
 #include "hardware/extmem_reg.h"
+#include "rom/esp32c3_libc_stubs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -292,6 +293,10 @@ void __esp32c3_start(void)
     {
       *dest++ = 0;
     }
+
+  /* Setup the syscall table needed by the ROM code */
+
+  setup_syscall_table();
 
   showprogress('B');
 
