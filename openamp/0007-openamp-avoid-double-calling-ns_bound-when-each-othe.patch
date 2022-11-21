@@ -1,7 +1,7 @@
 From 0e77783658066c02903cc6693460f3bb577e3030 Mon Sep 17 00:00:00 2001
 From: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
 Date: Mon, 11 Apr 2022 13:31:35 +0800
-Subject: [PATCH 7/9] openamp: avoid double calling ns_bound when each other
+Subject: [PATCH 07/10] openamp: avoid double calling ns_bound when each other
  calls create_ept
 
 VELAPLATFO-1522

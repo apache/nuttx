@@ -1,7 +1,7 @@
 From ddc209c9475a2822ffe5d18441bd01718acdbc11 Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Fri, 29 Jul 2022 22:57:23 +0800
-Subject: [PATCH 4/9] openamp: add new ops notify_wait() support
+Subject: [PATCH 04/10] openamp: add new ops notify_wait() support
 
 This can avoid looping check tx buffer
 

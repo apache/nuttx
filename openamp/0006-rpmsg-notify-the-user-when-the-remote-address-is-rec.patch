@@ -1,7 +1,7 @@
 From a2c9d79f9b77f057d89ede1395559c0645169b7a Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Tue, 19 Oct 2021 19:45:14 +0800
-Subject: [PATCH 6/9] rpmsg: notify the user when the remote address is
+Subject: [PATCH 06/10] rpmsg: notify the user when the remote address is
  received
 
 Change-Id: I2f0601fb38944e0cfb8888aa397740161b159e40

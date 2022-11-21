@@ -1,7 +1,8 @@
 From 5a9d63c1ce2878aa792c49a1205ebb73dbe6258f Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Mon, 28 Feb 2022 16:31:54 +0800
-Subject: [PATCH 5/9] rpmsg_virtio: don't need check status when get_tx_payload
+Subject: [PATCH 05/10] rpmsg_virtio: don't need check status when
+ get_tx_payload
 
 VELAOS-21
 

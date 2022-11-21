@@ -44,6 +44,7 @@ ifeq ($(wildcard open-amp/.git),)
 	$(Q) patch -p0 < 0007-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
 	$(Q) patch -p0 < 0008-remoteproc-make-all-elf_-functions-static-except-elf.patch
 	$(Q) patch -p0 < 0009-Fix-warn-declaration-of-vring_rsc-shadows-a-previous.patch
+	$(Q) patch -p0 < 0010-rptun-fix-rptun-don-t-wait-issue-when-get-tx-patyloa.patch
 endif
 
 .openamp_headers: open-amp.zip
