@@ -4,6 +4,10 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 11.0.x  | :heavy_check_mark: |
+| 10.3.x  | :heavy_check_mark: |
+| 10.2.x  | :heavy_check_mark: |
+| 10.1.x  | :heavy_check_mark: |
 | 10.0.x  | :heavy_check_mark: |
 | 9.1.x   | :heavy_check_mark: |
 | < 9.1   | :x:                |
