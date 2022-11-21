@@ -6,7 +6,7 @@
 menu "ARP Configuration"
 
 config NET_ARP
-	bool
+	bool "Address Resolution Protocol"
 	default y
 	depends on NET_ETHERNET && NET_IPv4
 	---help---
