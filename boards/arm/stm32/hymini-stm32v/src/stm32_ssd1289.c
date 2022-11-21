@@ -307,7 +307,7 @@ static void init_lcd_backlight(void)
 
   /* Select the output polarity level == HIGH */
 
-  ccer &= !ATIM_CCER_CC2P;
+  ccer &= ~ATIM_CCER_CC2P;
 
   /* Enable channel 2 */
 
