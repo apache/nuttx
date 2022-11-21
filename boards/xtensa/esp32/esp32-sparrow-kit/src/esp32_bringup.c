@@ -80,6 +80,10 @@
 #  include "esp32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_LTR308
+#  include "esp32_ltr308.h"
+#endif
+
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
@@ -339,6 +343,17 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_LTR308
+  /* Try to register LTR308 device in I2C0 */
+
+  ret = board_ltr308_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize LTR308 driver: %d\n", ret);
     }
 #endif
 
