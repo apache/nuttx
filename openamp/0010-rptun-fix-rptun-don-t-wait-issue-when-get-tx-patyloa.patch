@@ -1,0 +1,28 @@
+From 160e7ee44228668074347226e9c0d9068c480d98 Mon Sep 17 00:00:00 2001
+From: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
+Date: Thu, 11 Aug 2022 21:54:53 +0800
+Subject: [PATCH 10/10] rptun: fix rptun don't wait issue when get tx patyload
+ buffer
+
+Signed-off-by: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 49817799..06c6890b 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -372,8 +372,6 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
+ 		status = rpmsg_virtio_notify_wait(rvdev, rvdev->rvq);
+ 		if (status == RPMSG_SUCCESS)
+ 			continue;
+-		else if (status != RPMSG_ERR_NXIO)
+-			break;
+ 
+ 		metal_sleep_usec(RPMSG_TICKS_PER_INTERVAL);
+ 		tick_count--;
+-- 
+2.25.1
+

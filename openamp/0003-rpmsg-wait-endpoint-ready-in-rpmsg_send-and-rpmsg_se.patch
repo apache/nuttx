@@ -1,7 +1,7 @@
 From 931cd95ab99550befa75703cc36d5e6f6964b63e Mon Sep 17 00:00:00 2001
 From: Guiding Li <liguiding@pinecone.net>
 Date: Wed, 20 Feb 2019 11:36:57 +0800
-Subject: [PATCH 3/9] rpmsg: wait endpoint ready in rpmsg_send and
+Subject: [PATCH 03/10] rpmsg: wait endpoint ready in rpmsg_send and
  rpmsg_send_nocopy
 
 because the remote need time to return the destination address

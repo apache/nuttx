@@ -1,8 +1,17 @@
-From 3af4aed5e9f7d0299ded056adcdd1259fc44f64c Mon Sep 17 00:00:00 2001
+From e33b3fa0b6f111b54648f682102266b077a0c285 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Sun, 6 Nov 2022 00:51:35 +0800
-Subject: [PATCH 9/9] Fix warn: declaration of 'vring_rsc' shadows a previous
+Subject: [PATCH 09/10] Fix warn: declaration of 'vring_rsc' shadows a previous
  local
+
+regressed by commit 03c80a13417f67f94852cf7d5cb160f1bdf8271e
+Author: Tammy Leino <tammy_leino@mentor.com>
+Date:   Mon Sep 26 08:14:35 2022 -0700
+
+    handle_vdev_rsc must return error if notifyid cannot be assigned
+
+    Updated handle_vdev_rsc to return error if a unique id cannot be assigned
+    Signed-off-by: Tammy Leino <tammy_leino@mentor.com>
 
 Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
 ---
