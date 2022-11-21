@@ -1680,6 +1680,14 @@ config ARCH_BOARD_QEMU_ARMV8A
 		This options selects support for NuttX on the QEMU ARMv8a + virt
 		board featuring the qemu ARMv8a CPUs.
 
+config ARCH_BOARD_PINEPHONE
+	bool "PINE64 PinePhone"
+	depends on ARCH_CHIP_A64
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on PINE64 PinePhone based
+		on Allwinner A64 SoC with ARM Cortex-A53.
+
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
 	depends on ARCH_CHIP_ATSAMA5D27
@@ -2746,6 +2754,7 @@ config ARCH_BOARD
 	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "qemu-armv8a"              if ARCH_BOARD_QEMU_ARMV8A
+	default "pinephone"                if ARCH_BOARD_PINEPHONE
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -2932,6 +2941,9 @@ source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
+endif
+if ARCH_BOARD_PINEPHONE
+source "boards/arm64/a64/pinephone/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"

@@ -335,6 +335,16 @@ AM335x are supported by NuttX:
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/am335x/beaglebone-black/README.txt>`__
    file for further, up-to-date information.
 
+ARM Cortex-A53
+==============
+
+Allwinner A64
+-------------
+
+The basic port has been completed for the following Allwinner A64 board:
+
+-  **PINE64 PinePhone**: Refer to :doc:`PINE64 PinePhone </platforms/arm/a64/boards/pinephone/index>` for further information.
+
 ARM Cortex-A9
 =============
 
