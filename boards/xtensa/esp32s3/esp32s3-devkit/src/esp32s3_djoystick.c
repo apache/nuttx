@@ -208,6 +208,7 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
           ret = irq_attach(irq, djoy_interrupt, arg);
           if (ret < 0)
             {
+              leave_critical_section(flags);
               syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
               return;
             }

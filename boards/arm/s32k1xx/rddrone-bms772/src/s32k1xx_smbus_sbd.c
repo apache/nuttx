@@ -219,6 +219,7 @@ static ssize_t smbus_sbd_read(struct file *filep, char *buffer,
        * nothing was read.
        */
 
+      leave_critical_section(flags);
       return 0;
     }
 
@@ -316,6 +317,7 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
        * nothing was written.
        */
 
+      leave_critical_section(flags);
       return 0;
     }
 
