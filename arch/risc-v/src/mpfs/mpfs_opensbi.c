@@ -225,7 +225,7 @@ static const struct sbi_platform platform =
 
 /* This must go into l2_scratchpad region, starting at 0x0a000000. */
 
-sbi_scratch_holder_t g_scratches[0] \
+sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
                __attribute__((section(".l2_scratchpad")));
 
 /****************************************************************************
