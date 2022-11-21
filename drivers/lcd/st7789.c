@@ -455,11 +455,12 @@ static void st7789_wrram(FAR struct st7789_dev_s *dev,
 
   st7789_sendcmd(dev, ST7789_RAMWR);
 
-  st7789_select(dev->spi, 8);
+  st7789_select(dev->spi, ST7789_BYTESPP * 8);
 
   for (i = 0; i < count; i++)
     {
-      SPI_SNDBLOCK(dev->spi, buff + (i * (size + skip)), size);
+      SPI_SNDBLOCK(dev->spi, buff + (i * (size + skip)),
+                   size / ST7789_BYTESPP);
     }
 
   st7789_deselect(dev->spi);
@@ -535,7 +536,7 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   st7789_setarea(priv, col, row, col + npixels - 1, row);
-  st7789_wrram(priv, buffer, npixels, 0, 1);
+  st7789_wrram(priv, buffer, npixels * ST7789_BYTESPP, 0, 1);
 
   return OK;
 }
@@ -568,7 +569,7 @@ static int st7789_putarea(FAR struct lcd_dev_s *dev,
   FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
   size_t cols = col_end - col_start + 1;
   size_t rows = row_end - row_start + 1;
-  size_t row_size = cols * (priv->bpp >> 3);
+  size_t row_size = cols * ST7789_BYTESPP;
 
   ginfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
          row_start, row_end, col_start, col_end);
