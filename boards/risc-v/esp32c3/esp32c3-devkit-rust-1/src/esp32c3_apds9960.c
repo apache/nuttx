@@ -117,6 +117,7 @@ static int apds9960_irq_attach(struct apds9960_config_s *state,
   ret = irq_attach(irq, isr, arg);
   if (ret < 0)
     {
+      leave_critical_section(flags);
       syslog(LOG_ERR, "ERROR: apds9960_irq_attach() failed: %d\n", ret);
       return ret;
     }

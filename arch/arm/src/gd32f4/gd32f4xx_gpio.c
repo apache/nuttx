@@ -306,6 +306,7 @@ int gd32_gpio_config(uint32_t cfgset)
   port = (cfgset & GPIO_CFG_PORT_MASK) >> GPIO_CFG_PORT_SHIFT;
   if (port >= GD32_NGPIO_PORTS)
     {
+      leave_critical_section(flags);
       return -EINVAL;
     }
 
@@ -357,8 +358,8 @@ int gd32_gpio_config(uint32_t cfgset)
         break;
 
       default:
-      return -EINVAL;
-        break;
+        leave_critical_section(flags);
+        return -EINVAL;
     }
 
   regval  = getreg32(GD32_GPIO_CTL(port_base));
