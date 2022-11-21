@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_simuart.c
+ * arch/sim/src/sim/win/sim_hostuart.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,191 +22,121 @@
  * Included Files
  ****************************************************************************/
 
-#include <fcntl.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <termios.h>
-#include <poll.h>
-#include <errno.h>
-
-#include "sim_internal.h"
+#include <windows.h>
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct termios g_cooked;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: setrawmode
- ****************************************************************************/
-
-static void setrawmode(int fd)
-{
-  struct termios raw;
-
-  tcgetattr(fd, &raw);
-
-  /* Switch to raw mode */
-
-  raw.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
-                   ICRNL | IXON);
-  raw.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-  raw.c_cflag &= ~(CSIZE | PARENB);
-  raw.c_cflag |= CS8;
-
-  tcsetattr(fd, TCSANOW, &raw);
-}
-
-/****************************************************************************
- * Name: restoremode
- ****************************************************************************/
-
-static void restoremode(void)
-{
-  /* Restore the original terminal mode */
-
-  tcsetattr(0, TCSANOW, &g_cooked);
-}
+static HANDLE g_stdin_handle;
+static HANDLE g_stdout_handle;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: simuart_start
+ * Name: host_uart_start
  ****************************************************************************/
 
-void simuart_start(void)
+void host_uart_start(void)
 {
-  /* Get the current stdin terminal mode */
+  DWORD mode;
 
-  tcgetattr(0, &g_cooked);
-
-  /* Put stdin into raw mode */
-
-  setrawmode(0);
-
-  /* Restore the original terminal mode before exit */
-
-  atexit(restoremode);
-}
-
-/****************************************************************************
- * Name: simuart_open
- ****************************************************************************/
-
-int simuart_open(const char *pathname)
-{
-  int fd;
-
-  fd = open(pathname, O_RDWR | O_NONBLOCK);
-  if (fd >= 0)
+  g_stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
+  if (GetConsoleMode(g_stdin_handle, &mode))
     {
-      /* keep raw mode */
-
-      setrawmode(fd);
-    }
-  else
-    {
-      fd = -errno;
+      SetConsoleMode(g_stdin_handle, mode & ~(ENABLE_MOUSE_INPUT |
+                                              ENABLE_WINDOW_INPUT |
+                                              ENABLE_ECHO_INPUT |
+                                              ENABLE_LINE_INPUT));
+      FlushConsoleInputBuffer(g_stdin_handle);
     }
 
-  return fd;
+  g_stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 
 /****************************************************************************
- * Name: simuart_close
+ * Name: host_uart_open
  ****************************************************************************/
 
-void simuart_close(int fd)
+int host_uart_open(const char *pathname)
 {
-  close(fd);
+  return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: simuart_putc
+ * Name: host_uart_close
  ****************************************************************************/
 
-int simuart_putc(int fd, int ch)
+void host_uart_close(int fd)
 {
-  return write(fd, &ch, 1) == 1 ? ch : -1;
 }
 
 /****************************************************************************
- * Name: simuart_getc
+ * Name: host_uart_putc
  ****************************************************************************/
 
-int simuart_getc(int fd)
+int host_uart_putc(int fd, int ch)
 {
-  int ret;
+  DWORD nwritten;
+
+  if (WriteConsole(g_stdout_handle, &ch, 1, &nwritten, NULL))
+    {
+      return ch;
+    }
+
+  return -EIO;
+}
+
+/****************************************************************************
+ * Name: host_uart_getc
+ ****************************************************************************/
+
+int host_uart_getc(int fd)
+{
   unsigned char ch;
+  DWORD nread;
 
-  ret = read(fd, &ch, 1);
-  return ret < 0 ? ret : ch;
+  if (ReadConsole(g_stdin_handle, &ch, 1, &nread, 0))
+    {
+      return ch;
+    }
+
+  return -EIO;
 }
 
 /****************************************************************************
- * Name: simuart_getcflag
+ * Name: host_uart_getcflag
  ****************************************************************************/
 
-int simuart_getcflag(int fd, unsigned int *cflag)
+int host_uart_getcflag(int fd, unsigned int *cflag)
 {
-  struct termios t;
-  int ret;
-
-  ret = tcgetattr(fd, &t);
-  if (ret < 0)
-    {
-      ret = -errno;
-    }
-  else
-    {
-      *cflag = t.c_cflag;
-    }
-
-  return ret;
+  return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: simuart_setcflag
+ * Name: host_uart_setcflag
  ****************************************************************************/
 
-int simuart_setcflag(int fd, unsigned int cflag)
+int host_uart_setcflag(int fd, unsigned int cflag)
 {
-  struct termios t;
-  int ret;
-
-  ret = tcgetattr(fd, &t);
-  if (!ret)
-    {
-      t.c_cflag = cflag;
-      ret = tcsetattr(fd, TCSANOW, &t);
-    }
-
-  if (ret < 0)
-    {
-      ret = -errno;
-    }
-
-  return ret;
+  return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: simuart_checkc
+ * Name: host_uart_checkc
  ****************************************************************************/
 
-bool simuart_checkc(int fd)
+bool host_uart_checkc(int fd)
 {
-  struct pollfd pfd;
+  DWORD size;
 
-  pfd.fd     = fd;
-  pfd.events = POLLIN;
-  return poll(&pfd, 1, 0) == 1;
+  if (GetNumberOfConsoleInputEvents(g_stdin_handle, &size) && size > 1)
+    {
+      return true;
+    }
+
+  return false;
 }

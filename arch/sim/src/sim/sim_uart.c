@@ -257,7 +257,7 @@ static int tty_setup(struct uart_dev_s *dev)
 
   if (!dev->isconsole && priv->fd < 0)
     {
-      priv->fd = simuart_open(priv->path);
+      priv->fd = host_uart_open(priv->path);
       if (priv->fd < 0)
         {
           return priv->fd;
@@ -284,7 +284,7 @@ static void tty_shutdown(struct uart_dev_s *dev)
     {
       /* close file Description and reset fd */
 
-      simuart_close(priv->fd);
+      host_uart_close(priv->fd);
       priv->fd = -1;
     }
 }
@@ -348,12 +348,12 @@ static int tty_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       case TCGETS:
-        return simuart_getcflag(dev->isconsole ? 0 : priv->fd,
-                                &termiosp->c_cflag);
+        return host_uart_getcflag(dev->isconsole ? 0 : priv->fd,
+                                  &termiosp->c_cflag);
 
       case TCSETS:
-        return simuart_setcflag(dev->isconsole ? 0 : priv->fd,
-                               termiosp->c_cflag);
+        return host_uart_setcflag(dev->isconsole ? 0 : priv->fd,
+                                  termiosp->c_cflag);
     }
 #endif
 
@@ -375,7 +375,7 @@ static int tty_receive(struct uart_dev_s *dev, uint32_t *status)
   struct tty_priv_s *priv = dev->priv;
 
   *status = 0;
-  return simuart_getc(dev->isconsole ? 0 : priv->fd);
+  return host_uart_getc(dev->isconsole ? 0 : priv->fd);
 }
 
 /****************************************************************************
@@ -402,7 +402,7 @@ static bool tty_rxavailable(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  return simuart_checkc(dev->isconsole ? 0 : priv->fd);
+  return host_uart_checkc(dev->isconsole ? 0 : priv->fd);
 }
 
 /****************************************************************************
@@ -443,10 +443,10 @@ static void tty_send(struct uart_dev_s *dev, int ch)
 
   if (dev->isconsole && ch == '\n')
     {
-      simuart_putc(1, '\r');
+      host_uart_putc(1, '\r');
     }
 
-  simuart_putc(dev->isconsole ? 1 : priv->fd, ch);
+  host_uart_putc(dev->isconsole ? 1 : priv->fd, ch);
 }
 
 /****************************************************************************
@@ -505,7 +505,7 @@ void sim_uartinit(void)
 #ifdef USE_DEVCONSOLE
   /* Start the simulated UART device */
 
-  simuart_start();
+  host_uart_start();
 
   /* Register console device */
 
@@ -536,35 +536,35 @@ void sim_uartinit(void)
 void sim_uartloop(void)
 {
 #ifdef USE_DEVCONSOLE
-  if (simuart_checkc(0))
+  if (host_uart_checkc(0))
     {
       uart_recvchars(&g_console_dev);
     }
 #endif
 
 #ifdef CONFIG_SIM_UART0_NAME
-  if (g_tty0_priv.fd > 0 && simuart_checkc(g_tty0_priv.fd))
+  if (g_tty0_priv.fd > 0 && host_uart_checkc(g_tty0_priv.fd))
     {
       uart_recvchars(&g_tty0_dev);
     }
 #endif
 
 #ifdef CONFIG_SIM_UART1_NAME
-  if (g_tty1_priv.fd > 0 && simuart_checkc(g_tty1_priv.fd))
+  if (g_tty1_priv.fd > 0 && host_uart_checkc(g_tty1_priv.fd))
     {
       uart_recvchars(&g_tty1_dev);
     }
 #endif
 
 #ifdef CONFIG_SIM_UART2_NAME
-  if (g_tty2_priv.fd > 0 && simuart_checkc(g_tty2_priv.fd))
+  if (g_tty2_priv.fd > 0 && host_uart_checkc(g_tty2_priv.fd))
     {
       uart_recvchars(&g_tty2_dev);
     }
 #endif
 
 #ifdef CONFIG_SIM_UART3_NAME
-  if (g_tty3_priv.fd > 0 && simuart_checkc(g_tty3_priv.fd))
+  if (g_tty3_priv.fd > 0 && host_uart_checkc(g_tty3_priv.fd))
     {
       uart_recvchars(&g_tty3_dev);
     }

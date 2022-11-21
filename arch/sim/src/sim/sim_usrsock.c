@@ -30,7 +30,7 @@
 
 #include <nuttx/net/usrsock.h>
 
-#include "sim_usrsock_host.h"
+#include "sim_hostusrsock.h"
 
 /****************************************************************************
  * Pre-processor Definitions
