@@ -270,22 +270,22 @@ static uint32_t sam_configcommon(pio_pinset_t cfgset)
     {
       default:
       case PIO_INT_NONE:
-      break;
+        break;
       case PIO_INT_FALLING:
         regval |= PIO_CFGR_EVTSEL_FALLING;
-      break;
+        break;
       case PIO_INT_RISING:
         regval |= PIO_CFGR_EVTSEL_RISING;
-      break;
+        break;
       case PIO_INT_BOTHEDGES:
         regval |= PIO_CFGR_EVTSEL_BOTH;
-      break;
+        break;
       case PIO_INT_LOWLEVEL:
         regval |= PIO_CFGR_EVTSEL_LOW;
-      break;
+        break;
       case PIO_INT_HIGHLEVEL:
         regval |= PIO_CFGR_EVTSEL_HIGH;
-      break;
+        break;
     }
 
   return regval;
