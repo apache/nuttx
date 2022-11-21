@@ -402,7 +402,8 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
            * next receive is performed.
            */
 
-          if ((pstate->ir_recvlen > 0 && (flags & TCP_WAITALL) == 0) ||
+          if ((pstate->ir_recvlen > 0 &&
+               (pstate->ir_cb->flags & TCP_WAITALL) == 0) ||
               pstate->ir_buflen == 0)
             {
               ninfo("TCP resume\n");
