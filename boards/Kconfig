@@ -253,6 +253,23 @@ config ARCH_BOARD_ESP32_LYRAT
 		Development Framework (ADF). It is designed for smart speakers and smart-home
 		applications. This port is for board version 4.3.
 
+config ARCH_BOARD_ESP32_SPARROWKIT
+	bool "Espressif ESP-SPARROW-KIT"
+	depends on ARCH_CHIP_ESP32WROVER
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		ESP32-SPARROW-KIT is a custom-made board based on Espressif's ESP32WROVER chip
+		and built upon the ESP32-WROVERKIT board. It is designed for a university
+		course and its purpose is to allow the user to enable support by default for
+		various peripherals which have been soldered into the board:
+			LTR308 ambient light sensor
+			BME680 sensor
+			MicroSD card slot
+			SSD1306 OLED display
+			I2S microphone
+
 config ARCH_BOARD_ESP32_WROVERKIT
 	bool "Espressif ESP-WROVER-KIT"
 	depends on ARCH_CHIP_ESP32WROVER
@@ -2669,6 +2686,7 @@ config ARCH_BOARD
 	default "ttgo_eink5_v2"            if ARCH_BOARD_TTGO_T5V2_ESP32
 	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
 	default "esp32-lyrat"              if ARCH_BOARD_ESP32_LYRAT
+	default "esp32-sparrow-kit"        if ARCH_BOARD_ESP32_SPARROWKIT
 	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"           if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"    if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
@@ -3671,6 +3689,9 @@ source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_LYRAT
 source "boards/xtensa/esp32/esp32-lyrat/Kconfig"
+endif
+if ARCH_BOARD_ESP32_SPARROWKIT
+source "boards/xtensa/esp32/esp32-sparrow-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_WROVERKIT
 source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
