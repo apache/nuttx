@@ -10,6 +10,14 @@ choice
 	prompt "ARM64 chip selection"
 	default ARCH_CHIP_QEMU
 
+config ARCH_CHIP_A64
+	bool "Allwinner A64"
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	---help---
+		Allwinner A64 SoC
+
 config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_CORTEX_A53
@@ -80,6 +88,7 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
+	default "a64"       if ARCH_CHIP_A64
 	default "qemu"      if ARCH_CHIP_QEMU
 
 config ARCH_HAVE_TRUSTZONE
@@ -97,11 +106,16 @@ config ARM_HAVE_NEON
 
 config ARM_GIC_VERSION
 	int "GIC version"
+	default 2           if ARCH_CHIP_A64
 	default 3
 	range 2 4
 	---help---
 		Version of Generic Interrupt Controller (GIC) supported by the
 		architecture
+
+if ARCH_CHIP_A64
+source "arch/arm64/src/a64/Kconfig"
+endif
 
 if ARCH_CHIP_QEMU
 source "arch/arm64/src/qemu/Kconfig"
