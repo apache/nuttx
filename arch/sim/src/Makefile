@@ -94,7 +94,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hosttime.c sim_simuart.c sim_hostmisc.c
+HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hosttime.c sim_hostuart.c sim_hostmisc.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
@@ -117,7 +117,7 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
   CSRCS += sim_smpsignal.c sim_cpuidlestack.c
-  HOSTSRCS += sim_simsmp.c
+  HOSTSRCS += sim_hostsmp.c
 endif
 
 ifeq ($(CONFIG_ONESHOT),y)
@@ -177,21 +177,21 @@ else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
 endif
 
 ifeq ($(CONFIG_SIM_NETUSRSOCK),y)
-  HOSTSRCS += sim_usrsock_host.c
+  HOSTSRCS += sim_hostusrsock.c
   CSRCS += sim_usrsock.c
 endif
 
 ifeq ($(CONFIG_SIM_HCISOCKET),y)
-  HOSTSRCS += sim_hcisocket_host.c
+  HOSTSRCS += sim_hosthcisocket.c
   CSRCS += sim_hcisocket.c
 endif
 
 ifeq ($(CONFIG_SIM_I2CBUS_LINUX),y)
-  HOSTSRCS += sim_i2cbuslinux.c
+  HOSTSRCS += sim_linuxi2c.c
 endif
 
 ifeq ($(CONFIG_SIM_SPI_LINUX),y)
-  HOSTSRCS += sim_spilinux.c
+  HOSTSRCS += sim_linuxspi.c
 endif
 
 ifeq ($(CONFIG_RPTUN),y)

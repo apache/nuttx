@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_hcisocket_host.c
+ * arch/sim/src/sim/posix/sim_hosthcisocket.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,7 +34,7 @@
 #include <errno.h>
 
 #include "sim_internal.h"
-#include "sim_hcisocket_host.h"
+#include "sim_hostusrsock.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,7 +63,7 @@ struct sockaddr_hci
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_bthcisock_hostavail
+ * Name: sim_host_bthcisock_avail
  *
  * Description:
  *   Monitor the host user channel to see if I/O is possible on socket.
@@ -76,7 +76,7 @@ struct sockaddr_hci
  *
  ****************************************************************************/
 
-int sim_bthcisock_hostavail(int fd)
+int sim_host_bthcisock_avail(int fd)
 {
   struct timeval tv;
   fd_set fdset;
@@ -100,7 +100,7 @@ int sim_bthcisock_hostavail(int fd)
 }
 
 /****************************************************************************
- * Name: sim_bthcisock_hostsend
+ * Name: sim_host_bthcisock_send
  *
  * Description:
  *   Send a Bluetooth packet out via the host user socket.
@@ -116,7 +116,7 @@ int sim_bthcisock_hostavail(int fd)
  *
  ****************************************************************************/
 
-int sim_bthcisock_hostsend(int fd, const void *data, size_t len)
+int sim_host_bthcisock_send(int fd, const void *data, size_t len)
 {
   while (write(fd, data, len) < 0)
     {
@@ -132,7 +132,7 @@ int sim_bthcisock_hostsend(int fd, const void *data, size_t len)
 }
 
 /****************************************************************************
- * Name: sim_bthcisock_hostread
+ * Name: sim_host_bthcisock_receive
  *
  * Description:
  *   Read from the Host HCI socket interface.
@@ -148,7 +148,7 @@ int sim_bthcisock_hostsend(int fd, const void *data, size_t len)
  *
  ****************************************************************************/
 
-int sim_bthcisock_hostread(int fd, void *data, size_t len)
+int sim_host_bthcisock_receive(int fd, void *data, size_t len)
 {
   int err;
 
@@ -167,7 +167,7 @@ int sim_bthcisock_hostread(int fd, void *data, size_t len)
 }
 
 /****************************************************************************
- * Name: sim_bthcisock_hostopen
+ * Name: sim_host_bthcisock_open
  *
  * Description:
  *   Open a User Channel HCI socket on the Host for the given device.
@@ -183,7 +183,7 @@ int sim_bthcisock_hostread(int fd, void *data, size_t len)
  *
  ****************************************************************************/
 
-int sim_bthcisock_hostopen(int dev_idx)
+int sim_host_bthcisock_open(int dev_idx)
 {
   int err;
   struct sockaddr_hci addr;
@@ -218,7 +218,7 @@ int sim_bthcisock_hostopen(int dev_idx)
 }
 
 /****************************************************************************
- * Name: sim_bthcisock_hostclose
+ * Name: sim_host_bthcisock_close
  *
  * Description:
  *   Close a User Channel HCI socket on the Host for the given device idx.
@@ -232,7 +232,7 @@ int sim_bthcisock_hostopen(int dev_idx)
  *
  ****************************************************************************/
 
-int sim_bthcisock_hostclose(int fd)
+int sim_host_bthcisock_close(int fd)
 {
   return close(fd);
 }

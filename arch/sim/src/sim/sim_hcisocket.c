@@ -44,7 +44,7 @@
 #include <nuttx/serial/uart_bth4.h>
 
 #include "sim_internal.h"
-#include "sim_hcisocket_host.h"
+#include "sim_hosthcisocket.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -110,7 +110,7 @@ static int bthcisock_send(struct bt_driver_s *drv,
       return -EINVAL;
     }
 
-  ret = sim_bthcisock_hostsend(dev->fd, hdr, len + H4_HEADER_SIZE);
+  ret = sim_host_bthcisock_send(dev->fd, hdr, len + H4_HEADER_SIZE);
 
   return ret < 0 ? ret : len;
 }
@@ -119,7 +119,7 @@ static void bthcisock_close(struct bt_driver_s *drv)
 {
   struct bthcisock_s *dev = (struct bthcisock_s *)drv;
 
-  sim_bthcisock_hostclose(dev->fd);
+  sim_host_bthcisock_close(dev->fd);
   dev->fd = -1;
 }
 
@@ -130,7 +130,7 @@ static int bthcisock_receive(struct bt_driver_s *drv)
   enum bt_buf_type_e type;
   int ret;
 
-  ret = sim_bthcisock_hostread(dev->fd, data, sizeof(data));
+  ret = sim_host_bthcisock_receive(dev->fd, data, sizeof(data));
   if (ret <= 0)
     {
       return ret;
@@ -163,7 +163,7 @@ static int bthcisock_open(struct bt_driver_s *drv)
   struct bthcisock_s *dev = (struct bthcisock_s *)drv;
   int fd;
 
-  fd = sim_bthcisock_hostopen(dev->id);
+  fd = sim_host_bthcisock_open(dev->id);
 
   if (fd < 0)
     {
@@ -317,7 +317,7 @@ int sim_bthcisock_loop(void)
   for (entry = sq_peek(&g_bthcisock_list); entry; entry = sq_next(entry))
     {
       dev = container_of(entry, struct bthcisock_s, link);
-      if (sim_bthcisock_hostavail(dev->fd))
+      if (sim_host_bthcisock_avail(dev->fd))
         {
           bthcisock_receive(&dev->drv);
         }

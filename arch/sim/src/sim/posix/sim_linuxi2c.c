@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_i2cbuslinux.c
+ * arch/sim/src/sim/posix/sim_linuxi2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,7 +36,7 @@
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
 
-#include "sim_i2cbus.h"
+#include "sim_i2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions

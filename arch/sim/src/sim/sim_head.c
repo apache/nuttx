@@ -123,7 +123,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_SMP
   /* Start the CPU0 emulation.  This should not return. */
 
-  sim_cpu0_start();
+  sim_host_cpu0_start();
 #endif
   /* Start the NuttX emulation.  This should not return. */
 

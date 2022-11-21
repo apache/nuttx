@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_i2cbus.h
+ * arch/sim/src/sim/posix/sim_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_SIM_I2CBUS_H
-#define __ARCH_SIM_SRC_SIM_I2CBUS_H
+#ifndef __ARCH_SIM_SRC_POSIX_SIM_I2C_H
+#define __ARCH_SIM_SRC_POSIX_SIM_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ struct i2c_ops_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_SIM_SRC_SIM_I2CBUS_H */
+#endif /* __ARCH_SIM_SRC_POSIX_SIM_I2C_H */
