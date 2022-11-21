@@ -177,7 +177,7 @@ jobs:
   macOS:
     permissions:
       contents: none
-    runs-on: macos-10.15
+    runs-on: macos-12
     needs: Fetch-Source
     strategy:
       matrix:
@@ -204,6 +204,11 @@ jobs:
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
 
+      # Released version of Cython has issues with Python 11. Set runner to use Python 3.10
+      # https://github.com/cython/cython/issues/4500
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"

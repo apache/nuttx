@@ -147,10 +147,13 @@ function binutils {
 function bloaty {
   add_path "${prebuilt}"/bloaty/bin
   if [ ! -f "${prebuilt}/bloaty/bin/bloaty" ]; then
-    git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty-src
+    git clone --branch main https://github.com/google/bloaty bloaty-src
     cd bloaty-src
+    # Due to issues with latest MacOS versions use pinned commit.
+    # https://github.com/google/bloaty/pull/326
+    git checkout 52948c107c8f81045e7f9223ec02706b19cfa882
     mkdir -p "${prebuilt}"/bloaty
-    cmake -DCMAKE_SYSTEM_PREFIX_PATH="${prebuilt}"/bloaty
+    cmake -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -DCMAKE_SYSTEM_PREFIX_PATH="${prebuilt}"/bloaty
     make install -j 6
     cd "${prebuilt}"
     rm -rf bloaty-src
@@ -260,16 +263,17 @@ function python-tools {
   PYTHONUSERBASE=${prebuilt}/pylocal
   export PYTHONUSERBASE
   add_path "${PYTHONUSERBASE}"/bin
-  pip3 install CodeChecker
-  pip3 install cxxfilt
-  pip3 install esptool==3.3.1
-  pip3 install pexpect==4.8.0
-  pip3 install pyelftools
-  pip3 install pyserial==3.5
-  pip3 install pytest==6.2.5
-  pip3 install pytest-json==0.4.0
-  pip3 install pytest-ordering==0.6
-  pip3 install pytest-repeat==0.9.1
+  pip3 install \
+    CodeChecker \
+    cxxfilt \
+    esptool==3.3.1 \
+    pexpect==4.8.0 \
+    pyelftools \
+    pyserial==3.5 \
+    pytest==6.2.5 \
+    pytest-json==0.4.0 \
+    pytest-ordering==0.6 \
+    pytest-repeat==0.9.1 
 
   # MCUboot's tool for image signing and key management
   if ! command -v imgtool &> /dev/null; then
