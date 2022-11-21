@@ -844,7 +844,7 @@ static int esp32c3_i2c_polling_waitdone(struct esp32c3_i2c_priv_s *priv)
    * and an error didn't occur within the timeout
    */
 
-  while ((current < timeout) && (priv->error == 0))
+  while ((sclock_t)(current - timeout) < 0 && (priv->error == 0))
     {
       /* Check if any interrupt triggered, clear them
        * process the operation.
