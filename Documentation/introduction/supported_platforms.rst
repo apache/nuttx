@@ -25,6 +25,7 @@ from board-to-board. Follow the links for the details:
          - :ref:`introduction/detailed_support:ARM Cortex-A5` (3)
          - :ref:`introduction/detailed_support:ARM Cortex-A8` (2)
          - :ref:`introduction/detailed_support:ARM Cortex-A9` (1)
+         - :ref:`introduction/detailed_support:ARM Cortex-A53` (1)
          - :ref:`introduction/detailed_support:ARM Cortex-R4` (2)
          - :ref:`introduction/detailed_support:ARM Cortex-M0/M0+` (13)
          - :ref:`introduction/detailed_support:ARM Cortex-M3` (39)
