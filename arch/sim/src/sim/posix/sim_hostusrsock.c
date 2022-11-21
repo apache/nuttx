@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_usrsock_host.c
+ * arch/sim/src/sim/posix/sim_hostusrsock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,7 +37,7 @@
 
 #include <netinet/in.h>
 
-#include "sim_usrsock_host.h"
+#include "sim_hostusrsock.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -482,7 +482,7 @@ static const char *g_white_list[] =
   "QuadPart",
 
   /* Ref:
-   * sim/posix/sim_simuart.c
+   * sim/posix/sim_hostuart.c
    */
 
   "GetStdHandle",

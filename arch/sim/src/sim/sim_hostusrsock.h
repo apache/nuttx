@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_usrsock_host.h
+ * arch/sim/src/sim/sim_hostusrsock.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_SIM_USRSOCK_HOST_H
-#define __ARCH_SIM_SRC_SIM_USRSOCK_HOST_H
+#ifndef __ARCH_SIM_SRC_SIM_HOSTUSRSOCK_H
+#define __ARCH_SIM_SRC_SIM_HOSTUSRSOCK_H
 
 /****************************************************************************
  * Included Files
@@ -314,4 +314,4 @@ int usrsock_host_ioctl(int fd, unsigned long request, ...);
 void usrsock_host_loop(void);
 #endif /* __SIM__ */
 
-#endif /* __ARCH_SIM_SRC_SIM_USRSOCK_HOST_H */
+#endif /* __ARCH_SIM_SRC_SIM_HOSTUSRSOCK_H */

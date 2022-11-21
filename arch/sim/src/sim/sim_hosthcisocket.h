@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_hcisocket_host.h
+ * arch/sim/src/sim/sim_hosthcisocket.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_SIM_HCISOCKET_HOST_H
-#define __ARCH_SIM_SRC_SIM_HCISOCKET_HOST_H
+#ifndef __ARCH_SIM_SRC_SIM_HOSTHCISOCKET_H
+#define __ARCH_SIM_SRC_SIM_HOSTHCISOCKET_H
 
 /****************************************************************************
  * Included Files
@@ -32,10 +32,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int sim_bthcisock_hostopen(int dev_idx);
-int sim_bthcisock_hostsend(int fd, const void *data, size_t len);
-int sim_bthcisock_hostread(int fd, void *data, size_t len);
-int sim_bthcisock_hostavail(int fd);
-int sim_bthcisock_hostclose(int fd);
+int sim_host_bthcisock_open(int dev_idx);
+int sim_host_bthcisock_send(int fd, const void *data, size_t len);
+int sim_host_bthcisock_receive(int fd, void *data, size_t len);
+int sim_host_bthcisock_avail(int fd);
+int sim_host_bthcisock_close(int fd);
 
-#endif /* __ARCH_SIM_SRC_SIM_HCISOCKET_HOST_H */
+#endif /* __ARCH_SIM_SRC_SIM_HOSTHCISOCKET_H */
