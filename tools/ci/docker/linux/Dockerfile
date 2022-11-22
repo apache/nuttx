@@ -85,8 +85,8 @@ WORKDIR /tools
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm
 # Download the latest ARM clang toolchain prebuilt by ARM
 RUN mkdir clang-arm-none-eabi && \
-  curl -s -L  "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-15.0.2/LLVMEmbeddedToolchainForArm-15.0.2-Linux-x86_64.tar.gz" \
-  | tar -C clang-arm-none-eabi --strip-components 0 -xz
+  curl -s -L  "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz" \
+  | tar -C clang-arm-none-eabi --strip-components 1 -xz
 
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir gcc-arm-none-eabi && \

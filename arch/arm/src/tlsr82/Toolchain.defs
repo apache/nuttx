@@ -21,7 +21,7 @@
 # Clang Configuration files
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
-  TOOLCHAIN_MARCH := --config armv6m_soft_nofp
+  TOOLCHAIN_MARCH := --config armv6m_soft_nofp_nosys
 endif
 
 # Generic GNU EABI toolchain
