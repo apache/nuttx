@@ -488,7 +488,7 @@ configurations for building the simulation:
       install an X11 development package.
 
    -  Refer to the readme file in sim configuration
-      `README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
+      `README.txt <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
       file for additional information.
 
 **Test Coverage**. At present, ``apps/examples/nx``\ t only exercises a

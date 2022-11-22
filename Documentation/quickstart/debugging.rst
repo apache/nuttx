@@ -39,13 +39,13 @@ used.
 Note that enabling all these will produce an incredible amount of logging output. Enable the level you want and
 the area you're interested in, and leave the rest disabled, save the config, and then recompile. You can see the full
 list of debug feature logging functions in the file
-`debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`__.
+`debug.h <https://github.com/apache/nuttx/blob/master/include/debug.h>`__.
 
 Syslog timestamps can be enabled in the configuration in :menuselection:`Device Drivers --> System Logging --> Prepend
 timestamp to syslog message` (``CONFIG_SYSLOG_TIMESTAMP``).
 
 You may need to do a little bit of experimenting to find the combination of logging settings that work for the problem
-you're trying to solve. See the file `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`_
+you're trying to solve. See the file `debug.h <https://github.com/apache/nuttx/blob/master/include/debug.h>`_
 for available debug settings that are available.
 
 There are also subsystems that enable USB trace debugging, and you can log to memory too, if you need the logging to be

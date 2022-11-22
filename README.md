@@ -124,26 +124,26 @@ into future releases.
 
 ## Source Code
 
-The project sources are in two Git repositories.  The core OS is in
-incubator-nuttx and the apps repository is in incubator-nuttx-apps.  These
-are housed in GitBox on ASF servers and also mirrored at GitHub.  These
-are kept in sync, so you can use whichever option you prefer.
+The project sources are in two Git repositories.  The core OS is in nuttx
+and the apps repository is in nuttx-apps.  These are housed in GitBox on
+ASF servers and also mirrored at GitHub.  These are kept in sync, so you
+can use whichever option you prefer.
 
   - NuttX core OS repository:
 
     - Primary:
-      <https://gitbox.apache.org/repos/asf?p=incubator-nuttx.git>
+      <https://gitbox.apache.org/repos/asf?p=nuttx.git>
 
     - GitHub Mirror:
-      <https://github.com/apache/incubator-nuttx>
+      <https://github.com/apache/nuttx>
 
   - Apps repository:
 
     - Primary:
-      <https://gitbox.apache.org/repos/asf?p=incubator-nuttx-apps.git>
+      <https://gitbox.apache.org/repos/asf?p=nuttx-apps.git>
 
     - GitHub Mirror:
-      <https://github.com/apache/incubator-nuttx-apps>
+      <https://github.com/apache/nuttx-apps>
 
 ## Website Source Code
 
@@ -151,10 +151,10 @@ The project website sources are accessible via the website source code
   repository which is also mirrored in GitHub:
 
 - Primary:
-  <https://gitbox.apache.org/repos/asf?p=incubator-nuttx-website.git>
+  <https://gitbox.apache.org/repos/asf?p=nuttx-website.git>
 
 - GitHub Mirror:
-  <https://github.com/apache/incubator-nuttx-website>
+  <https://github.com/apache/nuttx-website>
 
 # ENVIRONMENTS
 
@@ -625,19 +625,19 @@ The current NuttX du jour is available in from a GIT repository.  Here are
 instructions for cloning the core NuttX RTOS (corresponding to the nuttx
 tarball discussed above):
 
-    git clone https://gitbox.apache.org/repos/asf/incubator-nuttx.git nuttx
+    git clone https://gitbox.apache.org/repos/asf/nuttx.git nuttx
 
 -or-
 
-    git clone https://github.com/apache/incubator-nuttx.git nuttx
+    git clone https://github.com/apache/nuttx.git nuttx
 
 And the semi-optional apps/ application directory and be cloned like:
 
-    git clone https://gitbox.apache.org/repos/asf/incubator-nuttx-apps.git apps
+    git clone https://gitbox.apache.org/repos/asf/nuttx-apps.git apps
 
 -or-
 
-    git clone https://github.com/apache/incubator-nuttx-apps.git apps
+    git clone https://github.com/apache/nuttx-apps.git apps
 
 That will give you the same directory structure like this:
 
@@ -679,9 +679,9 @@ some scripts like configure.sh. Before cloning, do the following:
 
 These are standalone repositories:
 
-  * <https://gitbox.apache.org/repos/asf/incubator-nuttx-apps>
+  * <https://gitbox.apache.org/repos/asf/nuttx-apps>
     or
-    <https://github.com/apache/incubator-nuttx-apps.git>
+    <https://github.com/apache/nuttx-apps.git>
 
     This directory holds an optional package of applications and libraries
     can be used with the NuttX RTOS.  There is a README.txt file there that

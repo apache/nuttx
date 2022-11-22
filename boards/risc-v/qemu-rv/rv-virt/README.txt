@@ -13,8 +13,8 @@
 3.1. Configure and build NuttX for BUILD_FLAT
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://github.com/apache/incubator-nuttx.git nuttx
-  $ git clone https://github.com/apache/incubator-nuttx-apps.git apps
+  $ git clone https://github.com/apache/nuttx.git nuttx
+  $ git clone https://github.com/apache/nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh rv-virt:nsh
@@ -23,8 +23,8 @@
 3.2 Configure and build NuttX for BUILD_KERNEL
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://github.com/apache/incubator-nuttx.git nuttx
-  $ git clone https://github.com/apache/incubator-nuttx-apps.git apps
+  $ git clone https://github.com/apache/nuttx.git nuttx
+  $ git clone https://github.com/apache/nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh rv-virt:knsh64

@@ -47,8 +47,8 @@ Installation
 3. Download NuttX and the companion applications.  These must both be
    contained in the same directory::
   
-    git clone https://github.com/apache/incubator-nuttx.git nuttx
-    git clone https://github.com/apache/incubator-nuttx-apps.git apps
+    git clone https://github.com/apache/nuttx.git nuttx
+    git clone https://github.com/apache/nuttx-apps.git apps
 
 Building NuttX
 ==============
