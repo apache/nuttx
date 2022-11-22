@@ -358,6 +358,13 @@ struct spi_dev_s *sim_spi_initialize(const char *filename);
 int sim_spi_uninitialize(struct spi_dev_s *dev);
 #endif
 
+/* up_video.c ***************************************************************/
+
+#ifdef CONFIG_SIM_VIDEO
+int sim_video_initialize(void);
+void sim_video_loop(void);
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
