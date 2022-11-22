@@ -254,10 +254,10 @@ Then create/re-create the ``nsh_romfsimg.h`` file as described below.
 
 There is a good example of how to do this in the NSH simulation
 configuration at
-`boards/sim/sim/sim/configs/nsh <https://github.com/apache/incubator-nuttx/blob/master/boards/sim/sim/sim/configs/nsh/>`__.
+`boards/sim/sim/sim/configs/nsh <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/configs/nsh/>`__.
 The ROMFS support files are provided at
-`boards/sim/include <https://github.com/apache/incubator-nuttx/blob/master/boards/sim/sim/sim/include/>`__
+`boards/sim/include <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/include/>`__
 and the
-`README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
+`README.txt <https://github.com/apache/nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
 file at the location provides detailed information about creating and
 modifying the ROMFS file system.

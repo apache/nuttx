@@ -32,28 +32,28 @@ Here's how to do it:
 
    Visit both these links and hit the Fork button in the upper right of the page:
 
-   * `NuttX <https://github.com/apache/incubator-nuttx/>`_
-   * `NuttX Apps <https://github.com/apache/incubator-nuttx-apps/>`_
+   * `NuttX <https://github.com/apache/nuttx/>`_
+   * `NuttX Apps <https://github.com/apache/nuttx-apps/>`_
 
 #. Clone the Repositories
 
-   On the GitHub web page for your forked ``incubator-nuttx`` project, copy the clone url – get it by hitting the
+   On the GitHub web page for your forked ``nuttx`` project, copy the clone url – get it by hitting the
    green ``Clone or Download`` button in the upper right. Then do this:
 
     .. code-block:: bash
 
-       $ git clone <your forked incubator-nuttx project clone url> nuttx
+       $ git clone <your forked nuttx project clone url> nuttx
        $ cd nuttx
-       $ git remote add upstream https://github.com/apache/incubator-nuttx.git
+       $ git remote add upstream https://github.com/apache/nuttx.git
 
-   Do the same for your forked ``incubator-nuttx-apps`` project:
+   Do the same for your forked ``nuttx-apps`` project:
 
     .. code-block:: bash
 
        $ cd ..
-       $ git clone <your forked incubator-nuttx-apps project clone url> apps
+       $ git clone <your forked nuttx-apps project clone url> apps
        $ cd apps
-       $ git remote add upstream https://github.com/apache/incubator-nuttx-apps.git
+       $ git remote add upstream https://github.com/apache/nuttx-apps.git
 
 #. Create a Local Git Branch
 
@@ -147,7 +147,7 @@ maybe doing that several times. Then when everything works, I get my branch read
    Note that there are some bugs in the ``nxstyle`` program that ``checkpatch.sh`` uses, so
    it may report a few errors that are not actually errors. The committers will help you
    find these. (Or view the
-   `nxstyle Issues <https://github.com/apache/incubator-nuttx/issues?q=is%3Aissue+is%3Aopen+nxstyle>`_.)
+   `nxstyle Issues <https://github.com/apache/nuttx/issues?q=is%3Aissue+is%3Aopen+nxstyle>`_.)
    |br|
    |br|
 
