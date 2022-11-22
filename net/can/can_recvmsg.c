@@ -434,9 +434,9 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 #endif
             {
 #ifdef CONFIG_NET_TIMESTAMP
-              if ((conn->sconn.s_timestamp && (dev->d_len >
+              if ((conn->timestamp && (dev->d_len >
                   sizeof(struct can_frame) + sizeof(struct timeval)))
-                  || (!conn->sconn.s_timestamp && (dev->d_len >
+                  || (!conn->timestamp && (dev->d_len >
                    sizeof(struct can_frame))))
 #else
               if (dev->d_len > sizeof(struct can_frame))
@@ -454,7 +454,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           can_newdata(dev, pstate);
 
 #ifdef CONFIG_NET_TIMESTAMP
-          if (conn->sconn.s_timestamp)
+          if (conn->timestamp)
             {
               if (pstate->pr_msglen == sizeof(struct timeval))
                 {
@@ -587,7 +587,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.pr_buffer = msg->msg_iov->iov_base;
 
 #ifdef CONFIG_NET_TIMESTAMP
-  if (conn->sconn.s_timestamp && msg->msg_controllen >=
+  if (conn->timestamp && msg->msg_controllen >=
         (sizeof(struct cmsghdr) + sizeof(struct timeval)))
     {
       struct cmsghdr *cmsg = CMSG_FIRSTHDR(msg);
@@ -619,7 +619,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (ret > 0)
     {
 #ifdef CONFIG_NET_TIMESTAMP
-      if (conn->sconn.s_timestamp)
+      if (conn->timestamp)
         {
           if (state.pr_msglen == sizeof(struct timeval))
             {

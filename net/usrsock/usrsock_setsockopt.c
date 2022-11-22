@@ -149,7 +149,7 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  *   See <sys/socket.h> a complete list of values for the 'option' argument.
  *
  * Input Parameters:
- *   conn      usrsock socket connection structure
+ *   psock     Socket structure of the socket to query
  *   level     Protocol level to set the option
  *   option    identifies the option to set
  *   value     Points to the argument value
@@ -157,10 +157,10 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  *
  ****************************************************************************/
 
-int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
-                       int level, int option,
-                       FAR const void *value, FAR socklen_t value_len)
+int usrsock_setsockopt(FAR struct socket *psock, int level, int option,
+                       FAR const void *value, socklen_t value_len)
 {
+  FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_reqstate_s state =
   {
   };
@@ -168,6 +168,18 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
   int ret;
 
   DEBUGASSERT(conn);
+  if (level == SOL_SOCKET)
+    {
+      if (option == SO_RCVTIMEO || option == SO_SNDTIMEO)
+        {
+          return -ENOPROTOOPT;
+        }
+      else
+        {
+          return -EINVAL;
+        }
+    }
+
   net_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||

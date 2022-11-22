@@ -34,15 +34,11 @@
 #include <arch/irq.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/netdev.h>
 #include <netdev/netdev.h>
 
 #include "socket/socket.h"
-#include "inet/inet.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "usrsock/usrsock.h"
 #include "utils/utils.h"
-#include "can/can.h"
 
 /****************************************************************************
  * Public Functions
@@ -134,27 +130,14 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
             {
               _SO_SETOPT(conn->s_options, option);
             }
-
-          return OK;
         }
-    }
+        break;
 
-#ifdef CONFIG_NET_USRSOCK
-    if (psock->s_type == SOCK_USRSOCK_TYPE)
-      {
-        return -ENOPROTOOPT;
-      }
-#endif
-
-  switch (option)
-    {
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
       case SO_DEBUG:      /* Enables recording of debugging information */
       case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
-#ifndef CONFIG_NET_TCPPROTO_OPTIONS
       case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
                            * periodic transmission of probes */
-#endif
       case SO_OOBINLINE:  /* Leaves received out-of-band data inline */
       case SO_REUSEADDR:  /* Allow reuse of local addresses */
         {
@@ -193,212 +176,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           net_unlock();
         }
         break;
-
-#ifdef CONFIG_NET_TCPPROTO_OPTIONS
-      /* Any connection-oriented protocol could potentially support
-       * SO_KEEPALIVE.  However, this option is currently only available for
-       * TCP/IP.
-       *
-       * NOTE: SO_KEEPALIVE is not really a socket-level option; it is a
-       * protocol-level option.  A given TCP connection may service multiple
-       * sockets (via dup'ing of the socket).  There is, however, still only
-       * one connection to be monitored and that is a global attribute across
-       * all of the clones that may use the underlying connection.
-       */
-
-      case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
-                           * periodic transmission of probes */
-        return tcp_setsockopt(psock, option, value, value_len);
-#endif
-
-#ifdef CONFIG_NET_SOLINGER
-      case SO_LINGER:  /* Lingers on a close() if data is present */
-        {
-          FAR struct linger *setting;
-
-          /* Verify that option is at least the size of an 'struct linger'. */
-
-          if (value_len < sizeof(FAR struct linger))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the value.  Is the option being set or cleared? */
-
-          setting = (FAR struct linger *)value;
-
-          /* Lock the network so that we have exclusive access to the socket
-           * options.
-           */
-
-          net_lock();
-
-          /* Set or clear the linger option bit and linger time
-           * (in deciseconds)
-           */
-
-          if (setting->l_onoff)
-            {
-              _SO_SETOPT(conn->s_options, option);
-              conn->s_linger = 10 * setting->l_linger;
-            }
-          else
-            {
-              _SO_CLROPT(conn->s_options, option);
-              conn->s_linger = 0;
-            }
-
-          net_unlock();
-        }
-        break;
-#endif
-
-#ifdef CONFIG_NET_TIMESTAMP
-      case SO_TIMESTAMP:  /* Generates a timestamp for each incoming packet */
-        {
-          /* Verify that option is at least the size of an integer. */
-
-          if (value_len < sizeof(FAR int32_t))
-            {
-              return -EINVAL;
-            }
-
-          /* Lock the network so that we have exclusive access to the socket
-           * options.
-           */
-
-          net_lock();
-
-          conn->s_timestamp = *((FAR int32_t *)value);
-
-          net_unlock();
-        }
-        break;
-#endif
-
-#if CONFIG_NET_RECV_BUFSIZE > 0
-      case SO_RCVBUF:     /* Sets receive buffer size */
-        {
-          int buffersize;
-
-          /* Verify that option is the size of an 'int'.  Should also check
-           * that 'value' is properly aligned for an 'int'
-           */
-
-          if (value_len != sizeof(int))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the value.  Is the option being set or cleared? */
-
-          buffersize = *(FAR int *)value;
-
-          if (buffersize < 0)
-            {
-              return -EINVAL;
-            }
-
-          net_lock();
-
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
-          if (psock->s_type == SOCK_STREAM)
-            {
-              FAR struct tcp_conn_s *tcp;
-
-              tcp = (FAR struct tcp_conn_s *)conn;
-
-              /* Save the receive buffer size */
-
-              tcp->rcv_bufs = buffersize;
-            }
-          else
-#endif
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              FAR struct udp_conn_s *udp;
-
-              udp = (FAR struct udp_conn_s *)conn;
-
-              /* Save the receive buffer size */
-
-              udp->rcvbufs = buffersize;
-            }
-          else
-#endif
-            {
-              net_unlock();
-              return -ENOPROTOOPT;
-            }
-
-          net_unlock();
-
-          break;
-        }
-#endif
-
-#if CONFIG_NET_SEND_BUFSIZE > 0
-      case SO_SNDBUF:     /* Sets send buffer size */
-        {
-          int buffersize;
-
-          /* Verify that option is the size of an 'int'.  Should also check
-           * that 'value' is properly aligned for an 'int'
-           */
-
-          if (value_len != sizeof(int))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the value.  Is the option being set or cleared? */
-
-          buffersize = *(FAR int *)value;
-
-          if (buffersize < 0)
-            {
-              return -EINVAL;
-            }
-
-          net_lock();
-
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
-          if (psock->s_type == SOCK_STREAM)
-            {
-              FAR struct tcp_conn_s *tcp;
-
-              tcp = (FAR struct tcp_conn_s *)conn;
-
-              /* Save the send buffer size */
-
-              tcp->snd_bufs = buffersize;
-            }
-          else
-#endif
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              FAR struct udp_conn_s *udp;
-
-              udp = (FAR struct udp_conn_s *)conn;
-
-              /* Save the send buffer size */
-
-              udp->sndbufs = buffersize;
-            }
-          else
-#endif
-            {
-              net_unlock();
-              return -ENOPROTOOPT;
-            }
-
-          net_unlock();
-
-          break;
-        }
-#endif
 
 #ifdef CONFIG_NET_BINDTODEVICE
       /* Handle the SO_BINDTODEVICE socket-level option.
@@ -516,7 +293,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 int psock_setsockopt(FAR struct socket *psock, int level, int option,
                      FAR const void *value, socklen_t value_len)
 {
-  int ret;
+  int ret = -ENOPROTOOPT;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -525,60 +302,20 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
       return -EBADF;
     }
 
-  /* Handle setting of the socket option according to the level at which
-   * option should be applied.
-   */
+  /* Perform the socket interface operation */
 
-  switch (level)
+  if (psock->s_sockif->si_setsockopt != NULL)
     {
-      case SOL_SOCKET: /* Socket-level options (see include/sys/socket.h) */
-        ret = psock_socketlevel_option(psock, option, value, value_len);
-        break;
-
-#ifdef CONFIG_NET_TCPPROTO_OPTIONS
-      case IPPROTO_TCP:/* TCP protocol socket options (see include/netinet/tcp.h) */
-        ret = tcp_setsockopt(psock, option, value, value_len);
-        break;
-#endif
-
-#ifdef CONFIG_NET_UDPPROTO_OPTIONS
-      case IPPROTO_UDP:/* UDP protocol socket options (see include/netinet/udp.h) */
-        ret = udp_setsockopt(psock, option, value, value_len);
-        break;
-#endif
-
-#ifdef CONFIG_NET_IPv4
-      case IPPROTO_IP:/* TCP protocol socket options (see include/netinet/in.h) */
-        ret = ipv4_setsockopt(psock, option, value, value_len);
-        break;
-#endif
-
-#ifdef CONFIG_NET_IPv6
-      case IPPROTO_IPV6:/* TCP protocol socket options (see include/netinet/in.h) */
-        ret = ipv6_setsockopt(psock, option, value, value_len);
-        break;
-#endif
-
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-      case SOL_CAN_RAW:   /* CAN protocol socket options (see include/netpacket/can.h) */
-        ret = can_setsockopt(psock, option, value, value_len);
-        break;
-#endif
-
-      default:         /* The provided level is invalid */
-        ret = -ENOPROTOOPT;
-        break;
+      ret = psock->s_sockif->si_setsockopt(psock, level, option,
+                                           value, value_len);
     }
 
-#ifdef CONFIG_NET_USRSOCK
-  /* Try usrsock further if the protocol not available */
+  /* Try socket level if the socket interface operation is not available */
 
-  if (ret == -ENOPROTOOPT && psock->s_type == SOCK_USRSOCK_TYPE)
+  if (ret == -ENOPROTOOPT && level == SOL_SOCKET)
     {
-      ret = usrsock_setsockopt(psock->s_conn, level,
-                               option, value, value_len);
+      ret = psock_socketlevel_option(psock, option, value, value_len);
     }
-#endif
 
   return ret;
 }

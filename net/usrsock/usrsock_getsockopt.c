@@ -160,7 +160,7 @@ static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
  *   See <sys/socket.h> a complete list of values for the 'option' argument.
  *
  * Input Parameters:
- *   conn      usrsock socket connection structure
+ *   psock     Socket structure of the socket to query
  *   level     Protocol level to set the option
  *   option    identifies the option to get
  *   value     Points to the argument value
@@ -168,16 +168,32 @@ static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
  *
  ****************************************************************************/
 
-int usrsock_getsockopt(FAR struct usrsock_conn_s *conn,
-                       int level, int option,
+int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
                        FAR void *value, FAR socklen_t *value_len)
 {
+  FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_data_reqstate_s state =
   {
   };
 
   struct iovec inbufs[1];
   int ret;
+
+  if (level == SOL_SOCKET)
+    {
+      if (option == SO_TYPE)
+        {
+          /* Return the actual socket type */
+
+          *(FAR int *)value = conn->type;
+          *value_len = sizeof(int);
+          return OK;
+        }
+      else
+        {
+          return -ENOPROTOOPT;
+        }
+    }
 
   net_lock();
 

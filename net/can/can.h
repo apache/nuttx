@@ -111,6 +111,9 @@ struct can_conn_s
   int32_t tx_deadline;
 # endif
 #endif
+#ifdef CONFIG_NET_TIMESTAMP
+  int32_t timestamp; /* Socket timestamp enabled/disabled */
+#endif
 };
 
 /****************************************************************************
@@ -353,6 +356,7 @@ void can_readahead_signal(FAR struct can_conn_s *conn);
  *
  * Input Parameters:
  *   psock     Socket structure of socket to operate on
+ *   level     Protocol level to set the option
  *   option    identifies the option to set
  *   value     Points to the argument value
  *   value_len The length of the argument value
@@ -365,7 +369,7 @@ void can_readahead_signal(FAR struct can_conn_s *conn);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-int can_setsockopt(FAR struct socket *psock, int option,
+int can_setsockopt(FAR struct socket *psock, int level, int option,
                    FAR const void *value, socklen_t value_len);
 #endif
 
@@ -399,7 +403,7 @@ int can_setsockopt(FAR struct socket *psock, int option,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
-int can_getsockopt(FAR struct socket *psock, int option,
+int can_getsockopt(FAR struct socket *psock, int level, int option,
                    FAR void *value, FAR socklen_t *value_len);
 #endif
 

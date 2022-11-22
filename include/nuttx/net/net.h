@@ -166,6 +166,12 @@ struct sock_intf_s
   CODE int        (*si_ioctl)(FAR struct socket *psock,
                     int cmd, unsigned long arg);
   CODE int        (*si_socketpair)(FAR struct socket *psocks[2]);
+#ifdef CONFIG_NET_SOCKOPTS
+  CODE int        (*si_getsockopt)(FAR struct socket *psock, int level,
+                    int option, FAR void *value, FAR socklen_t *value_len);
+  CODE int        (*si_setsockopt)(FAR struct socket *psock, int level,
+                    int option, FAR const void *value, socklen_t value_len);
+#endif
 #ifdef CONFIG_NET_SENDFILE
   CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
@@ -209,9 +215,6 @@ struct socket_conn_s
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #ifdef CONFIG_NET_SOLINGER
   socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
-#endif
-#ifdef CONFIG_NET_TIMESTAMP
-  int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
 #endif
 #ifdef CONFIG_NET_BINDTODEVICE
   uint8_t       s_boundto;   /* Index of the interface we are bound to.
