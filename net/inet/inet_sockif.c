@@ -91,6 +91,12 @@ static ssize_t    inet_recvmsg(FAR struct socket *psock,
 static int        inet_ioctl(FAR struct socket *psock,
                     int cmd, unsigned long arg);
 static int        inet_socketpair(FAR struct socket *psocks[2]);
+#ifdef CONFIG_NET_SOCKOPTS
+static int        inet_getsockopt(FAR struct socket *psock, int level,
+                    int option, FAR void *value, FAR socklen_t *value_len);
+static int        inet_setsockopt(FAR struct socket *psock, int level,
+                    int option, FAR const void *value, socklen_t value_len);
+#endif
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
@@ -118,9 +124,12 @@ static const struct sock_intf_s g_inet_sockif =
   inet_close,       /* si_close */
   inet_ioctl,       /* si_ioctl */
   inet_socketpair   /* si_socketpair */
+#ifdef CONFIG_NET_SOCKOPTS
+  , inet_getsockopt /* si_getsockopt */
+  , inet_setsockopt /* si_setsockopt */
+#endif
 #ifdef CONFIG_NET_SENDFILE
-  ,
-  inet_sendfile     /* si_sendfile */
+  , inet_sendfile   /* si_sendfile */
 #endif
 };
 
@@ -561,6 +570,464 @@ static int inet_getpeername(FAR struct socket *psock,
       return -EAFNOSUPPORT;
     }
 }
+
+#ifdef CONFIG_NET_SOCKOPTS
+
+/****************************************************************************
+ * Name: inet_get_socketlevel_option
+ *
+ * Description:
+ *   inet_get_socketlevel_option() retrieve the value for the option
+ *   specified by the 'option' argument for the socket specified by the
+ *   'psock' argument.  If the size of the option value is greater than
+ *   'value_len', the value stored in the object pointed to by the 'value'
+ *   argument will be silently truncated. Otherwise, the length pointed to
+ *   by the 'value_len' argument will be modified to indicate the actual
+ *   length of the 'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
+ *   argument is SOL_TCP.
+ *
+ *   See <sys/socket.h> a complete list of values for the socket-level
+ *   'option' argument.  Protocol-specific options are are protocol specific
+ *   header files (such as netinet/tcp.h for the case of the TCP protocol).
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_getsockopt() for
+ *   the complete list of appropriate return error codes.
+ *
+ ****************************************************************************/
+
+static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
+                                       FAR void *value,
+                                       FAR socklen_t *value_len)
+{
+  switch (option)
+    {
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      case SO_RCVBUF:     /* Reports receive buffer size */
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp = psock->s_conn;
+              *(FAR int *)value = tcp->rcv_bufs;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp = psock->s_conn;
+              *(FAR int *)value = udp->rcvbufs;
+            }
+          else
+#endif
+            {
+              return -ENOPROTOOPT;
+            }
+        }
+        break;
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:     /* Reports send buffer size */
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp = psock->s_conn;
+              *(FAR int *)value = tcp->snd_bufs;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp = psock->s_conn;
+
+              /* Save the send buffer size */
+
+              *(FAR int *)value = udp->sndbufs;
+            }
+          else
+#endif
+            {
+              return -ENOPROTOOPT;
+            }
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      case SO_KEEPALIVE:
+        {
+          /* Any connection-oriented protocol could potentially support
+           * SO_KEEPALIVE.  However, this option is currently only available
+           * for TCP/IP.
+           *
+           * NOTE: SO_KEEPALIVE is not really a socket-level option; it is a
+           * protocol-level option.  A given TCP connection may service
+           * multiple sockets (via dup'ing of the socket). There is, however,
+           * still only one connection to be monitored and that is a global
+           * attribute across all of the clones that may use the underlying
+           * connection.
+           */
+
+          /* Verifies TCP connections active by enabling the periodic
+           * transmission of probes.
+           */
+
+          return tcp_getsockopt(psock, option, value, value_len);
+        }
+#endif
+
+      default:
+        return -ENOPROTOOPT;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: inet_getsockopt
+ *
+ * Description:
+ *   inet_getsockopt() retrieve the value for the option specified by the
+ *   'option' argument at the protocol level specified by the 'level'
+ *   argument. If the size of the option value is greater than 'value_len',
+ *   the value stored in the object pointed to by the 'value' argument will
+ *   be silently truncated. Otherwise, the length pointed to by the
+ *   'value_len' argument will be modified to indicate the actual length
+ *   of the 'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ ****************************************************************************/
+
+static int inet_getsockopt(FAR struct socket *psock, int level, int option,
+                           FAR void *value, FAR socklen_t *value_len)
+{
+  if (level == SOL_SOCKET)
+    {
+      return inet_get_socketlevel_option(psock, option, value, value_len);
+    }
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+  else if (level == IPPROTO_TCP)
+    {
+      return tcp_getsockopt(psock, option, value, value_len);
+    }
+#endif
+  else
+    {
+      return -ENOPROTOOPT;
+    }
+}
+
+/****************************************************************************
+ * Name: inet_set_socketlevel_option
+ *
+ * Description:
+ *   inet_set_socketlevel_option() sets the socket-level option specified by
+ *   the 'option' argument to the value pointed to by the 'value' argument
+ *   for the socket specified by the 'psock' argument.
+ *
+ *   See <sys/socket.h> a complete list of values for the socket level
+ *   'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_setcockopt() for
+ *   the list of possible error values.
+ *
+ ****************************************************************************/
+
+static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
+                                       FAR const void *value,
+                                       socklen_t value_len)
+{
+  switch (option)
+    {
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      case SO_KEEPALIVE:
+        {
+          /* Any connection-oriented protocol could potentially support
+           * SO_KEEPALIVE.  However, this option is currently only available
+           * for TCP/IP.
+           *
+           * NOTE: SO_KEEPALIVE is not really a socket-level option; it is a
+           * protocol-level option.  A given TCP connection may service
+           * multiple sockets (via dup'ing of the socket). There is, however,
+           * still only one connection to be monitored and that is a global
+           * attribute across all of the clones that may use the underlying
+           * connection.
+           */
+
+          /* Verifies TCP connections active by enabling the
+           * periodic transmission of probes
+           */
+
+          return tcp_setsockopt(psock, option, value, value_len);
+        }
+#endif
+
+#ifdef CONFIG_NET_SOLINGER
+      case SO_LINGER:
+        {
+          /* Lingers on a close() if data is present */
+
+          FAR struct socket_conn_s *conn = psock->s_conn;
+          FAR struct linger *setting;
+
+          /* Verify that option is at least the size of an 'struct linger'. */
+
+          if (value_len < sizeof(struct linger))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          setting = (FAR struct linger *)value;
+
+          /* Lock the network so that we have exclusive access to the socket
+           * options.
+           */
+
+          net_lock();
+
+          /* Set or clear the linger option bit and linger time
+           * (in deciseconds)
+           */
+
+          if (setting->l_onoff)
+            {
+              _SO_SETOPT(conn->s_options, option);
+              conn->s_linger = 10 * setting->l_linger;
+            }
+          else
+            {
+              _SO_CLROPT(conn->s_options, option);
+              conn->s_linger = 0;
+            }
+
+          net_unlock();
+        }
+        break;
+#endif
+
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      case SO_RCVBUF:     /* Sets receive buffer size */
+        {
+          int buffersize;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          buffersize = *(FAR int *)value;
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+          net_lock();
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp = psock->s_conn;
+
+              /* Save the receive buffer size */
+
+              tcp->rcv_bufs = buffersize;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp = psock->s_conn;
+
+              /* Save the receive buffer size */
+
+              udp->rcvbufs = buffersize;
+            }
+          else
+#endif
+            {
+              net_unlock();
+              return -ENOPROTOOPT;
+            }
+
+          net_unlock();
+        }
+        break;
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:     /* Sets send buffer size */
+        {
+          int buffersize;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          buffersize = *(FAR int *)value;
+
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+          net_lock();
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp = psock->s_conn;
+
+              /* Save the send buffer size */
+
+              tcp->snd_bufs = buffersize;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp = psock->s_conn;
+
+              /* Save the send buffer size */
+
+              udp->sndbufs = buffersize;
+            }
+          else
+#endif
+            {
+              net_unlock();
+              return -ENOPROTOOPT;
+            }
+
+          net_unlock();
+        }
+        break;
+#endif
+
+      default:
+        return -ENOPROTOOPT;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: inet_setsockopt
+ *
+ * Description:
+ *   inet_setsockopt() sets the option specified by the 'option' argument,
+ *   at the protocol level specified by the 'level' argument, to the value
+ *   pointed to by the 'value' argument for the connection.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To set
+ *   options at the socket level, specify the level argument as SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ ****************************************************************************/
+
+static int inet_setsockopt(FAR struct socket *psock, int level, int option,
+                           FAR const void *value, socklen_t value_len)
+{
+  switch (level)
+    {
+      case SOL_SOCKET:
+        return inet_set_socketlevel_option(psock, option, value, value_len);
+
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      case IPPROTO_TCP:/* TCP protocol socket options (see include/netinet/tcp.h) */
+        return tcp_setsockopt(psock, option, value, value_len);
+#endif
+
+#ifdef CONFIG_NET_UDPPROTO_OPTIONS
+      case IPPROTO_UDP:/* UDP protocol socket options (see include/netinet/udp.h) */
+        return udp_setsockopt(psock, option, value, value_len);
+#endif
+
+#ifdef CONFIG_NET_IPv4
+      case IPPROTO_IP:/* TCP protocol socket options (see include/netinet/in.h) */
+        return ipv4_setsockopt(psock, option, value, value_len);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      case IPPROTO_IPV6:/* TCP protocol socket options (see include/netinet/in.h) */
+        return ipv6_setsockopt(psock, option, value, value_len);
+#endif
+      default:
+        return -ENOPROTOOPT;
+    }
+}
+
+#endif
 
 /****************************************************************************
  * Name: inet_listen

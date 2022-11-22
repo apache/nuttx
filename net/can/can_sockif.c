@@ -84,7 +84,13 @@ const struct sock_intf_s g_can_sockif =
   can_poll_local,   /* si_poll */
   can_sendmsg,      /* si_sendmsg */
   can_recvmsg,      /* si_recvmsg */
-  can_close         /* si_close */
+  can_close,        /* si_close */
+  NULL,             /* si_ioctl */
+  NULL              /* si_socketpair */
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_CANPROTO_OPTIONS)
+  , can_getsockopt  /* si_getsockopt */
+  , can_setsockopt  /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
