@@ -549,7 +549,7 @@
 #define SENS_TOUCH_PAD_OUTEN2_V  0x3ff
 #define SENS_TOUCH_PAD_OUTEN2_S  10
 
-/* SENS_TOUCH_PAD_WORKEN : R/W; bitpos: [19:10]; default: 0x3ff; */
+/* SENS_TOUCH_PAD_WORKEN : R/W; bitpos: [9:0]; default: 0x3ff; */
 
 #define SENS_TOUCH_PAD_WORKEN    0x000003ff
 #define SENS_TOUCH_PAD_WORKEN_M  (SENS_TOUCH_PAD_WORKEN_V << \
