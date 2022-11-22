@@ -195,6 +195,10 @@ static int sim_loop_task(int argc, char **argv)
       sim_audio_loop();
 #endif
 
+#ifdef CONFIG_SIM_VIDEO
+      sim_video_loop();
+#endif
+
 #ifdef CONFIG_MOTOR_FOC_DUMMY
       /* Update simulated FOC device */
 
