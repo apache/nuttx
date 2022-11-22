@@ -84,6 +84,7 @@ static int usrsock_rpmsg_send_dns_request(FAR void *arg,
   FAR struct rpmsg_endpoint *ept = &priv->ept;
   FAR struct usrsock_rpmsg_dns_request_s *dns;
   uint32_t len;
+  int ret;
 
   dns = rpmsg_get_tx_payload_buffer(ept, &len, true);
   if (dns == NULL)
@@ -97,7 +98,11 @@ static int usrsock_rpmsg_send_dns_request(FAR void *arg,
   dns->addrlen = addrlen;
   memcpy(dns + 1, addr, addrlen);
 
-  return rpmsg_send_nocopy(ept, dns, sizeof(*dns) + addrlen);
+  net_lock();
+  ret = rpmsg_send_nocopy(ept, dns, sizeof(*dns) + addrlen);
+  net_unlock();
+
+  return ret;
 }
 #endif
 
@@ -140,10 +145,14 @@ static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       return usrsock_rpmsg_dns_handler(ept, data);
     }
-  else
+
+  if (common->msgid == USRSOCK_RPMSG_FRAG_RESPONSE)
     {
-      return usrsock_response(data, len, NULL);
+      data = (FAR char *)data + sizeof(struct usrsock_message_frag_ack_s);
+      len -= sizeof(struct usrsock_message_frag_ack_s);
     }
+
+  return usrsock_response(data, len, NULL);
 }
 
 static void usrsock_rpmsg_device_created(FAR struct rpmsg_device *rdev,

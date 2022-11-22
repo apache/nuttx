@@ -218,6 +218,22 @@ static int usrsock_rpmsg_send_data_ack(FAR struct rpmsg_endpoint *ept,
   return rpmsg_send_nocopy(ept, ack, sizeof(*ack) + valuelen + datalen);
 }
 
+static int usrsock_rpmsg_send_frag_ack(FAR struct rpmsg_endpoint *ept,
+                              FAR struct usrsock_message_frag_ack_s *ack,
+                              uint16_t events,
+                              uint32_t xid, int32_t result,
+                              uint32_t datalen)
+{
+  ack->reqack.head.msgid  = USRSOCK_RPMSG_FRAG_RESPONSE;
+  ack->reqack.head.flags  = 0;
+  ack->reqack.head.events = events;
+  ack->reqack.xid         = xid;
+  ack->reqack.result      = result;
+  ack->datalen            = datalen;
+
+  return rpmsg_send_nocopy(ept, ack, sizeof(*ack) + datalen);
+}
+
 static int usrsock_rpmsg_send_event(FAR struct rpmsg_endpoint *ept,
                                     int16_t usockid, uint16_t events)
 {
@@ -459,7 +475,7 @@ out:
     }
 
   retr = usrsock_rpmsg_send_ack(ept, events, req->head.xid, ret);
-  if (ret > 0 && retr >= 0 && events == 0)
+  if (retr >= 0 && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid], POLLOUT);
     }
@@ -528,6 +544,8 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
           while (totlen < buflen &&
                  i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC)
             {
+              uint32_t offset = sizeof(struct usrsock_message_frag_ack_s);
+
               if (!usrsock_rpmsg_available(&priv->socks[req->usockid],
                                            FIONREAD))
                 {
@@ -543,21 +561,24 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
                   break;
                 }
 
-              if (buflen - totlen < len)
+              DEBUGASSERT(len > offset);
+              if (buflen - totlen < len - offset)
                 {
-                  len = buflen - totlen;
+                  len = buflen - totlen + offset;
                 }
 
               /* Should never wait */
 
-              iov[i].iov_len = psock_recvfrom(&priv->socks[req->usockid],
-                                              iov[i].iov_base, len,
-                                              req->flags | MSG_DONTWAIT,
-                                              NULL, NULL);
+              iov[i].iov_len =
+                psock_recvfrom(&priv->socks[req->usockid],
+                    (FAR char *)iov[i].iov_base + offset,
+                    len - offset,
+                    req->flags | MSG_DONTWAIT,
+                    NULL, NULL);
               if ((ssize_t)iov[i].iov_len > 0)
                 {
                   totlen += iov[i].iov_len;
-                  if (iov[i].iov_len < len)
+                  if (iov[i].iov_len < len - offset)
                     {
                       break;
                     }
@@ -592,8 +613,9 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
           continue;
         }
 
-      ret = rpmsg_send_nocopy(ept,
-                              iov[i].iov_base, iov[i].iov_len);
+      usrsock_rpmsg_send_frag_ack(ept,
+            (FAR struct usrsock_message_frag_ack_s *)iov[i].iov_base,
+            events, req->head.xid, totlen, iov[i].iov_len);
     }
 
   if (retr >= 0 && events == 0)

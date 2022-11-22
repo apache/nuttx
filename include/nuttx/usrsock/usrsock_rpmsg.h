@@ -33,8 +33,10 @@
 
 #define USRSOCK_RPMSG_EPT_NAME      "rpmsg-usrsock"
 
-#define USRSOCK_RPMSG_DNS_REQUEST    USRSOCK_REQUEST__MAX
-#define USRSOCK_RPMSG_DNS_EVENT      127
+#define USRSOCK_RPMSG_DNS_REQUEST   USRSOCK_REQUEST__MAX
+
+#define USRSOCK_RPMSG_DNS_EVENT     126
+#define USRSOCK_RPMSG_FRAG_RESPONSE 127
 
 /****************************************************************************
  * Public Types
@@ -56,6 +58,17 @@ begin_packed_struct struct usrsock_rpmsg_dns_event_s
   struct usrsock_message_common_s head;
 
   uint16_t addrlen;
+} end_packed_struct;
+
+/* fragemented ack message */
+
+begin_packed_struct struct usrsock_message_frag_ack_s
+{
+  struct usrsock_message_req_ack_s reqack;
+
+  /* head.result => positive buflen, negative error-code. */
+
+  uint32_t datalen; /* fragment's payload length */
 } end_packed_struct;
 
 /****************************************************************************
