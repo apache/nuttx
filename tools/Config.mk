@@ -243,8 +243,8 @@ OBJPATH ?= .
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  DEFINE ?= "$(TOPDIR)\tools\define.bat"
-  INCDIR ?= "$(TOPDIR)\tools\incdir.bat"
+  DEFINE ?= $(TOPDIR)\tools\define.bat
+  INCDIR ?= $(TOPDIR)\tools\incdir.bat
 else ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   DEFINE ?= "$(TOPDIR)/tools/define.sh" -w
   INCDIR ?= "$(TOPDIR)/tools/incdir$(HOSTEXEEXT)" -w
@@ -589,9 +589,9 @@ $(1)_$(2):
 
 endef
 
-export DEFINE_PREFIX ?= $(subst X,,${shell $(DEFINE) "$(CC)" "X" 2> ${EMPTYFILE}})
-export INCDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) "$(CC)" "X" 2> ${EMPTYFILE}})
-export INCSYSDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) -s "$(CC)" "X" 2> ${EMPTYFILE}})
+export DEFINE_PREFIX ?= $(subst X,,${shell $(DEFINE) "$(CC)" X 2> ${EMPTYFILE}})
+export INCDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) "$(CC)" X 2> ${EMPTYFILE}})
+export INCSYSDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) -s "$(CC)" X 2> ${EMPTYFILE}})
 
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 ARCHDEFINES += ${DEFINE_PREFIX}__NuttX__
