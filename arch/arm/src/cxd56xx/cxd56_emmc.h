@@ -43,7 +43,7 @@ extern "C"
  ****************************************************************************/
 
 int cxd56_emmcinitialize(void);
-void cxd56_emmcuninitialize(void);
+int cxd56_emmcuninitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

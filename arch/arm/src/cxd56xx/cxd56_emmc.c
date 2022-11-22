@@ -932,6 +932,10 @@ static int cxd56_emmc_geometry(struct inode *inode,
   return OK;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 int cxd56_emmcinitialize(void)
 {
   struct cxd56_emmc_state_s *priv = &g_emmcdev;
@@ -967,21 +971,25 @@ int cxd56_emmcinitialize(void)
     }
 
   ret = register_blockdriver("/dev/emmc0", &g_bops, 0, priv);
-  if (ret)
+  if (ret < 0)
     {
       ferr("register_blockdriver failed: %d\n", -ret);
+    }
+
+  return ret;
+}
+
+int cxd56_emmcuninitialize(void)
+{
+  int ret;
+
+  ret = unregister_blockdriver("/dev/emmc0");
+  if (ret < 0)
+    {
+      ferr("unregister_blockdriver failed: %d\n", -ret);
       return ret;
     }
 
-  return OK;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-int emmc_uninitialize(void)
-{
   /* Send power off command */
 
   emmc_switchcmd(EXTCSD_PON, EXTCSD_PON_POWERED_OFF_LONG);
