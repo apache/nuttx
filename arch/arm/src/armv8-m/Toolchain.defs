@@ -63,24 +63,24 @@ endif
 ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   ifeq ($(CONFIG_ARCH_CORTEXM23),y)
-    TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp
+    TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
   else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
-      TOOLCHAIN_MARCH += --config armv8m.main_hard_fp
+      TOOLCHAIN_MARCH += --config armv8m.main_hard_fp_nosys
     else
-      TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp
+      TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
     endif
   else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
-      TOOLCHAIN_MARCH += --config armv8m.main_hard_fp
+      TOOLCHAIN_MARCH += --config armv8m.main_hard_fp_nosys
     else
-      TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp
+      TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
     endif
   else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
-      TOOLCHAIN_MARCH += --config armv8.1m.main_hard_fp
+      TOOLCHAIN_MARCH += --config armv8.1m.main_hard_fp_nosys
     else
-      TOOLCHAIN_MARCH += --config armv8.1m.main_soft_nofp_nomve
+      TOOLCHAIN_MARCH += --config armv8.1m.main_soft_nofp_nomve_nosys
     endif
   endif
 

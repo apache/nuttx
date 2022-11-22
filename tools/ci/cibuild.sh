@@ -60,11 +60,11 @@ function arm-clang-toolchain {
 
   if [ ! -f "${prebuilt}/clang-arm-none-eabi/bin/clang" ]; then
     cd "${prebuilt}"
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-15.0.2/LLVMEmbeddedToolchainForArm-15.0.2-Linux-x86_64.tar.gz
-    mkdir -p clang-arm-none-eabi
-    tar zxf LLVMEmbeddedToolchainForArm-15.0.2-Linux-x86_64.tar.gz -C clang-arm-none-eabi
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+    tar zxf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+    mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
     cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
-    rm LLVMEmbeddedToolchainForArm-15.0.2-Linux-x86_64.tar.gz
+    rm LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
   fi
   clang --version
 }

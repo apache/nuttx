@@ -61,18 +61,18 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   ifeq ($(CONFIG_ARCH_CORTEXM4),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
-      TOOLCHAIN_MARCH += --config armv7em_hard_fpv4_sp_d16
+      TOOLCHAIN_MARCH += --config armv7em_hard_fpv4_sp_d16_nosys
     else
-      TOOLCHAIN_MARCH += --config armv7em_soft_nofp
+      TOOLCHAIN_MARCH += --config armv7em_soft_nofp_nosys
     endif
   else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
-      TOOLCHAIN_MARCH += --config armv7em_hard_fpv5_d16
+      TOOLCHAIN_MARCH += --config armv7em_hard_fpv5_d16_nosys
     else
-      TOOLCHAIN_MARCH += --config armv7em_soft_nofp
+      TOOLCHAIN_MARCH += --config armv7em_soft_nofp_nosys
     endif
   else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
-      TOOLCHAIN_MARCH += --config armv7m_soft_nofp
+      TOOLCHAIN_MARCH += --config armv7m_soft_nofp_nosys
   endif
 
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
