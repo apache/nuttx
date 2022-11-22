@@ -184,6 +184,12 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   dev->d_len -= llhdrlen;
 
+  /* Make sure that all packet processing logic knows that there is an IPv4
+   * packet in the device buffer.
+   */
+
+  IFF_SET_IPv4(dev->d_flags);
+
   /* Check the size of the packet.  If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet
    * has been corrupted in transit.  If the size of d_len is larger than the
@@ -353,12 +359,6 @@ int ipv4_input(FAR struct net_driver_s *dev)
       nwarn("WARNING: Bad IP checksum\n");
       goto drop;
     }
-
-  /* Make sure that all packet processing logic knows that there is an IPv4
-   * packet in the device buffer.
-   */
-
-  IFF_SET_IPv4(dev->d_flags);
 
   /* Now process the incoming packet according to the protocol. */
 
