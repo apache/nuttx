@@ -73,6 +73,8 @@ struct imgdata_ops_s
 
   CODE int (*validate_buf)(uint8_t *addr, uint32_t size);
   CODE int (*set_buf)(uint8_t *addr, uint32_t size);
+  CODE int (*enq_buf)(uint8_t *addr, uint32_t size);
+  CODE int (*dq_buf)(uint8_t **addr);
 
   CODE int (*validate_frame_setting)(uint8_t nr_datafmts,
                                      FAR imgdata_format_t *datafmts,

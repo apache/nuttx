@@ -625,7 +625,7 @@ static int start_capture(enum v4l2_buf_type type,
                          FAR video_format_t *fmt,
                          FAR struct v4l2_rect *clip,
                          FAR struct v4l2_fract *interval,
-                         uint32_t bufaddr, uint32_t bufsize)
+                         unsigned long bufaddr, uint32_t bufsize)
 {
   video_format_t c_fmt[MAX_VIDEO_FMT];
   imgdata_format_t df[MAX_VIDEO_FMT];
@@ -1136,6 +1136,7 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
   FAR vbuf_container_t *container;
   enum video_state_e   next_video_state;
   irqstate_t           flags;
+  int                  ret;
 
   if ((vmng == NULL) || (buf == NULL))
     {
@@ -1161,6 +1162,15 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
 
   memcpy(&container->buf, buf, sizeof(struct v4l2_buffer));
   video_framebuff_queue_container(&type_inf->bufinf, container);
+  if (g_video_data_ops->enq_buf)
+    {
+      ret = g_video_data_ops->enq_buf((uint8_t *)(uintptr_t)buf->m.userptr,
+          buf->length);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
 
   nxmutex_lock(&type_inf->lock_state);
   flags = enter_critical_section();
@@ -1210,6 +1220,8 @@ static int video_dqbuf(FAR struct video_mng_s *vmng,
   FAR vbuf_container_t *container;
   sem_t                *dqbuf_wait_flg;
   enum video_state_e   next_video_state;
+  FAR uint8_t          *dq_buf_addr;
+  int                  ret;
 
   if ((vmng == NULL) || (buf == NULL))
     {
@@ -1220,6 +1232,15 @@ static int video_dqbuf(FAR struct video_mng_s *vmng,
   if (type_inf == NULL)
     {
       return -EINVAL;
+    }
+
+  if (g_video_data_ops->dq_buf)
+    {
+      ret = g_video_data_ops->dq_buf(&dq_buf_addr);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   container = video_framebuff_dq_valid_container(&type_inf->bufinf);
@@ -1267,6 +1288,7 @@ static int video_dqbuf(FAR struct video_mng_s *vmng,
       type_inf->wait_capture.done_container = NULL;
     }
 
+  ASSERT(!dq_buf_addr || (uintptr_t)dq_buf_addr == container->buf.m.userptr);
   memcpy(buf, &container->buf, sizeof(struct v4l2_buffer));
 
   video_framebuff_free_container(&type_inf->bufinf, container);
