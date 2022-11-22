@@ -58,6 +58,7 @@
  *
  * Input Parameters:
  *   psock     Socket structure of socket to operate on
+ *   level     Protocol level to set the option
  *   option    identifies the option to set
  *   value     Points to the argument value
  *   value_len The length of the argument value
@@ -69,7 +70,7 @@
  *
  ****************************************************************************/
 
-int can_setsockopt(FAR struct socket *psock, int option,
+int can_setsockopt(FAR struct socket *psock, int level, int option,
                    FAR const void *value, socklen_t value_len)
 {
   FAR struct can_conn_s *conn;
@@ -80,6 +81,37 @@ int can_setsockopt(FAR struct socket *psock, int option,
   DEBUGASSERT(value_len == 0 || value != NULL);
 
   conn = (FAR struct can_conn_s *)psock->s_conn;
+
+#ifdef CONFIG_NET_TIMESTAMP
+
+  /* Generates a timestamp for each incoming packet */
+
+  if (level == SOL_SOCKET && option == SO_TIMESTAMP)
+    {
+      /* Verify that option is at least the size of an integer. */
+
+      if (value_len < sizeof(int32_t))
+        {
+          return -EINVAL;
+        }
+
+      /* Lock the network so that we have exclusive access to the socket
+       * options.
+       */
+
+      net_lock();
+
+      conn->timestamp = *((FAR int32_t *)value);
+
+      net_unlock();
+      return OK;
+    }
+#endif
+
+  if (level != SOL_CAN_RAW)
+    {
+      return -ENOPROTOOPT;
+    }
 
   if (psock->s_type != SOCK_RAW)
     {

@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-int can_getsockopt(FAR struct socket *psock, int option,
+int can_getsockopt(FAR struct socket *psock, int level, int option,
                    FAR void *value, FAR socklen_t *value_len)
 {
   FAR struct can_conn_s *conn;
@@ -83,6 +83,24 @@ int can_getsockopt(FAR struct socket *psock, int option,
   DEBUGASSERT(psock != NULL && value != NULL && value_len != NULL &&
               psock->s_conn != NULL);
   conn = (FAR struct can_conn_s *)psock->s_conn;
+
+#ifdef CONFIG_NET_TIMESTAMP
+  if (level == SOL_SOCKET && option == SO_TIMESTAMP)
+    {
+      if (*value_len != sizeof(int32_t))
+        {
+          return -EINVAL;
+        }
+
+      *(FAR int32_t *)value = conn->timestamp;
+      return OK;
+    }
+#endif
+
+  if (level != SOL_CAN_RAW)
+    {
+      return -ENOPROTOOPT;
+    }
 
   if (psock->s_type != SOCK_RAW)
     {
