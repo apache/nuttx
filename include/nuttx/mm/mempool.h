@@ -68,6 +68,7 @@ struct mempool_s
   size_t     interruptsize; /* The initialize size in interrupt mempool */
   size_t     expandsize;    /* The size of expand block every time for mempool */
   bool       wait;          /* The flag of need to wait when mempool is empty */
+  FAR void  *priv;          /* This pointer is used to store the user's private data */
   mempool_alloc_t alloc;    /* The alloc function for mempool */
   mempool_free_t  free;     /* The free function for mempool */
 
