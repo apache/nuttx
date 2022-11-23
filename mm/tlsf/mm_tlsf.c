@@ -57,12 +57,6 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-#  define MM_MPOOL_BIT (1 << 0)
-#  define MM_IS_FROM_MEMPOOL(mem) \
-          ((*((FAR size_t *)(mem) - 1)) & MM_MPOOL_BIT) == 0
-#endif
-
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
 #  define MEMPOOL_NPOOLS (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / tlsf_align_size())
 #endif
 
@@ -654,9 +648,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (MM_IS_FROM_MEMPOOL(mem))
+  if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
     {
-      mempool_multiple_free(heap->mm_mpool, mem);
       return;
     }
 #endif
@@ -954,9 +947,10 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (MM_IS_FROM_MEMPOOL(mem))
+  ssize_t size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
+  if (size >= 0)
     {
-      return mempool_multiple_alloc_size(heap->mm_mpool, mem);
+      return size;
     }
 #endif
 
@@ -1113,29 +1107,18 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (MM_IS_FROM_MEMPOOL(oldmem))
+  newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
+  if (newmem != NULL)
     {
-      newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
-      if (newmem != NULL)
-        {
-          return newmem;
-        }
-
-      newmem = mm_malloc(heap, size);
-      if (newmem != NULL)
-        {
-          memcpy(newmem, oldmem, size);
-          mempool_multiple_free(heap->mm_mpool, oldmem);
-        }
-
       return newmem;
     }
-  else
+  else if (size <= CONFIG_MM_HEAP_MEMPOOL_THRESHOLD ||
+           mempool_multiple_alloc_size(heap->mm_mpool, oldmem) >= 0)
     {
-      newmem = mempool_multiple_alloc(heap->mm_mpool, size);
-      if (newmem != NULL)
+      newmem = mm_malloc(heap, size);
+      if (newmem != 0)
         {
-          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(heap, oldmem)));
+          memcpy(newmem, oldmem, size);
           mm_free(heap, oldmem);
           return newmem;
         }
