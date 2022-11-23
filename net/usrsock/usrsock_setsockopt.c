@@ -174,10 +174,6 @@ int usrsock_setsockopt(FAR struct socket *psock, int level, int option,
         {
           return -ENOPROTOOPT;
         }
-      else
-        {
-          return -EINVAL;
-        }
     }
 
   net_lock();
