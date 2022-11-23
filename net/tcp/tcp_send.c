@@ -168,6 +168,10 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   tcp->urgp[0] = 0;
   tcp->urgp[1] = 0;
 
+  /* Update device buffer length before setup the IP header */
+
+  iob_update_pktlen(dev->d_iob, dev->d_len);
+
   /* Calculate chk & build L3 header */
 
 #ifdef CONFIG_NET_IPv6
@@ -263,8 +267,14 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len)
 {
-  FAR struct tcp_hdr_s *tcp = tcp_header(dev);
+  FAR struct tcp_hdr_s *tcp;
 
+  if (dev->d_iob == NULL)
+    {
+      return;
+    }
+
+  tcp            = tcp_header(dev);
   tcp->flags     = flags;
   dev->d_len     = len;
   tcp->tcpoffset = (TCP_HDRLEN / 4) << 4;
@@ -290,17 +300,24 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
 void tcp_reset(FAR struct net_driver_s *dev)
 {
-  FAR struct tcp_hdr_s *tcp = tcp_header(dev);
+  FAR struct tcp_hdr_s *tcp;
   uint32_t ackno;
   uint16_t tmp16;
   uint16_t acklen = 0;
   uint8_t seqbyte;
+
+  if (dev->d_iob == NULL)
+    {
+      return;
+    }
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.rst++;
 #endif
 
   /* TCP setup */
+
+  tcp = tcp_header(dev);
 
   if ((tcp->flags & TCP_SYN) != 0 || (tcp->flags & TCP_FIN) != 0)
     {
@@ -313,7 +330,12 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
     {
       FAR struct ipv6_hdr_s *ip = IPv6BUF;
+
       acklen += (ip->len[0] << 8 | ip->len[1]);
+
+      /* Set the packet length to the size of the IPv6 + TCP headers */
+
+      dev->d_len = IPv6TCP_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -323,7 +345,12 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
     {
       FAR struct ipv4_hdr_s *ip = IPv4BUF;
+
       acklen += (ip->len[0] << 8) + ip->len[1] - (ip->vhl & 0x0f) * 4;
+
+      /* Set the packet length to the size of the IPv4 + TCP headers */
+
+      dev->d_len = IPv4TCP_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -373,6 +400,10 @@ void tcp_reset(FAR struct net_driver_s *dev)
   tcp->urgp[0] = 0;
   tcp->urgp[0] = 0;
 
+  /* Update device buffer length before setup the IP header */
+
+  iob_update_pktlen(dev->d_iob, dev->d_len);
+
   /* Calculate chk & build L3 header */
 
 #ifdef CONFIG_NET_IPv6
@@ -381,10 +412,6 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
     {
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-
-      /* Set the packet length to the size of the IPv6 + TCP headers */
-
-      dev->d_len = IPv6TCP_HDRLEN;
 
       ipv6_build_header(ipv6, dev->d_len - IPv6_HDRLEN,
                         IP_PROTO_TCP, dev->d_ipv6addr, ipv6->srcipaddr,
@@ -401,10 +428,6 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
     {
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
-
-      /* Set the packet length to the size of the IPv4 + TCP headers */
-
-      dev->d_len = IPv4TCP_HDRLEN;
 
       ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_TCP,
                         &dev->d_ipaddr, (FAR in_addr_t *)ipv4->srcipaddr,
@@ -484,6 +507,11 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   FAR struct tcp_hdr_s *tcp;
   uint16_t tcp_mss;
   int16_t optlen = 0;
+
+  if (dev->d_iob == NULL)
+    {
+      return;
+    }
 
   /* Get values that vary with the underlying IP domain */
 
@@ -594,6 +622,46 @@ void tcp_send_txnotify(FAR struct socket *psock,
       netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
     }
 #endif /* CONFIG_NET_IPv6 */
+}
+
+/****************************************************************************
+ * Name: tcpip_hdrsize
+ *
+ * Description:
+ *   Get the total size of L3 and L4 TCP header
+ *
+ * Input Parameters:
+ *   conn     The connection structure associated with the socket
+ *
+ * Returned Value:
+ *   the total size of L3 and L4 TCP header
+ *
+ ****************************************************************************/
+
+uint16_t tcpip_hdrsize(FAR struct tcp_conn_s *conn)
+{
+  uint16_t hdrsize = sizeof(struct tcp_hdr_s);
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (conn->domain == PF_INET)
+    {
+      /* Select the IPv4 domain */
+
+      return sizeof(struct ipv4_hdr_s) + hdrsize;
+    }
+  else /* if (domain == PF_INET6) */
+    {
+      /* Select the IPv6 domain */
+
+      return sizeof(struct ipv6_hdr_s) + hdrsize;
+    }
+#elif defined(CONFIG_NET_IPv4)
+  ((void)conn);
+  return sizeof(struct ipv4_hdr_s) + hdrsize;
+#elif defined(CONFIG_NET_IPv6)
+  ((void)conn);
+  return sizeof(struct ipv6_hdr_s) + hdrsize;
+#endif
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

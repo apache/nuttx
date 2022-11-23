@@ -126,19 +126,19 @@ out:
  *   Copy the read data from the packet
  *
  * Input Parameters:
- *   dev      The structure of the network driver that generated the event.
+ *   dev      The structure of the network driver that generated the event
  *   pstate   recvfrom state structure
  *
  * Returned Value:
- *   The number of bytes taken from the packet.
+ *   None.
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
-                                   FAR struct udp_recvfrom_s *pstate)
+static inline size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
+                                          FAR struct udp_recvfrom_s *pstate)
 {
   size_t recvlen;
 
@@ -155,50 +155,23 @@ static size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Copy the new appdata into the user buffer */
 
-  memcpy(pstate->ir_msg->msg_iov->iov_base, dev->d_appdata, recvlen);
-  ninfo("Received %zu bytes (of %" PRIu16 ")\n", recvlen, dev->d_len);
+  recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base, dev->d_iob,
+                        recvlen, dev->d_appdata - dev->d_iob->io_data -
+                                 dev->d_iob->io_offset);
 
   /* Update the size of the data read */
 
   pstate->ir_recvlen = recvlen;
-  return recvlen;
-}
-
-/****************************************************************************
- * Name: udp_newdata
- *
- * Description:
- *   Copy the read data from the packet
- *
- * Input Parameters:
- *   dev      The structure of the network driver that generated the event
- *   pstate   recvfrom state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static inline void udp_newdata(FAR struct net_driver_s *dev,
-                               FAR struct udp_recvfrom_s *pstate)
-{
-  /* Take as much data from the packet as we can */
-
-  udp_recvfrom_newdata(dev, pstate);
-
-  /* Indicate no data in the buffer */
 
   dev->d_len = 0;
+
+  return recvlen;
 }
 
 static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 {
   FAR struct udp_conn_s *conn = pstate->ir_conn;
   FAR struct iob_s *iob;
-  int recvlen;
 
   /* Check there is any UDP datagram already buffered in a read-ahead
    * buffer.
@@ -208,44 +181,34 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
   if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
     {
-      FAR struct iob_s *tmp;
-#ifdef CONFIG_NET_IPv6
-      uint8_t srcaddr[sizeof(struct sockaddr_in6)];
-#else
-      uint8_t srcaddr[sizeof(struct sockaddr_in)];
-#endif
+      int recvlen = pstate->ir_msg->msg_iov->iov_len;
       uint8_t src_addr_size;
-      uint8_t offset  = 0;
-      uint8_t ifindex = 0;
+      uint8_t offset = 0;
+      FAR void *srcaddr;
+      uint8_t ifindex;
 
       DEBUGASSERT(iob->io_pktlen > 0);
 
-      /* Transfer that buffered data from the I/O buffer chain into
-       * the user buffer.
-       */
-
-      recvlen = iob_copyout(&src_addr_size, iob, sizeof(uint8_t), offset);
-      offset += sizeof(uint8_t);
-      if (recvlen != sizeof(uint8_t))
-        {
-          goto out;
-        }
-
-      recvlen = iob_copyout(srcaddr, iob, src_addr_size, offset);
-      offset += src_addr_size;
-      if (recvlen != src_addr_size)
-        {
-          goto out;
-        }
+      /* Unflatten saved connection information */
 
 #ifdef CONFIG_NETDEV_IFINDEX
-      recvlen = iob_copyout(&ifindex, iob, sizeof(uint8_t), offset);
-      offset += sizeof(uint8_t);
-      if (recvlen != sizeof(uint8_t))
-        {
-          goto out;
-        }
+      ifindex = iob->io_data[offset++];
+#else
+      ifindex = 0;
 #endif
+      src_addr_size = iob->io_data[offset++];
+      srcaddr = &iob->io_data[offset];
+
+      /* Copy to user */
+
+      recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base,
+                            iob, recvlen, 0);
+
+      /* Update the accumulated size of the data read */
+
+      pstate->ir_recvlen = recvlen;
+
+      ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
       if (pstate->ir_msg->msg_name)
         {
@@ -257,33 +220,13 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
                  pstate->ir_msg->msg_namelen);
         }
 
-      if (pstate->ir_msg->msg_iov->iov_len > 0)
-        {
-          recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base,
-                                iob, pstate->ir_msg->msg_iov->iov_len,
-                                offset);
-
-          ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
-
-          /* Update the accumulated size of the data read */
-
-          pstate->ir_recvlen = recvlen;
-        }
-      else
-        {
-          pstate->ir_recvlen = 0;
-        }
-
       udp_recvpktinfo(pstate, srcaddr, ifindex);
 
-out:
       /* Remove the I/O buffer chain from the head of the read-ahead
        * buffer queue.
        */
 
-      tmp = iob_remove_queue(&conn->readahead);
-      DEBUGASSERT(tmp == iob);
-      UNUSED(tmp);
+      iob_remove_queue(&conn->readahead);
 
       /* And free the I/O buffer chain */
 
@@ -481,17 +424,17 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
 
       else if ((flags & UDP_NEWDATA) != 0)
         {
+          /* Save the sender's address in the caller's 'from' location */
+
+          udp_sender(dev, pstate);
+
           /* Copy the data from the packet */
 
-          udp_newdata(dev, pstate);
+          udp_recvfrom_newdata(dev, pstate);
 
           /* We are finished. */
 
           ninfo("UDP done\n");
-
-          /* Save the sender's address in the caller's 'from' location */
-
-          udp_sender(dev, pstate);
 
           /* Don't allow any further UDP call backs. */
 
@@ -500,6 +443,12 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
           /* Indicate that the data has been consumed */
 
           flags &= ~UDP_NEWDATA;
+
+          /* Indicate no data in the buffer */
+
+          netdev_iob_release(dev);
+
+          dev->d_buf = NULL;
         }
     }
 

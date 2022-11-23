@@ -35,6 +35,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/tcp.h>
 #include <nuttx/wqueue.h>
 
 #ifdef CONFIG_NET_TCP
@@ -1250,8 +1251,9 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
-                         uint16_t nbytes);
+uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
+                         FAR struct tcp_conn_s *conn,
+                         uint16_t offset);
 
 /****************************************************************************
  * Name: tcp_backlogcreate
@@ -2043,6 +2045,22 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg);
 #if CONFIG_NET_SEND_BUFSIZE > 0
 void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
 #endif /* CONFIG_NET_SEND_BUFSIZE */
+
+/****************************************************************************
+ * Name: tcpip_hdrsize
+ *
+ * Description:
+ *   Get the total size of L3 and L4 TCP header
+ *
+ * Input Parameters:
+ *   conn     The connection structure associated with the socket
+ *
+ * Returned Value:
+ *   the total size of L3 and L4 TCP header
+ *
+ ****************************************************************************/
+
+uint16_t tcpip_hdrsize(FAR struct tcp_conn_s *conn);
 
 #ifdef __cplusplus
 }

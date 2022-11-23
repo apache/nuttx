@@ -87,82 +87,32 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
                                    unsigned int iplen)
 {
   FAR struct ipv6_hdr_s *ipv6;
-  FAR struct icmpv6_hdr_s *icmpv6;
-  FAR struct iob_s *iob;
   struct sockaddr_in6 inaddr;
-  uint16_t offset;
+  FAR struct iob_s *iob;
   uint16_t buflen;
-  uint8_t addrsize;
   int ret;
-
-  /* Try to allocate on I/O buffer to start the chain without waiting (and
-   * throttling as necessary).  If we would have to wait, then drop the
-   * packet.
-   */
-
-  iob = iob_tryalloc(true);
-  if (iob == NULL)
-    {
-      nerr("ERROR: Failed to create new I/O buffer chain\n");
-      goto drop;
-    }
 
   /* Put the IPv6 address at the beginning of the read-ahead buffer */
 
+  iob                = dev->d_iob;
   ipv6               = IPv6BUF;
   inaddr.sin6_family = AF_INET6;
   inaddr.sin6_port   = 0;
   net_ipv6addr_copy(inaddr.sin6_addr.s6_addr16, ipv6->srcipaddr);
 
-  /* Copy the src address info into the I/O buffer chain.  We will not wait
-   * for an I/O buffer to become available in this context.  It there is
-   * any failure to allocated, the entire I/O buffer chain will be discarded.
+  /* Copy the src address info into the front of I/O buffer chain which
+   * overwrites the contents of the packet header field.
    */
 
-  addrsize = sizeof(struct sockaddr_in6);
-  ret      = iob_trycopyin(iob, &addrsize, sizeof(uint8_t), 0, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_trycopyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to length to the I/O buffer chain: %d\n", ret);
-      goto drop_with_chain;
-    }
-
-  offset = sizeof(uint8_t);
-
-  ret = iob_trycopyin(iob, (FAR const uint8_t *)&inaddr,
-                      sizeof(struct sockaddr_in6), offset, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_trycopyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to source address to the I/O buffer chain: %d\n",
-           ret);
-      goto drop_with_chain;
-    }
-
-  offset += sizeof(struct sockaddr_in6);
+  memcpy(iob->io_data, &inaddr, sizeof(struct sockaddr_in6));
 
   /* Copy the new ICMPv6 reply into the I/O buffer chain (without waiting) */
 
   buflen = ICMPv6SIZE;
-  icmpv6 = IPBUF(iplen);
 
-  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPv6REPLY, buflen, offset, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_copyin return a negated error value but does
-       * not free any I/O buffers.
-       */
+  /* Trim l3 header */
 
-      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      goto drop_with_chain;
-    }
+  iob = iob_trimhead(iob, iplen);
 
   /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
    * without waiting).
@@ -172,19 +122,17 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      goto drop_with_chain;
+      iob_free_chain(iob);
+    }
+  else
+    {
+      ninfo("Buffered %d bytes\n", buflen);
     }
 
-  ninfo("Buffered %d bytes\n", buflen + addrsize + 1);
-  dev->d_len = 0;
+  /* Device buffer must be enqueue or freed, clear the handle */
+
+  netdev_iob_clear(dev);
   return buflen;
-
-drop_with_chain:
-  iob_free_chain(iob);
-
-drop:
-  dev->d_len = 0;
-  return 0;
 }
 #endif
 

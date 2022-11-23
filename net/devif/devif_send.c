@@ -65,10 +65,23 @@
  *
  ****************************************************************************/
 
-void devif_send(struct net_driver_s *dev, const void *buf, int len)
+void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
+                int len, unsigned int offset)
 {
-  DEBUGASSERT(dev != NULL && len > 0 && len < NETDEV_PKTSIZE(dev));
+  unsigned int limit = NETDEV_PKTSIZE(dev) -
+                       CONFIG_NET_LL_GUARDSIZE - offset;
 
-  memcpy(dev->d_appdata, buf, len);
-  dev->d_sndlen = len;
+  if (dev == NULL || len == 0 || len > limit)
+    {
+      nerr("ERROR: devif_send fail: %p, sndlen: %u, pktlen: %u\n",
+           dev, len, limit);
+      return;
+    }
+
+  iob_update_pktlen(dev->d_iob, offset);
+
+  /* Copy in iob to target device buffer */
+
+  dev->d_sndlen = iob_copyin(dev->d_iob, buf, len, offset, false) == len ?
+                  len : 0;
 }

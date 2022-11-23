@@ -227,10 +227,8 @@ static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
                                      FAR struct sockaddr_in *from,
                                      FAR socklen_t *fromlen)
 {
-  FAR struct sockaddr_in bitbucket;
   FAR struct iob_s *iob;
   ssize_t ret = -ENODATA;
-  int recvlen;
 
   /* Check there is any ICMP replies already buffered in a read-ahead
    * buffer.
@@ -238,68 +236,26 @@ static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
 
   if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
     {
-      FAR struct iob_s *tmp;
-      uint16_t offset;
-      uint8_t addrsize;
-
       DEBUGASSERT(iob->io_pktlen > 0);
-
-      /* Transfer that buffered data from the I/O buffer chain into
-       * the user buffer.
-       */
-
-      /* First get the size of the address */
-
-      recvlen = iob_copyout(&addrsize, iob, sizeof(uint8_t), 0);
-      if (recvlen != sizeof(uint8_t))
-        {
-          ret = -EIO;
-          goto out;
-        }
-
-      offset = sizeof(uint8_t);
-
-      if (addrsize > sizeof(struct sockaddr_in))
-        {
-          ret = -EINVAL;
-          goto out;
-        }
 
       /* Then get address */
 
-      if (from == NULL)
+      if (from != NULL)
         {
-          from = &bitbucket;
+          memcpy(from, iob->io_data, sizeof(struct sockaddr_in));
         }
 
-      recvlen = iob_copyout((FAR uint8_t *)from, iob, addrsize, offset);
-      if (recvlen != addrsize)
-        {
-          ret = -EIO;
-          goto out;
-        }
+      /* Copy to user */
 
-      if (fromlen != NULL)
-        {
-          *fromlen = addrsize;
-        }
-
-      offset += addrsize;
-
-      /* And finally, get the buffered data */
-
-      ret = (ssize_t)iob_copyout(buf, iob, buflen, offset);
+      ret = (ssize_t)iob_copyout(buf, iob, buflen, 0);
 
       ninfo("Received %ld bytes (of %u)\n", (long)ret, iob->io_pktlen);
 
-out:
       /* Remove the I/O buffer chain from the head of the read-ahead
        * buffer queue.
        */
 
-      tmp = iob_remove_queue(&conn->readahead);
-      DEBUGASSERT(tmp == iob);
-      UNUSED(tmp);
+      iob_remove_queue(&conn->readahead);
 
       /* And free the I/O buffer chain */
 
