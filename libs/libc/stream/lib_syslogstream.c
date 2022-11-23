@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/syslog_stream.c
+ * libs/libc/stream/lib_syslogstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,9 +28,8 @@
 #include <errno.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/streams.h>
 #include <nuttx/syslog/syslog.h>
-
-#include "syslog.h"
 
 /****************************************************************************
  * Private Functions
@@ -58,10 +57,10 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
       do
         {
           ssize_t nbytes = syslog_write((FAR const char *)iob->io_data,
-                                        (size_t)iob->io_len);
+                                        iob->io_len);
           if (nbytes < 0)
             {
-              ret = (int)nbytes;
+              ret = nbytes;
             }
           else
             {
@@ -177,7 +176,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslogstream_create
+ * Name: lib_syslogstream_open
  *
  * Description:
  *   Initializes a stream for use with the configured syslog interface.
@@ -192,7 +191,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  *
  ****************************************************************************/
 
-void syslogstream_create(FAR struct lib_syslogstream_s *stream)
+void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
 {
 #ifdef CONFIG_SYSLOG_BUFFER
   FAR struct iob_s *iob;
@@ -224,7 +223,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
 }
 
 /****************************************************************************
- * Name: syslogstream_destroy
+ * Name: lib_syslogstream_close
  *
  * Description:
  *   Free resources held by the syslog stream.
@@ -238,7 +237,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
  *
  ****************************************************************************/
 
-void syslogstream_destroy(FAR struct lib_syslogstream_s *stream)
+void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
 {
   DEBUGASSERT(stream != NULL);
 

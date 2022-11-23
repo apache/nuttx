@@ -30,8 +30,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
-#include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/streams.h>
 
 #include "syslog.h"
 
@@ -84,7 +84,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
    * do the work.
    */
 
-  syslogstream_create(&stream);
+  lib_syslogstream_open(&stream);
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   ts.tv_sec = 0;
@@ -230,7 +230,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   /* Flush and destroy the syslog stream buffer */
 
-  syslogstream_destroy(&stream);
-
+  lib_syslogstream_close(&stream);
   return ret;
 }
