@@ -38,6 +38,7 @@
 #include "pkt/pkt.h"
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
+#include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -75,12 +76,12 @@ net_sockif(sa_family_t family, int type, int protocol)
   switch (family)
     {
 #ifdef HAVE_INET_SOCKETS
-#ifdef HAVE_PFINET_SOCKETS
+#  ifdef HAVE_PFINET_SOCKETS
     case PF_INET:
-#endif
-#ifdef HAVE_PFINET6_SOCKETS
+#  endif
+#  ifdef HAVE_PFINET6_SOCKETS
     case PF_INET6:
-#endif
+#  endif
       sockif = inet_sockif(family, type, protocol);
       break;
 #endif
@@ -130,6 +131,13 @@ net_sockif(sa_family_t family, int type, int protocol)
     default:
       nerr("ERROR: Address family unsupported: %d\n", family);
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  if (sockif == NULL)
+    {
+      sockif = &g_usrsock_sockif;
+    }
+#endif
 
   return sockif;
 }

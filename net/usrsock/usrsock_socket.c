@@ -233,9 +233,6 @@ int usrsock_socket(int domain, int type, int protocol,
       goto errout_teardown_callback;
     }
 
-  psock->s_type = SOCK_USRSOCK_TYPE;
-  psock->s_domain = PF_USRSOCK_DOMAIN;
-  conn->type    = type;
   psock->s_conn = conn;
   conn->crefs   = 1;
 

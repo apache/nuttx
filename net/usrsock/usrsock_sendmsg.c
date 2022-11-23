@@ -226,7 +226,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
       goto errout_unlock;
     }
 
-  if (conn->type == SOCK_STREAM || conn->type == SOCK_SEQPACKET)
+  if (psock->s_type == SOCK_STREAM || psock->s_type == SOCK_SEQPACKET)
     {
       if (!conn->connected)
         {

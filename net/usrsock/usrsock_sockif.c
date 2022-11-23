@@ -99,12 +99,7 @@ const struct sock_intf_s g_usrsock_sockif =
 
 static int usrsock_sockif_setup(FAR struct socket *psock, int protocol)
 {
-  int domain = psock->s_domain;
-  int type = psock->s_type;
   int ret;
-
-  psock->s_type = PF_UNSPEC;
-  psock->s_conn = NULL;
 
   /* Let the user socket logic handle the setup...
    *
@@ -115,7 +110,7 @@ static int usrsock_sockif_setup(FAR struct socket *psock, int protocol)
    * to open socket with kernel networking stack in this case.
    */
 
-  ret = usrsock_socket(domain, type, protocol, psock);
+  ret = usrsock_socket(psock->s_domain, psock->s_type, protocol, psock);
   if (ret == -ENETDOWN)
     {
       nwarn("WARNING: usrsock daemon is not running\n");

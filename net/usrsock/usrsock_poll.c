@@ -200,8 +200,8 @@ static int usrsock_pollsetup(FAR struct socket *psock,
 
   /* Stream sockets need to be connected or connecting (or listening). */
 
-  else if ((conn->type == SOCK_STREAM ||
-            conn->type == SOCK_SEQPACKET) &&
+  else if ((psock->s_type == SOCK_STREAM ||
+            psock->s_type == SOCK_SEQPACKET) &&
           !(conn->connected || conn->state ==
             USRSOCK_CONN_STATE_CONNECTING))
     {

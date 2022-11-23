@@ -41,11 +41,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Internal socket type/domain for marking usrsock sockets */
-
-#define SOCK_USRSOCK_TYPE   0x7f
-#define PF_USRSOCK_DOMAIN   0x7f
-
 /* Internal event flags */
 
 #define USRSOCK_EVENT_CONNECT_READY (1 << 0)
@@ -84,7 +79,6 @@ struct usrsock_conn_s
 
   enum usrsock_conn_state_e state;   /* State of kernel<->daemon link for conn */
   bool          connected;           /* Socket has been connected */
-  int8_t        type;                /* Socket type (SOCK_STREAM, etc) */
   int16_t       usockid;             /* Connection number used for kernel<->daemon */
   uint16_t      flags;               /* Socket state flags */
 
