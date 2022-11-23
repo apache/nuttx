@@ -26,28 +26,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/streams.h>
 
 #include <stdbool.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is a special stream that does buffered character I/O.  NOTE that is
- * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
- * lib_outstream_s
- */
-
-struct iob_s;  /* Forward reference */
-
-struct lib_syslogstream_s
-{
-  struct lib_outstream_s public;
-#ifdef CONFIG_SYSLOG_BUFFER
-  FAR struct iob_s *iob;
-#endif
-};
 
 /****************************************************************************
  * Public Data
@@ -242,99 +222,6 @@ int syslog_add_intbuffer(int ch);
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
 int syslog_flush_intbuffer(bool force);
-#endif
-
-/****************************************************************************
- * Name: syslog_putc
- *
- * Description:
- *   This is the low-level, single character, system logging interface.
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_putc(int ch);
-
-/****************************************************************************
- * Name: syslog_write
- *
- * Description:
- *   This is the low-level, multiple character, system logging interface.
- *
- * Input Parameters:
- *   buffer - The buffer containing the data to be output
- *   buflen - The number of bytes in the buffer
- *
- * Returned Value:
- *   On success, the number of characters written is returned.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-ssize_t syslog_write(FAR const char *buffer, size_t buflen);
-
-/****************************************************************************
- * Name: syslog_force
- *
- * Description:
- *   This is the low-level system logging interface.  This version forces
- *   the output and is only used in emergency situations (e.g., in assertion
- *   handling).
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller. A negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_force(int ch);
-
-/****************************************************************************
- * Name: syslogstream_create
- *
- * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *   Only accessible from with the OS SYSLOG logic.
- *
- * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
- *
- ****************************************************************************/
-
-void syslogstream_create(FAR struct lib_syslogstream_s *stream);
-
-/****************************************************************************
- * Name: syslogstream_destroy
- *
- * Description:
- *   Free resources held by the syslog stream.
- *
- * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
- *
- * Returned Value:
- *   None (Resources freed).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSLOG_BUFFER
-void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
-#else
-#  define syslogstream_destroy(s)
 #endif
 
 #undef EXTERN

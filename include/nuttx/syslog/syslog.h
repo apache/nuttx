@@ -244,6 +244,41 @@ FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: syslog_putc
+ *
+ * Description:
+ *   This is the low-level, single character, system logging interface.
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_putc(int ch);
+
+/****************************************************************************
+ * Name: syslog_write
+ *
+ * Description:
+ *   This is the low-level, multiple character, system logging interface.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write(FAR const char *buffer, size_t buflen);
+
+/****************************************************************************
  * Name: syslog_flush
  *
  * Description:
@@ -271,6 +306,25 @@ FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath);
  ****************************************************************************/
 
 int syslog_flush(void);
+
+/****************************************************************************
+ * Name: syslog_force
+ *
+ * Description:
+ *   This is the low-level system logging interface.  This version forces
+ *   the output and is only used in emergency situations (e.g., in assertion
+ *   handling).
+ *
+ * Input Parameters:
+ *   ch - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller. A negated errno
+ *   value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_force(int ch);
 
 /****************************************************************************
  * Name: nx_vsyslog
