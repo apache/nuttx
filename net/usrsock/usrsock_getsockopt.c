@@ -189,7 +189,7 @@ int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
           *value_len = sizeof(int);
           return OK;
         }
-      else
+      else if (option == SO_RCVTIMEO || option == SO_SNDTIMEO)
         {
           return -ENOPROTOOPT;
         }
