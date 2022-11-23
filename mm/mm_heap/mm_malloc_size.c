@@ -38,6 +38,14 @@
 size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  ssize_t size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
+
+  if (size >= 0)
+    {
+      return size;
+    }
+#endif
 
   /* Protect against attempts to query a NULL reference */
 
@@ -45,13 +53,6 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       return 0;
     }
-
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (MM_IS_FROM_MEMPOOL(mem))
-    {
-      return mempool_multiple_alloc_size(heap->mm_mpool, mem);
-    }
-#endif
 
   /* Map the memory chunk into a free node */
 

@@ -190,7 +190,7 @@ config MM_HEAP_MEMPOOL_THRESHOLD
 
 config MM_HEAP_MEMPOOL_EXPAND
 	int "The expand size for each mempool in multiple mempool"
-	default 1024
+	default 4096
 	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
 	---help---
 		This size describes the size of each expansion of each memory

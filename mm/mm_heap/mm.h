@@ -134,11 +134,6 @@
 
 #define SIZEOF_MM_FREENODE sizeof(struct mm_freenode_s)
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-#  define MM_IS_FROM_MEMPOOL(mem) \
-  ((*((FAR mmsize_t *)mem - 1) & MM_ALLOC_BIT) == 0)
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
