@@ -33,7 +33,6 @@
 #include <errno.h>
 
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -122,21 +121,11 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           /* Then return the timeout value to the caller */
 
-          net_dsec2timeval(timeo, (struct timeval *)value);
-          *value_len   = sizeof(struct timeval);
+          net_dsec2timeval(timeo, (FAR struct timeval *)value);
+          *value_len = sizeof(struct timeval);
           return OK;
         }
-    }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      return -ENOPROTOOPT;
-    }
-#endif
-
-  switch (option)
-    {
       case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
         {
           if (*value_len < sizeof(int))
@@ -295,6 +284,13 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
   if (ret == -ENOPROTOOPT && level == SOL_SOCKET)
     {
       ret = psock_socketlevel_option(psock, option, value, value_len);
+    }
+
+  /* -ENOTTY really mean -ENOPROTOOPT, but skip the default action */
+
+  else if (ret == -ENOTTY)
+    {
+      ret = -ENOPROTOOPT;
     }
 
   return ret;

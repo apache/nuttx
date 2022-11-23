@@ -168,12 +168,13 @@ int usrsock_setsockopt(FAR struct socket *psock, int level, int option,
   int ret;
 
   DEBUGASSERT(conn);
-  if (level == SOL_SOCKET)
+
+  /* SO_[RCV|SND]TIMEO have to be handled locally to break the block i/o */
+
+  if (level == SOL_SOCKET && (option == SO_TYPE ||
+      option == SO_RCVTIMEO || option == SO_SNDTIMEO))
     {
-      if (option == SO_RCVTIMEO || option == SO_SNDTIMEO)
-        {
-          return -ENOPROTOOPT;
-        }
+      return -ENOPROTOOPT;
     }
 
   net_lock();
@@ -214,6 +215,13 @@ int usrsock_setsockopt(FAR struct socket *psock, int level, int option,
     }
 
   usrsock_teardown_request_callback(&state);
+
+  /* Skip the default socket option handler */
+
+  if (ret == -ENOPROTOOPT)
+    {
+      ret = -ENOTTY;
+    }
 
 errout_unlock:
   net_unlock();

@@ -29,7 +29,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET
@@ -94,38 +93,23 @@ int psock_socket(int domain, int type, int protocol,
   psock->s_conn   = NULL;
   psock->s_type   = type & SOCK_TYPE_MASK;
 
-#ifdef CONFIG_NET_USRSOCK
-  if (domain != PF_LOCAL && domain != PF_UNSPEC && domain != PF_RPMSG)
+  /* Get the socket interface */
+
+  sockif = net_sockif(domain, psock->s_type, protocol);
+  if (sockif == NULL)
     {
-      /* Handle special setup for USRSOCK sockets (user-space networking
-       * stack).
-       */
-
-      ret = g_usrsock_sockif.si_setup(psock, protocol);
-      psock->s_sockif = &g_usrsock_sockif;
-    }
-  else
-#endif /* CONFIG_NET_USRSOCK */
-    {
-      /* Get the socket interface */
-
-      sockif = net_sockif(domain, psock->s_type, protocol);
-      if (sockif == NULL)
-        {
-          nerr("ERROR: socket address family unsupported: %d\n", domain);
-          return -EAFNOSUPPORT;
-        }
-
-      /* The remaining of the socket initialization depends on the address
-       * family.
-       */
-
-      DEBUGASSERT(sockif->si_setup != NULL);
-      psock->s_sockif = sockif;
-
-      ret = sockif->si_setup(psock, protocol);
+      nerr("ERROR: socket address family unsupported: %d\n", domain);
+      return -EAFNOSUPPORT;
     }
 
+  /* The remaining of the socket initialization depends on the address
+   * family.
+   */
+
+  DEBUGASSERT(sockif->si_setup != NULL);
+  psock->s_sockif = sockif;
+
+  ret = sockif->si_setup(psock, protocol);
   if (ret >= 0)
     {
       FAR struct socket_conn_s *conn = psock->s_conn;

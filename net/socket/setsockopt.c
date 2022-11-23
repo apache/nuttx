@@ -38,7 +38,6 @@
 #include <netdev/netdev.h>
 
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -134,17 +133,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           return OK;
         }
-    }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      return -ENOPROTOOPT;
-    }
-#endif
-
-  switch (option)
-    {
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
       case SO_DEBUG:      /* Enables recording of debugging information */
       case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
@@ -327,6 +316,13 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
   if (ret == -ENOPROTOOPT && level == SOL_SOCKET)
     {
       ret = psock_socketlevel_option(psock, option, value, value_len);
+    }
+
+  /* -ENOTTY really mean -ENOPROTOOPT, but skip the default action */
+
+  else if (ret == -ENOTTY)
+    {
+      ret = -ENOPROTOOPT;
     }
 
   return ret;

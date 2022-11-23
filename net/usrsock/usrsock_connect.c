@@ -172,7 +172,7 @@ int usrsock_connect(FAR struct socket *psock,
     }
 
   if (conn->connected &&
-      (conn->type == SOCK_STREAM || conn->type == SOCK_SEQPACKET))
+      (psock->s_type == SOCK_STREAM || psock->s_type == SOCK_SEQPACKET))
     {
       /* Already connected. */
 
