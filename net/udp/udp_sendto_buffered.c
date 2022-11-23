@@ -152,6 +152,12 @@ static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
           wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
           DEBUGASSERT(wrb != NULL);
 
+          /* Do not need to release wb_iob, the life cycle of wb_iob is
+           * handed over to the network device
+           */
+
+          wrb->wb_iob = NULL;
+
           udp_wrbuffer_release(wrb);
 
           /* Set up for the next packet transfer by setting the connection
@@ -399,6 +405,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
   if (dev->d_sndlen <= 0 && (flags & UDP_NEWDATA) == 0 &&
       (flags & UDP_POLL) != 0 && !sq_empty(&conn->write_q))
     {
+      uint16_t udpiplen = udpip_hdrsize(conn);
       FAR struct udp_wrbuffer_s *wrb;
       size_t sndlen;
 
@@ -424,7 +431,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * window size.
        */
 
-      sndlen = wrb->wb_iob->io_pktlen;
+      sndlen = wrb->wb_iob->io_pktlen - udpiplen;
       ninfo("wrb=%p sndlen=%zu\n", wrb, sndlen);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
@@ -436,11 +443,16 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       sendto_ipselect(dev, conn);
 #endif
+
+      /* Release current device buffer and bypass the iob to l2 driver */
+
+      netdev_iob_release(dev);
+
       /* Then set-up to send that amount of data with the offset
        * corresponding to the size of the IP-dependent address structure.
        */
 
-      devif_iob_send(dev, wrb->wb_iob, sndlen, 0);
+      devif_iob_send(dev, wrb->wb_iob, sndlen, 0, udpiplen);
 
       /* Free the write buffer at the head of the queue and attempt to
        * setup the next transfer.
@@ -496,6 +508,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct udp_conn_s *conn;
   unsigned int timeout;
+  uint16_t udpiplen;
   bool nonblock;
   bool empty;
   int ret = OK;
@@ -737,6 +750,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           memcpy(&wrb->wb_dest, to, tolen);
         }
 
+      /* Skip l2/l3/l4 offset before copy */
+
+      udpiplen = udpip_hdrsize(conn);
+
+      iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
+      iob_update_pktlen(wrb->wb_iob, udpiplen);
+
       /* Copy the user data into the write buffer.  We cannot wait for
        * buffer space if the socket was opened non-blocking.
        */
@@ -744,7 +764,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       if (nonblock)
         {
           ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                              len, 0, false);
+                              len, udpiplen, false);
         }
       else
         {
@@ -757,7 +777,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
            */
 
           blresult = net_breaklock(&count);
-          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false);
+          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
+                           len, udpiplen, false);
           if (blresult >= 0)
             {
               net_restorelock(count);

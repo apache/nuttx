@@ -117,6 +117,15 @@ config NET_GUARDSIZE
 		packet size will be chopped down to the size indicated in the TCP
 		header.
 
+config NET_LL_GUARDSIZE
+	int "Data Link Layer(L2) Guard size of Network buffer(IOB)"
+	default 14 if NET_ETHERNET
+	default 0
+	---help---
+		This is reserved l2 buffer header size of network buffer to isolate
+		the L2/L3 (MAC/IP) data on Network layer, which will be beneficial
+		to L3 network layer protocol transparent transmission and forwarding
+
 config NET_RECV_BUFSIZE
 	int "Net Receive buffer size"
 	default 0

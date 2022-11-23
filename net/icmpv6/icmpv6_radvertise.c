@@ -193,6 +193,10 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   ipv6addr_mask(prefix->prefix, dev->d_ipv6addr, dev->d_ipv6netmask);
 #endif /* CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 
+  /* Update device buffer length */
+
+  iob_update_pktlen(dev->d_iob, IPv6_HDRLEN + l3size);
+
   /* Calculate the checksum over both the ICMP header and payload */
 
   adv->chksum  = 0;

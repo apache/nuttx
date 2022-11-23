@@ -209,10 +209,8 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *   receive the data.
  *
  * Input Parameters:
+ *   dev  - The device which as active when the event was detected.
  *   conn - A pointer to the CAN connection structure
- *   buffer - A pointer to the buffer to be copied to the read-ahead
- *     buffers
- *   buflen - The number of bytes to copy to the read-ahead buffer.
  *
  * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
@@ -225,8 +223,8 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
-                         uint16_t buflen);
+uint16_t can_datahandler(FAR struct net_driver_s *dev,
+                         FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_recvmsg

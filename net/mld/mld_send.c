@@ -159,6 +159,10 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
   dev->d_sndlen  = RASIZE + mldsize;
 
+  /* Update device buffer length */
+
+  iob_update_pktlen(dev->d_iob, dev->d_len);
+
   /* Select the IPv6 destination address.
    * This varies with the type of message being sent:
    *

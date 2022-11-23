@@ -185,15 +185,19 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ipv6_input
+ * Name: ipv6_in
  *
  * Description:
  *   Receive an IPv6 packet from the network device.  Verify and forward to
  *   L3 packet handling logic if the packet is destined for us.
+ *
+ *   This is the iob buffer version of ipv6_input(),
+ *   this function will support send/receive iob vectors directly between
+ *   the driver and l3/l4 stack to avoid unnecessary memory copies,
+ *   especially on hardware that supports Scatter/gather, which can
+ *   greatly improve performance
+ *   this function will uses d_iob as packets input which used by some
+ *   NICs such as celluler net driver.
  *
  * Input Parameters:
  *   dev   - The device on which the packet was received and which contains
@@ -214,11 +218,10 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int ipv6_input(FAR struct net_driver_s *dev)
+static int ipv6_in(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR uint8_t *payload;
-  uint16_t llhdrlen;
   uint16_t iphdrlen;
   uint16_t paylen;
   uint8_t nxthdr;
@@ -251,14 +254,11 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
   /* Get the size of the packet minus the size of link layer header */
 
-  llhdrlen = NET_LL_HDRLEN(dev);
-  if ((llhdrlen + IPv6_HDRLEN) > dev->d_len)
+  if (IPv6_HDRLEN > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv6 header\n");
       goto drop;
     }
-
-  dev->d_len -= llhdrlen;
 
   /* Make sure that all packet processing logic knows that there is an IPv6
    * packet in the device buffer.
@@ -287,11 +287,12 @@ int ipv6_input(FAR struct net_driver_s *dev)
   paylen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] +
            IPv6_HDRLEN;
 
-  if (paylen <= dev->d_len)
+  if (paylen < dev->d_len)
     {
+      iob_update_pktlen(dev->d_iob, paylen);
       dev->d_len = paylen;
     }
-  else
+  else if (paylen > dev->d_len)
     {
       nwarn("WARNING: IP packet shorter than length in IP header\n");
       goto drop;
@@ -524,5 +525,58 @@ drop:
 #endif
   dev->d_len = 0;
   return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv6_input
+ *
+ * Description:
+ *   Receive an IPv6 packet from the network device.  Verify and forward to
+ *   L3 packet handling logic if the packet is destined for us.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the IPv6 packet.
+ * Returned Value:
+ *   OK    - The packet was processed (or dropped) and can be discarded.
+ *   ERROR - Hold the packet and try again later.  There is a listening
+ *           socket but no receive in place to catch the packet yet.  The
+ *           device's d_len will be set to zero in this case as there is
+ *           no outgoing data.
+ *
+ *   If this function returns to the network driver with dev->d_len > 0,
+ *   that is an indication to the driver that there is an outgoing response
+ *   to this input.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int ipv6_input(FAR struct net_driver_s *dev)
+{
+  FAR uint8_t *buf;
+  int ret;
+
+  if (dev->d_iob != NULL)
+    {
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                        NET_LL_HDRLEN(dev)];
+      ret = ipv6_in(dev);
+
+      dev->d_buf = buf;
+
+      return ret;
+    }
+
+  return netdev_input(dev, ipv6_in, true);
 }
 #endif /* CONFIG_NET_IPv6 */

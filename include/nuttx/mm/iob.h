@@ -127,7 +127,7 @@ struct iob_s
 #if CONFIG_IOB_HEADSIZE > 0
   uint8_t  io_head[CONFIG_IOB_HEADSIZE];
 #endif
-  uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+  uint8_t  io_data[CONFIG_IOB_BUFSIZE] aligned_data(CONFIG_IOB_ALIGNMENT);
 };
 
 #if CONFIG_IOB_NCHAINS > 0

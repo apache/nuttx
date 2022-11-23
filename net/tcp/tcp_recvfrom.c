@@ -113,6 +113,7 @@ static inline void tcp_update_recvlen(FAR struct tcp_recvfrom_s *pstate,
 static size_t tcp_recvfrom_newdata(FAR struct net_driver_s *dev,
                                    FAR struct tcp_recvfrom_s *pstate)
 {
+  unsigned int offset;
   size_t recvlen;
 
   /* Get the length of the data to return */
@@ -128,7 +129,14 @@ static size_t tcp_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Copy the new appdata into the user buffer */
 
-  memcpy(pstate->ir_buffer, dev->d_appdata, recvlen);
+  offset = (dev->d_appdata - dev->d_iob->io_data) - dev->d_iob->io_offset;
+
+  recvlen = iob_copyout(pstate->ir_buffer, dev->d_iob, recvlen, offset);
+
+  /* Trim the copied buffers */
+
+  dev->d_iob = iob_trimhead(dev->d_iob, recvlen + offset);
+
   ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
@@ -172,11 +180,10 @@ static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
-      uint16_t buflen = dev->d_len - recvlen;
       uint16_t nsaved;
+      uint16_t buflen = dev->d_len - recvlen;
 
-      nsaved = tcp_datahandler(conn, buffer, buflen);
+      nsaved = tcp_datahandler(dev, conn, 0);
       if (nsaved < buflen)
         {
           nwarn("WARNING: packet data not fully saved "
@@ -188,6 +195,10 @@ static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
         }
 
       recvlen += nsaved;
+    }
+  else
+    {
+      netdev_iob_release(dev);
     }
 
   if (recvlen < dev->d_len)
@@ -379,15 +390,15 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
 
       if ((flags & TCP_NEWDATA) != 0)
         {
+          /* Save the sender's address in the caller's 'from' location */
+
+          tcp_sender(dev, pstate);
+
           /* Copy the data from the packet (saving any unused bytes from the
            * packet in the read-ahead buffer).
            */
 
           flags = tcp_newdata(dev, pstate, flags);
-
-          /* Save the sender's address in the caller's 'from' location */
-
-          tcp_sender(dev, pstate);
 
           /* Indicate that the data has been consumed and that an ACK
            * should be sent.

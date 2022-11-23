@@ -72,6 +72,11 @@
 
 #include "sim_internal.h"
 
+#if CONFIG_IOB_BUFSIZE >= (MAX_NETDEV_PKTSIZE + \
+    CONFIG_NET_GUARDSIZE + CONFIG_NET_LL_GUARDSIZE)
+#  define SIM_NETDEV_IOB_OFFLOAD
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -95,12 +100,23 @@ static struct net_driver_s g_sim_dev[CONFIG_SIM_NETDEV_NUMBER];
  * Private Functions
  ****************************************************************************/
 
-static void netdriver_reply(struct net_driver_s *dev)
+static void netdriver_send(struct net_driver_s *dev)
 {
   int devidx = (intptr_t)dev->d_private;
+#ifdef SIM_NETDEV_IOB_OFFLOAD
+  uint8_t *buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                      NET_LL_HDRLEN(dev)];
+#else
+  uint8_t *buf = dev->d_buf;
+#endif
 
   UNUSED(devidx);
 
+  sim_netdev_send(devidx, buf, dev->d_len);
+}
+
+static void netdriver_reply(struct net_driver_s *dev)
+{
   /* If the receiving resulted in data that should be sent out on
    * the network, the field d_len is set to a value > 0.
    */
@@ -110,7 +126,7 @@ static void netdriver_reply(struct net_driver_s *dev)
       /* Send the packet */
 
       NETDEV_TXPACKETS(dev);
-      sim_netdev_send(devidx, dev->d_buf, dev->d_len);
+      netdriver_send(dev);
       NETDEV_TXDONE(dev);
     }
 }
@@ -131,6 +147,14 @@ static void netdriver_recv_work(void *arg)
 
   while (sim_netdev_avail(devidx))
     {
+#ifdef SIM_NETDEV_IOB_OFFLOAD
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          netdriver_txdone_interrupt(dev);
+          break;
+        }
+#endif
+
       /* sim_netdev_read will return 0 on a timeout event and > 0
        * on a data received event
        */
@@ -141,6 +165,10 @@ static void netdriver_recv_work(void *arg)
       if (dev->d_len > 0)
         {
           NETDEV_RXPACKETS(dev);
+
+#ifdef SIM_NETDEV_IOB_OFFLOAD
+          iob_update_pktlen(dev->d_iob, dev->d_len - NET_LL_HDRLEN(dev));
+#endif
 
           /* Data received event.  Check for valid Ethernet header with
            * destination == our MAC address
@@ -208,7 +236,7 @@ static void netdriver_recv_work(void *arg)
 
                   if (dev->d_len > 0)
                     {
-                      sim_netdev_send(devidx, dev->d_buf, dev->d_len);
+                      netdriver_send(dev);
                     }
                 }
               else
@@ -224,6 +252,10 @@ static void netdriver_recv_work(void *arg)
               NETDEV_RXERRORS(dev);
             }
         }
+
+#ifdef SIM_NETDEV_IOB_OFFLOAD
+      netdev_iob_release(dev);
+#endif
     }
 
   net_unlock();
@@ -231,14 +263,10 @@ static void netdriver_recv_work(void *arg)
 
 static int netdriver_txpoll(struct net_driver_s *dev)
 {
-  int devidx = (intptr_t)dev->d_private;
-
-  UNUSED(devidx);
-
   /* Send the packet */
 
   NETDEV_TXPACKETS(dev);
-  sim_netdev_send(devidx, dev->d_buf, dev->d_len);
+  netdriver_send(dev);
   NETDEV_TXDONE(dev);
 
   /* If zero is returned, the polling will continue until all connections
@@ -321,9 +349,8 @@ static void netdriver_rxready_interrupt(void *priv)
 int sim_netdriver_init(void)
 {
   struct net_driver_s *dev;
-  void *pktbuf;
-  int pktsize;
   int devidx;
+
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
       dev = &g_sim_dev[devidx];
@@ -334,22 +361,19 @@ int sim_netdriver_init(void)
                   netdriver_txdone_interrupt,
                   netdriver_rxready_interrupt);
 
-      /* Update the buffer size */
-
-      pktsize = dev->d_pktsize ? dev->d_pktsize :
-                (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE);
-
       /* Allocate packet buffer */
 
-      pktbuf = kmm_malloc(pktsize);
-      if (pktbuf == NULL)
+#ifndef SIM_NETDEV_IOB_OFFLOAD
+      dev->d_buf = kmm_malloc(dev->d_pktsize != 0 ?
+                              dev->d_pktsize :
+                              (MAX_NETDEV_PKTSIZE +
+                               CONFIG_NET_GUARDSIZE));
+      if (dev->d_buf == NULL)
         {
           return -ENOMEM;
         }
+#endif
 
-      /* Set callbacks */
-
-      dev->d_buf     = pktbuf;
       dev->d_ifup    = netdriver_ifup;
       dev->d_ifdown  = netdriver_ifdown;
       dev->d_txavail = netdriver_txavail;

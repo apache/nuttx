@@ -41,7 +41,7 @@ config IOB_HEADSIZE
 
 config IOB_ALIGNMENT
 	int "Alignment size of each I/O buffer"
-	default 1
+	default 4
 	---help---
 		The member io_head of all I/O buffers is aligned to the value
 		specified by this configuration.

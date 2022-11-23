@@ -26,6 +26,10 @@ NETDEV_CSRCS += netdev_count.c netdev_ifconf.c netdev_foreach.c
 NETDEV_CSRCS += netdev_unregister.c netdev_carrier.c netdev_default.c
 NETDEV_CSRCS += netdev_verify.c netdev_lladdrsize.c
 
+ifeq ($(CONFIG_MM_IOB),y)
+NETDEV_CSRCS += netdev_input.c netdev_iob.c
+endif
+
 ifeq ($(CONFIG_NETDOWN_NOTIFIER),y)
 SOCK_CSRCS += netdown_notifier.c
 endif

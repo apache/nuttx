@@ -100,28 +100,14 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   FAR struct ipv4_hdr_s *ipv4;
   struct sockaddr_in inaddr;
   FAR struct iob_s *iob;
-  uint16_t offset;
-  uint16_t buflen;
   uint16_t iphdrlen;
-  uint8_t addrsize;
+  uint16_t buflen;
   int ret;
-
-  /* Try to allocate on I/O buffer to start the chain without waiting (and
-   * throttling as necessary).  If we would have to wait, then drop the
-   * packet.
-   */
-
-  iob = iob_tryalloc(true);
-  if (iob == NULL)
-    {
-      nerr("ERROR: Failed to create new I/O buffer chain\n");
-      goto drop;
-    }
 
   /* Put the IPv4 address at the beginning of the read-ahead buffer */
 
-  ipv4 = IPv4BUF;
-
+  iob               = dev->d_iob;
+  ipv4              = IPv4BUF;
   inaddr.sin_family = AF_INET;
   inaddr.sin_port   = 0;
 
@@ -129,57 +115,23 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
                     net_ip4addr_conv32(ipv4->srcipaddr));
   memset(inaddr.sin_zero, 0, sizeof(inaddr.sin_zero));
 
-  /* Copy the src address info into the I/O buffer chain.  We will not wait
-   * for an I/O buffer to become available in this context.  It there is
-   * any failure to allocated, the entire I/O buffer chain will be discarded.
-   */
-
-  addrsize = sizeof(struct sockaddr_in);
-  ret      = iob_trycopyin(iob, &addrsize, sizeof(uint8_t), 0, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_trycopyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to length to the I/O buffer chain: %d\n", ret);
-      goto drop_with_chain;
-    }
-
-  offset = sizeof(uint8_t);
-
-  ret = iob_trycopyin(iob, (FAR const uint8_t *)&inaddr,
-                      sizeof(struct sockaddr_in), offset, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_trycopyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to source address to the I/O buffer chain: %d\n",
-           ret);
-      goto drop_with_chain;
-    }
-
-  offset += sizeof(struct sockaddr_in);
-
   /* Get the IP header length (accounting for possible options). */
 
   iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
 
+  /* Copy the src address info into the front of I/O buffer chain which
+   * overwrites the contents of the packet header field.
+   */
+
+  memcpy(iob->io_data, &inaddr, sizeof(struct sockaddr_in));
+
   /* Copy the new ICMP reply into the I/O buffer chain (without waiting) */
 
   buflen = ICMPSIZE(iphdrlen);
-  ret = iob_trycopyin(iob, IPBUF(iphdrlen), buflen, offset, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_copyin return a negated error value but does
-       * not free any I/O buffers.
-       */
 
-      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      goto drop_with_chain;
-    }
+  /* Trim l3 header */
+
+  iob = iob_trimhead(iob, iphdrlen);
 
   /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
    * without waiting).
@@ -189,19 +141,18 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      goto drop_with_chain;
+      iob_free_chain(iob);
+    }
+  else
+    {
+      ninfo("Buffered %d bytes\n", buflen);
     }
 
-  ninfo("Buffered %d bytes\n", buflen + addrsize + 1);
-  dev->d_len = 0;
+  /* Device buffer must be enqueue or freed, clear the handle */
+
+  netdev_iob_clear(dev);
+
   return buflen;
-
-drop_with_chain:
-  iob_free_chain(iob);
-
-drop:
-  dev->d_len = 0;
-  return 0;
 }
 #endif
 

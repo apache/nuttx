@@ -265,35 +265,9 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
     }
 #endif
 
-  /* Try to allocate the head of an IOB chain.  If this fails, the
-   * packet will be dropped; we are not operating in a context
-   * where waiting for an IOB is a good idea
-   */
+  /* Relay the device buffer */
 
-  fwd->f_iob = iob_tryalloc(false);
-  if (fwd->f_iob == NULL)
-    {
-      nwarn("WARNING: iob_tryalloc() failed\n");
-      ret = -ENOMEM;
-      goto errout_with_fwd;
-    }
-
-  /* Copy the L2/L3 headers plus any following payload into an IOB chain.
-   * iob_trycopin() will not wait, but will fail there are no available
-   * IOBs.
-   *
-   * REVISIT: Consider an alternative design that does not require data
-   * copying.  This would require a pool of d_buf's that are managed by
-   * the network rather than the network device.
-   */
-
-  ret = iob_trycopyin(fwd->f_iob, (FAR const uint8_t *)ipv4,
-                      dev->d_len, 0, false);
-  if (ret < 0)
-    {
-      nwarn("WARNING: iob_trycopyin() failed: %d\n", ret);
-      goto errout_with_iobchain;
-    }
+  fwd->f_iob = dev->d_iob;
 
   /* Decrement the TTL in the copy of the IPv4 header (retaining the
    * original TTL in the source to handle the broadcast case).  If the
@@ -305,7 +279,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
     {
       nwarn("WARNING: Hop limit exceeded... Dropping!\n");
       ret = -EMULTIHOP;
-      goto errout_with_iobchain;
+      goto errout_with_fwd;
     }
 
 #ifdef CONFIG_NET_NAT
@@ -317,7 +291,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
   if (ret < 0)
     {
       nwarn("WARNING: Performing NAT outbound failed, dropping!\n");
-      goto errout_with_iobchain;
+      goto errout_with_fwd;
     }
 #endif
 
@@ -326,14 +300,8 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
   ret = ipfwd_forward(fwd);
   if (ret >= 0)
     {
-      dev->d_len = 0;
+      netdev_iob_clear(dev);
       return OK;
-    }
-
-errout_with_iobchain:
-  if (fwd != NULL && fwd->f_iob != NULL)
-    {
-      iob_free_chain(fwd->f_iob);
     }
 
 errout_with_fwd:
