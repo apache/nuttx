@@ -225,6 +225,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
                                   FAR struct v4l2_fract *interval);
+static size_t video_fmt_buf_size(video_format_t *vf);
 
 /* internal function for each cmds of ioctl */
 
@@ -518,6 +519,10 @@ static void convert_to_imgdatafmt(FAR video_format_t *video,
   data->height      = video->height;
   switch (video->pixelformat)
     {
+      case V4L2_PIX_FMT_YUV420 :
+        data->pixelformat = IMGDATA_PIX_FMT_YUV420P;
+        break;
+
       case V4L2_PIX_FMT_YUYV :
         data->pixelformat = IMGDATA_PIX_FMT_YUYV;
         break;
@@ -549,6 +554,10 @@ static void convert_to_imgsensorfmt(FAR video_format_t *video,
   sensor->height      = video->height;
   switch (video->pixelformat)
     {
+      case V4L2_PIX_FMT_YUV420 :
+        sensor->pixelformat = IMGSENSOR_PIX_FMT_YUV420P;
+        break;
+
       case V4L2_PIX_FMT_YUYV :
         sensor->pixelformat = IMGSENSOR_PIX_FMT_YUYV;
         break;
@@ -1187,8 +1196,8 @@ static int video_reqbufs(FAR struct video_mng_s         *vmng,
     {
       if (reqbufs->memory == V4L2_MEMORY_MMAP)
         {
-          vmng->buf_size = type_inf->fmt[VIDEO_FMT_MAIN].width
-            * type_inf->fmt[VIDEO_FMT_MAIN].height * 2;
+          vmng->buf_size =
+            video_fmt_buf_size(&type_inf->fmt[VIDEO_FMT_MAIN]);
           if (reqbufs->count * vmng->buf_size > MAX_VIDEO_HEAP_SIZE)
             {
               reqbufs->count = MAX_VIDEO_HEAP_SIZE / vmng->buf_size;
@@ -1622,6 +1631,22 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   return g_video_data_ops->validate_frame_setting(nr_fmt, df, &di);
 }
 
+static size_t video_fmt_buf_size(video_format_t *vf)
+{
+  size_t ret = vf->width * vf->height;
+  switch (vf->pixelformat)
+    {
+      case V4L2_PIX_FMT_YUV420 :
+        return ret * 3 / 2;
+      case V4L2_PIX_FMT_YUYV :
+      case V4L2_PIX_FMT_UYVY :
+      case V4L2_PIX_FMT_RGB565 :
+      case V4L2_PIX_FMT_JPEG :
+      default:
+        return ret * 2;
+    }
+}
+
 static int video_try_fmt(FAR struct video_mng_s *priv,
                          FAR struct v4l2_format *v4l2)
 {
@@ -1672,6 +1697,7 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
 
         break;
 
+      case V4L2_PIX_FMT_YUV420:
       case V4L2_PIX_FMT_YUYV:
       case V4L2_PIX_FMT_UYVY:
       case V4L2_PIX_FMT_RGB565:

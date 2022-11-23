@@ -66,6 +66,7 @@ typedef struct
   imgdata_capture_t capture_cb;
   uint32_t capture_size;
   buf_queue_t buf_q;
+  bool start;
 } video_priv_t;
 
 /****************************************************************************
@@ -114,6 +115,7 @@ static int sim_camera_data_enq_buf(uint8_t *addr, uint32_t size);
 static int sim_camera_data_dq_buf(uint8_t **addr, struct timeval *ts);
 
 static uint32_t imgsensor_fmt_to_v4l2(uint32_t pixelformat);
+static size_t imgdata_fmt_buf_size(imgdata_format_t *df);
 
 /****************************************************************************
  * Private Data
@@ -263,7 +265,8 @@ static int sim_camera_data_start_capture
   int ret;
 
   priv.capture_cb = callback;
-  priv.capture_size = datafmt->width * datafmt->height * 2;
+  priv.capture_size = imgdata_fmt_buf_size(datafmt);
+  priv.start = true;
   ret = video_host_start_capture(priv.buf_q.num);
   if (ret < 0)
     {
@@ -280,6 +283,7 @@ static int sim_camera_data_start_capture
 
 static int sim_camera_data_stop_capture()
 {
+  priv.start = false;
   return 0;
 }
 
@@ -306,7 +310,7 @@ static int sim_camera_data_enq_buf(uint8_t *addr, uint32_t size)
       return ret;
     }
 
-  if (priv.capture_cb)
+  if (priv.start)
     {
       video_host_enq_buf(addr, size);
     }
@@ -330,6 +334,10 @@ static uint32_t imgsensor_fmt_to_v4l2(uint32_t pixelformat)
   uint32_t fourcc;
   switch (pixelformat)
     {
+      case IMGSENSOR_PIX_FMT_YUV420P:
+        fourcc = V4L2_PIX_FMT_YUV420;
+        break;
+
       case IMGSENSOR_PIX_FMT_YUYV:
         fourcc = V4L2_PIX_FMT_YUYV;
         break;
@@ -358,6 +366,22 @@ static uint32_t imgsensor_fmt_to_v4l2(uint32_t pixelformat)
     }
 
   return fourcc;
+}
+
+static size_t imgdata_fmt_buf_size(imgdata_format_t *df)
+{
+  size_t ret = df->width * df->height;
+  switch (df->pixelformat)
+    {
+      case IMGDATA_PIX_FMT_YUV420P :
+        return ret * 3 / 2;
+      case IMGDATA_PIX_FMT_YUYV :
+      case IMGDATA_PIX_FMT_JPEG :
+      case IMGDATA_PIX_FMT_RGB565 :
+      case IMGDATA_PIX_FMT_UYVY :
+      default:
+        return ret * 2;
+    }
 }
 
 /****************************************************************************
