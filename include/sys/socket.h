@@ -202,9 +202,6 @@
                             */
 #define SO_BINDTODEVICE 17 /* Bind this socket to a specific network device.
                             */
-#define SO_PEERCRED     18 /* Return the credentials of the peer process
-                            * connected to this socket.
-                            */
 
 /* The options are unsupported but included for compatibility
  * and portability
@@ -331,13 +328,6 @@ struct cmsghdr
   unsigned long cmsg_len;       /* Data byte count, including hdr */
   int cmsg_level;               /* Originating protocol */
   int cmsg_type;                /* Protocol-specific type */
-};
-
-struct ucred
-{
-  pid_t pid;
-  uid_t uid;
-  gid_t gid;
 };
 
 /****************************************************************************

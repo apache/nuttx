@@ -29,7 +29,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
@@ -129,12 +128,6 @@ FAR struct local_conn_s *local_alloc(void)
        */
 
       nxmutex_init(&conn->lc_sendlock);
-
-#ifdef CONFIG_NET_LOCAL_SCM
-      conn->lc_cred.pid = getpid();
-      conn->lc_cred.uid = getuid();
-      conn->lc_cred.gid = getgid();
-#endif
 
       /* Add the connection structure to the list of listeners */
 
