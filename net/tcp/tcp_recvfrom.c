@@ -555,7 +555,7 @@ static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
    * handler error is prioritized over any previous error.
    */
 
-  return (pstate->ir_result <= 0) ? pstate->ir_result : result;
+  return (pstate->ir_result < 0) ? pstate->ir_result : result;
 }
 
 /****************************************************************************
