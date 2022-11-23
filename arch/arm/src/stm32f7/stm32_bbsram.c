@@ -39,7 +39,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <time.h>
-#include <mutex.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/crc32.h>
 
