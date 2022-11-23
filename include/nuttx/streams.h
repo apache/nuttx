@@ -31,6 +31,9 @@
 #include <stdio.h>
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 #include <nuttx/fs/fs.h>
+#ifdef CONFIG_MTD
+#include <nuttx/mtd/mtd.h>
+#endif
 #endif
 
 /****************************************************************************
@@ -206,6 +209,16 @@ struct lib_blkoutstream_s
   struct lib_outstream_s public;
   FAR struct inode      *inode;
   struct geometry        geo;
+  FAR unsigned char     *cache;
+};
+#endif
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+struct lib_mtdoutstream_s
+{
+  struct lib_outstream_s public;
+  FAR struct inode      *inode;
+  struct mtd_geometry_s  geo;
   FAR unsigned char     *cache;
 };
 #endif
@@ -425,6 +438,46 @@ int lib_blkoutstream_open(FAR struct lib_blkoutstream_s *stream,
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream);
+#endif
+
+/****************************************************************************
+ * Name: lib_mtdoutstream_open
+ *
+ * Description:
+ *  mtd driver stream backend
+ *
+ * Input Parameters:
+ *   stream   - User allocated, uninitialized instance of struct
+ *                lib_mtdoutstream_s to be initialized.
+ *   name     - The full path of mtd device.
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
+                          FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: lib_mtdoutstream_close
+ *
+ * Description:
+ *  close mtd driver stream backend
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_mtdoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+void lib_mtdoutstream_close(FAR struct lib_mtdoutstream_s *stream);
 #endif
 
 /****************************************************************************
