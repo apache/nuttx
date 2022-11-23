@@ -790,6 +790,24 @@
 #  define vinfo       _none
 #endif
 
+#ifdef CONFIG_DEBUG_VIRTIO_ERROR
+#  define vrterr      _err
+#else
+#  define vrterr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_VIRTIO_WARN
+#  define vrtwarn     _warn
+#else
+#  define vrtwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_VIRTIO_INFO
+#  define vrtinfo     _info
+#else
+#  define vrtinfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR
