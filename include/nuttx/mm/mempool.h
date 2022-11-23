@@ -354,10 +354,14 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
  *   blk  - The pointer of memory block.
+ *
+ * Returned Value:
+ *   Zero on success; Negative number mean the block doesn't come from pool.
+ *
  ****************************************************************************/
 
-void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
-                           FAR void *blk);
+int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
+                          FAR void *blk);
 
 /****************************************************************************
  * Name: mempool_multiple_alloc_size
@@ -370,12 +374,13 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
  *   blk  - The pointer of memory block.
  *
  * Returned Value:
- *   The size of memory block.
+ *   The size of memory block on success. Negative number mean the block
+ *   doesn't come from pool.
  *
  ****************************************************************************/
 
-size_t mempool_multiple_alloc_size(FAR struct mempool_multiple_s *mpool,
-                                   FAR void *blk);
+ssize_t mempool_multiple_alloc_size(FAR struct mempool_multiple_s *mpool,
+                                    FAR void *blk);
 
 /****************************************************************************
  * Name: mempool_multiple_memalign
