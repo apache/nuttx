@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_DISABLE_OS_API is not set
+# CONFIG_NET_ARP is not set
 # CONFIG_NSH_DISABLE_LOSMART is not set
 # CONFIG_NSH_NETINIT is not set
 CONFIG_16550_ADDRWIDTH=0
