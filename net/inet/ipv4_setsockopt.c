@@ -71,7 +71,6 @@
 int ipv4_setsockopt(FAR struct socket *psock, int option,
                     FAR const void *value, socklen_t value_len)
 {
-#ifdef CONFIG_NET_IGMP
   int ret;
 
   ninfo("option: %d\n", option);
@@ -86,6 +85,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
   net_lock();
   switch (option)
     {
+#ifdef CONFIG_NET_IGMP
       case IP_MSFILTER:    /* Access advanced, full-state filtering API */
         {
 #if 0 /* REVISIT:  This is not a proper implementation of IP_MSGFILTER */
@@ -203,7 +203,35 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             }
         }
         break;
+#endif
 
+      /* The following IPv4 socket options are defined, but not implemented */
+
+      case IP_MULTICAST_IF:           /* Set local device for a multicast
+                                       * socket */
+      case IP_MULTICAST_LOOP:         /* Set/read boolean that determines
+                                       * whether sent multicast packets
+                                       * should be looped back to local
+                                       * sockets. */
+      case IP_UNBLOCK_SOURCE:         /* Unblock previously blocked multicast
+                                       * source */
+      case IP_BLOCK_SOURCE:           /* Stop receiving multicast data from
+                                       * source */
+      case IP_ADD_SOURCE_MEMBERSHIP:  /* Join a multicast group; allow receive
+                                       * only from source */
+      case IP_DROP_SOURCE_MEMBERSHIP: /* Leave a source-specific group.  Stop
+                                       * receiving data from a given multicast
+                                       * group that come from a given source */
+      case IP_MULTICAST_ALL:          /* Modify the delivery policy of
+                                       * multicast messages bound to
+                                       * INADDR_ANY */
+#warning Missing logic
+        nwarn("WARNING: Unimplemented IPv4 option: %d\n", option);
+        ret = -ENOSYS;
+        break;
+#endif /* CONFIG_NET_IGMP */
+
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
       case IP_PKTINFO:
         {
           FAR struct udp_conn_s *conn;
@@ -233,31 +261,6 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         break;
 #endif
 
-      /* The following IPv4 socket options are defined, but not implemented */
-
-      case IP_MULTICAST_IF:           /* Set local device for a multicast
-                                       * socket */
-      case IP_MULTICAST_LOOP:         /* Set/read boolean that determines
-                                       * whether sent multicast packets
-                                       * should be looped back to local
-                                       * sockets. */
-      case IP_UNBLOCK_SOURCE:         /* Unblock previously blocked multicast
-                                       * source */
-      case IP_BLOCK_SOURCE:           /* Stop receiving multicast data from
-                                       * source */
-      case IP_ADD_SOURCE_MEMBERSHIP:  /* Join a multicast group; allow receive
-                                       * only from source */
-      case IP_DROP_SOURCE_MEMBERSHIP: /* Leave a source-specific group.  Stop
-                                       * receiving data from a given multicast
-                                       * group that come from a given source */
-      case IP_MULTICAST_ALL:          /* Modify the delivery policy of
-                                       * multicast messages bound to
-                                       * INADDR_ANY */
-#warning Missing logic
-        nwarn("WARNING: Unimplemented IPv4 option: %d\n", option);
-        ret = -ENOSYS;
-        break;
-
       default:
         nerr("ERROR: Unrecognized IPv4 option: %d\n", option);
         ret = -ENOPROTOOPT;
@@ -266,9 +269,6 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 
   net_unlock();
   return ret;
-#else
-  return -ENOPROTOOPT;
-#endif
 }
 
 #endif /* CONFIG_NET_IPv4 */
