@@ -58,18 +58,18 @@ typedef CODE int  (*lib_flush_t)(FAR struct lib_outstream_s *this);
 
 struct lib_instream_s
 {
-  lib_getc_t             get;     /* Get one character from the instream */
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
+  lib_getc_t             get;     /* Get one character from the instream */
 };
 
 struct lib_outstream_s
 {
+  int                    nput;    /* Total number of characters put.  Written
+                                   * by put method, readable by user */
   lib_putc_t             put;     /* Put one character to the outstream */
   lib_puts_t             puts;    /* Writes the string to the outstream */
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
-  int                    nput;    /* Total number of characters put.  Written
-                                   * by put method, readable by user */
 };
 
 /* Seek-able streams */
@@ -81,25 +81,28 @@ typedef CODE off_t (*lib_siseek_t)(FAR struct lib_sistream_s *this,
 
 struct lib_sostream_s;
 typedef CODE void  (*lib_soputc_t)(FAR struct lib_sostream_s *this, int ch);
+typedef CODE int   (*lib_soputs_t)(FAR struct lib_sostream_s *this,
+                                   FAR const void *buf, int len);
 typedef CODE int   (*lib_soflush_t)(FAR struct lib_sostream_s *this);
 typedef CODE off_t (*lib_soseek_t)(FAR struct lib_sostream_s *this,
                                    off_t offset, int whence);
 
 struct lib_sistream_s
 {
-  lib_sigetc_t           get;     /* Get one character from the instream */
-  lib_siseek_t           seek;    /* Seek to a position in the instream */
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
+  lib_sigetc_t           get;     /* Get one character from the instream */
+  lib_siseek_t           seek;    /* Seek to a position in the instream */
 };
 
 struct lib_sostream_s
 {
-  lib_soputc_t           put;     /* Put one character to the outstream */
-  lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
-  lib_soseek_t           seek;    /* Seek a position in the output stream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
+  lib_soputc_t           put;     /* Put one character to the outstream */
+  lib_soputs_t           puts;    /* Writes the string to the outstream */
+  lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
+  lib_soseek_t           seek;    /* Seek a position in the output stream */
 };
 
 /* These are streams that operate on a fixed-sized block of memory */
