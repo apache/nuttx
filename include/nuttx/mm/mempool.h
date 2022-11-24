@@ -39,7 +39,7 @@
 
 struct mempool_s;
 typedef CODE void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
-                                      size_t alignment, size_t size);
+                                      size_t size);
 typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
                                     FAR void *addr);
 
