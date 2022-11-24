@@ -37,6 +37,7 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/power/regulator.h>
 #include <nuttx/sensors/sensor.h>
+#include <nuttx/segger/rtt.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
@@ -66,6 +67,16 @@ void drivers_initialize(void)
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
+#endif
+
+#if defined(CONFIG_RTT_CHANNEL1)
+  rtt_channel_initialize(1, "rtt1", CONFIG_RTT_CHANNEL1_BUFFER_SIZE_UP,
+                         CONFIG_RTT_CHANNEL1_BUFFER_SIZE_DOWN);
+#endif
+
+#if defined(CONFIG_RTT_CHANNEL2)
+  rtt_channel_initialize(2, "rtt2", CONFIG_RTT_CHANNEL2_BUFFER_SIZE_UP,
+                         CONFIG_RTT_CHANNEL2_BUFFER_SIZE_DOWN);
 #endif
 
 #if defined(CONFIG_DEV_RANDOM)

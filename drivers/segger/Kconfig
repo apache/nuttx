@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menu "Segger RTT driver"
+
 config SEGGER_RTT
 	bool
 	---help---
@@ -77,6 +79,50 @@ config SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
 
 endchoice # SEGGER_RTT_MODE
 
+endif
+
+config RTT_CHANNEL1
+	bool "Enable RTT channel 1"
+	default n
+	---help---
+		Enable Segger J-Link RTT channel 1
+
+if RTT_CHANNEL1
+config RTT_CHANNEL1_BUFFER_SIZE_UP
+	int "RTT channel 1 tx buffer size"
+	select SEGGER_RTT
+	default 256
+	---help---
+		Configure the RTT channel 1 tx buffer size
+
+config RTT_CHANNEL1_BUFFER_SIZE_DOWN
+	int "RTT channel 1 tx buffer size"
+	default 256
+	---help---
+		Configure the RTT channel 1 rx buffer size
+endif
+
+config RTT_CHANNEL2
+	bool "Enable RTT channel 2"
+	select SEGGER_RTT
+	default n
+	---help---
+		Enable Segger J-Link RTT channel 2
+
+if RTT_CHANNEL2
+config RTT_CHANNEL2_BUFFER_SIZE_UP
+	int "RTT channel 2 tx buffer size"
+	default 256
+	---help---
+		Configure the RTT channel 2 tx buffer size
+
+config RTT_CHANNEL2_BUFFER_SIZE_DOWN
+	int "RTT channel 2 rx buffer size"
+	default 256
+	---help---
+		Configure the RTT channel 2 rx buffer size
+endif
+
 if SEGGER_SYSVIEW
 
 config SEGGER_SYSVIEW_RTT_BUFFER_SIZE
@@ -93,4 +139,4 @@ config SEGGER_SYSVIEW_RAM_BASE
 
 endif
 
-endif
+endmenu # Segger RTT driver
