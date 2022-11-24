@@ -1,0 +1,43 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_CUSTOM
+config S698PM_DKIT_WDG
+	bool "s698pm-dkit wdg kicker support"
+	depends on S698PM_WDG
+	depends on WATCHDOG
+
+config S698PM_DKIT_WDG_TIMEOUT
+	int "s698pm-dkit wdg Timeout (ms)"
+	default 1000
+	depends on S698PM_DKIT_WDG
+	---help---
+		Watchdog timeout value in milliseconds.
+
+if S698PM_DKIT_WDG
+config S698PM_DKIT_WDG_THREAD
+	bool "Watchdog Deamon Thread"
+
+if S698PM_DKIT_WDG_THREAD
+config S698PM_DKIT_WDG_THREAD_NAME
+	string "Watchdog Thread Name"
+	default "wdog"
+
+config S698PM_DKIT_WDG_THREAD_INTERVAL
+	int "Watchdog Thread Interval (ms)"
+	default 500
+
+config S698PM_DKIT_WDG_THREAD_PRIORITY
+	int "Watchdog Thread Priority"
+	default 200
+
+config S698PM_DKIT_WDG_THREAD_STACKSIZE
+	int "Watchdog Thread Stacksize"
+	default 2048
+
+endif # S698PM_DKIT_WDG_THREAD
+endif # S698PM_DKIT_WDG
+
+endif

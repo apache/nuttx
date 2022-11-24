@@ -171,7 +171,7 @@ struct up_dev_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
-  uint8_t   irq;       /* IRQ associated with this UART (for attachment) */
+  uint16_t   irq;      /* IRQ associated with this UART (for attachment) */
   uint8_t   im;        /* Interrupt mask state */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (5, 6, 7 or 8) */
