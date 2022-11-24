@@ -106,7 +106,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       newmem = mm_malloc(heap, size);
       if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, mempool_multiple_alloc_size(oldmem));
+          memcpy(newmem, oldmem,
+                 mempool_multiple_alloc_size(&heap->mm_mpool, oldmem));
           mempool_multiple_free(&heap->mm_mpool, oldmem);
         }
 
@@ -117,7 +118,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       newmem = mempool_multiple_alloc(&heap->mm_mpool, size);
       if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(oldmem)));
+          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(heap, oldmem)));
           mm_free(heap, oldmem);
           return newmem;
         }
@@ -373,7 +374,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - SIZEOF_MM_ALLOCNODE);
 
-      kasan_unpoison(newmem, mm_malloc_size(newmem));
+      kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
       if (newmem != oldmem)
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy

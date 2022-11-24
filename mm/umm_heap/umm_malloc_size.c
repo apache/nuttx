@@ -28,6 +28,8 @@
 
 #include <nuttx/mm/mm.h>
 
+#include "umm_heap.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -35,5 +37,5 @@
 #undef malloc_size /* See mm/README.txt */
 size_t malloc_size(FAR void *mem)
 {
-  return mm_malloc_size(mem);
+  return mm_malloc_size(USR_HEAP, mem);
 }

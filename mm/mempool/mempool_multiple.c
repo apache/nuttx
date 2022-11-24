@@ -272,6 +272,7 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
  *   Get size of memory block from multiple memory.
  *
  * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
  *   blk  - The pointer of memory block.
  *
  * Returned Value:
@@ -279,7 +280,8 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
  *
  ****************************************************************************/
 
-size_t mempool_multiple_alloc_size(FAR void *blk)
+size_t mempool_multiple_alloc_size(FAR struct mempool_multiple_s *mpool,
+                                   FAR void *blk)
 {
   FAR struct mempool_s *pool;
   FAR char *mem;
