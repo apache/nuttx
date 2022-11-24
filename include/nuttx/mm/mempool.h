@@ -424,64 +424,6 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
                               pid_t pid);
 
 /****************************************************************************
- * Name: mempool_multiple_fixed_alloc
- *
- * Description:
- *   Allocate an block from specific multiple memory pool.
- *   If the mempool of the corresponding size doesn't have free block,
- *   then wait until free happened or return NULL.
- *
- * Input Parameters:
- *   mpool - The handle of multiple memory pool to be used.
- *   size  - The size of alloc blk.
- *
- * Returned Value:
- *   The pointer to the allocated block on success; NULL on any failure.
- *
- ****************************************************************************/
-
-FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
-                                       size_t size);
-
-/****************************************************************************
- * Name: mempool_multiple_fixed_realloc
- *
- * Description:
- *   Change the size of the block memory pointed to by oldblk to size bytes.
- *
- * Input Parameters:
- *   mpool   - The handle of multiple memory pool to be used.
- *   oldblk  - The pointer to change the size of the block memory.
- *   oldsize - The size of block memory to oldblk.
- *   size    - The size of alloc blk.
- *
- * Returned Value:
- *   The pointer to the allocated block on success; NULL on any failure.
- *
- ****************************************************************************/
-
-FAR void *
-mempool_multiple_fixed_realloc(FAR struct mempool_multiple_s *mpool,
-                               FAR void *oldblk, size_t oldsize,
-                               size_t size);
-
-/****************************************************************************
- * Name: mempool_multiple_fixed_free
- *
- * Description:
- *   Release an memory block to the multiple mempry pool. The blk must have
- *   been returned by a previous call to mempool_multiple_fixed_alloc.
- *
- * Input Parameters:
- *   mpool - The handle of multiple memory pool to be used.
- *   blk   - The pointer of memory block.
- *   size  - The size of alloc blk.
- ****************************************************************************/
-
-void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
-                                 FAR void *blk, size_t size);
-
-/****************************************************************************
  * Name: mempool_multiple_deinit
  *
  * Description:
