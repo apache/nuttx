@@ -229,6 +229,8 @@ static void *backtrace_push_internal(void **psp, void **ppc)
                 break;
               }
 
+            /* Pass through */
+
           case 1:
             if (INSTR_IS(ins16, T_PUSH_LO))
               {
