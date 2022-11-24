@@ -49,6 +49,8 @@
 
 struct lib_instream_s;
 typedef CODE int  (*lib_getc_t)(FAR struct lib_instream_s *this);
+typedef CODE int  (*lib_gets_t)(FAR struct lib_instream_s *this,
+                                FAR void *buf, int len);
 
 struct lib_outstream_s;
 typedef CODE void (*lib_putc_t)(FAR struct lib_outstream_s *this, int ch);
@@ -61,6 +63,7 @@ struct lib_instream_s
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
   lib_getc_t             get;     /* Get one character from the instream */
+  lib_gets_t             gets;    /* Get the string from the instream */
 };
 
 struct lib_outstream_s
@@ -76,6 +79,8 @@ struct lib_outstream_s
 
 struct lib_sistream_s;
 typedef CODE int   (*lib_sigetc_t)(FAR struct lib_sistream_s *this);
+typedef CODE int   (*lib_sigets_t)(FAR struct lib_sistream_s *this,
+                                   FAR void *buf, int len);
 typedef CODE off_t (*lib_siseek_t)(FAR struct lib_sistream_s *this,
                                    off_t offset, int whence);
 
@@ -92,6 +97,7 @@ struct lib_sistream_s
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
   lib_sigetc_t           get;     /* Get one character from the instream */
+  lib_gets_t             gets;    /* Get the string from the instream */
   lib_siseek_t           seek;    /* Seek to a position in the instream */
 };
 
