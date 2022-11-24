@@ -63,7 +63,7 @@
 struct sendto_s
 {
 #ifdef NEED_IPDOMAIN_SUPPORT
-  FAR struct socket *st_sock;         /* Points to the parent socket structure */
+  FAR struct udp_conn_s *st_conn;     /* The UDP connection of interest */
 #endif
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
   FAR struct net_driver_s *st_dev;    /* Driver that will perform the transmission */
@@ -102,12 +102,12 @@ struct sendto_s
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct sendto_s *pstate)
 {
-  FAR struct socket *psock = pstate->st_sock;
-  DEBUGASSERT(psock);
+  FAR struct udp_conn_s *conn = pstate->st_conn;
+  DEBUGASSERT(conn);
 
   /* Which domain the socket support */
 
-  if (psock->s_domain == PF_INET)
+  if (conn->domain == PF_INET)
     {
       /* Select the IPv4 domain */
 
@@ -117,7 +117,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6);
+      DEBUGASSERT(conn->domain == PF_INET6);
       udp_ipv6_select(dev);
     }
 }
@@ -402,11 +402,11 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_buffer = buf;
 
 #ifdef NEED_IPDOMAIN_SUPPORT
-  /* Save the reference to the socket structure if it will be needed for
+  /* Save the reference to the conn structure if it will be needed for
    * asynchronous processing.
    */
 
-  state.st_sock = psock;
+  state.st_conn   = conn;
 #endif
 
   /* Check if the socket is connected */
