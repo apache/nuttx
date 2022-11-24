@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sparc/src/s698pm/s698pm-lowinit.c
+ * boards/sparc/s698pm/s698pm-dkit/src/s698pm_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,25 +23,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/mount.h>
+#include <stdio.h>
+#include <syslog.h>
 
-#include "s698pm-config.h"
-#include "sparc_internal.h"
+#include <nuttx/board.h>
 #include "s698pm.h"
+#include "s698pm-dkit.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -53,67 +44,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) sparc_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowinit
+ * Name: board_app_initialize
  *
  * Description:
- *   This performs basic initialization of the USART used for the serial
- *   console.  Its purpose is to get the console output available as soon
- *   as possible.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-void up_lowinit(void)
+int board_app_initialize(uintptr_t arg)
 {
-  uint32_t *dest;
+  int ret;
 
-  /* Initialize a console (probably a serial console) */
+#ifdef CONFIG_S698PM_WDG
+  /* Initialize the watchdog timer */
 
-  s698pm_consoleinit();
-
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = (uint32_t *)_bss_start; dest < (uint32_t *)_end; )
-    {
-      *dest++ = 0;
-    }
-
-  showprogress('B');
-  /* Perform early serial initialization (so that we will have debug output
-   * available as soon as possible).
-   */
-
-#ifdef USE_EARLYSERIALINIT
-  sparc_earlyserialinit();
+  s698pm_wdginitialize("/dev/watchdog0");
 #endif
 
-  /* Perform board-level initialization */
+#ifdef CONFIG_S698PM_DKIT_WDG
+  /* Start WDG kicker thread */
 
-  s698pm_boardinitialize();
+  ret = s698pm_dkit_watchdog_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
+      return ret;
+    }
+#endif
 
-  /* Then start NuttX */
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
 
-  showprogress('\r');
-  showprogress('\n');
+  ret = mount(NULL, S698PM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to mount procfs at %s: %d\n",
+             S698PM_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+  return ret;
 }

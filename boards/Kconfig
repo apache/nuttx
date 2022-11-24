@@ -2588,6 +2588,13 @@ config ARCH_BOARD_XX3823
 	---help---
 		none
 
+config ARCH_BOARD_S698PM_DKIT
+	bool "Sparc S698pm Dkit Board"
+	depends on ARCH_CHIP_S698PM
+	select ARCH_HAVE_LEDS
+	---help---
+		none
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	select ARCH_HAVE_BUTTONS
@@ -2932,6 +2939,7 @@ config ARCH_BOARD
 	default "spresense"                if ARCH_BOARD_SPRESENSE
 	default "xx3803"                   if ARCH_BOARD_XX3803
 	default "xx3823"                   if ARCH_BOARD_XX3823
+	default "s698pm-dkit"              if ARCH_BOARD_S698PM_DKIT
 
 comment "Common Board Options"
 
@@ -3755,6 +3763,9 @@ source "boards/sparc/bm3803/xx3803/Kconfig"
 endif
 if ARCH_BOARD_XX3823
 source "boards/sparc/bm3823/xx3823/Kconfig"
+endif
+if ARCH_BOARD_S698PM_DKIT
+source "boards/sparc/s698pm/s698pm-dkit/Kconfig"
 endif
 if ARCH_BOARD_TLSR8278ADK80D
 source "boards/arm/tlsr82/tlsr8278adk80d/Kconfig"
