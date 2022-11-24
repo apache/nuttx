@@ -661,7 +661,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   if (mm_lock(heap) == 0)
     {
-      kasan_poison(mem, mm_malloc_size(mem));
+      kasan_poison(mem, mm_malloc_size(heap, mem));
 
       /* Pass, return to the tlsf pool */
 
@@ -950,12 +950,12 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
  * Name: mm_malloc_size
  ****************************************************************************/
 
-size_t mm_malloc_size(FAR void *mem)
+size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   if (MM_IS_FROM_MEMPOOL(mem))
     {
-      return mempool_multiple_alloc_size(mem);
+      return mempool_multiple_alloc_size(&heap->mm_mpool, mem);
     }
 #endif
 
@@ -1008,11 +1008,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   if (ret)
     {
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(ret);
+      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(heap, ret);
 
       memdump_backtrace(heap, dump);
 #endif
-      kasan_unpoison(ret, mm_malloc_size(ret));
+      kasan_unpoison(ret, mm_malloc_size(heap, ret));
     }
 
   return ret;
@@ -1062,11 +1062,11 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   if (ret)
     {
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(ret);
+      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(heap, ret);
 
       memdump_backtrace(heap, dump);
 #endif
-      kasan_unpoison(ret, mm_malloc_size(ret));
+      kasan_unpoison(ret, mm_malloc_size(heap, ret));
     }
 
   return ret;
@@ -1134,7 +1134,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       newmem = mempool_multiple_alloc(&heap->mm_mpool, size);
       if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(oldmem)));
+          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(heap, oldmem)));
           mm_free(heap, oldmem);
           return newmem;
         }
@@ -1146,9 +1146,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   newmem = mm_malloc(heap, size);
   if (newmem)
     {
-      if (size > mm_malloc_size(oldmem))
+      if (size > mm_malloc_size(heap, oldmem))
         {
-          size = mm_malloc_size(oldmem);
+          size = mm_malloc_size(heap, oldmem);
         }
 
       memcpy(newmem, oldmem, size);
@@ -1173,7 +1173,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #if CONFIG_MM_BACKTRACE >= 0
   if (newmem)
     {
-      FAR struct memdump_backtrace_s *dump = newmem + mm_malloc_size(newmem);
+      FAR struct memdump_backtrace_s *dump = newmem +
+                                             mm_malloc_size(heap, newmem);
 
       memdump_backtrace(heap, dump);
     }

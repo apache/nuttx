@@ -101,7 +101,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-  kasan_poison(mem, mm_malloc_size(mem));
+  kasan_poison(mem, mm_malloc_size(heap, mem));
 
   DEBUGASSERT(mm_heapmember(heap, mem));
 

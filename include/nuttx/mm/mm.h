@@ -196,7 +196,7 @@ FAR void *kmm_malloc(size_t size) malloc_like1(1);
 
 /* Functions contained in mm_malloc_size.c **********************************/
 
-size_t mm_malloc_size(FAR void *mem);
+size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem);
 
 /* Functions contained in kmm_malloc_size.c *********************************/
 
