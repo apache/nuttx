@@ -28,6 +28,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/streams.h>
 
 #include <sys/types.h>
 #include <stdarg.h>
@@ -241,6 +242,31 @@ int syslog_initialize(void);
 
 #ifdef CONFIG_SYSLOG_FILE
 FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: syslog_stream_channel
+ *
+ * Description:
+ *   Initialize to use the device stream as the SYSLOG sink.
+ *
+ *   On power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function may be called later in the
+ *   initialization sequence after full driver support has been initialized.
+ *   (via syslog_initialize())  It installs the configured SYSLOG drivers
+ *   and enables full SYSLOGing capability.
+ *
+ * Input Parameters:
+ *   stream - The stream device to be used.
+ *
+ * Returned Value:
+ *   Returns a newly created SYSLOG channel, or NULL in case of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_STREAM
+FAR struct syslog_channel_s *
+syslog_stream_channel(FAR struct lib_outstream_s *stream);
 #endif
 
 /****************************************************************************
