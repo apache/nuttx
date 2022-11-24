@@ -140,7 +140,7 @@ struct gd25_dev_s
   uint16_t              nsectors;    /* Number of erase sectors */
   uint8_t               prev_instr;  /* Previous instruction given to GD25 device */
   bool                  addr_4byte;  /* True: Use Four-byte address */
-  uint8_t               memory;      /* memory type read from device */
+  uint8_t               memory;      /* memory type read from device*/
 };
 
 /***************************************************************************
@@ -309,9 +309,9 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
         {
           goto out;
         }
-
+      
       priv->memory = memory;
-
+      
       /* Capacity greater than 16MB, Enable four-byte address */
 
       if (priv->nsectors > GD25_NSECTORS_128MBIT)
@@ -428,10 +428,10 @@ static inline uint8_t gd25_rdsr(FAR struct gd25_dev_s *priv, uint32_t id)
 
 /***************************************************************************
  * Name:  gd25_4ben
- *
+ * 
  * Enable 4 byte memory addressing mode
  * Return success or not
- *
+ * 
  ***************************************************************************/
 
 static inline void gd25_4ben(FAR struct gd25_dev_s *priv)
@@ -440,6 +440,8 @@ static inline void gd25_4ben(FAR struct gd25_dev_s *priv)
   SPI_SEND(priv->spi, GD25_4BEN);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
 }
+
+
 
 /***************************************************************************
  * Name:  gd25_wren
