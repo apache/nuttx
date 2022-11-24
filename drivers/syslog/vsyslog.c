@@ -228,11 +228,9 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   ret += lib_sprintf(&stream.public, "\e[0m");
 #endif
 
-#ifdef CONFIG_SYSLOG_BUFFER
   /* Flush and destroy the syslog stream buffer */
 
   syslogstream_destroy(&stream);
-#endif
 
   return ret;
 }

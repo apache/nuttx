@@ -47,6 +47,7 @@ struct lib_syslogstream_s
 #ifdef CONFIG_SYSLOG_BUFFER
   FAR struct iob_s *iob;
 #endif
+  int last_ch;
 };
 
 /****************************************************************************
@@ -331,11 +332,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
 void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
-#else
-#  define syslogstream_destroy(s)
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

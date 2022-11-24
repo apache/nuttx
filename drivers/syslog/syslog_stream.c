@@ -112,16 +112,17 @@ static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
 
 static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
+  FAR struct lib_syslogstream_s *stream =
+                                      (FAR struct lib_syslogstream_s *)this;
+
+  DEBUGASSERT(stream != NULL);
+  stream->last_ch = ch;
+
   /* Discard carriage returns */
 
   if (ch != '\r')
     {
 #ifdef CONFIG_SYSLOG_BUFFER
-      FAR struct lib_syslogstream_s *stream =
-        (FAR struct lib_syslogstream_s *)this;
-
-      DEBUGASSERT(stream != NULL);
-
       /* Do we have an IO buffer? */
 
       if (stream->iob != NULL)
@@ -237,11 +238,16 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
 void syslogstream_destroy(FAR struct lib_syslogstream_s *stream)
 {
   DEBUGASSERT(stream != NULL);
 
+  if (stream->last_ch != '\n')
+    {
+      syslogstream_putc(&stream->public, '\n');
+    }
+
+#ifdef CONFIG_SYSLOG_BUFFER
   /* Verify that there is an IOB attached (there should be) */
 
   if (stream->iob != NULL)
@@ -255,5 +261,5 @@ void syslogstream_destroy(FAR struct lib_syslogstream_s *stream)
       iob_free(stream->iob);
       stream->iob = NULL;
     }
-}
 #endif
+}
