@@ -73,19 +73,15 @@ static inline void mempool_add_list(FAR struct list_node *list,
 }
 
 static inline FAR void *mempool_malloc(FAR struct mempool_s *pool,
-                                       size_t alignment, size_t size)
+                                       size_t size)
 {
   if (pool->alloc != NULL)
     {
-      return pool->alloc(pool, alignment, size);
-    }
-  else if (alignment == 0)
-    {
-      return kmm_malloc(size);
+      return pool->alloc(pool, size);
     }
   else
     {
-      return kmm_memalign(alignment, size);
+      return kmm_malloc(size);
     }
 }
 
@@ -152,7 +148,6 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 #else
   size_t blocksize = pool->blocksize;
 #endif
-  size_t alignment = 0;
   size_t ninterrupt;
   size_t ninitial;
   size_t count;
@@ -168,12 +163,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   list_initialize(&pool->alist);
 #endif
 
-  if ((pool->blocksize & (pool->blocksize - 1)) == 0)
-    {
-      alignment = pool->blocksize;
-      blocksize = ALIGN_UP(blocksize, alignment);
-    }
-
+  blocksize = ALIGN_UP(blocksize, pool->blocksize);
   ninitial = pool->initialsize / blocksize;
   ninterrupt = pool->interruptsize / blocksize;
   count = ninitial + ninterrupt;
@@ -181,8 +171,8 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
     {
       FAR char *base;
 
-      base = mempool_malloc(pool, alignment,
-                            blocksize * count + sizeof(struct list_node));
+      base = mempool_malloc(pool, blocksize * count +
+                            sizeof(struct list_node));
       if (base == NULL)
         {
           return -ENOMEM;
@@ -257,18 +247,11 @@ retry:
 #else
               size_t blocksize = pool->blocksize;
 #endif
-              size_t alignment = 0;
               size_t nexpand;
 
-              if ((pool->blocksize & (pool->blocksize - 1)) == 0)
-                {
-                  alignment = pool->blocksize;
-                  blocksize = ALIGN_UP(blocksize, alignment);
-                }
-
+              blocksize = ALIGN_UP(blocksize, pool->blocksize);
               nexpand = pool->expandsize / blocksize;
-              blk = mempool_malloc(pool, alignment,
-                                   blocksize * nexpand + sizeof(*blk));
+              blk = mempool_malloc(pool, blocksize * nexpand + sizeof(*blk));
               if (blk == NULL)
                 {
                   return NULL;
