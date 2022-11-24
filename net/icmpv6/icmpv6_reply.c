@@ -99,9 +99,9 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
       return;
     }
 
-  /* Get the data size of the packet. */
+  /* Get the data (whole original packet) size of the packet. */
 
-  datalen = (ipv6->len[0] << 8) + ipv6->len[1];
+  datalen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN;
 
   /* RFC says return as much as we can without exceeding 1280 bytes. */
 
