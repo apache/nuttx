@@ -157,6 +157,11 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
 #  define   sam_checkreg(tc,wr,regaddr,regval) (false)
 #endif
 
+static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
+                                     unsigned int offset);
+static inline void sam_tc_putreg(struct sam_chan_s *chan,
+                                 unsigned int offset, uint32_t regval);
+
 static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
                                        unsigned int offset);
 static inline void sam_chan_putreg(struct sam_chan_s *chan,
@@ -562,6 +567,55 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
 #endif
 
 /****************************************************************************
+ * Name: sam_tc_getreg
+ *
+ * Description:
+ *  Read an TC register
+ *
+ ****************************************************************************/
+
+static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
+                                     unsigned int offset)
+{
+  struct sam_tc_s *tc = chan->tc;
+  uint32_t regaddr    = tc->base + offset;
+  uint32_t regval     = getreg32(regaddr);
+
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
+  if (sam_checkreg(tc, false, regaddr, regval))
+    {
+      tmrinfo("%08x->%08x\n", regaddr, regval);
+    }
+#endif
+
+  return regval;
+}
+
+/****************************************************************************
+ * Name: sam_tc_putreg
+ *
+ * Description:
+ *  Write a value to an TC register
+ *
+ ****************************************************************************/
+
+static inline void sam_tc_putreg(struct sam_chan_s *chan,
+                                unsigned int offset, uint32_t regval)
+{
+  struct sam_tc_s *tc = chan->tc;
+  uint32_t regaddr    = tc->base + offset;
+
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
+  if (sam_checkreg(tc, true, regaddr, regval))
+    {
+      tmrinfo("%08x<-%08x\n", regaddr, regval);
+    }
+#endif
+
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
  * Name: sam_chan_getreg
  *
  * Description:
@@ -860,6 +914,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   uint32_t regval;
   uint8_t ch;
   int i;
+  int ret;
 
   /* Select the timer/counter and get the index associated with the
    * channel.
@@ -1406,7 +1461,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   uint32_t ftcin = sam_tc_infreq();
   int ndx = 0;
 
-  tmrinfo("frequency=%d\n", frequency);
+  tmrinfo("frequency=%ld\n", frequency);
 
   /* Satisfy lower bound.  That is, the value of the divider such that:
    *

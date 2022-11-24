@@ -40,7 +40,6 @@
 #define PIOB                       (1)
 #define PIOC                       (2)
 #define PIOD                       (3)
-#define PIOE                       (4)
 
 /* PIO register offsets *****************************************************/
 
