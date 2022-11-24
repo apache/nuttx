@@ -217,6 +217,7 @@ extern "C"
 /* YUV 4:2:2 */
 
 #define V4L2_PIX_FMT_UYVY v4l2_fourcc('U', 'Y', 'V', 'Y')
+#define V4L2_PIX_FMT_YUYV v4l2_fourcc('Y', 'U', 'Y', 'V')
 
 /* RGB565 */
 

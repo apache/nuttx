@@ -500,19 +500,23 @@ static void convert_to_imgdatafmt(FAR video_format_t *video,
   data->height      = video->height;
   switch (video->pixelformat)
     {
-      case V4L2_PIX_FMT_UYVY :
+      case V4L2_PIX_FMT_YUYV:
+        data->pixelformat = IMGDATA_PIX_FMT_YUYV;
+        break;
+
+      case V4L2_PIX_FMT_UYVY:
         data->pixelformat = IMGDATA_PIX_FMT_UYVY;
         break;
 
-      case V4L2_PIX_FMT_RGB565 :
+      case V4L2_PIX_FMT_RGB565:
         data->pixelformat = IMGDATA_PIX_FMT_RGB565;
         break;
 
-      case V4L2_PIX_FMT_JPEG :
+      case V4L2_PIX_FMT_JPEG:
         data->pixelformat = IMGDATA_PIX_FMT_JPEG;
         break;
 
-      default : /* V4L2_PIX_FMT_JPEG_WITH_SUBIMG */
+      default: /* V4L2_PIX_FMT_JPEG_WITH_SUBIMG */
         data->pixelformat = IMGDATA_PIX_FMT_JPEG_WITH_SUBIMG;
         break;
     }
@@ -527,19 +531,23 @@ static void convert_to_imgsensorfmt(FAR video_format_t *video,
   sensor->height      = video->height;
   switch (video->pixelformat)
     {
-      case V4L2_PIX_FMT_UYVY :
+      case V4L2_PIX_FMT_YUYV:
+        sensor->pixelformat = IMGSENSOR_PIX_FMT_YUYV;
+        break;
+
+      case V4L2_PIX_FMT_UYVY:
         sensor->pixelformat = IMGSENSOR_PIX_FMT_UYVY;
         break;
 
-      case V4L2_PIX_FMT_RGB565 :
+      case V4L2_PIX_FMT_RGB565:
         sensor->pixelformat = IMGSENSOR_PIX_FMT_RGB565;
         break;
 
-      case V4L2_PIX_FMT_JPEG :
+      case V4L2_PIX_FMT_JPEG:
         sensor->pixelformat = IMGSENSOR_PIX_FMT_JPEG;
         break;
 
-      default : /* V4L2_PIX_FMT_JPEG_WITH_SUBIMG */
+      default: /* V4L2_PIX_FMT_JPEG_WITH_SUBIMG */
         sensor->pixelformat = IMGSENSOR_PIX_FMT_JPEG_WITH_SUBIMG;
         break;
     }
@@ -1508,6 +1516,7 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
 
         break;
 
+      case V4L2_PIX_FMT_YUYV:
       case V4L2_PIX_FMT_UYVY:
       case V4L2_PIX_FMT_RGB565:
       case V4L2_PIX_FMT_JPEG:

@@ -101,7 +101,7 @@
 
 /* Status bit definition for IMGSENSOR_ID_3A_STATUS */
 
-#define IMGSENSOR_3A_STATUS_STABLE        (0) 
+#define IMGSENSOR_3A_STATUS_STABLE        (0)
 #define IMGSENSOR_3A_STATUS_AE_OPERATING  (1 << 0)
 #define IMGSENSOR_3A_STATUS_AWB_OPERATING (1 << 1)
 #define IMGSENSOR_3A_STATUS_AF_OPERATING  (1 << 2)
@@ -117,6 +117,7 @@
 #define IMGSENSOR_PIX_FMT_JPEG_WITH_SUBIMG (3)
 #define IMGSENSOR_PIX_FMT_SUBIMG_UYVY      (4)
 #define IMGSENSOR_PIX_FMT_SUBIMG_RGB565    (5)
+#define IMGSENSOR_PIX_FMT_YUYV             (6)
 
 /****************************************************************************
  * Public Types
