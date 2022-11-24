@@ -581,7 +581,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
     {
       blk = (FAR struct list_node *)((FAR char *)blk -
                                      count * blocksize);
-      kasan_unpoison(blk, mm_malloc_size(blk));
+      kasan_unpoison(blk, blocksize);
       mempool_mfree(pool, blk);
       count = pool->expandsize / blocksize;
     }

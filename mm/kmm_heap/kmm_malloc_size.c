@@ -34,7 +34,7 @@
 
 size_t kmm_malloc_size(FAR void *mem)
 {
-  return mm_malloc_size(mem);
+  return mm_malloc_size(g_kmmheap, mem);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */
