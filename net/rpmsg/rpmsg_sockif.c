@@ -103,7 +103,6 @@ struct rpmsg_socket_conn_s
   uint32_t                       recvlen;
   FAR struct circbuf_s           recvbuf;
 
-  FAR struct socket              *psock;
   FAR struct rpmsg_socket_conn_s *next;
 
   /* server listen-scoket listening: backlog > 0;
@@ -287,11 +286,9 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       nxmutex_lock(&conn->recvlock);
       conn->sendsize = head->size;
 
-      if (conn->psock)
-        {
-          conn->sconn.s_flags |= _SF_CONNECTED;
-          _SO_SETERRNO(conn->psock, OK);
-        }
+      conn->sconn.s_flags |= _SF_CONNECTED;
+
+      _SO_CONN_SETERRNO(conn, OK);
 
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_poll_notify(conn, POLLOUT);
@@ -589,7 +586,6 @@ static int rpmsg_socket_setup(FAR struct socket *psock, int protocol)
     }
 
   psock->s_conn = conn;
-  conn->psock = psock;
   return 0;
 }
 
@@ -773,7 +769,6 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           newsock->s_sockif = psock->s_sockif;
           newsock->s_type   = SOCK_STREAM;
           newsock->s_conn   = conn;
-          conn->psock       = newsock;
 
           rpmsg_socket_getaddr(conn, addr, addrlen);
 
