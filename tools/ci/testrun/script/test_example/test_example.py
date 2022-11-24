@@ -29,5 +29,5 @@ def test_popen(p):
 
 
 def test_usrsocktest(p):
-    ret = p.sendCommand("usrsocktest", "HEAP AFTER TESTS", 60)
+    ret = p.sendCommand("usrsocktest", "FAILED:0", 60)
     assert ret == 0
