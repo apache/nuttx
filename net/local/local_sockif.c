@@ -829,6 +829,7 @@ static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
             ret = -ENOTCONN;
           }
         break;
+      case FIONWRITE:
       case FIONSPACE:
         if (conn->lc_outfile.f_inode != NULL)
           {
