@@ -37,6 +37,7 @@
 #include "netdev/netdev.h"
 #include "sixlowpan/sixlowpan.h"
 #include "devif/devif.h"
+#include "icmpv6/icmpv6.h"
 #include "ipforward/ipforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
@@ -142,12 +143,6 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 
   if (ttl <= 0)
     {
-#ifdef CONFIG_NET_ICMPv6
-      /* Return an ICMPv6 error packet back to the sender. */
-
-#  warning Missing logic
-#endif
-
       /* Return zero which must cause the packet to be dropped */
 
       return 0;
@@ -572,7 +567,8 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
   if (fwddev == NULL)
     {
       nwarn("WARNING: Not routable\n");
-      return (ssize_t)-ENETUNREACH;
+      ret = -ENETUNREACH;
+      goto drop;
     }
 
   /* Check if we are forwarding on the same device that we received the
@@ -656,6 +652,30 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
 drop:
   ipv6_dropstats(ipv6);
+
+#ifdef CONFIG_NET_ICMPv6
+  /* Try reply ICMPv6 to the sender. */
+
+  switch (ret)
+    {
+      case -ENETUNREACH:
+        icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE, ICMPv6_ADDR_UNREACH, 0);
+        return OK;
+
+      case -EFBIG:
+        icmpv6_reply(dev, ICMPv6_PACKET_TOO_BIG, 0,
+                     NETDEV_PKTSIZE(fwddev) - NET_LL_HDRLEN(fwddev));
+        return OK;
+
+      case -EMULTIHOP:
+        icmpv6_reply(dev, ICMPv6_PACKET_TIME_EXCEEDED, 0, 0);
+        return OK;
+
+      default:
+        break; /* We don't know how to reply, just go on (to drop). */
+    }
+#endif
+
   dev->d_len = 0;
   return ret;
 }
