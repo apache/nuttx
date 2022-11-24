@@ -111,9 +111,9 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
   if (pool->procfs.backtrace)
     {
       int result = backtrace(buf->backtrace, CONFIG_MM_BACKTRACE);
-      while (result < CONFIG_MM_BACKTRACE)
+      if (result < CONFIG_MM_BACKTRACE)
         {
-          buf->backtrace[result++] = NULL;
+          buf->backtrace[result] = NULL;
         }
     }
   else

@@ -156,9 +156,9 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
       (tcb && tcb->flags & TCB_FLAG_HEAPDUMP))
     {
       int ret = backtrace(dump->backtrace, CONFIG_MM_BACKTRACE);
-      while (ret < CONFIG_MM_BACKTRACE)
+      if (ret < CONFIG_MM_BACKTRACE)
         {
-          dump->backtrace[ret++] = NULL;
+          dump->backtrace[ret] = NULL;
         }
     }
 #  endif
