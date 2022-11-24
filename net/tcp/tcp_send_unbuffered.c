@@ -77,7 +77,7 @@
 
 struct send_s
 {
-  FAR struct socket      *snd_sock;     /* Points to the parent socket structure */
+  FAR struct tcp_conn_s  *snd_conn;     /* The TCP connection of interest */
   FAR struct devif_callback_s *snd_cb;  /* Reference to callback instance */
   sem_t                   snd_sem;      /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;   /* Points to the buffer of data to send */
@@ -169,19 +169,15 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
                                      FAR void *pvpriv, uint16_t flags)
 {
   FAR struct send_s *pstate = pvpriv;
-  FAR struct socket *psock;
   FAR struct tcp_conn_s *conn;
 
   DEBUGASSERT(pstate != NULL);
-
-  psock = pstate->snd_sock;
-  DEBUGASSERT(psock != NULL);
 
   /* Get the TCP connection pointer reliably from
    * the corresponding TCP socket.
    */
 
-  conn = psock->s_conn;
+  conn = pstate->snd_conn;
   DEBUGASSERT(conn != NULL);
 
   /* The TCP socket is connected and, hence, should be bound to a device.
@@ -604,9 +600,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0);    /* Doesn't really fail */
 
-  state.snd_sock      = psock;             /* Socket descriptor to use */
-  state.snd_buflen    = len;               /* Number of bytes to send */
-  state.snd_buffer    = buf;               /* Buffer to send from */
+  state.snd_conn   = conn; /* Socket descriptor to use */
+  state.snd_buflen = len;  /* Number of bytes to send */
+  state.snd_buffer = buf;  /* Buffer to send from */
 
   if (len > 0)
     {

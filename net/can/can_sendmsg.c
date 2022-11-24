@@ -58,7 +58,6 @@
 
 struct send_s
 {
-  FAR struct socket      *snd_sock;    /* Points to the parent socket structure */
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
   sem_t                   snd_sem;     /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
@@ -218,7 +217,6 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_sock      = psock;                  /* Socket descriptor */
   state.snd_buflen    = msg->msg_iov->iov_len;  /* bytes to send */
   state.snd_buffer    = msg->msg_iov->iov_base; /* Buffer to send from */
 
