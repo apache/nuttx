@@ -48,10 +48,19 @@
 
 typedef struct
 {
+  uint8_t **addrs;
+  uint8_t head;
+  uint8_t tail;
+  uint8_t count;
+} dq_info_t;
+
+typedef struct
+{
   int fd;
-  int index;
   unsigned int reqbuf_count;
   struct v4l2_requestbuffers reqbuf;
+  dq_info_t c;
+  dq_info_t h;
 } video_host_dev_t;
 
 /****************************************************************************
@@ -103,26 +112,51 @@ int video_host_init(const char *video_host_dev_path)
       return -errno;
     }
 
+  memset(&priv, 0, sizeof(priv));
   priv.fd = fd;
-  priv.index = 0;
   return 0;
 }
 
 int video_host_enq_buf(uint8_t *addr, uint32_t size)
 {
   struct v4l2_buffer buf;
-  memset(&buf, 0, sizeof(buf));
-  buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  buf.memory = V4L2_MEMORY_USERPTR;
-  buf.m.userptr = (uintptr_t)addr;
-  buf.length = size;
-  buf.index = priv.index;
-  priv.index = (priv.index + 1) % priv.reqbuf.count;
-  int ret = ioctl(priv.fd, VIDIOC_QBUF, (unsigned long)&buf);
-  if (ret < 0)
+
+  if (priv.c.count == priv.reqbuf_count)
     {
-      perror("VIDIOC_QBUF");
-      return ret;
+      errno = ENOSPC;
+      perror("Client queue full");
+      return -ENOSPC;
+    }
+
+  /* If host queue is full, enqueue without calling ioctl VIDIOC_QBUF */
+
+  priv.c.addrs[priv.c.tail] = addr;
+  priv.c.tail = (priv.c.tail + 1) % priv.reqbuf_count;
+  priv.c.count++;
+
+  if (priv.h.count < priv.reqbuf.count)
+    {
+      /* Otherwise, call ioctl VIDIOC_QBUF */
+
+      memset(&buf, 0, sizeof(buf));
+      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      buf.memory = priv.reqbuf.memory;
+      buf.index = priv.h.tail;
+      priv.h.tail = (priv.h.tail + 1) % priv.reqbuf.count;
+      priv.h.count++;
+
+      if (buf.memory == V4L2_MEMORY_USERPTR)
+        {
+          buf.m.userptr = (uintptr_t)addr;
+          buf.length = size;
+        }
+
+      int ret = ioctl(priv.fd, VIDIOC_QBUF, (unsigned long)&buf);
+      if (ret < 0)
+        {
+          perror("VIDIOC_QBUF");
+          return ret;
+        }
     }
 
   return 0;
@@ -136,9 +170,10 @@ int video_host_set_buf(uint8_t *addr, uint32_t size)
 int video_host_dq_buf(uint8_t **addr, struct timeval *ts)
 {
   struct v4l2_buffer buf;
+
   memset(&buf, 0, sizeof(buf));
   buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  buf.memory = V4L2_MEMORY_USERPTR;
+  buf.memory = priv.reqbuf.memory;
   *addr = NULL;
 
   /* Dequeue a buffer */
@@ -162,14 +197,34 @@ int video_host_dq_buf(uint8_t **addr, struct timeval *ts)
         }
     }
 
-  *addr = (uint8_t *)(uintptr_t)buf.m.userptr;
-  *ts = buf.timestamp;
+  *addr = priv.c.addrs[priv.c.head];
+  if (buf.memory == V4L2_MEMORY_MMAP)
+    {
+      /* Ugly copy inevitable here */
 
+      memcpy(*addr, priv.h.addrs[priv.h.head], buf.bytesused);
+    }
+
+  *ts = buf.timestamp;
+  priv.c.head = (priv.c.head + 1) % priv.reqbuf_count;
+  priv.c.count--;
+  priv.h.head = (priv.h.head + 1) % priv.reqbuf.count;
+  priv.h.count--;
   return 0;
 }
 
 int video_host_uninit(void)
 {
+  if (priv.c.addrs)
+    {
+      free(priv.c.addrs);
+    }
+
+  if (priv.h.addrs)
+    {
+      free(priv.h.addrs);
+    }
+
   close(priv.fd);
   return 0;
 }
@@ -182,27 +237,81 @@ int video_host_data_init(void)
 int video_host_start_capture(int reqbuf_count)
 {
   int ret;
+  int i;
+  struct v4l2_buffer buf;
 
   /* VIDIOC_REQBUFS initiate user pointer I/O */
 
   priv.reqbuf.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   priv.reqbuf.memory = V4L2_MEMORY_USERPTR;
   priv.reqbuf.count  = reqbuf_count;
+  priv.reqbuf_count  = reqbuf_count;
 
-  ret = ioctl(priv.fd, VIDIOC_REQBUFS,
-    (unsigned long)&priv.reqbuf);
+  ret = ioctl(priv.fd, VIDIOC_REQBUFS, (unsigned long)&priv.reqbuf);
+
+  if (ret < 0)
+    {
+      /* V4L2_MEMORY_USERPTR not supported, use V4L2_MEMORY_MMAP for a shift.
+       * Note that this will lead to copy between buffers.
+       */
+
+      priv.reqbuf.memory = V4L2_MEMORY_MMAP;
+      ret = ioctl(priv.fd, VIDIOC_REQBUFS, (unsigned long)&priv.reqbuf);
+    }
+
   if (ret < 0)
     {
       perror("VIDIOC_REQBUFS");
       return ret;
     }
 
-  if (priv.reqbuf.count < reqbuf_count)
+  if (priv.reqbuf.count < 2)
     {
       errno = ENOMEM;
       perror("Not enough buffers");
-      close(priv.fd);
       return -ENOMEM;
+    }
+
+  priv.c.addrs = calloc(reqbuf_count, sizeof(*priv.c.addrs));
+  if (priv.c.addrs == NULL)
+    {
+      errno = ENOMEM;
+      perror("Addrs buffer alloc failed");
+      return -ENOMEM;
+    }
+
+  if (priv.reqbuf.memory == V4L2_MEMORY_MMAP)
+    {
+      priv.h.addrs = calloc(priv.reqbuf.count, sizeof(*priv.h.addrs));
+      if (priv.h.addrs == NULL)
+        {
+          errno = ENOMEM;
+          perror("Addrs buffer alloc failed");
+          return -ENOMEM;
+        }
+
+      for (i = 0; i < priv.reqbuf.count; i++)
+        {
+          memset(&buf, 0, sizeof(buf));
+          buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+          buf.memory = V4L2_MEMORY_MMAP;
+          buf.index = i;
+          ret = ioctl(priv.fd, VIDIOC_QUERYBUF, (unsigned long)&buf);
+          if (ret < 0)
+            {
+              perror("VIDIOC_QUERYBUF");
+              return ret;
+            }
+
+          priv.h.addrs[i] = mmap(NULL, buf.length,
+              PROT_READ | PROT_WRITE, MAP_SHARED,
+              priv.fd, buf.m.offset);
+          if (priv.h.addrs[i] == MAP_FAILED)
+            {
+              perror("Mmap failed");
+              return -errno;
+            }
+        }
     }
 
   enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -245,7 +354,6 @@ int video_host_set_fmt(uint16_t width, uint16_t height, uint32_t fmt,
   if (-1 == xioctl(priv.fd, VIDIOC_S_FMT, &v4l2_fmt))
     {
       perror("VIDIOC_S_FMT");
-      close(priv.fd);
       return -errno;
     }
 
@@ -258,7 +366,6 @@ int video_host_set_fmt(uint16_t width, uint16_t height, uint32_t fmt,
   if (-1 == xioctl(priv.fd, VIDIOC_G_PARM, &streamparm))
     {
       perror("VIDIOC_G_PARM");
-      close(priv.fd);
       return -errno;
     }
 
@@ -268,7 +375,6 @@ int video_host_set_fmt(uint16_t width, uint16_t height, uint32_t fmt,
   if (-1 == xioctl(priv.fd, VIDIOC_S_PARM, &streamparm))
     {
       perror("VIDIOC_S_PARM");
-      close(priv.fd);
       return -errno;
     }
 
