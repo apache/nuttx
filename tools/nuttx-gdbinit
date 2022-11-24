@@ -415,6 +415,13 @@ define _switch_tcb_simx86
   set $pc  = $tcb.xcp.regs[5]
 end
 
+define _restore_current_tcb
+  # TODO: SMP
+  set $tcb = g_readytorun->head
+  _switch_tcb $tcb
+  set $_current_tcb = 0x0
+end
+
 define nxthread
   _examine_target
   _save_current_tcb
@@ -432,6 +439,7 @@ define nxthread
       end
     end
   end
+  _restore_current_tcb
 end
 
 define nxthread_all_bt
@@ -442,6 +450,7 @@ define nxthread_all_bt
     nxthread $i 1
     set $i = $i + 1
   end
+  _restore_current_tcb
 end
 
 define info_nxthreads
@@ -452,13 +461,11 @@ define info_nxthreads
     nxthread $i 0 0
     set $i = $i + 1
   end
+  _restore_current_tcb
 end
 
 define nxcontinue
   printf "nxcontinue\n"
-  # TODO: SMP
-  set $tcb = g_readytorun->head
-  _switch_tcb $tcb
-  set $_current_tcb = 0x0
+  _restore_current_tcb
   continue
 end
