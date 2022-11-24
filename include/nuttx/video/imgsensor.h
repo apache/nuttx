@@ -118,6 +118,7 @@
 #define IMGSENSOR_PIX_FMT_SUBIMG_UYVY      (4)
 #define IMGSENSOR_PIX_FMT_SUBIMG_RGB565    (5)
 #define IMGSENSOR_PIX_FMT_YUYV             (6)
+#define IMGSENSOR_PIX_FMT_YUV420P          (7)
 
 /****************************************************************************
  * Public Types

@@ -43,6 +43,7 @@
 #define IMGDATA_PIX_FMT_SUBIMG_UYVY      (4)
 #define IMGDATA_PIX_FMT_SUBIMG_RGB565    (5)
 #define IMGDATA_PIX_FMT_YUYV             (6)
+#define IMGDATA_PIX_FMT_YUV420P          (7)
 
 /****************************************************************************
  * Public Types
