@@ -46,3 +46,10 @@ Make*.dep
 uImage
 /external
 .config-works
+.dirlinks
+arch/arm/src/.context
+boards/.context
+drivers/.context
+fs/.context
+libs/libc/.context
+libs/libxx/.context
