@@ -94,18 +94,34 @@
 /* Macro to set socket errors */
 
 #ifdef CONFIG_NET_SOCKOPTS
-#  define _SO_SETERRNO(s,e) \
+#  define _SO_CONN_SETERRNO(c,e) \
     do \
       { \
-        if (s != NULL && (s)->s_conn != NULL) \
+        if ((c) != NULL) \
           { \
-            FAR struct socket_conn_s *_conn = (s)->s_conn; \
+            FAR struct socket_conn_s *_conn = \
+              (FAR struct socket_conn_s *)(c); \
             _conn->s_error = (int16_t)e; \
           } \
         set_errno(e); \
       } \
     while (0)
+
+#  define _SO_SETERRNO(s,e) \
+    do \
+      { \
+        if (s != NULL) \
+          { \
+            _SO_CONN_SETERRNO((s)->s_conn, e); \
+          } \
+        else \
+          { \
+            set_errno(e); \
+          } \
+      } \
+    while (0)
 #else
+#  define _SO_CONN_SETERRNO(c,e) set_errno(e)
 #  define _SO_SETERRNO(s,e) set_errno(e)
 #endif /* CONFIG_NET_SOCKOPTS */
 
