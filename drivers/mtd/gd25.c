@@ -107,6 +107,7 @@
 #define GD25_SR_WIP                 (1 << 0)  /* Bit 0: Write in Progress */
 #define GD25_SR_WEL                 (1 << 1)  /* Bit 1: Write Enable Latch */
 #define GD25_SR1_EN4B               (1 << 3)  /* Bit 3: Enable 4byte address */
+#define GD25Q_SR1_EN4B              (1 << 0)  /* Bit 0: Enable 4byte address GD25Q memories */
 
 #define GD25_DUMMY                  0x00
 
@@ -140,6 +141,7 @@ struct gd25_dev_s
   uint16_t              nsectors;    /* Number of erase sectors */
   uint8_t               prev_instr;  /* Previous instruction given to GD25 device */
   bool                  addr_4byte;  /* True: Use Four-byte address */
+  uint8_t               memory;      /* memory type read from device */
 };
 
 /***************************************************************************
@@ -170,7 +172,7 @@ static void gd25_pagewrite(FAR struct gd25_dev_s *priv,
     FAR const uint8_t *buffer, off_t address, size_t nbytes);
 #endif
 static inline uint8_t gd25_rdsr(FAR struct gd25_dev_s *priv, uint32_t id);
-static inline void gd25_4ben(FAR struct gd25_dev_s *priv);
+static inline bool gd25_4ben(FAR struct gd25_dev_s *priv);
 
 /* MTD driver methods */
 
@@ -309,13 +311,13 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
           goto out;
         }
 
+      priv->memory = memory;
+
       /* Capacity greater than 16MB, Enable four-byte address */
 
       if (priv->nsectors > GD25_NSECTORS_128MBIT)
         {
-          gd25_4ben(priv);
-
-          if ((gd25_rdsr(priv, 1) & GD25_SR1_EN4B) != GD25_SR1_EN4B)
+          if (!gd25_4ben(priv))
             {
               ferr("ERROR: capacity %02x: Can't enable 4-byte mode!\n",
                    capacity);
@@ -425,13 +427,25 @@ static inline uint8_t gd25_rdsr(FAR struct gd25_dev_s *priv, uint32_t id)
 
 /***************************************************************************
  * Name:  gd25_4ben
+ *
+ * Enable 4 byte memory addressing mode
+ * Return success or not
+ *
  ***************************************************************************/
 
-static inline void gd25_4ben(FAR struct gd25_dev_s *priv)
+static inline bool gd25_4ben(FAR struct gd25_dev_s *priv)
 {
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
   SPI_SEND(priv->spi, GD25_4BEN);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+  if (priv->memory == GD25Q_JEDEC_MEMORY_TYPE)
+    {
+      return ((gd25_rdsr(priv, 1) & GD25Q_SR1_EN4B) == GD25Q_SR1_EN4B);
+    }
+  else
+    {
+      return ((gd25_rdsr(priv, 1) & GD25_SR1_EN4B) == GD25_SR1_EN4B);
+    }
 }
 
 /***************************************************************************
