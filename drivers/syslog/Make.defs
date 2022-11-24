@@ -77,6 +77,10 @@ ifeq ($(CONFIG_CONSOLE_SYSLOG),y)
   CSRCS += syslog_console.c
 endif
 
+ifeq ($(CONFIG_SYSLOG_STREAM),y)
+  CSRCS += syslog_stream.c
+endif
+
 # (Add other SYSLOG drivers here)
 
 # Include SYSLOG build support

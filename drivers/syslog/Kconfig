@@ -223,6 +223,14 @@ config SYSLOG_RPMSG
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
+config SYSLOG_STREAM
+	bool "Log to stream"
+	default n
+	---help---
+		Enables support to use stream as syslog backend, such as block out stream.
+		It is recommended to implement the backend stream in a way that syslog
+		works in interrupt context.
+
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
 	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
