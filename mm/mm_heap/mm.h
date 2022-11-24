@@ -89,9 +89,9 @@
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \
              int result = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
-             while (result < CONFIG_MM_BACKTRACE) \
+             if (result < CONFIG_MM_BACKTRACE) \
                { \
-                 tmp->backtrace[result++] = NULL; \
+                 tmp->backtrace[result] = NULL; \
                } \
            } \
          else \
