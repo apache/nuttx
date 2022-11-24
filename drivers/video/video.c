@@ -500,6 +500,10 @@ static void convert_to_imgdatafmt(FAR video_format_t *video,
   data->height      = video->height;
   switch (video->pixelformat)
     {
+      case V4L2_PIX_FMT_YUV420:
+        data->pixelformat = IMGDATA_PIX_FMT_YUV420P;
+        break;
+
       case V4L2_PIX_FMT_YUYV:
         data->pixelformat = IMGDATA_PIX_FMT_YUYV;
         break;
@@ -531,6 +535,10 @@ static void convert_to_imgsensorfmt(FAR video_format_t *video,
   sensor->height      = video->height;
   switch (video->pixelformat)
     {
+      case V4L2_PIX_FMT_YUV420:
+        sensor->pixelformat = IMGSENSOR_PIX_FMT_YUV420P;
+        break;
+
       case V4L2_PIX_FMT_YUYV:
         sensor->pixelformat = IMGSENSOR_PIX_FMT_YUYV;
         break;
@@ -1516,6 +1524,7 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
 
         break;
 
+      case V4L2_PIX_FMT_YUV420:
       case V4L2_PIX_FMT_YUYV:
       case V4L2_PIX_FMT_UYVY:
       case V4L2_PIX_FMT_RGB565:

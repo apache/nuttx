@@ -219,6 +219,10 @@ extern "C"
 #define V4L2_PIX_FMT_UYVY v4l2_fourcc('U', 'Y', 'V', 'Y')
 #define V4L2_PIX_FMT_YUYV v4l2_fourcc('Y', 'U', 'Y', 'V')
 
+/* YUV 4:2:0 */
+
+#define V4L2_PIX_FMT_YUV420  v4l2_fourcc('Y', 'U', '1', '2')
+
 /* RGB565 */
 
 #define V4L2_PIX_FMT_RGB565 v4l2_fourcc('R', 'G', 'B', 'P')
