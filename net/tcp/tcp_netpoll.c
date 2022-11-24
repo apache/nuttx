@@ -128,10 +128,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
               reason = ECONNREFUSED;
             }
 
-#ifdef CONFIG_NET_SOCKOPTS
-          info->conn->sconn.s_error = reason;
-#endif
-          set_errno(reason);
+          _SO_CONN_SETERRNO(info->conn, reason);
 
           /* Mark that the connection has been lost */
 
