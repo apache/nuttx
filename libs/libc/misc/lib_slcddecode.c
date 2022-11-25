@@ -177,7 +177,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
   /* No, ungotten characters.  Get the next character from the buffer. */
 
-  ch = stream->get(stream);
+  ch = lib_stream_getc(stream);
   if (ch == EOF)
     {
       /* End of file/stream (or perhaps an I/O error) */
@@ -201,7 +201,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
   /* Get the next character from the buffer */
 
-  ch = stream->get(stream);
+  ch = lib_stream_getc(stream);
   if (ch == EOF)
     {
       /* End of file/stream.  Return the escape character now.  We will
@@ -230,7 +230,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
   /* Get the next character from the buffer */
 
-  ch = stream->get(stream);
+  ch = lib_stream_getc(stream);
   if (ch == EOF)
     {
       /* End of file/stream.  Return the ESC now; return the following
@@ -278,7 +278,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
       /* Get the next character from the buffer */
 
-      ch = stream->get(stream);
+      ch = lib_stream_getc(stream);
       if (ch == EOF)
         {
           /* End of file/stream.  Return the ESC now; return the following
@@ -311,7 +311,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
       /* Get the next character from the buffer */
 
-      ch = stream->get(stream);
+      ch = lib_stream_getc(stream);
       if (ch == EOF)
         {
           /* End of file/stream.  Return the ESC now; return the following

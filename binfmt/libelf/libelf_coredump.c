@@ -61,7 +61,7 @@
 
 static int elf_flush(FAR struct elf_dumpinfo_s *cinfo)
 {
-  return cinfo->stream->flush(cinfo->stream);
+  return lib_stream_flush(cinfo->stream);
 }
 
 /****************************************************************************
@@ -81,7 +81,7 @@ static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
 
   while (total > 0)
     {
-      ret = cinfo->stream->puts(cinfo->stream, ptr, total);
+      ret = lib_stream_puts(cinfo->stream, ptr, total);
       if (ret < 0)
         {
           break;
