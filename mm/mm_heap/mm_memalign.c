@@ -122,7 +122,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       return NULL;
     }
 
-  kasan_poison((FAR void *)rawchunk, mm_malloc_size(heap, (FAR void *)rawchunk));
+  kasan_poison((FAR void *)rawchunk,
+               mm_malloc_size(heap, (FAR void *)rawchunk));
 
   /* We need to hold the MM mutex while we muck with the chunks and
    * nodelist.

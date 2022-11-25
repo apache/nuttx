@@ -1173,7 +1173,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #if CONFIG_MM_BACKTRACE >= 0
   if (newmem)
     {
-      FAR struct memdump_backtrace_s *dump = newmem + mm_malloc_size(heap, newmem);
+      FAR struct memdump_backtrace_s *dump = newmem +
+                                             mm_malloc_size(heap, newmem);
 
       memdump_backtrace(heap, dump);
     }
