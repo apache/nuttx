@@ -53,17 +53,39 @@
 #define BOARD_LED1        0
 #define BOARD_LED2        1
 #define BOARD_LED3        2
-#define BOARD_NLEDS       3
 
-#define BOARD_LED_RED     BOARD_LED1
-#define BOARD_LED_GREEN   BOARD_LED2
-#define BOARD_LED_BLUE    BOARD_LED3
+#define BOARD_LED_RED     BOARD_LED1    /* GPIO 0 */
+#define BOARD_LED_GREEN   BOARD_LED2    /* GPIO 2 */
+#define BOARD_LED_BLUE    BOARD_LED3    /* GPIO 4 */
 
 /* LED bits for use with autoleds */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
+
+/* GPIO 2 is used by MMCSD driver as MISO, therefore, it can't be used as
+ * USER LED
+ */
+#ifdef CONFIG_MMCSD
+
+/* GPIO 0 is used by BUTTONS, it can't be used as USER LED */
+#ifdef CONFIG_INPUT_BUTTONS
+#  define BOARD_NLEDS       1
+#else
+#  define BOARD_NLEDS       2
+#endif
+
+#else  /* MMCSD */
+
+/* GPIO 0 is used by BUTTONS, it can't be used as USER LED */
+#ifdef CONFIG_INPUT_BUTTONS
+#  define BOARD_NLEDS       2
+#else
+#  define BOARD_NLEDS       3
+#endif
+
+#endif
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 3 LEDs on
  * board the ESP-WROVER-KIT.  The following definitions describe how
