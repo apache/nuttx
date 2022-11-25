@@ -40,6 +40,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define lib_stream_puts(stream, buf, len) \
+        ((FAR struct lib_outstream_s *)(stream))->puts( \
+        (FAR struct lib_outstream_s *)(stream), buf, len)
+#define lib_stream_putc(stream, ch) \
+        ((FAR struct lib_outstream_s *)(stream))->putc( \
+        (FAR struct lib_outstream_s *)(stream), ch)
+#define lib_stream_getc(stream) \
+        ((FAR struct lib_instream_s *)(stream))->get( \
+        (FAR struct lib_instream_s *)(stream))
+#define lib_stream_gets(stream, buf, len) \
+        ((FAR struct lib_instream_s *)(stream))->gets( \
+        (FAR struct lib_instream_s *)(stream), buf, len)
+#define lib_stream_flush(stream) \
+        ((FAR struct lib_outstream_s *)(stream))->flush( \
+        (FAR struct lib_outstream_s *)(stream))
+#define lib_stream_seek(stream, offset, whence) \
+        ((FAR struct lib_sostream_s *)(stream))->seek( \
+        (FAR struct lib_sostream_s *)(stream), offset, whence)
+
 #ifdef CONFIG_LIBC_LZF
 #define LZF_STREAM_BLOCKSIZE  ((1 << CONFIG_STREAM_LZF_BLOG) - 1)
 #endif
