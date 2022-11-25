@@ -415,12 +415,9 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
  *
- * Returned Value:
- *   Zero on success; A negated errno value is returned on any failure.
- *
  ****************************************************************************/
 
-int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
+void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
 {
   size_t i;
 
@@ -428,16 +425,6 @@ int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
 
   for (i = 0; i < mpool->npools; i++)
     {
-      if (mpool->pools[i].nused != 0)
-        {
-          return -EBUSY;
-        }
+      DEBUGVERIFY(mempool_deinit(mpool->pools + i));
     }
-
-  for (i = 0; i < mpool->npools; i++)
-    {
-      mempool_deinit(mpool->pools + i);
-    }
-
-  return 0;
 }
