@@ -418,6 +418,15 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               }
           }
 
+        list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                ret = -EEXIST;
+                goto err;
+              }
+          }
+
         if (list_is_empty(&eph->free))
           {
             /* Malloc new epoll node, insert the first list_node to the
@@ -506,6 +515,31 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                       {
                         goto err;
                       }
+                  }
+
+                goto out;
+              }
+          }
+
+        list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                if (epn->pfd.events != ev->events)
+                  {
+                    epn->data        = ev->data;
+                    epn->pfd.events  = ev->events;
+                    epn->pfd.fd      = fd;
+                    epn->pfd.revents = 0;
+
+                    ret = poll_fdsetup(fd, &epn->pfd, true);
+                    if (ret < 0)
+                      {
+                        goto err;
+                      }
+
+                    list_delete(&epn->node);
+                    list_add_tail(&eph->setup, &epn->node);
                   }
 
                 break;
