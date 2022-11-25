@@ -247,17 +247,17 @@ static int readstream(FAR struct lib_instream_s *instream,
 
   /* Skip until the beginning of line start code is encountered */
 
-  ch = instream->get(instream);
+  ch = lib_stream_getc(instream);
   while (ch != RECORD_STARTCODE && ch != EOF)
     {
-      ch = instream->get(instream);
+      ch = lib_stream_getc(instream);
     }
 
   /* Skip over the startcode */
 
   if (ch != EOF)
     {
-      ch = instream->get(instream);
+      ch = lib_stream_getc(instream);
     }
 
   /* Then read, verify, and buffer until the end of line is encountered */
@@ -286,7 +286,7 @@ static int readstream(FAR struct lib_instream_s *instream,
 
       /* Read the next character from the input stream */
 
-      ch = instream->get(instream);
+      ch = lib_stream_getc(instream);
     }
 
   /* Some error occurred: Unexpected EOF, line too long, or bad character in
@@ -563,7 +563,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
 
             if (address != expected)
               {
-                off_t pos = outstream->seek(outstream,
+                off_t pos = lib_stream_seek(outstream,
                                             address - baseaddr, SEEK_SET);
                 if (pos == (off_t)-1)
                   {
