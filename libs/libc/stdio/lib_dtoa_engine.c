@@ -149,7 +149,7 @@ int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
 
       /* Now convert mantissa to decimal. */
 
-      uint64_t mant = (uint64_t) x;
+      uint64_t mant = (uint64_t)x;
       uint64_t decimal = MIN_MANT_INT;
 
       /* Compute digits */
