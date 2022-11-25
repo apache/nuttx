@@ -171,6 +171,7 @@ static int epoll_do_close(FAR struct file *filep)
 {
   FAR epoll_head_t *eph = filep->f_priv;
   FAR epoll_node_t *epn;
+  FAR epoll_node_t *tmp;
   int ret;
 
   ret = nxmutex_lock(&eph->lock);
@@ -189,7 +190,7 @@ static int epoll_do_close(FAR struct file *filep)
           poll_fdsetup(epn->pfd.fd, &epn->pfd, false);
         }
 
-      list_for_every_entry(&eph->extend, epn, epoll_node_t, node)
+      list_for_every_entry_safe(&eph->extend, epn, tmp, epoll_node_t, node)
         {
           kmm_free(epn);
         }
