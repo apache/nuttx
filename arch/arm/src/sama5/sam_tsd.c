@@ -1376,7 +1376,7 @@ static void sam_tsd_tracking(struct sam_tsd_s *priv, uint32_t time)
           tracktim--;
         }
     }
-#elif defined (ATSAMA5D3)
+#elif defined(ATSAMA5D3)
   tracktim = 0;
 #else /* ATSAMA5D2*/
   tracktim = MAX(time, 15);
