@@ -683,7 +683,6 @@ static void sam_tsd_bottomhalf(void *arg)
                 yraw, yscale);
           goto ignored;
         }
-#endif
 
       /* Scale the X/Y measurements.  The scale value is the maximum
        * value that the sample can attain.  It should be close to 4095.
