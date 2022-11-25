@@ -459,8 +459,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   flags |= FL_REPD_TYPE;
                 }
+              else
+                {
+                  flags |= FL_LONG;
+                }
 
-              flags |= FL_LONG;
               flags &= ~FL_SHORT;
               continue;
             }
@@ -471,8 +474,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   flags |= FL_REPD_TYPE;
                 }
+              else
+                {
+                  flags |= FL_SHORT;
+                }
 
-              flags |= FL_SHORT;
               flags &= ~FL_LONG;
               continue;
             }
