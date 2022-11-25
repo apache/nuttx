@@ -472,7 +472,7 @@ static void sam_tsd_setaverage(struct sam_tsd_s *priv, uint32_t tsav)
         }
 
         regval &= ~ADC_TSMR_TSFREQ_MASK;
-        regval |=  ADC_TSMR_TSFREQ(minfreq);
+        regval |= ADC_TSMR_TSFREQ(minfreq);
     }
 
   /* Save the new filter value */
