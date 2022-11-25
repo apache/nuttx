@@ -36,3 +36,7 @@ endif
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += qemu_rv_pgalloc.c
 endif
+
+ifeq ($(CONFIG_DRIVERS_VIRTIO_NET),y)
+CHIP_CSRCS += qemu_rv_virtio.c
+endif
