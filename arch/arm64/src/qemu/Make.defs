@@ -24,3 +24,7 @@ include common/Make.defs
 CHIP_CSRCS  = qemu_boot.c qemu_serial.c
 
 CHIP_ASRCS  = qemu_lowputc.S
+
+ifeq ($(CONFIG_DRIVERS_VIRTIO_NET),y)
+CHIP_CSRCS += qemu_virtio.c
+endif
