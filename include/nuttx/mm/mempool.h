@@ -29,6 +29,7 @@
 #include <sys/types.h>
 
 #include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -74,13 +75,15 @@ struct mempool_s
 
   /* Private data for memory pool */
 
-  struct list_node list;    /* The free block list in normal mempool */
-  struct list_node ilist;   /* The free block list in interrupt mempool */
-  struct list_node elist;   /* The expand block list for normal mempool */
+  FAR char  *ibase;   /* The inerrupt mempool base pointer */
+  sq_queue_t queue;   /* The free block queue in normal mempool */
+  sq_queue_t iqueue;  /* The free block queue in interrupt mempool */
+  sq_queue_t equeue;  /* The expand block queue for normal mempool */
 #if CONFIG_MM_BACKTRACE >= 0
   struct list_node alist;   /* The used block list in mempool */
+#else
+  size_t           nalloc;  /* The number of used block in mempool */
 #endif
-  size_t           nused;   /* The number of used block in mempool */
   spinlock_t       lock;    /* The protect lock to mempool */
   sem_t            waitsem; /* The semaphore of waiter get free block */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
@@ -433,12 +436,9 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
  *
- * Returned Value:
- *   Zero on success; A negated errno value is returned on any failure.
- *
  ****************************************************************************/
 
-int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
+void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
 
 /****************************************************************************
  * Name: mempool_multiple_info_task
