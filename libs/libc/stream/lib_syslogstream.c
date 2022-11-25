@@ -126,15 +126,6 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 
       if (stream->iob != NULL)
         {
-          /* Is this a linefeed? */
-
-          if (ch == '\n')
-            {
-              /* Yes... pre-pend carriage return */
-
-              syslogstream_addchar(stream, '\r');
-            }
-
           /* Add the incoming character to the buffer */
 
           syslogstream_addchar(stream, ch);
