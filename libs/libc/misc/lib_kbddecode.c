@@ -139,7 +139,7 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
   /* No, ungotten characters.  Check for the beginning of an ESC sequence. */
 
-  ch = lib_stream_getc(stream);
+  ch = lib_stream_get(stream);
   if (ch == EOF)
     {
       /* End of file/stream */
@@ -163,7 +163,7 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
   /* Check for ESC-[ */
 
-  ch = lib_stream_getc(stream);
+  ch = lib_stream_get(stream);
   if (ch == EOF)
     {
       /* End of file/stream.  Return the escape character now.  We will
@@ -189,7 +189,7 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
   /* Get and verify the special keyboard data to decode */
 
-  ch = lib_stream_getc(stream);
+  ch = lib_stream_get(stream);
   if (ch == EOF)
     {
       /* End of file/stream.  Unget everything and return the ESC character.
@@ -216,7 +216,7 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
   /* Check for the final semicolon */
 
-  ch = lib_stream_getc(stream);
+  ch = lib_stream_get(stream);
   if (ch == EOF)
     {
       /* End of file/stream.  Unget everything and return the ESC character.
