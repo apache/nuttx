@@ -43,10 +43,10 @@
 #define lib_stream_puts(stream, buf, len) \
         ((FAR struct lib_outstream_s *)(stream))->puts( \
         (FAR struct lib_outstream_s *)(stream), buf, len)
-#define lib_stream_putc(stream, ch) \
-        ((FAR struct lib_outstream_s *)(stream))->putc( \
+#define lib_stream_put(stream, ch) \
+        ((FAR struct lib_outstream_s *)(stream))->put( \
         (FAR struct lib_outstream_s *)(stream), ch)
-#define lib_stream_getc(stream) \
+#define lib_stream_get(stream) \
         ((FAR struct lib_instream_s *)(stream))->get( \
         (FAR struct lib_instream_s *)(stream))
 #define lib_stream_gets(stream, buf, len) \
