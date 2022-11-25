@@ -675,7 +675,6 @@ static void sam_tsd_bottomhalf(void *arg)
       pressr = sam_adc_getreg(priv->adc, SAM_ADC_PRESSR);
 #endif
       /* Discard any bad readings.  This check may not be necessary. */
-#if 1
       if (xraw == 0 || xraw >= xscale || yraw == 0 || yraw > yscale)
         {
           iwarn("WARNING: Discarding: x %" PRId32 ":%" PRId32
