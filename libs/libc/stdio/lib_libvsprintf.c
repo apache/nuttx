@@ -73,7 +73,7 @@
 #  undef putc
 #endif
 
-#define putc(c,stream)  (total_len++, (stream)->put(stream, c))
+#define putc(c,stream)  (stream)->put(stream, c)
 
 /* Order is relevant here and matches order in format string */
 
@@ -201,9 +201,9 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   FAR const char *pnt;
   size_t size;
   unsigned char len;
-  int total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
+  int total_len = 0;
   int argnumber = 0;
 #endif
 
@@ -1357,7 +1357,11 @@ tail:
     }
 
 ret:
-  return total_len;
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+  return stream ? stream->nput : total_len;
+#else
+  return stream->nput;
+#endif
 }
 
 /****************************************************************************
