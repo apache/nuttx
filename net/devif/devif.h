@@ -52,6 +52,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/net/ip.h>
+#include <nuttx/net/netdev.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -512,6 +513,20 @@ void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
 void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len);
 #endif
+
+/****************************************************************************
+ * Name: devif_out
+ *
+ * Description:
+ *   Generic callback before device output to build L2 headers before sending
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+int devif_out(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
 
 #undef EXTERN
 #ifdef __cplusplus
