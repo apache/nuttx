@@ -1323,77 +1323,48 @@ static int stm32_txpoll(struct net_driver_s *dev)
 
   DEBUGASSERT(priv->dev.d_buf != NULL);
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet */
+
+  stm32_transmit(priv);
+  DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
+
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU.  We cannot perform the TX poll if we are unable to accept
+   * another packet for transmission.
+   *
+   * In a race condition, ETH_TDES3_OWN may be cleared BUT still
+   * not available because stm32_freeframe() has not yet run. If
+   * stm32_freeframe() has run, the buffer1 pointer (tdes2) will be
+   * nullified (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
    */
 
-  if (priv->dev.d_len > 0)
+  if ((priv->txhead->des3 & ETH_TDES3_RD_OWN) != 0 ||
+      priv->txhead->des0 != 0)
     {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
+      /* We have to terminate the poll if we have no more descriptors
+       * available for another transfer.
        */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
+      nerr("No tx descriptors available");
 
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
+      return -EBUSY;
+    }
 
-      /* Send the packet */
+  /* We have the descriptor, we can continue the poll. Allocate a new
+   * buffer for the poll.
+   */
 
-      stm32_transmit(priv);
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
+  dev->d_buf = stm32_allocbuffer(priv);
 
-      /* Check if the next TX descriptor is owned by the Ethernet DMA or
-       * CPU.  We cannot perform the TX poll if we are unable to accept
-       * another packet for transmission.
-       *
-       * In a race condition, ETH_TDES3_OWN may be cleared BUT still
-       * not available because stm32_freeframe() has not yet run. If
-       * stm32_freeframe() has run, the buffer1 pointer (tdes2) will be
-       * nullified (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
-       */
+  /* We can't continue the poll if we have no buffers */
 
-      if ((priv->txhead->des3 & ETH_TDES3_RD_OWN) != 0 ||
-          priv->txhead->des0 != 0)
-        {
-          /* We have to terminate the poll if we have no more descriptors
-           * available for another transfer.
-           */
+  if (dev->d_buf == NULL)
+    {
+      /* Terminate the poll. */
 
-          nerr("No tx descriptors available");
+      nerr("No tx buffer available");
 
-          return -EBUSY;
-        }
-
-      /* We have the descriptor, we can continue the poll. Allocate a new
-       * buffer for the poll.
-       */
-
-      dev->d_buf = stm32_allocbuffer(priv);
-
-      /* We can't continue the poll if we have no buffers */
-
-      if (dev->d_buf == NULL)
-        {
-          /* Terminate the poll. */
-
-          nerr("No tx buffer available");
-
-          return -ENOMEM;
-        }
+      return -ENOMEM;
     }
 
   /* If zero is returned, the polling will continue until all connections

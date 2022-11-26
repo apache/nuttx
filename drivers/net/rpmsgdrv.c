@@ -255,56 +255,22 @@ static int net_rpmsg_drv_txpoll(FAR struct net_driver_s *dev)
   FAR struct net_rpmsg_drv_s *priv = dev->d_private;
   uint32_t size;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet */
+
+  net_rpmsg_drv_transmit(dev, true);
+
+  /* Check if there is room in the device to hold another packet. If
+   * not, return a non-zero value to terminate the poll.
    */
 
-  if (dev->d_len > 0)
+  dev->d_buf = rpmsg_get_tx_payload_buffer(&priv->ept, &size, false);
+  if (dev->d_buf)
     {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(dev->d_flags))
-        {
-          arp_out(dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(dev->d_flags))
-        {
-          neighbor_out(dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(dev))
-        {
-          /* Send the packet */
-
-          net_rpmsg_drv_transmit(dev, true);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          dev->d_buf = rpmsg_get_tx_payload_buffer(&priv->ept, &size, false);
-          if (dev->d_buf)
-            {
-              dev->d_buf += sizeof(struct net_rpmsg_transfer_s);
-              dev->d_pktsize = size - sizeof(struct net_rpmsg_transfer_s);
-            }
-
-          return dev->d_buf == NULL;
-        }
+      dev->d_buf += sizeof(struct net_rpmsg_transfer_s);
+      dev->d_pktsize = size - sizeof(struct net_rpmsg_transfer_s);
     }
 
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return dev->d_buf == NULL;
 }
 
 /****************************************************************************

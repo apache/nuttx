@@ -796,26 +796,23 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      if (!devif_loopback(&priv->dev))
+      s32k1xx_txdone(priv);
+
+      /* Send the packet */
+
+      s32k1xx_transmit(priv);
+
+      /* Check if there is room in the device to hold another packet. If
+       * not, return a non-zero value to terminate the poll.
+       */
+
+      if ((getreg32(priv->base + S32K1XX_CAN_ESR2_OFFSET) &
+          (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
+          (CAN_ESR2_IMB | CAN_ESR2_VPS))
         {
-          s32k1xx_txdone(priv);
-
-          /* Send the packet */
-
-          s32k1xx_transmit(priv);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          if ((getreg32(priv->base + S32K1XX_CAN_ESR2_OFFSET) &
-              (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-              (CAN_ESR2_IMB | CAN_ESR2_VPS))
+          if (s32k1xx_txringfull(priv))
             {
-              if (s32k1xx_txringfull(priv))
-                {
-                  return -EBUSY;
-                }
+              return -EBUSY;
             }
         }
     }

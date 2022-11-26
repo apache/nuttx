@@ -1128,83 +1128,45 @@ static int lpc43_txpoll(struct net_driver_s *dev)
   struct lpc43_ethmac_s *priv =
     (struct lpc43_ethmac_s *)dev->d_private;
 
-  DEBUGASSERT(priv->dev.d_buf != NULL);
+  /* Send the packet */
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  lpc43_transmit(priv);
+  DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
+
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU. We cannot perform the TX poll if we are unable to accept
+   * another packet for transmission.
+   *
+   * In a race condition, ETH_TDES0_OWN may be cleared BUT still
+   * not available because lpc43_freeframe() has not yet run. If
+   * lpc43_freeframe() has run, the buffer1 pointer (tdes2) will be
+   * nullified (and inflight should be < CONFIG_LPC43_ETH_NTXDESC).
    */
 
-  if (priv->dev.d_len > 0)
+  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) != 0 ||
+       priv->txhead->tdes2 != 0)
     {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
+      /* We have to terminate the poll if we have no more descriptors
+       * available for another transfer.
        */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->dev))
-        {
-          /* Send the packet */
-
-          lpc43_transmit(priv);
-          DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-
-          /* Check if the next TX descriptor is owned by the Ethernet DMA or
-           * CPU. We cannot perform the TX poll if we are unable to accept
-           * another packet for transmission.
-           *
-           * In a race condition, ETH_TDES0_OWN may be cleared BUT still
-           * not available because lpc43_freeframe() has not yet run. If
-           * lpc43_freeframe() has run, the buffer1 pointer (tdes2) will be
-           * nullified (and inflight should be < CONFIG_LPC43_ETH_NTXDESC).
-           */
-
-          if ((priv->txhead->tdes0 & ETH_TDES0_OWN) != 0 ||
-               priv->txhead->tdes2 != 0)
-            {
-              /* We have to terminate the poll if we have no more descriptors
-               * available for another transfer.
-               */
-
-              return -EBUSY;
-            }
-
-          /* We have the descriptor, we can continue the poll. Allocate a new
-           * buffer for the poll.
-           */
-
-          dev->d_buf = lpc43_allocbuffer(priv);
-
-          /* We can't continue the poll if we have no buffers */
-
-          if (dev->d_buf == NULL)
-            {
-              /* Terminate the poll. */
-
-              return -ENOMEM;
-            }
-        }
+      return -EBUSY;
     }
 
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
+  /* We have the descriptor, we can continue the poll. Allocate a new
+   * buffer for the poll.
    */
+
+  dev->d_buf = lpc43_allocbuffer(priv);
+
+  /* We can't continue the poll if we have no buffers */
+
+  if (dev->d_buf == NULL)
+    {
+      /* Terminate the poll. */
+
+      return -ENOMEM;
+    }
 
   return 0;
 }
