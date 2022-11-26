@@ -459,7 +459,7 @@ out:
     }
 
   retr = usrsock_rpmsg_send_ack(ept, events, req->head.xid, ret);
-  if (retr >= 0 && events == 0)
+  if (ret > 0 && retr >= 0 && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid], POLLOUT);
     }
