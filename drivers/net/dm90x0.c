@@ -782,57 +782,21 @@ static int dm9x_txpoll(FAR struct net_driver_s *dev)
   FAR struct dm9x_driver_s *priv =
     (FAR struct dm9x_driver_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet */
+
+  dm9x_transmit(priv);
+
+  /* Check if there is room in the DM90x0 to hold another packet.
+   * In 100M mode, that can be 2 packets, otherwise it is a single
+   * packet.
    */
 
-  if (priv->dm_dev.d_len > 0)
+  if (priv->dm_ntxpending > 1 || !priv->dm_b100m)
     {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
+      /* Returning a non-zero value terminate the poll operation */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dm_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dm_dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->dm_dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->dm_dev))
-        {
-          /* Send the packet */
-
-          dm9x_transmit(priv);
-
-          /* Check if there is room in the DM90x0 to hold another packet.
-           * In 100M mode, that can be 2 packets, otherwise it is a single
-           * packet.
-           */
-
-          if (priv->dm_ntxpending > 1 || !priv->dm_b100m)
-            {
-              /* Returning a non-zero value terminate the poll operation */
-
-              return 1;
-            }
-        }
+      return 1;
     }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
 
   return 0;
 }

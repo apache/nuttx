@@ -3045,22 +3045,19 @@ static int fdcan_txpoll(struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      if (!devif_loopback(&priv->dev))
+      fdcan_txdone(priv);
+
+      /* Send the packet */
+
+      fdcan_send(priv);
+
+      /* Check if there is room in the device to hold another packet. If
+       * not, return a non-zero value to terminate the poll.
+       */
+
+      if (fdcan_txready(priv) == false)
         {
-          fdcan_txdone(priv);
-
-          /* Send the packet */
-
-          fdcan_send(priv);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          if (fdcan_txready(priv) == false)
-            {
-              return -EBUSY;
-            }
+          return -EBUSY;
         }
     }
 

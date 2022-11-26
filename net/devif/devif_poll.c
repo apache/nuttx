@@ -31,6 +31,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/arp.h>
 
 #include "devif/devif.h"
 #include "arp/arp.h"
@@ -785,10 +786,42 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
 int devif_out(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
+  int bstop;
+
   if (dev->d_len == 0)
     {
       return 0;
     }
+
+  bstop = devif_loopback(dev);
+  if (bstop)
+    {
+      return bstop;
+    }
+
+#ifdef CONFIG_NET_ETHERNET
+  if (dev->d_lltype == NET_LL_ETHERNET ||
+      dev->d_lltype == NET_LL_IEEE80211)
+    {
+#  ifdef CONFIG_NET_IPv4
+#    ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(dev->d_flags))
+#    endif /* CONFIG_NET_IPv6 */
+        {
+          arp_out(dev);
+        }
+#  endif /* CONFIG_NET_IPv4 */
+
+#  ifdef CONFIG_NET_IPv6
+#    ifdef CONFIG_NET_IPv4
+      else
+#    endif /* CONFIG_NET_IPv4 */
+        {
+          neighbor_out(dev);
+        }
+#  endif /* CONFIG_NET_IPv6 */
+    }
+#endif /* CONFIG_NET_ETHERNET */
 
   return callback(dev);
 }

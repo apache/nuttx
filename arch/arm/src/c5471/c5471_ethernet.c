@@ -1015,51 +1015,19 @@ static int c5471_txpoll(struct net_driver_s *dev)
 {
   struct c5471_driver_s *priv = (struct c5471_driver_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet */
+
+  c5471_transmit(priv);
+
+  /* Check if the ESM has let go of the RX descriptor giving us
+   * access rights to submit another Ethernet frame.
    */
 
-  if (priv->c_dev.d_len > 0)
+  if ((EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) != 0)
     {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
+      /* No, then return non-zero to terminate the poll */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->c_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->c_dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->c_dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->c_dev))
-        {
-          /* Send the packet */
-
-          c5471_transmit(priv);
-
-          /* Check if the ESM has let go of the RX descriptor giving us
-           * access rights to submit another Ethernet frame.
-           */
-
-          if ((EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) != 0)
-            {
-              /* No, then return non-zero to terminate the poll */
-
-              return 1;
-            }
-        }
+      return 1;
     }
 
   /* If zero is returned, the polling will continue until all connections

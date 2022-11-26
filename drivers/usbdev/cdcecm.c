@@ -340,53 +340,15 @@ static int cdcecm_txpoll(FAR struct net_driver_s *dev)
   FAR struct cdcecm_driver_s *priv =
     (FAR struct cdcecm_driver_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet */
+
+  cdcecm_transmit(priv);
+
+  /* Check if there is room in the device to hold another packet. If
+   * not, return a non-zero value to terminate the poll.
    */
 
-  if (priv->dev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->dev))
-        {
-          /* Send the packet */
-
-          cdcecm_transmit(priv);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          return 1;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return 1;
 }
 
 /****************************************************************************

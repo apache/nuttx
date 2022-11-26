@@ -603,54 +603,12 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 static int tiva_txpoll(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
-  int ret = OK;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet.  tiva_transmit() will return zero if the
+   * packet was successfully handled.
    */
 
-  ninfo("Poll result: d_len=%d\n", priv->ld_dev.d_len);
-  if (priv->ld_dev.d_len > 0)
-    {
-      DEBUGASSERT(!(tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX));
-
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->ld_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->ld_dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->ld_dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->ld_dev))
-        {
-          /* Send the packet.  tiva_transmit() will return zero if the
-           * packet was successfully handled.
-           */
-
-          ret = tiva_transmit(priv);
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return ret;
+  return tiva_transmit(priv);
 }
 
 /****************************************************************************
