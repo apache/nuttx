@@ -587,9 +587,9 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
 
       if (!iov[i].iov_len || retr <= 0)
         {
-          /* FIXME: free rpmsg buffer */
-
-          break;
+          rpmsg_release_tx_buffer(ept, iov[i].iov_base);
+          iov[i].iov_base = NULL;
+          continue;
         }
 
       ret = rpmsg_send_nocopy(ept,
