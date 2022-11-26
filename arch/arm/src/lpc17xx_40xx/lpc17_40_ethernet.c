@@ -916,11 +916,8 @@ static void lpc17_40_rxdone_work(void *arg)
               ninfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->lp_dev);
 
-              /* Handle ARP on input then give the IPv4 packet to the
-               * network layer
-               */
+              /* Receive an IPv4 packet from the network device */
 
-              arp_ipin(&priv->lp_dev);
               ipv4_input(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
@@ -930,21 +927,6 @@ static void lpc17_40_rxdone_work(void *arg)
 
               if (priv->lp_dev.d_len > 0)
                 {
-                  /* Update Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-                  if (IFF_IS_IPv4(priv->lp_dev.d_flags))
-#endif
-                    {
-                      arp_out(&priv->lp_dev);
-                    }
-#ifdef CONFIG_NET_IPv6
-                  else
-                    {
-                      neighbor_out(&priv->lp_dev);
-                    }
-#endif
-
                   /* And send the packet */
 
                   lpc17_40_response(priv);
@@ -969,21 +951,6 @@ static void lpc17_40_rxdone_work(void *arg)
 
               if (priv->lp_dev.d_len > 0)
                 {
-                  /* Update Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-                  if (IFF_IS_IPv4(priv->lp_dev.d_flags))
-                    {
-                      arp_out(&priv->lp_dev);
-                    }
-                  else
-#endif
-#ifdef CONFIG_NET_IPv6
-                    {
-                      neighbor_out(&priv->lp_dev);
-                    }
-#endif
-
                   /* And send the packet */
 
                   lpc17_40_response(priv);

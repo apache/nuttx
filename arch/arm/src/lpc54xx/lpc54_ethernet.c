@@ -847,28 +847,6 @@ static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
 #warning Missing Logic
 #endif
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      /* Check for an outgoing IPv4 packet */
-
-      if (IFF_IS_IPv4(priv->eth_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->eth_dev);
-        }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      /* Otherwise, it must be an outgoing IPv6 packet */
-
-      else
-#endif
-        {
-          neighbor_out(&priv->eth_dev);
-        }
-#endif
-
       /* And send the packet */
 
       chan   = lpc54_eth_getring(priv);
@@ -917,11 +895,8 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
       ninfo("IPv4 packet\n");
       NETDEV_RXIPV4(dev);
 
-      /* Handle ARP on input,
-       * then dispatch IPv4 packet to the network layer
-       */
+      /* Receive an IPv4 packet from the network device */
 
-      arp_ipin(dev);
       ipv4_input(dev);
 
       /* Check for a reply to the IPv4 packet */

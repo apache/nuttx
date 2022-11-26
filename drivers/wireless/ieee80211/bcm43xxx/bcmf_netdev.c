@@ -286,11 +286,8 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
           ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->bc_dev);
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
-           */
+          /* Receive an IPv4 packet from the network device */
 
-          arp_ipin(&priv->bc_dev);
           ipv4_input(&priv->bc_dev);
 
           /* If the above function invocation resulted in data that should be
@@ -299,21 +296,6 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 
           if (priv->bc_dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(priv->bc_dev.d_flags))
-#endif
-                {
-                  arp_out(&priv->bc_dev);
-                }
-#ifdef CONFIG_NET_IPv6
-              else
-                {
-                  neighbor_out(&kel->bc_dev);
-                }
-#endif
-
               /* And send the packet */
 
               bcmf_transmit(priv, frame);
@@ -343,21 +325,6 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
 
           if (priv->bc_dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(priv->bc_dev.d_flags))
-                {
-                  arp_out(&priv->bc_dev);
-                }
-              else
-#endif
-#ifdef CONFIG_NET_IPv6
-                {
-                  neighbor_out(&priv->bc_dev);
-                }
-#endif
-
               /* And send the packet */
 
               bcmf_transmit(priv, frame);

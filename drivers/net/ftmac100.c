@@ -651,11 +651,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
         {
           ninfo("IPv4 frame\n");
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
-           */
+          /* Receive an IPv4 packet from the network device */
 
-          arp_ipin(&priv->ft_dev);
           ipv4_input(&priv->ft_dev);
 
           /* If the above function invocation resulted in data that should be
@@ -665,21 +662,6 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 
           if (priv->ft_dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(priv->ft_dev.d_flags))
-#endif
-                {
-                  arp_out(&priv->ft_dev);
-                }
-#ifdef CONFIG_NET_IPv6
-              else
-                {
-                  neighbor_out(&priv->ft_dev);
-                }
-#endif
-
               /* And send the packet */
 
               ftmac100_transmit(priv);
@@ -703,21 +685,6 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 
           if (priv->ft_dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(priv->ft_dev.d_flags))
-                {
-                  arp_out(&priv->ft_dev);
-                }
-              else
-#endif
-#ifdef CONFIG_NET_IPv6
-                {
-                  neighbor_out(&priv->ft_dev);
-                }
-#endif
-
               /* And send the packet */
 
               ftmac100_transmit(priv);

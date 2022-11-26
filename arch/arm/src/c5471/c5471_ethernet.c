@@ -1290,11 +1290,8 @@ static void c5471_receive(struct c5471_driver_s *priv)
         {
           ninfo("IPv4 frame\n");
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
-           */
+          /* Receive an IPv4 packet from the network device */
 
-          arp_ipin(dev);
           ipv4_input(dev);
 
           /* If the above function invocation resulted in data that should be
@@ -1306,21 +1303,6 @@ static void c5471_receive(struct c5471_driver_s *priv)
           if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) == 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(dev->d_flags))
-#endif
-                {
-                  arp_out(dev);
-                }
-#ifdef CONFIG_NET_IPv6
-              else
-                {
-                  neighbor_out(dev);
-                }
-#endif
-
               /* And send the packet */
 
                c5471_transmit(priv);
@@ -1346,21 +1328,6 @@ static void c5471_receive(struct c5471_driver_s *priv)
           if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) == 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(dev->d_flags))
-                {
-                  arp_out(dev);
-                }
-              else
-#endif
-#ifdef CONFIG_NET_IPv6
-                {
-                  neighbor_out(dev);
-                }
-#endif
-
               /* And send the packet */
 
                c5471_transmit(priv);
