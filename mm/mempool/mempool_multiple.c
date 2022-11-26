@@ -34,6 +34,27 @@
 #define MIN(a, b)   ((a) < (b) ? (a) : (b))
 #define ALIGN_BIT   (1 << 1)
 
+struct mempool_multiple_s
+{
+  FAR struct mempool_s *   pools;      /* The memory pool array */
+  size_t                   npools;     /* The number of memory pool array elements */
+
+  FAR void                *arg;     /* This pointer is used to store the user's
+                                     * private data
+                                     */
+  mempool_multiple_alloc_t alloc;   /* The alloc function for mempool */
+  mempool_multiple_free_t  free;    /* The free function for mempool */
+
+  /* This delta describes the relationship between the block size of each
+   * mempool in multiple mempool by user initialized. It is automatically
+   * detected by the mempool_multiple_init function. If the delta is not
+   * equal to 0, the block size of the pool in the multiple mempool is an
+   * arithmetic progressions, otherwise it is an increasing progressions.
+   */
+
+  size_t                   delta;
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -41,10 +62,16 @@
 static inline struct mempool_s *
 mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
 {
-  size_t right = mpool->npools;
+  size_t right;
   size_t left = 0;
   size_t mid;
 
+  if (mpool == NULL)
+    {
+      return NULL;
+    }
+
+  right = mpool->npools;
   if (mpool->delta != 0)
     {
       left = mpool->pools[0].blocksize;
@@ -91,50 +118,90 @@ mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
  *   relationship between the each block size of mempool in multiple mempool.
  *
  * Input Parameters:
- *   name  - The name of memory pool.
- *   mpool - The handle of the multiple memory pool to be used.
+ *   name        - The name of memory pool.
+ *   poolsize    - The block size array for pools in multiples pool.
+ *   npools      - How many pools in multiples pool.
+ *   alloc       - The alloc memory function for multiples pool.
+ *   free        - The free memory function for multiples pool.
+ *   arg         - The alloc & free memory fuctions used arg.
+ *   expandsize  - The expend mempry for all pools in multiples pool.
  *
  * Returned Value:
- *   Zero on success; A negated errno value is returned on any failure.
+ *   Return an initialized multiple pool pointer on success,
+ *   otherwise NULL is returned.
  *
  ****************************************************************************/
 
-int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
-                          FAR const char *name)
+FAR struct mempool_multiple_s *
+mempool_multiple_init(FAR const char *name,
+                      FAR size_t *poolsize, size_t npools,
+                      mempool_multiple_alloc_t alloc,
+                      mempool_multiple_free_t free,
+                      FAR void *arg, size_t expandsize)
 {
-  size_t i;
+  FAR struct mempool_multiple_s *mpool;
+  FAR struct mempool_s *pools;
+  int ret;
+  int i;
 
-  DEBUGASSERT(mpool != NULL && mpool->pools != NULL);
-
-  mpool->delta = 0;
-  for (i = 1; i < mpool->npools; i++)
+  mpool = alloc(arg, sizeof(uintptr_t), sizeof(struct mempool_multiple_s));
+  if (mpool == NULL)
     {
-      size_t delta = mpool->pools[i].blocksize -
-                     mpool->pools[i - 1].blocksize;
-      if (mpool->delta != 0 && delta != mpool->delta)
-        {
-          mpool->delta = 0;
-          break;
-        }
-
-      mpool->delta = delta;
+      return NULL;
     }
 
-  for (i = 0; i < mpool->npools; i++)
+  pools = alloc(arg, sizeof(uintptr_t),
+                npools * sizeof(FAR struct mempool_s));
+  if (pools == NULL)
     {
-      int ret = mempool_init(mpool->pools + i, name);
+      goto err_with_mpool;
+    }
+
+  mpool->pools = pools;
+  mpool->npools = npools;
+  mpool->alloc = alloc;
+  mpool->free = free;
+  mpool->arg = arg;
+
+  for (i = 0; i < npools; i++)
+    {
+      pools[i].blocksize = poolsize[i];
+      pools[i].expandsize = expandsize;
+      pools[i].initialsize = 0;
+      pools[i].interruptsize = 0;
+      ret = mempool_init(pools + i, name);
       if (ret < 0)
         {
           while (--i >= 0)
             {
-              mempool_deinit(mpool->pools + i);
+              mempool_deinit(pools + i);
             }
 
-          return ret;
+          goto err_with_pools;
+        }
+
+      if (i + 1 != npools)
+        {
+          size_t delta = pools[i + 1].blocksize - pools[i].blocksize;
+
+          if (i == 0)
+            {
+              mpool->delta = delta;
+            }
+          else if (delta != mpool->delta)
+            {
+              mpool->delta = 0;
+            }
         }
     }
 
-  return 0;
+  return mpool;
+
+err_with_pools:
+  free(arg, pools);
+err_with_mpool:
+  free(arg, mpool);
+  return NULL;
 }
 
 /****************************************************************************
@@ -427,4 +494,7 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
     {
       DEBUGVERIFY(mempool_deinit(mpool->pools + i));
     }
+
+  mpool->free(mpool->arg, mpool->pools);
+  mpool->free(mpool->arg, mpool);
 }

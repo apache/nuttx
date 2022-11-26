@@ -121,7 +121,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_alloc(&heap->mm_mpool, size);
+  ret = mempool_multiple_alloc(heap->mm_mpool, size);
   if (ret != NULL)
     {
       return ret;

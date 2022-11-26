@@ -62,6 +62,10 @@
           ((*((FAR size_t *)(mem) - 1)) & MM_MPOOL_BIT) == 0
 #endif
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#  define MEMPOOL_NPOOLS (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / tlsf_align_size())
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -97,9 +101,7 @@ struct mm_heap_s
   /* The is a multiple mempool of the heap */
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  struct mempool_multiple_s mm_mpool;
-  struct mempool_s mm_pools[CONFIG_MM_HEAP_MEMPOOL_THRESHOLD /
-                            sizeof(uintptr_t)];
+  FAR struct mempool_multiple_s *mm_mpool;
 #endif
 
   /* Free delay list, for some situation can't do free immdiately */
@@ -654,7 +656,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   if (MM_IS_FROM_MEMPOOL(mem))
     {
-      mempool_multiple_free(&heap->mm_mpool, mem);
+      mempool_multiple_free(heap->mm_mpool, mem);
       return;
     }
 #endif
@@ -757,6 +759,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 {
   FAR struct mm_heap_s *heap;
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  size_t poolsize[MEMPOOL_NPOOLS];
   int i;
 #endif
 
@@ -769,20 +772,6 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   memset(heap, 0, sizeof(struct mm_heap_s));
   heapstart += sizeof(struct mm_heap_s);
   heapsize -= sizeof(struct mm_heap_s);
-
-  /* Initialize the multiple mempool in heap */
-
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  heap->mm_mpool.pools = heap->mm_pools;
-  heap->mm_mpool.npools = sizeof(heap->mm_pools) / sizeof(heap->mm_pools[0]);
-  for (i = 0; i < heap->mm_mpool.npools; i++)
-    {
-      heap->mm_pools[i].blocksize = (i + 1) * sizeof(uintptr_t);
-      heap->mm_pools[i].expandsize = CONFIG_MM_HEAP_MEMPOOL_EXPAND;
-    }
-
-  mempool_multiple_init(&heap->mm_mpool, name);
-#endif
 
   /* Allocate and create TLSF context */
 
@@ -810,6 +799,18 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #  endif
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
+#endif
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  for (i = 0; i < MEMPOOL_NPOOLS; i++)
+    {
+      poolsize[i] = (i + 1) * tlsf_align_size();
+    }
+
+  heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
+                                    (mempool_multiple_alloc_t)mm_memalign,
+                                    (mempool_multiple_free_t)mm_free, heap,
+                                    CONFIG_MM_HEAP_MEMPOOL_EXPAND);
 #endif
 
   return heap;
@@ -870,7 +871,7 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
   info->aordblks = 0;
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  mempool_multiple_info_task(&heap->mm_mpool, info);
+  mempool_multiple_info_task(heap->mm_mpool, info);
 #endif
 
 #if CONFIG_MM_REGIONS > 1
@@ -926,7 +927,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  mempool_multiple_memdump(&heap->mm_mpool, pid);
+  mempool_multiple_memdump(heap->mm_mpool, pid);
 #endif
 
 #if CONFIG_MM_REGIONS > 1
@@ -955,7 +956,7 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   if (MM_IS_FROM_MEMPOOL(mem))
     {
-      return mempool_multiple_alloc_size(&heap->mm_mpool, mem);
+      return mempool_multiple_alloc_size(heap->mm_mpool, mem);
     }
 #endif
 
@@ -982,7 +983,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   FAR void *ret;
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_alloc(&heap->mm_mpool, size);
+  ret = mempool_multiple_alloc(heap->mm_mpool, size);
   if (ret != NULL)
     {
       return ret;
@@ -1037,7 +1038,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   FAR void *ret;
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_memalign(&heap->mm_mpool, alignment, size);
+  ret = mempool_multiple_memalign(heap->mm_mpool, alignment, size);
   if (ret != NULL)
     {
       return ret;
@@ -1114,7 +1115,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   if (MM_IS_FROM_MEMPOOL(oldmem))
     {
-      newmem = mempool_multiple_realloc(&heap->mm_mpool, oldmem, size);
+      newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
       if (newmem != NULL)
         {
           return newmem;
@@ -1124,14 +1125,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       if (newmem != NULL)
         {
           memcpy(newmem, oldmem, size);
-          mempool_multiple_free(&heap->mm_mpool, oldmem);
+          mempool_multiple_free(heap->mm_mpool, oldmem);
         }
 
       return newmem;
     }
   else
     {
-      newmem = mempool_multiple_alloc(&heap->mm_mpool, size);
+      newmem = mempool_multiple_alloc(heap->mm_mpool, size);
       if (newmem != NULL)
         {
           memcpy(newmem, oldmem, MIN(size, mm_malloc_size(heap, oldmem)));
@@ -1201,6 +1202,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
 void mm_uninitialize(FAR struct mm_heap_s *heap)
 {
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  mempool_multiple_deinit(heap->mm_mpool);
+#endif
+
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
 #  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   procfs_unregister_meminfo(&heap->mm_procfs);
