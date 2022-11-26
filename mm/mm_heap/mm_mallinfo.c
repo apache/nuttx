@@ -153,7 +153,7 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
   info->aordblks = 0;
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  mempool_multiple_info_task(&heap->mm_mpool, info);
+  mempool_multiple_info_task(heap->mm_mpool, info);
 #endif
 
   mm_foreach(heap, mallinfo_task_handler, info);

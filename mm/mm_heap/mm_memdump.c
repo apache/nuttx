@@ -148,7 +148,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  mempool_multiple_memdump(&heap->mm_mpool, pid);
+  mempool_multiple_memdump(heap->mm_mpool, pid);
 #endif
   mm_foreach(heap, memdump_handler, &pid);
 

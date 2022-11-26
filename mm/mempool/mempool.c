@@ -96,31 +96,6 @@ static inline void mempool_add_queue(FAR sq_queue_t *queue,
     }
 }
 
-static inline FAR void *mempool_malloc(FAR struct mempool_s *pool,
-                                       size_t size)
-{
-  if (pool->alloc != NULL)
-    {
-      return pool->alloc(pool, size);
-    }
-  else
-    {
-      return kmm_malloc(size);
-    }
-}
-
-static inline void mempool_mfree(FAR struct mempool_s *pool, FAR void *addr)
-{
-  if (pool->free != NULL)
-    {
-      return pool->free(pool, addr);
-    }
-  else
-    {
-      return kmm_free(addr);
-    }
-}
-
 #if CONFIG_MM_BACKTRACE >= 0
 static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
                                          FAR struct mempool_backtrace_s *buf)
@@ -191,7 +166,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
                           blocksize;
       size_t size = ninterrupt * blocksize + sizeof(sq_entry_t);
 
-      pool->ibase = mempool_malloc(pool, size);
+      pool->ibase = pool->alloc(pool, size);
       if (pool->ibase == NULL)
         {
           return -ENOMEM;
@@ -211,7 +186,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       size_t size = ninitial * blocksize + sizeof(sq_entry_t);
       FAR char *base;
 
-      base = mempool_malloc(pool, size);
+      base = pool->alloc(pool, size);
       if (base == NULL)
         {
           mempool_free(pool, pool->ibase);
@@ -290,7 +265,7 @@ retry:
               size_t nexpand = (pool->expandsize - sizeof(sq_entry_t)) /
                                blocksize;
               size_t size = nexpand * blocksize + sizeof(sq_entry_t);
-              FAR char *base = mempool_malloc(pool, size);
+              FAR char *base = pool->alloc(pool, size);
 
               if (base == NULL)
                 {
@@ -607,7 +582,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
   while ((blk = mempool_remove_queue(&pool->equeue)) != NULL)
     {
       blk = (FAR sq_entry_t *)((FAR char *)blk - count * blocksize);
-      mempool_mfree(pool, blk);
+      pool->free(pool, blk);
       if (pool->expandsize > sizeof(sq_entry_t))
         {
           count = (pool->expandsize - sizeof(sq_entry_t)) / blocksize;
@@ -616,7 +591,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
 
   if (pool->ibase)
     {
-      mempool_mfree(pool, pool->ibase);
+      pool->free(pool, pool->ibase);
     }
 
   if (pool->wait && pool->expandsize == 0)

@@ -49,7 +49,7 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   if (MM_IS_FROM_MEMPOOL(mem))
     {
-      return mempool_multiple_alloc_size(&heap->mm_mpool, mem);
+      return mempool_multiple_alloc_size(heap->mm_mpool, mem);
     }
 #endif
 

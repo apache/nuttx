@@ -73,7 +73,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  node = mempool_multiple_memalign(&heap->mm_mpool, alignment, size);
+  node = mempool_multiple_memalign(heap->mm_mpool, alignment, size);
   if (node != NULL)
     {
       return node;
