@@ -137,6 +137,17 @@ void arp_out(FAR struct net_driver_s *dev)
   in_addr_t destipaddr;
   int ret;
 
+  /* ARP support is only built if the Ethernet link layer is supported.
+   * Continue and send the ARP request only if this device uses the
+   * Ethernet link layer protocol.
+   */
+
+  if (dev->d_lltype != NET_LL_ETHERNET &&
+      dev->d_lltype != NET_LL_IEEE80211)
+    {
+      return;
+    }
+
 #if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_ARP_SEND)
   /* Skip sending ARP requests when the frame to be transmitted was
    * written into a packet socket.
