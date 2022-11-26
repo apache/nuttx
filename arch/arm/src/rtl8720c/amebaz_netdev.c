@@ -84,20 +84,6 @@ static void amebaz_reply(struct amebaz_dev_s *priv)
 {
   if (priv->dev.d_len > 0)
     {
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-
-#ifdef CONFIG_NET_IPv6
-      else
-        {
-          neighbor_out(&priv->dev);
-        }
-
-#endif
       amebaz_transmit(priv);
     }
 }
@@ -143,7 +129,6 @@ void amebaz_netdev_notify_receive(struct amebaz_dev_s *priv,
   if (hdr->type == HTONS(ETHTYPE_IP))
     {
       NETDEV_RXIPV4(&priv->dev);
-      arp_ipin(&priv->dev);
       ipv4_input(&priv->dev);
       amebaz_reply(priv);
     }

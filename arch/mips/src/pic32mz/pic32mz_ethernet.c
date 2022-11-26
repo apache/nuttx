@@ -1494,11 +1494,8 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
               ninfo("IPv4 frame\n");
               NETDEV_RXIPV4(&priv->pd_dev);
 
-              /* Handle ARP on input then give the IPv4 packet to the network
-               * layer
-               */
+              /* Receive an IPv4 packet from the network device */
 
-              arp_ipin(&priv->pd_dev);
               ipv4_input(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
@@ -1508,23 +1505,6 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC
-                   * address
-                   */
-
-#ifdef CONFIG_NET_IPv6
-                  if (IFF_IS_IPv4(priv->pd_dev.d_flags))
-#endif
-                    {
-                      arp_out(&priv->pd_dev);
-                    }
-#ifdef CONFIG_NET_IPv6
-                  else
-                    {
-                      neighbor_out(&priv->pd_dev);
-                    }
-#endif
-
                   /* And send the packet */
 
                   pic32mz_response(priv);
@@ -1549,23 +1529,6 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC
-                   * address
-                   */
-
-#ifdef CONFIG_NET_IPv4
-                  if (IFF_IS_IPv4(priv->pd_dev.d_flags))
-                    {
-                      arp_out(&priv->pd_dev);
-                    }
-                  else
-#endif
-#ifdef CONFIG_NET_IPv6
-                    {
-                      neighbor_out(&priv->pd_dev);
-                    }
-#endif
-
                   /* And send the packet */
 
                   pic32mz_response(priv);

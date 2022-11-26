@@ -378,30 +378,6 @@ static void cdcecm_reply(struct cdcecm_driver_s *priv)
 
   if (priv->dev.d_len > 0)
     {
-      /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      /* Check for an outgoing IPv4 packet */
-
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      /* Otherwise, it must be an outgoing IPv6 packet */
-
-      else
-#endif
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif
-
       /* And send the packet */
 
       cdcecm_transmit(priv);
@@ -454,11 +430,8 @@ static void cdcecm_receive(FAR struct cdcecm_driver_s *self)
       ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(&self->dev);
 
-      /* Handle ARP on input, then dispatch IPv4 packet to the network
-       * layer.
-       */
+      /* Receive an IPv4 packet from the network device */
 
-      arp_ipin(&self->dev);
       ipv4_input(&self->dev);
 
       /* Check for a reply to the IPv4 packet */

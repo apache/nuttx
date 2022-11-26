@@ -1224,22 +1224,6 @@ static void w5500_reply(FAR struct w5500_driver_s *self)
 
   if (self->w_dev.d_len > 0)
     {
-      /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(self->w_dev.d_flags))
-        {
-          arp_out(&self->w_dev);
-        }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(self->w_dev.d_flags))
-        {
-          neighbor_out(&self->w_dev);
-        }
-#endif
-
       /* And send the packet */
 
       w5500_transmit(self);
@@ -1389,11 +1373,8 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
           ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&self->w_dev);
 
-          /* Handle ARP on input, then dispatch IPv4 packet to the network
-           * layer.
-           */
+          /* Receive an IPv4 packet from the network device */
 
-          arp_ipin(&self->w_dev);
           ipv4_input(&self->w_dev);
 
           /* Check for a reply to the IPv4 packet */

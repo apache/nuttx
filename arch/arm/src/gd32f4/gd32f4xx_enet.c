@@ -1685,11 +1685,8 @@ static void gd32_receive(struct gd32_enet_mac_s *priv)
         {
           ninfo("IPv4 frame\n");
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
-           */
+          /* Receive an IPv4 packet from the network device */
 
-          arp_ipin(&priv->dev);
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
@@ -1698,10 +1695,6 @@ static void gd32_receive(struct gd32_enet_mac_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-              arp_out(&priv->dev);
-
               /* And send the packet */
 
               gd32_transmit(priv);

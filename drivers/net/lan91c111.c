@@ -534,22 +534,6 @@ static void lan91c111_reply(FAR struct net_driver_s *dev)
 
   if (dev->d_len > 0)
     {
-      /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(dev->d_flags))
-        {
-          arp_out(dev);
-        }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(dev->d_flags))
-        {
-          neighbor_out(dev);
-        }
-#endif
-
       /* And send the packet */
 
       lan91c111_transmit(dev);
@@ -645,11 +629,8 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
       ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(dev);
 
-      /* Handle ARP on input, then dispatch IPv4 packet to the network
-       * layer.
-       */
+      /* Receive an IPv4 packet from the network device */
 
-      arp_ipin(dev);
       ipv4_input(dev);
 
       /* Check for a reply to the IPv4 packet */
