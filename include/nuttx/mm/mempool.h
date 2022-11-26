@@ -39,10 +39,15 @@
  ****************************************************************************/
 
 struct mempool_s;
-typedef CODE void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
-                                      size_t size);
+typedef CODE FAR void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
+                                          size_t size);
 typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
                                     FAR void *addr);
+
+typedef CODE FAR void *(*mempool_multiple_alloc_t)(FAR void *args,
+                                                   size_t alignment,
+                                                   size_t size);
+typedef CODE void (*mempool_multiple_free_t)(FAR void *args, FAR void *addr);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 struct mempool_procfs_entry_s
@@ -89,23 +94,6 @@ struct mempool_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
-};
-
-struct mempool_multiple_s
-{
-  FAR struct mempool_s *pools;  /* The memory pool array */
-  size_t                npools; /* The number of memory pool array elements */
-
-  /* Private data for multiple memory pool */
-
-  /* This delta describes the relationship between the block size of each
-   * mempool in multiple mempool by user initialized. It is automatically
-   * detected by the mempool_multiple_init function. If the delta is not
-   * equal to 0, the block size of the pool in the multiple mempool is an
-   * arithmetic progressions, otherwise it is an increasing progressions.
-   */
-
-  size_t                delta;
 };
 
 struct mempoolinfo_s
@@ -293,16 +281,28 @@ void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
  *   relationship between the each block size of mempool in multiple mempool.
  *
  * Input Parameters:
- *   name  - The name of memory pool.
- *   mpool - The handle of the multiple memory pool to be used.
+ *   name        - The name of memory pool.
+ *   poolsize    - The block size array for pools in multiples pool.
+ *   npools      - How many pools in multiples pool.
+ *   alloc       - The alloc memory function for multiples pool.
+ *   free        - The free memory function for multiples pool.
+ *   arg         - The alloc & free memory fuctions used arg.
+ *   expandsize  - The expend mempry for all pools in multiples pool.
  *
  * Returned Value:
- *   Zero on success; A negated errno value is returned on any failure.
+ *   Return an initialized multiple pool pointer on success,
+ *   otherwise NULL is returned.
  *
  ****************************************************************************/
 
-int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
-                          FAR const char *name);
+struct mempool_multiple_s;
+
+FAR struct mempool_multiple_s *
+mempool_multiple_init(FAR const char *name,
+                      FAR size_t *poolsize, size_t npools,
+                      mempool_multiple_alloc_t alloc,
+                      mempool_multiple_free_t free,
+                      FAR void *arg, size_t expandsize);
 
 /****************************************************************************
  * Name: mempool_multiple_alloc
