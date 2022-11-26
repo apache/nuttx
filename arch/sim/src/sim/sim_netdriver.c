@@ -107,28 +107,6 @@ static void netdriver_reply(struct net_driver_s *dev)
 
   if (dev->d_len > 0)
     {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(dev->d_flags))
-#endif
-        {
-          arp_out(dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
       /* Send the packet */
 
       NETDEV_TXPACKETS(dev);
@@ -189,11 +167,8 @@ static void netdriver_recv_work(void *arg)
                   ninfo("IPv4 frame\n");
                   NETDEV_RXIPV4(dev);
 
-                  /* Handle ARP on input then give the IPv4 packet to
-                   * the network layer
-                   */
+                  /* Receive an IPv4 packet from the network device */
 
-                  arp_ipin(dev);
                   ipv4_input(dev);
 
                   /* Check for a reply to the IPv4 packet */
