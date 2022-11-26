@@ -377,7 +377,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_out(dev, callback);
         }
     }
 
@@ -424,7 +424,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_out(dev, callback);
         }
     }
   while (!bstop && (conn = icmpv6_nextconn(conn)) != NULL);
@@ -456,7 +456,7 @@ static inline int devif_poll_forward(FAR struct net_driver_s *dev,
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_out(dev, callback);
 }
 #endif /* CONFIG_NET_ICMPv6_SOCKET || CONFIG_NET_ICMPv6_NEIGHBOR*/
 
@@ -486,7 +486,7 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_out(dev, callback);
 }
 #endif /* CONFIG_NET_IGMP */
 
@@ -516,7 +516,7 @@ static inline int devif_poll_mld(FAR struct net_driver_s *dev,
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_out(dev, callback);
 }
 #endif /* CONFIG_NET_MLD */
 
@@ -561,7 +561,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_out(dev, callback);
         }
     }
 
@@ -606,7 +606,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_out(dev, callback);
         }
     }
 
@@ -769,6 +769,28 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
     }
 
   return bstop;
+}
+
+/****************************************************************************
+ * Name: devif_out
+ *
+ * Description:
+ *   Generic callback before device output to build L2 headers before sending
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+int devif_out(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
+{
+  if (dev->d_len == 0)
+    {
+      return 0;
+    }
+
+  return callback(dev);
 }
 
 #endif /* CONFIG_NET */
