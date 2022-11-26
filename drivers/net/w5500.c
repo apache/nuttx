@@ -1186,57 +1186,15 @@ static int w5500_txpoll(FAR struct net_driver_s *dev)
   FAR struct w5500_driver_s *self =
     (FAR struct w5500_driver_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* Send the packet */
+
+  w5500_transmit(self);
+
+  /* Check if there is room in the device to hold another packet.
+   * If not, return a non-zero value to terminate the poll.
    */
 
-  if (self->w_dev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(self->w_dev.d_flags))
-        {
-          arp_out(&self->w_dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(self->w_dev.d_flags))
-        {
-          neighbor_out(&self->w_dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      /* Check if the network is sending this packet to the IP address of
-       * this device.  If so, just loop the packet back into the network but
-       * don't attempt to put it on the wire.
-       */
-
-      if (!devif_loopback(&self->w_dev))
-        {
-          /* Send the packet */
-
-          w5500_transmit(self);
-
-          /* Check if there is room in the device to hold another packet.
-           * If not, return a non-zero value to terminate the poll.
-           */
-
-          if (!w5500_txbuf_numfree(self))
-            {
-              return -EBUSY;
-            }
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return OK;
+  return !w5500_txbuf_numfree(self);
 }
 
 /****************************************************************************

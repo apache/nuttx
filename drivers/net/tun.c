@@ -358,46 +358,12 @@ static int tun_txpoll_tap(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
+  /* Send the packet */
 
-  if (priv->dev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
+  priv->read_d_len = priv->dev.d_len;
+  tun_fd_transmit(priv);
 
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-        {
-          arp_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(priv->dev.d_flags))
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(dev))
-        {
-          /* Send the packet */
-
-          priv->read_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-
-          return 1;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return 1;
 }
 #endif
 
@@ -430,28 +396,10 @@ static int tun_txpoll_tun(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
+  priv->read_d_len = priv->dev.d_len;
+  tun_fd_transmit(priv);
 
-  if (priv->dev.d_len > 0)
-    {
-      if (!devif_loopback(dev))
-        {
-          /* Send the packet */
-
-          priv->read_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-
-          return 1;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return 1;
 }
 
 /****************************************************************************

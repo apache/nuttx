@@ -528,6 +528,23 @@ void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
 
 int devif_out(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
 
+/****************************************************************************
+ * Name: devif_loopback
+ *
+ * Description:
+ *   This function should be called before sending out a packet. The function
+ *   checks the destination address of the packet to see whether the target
+ *   of packet is ourself and then consume the packet directly by calling
+ *   input process functions.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet don't loop back to ourself, otherwise
+ *   a non-zero value is returned.
+ *
+ ****************************************************************************/
+
+int devif_loopback(FAR struct net_driver_s *dev);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
