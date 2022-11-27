@@ -36,6 +36,7 @@
  * Type Declarations
  ****************************************************************************/
 
+#ifdef CONFIG_STREAM_RTT
 struct lib_rttoutstream_s
 {
   struct lib_outstream_s public;
@@ -51,6 +52,7 @@ struct lib_rttinstream_s
   FAR char *buffer;
   int channel;
 };
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -61,6 +63,7 @@ extern "C"
 {
 #endif
 
+#ifdef CONFIG_STREAM_RTT
 /****************************************************************************
 * Name: lib_rttoutstream_open
 *****************************************************************************/
@@ -86,6 +89,7 @@ void lib_rttinstream_open(FAR struct lib_rttinstream_s *stream,
  ****************************************************************************/
 
 void lib_rttinstream_close(FAR struct lib_rttinstream_s *stream);
+#endif
 
 #ifdef __cplusplus
 }

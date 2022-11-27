@@ -78,6 +78,13 @@ endchoice # SEGGER_RTT_MODE
 
 endif # SEGGER_RTT
 
+config STREAM_RTT
+	bool "Stream to/from Segger J-Link RTT"
+	select SEGGER_RTT
+	default n
+	---help---
+		Use Segger J-Link RTT as a stream input and output.
+
 if SEGGER_SYSVIEW
 
 config SEGGER_SYSVIEW_RTT_CHANNEL
