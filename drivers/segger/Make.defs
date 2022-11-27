@@ -54,7 +54,7 @@ TARGET_ZIP += $(SGDIR)/RTT.zip
 
 endif
 
-ifeq ($(CONFIG_SEGGER_RTT),y)
+ifeq ($(CONFIG_STREAM_RTT),y)
   CSRCS += segger/stream_rtt.c
 endif
 
