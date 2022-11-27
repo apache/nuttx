@@ -1889,10 +1889,6 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
     /* get the clock freq */
   }
-
-  /* return */
-
-  return;
 }
 #endif
 

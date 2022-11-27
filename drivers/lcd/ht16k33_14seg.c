@@ -442,7 +442,6 @@ static void lcd_scroll_up(FAR struct ht16k33_dev_s *priv)
   ht16k33_clear_display(priv);
 
   kmm_free(data);
-  return;
 }
 
 /****************************************************************************

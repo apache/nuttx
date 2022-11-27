@@ -318,8 +318,6 @@ static void cxd56_rtc_initialize(wdparm_t arg)
   /* Make it possible to use the RTC timer functions */
 
   g_rtc_enabled = true;
-
-  return;
 }
 
 /****************************************************************************

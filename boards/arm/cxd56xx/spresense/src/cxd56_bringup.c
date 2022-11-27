@@ -168,8 +168,6 @@ static void timer_initialize(void)
       snprintf(devname, sizeof(devname), "/dev/timer%d", i);
       cxd56_timer_initialize(devname, i);
     }
-
-  return;
 }
 #endif
 

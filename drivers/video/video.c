@@ -700,8 +700,6 @@ static void change_video_state(FAR video_mng_t    *vmng,
     }
 
   vmng->video_inf.state = updated_next_state;
-
-  return;
 }
 
 static bool is_taking_still_picture(FAR video_mng_t *vmng)
@@ -743,8 +741,6 @@ static void initialize_streamresources(FAR video_type_inf_t *type_inf)
                            type_inf->fmt,
                            &type_inf->frame_interval);
   video_framebuff_init(&type_inf->bufinf);
-
-  return;
 }
 
 static int32_t get_default_value(uint32_t id)
@@ -907,8 +903,6 @@ static void initialize_resources(FAR video_mng_t *vmng)
   initialize_streamresources(&vmng->video_inf);
   initialize_streamresources(&vmng->still_inf);
   initialize_scenes_parameter();
-
-  return;
 }
 
 static void cleanup_streamresources(FAR video_type_inf_t *type_inf)
@@ -918,8 +912,6 @@ static void cleanup_streamresources(FAR video_type_inf_t *type_inf)
   nxmutex_destroy(&type_inf->lock_state);
   memset(type_inf, 0, sizeof(video_type_inf_t));
   type_inf->remaining_capnum = VIDEO_REMAINING_CAPNUM_INFINITY;
-
-  return;
 }
 
 static void cleanup_scene_parameter(video_scene_params_t *sp)
@@ -958,8 +950,6 @@ static void cleanup_resources(FAR video_mng_t *vmng)
   cleanup_streamresources(&vmng->video_inf);
   cleanup_streamresources(&vmng->still_inf);
   cleanup_scenes_parameter();
-
-  return;
 }
 
 static bool is_sem_waited(FAR sem_t *sem)
