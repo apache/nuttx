@@ -402,7 +402,10 @@ int ipv4_input(FAR struct net_driver_s *dev)
         goto drop;
     }
 
+#if defined(CONFIG_NET_IPFORWARD) || \
+    (defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK))
 done:
+#endif
   if (dev->d_len > 0)
     {
       arp_out(dev);
