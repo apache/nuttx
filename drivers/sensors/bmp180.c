@@ -282,8 +282,6 @@ static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
       snerr("ERROR: i2c_write failed: %d\n", ret);
       return;
     }
-
-  return;
 }
 
 /****************************************************************************

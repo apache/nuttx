@@ -383,7 +383,6 @@ static void lcd_scroll_up(FAR struct st7032_dev_s *priv)
   lcd_set_curpos(priv);
 
   kmm_free(data);
-  return;
 }
 
 /****************************************************************************

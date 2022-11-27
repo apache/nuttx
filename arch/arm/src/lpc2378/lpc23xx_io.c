@@ -98,10 +98,6 @@ void io_init(void)
   /* Status LED P1.19 */
 
   dir_putreg8((1 << 3), FIO1DIR2_OFFSET);
-
-  /* other io setup here */
-
-  return;
 }
 
 /****************************************************************************

@@ -456,8 +456,6 @@ void sparc_clrpend_irq(int irq)
 
       putreg32(1 << cpuint, S698PM_IRQREG_ICLEAR);
     }
-
-  return;
 }
 
 /****************************************************************************

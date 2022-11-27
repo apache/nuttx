@@ -2818,8 +2818,6 @@ void arm_usbinitialize(void)
   /* Reset/Re-initialize the USB hardware */
 
   lpc43_usbreset(priv);
-
-  return;
 }
 
 /****************************************************************************

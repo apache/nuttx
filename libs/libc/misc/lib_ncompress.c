@@ -712,8 +712,6 @@ void compress(int fdin, int fdout)
     write_error();
 
   bytes_out += (outbits + 7) >> 3;
-
-  return;
 }
 
 /* Decompress stdin to stdout.  This routine adapts to the codes in the
