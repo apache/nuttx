@@ -824,7 +824,6 @@ errout_with_csma:
 errout_with_lock:
   nxmutex_unlock(&priv->txlock);
   NETDEV_TXERRORS(&priv->radio.r_dev);
-  return;
 }
 
 /****************************************************************************

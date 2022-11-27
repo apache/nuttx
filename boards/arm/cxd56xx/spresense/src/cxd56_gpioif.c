@@ -136,8 +136,6 @@ void board_gpio_write(uint32_t pin, int value)
     {
       cxd56_gpio_write(pin, (value > 0));
     }
-
-  return;
 }
 
 /****************************************************************************

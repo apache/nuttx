@@ -544,8 +544,6 @@ static void esp32twai_shutdown(struct can_dev_s *dev)
       esp32_teardown_irq(priv->cpu, priv->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
     }
-
-  return;
 }
 
 /****************************************************************************
@@ -589,8 +587,6 @@ static void esp32twai_rxint(struct can_dev_s *dev, bool enable)
 
   twai_putreg(TWAI_INT_ENA_REG, regval);
   spin_unlock_irqrestore(&priv->lock, flags);
-
-  return;
 }
 
 /****************************************************************************

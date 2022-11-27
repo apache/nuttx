@@ -384,7 +384,6 @@ void arm_dma_initialize(void)
 
 void lc823450_dmaconfigure(uint8_t dmarequest, bool alternate)
 {
-  return;
 }
 
 /****************************************************************************
@@ -459,8 +458,6 @@ void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest)
 
   putreg32(val, DMACCFG(dmach->chn));
   up_disable_clk(LC823450_CLOCK_DMA);
-
-  return;
 }
 
 /****************************************************************************
@@ -665,5 +662,4 @@ void lc823450_dmastop(DMA_HANDLE handle)
     }
 
   spin_unlock_irqrestore(NULL, flags);
-  return;
 }

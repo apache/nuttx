@@ -588,7 +588,6 @@ void lx_cpu_sdram_initialize(void)
     }
 
   lx_cpu_sdram_adjust_timing();
-  return;
 }
 
 #endif /* CONFIG_LPC17_40_EMC && CONFIG_LPC17_40_EXTDRAM */

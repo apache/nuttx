@@ -166,8 +166,6 @@ static void pca8574_write(FAR struct pcf8574_lcd_dev_s *priv, uint8_t data)
       lcdinfo("pca8574_write() failed: %d\n", ret);
       return;
     }
-
-  return;
 }
 
 /****************************************************************************
@@ -716,7 +714,6 @@ static void lcd_scroll_up(FAR struct pcf8574_lcd_dev_s *priv)
   lcd_set_curpos(priv, priv->cfg.rows - 1, 0);
 
   kmm_free(data);
-  return;
 }
 
 /****************************************************************************

@@ -676,6 +676,4 @@ void foc_dummy_update(void)
     }
 
   leave_critical_section(flags);
-
-  return;
 }

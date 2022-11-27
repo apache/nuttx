@@ -2923,8 +2923,6 @@ void arm_usbinitialize(void)
   /* Reset/Re-initialize the USB hardware */
 
   imxrt_usbreset(priv);
-
-  return;
 }
 
 /****************************************************************************

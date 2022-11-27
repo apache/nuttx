@@ -133,8 +133,6 @@ void up_timer_initialize(void)
 #else
   irq_attach(TMR_IRQ, (xcpt_t)up_alarm_expire, NULL);
 #endif
-
-  return;
 }
 
 static inline uint64_t up_ts2tick(const struct timespec *ts)
@@ -338,8 +336,6 @@ void up_timer_expire(void)
 
   up_mask_tmr();
   sched_timer_expiration();
-
-  return;
 }
 
 #else /* CONFIG_SCHED_TICKLESS_ALARM */
@@ -469,8 +465,6 @@ void up_alarm_expire(void)
   up_timer_gettime(&now);
 
   nxsched_alarm_expiration(&now);
-
-  return;
 }
 
 #endif /* CONFIG_SCHED_TICKLESS_ALARM */

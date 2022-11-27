@@ -592,8 +592,6 @@ static void wm8994_settreble(FAR struct wm8994_dev_s *priv, uint8_t treble)
 static void wm8994_setdatawidth(FAR struct wm8994_dev_s *priv)
 {
   /* TODO */
-
-  return;
 }
 
 /* Name: wm8994_setbitrate
@@ -640,8 +638,6 @@ static void wm8994_setbitrate(FAR struct wm8994_dev_s *priv)
   wm8994_setsamplefreq(priv);
 
   I2S_RXSAMPLERATE(priv->i2s, priv->samprate);
-
-  return;
 }
 
 /* Name: wm8994_getcaps

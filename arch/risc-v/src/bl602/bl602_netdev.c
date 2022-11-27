@@ -1221,7 +1221,6 @@ static void scan_complete_indicate(void *data, void *param)
     }
 
   kmm_free(data);
-  return;
 }
 
 static int rssi_compare(const void *arg1, const void *arg2)
