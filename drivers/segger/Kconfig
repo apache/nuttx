@@ -51,8 +51,7 @@ config SEGGER_RTT_MAX_NUM_DOWN_BUFFERS
 
 config SEGGER_RTT_BUFFER_SIZE_UP
 	int "Segger RTT UP Buffer Size"
-	default 1024 if SYSLOG_RTT
-	default 1 if !SYSLOG_RTT
+	default 1024
 	---help---
 		Size of the buffer for terminal output of target, up to host
 
@@ -77,11 +76,19 @@ config SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
 
 endchoice # SEGGER_RTT_MODE
 
+endif # SEGGER_RTT
+
 if SEGGER_SYSVIEW
+
+config SEGGER_SYSVIEW_RTT_CHANNEL
+	int "Segger System View RTT channel"
+	default 0
+	---help---
+		The RTT channel number for SystemView, zero find the unused one.
 
 config SEGGER_SYSVIEW_RTT_BUFFER_SIZE
 	int "Segger System View buffer size"
-	default 1024
+	default SEGGER_RTT_BUFFER_SIZE_UP
 	---help---
 		Number of bytes that SystemView uses for the RTT buffer.
 
@@ -90,7 +97,5 @@ config SEGGER_SYSVIEW_RAM_BASE
 	default 0
 	---help---
 		The lowest RAM address used for IDs
-
-endif
 
 endif
