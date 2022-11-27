@@ -20,22 +20,29 @@
 
 UCLIBCXX_VERSION=0.2.5
 
-$(TOPDIR)/include/uClibc++:
-#	curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(UCLIBCXX_VERSION).tar.bz2
-#	$(Q) tar -xf uClibc++-$(UCLIBCXX_VERSION).tar.bz2
-#	$(Q) $(DELFILE) uClibc++-$(UCLIBCXX_VERSION).tar.bz2
-#	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) uClibc++
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard uClibc++/.git),)
+uClibc++:
+	curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) tar -xf uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) $(DELFILE) uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) uClibc++
+	$(Q) patch -p0 < 0001-uClibcxx-basic_definitions-fix-GCC-specific-definiti.patch
+	$(Q) patch -p0 < 0001-uclibxx-use-overload-constructor-of-filebuf-ostream.patch
+endif
+
+$(TOPDIR)/include/uClibc++: uClibc++
 	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/include $(TOPDIR)/include/uClibc++
 	$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
-#	$(Q) patch -p0 < 0001-uClibcxx-basic_definitions-fix-GCC-specific-definiti.patch
-#	$(Q) patch -p0 < 0001-uclibxx-use-overload-constructor-of-filebuf-ostream.patch
 
 context:: $(TOPDIR)/include/uClibc++
 
 distclean::
 	$(Q) $(DELFILE) $(TOPDIR)/include/uClibc++/system_configuration.h
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/uClibc++
-#	$(call DELDIR, uClibc++)
+ifeq ($(wildcard uClibc++/.git),)
+	$(call DELDIR, uClibc++)
+endif
 
 CPPSRCS += algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
 CPPSRCS += complex.cpp deque.cpp exception.cpp fstream.cpp

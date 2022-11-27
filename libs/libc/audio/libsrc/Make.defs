@@ -23,13 +23,18 @@ ifeq ($(CONFIG_AUDIO_SRC),y)
 PACKAGE=libsamplerate
 VERSION=0.1.9
 
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard libsamplerate/.git),)
 libsamplerate:
 	$(Q) curl -L https://codeload.github.com/libsndfile/libsamplerate/zip/master -o libsamplerate.zip
 	$(Q) unzip -o libsamplerate.zip
 	$(Q) mv libsamplerate-master libsamplerate
+endif
+
+$(TOPDIR)/include/nuttx/audio/samplerate.h : libsamplerate
 	$(Q) cp -rf libsamplerate/include/samplerate.h $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio$(DELIM)
 
-context:: libsamplerate
+context:: $(TOPDIR)/include/nuttx/audio/samplerate.h
 
 CSRCS += samplerate.c
 CSRCS += src_sinc.c
@@ -58,7 +63,9 @@ DEPPATH += --dep-path libsamplerate/src
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio$(DELIM)samplerate.h)
+ifeq ($(wildcard libsamplerate/.git),)
 	$(call DELDIR, libsamplerate)
 	$(call DELFILE, libsamplerate.zip)
+endif
 
 endif
