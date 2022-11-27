@@ -43,6 +43,10 @@
 
 #define SEGGER_SYSVIEW_GET_TIMESTAMP       sysview_get_timestamp
 
+/* The RTT channel that SystemView will use. */
+
+#define SEGGER_SYSVIEW_RTT_CHANNEL         CONFIG_SEGGER_SYSVIEW_RTT_CHANNEL
+
 /* Number of bytes that SystemView uses for the RTT buffer. */
 
 #define SEGGER_SYSVIEW_RTT_BUFFER_SIZE     CONFIG_SEGGER_SYSVIEW_RTT_BUFFER_SIZE
