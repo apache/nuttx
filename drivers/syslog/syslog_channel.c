@@ -41,7 +41,7 @@
 #endif
 
 #ifdef CONFIG_SYSLOG_RTT
-#  include <nuttx/syslog/syslog_rtt.h>
+#  include <nuttx/segger/rtt.h>
 #endif
 
 #ifdef CONFIG_ARCH_LOWPUTC
