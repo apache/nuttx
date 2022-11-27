@@ -223,13 +223,6 @@ config SYSLOG_RPMSG
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
-config SYSLOG_RTT
-	bool "Log to Segger J-Link RTT"
-	select SEGGER_RTT
-	default n
-	---help---
-		Use Segger J-Link RTT as a SYSLOG output device.
-
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
 	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
