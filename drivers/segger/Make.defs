@@ -54,6 +54,10 @@ TARGET_ZIP += $(SGDIR)/RTT.zip
 
 endif
 
+ifeq ($(CONFIG_SEGGER_RTT),y)
+  CSRCS += segger/stream_rtt.c
+endif
+
 ifeq ($(CONFIG_SYSLOG_RTT),y)
   CSRCS += segger/syslog_rtt.c
 endif
