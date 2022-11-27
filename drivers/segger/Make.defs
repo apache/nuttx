@@ -44,6 +44,8 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
 
   RTT_VERSION ?= 7.54
 
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard $(SGDIR)/RTT/.git),)
 $(SGDIR)/RTT.zip:
 	$(Q) curl -L https://github.com/SEGGERMicro/RTT/archive/refs/tags/V$(RTT_VERSION).zip -o $(SGDIR)/RTT.zip
 	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
@@ -51,6 +53,7 @@ $(SGDIR)/RTT.zip:
 	$(Q) patch -p0 < segger/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
 
 TARGET_ZIP += $(SGDIR)/RTT.zip
+endif
 
 endif
 
@@ -72,18 +75,25 @@ ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
 
   SYSVIEW_VERSION ?= 3.30
 
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard $(SGDIR)/SystemView/.git),)
 $(SGDIR)/SystemView.zip:
 	$(Q) curl -L https://github.com/SEGGERMicro/SystemView/archive/refs/tags/V$(SYSVIEW_VERSION).zip -o $(SGDIR)/SystemView.zip
 	$(Q) unzip -o $(SGDIR)/SystemView.zip -d $(SGDIR)
 	$(Q) mv $(SGDIR)/SystemView-$(SYSVIEW_VERSION) $(SGDIR)/SystemView
 
 TARGET_ZIP += $(SGDIR)/SystemView.zip
+endif
 
 endif
 
 context:: $(TARGET_ZIP)
 
 distclean::
+ifeq ($(wildcard $(SGDIR)/SystemView/.git),)
 	$(call DELDIR, $(SGDIR)/SystemView)
+endif
+ifeq ($(wildcard $(SGDIR)/RTT/.git),)
 	$(call DELDIR, $(SGDIR)/RTT)
+endif
 	$(call DELFILE, $(TARGET_ZIP))
