@@ -852,7 +852,8 @@ flt_oper:
                   lib_stream_put(stream, '.');
                   for (pos = 1; pos < 1 + prec; pos++)
                     {
-                      lib_stream_put(stream, pos < ndigs ? _dtoa.digits[pos] : '0');
+                      lib_stream_put(stream, pos < ndigs ?
+                                     _dtoa.digits[pos] : '0');
                     }
                 }
               else if ((flags & FL_ALT) != 0)
@@ -871,37 +872,12 @@ flt_oper:
                 }
 
               lib_stream_put(stream, ndigs);
-              for (ndigs = '0'; exp >= 10; exp -= 10)
+              c = __ultoa_invert(exp, (FAR char *)buf, 10) - (FAR char *)buf;
+              while (c > 0)
                 {
-                  ndigs += 1;
+                  lib_stream_put(stream, buf[c - 1]);
+                  c--;
                 }
-
-              /* Parse the ndigs if the value of it bigger than '9' */
-
-              while (1)
-                {
-                  if (ndigs >= 'd')
-                    {
-                      lib_stream_put(stream, ((ndigs - '0') / 100) + '0');
-                      ndigs = (ndigs - '0') % 100 + '0';
-                    }
-                  else if (ndigs >= ':')
-                    {
-                      lib_stream_put(stream, ((ndigs - '0') / 10) + '0');
-                      ndigs = (ndigs - '0') % 10 + '0';
-                    }
-                  else if(ndigs >= '0')
-                    {
-                      lib_stream_put(stream, ndigs);
-                      break;
-                    }
-                  else
-                    {
-                      break;
-                    }
-                 }
-
-               lib_stream_put(stream, '0' + exp);
             }
 
           goto tail;
