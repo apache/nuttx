@@ -64,6 +64,18 @@ void drivers_initialize(void)
 
   syslog_initialize();
 
+#if defined (CONFIG_SERIAL_RTT1)
+  serial_rtt_register("/dev/rtt1", 1,
+                      CONFIG_SEGGER_RTT1_BUFFER_SIZE_UP,
+                      CONFIG_SEGGER_RTT1_BUFFER_SIZE_DOWN);
+#endif
+
+#if defined (CONFIG_SERIAL_RTT2)
+  serial_rtt_register("/dev/rtt2", 2,
+                      CONFIG_SEGGER_RTT2_BUFFER_SIZE_UP,
+                      CONFIG_SEGGER_RTT2_BUFFER_SIZE_DOWN);
+#endif
+
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
 #endif
