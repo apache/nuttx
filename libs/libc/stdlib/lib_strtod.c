@@ -44,6 +44,8 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <stdbool.h>
+
 #ifdef CONFIG_HAVE_DOUBLE
 
 /****************************************************************************
@@ -78,6 +80,36 @@ static inline int is_real(double x)
   const double divzero = 0.0;
   const double infinite = 1.0 / divzero;
   return (x < infinite) && (x >= -infinite);
+}
+
+static bool chtod(char c, double base, FAR double *number)
+{
+  /* This function is to determine if c is keyword
+   * Then set number + base
+   */
+
+  double tmp = base;
+
+  if (isdigit(c))
+    {
+      tmp = c - '0';
+    }
+  else if (c >= 'a' && c <= 'f')
+    {
+      tmp = c - 'a' + 10;
+    }
+  else if (c >= 'A' && c <= 'F')
+    {
+      tmp = c - 'A' + 10;
+    }
+
+  if (tmp >= base)
+    {
+      return false;
+    }
+
+  *number = *number * base + tmp;
+  return true;
 }
 
 /****************************************************************************
@@ -140,16 +172,24 @@ double strtod(FAR const char *str, FAR char **endptr)
       break;
     }
 
+  p10          = 10.;
   number       = 0.;
   exponent     = 0;
   num_digits   = 0;
   num_decimals = 0;
 
+  /* Process optional 0x prefix */
+
+  if (*p == '0' && tolower(*(p + 1)) == 'x')
+    {
+      p += 2;
+      p10  = 16.;
+    }
+
   /* Process string of digits */
 
-  while (isdigit(*p))
+  while (chtod(*p, p10, &number))
     {
-      number = number * 10. + (*p - '0');
       p++;
       num_digits++;
     }
@@ -160,9 +200,8 @@ double strtod(FAR const char *str, FAR char **endptr)
     {
       p++;
 
-      while (isdigit(*p))
+      while (chtod(*p, p10, &number))
         {
-          number = number * 10. + (*p - '0');
           p++;
           num_digits++;
           num_decimals++;
@@ -188,8 +227,17 @@ double strtod(FAR const char *str, FAR char **endptr)
 
   /* Process an exponent string */
 
-  if (*p == 'e' || *p == 'E')
+  if ((p10 == 10. && (*p == 'e' || *p == 'E'))
+     || (p10 == 16. && (*p == 'p' || *p == 'P')))
     {
+      /* if the Hexadecimal system */
+
+      if (p10 == 16.)
+        {
+          exponent *= 4;
+          p10 = 2.0;
+        }
+
       /* Handle optional sign */
 
       negative = 0;
@@ -240,13 +288,20 @@ double strtod(FAR const char *str, FAR char **endptr)
       exponent > __DBL_MAX_EXP__)
     {
       set_errno(ERANGE);
-      number = infinite;
+      if (exponent < __DBL_MIN_EXP__)
+        {
+          number = divzero;
+        }
+      else
+        {
+          number = infinite;
+        }
+
       goto errout;
     }
 
   /* Scale the result */
 
-  p10 = 10.;
   n = exponent;
   if (n < 0)
     {
