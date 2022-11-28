@@ -74,13 +74,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 {
   FAR struct socket_conn_s *conn = psock->s_conn;
 
-  /* Verify that the socket option if valid (but might not be supported ) */
-
-  if (!value)
-    {
-      return -EFAULT;
-    }
-
   /* Process the options always handled locally */
 
   switch (option)
@@ -295,6 +288,13 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
                      FAR const void *value, socklen_t value_len)
 {
   int ret = -ENOPROTOOPT;
+
+  /* Verify that the socket option if valid (but might not be supported ) */
+
+  if (!value)
+    {
+      return -EFAULT;
+    }
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
