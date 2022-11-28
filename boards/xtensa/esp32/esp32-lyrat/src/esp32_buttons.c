@@ -31,6 +31,7 @@
 #include <stdio.h>
 
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <arch/irq.h>
@@ -38,6 +39,24 @@
 #include "esp32_gpio.h"
 
 #include "esp32-lyrat.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef ARRAY_SIZE
+#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const int g_buttons[] =
+{
+  BUTTON_REC,
+  BUTTON_MODE
+};
 
 /****************************************************************************
  * Public Functions
@@ -56,9 +75,11 @@
 
 uint32_t board_button_initialize(void)
 {
-  esp32_configgpio(BUTTON_MODE, INPUT_FUNCTION_3 | PULLUP);
-  esp32_configgpio(BUTTON_REC, INPUT_FUNCTION_3 | PULLUP);
-  return 1;
+  /* GPIOs 36 and 39 do not support PULLUP/PULLDOWN */
+
+  esp32_configgpio(BUTTON_MODE, INPUT_FUNCTION_3);
+  esp32_configgpio(BUTTON_REC, INPUT_FUNCTION_3);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
@@ -77,22 +98,18 @@ uint32_t board_buttons(void)
   uint8_t ret = 0;
   int n = 0;
 
-  const uint8_t btn_id_arr[] =
-  {
-    BUTTON_REC,
-    BUTTON_MODE
-  };
-
-  for (uint8_t btn_id = 0; btn_id < sizeof(btn_id_arr); btn_id++)
+  for (uint8_t btn_id = 0; btn_id < ARRAY_SIZE(g_buttons); btn_id++)
     {
       iinfo("Reading button %d\n", btn_id);
-      bool b0 = esp32_gpioread(btn_id_arr[btn_id]);
+
+      const int button_gpio = g_buttons[btn_id];
+      bool b0 = esp32_gpioread(button_gpio);
 
       for (int i = 0; i < 10; i++)
         {
           up_mdelay(1); /* TODO */
 
-          bool b1 = esp32_gpioread(btn_id_arr[btn_id]);
+          bool b1 = esp32_gpioread(button_gpio);
 
           if (b0 == b1)
             {
@@ -139,8 +156,11 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
+  DEBUGASSERT(id < ARRAY_SIZE(g_buttons));
+
   int ret;
-  int irq = ESP32_PIN2IRQ(id);
+  int pin = g_buttons[id];
+  int irq = ESP32_PIN2IRQ(pin);
 
   if (NULL != irqhandler)
     {
@@ -155,7 +175,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
           return ret;
         }
 
-      gpioinfo("Attach %p\n", irqhandler);
+      gpioinfo("Attach %p to pin %d\n", irqhandler, pin);
 
       gpioinfo("Enabling the interrupt\n");
 
@@ -165,7 +185,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
     }
   else
     {
-      gpioinfo("Disable the interrupt\n");
+      gpioinfo("Disabled interrupts from pin %d\n", pin);
       esp32_gpioirqdisable(irq);
     }
 
