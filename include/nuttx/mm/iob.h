@@ -547,6 +547,16 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
 int iob_contig(FAR struct iob_s *iob, unsigned int len);
 
 /****************************************************************************
+ * Name: iob_reserve
+ *
+ * Description:
+ *   Adjust headroom offset of iobs by reducing the tail room.
+ *
+ ****************************************************************************/
+
+void iob_reserve(FAR struct iob_s *iob, unsigned int reserved);
+
+/****************************************************************************
  * Name: iob_dump
  *
  * Description:
