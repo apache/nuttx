@@ -129,25 +129,6 @@ static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
 #endif
 
 /****************************************************************************
- * Name: spin_initialize
- *
- * Description:
- *   Initialize a non-reentrant spinlock object to its initial,
- *   unlocked state.
- *
- * Input Parameters:
- *   lock  - A reference to the spinlock object to be initialized.
- *   state - Initial state of the spinlock {SP_LOCKED or SP_UNLOCKED)
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-/* void spin_initialize(FAR spinlock_t *lock, spinlock_t state); */
-#define spin_initialize(l,s) do { *(l) = (s); } while (0)
-
-/****************************************************************************
  * Name: spin_lock
  *
  * Description:
@@ -350,6 +331,26 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
 #endif
 
 #endif /* CONFIG_SPINLOCK */
+
+/****************************************************************************
+ * Name: spin_initialize
+ *
+ * Description:
+ *   Initialize a non-reentrant spinlock object to its initial,
+ *   unlocked state.
+ *
+ * Input Parameters:
+ *   lock  - A reference to the spinlock object to be initialized.
+ *   state - Initial state of the spinlock {SP_LOCKED or SP_UNLOCKED)
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+/* void spin_initialize(FAR spinlock_t *lock, spinlock_t state); */
+
+#define spin_initialize(l,s) do { *(l) = (s); } while (0)
 
 /****************************************************************************
  * Name: spin_lock_irqsave
