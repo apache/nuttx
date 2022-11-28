@@ -357,7 +357,7 @@ static inline irqstate_t up_irq_save(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsid  i\n"
-#if defined(CONFIG_ARMV7A_DECODEFIQ)
+#if defined(CONFIG_ARMV7R_DECODEFIQ)
       "\tcpsid  f\n"
 #endif
       : "=r" (cpsr)
@@ -378,7 +378,7 @@ static inline irqstate_t up_irq_enable(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsie  i\n"
-#if defined(CONFIG_ARMV7A_DECODEFIQ)
+#if defined(CONFIG_ARMV7R_DECODEFIQ)
       "\tcpsie  f\n"
 #endif
       : "=r" (cpsr)
