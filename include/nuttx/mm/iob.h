@@ -557,6 +557,20 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len);
 void iob_reserve(FAR struct iob_s *iob, unsigned int reserved);
 
 /****************************************************************************
+ * Name: iob_update_pktlen
+ *
+ * Description:
+ *   This function will update packet length of the iob, it will be
+ *   trimmed if the length of the iob chain is greater than the current
+ *   length.
+ *   This function will not grow the iob link, any grow operation should
+ *   be implemented through iob_copyin()/iob_trycopyin().
+ *
+ ****************************************************************************/
+
+void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen);
+
+/****************************************************************************
  * Name: iob_dump
  *
  * Description:
