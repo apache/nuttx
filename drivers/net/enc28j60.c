@@ -50,7 +50,6 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/enc28j60.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT

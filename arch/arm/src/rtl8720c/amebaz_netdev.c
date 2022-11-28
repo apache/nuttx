@@ -26,8 +26,8 @@
 #include <string.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/kmalloc.h>
+
 #include "amebaz_netdev.h"
 
 /****************************************************************************

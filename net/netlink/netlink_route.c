@@ -35,7 +35,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/neighbor.h>
 #include <nuttx/net/netlink.h>
