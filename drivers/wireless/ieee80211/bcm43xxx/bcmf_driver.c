@@ -33,13 +33,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include <netinet/arp.h>
 #include <net/ethernet.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sdio.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/wireless/ieee80211/ieee80211.h>
 
 #include "bcmf_driver.h"

@@ -519,6 +519,42 @@ int sixlowpan_input(FAR struct radio_driver_s *ieee,
                     FAR struct iob_s *framelist, FAR const void *metadata);
 #endif
 
+#ifdef CONFIG_NET_ARP
+
+/****************************************************************************
+ * Name: arp_input
+ *
+ * Description:
+ *   This function should be called by the Ethernet device driver when an ARP
+ *   packet has been received.   The function will act differently
+ *   depending on the ARP packet type: if it is a reply for a request
+ *   that we previously sent out, the ARP cache will be filled in with
+ *   the values from the ARP reply.  If the incoming ARP packet is an ARP
+ *   request for our IP address, an ARP reply packet is created and put
+ *   into the d_buf buffer.
+ *
+ *   On entry, this function expects that an ARP packet with a prepended
+ *   Ethernet header is present in the d_buf buffer and that the length of
+ *   the packet is set in the d_len field.
+ *
+ *   When the function returns, the value of the field d_len indicates
+ *   whether the device driver should send out the ARP reply packet or not.
+ *   If d_len is zero, no packet should be sent; If d_len is non-zero, it
+ *   contains the length of the outbound packet that is present in the d_buf
+ *   buffer.
+ *
+ ****************************************************************************/
+
+void arp_input(FAR struct net_driver_s *dev);
+
+#else /* CONFIG_NET_ARP */
+
+/* If ARP is disabled, stub out all ARP interfaces */
+
+#  define arp_input(dev)
+
+#endif /* CONFIG_NET_ARP */
+
 /****************************************************************************
  * Polling of connections
  *

@@ -34,7 +34,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
-#include <nuttx/net/arp.h>
 #include <nuttx/net/dns.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/pkt.h>

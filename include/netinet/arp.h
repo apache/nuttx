@@ -36,6 +36,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* ARP protocol HARDWARE identifiers.  Provided as the sa_family member of a
+ * struct sockaddr.
+ *
+ * When sa_family is ARPHRD_ETHER, the 6 byte Ethernet address is provided
+ * in the first 6-bytes of the sockaddr sa_data array.
+ */
+
+#define ARPHRD_ETHER        1    /* Ethernet */
+#define ARPHRD_IEEE80211    801  /* IEEE 802.11 */
+#define ARPHRD_IEEE802154   804  /* IEEE 802.15.4 */
+
 /* Three ioctls are available on all PF_INET sockets. Each ioctl takes a
  * pointer to a 'struct arpreq' as its parameter.
  */

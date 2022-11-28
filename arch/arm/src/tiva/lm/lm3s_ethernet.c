@@ -42,7 +42,6 @@
 #include <nuttx/wqueue.h>
 
 #include <arch/board/board.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT

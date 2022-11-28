@@ -26,9 +26,9 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <netinet/arp.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/wireless/wireless.h>
 
 #include "esp32_wifi_adapter.h"
