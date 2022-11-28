@@ -246,6 +246,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libc6-dev-i386 \
   libcurl4-openssl-dev \
   libncurses5-dev \
+  libmad0-dev:i386 \
   libpulse-dev libpulse-dev:i386 \
   libpython2.7 \
   libtinfo5 \
