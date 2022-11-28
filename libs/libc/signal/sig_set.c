@@ -26,6 +26,7 @@
 
 #include <signal.h>
 #include <assert.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
@@ -98,9 +99,14 @@ _sa_handler_t sigset(int signo, _sa_handler_t func)
 {
   _sa_handler_t disposition;
   sigset_t set;
-  int ret;
+  int ret = -EINVAL;
 
-  DEBUGASSERT(GOOD_SIGNO(signo) && func != SIG_ERR);
+  if (signo == SIGKILL || signo == SIGSTOP || !GOOD_SIGNO(signo))
+    {
+      goto err;
+    }
+
+  DEBUGASSERT(func != SIG_ERR);
 
   sigemptyset(&set);
   sigaddset(&set, signo);
@@ -110,7 +116,12 @@ _sa_handler_t sigset(int signo, _sa_handler_t func)
   if (func == SIG_HOLD)
     {
       ret = sigprocmask(SIG_BLOCK, &set, NULL);
-      disposition = ret < 0 ? SIG_ERR : SIG_HOLD;
+      if (ret < 0)
+        {
+          goto err;
+        }
+
+      disposition = SIG_HOLD;
     }
 
   /* No.. then signal can handle the other cases */
@@ -132,10 +143,13 @@ _sa_handler_t sigset(int signo, _sa_handler_t func)
                */
 
               signal(signo, disposition);
-              disposition = SIG_ERR;
+              goto err;
             }
         }
     }
 
   return disposition;
+err:
+  set_errno(-ret);
+  return (_sa_handler_t)SIG_ERR;
 }
