@@ -128,6 +128,16 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *this,
 }
 
 /****************************************************************************
+ * Name: blkoutstream_putc
+ ****************************************************************************/
+
+static void blkoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+{
+  char tmp = ch;
+  blkoutstream_puts(this, &tmp, 1);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -217,6 +227,7 @@ int lib_blkoutstream_open(FAR struct lib_blkoutstream_s *stream,
     }
 
   stream->inode        = inode;
+  stream->public.put   = blkoutstream_putc;
   stream->public.puts  = blkoutstream_puts;
   stream->public.flush = blkoutstream_flush;
 
