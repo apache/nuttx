@@ -44,7 +44,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>

@@ -43,7 +43,6 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/phy.h>
 #include <nuttx/net/netdev.h>
 

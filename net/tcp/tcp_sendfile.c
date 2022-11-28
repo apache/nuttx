@@ -44,7 +44,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/tcp.h>
 
 #include "netdev/netdev.h"

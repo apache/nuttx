@@ -46,7 +46,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/wireless/wireless.h>

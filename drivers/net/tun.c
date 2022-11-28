@@ -61,7 +61,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/tun.h>

@@ -31,7 +31,6 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/arp.h>
 
 #include "devif/devif.h"
 #include "arp/arp.h"

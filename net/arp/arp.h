@@ -40,9 +40,9 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include <netinet/arp.h>
 #include <netinet/in.h>
 
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/semaphore.h>
 
@@ -153,6 +153,16 @@ struct arp_notify_s
   int       nt_result;                 /* The result of the wait */
 };
 #endif
+
+/* One entry in the ARP table (volatile!) */
+
+struct arp_entry_s
+{
+  in_addr_t                at_ipaddr;   /* IP address */
+  struct ether_addr        at_ethaddr;  /* Hardware address */
+  clock_t                  at_time;     /* Time of last usage */
+  FAR struct net_driver_s *at_dev;      /* The device driver structure */
+};
 
 /****************************************************************************
  * Public Data

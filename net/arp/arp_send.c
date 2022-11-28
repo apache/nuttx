@@ -34,7 +34,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/arp.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
