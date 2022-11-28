@@ -202,6 +202,26 @@ bool board_xtal_power_monitor(void);
 
 int board_lna_power_control(bool en);
 
+/****************************************************************************
+ * Name: board_set_reset_gpo
+ *
+ * Description:
+ *   Set gpo to off when power off the board.
+ *
+ ****************************************************************************/
+
+int board_set_reset_gpo(int target);
+
+/****************************************************************************
+ * Name: board_unset_reset_gpo
+ *
+ * Description:
+ *   Keep gpo status when power off the board.
+ *
+ ****************************************************************************/
+
+int board_unset_reset_gpo(int target);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
