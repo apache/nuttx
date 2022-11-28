@@ -878,26 +878,27 @@ flt_oper:
 
               /* Parse the ndigs if the value of it bigger than '9' */
 
-              while (1)
+              if(ndigs >= '0') 
                 {
-                  if (ndigs >= 'd')
+                  ndigs -= '0'; 
+                  __ultoa_invert(ndigs,(FAR char*) buf, 10); 
+                  if (ndigs >= 100) 
                     {
-                      lib_stream_put(stream, ((ndigs - '0') / 100) + '0');
-                      ndigs = (ndigs - '0') % 100 + '0';
+                      for(int i = 2;i >= 0;i--)
+                        {
+                          lib_stream_put(stream, buf[i]);
+                        }
                     }
-                  else if (ndigs >= ':')
+                  else if (ndigs >= 10 && ndigs < 100)
                     {
-                      lib_stream_put(stream, ((ndigs - '0') / 10) + '0');
-                      ndigs = (ndigs - '0') % 10 + '0';
-                    }
-                  else if(ndigs >= '0')
-                    {
-                      lib_stream_put(stream, ndigs);
-                      break;
+                      for(int i = 1;i >= 0;i--)
+                        {
+                          lib_stream_put(stream, buf[i]);
+                        }
                     }
                   else
                     {
-                      break;
+                      lib_stream_put(stream, buf[0]);
                     }
                  }
 
