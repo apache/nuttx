@@ -518,6 +518,20 @@ void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
  * Name: devif_out
  *
  * Description:
+ *   Common interface to build L2 headers
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+void devif_out(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: devif_poll_out
+ *
+ * Description:
  *   Generic callback before device output to build L2 headers before sending
  *
  * Assumptions:
@@ -526,7 +540,8 @@ void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
  *
  ****************************************************************************/
 
-int devif_out(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
+int devif_poll_out(FAR struct net_driver_s *dev,
+                   devif_poll_callback_t callback);
 
 /****************************************************************************
  * Name: devif_loopback
