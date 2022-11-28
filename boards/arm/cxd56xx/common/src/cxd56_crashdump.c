@@ -238,5 +238,7 @@ void board_crashdump(uintptr_t currentsp, void *tcb,
 exit:
 #if defined(CONFIG_CXD56_RESET_ON_CRASH)
   board_reset_on_crash();
+#else
+  return;
 #endif
 }
