@@ -336,7 +336,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
  * Name: cxd56_serial2_pm_event
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_UART2
+#if defined(CONFIG_CXD56_UART2) && !defined(CONFIG_UART2_SERIAL_CONSOLE)
 static int cxd56_serial2_pm_event(uint8_t id)
 {
   struct up_dev_s *priv = (struct up_dev_s *)&g_uart2priv;
