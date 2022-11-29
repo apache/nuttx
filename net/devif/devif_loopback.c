@@ -123,13 +123,6 @@ int devif_loopback(FAR struct net_driver_s *dev)
         }
 
       NETDEV_TXDONE(dev);
-
-      /* Add the link layer header length for the next loop */
-
-      if (dev->d_len != 0)
-        {
-          dev->d_len += dev->d_llhdrlen;
-        }
     }
   while (dev->d_len > 0);
 
