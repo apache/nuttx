@@ -70,7 +70,6 @@
 struct lo_driver_s
 {
   bool lo_bifup;               /* true:ifup false:ifdown */
-  bool lo_txdone;              /* One RX packet was looped back */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -89,10 +88,6 @@ static uint8_t g_iobuffer[NET_LO_PKTSIZE + CONFIG_NET_GUARDSIZE];
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Polling logic */
-
-static int  lo_txpoll(FAR struct net_driver_s *dev);
-
 /* NuttX callback functions */
 
 static int lo_ifup(FAR struct net_driver_s *dev);
@@ -107,80 +102,6 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lo_txpoll
- *
- * Description:
- *   Check if the network has any outgoing packets ready to send.  This is
- *   a callback from devif_poll().  devif_poll() will be called only during
- *   normal TX polling.
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
- *
- ****************************************************************************/
-
-static int lo_txpoll(FAR struct net_driver_s *dev)
-{
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
-
-  /* Loop while there is data "sent", i.e., while d_len > 0.  That should be
-   * the case upon entry here and while the processing of the IPv4/6 packet
-   * generates a new packet to be sent.  Sending, of course, just means
-   * relaying back through the network for this driver.
-   */
-
-  while (priv->lo_dev.d_len > 0)
-    {
-       NETDEV_TXPACKETS(&priv->lo_dev);
-       NETDEV_RXPACKETS(&priv->lo_dev);
-
-#ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the tap */
-
-       pkt_input(&priv->lo_dev);
-#endif
-
-      /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv4
-      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
-        {
-          ninfo("IPv4 frame\n");
-          NETDEV_RXIPV4(&priv->lo_dev);
-          ipv4_input(&priv->lo_dev);
-        }
-      else
-#endif
-#ifdef CONFIG_NET_IPv6
-      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
-        {
-          ninfo("IPv6 frame\n");
-          NETDEV_RXIPV6(&priv->lo_dev);
-          ipv6_input(&priv->lo_dev);
-        }
-      else
-#endif
-        {
-          nwarn("WARNING: Unrecognized IP version\n");
-          NETDEV_RXDROPPED(&priv->lo_dev);
-          priv->lo_dev.d_len = 0;
-        }
-
-      priv->lo_txdone = true;
-      NETDEV_TXDONE(&priv->lo_dev);
-    }
-
-  return 0;
-}
 
 /****************************************************************************
  * Name: lo_ifup
@@ -275,14 +196,11 @@ static void lo_txavail_work(FAR void *arg)
   net_lock();
   if (priv->lo_bifup)
     {
-      do
-        {
-          /* If so, then poll the network for new XMIT data */
+      /* Reuse the devif_loopback() logic, Polling all pending events until
+       * return stop
+       */
 
-          priv->lo_txdone = false;
-          devif_poll(&priv->lo_dev, lo_txpoll);
-        }
-      while (priv->lo_txdone);
+      while (devif_poll(&priv->lo_dev, NULL));
     }
 
   net_unlock();
