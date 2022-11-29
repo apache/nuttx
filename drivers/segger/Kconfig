@@ -63,6 +63,35 @@ config SEGGER_RTT_BUFFER_SIZE_DOWN
 	---help---
 		Size of the buffer for terminal input to target from host (Usually keyboard input)
 
+config SEGGER_RTT1_BUFFER_SIZE_UP
+	int "RTT channel 1 tx buffer size"
+	select SEGGER_RTT
+	depends on SEGGER_RTT_MAX_NUM_UP_BUFFERS >= 1
+	default SEGGER_RTT_BUFFER_SIZE_UP
+	---help---
+		Size of the buffer for channel 1 output of target, up to host
+
+config SEGGER_RTT_CHANNEL1_BUFFER_SIZE_DOWN
+	int "RTT channel 1 tx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_UP_BUFFERS >= 1
+	default SEGGER_RTT_BUFFER_SIZE_DOWN
+	---help---
+		Size of the buffer for channel 1 input to target from host
+
+config SEGGER_RTT2_BUFFER_SIZE_UP
+	int "RTT channel 2 tx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_UP_BUFFERS >= 2
+	default SEGGER_RTT_BUFFER_SIZE_UP
+	---help---
+		Size of the buffer for channel 2 output of target, up to host
+
+config SEGGER_RTT2_BUFFER_SIZE_DOWN
+	int "RTT channel 2 rx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_UP_BUFFERS >= 2
+	default SEGGER_RTT_BUFFER_SIZE_DOWN
+	---help---
+		Size of the buffer for channel 2 input to target from host
+
 choice
 	prompt "SEGGER_RTT_MODE"
 	default SEGGER_RTT_MODE_NO_BLOCK_SKIP
