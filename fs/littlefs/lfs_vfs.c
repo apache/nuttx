@@ -1522,8 +1522,14 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 static int littlefs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
   struct stat buf;
+  int ret;
 
-  littlefs_stat(mountpt, relpath, &buf);
+  ret = littlefs_stat(mountpt, relpath, &buf);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (S_ISDIR(buf.st_mode))
     {
       return littlefs_unlink(mountpt, relpath);
