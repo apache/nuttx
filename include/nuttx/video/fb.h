@@ -613,6 +613,10 @@ struct fb_vtable_s
   /* Enable/disable panel power (0: full off). */
 
   int (*setpower)(FAR struct fb_vtable_s *vtable, int power);
+
+  /* Pointer to framebuffer device private data. */
+
+  FAR void *priv;
 };
 
 /****************************************************************************
@@ -695,6 +699,19 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane);
  ****************************************************************************/
 
 void up_fbuninitialize(int display);
+
+/****************************************************************************
+ * Name: fb_pollnotify
+ *
+ * Description:
+ *   Notify the waiting thread that the framebuffer can be written.
+ *
+ * Input Parameters:
+ *   vtable - Pointer to framebuffer's virtual table.
+ *
+ ****************************************************************************/
+
+void fb_pollnotify(FAR struct fb_vtable_s *vtable);
 
 /****************************************************************************
  * Name: fb_register

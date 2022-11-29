@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <poll.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -53,6 +54,7 @@ struct fb_chardev_s
 {
   FAR struct fb_vtable_s *vtable; /* Framebuffer interface */
   FAR void *fbmem;                /* Start of frame buffer memory */
+  FAR struct pollfd *fds;         /* Polling structure of waiting thread */
   size_t fblen;                   /* Size of the framebuffer */
   uint8_t plane;                  /* Video plan number */
   uint8_t bpp;                    /* Bits per pixel */
@@ -68,6 +70,8 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
                         size_t buflen);
 static off_t   fb_seek(FAR struct file *filep, off_t offset, int whence);
 static int     fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     fb_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                       bool setup);
 
 /****************************************************************************
  * Private Data
@@ -81,7 +85,7 @@ static const struct file_operations fb_fops =
   fb_write,      /* write */
   fb_seek,       /* seek */
   fb_ioctl,      /* ioctl */
-  NULL           /* poll */
+  fb_poll        /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -545,6 +549,70 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: fb_poll
+ *
+ * Description:
+ *   Wait for framebuffer to be writable.
+ *
+ ****************************************************************************/
+
+static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+{
+  FAR struct inode *inode;
+  FAR struct fb_chardev_s *fb;
+
+  /* Get the framebuffer instance */
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+
+  if (setup)
+    {
+      if (fb->fds == NULL)
+        {
+          fb->fds = fds;
+          fds->priv = &fb->fds;
+        }
+      else
+        {
+          return -EBUSY;
+        }
+    }
+  else if (fds->priv)
+    {
+      fb->fds = NULL;
+      fds->priv = NULL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fb_pollnotify
+ *
+ * Description:
+ *   Notify the waiting thread that the framebuffer can be written.
+ *
+ * Input Parameters:
+ *   vtable - Pointer to framebuffer's virtual table.
+ *
+ ****************************************************************************/
+
+void fb_pollnotify(FAR struct fb_vtable_s *vtable)
+{
+  FAR struct fb_chardev_s *fb;
+
+  DEBUGASSERT(vtable != NULL);
+
+  fb = vtable->priv;
+
+  /* Notify framebuffer is writable. */
+
+  poll_notify(&fb->fds, 1, POLLOUT);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -610,6 +678,8 @@ int fb_register(int display, int plane)
       gerr("ERROR: up_fbgetvplane() failed, vplane=%d\n", plane);
       goto errout_with_fb;
     }
+
+  fb->vtable->priv = fb;
 
   /* Initialize the frame buffer instance. */
 
