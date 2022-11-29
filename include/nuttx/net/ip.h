@@ -88,6 +88,7 @@
 #ifdef CONFIG_NET_IPv4
 #  define IPv4_HDRLEN     20    /* Size of IPv4 header (without options) */
 #  define IPv4_HLMASK     0x0f  /* Isolates headler length in VHL field */
+#  define IPV4_OPTMAX     40    /* The limit of ip option length */
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -163,6 +164,14 @@ struct ipv4_hdr_s
   uint16_t ipchksum;         /* 16-bit Header checksum */
   uint16_t srcipaddr[2];     /* 32-bit Source IP address */
   uint16_t destipaddr[2];    /* 32-bit Destination IP address */
+};
+
+/* The IPv4 options */
+
+struct ipv4_opt_s
+{
+  uint8_t len;
+  uint8_t data[IPV4_OPTMAX];
 };
 #endif /* CONFIG_NET_IPv4 */
 

@@ -38,6 +38,7 @@
 #include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET_ICMPv6
 
@@ -66,31 +67,17 @@
 void icmpv6_advertise(FAR struct net_driver_s *dev,
                       const net_ipv6addr_t destipaddr)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct icmpv6_neighbor_advertise_s *adv;
   uint16_t lladdrsize;
   uint16_t l3size;
-
-  /* Set up the IPv6 header */
-
-  ipv6->vtc    = 0x60;                         /* Version/traffic class (MS) */
-  ipv6->tcf    = 0;                            /* Traffic class (LS)/Flow label (MS) */
-  ipv6->flow   = 0;                            /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
   lladdrsize   = netdev_lladdrsize(dev);
   l3size       = SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(lladdrsize);
-  ipv6->len[0] = (l3size >> 8);
-  ipv6->len[1] = (l3size & 0xff);
 
-  ipv6->proto  = IP_PROTO_ICMP6;               /* Next header */
-  ipv6->ttl    = 255;                          /* Hop limit */
-
-  /* Swap source for destination IP address, add our source IP address */
-
-  net_ipv6addr_copy(ipv6->destipaddr, destipaddr);
-  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
+  ipv6_build_header(IPv6BUF, l3size, IP_PROTO_ICMP6,
+                    dev->d_ipv6addr, destipaddr, 255);
 
   /* Set up the ICMPv6 Neighbor Advertise response */
 
@@ -125,8 +112,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   dev->d_len     = IPv6_HDRLEN + l3size;
 
-  ninfo("Outgoing ICMPv6 Neighbor Advertise length: %d (%d)\n",
-          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+  ninfo("Outgoing ICMPv6 Neighbor Advertise length: %d\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;

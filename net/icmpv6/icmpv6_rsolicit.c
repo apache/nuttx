@@ -66,37 +66,17 @@
 
 void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 {
-  FAR struct ipv6_hdr_s *ipv6;
   FAR struct icmpv6_router_solicit_s *sol;
   uint16_t lladdrsize;
   uint16_t l3size;
-
-  /* Set up the IPv6 header (most is probably already in place) */
-
-  ipv6          = IPv6BUF;
-  ipv6->vtc     = 0x60;                    /* Version/traffic class (MS) */
-  ipv6->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
-  ipv6->flow    = 0;                       /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
   lladdrsize    = netdev_lladdrsize(dev);
   l3size        = SIZEOF_ICMPV6_ROUTER_SOLICIT_S(lladdrsize);
-  ipv6->len[0]  = (l3size >> 8);
-  ipv6->len[1]  = (l3size & 0xff);
 
-  ipv6->proto   = IP_PROTO_ICMP6;          /* Next header */
-  ipv6->ttl     = 255;                     /* Hop limit */
-
-  /* Set the multicast destination IP address to the IPv6 all link-
-   * local routers address: ff02::2
-   */
-
-  net_ipv6addr_copy(ipv6->destipaddr, g_ipv6_allrouters);
-
-  /* Add our link local IPv6 address as the source address */
-
-  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
+  ipv6_build_header(IPv6BUF, l3size, IP_PROTO_ICMP6,
+                    dev->d_ipv6addr, g_ipv6_allrouters, 255);
 
   /* Set up the ICMPv6 Router Solicitation message */
 
@@ -126,8 +106,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   dev->d_len    = IPv6_HDRLEN + l3size;
 
-  ninfo("Outgoing ICMPv6 Router Solicitation length: %d (%d)\n",
-          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+  ninfo("Outgoing ICMPv6 Router Solicitation length: %d\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;

@@ -669,27 +669,6 @@ uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
 void net_incr32(FAR uint8_t *op32, uint16_t op16);
 
 /****************************************************************************
- * Name: ipv4_chksum
- *
- * Description:
- *   Calculate the IPv4 header checksum of the packet header in d_buf.
- *
- *   The IPv4 header checksum is the Internet checksum of the 20 bytes of
- *   the IPv4 header.
- *
- *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
- *   provided by architecture-specific logic.
- *
- * Returned Value:
- *   The IPv4 header checksum of the IPv4 header in the d_buf buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-uint16_t ipv4_chksum(FAR struct net_driver_s *dev);
-#endif
-
-/****************************************************************************
  * Name: netdev_ipv4_hdrlen
  *
  * Description:
