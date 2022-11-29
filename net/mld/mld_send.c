@@ -87,7 +87,6 @@
 void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
               uint8_t msgtype)
 {
-  FAR struct ipv6_hdr_s *ipv6;
   FAR struct ipv6_router_alert_s *ra;
   FAR const uint16_t *destipaddr;
   unsigned int mldsize;
@@ -160,23 +159,6 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
   dev->d_sndlen  = RASIZE + mldsize;
 
-  /* Set up the IPv6 header */
-
-  ipv6           = IPv6BUF;
-  ipv6->vtc      = 0x60;                     /* Version/traffic class (MS) */
-  ipv6->tcf      = 0;                        /* Traffic class(LS)/Flow label(MS) */
-  ipv6->flow     = 0;                        /* Flow label (LS) */
-  ipv6->len[0]   = (dev->d_sndlen >> 8);     /* Length excludes the IPv6 header */
-  ipv6->len[1]   = (dev->d_sndlen & 0xff);   /* but includes the extension headers */
-  ipv6->proto    = NEXT_HOPBYBOT_EH;         /* Hop-to-hop extension header */
-  ipv6->ttl      = MLD_TTL;                  /* MLD Time-to-live */
-
-  /* Select the IPv6 source address (the local interface assigned to the
-   * network device).
-   */
-
-  net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
-
   /* Select the IPv6 destination address.
    * This varies with the type of message being sent:
    *
@@ -216,7 +198,8 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
           destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
 
-  net_ipv6addr_hdrcopy(ipv6->destipaddr, destipaddr);
+  ipv6_build_header(IPv6BUF, dev->d_sndlen, NEXT_HOPBYBOT_EH,
+                    dev->d_ipv6addr, destipaddr, MLD_TTL);
 
   /* Add the router alert IP header option.
    *
@@ -379,8 +362,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   MLD_STATINCR(g_netstats.icmpv6.sent);
   MLD_STATINCR(g_netstats.ipv6.sent);
 
-  mldinfo("Outgoing ICMPv6 MLD packet length: %d (%d)\n",
-          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+  mldinfo("Outgoing ICMPv6 MLD packet length: %d\n", dev->d_len);
 
   mld_dumppkt((FAR const uint8_t *)IPv6BUF, MLD_HDRLEN + mldsize);
 }

@@ -36,6 +36,7 @@
 #include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET_ICMPv6
 
@@ -77,37 +78,24 @@ static const uint16_t g_icmpv_mcastaddr[6] =
 void icmpv6_solicit(FAR struct net_driver_s *dev,
                     FAR const net_ipv6addr_t ipaddr)
 {
-  FAR struct ipv6_hdr_s *ipv6;
   FAR struct icmpv6_neighbor_solicit_s *sol;
+  net_ipv6addr_t dstaddr;
   uint16_t lladdrsize;
   uint16_t l3size;
-
-  /* Set up the IPv6 header (most is probably already in place) */
-
-  ipv6          = IPv6BUF;
-  ipv6->vtc     = 0x60;                    /* Version/traffic class (MS) */
-  ipv6->tcf     = 0;                       /* Traffic class (LS)/Flow label (MS) */
-  ipv6->flow    = 0;                       /* Flow label (LS) */
 
   /* Length excludes the IPv6 header */
 
   lladdrsize    = netdev_lladdrsize(dev);
   l3size        = SIZEOF_ICMPV6_NEIGHBOR_SOLICIT_S(lladdrsize);
-  ipv6->len[0]  = (l3size >> 8);
-  ipv6->len[1]  = (l3size & 0xff);
-
-  ipv6->proto   = IP_PROTO_ICMP6;          /* Next header */
-  ipv6->ttl     = 255;                     /* Hop limit */
 
   /* Set the multicast destination IP address */
 
-  memcpy(ipv6->destipaddr, g_icmpv_mcastaddr, 6*sizeof(uint16_t));
-  ipv6->destipaddr[6] = ipaddr[6] | HTONS(0xff00);
-  ipv6->destipaddr[7] = ipaddr[7];
+  memcpy(dstaddr, g_icmpv_mcastaddr, sizeof(g_icmpv_mcastaddr));
+  dstaddr[6] = ipaddr[6] | HTONS(0xff00);
+  dstaddr[7] = ipaddr[7];
 
-  /* Add out IPv6 address as the source address */
-
-  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
+  ipv6_build_header(IPv6BUF, l3size, IP_PROTO_ICMP6,
+                    dev->d_ipv6addr, dstaddr, 255);
 
   /* Set up the ICMPv6 Neighbor Solicitation message */
 
@@ -141,8 +129,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
 
   dev->d_len    = IPv6_HDRLEN + l3size;
 
-  ninfo("Outgoing ICMPv6 Neighbor Solicitation length: %d (%d)\n",
-          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+  ninfo("Outgoing ICMPv6 Neighbor Solicitation length: %d\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;
