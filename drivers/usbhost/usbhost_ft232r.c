@@ -1180,7 +1180,7 @@ static void usbhost_rxdata_work(FAR void *arg)
 
           nread = DRVR_TRANSFER(hport->drvr, priv->bulkin,
                                 priv->inbuf, priv->pktsize);
-          if (nread < 0)
+          if (nread < 2)
             {
               /* The most likely reason for a failure is that the has no
                * data available now and NAK'ed the IN token OR that the
@@ -2584,7 +2584,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
   int ret;
 
   DEBUGASSERT(uartdev && uartdev->priv);
-  priv = (FAR struct usbhost_ft232r_s *)uartdev->priv
+  priv = (FAR struct usbhost_ft232r_s *)uartdev->priv;
 
   /* Is RX flow control enabled? */
 
