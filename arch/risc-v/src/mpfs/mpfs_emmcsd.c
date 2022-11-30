@@ -1812,6 +1812,7 @@ static void mpfs_widebus(struct sdio_dev_s *dev, bool wide)
 
 static void mpfs_set_hs_8bit(struct sdio_dev_s *dev)
 {
+  struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   int ret;
   uint32_t r1;
 
