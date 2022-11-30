@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/netdev.h>
 
 /****************************************************************************
  * Public Types
@@ -192,53 +193,6 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
 #endif
 
 /****************************************************************************
- * Name: chksum
- *
- * Description:
- *   Calculate the raw change some over the memory region described by
- *   data and len.
- *
- * Input Parameters:
- *   sum  - Partial calculations carried over from a previous call to chksum.
- *          This should be zero on the first time that check sum is called.
- *   data - Beginning of the data to include in the checksum.
- *   len  - Length of the data to include in the checksum.
- *
- * Returned Value:
- *   The updated checksum value.
- *
- ****************************************************************************/
-
-uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len);
-
-/****************************************************************************
- * Name: net_chksum
- *
- * Description:
- *   Calculate the Internet checksum over a buffer.
- *
- *   The Internet checksum is the one's complement of the one's complement
- *   sum of all 16-bit words in the buffer.
- *
- *   See RFC1071.
- *
- *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
- *   provided by architecture-specific logic.
- *
- * Input Parameters:
- *
- *   buf - A pointer to the buffer over which the checksum is to be computed.
- *
- *   len - Length of the buffer over which the checksum is to be computed.
- *
- * Returned Value:
- *   The Internet checksum of the buffer.
- *
- ****************************************************************************/
-
-uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
-
-/****************************************************************************
  * Name: net_chksum_adjust
  *
  * Description:
@@ -254,78 +208,12 @@ uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
  *
  * Limitations:
  *   The algorithm is applicable only for even offsets and even lengths.
+ *
  ****************************************************************************/
 
 void net_chksum_adjust(FAR uint16_t *chksum,
                        FAR const uint16_t *optr, ssize_t olen,
                        FAR const uint16_t *nptr, ssize_t nlen);
-
-/****************************************************************************
- * Name: ipv4_chksum
- *
- * Description:
- *   Calculate the IPv4 header checksum of the packet header in d_buf.
- *
- *   The IPv4 header checksum is the Internet checksum of the 20 bytes of
- *   the IPv4 header.
- *
- *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
- *   provided by architecture-specific logic.
- *
- * Returned Value:
- *   The IPv4 header checksum of the IPv4 header in the d_buf buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-uint16_t ipv4_chksum(FAR struct ipv4_hdr_s *ipv4);
-#endif
-
-/****************************************************************************
- * Name: ipv4_upperlayer_chksum
- *
- * Description:
- *   Perform the checksum calcaultion over the IPv4, protocol headers, and
- *   data payload as necessary.
- *
- * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
- *   proto - The protocol being supported
- *
- * Returned Value:
- *   The calculated checksum
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
-#endif
-
-/****************************************************************************
- * Name: ipv6_upperlayer_chksum
- *
- * Description:
- *   Perform the checksum calculation over the IPv6, protocol headers, and
- *   data payload as necessary.
- *
- * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
- *   proto - The protocol being supported
- *   iplen - The size of the IPv6 header.  This may be larger than
- *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
- *           present.
- *
- * Returned Value:
- *   The calculated checksum
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv6
-uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
-                                uint8_t proto, unsigned int iplen);
-#endif
 
 /****************************************************************************
  * Name: tcp_chksum, tcp_ipv4_chksum, and tcp_ipv6_chksum
