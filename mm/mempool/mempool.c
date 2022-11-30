@@ -316,7 +316,7 @@ out_with_lock:
 
 void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 {
-  irqstate_t flags;
+  irqstate_t flags = spin_lock_irqsave(&pool->lock);
 #if CONFIG_MM_BACKTRACE >= 0
   size_t blocksize =  ALIGN_UP(pool->blocksize +
                                sizeof(struct mempool_backtrace_s),
@@ -330,8 +330,6 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 
   pool->nalloc--;
 #endif
-
-  flags = spin_lock_irqsave(&pool->lock);
 
   if (pool->interruptsize > blocksize)
     {
