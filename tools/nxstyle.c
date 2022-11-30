@@ -521,6 +521,15 @@ static const char *g_white_list[] =
   "wMaxPacketSize",
   "bInterval",
 
+  /* Ref:
+   * sim/posix/sim_libusb.c
+   */
+
+  "bNumConfigurations",
+  "bDeviceClass",
+  "idVendor",
+  "idProduct",
+
   NULL
 };
 

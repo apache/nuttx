@@ -1549,3 +1549,29 @@ usbdev
           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
   Then you can test the network connection using the ping command or telnet.
+
+usbhost
+
+  This is a configuration with sim usbhost support.
+
+  1. Libusb1.0 setup
+
+  $ sudo apt-get -y install libusb-1.0-0-dev
+  $ sudo apt-get -y install libusb-1.0-0-dev:i386
+
+  2. Configuration
+
+  sim:usbhost support cdcacm.
+
+  You can use the sim:usbdev configuration:
+  $ ./tools/configure.sh sim:usbhost
+
+  Configure the device you want to connet:
+
+  CONFIG_SIM_USB_PID=0x0042
+  CONFIG_SIM_USB_VID=0x1630
+
+  3. How to run
+
+  Run sim usbhost with root mode, run sim usbdev or plug-in cdcacm usb device.
+  Then you can use /dev/ttyACM to transfer data.

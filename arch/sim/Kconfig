@@ -635,4 +635,39 @@ config SIM_USB_RAW_GADGET
 
 endif
 
+config SIM_USB_HOST
+	bool "Linux USB Host"
+	select USBHOST
+	select USBHOST_HAVE_ASYNCH
+	select USBHOST_ASYNCH
+	---help---
+		Build in support for simulated usb host
+
+if SIM_USB_HOST
+
+config SIM_LIBUSB
+	bool "Simulated USB Host use libusb"
+	default n
+	depends on HOST_LINUX
+	---help---
+		 Use libusb to set up virtual USB Host controller.
+
+config SIM_USB_VID
+	hex "Simulated USB Dev VID"
+	default 0x18d1
+
+config SIM_USB_PID
+	hex "Simulated USB Dev PID"
+	default 0x4e11
+
+config SIM_USB_STACKSIZE
+	int "Simulated USB waiter stack size"
+	default 1024
+
+config SIM_USB_PRIO
+	int "Simulated USB waiter task priority"
+	default 100
+
+endif
+
 endif # ARCH_SIM

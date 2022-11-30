@@ -216,6 +216,10 @@ static int sim_loop_task(int argc, char **argv)
       sched_unlock();
       up_irq_restore(flags);
 
+#ifdef CONFIG_SIM_USB_HOST
+      sim_usbhost_loop();
+#endif
+
       /* Sleep minimal time, let the idle run */
 
       usleep(CONFIG_SIM_LOOPTASK_INTERVAL);
@@ -295,6 +299,10 @@ void up_initialize(void)
 
 #ifdef CONFIG_SIM_USB_DEV
   sim_usbdev_initialize();
+#endif
+
+#ifdef CONFIG_SIM_USB_HOST
+  sim_usbhost_initialize();
 #endif
 
   kthread_create("loop_task", SCHED_PRIORITY_MAX,
