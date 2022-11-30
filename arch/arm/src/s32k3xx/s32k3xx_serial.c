@@ -2463,7 +2463,10 @@ static int s32k3xx_ioctl(struct file *filep, int cmd, unsigned long arg)
             stat &= ~LPUART_STAT_RXINV;
           }
 
-        if (arg & SER_INVERT_ENABLED_TX)
+        /* Do not invert TX when in TIOCSSINGLEWIRE */
+
+        if ((arg & SER_INVERT_ENABLED_TX) &&
+            ((ctrl & LPUART_CTRL_LOOPS) != LPUART_CTRL_LOOPS))
           {
             ctrl |= LPUART_CTRL_TXINV;
           }

@@ -38,7 +38,7 @@ MEMORY
   BOOT_HEADER (R)   : ORIGIN = 0x00400000, LENGTH = 0x00001000  /* 0x00400000 - 0x00400fff */
   flash       (rx)  : ORIGIN = 0x00401000, LENGTH = 0x003cffff  /* 0x00401000 - (0x007fffff - 0x20000 (128 KB) = 0x007dffff) */
   sram0_stdby (rwx) : ORIGIN = 0x20400000, LENGTH = 32K
-  sram        (rwx) : ORIGIN = 0x20408000, LENGTH = 240K
+  sram        (rwx) : ORIGIN = 0x20400000, LENGTH = 272K
   itcm        (rwx) : ORIGIN = 0x00000000, LENGTH = 64K
   dtcm        (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
@@ -149,8 +149,11 @@ SECTIONS
   SRAM_END_ADDR          = ORIGIN(sram) + LENGTH(sram);
   SRAM_STDBY_BASE_ADDR   = ORIGIN(sram0_stdby);
   SRAM_STDBY_END_ADDR    = ORIGIN(sram0_stdby) + LENGTH(sram0_stdby);
+  SRAM_INIT_END_ADDR     = ORIGIN(sram) + 320K;
   ITCM_BASE_ADDR         = ORIGIN(itcm);
   ITCM_END_ADDR          = ORIGIN(itcm) + LENGTH(itcm);
   DTCM_BASE_ADDR         = ORIGIN(dtcm);
   DTCM_END_ADDR          = ORIGIN(dtcm) + LENGTH(dtcm);
+  FLASH_BASE_ADDR        = ORIGIN(BOOT_HEADER);
+  FLASH_END_ADDR         = ORIGIN(flash) + LENGTH(flash);
 }
