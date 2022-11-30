@@ -86,7 +86,7 @@
 #define VRINGS                   0x02        /* Number of vrings          */
 #define VRING_ALIGN              0x1000      /* Vring alignment           */
 #define VRING_NR                 256         /* Number of descriptors     */
-#define VRING_SIZE               512         /* Size of one descriptor    */
+#define VRING_SIZE               612         /* Size of one descriptor    */
 
 #ifndef CONFIG_MPFS_IHC_RPMSG_CH2
 /* This is the RPMSG default channel used with only one RPMSG channel */
