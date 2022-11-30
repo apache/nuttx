@@ -193,6 +193,14 @@ config S32K3XX_HAVE_ENET
 	select ARCH_PHY_INTERRUPT
 	select ARCH_HAVE_NETDEV_STATISTICS
 
+# Select MPU when D-cache is enabled for ARM errata 1624041
+
+config S32K3XX_NEEDS_MPU
+    bool
+    default y
+	depends on ARMV7M_DCACHE
+	select ARM_MPU
+
 config S32K3XX_HAVE_FLEXCAN3
 	bool
 	default n

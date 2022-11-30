@@ -36,6 +36,7 @@
 #include <arch/irq.h>
 
 #include "arm_internal.h"
+#include "barriers.h"
 #include "nvic.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -49,8 +50,8 @@
 #include "s32k3xx_serial.h"
 #include "s32k3xx_swt.h"
 #include "s32k3xx_start.h"
-#if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K3XX_ENET)
-#include "hardware/s32k3xx_mpu.h"
+#if defined(CONFIG_ARCH_USE_MPU)
+#include "mpu.h"
 #endif
 
 #ifdef CONFIG_S32K3XX_PROGMEM
@@ -94,6 +95,31 @@
 
 #define STARTUP_ECC_INITVALUE   0
 
+#ifndef CONFIG_ARMV7M_DCACHE
+  /*  With Dcache off:
+   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be off
+   */
+#  undef  MPU_RASR_B
+#  define MPU_RASR_B    0
+#  define RASR_B_VALUE  0
+#  define RASR_C_VALUE  0
+#else
+#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+  /*  With Dcache on:
+   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be on
+   */
+#  define RASR_B_VALUE  MPU_RASR_B
+#  define RASR_C_VALUE  MPU_RASR_C
+
+#  else
+  /*  With Dcache in WRITETHROUGH Bufferable (MPU_RASR_B)
+   * needs to be off, except for FLASH for alignment leniency
+   */
+#  define RASR_B_VALUE  0
+#  define RASR_C_VALUE  MPU_RASR_C
+#  endif
+#endif
+
 /****************************************************************************
  * Name: showprogress
  *
@@ -113,11 +139,13 @@
  ****************************************************************************/
 
 extern uint8_t SRAM_BASE_ADDR[];
-extern uint8_t SRAM_END_ADDR[];
+extern uint8_t SRAM_INIT_END_ADDR[];
 extern uint8_t ITCM_BASE_ADDR[];
 extern uint8_t ITCM_END_ADDR[];
 extern uint8_t DTCM_BASE_ADDR[];
 extern uint8_t DTCM_END_ADDR[];
+extern uint8_t FLASH_BASE_ADDR[];
+extern uint8_t FLASH_END_ADDR[];
 
 /****************************************************************************
  * Private Functions
@@ -131,20 +159,95 @@ extern uint8_t DTCM_END_ADDR[];
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K3XX_ENET)
+#if defined(CONFIG_ARCH_USE_MPU)
 static inline void s32k3xx_mpu_config(void)
 {
   uint32_t regval;
+  uint32_t region;
 
-  /* Bus masters 0-2 are already enabled r/w/x in supervisor and user modes
-   * after reset.  Enable also bus master 3 (ENET) in S/U modes in default
-   * region 0:  User=r+w+x, Supervisor=same as used.
-   */
+  /* Show MPU information */
 
-  regval = (MPU_RGDAAC_M3UM_XACCESS | MPU_RGDAAC_M3UM_WACCESS |
-            MPU_RGDAAC_M3UM_RACCESS | MPU_RGDAAC_M3SM_M3UM);
+  mpu_showtype();
 
-  putreg32(regval, S32K3XX_MPU_RGDAAC(0));
+#ifdef CONFIG_ARMV7M_DCACHE
+  /* Memory barrier */
+
+  ARM_DMB();
+#endif
+
+  /* Reset MPU if enabled */
+
+  mpu_reset();
+
+  /* ARM errata 1013783-B Workaround */
+
+  region = mpu_allocregion();
+  DEBUGASSERT(region == 0);
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32(region | MPU_RBAR_VALID, MPU_RBAR);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE        | /* Enable region  */
+           MPU_RASR_SIZE_LOG2(32) | /* entire memory */
+           MPU_RASR_TEX_SO        | /* Strongly ordered */
+           MPU_RASR_AP_RWRW       | /* P:RW   U:RW */
+           MPU_RASR_XN;             /* Execute-never to prevent instruction fetch */
+  putreg32(regval, MPU_RASR);
+
+  mpu_configure_region((uintptr_t)FLASH_BASE_ADDR,
+                     FLASH_END_ADDR - FLASH_BASE_ADDR,
+                     MPU_RASR_TEX_SO   | /* Strongly ordered    */
+                     RASR_C_VALUE      | /* Cacheable          */
+                     MPU_RASR_B        | /* Bufferable
+                                          * Not Shareable      */
+                     MPU_RASR_AP_RORO);  /* P:RO   U:RO
+                                          * Instruction access */
+
+  mpu_configure_region((uintptr_t)SRAM_BASE_ADDR,
+                     SRAM_INIT_END_ADDR - SRAM_BASE_ADDR,
+                     MPU_RASR_TEX_SO   | /* Strongly ordered   */
+                     RASR_C_VALUE      | /* Cacheable          */
+                     RASR_B_VALUE      | /* Bufferable
+                                          * Not Shareable      */
+                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
+                                          * Instruction access */
+
+  mpu_configure_region((uintptr_t)ITCM_BASE_ADDR,
+                     ITCM_END_ADDR - ITCM_BASE_ADDR,
+                     MPU_RASR_TEX_SO   | /* Strongly ordered   */
+                     RASR_C_VALUE      | /* Cacheable          */
+                     RASR_B_VALUE      | /* Bufferable
+                                          * Not Shareable      */
+                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
+                                          * Instruction access */
+
+  mpu_configure_region((uintptr_t)DTCM_BASE_ADDR,
+                     DTCM_END_ADDR - DTCM_BASE_ADDR,
+                     MPU_RASR_TEX_SO   | /* Strongly ordered   */
+                     RASR_C_VALUE      | /* Cacheable          */
+                     RASR_B_VALUE      | /* Bufferable
+                                          * Not Shareable      */
+                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
+                                          * Instruction access */
+
+  mpu_configure_region(0x40000000, 3 * 2048 * 1024,
+                     MPU_RASR_TEX_DEV  | /* Device
+                                          * Not Cacheable
+                                          * Not Bufferable
+                                          * Not Shareable      */
+                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
+                                          * Instruction access */
+
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
 }
 #endif
 
@@ -160,9 +263,6 @@ static inline void s32k3xx_mpu_config(void)
  *
  ****************************************************************************/
 
-#define STR(x) #x
-#define XSTR(s) STR(s)
-
 void s32k3xx_start(void)
 {
   register uint64_t *src;
@@ -174,7 +274,7 @@ void s32k3xx_start(void)
    */
 
   dest = (uint64_t *)SRAM_BASE_ADDR;
-  while (dest < (uint64_t *)SRAM_END_ADDR)
+  while (dest < (uint64_t *)SRAM_INIT_END_ADDR)
     {
       *dest++ = STARTUP_ECC_INITVALUE;
     }
@@ -248,20 +348,20 @@ void s32k3xx_start(void)
 
   arm_fpuconfig();
 
+#if defined(CONFIG_ARCH_USE_MPU)
+
+  /* Config MPU regions */
+
+  s32k3xx_mpu_config();
+  showprogress('D');
+#endif
+
   /* Enable I- and D-Caches */
 
   up_enable_icache();
   up_enable_dcache();
 
   showprogress('C');
-
-#if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K3XX_ENET)
-
-  /* Enable all MPU bus masters */
-
-  s32k3xx_mpu_config();
-  showprogress('D');
-#endif
 
   /* Perform early serial initialization */
 

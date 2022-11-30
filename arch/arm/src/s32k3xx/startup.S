@@ -38,7 +38,7 @@ __start:
 
     /* Initialize SRAM ECC */
     ldr r1, =SRAM_BASE_ADDR
-    ldr r2, =SRAM_END_ADDR
+    ldr r2, =SRAM_INIT_END_ADDR
 
     subs    r2, r1
     subs    r2, #1
