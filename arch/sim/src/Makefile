@@ -205,6 +205,14 @@ ifeq ($(CONFIG_SIM_USB_RAW_GADGET),y)
 endif
 endif
 
+ifeq ($(CONFIG_SIM_USB_HOST),y)
+  CSRCS += sim_usbhost.c
+ifeq ($(CONFIG_SIM_LIBUSB),y)
+  HOSTSRCS += sim_libusb.c
+  STDLIBS += -lusb-1.0
+endif
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += sim_rptun.c
 endif

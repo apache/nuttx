@@ -390,6 +390,13 @@ void sim_usbdev_initialize(void);
 int sim_usbdev_loop(void);
 #endif
 
+/* sim_usbhost.c ************************************************************/
+
+#ifdef CONFIG_SIM_USB_HOST
+int sim_usbhost_initialize(void);
+int sim_usbhost_loop(void);
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
