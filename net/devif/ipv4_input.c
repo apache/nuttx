@@ -295,8 +295,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPFORWARD
           /* Try to forward the packet */
 
-          int ret = ipv4_forward(dev, ipv4);
-          if (ret >= 0)
+          if (ipv4_forward(dev, ipv4) >= 0)
             {
               /* The packet was forwarded.  Return success; d_len will
                * be set appropriately by the forwarding logic:  Cleared
