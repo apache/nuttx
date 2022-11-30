@@ -1845,7 +1845,8 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
         {
           clckr = MPFS_MMC_CLOCK_200MHZ;
         }
-      else if (priv->bus_mode == MPFS_EMMCSD_MODE_SDR)
+      else if (priv->bus_mode == MPFS_EMMCSD_MODE_SDR ||
+               priv->bus_mode == MPFS_EMMCSD_MODE_DDR)
         {
           clckr = MPFS_MMC_CLOCK_50MHZ;
         }
