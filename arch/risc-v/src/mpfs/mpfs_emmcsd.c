@@ -1808,6 +1808,57 @@ static void mpfs_widebus(struct sdio_dev_s *dev, bool wide)
 /****************************************************************************
  * Name: mpfs_clock
  *
+ ****************************************************************************/
+
+static void mpfs_set_hs_8bit(struct sdio_dev_s *dev)
+{
+  int ret;
+  uint32_t r1;
+
+  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b70000u | (6 << 8))) == OK)
+    {
+      if ((ret == mpfs_waitresponse(dev, MMCSD_CMD6)) == OK)
+        {
+          ret = mpfs_recvshortcrc(dev, MMCSD_CMD6, &r1);
+        }
+    }
+
+  if (ret < 0)
+    {
+      mcerr("Failed to set high speed mode\n");
+      goto err;
+    }
+
+  modifyreg32(MPFS_EMMCSD_HRS06, 0, priv->bus_mode);
+
+  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b70000u | (2 << 8))) == OK)
+    {
+      if ((ret == mpfs_waitresponse(dev, MMCSD_CMD6)) == OK)
+        {
+          ret = mpfs_recvshortcrc(dev, MMCSD_CMD6, &r1);
+        }
+    }
+
+  if (ret < 0)
+    {
+      mcerr("Failed to set 8-bit mode\n");
+      goto err;
+    }
+
+  modifyreg32(MPFS_EMMCSD_SRS10, 0, MPFS_EMMCSD_SRS10_EDTW);
+  return;
+
+err:
+
+  /* Reset to 1-bit legacy mode */
+
+  modifyreg32(MPFS_EMMCSD_HRS06, 0, MPFS_EMMCSD_MODE_LEGACY);
+  modifyreg32(MPFS_EMMCSD_SRS10, MPFS_EMMCSD_SRS10_EDTW, 0);
+}
+
+/****************************************************************************
+ * Name: mpfs_clock
+ *
  * Description:
  *   Enable/disable SDIO clocking. Only up to 25 Mhz is supported now. 50 Mhz
  *   may work with some cards.
@@ -1877,6 +1928,15 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
   /* Set the new clock frequency */
 
   mpfs_setclkrate(priv, clckr);
+
+  /* REVISIT: This should really be a separate configuration procedure */
+
+  if (rate == CLOCK_MMC_TRANSFER)
+    {
+      /* eMMC: Set 8-bit data bus and correct bus mode */
+
+      mpfs_set_hs_8bit(dev);
+    }
 }
 
 /****************************************************************************
