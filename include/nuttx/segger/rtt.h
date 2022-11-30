@@ -25,7 +25,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdbool.h>
+
 #include <nuttx/streams.h>
 #include <nuttx/syslog/syslog.h>
 
@@ -96,6 +97,15 @@ void lib_rttinstream_close(FAR struct lib_rttinstream_s *stream);
 int syslog_rtt_putc(FAR struct syslog_channel_s *channel, int ch);
 ssize_t syslog_rtt_write(FAR struct syslog_channel_s *channel,
                          FAR const char *buffer, size_t buflen);
+#endif
+
+/****************************************************************************
+* Name: serial_rtt_register
+*****************************************************************************/
+
+#ifdef CONFIG_SERIAL_RTT
+void serial_rtt_register(FAR const char *name, int channel,
+                         bool isconsole, size_t txsize, size_t rxsize);
 #endif
 
 #ifdef __cplusplus

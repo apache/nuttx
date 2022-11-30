@@ -63,6 +63,34 @@ config SEGGER_RTT_BUFFER_SIZE_DOWN
 	---help---
 		Size of the buffer for terminal input to target from host (Usually keyboard input)
 
+config SEGGER_RTT1_BUFFER_SIZE_UP
+	int "RTT channel 1 tx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_UP_BUFFERS >= 2
+	default SEGGER_RTT_BUFFER_SIZE_UP
+	---help---
+		Size of the buffer for channel 1 output of target, up to host
+
+config SEGGER_RTT1_BUFFER_SIZE_DOWN
+	int "RTT channel 1 tx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_DOWN_BUFFERS >= 2
+	default SEGGER_RTT_BUFFER_SIZE_DOWN
+	---help---
+		Size of the buffer for channel 1 input to target from host
+
+config SEGGER_RTT2_BUFFER_SIZE_UP
+	int "RTT channel 2 tx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_UP_BUFFERS >= 2
+	default SEGGER_RTT_BUFFER_SIZE_UP
+	---help---
+		Size of the buffer for channel 2 output of target, up to host
+
+config SEGGER_RTT2_BUFFER_SIZE_DOWN
+	int "RTT channel 2 rx buffer size"
+	depends on SEGGER_RTT_MAX_NUM_DOWN_BUFFERS >= 2
+	default SEGGER_RTT_BUFFER_SIZE_DOWN
+	---help---
+		Size of the buffer for channel 2 input to target from host
+
 choice
 	prompt "SEGGER_RTT_MODE"
 	default SEGGER_RTT_MODE_NO_BLOCK_SKIP
@@ -93,6 +121,48 @@ config SYSLOG_RTT
 	default n
 	---help---
 		Use Segger J-Link RTT as a SYSLOG output device.
+
+config SERIAL_RTT
+	bool
+	select SEGGER_RTT
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	default n
+	---help---
+		This option is used to enable RTT serial device
+		In Segger RTT serial driver, RTT channel buffer and serial DMA buffer are shared,
+		So you cannot use RTT stream to operate it
+
+config SERIAL_RTT1
+	bool "Segger RTT serial for channel 1"
+	default n
+	select SERIAL_RTT
+	---help---
+		This option is used to enable the serial driver of channel 1
+
+config SERIAL_RTT2
+	bool "Segger RTT serial for channel 2"
+	default n
+	select SERIAL_RTT
+	---help---
+		This option is used to enable the serial driver of channel 2
+
+config SERIAL_RTT_POLLING_INTERVAL
+	int "Segger RTT serial pilling interval (us)"
+	default 10000
+	depends on SERIAL_RTT
+	---help---
+		This option is used to configure the RTT serial polling interval
+
+config CONSOLE_RTT
+	bool "Segger RTT console"
+	default n
+	select SERIAL_CONSOLE
+	select SERIAL_RTT
+	---help---
+		Enabling this option will use RTT as the end device, using RTT channel 0 by default.
+		The buffer size of RTT channel 0 is configured by SEGGER_RTT_BUFFER_SIZE_UP/DOWN
+		You need to turn off other console devices before using Segger RTT console
 
 if SEGGER_SYSVIEW
 
