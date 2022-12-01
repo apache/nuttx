@@ -953,6 +953,7 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgdev_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgdev_ioctl_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->buf, rsp->arglen);
