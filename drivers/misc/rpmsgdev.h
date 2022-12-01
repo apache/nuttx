@@ -85,8 +85,8 @@ begin_packed_struct struct rpmsgdev_lseek_s
 {
   struct rpmsgdev_header_s header;
   uint64_t                 filep;
+  int64_t                  offset;
   int32_t                  whence;
-  int32_t                  offset;
 } end_packed_struct;
 
 begin_packed_struct struct rpmsgdev_ioctl_s
