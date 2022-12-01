@@ -280,7 +280,12 @@ static int rpmsgdev_lseek_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_lseek_s *msg = data;
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
 
-  msg->header.result = file_seek(filep, msg->offset, msg->whence);
+  msg->header.result = 0;
+  msg->offset = file_seek(filep, msg->offset, msg->whence);
+  if (msg->offset < 0)
+    {
+      msg->header.result = (int32_t)msg->offset;
+    }
 
   return rpmsg_send(ept, msg, len);
 }

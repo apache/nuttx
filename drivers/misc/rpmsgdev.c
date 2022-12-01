@@ -574,6 +574,7 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_lseek_s msg;
+  int ret;
 
   /* Sanity checks */
 
@@ -591,8 +592,14 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
   msg.offset = offset;
   msg.whence = whence;
 
-  return rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg.header,
-                            sizeof(msg), NULL);
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg.header,
+                           sizeof(msg), NULL);
+  if (ret >= 0)
+    {
+      filep->f_pos = msg.offset;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
