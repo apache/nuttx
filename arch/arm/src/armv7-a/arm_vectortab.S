@@ -38,6 +38,9 @@
 	.eabi_attribute Tag_ABI_align_preserved, 1
 #endif
 
+	.syntax	unified
+	.arm
+
 	.globl		_vector_start
 	.globl		_vector_end
 
