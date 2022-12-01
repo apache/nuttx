@@ -318,6 +318,7 @@ config ARCH_CHIP_S32K3XX
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
 	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_I2CRESET
 	---help---
 		NPX S32K3XX architectures (ARM Cortex-M7).
 
