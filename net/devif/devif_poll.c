@@ -842,6 +842,8 @@ int devif_poll_out(FAR struct net_driver_s *dev,
       return 0;
     }
 
+  devif_out(dev);
+
   bstop = devif_loopback(dev);
   if (bstop)
     {
@@ -850,8 +852,6 @@ int devif_poll_out(FAR struct net_driver_s *dev,
 
   if (callback)
     {
-      devif_out(dev);
-
       return callback(dev);
     }
 
