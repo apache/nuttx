@@ -541,9 +541,6 @@ int timerfd_create(int clockid, int flags)
   /* Initialize the timer instance */
 
   new_dev->clock = clockid;
-  new_dev->crefs = 1;
-  new_dev->delay = 0;
-  new_dev->counter = 0;
 
   /* Request a unique minor device number */
 
