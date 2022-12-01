@@ -549,7 +549,8 @@ static void usb_adb_wrcomplete(FAR struct usbdev_ep_s *ep,
 
     case -ESHUTDOWN: /* Disconnection */
       {
-        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), sq_count(&priv->txfree));
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN),
+                 sq_count(&priv->txfree));
       }
       break;
 
@@ -957,6 +958,8 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   usbtrace(TRACE_CLASSBIND, 0);
 
+  priv->usbdev = dev;
+
   priv->ctrlreq = usbclass_allocreq(dev->ep0, USBADB_MXDESCLEN);
   if (priv->ctrlreq == NULL)
     {
@@ -1123,6 +1126,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   uint16_t value;
   uint16_t len;
   int ret = -EOPNOTSUPP;
+  bool cfg_req = true;
 
   FAR struct usbdev_adb_s *priv;
   FAR struct usbdev_req_s *ctrlreq;
@@ -1202,7 +1206,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                       ret = usbclass_mkcfgdesc(ctrlreq->buf, NULL);
 #else
                       ret = usbclass_mkcfgdesc(ctrlreq->buf, NULL,
-                                             dev->speed, ctrl->req);
+                                               dev->speed, ctrl->req);
 #endif
                     }
                     break;
@@ -1218,8 +1222,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
                       ret =
                       usbclass_mkstrdesc(ctrl->value[0],
-                                        (FAR struct usb_strdesc_s *)
-                                          ctrlreq->buf);
+                                         (FAR struct usb_strdesc_s *)
+                                         ctrlreq->buf);
                     }
                     break;
 
@@ -1255,6 +1259,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 if (ctrl->type == 0)
                   {
                     ret = usbclass_setconfig(priv, value);
+                    cfg_req = false;
                   }
               }
               break;
@@ -1265,21 +1270,21 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
               break;
             }
         }
+        break;
 
       case USB_REQ_TYPE_CLASS:
         {
           /* ADB-Specific Requests */
 
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ),
-                  ctrl->req);
+                   ctrl->req);
           break;
         }
 
       default:
         {
-          usbtrace(
-            TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE),
-            ctrl->type);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE),
+                   ctrl->type);
         }
     }
 
@@ -1288,7 +1293,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
    * value (ret < 0), the USB driver will stall.
    */
 
-  if (ret >= 0)
+  if (ret >= 0 && cfg_req)
     {
       ctrlreq->len   = (len < ret) ? len : ret;
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
@@ -1693,7 +1698,7 @@ static int adb_char_blocking_io(FAR struct usbdev_adb_s *priv,
  ****************************************************************************/
 
 static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
-                               size_t len)
+                             size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct usbdev_adb_s *priv = inode->i_private;
