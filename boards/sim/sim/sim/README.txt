@@ -1435,3 +1435,117 @@ wamr
   [0]crcfinal      : 0xa14c
   Correct operation validated. See README.md for run and reporting rules.
   CoreMark 1.0 : 5.000000 / Clang 15.0.7 Using NuttX compilation options / Defined by the NuttX configuration
+
+usbdev
+
+  This is a configuration with sim usbdev support.
+
+  1. Raw Gadget setup
+
+  Get Raw Gadget:
+  Get Raw Gadget code at https://github.com/xairy/raw-gadget.
+
+  Make Raw Gadget:
+  Run make in the raw_gadget and dummy_hcd directory. If raw_gadget build
+  fail, you need to check which register interface meets your kenel version,
+  usb_gadget_probe_driver or usb_gadget_register_driver.
+
+  Install Raw Gadget:
+  Run ./insmod.sh in the raw_gadget and dummy_hcd directory.
+
+  2. Configuration
+
+  sim:usbdev contains two different sets of composite devices:
+  conn0: adb & rndis
+  conn1: cdcacm & cdcecm
+
+  You can use the sim:usbdev configuration:
+  ./tools/configure.sh sim:usbdev
+
+  3. How to run
+
+  Run nuttx with root mode, then you can use it as the following:
+
+    1> Run ADB:
+
+  NuttX enter command:
+  $ conn 0
+  $ adbd &
+
+  Host PC enter the ADB command:
+  $ adb kill-server
+  $ adb devices
+  List of devices attached
+  * daemon not running; starting now at tcp:5037
+  * daemon started successfully
+  0101        device
+
+  If ADB connection fails, make sure the udev rule is added correctly.
+  Edit /etc/udev/rules.d/51-android.rules file and add the following to it:
+  SUBSYSTEM=="usb", ATTR{idVendor}=="1630", ATTR{idProduct}=="0042", MODE="0666", GROUP="plugdev"
+
+  Then you can use commands such as adb shell, adb push, adb pull as normal.
+
+    2> Run RNDIS:
+  
+  NuttX enter command:
+  $ conn 0
+  $ ifconfig
+  eth0    Link encap:Ethernet HWaddr 00:00:00:00:00:00 at UP
+          inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+  $ dhcpd_start eth0
+  eth0    Link encap:Ethernet HWaddr 00:00:00:00:00:00 at UP
+        inet addr:10.0.0.1 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+  Host PC, you can see the network device named usb0:
+  $ ifconfig
+  usb0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 602
+          inet 10.0.0.4  netmask 255.255.255.0  broadcast 10.0.0.255
+          ether 36:50:3d:62:b5:80  txqueuelen 1000  (以太网)
+          RX packets 0  bytes 0 (0.0 B)
+          RX errors 0  dropped 0  overruns 0  frame 0
+          TX packets 43  bytes 8544 (8.5 KB)
+          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+  Then you can test the network connection using the ping command or telnet.
+
+    3> Run CDCACM:
+
+  NuttX enter command:
+  $ conn 1
+
+  If the connection is successful, you can see /dev/ttyACM devices on both NuttX
+  and host PC.
+
+  Then you can use echo and cat command to test:
+
+  NuttX:
+  nsh> echo hello > /dev/ttyACM0
+
+  Host PC:
+  $ cat /dev/ttyACM0
+  hello
+
+    3> Run CDCECM:
+
+  NuttX enter command:
+  $ conn 1
+  $ ifconfig
+  eth0    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP
+          inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+  $ dhcpd_start eth0
+  $ ifconfig
+  eth0    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP
+          inet addr:10.0.0.1 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+  Host PC, you can see the network device named enx020000112233:
+  $ ifconfig
+  enx020000112233: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 576
+          inet 10.0.0.4  netmask 255.255.255.0  broadcast 10.0.0.255
+          ether 02:00:00:11:22:33  txqueuelen 1000  (以太网)
+          RX packets 0  bytes 0 (0.0 B)
+          RX errors 0  dropped 0  overruns 0  frame 0
+          TX packets 58  bytes 9143 (9.1 KB)
+          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+  Then you can test the network connection using the ping command or telnet.
