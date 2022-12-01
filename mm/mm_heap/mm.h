@@ -83,7 +83,7 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         FAR strcut tcb_s *tcb; \
+         FAR struct tcb_s *tcb; \
          tmp->pid = gettid(); \
          tcb = nxsched_get_tcb(tmp->pid); \
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
