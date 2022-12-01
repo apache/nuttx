@@ -72,6 +72,14 @@ endif
 
 ifeq ($(CONFIG_ARM_THUMB),y)
   ARCHOPTIMIZATION += -mthumb
+
+  # GCC Manual:
+  # -mthumb
+  # ... If you want to force assembler files to be interpreted as Thumb
+  # code, either add a `.thumb' directive to the source or pass the
+  # -mthumb option directly to the assembler by prefixing it with -Wa.
+
+  ARCHOPTIMIZATION += -Wa,-mthumb
 endif
 
 ifeq ($(CONFIG_UNWINDER_ARM),y)
