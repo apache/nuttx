@@ -80,6 +80,11 @@ ifeq ($(CONFIG_ARM_THUMB),y)
   # -mthumb option directly to the assembler by prefixing it with -Wa.
 
   ARCHOPTIMIZATION += -Wa,-mthumb
+
+  # Outputs an implicit IT block when there is a conditional instruction
+  # without an enclosing IT block.
+
+  ARCHOPTIMIZATION += -Wa,-mimplicit-it=always
 endif
 
 ifeq ($(CONFIG_UNWINDER_ARM),y)
