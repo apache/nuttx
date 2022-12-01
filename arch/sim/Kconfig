@@ -605,4 +605,34 @@ config SIM_UART3_NAME
 
 endmenu
 
+config SIM_USB_DEV
+	bool "Linux USB Device"
+	select USBDEV
+	---help---
+		Build in support for simulated usb device
+
+if SIM_USB_DEV
+
+config SIM_USB_RAW_GADGET
+	bool "Simulated USB Raw Gadget Dev"
+	default n
+	depends on HOST_LINUX
+	---help---
+		 Use USB Raw Gadget and Dummy HCD/UDC to set up virtual
+		 USB Device and Host controller that connected to each
+		 other inside the kernel.
+
+		 Get Raw Gadget:
+		 Get Raw Gadget code at https://github.com/xairy/raw-gadget.
+
+		 Make Raw Gadget:
+		 Run make in the raw_gadget and dummy_hcd directory. If raw_gadget
+		 build fail, you need to check which register interface meets your
+		 kenel version, usb_gadget_probe_driver or usb_gadget_register_driver.
+
+		 Install Raw Gadget:
+		 Run ./insmod.sh in the raw_gadget and dummy_hcd directory.
+
+endif
+
 endif # ARCH_SIM

@@ -198,6 +198,13 @@ ifeq ($(CONFIG_SIM_SPI_LINUX),y)
   HOSTSRCS += sim_linuxspi.c
 endif
 
+ifeq ($(CONFIG_SIM_USB_DEV),y)
+  CSRCS += sim_usbdev.c
+ifeq ($(CONFIG_SIM_USB_RAW_GADGET),y)
+  HOSTSRCS += sim_rawgadget.c
+endif
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += sim_rptun.c
 endif

@@ -383,6 +383,13 @@ int sim_video_initialize(void);
 void sim_video_loop(void);
 #endif
 
+/* sim_usbdev.c *************************************************************/
+
+#ifdef CONFIG_SIM_USB_DEV
+void sim_usbdev_initialize(void);
+int sim_usbdev_loop(void);
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION

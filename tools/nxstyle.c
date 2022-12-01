@@ -505,6 +505,22 @@ static const char *g_white_list[] =
 
   "NimMain",
 
+  /* Ref:
+   * sim/posix/sim_rawgadget.c
+   */
+
+  "bRequestType",
+  "bRequest",
+  "wValue",
+  "wIndex",
+  "wLength",
+  "bLength",
+  "bDescriptorType",
+  "bEndpointAddress",
+  "bmAttributes",
+  "wMaxPacketSize",
+  "bInterval",
+
   NULL
 };
 

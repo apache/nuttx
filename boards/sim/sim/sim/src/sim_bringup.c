@@ -53,6 +53,8 @@
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
+#include <nuttx/usb/adb.h>
+#include <nuttx/usb/rndis.h>
 
 #ifdef CONFIG_LCD_DEV
 #include <nuttx/lcd/lcd_dev.h>
@@ -494,6 +496,23 @@ int sim_bringup(void)
 
 #ifdef CONFIG_RC_DUMMY
   rc_dummy_initialize(0);
+#endif
+
+#if defined(CONFIG_USBADB) && !defined(CONFIG_USBADB_COMPOSITE)
+  usbdev_adb_initialize();
+#endif
+
+#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
+  /* Set up a MAC address for the RNDIS device. */
+
+  uint8_t mac[6];
+  mac[0] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 5)) & 0xff;
+  mac[1] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 4)) & 0xff;
+  mac[2] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
 #endif
 
   return ret;

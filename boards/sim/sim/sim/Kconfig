@@ -59,4 +59,13 @@ config SIM_WTGAHRS2_UARTN
 		We can select the number according to which SIM_UARTX_NAME is used to sensor.
 		This range is 0-4.
 
+config SIM_RNDIS_MACADDR
+	hex "RNDIS MAC address"
+	default 0xfadedeadbeef
+	depends on RNDIS
+	---help---
+		If the hardware has no built-in MAC address then the fixed,
+		software-assigned MAC address MAC address must provided
+		with this selection.
+
 endif

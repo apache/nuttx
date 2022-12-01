@@ -203,6 +203,10 @@ static int sim_loop_task(int argc, char **argv)
       sim_video_loop();
 #endif
 
+#ifdef CONFIG_SIM_USB_DEV
+      sim_usbdev_loop();
+#endif
+
 #ifdef CONFIG_MOTOR_FOC_DUMMY
       /* Update simulated FOC device */
 
@@ -287,6 +291,10 @@ void up_initialize(void)
 
   audio_register("pcm1p", sim_audio_initialize(true, true));
   audio_register("pcm1c", sim_audio_initialize(false, true));
+#endif
+
+#ifdef CONFIG_SIM_USB_DEV
+  sim_usbdev_initialize();
 #endif
 
   kthread_create("loop_task", SCHED_PRIORITY_MAX,
