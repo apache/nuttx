@@ -112,6 +112,10 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
 
   dev->d_len = ipicmplen + datalen;
 
+  /* Copy fields from original packet */
+
+  memmove(icmpv6 + 1, ipv6, datalen);
+
   ipv6_build_header(IPv6BUF, dev->d_len - IPv6_HDRLEN, IP_PROTO_ICMP6,
                     dev->d_ipv6addr, ipv6->srcipaddr, 255);
 
@@ -119,8 +123,8 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
 
   icmpv6->type    = type;
   icmpv6->code    = code;
-  icmpv6->data[0] = data >> 16;
-  icmpv6->data[1] = data & 0xffff;
+  icmpv6->data[0] = htons(data >> 16);
+  icmpv6->data[1] = htons(data & 0xffff);
 
   /* Calculate the ICMPv6 checksum over the ICMPv6 header and payload. */
 
