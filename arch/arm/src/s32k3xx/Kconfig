@@ -374,6 +374,7 @@ config S32K3XX_ENET
 config S32K3XX_QSPI
 	bool "QSPI Flash"
 	default n
+	select ARCH_USE_MPU
 	depends on S32K3XX_HAVE_QSPI
 	
 menu "FlexCAN"

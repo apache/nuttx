@@ -888,6 +888,7 @@ static int qspi_transmit_blocking(struct s32k3xx_qspidev_s *priv,
   uint32_t count = UINT32_MAX;
   uint32_t *data = (uint32_t *)meminfo->buffer;
   uint32_t write_cycle = min(32, ((uint32_t)remaining) >> 2U);
+  uint32_t timeout = 1000;
   int ret = 0;
 
   /* Copy sequence in LUT registers */
@@ -916,30 +917,32 @@ static int qspi_transmit_blocking(struct s32k3xx_qspidev_s *priv,
 
   putreg32(QSPI_AMBA_BASE + meminfo->addr, S32K3XX_QSPI_SFAR);
 
-  /* Re-attempt filling TX fifo if size doesn't match */
+  /* Clear TX fifo */
 
-  while ((getreg32(S32K3XX_QSPI_TBSR) & QSPI_TBSR_TRBLF_MASK) != count)
+  regval  = getreg32(S32K3XX_QSPI_MCR);
+  regval |= QSPI_MCR_CLR_TXF;
+  putreg32(regval, S32K3XX_QSPI_MCR);
+
+  do /* Wait for fifo clear otherwise timeout */
     {
-      /* Clear TX fifo */
+      timeout--;
+    }
+  while ((getreg32(S32K3XX_QSPI_TBSR) & QSPI_TBSR_TRBLF_MASK) != 0
+          && timeout > 0);
 
-      regval  = getreg32(S32K3XX_QSPI_MCR);
-      regval |= QSPI_MCR_CLR_TXF;
-      putreg32(regval, S32K3XX_QSPI_MCR);
+  if (timeout == 0)
+    {
+      return -ETIMEDOUT;
+    }
 
-      spiinfo("Transmit: %" PRIu32 " size: %" PRIu32 "\n",
-              meminfo->addr, meminfo->buflen);
+  spiinfo("Transmit: %" PRIu32 " size: %" PRIu32 "\n",
+          meminfo->addr, meminfo->buflen);
 
-      for (count = 0U; count < write_cycle; count++)
-        {
-          while ((getreg32(S32K3XX_QSPI_TBSR)
-                & QSPI_TBSR_TRBLF_MASK) != count)
-            {
-            }
-
-          putreg32(*data, S32K3XX_QSPI_TBDR);
-          data++;
-          remaining -= 4U;
-        }
+  for (count = 0U; count < write_cycle; count++)
+    {
+      putreg32(*data, S32K3XX_QSPI_TBDR);
+      data++;
+      remaining -= 4U;
     }
 
   /* Trigger IP command with specified sequence and size */
