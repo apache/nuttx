@@ -2213,7 +2213,7 @@ struct adc_dev_s *sam_adc_initialize(void)
       /* Initialize the public ADC device data structure */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
-      g_adcdev.ad_ops  = &g_adcops;
+      g_adcdev.ad_ops = &g_adcops;
       priv->dev = &g_adcdev;
 #endif
 
@@ -2222,7 +2222,7 @@ struct adc_dev_s *sam_adc_initialize(void)
       /* Initialize the private ADC device data structure */
 
       nxmutex_init(&priv->lock);
-      priv->cb  = NULL;
+      priv->cb = NULL;
 
 #ifdef CONFIG_SAMA5_ADC_DMA
       /* Allocate a DMA channel from DMAC1 */
