@@ -290,7 +290,7 @@ static int riscv_mtimer_current(struct oneshot_lowerhalf_s *lower,
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
   uint64_t mtime = riscv_mtimer_get_mtime(priv);
-  uint64_t nsec = mtime * NSEC_PER_SEC / priv->freq;
+  uint64_t nsec = mtime / (priv->freq / USEC_PER_SEC) * NSEC_PER_USEC;
 
   ts->tv_sec  = nsec / NSEC_PER_SEC;
   ts->tv_nsec = nsec % NSEC_PER_SEC;
