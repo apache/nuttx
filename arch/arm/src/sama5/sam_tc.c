@@ -56,6 +56,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -481,26 +482,27 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
   uintptr_t base;
 
   base = tc->base;
-  tminfo("TC%d [%08x]: %s\n", tc->tc, (int)base, msg);
-  tminfo("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
+  tmrinfo("TC%d [%08x]: %s\n", tc->tc, (int)base, msg);
+  tmrinfo("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
         getreg32(base + SAM_TC_BMR_OFFSET),
         getreg32(base + SAM_TC_QIMR_OFFSET),
         getreg32(base + SAM_TC_QISR_OFFSET),
         getreg32(base + SAM_TC_WPMR_OFFSET));
 
   base = chan->base;
-  tminfo("TC%d Channel %d [%08x]: %s\n", tc->tc, chan->chan, (int)base, msg);
-  tminfo("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
+  tmrinfo("TC%d Channel %d [%08x]: %s\n", tc->tc,
+          chan->chan, (int)base, msg);
+  tmrinfo("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
         getreg32(base + SAM_TC_CMR_OFFSET),
         getreg32(base + SAM_TC_SMMR_OFFSET),
         getreg32(base + SAM_TC_RAB_OFFSET),
         getreg32(base + SAM_TC_CV_OFFSET));
-  tminfo("   RA: %08x   RB: %08x   RC: %08x   SR: %08x\n",
+  tmrinfo("   RA: %08x   RB: %08x   RC: %08x   SR: %08x\n",
         getreg32(base + SAM_TC_RA_OFFSET),
         getreg32(base + SAM_TC_RB_OFFSET),
         getreg32(base + SAM_TC_RC_OFFSET),
         getreg32(base + SAM_TC_SR_OFFSET));
-  tminfo("  IMR: %08x\n",
+  tmrinfo("  IMR: %08x\n",
         getreg32(base + SAM_TC_IMR_OFFSET));
 }
 #endif
@@ -601,7 +603,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(chan->tc, true, regaddr, regval))
     {
-      tmrinfo("%08x<-%08x\n", regaddr, regval);
+      tmrinfo("%08" PRIx32 "<-%08" PRIx32 "\n", regaddr, regval);
     }
 #endif
 
@@ -860,6 +862,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   uint32_t regval;
   uint8_t ch;
   int i;
+  int ret;
 
   /* Select the timer/counter and get the index associated with the
    * channel.
@@ -1267,7 +1270,7 @@ void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
           chan->chan, regid, (unsigned long)regval);
 
   sam_chan_putreg(chan, g_regoffset[regid], regval);
-  sam_regdump(chan, "Set register");
+  sam_regdump(chan, "set register");
 }
 
 /****************************************************************************
@@ -1406,7 +1409,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   uint32_t ftcin = sam_tc_infreq();
   int ndx = 0;
 
-  tmrinfo("frequency=%d\n", frequency);
+  tmrinfo("frequency=%" PRIu32 "\n", frequency);
 
   /* Satisfy lower bound.  That is, the value of the divider such that:
    *
