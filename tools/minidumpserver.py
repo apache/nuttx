@@ -130,6 +130,25 @@ reg_table = {
         "PC": 15,
         "xPSR": 16,
     },
+    "arm-a": {
+        "R0": 0,
+        "R1": 1,
+        "R2": 2,
+        "R3": 3,
+        "R4": 4,
+        "R5": 5,
+        "R6": 6,
+        "R7": 7,
+        "R8": 8,
+        "SB": 9,
+        "SL": 10,
+        "FP": 11,
+        "IP": 12,
+        "SP": 13,
+        "LR": 14,
+        "PC": 15,
+        "CPSR": 41,
+    },
     "riscv": {
         "ZERO": 0,
         "RA": 1,
@@ -204,7 +223,7 @@ class dump_log_file:
     def close(self):
         self.fd.closeself()
 
-    def parse(self):
+    def parse(self, arch):
         data = bytes()
         start = 0
         if self.fd is None:
@@ -217,7 +236,11 @@ class dump_log_file:
             tmp = re.search(r"([^ ]*)_registerdump:?", line)
             if tmp is not None:
                 # find arch
-                self.arch = tmp.group(1)
+                if arch == None:
+                    self.arch = tmp.group(1)
+                else:
+                    self.arch = arch
+
                 if self.arch not in reg_table:
                     logger.error("%s not supported" % (self.arch))
                 # init register list
@@ -492,6 +515,11 @@ if __name__ == "__main__":
 
     parser.add_argument("-l", "--logfile", required=True, help="logfile")
 
+    parser.add_argument("-a", "--arch",
+                        help="select architecture,if not use this options,\
+                        The architecture will be inferred from the logfile",
+                        choices=['arm', 'arm-a','riscv', 'xtensa'])
+
     parser.add_argument("-p", "--port", help="gdbport", type=int, default=1234)
 
     parser.add_argument("--debug", action="store_true", default=False)
@@ -512,7 +540,7 @@ if __name__ == "__main__":
         logger.setLevel(logging.INFO)
 
     log = dump_log_file(args.logfile)
-    log.parse()
+    log.parse(args.arch)
     elf = dump_elf_file(args.elffile)
     elf.parse()
 
