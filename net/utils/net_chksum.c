@@ -91,6 +91,51 @@ uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 
 /****************************************************************************
+ * Name: chksum_iob
+ *
+ * Description:
+ *   Calculate the Internet checksum over an iob chain buffer.
+ *
+ * Input Parameters:
+ *   sum    - Partial calculations carried over from a previous call to
+ *            chksum().  This should be zero on the first time that check
+ *            sum is called.
+ *   iob    - An iob chain buffer over which the checksum is to be computed.
+ *   offset - Specifies the byte offset of the start of valid data.
+ *
+ * Returned Value:
+ *   The updated checksum value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_IOB
+uint16_t chksum_iob(uint16_t sum, FAR struct iob_s *iob, uint16_t offset)
+{
+  /* Skip to the I/O buffer containing the data offset */
+
+  while (iob != NULL && offset > iob->io_len)
+    {
+      offset -= iob->io_len;
+      iob     = iob->io_flink;
+    }
+
+  /* If the link pointer is not empty, loop to walk through all I/O buffer
+   * and accumulate the sum
+   */
+
+  while (iob != NULL)
+    {
+      sum = chksum(sum, iob->io_data + iob->io_offset + offset,
+                   iob->io_len - offset);
+      iob = iob->io_flink;
+      offset = 0;
+    }
+
+  return sum;
+}
+#endif /* CONFIG_MM_IOB */
+
+/****************************************************************************
  * Name: net_chksum
  *
  * Description:
@@ -122,6 +167,39 @@ uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
   return HTONS(chksum(0, (uint8_t *)data, len));
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
+
+/****************************************************************************
+ * Name: net_chksum_iob
+ *
+ * Description:
+ *   Calculate the Internet checksum over an iob chain buffer.
+ *
+ *   The Internet checksum is the one's complement of the one's complement
+ *   sum of all 16-bit words in the buffer.
+ *
+ *   See RFC1071.
+ *
+ *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
+ *   provided by architecture-specific logic.
+ *
+ * Input Parameters:
+ *   sum    - Partial calculations carried over from a previous call to
+ *            chksum().  This should be zero on the first time that check
+ *            sum is called.
+ *   iob    - An iob chain buffer over which the checksum is to be computed.
+ *   offset - Specifies the byte offset of the start of valid data.
+ *
+ * Returned Value:
+ *   The Internet checksum of the given iob chain buffer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_IOB
+uint16_t net_chksum_iob(uint16_t sum, FAR struct iob_s *iob, uint16_t offset)
+{
+  return HTONS(chksum_iob(sum, iob, offset));
+}
+#endif /* CONFIG_MM_IOB */
 
 /****************************************************************************
  * Name: net_chksum_adjust

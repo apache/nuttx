@@ -114,7 +114,11 @@ static void sendto_request(FAR struct net_driver_s *dev,
   /* Copy the ICMP header and payload into place after the IPv4 header */
 
   icmp              = IPBUF(IPv4_HDRLEN);
-  memcpy(icmp, pstate->snd_buf, pstate->snd_buflen);
+
+  iob_update_pktlen(dev->d_iob, IPv4_HDRLEN);
+
+  iob_copyin(dev->d_iob, pstate->snd_buf,
+             pstate->snd_buflen, IPv4_HDRLEN, false);
 
   /* Initialize the IP header. */
 
@@ -125,7 +129,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
   /* Calculate the ICMP checksum. */
 
   icmp->icmpchksum  = 0;
-  icmp->icmpchksum  = ~(icmp_chksum(dev, pstate->snd_buflen));
+  icmp->icmpchksum  = ~icmp_chksum_iob(dev->d_iob);
   if (icmp->icmpchksum == 0)
     {
       icmp->icmpchksum = 0xffff;

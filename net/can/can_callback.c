@@ -61,10 +61,9 @@ static inline uint16_t
 can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
                uint16_t flags)
 {
-  uint16_t ret;
-  FAR uint8_t *buffer = dev->d_appdata;
   int buflen = dev->d_len;
   uint16_t recvlen;
+  uint16_t ret;
 
   ret = (flags & ~CAN_NEWDATA);
 
@@ -72,7 +71,7 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
    * partial packets will not be buffered.
    */
 
-  recvlen = can_datahandler(conn, buffer, buflen);
+  recvlen = can_datahandler(dev, conn);
   if (recvlen < buflen)
     {
       /* There is no handler to receive new data and there are no free
@@ -120,21 +119,6 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
 
   if (conn)
     {
-#ifdef CONFIG_NET_TIMESTAMP
-      /* TIMESTAMP sockopt is activated, create timestamp and copy to iob */
-
-      if (conn->timestamp)
-        {
-          struct timespec *ts = (struct timespec *)
-                                                &dev->d_appdata[dev->d_len];
-          struct timeval *tv = (struct timeval *)
-                                                &dev->d_appdata[dev->d_len];
-          dev->d_len += sizeof(struct timeval);
-          clock_systime_timespec(ts);
-          tv->tv_usec = ts->tv_nsec / 1000;
-        }
-#endif
-
       /* Try to lock the network when successful send data to the listener */
 
       if (net_trylock() == OK)
@@ -149,6 +133,34 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
 
       if ((flags & CAN_NEWDATA) != 0)
         {
+#ifdef CONFIG_NET_TIMESTAMP
+          /* TIMESTAMP sockopt is activated,
+           * create timestamp and copy to iob
+           */
+
+          if (conn->timestamp)
+            {
+              struct timeval tv;
+              FAR struct timespec *ts = (FAR struct timespec *)&tv;
+              int len;
+
+              clock_systime_timespec(ts);
+              tv.tv_usec = ts->tv_nsec / 1000;
+
+              len = iob_trycopyin(dev->d_iob, (FAR uint8_t *)&tv,
+                                  sizeof(struct timeval), 0, false);
+              if (len != sizeof(struct timeval))
+                {
+                  dev->d_len = 0;
+                  return flags & ~CAN_NEWDATA;
+                }
+              else
+                {
+                  dev->d_len += len;
+                }
+            }
+
+#endif
           /* Data was not handled.. dispose of it appropriately */
 
           flags = can_data_event(dev, conn, flags);
@@ -168,10 +180,8 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *   receive the data.
  *
  * Input Parameters:
+ *   dev  - The device which as active when the event was detected.
  *   conn - A pointer to the CAN connection structure
- *   buffer - A pointer to the buffer to be copied to the read-ahead
- *     buffers
- *   buflen - The number of bytes to copy to the read-ahead buffer.
  *
  * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
@@ -184,58 +194,28 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
-                         uint16_t buflen)
+uint16_t can_datahandler(FAR struct net_driver_s *dev,
+                         FAR struct can_conn_s *conn)
 {
-  FAR struct iob_s *iob;
+  FAR struct iob_s *iob = dev->d_iob;
   int ret;
 
-  /* Try to allocate on I/O buffer to start the chain without waiting (and
-   * throttling as necessary).  If we would have to wait, then drop the
-   * packet.
-   */
-
-  iob = iob_tryalloc(true);
-  if (iob == NULL)
-    {
-      nerr("ERROR: Failed to create new I/O buffer chain\n");
-      return 0;
-    }
-
-  /* Copy the new appdata into the I/O buffer chain (without waiting) */
-
-  ret = iob_trycopyin(iob, buffer, buflen, 0, true);
-  if (ret < 0)
-    {
-      /* On a failure, iob_copyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob);
-      return 0;
-    }
-
-  /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
-   * without waiting).
-   */
+  /* Concat the iob to readahead */
 
   ret = iob_tryadd_queue(iob, &conn->readahead);
-  if (ret < 0)
+  if (ret >= 0)
     {
-      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob);
-      return 0;
+#ifdef CONFIG_NET_CAN_NOTIFIER
+      /* Provide notification(s) that additional CAN read-ahead data is
+       * available.
+       */
+
+      can_readahead_signal(conn);
+#endif
+      ret = iob->io_pktlen;
     }
 
-#ifdef CONFIG_NET_CAN_NOTIFIER
-  /* Provide notification(s) that additional CAN read-ahead data is
-   * available.
-   */
-
-  can_readahead_signal(conn);
-#endif
-  return buflen;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CAN */

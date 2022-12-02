@@ -62,9 +62,7 @@
 
 struct sendto_s
 {
-#ifdef NEED_IPDOMAIN_SUPPORT
   FAR struct udp_conn_s *st_conn;     /* The UDP connection of interest */
-#endif
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
   FAR struct net_driver_s *st_dev;    /* Driver that will perform the transmission */
   sem_t st_sem;                       /* Semaphore signals sendto completion */
@@ -207,7 +205,8 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
           /* Copy the user data into d_appdata and send it */
 
-          devif_send(dev, pstate->st_buffer, pstate->st_buflen);
+          devif_send(dev, pstate->st_buffer,
+                     pstate->st_buflen, udpip_hdrsize(pstate->st_conn));
           pstate->st_sndlen = pstate->st_buflen;
         }
 
@@ -401,13 +400,11 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_buflen = len;
   state.st_buffer = buf;
 
-#ifdef NEED_IPDOMAIN_SUPPORT
   /* Save the reference to the conn structure if it will be needed for
    * asynchronous processing.
    */
 
   state.st_conn   = conn;
-#endif
 
   /* Check if the socket is connected */
 

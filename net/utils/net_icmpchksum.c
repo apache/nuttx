@@ -62,6 +62,22 @@ uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 #endif /* CONFIG_NET_ICMP */
 
 /****************************************************************************
+ * Name: icmp_chksum_iob
+ *
+ * Description:
+ *   Calculate the checksum of the ICMP message, the input can be an I/O
+ *   buffer chain
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_MM_IOB)
+uint16_t icmp_chksum_iob(FAR struct iob_s *iob)
+{
+  return net_chksum_iob(0, iob, 0);
+}
+#endif /* CONFIG_NET_ICMP */
+
+/****************************************************************************
  * Name: icmpv6_chksum
  *
  * Description:

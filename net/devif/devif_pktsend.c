@@ -33,34 +33,6 @@
 #ifdef CONFIG_NET_PKT
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,16 +55,25 @@
 void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len)
 {
-  DEBUGASSERT(dev && len > 0 && len < NETDEV_PKTSIZE(dev));
+  unsigned int limit = NETDEV_PKTSIZE(dev) -
+                       CONFIG_NET_LL_GUARDSIZE;
 
-  /* Copy the data into the device packet buffer */
+  if (dev == NULL || len == 0 || len > limit)
+    {
+      nerr("ERROR: devif_pkt_send fail: %p, sndlen: %u, pktlen: %u\n",
+           dev, len, limit);
+      return;
+    }
 
-  memcpy(dev->d_buf, buf, len);
+  iob_update_pktlen(dev->d_iob, 0);
 
-  /* Set the number of bytes to send */
+  /* Copy the data into the device packet buffer and set the number of
+   * bytes to send
+   */
 
-  dev->d_len    = len;
-  dev->d_sndlen = len;
+  dev->d_sndlen = iob_copyin(dev->d_iob, buf, len, 0, false) == len ?
+                  len : 0;
+  dev->d_len    = dev->d_sndlen;
 }
 
 #endif /* CONFIG_NET_PKT */

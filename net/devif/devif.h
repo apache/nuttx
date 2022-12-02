@@ -449,7 +449,8 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags);
  *
  ****************************************************************************/
 
-void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
+void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
+                int len, unsigned int offset);
 
 /****************************************************************************
  * Name: devif_iob_send
@@ -469,7 +470,8 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
 #ifdef CONFIG_MM_IOB
 struct iob_s;
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
-                    unsigned int len, unsigned int offset);
+                    unsigned int len, unsigned int offset,
+                    unsigned int target_offset);
 #endif
 
 /****************************************************************************
@@ -559,6 +561,40 @@ int devif_poll_out(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 int devif_loopback(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_input
+ *
+ * Description:
+ *   This function will copy the flat buffer that does not support
+ *   Scatter/gather to the iob vector buffer.
+ *
+ *   Compatible with all old flat buffer NICs:
+ *
+ *   [tcp|udp|icmp|...]ipv[4|6]_data_handler()
+ *                     |                    (iob_concat/append to readahead)
+ *                     |
+ *              pkt/ipv[4/6]_in()/...
+ *                     |
+ *                     |
+ *                netdev_input()  // new interface, Scatter/gather flat/iobs
+ *                     |
+ *                     |
+ *           pkt/ipv[4|6]_input()/...
+ *                     |
+ *                     |
+ *     NICs io vector receive(Orignal flat buffer)
+ *
+ * Input Parameters:
+ *   callback - Input callback of L3 stack
+ *
+ * Returned Value:
+ *   A non-zero copy is returned on success.
+ *
+ ****************************************************************************/
+
+int netdev_input(FAR struct net_driver_s *dev,
+                 devif_poll_callback_t callback, bool reply);
 
 #undef EXTERN
 #ifdef __cplusplus

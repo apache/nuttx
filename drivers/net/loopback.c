@@ -82,7 +82,6 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-static uint8_t g_iobuffer[NET_LO_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -334,7 +333,6 @@ int localhost_initialize(void)
   priv->lo_dev.d_addmac  = lo_addmac;    /* Add multicast MAC address */
   priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif
-  priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
   priv->lo_dev.d_private = priv;         /* Used to recover private state from dev */
 
   /* Register the loopabck device with the OS so that socket IOCTLs can b

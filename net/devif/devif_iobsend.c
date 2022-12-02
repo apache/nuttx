@@ -53,19 +53,78 @@
  ****************************************************************************/
 
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
-                    unsigned int len, unsigned int offset)
+                    unsigned int len, unsigned int offset,
+                    unsigned int target_offset)
 {
-  if (dev == NULL || len == 0 || len >= NETDEV_PKTSIZE(dev))
+  unsigned int limit = NETDEV_PKTSIZE(dev) -
+                       NET_LL_HDRLEN(dev) - target_offset;
+  unsigned int copyin;
+  int ret;
+
+  if (dev == NULL || len == 0 || len > limit)
     {
-      nerr("devif_iob_send error, %p, send len: %u, pkt len: %u\n",
-                                          dev, len, NETDEV_PKTSIZE(dev));
+      if (dev->d_iob == NULL)
+        {
+          iob_free_chain(iob);
+        }
+
+      nerr("devif_iob_send error, %p, send len: %u, limit len: %u\n",
+           dev, len, limit);
       return;
     }
 
-  /* Copy the data from the I/O buffer chain to the device buffer */
+  /* Append the send buffer after device buffer */
 
-  iob_copyout(dev->d_appdata, iob, len, offset);
-  dev->d_sndlen = len;
+  if (dev->d_iob != NULL)
+    {
+      /* Skip the l3/l4 offset before append */
+
+      iob_update_pktlen(dev->d_iob, target_offset);
+
+      /* Skip to the I/O buffer containing the data offset */
+
+      while (iob != NULL && offset > iob->io_len)
+        {
+          offset -= iob->io_len;
+          iob     = iob->io_flink;
+        }
+
+      dev->d_sndlen = len;
+
+      /* Clone the iob to target device buffer */
+
+      while (iob != NULL && len > 0)
+        {
+          copyin = (len > iob->io_len - offset) ?
+                   iob->io_len - offset : len;
+
+          ret = iob_copyin(dev->d_iob, iob->io_data +
+                                       iob->io_offset + offset,
+                           copyin, target_offset, false);
+          if (ret != copyin)
+            {
+              netdev_iob_release(dev);
+              dev->d_sndlen = 0;
+              nerr("devif_iob_send error, not enough iob entries, "
+                   "send len: %u\n", len);
+              return;
+            }
+
+          target_offset  += copyin;
+          len            -= copyin;
+          offset          = 0;
+          iob             = iob->io_flink;
+        }
+    }
+  else
+    {
+      /* Send the iob directly if no device buffer */
+
+      dev->d_iob    = iob;
+      dev->d_sndlen = len;
+      dev->d_buf    = &iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                    NET_LL_HDRLEN(dev)];
+    }
 
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
   /* Dump the outgoing device buffer */

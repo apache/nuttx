@@ -91,7 +91,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
 {
   int ipicmplen = IPv4_HDRLEN + sizeof(struct icmp_hdr_s);
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
-  FAR struct icmp_hdr_s *icmp = (FAR struct icmp_hdr_s *)(ipv4 + 1);
+  FAR struct icmp_hdr_s *icmp;
   uint16_t datalen;
 #ifdef CONFIG_NET_BROADCAST
   const in_addr_t bcast = INADDR_BROADCAST;
@@ -119,13 +119,67 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
   if (datalen > ICMP_MAXMSGLEN - ipicmplen)
     {
       datalen = ICMP_MAXMSGLEN - ipicmplen;
+      iob_trimtail(dev->d_iob, dev->d_iob->io_pktlen - datalen);
+    }
+
+  /* Save the original datagram */
+
+  if (CONFIG_IOB_BUFSIZE >= datalen + ipicmplen +
+                           CONFIG_NET_LL_GUARDSIZE)
+    {
+      /* Reuse current iob */
+
+      memmove((FAR char *)ipv4 + ipicmplen, ipv4, datalen);
+
+      /* Skip icmp header from iob */
+
+      iob_update_pktlen(dev->d_iob, datalen + ipicmplen);
+    }
+  else
+    {
+      FAR struct iob_s *iob;
+
+      /* Save the original datagram to iob chain */
+
+      iob = dev->d_iob;
+      dev->d_iob = NULL;
+
+      /* Re-prepare device buffer */
+
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          dev->d_len = 0;
+          dev->d_iob = iob;
+          netdev_iob_release(dev);
+          return;
+        }
+
+      /* Copy ipv4 header to device buffer */
+
+      if (iob_trycopyin(dev->d_iob, (FAR void *)ipv4,
+                        IPv4_HDRLEN, 0, false) != IPv4_HDRLEN)
+        {
+          dev->d_len = 0;
+          netdev_iob_release(dev);
+          iob_free_chain(iob);
+          return;
+        }
+
+      /* Skip icmp header from iob */
+
+      iob_update_pktlen(dev->d_iob, dev->d_iob->io_pktlen +
+                                    sizeof(struct icmp_hdr_s));
+
+      /* Concat new icmp packet before original datagram */
+
+      iob_concat(dev->d_iob, iob);
+
+      /* IPv4 header to new iob */
+
+      ipv4 = IPBUF(0);
     }
 
   dev->d_len = ipicmplen + datalen;
-
-  /* Copy fields from original packet */
-
-  memmove(icmp + 1, ipv4, datalen);
 
   ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_ICMP,
                     &dev->d_ipaddr, (FAR in_addr_t *)ipv4->srcipaddr,
@@ -133,6 +187,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
 
   /* Initialize the ICMP header */
 
+  icmp              = (FAR struct icmp_hdr_s *)(ipv4 + 1);
   icmp->type        = type;
   icmp->icode       = code;
   icmp->data[0]     = 0;
@@ -141,7 +196,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
   /* Calculate the ICMP checksum. */
 
   icmp->icmpchksum  = 0;
-  icmp->icmpchksum  = ~icmp_chksum(dev, datalen + sizeof(*icmp));
+  icmp->icmpchksum  = ~icmp_chksum_iob(dev->d_iob);
   if (icmp->icmpchksum == 0)
     {
       icmp->icmpchksum = 0xffff;
