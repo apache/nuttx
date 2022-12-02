@@ -1017,8 +1017,8 @@ DMACH_HANDLE s32k3xx_dmach_alloc(uint16_t dmamux, uint8_t dchpri)
 
           /* Make sure that the channel is disabled. */
 
-          putreg8(EDMA_CH_INT, S32K3XX_EDMA_TCD[dmach->chan] +
-                  S32K3XX_EDMA_CH_INT_OFFSET);
+          putreg32(EDMA_CH_INT, S32K3XX_EDMA_TCD[dmach->chan] +
+                   S32K3XX_EDMA_CH_INT_OFFSET);
 
           /* Disable the associated DMAMUX for now */
 
@@ -1085,8 +1085,8 @@ void s32k3xx_dmach_free(DMACH_HANDLE handle)
 
   /* Make sure that the channel is disabled. */
 
-  putreg8(EDMA_CH_INT, S32K3XX_EDMA_TCD[dmach->chan]
-                       + S32K3XX_EDMA_CH_INT_OFFSET);
+  putreg32(EDMA_CH_INT, S32K3XX_EDMA_TCD[dmach->chan] +
+           S32K3XX_EDMA_CH_INT_OFFSET);
 
   /* Disable the associated DMAMUX */
 
@@ -1096,7 +1096,7 @@ void s32k3xx_dmach_free(DMACH_HANDLE handle)
     }
   else
     {
-      putreg8(0, S32K3XX_DMAMUX1_CHCFG(dmach->chan));
+      putreg8(0, S32K3XX_DMAMUX1_CHCFG(dmach->chan - 16));
     }
 }
 
@@ -1554,7 +1554,7 @@ void s32k3xx_dmasample(DMACH_HANDLE handle, struct s32k3xx_dmaregs_s *regs)
     }
   else
     {
-      regs->dmamux   = getreg32(S32K3XX_DMAMUX1_CHCFG(chan)); /* Channel configuration */
+      regs->dmamux   = getreg32(S32K3XX_DMAMUX1_CHCFG(chan - 16)); /* Channel configuration */
     }
 
   spin_unlock_irqrestore(NULL, flags);
