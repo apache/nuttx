@@ -222,6 +222,8 @@ struct protoent
                             * alternative protocol names, terminated by a
                             * null pointer. */
   int        p_proto;      /* The protocol number. */
+  int        idx;          /* Index used by the local database, required
+                            * by _r version APIs */
 };
 
 struct servent
@@ -310,18 +312,20 @@ FAR struct servent  *getservbyport(int port, FAR const char *proto);
 FAR struct servent  *getservbyname(FAR const char *name,
                                    FAR const char *proto);
 
+void                 setprotoent(int stayopen);
+void                 endprotoent(void);
+FAR struct protoent *getprotobyname(FAR const char *name);
+FAR struct protoent *getprotobynumber(int proto);
+FAR struct protoent *getprotoent(void);
+
 #if 0 /* None of these are yet supported */
 FAR struct hostent  *gethostent(void);
 FAR struct netent   *getnetbyaddr(uint32_t net, int type);
 FAR struct netent   *getnetbyname(FAR const char *name);
 FAR struct netent   *getnetent(void);
-FAR struct protoent *getprotobyname(FAR const char *name);
-FAR struct protoent *getprotobynumber(int proto);
-FAR struct protoent *getprotoent(void);
 FAR struct servent  *getservent(void);
 void                 sethostent(int);
 void                 setnetent(int stayopen);
-void                 setprotoent(int stayopen);
 void                 setservent(int);
 #endif /* None of these are yet supported */
 
@@ -345,6 +349,17 @@ int getservbyport_r(int port, FAR const char *proto,
 int getservbyname_r(FAR const char *name, FAR const char *proto,
                     FAR struct servent *result_buf, FAR char *buf,
                     size_t buflen, FAR struct servent **result);
+
+void setprotoent_r(int stayopen, FAR struct protoent *result_buf);
+void endprotoent_r(FAR struct protoent *result_buf);
+int getprotoent_r(FAR struct protoent *result_buf, FAR char *buf,
+                  size_t buflen, FAR struct protoent **result);
+int getprotobyname_r(FAR const char *name,
+                     FAR struct protoent *result_buf, FAR char *buf,
+                     size_t buflen, FAR struct protoent **result);
+int getprotobynumber_r(int proto,
+                       FAR struct protoent *result_buf, FAR char *buf,
+                       size_t buflen, FAR struct protoent **result);
 
 #endif /* CONFIG_LIBC_NETDB */
 
