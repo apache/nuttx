@@ -34,6 +34,9 @@
  * Public Symbols
  ****************************************************************************/
 
+	.syntax	unified
+	.arm
+
 	.globl	_vector_start
 	.globl	_vector_end
 
