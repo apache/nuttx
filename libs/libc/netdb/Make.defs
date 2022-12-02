@@ -30,6 +30,7 @@ CSRCS += lib_getservbyname.c lib_getservbynamer.c
 CSRCS += lib_getservbyport.c lib_getservbyportr.c
 CSRCS += lib_gaistrerror.c lib_freeaddrinfo.c lib_getaddrinfo.c
 CSRCS += lib_getnameinfo.c lib_rexec.c lib_dn.c
+CSRCS += lib_proto.c lib_protor.c
 
 # Add host file support
 
