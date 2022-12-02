@@ -1755,7 +1755,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   /* Initialize the touchscreen device driver instance */
 
-  priv->adc     = adc;               /* Save the ADC device handle    */
+  priv->adc = adc; /* Save the ADC device handle    */
 
   /* Register the device as an input device */
 

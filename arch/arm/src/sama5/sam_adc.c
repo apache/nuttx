@@ -935,7 +935,7 @@ static void sam_adc_endconversion(void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-  ainfo("pending=%08lx\n", priv->pending);
+  ainfo("pending=%08" PRIx32 "\n", priv->pending);
 
   /* Get the set of unmasked, pending ADC interrupts */
 
@@ -1062,7 +1062,7 @@ static int sam_adc_interrupt(int irq, void *context, void *arg)
   return OK;
 }
 
-#ifdef SAMA5_ADC_HAVE_CHANNELS
+#if defined(SAMA5_ADC_HAVE_CHANNELS)
 /****************************************************************************
  * ADC methods
  ****************************************************************************/
@@ -1137,13 +1137,13 @@ static void sam_adc_reset(struct adc_dev_s *dev)
 
   /* Reset gain, offset, differential modes */
 
-#if defined (ATSAMA5D3)
+#if defined(ATSAMA5D3)
   sam_adc_putreg(priv, SAM_ADC_CGR, 0);
   #endif
 
   sam_adc_putreg(priv, SAM_ADC_COR, 0);
 
-#if !defined CONFIG_SAMA5_ADC_SWTRIG && !defined CONFIG_SAMA5_TSD
+#if !defined(CONFIG_SAMA5_ADC_SWTRIG) && !defined(CONFIG_SAMA5_TSD)
   /* Select software trigger (i.e., basically no trigger) */
 
   regval  = sam_adc_getreg(priv, SAM_ADC_MR);
@@ -1172,7 +1172,6 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 {
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
   uint32_t regval;
-  int ret;
 
   ainfo("Setup\n");
 
@@ -1417,7 +1416,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   priv->tc = sam_tc_allocate(channel, mode);
   if (!priv->tc)
     {
-      aerr("ERROR: Failed to allocate channel %d mode %08x\n",
+      aerr("ERROR: Failed to allocate channel %d mode %08" PRIx32 "\n",
             channel, mode);
       return -EINVAL;
     }
@@ -1890,7 +1889,7 @@ static void sam_adc_gain(struct sam_adc_s *priv)
   /* Set GAIN0 only.  GAIN0 will be used for all channels. */
 
   sam_adc_putreg(priv, SAM_ADC_CGR, ADC_CGR_GAIN0(CONFIG_SAMA5_ADC_GAIN));
-#endif /* CONFIG_SAMA5_ADC_ANARCH */
+#  endif /* CONFIG_SAMA5_ADC_ANARCH */
 #endif /* ATSAMA5D3 */
 }
 
@@ -1951,7 +1950,8 @@ static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2,
       *seqr1 |= ADC_SEQR1_USCH(seq, chan);
     }
 
-  ainfo("chan=%d seqr1=%08x seqr2=%08x seq=%d\n", chan, *seqr1, *seqr2, seq);
+  ainfo("chan=%d seqr1=%08" PRIx32 "x seqr2=%08" PRIx32 "seq=%d\n",
+         chan, *seqr1, *seqr2, seq);
 }
 #endif
 
@@ -2379,7 +2379,7 @@ uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 
   if (sam_adc_checkreg(priv, false, regval, address))
     {
-      ainfo("%08x->%08x\n", address, regval);
+      ainfo("%08" PRIx32 "->%08" PRIx32 "\n", address, regval);
     }
 
   return regval;
@@ -2400,7 +2400,7 @@ void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address,
 {
   if (sam_adc_checkreg(priv, true, regval, address))
     {
-      ainfo("%08x<-%08x\n", address, regval);
+      ainfo("%08" PRIx32 "<-%08" PRIx32 "\n", address, regval);
     }
 
   putreg32(regval, address);
