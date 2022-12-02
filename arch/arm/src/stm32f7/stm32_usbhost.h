@@ -51,10 +51,90 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/usbhost_trace.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #if (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGFSHS)) && \
     defined(CONFIG_USBHOST)
+
+#ifdef HAVE_USBHOST_TRACE
+enum usbhost_trace1codes_e
+{
+  __TRACE1_BASEVALUE = 0,           /* This will force the first value to be 1 */
+
+  OTG_TRACE1_DEVDISCONN,            /* OTG ERROR: Host Port Device disconnected */
+  OTG_TRACE1_IRQATTACH,             /* OTG ERROR: Failed to attach IRQ */
+  OTG_TRACE1_TRNSFRFAILED,          /* OTG ERROR: Host Port Transfer Failed */
+  OTG_TRACE1_SENDSETUP,             /* OTG ERROR: sendsetup() failed with: */
+  OTG_TRACE1_SENDDATA,              /* OTG ERROR: senddata() failed with: */
+  OTG_TRACE1_RECVDATA,              /* OTG ERROR: recvdata() failed with: */
+
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
+
+  OTG_VTRACE1_CONNECTED,            /* OTG Host Port connected */
+  OTG_VTRACE1_DISCONNECTED,         /* OTG Host Port disconnected */
+  OTG_VTRACE1_GINT,                 /* OTG Handling Interrupt. Entry Point */
+  OTG_VTRACE1_GINT_SOF,             /* OTG Handle the start of frame interrupt */
+  OTG_VTRACE1_GINT_RXFLVL,          /* OTG Handle the RxFIFO non-empty interrupt */
+  OTG_VTRACE1_GINT_NPTXFE,          /* OTG Handle the non-periodic TxFIFO empty interrupt */
+  OTG_VTRACE1_GINT_PTXFE,           /* OTG Handle the periodic TxFIFO empty interrupt */
+  OTG_VTRACE1_GINT_HC,              /* OTG Handle the host channels interrupt */
+  OTG_VTRACE1_GINT_HPRT,            /* OTG Handle the host port interrupt */
+  OTG_VTRACE1_GINT_HPRT_POCCHNG,    /* OTG  HPRT: Port Over-Current Change */
+  OTG_VTRACE1_GINT_HPRT_PCDET,      /* OTG  HPRT: Port Connect Detect */
+  OTG_VTRACE1_GINT_HPRT_PENCHNG,    /* OTG  HPRT: Port Enable Changed */
+  OTG_VTRACE1_GINT_HPRT_LSDEV,      /* OTG  HPRT: Low Speed Device Connected */
+  OTG_VTRACE1_GINT_HPRT_FSDEV,      /* OTG  HPRT: Full Speed Device Connected */
+  OTG_VTRACE1_GINT_HPRT_LSFSSW,     /* OTG  HPRT: Host Switch: LS -> FS */
+  OTG_VTRACE1_GINT_HPRT_FSLSSW,     /* OTG  HPRT: Host Switch: FS -> LS */
+  OTG_VTRACE1_GINT_DISC,            /* OTG Handle the disconnect detected interrupt */
+  OTG_VTRACE1_GINT_IPXFR,           /* OTG Handle the incomplete periodic transfer */
+
+#endif
+
+  __TRACE1_NSTRINGS,                /* Separates the format 1 from the format 2 strings */
+
+  OTG_TRACE2_CLIP,                  /* OTG CLIP: chidx:  buflen: */
+
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
+
+  OTG_VTRACE2_CHANWAKEUP_IN,        /* OTG IN Channel wake up with result */
+  OTG_VTRACE2_CHANWAKEUP_OUT,       /* OTG OUT Channel wake up with result */
+  OTG_VTRACE2_CTRLIN,               /* OTG CTRLIN */
+  OTG_VTRACE2_CTRLOUT,              /* OTG CTRLOUT */
+  OTG_VTRACE2_INTRIN,               /* OTG INTRIN */
+  OTG_VTRACE2_INTROUT,              /* OTG INTROUT */
+  OTG_VTRACE2_BULKIN,               /* OTG BULKIN */
+  OTG_VTRACE2_BULKOUT,              /* OTG BULKOUT */
+  OTG_VTRACE2_ISOCIN,               /* OTG ISOCIN */
+  OTG_VTRACE2_ISOCOUT,              /* OTG ISOCOUT */
+  OTG_VTRACE2_STARTTRANSFER,        /* OTG EP buflen */
+  OTG_VTRACE2_CHANCONF_CTRL_IN,
+  OTG_VTRACE2_CHANCONF_CTRL_OUT,
+  OTG_VTRACE2_CHANCONF_INTR_IN,
+  OTG_VTRACE2_CHANCONF_INTR_OUT,
+  OTG_VTRACE2_CHANCONF_BULK_IN,
+  OTG_VTRACE2_CHANCONF_BULK_OUT,
+  OTG_VTRACE2_CHANCONF_ISOC_IN,
+  OTG_VTRACE2_CHANCONF_ISOC_OUT,
+  OTG_VTRACE2_CHANHALT,             /* Channel halted. chidx: , reason:  */
+
+#endif
+
+  __TRACE2_NSTRINGS                 /* Total number of enumeration values */
+};
+
+#  define TRACE1_FIRST     ((int)__TRACE1_BASEVALUE + 1)
+#  define TRACE1_INDEX(id) ((int)(id) - TRACE1_FIRST)
+#  define TRACE1_NSTRINGS  TRACE1_INDEX(__TRACE1_NSTRINGS + 1)
+
+#  define TRACE2_FIRST     ((int)__TRACE1_NSTRINGS + 1)
+#  define TRACE2_INDEX(id) ((int)(id) - TRACE2_FIRST)
+#  define TRACE2_NSTRINGS  TRACE2_INDEX(__TRACE2_NSTRINGS)
+
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
