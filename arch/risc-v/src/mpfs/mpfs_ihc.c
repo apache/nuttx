@@ -91,19 +91,18 @@
 #ifndef CONFIG_MPFS_IHC_RPMSG_CH2
 /* This is the RPMSG default channel used with only one RPMSG channel */
 
-#define VRING_SHMEM              0xa2410000  /* Vring shared memory start */
-#define VRING0_DESCRIPTORS       0xa2400000  /* Vring0 descriptor area    */
-#define VRING1_DESCRIPTORS       0xa2408000  /* Vring1 descriptor area    */
-#define VRING0_NOTIFYID          0           /* Vring0 id                 */
-#define VRING1_NOTIFYID          1           /* Vring1 id                 */
+#define VRING_SHMEM              CONFIG_MPFS_CH1_VRING_SHMEM_ADDR   /* Vring shared memory start  */
+#define VRING0_DESCRIPTORS       CONFIG_MPFS_CH1_VRING0_DESC_ADDR   /* Vring0 descriptor area     */
+#define VRING1_DESCRIPTORS       CONFIG_MPFS_CH1_VRING1_DESC_ADDR   /* Vring1 descriptor area     */
+#define VRING0_NOTIFYID          0                                  /* Vring0 id                  */
+#define VRING1_NOTIFYID          1                                  /* Vring1 id                  */
 #else
 /* This is the RPMSG channel 2, enabled separately */
-
-#define VRING_SHMEM              0xa2460000  /* Vring shared memory start */
-#define VRING0_DESCRIPTORS       0xa2450000  /* Vring0 descriptor area    */
-#define VRING1_DESCRIPTORS       0xa2458000  /* Vring1 descriptor area    */
-#define VRING0_NOTIFYID          2           /* Vring0 id                 */
-#define VRING1_NOTIFYID          3           /* Vring1 id                 */
+#define VRING_SHMEM              CONFIG_MPFS_CH2_VRING_SHMEM_ADDR   /* Vring shared memory start  */
+#define VRING0_DESCRIPTORS       CONFIG_MPFS_CH2_VRING0_DESC_ADDR   /* Vring0 descriptor area     */
+#define VRING1_DESCRIPTORS       CONFIG_MPFS_CH2_VRING1_DESC_ADDR   /* Vring1 descriptor area     */
+#define VRING0_NOTIFYID          2                                  /* Vring0 id                  */
+#define VRING1_NOTIFYID          3                                  /* Vring1 id                  */
 #endif
 
 /****************************************************************************
