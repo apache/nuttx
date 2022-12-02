@@ -395,6 +395,36 @@ config MPFS_IHC_WITH_HSS
 	---help---
 		Set this to true if using IHC with HSS bootloader
 
+config MPFS_CH1_VRING_SHMEM_ADDR
+	hex "Channel 1 Vring shared memory start"
+	default 0xA2410000
+	depends on MPFS_IHC_CLIENT
+
+config MPFS_CH1_VRING0_DESC_ADDR
+	hex "Channel 1 Vring0 descriptor area"
+	default 0xA2400000
+	depends on MPFS_IHC_CLIENT
+
+config MPFS_CH1_VRING1_DESC_ADDR
+	hex "Channel 1 Vring1 descriptor area"
+	default 0xA2408000
+	depends on MPFS_IHC_CLIENT
+
+config MPFS_CH2_VRING_SHMEM_ADDR
+	hex "Channel 2 Vring shared memory start"
+	default 0xA2460000
+	depends on MPFS_IHC_CLIENT && MPFS_IHC_RPMSG_CH2
+
+config MPFS_CH2_VRING0_DESC_ADDR
+	hex "Channel 2 Vring0 descriptor area"
+	default 0xA2450000
+	depends on MPFS_IHC_CLIENT && MPFS_IHC_RPMSG_CH2
+
+config MPFS_CH2_VRING1_DESC_ADDR
+	hex "Channel 2 Vring1 descriptor area"
+	default 0xA2458000
+	depends on MPFS_IHC_CLIENT && MPFS_IHC_RPMSG_CH2
+
 config MPFS_ETHMAC
 	bool
 	default n
