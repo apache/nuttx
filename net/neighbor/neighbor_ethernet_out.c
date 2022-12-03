@@ -33,6 +33,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/neighbor.h>
 
+#include "devif/devif.h"
 #include "route/route.h"
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"

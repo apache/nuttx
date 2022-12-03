@@ -160,6 +160,12 @@
 
 #define TIVA_MAX_MDCCLK 2500000
 
+/* This is a helper pointer for accessing the contents of the Ethernet
+ * header
+ */
+
+#define BUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -757,7 +763,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-      if (ETHBUF->type == HTONS(ETHTYPE_IP))
+      if (BUF->type == HTONS(ETHTYPE_IP))
         {
           ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(dev);
@@ -780,7 +786,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_IPv6
-      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
+      if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(dev);
@@ -803,9 +809,9 @@ static void tiva_receive(struct tiva_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (ETHBUF->type == HTONS(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
-          ninfo("ARP packet received (%02x)\n", ETHBUF->type);
+          ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(dev);
 
           arp_arpin(dev);
@@ -823,7 +829,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #endif
         {
           nwarn("WARNING: Unsupported packet type dropped (%02x)\n",
-                HTONS(ETHBUF->type));
+                HTONS(BUF->type));
           NETDEV_RXDROPPED(dev);
         }
     }
