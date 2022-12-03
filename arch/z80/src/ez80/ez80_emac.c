@@ -247,6 +247,12 @@ extern uint8_t _RAM_ADDR_U_INIT_PARAM[];
 
 #define EMAC_TXTIMEOUT         (60*CLK_TCK)
 
+/* This is a helper pointer for accessing the contents of the Ethernet
+ * header
+ */
+
+#define BUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1361,7 +1367,7 @@ static int ez80emac_receive(FAR struct ez80emac_driver_s *priv)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-      if (ETHBUF->type == HTONS(ETHTYPE_IP))
+      if (BUF->type == HTONS(ETHTYPE_IP))
         {
           ninfo("IPv4 frame\n");
 
@@ -1385,7 +1391,7 @@ static int ez80emac_receive(FAR struct ez80emac_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_IPv6
-      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
+      if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           ninfo("IPv6 frame\n");
 
@@ -1409,9 +1415,9 @@ static int ez80emac_receive(FAR struct ez80emac_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (ETHBUF->type == HTONS(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
-          ninfo("ARP packet received (%02x)\n", ETHBUF->type);
+          ninfo("ARP packet received (%02x)\n", BUF->type);
           EMAC_STAT(priv, rx_arp);
 
           arp_arpin(&priv->dev);
@@ -1429,7 +1435,7 @@ static int ez80emac_receive(FAR struct ez80emac_driver_s *priv)
       else
 #endif
         {
-          ninfo("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
+          ninfo("Unsupported packet type dropped (%02x)\n", BUF->type);
           EMAC_STAT(priv, rx_dropped);
         }
 

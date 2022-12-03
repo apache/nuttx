@@ -32,17 +32,6 @@
 #include <nuttx/net/netdev.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This is a helper pointer for accessing the contents of the ip header */
-
-#define LOIPv4BUF ((FAR struct ipv4_hdr_s *) \
-                   &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE])
-#define LOIPv6BUF ((FAR struct ipv6_hdr_s *) \
-                   &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE])
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -51,16 +40,16 @@ static bool is_loopback(FAR struct net_driver_s *dev)
   if (dev->d_len > 0)
     {
 #ifdef CONFIG_NET_IPv4
-      if ((LOIPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION &&
-           net_ipv4addr_hdrcmp(LOIPv4BUF->destipaddr, &dev->d_ipaddr))
+      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION &&
+           net_ipv4addr_hdrcmp(IPv4BUF->destipaddr, &dev->d_ipaddr))
         {
           return true;
         }
 #endif
 
 #ifdef CONFIG_NET_IPv6
-      if ((LOIPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION &&
-          net_ipv6addr_hdrcmp(LOIPv6BUF->destipaddr, dev->d_ipv6addr))
+      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION &&
+          net_ipv6addr_hdrcmp(IPv6BUF->destipaddr, dev->d_ipv6addr))
         {
           return true;
         }
@@ -110,7 +99,7 @@ int devif_loopback(FAR struct net_driver_s *dev)
       /* We only accept IP packets of the configured type */
 
 #ifdef CONFIG_NET_IPv4
-      if ((LOIPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
+      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
         {
           ninfo("IPv4 frame\n");
 
@@ -120,7 +109,7 @@ int devif_loopback(FAR struct net_driver_s *dev)
       else
 #endif
 #ifdef CONFIG_NET_IPv6
-      if ((LOIPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
+      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
           ninfo("IPv6 frame\n");
 
