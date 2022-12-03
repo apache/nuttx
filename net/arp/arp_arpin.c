@@ -52,15 +52,16 @@
 #include <nuttx/net/arp.h>
 
 #include "arp/arp.h"
+#include "devif/devif.h"
 
 #ifdef CONFIG_NET_ARP
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arp_arpin
+ * Name: arp_input
  *
  * Description:
  *   This function should be called by the Ethernet device driver when an
@@ -83,7 +84,7 @@
  *
  ****************************************************************************/
 
-void arp_arpin(FAR struct net_driver_s *dev)
+static int arp_input(FAR struct net_driver_s *dev)
 {
   FAR struct arp_hdr_s *arp = ARPBUF;
   in_addr_t ipaddr;
@@ -92,7 +93,7 @@ void arp_arpin(FAR struct net_driver_s *dev)
     {
       nerr("ERROR: Packet Too small\n");
       dev->d_len = 0;
-      return;
+      return -EINVAL;
     }
 
   dev->d_len = 0;
@@ -153,6 +154,57 @@ void arp_arpin(FAR struct net_driver_s *dev)
           }
         break;
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arp_arpin
+ *
+ * Description:
+ *   This function should be called by the Ethernet device driver when an
+ *   ARP packet has been received.   The function will act differently
+ *   depending on the ARP packet type: if it is a reply for a request
+ *   that we previously sent out, the ARP cache will be filled in with
+ *   the values from the ARP reply.  If the incoming ARP packet is an ARP
+ *   request for our IP address, an ARP reply packet is created and put
+ *   into the d_buf buffer.
+ *
+ *   On entry, this function expects that an ARP packet with a prepended
+ *   Ethernet header is present in the d_buf buffer and that the length of
+ *   the packet is set in the d_len field.
+ *
+ *   When the function returns, the value of the field d_len indicates
+ *   whether the device driver should send out the ARP reply packet or not.
+ *   If d_len is zero, no packet should be sent; If d_len is non-zero, it
+ *   contains the length of the outbound packet that is present in the
+ *   d_buf buffer.
+ *
+ ****************************************************************************/
+
+void arp_arpin(FAR struct net_driver_s *dev)
+{
+  FAR uint8_t *buf;
+
+  if (dev->d_iob != NULL)
+    {
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                        NET_LL_HDRLEN(dev)];
+      arp_input(dev);
+
+      dev->d_buf = buf;
+      return;
+    }
+
+  netdev_input(dev, arp_input, true);
 }
 
 #endif /* CONFIG_NET_ARP */
