@@ -45,6 +45,8 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/semaphore.h>
 
+#include "devif/devif.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -81,8 +83,10 @@
 
 /* This is a helper pointer for accessing the contents of the IP header */
 
-#define ARPBUF    ((FAR struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
-#define ARPIPBUF  ((FAR struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
+#define ARPBUF   ((FAR struct arp_hdr_s *)\
+                  &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE])
+#define ARPIPBUF ((FAR struct arp_iphdr_s *)\
+                  &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE])
 
 /****************************************************************************
  * Public Types

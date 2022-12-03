@@ -157,17 +157,12 @@
 #  define NETDEV_ERRORS(dev)
 #endif
 
-/* There are some helper pointers for accessing the contents of the Ethernet
- * headers
- */
-
-#define ETHBUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
-
 /* There are some helper pointers for accessing the contents of the IP
  * headers
  */
 
-#define IPBUF(hl) ((FAR void *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
+#define IPBUF(hl) ((FAR void *)\
+                   &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE + (hl)])
 
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)IPBUF(0))
 #define IPv6BUF ((FAR struct ipv6_hdr_s *)IPBUF(0))

@@ -233,6 +233,14 @@
 #  define DEVIF_IS_IPv6(dev) (0)
 #endif
 
+/* There are some helper pointers for accessing the contents of the Ethernet
+ * headers
+ */
+
+#define ETHBUF ((FAR struct eth_hdr_s *)\
+                &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE - \
+                                     NET_LL_HDRLEN(dev)])
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
