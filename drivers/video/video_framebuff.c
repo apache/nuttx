@@ -21,14 +21,14 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-#include "video_framebuff.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+
+#include "video_framebuff.h"
 
 /****************************************************************************
  * Private Functions
@@ -36,8 +36,8 @@
 
 static void init_buf_chain(video_framebuff_t *fbuf)
 {
-  int i;
   vbuf_container_t *tmp;
+  int i;
 
   fbuf->vbuf_empty = fbuf->vbuf_alloced;
   fbuf->vbuf_next  = NULL;
@@ -53,14 +53,15 @@ static void init_buf_chain(video_framebuff_t *fbuf)
     }
 }
 
-static inline int is_last_one(video_framebuff_t *fbuf)
+static inline bool is_last_one(video_framebuff_t *fbuf)
 {
-  return fbuf->vbuf_top == fbuf->vbuf_tail ? 1 : 0;
+  return fbuf->vbuf_top == fbuf->vbuf_tail;
 }
 
 static inline vbuf_container_t *dequeue_vbuf_unsafe(video_framebuff_t *fbuf)
 {
   vbuf_container_t *ret = fbuf->vbuf_top;
+
   if (is_last_one(fbuf))
     {
       fbuf->vbuf_top  = NULL;
@@ -125,7 +126,7 @@ vbuf_container_t *video_framebuff_get_container(video_framebuff_t *fbuf)
 
   nxmutex_lock(&fbuf->lock_empty);
   ret = fbuf->vbuf_empty;
-  if (ret)
+  if (ret != NULL)
     {
       fbuf->vbuf_empty = ret->next;
       ret->next        = NULL;
@@ -150,7 +151,7 @@ void video_framebuff_queue_container(video_framebuff_t *fbuf,
   irqstate_t flags;
 
   flags = enter_critical_section();
-  if (fbuf->vbuf_top)
+  if (fbuf->vbuf_top != NULL)
     {
       fbuf->vbuf_tail->next = tgt;
       fbuf->vbuf_tail = tgt;
@@ -179,8 +180,8 @@ void video_framebuff_queue_container(video_framebuff_t *fbuf,
 
 vbuf_container_t *video_framebuff_dq_valid_container(video_framebuff_t *fbuf)
 {
-  irqstate_t flags;
   vbuf_container_t *ret = NULL;
+  irqstate_t flags;
 
   flags = enter_critical_section();
   if (fbuf->vbuf_top != NULL && fbuf->vbuf_top != fbuf->vbuf_next)
@@ -189,15 +190,14 @@ vbuf_container_t *video_framebuff_dq_valid_container(video_framebuff_t *fbuf)
     }
 
   leave_critical_section(flags);
-
   return ret;
 }
 
-vbuf_container_t *video_framebuff_get_vacant_container
-                 (video_framebuff_t *fbuf)
+vbuf_container_t *
+video_framebuff_get_vacant_container(video_framebuff_t *fbuf)
 {
-  irqstate_t flags;
   vbuf_container_t *ret;
+  irqstate_t flags;
 
   flags = enter_critical_section();
   ret = fbuf->vbuf_curr = fbuf->vbuf_next;
@@ -209,7 +209,7 @@ vbuf_container_t *video_framebuff_get_vacant_container
 void video_framebuff_capture_done(video_framebuff_t *fbuf)
 {
   fbuf->vbuf_curr = NULL;
-  if (fbuf->vbuf_next)
+  if (fbuf->vbuf_next != NULL)
     {
       fbuf->vbuf_next = fbuf->vbuf_next->next;
       if (fbuf->vbuf_next == fbuf->vbuf_top)  /* RING mode case. */
@@ -249,8 +249,8 @@ void video_framebuff_change_mode(video_framebuff_t  *fbuf,
 
 vbuf_container_t *video_framebuff_pop_curr_container(video_framebuff_t *fbuf)
 {
-  irqstate_t flags;
   vbuf_container_t *ret = NULL;
+  irqstate_t flags;
 
   flags = enter_critical_section();
   if (fbuf->vbuf_top != NULL)
@@ -259,6 +259,5 @@ vbuf_container_t *video_framebuff_pop_curr_container(video_framebuff_t *fbuf)
     }
 
   leave_critical_section(flags);
-
   return ret;
 }

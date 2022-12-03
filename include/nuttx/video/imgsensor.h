@@ -94,7 +94,7 @@
 #define IMGSENSOR_CLIP_INDEX_WIDTH        (2)
 #define IMGSENSOR_CLIP_INDEX_HEIGHT       (3)
 
-/* bit definition for IMGSENSOR_ID_3A_LOCK */
+/* Bit definition for IMGSENSOR_ID_3A_LOCK */
 
 #define IMGSENSOR_LOCK_EXPOSURE      (1 << 0)
 #define IMGSENSOR_LOCK_WHITE_BALANCE (1 << 1)
@@ -125,7 +125,7 @@
  * Public Types
  ****************************************************************************/
 
-/* enumeration for VIDEO_ID_COLORFX */
+/* Enumeration for VIDEO_ID_COLORFX */
 
 typedef enum imgsensor_colorfx_e
 {
@@ -148,28 +148,28 @@ typedef enum imgsensor_colorfx_e
   IMGSENSOR_COLORFX_PASTEL       = 16,
 } imgsensor_colorfx_t;
 
-/* enumeration for IMGSENSOR_ID_EXPOSURE_AUTO */
+/* Enumeration for IMGSENSOR_ID_EXPOSURE_AUTO */
 
 typedef enum imgsensor_exposure_auto_type_e
 {
-  /* exposure time:auto,   iris aperture:auto */
+  /* Exposure time:auto,   iris aperture:auto */
 
   IMGSENSOR_EXPOSURE_AUTO = 0,
 
-  /* exposure time:manual, iris aperture:manual */
+  /* Exposure time:manual, iris aperture:manual */
 
   IMGSENSOR_EXPOSURE_MANUAL = 1,
 
-  /* exposure time:manual, iris aperture:auto */
+  /* Exposure time:manual, iris aperture:auto */
 
   IMGSENSOR_EXPOSURE_SHUTTER_PRIORITY = 2,
 
-  /* exposure time:auto,   iris aperture:manual */
+  /* Exposure time:auto,   iris aperture:manual */
 
   IMGSENSOR_EXPOSURE_APERTURE_PRIORITY = 3
 } imgsensor_exposure_auto_type_t;
 
-/* enumeration for IMGSENSOR_ID_AUTO_N_PRESET_WHITE_BALANCE */
+/* Enumeration for IMGSENSOR_ID_AUTO_N_PRESET_WHITE_BALANCE */
 
 typedef enum imgsensor_white_balance_e
 {
@@ -185,7 +185,7 @@ typedef enum imgsensor_white_balance_e
   IMGSENSOR_WHITE_BALANCE_SHADE         = 9,
 } imgsensor_white_balance_t;
 
-/* enumeration for IMGSENSOR_ID_ISO_SENSITIVITY_AUTO */
+/* Enumeration for IMGSENSOR_ID_ISO_SENSITIVITY_AUTO */
 
 typedef enum imgsensor_iso_sensitivity_auto_type_e
 {
@@ -193,7 +193,7 @@ typedef enum imgsensor_iso_sensitivity_auto_type_e
   IMGSENSOR_ISO_SENSITIVITY_AUTO   = 1,
 } imgsensor_iso_sensitivity_auto_type_t;
 
-/* enumeration for IMGSENSOR_ID_EXPOSURE_METERING */
+/* Enumeration for IMGSENSOR_ID_EXPOSURE_METERING */
 
 typedef enum imgsensor_exposure_metering_e
 {
@@ -203,7 +203,7 @@ typedef enum imgsensor_exposure_metering_e
   IMGSENSOR_EXPOSURE_METERING_MATRIX          = 3,
 } imgsensor_exposure_metering_t;
 
-/* enumeration for IMGSENSOR_ID_FLASH_LED_MODE */
+/* Enumeration for IMGSENSOR_ID_FLASH_LED_MODE */
 
 typedef enum imgsensor_flash_led_mode_e
 {
@@ -212,7 +212,7 @@ typedef enum imgsensor_flash_led_mode_e
   IMGSENSOR_FLASH_LED_MODE_TORCH = 2,
 } imgsensor_flash_led_mode_t;
 
-/* enumeration for get_supported_value() */
+/* Enumeration for get_supported_value() */
 
 typedef enum imgsensor_ctrl_type_e
 {
@@ -229,7 +229,7 @@ typedef enum imgsensor_ctrl_type_e
   IMGSENSOR_CTRL_TYPE_U32              = 0x0102,
 } imgsensor_ctrl_type_t;
 
-/* enumeration for stream */
+/* Enumeration for stream */
 
 typedef enum imgsensor_stream_type_e
 {
@@ -237,7 +237,7 @@ typedef enum imgsensor_stream_type_e
   IMGSENSOR_STREAM_TYPE_STILL = 1,
 } imgsensor_stream_type_t;
 
-/* structure for validate_frame_setting() and start_capture() */
+/* Structure for validate_frame_setting() and start_capture() */
 
 typedef struct imgsensor_format_s
 {
@@ -252,7 +252,7 @@ typedef struct imgsensor_interval_s
   uint32_t denominator;
 } imgsensor_interval_t;
 
-/* structure for get_supported_value() */
+/* Structure for get_supported_value() */
 
 typedef struct imgsensor_capability_range_s
 {
@@ -279,7 +279,7 @@ typedef struct imgsensor_capability_elems_s
 
 typedef struct imgsensor_supported_value_s
 {
-  imgsensor_ctrl_type_t type;   /* control type */
+  imgsensor_ctrl_type_t type;   /* Control type */
   union
     {
       /* Use 'range' member in the following types cases.
