@@ -447,8 +447,6 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
           /* Indicate no data in the buffer */
 
           netdev_iob_release(dev);
-
-          dev->d_buf = NULL;
         }
     }
 

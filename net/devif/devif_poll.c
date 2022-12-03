@@ -833,8 +833,6 @@ static int devif_iob_poll(FAR struct net_driver_s *dev,
 
   netdev_iob_release(dev);
 
-  dev->d_buf = NULL;
-
   return bstop;
 }
 
