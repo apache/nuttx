@@ -49,7 +49,7 @@
  * Public Types
  ****************************************************************************/
 
-/* structure for validate_frame_setting() and start_capture() */
+/* Structure for validate_frame_setting() and start_capture() */
 
 typedef struct imgdata_format_s
 {
