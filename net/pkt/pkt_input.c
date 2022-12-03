@@ -137,9 +137,22 @@ static int pkt_in(FAR struct net_driver_s *dev)
 
 int pkt_input(FAR struct net_driver_s *dev)
 {
+  FAR uint8_t *buf;
+  int ret;
+
   if (dev->d_iob != NULL)
     {
-      return pkt_in(dev);
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                        NET_LL_HDRLEN(dev)];
+      ret = pkt_in(dev);
+
+      dev->d_buf = buf;
+
+      return ret;
     }
 
   return netdev_input(dev, pkt_in, false);
