@@ -258,60 +258,60 @@ struct nuttx_cmsghdr
 #ifdef __SIM__
 int usrsock_event_callback(int16_t usockid, uint16_t events);
 
-int usrsock_host_socket(int domain, int type, int protocol);
-int usrsock_host_close(int sockfd);
-int usrsock_host_connect(int sockfd, const struct nuttx_sockaddr *addr,
+int host_usrsock_socket(int domain, int type, int protocol);
+int host_usrsock_close(int sockfd);
+int host_usrsock_connect(int sockfd, const struct nuttx_sockaddr *addr,
                          nuttx_socklen_t addrlen);
-ssize_t usrsock_host_sendto(int sockfd, const void *buf, size_t len,
+ssize_t host_usrsock_sendto(int sockfd, const void *buf, size_t len,
                             int flags,
                             const struct nuttx_sockaddr *dest_addr,
                             nuttx_socklen_t addrlen);
-ssize_t usrsock_host_recvfrom(int sockfd, void *buf, size_t len, int flags,
+ssize_t host_usrsock_recvfrom(int sockfd, void *buf, size_t len, int flags,
                               struct nuttx_sockaddr *src_addr,
                               nuttx_socklen_t *addrlen);
-int usrsock_host_setsockopt(int sockfd, int level, int optname,
+int host_usrsock_setsockopt(int sockfd, int level, int optname,
                             const void *optval, nuttx_socklen_t optlen);
-int usrsock_host_getsockopt(int sockfd, int level, int optname,
+int host_usrsock_getsockopt(int sockfd, int level, int optname,
                             void *optval, nuttx_socklen_t *optlen);
-int usrsock_host_getsockname(int sockfd,
+int host_usrsock_getsockname(int sockfd,
                              struct nuttx_sockaddr *addr,
                              nuttx_socklen_t *addrlen);
-int usrsock_host_getpeername(int sockfd,
+int host_usrsock_getpeername(int sockfd,
                              struct nuttx_sockaddr *addr,
                              nuttx_socklen_t *addrlen);
-int usrsock_host_bind(int sockfd, const struct nuttx_sockaddr *addr,
+int host_usrsock_bind(int sockfd, const struct nuttx_sockaddr *addr,
                       nuttx_socklen_t addrlen);
-int usrsock_host_listen(int sockfd, int backlog);
-int usrsock_host_accept(int sockfd, struct nuttx_sockaddr *addr,
+int host_usrsock_listen(int sockfd, int backlog);
+int host_usrsock_accept(int sockfd, struct nuttx_sockaddr *addr,
                         nuttx_socklen_t *addrlen);
-int usrsock_host_ioctl(int fd, unsigned long request, ...);
+int host_usrsock_ioctl(int fd, unsigned long request, ...);
 #else
-int usrsock_host_socket(int domain, int type, int protocol);
-int usrsock_host_close(int sockfd);
-int usrsock_host_connect(int sockfd, const struct sockaddr *addr,
+int host_usrsock_socket(int domain, int type, int protocol);
+int host_usrsock_close(int sockfd);
+int host_usrsock_connect(int sockfd, const struct sockaddr *addr,
                          socklen_t addrlen);
-ssize_t usrsock_host_sendto(int sockfd, const void *buf, size_t len,
+ssize_t host_usrsock_sendto(int sockfd, const void *buf, size_t len,
                             int flags,
                             const struct sockaddr *dest_addr,
                             socklen_t addrlen);
-ssize_t usrsock_host_recvfrom(int sockfd, void *buf, size_t len, int flags,
+ssize_t host_usrsock_recvfrom(int sockfd, void *buf, size_t len, int flags,
                               struct sockaddr *src_addr,
                               socklen_t *addrlen);
-int usrsock_host_setsockopt(int sockfd, int level, int optname,
+int host_usrsock_setsockopt(int sockfd, int level, int optname,
                             const void *optval, socklen_t optlen);
-int usrsock_host_getsockopt(int sockfd, int level, int optname,
+int host_usrsock_getsockopt(int sockfd, int level, int optname,
                             void *optval, socklen_t *optlen);
-int usrsock_host_getsockname(int sockfd, struct sockaddr *addr,
+int host_usrsock_getsockname(int sockfd, struct sockaddr *addr,
                              socklen_t *addrlen);
-int usrsock_host_getpeername(int sockfd, struct sockaddr *addr,
+int host_usrsock_getpeername(int sockfd, struct sockaddr *addr,
                              socklen_t *addrlen);
-int usrsock_host_bind(int sockfd, const struct sockaddr *addr,
+int host_usrsock_bind(int sockfd, const struct sockaddr *addr,
                       socklen_t addrlen);
-int usrsock_host_listen(int sockfd, int backlog);
-int usrsock_host_accept(int sockfd, struct sockaddr *addr,
+int host_usrsock_listen(int sockfd, int backlog);
+int host_usrsock_accept(int sockfd, struct sockaddr *addr,
                         socklen_t *addrlen);
-int usrsock_host_ioctl(int fd, unsigned long request, ...);
-void usrsock_host_loop(void);
+int host_usrsock_ioctl(int fd, unsigned long request, ...);
+void host_usrsock_loop(void);
 #endif /* __SIM__ */
 
 #endif /* __ARCH_SIM_SRC_SIM_HOSTUSRSOCK_H */
