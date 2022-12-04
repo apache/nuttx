@@ -269,7 +269,7 @@ int sim_tapdev_avail(int devidx);
 unsigned int sim_tapdev_read(int devidx, unsigned char *buf,
                              unsigned int buflen);
 void sim_tapdev_send(int devidx, unsigned char *buf, unsigned int buflen);
-void sim_tapdev_ifup(int devidx, in_addr_t ifaddr);
+void sim_tapdev_ifup(int devidx, void *ifaddr);
 void sim_tapdev_ifdown(int devidx);
 
 #  define sim_netdev_init(idx,priv,txcb,rxcb) sim_tapdev_init(idx,priv,txcb,rxcb)

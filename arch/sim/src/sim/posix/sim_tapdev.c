@@ -118,7 +118,11 @@ static void (*g_tx_done_intr_cb[CONFIG_SIM_NETDEV_NUMBER])(void *priv);
 static void (*g_rx_ready_intr_cb[CONFIG_SIM_NETDEV_NUMBER])(void *priv);
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
+#  ifdef CONFIG_NET_IPv4
 static struct rtentry ghostroute[CONFIG_SIM_NETDEV_NUMBER];
+#  else
+static struct in6_rtmsg ghostrtm[CONFIG_SIM_NETDEV_NUMBER];
+#  endif
 #endif
 
 /****************************************************************************
@@ -368,14 +372,16 @@ void sim_tapdev_send(int devidx, unsigned char *buf, unsigned int buflen)
     }
 }
 
-void sim_tapdev_ifup(int devidx, in_addr_t ifaddr)
+void sim_tapdev_ifup(int devidx, void *ifaddr)
 {
   struct ifreq ifr;
   int          sockfd;
   int          ret;
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
+#  ifdef CONFIG_NET_IPv4
   struct sockaddr_in *addr;
+#  endif
 #endif
 
   if (gtapdevfd[devidx] < 0)
@@ -385,7 +391,11 @@ void sim_tapdev_ifup(int devidx, in_addr_t ifaddr)
 
   /* Get a socket with which to manipulate the tap device */
 
+#  ifdef CONFIG_NET_IPv4
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+#  else
+  sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
+#  endif
   if (sockfd < 0)
     {
       syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
@@ -418,17 +428,29 @@ void sim_tapdev_ifup(int devidx, in_addr_t ifaddr)
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
   /* Add host route */
 
+#  ifdef CONFIG_NET_IPv4
   memset(&ghostroute[devidx], 0, sizeof(ghostroute[devidx]));
 
   addr = (struct sockaddr_in *)&ghostroute[devidx].rt_dst;
   addr->sin_family = AF_INET;
-  addr->sin_addr.s_addr = ifaddr;
+  addr->sin_addr.s_addr = *(in_addr_t *)ifaddr;
 
   ghostroute[devidx].rt_dev    = gdevname[devidx];
   ghostroute[devidx].rt_flags  = RTF_UP | RTF_HOST;
   ghostroute[devidx].rt_metric = 0;
 
   ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute[devidx]);
+#  else
+  memset(&ghostrtm[devidx], 0, sizeof(ghostrtm[devidx]));
+
+  ghostrtm[devidx].rtmsg_flags = RTF_UP | RTF_HOST;
+  ghostrtm[devidx].rtmsg_metric = 1;
+  ghostrtm[devidx].rtmsg_ifindex = if_nametoindex(gdevname[devidx]);
+  memcpy(&ghostrtm[devidx].rtmsg_dst, ifaddr, sizeof(struct in6_addr));
+
+  ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostrtm[devidx]);
+#  endif
+
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: ioctl failed"
@@ -452,7 +474,8 @@ void sim_tapdev_ifdown(int devidx)
       return;
     }
 
-  if (((struct sockaddr_in *)&ghostroute[devidx].rt_dst)->sin_addr.s_addr)
+#  ifdef CONFIG_NET_IPv4
+  if (ghostroute[devidx].rt_flags != 0)
     {
       /* Get a socket with which to manipulate the tap device */
 
@@ -470,7 +493,31 @@ void sim_tapdev_ifdown(int devidx)
                  "(can't delete host route): %d\n", -ret);
         }
 
+      ghostroute[devidx].rt_flags = 0;
       close(sockfd);
     }
+#  else
+  if (ghostrtm[devidx].rtmsg_flags != 0)
+    {
+      /* Get a socket with which to manipulate the tap device */
+
+      sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
+      if (sockfd < 0)
+        {
+          syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+          return;
+        }
+
+      ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostrtm[devidx]);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "TAPDEV: ioctl failed "
+                 "(can't delete host route): %d\n", -ret);
+        }
+
+      ghostrtm[devidx].rtmsg_flags = 0;
+      close(sockfd);
+    }
+#  endif
 #endif
 }
