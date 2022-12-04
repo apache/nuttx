@@ -282,9 +282,9 @@ static int netdriver_ifup(struct net_driver_s *dev)
 
   UNUSED(devidx);
 #ifdef CONFIG_NET_IPv4
-  sim_netdev_ifup(devidx, dev->d_ipaddr);
+  sim_netdev_ifup(devidx, &dev->d_ipaddr);
 #else /* CONFIG_NET_IPv6 */
-  sim_netdev_ifup(devidx, INADDR_ANY);
+  sim_netdev_ifup(devidx, &dev->d_ipv6addr);
 #endif /* CONFIG_NET_IPv4 */
   netdev_carrier_on(dev);
   return OK;
