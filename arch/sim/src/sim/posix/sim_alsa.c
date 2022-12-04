@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_alsa.c
+ * arch/sim/src/sim/posix/sim_alsa.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
