@@ -46,21 +46,10 @@ static void init_buf_chain(video_framebuff_t *fbuf)
   fbuf->vbuf_tail  = NULL;
 
   tmp = fbuf->vbuf_alloced;
-  for (i = 0; i < fbuf->container_size - 1; i++)
+  for (i = 1; i < fbuf->container_size; i++)
     {
       tmp->next = &tmp[1];
       tmp++;
-    }
-}
-
-static void cleanup_container(video_framebuff_t *fbuf)
-{
-  if (fbuf->vbuf_alloced)
-    {
-      memset(fbuf->vbuf_alloced,
-             0,
-             sizeof(vbuf_container_t)*fbuf->container_size);
-      init_buf_chain(fbuf);
     }
 }
 
@@ -110,31 +99,27 @@ void video_framebuff_uninit(video_framebuff_t *fbuf)
 
 int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
 {
+  vbuf_container_t *vbuf;
+
   if (fbuf->container_size == sz)
     {
       return OK;
     }
 
-  if (fbuf->vbuf_alloced != NULL)
+  vbuf = kmm_realloc(fbuf->vbuf_alloced, sizeof(vbuf_container_t) * sz);
+  if (vbuf != NULL)
     {
-      kmm_free(fbuf->vbuf_alloced);
-      fbuf->vbuf_alloced   = NULL;
-      fbuf->container_size = 0;
+      memset(vbuf, 0, sizeof(vbuf_container_t) * sz);
+    }
+  else if (sz != 0)
+    {
+      return -ENOMEM;
     }
 
-  if (sz > 0)
-    {
-      fbuf->vbuf_alloced =
-        (vbuf_container_t *)kmm_malloc(sizeof(vbuf_container_t) * sz);
-      if (fbuf->vbuf_alloced == NULL)
-        {
-          return -ENOMEM;
-        }
+  fbuf->vbuf_alloced = vbuf;
+  fbuf->container_size = sz;
 
-      fbuf->container_size = sz;
-    }
-
-  cleanup_container(fbuf);
+  init_buf_chain(fbuf);
   return OK;
 }
 
