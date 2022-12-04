@@ -92,9 +92,9 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
 
+#include "arp/arp.h"
 #include "inet/inet.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
