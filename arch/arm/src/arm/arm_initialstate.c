@@ -145,5 +145,9 @@ void up_initial_state(struct tcb_s *tcb)
   cpsr                  |= PSR_I_BIT;
 # endif
 
+#ifdef CONFIG_ARM_THUMB
+  cpsr                  |= PSR_T_BIT;
+#endif
+
   xcp->regs[REG_CPSR]    = cpsr;
 }
