@@ -550,7 +550,7 @@ static void virtnet_rxdispatch(FAR struct virtnet_driver_s *priv)
     {
       /* Dispatch ARP packet to the network layer */
 
-      arp_arpin(&priv->vnet_dev);
+      arp_input(&priv->vnet_dev);
       NETDEV_RXARP(&priv->vnet_dev);
 
       /* If the above function invocation resulted in data that should be
