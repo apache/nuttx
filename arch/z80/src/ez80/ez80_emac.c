@@ -1420,7 +1420,7 @@ static int ez80emac_receive(FAR struct ez80emac_driver_s *priv)
           ninfo("ARP packet received (%02x)\n", BUF->type);
           EMAC_STAT(priv, rx_arp);
 
-          arp_arpin(&priv->dev);
+          arp_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value >

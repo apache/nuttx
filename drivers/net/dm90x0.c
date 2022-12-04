@@ -946,7 +946,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 #ifdef CONFIG_NET_ARP
           if (BUF->type == HTONS(ETHTYPE_ARP))
             {
-              arp_arpin(&priv->dm_dev);
+              arp_input(&priv->dm_dev);
               NETDEV_RXARP(&priv->dm_dev);
 
               /* If the above function invocation resulted in data that

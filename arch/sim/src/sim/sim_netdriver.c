@@ -227,7 +227,7 @@ static void netdriver_recv_work(void *arg)
                   ninfo("ARP frame\n");
                   NETDEV_RXARP(dev);
 
-                  arp_arpin(dev);
+                  arp_input(dev);
 
                   /* If the above function invocation resulted in data that
                    * should be sent out on the network, the global variable

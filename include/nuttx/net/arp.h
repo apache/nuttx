@@ -131,7 +131,7 @@ void arp_ipin(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
- * Name: arp_arpin
+ * Name: arp_input
  *
  * Description:
  *   This function should be called by the Ethernet device driver when an ARP
@@ -154,7 +154,7 @@ void arp_ipin(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-void arp_arpin(FAR struct net_driver_s *dev);
+void arp_input(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_out
@@ -190,7 +190,7 @@ void arp_out(FAR struct net_driver_s *dev);
 /* If ARP is disabled, stub out all ARP interfaces */
 
 # define arp_ipin(dev)
-# define arp_arpin(dev)
+# define arp_input(dev)
 # define arp_out(dev)
 
 #endif /* CONFIG_NET_ARP */

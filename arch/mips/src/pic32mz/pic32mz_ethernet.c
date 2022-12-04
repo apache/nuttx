@@ -1542,7 +1542,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
               /* Handle the incoming ARP packet */
 
               NETDEV_RXARP(&priv->pd_dev);
-              arp_arpin(&priv->pd_dev);
+              arp_input(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the field  d_len will

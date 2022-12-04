@@ -1410,7 +1410,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
 
           /* Dispatch ARP packet to the network layer */
 
-          arp_arpin(&self->w_dev);
+          arp_input(&self->w_dev);
           NETDEV_RXARP(&self->w_dev);
 
           /* If the above function invocation resulted in data that should be

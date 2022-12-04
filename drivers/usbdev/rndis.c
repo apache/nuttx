@@ -904,7 +904,7 @@ static void rndis_rxdispatch(FAR void *arg)
     {
       NETDEV_RXARP(&priv->netdev);
 
-      arp_arpin(&priv->netdev);
+      arp_input(&priv->netdev);
 
       if (priv->netdev.d_len > 0)
         {

@@ -951,7 +951,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
 
       /* Dispatch the ARP packet to the network layer */
 
-      arp_arpin(dev);
+      arp_input(dev);
       NETDEV_RXARP(dev);
 
       /* If the above function invocation resulted in data that should be

@@ -21,7 +21,7 @@
 # ARP support is available for Ethernet only
 
 ifeq ($(CONFIG_NET_ARP),y)
-NET_CSRCS += arp_arpin.c arp_out.c arp_format.c arp_table.c
+NET_CSRCS += arp_input.c arp_out.c arp_format.c arp_table.c
 
 ifeq ($(CONFIG_NET_ARP_IPIN),y)
 NET_CSRCS += arp_ipin.c

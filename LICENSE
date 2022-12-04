@@ -217,7 +217,7 @@ include/nuttx/net/netstats.h
 include/nuttx/net/tcp.h
 include/nuttx/net/tun.h
 include/nuttx/net/udp.h
-net/arp/arp_arpin.c
+net/arp/arp_input.c
 net/arp/arp_dump.c
 net/arp/arp_format.c
 net/arp/arp_ipin.c
