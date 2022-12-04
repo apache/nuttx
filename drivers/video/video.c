@@ -874,7 +874,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
         break;
     }
 
-  *gamma = malloc(sz);
+  *gamma = kmm_malloc(sz);
   val.p_u8 = (FAR uint8_t *)*gamma;
   g_video_sensor_ops->get_value(IMGSENSOR_ID_GAMMA_CURVE, sz, &val);
   return sz;
@@ -955,7 +955,9 @@ static void cleanup_scene_parameter(video_scene_params_t *sp)
 
   if (sp->gamma_curve)
     {
-      free(sp->gamma_curve);
+      kmm_free(sp->gamma_curve);
+      sp->gamma_curve = NULL;
+      sp->gamma_curve_sz = 0;
     }
 }
 
@@ -3467,8 +3469,8 @@ int imgsensor_register(FAR const struct imgsensor_ops_s *ops)
   int ret = -ENOMEM;
   FAR const struct imgsensor_ops_s **new_addr;
 
-  new_addr = realloc(g_video_registered_sensor,
-                     sizeof(ops) * (g_video_registered_sensor_num + 1));
+  new_addr = kmm_realloc(g_video_registered_sensor,
+                         sizeof(ops) * (g_video_registered_sensor_num + 1));
   if (new_addr)
     {
       new_addr[g_video_registered_sensor_num++] = ops;
