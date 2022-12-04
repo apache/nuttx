@@ -32,10 +32,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int sim_host_bthcisock_open(int dev_idx);
-int sim_host_bthcisock_send(int fd, const void *data, size_t len);
-int sim_host_bthcisock_receive(int fd, void *data, size_t len);
-int sim_host_bthcisock_avail(int fd);
-int sim_host_bthcisock_close(int fd);
+int host_bthcisock_open(int dev_idx);
+int host_bthcisock_send(int fd, const void *data, size_t len);
+int host_bthcisock_receive(int fd, void *data, size_t len);
+int host_bthcisock_avail(int fd);
+int host_bthcisock_close(int fd);
 
 #endif /* __ARCH_SIM_SRC_SIM_HOSTHCISOCKET_H */

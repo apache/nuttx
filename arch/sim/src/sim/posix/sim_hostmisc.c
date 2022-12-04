@@ -39,7 +39,7 @@ void __gcov_dump(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_host_abort
+ * Name: host_abort
  *
  * Description:
  *   Abort the simulation
@@ -48,7 +48,7 @@ void __gcov_dump(void);
  *   status - Exit status to set
  ****************************************************************************/
 
-void sim_host_abort(int status)
+void host_abort(int status)
 {
 #ifdef CONFIG_ARCH_COVERAGE
   /* Dump gcov data. */
@@ -61,7 +61,7 @@ void sim_host_abort(int status)
   exit(status);
 }
 
-int sim_host_backtrace(void** array, int size)
+int host_backtrace(void** array, int size)
 {
 #ifdef CONFIG_WINDOWS_CYGWIN
   return 0;

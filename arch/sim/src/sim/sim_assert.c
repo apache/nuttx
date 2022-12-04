@@ -123,6 +123,6 @@ void up_assert(const char *filename, int lineno)
     {
       /* Exit the simulation */
 
-      sim_host_abort(EXIT_FAILURE);
+      host_abort(EXIT_FAILURE);
     }
 }
