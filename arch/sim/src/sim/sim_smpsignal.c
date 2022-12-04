@@ -214,14 +214,14 @@ int up_cpu_paused(int cpu)
 }
 
 /****************************************************************************
- * Name: sim_host_cpu_started
+ * Name: host_cpu_started
  *
  * Description:
  *   Notify the current cpu start successfully.
  *
  ****************************************************************************/
 
-void sim_host_cpu_started(void)
+void host_cpu_started(void)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   struct tcb_s *tcb = this_task();
@@ -273,7 +273,7 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-  return sim_host_cpu_start(cpu, tcb->stack_base_ptr, tcb->adj_stack_size);
+  return host_cpu_start(cpu, tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 /****************************************************************************
@@ -339,7 +339,7 @@ int up_cpu_pause(int cpu)
 
   /* Generate IRQ for CPU(cpu) */
 
-  sim_host_send_ipi(cpu);
+  host_send_ipi(cpu);
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();

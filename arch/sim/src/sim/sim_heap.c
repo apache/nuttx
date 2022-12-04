@@ -141,7 +141,7 @@ struct mm_heap_s *mm_initialize(const char *name,
 {
   struct mm_heap_s *heap;
 
-  heap = sim_host_memalign(sizeof(void *), sizeof(*heap));
+  heap = host_memalign(sizeof(void *), sizeof(*heap));
   DEBUGASSERT(heap);
 
   memset(heap, 0, sizeof(struct mm_heap_s));
@@ -228,7 +228,7 @@ void mm_free(struct mm_heap_s *heap, void *mem)
     }
   else
     {
-      sim_host_free(mem);
+      host_free(mem);
     }
 }
 
@@ -259,7 +259,7 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
                     size_t size)
 {
   mm_free_delaylist(heap);
-  return sim_host_realloc(oldmem, size);
+  return host_realloc(oldmem, size);
 }
 
 /****************************************************************************
@@ -320,7 +320,7 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
   mm_free_delaylist(heap);
-  return sim_host_memalign(alignment, size);
+  return host_memalign(alignment, size);
 }
 
 /****************************************************************************
@@ -384,7 +384,7 @@ void mm_extend(struct mm_heap_s *heap, void *mem, size_t size,
 int mm_mallinfo(struct mm_heap_s *heap, struct mallinfo *info)
 {
   memset(info, 0, sizeof(struct mallinfo));
-  sim_host_mallinfo(&info->aordblks, &info->uordblks);
+  host_mallinfo(&info->aordblks, &info->uordblks);
   return 0;
 }
 
@@ -422,7 +422,7 @@ void mm_checkcorruption(struct mm_heap_s *heap)
 
 size_t mm_malloc_size(void *mem)
 {
-  return sim_host_mallocsize(mem);
+  return host_mallocsize(mem);
 }
 
 /****************************************************************************
@@ -455,7 +455,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    * ARCH_HAVE_TEXT_HEAP mechanism can be an alternative.
    */
 
-  uint8_t *sim_heap = sim_host_allocheap(SIM_HEAP_SIZE);
+  uint8_t *sim_heap = host_allocheap(SIM_HEAP_SIZE);
 
   *heap_start = sim_heap;
   *heap_size  = SIM_HEAP_SIZE;

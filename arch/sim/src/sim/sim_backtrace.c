@@ -40,7 +40,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 
   if (tcb == running_task())
     {
-      ret = sim_host_backtrace(buf, skip + size);
+      ret = host_backtrace(buf, skip + size);
     }
 
   if (ret <= skip)

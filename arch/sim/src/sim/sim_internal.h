@@ -149,27 +149,27 @@ void *sim_doirq(int irq, void *regs);
 
 /* sim_hostmisc.c ***********************************************************/
 
-void sim_host_abort(int status);
-int  sim_host_backtrace(void** array, int size);
+void host_abort(int status);
+int  host_backtrace(void** array, int size);
 
 /* sim_hostmemory.c *********************************************************/
 
-void *sim_host_allocheap(size_t sz);
-void *sim_host_allocshmem(const char *name, size_t size, int master);
-void  sim_host_freeshmem(void *mem);
+void *host_allocheap(size_t sz);
+void *host_allocshmem(const char *name, size_t size, int master);
+void  host_freeshmem(void *mem);
 
-size_t sim_host_mallocsize(void *mem);
-void *sim_host_memalign(size_t alignment, size_t size);
-void sim_host_free(void *mem);
-void *sim_host_realloc(void *oldmem, size_t size);
-void sim_host_mallinfo(int *aordblks, int *uordblks);
+size_t host_mallocsize(void *mem);
+void *host_memalign(size_t alignment, size_t size);
+void host_free(void *mem);
+void *host_realloc(void *oldmem, size_t size);
+void host_mallinfo(int *aordblks, int *uordblks);
 
 /* sim_hosttime.c ***********************************************************/
 
-uint64_t sim_host_gettime(bool rtc);
-void sim_host_sleep(uint64_t nsec);
-void sim_host_sleepuntil(uint64_t nsec);
-int sim_host_settimer(int *irq);
+uint64_t host_gettime(bool rtc);
+void host_sleep(uint64_t nsec);
+void host_sleepuntil(uint64_t nsec);
+int host_settimer(int *irq);
 
 /* sim_sigdeliver.c *********************************************************/
 
@@ -178,15 +178,15 @@ void sim_sigdeliver(void);
 /* sim_hostsmp.c ************************************************************/
 
 #ifdef CONFIG_SMP
-void sim_host_cpu0_start(void);
-int sim_host_cpu_start(int cpu, void *stack, size_t size);
-void sim_host_send_ipi(int cpu);
+void host_cpu0_start(void);
+int host_cpu_start(int cpu, void *stack, size_t size);
+void host_send_ipi(int cpu);
 #endif
 
 /* sim_smpsignal.c **********************************************************/
 
 #ifdef CONFIG_SMP
-void sim_host_cpu_started(void);
+void host_cpu_started(void);
 int sim_init_ipi(int irq);
 #endif
 
