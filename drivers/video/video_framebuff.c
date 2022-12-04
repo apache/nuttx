@@ -97,12 +97,8 @@ static inline vbuf_container_t *dequeue_vbuf_unsafe(video_framebuff_t *fbuf)
 
 void video_framebuff_init(video_framebuff_t *fbuf)
 {
-  fbuf->mode       = V4L2_BUF_MODE_RING;
-  fbuf->vbuf_empty = NULL;
-  fbuf->vbuf_top   = NULL;
-  fbuf->vbuf_tail  = NULL;
-  fbuf->vbuf_next  = NULL;
-
+  memset(fbuf, 0, sizeof(video_framebuff_t));
+  fbuf->mode = V4L2_BUF_MODE_RING;
   nxmutex_init(&fbuf->lock_empty);
 }
 
