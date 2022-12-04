@@ -69,11 +69,6 @@ static inline vbuf_container_t *dequeue_vbuf_unsafe(video_framebuff_t *fbuf)
     }
   else
     {
-      if (fbuf->mode == V4L2_BUF_MODE_RING)
-        {
-          fbuf->vbuf_tail->next = fbuf->vbuf_top->next;
-        }
-
       fbuf->vbuf_top = fbuf->vbuf_top->next;
     }
 
