@@ -461,7 +461,7 @@ static void cdcecm_receive(FAR struct cdcecm_driver_s *self)
     {
       /* Dispatch ARP packet to the network layer */
 
-      arp_arpin(&self->dev);
+      arp_input(&self->dev);
       NETDEV_RXARP(&self->dev);
 
       /* If the above function invocation resulted in data that should be

@@ -695,7 +695,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == HTONS(ETHTYPE_ARP))
         {
-          arp_arpin(&priv->ft_dev);
+          arp_input(&priv->ft_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value

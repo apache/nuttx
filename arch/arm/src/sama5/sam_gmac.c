@@ -1236,7 +1236,7 @@ static void sam_receive(struct sam_gmac_s *priv)
 
           /* Handle ARP packet */
 
-          arp_arpin(&priv->dev);
+          arp_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a

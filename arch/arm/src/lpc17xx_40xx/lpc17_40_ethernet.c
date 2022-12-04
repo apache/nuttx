@@ -962,7 +962,7 @@ static void lpc17_40_rxdone_work(void *arg)
           if (BUF->type == HTONS(ETHTYPE_ARP))
             {
               NETDEV_RXARP(&priv->lp_dev);
-              arp_arpin(&priv->lp_dev);
+              arp_input(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the field  d_len will

@@ -494,7 +494,7 @@ typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  *           }
  *         else if (ETHBUF->type == HTONS(ETHTYPE_ARP))
  *           {
- *             arp_arpin();
+ *             arp_input();
  *             if (dev->d_len > 0)
  *               {
  *                 devicedriver_send();

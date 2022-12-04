@@ -150,7 +150,7 @@ void amebaz_netdev_notify_receive(struct amebaz_dev_s *priv,
 #ifdef CONFIG_NET_ARP
           if (hdr->type == HTONS(ETHTYPE_ARP))
             {
-              arp_arpin(&priv->dev);
+              arp_input(&priv->dev);
               NETDEV_RXARP(&priv->dev);
               if (priv->dev.d_len > 0)
                 {

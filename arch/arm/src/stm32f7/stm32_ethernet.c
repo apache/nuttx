@@ -1852,7 +1852,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
           /* Handle ARP packet */
 
-          arp_arpin(&priv->dev);
+          arp_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, d_len field will set to a value > 0.

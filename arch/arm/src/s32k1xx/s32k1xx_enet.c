@@ -698,7 +698,7 @@ static inline void s32k1xx_dispatch(struct s32k1xx_driver_s *priv)
   if (BUF->type == HTONS(ETHTYPE_ARP))
     {
       NETDEV_RXARP(&priv->dev);
-      arp_arpin(&priv->dev);
+      arp_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should
        * be sent out on the network, the field  d_len will set to a

@@ -538,7 +538,7 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
 
       /* Dispatch ARP packet to the network layer */
 
-      arp_arpin(dev);
+      arp_input(dev);
 
       /* Check for a reply to the ARP packet */
 

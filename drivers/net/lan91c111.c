@@ -663,7 +663,7 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
 
       /* Dispatch ARP packet to the network layer */
 
-      arp_arpin(dev);
+      arp_input(dev);
 
       /* Check for a reply to the ARP packet */
 

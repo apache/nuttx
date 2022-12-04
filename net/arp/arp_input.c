@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/arp/arp_arpin.c
+ * net/arp/arp_input.c
  *
  *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arp_input
+ * Name: arp_in
  *
  * Description:
  *   This function should be called by the Ethernet device driver when an
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-static int arp_input(FAR struct net_driver_s *dev)
+static int arp_in(FAR struct net_driver_s *dev)
 {
   FAR struct arp_hdr_s *arp = ARPBUF;
   in_addr_t ipaddr;
@@ -163,7 +163,7 @@ static int arp_input(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arp_arpin
+ * Name: arp_input
  *
  * Description:
  *   This function should be called by the Ethernet device driver when an
@@ -186,7 +186,7 @@ static int arp_input(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-void arp_arpin(FAR struct net_driver_s *dev)
+void arp_input(FAR struct net_driver_s *dev)
 {
   FAR uint8_t *buf;
 
@@ -198,13 +198,13 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
       dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
                                         NET_LL_HDRLEN(dev)];
-      arp_input(dev);
+      arp_in(dev);
 
       dev->d_buf = buf;
       return;
     }
 
-  netdev_input(dev, arp_input, true);
+  netdev_input(dev, arp_in, true);
 }
 
 #endif /* CONFIG_NET_ARP */

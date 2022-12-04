@@ -814,7 +814,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(dev);
 
-          arp_arpin(dev);
+          arp_input(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, d_len field will set to a value > 0.

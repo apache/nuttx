@@ -379,7 +379,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
         {
           /* Dispatch ARP packet to the network layer */
 
-          arp_arpin(&priv->sk_dev);
+          arp_input(&priv->sk_dev);
           NETDEV_RXARP(&priv->sk_dev);
 
           /* If the above function invocation resulted in data that should be

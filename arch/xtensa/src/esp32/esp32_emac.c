@@ -1416,7 +1416,7 @@ static void emac_rx_interrupt_work(void *arg)
 
           /* Handle ARP packet */
 
-          arp_arpin(&priv->dev);
+          arp_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field d_len will set to a value > 0
