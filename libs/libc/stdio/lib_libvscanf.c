@@ -256,7 +256,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
   /* Get first character, we keep always the next character in c */
 
-  c = lib_stream_get(obj);
+  c = lib_stream_getc(obj);
 
   while (fmt_char(fmt))
     {
@@ -266,7 +266,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
         {
           while (isspace(c))
             {
-              c = lib_stream_get(obj);
+              c = lib_stream_getc(obj);
             }
         }
 
@@ -366,7 +366,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
               while (isspace(c))
                 {
-                  c = lib_stream_get(obj);
+                  c = lib_stream_getc(obj);
                 }
 
               /* But we only perform the data conversion is we still have
@@ -390,7 +390,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                         }
 
                       fwidth++;
-                      c = lib_stream_get(obj);
+                      c = lib_stream_getc(obj);
                     }
 
                   if (!noassign)
@@ -445,7 +445,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                         }
 
                       fwidth++;
-                      c = lib_stream_get(obj);
+                      c = lib_stream_getc(obj);
                     }
 
                   if (!fwidth)
@@ -509,7 +509,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                         }
 
                       fwidth++;
-                      c = lib_stream_get(obj);
+                      c = lib_stream_getc(obj);
                     }
 
                   if (fwidth != width)
@@ -582,7 +582,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
               while (isspace(c))
                 {
-                  c = lib_stream_get(obj);
+                  c = lib_stream_getc(obj);
                 }
 
               /* But we only perform the data conversion if we still have
@@ -641,7 +641,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           if (!stopconv)
                             {
                               tmp[fwidth++] = c;
-                              c = lib_stream_get(obj);
+                              c = lib_stream_getc(obj);
                             }
                         }
 
@@ -691,7 +691,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           if (!stopconv)
                             {
                               tmp[fwidth++] = c;
-                              c = lib_stream_get(obj);
+                              c = lib_stream_getc(obj);
                             }
                         }
 
@@ -716,7 +716,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           if (!stopconv)
                             {
                               tmp[fwidth++] = c;
-                              c = lib_stream_get(obj);
+                              c = lib_stream_getc(obj);
                             }
                         }
 
@@ -741,7 +741,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           if (!stopconv)
                             {
                               tmp[fwidth++] = c;
-                              c = lib_stream_get(obj);
+                              c = lib_stream_getc(obj);
                             }
                         }
 
@@ -796,7 +796,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           if (!stopconv)
                             {
                               tmp[fwidth++] = c;
-                              c = lib_stream_get(obj);
+                              c = lib_stream_getc(obj);
                             }
                         }
                       break;
@@ -954,7 +954,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
               while (isspace(c))
                 {
-                  c = lib_stream_get(obj);
+                  c = lib_stream_getc(obj);
                 }
 
               /* But we only perform the data conversion is we still have
@@ -1038,7 +1038,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       if (!stopconv)
                         {
                           tmp[fwidth++] = c;
-                          c = lib_stream_get(obj);
+                          c = lib_stream_getc(obj);
                         }
                     }
 
@@ -1168,7 +1168,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                 }
               else
                 {
-                  c = lib_stream_get(obj);
+                  c = lib_stream_getc(obj);
                 }
             }
 
@@ -1188,7 +1188,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
           while (isspace(c))
             {
-              c = lib_stream_get(obj);
+              c = lib_stream_getc(obj);
             }
 #endif
 
@@ -1201,7 +1201,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
           else
             {
               fmt++;
-              c = lib_stream_get(obj);
+              c = lib_stream_getc(obj);
             }
         }
       else

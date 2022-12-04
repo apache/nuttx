@@ -1226,7 +1226,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.get  = lcd_getstream;
+  instream.stream.getc = lcd_getstream;
   instream.stream.nget = 0;
   instream.buffer      = buffer;
   instream.nbytes      = buflen;

@@ -129,7 +129,7 @@ static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  lib_stream_put(chan->stream, ch);
+  lib_stream_putc(chan->stream, ch);
   leave_critical_section(flags);
 
   return OK;
@@ -156,7 +156,7 @@ static int syslog_stream_force(FAR struct syslog_channel_s *channel, int ch)
   FAR struct syslog_stream_s *chan =
     (FAR struct syslog_stream_s *)channel;
 
-  lib_stream_put(chan->stream, ch);
+  lib_stream_putc(chan->stream, ch);
   return OK;
 }
 

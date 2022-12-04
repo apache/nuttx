@@ -102,7 +102,7 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
 
 void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd)
 {
-  instream->public.get  = rawsistream_getc;
+  instream->public.getc = rawsistream_getc;
   instream->public.seek = rawsistream_seek;
   instream->public.nget = 0;
   instream->fd          = fd;

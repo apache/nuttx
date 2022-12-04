@@ -227,7 +227,7 @@ int lib_blkoutstream_open(FAR struct lib_blkoutstream_s *stream,
     }
 
   stream->inode        = inode;
-  stream->public.put   = blkoutstream_putc;
+  stream->public.putc  = blkoutstream_putc;
   stream->public.puts  = blkoutstream_puts;
   stream->public.flush = blkoutstream_flush;
 

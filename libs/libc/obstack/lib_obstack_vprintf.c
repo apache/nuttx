@@ -87,7 +87,7 @@ int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
 {
   struct obstack_stream outstream;
 
-  outstream.public.put = obstack_putc;
+  outstream.public.putc = obstack_putc;
   outstream.public.puts = obstack_puts;
   outstream.public.flush = lib_noflush;
   outstream.public.nput = 0;

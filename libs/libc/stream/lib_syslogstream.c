@@ -191,7 +191,7 @@ void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
 
   /* Initialize the common fields */
 
-  stream->public.put   = syslogstream_putc;
+  stream->public.putc  = syslogstream_putc;
   stream->public.flush = lib_noflush;
   stream->public.nput  = 0;
 

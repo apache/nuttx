@@ -247,17 +247,17 @@ static int readstream(FAR struct lib_instream_s *instream,
 
   /* Skip until the beginning of line start code is encountered */
 
-  ch = lib_stream_get(instream);
+  ch = lib_stream_getc(instream);
   while (ch != RECORD_STARTCODE && ch != EOF)
     {
-      ch = lib_stream_get(instream);
+      ch = lib_stream_getc(instream);
     }
 
   /* Skip over the startcode */
 
   if (ch != EOF)
     {
-      ch = lib_stream_get(instream);
+      ch = lib_stream_getc(instream);
     }
 
   /* Then read, verify, and buffer until the end of line is encountered */
@@ -286,7 +286,7 @@ static int readstream(FAR struct lib_instream_s *instream,
 
       /* Read the next character from the input stream */
 
-      ch = lib_stream_get(instream);
+      ch = lib_stream_getc(instream);
     }
 
   /* Some error occurred: Unexpected EOF, line too long, or bad character in
@@ -339,7 +339,7 @@ static inline void writedata(FAR struct lib_sostream_s *outstream,
 {
   for (; bytecount > 0; bytecount--)
     {
-      outstream->put(outstream, *data++);
+      lib_stream_putc(outstream, *data++);
     }
 }
 
