@@ -824,7 +824,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
   if ((g_video_sensor_ops->get_supported_value == NULL) ||
       (g_video_sensor_ops->get_value == NULL))
     {
-      return -ENOTTY;
+      return 0;
     }
 
   ret = g_video_sensor_ops->get_supported_value
@@ -833,7 +833,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
     {
       /* Unsupported parameter */
 
-      return -EINVAL;
+      return 0;
     }
 
   switch (sup_val.type)
@@ -844,7 +844,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
           {
             /* Multiplication overflow */
 
-            return -EINVAL;
+            return 0;
           }
 
         break;
@@ -855,7 +855,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
           {
             /* Multiplication overflow */
 
-            return -EINVAL;
+            return 0;
           }
 
         break;
@@ -866,7 +866,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
           {
             /* Multiplication overflow */
 
-            return -EINVAL;
+            return 0;
           }
 
         break;
