@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_host_abort
+ * Name: host_abort
  *
  * Description:
  *   Abort the simulation
@@ -40,14 +40,14 @@
  *   status - Exit status to set
  ****************************************************************************/
 
-void sim_host_abort(int status)
+void host_abort(int status)
 {
   /* exit the simulation */
 
   exit(status);
 }
 
-int sim_host_backtrace(void** array, int size)
+int host_backtrace(void** array, int size)
 {
 #ifdef CONFIG_WINDOWS_CYGWIN
   return 0;

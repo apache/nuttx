@@ -37,10 +37,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_host_gettime
+ * Name: host_gettime
  ****************************************************************************/
 
-uint64_t sim_host_gettime(bool rtc)
+uint64_t host_gettime(bool rtc)
 {
   static uint64_t start;
   struct timespec tp;
@@ -63,23 +63,23 @@ uint64_t sim_host_gettime(bool rtc)
 }
 
 /****************************************************************************
- * Name: sim_host_sleep
+ * Name: host_sleep
  ****************************************************************************/
 
-void sim_host_sleep(uint64_t nsec)
+void host_sleep(uint64_t nsec)
 {
   usleep((nsec + 999) / 1000);
 }
 
 /****************************************************************************
- * Name: sim_host_sleepuntil
+ * Name: host_sleepuntil
  ****************************************************************************/
 
-void sim_host_sleepuntil(uint64_t nsec)
+void host_sleepuntil(uint64_t nsec)
 {
   uint64_t now;
 
-  now = sim_host_gettime(false);
+  now = host_gettime(false);
   if (nsec > now + 1000)
     {
       usleep((nsec - now) / 1000);
@@ -87,7 +87,7 @@ void sim_host_sleepuntil(uint64_t nsec)
 }
 
 /****************************************************************************
- * Name: sim_host_settimer
+ * Name: host_settimer
  *
  * Description:
  *   Set up a timer to send periodic signals.
@@ -100,7 +100,7 @@ void sim_host_sleepuntil(uint64_t nsec)
  *
  ****************************************************************************/
 
-int sim_host_settimer(int *irq)
+int host_settimer(int *irq)
 {
   struct itimerval it;
 
