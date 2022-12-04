@@ -779,7 +779,9 @@ static int32_t get_default_value(uint32_t id)
   if ((g_video_sensor_ops == NULL) ||
       (g_video_sensor_ops->get_supported_value == NULL))
     {
-      return -EINVAL;
+      /* Don't care(unsupported parameter) */
+
+      return 0;
     }
 
   ret = g_video_sensor_ops->get_supported_value(id, &value);
