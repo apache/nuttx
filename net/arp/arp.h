@@ -181,6 +181,57 @@ struct net_driver_s; /* Forward reference */
 void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
 
 /****************************************************************************
+ * Name: arp_ipin
+ *
+ * Description:
+ *   The arp_ipin() function should be called by Ethernet device drivers
+ *   whenever an IP packet arrives from the network.  The function will
+ *   check if the address is in the ARP cache, and if so the ARP cache entry
+ *   will be refreshed.
+ *   If no ARP cache entry was found, a new one is created.
+ *
+ *   This function expects that an IP packet with an Ethernet header is
+ *   present in the d_buf buffer and that the length of the packet is in the
+ *   d_len field.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_IPIN
+void arp_ipin(FAR struct net_driver_s *dev);
+#else
+# define arp_ipin(dev)
+#endif
+
+/****************************************************************************
+ * Name: arp_out
+ *
+ * Description:
+ *   This function should be called before sending out an IPv4 packet. The
+ *   function checks the destination IPv4 address of the IPv4 packet to see
+ *   what Ethernet MAC address that should be used as a destination MAC
+ *   address on the Ethernet.
+ *
+ *   If the destination IPv4 address is in the local network (determined
+ *   by logical ANDing of netmask and our IPv4 address), the function
+ *   checks the ARP cache to see if an entry for the destination IPv4
+ *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   beginning of the packet and the function returns.
+ *
+ *   If no ARP cache entry is found for the destination IIPv4P address, the
+ *   packet in the d_buf is replaced by an ARP request packet for the
+ *   IPv4 address. The IPv4 packet is dropped and it is assumed that the
+ *   higher level protocols (e.g., TCP) eventually will retransmit the
+ *   dropped packet.
+ *
+ *   Upon return in either the case, a packet to be sent is present in the
+ *   d_buf buffer and the d_len field holds the length of the Ethernet
+ *   frame that should be transmitted.
+ *
+ ****************************************************************************/
+
+void arp_out(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: arp_send
  *
  * Description:
@@ -482,6 +533,8 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 /* If ARP is disabled, stub out all ARP interfaces */
 
 #  define arp_format(d,i);
+#  define arp_ipin(dev)
+#  define arp_out(dev)
 #  define arp_send(i) (0)
 #  define arp_poll(d,c) (0)
 #  define arp_wait_setup(i,n)
