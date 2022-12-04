@@ -72,7 +72,7 @@ static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
 void lib_lowoutstream(FAR struct lib_outstream_s *stream)
 {
-  stream->put   = lowoutstream_putc;
+  stream->putc  = lowoutstream_putc;
   stream->flush = lib_noflush;
   stream->nput  = 0;
 }

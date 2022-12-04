@@ -114,9 +114,9 @@ static off_t stdsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
 void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
                      FAR FILE *stream)
 {
-  /* Select the put operation */
+  /* Select the putc operation */
 
-  outstream->public.put = stdsostream_putc;
+  outstream->public.putc = stdsostream_putc;
 
   /* Select the correct flush operation.  This flush is only called when
    * a newline is encountered in the output stream.  However, we do not

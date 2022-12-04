@@ -67,7 +67,7 @@
 #  undef CONFIG_LIBC_LONG_LONG
 #endif
 
-#define stream_putc(c,stream)  (total_len++, lib_stream_put(stream, c))
+#define stream_putc(c,stream)  (total_len++, lib_stream_putc(stream, c))
 
 /* Order is relevant here and matches order in format string */
 

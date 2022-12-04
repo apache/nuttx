@@ -40,14 +40,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define lib_stream_putc(stream, ch) \
+        ((FAR struct lib_outstream_s *)(stream))->putc( \
+        (FAR struct lib_outstream_s *)(stream), ch)
 #define lib_stream_puts(stream, buf, len) \
         ((FAR struct lib_outstream_s *)(stream))->puts( \
         (FAR struct lib_outstream_s *)(stream), buf, len)
-#define lib_stream_put(stream, ch) \
-        ((FAR struct lib_outstream_s *)(stream))->put( \
-        (FAR struct lib_outstream_s *)(stream), ch)
-#define lib_stream_get(stream) \
-        ((FAR struct lib_instream_s *)(stream))->get( \
+#define lib_stream_getc(stream) \
+        ((FAR struct lib_instream_s *)(stream))->getc( \
         (FAR struct lib_instream_s *)(stream))
 #define lib_stream_gets(stream, buf, len) \
         ((FAR struct lib_instream_s *)(stream))->gets( \
@@ -84,7 +84,7 @@ struct lib_instream_s
 {
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
-  lib_getc_t             get;     /* Get one character from the instream */
+  lib_getc_t             getc;    /* Get one character from the instream */
   lib_gets_t             gets;    /* Get the string from the instream */
 };
 
@@ -92,7 +92,7 @@ struct lib_outstream_s
 {
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
-  lib_putc_t             put;     /* Put one character to the outstream */
+  lib_putc_t             putc;    /* Put one character to the outstream */
   lib_puts_t             puts;    /* Writes the string to the outstream */
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
 };
@@ -118,7 +118,7 @@ struct lib_sistream_s
 {
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
-  lib_sigetc_t           get;     /* Get one character from the instream */
+  lib_sigetc_t           getc;    /* Get one character from the instream */
   lib_gets_t             gets;    /* Get the string from the instream */
   lib_siseek_t           seek;    /* Seek to a position in the instream */
 };
@@ -127,7 +127,7 @@ struct lib_sostream_s
 {
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
-  lib_soputc_t           put;     /* Put one character to the outstream */
+  lib_soputc_t           putc;    /* Put one character to the outstream */
   lib_soputs_t           puts;    /* Writes the string to the outstream */
   lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
   lib_soseek_t           seek;    /* Seek a position in the output stream */

@@ -808,7 +808,7 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.get  = lcd_getstream;
+  instream.stream.getc = lcd_getstream;
   instream.stream.nget = 0;
   instream.buffer      = buffer;
   instream.nbytes      = buflen;

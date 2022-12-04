@@ -59,6 +59,6 @@ static int nullinstream_getc(FAR struct lib_instream_s *this)
 
 void lib_nullinstream(FAR struct lib_instream_s *nullinstream)
 {
-  nullinstream->get  = nullinstream_getc;
+  nullinstream->getc = nullinstream_getc;
   nullinstream->nget = 0;
 }

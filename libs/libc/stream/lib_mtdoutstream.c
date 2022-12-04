@@ -302,7 +302,7 @@ int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
     }
 
   stream->inode        = node;
-  stream->public.put   = mtdoutstream_putc;
+  stream->public.putc  = mtdoutstream_putc;
   stream->public.puts  = mtdoutstream_puts;
   stream->public.flush = mtdoutstream_flush;
 

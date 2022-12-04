@@ -124,7 +124,7 @@ static off_t memsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
 void lib_memsistream(FAR struct lib_memsistream_s *instream,
                      FAR const char *bufstart, int buflen)
 {
-  instream->public.get  = memsistream_getc;
+  instream->public.getc = memsistream_getc;
   instream->public.seek = memsistream_seek;
   instream->public.nget = 0;          /* Total number of characters read */
   instream->buffer      = bufstart;   /* Start of buffer */

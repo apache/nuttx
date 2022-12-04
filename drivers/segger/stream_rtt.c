@@ -126,7 +126,7 @@ void lib_rttoutstream_open(FAR struct lib_rttoutstream_s *stream,
                                 bufsize, SEGGER_RTT_MODE_DEFAULT);
     }
 
-  stream->public.put = rttstream_putc;
+  stream->public.putc = rttstream_putc;
   stream->public.puts = rttstream_puts;
   stream->public.flush = lib_noflush;
   stream->public.nput = 0;
@@ -174,7 +174,7 @@ void lib_rttinstream_open(FAR struct lib_rttinstream_s *stream,
                                   bufsize, SEGGER_RTT_MODE_DEFAULT);
     }
 
-  stream->public.get = rttstream_getc;
+  stream->public.getc = rttstream_getc;
   stream->public.gets = rttstream_gets;
   stream->public.nget = 0;
   stream->channel = channel;

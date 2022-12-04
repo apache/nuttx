@@ -109,7 +109,7 @@ static off_t rawsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
 
 void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd)
 {
-  outstream->public.put   = rawsostream_putc;
+  outstream->public.putc  = rawsostream_putc;
   outstream->public.flush = lib_snoflush;
   outstream->public.seek  = rawsostream_seek;
   outstream->public.nput  = 0;
