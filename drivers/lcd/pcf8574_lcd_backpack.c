@@ -83,13 +83,6 @@ struct pcf8574_lcd_dev_s
   mutex_t lock;                              /* mutex */
 };
 
-struct lcd_instream_s
-{
-  struct lib_instream_s stream;
-  FAR const char *buffer;
-  ssize_t nbytes;
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -972,29 +965,6 @@ static void lcd_codec_action(FAR struct pcf8574_lcd_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: lcd_getstream
- *
- * Description:
- *   Get one character from the LCD codec stream.
- *
- ****************************************************************************/
-
-static int lcd_getstream(FAR struct lib_instream_s *instream)
-{
-  FAR struct lcd_instream_s *lcdstream =
-    (FAR struct lcd_instream_s *)instream;
-
-  if (lcdstream->nbytes > 0)
-    {
-      lcdstream->nbytes--;
-      lcdstream->stream.nget++;
-      return (int)*lcdstream->buffer++;
-    }
-
-  return EOF;
-}
-
-/****************************************************************************
  * Name: lcd_fpos_to_curpos
  *
  * Description:
@@ -1214,7 +1184,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv =
     (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
-  struct lcd_instream_s instream;
+  struct lib_meminstream_s instream;
   uint8_t row;
   uint8_t col;
   struct slcdstate_s state;
@@ -1226,10 +1196,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.getc = lcd_getstream;
-  instream.stream.nget = 0;
-  instream.buffer      = buffer;
-  instream.nbytes      = buflen;
+  lib_meminstream(&instream, buffer, buflen);
 
   /* Get the current cursor position now; we'll keep track of it as we go */
 
@@ -1238,8 +1205,8 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result =
-          slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.public,
+                               &state, &ch, &count)) != SLCDRET_EOF)
     {
       if (result == SLCDRET_CHAR)       /* A normal character was returned */
         {

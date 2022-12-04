@@ -285,15 +285,6 @@
  * Private Type Definition
  ****************************************************************************/
 
-/* SLCD incoming stream structure */
-
-struct slcd_instream_s
-{
-  struct lib_instream_s stream;
-  const char *buffer;
-  ssize_t nbytes;
-};
-
 /* Global SLCD state */
 
 struct stm32_slcdstate_s
@@ -528,30 +519,6 @@ static void slcd_clear(void)
    */
 
   putreg32(1, SLCD_SR_UDR_BB);
-}
-
-/****************************************************************************
- * Name: slcd_getstream
- *
- * Description:
- *   Get one character from the keyboard.
- *
- ****************************************************************************/
-
-static int slcd_getstream(struct lib_instream_s *instream)
-{
-  struct slcd_instream_s *slcdstream = (struct slcd_instream_s *)
-                                           instream;
-
-  DEBUGASSERT(slcdstream && slcdstream->buffer);
-  if (slcdstream->nbytes > 0)
-    {
-      slcdstream->nbytes--;
-      slcdstream->stream.nget++;
-      return (int)*slcdstream->buffer++;
-    }
-
-  return EOF;
 }
 
 /****************************************************************************
@@ -1165,7 +1132,7 @@ static ssize_t slcd_read(struct file *filep, char *buffer,
 static ssize_t slcd_write(struct file *filep,
                           const char *buffer, size_t len)
 {
-  struct slcd_instream_s instream;
+  struct lib_meminstream_s instream;
   struct slcdstate_s state;
   enum slcdret_e result;
   uint8_t ch;
@@ -1175,17 +1142,14 @@ static ssize_t slcd_write(struct file *filep,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.getc = slcd_getstream;
-  instream.stream.nget = 0;
-  instream.buffer      = buffer;
-  instream.nbytes      = len;
+  lib_meminstream(&instream, buffer, len);
 
   /* Prime the pump.  This is messy, but necessary to handle decoration on a
    * character based on any following period or colon.
    */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  result = slcd_decode(&instream.stream, &state, &prev, &count);
+  result = slcd_decode(&instream.public, &state, &prev, &count);
 
   lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
            result, prev, count);
@@ -1209,8 +1173,8 @@ static ssize_t slcd_write(struct file *filep,
 
   /* Now decode and process every byte in the input buffer */
 
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) !=
-         SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.public,
+                               &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);

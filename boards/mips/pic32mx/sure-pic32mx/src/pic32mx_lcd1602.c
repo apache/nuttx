@@ -119,15 +119,6 @@
  * Private Type Definition
  ****************************************************************************/
 
-/* SLCD incoming stream structure */
-
-struct lcd_instream_s
-{
-  struct lib_instream_s stream;
-  const char *buffer;
-  ssize_t nbytes;
-};
-
 /* Global LCD state */
 
 struct lcd1602_2
@@ -147,7 +138,7 @@ struct lcd1602_2
 #ifdef CONFIG_DEBUG_LCD_INFO
 static void lcd_dumpstate(const char *msg);
 static void lcd_dumpstream(const char *msg,
-                           const struct lcd_instream_s *stream);
+                           const struct lib_meminstream_s *stream);
 #else
 #  define lcd_dumpstate(msg)
 #  define lcd_dumpstream(msg, stream)
@@ -245,38 +236,14 @@ static void lcd_dumpstate(const char *msg)
 
 #ifdef CONFIG_DEBUG_LCD_INFO
 static void lcd_dumpstream(const char *msg,
-                           const struct lcd_instream_s *stream)
+                           const struct lib_meminstream_s *stream)
 {
   lcdinfo("%s:\n", msg);
   lcdinfo("  nget: %d nbytes: %d\n",
-          stream->stream.nget, stream->nbytes);
-  lib_dumpbuffer("STREAM", stream->buffer, stream->nbytes);
+          stream->public.nget, stream->buflen);
+  lib_dumpbuffer("STREAM", stream->buffer, stream->buflen);
 }
 #endif
-
-/****************************************************************************
- * Name: lcd_getstream
- *
- * Description:
- *   Get one character from the keyboard.
- *
- ****************************************************************************/
-
-static int lcd_getstream(struct lib_instream_s *instream)
-{
-  struct lcd_instream_s *lcdstream =
-                            (struct lcd_instream_s *)instream;
-
-  DEBUGASSERT(lcdstream && lcdstream->buffer);
-  if (lcdstream->nbytes > 0)
-    {
-      lcdstream->nbytes--;
-      lcdstream->stream.nget++;
-      return (int)*lcdstream->buffer++;
-    }
-
-  return EOF;
-}
 
 /****************************************************************************
  * Name: lcd_brightness
@@ -829,7 +796,7 @@ static ssize_t lcd_read(struct file *filep, char *buffer, size_t len)
 static ssize_t lcd_write(struct file *filep,  const char *buffer,
                          size_t len)
 {
-  struct lcd_instream_s instream;
+  struct lib_meminstream_s instream;
   struct slcdstate_s state;
   enum slcdret_e result;
   uint8_t ch;
@@ -837,18 +804,14 @@ static ssize_t lcd_write(struct file *filep,  const char *buffer,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.getc = lcd_getstream;
-  instream.stream.nget = 0;
-  instream.buffer      = buffer;
-  instream.nbytes      = len;
-
+  lib_meminstream(&instream, buffer, len);
   lcd_dumpstream("BEFORE WRITE", &instream);
 
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.stream,
-         &state, &ch, &count)) != SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.public,
+                               &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);
