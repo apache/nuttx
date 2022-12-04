@@ -72,6 +72,7 @@ static inline vbuf_container_t *dequeue_vbuf_unsafe(video_framebuff_t *fbuf)
       fbuf->vbuf_top = fbuf->vbuf_top->next;
     }
 
+  ret->next = NULL;
   return ret;
 }
 
