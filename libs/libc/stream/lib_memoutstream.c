@@ -94,7 +94,7 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_memoutstream(FAR struct lib_memoutstream_s *outstream,
                       FAR char *bufstart, int buflen)
 {
-  outstream->public.put   = memoutstream_putc;
+  outstream->public.putc  = memoutstream_putc;
   outstream->public.puts  = memoutstream_puts;
   outstream->public.flush = lib_noflush;
   outstream->public.nput  = 0;          /* Will be buffer index */

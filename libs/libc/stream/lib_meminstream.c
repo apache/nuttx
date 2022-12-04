@@ -80,7 +80,7 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
 void lib_meminstream(FAR struct lib_meminstream_s *instream,
                      FAR const char *bufstart, int buflen)
 {
-  instream->public.get  = meminstream_getc;
+  instream->public.getc = meminstream_getc;
   instream->public.nget = 0;          /* Will be buffer index */
   instream->buffer      = bufstart;   /* Start of buffer */
   instream->buflen      = buflen;     /* Length of the buffer */

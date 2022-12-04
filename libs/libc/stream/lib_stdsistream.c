@@ -89,7 +89,7 @@ static off_t stdsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
 void lib_stdsistream(FAR struct lib_stdsistream_s *instream,
                      FAR FILE *stream)
 {
-  instream->public.get  = stdsistream_getc;
+  instream->public.getc = stdsistream_getc;
   instream->public.seek = stdsistream_seek;
   instream->public.nget = 0;
   instream->stream      = stream;

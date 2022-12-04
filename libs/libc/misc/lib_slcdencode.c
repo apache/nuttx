@@ -86,9 +86,9 @@ static inline void slcd_put3(uint8_t slcdcode,
 {
   /* Put the 3-byte escape sequences into the output buffer */
 
-  stream->put(stream, ASCII_ESC);
-  stream->put(stream, '[');
-  stream->put(stream, 'A' + (int)slcdcode);
+  lib_stream_putc(stream, ASCII_ESC);
+  lib_stream_putc(stream, '[');
+  lib_stream_putc(stream, 'A' + (int)slcdcode);
 }
 
 /****************************************************************************
@@ -114,11 +114,11 @@ static inline void slcd_put5(uint8_t slcdcode, uint8_t count,
 {
   /* Put the 5-byte escape sequences into the output buffer */
 
-  stream->put(stream, ASCII_ESC);
-  stream->put(stream, '[');
-  stream->put(stream, slcd_nibble(count >> 4));
-  stream->put(stream, slcd_nibble(count));
-  stream->put(stream, 'A' + (int)slcdcode);
+  lib_stream_putc(stream, ASCII_ESC);
+  lib_stream_putc(stream, '[');
+  lib_stream_putc(stream, slcd_nibble(count >> 4));
+  lib_stream_putc(stream, slcd_nibble(count));
+  lib_stream_putc(stream, 'A' + (int)slcdcode);
 }
 
 /****************************************************************************

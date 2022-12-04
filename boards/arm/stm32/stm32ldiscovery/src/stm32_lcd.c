@@ -1175,7 +1175,7 @@ static ssize_t slcd_write(struct file *filep,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.get  = slcd_getstream;
+  instream.stream.getc = slcd_getstream;
   instream.stream.nget = 0;
   instream.buffer      = buffer;
   instream.nbytes      = len;

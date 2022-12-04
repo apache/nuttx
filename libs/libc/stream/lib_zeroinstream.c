@@ -58,6 +58,6 @@ static int zeroinstream_getc(FAR struct lib_instream_s *this)
 
 void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream)
 {
-  zeroinstream->get  = zeroinstream_getc;
+  zeroinstream->getc = zeroinstream_getc;
   zeroinstream->nget = 0;
 }

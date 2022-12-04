@@ -965,7 +965,7 @@ static inline void usbhost_encodescancode(FAR struct usbhost_state_s *priv,
 
           /* And it does correspond to a special function key */
 
-          usbstream.stream.put  = usbhost_putstream;
+          usbstream.stream.putc = usbhost_putstream;
           usbstream.stream.nput = 0;
           usbstream.priv        = priv;
 

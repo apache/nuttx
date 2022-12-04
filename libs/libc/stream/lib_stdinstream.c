@@ -76,7 +76,7 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
 void lib_stdinstream(FAR struct lib_stdinstream_s *instream,
                      FAR FILE *stream)
 {
-  instream->public.get  = stdinstream_getc;
+  instream->public.getc = stdinstream_getc;
   instream->public.nget = 0;
   instream->stream      = stream;
 }

@@ -89,7 +89,7 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
 
 void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd)
 {
-  instream->public.get  = rawinstream_getc;
+  instream->public.getc = rawinstream_getc;
   instream->public.nget = 0;
   instream->fd          = fd;
 }
