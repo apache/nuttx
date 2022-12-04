@@ -158,24 +158,24 @@ void video_framebuff_queue_container(video_framebuff_t *fbuf,
     {
       fbuf->vbuf_tail->next = tgt;
       fbuf->vbuf_tail = tgt;
-      if (fbuf->vbuf_next == NULL)
-        {
-          fbuf->vbuf_next = tgt;
-        }
     }
   else
     {
       fbuf->vbuf_top = fbuf->vbuf_tail = tgt;
+    }
+
+  if (fbuf->vbuf_next == NULL)
+    {
       fbuf->vbuf_next = tgt;
     }
 
   if (fbuf->mode == V4L2_BUF_MODE_RING)
     {
-      fbuf->vbuf_tail->next = fbuf->vbuf_top;
+      tgt->next = fbuf->vbuf_top;
     }
   else  /* Case of V4L2_BUF_MODE_FIFO */
     {
-      fbuf->vbuf_tail->next = NULL;
+      tgt->next = NULL;
     }
 
   leave_critical_section(flags);
@@ -237,15 +237,14 @@ void video_framebuff_change_mode(video_framebuff_t  *fbuf,
           if (mode == V4L2_BUF_MODE_RING)
             {
               fbuf->vbuf_tail->next = fbuf->vbuf_top;
-              fbuf->vbuf_next = fbuf->vbuf_top;
             }
           else
             {
               fbuf->vbuf_tail->next = NULL;
-              fbuf->vbuf_next = fbuf->vbuf_top;
             }
         }
 
+      fbuf->vbuf_next = fbuf->vbuf_top;
       fbuf->mode = mode;
     }
 
