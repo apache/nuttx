@@ -157,42 +157,6 @@ int hex2mem(int fd, uint32_t baseaddr, uint32_t endpaddr,
 int fhex2mem(FAR FILE *instream, uint32_t baseaddr, uint32_t endpaddr,
              enum hex2bin_swap_e swap);
 
-/****************************************************************************
- * Name: hex2bin_main
- *
- * Description:
- *   Main entry point when hex2bin is built as an NSH built-in task.
- *
- * Input Parameters:
- *   Standard task inputs
- *
- * Returned Value:
- *   EXIT_SUCCESS on success; EXIT_FAILURE on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSTEM_HEX2BIN_BUILTIN
-int hex2bin_main(int argc, char **argv);
-#endif /* CONFIG_SYSTEM_HEX2BIN_BUILTIN */
-
-/****************************************************************************
- * Name: hex2mem_main
- *
- * Description:
- *   Main entry point when hex2mem is built as an NSH built-in task.
- *
- * Input Parameters:
- *   Standard task inputs
- *
- * Returned Value:
- *   EXIT_SUCCESS on success; EXIT_FAILURE on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSTEM_HEX2MEM_BUILTIN
-int hex2mem_main(int argc, char **argv);
-#endif /* CONFIG_SYSTEM_HEX2MEM_BUILTIN */
-
 #undef EXTERN
 #ifdef __cplusplus
 }
