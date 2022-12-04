@@ -110,34 +110,31 @@ void video_framebuff_uninit(video_framebuff_t *fbuf)
 
 int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
 {
-  if (fbuf->vbuf_alloced == NULL || fbuf->container_size != sz)
+  if (fbuf->container_size == sz)
     {
-      if (fbuf->container_size != sz)
-        {
-          if (fbuf->vbuf_alloced != NULL)
-            {
-              kmm_free(fbuf->vbuf_alloced);
-            }
+      return OK;
+    }
 
-          fbuf->vbuf_alloced   = NULL;
-          fbuf->container_size = 0;
-        }
+  if (fbuf->vbuf_alloced != NULL)
+    {
+      kmm_free(fbuf->vbuf_alloced);
+      fbuf->vbuf_alloced   = NULL;
+      fbuf->container_size = 0;
+    }
 
-      if (sz > 0)
+  if (sz > 0)
+    {
+      fbuf->vbuf_alloced =
+        (vbuf_container_t *)kmm_malloc(sizeof(vbuf_container_t) * sz);
+      if (fbuf->vbuf_alloced == NULL)
         {
-          fbuf->vbuf_alloced
-           = (vbuf_container_t *)kmm_malloc(sizeof(vbuf_container_t)*sz);
-          if (fbuf->vbuf_alloced == NULL)
-            {
-              return -ENOMEM;
-            }
+          return -ENOMEM;
         }
 
       fbuf->container_size = sz;
     }
 
   cleanup_container(fbuf);
-
   return OK;
 }
 
