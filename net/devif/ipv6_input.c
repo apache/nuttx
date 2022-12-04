@@ -395,6 +395,16 @@ static int ipv6_in(FAR struct net_driver_s *dev)
             }
         }
     }
+
+#ifdef CONFIG_NET_IPFORWARD
+  /* Return success if the packet was forwarded. */
+
+  if (dev->d_len == 0)
+    {
+      goto done;
+    }
+#endif
+
 #ifdef CONFIG_NET_ICMPv6
 
   /* In other cases, the device must be assigned a non-zero IP address
