@@ -694,6 +694,24 @@ static int start_capture(enum v4l2_buf_type type,
   return OK;
 }
 
+static int stop_capture(enum v4l2_buf_type type)
+{
+  ASSERT(g_video_sensor_ops && g_video_data_ops);
+
+  if (g_video_data_ops->stop_capture == NULL ||
+      g_video_sensor_ops->stop_capture == NULL)
+    {
+      return -ENOTTY;
+    }
+
+  g_video_data_ops->stop_capture();
+  g_video_sensor_ops->stop_capture(
+     type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
+     IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL);
+
+  return OK;
+}
+
 static void change_video_state(FAR video_mng_t    *vmng,
                                enum video_state_e next_state)
 {
@@ -726,7 +744,7 @@ static void change_video_state(FAR video_mng_t    *vmng,
       if ((current_state == VIDEO_STATE_CAPTURE) &&
           (next_state    != VIDEO_STATE_CAPTURE))
         {
-          g_video_data_ops->stop_capture();
+          stop_capture(V4L2_BUF_TYPE_VIDEO_CAPTURE);
         }
     }
 
@@ -975,15 +993,19 @@ static void cleanup_scenes_parameter(void)
 
 static void cleanup_resources(FAR video_mng_t *vmng)
 {
-  /* clean up resource */
+  /* If in capture, stop */
 
-  if ((vmng->video_inf.state == VIDEO_STATE_CAPTURE) ||
-      (vmng->still_inf.state == VIDEO_STATE_CAPTURE))
+  if (vmng->video_inf.state == VIDEO_STATE_CAPTURE)
     {
-      /* If in capture, stop */
-
-      g_video_data_ops->stop_capture();
+      stop_capture(V4L2_BUF_TYPE_VIDEO_CAPTURE);
     }
+
+  if (vmng->still_inf.state == VIDEO_STATE_CAPTURE)
+    {
+      stop_capture(V4L2_BUF_TYPE_STILL_CAPTURE);
+    }
+
+  /* clean up resource */
 
   cleanup_streamresources(&vmng->video_inf);
   cleanup_streamresources(&vmng->still_inf);
@@ -2025,7 +2047,7 @@ static int video_takepict_stop(FAR struct video_mng_s *vmng, bool halfpush)
       flags = enter_critical_section();
       if (vmng->still_inf.state == VIDEO_STATE_CAPTURE)
         {
-          g_video_data_ops->stop_capture();
+          stop_capture(V4L2_BUF_TYPE_STILL_CAPTURE);
         }
 
       leave_critical_section(flags);
@@ -3412,7 +3434,7 @@ static int video_complete_capture(uint8_t  err_code, uint32_t datasize)
 
   if (type_inf->remaining_capnum == 0)
     {
-      g_video_data_ops->stop_capture();
+      stop_capture(buf_type);
       type_inf->state = VIDEO_STATE_STREAMOFF;
 
       /* If stop still stream, notify it to video stream */
@@ -3430,7 +3452,7 @@ static int video_complete_capture(uint8_t  err_code, uint32_t datasize)
       container = video_framebuff_get_vacant_container(&type_inf->bufinf);
       if (!container)
         {
-          g_video_data_ops->stop_capture();
+          stop_capture(buf_type);
           type_inf->state = VIDEO_STATE_STREAMON;
         }
       else
