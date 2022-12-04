@@ -3362,7 +3362,7 @@ int video_initialize(FAR const char *devpath)
 
 int video_uninitialize(void)
 {
-  if (is_initialized)
+  if (!is_initialized)
     {
       return OK;
     }
