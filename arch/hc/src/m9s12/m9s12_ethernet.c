@@ -296,7 +296,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       if (BUF->type == HTONS(ETHTYPE_ARP))
         {
-          arp_arpin(&priv->d_dev);
+          arp_input(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, d_len field will set to a value > 0.

@@ -530,7 +530,7 @@ static void bl602_net_receive(struct bl602_net_driver_s *priv)
     {
       /* Dispatch ARP packet to the network layer */
 
-      arp_arpin(&priv->net_dev);
+      arp_input(&priv->net_dev);
       NETDEV_RXARP(&priv->net_dev);
 
       if (priv->net_dev.d_len > 0)

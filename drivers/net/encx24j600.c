@@ -1488,7 +1488,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(&priv->dev);
 
-          arp_arpin(&priv->dev);
+          arp_input(&priv->dev);
 
           /* ARP packets are freed immediately */
 

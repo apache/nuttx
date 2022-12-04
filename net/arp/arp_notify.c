@@ -176,7 +176,7 @@ int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout)
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   arp_arpin() will execute with the network locked.
+ *   arp_input() will execute with the network locked.
  *
  ****************************************************************************/
 
