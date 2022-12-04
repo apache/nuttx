@@ -940,8 +940,6 @@ static void cleanup_streamresources(FAR video_type_inf_t *type_inf)
   video_framebuff_uninit(&type_inf->bufinf);
   nxsem_destroy(&type_inf->wait_capture.dqbuf_wait_flg);
   nxmutex_destroy(&type_inf->lock_state);
-  memset(type_inf, 0, sizeof(video_type_inf_t));
-  type_inf->remaining_capnum = VIDEO_REMAINING_CAPNUM_INFINITY;
 }
 
 static void cleanup_scene_parameter(video_scene_params_t *sp)
