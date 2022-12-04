@@ -57,7 +57,7 @@ static fd_set g_active_write_fds;
  * Private Functions
  ****************************************************************************/
 
-static void usrsock_host_clear_fd(int fd, fd_set *fds)
+static void host_usrsock_clear_fd(int fd, fd_set *fds)
 {
   if (FD_ISSET(fd, fds))
     {
@@ -82,7 +82,7 @@ static void usrsock_host_clear_fd(int fd, fd_set *fds)
     }
 }
 
-static void usrsock_host_set_fd(int fd, fd_set *fds)
+static void host_usrsock_set_fd(int fd, fd_set *fds)
 {
   if (!FD_ISSET(fd, fds))
     {
@@ -128,7 +128,7 @@ static void sock_nonblock(int socket, int enable)
     }
 }
 
-static int usrsock_host_sockopt(int sockfd, int level, int optname,
+static int host_usrsock_sockopt(int sockfd, int level, int optname,
                                 const void *optval, nuttx_socklen_t *optlen,
                                 bool set)
 {
@@ -185,7 +185,7 @@ static int usrsock_host_sockopt(int sockfd, int level, int optname,
  * Public Functions
  ****************************************************************************/
 
-int usrsock_host_socket(int domain, int type, int protocol)
+int host_usrsock_socket(int domain, int type, int protocol)
 {
   int opt = 1;
   int ret;
@@ -246,20 +246,20 @@ int usrsock_host_socket(int domain, int type, int protocol)
   setsockopt(ret, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
   sock_nonblock(ret, true);
-  usrsock_host_set_fd(ret, &g_active_read_fds);
+  host_usrsock_set_fd(ret, &g_active_read_fds);
 
   return ret;
 }
 
-int usrsock_host_close(int sockfd)
+int host_usrsock_close(int sockfd)
 {
-  usrsock_host_clear_fd(sockfd, &g_active_read_fds);
-  usrsock_host_clear_fd(sockfd, &g_active_write_fds);
+  host_usrsock_clear_fd(sockfd, &g_active_read_fds);
+  host_usrsock_clear_fd(sockfd, &g_active_write_fds);
 
   return close(sockfd);
 }
 
-int usrsock_host_connect(int sockfd,
+int host_usrsock_connect(int sockfd,
                          const struct nuttx_sockaddr *addr,
                          nuttx_socklen_t addrlen)
 {
@@ -277,12 +277,12 @@ int usrsock_host_connect(int sockfd,
       return -errno;
     }
 
-  usrsock_host_set_fd(sockfd, &g_active_read_fds);
+  host_usrsock_set_fd(sockfd, &g_active_read_fds);
 
   return ret;
 }
 
-ssize_t usrsock_host_sendto(int sockfd, const void *buf,
+ssize_t host_usrsock_sendto(int sockfd, const void *buf,
                             size_t len, int flags,
                             const struct nuttx_sockaddr *dest_addr,
                             nuttx_socklen_t addrlen)
@@ -305,7 +305,7 @@ ssize_t usrsock_host_sendto(int sockfd, const void *buf,
     {
       if (errno == EAGAIN)
         {
-          usrsock_host_set_fd(sockfd, &g_active_write_fds);
+          host_usrsock_set_fd(sockfd, &g_active_write_fds);
         }
       else
         {
@@ -316,7 +316,7 @@ ssize_t usrsock_host_sendto(int sockfd, const void *buf,
   return ret >= 0 ? ret : -errno;
 }
 
-ssize_t usrsock_host_recvfrom(int sockfd, void *buf, size_t len, int flags,
+ssize_t host_usrsock_recvfrom(int sockfd, void *buf, size_t len, int flags,
                               struct nuttx_sockaddr *src_addr,
                               nuttx_socklen_t *addrlen)
 {
@@ -349,26 +349,26 @@ ssize_t usrsock_host_recvfrom(int sockfd, void *buf, size_t len, int flags,
       sockaddr_to_nuttx(&naddr, naddrlen, src_addr, addrlen);
     }
 
-  usrsock_host_set_fd(sockfd, &g_active_read_fds);
+  host_usrsock_set_fd(sockfd, &g_active_read_fds);
 
   return ret;
 }
 
-int usrsock_host_setsockopt(int sockfd, int level, int optname,
+int host_usrsock_setsockopt(int sockfd, int level, int optname,
                             const void *optval, nuttx_socklen_t optlen)
 {
-  return usrsock_host_sockopt(sockfd, level, optname,
+  return host_usrsock_sockopt(sockfd, level, optname,
                               optval, &optlen, true);
 }
 
-int usrsock_host_getsockopt(int sockfd, int level, int optname,
+int host_usrsock_getsockopt(int sockfd, int level, int optname,
                             void *optval, nuttx_socklen_t *optlen)
 {
-  return usrsock_host_sockopt(sockfd, level, optname,
+  return host_usrsock_sockopt(sockfd, level, optname,
                               optval, optlen, false);
 }
 
-int usrsock_host_getsockname(int sockfd,
+int host_usrsock_getsockname(int sockfd,
                              struct nuttx_sockaddr *addr,
                              nuttx_socklen_t *addrlen)
 {
@@ -390,7 +390,7 @@ int usrsock_host_getsockname(int sockfd,
   return ret;
 }
 
-int usrsock_host_getpeername(int sockfd,
+int host_usrsock_getpeername(int sockfd,
                              struct nuttx_sockaddr *addr,
                              nuttx_socklen_t *addrlen)
 {
@@ -412,7 +412,7 @@ int usrsock_host_getpeername(int sockfd,
   return ret;
 }
 
-int usrsock_host_bind(int sockfd,
+int host_usrsock_bind(int sockfd,
                       const struct nuttx_sockaddr *addr,
                       nuttx_socklen_t addrlen)
 {
@@ -424,7 +424,7 @@ int usrsock_host_bind(int sockfd,
   return bind(sockfd, &naddr, naddrlen) < 0 ? -errno : 0;
 }
 
-int usrsock_host_listen(int sockfd, int backlog)
+int host_usrsock_listen(int sockfd, int backlog)
 {
   int ret;
 
@@ -434,12 +434,12 @@ int usrsock_host_listen(int sockfd, int backlog)
       return -errno;
     }
 
-  usrsock_host_set_fd(sockfd, &g_active_read_fds);
+  host_usrsock_set_fd(sockfd, &g_active_read_fds);
 
   return ret;
 }
 
-int usrsock_host_accept(int sockfd, struct nuttx_sockaddr *addr,
+int host_usrsock_accept(int sockfd, struct nuttx_sockaddr *addr,
                         nuttx_socklen_t *addrlen)
 {
   socklen_t naddrlen = sizeof(socklen_t);
@@ -458,18 +458,18 @@ int usrsock_host_accept(int sockfd, struct nuttx_sockaddr *addr,
     }
 
   sock_nonblock(ret, true);
-  usrsock_host_set_fd(ret, &g_active_read_fds);
-  usrsock_host_set_fd(sockfd, &g_active_read_fds);
+  host_usrsock_set_fd(ret, &g_active_read_fds);
+  host_usrsock_set_fd(sockfd, &g_active_read_fds);
 
   return ret;
 }
 
-int usrsock_host_ioctl(int fd, unsigned long request, ...)
+int host_usrsock_ioctl(int fd, unsigned long request, ...)
 {
   return 0;
 }
 
-void usrsock_host_loop(void)
+void host_usrsock_loop(void)
 {
   struct timeval timeout;
   fd_set write_fds;
@@ -499,13 +499,13 @@ void usrsock_host_loop(void)
 
       if (FD_ISSET(i, &read_fds))
         {
-          usrsock_host_clear_fd(i, &g_active_read_fds);
+          host_usrsock_clear_fd(i, &g_active_read_fds);
           events |= NUTTX_USRSOCK_EVENT_RECVFROM_AVAIL;
         }
 
       if (FD_ISSET(i, &write_fds))
         {
-          usrsock_host_clear_fd(i, &g_active_write_fds);
+          host_usrsock_clear_fd(i, &g_active_write_fds);
           events |= NUTTX_USRSOCK_EVENT_SENDTO_READY;
         }
 
