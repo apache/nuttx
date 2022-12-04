@@ -111,13 +111,6 @@ struct ht16k33_dev_s
   mutex_t    lock;
 };
 
-struct lcd_instream_s
-{
-  struct lib_instream_s stream;
-  FAR const char *buffer;
-  ssize_t nbytes;
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -707,29 +700,6 @@ static void lcd_codec_action(FAR struct ht16k33_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: lcd_getstream
- *
- * Description:
- *   Get one character from the LCD codec stream.
- *
- ****************************************************************************/
-
-static int lcd_getstream(FAR struct lib_instream_s *instream)
-{
-  FAR struct lcd_instream_s *lcdstream =
-    (FAR struct lcd_instream_s *)instream;
-
-  if (lcdstream->nbytes > 0)
-    {
-      lcdstream->nbytes--;
-      lcdstream->stream.nget++;
-      return (int)*lcdstream->buffer++;
-    }
-
-  return EOF;
-}
-
-/****************************************************************************
  * Name: lcd_init
  *
  * Description:
@@ -798,7 +768,7 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ht16k33_dev_s *priv = inode->i_private;
-  struct lcd_instream_s instream;
+  struct lib_meminstream_s instream;
   struct slcdstate_s state;
   enum slcdret_e result;
   uint8_t ch;
@@ -808,16 +778,13 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.getc = lcd_getstream;
-  instream.stream.nget = 0;
-  instream.buffer      = buffer;
-  instream.nbytes      = buflen;
+  lib_meminstream(&instream, buffer, buflen);
 
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) !=
-         SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.public,
+                               &state, &ch, &count)) != SLCDRET_EOF)
     {
       /* Is there some pending scroll? */
 
