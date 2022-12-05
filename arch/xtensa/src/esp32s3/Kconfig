@@ -833,6 +833,48 @@ choice ESP32S3_FLASH_FREQ
 
 endchoice # ESP32S3_FLASH_FREQ
 
+config ESP32S3_HAVE_OTA_PARTITION
+	bool
+	default n
+
+if ESP32S3_HAVE_OTA_PARTITION
+
+comment "Application Image OTA Update support"
+
+config ESP32S3_OTA_PRIMARY_SLOT_OFFSET
+	hex "Application image primary slot offset"
+	default 0x10000
+
+config ESP32S3_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config ESP32S3_OTA_SECONDARY_SLOT_OFFSET
+	hex "Application image secondary slot offset"
+	default 0x110000
+
+config ESP32S3_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config ESP32S3_OTA_SLOT_SIZE
+	hex "Application image slot size (in bytes)"
+	default 0x100000
+
+config ESP32S3_OTA_SCRATCH_OFFSET
+	hex "Scratch partition offset"
+	default 0x210000
+
+config ESP32S3_OTA_SCRATCH_SIZE
+	hex "Scratch partition size"
+	default 0x40000
+
+config ESP32S3_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+endif
+
 if ESP32S3_SPIFLASH
 
 comment "General storage MTD configuration"
@@ -881,6 +923,18 @@ config ESP32S3_APP_FORMAT_LEGACY
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
 
+config ESP32S3_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select ESP32S3_HAVE_OTA_PARTITION
+	depends on EXPERIMENTAL
+	---help---
+		The Espressif port of MCUboot supports the loading of unsegmented firmware
+		images.
+
+comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
+	depends on !EXPERIMENTAL
+
+
 endchoice # Application Image Format
 
 choice
@@ -906,6 +960,36 @@ config ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
 		(ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT) and partition information.
 
 endchoice
+
+choice
+	prompt "Target slot for image flashing"
+	default ESP32S3_ESPTOOL_TARGET_PRIMARY
+	depends on ESP32S3_HAVE_OTA_PARTITION
+	---help---
+		Slot to which ESPTOOL will flash the generated binary image.
+
+config ESP32S3_ESPTOOL_TARGET_PRIMARY
+	bool "Application image primary slot"
+	---help---
+		This assumes that the generated image is already pre-validated.
+		This is the recommended option for the initial stages of the
+		application firmware image development.
+
+config ESP32S3_ESPTOOL_TARGET_SECONDARY
+	bool "Application image secondary slot"
+	---help---
+		The application needs to confirm the generated image as valid,
+		otherwise the bootloader may consider it invalid and perform the
+		rollback of the update after a reset.
+		This is the choice most suitable for the development and verification
+		of a secure firmware update workflow.
+
+endchoice
+
+config ESP32S3_APP_MCUBOOT_HEADER_SIZE
+	int "Application image header size (in bytes)"
+	default 32
+	depends on ESP32S3_APP_FORMAT_MCUBOOT
 
 config ESP32S3_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"

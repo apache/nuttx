@@ -34,7 +34,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
   ARCHSCRIPT += $(call FINDSCRIPT,kernel-space.ld)
 else
   ARCHSCRIPT += $(call FINDSCRIPT,flat_memory.ld)
-  ARCHSCRIPT += $(call FINDSCRIPT,esp32s3_sections.ld)
+  ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
