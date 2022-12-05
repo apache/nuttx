@@ -1826,11 +1826,11 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
 
   /* Then wait for each to complete */
 
-  ret = spi_dmarxwait(priv);
+  ret = spi_dmatxwait(priv);
 
   if (ret < 0)
     {
-      ret = spi_dmatxwait(priv);
+      ret = spi_dmarxwait(priv);
     }
 
   /* Reset any status */
