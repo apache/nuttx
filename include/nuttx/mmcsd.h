@@ -36,7 +36,12 @@
 
 /* mmcsd ioctl */
 
-#define MMC_RPMB_TRANSFER       _MMCSDIOC(0x0000)
+#define MMC_IOC_CMD             _MMCSDIOC(0x0000)
+#define MMC_IOC_MULTI_CMD       _MMCSDIOC(0x0001)
+
+#define MMC_IOC_MAX_BYTES       (512L * 1024)
+#define MMC_IOC_MAX_CMDS        255
+#define mmc_ioc_cmd_set_data(ic, ptr) (ic).data_ptr = (uint64_t)(unsigned long)(ptr)
 
 /* rpmb request */
 
@@ -49,6 +54,49 @@
  * Public Types
  ****************************************************************************/
 
+struct mmc_ioc_cmd
+{
+  /* Direction of data: nonzero = write, zero = read.
+   * Bit 31 selects 'Reliable Write' for RPMB.
+   */
+
+  int write_flag;
+
+  /* Application-specific command.  true = precede with CMD55 */
+
+  int is_acmd;
+
+  uint32_t opcode;
+  uint32_t arg;
+  uint32_t response[4];  /* CMD response */
+  unsigned int flags;
+  unsigned int blksz;
+  unsigned int blocks;
+
+  /* For 64-bit machines, the next member, ``uint64_t data_ptr``, wants to
+   * be 8-byte aligned.  Make sure this struct is the same size when
+   * built for 32-bit.
+   */
+
+  uint32_t pad;
+
+  /* DAT buffer */
+
+  uint64_t data_ptr;
+};
+
+/* struct mmc_ioc_multi_cmd - multi command information
+ * @num_of_cmds: Number of commands to send. Must be equal to or less than
+ * MMC_IOC_MAX_CMDS.
+ * @cmds: Array of commands with length equal to 'num_of_cmds'
+ */
+
+struct mmc_ioc_multi_cmd
+{
+  uint64_t num_of_cmds;
+  struct mmc_ioc_cmd cmds[1];
+};
+
 struct mmc_rpmb_frame_s
 {
   uint8_t  stuff[196];
@@ -60,12 +108,6 @@ struct mmc_rpmb_frame_s
   uint16_t block_count;
   uint16_t result;
   uint16_t req_resp;
-};
-
-struct mmc_rpmb_transfer_s
-{
-  unsigned int num_of_frames;
-  struct mmc_rpmb_frame_s frames[0];
 };
 
 /****************************************************************************

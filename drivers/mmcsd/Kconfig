@@ -27,6 +27,12 @@ menuconfig MMCSD
 
 if MMCSD
 
+config MMCSD_IOCSUPPORT
+	int "Enable MMC/SD ioctl support"
+	default y
+	---help---
+		Disable it to save some code size if required.
+
 config MMCSD_NSLOTS
 	int "Number of MMC/SD slots"
 	default 1
