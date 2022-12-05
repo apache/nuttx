@@ -321,7 +321,7 @@ begin_packed_struct struct bt_att_read_mult_rsp_s
 
 /* Read by Group Type Request */
 
-struct bt_att_read_group_req_s
+begin_packed_struct struct bt_att_read_group_req_s
 {
   uint16_t start_handle;
   uint16_t end_handle;

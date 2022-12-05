@@ -1175,7 +1175,7 @@ begin_packed_struct struct ieee80211_qosframe
 begin_packed_struct struct ieee80211_qoscntl
 {
   uint8_t  i_qos[2];
-};
+} end_packed_struct;
 
 begin_packed_struct struct ieee80211_frame_addr4
 {
