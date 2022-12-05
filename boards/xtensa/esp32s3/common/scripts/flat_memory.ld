@@ -51,6 +51,21 @@
 
 MEMORY
 {
+#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+  /* The origin values for "metadata" and "ROM" memory regions are the actual
+   * load addresses.
+   *
+   * NOTE: The memory region starting from 0x0 with length represented by
+   * CONFIG_ESP32S3_APP_MCUBOOT_HEADER_SIZE is reserved for the MCUboot header,
+   * which will be prepended to the binary file by the "imgtool" during the
+   * signing of firmware image.
+   */
+
+  metadata (RX) :        org = CONFIG_ESP32S3_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
+                         len = FLASH_SIZE - ORIGIN(ROM)
+#endif
+
   /* Below values assume the flash cache is on, and have the blocks this
    * uses subtracted from the length of the various regions. The 'data access
    * port' dram/drom regions map to the same iram/irom regions but are
@@ -63,6 +78,9 @@ MEMORY
 
   /* Flash mapped instruction data. */
 
+#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+  irom0_0_seg (RX) :                 org = 0x42000000, len = FLASH_SIZE
+#else
   /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
@@ -71,6 +89,7 @@ MEMORY
    */
 
   irom0_0_seg (RX) :                 org = 0x42000020, len = FLASH_SIZE - 0x20
+#endif
 
   /* Shared data RAM, excluding memory reserved for bootloader and ROM
    * bss/data/stack.
@@ -80,6 +99,23 @@ MEMORY
 
   /* Flash mapped constant data */
 
+#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+  /* The DROM segment origin is offset by 0x40 for mirroring the actual ROM
+   * image layout:
+   *    0x0  - 0x1F : MCUboot header
+   *    0x20 - 0x3F : Application image metadata section
+   *    0x40 onwards: ROM code and data
+   * This is required to meet the following constraint from the external
+   * flash MMU:
+   *    VMA % 64KB == LMA % 64KB
+   * i.e. the lower 16 bits of both the virtual address (address seen by the
+   * CPU) and the load address (physical address of the external flash) must
+   * be equal.
+   */
+
+  drom0_0_seg (R) :      org = 0x3c000000 + ORIGIN(ROM),
+                         len = FLASH_SIZE - ORIGIN(ROM)
+#else
   /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
@@ -88,6 +124,7 @@ MEMORY
    */
 
   drom0_0_seg (R) :                  org = 0x3c000020, len = FLASH_SIZE - 0x20
+#endif
 
   /* RTC fast memory (executable). Persists over deep sleep. */
 

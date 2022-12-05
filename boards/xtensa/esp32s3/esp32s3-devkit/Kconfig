@@ -7,7 +7,8 @@ if ARCH_BOARD_ESP32S3_DEVKIT
 
 config ESP32S3_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
-	default 0x180000
+	default 0x180000 if !ESP32S3_HAVE_OTA_PARTITION
+	default 0x250000 if ESP32S3_HAVE_OTA_PARTITION
 	depends on ESP32S3_MTD
 	---help---
 		MTD base address in SPI Flash.

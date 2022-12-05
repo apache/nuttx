@@ -34,7 +34,11 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
   ARCHSCRIPT += $(call FINDSCRIPT,kernel-space.ld)
 else
   ARCHSCRIPT += $(call FINDSCRIPT,flat_memory.ld)
-  ARCHSCRIPT += $(call FINDSCRIPT,esp32s3_sections.ld)
+  ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
+    ARCHSCRIPT += $(call FINDSCRIPT,mcuboot_sections.ld)
+  else
+    ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
+  endif
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
