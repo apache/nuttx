@@ -343,6 +343,7 @@ static void sim_updatework(void *arg)
 {
   work_queue(LPWORK, &g_updatework, sim_updatework, NULL, MSEC2TICK(33));
   sim_x11update();
+  fb_pollnotify(&g_fbobject);
 }
 #endif
 
