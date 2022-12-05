@@ -62,9 +62,9 @@ config NET_TCP_NPOLLWAITERS
 
 config NET_TCP_RTO
 	int "RTO of TCP/IP connections"
-	default 3
+	default 1
 	---help---
-		RTO of TCP/IP connections (all tasks)
+		RTO of TCP/IP connections (all tasks). In units of 500ms.
 
 config NET_TCP_MAXRTX
 	int "Maximum retransmitted number of TCP/IP data packet"
