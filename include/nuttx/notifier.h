@@ -176,7 +176,7 @@ extern "C"
       FAR struct atomic_notifier_head *nh = (nhead); \
       irqstate_t flags; \
       flags = enter_critical_section(); \
-      notifier_chain_unregister(nh->head, (nb); \
+      notifier_chain_unregister(nh->head, (nb)); \
       leave_critical_section(flags); \
     } \
   while(0)
