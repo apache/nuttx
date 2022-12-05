@@ -2826,6 +2826,10 @@ static int save_scene_param(enum v4l2_scene_mode mode,
         break;
 
       case IMGSENSOR_CTRL_TYPE_U8:
+        if (control->size < elem->nr_elems * sizeof(uint8_t))
+          {
+            return -EINVAL;
+          }
 
         for (i = 0; i < elem->nr_elems; i++)
           {
@@ -2842,6 +2846,10 @@ static int save_scene_param(enum v4l2_scene_mode mode,
         break;
 
       case IMGSENSOR_CTRL_TYPE_U16:
+        if (control->size < elem->nr_elems * sizeof(uint16_t))
+          {
+            return -EINVAL;
+          }
 
         for (i = 0; i < elem->nr_elems; i++)
           {
@@ -2858,6 +2866,10 @@ static int save_scene_param(enum v4l2_scene_mode mode,
         break;
 
       case IMGSENSOR_CTRL_TYPE_U32:
+        if (control->size < elem->nr_elems * sizeof(uint32_t))
+          {
+            return -EINVAL;
+          }
 
         for (i = 0; i < elem->nr_elems; i++)
           {
