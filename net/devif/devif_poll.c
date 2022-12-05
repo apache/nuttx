@@ -645,7 +645,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 static int devif_poll_connections(FAR struct net_driver_s *dev,
                                   devif_poll_callback_t callback)
 {
-  int bstop;
+  int bstop = false;
 
   /* Traverse all of the active packet connections and perform the poll
    * action.
