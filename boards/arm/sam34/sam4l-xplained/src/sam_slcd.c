@@ -267,7 +267,6 @@ static void slcd_setpixel(const struct slcd_pixel_s *info);
 static void slcd_clrpixel(const struct slcd_pixel_s *info);
 static inline void slcd_setdp(uint8_t curpos);
 static inline void slcd_clrdp(uint8_t curpos);
-static int slcd_getstream(struct lib_instream_s *instream);
 static uint8_t slcd_getcontrast(void);
 static int slcd_setcontrast(unsigned int contrast);
 static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options);
