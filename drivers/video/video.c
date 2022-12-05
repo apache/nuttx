@@ -1139,12 +1139,20 @@ static int video_enum_input(FAR struct v4l2_input *input)
 {
   FAR const char *name;
 
+  ASSERT(g_video_sensor_ops);
+
   if (input->index > 0)
     {
       return -EINVAL;
     }
 
+  if (g_video_sensor_ops->get_driver_name == NULL)
+    {
+      return -ENOTTY;
+    }
+
   name = g_video_sensor_ops->get_driver_name();
+  memset(input, 0, sizeof(struct v4l2_input));
   strlcpy((FAR char *)input->name, name, sizeof(input->name));
   input->type = V4L2_INPUT_TYPE_CAMERA;
 
@@ -1678,7 +1686,7 @@ static int video_g_fmt(FAR struct video_mng_s *priv,
       return -EINVAL;
     }
 
-  memset(fmt, 0, sizeof(*fmt));
+  memset(&fmt->fmt, 0, sizeof(fmt->fmt));
   fmt->fmt.pix.width = type_inf->fmt[VIDEO_FMT_MAIN].width;
   fmt->fmt.pix.height = type_inf->fmt[VIDEO_FMT_MAIN].height;
   fmt->fmt.pix.pixelformat = type_inf->fmt[VIDEO_FMT_MAIN].pixelformat;
@@ -1788,14 +1796,14 @@ static int video_g_parm(FAR struct video_mng_s *vmng,
       return -EINVAL;
     }
 
+  memset(&parm->parm, 0, sizeof(parm->parm));
+
   if ((type_inf->state == VIDEO_STATE_CAPTURE) &&
       (g_video_sensor_ops->get_frame_interval != NULL))
     {
       /* If capture is started and lower driver has the get_frame_interval(),
        * query lower driver.
        */
-
-      memset(&parm->parm, 0, sizeof(parm->parm));
 
       ret = g_video_sensor_ops->get_frame_interval
               (parm->type,
@@ -2121,6 +2129,11 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
     {
       return -EINVAL;
     }
+
+  attr->flags      = 0;
+  attr->elem_size  = 0;
+  attr->nr_of_dims = 0;
+  memset(attr->dims, 0, sizeof(attr->dims));
 
   if ((attr->ctrl_class == V4L2_CTRL_CLASS_CAMERA) &&
       (attr->id == V4L2_CID_SCENE_MODE))
