@@ -1609,12 +1609,6 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
 
   ASSERT(priv && g_video_sensor_ops && g_video_data_ops);
 
-  if ((g_video_sensor_ops->validate_frame_setting == NULL) ||
-      (g_video_data_ops->validate_frame_setting == NULL))
-    {
-      return -ENOTTY;
-    }
-
   if (v4l2 == NULL)
     {
       return -EINVAL;
@@ -1752,13 +1746,6 @@ static int video_s_parm(FAR struct video_mng_s *priv,
   FAR video_type_inf_t *type_inf;
 
   ASSERT(g_video_sensor_ops && g_video_data_ops);
-
-  if ((g_video_sensor_ops->validate_frame_setting == NULL) ||
-      (g_video_data_ops->validate_frame_setting == NULL) ||
-      (parm == NULL))
-    {
-      return -EINVAL;
-    }
 
   type_inf = get_video_type_inf(priv, parm->type);
   if (type_inf == NULL)
