@@ -219,6 +219,7 @@ static int video_complete_capture(uint8_t  err_code, uint32_t datasize);
 static int validate_frame_setting(enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
+                                  FAR struct v4l2_rect *clip,
                                   FAR struct v4l2_fract *interval);
 static size_t get_bufsize(FAR video_format_t *vf);
 
@@ -1463,7 +1464,6 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
   int32_t id;
   uint32_t p_u32[IMGSENSOR_CLIP_NELEM];
   imgsensor_value_t val;
-  video_format_t c_fmt[MAX_VIDEO_FMT];
 
   ASSERT(g_video_sensor_ops && vmng);
 
@@ -1493,16 +1493,10 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
       return -EINVAL;
     }
 
-  /* Query that clipped size is available. */
-
-  get_clipped_format(type_inf->nr_fmt,
-                     type_inf->fmt,
-                     &clip->r,
-                     c_fmt);
-
   ret = validate_frame_setting(clip->type,
                                type_inf->nr_fmt,
-                               c_fmt,
+                               type_inf->fmt,
+                               &clip->r,
                                &type_inf->frame_interval);
   if (ret != OK)
     {
@@ -1555,9 +1549,11 @@ static int video_g_selection(FAR struct video_mng_s    *vmng,
 static int validate_frame_setting(enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
+                                  FAR struct v4l2_rect *clip,
                                   FAR struct v4l2_fract *interval)
 {
   int ret;
+  video_format_t c_fmt[MAX_VIDEO_FMT];
   imgdata_format_t df[MAX_VIDEO_FMT];
   imgsensor_format_t sf[MAX_VIDEO_FMT];
   imgdata_interval_t di;
@@ -1575,8 +1571,10 @@ static int validate_frame_setting(enum v4l2_buf_type type,
    * image sensor driver support.
    */
 
-  convert_to_imgdatafmt(&vfmt[VIDEO_FMT_MAIN], &df[IMGDATA_FMT_MAIN]);
-  convert_to_imgdatafmt(&vfmt[VIDEO_FMT_SUB], &df[IMGDATA_FMT_SUB]);
+  get_clipped_format(nr_fmt, vfmt, clip, c_fmt);
+
+  convert_to_imgdatafmt(&c_fmt[VIDEO_FMT_MAIN], &df[IMGDATA_FMT_MAIN]);
+  convert_to_imgdatafmt(&c_fmt[VIDEO_FMT_SUB], &df[IMGDATA_FMT_SUB]);
   convert_to_imgdatainterval(interval, &di);
   convert_to_imgsensorfmt(&vfmt[VIDEO_FMT_MAIN], &sf[IMGSENSOR_FMT_MAIN]);
   convert_to_imgsensorfmt(&vfmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
@@ -1674,6 +1672,7 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
   return validate_frame_setting(v4l2->type,
                                 nr_fmt,
                                 vf,
+                                &type_inf->clip,
                                 &type_inf->frame_interval);
 }
 
@@ -1771,6 +1770,7 @@ static int video_s_parm(FAR struct video_mng_s *priv,
   ret = validate_frame_setting(parm->type,
                                type_inf->nr_fmt,
                                type_inf->fmt,
+                               &type_inf->clip,
                                &parm->parm.capture.timeperframe);
   if (ret != OK)
     {
