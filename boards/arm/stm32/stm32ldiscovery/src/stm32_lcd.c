@@ -313,7 +313,6 @@ static void slcd_dumpslcd(const char *msg);
 /* Internal utilities */
 
 static void slcd_clear(void);
-static int slcd_getstream(struct lib_instream_s *instream);
 static uint8_t slcd_getcontrast(void);
 static int slcd_setcontrast(uint8_t contrast);
 static void slcd_writebar(void);
