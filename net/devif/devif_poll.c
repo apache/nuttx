@@ -645,7 +645,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 static int devif_poll_connections(FAR struct net_driver_s *dev,
                                   devif_poll_callback_t callback)
 {
-  int bstop;
+  int bstop = false;
 
   /* Traverse all of the active packet connections and perform the poll
    * action.
@@ -903,8 +903,8 @@ static int devif_poll_callback(FAR struct net_driver_s *dev)
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
   uint16_t llhdrlen;
-  int bstop = false;
   FAR uint8_t *buf;
+  int bstop;
 
   if (dev->d_buf == NULL)
     {
@@ -913,17 +913,18 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   buf = dev->d_buf;
 
-  /* Device polling, prepare iob buffer */
-
-  if (netdev_iob_prepare(dev, false, 0) != OK)
-    {
-      return true;
-    }
-
   llhdrlen = NET_LL_HDRLEN(dev);
 
   do
     {
+      /* Device polling, prepare iob buffer */
+
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          bstop = true;
+          break;
+        }
+
       /* Perform all connections poll */
 
       bstop = devif_poll_connections(dev, devif_poll_callback);
@@ -951,18 +952,13 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
           if (dev->d_buf != buf)
             {
-              if (dev->d_buf == NULL)
+              buf = dev->d_buf;
+
+              if (buf == NULL)
                 {
                   break;
                 }
-
-              buf = dev->d_buf;
             }
-
-          /* Finish copy, reset iob */
-
-          netdev_iob_prepare(dev, false, 0);
-          iob_update_pktlen(dev->d_iob, 0);
         }
     }
   while (bstop);
