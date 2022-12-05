@@ -102,6 +102,10 @@
 #define EDMA_ALIGN_MASK   (EDMA_ALIGN - 1)
 #define EDMA_ALIGN_UP(n)  (((n) + EDMA_ALIGN_MASK) & ~EDMA_ALIGN_MASK)
 
+#ifdef CONFIG_S32K3XX_DTCM_HEAP
+#  define DTCM_BACKDOOR_OFFSET 0x1000000
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -153,12 +157,6 @@ struct s32k3xx_edma_s
 
   struct s32k3xx_dmach_s dmach[S32K3XX_EDMA_NCHANNELS];
 };
-
-#ifdef CONFIG_S32K3XX_DTCM_HEAP
-extern uint8_t DTCM_BASE_ADDR[];
-extern uint8_t DTCM_END_ADDR[];
-#define DTCM_BACKDOOR_OFFSET 0x1000000
-#endif
 
 /****************************************************************************
  * Private Data
@@ -418,6 +416,15 @@ const struct peripheral_clock_config_s edma_clockconfig[] =
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_S32K3XX_DTCM_HEAP
+extern uint8_t DTCM_BASE_ADDR[];
+extern uint8_t DTCM_END_ADDR[];
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -623,14 +630,14 @@ static inline void s32k3xx_tcd_configure(struct s32k3xx_edmatcd_s *tcd,
 #ifdef CONFIG_S32K3XX_DTCM_HEAP
   /* Remap address to backdoor address for eDMA */
 
-  if (tcd->saddr >= (uint32_t)DTCM_BASE_ADDR
-      && tcd->saddr < (uint32_t)DTCM_END_ADDR)
+  if (tcd->saddr >= (uint32_t)DTCM_BASE_ADDR &&
+      tcd->saddr < (uint32_t)DTCM_END_ADDR)
     {
         tcd->saddr += DTCM_BACKDOOR_OFFSET;
     }
 
-  if (tcd->daddr >= (uint32_t)DTCM_BASE_ADDR
-      && tcd->daddr < (uint32_t)DTCM_END_ADDR)
+  if (tcd->daddr >= (uint32_t)DTCM_BASE_ADDR &&
+      tcd->daddr < (uint32_t)DTCM_END_ADDR)
     {
         tcd->daddr += DTCM_BACKDOOR_OFFSET;
     }
