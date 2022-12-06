@@ -408,7 +408,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        * TTL decrements to zero, then do not forward the packet.
        */
 
-      ret = ipv6_decr_ttl((FAR struct ipv6_hdr_s *)fwd->f_iob->io_data);
+      ret = ipv6_decr_ttl(ipv6);
       if (ret < 1)
         {
           nwarn("WARNING: Hop limit exceeded... Dropping!\n");
