@@ -113,6 +113,19 @@ To see the available commands in NuttShell:
 
    $ help
 
+LEDs
+====
+
+The supported PinePhone LEDs are:
+
+===== ========= ===
+Index LED       PIO
+===== ========= ===
+LED1  Green LED PD18
+LED2  Red LED   PD19
+LED3  Blue LED  PD20
+===== ========= ===
+
 Configurations
 ==============
 
@@ -132,5 +145,6 @@ NuttX for PinePhone supports these peripherals:
 =========== ======= =====
 Peripheral  Support NOTES
 =========== ======= =====
+PIO          Yes
 UART         Yes    Only UART0 is supported
 =========== ======= =====

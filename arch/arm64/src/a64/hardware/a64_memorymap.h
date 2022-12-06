@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/a64/pinephone/src/pinephone_bringup.c
+ * arch/arm64/src/a64/hardware/a64_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,60 +18,34 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H
+#define __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <syslog.h>
-
-#ifdef CONFIG_FS_PROCFS
-#  include <nuttx/fs/fs.h>
-#endif
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#include "pinephone.h"
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Peripheral Base Addresses */
+
+#define A64_PIO_ADDR        0x01c20800 /* PIO             0x01c2:0800-0x01c2:0bff 1K */
+#define A64_RPIO_ADDR       0x01f02c00 /* R_PIO           0x01f0:2c00-0x01f0:2fff 1K */
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pinephone_bringup
- *
- * Description:
- *   Bring up board features
- *
+ * Public Data
  ****************************************************************************/
 
-int pinephone_bringup(void)
-{
-  int ret;
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H */

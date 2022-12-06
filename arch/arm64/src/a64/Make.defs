@@ -21,6 +21,6 @@
 include common/Make.defs
 
 # Allwinner A64 specific C source files
-CHIP_CSRCS  = a64_boot.c a64_serial.c
+CHIP_CSRCS  = a64_boot.c a64_pio.c a64_serial.c
 
 CHIP_ASRCS  = a64_lowputc.S
