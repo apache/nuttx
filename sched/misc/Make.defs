@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/assert/Make.defs
+# sched/misc/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,11 +18,10 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_STACK_CANARIES),y)
-CSRCS += lib_stackchk.c
-endif
+CSRCS += assert.c
 
-# Add the assert directory to the build
+# Include init build support
 
-DEPPATH += --dep-path assert
-VPATH += :assert
+DEPPATH += --dep-path misc
+VPATH += :misc
+
