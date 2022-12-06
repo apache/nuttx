@@ -301,7 +301,7 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      if (arp_find(ipaddr, NULL) >= 0)
+      if (arp_find(ipaddr, NULL, dev) >= 0)
         {
           /* We have it!  Break out with success */
 

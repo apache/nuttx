@@ -1221,40 +1221,6 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 /****************************************************************************
- * Name: netdev_arp_callback
- *
- * Description:
- *   This is a callback that checks if the Ethernet network device has the
- *   indicated name
- *
- * Input Parameters:
- *   dev    Ethernet driver device structure
- *   req    The argument of the ioctl cmd
- *
- * Returned Value:
- *   1 on success
- *   0 on error
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ARP
-static int netdev_arp_callback(FAR struct net_driver_s *dev, FAR void *arg)
-{
-  FAR struct arpreq *req = arg;
-  FAR struct sockaddr_in *addr = (FAR struct sockaddr_in *)&req->arp_pa;
-
-  if (strncmp(dev->d_ifname, (FAR const char *)req->arp_dev,
-              sizeof(dev->d_ifname)))
-    {
-      return 0;
-    }
-
-  arp_update(dev, addr->sin_addr.s_addr,
-             (FAR uint8_t *)req->arp_ha.sa_data);
-  return 1;
-}
-#endif
-
-/****************************************************************************
  * Name: netdev_arp_ioctl
  *
  * Description:
@@ -1276,7 +1242,19 @@ static int netdev_arp_callback(FAR struct net_driver_s *dev, FAR void *arg)
 static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
                             FAR struct arpreq *req)
 {
+  FAR struct net_driver_s *dev;
+  FAR struct sockaddr_in  *addr;
   int ret;
+
+  if (req == NULL)
+    {
+      return -EINVAL;
+    }
+
+  addr = (FAR struct sockaddr_in *)&req->arp_pa;
+  dev  = req->arp_dev[0] ?
+         netdev_findbyname((FAR const char *)req->arp_dev) :
+         netdev_findby_ripv4addr(INADDR_ANY, addr->sin_addr.s_addr);
 
   /* Execute the command */
 
@@ -1284,15 +1262,15 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
     {
       case SIOCSARP:  /* Set an ARP mapping */
         {
-          if (req != NULL &&
-              req->arp_pa.sa_family == AF_INET &&
+          if (dev != NULL && req->arp_pa.sa_family == AF_INET &&
               req->arp_ha.sa_family == ARPHRD_ETHER)
             {
               /* Update any existing ARP table entry for this protocol
                * address -OR- add a new ARP table entry if there is not.
                */
 
-              ret = netdev_foreach(netdev_arp_callback, req) ? OK : -EINVAL;
+              ret = arp_update(dev, addr->sin_addr.s_addr,
+                               (FAR const uint8_t *)req->arp_ha.sa_data);
             }
           else
             {
@@ -1303,28 +1281,11 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCDARP:  /* Delete an ARP mapping */
         {
-          if (req != NULL && req->arp_pa.sa_family == AF_INET)
+          if (dev != NULL && req->arp_pa.sa_family == AF_INET)
             {
-              FAR struct sockaddr_in *addr =
-                (FAR struct sockaddr_in *)&req->arp_pa;
+              /* Delete the ARP entry for this protocol address. */
 
-              /* Find the existing ARP entry for this protocol address. */
-
-              FAR struct arp_entry_s *entry =
-                arp_lookup(addr->sin_addr.s_addr);
-              if (entry != NULL)
-                {
-                  /* The ARP table is fixed size; an entry is deleted
-                   * by nullifying its protocol address.
-                   */
-
-                  entry->at_ipaddr = 0;
-                  ret = OK;
-                }
-              else
-                {
-                  ret = -ENOENT;
-                }
+              ret = arp_delete(addr->sin_addr.s_addr, dev);
             }
           else
             {
@@ -1335,17 +1296,10 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGARP:  /* Get an ARP mapping */
         {
-          if (req != NULL && req->arp_pa.sa_family == AF_INET)
+          if (req->arp_pa.sa_family == AF_INET)
             {
-              FAR struct sockaddr_in *addr =
-                (FAR struct sockaddr_in *)&req->arp_pa;
-
-              /* Get the hardware address from an existing ARP table entry
-               * matching this protocol address.
-               */
-
               ret = arp_find(addr->sin_addr.s_addr,
-                            (FAR struct ether_addr *)req->arp_ha.sa_data);
+                            (FAR uint8_t *)req->arp_ha.sa_data, dev);
               if (ret >= 0)
                 {
                   /* Return the mapped hardware address. */
