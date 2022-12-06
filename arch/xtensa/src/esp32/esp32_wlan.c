@@ -37,6 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/netdev.h>
@@ -88,12 +89,27 @@
 #  endif
 #endif
 
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+
+/* The smallest available heap is to ensure that Wi-Fi is not disconnected */
+
+#  define MINIMUM_HEAP_SIZE       (6000)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /* WLAN packet buffer */
 
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+struct wlan_pktbuf
+{
+  sq_entry_t    entry;          /* Queue entry */
+  uint16_t      len;            /* Packet data length */
+  uint8_t       buffer[0];      /* Packet data */
+};
+#else
 struct wlan_pktbuf
 {
   sq_entry_t    entry;          /* Queue entry */
@@ -103,6 +119,7 @@ struct wlan_pktbuf
   uint8_t       buffer[WLAN_BUF_SIZE];
   uint16_t      len;            /* Packet data length */
 };
+#endif
 
 /* WLAN operations */
 
@@ -152,7 +169,11 @@ struct wlan_priv_s
 
   /* Packet buffer cache */
 
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+  struct wlan_pktbuf *pktbuf;
+#else
   struct wlan_pktbuf  pktbuf[WLAN_PKTBUF_NUM];
+#endif
 
   /* RX packet queue */
 
@@ -264,6 +285,15 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
                       unsigned long arg);
 #endif
 
+#ifdef CONFIG_NET_ICMPv6
+static void wlan_ipv6multicast(struct wlan_priv_s *priv);
+#endif
+
+static struct wlan_pktbuf *wlan_recvframe(FAR struct wlan_priv_s *priv);
+static struct wlan_pktbuf *wlan_txframe(FAR struct wlan_priv_s *priv);
+static inline void wlan_free_buffer(struct wlan_priv_s *priv,
+                                    uint8_t *buffer);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -294,9 +324,20 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
 
 static inline void wlan_init_buffer(struct wlan_priv_s *priv)
 {
-  int i;
   irqstate_t flags;
 
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+  flags = spin_lock_irqsave(&priv->lock);
+
+  priv->dev.d_buf = NULL;
+  priv->dev.d_len = 0;
+
+  sq_init(&priv->rxb);
+  sq_init(&priv->txb);
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+#else
+  int i;
   flags = spin_lock_irqsave(&priv->lock);
 
   priv->dev.d_buf = NULL;
@@ -312,6 +353,40 @@ static inline void wlan_init_buffer(struct wlan_priv_s *priv)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+#endif
+}
+
+/****************************************************************************
+ * Function: wlan_deinit_buffer
+ *
+ * Description:
+ *   De-initialize the buffer list
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void wlan_deinit_buffer(struct wlan_priv_s *priv)
+{
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+  struct wlan_pktbuf *pktbuf;
+  while ((pktbuf = (struct wlan_pktbuf *)wlan_recvframe(priv)) != NULL)
+    {
+      wlan_free_buffer(priv, (void *)pktbuf->buffer);
+    }
+
+  while ((pktbuf = (struct wlan_pktbuf *)wlan_txframe(priv)) != NULL)
+    {
+      wlan_free_buffer(priv, (void *)pktbuf->buffer);
+    }
+
+  sq_init(&priv->rxb);
+  sq_init(&priv->txb);
+#endif
 }
 
 /****************************************************************************
@@ -330,11 +405,20 @@ static inline void wlan_init_buffer(struct wlan_priv_s *priv)
 
 static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
 {
-  sq_entry_t *entry;
-  irqstate_t flags;
   struct wlan_pktbuf *pktbuf = NULL;
 
-  flags = spin_lock_irqsave(&priv->lock);
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+  struct mallinfo info = kmm_mallinfo();
+  if (info.fordblks < MINIMUM_HEAP_SIZE)
+    {
+      return NULL;
+    }
+
+  pktbuf = (struct wlan_pktbuf *)kmm_malloc(
+            sizeof(struct wlan_pktbuf) + WLAN_BUF_SIZE);
+#else
+  sq_entry_t *entry;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   entry = sq_remfirst(&priv->freeb);
   if (entry)
@@ -344,6 +428,7 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
 
   spin_unlock_irqrestore(&priv->lock, flags);
 
+#endif
   return pktbuf;
 }
 
@@ -366,14 +451,18 @@ static inline void wlan_free_buffer(struct wlan_priv_s *priv,
                                     uint8_t *buffer)
 {
   struct wlan_pktbuf *pktbuf;
-  irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->lock);
+#ifdef CONFIG_ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+  pktbuf = container_of(buffer, struct wlan_pktbuf, buffer);
+  kmm_free(pktbuf);
+#else
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   pktbuf = container_of(buffer, struct wlan_pktbuf, buffer);
   sq_addlast(&pktbuf->entry, &priv->freeb);
 
   spin_unlock_irqrestore(&priv->lock, flags);
+#endif
 }
 
 /****************************************************************************
@@ -1069,14 +1158,6 @@ static int wlan_ifup(struct net_driver_s *dev)
       return OK;
     }
 
-  ret = priv->ops->start();
-  if (ret < 0)
-    {
-      net_unlock();
-      nerr("ERROR: Failed to start Wi-Fi ret=%d\n", ret);
-      return ret;
-    }
-
 #ifdef CONFIG_NET_ICMPv6
 
   /* Set up IPv6 multicast address filtering */
@@ -1085,6 +1166,14 @@ static int wlan_ifup(struct net_driver_s *dev)
 #endif
 
   wlan_init_buffer(priv);
+  ret = priv->ops->start();
+  if (ret < 0)
+    {
+      wlan_deinit_buffer(priv);
+      net_unlock();
+      nerr("ERROR: Failed to start Wi-Fi ret=%d\n", ret);
+      return ret;
+    }
 
   priv->ifup = true;
   if (g_callback_register_ref == 0)
@@ -1097,6 +1186,12 @@ static int wlan_ifup(struct net_driver_s *dev)
     }
 
   ++g_callback_register_ref;
+
+  /* We can make sure that the WLAN TX and RX are not doing, because
+   * the process is in "net_lock()"
+   */
+
+  wlan_deinit_buffer(priv);
   net_unlock();
 
   return OK;
