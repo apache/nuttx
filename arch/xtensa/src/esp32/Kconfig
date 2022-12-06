@@ -2013,6 +2013,12 @@ choice EXAMPLE_POWER_SAVE_MODE
 		bool "maximum modem"
 endchoice
 
+config ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+	bool "Enable optimization of WLAN driver buffer"
+	default n
+	---help---
+		Enable optimization of WLAN memory
+
 endmenu # ESP32_WIFI
 
 menu "BLE Configuration"
