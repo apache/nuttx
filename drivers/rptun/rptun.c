@@ -791,10 +791,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   rptun_update_rx(priv);
 
-  /* Register callback to mbox for receiving remote message */
-
-  RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
-
   /* Broadcast device_created to all registers */
 
   nxrmutex_lock(&g_rptun_lockcb);
@@ -812,6 +808,10 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   metal_list_add_tail(&g_rptun_priv, &priv->node);
   nxrmutex_unlock(&g_rptun_lockcb);
+
+  /* Register callback to mbox for receiving remote message */
+
+  RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
 
 #ifdef CONFIG_RPTUN_PING
   rptun_ping_init(&priv->rvdev, &priv->ping);
