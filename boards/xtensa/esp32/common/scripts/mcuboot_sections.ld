@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/scripts/esp32.ld
+ * boards/xtensa/esp32/common/scripts/mcuboot_sections.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,6 +24,93 @@ ENTRY(__start);
 
 SECTIONS
 {
+  .metadata :
+  {
+    /* Magic for load header */
+
+    LONG(0xace637d3)
+
+    /* Application entry point address */
+
+    KEEP(*(.entry_addr))
+
+    /* IRAM metadata:
+     * - Destination address (VMA) for IRAM region
+     * - Flash offset (LMA) for start of IRAM region
+     * - Size of IRAM region
+     */
+
+    LONG(ADDR(.iram0.vectors))
+    LONG(LOADADDR(.iram0.vectors))
+    LONG(LOADADDR(.iram0.text) + SIZEOF(.iram0.text) - LOADADDR(.iram0.vectors))
+
+    /* DRAM metadata:
+     * - Destination address (VMA) for DRAM region
+     * - Flash offset (LMA) for start of DRAM region
+     * - Size of DRAM region
+     */
+
+    LONG(ADDR(.dram0.data))
+    LONG(LOADADDR(.dram0.data))
+    LONG(SIZEOF(.dram0.data))
+  } >metadata
+
+  _image_drom_vma = ADDR(.flash.rodata);
+  _image_drom_lma = LOADADDR(.flash.rodata);
+  _image_drom_size = LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) - _image_drom_lma;
+
+  .flash.rodata :
+  {
+    . = ALIGN(4);
+    _srodata = ABSOLUTE(.);
+    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*) .rodata)
+    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*) .rodata.*)
+    *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
+    *(.gnu.linkonce.r.*)
+    *(.rodata1)
+    __XT_EXCEPTION_TABLE_ = ABSOLUTE(.);
+    *(.xt_except_table)
+    *(.gcc_except_table)
+    *(.gcc_except_table.*)
+    *(.gnu.linkonce.e.*)
+    *(.gnu.version_r)
+    *(.eh_frame)
+
+    . = (. + 3) & ~ 3;
+
+    /* C++ constructor and destructor tables, properly ordered: */
+
+    _sinit = ABSOLUTE(.);
+    KEEP (*crtbegin.o(.ctors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*(.ctors))
+    _einit = ABSOLUTE(.);
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
+
+    /* C++ exception handlers table: */
+
+    __XT_EXCEPTION_DESCS_ = ABSOLUTE(.);
+    *(.xt_except_desc)
+    *(.gnu.linkonce.h.*)
+    __XT_EXCEPTION_DESCS_END__ = ABSOLUTE(.);
+    *(.xt_except_desc_end)
+    *(.dynamic)
+    *(.gnu.version_d)
+    . = ALIGN(4);               /* This table MUST be 4-byte aligned */
+    _erodata = ABSOLUTE(.);
+    /* Literals are also RO data. */
+    _lit4_start = ABSOLUTE(.);
+    *(*.lit4)
+    *(.lit4.*)
+    *(.gnu.linkonce.lit4.*)
+    _lit4_end = ABSOLUTE(.);
+    . = ALIGN(4);
+  } >drom0_0_seg AT>ROM
+
   /* Send .iram0 code to iram */
 
   .iram0.vectors :
@@ -62,7 +149,7 @@ SECTIONS
     *(.init.literal)
     *(.init)
     _init_end = ABSOLUTE(.);
-  } > iram0_0_seg
+  } >iram0_0_seg AT>ROM
 
   .iram0.text :
   {
@@ -70,22 +157,14 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
+    *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
+    *libpp.a:(.literal .text .literal.* .text.*)
+    *libhal.a:(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_copystate.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_interruptcontext.*(.literal .text .literal.* .text.*)
-    *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
-
-    *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
-    *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
-    *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
-    *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
-    *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
-
+    esp32_start.*(.literal .text .literal.* .text.*)
     *(.wifirxiram .wifirxiram.*)
-    *(.wifi0iram  .wifi0iram.*)
+    *(.wifirxiram .wifi0iram.*)
     *(.wifislpiram .wifislpiram.*)
     *(.wifislprxiram .wifislprxiram.*)
     *(.phyiram .phyiram.*)
@@ -95,7 +174,7 @@ SECTIONS
 
     . = ALIGN (4);
     _siramheap = ABSOLUTE(.);
-  } > iram0_0_seg
+  } >iram0_0_seg AT>ROM
 
   /* Shared RAM */
 
@@ -105,17 +184,6 @@ SECTIONS
 
     . = ALIGN (8);
     _sbss = ABSOLUTE(.);
-    _bss_start = ABSOLUTE(.);
-    *(.ext_ram.bss*)
-    _bt_bss_start = ABSOLUTE(.);
-    *libbt.a:(.bss .bss.* COMMON)
-    . = ALIGN (4);
-    _bt_bss_end = ABSOLUTE(.);
-    _btdm_bss_start = ABSOLUTE(.);
-    *libbtdm_app.a:(.bss .bss.* COMMON)
-    . = ALIGN (4);
-    _btdm_bss_end = ABSOLUTE(.);
-    . = ALIGN (8);
     *(.dynsbss)
     *(.sbss)
     *(.sbss.*)
@@ -130,21 +198,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
-    *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
-    *libarch.a:xtensa_cpupause.*(.bss  .bss.*  COMMON)
-    *libarch.a:xtensa_copystate.*(.bss  .bss.*  COMMON)
-    *libarch.a:xtensa_interruptcontext.*(.bss  .bss.*  COMMON)
-    *libarch.a:xtensa_testset.*(.bss  .bss.*  COMMON)
-
-    *libsched.a:sched_suspendscheduler.*(.bss  .bss.*  COMMON)
-    *libsched.a:sched_thistask.*(.bss  .bss.*  COMMON)
-    *libsched.a:sched_note.*(.bss  .bss.*  COMMON)
-    *libsched.a:spinlock.*(.bss  .bss.*  COMMON)
-    *libsched.a:irq_csection.*(.bss  .bss.*  COMMON)
-    *libsched.a:irq_dispatch.*(.bss  .bss.*  COMMON)
-
     . = ALIGN(8);
-    _bss_end = ABSOLUTE(.);
     _ebss = ABSOLUTE(.);
   } >dram0_0_seg
 
@@ -154,7 +208,10 @@ SECTIONS
      * or during the application's initialization sequence.
      */
 
+    . = ALIGN(8);
     *(.noinit)
+    *(".noinit.*")
+    . = ALIGN(8);
   } >dram0_0_seg
 
   .dram0.data :
@@ -162,14 +219,6 @@ SECTIONS
     /* .data initialized on power-up in ROMed configurations. */
 
     _sdata = ABSOLUTE(.);
-    _bt_data_start = ABSOLUTE(.);
-    *libbt.a:(.data .data.*)
-    . = ALIGN (4);
-    _bt_data_end = ABSOLUTE(.);
-    _btdm_data_start = ABSOLUTE(.);
-    *libbtdm_app.a:(.data .data.*)
-    . = ALIGN (4);
-    _btdm_data_end = ABSOLUTE(.);
     KEEP (*(.data))
     KEEP (*(.data.*))
     KEEP (*(.gnu.linkonce.d.*))
@@ -182,27 +231,15 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
-    *libphy.a:(.rodata  .rodata.*)
     *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
-    *libarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
-    *libarch.a:xtensa_copystate.*(.rodata  .rodata.*)
-    *libarch.a:xtensa_interruptcontext.*(.rodata  .rodata.*)
-    *libarch.a:xtensa_testset.*(.rodata  .rodata.*)
-
-    *libsched.a:sched_suspendscheduler.*(.rodata  .rodata.*)
-    *libsched.a:sched_thistask.*(.rodata  .rodata.*)
-    *libsched.a:sched_note.*(.rodata  .rodata.*)
-    *libsched.a:spinlock.*(.rodata  .rodata.*)
-    *libsched.a:irq_csection.*(.rodata  .rodata.*)
-    *libsched.a:irq_dispatch.*(.rodata  .rodata.*)
-
-    . = ALIGN(4);
+    esp32_start.*(.rodata  .rodata.*)
     _edata = ABSOLUTE(.);
+    . = ALIGN(4);
 
     /* Heap starts at the end of .data */
 
     _sheap = ABSOLUTE(.);
-  } >dram0_0_seg
+  } >dram0_0_seg AT>ROM
 
   /* External memory bss, from any global variable with EXT_RAM_ATTR attribute */
 
@@ -212,59 +249,24 @@ SECTIONS
     *(.extmem.bss .extmem.bss.*)
     . = ALIGN(4);
     _ebss_extmem = ABSOLUTE(.);
-  } > extmem_seg
+  } >extmem_seg
 
-  .flash.rodata :
-  {
-    _srodata = ABSOLUTE(.);
-    *(.rodata)
-    *(.rodata.*)
-    *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
-    *(.gnu.linkonce.r.*)
-    *(.rodata1)
-    __XT_EXCEPTION_TABLE_ = ABSOLUTE(.);
-    *(.xt_except_table)
-    *(.gcc_except_table)
-    *(.gcc_except_table.*)
-    *(.gnu.linkonce.e.*)
-    *(.gnu.version_r)
-    *(.eh_frame)
+  _image_irom_vma = ADDR(.flash.text);
+  _image_irom_lma = LOADADDR(.flash.text);
+  _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
 
-    . = (. + 3) & ~ 3;
+  /* The alignment of the ".flash.text" output section is forced to
+   * 0x0000FFFF (64KB) to ensure that it will be allocated at the beginning
+   * of the next available Flash block.
+   * This is required to meet the following constraint from the external
+   * flash MMU:
+   *    VMA % 64KB == LMA % 64KB
+   * i.e. the lower 16 bits of both the virtual address (address seen by the
+   * CPU) and the load address (physical address of the external flash) must
+   * be equal.
+   */
 
-    /* C++ constructor and destructor tables, properly ordered: */
-
-    _sinit = ABSOLUTE(.);
-    KEEP (*crtbegin.o(.ctors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*(.ctors))
-    _einit = ABSOLUTE(.);
-    KEEP (*crtbegin.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*(.dtors))
-
-    /* C++ exception handlers table: */
-
-    __XT_EXCEPTION_DESCS_ = ABSOLUTE(.);
-    *(.xt_except_desc)
-    *(.gnu.linkonce.h.*)
-    __XT_EXCEPTION_DESCS_END__ = ABSOLUTE(.);
-    *(.xt_except_desc_end)
-    *(.dynamic)
-    *(.gnu.version_d)
-    _erodata = ABSOLUTE(.);
-    /* Literals are also RO data. */
-    _lit4_start = ABSOLUTE(.);
-    *(*.lit4)
-    *(.lit4.*)
-    *(.gnu.linkonce.lit4.*)
-    _lit4_end = ABSOLUTE(.);
-    . = ALIGN(4);
-  } >default_rodata_seg
-
-  .flash.text :
+  .flash.text : ALIGN(0x0000FFFF)
   {
     _stext = .;
     _text_start = ABSOLUTE(.);
@@ -273,15 +275,16 @@ SECTIONS
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+    . = ALIGN(4);
     _text_end = ABSOLUTE(.);
     _etext = .;
-  } >default_code_seg
+  } >irom0_0_seg AT>ROM
 
   .rtc.text :
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
-  } >rtc_iram_seg
+  } >rtc_iram_seg AT>ROM
 
   .rtc.data :
   {
@@ -292,5 +295,5 @@ SECTIONS
 
     . = ALIGN (4);
     _srtcheap = ABSOLUTE(.);
-  } > rtc_slow_seg
+  } >rtc_slow_seg AT>ROM
 }

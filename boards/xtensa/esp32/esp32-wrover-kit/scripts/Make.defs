@@ -31,16 +31,16 @@ ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 # Pick the linker scripts from the board level if they exist, if not
 # pick the common linker scripts.
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld),)
-	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_sections.ld),)
+	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_sections.ld
 else
 	ifeq ($(CONFIG_BUILD_PROTECTED),y)
 		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
 	else
 		ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
+			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)mcuboot_sections.ld
 		else
-			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)legacy_sections.ld
 		endif
 	endif
 endif
@@ -51,13 +51,13 @@ else
 	ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
 endif
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
-	LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_memory.ld),)
+	LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_memory.ld
 else
 	ifeq ($(CONFIG_BUILD_PROTECTED),y)
-		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected.template.ld
+		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected_memory.ld
 	else
-		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat.template.ld
+		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat_memory.ld
 	endif
 endif
 

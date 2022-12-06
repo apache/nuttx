@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/scripts/protected.template.ld
+ * boards/xtensa/esp32/common/scripts/protected_memory.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * ESP32 Linker Script Memory Layout
+ * ESP32 Linker Script Memory Layout for Protected Mode
  *
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
@@ -27,10 +27,6 @@
  * kernel-space.ld and user-space.ld contain output sections to link compiler
  * output into these memory blocks for the Kernel and User images,
  * respectively.
- *
- * NOTE: That this is not the actual linker script but rather a "template"
- * for the esp32_out.ld script. This template script is passed through
- * the C preprocessor to include selected configuration options.
  *
  ****************************************************************************/
 
@@ -40,9 +36,9 @@
 
 MEMORY
 {
-
   metadata (RX) :   org = 0x0, len = 0x18
-  ROM (RX) :        org = 0x18, len = 0x100000
+  ROM (RX) :        org = ORIGIN(metadata) + LENGTH(metadata),
+                    len = 0x100000 - ORIGIN(ROM)
 
   /* Below values assume the flash cache is on, and have the blocks this
    * uses subtracted from the length of the various regions. The 'data access
@@ -105,5 +101,5 @@ MEMORY
    */
 
   KDROM (R) : org = 0x3f400020, len = 0x80000 - 0x20
-  UDROM (R) : org = 0x3f480018, len = 0x80000 - 0x18
+  UDROM (R) : org = 0x3f480018, len = 0x80000 - ORIGIN(ROM)
 }
