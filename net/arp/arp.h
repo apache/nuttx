@@ -42,6 +42,7 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/semaphore.h>
 
@@ -363,23 +364,6 @@ void arp_notify(in_addr_t ipaddr);
 #endif
 
 /****************************************************************************
- * Name: arp_lookup
- *
- * Description:
- *   Find the ARP entry corresponding to this IP address in the ARP table.
- *
- * Input Parameters:
- *   ipaddr - Refers to an IP address in network order
- *
- * Assumptions:
- *   The network is locked to assure exclusive access to the ARP table.
- *   The return value will become unstable when the network is unlocked.
- *
- ****************************************************************************/
-
-FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
-
-/****************************************************************************
  * Name: arp_find
  *
  * Description:
@@ -387,11 +371,12 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
  *   not be in the ARP table (it may, instead, be a local network device).
  *
  * Input Parameters:
- *   ipaddr -  Refers to an IP address in network order
+ *   ipaddr  - Refers to an IP address in network order
  *   ethaddr - Location to return the corresponding Ethernet MAN address.
  *             This address may be NULL.  In that case, this function may be
  *             used simply to determine if the Ethernet MAC address is
  *             available.
+ *   dev     - Device structure
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
@@ -399,7 +384,8 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
  ****************************************************************************/
 
 struct ether_addr;  /* Forward reference */
-int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr);
+int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
+             FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_delete
@@ -409,13 +395,14 @@ int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr);
  *
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
+ *   dev    - Device structure
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-void arp_delete(in_addr_t ipaddr);
+int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_cleanup
@@ -455,7 +442,7 @@ void arp_cleanup(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
-               FAR uint8_t *ethaddr);
+               FAR const uint8_t *ethaddr);
 
 /****************************************************************************
  * Name: arp_hdr_update
@@ -479,7 +466,7 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
  ****************************************************************************/
 
 void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
-                    FAR uint8_t *ethaddr);
+                    FAR const uint8_t *ethaddr);
 
 /****************************************************************************
  * Name: arp_snapshot
@@ -541,8 +528,8 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 #  define arp_wait_cancel(n) (0)
 #  define arp_wait(n,t) (0)
 #  define arp_notify(i)
-#  define arp_find(i,e) (-ENOSYS)
-#  define arp_delete(i)
+#  define arp_find(i,e,d) (-ENOSYS)
+#  define arp_delete(i,d) (-ENOSYS)
 #  define arp_cleanup(d)
 #  define arp_update(d,i,m);
 #  define arp_hdr_update(d,i,m);

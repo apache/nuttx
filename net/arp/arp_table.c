@@ -78,8 +78,8 @@
 
 struct arp_table_info_s
 {
-  in_addr_t              ai_ipaddr;   /* IP address for lookup */
-  FAR struct ether_addr *ai_ethaddr;  /* Location to return the MAC address */
+  in_addr_t    ai_ipaddr;   /* IP address for lookup */
+  FAR uint8_t *ai_ethaddr;  /* Location to return the MAC address */
 };
 
 /****************************************************************************
@@ -170,6 +170,46 @@ arp_return_old_entry(FAR struct arp_entry_s *e1, FAR struct arp_entry_s *e2)
 }
 
 /****************************************************************************
+ * Name: arp_lookup
+ *
+ * Description:
+ *   Find the ARP entry corresponding to this IP address in the ARP table.
+ *
+ * Input Parameters:
+ *   ipaddr - Refers to an IP address in network order
+ *   dev    - Device structure
+ *
+ * Assumptions:
+ *   The network is locked to assure exclusive access to the ARP table.
+ *   The return value will become unstable when the network is unlocked.
+ *
+ ****************************************************************************/
+
+static FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr,
+                                          FAR struct net_driver_s *dev)
+{
+  FAR struct arp_entry_s *tabptr;
+  int i;
+
+  /* Check if the IPv4 address is already in the ARP table. */
+
+  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+    {
+      tabptr = &g_arptable[i];
+      if (tabptr->at_dev == dev &&
+          net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr) &&
+          clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
+        {
+          return tabptr;
+        }
+    }
+
+  /* Not found */
+
+  return NULL;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -195,7 +235,7 @@ arp_return_old_entry(FAR struct arp_entry_s *e1, FAR struct arp_entry_s *e2)
  ****************************************************************************/
 
 int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
-               FAR uint8_t *ethaddr)
+               FAR const uint8_t *ethaddr)
 {
   FAR struct arp_entry_s *tabptr = &g_arptable[0];
   int i;
@@ -211,7 +251,8 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
        * the IP address in this ARP table entry.
        */
 
-      if (g_arptable[i].at_ipaddr != 0 &&
+      if (g_arptable[i].at_dev == dev &&
+          g_arptable[i].at_ipaddr != 0 &&
           net_ipv4addr_cmp(ipaddr, g_arptable[i].at_ipaddr))
         {
           /* An old entry found, break. */
@@ -260,50 +301,13 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
  ****************************************************************************/
 
 void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
-                    FAR uint8_t *ethaddr)
+                    FAR const uint8_t *ethaddr)
 {
   in_addr_t ipaddr = net_ip4addr_conv32(pipaddr);
 
   /* Update the ARP table */
 
   arp_update(dev, ipaddr, ethaddr);
-}
-
-/****************************************************************************
- * Name: arp_lookup
- *
- * Description:
- *   Find the ARP entry corresponding to this IP address in the ARP table.
- *
- * Input Parameters:
- *   ipaddr - Refers to an IP address in network order
- *
- * Assumptions:
- *   The network is locked to assure exclusive access to the ARP table.
- *   The return value will become unstable when the network is unlocked.
- *
- ****************************************************************************/
-
-FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr)
-{
-  FAR struct arp_entry_s *tabptr;
-  int i;
-
-  /* Check if the IPv4 address is already in the ARP table. */
-
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      tabptr = &g_arptable[i];
-      if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr) &&
-          clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
-        {
-          return tabptr;
-        }
-    }
-
-  /* Not found */
-
-  return NULL;
 }
 
 /****************************************************************************
@@ -314,25 +318,27 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr)
  *   not be in the ARP table (it may, instead, be a local network device).
  *
  * Input Parameters:
- *   ipaddr -  Refers to an IP address in network order
+ *   ipaddr  - Refers to an IP address in network order
  *   ethaddr - Location to return the corresponding Ethernet MAN address.
  *             This address may be NULL.  In that case, this function may be
  *             used simply to determine if the Ethernet MAC address is
  *             available.
+ *   dev     - Device structure
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr)
+int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
+             FAR struct net_driver_s *dev)
 {
   FAR struct arp_entry_s *tabptr;
   struct arp_table_info_s info;
 
   /* Check if the IPv4 address is already in the ARP table. */
 
-  tabptr = arp_lookup(ipaddr);
+  tabptr = arp_lookup(ipaddr, dev);
   if (tabptr != NULL)
     {
       /* Yes.. return the Ethernet MAC address if the caller has provided a
@@ -377,25 +383,29 @@ int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr)
  *
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
+ *   dev    - Device structure
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-void arp_delete(in_addr_t ipaddr)
+int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev)
 {
   FAR struct arp_entry_s *tabptr;
 
   /* Check if the IPv4 address is in the ARP table. */
 
-  tabptr = arp_lookup(ipaddr);
+  tabptr = arp_lookup(ipaddr, dev);
   if (tabptr != NULL)
     {
       /* Yes.. Set the IP address to zero to "delete" it */
 
       tabptr->at_ipaddr = 0;
+      return OK;
     }
+
+  return -ENOENT;
 }
 
 /****************************************************************************
