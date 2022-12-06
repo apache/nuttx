@@ -1,4 +1,5 @@
 "_exit","unistd.h","","noreturn","int"
+"_assert","assert.h","","noreturn","FAR const char *","int"
 "accept","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
 "adjtime","sys/time.h","defined(CONFIG_CLOCK_TIMEKEEPING)","int","FAR const struct timeval *","FAR struct timeval *"
 "aio_cancel","aio.h","defined(CONFIG_FS_AIO)","int","int","FAR struct aiocb *"
@@ -183,7 +184,6 @@
 "umount2","sys/mount.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char *","unsigned int"
 "unlink","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char *"
 "unsetenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char *"
-"up_assert","nuttx/arch.h","","void","FAR const char *","int"
 "utimens","sys/stat.h","","int","FAR const char *","const struct timespec [2]|FAR const struct timespec *"
 "vfork","unistd.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)","pid_t"
 "wait","sys/wait.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)","pid_t","FAR int *"
