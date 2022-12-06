@@ -274,7 +274,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
    * TLL decrements to zero, then do not forward the packet.
    */
 
-  ret = ipv4_decr_ttl((FAR struct ipv4_hdr_s *)fwd->f_iob->io_data);
+  ret = ipv4_decr_ttl(ipv4);
   if (ret < 1)
     {
       nwarn("WARNING: Hop limit exceeded... Dropping!\n");
@@ -285,9 +285,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_NAT
   /* Try NAT outbound, rule matching will be performed in NAT module. */
 
-  ret = ipv4_nat_outbound(fwd->f_dev,
-                          (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data,
-                          NAT_MANIP_SRC);
+  ret = ipv4_nat_outbound(fwd->f_dev, ipv4, NAT_MANIP_SRC);
   if (ret < 0)
     {
       nwarn("WARNING: Performing NAT outbound failed, dropping!\n");
