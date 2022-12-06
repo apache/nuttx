@@ -102,6 +102,7 @@ MCU. Follow the links for the details:
        - Allwinner
 
          - :ref:`introduction/detailed_support:Allwinner A10` (Cortex-A8)
+         - :ref:`introduction/detailed_support:Allwinner A64` (Cortex-A53)
 
        - Broadcom
 

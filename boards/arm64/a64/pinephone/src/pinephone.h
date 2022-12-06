@@ -27,6 +27,33 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
+#include "a64_pio.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* LEDs *********************************************************************/
+
+/* Green LED on PD18 */
+
+#define LED1 (PIO_OUTPUT | PIO_PULL_NONE | \
+              PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
+              PIO_OUTPUT_SET | PIO_PORT_PIOD | PIO_PIN18)
+
+/* Red LED on PD19 */
+
+#define LED2 (PIO_OUTPUT | PIO_PULL_NONE | \
+              PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
+              PIO_OUTPUT_SET | PIO_PORT_PIOD | PIO_PIN19)
+
+/* Blue LED on PD20 */
+
+#define LED3 (PIO_OUTPUT | PIO_PULL_NONE | \
+              PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
+              PIO_OUTPUT_SET | PIO_PORT_PIOD | PIO_PIN20)
 
 #ifndef __ASSEMBLY__
 
@@ -44,6 +71,18 @@
 
 #if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int pinephone_bringup(void);
+#endif
+
+/****************************************************************************
+ * Name: pinephone_led_initialize
+ *
+ * Description:
+ *   Configure LEDs.  LEDs are left in the OFF state.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void pinephone_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

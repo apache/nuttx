@@ -1763,6 +1763,7 @@ config ARCH_BOARD_QEMU_ARMV8A
 config ARCH_BOARD_PINEPHONE
 	bool "PINE64 PinePhone"
 	depends on ARCH_CHIP_A64
+	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This options selects support for NuttX on PINE64 PinePhone based
