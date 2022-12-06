@@ -85,6 +85,32 @@ int netdev_iob_prepare(FAR struct net_driver_s *dev, bool throttled,
 }
 
 /****************************************************************************
+ * Name: netdev_iob_replace
+ *
+ * Description:
+ *   Replace buffer resources for a given NIC
+ *
+ * Assumptions:
+ *   The caller has locked the network and new iob is prepared with
+ *   l2 gruard size as offset.
+ *
+ ****************************************************************************/
+
+void netdev_iob_replace(FAR struct net_driver_s *dev, FAR struct iob_s *iob)
+{
+  /* Release previous buffer */
+
+  netdev_iob_release(dev);
+
+  /* Set new buffer */
+
+  dev->d_iob = iob;
+  dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                    NET_LL_HDRLEN(dev)];
+  dev->d_len = iob->io_pktlen;
+}
+
+/****************************************************************************
  * Name: netdev_iob_clear
  *
  * Description:
