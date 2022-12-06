@@ -222,7 +222,7 @@ config MM_UBSAN_OPTION
 config MM_UBSAN_TRAP_ON_ERROR
 	bool "Enable UBSan trap on error to crash immediately"
 	depends on MM_UBSAN
-	default y
+	default n
 	---help---
 		The undefined instruction trap should cause your program to crash,
 		save the code space significantly.
