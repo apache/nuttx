@@ -63,7 +63,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
   unsigned int offset1;
   unsigned int offset2;
 
-  DEBUGASSERT(iob2->io_len == 0 && iob2->io_offset == 0 &&
+  DEBUGASSERT(iob2->io_len == 0 &&
               iob2->io_pktlen == 0 && iob2->io_flink == NULL);
 
   /* Copy the total packet size from the I/O buffer at the head of the
@@ -99,8 +99,8 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
        * copy to that address.
        */
 
-      dest   = &iob2->io_data[offset2];
-      avail2 = CONFIG_IOB_BUFSIZE - offset2;
+      dest   = &iob2->io_data[iob2->io_offset + offset2];
+      avail2 = CONFIG_IOB_BUFSIZE - iob2->io_offset - offset2;
 
       /* Copy the smaller of the two and update the srce and destination
        * offsets.
@@ -111,6 +111,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
 
       offset1 += ncopy;
       offset2 += ncopy;
+      iob2->io_len += ncopy;
 
       /* Have we taken all of the data from the source I/O buffer? */
 
@@ -137,7 +138,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
        * transferred?
        */
 
-      if (offset2 >= CONFIG_IOB_BUFSIZE && iob1 != NULL)
+      if (offset2 >= CONFIG_IOB_BUFSIZE - iob2->io_offset && iob1 != NULL)
         {
           FAR struct iob_s *next;
 
