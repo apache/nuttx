@@ -647,6 +647,10 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
 {
   int bstop = false;
 
+  /* Reset device buffer length */
+
+  dev->d_len = 0;
+
   /* Traverse all of the active packet connections and perform the poll
    * action.
    */
