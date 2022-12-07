@@ -77,6 +77,12 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 
   if (dev->d_iob != NULL)
     {
+      if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE)
+        {
+          dev->d_sndlen = 0;
+          return;
+        }
+
       /* Skip the l3/l4 offset before append */
 
       iob_update_pktlen(dev->d_iob, target_offset);
@@ -98,9 +104,9 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
           copyin = (len > iob->io_len - offset) ?
                    iob->io_len - offset : len;
 
-          ret = iob_copyin(dev->d_iob, iob->io_data +
-                                       iob->io_offset + offset,
-                           copyin, target_offset, false);
+          ret = iob_trycopyin(dev->d_iob, iob->io_data +
+                              iob->io_offset + offset,
+                              copyin, target_offset, false);
           if (ret != copyin)
             {
               netdev_iob_release(dev);

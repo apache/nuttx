@@ -70,9 +70,22 @@ void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
    * bytes to send
    */
 
-  dev->d_sndlen = iob_copyin(dev->d_iob, buf, len, 0, false) == len ?
-                  len : 0;
-  dev->d_len    = dev->d_sndlen;
+  if (len <= iob_navail(false) * CONFIG_IOB_BUFSIZE)
+    {
+      dev->d_sndlen = iob_trycopyin(dev->d_iob, buf, len, 0, false);
+    }
+  else
+    {
+      dev->d_sndlen = 0;
+    }
+
+  if (dev->d_sndlen != len)
+    {
+      netdev_iob_release(dev);
+      dev->d_sndlen = 0;
+    }
+
+  dev->d_len = dev->d_sndlen;
 }
 
 #endif /* CONFIG_NET_CAN */

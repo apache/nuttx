@@ -82,6 +82,18 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
 
   /* Copy in iob to target device buffer */
 
-  dev->d_sndlen = iob_copyin(dev->d_iob, buf, len, offset, false) == len ?
-                  len : 0;
+  if (len <= iob_navail(false) * CONFIG_IOB_BUFSIZE)
+    {
+      dev->d_sndlen = iob_trycopyin(dev->d_iob, buf, len, offset, false);
+    }
+  else
+    {
+      dev->d_sndlen = 0;
+    }
+
+  if (dev->d_sndlen != len)
+    {
+      netdev_iob_release(dev);
+      dev->d_sndlen = 0;
+    }
 }
