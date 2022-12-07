@@ -67,6 +67,10 @@
 #  include <nuttx/wireless/pktradio.h>
 #endif
 
+#ifdef CONFIG_NET_CELLULAR
+#  include <nuttx/wireless/cellular/cellular.h>
+#endif
+
 #include "arp/arp.h"
 #include "socket/socket.h"
 #include "netdev/netdev.h"
@@ -545,6 +549,47 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
 #endif /* HAVE_PKTRADIO_IOCTL */
 
 /****************************************************************************
+ * Name: netdev_cell_ioctl
+ *
+ * Description:
+ *   Perform cell ioctl operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
+static int netdev_cell_ioctl(FAR struct socket *psock, int cmd,
+                             FAR struct icellreq *req)
+{
+  FAR struct net_driver_s *dev = NULL;
+  int ret = -ENOTTY;
+
+  ninfo("cmd: %d\n", cmd);
+  net_lock();
+
+  if (_CELLIOCVALID(cmd))
+    {
+      dev = netdev_findbyname(req->ifr_name);
+      if (dev && dev->d_ioctl)
+        {
+          ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)req);
+        }
+    }
+
+  net_unlock();
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_wifr_ioctl
  *
  * Description:
@@ -661,7 +706,6 @@ static ssize_t net_ioctl_ifreq_arglen(int cmd)
       case SIOCDCANEXTFILTER:
       case SIOCACANSTDFILTER:
       case SIOCDCANSTDFILTER:
-      case SIOCSCELLNETDEV:
       case SIOCSIFNAME:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
@@ -1075,22 +1119,6 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #ifdef CONFIG_NETDEV_IFINDEX
       case SIOCGIFINDEX:  /* Index to name mapping */
         req->ifr_ifindex = dev->d_ifindex;
-        break;
-#endif
-
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
-      case SIOCSCELLNETDEV:  /* set params for cellular network devices */
-        if (dev->d_ioctl)
-          {
-            FAR struct cell_ioctl_data_s *cell_netdev_data =
-                            &req->ifr_ifru.ifru_cell_data;
-            ret = dev->d_ioctl(dev, cmd,
-                            (unsigned long)(uintptr_t)cell_netdev_data);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
         break;
 #endif
 
@@ -1711,6 +1739,16 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
 
       wifrreq = (FAR struct iwreq *)((uintptr_t)arg);
       ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
+    }
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
+  /* Check for a cellular network command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_cell_ioctl(psock, cmd,
+                              (FAR struct icellreq *)(uintptr_t)arg);
     }
 #endif
 
