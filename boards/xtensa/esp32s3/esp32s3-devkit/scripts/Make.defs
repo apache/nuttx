@@ -23,30 +23,18 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32s3/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx7/Toolchain.defs
 
-# Pick the linker scripts from the board level if they exist, if not
-# pick the common linker scripts.
-
 ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_peripherals.ld
 ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_rom.ld
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_memory.ld),)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_memory.ld
-else
-  ifeq ($(CONFIG_BUILD_PROTECTED),y)
-    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected_memory.ld
-  else
-    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat_memory.ld
-  endif
-endif
+# Pick the linker scripts from the board level if they exist, if not
+# pick the common linker scripts.
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld),)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,protected_memory.ld)
+  ARCHSCRIPT += $(call FINDSCRIPT,kernel-space.ld)
 else
-  ifeq ($(CONFIG_BUILD_PROTECTED),y)
-    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
-  else
-    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_sections.ld
-  endif
+  ARCHSCRIPT += $(call FINDSCRIPT,flat_memory.ld)
+  ARCHSCRIPT += $(call FINDSCRIPT,esp32s3_sections.ld)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
