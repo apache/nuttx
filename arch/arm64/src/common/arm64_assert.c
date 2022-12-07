@@ -26,38 +26,16 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <assert.h>
 #include <debug.h>
-#include <nuttx/board.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/usb/usbdev_trace.h>
 
-#include "sched/sched.h"
-#include "irq/irq.h"
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "chip.h"
 
 #ifdef CONFIG_ARCH_FPU
 #include "arm64_fpu.h"
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* USB trace dumping */
-
-#ifndef CONFIG_USBDEV_TRACE
-#  undef CONFIG_ARCH_USBDUMP
-#endif
-
-#ifndef CONFIG_BOARD_RESET_ON_ASSERT
-#  define CONFIG_BOARD_RESET_ON_ASSERT 0
 #endif
 
 /****************************************************************************
@@ -123,10 +101,6 @@ static void arm64_registerdump(struct regs_context * regs)
 static void arm64_stackdump(uint64_t sp, uint64_t stack_top)
 {
   uint64_t stack;
-
-  /* Flush any buffered SYSLOG data to avoid overwrite */
-
-  syslog_flush();
 
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 64)
     {
@@ -334,30 +308,6 @@ static void arm64_showtasks(void)
 }
 
 /****************************************************************************
- * Name: assert_tracecallback
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(const char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the real work */
-
-  va_start(ap, fmt);
-  vsyslog(LOG_EMERG, fmt, ap);
-  va_end(ap);
-  return OK;
-}
-
-static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
-{
-  usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
-  return 0;
-}
-#endif
-
-/****************************************************************************
  * Name: arm_dump_stack
  ****************************************************************************/
 
@@ -458,12 +408,6 @@ static void arm64_dumpstate_assert(void)
   /* Dump the state of all tasks (if available) */
 
   arm64_showtasks();
-
-#ifdef CONFIG_ARCH_USBDUMP
-  /* Dump USB trace data */
-
-  usbtrace_enumerate(assert_tracecallback, NULL);
-#endif
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */
@@ -501,47 +445,6 @@ void up_mdelay(unsigned int milliseconds)
 }
 
 /****************************************************************************
- * Name: arm64_assert
- ****************************************************************************/
-
-static void arm64_assert(void)
-{
-  /* Flush any buffered SYSLOG data */
-
-  syslog_flush();
-
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (CURRENT_REGS || (running_task())->flink == NULL)
-    {
- #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-
-      /* Disable interrupts on this CPU */
-
-      up_irq_save();
-
-#ifdef CONFIG_SMP
-      /* Try (again) to stop activity on other CPUs */
-
-      spin_trylock(&g_cpu_irqlock);
-#endif
-
-      for (; ; )
-        {
-          up_mdelay(250);
-        }
-    }
-  else
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -551,43 +454,7 @@ static void arm64_assert(void)
 
 void up_assert(const char *filename, int lineno)
 {
-#ifdef CONFIG_ARCH_FPU
-  arm64_fpu_disable();
-#endif
-
-  /* Flush any buffered SYSLOG data (prior to the assertion) */
-
-  syslog_flush();
-
-  _alert("Assertion failed "
-#ifdef CONFIG_SMP
-         "CPU%d "
-#endif
-         "at file:%s line: %d"
-#if CONFIG_TASK_NAME_SIZE > 0
-         " task: %s"
-#endif
-         "\n",
-#ifdef CONFIG_SMP
-         up_cpu_index(),
-#endif
-         filename, lineno
-#if CONFIG_TASK_NAME_SIZE > 0
-         , running_task()->name
-#endif
-        );
-
 #ifdef CONFIG_ARCH_STACKDUMP
   arm64_dumpstate_assert();
 #endif
-
-  /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
-#endif
-
-  arm64_assert();
 }

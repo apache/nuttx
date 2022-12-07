@@ -34,10 +34,15 @@
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
+#include <nuttx/panic_notifier.h>
 #include <nuttx/power/pm.h>
 #include <arch/chip/chip.h>
 
 #include "arm64_arch.h"
+
+#ifdef CONFIG_ARCH_FPU
+#include "arm64_fpu.h"
+#endif
 #include "arm64_internal.h"
 #include "chip.h"
 
@@ -56,6 +61,10 @@
  */
 
 volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
+
+#ifdef CONFIG_ARCH_FPU
+static struct notifier_block g_fpu_panic_block;
+#endif
 
 #ifdef CONFIG_SMP
 INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_SMP_NCPUS,
@@ -128,6 +137,23 @@ static void up_color_intstack(void)
 #endif
 
 /****************************************************************************
+ * Name: arm64_panic_disable_fpu
+ *
+ * Description:
+ *   This is called when panic to close fpu.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+int arm64_panic_disable_fpu(struct notifier_block *this,
+                            unsigned long action, void *data)
+{
+  arm64_fpu_disable();
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: up_initialize
  *
  * Description:
@@ -186,5 +212,11 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   arm64_usbinitialize();
+#endif
+
+#ifdef CONFIG_ARCH_FPU
+  g_fpu_panic_block.notifier_call = arm64_panic_disable_fpu;
+  g_fpu_panic_block.priority = INT_MAX;
+  panic_notifier_chain_register(&g_fpu_panic_block);
 #endif
 }
