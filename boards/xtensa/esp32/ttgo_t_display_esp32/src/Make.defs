@@ -55,18 +55,6 @@ ifeq ($(CONFIG_ESP32_TWAI),y)
 CSRCS += esp32_twai.c
 endif
 
-SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
-
-.PHONY = context distclean
-
-$(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_COMMON_DIR)$(DELIM)scripts -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
-
-context:: $(SCRIPTOUT)
-
-distclean::
-	$(call DELFILE, $(SCRIPTOUT))
-
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
