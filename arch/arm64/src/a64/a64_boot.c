@@ -84,7 +84,7 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_HAVE_RESET)
   arm64_psci_init("smc");
 
 #endif
