@@ -215,6 +215,10 @@ uint16_t can_datahandler(FAR struct net_driver_s *dev,
       ret = iob->io_pktlen;
     }
 
+  /* Device buffer must be enqueue or freed, clear the handle */
+
+  netdev_iob_clear(dev);
+
   return ret;
 }
 
