@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/common/scripts/esp32s2_sections.ld
+ * boards/xtensa/esp32s2/common/scripts/legacy_sections.ld
  ****************************************************************************/
 
 /* Default entry point: */

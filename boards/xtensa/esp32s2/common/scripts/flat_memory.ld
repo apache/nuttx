@@ -1,12 +1,12 @@
 /****************************************************************************
- * boards/xtensa/esp32s2/common/scripts/esp32s2_memory.ld
+ * boards/xtensa/esp32s2/common/scripts/flat_memory.ld
  * ESP32-S2 Linker Script Memory Layout
  *
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
  *
- * esp32s2_sections.ld contains output sections to link compiler output
- * into these memory blocks.
+ * <legacy/mcuboot>_sections.ld contains output sections to link compiler
+ * output into these memory blocks.
  *
  ****************************************************************************/
 
