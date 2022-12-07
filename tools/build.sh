@@ -71,6 +71,11 @@ function setup_toolchain()
   if [ ! -n "${ARMLMD_LICENSE_FILE}" ]; then
     export ARMLMD_LICENSE_FILE=${HOME}/.arm/ds/licenses/DS000-EV-31030.lic
   fi
+
+  # Generate compile database file compile_commands.json
+  BEAR_DIR="${ROOTDIR}/prebuilts/tools/bear/bin/bear"
+  baer="${BEAR_DIR} --output compile_commands.json --append --"
+  export PATH="${BEAR_DIR}:$PATH"
 }
 
 function build_board()
@@ -97,7 +102,7 @@ function build_board()
     exit 1
   fi
 
-  if ! make -C ${NUTTXDIR} EXTRAFLAGS="$EXTRA_FLAGS" ${@:2}; then
+  if ! ${bear} make -C ${NUTTXDIR} EXTRAFLAGS="$EXTRA_FLAGS" ${@:2}; then
     echo "Error: ############# build ${1} fail ##############"
     exit 2
   fi
