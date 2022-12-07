@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_assert.c
+ * sched/misc/panic.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,73 +22,67 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sched/sched.h>
-#include <debug.h>
-#include <stdlib.h>
-#include <nuttx/syslog/syslog.h>
+#include <nuttx/arch.h>
+#include <nuttx/notifier.h>
 
-#ifdef CONFIG_BOARD_CRASHDUMP
-#  include <nuttx/board.h>
-#endif
-
-#include "sim_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+#include <sys/types.h>
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static ATOMIC_NOTIFIER_HEAD(g_panic_notifier_list);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name:  panic_notifier_chain_register
  *
  * Description:
- *   Called to terminate the simulation abnormally in the event of a failed
- *   assertion.
+ *   Add notifier to the panic notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
  *
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void panic_notifier_chain_register(FAR struct notifier_block *nb)
 {
-  struct tcb_s *rtcb = running_task();
-
-  /* Show back trace */
-
-#ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(rtcb->pid);
-#endif
-
-  /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
-
-  if (CURRENT_REGS || is_idle_task(rtcb))
-    {
-      /* Exit the simulation */
-
-      host_abort(EXIT_FAILURE);
-    }
+  atomic_notifier_chain_register(&g_panic_notifier_list, nb);
 }
+
+/****************************************************************************
+ * Name:  panic_notifier_chain_unregister
+ *
+ * Description:
+ *   Remove notifier from the panic notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
+
+void panic_notifier_chain_unregister(FAR struct notifier_block *nb)
+{
+  atomic_notifier_chain_unregister(&g_panic_notifier_list, nb);
+}
+
+/****************************************************************************
+ * Name:  panic_notifier_call_chain
+ *
+ * Description:
+ *   Call functions in the panic notifier chain.
+ *
+ * Input Parameters:
+ *    action - Value passed unmodified to notifier function
+ *    data   - Pointer passed unmodified to notifier function
+ *
+ ****************************************************************************/
+
+void panic_notifier_call_chain(unsigned long action, FAR void *data)
+{
+  atomic_notifier_call_chain(&g_panic_notifier_list, action, data);
+}
+

@@ -26,36 +26,16 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/tls.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "irq/irq.h"
 #include "arm_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* USB trace dumping */
-
-#ifndef CONFIG_USBDEV_TRACE
-#  undef CONFIG_ARCH_USBDUMP
-#endif
-
-#ifndef CONFIG_BOARD_RESET_ON_ASSERT
-#  define CONFIG_BOARD_RESET_ON_ASSERT 0
-#endif
 
 #ifdef CONFIG_ARCH_STACKDUMP
 
@@ -76,10 +56,6 @@ static uint8_t s_last_regs[XCPTCONTEXT_SIZE];
 static void arm_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
-
-  /* Flush any buffered SYSLOG data to avoid overwrite */
-
-  syslog_flush();
 
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
@@ -314,30 +290,6 @@ static void arm_showtasks(void)
 }
 
 /****************************************************************************
- * Name: assert_tracecallback
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(const char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the real work */
-
-  va_start(ap, fmt);
-  vsyslog(LOG_EMERG, fmt, ap);
-  va_end(ap);
-  return OK;
-}
-
-static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
-{
-  usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
-  return 0;
-}
-#endif
-
-/****************************************************************************
  * Name: arm_dump_stack
  ****************************************************************************/
 
@@ -461,54 +413,6 @@ static void arm_dumpstate(void)
 #endif /* CONFIG_ARCH_STACKDUMP */
 
 /****************************************************************************
- * Name: arm_assert
- ****************************************************************************/
-
-static void arm_assert(void)
-{
-  /* Flush any buffered SYSLOG data */
-
-  syslog_flush();
-
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (CURRENT_REGS || (running_task())->flink == NULL)
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-
-      /* Disable interrupts on this CPU */
-
-      up_irq_save();
-
-#ifdef CONFIG_SMP
-      /* Try (again) to stop activity on other CPUs */
-
-      spin_trylock(&g_cpu_irqlock);
-#endif
-
-      for (; ; )
-        {
-#ifdef CONFIG_ARCH_LEDS
-          /* FLASH LEDs a 2Hz */
-
-          board_autoled_on(LED_PANIC);
-          up_mdelay(250);
-          board_autoled_off(LED_PANIC);
-          up_mdelay(250);
-#endif
-        }
-    }
-  else
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -520,39 +424,7 @@ void up_assert(const char *filename, int lineno)
 {
   board_autoled_on(LED_ASSERTION);
 
-  /* Flush any buffered SYSLOG data (prior to the assertion) */
-
-  syslog_flush();
-
-  _alert("Assertion failed "
-#ifdef CONFIG_SMP
-         "CPU%d "
-#endif
-         "at file:%s line: %d"
-#if CONFIG_TASK_NAME_SIZE > 0
-         " task: %s"
-#endif
-         "\n",
-#ifdef CONFIG_SMP
-         up_cpu_index(),
-#endif
-         filename, lineno
-#if CONFIG_TASK_NAME_SIZE > 0
-         , running_task()->name
-#endif
-        );
-
 #ifdef CONFIG_ARCH_STACKDUMP
   arm_dumpstate();
 #endif
-
-  /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
-#endif
-
-  arm_assert();
 }

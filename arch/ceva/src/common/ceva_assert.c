@@ -24,30 +24,12 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/usb/usbdev_trace.h>
 
 #include "sched/sched.h"
-#include "irq/irq.h"
 #include "ceva_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* USB trace dumping */
-
-#ifndef CONFIG_USBDEV_TRACE
-#  undef CONFIG_ARCH_USBDUMP
-#endif
-
-#ifndef CONFIG_BOARD_RESET_ON_ASSERT
-#  define CONFIG_BOARD_RESET_ON_ASSERT 0
-#endif
 
 /****************************************************************************
  * Private Data
@@ -152,30 +134,6 @@ static inline void up_registerdump(void)
 #endif
 
 /****************************************************************************
- * Name: assert_tracecallback
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(const char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the real work */
-
-  va_start(ap, fmt);
-  vsyslog(LOG_EMERG, fmt, &ap);
-  va_end(ap);
-  return 0;
-}
-
-static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
-{
-  usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
-  return 0;
-}
-#endif
-
-/****************************************************************************
  * Name: up_dumpstate
  ****************************************************************************/
 
@@ -272,55 +230,10 @@ static void up_dumpstate(void)
   /* Dump the state of all tasks (if available) */
 
   up_showtasks();
-
-#ifdef CONFIG_ARCH_USBDUMP
-  /* Dump USB trace data */
-
-  usbtrace_enumerate(assert_tracecallback, NULL);
-#endif
 }
 #else
 # define up_dumpstate()
 #endif
-
-/****************************************************************************
- * Name: _up_assert
- ****************************************************************************/
-
-static void _up_assert(int errorcode) noreturn_function;
-static void _up_assert(int errorcode)
-{
-  /* Flush any buffered SYSLOG data */
-
-  syslog_flush();
-
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (up_interrupt_context() || sched_idletask())
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-
-      up_irq_save();
-
-#ifdef CONFIG_SMP
-      /* Try (again) to stop activity on other CPUs */
-
-      spin_trylock(&g_cpu_irqlock);
-#endif
-
-      for (; ; )
-        {
-        }
-    }
-  else
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-    }
-}
 
 /****************************************************************************
  * Public Functions
@@ -332,41 +245,5 @@ static void _up_assert(int errorcode)
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
-  struct tcb_s *rtcb = running_task();
-#endif
-
-  /* Flush any buffered SYSLOG data (prior to the assertion) */
-
-  syslog_flush();
-
-#ifdef CONFIG_SMP
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
-        up_cpu_index(), filename, lineno, rtcb->name);
-#else
-  _alert("Assertion failed CPU%d at file:%s line: %d\n",
-        up_cpu_index(), filename, lineno);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed at file:%s line: %d task: %s\n",
-        filename, lineno, rtcb->name);
-#else
-  _alert("Assertion failed at file:%s line: %d\n",
-        filename, lineno);
-#endif
-#endif
-
   up_dumpstate();
-
-  /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
-#endif
-
-  _up_assert(EXIT_FAILURE);
 }

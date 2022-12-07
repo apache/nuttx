@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_assert.c
+ * include/nuttx/panic_notifier.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,77 +18,70 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_PANIC_NOTIFIER_H
+#define __INCLUDE_NUTTX_PANIC_NOTIFIER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sched/sched.h>
-#include <debug.h>
-#include <stdlib.h>
-#include <nuttx/syslog/syslog.h>
+#include <nuttx/notifier.h>
 
-#ifdef CONFIG_BOARD_CRASHDUMP
-#  include <nuttx/board.h>
-#endif
-
-#include "sim_internal.h"
+#include <sys/types.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
+ ****************************************************************************/
+
+enum panic_type_e
+{
+  PANIC_KERNEL         =  0,
+  PANIC_TASK           =  1,
+};
+
+/****************************************************************************
+ * Public Function
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_assert
+ * Name:  panic_notifier_chain_register
  *
  * Description:
- *   Called to terminate the simulation abnormally in the event of a failed
- *   assertion.
+ *   Add notifier to the panic notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
  *
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
-{
-  struct tcb_s *rtcb = running_task();
+void panic_notifier_chain_register(FAR struct notifier_block *nb);
 
-  /* Show back trace */
+/****************************************************************************
+ * Name:  panic_notifier_chain_unregister
+ *
+ * Description:
+ *   Remove notifier from the panic notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(rtcb->pid);
-#endif
+void panic_notifier_chain_unregister(FAR struct notifier_block *nb);
 
-  /* Flush any buffered SYSLOG data (from the above) */
+/****************************************************************************
+ * Name:  panic_notifier_call_chain
+ *
+ * Description:
+ *   Call functions in the panic notifier chain.
+ *
+ * Input Parameters:
+ *    action - Value passed unmodified to notifier function
+ *    data   - Pointer passed unmodified to notifier function
+ *
+ ****************************************************************************/
 
-  syslog_flush();
+void panic_notifier_call_chain(unsigned long action, FAR void *data);
 
-  if (CURRENT_REGS || is_idle_task(rtcb))
-    {
-      /* Exit the simulation */
-
-      host_abort(EXIT_FAILURE);
-    }
-}
+#endif /* __INCLUDE_NUTTX_PANIC_NOTIFIER_H */
