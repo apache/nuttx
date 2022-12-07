@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_adc.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_adc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,7 +29,7 @@
 
 #include "esp32c3_adc.h"
 
-#include "esp32c3-devkit.h"
+#include "esp32c3_board_adc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -44,6 +44,9 @@
  *
  * Description:
  *   Configure the ADC driver.
+ *
+ * Input Parameters:
+ *   None.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned

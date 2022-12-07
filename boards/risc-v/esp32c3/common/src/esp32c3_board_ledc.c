@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3_apa102.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_ledc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,86 +24,102 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <debug.h>
+#include <sys/types.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/spi/spi.h>
-#include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/apa102.h>
+#include <nuttx/timers/pwm.h>
 
-#include "esp32c3_gpio.h"
-#include "esp32c3_spi.h"
-#include "esp32c3-devkit-rust-1.h"
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "esp32c3_ledc.h"
+
+#include "esp32c3_board_ledc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define LCD_SPI_PORTNO        2   /* On SPI2 */
-
-#ifndef CONFIG_LCD_CONTRAST
-#  define CONFIG_LCD_CONTRAST 60
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct spi_dev_s *g_spidev;
-static struct lcd_dev_s *g_lcddev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_lcd_initialize
+ * Name: board_ledc_setup
+ *
+ * Description:
+ *   Initialize LEDC PWM and register the PWM device.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-int board_lcd_initialize(void)
+int board_ledc_setup(void)
 {
-  g_spidev = esp32c3_spibus_initialize(LCD_SPI_PORTNO);
+  int ret;
+  struct pwm_lowerhalf_s *pwm;
 
-  if (!g_spidev)
+#ifdef CONFIG_ESP32C3_LEDC_TIM0
+  pwm = esp32c3_ledc_init(0);
+  if (!pwm)
     {
-      lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
+      syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 0 lower half\n");
       return -ENODEV;
     }
 
+  /* Register the PWM driver at "/dev/pwm0" */
+
+  ret = pwm_register("/dev/pwm0", pwm);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_LEDC_TIM1
+  pwm = esp32c3_ledc_init(1);
+  if (!pwm)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 1 lower half\n");
+      return -ENODEV;
+    }
+
+  /* Register the PWM driver at "/dev/pwm1" */
+
+  ret = pwm_register("/dev/pwm1", pwm);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_LEDC_TIM2
+  pwm = esp32c3_ledc_init(2);
+  if (!pwm)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 2 lower half\n");
+      return -ENODEV;
+    }
+
+  /* Register the PWM driver at "/dev/pwm2" */
+
+  ret = pwm_register("/dev/pwm2", pwm);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pwm_register failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return OK;
-}
-
-/****************************************************************************
- * Name: board_lcd_getdev
- ****************************************************************************/
-
-struct lcd_dev_s *board_lcd_getdev(int lcddev)
-{
-  g_lcddev = apa102_initialize(g_spidev, lcddev);
-  if (!g_lcddev)
-    {
-      lcderr("ERROR: Failed to bind SPI port 1 to LCD %d\n", lcddev);
-    }
-  else
-    {
-      lcdinfo("SPI port 1 bound to LCD %d\n", lcddev);
-
-      return g_lcddev;
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
- * Name: board_lcd_uninitialize
- ****************************************************************************/
-
-void board_lcd_uninitialize(void)
-{
-  /* TO-FIX */
 }
 

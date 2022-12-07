@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_board_wlan.c
+ * boards/risc-v/esp32c3/common/include/esp32c3_board_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,33 +18,42 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <syslog.h>
-#include <debug.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include <nuttx/wireless/wireless.h>
+#ifndef __ASSEMBLY__
 
-#include "esp32c3_spiflash.h"
-#include "esp32c3_wlan.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_wlan_init
+ * Name: board_i2c_init
  *
  * Description:
- *   Configure the wireless subsystem.
+ *   Configure the I2C driver.
+ *
+ * Input Parameters:
+ *   None.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -52,30 +61,14 @@
  *
  ****************************************************************************/
 
-int board_wlan_init(void)
-{
-  int ret = OK;
-
-#ifdef CONFIG_NET
-#ifdef ESP32C3_WLAN_HAS_STA
-  ret = esp32c3_wlan_sta_initialize();
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize Wi-Fi station\n");
-      return ret;
-    }
+#ifdef CONFIG_I2C_DRIVER
+int board_i2c_init(void);
 #endif
 
-#ifdef ESP32C3_WLAN_HAS_SOFTAP
-  ret = esp32c3_wlan_softap_initialize();
-  if (ret)
-    {
-      wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
-      return ret;
-    }
-#endif
-#endif
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_twai.c
+ * boards/risc-v/esp32c3/common/include/esp32c3_board_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,76 +18,57 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/can/can.h>
-#include <arch/board/board.h>
-
-#include "chip.h"
-/* #include "arm_arch.h" */
-
-#include "esp32c3_twai.h"
-#include "esp32c3-devkit.h"
-
-#ifdef CONFIG_CAN
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+#ifndef __ASSEMBLY__
 
-#define TWAI_PORT0 0
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_twai_setup
+ * Name: board_adc_init
  *
  * Description:
- *  Initialize TWAI and register the TWAI device
+ *   Configure the ADC driver.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32c3_twai_setup(void)
-{
-#ifdef CONFIG_ESP32C3_TWAI0
-  struct can_dev_s *twai;
-  int ret;
-
-  /* Call esp32c3_twaiinitialize() to get an instance of the TWAI0
-   * interface
-   * */
-
-  twai = esp32c3_twaiinitialize(TWAI_PORT0);
-  if (twai == NULL)
-    {
-      canerr("ERROR:  Failed to get TWAI0 interface\n");
-      return -ENODEV;
-    }
-
-  /* Register the TWAI0 driver at "/dev/can0" */
-
-  ret = can_register("/dev/can0", twai);
-  if (ret < 0)
-    {
-      canerr("ERROR: TWAI0 register failed: %d\n", ret);
-      return ret;
-    }
-
-  return OK;
-#else
-  return -ENODEV;
+#ifdef CONFIG_ADC
+int board_adc_init(void);
 #endif
-}
 
-#endif /* CONFIG_CAN */
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H */

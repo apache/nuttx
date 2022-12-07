@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_board_spi.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,60 +24,57 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/spi/spi.h>
+#include "esp32c3_i2c.h"
 
-#include "esp32c3_gpio.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "esp32c3_board_i2c.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spi2_status
+ * Name: board_i2c_init
+ *
+ * Description:
+ *   Configure the I2C driver.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32C3_SPI2
-
-uint8_t esp32c3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+int board_i2c_init(void)
 {
-  uint8_t status = 0;
+  int ret = OK;
 
-  return status;
-}
+#ifdef CONFIG_ESP32C3_I2C0
+  struct i2c_master_s *i2c;
 
-#endif
+  i2c = esp32c3_i2cbus_initialize(0);
 
-/****************************************************************************
- * Name: esp32c3_spi2_cmddata
- ****************************************************************************/
-
-#if defined(CONFIG_ESP32C3_SPI2) && defined(CONFIG_SPI_CMDDATA)
-
-int esp32c3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  if (devid == SPIDEV_DISPLAY(0))
+  if (i2c == NULL)
     {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
-
-      esp32c3_gpiowrite(CONFIG_ESP32C3_SPI2_MISOPIN, !cmd);
-
-      return OK;
+      i2cerr("ERROR: Failed to get I2C0 interface\n");
+      return -ENODEV;
     }
 
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
+  ret = i2c_register(i2c, 0);
+  if (ret < 0)
+    {
+      i2cerr("ERROR: Failed to register I2C0 driver: %d\n", ret);
+      esp32c3_i2cbus_uninitialize(i2c);
+    }
+#endif
 
-  return -ENODEV;
+  return ret;
 }
 
-#endif

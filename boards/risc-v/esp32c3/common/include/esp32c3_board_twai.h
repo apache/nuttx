@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_i2c.c
+ * boards/risc-v/esp32c3/common/include/esp32c3_board_twai.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,29 +18,42 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_TWAI_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_TWAI_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <nuttx/i2c/i2c_master.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include "esp32c3_i2c.h"
-#include "esp32c3-devkit.h"
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_i2c_init
+ * Name: board_twai_setup
  *
  * Description:
- *   Configure the I2C driver.
+ *   Configure the TWAI driver.
+ *
+ * Input Parameters:
+ *   None.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -48,29 +61,14 @@
  *
  ****************************************************************************/
 
-int board_i2c_init(void)
-{
-  int ret = OK;
-
-#ifdef CONFIG_ESP32C3_I2C0
-  struct i2c_master_s *i2c;
-
-  i2c = esp32c3_i2cbus_initialize(0);
-
-  if (i2c == NULL)
-    {
-      i2cerr("ERROR: Failed to get I2C0 interface\n");
-      return -ENODEV;
-    }
-
-  ret = i2c_register(i2c, 0);
-  if (ret < 0)
-    {
-      i2cerr("ERROR: Failed to register I2C0 driver: %d\n", ret);
-      esp32c3_i2cbus_uninitialize(i2c);
-    }
+#ifdef CONFIG_CAN
+int board_twai_setup(void);
 #endif
 
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_TWAI_H */

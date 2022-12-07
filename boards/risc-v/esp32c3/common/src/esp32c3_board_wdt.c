@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3-devkit-rust-1.h
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_wdt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,80 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
 
-#ifdef CONFIG_VIDEO_FB
-  #include <nuttx/video/fb.h>
-#endif
+#include <sys/types.h>
+#include <debug.h>
+
+#include "esp32c3_wdt_lowerhalf.h"
+#include "esp32c3_wdt.h"
+
+#include "esp32c3_board_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TIMERS */
-
-#define TIMER0 0
-#define TIMER1 1
-
-/* ONESHOT */
-
-#define ONESHOT_TIMER         1
-#define ONESHOT_RESOLUTION_US 1
-
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32c3_bringup
+ * Name: board_wdt_init
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Configure the Watchdog Timer driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   None.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32c3_bringup(void);
+int board_wdt_init(void)
+{
+  int ret = OK;
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H */
+#ifdef CONFIG_ESP32C3_MWDT0
+  ret = esp32c3_wdt_initialize("/dev/watchdog0", ESP32C3_WDT_MWDT0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32C3_MWDT0 */
+
+#ifdef CONFIG_ESP32C3_MWDT1
+  ret = esp32c3_wdt_initialize("/dev/watchdog1", ESP32C3_WDT_MWDT1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32C3_MWDT1 */
+
+#ifdef CONFIG_ESP32C3_RWDT
+  ret = esp32c3_wdt_initialize("/dev/watchdog2", ESP32C3_WDT_RWDT);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32C3_RWDT */
+
+  return ret;
+}
+

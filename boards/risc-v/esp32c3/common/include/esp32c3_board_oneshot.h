@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_board_spidev.c
+ * boards/risc-v/esp32c3/common/include/esp32c3_board_oneshot.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,55 +18,58 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ONESHOT_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ONESHOT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include <nuttx/spi/spi_transfer.h>
+#ifndef __ASSEMBLY__
 
-#include "esp32c3_spi.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_spidev_initialize
+ * Name: board_oneshot_init
  *
  * Description:
- *   Initialize and register SPI driver for the specified SPI port.
+ *   Configure the oneshot timer driver.
+ *
+ * Input Parameters:
+ *   timer      - Timer instance to be used as oneshot timer.
+ *   resolution - Oneshot timer resolution.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int board_spidev_initialize(int port)
-{
-  int ret;
-  struct spi_dev_s *spi;
+#ifdef CONFIG_ONESHOT
+int board_oneshot_init(int timer, uint16_t resolution);
+#endif
 
-  syslog(LOG_INFO, "Initializing /dev/spi%d...\n", port);
-
-  /* Initialize SPI device */
-
-  spi = esp32c3_spibus_initialize(port);
-  if (spi == NULL)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI%d.\n", port);
-      return -ENODEV;
-    }
-
-  ret = spi_register(spi, port);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to register /dev/spi%d: %d\n", port, ret);
-
-      esp32c3_spibus_uninitialize(spi);
-    }
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ONESHOT_H */

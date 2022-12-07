@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3-devkit-rust-1.h
+ * boards/risc-v/esp32c3/common/include/esp32c3_board_spislavedev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,57 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_SPISLAVEDEV_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_SPISLAVEDEV_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
-
-#ifdef CONFIG_VIDEO_FB
-  #include <nuttx/video/fb.h>
-#endif
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TIMERS */
-
-#define TIMER0 0
-#define TIMER1 1
-
-/* ONESHOT */
-
-#define ONESHOT_TIMER         1
-#define ONESHOT_RESOLUTION_US 1
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_bringup
+ * Name: board_spislavedev_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize SPI Slave driver and register the /dev/spislv device.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   bus - The SPI bus number, used to build the device path as /dev/spislvN
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32c3_bringup(void);
+#ifdef CONFIG_SPI_SLAVE
+int board_spislavedev_initialize(int bus);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_SPISLAVEDEV_H */

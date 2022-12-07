@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3_board_spi.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_wlan.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,60 +24,63 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <syslog.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/wireless/wireless.h>
 
-#include "esp32c3_gpio.h"
+#include "esp32c3_spiflash.h"
+#include "esp32c3_wlan.h"
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "esp32c3_board_wlan.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spi2_status
+ * Name: board_wlan_init
+ *
+ * Description:
+ *   Configure the wireless subsystem.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32C3_SPI2
-
-uint8_t esp32c3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+int board_wlan_init(void)
 {
-  uint8_t status = 0;
+  int ret = OK;
 
-  return status;
-}
-
-#endif
-
-/****************************************************************************
- * Name: esp32c3_spi2_cmddata
- ****************************************************************************/
-
-#if defined(CONFIG_ESP32C3_SPI2) && defined(CONFIG_SPI_CMDDATA)
-
-int esp32c3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  if (devid == SPIDEV_DISPLAY(0))
+#ifdef CONFIG_NET
+#ifdef ESP32C3_WLAN_HAS_STA
+  ret = esp32c3_wlan_sta_initialize();
+  if (ret)
     {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
-
-      esp32c3_gpiowrite(CONFIG_ESP32C3_SPI2_MISOPIN, !cmd);
-
-      return OK;
+      wlerr("ERROR: Failed to initialize Wi-Fi station\n");
+      return ret;
     }
+#endif
 
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
+#ifdef ESP32C3_WLAN_HAS_SOFTAP
+  ret = esp32c3_wlan_softap_initialize();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
+      return ret;
+    }
+#endif
+#endif
 
-  return -ENODEV;
+  return ret;
 }
 
-#endif

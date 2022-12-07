@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_oneshot.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_twai.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,26 +24,41 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
-#include <sys/types.h>
-#include <nuttx/timers/timer.h>
-#include <nuttx/clock.h>
-#include <nuttx/timers/oneshot.h>
-#include "esp32c3-devkit.h"
+
+#include <nuttx/can/can.h>
+#include <arch/board/board.h>
+
+#include "chip.h"
+/* #include "arm_arch.h" */
+
+#include "esp32c3_twai.h"
+
+#include "esp32c3_board_twai.h"
+
+#ifdef CONFIG_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#define TWAI_PORT0 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_oneshot_init
+ * Name: board_twai_setup
  *
  * Description:
- *   Configure the oneshot timer driver.
+ *   Configure the TWAI driver.
+ *
+ * Input Parameters:
+ *   None.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -51,33 +66,36 @@
  *
  ****************************************************************************/
 
-int board_oneshot_init(int timer, uint16_t resolution)
+int board_twai_setup(void)
 {
-  int ret = OK;
-  struct oneshot_lowerhalf_s *os_lower = NULL;
+#ifdef CONFIG_ESP32C3_TWAI0
+  struct can_dev_s *twai;
+  int ret;
 
-  os_lower = oneshot_initialize(timer, resolution);
-  if (os_lower != NULL)
+  /* Call esp32c3_twaiinitialize() to get an instance of the TWAI0
+   * interface
+   * */
+
+  twai = esp32c3_twaiinitialize(TWAI_PORT0);
+  if (twai == NULL)
     {
-#if defined(CONFIG_CPULOAD_ONESHOT)
-      /* Configure the oneshot timer to support CPU load measurement */
+      canerr("ERROR:  Failed to get TWAI0 interface\n");
+      return -ENODEV;
+    }
 
-      nxsched_oneshot_extclk(os_lower);
+  /* Register the TWAI0 driver at "/dev/can0" */
 
+  ret = can_register("/dev/can0", twai);
+  if (ret < 0)
+    {
+      canerr("ERROR: TWAI0 register failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 #else
-      ret = oneshot_register("/dev/oneshot", os_lower);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR,
-            "ERROR: Failed to register oneshot at /dev/oneshot: %d\n", ret);
-        }
-#endif /* CONFIG_CPULOAD_ONESHOT */
-    }
-  else
-    {
-      syslog(LOG_ERR, "ERROR: oneshot_initialize failed\n");
-      ret = -EBUSY;
-    }
-
-  return ret;
+  return -ENODEV;
+#endif
 }
+
+#endif /* CONFIG_CAN */

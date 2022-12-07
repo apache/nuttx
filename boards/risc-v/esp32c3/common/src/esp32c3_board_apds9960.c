@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3_apds9960.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_apds9960.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +35,8 @@
 #include "esp32c3.h"
 #include "esp32c3_i2c.h"
 #include "esp32c3_gpio.h"
+
+#include "esp32c3_board_apds9960.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -136,7 +138,7 @@ static int apds9960_irq_attach(struct apds9960_config_s *state,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: apds9960_initialize
+ * Name: board_apds9960_initialize
  *
  * Description:
  *   Initialize and register the APDS9960 gesture sensor.
@@ -150,7 +152,7 @@ static int apds9960_irq_attach(struct apds9960_config_s *state,
  *
  ****************************************************************************/
 
-int apds9960_initialize(int devno, int busno)
+int board_apds9960_initialize(int devno, int busno)
 {
   struct i2c_master_s *i2c;
   char devpath[12];

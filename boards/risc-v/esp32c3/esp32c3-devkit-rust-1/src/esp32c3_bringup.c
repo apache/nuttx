@@ -147,7 +147,7 @@ int esp32c3_bringup(void)
 #ifdef CONFIG_SENSORS_APDS9960
   /* Register the APDS-9960 gesture sensor */
 
-  ret = apds9960_initialize(0, 0);
+  ret = board_apds9960_initialize(0, 0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",

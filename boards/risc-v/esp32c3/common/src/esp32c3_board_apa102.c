@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_gc9a01.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_apa102.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,26 +33,19 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/gc9a01.h>
+#include <nuttx/lcd/apa102.h>
 
-#include "esp32c3_spi.h"
 #include "esp32c3_gpio.h"
+#include "esp32c3_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LCD_SPI_PORTNO ESP32C3_SPI2
-#define LCD_DC         CONFIG_ESP32C3_SPI2_MISOPIN
-#define LCD_RST        CONFIG_ESP32C3_LCD_RSTPIN
-#define LCD_BL         CONFIG_ESP32C3_LCD_BLPIN
+#define LCD_SPI_PORTNO        2   /* On SPI2 */
 
-#ifndef CONFIG_SPI_CMDDATA
-#  error "The GC9A01 driver requires CONFIG_SPI_CMDATA in the config"
-#endif
-
-#ifndef CONFIG_ESP32C3_SPI_SWCS
-#  error "The GC9A01 driver requires CONFIG_ESP32C3_SPI_SWCS in the config"
+#ifndef CONFIG_LCD_CONTRAST
+#  define CONFIG_LCD_CONTRAST 60
 #endif
 
 /****************************************************************************
@@ -60,89 +53,56 @@
  ****************************************************************************/
 
 static struct spi_dev_s *g_spidev;
-static struct lcd_dev_s *g_lcd = NULL;
+static struct lcd_dev_s *g_lcddev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  board_lcd_initialize
- *
- * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is
- *   fully initialized, display memory cleared, and the LCD ready to use, but
- *   with the power setting at 0 (full off).
- *
+ * Name: board_lcd_initialize
  ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
   g_spidev = esp32c3_spibus_initialize(LCD_SPI_PORTNO);
+
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
       return -ENODEV;
     }
 
-  /* SPI RX is not used. Same pin is used as LCD Data/Command control */
-
-  esp32c3_configgpio(LCD_DC, OUTPUT);
-  esp32c3_gpiowrite(LCD_DC, true);
-
-  /* Pull LCD_RESET high */
-
-  esp32c3_configgpio(LCD_RST, OUTPUT);
-  esp32c3_gpiowrite(LCD_RST, false);
-  up_mdelay(50);
-  esp32c3_gpiowrite(LCD_RST, true);
-  up_mdelay(50);
-
-  /* Set full brightness */
-
-  esp32c3_configgpio(LCD_BL, OUTPUT);
-  esp32c3_gpiowrite(LCD_BL, true);
-
   return OK;
 }
 
 /****************************************************************************
- * Name:  board_lcd_getdev
- *
- * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This
- *   allows support for multiple LCD devices.
- *
+ * Name: board_lcd_getdev
  ****************************************************************************/
 
-struct lcd_dev_s *board_lcd_getdev(int devno)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
-  g_lcd = gc9a01_lcdinitialize(g_spidev);
-  if (!g_lcd)
+  g_lcddev = apa102_initialize(g_spidev, lcddev);
+  if (!g_lcddev)
     {
-      lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n", LCD_SPI_PORTNO,
-      devno);
+      lcderr("ERROR: Failed to bind SPI port 1 to LCD %d\n", lcddev);
     }
   else
     {
-      lcdinfo("SPI port %d bound to LCD %d\n", LCD_SPI_PORTNO, devno);
-      return g_lcd;
+      lcdinfo("SPI port 1 bound to LCD %d\n", lcddev);
+
+      return g_lcddev;
     }
 
   return NULL;
 }
 
 /****************************************************************************
- * Name:  board_lcd_uninitialize
- *
- * Description:
- *   Uninitialize the LCD support
- *
+ * Name: board_lcd_uninitialize
  ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
-  /* Turn the display off */
-
-  g_lcd->setpower(g_lcd, 0);
+  /* TO-FIX */
 }
+
