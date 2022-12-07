@@ -187,7 +187,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
            * or default mutex.
            */
 
-          ret = pthread_mutex_take(mutex, abs_timeout, false);
+          ret = pthread_mutex_take(mutex, abs_timeout);
 
           /* If we successfully obtained the semaphore, then indicate
            * that we own it.

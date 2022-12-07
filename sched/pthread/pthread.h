@@ -96,12 +96,12 @@ int pthread_sem_give(sem_t *sem);
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
-                       FAR const struct timespec *abs_timeout, bool intr);
+                       FAR const struct timespec *abs_timeout);
 int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex);
 int pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
 void pthread_mutex_inconsistent(FAR struct tcb_s *tcb);
 #else
-#  define pthread_mutex_take(m,abs_timeout,i)  pthread_sem_take(&(m)->sem,(abs_timeout))
+#  define pthread_mutex_take(m,abs_timeout)  pthread_sem_take(&(m)->sem,(abs_timeout))
 #  define pthread_mutex_trytake(m)             pthread_sem_trytake(&(m)->sem)
 #  define pthread_mutex_give(m)                pthread_sem_give(&(m)->sem)
 #endif

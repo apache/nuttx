@@ -126,7 +126,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Reacquire mutex...\n");
 
-      status = pthread_mutex_take(mutex, NULL, false);
+      status = pthread_mutex_take(mutex, NULL);
       if (ret == OK)
         {
           /* Report the first failure that occurs */
