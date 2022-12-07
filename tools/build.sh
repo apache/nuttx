@@ -76,6 +76,20 @@ function setup_toolchain()
   BEAR_DIR="${ROOTDIR}/prebuilts/tools/bear/bin/bear"
   baer="${BEAR_DIR} --output compile_commands.json --append --"
   export PATH="${BEAR_DIR}:$PATH"
+
+  # Add compile cache
+  CCACHE_DIR=${ROOTDIR}/prebuilts/tools/ccache
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/cc
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/c++
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/gcc
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/g++
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/clang
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/clang++
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/arm-none-eabi-gcc
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/arm-none-eabi-g++
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/riscv64-unknown-elf-gcc
+  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/riscv64-unknown-elf-g++
+  export PATH="${CCACHE_DIR}:$PATH"
 }
 
 function build_board()
