@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_spiflash.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_spiflash.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -45,7 +45,8 @@
 
 #include "esp32c3_spiflash.h"
 #include "esp32c3_spiflash_mtd.h"
-#include "esp32c3-devkit.h"
+
+#include "esp32c3_board_spiflash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -553,7 +554,15 @@ static int init_storage_partition(void)
  * Name: board_spiflash_init
  *
  * Description:
- *   Initialize the SPIFLASH and register the MTD device.
+ *   Initialize the SPI Flash and register the MTD device.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
 int board_spiflash_init(void)

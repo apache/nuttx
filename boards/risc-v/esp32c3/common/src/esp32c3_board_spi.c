@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3-devkit-rust-1.h
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,66 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
 
-#ifdef CONFIG_VIDEO_FB
-  #include <nuttx/video/fb.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <nuttx/spi/spi.h>
+
+#include "esp32c3_gpio.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_spi2_status
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPI2
+
+uint8_t esp32c3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+{
+  uint8_t status = 0;
+
+  return status;
+}
+
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Name: esp32c3_spi2_cmddata
  ****************************************************************************/
 
-/* TIMERS */
+#if defined(CONFIG_ESP32C3_SPI2) && defined(CONFIG_SPI_CMDDATA)
 
-#define TIMER0 0
-#define TIMER1 1
+int esp32c3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
 
-/* ONESHOT */
+      esp32c3_gpiowrite(CONFIG_ESP32C3_SPI2_MISOPIN, !cmd);
 
-#define ONESHOT_TIMER         1
-#define ONESHOT_RESOLUTION_US 1
+      return OK;
+    }
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
+          "data");
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+  return -ENODEV;
+}
 
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32c3_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
- *
- ****************************************************************************/
-
-int esp32c3_bringup(void);
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H */
+#endif

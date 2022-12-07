@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_wdt.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_spidev.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,27 +24,28 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-#include "esp32c3_wdt_lowerhalf.h"
-#include "esp32c3_wdt.h"
+#include <nuttx/spi/spi_transfer.h>
 
-#include "esp32c3-devkit.h"
+#include "esp32c3_spi.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "esp32c3_board_spidev.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_wdt_init
+ * Name: board_spidev_initialize
  *
  * Description:
- *   Configure the watchdog timer driver.
+ *   Initialize SPI driver and register the /dev/spi device.
+ *
+ * Input Parameters:
+ *   bus - The SPI bus number, used to build the device path as /dev/spiN
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -52,43 +53,29 @@
  *
  ****************************************************************************/
 
-int board_wdt_init(void)
+int board_spidev_initialize(int port)
 {
-  int ret = OK;
+  int ret;
+  struct spi_dev_s *spi;
 
-#ifdef CONFIG_ESP32C3_MWDT0
-  ret = esp32c3_wdt_initialize("/dev/watchdog0", ESP32C3_WDT_MWDT0);
+  syslog(LOG_INFO, "Initializing /dev/spi%d...\n", port);
+
+  /* Initialize SPI device */
+
+  spi = esp32c3_spibus_initialize(port);
+  if (spi == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d.\n", port);
+      return -ENODEV;
+    }
+
+  ret = spi_register(spi, port);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif /* CONFIG_ESP32C3_MWDT0 */
+      syslog(LOG_ERR, "Failed to register /dev/spi%d: %d\n", port, ret);
 
-#ifdef CONFIG_ESP32C3_MWDT1
-  ret = esp32c3_wdt_initialize("/dev/watchdog1", ESP32C3_WDT_MWDT1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      return ret;
+      esp32c3_spibus_uninitialize(spi);
     }
-#endif /* CONFIG_ESP32C3_MWDT1 */
-
-#ifdef CONFIG_ESP32C3_RWDT
-  ret = esp32c3_wdt_initialize("/dev/watchdog2", ESP32C3_WDT_RWDT);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif /* CONFIG_ESP32C3_RWDT */
 
   return ret;
 }
-

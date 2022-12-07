@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3-devkit-rust-1.h
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_oneshot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,72 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
 
-#ifdef CONFIG_VIDEO_FB
-  #include <nuttx/video/fb.h>
-#endif
+#include <debug.h>
+#include <sys/types.h>
+
+#include <nuttx/timers/timer.h>
+#include <nuttx/clock.h>
+#include <nuttx/timers/oneshot.h>
+
+#include "esp32c3_board_oneshot.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TIMERS */
-
-#define TIMER0 0
-#define TIMER1 1
-
-/* ONESHOT */
-
-#define ONESHOT_TIMER         1
-#define ONESHOT_RESOLUTION_US 1
-
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32c3_bringup
+ * Name: board_oneshot_init
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Configure the oneshot timer driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   timer      - Timer instance to be used as oneshot timer.
+ *   resolution - Oneshot timer resolution.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32c3_bringup(void);
+int board_oneshot_init(int timer, uint16_t resolution)
+{
+  int ret = OK;
+  struct oneshot_lowerhalf_s *os_lower = NULL;
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_SRC_ESP32C3_DEVKIT_RUST1_H */
+  os_lower = oneshot_initialize(timer, resolution);
+  if (os_lower != NULL)
+    {
+#if defined(CONFIG_CPULOAD_ONESHOT)
+      /* Configure the oneshot timer to support CPU load measurement */
+
+      nxsched_oneshot_extclk(os_lower);
+
+#else
+      ret = oneshot_register("/dev/oneshot", os_lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+            "ERROR: Failed to register oneshot at /dev/oneshot: %d\n", ret);
+        }
+#endif /* CONFIG_CPULOAD_ONESHOT */
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: oneshot_initialize failed\n");
+      ret = -EBUSY;
+    }
+
+  return ret;
+}

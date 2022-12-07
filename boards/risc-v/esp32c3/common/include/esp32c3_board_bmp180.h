@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_board_spislavedev.c
+ * boards/risc-v/esp32c3/common/include/esp32c3_board_bmp180.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,63 +18,57 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_BMP180_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_BMP180_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include <nuttx/spi/slave.h>
+#ifndef __ASSEMBLY__
 
-#include "esp32c3_spi.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_spislavedev_initialize
+ * Name: board_bmp180_initialize
  *
  * Description:
- *   Initialize SPI Slave driver and register the /dev/spislv device.
+ *   Initialize and register the BMP180 Pressure Sensor driver.
  *
  * Input Parameters:
- *   bus - The SPI bus number, used to build the device path as /dev/spislvN
+ *   devno - The device number, used to build the device path as /dev/pressN
+ *   busno - The I2C bus number
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int board_spislavedev_initialize(int bus)
-{
-  int ret;
+#ifdef CONFIG_SENSORS_BMP180
+int board_bmp180_initialize(int devno, int busno);
+#endif
 
-  struct spi_slave_ctrlr_s *ctrlr;
-
-  spiinfo("Initializing /dev/spislv%d...\n", bus);
-
-  /* Initialize SPI Slave controller device */
-
-  ctrlr = esp32c3_spislave_ctrlr_initialize(bus);
-  if (ctrlr == NULL)
-    {
-      spierr("Failed to initialize SPI%d as slave.\n", bus);
-      return -ENODEV;
-    }
-
-  ret = spi_slave_register(ctrlr, bus);
-  if (ret < 0)
-    {
-      spierr("Failed to register /dev/spislv%d: %d\n", bus, ret);
-
-      esp32c3_spislave_ctrlr_uninitialize(ctrlr);
-    }
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_BMP180_H */

@@ -29,13 +29,13 @@ ENTRYPT = $(patsubst "%",%,$(CONFIG_INIT_ENTRYPOINT))
 # is appropriate for the host OS
 
 USER_LIBPATHS = $(addprefix -L,$(call CONVERT_PATH,$(addprefix $(TOPDIR)$(DELIM),$(dir $(USERLIBS)))))
-USER_LDSCRIPT = -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld)
-USER_LDSCRIPT += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
-USER_LDSCRIPT += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld)
+USER_LDSCRIPT = $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected_memory.ld)
+USER_LDSCRIPT += $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
+USER_LDSCRIPT += $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld)
 USER_HEXFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.hex)
 USER_BINFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.bin)
 
-USER_LDFLAGS = --undefined=$(ENTRYPT) --entry=$(ENTRYPT) $(USER_LDSCRIPT) -melf32lriscv
+USER_LDFLAGS = --undefined=$(ENTRYPT) --entry=$(ENTRYPT) $(addprefix -T,$(addsuffix .tmp,$(USER_LDSCRIPT))) -melf32lriscv
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
 USER_LDFLAGS += --cref -Map="$(TOPDIR)$(DELIM)User.map"
@@ -68,9 +68,12 @@ all: $(TOPDIR)$(DELIM)nuttx_user.elf
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
+$(addsuffix .tmp,$(USER_LDSCRIPT)): $(USER_LDSCRIPT)
+	$(call PREPROCESS,$(patsubst %.tmp,%,$@),$@)
+
 # Create the nuttx_user.elf file containing all of the user-mode code
 
-nuttx_user.elf: $(OBJS)
+nuttx_user.elf: $(OBJS) $(addsuffix .tmp,$(USER_LDSCRIPT))
 	$(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) $(LDSTARTGROUP) $(USER_LDLIBS) $(LDENDGROUP) $(USER_LIBGCC)
 
 $(TOPDIR)$(DELIM)nuttx_user.elf: nuttx_user.elf
@@ -84,6 +87,7 @@ ifeq ($(CONFIG_RAW_BINARY),y)
 	$(Q) echo "CP: nuttx_user.bin"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary nuttx_user.elf $(USER_BINFILE)
 endif
+	$(Q) $(call DELFILE,$(addsuffix .tmp,$(USER_LDSCRIPT)))
 
 .depend:
 

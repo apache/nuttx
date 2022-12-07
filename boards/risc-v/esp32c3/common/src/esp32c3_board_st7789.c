@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_st7735.c
+ * boards/risc-v/esp32c3/common/src/esp32c3_board_st7789.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/st7735.h>
+#include <nuttx/lcd/st7789.h>
 
 #include "esp32c3_spi.h"
 #include "esp32c3_gpio.h"
@@ -48,11 +48,11 @@
 #define LCD_BL         CONFIG_ESP32C3_LCD_BLPIN
 
 #ifndef CONFIG_SPI_CMDDATA
-#  error "The ST7735 driver requires CONFIG_SPI_CMDATA in the config"
+#  error "The ST7789 driver requires CONFIG_SPI_CMDATA in the config"
 #endif
 
 #ifndef CONFIG_ESP32C3_SPI_SWCS
-#  error "The ST7735 driver requires CONFIG_ESP32C3_SPI_SWCS in the config"
+#  error "The ST7789 driver requires CONFIG_ESP32C3_SPI_SWCS in the config"
 #endif
 
 /****************************************************************************
@@ -96,7 +96,7 @@ int board_lcd_initialize(void)
   esp32c3_gpiowrite(LCD_RST, false);
   up_mdelay(1);
   esp32c3_gpiowrite(LCD_RST, true);
-  up_mdelay(120);
+  up_mdelay(10);
 
   /* Set full brightness */
 
@@ -117,7 +117,7 @@ int board_lcd_initialize(void)
 
 struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  g_lcd = st7735_lcdinitialize(g_spidev);
+  g_lcd = st7789_lcdinitialize(g_spidev);
   if (!g_lcd)
     {
       lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n", LCD_SPI_PORTNO,
