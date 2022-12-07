@@ -55,8 +55,7 @@
 void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len)
 {
-  unsigned int limit = NETDEV_PKTSIZE(dev) -
-                       CONFIG_NET_LL_GUARDSIZE;
+  unsigned int limit = NETDEV_PKTSIZE(dev) - NET_LL_HDRLEN(dev);
 
   if (dev == NULL || len == 0 || len > limit)
     {
