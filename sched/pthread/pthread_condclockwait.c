@@ -159,7 +159,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
       sinfo("Re-locking...\n");
 
-      status = pthread_mutex_take(mutex, NULL, false);
+      status = pthread_mutex_take(mutex, NULL);
       if (status == OK)
         {
           mutex->pid    = mypid;

@@ -132,8 +132,6 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
  *
  * Input Parameters:
  *  mutex - The mutex to be locked
- *  intr  - false: ignore EINTR errors when locking; true treat EINTR as
- *          other errors by returning the errno value
  *
  * Returned Value:
  *   0 on success or an errno value on failure.
@@ -141,7 +139,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
  ****************************************************************************/
 
 int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
-                       FAR const struct timespec *abs_timeout, bool intr)
+                       FAR const struct timespec *abs_timeout)
 {
   int ret = EINVAL;
 
