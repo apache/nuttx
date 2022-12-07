@@ -166,7 +166,7 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
            * returns zero on success and a positive errno value on failure.
            */
 
-          ret = pthread_sem_take(&mutex->sem, abs_timeout, intr);
+          ret = pthread_sem_take(&mutex->sem, abs_timeout);
           if (ret == OK)
             {
               /* Check if the holder of the mutex has terminated without
