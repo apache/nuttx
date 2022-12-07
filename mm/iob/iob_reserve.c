@@ -78,5 +78,6 @@ void iob_reserve(FAR struct iob_s *iob, unsigned int reserved)
 
       iob->io_offset = offset;
       iob = iob->io_flink;
+      reserved -= offset;
     }
 }
