@@ -160,6 +160,20 @@ int pcsi_cpu_off(void)
   return psci_to_dev_err(ret);
 }
 
+int pcsi_cpu_reset(void)
+{
+  int ret;
+
+  if (psci_data.conduit == SMCCC_CONDUIT_NONE)
+    {
+      return -EINVAL;
+    }
+
+  ret = psci_data.invoke_psci_fn(PSCI_0_2_FN_SYSTEM_RESET, 0, 0, 0);
+
+  return psci_to_dev_err(ret);
+}
+
 int pcsi_cpu_on(unsigned long cpuid, uintptr_t entry_point)
 {
   int ret;

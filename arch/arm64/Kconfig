@@ -14,6 +14,7 @@ config ARCH_CHIP_A64
 	bool "Allwinner A64"
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		Allwinner A64 SoC

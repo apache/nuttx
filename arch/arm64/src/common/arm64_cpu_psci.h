@@ -99,6 +99,7 @@ struct psci_interface
 
 uint32_t psci_version(void);
 int pcsi_cpu_off(void);
+int pcsi_cpu_reset(void);
 int pcsi_cpu_on(unsigned long cpuid, uintptr_t entry_point);
 
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_CPU_PSCI_H */
