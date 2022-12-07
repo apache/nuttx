@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/scripts/flat.template.ld
+ * boards/risc-v/esp32c3/common/scripts/flat_memory.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -72,8 +72,8 @@ MEMORY
    */
 
   metadata (RX) :        org = CONFIG_ESP32C3_APP_MCUBOOT_HEADER_SIZE, len = 0x20
-  ROM (RX) :             org = CONFIG_ESP32C3_APP_MCUBOOT_HEADER_SIZE + 0x20,
-                         len = FLASH_SIZE - (CONFIG_ESP32C3_APP_MCUBOOT_HEADER_SIZE + 0x20)
+  ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
+                         len = FLASH_SIZE - ORIGIN(ROM)
 #endif
 
   /* Below values assume the flash cache is on, and have the blocks this
@@ -119,8 +119,8 @@ MEMORY
    * be equal.
    */
 
-  drom0_0_seg (R) :      org = 0x3c000000 + (CONFIG_ESP32C3_APP_MCUBOOT_HEADER_SIZE + 0x20),
-                         len = FLASH_SIZE - (CONFIG_ESP32C3_APP_MCUBOOT_HEADER_SIZE + 0x20)
+  drom0_0_seg (R) :      org = 0x3c000000 + ORIGIN(ROM),
+                         len = FLASH_SIZE - ORIGIN(ROM)
 #else
   /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip

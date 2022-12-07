@@ -1,4 +1,8 @@
-/* ROM function interface esp32c3.rom.ld for esp32c3
+/****************************************************************************
+ * boards/risc-v/esp32c3/common/scripts/esp32c3_rom.ld
+ ****************************************************************************/
+
+/* ROM function interface esp32c3_rom.ld for esp32c3
  *
  *
  * Generated from ./interface-esp32c3.yml md5sum 93b28a9e1fe42d212018eb4336849208

@@ -113,21 +113,4 @@ ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
 endif
 endif
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)protected.template.ld
-else
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)flat.template.ld
-endif
-SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
-
-.PHONY = context distclean
-
-$(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_DIR)/scripts -C -P -x c -E $(SCRIPTIN) -o $@
-
-context:: $(SCRIPTOUT)
-
-distclean::
-	$(call DELFILE, $(SCRIPTOUT))
-
 include $(TOPDIR)/boards/Board.mk

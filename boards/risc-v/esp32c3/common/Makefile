@@ -1,5 +1,5 @@
 #############################################################################
-# boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/Makefile
+# boards/risc-v/esp32c3/common/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,37 +20,14 @@
 
 include $(TOPDIR)/Make.defs
 
-SCRIPTDIR = $(BOARD_DIR)$(DELIM)scripts
+include board/Make.defs
+include src/Make.defs
 
-CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
-
-CSRCS = esp32c3_boot.c esp32c3_bringup.c
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += esp32c3_appinit.c
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += esp32c3_reset.c
-endif
-endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += esp32c3_autoleds.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
-CSRCS += esp32c3_ioctl.c
-endif
-
-ifeq ($(CONFIG_ESP32C3_SPI),y)
-CSRCS += esp32c3_board_spi.c
-endif
-
-ifeq ($(CONFIG_SENSORS_APDS9960),y)
-CSRCS += esp32c3_apds9960.c
-endif
-
-ifeq ($(CONFIG_LCD_APA102),y)
-CSRCS += esp32c3_apa102.c
-endif
+DEPPATH += --dep-path board
+DEPPATH += --dep-path src
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(BOARDDIR)$(DELIM)include)
