@@ -24,6 +24,9 @@ CSRCS = pinephone_boardinit.c pinephone_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += pinephone_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += pinephone_reset.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
