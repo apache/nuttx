@@ -50,6 +50,16 @@ else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
   endif
+else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m85
+  ifeq ($(CONFIG_ARM_HAVE_MVE),y)
+    TOOLCHAIN_MARCH  := -march=armv8.1-m.main+mve.fp+fp.dp
+  else
+    TOOLCHAIN_MARCH  := -march=armv8.1-m.main$(EXTCPUFLAGS)
+  endif
+  ifeq ($(CONFIG_ARCH_FPU),y)
+    TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -86,6 +96,12 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
     else
       TOOLCHAIN_MARCH += --config armv8.1m.main_soft_nofp_nomve
     endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv8.1m.main_hard_fp
+    else
+      TOOLCHAIN_MARCH += --config armv8.1m.main_soft_nofp_nomve
+    endif
   endif
 
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
@@ -116,6 +132,20 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
         LDFLAGS += --cpu=Cortex-M55.no_mve
       else
         LDFLAGS += --cpu=Cortex-M55.no_mve.no_fp
+      endif
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
+    ifeq ($(CONFIG_ARM_HAVE_MVE),y)
+      ifeq ($(CONFIG_ARCH_FPU),y)
+        LDFLAGS += --cpu=Cortex-M85
+      else
+        LDFLAGS += --cpu=Cortex-M85.no_fp
+      endif
+    else
+      ifeq ($(CONFIG_ARCH_FPU),y)
+        LDFLAGS += --cpu=Cortex-M85.no_mve
+      else
+        LDFLAGS += --cpu=Cortex-M85.no_mve.no_fp
       endif
     endif
   endif
