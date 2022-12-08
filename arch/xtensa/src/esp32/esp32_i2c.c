@@ -84,7 +84,7 @@
 
 /* Default option */
 
-#define I2C_FIFO_SIZE (255)
+#define I2C_FIFO_SIZE (32)
 
 #define I2C_FILTER_CYC_NUM_DEF (7)
 
