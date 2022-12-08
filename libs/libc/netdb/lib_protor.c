@@ -112,6 +112,7 @@ int getprotobyname_r(FAR const char *name,
                      size_t buflen, FAR struct protoent **result)
 {
   int ret;
+  endprotoent_r(result_buf);
   do
     {
       ret = getprotoent_r(result_buf, buf, buflen, result);
@@ -126,6 +127,7 @@ int getprotobynumber_r(int proto,
                        size_t buflen, FAR struct protoent **result)
 {
   int ret;
+  endprotoent_r(result_buf);
   do
     {
       ret = getprotoent_r(result_buf, buf, buflen, result);
