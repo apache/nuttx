@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdint.h>
 
 #undef HAVE_FWDALLOC
@@ -41,6 +42,9 @@
 #ifndef CONFIG_NET_IPFORWARD_NSTRUCT
 #  define CONFIG_NET_IPFORWARD_NSTRUCT 4
 #endif
+
+static_assert(CONFIG_IOB_NBUFFERS > CONFIG_NET_IPFORWARD_NSTRUCT,
+              "IP forward may consume all the IOB and break netdev logic");
 
 /* Allocate a new IP forwarding data callback */
 
