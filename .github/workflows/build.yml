@@ -198,7 +198,7 @@ jobs:
         env:
           cache-name: ${{ runner.os }}-cache-tools
         with:
-          path: prebuilt
+          path: ./sources/prebuilt
           key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/cibuild.sh') }}
 
       - name: Export NuttX Repo SHA
