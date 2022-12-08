@@ -29,9 +29,9 @@ CSRCS += open-amp/lib/rpmsg/rpmsg_virtio.c
 CSRCS += open-amp/lib/virtio/virtio.c
 CSRCS += open-amp/lib/virtio/virtqueue.c
 
-open-amp.zip:
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard open-amp/.git),)
+open-amp.zip:
 	$(Q) curl -L https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -o open-amp.zip
 	$(Q) unzip -o open-amp.zip
 	$(Q) mv open-amp-$(VERSION) open-amp
@@ -45,9 +45,11 @@ ifeq ($(wildcard open-amp/.git),)
 	$(Q) patch -p0 < 0008-remoteproc-make-all-elf_-functions-static-except-elf.patch
 	$(Q) patch -p0 < 0009-Fix-warn-declaration-of-vring_rsc-shadows-a-previous.patch
 	$(Q) patch -p0 < 0010-rptun-fix-rptun-don-t-wait-issue-when-get-tx-patyloa.patch
-endif
 
 .openamp_headers: open-amp.zip
+else
+.openamp_headers:
+endif
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))
 	$(shell mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
 	$(foreach header,$(headers),$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
