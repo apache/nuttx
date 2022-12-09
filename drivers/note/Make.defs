@@ -18,6 +18,13 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_EXTERNAL),)
+CSRCS += sched_note.c
+CFLAGS += ${INCDIR_PREFIX}${TOPDIR}/sched
+endif
+endif
+
 ifeq ($(CONFIG_DRIVER_NOTE),y)
   CSRCS += note_driver.c
 endif
