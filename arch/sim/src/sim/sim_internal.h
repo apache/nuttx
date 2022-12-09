@@ -195,7 +195,8 @@ int  host_uart_open(const char *pathname);
 void host_uart_close(int fd);
 int  host_uart_putc(int fd, int ch);
 int  host_uart_getc(int fd);
-bool host_uart_checkc(int fd);
+bool host_uart_checkin(int fd);
+bool host_uart_checkout(int fd);
 int  host_uart_setcflag(int fd, unsigned int cflag);
 int  host_uart_getcflag(int fd, unsigned int *cflag);
 
