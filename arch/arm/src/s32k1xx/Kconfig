@@ -772,6 +772,22 @@ config LPI2C1_SLAVE_BUS
 endmenu # LPI2C1 Slave Configuration
 endmenu # LPI2C Configuration
 
+menu "LPUART Configuration"
+comment "LP Uart Driver Configuration"
+
+
+config S32K1XX_LPUART_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 64
+	depends on LPUART0_RXDMA || LPUART1_RXDMA || LPUART2_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+endmenu # LPUART Configuration
+
 menu "Ethernet Configuration"
 	depends on S32K1XX_ENET
 
