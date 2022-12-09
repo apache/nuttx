@@ -1780,7 +1780,7 @@ static int imxrt_interrupt(int irq, void *context, void *arg)
           imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, LPUART_STAT_OR);
         }
 
-      if ((usr & LPUART_STAT_PF) != 0)
+      if ((usr & LPUART_STAT_NF) != 0)
         {
           imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, LPUART_STAT_NF);
         }
