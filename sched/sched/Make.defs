@@ -89,12 +89,6 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_thistask.c
 endif
 
-ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
-ifeq ($(CONFIG_SCHED_INSTRUMENTATION_EXTERNAL),)
-CSRCS += sched_note.c
-endif
-endif
-
 ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
 CSRCS += sched_critmonitor.c
 endif
