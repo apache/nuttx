@@ -420,10 +420,7 @@ function usage {
 }
 
 function enable_ccache {
-  export USE_CCACHE=1;
-  ccache -z
-  ccache -M 5G;
-  ccache -s
+  export CCACHE_DIR="${tools}"/ccache
 }
 
 function setup_links {
@@ -515,6 +512,10 @@ function run_builds {
   for build in "${builds[@]}"; do
     "${nuttx}"/tools/testbuild.sh ${options} -e "-Wno-cpp -Werror" "${build}"
   done
+
+  if [ -d "${CCACHE_DIR}" ]; then
+    ccache -s
+  fi
 }
 
 if [ -z "$1" ]; then
