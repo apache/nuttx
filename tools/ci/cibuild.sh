@@ -43,13 +43,20 @@ function arm-clang-toolchain {
   add_path "${tools}"/clang-arm-none-eabi/bin
 
   if [ ! -f "${tools}/clang-arm-none-eabi/bin/clang" ]; then
+    local flavor
+    case ${os} in
+      Linux)
+        flavor=linux
+        ;;
+    esac
     cd "${tools}"
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
-    tar zxf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
+    tar zxf LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
     mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
     cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
-    rm LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+    rm LLVMEmbeddedToolchainForArm-14.0.0-${flavor}.tar.gz
   fi
+
   clang --version
 }
 
@@ -74,6 +81,7 @@ function arm-gcc-toolchain {
     patch -p0 < ${nuttx}/tools/ci/patch/arm-none-eabi-workaround-for-newlib-version-break.patch
     rm arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar
   fi
+
   arm-none-eabi-gcc --version
 }
 
@@ -97,6 +105,7 @@ function arm64-gcc-toolchain {
     mv gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf gcc-aarch64-none-elf
     rm gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar
   fi
+
   aarch64-none-elf-gcc --version
 }
 
@@ -107,8 +116,13 @@ function avr-gcc-toolchain {
         brew tap osx-cross/avr
         brew install avr-gcc
         ;;
+      Linux)
+        apt-get install -y avr-libc gcc-avr
+        ;;
     esac
   fi
+
+  avr-gcc --version
 }
 
 function binutils {
@@ -126,10 +140,13 @@ function binutils {
         ;;
     esac
   fi
+
+  objcopy --version
 }
 
 function bloaty {
   add_path "${tools}"/bloaty/bin
+
   if [ ! -f "${tools}/bloaty/bin/bloaty" ]; then
     git clone --branch main https://github.com/google/bloaty bloaty-src
     cd bloaty-src
@@ -142,6 +159,8 @@ function bloaty {
     cd "${tools}"
     rm -rf bloaty-src
   fi
+
+  command bloaty --version
 }
 
 function c-cache {
@@ -165,12 +184,16 @@ function c-cache {
   ccache --version
 }
 
-function clang_clang-tidy {
-  # Install Clang and Clang-Tidy for Ubuntu.
-  apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
-    -o APT::Immediate-Configure=0 \
-    clang \
-    clang-tidy
+function clang-tidy {
+  if ! type clang-tidy &> /dev/null; then
+    case ${os} in
+      Linux)
+        apt-get install -y clang clang-tidy
+        ;;
+    esac
+  fi
+
+  command clang-tidy --version
 }
 
 function elf-toolchain {
@@ -181,6 +204,7 @@ function elf-toolchain {
         ;;
     esac
   fi
+
   x86_64-elf-gcc --version
 }
 
@@ -210,6 +234,8 @@ function gperf {
     cd "${tools}"
     rm -rf gperf-3.1; rm gperf-3.1.tar.gz
   fi
+
+  command gperf --version
 }
 
 function kconfig-frontends {
@@ -229,21 +255,27 @@ function kconfig-frontends {
 }
 
 function mips-gcc-toolchain {
-  add_path "${tools}"/pinguino-compilers/linux64/p32/bin
-
-  if [ ! -f "${tools}/pinguino-compilers/linux64/p32/bin/p32-gcc" ]; then
+  if [ ! -f "${tools}/pinguino-compilers" ]; then
     cd "${tools}"
     git clone https://github.com/PinguinoIDE/pinguino-compilers
   fi
-  p32-gcc --version
+
+  case ${os} in
+    Darwin)
+      add_path "${tools}"/pinguino-compilers/macosx/p32/bin
+      mips-elf-gcc --version
+      ;;
+    Linux)
+      add_path "${tools}"/pinguino-compilers/linux64/p32/bin
+      p32-gcc --version
+      ;;
+  esac
 }
 
 function python-tools {
   # Python User Env
-  PIP_USER=yes
-  export PIP_USER
-  PYTHONUSERBASE=${tools}/pylocal
-  export PYTHONUSERBASE
+  export PIP_USER=yes
+  export PYTHONUSERBASE=${tools}/pylocal
   add_path "${PYTHONUSERBASE}"/bin
   pip3 install \
     CodeChecker \
@@ -282,6 +314,7 @@ function riscv-gcc-toolchain {
     mv riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor} riscv64-unknown-elf-gcc
     rm riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor}.tar.gz
   fi
+
   riscv64-unknown-elf-gcc --version
 }
 
@@ -301,6 +334,8 @@ function rust {
         ;;
     esac
   fi
+
+  rustc --version
 }
 
 function rx-gcc-toolchain {
@@ -350,6 +385,7 @@ function rx-gcc-toolchain {
         ;;
     esac
   fi
+
   rx-elf-gcc --version
 }
 
@@ -368,6 +404,7 @@ function sparc-gcc-toolchain {
         ;;
     esac
   fi
+
   sparc-gaisler-elf-gcc --version
 }
 
@@ -390,6 +427,7 @@ function xtensa-esp32-gcc-toolchain {
         ;;
     esac
   fi
+
   xtensa-esp32-elf-gcc --version
 }
 
@@ -398,6 +436,9 @@ function u-boot-tools {
     case ${os} in
       Darwin)
         brew install u-boot-tools
+        ;;
+      Linux)
+        apt-get install -y u-boot-tools
         ;;
     esac
   fi
@@ -472,7 +513,7 @@ function install_tools {
 
 case ${os} in
   Darwin)
-    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty c-cache elf-toolchain gen-romfs kconfig-frontends python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
+    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty c-cache elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
     mkdir -p "${tools}"/homebrew
     export HOMEBREW_CACHE=${tools}/homebrew
     # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
@@ -481,7 +522,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain bloaty c-cache clang_clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain"
+    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty c-cache clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools"
     ;;
 esac
 
