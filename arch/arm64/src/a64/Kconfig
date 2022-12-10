@@ -6,10 +6,21 @@
 if ARCH_CHIP_A64
 
 menu "Allwinner A64 Peripheral Selection"
+
+config A64_MIPI_DSI
+	bool "MIPI DSI"
+	default n
+	---help---
+		Select to enable support for MIPI Display Serial Interface (DSI)
+		and MIPI Display Physical Layer (D-PHY).
+
 config A64_UART
 	bool "UART"
 	default n
 	select UART1_SERIALDRIVER
+	---help---
+		Select to enable support for UART.
+
 endmenu # Allwinner A64 Peripheral Selection
 
 endif # ARCH_CHIP_A64

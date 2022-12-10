@@ -145,6 +145,8 @@ NuttX for PinePhone supports these peripherals:
 =========== ======= =====
 Peripheral  Support NOTES
 =========== ======= =====
+MIPI D-PHY   Yes
+MIPI DSI     Yes
 PIO          Yes
 UART         Yes    Only UART0 is supported
 =========== ======= =====
