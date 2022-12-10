@@ -31,24 +31,8 @@ WORKSPACE=$(cd "${WD}"/../../../ && pwd -P)
 nuttx=${WORKSPACE}/nuttx
 apps=${WORKSPACE}/apps
 tools=${WORKSPACE}/tools
-prebuilt=${WORKSPACE}/prebuilt
 os=$(uname -s)
 EXTRA_PATH=
-
-case ${os} in
-  Darwin)
-    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty c-cache elf-toolchain gen-romfs kconfig-frontends python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
-    mkdir -p "${prebuilt}"/homebrew
-    export HOMEBREW_CACHE=${prebuilt}/homebrew
-    # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
-    rm -rf /usr/local/bin/2to3
-    # https://github.com/osx-cross/homebrew-avr/issues/205#issuecomment-760637996
-    brew update --quiet
-    ;;
-  Linux)
-    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain bloaty c-cache clang_clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain"
-    ;;
-esac
 
 function add_path {
   PATH=$1:${PATH}
@@ -56,10 +40,10 @@ function add_path {
 }
 
 function arm-clang-toolchain {
-  add_path "${prebuilt}"/clang-arm-none-eabi/bin
+  add_path "${tools}"/clang-arm-none-eabi/bin
 
-  if [ ! -f "${prebuilt}/clang-arm-none-eabi/bin/clang" ]; then
-    cd "${prebuilt}"
+  if [ ! -f "${tools}/clang-arm-none-eabi/bin/clang" ]; then
+    cd "${tools}"
     curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
     tar zxf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
     mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
@@ -70,9 +54,9 @@ function arm-clang-toolchain {
 }
 
 function arm-gcc-toolchain {
-  add_path "${prebuilt}"/gcc-arm-none-eabi/bin
+  add_path "${tools}"/gcc-arm-none-eabi/bin
 
-  if [ ! -f "${prebuilt}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
+  if [ ! -f "${tools}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
     local flavor
     case ${os} in
       Darwin)
@@ -82,7 +66,7 @@ function arm-gcc-toolchain {
         flavor=
         ;;
     esac
-    cd "${prebuilt}"
+    cd "${tools}"
     wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
     xz -d arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
     tar xf arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar
@@ -94,9 +78,9 @@ function arm-gcc-toolchain {
 }
 
 function arm64-gcc-toolchain {
-  add_path "${prebuilt}"/gcc-aarch64-none-elf/bin
+  add_path "${tools}"/gcc-aarch64-none-elf/bin
 
-  if [ ! -f "${prebuilt}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
+  if [ ! -f "${tools}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
     local flavor
     case ${os} in
       Darwin)
@@ -106,7 +90,7 @@ function arm64-gcc-toolchain {
         flavor=x86_64
         ;;
     esac
-    cd "${prebuilt}"
+    cd "${tools}"
     wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar.xz
     xz -d gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar.xz
     tar xf gcc-arm-11.2-2022.02-${flavor}-aarch64-none-elf.tar
@@ -128,8 +112,8 @@ function avr-gcc-toolchain {
 }
 
 function binutils {
-  mkdir -p "${prebuilt}"/bintools/bin
-  add_path "${prebuilt}"/bintools/bin
+  mkdir -p "${tools}"/bintools/bin
+  add_path "${tools}"/bintools/bin
 
   if ! type objcopy &> /dev/null; then
     case ${os} in
@@ -137,31 +121,31 @@ function binutils {
         brew install binutils
         # It is possible we cached prebuilt but did brew install so recreate
         # symlink if it exists
-        rm -f "${prebuilt}"/bintools/bin/objcopy
-        ln -s /usr/local/opt/binutils/bin/objcopy "${prebuilt}"/bintools/bin/objcopy
+        rm -f "${tools}"/bintools/bin/objcopy
+        ln -s /usr/local/opt/binutils/bin/objcopy "${tools}"/bintools/bin/objcopy
         ;;
     esac
   fi
 }
 
 function bloaty {
-  add_path "${prebuilt}"/bloaty/bin
-  if [ ! -f "${prebuilt}/bloaty/bin/bloaty" ]; then
+  add_path "${tools}"/bloaty/bin
+  if [ ! -f "${tools}/bloaty/bin/bloaty" ]; then
     git clone --branch main https://github.com/google/bloaty bloaty-src
     cd bloaty-src
     # Due to issues with latest MacOS versions use pinned commit.
     # https://github.com/google/bloaty/pull/326
     git checkout 52948c107c8f81045e7f9223ec02706b19cfa882
-    mkdir -p "${prebuilt}"/bloaty
-    cmake -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -DCMAKE_SYSTEM_PREFIX_PATH="${prebuilt}"/bloaty
+    mkdir -p "${tools}"/bloaty
+    cmake -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -DCMAKE_SYSTEM_PREFIX_PATH="${tools}"/bloaty
     make install -j 6
-    cd "${prebuilt}"
+    cd "${tools}"
     rm -rf bloaty-src
   fi
 }
 
 function c-cache {
-  add_path "${prebuilt}"/ccache/bin
+  add_path "${tools}"/ccache/bin
 
   if ! type ccache &> /dev/null; then
     case ${os} in
@@ -169,11 +153,11 @@ function c-cache {
         brew install ccache
         ;;
       Linux)
-        cd "${prebuilt}";
+        cd "${tools}";
         wget https://github.com/ccache/ccache/releases/download/v3.7.7/ccache-3.7.7.tar.gz
         tar zxf ccache-3.7.7.tar.gz
-        cd ccache-3.7.7; ./configure --prefix="${prebuilt}"/ccache; make; make install
-        cd "${prebuilt}"; rm -rf ccache-3.7.7; rm ccache-3.7.7.tar.gz
+        cd ccache-3.7.7; ./configure --prefix="${tools}"/ccache; make; make install
+        cd "${tools}"; rm -rf ccache-3.7.7; rm ccache-3.7.7.tar.gz
         ;;
     esac
   fi
@@ -201,56 +185,54 @@ function elf-toolchain {
 }
 
 function gen-romfs {
-  add_path "${prebuilt}"/genromfs/usr/bin
+  add_path "${tools}"/genromfs/usr/bin
 
-  if [ ! -f "${prebuilt}/genromfs/usr/bin/genromfs" ]; then
-    if [ ! -d "${tools}" ]; then
-      git clone https://bitbucket.org/nuttx/tools.git "${tools}"
-    fi
-    mkdir -p "${prebuilt}"; cd "${tools}"
-    tar zxf genromfs-0.5.2.tar.gz -C "${prebuilt}"
-    cd "${prebuilt}"/genromfs-0.5.2
-    make install PREFIX="${prebuilt}"/genromfs
-    cd "${prebuilt}"
+  if [ ! -f "${tools}/genromfs/usr/bin/genromfs" ]; then
+    git clone https://bitbucket.org/nuttx/tools.git "${tools}"/nuttx-tools
+    cd "${tools}"/nuttx-tools
+    tar zxf genromfs-0.5.2.tar.gz -C "${tools}"
+    cd "${tools}"/genromfs-0.5.2
+    make install PREFIX="${tools}"/genromfs
+    cd "${tools}"
     rm -rf genromfs-0.5.2
   fi
 }
 
 function gperf {
-  add_path "${prebuilt}"/gperf/bin
+  add_path "${tools}"/gperf/bin
 
-  if [ ! -f "${prebuilt}/gperf/bin/gperf" ]; then
-    cd "${prebuilt}"
+  if [ ! -f "${tools}/gperf/bin/gperf" ]; then
+    cd "${tools}"
     wget --quiet http://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz
     tar zxf gperf-3.1.tar.gz
-    cd "${prebuilt}"/gperf-3.1
-    ./configure --prefix="${prebuilt}"/gperf; make; make install
-    cd "${prebuilt}"
+    cd "${tools}"/gperf-3.1
+    ./configure --prefix="${tools}"/gperf; make; make install
+    cd "${tools}"
     rm -rf gperf-3.1; rm gperf-3.1.tar.gz
   fi
 }
 
 function kconfig-frontends {
-  add_path "${prebuilt}"/kconfig-frontends/bin
+  add_path "${tools}"/kconfig-frontends/bin
 
-  if [ ! -f "${prebuilt}/kconfig-frontends/bin/kconfig-conf" ]; then
-    cd "${tools}"/kconfig-frontends
-    ./configure --prefix="${prebuilt}"/kconfig-frontends \
+  if [ ! -f "${tools}/kconfig-frontends/bin/kconfig-conf" ]; then
+    cd "${tools}"/nuttx-tools/kconfig-frontends
+    ./configure --prefix="${tools}"/kconfig-frontends \
       --disable-kconfig --disable-nconf --disable-qconf \
       --disable-gconf --disable-mconf --disable-static \
       --disable-shared --disable-L10n
     # Avoid "aclocal/automake missing" errors
     touch aclocal.m4 Makefile.in
     make install
-    cd "${tools}"; git clean -xfd
+    cd "${tools}"/nuttx-tools; git clean -xfd
   fi
 }
 
 function mips-gcc-toolchain {
-  add_path "${prebuilt}"/pinguino-compilers/linux64/p32/bin
+  add_path "${tools}"/pinguino-compilers/linux64/p32/bin
 
-  if [ ! -f "${prebuilt}/pinguino-compilers/linux64/p32/bin/p32-gcc" ]; then
-    cd "${prebuilt}"
+  if [ ! -f "${tools}/pinguino-compilers/linux64/p32/bin/p32-gcc" ]; then
+    cd "${tools}"
     git clone https://github.com/PinguinoIDE/pinguino-compilers
   fi
   p32-gcc --version
@@ -260,7 +242,7 @@ function python-tools {
   # Python User Env
   PIP_USER=yes
   export PIP_USER
-  PYTHONUSERBASE=${prebuilt}/pylocal
+  PYTHONUSERBASE=${tools}/pylocal
   export PYTHONUSERBASE
   add_path "${PYTHONUSERBASE}"/bin
   pip3 install \
@@ -282,9 +264,9 @@ function python-tools {
 }
 
 function riscv-gcc-toolchain {
-  add_path "${prebuilt}"/riscv64-unknown-elf-gcc/bin
+  add_path "${tools}"/riscv64-unknown-elf-gcc/bin
 
-  if [ ! -f "${prebuilt}/riscv64-unknown-elf-gcc/bin/riscv64-unknown-elf-gcc" ]; then
+  if [ ! -f "${tools}/riscv64-unknown-elf-gcc/bin/riscv64-unknown-elf-gcc" ]; then
     local flavor
     case ${os} in
       Darwin)
@@ -294,7 +276,7 @@ function riscv-gcc-toolchain {
         flavor=x86_64-linux-ubuntu14
         ;;
     esac
-    cd "${prebuilt}"
+    cd "${tools}"
     wget --quiet https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.12/riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor}.tar.gz
     tar zxf riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor}.tar.gz
     mv riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-${flavor} riscv64-unknown-elf-gcc
@@ -304,8 +286,8 @@ function riscv-gcc-toolchain {
 }
 
 function rust {
-  mkdir -p "${prebuilt}"/rust/bin
-  add_path "${prebuilt}"/rust/bin
+  mkdir -p "${tools}"/rust/bin
+  add_path "${tools}"/rust/bin
 
   if ! type rustc &> /dev/null; then
     case ${os} in
@@ -314,7 +296,7 @@ function rust {
         ;;
       Linux)
         # Currently Debian installed rustc doesn't support 2021 edition.
-        export CARGO_HOME=${prebuilt}/rust
+        export CARGO_HOME=${tools}/rust
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         ;;
     esac
@@ -322,14 +304,14 @@ function rust {
 }
 
 function rx-gcc-toolchain {
-  add_path "${prebuilt}"/renesas-toolchain/rx-elf-gcc/bin
+  add_path "${tools}"/renesas-toolchain/rx-elf-gcc/bin
 
-  if [ ! -f "${prebuilt}/renesas-toolchain/rx-elf-gcc/bin/rx-elf-gcc" ]; then
+  if [ ! -f "${tools}/renesas-toolchain/rx-elf-gcc/bin/rx-elf-gcc" ]; then
     case ${os} in
       Linux)
         # Download toolchain source code
         # RX toolchain is built from source code. Once prebuilt RX toolchain is made available, the below code snippet can be removed.
-        mkdir -p "${prebuilt}"/renesas-tools/rx/source; cd "${prebuilt}"/renesas-tools/rx/source
+        mkdir -p "${tools}"/renesas-tools/rx/source; cd "${tools}"/renesas-tools/rx/source
         wget --quiet https://gcc-renesas.com/downloads/d.php?f=rx/binutils/4.8.4.201803-gnurx/rx_binutils2.24_2018Q3.tar.gz \
           -O rx_binutils2.24_2018Q3.tar.gz
         tar zxf rx_binutils2.24_2018Q3.tar.gz
@@ -341,30 +323,30 @@ function rx-gcc-toolchain {
         tar zxf rx_newlib2.2.0_2018Q3.tar.gz
 
         # Install binutils
-        cd "${prebuilt}"/renesas-tools/rx/source/binutils; chmod +x ./configure ./mkinstalldirs
-        mkdir -p "${prebuilt}"/renesas-tools/rx/build/binutils; cd "${prebuilt}"/renesas-tools/rx/build/binutils
-        "${prebuilt}"/renesas-tools/rx/source/binutils/configure --target=rx-elf --prefix="${prebuilt}"/renesas-toolchain/rx-elf-gcc \
+        cd "${tools}"/renesas-tools/rx/source/binutils; chmod +x ./configure ./mkinstalldirs
+        mkdir -p "${tools}"/renesas-tools/rx/build/binutils; cd "${tools}"/renesas-tools/rx/build/binutils
+        "${tools}"/renesas-tools/rx/source/binutils/configure --target=rx-elf --prefix="${tools}"/renesas-toolchain/rx-elf-gcc \
           --disable-werror
         make; make install
 
         # Install gcc
-        cd "${prebuilt}"/renesas-tools/rx/source/gcc
+        cd "${tools}"/renesas-tools/rx/source/gcc
         chmod +x ./contrib/download_prerequisites ./configure ./move-if-change ./libgcc/mkheader.sh
         ./contrib/download_prerequisites
         sed -i '1s/^/@documentencoding ISO-8859-1\n/' ./gcc/doc/gcc.texi
         sed -i 's/@tex/\n&/g' ./gcc/doc/gcc.texi && sed -i 's/@end tex/\n&/g' ./gcc/doc/gcc.texi
-        mkdir -p "${prebuilt}"/renesas-tools/rx/build/gcc; cd "${prebuilt}"/renesas-tools/rx/build/gcc
-        "${prebuilt}"/renesas-tools/rx/source/gcc/configure --target=rx-elf --prefix="${prebuilt}"/renesas-toolchain/rx-elf-gcc \
+        mkdir -p "${tools}"/renesas-tools/rx/build/gcc; cd "${tools}"/renesas-tools/rx/build/gcc
+        "${tools}"/renesas-tools/rx/source/gcc/configure --target=rx-elf --prefix="${tools}"/renesas-toolchain/rx-elf-gcc \
         --disable-shared --disable-multilib --disable-libssp --disable-libstdcxx-pch --disable-werror --enable-lto \
         --enable-gold --with-pkgversion=GCC_Build_1.02 --with-newlib --enable-languages=c
         make; make install
 
         # Install newlib
-        cd "${prebuilt}"/renesas-tools/rx/source/newlib; chmod +x ./configure
-        mkdir -p "${prebuilt}"/renesas-tools/rx/build/newlib; cd "${prebuilt}"/renesas-tools/rx/build/newlib
-        "${prebuilt}"/renesas-tools/rx/source/newlib/configure --target=rx-elf --prefix="${prebuilt}"/renesas-toolchain/rx-elf-gcc
+        cd "${tools}"/renesas-tools/rx/source/newlib; chmod +x ./configure
+        mkdir -p "${tools}"/renesas-tools/rx/build/newlib; cd "${tools}"/renesas-tools/rx/build/newlib
+        "${tools}"/renesas-tools/rx/source/newlib/configure --target=rx-elf --prefix="${tools}"/renesas-toolchain/rx-elf-gcc
         make; make install
-        rm -rf "${prebuilt}"/renesas-tools/
+        rm -rf "${tools}"/renesas-tools/
         ;;
     esac
   fi
@@ -372,12 +354,12 @@ function rx-gcc-toolchain {
 }
 
 function sparc-gcc-toolchain {
-  add_path "${prebuilt}"/sparc-gaisler-elf-gcc/bin
+  add_path "${tools}"/sparc-gaisler-elf-gcc/bin
 
-  if [ ! -f "${prebuilt}/sparc-gaisler-elf-gcc/bin/sparc-gaisler-elf-gcc" ]; then
+  if [ ! -f "${tools}/sparc-gaisler-elf-gcc/bin/sparc-gaisler-elf-gcc" ]; then
     case ${os} in
       Linux)
-        cd "${prebuilt}"
+        cd "${tools}"
         wget --quiet https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz
         xz -d bcc-2.1.0-gcc-linux64.tar.xz
         tar xf bcc-2.1.0-gcc-linux64.tar
@@ -390,10 +372,10 @@ function sparc-gcc-toolchain {
 }
 
 function xtensa-esp32-gcc-toolchain {
-  add_path "${prebuilt}"/xtensa-esp32-elf/bin
+  add_path "${tools}"/xtensa-esp32-elf/bin
 
-  if [ ! -f "${prebuilt}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
-    cd "${prebuilt}"
+  if [ ! -f "${tools}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
+    cd "${tools}"
     case ${os} in
       Darwin)
         wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
@@ -445,27 +427,27 @@ function enable_ccache {
 }
 
 function setup_links {
-  mkdir -p "${prebuilt}"/ccache/bin/
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/aarch64-none-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/aarch64-none-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/arm-none-eabi-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/arm-none-eabi-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/cc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/c++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/clang
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/clang++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/p32-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/riscv64-unknown-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/riscv64-unknown-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/x86_64-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/x86_64-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/xtensa-esp32-elf-gcc
+  mkdir -p "${tools}"/ccache/bin/
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/aarch64-none-elf-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/aarch64-none-elf-g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/arm-none-eabi-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/arm-none-eabi-g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/avr-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/avr-g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/cc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/c++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/clang
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/clang++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/p32-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/riscv64-unknown-elf-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/riscv64-unknown-elf-g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/sparc-gaisler-elf-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/sparc-gaisler-elf-g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/x86_64-elf-gcc
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/x86_64-elf-g++
+  ln -sf "$(which ccache)" "${tools}"/ccache/bin/xtensa-esp32-elf-gcc
 }
 
 function setup_repos {
@@ -489,6 +471,23 @@ function setup_repos {
 }
 
 function install_tools {
+  mkdir -p "${tools}"
+
+case ${os} in
+  Darwin)
+    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty c-cache elf-toolchain gen-romfs kconfig-frontends python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
+    mkdir -p "${tools}"/homebrew
+    export HOMEBREW_CACHE=${tools}/homebrew
+    # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
+    rm -rf /usr/local/bin/2to3
+    # https://github.com/osx-cross/homebrew-avr/issues/205#issuecomment-760637996
+    brew update --quiet
+    ;;
+  Linux)
+    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain bloaty c-cache clang_clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain"
+    ;;
+esac
+
   pushd .
   for func in ${install}; do
     ${func}
@@ -496,7 +495,7 @@ function install_tools {
   popd
 
   setup_links
-  echo PATH="${EXTRA_PATH}"/"${PATH}" > "${prebuilt}"/env.sh
+  echo PATH="${EXTRA_PATH}"/"${PATH}" > "${tools}"/env.sh
 }
 
 function run_builds {
