@@ -154,18 +154,15 @@ jobs:
         with:
           run: |
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
-            export CCACHE_DIR=`pwd`/ccache
-            mkdir $CCACHE_DIR
             export ARTIFACTDIR=`pwd`/buildartifacts
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
-                ./cibuild.sh -A -R -c --codechecker testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -R --codechecker testlist/${{matrix.boards}}.dat
             else
-                ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -R testlist/${{matrix.boards}}.dat
             fi
-            ccache -s
 
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
@@ -212,12 +209,9 @@ jobs:
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
-          export CCACHE_DIR=`pwd`/ccache
-          mkdir $CCACHE_DIR
           export ARTIFACTDIR=`pwd`/buildartifacts
           cd sources/nuttx/tools/ci
-          ./cibuild.sh -i -A -R -c testlist/${{matrix.boards}}.dat
-          ccache -s
+          ./cibuild.sh -i -c -A -R testlist/${{matrix.boards}}.dat
 
       - uses: actions/upload-artifact@v3
         with:
