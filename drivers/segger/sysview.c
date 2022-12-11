@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/segger/note_sysview.c
+ * drivers/segger/sysview.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,7 +28,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/note/note_sysview.h>
+#include <nuttx/segger/sysview.h>
 
 #include <SEGGER_RTT.h>
 #include <SEGGER_SYSVIEW.h>

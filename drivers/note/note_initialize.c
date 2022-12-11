@@ -23,9 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/note/note_driver.h>
-#include <nuttx/note/note_sysview.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notectl_driver.h>
+#include <nuttx/segger/sysview.h>
 
 /****************************************************************************
  * Public Functions
