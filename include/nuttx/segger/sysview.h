@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/note/note_sysview.h
+ * include/nuttx/segger/sysview.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NOTE_NOTE_SYSVIEW_H
-#define __INCLUDE_NUTTX_NOTE_NOTE_SYSVIEW_H
+#ifndef __INCLUDE_NUTTX_SEGGER_SYSVIEW_H
+#define __INCLUDE_NUTTX_SEGGER_SYSVIEW_H
 
 /****************************************************************************
  * Included Files
@@ -97,4 +97,4 @@ void PREFIX(sched_note_filter_syscall)(struct note_filter_syscall_s *oldf,
 
 #endif /* CONFIG_SEGGER_SYSVIEW */
 
-#endif /* __INCLUDE_NUTTX_NOTE_NOTE_SYSVIEW_H */
+#endif /* __INCLUDE_NUTTX_SEGGER_SYSVIEW_H */
