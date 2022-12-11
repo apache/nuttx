@@ -86,7 +86,7 @@ void drivers_initialize(void)
 #endif
 
 #if defined(CONFIG_DRIVER_NOTE)
-  note_register();      /* Non-standard /dev/note */
+  note_initialize();    /* Non-standard /dev/note */
 #endif
 
 #if defined(CONFIG_CLK_RPMSG)

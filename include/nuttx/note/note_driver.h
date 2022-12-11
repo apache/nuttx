@@ -42,7 +42,7 @@
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
 /****************************************************************************
- * Name: note_register
+ * Name: note_initialize
  *
  * Description:
  *   Register sched note related drivers at /dev folder that can be used by
@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DRIVER_NOTE
-int note_register(void);
+int note_initialize(void);
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
