@@ -204,8 +204,6 @@ function elf-toolchain {
         ;;
     esac
   fi
-
-  x86_64-elf-gcc --version
 }
 
 function gen-romfs {
