@@ -357,7 +357,7 @@ static int netlink_get_arptable(NETLINK_HANDLE handle,
    * the number of valid entries in the ARP table.
    */
 
-  tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof(struct arp_entry_s);
+  tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof(struct arpreq);
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
@@ -380,7 +380,7 @@ static int netlink_get_arptable(NETLINK_HANDLE handle,
    */
 
   net_lock();
-  ncopied = arp_snapshot((FAR struct arp_entry_s *)entry->payload.data,
+  ncopied = arp_snapshot((FAR struct arpreq *)entry->payload.data,
                          CONFIG_NET_ARPTAB_SIZE);
   net_unlock();
 
@@ -392,7 +392,7 @@ static int netlink_get_arptable(NETLINK_HANDLE handle,
     {
       FAR struct getneigh_recvfrom_rsplist_s *newentry;
 
-      tabsize = ncopied * sizeof(struct arp_entry_s);
+      tabsize = ncopied * sizeof(struct arpreq);
       rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
       allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
