@@ -489,7 +489,7 @@ void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NETLINK_ROUTE
-unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
+unsigned int arp_snapshot(FAR struct arpreq *snapshot,
                           unsigned int nentries);
 #else
 #  define arp_snapshot(s,n) (0)
