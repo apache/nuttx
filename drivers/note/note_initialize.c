@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/note/note_driver.c
+ * drivers/note/note_initialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: note_register
+ * Name: note_initialize
  *
  * Description:
  *   Register sched note related drivers at /dev folder that can be used by
@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-int note_register(void)
+int note_initialize(void)
 {
   int ret = 0;
 
