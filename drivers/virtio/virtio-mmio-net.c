@@ -592,12 +592,13 @@ static void virtnet_rxdispatch(FAR struct virtnet_driver_s *priv)
 
 static void virtnet_receive(FAR struct virtnet_driver_s *priv)
 {
+  uint16_t used = priv->rxq->used->idx;
   uint16_t idx;
 
   vrtinfo("+++ rxq->last_used_idx=%d: rxq->used->idx=%d\n",
           priv->rxq->last_used_idx, priv->rxq->used->idx);
 
-  for (idx = priv->rxq->last_used_idx; idx != priv->rxq->used->idx; idx++)
+  for (idx = priv->rxq->last_used_idx; idx != used; idx++)
     {
       uint16_t id  = idx % priv->rxq->len;
       uint16_t d1  = priv->rxq->used->ring[id].id; /* index for header */
@@ -630,7 +631,7 @@ static void virtnet_receive(FAR struct virtnet_driver_s *priv)
       vrtinfo("+++ rxq->avail->idx=%d\n", priv->rxq->avail->idx);
     }
 
-  priv->rxq->last_used_idx = priv->rxq->used->idx;
+  priv->rxq->last_used_idx = used;
   vrtinfo("+++ rxq->last_used_idx=%d\n",  priv->rxq->last_used_idx);
 }
 
@@ -723,11 +724,21 @@ static void virtnet_interrupt_work(FAR void *arg)
 
   net_unlock();
 
-  /* Re-enable Ethernet interrupts */
+  if (priv->rxq->last_used_idx == priv->rxq->used->idx)
+    {
+      /* Re-enable Ethernet interrupts */
 
-  priv->rxq->avail->flags = 0;
-  priv->txq->avail->flags = 0;
-  virtio_mb();
+      priv->rxq->avail->flags = 0;
+      priv->txq->avail->flags = 0;
+      virtio_mb();
+
+      virtio_putreg32(VIRTIO_NET_Q_RX, &priv->regs->queue_notify);
+    }
+  else if (work_available(&priv->vnet_irqwork))
+    {
+      work_queue(ETHWORK, &priv->vnet_irqwork,
+                 virtnet_interrupt_work, priv, 0);
+    }
 }
 
 /****************************************************************************
@@ -773,7 +784,12 @@ static int virtnet_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->vnet_irqwork, virtnet_interrupt_work, priv, 0);
+  if (work_available(&priv->vnet_irqwork))
+    {
+      work_queue(ETHWORK, &priv->vnet_irqwork,
+                 virtnet_interrupt_work, priv, 0);
+    }
+
   return OK;
 }
 
@@ -847,7 +863,11 @@ static void virtnet_txtimeout_expiry(wdparm_t arg)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->vnet_irqwork, virtnet_txtimeout_work, priv, 0);
+  if (work_available(&priv->vnet_irqwork))
+    {
+      work_queue(ETHWORK, &priv->vnet_irqwork,
+                 virtnet_txtimeout_work, priv, 0);
+    }
 }
 
 /****************************************************************************
