@@ -456,10 +456,11 @@ void arp_cleanup(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NETLINK_ROUTE
-unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
+unsigned int arp_snapshot(FAR struct arpreq *snapshot,
                           unsigned int nentries)
 {
   FAR struct arp_entry_s *tabptr;
+  FAR struct sockaddr_in *outaddr;
   clock_t now;
   unsigned int ncopied;
   int i;
@@ -474,7 +475,16 @@ unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
       if (tabptr->at_ipaddr != 0 &&
           now - tabptr->at_time <= ARP_MAXAGE_TICK)
         {
-          memcpy(&snapshot[ncopied], tabptr, sizeof(struct arp_entry_s));
+          outaddr = (FAR struct sockaddr_in *)&snapshot[ncopied].arp_pa;
+          outaddr->sin_family      = AF_INET;
+          outaddr->sin_port        = 0;
+          outaddr->sin_addr.s_addr = tabptr->at_ipaddr;
+          memcpy(snapshot[ncopied].arp_ha.sa_data,
+                 tabptr->at_ethaddr.ether_addr_octet,
+                 sizeof(struct ether_addr));
+          strlcpy((FAR char *)snapshot[ncopied].arp_dev,
+                  tabptr->at_dev->d_ifname,
+                  sizeof(snapshot[ncopied].arp_dev));
           ncopied++;
         }
     }
