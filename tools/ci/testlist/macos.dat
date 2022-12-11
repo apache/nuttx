@@ -13,7 +13,7 @@
 # PINGUINOL toolchain doesn't provide macOS binaries
 # with the same name
 
-#/mips/pic32mx/pic32mx-starterkit/configs/nsh,CONFIG_MIPS32_TOOLCHAIN_PINGUINOL
+/mips/pic32mx/pic32mx-starterkit/configs/nsh
 
 # RISC-V
 
