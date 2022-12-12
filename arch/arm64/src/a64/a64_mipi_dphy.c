@@ -51,6 +51,7 @@
 /* A64 CCU Registers and Bit Definitions ************************************/
 
 /* MIPI_DSI Clock Register */
+
 #define MIPI_DSI_CLK_REG    (A64_CCU_ADDR + 0x168)
 #define DPHY_CLK_DIV_M(n)   (n << 0)
 #define DSI_DPHY_SRC_SEL(n) (n << 8)

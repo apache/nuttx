@@ -53,37 +53,45 @@
  ****************************************************************************/
 
 /* Maximum Size of DSI Packets that will be sent */
+
 #define DSI_MAX_PACKET_SIZE 128  /* In bytes */
 
 /* Timeout for DSI Transmission in milliseconds */
+
 #define DSI_TIMEOUT_MS      5
 
 /* A64 CCU Registers and Bit Definitions ************************************/
 
 /* Bus Clock Gating Register 0 (A64 Page 100) */
+
 #define BUS_CLK_GATING_REG0 (A64_CCU_ADDR + 0x60)
 #define MIPIDSI_GATING      (1 << 1)
 
 /* Bus Software Reset Register 0 (A64 Page 138) */
+
 #define BUS_SOFT_RST_REG0   (A64_CCU_ADDR + 0x2C0)
 #define MIPI_DSI_RST        (1 << 1)
 
 /* A64 MIPI DSI Registers and Bit Definitions *******************************/
 
 /* DSI Control Register (A31 Page 843) */
+
 #define DSI_CTL_REG (A64_DSI_ADDR + 0x0)
 #define DSI_EN      (1 << 0)
 
 /* DSI Basic Control Register (Undocumented) */
+
 #define DSI_BASIC_CTL_REG (A64_DSI_ADDR + 0x0c)
 
 /* DSI Configuration Register 0 (A31 Page 845) */
+
 #define DSI_BASIC_CTL0_REG (A64_DSI_ADDR + 0x10)
 #define INSTRU_EN          (1 << 0)
 #define ECC_EN             (1 << 16)
 #define CRC_EN             (1 << 17)
 
 /* DSI Configuration Register 1 (A31 Page 846) */
+
 #define DSI_BASIC_CTL1_REG (A64_DSI_ADDR + 0x14)
 #define DSI_MODE                   (1 << 0)
 #define VIDEO_FRAME_START          (1 << 1)
@@ -91,26 +99,32 @@
 #define VIDEO_START_DELAY(n)       (n << 4)
 
 /* DSI Line Number Register 0 (A31 Page 847) */
+
 #define DSI_BASIC_SIZE0_REG (A64_DSI_ADDR + 0x18)
 #define VIDEO_VSA(n)        (n << 0)
 #define VIDEO_VBP(n)        (n << 16)
 
 /* DSI Line Number Register 1 (A31 Page 847) */
+
 #define DSI_BASIC_SIZE1_REG (A64_DSI_ADDR + 0x1c)
 #define VIDEO_VACT(n)       (n << 0)
 #define VIDEO_VT(n)         (n << 16)
 
 /* DSI Instruction Function Register (Undocumented) */
+
 #define DSI_INST_FUNC_REG(n)   (A64_DSI_ADDR + 0x020 + n * 0x04)
 #define DSI_INST_FUNC_LANE_CEN (1 << 4)
 
 /* DSI Instruction Loop Select Register (Undocumented) */
+
 #define DSI_INST_LOOP_SEL_REG  (A64_DSI_ADDR + 0x40)
 
 /* DSI Instruction Loop Number Register (Undocumented) */
+
 #define DSI_INST_LOOP_NUM_REG(n) (A64_DSI_ADDR + 0x44 + n * 0x10)
 
 /* DSI Instruction Jump Select Register (Undocumented) */
+
 #define DSI_INST_JUMP_SEL_REG (A64_DSI_ADDR + 0x48)
 #define DSI_INST_ID_LP11      0
 #define DSI_INST_ID_TBA       1
@@ -123,25 +137,31 @@
 #define DSI_INST_ID_END       15
 
 /* DSI Instruction Jump Configuration Register (Undocumented) */
+
 #define DSI_INST_JUMP_CFG_REG(n) (A64_DSI_ADDR + 0x4c + n * 0x04)
 #define DSI_INST_JUMP_CFG        0
 
 /* DSI Transfer Start Register (Undocumented) */
+
 #define DSI_TRANS_START_REG (A64_DSI_ADDR + 0x60)
 
 /* DSI Transfer Zero Register (Undocumented) */
+
 #define DSI_TRANS_ZERO_REG  (A64_DSI_ADDR + 0x78)
 
 /* DSI Timing Controller DRQ Register (Undocumented) */
+
 #define DSI_TCON_DRQ_REG    (A64_DSI_ADDR + 0x7c)
 
 /* DSI Pixel Format Register 0 (A31 Page 847) */
+
 #define DSI_PIXEL_CTL0_REG (A64_DSI_ADDR + 0x80)
 #define PIXEL_FORMAT(n) (n << 0)
 #define PIXEL_ENDIAN    (0 << 4)
 #define PD_PLUG_DIS     (1 << 16)
 
 /* DSI Pixel Package Register 0 (A31 Page 848) */
+
 #define DSI_PIXEL_PH_REG (A64_DSI_ADDR + 0x90)
 #define PIXEL_DT(n)      (n << 0)
 #define PIXEL_VC(n)      (n << 6)
@@ -149,15 +169,18 @@
 #define PIXEL_ECC(n)     (n << 24)
 
 /* DSI Pixel Package Register 2 (A31 Page 849) */
+
 #define DSI_PIXEL_PF0_REG (A64_DSI_ADDR + 0x98)
 #define CRC_FORCE         0xffff
 
 /* DSI Pixel Package Register 3 (A31 Page 849) */
+
 #define DSI_PIXEL_PF1_REG (A64_DSI_ADDR + 0x9c)
 #define CRC_INIT_LINE0(n) (n << 0)
 #define CRC_INIT_LINEN(n) (n << 16)
 
 /* DSI Sync Package Register 0 (A31 Page 850) */
+
 #define DSI_SYNC_HSS_REG (A64_DSI_ADDR + 0xb0)
 #define SYNC_ECC(n)      (n << 24)
 #define SYNC_D1(n)       (n << 16)
@@ -166,64 +189,80 @@
 #define SYNC_DT(n)       (n << 0)
 
 /* DSI Sync Package Register 1 (A31 Page 850) */
+
 #define DSI_SYNC_HSE_REG (A64_DSI_ADDR + 0xb4)
 
 /* DSI Sync Package Register 2 (A31 Page 851) */
+
 #define DSI_SYNC_VSS_REG (A64_DSI_ADDR + 0xb8)
 
 /* DSI Sync Package Register 3 (A31 Page 851) */
+
 #define DSI_SYNC_VSE_REG (A64_DSI_ADDR + 0xbc)
 
 /* DSI Blank Package Register 0 (A31 Page 852) */
+
 #define DSI_BLK_HSA0_REG (A64_DSI_ADDR + 0xc0)
 
 /* DSI Blank Package Register 1 (A31 Page 852) */
+
 #define DSI_BLK_HSA1_REG (A64_DSI_ADDR + 0xc4)
 #define HSA_PD(n)        (n << 0)
 #define HSA_PF(n)        (n << 16)
 
 /* DSI Blank Package Register 2 (A31 Page 852) */
+
 #define DSI_BLK_HBP0_REG (A64_DSI_ADDR + 0xc8)
 
 /* DSI Blank Package Register 3 (A31 Page 852) */
+
 #define DSI_BLK_HBP1_REG (A64_DSI_ADDR + 0xcc)
 #define HBP_PD(n)        (n << 0)
 #define HBP_PF(n)        (n << 16)
 
 /* DSI Blank Package Register 4 (A31 Page 852) */
+
 #define DSI_BLK_HFP0_REG (A64_DSI_ADDR + 0xd0)
 
 /* DSI Blank Package Register 5 (A31 Page 853) */
+
 #define DSI_BLK_HFP1_REG (A64_DSI_ADDR + 0xd4)
 #define HFP_PD(n)        (n << 0)
 #define HFP_PF(n)        (n << 16)
 
 /* DSI Blank Package Register 6 (A31 Page 853) */
+
 #define DSI_BLK_HBLK0_REG (A64_DSI_ADDR + 0xe0)
 
 /* DSI Blank Package Register 7 (A31 Page 853) */
+
 #define DSI_BLK_HBLK1_REG (A64_DSI_ADDR + 0xe4)
 #define HBLK_PD(n)        (n << 0)
 #define HBLK_PF(n)        (n << 16)
 
 /* DSI Blank Package Register 8 (A31 Page 854) */
+
 #define DSI_BLK_VBLK0_REG (A64_DSI_ADDR + 0xe8)
 
 /* DSI Blank Package Register 9 (A31 Page 854) */
+
 #define DSI_BLK_VBLK1_REG (A64_DSI_ADDR + 0xec)
 #define VBLK_PD(n)        (n << 0)
 #define VBLK_PF(n)        (n << 16)
 
 /* DSI Low Power Control Register (A31 Page 854) */
+
 #define DSI_CMD_CTL_REG (A64_DSI_ADDR + 0x200)
 #define TX_FLAG         (1 << 9)
 #define RX_FLAG         (1 << 25)
 #define RX_OVERFLOW     (1 << 26)
 
 /* DSI Debug Data Register (Undocumented) */
+
 #define DSI_DEBUG_DATA_REG (A64_DSI_ADDR + 0x2f8)
 
 /* DSI Low Power Transmit Package Register (A31 Page 856) */
+
 #define DSI_CMD_TX_REG     (A64_DSI_ADDR + 0x300)
 #define DSI_CMD_TX_END     (A64_DSI_ADDR + 0x3fc)
 
@@ -252,9 +291,7 @@ static void a64_disable_dsi_processing(void)
    * (Disable DSI Processing)
    */
 
-  modreg32(0,
-           INSTRU_EN,
-           DSI_BASIC_CTL0_REG);
+  modreg32(0, INSTRU_EN, DSI_BASIC_CTL0_REG);
 }
 
 /****************************************************************************
@@ -278,9 +315,7 @@ static void a64_enable_dsi_processing(void)
    * (Enable DSI Processing from Instruction 0)
    */
 
-  modreg32(INSTRU_EN,
-           INSTRU_EN,
-           DSI_BASIC_CTL0_REG);
+  modreg32(INSTRU_EN, INSTRU_EN, DSI_BASIC_CTL0_REG);
 }
 
 /****************************************************************************
@@ -426,8 +461,7 @@ ssize_t a64_mipi_dsi_write(uint8_t channel,
    * Set TX_Flag (Bit 9) to 1 (Clear flag for "Transmit has started")
    */
 
-  putreg32(RX_OVERFLOW | RX_FLAG | TX_FLAG,
-           DSI_CMD_CTL_REG);
+  putreg32(RX_OVERFLOW | RX_FLAG | TX_FLAG, DSI_CMD_CTL_REG);
 
   /* Write the packet to DSI Low Power Transmit Package Register
    * (A31 Page 856)
@@ -448,17 +482,12 @@ ssize_t a64_mipi_dsi_write(uint8_t channel,
 
       /* Merge the next 4 bytes into a 32-bit value */
 
-      const uint32_t v = b[0] +
-                        (b[1] << 8) +
-                        (b[2] << 16) +
-                        (b[3] << 24);
+      const uint32_t v = b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 
       /* Write the 32-bit value */
 
       DEBUGASSERT(addr <= DSI_CMD_TX_END);
-      modreg32(v,
-               0xffffffff,
-               addr);
+      modreg32(v, 0xffffffff, addr);
       addr += 4;
     }
 
@@ -466,9 +495,7 @@ ssize_t a64_mipi_dsi_write(uint8_t channel,
    * Set TX_Size (Bits 0 to 7) to Packet Length - 1
   */
 
-  modreg32(pktlen - 1,
-           0xff,
-           DSI_CMD_CTL_REG);
+  modreg32(pktlen - 1, 0xff, DSI_CMD_CTL_REG);
 
   /* DSI Instruction Jump Select Register (Undocumented)
    * Set to begin the Low Power Transmission (LPTX)
@@ -540,18 +567,14 @@ int a64_mipi_dsi_enable(void)
    * (Pass Gating Clock for MIPI DSI)
    */
 
-  modreg32(MIPIDSI_GATING,
-           MIPIDSI_GATING,
-           BUS_CLK_GATING_REG0);
+  modreg32(MIPIDSI_GATING, MIPIDSI_GATING, BUS_CLK_GATING_REG0);
 
   /* Bus Software Reset Register 0 (A64 Page 138)
    * Set MIPI_DSI_RST (Bit 1) to 1
    * (Deassert MIPI DSI Reset)
    */
 
-  modreg32(MIPI_DSI_RST,
-           MIPI_DSI_RST,
-           BUS_SOFT_RST_REG0);
+  modreg32(MIPI_DSI_RST, MIPI_DSI_RST, BUS_SOFT_RST_REG0);
 
   /* Enable DSI Block *******************************************************/
 
@@ -703,8 +726,7 @@ int a64_mipi_dsi_enable(void)
    *   (CRC initial to this value in 1st transmition every frame)
    */
 
-  dsi_pixel_pf1 = CRC_INIT_LINEN(0XFFFF) |
-                  CRC_INIT_LINE0(0XFFFF);
+  dsi_pixel_pf1 = CRC_INIT_LINEN(0XFFFF) | CRC_INIT_LINE0(0XFFFF);
   putreg32(dsi_pixel_pf1, DSI_PIXEL_PF1_REG);
 
   /* DSI Pixel Format Register 0 (A31 Page 847)
@@ -716,9 +738,7 @@ int a64_mipi_dsi_enable(void)
    *   (24-bit RGB888)
    */
 
-  dsi_pixel_ctl0 = PD_PLUG_DIS |
-                   PIXEL_ENDIAN |
-                   PIXEL_FORMAT(8);
+  dsi_pixel_ctl0 = PD_PLUG_DIS | PIXEL_ENDIAN | PIXEL_FORMAT(8);
   putreg32(dsi_pixel_ctl0, DSI_PIXEL_CTL0_REG);
 
   /* Set Sync Timings *******************************************************/
@@ -800,8 +820,7 @@ int a64_mipi_dsi_enable(void)
    * Set Video_VSA (Bits 0  to 11) to 10
    */
 
-  dsi_basic_size0 = VIDEO_VBP(17) |
-                    VIDEO_VSA(10);
+  dsi_basic_size0 = VIDEO_VBP(17) | VIDEO_VSA(10);
   putreg32(dsi_basic_size0, DSI_BASIC_SIZE0_REG);
 
   /* DSI Line Number Register 1 (A31 Page 847)
@@ -809,8 +828,7 @@ int a64_mipi_dsi_enable(void)
    * Set Video_VACT (Bits 0  to 11) to 1440
    */
 
-  dsi_basic_size1 = VIDEO_VT(1485) |
-                    VIDEO_VACT(1440);
+  dsi_basic_size1 = VIDEO_VT(1485) | VIDEO_VACT(1440);
   putreg32(dsi_basic_size1, DSI_BASIC_SIZE1_REG);
 
   /* Set Horizontal Blanking ************************************************/
@@ -828,8 +846,7 @@ int a64_mipi_dsi_enable(void)
    * Set HSA_PD (Bits 0  to 7)  to 0
    */
 
-  dsi_blk_hsa1 = HSA_PF(0x50b4) |
-                 HSA_PD(0);
+  dsi_blk_hsa1 = HSA_PF(0x50b4) | HSA_PD(0);
   putreg32(dsi_blk_hsa1, DSI_BLK_HSA1_REG);
 
   /* DSI Blank Package Register 2 (A31 Page 852)
@@ -843,8 +860,7 @@ int a64_mipi_dsi_enable(void)
    * Set HBP_PD (Bits 0  to 7)  to 0
    */
 
-  dsi_blk_hbp1 = HBP_PF(0x757a) |
-                 HBP_PD(0);
+  dsi_blk_hbp1 = HBP_PF(0x757a) | HBP_PD(0);
   putreg32(dsi_blk_hbp1, DSI_BLK_HBP1_REG);
 
   /* DSI Blank Package Register 4 (A31 Page 852)
@@ -858,8 +874,7 @@ int a64_mipi_dsi_enable(void)
    * Set HFP_PD (Bits 0  to 7)  to 0
    */
 
-  dsi_blk_hfp1 = HFP_PF(0x50b4) |
-                 HFP_PD(0);
+  dsi_blk_hfp1 = HFP_PF(0x50b4) | HFP_PD(0);
   putreg32(dsi_blk_hfp1, DSI_BLK_HFP1_REG);
 
   /* DSI Blank Package Register 6 (A31 Page 853)
@@ -873,8 +888,7 @@ int a64_mipi_dsi_enable(void)
    * Set HBLK_PD (Bits 0  to 7)  to 0
    */
 
-  dsi_blk_hblk1 = HBLK_PF(0x72bd) |
-                  HBLK_PD(0);
+  dsi_blk_hblk1 = HBLK_PF(0x72bd) | HBLK_PD(0);
   putreg32(dsi_blk_hblk1, DSI_BLK_HBLK1_REG);
 
   /* Set Vertical Blanking **************************************************/
@@ -892,8 +906,7 @@ int a64_mipi_dsi_enable(void)
    * Set VBLK_PD (Bits 0  to 7)  to 0
    */
 
-  dsi_blk_vblk1 = VBLK_PF(0xffff) |
-                  VBLK_PD(0);
+  dsi_blk_vblk1 = VBLK_PF(0xffff) | VBLK_PD(0);
   putreg32(dsi_blk_vblk1, DSI_BLK_VBLK1_REG);
 
   return OK;
@@ -937,9 +950,7 @@ int a64_mipi_dsi_start(void)
    * (Enable DSI Processing from Instruction 0)
    */
 
-  modreg32(INSTRU_EN,
-           INSTRU_EN,
-           DSI_BASIC_CTL0_REG);
+  modreg32(INSTRU_EN, INSTRU_EN, DSI_BASIC_CTL0_REG);
 
   /* Instruction Function Lane (Undocumented) *******************************/
 
@@ -976,9 +987,7 @@ int a64_mipi_dsi_start(void)
    * (Disable DSI Processing)
    */
 
-  modreg32(INSTRU_EN,
-           INSTRU_EN,
-           DSI_BASIC_CTL0_REG);
+  modreg32(INSTRU_EN, INSTRU_EN, DSI_BASIC_CTL0_REG);
 
   return OK;
 }

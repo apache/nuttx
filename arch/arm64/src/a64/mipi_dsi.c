@@ -111,8 +111,7 @@ static uint16_t crc16ccitt(FAR const uint8_t *src,
 
   for (i = 0; i < len; i++)
     {
-      v = (v >> 8) ^
-          crc16ccitt_tab[(v ^ src[i]) & 0xff];
+      v = (v >> 8) ^ crc16ccitt_tab[(v ^ src[i]) & 0xff];
     }
 
   return v;
@@ -181,9 +180,7 @@ static uint8_t compute_ecc(FAR const uint8_t *di_wc,
 
   /* Combine Data Identifier and Word Count into a 24-bit word */
 
-  di_wc_word = di_wc[0] |
-               (di_wc[1] << 8) |
-               (di_wc[2] << 16);
+  di_wc_word = di_wc[0] | (di_wc[1] << 8) | (di_wc[2] << 16);
 
   /* Extract the 24 bits from the word */
 
@@ -214,14 +211,8 @@ static uint8_t compute_ecc(FAR const uint8_t *di_wc,
 
   /* Merge the ECC bits */
 
-  return ecc[0] |
-         (ecc[1] << 1) |
-         (ecc[2] << 2) |
-         (ecc[3] << 3) |
-         (ecc[4] << 4) |
-         (ecc[5] << 5) |
-         (ecc[6] << 6) |
-         (ecc[7] << 7);
+  return ecc[0] | (ecc[1] << 1) | (ecc[2] << 2) | (ecc[3] << 3) |
+         (ecc[4] << 4) | (ecc[5] << 5) | (ecc[6] << 6) | (ecc[7] << 7);
 }
 
 /****************************************************************************
@@ -265,8 +256,7 @@ ssize_t mipi_dsi_long_packet(FAR uint8_t *pktbuf,
 
   const uint8_t vc = channel;
   const uint8_t dt = cmd;
-  const uint8_t di = (vc << 6) |
-                     dt;
+  const uint8_t di = (vc << 6) | dt;
 
   /* Word Count (WC) (2 bytes)：
    * Number of bytes in the Packet Payload
@@ -289,8 +279,7 @@ ssize_t mipi_dsi_long_packet(FAR uint8_t *pktbuf,
 
   /* Compute ECC for Data Identifier + Word Count */
 
-  const uint8_t ecc = compute_ecc(di_wc,
-                                  sizeof(di_wc));
+  const uint8_t ecc = compute_ecc(di_wc, sizeof(di_wc));
 
   /* Packet Header (4 bytes):
    * Data Identifier + Word Count + Error Correction Code
@@ -329,9 +318,7 @@ ssize_t mipi_dsi_long_packet(FAR uint8_t *pktbuf,
    * Packet Footer (2 bytes)
    */
 
-  const size_t len = sizeof(header) +
-                     txlen +
-                     sizeof(footer);
+  const size_t len = sizeof(header) + txlen + sizeof(footer);
 
   ginfo("channel=%d, cmd=0x%x, txlen=%ld\n", channel, cmd, txlen);
   DEBUGASSERT(pktbuf != NULL && txbuf != NULL);
@@ -352,15 +339,9 @@ ssize_t mipi_dsi_long_packet(FAR uint8_t *pktbuf,
 
   /* Copy Packet Header, Payload, Packet Footer to Packet Buffer */
 
-  memcpy(pktbuf,
-         header,
-         sizeof(header));  /* 4 bytes */
-  memcpy(pktbuf + sizeof(header),
-         txbuf,
-         txlen);           /* txlen bytes */
-  memcpy(pktbuf + sizeof(header) + txlen,
-         footer,
-         sizeof(footer));  /* 2 bytes */
+  memcpy(pktbuf, header, sizeof(header));
+  memcpy(pktbuf + sizeof(header), txbuf, txlen);
+  memcpy(pktbuf + sizeof(header) + txlen, footer, sizeof(footer));
 
   /* Return the Packet Length */
 
@@ -412,8 +393,7 @@ ssize_t mipi_dsi_short_packet(FAR uint8_t *pktbuf,
 
   const uint8_t vc = channel;
   const uint8_t dt = cmd;
-  const uint8_t di = (vc << 6) |
-                     dt;
+  const uint8_t di = (vc << 6) | dt;
 
   /* Data (2 bytes): Fill with 0 if Second Byte is missing */
 
@@ -436,8 +416,7 @@ ssize_t mipi_dsi_short_packet(FAR uint8_t *pktbuf,
 
   /* Compute ECC for Data Identifier + Word Count */
 
-  const uint8_t ecc = compute_ecc(di_data,
-                                  sizeof(di_data));
+  const uint8_t ecc = compute_ecc(di_data, sizeof(di_data));
 
   /* Packet Header (4 bytes):
    * Data Identifier + Data + Error Correction Code
@@ -474,9 +453,7 @@ ssize_t mipi_dsi_short_packet(FAR uint8_t *pktbuf,
 
   /* Copy Packet Header to Packet Buffer */
 
-  memcpy(pktbuf,
-         header,
-         sizeof(header));  /* 4 bytes */
+  memcpy(pktbuf, header, sizeof(header));  /* 4 bytes */
 
   /* Return the Packet Length */
 
