@@ -3790,6 +3790,9 @@ endif
 if ARCH_CHIP_ESP32S3
 source "boards/xtensa/esp32s3/common/Kconfig"
 endif
+if ARCH_CHIP_ESP32C3
+source "boards/risc-v/esp32c3/common/Kconfig"
+endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"
 endif

@@ -525,6 +525,15 @@ define RWILDCARD
   $(foreach d,$(wildcard $1/*),$(call RWILDCARD,$d,$2)$(filter $(subst *,%,$2),$d))
 endef
 
+# FINDSCRIPT - Find a given linker script. Prioritize the version from currently
+#              configured board. If not provided, use the linker script from the
+#              board common directory.
+# Example: $(call FINDSCRIPT,script.ld)
+
+define FINDSCRIPT
+	$(if $(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(1)),$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(1),$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(1))
+endef
+
 # CLEAN - Default clean target
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)

@@ -292,9 +292,8 @@ static inline void nx_start_application(void)
   posix_spawnattr_init(&attr);
 
   attr.priority  = CONFIG_INIT_PRIORITY;
-#  ifndef CONFIG_BUILD_KERNEL
   attr.stacksize = CONFIG_INIT_STACKSIZE;
-#  endif
+
   ret = exec_spawn(CONFIG_INIT_FILEPATH, argv, NULL,
                    CONFIG_INIT_SYMTAB, CONFIG_INIT_NEXPORTS, &attr);
   DEBUGASSERT(ret >= 0);

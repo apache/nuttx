@@ -1584,7 +1584,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   return g_video_data_ops->validate_frame_setting(nr_fmt, df, &di);
 }
 
-static size_t get_bufsize(video_format_t *vf)
+static size_t get_bufsize(FAR video_format_t *vf)
 {
   size_t ret = vf->width * vf->height;
   switch (vf->pixelformat)

@@ -1,0 +1,74 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ESP32C3_MERGE_BINS
+	bool "Merge raw binary files into a single file"
+	default n
+	---help---
+		Merge the raw binary files into a single file for flashing to the
+		device.
+		This is only useful when the path to binary files (e.g. bootloader)
+		is provided via the ESPTOOL_BINDIR variable.
+
+choice ESP32C3_SPIFLASH_FS
+	prompt "Mount SPI Flash MTD on bring-up"
+	default ESP32C3_SPIFLASH_SMARTFS
+	depends on ESP32C3_MTD
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
+	config ESP32C3_SPIFLASH_SMARTFS
+		bool "SmartFS"
+		select FS_SMARTFS
+		select MTD_SMART
+		depends on !ESP32C3_SECURE_FLASH_ENC_ENABLED
+
+	comment "SmartFS not supported with Flash Encryption"
+		depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
+	config ESP32C3_SPIFLASH_NXFFS
+		bool "NXFFS"
+		select FS_NXFFS
+		depends on !ESP32C3_SECURE_FLASH_ENC_ENABLED
+
+	comment "NXFFS not supported with Flash Encryption"
+		depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
+	config ESP32C3_SPIFLASH_SPIFFS
+		bool "SPIFFS"
+		select FS_SPIFFS
+		depends on !ESP32C3_SECURE_FLASH_ENC_ENABLED
+
+	comment "SPIFFS not supported with Flash Encryption"
+		depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
+	config ESP32C3_SPIFLASH_LITTLEFS
+		bool "LittleFS"
+		select FS_LITTLEFS
+
+	config ESP32C3_SPIFLASH_MTD_CONFIG
+		bool "Non-volatile storage"
+
+endchoice
+
+config ESP32C3_SPIFLASH_FS_MOUNT_PT
+	string "File-system Mount Point"
+	depends on ESP32C3_SPIFLASH_LITTLEFS
+	default "/data"
+
+if LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
+
+config ESP32C3_LCD_RSTPIN
+	int "LCD reset pin"
+	default 9
+
+config ESP32C3_LCD_BLPIN
+	int "LCD backlight pin"
+	default 18
+
+endif # LCD_ST7735 || LCD_ST7789 || LCD_GC9A01

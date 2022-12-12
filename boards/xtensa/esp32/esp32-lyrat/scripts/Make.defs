@@ -23,42 +23,22 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
-# This is the generated memory layout linker script.  It will always be
-# generated at the board level.
-
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
 
 # Pick the linker scripts from the board level if they exist, if not
 # pick the common linker scripts.
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld),)
-	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,protected_memory.ld)
+  ARCHSCRIPT += $(call FINDSCRIPT,kernel-space.ld)
 else
-	ifeq ($(CONFIG_BUILD_PROTECTED),y)
-		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
-	else
-		ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
-		else
-			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
-		endif
-	endif
-endif
+  ARCHSCRIPT += $(call FINDSCRIPT,flat_memory.ld)
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld),)
-	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
-else
-	ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
-endif
-
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
-	LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
-else
-	ifeq ($(CONFIG_BUILD_PROTECTED),y)
-		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected.template.ld
-	else
-		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat.template.ld
-	endif
+  ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+    ARCHSCRIPT += $(call FINDSCRIPT,mcuboot_sections.ld)
+  else
+    ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
+  endif
 endif
 
 ARCHPICFLAGS = -fpic

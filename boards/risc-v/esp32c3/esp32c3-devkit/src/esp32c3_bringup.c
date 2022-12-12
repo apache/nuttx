@@ -40,7 +40,19 @@
 #include "esp32c3_wlan.h"
 #include "esp32c3_spiflash.h"
 #include "esp32c3_partition.h"
+
 #include "esp32c3-devkit.h"
+#include "esp32c3_board_adc.h"
+#include "esp32c3_board_bmp180.h"
+#include "esp32c3_board_i2c.h"
+#include "esp32c3_board_ledc.h"
+#include "esp32c3_board_oneshot.h"
+#include "esp32c3_board_spiflash.h"
+#include "esp32c3_board_spidev.h"
+#include "esp32c3_board_spislavedev.h"
+#include "esp32c3_board_twai.h"
+#include "esp32c3_board_wdt.h"
+#include "esp32c3_board_wlan.h"
 
 #ifdef CONFIG_SPI
 #  include "esp32c3_spi.h"
@@ -224,10 +236,10 @@ int esp32c3_bringup(void)
 
   /* Initialize TWAI and register the TWAI driver. */
 
-  ret = esp32c3_twai_setup();
+  ret = board_twai_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: esp32c3_twai_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_twai_setup failed: %d\n", ret);
     }
 #endif
 
@@ -334,10 +346,10 @@ int esp32c3_bringup(void)
 #endif /* CONFIG_ESP32C3_WIRELESS */
 
 #ifdef CONFIG_ESP32C3_LEDC
-  ret = esp32c3_pwm_setup();
+  ret = board_ledc_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: esp32c3_pwm_setup() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESP32C3_LEDC */
 

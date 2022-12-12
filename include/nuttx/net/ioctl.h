@@ -47,6 +47,7 @@
 #define SIOCGIFNETMASK   _SIOC(0x0007)  /* Get network mask */
 #define SIOCSIFNETMASK   _SIOC(0x0008)  /* Set network mask */
 #define SIOCGIFMTU       _SIOC(0x0009)  /* Get MTU size */
+#define SIOCSIFMTU       _SIOC(0x0033)  /* Set MTU size */
 
 /* IPv6 interface control operations */
 
@@ -72,6 +73,7 @@
 
 #define SIOCGIFNAME      _SIOC(0x002A)  /* Get interface name string */
 #define SIOCGIFINDEX     _SIOC(0x002B)  /* Get index based name string */
+#define SIOCSIFNAME      _SIOC(0x0034)  /* Set interface name string*/
 
 /* Interface flags */
 
@@ -118,10 +120,6 @@
 #define SIOCDCANEXTFILTER  _SIOC(0x002F)  /* Delete hardware-level exteneded ID filter */
 #define SIOCACANSTDFILTER  _SIOC(0x0030)  /* Add hardware-level standard ID filter */
 #define SIOCDCANSTDFILTER  _SIOC(0x0031)  /* Delete hardware-level standard ID filter */
-
-/* Cellular net driver ******************************************************/
-
-#define SIOCSCELLNETDEV    _SIOC(0x0032)  /* Set cellular Netowrk Interface */
 
 /****************************************************************************
  * Public Type Definitions

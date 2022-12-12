@@ -265,6 +265,33 @@ endchoice
 
 endif
 
+config SIM_VIDEO
+	bool "Simulated video support"
+	depends on VIDEO
+	default y
+
+if SIM_VIDEO
+
+choice
+	prompt "Simulated video device type"
+	default SIM_VIDEO_V4L2
+
+config SIM_VIDEO_V4L2
+	bool "V4L2 camera support on sim"
+	depends on HOST_LINUX
+
+endchoice
+
+config HOST_VIDEO_DEV_PATH
+	string "Host video device path"
+	default "/dev/video0"
+
+config SIM_VIDEO_DEV_PATH
+	string "NuttX video device path"
+	default "/dev/video"
+
+endif
+
 menu "Simulated Graphics/Input"
 
 config SIM_X11FB
@@ -462,10 +489,10 @@ config SIM_UART_NUMBER
 		Under simulation, a NuttX port can be bound to a serial
 		port on the host machine. This way NuttX can access the
 		host's hardware directly.
-				
+
 		There are two possibilities regarding the host's port:
 		it can be either a physical one, or a simulated one.
-		
+
 		In case of a physical port, NuttX will be able to open
 		this port and communicate with any actual hardware that
 		it is connected to. This is useful for testing code that
@@ -473,18 +500,18 @@ config SIM_UART_NUMBER
 		In order for this to work, NuttX port name must be set to
 		the same name that the host is using for this port (e.g.
 		/dev/ttyUSB0).
-		
+
 		Alternativelly, a "simulated" host port may be used to.
 		This is useful if you need to also simulate the external
 		hardware, or to have NuttX communicate with any other
 		software in your system.
 		You can create a "simulated" port in your host,
 		by running:
-		
+
 			socat PTY,link=/dev/ttySIM0 PTY,link=/dev/ttyNX0
 		 	stty -F /dev/ttySIM0 raw
 		 	stty -F /dev/ttyNX0 raw
-		
+
 		This will create two new ports on your system.
 		NuttX will use the ttySIM0 port, and another software
 		may open and use the ttyNX0 port.
@@ -498,7 +525,7 @@ config SIM_UART_BUFFER_SIZE
 	---help---
 		The size of the transmit and receive buffers of the
 		simulated UART ports.
-		
+
 		Note that all ports will have the same buffer size.
 
 config SIM_UART0_NAME
@@ -508,7 +535,7 @@ config SIM_UART0_NAME
 	---help---
 		This is the name of the simulated UART port.
 		The port will be mounted in NuttX under this name.
-		
+
 		A UART port must also exist on the host system
 		with the exact same name specified here.
 
@@ -519,7 +546,7 @@ config SIM_UART1_NAME
 	---help---
 		This is the name of the simulated UART port.
 		The port will be mounted in NuttX under this name.
-		
+
 		A UART port must also exist on the host system
 		with the exact same name specified here.
 
@@ -530,7 +557,7 @@ config SIM_UART2_NAME
 	---help---
 		This is the name of the simulated UART port.
 		The port will be mounted in NuttX under this name.
-		
+
 		A UART port must also exist on the host system
 		with the exact same name specified here.
 
@@ -541,7 +568,7 @@ config SIM_UART3_NAME
 	---help---
 		This is the name of the simulated UART port.
 		The port will be mounted in NuttX under this name.
-		
+
 		A UART port must also exist on the host system
 		with the exact same name specified here.
 

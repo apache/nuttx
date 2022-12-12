@@ -75,30 +75,6 @@ void up_assert(const char *filename, int lineno)
 {
   struct tcb_s *rtcb = running_task();
 
-  /* Flush any buffered SYSLOG data (prior to the assertion) */
-
-  syslog_flush();
-
-  /* Show the location of the failed assertion */
-
-#ifdef CONFIG_SMP
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
-         up_cpu_index(), filename, lineno, rtcb->name);
-#else
-  _alert("Assertion failed CPU%d at file:%s line: %d\n",
-         up_cpu_index(), filename, lineno);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed at file:%s line: %d task: %s\n",
-         filename, lineno, rtcb->name);
-#else
-  _alert("Assertion failed at file:%s line: %d\n",
-         filename, lineno);
-#endif
-#endif
-
   /* Show back trace */
 
 #ifdef CONFIG_SCHED_BACKTRACE
@@ -106,16 +82,6 @@ void up_assert(const char *filename, int lineno)
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
-
-  /* Allow for any board/configuration specific crash information */
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), rtcb, filename, lineno);
-#endif
-
-  /* Flush any buffered SYSLOG data */
 
   syslog_flush();
 

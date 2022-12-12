@@ -410,6 +410,10 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
           devif_send(dev, &pstate->snd_buffer[pstate->snd_sent],
                      sndlen, tcpip_hdrsize(conn));
+          if (dev->d_sndlen == 0)
+            {
+              return flags;
+            }
 
           /* Update the amount of data sent (but not necessarily ACKed) */
 

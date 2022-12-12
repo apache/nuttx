@@ -755,10 +755,6 @@ config ESP32C3_WIFI_RXBA_AMPDU_WZ
 	int "Wi-Fi RX BA AMPDU windown size"
 	default 6
 
-config ESP32C3_WLAN_PKTBUF_NUM
-	int "WLAN netcard packet buffer number per netcard"
-	default 16
-
 config ESP32C3_WIFI_CONNECT_TIMEOUT
 	int "Connect timeout by second"
 	default 10

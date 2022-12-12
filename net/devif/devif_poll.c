@@ -925,6 +925,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
       if (netdev_iob_prepare(dev, false, 0) != OK)
         {
+          nwarn("WARNING: IOB Prepare failed for dev %s!\n", dev->d_ifname);
           bstop = true;
           break;
         }
