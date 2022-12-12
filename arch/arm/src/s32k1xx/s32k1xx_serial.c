@@ -447,14 +447,14 @@ static struct s32k1xx_uart_s g_lpuart0priv =
   .stopbits2    = CONFIG_LPUART0_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART0_OFLOWCONTROL)
   .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART0_CTS,
+  .cts_gpio     = PIN_LPUART0_CTS,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART0_IFLOWCONTROL)
   .iflow        = 1,
 #  endif
 #  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART0_RS485RTSCONTROL)) \
    || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART0_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART0_RTS,
+  .rts_gpio     = PIN_LPUART0_RTS,
 #  endif
 
 #  if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
@@ -512,14 +512,14 @@ static struct s32k1xx_uart_s g_lpuart1priv =
   .stopbits2    = CONFIG_LPUART1_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
   .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART1_CTS,
+  .cts_gpio     = PIN_LPUART1_CTS,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
   .iflow        = 1,
 #  endif
 #  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) \
    || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART1_RTS,
+  .rts_gpio     = PIN_LPUART1_RTS,
 #  endif
 #  if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
     && defined(CONFIG_LPUART1_INVERTIFLOWCONTROL))
@@ -574,14 +574,14 @@ static struct s32k1xx_uart_s g_lpuart2priv =
   .stopbits2    = CONFIG_LPUART2_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART2_OFLOWCONTROL)
   .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART2_CTS,
+  .cts_gpio     = PIN_LPUART2_CTS,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)
   .iflow        = 1,
 #  endif
 #  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) \
    || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART2_RTS,
+  .rts_gpio     = PIN_LPUART2_RTS,
 #  endif
 #  if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
     && defined(CONFIG_LPUART2_INVERTIFLOWCONTROL))
@@ -1311,7 +1311,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             flags  = spin_lock_irqsave(NULL);
             s32k1xx_disableuartint(priv, &ie);
-            ret = s32k1xx_setup(dev);
+            ret = dev->ops->setup(dev);
 
             /* Restore the interrupt state */
 
