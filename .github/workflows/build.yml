@@ -172,6 +172,7 @@ jobs:
         continue-on-error: true
 
   macOS:
+    if: ${{ false }}  # disable for now
     permissions:
       contents: none
     runs-on: macos-12
