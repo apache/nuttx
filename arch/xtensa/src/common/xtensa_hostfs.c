@@ -204,7 +204,7 @@ int host_unlink(const char *pathname)
   return -ENOSYS;
 }
 
-int host_mkdir(const char *pathname, mode_t mode)
+int host_mkdir(const char *pathname, int mode)
 {
   return -ENOSYS;
 }
