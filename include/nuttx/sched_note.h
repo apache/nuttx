@@ -407,7 +407,7 @@ struct note_filter_mode_s
 {
   unsigned int flag;          /* Filter mode flag */
 #ifdef CONFIG_SMP
-  unsigned int cpuset;        /* The set of monitored CPUs */
+  cpu_set_t cpuset;           /* The set of monitored CPUs */
 #endif
 };
 
@@ -609,8 +609,8 @@ void sched_note_add(FAR const void *note, size_t notelen);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
-void sched_note_filter_mode(struct note_filter_mode_s *oldm,
-                            struct note_filter_mode_s *newm);
+void sched_note_filter_mode(FAR struct note_filter_mode_s *oldm,
+                            FAR struct note_filter_mode_s *newm);
 #endif
 
 /****************************************************************************
@@ -635,8 +635,8 @@ void sched_note_filter_mode(struct note_filter_mode_s *oldm,
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
     defined(CONFIG_SCHED_INSTRUMENTATION_SYSCALL)
-void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
-                               struct note_filter_syscall_s *newf);
+void sched_note_filter_syscall(FAR struct note_filter_syscall_s *oldf,
+                               FAR struct note_filter_syscall_s *newf);
 #endif
 
 /****************************************************************************
@@ -661,8 +661,8 @@ void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
     defined(CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER)
-void sched_note_filter_irq(struct note_filter_irq_s *oldf,
-                           struct note_filter_irq_s *newf);
+void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
+                           FAR struct note_filter_irq_s *newf);
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
