@@ -35,15 +35,18 @@ ifeq ($(wildcard open-amp/.git),)
 	$(Q) curl -L https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -o open-amp.zip
 	$(Q) unzip -o open-amp.zip
 	$(Q) mv open-amp-$(VERSION) open-amp
-	$(Q) patch -p0 < 0001-ns-acknowledge-the-received-creation-message.patch
-	$(Q) patch -p0 < 0002-Negotiate-individual-buffer-size-dynamically.patch
-	$(Q) patch -p0 < 0003-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
-	$(Q) patch -p0 < 0004-openamp-add-new-ops-notify_wait-support.patch
-	$(Q) patch -p0 < 0005-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
-	$(Q) patch -p0 < 0006-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
-	$(Q) patch -p0 < 0007-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
-	$(Q) patch -p0 < 0008-remoteproc-make-all-elf_-functions-static-except-elf.patch
-	$(Q) patch -p0 < 0009-Fix-warn-declaration-of-vring_rsc-shadows-a-previous.patch
+	$(Q) patch -p0 < 0001-openamp-add-ns_unbind_notify-support.patch
+	$(Q) patch -p0 < 0002-ns-acknowledge-the-received-creation-message.patch
+	$(Q) patch -p0 < 0003-Negotiate-individual-buffer-size-dynamically.patch
+	$(Q) patch -p0 < 0004-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
+	$(Q) patch -p0 < 0005-openamp-add-new-ops-notify_wait-support.patch
+	$(Q) patch -p0 < 0006-openamp-divide-shram-to-TX-shram-RX-shram-by-config-.patch
+	$(Q) patch -p0 < 0007-openamp-don-t-need-check-status-when-get_tx_payload.patch
+	$(Q) patch -p0 < 0008-openamp-add-available_idx-to-dump.patch
+	$(Q) patch -p0 < 0009-openamp-firstly-take-all-buffer-from-shram-pool.patch
+	$(Q) patch -p0 < 0010-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
+	$(Q) patch -p0 < 0011-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
+	$(Q) patch -p0 < 0012-remoteproc-make-all-elf_-functions-static-except-elf.patch
 endif
 
 .openamp_headers: open-amp.zip

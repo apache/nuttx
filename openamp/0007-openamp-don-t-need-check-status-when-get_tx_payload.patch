@@ -1,0 +1,32 @@
+From 13f72065d4085cebe10687f486edaa014b4adf6c Mon Sep 17 00:00:00 2001
+From: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
+Date: Mon, 18 Apr 2022 15:20:52 +0800
+Subject: [PATCH 07/12] openamp: don't need check status when get_tx_payload
+
+Remove redundant check, because this status is already check in
+rpmsg_init_vdev_with_config and rpmsg_virtio_wait_remote_ready.
+Signed-off-by: Guiding Li <liguiding1@xiaomi.com>
+Signed-off-by: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index adc3dbc..92f5883 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -323,11 +323,6 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
+ 	/* Get the associated remote device for channel. */
+ 	rvdev = metal_container_of(rdev, struct rpmsg_virtio_device, rdev);
+ 
+-	/* Validate device state */
+-	status = rpmsg_virtio_get_status(rvdev);
+-	if (!(status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
+-		return NULL;
+-
+ 	if (wait)
+ 		tick_count = RPMSG_TICK_COUNT / RPMSG_TICKS_PER_INTERVAL;
+ 	else
+-- 
+2.25.1
+
