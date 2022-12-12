@@ -1,7 +1,7 @@
 From 285e4d359458ef09d397a41de04ada9a6b8d48e7 Mon Sep 17 00:00:00 2001
 From: Chao An <anchao@pinecone.net>
 Date: Mon, 10 Dec 2018 16:26:39 +0800
-Subject: [PATCH 02/10] Negotiate individual buffer size dynamically
+Subject: [PATCH 2/9] Negotiate individual buffer size dynamically
 
 If slave support VIRTIO_RPMSG_F_BUFSZ(0x04) feature, master
 determine the buffer size from config space(first 8 bytes),
