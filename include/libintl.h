@@ -40,24 +40,24 @@ extern "C"
 #define EXTERN extern
 #endif
 
-FAR char *gettext(FAR const char *msgid) formatlike(1);
+FAR char *gettext(FAR const char *msgid) format_like(1);
 FAR char *dgettext(FAR const char *domainname,
-                   FAR const char *msgid) formatlike(2);
+                   FAR const char *msgid) format_like(2);
 FAR char *dcgettext(FAR const char *domainname,
                     FAR const char *msgid,
-                    int category) formatlike(2);
+                    int category) format_like(2);
 FAR char *ngettext(FAR const char *msgid1,
                    FAR const char *msgid2,
-                   unsigned long int n) formatlike(1) formatlike(2);
+                   unsigned long int n) format_like(1) format_like(2);
 FAR char *dngettext(FAR const char *domainname,
                     FAR const char *msgid1,
                     FAR const char *msgid2,
-                    unsigned long int n) formatlike(2) formatlike(3);
+                    unsigned long int n) format_like(2) format_like(3);
 FAR char *dcngettext(FAR const char *domainname,
                      FAR const char *msgid1,
                      FAR const char *msgid2,
                      unsigned long int n,
-                     int category) formatlike(2) formatlike(3);
+                     int category) format_like(2) format_like(3);
 
 FAR char *textdomain(FAR const char *domainname);
 

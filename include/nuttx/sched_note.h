@@ -539,13 +539,13 @@ void sched_note_string(uintptr_t ip, FAR const char *buf);
 void sched_note_dump(uintptr_t ip, uint8_t event,
                      FAR const void *buf, size_t len);
 void sched_note_vprintf(uintptr_t ip, FAR const char *fmt,
-                        va_list va) printflike(2, 0);
+                        va_list va) printf_like(2, 0);
 void sched_note_vbprintf(uintptr_t ip, uint8_t event,
-                         FAR const char *fmt, va_list va) printflike(3, 0);
+                         FAR const char *fmt, va_list va) printf_like(3, 0);
 void sched_note_printf(uintptr_t ip,
-                       FAR const char *fmt, ...) printflike(2, 3);
+                       FAR const char *fmt, ...) printf_like(2, 3);
 void sched_note_bprintf(uintptr_t ip, uint8_t event,
-                        FAR const char *fmt, ...) printflike(3, 4);
+                        FAR const char *fmt, ...) printf_like(3, 4);
 #else
 #  define sched_note_string(ip,b)
 #  define sched_note_dump(ip,e,b,l)

@@ -196,6 +196,6 @@ void IRAM_ATTR phy_exit_critical(uint32_t level);
  *
  ****************************************************************************/
 
-int phy_printf(const char *format, ...) printflike(1, 2);
+int phy_printf(const char *format, ...) printf_like(1, 2);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WIRELESS_H */

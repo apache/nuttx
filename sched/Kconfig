@@ -1067,7 +1067,7 @@ config SCHED_INSTRUMENTATION_DUMP
 			void sched_note_dump(uint32_t module, uint8_t event, FAR const void *buf, size_t len);
 			void sched_note_vprintf(FAR const char *fmt, va_list va);
 			void sched_note_vbprintf(uint32_t module, uint8_t event, FAR const char *fmt, va_list va);
-			void sched_note_printf(FAR const char *fmt, ...) printflike(1, 2);
+			void sched_note_printf(FAR const char *fmt, ...) printf_like(1, 2);
 			void sched_note_bprintf(uint32_t module, uint8_t event, FAR const char *fmt, ...);
 
 config SCHED_INSTRUMENTATION_HIRES

@@ -1095,7 +1095,7 @@ extern "C"
 
 typedef CODE void (*lib_dump_handler_t)(FAR void *arg,
                                         FAR const char *fmt, ...)
-                  printflike(2, 3);
+                  printf_like(2, 3);
 
 /* Dump a buffer of data with handler */
 
@@ -1140,19 +1140,19 @@ void lib_dumpvfile(int fd, FAR const char *msg, FAR const struct iovec *iov,
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
 #ifdef CONFIG_DEBUG_ALERT
-void _alert(const char *format, ...) sysloglike(1, 2);
+void _alert(const char *format, ...) syslog_like(1, 2);
 #endif
 
 #ifdef CONFIG_DEBUG_ERROR
-void _err(const char *format, ...) sysloglike(1, 2);
+void _err(const char *format, ...) syslog_like(1, 2);
 #endif
 
 #ifdef CONFIG_DEBUG_WARN
-void _warn(const char *format, ...) sysloglike(1, 2);
+void _warn(const char *format, ...) syslog_like(1, 2);
 #endif
 
 #ifdef CONFIG_DEBUG_INFO
-void _info(const char *format, ...) sysloglike(1, 2);
+void _info(const char *format, ...) syslog_like(1, 2);
 #endif
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
