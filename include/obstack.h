@@ -432,7 +432,7 @@ size_t obstack_room(FAR struct obstack *h);
  ****************************************************************************/
 
 int obstack_printf(FAR struct obstack *h, FAR const char *fmt, ...)
-    printflike(2, 3);
+    printf_like(2, 3);
 
 /****************************************************************************
  * Name: obstack_vprintf
@@ -456,7 +456,7 @@ int obstack_printf(FAR struct obstack *h, FAR const char *fmt, ...)
  ****************************************************************************/
 
 int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
-    printflike(2, 0);
+    printf_like(2, 0);
 
 /****************************************************************************
  * Name: obstack_alloc_failed_handler
