@@ -40,7 +40,7 @@ extern "C"
  ****************************************************************************/
 
 #include "uart.h"
-void dbg_printf_(const char *format, ...) printflike(1, 2);
+void dbg_printf_(const char *format, ...) printf_like(1, 2);
 void dbg_printf_init(void);
 void my_dump_byte(uint8_t *pdata, int dlen);
 #ifndef DEBUG_INFO
@@ -126,8 +126,8 @@ extern volatile uint32_t s_rom_debug_level;
 typedef void(*std_putc)(char *data, int size);
 
 void log_vsprintf(std_putc putc, const char *fmt, va_list args)
-     printflike(2, 0);
-void log_printf(const char *format, ...) printflike(1, 2);
+     printf_like(2, 0);
+void log_printf(const char *format, ...) printf_like(1, 2);
 void log_set_putc(std_putc putc);
 void log_clr_putc(std_putc putc);
 int log_debug_level(uint8_t level);
