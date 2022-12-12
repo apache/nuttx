@@ -191,7 +191,7 @@ static inline int note_isenabled(void)
 #ifdef CONFIG_SMP
   /* Ignore notes that are not in the set of monitored CPUs */
 
-  if ((g_note_filter.mode.cpuset & (1 << this_cpu())) == 0)
+  if (CPU_ISSET(&g_note_filter.mode.cpuset, this_cpu()) == 0)
     {
       /* Not in the set of monitored CPUs.  Do not log the note. */
 
@@ -268,11 +268,7 @@ static inline int note_isenabled_syscall(int nr)
   if (up_interrupt_context())
     {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-#ifdef CONFIG_SMP
       int cpu = this_cpu();
-#else
-      int cpu = 0;
-#endif
 
       if (g_note_disabled_irq_nest[cpu] > 0)
         {
@@ -330,11 +326,7 @@ static inline int note_isenabled_irq(int irq, bool enter)
   if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_IRQ) ||
       NOTE_FILTER_IRQMASK_ISSET(irq, &g_note_filter.irq_mask))
     {
-#ifdef CONFIG_SMP
       int cpu = this_cpu();
-#else
-      int cpu = 0;
-#endif
 
       if (enter)
         {
@@ -420,7 +412,7 @@ static void note_spincommon(FAR struct tcb_s *tcb,
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
 
   sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spinlock));
-  note.nsp_value = *(uint8_t *)spinlock;
+  note.nsp_value = *(FAR uint8_t *)spinlock;
 
   /* Add the note to circular buffer */
 
@@ -518,7 +510,7 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   note_common(tcb, &note.nsu_cmn, sizeof(struct note_suspend_s),
               NOTE_SUSPEND);
-  note.nsu_state           = tcb->task_state;
+  note.nsu_state = tcb->task_state;
 
   /* Add the note to circular buffer */
 
@@ -742,8 +734,8 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   struct note_syscall_enter_s note;
   FAR struct tcb_s *tcb = this_task();
   unsigned int length;
+  FAR uint8_t *args;
   uintptr_t arg;
-  uint8_t *args;
   va_list ap;
   int i;
 
@@ -893,9 +885,7 @@ void sched_note_dump(uintptr_t ip, uint8_t event,
 
   /* Format the note */
 
-  note_common(tcb, &note->nbi_cmn, length,
-              NOTE_DUMP_BINARY);
-
+  note_common(tcb, &note->nbi_cmn, length, NOTE_DUMP_BINARY);
   sched_note_flatten(note->nbi_ip, &ip, sizeof(uintptr_t));
   note->nbi_event = event;
   memcpy(note->nbi_data, buf, length - sizeof(struct note_binary_s) + 1);
@@ -1132,9 +1122,7 @@ void sched_note_vbprintf(uintptr_t ip, uint8_t event,
 
   /* Format the note */
 
-  note_common(tcb, &note->nbi_cmn, length,
-              NOTE_DUMP_BINARY);
-
+  note_common(tcb, &note->nbi_cmn, length, NOTE_DUMP_BINARY);
   sched_note_flatten(note->nbi_ip, &ip, sizeof(uintptr_t));
   note->nbi_event = event;
 
@@ -1194,8 +1182,8 @@ void sched_note_end(uintptr_t ip)
  *
  ****************************************************************************/
 
-void sched_note_filter_mode(struct note_filter_mode_s *oldm,
-                            struct note_filter_mode_s *newm)
+void sched_note_filter_mode(FAR struct note_filter_mode_s *oldm,
+                            FAR struct note_filter_mode_s *newm)
 {
   irqstate_t irq_mask;
 
@@ -1235,8 +1223,8 @@ void sched_note_filter_mode(struct note_filter_mode_s *oldm,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
-                               struct note_filter_syscall_s *newf)
+void sched_note_filter_syscall(FAR struct note_filter_syscall_s *oldf,
+                               FAR struct note_filter_syscall_s *newf)
 {
   irqstate_t irq_mask;
 
@@ -1281,8 +1269,8 @@ void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-void sched_note_filter_irq(struct note_filter_irq_s *oldf,
-                           struct note_filter_irq_s *newf)
+void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
+                           FAR struct note_filter_irq_s *newf)
 {
   irqstate_t irq_mask;
 
