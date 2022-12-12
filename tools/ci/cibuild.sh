@@ -156,7 +156,8 @@ function bloaty {
     mkdir -p "${tools}"/bloaty
     cmake -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -DCMAKE_SYSTEM_PREFIX_PATH="${tools}"/bloaty
     make install -j 6
-    git clean -xfd
+    cd "${tools}"
+    rm -rf bloaty-src
   fi
 
   command bloaty --version
@@ -249,7 +250,8 @@ function kconfig-frontends {
     # Avoid "aclocal/automake missing" errors
     touch aclocal.m4 Makefile.in
     make install
-    cd "${tools}"/nuttx-tools; git clean -xfd
+    cd "${tools}"
+    rm -rf nuttx-tools
   fi
 }
 
