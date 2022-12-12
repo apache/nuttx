@@ -41,6 +41,7 @@
 /* File System Definitions **************************************************/
 
 #define FILENAME_MAX _POSIX_NAME_MAX
+#define FOPEN_MAX    _POSIX_STREAM_MAX
 
 /* The (default) size of the I/O buffers */
 
