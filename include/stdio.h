@@ -224,7 +224,7 @@ int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 
 FAR FILE *tmpfile(void);
 FAR char *tmpnam(FAR char *s);
-FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
+FAR char *tempnam(FAR const char *dir, FAR const char *pfx) malloc_like;
 int       remove(FAR const char *path);
 
 /* Shell operations.  These are not actually implemented in the OS.  See

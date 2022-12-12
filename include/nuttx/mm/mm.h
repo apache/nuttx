@@ -180,12 +180,12 @@ void kmm_addregion(FAR void *heapstart, size_t heapsize);
 
 /* Functions contained in mm_malloc.c ***************************************/
 
-FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size);
+FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size) malloc_like1(2);
 
 /* Functions contained in kmm_malloc.c **************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void *kmm_malloc(size_t size);
+FAR void *kmm_malloc(size_t size) malloc_like1(1);
 #endif
 
 /* Functions contained in mm_malloc_size.c **********************************/
@@ -211,32 +211,33 @@ void kmm_free(FAR void *mem);
 /* Functions contained in mm_realloc.c **************************************/
 
 FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
-                     size_t size);
+                     size_t size) realloc_like(3);
 
 /* Functions contained in kmm_realloc.c *************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void *kmm_realloc(FAR void *oldmem, size_t newsize);
+FAR void *kmm_realloc(FAR void *oldmem, size_t newsize) realloc_like(2);
 #endif
 
 /* Functions contained in mm_calloc.c ***************************************/
 
-FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size);
+FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n,
+                    size_t elem_size) malloc_like2(2, 3);
 
 /* Functions contained in kmm_calloc.c **************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void *kmm_calloc(size_t n, size_t elem_size);
+FAR void *kmm_calloc(size_t n, size_t elem_size) malloc_like2(1, 2);
 #endif
 
 /* Functions contained in mm_zalloc.c ***************************************/
 
-FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size);
+FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size) malloc_like1(2);
 
 /* Functions contained in kmm_zalloc.c **************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void *kmm_zalloc(size_t size);
+FAR void *kmm_zalloc(size_t size) malloc_like1(1);
 #endif
 
 /* Functions contained in kmm_memdump.c *************************************/
@@ -248,12 +249,12 @@ void kmm_memdump(pid_t pid);
 /* Functions contained in mm_memalign.c *************************************/
 
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
-                      size_t size);
+                      size_t size) malloc_like1(3);
 
 /* Functions contained in kmm_memalign.c ************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void *kmm_memalign(size_t alignment, size_t size);
+FAR void *kmm_memalign(size_t alignment, size_t size) malloc_like1(2);
 #endif
 
 /* Functions contained in mm_heapmember.c ***********************************/

@@ -53,8 +53,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-FAR char  *strdup(FAR const char *s);
-FAR char  *strndup(FAR const char *s, size_t size);
+FAR char  *strdup(FAR const char *s) malloc_like;
+FAR char  *strndup(FAR const char *s, size_t size) malloc_like;
 FAR char  *strerror(int);
 int        strerror_r(int, FAR char *, size_t);
 size_t     strlen(FAR const char *);

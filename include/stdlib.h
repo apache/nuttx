@@ -221,14 +221,14 @@ size_t    wcstombs(FAR char *dst, FAR const wchar_t *src, size_t len);
 
 /* Memory Management */
 
-FAR void *malloc(size_t);
-FAR void *valloc(size_t);
+FAR void *malloc(size_t) malloc_like1(1);
+FAR void *valloc(size_t) malloc_like1(1);
 void      free(FAR void *);
-FAR void *realloc(FAR void *, size_t);
-FAR void *memalign(size_t, size_t);
-FAR void *zalloc(size_t);
-FAR void *calloc(size_t, size_t);
-FAR void *aligned_alloc(size_t, size_t);
+FAR void *realloc(FAR void *, size_t) realloc_like(2);
+FAR void *memalign(size_t, size_t) malloc_like1(2);
+FAR void *zalloc(size_t) malloc_like1(1);
+FAR void *calloc(size_t, size_t) malloc_like2(1, 2);
+FAR void *aligned_alloc(size_t, size_t) malloc_like1(2);
 int       posix_memalign(FAR void **, size_t, size_t);
 
 /* Pseudo-Terminals */

@@ -233,6 +233,20 @@
 #  define used_code __attribute__((used))
 #  define used_data __attribute__((used))
 
+/* The allocation function annonations */
+
+#  if __GNUC__ >= 11
+#    define malloc_like __attribute__((__malloc__(__builtin_free, 1)))
+#    define malloc_like1(a) __attribute__((__malloc__(__builtin_free, 1))) __attribute__((__alloc_size__(a)))
+#    define malloc_like2(a, b) __attribute__((__malloc__(__builtin_free, 1))) __attribute__((__alloc_size__(a, b)))
+#    define realloc_like(a) __attribute__((__alloc_size__(a)))
+#  else
+#    define malloc_like __attribute__((__malloc__))
+#    define malloc_like1(a) __attribute__((__malloc__)) __attribute__((__alloc_size__(a)))
+#    define malloc_like2(a, b) __attribute__((__malloc__)) __attribute__((__alloc_size__(a, b)))
+#    define realloc_like(a) __attribute__((__alloc_size__(a)))
+#  endif
+
 /* Some versions of GCC have a separate __syslog__ format.
  * http://mail-index.netbsd.org/source-changes/2015/10/14/msg069435.html
  * Use it if available. Otherwise, assume __printf__ accepts %m.
@@ -481,6 +495,11 @@
 #  define used_code
 #  define used_data
 
+#  define malloc_like
+#  define malloc_like1(a)
+#  define malloc_like2(a, b)
+#  define realloc_like(a)
+
 #  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
@@ -612,6 +631,10 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define malloc_like
+#  define malloc_like1(a)
+#  define malloc_like2(a, b)
+#  define realloc_like(a)
 #  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
@@ -714,6 +737,10 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define malloc_like
+#  define malloc_like1(a)
+#  define malloc_like2(a, b)
+#  define realloc_like(a)
 #  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
@@ -795,6 +822,10 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define malloc_like
+#  define malloc_like1(a)
+#  define malloc_like2(a, b)
+#  define realloc_like(a)
 #  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
@@ -851,6 +882,10 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define malloc_like
+#  define malloc_like1(a)
+#  define malloc_like2(a, b)
+#  define realloc_like(a)
 #  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
