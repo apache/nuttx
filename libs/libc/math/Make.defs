@@ -27,7 +27,7 @@ CSRCS += lib_coshf.c  lib_expf.c lib_fabsf.c lib_fmodf.c lib_frexpf.c
 CSRCS += lib_ldexpf.c lib_logf.c lib_log10f.c lib_log2f.c lib_modff.c
 CSRCS += lib_powf.c lib_sinf.c lib_sinhf.c lib_sqrtf.c lib_tanf.c
 CSRCS += lib_tanhf.c lib_asinhf.c lib_acoshf.c lib_atanhf.c lib_erff.c
-CSRCS += lib_copysignf.c
+CSRCS += lib_copysignf.c lib_scalbnf.c lib_scalbn.c lib_scalbnl.c
 
 CSRCS += lib_acos.c lib_asin.c lib_atan.c lib_atan2.c lib_cos.c
 CSRCS += lib_cosh.c lib_exp.c lib_fabs.c lib_fmod.c lib_frexp.c
