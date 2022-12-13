@@ -66,10 +66,6 @@
 #define GPIO_SW1       (PIN_EIRQ31_2 | PIN_INT_BOTH)  /* PTD15 */
 #define GPIO_SW2       (PIN_EIRQ5_2  | PIN_INT_BOTH)  /* PTA25 */
 
-/* Count of peripheral clock user configurations */
-
-#define NUM_OF_PERIPHERAL_CLOCKS_0 26
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
