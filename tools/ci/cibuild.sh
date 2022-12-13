@@ -253,7 +253,7 @@ function kconfig-frontends {
 }
 
 function mips-gcc-toolchain {
-  if [ ! -f "${tools}/pinguino-compilers" ]; then
+  if [ ! -d "${tools}/pinguino-compilers" ]; then
     cd "${tools}"
     git clone https://github.com/PinguinoIDE/pinguino-compilers
   fi
