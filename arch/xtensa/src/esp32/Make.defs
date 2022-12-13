@@ -179,6 +179,10 @@ ifeq ($(CONFIG_ESP32_RT_TIMER),y)
 CHIP_CSRCS += esp32_rt_timer.c
 endif
 
+ifeq ($(CONFIG_ESP32_TOUCH),y)
+CHIP_CSRCS += esp32_touch.c
+endif
+
 ifeq ($(CONFIG_ESP32_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32_aes.c
 endif
