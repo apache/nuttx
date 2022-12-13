@@ -464,8 +464,8 @@ unsigned int iob_tailroom(FAR struct iob_s *iob);
  *
  ****************************************************************************/
 
-int iob_clone(FAR struct iob_s *iob1,
-              FAR struct iob_s *iob2, bool throttled);
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2,
+              bool throttled, bool block);
 
 /****************************************************************************
  * Name: iob_concat

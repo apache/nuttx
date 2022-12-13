@@ -267,7 +267,8 @@ Public Function Prototypes
   buffer starting at ``offset`` in the I/O buffer, returning that
   actual number of bytes copied out.
 
-.. c:function:: int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
+.. c:function:: int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, \
+                   bool throttled, bool block);
 
   Duplicate (and pack) the data in ``iob1`` in
   ``iob2``. ``iob2`` must be empty.
