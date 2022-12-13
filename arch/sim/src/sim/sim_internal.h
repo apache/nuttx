@@ -84,6 +84,16 @@
 
 #define sim_savestate(regs) sim_copyfullstate(regs, (xcpt_reg_t *)CURRENT_REGS)
 #define sim_restorestate(regs) (CURRENT_REGS = regs)
+#define sim_fullcontextrestore(restoreregs)                     \
+    do                                                          \
+    {                                                           \
+        xcpt_reg_t *env = restoreregs;                          \
+        uint32_t *flags = (uint32_t *)&env[JB_FLAG];            \
+                                                                \
+        up_irq_restore(((uint64_t)flags[1] << 32) | flags[0]);  \
+        longjmp(env, 1);                                        \
+    }                                                           \
+    while (0)
 
 /* File System Definitions **************************************************/
 
