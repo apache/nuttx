@@ -249,9 +249,11 @@ static bool s32k1xx_rxavailable(struct uart_dev_s *dev);
 #if !defined(SERIAL_HAVE_ONLY_TXDMA)
 static void s32k1xx_txint(struct uart_dev_s *dev, bool enable);
 #endif
-
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool s32k1xx_rxflowcontrol(struct uart_dev_s *dev,
+                                unsigned int nbuffered, bool upper);
+#endif
 static void s32k1xx_send(struct uart_dev_s *dev, int ch);
-
 static bool s32k1xx_txready(struct uart_dev_s *dev);
 #ifdef SERIAL_HAVE_TXDMA
 static void s32k1xx_dma_send(struct uart_dev_s *dev);
@@ -306,7 +308,7 @@ static const struct uart_ops_s g_lpuart_ops =
   .rxint          = s32k1xx_rxint,
   .rxavailable    = s32k1xx_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = NULL,
+  .rxflowcontrol  = s32k1xx_rxflowcontrol,
 #endif
   .send           = s32k1xx_send,
   .txint          = s32k1xx_txint,
@@ -326,6 +328,9 @@ static const struct uart_ops_s g_lpuart_rxtxdma_ops =
   .receive        = s32k1xx_dma_receive,
   .rxint          = s32k1xx_dma_rxint,
   .rxavailable    = s32k1xx_dma_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = s32k1xx_rxflowcontrol,
+#endif
   .send           = s32k1xx_send,
   .txint          = s32k1xx_dma_txint,
   .txready        = s32k1xx_txready,
@@ -345,6 +350,9 @@ static const struct uart_ops_s g_lpuart_rxdma_ops =
   .receive        = s32k1xx_dma_receive,
   .rxint          = s32k1xx_dma_rxint,
   .rxavailable    = s32k1xx_dma_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = s32k1xx_rxflowcontrol,
+#endif
   .send           = s32k1xx_send,
   .txint          = s32k1xx_txint,
   .txready        = s32k1xx_txready,
@@ -363,6 +371,9 @@ static const struct uart_ops_s g_lpuart_txdma_ops =
     .receive        = s32k1xx_receive,
     .rxint          = s32k1xx_rxint,
     .rxavailable    = s32k1xx_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = s32k1xx_rxflowcontrol,
+#endif
     .send           = s32k1xx_send,
     .txint          = s32k1xx_dma_txint,
     .txready        = s32k1xx_txready,
@@ -855,7 +866,13 @@ static int s32k1xx_setup(struct uart_dev_s *dev)
   config.usects     = priv->iflow;      /* Flow control on inbound side */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  config.userts     = priv->oflow;      /* Flow control on outbound side */
+  /* Flow control on outbound side if not GPIO based */
+
+  if ((priv->rts_gpio & _PIN_MODE_MASK) != _PIN_MODE_GPIO)
+    {
+      config.userts = priv->oflow;
+    }
+
 #endif
 #ifdef CONFIG_SERIAL_RS485CONTROL
   config.users485   = priv->rs485mode;  /* Switch into RS485 mode */
@@ -1460,6 +1477,102 @@ static bool s32k1xx_rxavailable(struct uart_dev_s *dev)
 
   regval = s32k1xx_serialin(priv, S32K1XX_LPUART_STAT_OFFSET);
   return ((regval & LPUART_STAT_RDRF) != 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: s32k1xx_rxflowcontrol
+ *
+ * Description:
+ *   Called when Rx buffer is full (or exceeds configured watermark levels
+ *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data
+ *
+ * Input Parameters:
+ *   dev       - UART device instance
+ *   nbuffered - the number of characters currently buffered
+ *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
+ *               not defined the value will be 0 for an empty buffer or the
+ *               defined buffer size for a full buffer)
+ *   upper     - true indicates the upper watermark was crossed where
+ *               false indicates the lower watermark has been crossed
+ *
+ * Returned Value:
+ *   true if RX flow control activated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool s32k1xx_rxflowcontrol(struct uart_dev_s *dev,
+                             unsigned int nbuffered, bool upper)
+{
+  struct s32k1xx_uart_s *priv = (struct s32k1xx_uart_s *)dev;
+  bool use_swhs = false;
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS)
+  use_swhs = (priv->rts_gpio & _PIN_MODE_MASK) == _PIN_MODE_GPIO;
+#endif
+
+  if (use_swhs && priv->iflow && (priv->rts_gpio != 0))
+    {
+      /* Assert/de-assert nRTS set it high resume/stop sending */
+
+      s32k1xx_gpiowrite(priv->rts_gpio, upper);
+
+      if (upper)
+        {
+          /* With heavy Rx traffic, RXNE might be set and data pending.
+           * Returning 'true' in such case would cause RXNE left unhandled
+           * and causing interrupt storm. Sending end might be also be slow
+           * to react on nRTS, and returning 'true' here would prevent
+           * processing that data.
+           *
+           * Therefore, return 'false' so input data is still being processed
+           * until sending end reacts on nRTS signal and stops sending more.
+           */
+
+          return false;
+        }
+
+      return upper;
+    }
+  else
+    {
+      /* Is the RX buffer full? */
+
+      if (upper)
+        {
+          /* Disable Rx interrupt to prevent more data being from
+           * peripheral.  When hardware RTS is enabled, this will
+           * prevent more data from coming in.
+           *
+           * This function is only called when UART recv buffer is full,
+           * that is: "dev->recv.head + 1 == dev->recv.tail".
+           *
+           * Logic in "uart_read" will automatically toggle Rx interrupts
+           * when buffer is read empty and thus we do not have to re-
+           * enable Rx interrupts.
+           */
+
+          uart_disablerxint(dev);
+          return true;
+        }
+
+      /* No.. The RX buffer is empty */
+
+      else
+        {
+          /* We might leave Rx interrupt disabled if full recv buffer was
+           * read empty.  Enable Rx interrupt to make sure that more input is
+           * received.
+           */
+
+          uart_enablerxint(dev);
+        }
+    }
+
+  return false;
 }
 #endif
 
