@@ -1242,19 +1242,17 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
 static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
                             FAR struct arpreq *req)
 {
-  FAR struct net_driver_s *dev;
-  FAR struct sockaddr_in  *addr;
+  FAR struct net_driver_s *dev  = NULL;
+  FAR struct sockaddr_in  *addr = NULL;
   int ret;
 
-  if (req == NULL)
+  if (req != NULL)
     {
-      return -EINVAL;
+      addr = (FAR struct sockaddr_in *)&req->arp_pa;
+      dev  = req->arp_dev[0] ?
+             netdev_findbyname((FAR const char *)req->arp_dev) :
+             netdev_findby_ripv4addr(INADDR_ANY, addr->sin_addr.s_addr);
     }
-
-  addr = (FAR struct sockaddr_in *)&req->arp_pa;
-  dev  = req->arp_dev[0] ?
-         netdev_findbyname((FAR const char *)req->arp_dev) :
-         netdev_findby_ripv4addr(INADDR_ANY, addr->sin_addr.s_addr);
 
   /* Execute the command */
 
@@ -1262,7 +1260,8 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
     {
       case SIOCSARP:  /* Set an ARP mapping */
         {
-          if (dev != NULL && req->arp_pa.sa_family == AF_INET &&
+          if (dev != NULL && req != NULL &&
+              req->arp_pa.sa_family == AF_INET &&
               req->arp_ha.sa_family == ARPHRD_ETHER)
             {
               /* Update any existing ARP table entry for this protocol
@@ -1281,7 +1280,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCDARP:  /* Delete an ARP mapping */
         {
-          if (dev != NULL && req->arp_pa.sa_family == AF_INET)
+          if (dev != NULL && req != NULL && req->arp_pa.sa_family == AF_INET)
             {
               /* Delete the ARP entry for this protocol address. */
 
@@ -1296,7 +1295,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGARP:  /* Get an ARP mapping */
         {
-          if (req->arp_pa.sa_family == AF_INET)
+          if (req != NULL && req->arp_pa.sa_family == AF_INET)
             {
               ret = arp_find(addr->sin_addr.s_addr,
                             (FAR uint8_t *)req->arp_ha.sa_data, dev);
