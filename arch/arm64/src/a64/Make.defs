@@ -23,4 +23,8 @@ include common/Make.defs
 # Allwinner A64 specific C source files
 CHIP_CSRCS  = a64_boot.c a64_pio.c a64_serial.c
 
+ifeq ($(CONFIG_A64_MIPI_DSI),y)
+CHIP_CSRCS += a64_mipi_dphy.c a64_mipi_dsi.c mipi_dsi.c
+endif
+
 CHIP_ASRCS  = a64_lowputc.S

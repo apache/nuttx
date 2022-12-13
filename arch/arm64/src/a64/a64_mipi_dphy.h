@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/a64/hardware/a64_memorymap.h
+ * arch/arm64/src/a64/a64_mipi_dphy.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,34 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H
-#define __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H
+#ifndef __ARCH_ARM64_SRC_A64_A64_MIPI_DPHY_H
+#define __ARCH_ARM64_SRC_A64_A64_MIPI_DPHY_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/a64_memorymap.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Peripheral Base Addresses */
-
-#define A64_CCU_ADDR        0x01c20000 /* CCU             0x01c2:0000-0x01c2:03ff 1K */
-#define A64_PIO_ADDR        0x01c20800 /* PIO             0x01c2:0800-0x01c2:0bff 1K */
-#define A64_DSI_ADDR        0x01ca0000 /* MIPI DSI        0x01ca:0000-0x01ca:0fff 4K */
-#define A64_DPHY_ADDR       0x01ca1000 /* MIPI DSI-PHY    0x01ca:1000-0x01ca:1fff 4K */
-#define A64_RPIO_ADDR       0x01f02c00 /* R_PIO           0x01f0:2c00-0x01f0:2fff 1K */
-
-/****************************************************************************
- * Public Types
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: a64_mipi_dphy_enable
+ *
+ * Description:
+ *   Enable MIPI Display Physical Layer (D-PHY).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK is always returned at present.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
+int a64_mipi_dphy_enable(void);
 
-#endif /* __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H */
+#endif /* __ARCH_ARM64_SRC_A64_A64_MIPI_DPHY_H */
