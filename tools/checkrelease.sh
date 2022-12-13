@@ -21,7 +21,7 @@
 
 RETURN_CODE=0
 
-BASE_URL="https://dist.apache.org/repos/dist/dev/incubator/nuttx"
+BASE_URL="https://dist.apache.org/repos/dist/dev/nuttx"
 TEMPDIR="/tmp/nuttx-checkrelease"
 KEY="$BASE_URL/KEYS"
 
@@ -171,7 +171,7 @@ function usage() {
     echo "Examples:"
     echo
     echo "  $0 --release 9.1.0-RC1"
-    echo "  $0 --url https://dist.apache.org/repos/dist/dev/incubator/nuttx/9.1.0-RC1"
+    echo "  $0 --url https://dist.apache.org/repos/dist/dev/nuttx/9.1.0-RC1"
     echo "  $0 --dir ./some-dir-that-has-nuttx-and-apps"
     echo
 }
