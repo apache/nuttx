@@ -48,11 +48,8 @@ void *sim_doirq(int irq, void *context)
    * CURRENT_REGS is also used to manage interrupt level context switches.
    */
 
-#ifdef CONFIG_SMP
-  if (setjmp(regs) == 0)
+  if (sim_saveusercontext(regs) == 0)
     {
-#endif
-
       CURRENT_REGS = regs;
 
       /* Deliver the IRQ */
@@ -74,12 +71,10 @@ void *sim_doirq(int irq, void *context)
 
       CURRENT_REGS = NULL;
 
-#ifdef CONFIG_SMP
       /* Then switch contexts */
 
-      longjmp(regs, 1);
+      sim_fullcontextrestore(regs);
     }
-#endif
 
   return regs;
 }

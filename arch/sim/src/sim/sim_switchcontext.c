@@ -31,7 +31,6 @@
 #include <nuttx/sched.h>
 
 #include "clock/clock.h"
-#include "sched/sched.h"
 #include "sim_internal.h"
 
 /****************************************************************************
@@ -84,11 +83,11 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     }
 
   /* Copy the exception context into the TCB of the task that was
-   * previously active.  if setjmp returns a non-zero value, then
-   * this is really the previously running task restarting!
+   * previously active.  if sim_saveusercontext returns a non-zero value,
+   * then this is really the previously running task restarting!
    */
 
-  else if (!setjmp(rtcb->xcp.regs))
+  else if (!sim_saveusercontext(rtcb->xcp.regs))
     {
       sinfo("New Active Task TCB=%p\n", tcb);
 
@@ -102,7 +101,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      longjmp(tcb->xcp.regs, 1);
+      sim_fullcontextrestore(tcb->xcp.regs);
     }
   else
     {

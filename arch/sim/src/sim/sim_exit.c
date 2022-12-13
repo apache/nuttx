@@ -31,6 +31,7 @@
 
 #include "task/task.h"
 #include "sched/sched.h"
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -82,7 +83,7 @@ void up_exit(int status)
 
   /* Then switch contexts */
 
-  longjmp(tcb->xcp.regs, 1);
+  sim_fullcontextrestore(tcb->xcp.regs);
 
   /* The function does not return */
 
