@@ -539,6 +539,136 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOGET_VSCREENINFO:
+        {
+          struct fb_videoinfo_s vinfo;
+          struct fb_planeinfo_s pinfo;
+          FAR struct fb_var_screeninfo *varinfo =
+            (FAR struct fb_var_screeninfo *)((uintptr_t)arg);
+
+          DEBUGASSERT(varinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->getvideoinfo != NULL &&
+                      fb->vtable->getplaneinfo != NULL);
+          ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          memset(varinfo, 0, sizeof(struct fb_var_screeninfo));
+          varinfo->xres           = vinfo.xres;
+          varinfo->yres           = vinfo.yres;
+          varinfo->xres_virtual   = pinfo.xres_virtual;
+          varinfo->yres_virtual   = pinfo.yres_virtual;
+          varinfo->xoffset        = pinfo.xoffset;
+          varinfo->yoffset        = pinfo.yoffset;
+          varinfo->bits_per_pixel = pinfo.bpp;
+          varinfo->grayscale      = FB_ISMONO(vinfo.fmt);
+          switch (vinfo.fmt)
+            {
+              case FB_FMT_Y1:
+                varinfo->red.offset    = 0;
+                varinfo->green.offset  = 0;
+                varinfo->blue.offset   = 0;
+                varinfo->red.length    = 1;
+                varinfo->green.length  = 1;
+                varinfo->blue.length   = 1;
+                break;
+
+              case FB_FMT_Y8:
+                varinfo->red.offset    = 0;
+                varinfo->green.offset  = 0;
+                varinfo->blue.offset   = 0;
+                varinfo->red.length    = 8;
+                varinfo->green.length  = 8;
+                varinfo->blue.length   = 8;
+                break;
+
+              case FB_FMT_RGB16_555:
+                varinfo->red.offset    = 10;
+                varinfo->green.offset  = 5;
+                varinfo->blue.offset   = 0;
+                varinfo->red.length    = 5;
+                varinfo->green.length  = 5;
+                varinfo->blue.length   = 5;
+                break;
+
+              case FB_FMT_RGB16_565:
+                varinfo->red.offset    = 11;
+                varinfo->green.offset  = 5;
+                varinfo->blue.offset   = 0;
+                varinfo->red.length    = 5;
+                varinfo->green.length  = 6;
+                varinfo->blue.length   = 5;
+                break;
+
+              case FB_FMT_RGB24:
+              case FB_FMT_RGB32:
+                varinfo->red.offset    = 16;
+                varinfo->green.offset  = 8;
+                varinfo->blue.offset   = 0;
+                varinfo->red.length    = 8;
+                varinfo->green.length  = 8;
+                varinfo->blue.length   = 8;
+                break;
+
+              case FB_FMT_RGBA32:
+                varinfo->red.offset    = 16;
+                varinfo->green.offset  = 8;
+                varinfo->blue.offset   = 0;
+                varinfo->transp.offset = 24;
+                varinfo->red.length    = 8;
+                varinfo->green.length  = 8;
+                varinfo->blue.length   = 8;
+                varinfo->transp.length = 8;
+                break;
+          }
+        }
+        break;
+
+      case FBIOGET_FSCREENINFO:
+        {
+          struct fb_videoinfo_s vinfo;
+          struct fb_planeinfo_s pinfo;
+          FAR struct fb_fix_screeninfo *fixinfo =
+            (FAR struct fb_fix_screeninfo *)((uintptr_t)arg);
+
+          DEBUGASSERT(fixinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->getvideoinfo != NULL &&
+                      fb->vtable->getplaneinfo != NULL);
+          ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          memset(fixinfo, 0, sizeof(struct fb_fix_screeninfo));
+#ifdef CONFIG_FB_MODULEINFO
+          strlcpy(fixinfo->id, vinfo.moduleinfo, sizeof(fixinfo->id));
+#endif
+          fixinfo->smem_start  = (unsigned long)pinfo.fbmem;
+          fixinfo->smem_len    = pinfo.fblen;
+          fixinfo->type        = FB_ISYUVPLANAR(vinfo.fmt) ?
+                                 FB_TYPE_INTERLEAVED_PLANES :
+                                 FB_TYPE_PACKED_PIXELS;
+          fixinfo->visual      = FB_ISMONO(vinfo.fmt) ?
+                                 FB_VISUAL_MONO10 : FB_VISUAL_TRUECOLOR;
+          fixinfo->line_length = pinfo.stride;
+        }
+        break;
+
       default:
         gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
         ret = -ENOTTY;
