@@ -53,7 +53,8 @@
  *
  ****************************************************************************/
 
-int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2,
+              bool throttled, bool block)
 {
   FAR uint8_t *src;
   FAR uint8_t *dest;
@@ -145,7 +146,15 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled)
            * destination I/O buffer chain.
            */
 
-          next = iob_alloc(throttled);
+          if (block)
+            {
+              next = iob_alloc(throttled);
+            }
+          else
+            {
+              next = iob_tryalloc(throttled);
+            }
+
           if (!next)
             {
               ioberr("ERROR: Failed to allocate an I/O buffer\n");
