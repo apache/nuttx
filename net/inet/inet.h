@@ -162,6 +162,38 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 #endif
 
 /****************************************************************************
+ * Name: ipv4_getsockopt
+ *
+ * Description:
+ *   ipv4_getsockopt() retrieve the value for the option specified by the
+ *   'option' argument for the socket specified by the 'psock' argument.  If
+ *   the size of the option value is greater than 'value_len', the value
+ *   stored in the object pointed to by the 'value' argument will be silently
+ *   truncated. Otherwise, the length pointed to by the 'value_len' argument
+ *   will be modified to indicate the actual length of the 'value'.
+ *
+ *   See <netinet/in.h> for the a complete list of values of IPv4 protocol
+ *   socket options.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_getsockopt() for
+ *   the list of possible error values.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int ipv4_getsockopt(FAR struct socket *psock, int option,
+                    FAR void *value, FAR socklen_t *value_len);
+#endif
+
+/****************************************************************************
  * Name: ipv4_getsockname and ipv6_sockname
  *
  * Description:
