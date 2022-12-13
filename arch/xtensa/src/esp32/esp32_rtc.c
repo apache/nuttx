@@ -35,6 +35,7 @@
 #include "esp32_rt_timer.h"
 
 #include "hardware/esp32_rtccntl.h"
+#include "hardware/esp32_rtc_io.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_i2s.h"
 
@@ -260,7 +261,6 @@ static void IRAM_ATTR esp32_rtc_clk_slow_freq_set(
 static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk);
 static void esp32_rtc_clk_32k_enable(int ac, int res, int bias);
 static void IRAM_ATTR esp32_rtc_clk_8m_enable(bool clk_8m_en, bool d256_en);
-static uint32_t IRAM_ATTR esp32_rtc_clk_slow_freq_get_hz(void);
 
 #ifdef CONFIG_RTC_ALARM
 static void IRAM_ATTR esp32_rt_cb_handler(void *arg);
@@ -611,39 +611,6 @@ static void IRAM_ATTR esp32_rtc_clk_8m_enable(bool clk_8m_en, bool d256_en)
 }
 
 /****************************************************************************
- * Name: esp32_rtc_clk_slow_freq_get_hz
- *
- * Description:
- *   Get the approximate frequency of RTC_SLOW_CLK, in Hz
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   slow_clk_freq - RTC_SLOW_CLK frequency, in Hz
- *
- ****************************************************************************/
-
-static uint32_t IRAM_ATTR esp32_rtc_clk_slow_freq_get_hz(void)
-{
-  enum esp32_rtc_slow_freq_e slow_clk_freq =
-              REG_GET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_ANA_CLK_RTC_SEL);
-  switch (slow_clk_freq)
-    {
-      case RTC_SLOW_FREQ_RTC:
-        return RTC_SLOW_CLK_FREQ_150K;
-
-      case RTC_SLOW_FREQ_32K_XTAL:
-        return RTC_SLOW_CLK_FREQ_32K;
-
-      case RTC_SLOW_FREQ_8MD256:
-        return RTC_SLOW_CLK_FREQ_8MD256;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: esp32_select_rtc_slow_clk
  *
  * Description:
@@ -781,6 +748,58 @@ static void IRAM_ATTR esp32_rt_cb_handler(void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_rtc_clk_slow_freq_get_hz
+ *
+ * Description:
+ *   Get the approximate frequency of RTC_SLOW_CLK, in Hz
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   slow_clk_freq - RTC_SLOW_CLK frequency, in Hz
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32_rtc_clk_slow_freq_get_hz(void)
+{
+  enum esp32_rtc_slow_freq_e slow_clk_freq =
+              REG_GET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_ANA_CLK_RTC_SEL);
+  switch (slow_clk_freq)
+    {
+      case RTC_SLOW_FREQ_RTC:
+        return RTC_SLOW_CLK_FREQ_150K;
+
+      case RTC_SLOW_FREQ_32K_XTAL:
+        return RTC_SLOW_CLK_FREQ_32K;
+
+      case RTC_SLOW_FREQ_8MD256:
+        return RTC_SLOW_CLK_FREQ_8MD256;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_rtc_clk_fast_freq_get_hz
+ *
+ * Description:
+ *   Get fast_clk_rtc source in Hz.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The clock source in Hz.
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32_rtc_clk_fast_freq_get_hz(void)
+{
+  return RTC_FAST_CLK_FREQ_APPROX;
+}
 
 /****************************************************************************
  * Name: esp32_rtc_get_slow_clk_rtc
