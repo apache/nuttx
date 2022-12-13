@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/crc16.h
+ * arch/arm64/src/a64/a64_mipi_dsi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,82 +18,88 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CRC16_H
-#define __INCLUDE_NUTTX_CRC16_H
+#ifndef __ARCH_ARM64_SRC_A64_A64_MIPI_DSI_H
+#define __ARCH_ARM64_SRC_A64_A64_MIPI_DSI_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <stdint.h>
+#include <nuttx/config.h>
+#include "hardware/a64_memorymap.h"
+#include "mipi_dsi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Append full suffix to avoid the penitential symbol collision */
+/* Virtual Channel to be used for data transfer on the MIPI DSI Bus */
 
-#define crc16   crc16full
+#define A64_MIPI_DSI_VIRTUAL_CHANNEL 0
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Name: crc16part
+ * Name: a64_mipi_dsi_enable
  *
  * Description:
- *   Continue CRC calculation on a part of the buffer.
+ *   Enable the MIPI DSI Block on the SoC. Should be called before
+ *   transferring data on the MIPI DSI Bus.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK is always returned at present.
  *
  ****************************************************************************/
 
-uint16_t crc16part(FAR const uint8_t *src, size_t len, uint16_t crc16val);
+int a64_mipi_dsi_enable(void);
 
 /****************************************************************************
- * Name: crc16
+ * Name: a64_mipi_dsi_write
  *
  * Description:
- *   Return a 16-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   Transmit the payload data to the MIPI DSI Bus as a MIPI DSI Short or
+ *   Long Packet. This function is called to initialize the LCD Controller.
+ *   Assumes that the MIPI DSI Block has been enabled on the SoC.
+ *
+ * Input Parameters:
+ *   channel - Virtual Channel
+ *   cmd     - DCS Command (Data Type)
+ *   txbuf   - Payload data for the packet
+ *   txlen   - Length of payload data (Max 65541 bytes)
+ *
+ * Returned Value:
+ *   Number of bytes transmitted; a negated errno value is returned on any
+ *   failure.
  *
  ****************************************************************************/
 
-uint16_t crc16(FAR const uint8_t *src, size_t len);
+ssize_t a64_mipi_dsi_write(uint8_t channel,
+                           enum mipi_dsi_e cmd,
+                           FAR const uint8_t *txbuf,
+                           size_t txlen);
 
 /****************************************************************************
- * Name: crc16ccittpart
+ * Name: a64_mipi_dsi_start
  *
  * Description:
- *   Continue 16-bit CRC-CCITT calculation on a part of the buffer using the
- *   polynomial x^16+x^12+x^5+1.
+ *   Start the MIPI DSI Bus in High Speed Clock Mode (HSC) for High Speed
+ *   Data Transmission (HSD). Should be called after initializing the LCD
+ *   Controller, and before executing any Display Engine operations.
+ *   Assumes that the MIPI DSI Block has been enabled on the SoC.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK is always returned at present.
  *
  ****************************************************************************/
 
-uint16_t crc16ccittpart(FAR const uint8_t *src, size_t len,
-                        uint16_t crc16val);
+int a64_mipi_dsi_start(void);
 
-/****************************************************************************
- * Name: crc16ccitt
- *
- * Description:
- *   Return a 16-bit CRC-CCITT of the contents of the 'src' buffer, length
- *   'len' using the polynomial x^16+x^12+x^5+1.
- *
- ****************************************************************************/
-
-uint16_t crc16ccitt(FAR const uint8_t *src, size_t len);
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __INCLUDE_NUTTX_CRC16_H */
+#endif /* __ARCH_ARM64_SRC_A64_A64_MIPI_DSI_H */
