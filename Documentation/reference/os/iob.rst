@@ -170,6 +170,7 @@ Public Function Prototypes
   - :c:func:`iob_trycopyin()`
   - :c:func:`iob_copyout()`
   - :c:func:`iob_clone()`
+  - :c:func:`iob_clone_partial()`
   - :c:func:`iob_concat()`
   - :c:func:`iob_trimhead()`
   - :c:func:`iob_trimhead_queue()`
@@ -272,6 +273,12 @@ Public Function Prototypes
 
   Duplicate (and pack) the data in ``iob1`` in
   ``iob2``. ``iob2`` must be empty.
+
+.. c:function:: int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len, \
+                      unsigned int offset1, FAR struct iob_s *iob2, \
+                      unsigned int offset2, bool throttled, bool block);
+
+  Duplicate the data from partial bytes of ``iob1`` to ``iob2``
 
 .. c:function:: void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 
