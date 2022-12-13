@@ -60,6 +60,18 @@
 #define IPT_TARGET(e) \
   ((FAR struct xt_entry_target *)((FAR uint8_t *)(e) + (e)->target_offset))
 
+/* Auto fill common fields of entry and target. */
+
+#define IPT_FILL_ENTRY(e, target_name) \
+  do \
+    { \
+      (e)->entry.target_offset = sizeof((e)->entry); \
+      (e)->entry.next_offset = sizeof(*(e)); \
+      (e)->target.target.u.target_size = sizeof(*(e)) - sizeof((e)->entry); \
+      strcpy((e)->target.target.u.user.name, (target_name)); \
+    } \
+  while(0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

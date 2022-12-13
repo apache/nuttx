@@ -739,19 +739,23 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
 static int inet_getsockopt(FAR struct socket *psock, int level, int option,
                            FAR void *value, FAR socklen_t *value_len)
 {
-  if (level == SOL_SOCKET)
+  switch (level)
     {
-      return inet_get_socketlevel_option(psock, option, value, value_len);
-    }
+      case SOL_SOCKET:
+        return inet_get_socketlevel_option(psock, option, value, value_len);
+
 #ifdef CONFIG_NET_TCPPROTO_OPTIONS
-  else if (level == IPPROTO_TCP)
-    {
-      return tcp_getsockopt(psock, option, value, value_len);
-    }
+      case IPPROTO_TCP:
+        return tcp_getsockopt(psock, option, value, value_len);
 #endif
-  else
-    {
-      return -ENOPROTOOPT;
+
+#ifdef CONFIG_NET_IPv4
+      case IPPROTO_IP:
+        return ipv4_getsockopt(psock, option, value, value_len);
+#endif
+
+      default:
+        return -ENOPROTOOPT;
     }
 }
 
