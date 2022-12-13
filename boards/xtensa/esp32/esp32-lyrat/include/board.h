@@ -43,14 +43,24 @@
 
 /* Button definitions *******************************************************/
 
-/* Board supports six buttons (2 push buttons and 4 touch buttons). */
+#define BUTTON_BTN1                 0 /* BUTTON_REC    */
+#define BUTTON_BTN1_BIT             (1 << BUTTON_BTN1)
+#define BUTTON_BTN2                 1 /* BUTTON_MODE   */
+#define BUTTON_BTN2_BIT             (1 << BUTTON_BTN2)
 
-#define BUTTON_BTN1      0
-#define BUTTON_BTN2      1
-#define NUM_BUTTONS      2
-
-#define BUTTON_BTN1_BIT  (1 << BUTTON_BTN1)
-#define BUTTON_BTN2_BIT  (1 << BUTTON_BTN2)
+#ifdef CONFIG_ESP32_TOUCH
+#  define BUTTON_BTN3               2 /* TOUCHPAD_PLAY */
+#  define BUTTON_BTN3_BIT           (1 << BUTTON_BTN3)
+#  define BUTTON_BTN4               3 /* TOUCHPAD_SET  */
+#  define BUTTON_BTN4_BIT           (1 << BUTTON_BTN4)
+#  define BUTTON_BTN5               4 /* TOUCHPAD_VOLM */
+#  define BUTTON_BTN5_BIT           (1 << BUTTON_BTN5)
+#  define BUTTON_BTN6               5 /* TOUCHPAD_VOLP */
+#  define BUTTON_BTN6_BIT           (1 << BUTTON_BTN6)
+#  define NUM_BUTTONS               6
+#else
+#  define NUM_BUTTONS               2
+#endif
 
 /* GPIO definitions *********************************************************/
 
