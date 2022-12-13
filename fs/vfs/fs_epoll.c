@@ -192,6 +192,7 @@ static int epoll_do_close(FAR struct file *filep)
 
       list_for_every_entry_safe(&eph->extend, epn, tmp, epoll_node_t, node)
         {
+          list_delete(&epn->node);
           kmm_free(epn);
         }
 
