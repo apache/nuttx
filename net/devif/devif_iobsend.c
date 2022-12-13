@@ -58,7 +58,6 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 {
   unsigned int limit = NETDEV_PKTSIZE(dev) -
                        NET_LL_HDRLEN(dev) - target_offset;
-  unsigned int copyin;
   int ret;
 
   if (dev == NULL || len == 0 || len > limit)
@@ -77,50 +76,26 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 
   if (dev->d_iob != NULL)
     {
+      dev->d_sndlen = 0;
+
       if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE)
         {
-          dev->d_sndlen = 0;
           return;
         }
 
-      /* Skip the l3/l4 offset before append */
+      /* Clone the iob to target device buffer */
 
-      iob_update_pktlen(dev->d_iob, target_offset);
-
-      /* Skip to the I/O buffer containing the data offset */
-
-      while (iob != NULL && offset > iob->io_len)
+      ret = iob_clone_partial(iob, len, offset, dev->d_iob,
+                              target_offset, false, false);
+      if (ret != OK)
         {
-          offset -= iob->io_len;
-          iob     = iob->io_flink;
+          netdev_iob_release(dev);
+          nerr("devif_iob_send error, not enough iob entries, "
+              "send len: %u\n", len);
+          return;
         }
 
       dev->d_sndlen = len;
-
-      /* Clone the iob to target device buffer */
-
-      while (iob != NULL && len > 0)
-        {
-          copyin = (len > iob->io_len - offset) ?
-                   iob->io_len - offset : len;
-
-          ret = iob_trycopyin(dev->d_iob, iob->io_data +
-                              iob->io_offset + offset,
-                              copyin, target_offset, false);
-          if (ret != copyin)
-            {
-              netdev_iob_release(dev);
-              dev->d_sndlen = 0;
-              nerr("devif_iob_send error, not enough iob entries, "
-                   "send len: %u\n", len);
-              return;
-            }
-
-          target_offset  += copyin;
-          len            -= copyin;
-          offset          = 0;
-          iob             = iob->io_flink;
-        }
     }
   else
     {
