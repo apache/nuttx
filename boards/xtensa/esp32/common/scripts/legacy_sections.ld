@@ -18,6 +18,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /* Default entry point: */
 
 ENTRY(__start);
@@ -71,6 +73,9 @@ SECTIONS
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
     *librtc.a:(.literal .text .literal.* .text.*)
+#ifdef CONFIG_STACK_CANARIES
+    *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
+#endif
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_copystate.*(.literal .text .literal.* .text.*)
@@ -130,6 +135,9 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+#ifdef CONFIG_STACK_CANARIES
+    *libc.a:lib_stackchk.*(.bss  .bss.*  COMMON)
+#endif
     *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
     *libarch.a:xtensa_cpupause.*(.bss  .bss.*  COMMON)
     *libarch.a:xtensa_copystate.*(.bss  .bss.*  COMMON)
@@ -183,6 +191,9 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     *libphy.a:(.rodata  .rodata.*)
+#ifdef CONFIG_STACK_CANARIES
+    *libc.a:lib_stackchk.*(.rodata  .rodata.*)
+#endif
     *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     *libarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
     *libarch.a:xtensa_copystate.*(.rodata  .rodata.*)
