@@ -37,6 +37,7 @@
 #include <arch/irq.h>
 
 #include "esp32_gpio.h"
+#include "esp32_touch.h"
 
 #include "esp32-lyrat.h"
 
@@ -48,14 +49,77 @@
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
+#define TOUCHPAD_REFH               (TOUCH_HVOLT_2V7)
+#define TOUCHPAD_REFL               (TOUCH_LVOLT_0V5)
+#define TOUCHPAD_ATTEN              (TOUCH_HVOLT_ATTEN_1V)
+#define TOUCHPAD_SLOPE              (TOUCH_SLOPE_7)
+#define TOUCHPAD_TIE_OPT            (TOUCH_TIE_OPT_LOW)
+#define TOUCHPAD_FSM_MODE           (TOUCH_FSM_MODE_SW)
+#define TOUCHPAD_INTR_THR           (450)
+#define TOUCHPAD_LOGIC_THR          (450)
+#define TOUCHPAD_FILTER_PERIOD      (10)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+typedef struct
+{
+  bool is_touchpad;
+  union
+  {
+    int channel;
+    int gpio;
+  };
+} button_type_t;
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const int g_buttons[] =
+#ifdef CONFIG_ESP32_TOUCH
+static const struct touch_config_s tp_config =
 {
-  BUTTON_REC,
-  BUTTON_MODE
+  .refh = TOUCHPAD_REFH,
+  .refl = TOUCHPAD_REFL,
+  .atten = TOUCHPAD_ATTEN,
+  .slope = TOUCHPAD_SLOPE,
+  .tie_opt = TOUCHPAD_TIE_OPT,
+  .fsm_mode = TOUCHPAD_FSM_MODE,
+  .interrupt_threshold = TOUCHPAD_INTR_THR,
+  .logic_threshold = TOUCHPAD_LOGIC_THR,
+  .filter_period = TOUCHPAD_FILTER_PERIOD
+};
+#endif
+
+static const button_type_t g_buttons[] =
+{
+  {
+    .is_touchpad = false,
+    .gpio = BUTTON_REC
+  },
+  {
+    .is_touchpad = false,
+    .gpio = BUTTON_MODE
+  },
+#ifdef CONFIG_ESP32_TOUCH
+  {
+    .is_touchpad = true,
+    .channel = BUTTON_PLAY_TP_CHANNEL
+  },
+  {
+    .is_touchpad = true,
+    .channel = BUTTON_SET_TP_CHANNEL
+  },
+  {
+    .is_touchpad = true,
+    .channel = BUTTON_VOLM_TP_CHANNEL
+  },
+  {
+    .is_touchpad = true,
+    .channel = BUTTON_VOLP_TP_CHANNEL
+  },
+#endif
 };
 
 /****************************************************************************
@@ -77,6 +141,12 @@ uint32_t board_button_initialize(void)
 {
   /* GPIOs 36 and 39 do not support PULLUP/PULLDOWN */
 
+#ifdef CONFIG_ESP32_TOUCH
+  esp32_configtouch(BUTTON_PLAY_TP_CHANNEL, tp_config);
+  esp32_configtouch(BUTTON_SET_TP_CHANNEL, tp_config);
+  esp32_configtouch(BUTTON_VOLM_TP_CHANNEL, tp_config);
+  esp32_configtouch(BUTTON_VOLP_TP_CHANNEL, tp_config);
+#endif
   esp32_configgpio(BUTTON_MODE, INPUT_FUNCTION_3);
   esp32_configgpio(BUTTON_REC, INPUT_FUNCTION_3);
   return NUM_BUTTONS;
@@ -96,20 +166,39 @@ uint32_t board_button_initialize(void)
 uint32_t board_buttons(void)
 {
   uint8_t ret = 0;
-  int n = 0;
+  bool b0;
+  bool b1;
+  int n;
 
   for (uint8_t btn_id = 0; btn_id < ARRAY_SIZE(g_buttons); btn_id++)
     {
       iinfo("Reading button %d\n", btn_id);
 
-      const int button_gpio = g_buttons[btn_id];
-      bool b0 = esp32_gpioread(button_gpio);
+      const button_type_t button_info = g_buttons[btn_id];
+
+      if (button_info.is_touchpad)
+        {
+          b0 = esp32_touchread(button_info.channel);
+        }
+      else
+        {
+          b0 = esp32_gpioread(button_info.gpio);
+        }
+
+      n = 0;
 
       for (int i = 0; i < 10; i++)
         {
-          up_mdelay(1); /* TODO */
+          up_mdelay(1);
 
-          bool b1 = esp32_gpioread(button_gpio);
+          if (button_info.is_touchpad)
+            {
+              b1 = esp32_touchread(button_info.channel);
+            }
+          else
+            {
+              b1 = esp32_gpioread(button_info.gpio);
+            }
 
           if (b0 == b1)
             {
@@ -159,7 +248,15 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
   DEBUGASSERT(id < ARRAY_SIZE(g_buttons));
 
   int ret;
-  int pin = g_buttons[id];
+  button_type_t button_info = g_buttons[id];
+
+  if (button_info.is_touchpad)
+    {
+      iwarn("Touch pad interrupts not yet implemented\n");
+      return OK;
+    }
+
+  int pin = button_info.gpio;
   int irq = ESP32_PIN2IRQ(pin);
 
   if (NULL != irqhandler)

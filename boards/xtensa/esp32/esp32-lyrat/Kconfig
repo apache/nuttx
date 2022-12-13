@@ -5,4 +5,18 @@
 
 if ARCH_BOARD_ESP32_LYRAT
 
+config ESP32_TOUCH
+	bool "Touch Pads"
+	default n
+	---help---
+		Enable ESP32 touch pad support.
+
+config ESP32_TOUCH_FILTER
+	bool "Touch Pad IIR Filter"
+	select ESP32_RT_TIMER
+	default n
+	depends on ESP32_TOUCH
+	---help---
+		Enable infinite impulse response filter for the touch pads.
+
 endif # ARCH_BOARD_ESP32_LYRAT
