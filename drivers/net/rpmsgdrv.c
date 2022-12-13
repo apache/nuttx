@@ -616,6 +616,13 @@ static int net_rpmsg_drv_send_recv(FAR struct net_driver_s *dev,
   FAR struct net_rpmsg_drv_cookie_s cookie;
   int ret;
 
+  /* TODO: Only TRANSFER command is implemeted on Linux side */
+
+  if (command != NET_RPMSG_TRANSFER)
+    {
+      return 0;
+    }
+
   nxsem_init(&cookie.sem, 0, 0);
 
   cookie.header   = header;
