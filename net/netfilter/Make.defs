@@ -1,5 +1,5 @@
 ############################################################################
-# net/inet/Make.defs
+# net/netfilter/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,27 +18,19 @@
 #
 ############################################################################
 
-# PF_INET/PF_INET6 socket address families
+# Netfilter source files
 
-SOCK_CSRCS += inet_txdrain.c
+ifeq ($(CONFIG_NET_IPTABLES),y)
 
-ifeq ($(CONFIG_NET_IPv4),y)
-SOCK_CSRCS += inet_sockif.c
-SOCK_CSRCS += inet_globals.c
-else ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += inet_sockif.c
-SOCK_CSRCS += inet_globals.c
+NET_CSRCS += ipt_sockopt.c
+
+ifeq ($(CONFIG_NET_NAT),y)
+NET_CSRCS += ipt_nat.c
 endif
 
-ifeq ($(CONFIG_NET_IPv4),y)
-SOCK_CSRCS += ipv4_setsockopt.c ipv4_getsockopt.c ipv4_getsockname.c ipv4_getpeername.c ipv4_build_header.c
+# Include Netfilter build support
+
+DEPPATH += --dep-path netfilter
+VPATH += :netfilter
+
 endif
-
-ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c ipv6_build_header.c
-endif
-
-# Include inet build support
-
-DEPPATH += --dep-path inet
-VPATH += :inet

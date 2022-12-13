@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NET_IPTABLES
+	bool "Iptables Interface"
+	default y
+	depends on NET_IPv4
+	depends on NET_SOCKOPTS
+	depends on NET_NAT  # May change dependency if we have firewall later.
+	---help---
+		Enable or disable iptables compatible interface (for NAT).

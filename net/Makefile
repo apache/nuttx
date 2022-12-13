@@ -48,6 +48,7 @@ include ieee802154/Make.defs
 include devif/Make.defs
 include ipforward/Make.defs
 include nat/Make.defs
+include netfilter/Make.defs
 include route/Make.defs
 include procfs/Make.defs
 include usrsock/Make.defs
