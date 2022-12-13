@@ -220,8 +220,8 @@ fi
 
 # Create the versioned tarball names
 
-NUTTX_TARNAME=apache-nuttx-${VERSION}-incubating.tar
-APPS_TARNAME=apache-nuttx-apps-${VERSION}-incubating.tar
+NUTTX_TARNAME=apache-nuttx-${VERSION}.tar
+APPS_TARNAME=apache-nuttx-apps-${VERSION}.tar
 NUTTX_ZIPNAME=${NUTTX_TARNAME}.gz
 APPS_ZIPNAME=${APPS_TARNAME}.gz
 NUTTX_ASCNAME=${NUTTX_ZIPNAME}.asc
