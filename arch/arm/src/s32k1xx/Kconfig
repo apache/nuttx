@@ -635,6 +635,44 @@ config S32K1XX_LPSPI_DWORD
 	bool "DWORD up to 64 bit transfer support"
 	default n
 
+config S32K1XX_LPSPI_DMA
+	bool "SPI DMA"
+	depends on S32K1XX_EDMA
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config S32K1XX_LPSPI0_DMA
+	bool "LPSPI0 DMA"
+	default n
+	depends on S32K1XX_LPSPI0 && S32K1XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI0 transfer performance.
+
+config S32K1XX_LPSPI1_DMA
+	bool "LPSPI1 DMA"
+	default n
+	depends on S32K1XX_LPSPI1 && S32K1XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI1 transfer performance.
+
+config S32K1XX_LPSPI2_DMA
+	bool "LPSPI2 DMA"
+	default n
+	depends on S32K1XX_LPSPI2 && S32K1XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI2 transfer performance.
+
+config S32K1XX_LPSPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on S32K1XX_LPSPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+
 config S32K1XX_LPSPI_HWPCS
 	bool "Use native hardware peripheral chip selects instead of GPIO pins"
 	default n
