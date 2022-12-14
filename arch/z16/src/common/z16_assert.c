@@ -24,7 +24,16 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
 #include "z16_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
 
 /****************************************************************************
  * Public Functions
@@ -34,9 +43,17 @@
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
+  FAR volatile uint32_t *regs32 = (FAR volatile uint32_t *)g_current_regs;
+
   board_autoled_on(LED_ASSERTION);
-  z16_registerdump();
-  z16_stackdump();
+
+  if (regs32 == NULL)
+    {
+      up_saveusercontext(s_last_regs);
+      regs32 = (FAR volatile uint32_t *)s_last_regs;
+    }
+
+  z16_registerdump(regs32);
 }

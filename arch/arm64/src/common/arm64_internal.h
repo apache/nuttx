@@ -347,6 +347,8 @@ size_t arm64_stack_check(void *stackbase, size_t nbytes);
 void arm64_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+void arm64_registerdump(struct regs_context * regs);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

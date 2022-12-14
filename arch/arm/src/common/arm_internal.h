@@ -480,6 +480,8 @@ size_t arm_stack_check(void *stackbase, size_t nbytes);
 void arm_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+void arm_registerdump(volatile uint32_t *regs);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

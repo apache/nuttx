@@ -34,7 +34,7 @@
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
-  sparc_dumpstate();
+  sparc_registerdump(CURRENT_REGS);
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z16/src/common/z16_stackdump.c
+ * arch/or1k/src/common/or1k_registerdump.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,68 +23,47 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/syslog/syslog.h>
 
+#include <stdint.h>
 #include <debug.h>
 
-#include "chip.h"
-#include "sched/sched.h"
-#include "z16_internal.h"
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
-#ifdef CONFIG_ARCH_STACKDUMP
+#include "or1k_internal.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
+ * Name: up_getusrsp
  ****************************************************************************/
 
-/* To be provided */
-
-/****************************************************************************
- * Name: z16_stackdump
- ****************************************************************************/
-
-void z16_stackdump(void)
+uintptr_t up_getusrsp(void)
 {
-  FAR struct tcb_s *rtcb = running_task();
-  chipreg_t sp = up_getsp();
-  chipreg_t stack_base = (chipreg_t)rtcb->stack_base_ptr;
-  chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
-  chipreg_t stack;
-  chipreg_t stack_top;
-
-  _alert("stack_base: %08x\n", stack_base);
-  _alert("stack_size: %08x\n", stack_size);
-  _alert("sp:         %08x\n", sp);
-
-  if (sp >= stack_base && sp < stack_base + stack_size)
-    {
-      stack = sp;
-    }
-  else
-    {
-      _err("ERROR: Stack pointer is not within allocated stack\n");
-      stack = stack_base;
-    }
-
-  stack_top = stack_base + stack_size;
-
-  /* Flush any buffered SYSLOG data to avoid overwrite */
-
-  syslog_flush();
-
-  for (stack = stack & ~(8 * sizeof(chipreg_t) - 1);
-       stack < (stack_top & ~(8 * sizeof(chipreg_t) - 1));
-       stack += 8 * sizeof(chipreg_t))
-    {
-      chipreg_t *ptr = (chipreg_t *)stack;
-      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
-    }
+  return CURRENT_REGS[REG_R13];
 }
 
-#endif /* CONFIG_ARCH_STACKDUMP */
+/****************************************************************************
+ * Name: or1k_registerdump
+ ****************************************************************************/
+
+void or1k_registerdump(volatile uint32_t *regs)
+{
+  /* Dump the interrupt registers */
+
+  _alert("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3],
+         regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
+  _alert("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+#ifdef CONFIG_BUILD_PROTECTED
+  _alert("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
+         regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
+#else
+  _alert("xPSR: %08x PRIMASK: %08x\n",
+         regs[REG_XPSR], regs[REG_PRIMASK]);
+#endif
+}

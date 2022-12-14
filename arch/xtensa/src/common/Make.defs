@@ -36,16 +36,12 @@ CMN_CSRCS += xtensa_nputs.c xtensa_releasestack.c
 CMN_CSRCS += xtensa_schedsigaction.c
 CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
 CMN_CSRCS += xtensa_switchcontext.c xtensa_usestack.c xtensa_swint.c
-CMN_CSRCS += xtensa_saveusercontext.c
+CMN_CSRCS += xtensa_saveusercontext.c xtensa_getintstack.c xtensa_registerdump.c
 
 # Configuration-dependent common Xtensa files
 
 ifeq ($(CONFIG_DEBUG_TCBINFO),y)
   CMN_CSRCS += xtensa_tcbinfo.c
-endif
-
-ifeq ($(CONFIG_DEBUG_ALERT),y)
-  CMN_CSRCS += xtensa_dumpstate.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

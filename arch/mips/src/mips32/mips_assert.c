@@ -38,8 +38,8 @@
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
   board_autoled_on(LED_ASSERTION);
-  mips_dumpstate();
+  mips_registerdump(CURRENT_REGS);
 }

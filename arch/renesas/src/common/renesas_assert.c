@@ -25,9 +25,17 @@
 #include <nuttx/config.h>
 
 #include <nuttx/board.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "renesas_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t s_last_regs[XCPTCONTEXT_REGS];
 
 /****************************************************************************
  * Public Functions
@@ -37,8 +45,21 @@
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
+  volatile uint32_t *regs = g_current_regs;
+
   board_autoled_on(LED_ASSERTION);
-  renesas_dumpstate();
+
+  /* Are user registers available from interrupt processing? */
+
+  if (regs == NULL)
+    {
+      /* No.. capture user registers by hand */
+
+      up_saveusercontext(s_last_regs);
+      regs = s_last_regs;
+    }
+
+  renesas_registerdump(regs);
 }

@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
@@ -37,19 +38,10 @@
 #include "xtensa.h"
 
 /****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Name: xtensa_assert
- ****************************************************************************/
-
-static void xtensa_assert(void)
-{
-  /* Dump the processor state */
-
-  xtensa_dumpstate();
-}
+static uint8_t s_last_regs[XCPTCONTEXT_SIZE];
 
 /****************************************************************************
  * Public Functions
@@ -59,10 +51,27 @@ static void xtensa_assert(void)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
+  struct tcb_s *rtcb = running_task();
+
   board_autoled_on(LED_ASSERTION);
-  xtensa_assert();
+
+  /* Update the xcp context */
+
+  if (CURRENT_REGS)
+    {
+      rtcb->xcp.regs = (uint32_t *)CURRENT_REGS;
+    }
+  else
+    {
+      up_saveusercontext(s_last_regs);
+      rtcb->xcp.regs = (uint32_t *)s_last_regs;
+    }
+
+  /* Dump the registers (if available) */
+
+  xtensa_registerdump(rtcb->xcp.regs);
 }
 
 /****************************************************************************
@@ -105,7 +114,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
   _alert("Unhandled Exception %d\n", xptcode);
 #endif
 
-  xtensa_assert(); /* Should not return */
+  PANIC();  /* Should not return */
   for (; ; );
 }
 
@@ -208,6 +217,6 @@ void xtensa_user_panic(int exccause, uint32_t *regs)
   _alert("User Exception: EXCCAUSE=%04x\n", exccause);
 #endif
 
-  xtensa_assert(); /* Should not return */
+  PANIC(); /* Should not return */
   for (; ; );
 }

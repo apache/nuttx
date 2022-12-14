@@ -34,8 +34,7 @@
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
   Z80_REGISTER_DUMP();
-  z80_stackdump();
 }

@@ -216,11 +216,7 @@ void xtensa_lowputs(const char *str);
 
 /* Debug */
 
-#ifdef CONFIG_ARCH_STACKDUMP
-void xtensa_dumpstate(void);
-#else
-#  define xtensa_dumpstate()
-#endif
+void xtensa_registerdump(uintptr_t *regs);
 
 /* Common XTENSA functions */
 

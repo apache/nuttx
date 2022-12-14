@@ -242,13 +242,8 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
-#ifdef CONFIG_SMP
-  return arm_stack_check((void *)arm_intstack_alloc(),
+  return arm_stack_check((void *)up_get_intstackbase(),
                          STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
-#else
-  return arm_stack_check(g_intstackalloc,
-                         STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
-#endif
 }
 
 size_t up_check_intstack_remain(void)

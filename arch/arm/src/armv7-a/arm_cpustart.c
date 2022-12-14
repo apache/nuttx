@@ -44,33 +44,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_registerdump
- ****************************************************************************/
-
-#if 0 /* Was useful in solving some startup problems */
-static inline void arm_registerdump(struct tcb_s *tcb)
-{
-  int regndx;
-
-  _info("CPU%d:\n", up_cpu_index());
-
-  /* Dump the startup registers */
-
-  for (regndx = REG_R0; regndx <= REG_R15; regndx += 8)
-    {
-      uint32_t *ptr = (uint32_t *)&tcb->xcp.regs[regndx];
-      _info("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            regndx, ptr[0], ptr[1], ptr[2], ptr[3],
-            ptr[4], ptr[5], ptr[6], ptr[7]);
-    }
-
-  _info("CPSR: %08x\n", tcb->xcp.regs[REG_CPSR]);
-}
-#else
-# define arm_registerdump(tcb)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -108,7 +81,9 @@ int arm_start_handler(int irq, void *context, void *arg)
 
   /* Dump registers so that we can see what is going to happen on return */
 
-  arm_registerdump(tcb);
+#if 0
+  arm_registerdump(tcb->xcp.regs);
+#endif
 
   /* Then switch contexts. This instantiates the exception context of the
    * tcb at the head of the assigned task list.  In this case, this should

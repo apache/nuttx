@@ -31,12 +31,7 @@ CMN_CSRCS += avr_initialize.c avr_initialstate.c
 CMN_CSRCS += avr_modifyreg8.c avr_modifyreg16.c avr_modifyreg32.c avr_releasestack.c
 CMN_CSRCS += avr_schedulesigaction.c avr_sigdeliver.c avr_stackframe.c
 CMN_CSRCS += avr_switchcontext.c avr_usestack.c avr_doirq.c avr_nputs.c
-
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += avr_dumpstate.c
-endif
+CMN_CSRCS += avr_registerdump.c avr_getintstack.c
 
 # Required AT32UC3 files
 

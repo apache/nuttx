@@ -253,15 +253,6 @@ extern uint32_t g_enronly;       /* Start of relocated read-only data in FLASH *
 #endif
 extern uint32_t g_svarvect;      /* Start of variable vectors */
 
-/* Address of the saved user stack pointer */
-
-#ifndef __ASSEMBLY__
-#  if CONFIG_ARCH_INTERRUPTSTACK > 3
-     extern uint8_t g_intstackalloc[];
-     extern uint8_t g_intstacktop[];
-#  endif
-#endif
-
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_RENESAS_SRC_M16C_CHIP_H */
