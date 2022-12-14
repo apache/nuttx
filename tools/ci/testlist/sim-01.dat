@@ -3,6 +3,9 @@
 # macOS doesn't have ALSA
 -Darwin,sim:alsa
 
+# macOS doesn't have V4L2
+-Darwin,sim:nxcamera
+
 # clang doesn't -fsanitize=kernel-address
 -Darwin,sim:kasan
 
