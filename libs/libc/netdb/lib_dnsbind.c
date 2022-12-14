@@ -83,6 +83,17 @@ int dns_bind(sa_family_t family)
   tv.tv_usec = 0;
 
   ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
+  if (ret >= 0)
+    {
+      /* Set up a send timeout */
+
+      tv.tv_sec  = CONFIG_NETDB_DNSCLIENT_SEND_TIMEOUT;
+      tv.tv_usec = 0;
+
+      ret = setsockopt(sd, SOL_SOCKET, SO_SNDTIMEO, &tv,
+                       sizeof(struct timeval));
+    }
+
   if (ret < 0)
     {
       ret = -get_errno();
