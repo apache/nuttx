@@ -42,7 +42,7 @@
  * DTC channel.
  */
 
-typedef FAR void *DTC_HANDLE;
+typedef void *DTC_HANDLE;
 
 /* Configurable options for DTC Transfer mode */
 
