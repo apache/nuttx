@@ -29,9 +29,9 @@
 #include <hardware/s32k1xx_memorymap.h>
 
 #if defined(CONFIG_ARCH_CHIP_S32K11X)
-#  error "Sorry no s32k11x_dmamux.h - Please author one"
+#  include <hardware/s32k11x_dmamux.h>
 #elif defined(CONFIG_ARCH_CHIP_S32K14X)
-#  include <hardware/s32k146_dmamux.h>
+#  include <hardware/s32k14x_dmamux.h>
 #endif
 
 /****************************************************************************
