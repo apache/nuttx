@@ -271,9 +271,9 @@ static int rtc_alm_interrupt(int irq, void *context, void *arg)
       /* Alarm callback */
 
       cbinfo = &g_alarmcb;
-          cb = cbinfo->ac_cb;
-          arg = (void *)cbinfo->ac_arg;
-          cbinfo->ac_cb  = NULL;
+      cb = cbinfo->ac_cb;
+      arg = (void *)cbinfo->ac_arg;
+      cbinfo->ac_cb  = NULL;
       cbinfo->ac_arg = NULL;
       cb(arg, 0);
     }
