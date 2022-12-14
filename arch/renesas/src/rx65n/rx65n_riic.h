@@ -73,7 +73,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel);
+struct i2c_master_s *rx65n_i2cbus_initialize(int channel);
 
 /****************************************************************************
  * Name: rx65n_i2cbus_uninitialize
@@ -90,6 +90,6 @@ FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel);
  *
  ****************************************************************************/
 
-int rx65n_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int rx65n_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_RIIC_H */
