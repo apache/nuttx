@@ -312,7 +312,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
         options = (FAR uint8_t *)adv +
                    sizeof(struct icmpv6_router_advertise_s);
 
-        for (ndx = 0; ndx + sizeof(struct icmpv6_prefixinfo_s) <= optlen; )
+        for (ndx = 0; ndx < optlen; )
           {
            FAR struct icmpv6_generic_s *opt =
                                 (FAR struct icmpv6_generic_s *)&options[ndx];
@@ -353,7 +353,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                   {
                     FAR struct icmpv6_mtu_s *mtuopt =
                                         (FAR struct icmpv6_mtu_s *)opt;
-                    dev->d_pktsize = NTOHL(mtuopt->mtu);
+                    dev->d_pktsize = NTOHL(mtuopt->mtu) + dev->d_llhdrlen;
                   }
                   break;
 
