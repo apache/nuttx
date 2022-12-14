@@ -50,8 +50,8 @@ int  nxtask_setup_arguments(FAR struct task_tcb_s *tcb,
 /* Task exit */
 
 int  nxtask_exit(void);
-int  nxtask_terminate(pid_t pid, bool nonblocking);
-void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
+int  nxtask_terminate(pid_t pid);
+void nxtask_exithook(FAR struct tcb_s *tcb, int status);
 void nxtask_recover(FAR struct tcb_s *tcb);
 
 /* Cancellation points */

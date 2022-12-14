@@ -27,6 +27,7 @@
 #include <nuttx/atexit.h>
 #include <nuttx/compiler.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -47,9 +48,15 @@ FAR void *__dso_handle = &__dso_handle;
 
 void exit(int status)
 {
+  /* Run the registered exit functions */
+
   atexit_call_exitfuncs(status);
 
-  /* REVISIT: Need to flush files and streams */
+  /* Flush all streams */
+
+  fflush(NULL);
+
+  /* Then perform the exit */
 
   _exit(status);
 }

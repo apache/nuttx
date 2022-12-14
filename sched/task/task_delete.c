@@ -132,7 +132,7 @@ int nxtask_delete(pid_t pid)
    * nxtask_terminate() do all of the heavy lifting.
    */
 
-  ret = nxtask_terminate(pid, false);
+  ret = nxtask_terminate(pid);
   if (ret < 0)
     {
       return ret;
