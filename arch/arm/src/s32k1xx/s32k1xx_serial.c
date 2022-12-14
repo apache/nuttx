@@ -251,7 +251,7 @@ static void s32k1xx_txint(struct uart_dev_s *dev, bool enable);
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool s32k1xx_rxflowcontrol(struct uart_dev_s *dev,
-                                unsigned int nbuffered, bool upper);
+                                  unsigned int nbuffered, bool upper);
 #endif
 static void s32k1xx_send(struct uart_dev_s *dev, int ch);
 static bool s32k1xx_txready(struct uart_dev_s *dev);
@@ -260,7 +260,7 @@ static void s32k1xx_dma_send(struct uart_dev_s *dev);
 static void s32k1xx_dma_txint(struct uart_dev_s *dev, bool enable);
 static void s32k1xx_dma_txavailable(struct uart_dev_s *dev);
 static void s32k1xx_dma_txcallback(DMACH_HANDLE handle, void *arg, bool done,
-                                  int result);
+                                   int result);
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
@@ -278,7 +278,7 @@ static void s32k1xx_dma_rxint(struct uart_dev_s *dev, bool enable);
 static bool s32k1xx_dma_rxavailable(struct uart_dev_s *dev);
 
 static void s32k1xx_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
-                                  int result);
+                                   int result);
 #endif
 
 static bool s32k1xx_txempty(struct uart_dev_s *dev);
@@ -746,7 +746,7 @@ static int s32k1xx_dma_setup(struct uart_dev_s *dev)
       if (priv->txdma == NULL)
         {
           priv->txdma = s32k1xx_dmach_alloc(priv->dma_txreqsrc |
-                                          DMAMUX_CHCFG_ENBL, 0);
+                                            DMAMUX_CHCFG_ENBL, 0);
           if (priv->txdma == NULL)
             {
               return -EBUSY;
@@ -771,7 +771,7 @@ static int s32k1xx_dma_setup(struct uart_dev_s *dev)
       if (priv->rxdma == NULL)
         {
           priv->rxdma = s32k1xx_dmach_alloc(priv->dma_rxreqsrc |
-                                          DMAMUX_CHCFG_ENBL, 0);
+                                            DMAMUX_CHCFG_ENBL, 0);
 
           if (priv->rxdma == NULL)
             {
@@ -786,7 +786,7 @@ static int s32k1xx_dma_setup(struct uart_dev_s *dev)
       /* Configure for circular DMA reception into the RX FIFO */
 
       config.saddr  = priv->uartbase + S32K1XX_LPUART_DATA_OFFSET;
-      config.daddr  = (uint32_t) priv->rxfifo;
+      config.daddr  = (uint32_t)priv->rxfifo;
       config.soff   = 0;
       config.doff   = 1;
       config.iter   = RXDMA_BUFFER_SIZE;
@@ -817,9 +817,9 @@ static int s32k1xx_dma_setup(struct uart_dev_s *dev)
       /* Enable itnerrupt on Idel and erros */
 
       modifyreg32(priv->uartbase + S32K1XX_LPUART_CTRL_OFFSET, 0,
-                  LPUART_CTRL_PEIE       |
-                  LPUART_CTRL_FEIE       |
-                  LPUART_CTRL_NEIE       |
+                  LPUART_CTRL_PEIE |
+                  LPUART_CTRL_FEIE |
+                  LPUART_CTRL_NEIE |
                   LPUART_CTRL_ILIE);
 
       /* Start the DMA channel, and arrange for callbacks at the half and
@@ -1150,7 +1150,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
   struct inode *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
+  struct uart_dev_s *dev = inode->i_private;
   irqstate_t flags;
 #endif
   int ret   = OK;
@@ -1326,7 +1326,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            flags  = spin_lock_irqsave(NULL);
+            flags = spin_lock_irqsave(NULL);
             s32k1xx_disableuartint(priv, &ie);
             ret = dev->ops->setup(dev);
 
@@ -1505,7 +1505,7 @@ static bool s32k1xx_rxavailable(struct uart_dev_s *dev)
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool s32k1xx_rxflowcontrol(struct uart_dev_s *dev,
-                             unsigned int nbuffered, bool upper)
+                                  unsigned int nbuffered, bool upper)
 {
   struct s32k1xx_uart_s *priv = (struct s32k1xx_uart_s *)dev;
   bool use_swhs = false;
@@ -1732,7 +1732,7 @@ static bool s32k1xx_dma_rxavailable(struct uart_dev_s *dev)
 
 #ifdef SERIAL_HAVE_TXDMA
 static void s32k1xx_dma_txcallback(DMACH_HANDLE handle, void *arg, bool done,
-                                  int result)
+                                   int result)
 {
   struct s32k1xx_uart_s *priv = (struct s32k1xx_uart_s *)arg;
   /* Update 'nbytes' indicating number of bytes actually transferred by DMA.
@@ -1804,7 +1804,7 @@ static void s32k1xx_dma_send(struct uart_dev_s *dev)
   config.ssize  = EDMA_8BIT;
   config.dsize  = EDMA_8BIT;
   config.nbytes = sizeof(dev->dmatx.buffer[0]);
-  config.saddr  = (uint32_t) dev->dmatx.buffer;
+  config.saddr  = (uint32_t)dev->dmatx.buffer;
   config.daddr  = priv->uartbase + S32K1XX_LPUART_DATA_OFFSET;
   config.soff   = sizeof(dev->dmatx.buffer[0]);
   config.doff   = 0;
@@ -1821,7 +1821,7 @@ static void s32k1xx_dma_send(struct uart_dev_s *dev)
   if (dev->dmatx.nbuffer)
     {
       config.iter   = priv->dev.dmatx.nlength;
-      config.saddr  = (uint32_t) priv->dev.dmatx.nbuffer;
+      config.saddr  = (uint32_t)priv->dev.dmatx.nbuffer;
 
       s32k1xx_dmach_xfrsetup(priv->txdma, &config);
     }
@@ -1950,7 +1950,7 @@ static bool s32k1xx_txempty(struct uart_dev_s *dev)
 
 #ifdef SERIAL_HAVE_RXDMA
 static void s32k1xx_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
-                                  int result)
+                                   int result)
 {
   struct s32k1xx_uart_s *priv = (struct s32k1xx_uart_s *)arg;
   uint32_t sr;
@@ -1974,9 +1974,9 @@ static void s32k1xx_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
   if ((sr & (LPUART_STAT_OR | LPUART_STAT_NF | LPUART_STAT_FE)) != 0)
     {
       s32k1xx_serialout(priv, S32K1XX_LPUART_STAT_OFFSET,
-                      sr & (LPUART_STAT_OR |
-                            LPUART_STAT_NF |
-                            LPUART_STAT_FE));
+                        sr & (LPUART_STAT_OR |
+                              LPUART_STAT_NF |
+                              LPUART_STAT_FE));
     }
 }
 #endif

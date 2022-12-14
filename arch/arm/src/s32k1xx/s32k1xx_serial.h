@@ -115,11 +115,11 @@
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
 
-#  if defined(SERIAL_HAVE_TXDMA) || defined(SERIAL_HAVE_RXDMA)
-#    ifndef CONFIG_S32K1XX_EDMA
-#      error S32K1XX LPUART receive or transmit DMA requires CONFIG_S32K1XX_EDMA
-#    endif
+#if defined(SERIAL_HAVE_TXDMA) || defined(SERIAL_HAVE_RXDMA)
+#  ifndef CONFIG_S32K1XX_EDMA
+#    error S32K1XX LPUART receive or transmit DMA requires CONFIG_S32K1XX_EDMA
 #  endif
+#endif
 
 #if defined(SERIAL_HAVE_RXDMA)
 /* Currently RS-485 support cannot be enabled when RXDMA is in use due to
