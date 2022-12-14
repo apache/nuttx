@@ -68,9 +68,9 @@
  *
  ****************************************************************************/
 
-FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
+void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
 {
-  FAR void *ret;
+  void *ret;
 
   /* Align the frame_size */
 
@@ -88,7 +88,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr  = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
+  tcb->stack_base_ptr  = (uint8_t *)tcb->stack_base_ptr + frame_size;
   tcb->adj_stack_size -= frame_size;
 
   /* And return a pointer to allocated memory */

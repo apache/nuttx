@@ -93,28 +93,26 @@ struct rx65n_sbram_s
 {
   mutex_t  lock;               /* For atomic accesses to this structure */
   uint8_t  refs;               /* Number of references */
-  FAR struct sbramfh_s *bbf;   /* File in bbram */
+  struct sbramfh_s *bbf;       /* File in bbram */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     rx65n_sbram_open(FAR struct file *filep);
-static int     rx65n_sbram_close(FAR struct file *filep);
-static off_t   rx65n_sbram_seek(FAR struct file *filep, off_t offset,
-                 int whence);
-static ssize_t rx65n_sbram_read(FAR struct file *filep, FAR char *buffer,
-                 size_t len);
-static ssize_t rx65n_sbram_write(FAR struct file *filep,
-                 FAR const char *buffer, size_t len);
-static int rx65n_sbram_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
-static int     rx65n_sbram_poll(FAR struct file *filep,
-                                FAR struct pollfd *fds,
-                                                                 bool setup);
+static int     rx65n_sbram_open(struct file *filep);
+static int     rx65n_sbram_close(struct file *filep);
+static off_t   rx65n_sbram_seek(struct file *filep, off_t offset,
+                                int whence);
+static ssize_t rx65n_sbram_read(struct file *filep, char *buffer,
+                                size_t len);
+static ssize_t rx65n_sbram_write(struct file *filep, const char *buffer,
+                                 size_t len);
+static int rx65n_sbram_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int     rx65n_sbram_poll(struct file *filep, struct pollfd *fds,
+                                bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     rx65n_sbram_unlink(FAR struct inode *inode);
+static int     rx65n_sbram_unlink(struct inode *inode);
 #endif
 
 /****************************************************************************
@@ -161,7 +159,7 @@ static void rx65n_sbram_rd(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SBRAM_DEBUG)
-static void rx65n_sbram_dump(FAR struct sbramfh_s *bbf, char *op)
+static void rx65n_sbram_dump(struct sbramfh_s *bbf, char *op)
 {
   SBRAM_DEBUG_READ();
   _info("%s:\n", op);
@@ -190,7 +188,7 @@ static void rx65n_sbram_dump(FAR struct sbramfh_s *bbf, char *op)
  *
  ****************************************************************************/
 
-static uint32_t rx65n_sbram_crc(FAR struct sbramfh_s *pf)
+static uint32_t rx65n_sbram_crc(struct sbramfh_s *pf)
 {
   return crc32((uint8_t *)pf + SBRAM_CRCED_OFFSET,
     SBRAM_CRCED_SIZE(pf->len));
@@ -203,13 +201,13 @@ static uint32_t rx65n_sbram_crc(FAR struct sbramfh_s *pf)
  *
  ****************************************************************************/
 
-static int rx65n_sbram_open(FAR struct file *filep)
+static int rx65n_sbram_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rx65n_sbram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct rx65n_sbram_s *bbr;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   /* Increment the reference count */
 
@@ -236,7 +234,7 @@ static int rx65n_sbram_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int rx65n_sbram_internal_close(FAR struct sbramfh_s *bbf)
+static int rx65n_sbram_internal_close(struct sbramfh_s *bbf)
 {
   bbf->dirty = 0;
   clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
@@ -253,14 +251,14 @@ static int rx65n_sbram_internal_close(FAR struct sbramfh_s *bbf)
  *
  ****************************************************************************/
 
-static int rx65n_sbram_close(FAR struct file *filep)
+static int rx65n_sbram_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rx65n_sbram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct rx65n_sbram_s *bbr;
   int ret = OK;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
 
@@ -293,16 +291,16 @@ static int rx65n_sbram_close(FAR struct file *filep)
  * Name: rx65n_sbram_seek
  ****************************************************************************/
 
-static off_t rx65n_sbram_seek(FAR struct file *filep, off_t offset,
-                               int whence)
+static off_t rx65n_sbram_seek(struct file *filep, off_t offset,
+                              int whence)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rx65n_sbram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct rx65n_sbram_s *bbr;
   off_t newpos;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
 
@@ -364,14 +362,14 @@ static off_t rx65n_sbram_seek(FAR struct file *filep, off_t offset,
  * Name: rx65n_sbram_read
  ****************************************************************************/
 
-static ssize_t rx65n_sbram_read(FAR struct file *filep, FAR char *buffer,
-                                 size_t len)
+static ssize_t rx65n_sbram_read(struct file *filep, char *buffer,
+                                size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rx65n_sbram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct rx65n_sbram_s *bbr;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
 
@@ -392,9 +390,9 @@ static ssize_t rx65n_sbram_read(FAR struct file *filep, FAR char *buffer,
  * Name: rx65n_sbram_internal_write
  ****************************************************************************/
 
-static ssize_t rx65n_sbram_internal_write(FAR struct sbramfh_s *bbf,
-                                           FAR const char *buffer,
-                                           off_t offset, size_t len)
+static ssize_t rx65n_sbram_internal_write(struct sbramfh_s *bbf,
+                                          const char *buffer,
+                                          off_t offset, size_t len)
 {
   bbf->dirty = 1;
   memcpy(&bbf->data[offset], buffer, len);
@@ -405,16 +403,15 @@ static ssize_t rx65n_sbram_internal_write(FAR struct sbramfh_s *bbf,
  * Name: rx65n_sbram_write
  ****************************************************************************/
 
-static ssize_t rx65n_sbram_write(FAR struct file *filep,
-                                 FAR const char *buffer,
-                                  size_t len)
+static ssize_t rx65n_sbram_write(struct file *filep, const char *buffer,
+                                 size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rx65n_sbram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct rx65n_sbram_s *bbr;
   int ret = -EFBIG;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   /* Forbid writes past the end of the device */
 
@@ -445,8 +442,8 @@ static ssize_t rx65n_sbram_write(FAR struct file *filep,
  * Name: rx65n_sbram_poll
  ****************************************************************************/
 
-static int rx65n_sbram_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                             bool setup)
+static int rx65n_sbram_poll(struct file *filep, struct pollfd *fds,
+                            bool setup)
 {
   if (setup)
     {
@@ -463,19 +460,18 @@ static int rx65n_sbram_poll(FAR struct file *filep, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-static int rx65n_sbram_ioctl(FAR struct file *filep, int cmd,
-                              unsigned long arg)
+static int rx65n_sbram_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rx65n_sbram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct rx65n_sbram_s *bbr;
   int ret = -ENOTTY;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   if (cmd == RX65N_SBRAM_GETDESC_IOCTL)
     {
-      FAR struct sbramd_s *bbrr = (FAR struct sbramd_s *)((uintptr_t)arg);
+      struct sbramd_s *bbrr = (struct sbramd_s *)((uintptr_t)arg);
 
       nxmutex_lock(&bbr->lock);
       if (!bbrr)
@@ -513,12 +509,12 @@ static int rx65n_sbram_ioctl(FAR struct file *filep, int cmd,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int rx65n_sbram_unlink(FAR struct inode *inode)
+static int rx65n_sbram_unlink(struct inode *inode)
 {
-  FAR struct rx65n_sbram_s *bbr;
+  struct rx65n_sbram_s *bbr;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct rx65n_sbram_s *)inode->i_private;
+  bbr = (struct rx65n_sbram_s *)inode->i_private;
 
   nxmutex_lock(&bbr->lock);
   memset(bbr->bbf->data, 0, bbr->bbf->len);
@@ -691,7 +687,7 @@ int rx65n_sbraminitialize(char *devpath, int *sizes)
 #if defined(CONFIG_RX65N_SAVE_CRASHDUMP)
 int rx65n_sbram_savepanic(int fileno, uint8_t *context, int length)
 {
-  FAR struct sbramfh_s *bbf;
+  struct sbramfh_s *bbf;
   int fill;
   int ret = -ENOSPC;
 
@@ -737,7 +733,7 @@ int rx65n_sbram_savepanic(int fileno, uint8_t *context, int length)
 
           /* Fill with 0 if data is less then file size */
 
-          fill = (int) bbf->len - length;
+          fill = (int)bbf->len - length;
 
           if (fill > 0)
             {

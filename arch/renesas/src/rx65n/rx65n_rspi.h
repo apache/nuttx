@@ -64,7 +64,7 @@ struct spi_dev_s;
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *rx65n_rspibus_initialize(int bus);
+struct spi_dev_s *rx65n_rspibus_initialize(int bus);
 
 /****************************************************************************
  * Name:  rx65n_rspi0/1/2 select and rx65n_rspi0/1/2 status
@@ -98,24 +98,24 @@ FAR struct spi_dev_s *rx65n_rspibus_initialize(int bus);
  *
  ****************************************************************************/
 #ifdef CONFIG_RX65N_RSPI0
-void rx65n_rspi0select(FAR struct spi_dev_s *dev, uint32_t devid,
-                        bool selected);
-uint8_t rx65n_rspi0status(FAR struct spi_dev_s *dev, uint32_t devid);
-int rx65n_rspi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+void rx65n_rspi0select(struct spi_dev_s *dev, uint32_t devid,
+                       bool selected);
+uint8_t rx65n_rspi0status(struct spi_dev_s *dev, uint32_t devid);
+int rx65n_rspi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_RX65N_RSPI1
-void rx65n_rspi1select(FAR struct spi_dev_s *dev, uint32_t devid,
-                        bool selected);
-uint8_t rx65n_rspi1status(FAR struct spi_dev_s *dev, uint32_t devid);
-int rx65n_rspi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+void rx65n_rspi1select(struct spi_dev_s *dev, uint32_t devid,
+                       bool selected);
+uint8_t rx65n_rspi1status(struct spi_dev_s *dev, uint32_t devid);
+int rx65n_rspi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_RX65N_RSPI2
-void rx65n_rspi2select(FAR struct spi_dev_s *dev, uint32_t devid,
-                        bool selected);
-uint8_t rx65n_rspi2status(FAR struct spi_dev_s *dev, uint32_t devid);
-int rx65n_rspi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+void rx65n_rspi2select(struct spi_dev_s *dev, uint32_t devid,
+                       bool selected);
+uint8_t rx65n_rspi2status(struct spi_dev_s *dev, uint32_t devid);
+int rx65n_rspi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -140,21 +140,18 @@ int rx65n_rspi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_RX65N_RSPI0
-int rx65n_rspi0register(FAR struct spi_dev_s *dev,
-                        spi_mediachange_t callback,
-                       FAR void *arg);
+int rx65n_rspi0register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                        void *arg);
 #endif
 
 #ifdef CONFIG_RX65N_RSPI1
-int rx65n_rspi1register(FAR struct spi_dev_s *dev,
-                        spi_mediachange_t callback,
-                       FAR void *arg);
+int rx65n_rspi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                        void *arg);
 #endif
 
 #ifdef CONFIG_RX65N_RSPI2
-int rx65n_rspi2register(FAR struct spi_dev_s *dev,
-                         spi_mediachange_t callback,
-                       FAR void *arg);
+int rx65n_rspi2register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                        void *arg);
 #endif
 #endif
 
