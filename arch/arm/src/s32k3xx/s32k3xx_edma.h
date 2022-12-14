@@ -180,7 +180,6 @@ struct s32k3xx_edma_xfrconfig_s
     uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
     uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
     uint8_t  dsize;      /* Destination data transfer size. */
-    uint8_t  ttype;      /* Transfer type (see enum s32k3xx_edma_xfrtype_e). */
 #ifdef CONFIG_S32K3XX_EDMA_EMLIM
     uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else

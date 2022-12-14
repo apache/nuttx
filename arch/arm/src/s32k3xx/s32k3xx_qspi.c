@@ -803,7 +803,6 @@ static int qspi_receive(struct s32k3xx_qspidev_s *priv,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = EDMA_16BYTE;
   config.dsize  = EDMA_16BYTE;
-  config.ttype  = EDMA_PERIPH2MEM;
   config.nbytes = 16;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
@@ -1029,6 +1028,9 @@ static int qspi_transmit(struct s32k3xx_qspidev_s *priv,
 
   putreg32(QSPI_AMBA_BASE + meminfo->addr, S32K3XX_QSPI_SFAR);
 
+  up_clean_dcache((uintptr_t)meminfo->buffer,
+                  (uintptr_t)meminfo->buffer + meminfo->buflen);
+
   /* Set up the DMA */
 
   uint32_t adjust = 1;
@@ -1043,7 +1045,6 @@ static int qspi_transmit(struct s32k3xx_qspidev_s *priv,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = EDMA_32BIT;
   config.dsize  = EDMA_32BIT;
-  config.ttype  = EDMA_MEM2PERIPH;
   config.nbytes = 4;
   #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;

@@ -1752,6 +1752,17 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
 
   s32k3xx_lpspi_putreg32(priv, S32K3XX_LPSPI_DER_OFFSET, 0);
 
+  if (txbuffer)
+    {
+      up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+    }
+
+  if (rxbuffer)
+    {
+     up_invalidate_dcache((uintptr_t)rxbuffer,
+                          (uintptr_t)rxbuffer + nbytes);
+    }
+
   /* Set up the DMA */
 
   adjust = (priv->nbits > 8) ? 2 : 1;
@@ -1766,7 +1777,6 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
-  config.ttype  = EDMA_PERIPH2MEM;
   config.nbytes = adjust;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
@@ -1781,7 +1791,6 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
-  config.ttype  = EDMA_MEM2PERIPH;
   config.nbytes = adjust;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
@@ -1816,9 +1825,6 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   /* Disable DMA */
 
   s32k3xx_lpspi_putreg32(priv, S32K3XX_LPSPI_DER_OFFSET, 0);
-
-  up_invalidate_dcache((uintptr_t)rxbuffer,
-                           (uintptr_t)rxbuffer + nbytes);
 }
 
 #endif  /* CONFIG_S32K3XX_SPI_DMA */
