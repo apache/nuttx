@@ -74,13 +74,6 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   upperlen = (((uint16_t)(ipv4->len[0]) << 8) + ipv4->len[1]) - iphdrlen;
 
-  /* Verify some minimal assumptions */
-
-  if (upperlen > NETDEV_PKTSIZE(dev))
-    {
-      return 0;
-    }
-
   /* First sum pseudo-header.
    *
    * IP protocol and length fields. This addition cannot carry.
@@ -141,13 +134,6 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
   /* Adjust for the presence of any extension headers */
 
   upperlen -= (iplen - IPv6_HDRLEN);
-
-  /* Verify some minimal assumptions */
-
-  if (upperlen > NETDEV_PKTSIZE(dev))
-    {
-      return 0;
-    }
 
   /* The checksum is calculated starting with a pseudo-header of IPv6 header
    * fields according to the IPv6 standard, which consists of the source
