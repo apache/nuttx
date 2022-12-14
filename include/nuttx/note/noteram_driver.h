@@ -93,7 +93,7 @@ struct noteram_get_taskname_s
  * Name: noteram_register
  *
  * Description:
- *   Register RAM note driver at /dev/note that can be used by an
+ *   Register RAM note driver at /dev/note/ram that can be used by an
  *   application to read note data from the circular note buffer.
  *
  * Input Parameters:

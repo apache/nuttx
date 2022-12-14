@@ -881,7 +881,7 @@ void sched_note_add(FAR const void *note, size_t notelen)
  * Name: noteram_register
  *
  * Description:
- *   Register a serial driver at /dev/note that can be used by an
+ *   Register a serial driver at /dev/note/ram that can be used by an
  *   application to read data from the circular note buffer.
  *
  * Input Parameters:
@@ -894,5 +894,5 @@ void sched_note_add(FAR const void *note, size_t notelen)
 
 int noteram_register(void)
 {
-  return register_driver("/dev/note", &g_noteram_fops, 0666, NULL);
+  return register_driver("/dev/note/ram", &g_noteram_fops, 0666, NULL);
 }
