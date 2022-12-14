@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /* Following raw buffer will be divided into iob_s instances, the initial
- * procedure will ensure that the member io_head of each iob_s is aligned
+ * procedure will ensure that the member io_data of each iob_s is aligned
  * to the CONFIG_IOB_ALIGNMENT memory boundary.
  */
 
@@ -119,12 +119,12 @@ void iob_initialize(void)
   int i;
   uintptr_t buf;
 
-  /* Get a start address which plus offsetof(struct iob_s, io_head) is
+  /* Get a start address which plus offsetof(struct iob_s, io_data) is
    * aligned to the CONFIG_IOB_ALIGNMENT memory boundary
    */
 
-  buf = ROUNDUP((uintptr_t)g_iob_buffer + offsetof(struct iob_s, io_head),
-                CONFIG_IOB_ALIGNMENT) - offsetof(struct iob_s, io_head);
+  buf = ROUNDUP((uintptr_t)g_iob_buffer + offsetof(struct iob_s, io_data),
+                CONFIG_IOB_ALIGNMENT) - offsetof(struct iob_s, io_data);
 
   /* Get I/O buffer instance from the start address and add each I/O buffer
    * to the free list
@@ -141,7 +141,7 @@ void iob_initialize(void)
     }
 
 #if CONFIG_IOB_NCHAINS > 0
-      /* Add each I/O buffer chain queue container to the free list */
+  /* Add each I/O buffer chain queue container to the free list */
 
   for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
     {
