@@ -41,23 +41,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_registerdump
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void xtensa_registerdump(const uintptr_t *regs)
-{
-  svcinfo("  A0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_A0],  regs[REG_A1],  regs[REG_A2],  regs[REG_A3],
-          regs[REG_A4],  regs[REG_A5],  regs[REG_A6],  regs[REG_A7]);
-  svcinfo("  A8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_A8],  regs[REG_A9],  regs[REG_A10], regs[REG_A11],
-          regs[REG_A12], regs[REG_A13], regs[REG_A14], regs[REG_A15]);
-  svcinfo("  PC: %08x PS: %08x\n", regs[REG_PC], regs[REG_PS]);
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -448,7 +431,7 @@ int xtensa_swint(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SYSCALL Return: Context switch!\n");
-      xtensa_registerdump((const uintptr_t *)CURRENT_REGS);
+      xtensa_registerdump(CURRENT_REGS);
     }
   else
     {

@@ -157,13 +157,7 @@ void z16_netinitialize(void);
 
 /* Dump stack and registers */
 
-#ifdef CONFIG_ARCH_STACKDUMP
-void z16_stackdump(void);
-void z16_registerdump(void);
-#else
-# define z16_stackdump()
-# define z16_registerdump()
-#endif
+void z16_registerdump(FAR volatile uint32_t *regs);
 
 #endif /* __ASSEMBLY__ */
 

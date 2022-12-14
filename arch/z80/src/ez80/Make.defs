@@ -25,10 +25,6 @@ CMN_CSRCS += z80_idle.c z80_assert.c z80_doirq.c
 CMN_CSRCS += z80_mdelay.c z80_stackframe.c z80_udelay.c z80_usestack.c
 CMN_CSRCS += z80_nputs.c
 
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += z80_stackdump.c
-endif
-
 CHIP_ASRCS  = ez80_startup.asm ez80_io.asm ez80_irqsave.asm
 CHIP_ASRCS += ez80_irqcommon.asm
 CHIP_ASRCS += ez80_saveusercontext.asm ez80_restorecontext.asm

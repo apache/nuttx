@@ -323,6 +323,8 @@ size_t or1k_stack_check(uintptr_t alloc, size_t size);
 void or1k_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+void or1k_registerdump(volatile uint32_t *regs);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

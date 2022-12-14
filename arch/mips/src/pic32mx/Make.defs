@@ -33,6 +33,7 @@ CMN_CSRCS += mips_nputs.c mips_releasestack.c
 CMN_CSRCS += mips_schedulesigaction.c mips_sigdeliver.c
 CMN_CSRCS += mips_stackframe.c mips_swint0.c mips_udelay.c mips_switchcontext.c
 CMN_CSRCS += mips_usestack.c mips_vfork.c
+CMN_CSRCS += mips_registerdump.c mips_getintstack.c
 
 # Configuration dependent common files
 
@@ -48,10 +49,6 @@ ifneq ($(CONFIG_PIC32MX_ETHERNET),y)
 ifeq ($(CONFIG_NET),y)
 CMN_CSRCS += mips_etherstub.c
 endif
-endif
-
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += mips_dumpstate.c
 endif
 
 # Required PIC32MX files

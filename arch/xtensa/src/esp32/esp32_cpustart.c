@@ -66,23 +66,6 @@ extern void ets_set_appcpu_boot_addr(uint32_t start);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_registerdump
- ****************************************************************************/
-
-#if 0 /* Was useful in solving some startup problems */
-static inline void xtensa_registerdump(struct tcb_s *tcb)
-{
-  _info("CPU%d:\n", up_cpu_index());
-
-  /* Dump the startup registers */
-
-  /* To be provided */
-}
-#else
-# define xtensa_registerdump(tcb)
-#endif
-
-/****************************************************************************
  * Name: xtensa_attach_fromcpu0_interrupt
  ****************************************************************************/
 
@@ -182,7 +165,9 @@ void IRAM_ATTR xtensa_appcpu_start(void)
 
   /* Dump registers so that we can see what is going to happen on return */
 
-  xtensa_registerdump(tcb);
+#if 0
+  xtensa_registerdump(tcb->xcp.regs);
+#endif
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
   /* Initialize GPIO interrupt support */

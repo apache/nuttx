@@ -277,6 +277,8 @@ size_t riscv_stack_check(uintptr_t alloc, size_t size);
 void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+void riscv_registerdump(volatile uintptr_t *regs);
+
 #ifdef CONFIG_SMP
 void riscv_cpu_boot(int cpu);
 int riscv_pause_handler(int irq, void *c, void *arg);

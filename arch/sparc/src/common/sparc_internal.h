@@ -185,11 +185,7 @@ void sparc_lowputs(const char *str);
 
 /* Debug */
 
-#ifdef CONFIG_ARCH_STACKDUMP
-void sparc_dumpstate(void);
-#else
-#  define sparc_dumpstate()
-#endif
+void sparc_registerdump(volatile uint32_t *regs);
 
 /* Software interrupt 0 handler */
 

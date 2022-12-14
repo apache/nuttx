@@ -430,7 +430,7 @@ void up_exit(int status) noreturn_function;
  *
  ****************************************************************************/
 
-void up_assert(FAR const char *filename, int linenum);
+void up_assert(void);
 
 #ifdef CONFIG_ARCH_HAVE_BACKTRACE
 
@@ -1758,6 +1758,19 @@ int up_timer_tick_start(clock_t ticks);
  */
 
 /****************************************************************************
+ * Name: up_getusrsp
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   User stack pointer.
+ *
+ ****************************************************************************/
+
+uintptr_t up_getusrsp(void);
+
+/****************************************************************************
  * TLS support
  ****************************************************************************/
 
@@ -2267,6 +2280,10 @@ ssize_t up_check_stack_remain(void);
 size_t  up_check_intstack(void);
 size_t  up_check_intstack_remain(void);
 #endif
+#endif
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+uintptr_t up_get_intstackbase(void);
 #endif
 
 /****************************************************************************
