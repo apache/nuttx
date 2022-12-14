@@ -165,7 +165,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
     {
       /* Yes.. that is the CPU we must use */
 
-      cpu  = btcb->cpu;
+      cpu = btcb->cpu;
     }
   else
     {
@@ -178,7 +178,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
   /* Get the task currently running on the CPU (may be the IDLE task) */
 
-  rtcb = (FAR struct tcb_s *)g_assignedtasks[cpu].head;
+  rtcb = current_task(cpu);
 
   /* Determine the desired new task state.  First, if the new task priority
    * is higher then the priority of the lowest priority, running task, then
@@ -198,7 +198,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
   else if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
     {
       task_state = TSTATE_TASK_ASSIGNED;
-      cpu = btcb->cpu;
+      cpu        = btcb->cpu;
     }
 
   /* Otherwise, it will be ready-to-run, but not not yet running */
@@ -206,7 +206,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
   else
     {
       task_state = TSTATE_TASK_READYTORUN;
-      cpu = 0;  /* CPU does not matter */
+      cpu        = 0;  /* CPU does not matter */
     }
 
   /* If the selected state is TSTATE_TASK_RUNNING, then we would like to
@@ -232,7 +232,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
       nxsched_add_prioritized(btcb, &g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
-      doswitch = false;
+      doswitch         = false;
     }
   else if (task_state == TSTATE_TASK_READYTORUN)
     {
@@ -316,7 +316,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
            */
 
           DEBUGASSERT(btcb->flink != NULL);
-          next = (FAR struct tcb_s *)btcb->flink;
+          next = btcb->flink;
 
           if ((next->flags & TCB_FLAG_CPU_LOCKED) != 0)
             {
