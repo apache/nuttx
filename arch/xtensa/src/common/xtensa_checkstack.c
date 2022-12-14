@@ -180,11 +180,7 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 size_t up_check_intstack(void)
 {
-#ifdef CONFIG_SMP
-  return xtensa_stack_check(xtensa_intstack_alloc(), INTSTACK_SIZE);
-#else
-  return xtensa_stack_check((uintptr_t)g_intstackalloc, INTSTACK_SIZE);
-#endif
+  return xtensa_stack_check(up_get_intstackbase(), INTSTACK_SIZE);
 }
 
 size_t up_check_intstack_remain(void)

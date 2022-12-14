@@ -23,7 +23,7 @@
 CMN_CSRCS += x86_64_allocateheap.c x86_64_assert.c x86_64_copystate.c
 CMN_CSRCS += x86_64_mdelay.c x86_64_udelay.c x86_64_exit.c x86_64_initialize.c 
 CMN_CSRCS += x86_64_modifyreg8.c x86_64_modifyreg16.c x86_64_modifyreg32.c x86_64_nputs.c
-CMN_CSRCS += x86_64_switchcontext.c
+CMN_CSRCS += x86_64_switchcontext.c x86_64_getintstack.c
 CMN_CSRCS += intel64_restore_auxstate.c intel64_createstack.c intel64_initialstate.c
 CMN_CSRCS += intel64_regdump.c intel64_releasestack.c intel64_map_region.c
 CMN_CSRCS += intel64_savestate.c intel64_sigdeliver.c

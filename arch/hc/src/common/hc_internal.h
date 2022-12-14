@@ -195,6 +195,8 @@ void hc_usbuninitialize(void);
 # define hc_usbuninitialize()
 #endif
 
+void hc_registerdump(volatile uint8_t *regs);
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_HC_SRC_COMMON_UP_INTERNAL_H */

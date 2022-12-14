@@ -71,19 +71,9 @@
  *
  ****************************************************************************/
 
-void up_assert(const char *filename, int lineno)
+void up_assert(void)
 {
   struct tcb_s *rtcb = running_task();
-
-  /* Show back trace */
-
-#ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(rtcb->pid);
-#endif
-
-  /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
 
   if (CURRENT_REGS || is_idle_task(rtcb))
     {

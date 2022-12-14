@@ -41,18 +41,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_registerdump
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void up_registerdump(const uint32_t *regs)
-{
-}
-#else
-#  define up_registerdump(regs)
-#endif
-
-/****************************************************************************
  * Name: dispatch_syscall
  *
  * Description:
@@ -229,7 +217,7 @@ int sparc_swint1(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t *)CURRENT_REGS);
+      up_registerdump(CURRENT_REGS);
     }
   else
     {

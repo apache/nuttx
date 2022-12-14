@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/z80_stackdump.c
+ * arch/x86/src/common/x86_getintstack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,59 +25,20 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
 
-#include "sched/sched.h"
-#include "z80_internal.h"
-
-#ifdef CONFIG_ARCH_STACKDUMP
+#include "x86_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z80_stackdump
+ * Name: up_get_intstackbase
  ****************************************************************************/
 
-void z80_stackdump(void)
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+uintptr_t up_get_intstackbase(void)
 {
-  FAR struct tcb_s *rtcb = running_task();
-  uintptr_t sp = up_getsp();
-  uintptr_t stack_base = (uintptr_t)rtcb->stack_base_ptr;
-  uintptr_t stack_size = (uintptr_t)rtcb->adj_stack_size;
-  uintptr_t stack;
-  uintptr_t stack_top;
-
-  _alert("stack_base: %06x\n", stack_base);
-  _alert("stack_size: %06x\n", stack_size);
-  _alert("sp:         %06x\n", sp);
-
-  if (sp >= stack_base && sp < stack_base + stack_size)
-    {
-      stack = sp;
-    }
-  else
-    {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      stack = stack_base;
-    }
-
-  stack_top = stack_base + stack_size;
-
-  /* Flush any buffered SYSLOG data to avoid overwrite */
-
-  syslog_flush();
-
-  for (stack = stack & ~(8 * sizeof(chipreg_t) - 1);
-       stack < (stack_top & ~(8 * sizeof(chipreg_t) - 1));
-       stack += 8 * sizeof(chipreg_t))
-    {
-      FAR chipreg_t *ptr = (FAR chipreg_t *)stack;
-      _alert("%06x: %06x %06x %06x %06x %06x %06x %06x %06x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
-    }
+  return (uintptr_t)g_intstackalloc;
 }
-
-#endif /* CONFIG_ARCH_STACKDUMP */
+#endif

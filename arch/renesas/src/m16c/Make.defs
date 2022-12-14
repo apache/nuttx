@@ -22,13 +22,14 @@ HEAD_ASRC = m16c_head.S
 
 CMN_CSRCS  = renesas_allocateheap.c renesas_assert.c
 CMN_CSRCS += renesas_createstack.c renesas_doirq.c renesas_exit.c renesas_idle.c renesas_initialize.c
-CMN_CSRCS += renesas_lowputs.c renesas_mdelay.c renesas_nputs.c renesas_releasestack.c
+CMN_CSRCS += renesas_lowputs.c renesas_mdelay.c renesas_nputs.c
+CMN_CSRCS += renesas_releasestack.c renesas_getintstack.c
 CMN_CSRCS += renesas_stackframe.c renesas_udelay.c renesas_switchcontext.c renesas_usestack.c
 
 CHIP_ASRCS  = m16c_vectors.S
 CHIP_CSRCS  = m16c_initialstate.c m16c_copystate.c m16c_lowputc.c m16c_irq.c
 CHIP_CSRCS += m16c_schedulesigaction.c m16c_sigdeliver.c
-CHIP_CSRCS += m16c_serial.c m16c_dumpstate.c
+CHIP_CSRCS += m16c_serial.c m16c_registerdump.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += m16c_timerisr.c

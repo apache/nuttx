@@ -118,6 +118,15 @@ typedef void (*up_vector_t)(void);
 extern uint32_t g_idle_topstack;
 #endif
 
+/* Address of the saved user stack pointer */
+
+#ifndef __ASSEMBLY__
+#  if CONFIG_ARCH_INTERRUPTSTACK > 3
+     extern uint8_t g_intstackalloc[];
+     extern uint8_t g_intstacktop[];
+#  endif
+#endif
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -193,11 +202,7 @@ void renesas_usbuninitialize(void);
 
 /* Defined in chip-specific logic */
 
-#ifdef CONFIG_ARCH_STACKDUMP
-void renesas_dumpstate(void);
-#else
-#  define renesas_dumpstate()
-#endif
+void renesas_registerdump(volatile uint32_t *regs);
 
 #endif /* __ASSEMBLY__ */
 #endif /* ___ARCH_RENESAS_SRC_COMMON_UP_INTERNAL_H */
