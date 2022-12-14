@@ -833,7 +833,7 @@ void nxsem_release_holder(FAR sem_t *sem)
 
   /* The current task is not a holder */
 
-  if (total == 1)
+  if (candidate != NULL && total == 1)
     {
       /* If the semaphore has only one holder, we can decrement the counts
        * simply.
