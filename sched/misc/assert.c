@@ -251,7 +251,8 @@ static void dump_task(struct tcb_s *tcb, void *arg)
     {
       struct pthread_tcb_s *ptcb = (struct pthread_tcb_s *)tcb;
 
-      snprintf(args, sizeof(args), " %p", ptcb->arg);
+      snprintf(args, sizeof(args), " %p %p",
+               ptcb->cmn.entry.main, ptcb->arg);
     }
   else
 #endif
@@ -443,16 +444,18 @@ void _assert(FAR const char *filename, int linenum)
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
-         up_cpu_index(), filename, linenum, running_task()->name);
+  _alert("Assertion failed CPU%d at file:%s line: %d task: %s %p\n",
+         up_cpu_index(), filename, linenum, running_task()->name,
+         running_task()->entry.main);
 #  else
   _alert("Assertion failed CPU%d at file:%s line: %d\n",
          up_cpu_index(), filename, linenum);
 #  endif
 #else
 #  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed at file:%s line: %d task: %s\n",
-         filename, linenum, running_task()->name);
+  _alert("Assertion failed at file:%s line: %d task: %s %p\n",
+         filename, linenum, running_task()->name,
+         running_task()->entry.main);
 #  else
   _alert("Assertion failed at file:%s line: %d\n",
          filename, linenum);
