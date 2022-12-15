@@ -134,6 +134,10 @@
 
 #define SIZEOF_MM_FREENODE sizeof(struct mm_freenode_s)
 
+/* Get the node size */
+
+#define SIZEOF_MM_NODE(node) ((node)->size & (~MM_MASK_BIT))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -153,28 +157,28 @@ typedef size_t mmsize_t;
 
 struct mm_allocnode_s
 {
+  mmsize_t preceding;                       /* Size of the preceding chunk */
+  mmsize_t size;                            /* Size of this chunk */
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
 #  endif
 #endif
-  mmsize_t size;                            /* Size of this chunk */
-  mmsize_t preceding;                       /* Size of the preceding chunk */
 };
 
 /* This describes a free chunk */
 
 struct mm_freenode_s
 {
+  mmsize_t preceding;                       /* Size of the preceding chunk */
+  mmsize_t size;                            /* Size of this chunk */
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
 #  endif
 #endif
-  mmsize_t size;                            /* Size of this chunk */
-  mmsize_t preceding;                       /* Size of the preceding chunk */
   FAR struct mm_freenode_s *flink;          /* Supports a doubly linked list */
   FAR struct mm_freenode_s *blink;
 };

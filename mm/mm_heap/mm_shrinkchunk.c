@@ -53,24 +53,25 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
                     FAR struct mm_allocnode_s *node, size_t size)
 {
   FAR struct mm_freenode_s *next;
+  size_t nodesize = SIZEOF_MM_NODE(node);
 
   DEBUGASSERT((size & MM_GRAN_MASK) == 0);
 
   /* Get a reference to the next node */
 
-  next = (FAR struct mm_freenode_s *)((FAR char *)node + node->size);
+  next = (FAR struct mm_freenode_s *)((FAR char *)node + nodesize);
 
   /* Check if it is free */
 
-  if ((next->preceding & MM_ALLOC_BIT) == 0)
+  if ((next->size & MM_ALLOC_BIT) == 0)
     {
       FAR struct mm_allocnode_s *andbeyond;
       FAR struct mm_freenode_s *newnode;
+      size_t nextsize = SIZEOF_MM_NODE(next);
 
       /* Get the chunk next the next node (which could be the tail chunk) */
 
-      andbeyond = (FAR struct mm_allocnode_s *)
-                  ((FAR char *)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + nextsize);
 
       /* Remove the next node.  There must be a predecessor, but there may
        * not be a successor node.
@@ -91,11 +92,10 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
 
       /* Set up the size of the new node */
 
-      newnode->size        = next->size + node->size - size;
+      newnode->size        = nextsize + nodesize - size;
       newnode->preceding   = size;
-      node->size           = size;
-      andbeyond->preceding = newnode->size |
-                             (andbeyond->preceding & MM_MASK_BIT);
+      node->size           = size | (node->size & MM_MASK_BIT);
+      andbeyond->preceding = newnode->size;
 
       /* Add the new node to the freenodelist */
 
@@ -106,7 +106,7 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
    * chunk to be shrunk.
    */
 
-  else if (node->size >= size + SIZEOF_MM_FREENODE)
+  else if (nodesize >= size + SIZEOF_MM_FREENODE)
     {
       FAR struct mm_freenode_s *newnode;
 
@@ -118,11 +118,10 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
 
       /* Set up the size of the new node */
 
-      newnode->size        = node->size - size;
-      newnode->preceding   = size;
-      node->size           = size;
-      next->preceding      = newnode->size |
-                             (next->preceding & MM_MASK_BIT);
+      newnode->size      = nodesize - size;
+      newnode->preceding = size;
+      node->size         = size | (node->size & MM_MASK_BIT);
+      next->preceding    = newnode->size;
 
       /* Add the new node to the freenodelist */
 

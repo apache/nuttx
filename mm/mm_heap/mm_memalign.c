@@ -148,14 +148,12 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       FAR struct mm_allocnode_s *next;
       FAR struct mm_freenode_s *prev;
       size_t precedingsize;
-
-      /* Mark node free */
-
-      node->preceding &= ~MM_MASK_BIT;
+      size_t newnodesize;
 
       /* Get the node the next node after the allocation. */
 
-      next = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size);
+      next = (FAR struct mm_allocnode_s *)
+        ((FAR char *)node + SIZEOF_MM_NODE(node));
       prev = (FAR struct mm_freenode_s *)
         ((FAR char *)node - node->preceding);
 
@@ -195,7 +193,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
        * set up the node size.
        */
 
-      if ((prev->preceding & MM_ALLOC_BIT) == 0)
+      if ((prev->size & MM_ALLOC_BIT) == 0)
         {
           /* Remove the node.  There must be a predecessor, but there may
            * not be a successor node.
@@ -216,18 +214,19 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
       /* Set up the size of the new node */
 
-      newnode->size = (uintptr_t)next - (uintptr_t)newnode;
-      newnode->preceding = precedingsize | MM_ALLOC_BIT;
+      newnodesize = (uintptr_t)next - (uintptr_t)newnode;
+      newnode->size = newnodesize | MM_ALLOC_BIT;
+      newnode->preceding = precedingsize;
 
       /* Fix the preceding size of the next node */
 
-      next->preceding = newnode->size | (next->preceding & MM_ALLOC_BIT);
+      next->preceding = newnodesize;
 
       /* Convert the newnode chunk size back into malloc-compatible size by
        * subtracting the header size SIZEOF_MM_ALLOCNODE.
        */
 
-      allocsize = newnode->size - SIZEOF_MM_ALLOCNODE;
+      allocsize = newnodesize - SIZEOF_MM_ALLOCNODE;
 
       /* Add the original, newly freed node to the free nodelist */
 
