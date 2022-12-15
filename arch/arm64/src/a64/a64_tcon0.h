@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/a64/hardware/a64_memorymap.h
+ * arch/arm64/src/a64/a64_tcon0.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H
-#define __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H
+#ifndef __ARCH_ARM64_SRC_A64_A64_TCON0_H
+#define __ARCH_ARM64_SRC_A64_A64_TCON0_H
 
 /****************************************************************************
  * Included Files
@@ -28,28 +28,26 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Peripheral Base Addresses */
-
-#define A64_TCON0_ADDR      0x01c0c000 /* TCON 0          0x01c0:c000-0x01c0:cfff 4K */
-#define A64_CCU_ADDR        0x01c20000 /* CCU             0x01c2:0000-0x01c2:03ff 1K */
-#define A64_PIO_ADDR        0x01c20800 /* PIO             0x01c2:0800-0x01c2:0bff 1K */
-#define A64_DSI_ADDR        0x01ca0000 /* MIPI DSI        0x01ca:0000-0x01ca:0fff 4K */
-#define A64_DPHY_ADDR       0x01ca1000 /* MIPI DSI-PHY    0x01ca:1000-0x01ca:1fff 4K */
-#define A64_RPIO_ADDR       0x01f02c00 /* R_PIO           0x01f0:2c00-0x01f0:2fff 1K */
-
-/****************************************************************************
- * Public Types
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: a64_tcon0_init
+ *
+ * Description:
+ *   Initialize Timing Controller TCON0 to stream pixel data from Display
+ *   Engine to MIPI Display Serial Interface. Should be called before
+ *   enabling the MIPI DSI Block on the SoC.
+ *
+ * Input Parameters:
+ *   panel_width  - LCD Panel Width (pixels)
+ *   panel_height - LCD Panel Height (pixels)
+ *
+ * Returned Value:
+ *   OK is always returned at present.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
+int a64_tcon0_init(uint16_t panel_width, uint16_t panel_height);
 
-#endif /* __ARCH_ARM64_SRC_A64_HARDWARE_A64_MEMORYMAP_H */
+#endif /* __ARCH_ARM64_SRC_A64_A64_TCON0_H */

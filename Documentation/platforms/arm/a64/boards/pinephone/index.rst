@@ -148,5 +148,6 @@ Peripheral  Support NOTES
 MIPI D-PHY   Yes
 MIPI DSI     Yes
 PIO          Yes
+TCON0        Yes
 UART         Yes    Only UART0 is supported
 =========== ======= =====
