@@ -50,12 +50,12 @@ open-amp.zip:
 else
 .openamp_headers:
 endif
+
+context::# .openamp_headers
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))
 	$(shell mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
 	$(foreach header,$(headers),$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
-	touch $@
-
-context:: .openamp_headers
+	touch .openamp_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
