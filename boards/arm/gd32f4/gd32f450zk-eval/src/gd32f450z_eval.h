@@ -101,6 +101,41 @@
 
 #define HAVE_GD25         1
 
+#if !defined(CONFIG_MTD_GD25) || !defined(CONFIG_GD32F4_SPI5)
+#  undef HAVE_GD25
+#endif
+
+/* Can't support AT24 features if mountpoints are disabled or if we were not
+ * asked to mount the AT25 part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || \
+   !defined(CONFIG_GD32F450ZK_EVAL_GD25_BLOCKMOUNT)
+#  undef HAVE_GD25
+#endif
+
+#define HAVE_AT24         1
+
+/* AT24 Serial EEPROM
+ *
+ * A AT24C02C Serial EEPPROM was used for tested I2C0.
+ */
+
+#define AT24_BUS          0
+#define AT24_MINOR        0
+
+#if !defined(CONFIG_MTD_AT24XX) || !defined(CONFIG_GD32F4_I2C0)
+#  undef HAVE_AT24
+#endif
+
+/* Can't support AT24 features if mountpoints are disabled or if we were not
+ * asked to mount the AT25 part
+ */
+
+#ifndef CONFIG_GD32F450ZK_EVAL_AT24_TEST
+#  undef HAVE_AT24
+#endif
+
 /* GPIO pins used by the GPIO Subsystem */
 
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
@@ -142,6 +177,18 @@ void gd32_spidev_initialize(void);
 
 #ifdef HAVE_GD25
 int gd32_gd25_automount(int minor);
+#endif
+
+/****************************************************************************
+ * Name: gd32_at24_wr_test
+ *
+ * Description:
+ *   Write and read the AT24 serial EEPROM test.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AT24
+int gd32_at24_wr_test(int minor);
 #endif
 
 /****************************************************************************
