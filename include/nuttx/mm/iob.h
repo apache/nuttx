@@ -114,7 +114,7 @@ struct iob_s
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
-  uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+  FAR uint8_t *io_data;
 };
 
 #if CONFIG_IOB_NCHAINS > 0

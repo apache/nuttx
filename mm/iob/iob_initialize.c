@@ -38,9 +38,8 @@
 
 /* Fix the I/O Buffer size with specified alignment size */
 
-#define IOB_ALIGN_SIZE    ROUNDUP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT)
-#define IOB_BUFFER_SIZE   (IOB_ALIGN_SIZE * CONFIG_IOB_NBUFFERS + \
-                           CONFIG_IOB_ALIGNMENT - 1)
+#define IOB_BUFSIZE   ROUNDUP(CONFIG_IOB_BUFSIZE, CONFIG_IOB_ALIGNMENT)
+#define IOB_POOLSIZE  (IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
 
 /****************************************************************************
  * Private Data
@@ -52,10 +51,12 @@
  */
 
 #ifdef IOB_SECTION
-static uint8_t g_iob_buffer[IOB_BUFFER_SIZE] locate_data(IOB_SECTION);
+static uint8_t g_iob_buffer[IOB_POOLSIZE] locate_data(IOB_SECTION);
 #else
-static uint8_t g_iob_buffer[IOB_BUFFER_SIZE];
+static uint8_t g_iob_buffer[IOB_POOLSIZE];
 #endif
+
+static struct iob_s g_iob_list[CONFIG_IOB_NBUFFERS];
 
 #if CONFIG_IOB_NCHAINS > 0
 /* This is a pool of pre-allocated iob_qentry_s buffers */
@@ -117,14 +118,6 @@ sem_t g_qentry_sem = SEM_INITIALIZER(CONFIG_IOB_NCHAINS);
 void iob_initialize(void)
 {
   int i;
-  uintptr_t buf;
-
-  /* Get a start address which plus offsetof(struct iob_s, io_data) is
-   * aligned to the CONFIG_IOB_ALIGNMENT memory boundary
-   */
-
-  buf = ROUNDUP((uintptr_t)g_iob_buffer + offsetof(struct iob_s, io_data),
-                CONFIG_IOB_ALIGNMENT) - offsetof(struct iob_s, io_data);
 
   /* Get I/O buffer instance from the start address and add each I/O buffer
    * to the free list
@@ -132,10 +125,11 @@ void iob_initialize(void)
 
   for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
     {
-      FAR struct iob_s *iob = (FAR struct iob_s *)(buf + i * IOB_ALIGN_SIZE);
+      FAR struct iob_s *iob = &g_iob_list[i];
 
       /* Add the pre-allocate I/O buffer to the head of the free list */
 
+      iob->io_data   = &g_iob_buffer[i * IOB_BUFSIZE];
       iob->io_flink  = g_iob_freelist;
       g_iob_freelist = iob;
     }
