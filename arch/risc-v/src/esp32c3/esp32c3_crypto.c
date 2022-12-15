@@ -445,11 +445,9 @@ static int esp32c3_process(struct cryptop *crp)
       switch (data->alg)
         {
           case CRYPTO_AES_CBC:
-            err = esp32c3_aes_cypher(crp->crp_dst, crp->crp_buf,
-                                     crd->crd_len,
-                                     crd->crd_iv, crd->crd_key, 16,
-                                     AES_MODE_CBC,
-                                     crd->crd_flags & CRD_F_ENCRYPT);
+            err = aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len,
+                             crd->crd_iv, crd->crd_key, 16, AES_MODE_CBC,
+                             crd->crd_flags & CRD_F_ENCRYPT);
             if (err < 0)
               {
                 return err;
@@ -460,12 +458,9 @@ static int esp32c3_process(struct cryptop *crp)
             memcpy(iv, crd->crd_key + crd->crd_klen / 8 - 4, 4);
             memcpy(iv + 4, crd->crd_iv, 8);
             iv[15] = 0x1;
-            err = esp32c3_aes_cypher(crp->crp_dst, crp->crp_buf,
-                                     crd->crd_len,
-                                     iv, crd->crd_key,
-                                     crd->crd_klen / 8 - 4,
-                                     AES_MODE_CTR ,
-                                     crd->crd_flags & CRD_F_ENCRYPT);
+            err = aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len, iv,
+                             crd->crd_key, crd->crd_klen / 8 - 4,
+                             AES_MODE_CTR, crd->crd_flags & CRD_F_ENCRYPT);
             if (err < 0)
               {
                 return err;
