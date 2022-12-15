@@ -107,13 +107,13 @@
  * used when _f is not left shifted by _f##_S
  */
 
-#define REG_GET_FIELD(addr, field) ((getreg32(addr) >> field##_S) & field##_V)
+#define REG_GET_FIELD(addr, field) ((getreg32(addr) >> (field##_S)) & (field##_V))
 
 /* Set field to register,
  * used when _f is not left shifted by _f##_S
  */
 
-#define REG_SET_FIELD(addr, field, val) (modifyreg32(addr, field##_M, (((uint32_t) val) & field##_V) << field##_S))
+#define REG_SET_FIELD(addr, field, val) (modifyreg32((addr), (field##_M), (((uint32_t) val) & (field##_V)) << (field##_S)))
 
 /* Set field value from a variable,
  * used when _f is not left shifted by _f##_S
