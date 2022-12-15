@@ -379,4 +379,12 @@
 #  undef  SAMA5_HAVE_FLEXCOM_CONSOLE
 #endif
 
+#if defined(CONFIG_SAMA5_FLEXCOM0_SPI) || \
+    defined(CONFIG_SAMA5_FLEXCOM1_SPI) || \
+    defined(CONFIG_SAMA5_FLEXCOM2_SPI) || \
+    defined(CONFIG_SAMA5_FLEXCOM3_SPI) || \
+    defined(CONFIG_SAMA5_FLEXCOM4_SPI)
+#  define SAMA5_HAVE_FLEXCOM_SPI
+#endif
+
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_CONFIG_H */
