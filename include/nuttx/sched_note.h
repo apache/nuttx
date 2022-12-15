@@ -553,8 +553,6 @@ void sched_note_printf(uintptr_t ip,
                        FAR const char *fmt, ...) printflike(2, 3);
 void sched_note_bprintf(uintptr_t ip, uint8_t event,
                         FAR const char *fmt, ...) printflike(3, 4);
-void sched_note_begin(uintptr_t ip);
-void sched_note_end(uintptr_t ip);
 #else
 #  define sched_note_string(ip,b)
 #  define sched_note_dump(ip,e,b,l)
@@ -562,8 +560,6 @@ void sched_note_end(uintptr_t ip);
 #  define sched_note_vbprintf(ip,e,f,v)
 #  define sched_note_printf(ip,f,...)
 #  define sched_note_bprintf(ip,e,f,...)
-#  define sched_note_begin(ip)
-#  define sched_note_end(ip)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
@@ -708,8 +704,10 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
 #  define sched_note_vbprintf(ip,e,f,v)
 #  define sched_note_printf(ip,f,...)
 #  define sched_note_bprintf(ip,e,f,...)
-#  define sched_note_begin(ip,f)
-#  define sched_note_end(ip,f)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
+
+#define sched_note_begin(ip) sched_note_string(ip, "B")
+#define sched_note_end(ip) sched_note_string(ip, "E")
+
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */
