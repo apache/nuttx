@@ -58,26 +58,9 @@
 
 #define IOB_MASK      (IOB_DIVIDER - 1)
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_free
- *
- * Description:
- *   Free the I/O buffer at the head of a buffer chain returning it to the
- *   free list.  The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
-
-FAR struct iob_s *iob_free(FAR struct iob_s *iob)
+static void update_next(FAR struct iob_s *iob)
 {
   FAR struct iob_s *next = iob->io_flink;
-  irqstate_t flags;
-#ifdef CONFIG_IOB_NOTIFIER
-  int16_t navail;
-#endif
 
   iobinfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
           iob, iob->io_pktlen, iob->io_len, next);
@@ -111,14 +94,75 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       iobinfo("next=%p io_pktlen=%u io_len=%u\n",
               next, next->io_pktlen, next->io_len);
     }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: iob_free
+ *
+ * Description:
+ *   Free the I/O buffer at the head of a buffer chain returning it to the
+ *   free list.  The link to  the next I/O buffer in the chain is return.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_free(FAR struct iob_s *iob)
+{
+  FAR struct iob_s *next = iob->io_flink;
+  irqstate_t flags;
+#ifdef CONFIG_IOB_NOTIFIER
+  int16_t navail;
+#endif
+
+  /* Update pktlen for next node */
+
+  update_next(iob);
+
+  flags = enter_critical_section();
+
+#ifdef CONFIG_IOB_SHARED
+
+  /* Shared iob entry ? */
+
+  if (iob->io_parent != NULL)
+    {
+      /* Put to shared list */
+
+      iob->io_flink   = g_iob_sharelist;
+      g_iob_sharelist = iob;
+
+      /* Look up the parent reference count */
+
+      if (--iob->io_parent->io_refs != 0)
+        {
+          leave_critical_section(flags);
+          return next;
+        }
+
+      /* Reference count == 0, release parent */
+
+      iob  = iob->io_parent;
+      next = iob->io_flink;
+
+      update_next(iob);
+    }
+  else if (--iob->io_refs != 0)
+    {
+      /* Hold the entry until which is released by shared iobs */
+
+      leave_critical_section(flags);
+      return next;
+    }
+#endif
 
   /* Free the I/O buffer by adding it to the head of the free or the
    * committed list. We don't know what context we are called from so
    * we use extreme measures to protect the free list:  We disable
    * interrupts very briefly.
    */
-
-  flags = enter_critical_section();
 
   /* Which list?  If there is a task waiting for an IOB, then put
    * the IOB on either the free list or on the committed list where

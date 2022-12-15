@@ -32,6 +32,10 @@ Configuration Options
 ``CONFIG_MM_IOB``
    Enables generic I/O buffer support. This setting will build the
    common I/O buffer (IOB) support library.
+``CONFIG_IOB_SHARED``
+   Enables shared iob entries support, add reference count to each
+   iob entry to support shared iob, multiple iob entries could share
+   the io_data to avoid unnecessary iob_alloc and memory copies
 ``CONFIG_IOB_NBUFFERS``
    Number of pre-allocated I/O buffers. Each packet is represented
    by a series of small I/O buffers in a chain. This setting
@@ -177,6 +181,8 @@ Public Function Prototypes
   - :c:func:`iob_trimtail()`
   - :c:func:`iob_pack()`
   - :c:func:`iob_contig()`
+  - :c:func:`iob_share()`
+  - :c:func:`iob_share_partial()`
   - :c:func:`iob_dump()`
 
 .. c:function:: void iob_initialize(void);
@@ -323,6 +329,15 @@ Public Function Prototypes
   Ensure that there is ``len`` bytes of contiguous
   space at the beginning of the I/O buffer chain starting at
   ``iob``.
+
+.. c:function:: FAR struct iob_s *iob_share(FAR struct iob_s *iob);
+
+  Create share chain to share the data from input ``iob``.
+
+.. c:function:: FAR struct iob_s *iob_share_partial(FAR struct iob_s *iob, \
+                  unsigned int len, unsigned int offset);
+
+  Create share chain to share the partial data from input ``iob``.
 
 .. c:function:: void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len, \
                  unsigned int offset);

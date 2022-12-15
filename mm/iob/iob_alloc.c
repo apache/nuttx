@@ -73,6 +73,10 @@ static FAR struct iob_s *iob_alloc_committed(void)
       iob->io_len    = 0;    /* Length of the data in the entry */
       iob->io_offset = 0;    /* Offset to the beginning of data */
       iob->io_pktlen = 0;    /* Total length of the packet */
+#ifdef CONFIG_IOB_SHARED
+      iob->io_parent = NULL; /* Not parent in a chain */
+      iob->io_refs   = 1;    /* Reference count of this iob */
+#endif
     }
 
   leave_critical_section(flags);
@@ -302,6 +306,10 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
           iob->io_len    = 0;    /* Length of the data in the entry */
           iob->io_offset = 0;    /* Offset to the beginning of data */
           iob->io_pktlen = 0;    /* Total length of the packet */
+#ifdef CONFIG_IOB_SHARED
+          iob->io_parent = NULL; /* Not parent in a chain */
+          iob->io_refs   = 1;    /* Reference count of this iob */
+#endif
           return iob;
         }
     }

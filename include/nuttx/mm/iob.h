@@ -114,6 +114,14 @@ struct iob_s
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
+#ifdef CONFIG_IOB_SHARED
+  /* Pointer to parent node */
+
+  FAR struct iob_s *io_parent;
+
+  unsigned int io_refs; /* Reference count of this iob */
+#endif
+
   FAR uint8_t *io_data;
 };
 
@@ -579,6 +587,43 @@ void iob_reserve(FAR struct iob_s *iob, unsigned int reserved);
  ****************************************************************************/
 
 void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen);
+
+/****************************************************************************
+ * Name: iob_share
+ *
+ * Description:
+ *   Create share chain to share the data from input iob.
+ *
+ * Input Parameters:
+ *   iob      - Pointer to source iob_s
+ *
+ * Returned Value:
+ *   Return iob share chain if success.
+ *   Return NULL if the shared pool cannot be allocated
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_share(FAR struct iob_s *iob);
+
+/****************************************************************************
+ * Name: iob_share_partial
+ *
+ * Description:
+ *   Create shared chain to share the partial data from input iob.
+ *
+ * Input Parameters:
+ *   iob      - Pointer to source iob_s
+ *   len      - Number of bytes to share
+ *   offset   - Offset of source iobs_s
+ *
+ * Returned Value:
+ *   Return iob share chain if success.
+ *   Return NULL if the shared pool cannot be allocated
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_share_partial(FAR struct iob_s *iob, unsigned int len,
+                                    unsigned int offset);
 
 /****************************************************************************
  * Name: iob_dump

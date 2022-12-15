@@ -56,6 +56,12 @@
 
 extern FAR struct iob_s *g_iob_freelist;
 
+/* A list of all share node */
+
+#ifdef CONFIG_IOB_SHARED
+extern FAR struct iob_s *g_iob_sharelist;
+#endif
+
 /* A list of I/O buffers that are committed for allocation */
 
 extern FAR struct iob_s *g_iob_committed;

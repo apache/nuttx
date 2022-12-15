@@ -41,6 +41,12 @@
 #define IOB_BUFSIZE   ROUNDUP(CONFIG_IOB_BUFSIZE, CONFIG_IOB_ALIGNMENT)
 #define IOB_POOLSIZE  (IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
 
+#ifdef CONFIG_IOB_SHARED
+#  define IOB_NBUFFERS (CONFIG_IOB_NBUFFERS + CONFIG_IOB_SHARED_NBUFFERS)
+#else
+#  define IOB_NBUFFERS (CONFIG_IOB_NBUFFERS)
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -56,7 +62,7 @@ static uint8_t g_iob_buffer[IOB_POOLSIZE] locate_data(IOB_SECTION);
 static uint8_t g_iob_buffer[IOB_POOLSIZE];
 #endif
 
-static struct iob_s g_iob_list[CONFIG_IOB_NBUFFERS];
+static struct iob_s g_iob_list[IOB_NBUFFERS];
 
 #if CONFIG_IOB_NCHAINS > 0
 /* This is a pool of pre-allocated iob_qentry_s buffers */
@@ -71,6 +77,10 @@ static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 /* A list of all free, unallocated I/O buffers */
 
 FAR struct iob_s *g_iob_freelist;
+
+#ifdef CONFIG_IOB_SHARED
+FAR struct iob_s *g_iob_sharelist;
+#endif
 
 /* A list of I/O buffers that are committed for allocation */
 
@@ -133,6 +143,20 @@ void iob_initialize(void)
       iob->io_flink  = g_iob_freelist;
       g_iob_freelist = iob;
     }
+
+#ifdef CONFIG_IOB_SHARED
+  /* Initialize the shared iob pool */
+
+  for (i = CONFIG_IOB_NBUFFERS; i < IOB_NBUFFERS; i++)
+    {
+      FAR struct iob_s *iob = &g_iob_list[i];
+
+      /* Add the pre-allocate I/O buffer to the head of the free list */
+
+      iob->io_flink   = g_iob_sharelist;
+      g_iob_sharelist = iob;
+    }
+#endif
 
 #if CONFIG_IOB_NCHAINS > 0
   /* Add each I/O buffer chain queue container to the free list */
