@@ -1023,6 +1023,19 @@ config RNDIS_VERSIONNO
 	default 0x0001
 
 endif # !RNDIS_COMPOSITE
+
+config RNDIS_EPBULKIN
+	int "RNDIS bulk in endpoint number"
+	default 1
+
+config RNDIS_EPBULKOUT
+	int "RNDIS bulk out endpoint number"
+	default 2
+
+config RNDIS_EPINTIN
+	int "RNDIS interrupt in endpoint number"
+	default 3
+
 endif # RNDIS
 
 menuconfig DFU
