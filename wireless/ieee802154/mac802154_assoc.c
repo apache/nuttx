@@ -135,11 +135,6 @@ int mac802154_req_associate(MACHANDLE mac,
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
 
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
-
   /* Allocate the txdesc, waiting if necessary */
 
   ret = mac802154_txdesc_alloc(priv, &txdesc);
@@ -326,11 +321,6 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
-
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
 
   /* The Destination Addressing Mode and Source Addressing Mode fields shall
    * each be set to indicate extended addressing.

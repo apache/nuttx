@@ -231,10 +231,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   /* Allocate an IOB to put the frame into */
 
   ind->frame = iob_alloc(false);
-  ind->frame->io_flink = NULL;
-  ind->frame->io_len = 0;
-  ind->frame->io_pktlen = 0;
-  ind->frame->io_offset = 0;
+  DEBUGASSERT(ind->frame != NULL);
 
   /* Read packet */
 

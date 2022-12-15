@@ -163,11 +163,8 @@ static void xbee_attnworker(FAR void *arg)
 
   /* Allocate an IOB for the incoming data. */
 
-  iob             = iob_alloc(false);
-  iob->io_flink   = NULL;
-  iob->io_len     = 0;
-  iob->io_offset  = 0;
-  iob->io_pktlen  = 0;
+  iob = iob_alloc(false);
+  DEBUGASSERT(iob != NULL);
 
   /* Keep a reference to the first IOB.  If we need to allocate more than
    * one to hold each API frame, then we will still have this reference to
@@ -266,13 +263,6 @@ static void xbee_attnworker(FAR void *arg)
                           iob->io_flink = iob_tryalloc(false);
 
                           iob = iob->io_flink;
-                          if (iob != NULL)
-                            {
-                              iob->io_flink  = NULL;
-                              iob->io_len    = 0;
-                              iob->io_offset = 0;
-                              iob->io_pktlen = 0;
-                            }
                        }
                       else
                         {
@@ -1324,11 +1314,8 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
    * data.
    */
 
-  iob             = iob_tryalloc(false);
-  iob->io_flink   = NULL;
-  iob->io_len     = 0;
-  iob->io_offset  = 0;
-  iob->io_pktlen  = 0;
+  iob = iob_tryalloc(false);
+  DEBUGASSERT(iob != NULL);
 
   /* Keep a reference to the first IOB.  If we need to allocate more than
    * one to hold each API frame, then we will still have this reference to
@@ -1420,14 +1407,6 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
 
                           iob->io_flink = iob_tryalloc(false);
                           iob = iob->io_flink;
-
-                          if (iob != NULL)
-                            {
-                              iob->io_flink  = NULL;
-                              iob->io_len    = 0;
-                              iob->io_offset = 0;
-                              iob->io_pktlen = 0;
-                            }
                        }
                       else
                         {
