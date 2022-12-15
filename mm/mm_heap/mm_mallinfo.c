@@ -39,38 +39,38 @@
 static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 {
   FAR struct mallinfo *info = arg;
+  size_t nodesize = SIZEOF_MM_NODE(node);
 
-  minfo("node=%p size=%u preceding=%u (%c)\n",
-        node, (unsigned int)node->size,
-        (unsigned int)(node->preceding & ~MM_ALLOC_BIT),
-        (node->preceding & MM_ALLOC_BIT) ? 'A' : 'F');
+  minfo("node=%p size=%zu preceding=%u (%c)\n",
+        node, nodesize, (unsigned int)node->preceding,
+        (node->size & MM_ALLOC_BIT) ? 'A' : 'F');
 
   /* Check if the node corresponds to an allocated memory chunk */
 
-  if ((node->preceding & MM_ALLOC_BIT) != 0)
+  if ((node->size & MM_ALLOC_BIT) != 0)
     {
-      DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
+      DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
       info->aordblks++;
-      info->uordblks += node->size;
+      info->uordblks += nodesize;
     }
   else
     {
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
 
-      DEBUGASSERT(node->size >= SIZEOF_MM_FREENODE);
+      DEBUGASSERT(nodesize >= SIZEOF_MM_FREENODE);
       DEBUGASSERT(fnode->blink->flink == fnode);
-      DEBUGASSERT(fnode->blink->size <= fnode->size);
+      DEBUGASSERT(SIZEOF_MM_NODE(fnode->blink) <= nodesize);
       DEBUGASSERT(fnode->flink == NULL ||
                   fnode->flink->blink == fnode);
       DEBUGASSERT(fnode->flink == NULL ||
-                  fnode->flink->size == 0 ||
-                  fnode->flink->size >= fnode->size);
+                  SIZEOF_MM_NODE(fnode->flink) == 0 ||
+                  SIZEOF_MM_NODE(fnode->flink) >= nodesize);
 
       info->ordblks++;
-      info->fordblks += node->size;
+      info->fordblks += nodesize;
       if (node->size > (size_t)info->mxordblk)
         {
-          info->mxordblk = node->size;
+          info->mxordblk = nodesize;
         }
     }
 }
@@ -79,12 +79,13 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
                                   FAR void *arg)
 {
   FAR struct mallinfo_task *info = arg;
+  size_t nodesize = SIZEOF_MM_NODE(node);
 
   /* Check if the node corresponds to an allocated memory chunk */
 
-  if ((node->preceding & MM_ALLOC_BIT) != 0)
+  if ((node->size & MM_ALLOC_BIT) != 0)
     {
-      DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
+      DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
       if (info->pid == -1)
 #else
@@ -92,13 +93,13 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
 #endif
         {
           info->aordblks++;
-          info->uordblks += node->size;
+          info->uordblks += nodesize;
         }
     }
   else if (info->pid == -2)
     {
       info->aordblks++;
-      info->uordblks += node->size;
+      info->uordblks += nodesize;
     }
 }
 

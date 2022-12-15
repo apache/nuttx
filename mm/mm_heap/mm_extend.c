@@ -92,18 +92,18 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
    * (SIZEOF_MM_ALLOCNODE) or simply:
    */
 
-  oldnode->size = size;
+  oldnode->size = size | (oldnode->size & MM_MASK_BIT);
 
   /* The old node should already be marked as allocated */
 
-  DEBUGASSERT((oldnode->preceding & MM_ALLOC_BIT) != 0);
+  DEBUGASSERT((oldnode->size & MM_ALLOC_BIT) != 0);
 
   /* Get and initialize the new terminal node in the heap */
 
   newnode            = (FAR struct mm_allocnode_s *)
                        (blockend - SIZEOF_MM_ALLOCNODE);
-  newnode->size      = SIZEOF_MM_ALLOCNODE;
-  newnode->preceding = oldnode->size | MM_ALLOC_BIT;
+  newnode->size      = SIZEOF_MM_ALLOCNODE | MM_ALLOC_BIT;
+  newnode->preceding = size;
 
   heap->mm_heapend[region] = newnode;
 
