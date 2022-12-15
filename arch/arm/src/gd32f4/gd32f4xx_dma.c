@@ -714,21 +714,17 @@ void gd32_dma_singlemode_setup(struct gd32_dma_channel_s *dmachan,
 
   regval |= init_struct->direction;
 
-  if (DMA_WIDTH_8BITS_SELECT == init_struct->periph_memory_width)
+  if (DMA_WIDTH_32BITS_SELECT == init_struct->periph_memory_width)
     {
-      regval |= DMA_MEMORY_WIDTH_8BIT;
+      regval |= DMA_MEMORY_WIDTH_32BIT | DMA_PERIPH_WIDTH_32BIT;
     }
   else if (DMA_WIDTH_16BITS_SELECT == init_struct->periph_memory_width)
     {
-      regval |= DMA_MEMORY_WIDTH_16BIT;
-    }
-  else if (DMA_WIDTH_32BITS_SELECT == init_struct->periph_memory_width)
-    {
-      regval |= DMA_MEMORY_WIDTH_32BIT;
+      regval |= DMA_MEMORY_WIDTH_16BIT | DMA_PERIPH_WIDTH_16BIT;
     }
   else
     {
-      regval |= DMA_MEMORY_WIDTH_8BIT;
+      regval |= DMA_MEMORY_WIDTH_8BIT | DMA_PERIPH_WIDTH_8BIT;
     }
 
   if (DMA_PRIO_LOW_SELECT == init_struct->priority)

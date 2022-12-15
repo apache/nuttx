@@ -138,7 +138,7 @@ int board_app_initialize(uintptr_t arg)
 
 #  endif
 
-#  ifdef CONFIG_MTD_GD25
+#  ifdef HAVE_GD25
 
       ret = gd32_gd25_automount(0);
       if (ret < 0)
@@ -149,7 +149,18 @@ int board_app_initialize(uintptr_t arg)
 
 #  endif
 
-#endif
+#  ifdef HAVE_AT24
+
+     ret = gd32_at24_wr_test(AT24_MINOR);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: I2C EEPROM write and read test fail: \
+                 %d\n", ret);
+        }
+
+#  endif
+
+#endif /* CONFIG_FS_NXFFS */
 
 #ifdef CONFIG_DEV_GPIO
       /* Register the GPIO driver */
