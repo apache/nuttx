@@ -511,11 +511,6 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
 
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
-
   /* Get the MAC header length */
 
   ret = mac802154_get_mhrlen(dev->md_mac, &tx->meta);
