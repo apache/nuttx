@@ -482,7 +482,7 @@ unsigned int arp_snapshot(FAR struct arpreq *snapshot,
           memcpy(snapshot[ncopied].arp_ha.sa_data,
                  tabptr->at_ethaddr.ether_addr_octet,
                  sizeof(struct ether_addr));
-          strlcpy((char *)snapshot[ncopied].arp_dev,
+          strlcpy((FAR char *)snapshot[ncopied].arp_dev,
                   tabptr->at_dev->d_ifname,
                   sizeof(snapshot[ncopied].arp_dev));
           ncopied++;
