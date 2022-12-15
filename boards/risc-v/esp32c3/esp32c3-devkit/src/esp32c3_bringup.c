@@ -126,7 +126,8 @@ int esp32c3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+#if defined(CONFIG_ESP32C3_SHA_ACCELERATOR) && \
+    !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
   ret = esp32c3_sha_init();
   if (ret < 0)
     {
