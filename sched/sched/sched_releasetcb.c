@@ -126,7 +126,7 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       if (tcb->stack_alloc_ptr)
         {
-    #ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
           /* If the exiting thread is not a kernel thread, then it has an
            * address environment.  Don't bother to release the stack memory
            * in this case... There is no point since the memory lies in the
@@ -138,7 +138,7 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
            */
 
           if (ttype == TCB_FLAG_TTYPE_KERNEL)
-    #endif
+#endif
             {
               up_release_stack(tcb, ttype);
             }
