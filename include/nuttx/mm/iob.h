@@ -113,8 +113,6 @@ struct iob_s
 
   FAR struct iob_s *io_flink;
 
-  FAR void *io_private;  /* Interpreted by user */
-
   /* Payload */
 
 #if CONFIG_IOB_BUFSIZE < 256
