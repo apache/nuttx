@@ -14,6 +14,13 @@ config A64_MIPI_DSI
 		Select to enable support for MIPI Display Serial Interface (DSI)
 		and MIPI Display Physical Layer (D-PHY).
 
+config A64_TCON0
+	bool "TCON0"
+	default n
+	select A64_MIPI_DSI
+	---help---
+		Select to enable support for Timing Controller TCON0.
+
 config A64_UART
 	bool "UART"
 	default n
