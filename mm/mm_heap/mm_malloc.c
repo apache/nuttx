@@ -106,6 +106,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR struct mm_freenode_s *node;
   size_t alignsize;
+  size_t nodesize;
   FAR void *ret = NULL;
   int ndx;
 
@@ -156,11 +157,14 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    * other mm_nodelist[] entries.
    */
 
-  for (node = heap->mm_nodelist[ndx].flink;
-       node && node->size < alignsize;
-       node = node->flink)
+  for (node = heap->mm_nodelist[ndx].flink; node; node = node->flink)
     {
       DEBUGASSERT(node->blink->flink == node);
+      nodesize = SIZEOF_MM_NODE(node);
+      if (nodesize >= alignsize)
+        {
+          break;
+        }
     }
 
   /* If we found a node with non-zero size, then this is one to use. Since
@@ -192,13 +196,12 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
        * allocation.
        */
 
-      remaining = node->size - alignsize;
+      remaining = nodesize - alignsize;
       if (remaining >= SIZEOF_MM_FREENODE)
         {
           /* Get a pointer to the next node in physical memory */
 
-          next = (FAR struct mm_freenode_s *)
-                 (((FAR char *)node) + node->size);
+          next = (FAR struct mm_freenode_s *)(((FAR char *)node) + nodesize);
 
           /* Create the remainder node */
 
@@ -212,11 +215,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
           node->size = alignsize;
 
-          /* Adjust the 'preceding' size of the (old) next node, preserving
-           * the allocated flag.
-           */
+          /* Adjust the 'preceding' size of the (old) next node. */
 
-          next->preceding = remaining | (next->preceding & MM_MASK_BIT);
+          next->preceding = remaining;
 
           /* Add the remainder back into the nodelist */
 
@@ -225,7 +226,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
       /* Handle the case of an exact size match */
 
-      node->preceding |= MM_ALLOC_BIT;
+      node->size |= MM_ALLOC_BIT;
       ret = (FAR void *)((FAR char *)node + SIZEOF_MM_ALLOCNODE);
     }
 
