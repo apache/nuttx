@@ -79,8 +79,8 @@
 #include "s32k1xx_lpspi.h"
 
 #ifdef CONFIG_S32K1XX_LPSPI_DMA
-#include "hardware/s32k1xx_dmamux.h"
-#include "s32k1xx_edma.h"
+#  include "hardware/s32k1xx_dmamux.h"
+#  include "s32k1xx_edma.h"
 #endif
 
 #include <arch/board/board.h>
@@ -1000,8 +1000,8 @@ static uint32_t s32k1xx_lpspi_setfrequency(struct spi_dev_s *dev,
       /* Write the best values in the CCR register */
 
       s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET,
-                              LPSPI_TCR_PRESCALE_MASK,
-                              LPSPI_TCR_PRESCALE(best_prescaler));
+                                LPSPI_TCR_PRESCALE_MASK,
+                                LPSPI_TCR_PRESCALE(best_prescaler));
 
       priv->frequency = frequency;
       priv->actual = best_frequency;
@@ -1011,7 +1011,7 @@ static uint32_t s32k1xx_lpspi_setfrequency(struct spi_dev_s *dev,
       s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_LAST_SCK_TO_PCS);
       s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
-                                    LPSPI_BETWEEN_TRANSFER);
+                               LPSPI_BETWEEN_TRANSFER);
 
       s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
                                 LPSPI_CCR_SCKDIV_MASK,
@@ -1646,12 +1646,12 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
                                    const void *txbuffer, void *rxbuffer,
                                    size_t nwords)
 {
-  int                          ret;
-  size_t                       adjust;
-  ssize_t                      nbytes;
-  static uint8_t               rxdummy[4] aligned_data(4);
-  static const uint16_t        txdummy = 0xffff;
-  uint32_t                     regval;
+  int                       ret;
+  size_t                    adjust;
+  ssize_t                   nbytes;
+  static uint8_t            rxdummy[4] aligned_data(4);
+  static const uint16_t     txdummy = 0xffff;
+  uint32_t                  regval;
   struct s32k1xx_lpspidev_s *priv = (struct s32k1xx_lpspidev_s *)dev;
 
   DEBUGASSERT(priv != NULL);
@@ -1703,7 +1703,7 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
   struct s32k1xx_edma_xfrconfig_s config;
 
   config.saddr  = priv->spibase + S32K1XX_LPSPI_RDR_OFFSET;
-  config.daddr  = (uint32_t) (rxbuffer ? rxbuffer : rxdummy);
+  config.daddr  = (uint32_t)(rxbuffer ? rxbuffer : rxdummy);
   config.soff   = 0;
   config.doff   = rxbuffer ? adjust : 0;
   config.iter   = nbytes;
@@ -1716,7 +1716,7 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
 #endif
   s32k1xx_dmach_xfrsetup(priv->rxdma, &config);
 
-  config.saddr  = (uint32_t) (txbuffer ? txbuffer : &txdummy);
+  config.saddr  = (uint32_t)(txbuffer ? txbuffer : &txdummy);
   config.daddr  = priv->spibase + S32K1XX_LPSPI_TDR_OFFSET;
   config.soff   = txbuffer ? adjust : 0;
   config.doff   = 0;
@@ -1760,7 +1760,7 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
   s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_DER_OFFSET, 0);
 
   up_invalidate_dcache((uintptr_t)rxbuffer,
-                           (uintptr_t)rxbuffer + nbytes);
+                       (uintptr_t)rxbuffer + nbytes);
 }
 
 #endif  /* CONFIG_S32K1XX_SPI_DMA */
