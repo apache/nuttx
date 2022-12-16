@@ -10,6 +10,12 @@ menuconfig DRIVER_NOTE
 
 if DRIVER_NOTE
 
+config DRIVER_NOTE_MAX
+	int "Maximum number of sched_note drivers"
+	default 1
+	---help---
+		sched_note supports the maximum number of drivers
+
 choice
 	prompt "Note driver selection"
 	default DRIVER_NOTERAM
