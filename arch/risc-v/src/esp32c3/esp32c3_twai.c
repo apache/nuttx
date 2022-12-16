@@ -451,12 +451,12 @@ static int esp32c3twai_setup(struct can_dev_s *dev)
     {
       /* Disable the provided CPU Interrupt to configure it. */
 
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->irq);
     }
 
-  priv->cpuint = esp32c3_request_irq(priv->periph,
-                                     ESP32C3_INT_PRIO_DEF,
-                                     ESP32C3_INT_LEVEL);
+  priv->cpuint = esp32c3_setup_irq(priv->periph,
+                                   ESP32C3_INT_PRIO_DEF,
+                                   ESP32C3_INT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
@@ -472,7 +472,7 @@ static int esp32c3twai_setup(struct can_dev_s *dev)
     {
       /* Failed to attach IRQ, so CPU interrupt must be freed. */
 
-      esp32c3_free_cpuint(priv->periph);
+      esp32c3_teardown_irq(priv->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
       leave_critical_section(flags);
 
@@ -481,7 +481,7 @@ static int esp32c3twai_setup(struct can_dev_s *dev)
 
   /* Enable the CPU interrupt that is linked to the TWAI device. */
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(priv->irq);
 
   leave_critical_section(flags);
 
@@ -515,7 +515,7 @@ static void esp32c3twai_shutdown(struct can_dev_s *dev)
     {
       /* Disable cpu interrupt */
 
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->irq);
 
       /* Dissociate the IRQ from the ISR */
 
@@ -523,7 +523,7 @@ static void esp32c3twai_shutdown(struct can_dev_s *dev)
 
       /* Free cpu interrupt that is attached to this peripheral */
 
-      esp32c3_free_cpuint(priv->periph);
+      esp32c3_teardown_irq(priv->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
     }
 }

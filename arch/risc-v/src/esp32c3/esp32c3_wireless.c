@@ -445,14 +445,14 @@ int esp32c3_wl_init(void)
       return OK;
     }
 
-  priv->cpuint = esp32c3_request_irq(SWI_PERIPH,
-                                     ESP32C3_INT_PRIO_DEF,
-                                     ESP32C3_INT_LEVEL);
+  priv->cpuint = esp32c3_setup_irq(SWI_PERIPH,
+                                   ESP32C3_INT_PRIO_DEF,
+                                   ESP32C3_INT_LEVEL);
 
   ret = irq_attach(SWI_IRQ, esp32c3_wl_swi_irq, NULL);
   if (ret < 0)
     {
-      esp32c3_free_cpuint(SWI_PERIPH);
+      esp32c3_teardown_irq(SWI_PERIPH, priv->cpuint);
       leave_critical_section(flags);
       wlerr("ERROR: Failed to attach IRQ ret=%d\n", ret);
 
@@ -461,7 +461,7 @@ int esp32c3_wl_init(void)
 
   list_initialize(&priv->sc_list);
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(SWI_IRQ);
 
   priv->ref++;
 
@@ -497,9 +497,9 @@ int esp32c3_wl_deinit(void)
       return OK;
     }
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(SWI_IRQ);
   irq_detach(SWI_IRQ);
-  esp32c3_free_cpuint(SWI_PERIPH);
+  esp32c3_teardown_irq(SWI_PERIPH, priv->cpuint);
 
   priv->ref--;
 

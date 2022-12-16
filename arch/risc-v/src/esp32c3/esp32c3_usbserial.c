@@ -276,9 +276,9 @@ static int esp32c3_attach(struct uart_dev_s *dev)
 
   /* Try to attach the IRQ to a CPU int */
 
-  priv->cpuint = esp32c3_request_irq(priv->periph,
-                                     ESP32C3_INT_PRIO_DEF,
-                                     ESP32C3_INT_LEVEL);
+  priv->cpuint = esp32c3_setup_irq(priv->periph,
+                                   ESP32C3_INT_PRIO_DEF,
+                                   ESP32C3_INT_LEVEL);
   if (priv->cpuint < 0)
     {
       return priv->cpuint;
@@ -289,11 +289,11 @@ static int esp32c3_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, esp32c3_interrupt, dev);
   if (ret == OK)
     {
-      up_enable_irq(priv->cpuint);
+      up_enable_irq(priv->irq);
     }
   else
     {
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->irq);
     }
 
   return ret;
@@ -315,9 +315,9 @@ static void esp32c3_detach(struct uart_dev_s *dev)
 
   DEBUGASSERT(priv->cpuint != -ENOMEM);
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(priv->irq);
   irq_detach(priv->irq);
-  esp32c3_free_cpuint(priv->periph);
+  esp32c3_teardown_irq(priv->periph, priv->cpuint);
 
   priv->cpuint = -ENOMEM;
 }
