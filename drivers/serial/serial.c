@@ -570,7 +570,11 @@ static int uart_open(FAR struct file *filep)
       ret = uart_attach(dev);
       if (ret < 0)
         {
-          uart_shutdown(dev);
+          if (!dev->isconsole)
+            {
+              uart_shutdown(dev);
+            }
+
           leave_critical_section(flags);
           goto errout_with_lock;
         }
