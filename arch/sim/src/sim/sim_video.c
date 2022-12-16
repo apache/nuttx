@@ -103,7 +103,6 @@ static const struct imgdata_ops_s g_sim_video_data_ops =
 {
   .init                     = sim_video_data_init,
   .uninit                   = sim_video_data_uninit,
-  .validate_buf             = sim_video_data_validate_buf,
   .set_buf                  = sim_video_data_set_buf,
   .validate_frame_setting   = sim_video_data_validate_frame_setting,
   .start_capture            = sim_video_data_start_capture,
