@@ -133,14 +133,17 @@ int sched_unlock(void)
            *
            * REVISIT: If this CPU is only one that holds the IRQ lock, then
            * we should go ahead and release the pending tasks.  See the logic
-           * leave_critical_section():  It will call up_release_pending()
+           * leave_critical_section():  It will call nxsched_merge_pending()
            * BEFORE it clears IRQ lock.
            */
 
           if (!nxsched_islocked_global() && !irq_cpu_locked(cpu) &&
               g_pendingtasks.head != NULL)
             {
-              up_release_pending();
+              if (nxsched_merge_pending())
+                {
+                  up_switch_context(this_task(), rtcb);
+                }
             }
 
 #if CONFIG_RR_INTERVAL > 0
@@ -155,7 +158,7 @@ int sched_unlock(void)
               rtcb->timeslice == 0)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
-               * to up_release_pending() above may have actually replaced
+               * to nxsched_merge_pending() above may have actually replaced
                * the task at the head of the ready-to-run list.  In that
                * case, we need only to reset the timeslice value back to the
                * maximum.
@@ -195,7 +198,7 @@ int sched_unlock(void)
               nxsched_sporadic_lowpriority(rtcb);
 
 #ifdef CONFIG_SCHED_TICKLESS
-              /* Make sure that the call to up_release_pending() did not
+              /* Make sure that the call to nxsched_merge_pending() did not
                * change the currently active task.
                */
 
@@ -271,7 +274,10 @@ int sched_unlock(void)
 
           if (g_pendingtasks.head != NULL)
             {
-              up_release_pending();
+              if (nxsched_merge_pending())
+                {
+                  up_switch_context(this_task(), rtcb);
+                }
             }
 
 #if CONFIG_RR_INTERVAL > 0
@@ -286,7 +292,7 @@ int sched_unlock(void)
               rtcb->timeslice == 0)
             {
               /* Yes.. that is the situation.  But one more thing:  The call
-               * to up_release_pending() above may have actually replaced
+               * to nxsched_merge_pending() above may have actually replaced
                * the task at the head of the ready-to-run list.  In that
                * case, we need only to reset the timeslice value back to the
                * maximum.
@@ -326,7 +332,7 @@ int sched_unlock(void)
               nxsched_sporadic_lowpriority(rtcb);
 
 #ifdef CONFIG_SCHED_TICKLESS
-              /* Make sure that the call to up_release_pending() did not
+              /* Make sure that the call to nxsched_merge_pending() did not
                * change the currently active task.
                */
 

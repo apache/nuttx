@@ -61,7 +61,6 @@ SECTIONS
         *libarch.a:arm_doirq.o(.text .text.*)
         *libarch.a:arm_unblocktask.o(.text .text.*)
         *libarch.a:arm_blocktask.o(.text .text.*)
-        *libarch.a:arm_releasepending.o(.text .text.*)
 
         *libsched.a:nx_start.o(.rodata .rodata.g_tasklisttable)
         *libsched.a:sem_post.o(.text .text.*)

@@ -45,8 +45,7 @@ endif
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
 CMN_CSRCS += arm64_nputs.c arm64_idle.c arm64_copystate.c
 CMN_CSRCS += arm64_createstack.c arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
-CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_vfork.c
-CMN_CSRCS += arm64_releasepending.c arm64_switchcontext.c
+CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_vfork.c arm64_switchcontext.c
 CMN_CSRCS += arm64_assert.c arm64_schedulesigaction.c arm64_backtrace.c
 CMN_CSRCS += arm64_sigdeliver.c
 

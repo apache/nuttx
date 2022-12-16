@@ -186,19 +186,6 @@ APIs Exported by Architecture-Specific Logic to NuttX
      which will be executed.
   :param rtcb: Refers to the running task which will be blocked.
 
-.. c:function:: void up_release_pending(void)
-
-  When tasks become ready-to-run but cannot run
-  because pre-emption is disabled, they are placed into a pending
-  task list. This function releases and makes ready-to-run all of
-  the tasks that have collected in the pending task list. This can
-  cause a context switch if a new task is placed at the head of the
-  ready to run list.
-
-  This function is called only from the NuttX scheduling logic when
-  pre-emption is re-enabled. Interrupts will always be disabled when
-  this function is called.
-
 .. c:macro:: noreturn_function
 
 .. c:function:: void up_exit(int status) noreturn_function;
