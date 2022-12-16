@@ -262,16 +262,8 @@ static int tty_setup(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  if (!dev->isconsole && priv->fd < 0)
-    {
-      priv->fd = host_uart_open(priv->path);
-      if (priv->fd < 0)
-        {
-          return priv->fd;
-        }
-    }
-
-  return OK;
+  priv->fd = host_uart_open(priv->path);
+  return priv->fd;
 }
 
 /****************************************************************************
@@ -287,13 +279,10 @@ static void tty_shutdown(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  if (!dev->isconsole && priv->fd >= 0)
-    {
-      /* close file Description and reset fd */
+  /* close file Description and reset fd */
 
-      host_uart_close(priv->fd);
-      priv->fd = -1;
-    }
+  host_uart_close(priv->fd);
+  priv->fd = -1;
 }
 
 /****************************************************************************
