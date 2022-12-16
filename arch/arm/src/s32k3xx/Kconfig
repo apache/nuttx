@@ -1318,6 +1318,21 @@ config S32K3XX_LPUART_SINGLEWIRE
 	bool "Signal Wire Support"
 	default n
 	
+config S32K3XX_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 64
+	depends on LPUART0_RXDMA || LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || \
+	           LPUART4_RXDMA || LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || \
+	           LPUART8_RXDMA || LPUART9_RXDMA || LPUART10_RXDMA || LPUART11_RXDMA || \
+	           LPUART12_RXDMA || LPUART13_RXDMA ||LPUART14_RXDMA || LPUART15_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
 endmenu
 
 menu "Ethernet Configuration"
