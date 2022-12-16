@@ -256,7 +256,6 @@ const struct imgdata_ops_s g_cxd56_cisif_ops =
   {
     .init                   = cxd56_cisif_init,
     .uninit                 = cxd56_cisif_uninit,
-    .validate_buf           = cxd56_cisif_validate_buf,
     .set_buf                = cxd56_cisif_set_buf,
     .validate_frame_setting = cxd56_cisif_validate_frame_setting,
     .start_capture          = cxd56_cisif_start_capture,
