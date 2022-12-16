@@ -33,6 +33,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/* CPU interrupt types. */
+
 #define ESP32C3_INT_LEVEL           (0 << 0)
 #define ESP32C3_INT_EDGE            (1 << 0)
 
@@ -40,6 +53,10 @@
 #define ESP32C3_INT_PRIO_MAX        7
 
 #define ESP32C3_INT_PRIO_DEF        1
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: esp32c3_bind_irq
@@ -62,37 +79,68 @@ void esp32c3_bind_irq(uint8_t cpuint, uint8_t periphid, uint8_t prio,
                       uint32_t flags);
 
 /****************************************************************************
- * Name: esp32c3_request_irq
+ * Name:  esp32c3_cpuint_initialize
  *
  * Description:
- *   Request IRQ and resource with given parameters.
+ *   Initialize CPU interrupts
  *
  * Input Parameters:
- *   periphid  - Peripheral ID
- *   prio  - Interrupt priority
- *   flags - Interrupt flags
+ *   None
  *
  * Returned Value:
- *   Allocated CPU interrupt on success, a negated error on failure.
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-int esp32c3_request_irq(uint8_t periphid, uint8_t prio, uint32_t flags);
+int esp32c3_cpuint_initialize(void);
 
 /****************************************************************************
- * Name: esp32c3_free_cpuint
+ * Name:  esp32c3_setup_irq
  *
  * Description:
- *   Free IRQ and resource.
+ *   This function sets up the IRQ. It allocates a CPU interrupt of the given
+ *   priority and type and attaches it to the given peripheral.
  *
  * Input Parameters:
- *   periphid - Peripheral ID.
+ *   periphid - The peripheral number from irq.h to be assigned to
+ *              a CPU interrupt.
+ *   priority - Interrupt's priority (1 - 5).
+ *   type     - Interrupt's type (level or edge).
  *
  * Returned Value:
- *   None.
+ *   The allocated CPU interrupt on success, a negated errno value on
+ *   failure.
  *
  ****************************************************************************/
 
-void esp32c3_free_cpuint(uint8_t periphid);
+int esp32c3_setup_irq(int periphid, int priority, int type);
 
+/****************************************************************************
+ * Name:  esp32c3_teardown_irq
+ *
+ * Description:
+ *   This function undoes the operations done by esp32c3_setup_irq.
+ *   It detaches a peripheral interrupt from a CPU interrupt and frees the
+ *   CPU interrupt.
+ *
+ * Input Parameters:
+ *   periphid - The peripheral number from irq.h to be detached from the
+ *              CPU interrupt.
+ *   cpuint   - The CPU interrupt from which the peripheral interrupt will
+ *              be detached.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32c3_teardown_irq(int periphid, int cpuint);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_IRQ_H */

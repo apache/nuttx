@@ -39,11 +39,6 @@
 
 #include "chip.h"
 
-#include "hardware/esp32c3_uart.h"
-#include "hardware/esp32c3_gpio_sigmap.h"
-
-#include "esp32c3_irq.h"
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

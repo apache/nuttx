@@ -1485,14 +1485,15 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
   config = priv->config;
   if (priv->cpuint != -ENOMEM)
     {
-      /* Disable the provided CPU Interrupt to configure it. */
+      /* Disable the previous IRQ */
 
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(config->irq);
+      esp32c3_teardown_irq(config->periph, priv->cpuint);
     }
 
-  priv->cpuint = esp32c3_request_irq(config->periph,
-                                     ESP32C3_INT_PRIO_DEF,
-                                     ESP32C3_INT_LEVEL);
+  priv->cpuint = esp32c3_setup_irq(config->periph,
+                                   ESP32C3_INT_PRIO_DEF,
+                                   ESP32C3_INT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
@@ -1506,9 +1507,9 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
   ret = irq_attach(config->irq, esp32c3_i2c_irq, priv);
   if (ret != OK)
     {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
+      /* Failed to attach IRQ, free the allocated CPU interrupt */
 
-      esp32c3_free_cpuint(config->periph);
+      esp32c3_teardown_irq(config->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
       priv->refs--;
       nxmutex_unlock(&priv->lock);
@@ -1518,7 +1519,7 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
 
   /* Enable the CPU interrupt that is linked to the I2C device. */
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(config->irq);
 #endif
 
   esp32c3_i2c_init(priv);
@@ -1564,8 +1565,8 @@ int esp32c3_i2cbus_uninitialize(struct i2c_master_s *dev)
     }
 
 #ifndef CONFIG_I2C_POLLED
-  up_disable_irq(priv->cpuint);
-  esp32c3_free_cpuint(priv->config->periph);
+  up_disable_irq(priv->config->irq);
+  esp32c3_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 #endif
 

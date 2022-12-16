@@ -40,6 +40,7 @@
 #include "hardware/esp32c3_system.h"
 #include "hardware/esp32c3_uart.h"
 #include "hardware/esp32c3_soc.h"
+#include "hardware/esp32c3_gpio_sigmap.h"
 
 #include "esp32c3_clockconfig.h"
 #include "esp32c3_config.h"

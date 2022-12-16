@@ -746,7 +746,7 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
 
           up_disable_irq(wdt->cpuint);
           irq_detach(wdt->irq);
-          esp32c3_free_cpuint(wdt->periph);
+          esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
           wdt->cpuint = -ENOMEM;
         }
     }
@@ -762,13 +762,13 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
           up_disable_irq(wdt->cpuint);
 
           /* Free CPU interrupt that is attached to this peripheral
-           * because we will get another from esp32c3_request_irq()
+           * because we will get another from esp32c3_setup_irq()
            */
 
-          esp32c3_free_cpuint(wdt->periph);
+          esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
         }
 
-      wdt->cpuint = esp32c3_request_irq(wdt->periph,
+      wdt->cpuint = esp32c3_setup_irq(wdt->periph,
                                         ESP32C3_INT_PRIO_DEF,
                                         ESP32C3_INT_LEVEL);
 
@@ -784,7 +784,7 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
         {
           /* Failed to attach IRQ, so CPU interrupt must be freed. */
 
-          esp32c3_free_cpuint(wdt->periph);
+          esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
           wdt->cpuint = -ENOMEM;
           return ret;
         }
