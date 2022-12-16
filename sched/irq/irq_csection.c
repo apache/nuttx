@@ -113,7 +113,7 @@ static bool irq_waitlock(int cpu)
 
   /* Notify that we are waiting for a spinlock */
 
-  sched_note_spinlock(tcb, &g_cpu_irqlock);
+  sched_note_spinlock(tcb, &g_cpu_irqlock, NOTE_SPINLOCK_LOCK);
 #endif
 
   /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
@@ -133,7 +133,7 @@ static bool irq_waitlock(int cpu)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
           /* Notify that we have aborted the wait for the spinlock */
 
-          sched_note_spinabort(tcb, &g_cpu_irqlock);
+          sched_note_spinlock(tcb, &g_cpu_irqlock, NOTE_SPINLOCK_ABORT);
 #endif
 
           return false;
@@ -145,7 +145,7 @@ static bool irq_waitlock(int cpu)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
-  sched_note_spinlocked(tcb, &g_cpu_irqlock);
+  sched_note_spinlock(tcb, &g_cpu_irqlock, NOTE_SPINLOCK_LOCKED);
 #endif
 
   return true;

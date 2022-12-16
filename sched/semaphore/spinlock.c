@@ -68,7 +68,7 @@ void spin_lock(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we are waiting for a spinlock */
 
-  sched_note_spinlock(this_task(), lock);
+  sched_note_spinlock(this_task(), lock, NOTE_SPINLOCK_LOCK);
 #endif
 
   while (up_testset(lock) == SP_LOCKED)
@@ -80,7 +80,7 @@ void spin_lock(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
-  sched_note_spinlocked(this_task(), lock);
+  sched_note_spinlock(this_task(), lock, NOTE_SPINLOCK_LOCKED);
 #endif
   SP_DMB();
 }
@@ -142,7 +142,7 @@ spinlock_t spin_trylock(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we are waiting for a spinlock */
 
-  sched_note_spinlock(this_task(), lock);
+  sched_note_spinlock(this_task(), lock, NOTE_SPINLOCK_LOCK);
 #endif
 
   if (up_testset(lock) == SP_LOCKED)
@@ -150,7 +150,7 @@ spinlock_t spin_trylock(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
       /* Notify that we abort for a spinlock */
 
-      sched_note_spinabort(this_task(), &lock);
+      sched_note_spinlock(this_task(), lock, NOTE_SPINLOCK_ABORT);
 #endif
       SP_DSB();
       return SP_LOCKED;
@@ -159,7 +159,7 @@ spinlock_t spin_trylock(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
-  sched_note_spinlocked(this_task(), lock);
+  sched_note_spinlock(this_task(), lock, NOTE_SPINLOCK_LOCKED);
 #endif
   SP_DMB();
   return SP_UNLOCKED;
@@ -222,7 +222,7 @@ void spin_unlock(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we are unlocking the spinlock */
 
-  sched_note_spinunlock(this_task(), lock);
+  sched_note_spinlock(this_task(), lock, NOTE_SPINLOCK_UNLOCK);
 #endif
 
   SP_DMB();
@@ -310,7 +310,7 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
     {
       /* Notify that we have locked the spinlock */
 
-      sched_note_spinlocked(this_task(), orlock);
+      sched_note_spinlock(this_task(), orlock, NOTE_SPINLOCK_LOCKED);
     }
 #endif
 
@@ -373,7 +373,7 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
     {
       /* Notify that we have unlocked the spinlock */
 
-      sched_note_spinunlock(this_task(), orlock);
+      sched_note_spinlock(this_task(), orlock, NOTE_SPINLOCK_UNLOCK);
     }
 #endif
 
