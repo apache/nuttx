@@ -66,6 +66,20 @@
  * Private Functions
  ****************************************************************************/
 
+static uint32_t __ramfunc__ sam_iap(uint32_t cmd)
+{
+  uint32_t status;
+  irqstate_t flags;
+
+  flags = up_irq_save();
+
+  status = ((uint32_t (*)(uint32_t, uint32_t))SAM_IAP_BASE)(0, cmd);
+
+  up_irq_restore(flags);
+
+  return status;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -84,7 +98,7 @@
  *
  ****************************************************************************/
 
-__ramfunc__ void sam_eefc_writefmr(uint32_t regval)
+void __ramfunc__ sam_eefc_writefmr(uint32_t regval)
 {
   putreg32(regval, SAM_EEFC_FMR);
 }
@@ -105,31 +119,18 @@ __ramfunc__ void sam_eefc_writefmr(uint32_t regval)
  *
  ****************************************************************************/
 
-__ramfunc__ int sam_eefc_command(uint32_t cmd, uint32_t arg)
+int __ramfunc__ sam_eefc_command(uint32_t cmd, uint32_t arg)
 {
-  volatile uint32_t regval;
-  irqstate_t flags;
-
-  flags = up_irq_save();
+  uint32_t status;
 
   /* Write the command to the flash command register */
 
-  regval = EEFC_FCR_FCMD(cmd) |  EEFC_FCR_FARG(arg) | EEFC_FCR_FKEY_PASSWD;
-  putreg32(regval, SAM_EEFC_FCR);
-
-  /* Wait for the FLASH to become ready again */
-
-  do
-    {
-      regval = getreg32(SAM_EEFC_FSR);
-    }
-  while ((regval & EEFC_FSR_FRDY) != EEFC_FSR_FRDY);
-
-  up_irq_restore(flags);
+  status = sam_iap(EEFC_FCR_FCMD(cmd) | EEFC_FCR_FARG(arg) |
+                   EEFC_FCR_FKEY_PASSWD);
 
   /* Check for errors */
 
-  if ((regval & (EEFC_FSR_FLOCKE | EEFC_FSR_FCMDE | EEFC_FSR_FLERR)) != 0)
+  if ((status & (EEFC_FSR_FLOCKE | EEFC_FSR_FCMDE | EEFC_FSR_FLERR)) != 0)
     {
       return -EIO;
     }
@@ -156,12 +157,13 @@ __ramfunc__ int sam_eefc_command(uint32_t cmd, uint32_t arg)
  *
  ****************************************************************************/
 
-__ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
+int __ramfunc__ sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
                                       uint32_t *buffer, size_t bufsize)
 {
-  volatile uint32_t regval;
+  uint32_t regval;
   uint32_t *flash_data;
   size_t read_count;
+  irqstate_t flags;
 
   if (buffer == NULL)
     {
@@ -176,21 +178,16 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
   regval |= EEFC_FMR_SCOD;
   sam_eefc_writefmr(regval);
 
+  /* Perform a dummy read at the Flash base address */
+
+  regval = *flash_data;
+
+  flags = up_irq_save();
+
   /* Send the Start Read command */
 
-  regval = EEFC_FCR_FCMD(start_cmd) |  EEFC_FCR_FARG(FCMD_GETD) |
-           EEFC_FCR_FKEY_PASSWD;
-  putreg32(regval, SAM_EEFC_FCR);
-
-  /* Wait for the FRDY bit in the Flash Programming Status Register
-   * (EEFC_FSR) falls.
-   */
-
-  do
-    {
-      regval = getreg32(SAM_EEFC_FSR);
-    }
-  while ((regval & EEFC_FSR_FRDY) == EEFC_FSR_FRDY);
+  sam_iap(EEFC_FCR_FCMD(start_cmd) | EEFC_FCR_FARG(FCMD_GETD) |
+          EEFC_FCR_FKEY_PASSWD);
 
   /* The data is located in the first address of the Flash
    * memory mapping.
@@ -203,19 +200,10 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
 
   /* Send the Stop Read command */
 
-  regval = EEFC_FCR_FCMD(stop_cmd) |  EEFC_FCR_FARG(FCMD_GETD) |
-           EEFC_FCR_FKEY_PASSWD;
-  putreg32(regval, SAM_EEFC_FCR);
+  sam_iap(EEFC_FCR_FCMD(stop_cmd) | EEFC_FCR_FARG(FCMD_GETD) |
+          EEFC_FCR_FKEY_PASSWD);
 
-  /* Wait for the FRDY bit in the Flash Programming Status Register
-   * rises.
-   */
-
-  do
-    {
-      regval = getreg32(SAM_EEFC_FSR);
-    }
-  while ((regval & EEFC_FSR_FRDY) != EEFC_FSR_FRDY);
+  up_irq_restore(flags);
 
   regval = getreg32(SAM_EEFC_FMR);
   regval &= ~EEFC_FMR_SCOD;

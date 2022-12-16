@@ -74,7 +74,7 @@ extern "C"
  *
  ****************************************************************************/
 
-__ramfunc__ void sam_eefc_writefmr(uint32_t regval);
+void __ramfunc__ sam_eefc_writefmr(uint32_t regval);
 
 /****************************************************************************
  * Name: sam_eefc_command
@@ -84,7 +84,7 @@ __ramfunc__ void sam_eefc_writefmr(uint32_t regval);
  *
  ****************************************************************************/
 
-__ramfunc__ int sam_eefc_command(uint32_t cmd, uint32_t arg);
+int __ramfunc__ sam_eefc_command(uint32_t cmd, uint32_t arg);
 
 /****************************************************************************
  * Name: sam_eefc_readsequence
@@ -94,7 +94,7 @@ __ramfunc__ int sam_eefc_command(uint32_t cmd, uint32_t arg);
  *
  ****************************************************************************/
 
-__ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
+int __ramfunc__ sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
                                       uint32_t *buffer, size_t bufsize);
 
 /****************************************************************************

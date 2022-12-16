@@ -49,6 +49,7 @@
 #define SAM_BOOTMEMORY_BASE    0x00000000 /* 0x00000000-0x00ffffff: ITCM or Boot Memory */
 #define SAM_INTFLASH_BASE      0x00400000 /* 0x00400000-0x007fffff: Internal FLASH */
 #define SAM_INTROM_BASE        0x00800000 /* 0x00800000-0x00bfffff: Internal ROM */
+#  define SAM_IAP_BASE         0x00800008 /* 0x00800008           :  In Application Programming */
                                           /* 0x00c00000-0x1fffffff: Reserved */
 
 /* Internal SRAM memory region */
