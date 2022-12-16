@@ -110,7 +110,7 @@
 #define TCB_FLAG_FREE_STACK        (1 << 12)                     /* Bit 12: Free stack after exit */
 #define TCB_FLAG_HEAP_CHECK        (1 << 13)                     /* Bit 13: Heap check */
 #define TCB_FLAG_HEAP_DUMP         (1 << 14)                     /* Bit 14: Heap dump */
-                                                                 /* Bits 15: Available */
+#define TCB_FLAG_DETACHED          (1 << 15)                     /* Bit 15: Pthread detached */
 
 /* Values for struct task_group tg_flags */
 
@@ -619,7 +619,7 @@ struct tcb_s
   sq_queue_t sigpostedq;                 /* List of posted signals          */
   siginfo_t  sigunbinfo;                 /* Signal info when task unblocked */
 
-  /* Tqueue Fields used for xring ********************************************/
+  /* Tqueue Fields used for xring *******************************************/
 
 #ifdef CONFIG_ENABLE_TQUEUE
   FAR void         *tq_waitq;            /* the tqueue waiting by the thread */
