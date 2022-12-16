@@ -278,22 +278,21 @@ function python-tools {
   export PIP_USER=yes
   export PYTHONUSERBASE=${tools}/pylocal
   add_path "${PYTHONUSERBASE}"/bin
-  pip3 install \
+
+  # Force the reinstall of python packages due to issues with GitHub
+  # cache restoration.
+  pip3 install --force-reinstall \
     CodeChecker \
     cxxfilt \
     esptool==3.3.1 \
+    imgtool==1.9.0 \
     pexpect==4.8.0 \
     pyelftools \
     pyserial==3.5 \
     pytest==6.2.5 \
     pytest-json==0.4.0 \
     pytest-ordering==0.6 \
-    pytest-repeat==0.9.1 
-
-  # MCUboot's tool for image signing and key management
-  if ! command -v imgtool &> /dev/null; then
-    pip3 install imgtool
-  fi
+    pytest-repeat==0.9.1
 }
 
 function riscv-gcc-toolchain {
