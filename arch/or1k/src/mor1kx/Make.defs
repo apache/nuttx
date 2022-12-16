@@ -30,7 +30,6 @@ CMN_CSRCS  = or1k_initialize.c \
              or1k_stackframe.c \
              or1k_initialstate.c \
              or1k_switchcontext.c \
-             or1k_releasepending.c \
              or1k_schedulesigaction.c \
              or1k_copyfullstate.c \
              or1k_assert.c \

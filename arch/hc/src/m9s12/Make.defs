@@ -23,7 +23,7 @@ HEAD_ASRC = m9s12_vectors.S
 CMN_CSRCS  = hc_allocateheap.c hc_copystate.c hc_createstack.c
 CMN_CSRCS += hc_doirq.c hc_exit.c hc_idle.c hc_initialize.c
 CMN_CSRCS += hc_mdelay.c hc_modifyreg16.c hc_modifyreg32.c hc_modifyreg8.c
-CMN_CSRCS += hc_nputs.c hc_releasepending.c hc_releasestack.c
+CMN_CSRCS += hc_nputs.c hc_releasestack.c
 CMN_CSRCS += hc_stackframe.c hc_udelay.c hc_switchcontext.c hc_usestack.c
 
 CHIP_ASRCS  = m9s12_start.S m9s12_lowputc.S m9s12_saveusercontext.S

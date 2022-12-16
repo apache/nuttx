@@ -28,8 +28,7 @@ CMN_ASRCS  = avr_exceptions.S avr_fullcontextrestore.S avr_doswitch.S
 CMN_CSRCS  = avr_assert.c avr_allocateheap.c avr_copystate.c
 CMN_CSRCS += avr_createstack.c avr_mdelay.c avr_udelay.c avr_exit.c avr_idle.c
 CMN_CSRCS += avr_initialize.c avr_initialstate.c
-CMN_CSRCS += avr_modifyreg8.c avr_modifyreg16.c avr_modifyreg32.c
-CMN_CSRCS += avr_releasepending.c avr_releasestack.c
+CMN_CSRCS += avr_modifyreg8.c avr_modifyreg16.c avr_modifyreg32.c avr_releasestack.c
 CMN_CSRCS += avr_schedulesigaction.c avr_sigdeliver.c avr_stackframe.c
 CMN_CSRCS += avr_switchcontext.c avr_usestack.c avr_doirq.c avr_nputs.c
 

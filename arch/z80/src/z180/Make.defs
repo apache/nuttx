@@ -28,7 +28,7 @@ endif
 
 CMN_CSRCS  = z80_allocateheap.c z80_assert.c z80_createstack.c
 CMN_CSRCS += z80_doirq.c z80_exit.c z80_idle.c z80_initialize.c
-CMN_CSRCS += z80_interruptcontext.c z80_mdelay.c z80_releasepending.c
+CMN_CSRCS += z80_interruptcontext.c z80_mdelay.c
 CMN_CSRCS += z80_releasestack.c z80_stackframe.c
 CMN_CSRCS += z80_switchcontext.c z80_udelay.c z80_usestack.c z80_nputs.c
 

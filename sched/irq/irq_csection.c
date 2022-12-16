@@ -546,7 +546,7 @@ void leave_critical_section(irqstate_t flags)
                 {
                   /* Yes.. Check if there are pending tasks and that pre-
                    * emption is also enabled.  This is necessary because we
-                   * may have deferred the up_release_pending() call in
+                   * may have deferred the nxsched_merge_pending() call in
                    * sched_unlock() because we were within a critical
                    * section then.
                    */
@@ -560,7 +560,10 @@ void leave_critical_section(irqstate_t flags)
                        * out!
                        */
 
-                      up_release_pending();
+                      if (nxsched_merge_pending())
+                        {
+                          up_switch_context(this_task(), rtcb);
+                        }
                     }
                 }
 
