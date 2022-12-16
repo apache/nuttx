@@ -479,23 +479,23 @@ static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART0_SERIALDRIVER
+#if defined(CONFIG_USART0_SERIALDRIVER) && defined(CONFIG_SAMA5_USART0)
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART1_SERIALDRIVER
+#if defined(CONFIG_USART1_SERIALDRIVER) && defined(CONFIG_SAMA5_USART1)
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART2_SERIALDRIVER
+#if defined(CONFIG_USART2_SERIALDRIVER) && defined(CONFIG_SAMA5_USART2)
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART3_SERIALDRIVER
+#if defined(CONFIG_USART3_SERIALDRIVER) && defined(CONFIG_SAMA5_USART3)
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART4_SERIALDRIVER
+#if defined(CONFIG_USART4_SERIALDRIVER) && defined(CONFIG_SAMA5_USART4)
 static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
 static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 #endif
