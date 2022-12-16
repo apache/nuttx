@@ -428,13 +428,6 @@ static void tty_send(struct uart_dev_s *dev, int ch)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  /* For console device */
-
-  if (dev->isconsole && ch == '\n')
-    {
-      host_uart_putc(1, '\r');
-    }
-
   host_uart_putc(dev->isconsole ? 1 : priv->fd, ch);
 }
 
@@ -567,6 +560,11 @@ void sim_uartloop(void)
 int up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
+  if (ch == '\n')
+    {
+      tty_send(&g_console_dev, '\r');
+    }
+
   tty_send(&g_console_dev, ch);
 #endif
   return 0;
