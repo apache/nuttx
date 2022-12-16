@@ -39,7 +39,7 @@ NUTTX = $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx$(EXEEXT))
 # are called only from the host OS-specific logic(HOSTOBJS)
 
 LINKOBJS = sim_head$(OBJEXT)
-REQUIREDOBJS = $(LINKOBJS)
+REQUIREDOBJS = $(LINKOBJS) sim_doirq$(OBJEXT)
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
@@ -57,7 +57,7 @@ endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS  = sim_initialize.c sim_idle.c sim_interruptcontext.c sim_initialstate.c
+CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
 CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
 CSRCS += sim_uart.c sim_assert.c sim_copyfullstate.c sim_sigdeliver.c
