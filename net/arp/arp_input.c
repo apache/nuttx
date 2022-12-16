@@ -129,8 +129,8 @@ static int arp_in(FAR struct net_driver_s *dev)
             net_ipv4addr_hdrcopy(arp->ah_sipaddr, &dev->d_ipaddr);
             arp_dump(arp);
 
-            eth->type           = HTONS(ETHTYPE_ARP);
-            dev->d_len          = sizeof(struct arp_hdr_s) + ETH_HDRLEN;
+            eth->type  = HTONS(ETHTYPE_ARP);
+            dev->d_len = sizeof(struct arp_hdr_s) + ETH_HDRLEN;
           }
         break;
 

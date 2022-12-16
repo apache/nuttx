@@ -388,18 +388,18 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
 
       /* Initialize the poll info container */
 
-      info->psock  = psock;
-      info->fds    = fds;
-      info->cb     = cb;
+      info->psock = psock;
+      info->fds   = fds;
+      info->cb    = cb;
 
       /* Initialize the callback structure.  Save the reference to the info
        * structure as callback private data so that it will be available
        * during callback processing.
        */
 
-      cb->flags    = NETDEV_DOWN;
-      cb->priv     = (FAR void *)info;
-      cb->event    = can_poll_eventhandler;
+      cb->flags   = NETDEV_DOWN;
+      cb->priv    = (FAR void *)info;
+      cb->event   = can_poll_eventhandler;
 
       if ((fds->events & POLLOUT) != 0)
         {

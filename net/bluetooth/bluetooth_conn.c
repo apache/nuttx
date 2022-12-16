@@ -190,7 +190,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
     {
       /* Remove the frame from the list */
 
-      next                = container->bn_flink;
+      next = container->bn_flink;
       container->bn_flink = NULL;
 
       /* Free the contained frame data (should be only one in chain) */
