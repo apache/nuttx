@@ -558,26 +558,6 @@ void sched_note_bprintf(uintptr_t ip, uint8_t event,
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
 /****************************************************************************
- * Name: sched_note_add
- *
- * Description:
- *   Add the variable length note to the transport layer
- *
- * Input Parameters:
- *   note    - The note buffer
- *   notelen - The buffer length
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-void sched_note_add(FAR const void *note, size_t notelen);
-
-/****************************************************************************
  * Name: sched_note_filter_mode
  *
  * Description:

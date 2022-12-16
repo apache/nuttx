@@ -34,6 +34,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/fs/fs.h>
 
@@ -73,6 +74,8 @@ static int noteram_open(FAR struct file *filep);
 static ssize_t noteram_read(FAR struct file *filep,
                             FAR char *buffer, size_t buflen);
 static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg);
+static void noteram_add(FAR struct note_driver_s *drv,
+                        FAR const void *note, size_t len);
 
 /****************************************************************************
  * Private Data
@@ -105,9 +108,23 @@ static struct noteram_info_s g_noteram_info =
 static struct noteram_taskname_s g_noteram_taskname;
 #endif
 
+static const struct note_driver_ops_s g_noteram_ops =
+{
+  noteram_add
+};
+
 #ifdef CONFIG_SMP
 static volatile spinlock_t g_noteram_lock;
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct note_driver_s g_noteram_driver =
+{
+  &g_noteram_ops,
+};
 
 /****************************************************************************
  * Private Functions
@@ -769,11 +786,7 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sched_note_add
+ * Name: noteram_add
  *
  * Description:
  *   Add the variable length note to the transport layer
@@ -790,7 +803,8 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-void sched_note_add(FAR const void *note, size_t notelen)
+static void noteram_add(FAR struct note_driver_s *drv,
+                        FAR const void *note, size_t notelen)
 {
   FAR const char *buf = note;
   unsigned int head;
@@ -876,6 +890,10 @@ void sched_note_add(FAR const void *note, size_t notelen)
 #endif
   up_irq_restore(flags);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: noteram_register
