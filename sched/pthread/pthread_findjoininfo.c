@@ -26,16 +26,85 @@
 
 #include <sys/types.h>
 #include <assert.h>
+#include <debug.h>
 
 #include "group/group.h"
 #include "pthread/pthread.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_createjoininfo
+ *
+ * Description:
+ *    Allocate a detachable structure to support pthread_join logic and add
+ *    the joininfo to the thread.
+ *
+ * Input Parameters:
+ *   ptcb
+ *
+ * Returned Value:
+ *   joininfo point.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static FAR struct join_s *
+pthread_createjoininfo(FAR struct pthread_tcb_s *ptcb)
+{
+  FAR struct join_s *pjoin;
+
+  /* Allocate a detachable structure to support pthread_join logic */
+
+  pjoin = (FAR struct join_s *)kmm_zalloc(sizeof(struct join_s));
+  if (!pjoin)
+    {
+      serr("ERROR: Failed to allocate join\n");
+      return NULL;
+    }
+
+  pjoin->thread = (pthread_t)ptcb->cmn.pid;
+
+  /* Initialize the semaphore in the join structure to zero. */
+
+  if (nxsem_init(&pjoin->exit_sem, 0, 0) < 0)
+    {
+      kmm_free(pjoin);
+      return NULL;
+    }
+  else
+    {
+      FAR struct task_group_s *group = ptcb->cmn.group;
+
+      /* Attach the join info to the TCB. */
+
+      ptcb->joininfo = (FAR void *)pjoin;
+
+      pjoin->next = NULL;
+      if (!group->tg_jointail)
+        {
+          group->tg_joinhead = pjoin;
+        }
+      else
+        {
+          group->tg_jointail->next = pjoin;
+        }
+
+      group->tg_jointail = pjoin;
+    }
+
+  return pjoin;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: thread_findjoininfo
+ * Name: pthread_findjoininfo
  *
  * Description:
  *   Find a join structure in a local data set.
@@ -66,6 +135,16 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
        pjoin = pjoin->next);
 
   /* and return it */
+
+  if (pjoin == NULL)
+    {
+      FAR struct tcb_s *tcb = nxsched_get_tcb((pthread_t)pid);
+
+      if (tcb != NULL && (tcb->flags & TCB_FLAG_DETACHED) == 0)
+        {
+          pjoin = pthread_createjoininfo((FAR struct pthread_tcb_s *)tcb);
+        }
+    }
 
   return pjoin;
 }
