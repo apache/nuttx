@@ -124,9 +124,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       /* Don't allow any further call backs. */
 
-      pstate->snd_cb->flags    = 0;
-      pstate->snd_cb->priv     = NULL;
-      pstate->snd_cb->event    = NULL;
+      pstate->snd_cb->flags = 0;
+      pstate->snd_cb->priv  = NULL;
+      pstate->snd_cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -223,8 +223,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_buflen    = msg->msg_iov->iov_len;  /* bytes to send */
-  state.snd_buffer    = msg->msg_iov->iov_base; /* Buffer to send from */
+  state.snd_buflen = msg->msg_iov->iov_len;  /* bytes to send */
+  state.snd_buffer = msg->msg_iov->iov_base; /* Buffer to send from */
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   if (msg->msg_controllen > sizeof(struct cmsghdr))
@@ -234,8 +234,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
               && cmsg->cmsg_type == CAN_RAW_TX_DEADLINE
               && cmsg->cmsg_len == sizeof(struct timeval))
         {
-          state.pr_msgbuf     = CMSG_DATA(cmsg); /* Buffer to cmsg data */
-          state.pr_msglen     = cmsg->cmsg_len;  /* len of cmsg data */
+          state.pr_msgbuf = CMSG_DATA(cmsg); /* Buffer to cmsg data */
+          state.pr_msglen = cmsg->cmsg_len;  /* len of cmsg data */
         }
     }
 #endif

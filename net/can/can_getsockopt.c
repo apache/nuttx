@@ -151,13 +151,13 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
              * to me in this case.
              */
 
-            ret              = -EINVAL;
+            ret = -EINVAL;
           }
         else
           {
-            FAR int32_t *loopback  = (FAR int32_t *)value;
-            *loopback              = conn->loopback;
-            *value_len             = sizeof(conn->loopback);
+            FAR int32_t *loopback = (FAR int32_t *)value;
+            *loopback             = conn->loopback;
+            *value_len            = sizeof(conn->loopback);
           }
         break;
 
@@ -169,7 +169,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
              * to me in this case.
              */
 
-            ret              = -EINVAL;
+            ret = -EINVAL;
           }
         else
           {
@@ -188,7 +188,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
              * to me in this case.
              */
 
-            ret              = -EINVAL;
+            ret = -EINVAL;
           }
         else
           {
@@ -211,7 +211,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
              * to me in this case.
              */
 
-            ret              = -EINVAL;
+            ret = -EINVAL;
           }
         else
           {

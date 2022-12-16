@@ -379,9 +379,9 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Don't allow any further call backs. */
 
-          pstate->pr_cb->flags   = 0;
-          pstate->pr_cb->priv    = NULL;
-          pstate->pr_cb->event   = NULL;
+          pstate->pr_cb->flags = 0;
+          pstate->pr_cb->priv  = NULL;
+          pstate->pr_cb->event = NULL;
 
           /* indicate that the data has been consumed */
 
@@ -545,7 +545,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Get the device driver that will service this transfer */
 
-  dev  = conn->dev;
+  dev = conn->dev;
   if (dev == NULL)
     {
       ret = -ENODEV;
@@ -557,9 +557,9 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.pr_cb = can_callback_alloc(dev, conn);
   if (state.pr_cb)
     {
-      state.pr_cb->flags  = (CAN_NEWDATA | CAN_POLL);
-      state.pr_cb->priv   = (FAR void *)&state;
-      state.pr_cb->event  = can_recvfrom_eventhandler;
+      state.pr_cb->flags = (CAN_NEWDATA | CAN_POLL);
+      state.pr_cb->priv  = (FAR void *)&state;
+      state.pr_cb->event = can_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  (1) net_sem_wait will also terminate if a signal

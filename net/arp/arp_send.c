@@ -54,11 +54,11 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
 {
   /* Don't allow any further call backs. */
 
-  state->snd_sent         = true;
-  state->snd_result       = (int16_t)result;
-  state->snd_cb->flags    = 0;
-  state->snd_cb->priv     = NULL;
-  state->snd_cb->event    = NULL;
+  state->snd_sent      = true;
+  state->snd_result    = (int16_t)result;
+  state->snd_cb->flags = 0;
+  state->snd_cb->priv  = NULL;
+  state->snd_cb->event = NULL;
 
   /* Wake up the waiting thread */
 
@@ -277,8 +277,8 @@ int arp_send(in_addr_t ipaddr)
 
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_retries   = 0;              /* No retries yet */
-  state.snd_ipaddr    = ipaddr;         /* IP address to query */
+  state.snd_retries = 0;            /* No retries yet */
+  state.snd_ipaddr  = ipaddr;       /* IP address to query */
 
   /* Remember the routing device name */
 

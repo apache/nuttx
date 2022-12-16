@@ -157,7 +157,7 @@ static ssize_t
 
       /* Extract the IOB containing the frame from the container */
 
-      iob               = container->bn_iob;
+      iob = container->bn_iob;
       container->bn_iob = NULL;
       DEBUGASSERT(iob != NULL);
 
@@ -175,8 +175,8 @@ static ssize_t
 
       if (pstate->ir_from != NULL)
         {
-          iaddr             = (FAR struct sockaddr_l2 *)pstate->ir_from;
-          iaddr->l2_family  = AF_BLUETOOTH;
+          iaddr = (FAR struct sockaddr_l2 *)pstate->ir_from;
+          iaddr->l2_family = AF_BLUETOOTH;
           BLUETOOTH_ADDRCOPY(&iaddr->l2_bdaddr, &container->bn_raddr);
           iaddr->l2_cid = container->bn_channel;
         }
@@ -245,10 +245,10 @@ static uint16_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
             {
               /* Don't allow any further call backs. */
 
-              pstate->ir_cb->flags   = 0;
-              pstate->ir_cb->priv    = NULL;
-              pstate->ir_cb->event   = NULL;
-              pstate->ir_result      = ret;
+              pstate->ir_cb->flags = 0;
+              pstate->ir_cb->priv  = NULL;
+              pstate->ir_cb->event = NULL;
+              pstate->ir_result    = ret;
 
               /* indicate that the data has been consumed */
 
@@ -372,9 +372,9 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.ir_cb = bluetooth_callback_alloc(&radio->r_dev, conn);
   if (state.ir_cb)
     {
-      state.ir_cb->flags  = (BLUETOOTH_NEWDATA | BLUETOOTH_POLL);
-      state.ir_cb->priv   = (FAR void *)&state;
-      state.ir_cb->event  = bluetooth_recvfrom_eventhandler;
+      state.ir_cb->flags = (BLUETOOTH_NEWDATA | BLUETOOTH_POLL);
+      state.ir_cb->priv  = (FAR void *)&state;
+      state.ir_cb->event = bluetooth_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  (1) net_sem_wait will also terminate if a signal

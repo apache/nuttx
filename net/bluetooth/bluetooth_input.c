@@ -250,7 +250,7 @@ int bluetooth_input(FAR struct radio_driver_s *radio,
         {
           /* Remove the frame from the list */
 
-          next            = frame->io_flink;
+          next = frame->io_flink;
           frame->io_flink = NULL;
 
           /* Add the frame to the RX queue */
