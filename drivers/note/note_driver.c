@@ -381,46 +381,6 @@ static inline int note_isenabled_dump(void)
 #endif
 
 /****************************************************************************
- * Name: note_spincommon
- *
- * Description:
- *   Common logic for NOTE_SPINLOCK, NOTE_SPINLOCKED, and NOTE_SPINUNLOCK
- *
- * Input Parameters:
- *   tcb  - The TCB containing the information
- *   note - The common note structure to use
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-static void note_spincommon(FAR struct tcb_s *tcb,
-                            FAR volatile spinlock_t *spinlock,
-                            int type)
-{
-  struct note_spinlock_s note;
-
-  if (!note_isenabled())
-    {
-      return;
-    }
-
-  /* Format the note */
-
-  note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
-
-  sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spinlock));
-  note.nsp_value = *(FAR uint8_t *)spinlock;
-
-  /* Add the note to circular buffer */
-
-  sched_note_add(&note, sizeof(struct note_spinlock_s));
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -704,27 +664,43 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 }
 #endif
 
+/****************************************************************************
+ * Name: sched_note_spinlock
+ *
+ * Description:
+ *   Common logic for NOTE_SPINLOCK, NOTE_SPINLOCKED, and NOTE_SPINUNLOCK
+ *
+ * Input Parameters:
+ *   tcb  - The TCB containing the information
+ *   note - The common note structure to use
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+void sched_note_spinlock(FAR struct tcb_s *tcb,
+                         FAR volatile spinlock_t *spinlock,
+                         int type)
 {
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK);
-}
+  struct note_spinlock_s note;
 
-void sched_note_spinlocked(FAR struct tcb_s *tcb,
-                           FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED);
-}
+  if (!note_isenabled())
+    {
+      return;
+    }
 
-void sched_note_spinunlock(FAR struct tcb_s *tcb,
-                           FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
-}
+  /* Format the note */
 
-void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
-{
-  note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT);
+  note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
+
+  sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spinlock));
+  note.nsp_value = *(FAR uint8_t *)spinlock;
+
+  /* Add the note to circular buffer */
+
+  sched_note_add(&note, sizeof(struct note_spinlock_s));
 }
 #endif
 

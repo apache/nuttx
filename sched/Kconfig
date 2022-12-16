@@ -1037,10 +1037,7 @@ config SCHED_INSTRUMENTATION_SPINLOCKS
 		Enables additional hooks for spinlock state.  Board-specific logic
 		must provide this additional logic.
 
-			void sched_note_spinlock(FAR struct tcb_s *tcb, bool state);
-			void sched_note_spinlocked(FAR struct tcb_s *tcb, bool state);
-			void sched_note_spinunlock(FAR struct tcb_s *tcb, bool state);
-			void sched_note_spinabort(FAR struct tcb_s *tcb, bool state);
+		void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile spinlock_t *spinlock, int type)
 
 config SCHED_INSTRUMENTATION_SYSCALL
 	bool "System call monitor hooks"
