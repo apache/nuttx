@@ -146,7 +146,17 @@ static inline uintptr_t up_getsp(void)
 
 static inline bool up_interrupt_context(void)
 {
-  return CURRENT_REGS != NULL;
+#ifdef CONFIG_SMP
+  irqstate_t flags = up_irq_save();
+#endif
+
+  bool ret = CURRENT_REGS != NULL;
+
+#ifdef CONFIG_SMP
+  up_irq_restore(flags);
+#endif
+
+  return ret;
 }
 
 #undef EXTERN
