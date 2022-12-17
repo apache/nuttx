@@ -564,3 +564,19 @@ int up_putc(int ch)
 #endif
   return 0;
 }
+
+/****************************************************************************
+ * Name: up_nputs
+ *
+ * Description:
+ *   This is a low-level helper function used to support debug.
+ *
+ ****************************************************************************/
+
+void up_nputs(const char *str, size_t len)
+{
+  while (len-- > 0 && *str)
+    {
+      up_putc(*str++);
+    }
+}
