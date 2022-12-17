@@ -236,11 +236,15 @@
 /* The allocation function annonations */
 
 #  if __GNUC__ >= 11
+#    define fopen_like __attribute__((__malloc__(fclose, 1)))
+#    define popen_like __attribute__((__malloc__(pclose, 1)))
 #    define malloc_like __attribute__((__malloc__(__builtin_free, 1)))
 #    define malloc_like1(a) __attribute__((__malloc__(__builtin_free, 1))) __attribute__((__alloc_size__(a)))
 #    define malloc_like2(a, b) __attribute__((__malloc__(__builtin_free, 1))) __attribute__((__alloc_size__(a, b)))
 #    define realloc_like(a) __attribute__((__alloc_size__(a)))
 #  else
+#    define fopen_like __attribute__((__malloc__))
+#    define popen_like __attribute__((__malloc__))
 #    define malloc_like __attribute__((__malloc__))
 #    define malloc_like1(a) __attribute__((__malloc__)) __attribute__((__alloc_size__(a)))
 #    define malloc_like2(a, b) __attribute__((__malloc__)) __attribute__((__alloc_size__(a, b)))
@@ -495,6 +499,8 @@
 #  define used_code
 #  define used_data
 
+#  define fopen_like
+#  define popen_like
 #  define malloc_like
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
@@ -631,6 +637,8 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define fopen_like
+#  define popen_like
 #  define malloc_like
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
@@ -737,6 +745,8 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define fopen_like
+#  define popen_like
 #  define malloc_like
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
@@ -822,6 +832,8 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define fopen_like
+#  define popen_like
 #  define malloc_like
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
@@ -882,6 +894,8 @@
 #  define unused_data
 #  define used_code
 #  define used_data
+#  define fopen_like
+#  define popen_like
 #  define malloc_like
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
