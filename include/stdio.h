@@ -142,7 +142,7 @@ int    fileno(FAR FILE *stream);
 int    fgetc(FAR FILE *stream);
 int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
 FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
-FAR FILE *fopen(FAR const char *path, FAR const char *type);
+FAR FILE *fopen(FAR const char *path, FAR const char *type) fopen_like;
 int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...)
        printflike(2, 3);
 int    fputc(int c, FAR FILE *stream);
@@ -215,14 +215,14 @@ int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
  *   Part 1 (dprintf and vdprintf)
  */
 
-FAR FILE *fdopen(int fd, FAR const char *type);
+FAR FILE *fdopen(int fd, FAR const char *type) fopen_like;
 int    dprintf(int fd, FAR const IPTR char *fmt, ...) printflike(2, 3);
 int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
        printflike(2, 0);
 
 /* Operations on paths */
 
-FAR FILE *tmpfile(void);
+FAR FILE *tmpfile(void) fopen_like;
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx) malloc_like;
 int       remove(FAR const char *path);
@@ -232,8 +232,8 @@ int       remove(FAR const char *path);
  */
 
 #ifndef __KERNEL__
-FILE *popen(FAR const char *command, FAR const char *mode);
 int pclose(FILE *stream);
+FILE *popen(FAR const char *command, FAR const char *mode) popen_like;
 #endif
 
 #undef EXTERN
