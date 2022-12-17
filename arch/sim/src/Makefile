@@ -164,10 +164,6 @@ ifeq ($(CONFIG_FS_FAT),y)
   STDLIBS += -lz
 endif
 
-ifeq ($(CONFIG_ARCH_ROMGETC),y)
-  CSRCS += sim_romgetc.c
-endif
-
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += sim_netdriver.c
 ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
