@@ -175,7 +175,7 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
   int totlen;
   int pathlen;
 
-  DEBUGASSERT(conn && addr && addrlen && *addrlen >= sizeof(sa_family_t));
+  DEBUGASSERT(conn && addr && addrlen);
 
   /* Get the length of the path (minus the NUL terminator) and the length
    * of the whole Unix domain address.

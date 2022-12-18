@@ -354,8 +354,7 @@ static int local_getsockname(FAR struct socket *psock,
   FAR struct local_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              unaddr != NULL && addrlen != NULL &&
-              *addrlen >= sizeof(sa_family_t));
+              unaddr != NULL && addrlen != NULL);
 
   if (*addrlen < sizeof(sa_family_t))
     {
