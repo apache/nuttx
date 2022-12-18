@@ -318,11 +318,9 @@ Public Function Prototypes
   data offset is zero and all but the final buffer in the chain are
   filled. Any emptied buffers at the end of the chain are freed.
 
-.. c:function:: int iob_contig(FAR struct iob_s *iob, unsigned int len);
+.. c:function:: FAR struct iob_s *iob_contig(FAR struct iob_s *iob);
 
-  Ensure that there is ``len`` bytes of contiguous
-  space at the beginning of the I/O buffer chain starting at
-  ``iob``.
+  Merge an ``iob`` chain into a continuous space, thereby reducing ``iob`` consumption
 
 .. c:function:: void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len, \
                  unsigned int offset);

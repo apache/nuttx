@@ -25,9 +25,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
 #include <nuttx/mm/iob.h>
 
@@ -49,41 +46,55 @@
  * Name: iob_contig
  *
  * Description:
- *   Ensure that there is'len' bytes of contiguous space at the beginning
- *   of the I/O buffer chain starting at 'iob'.
+ *   Merge an iob chain into a continuous space, thereby reducing iob
+ *   consumption
  *
  ****************************************************************************/
 
-int iob_contig(FAR struct iob_s *iob, unsigned int len)
+FAR struct iob_s *iob_contig(FAR struct iob_s *iob)
 {
+  FAR struct iob_s *head;
   FAR struct iob_s *next;
   unsigned int ncopy;
 
-  /* We can't make more contiguous space that the size of one I/O buffer.
-   * If you get this assertion and really need that much contiguous data,
-   * then you will need to increase CONFIG_IOB_BUFSIZE.
-   */
+  /* Trim empty iob header */
 
-  DEBUGASSERT(len <= CONFIG_IOB_BUFSIZE);
-
-  /* Check if there is already sufficient, contiguous space at the beginning
-   * of the packet
-   */
-
-  if (len <= iob->io_len)
+  while (iob != NULL && iob->io_len == 0)
     {
-      /* Yes we are good */
-
-      return 0;
+      iob = iob_free(iob);
     }
 
-  /* Can we get the required amount of contiguous data by just packing the
-   * head I/0 buffer?
-   */
-
-  else if (len <= iob->io_pktlen)
+  if (iob == NULL)
     {
-      /* Yes.. First eliminate any leading offset */
+      return NULL;
+    }
+
+  /* Remember the chain header */
+
+  head = iob;
+
+  while (iob != NULL && iob->io_flink != NULL)
+    {
+      next = iob->io_flink;
+
+      /* Skip and free the empty next node */
+
+      if (next->io_len == 0)
+        {
+          next = iob_free(next);
+          iob->io_flink = next;
+          continue;
+        }
+
+      /* Skip filled node */
+
+      if (iob->io_len == CONFIG_IOB_BUFSIZE)
+        {
+          iob = iob->io_flink;
+          continue;
+        }
+
+      /* Eliminate any leading offset */
 
       if (iob->io_offset > 0)
         {
@@ -91,55 +102,19 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
           iob->io_offset = 0;
         }
 
-      /* Then move what we need from the next I/O buffer(s) */
+      /* Copy what we need or what we can from the next buffer */
 
-      do
-        {
-          /* Get the next I/O buffer in the chain */
+      ncopy = CONFIG_IOB_BUFSIZE - iob->io_len;
+      ncopy = MIN(ncopy, next->io_len);
+      memcpy(&iob->io_data[iob->io_len],
+             &next->io_data[next->io_offset], ncopy);
 
-          next = iob->io_flink;
-          DEBUGASSERT(next != NULL);
+      /* Adjust counts and offsets */
 
-          /* Copy what we need or what we can from the next buffer */
-
-          ncopy = len - iob->io_len;
-          ncopy = MIN(ncopy, next->io_len);
-          memcpy(&iob->io_data[iob->io_len],
-                 &next->io_data[next->io_offset], ncopy);
-
-          /* Adjust counts and offsets */
-
-          iob->io_len     += ncopy;
-          next->io_offset += ncopy;
-          next->io_len    -= ncopy;
-
-          /* Handle a (improbable) case where we just emptied the second
-           * buffer in the chain.
-           */
-
-          if (next->io_len == 0)
-            {
-              iob->io_flink = iob_free(next);
-            }
-        }
-      while (len > iob->io_len);
-
-      /* This should always succeed because we know that:
-       *
-       *   pktlen >= CONFIG_IOB_BUFSIZE >= len
-       */
-
-      return 0;
+      iob->io_len     += ncopy;
+      next->io_offset += ncopy;
+      next->io_len    -= ncopy;
     }
 
-  /* Otherwise, the request for contiguous data is larger then the entire
-   * packet.  We can't do that without extending the I/O buffer chain with
-   * garbage (which would probably not be what the caller wants).
-   */
-
-  else
-    {
-      ioberr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
-      return -ENOSPC;
-    }
+  return head;
 }
