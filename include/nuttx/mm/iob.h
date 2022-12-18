@@ -562,12 +562,12 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
  * Name: iob_contig
  *
  * Description:
- *   Merge an iob chain into a continuous space, thereby reducing iob
- *   consumption
+ *   Ensure that there is 'len' bytes of contiguous space at the beginning
+ *   of the I/O buffer chain starting at 'iob'.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_contig(FAR struct iob_s *iob);
+int iob_contig(FAR struct iob_s *iob, unsigned int len);
 
 /****************************************************************************
  * Name: iob_reserve
