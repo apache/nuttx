@@ -194,7 +194,7 @@ config NET_TCP_WRBUFFER_DUMP
 
 endif # NET_TCP_WRITE_BUFFERS
 
-config NET_TCP_RECV_CONTIG
+config NET_TCP_RECV_PACK
 	bool "Enable TCP/IP receive data in a continuous poll"
 	default y
 	---help---
