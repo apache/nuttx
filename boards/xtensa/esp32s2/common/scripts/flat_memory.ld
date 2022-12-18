@@ -51,8 +51,8 @@ MEMORY
    */
 
   metadata (RX) :        org = CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE, len = 0x20
-  ROM (RX) :             org = CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE + 0x20,
-                         len = FLASH_SIZE - (CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE + 0x20)
+  ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
+                         len = FLASH_SIZE - ORIGIN(ROM)
 #endif
 
   /* Below values assume the flash cache is on, and have the blocks this
@@ -102,8 +102,8 @@ MEMORY
    * be equal.
    */
 
-  drom0_0_seg (R) :      org = 0x3f000000 + (CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE + 0x20),
-                         len = FLASH_SIZE - (CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE + 0x20)
+  drom0_0_seg (R) :      org = 0x3f000000 + ORIGIN(ROM),
+                         len = FLASH_SIZE - ORIGIN(ROM)
 #else
   /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
