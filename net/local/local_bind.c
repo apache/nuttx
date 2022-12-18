@@ -66,6 +66,7 @@ int psock_local_bind(FAR struct socket *psock,
   /* Save the address family */
 
   conn->lc_proto = psock->s_type;
+  conn->lc_instance_id = -1;
 
   /* Now determine the type of the Unix domain socket by comparing the size
    * of the address description.
@@ -75,8 +76,11 @@ int psock_local_bind(FAR struct socket *psock,
     {
       /* Zero-length sun_path... This is an abstract Unix domain socket */
 
-      conn->lc_type    = LOCAL_TYPE_ABSTRACT;
-      conn->lc_path[0] = '\0';
+      conn->lc_type = LOCAL_TYPE_ABSTRACT;
+
+      /* Copy the path into the connection structure */
+
+      strlcpy(conn->lc_path, &unaddr->sun_path[1], sizeof(conn->lc_path));
     }
   else
     {
@@ -87,7 +91,6 @@ int psock_local_bind(FAR struct socket *psock,
       /* Copy the path into the connection structure */
 
       strlcpy(conn->lc_path, unaddr->sun_path, sizeof(conn->lc_path));
-      conn->lc_instance_id = -1;
     }
 
   conn->lc_state = LOCAL_STATE_BOUND;
