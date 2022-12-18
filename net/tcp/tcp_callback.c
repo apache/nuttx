@@ -258,12 +258,12 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
       iob_concat(conn->readahead, iob);
     }
 
-#ifdef CONFIG_NET_TCP_RECV_CONTIG
+#ifdef CONFIG_NET_TCP_RECV_PACK
   /* Merge an iob chain into a continuous space, thereby reducing iob
    * consumption.
    */
 
-  conn->readahead = iob_contig(conn->readahead);
+  conn->readahead = iob_pack(conn->readahead);
 #endif
 
   netdev_iob_clear(dev);
