@@ -370,7 +370,16 @@ config ARCH_BOARD_ESP32S2_SAOLA_1
 	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		This is the ESP32-S2-Saola-1 board
-
+		
+config ARCH_BOARD_FRANZININHO_WIFI
+	bool "FRANZININHO WI-FI"
+	depends on ARCH_CHIP_ESP32S2WROVER
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
+	---help---
+		Franzininho Wi-Fi is a development board to evaluate the ESP32-S2 SoC
+		
 config ARCH_BOARD_ESP32S3_DEVKIT
 	bool "Espressif ESP32-S3 DevKit"
 	depends on ARCH_CHIP_ESP32S3WROOM1 || ARCH_CHIP_ESP32S3MINI1
@@ -2708,6 +2717,7 @@ config ARCH_BOARD
 	default "esp32c3-devkit-rust-1"    if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	default "esp32s2-kaluga-1"         if ARCH_BOARD_ESP32S2_KALUGA_1
 	default "esp32s2-saola-1"          if ARCH_BOARD_ESP32S2_SAOLA_1
+	default "franzininho-wifi"         if ARCH_BOARD_FRANZININHO_WIFI
 	default "esp32s3-devkit"           if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"              if ARCH_BOARD_ESP32S3_EYE
 	default "et-stm32-stamp"           if ARCH_BOARD_ET_STM32_STAMP
@@ -3671,6 +3681,9 @@ source "boards/xtensa/esp32s2/esp32s2-kaluga-1/Kconfig"
 endif
 if ARCH_BOARD_ESP32S2_SAOLA_1
 source "boards/xtensa/esp32s2/esp32s2-saola-1/Kconfig"
+endif
+if ARCH_BOARD_FRANZININHO_WIFI
+source "boards/xtensa/esp32s2/franzininho-wifi/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_DEVKIT
 source "boards/xtensa/esp32s3/esp32s3-devkit/Kconfig"
