@@ -266,6 +266,8 @@ int psock_local_connect(FAR struct socket *psock,
       switch (conn->lc_type)
         {
         case LOCAL_TYPE_UNNAMED:   /* A Unix socket that is not bound to any name */
+          break;
+
         case LOCAL_TYPE_ABSTRACT:  /* lc_path is length zero */
           {
 #warning Missing logic
@@ -314,14 +316,10 @@ int psock_local_connect(FAR struct socket *psock,
           }
           break;
 
-        default:                 /* Bad, memory must be corrupted */
-          DEBUGPANIC();          /* PANIC if debug on, else fall through */
-
-        case LOCAL_TYPE_UNTYPED: /* Type is not determined until the socket is bound */
-          {
-            net_unlock();
-            return -EINVAL;
-          }
+        default:        /* Bad, memory must be corrupted */
+          DEBUGPANIC(); /* PANIC if debug on */
+          net_unlock();
+          return -EINVAL;
         }
     }
 
