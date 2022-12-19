@@ -248,6 +248,8 @@ struct lpc17_40_can_s
 
   void *cd_priv;                /* Used by the arch-specific logic */
 
+  uint8_t tx_prio;              /* Used to enforce TX fifo behaviour */
+
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct txmbstats txmb[TXMBCOUNT];
 #endif
@@ -627,7 +629,11 @@ static void lpc17can_reset(struct lpc17_40_can_s *dev)
 #ifdef CONFIG_CAN_LOOPBACK
   can_putreg(priv, LPC17_40_CAN_MOD_OFFSET, CAN_MOD_STM); /* Leave Reset Mode, enter Test Mode */
 #else
+#  if defined(SOCKET_CAN)
+  can_putreg(priv, LPC17_40_CAN_MOD_OFFSET, CAN_MOD_TPM); /* Leave Reset Mode, TX prio for FIFO */
+#  else
   can_putreg(priv, LPC17_40_CAN_MOD_OFFSET, 0);           /* Leave Reset Mode */
+#  endif
 #endif
   can_putcommon(LPC17_40_CANAF_AFMR, CANAF_AFMR_ACCBP);   /* All RX messages accepted */
   leave_critical_section(flags);
@@ -1015,7 +1021,14 @@ static int lpc17can_send(struct lpc17_40_can_s *dev,
 
 static inline bool lpc17can_txringfull(struct lpc17_40_can_s *dev)
 {
-  return !lpc17can_txready(dev);
+  if (dev->tx_prio == 255)
+    {
+      return true;
+    }
+  else
+    {
+      return !lpc17can_txready(dev);
+    }
 }
 
 /****************************************************************************
@@ -1049,10 +1062,6 @@ static int lpc17can_txpoll(struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      /* Send the packet */
-
-      lpc17can_transmit(priv);
-
       /* Check if there is room in the device to hold another packet. If
        * not, return a non-zero value to terminate the poll.
        */
@@ -1060,6 +1069,12 @@ static int lpc17can_txpoll(struct net_driver_s *dev)
       if (lpc17can_txringfull(priv))
         {
           return -EBUSY;
+        }
+      else
+        {
+          /* Send the packet */
+
+          lpc17can_transmit(priv);
         }
     }
 
@@ -1127,6 +1142,8 @@ static int lpc17can_transmit(struct lpc17_40_can_s *dev)
     }
 
   flags = enter_critical_section();
+
+  tfi |= dev->tx_prio++;
 
   /* Pick a transmit buffer */
 
@@ -1229,7 +1246,7 @@ static int lpc17can_transmit(struct lpc17_40_can_s *dev)
     }
   else
     {
-      canerr("ERROR: No available transmission buffer, SR: %08lx\n", regval);
+      nerr("ERROR: No available transmission buffer, SR: %08lx\n", regval);
       ret = -EBUSY;
     }
 
@@ -1436,6 +1453,13 @@ static void can_interrupt(struct lpc17_40_can_s *dev)
       can_txdone(dev);
 #elif defined(SOCKET_CAN)
       NETDEV_TXDONE(&priv->dev);
+      regval = can_getreg(priv, LPC17_40_CAN_GSR_OFFSET);
+      if ((regval & CAN_GSR_TBS) != 0)
+        {
+          /* All TX clear reset prio fifo counter */
+
+          dev->tx_prio = 0;
+        }
 #endif
     }
 
@@ -1455,6 +1479,13 @@ static void can_interrupt(struct lpc17_40_can_s *dev)
       can_txdone(dev);
 #elif defined(SOCKET_CAN)
       NETDEV_TXDONE(&priv->dev);
+      regval = can_getreg(priv, LPC17_40_CAN_GSR_OFFSET);
+      if ((regval & CAN_GSR_TBS) != 0)
+        {
+          /* All TX clear reset prio fifo counter */
+
+          dev->tx_prio = 0;
+        }
 #endif
     }
 
@@ -1474,6 +1505,13 @@ static void can_interrupt(struct lpc17_40_can_s *dev)
       can_txdone(dev);
 #elif defined(SOCKET_CAN)
       NETDEV_TXDONE(&priv->dev);
+      regval = can_getreg(priv, LPC17_40_CAN_GSR_OFFSET);
+      if ((regval & CAN_GSR_TBS) != 0)
+        {
+          /* All TX clear reset prio fifo counter */
+
+          dev->tx_prio = 0;
+        }
 #endif
     }
 }
@@ -1726,6 +1764,7 @@ static int lpc17can_ifup(struct net_driver_s *dev)
     (struct lpc17_40_can_s *)dev->d_private;
 
   priv->bifup = true;
+  priv->tx_prio = 0;
 
   priv->txdesc = (struct can_frame *)&g_tx_pool;
   priv->rxdesc = (struct can_frame *)&g_rx_pool;
