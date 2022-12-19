@@ -107,6 +107,10 @@ int nxsem_wait(FAR sem_t *sem)
 
   else
     {
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      uint8_t prioinherit = sem->flags & PRIOINHERIT_FLAGS_ENABLE;
+#endif
+
       /* First, verify that the task is not already waiting on a
        * semaphore
        */
@@ -126,18 +130,22 @@ int nxsem_wait(FAR sem_t *sem)
        */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      /* Disable context switching.  The following operations must be
-       * atomic with regard to the scheduler.
-       */
+      if (prioinherit != 0)
+        {
+          /* Disable context switching.  The following operations must be
+           * atomic with regard to the scheduler.
+           */
 
-      sched_lock();
+          sched_lock();
 
-      /* Boost the priority of any threads holding a count on the
-       * semaphore.
-       */
+          /* Boost the priority of any threads holding a count on the
+           * semaphore.
+           */
 
-      nxsem_boost_priority(sem);
+          nxsem_boost_priority(sem);
+        }
 #endif
+
       /* Set the errno value to zero (preserving the original errno)
        * value).  We reuse the per-thread errno to pass information
        * between sem_waitirq() and this functions.
@@ -201,7 +209,10 @@ int nxsem_wait(FAR sem_t *sem)
       ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      sched_unlock();
+      if (prioinherit != 0)
+        {
+          sched_unlock();
+        }
 #endif
     }
 
