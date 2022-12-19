@@ -38,6 +38,10 @@ void __gcov_dump(void);
  * Public Functions
  ****************************************************************************/
 
+extern uint64_t up_irq_save(void);
+extern void up_irq_restore(uint64_t flags);
+extern int backtrace(void **array, int size);
+
 /****************************************************************************
  * Name: host_abort
  *
@@ -50,6 +54,8 @@ void __gcov_dump(void);
 
 void host_abort(int status)
 {
+  uint64_t flags = up_irq_save();
+
 #ifdef CONFIG_ARCH_COVERAGE
   /* Dump gcov data. */
 
@@ -59,14 +65,26 @@ void host_abort(int status)
   /* exit the simulation */
 
   exit(status);
+
+  up_irq_restore(flags);
 }
+
+/****************************************************************************
+ * Name: host_backtrace
+ *
+ * Description:
+ *   bcaktrace
+ *
+ * Input Parameters:
+ *   array - return array, which backtrace will be stored
+ *   size  - array size
+ ****************************************************************************/
 
 int host_backtrace(void** array, int size)
 {
 #ifdef CONFIG_WINDOWS_CYGWIN
   return 0;
 #else
-  extern int backtrace(void **array, int size);
   return backtrace(array, size);
 #endif
 }
