@@ -1479,12 +1479,13 @@ unsigned int s32k3xx_dmach_getcount(DMACH_HANDLE *handle)
 
       if ((regval16 & EDMA_TCD_CITER_ELINK) != 0)
         {
-          remaining = (regval16 & EDMA_TCD_CITER_MASK) >>
+          remaining = (regval16 & EDMA_TCD_CITER_MASK_ELINK) >>
                       EDMA_TCD_CITER_SHIFT;
         }
       else
         {
-          remaining = 1;
+          remaining = (regval16 & EDMA_TCD_CITER_MASK) >>
+                       EDMA_TCD_CITER_SHIFT;
         }
     }
 
