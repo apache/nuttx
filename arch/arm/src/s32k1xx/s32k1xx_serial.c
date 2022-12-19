@@ -862,15 +862,15 @@ static int s32k1xx_setup(struct uart_dev_s *dev)
   config.parity     = priv->parity;     /* 0=none, 1=odd, 2=even */
   config.bits       = priv->bits;       /* Number of bits (5-9) */
   config.stopbits2  = priv->stopbits2;  /* true: Configure with 2 stop bits instead of 1 */
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  config.usects     = priv->iflow;      /* Flow control on inbound side */
-#endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  /* Flow control on outbound side if not GPIO based */
+  config.usects     = priv->oflow;      /* Flow control on outbound side */
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  /* Flow control on inbound side if not GPIO based */
 
   if ((priv->rts_gpio & _PIN_MODE_MASK) != _PIN_MODE_GPIO)
     {
-      config.userts = priv->oflow;
+      config.userts = priv->iflow;
     }
 
 #endif
