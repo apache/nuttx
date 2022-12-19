@@ -162,6 +162,10 @@ static int sim_loop_task(int argc, char **argv)
 {
   while (1)
     {
+      irqstate_t flags = up_irq_save();
+
+      sched_lock();
+
       /* Handle UART data availability */
 
       sim_uartloop();
@@ -204,6 +208,9 @@ static int sim_loop_task(int argc, char **argv)
 
       foc_dummy_update();
 #endif
+
+      sched_unlock();
+      up_irq_restore(flags);
 
       /* Sleep minimal time, let the idle run */
 
