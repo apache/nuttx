@@ -36,7 +36,6 @@
 #include <arch/irq.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 #include "nvic.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -51,7 +50,7 @@
 #include "s32k3xx_swt.h"
 #include "s32k3xx_start.h"
 #if defined(CONFIG_ARCH_USE_MPU)
-#include "mpu.h"
+#include "s32k3xx_mpuinit.h"
 #endif
 
 #ifdef CONFIG_S32K3XX_PROGMEM
@@ -95,31 +94,6 @@
 
 #define STARTUP_ECC_INITVALUE   0
 
-#ifndef CONFIG_ARMV7M_DCACHE
-  /*  With Dcache off:
-   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be off
-   */
-#  undef  MPU_RASR_B
-#  define MPU_RASR_B    0
-#  define RASR_B_VALUE  0
-#  define RASR_C_VALUE  0
-#else
-#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-  /*  With Dcache on:
-   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be on
-   */
-#  define RASR_B_VALUE  MPU_RASR_B
-#  define RASR_C_VALUE  MPU_RASR_C
-
-#  else
-  /*  With Dcache in WRITETHROUGH Bufferable (MPU_RASR_B)
-   * needs to be off, except for FLASH for alignment leniency
-   */
-#  define RASR_B_VALUE  0
-#  define RASR_C_VALUE  MPU_RASR_C
-#  endif
-#endif
-
 /****************************************************************************
  * Name: showprogress
  *
@@ -146,110 +120,6 @@ extern uint8_t DTCM_BASE_ADDR[];
 extern uint8_t DTCM_END_ADDR[];
 extern uint8_t FLASH_BASE_ADDR[];
 extern uint8_t FLASH_END_ADDR[];
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: s32k3xx_mpu_config
- *
- * Description:
- *   Enable all bus masters.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_USE_MPU)
-static inline void s32k3xx_mpu_config(void)
-{
-  uint32_t regval;
-  uint32_t region;
-
-  /* Show MPU information */
-
-  mpu_showtype();
-
-#ifdef CONFIG_ARMV7M_DCACHE
-  /* Memory barrier */
-
-  ARM_DMB();
-#endif
-
-  /* Reset MPU if enabled */
-
-  mpu_reset();
-
-  /* ARM errata 1013783-B Workaround */
-
-  region = mpu_allocregion();
-  DEBUGASSERT(region == 0);
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32(region | MPU_RBAR_VALID, MPU_RBAR);
-
-  /* The configure the region */
-
-  regval = MPU_RASR_ENABLE        | /* Enable region  */
-           MPU_RASR_SIZE_LOG2(32) | /* entire memory */
-           MPU_RASR_TEX_SO        | /* Strongly ordered */
-           MPU_RASR_AP_RWRW       | /* P:RW   U:RW */
-           MPU_RASR_XN;             /* Execute-never to prevent instruction fetch */
-  putreg32(regval, MPU_RASR);
-
-  mpu_configure_region((uintptr_t)FLASH_BASE_ADDR,
-                     FLASH_END_ADDR - FLASH_BASE_ADDR,
-                     MPU_RASR_TEX_SO   | /* Strongly ordered    */
-                     RASR_C_VALUE      | /* Cacheable          */
-                     MPU_RASR_B        | /* Bufferable
-                                          * Not Shareable      */
-                     MPU_RASR_AP_RORO);  /* P:RO   U:RO
-                                          * Instruction access */
-
-  mpu_configure_region((uintptr_t)SRAM_BASE_ADDR,
-                     SRAM_INIT_END_ADDR - SRAM_BASE_ADDR,
-                     MPU_RASR_TEX_SO   | /* Strongly ordered   */
-                     RASR_C_VALUE      | /* Cacheable          */
-                     RASR_B_VALUE      | /* Bufferable
-                                          * Not Shareable      */
-                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
-                                          * Instruction access */
-
-  mpu_configure_region((uintptr_t)ITCM_BASE_ADDR,
-                     ITCM_END_ADDR - ITCM_BASE_ADDR,
-                     MPU_RASR_TEX_SO   | /* Strongly ordered   */
-                     RASR_C_VALUE      | /* Cacheable          */
-                     RASR_B_VALUE      | /* Bufferable
-                                          * Not Shareable      */
-                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
-                                          * Instruction access */
-
-  mpu_configure_region((uintptr_t)DTCM_BASE_ADDR,
-                     DTCM_END_ADDR - DTCM_BASE_ADDR,
-                     MPU_RASR_TEX_SO   | /* Strongly ordered   */
-                     RASR_C_VALUE      | /* Cacheable          */
-                     RASR_B_VALUE      | /* Bufferable
-                                          * Not Shareable      */
-                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
-                                          * Instruction access */
-
-  mpu_configure_region(0x40000000, 3 * 2048 * 1024,
-                     MPU_RASR_TEX_DEV  | /* Device
-                                          * Not Cacheable
-                                          * Not Bufferable
-                                          * Not Shareable      */
-                     MPU_RASR_AP_RWRW);  /* P:RW   U:RW
-                                          * Instruction access */
-
-  /* Then enable the MPU */
-
-  mpu_control(true, false, true);
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -348,11 +218,23 @@ void s32k3xx_start(void)
 
   arm_fpuconfig();
 
-#if defined(CONFIG_ARCH_USE_MPU)
+#ifdef CONFIG_ARM_MPU
+#ifdef CONFIG_BUILD_PROTECTED
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
 
-  /* Config MPU regions */
+  s32k3xx_userspace();
+#endif
 
-  s32k3xx_mpu_config();
+  /* Configure the MPU to permit user-space access to its FLASH and RAM (for
+   * CONFIG_BUILD_PROTECTED) or to manage cache properties in external
+   * memory regions.
+   */
+
+  s32k3xx_mpuinitialize();
   showprogress('D');
 #endif
 
@@ -376,17 +258,6 @@ void s32k3xx_start(void)
 
 #ifdef CONFIG_S32K3XX_EEEPROM
   s32k3xx_eeeprom_init();
-#endif
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segments.
-   */
-
-#ifdef CONFIG_BUILD_PROTECTED
-  s32k3xx_userspace();
-  showprogress('F');
 #endif
 
   /* Initialize on-board resources */

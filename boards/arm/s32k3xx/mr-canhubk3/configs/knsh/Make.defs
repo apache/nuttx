@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/s32k3xx/mr-canhubk3/scripts/Make.defs
+# boards/arm/s32k3xx/mr-canhubk3/configs/knsh/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,22 +18,15 @@
 #
 ############################################################################
 
-# Copyright 2022 NXP
-
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
- LDSCRIPT = flash.ld
-else ifeq ($(CONFIG_BOOT_RUNFROMISRAM),y)
- LDSCRIPT = sram.ld
-endif
+LDSCRIPT1 = memory.ld
+LDSCRIPT2 = kernel-space.ld
 
-$(warning, LDSCRIPT is $(LDSCRIPT))
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-$(warning, LDSCRIPT is $(LDSCRIPT))
-$(warning, ARCHSCRIPT is $(ARCHSCRIPT))
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT1)
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT2)
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
