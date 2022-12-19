@@ -544,7 +544,7 @@ struct sensor_ecg           /* Type: ECG */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   float ecg;                /* Unit is μV */
-  int32_t lead;             /* Lead detection info. 0-off, 1-on.*/
+  uint32_t status;          /* Status info*/
 };
 
 struct sensor_ppgd          /* Type: PPGD */
