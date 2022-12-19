@@ -72,6 +72,9 @@ int nxsem_post(FAR sem_t *sem)
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
   int16_t sem_count;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  uint8_t prioinherit;
+#endif
 
   DEBUGASSERT(sem != NULL);
 
@@ -118,8 +121,13 @@ int nxsem_post(FAR sem_t *sem)
    * will do nothing.
    */
 
-  sched_lock();
+  prioinherit = sem->flags & PRIOINHERIT_FLAGS_ENABLE;
+  if (prioinherit != 0)
+    {
+      sched_lock();
+    }
 #endif
+
   /* If the result of semaphore unlock is non-positive, then
    * there must be some task waiting for the semaphore.
    */
@@ -180,8 +188,11 @@ int nxsem_post(FAR sem_t *sem)
    */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  nxsem_restore_baseprio(stcb, sem);
-  sched_unlock();
+  if (prioinherit != 0)
+    {
+      nxsem_restore_baseprio(stcb, sem);
+      sched_unlock();
+    }
 #endif
 
   /* Interrupts may now be enabled. */
