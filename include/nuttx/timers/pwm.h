@@ -148,6 +148,9 @@ struct pwm_info_s
                                  * generate an indefinite number of pulses */
 #  endif
 #endif /* CONFIG_PWM_MULTICHAN */
+
+  FAR void           *arg;      /* User provided argument to be used in the
+                                 * lower half */
 };
 
 /* This structure is a set a callback functions used to call from the upper-
