@@ -762,12 +762,13 @@ out:
 static int sim_mixer_open(struct sim_audio_s *priv)
 {
   snd_mixer_selem_id_t *sid = NULL;
+  irqstate_t flags = up_irq_save();
   int ret;
 
   ret = snd_mixer_open(&priv->mixer, 0);
   if (ret < 0)
     {
-      return ret;
+      goto fail;
     }
 
   ret = snd_mixer_attach(priv->mixer, "default");
@@ -831,9 +832,11 @@ static int sim_mixer_open(struct sim_audio_s *priv)
         }
     }
 
+  up_irq_restore(flags);
   return 0;
 fail:
   snd_mixer_close(priv->mixer);
+  up_irq_restore(flags);
   priv->mixer = NULL;
   return 0;
 }
