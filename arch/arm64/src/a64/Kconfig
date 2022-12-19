@@ -7,6 +7,13 @@ if ARCH_CHIP_A64
 
 menu "Allwinner A64 Peripheral Selection"
 
+config A64_DE
+	bool "DE"
+	default n
+	select A64_TCON0
+	---help---
+		Select to enable support for Display Engine 2.0.
+
 config A64_MIPI_DSI
 	bool "MIPI DSI"
 	default n

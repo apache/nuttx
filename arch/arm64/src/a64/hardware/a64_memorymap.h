@@ -33,6 +33,8 @@
 
 /* Peripheral Base Addresses */
 
+#define A64_DE_ADDR         0x01000000 /* DE              0x0100:0000-0x012f:ffff 3M */
+#define A64_SYSCTL_ADDR     0x01c00000 /* System Control  0x01c0:0000-0x01c0:0fff 4K */
 #define A64_TCON0_ADDR      0x01c0c000 /* TCON 0          0x01c0:c000-0x01c0:cfff 4K */
 #define A64_CCU_ADDR        0x01c20000 /* CCU             0x01c2:0000-0x01c2:03ff 1K */
 #define A64_PIO_ADDR        0x01c20800 /* PIO             0x01c2:0800-0x01c2:0bff 1K */
