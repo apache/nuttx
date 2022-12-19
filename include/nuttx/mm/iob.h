@@ -594,6 +594,16 @@ void iob_reserve(FAR struct iob_s *iob, unsigned int reserved);
 void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen);
 
 /****************************************************************************
+ * Name: iob_count
+ *
+ * Description:
+ *   Get iob entries count in chain.
+ *
+ ****************************************************************************/
+
+int iob_count(FAR struct iob_s *iob);
+
+/****************************************************************************
  * Name: iob_dump
  *
  * Description:

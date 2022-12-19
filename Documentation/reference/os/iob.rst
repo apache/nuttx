@@ -177,6 +177,7 @@ Public Function Prototypes
   - :c:func:`iob_trimtail()`
   - :c:func:`iob_pack()`
   - :c:func:`iob_contig()`
+  - :c:func:`iob_count()`
   - :c:func:`iob_dump()`
 
 .. c:function:: void iob_initialize(void);
@@ -323,6 +324,10 @@ Public Function Prototypes
   Ensure that there is ``len`` bytes of contiguous
   space at the beginning of the I/O buffer chain starting at
   ``iob``.
+
+.. c:function:: int iob_count(FAR struct iob_s *iob);
+
+  Get ``iob`` entries count in chain.
 
 .. c:function:: void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len, \
                  unsigned int offset);
