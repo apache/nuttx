@@ -177,6 +177,10 @@ static int sim_loop_task(int argc, char **argv)
       sim_x11events();
 #endif
 
+#if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
+      sim_x11loop();
+#endif
+
 #ifdef CONFIG_SIM_NETDEV
       /* Run the network if enabled */
 

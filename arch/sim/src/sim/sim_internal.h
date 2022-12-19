@@ -251,6 +251,12 @@ void sim_x11events(void);
 void sim_buttonevent(int x, int y, int buttons);
 #endif
 
+/* sim_framebuffer.c sim_lcd.c **********************************************/
+
+#if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
+void sim_x11loop(void);
+#endif
+
 /* sim_ajoystick.c **********************************************************/
 
 #ifdef CONFIG_SIM_AJOYSTICK

@@ -156,8 +156,6 @@ static uint8_t g_runbuffer[FB_STRIDE];
 #else
 static size_t g_fblen;
 static unsigned short g_stride;
-
-static struct work_s g_updatework;
 #endif
 
 /* This structure describes the overall LCD video controller */
@@ -426,13 +424,22 @@ static int sim_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  * Name: sim_updatework
  ****************************************************************************/
 
-#ifdef CONFIG_SIM_X11FB
-static void sim_updatework(void *arg)
+void sim_x11loop(void)
 {
-  work_queue(LPWORK, &g_updatework, sim_updatework, NULL, MSEC2TICK(33));
-  sim_x11update();
-}
+#ifdef CONFIG_SIM_X11FB
+  if (g_planeinfo.buffer != NULL)
+    {
+      static clock_t last;
+      clock_t now = clock_systime_ticks();
+
+      if (now - last >= MSEC2TICK(16))
+        {
+          sim_x11update();
+          last = now;
+        }
+    }
 #endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -456,14 +463,8 @@ int board_lcd_initialize(void)
 
 #ifdef CONFIG_SIM_X11FB
   ret = sim_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
-                         (void**)&g_planeinfo.buffer, &g_fblen,
-                         &g_planeinfo.bpp, &g_stride);
-
-  if (ret == OK)
-    {
-      work_queue(LPWORK, &g_updatework, sim_updatework, NULL, MSEC2TICK(33));
-    }
-
+                          (void**)&g_planeinfo.buffer, &g_fblen,
+                          &g_planeinfo.bpp, &g_stride);
 #endif
 
   return ret;
