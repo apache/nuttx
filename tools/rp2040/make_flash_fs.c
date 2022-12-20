@@ -38,7 +38,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
 
 #define MAX_NAME_LEN     16
 #define MAX_SECTOR_DATA  (1024 - 10)

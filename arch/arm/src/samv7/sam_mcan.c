@@ -62,11 +62,11 @@
 /* Common definitions *******************************************************/
 
 #ifndef MIN
-#  define MIN(a,b) ((a < b) ? a : b)
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) ((a > b) ? a : b)
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
 /* Clock source *************************************************************/
@@ -131,7 +131,7 @@
 
 #  define MCAN0_TSEG1  (CONFIG_SAMV7_MCAN0_PROPSEG + CONFIG_SAMV7_MCAN0_PHASESEG1)
 #  define MCAN0_TSEG2  CONFIG_SAMV7_MCAN0_PHASESEG2
-#  define MCAN0_BRP    ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+#  define MCAN0_BRP    ((uint32_t)(((float)SAMV7_MCANCLK_FREQUENCY / \
                        ((float)(MCAN0_TSEG1 + MCAN0_TSEG2 + 3) * \
                         (float)CONFIG_SAMV7_MCAN0_BITRATE)) - 1))
 #  define MCAN0_SJW    (CONFIG_SAMV7_MCAN0_FSJW - 1)
@@ -148,7 +148,7 @@
 
 #  define MCAN0_DTSEG1 (CONFIG_SAMV7_MCAN0_FPROPSEG + CONFIG_SAMV7_MCAN0_FPHASESEG1)
 #  define MCAN0_DTSEG2 (CONFIG_SAMV7_MCAN0_FPHASESEG2)
-#  define MCAN0_DBRP   ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+#  define MCAN0_DBRP   ((uint32_t)(((float)SAMV7_MCANCLK_FREQUENCY / \
                        ((float)(MCAN0_DTSEG1 + MCAN0_DTSEG2 + 3) * \
                         (float)CONFIG_SAMV7_MCAN0_FBITRATE)) - 1))
 #  define MCAN0_DSJW   (CONFIG_SAMV7_MCAN0_FFSJW - 1)
@@ -416,7 +416,7 @@
 
 #  define MCAN1_TSEG1  (CONFIG_SAMV7_MCAN1_PROPSEG + CONFIG_SAMV7_MCAN1_PHASESEG1)
 #  define MCAN1_TSEG2  CONFIG_SAMV7_MCAN1_PHASESEG2
-#  define MCAN1_BRP    ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+#  define MCAN1_BRP    ((uint32_t)(((float)SAMV7_MCANCLK_FREQUENCY / \
                        ((float)(MCAN1_TSEG1 + MCAN1_TSEG2 + 3) * \
                         (float)CONFIG_SAMV7_MCAN1_BITRATE)) - 1))
 #  define MCAN1_SJW    (CONFIG_SAMV7_MCAN1_FSJW - 1)
@@ -433,7 +433,7 @@
 
 #  define MCAN1_DTSEG1 (CONFIG_SAMV7_MCAN1_FPROPSEG + CONFIG_SAMV7_MCAN1_FPHASESEG1)
 #  define MCAN1_DTSEG2 (CONFIG_SAMV7_MCAN1_FPHASESEG2)
-#  define MCAN1_DBRP   ((uint32_t)(((float) SAMV7_MCANCLK_FREQUENCY / \
+#  define MCAN1_DBRP   ((uint32_t)(((float)SAMV7_MCANCLK_FREQUENCY / \
                        ((float)(MCAN1_DTSEG1 + MCAN1_DTSEG2 + 3) * \
                         (float)CONFIG_SAMV7_MCAN1_FBITRATE)) - 1))
 #  define MCAN1_DSJW   (CONFIG_SAMV7_MCAN1_FFSJW - 1)
