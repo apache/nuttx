@@ -1276,7 +1276,7 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
 
       container->buf.length = get_bufsize(&type_inf->fmt[VIDEO_FMT_MAIN]);
       container->buf.m.userptr = (unsigned long)(type_inf->bufheap +
-                                 buf->length * buf->index);
+                                 container->buf.length * buf->index);
     }
 
   video_framebuff_queue_container(&type_inf->bufinf, container);
