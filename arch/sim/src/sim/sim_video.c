@@ -307,9 +307,9 @@ void sim_video_loop(void)
 
   if (g_sim_video_priv.next_buf)
     {
-      ret = host_video_dq_buf(g_sim_video_priv.vdev,
-                              g_sim_video_priv.next_buf,
-                              g_sim_video_priv.buf_size);
+      ret = host_video_dqbuf(g_sim_video_priv.vdev,
+                             g_sim_video_priv.next_buf,
+                             g_sim_video_priv.buf_size);
       if (ret > 0)
         {
           g_sim_video_priv.capture_cb(0, ret);
