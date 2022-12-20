@@ -1079,7 +1079,7 @@ static const struct sam_config_s g_mcan0const =
 
 static struct sam_mcan_s g_mcan0priv =
 {
-  .config           = &g_mcan1const,
+  .config           = &g_mcan0const,
   .lock             = NXMUTEX_INITIALIZER,
   .txfsem           = SEM_INITIALIZER(CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE),
 };
@@ -1157,7 +1157,7 @@ static const struct sam_config_s g_mcan1const =
 #ifdef CONFIG_SAMV7_MCAN1_LOOPBACK
   .loopback         = true,
 #endif
-  /* MCAN0 Message RAM */
+  /* MCAN1 Message RAM */
 
   .msgram =
   {
@@ -1172,13 +1172,13 @@ static const struct sam_config_s g_mcan1const =
   }
 };
 
-/* MCAN0 variable driver state */
+/* MCAN1 variable driver state */
 
 static struct sam_mcan_s g_mcan1priv =
 {
   .config           = &g_mcan1const,
   .lock             = NXMUTEX_INITIALIZER,
-  .txfsem           = SEM_INITIALIZER(CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE),
+  .txfsem           = SEM_INITIALIZER(CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE),
 };
 
 static struct can_dev_s g_mcan1dev =
