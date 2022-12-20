@@ -25,9 +25,12 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdint.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/hashtable.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/queue.h>
 
 #include "icmp/icmp.h"
@@ -50,11 +53,42 @@
  * Private Data
  ****************************************************************************/
 
-static dq_queue_t g_entries;
+static DECLARE_HASHTABLE(g_table_inbound, CONFIG_NET_NAT_HASH_BITS);
+static DECLARE_HASHTABLE(g_table_outbound, CONFIG_NET_NAT_HASH_BITS);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv4_nat_inbound_key
+ *
+ * Description:
+ *   Create an inbound hash key for NAT.
+ *
+ ****************************************************************************/
+
+static inline uint32_t ipv4_nat_inbound_key(uint16_t external_port,
+                                            uint8_t protocol)
+{
+  return ((uint32_t)protocol << 16) | external_port;
+}
+
+/****************************************************************************
+ * Name: ipv4_nat_outbound_key
+ *
+ * Description:
+ *   Create an outbound hash key for NAT.
+ *
+ ****************************************************************************/
+
+static inline uint32_t ipv4_nat_outbound_key(in_addr_t local_ip,
+                                             uint16_t local_port,
+                                             uint8_t protocol)
+{
+  return NTOHL(local_ip) ^ /* NTOHL makes sure difference is in lower bits. */
+         ((uint32_t)protocol << 8) ^ ((uint32_t)local_port << 16);
+}
 
 /****************************************************************************
  * Name: ipv4_nat_select_port_without_stack
@@ -211,6 +245,10 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
 
 static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
 {
+  /* Note: May add logic here to move recent node to head side if each chain
+   * in hashtable is still too long (with long expire time).
+   */
+
   switch (entry->protocol)
     {
 #ifdef CONFIG_NET_TCP
@@ -279,7 +317,11 @@ ipv4_nat_entry_create(uint8_t protocol, uint16_t external_port,
 
   ipv4_nat_entry_refresh(entry);
 
-  dq_addfirst((FAR dq_entry_t *)entry, &g_entries);
+  hashtable_add(g_table_inbound, &entry->hash_inbound,
+                ipv4_nat_inbound_key(external_port, protocol));
+  hashtable_add(g_table_outbound, &entry->hash_outbound,
+                ipv4_nat_outbound_key(local_ip, local_port, protocol));
+
   return entry;
 }
 
@@ -294,13 +336,19 @@ ipv4_nat_entry_create(uint8_t protocol, uint16_t external_port,
  *
  ****************************************************************************/
 
-void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
+static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
 {
   ninfo("INFO: Removing NAT entry proto=%d, local=%x:%d, external=:%d\n",
         entry->protocol, entry->local_ip, entry->local_port,
         entry->external_port);
 
-  dq_rem((FAR dq_entry_t *)entry, &g_entries);
+  hashtable_delete(g_table_inbound, &entry->hash_inbound,
+                   ipv4_nat_inbound_key(entry->external_port,
+                                        entry->protocol));
+  hashtable_delete(g_table_outbound, &entry->hash_outbound,
+                   ipv4_nat_outbound_key(entry->local_ip, entry->local_port,
+                                         entry->protocol));
+
   kmm_free(entry);
 }
 
@@ -328,13 +376,15 @@ FAR struct ipv4_nat_entry *
 ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
                             bool refresh)
 {
-  FAR sq_entry_t *p;
-  FAR sq_entry_t *tmp;
+  FAR hash_node_t *p;
+  FAR hash_node_t *tmp;
   uint32_t current_time = TICK2SEC(clock_systime_ticks());
 
-  sq_for_every_safe((FAR sq_queue_t *)&g_entries, p, tmp)
+  hashtable_for_every_possible_safe(g_table_inbound, p, tmp,
+                              ipv4_nat_inbound_key(external_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry = (FAR struct ipv4_nat_entry *)p;
+      FAR struct ipv4_nat_entry *entry =
+        container_of(p, struct ipv4_nat_entry, hash_inbound);
 
       /* Remove expired entries. */
 
@@ -347,8 +397,6 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
       if (entry->protocol == protocol &&
           entry->external_port == external_port)
         {
-          /* TODO: Use hash table, or move recent node to head. */
-
           if (refresh)
             {
               ipv4_nat_entry_refresh(entry);
@@ -387,13 +435,15 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
                              bool try_create)
 {
-  FAR sq_entry_t *p;
-  FAR sq_entry_t *tmp;
+  FAR hash_node_t *p;
+  FAR hash_node_t *tmp;
   uint32_t current_time = TICK2SEC(clock_systime_ticks());
 
-  sq_for_every_safe((FAR sq_queue_t *)&g_entries, p, tmp)
+  hashtable_for_every_possible_safe(g_table_outbound, p, tmp,
+                      ipv4_nat_outbound_key(local_ip, local_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry = (FAR struct ipv4_nat_entry *)p;
+      FAR struct ipv4_nat_entry *entry =
+        container_of(p, struct ipv4_nat_entry, hash_outbound);
 
       /* Remove expired entries. */
 
@@ -407,8 +457,6 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
           net_ipv4addr_cmp(entry->local_ip, local_ip) &&
           entry->local_port == local_port)
         {
-          /* TODO: Use hash table, or move recent node to head. */
-
           ipv4_nat_entry_refresh(entry);
           return entry;
         }
