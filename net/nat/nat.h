@@ -32,6 +32,7 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/hashtable.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
@@ -43,14 +44,8 @@
 
 struct ipv4_nat_entry
 {
-  /* Support for doubly-linked lists.
-   *
-   * TODO: Implement a general hash table, and use it to optimize performance
-   * here.
-   */
-
-  FAR struct ipv4_nat_entry *flink;
-  FAR struct ipv4_nat_entry *blink;
+  hash_node_t hash_inbound;
+  hash_node_t hash_outbound;
 
   /*  Local Network                             External Network
    *                |----------------|
