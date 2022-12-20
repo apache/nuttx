@@ -76,7 +76,7 @@ if [ -z ${VERSION} ] ; then
   # If the VERSION does not match X.Y.Z, retrieve version from the tag
 
   if [[ ! ${VERSION} =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]] ; then
-    VERSION=`git -C ${WD} -c 'versionsort.suffix=-' tag --sort=v:refname | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2-`
+    VERSION=`git -C ${WD} -c 'versionsort.suffix=-' tag --sort=v:refname 2>/dev/null | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2-`
   fi
 
 fi
@@ -117,12 +117,11 @@ PATCH=`echo ${VERSION} | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+" | cut -d'.' -f3`
 # Get GIT information (if not provided on the command line)
 
 if [ -z "${BUILD}" ]; then
-  BUILD=`git -C ${WD} log --oneline -1 | cut -d' ' -f1 2>/dev/null`
+  BUILD=`git -C ${WD} log --oneline -1 2>/dev/null | cut -d' ' -f1`
   if [ -z "${BUILD}" ]; then
     echo "GIT version information is not available"
-    exit 5
   fi
-  if [ -n "`git -C ${WD} diff-index --name-only HEAD | head -1`" ]; then
+  if [ -n "`git -C ${WD} diff-index --name-only HEAD 2>/dev/null | head -1`" ]; then
     BUILD=${BUILD}-dirty
   fi
 fi
