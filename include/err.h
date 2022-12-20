@@ -65,6 +65,6 @@ void vwarnx(FAR const char *fmt, va_list ap) printf_like(1, 0);
 void err(int status, FAR const char *fmt, ...) printf_like(2, 3);
 void verr(int status, FAR const char *fmt, va_list ap) printf_like(2, 0);
 void errx(int status, FAR const char *fmt, ...) printf_like(2, 3);
-void verrx(int status, FAR const char *, va_list ap) printf_like(2, 0);
+void verrx(int status, FAR const char *fmt, va_list ap) printf_like(2, 0);
 
 #endif /* __INCLUDE_ERR_H */

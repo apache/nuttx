@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_ALERT
-void _alert(const char *format, ...)
+void _alert(FAR const char *format, ...)
 {
   va_list ap;
 
@@ -56,7 +56,7 @@ void _alert(const char *format, ...)
 #endif /* CONFIG_DEBUG_ALERT */
 
 #ifdef CONFIG_DEBUG_ERROR
-void _err(const char *format, ...)
+void _err(FAR const char *format, ...)
 {
   va_list ap;
 
@@ -67,7 +67,7 @@ void _err(const char *format, ...)
 #endif /* CONFIG_DEBUG_ERROR */
 
 #ifdef CONFIG_DEBUG_WARN
-void _warn(const char *format, ...)
+void _warn(FAR const char *format, ...)
 {
   va_list ap;
 
@@ -78,7 +78,7 @@ void _warn(const char *format, ...)
 #endif /* CONFIG_DEBUG_WARN */
 
 #ifdef CONFIG_DEBUG_INFO
-void _info(const char *format, ...)
+void _info(FAR const char *format, ...)
 {
   va_list ap;
 
