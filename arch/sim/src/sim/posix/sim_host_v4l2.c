@@ -115,8 +115,8 @@ struct host_video_dev_s *host_video_init(const char *host_video_dev_path)
   return vdev;
 }
 
-int host_video_dq_buf(struct host_video_dev_s *vdev, uint8_t *addr,
-                      uint32_t size)
+int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
+                     uint32_t size)
 {
   struct v4l2_buffer buf;
 

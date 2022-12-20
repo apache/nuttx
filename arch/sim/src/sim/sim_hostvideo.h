@@ -43,8 +43,8 @@ struct host_video_dev_s *host_video_init(const char *host_video_dev_path);
 int host_video_uninit(struct host_video_dev_s *vdev);
 int host_video_start_capture(struct host_video_dev_s *vdev);
 int host_video_stop_capture(struct host_video_dev_s *vdev);
-int host_video_dq_buf(struct host_video_dev_s *vdev, uint8_t *addr,
-                      uint32_t size);
+int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
+                     uint32_t size);
 int host_video_set_fmt(struct host_video_dev_s *vdev,
                        uint16_t width, uint16_t height, uint32_t fmt,
                        uint32_t denom, uint32_t numer);
