@@ -1177,13 +1177,13 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct tun_device_s *priv = filep->f_priv;
   int ret = OK;
 
-  if (cmd == TUNSETIFF && priv == NULL)
+  if (cmd == TUNSETIFF)
     {
       uint8_t free_tuns;
       int intf;
       FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
 
-      if (ifr  == NULL ||
+      if (priv != NULL || ifr == NULL ||
          ((ifr->ifr_flags & IFF_MASK) != IFF_TUN &&
           (ifr->ifr_flags & IFF_MASK) != IFF_TAP))
         {
@@ -1222,6 +1222,18 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       priv = filep->f_priv;
       strlcpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
       nxmutex_unlock(&tun->lock);
+
+      return OK;
+    }
+  else if (cmd == TUNGETIFF)
+    {
+      FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
+      if (priv == NULL || ifr == NULL)
+        {
+          return -EINVAL;
+        }
+
+      strlcpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
 
       return OK;
     }
