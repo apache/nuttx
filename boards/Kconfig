@@ -1796,6 +1796,15 @@ config ARCH_BOARD_GIANT_BOARD
 		This options selects support for NuttX on the Groboards Giant Board,
 		featuring the SAMA5D27C-D1G SIP with 128MB DDR2 RAM.
 
+config ARCH_BOARD_JUPITER_NANO
+	bool "Starcat Jupiter Nano (SAMA5D27C-LD1G)"
+	depends on ARCH_CHIP_ATSAMA5D27
+	select SAMA5D27_JUPITER_NANO_498MHZ
+	select ARCH_HAVE_LEDS
+	---help---
+	    This options selects support for NuttX on the Starcat Jupiter Nano
+	    featuring the SAMA5D27C-LD1G SIP with 128MB LPDDR2 RAM.
+
 config ARCH_BOARD_SAMA5D3X_EK
 	bool "Atmel SAMA5D3x-EK development board"
 	depends on ARCH_CHIP_ATSAMA5D31 || ARCH_CHIP_ATSAMA5D33 || ARCH_CHIP_ATSAMA5D34 || ARCH_CHIP_ATSAMA5D35
@@ -2862,6 +2871,7 @@ config ARCH_BOARD
 	default "pinephone"                if ARCH_BOARD_PINEPHONE
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
+	default "jupiter-nano"             if ARCH_BOARD_JUPITER_NANO
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
@@ -3252,6 +3262,9 @@ source "boards/arm/sama5/sama5d2-xult/Kconfig"
 endif
 if ARCH_BOARD_GIANT_BOARD
 source "boards/arm/sama5/giant-board/Kconfig"
+endif
+if ARCH_BOARD_JUPITER_NANO
+source "boards/arm/sama5/jupiter-nano/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
 source "boards/arm/sama5/sama5d3x-ek/Kconfig"
