@@ -58,15 +58,9 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 {
   unsigned int limit = NETDEV_PKTSIZE(dev) -
                        NET_LL_HDRLEN(dev) - target_offset;
-  int ret;
 
   if (dev == NULL || len == 0 || len > limit)
     {
-      if (dev->d_iob == NULL)
-        {
-          iob_free_chain(iob);
-        }
-
       nerr("devif_iob_send error, %p, send len: %u, limit len: %u\n",
            dev, len, limit);
       return;
@@ -78,22 +72,38 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
     {
       dev->d_sndlen = 0;
 
+#ifdef CONFIG_IOB_SHARED
+      /* Skip the l3/l4 offset before append */
+
+      iob_update_pktlen(dev->d_iob, target_offset);
+
+      /* Clone the iob to target device buffer */
+
+      iob = iob_share_partial(iob, len, offset);
+      if (iob == NULL)
+        {
+          netdev_iob_release(dev);
+          nerr("devif_iob_send error, not enough shared iob entries, "
+              "send len: %u\n", len);
+          return;
+        }
+
+      iob_concat(dev->d_iob, iob);
+#else
       if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE)
         {
           return;
         }
 
-      /* Clone the iob to target device buffer */
-
-      ret = iob_clone_partial(iob, len, offset, dev->d_iob,
-                              target_offset, false, false);
-      if (ret != OK)
+      if (iob_clone_partial(iob, len, offset, dev->d_iob,
+            target_offset, false, false) != OK)
         {
           netdev_iob_release(dev);
           nerr("devif_iob_send error, not enough iob entries, "
               "send len: %u\n", len);
           return;
         }
+#endif
 
       dev->d_sndlen = len;
     }

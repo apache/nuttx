@@ -76,16 +76,6 @@
 #  define CONFIG_IOB_ALIGNMENT      1
 #endif
 
-#if !defined(CONFIG_IOB_HEADSIZE)
-#  define CONFIG_IOB_HEADSIZE       0
-#endif
-
-/* For backward compatibility when not using iob header padding */
-
-#if CONFIG_IOB_HEADSIZE == 0
-#  define  io_head  io_data
-#endif
-
 /* IOB helpers */
 
 #define IOB_DATA(p)      (&(p)->io_data[(p)->io_offset])
@@ -124,10 +114,15 @@ struct iob_s
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
-#if CONFIG_IOB_HEADSIZE > 0
-  uint8_t  io_head[CONFIG_IOB_HEADSIZE];
+#ifdef CONFIG_IOB_SHARED
+  /* Pointer to parent node */
+
+  FAR struct iob_s *io_parent;
+
+  unsigned int io_refs; /* Reference count of this iob */
 #endif
-  uint8_t  io_data[CONFIG_IOB_BUFSIZE] aligned_data(CONFIG_IOB_ALIGNMENT);
+
+  FAR uint8_t *io_data;
 };
 
 #if CONFIG_IOB_NCHAINS > 0
@@ -592,6 +587,43 @@ void iob_reserve(FAR struct iob_s *iob, unsigned int reserved);
  ****************************************************************************/
 
 void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen);
+
+/****************************************************************************
+ * Name: iob_share
+ *
+ * Description:
+ *   Create share chain to share the data from input iob.
+ *
+ * Input Parameters:
+ *   iob      - Pointer to source iob_s
+ *
+ * Returned Value:
+ *   Return iob share chain if success.
+ *   Return NULL if the shared pool cannot be allocated
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_share(FAR struct iob_s *iob);
+
+/****************************************************************************
+ * Name: iob_share_partial
+ *
+ * Description:
+ *   Create shared chain to share the partial data from input iob.
+ *
+ * Input Parameters:
+ *   iob      - Pointer to source iob_s
+ *   len      - Number of bytes to share
+ *   offset   - Offset of source iobs_s
+ *
+ * Returned Value:
+ *   Return iob share chain if success.
+ *   Return NULL if the shared pool cannot be allocated
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_share_partial(FAR struct iob_s *iob, unsigned int len,
+                                    unsigned int offset);
 
 /****************************************************************************
  * Name: iob_dump

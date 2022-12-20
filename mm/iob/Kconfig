@@ -14,6 +14,25 @@ config MM_IOB
 
 if MM_IOB
 
+config IOB_SHARED
+	bool "Enable shared shadow I/O buffers support"
+	default n
+	---help---
+		This option will enable shared iob support, Shared iob added
+		reference count to each iob entry, multiple iob entries could
+		share the io_data to avoid unnecessary iob_alloc and memory copies
+
+if IOB_SHARED
+
+config IOB_SHARED_NBUFFERS
+	int "Number of Shared pre-allocated I/O buffers"
+	default IOB_NBUFFERS
+	---help---
+		This setting determines the number of preallocated shared I/O
+		buffers available for packet data.
+
+endif # IOB_SHARED
+
 config IOB_NBUFFERS
 	int "Number of pre-allocated I/O buffers"
 	default 36 if NET_WRITE_BUFFERS
@@ -31,13 +50,6 @@ config IOB_BUFSIZE
 		Each packet is represented by a series of small I/O buffers in a
 		chain.  This setting determines the data payload each preallocated
 		I/O buffer.
-
-config IOB_HEADSIZE
-	int "Head size of each I/O buffer"
-	default 0
-	---help---
-		This setting determines the reserved size in front of the payload
-		buffer in each I/O buffer.
 
 config IOB_ALIGNMENT
 	int "Alignment size of each I/O buffer"
