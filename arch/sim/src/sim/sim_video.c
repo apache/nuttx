@@ -229,7 +229,7 @@ static int sim_video_data_start_capture(uint8_t nr_datafmt,
                            imgdata_fmt_to_v4l2(
                              datafmt[IMGDATA_FMT_MAIN].pixelformat),
                            interval->denominator, interval->numerator);
-  if (ret < 0)
+  if (ret < 0 && ret != -EBUSY)
     {
       return ret;
     }
