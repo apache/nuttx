@@ -419,7 +419,7 @@ typedef uint16_t usbtrace_idset_t;
 
 /* Print routine to use for usbdev_trprint() output */
 
-typedef CODE int (*trprintf_t)(const char *fmt, ...) printf_like(1, 2);
+typedef CODE int (*trprintf_t)(FAR const char *fmt, ...) printf_like(1, 2);
 
 /****************************************************************************
  * Public Data
