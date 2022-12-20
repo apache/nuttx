@@ -99,10 +99,11 @@
 /* Miscellaneous Definitions ************************************************/
 
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
+
 #ifndef MAX
-#  define MAX(a,b) (a > b ? a : b)
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
 #define MIN_BUTTON MIN(CONFIG_PM_BUTTONS_MIN, CONFIG_PM_IRQBUTTONS_MIN)
