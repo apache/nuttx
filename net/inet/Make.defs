@@ -35,7 +35,7 @@ SOCK_CSRCS += ipv4_setsockopt.c ipv4_getsockopt.c ipv4_getsockname.c ipv4_getpee
 endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c ipv6_build_header.c
+SOCK_CSRCS += ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c ipv6_build_header.c ipv6_getsockopt.c
 endif
 
 # Include inet build support

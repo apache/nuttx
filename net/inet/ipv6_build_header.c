@@ -48,6 +48,7 @@
  *   src_ip       Source IPv6 address
  *   dst_ip       Destination IPv6 address
  *   ttl          Time to live(IPv4) hop limit(IPv6)
+ *   tclass       traffic class(IPv6)
  *
  * Returned Value:
  *   length of IPv6 header
@@ -56,12 +57,13 @@
 
 uint16_t ipv6_build_header(FAR struct ipv6_hdr_s *ipv6, uint16_t payload_len,
                            uint16_t prot, const net_ipv6addr_t src_ip,
-                           const net_ipv6addr_t dst_ip, uint8_t ttl)
+                           const net_ipv6addr_t dst_ip, uint8_t ttl,
+                           uint8_t tclass)
 {
   /* Set up the IPv6 header */
 
   ipv6->vtc      = 0x60;                 /* Version/traffic class (MS) */
-  ipv6->tcf      = 0;                    /* Traffic class(LS)/Flow label(MS) */
+  ipv6->tcf      = tclass;               /* Traffic class(LS)/Flow label(MS) */
   ipv6->flow     = 0;                    /* Flow label (LS) */
   ipv6->len[0]   = (payload_len >> 8);   /* Length excludes the IPv6 header */
   ipv6->len[1]   = (payload_len & 0xff);

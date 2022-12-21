@@ -183,7 +183,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
 
   ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_ICMP,
                     &dev->d_ipaddr, (FAR in_addr_t *)ipv4->srcipaddr,
-                    IP_TTL_DEFAULT, NULL);
+                    IP_TTL_DEFAULT, 0, NULL);
 
   /* Initialize the ICMP header */
 

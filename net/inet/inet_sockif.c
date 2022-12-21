@@ -750,8 +750,13 @@ static int inet_getsockopt(FAR struct socket *psock, int level, int option,
 #endif
 
 #ifdef CONFIG_NET_IPv4
-      case IPPROTO_IP:
+      case IPPROTO_IP:/* IPv4 protocol socket options (see include/netinet/in.h) */
         return ipv4_getsockopt(psock, option, value, value_len);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      case IPPROTO_IPV6:/* IPv6 protocol socket options (see include/netinet/in.h) */
+          return ipv6_getsockopt(psock, option, value, value_len);
 #endif
 
       default:
@@ -1018,12 +1023,12 @@ static int inet_setsockopt(FAR struct socket *psock, int level, int option,
 #endif
 
 #ifdef CONFIG_NET_IPv4
-      case IPPROTO_IP:/* TCP protocol socket options (see include/netinet/in.h) */
+      case IPPROTO_IP:/* IPv4 protocol socket options (see include/netinet/in.h) */
         return ipv4_setsockopt(psock, option, value, value_len);
 #endif
 
 #ifdef CONFIG_NET_IPv6
-      case IPPROTO_IPV6:/* TCP protocol socket options (see include/netinet/in.h) */
+      case IPPROTO_IPV6:/* IPv6 protocol socket options (see include/netinet/in.h) */
         return ipv6_setsockopt(psock, option, value, value_len);
 #endif
       default:

@@ -77,6 +77,26 @@
 #define IP_PROTO_UDP      17
 #define IP_PROTO_ICMP6    58
 
+/* Values for the TOS field */
+
+#define IPTOS_TOS_MASK    0x1e
+#define IPTOS_TOS(tos)    ((tos) & IPTOS_TOS_MASK)
+#define	IPTOS_LOWDELAY    0x10
+#define	IPTOS_THROUGHPUT  0x08
+#define	IPTOS_RELIABILITY 0x04
+#define	IPTOS_MINCOST     0x02
+
+#define IPTOS_PREC_MASK            0xe0
+#define IPTOS_PREC(tos)            ((tos) & IPTOS_PREC_MASK)
+#define IPTOS_PREC_NETCONTROL      0xe0
+#define IPTOS_PREC_INTERNETCONTROL 0xc0
+#define IPTOS_PREC_CRITIC_ECP      0xa0
+#define IPTOS_PREC_FLASHOVERRIDE   0x80
+#define IPTOS_PREC_FLASH           0x60
+#define IPTOS_PREC_IMMEDIATE       0x40
+#define IPTOS_PREC_PRIORITY        0x20
+#define IPTOS_PREC_ROUTINE         0x00
+
 /* Flag bits in 16-bit flags + fragment offset IPv4 header field */
 
 #define IP_FLAG_RESERVED  0x8000
