@@ -53,3 +53,17 @@ config NET_NAT_ICMP_EXPIRE_SEC
 
 		Note: The default value 60 is suggested by RFC5508, Section 3.2,
 		Page 8.
+
+config NET_NAT_ENTRY_RECLAIM_SEC
+	int "The time to auto reclaim all expired entries"
+	default 3600
+	depends on NET_NAT
+	---help---
+		The time to auto reclaim all expired entries. A value of zero will
+		disable auto reclaiming.
+
+		Note: Expired entries will be automatically reclaimed when matching
+		inbound/outbound entries, so this config does not have significant
+		impact when NAT is normally used, but very useful when the hashtable
+		is big and there are only a few connections using NAT (which will
+		only trigger reclaiming on a few chains in hashtable).
