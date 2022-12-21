@@ -23,7 +23,6 @@ CSRCS += sched_addreadytorun.c sched_removereadytorun.c
 CSRCS += sched_addprioritized.c sched_mergeprioritized.c sched_mergepending.c
 CSRCS += sched_addblocked.c sched_removeblocked.c
 CSRCS += sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
-CSRCS += sched_getstreams.c
 CSRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
 CSRCS += sched_setscheduler.c sched_getscheduler.c
 CSRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c

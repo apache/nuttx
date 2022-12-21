@@ -29,6 +29,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/atexit.h>
+#include <nuttx/fs/fs.h>
 
 #include <sys/types.h>
 #include <pthread.h>
@@ -145,6 +146,9 @@ struct task_info_s
 #endif
 #if CONFIG_LIBC_MAX_EXITFUNS > 0
   struct atexit_list_s ta_exit; /* Exit functions */
+#endif
+#ifdef CONFIG_FILE_STREAM
+  struct streamlist ta_streamlist; /* Holds C buffered I/O info */
 #endif
 };
 

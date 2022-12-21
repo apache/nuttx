@@ -32,7 +32,7 @@
 #include <time.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/sched.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,9 +62,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin      (&nxsched_get_streams()->sl_std[0])
-#define stdout     (&nxsched_get_streams()->sl_std[1])
-#define stderr     (&nxsched_get_streams()->sl_std[2])
+#define stdin      (&lib_get_streams()->sl_std[0])
+#define stdout     (&lib_get_streams()->sl_std[1])
+#define stderr     (&lib_get_streams()->sl_std[2])
 
 /* Path to the directory where temporary files can be created */
 
