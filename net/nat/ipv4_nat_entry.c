@@ -353,6 +353,54 @@ static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
 }
 
 /****************************************************************************
+ * Name: ipv4_nat_reclaim_entry
+ *
+ * Description:
+ *   Try reclaim all expired NAT entries.
+ *   Only works after every CONFIG_NET_NAT_ENTRY_RECLAIM_SEC (low frequency).
+ *
+ *   Although expired entries will be automatically reclaimed when matching
+ *   inbound/outbound entries, there might be some situations that entries
+ *   will be kept in memory, e.g. big hashtable with only a few connections.
+ *
+ * Assumptions:
+ *   NAT is initialized.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
+static void ipv4_nat_reclaim_entry(int32_t current_time)
+{
+  static int32_t next_reclaim_time = CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
+
+  if (next_reclaim_time - current_time <= 0)
+    {
+      FAR hash_node_t *p;
+      FAR hash_node_t *tmp;
+      int count = 0;
+      int i;
+
+      ninfo("INFO: Reclaiming all expired NAT entries.\n");
+
+      hashtable_for_every_safe(g_table_inbound, p, tmp, i)
+        {
+          FAR struct ipv4_nat_entry *entry =
+            container_of(p, struct ipv4_nat_entry, hash_inbound);
+
+          if (entry->expire_time - current_time <= 0)
+            {
+              ipv4_nat_entry_delete(entry);
+              count++;
+            }
+        }
+
+      ninfo("INFO: %d expired NAT entries reclaimed.\n", count);
+      next_reclaim_time = current_time + CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -378,7 +426,11 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
-  uint32_t current_time = TICK2SEC(clock_systime_ticks());
+  int32_t current_time = TICK2SEC(clock_systime_ticks());
+
+#if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
+  ipv4_nat_reclaim_entry(current_time);
+#endif
 
   hashtable_for_every_possible_safe(g_table_inbound, p, tmp,
                               ipv4_nat_inbound_key(external_port, protocol))
@@ -388,7 +440,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
 
       /* Remove expired entries. */
 
-      if (entry->expire_time < current_time)
+      if (entry->expire_time - current_time <= 0)
         {
           ipv4_nat_entry_delete(entry);
           continue;
@@ -437,7 +489,11 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
-  uint32_t current_time = TICK2SEC(clock_systime_ticks());
+  int32_t current_time = TICK2SEC(clock_systime_ticks());
+
+#if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
+  ipv4_nat_reclaim_entry(current_time);
+#endif
 
   hashtable_for_every_possible_safe(g_table_outbound, p, tmp,
                       ipv4_nat_outbound_key(local_ip, local_port, protocol))
@@ -447,7 +503,7 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
 
       /* Remove expired entries. */
 
-      if (entry->expire_time < current_time)
+      if (entry->expire_time - current_time <= 0)
         {
           ipv4_nat_entry_delete(entry);
           continue;
