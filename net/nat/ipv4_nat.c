@@ -171,9 +171,12 @@ ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
                      enum nat_manip_type_e manip_type)
 {
   FAR struct tcp_hdr_s      *tcp           = L4_HDR(ipv4);
+  FAR uint16_t              *external_ip   = MANIP_IPADDR(ipv4, manip_type);
   FAR uint16_t              *external_port = MANIP_PORT(tcp, manip_type);
   FAR struct ipv4_nat_entry *entry         =
-      ipv4_nat_inbound_entry_find(IP_PROTO_TCP, *external_port, true);
+                 ipv4_nat_inbound_entry_find(IP_PROTO_TCP,
+                                             net_ip4addr_conv32(external_ip),
+                                             *external_port, true);
   if (!entry)
     {
       return NULL;
@@ -217,10 +220,13 @@ ipv4_nat_inbound_udp(FAR struct ipv4_hdr_s *ipv4,
                      enum nat_manip_type_e manip_type)
 {
   FAR struct udp_hdr_s      *udp           = L4_HDR(ipv4);
+  FAR uint16_t              *external_ip   = MANIP_IPADDR(ipv4, manip_type);
   FAR uint16_t              *external_port = MANIP_PORT(udp, manip_type);
   FAR uint16_t              *udpchksum;
   FAR struct ipv4_nat_entry *entry         =
-      ipv4_nat_inbound_entry_find(IP_PROTO_UDP, *external_port, true);
+                 ipv4_nat_inbound_entry_find(IP_PROTO_UDP,
+                                             net_ip4addr_conv32(external_ip),
+                                             *external_port, true);
 
   if (!entry)
     {
@@ -264,13 +270,17 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
   FAR struct icmp_hdr_s     *icmp = L4_HDR(ipv4);
+  FAR uint16_t              *external_ip;
   FAR struct ipv4_nat_entry *entry;
 
   switch (icmp->type)
     {
       case ICMP_ECHO_REQUEST:
       case ICMP_ECHO_REPLY:
-        entry = ipv4_nat_inbound_entry_find(IP_PROTO_ICMP, icmp->id, true);
+        external_ip = MANIP_IPADDR(ipv4, manip_type);
+        entry = ipv4_nat_inbound_entry_find(IP_PROTO_ICMP,
+                                            net_ip4addr_conv32(external_ip),
+                                            icmp->id, true);
         if (!entry)
           {
             return NULL;
@@ -391,7 +401,7 @@ ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
    */
 
   ipv4_nat_port_adjust(&tcp->tcpchksum, local_port, entry->external_port);
-  ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, dev->d_ipaddr, manip_type);
+  ipv4_nat_ip_adjust(ipv4, &tcp->tcpchksum, entry->external_ip, manip_type);
 
   return entry;
 }
@@ -444,7 +454,7 @@ ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
   udpchksum = udp->udpchksum != 0 ? &udp->udpchksum : NULL;
 
   ipv4_nat_port_adjust(udpchksum, local_port, entry->external_port);
-  ipv4_nat_ip_adjust(ipv4, udpchksum, dev->d_ipaddr, manip_type);
+  ipv4_nat_ip_adjust(ipv4, udpchksum, entry->external_ip, manip_type);
 
   return entry;
 }
@@ -499,7 +509,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
         ipv4_nat_port_adjust(&icmp->icmpchksum,
                              &icmp->id, entry->external_port);
-        ipv4_nat_ip_adjust(ipv4, NULL, dev->d_ipaddr, manip_type);
+        ipv4_nat_ip_adjust(ipv4, NULL, entry->external_ip, manip_type);
         return entry;
 
       case ICMP_DEST_UNREACHABLE:
@@ -547,7 +557,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
             /* Adjust outer IP */
 
-            ipv4_nat_ip_adjust(ipv4, NULL, dev->d_ipaddr, manip_type);
+            ipv4_nat_ip_adjust(ipv4, NULL, entry->external_ip, manip_type);
 
             /* Recalculate ICMP checksum, we only need to re-calc data in L4
              * header, because the inner IPv4 header's checksum is updated,
@@ -673,16 +683,6 @@ ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
  *   Zero is returned if NAT function is successfully enabled on the device;
  *   A negated errno value is returned if failed.
  *
- * Assumptions:
- *   NAT will only be enabled on at most one device.
- *
- * Limitations:
- *   External ports are not isolated between devices yet, so if NAT is
- *   enabled on more than one device, an external port used on one device
- *   will also be used by same local ip:port on another device.
- *
- * TODO:
- *   Support multiple NAT devices with isolated external port mapping.
  ****************************************************************************/
 
 int ipv4_nat_enable(FAR struct net_driver_s *dev)
@@ -831,13 +831,7 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
 bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port)
 {
   FAR struct ipv4_nat_entry *entry =
-      ipv4_nat_inbound_entry_find(protocol, port, false);
-
-  /* Not checking ip is enough for single NAT device, may save external_ip in
-   * entry for multiple device support in future.
-   */
-
-  UNUSED(ip);
+      ipv4_nat_inbound_entry_find(protocol, ip, port, false);
 
   return entry != NULL;
 }
