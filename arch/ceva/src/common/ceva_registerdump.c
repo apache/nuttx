@@ -45,11 +45,12 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: ceva_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void ceva_registerdump(volatile uint32_t *regs)
+void up_dump_register(void *dumpregs)
 {
+  volatile uint32_t *regs = dumpregs ? dumpregs : CURRENT_REGS;
   int rx;
 
   /* Dump the interrupt registers */

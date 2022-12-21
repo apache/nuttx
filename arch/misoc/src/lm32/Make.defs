@@ -27,11 +27,9 @@ CMN_CSRCS  += misoc_timerisr.c misoc_net.c misoc_flushcache.c
 
 CHIP_ASRCS  = lm32_syscall.S
 
-CHIP_CSRCS  = lm32_allocateheap.c lm32_assert.c
-CHIP_CSRCS += lm32_copystate.c lm32_createstack.c lm32_decodeirq.c
-CHIP_CSRCS += lm32_doirq.c lm32_registerdump.c lm32_exit.c lm32_idle.c
-CHIP_CSRCS += lm32_initialstate.c lm32_irq.c
-CHIP_CSRCS += lm32_releasestack.c lm32_stackframe.c lm32_swint.c
-CHIP_CSRCS += lm32_switchcontext.c
-CHIP_CSRCS += lm32_schedulesigaction.c lm32_sigdeliver.c
-CHIP_CSRCS +=  lm32_flushcache.c  lm32_usetack.c
+CHIP_CSRCS  = lm32_allocateheap.c lm32_copystate.c lm32_createstack.c
+CHIP_CSRCS += lm32_decodeirq.c lm32_doirq.c lm32_exit.c lm32_flushcache.c
+CHIP_CSRCS += lm32_idle.c lm32_initialstate.c lm32_irq.c lm32_usetack.c
+CHIP_CSRCS += lm32_registerdump.c lm32_releasestack.c lm32_swint.c
+CHIP_CSRCS += lm32_stackframe.c lm32_switchcontext.c lm32_sigdeliver.c
+CHIP_CSRCS += lm32_schedulesigaction.c lm32_saveusercontext.c

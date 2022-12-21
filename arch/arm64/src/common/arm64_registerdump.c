@@ -53,11 +53,14 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: arm64_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void arm64_registerdump(struct regs_context * regs)
+void up_dump_register(void *dumpregs)
 {
+  volatile struct regs_context *regs = dumpregs ? dumpregs :
+                              (struct regs_context *)CURRENT_REGS;
+
   _alert("stack = %p\n", regs);
   _alert("x0:   0x%-16"PRIx64"  x1:   0x%"PRIx64"\n",
     regs->regs[REG_X0], regs->regs[REG_X1]);

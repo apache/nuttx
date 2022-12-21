@@ -200,9 +200,5 @@ void renesas_usbuninitialize(void);
 # define renesas_usbuninitialize()
 #endif
 
-/* Defined in chip-specific logic */
-
-void renesas_registerdump(volatile uint32_t *regs);
-
 #endif /* __ASSEMBLY__ */
 #endif /* ___ARCH_RENESAS_SRC_COMMON_UP_INTERNAL_H */

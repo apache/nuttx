@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z16/src/common/z16_assert.c
+ * arch/sparc/src/sparc_v8/sparc_v8_saveusercontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,36 +24,27 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-
-#include "z16_internal.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
+#include <arch/syscall.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  up_saveusercontext(void *saveregs);
+ *
+ * Returned Value:
+ *   0: Normal return
+ *   1: Context switch return
+ *
  ****************************************************************************/
 
-void up_assert(void)
+int up_saveusercontext(void *saveregs)
 {
-  FAR volatile uint32_t *regs32 = (FAR volatile uint32_t *)g_current_regs;
-
-  board_autoled_on(LED_ASSERTION);
-
-  if (regs32 == NULL)
-    {
-      up_saveusercontext(s_last_regs);
-      regs32 = (FAR volatile uint32_t *)s_last_regs;
-    }
-
-  z16_registerdump(regs32);
+  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
 }

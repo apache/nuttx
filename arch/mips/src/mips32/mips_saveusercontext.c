@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/arm64_assert.c
+ * arch/mips/src/mips32/mips_saveusercontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,78 +24,27 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <stdint.h>
-
-#include <nuttx/arch.h>
-#include <debug.h>
-
-#include "arm64_arch.h"
-#include "arm64_internal.h"
-#include "chip.h"
-
-#ifdef CONFIG_ARCH_FPU
-#include "arm64_fpu.h"
-#endif
+#include <arch/syscall.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm64_dump_fatal
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  up_saveusercontext(void *saveregs);
+ *
+ * Returned Value:
+ *   0: Normal return
+ *   1: Context switch return
+ *
  ****************************************************************************/
 
-void arm64_dump_fatal(struct regs_context *regs)
+int up_saveusercontext(void *saveregs)
 {
-#ifdef CONFIG_SCHED_BACKTRACE
-  struct tcb_s *rtcb = (struct tcb_s *)regs->tpidr_el1;
-
-  /* Show back trace */
-
-  sched_dumpstack(rtcb->pid);
-#endif
-
-  /* Dump the registers */
-
-  arm64_registerdump(regs);
-}
-
-void up_mdelay(unsigned int milliseconds)
-{
-  volatile unsigned int i;
-  volatile unsigned int j;
-
-  for (i = 0; i < milliseconds; i++)
-    {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
-    }
-}
-
-/****************************************************************************
- * Name: up_assert
- ****************************************************************************/
-
-void up_assert(void)
-{
-  struct tcb_s *rtcb = (struct tcb_s *)arch_get_current_tcb();
-
-  /* Update the xcp context */
-
-  if (CURRENT_REGS)
-    {
-      /* in interrupt */
-
-      rtcb->xcp.regs = (uint64_t *)CURRENT_REGS;
-    }
-  else
-    {
-      up_saveusercontext(rtcb->xcp.regs);
-    }
-
-  /* Dump the registers */
-
-  arm64_registerdump((struct regs_context *)rtcb->xcp.regs);
+  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
 }

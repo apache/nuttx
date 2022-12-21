@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_assert.c
+ * arch/misoc/src/minerva/minerva_saveusercontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,22 +24,27 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "lm32.h"
+#include <arch/syscall.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  up_saveusercontext(void *saveregs);
+ *
+ * Returned Value:
+ *   0: Normal return
+ *   1: Context switch return
+ *
  ****************************************************************************/
 
-void up_assert(void)
+int up_saveusercontext(void *saveregs)
 {
-  board_autoled_on(LED_ASSERTION);
-  lm32_registerdump(g_current_regs);
+  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
 }

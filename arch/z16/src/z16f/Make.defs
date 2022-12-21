@@ -20,12 +20,11 @@
 
 HEAD_SSRC = z16f_head.S
 
-CMN_CSRCS  = z16_allocateheap.c z16_initialize.c z16_schedulesigaction.c
-CMN_CSRCS += z16_assert.c z16_initialstate.c z16_sigdeliver.c z16_copystate.c
-CMN_CSRCS += z16_mdelay.c z16_udelay.c z16_createstack.c z16_registerdump.c
-CMN_CSRCS += z16_switchcontext.c z16_doirq.c z16_usestack.c
-CMN_CSRCS += z16_exit.c z16_releasestack.c z16_stackframe.c z16_idle.c
-CMN_CSRCS += z16_nputs.c
+CMN_CSRCS  = z16_allocateheap.c z16_copystate.c z16_createstack.c z16_doirq.c
+CMN_CSRCS += z16_exit.c z16_initialstate.c z16_initialize.c z16_idle.c
+CMN_CSRCS += z16_mdelay.c z16_nputs.c z16_registerdump.c z16_releasestack.c
+CMN_CSRCS += z16_schedulesigaction.c z16_sigdeliver.c z16_switchcontext.c
+CMN_CSRCS += z16_stackframe.c z16_udelay.c z16_usestack.c
 
 CHIP_SSRCS = z16f_lowuart.S z16f_saveusercontext.S z16f_restoreusercontext.S
 CHIP_CSRCS = z16f_clkinit.c z16f_sysexec.c z16f_irq.c z16f_serial.c

@@ -32,14 +32,6 @@
 #include "chip/switch.h"
 #include "z80_internal.h"
 
-#ifdef CONFIG_ARCH_STACKDUMP
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -55,18 +47,12 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: z80_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void ez80_registerdump(void)
+void up_dump_register(FAR void *dumpregs)
 {
-  volatile chipreg_t *regs = g_current_regs;
-
-  if (regs == NULL)
-    {
-      up_saveusercontext(s_last_regs);
-      regs = s_last_regs;
-    }
+  FAR chipreg_t *regs = dumpregs ? dumpregs : g_current_regs;
 
 #ifdef CONFIG_EZ80_Z80MODE
   _alert("AF: %04x  I: %04x\n",
@@ -88,5 +74,3 @@ void ez80_registerdump(void)
          regs[XCPT_SP], regs[XCPT_PC]);
 #endif
 }
-
-#endif /* CONFIG_ARCH_STACKDUMP */

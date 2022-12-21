@@ -166,7 +166,7 @@ void IRAM_ATTR xtensa_appcpu_start(void)
   /* Dump registers so that we can see what is going to happen on return */
 
 #if 0
-  xtensa_registerdump(tcb->xcp.regs);
+  up_dump_register(tcb->xcp.regs);
 #endif
 
 #ifdef CONFIG_ESP32_GPIO_IRQ

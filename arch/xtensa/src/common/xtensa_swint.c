@@ -68,7 +68,7 @@ int xtensa_swint(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("SYSCALL Entry: regs: %p cmd: %" PRIu32 "\n", regs, cmd);
-  xtensa_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the syscall according to the command in A2 */
@@ -431,7 +431,7 @@ int xtensa_swint(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SYSCALL Return: Context switch!\n");
-      xtensa_registerdump(CURRENT_REGS);
+      up_dump_register(CURRENT_REGS);
     }
   else
     {

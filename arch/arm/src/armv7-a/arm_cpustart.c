@@ -82,7 +82,7 @@ int arm_start_handler(int irq, void *context, void *arg)
   /* Dump registers so that we can see what is going to happen on return */
 
 #if 0
-  arm_registerdump(tcb->xcp.regs);
+  up_dump_register(tcb->xcp.regs);
 #endif
 
   /* Then switch contexts. This instantiates the exception context of the

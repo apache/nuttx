@@ -109,6 +109,21 @@ int minerva_swint(int irq, void *context, void *arg)
 
   switch (regs[REG_A0])
     {
+      /* A0=SYS_save_context: This a save context command: void
+       * int up_saveusercontext(void *saveregs);
+       * At this point, the following values are saved in context: A0 =
+       * SYS_save_context A1 = saveregs A2 = saveregs. In this case, we
+       * save the context registers to the save register area referenced by
+       * the saved contents of R5.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          minerva_copystate((uint32_t *) regs[REG_A1], regs);
+        }
+        break;
+
       /* A0=SYS_restore_context: This a restore context command: void
        * up_fullcontextrestore(uint32_t *restoreregs) noreturn_function; At
        * this point, the following values are saved in context: A0 =
