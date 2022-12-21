@@ -63,7 +63,7 @@ struct ipv4_nat_entry
   uint16_t   external_port;  /* The external port of local (private) host. */
   uint8_t    protocol;       /* L4 protocol (TCP, UDP etc). */
 
-  uint32_t   expire_time;    /* The expiration time of this entry. */
+  int32_t    expire_time;    /* The expiration time of this entry. */
 };
 
 /* NAT IP/Port manipulate type, to indicate whether to manipulate source or
