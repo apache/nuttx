@@ -1146,7 +1146,7 @@ static inline void sam_mainclk(uint32_t mcsel)
  *
  ****************************************************************************/
 
-static __ramfunc__ void sam_instantiatepsm(uint32_t regval)
+static void __ramfunc__ sam_instantiatepsm(uint32_t regval)
 {
   /* Set the BMP PCOM register (containing the new power scaling mode) */
 
