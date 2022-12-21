@@ -315,7 +315,8 @@ static void sim_audio_config_ops(struct sim_audio_s *priv, uint8_t fmt)
 
 static int sim_audio_open(struct sim_audio_s *priv)
 {
-  snd_pcm_t *pcm;
+  irqstate_t flags;
+  snd_pcm_t *pcm = NULL;
   int direction;
   int ret;
 
@@ -324,13 +325,15 @@ static int sim_audio_open(struct sim_audio_s *priv)
       return 0;
     }
 
+  flags = up_irq_save();
+
   direction = priv->playback ? SND_PCM_STREAM_PLAYBACK
                              : SND_PCM_STREAM_CAPTURE;
 
   ret = snd_pcm_open(&pcm, "default", direction, 0);
   if (ret < 0)
     {
-      return ret;
+      goto fail;
     }
 
   ret = sim_audio_config_format(priv, pcm);
@@ -347,10 +350,12 @@ static int sim_audio_open(struct sim_audio_s *priv)
 
   priv->pcm = pcm;
 
+  up_irq_restore(flags);
   return 0;
 
 fail:
   snd_pcm_close(pcm);
+  up_irq_restore(flags);
   return ret;
 }
 
