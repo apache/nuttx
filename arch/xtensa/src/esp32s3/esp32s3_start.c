@@ -87,7 +87,7 @@ extern uint8_t _image_drom_size[];
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
-extern int ets_printf(const char *fmt, ...) printflike(1, 2);
+extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
 extern int cache_dbus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
                               uint32_t paddr, uint32_t psize, uint32_t num,
                               uint32_t fixed);
