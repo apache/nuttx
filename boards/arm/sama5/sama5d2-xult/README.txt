@@ -261,7 +261,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
     Command to generate an uncompressed uImage file (4) :
 
-      mkimage -A arm -O linux -C none -T kernel -a 20008000 -e 20008000 \
+      mkimage -A arm -O linux -C none -T kernel -a 20008000 -e 20008E20 \
         -n nuttx -d nuttx.bin uImage
 
     Where:
@@ -272,7 +272,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
       -T kernel: Set image type.
       -C none: Set compression type.
       -a 20008000:  Set load address.
-      -e 20008000: Set entry point.
+      -e 20008E20: Set entry point.
       -n nuttx: Set image name.
       -d nuttx.bin: Use image data from nuttx.bin.
 
@@ -283,7 +283,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
       CONFIG_RAW_BINARY=y
       CONFIG_UBOOT_UIMAGE=y
       CONFIG_UIMAGE_LOAD_ADDRESS=0x20008000
-      CONFIG_UIMAGE_ENTRY_POINT=0x20008040
+      CONFIG_UIMAGE_ENTRY_POINT=0x20008E20
 
     The uImage file can them be loaded into memory from a variety of sources
     (serial, SD card, JFFS2 on NAND, TFTP).
@@ -303,7 +303,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
            Image Type:   ARM Linux Kernel Image (uncompressed)
            Data Size:    97680 Bytes = 95.4 KiB
            Load Address: 20008000
-           Entry Point:  20008040
+           Entry Point:  20008E20
            Verifying Checksum ... OK
            XIP Kernel Image ... OK
         FDT and ATAGS support not compiled in - hanging
@@ -321,8 +321,8 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
         reading nuttx.bin
         108076 bytes read in 23 ms (4.5 MiB/s)
 
-        U-Boot> go 0x20008040
-        ## Starting application at 0x20008040 ...
+        U-Boot> go 0x20008E20
+        ## Starting application at 0x20008E20 ...
 
         NuttShell (NSH) NuttX-7.2
         nsh>
@@ -400,7 +400,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
   6. Now you have SDRAM initialized and you use 'load nuttx' to load the
      ELF file into SDRAM.
   7. Use 'file nuttx' to load symbols
-  8. Set the PC to the NuttX entry point 'mon pc 0x20008040' and start
+  8. Set the PC to the NuttX entry point 'mon pc 0x20008E20' and start
      nuttx using 'mon go'.
 
 Buttons and LEDs
@@ -881,7 +881,7 @@ Configurations
        from the SD card:
 
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
-         U-Boot> go 0x20008040
+         U-Boot> go 0x20008E20 
 
     6. Board LEDs and buttons are supported as described under "Buttons and
        LEDs".  The interrupt button test is also enabled as an NSH built-in
