@@ -21,6 +21,12 @@ config A64_MIPI_DSI
 		Select to enable support for MIPI Display Serial Interface (DSI)
 		and MIPI Display Physical Layer (D-PHY).
 
+config A64_RSB
+	bool "RSB"
+	default n
+	---help---
+		Select to enable support for Reduced Serial Bus.
+
 config A64_TCON0
 	bool "TCON0"
 	default n

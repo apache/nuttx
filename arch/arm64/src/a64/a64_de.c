@@ -57,7 +57,7 @@
 
 /* Timeout for Display Engine PLL in milliseconds */
 
-#define PLL_TIMEOUT_MS          5
+#define PLL_TIMEOUT_MS          100
 
 /* A64 Display Engine Base Addresses ****************************************/
 
