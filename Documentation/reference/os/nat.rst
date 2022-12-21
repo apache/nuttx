@@ -77,11 +77,6 @@ Usage
   Enable NAT function on a network device, on which the outbound packets
   will be masqueraded.
 
-  Note that NAT is currently designed to be enabled on single device, it
-  may work when enabled on multiple devices, but external ports will not
-  be isolated between devices, so an external port used on one NAT device
-  will also be used by same local ip:port on another NAT device.
-
   :return: Zero is returned if NAT function is successfully enabled on
     the device; A negated errno value is returned if failed.
 
