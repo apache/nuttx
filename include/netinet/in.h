@@ -129,6 +129,8 @@
                                                     * the incoming packet */
 #define IPV6_RECVPKTINFO      (__SO_PROTOCOL + 9)  /* It functions just same as
                                                     * IPV6_PKTINFO for now */
+#define IPV6_TCLASS           (__SO_PROTOCOL + 10) /* Access the Traffic Class
+                                                    * field */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 

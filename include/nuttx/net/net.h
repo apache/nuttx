@@ -222,6 +222,11 @@ struct socket_conn_s
 
   uint8_t       s_flags;     /* See _SF_* definitions */
 
+  /* Definitions of IPv4 TOS and IPv6 Traffic Class */
+
+  uint8_t       s_tos;       /* IPv4 Type of Service */
+#define s_tclass s_tos       /* IPv6 traffic class defination */
+
   /* Connection-specific content may follow */
 };
 

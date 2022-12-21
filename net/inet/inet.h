@@ -192,6 +192,10 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 int ipv4_getsockopt(FAR struct socket *psock, int option,
                     FAR void *value, FAR socklen_t *value_len);
 #endif
+#ifdef CONFIG_NET_IPv6
+int ipv6_getsockopt(FAR struct socket *psock, int option,
+                    FAR void *value, FAR socklen_t *value_len);
+#endif
 
 /****************************************************************************
  * Name: ipv4_getsockname and ipv6_sockname
@@ -300,6 +304,7 @@ int inet_txdrain(FAR struct socket *psock, unsigned int timeout);
  *   src_ip     Source IPv4 address
  *   dst_ip     Destination IPv4 address
  *   ttl        Time to live(IPv4)
+ *   tos        Type of Service(IPv4)
  *   opt        IPv4 options
  *
  * Returned Value:
@@ -311,7 +316,7 @@ int inet_txdrain(FAR struct socket *psock, unsigned int timeout);
 uint16_t ipv4_build_header(FAR struct ipv4_hdr_s *ipv4, uint16_t total_len,
                            uint16_t prot, FAR const in_addr_t *src_ip,
                            FAR const in_addr_t *dst_ip, uint8_t ttl,
-                           FAR struct ipv4_opt_s *opt);
+                           uint8_t tos, FAR struct ipv4_opt_s *opt);
 #endif
 
 /****************************************************************************
@@ -327,6 +332,7 @@ uint16_t ipv4_build_header(FAR struct ipv4_hdr_s *ipv4, uint16_t total_len,
  *   src_ip       Source IPv6 address
  *   dst_ip       Destination IPv6 address
  *   ttl          hop limit(IPv6)
+ *   tclass       traffic class(IPv6)
  *
  * Returned Value:
  *   length of IPv6 header
@@ -336,7 +342,8 @@ uint16_t ipv4_build_header(FAR struct ipv4_hdr_s *ipv4, uint16_t total_len,
 #ifdef CONFIG_NET_IPv6
 uint16_t ipv6_build_header(FAR struct ipv6_hdr_s *ipv6, uint16_t payload_len,
                            uint16_t prot, const net_ipv6addr_t src_ip,
-                           const net_ipv6addr_t dst_ip, uint8_t ttl);
+                           const net_ipv6addr_t dst_ip, uint8_t ttl,
+                           uint8_t tclass);
 #endif
 
 #undef EXTERN

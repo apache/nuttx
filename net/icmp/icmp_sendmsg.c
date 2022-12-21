@@ -119,7 +119,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
 
   ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_ICMP,
                     &dev->d_ipaddr, &pstate->snd_toaddr,
-                    IP_TTL_DEFAULT, NULL);
+                    IP_TTL_DEFAULT, 0, NULL);
 
   /* Copy the ICMP header and payload into place after the IPv4 header */
 
