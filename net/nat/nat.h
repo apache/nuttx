@@ -54,11 +54,12 @@ struct ipv4_nat_entry
    *    local port> |                |  external port>            peer port>
    *                |----------------|
    *
-   * Full cone NAT on single WAN only need to save local ip:port and external
-   * port. For ICMP, save id in port field.
+   * Full cone NAT only need to save local ip:port and external ip:port.
+   * For ICMP, save id in port field.
    */
 
   in_addr_t  local_ip;       /* IP address of the local (private) host. */
+  in_addr_t  external_ip;    /* External IP address. */
   uint16_t   local_port;     /* Port of the local (private) host. */
   uint16_t   external_port;  /* The external port of local (private) host. */
   uint8_t    protocol;       /* L4 protocol (TCP, UDP etc). */
@@ -92,14 +93,6 @@ enum nat_manip_type_e
  * Returned Value:
  *   Zero is returned if NAT function is successfully enabled on the device;
  *   A negated errno value is returned if failed.
- *
- * Assumptions:
- *   NAT will only be enabled on at most one device.
- *
- * Limitations:
- *   External ports are not isolated between devices yet, so if NAT is
- *   enabled on more than one device, an external port used on one device
- *   will also be used by same local ip:port on another device.
  *
  ****************************************************************************/
 
@@ -191,6 +184,7 @@ bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
  *
  * Input Parameters:
  *   protocol      - The L4 protocol of the packet.
+ *   external_ip   - The external ip of the packet, supports INADDR_ANY.
  *   external_port - The external port of the packet.
  *   refresh       - Whether to refresh the selected entry.
  *
@@ -200,8 +194,8 @@ bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
  ****************************************************************************/
 
 FAR struct ipv4_nat_entry *
-ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
-                            bool refresh);
+ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
+                            uint16_t external_port, bool refresh);
 
 /****************************************************************************
  * Name: ipv4_nat_outbound_entry_find
