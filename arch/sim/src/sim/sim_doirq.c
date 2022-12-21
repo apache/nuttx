@@ -78,12 +78,6 @@ void *sim_doirq(int irq, void *context)
 
       CURRENT_REGS = NULL;
 
-#ifdef CONFIG_SMP
-      /* Handle signal */
-
-      sim_sigdeliver();
-#endif
-
       /* Then switch contexts */
 
       sim_fullcontextrestore(regs);
