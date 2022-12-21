@@ -433,16 +433,13 @@ static int sim_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 void sim_x11loop(void)
 {
 #ifdef CONFIG_SIM_X11FB
-  if (g_planeinfo.buffer != NULL)
-    {
-      static clock_t last;
-      clock_t now = clock_systime_ticks();
+  static clock_t last;
+  clock_t now = clock_systime_ticks();
 
-      if (now - last >= MSEC2TICK(16))
-        {
-          sim_x11update();
-          last = now;
-        }
+  if (now - last >= MSEC2TICK(16))
+    {
+      sim_x11update();
+      last = now;
     }
 #endif
 }
