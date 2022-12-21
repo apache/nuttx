@@ -38,41 +38,8 @@
 #include "xtensa.h"
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint8_t s_last_regs[XCPTCONTEXT_SIZE];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_assert
- ****************************************************************************/
-
-void up_assert(void)
-{
-  struct tcb_s *rtcb = running_task();
-
-  board_autoled_on(LED_ASSERTION);
-
-  /* Update the xcp context */
-
-  if (CURRENT_REGS)
-    {
-      rtcb->xcp.regs = (uint32_t *)CURRENT_REGS;
-    }
-  else
-    {
-      up_saveusercontext(s_last_regs);
-      rtcb->xcp.regs = (uint32_t *)s_last_regs;
-    }
-
-  /* Dump the registers (if available) */
-
-  xtensa_registerdump(rtcb->xcp.regs);
-}
 
 /****************************************************************************
  * Name: xtensa_panic

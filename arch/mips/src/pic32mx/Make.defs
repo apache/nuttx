@@ -25,15 +25,14 @@ HEAD_ASRC = pic32mx_head.S
 # Common MIPS files
 
 CMN_ASRCS  = mips_syscall0.S vfork.S
-CMN_CSRCS  = mips_allocateheap.c mips_assert.c mips_copystate.c
-CMN_CSRCS += mips_createstack.c mips_doirq.c mips_exit.c mips_initialize.c
-CMN_CSRCS += mips_initialstate.c mips_irq.c mips_lowputs.c
-CMN_CSRCS += mips_mdelay.c mips_modifyreg8.c mips_modifyreg16.c mips_modifyreg32.c
-CMN_CSRCS += mips_nputs.c mips_releasestack.c
-CMN_CSRCS += mips_schedulesigaction.c mips_sigdeliver.c
-CMN_CSRCS += mips_stackframe.c mips_swint0.c mips_udelay.c mips_switchcontext.c
-CMN_CSRCS += mips_usestack.c mips_vfork.c
-CMN_CSRCS += mips_registerdump.c mips_getintstack.c
+CMN_CSRCS  = mips_allocateheap.c mips_copystate.c mips_createstack.c
+CMN_CSRCS += mips_doirq.c mips_exit.c mips_getintstack.c mips_initialize.c
+CMN_CSRCS += mips_initialstate.c mips_irq.c mips_lowputs.c mips_mdelay.c
+CMN_CSRCS += mips_modifyreg8.c mips_modifyreg16.c mips_modifyreg32.c
+CMN_CSRCS += mips_nputs.c mips_releasestack.c mips_registerdump.c
+CMN_CSRCS += mips_schedulesigaction.c mips_sigdeliver.c mips_swint0.c
+CMN_CSRCS += mips_stackframe.c mips_switchcontext.c mips_saveusercontext.c
+CMN_CSRCS += mips_udelay.c mips_usestack.c mips_vfork.c
 
 # Configuration dependent common files
 

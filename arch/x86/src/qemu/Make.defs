@@ -27,14 +27,13 @@ HEAD_ASRC = qemu_head.S
 CMN_ASRCS  = i486_utils.S i486_syscall6.S
 CMN_CSRCS += i486_createstack.c i486_initialstate.c
 
-CMN_CSRCS += x86_allocateheap.c x86_assert.c x86_copystate.c
-CMN_CSRCS += x86_exit.c x86_initialize.c x86_mdelay.c x86_udelay.c
+CMN_CSRCS += x86_allocateheap.c x86_copystate.c x86_exit.c
+CMN_CSRCS += x86_getintstack.c x86_initialize.c x86_mdelay.c
 CMN_CSRCS += x86_modifyreg8.c x86_modifyreg16.c x86_modifyreg32.c
-CMN_CSRCS += x86_nputs.c x86_switchcontext.c x86_getintstack.c
+CMN_CSRCS += x86_nputs.c x86_switchcontext.c x86_udelay.c
 CMN_CSRCS += i486_irq.c i486_regdump.c i486_releasestack.c
-CMN_CSRCS += i486_savestate.c i486_sigdeliver.c
-CMN_CSRCS += i486_schedulesigaction.c i486_stackframe.c
-CMN_CSRCS += i486_usestack.c
+CMN_CSRCS += i486_savestate.c i486_sigdeliver.c i486_stackframe.c
+CMN_CSRCS += i486_schedulesigaction.c i486_usestack.c
 
 # Required QEMU files
 

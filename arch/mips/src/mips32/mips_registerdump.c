@@ -48,11 +48,13 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: mips_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void mips_registerdump(volatile uint32_t *regs)
+void up_dump_register(void *dumpregs)
 {
+  volatile uint32_t *regs = dumpregs ? dumpregs : CURRENT_REGS;
+
   /* Are user registers available from interrupt processing? */
 
   if (regs)

@@ -25,6 +25,6 @@ include common/Make.defs
 CMN_ASRCS += sparc_v8_syscall.S
 CMN_CSRCS += sparc_v8_copystate.c sparc_v8_doirq.c
 CMN_CSRCS += sparc_v8_initialstate.c sparc_v8_irq.c
-CMN_CSRCS += sparc_v8_schedulesigaction.c
+CMN_CSRCS += sparc_v8_schedulesigaction.c sparc_v8_saveusercontext.c
 CMN_CSRCS += sparc_v8_sigdeliver.c sparc_v8_swint1.c sparc_v8_systemreset.c
 CMN_CSRCS += sparc_v8_switchcontext.c sparc_v8_registerdump.c

@@ -423,14 +423,14 @@ void up_exit(int status) noreturn_function;
 /* Prototype is in unistd.h */
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_dump_register
  *
  * Description:
- *   Assertions may be handled in an architecture-specific way.
+ *   Register dump may be handled in an architecture-specific way.
  *
  ****************************************************************************/
 
-void up_assert(void);
+void up_dump_register(FAR void *regs);
 
 #ifdef CONFIG_ARCH_HAVE_BACKTRACE
 

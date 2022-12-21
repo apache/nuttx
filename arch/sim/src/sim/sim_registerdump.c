@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/common/renesas_assert.c
+ * arch/sim/src/sim/sim_registerdump.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,42 +24,18 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
 
-#include "renesas_internal.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_dump_register
  ****************************************************************************/
 
-void up_assert(void)
+void up_dump_register(void *dumpregs)
 {
-  volatile uint32_t *regs = g_current_regs;
-
-  board_autoled_on(LED_ASSERTION);
-
-  /* Are user registers available from interrupt processing? */
-
-  if (regs == NULL)
-    {
-      /* No.. capture user registers by hand */
-
-      up_saveusercontext(s_last_regs);
-      regs = s_last_regs;
-    }
-
-  renesas_registerdump(regs);
 }

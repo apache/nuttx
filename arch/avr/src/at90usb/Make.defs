@@ -24,15 +24,14 @@ HEAD_ASRC = at90usb_head.S
 
 # Common AVR files
 
-CMN_ASRCS  = avr_doswitch.S
-CMN_CSRCS  = avr_allocateheap.c avr_assert.c avr_copystate.c
-CMN_CSRCS += avr_createstack.c avr_doirq.c avr_exit.c  avr_idle.c avr_initialize.c
-CMN_CSRCS += avr_initialstate.c avr_irq.c avr_lowputs.c
-CMN_CSRCS += avr_mdelay.c avr_modifyreg8.c avr_modifyreg16.c avr_modifyreg32.c
-CMN_CSRCS += avr_nputs.c avr_releasestack.c
-CMN_CSRCS += avr_schedulesigaction.c avr_sigdeliver.c
-CMN_CSRCS += avr_stackframe.c avr_udelay.c avr_switchcontext.c avr_usestack.c
-CMN_CSRCS += avr_registerdump.c avr_getintstack.c
+CMN_ASRCS  = avr_doswitch.S avr_saveusercontext.S
+CMN_CSRCS  = avr_allocateheap.c avr_copystate.c avr_createstack.c
+CMN_CSRCS += avr_doirq.c avr_exit.c avr_idle.c avr_irq.c avr_udelay.c
+CMN_CSRCS += avr_initialize.c avr_initialstate.c avr_lowputs.c avr_mdelay.c
+CMN_CSRCS += avr_modifyreg8.c avr_modifyreg16.c avr_modifyreg32.c
+CMN_CSRCS += avr_nputs.c avr_releasestack.c avr_registerdump.c
+CMN_CSRCS += avr_schedulesigaction.c avr_sigdeliver.c avr_getintstack.c
+CMN_CSRCS += avr_stackframe.c avr_switchcontext.c avr_usestack.c
 
 # Configuration-dependent common files
 

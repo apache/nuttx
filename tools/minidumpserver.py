@@ -233,7 +233,7 @@ class dump_log_file:
             if line == "":
                 break
 
-            tmp = re.search(r"([^ ]*)_registerdump:?", line)
+            tmp = re.search("up_dump_register:", line)
             if tmp is not None:
                 # find arch
                 if arch == None:

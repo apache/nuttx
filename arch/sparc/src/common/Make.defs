@@ -20,12 +20,12 @@
 
 # Common Sparc files (arch/sparc/src/common)
 
-CMN_CSRCS += sparc_allocateheap.c sparc_assert.c
-CMN_CSRCS += sparc_createstack.c sparc_exit.c sparc_idle.c sparc_initialize.c
-CMN_CSRCS += sparc_lowputs.c sparc_mdelay.c
-CMN_CSRCS += sparc_modifyreg8.c sparc_modifyreg16.c sparc_modifyreg32.c
-CMN_CSRCS += sparc_nputs.c sparc_releasestack.c sparc_getintstack.c
-CMN_CSRCS += sparc_stackframe.c sparc_udelay.c sparc_usestack.c
+CMN_CSRCS += sparc_allocateheap.c sparc_createstack.c sparc_exit.c
+CMN_CSRCS += sparc_getintstack.c sparc_idle.c sparc_initialize.c
+CMN_CSRCS += sparc_lowputs.c sparc_mdelay.c sparc_modifyreg8.c
+CMN_CSRCS += sparc_modifyreg16.c sparc_modifyreg32.c sparc_nputs.c
+CMN_CSRCS += sparc_releasestack.c sparc_stackframe.c
+CMN_CSRCS += sparc_udelay.c sparc_usestack.c
 
 # Configuration-dependent common files
 

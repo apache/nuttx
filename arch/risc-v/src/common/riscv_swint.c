@@ -125,7 +125,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_A0]);
-  riscv_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the SWInt according to the command in $a0 */
@@ -513,7 +513,7 @@ int riscv_swint(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      riscv_registerdump(CURRENT_REGS);
+      up_dump_register(CURRENT_REGS);
     }
   else
     {

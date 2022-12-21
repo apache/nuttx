@@ -34,6 +34,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "irq/irq.h"
@@ -58,6 +59,12 @@
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint8_t g_last_regs[XCPTCONTEXT_SIZE];
 
 /****************************************************************************
  * Private Functions
@@ -480,12 +487,14 @@ static void assert_end(void)
 
 void _assert(FAR const char *filename, int linenum)
 {
+  FAR struct tcb_s *rtcb = running_task();
+
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
   syslog_flush();
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
-  if (!up_interrupt_context() && running_task()->flink != NULL)
+  if (!up_interrupt_context() && rtcb->flink != NULL)
     {
       panic_notifier_call_chain(PANIC_TASK, NULL);
     }
@@ -498,8 +507,8 @@ void _assert(FAR const char *filename, int linenum)
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed CPU%d at file: %s:%d task: %s %p\n",
-         up_cpu_index(), filename, linenum, running_task()->name,
-         running_task()->entry.main);
+         up_cpu_index(), filename, linenum, rtcb->name,
+         rtcb->entry.main);
 #  else
   _alert("Assertion failed CPU%d at file: %s:%d\n",
          up_cpu_index(), filename, linenum);
@@ -507,22 +516,11 @@ void _assert(FAR const char *filename, int linenum)
 #else
 #  if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file: %s:%d task: %s %p\n",
-         filename, linenum, running_task()->name,
-         running_task()->entry.main);
+         filename, linenum, rtcb->name, rtcb->entry.main);
 #  else
   _alert("Assertion failed at file: %s:%d\n",
          filename, linenum);
 #  endif
-#endif
-
-#ifdef CONFIG_ARCH_USBDUMP
-  /* Dump USB trace data */
-
-  usbtrace_enumerate(assert_tracecallback, NULL);
-#endif
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, linenum);
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */
@@ -532,16 +530,36 @@ void _assert(FAR const char *filename, int linenum)
   /* Show back trace */
 
 #ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(running_task()->pid);
+  sched_dumpstack(rtcb->pid);
 #endif
 
-  up_assert();
+  /* Register dump */
+
+  if (up_interrupt_context())
+    {
+      up_dump_register(NULL);
+    }
+  else
+    {
+      up_saveusercontext(g_last_regs);
+      up_dump_register(g_last_regs);
+    }
 
 #ifdef CONFIG_ARCH_STACKDUMP
   showstacks();
 #endif
 
   showtasks();
+
+#ifdef CONFIG_ARCH_USBDUMP
+  /* Dump USB trace data */
+
+  usbtrace_enumerate(assert_tracecallback, NULL);
+#endif
+
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), rtcb, filename, linenum);
+#endif
 
   assert_end();
 }

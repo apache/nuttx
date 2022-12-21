@@ -82,6 +82,7 @@
 
 #define INTCONTEXT_REGS   8 /* r8-r12, lr, pc, sr */
 #define XCPTCONTEXT_REGS 17 /* Plus r0-r7, sp */
+#define XCPTCONTEXT_SIZE (4 * XCPTCONTEXT_REGS)
 
 /****************************************************************************
  * Public Types

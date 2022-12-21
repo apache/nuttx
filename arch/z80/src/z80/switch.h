@@ -96,10 +96,6 @@
 
 #define RESTORE_USERCONTEXT(tcb) z80_restoreusercontext((tcb)->xcp.regs)
 
-/* Dump the current machine registers */
-
-#define _REGISTER_DUMP()         z80_registerdump()
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -137,10 +133,6 @@ int up_saveusercontext(FAR chipreg_t *regs);
 /* Defined in z80_restoreusercontext.asm */
 
 void z80_restoreusercontext(FAR chipreg_t *regs);
-
-/* Defined in z80_registerdump.c */
-
-void z80_registerdump(void);
 
 #ifdef __cplusplus
 }

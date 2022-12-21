@@ -198,9 +198,9 @@ APIs Exported by Architecture-Specific Logic to NuttX
   function should disable interrupts before performing scheduling
   operations.
 
-.. c:function:: void up_assert(FAR const char *filename, int linenum)
+.. c:function:: void up_dump_register(FAR void *dumpregs)
 
-  Assertions may be handled in an
+  Register dump may be handled in an
   architecture-specific way.
 
 .. c:function:: void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)

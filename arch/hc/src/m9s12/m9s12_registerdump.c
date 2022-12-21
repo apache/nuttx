@@ -47,11 +47,13 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: hc_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void hc_registerdump(volatile uint8_t *regs)
+void up_dump_register(void *dumpregs)
 {
+  volatile uint8_t *regs = dumpregs ? dumpregs : (uint8_t *)g_current_regs;
+
   _alert("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
          regs[REG_A],  regs[REG_B],  regs[REG_XH],  regs[REG_XL],
          regs[REG_YH], regs[REG_YL], regs[REG_PCH], regs[REG_PCL],

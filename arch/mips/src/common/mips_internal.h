@@ -176,10 +176,6 @@ void mips_copystate(uint32_t *dest, uint32_t *src);
 
 void mips_lowputs(const char *str);
 
-/* Debug */
-
-void mips_registerdump(volatile uint32_t *regs);
-
 /* Common MIPS32 functions defined in arch/mips/src/MIPS32 */
 
 /* IRQs */
