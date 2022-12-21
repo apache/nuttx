@@ -67,12 +67,12 @@ static uint16_t g_ipid;
 uint16_t ipv4_build_header(FAR struct ipv4_hdr_s *ipv4, uint16_t total_len,
                            uint16_t prot, FAR const in_addr_t *src_ip,
                            FAR const in_addr_t *dst_ip, uint8_t ttl,
-                           FAR struct ipv4_opt_s *opt)
+                           uint8_t tos, FAR struct ipv4_opt_s *opt)
 {
   /* Initialize the IP header. */
 
   ipv4->vhl         = 0x45;   /* orginal initial value like this */
-  ipv4->tos         = 0;
+  ipv4->tos         = tos;
   ipv4->len[0]      = (total_len >> 8);
   ipv4->len[1]      = (total_len & 0xff);
   ++g_ipid;

@@ -261,6 +261,26 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 #endif
+      case IP_TOS:
+        {
+          FAR struct socket_conn_s *conn =
+                           (FAR struct socket_conn_s *)psock->s_conn;
+          int tos;
+
+          tos = (value_len >= sizeof(int)) ?
+                *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          if (tos < 0 || tos > 0xff)
+            {
+              nerr("ERROR: invalid tos:%d\n", tos);
+              ret = -EINVAL;
+            }
+          else
+            {
+              conn->s_tos = tos;
+              ret = OK;
+            }
+        }
+        break;
 
 #ifdef CONFIG_NET_IPTABLES
       case IPT_SO_SET_REPLACE:

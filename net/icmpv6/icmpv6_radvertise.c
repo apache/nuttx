@@ -137,7 +137,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   icmpv6_linkipaddr(dev, srcv6addr);
 
   ipv6_build_header(IPv6BUF, l3size, IP_PROTO_ICMP6,
-                    srcv6addr, g_ipv6_allnodes, 255);
+                    srcv6addr, g_ipv6_allnodes, 255, 0);
 
   /* Set up the ICMPv6 Router Advertise response */
 

@@ -69,16 +69,17 @@
 int ipv6_setsockopt(FAR struct socket *psock, int option,
                     FAR const void *value, socklen_t value_len)
 {
-#ifdef CONFIG_NET_MLD
   int ret;
 
   ninfo("option: %d\n", option);
 
-  /* Handle MLD-related socket options */
-
   net_lock();
   switch (option)
     {
+#ifdef CONFIG_NET_MLD
+
+      /* Handle MLD-related socket options */
+
       case IPV6_JOIN_GROUP:       /* Join a multicast group */
         {
           FAR const struct ipv6_mreq *mrec ;
@@ -109,6 +110,21 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
               ret = mld_leavegroup(mrec);
             }
         }
+        break;
+
+      /* The following IPv6 socket options are defined, but not implemented */
+
+      case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
+      case IPV6_MULTICAST_IF:     /* Interface to use for outgoing multicast
+                                   * packets */
+      case IPV6_MULTICAST_LOOP:   /* Multicast packets are delivered back to
+                                   * the local application */
+#endif
+      case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
+      case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
+                                   * communications only */
+        nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
+        ret = -ENOSYS;
         break;
 
 #if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
@@ -142,18 +158,41 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         break;
 #endif
 
-      /* The following IPv6 socket options are defined, but not implemented */
+      case IPV6_TCLASS:
+        {
+          FAR struct socket_conn_s *conn =
+                           (FAR struct socket_conn_s *)psock->s_conn;
+          int tclass;
 
-      case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
-      case IPV6_MULTICAST_IF:     /* Interface to use for outgoing multicast
-                                   * packets */
-      case IPV6_MULTICAST_LOOP:   /* Multicast packets are delivered back to
-                                   * the local application */
-      case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
-      case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
-                                   * communications only */
-        nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
-        ret = -ENOSYS;
+          tclass = (value_len >= sizeof(int)) ?
+                   *(FAR int *)value : (int)*(FAR unsigned char *)value;
+
+          /* According to RFC3542 6.5, the interpretation of the integer
+           * traffic class value is:
+           *   x < -1:        return an error of EINVAL
+           *   x == -1:       use kernel default
+           *   0 <= x <= 255: use x
+           *   x >= 256:      return an error of EINVAL
+           */
+
+          if (tclass < -1 || tclass > 0xff)
+            {
+              nerr("ERROR: invalid tclass:%d\n", tclass);
+              ret = -EINVAL;
+            }
+          else
+            {
+              if (tclass == -1)
+                {
+                  /* Default value is 0 */
+
+                  tclass = 0;
+                }
+
+              conn->s_tclass = tclass;
+              ret = OK;
+            }
+        }
         break;
 
       default:
@@ -164,9 +203,6 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
   net_unlock();
   return ret;
-#else
-  return -ENOPROTOOPT;
-#endif
 }
 
 #endif /* CONFIG_NET_IPv6 */

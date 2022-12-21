@@ -77,7 +77,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
   l3size       = SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(lladdrsize);
 
   ipv6_build_header(IPv6BUF, l3size, IP_PROTO_ICMP6,
-                    dev->d_ipv6addr, destipaddr, 255);
+                    dev->d_ipv6addr, destipaddr, 255, 0);
 
   /* Set up the ICMPv6 Neighbor Advertise response */
 

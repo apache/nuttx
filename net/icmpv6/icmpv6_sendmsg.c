@@ -115,7 +115,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
   dev->d_len = IPv6_HDRLEN + pstate->snd_buflen;
 
   ipv6_build_header(IPv6BUF, pstate->snd_buflen, IP_PROTO_ICMP6,
-                    dev->d_ipv6addr, pstate->snd_toaddr.s6_addr16, 255);
+                    dev->d_ipv6addr, pstate->snd_toaddr.s6_addr16, 255, 0);
 
   /* Copy the ICMPv6 request and payload into place after the IPv6 header */
 

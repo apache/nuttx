@@ -171,7 +171,7 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
   dev->d_len = ipicmplen + datalen;
 
   ipv6_build_header(IPv6BUF, dev->d_len - IPv6_HDRLEN, IP_PROTO_ICMP6,
-                    dev->d_ipv6addr, ipv6->srcipaddr, 255);
+                    dev->d_ipv6addr, ipv6->srcipaddr, 255, 0);
 
   /* Initialize the ICMPv6 header */
 
