@@ -47,11 +47,13 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: lm32_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void lm32_registerdump(volatile uint32_t *regs)
+void up_dump_register(void *dumpregs)
 {
+  volatile uint32_t *regs = dumpregs ? dumpregs : g_current_regs;
+
   /* Are user registers available from interrupt processing? */
 
   if (regs)
@@ -85,4 +87,3 @@ void lm32_registerdump(volatile uint32_t *regs)
       _alert(" IE:%08x\n", regs[REG_X32_NDX]);
     }
 }
-

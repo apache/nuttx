@@ -106,13 +106,33 @@ int lm32_swint(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_A0]);
-  lm32_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the SWInt according to the command in $a0 */
 
   switch (regs[REG_A0])
     {
+      /* A0=SYS_save_context:  This is a save context command:
+       *
+       *   int up_saveusercontext(void *saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A0 = SYS_save_context
+       *   A1 = saveregs
+       *
+       * In this case, we simply need to copy the current registers to the
+       * save register space references in the saved R1 and return.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          lm32_copystate((uint32_t *)regs[REG_A1], regs);
+        }
+        break;
+
       /* A0=SYS_restore_context: This a restore context command:
        *
        *   void up_fullcontextrestore(uint32_t *restoreregs)
@@ -254,7 +274,7 @@ int lm32_swint(int irq, void *context, void *arg)
   if (regs != g_current_regs)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      lm32_registerdump(g_current_regs);
+      up_dump_register(g_current_regs);
     }
   else
     {

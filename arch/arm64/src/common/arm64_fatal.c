@@ -285,6 +285,42 @@ static void print_ec_cause(uint64_t esr)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_mdelay
+ ****************************************************************************/
+
+void up_mdelay(unsigned int milliseconds)
+{
+  volatile unsigned int i;
+  volatile unsigned int j;
+
+  for (i = 0; i < milliseconds; i++)
+    {
+      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+        {
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: arm64_dump_fatal
+ ****************************************************************************/
+
+void arm64_dump_fatal(struct regs_context *regs)
+{
+#ifdef CONFIG_SCHED_BACKTRACE
+  struct tcb_s *rtcb = (struct tcb_s *)regs->tpidr_el1;
+
+  /* Show back trace */
+
+  sched_dumpstack(rtcb->pid);
+#endif
+
+  /* Dump the registers */
+
+  up_dump_register(regs);
+}
+
+/****************************************************************************
  * Name: arm64_fatal_error
  *
  * Description:

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/arm_assert.c
+ * arch/misoc/src/lm32/lm32_saveusercontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,51 +24,27 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "sched/sched.h"
-#include "arm_internal.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint8_t s_last_regs[XCPTCONTEXT_SIZE];
+#include <arch/syscall.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  up_saveusercontext(void *saveregs);
+ *
+ * Returned Value:
+ *   0: Normal return
+ *   1: Context switch return
+ *
  ****************************************************************************/
 
-void up_assert(void)
+int up_saveusercontext(void *saveregs)
 {
-  struct tcb_s *rtcb = running_task();
-
-  board_autoled_on(LED_ASSERTION);
-
-  /* Update the xcp context */
-
-  if (CURRENT_REGS)
-    {
-      rtcb->xcp.regs = (uint32_t *)CURRENT_REGS;
-    }
-  else
-    {
-      up_saveusercontext(s_last_regs);
-      rtcb->xcp.regs = (uint32_t *)s_last_regs;
-    }
-
-  /* Dump the interrupt registers */
-
-  arm_registerdump(rtcb->xcp.regs);
+  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
 }

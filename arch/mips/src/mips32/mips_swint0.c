@@ -109,13 +109,33 @@ int mips_swint0(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_R4]);
-  mips_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the SWInt according to the command in $4 */
 
   switch (regs[REG_R4])
     {
+      /* R4=SYS_save_context:  This is a save context command:
+       *
+       *   int up_saveusercontext(void *saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R4 = SYS_save_context
+       *   R5 = saveregs
+       *
+       * In this case, we simply need to copy the current registers to the
+       * save register space references in the saved R1 and return.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          mips_copystate((uint32_t *)regs[REG_A1], regs);
+        }
+        break;
+
       /* R4=SYS_restore_context: This a restore context command:
        *
        * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
@@ -256,7 +276,7 @@ int mips_swint0(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      mips_registerdump(CURRENT_REGS);
+      up_dump_register(CURRENT_REGS);
     }
   else
     {

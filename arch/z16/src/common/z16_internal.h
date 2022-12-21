@@ -155,10 +155,6 @@ void z16_netinitialize(void);
 # define z16_netinitialize()
 #endif
 
-/* Dump stack and registers */
-
-void z16_registerdump(FAR volatile uint32_t *regs);
-
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_Z16_SRC_COMMON_Z16_INTERNAL_H */

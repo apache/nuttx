@@ -305,8 +305,6 @@ size_t ceva_stack_check(uintptr_t alloc, size_t size);
 void ceva_stack_color(void *stackbase, size_t nbytes);
 #endif
 
-void ceva_registerdump(volatile uint32_t *regs);
-
 #undef EXTERN
 #ifdef __cplusplus
 }

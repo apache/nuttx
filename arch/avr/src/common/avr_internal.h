@@ -119,11 +119,6 @@ void weak_function avr_dma_initialize(void);
 void avr_sigdeliver(void);
 void avr_lowputc(char ch);
 void avr_lowputs(const char *str);
-#ifdef CONFIG_ARCH_FAMILY_AVR32
-void avr_registerdump(volatile uint32_t *regs);
-#else
-void avr_registerdump(volatile uint8_t *regs);
-#endif
 
 /* Defined in common/avr_allocateheap.c or chip/xxx_allocateheap.c */
 

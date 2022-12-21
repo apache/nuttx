@@ -33,14 +33,6 @@
 #include "chip/switch.h"
 #include "z80_internal.h"
 
-#ifdef CONFIG_ARCH_STACKDUMP
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -74,10 +66,10 @@ uintptr_t up_getusrsp(void)
 }
 
 /****************************************************************************
- * Name: z8_registerdump
+ * Name: up_dump_register
  ****************************************************************************/
 
-void z8_registerdump(void)
+void up_dump_register(FAR void *dumpregs)
 {
   FAR chipret_t *regs;
   chipreg_t      sp;
@@ -124,5 +116,3 @@ void z8_registerdump(void)
         break;
     }
 }
-
-#endif /* CONFIG_ARCH_STACKDUMP */

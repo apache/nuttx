@@ -20,12 +20,11 @@
 
 HEAD_SSRC = z8_head.S
 
-CMN_CSRCS  = z80_initialize.c z80_allocateheap.c z80_createstack.c
-CMN_CSRCS += z80_releasestack.c z80_interruptcontext.c
-CMN_CSRCS += z80_switchcontext.c z80_exit.c
-CMN_CSRCS += z80_idle.c z80_assert.c z80_doirq.c
-CMN_CSRCS += z80_mdelay.c z80_stackframe.c z80_udelay.c z80_usestack.c
-CMN_CSRCS += z80_nputs.c
+CMN_CSRCS  = z80_allocateheap.c z80_createstack.c z80_doirq.c
+CMN_CSRCS += z80_exit.c z80_idle.c z80_interruptcontext.c
+CMN_CSRCS += z80_initialize.c z80_mdelay.c z80_nputs.c
+CMN_CSRCS += z80_releasestack.c z80_switchcontext.c
+CMN_CSRCS += z80_stackframe.c z80_udelay.c z80_usestack.c
 
 CHIP_SSRCS  = z8_vector.S z8_saveusercontext.S z8_restorecontext.S
 CHIP_CSRCS  = z8_initialstate.c z8_irq.c z8_saveirqcontext.c

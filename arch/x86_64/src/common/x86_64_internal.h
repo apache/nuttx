@@ -199,7 +199,6 @@ void x86_64_restore_auxstate(struct tcb_s *rtcb);
 void x86_64_checktasks(void);
 
 void x86_64_syscall(uint64_t *regs);
-void x86_64_registerdump(uint64_t *regs);
 
 /* Defined in up_allocateheap.c */
 
