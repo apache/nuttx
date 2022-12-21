@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_getstreams.c
+ * libs/libc/stdio/lib_libgetstreams.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,10 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
 #include <assert.h>
 
-#include "sched/sched.h"
+#include <nuttx/tls.h>
 
 #ifdef CONFIG_FILE_STREAM
 
@@ -35,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_get_streams
+ * Name: lib_get_streams
  *
  * Description:
  *   Return a pointer to the streams list for this thread
@@ -50,18 +49,12 @@
  *
  ****************************************************************************/
 
-FAR struct streamlist *nxsched_get_streams(void)
+FAR struct streamlist *lib_get_streams(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
+  FAR struct task_info_s *info;
 
-  DEBUGASSERT(group);
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-  return group->tg_streamlist;
-#else
-  return &group->tg_streamlist;
-#endif
+  info = task_get_info();
+  return &info->ta_streamlist;
 }
 
 #endif /* CONFIG_FILE_STREAM */

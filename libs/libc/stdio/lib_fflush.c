@@ -62,7 +62,7 @@ int fflush(FAR FILE *stream)
     {
       /* Yes... then this is a request to flush all streams */
 
-      ret = lib_flushall(nxsched_get_streams());
+      ret = lib_flushall(lib_get_streams());
     }
   else
     {
