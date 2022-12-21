@@ -84,7 +84,7 @@ int fclose(FAR FILE *stream)
 
       /* Remove FILE structure from the stream list */
 
-      slist = nxsched_get_streams();
+      slist = lib_get_streams();
       nxmutex_lock(&slist->sl_lock);
 
       for (next = slist->sl_head; next; prev = next, next = next->fs_next)
