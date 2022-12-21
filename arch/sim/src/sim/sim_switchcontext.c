@@ -38,25 +38,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_saveusercontext
- *
- * Description:
- *   Save the current thread context
- *
- ****************************************************************************/
-
-int up_saveusercontext(void *saveregs)
-{
-  irqstate_t flags = up_irq_flags();
-  uint32_t *regs = (uint32_t *)saveregs + JB_FLAG;
-
-  regs[0] = flags & UINT32_MAX;
-  regs[1] = (flags >> 32) & UINT32_MAX;
-
-  return setjmp(saveregs);
-}
-
-/****************************************************************************
  * Name: up_switch_context
  *
  * Description:
@@ -102,11 +83,11 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     }
 
   /* Copy the exception context into the TCB of the task that was
-   * previously active.  if up_saveusercontext returns a non-zero value, then
-   * this is really the previously running task restarting!
+   * previously active.  if sim_saveusercontext returns a non-zero value,
+   * then this is really the previously running task restarting!
    */
 
-  else if (!up_saveusercontext(rtcb->xcp.regs))
+  else if (!sim_saveusercontext(rtcb->xcp.regs))
     {
       sinfo("New Active Task TCB=%p\n", tcb);
 

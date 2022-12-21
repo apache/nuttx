@@ -48,7 +48,7 @@ void *sim_doirq(int irq, void *context)
    * CURRENT_REGS is also used to manage interrupt level context switches.
    */
 
-  if (up_saveusercontext(regs) == 0)
+  if (sim_saveusercontext(regs) == 0)
     {
       CURRENT_REGS = regs;
 
