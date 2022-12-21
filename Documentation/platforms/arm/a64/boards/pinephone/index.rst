@@ -149,6 +149,7 @@ Display Engine  Yes
 MIPI D-PHY      Yes
 MIPI DSI        Yes
 PIO             Yes
+RSB             Yes
 TCON0           Yes
 UART            Yes    Only UART0 is supported
 ============== ======= =====

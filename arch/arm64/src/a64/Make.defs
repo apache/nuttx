@@ -31,6 +31,10 @@ ifeq ($(CONFIG_A64_MIPI_DSI),y)
 CHIP_CSRCS += a64_mipi_dphy.c a64_mipi_dsi.c mipi_dsi.c
 endif
 
+ifeq ($(CONFIG_A64_RSB),y)
+CHIP_CSRCS += a64_rsb.c
+endif
+
 ifeq ($(CONFIG_A64_TCON0),y)
 CHIP_CSRCS += a64_tcon0.c
 endif
