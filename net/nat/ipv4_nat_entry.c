@@ -159,7 +159,7 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
           /* Try to select local_port first. */
 
           int ret = tcp_selectport(PF_INET,
-                        (FAR const union ip_addr_u *)&dev->d_draddr,
+                        (FAR const union ip_addr_u *)&dev->d_ipaddr,
                         local_port);
 
           /* If failed, try select another unused port. */
@@ -167,13 +167,13 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
           if (ret < 0)
             {
               ret = tcp_selectport(PF_INET,
-                        (FAR const union ip_addr_u *)&dev->d_draddr, 0);
+                        (FAR const union ip_addr_u *)&dev->d_ipaddr, 0);
             }
 
           return ret > 0 ? ret : 0;
 #else
           return ipv4_nat_select_port_without_stack(IP_PROTO_TCP,
-                                                    dev->d_draddr,
+                                                    dev->d_ipaddr,
                                                     local_port);
 #endif
         }
@@ -184,7 +184,7 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
         {
 #ifndef CONFIG_NET_UDP_NO_STACK
           union ip_binding_u u;
-          u.ipv4.laddr = dev->d_draddr;
+          u.ipv4.laddr = dev->d_ipaddr;
           u.ipv4.raddr = INADDR_ANY;
 
           /* TODO: Try keep origin port as possible. */
@@ -192,7 +192,7 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
           return HTONS(udp_select_port(PF_INET, &u));
 #else
           return ipv4_nat_select_port_without_stack(IP_PROTO_UDP,
-                                                    dev->d_draddr,
+                                                    dev->d_ipaddr,
                                                     local_port);
 #endif
         }
@@ -205,7 +205,7 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
           uint16_t id = local_port;
           uint16_t hid = NTOHS(id);
           while (icmp_findconn(dev, id) ||
-                 ipv4_nat_port_inuse(IP_PROTO_ICMP, dev->d_draddr, id))
+                 ipv4_nat_port_inuse(IP_PROTO_ICMP, dev->d_ipaddr, id))
             {
               if (++hid >= NAT_PORT_REASSIGN_MAX)
                 {
@@ -218,7 +218,7 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
           return id;
 #else
           return ipv4_nat_select_port_without_stack(IP_PROTO_ICMP,
-                                                    dev->d_draddr,
+                                                    dev->d_ipaddr,
                                                     local_port);
 #endif
         }
