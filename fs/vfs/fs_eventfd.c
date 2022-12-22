@@ -43,20 +43,18 @@
 typedef struct eventfd_waiter_sem_s
 {
   sem_t sem;
-  struct eventfd_waiter_sem_s *next;
+  FAR struct eventfd_waiter_sem_s *next;
 } eventfd_waiter_sem_t;
 
 /* This structure describes the internal state of the driver */
 
 struct eventfd_priv_s
 {
-  mutex_t                   lock;            /* Enforces device exclusive access */
-  FAR eventfd_waiter_sem_t *rdsems;          /* List of blocking readers */
-  FAR eventfd_waiter_sem_t *wrsems;          /* List of blocking writers */
-  eventfd_t                 counter;         /* eventfd counter */
-  unsigned int              minor;           /* eventfd minor number */
-  uint8_t                   crefs;           /* References counts on eventfd (max: 255) */
-  bool                      mode_semaphore;  /* eventfd mode (semaphore or counter) */
+  mutex_t                   lock;    /* Enforces device exclusive access */
+  FAR eventfd_waiter_sem_t *rdsems;  /* List of blocking readers */
+  FAR eventfd_waiter_sem_t *wrsems;  /* List of blocking writers */
+  eventfd_t                 counter; /* eventfd counter */
+  uint8_t                   crefs;   /* References counts on eventfd (max: 255) */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
@@ -87,9 +85,6 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
                                FAR eventfd_waiter_sem_t  *sem,
                                FAR eventfd_waiter_sem_t **slist);
 
-static unsigned int eventfd_get_unique_minor(void);
-static void eventfd_release_minor(unsigned int minor);
-
 static FAR struct eventfd_priv_s *eventfd_allocdev(void);
 static void eventfd_destroy(FAR struct eventfd_priv_s *dev);
 
@@ -115,6 +110,18 @@ static const struct file_operations g_eventfd_fops =
 #endif
 };
 
+static struct inode g_eventfd_inode =
+{
+  NULL,                   /* i_parent */
+  NULL,                   /* i_peer */
+  NULL,                   /* i_child */
+  1,                      /* i_crefs */
+  FSNODEFLAG_TYPE_DRIVER, /* i_flags */
+  {
+    &g_eventfd_fops       /* u */
+  }
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -138,25 +145,14 @@ static FAR struct eventfd_priv_s *eventfd_allocdev(void)
 
 static void eventfd_destroy(FAR struct eventfd_priv_s *dev)
 {
+  nxmutex_unlock(&dev->lock);
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
 }
 
-static unsigned int eventfd_get_unique_minor(void)
-{
-  static unsigned int minor;
-
-  return minor++;
-}
-
-static void eventfd_release_minor(unsigned int minor)
-{
-}
-
 static int eventfd_do_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *priv = inode->i_private;
+  FAR struct eventfd_priv_s *priv = filep->f_priv;
   int ret;
 
   /* Get exclusive access to the device structures */
@@ -166,8 +162,6 @@ static int eventfd_do_open(FAR struct file *filep)
     {
       return ret;
     }
-
-  finfo("crefs: %d <%s>\n", priv->crefs, inode->i_name);
 
   if (priv->crefs >= 255)
     {
@@ -189,13 +183,8 @@ static int eventfd_do_open(FAR struct file *filep)
 
 static int eventfd_do_close(FAR struct file *filep)
 {
+  FAR struct eventfd_priv_s *priv = filep->f_priv;
   int ret;
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *priv = inode->i_private;
-
-  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %u (10) + null char (1) */
-
-  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 10 + 1];
 
   /* Get exclusive access to the device structures */
 
@@ -204,8 +193,6 @@ static int eventfd_do_close(FAR struct file *filep)
     {
       return ret;
     }
-
-  finfo("crefs: %d <%s>\n", priv->crefs, inode->i_name);
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -223,16 +210,8 @@ static int eventfd_do_close(FAR struct file *filep)
   /* Re-create the path to the driver. */
 
   finfo("destroy\n");
-  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%u", priv->minor);
 
-  /* Will be unregistered later after close is done */
-
-  unregister_driver(devpath);
-
-  DEBUGASSERT(nxmutex_is_locked(&priv->lock));
-  eventfd_release_minor(priv->minor);
   eventfd_destroy(priv);
-
   return OK;
 }
 
@@ -241,6 +220,7 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
                                FAR eventfd_waiter_sem_t **slist)
 {
   int ret;
+
   sem->next = *slist;
   *slist = sem;
 
@@ -287,8 +267,7 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
 static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
                                size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *dev = inode->i_private;
+  FAR struct eventfd_priv_s *dev = filep->f_priv;
   FAR eventfd_waiter_sem_t *cur_sem;
   ssize_t ret;
 
@@ -332,7 +311,7 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 
   /* Device ready for read */
 
-  if (dev->mode_semaphore)
+  if ((filep->f_oflags & EFD_SEMAPHORE) != 0)
     {
       *(FAR eventfd_t *)buffer = 1;
       dev->counter -= 1;
@@ -367,11 +346,10 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t eventfd_do_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *dev = inode->i_private;
+  FAR struct eventfd_priv_s *dev = filep->f_priv;
   FAR eventfd_waiter_sem_t *cur_sem;
-  ssize_t ret;
   eventfd_t new_counter;
+  ssize_t ret;
 
   if (len < sizeof(eventfd_t) || buffer == NULL ||
       (*(FAR eventfd_t *)buffer == (eventfd_t)-1) ||
@@ -443,10 +421,9 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 
 #ifdef CONFIG_EVENT_FD_POLL
 static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+                           bool setup)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *dev = inode->i_private;
+  FAR struct eventfd_priv_s *dev = filep->f_priv;
   int ret;
   int i;
   pollevent_t eventset;
@@ -528,13 +505,15 @@ out:
 
 int eventfd(unsigned int count, int flags)
 {
-  int ret;
-  int new_fd;
   FAR struct eventfd_priv_s *new_dev;
+  int new_fd;
+  int ret;
 
-  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %u (10) + null char (1) */
-
-  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 10 + 1];
+  if ((flags & ~(EFD_NONBLOCK | EFD_SEMAPHORE | EFD_CLOEXEC)) != 0)
+    {
+      ret = -EINVAL;
+      goto exit_set_errno;
+    }
 
   /* Allocate instance data for this driver */
 
@@ -548,46 +527,21 @@ int eventfd(unsigned int count, int flags)
     }
 
   new_dev->counter = count;
-  new_dev->mode_semaphore = !!(flags & EFD_SEMAPHORE);
-
-  /* Request a unique minor device number */
-
-  new_dev->minor = eventfd_get_unique_minor();
-
-  /* Get device path */
-
-  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%u", new_dev->minor);
-
-  /* Register the driver */
-
-  ret = register_driver(devpath, &g_eventfd_fops, 0666, new_dev);
-  if (ret < 0)
+  new_fd = file_allocate(&g_eventfd_inode, O_RDWR | flags,
+                         0, new_dev, 0, true);
+  if (new_fd < 0)
     {
-      ferr("Failed to register new device %s: %d\n", devpath, ret);
-      goto exit_release_minor;
+      ret = new_fd;
+      goto exit_with_dev;
     }
 
   /* Device is ready for use */
 
   nxmutex_unlock(&new_dev->lock);
 
-  /* Try open new device */
-
-  new_fd = nx_open(devpath, O_RDWR |
-    (flags & (EFD_NONBLOCK | EFD_SEMAPHORE | EFD_CLOEXEC)));
-
-  if (new_fd < 0)
-    {
-      ret = new_fd;
-      goto exit_unregister_driver;
-    }
-
   return new_fd;
 
-exit_unregister_driver:
-  unregister_driver(devpath);
-exit_release_minor:
-  eventfd_release_minor(new_dev->minor);
+exit_with_dev:
   eventfd_destroy(new_dev);
 exit_set_errno:
   set_errno(-ret);

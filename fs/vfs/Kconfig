@@ -11,12 +11,6 @@ config EVENT_FD
 
 if EVENT_FD
 
-config EVENT_FD_VFS_PATH
-	string "Path to eventfd storage"
-	default "/var/event"
-	---help---
-		The path to where eventfd will exist in the VFS namespace.
-
 config EVENT_FD_POLL
 	bool "EventFD poll support"
 	default y
@@ -39,12 +33,6 @@ config TIMER_FD
 		Create a file descriptor for timer notification
 
 if TIMER_FD
-
-config TIMER_FD_VFS_PATH
-	string "Path to timerfd storage"
-	default "/var/timer"
-	---help---
-		The path to where timerfd will exist in the VFS namespace.
 
 config TIMER_FD_POLL
 	bool "TimerFD poll support"
