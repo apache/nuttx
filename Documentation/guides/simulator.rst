@@ -170,6 +170,12 @@ Accessing the Network
        56 bytes from 8.8.8.8: icmp_seq=0 time=10 ms
        1 packets transmitted, 1 received, 0% packet loss, time 1010 ms
 
+    If it doesn't work, then you need to enable the IP forward on your computer:
+
+    .. code-block:: console
+
+       sudo sysctl -w net.ipv4.ip_forward=1
+
    Success!
 
 Testing / capturing TCP network traffic
