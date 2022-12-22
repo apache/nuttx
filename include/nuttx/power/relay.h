@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -53,14 +54,95 @@
 
 /* IOCTL Commands ***********************************************************/
 
-#define RELAYIOC_CTRL   _RELAYIOC(0x0001) /* Relay control
-                                           * IN: unsigned long integer
-                                           *     0=open
-                                           *     1=close
+#define RELAYIOC_SET    _RELAYIOC(0x0001) /* Relay state set
+                                           * IN: pointer of bool
+                                           *     false=disable, open
+                                           *     true=enable, close
                                            * OUT: None */
+
+#define RELAYIOC_GET    _RELAYIOC(0x0002) /* Relay state get
+                                           * IN: pointer of bool
+                                           * OUT:
+                                           *     false=disable, open
+                                           *     true=enable, close */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+struct relay_dev_s;
+struct relay_ops_s
+{
+  CODE int (*set)(FAR struct relay_dev_s *dev, bool onoff);
+  CODE int (*get)(FAR struct relay_dev_s *dev, FAR bool *onoff);
+  CODE int (*ioctl)(FAR struct relay_dev_s *dev, int cmd,
+                    unsigned long arg);
+};
+
+struct relay_dev_s
+{
+  FAR const struct relay_ops_s *ops;
+  mutex_t                       lock;
+};
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: relay_register
+ *
+ * Description:
+ *   Register the relay driver to the vfs.
+ *
+ * Input Parameters:
+ *   dev     - the relay device
+ *   devname - the relay device name
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RELAY
+int relay_register(FAR struct relay_dev_s *dev, FAR const char *devname);
+#endif
+
+/****************************************************************************
+ * Name: relay_gpio_register
+ *
+ * Description:
+ *   Register the relay device based on the ioexpander device
+ *
+ * Input Parameters:
+ *   iodev     - The ioexpander dev pointer.
+ *   iopin     - The relay gpio pin number.
+ *   ioinvert  - true : enable (relay close) is low , disable (relay open)
+ *                      is high.
+ *               false: enable (rekat close) is high, disable (relay open)
+ *                      is low.
+ *   devname   - The relay device name.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RELAY_GPIO
+int relay_gpio_register(FAR struct ioexpander_dev_s *iodev, uint8_t iopin,
+                        bool ioinvert, FAR const char *devname);
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __INCLUDE_NUTTX_POWER_RELAY_H */
