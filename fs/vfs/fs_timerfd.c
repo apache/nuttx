@@ -55,7 +55,7 @@
 typedef struct timerfd_waiter_sem_s
 {
   sem_t sem;
-  struct timerfd_waiter_sem_s *next;
+  FAR struct timerfd_waiter_sem_s *next;
 } timerfd_waiter_sem_t;
 
 /* This structure describes the internal state of the driver */
@@ -71,7 +71,6 @@ struct timerfd_priv_s
   struct work_s             work;    /* For deferred timeout operations */
   timerfd_t                 counter; /* timerfd counter */
   spinlock_t                splock;  /* timerfd counter specific lock */
-  unsigned int              minor;   /* timerfd minor number */
   uint8_t                   crefs;   /* References counts on timerfd (max: 255) */
 
   /* The following is a list if poll structures of threads waiting for
@@ -101,9 +100,6 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
                                FAR timerfd_waiter_sem_t  *sem,
                                FAR timerfd_waiter_sem_t **slist);
 
-static unsigned int timerfd_get_unique_minor(void);
-static void timerfd_release_minor(unsigned int minor);
-
 static FAR struct timerfd_priv_s *timerfd_allocdev(void);
 static void timerfd_destroy(FAR struct timerfd_priv_s *dev);
 
@@ -132,6 +128,18 @@ static const struct file_operations g_timerfd_fops =
 #endif
 };
 
+static struct inode g_timerfd_inode =
+{
+  NULL,                   /* i_parent */
+  NULL,                   /* i_peer */
+  NULL,                   /* i_child */
+  1,                      /* i_crefs */
+  FSNODEFLAG_TYPE_DRIVER, /* i_flags */
+  {
+    &g_timerfd_fops       /* u */
+  }
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -157,6 +165,7 @@ static void timerfd_destroy(FAR struct timerfd_priv_s *dev)
 {
   wd_cancel(&dev->wdog);
   work_cancel(TIMER_FD_WORK, &dev->work);
+  nxmutex_unlock(&dev->lock);
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
 }
@@ -173,21 +182,9 @@ static timerfd_t timerfd_get_counter(FAR struct timerfd_priv_s *dev)
   return counter;
 }
 
-static unsigned int timerfd_get_unique_minor(void)
-{
-  static unsigned int minor;
-
-  return minor++;
-}
-
-static void timerfd_release_minor(unsigned int minor)
-{
-}
-
 static int timerfd_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct timerfd_priv_s *priv = inode->i_private;
+  FAR struct timerfd_priv_s *priv = filep->f_priv;
   int ret;
 
   /* Get exclusive access to the device structures */
@@ -197,8 +194,6 @@ static int timerfd_open(FAR struct file *filep)
     {
       return ret;
     }
-
-  finfo("crefs: %d <%s>\n", priv->crefs, inode->i_name);
 
   if (priv->crefs >= 255)
     {
@@ -220,13 +215,8 @@ static int timerfd_open(FAR struct file *filep)
 
 static int timerfd_close(FAR struct file *filep)
 {
+  FAR struct timerfd_priv_s *priv = filep->f_priv;
   int ret;
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct timerfd_priv_s *priv = inode->i_private;
-
-  /* devpath: TIMER_FD_VFS_PATH + /tfd (4) + %u (10) + null char (1) */
-
-  char devpath[sizeof(CONFIG_TIMER_FD_VFS_PATH) + 4 + 10 + 1];
 
   /* Get exclusive access to the device structures */
 
@@ -235,8 +225,6 @@ static int timerfd_close(FAR struct file *filep)
     {
       return ret;
     }
-
-  finfo("crefs: %d <%s>\n", priv->crefs, inode->i_name);
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -254,16 +242,8 @@ static int timerfd_close(FAR struct file *filep)
   /* Re-create the path to the driver. */
 
   finfo("destroy\n");
-  sprintf(devpath, CONFIG_TIMER_FD_VFS_PATH "/tfd%u", priv->minor);
 
-  /* Will be unregistered later after close is done */
-
-  unregister_driver(devpath);
-
-  DEBUGASSERT(nxmutex_is_locked(&priv->lock));
-  timerfd_release_minor(priv->minor);
   timerfd_destroy(priv);
-
   return OK;
 }
 
@@ -272,6 +252,7 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
                                FAR timerfd_waiter_sem_t **slist)
 {
   int ret;
+
   sem->next = *slist;
   *slist = sem;
 
@@ -318,8 +299,7 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
 static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
                             size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct timerfd_priv_s *dev = inode->i_private;
+  FAR struct timerfd_priv_s *dev = filep->f_priv;
   irqstate_t intflags;
   ssize_t ret;
 
@@ -381,8 +361,7 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
 static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct timerfd_priv_s *dev = inode->i_private;
+  FAR struct timerfd_priv_s *dev = filep->f_priv;
   int ret;
   int i;
 
@@ -402,8 +381,8 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
       goto out;
     }
 
@@ -518,17 +497,14 @@ int timerfd_create(int clockid, int flags)
 
   /* Sanity checks. */
 
-  if (clockid != CLOCK_REALTIME &&
-      clockid != CLOCK_MONOTONIC &&
-      clockid != CLOCK_BOOTTIME)
+  if ((clockid != CLOCK_REALTIME &&
+       clockid != CLOCK_MONOTONIC &&
+       clockid != CLOCK_BOOTTIME) ||
+      (flags & ~(TFD_NONBLOCK | TFD_CLOEXEC)))
     {
       ret = -EINVAL;
       goto errout;
     }
-
-  /* devpath: TIMER_FD_VFS_PATH + /tfd (4) + %u (10) + null char (1) */
-
-  char devpath[sizeof(CONFIG_TIMER_FD_VFS_PATH) + 4 + 10 + 1];
 
   /* Allocate instance data for this driver */
 
@@ -544,46 +520,21 @@ int timerfd_create(int clockid, int flags)
   /* Initialize the timer instance */
 
   new_dev->clock = clockid;
-
-  /* Request a unique minor device number */
-
-  new_dev->minor = timerfd_get_unique_minor();
-
-  /* Get device path */
-
-  sprintf(devpath, CONFIG_TIMER_FD_VFS_PATH "/tfd%u", new_dev->minor);
-
-  /* Register the driver */
-
-  ret = register_driver(devpath, &g_timerfd_fops, 0444, new_dev);
-  if (ret < 0)
+  new_fd = file_allocate(&g_timerfd_inode, O_RDONLY | flags,
+                         0, new_dev, 0, true);
+  if (new_fd < 0)
     {
-      ferr("Failed to register new device %s: %d\n", devpath, ret);
-      ret = -ENODEV;
-      goto errout_release_minor;
+      ret = new_fd;
+      goto errout_with_dev;
     }
 
   /* Device is ready for use */
 
   nxmutex_unlock(&new_dev->lock);
 
-  /* Try open new device */
-
-  new_fd = nx_open(devpath, O_RDONLY |
-                   (flags & (TFD_NONBLOCK | TFD_CLOEXEC)));
-
-  if (new_fd < 0)
-    {
-      ret = new_fd;
-      goto errout_unregister_driver;
-    }
-
   return new_fd;
 
-errout_unregister_driver:
-  unregister_driver(devpath);
-errout_release_minor:
-  timerfd_release_minor(new_dev->minor);
+errout_with_dev:
   timerfd_destroy(new_dev);
 errout:
   set_errno(-ret);
@@ -594,8 +545,8 @@ int timerfd_settime(int fd, int flags,
                     FAR const struct itimerspec *new_value,
                     FAR struct itimerspec *old_value)
 {
-  FAR struct file *filep;
   FAR struct timerfd_priv_s *dev;
+  FAR struct file *filep;
   irqstate_t intflags;
   sclock_t delay;
   int ret;
@@ -630,7 +581,7 @@ int timerfd_settime(int fd, int flags,
       goto errout;
     }
 
-  dev = (FAR struct timerfd_priv_s *)filep->f_inode->i_private;
+  dev = (FAR struct timerfd_priv_s *)filep->f_priv;
 
   if (old_value)
     {
@@ -743,8 +694,8 @@ errout:
 
 int timerfd_gettime(int fd, FAR struct itimerspec *curr_value)
 {
-  FAR struct file *filep;
   FAR struct timerfd_priv_s *dev;
+  FAR struct file *filep;
   sclock_t ticks;
   int ret;
 
@@ -772,7 +723,7 @@ int timerfd_gettime(int fd, FAR struct itimerspec *curr_value)
       goto errout;
     }
 
-  dev = (FAR struct timerfd_priv_s *)filep->f_inode->i_private;
+  dev = (FAR struct timerfd_priv_s *)filep->f_priv;
 
   /* Get the number of ticks before the underlying watchdog expires */
 
