@@ -46,6 +46,8 @@ Configuration Options
 ``CONFIG_NET_NAT``
   Enable or disable Network Address Translation (NAT) function.
   Depends on ``CONFIG_NET_IPFORWARD``.
+``CONFIG_NET_NAT_HASH_BITS``
+  The bits of the hashtable of NAT entries, hashtable has (1 << bits) buckets.
 ``CONFIG_NET_NAT_TCP_EXPIRE_SEC``
   The expiration time for idle TCP entry in NAT.
   The default value 86400 is suggested by RFC2663, Section 2.6,
@@ -55,6 +57,14 @@ Configuration Options
   The expiration time for idle UDP entry in NAT.
 ``CONFIG_NET_NAT_ICMP_EXPIRE_SEC``
   The expiration time for idle ICMP entry in NAT.
+``CONFIG_NET_NAT_ENTRY_RECLAIM_SEC``
+  The time to auto reclaim all expired NAT entries. A value of zero will
+  disable auto reclaiming.
+  Expired entries will be automatically reclaimed when matching
+  inbound/outbound entries, so this config does not have significant
+  impact when NAT is normally used, but very useful when the hashtable
+  is big and there are only a few connections using NAT (which will
+  only trigger reclaiming on a few chains in hashtable).
 
 Usage
 =====
