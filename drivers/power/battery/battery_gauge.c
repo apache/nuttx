@@ -93,6 +93,7 @@ static const struct file_operations g_batteryops =
   bat_gauge_write,  /* write */
   NULL,             /* seek */
   bat_gauge_ioctl,  /* ioctl */
+  NULL,             /* truncate */
   bat_gauge_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */

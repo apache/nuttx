@@ -119,6 +119,7 @@ const struct mountpt_operations romfs_operations =
   NULL,            /* write */
   romfs_seek,      /* seek */
   romfs_ioctl,     /* ioctl */
+  NULL,            /* truncate */
 
   NULL,            /* sync */
   romfs_dup,       /* dup */

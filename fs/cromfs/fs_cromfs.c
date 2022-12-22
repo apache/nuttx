@@ -184,12 +184,12 @@ const struct mountpt_operations cromfs_operations =
   NULL,              /* write */
   NULL,              /* seek */
   cromfs_ioctl,      /* ioctl */
+  NULL,              /* truncate */
 
   NULL,              /* sync */
   cromfs_dup,        /* dup */
   cromfs_fstat,      /* fstat */
   NULL,              /* fchstat */
-  NULL,              /* truncate */
 
   cromfs_opendir,    /* opendir */
   cromfs_closedir,   /* closedir */

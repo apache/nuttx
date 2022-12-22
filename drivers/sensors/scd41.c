@@ -190,6 +190,7 @@ static const struct file_operations g_scd41fops =
   scd41_write,    /* write */
   NULL,           /* seek */
   scd41_ioctl,    /* ioctl */
+  NULL,           /* truncate */
   NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , scd41_unlink /* unlink */

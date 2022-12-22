@@ -77,6 +77,7 @@ static const struct file_operations g_alt1250fops =
   NULL,          /* write */
   NULL,          /* seek */
   alt1250_ioctl, /* ioctl */
+  NULL,          /* truncate */
   alt1250_poll,  /* poll */
 };
 static uint8_t g_recvbuff[ALTCOM_RX_PKT_SIZE_MAX];

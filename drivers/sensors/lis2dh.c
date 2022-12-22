@@ -154,6 +154,7 @@ static const struct file_operations g_lis2dhops =
   lis2dh_write,  /* write */
   NULL,          /* seek */
   lis2dh_ioctl,  /* ioctl */
+  NULL,          /* truncate */
   lis2dh_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */

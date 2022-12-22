@@ -177,12 +177,12 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_write,      /* write */
   tmpfs_seek,       /* seek */
   tmpfs_ioctl,      /* ioctl */
+  tmpfs_truncate,   /* truncate */
 
   tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */
   tmpfs_fstat,      /* fstat */
   NULL,             /* fchstat */
-  tmpfs_truncate,   /* truncate */
 
   tmpfs_opendir,    /* opendir */
   tmpfs_closedir,   /* closedir */

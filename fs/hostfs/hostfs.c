@@ -142,12 +142,12 @@ const struct mountpt_operations hostfs_operations =
   hostfs_write,         /* write */
   hostfs_seek,          /* seek */
   hostfs_ioctl,         /* ioctl */
+  hostfs_ftruncate,     /* ftruncate */
 
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */
   hostfs_fstat,         /* fstat */
   hostfs_fchstat,       /* fchstat */
-  hostfs_ftruncate,     /* ftruncate */
 
   hostfs_opendir,       /* opendir */
   hostfs_closedir,      /* closedir */
