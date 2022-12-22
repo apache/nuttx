@@ -444,20 +444,20 @@ void _assert(FAR const char *filename, int linenum)
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed CPU%d at file:%s line: %d task: %s %p\n",
+  _alert("Assertion failed CPU%d at file: %s:%d task: %s %p\n",
          up_cpu_index(), filename, linenum, running_task()->name,
          running_task()->entry.main);
 #  else
-  _alert("Assertion failed CPU%d at file:%s line: %d\n",
+  _alert("Assertion failed CPU%d at file: %s:%d\n",
          up_cpu_index(), filename, linenum);
 #  endif
 #else
 #  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed at file:%s line: %d task: %s %p\n",
+  _alert("Assertion failed at file: %s:%d task: %s %p\n",
          filename, linenum, running_task()->name,
          running_task()->entry.main);
 #  else
-  _alert("Assertion failed at file:%s line: %d\n",
+  _alert("Assertion failed at file: %s:%d\n",
          filename, linenum);
 #  endif
 #endif
