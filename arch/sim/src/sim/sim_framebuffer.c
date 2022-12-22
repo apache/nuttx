@@ -348,7 +348,7 @@ void sim_x11loop(void)
 
   if (now - last >= MSEC2TICK(16))
     {
-      if (sim_x11update() > 0)
+      if (sim_x11update() >= 0)
         {
           fb_pollnotify(&g_fbobject);
         }
