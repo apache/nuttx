@@ -628,6 +628,14 @@ config S32K1XX_EDMA_EDBG
 
 endmenu # eDMA Global Configuration
 
+menu "LPUART Configuration"
+	depends on S32K1XX_LPUART
+	
+config S32K1XX_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+endmenu	
+
 menu "LPSPI Configuration"
 	depends on S32K1XX_LPSPI
 	
