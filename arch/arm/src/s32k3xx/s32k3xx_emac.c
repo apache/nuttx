@@ -230,6 +230,92 @@
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
+/* PHY definitions.
+ *
+ * The selected PHY must be selected from the drivers/net/Kconfig PHY menu.
+ * A description of the PHY must be provided here.  That description must
+ * include:
+ *
+ * 1. BOARD_PHY_NAME: A PHY name string (for debug output),
+ * 2. BOARD_PHYID1 and BOARD_PHYID2: The PHYID1 and PHYID2 values (from
+ *    include/nuttx/net/mii.h)
+ * 3. BOARD_PHY_STATUS:  The address of the status register to use when
+ *    querying link status (from include/nuttx/net/mii.h)
+ * 4. BOARD_PHY_ADDRThe PHY broadcast address of 0 is selected.  This
+ *    should be fine as long as there is only a single PHY.
+ * 5. BOARD_PHY_10BASET:  A macro that can convert the status register
+ *    value into a boolean: true=10Base-T, false=Not 10Base-T
+ * 6. BOARD_PHY_100BASET:  A macro that can convert the status register
+ *    value into a boolean: true=100Base-T, false=Not 100Base-T
+ * 7. BOARD_PHY_ISDUPLEX:  A macro that can convert the status register
+ *    value into a boolean: true=duplex mode, false=half-duplex mode
+ *
+ * The imxrt1050-evk board uses a KSZ8081 PHY
+ * The Versiboard2 uses a LAN8720 PHY
+ * The Teensy-4.1 board uses a DP83825I PHY
+ *
+ * ...and further PHY descriptions here.
+ */
+
+#if defined(CONFIG_ETH0_PHY_KSZ8081)
+#  define BOARD_PHY_NAME        "KSZ8081"
+#  define BOARD_PHYID1          MII_PHYID1_KSZ8081
+#  define BOARD_PHYID2          MII_PHYID2_KSZ8081
+#  define BOARD_PHY_STATUS      MII_KSZ8081_PHYCTRL1
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_PHYCTRL1_MODE_10HDX) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_PHYCTRL1_MODE_100HDX) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_PHYCTRL1_MODE_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
+#  define BOARD_PHY_NAME        "LAN8720"
+#  define BOARD_PHYID1          MII_PHYID1_LAN8720
+#  define BOARD_PHYID2          MII_PHYID2_LAN8720
+#  define BOARD_PHY_STATUS      MII_LAN8720_SCSR
+#  define BOARD_PHY_ADDR        (1)
+#  define BOARD_PHY_10BASET(s)  (((s)&MII_LAN8720_SPSCR_10MBPS) != 0)
+#  define BOARD_PHY_100BASET(s) (((s)&MII_LAN8720_SPSCR_100MBPS) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s)&MII_LAN8720_SPSCR_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_LAN8742A)
+#  define BOARD_PHY_NAME        "LAN8742A"
+#  define BOARD_PHYID1          MII_PHYID1_LAN8742A
+#  define BOARD_PHYID2          MII_PHYID2_LAN8742A
+#  define BOARD_PHY_STATUS      MII_LAN8740_SCSR
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  (((s)&MII_LAN8720_SPSCR_10MBPS) != 0)
+#  define BOARD_PHY_100BASET(s) (((s)&MII_LAN8720_SPSCR_100MBPS) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s)&MII_LAN8720_SPSCR_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_DP83825I)
+#  define BOARD_PHY_NAME        "DP83825I"
+#  define BOARD_PHYID1          MII_PHYID1_DP83825I
+#  define BOARD_PHYID2          MII_PHYID2_DP83825I
+#  define BOARD_PHY_STATUS      MII_DP83825I_PHYSTS
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83825I_PHYSTS_SPEED) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_DP83825I_PHYSTS_SPEED) == 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83825I_PHYSTS_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_TJA1103)
+#  define BOARD_PHY_NAME        "TJA1103"
+#  define BOARD_PHYID1          MII_PHYID1_TJA1103
+#  define BOARD_PHYID2          MII_PHYID2_TJA1103
+#  define BOARD_PHY_STATUS      MII_TJA110X_BSR
+#  define BOARD_PHY_ADDR        (18)
+#  define BOARD_PHY_10BASET(s)  0 /* PHY only supports 100BASE-T1 */
+#  define BOARD_PHY_100BASET(s) 1 /* PHY only supports 100BASE-T1 */
+#  define BOARD_PHY_ISDUPLEX(s) 1 /* PHY only supports fullduplex */
+
+#  define CLAUSE45              1
+#  define MMD1                  1
+#  define MMD1_PMA_STATUS1      1
+#  define MMD1_PS1_RECEIVE_LINK_STATUS (1 << 2)
+#  define MMD30_VEND1           30
+#  define VEND1_PHY_IRQ_ACK     0x80A0
+#  define VEND1_PHY_IRQ_EN      0x80A1
+#  define VEND1_PHY_IRQ_STATUS  0x80A2
+#  define PHY_IRQ_LINK_EVENT    (1 << 1)
+#else
+#  error "Unrecognized or missing PHY selection"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -363,10 +449,16 @@ static int s32k3xx_phyintenable(struct s32k3xx_driver_s *priv);
 #if defined(CONFIG_NETDEV_PHY_IOCTL)
 static int s32k3xx_writemii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
              uint8_t regaddr, uint16_t data);
+#endif
 static int s32k3xx_readmii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
              uint8_t regaddr, uint16_t *data);
-#endif
 static int s32k3xx_initphy(struct s32k3xx_driver_s *priv, bool renogphy);
+#if defined(CLAUSE45)
+static int s32k3xx_readmmd(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
+                         uint8_t mmd, uint16_t regaddr, uint16_t *data);
+static int s32k3xx_writemmd(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
+                         uint8_t mmd, uint16_t regaddr, uint16_t data);
+#endif
 
 /* Initialization */
 
@@ -1903,10 +1995,6 @@ static int s32k3xx_ifup_action(struct net_driver_s *dev, bool resetphy)
            | EMAC_MAC_INTERRUPT_ENABLE_RXSTSIE,
            S32K3XX_EMAC_MAC_INTERRUPT_ENABLE);
 
-  putreg32(EMAC_MAC_CONFIGURATION_DM | EMAC_MAC_CONFIGURATION_RE
-           | EMAC_MAC_CONFIGURATION_TE | EMAC_MAC_CONFIGURATION_FES,
-           S32K3XX_EMAC_MAC_CONFIGURATION);
-
   regval = EMAC_MAC_PACKET_FILTER_RA;
 #ifdef CONFIG_NET_PROMISCUOUS
   regval |= EMAC_MAC_PACKET_FILTER_PR;
@@ -2314,8 +2402,21 @@ static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret =
-            s32k3xx_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+#if defined(CLAUSE45)
+          if (MII_MSR == req->reg_num)
+            {
+              ret = s32k3xx_writemmd(priv, priv->phyaddr, MMD30_VEND1,
+                                     VEND1_PHY_IRQ_ACK, PHY_IRQ_LINK_EVENT);
+
+              ret = s32k3xx_readmmd(priv, req->phy_id, MMD1,
+                                    MMD1_PMA_STATUS1, &req->val_out);
+            }
+          else
+#endif
+            {
+              ret = s32k3xx_readmii(priv, req->phy_id,
+                              req->reg_num, &req->val_out);
+            }
         }
         break;
 
@@ -2379,6 +2480,14 @@ static int s32k3xx_phyintenable(struct s32k3xx_driver_s *priv)
     }
 
   return ret;
+#elif defined(CONFIG_ETH0_PHY_TJA1103)
+  uint16_t phyval;
+  int ret;
+
+  ret = s32k3xx_writemmd(priv, priv->phyaddr, MMD30_VEND1, VEND1_PHY_IRQ_EN,
+                    PHY_IRQ_LINK_EVENT);
+
+  return ret;
 #else
 #  error Unrecognized PHY
   return -ENOSYS;
@@ -2424,8 +2533,7 @@ static int s32k3xx_writemii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
            S32K3XX_EMAC_MAC_MDIO_DATA);
 
   regval = getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS);
-  regval |= (EMAC_MAC_MDIO_ADDRESS_GOC_1 | /* Indicate write */
-             EMAC_MAC_MDIO_ADDRESS_GOC_0 |
+  regval |= (EMAC_MAC_MDIO_ADDRESS_GOC_0 |
              EMAC_MAC_MDIO_ADDRESS_PA(phyaddr) |
              EMAC_MAC_MDIO_ADDRESS_RDA(regaddr) |
              EMAC_MAC_MDIO_ADDRESS_GB);
@@ -2451,6 +2559,7 @@ static int s32k3xx_writemii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Function: s32k3xx_reademii
@@ -2490,6 +2599,7 @@ static int s32k3xx_readmii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
 
   regval = getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS);
   regval |= (EMAC_MAC_MDIO_ADDRESS_GOC_0 |
+             EMAC_MAC_MDIO_ADDRESS_GOC_1 | /* Indicate read */
              EMAC_MAC_MDIO_ADDRESS_PA(phyaddr) |
              EMAC_MAC_MDIO_ADDRESS_RDA(regaddr) |
              EMAC_MAC_MDIO_ADDRESS_GB);
@@ -2517,6 +2627,143 @@ static int s32k3xx_readmii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
 
   return OK;
 }
+
+#if defined(CLAUSE45)
+/****************************************************************************
+ * Function: s32k3xx_readmmd
+ *
+ * Description:
+ *   Read a 16-bit value from a PHY register.
+ *
+ * Input Parameters:
+ *   priv - Reference to the private ENET driver state structure
+ *   phyaddr - The PHY address
+ *   mmd     - The Selected MMD Space
+ *   regaddr - The PHY register address
+ *   data    - A pointer to the location to return the data
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int s32k3xx_readmmd(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
+                         uint8_t mmd, uint16_t regaddr, uint16_t *data)
+{
+  int timeout;
+  uint32_t regval;
+
+  /* Clear the MDIO  */
+
+  regval = getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+  regval &= ~(EMAC_MAC_MDIO_ADDRESS_PA_MASK |
+              EMAC_MAC_MDIO_ADDRESS_RDA_MASK |
+              EMAC_MAC_MDIO_ADDRESS_GOC_0 |
+              EMAC_MAC_MDIO_ADDRESS_GOC_1 |
+              EMAC_MAC_MDIO_ADDRESS_C45E);
+  putreg32(regval, S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+
+  putreg32(EMAC_MAC_MDIO_DATA_RA(regaddr), /* CL45 regaddr */
+           S32K3XX_EMAC_MAC_MDIO_DATA);
+
+  regval = getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+  regval |= (EMAC_MAC_MDIO_ADDRESS_GOC_0 |
+             EMAC_MAC_MDIO_ADDRESS_GOC_1 | /* Indicate read */
+             EMAC_MAC_MDIO_ADDRESS_PA(phyaddr) |
+             EMAC_MAC_MDIO_ADDRESS_RDA(mmd) |
+             EMAC_MAC_MDIO_ADDRESS_C45E |
+             EMAC_MAC_MDIO_ADDRESS_GB);
+  putreg32(regval, S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
+    {
+      if ((getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS)
+          & EMAC_MAC_MDIO_ADDRESS_GB) == 0)
+        {
+          break;
+        }
+    }
+
+  /* Check for a timeout */
+
+  if (timeout == MII_MAXPOLLS)
+    {
+      return -ETIMEDOUT;
+    }
+
+  *data = EMAC_MAC_MDIO_DATA_GD(getreg32(S32K3XX_EMAC_MAC_MDIO_DATA));
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: s32k3xx_writemmd
+ *
+ * Description:
+ *   Write a 16-bit value to a PHY register.
+ *
+ * Input Parameters:
+ *   priv - Reference to the private ENET driver state structure
+ *   phyaddr - The PHY address
+ *   mmd     - The Selected MMD Space
+ *   regaddr - The PHY register address
+ *   data    - Data
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int s32k3xx_writemmd(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
+                         uint8_t mmd, uint16_t regaddr, uint16_t data)
+{
+  int timeout;
+  uint32_t regval;
+
+  /* Clear the MDIO  */
+
+  regval = getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+  regval &= ~(EMAC_MAC_MDIO_ADDRESS_PA_MASK |
+              EMAC_MAC_MDIO_ADDRESS_RDA_MASK |
+              EMAC_MAC_MDIO_ADDRESS_GOC_0 |
+              EMAC_MAC_MDIO_ADDRESS_GOC_1 |
+              EMAC_MAC_MDIO_ADDRESS_C45E);
+  putreg32(regval, S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+
+  putreg32((EMAC_MAC_MDIO_DATA_RA(regaddr) |
+           EMAC_MAC_MDIO_DATA_GD(data)),
+           S32K3XX_EMAC_MAC_MDIO_DATA);
+
+  regval = getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+  regval |= (EMAC_MAC_MDIO_ADDRESS_GOC_0 |
+             EMAC_MAC_MDIO_ADDRESS_PA(phyaddr) |
+             EMAC_MAC_MDIO_ADDRESS_RDA(mmd) |
+             EMAC_MAC_MDIO_ADDRESS_C45E |
+             EMAC_MAC_MDIO_ADDRESS_GB);
+  putreg32(regval, S32K3XX_EMAC_MAC_MDIO_ADDRESS);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
+    {
+      if ((getreg32(S32K3XX_EMAC_MAC_MDIO_ADDRESS)
+          & EMAC_MAC_MDIO_ADDRESS_GB) == 0)
+        {
+          break;
+        }
+    }
+
+  /* Check for a timeout */
+
+  if (timeout == MII_MAXPOLLS)
+    {
+      return -ETIMEDOUT;
+    }
+
+  return OK;
+}
 #endif
 
 /****************************************************************************
@@ -2540,9 +2787,293 @@ static int s32k3xx_readmii(struct s32k3xx_driver_s *priv, uint8_t phyaddr,
 static inline int s32k3xx_initphy(struct s32k3xx_driver_s *priv,
                                   bool renogphy)
 {
-  /* Not implemented */
+  uint16_t phydata;
+  uint8_t phyaddr    = BOARD_PHY_ADDR;
+  int retries;
+  int ret;
+  uint32_t mac_conf = 0;
 
-  return 0;
+  if (renogphy)
+    {
+      /* Loop (potentially infinitely?) until we successfully communicate
+       * with the PHY. This is 'standard stuff' that should work for any PHY
+       * - we are not communicating with it's 'special' registers
+       * at this point.
+       */
+
+      ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
+
+      /* Try to read PHYID1 few times using this address */
+
+      retries = 0;
+      do
+        {
+          nxsig_usleep(LINK_WAITUS);
+
+          ninfo("%s: Read PHYID1, retries=%d\n",
+                BOARD_PHY_NAME, retries + 1);
+
+          phydata = 0xffff;
+          ret     = s32k3xx_readmii(priv, phyaddr, MII_PHYID1, &phydata);
+        }
+      while ((ret < 0 || phydata == 0xffff) && ++retries < 3);
+
+      if (retries >= 3)
+        {
+          nerr("ERROR: Failed to read %s PHYID1 at address %d\n",
+               BOARD_PHY_NAME, phyaddr);
+          return -ENOENT;
+        }
+
+      ninfo("%s: Using PHY address %u\n", BOARD_PHY_NAME, phyaddr);
+      priv->phyaddr = phyaddr;
+
+      /* Verify PHYID1.  Compare OUI bits 3-18 */
+
+      ninfo("%s: PHYID1: %04x\n", BOARD_PHY_NAME, phydata);
+      if (phydata != BOARD_PHYID1)
+        {
+          nerr("ERROR: PHYID1=%04x incorrect for %s.  Expected %04x\n",
+               phydata, BOARD_PHY_NAME, BOARD_PHYID1);
+          return -ENXIO;
+        }
+
+      /* Read PHYID2 */
+
+      ret = s32k3xx_readmii(priv, phyaddr, MII_PHYID2, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read %s PHYID2: %d\n", BOARD_PHY_NAME, ret);
+          return ret;
+        }
+
+      ninfo("%s: PHYID2: %04x\n", BOARD_PHY_NAME, phydata);
+
+      /* Verify PHYID2:  Compare OUI bits 19-24 and the 6-bit model number
+       * (ignoring the 4-bit revision number).
+       */
+
+      if ((phydata & 0xfff0) != (BOARD_PHYID2 & 0xfff0))
+        {
+          nerr("ERROR: PHYID2=%04x incorrect for %s.  Expected %04x\n",
+               (phydata & 0xfff0), BOARD_PHY_NAME, (BOARD_PHYID2 & 0xfff0));
+          return -ENXIO;
+        }
+
+#ifdef CONFIG_ETH0_PHY_KSZ8081
+      /* Reset PHY */
+
+      s32k3xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+      /* Set RMII mode */
+
+      ret = s32k3xx_readmii(priv, phyaddr, MII_KSZ8081_PHYCTRL2, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read MII_KSZ8081_PHYCTRL2\n");
+          return ret;
+        }
+
+      /* Indicate 50MHz clock */
+
+      s32k3xx_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
+                     (phydata | (1 << 7)));
+
+      /* Switch off NAND Tree mode (in case it was set via pinning) */
+
+      ret = s32k3xx_readmii(priv, phyaddr, MII_KSZ8081_OMSO, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read MII_KSZ8081_OMSO: %d\n", ret);
+          return ret;
+        }
+
+      s32k3xx_writemii(priv, phyaddr, MII_KSZ8081_OMSO,
+                     (phydata & ~(1 << 5)));
+
+      /* Set Ethernet led to green = activity and yellow = link and  */
+
+      ret = s32k3xx_readmii(priv, phyaddr, MII_KSZ8081_PHYCTRL2, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read MII_KSZ8081_PHYCTRL2\n");
+          return ret;
+        }
+
+      s32k3xx_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
+                     (phydata | (1 << 4)));
+
+      s32k3xx_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
+#elif defined (CONFIG_ETH0_PHY_LAN8720) || defined (CONFIG_ETH0_PHY_LAN8742A)
+      /* Make sure that PHY comes up in correct mode when it's reset */
+
+      s32k3xx_writemii(priv, phyaddr, MII_LAN8720_MODES,
+                     MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
+                     MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
+
+      /* ...and reset PHY */
+
+      s32k3xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+#elif defined (CONFIG_ETH0_PHY_DP83825I)
+
+      /* Reset PHY */
+
+      s32k3xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+
+      /* Set RMII mode and Indicate 50MHz clock */
+
+      s32k3xx_writemii(priv, phyaddr, MII_DP83825I_RCSR,
+                    MII_DP83825I_RCSC_ELAST_2 | MII_DP83825I_RCSC_RMIICS);
+
+      s32k3xx_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
+#endif
+#if !defined(CONFIG_ETH0_PHY_TJA1103)
+
+      /* Start auto negotiation */
+
+      ninfo("%s: Start Autonegotiation...\n",  BOARD_PHY_NAME);
+      s32k3xx_writemii(priv, phyaddr, MII_MCR,
+                     (MII_MCR_ANRESTART | MII_MCR_ANENABLE));
+
+      /* Wait for auto negotiation to complete */
+
+      for (retries = 0; retries < LINK_NLOOPS; retries++)
+        {
+          ret = s32k3xx_readmii(priv, phyaddr, MII_MSR, &phydata);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to read %s MII_MSR: %d\n",
+                    BOARD_PHY_NAME, ret);
+              return ret;
+            }
+
+          if (phydata & MII_MSR_ANEGCOMPLETE)
+            {
+              break;
+            }
+
+          nxsig_usleep(LINK_WAITUS);
+        }
+
+      if (phydata & MII_MSR_ANEGCOMPLETE)
+        {
+          ninfo("%s: Autonegotiation complete\n",  BOARD_PHY_NAME);
+          ninfo("%s: MII_MSR: %04x\n", BOARD_PHY_NAME, phydata);
+        }
+      else
+        {
+          /* TODO: Autonegotiation has right now failed. Maybe the Eth cable
+           * is not connected.  PHY chip have mechanisms to configure link
+           * OK. We should leave autconf on, and find a way to re-configure
+           * MCU whenever the link is ready.
+           */
+
+          ninfo("%s: Autonegotiation failed [%d] (is cable plugged-in ?), "
+                "default to 10Mbs mode\n", \
+                BOARD_PHY_NAME, retries);
+
+          /* Stop auto negotiation */
+
+          s32k3xx_writemii(priv, phyaddr, MII_MCR, 0);
+        }
+#endif
+    }
+
+#if !defined(CONFIG_ETH0_PHY_TJA1103)
+  /* When we get here we have a (negotiated) speed and duplex. This is also
+   * the point we enter if renegotiation is turned off, so have multiple
+   * attempts at reading the status register in case the PHY isn't awake
+   * properly.
+   */
+
+  retries = 0;
+  do
+    {
+      phydata = 0xffff;
+      ret = s32k3xx_readmii(priv, phyaddr, BOARD_PHY_STATUS, &phydata);
+    }
+  while ((ret < 0 || phydata == 0xffff) && ++retries < 3);
+
+  /* If we didn't successfully read anything and we haven't tried a physical
+   * renegotiation then lets do that
+   */
+
+  if (retries >= 3)
+    {
+      if (renogphy == false)
+        {
+          /* Give things one more chance with renegotiation turned on */
+
+          return s32k3xx_initphy(priv, true);
+        }
+      else
+        {
+          /* That didn't end well, just give up */
+
+          nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
+               BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
+          return ret;
+        }
+    }
+
+  ninfo("%s: BOARD_PHY_STATUS: %04x\n", BOARD_PHY_NAME, phydata);
+#endif
+
+  /* Setup half or full duplex */
+
+  if (BOARD_PHY_ISDUPLEX(phydata))
+    {
+      /* Full duplex */
+
+      ninfo("%s: Full duplex\n",  BOARD_PHY_NAME);
+      mac_conf |= EMAC_MAC_CONFIGURATION_DM;
+    }
+  else
+    {
+      /* Half duplex */
+
+      ninfo("%s: Half duplex\n",  BOARD_PHY_NAME);
+    }
+
+  if (BOARD_PHY_10BASET(phydata))
+    {
+      /* 10 Mbps */
+
+      ninfo("%s: 10 Base-T\n",  BOARD_PHY_NAME);
+    }
+  else if (BOARD_PHY_100BASET(phydata))
+    {
+      /* 100 Mbps */
+
+      ninfo("%s: 100 Base-T\n",  BOARD_PHY_NAME);
+      mac_conf |= EMAC_MAC_CONFIGURATION_FES;
+    }
+  else
+    {
+      /* This might happen if Autonegotiation did not complete(?) */
+
+      nerr("ERROR: Neither 10- nor 100-BaseT reported: PHY STATUS=%04x\n",
+           phydata);
+      return -EIO;
+    }
+
+  putreg32(mac_conf | EMAC_MAC_CONFIGURATION_DM | EMAC_MAC_CONFIGURATION_RE
+           | EMAC_MAC_CONFIGURATION_TE | EMAC_MAC_CONFIGURATION_PS,
+           S32K3XX_EMAC_MAC_CONFIGURATION);
+  return OK;
 }
 
 /****************************************************************************
@@ -2975,8 +3506,6 @@ int s32k3xx_netinitialize(int intf)
 
 #ifdef CONFIG_S32K3XX_ENET_PHYINIT
   /* Perform any necessary, one-time, board-specific PHY initialization */
-
-  /* FIXME unspported */
 
   ret = s32k3xx_phy_boardinitialize(0);
   if (ret < 0)
