@@ -544,5 +544,4 @@ void _assert(FAR const char *filename, int linenum)
   showtasks();
 
   assert_end();
-  exit(EXIT_FAILURE);
 }
