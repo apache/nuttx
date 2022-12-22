@@ -187,6 +187,13 @@ config MM_HEAP_MEMPOOL_EXPAND
 		This size describes the size of each expansion of each memory
 		pool with insufficient memory in the multi-level memory pool.
 
+config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND
+	int "The expand size for multiple mempool's dictonary"
+	default MM_HEAP_MEMPOOL_EXPAND
+	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
+	---help---
+		This size describes the multiple mempool dictonary expend.
+
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
 	default DEFAULT_SMALL
