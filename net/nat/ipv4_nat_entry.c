@@ -411,6 +411,41 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ipv4_nat_entry_clear
+ *
+ * Description:
+ *   Clear all entries related to dev. Called when NAT will be disabled on
+ *   any device.
+ *
+ * Input Parameters:
+ *   dev        - The device on which NAT entries will be cleared.
+ *
+ * Assumptions:
+ *   NAT is initialized.
+ *
+ ****************************************************************************/
+
+void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
+{
+  FAR hash_node_t *p;
+  FAR hash_node_t *tmp;
+  int i;
+
+  ninfo("INFO: Clearing all NAT entries for %s\n", dev->d_ifname);
+
+  hashtable_for_every_safe(g_table_inbound, p, tmp, i)
+    {
+      FAR struct ipv4_nat_entry *entry =
+        container_of(p, struct ipv4_nat_entry, hash_inbound);
+
+      if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
+        {
+          ipv4_nat_entry_delete(entry);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: ipv4_nat_inbound_entry_find
  *
  * Description:
