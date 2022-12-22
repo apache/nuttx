@@ -99,6 +99,7 @@ static const struct file_operations spidrvr_fops =
   spidrvr_write,   /* write */
   NULL,            /* seek */
   spidrvr_ioctl,   /* ioctl */
+  NULL,            /* truncate */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , spidrvr_unlink /* unlink */

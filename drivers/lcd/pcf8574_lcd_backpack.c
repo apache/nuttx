@@ -117,6 +117,7 @@ static const struct file_operations g_pcf8574_lcd_fops =
   pcf8574_lcd_write,            /* write */
   pcf8574_lcd_seek,             /* seek */
   pcf8574_lcd_ioctl,            /* ioctl */
+  NULL,                         /* truncate */
   pcf8574_lcd_poll              /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pcf8574_lcd_unlink          /* unlink */

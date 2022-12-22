@@ -284,6 +284,7 @@ static const struct file_operations g_video_fops =
   video_write,              /* write */
   NULL,                     /* seek */
   video_ioctl,              /* ioctl */
+  NULL,                     /* truncate */
   NULL                      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                    /* unlink */

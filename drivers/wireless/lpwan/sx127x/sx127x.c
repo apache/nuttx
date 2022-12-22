@@ -451,6 +451,7 @@ static const struct file_operations sx127x_fops =
   sx127x_write,   /* write */
   NULL,           /* seek */
   sx127x_ioctl,   /* ioctl */
+  NULL,           /* truncate */
   sx127x_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */

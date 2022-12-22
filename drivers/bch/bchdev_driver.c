@@ -78,6 +78,7 @@ const struct file_operations bch_fops =
   bch_write,   /* write */
   bch_seek,    /* seek */
   bch_ioctl,   /* ioctl */
+  NULL,        /* truncate */
   bch_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , bch_unlink /* unlink */

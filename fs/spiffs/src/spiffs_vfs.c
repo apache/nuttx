@@ -141,12 +141,12 @@ const struct mountpt_operations spiffs_operations =
   spiffs_write,      /* write */
   spiffs_seek,       /* seek */
   spiffs_ioctl,      /* ioctl */
+  spiffs_truncate,   /* truncate */
 
   spiffs_sync,       /* sync */
   spiffs_dup,        /* dup */
   spiffs_fstat,      /* fstat */
   NULL,              /* fchstat */
-  spiffs_truncate,   /* truncate */
 
   spiffs_opendir,    /* opendir */
   spiffs_closedir,   /* closedir */
