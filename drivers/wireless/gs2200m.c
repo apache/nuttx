@@ -231,6 +231,7 @@ static const struct file_operations g_gs2200m_fops =
   gs2200m_write, /* write */
   NULL,          /* seek */
   gs2200m_ioctl, /* ioctl */
+  NULL,          /* truncate */
   gs2200m_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */

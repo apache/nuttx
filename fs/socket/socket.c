@@ -64,6 +64,7 @@ static const struct file_operations g_sock_fileops =
   sock_file_write,  /* write */
   NULL,             /* seek */
   sock_file_ioctl,  /* ioctl */
+  NULL,             /* truncate */
   sock_file_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */

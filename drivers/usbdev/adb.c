@@ -254,6 +254,7 @@ static const struct file_operations g_adb_fops =
   adb_char_write, /* write */
   NULL,           /* seek */
   NULL,           /* ioctl */
+  NULL,           /* truncate */
   adb_char_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */

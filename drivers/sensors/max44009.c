@@ -112,6 +112,7 @@ static const struct file_operations g_alsops =
   max44009_write,  /* write */
   NULL,            /* seek */
   max44009_ioctl,  /* ioctl */
+  NULL,            /* truncate */
   max44009_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */

@@ -239,6 +239,7 @@ static const struct file_operations nrf24l01_fops =
   nrf24l01_write,   /* write */
   NULL,             /* seek */
   nrf24l01_ioctl,   /* ioctl */
+  NULL,             /* truncate */
   nrf24l01_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */

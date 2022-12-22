@@ -212,6 +212,7 @@ struct file_operations
                    size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
+  int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* The two structures need not be common after this point */
 
@@ -298,6 +299,7 @@ struct mountpt_operations
             size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
+  int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
@@ -311,7 +313,6 @@ struct mountpt_operations
   int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
   int     (*fchstat)(FAR const struct file *filep,
                      FAR const struct stat *buf, int flags);
-  int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* Directory operations */
 

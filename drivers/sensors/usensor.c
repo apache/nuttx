@@ -81,6 +81,7 @@ static const struct file_operations g_usensor_fops =
   usensor_write, /* write */
   NULL,          /* seek  */
   usensor_ioctl, /* ioctl */
+  NULL,          /* truncate */
   NULL,          /* poll  */
 };
 

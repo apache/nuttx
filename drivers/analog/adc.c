@@ -72,6 +72,7 @@ static const struct file_operations g_adc_fops =
   NULL,         /* write */
   NULL,         /* seek */
   adc_ioctl,    /* ioctl */
+  NULL,         /* truncate */
   adc_poll      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
