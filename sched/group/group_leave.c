@@ -128,11 +128,6 @@ static void group_remove(FAR struct task_group_s *group)
 
 static inline void group_release(FAR struct task_group_s *group)
 {
-#ifdef CONFIG_ARCH_ADDRENV
-  save_addrenv_t oldenv;
-  int i;
-#endif
-
 #if CONFIG_TLS_TASK_NELEM > 0
   task_tls_destruct();
 #endif
@@ -209,46 +204,19 @@ static inline void group_release(FAR struct task_group_s *group)
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* Switch the addrenv and also save the current addrenv */
 
-  up_addrenv_select(&group->tg_addrenv, &oldenv);
+  /* Drop the reference to this address environment */
 
-  /* Destroy the group address environment */
-
-  up_addrenv_destroy(&group->tg_addrenv);
-
-  /* Mark no address environment */
-
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      if (group == g_group_current[i])
-        {
-          g_group_current[i] = NULL;
-        }
-    }
-
-  /* Restore the previous addrenv */
-
-  up_addrenv_restore(&oldenv);
+  group_addrenv_drop(group);
 #endif
 
-#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
-  /* If there are threads waiting for this group to be freed, then we cannot
-   * yet free the memory resources.  Instead just mark the group deleted
-   * and wait for those threads complete their waits.
-   */
+  /* Mark the group as deleted now */
 
-  if (group->tg_nwaiters > 0)
-    {
-      group->tg_flags |= GROUP_FLAG_DELETED;
-    }
-  else
-#endif
-    {
-      /* Release the group container itself */
+  group->tg_flags |= GROUP_FLAG_DELETED;
 
-      kmm_free(group);
-    }
+  /* Then drop the group freeing the allocated memory */
+
+  group_drop(group);
 }
 
 /****************************************************************************
@@ -405,3 +373,62 @@ void group_leave(FAR struct tcb_s *tcb)
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
+
+/****************************************************************************
+ * Name: group_drop
+ *
+ * Description:
+ *   Release the group's memory. This function is called whenever a reference
+ *   to the group structure is released. It is not dependent on member count,
+ *   but rather external references, which include:
+ *   - Waiter list for waitpid()
+ *   - Users of the group's address environment, which can be the group's
+ *     members themselves, as well as kernel tasks whom do not have their own
+ *     address environment.
+ *
+ * Input Parameters:
+ *   group - The group that is to be dropped
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Called during task deletion or context switch in a safe context.  No
+ *   special precautions are required here.
+ *
+ ****************************************************************************/
+
+void group_drop(FAR struct task_group_s *group)
+{
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  /* If there are threads waiting for this group to be freed, then we cannot
+   * yet free the memory resources.  Instead just mark the group deleted
+   * and wait for those threads complete their waits.
+   */
+
+  if (group->tg_nwaiters > 0)
+    {
+      /* Hold the group still */
+    }
+  else
+#endif
+
+#if defined(CONFIG_ARCH_ADDRENV)
+  /* If someone needs this address environment, cannot drop it yet */
+
+  if (group->tg_addrenv_refs > 0)
+    {
+      /* Hold the group still */
+    }
+  else
+#endif
+
+  /* Finally, if no one needs the group and it has been deleted, remove it */
+
+  if (group->tg_flags & GROUP_FLAG_DELETED)
+    {
+      /* Release the group container itself */
+
+      kmm_free(group);
+    }
+}

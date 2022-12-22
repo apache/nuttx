@@ -508,6 +508,7 @@ struct task_group_s
   /* Address Environment ****************************************************/
 
   group_addrenv_t tg_addrenv;       /* Task group address environment       */
+  uint16_t        tg_addrenv_refs;  /* Users of address environment         */
 #endif
 
 #ifdef CONFIG_MM_SHM
@@ -538,6 +539,9 @@ struct tcb_s
 
   /* Task Group *************************************************************/
 
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct task_group_s *mm_group;   /* Active memory mappings group      */
+#endif
   FAR struct task_group_s *group;      /* Pointer to shared task group data */
 
   /* Task Management Fields *************************************************/
@@ -1066,6 +1070,29 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
 FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr);
 pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
 void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
+
+/****************************************************************************
+ * Name: group_addrenv_attach
+ *
+ * Description:
+ *   Attach address environment to a newly created group. Called by exec()
+ *   right before injecting the new process into the system.
+ *
+ * Input Parameters:
+ *   tcb     - The tcb of the newly loaded task.
+ *   addrenv - The address environment that is attached.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int group_addrenv_attach(FAR struct tcb_s *tcb,
+                         FAR const struct group_addrenv_s *addrenv);
+#endif
 
 /****************************************************************************
  * Name: group_exitinfo

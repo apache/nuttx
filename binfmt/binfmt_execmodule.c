@@ -251,18 +251,14 @@ int exec_module(FAR const struct binary_s *binp,
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* Assign the address environment to the new task group */
+  /* Attach the address environment to the new task group */
 
-  ret = up_addrenv_clone(&binp->addrenv, &tcb->cmn.group->tg_addrenv);
+  ret = group_addrenv_attach((FAR struct tcb_s *)tcb, &binp->addrenv);
   if (ret < 0)
     {
-      berr("ERROR: up_addrenv_clone() failed: %d\n", ret);
+      berr("ERROR: group_addrenv_attach() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
-
-  /* Mark that this group has an address environment */
-
-  tcb->cmn.group->tg_flags |= GROUP_FLAG_ADDRENV;
 #endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS

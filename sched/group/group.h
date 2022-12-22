@@ -50,17 +50,6 @@ typedef int (*foreachchild_t)(pid_t pid, FAR void *arg);
 extern FAR struct task_group_s *g_grouphead;
 #endif
 
-#ifdef CONFIG_ARCH_ADDRENV
-/* This variable holds the current task group.  This pointer is NULL
- * if the current task is a kernel thread that has no address environment
- * (other than the kernel context).
- *
- * This must only be accessed with interrupts disabled.
- */
-
-extern FAR struct task_group_s *g_group_current[CONFIG_SMP_NCPUS];
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -80,6 +69,7 @@ int  group_bind(FAR struct pthread_tcb_s *tcb);
 int  group_join(FAR struct pthread_tcb_s *tcb);
 #endif
 void group_leave(FAR struct tcb_s *tcb);
+void group_drop(FAR struct task_group_s *group);
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
 void group_add_waiter(FAR struct task_group_s *group);
 void group_del_waiter(FAR struct task_group_s *group);
@@ -103,6 +93,8 @@ int group_continue(FAR struct tcb_s *tcb);
 /* Group address environment management */
 
 int group_addrenv(FAR struct tcb_s *tcb);
+void group_addrenv_take(struct task_group_s *group);
+void group_addrenv_drop(struct task_group_s *group);
 #endif
 
 /* Convenience functions */
