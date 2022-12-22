@@ -801,9 +801,10 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
     }
 
   heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
-                                    (mempool_multiple_alloc_t)mm_memalign,
-                                    (mempool_multiple_free_t)mm_free, heap,
-                                    CONFIG_MM_HEAP_MEMPOOL_EXPAND);
+                                  (mempool_multiple_alloc_t)mm_memalign,
+                                  (mempool_multiple_free_t)mm_free, heap,
+                                  CONFIG_MM_HEAP_MEMPOOL_EXPAND,
+                                  CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND);
 #endif
 
   return heap;
