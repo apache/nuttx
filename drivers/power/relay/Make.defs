@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/power/Make.defs
+# drivers/power/relay/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,13 @@
 #
 ############################################################################
 
-include power/pm/Make.defs
-include power/battery/Make.defs
-include power/supply/Make.defs
-include power/relay/Make.defs
+ifeq ($(CONFIG_RELAY),y)
+CSRCS += relay.c
+endif
+
+ifeq ($(CONFIG_RELAY_GPIO),y)
+CSRCS += relay_gpio.c
+endif
+
+DEPPATH += --dep-path power/relay
+VPATH += power/relay
