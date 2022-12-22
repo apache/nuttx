@@ -129,7 +129,15 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   mm_foreach(heap, mallinfo_handler, info);
 
   info->arena = heap->mm_heapsize;
-  info->uordblks += region * SIZEOF_MM_ALLOCNODE; /* account for the tail node */
+
+  /* Account for the heap->mm_heapend[region] node overhead and the
+   * heap->mm_heapstart[region]->preceding:
+   * heap->mm_heapend[region] overhead size     = OVERHEAD_MM_ALLOCNODE
+   * heap->mm_heapstart[region]->preceding size = sizeof(mmsize_t)
+   * and SIZEOF_MM_ALLOCNODE = OVERHEAD_MM_ALLOCNODE + sizeof(mmsize_t).
+   */
+
+  info->uordblks += region * SIZEOF_MM_ALLOCNODE;
 
   DEBUGASSERT((size_t)info->uordblks + info->fordblks == heap->mm_heapsize);
 
