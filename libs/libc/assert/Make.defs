@@ -18,6 +18,8 @@
 #
 ############################################################################
 
+CSRCS += lib_assert.c
+
 ifeq ($(CONFIG_STACK_CANARIES),y)
 CSRCS += lib_stackchk.c
 endif
