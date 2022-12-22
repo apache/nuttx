@@ -685,7 +685,7 @@ ssize_t up_addrenv_heapsize(const group_addrenv_t *addrenv)
 int up_addrenv_select(const group_addrenv_t *addrenv,
                       save_addrenv_t *oldenv)
 {
-  DEBUGASSERT(addrenv);
+  DEBUGASSERT(addrenv && addrenv->satp);
   if (oldenv)
     {
       /* Save the old environment */
