@@ -100,10 +100,9 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* Get and initialize the new terminal node in the heap */
 
-  newnode            = (FAR struct mm_allocnode_s *)
-                       (blockend - SIZEOF_MM_ALLOCNODE);
-  newnode->size      = SIZEOF_MM_ALLOCNODE | MM_ALLOC_BIT;
-  newnode->preceding = size;
+  newnode       = (FAR struct mm_allocnode_s *)
+                  (blockend - SIZEOF_MM_ALLOCNODE);
+  newnode->size = SIZEOF_MM_ALLOCNODE | MM_ALLOC_BIT;
 
   heap->mm_heapend[region] = newnode;
 

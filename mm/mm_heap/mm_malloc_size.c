@@ -62,5 +62,5 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 
   DEBUGASSERT(node->size & MM_ALLOC_BIT);
 
-  return SIZEOF_MM_NODE(node) - SIZEOF_MM_ALLOCNODE;
+  return SIZEOF_MM_NODE(node) - OVERHEAD_MM_ALLOCNODE;
 }

@@ -120,7 +120,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   /* Check if the following node is free and, if so, merge it */
 
   next = (FAR struct mm_freenode_s *)((FAR char *)node + nodesize);
-  DEBUGASSERT(next->preceding == nodesize);
+  DEBUGASSERT((next->size & MM_PREVFREE_BIT) == 0);
   if ((next->size & MM_ALLOC_BIT) == 0)
     {
       FAR struct mm_allocnode_s *andbeyond;
@@ -132,6 +132,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        */
 
       andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + nextsize);
+      DEBUGASSERT((andbeyond->size & MM_PREVFREE_BIT) != 0 &&
+                   andbeyond->preceding == nextsize);
 
       /* Remove the next node.  There must be a predecessor,
        * but there may not be a successor node.
@@ -151,16 +153,24 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       andbeyond->preceding = nodesize;
       next                 = (FAR struct mm_freenode_s *)andbeyond;
     }
+  else
+    {
+      next->size     |= MM_PREVFREE_BIT;
+      next->preceding = nodesize;
+    }
 
   /* Check if the preceding node is also free and, if so, merge
    * it with this node
    */
 
-  prev = (FAR struct mm_freenode_s *)((FAR char *)node - node->preceding);
-  prevsize = SIZEOF_MM_NODE(prev);
-  DEBUGASSERT(node->preceding == prevsize);
-  if ((prev->size & MM_ALLOC_BIT) == 0)
+  if ((node->size & MM_PREVFREE_BIT) != 0)
     {
+      prev = (FAR struct mm_freenode_s *)
+        ((FAR char *)node - node->preceding);
+      prevsize = SIZEOF_MM_NODE(prev);
+      DEBUGASSERT((prev->size & MM_ALLOC_BIT) == 0 &&
+                  node->preceding == prevsize);
+
       /* Remove the node.  There must be a predecessor, but there may
        * not be a successor node.
        */
