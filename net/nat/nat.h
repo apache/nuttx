@@ -177,6 +177,23 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
 bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
 
 /****************************************************************************
+ * Name: ipv4_nat_entry_clear
+ *
+ * Description:
+ *   Clear all entries related to dev. Called when NAT will be disabled on
+ *   any device.
+ *
+ * Input Parameters:
+ *   dev        - The device on which NAT entries will be cleared.
+ *
+ * Assumptions:
+ *   NAT is initialized.
+ *
+ ****************************************************************************/
+
+void ipv4_nat_entry_clear(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: ipv4_nat_inbound_entry_find
  *
  * Description:

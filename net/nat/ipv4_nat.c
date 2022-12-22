@@ -687,13 +687,18 @@ ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
 
 int ipv4_nat_enable(FAR struct net_driver_s *dev)
 {
+  net_lock();
+
   if (IFF_IS_NAT(dev->d_flags))
     {
       nwarn("WARNING: NAT was already enabled for %s!\n", dev->d_ifname);
+      net_unlock();
       return -EEXIST;
     }
 
   IFF_SET_NAT(dev->d_flags);
+
+  net_unlock();
   return OK;
 }
 
@@ -714,15 +719,22 @@ int ipv4_nat_enable(FAR struct net_driver_s *dev)
 
 int ipv4_nat_disable(FAR struct net_driver_s *dev)
 {
+  net_lock();
+
   if (!IFF_IS_NAT(dev->d_flags))
     {
       nwarn("WARNING: NAT was not enabled for %s!\n", dev->d_ifname);
+      net_unlock();
       return -ENODEV;
     }
 
-  /* TODO: Clear entries related to dev. */
+  /* Clear entries related to dev. */
+
+  ipv4_nat_entry_clear(dev);
 
   IFF_CLR_NAT(dev->d_flags);
+
+  net_unlock();
   return OK;
 }
 
