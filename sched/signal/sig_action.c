@@ -373,6 +373,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
       sigact->act.sa_handler = handler;
       sigact->act.sa_mask    = act->sa_mask;
       sigact->act.sa_flags   = act->sa_flags;
+      sigact->act.sa_user    = act->sa_user;
     }
 
   return OK;
