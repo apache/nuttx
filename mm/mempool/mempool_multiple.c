@@ -22,6 +22,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <strings.h>
+#include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mempool.h>
 
@@ -73,9 +75,11 @@ struct mempool_multiple_s
    * expansion, and find the mempool by adding an index
    */
 
-  size_t                   dict_alloc;
-  size_t                   dict_used;
-  FAR struct mpool_dict_s *dict;
+  mutex_t                   dict_lock;
+  size_t                    dict_used;
+  size_t                    dict_col_num_log2;
+  size_t                    dict_row_num;
+  FAR struct mpool_dict_s **dict;
 };
 
 /****************************************************************************
@@ -133,23 +137,8 @@ static FAR void *mempool_multiple_alloc_callback(FAR struct mempool_s *pool,
 {
   FAR struct mempool_multiple_s *mpool = pool->priv;
   FAR void *ret;
-
-  if (mpool->dict_used >= mpool->dict_alloc)
-    {
-      ret = mpool->alloc(mpool->arg, sizeof(uintptr_t),
-                         mpool->dict_alloc *
-                         sizeof(struct mpool_dict_s) * 2);
-      if (ret == NULL)
-        {
-          return NULL;
-        }
-
-      memcpy(ret, mpool->dict,
-             mpool->dict_alloc * sizeof(struct mpool_dict_s));
-      mpool->free(mpool->arg, mpool->dict);
-      mpool->dict = ret;
-      mpool->dict_alloc *= 2;
-    }
+  size_t row;
+  size_t col;
 
   ret = mpool->alloc(mpool->arg, mpool->expandsize,
                      mpool->minpoolsize + size);
@@ -158,10 +147,27 @@ static FAR void *mempool_multiple_alloc_callback(FAR struct mempool_s *pool,
       return NULL;
     }
 
-  mpool->dict[mpool->dict_used].pool = pool;
-  mpool->dict[mpool->dict_used].addr = ret;
-  mpool->dict[mpool->dict_used].size = mpool->minpoolsize + size;
+  nxmutex_lock(&mpool->dict_lock);
+  row = mpool->dict_used >> mpool->dict_col_num_log2;
+
+  /* There is no new pointer address to store the dictionarys */
+
+  DEBUGASSERT(mpool->dict_row_num > row);
+
+  col = mpool->dict_used - (row << mpool->dict_col_num_log2);
+
+  if (mpool->dict[row] == NULL)
+    {
+      mpool->dict[row] = mpool->alloc(mpool->arg, sizeof(uintptr_t),
+                                      (1 << mpool->dict_col_num_log2) *
+                                      sizeof(struct mpool_dict_s));
+    }
+
+  mpool->dict[row][col].pool = pool;
+  mpool->dict[row][col].addr = ret;
+  mpool->dict[row][col].size = mpool->minpoolsize + size;
   *(FAR size_t *)ret = mpool->dict_used++;
+  nxmutex_unlock(&mpool->dict_lock);
   return (FAR char *)ret + mpool->minpoolsize;
 }
 
@@ -194,6 +200,8 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
 {
   FAR void *addr;
   size_t index;
+  size_t row;
+  size_t col;
 
   if (mpool == NULL || blk == NULL)
     {
@@ -208,13 +216,16 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
       return NULL;
     }
 
-  if (mpool->dict[index].addr != addr ||
-      blk - addr >= mpool->dict[index].size)
+  row = index >> mpool->dict_col_num_log2;
+  col = index - (row << mpool->dict_col_num_log2);
+  if (mpool->dict[row] == NULL ||
+      mpool->dict[row][col].addr != addr ||
+      blk - addr >= mpool->dict[row][col].size)
     {
       return NULL;
     }
 
-  return &mpool->dict[index];
+  return &mpool->dict[row][col];
 }
 
 /****************************************************************************
@@ -235,14 +246,14 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
  *   relationship between the each block size of mempool in multiple mempool.
  *
  * Input Parameters:
- *   name        - The name of memory pool.
- *   poolsize    - The block size array for pools in multiples pool.
- *   npools      - How many pools in multiples pool.
- *   alloc       - The alloc memory function for multiples pool.
- *   free        - The free memory function for multiples pool.
- *   arg         - The alloc & free memory fuctions used arg.
- *   expandsize  - The expend mempry for all pools in multiples pool.
- *
+ *   name            - The name of memory pool.
+ *   poolsize        - The block size array for pools in multiples pool.
+ *   npools          - How many pools in multiples pool.
+ *   alloc           - The alloc memory function for multiples pool.
+ *   free            - The free memory function for multiples pool.
+ *   arg             - The alloc & free memory fuctions used arg.
+ *   expandsize      - The expend mempry for all pools in multiples pool.
+ *   dict_expendsize -  The expend size for multiple dictnoary
  * Returned Value:
  *   Return an initialized multiple pool pointer on success,
  *   otherwise NULL is returned.
@@ -254,7 +265,8 @@ mempool_multiple_init(FAR const char *name,
                       FAR size_t *poolsize, size_t npools,
                       mempool_multiple_alloc_t alloc,
                       mempool_multiple_free_t free,
-                      FAR void *arg, size_t expandsize)
+                      FAR void *arg, size_t expandsize,
+                      size_t dict_expendsize)
 {
   FAR struct mempool_multiple_s *mpool;
   FAR struct mempool_s *pools;
@@ -335,14 +347,21 @@ mempool_multiple_init(FAR const char *name,
         }
     }
 
-  mpool->dict_alloc = maxpoolszie / sizeof(struct mpool_dict_s) + 1;
   mpool->dict_used = 0;
-  mpool->dict = alloc(arg, sizeof(uintptr_t),
-                      mpool->dict_alloc * sizeof(struct mpool_dict_s));
+  mpool->dict_col_num_log2 = fls(dict_expendsize /
+                                 sizeof(struct mpool_dict_s));
+
+  mpool->dict_row_num = dict_expendsize / sizeof(struct mpool_dict_s *);
+  mpool->dict = alloc(arg, sizeof(struct mpool_dict_s *),
+                      sizeof(struct mpool_dict_s *) * mpool->dict_row_num);
   if (mpool->dict == NULL)
     {
       goto err_with_pools;
     }
+
+  memset(mpool->dict, 0,
+         mpool->dict_row_num * sizeof(struct mpool_dict_s *));
+  nxmutex_init(&mpool->dict_lock);
 
   return mpool;
 
@@ -643,7 +662,20 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
       DEBUGVERIFY(mempool_deinit(mpool->pools + i));
     }
 
+  for (i = 0; i < mpool->dict_row_num; i++)
+    {
+      if (mpool->dict[i] != NULL)
+        {
+          mpool->free(mpool->arg, mpool->dict[i]);
+        }
+      else
+        {
+          break;
+        }
+    }
+
   mpool->free(mpool->arg, mpool->dict);
   mpool->free(mpool->arg, mpool->pools);
   mpool->free(mpool->arg, mpool);
+  nxmutex_destroy(&mpool->dict_lock);
 }
