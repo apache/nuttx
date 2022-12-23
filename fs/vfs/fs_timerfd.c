@@ -32,8 +32,6 @@
 #include <debug.h>
 
 #include <nuttx/wdog.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/mutex.h>
 
 #include <sys/ioctl.h>
@@ -45,8 +43,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define TIMER_FD_WORK LPWORK
 
 /****************************************************************************
  * Private Types
@@ -68,9 +64,7 @@ struct timerfd_priv_s
   int                       delay;   /* If non-zero, used to reset repetitive
                                       * timers */
   struct wdog_s             wdog;    /* The watchdog that provides the timing */
-  struct work_s             work;    /* For deferred timeout operations */
   timerfd_t                 counter; /* timerfd counter */
-  spinlock_t                splock;  /* timerfd counter specific lock */
   uint8_t                   crefs;   /* References counts on timerfd (max: 255) */
 
   /* The following is a list if poll structures of threads waiting for
@@ -103,8 +97,7 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
 static FAR struct timerfd_priv_s *timerfd_allocdev(void);
 static void timerfd_destroy(FAR struct timerfd_priv_s *dev);
 
-static void timerfd_timeout_work(FAR void *arg);
-static void timerfd_timeout(wdparm_t idev);
+static void timerfd_timeout(wdparm_t arg);
 
 /****************************************************************************
  * Private Data
@@ -164,22 +157,9 @@ static FAR struct timerfd_priv_s *timerfd_allocdev(void)
 static void timerfd_destroy(FAR struct timerfd_priv_s *dev)
 {
   wd_cancel(&dev->wdog);
-  work_cancel(TIMER_FD_WORK, &dev->work);
   nxmutex_unlock(&dev->lock);
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
-}
-
-static timerfd_t timerfd_get_counter(FAR struct timerfd_priv_s *dev)
-{
-  timerfd_t counter;
-  irqstate_t intflags;
-
-  intflags = spin_lock_irqsave(&dev->splock);
-  counter = dev->counter;
-  spin_unlock_irqrestore(&dev->splock, intflags);
-
-  return counter;
 }
 
 static int timerfd_open(FAR struct file *filep)
@@ -256,21 +236,12 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
   sem->next = *slist;
   *slist = sem;
 
-  nxmutex_unlock(&dev->lock);
-
   /* Wait for timerfd to notify */
 
   ret = nxsem_wait(&sem->sem);
-
   if (ret < 0)
     {
       FAR timerfd_waiter_sem_t *cur_sem;
-
-      /* Interrupted wait, unregister semaphore
-       * TODO ensure that lock wait does not fail (ECANCELED)
-       */
-
-      nxmutex_lock(&dev->lock);
 
       cur_sem = *slist;
       if (cur_sem == sem)
@@ -288,12 +259,9 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
                 }
             }
         }
-
-      nxmutex_unlock(&dev->lock);
-      return ret;
     }
 
-  return nxmutex_lock(&dev->lock);
+  return ret;
 }
 
 static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
@@ -308,21 +276,22 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  ret = nxmutex_lock(&dev->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  /* Ensure that interrupts are disabled and we do not lose counts
+   * if expiration occurs after read, but before setting counter
+   * to zero
+   */
+
+  intflags = enter_critical_section();
 
   /* Wait for an incoming event */
 
-  if (timerfd_get_counter(dev) == 0)
+  if (dev->counter == 0)
     {
       timerfd_waiter_sem_t sem;
 
       if (filep->f_oflags & O_NONBLOCK)
         {
-          nxmutex_unlock(&dev->lock);
+          leave_critical_section(intflags);
           return -EAGAIN;
         }
 
@@ -332,28 +301,21 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
           ret = timerfd_blocking_io(dev, &sem, &dev->rdsems);
           if (ret < 0)
             {
+              leave_critical_section(intflags);
               nxsem_destroy(&sem.sem);
               return ret;
             }
         }
-      while (timerfd_get_counter(dev) == 0);
+      while (dev->counter == 0);
 
       nxsem_destroy(&sem.sem);
     }
 
-  /* Device ready for read.  Ensure that interrupts are disabled and we
-   * do not lose counts if expiration occurs after read, but before setting
-   * counter to zero
-   */
-
-  intflags = spin_lock_irqsave(&dev->splock);
-
   *(FAR timerfd_t *)buffer = dev->counter;
   dev->counter = 0;
 
-  spin_unlock_irqrestore(&dev->splock, intflags);
+  leave_critical_section(intflags);
 
-  nxmutex_unlock(&dev->lock);
   return sizeof(timerfd_t);
 }
 
@@ -362,17 +324,11 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
   FAR struct timerfd_priv_s *dev = filep->f_priv;
-  int ret;
+  irqstate_t intflags;
+  int ret = OK;
   int i;
 
-  ret = nxmutex_lock(&dev->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = OK;
-
+  intflags = enter_critical_section();
   if (!setup)
     {
       /* This is a request to tear down the poll. */
@@ -413,7 +369,7 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Notify the POLLIN event if the counter is not zero */
 
-  if (timerfd_get_counter(dev) > 0)
+  if (dev->counter > 0)
     {
 #ifdef CONFIG_TIMER_FD_POLL
       poll_notify(dev->fds, CONFIG_TIMER_FD_NPOLLWAITERS, POLLIN);
@@ -421,22 +377,32 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  nxmutex_unlock(&dev->lock);
+  leave_critical_section(intflags);
   return ret;
 }
 #endif
 
-static void timerfd_timeout_work(FAR void *arg)
+static void timerfd_timeout(wdparm_t arg)
 {
   FAR struct timerfd_priv_s *dev = (FAR struct timerfd_priv_s *)arg;
   FAR timerfd_waiter_sem_t *cur_sem;
-  int ret;
+  irqstate_t intflags;
 
-  ret = nxmutex_lock(&dev->lock);
-  if (ret < 0)
+  /* Disable interrupts to ensure that expiration counter is accessed
+   * atomically
+   */
+
+  intflags = enter_critical_section();
+
+  /* Increment timer expiration counter */
+
+  dev->counter++;
+
+  /* If this is a repetitive timer, then restart the watchdog */
+
+  if (dev->delay > 0)
     {
-      wd_cancel(&dev->wdog);
-      return;
+      wd_start(&dev->wdog, dev->delay, timerfd_timeout, arg);
     }
 
 #ifdef CONFIG_TIMER_FD_POLL
@@ -455,34 +421,8 @@ static void timerfd_timeout_work(FAR void *arg)
     }
 
   dev->rdsems = NULL;
-  nxmutex_unlock(&dev->lock);
-}
 
-static void timerfd_timeout(wdparm_t idev)
-{
-  FAR struct timerfd_priv_s *dev = (FAR struct timerfd_priv_s *)idev;
-  irqstate_t intflags;
-
-  /* Disable interrupts to ensure that expiration counter is accessed
-   * atomically
-   */
-
-  intflags = spin_lock_irqsave(&dev->splock);
-
-  /* Increment timer expiration counter */
-
-  dev->counter++;
-
-  work_queue(TIMER_FD_WORK, &dev->work, timerfd_timeout_work, dev, 0);
-
-  /* If this is a repetitive timer, then restart the watchdog */
-
-  if (dev->delay)
-    {
-      wd_start(&dev->wdog, dev->delay, timerfd_timeout, idev);
-    }
-
-  spin_unlock_irqrestore(&dev->splock, intflags);
+  leave_critical_section(intflags);
 }
 
 /****************************************************************************
@@ -559,7 +499,7 @@ int timerfd_settime(int fd, int flags,
       goto errout;
     }
 
-  if (flags && (flags & TFD_TIMER_ABSTIME) == 0)
+  if ((flags & ~TFD_TIMER_ABSTIME) != 0)
     {
       ret = -EINVAL;
       goto errout;
@@ -583,6 +523,12 @@ int timerfd_settime(int fd, int flags,
 
   dev = (FAR struct timerfd_priv_s *)filep->f_priv;
 
+  /* Disable interrupts here to ensure that expiration counter is accessed
+   * atomicaly.
+   */
+
+  intflags = enter_critical_section();
+
   if (old_value)
     {
       /* Get the number of ticks before the underlying watchdog expires */
@@ -595,21 +541,11 @@ int timerfd_settime(int fd, int flags,
       clock_ticks2time(dev->delay, &old_value->it_interval);
     }
 
-  /* Disable interrupts here to ensure that expiration counter is accessed
-   * atomicaly and timeout work is canceled with the same sequence
-   */
-
-  intflags = spin_lock_irqsave(&dev->splock);
-
   /* Disarm the timer (in case the timer was already armed when
    * timerfd_settime() is called).
    */
 
   wd_cancel(&dev->wdog);
-
-  /* Cancel notification work */
-
-  work_cancel(TIMER_FD_WORK, &dev->work);
 
   /* Clear expiration counter */
 
@@ -621,25 +557,14 @@ int timerfd_settime(int fd, int flags,
 
   if (new_value->it_value.tv_sec <= 0 && new_value->it_value.tv_nsec <= 0)
     {
-      spin_unlock_irqrestore(&dev->splock, intflags);
+      leave_critical_section(intflags);
       return OK;
     }
 
   /* Setup up any repetitive timer */
 
-  if (new_value->it_interval.tv_sec > 0 ||
-      new_value->it_interval.tv_nsec > 0)
-    {
-      clock_time2ticks(&new_value->it_interval, &delay);
-
-      /* REVISIT: Should delay be sclock_t? */
-
-      dev->delay = (int)delay;
-    }
-  else
-    {
-      dev->delay = 0;
-    }
+  clock_time2ticks(&new_value->it_interval, &delay);
+  dev->delay = delay;
 
   /* We need to disable timer interrupts through the following section so
    * that the system timer is stable.
@@ -674,17 +599,14 @@ int timerfd_settime(int fd, int flags,
 
   /* Then start the watchdog */
 
-  if (delay > 0)
+  ret = wd_start(&dev->wdog, delay, timerfd_timeout, (wdparm_t)dev);
+  if (ret < 0)
     {
-      ret = wd_start(&dev->wdog, delay, timerfd_timeout, (wdparm_t)dev);
-      if (ret < 0)
-        {
-          spin_unlock_irqrestore(&dev->splock, intflags);
-          goto errout;
-        }
+      leave_critical_section(intflags);
+      goto errout;
     }
 
-  spin_unlock_irqrestore(&dev->splock, intflags);
+  leave_critical_section(intflags);
   return OK;
 
 errout:
