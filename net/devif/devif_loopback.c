@@ -119,7 +119,9 @@ int devif_loopback(FAR struct net_driver_s *dev)
       else
 #endif
         {
+          nwarn("WARNING: Unrecognized IP version\n");
           NETDEV_RXDROPPED(dev);
+          dev->d_len = 0;
         }
 
       NETDEV_TXDONE(dev);
