@@ -76,6 +76,10 @@ ifeq ($(CONFIG_S32K3XX_QSPI),y)
 CHIP_CSRCS += s32k3xx_qspi.c
 endif
 
+ifeq ($(CONFIG_S32K3XX_PROGMEM),y)
+CHIP_CSRCS += s32k3xx_progmem.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += s32k3xx_userspace.c
 endif

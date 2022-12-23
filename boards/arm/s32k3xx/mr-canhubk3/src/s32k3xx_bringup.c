@@ -163,6 +163,46 @@ int s32k3xx_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_S32K3XX_PROGMEM
+  struct mtd_dev_s *mtd;
+
+  mtd = progmem_initialize();
+  if (mtd == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: progmem_initialize() failed\n");
+    }
+
+  ret = register_mtddriver("/dev/progmem0", mtd, 0755, NULL);
+
+  if (ret != OK)
+    {
+      _err("register_mtddriver() failed: %d\n", ret);
+    }
+#  ifdef CONFIG_FS_LITTLEFS
+  else
+    {
+      _info("register_mtddriver() succesful\n");
+
+      ret = nx_mount("/dev/progmem0", "/mnt/progmem", "littlefs", 0, NULL);
+
+      if (ret < 0)
+        {
+          ret = nx_mount("/dev/progmem0", "/mnt/progmem", "littlefs", 0,
+                    "forceformat");
+
+          if (ret < 0)
+            {
+              _err("nx_mount() failed: %d\n", ret);
+            }
+          else
+            {
+              _info("nx_mount() succesful\n");
+            }
+        }
+    }
+#  endif
+#endif
+
 #ifdef HAVE_MX25L
   /* Create an instance of the S32K3XX QSPI device driver */
 
