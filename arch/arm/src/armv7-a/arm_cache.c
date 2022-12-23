@@ -53,7 +53,28 @@
 
 void up_invalidate_icache_all(void)
 {
-  cp15_invalidate_icache();
+  cp15_invalidate_icache_all();
+}
+
+/****************************************************************************
+ * Name: up_invalidate_icache
+ *
+ * Description:
+ *   Validate the specified range instruction cache as PoU,
+ *   and flush the branch target cache
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_invalidate_icache(uintptr_t start, uintptr_t end)
+{
+  cp15_invalidate_icache(start, end);
 }
 
 /****************************************************************************

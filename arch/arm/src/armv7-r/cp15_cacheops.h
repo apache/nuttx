@@ -688,7 +688,7 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
  *
  ****************************************************************************/
 
-static inline void cp15_invalidate_icache(void)
+static inline void cp15_invalidate_icache_all(void)
 {
   CP15_SET(ICIALLU, 0);
   ARM_ISB();
