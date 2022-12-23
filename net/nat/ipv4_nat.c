@@ -46,15 +46,14 @@
 
 /* Adjust checksums in headers. */
 
-#define chksum_adjust(chksum,old_data,new_data) \
-  net_chksum_adjust((FAR uint16_t *)&(chksum), \
-                    (FAR uint16_t *)&(old_data), sizeof(old_data), \
-                    (FAR uint16_t *)&(new_data), sizeof(new_data))
+#define chksum_adjust(chksum,optr,nptr,len) \
+  net_chksum_adjust((FAR uint16_t *)(chksum), (FAR uint16_t *)(optr), len, \
+                    (FAR uint16_t *)(nptr), len)
 
 /* Getting IP & Port to manipulate from L3/L4 header. */
 
 #define MANIP_IPADDR(iphdr,manip_type) \
-  ((manip_type) == NAT_MANIP_SRC ? &(iphdr)->srcipaddr : &(iphdr)->destipaddr)
+  ((manip_type) == NAT_MANIP_SRC ? (iphdr)->srcipaddr : (iphdr)->destipaddr)
 
 #define MANIP_PORT(l4hdr,manip_type) \
   ((manip_type) == NAT_MANIP_SRC ? &(l4hdr)->srcport : &(l4hdr)->destport)
@@ -111,15 +110,15 @@ static void ipv4_nat_ip_adjust(FAR struct ipv4_hdr_s *ipv4,
                                FAR uint16_t *l4chksum, in_addr_t new_ip,
                                enum nat_manip_type_e manip_type)
 {
-  FAR uint16_t (*old_ip)[2] = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t *old_ip = MANIP_IPADDR(ipv4, manip_type);
 
   if (l4chksum != NULL)
     {
-      chksum_adjust(*l4chksum, *old_ip, new_ip);
+      chksum_adjust(l4chksum, old_ip, &new_ip, sizeof(new_ip));
     }
 
-  chksum_adjust(ipv4->ipchksum, *old_ip, new_ip);
-  net_ipv4addr_hdrcopy(*old_ip, &new_ip);
+  chksum_adjust(&ipv4->ipchksum, old_ip, &new_ip, sizeof(new_ip));
+  net_ipv4addr_hdrcopy(old_ip, &new_ip);
 }
 
 /****************************************************************************
@@ -140,7 +139,7 @@ static void ipv4_nat_port_adjust(FAR uint16_t *l4chksum,
 {
   if (l4chksum != NULL)
     {
-      chksum_adjust(*l4chksum, *old_port, new_port);
+      chksum_adjust(l4chksum, old_port, &new_port, sizeof(new_port));
     }
 
   *old_port = new_port;
@@ -171,9 +170,9 @@ static FAR struct ipv4_nat_entry *
 ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
                      enum nat_manip_type_e manip_type)
 {
-  FAR struct tcp_hdr_s *tcp = L4_HDR(ipv4);
-  FAR uint16_t *external_port = MANIP_PORT(tcp, manip_type);
-  FAR struct ipv4_nat_entry *entry =
+  FAR struct tcp_hdr_s      *tcp           = L4_HDR(ipv4);
+  FAR uint16_t              *external_port = MANIP_PORT(tcp, manip_type);
+  FAR struct ipv4_nat_entry *entry         =
       ipv4_nat_inbound_entry_find(IP_PROTO_TCP, *external_port, true);
   if (!entry)
     {
@@ -217,11 +216,12 @@ static FAR struct ipv4_nat_entry *
 ipv4_nat_inbound_udp(FAR struct ipv4_hdr_s *ipv4,
                      enum nat_manip_type_e manip_type)
 {
-  FAR struct udp_hdr_s *udp = L4_HDR(ipv4);
-  FAR uint16_t *external_port = MANIP_PORT(udp, manip_type);
-  FAR uint16_t *udpchksum;
-  FAR struct ipv4_nat_entry *entry =
+  FAR struct udp_hdr_s      *udp           = L4_HDR(ipv4);
+  FAR uint16_t              *external_port = MANIP_PORT(udp, manip_type);
+  FAR uint16_t              *udpchksum;
+  FAR struct ipv4_nat_entry *entry         =
       ipv4_nat_inbound_entry_find(IP_PROTO_UDP, *external_port, true);
+
   if (!entry)
     {
       return NULL;
@@ -263,7 +263,7 @@ static FAR struct ipv4_nat_entry *
 ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
-  FAR struct icmp_hdr_s *icmp = L4_HDR(ipv4);
+  FAR struct icmp_hdr_s     *icmp = L4_HDR(ipv4);
   FAR struct ipv4_nat_entry *entry;
 
   switch (icmp->type)
@@ -333,8 +333,8 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
              * and the overall checksum of IPv4 header will not change.
              */
 
-            net_chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak,
-                              inner_l4hdrlen, inner_l4, inner_l4hdrlen);
+            chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak, inner_l4,
+                          inner_l4hdrlen);
 
             return entry;
           }
@@ -370,15 +370,15 @@ ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
                       FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
-  FAR struct tcp_hdr_s *tcp = L4_HDR(ipv4);
-  FAR uint16_t (*local_ip)[2] = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t *local_port = MANIP_PORT(tcp, manip_type);
+  FAR struct tcp_hdr_s      *tcp        = L4_HDR(ipv4);
+  FAR uint16_t              *local_ip   = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t              *local_port = MANIP_PORT(tcp, manip_type);
   FAR struct ipv4_nat_entry *entry;
 
   /* Only create entry when it's the outermost packet (manip type is SRC). */
 
   entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_TCP,
-              net_ip4addr_conv32(*local_ip), *local_port,
+              net_ip4addr_conv32(local_ip), *local_port,
               (manip_type == NAT_MANIP_SRC));
   if (!entry)
     {
@@ -423,16 +423,16 @@ ipv4_nat_outbound_udp(FAR struct net_driver_s *dev,
                       FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type)
 {
-  FAR struct udp_hdr_s *udp = L4_HDR(ipv4);
-  FAR uint16_t (*local_ip)[2] = MANIP_IPADDR(ipv4, manip_type);
-  FAR uint16_t *local_port = MANIP_PORT(udp, manip_type);
-  FAR uint16_t *udpchksum;
+  FAR struct udp_hdr_s      *udp        = L4_HDR(ipv4);
+  FAR uint16_t              *local_ip   = MANIP_IPADDR(ipv4, manip_type);
+  FAR uint16_t              *local_port = MANIP_PORT(udp, manip_type);
+  FAR uint16_t              *udpchksum;
   FAR struct ipv4_nat_entry *entry;
 
   /* Only create entry when it's the outermost packet (manip type is SRC). */
 
   entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_UDP,
-              net_ip4addr_conv32(*local_ip), *local_port,
+              net_ip4addr_conv32(local_ip), *local_port,
               (manip_type == NAT_MANIP_SRC));
   if (!entry)
     {
@@ -476,8 +476,8 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
                        FAR struct ipv4_hdr_s *ipv4,
                        enum nat_manip_type_e manip_type)
 {
-  FAR struct icmp_hdr_s *icmp = L4_HDR(ipv4);
-  FAR uint16_t (*local_ip)[2] = MANIP_IPADDR(ipv4, manip_type);
+  FAR struct icmp_hdr_s     *icmp     = L4_HDR(ipv4);
+  FAR uint16_t              *local_ip = MANIP_IPADDR(ipv4, manip_type);
   FAR struct ipv4_nat_entry *entry;
 
   switch (icmp->type)
@@ -490,7 +490,7 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
          */
 
         entry = ipv4_nat_outbound_entry_find(dev, IP_PROTO_ICMP,
-                    net_ip4addr_conv32(*local_ip), icmp->id,
+                    net_ip4addr_conv32(local_ip), icmp->id,
                     (manip_type == NAT_MANIP_SRC));
         if (!entry)
           {
@@ -554,8 +554,8 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
              * and the overall checksum of IPv4 header will not change.
              */
 
-            net_chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak,
-                              inner_l4hdrlen, inner_l4, inner_l4hdrlen);
+            chksum_adjust(&icmp->icmpchksum, inner_l4hdrbak, inner_l4,
+                          inner_l4hdrlen);
 
             return entry;
           }
