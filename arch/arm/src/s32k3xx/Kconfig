@@ -600,6 +600,14 @@ config S32K3XX_FS26
 		Engineering development purpose only, not for use in production.
 		Please refer to the FS26 Datasheet.
 
+config S32K3XX_PROGMEM
+	bool "PROGMEM"
+	default n
+	select ARCH_HAVE_PROGMEM
+	---help---
+		Use the Data Flash data memory as a
+		Memory-Technology-Device (MTD).
+
 endmenu # S32K3XX Peripheral Selection
 
 menu "S32K3XX eMIOS PWM Configuration"
