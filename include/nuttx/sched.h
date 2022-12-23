@@ -44,6 +44,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/map.h>
+#include <nuttx/wqueue.h>
 
 #include <arch/arch.h>
 
@@ -508,6 +509,7 @@ struct task_group_s
   /* Address Environment ****************************************************/
 
   group_addrenv_t tg_addrenv;       /* Task group address environment       */
+  struct work_s   tg_addrenv_work;  /* Worker to free address environment   */
   uint16_t        tg_addrenv_refs;  /* Users of address environment         */
 #endif
 

@@ -158,6 +158,9 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
   /* Copy the group reference from the parent to the child */
 
   tcb->cmn.group = ptcb->group;
+#ifdef CONFIG_ARCH_ADDRENV
+  tcb->cmn.mm_group = ptcb->mm_group;
+#endif
   return OK;
 }
 

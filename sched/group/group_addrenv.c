@@ -29,6 +29,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
+#include <nuttx/wqueue.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -40,6 +41,61 @@
  ****************************************************************************/
 
 #define has_addrenv(grp) (((grp)->tg_flags & GROUP_FLAG_ADDRENV) != 0)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: addrenv_dsr
+ *
+ * Description:
+ *   Deferred service routine for destroying an address environment. This is
+ *   so that the heavy lifting is not done when the context is switching, or
+ *   from ISR.
+
+ * Input Parameters:
+ *   arg - Contains pointer to the group structure that is freed
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void addrenv_dsr(FAR void *arg)
+{
+  FAR struct task_group_s *group = (struct task_group_s *)arg;
+  save_addrenv_t oldenv;
+  irqstate_t flags;
+
+  /* A context switch must not happen here */
+
+  flags = enter_critical_section();
+
+  /* Switch the addrenv and also save the current addrenv */
+
+  up_addrenv_select(&group->tg_addrenv, &oldenv);
+
+  /* Destroy the group address environment */
+
+  up_addrenv_destroy(&group->tg_addrenv);
+
+  /* Restore the previous addrenv */
+
+  up_addrenv_restore(&oldenv);
+
+  /* Can release the scheduler now */
+
+  leave_critical_section(flags);
+
+  /* Address environment can finally be freed */
+
+  group->tg_addrenv_refs = 0;
+
+  /* Finally drop the group itself */
+
+  group_drop(group);
+}
 
 /****************************************************************************
  * Public Data
@@ -159,7 +215,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
       if (curr)
         {
-          group_addrenv_drop(curr);
+          group_addrenv_drop(curr, true);
         }
 
       /* Save the new, current address environment group */
@@ -219,9 +275,8 @@ void group_addrenv_take(struct task_group_s *group)
   leave_critical_section(flags);
 }
 
-void group_addrenv_drop(struct task_group_s *group)
+void group_addrenv_drop(struct task_group_s *group, bool deferred)
 {
-  save_addrenv_t oldenv;
   irqstate_t flags;
   uint16_t refs;
 
@@ -233,21 +288,26 @@ void group_addrenv_drop(struct task_group_s *group)
 
   if (refs == 0)
     {
-      /* Switch the addrenv and also save the current addrenv */
+      /* Mark that we no longer have an address environment */
 
-      up_addrenv_select(&group->tg_addrenv, &oldenv);
+      group->tg_flags &= ~GROUP_FLAG_ADDRENV;
 
-      /* Destroy the group address environment */
+      /* Defer dropping if requested to do so, otherwise drop at once */
 
-      up_addrenv_destroy(&group->tg_addrenv);
+      if (deferred)
+        {
+          /* Need to hold the address environment for a while still */
 
-      /* Restore the previous addrenv */
+          group->tg_addrenv_refs = 1;
 
-      up_addrenv_restore(&oldenv);
+          /* Let the DSR do the heavy lifting */
 
-      /* Finally drop the group itself */
-
-      group_drop(group);
+          work_queue(LPWORK, &group->tg_addrenv_work, addrenv_dsr, group, 0);
+        }
+      else
+        {
+          addrenv_dsr(group);
+        }
     }
 }
 

@@ -94,7 +94,7 @@ int group_continue(FAR struct tcb_s *tcb);
 
 int group_addrenv(FAR struct tcb_s *tcb);
 void group_addrenv_take(struct task_group_s *group);
-void group_addrenv_drop(struct task_group_s *group);
+void group_addrenv_drop(struct task_group_s *group, bool deferred);
 #endif
 
 /* Convenience functions */

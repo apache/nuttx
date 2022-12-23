@@ -207,7 +207,7 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Drop the reference to this address environment */
 
-  group_addrenv_drop(group);
+  group_addrenv_drop(group, false);
 #endif
 
   /* Mark the group as deleted now */
