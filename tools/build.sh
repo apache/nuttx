@@ -36,6 +36,12 @@ function mount_unionfs()
 
 function setup_toolchain()
 {
+  if [ "`uname`" == "Darwin" ]; then
+    export MACOSX_DEPLOYMENT_TARGET=11
+    echo -e "Note: macOS users need to manually deploy toolchains. Skipping prebuilts setup."
+    return
+  fi
+
   ARCH=(\
       "xtensa" \
       "arm" \
