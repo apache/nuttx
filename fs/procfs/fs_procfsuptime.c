@@ -250,7 +250,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
                                  "%7" PRIu64 ".%02u\n", sec, csec);
 #else
       linesize = procfs_snprintf(attr->line, UPTIME_LINELEN,
-                                 "%7lu.%02u\n", (unsigned long)sec, csec);
+                                 "%7" PRIu32 ".%02u\n", sec, csec);
 #endif
 
 #endif
