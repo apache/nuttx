@@ -516,8 +516,12 @@ case ${os} in
     install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools c-cache"
     mkdir -p "${tools}"/homebrew
     export HOMEBREW_CACHE=${tools}/homebrew
-    # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
-    rm -rf /usr/local/bin/2to3
+    # https://github.com/apache/arrow/issues/15025
+    rm -f /usr/local/bin/2to3 || :
+    rm -f /usr/local/bin/idle3 || :
+    rm -f /usr/local/bin/pydoc3 || :
+    rm -f /usr/local/bin/python3 || :
+    rm -f /usr/local/bin/python3-config || :
     # https://github.com/osx-cross/homebrew-avr/issues/205#issuecomment-760637996
     brew update --quiet
     ;;
