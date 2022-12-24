@@ -127,7 +127,7 @@ size_t avr_stack_check(uintptr_t alloc, size_t size)
 }
 
 /****************************************************************************
- * Name: up_check_stack and friends
+ * Name: up_check_tcbstack and friends
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -148,31 +148,11 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb)
                          tcb->adj_stack_size);
 }
 
-ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
-{
-  return tcb->adj_stack_size - up_check_tcbstack(tcb);
-}
-
-size_t up_check_stack(void)
-{
-  return up_check_tcbstack(running_task());
-}
-
-ssize_t up_check_stack_remain(void)
-{
-  return up_check_tcbstack_remain(running_task());
-}
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
   uintptr_t start = (uintptr_t)g_intstackalloc;
   return avr_stack_check(start, CONFIG_ARCH_INTERRUPTSTACK & ~3);
-}
-
-size_t up_check_intstack_remain(void)
-{
-  return (CONFIG_ARCH_INTERRUPTSTACK & ~3) - up_check_intstack();
 }
 #endif
 

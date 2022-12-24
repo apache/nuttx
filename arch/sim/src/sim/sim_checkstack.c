@@ -137,7 +137,7 @@ size_t sim_stack_check(void *alloc, size_t size)
 }
 
 /****************************************************************************
- * Name: up_check_stack and friends
+ * Name: up_check_tcbstack and friends
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -156,19 +156,4 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 {
   return sim_stack_check((void *)(uintptr_t)tcb->stack_base_ptr,
                          tcb->adj_stack_size);
-}
-
-ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
-{
-  return tcb->adj_stack_size - up_check_tcbstack(tcb);
-}
-
-size_t up_check_stack(void)
-{
-  return up_check_tcbstack(running_task());
-}
-
-ssize_t up_check_stack_remain(void)
-{
-  return up_check_tcbstack_remain(running_task());
 }
