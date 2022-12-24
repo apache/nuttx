@@ -141,7 +141,7 @@ size_t xtensa_stack_check(uintptr_t alloc, size_t size)
 }
 
 /****************************************************************************
- * Name: up_check_stack and friends
+ * Name: up_check_tcbstack and friends
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -162,30 +162,10 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
                             tcb->adj_stack_size);
 }
 
-ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
-{
-  return tcb->adj_stack_size - up_check_tcbstack(tcb);
-}
-
-size_t up_check_stack(void)
-{
-  return up_check_tcbstack(running_task());
-}
-
-ssize_t up_check_stack_remain(void)
-{
-  return up_check_tcbstack_remain(running_task());
-}
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 size_t up_check_intstack(void)
 {
   return xtensa_stack_check(up_get_intstackbase(), INTSTACK_SIZE);
-}
-
-size_t up_check_intstack_remain(void)
-{
-  return INTSTACK_SIZE - up_check_intstack();
 }
 #endif
 
