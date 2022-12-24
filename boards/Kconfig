@@ -3758,10 +3758,10 @@ config BOARD_RESET_ON_ASSERT
 	depends on BOARDCTL_RESET
 	---help---
 		== 0 up_assert never reset the machine
-		>= 1 up_assert from interrupt handler or IDLE thread will reset the
-		     machine
+		>= 1 up_assert from interrupt handler or kernel thread will reset
+		     the machine
 		>= 2 up_assert from user or kernel thread will reset the machine.
-		     The default behavior is just to kill the asserting thread.
+		     The default behavior just kill the asserting thread.
 
 config BOARD_ASSERT_RESET_VALUE
 	int "Board reset argument"
