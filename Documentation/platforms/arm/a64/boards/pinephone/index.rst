@@ -12,7 +12,7 @@ Features
     - **GPU:** ARM Mali400 MP2
     - **Interrupt Controller:** ARM GIC PL400 (Generic Interrupt Controller v2)
     - **Display Engine:** Allwinner Display Engine 2.0 (MIPI DSI with DMA)
-- **Display:** Xingbangda XBD599 HD IPS Capacitive Touchscreen (5.95 inches, 1440x720 resolution, 16M colors)
+- **Display:** Xingbangda XBD599 HD IPS Capacitive Touchscreen (5.95 inches, 1440x720 resolution, 16M colors, PWM Backlight)
 - **LCD Controller:** Sitronix ST7703 (MIPI DSI)
 - **RAM:** 2GB or 3GB LPDDR3 SDRAM
 - **Internal Storage:** 16GB or 32GB eMMC, extendable up to 2TB via microSD
@@ -29,6 +29,7 @@ Features
 - **Privacy Switches:** Modem, WiFi & Bluetooth, Microphone, Cameras, Headphone
 - **Battery:** Lithium-ion, rated capacity 2800mAh (10.64Wh), typical capacity 3000mAh (11.40Wh)
 - **I/O:** USB Type-C, USB Host, DisplayPort Alternate Mode output, 15W 5V 3A Quick Charge, follows USB PD specification
+- **Power Management Integrated Circuit:** X-Powers AXP803 (Reduced Serial Bus)
 
 Serial Console
 ==============
@@ -73,7 +74,7 @@ Configure the NuttX project and build the project:
 .. code:: console
 
    $ cd nuttx
-   $ tools/configure.sh pinephone:nsh
+   $ tools/configure.sh pinephone:lcd
    $ make
    $ cp nuttx.bin Image
    $ rm -f Image.gz
@@ -129,6 +130,15 @@ LED3  Blue LED  PD20
 Configurations
 ==============
 
+lcd
+___
+
+Supports LCD Display (XBD599) with LCD Controller (ST7703),
+Display Engine 2.0, MIPI Display Serial Interface (DSI),
+Power Management Integrated Circuit (AXP803) and
+Reduced Serial Bus (RSB).
+Serial Console is enabled on UART0 at 115.2 kbps.
+
 nsh
 ---
 
@@ -142,14 +152,18 @@ Peripheral Support
 
 NuttX for PinePhone supports these peripherals:
 
-============== ======= =====
-Peripheral     Support NOTES
-============== ======= =====
-Display Engine  Yes
-MIPI D-PHY      Yes
-MIPI DSI        Yes
-PIO             Yes
-RSB             Yes
-TCON0           Yes
-UART            Yes    Only UART0 is supported
-============== ======= =====
+======================= ======= =====
+Peripheral              Support NOTES
+======================= ======= =====
+Backlight                Yes
+Display Engine           Yes
+LCD Controller (ST7703)  Yes
+LCD Panel (XBD599)       Yes
+MIPI D-PHY               Yes
+MIPI DSI                 Yes
+PIO                      Yes
+PMIC (AXP803)            Yes
+RSB                      Yes
+TCON0                    Yes
+UART                     Yes    Only UART0 is supported
+======================= ======= =====
