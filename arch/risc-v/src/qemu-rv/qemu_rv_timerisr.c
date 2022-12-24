@@ -31,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/init.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/arch_alarm.h>
 #include <arch/board/board.h>
@@ -198,9 +199,12 @@ void qemu_rv_mtimer_interrupt(void)
   g_mtimer_cnt++;
   g_stimer_pending = true;
 
-  /* Post Supervisor Software Interrupt */
+  if (OSINIT_HW_READY())
+    {
+      /* Post Supervisor Software Interrupt */
 
-  SET_CSR(sip, SIP_SSIP);
+      SET_CSR(sip, SIP_SSIP);
+    }
 }
 
 #endif /* CONFIG_BUILD_KERNEL */
