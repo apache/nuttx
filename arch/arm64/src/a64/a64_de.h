@@ -92,7 +92,7 @@ int a64_de_blender_init(void);
  ****************************************************************************/
 
 int a64_de_ui_channel_init(uint8_t channel,
-                           void *fbmem,
+                           const void *fbmem,
                            size_t fblen,
                            uint16_t xres,
                            uint16_t yres,

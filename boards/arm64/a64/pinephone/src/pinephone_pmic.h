@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/a64/pinephone/src/pinephone_bringup.c
+ * boards/arm64/a64/pinephone/src/pinephone_pmic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,74 +18,36 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_PMIC_H
+#define __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_PMIC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <syslog.h>
-
-#ifdef CONFIG_FS_PROCFS
-#  include <nuttx/fs/fs.h>
-#endif
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#ifdef CONFIG_VIDEO_FB
-#  include <nuttx/video/fb.h>
-#endif
-
-#include "pinephone.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pinephone_bringup
+ * Name: pinephone_pmic_init
  *
  * Description:
- *   Bring up board features
+ *   Initialize the X-Powers AXP803 Power Management Integrated Circuit,
+ *   connected on Reduced Serial Bus.  Power on the MIPI DSI Interface of
+ *   Xingbangda XBD599 LCD Panel.  Doesn't switch on the LCD Panel
+ *   Backlight, which is controlled by PIO and PWM.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int pinephone_bringup(void)
-{
-  int ret;
+int pinephone_pmic_init(void);
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_VIDEO_FB
-  /* Initialize and register the framebuffer driver */
-
-  ret = fb_register(0, 0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_PMIC_H */
