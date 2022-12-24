@@ -205,12 +205,7 @@ static void show_stacks(FAR struct tcb_s *rtcb)
   dump_stack("Kernel", sp,
              (uintptr_t)rtcb->xcp.kstack,
              CONFIG_ARCH_KERNEL_STACKSIZE,
-#  ifdef CONFIG_STACK_COLORATION
-             up_check_tcbstack(rtcb),
-#  else
-             0,
-#  endif
-             false);
+             0, false);
 #endif
 }
 
