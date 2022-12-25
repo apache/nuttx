@@ -903,6 +903,23 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: cp15_invalidate_icache
+ *
+ * Description:
+ *   Invalidate the instruction cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_invalidate_icache(uintptr_t start, uintptr_t end);
+
+/****************************************************************************
  * Name: cp15_dcache_op_level
  *
  * Description:

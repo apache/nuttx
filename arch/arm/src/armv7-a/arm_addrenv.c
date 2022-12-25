@@ -737,7 +737,7 @@ int up_addrenv_coherent(const group_addrenv_t *addrenv)
 
   /* Invalidate I-Cache */
 
-  cp15_invalidate_icache();
+  up_invalidate_icache_all();
 
   /* Clean D-Cache in each region.
    * REVISIT:  Cause crashes when trying to clean unmapped memory.  In order
