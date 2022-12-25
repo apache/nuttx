@@ -326,7 +326,7 @@
 .endm
 
 /****************************************************************************
- * Name: cp15_invalidate_icache
+ * Name: cp15_invalidate_icache_all
  *
  * Description:
  *   Invalidate all instruction caches to PoU, also flushes branch target
@@ -340,7 +340,7 @@
  *
  ****************************************************************************/
 
-.macro cp15_invalidate_icache, tmp
+.macro cp15_invalidate_icache_all, tmp
   mov \tmp, #0
   mrc p15, 0, \tmp, c7, c5, 0 /* ICIALLU */
   isb
@@ -397,9 +397,8 @@
  *
  ****************************************************************************/
 
-.macro cp15_flush_btb_bymva, tmp
-  mov \tmp, #0
-  mrc p15, 0, \tmp, c7, c5, 7 /* BPIMVA */
+.macro cp15_flush_btb_bymva, va
+  mrc p15, 0, \va, c7, c5, 7 /* BPIMVA */
 .endm
 
 /****************************************************************************
@@ -488,8 +487,8 @@
  *
  ****************************************************************************/
 
-.macro cp15_clean_ucache_bymva, setway
-  mrc p15, 0, \setway, c7, c11, 1 /* DCCMVAU */
+.macro cp15_clean_ucache_bymva, va
+  mrc p15, 0, \va, c7, c11, 1 /* DCCMVAU */
 .endm
 
 /****************************************************************************
@@ -667,7 +666,7 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
 }
 
 /****************************************************************************
- * Name: cp15_invalidate_icache
+ * Name: cp15_invalidate_icache_all
  *
  * Description:
  *   Invalidate all instruction caches to PoU, also flushes branch target
@@ -732,16 +731,16 @@ static inline void cp15_flush_btb(void)
  *   Invalidate branch predictor array entry by MVA
  *
  * Input Parameters:
- *   None
+ *   va - 32-bit value with VA format
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void cp15_flush_btb_bymva(void)
+static inline void cp15_flush_btb_bymva(unsigned int va)
 {
-  CP15_SET(BPIMVA, 0);
+  CP15_SET(BPIMVA, va);
 }
 
 /****************************************************************************
@@ -833,16 +832,16 @@ static inline void cp15_clean_dcache_bysetway(unsigned int setway)
  *   Clean unified cache line by MVA
  *
  * Input Parameters:
- *   setway - 32-bit value with VA format
+ *   va - 32-bit value with VA format
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void cp15_clean_ucache_bymva(unsigned int setway)
+static inline void cp15_clean_ucache_bymva(unsigned int va)
 {
-  CP15_SET(DCCMVAU, setway);
+  CP15_SET(DCCMVAU, va);
 }
 
 /****************************************************************************
