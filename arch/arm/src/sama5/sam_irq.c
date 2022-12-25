@@ -504,7 +504,7 @@ void up_irqinitialize(void)
    */
 
   vectorsize = sam_vectorsize();
-  cp15_invalidate_icache();
+  cp15_invalidate_icache(0, vectorsize);
   cp15_invalidate_dcache(0, vectorsize);
   mmu_invalidate_region(0, vectorsize);
 
