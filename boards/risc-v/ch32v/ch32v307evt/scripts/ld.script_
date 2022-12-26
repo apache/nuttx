@@ -1,0 +1,208 @@
+OUTPUT_ARCH( "riscv" )
+
+ENTRY( bl602_start )
+
+__EM_SIZE = DEFINED(ble_controller_init) ? 8K : 0K;
+__RFTLV_SIZE_OFFSET = 1K;
+__RFTLV_SIZE_HOLE = 2K;
+__RFTLV_HEAD1_H = (0x46524C42); /* BLRF */
+__RFTLV_HEAD1_L = (0x41524150); /* PAPA */
+
+MEMORY
+{
+  rom       (rxai!w) : ORIGIN = 0x21015000, LENGTH = 44K
+  flash     (rxai!w) : ORIGIN = 0x23000000, LENGTH = 4M
+  ram_tcm   (wxa)    : ORIGIN = 0x42010000, LENGTH = (32K + 48K + 64K - 16K) /* itcm_32 + dtcm_48 + ocram_64 */
+  ram_wifi  (wxa)    : ORIGIN = 0x42030000, LENGTH = (112K - 8K) /* 8K left for em */
+}
+
+SECTIONS
+{
+  /* __stack_size = DEFINED(__stack_size) ? __stack_size : 2K; */
+  BOOT2_PT_ADDR = 0x42049C00;
+  BOOT2_FLASHCFG_ADDR = 0x42049c18;
+
+  .init           :
+  {
+    KEEP (*(SORT_NONE(.init)))
+  } > flash
+
+	/* value for rftlv */
+
+  .rftlv.tool :
+  {
+      . = ORIGIN(flash) + __RFTLV_SIZE_OFFSET;
+      PROVIDE( _ld_symbol_rftlv_address = . );
+      LONG(__RFTLV_HEAD1_H);
+      LONG(__RFTLV_HEAD1_L);
+      . = ORIGIN(flash) + __RFTLV_SIZE_OFFSET + __RFTLV_SIZE_HOLE;
+  } > flash
+
+  .text           :
+  {
+    PROVIDE(_stext = .);
+    *(.text.unlikely .text.unlikely.*)
+    *(.text.startup .text.startup.*)
+    *(.text .text.*)
+    *(.gnu.linkonce.t.*)
+    PROVIDE(_etext = .);
+  } > flash
+
+  .rodata         :
+  {
+    *(.rdata)
+    *(.rodata .rodata.*)
+    *(.sdata2.*)
+
+    /* static fw attribute entry */
+    . = ALIGN(4);
+    _bl_static_fw_cfg_entry_start = .;
+    KEEP(*(.wifi.cfg.entry))
+    _bl_static_fw_cfg_entry_end = .;
+
+    *(.gnu.linkonce.r.*)
+  } > flash
+
+  .preinit_array :
+  {
+    . = ALIGN(4);
+    __preinit_array_start = .;
+    KEEP (*(.preinit_array))
+    __preinit_array_end = .;
+  } > flash
+
+  .init_array :
+  {
+    . = ALIGN(4);
+    __init_array_start = .;
+    _sinit = .;
+    KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*)))
+    KEEP (*(.init_array))
+    __init_array_end = .;
+    _einit = .;
+  } > flash
+
+  .tdata :
+  {
+    _stdata = ABSOLUTE(.);
+    *(.tdata .tdata.* .gnu.linkonce.td.*);
+    _etdata = ABSOLUTE(.);
+  } > flash
+
+  .tbss :
+  {
+    _stbss = ABSOLUTE(.);
+    *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+    _etbss = ABSOLUTE(.);
+  } > flash
+
+  /*put wifibss in the first place*/
+  .wifibss         (NOLOAD) :
+  {
+    PROVIDE( __wifi_bss_start = ADDR(.wifibss) );
+    PROVIDE( __wifi_bss_end = ADDR(.wifibss) + SIZEOF(.wifibss) );
+    *ipc_shared.o(COMMON)
+    *sdu_shared.o(COMMON)
+    *hal_desc.o(COMMON)
+    *txl_buffer_shared.o(COMMON)
+    *txl_frame_shared.o(COMMON)
+    *scan_shared.o(COMMON)
+    *scanu_shared.o(COMMON)
+    *mfp_bip.o(COMMON)
+    *me_mic.o(COMMON)
+    *bl_sta_mgmt_others.o(COMMON)
+    *bl_pmk_mgmt.o(COMMON)
+    *bl_pmk_mgmt_internal.o(COMMON)
+    *libwifi_drv.a:bl_utils.o(COMMON)
+    *libwifi_drv.a:bl_utils.o(.bss*)
+    *(.wifi_ram*)
+    . = ALIGN(16);
+  } > ram_wifi
+
+  PROVIDE( _heap_wifi_start = . );
+  PROVIDE( _heap_wifi_size = ORIGIN(ram_wifi) + LENGTH(ram_wifi) - _heap_wifi_start );
+
+  .romdata       :
+  {
+    PROVIDE( __global_pointer$ = . + 0x7F0 );
+    . = . + 0x498;
+  } > ram_tcm AT > flash
+
+  .data          :
+  {
+    PROVIDE( _data_load = LOADADDR(.data) );
+    PROVIDE( _data_run = ADDR(.data) );
+    PROVIDE( _data_run_end = ADDR(.data) + SIZEOF(.data));
+
+    *(.tcm_code)
+    *(.tcm_const)
+    *(.sclock_rlt_code)
+    *(.sclock_rlt_const)
+    *(.data .data.*)
+    *(.gnu.linkonce.d.*)
+
+    *(.sdata .sdata.*)
+    *(.gnu.linkonce.s.*)
+
+    . = ALIGN(8);
+    *(.srodata.cst16)
+    *(.srodata.cst8)
+    *(.srodata.cst4)
+    *(.srodata.cst2)
+    *(.srodata .srodata.*)
+
+  } > ram_tcm AT > flash
+
+  .boot2 (NOLOAD) :
+  {
+    PROVIDE ( __boot2_pt_addr_start = . );
+    *(.bss.g_boot2_partition_table)
+    PROVIDE ( __boot2_pt_addr_end   = . );
+
+    PROVIDE ( __boot2_flash_cfg_start = . );
+    *(.bss.g_bl602_romflash_cfg)
+    PROVIDE ( __boot2_flash_cfg_end = . );
+  } > ram_tcm
+
+  .noinit (NOLOAD) :
+  {
+    . = ALIGN(16);
+    *(.noinit_idle_stack*)
+  } > ram_tcm
+
+  .bss (NOLOAD)   :
+  {
+    PROVIDE( __bss_start = ADDR(.bss) );
+    PROVIDE( __bss_end = ADDR(.bss) + SIZEOF(.bss) );
+
+    PROVIDE( _sbss = __bss_start );
+    PROVIDE( _ebss = __bss_end );
+
+    *(.sbss*)
+    *(.gnu.linkonce.sb.*)
+    *(.bss .bss.*)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+  } > ram_tcm
+
+  . = ALIGN(4);
+
+  PROVIDE( _heap_start = . );
+  PROVIDE( _heap_size = ADDR(.stack) - _heap_start );
+
+  /* .stack ORIGIN(ram_tcm) + LENGTH(ram_tcm) - __stack_size (NOLOAD) : */
+  .stack ORIGIN(ram_tcm) + LENGTH(ram_tcm) (NOLOAD) :
+  {
+    PROVIDE( _sp_irq_base = . );
+    /* . = . + __stack_size; */
+    /* PROVIDE( _sp_main = . ); */
+  } >ram_tcm
+
+  /*CFG FW used in code*/
+  PROVIDE( _ld_bl_static_cfg_entry_start = _bl_static_fw_cfg_entry_start );
+  PROVIDE( _ld_bl_static_cfg_entry_end   = _bl_static_fw_cfg_entry_end );
+
+  /*BOOT2 sections*/
+  PROVIDE ( __boot2_pt_addr_src = BOOT2_PT_ADDR );
+  PROVIDE ( __boot2_flash_cfg_src = BOOT2_FLASHCFG_ADDR );
+}
