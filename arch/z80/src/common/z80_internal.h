@@ -143,16 +143,6 @@ int z80_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac,
 # define z80_multicastfilter(dev, mac, enable)
 #endif
 
-/* Dump stack and registers */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-void z80_stackdump(void);
-# define Z80_REGISTER_DUMP() _REGISTER_DUMP()
-#else
-# define z80_stackdump()
-# define Z80_REGISTER_DUMP()
-#endif
-
 #ifdef __cplusplus
 }
 #endif

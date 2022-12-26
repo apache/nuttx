@@ -58,6 +58,10 @@ config VIDEO_STREAM
 
 if VIDEO_STREAM
 
+config VIDEO_REQBUFS_COUNT_MAX
+	int "Maximum Video reqbuf buffers count"
+	default 3
+
 config VIDEO_SCENE_BACKLIGHT
 	bool "Enable backlight scene"
 	default y

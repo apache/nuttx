@@ -322,7 +322,7 @@ static int nxsem_recoverholders(FAR struct semholder_s *pholder,
 static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
                                  FAR sem_t *sem, FAR void *arg)
 {
-  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
+  FAR struct tcb_s *htcb = pholder->htcb;
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)arg;
 
   /* If the priority of the thread that is waiting for a count is less than
@@ -357,7 +357,7 @@ static int nxsem_verifyholder(FAR struct semholder_s *pholder,
    */
 
 #if 0
-  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
+  FAR struct tcb_s *htcb = pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore
    * could be non-negative, and there is no thread waiting for the count.

@@ -20,39 +20,44 @@
 
 # Network device interface source files
 
-NET_CSRCS += devif_initialize.c devif_send.c devif_poll.c devif_callback.c
-NET_CSRCS += devif_loopback.c
+NET_CSRCS += devif_initialize.c devif_callback.c
 
 # Device driver IP packet receipt interfaces
 
-ifeq ($(CONFIG_NET_IPv4),y)
-NET_CSRCS += ipv4_input.c
-endif
-
-ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += ipv6_input.c
-endif
-
-# IP forwarding
-
-ifeq ($(CONFIG_NET_IPFORWARD),y)
-NET_CSRCS += devif_forward.c
-endif
-
-# I/O buffer chain support required?
-
 ifeq ($(CONFIG_MM_IOB),y)
-NET_CSRCS += devif_iobsend.c
-endif
 
-# Raw packet socket support
+  # IP packet
 
-ifeq ($(CONFIG_NET_PKT),y)
-NET_CSRCS += devif_pktsend.c
-endif
+  NET_CSRCS += devif_send.c devif_loopback.c
 
-ifeq ($(CONFIG_NET_CAN),y)
-NET_CSRCS += devif_cansend.c
+  ifeq ($(CONFIG_NET_IPv4),y)
+    NET_CSRCS += ipv4_input.c
+  endif
+
+  ifeq ($(CONFIG_NET_IPv6),y)
+    NET_CSRCS += ipv6_input.c
+  endif
+
+  # IP forwarding
+
+  ifeq ($(CONFIG_NET_IPFORWARD),y)
+    NET_CSRCS += devif_forward.c
+  endif
+
+  # I/O buffer chain support required?
+
+  NET_CSRCS += devif_poll.c
+  NET_CSRCS += devif_iobsend.c
+
+  # Raw packet socket support
+
+  ifeq ($(CONFIG_NET_PKT),y)
+    NET_CSRCS += devif_pktsend.c
+  endif
+
+  ifeq ($(CONFIG_NET_CAN),y)
+    NET_CSRCS += devif_cansend.c
+  endif
 endif
 
 # Include network device interface build support

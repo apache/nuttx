@@ -63,6 +63,23 @@ static void up_handle_irq(int irq, siginfo_t *info, void *context)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_irq_flags
+ *
+ * Description:
+ *   Get the current irq flags
+ *
+ ****************************************************************************/
+
+uint64_t up_irq_flags(void)
+{
+  union sigset_u omask;
+
+  pthread_sigmask(SIG_SETMASK, NULL, &omask.sigset);
+
+  return omask.flags;
+}
+
+/****************************************************************************
  * Name: up_irq_save
  *
  * Description:

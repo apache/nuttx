@@ -103,10 +103,3 @@ void arm64_chip_boot(void)
   qemu_earlyserialinit();
 #endif
 }
-
-#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void arm64_netinitialize(void)
-{
-  /* TODO: qemu net support will be support */
-}
-#endif

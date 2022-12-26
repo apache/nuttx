@@ -400,7 +400,6 @@ endef
 # created from scratch
 
 define ARCHIVE
-	@echo "AR (create): ${shell basename $(1)} $(2)"
 	$(Q) $(RM) $1
 	$(Q) $(AR) $1 $(2)
 endef
@@ -450,8 +449,12 @@ endef
 # DELFILE - Delete one file
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define NEWLINE
+
+
+endef
 define DELFILE
-	$(Q) if exist $1 (del /f /q $1)
+	$(foreach FILE, $(1), $(NEWLINE) $(Q) if exist $(FILE) (del /f /q  $(FILE)))
 endef
 else
 define DELFILE
@@ -463,7 +466,7 @@ endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define DELDIR
-	$(Q) if exist $1 (rmdir /q /s $1)
+	$(Q) if exist $1 (rmdir /q /s $1) $(NEWLINE)
 endef
 else
 define DELDIR
@@ -501,7 +504,7 @@ endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CATFILE
-	$(Q) type $(2) > $1
+	$(foreach FILE, $(2), $(NEWLINE) $(Q) type $(FILE) >> $1)
 endef
 else
 define CATFILE
@@ -522,6 +525,15 @@ define RWILDCARD
   $(foreach d,$(wildcard $1/*),$(call RWILDCARD,$d,$2)$(filter $(subst *,%,$2),$d))
 endef
 
+# FINDSCRIPT - Find a given linker script. Prioritize the version from currently
+#              configured board. If not provided, use the linker script from the
+#              board common directory.
+# Example: $(call FINDSCRIPT,script.ld)
+
+define FINDSCRIPT
+	$(if $(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(1)),$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(1),$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(1))
+endef
+
 # CLEAN - Default clean target
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
@@ -529,20 +541,14 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-
-define NEWLINE
-
-
-endef
-
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
 	$(Q) if exist *$(LIBEXT) (del /f /q *$(LIBEXT))
 	$(Q) if exist *~ (del /f /q *~)
 	$(Q) if exist (del /f /q  .*.swp)
-	$(foreach OBJ, $(OBJS), $(NEWLINE) $(call DELFILE,$(OBJ)))
-	$(Q) if exist $(BIN) (del /f /q  $(BIN))
-	$(Q) if exist $(EXTRA) (del /f /q  $(EXTRA))
+	$(call DELFILE,$(subst /,\,$(OBJS)))
+	$(Q) if exist $(BIN) (del /f /q  $(subst /,\,$(BIN)))
+	$(Q) if exist $(EXTRA) (del /f /q  $(subst /,\,$(EXTRA)))
 endef
 else
 define CLEAN

@@ -52,7 +52,6 @@
 #ifdef CONFIG_NET
 void up_netinitialize(void)
 {
-  return;
 }
 #endif
 

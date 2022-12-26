@@ -72,6 +72,19 @@ endif
 
 ifeq ($(CONFIG_ARM_THUMB),y)
   ARCHOPTIMIZATION += -mthumb
+
+  # GCC Manual:
+  # -mthumb
+  # ... If you want to force assembler files to be interpreted as Thumb
+  # code, either add a `.thumb' directive to the source or pass the
+  # -mthumb option directly to the assembler by prefixing it with -Wa.
+
+  ARCHOPTIMIZATION += -Wa,-mthumb
+
+  # Outputs an implicit IT block when there is a conditional instruction
+  # without an enclosing IT block.
+
+  ARCHOPTIMIZATION += -Wa,-mimplicit-it=always
 endif
 
 ifeq ($(CONFIG_UNWINDER_ARM),y)
@@ -143,7 +156,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
-  # https://github.com/apache/incubator-nuttx/pull/5971
+  # https://github.com/apache/nuttx/pull/5971
 
   ARCHOPTIMIZATION += -fno-builtin
 
@@ -163,7 +176,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
-  # https://github.com/apache/incubator-nuttx/pull/5971
+  # https://github.com/apache/nuttx/pull/5971
 
   ARCHOPTIMIZATION += -fno-builtin
   ARCHOPTIMIZATION += --target=arm-arm-none-eabi

@@ -528,7 +528,7 @@ static void usb_adb_wrcomplete(FAR struct usbdev_ep_s *ep,
     {
     case OK: /* Normal completion */
       {
-        usbtrace(TRACE_CLASSWRCOMPLETE, priv->nwrq);
+        usbtrace(TRACE_CLASSWRCOMPLETE, sq_count(&priv->txfree));
 
         /* Notify all waiting writers that write req is available */
 
@@ -549,7 +549,8 @@ static void usb_adb_wrcomplete(FAR struct usbdev_ep_s *ep,
 
     case -ESHUTDOWN: /* Disconnection */
       {
-        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), priv->nwrq);
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN),
+                 sq_count(&priv->txfree));
       }
       break;
 
@@ -600,7 +601,7 @@ static void usb_adb_rdcomplete(FAR struct usbdev_ep_s *ep,
     {
     case 0: /* Normal completion */
 
-      usbtrace(TRACE_CLASSRDCOMPLETE, priv->nrdq);
+      usbtrace(TRACE_CLASSRDCOMPLETE, sq_count(&priv->rxpending));
 
       /* Restart request due to either no reader or
        * empty frame received.
@@ -816,7 +817,7 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
 #ifdef CONFIG_USBDEV_DUALSPEED
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
-                                  uint8_t speed, uint8_t type);
+                                  uint8_t speed, uint8_t type)
 #else
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo)
@@ -956,6 +957,8 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
   FAR struct usbdev_adb_s *priv = &((FAR struct adb_driver_s *)driver)->dev;
 
   usbtrace(TRACE_CLASSBIND, 0);
+
+  priv->usbdev = dev;
 
   priv->ctrlreq = usbclass_allocreq(dev->ep0, USBADB_MXDESCLEN);
   if (priv->ctrlreq == NULL)
@@ -1123,6 +1126,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   uint16_t value;
   uint16_t len;
   int ret = -EOPNOTSUPP;
+  bool cfg_req = true;
 
   FAR struct usbdev_adb_s *priv;
   FAR struct usbdev_req_s *ctrlreq;
@@ -1198,7 +1202,12 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
                   case USB_DESC_TYPE_CONFIG:
                     {
+#ifndef CONFIG_USBDEV_DUALSPEED
                       ret = usbclass_mkcfgdesc(ctrlreq->buf, NULL);
+#else
+                      ret = usbclass_mkcfgdesc(ctrlreq->buf, NULL,
+                                               dev->speed, ctrl->req);
+#endif
                     }
                     break;
 
@@ -1213,8 +1222,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
                       ret =
                       usbclass_mkstrdesc(ctrl->value[0],
-                                        (FAR struct usb_strdesc_s *)
-                                          ctrlreq->buf);
+                                         (FAR struct usb_strdesc_s *)
+                                         ctrlreq->buf);
                     }
                     break;
 
@@ -1250,6 +1259,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 if (ctrl->type == 0)
                   {
                     ret = usbclass_setconfig(priv, value);
+                    cfg_req = false;
                   }
               }
               break;
@@ -1260,21 +1270,21 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
               break;
             }
         }
+        break;
 
       case USB_REQ_TYPE_CLASS:
         {
           /* ADB-Specific Requests */
 
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ),
-                  ctrl->req);
+                   ctrl->req);
           break;
         }
 
       default:
         {
-          usbtrace(
-            TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE),
-            ctrl->type);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE),
+                   ctrl->type);
         }
     }
 
@@ -1283,7 +1293,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
    * value (ret < 0), the USB driver will stall.
    */
 
-  if (ret >= 0)
+  if (ret >= 0 && cfg_req)
     {
       ctrlreq->len   = (len < ret) ? len : ret;
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
@@ -1688,7 +1698,7 @@ static int adb_char_blocking_io(FAR struct usbdev_adb_s *priv,
  ****************************************************************************/
 
 static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
-                               size_t len)
+                             size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct usbdev_adb_s *priv = inode->i_private;

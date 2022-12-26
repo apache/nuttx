@@ -165,10 +165,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
           /* Clear the socket error */
 
-#ifdef CONFIG_NET_SOCKOPTS
-          conn->sconn.s_error = OK;
-#endif
-          set_errno(OK);
+          _SO_CONN_SETERRNO(conn, OK);
 
           /* Indicate that the socket is now connected */
 

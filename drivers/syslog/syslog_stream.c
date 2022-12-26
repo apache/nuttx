@@ -24,151 +24,166 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
 #include <errno.h>
+#include <sys/types.h>
 
-#include <nuttx/mm/iob.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/streams.h>
 #include <nuttx/syslog/syslog.h>
 
-#include "syslog.h"
+#ifdef CONFIG_SYSLOG_STREAM
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure contains all SYSLOGing state information */
+
+struct syslog_stream_s
+{
+  struct syslog_channel_s     channel;
+  FAR struct lib_outstream_s *stream;
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static ssize_t syslog_stream_write(FAR struct syslog_channel_s *channel,
+                                   FAR const char *buffer, size_t buflen);
+static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch);
+static int syslog_stream_force(FAR struct syslog_channel_s *channel, int ch);
+static int syslog_stream_flush(FAR struct syslog_channel_s *channel);
+void syslog_stream_uninit(FAR struct syslog_channel_s *channel);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct syslog_channel_ops_s g_syslog_stream_ops =
+{
+  syslog_stream_putc,
+  syslog_stream_force,
+  syslog_stream_flush,
+  syslog_stream_write,
+  syslog_stream_uninit
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslogstream_flush
+ * Name: syslog_stream_write
+ *
+ * Description:
+ *   This is the low-level, multiple byte, system logging interface provided
+ *   for the driver interface.
+ *
+ * Input Parameters:
+ *   channel    - Handle to syslog channel to be used.
+ *   buffer     - The buffer containing the data to be output.
+ *   buflen     - The number of bytes in the buffer.
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned. A negated
+ *   errno value is returned on any failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
-static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
+static ssize_t syslog_stream_write(FAR struct syslog_channel_s *channel,
+                                   FAR const char *buffer, size_t buflen)
 {
-  FAR struct iob_s *iob;
-  int ret = OK;
+  FAR struct syslog_stream_s *chan =
+    (FAR struct syslog_stream_s *)channel;
+  ssize_t nwritten;
+  irqstate_t flags;
 
-  DEBUGASSERT(stream != NULL);
-  iob = stream->iob;
-
-  /* Do we have an IO buffer? Is there anything buffered? */
-
-  if (iob != NULL && iob->io_len > 0)
-    {
-      /* Yes write the buffered data */
-
-      do
-        {
-          ssize_t nbytes = syslog_write((FAR const char *)iob->io_data,
-                                        (size_t)iob->io_len);
-          if (nbytes < 0)
-            {
-              ret = (int)nbytes;
-            }
-          else
-            {
-              iob->io_len = 0;
-              ret = OK;
-            }
-        }
-      while (ret == -EINTR);
-    }
-
-  return ret;
+  flags = enter_critical_section();
+  nwritten = lib_stream_puts(chan->stream, buffer, buflen);
+  leave_critical_section(flags);
+  return nwritten;
 }
-#endif
 
 /****************************************************************************
- * Name: syslogstream_addchar
+ * Name: syslog_stream_putc
+ *
+ * Description:
+ *   This is the low-level, single character, system logging interface
+ *   provided for the driver interface.
+ *
+ * Input Parameters:
+ *   channel    - Handle to syslog channel to be used.
+ *   ch         - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller. A negated errno
+ *   value is returned on any failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
-static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
-                                 int ch)
+static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch)
 {
-  FAR struct iob_s *iob = stream->iob;
+  FAR struct syslog_stream_s *chan =
+    (FAR struct syslog_stream_s *)channel;
+  irqstate_t flags;
 
-  /* Add the incoming character to the buffer */
+  flags = enter_critical_section();
+  lib_stream_putc(chan->stream, ch);
+  leave_critical_section(flags);
 
-  iob->io_data[iob->io_len] = ch;
-  iob->io_len++;
-
-  /* Increment the total number of bytes buffered. */
-
-  stream->public.nput++;
-
-  /* Is the buffer full? */
-
-  if (iob->io_len >= CONFIG_IOB_BUFSIZE)
-    {
-      /* Yes.. then flush the buffer */
-
-      syslogstream_flush(stream);
-    }
+  return OK;
 }
-#endif
 
 /****************************************************************************
- * Name: syslogstream_putc
+ * Name: syslog_stream_force
+ *
+ * Description:
+ *   Force output in interrupt context.
+ *
+ * Input Parameters:
+ *   channel    - Handle to syslog channel to be used.
+ *   ch         - The character to add to the SYSLOG (must be positive).
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
  ****************************************************************************/
 
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
+static int syslog_stream_force(FAR struct syslog_channel_s *channel, int ch)
 {
-  /* Discard carriage returns */
+  FAR struct syslog_stream_s *chan =
+    (FAR struct syslog_stream_s *)channel;
 
-  if (ch != '\r')
-    {
-#ifdef CONFIG_SYSLOG_BUFFER
-      FAR struct lib_syslogstream_s *stream =
-        (FAR struct lib_syslogstream_s *)this;
+  lib_stream_putc(chan->stream, ch);
+  return OK;
+}
 
-      DEBUGASSERT(stream != NULL);
+/****************************************************************************
+ * Name: syslog_stream_flush
+ *
+ * Description:
+ *   Flush any buffer data in the file system to media.
+ *
+ * Input Parameters:
+ *   channel    - Handle to syslog channel to be used.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
 
-      /* Do we have an IO buffer? */
+static int syslog_stream_flush(FAR struct syslog_channel_s *channel)
+{
+  FAR struct syslog_stream_s *chan =
+    (FAR struct syslog_stream_s *)channel;
+  irqstate_t flags;
 
-      if (stream->iob != NULL)
-        {
-          /* Is this a linefeed? */
-
-          if (ch == '\n')
-            {
-              /* Yes... pre-pend carriage return */
-
-              syslogstream_addchar(stream, '\r');
-            }
-
-          /* Add the incoming character to the buffer */
-
-          syslogstream_addchar(stream, ch);
-        }
-      else
-#endif
-        {
-          int ret;
-
-          /* Try writing until the write was successful or until an
-           * irrecoverable error occurs.
-           */
-
-          do
-            {
-              /* Write the character to the supported logging device.  On
-               * failure, syslog_putc returns a negated errno value.
-               */
-
-              ret = syslog_putc(ch);
-              if (ret >= 0)
-                {
-                  this->nput++;
-                  return;
-                }
-
-              /* The special return value -EINTR means that syslog_putc() was
-               * awakened by a signal.  This is not a real error and must be
-               * ignored in this context.
-               */
-            }
-          while (ret == -EINTR);
-        }
-    }
+  flags = enter_critical_section();
+  lib_stream_flush(chan->stream);
+  leave_critical_section(flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -176,84 +191,77 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslogstream_create
+ * Name: syslog_stream_uninit
  *
  * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *   Only accessible from with the OS SYSLOG logic.
+ *   Disable the channel in preparation to use a different
+ *   SYSLOG device.
  *
  * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *   channel    - Handle to syslog channel to be used.
  *
  * Returned Value:
- *   None (User allocated instance initialized).
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   The caller has already switched the SYSLOG source to some safe channel
+ *   (the default channel).
  *
  ****************************************************************************/
 
-void syslogstream_create(FAR struct lib_syslogstream_s *stream)
+void syslog_stream_uninit(FAR struct syslog_channel_s *channel)
 {
-#ifdef CONFIG_SYSLOG_BUFFER
-  FAR struct iob_s *iob;
-#endif
+  FAR struct syslog_stream_s *chan =
+    (FAR struct syslog_stream_s *)channel;
 
-  DEBUGASSERT(stream != NULL);
+  /* Attempt to flush any buffered data. */
 
-  /* Initialize the common fields */
+  syslog_stream_flush(channel);
 
-  stream->public.put   = syslogstream_putc;
-  stream->public.flush = lib_noflush;
-  stream->public.nput  = 0;
+  /* Free the channel structure */
 
-#ifdef CONFIG_SYSLOG_BUFFER
-  /* Allocate an IOB */
-
-  iob                  = iob_tryalloc(true);
-  stream->iob          = iob;
-
-  if (iob != NULL)
-    {
-      /* Initialize the IOB */
-
-      iob->io_len      = 0;
-      iob->io_offset   = 0;
-      iob->io_pktlen   = 0;
-    }
-#endif
+  kmm_free(chan);
 }
 
 /****************************************************************************
- * Name: syslogstream_destroy
+ * Name: syslog_stream_channel
  *
  * Description:
- *   Free resources held by the syslog stream.
+ *   Initialize to use the device stream as the SYSLOG sink.
+ *
+ *   On power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function may be called later in the
+ *   initialization sequence after full driver support has been initialized.
+ *   (via syslog_initialize())  It installs the configured SYSLOG drivers
+ *   and enables full SYSLOGing capability.
  *
  * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *   stream - The stream device to be used.
  *
  * Returned Value:
- *   None (Resources freed).
+ *   Returns a newly created SYSLOG channel, or NULL in case of any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
-void syslogstream_destroy(FAR struct lib_syslogstream_s *stream)
+FAR struct syslog_channel_s *
+syslog_stream_channel(FAR struct lib_outstream_s *stream)
 {
+  FAR struct syslog_stream_s *chan;
+
   DEBUGASSERT(stream != NULL);
 
-  /* Verify that there is an IOB attached (there should be) */
+  chan = (FAR struct syslog_stream_s *)
+    kmm_zalloc(sizeof(struct syslog_stream_s));
 
-  if (stream->iob != NULL)
+  if (chan == NULL)
     {
-      /* Flush the output buffered in the IOB */
-
-      syslogstream_flush(stream);
-
-      /* Free the IOB */
-
-      iob_free(stream->iob);
-      stream->iob = NULL;
+      return NULL;
     }
+
+  chan->stream = stream;
+  chan->channel.sc_ops = &g_syslog_stream_ops;
+  return (FAR struct syslog_channel_s *)chan;
 }
-#endif
+
+#endif /* CONFIG_SYSLOG_STREAM */

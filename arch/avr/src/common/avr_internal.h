@@ -119,7 +119,6 @@ void weak_function avr_dma_initialize(void);
 void avr_sigdeliver(void);
 void avr_lowputc(char ch);
 void avr_lowputs(const char *str);
-void avr_dumpstate(void);
 
 /* Defined in common/avr_allocateheap.c or chip/xxx_allocateheap.c */
 

@@ -377,7 +377,16 @@ config ARCH_BOARD_ESP32S2_SAOLA_1
 	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		This is the ESP32-S2-Saola-1 board
-
+		
+config ARCH_BOARD_FRANZININHO_WIFI
+	bool "FRANZININHO WI-FI"
+	depends on ARCH_CHIP_ESP32S2WROVER
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
+	---help---
+		Franzininho Wi-Fi is a development board to evaluate the ESP32-S2 SoC
+		
 config ARCH_BOARD_ESP32S3_DEVKIT
 	bool "Espressif ESP32-S3 DevKit"
 	depends on ARCH_CHIP_ESP32S3WROOM1 || ARCH_CHIP_ESP32S3MINI1
@@ -1767,6 +1776,15 @@ config ARCH_BOARD_QEMU_ARMV8A
 		This options selects support for NuttX on the QEMU ARMv8a + virt
 		board featuring the qemu ARMv8a CPUs.
 
+config ARCH_BOARD_PINEPHONE
+	bool "PINE64 PinePhone"
+	depends on ARCH_CHIP_A64
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on PINE64 PinePhone based
+		on Allwinner A64 SoC with ARM Cortex-A53.
+
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
 	depends on ARCH_CHIP_ATSAMA5D27
@@ -1784,6 +1802,15 @@ config ARCH_BOARD_GIANT_BOARD
 	---help---
 		This options selects support for NuttX on the Groboards Giant Board,
 		featuring the SAMA5D27C-D1G SIP with 128MB DDR2 RAM.
+
+config ARCH_BOARD_JUPITER_NANO
+	bool "Starcat Jupiter Nano (SAMA5D27C-LD1G)"
+	depends on ARCH_CHIP_ATSAMA5D27
+	select SAMA5D27_JUPITER_NANO_498MHZ
+	select ARCH_HAVE_LEDS
+	---help---
+	    This options selects support for NuttX on the Starcat Jupiter Nano
+	    featuring the SAMA5D27C-LD1G SIP with 128MB LPDDR2 RAM.
 
 config ARCH_BOARD_SAMA5D3X_EK
 	bool "Atmel SAMA5D3x-EK development board"
@@ -2587,6 +2614,13 @@ config ARCH_BOARD_XX3823
 	---help---
 		none
 
+config ARCH_BOARD_S698PM_DKIT
+	bool "Sparc S698pm Dkit Board"
+	depends on ARCH_CHIP_S698PM
+	select ARCH_HAVE_LEDS
+	---help---
+		none
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	select ARCH_HAVE_BUTTONS
@@ -2700,6 +2734,7 @@ config ARCH_BOARD
 	default "esp32c3-devkit-rust-1"    if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	default "esp32s2-kaluga-1"         if ARCH_BOARD_ESP32S2_KALUGA_1
 	default "esp32s2-saola-1"          if ARCH_BOARD_ESP32S2_SAOLA_1
+	default "franzininho-wifi"         if ARCH_BOARD_FRANZININHO_WIFI
 	default "esp32s3-devkit"           if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"              if ARCH_BOARD_ESP32S3_EYE
 	default "et-stm32-stamp"           if ARCH_BOARD_ET_STM32_STAMP
@@ -2841,8 +2876,10 @@ config ARCH_BOARD
 	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "qemu-armv8a"              if ARCH_BOARD_QEMU_ARMV8A
+	default "pinephone"                if ARCH_BOARD_PINEPHONE
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
+	default "jupiter-nano"             if ARCH_BOARD_JUPITER_NANO
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
@@ -2931,6 +2968,7 @@ config ARCH_BOARD
 	default "spresense"                if ARCH_BOARD_SPRESENSE
 	default "xx3803"                   if ARCH_BOARD_XX3803
 	default "xx3823"                   if ARCH_BOARD_XX3823
+	default "s698pm-dkit"              if ARCH_BOARD_S698PM_DKIT
 
 comment "Common Board Options"
 
@@ -3028,6 +3066,9 @@ source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
+endif
+if ARCH_BOARD_PINEPHONE
+source "boards/arm64/a64/pinephone/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
@@ -3229,6 +3270,9 @@ source "boards/arm/sama5/sama5d2-xult/Kconfig"
 endif
 if ARCH_BOARD_GIANT_BOARD
 source "boards/arm/sama5/giant-board/Kconfig"
+endif
+if ARCH_BOARD_JUPITER_NANO
+source "boards/arm/sama5/jupiter-nano/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
 source "boards/arm/sama5/sama5d3x-ek/Kconfig"
@@ -3659,6 +3703,9 @@ endif
 if ARCH_BOARD_ESP32S2_SAOLA_1
 source "boards/xtensa/esp32s2/esp32s2-saola-1/Kconfig"
 endif
+if ARCH_BOARD_FRANZININHO_WIFI
+source "boards/xtensa/esp32s2/franzininho-wifi/Kconfig"
+endif
 if ARCH_BOARD_ESP32S3_DEVKIT
 source "boards/xtensa/esp32s3/esp32s3-devkit/Kconfig"
 endif
@@ -3755,6 +3802,9 @@ endif
 if ARCH_BOARD_XX3823
 source "boards/sparc/bm3823/xx3823/Kconfig"
 endif
+if ARCH_BOARD_S698PM_DKIT
+source "boards/sparc/s698pm/s698pm-dkit/Kconfig"
+endif
 if ARCH_BOARD_TLSR8278ADK80D
 source "boards/arm/tlsr82/tlsr8278adk80d/Kconfig"
 endif
@@ -3776,6 +3826,9 @@ source "boards/xtensa/esp32s2/common/Kconfig"
 endif
 if ARCH_CHIP_ESP32S3
 source "boards/xtensa/esp32s3/common/Kconfig"
+endif
+if ARCH_CHIP_ESP32C3
+source "boards/risc-v/esp32c3/common/Kconfig"
 endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"

@@ -23,7 +23,6 @@ CSRCS += sched_addreadytorun.c sched_removereadytorun.c
 CSRCS += sched_addprioritized.c sched_mergeprioritized.c sched_mergepending.c
 CSRCS += sched_addblocked.c sched_removeblocked.c
 CSRCS += sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
-CSRCS += sched_getstreams.c
 CSRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
 CSRCS += sched_setscheduler.c sched_getscheduler.c
 CSRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
@@ -87,12 +86,6 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_thistask.c
-endif
-
-ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
-ifeq ($(CONFIG_SCHED_INSTRUMENTATION_EXTERNAL),)
-CSRCS += sched_note.c
-endif
 endif
 
 ifeq ($(CONFIG_SCHED_CRITMONITOR),y)

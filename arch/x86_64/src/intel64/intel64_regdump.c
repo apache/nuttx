@@ -35,6 +35,15 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+uintptr_t up_getusrsp(void)
+{
+  return g_current_regs[REG_RSP];
+}
+
+/****************************************************************************
  * Name: x86_64_registerdump
  ****************************************************************************/
 
@@ -99,8 +108,9 @@ void backtrace(uint64_t rbp)
     }
 }
 
-void x86_64_registerdump(uint64_t *regs)
+void up_dump_register(void *dumpregs)
 {
+  volatile uint64_t *regs = dumpregs ? dumpregs : g_current_regs;
   uint64_t mxcsr;
   uint64_t cr2;
 

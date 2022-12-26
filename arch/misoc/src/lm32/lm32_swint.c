@@ -41,41 +41,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lm32_registerdump
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void lm32_registerdump(const uint32_t *regs)
-{
-#if 0
-  svcinfo("EPC:%08x\n",
-          regs[REG_EPC]);
-  svcinfo("A0:%08x A1:%08x A2:%08x A3:%08x "
-          "A4:%08x A5:%08x A6:%08x A7:%08x\n",
-          regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3],
-          regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
-  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
-          regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
-          regs[REG_T4], regs[REG_T5], regs[REG_T6]);
-  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x "
-          "S4:%08x S5:%08x S6:%08x S7:%08x\n",
-          regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
-          regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
-  svcinfo("S8:%08x S9:%08x S10:%08x S11:%08x\n",
-          regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
-#ifdef LM3232_SAVE_GP
-  svcinfo("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
-          regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
-          regs[REG_RA]);
-#else
-  svcinfo("SP:%08x FP:%08x TP:%08x RA:%08x\n",
-          regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
-#endif
-#endif
-}
-#endif
-
-/****************************************************************************
  * Name: dispatch_syscall
  *
  * Description:
@@ -141,13 +106,33 @@ int lm32_swint(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_A0]);
-  lm32_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the SWInt according to the command in $a0 */
 
   switch (regs[REG_A0])
     {
+      /* A0=SYS_save_context:  This is a save context command:
+       *
+       *   int up_saveusercontext(void *saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A0 = SYS_save_context
+       *   A1 = saveregs
+       *
+       * In this case, we simply need to copy the current registers to the
+       * save register space references in the saved R1 and return.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          lm32_copystate((uint32_t *)regs[REG_A1], regs);
+        }
+        break;
+
       /* A0=SYS_restore_context: This a restore context command:
        *
        *   void up_fullcontextrestore(uint32_t *restoreregs)
@@ -289,7 +274,7 @@ int lm32_swint(int irq, void *context, void *arg)
   if (regs != g_current_regs)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      lm32_registerdump((const uint32_t *)g_current_regs);
+      up_dump_register(g_current_regs);
     }
   else
     {

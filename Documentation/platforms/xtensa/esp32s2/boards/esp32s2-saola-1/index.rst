@@ -96,7 +96,7 @@ audio
 This configuration uses the I2S peripheral and an externally connected audio
 codec to play an audio file. The easiest way of playing an uncompressed file
 is embedding into the firmware. This configuration selects
-`romfs example <https://github.com/apache/incubator-nuttx-apps/tree/master/examples/romfs>`__
+`romfs example <https://github.com/apache/nuttx-apps/tree/master/examples/romfs>`__
 to allow that.
 
 **Audio Codec Setup**

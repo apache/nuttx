@@ -102,7 +102,8 @@
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 11)                     /* Bit 10: Exitting */
 #define TCB_FLAG_FREE_STACK        (1 << 12)                     /* Bit 12: Free stack after exit */
 #define TCB_FLAG_HEAP_CHECK        (1 << 13)                     /* Bit 13: Heap check */
-                                                                 /* Bits 14-15: Available */
+#define TCB_FLAG_HEAP_DUMP         (1 << 14)                     /* Bit 14: Heap dump */
+#define TCB_FLAG_DETACHED          (1 << 15)                     /* Bit 15: Pthread detached */
 
 /* Values for struct task_group tg_flags */
 
@@ -494,21 +495,6 @@ struct task_group_s
 
   struct filelist tg_filelist;      /* Maps file descriptor to file         */
 
-#ifdef CONFIG_FILE_STREAM
-  /* FILE streams ***********************************************************/
-
-  /* In a flat, single-heap build.  The stream list is allocated with this
-   * structure.  But kernel mode with a kernel allocator,
-  * it must be separately allocated using a user-space allocator.
-   */
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-  FAR struct streamlist *tg_streamlist;
-#else
-  struct streamlist tg_streamlist;  /* Holds C buffered I/O info            */
-#endif
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
   /* Address Environment ****************************************************/
 
@@ -840,9 +826,6 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype);
  */
 
 FAR struct filelist *nxsched_get_files(void);
-#ifdef CONFIG_FILE_STREAM
-FAR struct streamlist *nxsched_get_streams(void);
-#endif /* CONFIG_FILE_STREAM */
 
 /****************************************************************************
  * Name: nxtask_init

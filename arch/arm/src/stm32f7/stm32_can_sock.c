@@ -1045,22 +1045,19 @@ static int stm32can_txpoll(struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      if (!devif_loopback(&priv->dev))
+      stm32can_txdone(priv);
+
+      /* Send the packet */
+
+      stm32can_transmit(priv);
+
+      /* Check if there is room in the device to hold another packet. If
+       * not, return a non-zero value to terminate the poll.
+       */
+
+      if (stm32can_txready(priv) == false)
         {
-          stm32can_txdone(priv);
-
-          /* Send the packet */
-
-          stm32can_transmit(priv);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          if (stm32can_txready(priv) == false)
-            {
-              return -EBUSY;
-            }
+          return -EBUSY;
         }
     }
 

@@ -34,7 +34,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/arp.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -301,7 +300,7 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      if (arp_find(ipaddr, NULL) >= 0)
+      if (arp_find(ipaddr, NULL, dev) >= 0)
         {
           /* We have it!  Break out with success */
 

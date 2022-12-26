@@ -34,11 +34,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: x86_registerdump
+ * Name: up_getusrsp
  ****************************************************************************/
 
-void x86_registerdump(uint32_t *regs)
+uintptr_t up_getusrsp(void)
 {
+  return g_current_regs[REG_ESP];
+}
+
+/****************************************************************************
+ * Name: up_dump_register
+ ****************************************************************************/
+
+void up_dump_register(void *dumpregs)
+{
+  volatile uint32_t *regs = dumpregs ? dumpregs : g_current_regs;
+
   _alert(" ds:%08x irq:%08x err:%08x\n",
          regs[REG_DS], regs[REG_IRQNO], regs[REG_ERRCODE]);
   _alert("edi:%08x esi:%08x ebp:%08x esp:%08x\n",

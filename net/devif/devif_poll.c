@@ -377,7 +377,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_poll_out(dev, callback);
         }
     }
 
@@ -424,7 +424,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_poll_out(dev, callback);
         }
     }
   while (!bstop && (conn = icmpv6_nextconn(conn)) != NULL);
@@ -456,7 +456,7 @@ static inline int devif_poll_forward(FAR struct net_driver_s *dev,
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_poll_out(dev, callback);
 }
 #endif /* CONFIG_NET_ICMPv6_SOCKET || CONFIG_NET_ICMPv6_NEIGHBOR*/
 
@@ -486,7 +486,7 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_poll_out(dev, callback);
 }
 #endif /* CONFIG_NET_IGMP */
 
@@ -516,7 +516,7 @@ static inline int devif_poll_mld(FAR struct net_driver_s *dev,
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_poll_out(dev, callback);
 }
 #endif /* CONFIG_NET_MLD */
 
@@ -561,7 +561,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_poll_out(dev, callback);
         }
     }
 
@@ -606,7 +606,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          bstop = devif_poll_out(dev, callback);
         }
     }
 
@@ -617,11 +617,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: devif_poll
+ * Name: devif_poll_connections
  *
  * Description:
  *   This function will traverse each active network connection structure and
@@ -645,9 +641,14 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
+static int devif_poll_connections(FAR struct net_driver_s *dev,
+                                  devif_poll_callback_t callback)
 {
   int bstop = false;
+
+  /* Reset device buffer length */
+
+  dev->d_len = 0;
 
   /* Traverse all of the active packet connections and perform the poll
    * action.
@@ -769,6 +770,298 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
     }
 
   return bstop;
+}
+
+/****************************************************************************
+ * Name: devif_iob_poll
+ *
+ * Description:
+ *   This function will traverse each active network connection structure and
+ *   will perform network polling operations. devif_poll() may be called
+ *   asynchronously with the network driver can accept another outgoing
+ *   packet.
+ *
+ *   This function will call the provided callback function for every active
+ *   connection. Polling will continue until all connections have been polled
+ *   or until the user-supplied function returns a non-zero value (which it
+ *   should do only if it cannot accept further write data).
+ *
+ *   When the callback function is called, there may be an outbound packet
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero. The device driver should then
+ *   send out the packet.
+ *
+ *   This is the iob buffer version of devif_input(),
+ *   this function will support send/receive iob vectors directly between
+ *   the driver and l3/l4 stack to avoid unnecessary memory copies,
+ *   especially on hardware that supports Scatter/gather, which can
+ *   greatly improve performance
+ *   this function will uses d_iob as packets input which used by some
+ *   NICs such as celluler net driver.
+ *
+ *   If NIC hardware support Scatter/gather transfer
+ *
+ *                  tcp_poll()/udp_poll()/pkt_poll()/...(l3/l4)
+ *                             /           \
+ *                            /             \
+ *  devif_poll_[l3|l4]_connections()  devif_iob_send() (nocopy:udp/icmp/...)
+ *             /                                \      (copy:tcp)
+ *            /                                  \
+ *    devif_iob_poll("NIC"_txpoll)             callback() // "NIC"_txpoll
+ *
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+static int devif_iob_poll(FAR struct net_driver_s *dev,
+                          devif_poll_callback_t callback)
+{
+  int bstop;
+
+  /* Device polling, prepare iob buffer */
+
+  if (netdev_iob_prepare(dev, false, 0) != OK)
+    {
+      return true;
+    }
+
+  /* Perform all connections poll */
+
+  bstop = devif_poll_connections(dev, callback);
+
+  /* Device polling completed, release iob */
+
+  netdev_iob_release(dev);
+
+  return bstop;
+}
+
+/****************************************************************************
+ * Name: devif_poll_callback
+ *
+ * Description:
+ *   This function will help us to gather multiple iob memory slices into a
+ *   linear device buffer. if devices with small memory, this function will
+ *   trigger a memory copy if net device start transmit the iob slices to
+ *   flat buffer
+ *
+ ****************************************************************************/
+
+static int devif_poll_callback(FAR struct net_driver_s *dev)
+{
+  if (dev->d_len > 0)
+    {
+      return true;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: devif_poll
+ *
+ * Description:
+ *   This function will traverse each active network connection structure and
+ *   will perform network polling operations. devif_poll() may be called
+ *   asynchronously with the network driver can accept another outgoing
+ *   packet.
+ *
+ *   This function will call the provided callback function for every active
+ *   connection. Polling will continue until all connections have been polled
+ *   or until the user-supplied function returns a non-zero value (which it
+ *   should do only if it cannot accept further write data).
+ *
+ *   When the callback function is called, there may be an outbound packet
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero. The device driver should then
+ *   send out the packet.
+ *
+ *   Compatible with all old flat buffer NICs
+ *
+ *                 tcp_poll()/udp_poll()/pkt_poll()/...(l3|l4)
+ *                            /              \
+ *                           /                \
+ * devif_poll_[l3|l4]_connections()     devif_iob_send() (nocopy:udp/icmp/..)
+ *            /                                   \      (copy:tcp)
+ *           /                                     \
+ *   devif_iob_poll(devif_poll_callback())  devif_poll_callback()
+ *        /                                           \
+ *       /                                             \
+ *  devif_poll("NIC"_txpoll)                     "NIC"_send()(dev->d_buf)
+ *
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
+{
+  uint16_t llhdrlen;
+  FAR uint8_t *buf;
+  int bstop;
+
+  if (dev->d_buf == NULL)
+    {
+      return devif_iob_poll(dev, callback);
+    }
+
+  buf = dev->d_buf;
+
+  llhdrlen = NET_LL_HDRLEN(dev);
+
+  do
+    {
+      /* Device polling, prepare iob buffer */
+
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          nwarn("WARNING: IOB Prepare failed for dev %s!\n", dev->d_ifname);
+          bstop = true;
+          break;
+        }
+
+      /* Perform all connections poll */
+
+      bstop = devif_poll_connections(dev, devif_poll_callback);
+      if (dev->d_len > 0)
+        {
+          /* Copy iob to flat buffer */
+
+          iob_copyout(buf + llhdrlen,
+                      dev->d_iob, dev->d_len, 0);
+
+          /* Copy l2 header (arp out) */
+
+          memcpy(buf, dev->d_iob->io_data +
+                 (CONFIG_NET_LL_GUARDSIZE - llhdrlen), llhdrlen);
+
+          /* Restore flat buffer pointer */
+
+          dev->d_buf = buf;
+
+          /* Call the real device callback */
+
+          bstop = callback(dev);
+
+          /* Flat buffer changed by NIC ? */
+
+          if (dev->d_buf != buf)
+            {
+              buf = dev->d_buf;
+
+              if (buf == NULL)
+                {
+                  break;
+                }
+            }
+        }
+    }
+  while (bstop);
+
+  /* Device polling completed, release iob */
+
+  netdev_iob_release(dev);
+
+  /* Restore the flat buffer */
+
+  dev->d_buf = buf;
+
+  return bstop;
+}
+
+/****************************************************************************
+ * Name: devif_out
+ *
+ * Description:
+ *   Generic interface to build L2 headers
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+void devif_out(FAR struct net_driver_s *dev)
+{
+  if (dev->d_len == 0)
+    {
+      return;
+    }
+
+  switch (dev->d_lltype)
+    {
+#ifdef CONFIG_NET_ETHERNET
+      case NET_LL_ETHERNET:
+      case NET_LL_IEEE80211:
+#  ifdef CONFIG_NET_IPv4
+#    ifdef CONFIG_NET_IPv6
+        if (IFF_IS_IPv4(dev->d_flags))
+#    endif /* CONFIG_NET_IPv6 */
+          {
+            arp_out(dev);
+          }
+#  endif /* CONFIG_NET_IPv4 */
+#  ifdef CONFIG_NET_IPv6
+#    ifdef CONFIG_NET_IPv4
+        else
+#    endif /* CONFIG_NET_IPv4 */
+          {
+            neighbor_out(dev);
+          }
+#  endif /* CONFIG_NET_IPv6 */
+
+        break;
+#endif /* CONFIG_NET_ETHERNET */
+      default:
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: devif_poll_out
+ *
+ * Description:
+ *   Generic callback before device output to build L2 headers before sending
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+int devif_poll_out(FAR struct net_driver_s *dev,
+                   devif_poll_callback_t callback)
+{
+  int bstop;
+
+  if (dev->d_len == 0)
+    {
+      return 0;
+    }
+
+  devif_out(dev);
+
+  bstop = devif_loopback(dev);
+  if (bstop)
+    {
+      return bstop;
+    }
+
+  if (callback)
+    {
+      return callback(dev);
+    }
+
+  return 0;
 }
 
 #endif /* CONFIG_NET */

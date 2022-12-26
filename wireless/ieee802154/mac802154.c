@@ -244,11 +244,6 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
 
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
-
   /* Set the frame control fields */
 
   iob->io_data[0] = 0;
@@ -1533,11 +1528,6 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
   iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
-
-  iob->io_flink  = NULL;
-  iob->io_len    = 0;
-  iob->io_offset = 0;
-  iob->io_pktlen = 0;
 
   iob->io_len += 2;
 

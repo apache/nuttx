@@ -824,7 +824,6 @@ errout_with_csma:
 errout_with_lock:
   nxmutex_unlock(&priv->txlock);
   NETDEV_TXERRORS(&priv->radio.r_dev);
-  return;
 }
 
 /****************************************************************************
@@ -1198,14 +1197,6 @@ static void spirit_interrupt_work(FAR void *arg)
       if (priv->rxbuffer == NULL)
         {
           priv->rxbuffer = iob_alloc(false);
-        }
-
-      if (priv->rxbuffer != NULL)
-        {
-          priv->rxbuffer->io_len    = 0;
-          priv->rxbuffer->io_offset = 0;
-          priv->rxbuffer->io_pktlen = 0;
-          priv->rxbuffer->io_flink  = NULL;
         }
 #endif
     }

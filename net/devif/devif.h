@@ -52,6 +52,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/net/ip.h>
+#include <nuttx/net/netdev.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -231,6 +232,14 @@
 #else
 #  define DEVIF_IS_IPv6(dev) (0)
 #endif
+
+/* There are some helper pointers for accessing the contents of the Ethernet
+ * headers
+ */
+
+#define ETHBUF ((FAR struct eth_hdr_s *)\
+                &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE - \
+                                     NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Type Definitions
@@ -448,7 +457,8 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags);
  *
  ****************************************************************************/
 
-void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
+void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
+                int len, unsigned int offset);
 
 /****************************************************************************
  * Name: devif_iob_send
@@ -468,7 +478,8 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
 #ifdef CONFIG_MM_IOB
 struct iob_s;
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
-                    unsigned int len, unsigned int offset);
+                    unsigned int len, unsigned int offset,
+                    unsigned int target_offset);
 #endif
 
 /****************************************************************************
@@ -512,6 +523,86 @@ void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
 void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len);
 #endif
+
+/****************************************************************************
+ * Name: devif_out
+ *
+ * Description:
+ *   Common interface to build L2 headers
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+void devif_out(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: devif_poll_out
+ *
+ * Description:
+ *   Generic callback before device output to build L2 headers before sending
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+int devif_poll_out(FAR struct net_driver_s *dev,
+                   devif_poll_callback_t callback);
+
+/****************************************************************************
+ * Name: devif_loopback
+ *
+ * Description:
+ *   This function should be called before sending out a packet. The function
+ *   checks the destination address of the packet to see whether the target
+ *   of packet is ourself and then consume the packet directly by calling
+ *   input process functions.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet don't loop back to ourself, otherwise
+ *   a non-zero value is returned.
+ *
+ ****************************************************************************/
+
+int devif_loopback(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_input
+ *
+ * Description:
+ *   This function will copy the flat buffer that does not support
+ *   Scatter/gather to the iob vector buffer.
+ *
+ *   Compatible with all old flat buffer NICs:
+ *
+ *   [tcp|udp|icmp|...]ipv[4|6]_data_handler()
+ *                     |                    (iob_concat/append to readahead)
+ *                     |
+ *              pkt/ipv[4/6]_in()/...
+ *                     |
+ *                     |
+ *                netdev_input()  // new interface, Scatter/gather flat/iobs
+ *                     |
+ *                     |
+ *           pkt/ipv[4|6]_input()/...
+ *                     |
+ *                     |
+ *     NICs io vector receive(Orignal flat buffer)
+ *
+ * Input Parameters:
+ *   callback - Input callback of L3 stack
+ *
+ * Returned Value:
+ *   A non-zero copy is returned on success.
+ *
+ ****************************************************************************/
+
+int netdev_input(FAR struct net_driver_s *dev,
+                 devif_poll_callback_t callback, bool reply);
 
 #undef EXTERN
 #ifdef __cplusplus

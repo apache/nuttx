@@ -75,7 +75,7 @@
 #define RTC_MODULE_SLEEP_PREPARE_CYCLES (6)
 
 #ifndef MAX
-#define MAX(a,b) a > b ? a : b
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 /* Time from VDD_SDIO power up to first flash read in ROM code */

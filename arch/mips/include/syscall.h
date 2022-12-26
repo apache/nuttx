@@ -136,7 +136,12 @@
 
 /* Context switching system calls *******************************************/
 
-/* SYS call 0: (not used) */
+/* SYS call 0:
+ *
+ * int up_saveusercontext(void *saveregs);
+ */
+
+#define SYS_save_context (0)
 
 /* SYS call 1:
  *

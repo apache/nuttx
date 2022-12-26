@@ -409,7 +409,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           if (ret >= 0)
             {
               newconn->connected = true;
-              newconn->type      = conn->type;
               newconn->crefs     = 1;
 
               newsock->s_type    = psock->s_type;

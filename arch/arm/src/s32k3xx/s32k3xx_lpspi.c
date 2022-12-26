@@ -518,32 +518,6 @@ static struct s32k3xx_lpspidev_s g_lpspi5dev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spi_modifyreg
- *
- * Description:
- *   Atomic modification of the 32-bit contents of the SPI register at offset
- *
- * Input Parameters:
- *   priv      - private SPI device structure
- *   offset    - offset to the register of interest
- *   clearbits - bits to clear
- *   clearbits - bits to set
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_S32K3XX_LPSPI_DMA
-static inline void spi_modifyreg(struct s32k3xx_lpspidev_s *priv,
-                                 uint8_t offset, uint32_t clearbits,
-                                 uint32_t setbits)
-{
-  modifyreg32(priv->spibase + offset, clearbits, setbits);
-}
-#endif
-
-/****************************************************************************
  * Name: s32k3xx_lpspi_getreg8
  *
  * Description:
@@ -746,7 +720,7 @@ static inline uint16_t
 }
 
 /****************************************************************************
- * Name: s32k3xx_lpspi_modifyreg
+ * Name: s32k3xx_lpspi_modifyreg32
  *
  * Description:
  *   Clear and set bits in register
@@ -1104,9 +1078,9 @@ static uint32_t s32k3xx_lpspi_setfrequency(struct spi_dev_s *dev,
 
       /* Write the best values in the CCR register */
 
-      regval &= ~LPSPI_CCR_SCKDIV_MASK;
-      regval |= LPSPI_CCR_SCKDIV(best_scaler);
-      s32k3xx_lpspi_putreg32(priv, S32K3XX_LPSPI_CCR_OFFSET, regval);
+      s32k3xx_lpspi_modifyreg32(priv, S32K3XX_LPSPI_CCR_OFFSET,
+                                LPSPI_CCR_SCKDIV_MASK,
+                                LPSPI_CCR_SCKDIV(best_scaler));
 
       /* Re-enable LPSPI if it was enabled previously */
 
@@ -1764,9 +1738,9 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
 
   regval = s32k3xx_lpspi_getreg32(priv, S32K3XX_LPSPI_CFGR1_OFFSET);
 
-  spi_modifyreg(priv, S32K3XX_LPSPI_CR_OFFSET,
-                LPSPI_CR_RTF | LPSPI_CR_RRF,
-                LPSPI_CR_RTF | LPSPI_CR_RRF);
+  s32k3xx_lpspi_modifyreg32(priv, S32K3XX_LPSPI_CR_OFFSET,
+                            LPSPI_CR_RTF | LPSPI_CR_RRF,
+                            LPSPI_CR_RTF | LPSPI_CR_RRF);
 
   s32k3xx_lpspi_putreg32(priv, S32K3XX_LPSPI_CFGR1_OFFSET, regval);
 
@@ -1777,6 +1751,17 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   /* disable DMA */
 
   s32k3xx_lpspi_putreg32(priv, S32K3XX_LPSPI_DER_OFFSET, 0);
+
+  if (txbuffer)
+    {
+      up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+    }
+
+  if (rxbuffer)
+    {
+     up_invalidate_dcache((uintptr_t)rxbuffer,
+                          (uintptr_t)rxbuffer + nbytes);
+    }
 
   /* Set up the DMA */
 
@@ -1792,7 +1777,6 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
-  config.ttype  = EDMA_PERIPH2MEM;
   config.nbytes = adjust;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
@@ -1807,7 +1791,6 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
-  config.ttype  = EDMA_MEM2PERIPH;
   config.nbytes = adjust;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
@@ -1821,16 +1804,16 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
 
   /* Invoke SPI DMA */
 
-  spi_modifyreg(priv, S32K3XX_LPSPI_DER_OFFSET,
-                0, LPSPI_DER_TDDE | LPSPI_DER_RDDE);
+  s32k3xx_lpspi_modifyreg32(priv, S32K3XX_LPSPI_DER_OFFSET,
+                            0, LPSPI_DER_TDDE | LPSPI_DER_RDDE);
 
   /* Then wait for each to complete */
 
-  ret = spi_dmarxwait(priv);
+  ret = spi_dmatxwait(priv);
 
   if (ret < 0)
     {
-      ret = spi_dmatxwait(priv);
+      ret = spi_dmarxwait(priv);
     }
 
   /* Reset any status */
@@ -1842,9 +1825,6 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
   /* Disable DMA */
 
   s32k3xx_lpspi_putreg32(priv, S32K3XX_LPSPI_DER_OFFSET, 0);
-
-  up_invalidate_dcache((uintptr_t)rxbuffer,
-                           (uintptr_t)rxbuffer + nbytes);
 }
 
 #endif  /* CONFIG_S32K3XX_SPI_DMA */

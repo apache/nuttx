@@ -135,16 +135,16 @@ ARM architecture:
 .. tip::
   There are hints on how to get the latest tool chains for most supported
   architectures in the Apache NuttX CI helper
-  `script <https://github.com/apache/incubator-nuttx/tree/master/tools/ci/cibuild.sh>`_
-  and Docker `container <https://github.com/apache/incubator-nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
+  `script <https://github.com/apache/nuttx/tree/master/tools/ci/cibuild.sh>`_
+  and Docker `container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
   
 .. todo::
-  Required toolchain should be part of each arch documentation (see `relevant issue <https://github.com/apache/incubator-nuttx/issues/2409>`_).
+  Required toolchain should be part of each arch documentation (see `relevant issue <https://github.com/apache/nuttx/issues/2409>`_).
 
 Download NuttX
 ==============
 
-Apache NuttX is actively developed on GitHub. There are two main repositories, `nuttx <https://github.com/apache/incubator-nuttx>`_ and `apps <https://github.com/apache/incubator-nuttx-apps>`_, where the latter is technically optional (but recommended for complete set of features). If you intend to contribute changes, you need the absolute latest version or you simply prefer to work using git, you should clone these repositories (recommended). Otherwise you can choose to download any `stable release <https://nuttx.apache.org/download/>`_ archive.
+Apache NuttX is actively developed on GitHub. There are two main repositories, `nuttx <https://github.com/apache/nuttx>`_ and `apps <https://github.com/apache/nuttx-apps>`_, where the latter is technically optional (but recommended for complete set of features). If you intend to contribute changes, you need the absolute latest version or you simply prefer to work using git, you should clone these repositories (recommended). Otherwise you can choose to download any `stable release <https://nuttx.apache.org/download/>`_ archive.
 
 .. tabs::
 
@@ -154,8 +154,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
 
        $ mkdir nuttxspace
        $ cd nuttxspace
-       $ git clone https://github.com/apache/incubator-nuttx.git nuttx
-       $ git clone https://github.com/apache/incubator-nuttx-apps apps
+       $ git clone https://github.com/apache/nuttx.git nuttx
+       $ git clone https://github.com/apache/nuttx-apps apps
 
     The development source code is also available as a compressed archive, should you need it:
 
@@ -163,8 +163,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
 
        $ mkdir nuttxspace
        $ cd nuttxspace
-       $ curl -L https://github.com/apache/incubator-nuttx/tarball/master -o nuttx.tar.gz 
-       $ curl -L https://github.com/apache/incubator-nuttx-apps/tarball/master -o apps.tar.gz
+       $ curl -L https://github.com/apache/nuttx/tarball/master -o nuttx.tar.gz 
+       $ curl -L https://github.com/apache/nuttx-apps/tarball/master -o apps.tar.gz
        $ tar zxf nuttx.tar.gz --one-top-level=nuttx --strip-components 1
        $ tar zxf apps.tar.gz --one-top-level=apps --strip-components 1
        
@@ -180,7 +180,7 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
     
        $ mkdir nuttxspace
        $ cd nuttxspace
-       $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-10.1.0-incubating.tar.gz?action=download -o nuttx.tar.gz 
-       $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-apps-10.1.0-incubating.tar.gz?action=download -o apps.tar.gz
+       $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.0.0/apache-nuttx-12.0.0.tar.gz?action=download -o nuttx.tar.gz
+       $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.0.0/apache-nuttx-apps-12.0.0.tar.gz?action=download -o apps.tar.gz
        $ tar zxf nuttx.tar.gz
        $ tar zxf apps.tar.gz

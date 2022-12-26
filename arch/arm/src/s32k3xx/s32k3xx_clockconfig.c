@@ -1053,7 +1053,7 @@ int s32k3xx_clockconfig(const struct clock_configuration_s *clkcfg)
   ret = s32k3xx_cgm_config(&clkcfg->cgm);
   if (ret >= 0)
     {
-        s32k3xx_periphclocks(clkcfg->pcc.count, clkcfg->pcc.pclks);
+        s32k3xx_periphclocks(num_of_peripheral_clocks_0, clkcfg->pcc.pclks);
     }
 
   return 0;

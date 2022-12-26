@@ -40,7 +40,6 @@
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>

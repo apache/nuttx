@@ -64,7 +64,7 @@ int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   /* Call back into the driver */
 
-  return callback(dev);
+  return devif_poll_out(dev, callback);
 }
 
 #endif /* CONFIG_NET_ARP_SEND */

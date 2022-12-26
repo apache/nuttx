@@ -69,7 +69,7 @@ static int sim_rtc_rdtime(struct rtc_lowerhalf_s *lower,
   uint64_t nsec;
   time_t sec;
 
-  nsec  = sim_host_gettime(true);
+  nsec  = host_gettime(true);
   nsec += g_sim_delta;
   sec   = nsec / NSEC_PER_SEC;
   nsec -= sec * NSEC_PER_SEC;
@@ -86,7 +86,7 @@ static int sim_rtc_settime(struct rtc_lowerhalf_s *lower,
   g_sim_delta = timegm((struct tm *)rtctime);
   g_sim_delta *= NSEC_PER_SEC;
   g_sim_delta += rtctime->tm_nsec;
-  g_sim_delta -= sim_host_gettime(true);
+  g_sim_delta -= host_gettime(true);
 
   return OK;
 }

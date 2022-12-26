@@ -59,6 +59,8 @@
 #  include "esp32c3_ble.h"
 #endif
 
+#include "esp32c3_board_apds9960.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -93,7 +95,8 @@ int esp32c3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+#if defined(CONFIG_ESP32C3_SHA_ACCELERATOR) && \
+    !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
   ret = esp32c3_sha_init();
   if (ret < 0)
     {
@@ -147,7 +150,7 @@ int esp32c3_bringup(void)
 #ifdef CONFIG_SENSORS_APDS9960
   /* Register the APDS-9960 gesture sensor */
 
-  ret = apds9960_initialize(0, 0);
+  ret = board_apds9960_initialize(0, 0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",

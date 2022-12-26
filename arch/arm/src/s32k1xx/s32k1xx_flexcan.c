@@ -502,9 +502,6 @@ static void s32k1xx_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t s32k1xx_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
-static uint32_t s32k1xx_waitesr2_change(uint32_t base,
-                                       uint32_t mask,
-                                       uint32_t target_state);
 
 /* Interrupt handling */
 
@@ -796,26 +793,23 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      if (!devif_loopback(&priv->dev))
+      s32k1xx_txdone(priv);
+
+      /* Send the packet */
+
+      s32k1xx_transmit(priv);
+
+      /* Check if there is room in the device to hold another packet. If
+       * not, return a non-zero value to terminate the poll.
+       */
+
+      if ((getreg32(priv->base + S32K1XX_CAN_ESR2_OFFSET) &
+          (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
+          (CAN_ESR2_IMB | CAN_ESR2_VPS))
         {
-          s32k1xx_txdone(priv);
-
-          /* Send the packet */
-
-          s32k1xx_transmit(priv);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          if ((getreg32(priv->base + S32K1XX_CAN_ESR2_OFFSET) &
-              (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-              (CAN_ESR2_IMB | CAN_ESR2_VPS))
+          if (s32k1xx_txringfull(priv))
             {
-              if (s32k1xx_txringfull(priv))
-                {
-                  return -EBUSY;
-                }
+              return -EBUSY;
             }
         }
     }
@@ -1219,26 +1213,6 @@ static void s32k1xx_setenable(uint32_t base, uint32_t enable)
   s32k1xx_waitmcr_change(base, CAN_MCR_LPMACK, 1);
 }
 
-static uint32_t s32k1xx_waitesr2_change(uint32_t base, uint32_t mask,
-                                       uint32_t target_state)
-{
-  const uint32_t timeout = 1000;
-  uint32_t wait_ack;
-
-  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
-    {
-      uint32_t state = (getreg32(base + S32K1XX_CAN_ESR2_OFFSET) & mask);
-      if (state == target_state)
-        {
-          return true;
-        }
-
-      up_udelay(10);
-    }
-
-  return false;
-}
-
 static void s32k1xx_setfreeze(uint32_t base, uint32_t freeze)
 {
   uint32_t regval;
@@ -1398,9 +1372,7 @@ static void s32k1xx_txavail_work(void *arg)
        * packet.
        */
 
-      if (s32k1xx_waitesr2_change(priv->base,
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS),
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS)))
+      if (!s32k1xx_txringfull(priv))
         {
           /* No, there is space for another transfer.  Poll the network for
            * new XMIT data.

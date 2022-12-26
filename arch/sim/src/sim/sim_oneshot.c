@@ -114,7 +114,7 @@ static inline void sim_timer_current(struct timespec *ts)
   uint64_t nsec;
   time_t sec;
 
-  nsec  = sim_host_gettime(false);
+  nsec  = host_gettime(false);
   sec   = nsec / NSEC_PER_SEC;
   nsec -= sec * NSEC_PER_SEC;
 
@@ -410,7 +410,7 @@ void up_timer_initialize(void)
 #ifdef CONFIG_SIM_WALLTIME_SIGNAL
   int host_alarm_irq;
 
-  sim_host_settimer(&host_alarm_irq);
+  host_settimer(&host_alarm_irq);
 
   /* Enable the alarm handler and attach the interrupt to the NuttX logic */
 
@@ -442,7 +442,7 @@ void sim_timer_update(void)
   /* Wait a bit so that the timing is close to the correct rate. */
 
   until += NSEC_PER_TICK;
-  sim_host_sleepuntil(until);
+  host_sleepuntil(until);
 
 #ifdef CONFIG_SIM_WALLTIME_SLEEP
   sim_timer_update_internal();

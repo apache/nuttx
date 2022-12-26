@@ -31,6 +31,7 @@
 #include <stdbool.h>
 
 #include <nuttx/net/ip.h>
+#include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NETDOWN_NOTIFIER
 #  include <nuttx/wqueue.h>

@@ -223,12 +223,13 @@ config SYSLOG_RPMSG
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
-config SYSLOG_RTT
-	bool "Log to Segger J-Link RTT"
-	select SEGGER_RTT
+config SYSLOG_STREAM
+	bool "Log to stream"
 	default n
 	---help---
-		Use Segger J-Link RTT as a SYSLOG output device.
+		Enables support to use stream as syslog backend, such as block out stream.
+		It is recommended to implement the backend stream in a way that syslog
+		works in interrupt context.
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"

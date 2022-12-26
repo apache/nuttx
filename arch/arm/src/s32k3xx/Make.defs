@@ -76,6 +76,18 @@ ifeq ($(CONFIG_S32K3XX_QSPI),y)
 CHIP_CSRCS += s32k3xx_qspi.c
 endif
 
+ifeq ($(CONFIG_S32K3XX_PROGMEM),y)
+CHIP_CSRCS += s32k3xx_progmem.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += s32k3xx_userspace.c
+endif
+
+ifeq ($(CONFIG_ARM_MPU),y)
+CHIP_CSRCS += s32k3xx_mpuinit.c
+endif
+
 # Make sure that the S32K3 common directory in included in the VPATH
 
 VPATH += chip/common

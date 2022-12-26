@@ -73,7 +73,7 @@
 #undef USART3_ASSIGNED
 #undef USART4_ASSIGNED
 
-#ifdef SAMA5_HAVE_FLEXCOM_USART
+#ifdef CONFIG_SAMA5_FLEXCOM_USART
 
 /* Which Flexcom with be ttyFC0/console and which ttyFC1? ttyFC2? ttyFC3?
  * ttyFC4? ttyFC5?
@@ -117,16 +117,13 @@
 #    define FLEXUS3_ASSIGNED    1
 #  elif defined(CONFIG_USART4_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus4port /* FLEXUS4 is ttyFC0 */
-#    define FLEXUS4_ASSIGNED    4
+#    define FLEXUS4_ASSIGNED    1
 #  endif
 #endif
 
-/* Pick ttyFC1.  This could be any of USART0-4 excluding the console UART. */
+/* Pick ttyFC1.  This could be any of USART1-4 excluding the console UART. */
 
-#if defined(CONFIG_USART0_SERIALDRIVER) && !defined(FLEXUS0_ASSIGNED)
-#  define TTYFC1_DEV           g_flexus0port /* FLEXUS0 is ttyFC1 */
-#  define FLEXUS0_ASSIGNED     1
-#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
+#if defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
 #  define TTYFC1_DEV           g_flexus1port /* FLEXUS1 is ttyFC1 */
 #  define FLEXUS1_ASSIGNED     1
 #elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
@@ -140,34 +137,28 @@
 #  define FLEXUS4_ASSIGNED     1
 #endif
 
-/* Pick ttyFC2.  This could be one of FLEXUS1-4. It can't be FLEXUS0
+/* Pick ttyFC2.  This could be one of FLEXUS2-4. It can't be FLEXUS0
  * because that was either assigned as ttyFC0 or ttyFC1.  One of these
  * could also be the console.
  */
 
-#if defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
-#  define TTYFC2_DEV           g_flexus1port /* FLEXUS1 is ttyFC2 */
-#  define FLEXUS1_ASSIGNED     1
-#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
+#if defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus2port /* FLEXUS2 is ttyFC2 */
 #  define FLEXUS2_ASSIGNED     1
 #elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus3port /* FLEXUS3 is ttyFC2 */
 #  define FLEXUS3_ASSIGNED     1
-#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(FLEXUS4_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus4port /* FLEXUS4 is ttyFC2 */
 #  define FLEXUS4_ASSIGNED     1
 #endif
 
-/* Pick ttyFC3.  This could be one of FLEXUS2-4. It can't be FLEXUS0-1
+/* Pick ttyFC3.  This could be one of FLEXUS3-4. It can't be FLEXUS0-1
  * UART0-1; those have already been assigned to ttyFC0, 1, or 2.  One of
  * FLEXUS2-4 could also be the console.
  */
 
-#if defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
-#  define TTYFC3_DEV           g_flexus2port /* FLEXUS2 is ttyFC3 */
-#  define FLEXUS2_ASSIGNED     1
-#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
+#if defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
 #  define TTYFC3_DEV           g_flexus3port /* FLEXUS3 is ttyFC3 */
 #  define FLEXUS3_ASSIGNED     1
 #elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(FLEXUS4_ASSIGNED)
@@ -175,17 +166,14 @@
 #  define FLEXUS4_ASSIGNED     1
 #endif
 
-/* Pick ttyFC4.  This could be one of USART3-4. It can't be one of
+/* Pick ttyFC4.  This could be USART4. It can't be one of
  * USART0-2; those have already been assigned to ttyFC0-3.  One of
  * USART3-4 could also be the console.
  */
 
-#if defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
-#  define TTYFC4_DEV           g_flexus3port /* USART3 is ttyFC4 */
-#  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
+#if defined(CONFIG_USART4_SERIALDRIVER) && !defined(FLEXUS4_ASSIGNED)
 #  define TTYFC4_DEV           g_flexus4port /* USART4 is ttyFC4 */
-#  define USART4_ASSIGNED     1
+#  define FLEXUS4_ASSIGNED     1
 #endif
 
 /* The Flexcom modules are driven by the peripheral clock (MCK or MCK2). */
@@ -221,7 +209,7 @@ static void flexus_shutdown(struct uart_dev_s *dev);
 static int  flexus_attach(struct uart_dev_s *dev);
 static void flexus_detach(struct uart_dev_s *dev);
 static int  flexus_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  flexus_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  flexus_receive(struct uart_dev_s *dev, unsigned int *status);
 static void flexus_rxint(struct uart_dev_s *dev, bool enable);
 static bool flexus_rxavailable(struct uart_dev_s *dev);
 static void flexus_send(struct uart_dev_s *dev, int ch);
@@ -262,7 +250,7 @@ static char g_flexus0txbuffer[CONFIG_USART0_TXBUFSIZE];
 static char g_flexus1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_flexus1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_USART2_SERIALDRIVER
+#ifdef CONFIG_SAMA5_FLEXCOM2_USART
 static char g_flexus2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_flexus2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
@@ -343,7 +331,7 @@ static uart_dev_t g_flexus1port =
 
 /* This describes the state of the USART2 port. */
 
-#ifdef CONFIG_USART2_SERIALDRIVER
+#ifdef CONFIG_SAMA5_FLEXCOM2_USART
 static struct flexus_dev_s g_flexus2priv =
 {
   .usartbase      = SAM_FLEXCOM2_VBASE,
@@ -973,7 +961,7 @@ static int flexus_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int flexus_receive(struct uart_dev_s *dev, uint32_t *status)
+static int flexus_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct flexus_dev_s *priv = (struct flexus_dev_s *)dev->priv;
 

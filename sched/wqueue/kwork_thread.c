@@ -126,7 +126,7 @@ static int work_thread(int argc, FAR char *argv[])
 {
   FAR struct kwork_wqueue_s *wqueue;
   FAR struct work_s *work;
-  worker_t  worker;
+  worker_t worker;
   irqstate_t flags;
   FAR void *arg;
 

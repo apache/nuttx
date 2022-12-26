@@ -76,16 +76,6 @@
 #  define CONFIG_IOB_ALIGNMENT      1
 #endif
 
-#if !defined(CONFIG_IOB_HEADSIZE)
-#  define CONFIG_IOB_HEADSIZE       0
-#endif
-
-/* For backward compatibility when not using iob header padding */
-
-#if CONFIG_IOB_HEADSIZE == 0
-#  define  io_head  io_data
-#endif
-
 /* IOB helpers */
 
 #define IOB_DATA(p)      (&(p)->io_data[(p)->io_offset])
@@ -124,9 +114,6 @@ struct iob_s
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
-#if CONFIG_IOB_HEADSIZE > 0
-  uint8_t  io_head[CONFIG_IOB_HEADSIZE];
-#endif
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
 };
 
@@ -464,8 +451,33 @@ unsigned int iob_tailroom(FAR struct iob_s *iob);
  *
  ****************************************************************************/
 
-int iob_clone(FAR struct iob_s *iob1,
-              FAR struct iob_s *iob2, bool throttled);
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2,
+              bool throttled, bool block);
+
+/****************************************************************************
+ * Name: iob_clone_partial
+ *
+ * Description:
+ *   Duplicate the data from partial bytes of iob1 to iob2
+ *
+ * Input Parameters:
+ *   iob1      - Pointer to source iob_s
+ *   len       - Number of bytes to copy
+ *   offset1   - Offset of source iobs_s
+ *   iob2      - Pointer to destination iob_s
+ *   offset2   - Offset of destination iobs_s
+ *   throttled - An indication of the IOB allocation is "throttled"
+ *   block     - Flag of Enable/Disable nonblocking operation
+ *
+ * Returned Value:
+ *   == 0  - Partial clone successfully.
+ *   < 0   - No available to clone to destination iob.
+ *
+ ****************************************************************************/
+
+int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
+                      unsigned int offset1, FAR struct iob_s *iob2,
+                      unsigned int offset2, bool throttled, bool block);
 
 /****************************************************************************
  * Name: iob_concat
@@ -543,6 +555,40 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
  ****************************************************************************/
 
 int iob_contig(FAR struct iob_s *iob, unsigned int len);
+
+/****************************************************************************
+ * Name: iob_reserve
+ *
+ * Description:
+ *   Adjust headroom offset of iobs by reducing the tail room.
+ *
+ ****************************************************************************/
+
+void iob_reserve(FAR struct iob_s *iob, unsigned int reserved);
+
+/****************************************************************************
+ * Name: iob_update_pktlen
+ *
+ * Description:
+ *   This function will update packet length of the iob, it will be
+ *   trimmed if the length of the iob chain is greater than the current
+ *   length.
+ *   This function will not grow the iob link, any grow operation should
+ *   be implemented through iob_copyin()/iob_trycopyin().
+ *
+ ****************************************************************************/
+
+void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen);
+
+/****************************************************************************
+ * Name: iob_count
+ *
+ * Description:
+ *   Get iob entries count in chain.
+ *
+ ****************************************************************************/
+
+int iob_count(FAR struct iob_s *iob);
 
 /****************************************************************************
  * Name: iob_dump

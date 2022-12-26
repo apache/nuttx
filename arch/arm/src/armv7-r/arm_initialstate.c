@@ -139,6 +139,10 @@ void up_initial_state(struct tcb_s *tcb)
 
 #endif /* !CONFIG_ARMV7R_DECODEFIQ */
 
+#ifdef CONFIG_ARM_THUMB
+  cpsr |= PSR_T_BIT;
+#endif
+
 #ifdef CONFIG_ENDIAN_BIG
 
   cpsr |= PSR_E_BIT;

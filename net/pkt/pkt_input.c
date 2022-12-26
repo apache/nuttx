@@ -36,20 +36,22 @@
 #include "pkt/pkt.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define PKTBUF ((FAR struct eth_hdr_s *)dev->d_buf)
-
-/****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pkt_input
+ * Name: pkt_in
  *
  * Description:
  *   Handle incoming packet input
+ *
+ *   This is the iob buffer version of pkt_input(),
+ *   this function will support send/receive iob vectors directly between
+ *   the driver and l3/l4 stack to avoid unnecessary memory copies,
+ *   especially on hardware that supports Scatter/gather, which can
+ *   greatly improve performance
+ *   this function will uses d_iob as packets input which used by some
+ *   NICs such as celluler net driver.
  *
  * Input Parameters:
  *   dev - The device driver structure containing the received packet
@@ -65,10 +67,10 @@
  *
  ****************************************************************************/
 
-int pkt_input(struct net_driver_s *dev)
+static int pkt_in(FAR struct net_driver_s *dev)
 {
   FAR struct pkt_conn_s *conn;
-  FAR struct eth_hdr_s  *pbuf = PKTBUF;
+  FAR struct eth_hdr_s  *pbuf = ETHBUF;
   int ret = OK;
 
   conn = pkt_active(pbuf);
@@ -107,6 +109,53 @@ int pkt_input(struct net_driver_s *dev)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pkt_input
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int pkt_input(FAR struct net_driver_s *dev)
+{
+  FAR uint8_t *buf;
+  int ret;
+
+  if (dev->d_iob != NULL)
+    {
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                        NET_LL_HDRLEN(dev)];
+      ret = pkt_in(dev);
+
+      dev->d_buf = buf;
+
+      return ret;
+    }
+
+  return netdev_input(dev, pkt_in, false);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

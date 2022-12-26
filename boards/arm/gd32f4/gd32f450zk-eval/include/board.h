@@ -283,6 +283,16 @@ typedef enum
 #  define GPIO_USART3_TX GPIO_USART3_TX_3
 #endif
 
+/* I2C0 gpios:
+ *
+ *   PB6      I2C0_SCL
+ *   PB7      I2C0_SDA
+ *
+ */
+
+#define GPIO_I2C0_SCL   GPIO_I2C0_SCL_1
+#define GPIO_I2C0_SDA   GPIO_I2C0_SDA_1
+
 /* SPI flash
  *
  *  PG12  SPI5_MISO

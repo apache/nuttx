@@ -42,7 +42,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/tcp.h>
 
 #include "netdev/netdev.h"
@@ -77,7 +76,7 @@
 
 struct send_s
 {
-  FAR struct socket      *snd_sock;     /* Points to the parent socket structure */
+  FAR struct tcp_conn_s  *snd_conn;     /* The TCP connection of interest */
   FAR struct devif_callback_s *snd_cb;  /* Reference to callback instance */
   sem_t                   snd_sem;      /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;   /* Points to the buffer of data to send */
@@ -139,7 +138,6 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(conn->domain == PF_INET6);
       tcp_ipv6_select(dev);
     }
 }
@@ -169,19 +167,15 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
                                      FAR void *pvpriv, uint16_t flags)
 {
   FAR struct send_s *pstate = pvpriv;
-  FAR struct socket *psock;
   FAR struct tcp_conn_s *conn;
 
   DEBUGASSERT(pstate != NULL);
-
-  psock = pstate->snd_sock;
-  DEBUGASSERT(psock != NULL);
 
   /* Get the TCP connection pointer reliably from
    * the corresponding TCP socket.
    */
 
-  conn = psock->s_conn;
+  conn = pstate->snd_conn;
   DEBUGASSERT(conn != NULL);
 
   /* The TCP socket is connected and, hence, should be bound to a device.
@@ -224,7 +218,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       if (conn->domain == PF_INET)
 #endif
         {
-          DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
           tcp = TCPIPv4BUF;
         }
 #endif /* CONFIG_NET_IPv4 */
@@ -234,7 +227,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
           tcp = TCPIPv6BUF;
         }
 #endif /* CONFIG_NET_IPv6 */
@@ -333,9 +325,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * happen until the polling cycle completes).
        */
 
-      devif_send(dev,
-                 &pstate->snd_buffer[pstate->snd_acked],
-                 sndlen);
+      devif_send(dev, &pstate->snd_buffer[pstate->snd_acked],
+                 sndlen, tcpip_hdrsize(conn));
 
       /* Continue waiting */
 
@@ -416,7 +407,12 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
            * happen until the polling cycle completes).
            */
 
-          devif_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
+          devif_send(dev, &pstate->snd_buffer[pstate->snd_sent],
+                     sndlen, tcpip_hdrsize(conn));
+          if (dev->d_sndlen == 0)
+            {
+              return flags;
+            }
 
           /* Update the amount of data sent (but not necessarily ACKed) */
 
@@ -604,9 +600,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0);    /* Doesn't really fail */
 
-  state.snd_sock      = psock;             /* Socket descriptor to use */
-  state.snd_buflen    = len;               /* Number of bytes to send */
-  state.snd_buffer    = buf;               /* Buffer to send from */
+  state.snd_conn   = conn; /* Socket descriptor to use */
+  state.snd_buflen = len;  /* Number of bytes to send */
+  state.snd_buffer = buf;  /* Buffer to send from */
 
   if (len > 0)
     {

@@ -119,17 +119,12 @@ int devif_loopback(FAR struct net_driver_s *dev)
       else
 #endif
         {
+          nwarn("WARNING: Unrecognized IP version\n");
           NETDEV_RXDROPPED(dev);
+          dev->d_len = 0;
         }
 
       NETDEV_TXDONE(dev);
-
-      /* Add the link layer header length for the next loop */
-
-      if (dev->d_len != 0)
-        {
-          dev->d_len += dev->d_llhdrlen;
-        }
     }
   while (dev->d_len > 0);
 

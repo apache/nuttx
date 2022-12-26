@@ -92,7 +92,7 @@ RUN mkdir clang-arm-none-eabi && \
 RUN mkdir gcc-arm-none-eabi && \
   curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ  \
-  && curl -s -L -O "https://raw.githubusercontent.com/apache/incubator-nuttx/master/tools/ci/patch/arm-none-eabi-workaround-for-newlib-version-break.patch" \
+  && curl -s -L -O "https://raw.githubusercontent.com/apache/nuttx/master/tools/ci/patch/arm-none-eabi-workaround-for-newlib-version-break.patch" \
   && patch -p0 < arm-none-eabi-workaround-for-newlib-version-break.patch
 
 ###############################################################################
@@ -177,7 +177,7 @@ RUN cd /tools/renesas-tools/build/gcc && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
 # Download the latest RISCV GCC toolchain prebuilt by SiFive
 RUN mkdir riscv64-unknown-elf-gcc && \
-  curl -s -L "https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz" \
+  curl -s -L "https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.12/riscv64-unknown-elf-toolchain-10.2.0-2020.12.8-x86_64-linux-ubuntu14.tar.gz" \
   | tar -C riscv64-unknown-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
@@ -245,10 +245,12 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libasound2-dev libasound2-dev:i386 \
   libc6-dev-i386 \
   libcurl4-openssl-dev \
+  libmad0-dev:i386 \
   libncurses5-dev \
   libpulse-dev libpulse-dev:i386 \
   libpython2.7 \
   libtinfo5 \
+  libv4l-dev libv4l-dev:i386 \
   libx11-dev libx11-dev:i386 \
   libxext-dev libxext-dev:i386 \
   linux-headers-generic \
@@ -308,7 +310,7 @@ ENV PATH="/tools/rust/cargo/bin:$PATH"
 
 # ARM toolchain
 COPY --from=nuttx-toolchain-arm /tools/clang-arm-none-eabi/ clang-arm-none-eabi/
-CMD cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
+RUN cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
 ENV PATH="/tools/clang-arm-none-eabi/bin:$PATH"
 
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/

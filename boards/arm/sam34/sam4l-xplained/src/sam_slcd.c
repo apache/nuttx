@@ -71,11 +71,11 @@
 /* The ever-present MIN/MAX macros ******************************************/
 
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (a > b ? a : b)
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
 /* LCD **********************************************************************/
@@ -226,15 +226,6 @@
  * Private Type Definition
  ****************************************************************************/
 
-/* SLCD incoming stream structure */
-
-struct slcd_instream_s
-{
-  struct lib_instream_s stream;
-  const char *buffer;
-  ssize_t nbytes;
-};
-
 /* Global SLCD state */
 
 struct sam_slcdstate_s
@@ -276,7 +267,6 @@ static void slcd_setpixel(const struct slcd_pixel_s *info);
 static void slcd_clrpixel(const struct slcd_pixel_s *info);
 static inline void slcd_setdp(uint8_t curpos);
 static inline void slcd_clrdp(uint8_t curpos);
-static int slcd_getstream(struct lib_instream_s *instream);
 static uint8_t slcd_getcontrast(void);
 static int slcd_setcontrast(unsigned int contrast);
 static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options);
@@ -512,30 +502,6 @@ static inline void slcd_clrdp(uint8_t curpos)
    */
 
   slcd_clrpixel(&g_binfo[curpos + 3]);
-}
-
-/****************************************************************************
- * Name: slcd_getstream
- *
- * Description:
- *   Get one character from the keyboard.
- *
- ****************************************************************************/
-
-static int slcd_getstream(struct lib_instream_s *instream)
-{
-  struct slcd_instream_s *slcdstream =
-                                 (struct slcd_instream_s *)instream;
-
-  DEBUGASSERT(slcdstream && slcdstream->buffer);
-  if (slcdstream->nbytes > 0)
-    {
-      slcdstream->nbytes--;
-      slcdstream->stream.nget++;
-      return (int)*slcdstream->buffer++;
-    }
-
-  return EOF;
 }
 
 /****************************************************************************
@@ -899,7 +865,7 @@ static ssize_t slcd_read(struct file *filep,
 static ssize_t slcd_write(struct file *filep,
                           const char *buffer, size_t len)
 {
-  struct slcd_instream_s instream;
+  struct lib_meminstream_s instream;
   struct slcdstate_s state;
   enum slcdret_e result;
   uint8_t ch;
@@ -908,10 +874,7 @@ static ssize_t slcd_write(struct file *filep,
 
   /* Initialize the stream for use with the SLCD CODEC */
 
-  instream.stream.get  = slcd_getstream;
-  instream.stream.nget = 0;
-  instream.buffer      = buffer;
-  instream.nbytes      = len;
+  lib_meminstream(&instream, buffer, len);
 
   /* Initialize the SLCD decode state buffer */
 
@@ -920,8 +883,8 @@ static ssize_t slcd_write(struct file *filep,
   /* Decode and process every byte in the input buffer */
 
   options = 0;
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) !=
-          SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.public,
+                               &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);

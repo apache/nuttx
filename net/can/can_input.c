@@ -132,7 +132,7 @@ const uint8_t len_to_can_dlc[65] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: can_input
+ * Name: can_in
  *
  * Description:
  *   Handle incoming packet input
@@ -151,7 +151,7 @@ const uint8_t len_to_can_dlc[65] =
  *
  ****************************************************************************/
 
-int can_input(struct net_driver_s *dev)
+static int can_in(struct net_driver_s *dev)
 {
   FAR struct can_conn_s *conn = NULL;
   int ret = OK;
@@ -195,6 +195,49 @@ int can_input(struct net_driver_s *dev)
   while (conn);
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: can_input
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+int can_input(FAR struct net_driver_s *dev)
+{
+  FAR uint8_t *buf;
+  int ret;
+
+  if (dev->d_iob != NULL)
+    {
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
+                                        NET_LL_HDRLEN(dev)];
+      ret = can_in(dev);
+
+      dev->d_buf = buf;
+
+      return ret;
+    }
+
+  return netdev_input(dev, can_in, false);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CAN */

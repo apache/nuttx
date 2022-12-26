@@ -68,12 +68,18 @@ void _exit(int status)
 #endif
 
   /* Perform common task termination logic.  This will get called again later
-   * through logic kicked off by up_exit().  However, we need to call it here
-   * so that we can flush buffered I/O (both of which may required
-   * suspending). This will be fixed later when I/O flush is moved to libc.
+   * through logic kicked off by up_exit().
+   *
+   * REVISIT: Tt should not be necessary to call this here, but releasing the
+   * task group (especially the group file list) requires that it is done
+   * here.
+   *
+   * The reason? up_exit removes the current process from the ready-to-run
+   * list and trying to execute code that depends on this_task() crashes at
+   * once, or does something very naughty.
    */
 
-  nxtask_exithook(tcb, status, false);
+  nxtask_exithook(tcb, status);
 
   up_exit(status);
 }

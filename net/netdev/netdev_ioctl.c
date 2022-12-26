@@ -42,7 +42,6 @@
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
-#include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 #  include <nuttx/net/sixlowpan.h>
@@ -65,6 +64,10 @@
 
 #ifdef CONFIG_WIRELESS_PKTRADIO
 #  include <nuttx/wireless/pktradio.h>
+#endif
+
+#ifdef CONFIG_NET_CELLULAR
+#  include <nuttx/wireless/cellular/cellular.h>
 #endif
 
 #include "arp/arp.h"
@@ -545,6 +548,47 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
 #endif /* HAVE_PKTRADIO_IOCTL */
 
 /****************************************************************************
+ * Name: netdev_cell_ioctl
+ *
+ * Description:
+ *   Perform cell ioctl operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
+static int netdev_cell_ioctl(FAR struct socket *psock, int cmd,
+                             FAR struct icellreq *req)
+{
+  FAR struct net_driver_s *dev = NULL;
+  int ret = -ENOTTY;
+
+  ninfo("cmd: %d\n", cmd);
+  net_lock();
+
+  if (_CELLIOCVALID(cmd))
+    {
+      dev = netdev_findbyname(req->ifr_name);
+      if (dev && dev->d_ioctl)
+        {
+          ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)req);
+        }
+    }
+
+  net_unlock();
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_wifr_ioctl
  *
  * Description:
@@ -643,6 +687,7 @@ static ssize_t net_ioctl_ifreq_arglen(int cmd)
       case SIOCSIFBRDADDR:
       case SIOCGIFNETMASK:
       case SIOCSIFNETMASK:
+      case SIOCSIFMTU:
       case SIOCGIFMTU:
       case SIOCGIFHWADDR:
       case SIOCSIFHWADDR:
@@ -660,7 +705,7 @@ static ssize_t net_ioctl_ifreq_arglen(int cmd)
       case SIOCDCANEXTFILTER:
       case SIOCACANSTDFILTER:
       case SIOCDCANSTDFILTER:
-      case SIOCSCELLNETDEV:
+      case SIOCSIFNAME:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
         return sizeof(struct ifreq);
@@ -731,6 +776,21 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 #ifdef CONFIG_NETDEV_IFINDEX
+      case SIOCSIFNAME:   /* Set interface name */
+        {
+          FAR struct net_driver_s *tmpdev;
+          tmpdev = netdev_findbyindex(req->ifr_ifindex);
+          if (tmpdev != NULL)
+            {
+              strlcpy(tmpdev->d_ifname, req->ifr_name, IFNAMSIZ);
+            }
+          else
+            {
+              ret = -ENODEV;
+            }
+        }
+        break;
+
       case SIOCGIFNAME:  /* Get interface name */
         {
           FAR struct net_driver_s *tmpdev;
@@ -859,6 +919,13 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGLIFMTU:  /* Get MTU size */
       case SIOCGIFMTU:   /* Get MTU size */
         req->ifr_mtu = NETDEV_PKTSIZE(dev);
+        break;
+      case SIOCSIFMTU:   /* Set MTU size */
+        dev = netdev_ifr_dev(req);
+        if (dev)
+          {
+            NETDEV_PKTSIZE(dev) = req->ifr_mtu;
+          }
         break;
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
@@ -1054,22 +1121,6 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         break;
 #endif
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
-      case SIOCSCELLNETDEV:  /* set params for cellular network devices */
-        if (dev->d_ioctl)
-          {
-            FAR struct cell_ioctl_data_s *cell_netdev_data =
-                            &req->ifr_ifru.ifru_cell_data;
-            ret = dev->d_ioctl(dev, cmd,
-                            (unsigned long)(uintptr_t)cell_netdev_data);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
-        break;
-#endif
-
       default:
         ret = -ENOTTY;
         break;
@@ -1169,40 +1220,6 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 /****************************************************************************
- * Name: netdev_arp_callback
- *
- * Description:
- *   This is a callback that checks if the Ethernet network device has the
- *   indicated name
- *
- * Input Parameters:
- *   dev    Ethernet driver device structure
- *   req    The argument of the ioctl cmd
- *
- * Returned Value:
- *   1 on success
- *   0 on error
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ARP
-static int netdev_arp_callback(FAR struct net_driver_s *dev, FAR void *arg)
-{
-  FAR struct arpreq *req = arg;
-  FAR struct sockaddr_in *addr = (FAR struct sockaddr_in *)&req->arp_pa;
-
-  if (strncmp(dev->d_ifname, (FAR const char *)req->arp_dev,
-              sizeof(dev->d_ifname)))
-    {
-      return 0;
-    }
-
-  arp_update(dev, addr->sin_addr.s_addr,
-             (FAR uint8_t *)req->arp_ha.sa_data);
-  return 1;
-}
-#endif
-
-/****************************************************************************
  * Name: netdev_arp_ioctl
  *
  * Description:
@@ -1224,7 +1241,17 @@ static int netdev_arp_callback(FAR struct net_driver_s *dev, FAR void *arg)
 static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
                             FAR struct arpreq *req)
 {
+  FAR struct net_driver_s *dev  = NULL;
+  FAR struct sockaddr_in  *addr = NULL;
   int ret;
+
+  if (req != NULL)
+    {
+      addr = (FAR struct sockaddr_in *)&req->arp_pa;
+      dev  = req->arp_dev[0] ?
+             netdev_findbyname((FAR const char *)req->arp_dev) :
+             netdev_findby_ripv4addr(INADDR_ANY, addr->sin_addr.s_addr);
+    }
 
   /* Execute the command */
 
@@ -1232,7 +1259,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
     {
       case SIOCSARP:  /* Set an ARP mapping */
         {
-          if (req != NULL &&
+          if (dev != NULL && req != NULL &&
               req->arp_pa.sa_family == AF_INET &&
               req->arp_ha.sa_family == ARPHRD_ETHER)
             {
@@ -1240,7 +1267,8 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
                * address -OR- add a new ARP table entry if there is not.
                */
 
-              ret = netdev_foreach(netdev_arp_callback, req) ? OK : -EINVAL;
+              ret = arp_update(dev, addr->sin_addr.s_addr,
+                               (FAR const uint8_t *)req->arp_ha.sa_data);
             }
           else
             {
@@ -1251,28 +1279,11 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCDARP:  /* Delete an ARP mapping */
         {
-          if (req != NULL && req->arp_pa.sa_family == AF_INET)
+          if (dev != NULL && req != NULL && req->arp_pa.sa_family == AF_INET)
             {
-              FAR struct sockaddr_in *addr =
-                (FAR struct sockaddr_in *)&req->arp_pa;
+              /* Delete the ARP entry for this protocol address. */
 
-              /* Find the existing ARP entry for this protocol address. */
-
-              FAR struct arp_entry_s *entry =
-                arp_lookup(addr->sin_addr.s_addr);
-              if (entry != NULL)
-                {
-                  /* The ARP table is fixed size; an entry is deleted
-                   * by nullifying its protocol address.
-                   */
-
-                  entry->at_ipaddr = 0;
-                  ret = OK;
-                }
-              else
-                {
-                  ret = -ENOENT;
-                }
+              ret = arp_delete(addr->sin_addr.s_addr, dev);
             }
           else
             {
@@ -1285,15 +1296,8 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
         {
           if (req != NULL && req->arp_pa.sa_family == AF_INET)
             {
-              FAR struct sockaddr_in *addr =
-                (FAR struct sockaddr_in *)&req->arp_pa;
-
-              /* Get the hardware address from an existing ARP table entry
-               * matching this protocol address.
-               */
-
               ret = arp_find(addr->sin_addr.s_addr,
-                            (FAR struct ether_addr *)req->arp_ha.sa_data);
+                            (FAR uint8_t *)req->arp_ha.sa_data, dev);
               if (ret >= 0)
                 {
                   /* Return the mapped hardware address. */
@@ -1687,6 +1691,16 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
 
       wifrreq = (FAR struct iwreq *)((uintptr_t)arg);
       ret     = netdev_wifr_ioctl(psock, cmd, wifrreq);
+    }
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
+  /* Check for a cellular network command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_cell_ioctl(psock, cmd,
+                              (FAR struct icellreq *)(uintptr_t)arg);
     }
 #endif
 

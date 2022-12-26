@@ -121,7 +121,7 @@ static off_t memsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
 void lib_memsostream(FAR struct lib_memsostream_s *outstream,
                      FAR char *bufstart, int buflen)
 {
-  outstream->public.put   = memsostream_putc;
+  outstream->public.putc  = memsostream_putc;
   outstream->public.flush = lib_snoflush;
   outstream->public.seek  = memsostream_seek;
   outstream->public.nput  = 0;          /* Total number of characters written */

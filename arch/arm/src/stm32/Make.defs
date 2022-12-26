@@ -221,6 +221,10 @@ ifeq ($(CONFIG_STM32_AES),y)
 CHIP_CSRCS += stm32_aes.c
 endif
 
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += stm32_crypto.c
+endif
+
 ifeq ($(CONFIG_STM32_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif

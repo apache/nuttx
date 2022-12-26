@@ -24,24 +24,13 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/elf.h>
 #include <nuttx/elf.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -78,7 +67,7 @@ bool up_checkarch(const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
       berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n",
-            ehdr->e_ident[EI_CLASS]);
+           ehdr->e_ident[EI_CLASS]);
       return false;
     }
 
@@ -91,16 +80,20 @@ bool up_checkarch(const Elf32_Ehdr *ehdr)
 #endif
     {
       berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n",
-            ehdr->e_ident[EI_DATA]);
+           ehdr->e_ident[EI_DATA]);
       return false;
     }
 
   /* Make sure the entry point address is properly aligned */
 
+#ifdef CONFIG_ARM_THUMB
+  if ((ehdr->e_entry & 2) != 0)
+#else
   if ((ehdr->e_entry & 3) != 0)
+#endif
     {
-      berr("ERROR: Entry point is not properly aligned: %08x\n",
-            ehdr->e_entry);
+      berr("ERROR: Entry point is not properly aligned: %08" PRIx32 "\n",
+           ehdr->e_entry);
       return false;
     }
 
@@ -136,10 +129,17 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
   int32_t offset;
   unsigned int relotype;
 
-  /* All relocations depend upon having valid symbol information */
+#ifdef CONFIG_ARM_THUMB
+  uint32_t upper_insn;
+  uint32_t lower_insn;
+#endif
+
+  /* All relocations except R_ARM_V4BX depend upon having valid symbol
+   * information.
+   */
 
   relotype = ELF32_R_TYPE(rel->r_info);
-  if (sym == NULL && relotype != R_ARM_NONE)
+  if (sym == NULL && relotype != R_ARM_NONE && relotype != R_ARM_V4BX)
     {
       return -EINVAL;
     }
@@ -158,12 +158,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        binfo("Performing PC24 [%d] link", ELF32_R_TYPE(rel->r_info),
-        binfo(" at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
-              (long)addr,
+        binfo("Performing PC24 [%" PRId32 "] link "
+              "at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
               (long)(*(uint32_t *)addr),
-               sym,
-              (long)sym->st_value);
+              sym, (long)sym->st_value);
 
         offset = (*(uint32_t *)addr & 0x00ffffff) << 2;
         if (offset & 0x02000000)
@@ -172,11 +171,16 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
           }
 
         offset += sym->st_value - addr;
-        if (offset & 3 || offset <
-           (int32_t) 0xfe000000 || offset >=
-           (int32_t) 0x02000000)
+
+#ifdef CONFIG_ARM_THUMB
+        if ((offset & 2) != 0 || offset < (int32_t) 0xfe000000 ||
+#else
+        if ((offset & 3) != 0 || offset < (int32_t) 0xfe000000 ||
+#endif
+            offset >= (int32_t) 0x02000000)
           {
-            berr("ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
+            berr("ERROR: PC24 [%" PRId32 "] relocation out of range, "
+                 "offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -192,12 +196,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        binfo("Performing ABS32 link");
-        binfo(" at addr=%08lx [%08lx]
-               to sym=%p st_value=%08lx\n",
-              (long)addr,
-              (long)(*(uint32_t *)addr),
-              sym,
+        binfo("Performing ABS32 link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr), sym,
               (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
@@ -221,11 +222,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 
     case R_ARM_PREL31:
       {
-        binfo("Performing PREL31 link at");
-        binfo(" addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr,
-              (long)(*(uint32_t *)addr),
-               sym,
+        binfo("Performing PREL31 link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr), sym,
               (long)sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
@@ -236,11 +235,11 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        binfo("Performing MOVx_ABS [%d] link", ELF32_R_TYPE(rel->r_info));
-        binfo(" at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr),
-               sym,
-              (long)sym->st_value);
+        binfo("Performing MOVx_ABS [%" PRId32 "] link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (long)(*(uint32_t *)addr),
+              sym, (long)sym->st_value);
 
         offset = *(uint32_t *)addr;
         offset = ((offset & 0xf0000) >> 4) | (offset & 0xfff);
@@ -256,8 +255,219 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
       }
       break;
 
+#ifdef CONFIG_ARM_THUMB
+    case R_ARM_THM_MOVW_ABS_NC:
+    case R_ARM_THM_MOVT_ABS:
+      {
+        /* Thumb BL and B.W instructions. Encoding:
+         *
+         * upper_insn:
+         *
+         *  1   1   1   1   1   1
+         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instruction
+         * +----------+---+--------------------------+----------+
+         * |1   1   1 |OP1|     OP2                  |          | 32-Bit
+         * +----------+---+--+-----+-----------------+----------+
+         * |1   1   1 | 1   0|  i  |1  0  1  1  0  0 |  imm4    | MOVT
+         * +----------+------+-----+-----------------+----------+
+         *
+         * lower_insn:
+         *
+         *  1   1   1   1   1   1
+         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instructions
+         * +---+-------------------------------------------------+
+         * |OP |                                                 | 32-Bit
+         * +---+----------+--------+-----------------------------+
+         * |0  |   imm3   |   Rd   |          imm8               | MOVT
+         * +---+----------+--------+-----------------------------+
+         *
+         * The 16-bit immediate value is encoded in these bits:
+         *
+         *   i    = imm16[11]    = upper_insn[10]
+         *   imm4 = imm16[12:15] = upper_insn[3:0]
+         *   imm3 = imm16[8:10]  = lower_insn[14:12]
+         *   imm8 = imm16[0:7]   = lower_insn[7:0]
+         */
+
+        upper_insn = (uint32_t)(*(uint16_t *)addr);
+        lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
+
+        binfo("Performing THM_MOVx [%" PRId32 "] link "
+              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (int)upper_insn, (int)lower_insn,
+              sym, (long)sym->st_value);
+
+        /* Extract the 16-bit offset from the 32-bit instruction */
+
+        offset = ((upper_insn & 0x000f) << 12) | /* imm4 -> imm16[8:10] */
+                 ((upper_insn & 0x0400) << 1) |  /* i    -> imm16[11] */
+                 ((lower_insn & 0x7000) >> 4) |  /* imm3 -> imm16[8:10] */
+                  (lower_insn & 0x00ff);         /* imm8 -> imm16[0:7] */
+
+        /* And perform the relocation */
+
+        binfo("  offset=%08" PRIx32 " branch target=%08" PRIx32 "\n",
+              offset, offset + sym->st_value);
+
+        offset += sym->st_value;
+
+        /* Update the immediate value in the instruction.
+         * For MOVW we want the bottom 16-bits; for MOVT we want
+         * the top 16-bits.
+         */
+
+        if (ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_ABS)
+          {
+            offset >>= 16;
+          }
+
+        upper_insn = ((upper_insn & 0xfbf0) | ((offset & 0xf000) >> 12) |
+                      ((offset & 0x0800) >> 1));
+        *(uint16_t *)addr = (uint16_t)upper_insn;
+
+        lower_insn = ((lower_insn & 0x8f00) | ((offset & 0x0700) << 4) |
+                      (offset & 0x00ff));
+        *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
+
+        binfo("  insn [%04x %04x]\n",
+             (int)upper_insn, (int)lower_insn);
+      }
+      break;
+
+    case R_ARM_THM_CALL:
+    case R_ARM_THM_JUMP24:
+      {
+        uint32_t S;
+        uint32_t J1;
+        uint32_t J2;
+
+        /* Thumb BL and B.W instructions. Encoding:
+         *
+         * upper_insn:
+         *
+         *  1   1   1   1   1   1
+         *  5   4   3   2   1   0   9  8  7  6  5  4  3  2  1  0 Instructions
+         * +----------+---+--------------------------+----------+
+         * |1   1   1 |OP1|     OP2                  |          | 32-Bit
+         * +----------+---+--+-----+-----------------+----------+
+         * |1   1   1 | 1   0|  S  |        imm10               | BL
+         * +----------+------+-----+----------------------------+
+         *
+         * lower_insn:
+         *
+         *  1   1   1   1   1   1
+         *  5   4   3   2   1   0  9  8  7  6  5  4   3  2  1  0 Instructions
+         * +---+------------------------------------------------+
+         * |OP |                                                | 32-Bit
+         * +---+--+---+---+---+---------------------------------+
+         * |1   1 |J1 | 1 |J2 |            imm11                | BL
+         * +------+---+---+---+--------------------------------+
+         *
+         * The branch target is encoded in these bits:
+         *
+         *   S     = upper_insn[10]
+         *   imm10 = upper_insn[0:9]
+         *   imm11 = lower_insn[0:10]
+         *   J1    = lower_insn[13]
+         *   J2    = lower_insn[11]
+         */
+
+        upper_insn = (uint32_t)(*(uint16_t *)addr);
+        lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
+
+        binfo("Performing THM_JUMP24 [%" PRId32 "] link "
+              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (int)upper_insn, (int)lower_insn,
+              sym, (long)sym->st_value);
+
+        /* Extract the 25-bit offset from the 32-bit instruction:
+         *
+         *   offset[24]    = S
+         *   offset[23]    = ~(J1 ^ S)
+         *   offset[22]    = ~(J2 ^ S)]
+         *   offset[12:21] = imm10
+         *   offset[1:11]  = imm11
+         *   offset[0]     = 0
+         */
+
+        S   = (upper_insn >> 10) & 1;
+        J1  = (lower_insn >> 13) & 1;
+        J2  = (lower_insn >> 11) & 1;
+
+        offset = (S << 24) |                       /* S -   > offset[24] */
+                 ((~(J1 ^ S) & 1) << 23) |         /* J1    -> offset[23] */
+                 ((~(J2 ^ S) & 1) << 22) |         /* J2    -> offset[22] */
+                 ((upper_insn & 0x03ff) << 12) |   /* imm10 -> offset[12:21] */
+                 ((lower_insn & 0x07ff) << 1);     /* imm11 -> offset[1:11] */
+                                                   /* 0     -> offset[0] */
+
+        /* Sign extend */
+
+        if (offset & 0x01000000)
+          {
+            offset -= 0x02000000;
+          }
+
+        /* And perform the relocation */
+
+        binfo("  S=%" PRId32 " J1=%" PRId32 " J2=%" PRId32
+              " offset=%08" PRIx32 " branch target=%08" PRIx32 "\n",
+              S, J1, J2, offset, offset + sym->st_value - addr);
+
+        offset += sym->st_value - addr;
+
+        /* Is this a function symbol?  If so, then the branch target must be
+         * an odd Thumb address
+         */
+
+        if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && (offset & 1) == 0)
+          {
+            berr("ERROR:   ERROR: JUMP24 [%" PRId32 "] "
+                 "requires odd offset, offset=%08" PRIx32 "\n",
+                 ELF32_R_TYPE(rel->r_info), offset);
+
+            return -EINVAL;
+          }
+
+        /* Check the range of the offset */
+
+        if (offset < (int32_t)0xff000000 || offset >= (int32_t)0x01000000)
+          {
+            berr("ERROR:   ERROR: JUMP24 [%" PRId32 "] "
+                 "relocation out of range, branch target=%08" PRIx32 "\n",
+                 ELF32_R_TYPE(rel->r_info), offset);
+
+            return -EINVAL;
+          }
+
+        /* Now, reconstruct the 32-bit instruction using the new, relocated
+         * branch target.
+         */
+
+        S  = (offset >> 24) & 1;
+        J1 = S ^ (~(offset >> 23) & 1);
+        J2 = S ^ (~(offset >> 22) & 1);
+
+        upper_insn = ((upper_insn & 0xf800) | (S << 10) |
+                      ((offset >> 12) & 0x03ff));
+        *(uint16_t *)addr = (uint16_t)upper_insn;
+
+        lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) |
+                      ((offset >> 1) & 0x07ff));
+        *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
+
+        binfo("  S=%" PRId32 " J1=%" PRId32 " J2=%" PRId32
+              " insn [%04" PRIx32 " %04" PRIx32 "]\n",
+              S, J1, J2, upper_insn, lower_insn);
+      }
+      break;
+#endif /* CONFIG_ARM_THUMB */
+
     default:
-      berr("ERROR: Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
+      berr("ERROR: Unsupported relocation: %" PRId32 "\n",
+           ELF32_R_TYPE(rel->r_info));
       return -EINVAL;
     }
 

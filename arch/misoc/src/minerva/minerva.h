@@ -125,9 +125,5 @@ void minerva_sigdeliver(void);
 void minerva_flush_dcache(void);
 void minerva_flush_icache(void);
 
-/* Debug ********************************************************************/
-
-void minerva_dumpstate(void);
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MISOC_SRC_MINERVA_MINERVA_H */

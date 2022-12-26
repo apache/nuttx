@@ -162,6 +162,10 @@ static int sim_loop_task(int argc, char **argv)
 {
   while (1)
     {
+      irqstate_t flags = up_irq_save();
+
+      sched_lock();
+
       /* Handle UART data availability */
 
       sim_uartloop();
@@ -173,6 +177,10 @@ static int sim_loop_task(int argc, char **argv)
       sim_x11events();
 #endif
 
+#if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
+      sim_x11loop();
+#endif
+
 #ifdef CONFIG_SIM_NETDEV
       /* Run the network if enabled */
 
@@ -180,7 +188,7 @@ static int sim_loop_task(int argc, char **argv)
 #endif
 
 #ifdef CONFIG_SIM_NETUSRSOCK
-      usrsock_host_loop();
+      host_usrsock_loop();
 #endif
 
 #ifdef CONFIG_RPTUN
@@ -195,11 +203,18 @@ static int sim_loop_task(int argc, char **argv)
       sim_audio_loop();
 #endif
 
+#ifdef CONFIG_SIM_VIDEO
+      sim_video_loop();
+#endif
+
 #ifdef CONFIG_MOTOR_FOC_DUMMY
       /* Update simulated FOC device */
 
       foc_dummy_update();
 #endif
+
+      sched_unlock();
+      up_irq_restore(flags);
 
       /* Sleep minimal time, let the idle run */
 

@@ -355,17 +355,7 @@ static int slip_txpoll(FAR struct net_driver_s *dev)
   FAR struct slip_driver_s *priv =
     (FAR struct slip_driver_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
-
-  if (priv->dev.d_len > 0)
-    {
-      if (!devif_loopback(&priv->dev))
-        {
-          slip_transmit(priv);
-        }
-    }
+  slip_transmit(priv);
 
   /* If zero is returned, the polling will continue until all connections
    * have been examined.

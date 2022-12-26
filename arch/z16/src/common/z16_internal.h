@@ -155,16 +155,6 @@ void z16_netinitialize(void);
 # define z16_netinitialize()
 #endif
 
-/* Dump stack and registers */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-void z16_stackdump(void);
-void z16_registerdump(void);
-#else
-# define z16_stackdump()
-# define z16_registerdump()
-#endif
-
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_Z16_SRC_COMMON_Z16_INTERNAL_H */

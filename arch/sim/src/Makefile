@@ -39,7 +39,7 @@ NUTTX = $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx$(EXEEXT))
 # are called only from the host OS-specific logic(HOSTOBJS)
 
 LINKOBJS = sim_head$(OBJEXT)
-REQUIREDOBJS = $(LINKOBJS)
+REQUIREDOBJS = $(LINKOBJS) sim_doirq$(OBJEXT)
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
@@ -57,13 +57,11 @@ endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS  = sim_initialize.c sim_idle.c sim_interruptcontext.c sim_initialstate.c
+CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
-CSRCS += sim_switchcontext.c sim_releasepending.c
-CSRCS += sim_exit.c sim_schedulesigaction.c
-CSRCS += sim_heap.c sim_uart.c sim_assert.c sim_nputs.c
-CSRCS += sim_copyfullstate.c
-CSRCS += sim_sigdeliver.c
+CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
+CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c
+CSRCS += sim_registerdump.c sim_saveusercontext.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sim_backtrace.c
@@ -94,7 +92,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hosttime.c sim_hostuart.c sim_hostmisc.c
+HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
@@ -157,10 +155,6 @@ ifeq ($(CONFIG_FS_FAT),y)
   STDLIBS += -lz
 endif
 
-ifeq ($(CONFIG_ARCH_ROMGETC),y)
-  CSRCS += sim_romgetc.c
-endif
-
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += sim_netdriver.c
 ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
@@ -172,7 +166,7 @@ endif # CONFIG_WINDOWS_CYGWIN != y
 else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   CSRCS += sim_netdriver.c
   HOSTSRCS += sim_vpnkit.c
-  VPATH += :sim/vpnkit
+  VPATH += :sim/posix/vpnkit
   HOSTSRCS += sim_protocol.c sim_negotiate.c
 endif
 
@@ -201,6 +195,13 @@ endif
 ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   CSRCS += sim_alsa.c
   STDLIBS += -lasound
+  STDLIBS += -lmad
+endif
+
+ifeq ($(CONFIG_SIM_VIDEO_V4L2),y)
+  HOSTSRCS += sim_host_v4l2.c
+  CSRCS += sim_video.c
+  STDLIBS += -lv4l2
 endif
 
 ifeq ($(CONFIG_SIM_HOSTFS),y)

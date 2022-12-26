@@ -86,8 +86,8 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    */
 
 #else
-  /* These values come from the linker scripts (esp32c3.ld and
-   * flat.template.ld).
+  /* These values come from the linker scripts
+   * (<legacy/mcuboot>_sections.ld and flat_memory.ld).
    * Check boards/risc-v/esp32c3.
    */
 
@@ -119,7 +119,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
   /* These values come from the linker scripts (kernel-space.ld and
-   * protected.template.ld).
+   * protected_memory.ld).
    * Check boards/risc-v/esp32c3.
    */
 

@@ -177,7 +177,6 @@ void x86_lowputc(char ch);
 void x86_lowputs(const char *str);
 
 void x86_syscall(uint32_t *regs);
-void x86_registerdump(uint32_t *regs);
 
 /* Defined in up_allocateheap.c */
 

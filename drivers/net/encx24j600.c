@@ -50,7 +50,6 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/encx24j600.h>
 
@@ -1146,51 +1145,8 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
 static int enc_txpoll(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
-  int ret = OK;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
-
-  ninfo("Poll result: d_len=%d\n", priv->dev.d_len);
-
-  if (priv->dev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->dev))
-        {
-          /* Send the packet */
-
-          ret = enc_txenqueue(priv);
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return ret;
+  return enc_txenqueue(priv);
 }
 
 /****************************************************************************
@@ -1475,11 +1431,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->dev);
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
-           */
+          /* Receive an IPv4 packet from the network device */
 
-          arp_ipin(&priv->dev);
           ipv4_input(&priv->dev);
 
           /* Free the packet */
@@ -1493,21 +1446,6 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-                {
-                  arp_out(&priv->dev);
-                }
-#ifdef CONFIG_NET_IPv6
-              else
-                {
-                  neighbor_out(&priv->dev);
-                }
-#endif
-
               /* And send the packet */
 
               enc_txenqueue(priv);
@@ -1536,21 +1474,6 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(priv->dev.d_flags))
-                {
-                  arp_out(&priv->dev);
-                }
-              else
-#endif
-#ifdef CONFIG_NET_IPv6
-                {
-                  neighbor_out(&priv->dev);
-                }
-#endif
-
               /* And send the packet */
 
               enc_txenqueue(priv);
@@ -1564,7 +1487,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(&priv->dev);
 
-          arp_arpin(&priv->dev);
+          arp_input(&priv->dev);
 
           /* ARP packets are freed immediately */
 

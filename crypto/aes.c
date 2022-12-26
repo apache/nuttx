@@ -1,842 +1,1084 @@
 /****************************************************************************
  * crypto/aes.c
+ * $OpenBSD: aes.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
  *
- *   Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
- *   Extracted from the CC3000 Host Driver Implementation.
+ * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Modified for OpenBSD by Thomas Pornin and Mike Belopuhov.
  *
- *   Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
  *
- *   Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in the
- *   documentation and/or other materials provided with the
- *   distribution.
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
  *
- *   Neither the name of Texas Instruments Incorporated nor the names of
- *   its contributors may be used to endorse or promote products derived
- *   from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  ****************************************************************************/
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <errno.h>
-
-#include <nuttx/crypto/aes.h>
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Forward sbox */
-
-static const uint8_t g_sbox[256] =
-{
-  /* 0    1    2      3     4     5     6     7     8    9
-   *                        A     B     C     D     E    F
-   */
-
-  0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01,
-                          0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, /* 0 */
-  0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4,
-                           0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, /* 1 */
-  0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5,
-                           0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15, /* 2 */
-  0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12,
-                           0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75, /* 3 */
-  0x09, 0x83, 0x2c, 0x1a, 0x1b, 0x6e, 0x5a, 0xa0, 0x52, 0x3b,
-                           0xd6, 0xb3, 0x29, 0xe3, 0x2f, 0x84, /* 4 */
-  0x53, 0xd1, 0x00, 0xed, 0x20, 0xfc, 0xb1, 0x5b, 0x6a, 0xcb,
-                           0xbe, 0x39, 0x4a, 0x4c, 0x58, 0xcf, /* 5 */
-  0xd0, 0xef, 0xaa, 0xfb, 0x43, 0x4d, 0x33, 0x85, 0x45, 0xf9,
-                           0x02, 0x7f, 0x50, 0x3c, 0x9f, 0xa8, /* 6 */
-  0x51, 0xa3, 0x40, 0x8f, 0x92, 0x9d, 0x38, 0xf5, 0xbc, 0xb6,
-                           0xda, 0x21, 0x10, 0xff, 0xf3, 0xd2, /* 7 */
-  0xcd, 0x0c, 0x13, 0xec, 0x5f, 0x97, 0x44, 0x17, 0xc4, 0xa7,
-                           0x7e, 0x3d, 0x64, 0x5d, 0x19, 0x73, /* 8 */
-  0x60, 0x81, 0x4f, 0xdc, 0x22, 0x2a, 0x90, 0x88, 0x46, 0xee,
-                           0xb8, 0x14, 0xde, 0x5e, 0x0b, 0xdb, /* 9 */
-  0xe0, 0x32, 0x3a, 0x0a, 0x49, 0x06, 0x24, 0x5c, 0xc2, 0xd3,
-                           0xac, 0x62, 0x91, 0x95, 0xe4, 0x79, /* A */
-  0xe7, 0xc8, 0x37, 0x6d, 0x8d, 0xd5, 0x4e, 0xa9, 0x6c, 0x56,
-                           0xf4, 0xea, 0x65, 0x7a, 0xae, 0x08, /* B */
-  0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd,
-                           0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a, /* C */
-  0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35,
-                           0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e, /* D */
-  0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e,
-                           0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf, /* E */
-  0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99,
-                           0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16  /* F */
-};
-
-/* Inverse sbox */
-
-static const uint8_t g_rsbox[256] =
-{
-  0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40,
-                          0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
-  0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e,
-                          0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
-  0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c,
-                          0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
-  0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b,
-                          0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25,
-  0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4,
-                          0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92,
-  0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15,
-                          0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84,
-  0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4,
-                          0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06,
-  0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf,
-                          0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b,
-  0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2,
-                          0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73,
-  0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9,
-                          0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e,
-  0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7,
-                          0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b,
-  0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb,
-                          0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4,
-  0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12,
-                          0x10, 0x59, 0x27, 0x80, 0xec, 0x5f,
-  0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5,
-                          0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef,
-  0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb,
-                          0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
-  0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69,
-                          0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
-};
-
-/* Round constant */
-
-static const uint8_t g_rcon[11] =
-{
-  0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
-};
-
-static struct aes_state_s g_aes_state;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: expand_key
- *
- * Description:
- *   Expend a 16 bytes key for AES128 implementation
- *
- * Input Parameters:
- *  key          AES128 key - 16 bytes
- *  expanded_key expanded AES128 key
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-static void expand_key(FAR uint8_t *expanded_key, FAR const uint8_t *key)
-{
-  uint16_t buf1;
-  uint16_t ii;
-
-  for (ii = 0; ii < 16; ii++)
-    {
-      expanded_key[ii] = key[ii];
-    }
-
-  for (ii = 1; ii < 11; ii++)
-    {
-      buf1 = expanded_key[ii * 16 - 4];
-      expanded_key[ii * 16 + 0] = g_sbox[expanded_key[ii *16 - 3]] ^
-                            expanded_key[(ii - 1) * 16 + 0] ^ g_rcon[ii];
-
-      expanded_key[ii * 16 + 1] = g_sbox[expanded_key[ii *16 - 2]] ^
-                            expanded_key[(ii - 1) * 16 + 1];
-
-      expanded_key[ii * 16 + 2] = g_sbox[expanded_key[ii *16 - 1]] ^
-                            expanded_key[(ii - 1) * 16 + 2];
-
-      expanded_key[ii * 16 + 3] = g_sbox[buf1] ^
-                            expanded_key[(ii - 1) * 16 + 3];
-
-      expanded_key[ii * 16 + 4] = expanded_key[(ii - 1) * 16 + 4] ^
-                            expanded_key[ii * 16 + 0];
-
-      expanded_key[ii * 16 + 5] = expanded_key[(ii - 1) * 16 + 5] ^
-                            expanded_key[ii * 16 + 1];
-
-      expanded_key[ii * 16 + 6] = expanded_key[(ii - 1) * 16 + 6] ^
-                            expanded_key[ii * 16 + 2];
-
-      expanded_key[ii * 16 + 7] = expanded_key[(ii - 1) * 16 + 7] ^
-                            expanded_key[ii * 16 + 3];
-
-      expanded_key[ii * 16 + 8] = expanded_key[(ii - 1) * 16 + 8] ^
-                            expanded_key[ii * 16 + 4];
-
-      expanded_key[ii * 16 + 9] = expanded_key[(ii - 1) * 16 + 9] ^
-                            expanded_key[ii * 16 + 5];
-
-      expanded_key[ii * 16 +10] = expanded_key[(ii - 1) * 16 +10] ^
-                            expanded_key[ii * 16 + 6];
-
-      expanded_key[ii * 16 +11] = expanded_key[(ii - 1) * 16 +11] ^
-                            expanded_key[ii * 16 + 7];
-
-      expanded_key[ii * 16 +12] = expanded_key[(ii - 1) * 16 +12] ^
-                            expanded_key[ii * 16 + 8];
-
-      expanded_key[ii * 16 +13] = expanded_key[(ii - 1) * 16 +13] ^
-                            expanded_key[ii * 16 + 9];
-
-      expanded_key[ii * 16 +14] = expanded_key[(ii - 1) * 16 +14] ^
-                            expanded_key[ii * 16 +10];
-
-      expanded_key[ii * 16 +15] = expanded_key[(ii - 1) * 16 +15] ^
-                            expanded_key[ii * 16 +11];
-    }
-}
-
-/****************************************************************************
- * Name: galois_mul2
- *
- * Description:
- *    Multiply by 2 in the galois field
- *
- * Input Parameters:
- *  value    argument to multiply
- *
- * Returned Value:
- *  Multiplied argument
- *
- ****************************************************************************/
-
-static uint8_t galois_mul2(uint8_t value)
-{
-  if (value >> 7)
-    {
-      value = value << 1;
-      return (value ^ 0x1b);
-    }
-  else
-    {
-      return value << 1;
-    }
-}
-
-/****************************************************************************
- * Name: aes_encr
- *
- * Description:
- *  Internal implementation of AES128 encryption.
- *  Straight forward aes encryption implementation. First the group of
- *  operations:
- *
- *    - addRoundKey
- *    - subbytes
- *    - shiftrows
- *    - mixcolums
- *
- *  is executed 9 times, after this addroundkey to finish the 9th round,
- *  after that the 10th round without mixcolums no further subfunctions
- *  to save cycles for function calls no structuring with "for (....)"
- *  to save cycles.
- *
- * Input Parameters:
- *  expanded_key expanded AES128 key
- *  state        16 bytes of plain text and cipher text
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-static void aes_encr(FAR uint8_t *state, FAR const uint8_t *expanded_key)
-{
-  uint8_t buf1;
-  uint8_t buf2;
-  uint8_t buf3;
-  uint8_t round;
-
-  for (round = 0; round < 9; round ++)
-    {
-      /* addroundkey, sbox and shiftrows */
-
-      /* Row 0 */
-
-      state[0]   = g_sbox[(state[0]  ^ expanded_key[(round * 16)])];
-      state[4]   = g_sbox[(state[4]  ^ expanded_key[(round * 16) +  4])];
-      state[8]   = g_sbox[(state[8]  ^ expanded_key[(round * 16) +  8])];
-      state[12]  = g_sbox[(state[12] ^ expanded_key[(round * 16) + 12])];
-
-      /* Row 1 */
-
-      buf1       = state[1] ^ expanded_key[(round * 16) + 1];
-      state[1]   = g_sbox[(state[5]  ^ expanded_key[(round * 16) +  5])];
-      state[5]   = g_sbox[(state[9]  ^ expanded_key[(round * 16) +  9])];
-      state[9]   = g_sbox[(state[13] ^ expanded_key[(round * 16) + 13])];
-      state[13]  = g_sbox[buf1];
-
-      /* Row 2 */
-
-      buf1       = state[2] ^ expanded_key[(round * 16) + 2];
-      buf2       = state[6] ^ expanded_key[(round * 16) + 6];
-      state[2]   = g_sbox[(state[10] ^ expanded_key[(round * 16) + 10])];
-      state[6]   = g_sbox[(state[14] ^ expanded_key[(round * 16) + 14])];
-      state[10]  = g_sbox[buf1];
-      state[14]  = g_sbox[buf2];
-
-      /* Row 3 */
-
-      buf1       = state[15] ^ expanded_key[(round * 16) + 15];
-      state[15]  = g_sbox[(state[11] ^ expanded_key[(round * 16) + 11])];
-      state[11]  = g_sbox[(state[7]  ^ expanded_key[(round * 16) +  7])];
-      state[7]   = g_sbox[(state[3]  ^ expanded_key[(round * 16) +  3])];
-      state[3]   = g_sbox[buf1];
-
-      /* mixcolums */
-
-      /* Col1 */
-
-      buf1 = state[0] ^ state[1] ^ state[2] ^ state[3];
-      buf2 = state[0];
-
-      buf3 = state[0] ^ state[1];
-      buf3 = galois_mul2(buf3);
-      state[0] = state[0] ^ buf3 ^ buf1;
-
-      buf3 = state[1] ^ state[2];
-      buf3 = galois_mul2(buf3);
-      state[1] = state[1] ^ buf3 ^ buf1;
-
-      buf3 = state[2] ^ state[3];
-      buf3 = galois_mul2(buf3);
-      state[2] = state[2] ^ buf3 ^ buf1;
-
-      buf3 = state[3] ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[3] = state[3] ^ buf3 ^ buf1;
-
-      /* Col2 */
-
-      buf1 = state[4] ^ state[5] ^ state[6] ^ state[7];
-      buf2 = state[4];
-
-      buf3 = state[4] ^ state[5];
-      buf3 = galois_mul2(buf3);
-      state[4] = state[4] ^ buf3 ^ buf1;
-
-      buf3 = state[5] ^ state[6];
-      buf3 = galois_mul2(buf3);
-      state[5] = state[5] ^ buf3 ^ buf1;
-
-      buf3 = state[6] ^ state[7];
-      buf3 = galois_mul2(buf3);
-      state[6] = state[6] ^ buf3 ^ buf1;
-
-      buf3 = state[7] ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[7] = state[7] ^ buf3 ^ buf1;
-
-      /* Col3 */
-
-      buf1 = state[8] ^ state[9] ^ state[10] ^ state[11];
-      buf2 = state[8];
-
-      buf3 = state[8] ^ state[9];
-      buf3 = galois_mul2(buf3);
-      state[8] = state[8] ^ buf3 ^ buf1;
-
-      buf3 = state[9] ^ state[10];
-      buf3 = galois_mul2(buf3);
-      state[9] = state[9] ^ buf3 ^ buf1;
-
-      buf3 = state[10] ^ state[11];
-      buf3 = galois_mul2(buf3);
-      state[10] = state[10] ^ buf3 ^ buf1;
-
-      buf3 = state[11] ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[11] = state[11] ^ buf3 ^ buf1;
-
-      /* Col4 */
-
-      buf1 = state[12] ^ state[13] ^ state[14] ^ state[15];
-      buf2 = state[12];
-
-      buf3 = state[12] ^ state[13];
-      buf3 = galois_mul2(buf3);
-      state[12] = state[12] ^ buf3 ^ buf1;
-
-      buf3 = state[13] ^ state[14];
-      buf3 = galois_mul2(buf3);
-      state[13] = state[13] ^ buf3 ^ buf1;
-
-      buf3 = state[14] ^ state[15];
-      buf3 = galois_mul2(buf3);
-      state[14] = state[14] ^ buf3 ^ buf1;
-
-      buf3 = state[15] ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[15] = state[15] ^ buf3 ^ buf1;
-    }
-
-  /* 10th round without mixcols */
-
-  state[0]   = g_sbox[(state[0]  ^ expanded_key[(round * 16)])];
-  state[4]   = g_sbox[(state[4]  ^ expanded_key[(round * 16) +  4])];
-  state[8]   = g_sbox[(state[8]  ^ expanded_key[(round * 16) +  8])];
-  state[12]  = g_sbox[(state[12] ^ expanded_key[(round * 16) + 12])];
-
-  /* Row 1 */
-
-  buf1       = state[1] ^ expanded_key[(round * 16) + 1];
-  state[1]   = g_sbox[(state[5]  ^ expanded_key[(round * 16) +  5])];
-  state[5]   = g_sbox[(state[9]  ^ expanded_key[(round * 16) +  9])];
-  state[9]   = g_sbox[(state[13] ^ expanded_key[(round * 16) + 13])];
-  state[13]  = g_sbox[buf1];
-
-  /* Row 2 */
-
-  buf1       = state[2] ^ expanded_key[(round * 16) + 2];
-  buf2       = state[6] ^ expanded_key[(round * 16) + 6];
-  state[2]   = g_sbox[(state[10] ^ expanded_key[(round * 16) + 10])];
-  state[6]   = g_sbox[(state[14] ^ expanded_key[(round * 16) + 14])];
-  state[10]  = g_sbox[buf1];
-  state[14]  = g_sbox[buf2];
-
-  /* Row 3 */
-
-  buf1       = state[15] ^ expanded_key[(round * 16) + 15];
-  state[15]  = g_sbox[(state[11] ^ expanded_key[(round * 16) + 11])];
-  state[11]  = g_sbox[(state[7]  ^ expanded_key[(round * 16) +  7])];
-  state[7]   = g_sbox[(state[3]  ^ expanded_key[(round * 16) +  3])];
-  state[3]   = g_sbox[buf1];
-
-  /* Last addroundkey */
-
-  state[0]  ^= expanded_key[160];
-  state[1]  ^= expanded_key[161];
-  state[2]  ^= expanded_key[162];
-  state[3]  ^= expanded_key[163];
-  state[4]  ^= expanded_key[164];
-  state[5]  ^= expanded_key[165];
-  state[6]  ^= expanded_key[166];
-  state[7]  ^= expanded_key[167];
-  state[8]  ^= expanded_key[168];
-  state[9]  ^= expanded_key[169];
-  state[10] ^= expanded_key[170];
-  state[11] ^= expanded_key[171];
-  state[12] ^= expanded_key[172];
-  state[13] ^= expanded_key[173];
-  state[14] ^= expanded_key[174];
-  state[15] ^= expanded_key[175];
-}
-
-/****************************************************************************
- * Name: aes_decr
- *
- * Description:
- *  Internal implementation of AES128 decryption.
- *  Straight forward aes decryption implementation.  The order of substeps is
- *  the exact reverse of decryption inverse functions:
- *
- *     - addRoundKey is its own inverse
- *     - rsbox is inverse of sbox
- *     - rightshift instead of leftshift
- *     - invMixColumns = barreto + mixColumns
- *
- *  No further subfunctions to save cycles for function calls no structuring
- *  with "for (....)" to save cycles
- *
- * Input Parameters:
- *  expanded_key expanded AES128 key
- *  state        16 bytes of cipher text and plain text
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-static void aes_decr(FAR uint8_t *state, FAR const uint8_t *expanded_key)
-{
-  uint8_t buf1;
-  uint8_t buf2;
-  uint8_t buf3;
-  int8_t round;
-
-  round = 9;
-
-  /* Initial addroundkey */
-
-  state[0]  ^= expanded_key[160];
-  state[1]  ^= expanded_key[161];
-  state[2]  ^= expanded_key[162];
-  state[3]  ^= expanded_key[163];
-  state[4]  ^= expanded_key[164];
-  state[5]  ^= expanded_key[165];
-  state[6]  ^= expanded_key[166];
-  state[7]  ^= expanded_key[167];
-  state[8]  ^= expanded_key[168];
-  state[9]  ^= expanded_key[169];
-  state[10] ^= expanded_key[170];
-  state[11] ^= expanded_key[171];
-  state[12] ^= expanded_key[172];
-  state[13] ^= expanded_key[173];
-  state[14] ^= expanded_key[174];
-  state[15] ^= expanded_key[175];
-
-  /* 10th round without mixcols */
-
-  state[0]   = g_rsbox[state[0]]  ^ expanded_key[(round * 16)];
-  state[4]   = g_rsbox[state[4]]  ^ expanded_key[(round * 16) +  4];
-  state[8]   = g_rsbox[state[8]]  ^ expanded_key[(round * 16) +  8];
-  state[12]  = g_rsbox[state[12]] ^ expanded_key[(round * 16) + 12];
-
-  /* Row 1 */
-
-  buf1       = g_rsbox[state[13]] ^ expanded_key[(round * 16) +  1];
-  state[13]  = g_rsbox[state[9]]  ^ expanded_key[(round * 16) + 13];
-  state[9]   = g_rsbox[state[5]]  ^ expanded_key[(round * 16) +  9];
-  state[5]   = g_rsbox[state[1]]  ^ expanded_key[(round * 16) +  5];
-  state[1]   = buf1;
-
-  /* Row 2 */
-
-  buf1       = g_rsbox[state[2]]  ^ expanded_key[(round * 16) + 10];
-  buf2       = g_rsbox[state[6]]  ^ expanded_key[(round * 16) + 14];
-  state[2]   = g_rsbox[state[10]] ^ expanded_key[(round * 16) +  2];
-  state[6]   = g_rsbox[state[14]] ^ expanded_key[(round * 16) +  6];
-  state[10]  = buf1;
-  state[14]  = buf2;
-
-  /* Row 3 */
-
-  buf1       = g_rsbox[state[3]]  ^ expanded_key[(round * 16) + 15];
-  state[3]   = g_rsbox[state[7]]  ^ expanded_key[(round * 16) +  3];
-  state[7]   = g_rsbox[state[11]] ^ expanded_key[(round * 16) +  7];
-  state[11]  = g_rsbox[state[15]] ^ expanded_key[(round * 16) + 11];
-  state[15]  = buf1;
-
-  for (round = 8; round >= 0; round--)
-    {
-      /* barreto */
-
-      /* Col1 */
-
-      buf1       = galois_mul2(galois_mul2(state[0] ^ state[2]));
-      buf2       = galois_mul2(galois_mul2(state[1] ^ state[3]));
-      state[0]  ^= buf1;
-      state[1]  ^= buf2;
-      state[2]  ^= buf1;
-      state[3]  ^= buf2;
-
-      /* Col2 */
-
-      buf1       = galois_mul2(galois_mul2(state[4] ^ state[6]));
-      buf2       = galois_mul2(galois_mul2(state[5] ^ state[7]));
-      state[4]  ^= buf1;
-      state[5]  ^= buf2;
-      state[6]  ^= buf1;
-      state[7]  ^= buf2;
-
-      /* Col3 */
-
-      buf1       = galois_mul2(galois_mul2(state[8] ^ state[10]));
-      buf2       = galois_mul2(galois_mul2(state[9] ^ state[11]));
-      state[8]  ^= buf1;
-      state[9]  ^= buf2;
-      state[10] ^= buf1;
-      state[11] ^= buf2;
-
-      /* Col4 */
-
-      buf1       = galois_mul2(galois_mul2(state[12] ^ state[14]));
-      buf2       = galois_mul2(galois_mul2(state[13] ^ state[15]));
-      state[12] ^= buf1;
-      state[13] ^= buf2;
-      state[14] ^= buf1;
-      state[15] ^= buf2;
-
-      /* mixcolums */
-
-      /* Col1 */
-
-      buf1 = state[0]  ^ state[1] ^ state[2] ^ state[3];
-      buf2 = state[0];
-
-      buf3 = state[0]  ^ state[1];
-      buf3 = galois_mul2(buf3);
-      state[0] = state[0] ^ buf3 ^ buf1;
-
-      buf3 = state[1]  ^ state[2];
-      buf3 = galois_mul2(buf3);
-      state[1] = state[1] ^ buf3 ^ buf1;
-
-      buf3 = state[2]  ^ state[3];
-      buf3 = galois_mul2(buf3);
-      state[2] = state[2] ^ buf3 ^ buf1;
-
-      buf3 = state[3]  ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[3] = state[3] ^ buf3 ^ buf1;
-
-      /* Col2 */
-
-      buf1 = state[4]  ^ state[5] ^ state[6] ^ state[7];
-      buf2 = state[4];
-
-      buf3 = state[4]  ^ state[5];
-      buf3 = galois_mul2(buf3);
-      state[4] = state[4] ^ buf3 ^ buf1;
-
-      buf3 = state[5]  ^ state[6];
-      buf3 = galois_mul2(buf3);
-      state[5] = state[5] ^ buf3 ^ buf1;
-
-      buf3 = state[6]  ^ state[7];
-      buf3 = galois_mul2(buf3);
-      state[6] = state[6] ^ buf3 ^ buf1;
-
-      buf3 = state[7]  ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[7] = state[7] ^ buf3 ^ buf1;
-
-      /* Col3 */
-
-      buf1 = state[8]  ^ state[9] ^ state[10] ^ state[11];
-      buf2 = state[8];
-
-      buf3 = state[8]  ^ state[9];
-      buf3 = galois_mul2(buf3);
-      state[8] = state[8] ^ buf3 ^ buf1;
-
-      buf3 = state[9]  ^ state[10];
-      buf3 = galois_mul2(buf3);
-      state[9] = state[9] ^ buf3 ^ buf1;
-
-      buf3 = state[10] ^ state[11];
-      buf3 = galois_mul2(buf3);
-      state[10] = state[10] ^ buf3 ^ buf1;
-
-      buf3 = state[11] ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[11] = state[11] ^ buf3 ^ buf1;
-
-      /* Col4 */
-
-      buf1 = state[12] ^ state[13] ^ state[14] ^ state[15];
-      buf2 = state[12];
-
-      buf3 = state[12] ^ state[13];
-      buf3 = galois_mul2(buf3);
-      state[12] = state[12] ^ buf3 ^ buf1;
-
-      buf3 = state[13] ^ state[14];
-      buf3 = galois_mul2(buf3);
-      state[13] = state[13] ^ buf3 ^ buf1;
-
-      buf3 = state[14] ^ state[15];
-      buf3 = galois_mul2(buf3);
-      state[14] = state[14] ^ buf3 ^ buf1;
-
-      buf3 = state[15] ^ buf2;
-      buf3 = galois_mul2(buf3);
-      state[15] = state[15] ^ buf3 ^ buf1;
-
-      /* addroundkey, rsbox and shiftrows */
-
-      /* Row 0 */
-
-      state[0]   = g_rsbox[state[0]]  ^ expanded_key[(round * 16)];
-      state[4]   = g_rsbox[state[4]]  ^ expanded_key[(round * 16) +  4];
-      state[8]   = g_rsbox[state[8]]  ^ expanded_key[(round * 16) +  8];
-      state[12]  = g_rsbox[state[12]] ^ expanded_key[(round * 16) + 12];
-
-      /* Row 1 */
-
-      buf1       = g_rsbox[state[13]] ^ expanded_key[(round * 16) +  1];
-      state[13]  = g_rsbox[state[9]]  ^ expanded_key[(round * 16) + 13];
-      state[9]   = g_rsbox[state[5]]  ^ expanded_key[(round * 16) +  9];
-      state[5]   = g_rsbox[state[1]]  ^ expanded_key[(round * 16) +  5];
-      state[1]   = buf1;
-
-      /* Row 2 */
-
-      buf1       = g_rsbox[state[2]]  ^ expanded_key[(round * 16) + 10];
-      buf2       = g_rsbox[state[6]]  ^ expanded_key[(round * 16) + 14];
-      state[2]   = g_rsbox[state[10]] ^ expanded_key[(round * 16) +  2];
-      state[6]   = g_rsbox[state[14]] ^ expanded_key[(round * 16) +  6];
-      state[10]  = buf1;
-      state[14]  = buf2;
-
-      /* Row 3 */
-
-      buf1       = g_rsbox[state[3]]  ^ expanded_key[(round * 16) + 15];
-      state[3]   = g_rsbox[state[7]]  ^ expanded_key[(round * 16) +  3];
-      state[7]   = g_rsbox[state[11]] ^ expanded_key[(round * 16) +  7];
-      state[11]  = g_rsbox[state[15]] ^ expanded_key[(round * 16) + 11];
-      state[15]  = buf1;
-    }
-}
+#include <string.h>
+#include <sys/types.h>
+#include <crypto/aes.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: aes_setupkey
- *
- * Description:
- *   Configure the given AES context for operation with the selected key.
- *
- * Input Parameters:
- *  state  an AES context that can be used for AES operations
- *  key    a pointer to a 16-byte buffer holding the AES-128 key
- *  len    length of the key, must be 16
- *
- * TODO: Support other key lengths of 24 (AES-192) and 32 (AES-256)
- *
- * Returned Value:
- *   0 if OK
- *   -EINVAL if len is not 16
- *
- ****************************************************************************/
-
-int aes_setupkey(FAR struct aes_state_s *state,
-                 FAR const uint8_t *key,
-                 int len)
+static inline void enc32le(FAR void *dst, uint32_t x)
 {
-  if (len != 16)
+  FAR unsigned char *buf = dst;
+
+  buf[0] = (unsigned char)x;
+  buf[1] = (unsigned char)(x >> 8);
+  buf[2] = (unsigned char)(x >> 16);
+  buf[3] = (unsigned char)(x >> 24);
+}
+
+static inline uint32_t dec32le(FAR const void *src)
+{
+  FAR const unsigned char *buf = src;
+
+  return (uint32_t)buf[0]
+    | ((uint32_t)buf[1] << 8)
+    | ((uint32_t)buf[2] << 16)
+    | ((uint32_t)buf[3] << 24);
+}
+
+/* This constant-time implementation is "bitsliced": the 128-bit state is
+ * split over eight 32-bit words q* in the following way:
+ *
+ * -- Input block consists in 16 bytes:
+ *    a00 a10 a20 a30 a01 a11 a21 a31 a02 a12 a22 a32 a03 a13 a23 a33
+ * In the terminology of FIPS 197, this is a 4x4 matrix which is read
+ * column by column.
+ *
+ * -- Each byte is split into eight bits which are distributed over the
+ * eight words, at the same rank. Thus, for a byte x at rank k, bit 0
+ * (least significant) of x will be at rank k in q0 (if that bit is b,
+ * then it contributes "b << k" to the value of q0), bit 1 of x will be
+ * at rank k in q1, and so on.
+ *
+ * -- Ranks given to bits are in "row order" and are either all even, or
+ * all odd. Two independent AES states are thus interleaved, one using
+ * the even ranks, the other the odd ranks. Row order means:
+ *    a00 a01 a02 a03 a10 a11 a12 a13 a20 a21 a22 a23 a30 a31 a32 a33
+ *
+ * Converting input bytes from two AES blocks to bitslice representation
+ * is done in the following way:
+ * -- Decode first block into the four words q0 q2 q4 q6, in that order,
+ * using little-endian convention.
+ * -- Decode second block into the four words q1 q3 q5 q7, in that order,
+ * using little-endian convention.
+ * -- Call aes_ct_ortho().
+ *
+ * Converting back to bytes is done by using the reverse operations. Note
+ * that aes_ct_ortho() is its own inverse.
+ */
+
+/* The AES S-box, as a bitsliced constant-time version. The input array
+ * consists in eight 32-bit words; 32 S-box instances are computed in
+ * parallel. Bits 0 to 7 of each S-box input (bit 0 is least significant)
+ * are spread over the words 0 to 7, at the same rank.
+ */
+
+static void aes_ct_bitslice_sbox(FAR uint32_t *q)
+{
+  /* This S-box implementation is a straightforward translation of
+   * the circuit described by Boyar and Peralta in "A new
+   * combinational logic minimization technique with applications
+   * to cryptology" (https://eprint.iacr.org/2009/191.pdf).
+   *
+   * Note that variables x* (input) and s* (output) are numbered
+   * in "reverse" order (x0 is the high bit, x7 is the low bit).
+   */
+
+  uint32_t x0;
+  uint32_t x1;
+  uint32_t x2;
+  uint32_t x3;
+  uint32_t x4;
+  uint32_t x5;
+  uint32_t x6;
+  uint32_t x7;
+  uint32_t y1;
+  uint32_t y2;
+  uint32_t y3;
+  uint32_t y4;
+  uint32_t y5;
+  uint32_t y6;
+  uint32_t y7;
+  uint32_t y8;
+  uint32_t y9;
+  uint32_t y10;
+  uint32_t y11;
+  uint32_t y12;
+  uint32_t y13;
+  uint32_t y14;
+  uint32_t y15;
+  uint32_t y16;
+  uint32_t y17;
+  uint32_t y18;
+  uint32_t y19;
+  uint32_t y20;
+  uint32_t y21;
+  uint32_t z0;
+  uint32_t z1;
+  uint32_t z2;
+  uint32_t z3;
+  uint32_t z4;
+  uint32_t z5;
+  uint32_t z6;
+  uint32_t z7;
+  uint32_t z8;
+  uint32_t z9;
+  uint32_t z10;
+  uint32_t z11;
+  uint32_t z12;
+  uint32_t z13;
+  uint32_t z14;
+  uint32_t z15;
+  uint32_t z16;
+  uint32_t z17;
+  uint32_t t0;
+  uint32_t t1;
+  uint32_t t2;
+  uint32_t t3;
+  uint32_t t4;
+  uint32_t t5;
+  uint32_t t6;
+  uint32_t t7;
+  uint32_t t8;
+  uint32_t t9;
+  uint32_t t10;
+  uint32_t t11;
+  uint32_t t12;
+  uint32_t t13;
+  uint32_t t14;
+  uint32_t t15;
+  uint32_t t16;
+  uint32_t t17;
+  uint32_t t18;
+  uint32_t t19;
+  uint32_t t20;
+  uint32_t t21;
+  uint32_t t22;
+  uint32_t t23;
+  uint32_t t24;
+  uint32_t t25;
+  uint32_t t26;
+  uint32_t t27;
+  uint32_t t28;
+  uint32_t t29;
+  uint32_t t30;
+  uint32_t t31;
+  uint32_t t32;
+  uint32_t t33;
+  uint32_t t34;
+  uint32_t t35;
+  uint32_t t36;
+  uint32_t t37;
+  uint32_t t38;
+  uint32_t t39;
+  uint32_t t40;
+  uint32_t t41;
+  uint32_t t42;
+  uint32_t t43;
+  uint32_t t44;
+  uint32_t t45;
+  uint32_t t46;
+  uint32_t t47;
+  uint32_t t48;
+  uint32_t t49;
+  uint32_t t50;
+  uint32_t t51;
+  uint32_t t52;
+  uint32_t t53;
+  uint32_t t54;
+  uint32_t t55;
+  uint32_t t56;
+  uint32_t t57;
+  uint32_t t58;
+  uint32_t t59;
+  uint32_t t60;
+  uint32_t t61;
+  uint32_t t62;
+  uint32_t t63;
+  uint32_t t64;
+  uint32_t t65;
+  uint32_t t66;
+  uint32_t t67;
+  uint32_t s0;
+  uint32_t s1;
+  uint32_t s2;
+  uint32_t s3;
+  uint32_t s4;
+  uint32_t s5;
+  uint32_t s6;
+  uint32_t s7;
+
+  x0 = q[7];
+  x1 = q[6];
+  x2 = q[5];
+  x3 = q[4];
+  x4 = q[3];
+  x5 = q[2];
+  x6 = q[1];
+  x7 = q[0];
+
+  /* Top linear transformation. */
+
+  y14 = x3 ^ x5;
+  y13 = x0 ^ x6;
+  y9 = x0 ^ x3;
+  y8 = x0 ^ x5;
+  t0 = x1 ^ x2;
+  y1 = t0 ^ x7;
+  y4 = y1 ^ x3;
+  y12 = y13 ^ y14;
+  y2 = y1 ^ x0;
+  y5 = y1 ^ x6;
+  y3 = y5 ^ y8;
+  t1 = x4 ^ y12;
+  y15 = t1 ^ x5;
+  y20 = t1 ^ x1;
+  y6 = y15 ^ x7;
+  y10 = y15 ^ t0;
+  y11 = y20 ^ y9;
+  y7 = x7 ^ y11;
+  y17 = y10 ^ y11;
+  y19 = y10 ^ y8;
+  y16 = t0 ^ y11;
+  y21 = y13 ^ y16;
+  y18 = x0 ^ y16;
+
+  /* Non-linear section. */
+
+  t2 = y12 & y15;
+  t3 = y3 & y6;
+  t4 = t3 ^ t2;
+  t5 = y4 & x7;
+  t6 = t5 ^ t2;
+  t7 = y13 & y16;
+  t8 = y5 & y1;
+  t9 = t8 ^ t7;
+  t10 = y2 & y7;
+  t11 = t10 ^ t7;
+  t12 = y9 & y11;
+  t13 = y14 & y17;
+  t14 = t13 ^ t12;
+  t15 = y8 & y10;
+  t16 = t15 ^ t12;
+  t17 = t4 ^ t14;
+  t18 = t6 ^ t16;
+  t19 = t9 ^ t14;
+  t20 = t11 ^ t16;
+  t21 = t17 ^ y20;
+  t22 = t18 ^ y19;
+  t23 = t19 ^ y21;
+  t24 = t20 ^ y18;
+
+  t25 = t21 ^ t22;
+  t26 = t21 & t23;
+  t27 = t24 ^ t26;
+  t28 = t25 & t27;
+  t29 = t28 ^ t22;
+  t30 = t23 ^ t24;
+  t31 = t22 ^ t26;
+  t32 = t31 & t30;
+  t33 = t32 ^ t24;
+  t34 = t23 ^ t33;
+  t35 = t27 ^ t33;
+  t36 = t24 & t35;
+  t37 = t36 ^ t34;
+  t38 = t27 ^ t36;
+  t39 = t29 & t38;
+  t40 = t25 ^ t39;
+
+  t41 = t40 ^ t37;
+  t42 = t29 ^ t33;
+  t43 = t29 ^ t40;
+  t44 = t33 ^ t37;
+  t45 = t42 ^ t41;
+  z0 = t44 & y15;
+  z1 = t37 & y6;
+  z2 = t33 & x7;
+  z3 = t43 & y16;
+  z4 = t40 & y1;
+  z5 = t29 & y7;
+  z6 = t42 & y11;
+  z7 = t45 & y17;
+  z8 = t41 & y10;
+  z9 = t44 & y12;
+  z10 = t37 & y3;
+  z11 = t33 & y4;
+  z12 = t43 & y13;
+  z13 = t40 & y5;
+  z14 = t29 & y2;
+  z15 = t42 & y9;
+  z16 = t45 & y14;
+  z17 = t41 & y8;
+
+  /* Bottom linear transformation. */
+
+  t46 = z15 ^ z16;
+  t47 = z10 ^ z11;
+  t48 = z5 ^ z13;
+  t49 = z9 ^ z10;
+  t50 = z2 ^ z12;
+  t51 = z2 ^ z5;
+  t52 = z7 ^ z8;
+  t53 = z0 ^ z3;
+  t54 = z6 ^ z7;
+  t55 = z16 ^ z17;
+  t56 = z12 ^ t48;
+  t57 = t50 ^ t53;
+  t58 = z4 ^ t46;
+  t59 = z3 ^ t54;
+  t60 = t46 ^ t57;
+  t61 = z14 ^ t57;
+  t62 = t52 ^ t58;
+  t63 = t49 ^ t58;
+  t64 = z4 ^ t59;
+  t65 = t61 ^ t62;
+  t66 = z1 ^ t63;
+  s0 = t59 ^ t63;
+  s6 = t56 ^ ~t62;
+  s7 = t48 ^ ~t60;
+  t67 = t64 ^ t65;
+  s3 = t53 ^ t66;
+  s4 = t51 ^ t66;
+  s5 = t47 ^ t65;
+  s1 = t64 ^ ~s3;
+  s2 = t55 ^ ~t67;
+
+  q[7] = s0;
+  q[6] = s1;
+  q[5] = s2;
+  q[4] = s3;
+  q[3] = s4;
+  q[2] = s5;
+  q[1] = s6;
+  q[0] = s7;
+}
+
+/* Perform bytewise orthogonalization of eight 32-bit words. Bytes
+ * of q0..q7 are spread over all words: for a byte x that occurs
+ * at rank i in q[j] (byte x uses bits 8*i to 8*i+7 in q[j]), the bit
+ * of rank k in x (0 <= k <= 7) goes to q[k] at rank 8*i+j.
+ *
+ * This operation is an involution.
+ */
+
+static void aes_ct_ortho(FAR uint32_t *q)
+{
+#define SWAPN(cl, ch, s, x, y)   do { \
+    uint32_t a, b; \
+    a = (x); \
+    b = (y); \
+    (x) = (a & (uint32_t)cl) | ((b & (uint32_t)cl) << (s)); \
+    (y) = ((a & (uint32_t)ch) >> (s)) | (b & (uint32_t)ch); \
+  } while (0)
+
+#define SWAP2(x, y)   SWAPN(0x55555555, 0xaaaaaaaa, 1, x, y)
+#define SWAP4(x, y)   SWAPN(0x33333333, 0xcccccccc, 2, x, y)
+#define SWAP8(x, y)   SWAPN(0x0f0f0f0f, 0xf0f0f0f0, 4, x, y)
+
+  SWAP2(q[0], q[1]);
+  SWAP2(q[2], q[3]);
+  SWAP2(q[4], q[5]);
+  SWAP2(q[6], q[7]);
+
+  SWAP4(q[0], q[2]);
+  SWAP4(q[1], q[3]);
+  SWAP4(q[4], q[6]);
+  SWAP4(q[5], q[7]);
+
+  SWAP8(q[0], q[4]);
+  SWAP8(q[1], q[5]);
+  SWAP8(q[2], q[6]);
+  SWAP8(q[3], q[7]);
+}
+
+static inline uint32_t sub_word(uint32_t x)
+{
+  uint32_t q[8];
+  int i;
+
+  for (i = 0; i < 8; i++)
     {
-      return -EINVAL;
+      q[i] = x;
     }
 
-  expand_key(state->expanded_key, key);
+  aes_ct_ortho(q);
+  aes_ct_bitslice_sbox(q);
+  aes_ct_ortho(q);
+  return q[0];
+}
+
+static const unsigned char rcon[] =
+{
+  0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
+};
+
+/* Base key schedule code. The function sub_word() must be defined
+ * below. Subkeys are produced in little-endian convention (but not
+ * bitsliced). Key length is expressed in bytes.
+ */
+
+static unsigned aes_keysched_base(FAR uint32_t *skey,
+                                  FAR const void *key, size_t key_len)
+{
+  unsigned num_rounds;
+  int i;
+  int j;
+  int k;
+  int nk;
+  int nkf;
+  uint32_t tmp;
+
+  switch (key_len)
+    {
+      case 16:
+        num_rounds = 10;
+        break;
+      case 24:
+        num_rounds = 12;
+        break;
+      case 32:
+        num_rounds = 14;
+        break;
+      default:
+        return 0;
+    }
+
+  nk = (int)(key_len >> 2);
+  nkf = (int)((num_rounds + 1) << 2);
+  for (i = 0; i < nk; i++)
+    {
+      tmp = dec32le((FAR const unsigned char *)key + (i << 2));
+      skey[i] = tmp;
+    }
+
+  tmp = skey[(key_len >> 2) - 1];
+  for (i = nk, j = 0, k = 0; i < nkf; i++)
+    {
+      if (j == 0)
+        {
+          tmp = (tmp << 24) | (tmp >> 8);
+          tmp = sub_word(tmp) ^ rcon[k];
+        }
+      else if (nk > 6 && j == 4)
+        {
+          tmp = sub_word(tmp);
+        }
+
+      tmp ^= skey[i - nk];
+      skey[i] = tmp;
+      if (++j == nk)
+        {
+          j = 0;
+          k++;
+        }
+    }
+
+  return num_rounds;
+}
+
+/* AES key schedule, constant-time version. skey[] is filled with n+1
+ * 128-bit subkeys, where n is the number of rounds (10 to 14, depending
+ * on key size). The number of rounds is returned. If the key size is
+ * invalid (not 16, 24 or 32), then 0 is returned.
+ */
+
+unsigned aes_ct_keysched(FAR uint32_t *comp_skey,
+                         FAR const void *key,
+                         size_t key_len)
+{
+  uint32_t skey[60];
+  unsigned u;
+  unsigned num_rounds;
+
+  num_rounds = aes_keysched_base(skey, key, key_len);
+  for (u = 0; u <= num_rounds; u++)
+    {
+      uint32_t q[8];
+
+      q[0] = q[1] = skey[(u << 2) + 0];
+      q[2] = q[3] = skey[(u << 2) + 1];
+      q[4] = q[5] = skey[(u << 2) + 2];
+      q[6] = q[7] = skey[(u << 2) + 3];
+      aes_ct_ortho(q);
+      comp_skey[(u << 2) + 0] =
+        (q[0] & 0x55555555) | (q[1] & 0xaaaaaaaa);
+      comp_skey[(u << 2) + 1] =
+        (q[2] & 0x55555555) | (q[3] & 0xaaaaaaaa);
+      comp_skey[(u << 2) + 2] =
+        (q[4] & 0x55555555) | (q[5] & 0xaaaaaaaa);
+      comp_skey[(u << 2) + 3] =
+        (q[6] & 0x55555555) | (q[7] & 0xaaaaaaaa);
+    }
+
+  return num_rounds;
+}
+
+/* Expand AES subkeys as produced by aes_ct_keysched(), into
+ * a larger array suitable for aes_ct_bitslice_encrypt() and
+ * aes_ct_bitslice_decrypt().
+ */
+
+void aes_ct_skey_expand(FAR uint32_t *skey,
+                        unsigned num_rounds,
+                        FAR const uint32_t *comp_skey)
+{
+  unsigned u;
+  unsigned v;
+  unsigned n;
+
+  n = (num_rounds + 1) << 2;
+  for (u = 0, v = 0; u < n; u ++, v += 2)
+    {
+      uint32_t x;
+      uint32_t y;
+
+      x = y = comp_skey[u];
+      x &= 0x55555555;
+      skey[v + 0] = x | (x << 1);
+      y &= 0xaaaaaaaa;
+      skey[v + 1] = y | (y >> 1);
+    }
+}
+
+static inline void add_round_key(FAR uint32_t *q, FAR const uint32_t *sk)
+{
+  q[0] ^= sk[0];
+  q[1] ^= sk[1];
+  q[2] ^= sk[2];
+  q[3] ^= sk[3];
+  q[4] ^= sk[4];
+  q[5] ^= sk[5];
+  q[6] ^= sk[6];
+  q[7] ^= sk[7];
+}
+
+static inline void shift_rows(FAR uint32_t *q)
+{
+  int i;
+
+  for (i = 0; i < 8; i++)
+    {
+      uint32_t x;
+
+      x = q[i];
+      q[i] = (x & 0x000000ff)
+        | ((x & 0x0000fc00) >> 2) | ((x & 0x00000300) << 6)
+        | ((x & 0x00f00000) >> 4) | ((x & 0x000f0000) << 4)
+        | ((x & 0xc0000000) >> 6) | ((x & 0x3f000000) << 2);
+    }
+}
+
+static inline uint32_t rotr16(uint32_t x)
+{
+  return (x << 16) | (x >> 16);
+}
+
+static inline void mix_columns(FAR uint32_t *q)
+{
+  uint32_t q0;
+  uint32_t q1;
+  uint32_t q2;
+  uint32_t q3;
+  uint32_t q4;
+  uint32_t q5;
+  uint32_t q6;
+  uint32_t q7;
+  uint32_t r0;
+  uint32_t r1;
+  uint32_t r2;
+  uint32_t r3;
+  uint32_t r4;
+  uint32_t r5;
+  uint32_t r6;
+  uint32_t r7;
+
+  q0 = q[0];
+  q1 = q[1];
+  q2 = q[2];
+  q3 = q[3];
+  q4 = q[4];
+  q5 = q[5];
+  q6 = q[6];
+  q7 = q[7];
+  r0 = (q0 >> 8) | (q0 << 24);
+  r1 = (q1 >> 8) | (q1 << 24);
+  r2 = (q2 >> 8) | (q2 << 24);
+  r3 = (q3 >> 8) | (q3 << 24);
+  r4 = (q4 >> 8) | (q4 << 24);
+  r5 = (q5 >> 8) | (q5 << 24);
+  r6 = (q6 >> 8) | (q6 << 24);
+  r7 = (q7 >> 8) | (q7 << 24);
+
+  q[0] = q7 ^ r7 ^ r0 ^ rotr16(q0 ^ r0);
+  q[1] = q0 ^ r0 ^ q7 ^ r7 ^ r1 ^ rotr16(q1 ^ r1);
+  q[2] = q1 ^ r1 ^ r2 ^ rotr16(q2 ^ r2);
+  q[3] = q2 ^ r2 ^ q7 ^ r7 ^ r3 ^ rotr16(q3 ^ r3);
+  q[4] = q3 ^ r3 ^ q7 ^ r7 ^ r4 ^ rotr16(q4 ^ r4);
+  q[5] = q4 ^ r4 ^ r5 ^ rotr16(q5 ^ r5);
+  q[6] = q5 ^ r5 ^ r6 ^ rotr16(q6 ^ r6);
+  q[7] = q6 ^ r6 ^ r7 ^ rotr16(q7 ^ r7);
+}
+
+/* Compute AES encryption on bitsliced data. Since input is stored on
+ * eight 32-bit words, two block encryptions are actually performed
+ * in parallel.
+ */
+
+void aes_ct_bitslice_encrypt(unsigned num_rounds,
+                             FAR const uint32_t *skey,
+                             FAR uint32_t *q)
+{
+  unsigned u;
+
+  add_round_key(q, skey);
+  for (u = 1; u < num_rounds; u++)
+    {
+      aes_ct_bitslice_sbox(q);
+      shift_rows(q);
+      mix_columns(q);
+      add_round_key(q, skey + (u << 3));
+    }
+
+  aes_ct_bitslice_sbox(q);
+  shift_rows(q);
+  add_round_key(q, skey + (num_rounds << 3));
+}
+
+/* Like aes_ct_bitslice_sbox(), but for the inverse S-box. */
+
+void aes_ct_bitslice_invsbox(FAR uint32_t *q)
+{
+  /* AES S-box is:
+   *   S(x) = A(I(x)) ^ 0x63
+   * where I() is inversion in GF(256), and A() is a linear
+   * transform (0 is formally defined to be its own inverse).
+   * Since inversion is an involution, the inverse S-box can be
+   * computed from the S-box as:
+   *   iS(x) = B(S(B(x ^ 0x63)) ^ 0x63)
+   * where B() is the inverse of A(). Indeed, for any y in GF(256):
+   *   iS(S(y)) = B(A(I(B(A(I(y)) ^ 0x63 ^ 0x63))) ^ 0x63 ^ 0x63) = y
+   *
+   * Note: we reuse the implementation of the forward S-box,
+   * instead of duplicating it here, so that total code size is
+   * lower. By merging the B() transforms into the S-box circuit
+   * we could make faster CBC decryption, but CBC decryption is
+   * already quite faster than CBC encryption because we can
+   * process two blocks in parallel.
+   */
+
+  uint32_t q0;
+  uint32_t q1;
+  uint32_t q2;
+  uint32_t q3;
+  uint32_t q4;
+  uint32_t q5;
+  uint32_t q6;
+  uint32_t q7;
+
+  q0 = ~q[0];
+  q1 = ~q[1];
+  q2 = q[2];
+  q3 = q[3];
+  q4 = q[4];
+  q5 = ~q[5];
+  q6 = ~q[6];
+  q7 = q[7];
+  q[7] = q1 ^ q4 ^ q6;
+  q[6] = q0 ^ q3 ^ q5;
+  q[5] = q7 ^ q2 ^ q4;
+  q[4] = q6 ^ q1 ^ q3;
+  q[3] = q5 ^ q0 ^ q2;
+  q[2] = q4 ^ q7 ^ q1;
+  q[1] = q3 ^ q6 ^ q0;
+  q[0] = q2 ^ q5 ^ q7;
+
+  aes_ct_bitslice_sbox(q);
+
+  q0 = ~q[0];
+  q1 = ~q[1];
+  q2 = q[2];
+  q3 = q[3];
+  q4 = q[4];
+  q5 = ~q[5];
+  q6 = ~q[6];
+  q7 = q[7];
+  q[7] = q1 ^ q4 ^ q6;
+  q[6] = q0 ^ q3 ^ q5;
+  q[5] = q7 ^ q2 ^ q4;
+  q[4] = q6 ^ q1 ^ q3;
+  q[3] = q5 ^ q0 ^ q2;
+  q[2] = q4 ^ q7 ^ q1;
+  q[1] = q3 ^ q6 ^ q0;
+  q[0] = q2 ^ q5 ^ q7;
+}
+
+static inline void inv_shift_rows(FAR uint32_t *q)
+{
+  int i;
+
+  for (i = 0; i < 8; i++)
+    {
+      uint32_t x;
+
+      x = q[i];
+      q[i] = (x & 0x000000ff)
+        | ((x & 0x00003f00) << 2) | ((x & 0x0000c000) >> 6)
+        | ((x & 0x000f0000) << 4) | ((x & 0x00f00000) >> 4)
+        | ((x & 0x03000000) << 6) | ((x & 0xfc000000) >> 2);
+    }
+}
+
+static void inv_mix_columns(FAR uint32_t *q)
+{
+  uint32_t q0;
+  uint32_t q1;
+  uint32_t q2;
+  uint32_t q3;
+  uint32_t q4;
+  uint32_t q5;
+  uint32_t q6;
+  uint32_t q7;
+  uint32_t r0;
+  uint32_t r1;
+  uint32_t r2;
+  uint32_t r3;
+  uint32_t r4;
+  uint32_t r5;
+  uint32_t r6;
+  uint32_t r7;
+
+  q0 = q[0];
+  q1 = q[1];
+  q2 = q[2];
+  q3 = q[3];
+  q4 = q[4];
+  q5 = q[5];
+  q6 = q[6];
+  q7 = q[7];
+  r0 = (q0 >> 8) | (q0 << 24);
+  r1 = (q1 >> 8) | (q1 << 24);
+  r2 = (q2 >> 8) | (q2 << 24);
+  r3 = (q3 >> 8) | (q3 << 24);
+  r4 = (q4 >> 8) | (q4 << 24);
+  r5 = (q5 >> 8) | (q5 << 24);
+  r6 = (q6 >> 8) | (q6 << 24);
+  r7 = (q7 >> 8) | (q7 << 24);
+
+  q[0] = q5 ^ q6 ^ q7 ^ r0 ^ r5 ^
+         r7 ^ rotr16(q0 ^ q5 ^ q6 ^ r0 ^ r5);
+
+  q[1] = q0 ^ q5 ^ r0 ^ r1 ^ r5 ^
+         r6 ^ r7 ^ rotr16(q1 ^ q5 ^ q7 ^ r1 ^ r5 ^ r6);
+
+  q[2] = q0 ^ q1 ^ q6 ^ r1 ^ r2 ^
+         r6 ^ r7 ^ rotr16(q0 ^ q2 ^ q6 ^ r2 ^ r6 ^ r7);
+
+  q[3] = q0 ^ q1 ^ q2 ^ q5 ^ q6 ^
+         r0 ^ r2 ^ r3 ^ r5 ^
+         rotr16(q0 ^ q1 ^ q3 ^ q5 ^ q6 ^ q7 ^ r0 ^ r3 ^ r5 ^ r7);
+
+  q[4] = q1 ^ q2 ^ q3 ^ q5 ^ r1 ^
+         r3 ^ r4 ^ r5 ^ r6 ^ r7 ^
+         rotr16(q1 ^ q2 ^ q4 ^ q5 ^ q7 ^ r1 ^ r4 ^ r5 ^ r6);
+
+  q[5] = q2 ^ q3 ^ q4 ^ q6 ^ r2 ^
+         r4 ^ r5 ^ r6 ^ r7 ^
+         rotr16(q2 ^ q3 ^ q5 ^ q6 ^ r2 ^ r5 ^ r6 ^ r7);
+
+  q[6] = q3 ^ q4 ^ q5 ^ q7 ^ r3 ^
+         r5 ^ r6 ^ r7 ^
+         rotr16(q3 ^ q4 ^ q6 ^ q7 ^ r3 ^ r6 ^ r7);
+
+  q[7] = q4 ^ q5 ^ q6 ^ r4 ^ r6 ^
+         r7 ^ rotr16(q4 ^ q5 ^ q7 ^ r4 ^ r7);
+}
+
+/* Compute AES decryption on bitsliced data.
+ * Since input is stored on
+ * eight 32-bit words, two block decryptions
+ * are actually performed in parallel.
+ */
+
+void aes_ct_bitslice_decrypt(unsigned num_rounds,
+                             FAR const uint32_t *skey,
+                             FAR uint32_t *q)
+{
+  unsigned u;
+
+  add_round_key(q, skey + (num_rounds << 3));
+  for (u = num_rounds - 1; u > 0; u--)
+    {
+      inv_shift_rows(q);
+      aes_ct_bitslice_invsbox(q);
+      add_round_key(q, skey + (u << 3));
+      inv_mix_columns(q);
+    }
+
+  inv_shift_rows(q);
+  aes_ct_bitslice_invsbox(q);
+  add_round_key(q, skey);
+}
+
+int aes_setkey(FAR AES_CTX *ctx, FAR const uint8_t *key, int len)
+{
+  ctx->num_rounds = aes_ct_keysched(ctx->sk, key, len);
+  if (ctx->num_rounds == 0)
+    {
+      return -1;
+    }
+
+  aes_ct_skey_expand(ctx->sk_exp, ctx->num_rounds, ctx->sk);
   return 0;
 }
 
-/****************************************************************************
- * Name: aes_encipher
- *
- * Description:
- *   Encipher some 16-byte blocks (without any operation mode) using the
- *   previously defined key. The function can be called multiple times with
- *   the same state parameter.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void aes_encipher(FAR struct aes_state_s *state, FAR uint8_t *blocks,
-                  int nblk)
+void aes_encrypt_ecb(FAR AES_CTX *ctx, FAR const uint8_t *src,
+                     FAR uint8_t *dst, size_t num_blocks)
 {
-  int i;
-  uint32_t off = 0;
-
-  for (i = 0; i < nblk; i++)
+  while (num_blocks > 0)
     {
-      aes_encr(blocks + off, state->expanded_key);
-      off += 16;
+      uint32_t q[8];
+
+      q[0] = dec32le(src);
+      q[2] = dec32le(src + 4);
+      q[4] = dec32le(src + 8);
+      q[6] = dec32le(src + 12);
+      if (num_blocks > 1)
+        {
+          q[1] = dec32le(src + 16);
+          q[3] = dec32le(src + 20);
+          q[5] = dec32le(src + 24);
+          q[7] = dec32le(src + 28);
+        }
+      else
+        {
+          q[1] = 0;
+          q[3] = 0;
+          q[5] = 0;
+          q[7] = 0;
+        }
+
+      aes_ct_ortho(q);
+      aes_ct_bitslice_encrypt(ctx->num_rounds, ctx->sk_exp, q);
+      aes_ct_ortho(q);
+      enc32le(dst, q[0]);
+      enc32le(dst + 4, q[2]);
+      enc32le(dst + 8, q[4]);
+      enc32le(dst + 12, q[6]);
+      if (num_blocks > 1)
+        {
+          enc32le(dst + 16, q[1]);
+          enc32le(dst + 20, q[3]);
+          enc32le(dst + 24, q[5]);
+          enc32le(dst + 28, q[7]);
+          src += 32;
+          dst += 32;
+          num_blocks -= 2;
+        }
+      else
+        {
+          break;
+        }
     }
 }
 
-/****************************************************************************
- * Name: aes_decipher
- *
- * Description:
- *   Decipher some 16-byte blocks (without any operation mode) using the
- *   previously defined key. The function can be called multiple times with
- *   the same state parameter.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void aes_decipher(FAR struct aes_state_s *state, FAR uint8_t *blocks,
-                  int nblk)
+void aes_decrypt_ecb(FAR AES_CTX *ctx, FAR const uint8_t *src,
+                     FAR uint8_t *dst, size_t num_blocks)
 {
-  int i;
-  uint32_t off = 0;
-
-  for (i = 0; i < nblk; i++)
+  while (num_blocks > 0)
     {
-      aes_decr(blocks + off, state->expanded_key);
-      off += 16;
+      uint32_t q[8];
+
+      q[0] = dec32le(src);
+      q[2] = dec32le(src + 4);
+      q[4] = dec32le(src + 8);
+      q[6] = dec32le(src + 12);
+      if (num_blocks > 1)
+        {
+          q[1] = dec32le(src + 16);
+          q[3] = dec32le(src + 20);
+          q[5] = dec32le(src + 24);
+          q[7] = dec32le(src + 28);
+        }
+      else
+        {
+          q[1] = 0;
+          q[3] = 0;
+          q[5] = 0;
+          q[7] = 0;
+        }
+
+      aes_ct_ortho(q);
+      aes_ct_bitslice_decrypt(ctx->num_rounds, ctx->sk_exp, q);
+      aes_ct_ortho(q);
+      enc32le(dst, q[0]);
+      enc32le(dst + 4, q[2]);
+      enc32le(dst + 8, q[4]);
+      enc32le(dst + 12, q[6]);
+      if (num_blocks > 1)
+        {
+          enc32le(dst + 16, q[1]);
+          enc32le(dst + 20, q[3]);
+          enc32le(dst + 24, q[5]);
+          enc32le(dst + 28, q[7]);
+          src += 32;
+          dst += 32;
+          num_blocks -= 2;
+        }
+        else
+        {
+          break;
+        }
     }
 }
 
-/****************************************************************************
- * Name: aes_encrypt
- *
- * Description:
- *   AES128 encryption:  Given AES128 key and 16 bytes plain text, cipher
- *   text of 16 bytes is computed. The AES implementation is in mode ECB
- *   (Electronic Code Book).
- *
- * Input Parameters:
- *  key   AES128 key of size 16 bytes
- *  state 16 bytes of plain text and cipher text
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key)
+void aes_encrypt(FAR AES_CTX *ctx, FAR const uint8_t *src, FAR uint8_t *dst)
 {
-  /* Expand the key into 176 bytes */
-
-  aes_setupkey(&g_aes_state, key, 16);
-  aes_encr(state, g_aes_state.expanded_key);
+  aes_encrypt_ecb(ctx, src, dst, 1);
 }
 
-/****************************************************************************
- * Name: aes_decrypt
- *
- * Description:
- *   AES128 decryption: Given AES128 key and 16 bytes cipher text, plain
- *   text of 16 bytes is computed The AES implementation is in mode ECB
- *   (Electronic Code Book).
- *
- * Input Parameters:
- *  key   AES128 key of size 16 bytes
- *  state 16 bytes of plain text and cipher text
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void aes_decrypt(FAR uint8_t *state, FAR const uint8_t *key)
+void aes_decrypt(FAR AES_CTX *ctx, FAR const uint8_t *src, FAR uint8_t *dst)
 {
-  /* Expand the key into 176 bytes */
+  aes_decrypt_ecb(ctx, src, dst, 1);
+}
 
-  aes_setupkey(&g_aes_state, key, 16);
-  aes_decr(state, g_aes_state.expanded_key);
+int aes_keysetup_encrypt(FAR uint32_t *skey, FAR const uint8_t *key, int len)
+{
+  unsigned r;
+  unsigned u;
+  uint32_t tkey[60];
+
+  r = aes_keysched_base(tkey, key, len);
+  if (r == 0)
+    {
+      return 0;
+    }
+
+  for (u = 0; u < ((r + 1) << 2); u++)
+    {
+      uint32_t w;
+
+      w = tkey[u];
+      skey[u] = (w << 24)
+        | ((w & 0x0000ff00) << 8)
+        | ((w & 0x00ff0000) >> 8)
+        | (w >> 24);
+    }
+
+  return r;
+}
+
+/* Reduce value x modulo polynomial x^8+x^4+x^3+x+1. This works as
+ * long as x fits on 12 bits at most.
+ */
+
+static inline uint32_t redgf256(uint32_t x)
+{
+  uint32_t h;
+
+  h = x >> 8;
+  return (x ^ h ^ (h << 1) ^ (h << 3) ^ (h << 4)) & 0xff;
+}
+
+/* Multiplication by 0x09 in GF(256). */
+
+static inline uint32_t mul9(uint32_t x)
+{
+  return redgf256(x ^ (x << 3));
+}
+
+/* Multiplication by 0x0B in GF(256). */
+
+static inline uint32_t mulb(uint32_t x)
+{
+  return redgf256(x ^ (x << 1) ^ (x << 3));
+}
+
+/* Multiplication by 0x0D in GF(256). */
+
+static inline uint32_t muld(uint32_t x)
+{
+  return redgf256(x ^ (x << 2) ^ (x << 3));
+}
+
+/* Multiplication by 0x0E in GF(256). */
+
+static inline uint32_t mule(uint32_t x)
+{
+  return redgf256((x << 1) ^ (x << 2) ^ (x << 3));
+}
+
+int aes_keysetup_decrypt(FAR uint32_t *skey,
+                         FAR const uint8_t *key,
+                         int len)
+{
+  unsigned r;
+  unsigned u;
+  uint32_t tkey[60];
+
+  /* Compute encryption subkeys. We get them in big-endian
+   * notation.
+   */
+
+  r = aes_keysetup_encrypt(tkey, key, len);
+  if (r == 0)
+    {
+      return 0;
+    }
+
+  /* Copy the subkeys in reverse order. Also, apply InvMixColumns()
+   * on the subkeys (except first and last).
+   */
+
+  memcpy(skey + (r << 2), tkey, 4 * sizeof(uint32_t));
+  memcpy(skey, tkey + (r << 2), 4 * sizeof(uint32_t));
+  for (u = 4; u < (r << 2); u++)
+    {
+      uint32_t sk;
+      uint32_t sk0;
+      uint32_t sk1;
+      uint32_t sk2;
+      uint32_t sk3;
+      uint32_t tk;
+      uint32_t tk0;
+      uint32_t tk1;
+      uint32_t tk2;
+      uint32_t tk3;
+
+      sk = tkey[u];
+      sk0 = sk >> 24;
+      sk1 = (sk >> 16) & 0xff;
+      sk2 = (sk >> 8) & 0xff;
+      sk3 = sk & 0xff;
+      tk0 = mule(sk0) ^ mulb(sk1) ^ muld(sk2) ^ mul9(sk3);
+      tk1 = mul9(sk0) ^ mule(sk1) ^ mulb(sk2) ^ muld(sk3);
+      tk2 = muld(sk0) ^ mul9(sk1) ^ mule(sk2) ^ mulb(sk3);
+      tk3 = mulb(sk0) ^ muld(sk1) ^ mul9(sk2) ^ mule(sk3);
+      tk = (tk0 << 24) ^ (tk1 << 16) ^ (tk2 << 8) ^ tk3;
+      skey[((r - (u >> 2)) << 2) + (u & 3)] = tk;
+    }
+
+  return r;
 }

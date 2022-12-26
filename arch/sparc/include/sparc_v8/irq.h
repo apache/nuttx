@@ -95,10 +95,11 @@
 #define REG_R33             (1)   /* R33 */
 #define REG_R34             (2)   /* R34 */
 
-#define REG_R35             (18)   /* R35 */
-#define REG_R36             (19)   /* R36 */
+#define REG_R35             (18)  /* R35 */
+#define REG_R36             (19)  /* R36 */
 
-#define XCPTCONTEXT_REGS    (52)
+#define XCPTCONTEXT_REGS    (68)
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 /* Alternate register names *************************************************/
 
 /* %psr: processor status register */

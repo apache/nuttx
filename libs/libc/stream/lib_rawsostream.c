@@ -102,7 +102,7 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
 void lib_rawoutstream(FAR struct lib_rawoutstream_s *outstream, int fd)
 {
-  outstream->public.put   = rawoutstream_putc;
+  outstream->public.putc  = rawoutstream_putc;
   outstream->public.puts  = rawoutstream_puts;
   outstream->public.flush = lib_noflush;
   outstream->public.nput  = 0;

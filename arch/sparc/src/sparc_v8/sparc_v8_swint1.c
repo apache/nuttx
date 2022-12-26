@@ -41,18 +41,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_registerdump
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void up_registerdump(const uint32_t *regs)
-{
-}
-#else
-#  define up_registerdump(regs)
-#endif
-
-/****************************************************************************
  * Name: dispatch_syscall
  *
  * Description:
@@ -94,13 +82,33 @@ int sparc_swint1(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_I0]);
-  up_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the SWInt according to the command in $4 */
 
   switch (regs[REG_I0])
     {
+      /* A0=SYS_save_context:  This is a save context command:
+       *
+       *   int up_saveusercontext(void *saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A0 = SYS_save_context
+       *   A1 = saveregs
+       *
+       * In this case, we simply need to copy the current registers to the
+       * save register space references in the saved R1 and return.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_I1] != 0);
+          trap_flush_task((uint32_t *)regs[REG_I1], regs);
+        }
+        break;
+
       /* A0=SYS_restore_context: This a restore context command:
        *
        * void sparc_fullcontextrestore
@@ -229,7 +237,7 @@ int sparc_swint1(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t *)CURRENT_REGS);
+      up_dump_register(CURRENT_REGS);
     }
   else
     {

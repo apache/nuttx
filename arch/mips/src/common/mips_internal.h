@@ -176,14 +176,6 @@ void mips_copystate(uint32_t *dest, uint32_t *src);
 
 void mips_lowputs(const char *str);
 
-/* Debug */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-void mips_dumpstate(void);
-#else
-#  define mips_dumpstate()
-#endif
-
 /* Common MIPS32 functions defined in arch/mips/src/MIPS32 */
 
 /* IRQs */

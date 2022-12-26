@@ -46,7 +46,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/wireless/wireless.h>
@@ -372,63 +371,22 @@ static int bl602_net_txpoll(struct net_driver_s *dev)
   struct bl602_net_driver_s *priv =
     (struct bl602_net_driver_s *)dev->d_private;
 
-  if (priv->net_dev.d_len > 0)
-    {
-      DEBUGASSERT(priv->net_dev.d_buf);
+  /* Send the packet */
 
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
+  bl602_net_transmit(priv);
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->net_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->net_dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->net_dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      /* Check if the network is sending this packet to the IP address of
-       * this device.  If so, just loop the packet back into the network but
-       * don't attempt to put it on the wire.
-       */
-
-      if (!devif_loopback(&priv->net_dev))
-        {
-          /* Send the packet */
-
-          bl602_net_transmit(priv);
-
-          /* Check if there is room in the device to hold another packet.
-           * If not, return a non-zero value to terminate the poll.
-           */
-
-          priv->net_dev.d_buf = bl602_netdev_alloc_txbuf();
-          if (priv->net_dev.d_buf)
-            {
-              priv->net_dev.d_buf += PRESERVE_80211_HEADER_LEN;
-              priv->net_dev.d_len = 0;
-            }
-
-          return priv->net_dev.d_buf == NULL;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
+  /* Check if there is room in the device to hold another packet.
+   * If not, return a non-zero value to terminate the poll.
    */
 
-  return 0;
+  priv->net_dev.d_buf = bl602_netdev_alloc_txbuf();
+  if (priv->net_dev.d_buf)
+    {
+      priv->net_dev.d_buf += PRESERVE_80211_HEADER_LEN;
+      priv->net_dev.d_len = 0;
+    }
+
+  return priv->net_dev.d_buf == NULL;
 }
 
 /****************************************************************************
@@ -460,30 +418,6 @@ static void bl602_net_reply(struct bl602_net_driver_s *priv)
 
   if (priv->net_dev.d_len > 0)
     {
-      /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      /* Check for an outgoing IPv4 packet */
-
-      if (IFF_IS_IPv4(priv->net_dev.d_flags))
-#endif
-        {
-          arp_out(&priv->net_dev);
-        }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      /* Otherwise, it must be an outgoing IPv6 packet */
-
-      else
-#endif
-        {
-          neighbor_out(&priv->net_dev);
-        }
-#endif
-
       /* alloc tx buffer and copy to it */
 
       tx_p = bl602_netdev_alloc_txbuf();
@@ -560,11 +494,8 @@ static void bl602_net_receive(struct bl602_net_driver_s *priv)
       ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->net_dev);
 
-      /* Handle ARP on input, then dispatch IPv4 packet to the network
-       * layer.
-       */
+      /* Receive an IPv4 packet from the network device */
 
-      arp_ipin(&priv->net_dev);
       ipv4_input(&priv->net_dev);
 
       /* Check for a reply to the IPv4 packet */
@@ -598,7 +529,7 @@ static void bl602_net_receive(struct bl602_net_driver_s *priv)
     {
       /* Dispatch ARP packet to the network layer */
 
-      arp_arpin(&priv->net_dev);
+      arp_input(&priv->net_dev);
       NETDEV_RXARP(&priv->net_dev);
 
       if (priv->net_dev.d_len > 0)
@@ -1221,7 +1152,6 @@ static void scan_complete_indicate(void *data, void *param)
     }
 
   kmm_free(data);
-  return;
 }
 
 static int rssi_compare(const void *arg1, const void *arg2)

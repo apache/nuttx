@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_NET_ARP is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
 # CONFIG_NSH_NETINIT is not set
 CONFIG_ARCH="arm"

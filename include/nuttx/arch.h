@@ -404,25 +404,6 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
 void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb);
 
 /****************************************************************************
- * Name: up_release_pending
- *
- * Description:
- *   When tasks become ready-to-run but cannot run because
- *   pre-emption is disabled, they are placed into a pending
- *   task list.  This function releases and makes ready-to-run
- *   all of the tasks that have collected in the pending task
- *   list.  This can cause a context switch if a new task is
- *   placed at the head of the ready to run list.
- *
- *   This function is called only from the NuttX scheduling
- *   logic when pre-emptioni is re-enabled.  Interrupts will
- *   always be disabled when this function is called.
- *
- ****************************************************************************/
-
-void up_release_pending(void);
-
-/****************************************************************************
  * Name: up_exit
  *
  * Description:
@@ -442,14 +423,14 @@ void up_exit(int status) noreturn_function;
 /* Prototype is in unistd.h */
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_dump_register
  *
  * Description:
- *   Assertions may be handled in an architecture-specific way.
+ *   Register dump may be handled in an architecture-specific way.
  *
  ****************************************************************************/
 
-void up_assert(FAR const char *filename, int linenum);
+void up_dump_register(FAR void *regs);
 
 #ifdef CONFIG_ARCH_HAVE_BACKTRACE
 
@@ -1777,6 +1758,19 @@ int up_timer_tick_start(clock_t ticks);
  */
 
 /****************************************************************************
+ * Name: up_getusrsp
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   User stack pointer.
+ *
+ ****************************************************************************/
+
+uintptr_t up_getusrsp(void);
+
+/****************************************************************************
  * TLS support
  ****************************************************************************/
 
@@ -2261,7 +2255,7 @@ void nxsched_process_cpuload_ticks(uint32_t ticks);
 void irq_dispatch(int irq, FAR void *context);
 
 /****************************************************************************
- * Name: up_check_stack and friends
+ * Name: up_check_tcbstack and friends
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -2278,14 +2272,14 @@ void irq_dispatch(int irq, FAR void *context);
 
 #ifdef CONFIG_STACK_COLORATION
 struct tcb_s;
-size_t  up_check_tcbstack(FAR struct tcb_s *tcb);
-ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb);
-size_t  up_check_stack(void);
-ssize_t up_check_stack_remain(void);
+size_t up_check_tcbstack(FAR struct tcb_s *tcb);
 #if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t  up_check_intstack(void);
-size_t  up_check_intstack_remain(void);
+size_t up_check_intstack(void);
 #endif
+#endif
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+uintptr_t up_get_intstackbase(void);
 #endif
 
 /****************************************************************************

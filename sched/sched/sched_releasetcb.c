@@ -126,7 +126,22 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       if (tcb->stack_alloc_ptr)
         {
-          up_release_stack(tcb, ttype);
+#ifdef CONFIG_BUILD_KERNEL
+          /* If the exiting thread is not a kernel thread, then it has an
+           * address environment.  Don't bother to release the stack memory
+           * in this case... There is no point since the memory lies in the
+           * user memory region that will be destroyed anyway (and the
+           * address environment has probably already been destroyed at
+           * this point.. so we would crash if we even tried it).  But if
+           * this is a privileged group, when we still have to release the
+           * memory using the kernel allocator.
+           */
+
+          if (ttype == TCB_FLAG_TTYPE_KERNEL)
+#endif
+            {
+              up_release_stack(tcb, ttype);
+            }
         }
 
 #ifdef CONFIG_PIC

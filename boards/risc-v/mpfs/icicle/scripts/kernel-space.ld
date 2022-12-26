@@ -90,7 +90,7 @@ SECTIONS
     } > ksram
 
     /* Page tables here, align to 4K boundary */
-    .pgtables : ALIGN(0x1000) {
+    .pgtables (NOLOAD) : ALIGN(0x1000) {
         *(.pgtables)
          . = ALIGN(32);
         _ebss = ABSOLUTE(.);

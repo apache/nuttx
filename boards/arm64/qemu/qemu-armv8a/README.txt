@@ -51,6 +51,19 @@ Getting Started
      -net none -chardev stdio,id=con,mux=on -serial chardev:con \
      -mon chardev=con,mode=readline -kernel ./nuttx
 
+  3.1.1 Single Core with network (GICv3)
+   Configuring NuttX and compile:
+   $ ./tools/configure.sh -l qemu-armv8a:netnsh
+   $ make
+   Running with qemu
+   $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
+     -machine virt,virtualization=on,gic-version=3 \
+     -chardev stdio,id=con,mux=on -serial chardev:con \
+     -global virtio-mmio.force-legacy=false \
+     -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
+     -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
+     -mon chardev=con,mode=readline -kernel ./nuttx
+
   3.2 SMP (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:nsh_smp
@@ -60,6 +73,19 @@ Getting Started
       -machine virt,virtualization=on,gic-version=3 \
       -net none -chardev stdio,id=con,mux=on -serial chardev:con \
       -mon chardev=con,mode=readline -kernel ./nuttx
+
+  3.2.1 SMP (GICv3)
+   Configuring NuttX and compile:
+   $ ./tools/configure.sh -l qemu-armv8a:netnsh_smp
+   $ make
+   Running with qemu
+   $ qemu-system-aarch64 -cpu cortex-a53 -smp 4 -nographic \
+     -machine virt,virtualization=on,gic-version=3 \
+     -chardev stdio,id=con,mux=on -serial chardev:con \
+     -global virtio-mmio.force-legacy=false \
+     -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
+     -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
+     -mon chardev=con,mode=readline -kernel ./nuttx
 
   3.3 Single Core (GICv2)
    Configuring NuttX and compile:

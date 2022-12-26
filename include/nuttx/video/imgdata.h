@@ -42,12 +42,14 @@
 #define IMGDATA_PIX_FMT_JPEG_WITH_SUBIMG (3)
 #define IMGDATA_PIX_FMT_SUBIMG_UYVY      (4)
 #define IMGDATA_PIX_FMT_SUBIMG_RGB565    (5)
+#define IMGDATA_PIX_FMT_YUYV             (6)
+#define IMGDATA_PIX_FMT_YUV420P          (7)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* structure for validate_frame_setting() and start_capture() */
+/* Structure for validate_frame_setting() and start_capture() */
 
 typedef struct imgdata_format_s
 {
@@ -71,7 +73,6 @@ struct imgdata_ops_s
   CODE int (*init)(void);
   CODE int (*uninit)(void);
 
-  CODE int (*validate_buf)(uint8_t *addr, uint32_t size);
   CODE int (*set_buf)(uint8_t *addr, uint32_t size);
 
   CODE int (*validate_frame_setting)(uint8_t nr_datafmts,

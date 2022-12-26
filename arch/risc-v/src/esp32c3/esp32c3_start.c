@@ -47,6 +47,7 @@
 #endif
 #include "hardware/esp32c3_cache_memory.h"
 #include "hardware/extmem_reg.h"
+#include "rom/esp32c3_libc_stubs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,7 +95,7 @@ extern uint8_t _image_drom_size[];
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_APP_FORMAT_MCUBOOT
-extern int ets_printf(const char *fmt, ...) printflike(1, 2);
+extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
 extern uint32_t cache_suspend_icache(void);
 extern void cache_resume_icache(uint32_t val);
 extern void cache_invalidate_icache_all(void);
@@ -292,6 +293,10 @@ void __esp32c3_start(void)
     {
       *dest++ = 0;
     }
+
+  /* Setup the syscall table needed by the ROM code */
+
+  setup_syscall_table();
 
   showprogress('B');
 

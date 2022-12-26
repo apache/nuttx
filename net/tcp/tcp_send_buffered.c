@@ -50,7 +50,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/net.h>
 
@@ -281,7 +280,6 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(conn->domain == PF_INET6);
       tcp_ipv6_select(dev);
     }
 }
@@ -361,7 +359,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       if (conn->domain == PF_INET)
 #endif
         {
-          DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
           tcp = TCPIPv4BUF;
         }
 #endif /* CONFIG_NET_IPv4 */
@@ -371,7 +368,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
           tcp = TCPIPv6BUF;
         }
 #endif /* CONFIG_NET_IPv6 */
@@ -599,7 +595,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * happen until the polling cycle completes).
            */
 
-          devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, 0);
+          devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
+                         0, tcpip_hdrsize(conn));
+          if (dev->d_sndlen == 0)
+            {
+              return flags;
+            }
 
           /* Reset the retransmission timer. */
 
@@ -885,7 +886,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * won't actually happen until the polling cycle completes).
            */
 
-          devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, TCP_WBSENT(wrb));
+          devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
+                         TCP_WBSENT(wrb), tcpip_hdrsize(conn));
+          if (dev->d_sndlen == 0)
+            {
+              return flags;
+            }
 
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment

@@ -214,14 +214,6 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 void xtensa_lowputs(const char *str);
 
-/* Debug */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-void xtensa_dumpstate(void);
-#else
-#  define xtensa_dumpstate()
-#endif
-
 /* Common XTENSA functions */
 
 /* Initialization */

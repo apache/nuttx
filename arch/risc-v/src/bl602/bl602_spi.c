@@ -1092,8 +1092,6 @@ static void bl602_spi_dma_exchange(struct bl602_spi_priv_s *priv,
     {
       kmm_free(rx_lli);
     }
-
-  return;
 }
 #endif
 

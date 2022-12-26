@@ -42,9 +42,13 @@
 #define FUN_PU                            (BIT(8))
 #define FUN_IE                            (BIT(9))
 #define FUN_DRV                           0x3
+#define FUN_DRV_V                         0x3
 #define FUN_DRV_S                         10
+#define FUN_DRV_M                         ((FUN_DRV_V) << (FUN_DRV_S))
 #define MCU_SEL                           0x7
+#define MCU_SEL_V                         0x7
 #define MCU_SEL_S                         12
+#define MCU_SEL_M                         ((MCU_SEL_V) << (MCU_SEL_S))
 
 #define PIN_INPUT_ENABLE(PIN_NAME)        SET_PERI_REG_MASK(PIN_NAME,FUN_IE)
 #define PIN_INPUT_DISABLE(PIN_NAME)       CLEAR_PERI_REG_MASK(PIN_NAME,FUN_IE)

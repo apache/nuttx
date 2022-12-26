@@ -33,6 +33,45 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#define HAVE_USBDEV     1
+#define HAVE_USBHOST    1
+#define HAVE_USBMONITOR 1
+
+/* Can't support USB host or device features if USB OTG FS is not enabled */
+
+#ifndef CONFIG_STM32F7_OTGFS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#endif
+
+/* Can't support USB device if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#ifndef CONFIG_USBMONITOR
+#  undef HAVE_USBMONITOR
+#endif
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
+#  undef HAVE_USBMONITOR
+#endif
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS

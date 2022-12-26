@@ -30,6 +30,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "stm32_start.h"
 #include "stm32f746g-disco.h"
 
 /****************************************************************************
@@ -76,6 +77,12 @@ void stm32_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
   board_autoled_initialize();
+#endif
+
+#if defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_HOST)
+  /* Initialize USB */
+
+  stm32_usbinitialize();
 #endif
 
 #ifdef CONFIG_STM32F7_FMC

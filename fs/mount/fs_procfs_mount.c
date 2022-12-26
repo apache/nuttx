@@ -101,7 +101,7 @@ struct mount_info_s
 /* Helpers */
 
 static void    mount_sprintf(FAR struct mount_info_s *info,
-                 FAR const char *fmt, ...) printflike(2, 3);
+                 FAR const char *fmt, ...) printf_like(2, 3);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
 static int     mount_entry(FAR const char *mountpoint,
                  FAR struct statfs *statbuf, FAR void *arg);

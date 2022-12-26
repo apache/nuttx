@@ -181,7 +181,7 @@ void arm64_stack_color(void *stackbase, size_t nbytes)
 }
 
 /****************************************************************************
- * Name: up_check_stack and friends
+ * Name: up_check_tcbstack and friends
  *
  * Description:
  *   Determine (approximately) how much stack has been used by searching the
@@ -201,36 +201,11 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
   return arm64_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
-ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
-{
-  return tcb->adj_stack_size - up_check_tcbstack(tcb);
-}
-
-size_t up_check_stack(void)
-{
-  return up_check_tcbstack(running_task());
-}
-
-ssize_t up_check_stack_remain(void)
-{
-  return up_check_tcbstack_remain(running_task());
-}
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 size_t up_check_intstack(void)
 {
-#ifdef CONFIG_SMP
-  return arm64_stack_check((void *)arm64_intstack_alloc(),
+  return arm64_stack_check((void *)up_get_intstackbase(),
                            STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
-#else
-  return arm64_stack_check((void *)&g_interrupt_stack,
-                           STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
-#endif
-}
-
-size_t up_check_intstack_remain(void)
-{
-  return STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK) - up_check_intstack();
 }
 #endif
 

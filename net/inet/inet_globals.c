@@ -38,12 +38,6 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-/* Increasing number used for the IP ID field. */
-
-uint16_t g_ipid;
-#endif /* CONFIG_NET_IPv4 */
-
 #ifdef CONFIG_NET_IPv6
 
 /* Unspecified address (all zero).  See RFC 4291 (replaces 3513) */

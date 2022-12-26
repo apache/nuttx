@@ -160,6 +160,38 @@ struct alm_setalarm_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32_rtc_clk_slow_freq_get_hz
+ *
+ * Description:
+ *   Get the approximate frequency of RTC_SLOW_CLK, in Hz
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   slow_clk_freq - RTC_SLOW_CLK frequency, in Hz
+ *
+ ****************************************************************************/
+
+uint32_t esp32_rtc_clk_slow_freq_get_hz(void);
+
+/****************************************************************************
+ * Name: esp32_rtc_clk_fast_freq_get_hz
+ *
+ * Description:
+ *   Get fast_clk_rtc source in Hz.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The clock source in Hz.
+ *
+ ****************************************************************************/
+
+uint32_t esp32_rtc_clk_fast_freq_get_hz(void);
+
+/****************************************************************************
  * Name: esp32_rtc_get_slow_clk_rtc
  *
  * Description:

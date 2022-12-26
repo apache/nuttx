@@ -99,6 +99,10 @@ ifeq ($(CONFIG_SAM34_AES),y)
 CHIP_CSRCS += sam_aes.c
 endif
 
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += sam_crypto.c
+endif
+
 ifeq ($(CONFIG_SAM34_RTC),y)
 CHIP_CSRCS += sam_rtc.c
 endif

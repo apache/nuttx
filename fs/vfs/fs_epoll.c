@@ -171,6 +171,7 @@ static int epoll_do_close(FAR struct file *filep)
 {
   FAR epoll_head_t *eph = filep->f_priv;
   FAR epoll_node_t *epn;
+  FAR epoll_node_t *tmp;
   int ret;
 
   ret = nxmutex_lock(&eph->lock);
@@ -189,8 +190,9 @@ static int epoll_do_close(FAR struct file *filep)
           poll_fdsetup(epn->pfd.fd, &epn->pfd, false);
         }
 
-      list_for_every_entry(&eph->extend, epn, epoll_node_t, node)
+      list_for_every_entry_safe(&eph->extend, epn, tmp, epoll_node_t, node)
         {
+          list_delete(&epn->node);
           kmm_free(epn);
         }
 
@@ -418,6 +420,15 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               }
           }
 
+        list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                ret = -EEXIST;
+                goto err;
+              }
+          }
+
         if (list_is_empty(&eph->free))
           {
             /* Malloc new epoll node, insert the first list_node to the
@@ -506,6 +517,31 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                       {
                         goto err;
                       }
+                  }
+
+                goto out;
+              }
+          }
+
+        list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                if (epn->pfd.events != ev->events)
+                  {
+                    epn->data        = ev->data;
+                    epn->pfd.events  = ev->events;
+                    epn->pfd.fd      = fd;
+                    epn->pfd.revents = 0;
+
+                    ret = poll_fdsetup(fd, &epn->pfd, true);
+                    if (ret < 0)
+                      {
+                        goto err;
+                      }
+
+                    list_delete(&epn->node);
+                    list_add_tail(&eph->setup, &epn->node);
                   }
 
                 break;

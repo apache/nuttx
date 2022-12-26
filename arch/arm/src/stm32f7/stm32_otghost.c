@@ -52,6 +52,8 @@
 #include <arch/board/board.h> /* May redefine GPIO settings */
 
 #include "arm_internal.h"
+#include "hardware/stm32_pwr.h"
+#include "stm32_gpio.h"
 #include "stm32_otg.h"
 #include "stm32_usbhost.h"
 
@@ -67,9 +69,9 @@
  *
  * Pre-requisites
  *
- *  CONFIG_USBHOST      - Enable general USB host support
- *  CONFIG_STM32F7_OTGFS  - Enable the STM32 USB OTG FS block
- *  CONFIG_STM32F7_SYSCFG - Needed
+ *  CONFIG_USBHOST                       - Enable general USB host support
+ *  CONFIG_STM32F7_OTGFS                 - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32F7_SYSCFG_IOCOMPENSATION - Needed
  *
  * Options:
  *
@@ -90,8 +92,8 @@
 
 /* Pre-requisites (partial) */
 
-#ifndef CONFIG_STM32F7_SYSCFG
-#  error "CONFIG_STM32F7_SYSCFG is required"
+#ifndef CONFIG_STM32F7_SYSCFG_IOCOMPENSATION
+#  error "CONFIG_STM32F7_SYSCFG_IOCOMPENSATION is required"
 #endif
 
 /* Default RxFIFO size */
@@ -502,7 +504,7 @@ static struct usbhost_connection_s g_usbconn =
 #ifdef CONFIG_STM32F7_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -552,7 +554,7 @@ static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -5306,17 +5308,11 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 
   /* Deactivate the power down */
 
-  regval  = (OTG_GCCFG_PWRDWN | OTG_GCCFG_VBUSASEN | OTG_GCCFG_VBUSBSEN);
-#ifndef CONFIG_USBDEV_VBUSSENSING
-  regval |= OTG_GCCFG_NOVBUSSENS;
-#endif
-#ifdef CONFIG_STM32F7_OTG_SOFOUTPUT
-  regval |= OTG_GCCFG_SOFOUTEN;
-#endif
+  regval  = (OTG_GCCFG_PWRDWN | OTG_GCCFG_VBDEN);
   stm32_putreg(STM32_OTG_GCCFG, regval);
   up_mdelay(20);
 
-  /* Initialize OTG features:  In order to support OTP, the HNPCAP and SRPCAP
+  /* Initialize OTG features:  In order to support OTG, the HNPCAP and SRPCAP
    * bits would need to be set in the GUSBCFG register about here.
    */
 

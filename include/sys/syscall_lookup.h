@@ -25,6 +25,7 @@
  */
 
 SYSCALL_LOOKUP1(_exit,                     1)
+SYSCALL_LOOKUP(_assert,                    2)
 SYSCALL_LOOKUP(getpid,                     0)
 SYSCALL_LOOKUP(gettid,                     0)
 SYSCALL_LOOKUP(prctl,                      2)
@@ -99,7 +100,6 @@ SYSCALL_LOOKUP(sem_wait,                   1)
 #endif
 
 SYSCALL_LOOKUP(task_setcancelstate,        2)
-SYSCALL_LOOKUP(up_assert,                  2)
 
 #ifdef CONFIG_CANCELLATION_POINTS
   SYSCALL_LOOKUP(task_setcanceltype,       2)
@@ -268,7 +268,6 @@ SYSCALL_LOOKUP(futimens,                   2)
 
 #ifdef CONFIG_FILE_STREAM
   SYSCALL_LOOKUP(fs_fdopen,                4)
-  SYSCALL_LOOKUP(nxsched_get_streams,      0)
 #endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT

@@ -83,7 +83,7 @@ void arm_serialinit(void)
   uart_serialinit();
 #endif
 
-#ifdef SAMA5_HAVE_FLEXCOM_USART
+#ifdef CONFIG_SAMA5_FLEXCOM_USART
   /* Register Flexcom USART drivers */
 
   flexus_serialinit();

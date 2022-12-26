@@ -45,6 +45,7 @@
 #include "gd32f4xx_fmc.h"
 #include "gd32f4xx_pmu.h"
 #include "gd32f4xx_spi.h"
+#include "gd32f4xx_i2c.h"
 #include "gd32f4xx_syscfg.h"
 
 #endif /* __ARCH_ARM_SRC_GD32F4_GD32F4XX_H */

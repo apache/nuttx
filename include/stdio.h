@@ -32,7 +32,7 @@
 #include <time.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/sched.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -41,6 +41,7 @@
 /* File System Definitions **************************************************/
 
 #define FILENAME_MAX _POSIX_NAME_MAX
+#define FOPEN_MAX    _POSIX_STREAM_MAX
 
 /* The (default) size of the I/O buffers */
 
@@ -62,9 +63,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin      (&nxsched_get_streams()->sl_std[0])
-#define stdout     (&nxsched_get_streams()->sl_std[1])
-#define stderr     (&nxsched_get_streams()->sl_std[2])
+#define stdin      (&lib_get_streams()->sl_std[0])
+#define stdout     (&lib_get_streams()->sl_std[1])
+#define stderr     (&lib_get_streams()->sl_std[2])
 
 /* Path to the directory where temporary files can be created */
 
@@ -142,16 +143,16 @@ int    fileno(FAR FILE *stream);
 int    fgetc(FAR FILE *stream);
 int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
 FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
-FAR FILE *fopen(FAR const char *path, FAR const char *type);
+FAR FILE *fopen(FAR const char *path, FAR const char *type) fopen_like;
 int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...)
-       printflike(2, 3);
+       printf_like(2, 3);
 int    fputc(int c, FAR FILE *stream);
 int    fputs(FAR const IPTR char *s, FAR FILE *stream);
 size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
 FAR FILE *freopen(FAR const char *path, FAR const char *mode,
          FAR FILE *stream);
 int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
-       scanflike(2, 3);
+       scanf_like(2, 3);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fseeko(FAR FILE *stream, off_t offset, int whence);
 int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
@@ -182,35 +183,35 @@ void funlockfile(FAR FILE *stream);
  */
 
 void   perror(FAR const char *s);
-int    printf(FAR const IPTR char *fmt, ...) printflike(1, 2);
+int    printf(FAR const IPTR char *fmt, ...) printf_like(1, 2);
 int    putc(int c, FAR FILE *stream);
 int    putchar(int c);
 int    puts(FAR const IPTR char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
 int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
-       printflike(2, 3);
+       printf_like(2, 3);
 int    asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)
-       printflike(2, 3);
+       printf_like(2, 3);
 int    snprintf(FAR char *buf, size_t size,
-         FAR const IPTR char *fmt, ...) printflike(3, 4);
+         FAR const IPTR char *fmt, ...) printf_like(3, 4);
 int    sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...)
-       scanflike(2, 3);
+       scanf_like(2, 3);
 
-int    scanf(FAR const IPTR char *fmt, ...) scanflike(1, 2);
+int    scanf(FAR const IPTR char *fmt, ...) scanf_like(1, 2);
 int    vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
-       printflike(2, 0);
+       printf_like(2, 0);
 int    vfprintf(FAR FILE *stream, FAR const IPTR char *fmt,
-         va_list ap) printflike(2, 0);
+         va_list ap) printf_like(2, 0);
 int    vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
-       scanflike(2, 0);
-int    vprintf(FAR const IPTR char *fmt, va_list ap) printflike(1, 0);
-int    vscanf(FAR const IPTR char *fmt, va_list ap) scanflike(1, 0);
+       scanf_like(2, 0);
+int    vprintf(FAR const IPTR char *fmt, va_list ap) printf_like(1, 0);
+int    vscanf(FAR const IPTR char *fmt, va_list ap) scanf_like(1, 0);
 int    vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt,
-         va_list ap) printflike(3, 0);
+         va_list ap) printf_like(3, 0);
 int    vsprintf(FAR char *buf, FAR const IPTR char *fmt, va_list ap)
-       printflike(2, 0);
+       printf_like(2, 0);
 int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
-       scanflike(2, 0);
+       scanf_like(2, 0);
 
 /* Operations on file descriptors including:
  *
@@ -219,16 +220,16 @@ int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
  *   Part 1 (dprintf and vdprintf)
  */
 
-FAR FILE *fdopen(int fd, FAR const char *type);
-int    dprintf(int fd, FAR const IPTR char *fmt, ...) printflike(2, 3);
+FAR FILE *fdopen(int fd, FAR const char *type) fopen_like;
+int    dprintf(int fd, FAR const IPTR char *fmt, ...) printf_like(2, 3);
 int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
-       printflike(2, 0);
+       printf_like(2, 0);
 
 /* Operations on paths */
 
-FAR FILE *tmpfile(void);
+FAR FILE *tmpfile(void) fopen_like;
 FAR char *tmpnam(FAR char *s);
-FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
+FAR char *tempnam(FAR const char *dir, FAR const char *pfx) malloc_like;
 int       remove(FAR const char *path);
 
 /* Shell operations.  These are not actually implemented in the OS.  See
@@ -236,8 +237,8 @@ int       remove(FAR const char *path);
  */
 
 #ifndef __KERNEL__
-FILE *popen(FAR const char *command, FAR const char *mode);
 int pclose(FILE *stream);
+FILE *popen(FAR const char *command, FAR const char *mode) popen_like;
 #endif
 
 #undef EXTERN

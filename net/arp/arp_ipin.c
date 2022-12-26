@@ -45,8 +45,8 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/arp.h>
 
 #include "arp/arp.h"
 
@@ -75,6 +75,17 @@
 void arp_ipin(FAR struct net_driver_s *dev)
 {
   in_addr_t srcipaddr;
+
+  /* ARP support is only built if the Ethernet link layer is supported.
+   * Continue and send the ARP request only if this device uses the
+   * Ethernet link layer protocol.
+   */
+
+  if (dev->d_lltype != NET_LL_ETHERNET &&
+      dev->d_lltype != NET_LL_IEEE80211)
+    {
+      return;
+    }
 
   /* Only insert/update an entry if the source IP address of the incoming IP
    * packet comes from a host on the local network.

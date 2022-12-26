@@ -214,7 +214,7 @@ class dump_log_file:
             if line == "":
                 break
 
-            tmp = re.search(r"([^ ]*)_registerdump:?", line)
+            tmp = re.search("up_dump_register:", line)
             if tmp is not None:
                 # find arch
                 self.arch = tmp.group(1)
@@ -244,7 +244,7 @@ class dump_log_file:
                     line = line[tmp.span()[1] :]
                 continue
 
-            tmp = re.search("_stackdump:", line)
+            tmp = re.search("stackdump:", line)
             if tmp is not None:
                 # find stackdump
                 line = line[tmp.span()[1] :]

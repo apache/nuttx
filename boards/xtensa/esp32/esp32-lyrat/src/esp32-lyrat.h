@@ -51,8 +51,12 @@
  * driver to avoid conflict with the remaining peripherals.
  */
 
-#define BUTTON_REC      36
-#define BUTTON_MODE     39
+#define BUTTON_REC                  36
+#define BUTTON_MODE                 39
+#define BUTTON_PLAY_TP_CHANNEL      8
+#define BUTTON_SET_TP_CHANNEL       9
+#define BUTTON_VOLM_TP_CHANNEL      4
+#define BUTTON_VOLP_TP_CHANNEL      7
 
 /* TIMERS */
 

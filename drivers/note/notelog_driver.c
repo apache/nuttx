@@ -31,6 +31,10 @@
 #include <nuttx/sched_note.h>
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -265,91 +269,51 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 }
 #endif
 
+/****************************************************************************
+ * Name: sched_note_spinlock
+ *
+ * Description:
+ *   Common logic for NOTE_SPINLOCK, NOTE_SPINLOCKED, and NOTE_SPINUNLOCK
+ *
+ * Input Parameters:
+ *   tcb  - The TCB containing the information
+ *   note - The common note structure to use
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
 void sched_note_spinlock(FAR struct tcb_s *tcb,
-                         FAR volatile void *spinlock)
+                         FAR volatile spinlock_t *spinlock,
+                         int type)
 {
-#ifdef CONFIG_SMP
-#if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p LOCK\n",
-         tcb->cpu, tcb->name, tcb, spinlock);
-#else
-  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p LOCK\n",
-         tcb->cpu, tcb, spinlock);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p LOCK\n",
-         tcb->name, tcb, spinlock);
-#else
-  syslog(LOG_INFO, "TCB@%p spinlock@%p LOCK\n",
-         tcb, spinlock);
-#endif
-#endif
-}
+  FAR static const char * const tmp[] =
+    {
+      "LOCK",
+      "LOCKED",
+      "UNLOCK",
+      "ABORT"
+    };
 
-void sched_note_spinlocked(FAR struct tcb_s *tcb,
-                           FAR volatile void *spinlock)
-{
-#ifdef CONFIG_SMP
-#if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p LOCKED\n",
-         tcb->cpu, tcb->name, tcb, spinlock);
-#else
-  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p LOCKED\n",
-         tcb->cpu, tcb, spinlock);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p LOCKED\n",
-         tcb->name, tcb, spinlock);
-#else
-  syslog(LOG_INFO, "TCB@%p spinlock@%p LOCKED\n",
-         tcb, spinlock);
-#endif
-#endif
-}
+  FAR const char * msg = tmp[type - NOTE_SPINLOCK_LOCK];
 
-void sched_note_spinunlock(FAR struct tcb_s *tcb,
-                           FAR volatile void *spinlock)
-{
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p UNLOCK\n",
-         tcb->cpu, tcb->name, tcb, spinlock);
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p %s\n",
+         tcb->cpu, tcb->name, tcb, spinlock, msg);
 #else
-  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p UNLOCK\n",
-         tcb->cpu, tcb, spinlock);
+  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p %s\n",
+         tcb->cpu, tcb, spinlock, msg);
 #endif
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p UNLOCK\n",
-         tcb->name, tcb, spinlock);
+  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p %s\n",
+         tcb->name, tcb, spinlock, msg);
 #else
-  syslog(LOG_INFO, "TCB@%p spinlock@%p UNLOCK\n",
-         tcb, spinlock);
-#endif
-#endif
-}
-
-void sched_note_spinabort(FAR struct tcb_s *tcb,
-                          FAR volatile void *spinlock)
-{
-#ifdef CONFIG_SMP
-#if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p ABORT\n",
-         tcb->cpu, tcb->name, tcb, spinlock);
-#else
-  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p ABORT\n",
-         tcb->cpu, tcb, spinlock);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0
-  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p ABORT\n",
-         tcb->name, tcb, spinlock);
-#else
-  syslog(LOG_INFO, "TCB@%p spinlock@%p ABORT\n",
-         tcb, spinlock);
+  syslog(LOG_INFO, "TCB@%p spinlock@%p %s\n",
+         tcb, spinlock, msg);
 #endif
 #endif
 }

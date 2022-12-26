@@ -58,7 +58,6 @@
 
 struct send_s
 {
-  FAR struct socket      *snd_sock;    /* Points to the parent socket structure */
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
   sem_t                   snd_sem;     /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
@@ -108,6 +107,11 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Copy the packet data into the device packet buffer and send it */
 
           devif_can_send(dev, pstate->snd_buffer, pstate->snd_buflen);
+          if (dev->d_sndlen == 0)
+            {
+              return flags;
+            }
+
           pstate->snd_sent = pstate->snd_buflen;
           if (pstate->pr_msglen > 0) /* concat cmsg data after packet */
             {
@@ -218,7 +222,6 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_sock      = psock;                  /* Socket descriptor */
   state.snd_buflen    = msg->msg_iov->iov_len;  /* bytes to send */
   state.snd_buffer    = msg->msg_iov->iov_base; /* Buffer to send from */
 

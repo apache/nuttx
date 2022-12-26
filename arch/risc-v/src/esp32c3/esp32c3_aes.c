@@ -602,7 +602,12 @@ int aes_cypher(void *out, const void *in, size_t size,
       return -EINVAL;
     }
 
-  if (keysize != 16)
+  if (mode == AES_MODE_CTR)
+    {
+      keysize -= 4;
+    }
+
+  if (keysize != 16 && keysize != 32)
     {
       return -EINVAL;
     }
@@ -640,6 +645,7 @@ int aes_cypher(void *out, const void *in, size_t size,
         memcpy(iv_buf, iv, AES_BLK_SIZE);
         ret = esp32c3_aes_ctr_cypher(&aes, &nc_off, iv_buf, cache_buf,
                                    in, out, size);
+        break;
       default :
         ret = -EINVAL;
         break;
@@ -649,4 +655,3 @@ int aes_cypher(void *out, const void *in, size_t size,
 }
 
 #endif
-

@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_A64
+
+menu "Allwinner A64 Peripheral Selection"
+
+config A64_DE
+	bool "DE"
+	default n
+	select A64_TCON0
+	---help---
+		Select to enable support for Display Engine 2.0.
+
+config A64_MIPI_DSI
+	bool "MIPI DSI"
+	default n
+	---help---
+		Select to enable support for MIPI Display Serial Interface (DSI)
+		and MIPI Display Physical Layer (D-PHY).
+
+config A64_RSB
+	bool "RSB"
+	default n
+	---help---
+		Select to enable support for Reduced Serial Bus.
+
+config A64_TCON0
+	bool "TCON0"
+	default n
+	select A64_MIPI_DSI
+	---help---
+		Select to enable support for Timing Controller TCON0.
+
+config A64_UART
+	bool "UART"
+	default n
+	select UART1_SERIALDRIVER
+	---help---
+		Select to enable support for UART.
+
+endmenu # Allwinner A64 Peripheral Selection
+
+endif # ARCH_CHIP_A64

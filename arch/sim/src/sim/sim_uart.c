@@ -40,6 +40,19 @@
   #define CONFIG_SIM_UART_BUFFER_SIZE 256
 #endif
 
+#define TTY_RECVSEND(port) \
+  if (g_##port##_priv.fd >= 0) \
+    { \
+      if (g_##port##_priv.rxint) \
+        { \
+          uart_recvchars(&g_##port##_dev); \
+        } \
+      if (g_##port##_priv.txint) \
+        { \
+          uart_xmitchars(&g_##port##_dev); \
+        } \
+    } \
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -52,7 +65,15 @@ struct tty_priv_s
 
   /* The file descriptor. It is returned by open */
 
-  int             fd;
+  int         fd;
+
+  /* TX interrupt enable or not */
+
+  bool        txint;
+
+  /* RX interrupt enable or not */
+
+  bool        rxint;
 };
 
 /****************************************************************************
@@ -123,10 +144,17 @@ static char g_tty3_txbuf[CONFIG_SIM_UART_BUFFER_SIZE];
 #endif
 
 #ifdef USE_DEVCONSOLE
+static struct tty_priv_s g_console_priv =
+{
+  .path           = "console",
+  .fd             = 0,
+};
+
 static struct uart_dev_s g_console_dev =
 {
   .isconsole      = true,
   .ops            = &g_tty_ops,
+  .priv           = &g_console_priv,
   .xmit =
   {
     .size         = CONFIG_SIM_UART_BUFFER_SIZE,
@@ -255,16 +283,8 @@ static int tty_setup(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  if (!dev->isconsole && priv->fd < 0)
-    {
-      priv->fd = host_uart_open(priv->path);
-      if (priv->fd < 0)
-        {
-          return priv->fd;
-        }
-    }
-
-  return OK;
+  priv->fd = host_uart_open(priv->path);
+  return priv->fd;
 }
 
 /****************************************************************************
@@ -280,13 +300,10 @@ static void tty_shutdown(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  if (!dev->isconsole && priv->fd >= 0)
-    {
-      /* close file Description and reset fd */
+  /* close file Description and reset fd */
 
-      host_uart_close(priv->fd);
-      priv->fd = -1;
-    }
+  host_uart_close(priv->fd);
+  priv->fd = -1;
 }
 
 /****************************************************************************
@@ -348,12 +365,10 @@ static int tty_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       case TCGETS:
-        return host_uart_getcflag(dev->isconsole ? 0 : priv->fd,
-                                  &termiosp->c_cflag);
+        return host_uart_getcflag(priv->fd, &termiosp->c_cflag);
 
       case TCSETS:
-        return host_uart_setcflag(dev->isconsole ? 0 : priv->fd,
-                                  termiosp->c_cflag);
+        return host_uart_setcflag(priv->fd, termiosp->c_cflag);
     }
 #endif
 
@@ -375,7 +390,7 @@ static int tty_receive(struct uart_dev_s *dev, uint32_t *status)
   struct tty_priv_s *priv = dev->priv;
 
   *status = 0;
-  return host_uart_getc(dev->isconsole ? 0 : priv->fd);
+  return host_uart_getc(priv->fd);
 }
 
 /****************************************************************************
@@ -388,6 +403,9 @@ static int tty_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void tty_rxint(struct uart_dev_s *dev, bool enable)
 {
+  struct tty_priv_s *priv = dev->priv;
+
+  priv->rxint = enable;
 }
 
 /****************************************************************************
@@ -402,7 +420,7 @@ static bool tty_rxavailable(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  return host_uart_checkc(dev->isconsole ? 0 : priv->fd);
+  return host_uart_checkin(priv->fd);
 }
 
 /****************************************************************************
@@ -439,13 +457,6 @@ static void tty_send(struct uart_dev_s *dev, int ch)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  /* For console device */
-
-  if (dev->isconsole && ch == '\n')
-    {
-      host_uart_putc(1, '\r');
-    }
-
   host_uart_putc(dev->isconsole ? 1 : priv->fd, ch);
 }
 
@@ -459,10 +470,9 @@ static void tty_send(struct uart_dev_s *dev, int ch)
 
 static void tty_txint(struct uart_dev_s *dev, bool enable)
 {
-  if (enable)
-    {
-      uart_xmitchars(dev);
-    }
+  struct tty_priv_s *priv = dev->priv;
+
+  priv->txint = enable;
 }
 
 /****************************************************************************
@@ -475,7 +485,9 @@ static void tty_txint(struct uart_dev_s *dev, bool enable)
 
 static bool tty_txready(struct uart_dev_s *dev)
 {
-  return true;
+  struct tty_priv_s *priv = dev->priv;
+
+  return host_uart_checkout(dev->isconsole ? 1 : priv->fd);
 }
 
 /****************************************************************************
@@ -536,38 +548,23 @@ void sim_uartinit(void)
 void sim_uartloop(void)
 {
 #ifdef USE_DEVCONSOLE
-  if (host_uart_checkc(0))
-    {
-      uart_recvchars(&g_console_dev);
-    }
+  TTY_RECVSEND(console)
 #endif
 
 #ifdef CONFIG_SIM_UART0_NAME
-  if (g_tty0_priv.fd > 0 && host_uart_checkc(g_tty0_priv.fd))
-    {
-      uart_recvchars(&g_tty0_dev);
-    }
+  TTY_RECVSEND(tty0)
 #endif
 
 #ifdef CONFIG_SIM_UART1_NAME
-  if (g_tty1_priv.fd > 0 && host_uart_checkc(g_tty1_priv.fd))
-    {
-      uart_recvchars(&g_tty1_dev);
-    }
+  TTY_RECVSEND(tty1)
 #endif
 
 #ifdef CONFIG_SIM_UART2_NAME
-  if (g_tty2_priv.fd > 0 && host_uart_checkc(g_tty2_priv.fd))
-    {
-      uart_recvchars(&g_tty2_dev);
-    }
+  TTY_RECVSEND(tty2)
 #endif
 
 #ifdef CONFIG_SIM_UART3_NAME
-  if (g_tty3_priv.fd > 0 && host_uart_checkc(g_tty3_priv.fd))
-    {
-      uart_recvchars(&g_tty3_dev);
-    }
+  TTY_RECVSEND(tty3)
 #endif
 }
 
@@ -578,7 +575,28 @@ void sim_uartloop(void)
 int up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
+  if (ch == '\n')
+    {
+      tty_send(&g_console_dev, '\r');
+    }
+
   tty_send(&g_console_dev, ch);
 #endif
   return 0;
+}
+
+/****************************************************************************
+ * Name: up_nputs
+ *
+ * Description:
+ *   This is a low-level helper function used to support debug.
+ *
+ ****************************************************************************/
+
+void up_nputs(const char *str, size_t len)
+{
+  while (len-- > 0 && *str)
+    {
+      up_putc(*str++);
+    }
 }

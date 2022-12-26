@@ -44,38 +44,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mips_registerdump
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void mips_registerdump(const uint32_t *regs)
-{
-  svcinfo("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
-          regs[REG_MFLO], regs[REG_MFHI], regs[REG_EPC], regs[REG_STATUS]);
-  svcinfo("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
-          regs[REG_AT], regs[REG_V0], regs[REG_V1], regs[REG_A0],
-          regs[REG_A1], regs[REG_A2], regs[REG_A3]);
-  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x "
-          "T4:%08x T5:%08x T6:%08x T7:%08x\n",
-          regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
-          regs[REG_T4], regs[REG_T5], regs[REG_T6], regs[REG_T7]);
-  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x "
-          "S4:%08x S5:%08x S6:%08x S7:%08x\n",
-          regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
-          regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
-#ifdef MIPS32_SAVE_GP
-  svcinfo("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
-          regs[REG_T8], regs[REG_T9], regs[REG_GP], regs[REG_SP],
-          regs[REG_FP], regs[REG_RA]);
-#else
-  svcinfo("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
-          regs[REG_T8], regs[REG_T9], regs[REG_SP], regs[REG_FP],
-          regs[REG_RA]);
-#endif
-}
-#endif
-
-/****************************************************************************
  * Name: dispatch_syscall
  *
  * Description:
@@ -141,13 +109,33 @@ int mips_swint0(int irq, void *context, void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_R4]);
-  mips_registerdump(regs);
+  up_dump_register(regs);
 #endif
 
   /* Handle the SWInt according to the command in $4 */
 
   switch (regs[REG_R4])
     {
+      /* R4=SYS_save_context:  This is a save context command:
+       *
+       *   int up_saveusercontext(void *saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R4 = SYS_save_context
+       *   R5 = saveregs
+       *
+       * In this case, we simply need to copy the current registers to the
+       * save register space references in the saved R1 and return.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          mips_copystate((uint32_t *)regs[REG_A1], regs);
+        }
+        break;
+
       /* R4=SYS_restore_context: This a restore context command:
        *
        * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
@@ -288,7 +276,7 @@ int mips_swint0(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      mips_registerdump((const uint32_t *)CURRENT_REGS);
+      up_dump_register(CURRENT_REGS);
     }
   else
     {

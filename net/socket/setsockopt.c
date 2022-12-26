@@ -38,7 +38,6 @@
 #include <netdev/netdev.h>
 
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -74,13 +73,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
                                     socklen_t value_len)
 {
   FAR struct socket_conn_s *conn = psock->s_conn;
-
-  /* Verify that the socket option if valid (but might not be supported ) */
-
-  if (!value)
-    {
-      return -EFAULT;
-    }
 
   /* Process the options always handled locally */
 
@@ -134,17 +126,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           return OK;
         }
-    }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      return -ENOPROTOOPT;
-    }
-#endif
-
-  switch (option)
-    {
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
       case SO_DEBUG:      /* Enables recording of debugging information */
       case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
@@ -307,6 +289,13 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 {
   int ret = -ENOPROTOOPT;
 
+  /* Verify that the socket option if valid (but might not be supported ) */
+
+  if (!value)
+    {
+      return -EFAULT;
+    }
+
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_conn == NULL)
@@ -327,6 +316,13 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
   if (ret == -ENOPROTOOPT && level == SOL_SOCKET)
     {
       ret = psock_socketlevel_option(psock, option, value, value_len);
+    }
+
+  /* -ENOTTY really mean -ENOPROTOOPT, but skip the default action */
+
+  else if (ret == -ENOTTY)
+    {
+      ret = -ENOPROTOOPT;
     }
 
   return ret;

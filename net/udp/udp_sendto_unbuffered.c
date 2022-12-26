@@ -62,9 +62,7 @@
 
 struct sendto_s
 {
-#ifdef NEED_IPDOMAIN_SUPPORT
-  FAR struct socket *st_sock;         /* Points to the parent socket structure */
-#endif
+  FAR struct udp_conn_s *st_conn;     /* The UDP connection of interest */
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
   FAR struct net_driver_s *st_dev;    /* Driver that will perform the transmission */
   sem_t st_sem;                       /* Semaphore signals sendto completion */
@@ -102,12 +100,12 @@ struct sendto_s
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct sendto_s *pstate)
 {
-  FAR struct socket *psock = pstate->st_sock;
-  DEBUGASSERT(psock);
+  FAR struct udp_conn_s *conn = pstate->st_conn;
+  DEBUGASSERT(conn);
 
   /* Which domain the socket support */
 
-  if (psock->s_domain == PF_INET)
+  if (conn->domain == PF_INET)
     {
       /* Select the IPv4 domain */
 
@@ -117,7 +115,6 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(psock->s_domain == PF_INET6);
       udp_ipv6_select(dev);
     }
 }
@@ -207,7 +204,13 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
           /* Copy the user data into d_appdata and send it */
 
-          devif_send(dev, pstate->st_buffer, pstate->st_buflen);
+          devif_send(dev, pstate->st_buffer,
+                     pstate->st_buflen, udpip_hdrsize(pstate->st_conn));
+          if (dev->d_sndlen == 0)
+            {
+              return flags;
+            }
+
           pstate->st_sndlen = pstate->st_buflen;
         }
 
@@ -401,13 +404,11 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_buflen = len;
   state.st_buffer = buf;
 
-#ifdef NEED_IPDOMAIN_SUPPORT
-  /* Save the reference to the socket structure if it will be needed for
+  /* Save the reference to the conn structure if it will be needed for
    * asynchronous processing.
    */
 
-  state.st_sock = psock;
-#endif
+  state.st_conn   = conn;
 
   /* Check if the socket is connected */
 

@@ -42,7 +42,28 @@
 
 static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
+  /* GPIO 2 is used by MMCSD driver as MISO, therefore, it can't be used as
+   * USER LED
+   */
+#ifdef CONFIG_MMCSD
+
+  /* GPIO 0 is used by BUTTONS, it can't be used as USER LED */
+#ifdef CONFIG_INPUT_BUTTONS
+  GPIO_LED3
+#else
+  GPIO_LED1, GPIO_LED3
+#endif
+
+#else  /* MMCSD */
+
+  /* GPIO 0 is used by BUTTONS, it can't be used as USER LED */
+#ifdef CONFIG_INPUT_BUTTONS
+  GPIO_LED2, GPIO_LED3
+#else
   GPIO_LED1, GPIO_LED2, GPIO_LED3
+#endif
+
+#endif
 };
 
 /****************************************************************************

@@ -85,6 +85,27 @@
 #define sim_savestate(regs) sim_copyfullstate(regs, (xcpt_reg_t *)CURRENT_REGS)
 #define sim_restorestate(regs) (CURRENT_REGS = regs)
 
+#define sim_saveusercontext(saveregs)                           \
+    ({                                                          \
+       irqstate_t flags = up_irq_flags();                       \
+       uint32_t *env = (uint32_t *)saveregs + JB_FLAG;          \
+                                                                \
+       env[0] = flags & UINT32_MAX;                             \
+       env[1] = (flags >> 32) & UINT32_MAX;                     \
+                                                                \
+       setjmp(saveregs);                                        \
+    })
+#define sim_fullcontextrestore(restoreregs)                     \
+    do                                                          \
+      {                                                         \
+        xcpt_reg_t *env = restoreregs;                          \
+        uint32_t *flags = (uint32_t *)&env[JB_FLAG];            \
+                                                                \
+        up_irq_restore(((uint64_t)flags[1] << 32) | flags[0]);  \
+        longjmp(env, 1);                                        \
+      }                                                         \
+    while (0)
+
 /* File System Definitions **************************************************/
 
 /* These definitions characterize the compressed filesystem image */
@@ -120,19 +141,6 @@ struct i2c_master_s;
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-extern volatile void *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
-
 /* The command line  arguments passed to simulator */
 
 extern int g_argc;
@@ -149,27 +157,27 @@ void *sim_doirq(int irq, void *regs);
 
 /* sim_hostmisc.c ***********************************************************/
 
-void sim_host_abort(int status);
-int  sim_host_backtrace(void** array, int size);
+void host_abort(int status);
+int  host_backtrace(void** array, int size);
 
 /* sim_hostmemory.c *********************************************************/
 
-void *sim_host_allocheap(size_t sz);
-void *sim_host_allocshmem(const char *name, size_t size, int master);
-void  sim_host_freeshmem(void *mem);
+void *host_allocheap(size_t sz);
+void *host_allocshmem(const char *name, size_t size, int master);
+void  host_freeshmem(void *mem);
 
-size_t sim_host_mallocsize(void *mem);
-void *sim_host_memalign(size_t alignment, size_t size);
-void sim_host_free(void *mem);
-void *sim_host_realloc(void *oldmem, size_t size);
-void sim_host_mallinfo(int *aordblks, int *uordblks);
+size_t host_mallocsize(void *mem);
+void *host_memalign(size_t alignment, size_t size);
+void host_free(void *mem);
+void *host_realloc(void *oldmem, size_t size);
+void host_mallinfo(int *aordblks, int *uordblks);
 
 /* sim_hosttime.c ***********************************************************/
 
-uint64_t sim_host_gettime(bool rtc);
-void sim_host_sleep(uint64_t nsec);
-void sim_host_sleepuntil(uint64_t nsec);
-int sim_host_settimer(int *irq);
+uint64_t host_gettime(bool rtc);
+void host_sleep(uint64_t nsec);
+void host_sleepuntil(uint64_t nsec);
+int host_settimer(int *irq);
 
 /* sim_sigdeliver.c *********************************************************/
 
@@ -178,15 +186,15 @@ void sim_sigdeliver(void);
 /* sim_hostsmp.c ************************************************************/
 
 #ifdef CONFIG_SMP
-void sim_host_cpu0_start(void);
-int sim_host_cpu_start(int cpu, void *stack, size_t size);
-void sim_host_send_ipi(int cpu);
+void host_cpu0_start(void);
+int host_cpu_start(int cpu, void *stack, size_t size);
+void host_send_ipi(int cpu);
 #endif
 
 /* sim_smpsignal.c **********************************************************/
 
 #ifdef CONFIG_SMP
-void sim_host_cpu_started(void);
+void host_cpu_started(void);
 int sim_init_ipi(int irq);
 #endif
 
@@ -208,7 +216,8 @@ int  host_uart_open(const char *pathname);
 void host_uart_close(int fd);
 int  host_uart_putc(int fd, int ch);
 int  host_uart_getc(int fd);
-bool host_uart_checkc(int fd);
+bool host_uart_checkin(int fd);
+bool host_uart_checkout(int fd);
 int  host_uart_setcflag(int fd, unsigned int cflag);
 int  host_uart_getcflag(int fd, unsigned int *cflag);
 
@@ -253,6 +262,12 @@ void sim_x11events(void);
 void sim_buttonevent(int x, int y, int buttons);
 #endif
 
+/* sim_framebuffer.c sim_lcd.c **********************************************/
+
+#if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
+void sim_x11loop(void);
+#endif
+
 /* sim_ajoystick.c **********************************************************/
 
 #ifdef CONFIG_SIM_AJOYSTICK
@@ -269,7 +284,7 @@ int sim_tapdev_avail(int devidx);
 unsigned int sim_tapdev_read(int devidx, unsigned char *buf,
                              unsigned int buflen);
 void sim_tapdev_send(int devidx, unsigned char *buf, unsigned int buflen);
-void sim_tapdev_ifup(int devidx, in_addr_t ifaddr);
+void sim_tapdev_ifup(int devidx, void *ifaddr);
 void sim_tapdev_ifdown(int devidx);
 
 #  define sim_netdev_init(idx,priv,txcb,rxcb) sim_tapdev_init(idx,priv,txcb,rxcb)
@@ -355,6 +370,13 @@ int sim_i2cbus_uninitialize(struct i2c_master_s *dev);
 #ifdef CONFIG_SIM_SPI
 struct spi_dev_s *sim_spi_initialize(const char *filename);
 int sim_spi_uninitialize(struct spi_dev_s *dev);
+#endif
+
+/* up_video.c ***************************************************************/
+
+#ifdef CONFIG_SIM_VIDEO
+int sim_video_initialize(void);
+void sim_video_loop(void);
 #endif
 
 /* Debug ********************************************************************/

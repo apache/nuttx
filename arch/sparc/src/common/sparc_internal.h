@@ -183,14 +183,6 @@ void sparc_copystate(uint32_t *dest, uint32_t *src);
 
 void sparc_lowputs(const char *str);
 
-/* Debug */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-void sparc_dumpstate(void);
-#else
-#  define sparc_dumpstate()
-#endif
-
 /* Software interrupt 0 handler */
 
 int sparc_swint0(int irq, void *context, void *arg);

@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Relay Support"
+
+config RELAY
+	bool "Relay driver support"
+	default n
+
+config RELAY_GPIO
+	bool "Relay gpio driver support"
+	default n
+  depends on RELAY
+  depends on IOEXPANDER
+
+endmenu

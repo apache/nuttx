@@ -150,6 +150,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               CURRENT_REGS[REG_PC]      = (uint32_t)arm_sigdeliver;
               CURRENT_REGS[REG_CPSR]    = (PSR_MODE_SYS | PSR_I_BIT |
                                            PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+              CURRENT_REGS[REG_CPSR]   |= PSR_T_BIT;
+#endif
 
 #ifdef CONFIG_ENDIAN_BIG
               CURRENT_REGS[REG_CPSR]   |= PSR_E_BIT;
@@ -195,6 +198,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_PC]      = (uint32_t)arm_sigdeliver;
           tcb->xcp.regs[REG_CPSR]    = (PSR_MODE_SYS | PSR_I_BIT |
                                         PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+          tcb->xcp.regs[REG_CPSR]   |= PSR_T_BIT;
+#endif
 
 #ifdef CONFIG_ENDIAN_BIG
           tcb->xcp.regs[REG_CPSR]   |= PSR_E_BIT;

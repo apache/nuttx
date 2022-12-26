@@ -57,8 +57,7 @@
 
 enum local_type_e
 {
-  LOCAL_TYPE_UNTYPED = 0,      /* Type is not determined until the socket is bound */
-  LOCAL_TYPE_UNNAMED,          /* A Unix socket that is not bound to any name */
+  LOCAL_TYPE_UNNAMED = 0,      /* A Unix socket that is not bound to any name */
   LOCAL_TYPE_PATHNAME,         /* lc_path holds a null terminated string */
   LOCAL_TYPE_ABSTRACT          /* lc_path is length zero */
 };

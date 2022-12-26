@@ -61,7 +61,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/tun.h>
@@ -358,46 +357,12 @@ static int tun_txpoll_tap(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
+  /* Send the packet */
 
-  if (priv->dev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
+  priv->read_d_len = priv->dev.d_len;
+  tun_fd_transmit(priv);
 
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-        {
-          arp_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(priv->dev.d_flags))
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(dev))
-        {
-          /* Send the packet */
-
-          priv->read_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-
-          return 1;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return 1;
 }
 #endif
 
@@ -430,28 +395,10 @@ static int tun_txpoll_tun(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
+  priv->read_d_len = priv->dev.d_len;
+  tun_fd_transmit(priv);
 
-  if (priv->dev.d_len > 0)
-    {
-      if (!devif_loopback(dev))
-        {
-          /* Send the packet */
-
-          priv->read_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-
-          return 1;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return 1;
 }
 
 /****************************************************************************
@@ -526,9 +473,8 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
       ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->dev);
 
-      /* Give the IPv4 packet to the network layer. */
+      /* Receive an IPv4 packet from the network device */
 
-      arp_ipin(&priv->dev);
       ipv4_input(&priv->dev);
     }
   else
@@ -548,7 +494,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 #ifdef CONFIG_NET_ARP
   if (BUF->type == HTONS(ETHTYPE_ARP))
     {
-      arp_arpin(&priv->dev);
+      arp_input(&priv->dev);
       NETDEV_RXARP(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
@@ -575,21 +521,6 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 
   if (priv->dev.d_len > 0)
     {
-      /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-        {
-          arp_out(&priv->dev);
-        }
-#ifdef CONFIG_NET_IPv6
-      else
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif
-
       /* And send the packet */
 
       priv->write_d_len = priv->dev.d_len;
@@ -1246,13 +1177,13 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct tun_device_s *priv = filep->f_priv;
   int ret = OK;
 
-  if (cmd == TUNSETIFF && priv == NULL)
+  if (cmd == TUNSETIFF)
     {
       uint8_t free_tuns;
       int intf;
       FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
 
-      if (ifr  == NULL ||
+      if (priv != NULL || ifr == NULL ||
          ((ifr->ifr_flags & IFF_MASK) != IFF_TUN &&
           (ifr->ifr_flags & IFF_MASK) != IFF_TAP))
         {
@@ -1291,6 +1222,18 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       priv = filep->f_priv;
       strlcpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
       nxmutex_unlock(&tun->lock);
+
+      return OK;
+    }
+  else if (cmd == TUNGETIFF)
+    {
+      FAR struct ifreq *ifr = (FAR struct ifreq *)arg;
+      if (priv == NULL || ifr == NULL)
+        {
+          return -EINVAL;
+        }
+
+      strlcpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
 
       return OK;
     }

@@ -22,9 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/syslog/syslog_rtt.h>
+#include <nuttx/segger/rtt.h>
 
 #include <SEGGER_RTT.h>
 

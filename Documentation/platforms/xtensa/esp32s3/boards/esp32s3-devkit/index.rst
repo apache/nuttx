@@ -55,3 +55,9 @@ nsh
 
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
+
+mcuboot_nsh
+---
+
+Similar configuration as nsh, except that it enables booting from
+MCUboot and the experimental features configuration.

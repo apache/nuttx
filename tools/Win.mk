@@ -424,7 +424,7 @@ context: include\setjmp.h
 endif
 
 staging:
-	$(Q) mkdir -p $@
+	$(Q) mkdir $@
 
 # Pattern rule for $(CONTEXTDIRS_DEPS)
 
@@ -446,14 +446,14 @@ clean_context:
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
 	$(call DELFILE, arch\dummy\Kconfig)
-	$(call DELFILE, $(CONTEXTDIRS_DEPS))
-	$(call DIRUNLINK, include\arch\board)
-	$(call DIRUNLINK, include\arch\chip)
-	$(call DIRUNLINK, include\arch)
-	$(call DIRUNLINK, $(ARCH_SRC)\board\board)
-	$(call DIRUNLINK, $(ARCH_SRC)\board)
-	$(call DIRUNLINK, $(ARCH_SRC)\chip)
-	$(call DIRUNLINK, $(TOPDIR)\drivers\platform)
+	$(call DELFILE, $(subst /,\,$(CONTEXTDIRS_DEPS)))
+	$(Q) $(DIRUNLINK) include\arch\board
+	$(Q) $(DIRUNLINK) include\arch\chip
+	$(Q) $(DIRUNLINK) include\arch
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)\board\board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)\board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)\chip
+	$(Q) $(DIRUNLINK) $(TOPDIR)\drivers\platform
 
 # Archive targets.  The target build sequence will first create a series of
 # libraries, one per configured source file directory.  The final NuttX
@@ -557,7 +557,9 @@ clean_bootloader:
 # pass2dep: Create pass2 build dependencies
 
 pass1dep: context tools\mkdeps$(HOSTEXEEXT)
+ifneq ($(USERDEPDIRS),)
 	$(Q) for %%G in ($(USERDEPDIRS)) do ( $(MAKE) -C %%G depend )
+endif
 
 pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 	$(Q) for %%G in ($(KERNDEPDIRS)) do ( $(MAKE) -C %%G EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend )

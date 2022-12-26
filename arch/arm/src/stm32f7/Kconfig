@@ -1469,6 +1469,21 @@ config STM32F7_QUADSPI
 	bool "QuadSPI"
 	default n
 
+config STM32F7_USBDEV_REGDEBUG
+	bool "OTG USBDEV REGDEBUG"
+	default n
+	depends on USBDEV
+
+config STM32F7_USBHOST_REGDEBUG
+	bool "OTG USBHOST REGDEBUG"
+	default n
+	depends on USBHOST
+
+config STM32F7_USBHOST_PKTDUMP
+	bool "OTG USBHOST PKTDUMP"
+	default n
+	depends on USBHOST
+
 config STM32F7_RTC
 	bool "RTC"
 	default n

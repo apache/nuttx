@@ -49,7 +49,6 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/arp.h>
 
 #include "arp/arp.h"
 
@@ -97,6 +96,10 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr)
 
   eth->type        = HTONS(ETHTYPE_ARP);
   dev->d_len       = sizeof(struct arp_hdr_s) + ETH_HDRLEN;
+
+  /* Update device buffer length */
+
+  iob_update_pktlen(dev->d_iob, sizeof(struct arp_hdr_s));
 }
 
 #endif /* CONFIG_NET_ARP */

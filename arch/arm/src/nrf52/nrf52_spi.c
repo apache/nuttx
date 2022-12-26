@@ -903,8 +903,6 @@ static void nrf52_spi_setbits(struct spi_dev_s *dev, int nbits)
     {
       spierr("ERROR: nbits not supported: %d\n", nbits);
     }
-
-  return;
 }
 
 /****************************************************************************

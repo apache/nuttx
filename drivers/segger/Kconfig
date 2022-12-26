@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menu "Segger RTT drivers"
+
 config SEGGER_RTT
 	bool
 	---help---
@@ -51,8 +53,7 @@ config SEGGER_RTT_MAX_NUM_DOWN_BUFFERS
 
 config SEGGER_RTT_BUFFER_SIZE_UP
 	int "Segger RTT UP Buffer Size"
-	default 1024 if SYSLOG_RTT
-	default 1 if !SYSLOG_RTT
+	default 1024
 	---help---
 		Size of the buffer for terminal output of target, up to host
 
@@ -77,11 +78,33 @@ config SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
 
 endchoice # SEGGER_RTT_MODE
 
+endif # SEGGER_RTT
+
+config STREAM_RTT
+	bool "Stream to/from Segger J-Link RTT"
+	select SEGGER_RTT
+	default n
+	---help---
+		Use Segger J-Link RTT as a stream input and output.
+
+config SYSLOG_RTT
+	bool "Log to Segger J-Link RTT"
+	select SEGGER_RTT
+	default n
+	---help---
+		Use Segger J-Link RTT as a SYSLOG output device.
+
 if SEGGER_SYSVIEW
+
+config SEGGER_SYSVIEW_RTT_CHANNEL
+	int "Segger System View RTT channel"
+	default 0
+	---help---
+		The RTT channel number for SystemView, zero find the unused one.
 
 config SEGGER_SYSVIEW_RTT_BUFFER_SIZE
 	int "Segger System View buffer size"
-	default 1024
+	default SEGGER_RTT_BUFFER_SIZE_UP
 	---help---
 		Number of bytes that SystemView uses for the RTT buffer.
 
@@ -91,6 +114,12 @@ config SEGGER_SYSVIEW_RAM_BASE
 	---help---
 		The lowest RAM address used for IDs
 
-endif
+config SEGGER_SYSVIEW_PREFIX
+	bool "Segger note function prefix"
+	default ""
+	---help---
+		prefix sched_note functions with "sysview_" to call them indirectly
 
 endif
+
+endmenu # Segger RTT drivers

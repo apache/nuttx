@@ -38,7 +38,6 @@
 #include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/usb/usb.h>
@@ -868,30 +867,12 @@ static void rndis_rxdispatch(FAR void *arg)
     {
       NETDEV_RXIPV4(&priv->netdev);
 
-      /* Handle ARP on input then give the IPv4 packet to the network
-       * layer
-       */
+      /* Receive an IPv4 packet from the network device */
 
-      arp_ipin(&priv->netdev);
       ipv4_input(&priv->netdev);
 
       if (priv->netdev.d_len > 0)
         {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-          if (IFF_IS_IPv4(priv->netdev.d_flags))
-#endif
-            {
-              arp_out(&priv->netdev);
-            }
-#ifdef CONFIG_NET_IPv6
-          else
-            {
-              neighbor_out(&priv->netdev);
-            }
-#endif
-
           /* And send the packet */
 
           rndis_transmit(priv);
@@ -906,26 +887,10 @@ static void rndis_rxdispatch(FAR void *arg)
 
       /* Give the IPv6 packet to the network layer */
 
-      arp_ipin(&priv->netdev);
       ipv6_input(&priv->netdev);
 
       if (priv->netdev.d_len > 0)
         {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-          if (IFF_IS_IPv4(priv->netdev.d_flags))
-            {
-              arp_out(&priv->netdev);
-            }
-          else
-#endif
-#ifdef CONFIG_NET_IPv6
-            {
-              neighbor_out(&priv->netdev);
-            }
-#endif
-
           /* And send the packet */
 
           rndis_transmit(priv);
@@ -938,7 +903,7 @@ static void rndis_rxdispatch(FAR void *arg)
     {
       NETDEV_RXARP(&priv->netdev);
 
-      arp_arpin(&priv->netdev);
+      arp_input(&priv->netdev);
 
       if (priv->netdev.d_len > 0)
         {
@@ -983,53 +948,13 @@ static void rndis_rxdispatch(FAR void *arg)
 static int rndis_txpoll(FAR struct net_driver_s *dev)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
-  int ret = OK;
 
   if (!priv->connected)
     {
       return -EBUSY;
     }
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
-
-  ninfo("Poll result: d_len=%d\n", priv->netdev.d_len);
-  if (priv->netdev.d_len > 0)
-    {
-      /* Look up the destination MAC address and add it to the Ethernet
-       * header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(priv->netdev.d_flags))
-#endif
-        {
-          arp_out(&priv->netdev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          neighbor_out(&priv->netdev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
-      if (!devif_loopback(&priv->netdev))
-        {
-          ret = rndis_transmit(priv);
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return ret;
+  return rndis_transmit(priv);
 }
 
 /****************************************************************************

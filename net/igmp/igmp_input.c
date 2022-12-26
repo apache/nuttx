@@ -297,7 +297,6 @@ void igmp_input(struct net_driver_s *dev)
 
 drop:
   dev->d_len = 0;
-  return;
 }
 
 #endif /* CONFIG_NET_IGMP */

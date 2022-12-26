@@ -96,7 +96,6 @@ static int nrf52_hts221_irq_attach(struct hts221_config_s *state,
 static void nrf52_hts221_irq_enable(const struct hts221_config_s *state,
                                     bool enable)
 {
-  return;
 }
 
 /****************************************************************************
@@ -105,7 +104,6 @@ static void nrf52_hts221_irq_enable(const struct hts221_config_s *state,
 
 static void nrf52_hts221_irq_clear(const struct hts221_config_s *state)
 {
-  return;
 }
 
 /****************************************************************************

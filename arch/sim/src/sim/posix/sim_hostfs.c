@@ -544,7 +544,7 @@ int host_unlink(const char *pathname)
  * Name: host_mkdir
  ****************************************************************************/
 
-int host_mkdir(const char *pathname, mode_t mode)
+int host_mkdir(const char *pathname, nuttx_mode_t mode)
 {
   /* Just call the host's mkdir routine */
 

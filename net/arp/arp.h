@@ -40,10 +40,13 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include <netinet/arp.h>
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/semaphore.h>
+
+#include "devif/devif.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -81,8 +84,10 @@
 
 /* This is a helper pointer for accessing the contents of the IP header */
 
-#define ARPBUF    ((FAR struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
-#define ARPIPBUF  ((FAR struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
+#define ARPBUF   ((FAR struct arp_hdr_s *)\
+                  &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE])
+#define ARPIPBUF ((FAR struct arp_iphdr_s *)\
+                  &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE])
 
 /****************************************************************************
  * Public Types
@@ -149,6 +154,16 @@ struct arp_notify_s
 };
 #endif
 
+/* One entry in the ARP table (volatile!) */
+
+struct arp_entry_s
+{
+  in_addr_t                at_ipaddr;   /* IP address */
+  struct ether_addr        at_ethaddr;  /* Hardware address */
+  clock_t                  at_time;     /* Time of last usage */
+  FAR struct net_driver_s *at_dev;      /* The device driver structure */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -175,6 +190,57 @@ struct arp_notify_s
 
 struct net_driver_s; /* Forward reference */
 void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
+
+/****************************************************************************
+ * Name: arp_ipin
+ *
+ * Description:
+ *   The arp_ipin() function should be called by Ethernet device drivers
+ *   whenever an IP packet arrives from the network.  The function will
+ *   check if the address is in the ARP cache, and if so the ARP cache entry
+ *   will be refreshed.
+ *   If no ARP cache entry was found, a new one is created.
+ *
+ *   This function expects that an IP packet with an Ethernet header is
+ *   present in the d_buf buffer and that the length of the packet is in the
+ *   d_len field.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_IPIN
+void arp_ipin(FAR struct net_driver_s *dev);
+#else
+# define arp_ipin(dev)
+#endif
+
+/****************************************************************************
+ * Name: arp_out
+ *
+ * Description:
+ *   This function should be called before sending out an IPv4 packet. The
+ *   function checks the destination IPv4 address of the IPv4 packet to see
+ *   what Ethernet MAC address that should be used as a destination MAC
+ *   address on the Ethernet.
+ *
+ *   If the destination IPv4 address is in the local network (determined
+ *   by logical ANDing of netmask and our IPv4 address), the function
+ *   checks the ARP cache to see if an entry for the destination IPv4
+ *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   beginning of the packet and the function returns.
+ *
+ *   If no ARP cache entry is found for the destination IIPv4P address, the
+ *   packet in the d_buf is replaced by an ARP request packet for the
+ *   IPv4 address. The IPv4 packet is dropped and it is assumed that the
+ *   higher level protocols (e.g., TCP) eventually will retransmit the
+ *   dropped packet.
+ *
+ *   Upon return in either the case, a packet to be sent is present in the
+ *   d_buf buffer and the d_len field holds the length of the Ethernet
+ *   frame that should be transmitted.
+ *
+ ****************************************************************************/
+
+void arp_out(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_send
@@ -297,7 +363,7 @@ int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout);
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   arp_arpin() and will execute with the network locked.
+ *   arp_input() and will execute with the network locked.
  *
  ****************************************************************************/
 
@@ -308,23 +374,6 @@ void arp_notify(in_addr_t ipaddr);
 #endif
 
 /****************************************************************************
- * Name: arp_lookup
- *
- * Description:
- *   Find the ARP entry corresponding to this IP address in the ARP table.
- *
- * Input Parameters:
- *   ipaddr - Refers to an IP address in network order
- *
- * Assumptions:
- *   The network is locked to assure exclusive access to the ARP table.
- *   The return value will become unstable when the network is unlocked.
- *
- ****************************************************************************/
-
-FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
-
-/****************************************************************************
  * Name: arp_find
  *
  * Description:
@@ -332,11 +381,12 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
  *   not be in the ARP table (it may, instead, be a local network device).
  *
  * Input Parameters:
- *   ipaddr -  Refers to an IP address in network order
+ *   ipaddr  - Refers to an IP address in network order
  *   ethaddr - Location to return the corresponding Ethernet MAN address.
  *             This address may be NULL.  In that case, this function may be
  *             used simply to determine if the Ethernet MAC address is
  *             available.
+ *   dev     - Device structure
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
@@ -344,7 +394,8 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
  ****************************************************************************/
 
 struct ether_addr;  /* Forward reference */
-int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr);
+int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
+             FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_delete
@@ -354,13 +405,14 @@ int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr);
  *
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
+ *   dev    - Device structure
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-void arp_delete(in_addr_t ipaddr);
+int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_cleanup
@@ -400,7 +452,7 @@ void arp_cleanup(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
-               FAR uint8_t *ethaddr);
+               FAR const uint8_t *ethaddr);
 
 /****************************************************************************
  * Name: arp_hdr_update
@@ -424,7 +476,7 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
  ****************************************************************************/
 
 void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
-                    FAR uint8_t *ethaddr);
+                    FAR const uint8_t *ethaddr);
 
 /****************************************************************************
  * Name: arp_snapshot
@@ -447,7 +499,7 @@ void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NETLINK_ROUTE
-unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
+unsigned int arp_snapshot(FAR struct arpreq *snapshot,
                           unsigned int nentries);
 #else
 #  define arp_snapshot(s,n) (0)
@@ -478,14 +530,16 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 /* If ARP is disabled, stub out all ARP interfaces */
 
 #  define arp_format(d,i);
+#  define arp_ipin(dev)
+#  define arp_out(dev)
 #  define arp_send(i) (0)
 #  define arp_poll(d,c) (0)
 #  define arp_wait_setup(i,n)
 #  define arp_wait_cancel(n) (0)
 #  define arp_wait(n,t) (0)
 #  define arp_notify(i)
-#  define arp_find(i,e) (-ENOSYS)
-#  define arp_delete(i)
+#  define arp_find(i,e,d) (-ENOSYS)
+#  define arp_delete(i,d) (-ENOSYS)
 #  define arp_cleanup(d)
 #  define arp_update(d,i,m);
 #  define arp_hdr_update(d,i,m);

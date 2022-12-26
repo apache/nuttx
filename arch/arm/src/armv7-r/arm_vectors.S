@@ -106,6 +106,8 @@
  ****************************************************************************/
 
 	.text
+	.syntax	unified
+	.arm
 
 /****************************************************************************
  * Public Functions
@@ -132,7 +134,7 @@ arm_vectorirq:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#ifdef CONFIG_ARMV7R_DECODEFIQ
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -242,7 +244,7 @@ arm_vectorsvc:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#ifdef CONFIG_ARMV7R_DECODEFIQ
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -353,7 +355,7 @@ arm_vectordata:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#ifdef CONFIG_ARMV7R_DECODEFIQ
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS

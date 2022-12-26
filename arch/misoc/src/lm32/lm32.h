@@ -126,9 +126,5 @@ void lm32_sigdeliver(void);
 void lm32_flush_dcache(void);
 void lm32_flush_icache(void);
 
-/* Debug ********************************************************************/
-
-void lm32_dumpstate(void);
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MISOC_SRC_LM32_LM32_H */

@@ -86,7 +86,7 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
 {
   int ipicmplen = IPv6_HDRLEN + sizeof(struct icmpv6_hdr_s);
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  FAR struct icmpv6_hdr_s *icmpv6 = (FAR struct icmpv6_hdr_s *)(ipv6 + 1);
+  FAR struct icmpv6_hdr_s *icmpv6;
   uint16_t datalen;
 
   if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_unspecaddr)
@@ -99,54 +99,98 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
       return;
     }
 
-  /* Get the data size of the packet. */
+  /* Get the data (whole original packet) size of the packet. */
 
-  datalen = (ipv6->len[0] << 8) + ipv6->len[1];
+  datalen = (ipv6->len[0] << 8) + ipv6->len[1] + IPv6_HDRLEN;
 
   /* RFC says return as much as we can without exceeding 1280 bytes. */
 
   if (datalen > ICMPv6_MINMTULEN - ipicmplen)
     {
       datalen = ICMPv6_MINMTULEN - ipicmplen;
+      iob_trimtail(dev->d_iob, dev->d_iob->io_pktlen - datalen);
+    }
+
+  /* Save the original datagram */
+
+  if (CONFIG_IOB_BUFSIZE >= datalen + ipicmplen +
+                            CONFIG_NET_LL_GUARDSIZE)
+    {
+      /* Reuse current iob */
+
+      memmove((FAR char *)ipv6 + ipicmplen, ipv6, datalen);
+
+      /* Skip icmp header from iob */
+
+      iob_update_pktlen(dev->d_iob, datalen + ipicmplen);
+    }
+  else
+    {
+      FAR struct iob_s *iob;
+
+      /* Save the original datagram to iob chain */
+
+      iob = dev->d_iob;
+      dev->d_iob = NULL;
+
+      /* Re-prepare device buffer */
+
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          dev->d_len = 0;
+          dev->d_iob = iob;
+          netdev_iob_release(dev);
+          return;
+        }
+
+      /* Copy ipv4 header to device buffer */
+
+      if (iob_trycopyin(dev->d_iob, (FAR void *)ipv6,
+                        IPv6_HDRLEN, 0, false) != IPv6_HDRLEN)
+        {
+          dev->d_len = 0;
+          netdev_iob_release(dev);
+          iob_free_chain(iob);
+          return;
+        }
+
+      /* Skip icmp header from iob */
+
+      iob_update_pktlen(dev->d_iob, dev->d_iob->io_pktlen +
+                                    sizeof(struct icmpv6_hdr_s));
+
+      /* Concat new icmp packet before original datagram */
+
+      iob_concat(dev->d_iob, iob);
+
+      /* IPv6 header to new iob */
+
+      ipv6 = IPBUF(0);
     }
 
   dev->d_len = ipicmplen + datalen;
 
-  /* Copy fields from original packet */
-
-  memmove(icmpv6 + 1, ipv6, datalen);
-
-  /* Set up the IPv6 header (most is probably already in place) */
-
-  ipv6->vtc      = 0x60;               /* Version/traffic class (MS) */
-  ipv6->tcf      = 0;                  /* Traffic class(LS)/Flow label(MS) */
-  ipv6->flow     = 0;                  /* Flow label (LS) */
-  ipv6->len[0]   = (dev->d_len >> 8);  /* Length excludes the IPv6 header */
-  ipv6->len[1]   = (dev->d_len & 0xff);
-  ipv6->proto    = IP_PROTO_ICMP6;     /* Next header */
-  ipv6->ttl      = 255;                /* Hop limit */
-
-  net_ipv6addr_hdrcopy(ipv6->destipaddr, ipv6->srcipaddr);
-  net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
+  ipv6_build_header(IPv6BUF, dev->d_len - IPv6_HDRLEN, IP_PROTO_ICMP6,
+                    dev->d_ipv6addr, ipv6->srcipaddr, 255);
 
   /* Initialize the ICMPv6 header */
 
+  icmpv6          = (FAR struct icmpv6_hdr_s *)(ipv6 + 1);
   icmpv6->type    = type;
   icmpv6->code    = code;
-  icmpv6->data[0] = data >> 16;
-  icmpv6->data[1] = data & 0xffff;
+  icmpv6->data[0] = htons(data >> 16);
+  icmpv6->data[1] = htons(data & 0xffff);
 
   /* Calculate the ICMPv6 checksum over the ICMPv6 header and payload. */
 
   icmpv6->chksum = 0;
-  icmpv6->chksum = ~icmpv6_chksum(dev, datalen + sizeof(*icmpv6));
+  icmpv6->chksum = ~icmpv6_chksum(dev, IPv6_HDRLEN);
   if (icmpv6->chksum == 0)
     {
       icmpv6->chksum = 0xffff;
     }
 
-  ninfo("Outgoing ICMPv6 packet length: %d (%d)\n",
-         dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+  ninfo("Outgoing ICMPv6 packet length: %d\n", dev->d_len);
 }
 
 #endif /* CONFIG_NET_ICMPv6 */

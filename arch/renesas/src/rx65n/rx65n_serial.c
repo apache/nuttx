@@ -281,10 +281,10 @@ static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_xmtinterrupt(int irq, void *context, FAR void *arg);
-static int  up_rcvinterrupt(int irq, void *context, FAR void *arg);
-static int  up_eriinterrupt(int irq, void *context, FAR void *arg);
-static int  up_teiinterrupt(int irq, void *context, FAR void *arg);
+static int  up_xmtinterrupt(int irq, void *context, void *arg);
+static int  up_rcvinterrupt(int irq, void *context, void *arg);
+static int  up_eriinterrupt(int irq, void *context, void *arg);
+static int  up_teiinterrupt(int irq, void *context, void *arg);
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
@@ -1268,7 +1268,7 @@ static int up_rcvinterrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int  up_xmtinterrupt(int irq, void *context, FAR void *arg)
+static int  up_xmtinterrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev;
   dev = (struct uart_dev_s *)arg;

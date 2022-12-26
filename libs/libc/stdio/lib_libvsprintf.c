@@ -67,13 +67,7 @@
 #  undef CONFIG_LIBC_LONG_LONG
 #endif
 
-/* [Re]define putc() */
-
-#ifdef putc
-#  undef putc
-#endif
-
-#define putc(c,stream)  (total_len++, (stream)->put(stream, c))
+#define stream_putc(c,stream)  (total_len++, lib_stream_putc(stream, c))
 
 /* Order is relevant here and matches order in format string */
 
@@ -152,7 +146,7 @@ static const char g_nullstring[] = "(null)";
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
-           printflike(4, 0);
+           printf_like(4, 0);
 
 /****************************************************************************
  * Private Functions
@@ -229,10 +223,10 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if (stream != NULL)
             {
-              putc(c, stream);
+              stream_putc(c, stream);
             }
 #else
-          putc(c, stream);
+          stream_putc(c, stream);
 #endif
         }
 
@@ -459,8 +453,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   flags |= FL_REPD_TYPE;
                 }
+              else
+                {
+                  flags |= FL_LONG;
+                }
 
-              flags |= FL_LONG;
               flags &= ~FL_SHORT;
               continue;
             }
@@ -471,8 +468,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   flags |= FL_REPD_TYPE;
                 }
+              else
+                {
+                  flags |= FL_SHORT;
+                }
 
-              flags |= FL_SHORT;
               flags &= ~FL_LONG;
               continue;
             }
@@ -655,7 +655,7 @@ flt_oper:
                     {
                       do
                         {
-                          putc(' ', stream);
+                          stream_putc(' ', stream);
                         }
                       while (--width);
                     }
@@ -667,7 +667,7 @@ flt_oper:
 
               if (sign)
                 {
-                  putc(sign, stream);
+                  stream_putc(sign, stream);
                 }
 
               p = "inf";
@@ -686,7 +686,7 @@ flt_oper:
                       ndigs += 'I' - 'i';
                     }
 
-                  putc(ndigs, stream);
+                  stream_putc(ndigs, stream);
                   p++;
                 }
 
@@ -760,21 +760,21 @@ flt_oper:
             {
               while (width)
                 {
-                  putc(' ', stream);
+                  stream_putc(' ', stream);
                   width--;
                 }
             }
 
           if (sign != 0)
             {
-              putc(sign, stream);
+              stream_putc(sign, stream);
             }
 
           if ((flags & FL_LPAD) == 0)
             {
               while (width)
                 {
-                  putc('0', stream);
+                  stream_putc('0', stream);
                   width--;
                 }
             }
@@ -798,7 +798,7 @@ flt_oper:
 
                   if (n == -1)
                     {
-                      putc('.', stream);
+                      stream_putc('.', stream);
                     }
 
                   /* Pull digits from buffer when in-range, otherwise use 0 */
@@ -816,13 +816,13 @@ flt_oper:
                     {
                       if ((flags & FL_ALT) != 0 && n == -1)
                         {
-                          putc('.', stream);
+                          stream_putc('.', stream);
                         }
 
                       break;
                     }
 
-                  putc(out, stream);
+                  stream_putc(out, stream);
                 }
               while (1);
 
@@ -832,7 +832,7 @@ flt_oper:
                   out = '1';
                 }
 
-              putc(out, stream);
+              stream_putc(out, stream);
             }
           else
             {
@@ -846,25 +846,26 @@ flt_oper:
                   _dtoa.flags &= ~DTOA_CARRY;
                 }
 
-              putc(_dtoa.digits[0], stream);
+              stream_putc(_dtoa.digits[0], stream);
               if (prec > 0)
                 {
                   uint8_t pos;
 
-                  putc('.', stream);
+                  stream_putc('.', stream);
                   for (pos = 1; pos < 1 + prec; pos++)
                     {
-                      putc(pos < ndigs ? _dtoa.digits[pos] : '0', stream);
+                      stream_putc(pos < ndigs ? _dtoa.digits[pos] : '0',
+                                  stream);
                     }
                 }
               else if ((flags & FL_ALT) != 0)
                 {
-                  putc('.', stream);
+                  stream_putc('.', stream);
                 }
 
               /* Exponent */
 
-              putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
+              stream_putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
               ndigs = '+';
               if (exp < 0 || (exp == 0 && (_dtoa.flags & DTOA_CARRY) != 0))
                 {
@@ -872,14 +873,13 @@ flt_oper:
                   ndigs = '-';
                 }
 
-              putc(ndigs, stream);
-              for (ndigs = '0'; exp >= 10; exp -= 10)
+              stream_putc(ndigs, stream);
+              c = __ultoa_invert(exp, (FAR char *)buf, 10) - (FAR char *)buf;
+              while (c > 0)
                 {
-                  ndigs += 1;
+                  stream_putc(buf[c - 1], stream);
+                  c--;
                 }
-
-              putc(ndigs, stream);
-              putc('0' + exp, stream);
             }
 
           goto tail;
@@ -942,14 +942,14 @@ str_lpad:
             {
               while (size < width)
                 {
-                  putc(' ', stream);
+                  stream_putc(' ', stream);
                   width--;
                 }
             }
 
           while (size)
             {
-              putc(*pnt++, stream);
+              stream_putc(*pnt++, stream);
               if (width != 0)
                 {
                   width -= 1;
@@ -1159,7 +1159,7 @@ str_lpad:
                           pnt = symbol->sym_name;
                           while (*pnt != '\0')
                             {
-                              putc(*pnt++, stream);
+                              stream_putc(*pnt++, stream);
                             }
 
                           if (c == 'S')
@@ -1204,8 +1204,8 @@ str_lpad:
               break;
 
             default:
-              putc('%', stream);
-              putc(c, stream);
+              stream_putc('%', stream);
+              stream_putc(c, stream);
               continue;
             }
 
@@ -1273,7 +1273,7 @@ str_lpad:
 
           while (len < width)
             {
-              putc(' ', stream);
+              stream_putc(' ', stream);
               len++;
             }
         }
@@ -1282,10 +1282,10 @@ str_lpad:
 
       if ((flags & FL_ALT) != 0)
         {
-          putc('0', stream);
+          stream_putc('0', stream);
           if ((flags & FL_ALTHEX) != 0)
             {
-              putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
+              stream_putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
             }
         }
       else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
@@ -1301,18 +1301,18 @@ str_lpad:
               z = '-';
             }
 
-          putc(z, stream);
+          stream_putc(z, stream);
         }
 
       while (prec > c)
         {
-          putc('0', stream);
+          stream_putc('0', stream);
           prec--;
         }
 
       while (c)
         {
-          putc(buf[--c], stream);
+          stream_putc(buf[--c], stream);
         }
 
 tail:
@@ -1321,7 +1321,7 @@ tail:
 
       while (width)
         {
-          putc(' ', stream);
+          stream_putc(' ', stream);
           width--;
         }
     }

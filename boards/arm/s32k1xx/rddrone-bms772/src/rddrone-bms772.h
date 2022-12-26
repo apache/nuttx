@@ -77,10 +77,6 @@
 
 #define NUM_OF_GPIO 12
 
-/* Count of peripheral clock user configurations */
-
-#define NUM_OF_PERIPHERAL_CLOCKS_0 12
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

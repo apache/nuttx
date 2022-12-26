@@ -154,11 +154,6 @@
     } \
   while (0)
 
-/* Dump the current machine registers */
-
-#define _REGISTER_DUMP() \
-  z180_registerdump()
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -209,10 +204,6 @@ void z180_restoreusercontext(FAR chipreg_t *regs);
 
 void z180_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
                    FAR chipreg_t *regs);
-
-/* Defined in z180_registerdump.c */
-
-void z180_registerdump(void);
 
 #ifdef __cplusplus
 }

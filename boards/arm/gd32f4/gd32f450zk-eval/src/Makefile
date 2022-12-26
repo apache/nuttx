@@ -53,4 +53,8 @@ ifeq ($(CONFIG_MTD_GD25),y)
 CSRCS += gd32f4xx_gd25.c
 endif
 
+ifeq ($(CONFIG_MTD_AT24XX), y)
+CSRCS += gd32f4xx_at24.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

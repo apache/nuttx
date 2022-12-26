@@ -118,6 +118,12 @@
 #define S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS1_OFFSET (0x04b8) /* Block 3 Lock Master Super Sector 1 (PFCBLK3_LOCKMASTER_SS1) */
 #define S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS2_OFFSET (0x04bc) /* Block 3 Lock Master Super Sector 2 (PFCBLK3_LOCKMASTER_SS2) */
 
+/* Flash Management Unit Register Offsets ***********************************/
+
+#define S32K3XX_FMU_MCR_OFFSET                       (0x0000) /* Module Configuration (MCR) */
+#define S32K3XX_FMU_MCRS_OFFSET                      (0x0004) /* Module Configuration Status (MCRS) */
+#define S32K3XX_FMU_PD_OFFSET                        (0x0100) /* Program data (PD) */
+
 /* PFLASH Register Addresses ************************************************/
 
 #define S32K3XX_PFLASH_PFCR0                         (S32K3XX_PFLASH_BASE + S32K3XX_PFLASH_PFCR0_OFFSET)
@@ -202,6 +208,12 @@
 #define S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS0        (S32K3XX_PFLASH_BASE + S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS0_OFFSET)
 #define S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS1        (S32K3XX_PFLASH_BASE + S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS1_OFFSET)
 #define S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS2        (S32K3XX_PFLASH_BASE + S32K3XX_PFLASH_PFCBLK3_LOCKMASTER_SS2_OFFSET)
+
+/* Flash Management Unit Register Addresses *********************************/
+
+#define S32K3XX_FMU_MCR                              (S32K3XX_FMU_BASE + S32K3XX_FMU_MCR_OFFSET)
+#define S32K3XX_FMU_MCRS                             (S32K3XX_FMU_BASE + S32K3XX_FMU_MCRS_OFFSET)
+#define S32K3XX_FMU_PD(n)                            (S32K3XX_FMU_BASE + S32K3XX_FMU_PD_OFFSET + (n * 4))
 
 /* PFLASH Register Bitfield Definitions *************************************/
 
@@ -346,5 +358,34 @@
 
 #define PFLASH_PFCBLK_LOCKMASTER_SS_SHIFT (0)       /* Bits 0-31: Block n Lock Master Super Sector m (LOCKMASTER_SS) */
 #define PFLASH_PFCBLK_LOCKMASTER_SS_MASK  (0xffffffff << PFLASH_PFCBLK_LOCKMASTER_SS_SHIFT)
+
+/* Flash Management Unit Bitfield Definitions *******************************/
+
+/* Module Configuration (MCR) */
+
+#define FMU_MCR_EHV_SHIFT                 (0)       /* Bit 0: Enable High Voltage (EHV) */
+#define FMU_MCR_EHV_MASK                  (0x01 << FMU_MCR_EHV_SHIFT)
+#define FMU_MCR_ERS_SHIFT                 (4)       /* Bit 4: Erase (ERS) */
+#define FMU_MCR_ERS_MASK                  (0x01 << FMU_MCR_ERS_SHIFT)
+#define FMU_MCR_ESS_SHIFT                 (5)       /* Bit 5: Erase Size Select (ESS) */
+#define FMU_MCR_ESS_MASK                  (0x01 << FMU_MCR_ESS_SHIFT)
+#define FMU_MCR_PGM_SHIFT                 (8)       /* Bit 8: Program (PGM) */
+#define FMU_MCR_PGM_MASK                  (0x01 << FMU_MCR_PGM_SHIFT)
+#define FMU_MCR_WDIE_SHIFT                (12)      /* Bit 12: Watch Dog Interrupt Enable (WDIE) */
+#define FMU_MCR_WDIE_MASK                 (0x01 << FMU_MCR_WDIE_SHIFT)
+#define FMU_MCR_PECIE_SHIFT               (15)      /* Bit 15: Program/Erase Complete Interrupt Enable (PECIE) */
+#define FMU_MCR_PECIE_MASK                (0x01 << FMU_MCR_PECIE_SHIFT)
+#define FMU_MCR_PEID_SHIFT                (16)      /* Bit 16-23: Program and Erase Master/Domain ID (PEID) */
+#define FMU_MCR_PEID_MASK                 (0xFF << FMU_MCR_PEID_SHIFT)
+#define FMU_MCR_PEID(n)                   ((n & FMU_MCR_PEID_MASK) >> FMU_MCR_PEID_SHIFT)
+
+#define FMU_MCRS_PEG_SHIFT                (14)      /* Bit 14: Program/Erase Good (PEG) */
+#define FMU_MCRS_PEG_MASK                 (0x01 << FMU_MCRS_PEG_SHIFT)
+#define FMU_MCRS_DONE_SHIFT               (15)      /* Bit 15: State machine status (DONE) */
+#define FMU_MCRS_DONE_MASK                (0x01 << FMU_MCRS_DONE_SHIFT)
+#define FMU_MCRS_PES_SHIFT                (16)      /* Bit 16: Program and erase Protection error (PEP) */
+#define FMU_MCRS_PES_MASK                 (0x01 << FMU_MCRS_PES_SHIFT)
+#define FMU_MCRS_PEP_SHIFT                (17)      /* Bit 17: Program and erase sequence error (PES) */
+#define FMU_MCRS_PEP_MASK                 (0x01 << FMU_MCRS_PEP_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_S32K3XX_HARDWARE_S32K3XX_PFLASH_H */

@@ -21,3 +21,4 @@
 include power/pm/Make.defs
 include power/battery/Make.defs
 include power/supply/Make.defs
+include power/relay/Make.defs

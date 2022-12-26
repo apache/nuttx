@@ -31,11 +31,33 @@
 #include <stdio.h>
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 #include <nuttx/fs/fs.h>
+#ifdef CONFIG_MTD
+#include <nuttx/mtd/mtd.h>
+#endif
 #endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define lib_stream_putc(stream, ch) \
+        ((FAR struct lib_outstream_s *)(stream))->putc( \
+        (FAR struct lib_outstream_s *)(stream), ch)
+#define lib_stream_puts(stream, buf, len) \
+        ((FAR struct lib_outstream_s *)(stream))->puts( \
+        (FAR struct lib_outstream_s *)(stream), buf, len)
+#define lib_stream_getc(stream) \
+        ((FAR struct lib_instream_s *)(stream))->getc( \
+        (FAR struct lib_instream_s *)(stream))
+#define lib_stream_gets(stream, buf, len) \
+        ((FAR struct lib_instream_s *)(stream))->gets( \
+        (FAR struct lib_instream_s *)(stream), buf, len)
+#define lib_stream_flush(stream) \
+        ((FAR struct lib_outstream_s *)(stream))->flush( \
+        (FAR struct lib_outstream_s *)(stream))
+#define lib_stream_seek(stream, offset, whence) \
+        ((FAR struct lib_sostream_s *)(stream))->seek( \
+        (FAR struct lib_sostream_s *)(stream), offset, whence)
 
 #ifdef CONFIG_LIBC_LZF
 #define LZF_STREAM_BLOCKSIZE  ((1 << CONFIG_STREAM_LZF_BLOG) - 1)
@@ -49,6 +71,8 @@
 
 struct lib_instream_s;
 typedef CODE int  (*lib_getc_t)(FAR struct lib_instream_s *this);
+typedef CODE int  (*lib_gets_t)(FAR struct lib_instream_s *this,
+                                FAR void *buf, int len);
 
 struct lib_outstream_s;
 typedef CODE void (*lib_putc_t)(FAR struct lib_outstream_s *this, int ch);
@@ -58,48 +82,55 @@ typedef CODE int  (*lib_flush_t)(FAR struct lib_outstream_s *this);
 
 struct lib_instream_s
 {
-  lib_getc_t             get;     /* Get one character from the instream */
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
+  lib_getc_t             getc;    /* Get one character from the instream */
+  lib_gets_t             gets;    /* Get the string from the instream */
 };
 
 struct lib_outstream_s
 {
-  lib_putc_t             put;     /* Put one character to the outstream */
-  lib_puts_t             puts;    /* Writes the string to the outstream */
-  lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
+  lib_putc_t             putc;    /* Put one character to the outstream */
+  lib_puts_t             puts;    /* Writes the string to the outstream */
+  lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
 };
 
 /* Seek-able streams */
 
 struct lib_sistream_s;
 typedef CODE int   (*lib_sigetc_t)(FAR struct lib_sistream_s *this);
+typedef CODE int   (*lib_sigets_t)(FAR struct lib_sistream_s *this,
+                                   FAR void *buf, int len);
 typedef CODE off_t (*lib_siseek_t)(FAR struct lib_sistream_s *this,
                                    off_t offset, int whence);
 
 struct lib_sostream_s;
 typedef CODE void  (*lib_soputc_t)(FAR struct lib_sostream_s *this, int ch);
+typedef CODE int   (*lib_soputs_t)(FAR struct lib_sostream_s *this,
+                                   FAR const void *buf, int len);
 typedef CODE int   (*lib_soflush_t)(FAR struct lib_sostream_s *this);
 typedef CODE off_t (*lib_soseek_t)(FAR struct lib_sostream_s *this,
                                    off_t offset, int whence);
 
 struct lib_sistream_s
 {
-  lib_sigetc_t           get;     /* Get one character from the instream */
-  lib_siseek_t           seek;    /* Seek to a position in the instream */
   int                    nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
+  lib_sigetc_t           getc;    /* Get one character from the instream */
+  lib_gets_t             gets;    /* Get the string from the instream */
+  lib_siseek_t           seek;    /* Seek to a position in the instream */
 };
 
 struct lib_sostream_s
 {
-  lib_soputc_t           put;     /* Put one character to the outstream */
-  lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
-  lib_soseek_t           seek;    /* Seek a position in the output stream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
+  lib_soputc_t           putc;    /* Put one character to the outstream */
+  lib_soputs_t           puts;    /* Writes the string to the outstream */
+  lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
+  lib_soseek_t           seek;    /* Seek a position in the output stream */
 };
 
 /* These are streams that operate on a fixed-sized block of memory */
@@ -186,6 +217,21 @@ struct lib_rawsostream_s
   int                    fd;
 };
 
+/* This is a special stream that does buffered character I/O.  NOTE that is
+ * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
+ * lib_outstream_s
+ */
+
+struct iob_s;  /* Forward reference */
+
+struct lib_syslogstream_s
+{
+  struct lib_outstream_s public;
+#ifdef CONFIG_SYSLOG_BUFFER
+  FAR struct iob_s *iob;
+#endif
+};
+
 /* LZF compressed stream pipeline */
 
 #ifdef CONFIG_LIBC_LZF
@@ -206,6 +252,16 @@ struct lib_blkoutstream_s
   struct lib_outstream_s public;
   FAR struct inode      *inode;
   struct geometry        geo;
+  FAR unsigned char     *cache;
+};
+#endif
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+struct lib_mtdoutstream_s
+{
+  struct lib_outstream_s public;
+  FAR struct inode      *inode;
+  struct mtd_geometry_s  geo;
   FAR unsigned char     *cache;
 };
 #endif
@@ -367,6 +423,45 @@ void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 /****************************************************************************
+ * Name: lib_syslogstream_open
+ *
+ * Description:
+ *   Initializes a stream for use with the configured syslog interface.
+ *   Only accessible from with the OS SYSLOG logic.
+ *
+ * Input Parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_syslogstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream);
+
+/****************************************************************************
+ * Name: lib_syslogstream_close
+ *
+ * Description:
+ *   Free resources held by the syslog stream.
+ *
+ * Input Parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_syslogstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (Resources freed).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_BUFFER
+void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream);
+#else
+#  define lib_syslogstream_close(s)
+#endif
+
+/****************************************************************************
  * Name: lib_lzfoutstream
  *
  * Description:
@@ -428,6 +523,46 @@ void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream);
 #endif
 
 /****************************************************************************
+ * Name: lib_mtdoutstream_open
+ *
+ * Description:
+ *  mtd driver stream backend
+ *
+ * Input Parameters:
+ *   stream   - User allocated, uninitialized instance of struct
+ *                lib_mtdoutstream_s to be initialized.
+ *   name     - The full path of mtd device.
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
+                          FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: lib_mtdoutstream_close
+ *
+ * Description:
+ *  close mtd driver stream backend
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_mtdoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+void lib_mtdoutstream_close(FAR struct lib_mtdoutstream_s *stream);
+#endif
+
+/****************************************************************************
  * Name: lib_noflush
  *
  * Description:
@@ -465,7 +600,7 @@ int lib_snoflush(FAR struct lib_sostream_s *this);
  ****************************************************************************/
 
 int lib_sprintf(FAR struct lib_outstream_s *obj,
-                FAR const IPTR char *fmt, ...) printflike(2, 3);
+                FAR const IPTR char *fmt, ...) printf_like(2, 3);
 
 /****************************************************************************
  * Name: lib_vsprintf
@@ -477,7 +612,7 @@ int lib_sprintf(FAR struct lib_outstream_s *obj,
  ****************************************************************************/
 
 int lib_vsprintf(FAR struct lib_outstream_s *obj,
-                 FAR const IPTR char *src, va_list ap) printflike(2, 0);
+                 FAR const IPTR char *src, va_list ap) printf_like(2, 0);
 
 /****************************************************************************
  * Name: lib_vscanf
@@ -489,7 +624,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj,
  ****************************************************************************/
 
 int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
-               FAR const IPTR char *src, va_list ap) scanflike(3, 0);
+               FAR const IPTR char *src, va_list ap) scanf_like(3, 0);
 
 #undef EXTERN
 #if defined(__cplusplus)

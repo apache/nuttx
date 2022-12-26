@@ -91,9 +91,9 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
 
   while (priv->shmem == NULL)
     {
-      priv->shmem = sim_host_allocshmem(priv->shmemname,
-                                        sizeof(*priv->shmem),
-                                        priv->master);
+      priv->shmem = host_allocshmem(priv->shmemname,
+                                    sizeof(*priv->shmem),
+                                    priv->master);
       usleep(1000);
 
       /* Master isn't ready, sleep and try again */

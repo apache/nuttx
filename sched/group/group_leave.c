@@ -33,6 +33,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/sched.h>
 
 #ifdef CONFIG_BINFMT_LOADABLE
 #  include <nuttx/binfmt/binfmt.h>
@@ -194,33 +195,6 @@ static inline void group_release(FAR struct task_group_s *group)
     {
       kmm_free(group->tg_members);
       group->tg_members = NULL;
-    }
-#endif
-
-#if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* In a flat, single-heap build.  The stream list is part of the
-   * group structure and, hence will be freed when the group structure
-   * is freed.  Otherwise, it is separately allocated an must be
-   * freed here.
-   */
-
-#  ifdef CONFIG_BUILD_KERNEL
-  /* In the kernel build, the unprivileged process's stream list will be
-   * allocated from with its per-process, private user heap. But in that
-   * case, there is no reason to do anything here:  That allocation resides
-   * in the user heap which which be completely freed when we destroy the
-   * process's address environment.
-   */
-
-  if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
-#  endif
-    {
-      /* But kernel threads are different in this build configuration: Their
-       * stream lists were allocated from the common, global kernel heap and
-       * must explicitly freed here.
-       */
-
-      group_free(group, group->tg_streamlist);
     }
 #endif
 

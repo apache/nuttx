@@ -6,3 +6,4 @@
 source "drivers/power/pm/Kconfig"
 source "drivers/power/battery/Kconfig"
 source "drivers/power/supply/Kconfig"
+source "drivers/power/relay/Kconfig"

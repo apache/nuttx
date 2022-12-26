@@ -81,7 +81,7 @@ int nxtask_delete(pid_t pid)
 
   /* Get the TCB of the task to be deleted */
 
-  dtcb = (FAR struct tcb_s *)nxsched_get_tcb(pid);
+  dtcb = nxsched_get_tcb(pid);
   if (dtcb == NULL)
     {
       /* The pid does not correspond to any known thread.  The task
@@ -132,7 +132,7 @@ int nxtask_delete(pid_t pid)
    * nxtask_terminate() do all of the heavy lifting.
    */
 
-  ret = nxtask_terminate(pid, false);
+  ret = nxtask_terminate(pid);
   if (ret < 0)
     {
       return ret;

@@ -100,5 +100,5 @@ int pthread_cancel(pthread_t thread)
 
   /* Then let nxtask_terminate do the real work */
 
-  return nxtask_terminate((pid_t)thread, false);
+  return nxtask_terminate((pid_t)thread);
 }

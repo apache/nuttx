@@ -5,8 +5,14 @@ Network Address Translation (NAT)
 NuttX supports full cone NAT logic, which currently supports
 
 - TCP
+
 - UDP
-- ICMP ECHO (REQUEST & REPLY)
+
+- ICMP
+
+  - ECHO (REQUEST & REPLY)
+
+  - Error Messages (DEST_UNREACHABLE & TIME_EXCEEDED & PARAMETER_PROBLEM)
 
 Workflow
 ========
@@ -40,6 +46,8 @@ Configuration Options
 ``CONFIG_NET_NAT``
   Enable or disable Network Address Translation (NAT) function.
   Depends on ``CONFIG_NET_IPFORWARD``.
+``CONFIG_NET_NAT_HASH_BITS``
+  The bits of the hashtable of NAT entries, hashtable has (1 << bits) buckets.
 ``CONFIG_NET_NAT_TCP_EXPIRE_SEC``
   The expiration time for idle TCP entry in NAT.
   The default value 86400 is suggested by RFC2663, Section 2.6,
@@ -49,6 +57,14 @@ Configuration Options
   The expiration time for idle UDP entry in NAT.
 ``CONFIG_NET_NAT_ICMP_EXPIRE_SEC``
   The expiration time for idle ICMP entry in NAT.
+``CONFIG_NET_NAT_ENTRY_RECLAIM_SEC``
+  The time to auto reclaim all expired NAT entries. A value of zero will
+  disable auto reclaiming.
+  Expired entries will be automatically reclaimed when matching
+  inbound/outbound entries, so this config does not have significant
+  impact when NAT is normally used, but very useful when the hashtable
+  is big and there are only a few connections using NAT (which will
+  only trigger reclaiming on a few chains in hashtable).
 
 Usage
 =====
@@ -60,11 +76,6 @@ Usage
 
   Enable NAT function on a network device, on which the outbound packets
   will be masqueraded.
-
-  Note that NAT is currently designed to be enabled on single device, it
-  may work when enabled on multiple devices, but external ports will not
-  be isolated between devices, so an external port used on one NAT device
-  will also be used by same local ip:port on another NAT device.
 
   :return: Zero is returned if NAT function is successfully enabled on
     the device; A negated errno value is returned if failed.
@@ -160,6 +171,12 @@ Validated on Ubuntu 22.04 x86_64 with NuttX SIM by following steps:
 
     # LAN side
     sudo ip netns exec LAN ping 8.8.8.8
+
+  ..  code-block:: shell
+
+    # LAN side
+    sudo ip netns exec LAN traceroute -n 8.8.8.8     # ICMP error msg of UDP
+    sudo ip netns exec LAN traceroute -n -T 8.8.8.8  # ICMP error msg of TCP
 
   ..  code-block:: shell
 

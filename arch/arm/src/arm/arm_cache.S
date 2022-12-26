@@ -37,6 +37,8 @@
  ****************************************************************************/
 
 	.text
+	.syntax	unified
+	.arm
 
 /* Control functions caches and the write buffer c7
  * Register c7 controls the caches and the write buffer. The function of each cache

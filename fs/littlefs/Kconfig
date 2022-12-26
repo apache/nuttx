@@ -17,4 +17,54 @@ config FS_LITTLEFS_BLOCK_CYCLE
 	default 200
 	---help---
 		Configure the block cycle of the LITTLEFS file system.
+
+config FS_LITTLEFS_NAME_MAX
+	int "LITTLEFS LFS_NAME_MAX"
+	default NAME_MAX
+	---help---
+		Configure LFS_NAME_MAX value for LITTLEFS file systems.
+
+		Note: Using a larger value for this configuration makes the lfs_info
+		structure larger and thus increases the stack usage.
+
+		Note: To mount a LITTLEFS filesystem, this configuration should
+		equal to or larger than the corresponding on-disk parameter.
+
+		Note: Many of tools to generate LITTLEFS images use 255 for
+		this by default.
+
+		Note: NuttX releases prior to 10.4.0 (exclusive) uses 255
+		for this. If you need to mount LITTLEFS filesystems used by
+		previous versions of NuttX, it's safer to use 255.
+
+config FS_LITTLEFS_FILE_MAX
+	int "LITTLEFS LFS_FILE_MAX"
+	default 2147483647
+	---help---
+		Configure LFS_FILE_MAX value for LITTLEFS file systems.
+
+		Note: To mount a LITTLEFS filesystem, this configuration should
+		equal to or larger than the corresponding on-disk parameter.
+
+		Note: Many of tools to generate LITTLEFS images use 2147483647
+		for this by default.
+
+config FS_LITTLEFS_ATTR_MAX
+	int "LITTLEFS LFS_ATTR_MAX"
+	default 1022
+	---help---
+		Configure LFS_ATTR_MAX value for LITTLEFS file systems.
+
+		Note: To mount a LITTLEFS filesystem, this configuration should
+		equal to or larger than the corresponding on-disk parameter.
+
+		Note: because NuttX's LITTLEFS driver does never use custom attributes,
+		the value of this configuration doesn't matter much. The default value
+		here is chosen to be compatible with filesystems created by external
+		tools. Unlike LFS_NAME_MAX, a large LFS_ATTR_MAX value doesn't
+		have any runtime overhead, at least with the implementation as of
+		writing this.
+
+		Note: Many of tools to generate LITTLEFS images use 1022
+		for this by default.
 endif

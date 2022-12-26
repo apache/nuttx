@@ -42,6 +42,12 @@
 #include "arm64_fpu.h"
 
 /***************************************************************************
+ * Pre-processor Definitions
+ ***************************************************************************/
+
+#define FPU_CALLEE_REGS     (8)
+
+/***************************************************************************
  * Private Data
  ***************************************************************************/
 
@@ -245,5 +251,10 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
   const uint64_t *regs1  = saveregs1 + XCPTCONTEXT_GP_SIZE;
   const uint64_t *regs2  = saveregs2 + XCPTCONTEXT_GP_SIZE;
 
-  return memcmp(regs1, regs2, 8 * XCPTCONTEXT_FPU_REGS) == 0;
+  /* Only compare callee-saved registers, caller-saved registers do not
+   * need to be preserved.
+   */
+
+  return memcmp(&regs1[FPU_REG_Q4], &regs2[FPU_REG_Q4],
+                8 * FPU_CALLEE_REGS) == 0;
 }

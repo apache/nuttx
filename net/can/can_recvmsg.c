@@ -56,7 +56,7 @@
 
 struct can_recvfrom_s
 {
-  FAR struct socket *pr_sock;          /* The parent socket structure */
+  FAR struct can_conn_s *pr_conn;      /* Connection associated with the socket */
   FAR struct devif_callback_s *pr_cb;  /* Reference to callback instance */
   sem_t        pr_sem;                 /* Semaphore signals recv completion */
   size_t       pr_buflen;              /* Length of receive buffer */
@@ -120,8 +120,9 @@ static inline void can_add_recvlen(FAR struct can_recvfrom_s *pstate,
  ****************************************************************************/
 
 static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
-                                 FAR struct can_recvfrom_s *pstate)
+                                   FAR struct can_recvfrom_s *pstate)
 {
+  unsigned int offset;
   size_t recvlen;
 
   if (dev->d_len > pstate->pr_buflen)
@@ -135,7 +136,13 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Copy the new packet data into the user buffer */
 
-  memcpy(pstate->pr_buffer, dev->d_buf, recvlen);
+  offset = (dev->d_appdata - dev->d_iob->io_data) - dev->d_iob->io_offset;
+
+  recvlen = iob_copyout(pstate->pr_buffer, dev->d_iob, recvlen, offset);
+
+  /* Trim the copied buffers */
+
+  dev->d_iob = iob_trimhead(dev->d_iob, recvlen + offset);
 
   /* Update the accumulated size of the data read */
 
@@ -175,35 +182,7 @@ static inline void can_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      FAR struct can_conn_s *conn =
-        (FAR struct can_conn_s *)pstate->pr_sock->s_conn;
-      FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
-      uint16_t buflen = dev->d_len - recvlen;
-#ifdef CONFIG_DEBUG_NET
-      uint16_t nsaved;
-
-      nsaved = can_datahandler(conn, buffer, buflen);
-#else
-      can_datahandler(conn, buffer, buflen);
-#endif
-
-      /* There are complicated buffering issues that are not addressed fully
-       * here.  For example, what if up_datahandler() cannot buffer the
-       * remainder of the packet?  In that case, the data will be dropped but
-       * still ACKed.  Therefore it would not be resent.
-       *
-       * This is probably not an issue here because we only get here if the
-       * read-ahead buffers are empty and there would have to be something
-       * serioulsy wrong with the configuration not to be able to buffer a
-       * partial packet in this context.
-       */
-
-#ifdef CONFIG_DEBUG_NET
-      if (nsaved < buflen)
-        {
-          nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
-        }
-#endif
+      can_datahandler(dev, pstate->pr_conn);
     }
 
   /* Indicate no data in the buffer */
@@ -230,8 +209,7 @@ static inline void can_newdata(FAR struct net_driver_s *dev,
 
 static inline int can_readahead(struct can_recvfrom_s *pstate)
 {
-  FAR struct can_conn_s *conn =
-    (FAR struct can_conn_s *) pstate->pr_sock->s_conn;
+  FAR struct can_conn_s *conn = pstate->pr_conn;
   FAR struct iob_s *iob;
   int recvlen;
 
@@ -408,7 +386,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 {
   struct can_recvfrom_s *pstate = pvpriv;
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_TIMESTAMP)
-  struct can_conn_s *conn = (struct can_conn_s *)pstate->pr_sock->s_conn;
+  struct can_conn_s *conn = pstate->pr_conn;
 #endif
 
   /* 'priv' might be null in some race conditions (?) */
@@ -608,7 +586,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 #endif
 
-  state.pr_sock   = psock;
+  state.pr_conn = conn;
 
   /* Handle any any CAN data already buffered in a read-ahead buffer.  NOTE
    * that there may be read-ahead data to be retrieved even after the

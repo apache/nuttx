@@ -1901,6 +1901,11 @@ static FAR struct tm *localsub(FAR const time_t *timep,
       return gmtsub(timep, offset, tmp);
     }
 
+  if (nxrmutex_is_hold(&g_lcl_lock))
+    {
+      return NULL;
+    }
+
   if ((sp->goback && t < sp->ats[0]) ||
       (sp->goahead && t > sp->ats[sp->timecnt - 1]))
     {
@@ -2746,7 +2751,6 @@ static int zoneinit(FAR const char *name)
 void tzset(void)
 {
   FAR const char *name;
-  int lcl = -1;
 
 #ifndef __KERNEL__
   if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
@@ -2755,22 +2759,23 @@ void tzset(void)
     }
 #endif
 
-  nxrmutex_lock(&g_lcl_lock);
-
   name = getenv("TZ");
-  if (name != NULL)
+  if (name == NULL)
     {
-      lcl = 1;
+      return;
     }
 
-  if (lcl < 0 && g_lcl_isset < 0)
+  if (g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
     {
-      goto out;
+      return;
     }
-  else if (lcl > 0 && g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
+
+  if (nxrmutex_is_hold(&g_lcl_lock))
     {
-      goto out;
+      return;
     }
+
+  nxrmutex_lock(&g_lcl_lock);
 
   if (g_lcl_ptr == NULL)
     {
@@ -2786,15 +2791,11 @@ void tzset(void)
       zoneinit("");
     }
 
-  if (lcl > 0)
-    {
-      strcpy(g_lcl_tzname, name);
-    }
+  strcpy(g_lcl_tzname, name);
 
 tzname:
   settzname();
-  g_lcl_isset = lcl;
-out:
+  g_lcl_isset = 1;
   nxrmutex_unlock(&g_lcl_lock);
 }
 

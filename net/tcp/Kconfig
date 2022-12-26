@@ -194,6 +194,20 @@ config NET_TCP_WRBUFFER_DUMP
 
 endif # NET_TCP_WRITE_BUFFERS
 
+config NET_TCP_RECV_PACK
+	bool "Enable TCP/IP receive data in a continuous poll"
+	default y
+	---help---
+		This option will enable TCP/IP receive data into a continuous iob chain.
+		Fragmentation of network data will intensify iob consumption, if
+		the device receives a message storm of fragmented packets, the iob
+		cache will not be effectively used, this is not allowed on iot devices
+		since the resources of such devices are limited. Of course, this
+		also takes some disadvantages: data needs to be copied.
+		This option will brings some balance on resource-constrained devices,
+		enable this config to reduce the consumption of iob, the received iob
+		buffers will be merged into the contiguous iob chain.
+
 config NET_TCPBACKLOG
 	bool "TCP/IP backlog support"
 	default n
