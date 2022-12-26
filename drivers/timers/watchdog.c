@@ -436,7 +436,48 @@ static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
-  return 0;
+#ifdef CONFIG_WATCHDOG_MAGIC_V
+  FAR struct inode                *inode = filep->f_inode;
+  FAR struct watchdog_upperhalf_s *upper;
+  FAR struct watchdog_lowerhalf_s *lower;
+  int err = 0;
+  int i;
+
+  upper = inode->i_private;
+  DEBUGASSERT(upper != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
+
+  nxmutex_lock(&upper->lock);
+
+  for (i = 0; i < buflen; i++)
+    {
+      if (buffer[i] == 'V')
+        {
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR
+          watchdog_automonitor_stop(upper);
+#else
+          err = lower->ops->stop(lower);
+#endif
+          break;
+        }
+    }
+
+  if (i == buflen)
+    {
+      err = lower->ops->keepalive(lower);
+    }
+
+  nxmutex_unlock(&upper->lock);
+
+  if (err < 0)
+    {
+      return err;
+    }
+
+#endif
+
+  return buflen;
 }
 
 /****************************************************************************
