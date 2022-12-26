@@ -51,21 +51,6 @@ struct noteram_info_s
   uint8_t ni_buffer[CONFIG_DRIVER_NOTERAM_BUFSIZE];
 };
 
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-struct noteram_taskname_info_s
-{
-  uint8_t size;
-  uint8_t pid[2];
-  char name[1];
-};
-
-struct noteram_taskname_s
-{
-  int buffer_used;
-  char buffer[CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE];
-};
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -104,10 +89,6 @@ static struct noteram_info_s g_noteram_info =
 #endif
 };
 
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-static struct noteram_taskname_s g_noteram_taskname;
-#endif
-
 static const struct note_driver_ops_s g_noteram_ops =
 {
   noteram_add
@@ -129,170 +110,6 @@ struct note_driver_s g_noteram_driver =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: noteram_find_taskname
- *
- * Description:
- *   Find task name info corresponding to the specified PID
- *
- * Input Parameters:
- *   PID - Task ID
- *
- * Returned Value:
- *   Pointer to the task name info
- *   If the corresponding info doesn't exist in the buffer, NULL is returned.
- *
- ****************************************************************************/
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-static FAR struct noteram_taskname_info_s *noteram_find_taskname(pid_t pid)
-{
-  int n;
-  FAR struct noteram_taskname_info_s *ti;
-
-  for (n = 0; n < g_noteram_taskname.buffer_used; )
-    {
-      ti = (FAR struct noteram_taskname_info_s *)
-            &g_noteram_taskname.buffer[n];
-      if (ti->pid[0] + (ti->pid[1] << 8) == pid)
-        {
-          return ti;
-        }
-
-      n += ti->size;
-    }
-
-  return NULL;
-}
-#endif
-
-/****************************************************************************
- * Name: noteram_record_taskname
- *
- * Description:
- *   Record the task name info of the specified task
- *
- * Input Parameters:
- *   PID - Task ID
- *   name - task name
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-static void noteram_record_taskname(pid_t pid, const char *name)
-{
-  FAR struct noteram_taskname_info_s *ti;
-  size_t tilen;
-  size_t namelen;
-
-  namelen = strlen(name);
-  DEBUGASSERT(namelen <= CONFIG_TASK_NAME_SIZE);
-  tilen = sizeof(struct noteram_taskname_info_s) + namelen;
-  DEBUGASSERT(tilen <= UCHAR_MAX);
-
-  if (g_noteram_taskname.buffer_used + tilen >
-      CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE)
-    {
-      /* No space in the buffer - ignored */
-
-      return;
-    }
-
-  ti = (FAR struct noteram_taskname_info_s *)
-        &g_noteram_taskname.buffer[g_noteram_taskname.buffer_used];
-  ti->size = tilen;
-  ti->pid[0] = pid & 0xff;
-  ti->pid[1] = (pid >> 8) & 0xff;
-  strlcpy(ti->name, name, namelen + 1);
-  g_noteram_taskname.buffer_used += tilen;
-}
-#endif
-
-/****************************************************************************
- * Name: noteram_remove_taskname
- *
- * Description:
- *   Remove the task name info corresponding to the specified PID
- *
- * Input Parameters:
- *   PID - Task ID
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-static void noteram_remove_taskname(pid_t pid)
-{
-  FAR struct noteram_taskname_info_s *ti;
-  size_t tilen;
-  char *src;
-  int sindex;
-
-  ti = noteram_find_taskname(pid);
-  if (ti == NULL)
-    {
-      return;
-    }
-
-  tilen = ti->size;
-  src = (char *)ti + tilen;
-  sindex = src - g_noteram_taskname.buffer;
-
-  memcpy(ti, src, g_noteram_taskname.buffer_used - sindex);
-  g_noteram_taskname.buffer_used -= tilen;
-}
-#endif
-
-/****************************************************************************
- * Name: noteram_get_taskname
- *
- * Description:
- *   Get the task name string of the specified PID
- *
- * Input Parameters:
- *   PID - Task ID
- *
- * Returned Value:
- *   Pointer to the task name string
- *   If the corresponding name doesn't exist in the buffer, NULL is returned.
- *
- ****************************************************************************/
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-static const char *noteram_get_taskname(pid_t pid)
-{
-  irqstate_t irq_mask;
-  const char *ret = NULL;
-  FAR struct noteram_taskname_info_s *ti;
-  FAR struct tcb_s *tcb;
-
-  irq_mask = enter_critical_section();
-
-  ti = noteram_find_taskname(pid);
-  if (ti != NULL)
-    {
-      ret = ti->name;
-    }
-  else
-    {
-      tcb = nxsched_get_tcb(pid);
-      if (tcb != NULL)
-        {
-          noteram_record_taskname(pid, tcb->name);
-          ret = tcb->name;
-        }
-    }
-
-  leave_critical_section(irq_mask);
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Name: noteram_buffer_clear
@@ -321,10 +138,6 @@ static void noteram_buffer_clear(void)
     {
       g_noteram_info.ni_overwrite = NOTERAM_MODE_OVERWRITE_DISABLE;
     }
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-  g_noteram_taskname.buffer_used = 0;
-#endif
 
   leave_critical_section(flags);
 }
@@ -441,27 +254,6 @@ static void noteram_remove(void)
 
   length = g_noteram_info.ni_buffer[tail];
   DEBUGASSERT(length <= noteram_length());
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-  if (g_noteram_info.ni_buffer[noteram_next(tail, 1)] == NOTE_STOP)
-    {
-      uint8_t nc_pid[2];
-
-      /* The name of the task is no longer needed because the task is deleted
-       * and the corresponding notes are lost.
-       */
-
-#ifdef CONFIG_SMP
-      nc_pid[0] = g_noteram_info.ni_buffer[noteram_next(tail, 4)];
-      nc_pid[1] = g_noteram_info.ni_buffer[noteram_next(tail, 5)];
-#else
-      nc_pid[0] = g_noteram_info.ni_buffer[noteram_next(tail, 3)];
-      nc_pid[1] = g_noteram_info.ni_buffer[noteram_next(tail, 4)];
-#endif
-
-      noteram_remove_taskname(nc_pid[0] + (nc_pid[1] << 8));
-    }
-#endif
 
   /* Increment the tail index to remove the entire note from the circular
    * buffer.
@@ -690,7 +482,7 @@ static ssize_t noteram_read(FAR struct file *filep,
  * Name: noteram_ioctl
  ****************************************************************************/
 
-static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   int ret = -ENOSYS;
 
@@ -742,7 +534,7 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
+#ifdef NOTERAM_GETTASKNAME
       /* NOTERAM_GETTASKNAME
        *      - Get task name string
        *        Argument: A writable pointer to struct note_get_taskname_s
@@ -752,28 +544,16 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTERAM_GETTASKNAME:
         {
-          struct noteram_get_taskname_s *param;
-          const char *taskname;
+          FAR struct noteram_get_taskname_s *param;
 
-        if (arg == 0)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (arg == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-          param = (struct noteram_get_taskname_s *)arg;
-          taskname = noteram_get_taskname(param->pid);
-          if (taskname != NULL)
-            {
-              strlcpy(param->taskname, taskname, CONFIG_TASK_NAME_SIZE + 1);
-              param->taskname[CONFIG_TASK_NAME_SIZE] = '\0';
-              ret = 0;
-            }
-          else
-            {
-              param->taskname[0] = '\0';
-              ret = -ESRCH;
-            }
+          param = (FAR struct noteram_get_taskname_s *)arg;
+          ret = note_get_taskname(param->pid, param->taskname);
         }
         break;
 #endif
@@ -824,22 +604,6 @@ static void noteram_add(FAR struct note_driver_s *drv,
       up_irq_restore(flags);
       return;
     }
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-  /* Record the name if the new task was created */
-
-    {
-      FAR struct note_start_s *note_st;
-
-      note_st = (FAR struct note_start_s *)note;
-      if (note_st->nst_cmn.nc_type == NOTE_START)
-        {
-          noteram_record_taskname(note_st->nst_cmn.nc_pid[0] +
-                                  (note_st->nst_cmn.nc_pid[1] << 8),
-                                  note_st->nst_name);
-        }
-    }
-#endif
 
   /* Get the index to the head of the circular buffer */
 

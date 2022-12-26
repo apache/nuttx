@@ -130,4 +130,26 @@ int note_initialize(void);
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
+#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+
+/****************************************************************************
+ * Name: note_get_taskname
+ *
+ * Description:
+ *   Get the task name string of the specified PID
+ *
+ * Input Parameters:
+ *   PID - Task ID
+ *   name - Task name buffer
+ *          this buffer must be greater than CONFIG_TASK_NAME_SIZE + 1
+ *
+ * Returned Value:
+ *   Retrun OK if task name can be retrieved, otherwise -ESRCH
+ *
+ ****************************************************************************/
+
+int note_get_taskname(pid_t pid, FAR char *name);
+
+#endif /* CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0 */
+
 #endif /* __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H */

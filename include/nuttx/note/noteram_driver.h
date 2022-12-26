@@ -56,7 +56,7 @@
 #define NOTERAM_CLEAR           _NOTERAMIOC(0x01)
 #define NOTERAM_GETMODE         _NOTERAMIOC(0x02)
 #define NOTERAM_SETMODE         _NOTERAMIOC(0x03)
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
 #define NOTERAM_GETTASKNAME     _NOTERAMIOC(0x04)
 #endif
 #endif
@@ -75,7 +75,7 @@
 
 /* This is the type of the argument passed to the NOTERAM_GETTASKNAME ioctl */
 
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
+#ifdef NOTERAM_GETTASKNAME
 struct noteram_get_taskname_s
 {
   pid_t pid;

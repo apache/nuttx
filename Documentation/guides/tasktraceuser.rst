@@ -46,17 +46,17 @@ The following configurations are configurable parameters for trace.
 
   - If enabled, use higher resolution system timer for instrumentation.
 
-- ``CONFIG_DRIVER_NOTERAM_BUFSIZE``
-
-  - Specify the note buffer size in bytes.
-    Higher value can hold more note records, but consumes more kernel memory.
-
-- ``CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE``
+- ``CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE``
 
   - Specify the task name buffer size in bytes.
     The buffer is used to hold the name of the task during instrumentation.
     Trace dump can find and show a task name corresponding to given pid in the instrumentation data by using this buffer.
     If 0 is specified, this feature is disabled and trace dump shows only the name of the newly created task.
+
+- ``CONFIG_DRIVER_NOTERAM_BUFSIZE``
+
+  - Specify the note buffer size in bytes.
+    Higher value can hold more note records, but consumes more kernel memory.
 
 - ``CONFIG_DRIVER_NOTERAM_DEFAULT_NOOVERWRITE``
 
