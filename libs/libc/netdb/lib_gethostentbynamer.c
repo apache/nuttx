@@ -89,7 +89,7 @@ static int lib_numeric_address(FAR const char *name,
   FAR struct hostent_info_s *info;
   FAR char *ptr;
   socklen_t addrlen;
-  int namelen;
+  size_t namelen;
   int ret;
 
   /* Verify that we have a buffer big enough to get started (it still may not
@@ -320,7 +320,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent_s *host,
   socklen_t addrlen;
   int naddr;
   int addrtype;
-  int namelen;
+  size_t namelen;
   int ret;
   int i;
 
@@ -466,7 +466,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
   socklen_t addrlen;
   int naddr;
   int addrtype;
-  int namelen;
+  size_t namelen;
   int ret;
   int i;
 

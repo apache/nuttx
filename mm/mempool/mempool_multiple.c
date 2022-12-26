@@ -91,7 +91,7 @@ mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
 int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
                           FAR const char *name)
 {
-  int i;
+  size_t i;
 
   DEBUGASSERT(mpool != NULL && mpool->pools != NULL);
 
@@ -359,7 +359,7 @@ void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
 
 int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
 {
-  int i;
+  size_t i;
 
   DEBUGASSERT(mpool != NULL);
 
