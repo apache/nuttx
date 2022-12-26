@@ -122,6 +122,7 @@ int swcr_encdec(FAR struct cryptop *crp, FAR struct cryptodesc *crd,
 
   i = crd->crd_len;
 
+  buf = buf + crd->crd_skip;
   while (i > 0)
     {
       bcopy(buf, blk, exf->blocksize);
@@ -219,7 +220,7 @@ int swcr_authcompute(FAR struct cryptop *crp,
     }
 
   axf = sw->sw_axf;
-  err = axf->update(ctx, (FAR uint8_t *)buf, crd->crd_len);
+  err = axf->update(ctx, (FAR uint8_t *)buf + crd->crd_skip, crd->crd_len);
 
   if (err)
     {
