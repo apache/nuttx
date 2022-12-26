@@ -16,6 +16,18 @@ config DRIVER_NOTE_MAX
 	---help---
 		sched_note supports the maximum number of drivers
 
+config DRIVER_NOTE_TASKNAME_BUFSIZE
+	int "Note task name buffer size"
+	default 256 if TASK_NAME_SIZE > 0
+	default 0 if TASK_NAME_SIZE = 0
+	---help---
+		The size of the in-memory task name buffer (in bytes).
+		The buffer is used to hold the name of the task during instrumentation.
+		Trace dump can find and show a task name corresponding to given pid in
+		the instrumentation data by using this buffer.
+		If 0 is specified, this feature is disabled and trace dump shows only
+		the name of the newly created task.
+
 choice
 	prompt "Note driver selection"
 	default DRIVER_NOTERAM
@@ -78,19 +90,6 @@ config DRIVER_NOTERAM_BUFSIZE
 	default 2048
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
-
-config DRIVER_NOTERAM_TASKNAME_BUFSIZE
-	int "Note RAM task name buffer size"
-	depends on DRIVER_NOTERAM
-	default 256 if TASK_NAME_SIZE > 0
-	default 0 if TASK_NAME_SIZE = 0
-	---help---
-		The size of the in-memory task name buffer (in bytes).
-		The buffer is used to hold the name of the task during instrumentation.
-		Trace dump can find and show a task name corresponding to given pid in
-		the instrumentation data by using this buffer.
-		If 0 is specified, this feature is disabled and trace dump shows only
-		the name of the newly created task.
 
 config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
 	bool "Disable overwrite by default"
