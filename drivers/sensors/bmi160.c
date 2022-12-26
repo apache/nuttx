@@ -307,7 +307,7 @@ static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
 
   msg[0].frequency = priv->freq;
   msg[0].addr      = priv->addr;
-  msg[0].flags     = 0;
+  msg[0].flags     = I2C_M_NOSTOP;
   msg[0].buffer    = &regaddr;
   msg[0].length    = 1;
 
@@ -426,7 +426,7 @@ static uint16_t bmi160_getreg16(FAR struct bmi160_dev_s *priv,
 
   msg[0].frequency = priv->freq;
   msg[0].addr      = priv->addr;
-  msg[0].flags     = 0;
+  msg[0].flags     = I2C_M_NOSTOP;
   msg[0].buffer    = &regaddr;
   msg[0].length    = 1;
 
@@ -486,7 +486,7 @@ static void bmi160_getregs(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 
   msg[0].frequency = priv->freq;
   msg[0].addr      = priv->addr;
-  msg[0].flags     = 0;
+  msg[0].flags     = I2C_M_NOSTOP;
   msg[0].buffer    = &regaddr;
   msg[0].length    = 1;
 
