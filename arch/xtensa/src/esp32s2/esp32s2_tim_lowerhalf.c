@@ -153,6 +153,8 @@ static int esp32s2_timer_handler(int irq, void *context, void *arg)
     (struct esp32s2_timer_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
+  ESP32S2_TIM_ACKINT(priv->tim);        /* Clear the Interrupt */
+
   if (priv->callback(&next_interval_us, priv->upper))
     {
       if (next_interval_us > 0)
@@ -168,7 +170,6 @@ static int esp32s2_timer_handler(int irq, void *context, void *arg)
     }
 
   ESP32S2_TIM_SETALRM(priv->tim, true); /* Re-enables the alarm */
-  ESP32S2_TIM_ACKINT(priv->tim);        /* Clear the Interrupt */
   return OK;
 }
 
