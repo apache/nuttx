@@ -41,6 +41,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
@@ -53,6 +54,7 @@
 #include "a64_tcon0.h"
 #include "pinephone_lcd.h"
 #include "pinephone_pmic.h"
+#include "pinephone_display.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,8 +79,51 @@
 #define FB1_HEIGHT   600
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int pinephone_getvideoinfo(struct fb_vtable_s *vtable,
+                                  struct fb_videoinfo_s *vinfo);
+
+static int pinephone_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                                  struct fb_planeinfo_s *pinfo);
+
+static int pinephone_getoverlayinfo(struct fb_vtable_s *vtable,
+                                    int overlayno,
+                                    struct fb_overlayinfo_s *oinfo);
+
+static int pinephone_settransp(struct fb_vtable_s *vtable,
+                               const struct fb_overlayinfo_s *oinfo);
+
+static int pinephone_setchromakey(struct fb_vtable_s *vtable,
+                                  const struct fb_overlayinfo_s *oinfo);
+
+static int pinephone_setcolor(struct fb_vtable_s *vtable,
+                              const struct fb_overlayinfo_s *oinfo);
+
+static int pinephone_setblank(struct fb_vtable_s *vtable,
+                              const struct fb_overlayinfo_s *oinfo);
+
+static int pinephone_setarea(struct fb_vtable_s *vtable,
+                             const struct fb_overlayinfo_s *oinfo);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Vtable for Frame Buffer Operations */
+
+static struct fb_vtable_s g_pinephone_vtable =
+{
+  .getvideoinfo    = pinephone_getvideoinfo,
+  .getplaneinfo    = pinephone_getplaneinfo,
+  .getoverlayinfo  = pinephone_getoverlayinfo,
+  .settransp       = pinephone_settransp,
+  .setchromakey    = pinephone_setchromakey,
+  .setcolor        = pinephone_setcolor,
+  .setblank        = pinephone_setblank,
+  .setarea         = pinephone_setarea
+};
 
 /* Frame Buffers for Display Engine *****************************************/
 
@@ -196,130 +241,6 @@ static struct fb_overlayinfo_s g_pinephone_overlays[2] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: test_pattern
- *
- * Description:
- *   Fill the 3 Frame Buffers with a Test Pattern.  Should be called after
- *   Display Engine is Enabled, or the rendered image will have missing
- *   rows.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void test_pattern(void)
-{
-  int i;
-  int x;
-  int y;
-  const int fb0_len = sizeof(g_pinephone_fb0) / sizeof(g_pinephone_fb0[0]);
-  const int fb1_len = sizeof(g_pinephone_fb1) / sizeof(g_pinephone_fb1[0]);
-
-  /* Zero the Framebuffers */
-
-  memset(g_pinephone_fb0, 0, sizeof(g_pinephone_fb0));
-  memset(g_pinephone_fb1, 0, sizeof(g_pinephone_fb1));
-  memset(g_pinephone_fb2, 0, sizeof(g_pinephone_fb2));
-
-  /* Init Framebuffer 0:
-   * Fill with Blue, Green and Red
-   */
-
-  for (i = 0; i < fb0_len; i++)
-    {
-      /* Colours are in XRGB 8888 format */
-
-      if (i < fb0_len / 4)
-        {
-          /* Blue for top quarter */
-
-          g_pinephone_fb0[i] = 0x80000080;
-        }
-      else if (i < fb0_len / 2)
-        {
-          /* Green for next quarter */
-
-          g_pinephone_fb0[i] = 0x80008000;
-        }
-      else
-        {
-          /* Red for lower half */
-
-          g_pinephone_fb0[i] = 0x80800000;
-        }
-
-      /* Fixes missing rows in the rendered image, not sure why */
-
-      ARM64_DMB();
-      ARM64_DSB();
-      ARM64_ISB();
-    }
-
-  /* Init Framebuffer 1:
-   * Fill with Semi-Transparent White
-   */
-
-  for (i = 0; i < fb1_len; i++)
-    {
-      /* Semi-Transparent White in ARGB 8888 format */
-
-      g_pinephone_fb1[i] = 0x40ffffff;
-
-      /* Fixes missing rows in the rendered image, not sure why */
-
-      ARM64_DMB();
-      ARM64_DSB();
-      ARM64_ISB();
-    }
-
-  /* Init Framebuffer 2:
-   * Fill with Semi-Transparent Green Circle
-   */
-
-  for (y = 0; y < PANEL_HEIGHT; y++)
-    {
-      for (x = 0; x < PANEL_WIDTH; x++)
-        {
-          /* Get pixel index */
-
-          const int p = (y * PANEL_WIDTH) + x;
-
-          /* Shift coordinates so that centre of screen is (0,0) */
-
-          const int half_width  = PANEL_WIDTH  / 2;
-          const int half_height = PANEL_HEIGHT / 2;
-          const int x_shift = x - half_width;
-          const int y_shift = y - half_height;
-
-          /* If x^2 + y^2 < radius^2, set to Semi-Transparent Green */
-
-          if (x_shift*x_shift + y_shift*y_shift < half_width*half_width)
-            {
-              /* Semi-Transparent Green in ARGB 8888 Format */
-
-              g_pinephone_fb2[p] = 0x80008000;
-            }
-          else  /* Otherwise set to Transparent Black */
-            {
-              /* Transparent Black in ARGB 8888 Format */
-
-              g_pinephone_fb2[p] = 0x00000000;
-            }
-
-          /* Fixes missing rows in the rendered image, not sure why */
-
-          ARM64_DMB();
-          ARM64_DSB();
-          ARM64_ISB();
-        }
-    }
-}
-
-/****************************************************************************
  * Name: render_framebuffers
  *
  * Description:
@@ -418,13 +339,263 @@ static int render_framebuffers(void)
       return ret;
     }
 
-  /* Fill Frame Buffers with Test Pattern. Should be called after
-   * Display Engine is Enabled, or the rendered image will have
-   * missing rows.
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pinephone_getvideoinfo
+ *
+ * Description:
+ *   Get the videoinfo for the framebuffer. (ioctl Entrypoint:
+ *   FBIOGET_VIDEOINFO)
+ *
+ * Input Parameters:
+ *   vtable - Framebuffer driver object
+ *   vinfo  - Returned videoinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_getvideoinfo(struct fb_vtable_s *vtable,
+                                  struct fb_videoinfo_s *vinfo)
+{
+  static int stage = 0;
+
+  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable &&
+              vinfo != NULL);
+
+  /* Copy and return the videoinfo object */
+
+  memcpy(vinfo, &g_pinephone_video, sizeof(struct fb_videoinfo_s));
+
+  /* Keep track of the stages during startup:
+   * Stage 0: Initialize driver at startup
+   * Stage 1: First call by apps
+   * Stage 2: Subsequent calls by apps
+   * We erase the framebuffers at stages 0 and 1. This allows the
+   * Test Pattern to be displayed for as long as possible before erasure.
    */
 
-  test_pattern();
+  if (stage < 2)
+    {
+      stage++;
+      memset(g_pinephone_fb0, 0, sizeof(g_pinephone_fb0));
+      memset(g_pinephone_fb1, 0, sizeof(g_pinephone_fb1));
+      memset(g_pinephone_fb2, 0, sizeof(g_pinephone_fb2));
+    }
 
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pinephone_getplaneinfo
+ *
+ * Description:
+ *   Get the planeinfo for the framebuffer. (ioctl Entrypoint:
+ *   FBIOGET_PLANEINFO)
+ *
+ * Input Parameters:
+ *   vtable - Framebuffer driver object
+ *   pinfo  - Returned planeinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                                  struct fb_planeinfo_s *pinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable);
+  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+
+  /* Copy and return the planeinfo object */
+
+  if (planeno == 0)
+    {
+      memcpy(pinfo, &g_pinephone_plane, sizeof(struct fb_planeinfo_s));
+      return OK;
+    }
+
+  gerr("ERROR: Returning EINVAL\n");
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: pinephone_getoverlayinfo
+ *
+ * Description:
+ *   Get the overlayinfo for the framebuffer. (ioctl Entrypoint:
+ *   FBIOGET_OVERLAYINFO)
+ *
+ * Input Parameters:
+ *   vtable    - Framebuffer driver object
+ *   overlayno - Overlay number
+ *   oinfo     - Returned overlayinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_getoverlayinfo(struct fb_vtable_s *vtable,
+                                    int overlayno,
+                                    struct fb_overlayinfo_s *oinfo)
+{
+  const int overlay_len = sizeof(g_pinephone_overlays) /
+                          sizeof(g_pinephone_overlays[0]);
+
+  ginfo("vtable=%p overlay=%d oinfo=%p\n", vtable, overlayno, oinfo);
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable);
+
+  /* Copy and return the overlayinfo object */
+
+  if (overlayno >= 0 && overlayno < overlay_len)
+    {
+      struct fb_overlayinfo_s *overlay = &g_pinephone_overlays[overlayno];
+
+      memcpy(oinfo, overlay, sizeof(struct fb_overlayinfo_s));
+      return OK;
+    }
+
+  gerr("ERROR: Returning EINVAL\n");
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: pinephone_settransp
+ *
+ * Description:
+ *   Set the overlay transparency for the framebuffer. (ioctl Entrypoint:
+ *   FBIOSET_TRANSP)
+ *
+ * Input Parameters:
+ *   vtable    - Framebuffer driver object
+ *   oinfo     - overlayinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_settransp(struct fb_vtable_s *vtable,
+                               const struct fb_overlayinfo_s *oinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable);
+  ginfo("vtable=%p, overlay=%d, transp=%02x, transp_mode=%02x\n", vtable,
+        oinfo->overlay, oinfo->transp.transp, oinfo->transp.transp_mode);
+  gerr("Not implemented");
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pinephone_setchromakey
+ *
+ * Description:
+ *   Set the overlay chroma key for the framebuffer. (ioctl Entrypoint:
+ *   FBIOSET_CHROMAKEY)
+ *
+ * Input Parameters:
+ *   vtable    - Framebuffer driver object
+ *   oinfo     - overlayinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_setchromakey(struct fb_vtable_s *vtable,
+                                  const struct fb_overlayinfo_s *oinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable &&
+              oinfo != NULL);
+  ginfo("vtable=%p, overlay=%d, chromakey=%08x\n", vtable,
+        oinfo->overlay, oinfo->chromakey);
+  gerr("Not implemented");
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pinephone_setcolor
+ *
+ * Description:
+ *   Set the overlay color for the framebuffer. (ioctl Entrypoint:
+ *   FBIOSET_COLOR)
+ *
+ * Input Parameters:
+ *   vtable    - Framebuffer driver object
+ *   oinfo     - overlayinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_setcolor(struct fb_vtable_s *vtable,
+                              const struct fb_overlayinfo_s *oinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable &&
+              oinfo != NULL);
+  ginfo("vtable=%p, overlay=%d, color=%08x\n",
+        vtable, oinfo->overlay, oinfo->color);
+  gerr("Not implemented");
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pinephone_setblank
+ *
+ * Description:
+ *   Set the framebuffer overlay to blank. (ioctl Entrypoint: FBIOSET_BLANK)
+ *
+ * Input Parameters:
+ *   vtable    - Framebuffer driver object
+ *   oinfo     - overlayinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_setblank(struct fb_vtable_s *vtable,
+                              const struct fb_overlayinfo_s *oinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable &&
+              oinfo != NULL);
+  ginfo("vtable=%p, overlay=%d, blank=%02x\n",
+        vtable, oinfo->overlay, oinfo->blank);
+  gerr("Not implemented");
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pinephone_setarea
+ *
+ * Description:
+ *   Set the overlay area for the framebuffer. (ioctl Entrypoint:
+ *   FBIOSET_AREA)
+ *
+ * Input Parameters:
+ *   vtable    - Framebuffer driver object
+ *   oinfo     - overlayinfo object
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_setarea(struct fb_vtable_s *vtable,
+                             const struct fb_overlayinfo_s *oinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable &&
+              oinfo != NULL);
+  ginfo("vtable=%p, overlay=%d, x=%d, y=%d, w=%d, h=%d\n", vtable,
+        oinfo->overlay, oinfo->sarea.x, oinfo->sarea.y, oinfo->sarea.w,
+        oinfo->sarea.h);
+  gerr("Not implemented");
   return OK;
 }
 
@@ -585,7 +756,7 @@ int up_fbinitialize(int display)
  * Name: up_fbgetvplane
  *
  * Description:
- *   Return a a reference to the framebuffer object for the specified video
+ *   Return a reference to the framebuffer object for the specified video
  *   plane of the specified plane.  Many OSDs support multiple planes of
  *   video.
  *
@@ -602,10 +773,13 @@ int up_fbinitialize(int display)
 
 struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
-  /* TODO: Implement up_fbgetvplane */
+  ginfo("vplane: %d\n", vplane);
 
   DEBUGASSERT(display == 0);
-  _err("up_fbgetvplane not implemented\n");
+  if (vplane == 0)
+    {
+      return &g_pinephone_vtable;
+    }
 
   return NULL;
 }
@@ -630,4 +804,128 @@ void up_fbuninitialize(int display)
   /* Uninitialize is not supported */
 
   UNUSED(display);
+}
+
+/****************************************************************************
+ * Name: pinephone_display_test_pattern
+ *
+ * Description:
+ *   Fill the 3 Frame Buffers with a Test Pattern.  Should be called after
+ *   Display Engine is Enabled, or the rendered image will have missing
+ *   rows.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pinephone_display_test_pattern(void)
+{
+  int i;
+  int x;
+  int y;
+  const int fb0_len = sizeof(g_pinephone_fb0) / sizeof(g_pinephone_fb0[0]);
+  const int fb1_len = sizeof(g_pinephone_fb1) / sizeof(g_pinephone_fb1[0]);
+
+  /* Zero the Framebuffers */
+
+  memset(g_pinephone_fb0, 0, sizeof(g_pinephone_fb0));
+  memset(g_pinephone_fb1, 0, sizeof(g_pinephone_fb1));
+  memset(g_pinephone_fb2, 0, sizeof(g_pinephone_fb2));
+
+  /* Init Framebuffer 0:
+   * Fill with Blue, Green and Red
+   */
+
+  for (i = 0; i < fb0_len; i++)
+    {
+      /* Colours are in XRGB 8888 format */
+
+      if (i < fb0_len / 4)
+        {
+          /* Blue for top quarter */
+
+          g_pinephone_fb0[i] = 0x80000080;
+        }
+      else if (i < fb0_len / 2)
+        {
+          /* Green for next quarter */
+
+          g_pinephone_fb0[i] = 0x80008000;
+        }
+      else
+        {
+          /* Red for lower half */
+
+          g_pinephone_fb0[i] = 0x80800000;
+        }
+
+      /* Fixes missing rows in the rendered image, not sure why */
+
+      ARM64_DMB();
+      ARM64_DSB();
+      ARM64_ISB();
+    }
+
+  /* Init Framebuffer 1:
+   * Fill with Semi-Transparent White
+   */
+
+  for (i = 0; i < fb1_len; i++)
+    {
+      /* Semi-Transparent White in ARGB 8888 format */
+
+      g_pinephone_fb1[i] = 0x40ffffff;
+
+      /* Fixes missing rows in the rendered image, not sure why */
+
+      ARM64_DMB();
+      ARM64_DSB();
+      ARM64_ISB();
+    }
+
+  /* Init Framebuffer 2:
+   * Fill with Semi-Transparent Green Circle
+   */
+
+  for (y = 0; y < PANEL_HEIGHT; y++)
+    {
+      for (x = 0; x < PANEL_WIDTH; x++)
+        {
+          /* Get pixel index */
+
+          const int p = (y * PANEL_WIDTH) + x;
+
+          /* Shift coordinates so that centre of screen is (0,0) */
+
+          const int half_width  = PANEL_WIDTH  / 2;
+          const int half_height = PANEL_HEIGHT / 2;
+          const int x_shift = x - half_width;
+          const int y_shift = y - half_height;
+
+          /* If x^2 + y^2 < radius^2, set to Semi-Transparent Green */
+
+          if (x_shift*x_shift + y_shift*y_shift < half_width*half_width)
+            {
+              /* Semi-Transparent Green in ARGB 8888 Format */
+
+              g_pinephone_fb2[p] = 0x80008000;
+            }
+          else  /* Otherwise set to Transparent Black */
+            {
+              /* Transparent Black in ARGB 8888 Format */
+
+              g_pinephone_fb2[p] = 0x00000000;
+            }
+
+          /* Fixes missing rows in the rendered image, not sure why */
+
+          ARM64_DMB();
+          ARM64_DSB();
+          ARM64_ISB();
+        }
+    }
 }
