@@ -195,28 +195,11 @@ void sim_buttonevent(int x, int y, int buttons)
 
   if (!pendown)
     {
-      /* Ignore the pend up if the pen was already up
-       * (CONTACT_NONE == pen up and  already reported.
-       *  CONTACT_UP == pen up, but not reported)
-       */
-
-      if (priv->contact == TOUCH_UP)
-        {
-          return;
-        }
-
-      /* Not yet reported */
-
       priv->contact = TOUCH_UP;
       sample.point[0].flags = TOUCH_UP | TOUCH_ID_VALID;
     }
   else
     {
-      /* Save the measurements */
-
-      sample.point[0].x = x;
-      sample.point[0].y = y;
-
       /* Note the availability of new measurements:
        * If this is the first (acknowledged) pen down report, then report
        * this as the first contact.  If flags == TOUCH_DOWN, it will be
@@ -243,6 +226,10 @@ void sim_buttonevent(int x, int y, int buttons)
         }
     }
 
+  /* Save the measurements */
+
+  sample.point[0].x         = x;
+  sample.point[0].y         = y;
   sample.npoints            = 1;
   sample.point[0].h         = 1;
   sample.point[0].w         = 1;
