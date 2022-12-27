@@ -34,6 +34,7 @@
 #include <nuttx/net/net.h>
 
 #include <arch/irq.h>
+#include <sys/stat.h>
 
 #include "utils/utils.h"
 #include "socket/socket.h"
@@ -241,6 +242,8 @@ int psock_local_connect(FAR struct socket *psock,
   FAR const char *unpath = unaddr->sun_path;
   FAR struct local_conn_s *conn = NULL;
   uint8_t type = LOCAL_TYPE_PATHNAME;
+  struct stat buf;
+  int ret;
 
   DEBUGASSERT(psock && psock->s_conn);
   client = (FAR struct local_conn_s *)psock->s_conn;
@@ -287,7 +290,7 @@ int psock_local_connect(FAR struct socket *psock,
               conn->lc_type == type && conn->lc_proto == SOCK_STREAM &&
               strncmp(conn->lc_path, unpath, UNIX_PATH_MAX - 1) == 0)
             {
-              int ret = OK;
+              ret = OK;
 
               /* Bind the address and protocol */
 
@@ -322,7 +325,8 @@ int psock_local_connect(FAR struct socket *psock,
     }
 
   net_unlock();
-  return -EADDRNOTAVAIL;
+  ret = nx_stat(unpath, &buf, 1);
+  return ret < 0 ? ret : -ECONNREFUSED;
 }
 
 #endif /* CONFIG_NET_LOCAL_STREAM */
