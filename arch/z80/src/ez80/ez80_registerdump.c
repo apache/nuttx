@@ -52,7 +52,7 @@ uintptr_t up_getusrsp(void)
 
 void up_dump_register(FAR void *dumpregs)
 {
-  FAR chipreg_t *regs = dumpregs ? dumpregs : g_current_regs;
+  FAR volatile chipreg_t *regs = dumpregs ? dumpregs : g_current_regs;
 
 #ifdef CONFIG_EZ80_Z80MODE
   _alert("AF: %04x  I: %04x\n",
