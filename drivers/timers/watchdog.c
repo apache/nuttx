@@ -36,6 +36,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/panic_notifier.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wdog.h>
@@ -75,6 +76,9 @@
 
 struct watchdog_upperhalf_s
 {
+  /* When a crash occurs, stop the watchdog */
+
+  struct notifier_block nb;
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
 #  if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
   FAR struct oneshot_lowerhalf_s *oneshot;
@@ -295,6 +299,24 @@ static void watchdog_automonitor_stop(FAR struct watchdog_upperhalf_s *upper)
     }
 }
 #endif
+
+static int wdog_notifier(FAR struct notifier_block *nb, unsigned long action,
+                         FAR void *data)
+{
+  FAR struct watchdog_upperhalf_s *upper =
+                                       (FAR struct watchdog_upperhalf_s *)nb;
+
+  if (action == PANIC_KERNEL)
+    {
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR
+      watchdog_automonitor_stop(upper);
+#else
+      return upper->lower->ops->stop(upper->lower);
+#endif
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: wdog_open
@@ -715,6 +737,9 @@ FAR void *watchdog_register(FAR const char *path,
   watchdog_automonitor_start(upper);
 #endif
 
+  upper->nb.notifier_call = wdog_notifier;
+  panic_notifier_chain_register(&upper->nb);
+
   return (FAR void *)upper;
 
 errout_with_path:
@@ -769,6 +794,7 @@ void watchdog_unregister(FAR void *handle)
   /* Unregister the watchdog timer device */
 
   unregister_driver(upper->path);
+  panic_notifier_chain_unregister(&upper->nb);
 
   /* Then free all of the driver resources */
 
