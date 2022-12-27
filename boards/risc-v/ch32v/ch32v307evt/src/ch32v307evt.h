@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/ch32v/ch32vevt/src/ch32v_boot.c
+ * boards/risc-v/ch32v/ch32vevb/src/bl602evb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,41 +18,16 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_CH32V_CH32VEVT_SRC_CH32VEVT_H
+#define __BOARDS_RISCV_CH32V_CH32VEVT_SRC_CH32VEVT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+int ch32v_bringup(void);
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ch32v_boardinitialize
- *
- * Description:
- *   All ch32v architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
- ****************************************************************************/
-
-void ch32v_boardinitialize(void)
-{
-}
+#endif /* __BOARDS_RISCV_CH32V_CH32VEVB_SRC_CH32VEVT_H */
 

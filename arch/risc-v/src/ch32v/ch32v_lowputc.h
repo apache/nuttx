@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/ch32v/ch32vevt/src/ch32v_boot.c
+ * arch/risc-v/src/bl602/bl602_lowputc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,41 +18,51 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_LOWPUTC_H
+#define __ARCH_RISCV_SRC_BL602_BL602_LOWPUTC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include "chip.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ch32v_boardinitialize
- *
- * Description:
- *   All ch32v architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
- ****************************************************************************/
-
-void ch32v_boardinitialize(void)
+struct uart_config_s
 {
-}
+  uint8_t  idx;       /* Uart idx */
+  uint32_t baud;      /* Configured baud */
+  uint8_t  iflow_ctl; /* Input flow control supported */
+  uint8_t  oflow_ctl; /* Output flow control supported. */
+  uint8_t  data_bits; /* Number of bits per word */
+  bool     stop_bits; /* true=2 stop bits; false=1 stop bit */
+  uint8_t  parity;    /* Parity selection:  0=none, 1=odd, 2=even */
+};
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+EXTERN void bl602_lowsetup(void);
+
+EXTERN void bl602_uart_configure(const struct uart_config_s *config);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_LOWPUTC_H */

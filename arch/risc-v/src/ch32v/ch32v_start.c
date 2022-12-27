@@ -206,9 +206,39 @@ void ch32v_main(void)
   /* Configure FPU */
 
   riscv_fpuconfig();
+
+  /* set interrupt vector */
+  // TODO: this might not be right, but it neeeds to be SOMETHING.
+
+//  asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
+
+  /* Configure the UART so we can get debug output */
+#if 1
+  ch32v_lowsetup();
+
+#ifdef USE_EARLYSERIALINIT
+  riscv_earlyserialinit();
+#endif
+
+  /* Do board initialization */
+
+  ch32v_boardinitialize();
+
+  /* Call nx_start() */
+
+  nx_start();
+#endif
+
 }
 
 uint32_t noinstrument_function boot2_get_flash_addr(void)
 {
 }
+void board_app_initialize() {assert(0);}
+void riscv_sigdeliver() {assert(0);}
+void nxsched_get_streams() {assert(0);}
+void up_timer_initialize() {assert(0);}
+void up_irqinitialize() {assert(0);}
+
+
 #endif // BOOGER

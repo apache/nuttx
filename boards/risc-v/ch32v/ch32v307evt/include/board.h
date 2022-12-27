@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/bl602/bl602evb/include/board.h
+ * boards/risc-v/ch32v/ch32v/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_BL602_BL602EVB_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_BL602_BL602EVB_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISCV_CH32V_CH32VEVB_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_CH32V_CH32VEVB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-/* Do not include BL602 header files here. */
+/* Do not include CH32V header files here. */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -109,11 +109,11 @@ extern "C"
  * Name: litex_boardinitialize
  ****************************************************************************/
 
-void bl602_boardinitialize(void);
+void ch32v_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISC_V_BL602_BL602EVB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RISC_V_CH32V_CH32VEVB_INCLUDE_BOARD_H */

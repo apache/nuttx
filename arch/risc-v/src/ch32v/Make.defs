@@ -28,9 +28,9 @@ HEAD_ASRC = ch32v_head.S
 # CHIP_CSRCS  = ch32v_allocateheap.c
 # CHIP_CSRCS += ch32v_irq.c ch32v_irq_dispatch.c
 CHIP_CSRCS += ch32v_irq_dispatch.c
-# CHIP_CSRCS += bl602_serial.c bl602_lowputc.c bl602_tim.c
-# CHIP_CSRCS += bl602_start.c bl602_timerisr.c bl602_efuse.c
-# CHIP_CSRCS += bl602_os_hal.c
+CHIP_CSRCS += ch32v_serial.c ch32v_lowputc.c ch32v_tim.c
+# CHIP_CSRCS += ch32v_start.c ch32v_timerisr.c ch32v_efuse.c
+# CHIP_CSRCS += ch32v_os_hal.c
 
 CHIP_CSRCS += ch32v_start.c
 
