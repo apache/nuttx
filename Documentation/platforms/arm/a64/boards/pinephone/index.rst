@@ -157,6 +157,7 @@ Peripheral              Support NOTES
 ======================= ======= =====
 Backlight                Yes
 Display Engine           Yes
+Frame Buffer             Yes
 LCD Controller (ST7703)  Yes
 LCD Panel (XBD599)       Yes
 MIPI D-PHY               Yes

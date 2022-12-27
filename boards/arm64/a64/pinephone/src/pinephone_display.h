@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/a64/pinephone/src/pinephone_bringup.c
+ * boards/arm64/a64/pinephone/src/pinephone_display.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,79 +18,35 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_DISPLAY_H
+#define __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_DISPLAY_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <syslog.h>
-
-#ifdef CONFIG_FS_PROCFS
-#  include <nuttx/fs/fs.h>
-#endif
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#ifdef CONFIG_VIDEO_FB
-#  include <nuttx/video/fb.h>
-#  include "pinephone_display.h"
-#endif
-
-#include "pinephone.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pinephone_bringup
+ * Name: pinephone_display_test_pattern
  *
  * Description:
- *   Bring up board features
+ *   Fill the 3 Frame Buffers with a Test Pattern.  Should be called after
+ *   Display Engine is Enabled, or the rendered image will have missing
+ *   rows.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-int pinephone_bringup(void)
-{
-  int ret;
+void pinephone_display_test_pattern(void);
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_VIDEO_FB
-  /* Initialize and register the framebuffer driver */
-
-  ret = fb_register(0, 0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
-    }
-
-  /* Render the Test Pattern */
-
-  pinephone_display_test_pattern();
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_DISPLAY_H */
