@@ -203,7 +203,7 @@ int swcr_authcompute(FAR struct cryptop *crp,
                      caddr_t buf)
 {
   unsigned char aalg[AALG_MAX_RESULT_LEN];
-  FAR const struct auth_hash *axf;
+  FAR const struct auth_hash *axf = sw->sw_axf;
   union authctx *ctx = sw->sw_ictx;
   union authctx tmp;
   int err;
@@ -219,7 +219,6 @@ int swcr_authcompute(FAR struct cryptop *crp,
       ctx = &tmp;
     }
 
-  axf = sw->sw_axf;
   err = axf->update(ctx, (FAR uint8_t *)buf + crd->crd_skip, crd->crd_len);
 
   if (err)
@@ -250,10 +249,10 @@ int swcr_authcompute(FAR struct cryptop *crp,
             break;
           }
 
-        axf->final(aalg, &ctx);
-        bcopy(sw->sw_octx, &ctx, axf->ctxsize);
-        axf->update(&ctx, aalg, axf->hashsize);
-        axf->final((FAR uint8_t *)crp->crp_mac, &ctx);
+        axf->final(aalg, ctx);
+        bcopy(sw->sw_octx, ctx, axf->ctxsize);
+        axf->update(ctx, aalg, axf->hashsize);
+        axf->final((FAR uint8_t *)crp->crp_mac, ctx);
         break;
     }
 
