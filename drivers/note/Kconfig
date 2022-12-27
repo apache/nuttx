@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config SCHED_INSTRUMENTATION
+menuconfig SCHED_INSTRUMENTATION
 	bool "System performance monitor hooks"
 	default n
 	select SCHED_SUSPENDSCHEDULER
@@ -23,28 +23,6 @@ config SCHED_INSTRUMENTATION
 			void sched_note_cpu_started(FAR struct tcb_s *tcb);
 
 if SCHED_INSTRUMENTATION
-
-config SCHED_INSTRUMENTATION_SWITCH
-	bool "Use note switch for instrumentation"
-	default n
-	---help---
-		Use note switch for instrumentation.
-
-			void sched_note_suspend(FAR struct tcb_s *tcb);
-			void sched_note_resume(FAR struct tcb_s *tcb);
-
-		If CONFIG_SMP is enabled, then these additional interfaces are
-		expected:
-
-			void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
-			void sched_note_cpu_paused(FAR struct tcb_s *tcb);
-			void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
-			void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
-
-		NOTE: These are internal OS interfaces and are called at very
-		critical locations in the OS. There is very little that can be
-		done in these interfaces.  For example, normal devices may not be
-		used; syslog output cannot be performed.
 
 config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
@@ -67,6 +45,59 @@ config SCHED_INSTRUMENTATION_CPUSET
 	depends on SMP && SCHED_INSTRUMENTATION_FILTER
 	---help---
 		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
+
+config SCHED_INSTRUMENTATION_HIRES
+	bool "Use Hi-Res RTC for instrumentation"
+	default n
+	---help---
+		Use higher resolution system timer for instrumentation.
+
+config SCHED_INSTRUMENTATION_FILTER
+	bool "Instrumenation filter"
+	default n
+	---help---
+		Enables the filter logic for the instrumentation. If this option
+		is enabled, the instrumentation data passed to sched_note_add()
+		can be filtered by syscall and IRQ number.
+		The filter logic can be configured by sched_note_filter APIs defined in
+		include/nuttx/sched_note.h.
+
+config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	hex "Default instrumentation filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default 0x3f
+	---help---
+		Default mode of the instrumentation filter logic.
+			Bit 0 = Enable instrumentation
+			Bit 1 = Enable switch instrumentation
+			Bit 2 = Enable syscall instrumentation
+			Bit 3 = Enable IRQ instrumentation
+			Bit 4 = Enable dump instrumentation
+			Bit 5 = Enable collecting syscall arguments
+
+menu "System performance monitor hooks choose"
+
+config SCHED_INSTRUMENTATION_SWITCH
+	bool "Use note switch for instrumentation"
+	default n
+	---help---
+		Use note switch for instrumentation.
+
+			void sched_note_suspend(FAR struct tcb_s *tcb);
+			void sched_note_resume(FAR struct tcb_s *tcb);
+
+		If CONFIG_SMP is enabled, then these additional interfaces are
+		expected:
+
+			void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_paused(FAR struct tcb_s *tcb);
+			void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
+
+		NOTE: These are internal OS interfaces and are called at very
+		critical locations in the OS. There is very little that can be
+		done in these interfaces.  For example, normal devices may not be
+		used; syslog output cannot be performed.
 
 config SCHED_INSTRUMENTATION_PREEMPTION
 	bool "Preemption monitor hooks"
@@ -130,40 +161,10 @@ config SCHED_INSTRUMENTATION_DUMP
 			void sched_note_printf(FAR const char *fmt, ...) printf_like(1, 2);
 			void sched_note_bprintf(uint32_t module, uint8_t event, FAR const char *fmt, ...);
 
-config SCHED_INSTRUMENTATION_HIRES
-	bool "Use Hi-Res RTC for instrumentation"
-	default n
-	---help---
-		Use higher resolution system timer for instrumentation.
+endmenu # "System performance monitor hooks choose"
 
-config SCHED_INSTRUMENTATION_FILTER
-	bool "Instrumenation filter"
-	default n
-	---help---
-		Enables the filter logic for the instrumentation. If this option
-		is enabled, the instrumentation data passed to sched_note_add()
-		can be filtered by syscall and IRQ number.
-		The filter logic can be configured by sched_note_filter APIs defined in
-		include/nuttx/sched_note.h.
-
-config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
-	hex "Default instrumentation filter mode"
-	depends on SCHED_INSTRUMENTATION_FILTER
-	default 0x3f
-	---help---
-		Default mode of the instrumentation filter logic.
-			Bit 0 = Enable instrumentation
-			Bit 1 = Enable switch instrumentation
-			Bit 2 = Enable syscall instrumentation
-			Bit 3 = Enable IRQ instrumentation
-			Bit 4 = Enable dump instrumentation
-			Bit 5 = Enable collecting syscall arguments
-
-endif # SCHED_INSTRUMENTATION
-
-menuconfig DRIVER_NOTE
+config DRIVER_NOTE
 	bool "Note Driver Support"
-	depends on SCHED_INSTRUMENTATION
 	default n
 
 if DRIVER_NOTE
@@ -185,6 +186,14 @@ config DRIVER_NOTE_TASKNAME_BUFSIZE
 		the instrumentation data by using this buffer.
 		If 0 is specified, this feature is disabled and trace dump shows only
 		the name of the newly created task.
+
+config DRIVER_NOTECTL
+	bool "Scheduler instrumentation filter control driver"
+	default n
+	depends on SCHED_INSTRUMENTATION_FILTER
+	---help---
+		If this option is selected, the instrumentation filter control device
+		/dev/notectl is provided.
 
 choice
 	prompt "Note driver selection"
@@ -258,12 +267,6 @@ config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
 		is full by default. This is useful to keep instrumentation data of the
 		beginning of a system boot.
 
-config DRIVER_NOTECTL
-	bool "Scheduler instrumentation filter control driver"
-	default n
-	depends on SCHED_INSTRUMENTATION_FILTER
-	---help---
-		If this option is selected, the instrumentation filter control device
-		/dev/notectl is provided.
+endif # DRIVER_NOTE
 
-endif
+endif # SCHED_INSTRUMENTATION
