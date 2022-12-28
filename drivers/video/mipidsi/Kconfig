@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig MIPI_DSI
+	bool "Dsi Driver Support"
+	default n
+	---help---
+		Enables building of a dsi generic driver.
+
+if MIPI_DSI
+
+config MIPI_DSI_DRIVER
+	bool "MIPI DSI Character Driver"
+	default n
+
+endif
+
