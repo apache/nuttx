@@ -74,7 +74,7 @@ int netdev_input(FAR struct net_driver_s *dev,
 
   /* Prepare iob buffer */
 
-  ret = netdev_iob_prepare(dev, false, 0);
+  ret = netdev_iob_prepare(dev, true, 0);
   if (ret != OK)
     {
       return ret;
