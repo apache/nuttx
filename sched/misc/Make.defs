@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-CSRCS += assert.c panic.c
+CSRCS += assert.c panic_notifier.c
 
 # Include init build support
 
