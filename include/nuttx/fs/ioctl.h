@@ -94,6 +94,7 @@
 #define _LTEBASE        (0x3600) /* LTE device ioctl commands */
 #define _VIDIOCBASE     (0x3700) /* Video device ioctl commands */
 #define _CELLIOCBASE    (0x3800) /* Cellular device ioctl commands */
+#define _MIPIDSIBASE    (0x3900) /* Mipidsi device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -620,6 +621,11 @@
 
 #define _CELLIOCVALID(c) (_IOC_TYPE(c)==_CELLIOCBASE)
 #define _CELLIOC(nr)     _IOC(_CELLIOCBASE,nr)
+
+/* mipidsi driver ioctl definitions *****************************************/
+
+#define _MIPIDSIIOCVALID(c)    (_IOC_TYPE(c)==_MIPIDSIBASE)
+#define _MIPIDSIIOC(nr)        _IOC(_MIPIDSIBASE,nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 

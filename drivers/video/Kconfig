@@ -322,5 +322,6 @@ config OV2640_REGDEBUG
 endif
 
 source "drivers/video/vnc/Kconfig"
+source "drivers/video/mipidsi/Kconfig"
 
 endif # DRIVERS_VIDEO
