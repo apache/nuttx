@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/video/Make.defs
+# drivers/video/mipidsi/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,53 +18,18 @@
 #
 ############################################################################
 
-# Include video drivers
+# Don't build anything if there is no mipi dsi support
 
-ifeq ($(CONFIG_DRIVERS_VIDEO),y)
+ifeq ($(CONFIG_MIPI_DSI),y)
 
-ifeq ($(CONFIG_VIDEO_FB),y)
-  CSRCS += fb.c
+CSRCS += mipi_dsi_device.c mipi_dsi_host.c mipi_dsi_packet.c
+
+ifeq ($(CONFIG_MIPI_DSI_DRIVER),y)
+CSRCS += mipi_dsi_device_driver.c mipi_dsi_host_driver.c
 endif
 
-ifeq ($(CONFIG_VIDEO_STREAM),y)
-  CSRCS += video.c video_framebuff.c
-endif
+DEPPATH += --dep-path video/mipidsi
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)video$(DELIM)mipidsi
+VPATH += :video/mipidsi
 
-# These video drivers depend on I2C support
-
-ifeq ($(CONFIG_I2C),y)
-
-ifeq ($(CONFIG_VIDEO_ISX012),y)
-  CSRCS += isx012.c
-endif
-
-ifeq ($(CONFIG_VIDEO_ISX019),y)
-  CSRCS += isx019.c
-endif
-
-ifeq ($(CONFIG_VIDEO_OV2640),y)
-  CSRCS += ov2640.c
-endif
-
-endif
-
-# These video drivers depend on SPI support
-
-ifeq ($(CONFIG_SPI),y)
-
-ifeq ($(CONFIG_VIDEO_MAX7456),y)
-  CSRCS += max7456.c
-endif
-
-endif
-
-include video/vnc/Make.defs
-include video/mipidsi/Make.defs
-
-# Include video driver build support
-
-DEPPATH += --dep-path video
-VPATH += :video
-CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)video
-
-endif
+endif  # CONFIG_MIPI_DSI
