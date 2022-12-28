@@ -118,7 +118,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
   iob_update_pktlen(dev->d_iob, IPv4_HDRLEN);
 
   iob_copyin(dev->d_iob, pstate->snd_buf,
-             pstate->snd_buflen, IPv4_HDRLEN, false);
+             pstate->snd_buflen, IPv4_HDRLEN, true);
 
   /* Initialize the IP header. */
 
