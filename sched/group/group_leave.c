@@ -156,6 +156,12 @@ static inline void group_release(FAR struct task_group_s *group)
   pthread_release(group);
 #endif
 
+#ifdef CONFIG_FILE_STREAM
+  /* Free resource held by the stream list */
+
+  lib_stream_release(group);
+#endif /* CONFIG_FILE_STREAM */
+
   /* Free all file-related resources now.  We really need to close files as
    * soon as possible while we still have a functioning task.
    */
@@ -163,12 +169,6 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Free resources held by the file descriptor list */
 
   files_releaselist(&group->tg_filelist);
-
-#ifdef CONFIG_FILE_STREAM
-  /* Free resource held by the stream list */
-
-  lib_stream_release(group);
-#endif /* CONFIG_FILE_STREAM */
 
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */
