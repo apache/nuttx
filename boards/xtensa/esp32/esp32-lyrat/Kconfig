@@ -6,13 +6,13 @@
 if ARCH_BOARD_ESP32_LYRAT
 
 config ESP32_TOUCH
-	bool "Touch Pads"
+	bool "Touch pads"
 	default n
 	---help---
 		Enable ESP32 touch pad support.
 
 config ESP32_TOUCH_FILTER
-	bool "Touch Pad IIR Filter"
+	bool "Touch pad IIR filter"
 	select ESP32_RT_TIMER
 	default n
 	depends on ESP32_TOUCH
