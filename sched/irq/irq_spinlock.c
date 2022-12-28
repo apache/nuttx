@@ -107,6 +107,34 @@ irqstate_t spin_lock_irqsave(spinlock_t *lock)
 }
 
 /****************************************************************************
+ * Name: spin_lock_irqsave_wo_note
+ ****************************************************************************/
+
+irqstate_t spin_lock_irqsave_wo_note(spinlock_t *lock)
+{
+  irqstate_t ret;
+  ret = up_irq_save();
+
+  if (NULL == lock)
+    {
+      int me = this_cpu();
+      if (0 == g_irq_spin_count[me])
+        {
+          spin_lock_wo_note(&g_irq_spin);
+        }
+
+      g_irq_spin_count[me]++;
+      DEBUGASSERT(0 != g_irq_spin_count[me]);
+    }
+  else
+    {
+      spin_lock_wo_note(lock);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: spin_unlock_irqrestore
  *
  * Description:
@@ -152,6 +180,31 @@ void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags)
   else
     {
       spin_unlock(lock);
+    }
+
+  up_irq_restore(flags);
+}
+
+/****************************************************************************
+ * Name: spin_lock_irqsave_wo_note
+ ****************************************************************************/
+
+void spin_unlock_irqrestore_wo_note(spinlock_t *lock, irqstate_t flags)
+{
+  if (NULL == lock)
+    {
+      int me = this_cpu();
+      DEBUGASSERT(0 < g_irq_spin_count[me]);
+      g_irq_spin_count[me]--;
+
+      if (0 == g_irq_spin_count[me])
+        {
+          spin_unlock_wo_note(&g_irq_spin);
+        }
+    }
+  else
+    {
+      spin_unlock_wo_note(lock);
     }
 
   up_irq_restore(flags);
