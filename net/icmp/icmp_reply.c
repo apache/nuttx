@@ -146,7 +146,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
 
       /* Re-prepare device buffer */
 
-      if (netdev_iob_prepare(dev, false, 0) != OK)
+      if (netdev_iob_prepare(dev, true, 0) != OK)
         {
           dev->d_len = 0;
           dev->d_iob = iob;
@@ -157,7 +157,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
       /* Copy ipv4 header to device buffer */
 
       if (iob_trycopyin(dev->d_iob, (FAR void *)ipv4,
-                        IPv4_HDRLEN, 0, false) != IPv4_HDRLEN)
+                        IPv4_HDRLEN, 0, true) != IPv4_HDRLEN)
         {
           dev->d_len = 0;
           netdev_iob_release(dev);
