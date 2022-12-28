@@ -452,6 +452,14 @@ config SIM_I2CBUS_LINUX
 
 endchoice
 
+config SIM_I2CBUS_ID
+	int "I2C host bus ID to attach to simulator"
+	default 0
+	depends on SIM_I2CBUS
+	---help---
+		This is the bus identifier that should be used by the host implementation to
+		attach to the simulator driver.
+
 endif
 
 config SIM_SPI
@@ -476,6 +484,14 @@ config SIM_SPI_LINUX
 		recommended to use a USB<>SPI device such as CH341A/B.
 
 endchoice
+
+config SIM_SPIDEV_NAME
+	string "the name of SPI host dev to attach to simulator"
+	default "/dev/spidev0.0"
+	depends on SIM_SPI
+	---help---
+		This is the name of the SPI device on the host implementation to
+		attach to the simulator driver.
 
 endif
 
