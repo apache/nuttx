@@ -522,6 +522,12 @@ case ${os} in
     rm -f /usr/local/bin/pydoc3 || :
     rm -f /usr/local/bin/python3 || :
     rm -f /usr/local/bin/python3-config || :
+    # same for python@3.11
+    rm -f /usr/local/bin/2to3-3.11 || :
+    rm -f /usr/local/bin/idle3.11 || :
+    rm -f /usr/local/bin/pydoc3.11 || :
+    rm -f /usr/local/bin/python3.11 || :
+    rm -f /usr/local/bin/python3.11-config || :
     # https://github.com/osx-cross/homebrew-avr/issues/205#issuecomment-760637996
     brew update --quiet
     ;;
