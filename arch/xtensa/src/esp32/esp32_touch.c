@@ -495,7 +495,7 @@ static void touch_set_voltage(struct touch_config_volt_s *volt)
 }
 
 /****************************************************************************
- * Name: touch_set_voltage
+ * Name: touch_set_meas_mode
  *
  * Description:
  *   Set the measurement mode for a given touch pad.

@@ -241,8 +241,15 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
         (((RTCIO_PIN_FUNC) & RTC_IO_TOUCH_PAD1_FUN_SEL_V) <<
         (rtc_reg_desc.func)));
 
-      resetbits(rtc_reg_desc.reg, rtc_reg_desc.pulldown);
-      resetbits(rtc_reg_desc.reg, rtc_reg_desc.pullup);
+      if (rtc_reg_desc.pulldown)
+        {
+          resetbits(rtc_reg_desc.reg, rtc_reg_desc.pulldown);
+        }
+
+      if (rtc_reg_desc.pullup)
+        {
+          resetbits(rtc_reg_desc.reg, rtc_reg_desc.pullup);
+        }
 
       if ((attr & PULLUP) != 0)
         {
