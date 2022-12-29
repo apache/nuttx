@@ -13,6 +13,7 @@ config PINEPHONE_LCD
 	select DRIVERS_VIDEO
 	select VIDEO_FB
 	select FB_OVERLAY
+	select FB_UPDATE
 	---help---
 		Select to enable support for LCD Display.
 
