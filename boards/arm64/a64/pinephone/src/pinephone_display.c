@@ -92,6 +92,9 @@ static int pinephone_getoverlayinfo(struct fb_vtable_s *vtable,
                                     int overlayno,
                                     struct fb_overlayinfo_s *oinfo);
 
+static int pinephone_updatearea(struct fb_vtable_s *vtable,
+                                const struct fb_area_s *area);
+
 static int pinephone_settransp(struct fb_vtable_s *vtable,
                                const struct fb_overlayinfo_s *oinfo);
 
@@ -117,6 +120,7 @@ static struct fb_vtable_s g_pinephone_vtable =
 {
   .getvideoinfo    = pinephone_getvideoinfo,
   .getplaneinfo    = pinephone_getplaneinfo,
+  .updatearea      = pinephone_updatearea,
   .getoverlayinfo  = pinephone_getoverlayinfo,
   .settransp       = pinephone_settransp,
   .setchromakey    = pinephone_setchromakey,
@@ -463,6 +467,49 @@ static int pinephone_getoverlayinfo(struct fb_vtable_s *vtable,
 
   gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: pinephone_updatearea
+ *
+ * Description:
+ *   Update the display when there is a change to the framebuffer. (ioctl
+ *   Entrypoint: FBIO_UPDATE)
+ *
+ * Input Parameters:
+ *   vtable - Framebuffer driver object
+ *   area   - Updated area of framebuffer
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int pinephone_updatearea(struct fb_vtable_s *vtable,
+                                const struct fb_area_s *area)
+{
+  int i;
+  uint8_t *fb = (uint8_t *)g_pinephone_fb0;
+  const size_t fbsize = sizeof(g_pinephone_fb0);
+
+  DEBUGASSERT(vtable != NULL && vtable == &g_pinephone_vtable &&
+              area != NULL);
+  ginfo("vtable=%p, area=%p\n", vtable, area);
+
+  /* Copy the entire framebuffer to itself, to fix the missing pixels.
+   * Not sure why this works.
+   */
+
+  for (i = 0; i < fbsize; i++)
+    {
+      /* Declare as volatile to prevent compiler optimization */
+
+      volatile uint8_t v = fb[i];
+
+      fb[i] = v;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
