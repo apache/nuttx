@@ -43,6 +43,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if CONFIG_S32K3XX_PROGMEM_SIZE > DFLASH_SIZE
+# error Progmem size too big
+#endif
+
+#if CONFIG_S32K3XX_PROGMEM_SIZE % 8 != 0
+# error Progmem must be a multiple of 8
+#endif
+
 #define min(a,b) \
   ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \
@@ -54,14 +62,13 @@
 
 uint32_t get_sector(uint32_t address)
 {
-  if ((address >= S32K3XX_PROGMEM_START_ADDR) &&
-      (address <= S32K3XX_PROGMEM_END_ADDR))
-    {
-      /* The address is from the data sectors */
+  DEBUGASSERT(((address >= S32K3XX_PROGMEM_START_ADDR) &&
+      (address <= S32K3XX_PROGMEM_END_ADDR)));
 
-      return ((address - (uint32_t)S32K3XX_PROGMEM_START_ADDR) /
+  /* The address is from the data sectors */
+
+  return ((address - (uint32_t)S32K3XX_PROGMEM_START_ADDR) /
               S32K3XX_PROGMEM_SECTOR_SIZE);
-    }
 }
 
 void data_sector_lock(uint32_t sector, uint32_t lock)
@@ -362,6 +369,10 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EINVAL;
     }
 
+  /* Address with or without flash offset */
+
+  addr = ((addr % S32K3XX_PROGMEM_START_ADDR) + S32K3XX_PROGMEM_START_ADDR);
+
   offset = addr % S32K3XX_PROGMEM_WRITE_SIZE;
   dest = addr - offset;
   words_to_write = ((count + offset) / 4);
@@ -392,6 +403,8 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
             {
               putreg32(*p_src++, S32K3XX_FMU_PD(i));
             }
+
+          dest += 4;
         }
 
       words_to_write = words_to_write - i;

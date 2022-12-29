@@ -1677,4 +1677,17 @@ config FS26_SPI_FREQUENCY
 
 endmenu
 
+
+menu "Progmem (Data-flash) Configuration"
+	depends on S32K3XX_PROGMEM
+
+config S32K3XX_PROGMEM_SIZE
+	int "Progmem size"
+	default 128
+	---help---
+		Size of the Data Flash data memory used as a
+		Memory-Technology-Device (MTD).
+
+endmenu
+
 endif # ARCH_CHIP_S32K3XX

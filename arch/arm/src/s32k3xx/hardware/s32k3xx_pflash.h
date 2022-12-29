@@ -213,7 +213,7 @@
 
 #define S32K3XX_FMU_MCR                              (S32K3XX_FMU_BASE + S32K3XX_FMU_MCR_OFFSET)
 #define S32K3XX_FMU_MCRS                             (S32K3XX_FMU_BASE + S32K3XX_FMU_MCRS_OFFSET)
-#define S32K3XX_FMU_PD(n)                            (S32K3XX_FMU_BASE + S32K3XX_FMU_PD_OFFSET + (n * 4))
+#define S32K3XX_FMU_PD(n)                            (S32K3XX_FMU_BASE + S32K3XX_FMU_PD_OFFSET + (n) * 4)
 
 /* PFLASH Register Bitfield Definitions *************************************/
 
