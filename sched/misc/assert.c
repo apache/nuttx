@@ -454,7 +454,7 @@ void _assert(FAR const char *filename, int linenum)
   fatal = true;
 #endif
 
-  panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK, NULL);
+  panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK, rtcb);
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
@@ -517,6 +517,7 @@ void _assert(FAR const char *filename, int linenum)
       /* Flush any buffered SYSLOG data */
 
       syslog_flush();
+      panic_notifier_call_chain(PANIC_KERNEL_FINAL, rtcb);
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
