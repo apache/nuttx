@@ -71,10 +71,12 @@
 #define note_spinlock(drv, tcb, spinlock, type)                              \
   ((drv)->ops->spinlock &&                                                   \
   ((drv)->ops->spinlock(drv, tcb, spinlock, type), true))
-#define note_syscall_enter(drv, nr)                                          \
-  ((drv)->ops->syscall_enter && ((drv)->ops->syscall_enter(drv, nr), true))
-#define note_syscall_leave(drv, nr)                                          \
-  ((drv)->ops->syscall_leave && ((drv)->ops->syscall_leave(drv, nr), true))
+#define note_syscall_enter(drv, nr, argc, ap)                                \
+  ((drv)->ops->syscall_enter &&                                              \
+  ((drv)->ops->syscall_enter(drv, nr, argc, ap), true))
+#define note_syscall_leave(drv, nr, result)                                  \
+  ((drv)->ops->syscall_leave &&                                              \
+  ((drv)->ops->syscall_leave(drv, nr, result), true))
 #define note_irqhandler(drv, irq, handler, enter)                            \
   ((drv)->ops->irqhandler &&                                                 \
   ((drv)->ops->irqhandler(drv, irq, handler, enter), true))
@@ -1184,13 +1186,18 @@ void sched_note_syscall_enter(int nr, int argc, ...)
     }
 #endif
 
+  va_start(ap, argc);
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (note_syscall_enter(*driver, nr))
+      va_list copy;
+      va_copy(copy, ap);
+      if (note_syscall_enter(*driver, nr, argc, &copy))
         {
+          va_end(copy);
           continue;
         }
 
+      va_end(copy);
       if ((*driver)->ops->add == NULL)
         {
           continue;
@@ -1210,23 +1217,21 @@ void sched_note_syscall_enter(int nr, int argc, ...)
 
           /* If needed, retrieve the given syscall arguments */
 
-          va_start(ap, argc);
-
           args = note.nsc_args;
           for (i = 0; i < argc; i++)
             {
-              arg = (uintptr_t)va_arg(ap, uintptr_t);
+              arg = (uintptr_t)va_arg(copy, uintptr_t);
               sched_note_flatten(args, &arg, sizeof(arg));
               args += sizeof(uintptr_t);
             }
-
-          va_end(ap);
         }
 
       /* Add the note to circular buffer */
 
       note_add(*driver, &note, length);
     }
+
+    va_end(ap);
 }
 
 void sched_note_syscall_leave(int nr, uintptr_t result)
@@ -1243,7 +1248,7 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
 
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (note_syscall_leave(*driver, nr))
+      if (note_syscall_leave(*driver, nr, result))
         {
           continue;
         }
