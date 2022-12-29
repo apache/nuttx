@@ -78,8 +78,10 @@ struct note_driver_ops_s
                         FAR volatile void *spinlock, int type);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-  CODE void (*syscall_enter)(FAR struct note_driver_s *drv, int nr);
-  CODE void (*syscall_leave)(FAR struct note_driver_s *drv, int nr);
+  CODE void (*syscall_enter)(FAR struct note_driver_s *drv,
+                             int nr, int argc, va_list *ap);
+  CODE void (*syscall_leave)(FAR struct note_driver_s *drv,
+                             int nr, uintptr_t result);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
   CODE void (*irqhandler)(FAR struct note_driver_s *drv, int irq,
