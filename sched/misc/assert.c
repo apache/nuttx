@@ -30,6 +30,7 @@
 #include <nuttx/tls.h>
 
 #include <nuttx/panic_notifier.h>
+#include <nuttx/reboot_notifier.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 
@@ -517,6 +518,8 @@ void _assert(FAR const char *filename, int linenum)
       /* Flush any buffered SYSLOG data */
 
       syslog_flush();
+
+      reboot_notifier_call_chain(SYS_HALT, NULL);
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);

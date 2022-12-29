@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/mutex.h>
 
 #include <debug.h>
 #include <errno.h>
@@ -41,6 +42,14 @@
 
 #define ATOMIC_NOTIFIER_HEAD(name) \
   struct atomic_notifier_head name = ATOMIC_NOTIFIER_INIT(name)
+
+#define BLOCKING_NOTIFIER_INIT(name) { \
+    NXMUTEX_INITIALIZER, \
+    NULL \
+  }
+
+#define BLOCKING_NOTIFIER_HEAD(name) \
+  struct blocking_notifier_head name = BLOCKING_NOTIFIER_INIT(name)
 
 /****************************************************************************
  * Public Type Definitions
@@ -60,6 +69,12 @@ struct notifier_block
 
 struct atomic_notifier_head
 {
+  FAR struct notifier_block *head;
+};
+
+struct blocking_notifier_head
+{
+  mutex_t mutex;
   FAR struct notifier_block *head;
 };
 
@@ -189,6 +204,58 @@ extern "C"
       flags = enter_critical_section(); \
       notifier_call_chain(nh->head, (val), (v), -1, NULL); \
       leave_critical_section(flags); \
+    } \
+  while(0)
+
+#define blocking_notifier_chain_register(nhead, nb) \
+  do \
+    { \
+      FAR struct blocking_notifier_head *nh = (nhead); \
+      if (nxmutex_lock(&nh->mutex) < 0) \
+        { \
+          break; \
+        } \
+      notifier_chain_register(nh->head, (nb), false); \
+      nxmutex_unlock(&nh->mutex);\
+    } \
+  while(0)
+
+#define blocking_notifier_chain_register_uniqueprio(nhead, nb) \
+  do \
+    { \
+      FAR struct blocking_notifier_head *nh = (nhead); \
+      if (nxmutex_lock(&nh->mutex) < 0) \
+        { \
+          break; \
+        } \
+      notifier_chain_register(nh->head, (nb), true); \
+      nxmutex_unlock(&nh->mutex);\
+    } \
+  while(0)
+
+#define blocking_notifier_chain_unregister(nhead, nb) \
+  do \
+    { \
+      FAR struct blocking_notifier_head *nh = (nhead); \
+      if (nxmutex_lock(&nh->mutex) < 0) \
+        { \
+          break; \
+        } \
+      notifier_chain_unregister(nh->head, (nb)); \
+      nxmutex_unlock(&nh->mutex);\
+    } \
+  while(0)
+
+#define blocking_notifier_call_chain(nhead, val, v) \
+  do \
+    { \
+      FAR struct blocking_notifier_head *nh = (nhead); \
+      if (nxmutex_lock(&nh->mutex) < 0) \
+        { \
+          break; \
+        } \
+      notifier_call_chain(nh->head, (val), (v), -1, NULL); \
+      nxmutex_unlock(&nh->mutex);\
     } \
   while(0)
 

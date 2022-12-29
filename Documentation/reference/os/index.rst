@@ -23,3 +23,4 @@ in other header files.
   paging.rst
   led.rst
   iob.rst
+  notifier.rst
