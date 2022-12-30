@@ -50,7 +50,7 @@ static void checkcorruption_handler(FAR struct mm_allocnode_s *node,
     {
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
 
-      assert(nodesize >= SIZEOF_MM_FREENODE);
+      assert(nodesize >= MM_MIN_CHUNK);
       assert(fnode->blink->flink == fnode);
       assert(SIZEOF_MM_NODE(fnode->blink) <= nodesize);
       assert(fnode->flink == NULL ||

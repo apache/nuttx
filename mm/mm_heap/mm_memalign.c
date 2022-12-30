@@ -54,7 +54,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   FAR struct mm_allocnode_s *node;
   uintptr_t rawchunk;
   uintptr_t alignedchunk;
-  size_t mask = alignment - 1;
+  size_t mask;
   size_t allocsize;
   size_t newsize;
 
@@ -84,16 +84,22 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * alignment of malloc, then just let malloc do the work.
    */
 
-  if (alignment <= MM_MIN_CHUNK)
+  if (alignment <= MM_ALIGN)
     {
       FAR void *ptr = mm_malloc(heap, size);
       DEBUGASSERT(ptr == NULL || ((uintptr_t)ptr) % alignment == 0);
       return ptr;
     }
+  else if (alignment < MM_MIN_CHUNK)
+    {
+      alignment = MM_MIN_CHUNK;
+    }
 
-  /* Adjust the size to account for (1) the size of the allocated node, (2)
-   * to make sure that it is an even multiple of our granule size, and to
-   * include the alignment amount.
+  mask = alignment - 1;
+
+  /* Adjust the size to account for (1) the size of the allocated node and
+   * (2) to make sure that it is aligned with MM_ALIGN and its size is at
+   * least MM_MIN_CHUNK.
    *
    * Notice that we increase the allocation size by twice the requested
    * alignment.  We do this so that there will be at least two valid
@@ -102,6 +108,11 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * NOTE:  These are sizes given to malloc and not chunk sizes. They do
    * not include SIZEOF_MM_ALLOCNODE.
    */
+
+  if (size < MM_MIN_CHUNK - OVERHEAD_MM_ALLOCNODE)
+    {
+      size = MM_MIN_CHUNK - OVERHEAD_MM_ALLOCNODE;
+    }
 
   newsize = MM_ALIGN_UP(size);         /* Make multiples of our granule size */
   allocsize = newsize + 2 * alignment; /* Add double full alignment size */
@@ -154,13 +165,6 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       next = (FAR struct mm_allocnode_s *)
         ((FAR char *)node + SIZEOF_MM_NODE(node));
 
-      /* Make sure that there is space to convert the preceding
-       * mm_allocnode_s into an mm_freenode_s.  I think that this should
-       * always be true
-       */
-
-      DEBUGASSERT(alignedchunk >= rawchunk + 8);
-
       newnode = (FAR struct mm_allocnode_s *)
         (alignedchunk - SIZEOF_MM_ALLOCNODE);
 
@@ -178,7 +182,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
        * alignment point.
        */
 
-      if (precedingsize < SIZEOF_MM_FREENODE)
+      if (precedingsize < MM_MIN_CHUNK)
         {
           alignedchunk += alignment;
           newnode       = (FAR struct mm_allocnode_s *)

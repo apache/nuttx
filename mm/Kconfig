@@ -61,6 +61,15 @@ config MM_KERNEL_HEAPSIZE
 		user-mode heap.  This value may need to be aligned to units of the
 		size of the smallest memory protection region.
 
+config MM_DFAULT_ALIGNMENT
+	int "Memory default alignment in bytes"
+	default 8
+	range 0 64
+	---help---
+		The memory default alignment in bytes, if this value is 0, the real
+		memory default alignment is equal to sizoef(uintptr), if this value
+		is not 0, this value must be 2^n and at least sizeof(uintptr).
+
 config MM_SMALL
 	bool "Small memory model"
 	default n

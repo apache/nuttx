@@ -51,7 +51,7 @@ void mm_addfreechunk(FAR struct mm_heap_s *heap,
   size_t nodesize = SIZEOF_MM_NODE(node);
   int ndx;
 
-  DEBUGASSERT(nodesize >= SIZEOF_MM_FREENODE);
+  DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
   DEBUGASSERT((node->size & MM_ALLOC_BIT) == 0);
 
   /* Convert the size to a nodelist index */

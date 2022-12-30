@@ -95,7 +95,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
     {
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
 
-      DEBUGASSERT(nodesize >= SIZEOF_MM_FREENODE);
+      DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
       DEBUGASSERT(fnode->blink->flink == fnode);
       DEBUGASSERT(SIZEOF_MM_NODE(fnode->blink) <= nodesize);
       DEBUGASSERT(fnode->flink == NULL ||
