@@ -87,11 +87,11 @@ struct pm_domain_s
 
 struct pm_global_s
 {
-  /* This mutex manages mutually exclusive access to the power management
+  /* This rmutex manages mutually exclusive access to the power management
    * registry.  It must be initialized to the value 1.
    */
 
-  mutex_t reglock;
+  rmutex_t reglock;
 
   /* registry is a doubly-linked list of registered power management
    * callback structures.  To ensure mutually exclusive access, this list
