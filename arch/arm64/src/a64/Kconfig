@@ -41,6 +41,30 @@ config A64_UART
 	---help---
 		Select to enable support for UART.
 
+config A64_RTWI
+	bool "Two-wire Master Controller R"
+	default n
+	---help---
+		Select to enable support for R_TWI.
+
+config A64_TWI0
+	bool "Two-wire Master Controller 0"
+	default n
+	---help---
+		Select to enable support for TWI0.
+
+config A64_TWI1
+	bool "Two-wire Master Controller 1"
+	default n
+	---help---
+		Select to enable support for TWI1.
+
+config A64_TWI2
+	bool "Two-wire Master Controller 2"
+	default n
+	---help---
+		Select to enable support for TWI2.
+
 endmenu # Allwinner A64 Peripheral Selection
 
 endif # ARCH_CHIP_A64

@@ -166,5 +166,6 @@ PIO                      Yes
 PMIC (AXP803)            Yes
 RSB                      Yes
 TCON0                    Yes
+TWI                      Yes
 UART                     Yes    Only UART0 is supported
 ======================= ======= =====
