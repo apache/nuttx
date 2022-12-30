@@ -116,8 +116,7 @@ errout:
 
 static void local_inout_poll_cb(FAR struct pollfd *fds)
 {
-  FAR struct pollfd **shandowfds = fds->priv;
-  FAR struct pollfd *originfds = (*shandowfds)->ptr;
+  FAR struct pollfd *originfds = fds->arg;
 
   poll_notify(&originfds, 1, fds->revents);
 }
@@ -215,13 +214,13 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
           shadowfds[0]         = *fds;
           shadowfds[0].fd      = 1; /* Does not matter */
           shadowfds[0].cb      = local_inout_poll_cb;
-          shadowfds[0].ptr     = fds;
+          shadowfds[0].arg     = fds;
           shadowfds[0].events &= ~POLLOUT;
 
           shadowfds[1]         = *fds;
           shadowfds[1].fd      = 0; /* Does not matter */
           shadowfds[1].cb      = local_inout_poll_cb;
-          shadowfds[1].ptr     = fds;
+          shadowfds[1].arg     = fds;
           shadowfds[1].events &= ~POLLIN;
 
           net_unlock();
