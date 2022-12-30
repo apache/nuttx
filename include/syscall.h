@@ -33,6 +33,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_LIB_SYSCALL
+#  ifndef UP_WRAPSYM
+#    define UP_WRAPSYM(s) __wrap_##s
+#  endif
+#  ifndef UP_REALSYM
+#    define UP_REALSYM(s) __real_##s
+#  endif
+#else
+#  define UP_WRAPSYM(s) s
+#  define UP_REALSYM(s) s
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
