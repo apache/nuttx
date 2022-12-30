@@ -25,6 +25,13 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <syslog.h>
+#ifdef CONFIG_I2C
+#  include <nuttx/i2c/i2c_master.h>
+#endif
+#include <nuttx/kmalloc.h>
+#ifdef CONFIG_MPU60X0_I2C
+#  include <nuttx/sensors/mpu60x0.h>
+#endif
 
 #ifdef CONFIG_FS_PROCFS
 #  include <nuttx/fs/fs.h>
@@ -39,7 +46,9 @@
 #  include "pinephone_display.h"
 #endif
 
+#include "a64_twi.h"
 #include "pinephone.h"
+#include "pinephone_pmic.h"
 
 /****************************************************************************
  * Public Functions
@@ -56,6 +65,13 @@
 int pinephone_bringup(void)
 {
   int ret;
+#ifdef CONFIG_I2C
+  int i2c_bus;
+  struct i2c_master_s *i2c;
+#ifdef CONFIG_MPU60X0_I2C
+  struct mpu_config_s *mpu_config;
+#endif
+#endif
 
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
@@ -89,6 +105,53 @@ int pinephone_bringup(void)
   /* Render the Test Pattern */
 
   pinephone_display_test_pattern();
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_A64_TWI1)
+  i2c_bus = 1;
+  i2c = a64_i2cbus_initialize(i2c_bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", i2c_bus);
+    }
+  else
+    {
+#if defined(CONFIG_SYSTEM_I2CTOOL)
+      ret = i2c_register(i2c, i2c_bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 i2c_bus, ret);
+        }
+#endif
+
+#ifdef CONFIG_MPU60X0_I2C
+      /* Init PMIC */
+
+      ret = pinephone_pmic_init();
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "Init PMIC failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Wait 15 milliseconds for power supply and power-on init */
+
+      up_mdelay(15);
+
+      mpu_config = kmm_zalloc(sizeof(struct mpu_config_s));
+      if (mpu_config == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to allocate mpu60x0 driver\n");
+        }
+      else
+        {
+          mpu_config->i2c = i2c;
+          mpu_config->addr = 0x68;
+          mpu60x0_register("/dev/imu0", mpu_config);
+        }
+#endif
+    }
 #endif
 
   UNUSED(ret);
