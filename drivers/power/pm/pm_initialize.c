@@ -46,7 +46,7 @@
 
 struct pm_global_s g_pmglobals =
 {
-  NXMUTEX_INITIALIZER
+  NXRMUTEX_INITIALIZER
 };
 
 /****************************************************************************
