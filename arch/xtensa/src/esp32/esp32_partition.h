@@ -43,6 +43,27 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Partition APP type and subtype */
+
+#define PARTITION_TYPE_APP                (0x00)
+#define PARTITION_SUBTYPE_FACTORY         (0x00)
+#define PARTITION_SUBTYPE_OTA_FLAG        (0x10)
+#define PARTITION_SUBTYPE_OTA_MASK        (0x0f)
+#define PARTITION_SUBTYPE_TEST            (0x20)
+
+/* Partition DATA type and subtype */
+
+#define PARTITION_TYPE_DATA               (0x01)
+#define PARTITION_SUBTYPE_DATA_OTA        (0x00)
+#define PARTITION_SUBTYPE_DATA_RF         (0x01)
+#define PARTITION_SUBTYPE_DATA_WIFI       (0x02)
+#define PARTITION_SUBTYPE_DATA_NVS_KEYS   (0x04)
+#define PARTITION_SUBTYPE_DATA_EFUSE_EM   (0x05)
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
