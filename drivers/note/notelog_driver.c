@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <syscall.h>
 #include <syslog.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
@@ -316,36 +315,6 @@ void sched_note_spinlock(FAR struct tcb_s *tcb,
          tcb, spinlock, msg);
 #endif
 #endif
-}
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-void sched_note_syscall_enter(int nr, int argc, ...)
-{
-  char buf[128];
-  FAR char *p = buf;
-  va_list ap;
-
-  va_start(ap, argc);
-  while (argc-- > 0)
-    {
-      if (argc)
-        {
-          p += sprintf(p, "%#"PRIxPTR", ", va_arg(ap, uintptr_t));
-        }
-      else
-        {
-          p += sprintf(p, "%#"PRIxPTR, va_arg(ap, uintptr_t));
-        }
-    }
-
-  va_end(ap);
-  syslog(LOG_INFO, "%s@%d ENTER %s\n", g_funcnames[nr], nr, buf);
-}
-
-void sched_note_syscall_leave(int nr, uintptr_t result)
-{
-  syslog(LOG_INFO, "%s@%d LEAVE %"PRIdPTR"\n", g_funcnames[nr], nr, result);
 }
 #endif
 
