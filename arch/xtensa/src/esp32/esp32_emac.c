@@ -1989,10 +1989,8 @@ static int emac_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
     }
 
   return ret;
-#else
-  return -EINVAL;
-#endif /* CONFIG_NETDEV_IOCTL */
 }
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Public Functions
