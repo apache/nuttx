@@ -244,7 +244,7 @@ class dump_log_file:
                     line = line[tmp.span()[1] :]
                 continue
 
-            tmp = re.search("stackdump:", line)
+            tmp = re.search("stack_dump:", line)
             if tmp is not None:
                 # find stackdump
                 line = line[tmp.span()[1] :]
