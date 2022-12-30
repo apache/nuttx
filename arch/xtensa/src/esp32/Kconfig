@@ -1860,10 +1860,15 @@ config ESP32_ETH_MDIOPIN
 	default 18
 	range 0 39
 
+config ESP32_ETH_ENABLE_PHY_RSTPIN
+	bool "Enable Reset PHY Pin"
+	default y
+
 config ESP32_ETH_PHY_RSTPIN
 	int "Reset PHY Pin"
 	default 5
 	range 0 39
+	depends on ESP32_ETH_ENABLE_PHY_RSTPIN
 
 config ESP32_ETH_PHY_ADDR
 	int "PHY address"

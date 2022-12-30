@@ -146,7 +146,9 @@
 
 /* Reset PHY chip pins */
 
-#define EMAC_PHYRST_PIN         (CONFIG_ESP32_ETH_PHY_RSTPIN)
+#ifdef CONFIG_ESP32_ETH_ENABLE_PHY_RSTPIN
+#  define EMAC_PHYRST_PIN       (CONFIG_ESP32_ETH_PHY_RSTPIN)
+#endif
 
 /* PHY chip address in SMI bus */
 
@@ -511,7 +513,9 @@ static void emac_init_gpio(void)
   esp32_gpio_matrix_out(EMAC_MDIO_PIN, EMAC_MDO_O_IDX, 0, 0);
   esp32_gpio_matrix_in(EMAC_MDIO_PIN, EMAC_MDI_I_IDX, 0);
 
+#ifdef CONFIG_ESP32_ETH_ENABLE_PHY_RSTPIN
   esp32_configgpio(EMAC_PHYRST_PIN, OUTPUT | PULLUP);
+#endif
 }
 
 /****************************************************************************
@@ -538,11 +542,14 @@ static int emac_config(void)
   uint32_t regval;
   uint8_t macaddr[6];
 
+#ifdef CONFIG_ESP32_ETH_ENABLE_PHY_RSTPIN
+
   /* Hardware reset PHY chip */
 
   esp32_gpiowrite(EMAC_PHYRST_PIN, false);
   nxsig_usleep(50);
   esp32_gpiowrite(EMAC_PHYRST_PIN, true);
+#endif
 
   /* Open hardware clock */
 
