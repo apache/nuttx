@@ -37,6 +37,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
+#include <nuttx/note/notelog_driver.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
@@ -160,8 +161,12 @@ static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
 FAR static struct note_driver_s *g_note_drivers[CONFIG_DRIVER_NOTE_MAX + 1] =
 {
 #ifdef CONFIG_DRIVER_NOTERAM
-  &g_noteram_driver
+  &g_noteram_driver,
 #endif
+#ifdef CONFIG_DRIVER_NOTELOG
+  &g_notelog_driver,
+#endif
+  NULL
 };
 
 #if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
