@@ -595,13 +595,7 @@ static void generate_wrapper(int nfixed, int nparms)
 
   /* Define macros to get wrapper symbol */
 
-  fprintf(stream, "#include <nuttx/arch.h>\n");
-  fprintf(stream, "#ifndef UP_WRAPSYM\n");
-  fprintf(stream, "#define UP_WRAPSYM(s) __wrap_##s\n");
-  fprintf(stream, "#endif\n");
-  fprintf(stream, "#ifndef UP_REALSYM\n");
-  fprintf(stream, "#define UP_REALSYM(s) __real_##s\n");
-  fprintf(stream, "#endif\n\n");
+  fprintf(stream, "#include <nuttx/arch.h>\n\n");
 
   if (g_parm[COND_INDEX][0] != '\0')
     {
