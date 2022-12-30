@@ -1456,7 +1456,7 @@ int esp32c3_spibus_uninitialize(struct spi_dev_s *dev)
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
   up_disable_irq(priv->config->irq);
-  esp32c3_free_cpuint(priv->config->periph, priv->cpuint);
+  esp32c3_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 #endif
 
