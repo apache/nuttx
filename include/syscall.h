@@ -33,6 +33,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef UP_WRAPSYM
+#define UP_WRAPSYM(s) __wrap_##s
+#endif
+#ifndef UP_REALSYM
+#define UP_REALSYM(s) __real_##s
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
