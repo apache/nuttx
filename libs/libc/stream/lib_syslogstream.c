@@ -295,16 +295,11 @@ void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_BUFFER
 void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
 {
   DEBUGASSERT(stream != NULL);
 
-  if (stream->last_ch != '\n')
-    {
-      syslogstream_putc(&stream->public, '\n');
-    }
-
-#ifdef CONFIG_SYSLOG_BUFFER
   /* Verify that there is an IOB attached (there should be) */
 
   if (stream->iob != NULL)
@@ -318,5 +313,5 @@ void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
       iob_free(stream->iob);
       stream->iob = NULL;
     }
-#endif
 }
+#endif
