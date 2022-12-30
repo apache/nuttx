@@ -38,6 +38,7 @@
 #include <debug.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <sys/utsname.h>
 
 #include "irq/irq.h"
 #include "sched/sched.h"
@@ -439,6 +440,7 @@ static void show_tasks(void)
 void _assert(FAR const char *filename, int linenum)
 {
   FAR struct tcb_s *rtcb = running_task();
+  struct utsname name;
   bool fatal = false;
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
@@ -456,6 +458,11 @@ void _assert(FAR const char *filename, int linenum)
 #endif
 
   panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK, rtcb);
+
+  uname(&name);
+  _alert("Current Version: %s %s %s %s %s\n",
+          name.sysname, name.nodename,
+          name.release, name.version, name.machine);
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
