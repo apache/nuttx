@@ -19,7 +19,7 @@
 ############################################################################
 
 ifeq ($(CONFIG_DRIVER_NOTE),y)
-  ifeq ($(CONFIG_SCHED_INSTRUMENTATION_EXTERNAL),)
+  ifeq ($(CONFIG_SEGGER_SYSVIEW),)
     CSRCS += note_driver.c
     CFLAGS += ${INCDIR_PREFIX}${TOPDIR}/sched
   endif

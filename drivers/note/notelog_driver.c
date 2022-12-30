@@ -22,24 +22,113 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <syslog.h>
+
+#include <nuttx/note/note_driver.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void notelog_start(FAR struct note_driver_s *drv,
+                          FAR struct tcb_s *tcb);
+static void notelog_stop(FAR struct note_driver_s *drv,
+                         FAR struct tcb_s *tcb);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+static void notelog_suspend(FAR struct note_driver_s *drv,
+                            FAR struct tcb_s *tcb);
+static void notelog_resume(FAR struct note_driver_s *drv,
+                           FAR struct tcb_s *tcb);
+#  ifdef CONFIG_SMP
+static void notelog_cpu_start(FAR struct note_driver_s *drv,
+                              FAR struct tcb_s *tcb, int cpu);
+static void notelog_cpu_started(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb);
+static void notelog_cpu_pause(FAR struct note_driver_s *drv,
+                              FAR struct tcb_s *tcb, int cpu);
+static void notelog_cpu_paused(FAR struct note_driver_s *drv,
+                               FAR struct tcb_s *tcb);
+static void notelog_cpu_resume(FAR struct note_driver_s *drv,
+                               FAR struct tcb_s *tcb, int cpu);
+static void notelog_cpu_resumed(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb);
+#  endif
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+static void notelog_premption(FAR struct note_driver_s *drv,
+                              FAR struct tcb_s *tcb, bool locked);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+static void notelog_csection(FAR struct note_driver_s *drv,
+                             FAR struct tcb_s *tcb, bool enter);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+static void note_spinlock(FAR struct note_driver_s *drv,
+                          FAR struct tcb_s *tcb,
+                          FAR volatile void *spinlock,
+                          int type);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+static void notelog_irqhandler(FAR struct note_driver_s *drv, int irq,
+                               FAR void *handler, bool enter);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct note_driver_ops_s g_notelog_ops =
+{
+  NULL,                  /* add */
+  notelog_start,         /* start */
+  notelog_stop,          /* stop */
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+  notelog_suspend,       /* suspend */
+  notelog_resume,        /* resume */
+#ifdef CONFIG_SMP
+  notelog_cpu_start,     /* cpu_start */
+  notelog_cpu_started,   /* cpu_started */
+  notelog_cpu_pause,     /* cpu_pause */
+  notelog_cpu_paused,    /* cpu_paused */
+  notelog_cpu_resume,    /* cpu_resume */
+  notelog_cpu_resumed,   /* cpu_resumed */
+#endif
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+  notelog_premption,     /* premption */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+  notelog_csection,      /* csection */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  note_spinlock,         /* spinlock */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+  NULL,                  /* syscall_enter */
+  NULL,                  /* syscall_leave */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  notelog_irqhandler,    /* irqhandler */
+#endif
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct note_driver_s g_notelog_driver =
+{
+  &g_notelog_ops,
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sched_note_start, sched_note_stop, sched_note_switch,
- *       sched_note_premption
+ * Name: notelog_*
  *
  * Description:
  *   Hooks to scheduler monitor
@@ -52,7 +141,8 @@
  *
  ****************************************************************************/
 
-void sched_note_start(FAR struct tcb_s *tcb)
+static void notelog_start(FAR struct note_driver_s *drv,
+                          FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -73,7 +163,8 @@ void sched_note_start(FAR struct tcb_s *tcb)
 #endif
 }
 
-void sched_note_stop(FAR struct tcb_s *tcb)
+static void notelog_stop(FAR struct note_driver_s *drv,
+                         FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -95,7 +186,8 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-void sched_note_suspend(FAR struct tcb_s *tcb)
+static void notelog_suspend(FAR struct note_driver_s *drv,
+                            FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -116,7 +208,8 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 #endif
 }
 
-void sched_note_resume(FAR struct tcb_s *tcb)
+static void notelog_resume(FAR struct note_driver_s *drv,
+                           FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -139,7 +232,8 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SMP
-void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
+static void notelog_cpu_start(FAR struct note_driver_s *drv,
+                              FAR struct tcb_s *tcb, int cpu)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d START\n",
@@ -150,7 +244,8 @@ void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 #endif
 }
 
-void sched_note_cpu_started(FAR struct tcb_s *tcb)
+static void notelog_cpu_started(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d STARTED\n",
@@ -162,7 +257,8 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
+static void notelog_cpu_pause(FAR struct note_driver_s *drv,
+                              FAR struct tcb_s *tcb, int cpu)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d PAUSE\n",
@@ -173,7 +269,8 @@ void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 #endif
 }
 
-void sched_note_cpu_paused(FAR struct tcb_s *tcb)
+static void notelog_cpu_paused(FAR struct note_driver_s *drv,
+                               FAR struct tcb_s *tcb)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d PAUSED\n",
@@ -184,7 +281,8 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 #endif
 }
 
-void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
+static void notelog_cpu_resume(FAR struct note_driver_s *drv,
+                               FAR struct tcb_s *tcb, int cpu)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d RESUME\n",
@@ -195,7 +293,8 @@ void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 #endif
 }
 
-void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
+static void notelog_cpu_resumed(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d RESUMED\n",
@@ -216,7 +315,8 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
 #warning CONFIG_SCHED_INSTRUMENTATION_PREEMPTION is a bad idea
 
-void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
+static void notelog_premption(FAR struct note_driver_s *drv,
+                              FAR struct tcb_s *tcb, bool locked)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -246,7 +346,8 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
 #warning CONFIG_SCHED_INSTRUMENTATION_CSECTION is a bad idea
 
-void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
+static void notelog_csection(FAR struct note_driver_s *drv,
+                             FAR struct tcb_s *tcb, bool enter)
 {
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -268,25 +369,11 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 }
 #endif
 
-/****************************************************************************
- * Name: sched_note_spinlock
- *
- * Description:
- *   Common logic for NOTE_SPINLOCK, NOTE_SPINLOCKED, and NOTE_SPINUNLOCK
- *
- * Input Parameters:
- *   tcb  - The TCB containing the information
- *   note - The common note structure to use
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb,
-                         FAR volatile spinlock_t *spinlock,
-                         int type)
+static void note_spinlock(FAR struct note_driver_s *drv,
+                          FAR struct tcb_s *tcb,
+                          FAR volatile void *spinlock,
+                          int type)
 {
   FAR static const char * const tmp[] =
     {
@@ -319,7 +406,8 @@ void sched_note_spinlock(FAR struct tcb_s *tcb,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
+static void notelog_irqhandler(FAR struct note_driver_s *drv, int irq,
+                               FAR void *handler, bool enter)
 {
   syslog(LOG_INFO, "IRQ%d handler@%p %s\n",
          irq, handler, enter ? "ENTER" : "LEAVE");
