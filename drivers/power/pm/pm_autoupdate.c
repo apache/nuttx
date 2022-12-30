@@ -44,12 +44,12 @@ static void pm_auto_updatestate_cb(FAR void *arg)
   enum pm_state_e newstate;
   irqstate_t flags;
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   newstate = pm_checkstate(domain);
   pm_changestate(domain, newstate);
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 }
 
 /****************************************************************************
@@ -114,9 +114,9 @@ void pm_auto_update(int domain, bool auto_update)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdom = &g_pmglobals.domain[domain];
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
   pdom->auto_update = auto_update;
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 }
 
 #endif /* CONFIG_PM */
