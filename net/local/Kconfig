@@ -17,7 +17,7 @@ if NET_LOCAL
 
 config NET_LOCAL_VFS_PATH
 	string "Path prefix to Unix domain sockets"
-	default "/var/socket"
+	default "/var/run"
 	---help---
 		The path prefix to where Unix domain sockets will exist in the VFS namespace.
 
