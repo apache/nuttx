@@ -1195,6 +1195,7 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   for (driver = g_note_drivers; *driver; driver++)
     {
       va_list copy;
+
       va_copy(copy, ap);
       if (note_syscall_enter(*driver, nr, argc, &copy))
         {
@@ -1202,9 +1203,9 @@ void sched_note_syscall_enter(int nr, int argc, ...)
           continue;
         }
 
-      va_end(copy);
       if ((*driver)->ops->add == NULL)
         {
+          va_end(copy);
           continue;
         }
 
@@ -1230,6 +1231,8 @@ void sched_note_syscall_enter(int nr, int argc, ...)
               args += sizeof(uintptr_t);
             }
         }
+
+      va_end(copy);
 
       /* Add the note to circular buffer */
 
