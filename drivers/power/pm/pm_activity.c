@@ -305,7 +305,7 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
   dq     = &pdom->wakelock[wakelock->state];
   wdog   = &wakelock->wdog;
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   if (wakelock->count > 0)
     {
@@ -316,7 +316,7 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
   wd_cancel(wdog);
   pm_wakelock_stats_rm(wakelock);
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 }
 
 /****************************************************************************
@@ -353,7 +353,7 @@ void pm_wakelock_stay(FAR struct pm_wakelock_s *wakelock)
   pdom   = &g_pmglobals.domain[domain];
   dq     = &pdom->wakelock[wakelock->state];
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   DEBUGASSERT(wakelock->count < UINT32_MAX);
   if (wakelock->count++ == 0)
@@ -362,7 +362,7 @@ void pm_wakelock_stay(FAR struct pm_wakelock_s *wakelock)
       pm_wakelock_stats(wakelock, true);
     }
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 
   pm_auto_updatestate(domain);
 }
@@ -400,7 +400,7 @@ void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
   pdom   = &g_pmglobals.domain[domain];
   dq     = &pdom->wakelock[wakelock->state];
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   DEBUGASSERT(wakelock->count > 0);
   if (--wakelock->count == 0)
@@ -409,7 +409,7 @@ void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
       pm_wakelock_stats(wakelock, false);
     }
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 
   pm_auto_updatestate(domain);
 }
@@ -452,7 +452,7 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
   dq     = &pdom->wakelock[wakelock->state];
   wdog   = &wakelock->wdog;
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   if (!WDOG_ISACTIVE(wdog))
     {
@@ -469,7 +469,7 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
       wd_start(wdog, MSEC2TICK(ms), pm_waklock_cb, (wdparm_t)wakelock);
     }
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 
   pm_auto_updatestate(domain);
 }

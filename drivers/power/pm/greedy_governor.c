@@ -119,7 +119,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
    * invoked, which modifies the stay count which we are about to read
    */
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   if (!WDOG_ISACTIVE(&pdomstate->wdog))
     {
@@ -131,7 +131,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
         }
     }
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 
   /* Return the found state */
 
@@ -159,7 +159,7 @@ static void greedy_governor_activity(int domain, int count)
   pdomstate = &g_pm_greedy_governor.domain_states[domain];
   count = count ? count : 1;
 
-  flags = pm_lock(domain);
+  flags = pm_domain_lock(domain);
 
   if (TICK2SEC(wd_gettime(&pdomstate->wdog)) < count)
     {
@@ -167,7 +167,7 @@ static void greedy_governor_activity(int domain, int count)
                greedy_governor_timer_cb, (wdparm_t)domain);
     }
 
-  pm_unlock(domain, flags);
+  pm_domain_unlock(domain, flags);
 }
 
 /****************************************************************************

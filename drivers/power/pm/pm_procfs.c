@@ -268,7 +268,7 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
 
   totalsize += copysize;
 
-  flags = pm_lock(pmfile->domain);
+  flags = pm_domain_lock(pmfile->domain);
 
   for (state = 0; state < PM_COUNT; state++)
     {
@@ -300,7 +300,7 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
       totalsize += copysize;
     }
 
-  pm_unlock(pmfile->domain, flags);
+  pm_domain_unlock(pmfile->domain, flags);
 
   filep->f_pos += totalsize;
   return totalsize;
@@ -340,7 +340,7 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
 
   totalsize += copysize;
 
-  flags = pm_lock(pmfile->domain);
+  flags = pm_domain_lock(pmfile->domain);
 
   entry = dq_peek(&dom->wakelockall);
   for (; entry && totalsize < buflen; entry = dq_next(entry))
@@ -374,7 +374,7 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
       totalsize += copysize;
     }
 
-  pm_unlock(pmfile->domain, flags);
+  pm_domain_unlock(pmfile->domain, flags);
 
   filep->f_pos += totalsize;
   return totalsize;
