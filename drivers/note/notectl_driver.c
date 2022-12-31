@@ -52,10 +52,6 @@ static const struct file_operations notectl_fops =
   NULL,          /* write */
   NULL,          /* seek */
   notectl_ioctl, /* ioctl */
-  NULL           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

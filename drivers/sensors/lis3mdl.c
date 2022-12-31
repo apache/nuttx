@@ -104,12 +104,6 @@ static const struct file_operations g_lis3mdl_fops =
   lis3mdl_close,   /* close */
   lis3mdl_read,    /* read */
   lis3mdl_write,   /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /* Single linked list to store instances of drivers */

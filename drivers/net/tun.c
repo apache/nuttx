@@ -222,9 +222,6 @@ static const struct file_operations g_tun_file_ops =
   NULL,         /* truncate */
   NULL,         /* mmap */
   tun_poll      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL        /* unlink */
-#endif
 };
 
 /****************************************************************************

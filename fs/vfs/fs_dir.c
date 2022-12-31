@@ -71,10 +71,6 @@ static const struct file_operations g_dir_fileops =
   NULL,       /* write */
   dir_seek,   /* seek */
   dir_ioctl,  /* ioctl */
-  NULL,       /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL,       /* unlink */
-#endif
 };
 
 static struct inode g_dir_inode =

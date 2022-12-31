@@ -299,9 +299,6 @@ static const struct file_operations g_slcdops =
   NULL,          /* truncate */
   NULL,          /* mmap */
   slcd_poll      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /* LCD state data */

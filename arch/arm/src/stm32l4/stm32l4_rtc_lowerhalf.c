@@ -142,12 +142,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .setperiodic    = stm32l4_setperiodic,
   .cancelperiodic = stm32l4_cancelperiodic,
 #endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl       = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy     = NULL,
-#endif
 };
 
 /* STM32L4 RTC device state */

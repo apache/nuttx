@@ -112,16 +112,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .cancelalarm    = imxrt_cancelalarm,
   .rdalarm        = imxrt_rdalarm,
 #endif
-#ifdef CONFIG_RTC_PERIODIC
-  .setperiodic    = NULL,  /* Not implemented */
-  .cancelperiodic = NULL,
-#endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl          = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy        = NULL,
-#endif
 };
 
 /* i.MXRT RTC device state */

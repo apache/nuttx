@@ -98,12 +98,6 @@ static const struct file_operations g_bmg160_fops =
   bmg160_close,    /* close */
   bmg160_read,     /* read */
   bmg160_write,    /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /* Single linked list to store instances of drivers */

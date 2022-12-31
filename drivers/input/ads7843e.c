@@ -125,9 +125,6 @@ static const struct file_operations ads7843e_fops =
   NULL,             /* truncate */
   NULL,             /* mmap */
   ads7843e_poll     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 /* If only a single ADS7843E device is supported, then the driver state

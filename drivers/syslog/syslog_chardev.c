@@ -54,12 +54,6 @@ static const struct file_operations syslog_fops =
   NULL,                 /* close */
   NULL,                 /* read */
   syslog_chardev_write, /* write */
-  NULL,                 /* seek */
-  NULL,                 /* ioctl */
-  NULL                  /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                /* unlink */
-#endif
 };
 
 /****************************************************************************

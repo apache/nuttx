@@ -104,11 +104,6 @@ static const struct file_operations g_eventfd_fops =
   NULL,             /* mmap */
 #ifdef CONFIG_EVENT_FD_POLL
   eventfd_do_poll   /* poll */
-#else
-  NULL              /* poll */
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
 #endif
 };
 

@@ -152,10 +152,6 @@ static const struct file_operations g_ht16k33fops =
   ht16k33_write,  /* write */
   ht16k33_seek,   /* seek */
   ht16k33_ioctl,  /* ioctl */
-  NULL            /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 /****************************************************************************

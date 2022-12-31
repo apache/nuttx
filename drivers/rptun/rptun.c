@@ -177,10 +177,6 @@ static const struct file_operations g_rptun_devops =
   NULL,             /* write */
   NULL,             /* seek */
   rptun_dev_ioctl,  /* ioctl */
-  NULL              /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 #ifdef CONFIG_RPTUN_LOADER

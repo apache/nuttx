@@ -116,10 +116,6 @@ static const struct file_operations g_fops =
   msa301_write,    /* write */
   NULL,            /* seek */
   msa301_ioctl,    /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 static const struct msa301_ops_s g_msa301_sensor_ops =

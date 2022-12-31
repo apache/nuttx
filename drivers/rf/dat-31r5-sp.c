@@ -83,10 +83,6 @@ static const struct file_operations g_dat31r5sp_fops =
   dat31r5sp_write,  /* write */
   NULL,             /* seek */
   dat31r5sp_ioctl,  /* ioctl */
-  NULL              /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 /****************************************************************************

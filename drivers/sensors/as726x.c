@@ -114,12 +114,6 @@ static const struct file_operations g_as726x_fops =
   NULL,                         /* close */
   as726x_read,                  /* read */
   as726x_write,                 /* write */
-  NULL,                         /* seek */
-  NULL,                         /* ioctl */
-  NULL                          /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                        /* unlink */
-#endif
 };
 
 /****************************************************************************

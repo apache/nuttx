@@ -133,12 +133,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .setperiodic    = lpc54_setperiodic,
   .cancelperiodic = lpc54_cancelperiodic,
 #endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl          = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy        = NULL,
-#endif
 };
 
 /* LPC54 RTC device state */

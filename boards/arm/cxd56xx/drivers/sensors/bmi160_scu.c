@@ -297,10 +297,6 @@ static const struct file_operations g_bmi160gyrofops =
   NULL,                /* write */
   NULL,                /* seek */
   bmi160_ioctl,        /* ioctl */
-  NULL                 /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL               /* unlink */
-#endif
 };
 
 static const struct file_operations g_bmi160accelfops =
@@ -311,10 +307,6 @@ static const struct file_operations g_bmi160accelfops =
   NULL,                 /* write */
   NULL,                 /* seek */
   bmi160_ioctl,         /* ioctl */
-  NULL                  /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                /* unlink */
-#endif
 };
 
 /* SCU instructions for pick gyro sensing data. */

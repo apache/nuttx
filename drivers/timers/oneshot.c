@@ -83,10 +83,6 @@ static const struct file_operations g_oneshot_ops =
   oneshot_write, /* write */
   NULL,          /* seek */
   oneshot_ioctl, /* ioctl */
-  NULL           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

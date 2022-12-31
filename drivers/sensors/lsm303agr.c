@@ -130,10 +130,6 @@ static const struct file_operations g_fops =
   lsm303agr_write,    /* write */
   NULL,               /* seek */
   lsm303agr_ioctl,    /* ioctl */
-  NULL                /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL              /* unlink */
-#endif
 };
 
 static const struct lsm303agr_ops_s g_lsm303agrsensor_ops =

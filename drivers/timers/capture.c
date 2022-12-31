@@ -88,10 +88,6 @@ static const struct file_operations g_capops =
   cap_write, /* write */
   NULL,      /* seek */
   cap_ioctl, /* ioctl */
-  NULL,      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL       /* unlink */
-#endif
 };
 
 /****************************************************************************

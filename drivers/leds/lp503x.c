@@ -165,10 +165,6 @@ static const struct file_operations g_lp503x_fileops =
   NULL,                      /* write */
   NULL,                      /* seek */
   lp503x_ioctl,              /* ioctl */
-  NULL                       /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                     /* unlink */
-#endif
 };
 
 /****************************************************************************
