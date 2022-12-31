@@ -168,9 +168,6 @@ const struct file_operations g_rpmsgdev_ops =
   NULL,                   /* truncate */
   NULL,                   /* mmap */
   rpmsgdev_poll           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                  /* unlink */
-#endif
 };
 
 /****************************************************************************

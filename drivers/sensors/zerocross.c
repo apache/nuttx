@@ -113,10 +113,6 @@ static const struct file_operations g_zcops =
   zc_write,  /* write */
   NULL,      /* seek */
   zc_ioctl,  /* ioctl */
-  NULL       /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL     /* unlink */
-#endif
 };
 
 volatile int sample = 0;

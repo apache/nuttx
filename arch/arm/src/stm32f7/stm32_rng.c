@@ -80,13 +80,6 @@ static const struct file_operations g_rngops =
   NULL,            /* open */
   NULL,            /* close */
   stm32_rngread,   /* read */
-  NULL,            /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

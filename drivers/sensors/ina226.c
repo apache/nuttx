@@ -97,12 +97,6 @@ static const struct file_operations g_ina226fops =
   ina226_close,    /* close */
   ina226_read,     /* read */
   ina226_write,    /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

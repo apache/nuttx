@@ -283,9 +283,6 @@ static const struct file_operations mxt_fops =
   NULL,        /* truncate */
   NULL,        /* mmap */
   mxt_poll     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL       /* unlink */
-#endif
 };
 
 /****************************************************************************

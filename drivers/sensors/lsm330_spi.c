@@ -148,10 +148,6 @@ static const struct file_operations g_lsm330a_fops =
   lsm330acl_write,     /* write */
   lsm330acl_seek,      /* seek */
   lsm330_ioctl,        /* ioctl */
-  NULL                 /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL               /* unlink */
-#endif
 };
 
 static const struct file_operations g_lsm330g_fops =
@@ -162,10 +158,6 @@ static const struct file_operations g_lsm330g_fops =
   lsm330gyro_write,    /* write */
   lsm330gyro_seek,     /* seek */
   lsm330_ioctl,        /* ioctl */
-  NULL                 /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL               /* unlink */
-#endif
 };
 
 static const struct lsm330spi_dvr_entry_vector_s g_lsm330acl_dops =

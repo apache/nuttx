@@ -87,10 +87,6 @@ static const struct file_operations g_fops =
   mb7040_write,    /* write */
   NULL,            /* seek */
   mb7040_ioctl,    /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

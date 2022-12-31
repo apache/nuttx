@@ -75,9 +75,6 @@ static const struct file_operations g_adc_fops =
   NULL,         /* truncate */
   NULL,         /* mmap */
   adc_poll      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL        /* unlink */
-#endif
 };
 
 static const struct adc_callback_s g_adc_callback =

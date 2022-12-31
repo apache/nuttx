@@ -107,9 +107,6 @@ static const struct file_operations g_epoll_ops =
   NULL,             /* truncate */
   NULL,             /* mmap */
   epoll_do_poll     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 static struct inode g_epoll_inode =

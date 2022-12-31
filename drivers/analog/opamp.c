@@ -57,10 +57,6 @@ static const struct file_operations opamp_fops =
   NULL,                          /* write */
   NULL,                          /* seek */
   opamp_ioctl,                   /* ioctl */
-  NULL                           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                         /* unlink */
-#endif
 };
 
 /****************************************************************************

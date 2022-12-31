@@ -91,9 +91,6 @@ static const struct file_operations fb_fops =
   NULL,          /* truncate */
   fb_mmap,       /* mmap */
   fb_poll        /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

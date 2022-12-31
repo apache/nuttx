@@ -193,9 +193,6 @@ static const struct file_operations g_telnet_fops =
   NULL,          /* truncate */
   NULL,          /* mmap */
   telnet_poll    /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 static const struct file_operations g_factory_fops =
@@ -206,12 +203,6 @@ static const struct file_operations g_factory_fops =
   factory_write, /* write */
   NULL,          /* seek */
   factory_ioctl, /* ioctl */
-  NULL,          /* truncate */
-  NULL,          /* mmap */
-  NULL           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /* This is an global data set of all of all active Telnet drivers.  This

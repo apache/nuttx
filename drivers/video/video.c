@@ -289,10 +289,6 @@ static const struct file_operations g_video_fops =
   video_ioctl,              /* ioctl */
   NULL,                     /* truncate */
   video_mmap,               /* mmap */
-  NULL                      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                    /* unlink */
-#endif
 };
 
 static bool g_video_initialized = false;

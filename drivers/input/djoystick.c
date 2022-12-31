@@ -138,9 +138,6 @@ static const struct file_operations djoy_fops =
   NULL,       /* truncate */
   NULL,       /* mmap */
   djoy_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL      /* unlink */
-#endif
 };
 
 /****************************************************************************

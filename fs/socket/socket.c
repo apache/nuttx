@@ -67,9 +67,6 @@ static const struct file_operations g_sock_fileops =
   NULL,             /* truncate */
   NULL,             /* mmap */
   sock_file_poll    /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 static struct inode g_sock_inode =

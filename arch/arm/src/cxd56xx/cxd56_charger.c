@@ -97,10 +97,6 @@ static const struct file_operations g_chargerops =
   charger_write,  /* write */
   NULL,           /* seek */
   charger_ioctl,  /* ioctl */
-  NULL            /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 static struct charger_dev_s g_chargerdev =

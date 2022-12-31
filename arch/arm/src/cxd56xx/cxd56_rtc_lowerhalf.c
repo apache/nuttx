@@ -114,12 +114,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .setrelative = cxd56_setrelative,
   .cancelalarm = cxd56_cancelalarm,
 #endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl       = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy     = NULL,
-#endif
 };
 
 /* CXD56 RTC device state */

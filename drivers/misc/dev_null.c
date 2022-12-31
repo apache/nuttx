@@ -60,9 +60,6 @@ static const struct file_operations devnull_fops =
   NULL,          /* truncate */
   NULL,          /* mmap */
   devnull_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

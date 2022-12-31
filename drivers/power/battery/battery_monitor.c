@@ -95,9 +95,6 @@ static const struct file_operations g_batteryops =
   NULL,                /* truncate */
   NULL,                /* mmap */
   bat_monitor_poll     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL               /* unlink */
-#endif
 };
 
 /****************************************************************************

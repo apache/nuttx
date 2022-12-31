@@ -119,16 +119,6 @@ static const struct rtc_ops_s g_rtc_ops =
     ez80_cancelalarm,   /* cancelalarm */
     ez80_rdalarm        /* rdalarm */
 #endif
-#ifdef CONFIG_RTC_PERIODIC
-  , NULL,               /* setperiodic */
-    NULL                /* cancelperiodic */
-#endif
-#ifdef CONFIG_RTC_IOCTL
-  , NULL                /* ioctl */
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                /* destroy */
-#endif
 };
 
 /* eZ80 RTC device state */

@@ -87,10 +87,6 @@ static const struct file_operations g_mcp9844_fops =
   mcp9844_write,   /* write */
   NULL,            /* seek */
   mcp9844_ioctl,   /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

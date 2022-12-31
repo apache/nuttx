@@ -118,9 +118,6 @@ static const struct file_operations g_ramlogfops =
   NULL,              /* truncate */
   NULL,              /* mmap */
   ramlog_file_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL             /* unlink */
-#endif
 };
 
 /* This is the pre-allocated buffer used for the console RAM log and/or

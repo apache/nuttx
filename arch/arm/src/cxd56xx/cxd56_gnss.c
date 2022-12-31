@@ -319,9 +319,6 @@ static const struct file_operations g_gnssfops =
   NULL,             /* truncate */
   NULL,             /* mmap */
   cxd56_gnss_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 /* GNSS ioctl command list */

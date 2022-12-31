@@ -129,9 +129,6 @@ static const struct file_operations g_serialops =
   NULL,       /* truncate */
   NULL,       /* mmap */
   uart_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL      /* unlink */
-#endif
 };
 
 #ifdef CONFIG_TTY_LAUNCH

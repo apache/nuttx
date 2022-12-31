@@ -235,11 +235,6 @@ static const struct file_operations g_vgaops =
   vga_read,     /* read */
   vga_write,    /* write */
   vga_seek,     /* seek */
-  NULL,         /* ioctl */
-  NULL          /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL        /* unlink */
-#endif
 };
 
 /****************************************************************************

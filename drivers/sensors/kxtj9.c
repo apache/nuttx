@@ -165,10 +165,6 @@ static const struct file_operations g_fops =
   kxtj9_write,     /* write */
   NULL,            /* seek */
   kxtj9_ioctl,     /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

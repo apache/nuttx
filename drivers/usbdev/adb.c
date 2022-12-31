@@ -257,9 +257,6 @@ static const struct file_operations g_adb_fops =
   NULL,           /* truncate */
   NULL,           /* mmap */
   adb_char_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 /* USB descriptor ***********************************************************/

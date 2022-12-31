@@ -65,10 +65,6 @@ static const struct file_operations smps_fops =
   smps_write,                   /* write */
   NULL,                         /* seek */
   smps_ioctl,                   /* ioctl */
-  NULL                          /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                        /* unlink */
-#endif
 };
 
 /****************************************************************************

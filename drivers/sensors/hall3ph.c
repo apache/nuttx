@@ -80,10 +80,6 @@ static const struct file_operations g_hall3ops =
   hall3_write, /* write */
   NULL,        /* seek */
   hall3_ioctl, /* ioctl */
-  NULL         /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL       /* unlink */
-#endif
 };
 
 /****************************************************************************

@@ -157,9 +157,6 @@ static const struct file_operations g_lis2dhops =
   NULL,          /* truncate */
   NULL,          /* mmap */
   lis2dh_poll    /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

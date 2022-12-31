@@ -109,18 +109,11 @@ static const struct rtc_ops_s g_rtc_ops =
 {
   .rdtime      = kinetis_rdtime,
   .settime     = kinetis_settime,
-  .havesettime = NULL,
 #ifdef CONFIG_RTC_ALARM
   .setalarm    = kinetis_setalarm,
   .setrelative = kinetis_setrelative,
   .cancelalarm = kinetis_cancelalarm,
   .rdalarm     = kinetis_rdalarm,
-#endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl       = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy     = NULL,
 #endif
 };
 

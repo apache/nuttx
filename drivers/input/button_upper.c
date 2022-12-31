@@ -149,9 +149,6 @@ static const struct file_operations btn_fops =
   NULL,      /* truncate */
   NULL,      /* mmap */
   btn_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL     /* unlink */
-#endif
 };
 
 /****************************************************************************
