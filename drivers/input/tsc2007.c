@@ -212,9 +212,6 @@ static const struct file_operations tsc2007_fops =
   NULL,            /* truncate */
   NULL,            /* mmap */
   tsc2007_poll     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /* If only a single TSC2007 device is supported, then the driver state

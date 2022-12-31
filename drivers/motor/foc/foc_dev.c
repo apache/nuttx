@@ -78,10 +78,6 @@ static const struct file_operations g_foc_fops =
   NULL,                         /* write */
   NULL,                         /* seek */
   foc_ioctl,                    /* ioctl */
-  NULL                          /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                        /* unlink */
-#endif
 };
 
 /* FOC callbacks from the lower-half implementation to this driver */

@@ -795,10 +795,6 @@ static const struct file_operations hrtim_fops =
   NULL,               /* write */
   NULL,               /* seek */
   stm32_hrtim_ioctl,  /* ioctl */
-  NULL                /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL              /* unlink */
-#endif
 };
 #endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 

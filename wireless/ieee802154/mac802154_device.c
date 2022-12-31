@@ -144,10 +144,6 @@ static const struct file_operations mac802154dev_fops =
   mac802154dev_write, /* write */
   NULL,               /* seek */
   mac802154dev_ioctl, /* ioctl */
-  NULL                /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL               /* unlink */
-#endif
 };
 
 /****************************************************************************

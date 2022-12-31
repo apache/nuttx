@@ -123,10 +123,6 @@ static const struct file_operations g_adxl372_fops =
   adxl372_write,   /* write */
   adxl372_seek,    /* seek */
   adxl372_ioctl,   /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 static const struct adxl372_dvr_entry_vector_s g_adxl372_dops =

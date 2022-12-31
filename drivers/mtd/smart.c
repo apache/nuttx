@@ -482,10 +482,6 @@ static const struct file_operations g_fops =
   smart_loop_write, /* write */
   NULL,             /* seek */
   smart_loop_ioctl, /* ioctl */
-  NULL              /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 #endif /* CONFIG_SMART_DEV_LOOP */
 

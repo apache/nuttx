@@ -110,10 +110,6 @@ static const struct file_operations g_pn532fops =
   _write,         /* write */
   NULL,           /* seek */
   _ioctl,         /* ioctl */
-  NULL            /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 static const uint8_t pn532ack[] =

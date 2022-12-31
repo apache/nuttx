@@ -69,10 +69,6 @@ static const struct file_operations dac_fops =
   dac_write,      /* write */
   NULL,           /* seek */
   dac_ioctl,      /* ioctl */
-  NULL            /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 /****************************************************************************

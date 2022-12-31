@@ -103,12 +103,6 @@ static const struct file_operations g_lis3dsh_fops =
   lis3dsh_close,   /* close */
   lis3dsh_read,    /* read */
   lis3dsh_write,   /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /* Single linked list to store instances of drivers */

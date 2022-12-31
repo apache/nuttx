@@ -205,10 +205,6 @@ static const struct file_operations g_adcops =
   NULL,                      /* write */
   NULL,                      /* seek */
   cxd56_adc_ioctl,           /* ioctl */
-  NULL                       /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                     /* unlink */
-#endif
 };
 
 #if defined (CONFIG_CXD56_LPADC0) || defined (CONFIG_CXD56_LPADC0_1) || defined (CONFIG_CXD56_LPADC_ALL)

@@ -109,16 +109,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .cancelalarm = rtc_lh_cancelalarm,
   .rdalarm     = rtc_lh_rdalarm,
 #endif
-#ifdef CONFIG_RTC_PERIODIC
-  .setperiodic    = NULL,
-  .cancelperiodic = NULL,
-#endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl       = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy     = NULL,
-#endif
 };
 
 /* ESP32-C3 RTC device state */

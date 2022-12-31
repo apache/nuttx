@@ -131,10 +131,6 @@ static const struct file_operations g_kx022fops =
   kx022_write,                 /* write */
   NULL,                        /* seek */
   kx022_ioctl,                 /* ioctl */
-  NULL                         /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                       /* unlink */
-#endif
 };
 
 /* Take XYZ data. */

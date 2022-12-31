@@ -142,12 +142,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .setperiodic    = bl602_setperiodic,
   .cancelperiodic = bl602_cancelperiodic,
 #endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl       = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy     = NULL,
-#endif
 };
 
 /* BL602 RTC device state */

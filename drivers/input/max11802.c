@@ -118,9 +118,6 @@ static const struct file_operations max11802_fops =
   NULL,             /* truncate */
   NULL,             /* mmap */
   max11802_poll     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL            /* unlink */
-#endif
 };
 
 /* If only a single MAX11802 device is supported, then the driver state

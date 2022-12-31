@@ -138,10 +138,6 @@ static const struct file_operations g_fops =
   lsm6dsl_write,   /* write */
   NULL,            /* seek */
   lsm6dsl_ioctl,   /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 static const struct lsm6dsl_ops_s g_lsm6dsl_sensor_ops =

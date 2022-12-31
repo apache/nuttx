@@ -112,10 +112,6 @@ static const struct file_operations i2schar_fops =
   i2schar_write,        /* write */
   NULL,                 /* seek  */
   i2schar_ioctl,        /* ioctl */
-  NULL                  /* poll  */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                /* unlink */
-#endif
 };
 
 /****************************************************************************

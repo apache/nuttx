@@ -139,12 +139,6 @@ static const struct rtc_ops_s g_rtc_ops =
   .setperiodic    = max326_setperiodic,
   .cancelperiodic = max326_cancelperiodic,
 #endif
-#ifdef CONFIG_RTC_IOCTL
-  .ioctl       = NULL,
-#endif
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy     = NULL,
-#endif
 };
 
 /* RTC device state */

@@ -214,10 +214,6 @@ static const struct file_operations g_lps25hops =
   lps25h_write,  /* write */
   NULL,          /* seek */
   lps25h_ioctl,  /* ioctl */
-  NULL           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
- #endif
 };
 
 /****************************************************************************

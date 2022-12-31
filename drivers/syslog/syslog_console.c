@@ -53,12 +53,6 @@ static const struct file_operations g_consoleops =
   NULL,                 /* close */
   syslog_console_read,  /* read */
   syslog_console_write, /* write */
-  NULL,                 /* seek */
-  NULL,                 /* ioctl */
-  NULL                  /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                /* unlink */
-#endif
 };
 
 /****************************************************************************

@@ -107,12 +107,6 @@ static const struct file_operations g_syslog_rpmsgfops =
   NULL,                    /* close */
   syslog_rpmsg_file_read,  /* read */
   syslog_rpmsg_file_write, /* write */
-  NULL,                    /* seek */
-  NULL,                    /* ioctl */
-  NULL                     /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                   /* unlink */
-#endif
 };
 #endif
 

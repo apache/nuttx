@@ -131,9 +131,6 @@ static const struct file_operations g_fusb303ops =
   NULL,          /* truncate */
   NULL,          /* mmap */
   fusb303_poll   /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

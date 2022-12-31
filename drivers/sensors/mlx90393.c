@@ -102,12 +102,6 @@ static const struct file_operations g_mlx90393_fops =
   mlx90393_close,  /* close */
   mlx90393_read,   /* read */
   mlx90393_write,  /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /* Single linked list to store instances of drivers */

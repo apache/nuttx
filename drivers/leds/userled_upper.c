@@ -105,10 +105,6 @@ static const struct file_operations userled_fops =
   userled_write,  /* write */
   NULL,           /* seek */
   userled_ioctl,  /* ioctl */
-  NULL            /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 /****************************************************************************

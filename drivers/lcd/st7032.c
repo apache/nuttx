@@ -108,10 +108,6 @@ static const struct file_operations g_st7032fops =
   st7032_write,  /* write */
   st7032_seek,   /* seek */
   st7032_ioctl,  /* ioctl */
-  NULL           /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
-#endif
 };
 
 /****************************************************************************

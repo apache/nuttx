@@ -118,10 +118,6 @@ static const struct file_operations nunchuck_fops =
   NULL,           /* write */
   NULL,           /* seek */
   nunchuck_ioctl, /* ioctl */
-  NULL            /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
-#endif
 };
 
 /****************************************************************************

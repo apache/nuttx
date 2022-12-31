@@ -299,9 +299,6 @@ static const struct file_operations g_xboxcontroller_fops =
   NULL,                     /* truncate */
   NULL,                     /* mmap */
   usbhost_poll              /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                    /* unlink */
-#endif
 };
 
 /* This is a bitmap that is used to allocate device names /dev/xboxa-z. */

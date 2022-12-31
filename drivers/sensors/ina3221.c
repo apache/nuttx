@@ -118,12 +118,6 @@ static const struct file_operations g_ina3221fops =
   NULL,            /* close */
   ina3221_read,    /* read */
   ina3221_write,   /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

@@ -92,12 +92,6 @@ static const struct file_operations g_max31855fops =
   NULL,            /* close */
   max31855_read,   /* read */
   max31855_write,  /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

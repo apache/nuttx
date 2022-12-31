@@ -106,10 +106,6 @@ static const struct file_operations g_adt7320fops =
   adt7320_write,   /* write */
   NULL,            /* seek */
   adt7320_ioctl,   /* ioctl */
-  NULL             /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL           /* unlink */
-#endif
 };
 
 /****************************************************************************

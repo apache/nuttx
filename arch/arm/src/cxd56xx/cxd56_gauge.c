@@ -82,10 +82,6 @@ static const struct file_operations g_gaugeops =
   gauge_write,  /* write */
   NULL,         /* seek */
   gauge_ioctl,  /* ioctl */
-  NULL          /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL        /* unlink */
-#endif
 };
 
 static struct bat_gauge_dev_s g_gaugedev =
