@@ -451,6 +451,33 @@ static inline uint32_t getipsr(void)
   return ipsr;
 }
 
+/* Get/set FAULTMASK */
+
+static inline uint32_t getfaultmask(void) always_inline_function;
+static inline uint32_t getfaultmask(void)
+{
+  uint32_t faultmask;
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, faultmask\n"
+     : "=r" (faultmask)
+     :
+     : "memory");
+
+  return faultmask;
+}
+
+static inline void setfaultmask(uint32_t faultmask) always_inline_function;
+static inline void setfaultmask(uint32_t faultmask)
+{
+  __asm__ __volatile__
+    (
+      "\tmsr faultmask, %0\n"
+      :
+      : "r" (faultmask)
+      : "memory");
+}
+
 /* Get/set CONTROL */
 
 static inline uint32_t getcontrol(void) always_inline_function;
