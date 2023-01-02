@@ -278,7 +278,7 @@ static inline void bmi160_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the BMI160 */
 
-  SPI_SETMODE(spi, SPIDEV_MODE3);
+  SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, BMI160_SPI_MAXFREQUENCY);
