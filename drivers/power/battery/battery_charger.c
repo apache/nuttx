@@ -91,8 +91,8 @@ static const struct file_operations g_batteryops =
   bat_charger_write,   /* write */
   NULL,                /* seek */
   bat_charger_ioctl,   /* ioctl */
-  NULL,                /* truncate */
   NULL,                /* mmap */
+  NULL,                /* truncate */
   bat_charger_poll     /* poll */
 };
 

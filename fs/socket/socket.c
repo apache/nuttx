@@ -64,8 +64,8 @@ static const struct file_operations g_sock_fileops =
   sock_file_write,  /* write */
   NULL,             /* seek */
   sock_file_ioctl,  /* ioctl */
-  NULL,             /* truncate */
   NULL,             /* mmap */
+  NULL,             /* truncate */
   sock_file_poll    /* poll */
 };
 

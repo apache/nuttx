@@ -316,8 +316,8 @@ static const struct file_operations g_gnssfops =
   cxd56_gnss_write, /* write */
   NULL,             /* seek */
   cxd56_gnss_ioctl, /* ioctl */
-  NULL,             /* truncate */
   NULL,             /* mmap */
+  NULL,             /* truncate */
   cxd56_gnss_poll   /* poll */
 };
 

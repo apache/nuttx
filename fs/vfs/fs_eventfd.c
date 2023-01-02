@@ -100,8 +100,8 @@ static const struct file_operations g_eventfd_fops =
   eventfd_do_write, /* write */
   NULL,             /* seek */
   NULL,             /* ioctl */
-  NULL,             /* truncate */
   NULL,             /* mmap */
+  NULL,             /* truncate */
 #ifdef CONFIG_EVENT_FD_POLL
   eventfd_do_poll   /* poll */
 #endif

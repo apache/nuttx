@@ -178,8 +178,8 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_write,      /* write */
   tmpfs_seek,       /* seek */
   NULL,             /* ioctl */
-  tmpfs_truncate,   /* truncate */
   tmpfs_mmap,       /* mmap */
+  tmpfs_truncate,   /* truncate */
 
   tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */

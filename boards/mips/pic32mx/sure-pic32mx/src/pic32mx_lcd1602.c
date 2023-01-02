@@ -181,8 +181,8 @@ static const struct file_operations g_lcdops =
   lcd_write,     /* write */
   NULL,          /* seek */
   lcd_ioctl,     /* ioctl */
-  NULL,          /* truncate */
   NULL,          /* mmap */
+  NULL,          /* truncate */
   lcd_poll       /* poll */
 };
 

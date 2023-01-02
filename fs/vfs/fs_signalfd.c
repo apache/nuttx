@@ -79,8 +79,8 @@ static const struct file_operations g_signalfd_fileops =
   NULL,                 /* write */
   NULL,                 /* seek */
   NULL,                 /* ioctl */
-  NULL,                 /* truncate */
   NULL,                 /* mmap */
+  NULL,                 /* truncate */
   signalfd_file_poll    /* poll */
 };
 

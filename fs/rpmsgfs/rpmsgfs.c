@@ -160,8 +160,8 @@ const struct mountpt_operations rpmsgfs_operations =
   rpmsgfs_write,         /* write */
   rpmsgfs_seek,          /* seek */
   rpmsgfs_ioctl,         /* ioctl */
-  rpmsgfs_ftruncate,     /* ftruncate */
   NULL,                  /* mmap */
+  rpmsgfs_ftruncate,     /* ftruncate */
 
   rpmsgfs_sync,          /* sync */
   rpmsgfs_dup,           /* dup */

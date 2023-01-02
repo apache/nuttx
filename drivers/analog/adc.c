@@ -72,8 +72,8 @@ static const struct file_operations g_adc_fops =
   NULL,         /* write */
   NULL,         /* seek */
   adc_ioctl,    /* ioctl */
-  NULL,         /* truncate */
   NULL,         /* mmap */
+  NULL,         /* truncate */
   adc_poll      /* poll */
 };
 

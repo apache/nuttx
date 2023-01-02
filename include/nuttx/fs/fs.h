@@ -213,8 +213,8 @@ struct file_operations
                    size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
-  int     (*truncate)(FAR struct file *filep, off_t length);
   int     (*mmap)(FAR struct file *filep, FAR struct mm_map_entry_s *map);
+  int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* The two structures need not be common after this point */
 
@@ -305,8 +305,8 @@ struct mountpt_operations
             size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
-  int     (*truncate)(FAR struct file *filep, off_t length);
   int     (*mmap)(FAR struct file *filep, FAR struct mm_map_entry_s *map);
+  int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted

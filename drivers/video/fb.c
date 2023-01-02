@@ -88,8 +88,8 @@ static const struct file_operations fb_fops =
   fb_write,      /* write */
   fb_seek,       /* seek */
   fb_ioctl,      /* ioctl */
-  NULL,          /* truncate */
   fb_mmap,       /* mmap */
+  NULL,          /* truncate */
   fb_poll        /* poll */
 };
 

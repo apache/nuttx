@@ -254,8 +254,8 @@ static const struct file_operations g_adb_fops =
   adb_char_write, /* write */
   NULL,           /* seek */
   NULL,           /* ioctl */
-  NULL,           /* truncate */
   NULL,           /* mmap */
+  NULL,           /* truncate */
   adb_char_poll   /* poll */
 };
 

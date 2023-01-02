@@ -158,8 +158,8 @@ const struct mountpt_operations littlefs_operations =
   littlefs_write,         /* write */
   littlefs_seek,          /* seek */
   littlefs_ioctl,         /* ioctl */
-  littlefs_truncate,      /* truncate */
   NULL,                   /* mmap */
+  littlefs_truncate,      /* truncate */
 
   littlefs_sync,          /* sync */
   littlefs_dup,           /* dup */

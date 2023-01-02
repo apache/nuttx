@@ -115,8 +115,8 @@ const struct mountpt_operations fat_operations =
   fat_write,         /* write */
   fat_seek,          /* seek */
   fat_ioctl,         /* ioctl */
-  fat_truncate,      /* truncate */
   NULL,              /* mmap */
+  fat_truncate,      /* truncate */
   fat_sync,          /* sync */
   fat_dup,           /* dup */
   fat_fstat,         /* fstat */

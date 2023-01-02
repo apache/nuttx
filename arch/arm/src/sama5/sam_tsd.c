@@ -237,8 +237,8 @@ static const struct file_operations g_tsdops =
   NULL,            /* write */
   NULL,            /* seek */
   sam_tsd_ioctl,   /* ioctl */
-  NULL,            /* truncate */
   NULL,            /* mmap */
+  NULL,            /* truncate */
   sam_tsd_poll     /* poll */
 };
 
