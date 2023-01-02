@@ -106,8 +106,8 @@ static const struct file_operations g_geofencefops =
   NULL,                 /* write */
   NULL,                 /* seek */
   cxd56_geofence_ioctl, /* ioctl */
-  NULL,                 /* truncate */
   NULL,                 /* mmap */
+  NULL,                 /* truncate */
   cxd56_geofence_poll   /* poll */
 };
 

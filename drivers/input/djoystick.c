@@ -135,8 +135,8 @@ static const struct file_operations djoy_fops =
   NULL,       /* write */
   NULL,       /* seek */
   djoy_ioctl, /* ioctl */
-  NULL,       /* truncate */
   NULL,       /* mmap */
+  NULL,       /* truncate */
   djoy_poll   /* poll */
 };
 

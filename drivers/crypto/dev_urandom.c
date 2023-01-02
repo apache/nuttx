@@ -100,8 +100,8 @@ static const struct file_operations g_urand_fops =
   devurand_write,               /* write */
   NULL,                         /* seek */
   NULL,                         /* ioctl */
-  NULL,                         /* truncate */
   NULL,                         /* mmap */
+  NULL,                         /* truncate */
   devurand_poll                 /* poll */
 };
 

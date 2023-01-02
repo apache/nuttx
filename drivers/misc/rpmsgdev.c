@@ -165,8 +165,8 @@ const struct file_operations g_rpmsgdev_ops =
   rpmsgdev_write,         /* write */
   rpmsgdev_seek,          /* seek */
   rpmsgdev_ioctl,         /* ioctl */
-  NULL,                   /* truncate */
   NULL,                   /* mmap */
+  NULL,                   /* truncate */
   rpmsgdev_poll           /* poll */
 };
 
