@@ -136,6 +136,7 @@ static const struct file_operations ajoy_fops =
   NULL,       /* seek */
   ajoy_ioctl, /* ioctl */
   NULL,       /* truncate */
+  NULL,       /* mmap */
   ajoy_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL      /* unlink */

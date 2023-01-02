@@ -134,11 +134,12 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
               size_t buflen);
 static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence);
-static int  tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  tmpfs_sync(FAR struct file *filep);
 static int  tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int  tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 static int  tmpfs_truncate(FAR struct file *filep, off_t length);
+static int  tmpfs_mmap(FAR struct file *filep,
+                       FAR struct mm_map_entry_s *map);
 
 static int  tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               FAR struct fs_dirent_s **dir);
@@ -176,8 +177,9 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_read,       /* read */
   tmpfs_write,      /* write */
   tmpfs_seek,       /* seek */
-  tmpfs_ioctl,      /* ioctl */
+  NULL,             /* ioctl */
   tmpfs_truncate,   /* truncate */
+  tmpfs_mmap,       /* mmap */
 
   tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */
@@ -1640,16 +1642,11 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   return position;
 }
 
-/****************************************************************************
- * Name: tmpfs_ioctl
- ****************************************************************************/
-
-static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct tmpfs_file_s *tfo;
-  FAR void **ppv = (FAR void**)arg;
+  int ret = -EINVAL;
 
-  finfo("filep: %p cmd: %d arg: %08lx\n", filep, cmd, arg);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Recover our private data from the struct file instance */
@@ -1658,20 +1655,13 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   DEBUGASSERT(tfo != NULL);
 
-  /* Only one ioctl command is supported */
-
-  if (cmd == FIOC_MMAP && ppv != NULL)
+  if (map && map->offset + map->length <= tfo->tfo_size)
     {
-      /* Return the address on the media corresponding to the start of
-       * the file.
-       */
-
-      *ppv = (FAR void *)tfo->tfo_data;
-      return OK;
+      map->vaddr = tfo->tfo_data + map->offset;
+      ret = OK;
     }
 
-  ferr("ERROR: Invalid cmd: %d\n", cmd);
-  return -ENOTTY;
+  return ret;
 }
 
 /****************************************************************************

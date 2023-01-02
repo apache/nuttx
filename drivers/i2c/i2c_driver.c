@@ -100,6 +100,7 @@ static const struct file_operations i2cdrvr_fops =
   NULL,            /* seek */
   i2cdrvr_ioctl,   /* ioctl */
   NULL,            /* truncate */
+  NULL,            /* mmap */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , i2cdrvr_unlink /* unlink */

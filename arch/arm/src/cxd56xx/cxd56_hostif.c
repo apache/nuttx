@@ -146,6 +146,7 @@ static const struct file_operations g_hif_fops =
   hif_seek,    /* seek */
   hif_ioctl,   /* ioctl */
   NULL,        /* truncate */
+  NULL,        /* mmap */
   hif_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , hif_unlink /* unlink */

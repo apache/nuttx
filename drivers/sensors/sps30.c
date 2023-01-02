@@ -176,6 +176,7 @@ static const struct file_operations g_sps30fops =
   NULL,           /* seek */
   sps30_ioctl,    /* ioctl */
   NULL,           /* truncate */
+  NULL,           /* mmap */
   NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , sps30_unlink /* unlink */

@@ -110,6 +110,7 @@ const struct mountpt_operations binfs_operations =
   NULL,              /* seek */
   binfs_ioctl,       /* ioctl */
   NULL,              /* truncate */
+  NULL,              /* mmap */
 
   NULL,              /* sync */
   binfs_dup,         /* dup */

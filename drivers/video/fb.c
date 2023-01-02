@@ -39,6 +39,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/video/fb.h>
+#include <nuttx/mm/map.h>
 
 /****************************************************************************
  * Private Types
@@ -70,6 +71,8 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
                         size_t buflen);
 static off_t   fb_seek(FAR struct file *filep, off_t offset, int whence);
 static int     fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     fb_mmap(FAR struct file *filep,
+                       FAR struct mm_map_entry_s *map);
 static int     fb_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
 
@@ -86,6 +89,7 @@ static const struct file_operations fb_fops =
   fb_seek,       /* seek */
   fb_ioctl,      /* ioctl */
   NULL,          /* truncate */
+  fb_mmap,       /* mmap */
   fb_poll        /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
@@ -282,18 +286,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case FIOC_MMAP:  /* Get color plane info */
-        {
-          FAR void **ppv = (FAR void **)((uintptr_t)arg);
-
-          /* Return the address corresponding to the start of frame buffer. */
-
-          DEBUGASSERT(ppv != NULL);
-          *ppv = fb->fbmem;
-          ret = OK;
-        }
-        break;
-
       case FBIOGET_VIDEOINFO:  /* Get color plane info */
         {
           FAR struct fb_videoinfo_s *vinfo =
@@ -678,6 +670,29 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
         ret = -ENOTTY;
         break;
+    }
+
+  return ret;
+}
+
+static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
+{
+  FAR struct inode *inode;
+  FAR struct fb_chardev_s *fb;
+  int ret = -EINVAL;
+
+  /* Get the framebuffer instance */
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  fb    = (FAR struct fb_chardev_s *)inode->i_private;
+
+  /* Return the address corresponding to the start of frame buffer. */
+
+  if (map->offset + map->length <= fb->fblen)
+    {
+      map->vaddr = (FAR char *)fb->fbmem + map->offset;
+      ret = OK;
     }
 
   return ret;

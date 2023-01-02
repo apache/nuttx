@@ -126,6 +126,7 @@ static const struct file_operations g_cryptofops =
   NULL,                /* seek   */
   cryptof_ioctl,       /* ioctl  */
   NULL,                /* truncate */
+  NULL,                /* mmap */
   cryptof_poll         /* poll   */
 };
 
@@ -138,6 +139,7 @@ static const struct file_operations g_cryptoops =
   NULL,                /* seek   */
   cryptoioctl,         /* ioctl  */
   NULL,                /* truncate */
+  NULL,                /* mmap */
   NULL                 /* poll   */
 };
 

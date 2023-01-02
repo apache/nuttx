@@ -37,6 +37,7 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/mm/map.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -213,6 +214,7 @@ struct file_operations
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
   int     (*truncate)(FAR struct file *filep, off_t length);
+  int     (*mmap)(FAR struct file *filep, FAR struct mm_map_entry_s *map);
 
   /* The two structures need not be common after this point */
 
@@ -300,6 +302,7 @@ struct mountpt_operations
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
   int     (*truncate)(FAR struct file *filep, off_t length);
+  int     (*mmap)(FAR struct file *filep, FAR struct mm_map_entry_s *map);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted

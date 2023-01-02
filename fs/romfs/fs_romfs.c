@@ -73,6 +73,8 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 static off_t   romfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int     romfs_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
+static int     romfs_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map);
 
 static int     romfs_dup(FAR const struct file *oldp,
                          FAR struct file *newp);
@@ -120,12 +122,12 @@ const struct mountpt_operations romfs_operations =
   romfs_seek,      /* seek */
   romfs_ioctl,     /* ioctl */
   NULL,            /* truncate */
+  romfs_mmap,      /* mmap */
 
   NULL,            /* sync */
   romfs_dup,       /* dup */
   romfs_fstat,     /* fstat */
   NULL,            /* fchstat */
-  NULL,            /* truncate */
 
   romfs_opendir,   /* opendir */
   romfs_closedir,  /* closedir */
@@ -578,9 +580,7 @@ errout_with_lock:
 
 static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s    *rf;
-  FAR void                  **ppv = (FAR void**)arg;
 
   finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
@@ -591,22 +591,10 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   /* Recover our private data from the struct file instance */
 
   rf = filep->f_priv;
-  rm = filep->f_inode->i_private;
-
-  DEBUGASSERT(rm != NULL);
 
   /* Only one ioctl command is supported */
 
-  if (cmd == FIOC_MMAP && rm->rm_xipbase && ppv)
-    {
-      /* Return the address on the media corresponding to the start of
-       * the file.
-       */
-
-      *ppv = rm->rm_xipbase + rf->rf_startoffset;
-      return OK;
-    }
-  else if (cmd == FIOC_FILEPATH)
+  if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
       inode_getpath(filep->f_inode, ptr);
@@ -616,6 +604,35 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   ferr("ERROR: Invalid cmd: %d\n", cmd);
   return -ENOTTY;
+}
+
+static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
+{
+  FAR struct romfs_mountpt_s *rm;
+  FAR struct romfs_file_s *rf;
+  int ret = -EINVAL;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  rf = filep->f_priv;
+  rm = filep->f_inode->i_private;
+
+  /* Return the address on the media corresponding to the start of
+   * the file.
+   */
+
+  if (map && rm && rm->rm_xipbase && rf &&
+      map->offset + map->length <= rf->rf_size)
+    {
+      map->vaddr = rm->rm_xipbase + rf->rf_startoffset + map->offset;
+      ret = OK;
+    }
+
+  return ret;
 }
 
 /****************************************************************************

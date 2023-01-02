@@ -115,6 +115,7 @@ static const struct file_operations g_ramlogfops =
   NULL,              /* seek */
   ramlog_file_ioctl, /* ioctl */
   NULL,              /* truncate */
+  NULL,              /* mmap */
   ramlog_file_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL             /* unlink */

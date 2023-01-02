@@ -306,6 +306,7 @@ static const struct file_operations g_cc1101ops =
   NULL,              /* seek */
   NULL,              /* ioctl */
   NULL,              /* truncate */
+  NULL,              /* mmap */
   cc1101_file_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL             /* unlink */

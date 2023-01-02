@@ -452,6 +452,7 @@ static const struct file_operations sx127x_fops =
   NULL,           /* seek */
   sx127x_ioctl,   /* ioctl */
   NULL,           /* truncate */
+  NULL,           /* mmap */
   sx127x_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */

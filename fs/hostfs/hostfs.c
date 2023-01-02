@@ -143,6 +143,7 @@ const struct mountpt_operations hostfs_operations =
   hostfs_seek,          /* seek */
   hostfs_ioctl,         /* ioctl */
   hostfs_ftruncate,     /* ftruncate */
+  NULL,                 /* mmap */
 
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */

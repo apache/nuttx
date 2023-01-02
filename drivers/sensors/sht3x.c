@@ -171,6 +171,7 @@ static const struct file_operations g_sht3xfops =
   NULL,           /* seek */
   sht3x_ioctl,    /* ioctl */
   NULL,           /* truncate */
+  NULL,           /* mmap */
   NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , sht3x_unlink  /* unlink */

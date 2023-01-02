@@ -182,8 +182,8 @@ static const struct file_operations g_ws2812fops =
 /****************************************************************************
  * #### TODO ####
  *
- * Consider supporting mmap by returning memory buffer using...
- *       file_ioctl(filep, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
+ * Consider supporting mmap by returning memory buffer using file_operations'
+ *   mmap
  * Code using this would be non-portable across architectures as the format
  * of the buffer can be different.
  *

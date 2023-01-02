@@ -182,6 +182,7 @@ static const struct file_operations g_lcdops =
   NULL,          /* seek */
   lcd_ioctl,     /* ioctl */
   NULL,          /* truncate */
+  NULL,          /* mmap */
   lcd_poll       /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
