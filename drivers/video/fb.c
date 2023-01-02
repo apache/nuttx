@@ -686,7 +686,8 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   /* Return the address corresponding to the start of frame buffer. */
 
-  if (map->offset + map->length <= fb->fblen)
+  if (map->offset >= 0 && map->offset < fb->fblen &&
+      map->length && map->offset + map->length <= fb->fblen)
     {
       map->vaddr = (FAR char *)fb->fbmem + map->offset;
       ret = OK;

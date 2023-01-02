@@ -580,7 +580,7 @@ errout_with_lock:
 
 static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct romfs_file_s    *rf;
+  FAR struct romfs_file_s *rf;
 
   finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
@@ -625,8 +625,8 @@ static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
    * the file.
    */
 
-  if (map && rm && rm->rm_xipbase && rf &&
-      map->offset + map->length <= rf->rf_size)
+  if (rm->rm_xipbase && map->offset >= 0 && map->offset < rf->rf_size &&
+      map->length != 0 && map->offset + map->length <= rf->rf_size)
     {
       map->vaddr = rm->rm_xipbase + rf->rf_startoffset + map->offset;
       ret = OK;
