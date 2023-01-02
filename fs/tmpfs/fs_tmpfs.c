@@ -1641,7 +1641,8 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   DEBUGASSERT(tfo != NULL);
 
-  if (map && map->offset + map->length <= tfo->tfo_size)
+  if (map->offset >= 0 && map->offset < tfo->tfo_size &&
+      map->length && map->offset + map->length <= tfo->tfo_size)
     {
       map->vaddr = tfo->tfo_data + map->offset;
       ret = OK;
