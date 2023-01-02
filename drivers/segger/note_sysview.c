@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/segger/sysview.c
+ * drivers/segger/note_sysview.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -326,33 +326,33 @@ static void note_sysview_syscall_leave(FAR struct note_driver_s *drv,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sysview_get_interrupt_id
+ * Name: note_sysview_get_interrupt_id
  *
  * Description:
  *   Retrieve the Id of the currently active interrupt.
  *
  ****************************************************************************/
 
-unsigned int sysview_get_interrupt_id(void)
+unsigned int note_sysview_get_interrupt_id(void)
 {
   return g_note_sysview_driver.irq[up_cpu_index()];
 }
 
 /****************************************************************************
- * Name: sysview_get_timestamp
+ * Name: note_sysview_get_timestamp
  *
  * Description:
  *   Retrieve a system timestamp for SYSVIEW events.
  *
  ****************************************************************************/
 
-unsigned int sysview_get_timestamp(void)
+unsigned int note_sysview_get_timestamp(void)
 {
   return up_perf_gettime();
 }
 
 /****************************************************************************
- * Name: sysview_initialize
+ * Name: note_sysview_initialize
  *
  * Description:
  *   Initializes the SYSVIEW module.
@@ -365,7 +365,7 @@ unsigned int sysview_get_timestamp(void)
  *
  ****************************************************************************/
 
-int sysview_initialize(void)
+int note_sysview_initialize(void)
 {
   uint32_t freq = up_perf_getfreq();
 
