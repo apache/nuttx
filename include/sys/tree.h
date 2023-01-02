@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/tree.h
+ * include/sys/tree.h
  *
  * Copyright 2002 Niels Provos <provos@citi.umich.edu>
  * All rights reserved.
@@ -56,8 +56,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_TREE_H
-#define __INCLUDE_NUTTX_TREE_H
+#ifndef __INCLUDE_SYS_TREE_H
+#define __INCLUDE_SYS_TREE_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1055,4 +1055,4 @@ while (0)
       ((x) != NULL) && ((y) = name##_RB_PREV(x), 1); \
        (x) = (y))
 
-#endif    /* __INCLUDE_NUTTX_TREE_H */
+#endif    /* __INCLUDE_SYS_TREE_H */
