@@ -101,6 +101,7 @@ static const struct file_operations g_eventfd_fops =
   NULL,             /* seek */
   NULL,             /* ioctl */
   NULL,             /* truncate */
+  NULL,             /* mmap */
 #ifdef CONFIG_EVENT_FD_POLL
   eventfd_do_poll   /* poll */
 #else

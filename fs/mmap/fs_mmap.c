@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mm/map.h>
 
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -49,7 +50,6 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
                       size_t length, int prot, int flags,
                       off_t offset, bool kernel, FAR void **mapped)
 {
-  FAR void *addr;
   int ret;
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
@@ -135,14 +135,33 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 #endif
     }
 
-  /* Perform the ioctl to get the base address of the file in 'mapped'
-   * in memory. (casting to uintptr_t first eliminates complaints on some
-   * architectures where the sizeof long is different from the size of
-   * a pointer).
+  /* Call driver's mmap to get the base address of the file in 'mapped'
+   * in memory.
    */
 
-  ret = file_ioctl(filep, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
-  if (ret < 0)
+  if (filep->f_inode && filep->f_inode->u.i_ops->mmap != NULL)
+    {
+      /* Pass the information about the mapping in mm_map_entry_s structure.
+       * The driver may alter the structure, and if it supports unmap, it
+       * will also add it to the kernel maintained list of mappings.
+       */
+
+      struct mm_map_entry_s map =
+        {
+         NULL, /* sq_entry_t */
+         start, length, offset,
+         prot, flags,
+         NULL, /* priv */
+         NULL  /* munmap */
+        };
+
+      ret = filep->f_inode->u.i_ops->mmap(filep, &map);
+      if (ret == OK)
+        {
+          *mapped = (void *)map.vaddr;
+        }
+    }
+  else
     {
       /* Not directly mappable, probably because the underlying media does
        * not support random access.
@@ -155,15 +174,14 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 
       return rammap(filep, length, offset, kernel, mapped);
 #else
-      ferr("ERROR: file_ioctl(FIOC_MMAP) failed: %d\n", ret);
-      return ret;
+      ferr("ERROR: mmap not supported \n");
+      return -ENOSYS;
 #endif
     }
 
-  /* Return the offset address */
+  /* Return */
 
-  *mapped = (FAR void *)(((FAR uint8_t *)addr) + offset);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -197,7 +215,7 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
  *   1. mmap() is the API that is used to support direct access to random
  *     access media under the following very restrictive conditions:
  *
- *     a. The filesystem supports the FIOC_MMAP ioctl command.  Any file
+ *     a. The filesystem implements the mmap file operation.  Any file
  *        system that maps files contiguously on the media should support
  *        this ioctl. (vs. file system that scatter files over the media
  *        in non-contiguous sectors).  As of this writing, ROMFS is the

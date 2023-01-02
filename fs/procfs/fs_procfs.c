@@ -253,6 +253,7 @@ const struct mountpt_operations procfs_operations =
   NULL,              /* seek */
   procfs_ioctl,      /* ioctl */
   NULL,              /* truncate */
+  NULL,              /* mmap */
 
   NULL,              /* sync */
   procfs_dup,        /* dup */

@@ -142,6 +142,7 @@ static const struct file_operations g_mtdnvs_fops =
   NULL,            /* Seek */
   mtdconfig_ioctl, /* Ioctl */
   NULL,            /* Truncate */
+  NULL,            /* Mmap */
   mtdconfig_poll   /* Poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* Unlink */

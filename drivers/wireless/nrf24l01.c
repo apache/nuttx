@@ -240,6 +240,7 @@ static const struct file_operations nrf24l01_fops =
   NULL,             /* seek */
   nrf24l01_ioctl,   /* ioctl */
   NULL,             /* truncate */
+  NULL,             /* mmap */
   nrf24l01_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */

@@ -92,6 +92,7 @@ static const struct file_operations g_batteryops =
   NULL,                /* seek */
   bat_charger_ioctl,   /* ioctl */
   NULL,                /* truncate */
+  NULL,                /* mmap */
   bat_charger_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL               /* unlink */

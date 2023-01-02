@@ -166,6 +166,7 @@ const struct file_operations g_rpmsgdev_ops =
   rpmsgdev_seek,          /* seek */
   rpmsgdev_ioctl,         /* ioctl */
   NULL,                   /* truncate */
+  NULL,                   /* mmap */
   rpmsgdev_poll           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                  /* unlink */

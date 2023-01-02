@@ -116,6 +116,7 @@ static const struct file_operations max11802_fops =
   NULL,             /* seek */
   max11802_ioctl,   /* ioctl */
   NULL,             /* truncate */
+  NULL,             /* mmap */
   max11802_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */

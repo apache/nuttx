@@ -80,6 +80,7 @@ static const struct file_operations g_signalfd_fileops =
   NULL,                 /* seek */
   NULL,                 /* ioctl */
   NULL,                 /* truncate */
+  NULL,                 /* mmap */
   signalfd_file_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                /* unlink */

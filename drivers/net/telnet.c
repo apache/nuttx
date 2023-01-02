@@ -191,6 +191,7 @@ static const struct file_operations g_telnet_fops =
   NULL,          /* seek */
   telnet_ioctl,  /* ioctl */
   NULL,          /* truncate */
+  NULL,          /* mmap */
   telnet_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
@@ -206,6 +207,7 @@ static const struct file_operations g_factory_fops =
   NULL,          /* seek */
   factory_ioctl, /* ioctl */
   NULL,          /* truncate */
+  NULL,          /* mmap */
   NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */

@@ -158,6 +158,7 @@ static const struct file_operations g_humidityops =
   NULL,          /* seek */
   hts221_ioctl,  /* ioctl */
   NULL,          /* truncate */
+  NULL,          /* mmap */
   hts221_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */

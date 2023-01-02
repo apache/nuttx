@@ -91,6 +91,7 @@ static const struct file_operations g_uart_bth4_ops =
   NULL,             /* seek */
   uart_bth4_ioctl,  /* ioctl */
   NULL,             /* truncate */
+  NULL,             /* mmap */
   uart_bth4_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */

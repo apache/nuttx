@@ -142,6 +142,7 @@ const struct mountpt_operations spiffs_operations =
   spiffs_seek,       /* seek */
   spiffs_ioctl,      /* ioctl */
   spiffs_truncate,   /* truncate */
+  NULL,              /* mmap */
 
   spiffs_sync,       /* sync */
   spiffs_dup,        /* dup */

@@ -67,6 +67,7 @@ const struct file_operations g_nxterm_drvrops =
   NULL,           /* seek */
   nxterm_ioctl,   /* ioctl */
   NULL,           /* truncate */
+  NULL,           /* mmap */
   nxterm_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , nxterm_unlink /* unlink */
@@ -84,6 +85,7 @@ const struct file_operations g_nxterm_drvrops =
   NULL,           /* seek */
   nxterm_ioctl,   /* ioctl */
   NULL,           /* truncate */
+  NULL,           /* mmap */
   NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , nxterm_unlink /* unlink */

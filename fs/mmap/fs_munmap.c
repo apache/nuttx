@@ -196,7 +196,7 @@ int file_munmap(FAR void *start, size_t length)
  *   1. mmap() is the API that is used to support direct access to random
  *     access media under the following very restrictive conditions:
  *
- *     a. The filesystem supports the FIOC_MMAP ioctl command.  Any file
+ *     a. The filesystem impelements the mmap file operation.  Any file
  *        system that maps files contiguously on the media should support
  *        this ioctl. (vs. file system that scatter files over the media
  *        in non-contiguous sectors).  As of this writing, ROMFS is the

@@ -297,6 +297,7 @@ static const struct file_operations g_xboxcontroller_fops =
   NULL,                     /* seek */
   usbhost_ioctl,            /* ioctl */
   NULL,                     /* truncate */
+  NULL,                     /* mmap */
   usbhost_poll              /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                    /* unlink */

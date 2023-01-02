@@ -162,6 +162,7 @@ const struct mountpt_operations rpmsgfs_operations =
   rpmsgfs_seek,          /* seek */
   rpmsgfs_ioctl,         /* ioctl */
   rpmsgfs_ftruncate,     /* ftruncate */
+  NULL,                  /* mmap */
 
   rpmsgfs_sync,          /* sync */
   rpmsgfs_dup,           /* dup */
