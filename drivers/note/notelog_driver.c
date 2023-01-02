@@ -79,7 +79,7 @@ static void notelog_irqhandler(FAR struct note_driver_s *drv, int irq,
  * Private Data
  ****************************************************************************/
 
-static struct note_driver_ops_s g_notelog_ops =
+static const struct note_driver_ops_s g_notelog_ops =
 {
   NULL,                  /* add */
   notelog_start,         /* start */
