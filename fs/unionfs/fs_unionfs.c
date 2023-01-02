@@ -222,8 +222,8 @@ const struct mountpt_operations unionfs_operations =
   unionfs_write,       /* write */
   unionfs_seek,        /* seek */
   unionfs_ioctl,       /* ioctl */
-  unionfs_truncate,    /* truncate */
   NULL,                /* mmap */
+  unionfs_truncate,    /* truncate */
 
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */

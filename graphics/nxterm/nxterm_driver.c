@@ -66,8 +66,8 @@ const struct file_operations g_nxterm_drvrops =
   nxterm_write,   /* write */
   NULL,           /* seek */
   nxterm_ioctl,   /* ioctl */
-  NULL,           /* truncate */
   NULL,           /* mmap */
+  NULL,           /* truncate */
   nxterm_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , nxterm_unlink /* unlink */
@@ -84,8 +84,8 @@ const struct file_operations g_nxterm_drvrops =
   nxterm_write,   /* write */
   NULL,           /* seek */
   nxterm_ioctl,   /* ioctl */
-  NULL,           /* truncate */
   NULL,           /* mmap */
+  NULL,           /* truncate */
   NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , nxterm_unlink /* unlink */

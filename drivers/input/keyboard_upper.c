@@ -88,8 +88,8 @@ static const struct file_operations g_keyboard_fops =
   keyboard_write, /* write */
   NULL,           /* seek */
   NULL,           /* ioctl */
-  NULL,           /* truncate */
   NULL,           /* mmap */
+  NULL,           /* truncate */
   keyboard_poll   /* poll */
 };
 

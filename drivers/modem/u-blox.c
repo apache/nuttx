@@ -114,8 +114,8 @@ static const struct file_operations ubxmdm_fops =
   ubxmdm_write, /* write */
   NULL,         /* seek */
   ubxmdm_ioctl, /* ioctl */
-  NULL,         /* truncate */
   NULL,         /* mmap */
+  NULL,         /* truncate */
   ubxmdm_poll   /* poll */
 };
 

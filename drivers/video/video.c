@@ -287,7 +287,6 @@ static const struct file_operations g_video_fops =
   video_write,              /* write */
   NULL,                     /* seek */
   video_ioctl,              /* ioctl */
-  NULL,                     /* truncate */
   video_mmap,               /* mmap */
 };
 
