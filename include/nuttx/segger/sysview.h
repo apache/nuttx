@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sysview_initialize
+ * Name: note_sysview_initialize
  *
  * Description:
  *   Initializes the SYSVIEW module.
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SEGGER_SYSVIEW
-int sysview_initialize(void);
+int note_sysview_initialize(void);
 #endif
 
 #endif /* __INCLUDE_NUTTX_SEGGER_SYSVIEW_H */
