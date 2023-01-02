@@ -185,6 +185,7 @@ const struct mountpt_operations cromfs_operations =
   NULL,              /* seek */
   cromfs_ioctl,      /* ioctl */
   NULL,              /* truncate */
+  NULL,              /* mmap */
 
   NULL,              /* sync */
   cromfs_dup,        /* dup */

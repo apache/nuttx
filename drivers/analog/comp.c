@@ -66,6 +66,7 @@ static const struct file_operations comp_fops =
   NULL,                         /* seek */
   comp_ioctl,                   /* ioctl */
   NULL,                         /* truncate */
+  NULL,                         /* mmap */
   comp_poll                     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                        /* unlink */

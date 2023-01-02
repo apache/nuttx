@@ -48,6 +48,7 @@ static const struct file_operations g_fifo_fops =
   NULL,                /* seek */
   pipecommon_ioctl,    /* ioctl */
   NULL,                /* truncate */
+  NULL,                /* mmap */
   pipecommon_poll      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pipecommon_unlink  /* unlink */

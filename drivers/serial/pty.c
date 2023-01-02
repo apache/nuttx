@@ -128,6 +128,7 @@ static const struct file_operations g_pty_fops =
   NULL,          /* seek */
   pty_ioctl,     /* ioctl */
   NULL,          /* truncate */
+  NULL,          /* mmap */
   pty_poll       /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pty_unlink   /* unlink */

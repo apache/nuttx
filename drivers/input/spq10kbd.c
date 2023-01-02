@@ -256,6 +256,7 @@ static const struct file_operations g_hidkbd_fops =
   NULL,                      /* seek */
   NULL,                      /* ioctl */
   NULL,                      /* truncate */
+  NULL,                      /* mmap */
   spq10kbd_poll              /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                     /* unlink */

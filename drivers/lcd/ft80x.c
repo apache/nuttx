@@ -135,6 +135,7 @@ static const struct file_operations g_ft80x_fops =
   NULL,          /* seek */
   ft80x_ioctl,   /* ioctl */
   NULL,          /* truncate */
+  NULL,          /* mmap */
   NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , ft80x_unlink /* unlink */
