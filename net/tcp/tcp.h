@@ -450,6 +450,16 @@ void tcp_initialize(void);
 FAR struct tcp_conn_s *tcp_alloc(uint8_t domain);
 
 /****************************************************************************
+ * Name: tcp_free_rx_buffers
+ *
+ * Description:
+ *   Free rx buffer of a connection
+ *
+ ****************************************************************************/
+
+void tcp_free_rx_buffers(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
  * Name: tcp_free
  *
  * Description:

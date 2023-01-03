@@ -236,6 +236,10 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
        conn->tcpstateflags == TCP_LAST_ACK) &&
       (conn->clscb = tcp_callback_alloc(conn)) != NULL)
     {
+      /* Free rx buffers of the connection immediately */
+
+      tcp_free_rx_buffers(conn);
+
       /* Set up to receive TCP data event callbacks */
 
       conn->clscb->flags = TCP_NEWDATA | TCP_ACKDATA |

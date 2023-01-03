@@ -747,6 +747,38 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 }
 
 /****************************************************************************
+ * Name: tcp_free_rx_buffers
+ *
+ * Description:
+ *   Free rx buffer of a connection
+ *
+ ****************************************************************************/
+
+void tcp_free_rx_buffers(FAR struct tcp_conn_s *conn)
+{
+  /* Release any read-ahead buffers attached to the connection */
+
+  iob_free_chain(conn->readahead);
+  conn->readahead = NULL;
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+  /* Release any out-of-order buffers */
+
+  if (conn->nofosegs > 0)
+    {
+      int i;
+
+      for (i = 0; i < conn->nofosegs; i++)
+        {
+          iob_free_chain(conn->ofosegs[i].data);
+        }
+
+      conn->nofosegs = 0;
+    }
+#endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
+}
+
+/****************************************************************************
  * Name: tcp_free
  *
  * Description:
@@ -801,26 +833,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       dq_rem(&conn->sconn.node, &g_active_tcp_connections);
     }
 
-  /* Release any read-ahead buffers attached to the connection */
-
-  iob_free_chain(conn->readahead);
-  conn->readahead = NULL;
-
-#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
-  /* Release any out-of-order buffers */
-
-  if (conn->nofosegs > 0)
-    {
-      int i;
-
-      for (i = 0; i < conn->nofosegs; i++)
-        {
-          iob_free_chain(conn->ofosegs[i].data);
-        }
-
-      conn->nofosegs = 0;
-    }
-#endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
+  tcp_free_rx_buffers(conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
