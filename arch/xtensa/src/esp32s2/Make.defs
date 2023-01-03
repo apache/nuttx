@@ -77,6 +77,10 @@ ifeq ($(CONFIG_ESP32S2_RT_TIMER),y)
 CHIP_CSRCS += esp32s2_rt_timer.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_TOUCH),y)
+CHIP_CSRCS += esp32s2_touch.c
+endif
+
 ifeq ($(CONFIG_ESP32S2_ONESHOT),y)
 CHIP_CSRCS += esp32s2_oneshot.c
 ifeq ($(CONFIG_ONESHOT),y)
