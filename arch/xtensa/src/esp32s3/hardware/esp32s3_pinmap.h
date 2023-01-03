@@ -34,6 +34,11 @@
  * speed performance.
  */
 
+/* USB Serial JTAG */
+
+#define JTAG_IOMUX_USB_DM       (19)
+#define JTAG_IOMUX_USB_DP       (20)
+
 /* UART0 */
 
 #define UART0_IOMUX_TXPIN       (43)
