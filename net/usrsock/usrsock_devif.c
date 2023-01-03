@@ -625,7 +625,7 @@ ssize_t usrsock_iovec_put(FAR struct iovec *iov, int iovcnt, size_t pos,
 }
 
 /****************************************************************************
- * Name: usrsock_request() - finish usrsock's request
+ * Name: usrsock_do_request() - finish usrsock's request
  ****************************************************************************/
 
 int usrsock_do_request(FAR struct usrsock_conn_s *conn,
@@ -657,7 +657,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
   req->ackxid = req_head->xid;
 
   ret = usrsock_request(iov, iovcnt);
-  if (ret == OK)
+  if (ret >= 0)
     {
       /* Wait ack for request. */
 

@@ -36,3 +36,13 @@ DEPPATH += --dep-path usrsock
 VPATH += :usrsock
 
 endif
+
+ifeq ($(CONFIG_NET_USRSOCK_RPMSG_SERVER),y)
+
+CSRCS += usrsock_rpmsg_server.c
+
+# Include User Socket Driver build support
+
+DEPPATH += --dep-path usrsock
+VPATH += :usrsock
+endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usrsock/usrsock_rpmsg.h
+ * include/nuttx/usrsock/usrsock_rpmsg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_USRSOCK_USRSOCK_RPMSG_H
-#define __DRIVERS_USRSOCK_USRSOCK_RPMSG_H
+#ifndef __INCLUDE_NUTTX_USRSOCK_USRSOCK_RPMSG_H
+#define __INCLUDE_NUTTX_USRSOCK_USRSOCK_RPMSG_H
 
 /****************************************************************************
  * Included Files
@@ -33,8 +33,10 @@
 
 #define USRSOCK_RPMSG_EPT_NAME      "rpmsg-usrsock"
 
-#define USRSOCK_RPMSG_DNS_REQUEST    USRSOCK_REQUEST__MAX
-#define USRSOCK_RPMSG_DNS_EVENT      127
+#define USRSOCK_RPMSG_DNS_REQUEST   USRSOCK_REQUEST__MAX
+
+#define USRSOCK_RPMSG_DNS_EVENT     126
+#define USRSOCK_RPMSG_FRAG_RESPONSE 127
 
 /****************************************************************************
  * Public Types
@@ -58,4 +60,45 @@ begin_packed_struct struct usrsock_rpmsg_dns_event_s
   uint16_t addrlen;
 } end_packed_struct;
 
-#endif /* __DRIVERS_USRSOCK_USRSOCK_RPMSG_H */
+/* fragemented ack message */
+
+begin_packed_struct struct usrsock_message_frag_ack_s
+{
+  struct usrsock_message_req_ack_s reqack;
+
+  /* head.result => positive buflen, negative error-code. */
+
+  uint32_t datalen; /* fragment's payload length */
+} end_packed_struct;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: usrsock_rpmsg_server_initialize()
+ *
+ * Description:
+ *   Initialize the User Socket rpmsg server.  Called once and only
+ *   from the driver layer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_USRSOCK_RPMSG_SERVER
+int usrsock_rpmsg_server_initialize(void);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_USRSOCK_USRSOCK_RPMSG_H */
