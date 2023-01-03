@@ -49,7 +49,11 @@ struct mm_map_entry_s
   off_t offset;
   int prot;
   int flags;
-  FAR void *priv;
+  union
+  {
+    FAR void *p;
+    int i;
+  } priv;
 
   /* Drivers which register mappings may also
    * implement the unmap function to undo anything done in mmap.
