@@ -19,19 +19,17 @@
 ############################################################################
 
 ifeq ($(CONFIG_ARMV7R_MEMCPY),y)
-
 ASRCS += arch_memcpy.S
-
-DEPPATH += --dep-path machine/arm/armv7-r/gnu
-VPATH += :machine/arm/armv7-r/gnu
-
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
-
 CSRCS += arch_elf.c
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+DEPPATH += --dep-path machine/arm/armv7-r/gnu
+VPATH += :machine/arm/armv7-r/gnu
+endif
 
 DEPPATH += --dep-path machine/arm/armv7-r
 VPATH += :machine/arm/armv7-r
-
-endif

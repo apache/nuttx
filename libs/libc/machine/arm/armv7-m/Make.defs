@@ -46,14 +46,12 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
-ifeq ($(CONFIG_MACHINE_OPTS_ARMV7M),y)
 ifeq ($(CONFIG_LIBM_ARCH_FABSF),y)
 CSRCS += arch_fabsf.c
 endif
 
 ifeq ($(CONFIG_LIBM_ARCH_SQRTF),y)
 CSRCS += arch_sqrtf.c
-endif
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)

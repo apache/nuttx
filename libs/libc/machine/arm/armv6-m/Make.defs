@@ -19,10 +19,8 @@
 ############################################################################
 
 ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
-
 CSRCS += arch_elf.c
+endif
 
 DEPPATH += --dep-path machine/arm/armv6-m
 VPATH += :machine/arm/armv6-m
-
-endif
