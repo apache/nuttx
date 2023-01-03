@@ -809,7 +809,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
    */
 
   if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
-      (flags & (TCP_POLL | TCP_REXMIT)) &&
+      ((flags & TCP_NEWDATA) == 0) &&
+      (flags & (TCP_POLL | TCP_REXMIT | TCP_ACKDATA)) &&
       !(sq_empty(&conn->write_q)) &&
       conn->snd_wnd > 0)
     {
