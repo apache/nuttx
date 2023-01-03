@@ -60,6 +60,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32_SPI2
+#  if defined(CONFIG_ESP32_SPI2_MASTER_IO_RW)
+#    define ESP32_SPI2_IO   ESP32_SPI_IO_RW
+#  elif defined(CONFIG_ESP32_SPI2_MASTER_IO_RO)
+#    define ESP32_SPI2_IO   ESP32_SPI_IO_R
+#  elif defined(CONFIG_ESP32_SPI2_MASTER_IO_WO)
+#    define ESP32_SPI2_IO   ESP32_SPI_IO_W
+#  endif
+#endif
+
+#ifdef CONFIG_ESP32_SPI3
+#  if defined(CONFIG_ESP32_SPI3_MASTER_IO_RW)
+#    define ESP32_SPI3_IO   ESP32_SPI_IO_RW
+#  elif defined(CONFIG_ESP32_SPI3_MASTER_IO_RO)
+#    define ESP32_SPI3_IO   ESP32_SPI_IO_R
+#  elif defined(CONFIG_ESP32_SPI3_MASTER_IO_WO)
+#    define ESP32_SPI3_IO   ESP32_SPI_IO_W
+#  endif
+#endif
+
 /* SPI DMA RX/TX description number */
 
 #define SPI_DMADESC_NUM     (CONFIG_SPI_DMADESC_NUM)
@@ -130,6 +150,8 @@ struct esp32_spi_config_s
   uint32_t miso_outsig;       /* SPI MISO output signal index */
   uint32_t clk_insig;         /* SPI CLK input signal index */
   uint32_t clk_outsig;        /* SPI CLK output signal index */
+
+  uint32_t flags;             /* SPI supports features */
 };
 
 struct esp32_spi_priv_s
@@ -235,7 +257,8 @@ static const struct esp32_spi_config_s esp32_spi2_config =
   .miso_insig   = HSPIQ_IN_IDX,
   .miso_outsig  = HSPIQ_OUT_IDX,
   .clk_insig    = HSPICLK_IN_IDX,
-  .clk_outsig   = HSPICLK_OUT_IDX
+  .clk_outsig   = HSPICLK_OUT_IDX,
+  .flags        = ESP32_SPI2_IO
 };
 
 static const struct spi_ops_s esp32_spi2_ops =
@@ -311,7 +334,8 @@ static const struct esp32_spi_config_s esp32_spi3_config =
   .miso_insig   = VSPIQ_IN_IDX,
   .miso_outsig  = VSPIQ_OUT_IDX,
   .clk_insig    = VSPICLK_IN_IDX,
-  .clk_outsig   = VSPICLK_OUT_MUX_IDX
+  .clk_outsig   = VSPICLK_OUT_MUX_IDX,
+  .flags        = ESP32_SPI3_IO
 };
 
 static const struct spi_ops_s esp32_spi3_ops =
@@ -431,11 +455,15 @@ static inline bool esp32_spi_iomux(struct esp32_spi_priv_s *priv)
 
   if (cfg->id == 2)
     {
-      if (cfg->mosi_pin == SPI2_IOMUX_MOSIPIN &&
+      if ((!(cfg->flags & ESP32_SPI_IO_W) ||
+           cfg->mosi_pin == SPI2_IOMUX_MOSIPIN) &&
+
 #ifndef CONFIG_ESP32_SPI_SWCS
           cfg->cs_pin == SPI2_IOMUX_CSPIN &&
 #endif
-          cfg->miso_pin == SPI2_IOMUX_MISOPIN &&
+          (!(cfg->flags & ESP32_SPI_IO_R) ||
+           cfg->miso_pin == SPI2_IOMUX_MISOPIN) &&
+
           cfg->clk_pin == SPI2_IOMUX_CLKPIN)
         {
           mapped = true;
@@ -443,11 +471,15 @@ static inline bool esp32_spi_iomux(struct esp32_spi_priv_s *priv)
     }
   else if (cfg->id == 3)
     {
-      if (cfg->mosi_pin == SPI3_IOMUX_MOSIPIN &&
+      if ((!(cfg->flags & ESP32_SPI_IO_W) ||
+           cfg->mosi_pin == SPI3_IOMUX_MOSIPIN) &&
+
 #ifndef CONFIG_ESP32_SPI_SWCS
           cfg->cs_pin == SPI3_IOMUX_CSPIN &&
 #endif
-          cfg->miso_pin == SPI3_IOMUX_MISOPIN &&
+          (!(cfg->flags & ESP32_SPI_IO_R) ||
+           cfg->miso_pin == SPI3_IOMUX_MISOPIN) &&
+
           cfg->clk_pin == SPI3_IOMUX_CLKPIN)
         {
           mapped = true;
@@ -1270,9 +1302,17 @@ static void esp32_spi_init(struct spi_dev_s *dev)
   uint32_t regval;
 
   esp32_gpiowrite(config->cs_pin, 1);
-  esp32_gpiowrite(config->mosi_pin, 1);
-  esp32_gpiowrite(config->miso_pin, 1);
   esp32_gpiowrite(config->clk_pin, 1);
+
+  if (config->flags & ESP32_SPI_IO_W)
+    {
+      esp32_gpiowrite(config->mosi_pin, 1);
+    }
+
+  if (config->flags & ESP32_SPI_IO_R)
+    {
+      esp32_gpiowrite(config->miso_pin, 1);
+    }
 
 #ifdef CONFIG_ESP32_SPI_SWCS
   esp32_configgpio(config->cs_pin, OUTPUT);
@@ -1285,14 +1325,21 @@ static void esp32_spi_init(struct spi_dev_s *dev)
       esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_2);
       esp32_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
 #endif
-      esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_2);
-      esp32_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
-
-      esp32_configgpio(config->miso_pin, INPUT_FUNCTION_2 | PULLUP);
-      esp32_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
       esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_2);
       esp32_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
+
+      if (config->flags & ESP32_SPI_IO_W)
+        {
+          esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_2);
+          esp32_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
+
+      if (config->flags & ESP32_SPI_IO_R)
+        {
+          esp32_configgpio(config->miso_pin, INPUT_FUNCTION_2 | PULLUP);
+          esp32_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
     }
   else
     {
@@ -1301,14 +1348,20 @@ static void esp32_spi_init(struct spi_dev_s *dev)
       esp32_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
 #endif
 
-      esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_3);
-      esp32_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
-
-      esp32_configgpio(config->miso_pin, INPUT_FUNCTION_3 | PULLUP);
-      esp32_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
-
       esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_3);
       esp32_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+
+      if (config->flags & ESP32_SPI_IO_W)
+        {
+          esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_3);
+          esp32_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+        }
+
+      if (config->flags & ESP32_SPI_IO_R)
+        {
+          esp32_configgpio(config->miso_pin, INPUT_FUNCTION_3 | PULLUP);
+          esp32_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+        }
     }
 
   modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, config->clk_bit);

@@ -1158,6 +1158,37 @@ config ESP32_SPI2_MISOPIN
 	default 12
 	range 0 39
 
+choice ESP32_SPI2_MASTER_IO
+	prompt "SPI2 master I/O mode"
+	default ESP32_SPI2_MASTER_IO_RW
+
+config ESP32_SPI2_MASTER_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI2_MASTER_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI2_MASTER_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI2_MASTER_IO
+
+choice ESP32_SPI2_SLAVE_IO
+	prompt "SPI2 slave I/O mode"
+	default ESP32_SPI2_SLAVE_IO_RW
+	depends on SPI_SLAVE
+
+config ESP32_SPI2_SLAVE_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI2_SLAVE_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI2_SLAVE_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI2_SLAVE_IO
+
 endif # ESP32_SPI2
 
 if ESP32_SPI3
@@ -1181,6 +1212,37 @@ config ESP32_SPI3_MISOPIN
 	int "SPI3 MISO Pin"
 	default 19
 	range 0 39
+
+choice ESP32_SPI3_MASTER_IO
+	prompt "SPI3 master I/O mode"
+	default ESP32_SPI3_MASTER_IO_RW
+
+config ESP32_SPI3_MASTER_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI3_MASTER_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI3_MASTER_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI3_MASTER_IO
+
+choice ESP32_SPI3_SLAVE_IO
+	prompt "SPI3 slave I/O mode"
+	default ESP32_SPI3_SLAVE_IO_RW
+	depends on SPI_SLAVE
+
+config ESP32_SPI3_SLAVE_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI3_SLAVE_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI3_SLAVE_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI3_SLAVE_IO
 
 endif # ESP32_SPI3
 
