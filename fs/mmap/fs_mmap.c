@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mm/map.h>
 
 #include <sys/types.h>
 #include <sys/mman.h>

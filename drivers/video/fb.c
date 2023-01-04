@@ -39,7 +39,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/video/fb.h>
-#include <nuttx/mm/map.h>
 
 /****************************************************************************
  * Private Types
