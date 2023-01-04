@@ -630,9 +630,9 @@ int up_backtrace(struct tcb_s *tcb,
           ret = backtrace_unwind(&frame, buffer, size, &skip);
           if (ret < size)
             {
-              frame.fp = rtcb->xcp.regs[REG_FP];
-              frame.sp = rtcb->xcp.regs[REG_SP];
-              frame.pc = rtcb->xcp.regs[REG_PC];
+              frame.fp = CURRENT_REGS[REG_FP];
+              frame.sp = CURRENT_REGS[REG_SP];
+              frame.pc = CURRENT_REGS[REG_PC];
               frame.lr = 0;
               frame.stack_top = (unsigned long)rtcb->stack_base_ptr +
                                                rtcb->adj_stack_size;
