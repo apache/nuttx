@@ -262,7 +262,7 @@ int up_backtrace(struct tcb_s *tcb,
               ret += backtrace_branch((unsigned long)
                                       rtcb->stack_base_ptr +
                                       rtcb->adj_stack_size,
-                                      rtcb->xcp.regs[REG_SP],
+                                      CURRENT_REGS[REG_SP],
                                       &buffer[ret],
                                       size - ret, &skip);
             }
