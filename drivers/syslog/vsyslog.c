@@ -39,8 +39,22 @@
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
+static FAR const char * const g_priority_color[] =
+  {
+    "\e[31;1;5m", /* LOG_EMERG, Red, Bold, Blinking */
+    "\e[31;1m",   /* LOG_ALERT, Red, Bold */
+    "\e[31;1m",   /* LOG_CRIT, Red, Bold */
+    "\e[31m",     /* LOG_ERR, Red */
+    "\e[33m",     /* LOG_WARNING, Yellow */
+    "\e[1m",      /* LOG_NOTICE, Bold */
+    "",           /* LOG_INFO, Normal */
+    "\e[2m",      /* LOG_DEBUG, Dim */
+  };
+#endif
+
 #if defined(CONFIG_SYSLOG_PRIORITY)
-static FAR const char * g_priority_str[] =
+static FAR const char * const g_priority_str[] =
   {
     "EMERG", "ALERT", "CRIT", "ERROR",
     "WARN", "NOTICE", "INFO", "DEBUG"
@@ -163,39 +177,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Set the terminal style according to message priority. */
 
-  switch (priority)
-    {
-      case LOG_EMERG:   /* Red, Bold, Blinking */
-        ret += lib_sprintf(&stream.public, "\e[31;1;5m");
-        break;
-
-      case LOG_ALERT:   /* Red, Bold */
-        ret += lib_sprintf(&stream.public, "\e[31;1m");
-        break;
-
-      case LOG_CRIT:    /* Red, Bold */
-        ret += lib_sprintf(&stream.public, "\e[31;1m");
-        break;
-
-      case LOG_ERR:     /* Red */
-        ret += lib_sprintf(&stream.public, "\e[31m");
-        break;
-
-      case LOG_WARNING: /* Yellow */
-        ret += lib_sprintf(&stream.public, "\e[33m");
-        break;
-
-      case LOG_NOTICE:  /* Bold */
-        ret += lib_sprintf(&stream.public, "\e[1m");
-        break;
-
-      case LOG_INFO:    /* Normal */
-        break;
-
-      case LOG_DEBUG:   /* Dim */
-        ret += lib_sprintf(&stream.public, "\e[2m");
-        break;
-    }
+  ret += lib_sprintf(&stream.public, "%s", g_priority_color[priority]);
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
@@ -215,7 +197,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   tcb = nxsched_get_tcb(gettid());
   ret += lib_sprintf(&stream.public, "%s: ",
-                     (tcb != NULL) ? tcb->name : "(null)");
+                     tcb != NULL ? tcb->name : "(null)");
 #endif
 
   /* Generate the output */
@@ -230,7 +212,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style back to normal. */
 
-  ret += lib_sprintf(&stream.public, "\e[0m");
+  ret += lib_stream_puts(&stream.public, "\e[0m", sizeof("\e[0m"));
 #endif
 
   /* Flush and destroy the syslog stream buffer */
