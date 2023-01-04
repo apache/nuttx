@@ -40,43 +40,65 @@ IF_HOST=$1
 STATUS=$2
 
 IF_BRIDGE=nuttx0
-IP_NET="10.0.1.0/24"
-IP_NETMASK="255.255.255.0"
-IP_BROADCAST="10.0.0.255"
-IP_HOST="10.0.1.1"
-IP_NUTTX="10.0.1.2"
+IPv4_HOST="10.0.1.1/24"
+IPv6_HOST="fc00::1/112"
+IPv6_ENABLE=true
+
+call_all() {
+  FUNC=$1
+
+  IPTABLES="iptables"
+  IP_HOST=$IPv4_HOST
+
+  # call function
+  $FUNC
+
+  # enable forward to make sure nat works
+  sysctl -w net.ipv4.ip_forward=1
+
+  if [ "$IPv6_ENABLE" == "true" ]; then
+    IPTABLES="ip6tables"
+    IP_HOST=$IPv6_HOST
+
+    # call function
+    $FUNC
+
+    # enable forward to make sure nat works
+    sysctl -w net.ipv6.conf.all.forwarding=1
+  fi
+}
+
+net_on() {
+  # add address to the bridge, with CIDR specified, netmask/route will be automatically added.
+  ip addr add $IP_HOST dev $IF_BRIDGE
+
+  # nat to allow NuttX to access the internet
+  $IPTABLES -t nat -A POSTROUTING -o $IF_HOST -j MASQUERADE
+  $IPTABLES -A FORWARD -i $IF_HOST -o $IF_BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
+  $IPTABLES -A FORWARD -i $IF_BRIDGE -o $IF_HOST -j ACCEPT
+}
+
+net_off() {
+  ip addr del $IP_HOST dev $IF_BRIDGE
+
+  # delete nat rules to clean up
+  $IPTABLES -t nat -D POSTROUTING -o $IF_HOST -j MASQUERADE
+  $IPTABLES -D FORWARD -i $IF_HOST -o $IF_BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
+  $IPTABLES -D FORWARD -i $IF_BRIDGE -o $IF_HOST -j ACCEPT
+}
+
+# remove all configs first to avoid double configure
+call_all net_off
 
 if [ "$STATUS" == "on" ]; then
     ip link add $IF_BRIDGE type bridge
-    ifconfig $IF_BRIDGE $IP_HOST
     ifconfig $IF_BRIDGE up
     ifconfig -a
-    ip addr add $IP_HOST dev $IF_BRIDGE
-    ifconfig $IF_BRIDGE netmask $IP_NETMASK
-    ip route delete $IP_NET
-    ip route add $IP_NET dev $IF_BRIDGE src $IP_HOST
-    ip route add $IP_NUTTX/32 dev $IF_BRIDGE src $IP_HOST
 
-    # nat to allow NuttX to access the internet
-    iptables -t nat -A POSTROUTING -o $IF_HOST -j MASQUERADE
-    iptables -A FORWARD -i $IF_HOST -o $IF_BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
-    iptables -A FORWARD -i $IF_BRIDGE -o $IF_HOST -j ACCEPT
-
-    # enable forward to make sure nat works
-    sysctl -w net.ipv4.ip_forward=1
-
-    ip route show
+    call_all net_on
 else
-    ip route delete $IP_NET
-    ip route delete $IP_NUTTX/32
-
-    # delete nat rules to clean up
-    iptables -t nat -D POSTROUTING -o $IF_HOST -j MASQUERADE
-    iptables -D FORWARD -i $IF_HOST -o $IF_BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
-    iptables -D FORWARD -i $IF_BRIDGE -o $IF_HOST -j ACCEPT
-
     ip link delete $IF_BRIDGE type bridge
-
-    ip route show
 fi
 
+ip route show
+ip -6 route show
