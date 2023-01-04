@@ -258,8 +258,8 @@ struct icmpv6_router_advertise_s
   uint8_t  hoplimit;         /* Current hop limit */
   uint8_t  flags;            /* See ICMPv6_RADV_FLAG_* definitions */
   uint16_t lifetime;         /* Router lifetime */
-  uint32_t reachable;        /* Reachable time */
-  uint32_t retrans;          /* Retransmission timer */
+  uint16_t reachable[2];     /* Reachable time */
+  uint16_t retrans[2];       /* Retransmission timer */
                              /* Options begin here */
 };
 
@@ -329,8 +329,8 @@ struct icmpv6_prefixinfo_s
   uint8_t  optlen;           /* "   " ": Option length: 4 octets */
   uint8_t  preflen;          /* "   " ": Prefix length */
   uint8_t  flags;            /* "   " ": Flags */
-  uint32_t vlifetime;        /* "   " ": Valid lifetime */
-  uint32_t plifetime;        /* Octet 2: Preferred lifetime */
+  uint16_t vlifetime[2];     /* "   " ": Valid lifetime */
+  uint16_t plifetime[2];     /* Octet 2: Preferred lifetime */
   uint16_t reserved[2];      /* "   " ": Reserved */
   uint16_t prefix[8];        /* Octets 3-4: Prefix */
 };
@@ -348,7 +348,7 @@ struct icmpv6_mtu_s
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_MTU */
   uint8_t  optlen;           /* "   " ": Option length: 1 octet */
   uint16_t reserved;         /* "   " ": Reserved */
-  uint32_t mtu;              /* "   " ": MTU */
+  uint16_t mtu[2];           /* "   " ": MTU */
 };
 
 /* The structure holding the ICMP statistics that are gathered if
