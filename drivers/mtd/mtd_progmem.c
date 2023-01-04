@@ -101,6 +101,8 @@ static struct progmem_dev_s g_progmem =
     progmem_write,
 #endif
     progmem_ioctl,
+    NULL,
+    NULL,
     "progmem",
   }
 };
