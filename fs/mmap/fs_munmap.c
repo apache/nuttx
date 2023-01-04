@@ -44,122 +44,6 @@
 
 static int file_munmap_(FAR void *start, size_t length, bool kernel)
 {
-#ifdef CONFIG_FS_RAMMAP
-  FAR struct fs_rammap_s *prev;
-  FAR struct fs_rammap_s *curr;
-  FAR void *newaddr;
-  unsigned int offset;
-  int ret;
-
-  /* Find a region containing this start and length in the list of regions */
-
-  ret = nxmutex_lock(&g_rammaps.lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Search the list of regions */
-
-  for (prev = NULL, curr = g_rammaps.head; curr;
-       prev = curr, curr = curr->flink)
-    {
-      /* Does this region include any part of the specified range? */
-
-      if ((uintptr_t)start < (uintptr_t)curr->addr + curr->length &&
-          (uintptr_t)start + length >= (uintptr_t)curr->addr)
-        {
-          break;
-        }
-    }
-
-  /* Did we find the region */
-
-  if (!curr)
-    {
-      ferr("ERROR: Region not found\n");
-      ret = -EINVAL;
-      goto errout_with_lock;
-    }
-
-  /* Get the offset from the beginning of the region and the actual number
-   * of bytes to "unmap".  All mappings must extend to the end of the region.
-   * There is no support for free a block of memory but leaving a block of
-   * memory at the end.  This is a consequence of using kumm_realloc() to
-   * simulate the unmapping.
-   */
-
-  offset = start - curr->addr;
-  if (offset + length < curr->length)
-    {
-      ferr("ERROR: Cannot umap without unmapping to the end\n");
-      ret = -ENOSYS;
-      goto errout_with_lock;
-    }
-
-  /* Okay.. the region is beging umapped to the end.  Make sure the length
-   * indicates that.
-   */
-
-  length = curr->length - offset;
-
-  /* Are we unmapping the entire region (offset == 0)? */
-
-  if (length >= curr->length)
-    {
-      /* Yes.. remove the mapping from the list */
-
-      if (prev)
-        {
-          prev->flink = curr->flink;
-        }
-      else
-        {
-          g_rammaps.head = curr->flink;
-        }
-
-      /* Then free the region */
-
-      if (kernel)
-        {
-          kmm_free(curr);
-        }
-      else
-        {
-          kumm_free(curr);
-        }
-    }
-
-  /* No.. We have been asked to "unmap' only a portion of the memory
-   * (offset > 0).
-   */
-
-  else
-    {
-      if (kernel)
-        {
-          newaddr = kmm_realloc(curr->addr,
-                               sizeof(struct fs_rammap_s) + length);
-        }
-      else
-        {
-          newaddr = kumm_realloc(curr->addr,
-                                sizeof(struct fs_rammap_s) + length);
-        }
-
-      DEBUGASSERT(newaddr == (FAR void *)(curr->addr));
-      UNUSED(newaddr); /* May not be used */
-      curr->length = length;
-    }
-
-  nxmutex_unlock(&g_rammaps.lock);
-  return OK;
-
-errout_with_lock:
-  nxmutex_unlock(&g_rammaps.lock);
-  return ret;
-#else
-
   FAR struct tcb_s *tcb = nxsched_self();
   FAR struct task_group_s *group = tcb->group;
   FAR struct mm_map_entry_s *entry = NULL;
@@ -185,7 +69,6 @@ errout_with_lock:
     }
 
   return ret;
-#endif /* CONFIG_FS_RAMMAP */
 }
 
 /****************************************************************************
