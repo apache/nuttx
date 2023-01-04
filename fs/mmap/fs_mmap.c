@@ -135,7 +135,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
        * do much better in the KERNEL build using the MMU.
        */
 
-      return rammap(filep, length, offset, kernel, mapped);
+      return rammap(filep, &entry, kernel);
 #endif
     }
 
@@ -162,7 +162,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
        * do much better in the KERNEL build using the MMU.
        */
 
-      return rammap(filep, length, offset, kernel, mapped);
+      return rammap(filep, &entry, kernel);
 #else
       ferr("ERROR: mmap not supported \n");
       return -ENOSYS;

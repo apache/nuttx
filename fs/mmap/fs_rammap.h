@@ -18,25 +18,7 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_MMAP_FS_RAMMAP_H
-#define __FS_MMAP_FS_RAMMAP_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <nuttx/mutex.h>
-
-#ifdef CONFIG_FS_RAMMAP
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This structure describes one file that has been copied to memory and
+/* This driver manages files that have been copied to memory and
  * managed as a share-able "memory mapped" file.  This functionality is
  * intended to provide a substitute for memory mapped files for architectures
  * that do not have MMUs and, hence, cannot support on demand paging of
@@ -53,29 +35,27 @@
  * - There are not access privileges.
  */
 
-struct fs_rammap_s
-{
-  struct fs_rammap_s *flink;       /* Implements a singly linked list */
-  FAR void           *addr;        /* Start of allocated memory */
-  size_t              length;      /* Length of region */
-  off_t               offset;      /* File offset */
-};
+#ifndef __FS_MMAP_FS_RAMMAP_H
+#define __FS_MMAP_FS_RAMMAP_H
 
-/* This structure defines all "mapped" files */
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
-struct fs_allmaps_s
-{
-  mutex_t             lock;        /* Provides exclusive access the list */
-  struct fs_rammap_s *head;        /* List of mapped files */
-};
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <nuttx/mm/map.h>
+
+#ifdef CONFIG_FS_RAMMAP
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-/* This is the list of all mapped files */
-
-extern struct fs_allmaps_s g_rammaps;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -107,8 +87,8 @@ extern struct fs_allmaps_s g_rammaps;
  *
  ****************************************************************************/
 
-int rammap(FAR struct file *filep, size_t length,
-           off_t offset, bool kernel, FAR void **mapped);
+int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
+           bool kernel);
 
 #endif /* CONFIG_FS_RAMMAP */
 #endif /* __FS_MMAP_FS_RAMMAP_H */
