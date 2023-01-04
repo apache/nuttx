@@ -147,8 +147,10 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   adv->hoplimit     = 64;                      /* Current hop limit */
   adv->flags        = ICMPv6_RADV_FLAG_M;      /* Managed address flag. */
   adv->lifetime     = HTONS(1800);             /* Router lifetime */
-  adv->reachable    = 0;                       /* Reachable time */
-  adv->retrans      = 0;                       /* Retransmission timer */
+  adv->reachable[0] = 0;                       /* Reachable time */
+  adv->reachable[1] = 0;
+  adv->retrans[0]   = 0;                       /* Retransmission timer */
+  adv->retrans[1]   = 0;
 
   /* Set up the source address option */
 
@@ -167,19 +169,22 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   mtu->opttype      = ICMPv6_OPT_MTU;
   mtu->optlen       = 1;
   mtu->reserved     = 0;
-  mtu->mtu          = HTONL(dev->d_pktsize - dev->d_llhdrlen);
+  mtu->mtu[0]       = 0;
+  mtu->mtu[1]       = HTONS(dev->d_pktsize - dev->d_llhdrlen);
 
   /* Set up the prefix option */
 
-  prefix              = (FAR struct icmpv6_prefixinfo_s *)
-                        ((FAR uint8_t *)mtu + sizeof(struct icmpv6_mtu_s));
-  prefix->opttype     = ICMPv6_OPT_PREFIX;
-  prefix->optlen      = 4;
-  prefix->flags       = ICMPv6_PRFX_FLAG_L | ICMPv6_PRFX_FLAG_A;
-  prefix->vlifetime   = HTONL(2592000);
-  prefix->plifetime   = HTONL(604800);
-  prefix->reserved[0] = 0;
-  prefix->reserved[1] = 0;
+  prefix               = (FAR struct icmpv6_prefixinfo_s *)
+                         ((FAR uint8_t *)mtu + sizeof(struct icmpv6_mtu_s));
+  prefix->opttype      = ICMPv6_OPT_PREFIX;
+  prefix->optlen       = 4;
+  prefix->flags        = ICMPv6_PRFX_FLAG_L | ICMPv6_PRFX_FLAG_A;
+  prefix->vlifetime[0] = HTONS(2592000 >> 16);
+  prefix->vlifetime[1] = HTONS(2592000 & 0xffff);
+  prefix->plifetime[0] = HTONS(604800 >> 16);
+  prefix->plifetime[1] = HTONS(604800 & 0xffff);
+  prefix->reserved[0]  = 0;
+  prefix->reserved[1]  = 0;
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER_MANUAL
   /* Copy the configured prefex */

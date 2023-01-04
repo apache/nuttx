@@ -353,7 +353,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                   {
                     FAR struct icmpv6_mtu_s *mtuopt =
                                         (FAR struct icmpv6_mtu_s *)opt;
-                    dev->d_pktsize = NTOHL(mtuopt->mtu) + dev->d_llhdrlen;
+                    dev->d_pktsize = NTOHS(mtuopt->mtu[1]) + dev->d_llhdrlen;
                   }
                   break;
 
