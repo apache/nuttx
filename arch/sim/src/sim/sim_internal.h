@@ -354,7 +354,7 @@ int sim_bthcisock_loop(void);
 /* sim_audio.c **************************************************************/
 
 #ifdef CONFIG_SIM_SOUND
-struct audio_lowerhalf_s *sim_audio_initialize(bool playback);
+struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload);
 void sim_audio_loop(void);
 #endif
 
