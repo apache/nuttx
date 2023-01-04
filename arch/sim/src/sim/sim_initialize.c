@@ -282,8 +282,15 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_SIM_SOUND
-  audio_register("pcm0p", sim_audio_initialize(true));
-  audio_register("pcm0c", sim_audio_initialize(false));
+  /* Register audio normal device */
+
+  audio_register("pcm0p", sim_audio_initialize(true, false));
+  audio_register("pcm0c", sim_audio_initialize(false, false));
+
+  /* Register audio compress device */
+
+  audio_register("pcm1p", sim_audio_initialize(true, true));
+  audio_register("pcm1c", sim_audio_initialize(false, true));
 #endif
 
   kthread_create("loop_task", SCHED_PRIORITY_MAX,
