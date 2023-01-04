@@ -38,7 +38,6 @@
 
 #include <nuttx/video/imgsensor.h>
 #include <nuttx/video/imgdata.h>
-#include <nuttx/mm/map.h>
 
 #include "video_framebuff.h"
 
