@@ -59,7 +59,9 @@ On Linux:
 
 On the NuttX Simulator:
 
-    nsh> ifconfig eth0 10.0.1.2
+    nsh> # replace or omit dns if needed, IPv6 line is optional
+    nsh> ifconfig eth0 inet6 fc00::2/112 dns 2001:4860:4860::8888
+    nsh> ifconfig eth0 10.0.1.2 dns 8.8.8.8
     nsh> ifup eth0
 
 On Linux:
