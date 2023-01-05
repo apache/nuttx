@@ -30,7 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRNCMP
+#ifndef CONFIG_LIBC_ARCH_STRNCMP
 #undef strncmp /* See mm/README.txt */
 int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {

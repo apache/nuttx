@@ -72,7 +72,15 @@ config LIBC_ARCH_STRCHR
 	bool
 	default n
 
+config LIBC_ARCH_STRCHRNUL
+	bool
+	default n
+
 config LIBC_ARCH_STRCMP
+	bool
+	default n
+
+config LIBC_ARCH_STRNCMP
 	bool
 	default n
 
@@ -97,6 +105,10 @@ config LIBC_ARCH_STRLEN
 	default n
 
 config LIBC_ARCH_STRNLEN
+	bool
+	default n
+
+config LIBC_ARCH_STRRCHR
 	bool
 	default n
 
@@ -173,6 +185,9 @@ config LIBM_ARCH_TRUNCF
 
 if ARCH_ARM
 source "libs/libc/machine/arm/Kconfig"
+endif
+if ARCH_ARM64
+source "libs/libc/machine/arm64/Kconfig"
 endif
 if ARCH_RISCV
 source "libs/libc/machine/risc-v/Kconfig"
