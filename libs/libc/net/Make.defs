@@ -22,7 +22,7 @@
 
 CSRCS += lib_addrconfig.c lib_base64.c lib_htons.c lib_htonl.c
 CSRCS += lib_inetaddr.c lib_inetaton.c lib_inetntoa.c
-CSRCS += lib_inetntop.c lib_inetpton.c
+CSRCS += lib_inetntop.c lib_inetpton.c lib_inetnetwork.c
 CSRCS += lib_etherntoa.c lib_etheraton.c
 
 ifeq ($(CONFIG_NET),y)
