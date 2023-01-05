@@ -165,6 +165,7 @@
 #define RTA_OIF               4    /* Argument:  Output interface index */
 #define RTA_GATEWAY           5    /* Argument:  Gateway address of the route */
 #define RTA_GENMASK           6    /* Argument:  Network address mask of sub-net */
+#define RTA_MAX               6    /* MAX type, same as last argument */
 
 /* NETLINK_ROUTE protocol message types *************************************/
 
