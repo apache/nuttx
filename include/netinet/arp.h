@@ -44,8 +44,13 @@
  */
 
 #define ARPHRD_ETHER        1    /* Ethernet */
+#define ARPHRD_PPP          512
+#define ARPHRD_LOOPBACK     772  /* Loopback device    */
 #define ARPHRD_IEEE80211    801  /* IEEE 802.11 */
 #define ARPHRD_IEEE802154   804  /* IEEE 802.15.4 */
+
+#define ARPHRD_VOID         0xFFFF  /* Void type, nothing is known */
+#define ARPHRD_NONE         0xFFFE  /* zero header length */
 
 /* Three ioctls are available on all PF_INET sockets. Each ioctl takes a
  * pointer to a 'struct arpreq' as its parameter.
