@@ -114,12 +114,6 @@ config SEGGER_SYSVIEW_RAM_BASE
 	---help---
 		The lowest RAM address used for IDs
 
-config SEGGER_SYSVIEW_PREFIX
-	bool "Segger note function prefix"
-	default ""
-	---help---
-		prefix sched_note functions with "sysview_" to call them indirectly
-
 endif
 
 endmenu # Segger RTT drivers
