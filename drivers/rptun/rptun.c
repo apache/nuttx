@@ -224,6 +224,11 @@ static void rptun_pm_callback(wdparm_t arg)
 {
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)arg;
 
+  if (priv->rproc.state != RPROC_RUNNING)
+    {
+      return;
+    }
+
   if (rptun_buffer_nused(&priv->rvdev, false))
     {
       rptun_wakeup_tx(priv);
@@ -261,7 +266,7 @@ static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtqueue *rvq = rvdev->rvq;
 
-  if (!rvdev->vdev || !rvq)
+  if (priv->rproc.state != RPROC_RUNNING)
     {
       return;
     }
@@ -281,7 +286,7 @@ static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtqueue *rvq = rvdev->rvq;
 
-  if (!rvdev->vdev || !rvq)
+  if (priv->rproc.state != RPROC_RUNNING)
     {
       return false;
     }
