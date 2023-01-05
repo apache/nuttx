@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: a64_pio_pin
+ * Name: a64_pio_port
  *
  * Description:
  *   Return the Port Number for the bit-encoded description of the pin.
@@ -61,6 +61,42 @@ static inline int a64_pio_port(pio_pinset_t cfgset)
 
   DEBUGASSERT(port >= PIO_REG_PORTB && port <= PIO_REG_PORTL);
   return port;
+}
+
+/****************************************************************************
+ * Name: a64_pio_ext
+ *
+ * Description:
+ *   Return the External Port Number for the bit-encoded description of the
+ *   pin.
+ *
+ * Input Parameters:
+ *   cfgset - Bit-encoded description of a pin that supports External
+ *            Interrupts
+ *
+ * Returned Value:
+ *   0 for Port B, 1 for Port G, 2 for Port H, -1 otherwise
+ *
+ ****************************************************************************/
+
+static inline int a64_pio_ext(pio_pinset_t cfgset)
+{
+  int port = (cfgset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
+
+  switch (port)
+    {
+      case PIO_REG_PORTB:
+        return 0;
+
+      case PIO_REG_PORTG:
+        return 1;
+
+      case PIO_REG_PORTH:
+        return 2;
+
+      default:
+        return -1; /* External Interrupt not supported for the Port */
+    }
 }
 
 /****************************************************************************
@@ -86,6 +122,53 @@ static inline int a64_pio_pin(pio_pinset_t cfgset)
 }
 
 /****************************************************************************
+ * Name: a64_pio_irq
+ *
+ * Description:
+ *   Enable or disable the interrupt for specified PIO pin.  Only Ports B, G
+ *   and H are supported for interrupts.
+ *
+ * Input Parameters:
+ *   pinset - Bit-encoded description of a pin. Port should be B, G or H.
+ *   enable - True to enable interrupt; False to disable.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -EINVAL if pin is not from Port B, G or H.
+ *
+ ****************************************************************************/
+
+static int a64_pio_irq(pio_pinset_t pinset, bool enable)
+{
+  const unsigned int port = a64_pio_port(pinset);
+  const unsigned int ext  = a64_pio_ext(pinset);
+  const unsigned int pin  = a64_pio_pin(pinset);
+  const uint32_t pin_mask = PIO_INT_CTL(pin);
+  const uint32_t pin_val  = enable ? pin_mask : 0;
+  const unsigned long pin_addr = A64_PIO_INT_CTL(ext);
+  irqstate_t flags;
+
+  if (ext < 0)
+    {
+      gpioerr("External Interrupt not supported for Port %d\n", port);
+      return -EINVAL;
+    }
+
+  /* Enter Critical Section */
+
+  flags = enter_critical_section();
+
+  /* Enable or disable the interrupt */
+
+  modreg32(pin_val, pin_mask, pin_addr);
+
+  /* Leave Critical Section */
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -106,6 +189,7 @@ static inline int a64_pio_pin(pio_pinset_t cfgset)
 int a64_pio_config(pio_pinset_t cfgset)
 {
   unsigned int port = a64_pio_port(cfgset);
+  unsigned int ext  = a64_pio_ext(cfgset);
   unsigned int pin  = a64_pio_pin(cfgset);
   unsigned int shift;
   unsigned int value;
@@ -131,7 +215,7 @@ int a64_pio_config(pio_pinset_t cfgset)
                   A64_PIO_CFG0(port);
         intaddr = (port == PIO_REG_PORTL) ?
                   A64_RPIO_INT_CFG0 :
-                  A64_PIO_INT_CFG0;
+                  A64_PIO_INT_CFG0(ext);
         break;
 
       case 1: /* PIO 8-15 */
@@ -140,7 +224,7 @@ int a64_pio_config(pio_pinset_t cfgset)
                   A64_PIO_CFG1(port);
         intaddr = (port == PIO_REG_PORTL) ?
                   A64_RPIO_INT_CFG1 :
-                  A64_PIO_INT_CFG1;
+                  A64_PIO_INT_CFG1(ext);
         break;
 
       case 2: /* PIO 16-23 */
@@ -149,7 +233,7 @@ int a64_pio_config(pio_pinset_t cfgset)
                   A64_PIO_CFG2(port);
         intaddr = (port == PIO_REG_PORTL) ?
                   A64_RPIO_INT_CFG2 :
-                  A64_PIO_INT_CFG2;
+                  A64_PIO_INT_CFG2(ext);
         break;
 
       case 3: /* PIO 24-31 */
@@ -158,7 +242,7 @@ int a64_pio_config(pio_pinset_t cfgset)
                   A64_PIO_CFG3(port);
         intaddr = (port == PIO_REG_PORTL) ?
                   A64_RPIO_INT_CFG3 :
-                  A64_PIO_INT_CFG3;
+                  A64_PIO_INT_CFG3(ext);
         break;
 
       default:
@@ -180,6 +264,12 @@ int a64_pio_config(pio_pinset_t cfgset)
 
   if ((cfgset & PIO_EINT_MASK) == PIO_EINT)
     {
+      if (ext < 0)
+        {
+          gpioerr("External Interrupt not supported for Port %d\n", port);
+          return -EINVAL;
+        }
+
       value = (cfgset & PIO_INT_MASK) >> PIO_INT_SHIFT;
 
       regval = getreg32(intaddr);
@@ -326,4 +416,44 @@ bool a64_pio_read(pio_pinset_t pinset)
             A64_PIO_DAT(port);
   regval  = getreg32(regaddr);
   return ((regval & PIO_DAT(pin)) != 0);
+}
+
+/****************************************************************************
+ * Name: a64_pio_irqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified PIO pin.  Only Ports B, G and H are
+ *   supported for interrupts.
+ *
+ * Input Parameters:
+ *   cfgset - Bit-encoded description of a pin. Port should be B, G or H.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -EINVAL if pin is not from Port B, G or H.
+ *
+ ****************************************************************************/
+
+int a64_pio_irqenable(pio_pinset_t pinset)
+{
+  return a64_pio_irq(pinset, true);
+}
+
+/****************************************************************************
+ * Name: a64_pio_irqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified PIO pin.  Only Ports B, G and H are
+ *   supported for interrupts.
+ *
+ * Input Parameters:
+ *   cfgset - Bit-encoded description of a pin. Port should be B, G or H.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -EINVAL if pin is not from Port B, G or H.
+ *
+ ****************************************************************************/
+
+int a64_pio_irqdisable(pio_pinset_t pinset)
+{
+  return a64_pio_irq(pinset, false);
 }
