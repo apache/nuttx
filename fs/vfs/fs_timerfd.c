@@ -111,6 +111,8 @@ static const struct file_operations g_timerfd_fops =
   NULL,          /* write */
   NULL,          /* seek */
   NULL,          /* ioctl */
+  NULL,          /* truncate */
+  NULL,          /* mmap */
 #ifdef CONFIG_TIMER_FD_POLL
   timerfd_poll   /* poll */
 #endif
