@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/risc-v/common/arch_setjmp.S
+# libs/libc/machine/risc-v/gnu/arch_setjmp.S
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,7 @@
 #
 ############################################################################
 
-#include <nuttx/config.h>
-
-#ifdef CONFIG_ARCH_RV64
-#  define SZREG	 8
-#  define REG_S sd
-#  define REG_L ld
-#elif defined(CONFIG_ARCH_RV32)
-#  define SZREG	 4
-#  define REG_S sw
-#  define REG_L lw
-#endif
-
-#ifdef CONFIG_ARCH_QPFPU
-#  define SZFREG  16
-#  define FREG_S fsq
-#  define FREG_L flq
-#elif defined(CONFIG_ARCH_DPFPU)
-#  define SZFREG   8
-#  define FREG_S fsd
-#  define FREG_L fld
-#elif defined(CONFIG_ARCH_FPU)
-#  define SZFREG   4
-#  define FREG_S fsw
-#  define FREG_L flw
-#endif
+#include "asm.h"
 
 .section .text
 .globl  setjmp
