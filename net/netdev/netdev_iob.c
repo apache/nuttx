@@ -150,6 +150,7 @@ void netdev_iob_release(FAR struct net_driver_s *dev)
     {
       iob_free_chain(dev->d_iob);
       dev->d_iob = NULL;
-      dev->d_buf = NULL;
     }
+
+  dev->d_buf = NULL;
 }
