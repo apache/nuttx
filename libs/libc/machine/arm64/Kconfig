@@ -1,0 +1,106 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ARM64_MEMCHR
+	bool "Enable optimized memchr() for ARM64"
+	default n
+	select LIBC_ARCH_MEMCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific memchr() library function
+
+config ARM64_MEMCMP
+	bool "Enable optimized memcmp() for ARM64"
+	select LIBC_ARCH_MEMCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific memcmp() library function
+
+config ARM64_MEMCPY
+	bool "Enable optimized memcpy() for ARM64"
+	select LIBC_ARCH_MEMCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific memcpy() library function
+
+config ARM64_MEMSET
+	bool "Enable optimized memset() for ARM64"
+	default n
+	select LIBC_ARCH_MEMSET
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific memset() library function
+
+config ARM64_MEMMOVE
+	bool "Enable optimized memmove() for ARM64"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific memmove() library function
+
+config ARM64_STRCHR
+	bool "Enable optimized strchr() for ARM64"
+	default n
+	select LIBC_ARCH_STRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strchr() library function
+
+config ARM64_STRCHRNUL
+	bool "Enable optimized strchrnul() for ARM64"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strchrnul() library function
+
+config ARM64_STRCMP
+	bool "Enable optimized strcmp() for ARM64"
+	default n
+	select LIBC_ARCH_STRCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strcmp() library function
+
+config ARM64_STRCPY
+	bool "Enable optimized strcpy() for ARM64"
+	default n
+	select LIBC_ARCH_STRCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strcpy() library function
+
+config ARM64_STRLEN
+	bool "Enable optimized strlen() for ARM64"
+	default n
+	select LIBC_ARCH_STRLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strlen() library function
+
+config ARM64_STRNCMP
+	bool "Enable optimized strncmp() for ARM64"
+	default n
+	select LIBC_ARCH_STRNCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strncmp() library function
+
+config ARM64_STRNLEN
+	bool "Enable optimized strnlen() for ARM64"
+	default n
+	select LIBC_ARCH_STRNLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strnlen() library function
+
+config ARM64_STRRCHR
+	bool "Enable optimized strrchr() for ARM64"
+	default n
+	select LIBC_ARCH_STRRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARM64 specific strrchr() library function

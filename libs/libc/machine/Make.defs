@@ -25,6 +25,9 @@ endif
 ifeq ($(CONFIG_ARCH_ARM),y)
 include $(TOPDIR)/libs/libc/machine/arm/Make.defs
 endif
+ifeq ($(CONFIG_ARCH_ARM64),y)
+include $(TOPDIR)/libs/libc/machine/arm64/Make.defs
+endif
 ifeq ($(CONFIG_ARCH_RISCV),y)
 include $(TOPDIR)/libs/libc/machine/risc-v/Make.defs
 endif
