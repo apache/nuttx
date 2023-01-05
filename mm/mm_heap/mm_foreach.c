@@ -43,7 +43,7 @@
  *
  ****************************************************************************/
 
-void mm_foreach(FAR struct mm_heap_s *heap, mmchunk_handler_t handler,
+void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
                 FAR void *arg)
 {
   FAR struct mm_allocnode_s *node;
