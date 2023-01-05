@@ -254,7 +254,7 @@ RELLIBS += -lboard
 
 all: sim_head$(OBJEXT) libarch$(LIBEXT)
 
-.PHONY: export_startup clean distclean cleanrel depend
+.PHONY: export_startup clean distclean cleanrel depend board/libboard$(LIBEXT)
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
