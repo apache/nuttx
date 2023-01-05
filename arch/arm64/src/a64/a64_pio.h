@@ -278,6 +278,40 @@ void a64_pio_write(pio_pinset_t pinset, bool value);
 
 bool a64_pio_read(pio_pinset_t pinset);
 
+/****************************************************************************
+ * Name: a64_pio_irqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified PIO pin.  Only Ports B, G and H are
+ *   supported for interrupts.
+ *
+ * Input Parameters:
+ *   pinset - Bit-encoded description of a pin. Port should be B, G or H.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -EINVAL if pin is not from Port B, G or H.
+ *
+ ****************************************************************************/
+
+int a64_pio_irqenable(pio_pinset_t pinset);
+
+/****************************************************************************
+ * Name: a64_pio_irqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified PIO pin.  Only Ports B, G and H are
+ *   supported for interrupts.
+ *
+ * Input Parameters:
+ *   pinset - Bit-encoded description of a pin. Port should be B, G or H.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -EINVAL if pin is not from Port B, G or H.
+ *
+ ****************************************************************************/
+
+int a64_pio_irqdisable(pio_pinset_t pinset);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

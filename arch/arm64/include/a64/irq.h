@@ -85,6 +85,8 @@
 #define A64_IRQ_TIMER0          (50)  /* 0x00C8 Timer 0 interrupt */
 #define A64_IRQ_TIMER1          (51)  /* 0x00CC Timer 1 interrupt */
 
+#define A64_IRQ_PH_EINT         (53)  /* 0x00C4 PH_EINT interrupt */
+
 #define A64_IRQ_AC_DET          (60)  /* 0x00F0 Audio Codec earphone detect interrupt */
 #define A64_IRQ_AUDIO_CODEC     (61)  /* 0x00F4 Audio Codec interrupt */
 #define A64_IRQ_KEYADC          (62)  /* 0x00F8 KEYADC interrupt */

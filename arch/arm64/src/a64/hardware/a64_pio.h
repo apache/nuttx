@@ -70,13 +70,14 @@
 #define A64_PIO_DRV1_OFFSET(n)    (0x0018 + (n)*0x24) /* Port Multi-Driving Register 1, n=0-7 */
 #define A64_PIO_PUL0_OFFSET(n)    (0x001c + (n)*0x24) /* Port Pull Register 0, n=0-7 */
 #define A64_PIO_PUL1_OFFSET(n)    (0x0020 + (n)*0x24) /* Port Pull Register 1, n=0-7 */
-#define A64_PIO_INT_CFG0_OFFSET   0x0200              /* PIO Interrupt Configure Register 0 */
-#define A64_PIO_INT_CFG1_OFFSET   0x0204              /* PIO Interrupt Configure Register 1 */
-#define A64_PIO_INT_CFG2_OFFSET   0x0208              /* PIO Interrupt Configure Register 2 */
-#define A64_PIO_INT_CFG3_OFFSET   0x020c              /* PIO Interrupt Configure Register 3 */
-#define A64_PIO_INT_CTL_OFFSET    0x0210              /* PIO Interrupt Control Register */
-#define A64_PIO_INT_STA_OFFSET    0x0214              /* PIO Interrupt Status Register */
-#define A64_PIO_INT_DEB_OFFSET    0x0218              /* PIO Interrupt Debounce Register */
+
+#define A64_PIO_INT_CFG0_OFFSET(n) (0x0200 + (n)*0x20) /* PIO Interrupt Configure Register 0, n=0-2 */
+#define A64_PIO_INT_CFG1_OFFSET(n) (0x0204 + (n)*0x20) /* PIO Interrupt Configure Register 1, n=0-2 */
+#define A64_PIO_INT_CFG2_OFFSET(n) (0x0208 + (n)*0x20) /* PIO Interrupt Configure Register 2, n=0-2 */
+#define A64_PIO_INT_CFG3_OFFSET(n) (0x020c + (n)*0x20) /* PIO Interrupt Configure Register 3, n=0-2 */
+#define A64_PIO_INT_CTL_OFFSET(n)  (0x0210 + (n)*0x20) /* PIO Interrupt Control Register, n=0-2 */
+#define A64_PIO_INT_STA_OFFSET(n)  (0x0214 + (n)*0x20) /* PIO Interrupt Status Register, n=0-2 */
+#define A64_PIO_INT_DEB_OFFSET(n)  (0x0218 + (n)*0x20) /* PIO Interrupt Debounce Register, n=0-2 */
 
 /* Register Addresses *******************************************************/
 
@@ -89,13 +90,13 @@
 #define A64_PIO_DRV1(n)           (A64_PIO_ADDR+A64_PIO_DRV1_OFFSET(n))
 #define A64_PIO_PUL0(n)           (A64_PIO_ADDR+A64_PIO_PUL0_OFFSET(n))
 #define A64_PIO_PUL1(n)           (A64_PIO_ADDR+A64_PIO_PUL1_OFFSET(n))
-#define A64_PIO_INT_CFG0          (A64_PIO_ADDR+A64_PIO_INT_CFG0_OFFSET)
-#define A64_PIO_INT_CFG1          (A64_PIO_ADDR+A64_PIO_INT_CFG1_OFFSET)
-#define A64_PIO_INT_CFG2          (A64_PIO_ADDR+A64_PIO_INT_CFG2_OFFSET)
-#define A64_PIO_INT_CFG3          (A64_PIO_ADDR+A64_PIO_INT_CFG3_OFFSET)
-#define A64_PIO_INT_CTL           (A64_PIO_ADDR+A64_PIO_INT_CTL_OFFSET)
-#define A64_PIO_INT_STA           (A64_PIO_ADDR+A64_PIO_INT_STA_OFFSET)
-#define A64_PIO_INT_DEB           (A64_PIO_ADDR+A64_PIO_INT_DEB_OFFSET)
+#define A64_PIO_INT_CFG0(n)       (A64_PIO_ADDR+A64_PIO_INT_CFG0_OFFSET(n))
+#define A64_PIO_INT_CFG1(n)       (A64_PIO_ADDR+A64_PIO_INT_CFG1_OFFSET(n))
+#define A64_PIO_INT_CFG2(n)       (A64_PIO_ADDR+A64_PIO_INT_CFG2_OFFSET(n))
+#define A64_PIO_INT_CFG3(n)       (A64_PIO_ADDR+A64_PIO_INT_CFG3_OFFSET(n))
+#define A64_PIO_INT_CTL(n)        (A64_PIO_ADDR+A64_PIO_INT_CTL_OFFSET(n))
+#define A64_PIO_INT_STA(n)        (A64_PIO_ADDR+A64_PIO_INT_STA_OFFSET(n))
+#define A64_PIO_INT_DEB(n)        (A64_PIO_ADDR+A64_PIO_INT_DEB_OFFSET(n))
 
 #define A64_RPIO_CFG0             (A64_RPIO_ADDR+A64_PIO_CFG0_OFFSET(0))
 #define A64_RPIO_CFG1             (A64_RPIO_ADDR+A64_PIO_CFG1_OFFSET(0))
@@ -106,13 +107,13 @@
 #define A64_RPIO_DRV1             (A64_RPIO_ADDR+A64_PIO_DRV1_OFFSET(0))
 #define A64_RPIO_PUL0             (A64_RPIO_ADDR+A64_PIO_PUL0_OFFSET(0))
 #define A64_RPIO_PUL1             (A64_RPIO_ADDR+A64_PIO_PUL1_OFFSET(0))
-#define A64_RPIO_INT_CFG0         (A64_RPIO_ADDR+A64_PIO_INT_CFG0_OFFSET)
-#define A64_RPIO_INT_CFG1         (A64_RPIO_ADDR+A64_PIO_INT_CFG1_OFFSET)
-#define A64_RPIO_INT_CFG2         (A64_RPIO_ADDR+A64_PIO_INT_CFG2_OFFSET)
-#define A64_RPIO_INT_CFG3         (A64_RPIO_ADDR+A64_PIO_INT_CFG3_OFFSET)
-#define A64_RPIO_INT_CTL          (A64_RPIO_ADDR+A64_PIO_INT_CTL_OFFSET)
-#define A64_RPIO_INT_STA          (A64_RPIO_ADDR+A64_PIO_INT_STA_OFFSET)
-#define A64_RPIO_INT_DEB          (A64_RPIO_ADDR+A64_PIO_INT_DEB_OFFSET)
+#define A64_RPIO_INT_CFG0         (A64_RPIO_ADDR+A64_PIO_INT_CFG0_OFFSET(0))
+#define A64_RPIO_INT_CFG1         (A64_RPIO_ADDR+A64_PIO_INT_CFG1_OFFSET(0))
+#define A64_RPIO_INT_CFG2         (A64_RPIO_ADDR+A64_PIO_INT_CFG2_OFFSET(0))
+#define A64_RPIO_INT_CFG3         (A64_RPIO_ADDR+A64_PIO_INT_CFG3_OFFSET(0))
+#define A64_RPIO_INT_CTL          (A64_RPIO_ADDR+A64_PIO_INT_CTL_OFFSET(0))
+#define A64_RPIO_INT_STA          (A64_RPIO_ADDR+A64_PIO_INT_STA_OFFSET(0))
+#define A64_RPIO_INT_DEB          (A64_RPIO_ADDR+A64_PIO_INT_DEB_OFFSET(0))
 
 /* Register Bit Field Definitions *******************************************/
 
