@@ -52,9 +52,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
   FAR struct mm_allocnode_s *node;
-  size_t rawchunk;
-  size_t alignedchunk;
-  size_t mask = (size_t)(alignment - 1);
+  uintptr_t rawchunk;
+  uintptr_t alignedchunk;
+  size_t mask = alignment - 1;
   size_t allocsize;
   size_t newsize;
 
@@ -95,11 +95,10 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * not include SIZEOF_MM_ALLOCNODE.
    */
 
-  newsize  = MM_ALIGN_UP(size);   /* Make multiples of our granule size */
-
+  newsize = MM_ALIGN_UP(size);         /* Make multiples of our granule size */
   allocsize = newsize + 2 * alignment; /* Add double full alignment size */
 
-  if ((newsize < size) || (allocsize < newsize))
+  if (newsize < size || allocsize < newsize)
     {
       /* Integer overflow */
 
@@ -108,7 +107,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Then malloc that size */
 
-  rawchunk = (size_t)mm_malloc(heap, allocsize);
+  rawchunk = (uintptr_t)mm_malloc(heap, allocsize);
   if (rawchunk == 0)
     {
       return NULL;
@@ -158,7 +157,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
        * SIZEOF_MM_ALLOCNODE
        */
 
-      precedingsize = (size_t)newnode - (size_t)node;
+      precedingsize = (uintptr_t)newnode - (uintptr_t)node;
 
       /* If we were unlucky, then the alignedchunk can lie in such a position
        * that precedingsize < SIZEOF_NODE_FREENODE.  We can't let that happen
@@ -173,12 +172,12 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
           alignedchunk += alignment;
           newnode       = (FAR struct mm_allocnode_s *)
                           (alignedchunk - SIZEOF_MM_ALLOCNODE);
-          precedingsize = (size_t)newnode - (size_t)node;
+          precedingsize = (uintptr_t)newnode - (uintptr_t)node;
         }
 
       /* Set up the size of the new node */
 
-      newnode->size = (size_t)next - (size_t)newnode;
+      newnode->size = (uintptr_t)next - (uintptr_t)newnode;
       newnode->preceding = precedingsize | MM_ALLOC_BIT;
 
       /* Reduce the size of the original chunk and mark it not allocated, */
