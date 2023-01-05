@@ -276,7 +276,7 @@ static inline int sysview_isenabled_syscall(int nr)
  *
  ****************************************************************************/
 
-void PREFIX(sched_note_start)(FAR struct tcb_s *tcb)
+void sched_note_start(FAR struct tcb_s *tcb)
 {
   if (!sysview_isenabled())
     {
@@ -287,7 +287,7 @@ void PREFIX(sched_note_start)(FAR struct tcb_s *tcb)
   sysview_send_taskinfo(tcb);
 }
 
-void PREFIX(sched_note_stop)(FAR struct tcb_s *tcb)
+void sched_note_stop(FAR struct tcb_s *tcb)
 {
   if (!sysview_isenabled())
     {
@@ -298,7 +298,7 @@ void PREFIX(sched_note_stop)(FAR struct tcb_s *tcb)
 }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-void PREFIX(sched_note_suspend)(FAR struct tcb_s *tcb)
+void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   if (!sysview_isenabled())
     {
@@ -311,7 +311,7 @@ void PREFIX(sched_note_suspend)(FAR struct tcb_s *tcb)
     }
 }
 
-void PREFIX(sched_note_resume)(FAR struct tcb_s *tcb)
+void sched_note_resume(FAR struct tcb_s *tcb)
 {
   if (!sysview_isenabled())
     {
@@ -333,7 +333,7 @@ void PREFIX(sched_note_resume)(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-void PREFIX(sched_note_irqhandler)(int irq, FAR void *handler, bool enter)
+void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 {
   if (!sysview_isenabled_irq(irq, enter))
     {
@@ -371,7 +371,7 @@ void PREFIX(sched_note_irqhandler)(int irq, FAR void *handler, bool enter)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-void PREFIX(sched_note_syscall_enter)(int nr, int argc, ...)
+void sched_note_syscall_enter(int nr, int argc, ...)
 {
   nr -= CONFIG_SYS_RESERVED;
 
@@ -406,7 +406,7 @@ void PREFIX(sched_note_syscall_enter)(int nr, int argc, ...)
   SEGGER_SYSVIEW_MarkStart(nr);
 }
 
-void PREFIX(sched_note_syscall_leave)(int nr, uintptr_t result)
+void sched_note_syscall_leave(int nr, uintptr_t result)
 {
   nr -= CONFIG_SYS_RESERVED;
 
@@ -514,8 +514,8 @@ int sysview_initialize(void)
  *
  ****************************************************************************/
 
-void PREFIX(sched_note_filter_mode)(struct note_filter_mode_s *oldm,
-                                    struct note_filter_mode_s *newm)
+void sched_note_filter_mode(struct note_filter_mode_s *oldm,
+                            struct note_filter_mode_s *newm)
 {
   irqstate_t flags;
 
@@ -579,8 +579,8 @@ void PREFIX(sched_note_filter_mode)(struct note_filter_mode_s *oldm,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-void PREFIX(sched_note_filter_irq)(struct note_filter_irq_s *oldf,
-                                   struct note_filter_irq_s *newf)
+void sched_note_filter_irq(struct note_filter_irq_s *oldf,
+                           struct note_filter_irq_s *newf)
 {
   irqstate_t flags;
 
@@ -625,8 +625,8 @@ void PREFIX(sched_note_filter_irq)(struct note_filter_irq_s *oldf,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-void PREFIX(sched_note_filter_syscall)(struct note_filter_syscall_s *oldf,
-                                       struct note_filter_syscall_s *newf)
+void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
+                               struct note_filter_syscall_s *newf)
 {
   irqstate_t flags;
 
