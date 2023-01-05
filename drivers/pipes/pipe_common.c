@@ -825,6 +825,10 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_FLUSH:
+        ret = -EINVAL;
+        break;
+
       default:
         ret = -ENOTTY;
         break;

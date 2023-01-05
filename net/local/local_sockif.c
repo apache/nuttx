@@ -847,6 +847,9 @@ static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
             ret = -ENOTCONN;
           }
         break;
+      case BIOC_FLUSH:
+        ret = -EINVAL;
+        break;
       default:
         ret = -ENOTTY;
         break;
