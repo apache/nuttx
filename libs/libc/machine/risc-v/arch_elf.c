@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/common/arch_elf.c
+ * libs/libc/machine/risc-v/arch_elf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
