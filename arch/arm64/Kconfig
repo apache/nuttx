@@ -7,6 +7,22 @@ if ARCH_ARM64
 comment "ARM64 Options"
 
 choice
+	prompt "ARM64 Toolchain Selection"
+	default ARM64_TOOLCHAIN_GNU_EABI
+
+config ARM64_TOOLCHAIN_GNU_EABI
+	bool "Generic GNU EABI toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+
+config ARM64_TOOLCHAIN_CLANG
+	bool "LLVM Clang toolchain"
+	select ARCH_TOOLCHAIN_CLANG
+
+endchoice
+
+choice
 	prompt "ARM64 chip selection"
 	default ARCH_CHIP_QEMU
 
