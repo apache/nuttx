@@ -88,8 +88,11 @@
          tcb = nxsched_get_tcb(tmp->pid); \
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \
-             memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
-             backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
+             int n = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
+             if (n < CONFIG_MM_BACKTRACE) \
+               { \
+                 tmp->backtrace[n] = 0; \
+               } \
            } \
          else \
            { \
