@@ -3,7 +3,26 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_RV64
-source "libs/libc/machine/risc-v/rv64/Kconfig"
-endif
+config RISCV_MEMCPY
+	bool "Enable optimized memcpy() for RISC-V"
+	select LIBC_ARCH_MEMCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific memcpy() library function
+
+config RISCV_MEMSET
+	bool "Enable optimized memset() for RISC-V"
+	default n
+	select LIBC_ARCH_MEMSET
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific memset() library function
+
+config RISCV_STRCMP
+	bool "Enable optimized strcmp() for RISC-V"
+	default n
+	select LIBC_ARCH_STRCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strcmp() library function
 

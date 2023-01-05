@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/rv32/arch_memcpy.S
+ * libs/libc/machine/risc-v/gnu/arch_memcpy.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

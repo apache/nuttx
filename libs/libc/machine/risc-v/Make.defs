@@ -18,12 +18,30 @@
 #
 ############################################################################
 
-include $(TOPDIR)/libs/libc/machine/risc-v/common/Make.defs
-
-ifeq ($(CONFIG_ARCH_RV64),y)
-include $(TOPDIR)/libs/libc/machine/risc-v/rv64/Make.defs
+ifeq ($(CONFIG_RISCV_MEMCPY),y)
+ASRCS += arch_memcpy.S
 endif
 
-ifeq ($(CONFIG_ARCH_RV32),y)
-include $(TOPDIR)/libs/libc/machine/risc-v/rv32/Make.defs
+ifeq ($(CONFIG_RISCV_MEMSET),y)
+ASRCS += arch_memset.S
 endif
+
+ifeq ($(CONFIG_RISCV_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+CSRCS += arch_elf.c
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+DEPPATH += --dep-path machine/risc-v/gnu
+VPATH += :machine/risc-v/gnu
+endif
+
+DEPPATH += --dep-path machine/risc-v
+VPATH += :machine/risc-v
