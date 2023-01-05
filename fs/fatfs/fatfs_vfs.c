@@ -166,12 +166,12 @@ const struct mountpt_operations fatfs_operations =
   fatfs_write,         /* write */
   fatfs_seek,          /* seek */
   fatfs_ioctl,         /* ioctl */
+  fatfs_truncate,      /* truncate */
 
   fatfs_sync,          /* sync */
   fatfs_dup,           /* dup */
   fatfs_fstat,         /* fstat */
   fatfs_fchstat,       /* fchstat */
-  fatfs_truncate,      /* truncate */
 
   fatfs_opendir,       /* opendir */
   fatfs_closedir,      /* closedir */
