@@ -154,4 +154,10 @@ int note_get_taskname(pid_t pid, FAR char *name);
 
 #endif /* CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0 */
 
+/****************************************************************************
+ * Name: note_driver_register
+ ****************************************************************************/
+
+int note_driver_register(FAR struct note_driver_s *driver);
+
 #endif /* __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H */

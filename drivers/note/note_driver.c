@@ -1907,3 +1907,24 @@ int note_get_taskname(pid_t pid, FAR char *buffer)
 }
 
 #endif
+
+/****************************************************************************
+ * Name: note_driver_register
+ ****************************************************************************/
+
+int note_driver_register(FAR struct note_driver_s *driver)
+{
+  int i;
+  DEBUGASSERT(driver);
+
+  for (i = 0; i < CONFIG_DRIVER_NOTE_MAX; i++)
+    {
+      if (g_note_drivers[i] == NULL)
+        {
+          g_note_drivers[i] = driver;
+          return OK;
+        }
+    }
+
+  return -ENOMEM;
+}
