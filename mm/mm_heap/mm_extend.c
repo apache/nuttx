@@ -61,8 +61,8 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   DEBUGASSERT(heap && mem);
 #if CONFIG_MM_REGIONS > 1
-  DEBUGASSERT(size >= MIN_EXTEND &&
-      (size_t)region < (size_t)heap->mm_nregions);
+  DEBUGASSERT(size >= MIN_EXTEND && region >= 0 &&
+              region < heap->mm_nregions);
 #else
   DEBUGASSERT(size >= MIN_EXTEND && region == 0);
 #endif
@@ -84,7 +84,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
    */
 
   oldnode = heap->mm_heapend[region];
-  DEBUGASSERT((uintptr_t)oldnode + SIZEOF_MM_ALLOCNODE == (uintptr_t)mem);
+  DEBUGASSERT((uintptr_t)oldnode + SIZEOF_MM_ALLOCNODE == blockstart);
 
   /* The size of the old node now extends to the new terminal node.
    * This is the old size (SIZEOF_MM_ALLOCNODE) plus the size of
@@ -112,5 +112,5 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
    * located.
    */
 
-  mm_free(heap, (FAR void *)mem);
+  mm_free(heap, mem);
 }

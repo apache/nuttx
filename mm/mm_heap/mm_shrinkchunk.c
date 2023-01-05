@@ -49,8 +49,8 @@
  *
  ****************************************************************************/
 
-void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
-                     FAR struct mm_allocnode_s *node, size_t size)
+void mm_shrinkchunk(FAR struct mm_heap_s *heap,
+                    FAR struct mm_allocnode_s *node, size_t size)
 {
   FAR struct mm_freenode_s *next;
 
