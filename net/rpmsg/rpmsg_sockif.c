@@ -375,7 +375,7 @@ static inline void rpmsg_socket_destroy_ept(
       return;
     }
 
-  nxmutex_lock(&conn->recvlock);
+  nxmutex_lock(&conn->sendlock);
 
   if (conn->ept.rdev)
     {
@@ -392,7 +392,7 @@ static inline void rpmsg_socket_destroy_ept(
       rpmsg_socket_poll_notify(conn, POLLIN | POLLOUT);
     }
 
-  nxmutex_unlock(&conn->recvlock);
+  nxmutex_unlock(&conn->sendlock);
 }
 
 static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
@@ -1007,10 +1007,10 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
       conn->lastpos  = conn->recvpos;
       conn->sendpos += msg->len;
 
-      nxmutex_unlock(&conn->sendlock);
 
       ret = rpmsg_sendto_nocopy(&conn->ept, msg, block + sizeof(*msg),
                                 conn->ept.dest_addr);
+      nxmutex_unlock(&conn->sendlock);
       if (ret < 0)
         {
           rpdev_release_tx_buffer(conn->rdev, msg);
@@ -1110,9 +1110,9 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   conn->lastpos  = conn->recvpos;
   conn->sendpos += len + sizeof(uint32_t);
 
-  nxmutex_unlock(&conn->sendlock);
 
   ret = rpmsg_sendto_nocopy(&conn->ept, msg, total, conn->ept.dest_addr);
+  nxmutex_unlock(&conn->sendlock);
   if (ret < 0)
     {
       rpdev_release_tx_buffer(conn->rdev, msg);
