@@ -2144,6 +2144,24 @@ static int esp_event_id_map(int event_id)
         id = WIFI_ADPT_EVT_STA_STOP;
         break;
 #endif
+
+#ifdef ESP32_WLAN_HAS_SOFTAP
+      case WIFI_EVENT_AP_START:
+        id = WIFI_ADPT_EVT_AP_START;
+        break;
+
+      case WIFI_EVENT_AP_STOP:
+        id = WIFI_ADPT_EVT_AP_STOP;
+        break;
+
+      case WIFI_EVENT_AP_STACONNECTED:
+        id = WIFI_ADPT_EVT_AP_STACONNECTED;
+        break;
+
+      case WIFI_EVENT_AP_STADISCONNECTED:
+        id = WIFI_ADPT_EVT_AP_STADISCONNECTED;
+        break;
+#endif
       default:
         return -1;
     }
@@ -2222,6 +2240,24 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_STOP:
             wlinfo("Wi-Fi sta stop\n");
             g_sta_connected = false;
+            break;
+#endif
+
+#ifdef ESP32_WLAN_HAS_SOFTAP
+          case WIFI_ADPT_EVT_AP_START:
+            wlinfo("INFO: Wi-Fi softap start\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STOP:
+            wlinfo("INFO: Wi-Fi softap stop\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STACONNECTED:
+            wlinfo("INFO: Wi-Fi station join\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STADISCONNECTED:
+            wlinfo("INFO: Wi-Fi station leave\n");
             break;
 #endif
           default:
