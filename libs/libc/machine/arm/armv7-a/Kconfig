@@ -3,9 +3,50 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARMV7A_MEMCHR
+	bool "Enable optimized memchr() for ARMv7-A"
+	default n
+	select LIBC_ARCH_MEMCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific memchr() library function
+
 config ARMV7A_MEMCPY
 	bool "Enable optimized memcpy() for ARMv7-A"
 	select LIBC_ARCH_MEMCPY
 	depends on ARCH_TOOLCHAIN_GNU
 	---help---
 		Enable optimized ARMv7-A specific memcpy() library function
+
+config ARMV7A_MEMMOVE
+	bool "Enable optimized memmove() for ARMv7-A"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific memmove() library function
+
+config ARMV7A_MEMSET
+	bool "Enable optimized memset() for ARMv7-A"
+	default n
+	select LIBC_ARCH_MEMSET
+	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARM_NEON
+	---help---
+		Enable optimized ARMv7-A specific memset() library function
+
+config ARMV7A_STRCMP
+	bool "Enable optimized strcmp() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strcmp() library function
+
+config ARMV7A_STRLEN
+	bool "Enable optimized strlen() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strlen() library function

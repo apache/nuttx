@@ -18,22 +18,40 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARMV7M_MEMCHR),y)
+ASRCS += arch_memchr.S
+endif
+
 ifeq ($(CONFIG_ARMV7M_MEMCPY),y)
 ASRCS += arch_memcpy.S
+endif
+
+ifeq ($(CONFIG_ARMV7M_MEMSET),y)
+ASRCS += arch_memset.S
+endif
+
+ifeq ($(CONFIG_ARMV7M_MEMMOVE),y)
+ASRCS += arch_memmove.S
+endif
+
+ifeq ($(CONFIG_ARMV7M_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
+
+ifeq ($(CONFIG_ARMV7M_STRLEN),y)
+ASRCS += arch_strlen.S
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
-ifeq ($(CONFIG_MACHINE_OPTS_ARMV7M),y)
 ifeq ($(CONFIG_LIBM_ARCH_FABSF),y)
 CSRCS += arch_fabsf.c
 endif
 
 ifeq ($(CONFIG_LIBM_ARCH_SQRTF),y)
 CSRCS += arch_sqrtf.c
-endif
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)

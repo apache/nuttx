@@ -5,19 +5,57 @@
 
 if ARCH_ARMV7M
 
+config ARMV7M_MEMCHR
+	bool "Enable optimized memchr() for ARMv7-M"
+	default n
+	select LIBC_ARCH_MEMCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific memchr() library function
+
 config ARMV7M_MEMCPY
 	bool "Enable optimized memcpy() for ARMv7-M"
 	default n
-	select MACHINE_OPTS_ARMV7M
 	select LIBC_ARCH_MEMCPY
 	depends on ARCH_TOOLCHAIN_GNU
 	---help---
 		Enable optimized ARMv7-M specific memcpy() library function
 
+config ARMV7M_MEMSET
+	bool "Enable optimized memset() for ARMv7-M"
+	default n
+	select LIBC_ARCH_MEMSET
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific memset() library function
+
+config ARMV7M_MEMMOVE
+	bool "Enable optimized memmove() for ARMv7-M"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific memmove() library function
+
+config ARMV7M_STRCMP
+	bool "Enable optimized strcmp() for ARMv7-M"
+	default n
+	select LIBC_ARCH_STRCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific strcmp() library function
+
+config ARMV7M_STRLEN
+	bool "Enable optimized strlen() for ARMv7-M"
+	default n
+	select LIBC_ARCH_STRLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific strlen() library function
+
 config ARMV7M_LIBM
 	bool "Architecture specific FPU optimizations"
 	default n
-	select MACHINE_OPTS_ARMV7M
 	select LIBM_ARCH_FABSF
 	select LIBM_ARCH_SQRTF
 	depends on ARCH_FPU
@@ -25,10 +63,6 @@ config ARMV7M_LIBM
 	---help---
 		Enable ARMv7E-M specific floating point optimizations
 		for fabsf() and fsqrtf()
-
-config MACHINE_OPTS_ARMV7M
-	bool
-	default n
 
 config LIBM_ARCH_FABSF
 	bool
