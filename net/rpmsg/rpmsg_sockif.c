@@ -85,6 +85,7 @@ struct rpmsg_socket_conn_s
 
   struct socket_conn_s           sconn;
 
+  FAR struct rpmsg_device        *rdev;
   struct rpmsg_endpoint          ept;
 
   struct sockaddr_rpmsg          rpaddr;
@@ -423,6 +424,7 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
 
   if (strcmp(conn->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev)) == 0)
     {
+      conn->rdev = rdev;
       conn->ept.priv = conn;
       conn->ept.ns_bound_cb = rpmsg_socket_ns_bound;
       snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
@@ -493,6 +495,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
+  new->rdev = rdev;
   new->ept.priv = new;
   ret = rpmsg_create_ept(&new->ept, rdev, name,
                          RPMSG_ADDR_ANY, dest,
@@ -1010,7 +1013,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
                                 conn->ept.dest_addr);
       if (ret < 0)
         {
-          rpmsg_release_tx_buffer(&conn->ept, msg);
+          rpdev_release_tx_buffer(conn->rdev, msg);
           break;
         }
 
@@ -1112,7 +1115,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   ret = rpmsg_sendto_nocopy(&conn->ept, msg, total, conn->ept.dest_addr);
   if (ret < 0)
     {
-      rpmsg_release_tx_buffer(&conn->ept, msg);
+      rpdev_release_tx_buffer(conn->rdev, msg);
     }
 
   return ret > 0 ? len : ret;
