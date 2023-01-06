@@ -109,8 +109,7 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 
       dev->d_iob    = iob;
       dev->d_sndlen = len;
-      dev->d_buf    = &iob->io_data[CONFIG_NET_LL_GUARDSIZE -
-                                    NET_LL_HDRLEN(dev)];
+      dev->d_buf    = NETLLBUF;
     }
 
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP

@@ -161,8 +161,8 @@
  * headers
  */
 
-#define IPBUF(hl) ((FAR void *)\
-                   &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE + (hl)])
+#define IPBUF(hl) ((FAR void *)(IOB_DATA(dev->d_iob) + (hl)))
+#define NETLLBUF  (IPBUF(0) - NET_LL_HDRLEN(dev))
 
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)IPBUF(0))
 #define IPv6BUF ((FAR struct ipv6_hdr_s *)IPBUF(0))

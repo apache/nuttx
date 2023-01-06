@@ -63,7 +63,7 @@
 #include "utils/utils.h"
 #include "tcp/tcp.h"
 
-#define IPDATA(hl) (dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE + (hl)])
+#define IPDATA(hl) (*(FAR uint8_t *)IPBUF(hl))
 
 /****************************************************************************
  * Private Functions
