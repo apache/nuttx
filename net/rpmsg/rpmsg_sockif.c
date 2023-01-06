@@ -107,6 +107,7 @@ struct rpmsg_socket_conn_s
 
   /* server listen-scoket listening: backlog > 0;
    * server listen-scoket closed: backlog = -1;
+   * accept scoket: backlog = -2;
    * others: backlog = 0;
    */
 
@@ -756,8 +757,9 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
 
       if (conn)
         {
+          conn->backlog = -2;
           rpmsg_register_callback(conn,
-                                  rpmsg_socket_device_created,
+                                  NULL,
                                   rpmsg_socket_device_destroy,
                                   NULL,
                                   NULL);
@@ -1278,7 +1280,15 @@ static int rpmsg_socket_close(FAR struct socket *psock)
       return 0;
     }
 
-  if (conn->backlog)
+  if (conn->backlog == -2)
+    {
+      rpmsg_unregister_callback(conn,
+                                NULL,
+                                rpmsg_socket_device_destroy,
+                                NULL,
+                                NULL);
+    }
+  else if (conn->backlog)
     {
       rpmsg_unregister_callback(conn,
                                 NULL,
