@@ -67,8 +67,8 @@ int netdev_input(FAR struct net_driver_s *dev,
                  devif_poll_callback_t callback, bool reply)
 {
   uint16_t llhdrlen = NET_LL_HDRLEN(dev);
-  unsigned int offset = CONFIG_NET_LL_GUARDSIZE - llhdrlen;
   FAR uint8_t *buf = dev->d_buf;
+  unsigned int offset;
   unsigned int l3l4len;
   int ret;
 
@@ -82,6 +82,7 @@ int netdev_input(FAR struct net_driver_s *dev,
 
   /* Copy l2 header to gruard area */
 
+  offset = dev->d_iob->io_offset - llhdrlen;
   memcpy(dev->d_iob->io_data + offset, buf, llhdrlen);
 
   /* Copy l3/l4 data to iob entry */

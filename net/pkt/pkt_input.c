@@ -146,8 +146,7 @@ int pkt_input(FAR struct net_driver_s *dev)
 
       /* Set the device buffer to l2 */
 
-      dev->d_buf = &dev->d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
-                                        NET_LL_HDRLEN(dev)];
+      dev->d_buf = NETLLBUF;
       ret = pkt_in(dev);
 
       dev->d_buf = buf;
