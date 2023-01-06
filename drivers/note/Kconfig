@@ -24,21 +24,6 @@ menuconfig SCHED_INSTRUMENTATION
 
 if SCHED_INSTRUMENTATION
 
-config SCHED_INSTRUMENTATION_EXTERNAL
-	bool "System performance monitor endpoints are external"
-	default n
-	---help---
-		When this option is enabled, the board specific logic must implement all
-		callbacks listed in SCHED_INSTRUMENTATION, SCHED_INSTRUMENTATION_CSECTION,
-		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
-		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
-		these callbacks and packet the arguments into note_ struct. Then the board
-		-specific logic just needs to implement one callback:
-
-		  void sched_note_add(FAR const void *note, size_t notelen);
-
-		and send the data to the suitable transport hardware.
-
 config SCHED_INSTRUMENTATION_CPUSET
 	hex "CPU bit set"
 	default 0xffff
@@ -195,12 +180,9 @@ config DRIVER_NOTECTL
 		If this option is selected, the instrumentation filter control device
 		/dev/notectl is provided.
 
-choice
-	prompt "Note driver selection"
-	default DRIVER_NOTERAM
-
 config DRIVER_NOTERAM
 	bool "Note RAM driver"
+	default y
 	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
 		If this option is selected, then in-memory buffering logic is
@@ -226,46 +208,28 @@ config DRIVER_NOTERAM
 		sched_note_get() causes several additional entries to be added from
 		the note buffer in order to remove one entry.
 
-config DRIVER_NOTEARCH
-	bool "Note Arch driver"
-	---help---
-		The note driver is provided by arch specific code.
-
-config DRIVER_NOTELOG
-	bool "Note syslog driver"
-	select SCHED_INSTRUMENTATION_EXTERNAL
-	---help---
-		The note driver output to syslog.
-
-config SEGGER_SYSVIEW
-	bool "Note SEGGER SystemView driver"
-	select SEGGER_RTT
-	select SCHED_INSTRUMENTATION_EXTERNAL
-	---help---
-		SystemView is a real-time recording and visualization tool for embedded
-		systems that reveals the true runtime behavior of an application,
-		going far deeper than the system insights provided by debuggers. This is
-		particularly effective when developing and working with complex embedded
-		systems comprising multiple threads and interrupts. SystemView can ensure
-		unintended interactions and resource conflicts.
-
-endchoice
+if DRIVER_NOTERAM
 
 config DRIVER_NOTERAM_BUFSIZE
 	int "Note RAM buffer size"
-	depends on DRIVER_NOTERAM
 	default 2048
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
 config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
 	bool "Disable overwrite by default"
-	depends on DRIVER_NOTERAM
 	default n
 	---help---
 		Disables overwriting old notes in the circular buffer when the buffer
 		is full by default. This is useful to keep instrumentation data of the
 		beginning of a system boot.
+
+endif # DRIVER_NOTERAM
+
+config DRIVER_NOTELOG
+	bool "Note syslog driver"
+	---help---
+		The note driver output to syslog.
 
 endif # DRIVER_NOTE
 
