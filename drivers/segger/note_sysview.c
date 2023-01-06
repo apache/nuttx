@@ -375,6 +375,12 @@ int note_sysview_initialize(void)
       note_sysview_send_tasklist,
     };
 
+  if (freq == 0)
+    {
+      syslog(LOG_ERR, "up_perf isn't initialized, sysview isn't available");
+      PANIC();
+    }
+
   SEGGER_SYSVIEW_Init(freq, freq, &g_sysview_trace_api,
                       note_sysview_send_description);
 
