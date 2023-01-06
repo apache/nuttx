@@ -197,6 +197,43 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Name: tcp_dataconcat
+ *
+ * Description:
+ *   Concatenate iob_s chain iob2 to iob1, if CONFIG_NET_TCP_RECV_PACK is
+ *   endabled, pack all data in the I/O buffer chain.
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to iob->io_pktlen.
+ *
+ ****************************************************************************/
+
+uint16_t tcp_dataconcat(FAR struct iob_s **iob1, FAR struct iob_s **iob2)
+{
+  if (*iob1 == NULL)
+    {
+      *iob1 = *iob2;
+    }
+  else
+    {
+      iob_concat(*iob1, *iob2);
+    }
+
+  *iob2 = NULL;
+
+#ifdef CONFIG_NET_TCP_RECV_PACK
+  /* Merge an iob chain into a continuous space, thereby reducing iob
+   * consumption.
+   */
+
+  *iob1 = iob_pack(*iob1);
+#endif
+
+  return (*iob1)->io_pktlen;
+}
+
+/****************************************************************************
  * Name: tcp_datahandler
  *
  * Description:
@@ -247,22 +284,9 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
 
   /* Concat the iob to readahead */
 
-  if (conn->readahead == NULL)
-    {
-      conn->readahead = iob;
-    }
-  else
-    {
-      iob_concat(conn->readahead, iob);
-    }
+  tcp_dataconcat(&conn->readahead, &iob);
 
-#ifdef CONFIG_NET_TCP_RECV_PACK
-  /* Merge an iob chain into a continuous space, thereby reducing iob
-   * consumption.
-   */
-
-  conn->readahead = iob_pack(conn->readahead);
-#endif
+  /* Clear device buffer */
 
   netdev_iob_clear(dev);
 
