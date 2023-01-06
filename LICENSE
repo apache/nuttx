@@ -423,6 +423,7 @@ libc/string/lib_vikmemcpy.c
      distribution.
 
 libs/libc/machine/arm/armv7-a/gnu/arch_memchr.S
+libs/libc/machine/arm/armv7-r/gnu/arch_memchr.S
 libs/libc/machine/arm/armv7-m/gnu/arch_memchr.S
 libs/libc/machine/arm/armv8-m/gnu/arch_memchr.S
 ================================================
@@ -487,6 +488,8 @@ libs/libc/machine/arm/armv8-m/gnu/arch_memchr.S
 
 libs/libc/machine/arm/armv7-a/gnu/arch_memcpy.S
 libs/libc/machine/arm/armv7-a/gnu/arch_strlen.S
+libs/libc/machine/arm/armv7-r/gnu/arch_memcpy.S
+libs/libc/machine/arm/armv7-r/gnu/arch_strlen.S
 ================================================
 
    Copyright (c) 2013, Linaro Limited
@@ -521,6 +524,7 @@ libs/libc/machine/arm/armv7-a/gnu/arch_strlen.S
 
 
 libs/libc/machine/arm/armv7-a/gnu/arch_memmove.S
+libs/libc/machine/arm/armv7-r/gnu/arch_memmove.S
 libs/libc/machine/arm/armv7-m/gnu/arch_memmove.S
 libs/libc/machine/arm/armv7-m/gnu/arch_memset.S
 libs/libc/machine/arm/armv8-m/gnu/arch_memmove.S
@@ -555,6 +559,7 @@ libs/libc/machine/arm/armv8-m/gnu/arch_memset.S
 
 
 libs/libc/machine/arm/armv7-a/gnu/arch_memset.S
+libs/libc/machine/arm/armv7-r/gnu/arch_memset.S
 ================================================
 
  Copyright (C) 2013 The Android Open Source Project
@@ -584,6 +589,7 @@ libs/libc/machine/arm/armv7-a/gnu/arch_memset.S
  SUCH DAMAGE.
 
 libs/libc/machine/arm/armv7-a/gnu/arch_strcmp.S
+libs/libc/machine/arm/armv7-r/gnu/arch_strcmp.S
 ================================================
 
  Copyright (c) 2011 The Android Open Source Project
