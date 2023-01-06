@@ -409,6 +409,15 @@ config ARCH_BOARD_ET_STM32_STAMP
 		The ET-STM32 Stamp features the STM32F103RET6 (Cortex M3) microcontroller.
 		For board details, see: https://www.futurlec.com/ET-STM32_Stamp.shtml
 
+config ARCH_BOARD_ESP32C6_DEVKIT
+	bool "Espressif ESP32-C6 DevKit"
+	depends on ARCH_CHIP_ESP32C6MINI1 || ARCH_CHIP_ESP32C6WROOM1
+	---help---
+		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
+		It comes in two flavors, the ESP32-C6-DevKitM-1 and the ESP32-C6-DevKitC-02.
+		The ESP32-C6-DevKitM-1 version contains the ESP32-C6-MINI-1 module and the
+		ESP32-C6-DevKitC-02 version the ESP32-C6-WROOM-1.
+
 config ARCH_BOARD_EZ80F910200KITG
 	bool "ZiLOG ez80f910200kitg development kit"
 	depends on ARCH_CHIP_EZ80F91
@@ -2749,6 +2758,7 @@ config ARCH_BOARD
 	default "franzininho-wifi"          if ARCH_BOARD_FRANZININHO_WIFI
 	default "esp32s3-devkit"            if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
+	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"            if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"           if ARCH_BOARD_EZ80F910200KITG
@@ -3729,6 +3739,9 @@ source "boards/xtensa/esp32s3/esp32s3-devkit/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_EYE
 source "boards/xtensa/esp32s3/esp32s3-eye/Kconfig"
+endif
+if ARCH_BOARD_ESP32C6_DEVKIT
+source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "boards/sim/sim/sim/Kconfig"
