@@ -74,6 +74,30 @@ endif
 
 endif # CONFIG_ARMV8M_LIBM
 
+ifeq ($(CONFIG_ARMV8M_MEMCHR),y)
+ASRCS += arch_memchr.S
+endif
+
+ifeq ($(CONFIG_ARMV8M_MEMCPY),y)
+ASRCS += arch_memcpy.S
+endif
+
+ifeq ($(CONFIG_ARMV8M_MEMSET),y)
+ASRCS += arch_memset.S
+endif
+
+ifeq ($(CONFIG_ARMV8M_MEMMOVE),y)
+ASRCS += arch_memmove.S
+endif
+
+ifeq ($(CONFIG_ARMV8M_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
+
+ifeq ($(CONFIG_ARMV8M_STRLEN),y)
+ASRCS += arch_strlen.S
+endif
+
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
 DEPPATH += --dep-path machine/arm/armv8-m/gnu
 VPATH += :machine/arm/armv8-m/gnu

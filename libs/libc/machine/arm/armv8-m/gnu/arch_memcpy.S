@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv7-m/gnu/arch_memcpy.S
+ * libs/libc/machine/arm/armv8-m/gnu/arch_memcpy.S
  *
  * Copyright (c) 2013 ARM Ltd
  * All rights reserved.
@@ -29,6 +29,7 @@
  *
  ****************************************************************************/
 
+#ifndef __ARM_FEATURE_MVE
 /* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
    unaligned access.
 
@@ -81,6 +82,7 @@
 #endif
 
 #define END_UNROLL .endr
+#endif
 
 	.syntax unified
 	.text
@@ -93,6 +95,17 @@ memcpy:
 	@ r0: dst
 	@ r1: src
 	@ r2: len
+#ifdef __ARM_FEATURE_MVE
+	mov	r3, lr
+	wlstp.8	lr, r2, 2f
+	mov	r2, r0
+1:
+	vldrb.8	q0, [r1], #16
+	vstrb.8	q0, [r2], #16
+	letp	lr, 1b
+2:
+	bx	r3
+#else
 #ifdef __ARM_FEATURE_UNALIGNED
 	/* In case of UNALIGNED access supported, ip is not used in
 	   function body.  */
@@ -328,5 +341,5 @@ memcpy:
 	pop	{r0}
 #endif
 	bx	lr
-
+#endif
 	.size	memcpy, .-memcpy
