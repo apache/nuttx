@@ -118,7 +118,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
 
   /* Prepare device buffer */
 
-  if (dev->d_iob == NULL && netdev_iob_prepare(dev, true, 0) != OK)
+  if (dev->d_iob == NULL && netdev_iob_prepare(dev, false, 0) != OK)
     {
       return 0;
     }
@@ -190,7 +190,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
 
   if (dev->d_iob == NULL)
     {
-      netdev_iob_prepare(dev, true, 0);
+      netdev_iob_prepare(dev, false, 0);
     }
 
   return flags;
