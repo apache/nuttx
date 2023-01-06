@@ -829,6 +829,7 @@ static int fatfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct fatfs_mountpt_s *fs;
   FAR struct fatfs_file_s *fp;
+  FAR char *buffer = NULL;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -841,17 +842,59 @@ static int fatfs_truncate(FAR struct file *filep, off_t length)
       return ret;
     }
 
-  ret = fatfs_convert_result(f_lseek(&fp->f, length));
-  if (ret < 0)
-    {
-      goto errsem;
-    }
-
   if (length < f_size(&fp->f))
     {
+      ret = fatfs_convert_result(f_lseek(&fp->f, length));
+      if (ret < 0)
+        {
+          goto errsem;
+        }
+
+      ret = fatfs_convert_result(f_truncate(&fp->f));
+    }
+  else if (length > f_size(&fp->f))
+    {
+      ret = fatfs_convert_result(f_lseek(&fp->f, f_size(&fp->f)));
+      if (ret < 0)
+        {
+          goto errsem;
+        }
+
+      length -= f_size(&fp->f);
+      buffer = kmm_zalloc(SS(&fs->fat));
+      if (buffer == NULL)
+        {
+          goto errbuf;
+        }
+
+      while (length > 0)
+        {
+          UINT size;
+          if (length >= sizeof(buffer))
+            {
+              ret = fatfs_convert_result(f_write(&fp->f, buffer,
+                                                 sizeof(buffer), &size));
+            }
+          else
+            {
+              ret = fatfs_convert_result(f_write(&fp->f, buffer,
+                                                 length, &size));
+            }
+
+          if (ret < 0)
+            {
+              goto errbuf;
+            }
+
+          length -= size;
+          filep->f_pos += size;
+        }
+
       ret = fatfs_convert_result(f_truncate(&fp->f));
     }
 
+errbuf:
+  kmm_free(buffer);
 errsem:
   fatfs_semgive(fs);
   return ret;
