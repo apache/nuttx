@@ -120,6 +120,8 @@ struct pipe_dev_s
   pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
   pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
   pipe_ndx_t d_bufsize;     /* allocated size of d_buffer in bytes */
+  pipe_ndx_t d_pollinthrd;  /* Buffer threshold for POLLIN to occur */
+  pipe_ndx_t d_polloutthrd; /* Buffer threshold for POLLOUT to occur */
   uint8_t    d_nwriters;    /* Number of reference counts for write access */
   uint8_t    d_nreaders;    /* Number of reference counts for read access */
   uint8_t    d_flags;       /* See PIPE_FLAG_* definitions */

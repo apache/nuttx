@@ -61,6 +61,26 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pipecommon_bufferused
+ ****************************************************************************/
+
+static pipe_ndx_t pipecommon_bufferused(FAR struct pipe_dev_s *dev)
+{
+  if (dev->d_wrndx >= dev->d_rdndx)
+    {
+      return dev->d_wrndx - dev->d_rdndx;
+    }
+  else
+    {
+      return dev->d_bufsize + dev->d_wrndx - dev->d_rdndx;
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -417,9 +437,14 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       nread++;
     }
 
-  /* Notify all poll/select waiters that they can write to the FIFO */
+  /* Notify all poll/select waiters that they can write to the
+   * FIFO when buffer can accept more than d_polloutthrd bytes.
+   */
 
-  poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLOUT);
+  if (pipecommon_bufferused(dev) < (dev->d_bufsize - dev->d_polloutthrd))
+    {
+      poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLOUT);
+    }
 
   /* Notify all waiting writers that bytes have been removed from the
    * buffer.
@@ -527,10 +552,14 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
           if ((size_t)nwritten >= len)
             {
               /* Notify all poll/select waiters that they can read from the
-               * FIFO.
+               * FIFO when buffer used exceeds poll threshold.
                */
 
-              poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLIN);
+              if (pipecommon_bufferused(dev) > dev->d_pollinthrd)
+                {
+                  poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS,
+                              POLLIN);
+                }
 
               /* Yes.. Notify all of the waiting readers that more data is
                * available.
@@ -661,28 +690,23 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * First, determine how many bytes are in the buffer
        */
 
-      if (dev->d_wrndx >= dev->d_rdndx)
-        {
-          nbytes = dev->d_wrndx - dev->d_rdndx;
-        }
-      else
-        {
-          nbytes = dev->d_bufsize + dev->d_wrndx - dev->d_rdndx;
-        }
+      nbytes = pipecommon_bufferused(dev);
 
-      /* Notify the POLLOUT event if the pipe is not full, but only if
+      /* Notify the POLLOUT event if the pipe buffer can accept
+       * more than d_polloutthrd bytes, but only if
        * there is readers.
        */
 
       eventset = 0;
-      if ((filep->f_oflags & O_WROK) && (nbytes < (dev->d_bufsize - 1)))
+      if ((filep->f_oflags & O_WROK) &&
+          nbytes < (dev->d_bufsize - dev->d_polloutthrd))
         {
           eventset |= POLLOUT;
         }
 
-      /* Notify the POLLIN event if the pipe is not empty */
+      /* Notify the POLLIN event if buffer used exceeds poll threshold */
 
-      if ((filep->f_oflags & O_RDOK) && (nbytes > 0))
+      if ((filep->f_oflags & O_RDOK) && (nbytes > dev->d_pollinthrd))
         {
           eventset |= POLLIN;
         }
@@ -768,6 +792,34 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               PIPE_POLICY_0(dev->d_flags);
             }
 
+          ret = OK;
+        }
+        break;
+
+      case PIPEIOC_POLLINTHRD:
+        {
+          pipe_ndx_t threshold = (pipe_ndx_t)arg;
+          if (threshold >= dev->d_bufsize)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          dev->d_pollinthrd = threshold;
+          ret = OK;
+        }
+        break;
+
+      case PIPEIOC_POLLOUTTHRD:
+        {
+          pipe_ndx_t threshold = (pipe_ndx_t)arg;
+          if (threshold >= dev->d_bufsize)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          dev->d_polloutthrd = threshold;
           ret = OK;
         }
         break;
