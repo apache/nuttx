@@ -1,0 +1,119 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESP32C6
+
+comment "ESP32-C6 Configuration Options"
+
+choice
+	prompt "ESP32-C6 Chip Selection"
+	default ARCH_CHIP_ESP32C6WROOM1
+	depends on ARCH_CHIP_ESP32C6
+
+config ARCH_CHIP_ESP32C6X
+	bool "ESP32-C6"
+	select ESP32C6_ESP32C6XXX
+	---help---
+		ESP32 chip with a single RISC-V IMC core, no embedded Flash memory
+
+config ARCH_CHIP_ESP32C6FX4
+	bool "ESP32-C6Fx4"
+	select ESP32C6_ESP32C6XXX
+	select ESP32C6_FLASH_4M
+	---help---
+		ESP32 chip with a single RISC-V IMC core, 4 MB of in-package Flash memory
+
+config ARCH_CHIP_ESP32C6MINI1
+	bool "ESP32-C6-MINI-1"
+	select ESP32C6_ESP32C6XXX
+	select ESP32C6_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-C6Fx4 chip
+
+config ARCH_CHIP_ESP32C6WROOM1
+	bool "ESP32-C6-WROOM-1"
+	select ESP32C6_ESP32C6XXX
+	select ESP32C6_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-C6 chip, 4 MB of Flash memory
+
+endchoice # ESP32-C6 Chip Selection
+
+comment "Selected ESP32-C6 chip without embedded Flash, an external Flash memory is required."
+	depends on ARCH_CHIP_ESP32C6X
+
+config ESP32C6_SINGLE_CPU
+	bool
+	default n
+
+config ESP32C6_DUAL_CPU
+	bool
+	default n
+
+config ESP32C6_FLASH_2M
+	bool
+	default n
+
+config ESP32C6_FLASH_4M
+	bool
+	default n
+
+config ESP32C6_FLASH_8M
+	bool
+	default n
+
+config ESP32C6_FLASH_16M
+	bool
+	default n
+
+config ESP32C6_ESP32C6XXX
+	bool
+	default n
+	select ESP32C6_SINGLE_CPU
+
+choice ESP32C6_CPU_FREQ
+	prompt "CPU frequency"
+	default ESP32C6_CPU_FREQ_160
+	help
+		CPU frequency to be set on application startup.
+
+config ESP32C6_CPU_FREQ_80
+	bool "80 MHz"
+
+config ESP32C6_CPU_FREQ_120
+	bool "120 MHz"
+
+config ESP32C6_CPU_FREQ_160
+	bool "160 MHz"
+
+endchoice # CPU frequency
+
+config ESP32C6_CPU_FREQ_MHZ
+	int
+	default 80 if ESP32C6_CPU_FREQ_80
+	default 120 if ESP32C6_CPU_FREQ_120
+	default 160 if ESP32C6_CPU_FREQ_160
+
+menu "ESP32-C6 Peripheral Support"
+
+config ESP32C6_UART
+	bool
+	default n
+
+config ESP32C6_UART0
+	bool "UART0"
+	default y
+	select ESP32C6_UART
+	select UART0_SERIALDRIVER
+
+config ESP32C6_UART1
+	bool "UART1"
+	default n
+	select ESP32C6_UART
+	select UART1_SERIALDRIVER
+
+endmenu
+
+endif # ARCH_CHIP_ESP32C6
