@@ -86,8 +86,6 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                                 dev->d_iob->io_offset);
 
       net_incr32(conn->rcvseq, recvlen);
-
-      netdev_iob_clear(dev);
     }
 
   /* In any event, the new data has now been handled */
