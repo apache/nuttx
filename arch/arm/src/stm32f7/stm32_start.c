@@ -245,6 +245,10 @@ void __start(void)
   up_enable_dcache();
   showprogress('C');
 
+#ifdef CONFIG_SCHED_IRQMONITOR
+  up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
+#endif
+
 #ifdef CONFIG_ARMV7M_ITMSYSLOG
   /* Perform ARMv7-M ITM SYSLOG initialization */
 
