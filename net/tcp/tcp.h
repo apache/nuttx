@@ -1279,6 +1279,21 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
                          uint16_t offset);
 
 /****************************************************************************
+ * Name: tcp_dataconcat
+ *
+ * Description:
+ *   Concatenate iob_s chain iob2 to iob1, if CONFIG_NET_TCP_RECV_PACK is
+ *   endabled, pack all data in the I/O buffer chain.
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to iob1->io_pktlen.
+ *
+ ****************************************************************************/
+
+uint16_t tcp_dataconcat(FAR struct iob_s **iob1, FAR struct iob_s **iob2);
+
+/****************************************************************************
  * Name: tcp_backlogcreate
  *
  * Description:
