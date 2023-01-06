@@ -94,6 +94,20 @@ config SYSLOG_RTT
 	---help---
 		Use Segger J-Link RTT as a SYSLOG output device.
 
+if DRIVER_NOTE
+config SEGGER_SYSVIEW
+	bool "Note SEGGER SystemView driver"
+	select SEGGER_RTT
+	---help---
+		SystemView is a real-time recording and visualization tool for embedded
+		systems that reveals the true runtime behavior of an application,
+		going far deeper than the system insights provided by debuggers. This is
+		particularly effective when developing and working with complex embedded
+		systems comprising multiple threads and interrupts. SystemView can ensure
+		unintended interactions and resource conflicts.
+
+endif # DRIVER_NOTE
+
 if SEGGER_SYSVIEW
 
 config SEGGER_SYSVIEW_RTT_CHANNEL
