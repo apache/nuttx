@@ -53,10 +53,6 @@
 
 void stm32_boardinitialize(void)
 {
-#ifdef CONFIG_SCHED_CRITMONITOR
-  up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
-#endif
-
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
     defined(CONFIG_STM32_SPI3)
   stm32_spidev_initialize();
