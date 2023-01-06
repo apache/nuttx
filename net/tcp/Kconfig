@@ -135,6 +135,22 @@ config NET_TCP_WINDOW_SCALE_FACTOR
 
 endif # NET_TCP_WINDOW_SCALE
 
+config NET_TCP_OUT_OF_ORDER
+	bool "Enable TCP/IP Out Of Order segments"
+	default n
+	---help---
+		TCP will queue segments that arrive out of order.
+
+if NET_TCP_OUT_OF_ORDER
+
+config NET_TCP_OUT_OF_ORDER_BUFSIZE
+	int "TCP/IP Out Of Order buffer size"
+	default 16384
+	---help---
+		This is the default value for out-of-order buffer size.
+
+endif # NET_TCP_OUT_OF_ORDER
+
 config NET_TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n

@@ -806,6 +806,22 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   iob_free_chain(conn->readahead);
   conn->readahead = NULL;
 
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+  /* Release any out-of-order buffers */
+
+  if (conn->nofosegs > 0)
+    {
+      int i;
+
+      for (i = 0; i < conn->nofosegs; i++)
+        {
+          iob_free_chain(conn->ofosegs[i].data);
+        }
+
+      conn->nofosegs = 0;
+    }
+#endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
+
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
 
