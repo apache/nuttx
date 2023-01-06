@@ -219,6 +219,36 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
   recvwndo = tcp_calc_rcvsize(conn, recvwndo);
 
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+  /* Calculate the minimum desired size */
+
+  if (conn->nofosegs > 0)
+    {
+      uint32_t desire = conn->ofosegs[0].left -
+                        tcp_getsequence(conn->rcvseq);
+      int bufsize = tcp_ofoseg_bufsize(conn);
+
+      if (desire < tcp_rx_mss(dev))
+        {
+          desire = tcp_rx_mss(dev);
+        }
+
+      if (TCP_SEQ_LT(recvwndo, bufsize))
+        {
+          recvwndo = 0;
+        }
+      else
+        {
+          recvwndo -= bufsize;
+        }
+
+      if (recvwndo < desire)
+        {
+          recvwndo = desire;
+        }
+    }
+#endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
+
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
   recvwndo >>= conn->rcv_scale;
 #endif

@@ -106,6 +106,10 @@
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */
 
+/* The Max Range count of TCP Selective ACKs */
+
+#define TCP_SACK_RANGES_MAX   4
+
 /* After receiving 3 duplicate ACKs, TCP performs a retransmission
  * (RFC 5681 (3.2))
  */
@@ -142,6 +146,15 @@ struct tcp_poll_s
   FAR struct tcp_conn_s *conn;     /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+};
+
+/* Out-of-order segments */
+
+struct tcp_ofoseg_s
+{
+  uint32_t         left;  /* Left edge of segment */
+  uint32_t         right; /* Right edge of segment */
+  FAR struct iob_s *data; /* Out-of-order buffering */
 };
 
 struct tcp_conn_s
@@ -250,6 +263,17 @@ struct tcp_conn_s
    */
 
   struct iob_s *readahead;   /* Read-ahead buffering */
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+
+  /* Number of out-of-order segments */
+
+  uint8_t nofosegs;
+
+  /* This defines a out of order segment block. */
+
+  struct tcp_ofoseg_s ofosegs[TCP_SACK_RANGES_MAX];
+#endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Write buffering
@@ -2099,6 +2123,25 @@ void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 uint16_t tcpip_hdrsize(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_ofoseg_bufsize
+ *
+ * Description:
+ *   Calculate the pending size of out-of-order buffer
+ *
+ * Input Parameters:
+ *   conn   - The TCP connection of interest
+ *
+ * Returned Value:
+ *   Total size of out-of-order buffer
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+int tcp_ofoseg_bufsize(FAR struct tcp_conn_s *conn);
 
 #ifdef __cplusplus
 }

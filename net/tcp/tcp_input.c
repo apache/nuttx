@@ -257,6 +257,313 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
     }
 }
 
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+
+/****************************************************************************
+ * Name: tcp_rebuild_ofosegs
+ *
+ * Description:
+ *   Re-build out-of-order pool from incoming segment
+ *
+ * Input Parameters:
+ *   conn   - The TCP connection of interest
+ *   ofoseg - Pointer to incoming out-of-order segment
+ *   start  - Index of start postion of segment pool
+ *
+ * Returned Value:
+ *   True if incoming data has been consumed
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static bool tcp_rebuild_ofosegs(FAR struct tcp_conn_s *conn,
+                                FAR struct tcp_ofoseg_s *ofoseg,
+                                int start)
+{
+  struct tcp_ofoseg_s *seg;
+  int i;
+
+  for (i = start; i < conn->nofosegs && ofoseg->data != NULL; i++)
+    {
+      seg = &conn->ofosegs[i];
+
+      /* ofoseg    |~~~
+       * segpool |---|
+       */
+
+      if (TCP_SEQ_GTE(ofoseg->left, seg->left))
+        {
+          /* ofoseg        |---|
+           * segpool |---|
+           */
+
+          if (TCP_SEQ_GT(ofoseg->left, seg->right))
+            {
+              continue;
+            }
+
+          /* ofoseg      |---|
+           * segpool |---|
+           */
+
+          else if (ofoseg->left == seg->right)
+            {
+              tcp_dataconcat(&seg->data, &ofoseg->data);
+              seg->right = ofoseg->right;
+            }
+
+          /* ofoseg   |--|
+           * segpool |---|
+           */
+
+          else if (TCP_SEQ_LTE(ofoseg->right, seg->right))
+            {
+              iob_free_chain(ofoseg->data);
+              ofoseg->data = NULL;
+            }
+
+          /* ofoseg    |---|
+           * segpool |---|
+           */
+
+          else if (TCP_SEQ_GT(ofoseg->right, seg->right))
+            {
+              ofoseg->data =
+                iob_trimhead(ofoseg->data,
+                             TCP_SEQ_SUB(seg->right, ofoseg->left));
+              tcp_dataconcat(&seg->data, &ofoseg->data);
+              seg->right = ofoseg->right;
+            }
+        }
+
+      /* ofoseg  |~~~
+       * segpool   |---|
+       */
+
+      else
+        {
+          /* ofoseg  |---|
+           * segpool     |---|
+           */
+
+          if (ofoseg->right == seg->left)
+            {
+              tcp_dataconcat(&ofoseg->data, &seg->data);
+              seg->data = ofoseg->data;
+              seg->left = ofoseg->left;
+              ofoseg->data = NULL;
+            }
+
+          /* ofoseg  |---|
+           * segpool       |---|
+           */
+
+          else if (TCP_SEQ_LT(ofoseg->right, seg->left))
+            {
+              continue;
+            }
+
+          /* ofoseg  |---|~|
+           * segpool  |--|
+           */
+
+          else if (TCP_SEQ_GTE(ofoseg->right, seg->right))
+            {
+              iob_free_chain(seg->data);
+              *seg = *ofoseg;
+              ofoseg->data = NULL;
+            }
+
+          /* ofoseg  |---|
+           * segpool   |---|
+           */
+
+          else if (TCP_SEQ_GT(ofoseg->right, seg->left))
+            {
+              ofoseg->data =
+                iob_trimtail(ofoseg->data,
+                             ofoseg->right - seg->left);
+              tcp_dataconcat(&ofoseg->data, &seg->data);
+              seg->data = ofoseg->data;
+              seg->left = ofoseg->left;
+              ofoseg->data = NULL;
+            }
+        }
+    }
+
+  return (ofoseg->data == NULL);
+}
+
+/****************************************************************************
+ * Name: tcp_reorder_ofosegs
+ *
+ * Description:
+ *   Sort out-of-order segments by left edge
+ *
+ * Input Parameters:
+ *   nofosegs - Number of out-of-order semgnets
+ *   ofosegs  - Pointer to out-of-order segments
+ *
+ * Returned Value:
+ *   True if re-order occurs
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static bool tcp_reorder_ofosegs(int nofosegs,
+                                FAR struct tcp_ofoseg_s *ofosegs)
+{
+  struct tcp_ofoseg_s segs;
+  bool reordered = false;
+  int i;
+  int j;
+
+  /* Sort out-of-order segments by left edge */
+
+  for (i = 0; i < nofosegs - 1; i++)
+    {
+      for (j = 0; j < nofosegs - 1 - i; j++)
+        {
+          if (TCP_SEQ_GT(ofosegs[j].left,
+                         ofosegs[j + 1].left))
+            {
+              segs = ofosegs[j];
+              ofosegs[j] = ofosegs[j + 1];
+              ofosegs[j + 1] = segs;
+              reordered = true;
+            }
+        }
+    }
+
+  return reordered;
+}
+
+/****************************************************************************
+ * Name: tcp_input_ofosegs
+ *
+ * Description:
+ *   Handle incoming TCP data to out-of-order pool
+ *
+ * Input Parameters:
+ *   dev    - The device driver structure containing the received TCP packet.
+ *   conn   - The TCP connection of interest
+ *   iplen  - Length of the IP header (IPv4_HDRLEN or IPv6_HDRLEN).
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void tcp_input_ofosegs(FAR struct net_driver_s *dev,
+                              FAR struct tcp_conn_s *conn,
+                              unsigned int iplen)
+{
+  struct tcp_ofoseg_s ofoseg;
+  bool rebuild;
+  int i = 0;
+  int len;
+
+  ofoseg.left =
+    tcp_getsequence(((FAR struct tcp_hdr_s *)IPBUF(iplen))->seqno);
+
+  /* Calculate the pending size of out-of-order cache, if the input edge can
+   * not fill the adjacent segments, drop it
+   */
+
+  if (tcp_ofoseg_bufsize(conn) > CONFIG_NET_TCP_OUT_OF_ORDER_BUFSIZE &&
+      ofoseg.left >= conn->ofosegs[0].left)
+    {
+      return;
+    }
+
+  /* Get left/right edge from incoming data */
+
+  len = (dev->d_appdata - dev->d_iob->io_data) - dev->d_iob->io_offset;
+  ofoseg.right = TCP_SEQ_ADD(ofoseg.left, dev->d_iob->io_pktlen - len);
+
+  ninfo("TCP OFOSEG out-of-order "
+        "[%" PRIu32 " : %" PRIu32 " : %" PRIu32 "]\n",
+        ofoseg.left, ofoseg.right, TCP_SEQ_SUB(ofoseg.right, ofoseg.left));
+
+  /* Trim l3/l4 header to reserve appdata */
+
+  dev->d_iob = iob_trimhead(dev->d_iob, len);
+  if (dev->d_iob == NULL)
+    {
+      /* No available data, clear device buffer */
+
+      goto clear;
+    }
+
+  ofoseg.data = dev->d_iob;
+
+  /* Build out-of-order pool */
+
+  rebuild = tcp_rebuild_ofosegs(conn, &ofoseg, 0);
+
+  /* Incoming segment out of order from existing pool, add to new segment */
+
+  if (!rebuild && conn->nofosegs != TCP_SACK_RANGES_MAX)
+    {
+      conn->ofosegs[conn->nofosegs] = ofoseg;
+      conn->nofosegs++;
+      rebuild = true;
+    }
+
+  /* Try Re-order ofosegs */
+
+  if (rebuild &&
+      tcp_reorder_ofosegs(conn->nofosegs, (FAR void *)conn->ofosegs))
+    {
+      /* Re-build out-of-order pool after re-order */
+
+      while (i < conn->nofosegs - 1)
+        {
+          if (tcp_rebuild_ofosegs(conn, &conn->ofosegs[i], i + 1))
+            {
+              for (; i < conn->nofosegs - 1; i++)
+                {
+                  conn->ofosegs[i] = conn->ofosegs[i + 1];
+                }
+
+              conn->nofosegs--;
+
+              i = 0;
+            }
+          else
+            {
+              i++;
+            }
+        }
+    }
+
+  for (i = 0; i < conn->nofosegs; i++)
+    {
+      ninfo("TCP OFOSEG [%d][%" PRIu32 " : %" PRIu32 " : %" PRIu32 "]\n", i,
+            conn->ofosegs[i].left, conn->ofosegs[i].right,
+            TCP_SEQ_SUB(conn->ofosegs[i].right, conn->ofosegs[i].left));
+    }
+
+  /* Incoming data has been consumed, re-prepare device buffer to send
+   * response.
+   */
+
+  if (rebuild)
+    {
+clear:
+      netdev_iob_clear(dev);
+      netdev_iob_prepare(dev, false, 0);
+    }
+}
+#endif /* CONFIG_NET_TCP_OUT_OF_ORDER */
+
 /****************************************************************************
  * Name: tcp_input
  *
@@ -697,8 +1004,11 @@ found:
             }
           else
             {
-              /* We never queue out-of-order segments. */
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER
+              /* Queue out-of-order segments. */
 
+              tcp_input_ofosegs(dev, conn, iplen);
+#endif
               tcp_send(dev, conn, TCP_ACK, tcpiplen);
               return;
             }
