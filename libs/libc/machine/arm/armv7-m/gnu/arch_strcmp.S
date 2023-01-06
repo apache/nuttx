@@ -1,4 +1,6 @@
-/*
+/****************************************************************************
+ * libs/libc/machine/arm/armv7-m/gnu/arch_strcmp.S
+ *
  * Copyright (c) 2012-2014 ARM Ltd
  * All rights reserved.
  *
@@ -24,7 +26,8 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
 
 /* Very similar to the generic code, but uses Thumb2 as implemented
    in ARMv7-M.  */

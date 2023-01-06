@@ -1,329 +1,626 @@
-/*
- * Copyright (c) 2013 ARM Ltd
- * All rights reserved.
+/****************************************************************************
+ * libs/libc/machine/arm/armv7-a/gnu/arch_memcpy.S
+ *
+ * Copyright (c) 2013, Linaro Limited
+ *  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 1. Redistributions of source code must retain the above copyright
+ *
+ *    * Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
+ *
+ *    * Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. The name of the company may not be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
  *
- * THIS SOFTWARE IS PROVIDED BY ARM LTD ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL ARM LTD BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *    * Neither the name of Linaro Limited nor the names of its
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/*
+ * This memcpy routine is optimised for Cortex-A15 cores and takes advantage
+ * of VFP or NEON when built with the appropriate flags.
+ *
+ * Assumptions:
+ *
+ *  ARMv6 (ARMv7-a if using Neon)
+ *  ARM state
+ *  Unaligned accesses
+ *  LDRD/STRD support unaligned word accesses
+ *
+ * If compiled with GCC, this file should be enclosed within following
+ * pre-processing check:
+ * if defined (__ARM_ARCH_7A__) && defined (__ARM_FEATURE_UNALIGNED)
+ *
  */
-
-/* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
-   unaligned access.
-
-   If compiled with GCC, this file should be enclosed within following
-   pre-processing check:
-   if defined (__ARM_ARCH_7M__) || defined (__ARM_ARCH_7EM__)
-
-   Prototype: void *memcpy (void *dst, const void *src, size_t count);
-
-   The job will be done in 5 steps.
-   Step 1: Align src/dest pointers, copy mis-aligned if fail to align both
-   Step 2: Repeatedly copy big block size of __OPT_BIG_BLOCK_SIZE
-   Step 3: Repeatedly copy big block size of __OPT_MID_BLOCK_SIZE
-   Step 4: Copy word by word
-   Step 5: Copy byte-to-byte
-
-   Tunable options:
-     __OPT_BIG_BLOCK_SIZE: Size of big block in words.  Default to 64.
-     __OPT_MID_BLOCK_SIZE: Size of big block in words.  Default to 16.
- */
-#ifndef __OPT_BIG_BLOCK_SIZE
-#define __OPT_BIG_BLOCK_SIZE (4 * 16)
-#endif
-
-#ifndef __OPT_MID_BLOCK_SIZE
-#define __OPT_MID_BLOCK_SIZE (4 * 4)
-#endif
-
-#if __OPT_BIG_BLOCK_SIZE == 16
-#define BEGIN_UNROLL_BIG_BLOCK \
-  .irp offset, 0,4,8,12
-#elif __OPT_BIG_BLOCK_SIZE == 32
-#define BEGIN_UNROLL_BIG_BLOCK \
-  .irp offset, 0,4,8,12,16,20,24,28
-#elif __OPT_BIG_BLOCK_SIZE == 64
-#define BEGIN_UNROLL_BIG_BLOCK \
-  .irp offset, 0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60
-#else
-#error "Illegal __OPT_BIG_BLOCK_SIZE"
-#endif
-
-#if __OPT_MID_BLOCK_SIZE == 8
-#define BEGIN_UNROLL_MID_BLOCK \
-  .irp offset, 0,4
-#elif __OPT_MID_BLOCK_SIZE == 16
-#define BEGIN_UNROLL_MID_BLOCK \
-  .irp offset, 0,4,8,12
-#else
-#error "Illegal __OPT_MID_BLOCK_SIZE"
-#endif
-
-#define END_UNROLL .endr
 
 	.syntax unified
-	.text
-	.align	2
-	.global	memcpy
-	.thumb
-	.thumb_func
-	.type	memcpy, %function
-memcpy:
-	@ r0: dst
-	@ r1: src
-	@ r2: len
-#ifdef __ARM_FEATURE_UNALIGNED
-	/* In case of UNALIGNED access supported, ip is not used in
-	   function body.  */
-	mov	ip, r0
+	/* This implementation requires ARM state.  */
+	.arm
+
+#ifdef __ARM_NEON__
+
+	.fpu	neon
+	.arch	armv7-a
+# define FRAME_SIZE	4
+# define USE_VFP
+# define USE_NEON
+
+#elif !defined (__SOFTFP__)
+
+	.arch	armv6
+	.fpu	vfpv2
+# define FRAME_SIZE	32
+# define USE_VFP
+
 #else
-	push	{r0}
+	.arch	armv6
+# define FRAME_SIZE    32
+
 #endif
-	orr	r3, r1, r0
-	ands	r3, r3, #3
-	bne	.Lmisaligned_copy
 
-.Lbig_block:
-	subs	r2, __OPT_BIG_BLOCK_SIZE
-	blo	.Lmid_block
-
-	/* Kernel loop for big block copy */
-	.align 2
-.Lbig_block_loop:
-	BEGIN_UNROLL_BIG_BLOCK
-#ifdef __ARM_ARCH_7EM__
-	ldr	r3, [r1], #4
-	str	r3, [r0], #4
-	END_UNROLL
-#else /* __ARM_ARCH_7M__ */
-	ldr	r3, [r1, \offset]
-	str	r3, [r0, \offset]
-	END_UNROLL
-	adds	r0, __OPT_BIG_BLOCK_SIZE
-	adds	r1, __OPT_BIG_BLOCK_SIZE
+/* Old versions of GAS incorrectly implement the NEON align semantics.  */
+#ifdef BROKEN_ASM_NEON_ALIGN
+#define ALIGN(addr, align) addr,:align
+#else
+#define ALIGN(addr, align) addr:align
 #endif
-	subs	r2, __OPT_BIG_BLOCK_SIZE
-	bhs .Lbig_block_loop
 
-.Lmid_block:
-	adds	r2, __OPT_BIG_BLOCK_SIZE - __OPT_MID_BLOCK_SIZE
-	blo	.Lcopy_word_by_word
+#define PC_OFFSET	8	/* PC pipeline compensation.  */
+#define INSN_SIZE	4
 
-	/* Kernel loop for mid-block copy */
-	.align 2
-.Lmid_block_loop:
-	BEGIN_UNROLL_MID_BLOCK
-#ifdef __ARM_ARCH_7EM__
-	ldr	r3, [r1], #4
-	str	r3, [r0], #4
-	END_UNROLL
-#else /* __ARM_ARCH_7M__ */
-	ldr	r3, [r1, \offset]
-	str	r3, [r0, \offset]
-	END_UNROLL
-	adds    r0, __OPT_MID_BLOCK_SIZE
-	adds    r1, __OPT_MID_BLOCK_SIZE
+/* Call parameters.  */
+#define dstin	r0
+#define src	r1
+#define count	r2
+
+/* Locals.  */
+#define tmp1	r3
+#define dst	ip
+#define tmp2	r10
+
+#ifndef USE_NEON
+/* For bulk copies using GP registers.  */
+#define	A_l	r2		/* Call-clobbered.  */
+#define	A_h	r3		/* Call-clobbered.  */
+#define	B_l	r4
+#define	B_h	r5
+#define	C_l	r6
+#define	C_h	r7
+#define	D_l	r8
+#define	D_h	r9
 #endif
-	subs	r2, __OPT_MID_BLOCK_SIZE
-	bhs	.Lmid_block_loop
 
-.Lcopy_word_by_word:
-	adds	r2, __OPT_MID_BLOCK_SIZE - 4
-	blo	.Lcopy_less_than_4
+/* Number of lines ahead to pre-fetch data.  If you change this the code
+   below will need adjustment to compensate.  */
 
-	/* Kernel loop for small block copy */
-	.align 2
-.Lcopy_word_by_word_loop:
-	ldr	r3, [r1], #4
-	str	r3, [r0], #4
-	subs	r2, #4
-	bhs	.Lcopy_word_by_word_loop
+#define prefetch_lines	5
 
-.Lcopy_less_than_4:
-	adds	r2, #4
-	beq	.Ldone
-
-	lsls	r2, r2, #31
-	itt ne
-	ldrbne  r3, [r1], #1
-	strbne  r3, [r0], #1
-
-	bcc	.Ldone
-#ifdef __ARM_FEATURE_UNALIGNED
-	ldrh	r3, [r1]
-	strh	r3, [r0]
-#else
-	ldrb	r3, [r1]
-	strb	r3, [r0]
-	ldrb	r3, [r1, #1]
-	strb	r3, [r0, #1]
-#endif /* __ARM_FEATURE_UNALIGNED */
-
-.Ldone:
-#ifdef __ARM_FEATURE_UNALIGNED
-	mov	r0, ip
-#else
-	pop	{r0}
-#endif
-	bx	lr
-
-	.align 2
-.Lmisaligned_copy:
-#ifdef __ARM_FEATURE_UNALIGNED
-	/* Define label DST_ALIGNED to BIG_BLOCK.  It will go to aligned copy
-	   once destination is adjusted to aligned.  */
-#define Ldst_aligned Lbig_block
-
-	/* Copy word by word using LDR when alignment can be done in hardware,
-	i.e., SCTLR.A is set, supporting unaligned access in LDR and STR.  */
-
-	cmp	r2, #8
-	blo	.Lbyte_copy
-
-	/* if src is aligned, just go to the big block loop.  */
-	lsls	r3, r1, #30
-	beq	.Ldst_aligned
-#else
-	/* if len < 12, misalignment adjustment has more overhead than
-	just byte-to-byte copy.  Also, len must >=8 to guarantee code
-	afterward work correctly.  */
-	cmp	r2, #12
-	blo	.Lbyte_copy
-#endif /* __ARM_FEATURE_UNALIGNED */
-
-	/* Align dst only, not trying to align src.  That is the because
-	handling of aligned src and misaligned dst need more overhead than
-	otherwise.  By doing this the worst case is when initial src is aligned,
-	additional up to 4 byte additional copy will executed, which is
-	acceptable.  */
-
-	ands	r3, r0, #3
-	beq	.Ldst_aligned
-
-	rsb	r3, #4
-	subs	r2, r3
-
-	lsls    r3, r3, #31
-	itt ne
-	ldrbne  r3, [r1], #1
-	strbne  r3, [r0], #1
-
-	bcc .Ldst_aligned
-
-#ifdef __ARM_FEATURE_UNALIGNED
-	ldrh    r3, [r1], #2
-	strh    r3, [r0], #2
-	b	.Ldst_aligned
-#else
-	ldrb    r3, [r1], #1
-	strb    r3, [r0], #1
-	ldrb    r3, [r1], #1
-	strb    r3, [r0], #1
-	/* Now that dst is aligned */
-.Ldst_aligned:
-	/* if r1 is aligned now, it means r0/r1 has the same misalignment,
-	and they are both aligned now.  Go aligned copy.  */
-	ands	r3, r1, #3
-	beq	.Lbig_block
-
-	/* dst is aligned, but src isn't.  Misaligned copy.  */
-
-	push	{r4, r5}
-	subs	r2, #4
-
-	/* Backward r1 by misaligned bytes, to make r1 aligned.
-	Since we need to restore r1 to unaligned address after the loop,
-	we need keep the offset bytes to ip and sub it from r1 afterward.  */
-	subs	r1, r3
-	rsb	ip, r3, #4
-
-	/* Pre-load on word */
-	ldr	r4, [r1], #4
-
-	cmp	r3, #2
-	beq	.Lmisaligned_copy_2_2
-	cmp	r3, #3
-	beq	.Lmisaligned_copy_3_1
-
-	.macro mis_src_copy shift
-1:
-#ifdef __ARM_BIG_ENDIAN
-	lsls	r4, r4, \shift
-#else
-	lsrs	r4, r4, \shift
-#endif
-	ldr	r3, [r1], #4
-#ifdef __ARM_BIG_ENDIAN
-	lsrs	r5, r3, 32-\shift
-#else
-	lsls	r5, r3, 32-\shift
-#endif
-	orr	r4, r4, r5
-	str	r4, [r0], #4
-	mov	r4, r3
-	subs	r2, #4
-	bhs	1b
+#ifdef USE_VFP
+	.macro	cpy_line_vfp vreg, base
+	vstr	\vreg, [dst, #\base]
+	vldr	\vreg, [src, #\base]
+	vstr	d0, [dst, #\base + 8]
+	vldr	d0, [src, #\base + 8]
+	vstr	d1, [dst, #\base + 16]
+	vldr	d1, [src, #\base + 16]
+	vstr	d2, [dst, #\base + 24]
+	vldr	d2, [src, #\base + 24]
+	vstr	\vreg, [dst, #\base + 32]
+	vldr	\vreg, [src, #\base + prefetch_lines * 64 - 32]
+	vstr	d0, [dst, #\base + 40]
+	vldr	d0, [src, #\base + 40]
+	vstr	d1, [dst, #\base + 48]
+	vldr	d1, [src, #\base + 48]
+	vstr	d2, [dst, #\base + 56]
+	vldr	d2, [src, #\base + 56]
 	.endm
 
-.Lmisaligned_copy_1_3:
-	mis_src_copy shift=8
-	b	.Lsrc_misaligned_tail
-
-.Lmisaligned_copy_3_1:
-	mis_src_copy shift=24
-	b	.Lsrc_misaligned_tail
-
-.Lmisaligned_copy_2_2:
-	/* For 2_2 misalignment, ldr is still faster than 2 x ldrh.  */
-	mis_src_copy shift=16
-
-.Lsrc_misaligned_tail:
-	adds	r2, #4
-	subs	r1, ip
-	pop	{r4, r5}
-
-#endif /* __ARM_FEATURE_UNALIGNED */
-
-.Lbyte_copy:
-	subs	r2, #4
-	blo	.Lcopy_less_than_4
-
-.Lbyte_copy_loop:
-	subs    r2, #1
-	ldrb    r3, [r1], #1
-	strb    r3, [r0], #1
-	bhs	.Lbyte_copy_loop
-
-	ldrb	r3, [r1]
-	strb	r3, [r0]
-	ldrb	r3, [r1, #1]
-	strb	r3, [r0, #1]
-	ldrb	r3, [r1, #2]
-	strb	r3, [r0, #2]
-
-#ifdef __ARM_FEATURE_UNALIGNED
-	mov	r0, ip
-#else
-	pop	{r0}
+	.macro	cpy_tail_vfp vreg, base
+	vstr	\vreg, [dst, #\base]
+	vldr	\vreg, [src, #\base]
+	vstr	d0, [dst, #\base + 8]
+	vldr	d0, [src, #\base + 8]
+	vstr	d1, [dst, #\base + 16]
+	vldr	d1, [src, #\base + 16]
+	vstr	d2, [dst, #\base + 24]
+	vldr	d2, [src, #\base + 24]
+	vstr	\vreg, [dst, #\base + 32]
+	vstr	d0, [dst, #\base + 40]
+	vldr	d0, [src, #\base + 40]
+	vstr	d1, [dst, #\base + 48]
+	vldr	d1, [src, #\base + 48]
+	vstr	d2, [dst, #\base + 56]
+	vldr	d2, [src, #\base + 56]
+	.endm
 #endif
+
+	.macro def_fn f p2align=0
+	.text
+	.p2align \p2align
+	.global \f
+	.type \f, %function
+\f:
+	.endm
+
+def_fn memcpy p2align=6
+
+	mov	dst, dstin	/* Preserve dstin, we need to return it.  */
+	cmp	count, #64
+	bge	.Lcpy_not_short
+	/* Deal with small copies quickly by dropping straight into the
+	   exit block.  */
+
+.Ltail63unaligned:
+#ifdef USE_NEON
+	and	tmp1, count, #0x38
+	rsb	tmp1, tmp1, #(56 - PC_OFFSET + INSN_SIZE)
+	add	pc, pc, tmp1
+	vld1.8	{d0}, [src]!	/* 14 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 12 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 10 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 8 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 6 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 4 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 2 words to go.  */
+	vst1.8	{d0}, [dst]!
+
+	tst	count, #4
+	ldrne	tmp1, [src], #4
+	strne	tmp1, [dst], #4
+#else
+	/* Copy up to 15 full words of data.  May not be aligned.  */
+	/* Cannot use VFP for unaligned data.  */
+	and	tmp1, count, #0x3c
+	add	dst, dst, tmp1
+	add	src, src, tmp1
+	rsb	tmp1, tmp1, #(60 - PC_OFFSET/2 + INSN_SIZE/2)
+	/* Jump directly into the sequence below at the correct offset.  */
+	add	pc, pc, tmp1, lsl #1
+
+	ldr	tmp1, [src, #-60]	/* 15 words to go.  */
+	str	tmp1, [dst, #-60]
+
+	ldr	tmp1, [src, #-56]	/* 14 words to go.  */
+	str	tmp1, [dst, #-56]
+	ldr	tmp1, [src, #-52]
+	str	tmp1, [dst, #-52]
+
+	ldr	tmp1, [src, #-48]	/* 12 words to go.  */
+	str	tmp1, [dst, #-48]
+	ldr	tmp1, [src, #-44]
+	str	tmp1, [dst, #-44]
+
+	ldr	tmp1, [src, #-40]	/* 10 words to go.  */
+	str	tmp1, [dst, #-40]
+	ldr	tmp1, [src, #-36]
+	str	tmp1, [dst, #-36]
+
+	ldr	tmp1, [src, #-32]	/* 8 words to go.  */
+	str	tmp1, [dst, #-32]
+	ldr	tmp1, [src, #-28]
+	str	tmp1, [dst, #-28]
+
+	ldr	tmp1, [src, #-24]	/* 6 words to go.  */
+	str	tmp1, [dst, #-24]
+	ldr	tmp1, [src, #-20]
+	str	tmp1, [dst, #-20]
+
+	ldr	tmp1, [src, #-16]	/* 4 words to go.  */
+	str	tmp1, [dst, #-16]
+	ldr	tmp1, [src, #-12]
+	str	tmp1, [dst, #-12]
+
+	ldr	tmp1, [src, #-8]	/* 2 words to go.  */
+	str	tmp1, [dst, #-8]
+	ldr	tmp1, [src, #-4]
+	str	tmp1, [dst, #-4]
+#endif
+
+	lsls	count, count, #31
+	ldrhcs	tmp1, [src], #2
+	ldrbne	src, [src]		/* Src is dead, use as a scratch.  */
+	strhcs	tmp1, [dst], #2
+	strbne	src, [dst]
 	bx	lr
 
-	.size	memcpy, .-memcpy
+.Lcpy_not_short:
+	/* At least 64 bytes to copy, but don't know the alignment yet.  */
+	str	tmp2, [sp, #-FRAME_SIZE]!
+	and	tmp2, src, #7
+	and	tmp1, dst, #7
+	cmp	tmp1, tmp2
+	bne	.Lcpy_notaligned
+
+#ifdef USE_VFP
+	/* Magic dust alert!  Force VFP on Cortex-A9.  Experiments show
+	   that the FP pipeline is much better at streaming loads and
+	   stores.  This is outside the critical loop.  */
+	vmov.f32	s0, s0
+#endif
+
+	/* SRC and DST have the same mutual 32-bit alignment, but we may
+	   still need to pre-copy some bytes to get to natural alignment.
+	   We bring DST into full 64-bit alignment.  */
+	lsls	tmp2, dst, #29
+	beq	1f
+	rsbs	tmp2, tmp2, #0
+	sub	count, count, tmp2, lsr #29
+	ldrmi	tmp1, [src], #4
+	strmi	tmp1, [dst], #4
+	lsls	tmp2, tmp2, #2
+	ldrhcs	tmp1, [src], #2
+	ldrbne	tmp2, [src], #1
+	strhcs	tmp1, [dst], #2
+	strbne	tmp2, [dst], #1
+
+1:
+	subs	tmp2, count, #64	/* Use tmp2 for count.  */
+	blt	.Ltail63aligned
+
+	cmp	tmp2, #512
+	bge	.Lcpy_body_long
+
+.Lcpy_body_medium:			/* Count in tmp2.  */
+#ifdef USE_VFP
+1:
+	vldr	d0, [src, #0]
+	subs	tmp2, tmp2, #64
+	vldr	d1, [src, #8]
+	vstr	d0, [dst, #0]
+	vldr	d0, [src, #16]
+	vstr	d1, [dst, #8]
+	vldr	d1, [src, #24]
+	vstr	d0, [dst, #16]
+	vldr	d0, [src, #32]
+	vstr	d1, [dst, #24]
+	vldr	d1, [src, #40]
+	vstr	d0, [dst, #32]
+	vldr	d0, [src, #48]
+	vstr	d1, [dst, #40]
+	vldr	d1, [src, #56]
+	vstr	d0, [dst, #48]
+	add	src, src, #64
+	vstr	d1, [dst, #56]
+	add	dst, dst, #64
+	bge	1b
+	tst	tmp2, #0x3f
+	beq	.Ldone
+
+.Ltail63aligned:			/* Count in tmp2.  */
+	and	tmp1, tmp2, #0x38
+	add	dst, dst, tmp1
+	add	src, src, tmp1
+	rsb	tmp1, tmp1, #(56 - PC_OFFSET + INSN_SIZE)
+	add	pc, pc, tmp1
+
+	vldr	d0, [src, #-56]	/* 14 words to go.  */
+	vstr	d0, [dst, #-56]
+	vldr	d0, [src, #-48]	/* 12 words to go.  */
+	vstr	d0, [dst, #-48]
+	vldr	d0, [src, #-40]	/* 10 words to go.  */
+	vstr	d0, [dst, #-40]
+	vldr	d0, [src, #-32]	/* 8 words to go.  */
+	vstr	d0, [dst, #-32]
+	vldr	d0, [src, #-24]	/* 6 words to go.  */
+	vstr	d0, [dst, #-24]
+	vldr	d0, [src, #-16]	/* 4 words to go.  */
+	vstr	d0, [dst, #-16]
+	vldr	d0, [src, #-8]	/* 2 words to go.  */
+	vstr	d0, [dst, #-8]
+#else
+	sub	src, src, #8
+	sub	dst, dst, #8
+1:
+	ldrd	A_l, A_h, [src, #8]
+	strd	A_l, A_h, [dst, #8]
+	ldrd	A_l, A_h, [src, #16]
+	strd	A_l, A_h, [dst, #16]
+	ldrd	A_l, A_h, [src, #24]
+	strd	A_l, A_h, [dst, #24]
+	ldrd	A_l, A_h, [src, #32]
+	strd	A_l, A_h, [dst, #32]
+	ldrd	A_l, A_h, [src, #40]
+	strd	A_l, A_h, [dst, #40]
+	ldrd	A_l, A_h, [src, #48]
+	strd	A_l, A_h, [dst, #48]
+	ldrd	A_l, A_h, [src, #56]
+	strd	A_l, A_h, [dst, #56]
+	ldrd	A_l, A_h, [src, #64]!
+	strd	A_l, A_h, [dst, #64]!
+	subs	tmp2, tmp2, #64
+	bge	1b
+	tst	tmp2, #0x3f
+	bne	1f
+	ldr	tmp2,[sp], #FRAME_SIZE
+	bx	lr
+1:
+	add	src, src, #8
+	add	dst, dst, #8
+
+.Ltail63aligned:			/* Count in tmp2.  */
+	/* Copy up to 7 d-words of data.  Similar to Ltail63unaligned, but
+	   we know that the src and dest are 32-bit aligned so we can use
+	   LDRD/STRD to improve efficiency.  */
+	/* TMP2 is now negative, but we don't care about that.  The bottom
+	   six bits still tell us how many bytes are left to copy.  */
+
+	and	tmp1, tmp2, #0x38
+	add	dst, dst, tmp1
+	add	src, src, tmp1
+	rsb	tmp1, tmp1, #(56 - PC_OFFSET + INSN_SIZE)
+	add	pc, pc, tmp1
+	ldrd	A_l, A_h, [src, #-56]	/* 14 words to go.  */
+	strd	A_l, A_h, [dst, #-56]
+	ldrd	A_l, A_h, [src, #-48]	/* 12 words to go.  */
+	strd	A_l, A_h, [dst, #-48]
+	ldrd	A_l, A_h, [src, #-40]	/* 10 words to go.  */
+	strd	A_l, A_h, [dst, #-40]
+	ldrd	A_l, A_h, [src, #-32]	/* 8 words to go.  */
+	strd	A_l, A_h, [dst, #-32]
+	ldrd	A_l, A_h, [src, #-24]	/* 6 words to go.  */
+	strd	A_l, A_h, [dst, #-24]
+	ldrd	A_l, A_h, [src, #-16]	/* 4 words to go.  */
+	strd	A_l, A_h, [dst, #-16]
+	ldrd	A_l, A_h, [src, #-8]	/* 2 words to go.  */
+	strd	A_l, A_h, [dst, #-8]
+
+#endif
+	tst	tmp2, #4
+	ldrne	tmp1, [src], #4
+	strne	tmp1, [dst], #4
+	lsls	tmp2, tmp2, #31		/* Count (tmp2) now dead. */
+	ldrhcs	tmp1, [src], #2
+	ldrbne	tmp2, [src]
+	strhcs	tmp1, [dst], #2
+	strbne	tmp2, [dst]
+
+.Ldone:
+	ldr	tmp2, [sp], #FRAME_SIZE
+	bx	lr
+
+.Lcpy_body_long:			/* Count in tmp2.  */
+
+	/* Long copy.  We know that there's at least (prefetch_lines * 64)
+	   bytes to go.  */
+#ifdef USE_VFP
+	/* Don't use PLD.  Instead, read some data in advance of the current
+	   copy position into a register.  This should act like a PLD
+	   operation but we won't have to repeat the transfer.  */
+
+	vldr	d3, [src, #0]
+	vldr	d4, [src, #64]
+	vldr	d5, [src, #128]
+	vldr	d6, [src, #192]
+	vldr	d7, [src, #256]
+
+	vldr	d0, [src, #8]
+	vldr	d1, [src, #16]
+	vldr	d2, [src, #24]
+	add	src, src, #32
+
+	subs	tmp2, tmp2, #prefetch_lines * 64 * 2
+	blt	2f
+1:
+	cpy_line_vfp	d3, 0
+	cpy_line_vfp	d4, 64
+	cpy_line_vfp	d5, 128
+	add	dst, dst, #3 * 64
+	add	src, src, #3 * 64
+	cpy_line_vfp	d6, 0
+	cpy_line_vfp	d7, 64
+	add	dst, dst, #2 * 64
+	add	src, src, #2 * 64
+	subs	tmp2, tmp2, #prefetch_lines * 64
+	bge	1b
+
+2:
+	cpy_tail_vfp	d3, 0
+	cpy_tail_vfp	d4, 64
+	cpy_tail_vfp	d5, 128
+	add	src, src, #3 * 64
+	add	dst, dst, #3 * 64
+	cpy_tail_vfp	d6, 0
+	vstr	d7, [dst, #64]
+	vldr	d7, [src, #64]
+	vstr	d0, [dst, #64 + 8]
+	vldr	d0, [src, #64 + 8]
+	vstr	d1, [dst, #64 + 16]
+	vldr	d1, [src, #64 + 16]
+	vstr	d2, [dst, #64 + 24]
+	vldr	d2, [src, #64 + 24]
+	vstr	d7, [dst, #64 + 32]
+	add	src, src, #96
+	vstr	d0, [dst, #64 + 40]
+	vstr	d1, [dst, #64 + 48]
+	vstr	d2, [dst, #64 + 56]
+	add	dst, dst, #128
+	add	tmp2, tmp2, #prefetch_lines * 64
+	b	.Lcpy_body_medium
+#else
+	/* Long copy.  Use an SMS style loop to maximize the I/O
+	   bandwidth of the core.  We don't have enough spare registers
+	   to synthesise prefetching, so use PLD operations.  */
+	/* Pre-bias src and dst.  */
+	sub	src, src, #8
+	sub	dst, dst, #8
+	pld	[src, #8]
+	pld	[src, #72]
+	subs	tmp2, tmp2, #64
+	pld	[src, #136]
+	ldrd	A_l, A_h, [src, #8]
+	strd	B_l, B_h, [sp, #8]
+	ldrd	B_l, B_h, [src, #16]
+	strd	C_l, C_h, [sp, #16]
+	ldrd	C_l, C_h, [src, #24]
+	strd	D_l, D_h, [sp, #24]
+	pld	[src, #200]
+	ldrd	D_l, D_h, [src, #32]!
+	b	1f
+	.p2align	6
+2:
+	pld	[src, #232]
+	strd	A_l, A_h, [dst, #40]
+	ldrd	A_l, A_h, [src, #40]
+	strd	B_l, B_h, [dst, #48]
+	ldrd	B_l, B_h, [src, #48]
+	strd	C_l, C_h, [dst, #56]
+	ldrd	C_l, C_h, [src, #56]
+	strd	D_l, D_h, [dst, #64]!
+	ldrd	D_l, D_h, [src, #64]!
+	subs	tmp2, tmp2, #64
+1:
+	strd	A_l, A_h, [dst, #8]
+	ldrd	A_l, A_h, [src, #8]
+	strd	B_l, B_h, [dst, #16]
+	ldrd	B_l, B_h, [src, #16]
+	strd	C_l, C_h, [dst, #24]
+	ldrd	C_l, C_h, [src, #24]
+	strd	D_l, D_h, [dst, #32]
+	ldrd	D_l, D_h, [src, #32]
+	bcs	2b
+	/* Save the remaining bytes and restore the callee-saved regs.  */
+	strd	A_l, A_h, [dst, #40]
+	add	src, src, #40
+	strd	B_l, B_h, [dst, #48]
+	ldrd	B_l, B_h, [sp, #8]
+	strd	C_l, C_h, [dst, #56]
+	ldrd	C_l, C_h, [sp, #16]
+	strd	D_l, D_h, [dst, #64]
+	ldrd	D_l, D_h, [sp, #24]
+	add	dst, dst, #72
+	tst	tmp2, #0x3f
+	bne	.Ltail63aligned
+	ldr	tmp2, [sp], #FRAME_SIZE
+	bx	lr
+#endif
+
+.Lcpy_notaligned:
+	pld	[src]
+	pld	[src, #64]
+	/* There's at least 64 bytes to copy, but there is no mutual
+	   alignment.  */
+	/* Bring DST to 64-bit alignment.  */
+	lsls	tmp2, dst, #29
+	pld	[src, #(2 * 64)]
+	beq	1f
+	rsbs	tmp2, tmp2, #0
+	sub	count, count, tmp2, lsr #29
+	ldrmi	tmp1, [src], #4
+	strmi	tmp1, [dst], #4
+	lsls	tmp2, tmp2, #2
+	ldrbne	tmp1, [src], #1
+	ldrhcs	tmp2, [src], #2
+	strbne	tmp1, [dst], #1
+	strhcs	tmp2, [dst], #2
+1:
+	pld	[src, #(3 * 64)]
+	subs	count, count, #64
+	ldrmi	tmp2, [sp], #FRAME_SIZE
+	bmi	.Ltail63unaligned
+	pld	[src, #(4 * 64)]
+
+#ifdef USE_NEON
+	vld1.8	{d0-d3}, [src]!
+	vld1.8	{d4-d7}, [src]!
+	subs	count, count, #64
+	bmi	2f
+1:
+	pld	[src, #(4 * 64)]
+	vst1.8	{d0-d3}, [ALIGN (dst, 64)]!
+	vld1.8	{d0-d3}, [src]!
+	vst1.8	{d4-d7}, [ALIGN (dst, 64)]!
+	vld1.8	{d4-d7}, [src]!
+	subs	count, count, #64
+	bpl	1b
+2:
+	vst1.8	{d0-d3}, [ALIGN (dst, 64)]!
+	vst1.8	{d4-d7}, [ALIGN (dst, 64)]!
+	ands	count, count, #0x3f
+#else
+	/* Use an SMS style loop to maximize the I/O bandwidth.  */
+	sub	src, src, #4
+	sub	dst, dst, #8
+	subs	tmp2, count, #64	/* Use tmp2 for count.  */
+	ldr	A_l, [src, #4]
+	ldr	A_h, [src, #8]
+	strd	B_l, B_h, [sp, #8]
+	ldr	B_l, [src, #12]
+	ldr	B_h, [src, #16]
+	strd	C_l, C_h, [sp, #16]
+	ldr	C_l, [src, #20]
+	ldr	C_h, [src, #24]
+	strd	D_l, D_h, [sp, #24]
+	ldr	D_l, [src, #28]
+	ldr	D_h, [src, #32]!
+	b	1f
+	.p2align	6
+2:
+	pld	[src, #(5 * 64) - (32 - 4)]
+	strd	A_l, A_h, [dst, #40]
+	ldr	A_l, [src, #36]
+	ldr	A_h, [src, #40]
+	strd	B_l, B_h, [dst, #48]
+	ldr	B_l, [src, #44]
+	ldr	B_h, [src, #48]
+	strd	C_l, C_h, [dst, #56]
+	ldr	C_l, [src, #52]
+	ldr	C_h, [src, #56]
+	strd	D_l, D_h, [dst, #64]!
+	ldr	D_l, [src, #60]
+	ldr	D_h, [src, #64]!
+	subs	tmp2, tmp2, #64
+1:
+	strd	A_l, A_h, [dst, #8]
+	ldr	A_l, [src, #4]
+	ldr	A_h, [src, #8]
+	strd	B_l, B_h, [dst, #16]
+	ldr	B_l, [src, #12]
+	ldr	B_h, [src, #16]
+	strd	C_l, C_h, [dst, #24]
+	ldr	C_l, [src, #20]
+	ldr	C_h, [src, #24]
+	strd	D_l, D_h, [dst, #32]
+	ldr	D_l, [src, #28]
+	ldr	D_h, [src, #32]
+	bcs	2b
+
+	/* Save the remaining bytes and restore the callee-saved regs.  */
+	strd	A_l, A_h, [dst, #40]
+	add	src, src, #36
+	strd	B_l, B_h, [dst, #48]
+	ldrd	B_l, B_h, [sp, #8]
+	strd	C_l, C_h, [dst, #56]
+	ldrd	C_l, C_h, [sp, #16]
+	strd	D_l, D_h, [dst, #64]
+	ldrd	D_l, D_h, [sp, #24]
+	add	dst, dst, #72
+	ands	count, tmp2, #0x3f
+#endif
+	ldr	tmp2, [sp], #FRAME_SIZE
+	bne	.Ltail63unaligned
+	bx	lr
+
+	.size	memcpy, . - memcpy

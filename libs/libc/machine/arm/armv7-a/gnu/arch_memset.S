@@ -1,4 +1,6 @@
-/*
+/****************************************************************************
+ * libs/libc/machine/arm/armv7-a/gnu/arch_memset.S
+ *
  * Copyright (C) 2013 The Android Open Source Project
  * All rights reserved.
  *
@@ -24,7 +26,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
+
 	.arm
 	.syntax unified
 	.global memset

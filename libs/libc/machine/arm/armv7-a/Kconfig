@@ -31,6 +31,7 @@ config ARMV7A_MEMSET
 	default n
 	select LIBC_ARCH_MEMSET
 	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARM_NEON
 	---help---
 		Enable optimized ARMv7-A specific memset() library function
 

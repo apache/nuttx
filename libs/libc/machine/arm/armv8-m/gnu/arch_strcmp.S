@@ -1,4 +1,6 @@
-/*
+/****************************************************************************
+ * libs/libc/machine/arm/armv8-m/gnu/arch_strcmp.S
+ *
  * Copyright (c) 2012-2014 ARM Ltd
  * All rights reserved.
  *
@@ -24,7 +26,8 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
 
 #ifdef __ARM_BIG_ENDIAN
 #define S2LO lsl

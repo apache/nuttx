@@ -1,4 +1,6 @@
-/*
+/****************************************************************************
+ * libs/libc/machine/arm/armv7-m/gnu/arch_memcpy.S
+ *
  * Copyright (c) 2013 ARM Ltd
  * All rights reserved.
  *
@@ -24,7 +26,8 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
 
 /* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
    unaligned access.
