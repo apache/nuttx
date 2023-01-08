@@ -551,6 +551,19 @@ config STM32WB_LPUART1
 	select ARCH_HAVE_LPUART1
 	select STM32WB_USART
 
+config STM32WB_I2C1
+	bool "I2C1"
+	default n
+	select I2C
+	select STM32WB_I2C
+
+config STM32WB_I2C3
+	bool "I2C3"
+	default n
+	depends on STM32WB_HAVE_I2C3
+	select I2C
+	select STM32WB_I2C
+
 comment "APB2 Peripherals"
 
 config STM32WB_SYSCFG
