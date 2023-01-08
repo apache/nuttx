@@ -29,10 +29,10 @@ include armv7-m/Make.defs
 
 CHIP_CSRCS  = stm32wb_allocateheap.c stm32wb_exti_gpio.c stm32wb_gpio.c
 CHIP_CSRCS += stm32wb_irq.c stm32wb_lowputc.c stm32wb_rcc.c stm32wb_spi.c
-CHIP_CSRCS += stm32wb_serial.c stm32wb_start.c stm32wb_waste.c stm32wb_uid.c
+CHIP_CSRCS += stm32wb_serial.c stm32wb_i2c.c stm32wb_start.c stm32wb_waste.c
 CHIP_CSRCS += stm32wb_rcc_lse.c stm32wb_rcc_lsi.c
 CHIP_CSRCS += stm32wb_pwr.c stm32wb_tim.c
-CHIP_CSRCS += stm32wb_flash.c
+CHIP_CSRCS += stm32wb_flash.c stm32wb_uid.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32wb_idle.c
