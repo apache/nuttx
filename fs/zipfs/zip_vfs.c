@@ -130,6 +130,7 @@ const struct mountpt_operations zipfs_operations =
   NULL,                /* write */
   zipfs_seek,          /* seek */
   NULL,                /* ioctl */
+  NULL,                /* mmap */
   NULL,                /* truncate */
 
   NULL,                /* sync */
