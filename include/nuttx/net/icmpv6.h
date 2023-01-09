@@ -141,6 +141,11 @@
 #define ICMPv6_POLICY_FAIL    5
 #define ICMPv6_REJECT_ROUTE   6
 
+/* Codes for Time Exceeded */
+
+#define ICMPV6_EXC_HOPLIMIT   0
+#define ICMPV6_EXC_FRAGTIME   1
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

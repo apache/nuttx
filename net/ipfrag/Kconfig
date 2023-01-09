@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NET_IPFRAG
+	bool "IP fragmentation support"
+	default n
+	depends on (NET_IPv4 || NET_IPv6)
+	---help---
+		Enable support IP packet fragmentation and IP packet reassembly of
+		fragmented IP packets.
+
+if NET_IPFRAG
+
+config NET_IPFRAG_REASS_MAXAGE
+	int "IP fragmentation timeout"
+	default 20
+	---help---
+		The maximum time an IP fragment should wait in the reassembly buffer
+		before it is dropped.  Units are deci-seconds. Default: 2 seconds.
+
+endif # NET_IPFRAG

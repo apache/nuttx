@@ -114,6 +114,11 @@
 #define ICMP_PREC_CUTOFF             15   /* Precedence cut off */
 #define NR_ICMP_UNREACH              15   /* instead of hardcoding immediate value */
 
+/* Codes for TIME_EXCEEDED. */
+
+#define ICMP_EXC_TTL                 0    /* TTL count exceeded */
+#define ICMP_EXC_FRAGTIME            1    /* Fragment Reassembly time exceeded */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

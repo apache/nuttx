@@ -33,6 +33,7 @@
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "arp/arp.h"
 #include "can/can.h"
 #include "tcp/tcp.h"
@@ -46,6 +47,7 @@
 #include "mld/mld.h"
 #include "ipforward/ipforward.h"
 #include "sixlowpan/sixlowpan.h"
+#include "ipfrag/ipfrag.h"
 
 /****************************************************************************
  * Private Types
@@ -617,6 +619,79 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: devif_poll_ipfrag
+ *
+ * Description:
+ *   Poll all ip fragments for available packets to send.
+ *
+ * Input Parameters:
+ *   dev - NIC Device instance.
+ *   callback - the actual sending API provided by each NIC driver.
+ *
+ * Returned Value:
+ *   Zero indicated the polling will continue, else stop the polling.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPFRAG
+static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
+                             devif_poll_callback_t callback)
+{
+  FAR struct iob_s *frag;
+  bool reused = false;
+  int bstop = false;
+
+  while (!bstop)
+    {
+      /* Dequeue outgoing fragment from dev->d_fragout */
+
+      frag = iob_remove_queue(&dev->d_fragout);
+      if (frag == NULL)
+        {
+          break;
+        }
+
+      /* Frag buffer could be reused for other protocols */
+
+      reused = true;
+
+      /* Replace original iob */
+
+      netdev_iob_replace(dev, frag);
+
+      /* build L2 headers */
+
+      devif_out(dev);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  /* Notify the device driver that ip fragments is available. */
+
+  if (iob_peek_queue(&dev->d_fragout) != NULL)
+    {
+      netdev_txnotify_dev(dev);
+    }
+
+  /* Reuse iob buffer */
+
+  if (!bstop && reused)
+    {
+      iob_update_pktlen(dev->d_iob, 0);
+      netdev_iob_prepare(dev, true, 0);
+    }
+
+  return bstop;
+}
+#endif
+
+/****************************************************************************
  * Name: devif_poll_connections
  *
  * Description:
@@ -654,10 +729,19 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
-#ifdef CONFIG_NET_ARP_SEND
-  /* Check for pending ARP requests */
+#ifdef CONFIG_NET_IPFRAG
+  /* Traverse all of ip fragments for available packets to transfer */
 
-  bstop = arp_poll(dev, callback);
+  bstop = devif_poll_ipfrag(dev, callback);
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_ARP_SEND
+    {
+      /* Check for pending ARP requests */
+
+      bstop = arp_poll(dev, callback);
+    }
+
   if (!bstop)
 #endif
 #ifdef CONFIG_NET_PKT
@@ -1048,6 +1132,18 @@ int devif_poll_out(FAR struct net_driver_s *dev,
 
   if (callback)
     {
+#ifdef CONFIG_NET_IPFRAG
+      if (ip_fragout(dev) != OK)
+        {
+          netdev_iob_release(dev);
+          return 1;
+        }
+      else if (iob_peek_queue(&dev->d_fragout) != NULL)
+        {
+          return devif_poll_ipfrag(dev, callback);
+        }
+#endif
+
       return callback(dev);
     }
 

@@ -214,11 +214,15 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 #endif
   int ret;
 
-  /* Verify that the full packet will fit within the forwarding devices MTU.
-   * We provide no support for fragmenting forwarded packets.
+  /* Verify that the full packet will fit within the forwarding device's MTU
+   * if DF is set.
    */
 
-  if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev))
+  if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev)
+#ifdef CONFIG_NET_IPFRAG
+      && (ipv4->ipoffset[0] & (IP_FLAG_DONTFRAG >> 8))
+#endif
+     )
     {
       nwarn("WARNING: Packet > MTU... Dropping\n");
       ret = -EFBIG;
@@ -490,7 +494,7 @@ drop:
 
       case -EMULTIHOP:
         icmp_reply_type = ICMP_TIME_EXCEEDED;
-        icmp_reply_code = 0;
+        icmp_reply_code = ICMP_EXC_TTL;
         goto reply;
 
       default:

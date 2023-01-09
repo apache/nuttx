@@ -217,6 +217,8 @@ struct ipv6_stats_s
   net_stats_t sent;       /* Number of sent packets at the IP layer */
   net_stats_t vhlerr;     /* Number of packets dropped due to wrong
                            * IP version or header length */
+  net_stats_t fragerr;    /* Number of packets dropped since they
+                           * were IP fragments */
   net_stats_t protoerr;   /* Number of packets dropped since they
                            * were neither ICMP, UDP nor TCP */
 };

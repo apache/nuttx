@@ -105,6 +105,7 @@
 #include "ipforward/ipforward.h"
 #include "devif/devif.h"
 #include "nat/nat.h"
+#include "ipfrag/ipfrag.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -219,6 +220,13 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 
   if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
     {
+#ifdef CONFIG_NET_IPFRAG
+      if (ipv4_fragin(dev) == OK)
+        {
+          return OK;
+        }
+
+#endif
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.ipv4.drop++;
       g_netstats.ipv4.fragerr++;
@@ -434,6 +442,11 @@ static int ipv4_in(FAR struct net_driver_s *dev)
     (defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK))
 done:
 #endif
+
+#ifdef CONFIG_NET_IPFRAG
+  ip_fragout(dev);
+#endif
+
   devif_out(dev);
 
   /* Return and let the caller do any pending transmission. */
