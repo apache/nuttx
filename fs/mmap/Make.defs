@@ -24,6 +24,10 @@ ifeq ($(CONFIG_FS_RAMMAP),y)
 CSRCS += fs_rammap.c
 endif
 
+ifeq ($(CONFIG_FS_ANONMAP),y)
+CSRCS += fs_anonmap.c
+endif
+
 # Include MMAP build support
 
 DEPPATH += --dep-path mmap

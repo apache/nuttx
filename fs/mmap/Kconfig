@@ -23,5 +23,8 @@ config FS_RAMMAP
 
 		See nuttx/fs/mmap/README.txt for additional information.
 
-if FS_RAMMAP
-endif
+config FS_ANONMAP
+	bool "Anonymous mapping emulation"
+	default y
+	---help---
+		Simulate private anonymous mappings by plain malloc
