@@ -2122,7 +2122,9 @@ static void fdcan_error_work(void *arg)
 
   /* Report errors */
 
+  net_lock();
   fdcan_error(priv, pending & FDCAN_ANYERR_INTS);
+  net_unlock();
 
   /* Re-enable ERROR interrupts */
 
