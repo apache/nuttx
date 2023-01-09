@@ -97,7 +97,7 @@ int sem_unlink(FAR const char *name)
 
   if (!INODE_IS_NAMEDSEM(inode))
     {
-      errcode = ENXIO;
+      errcode = ENOENT;
       goto errout_with_inode;
     }
 
