@@ -32,10 +32,23 @@
 #include <nuttx/net/netdev.h>
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
-static bool is_loopback(FAR struct net_driver_s *dev)
+/****************************************************************************
+ * Name: devif_is_loopback
+ *
+ * Description:
+ *   The function checks the destination address of the packet to see
+ *   whether the target of packet is ourself.
+ *
+ * Returned Value:
+ *   true is returned if the packet need loop back to ourself, otherwise
+ *   false is returned.
+ *
+ ****************************************************************************/
+
+bool devif_is_loopback(FAR struct net_driver_s *dev)
 {
   if (dev->d_len > 0)
     {
@@ -76,7 +89,7 @@ static bool is_loopback(FAR struct net_driver_s *dev)
 
 int devif_loopback(FAR struct net_driver_s *dev)
 {
-  if (!is_loopback(dev))
+  if (!devif_is_loopback(dev))
     {
       return 0;
     }

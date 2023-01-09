@@ -320,6 +320,12 @@ struct net_driver_s
 
   FAR struct iob_s *d_iob;
 
+  /* Remember the outgoing fragments waiting to be sent */
+
+#ifdef CONFIG_NET_IPFRAG
+  FAR struct iob_queue_s d_fragout;
+#endif
+
   /* The d_buf array is used to hold incoming and outgoing packets. The
    * device driver should place incoming data into this buffer.  When sending
    * data, the device driver should read the link level headers and the

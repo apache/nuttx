@@ -56,19 +56,29 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
                     unsigned int len, unsigned int offset,
                     unsigned int target_offset)
 {
+#ifndef CONFIG_NET_IPFRAG
   unsigned int limit = NETDEV_PKTSIZE(dev) -
                        NET_LL_HDRLEN(dev) - target_offset;
+#endif
   int ret;
 
+#ifndef CONFIG_NET_IPFRAG
   if (dev == NULL || len == 0 || len > limit)
+#else
+  if (dev == NULL || len == 0)
+#endif
     {
       if (dev->d_iob == NULL)
         {
           iob_free_chain(iob);
         }
 
+#ifndef CONFIG_NET_IPFRAG
       nerr("devif_iob_send error, %p, send len: %u, limit len: %u\n",
            dev, len, limit);
+#else
+      nerr("devif_iob_send error, %p, send len: %u\n", dev, len);
+#endif
       return;
     }
 
