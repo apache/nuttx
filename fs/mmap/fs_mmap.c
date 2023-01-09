@@ -36,50 +36,11 @@
 
 #include "inode/inode.h"
 #include "fs_rammap.h"
+#include "fs_anonmap.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: unmap_anonymous
- ****************************************************************************/
-
-static int unmap_anonymous(FAR struct task_group_s *group,
-                           FAR struct mm_map_entry_s *entry,
-                           FAR void *start,
-                           size_t length)
-{
-  int ret;
-
-  /* De-allocate memory.
-   * NB: This is incomplete anounymous mapping implementation
-   * see file_mmap_ below
-   */
-
-  if (start == entry->vaddr && length == entry->length)
-    {
-      /* entry->priv marks allocation from kernel heap */
-
-      if (entry->priv.i)
-        {
-          kmm_free(start);
-        }
-      else
-        {
-          kumm_free(start);
-        }
-
-      ret = mm_map_remove(group, &entry);
-    }
-  else
-    {
-      ret = -EINVAL;
-      ferr("ERROR: Unknown map type\n");
-    }
-
-  return ret;
-}
 
 /****************************************************************************
  * Name: file_mmap_
@@ -164,25 +125,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 
   if ((flags & MAP_ANONYMOUS) != 0)
     {
-      /* REVISIT:  Should reside outside of the heap.  That is really the
-       * only purpose of MAP_ANONYMOUS:  To get non-heap memory.  In KERNEL
-       * build, this could be accomplished using pgalloc(), provided that
-       * you had logic in place to assign a virtual address to the mapping.
-       */
-
-      *mapped = kernel ? kmm_zalloc(length) : kumm_zalloc(length);
-      if (*mapped == NULL)
-        {
-          ferr("ERROR: kumm_alloc() failed, enable DEBUG_MM for info!\n");
-          return -ENOMEM;
-        }
-
-      entry.vaddr = *mapped;
-      entry.munmap = unmap_anonymous;
-      entry.priv.i = kernel;
-      mm_map_add(&entry);
-
-      return OK;
+      return map_anonymous(&entry, kernel);
     }
 
   if ((flags & MAP_PRIVATE) != 0)
