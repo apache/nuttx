@@ -376,6 +376,7 @@ static inline void rpmsg_socket_destroy_ept(
       return;
     }
 
+  nxmutex_lock(&conn->recvlock);
   nxmutex_lock(&conn->sendlock);
 
   if (conn->ept.rdev)
@@ -394,6 +395,7 @@ static inline void rpmsg_socket_destroy_ept(
     }
 
   nxmutex_unlock(&conn->sendlock);
+  nxmutex_unlock(&conn->recvlock);
 }
 
 static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
