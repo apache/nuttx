@@ -37,8 +37,8 @@
  ****************************************************************************/
 
 #define NXRMUTEX_NO_HOLDER   (pid_t)-1
-#define NXMUTEX_INITIALIZER  NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_ENABLE)
-#define NXRMUTEX_INITIALIZER {NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_ENABLE), \
+#define NXMUTEX_INITIALIZER  NXSEM_INITIALIZER(1, SEM_PRIO_INHERIT)
+#define NXRMUTEX_INITIALIZER {NXSEM_INITIALIZER(1, SEM_PRIO_INHERIT), \
                               NXRMUTEX_NO_HOLDER, 0}
 
 /****************************************************************************
