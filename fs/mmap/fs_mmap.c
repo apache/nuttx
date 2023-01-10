@@ -85,15 +85,6 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       return -ENOSYS;
     }
 
-#ifndef CONFIG_FS_RAMMAP
-  if ((flags & MAP_PRIVATE) != 0)
-    {
-      ferr("ERROR: MAP_PRIVATE is not supported without file mapping"
-           "emulation\n");
-      return -ENOSYS;
-    }
-#endif /* CONFIG_FS_RAMMAP */
-
   /* A length of 0 is invalid. */
 
   if (length == 0)
@@ -103,8 +94,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
     }
 #endif /* CONFIG_DEBUG_FEATURES */
 
-  if ((filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE &&
-      (flags & MAP_SHARED) != 0)
+  if ((filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE)
     {
       ferr("ERROR: Unsupported options for read-only file descriptor,"
            "prot=%x flags=%04x\n", prot, flags);
@@ -128,45 +118,30 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       return map_anonymous(&entry, kernel);
     }
 
-  if ((flags & MAP_PRIVATE) != 0)
-    {
-#ifdef CONFIG_FS_RAMMAP
-      /* Allocate memory and copy the file into memory.  We would, of course,
-       * do much better in the KERNEL build using the MMU.
-       */
-
-      return rammap(filep, &entry, kernel);
-#endif
-    }
-
   /* Call driver's mmap to get the base address of the file in 'mapped'
    * in memory.
    */
 
-  if (filep->f_inode && filep->f_inode->u.i_ops->mmap != NULL)
+  if ((flags & MAP_PRIVATE) == 0 && filep->f_inode &&
+      filep->f_inode->u.i_ops->mmap != NULL)
     {
       ret = filep->f_inode->u.i_ops->mmap(filep, &entry);
       if (ret == OK)
         {
-          *mapped = (void *)entry.vaddr;
+          *mapped = entry.vaddr;
         }
     }
   else
     {
-      /* Not directly mappable, probably because the underlying media does
-       * not support random access.
+      /* Caller request the private mapping. Or not directly mappable,
+       * probably because the underlying media doesn't support random access.
        */
 
-#ifdef CONFIG_FS_RAMMAP
       /* Allocate memory and copy the file into memory.  We would, of course,
        * do much better in the KERNEL build using the MMU.
        */
 
       return rammap(filep, &entry, kernel);
-#else
-      ferr("ERROR: mmap not supported \n");
-      return -ENOSYS;
-#endif
     }
 
   /* Return */
