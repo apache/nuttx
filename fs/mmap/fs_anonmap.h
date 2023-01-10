@@ -55,7 +55,7 @@
 #ifdef CONFIG_FS_ANONMAP
 int map_anonymous(FAR struct mm_map_entry_s *entry, bool kernel);
 #else
-#define map_anonymous(entry,kernel) (-ENOSYS)
+#  define map_anonymous(entry, kernel) (-ENOSYS)
 #endif /* CONFIG_FS_ANONMAP */
 
 #endif /* __FS_MMAP_FS_ANONMAP_H */
