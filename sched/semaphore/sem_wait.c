@@ -108,7 +108,7 @@ int nxsem_wait(FAR sem_t *sem)
   else
     {
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      uint8_t prioinherit = sem->flags & PRIOINHERIT_FLAGS_ENABLE;
+      uint8_t prioinherit = sem->flags & SEM_PRIO_MASK;
 #endif
 
       /* First, verify that the task is not already waiting on a
@@ -130,7 +130,7 @@ int nxsem_wait(FAR sem_t *sem)
        */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      if (prioinherit != 0)
+      if (prioinherit == SEM_PRIO_INHERIT)
         {
           /* Disable context switching.  The following operations must be
            * atomic with regard to the scheduler.

@@ -121,8 +121,8 @@ int nxsem_post(FAR sem_t *sem)
    * will do nothing.
    */
 
-  prioinherit = sem->flags & PRIOINHERIT_FLAGS_ENABLE;
-  if (prioinherit != 0)
+  prioinherit = sem->flags & SEM_PRIO_MASK;
+  if (prioinherit == SEM_PRIO_INHERIT)
     {
       sched_lock();
     }
@@ -188,7 +188,7 @@ int nxsem_post(FAR sem_t *sem)
    */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  if (prioinherit != 0)
+  if (prioinherit == SEM_PRIO_INHERIT)
     {
       nxsem_restore_baseprio(stcb, sem);
       sched_unlock();

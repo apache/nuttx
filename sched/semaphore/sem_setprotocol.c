@@ -76,25 +76,18 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 {
   DEBUGASSERT(sem != NULL);
 
-  switch (protocol)
+  switch (protocol & SEM_PRIO_MASK)
     {
       case SEM_PRIO_NONE:
-
-        /* Disable priority inheritance */
-
-        sem->flags &= ~PRIOINHERIT_FLAGS_ENABLE;
 
         /* Remove any current holders */
 
         nxsem_destroyholder(sem);
-        return OK;
+        break;
 
       case SEM_PRIO_INHERIT:
 
-        /* Enable priority inheritance (dangerous) */
-
-        sem->flags |= PRIOINHERIT_FLAGS_ENABLE;
-        return OK;
+        break;
 
       case SEM_PRIO_PROTECT:
 
@@ -103,10 +96,11 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
         return -ENOTSUP;
 
       default:
-        break;
+        return -EINVAL;
     }
 
-  return -EINVAL;
+  sem->flags = protocol;
+  return OK;
 }
 
 /****************************************************************************
