@@ -128,6 +128,19 @@ static int rptun_ping_once(FAR struct rpmsg_endpoint *ept,
   return ret;
 }
 
+static void rptun_ping_logout(FAR const char *s, uint32_t value)
+{
+  struct timespec ts;
+
+  up_perf_convert(value, &ts);
+
+#ifdef CONFIG_SYSTEM_TIME64
+  syslog(LOG_INFO, "%s: s %" PRIu64 ", ns %ld\n", s, ts.tv_sec, ts.tv_nsec);
+#else
+  syslog(LOG_INFO, "%s: s %" PRIu32 ", ns %ld\n", s, ts.tv_sec, ts.tv_nsec);
+#endif
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -138,7 +151,6 @@ int rptun_ping(FAR struct rpmsg_endpoint *ept,
   uint32_t min = UINT32_MAX;
   uint32_t max = 0;
   uint64_t total = 0;
-  struct timespec ts;
   int i;
 
   if (!ept || !ping || ping->times <= 0)
@@ -167,14 +179,9 @@ int rptun_ping(FAR struct rpmsg_endpoint *ept,
   syslog(LOG_INFO, "current CPU freq: %" PRIu32 ", ping times: %d\n",
                     up_perf_getfreq(), ping->times);
 
-  up_perf_convert(total / ping->times, &ts);
-  syslog(LOG_INFO, "avg: s %" PRIu32 ", ns %ld\n", ts.tv_sec, ts.tv_nsec);
-
-  up_perf_convert(min, &ts);
-  syslog(LOG_INFO, "min: s %" PRIu32 ", ns %ld\n", ts.tv_sec, ts.tv_nsec);
-
-  up_perf_convert(max, &ts);
-  syslog(LOG_INFO, "max: s %" PRIu32 ", ns %ld\n", ts.tv_sec, ts.tv_nsec);
+  rptun_ping_logout("avg", total / ping->times);
+  rptun_ping_logout("min", min);
+  rptun_ping_logout("max", max);
 
   return 0;
 }
