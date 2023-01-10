@@ -394,6 +394,14 @@ long double frexpl(long double x, int *exp);
 
 /* Trigonometric Functions **************************************************/
 
+void        sincosf(float, float *, float *);
+#ifdef CONFIG_HAVE_DOUBLE
+void        sincos(double, double *, double *);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+void        sincosl(long double, long double *, long double *);
+#endif
+
 float       sinf  (float x);
 #ifdef CONFIG_HAVE_DOUBLE
 double      sin   (double x);
