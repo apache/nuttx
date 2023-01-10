@@ -39,32 +39,69 @@ static int unmap_anonymous(FAR struct task_group_s *group,
                            FAR void *start,
                            size_t length)
 {
-  int ret;
+  FAR void *newaddr;
+  off_t offset;
+  bool kernel = entry->priv.i;
+  int ret = OK;
 
-  /* De-allocate memory.
-   * NB: This is incomplete anounymous mapping implementation
-   * see file_mmap_ below
+  /* Get the offset from the beginning of the region and the actual number
+   * of bytes to "unmap".  All mappings must extend to the end of the region.
+   * There is no support for freeing a block of memory but leaving a block of
+   * memory at the end.  This is a consequence of using kumm_realloc() to
+   * simulate the unmapping.
    */
 
-  if (start == entry->vaddr && length == entry->length)
+  offset = start - entry->vaddr;
+  if (offset + length < entry->length)
     {
-      /* entry->priv marks allocation from kernel heap */
+      ferr("ERROR: Cannot umap without unmapping to the end\n");
+      return -ENOSYS;
+    }
 
-      if (entry->priv.i)
+  /* Okay.. the region is being unmapped to the end.  Make sure the length
+   * indicates that.
+   */
+
+  length = entry->length - offset;
+
+  /* Are we unmapping the entire region (offset == 0)? */
+
+  if (length >= entry->length)
+    {
+      /* Free the region */
+
+      if (kernel)
         {
-          kmm_free(start);
+          kmm_free(entry->vaddr);
         }
       else
         {
-          kumm_free(start);
+          kumm_free(entry->vaddr);
         }
+
+      /* Then remove the mapping from the list */
 
       ret = mm_map_remove(get_group_mm(group), entry);
     }
+
+  /* No.. We have been asked to "unmap' only a portion of the memory
+   * (offset > 0).
+   */
+
   else
     {
-      ret = -EINVAL;
-      ferr("ERROR: Unknown map type\n");
+      if (kernel)
+        {
+          newaddr = kmm_realloc(entry->vaddr, length);
+        }
+      else
+        {
+          newaddr = kumm_realloc(entry->vaddr, length);
+        }
+
+      DEBUGASSERT(newaddr == entry->vaddr);
+      entry->vaddr = newaddr;
+      entry->length = length;
     }
 
   return ret;
