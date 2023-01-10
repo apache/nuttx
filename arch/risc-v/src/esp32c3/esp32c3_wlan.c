@@ -270,6 +270,34 @@ static inline void wlan_cache_txpkt_tail(struct wlan_priv_s *priv)
 }
 
 /****************************************************************************
+ * Function: wlan_recvframe
+ *
+ * Description:
+ *   Try to receive RX packet from RX done packet queue.
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   RX packet if success or NULl if no packet in queue.
+ *
+ ****************************************************************************/
+
+static struct iob_s *wlan_recvframe(struct wlan_priv_s *priv)
+{
+  struct iob_s *iob;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  iob = iob_remove_queue(&priv->rxb);
+
+  leave_critical_section(flags);
+
+  return iob;
+}
+
+/****************************************************************************
  * Name: wlan_transmit
  *
  * Description:
@@ -362,6 +390,7 @@ static void wlan_tx_done(struct wlan_priv_s *priv)
 static int wlan_rx_done(struct wlan_priv_s *priv, void *buffer,
                         uint16_t len, void *eb)
 {
+  struct net_driver_s *dev = &priv->dev;
   struct iob_s *iob = NULL;
   irqstate_t flags;
   int ret = 0;
@@ -392,14 +421,14 @@ static int wlan_rx_done(struct wlan_priv_s *priv, void *buffer,
       goto out;
     }
 
+  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE - NET_LL_HDRLEN(dev));
+
   ret = iob_trycopyin(iob, buffer, len, 0, false);
   if (ret != len)
     {
       ret = -ENOBUFS;
       goto out;
     }
-
-  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
 
   flags = enter_critical_section();
   ret = iob_tryadd_queue(iob, &priv->rxb);
@@ -471,10 +500,12 @@ static void wlan_rxpoll(void *arg)
 
   net_lock();
 
-  while ((iob = iob_remove_queue(&priv->rxb)) != NULL)
+  while ((iob = wlan_recvframe(priv)) != NULL)
     {
       dev->d_iob = iob;
       dev->d_len = iob->io_pktlen;
+
+      iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
 
 #ifdef CONFIG_NET_PKT
 
