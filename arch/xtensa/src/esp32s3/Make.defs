@@ -30,6 +30,7 @@ HEAD_CSRC  = esp32s3_start.c
 CHIP_CSRCS  = esp32s3_irq.c esp32s3_clockconfig.c esp32s3_region.c
 CHIP_CSRCS += esp32s3_systemreset.c esp32s3_user.c esp32s3_allocateheap.c
 CHIP_CSRCS += esp32s3_wdt.c esp32s3_gpio.c esp32s3_lowputc.c esp32s3_serial.c
+CHIP_CSRCS += esp32s3_rtc_gpio.c
 
 # Configuration-dependent ESP32-S3 files
 
