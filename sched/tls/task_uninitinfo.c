@@ -24,6 +24,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/lib/lib.h>
 
 #include "tls.h"
 
@@ -48,6 +49,12 @@
 void task_uninit_info(FAR struct task_group_s *group)
 {
   FAR struct task_info_s *info = group->tg_info;
+
+#ifdef CONFIG_FILE_STREAM
+  /* Free resource held by the stream list */
+
+  lib_stream_release(group);
+#endif /* CONFIG_FILE_STREAM */
 
   nxmutex_destroy(&info->ta_lock);
   group_free(group, info);
