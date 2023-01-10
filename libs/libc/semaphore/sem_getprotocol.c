@@ -55,15 +55,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol)
   DEBUGASSERT(sem != NULL && protocol != NULL);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  if ((sem->flags & PRIOINHERIT_FLAGS_ENABLE) != 0)
-    {
-      *protocol = SEM_PRIO_INHERIT;
-    }
-  else
-    {
-      *protocol = SEM_PRIO_NONE;
-    }
-
+  *protocol = sem->flags;
 #else
   *protocol = SEM_PRIO_NONE;
 #endif

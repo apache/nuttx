@@ -41,16 +41,11 @@
 #define SEM_PRIO_NONE             0
 #define SEM_PRIO_INHERIT          1
 #define SEM_PRIO_PROTECT          2
+#define SEM_PRIO_MASK             3
 
 /* Value returned by sem_open() in the event of a failure. */
 
 #define SEM_FAILED                NULL
-
-/* Bit definitions for the struct sem_s flags field */
-
-#define PRIOINHERIT_FLAGS_ENABLE (1 << 0)  /* Bit 0: Priority inheritance
-                                            * is enabled for this semaphore.
-                                            */
 
 /****************************************************************************
  * Public Type Declarations
