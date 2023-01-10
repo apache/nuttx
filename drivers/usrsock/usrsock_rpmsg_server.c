@@ -533,7 +533,8 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
               outaddrlen ? (FAR struct sockaddr *)(ack + 1) : NULL,
               outaddrlen ? &outaddrlen : NULL);
       totlen = ret;
-      if (ret > 0)
+      if (ret > 0 && (priv->socks[req->usockid].s_type & SOCK_TYPE_MASK) ==
+                      SOCK_STREAM)
         {
           if (outaddrlen < inaddrlen)
             {
