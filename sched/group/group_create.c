@@ -32,7 +32,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/lib/lib.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
 
@@ -165,14 +164,6 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   group->tg_mxmembers = GROUP_INITIAL_MEMBERS;
 #endif
 
-  /* Alloc task info for group  */
-
-  ret = task_init_info(group);
-  if (ret < 0)
-    {
-      goto errout_with_member;
-    }
-
   /* Attach the group to the TCB */
 
   tcb->cmn.group = group;
@@ -185,11 +176,13 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   files_initlist(&group->tg_filelist);
 
-#ifdef CONFIG_FILE_STREAM
-  /* Initialize file streams for the task group */
+  /* Alloc task info for group  */
 
-  lib_stream_initialize(group);
-#endif
+  ret = task_init_info(group);
+  if (ret < 0)
+    {
+      goto errout_with_member;
+    }
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the pthread join mutex */
