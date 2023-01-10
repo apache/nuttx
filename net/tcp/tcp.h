@@ -105,6 +105,7 @@
 /* The TCP options flags */
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */
+#define TCP_SACK              0x02U /* Selective ACKs enabled */
 
 /* The Max Range count of TCP Selective ACKs */
 
@@ -155,6 +156,14 @@ struct tcp_ofoseg_s
   uint32_t         left;  /* Left edge of segment */
   uint32_t         right; /* Right edge of segment */
   FAR struct iob_s *data; /* Out-of-order buffering */
+};
+
+/* SACK ranges to include in ACK packets. */
+
+struct tcp_sack_s
+{
+  uint32_t left;    /* Left edge of the SACK */
+  uint32_t right;   /* Right edge of the SACK */
 };
 
 struct tcp_conn_s
@@ -2147,6 +2156,26 @@ uint16_t tcpip_hdrsize(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 int tcp_ofoseg_bufsize(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_reorder_ofosegs
+ *
+ * Description:
+ *   Sort out-of-order segments by left edge
+ *
+ * Input Parameters:
+ *   nofosegs - Number of out-of-order semgnets
+ *   ofosegs  - Pointer to out-of-order segments
+ *
+ * Returned Value:
+ *   True if re-order occurs
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+bool tcp_reorder_ofosegs(int nofosegs, FAR struct tcp_ofoseg_s *ofosegs);
 
 #ifdef __cplusplus
 }
