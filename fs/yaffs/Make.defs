@@ -1,0 +1,44 @@
+############################################################################
+# fs/yaffs/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_FS_YAFFS),y)
+
+# Files required for yaffs file system support
+
+CSRCS += yaffs_vfs.c yaffs_osglue.c
+
+DEPPATH += --dep-path yaffs
+VPATH += :yaffs
+
+CSRCS += $(wildcard yaffs/yaffs/*.c)
+NONDIRECT := yaffs/yaffs/yaffs_attribs.c \
+             yaffs/yaffs/yaffs_mtdif_multi.c \
+             yaffs/yaffs/yaffs_mtdif_single.c \
+             yaffs/yaffs/yaffs_vfs_multi.c \
+             yaffs/yaffs/yaffs_vfs_single.c
+CSRCS := $(filter-out $(NONDIRECT), $(CSRCS))
+CSRCS += $(wildcard yaffs/yaffs/direct/*.c)
+
+CFLAGS += -DCONFIG_YAFFS_DIRECT -DCONFIG_YAFFS_PROVIDE_DEFS \
+          -DCONFIG_YAFFS_DEFINES_TYPES -Dloff_t=off_t
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)fs$(DELIM)yaffs
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)fs$(DELIM)yaffs$(DELIM)yaffs
+
+endif

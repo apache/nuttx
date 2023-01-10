@@ -111,6 +111,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
         break;
 #endif
 
+#ifdef CONFIG_FS_YAFFS
+      case YAFFS_SUPER_MAGIC:
+        fstype = "yaffs";
+        break;
+#endif
+
 #ifdef CONFIG_NFS
       case NFS_SUPER_MAGIC:
         fstype = "nfs";

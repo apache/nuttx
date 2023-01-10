@@ -1,0 +1,59 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_YAFFS
+	bool "YAFFS File System"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Build the YAFFS file system. https://yaffs.net/documents/yaffs-direct-interface
+
+if FS_YAFFS
+config FS_YAFFS_RESERVED_BLOCKS
+	int "YAFFS Reserved blocks"
+	default 5
+	---help---
+		Number of good blocks blocks reserved for garbage collection etc.
+		Needs to be at least 2, but 5 would be a more typical number.
+
+config FS_YAFFS_CHUNK_CACHE
+	int "YAFFS Chunk cache is used for short read/write operations"
+	default 20
+	---help---
+		Number of chunks to store in the short operation cache.
+		Zero disables caching. Typical value is 10 to 20 or so.
+		Caching is required for inband tags.
+
+config FS_YAFFS_REFRESH_PERIOD
+	int "How often Yaffs should do a block refresh"
+	default 1000
+	---help---
+		Values less than 10 disable block refreshing.
+
+config FS_YAFFS_CACHE_BYPASS_ALIGNED
+	bool "YAFFS Bypass the cache for aligned writes"
+	default n
+	---help---
+		Flag to by pass the cache for aligned writes.
+
+config FS_YAFFS_SKIP_READ_CHECKPOINT
+	bool "YAFFS Skip reading checkpoint"
+	default n
+	---help---
+		Flag to skip reading checkpoint on mount.
+		If set then a re-scan is forced.
+
+config FS_YAFFS_SKIP_WRITE_CHECKPOINT
+	bool "YAFFS Skip writing checkpoint"
+	default n
+	---help---
+		Flag to skip writing checkpoint on sync or unmount.
+
+config FS_YAFFS_EMPTY_LOST_FOUND
+	bool "YAFFS Auto-empty lost+found directory"
+	default n
+	---help---
+		Flag to delete all files in lost and found on mount.
+endif
