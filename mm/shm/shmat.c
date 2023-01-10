@@ -49,13 +49,100 @@ static int munmap_shm(FAR struct task_group_s *group,
 {
   FAR const void *shmaddr = entry->vaddr;
   int shmid = entry->priv.i;
+  FAR struct shm_region_s *region;
+  pid_t pid;
+  unsigned int npages;
+  int ret;
 
-  if (mm_map_remove(get_group_mm(group), entry))
+  /* Remove the entry from the process' mappings */
+
+  ret = mm_map_remove(get_group_mm(group), entry);
+  if (ret < 0)
     {
-      shmerr("ERROR: mm_map_remove() failed\n");
+      return ret;
     }
 
-  return shmdt_priv(group, shmaddr, shmid);
+  /* Get the region associated with the shmid */
+
+  region =  &g_shminfo.si_region[shmid];
+  DEBUGASSERT((region->sr_flags & SRFLAG_INUSE) != 0);
+
+  /* Get exclusive access to the region data structure */
+
+  ret = nxmutex_lock(&region->sr_lock);
+  if (ret < 0)
+    {
+      shmerr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
+    }
+
+  if (group)
+    {
+      /* Free the virtual address space */
+
+      shm_free(group, (FAR void *)shmaddr, region->sr_ds.shm_segsz);
+
+      /* Convert the region size to pages */
+
+      npages = MM_NPAGES(region->sr_ds.shm_segsz);
+
+      /* Detach, i.e, unmap, on shared memory region from a user virtual
+       * address.
+       */
+
+      ret = up_shmdt((uintptr_t)shmaddr, npages);
+
+      /* Get pid of this process */
+
+      pid = group->tg_pid;
+    }
+  else
+    {
+      /* We are in the middle of process destruction and don't know the
+       * context
+       */
+
+      pid = 0;
+    }
+
+  /* Decrement the count of processes attached to this region.
+   * If the count decrements to zero and there is a pending unlink,
+   * then destroy the shared memory region now and stop any further
+   * operations on it.
+   */
+
+  DEBUGASSERT(region->sr_ds.shm_nattch > 0);
+  if (region->sr_ds.shm_nattch <= 1)
+    {
+      region->sr_ds.shm_nattch = 0;
+      if ((region->sr_flags & SRFLAG_UNLINKED) != 0)
+        {
+          shm_destroy(shmid);
+          return OK;
+        }
+    }
+  else
+    {
+      /* Just decrement the number of processes attached to the shared
+       * memory region.
+       */
+
+      region->sr_ds.shm_nattch--;
+    }
+
+  /* Save the process ID of the last operation */
+
+  region->sr_ds.shm_lpid = pid;
+
+  /* Save the time of the last shmdt() */
+
+  region->sr_ds.shm_dtime = time(NULL);
+
+  /* Release our lock on the entry */
+
+  nxmutex_unlock(&region->sr_lock);
+
+  return ret;
 }
 
 /****************************************************************************
