@@ -441,6 +441,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
+  struct pollfd *kfds;
   sem_t sem;
   int count = 0;
   int ret2;
@@ -452,8 +453,29 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
   enter_cancellation_point();
 
+#ifdef CONFIG_BUILD_KERNEL
+  /* Allocate kernel memory for the fds */
+
+  kfds = kmm_malloc(nfds * sizeof(struct pollfd));
+  if (!kfds)
+    {
+      /* Out of memory */
+
+      ret = ENOMEM;
+      goto out_with_cancelpt;
+    }
+
+  /* Copy the user fds to neutral kernel memory */
+
+  memcpy(kfds, fds, nfds * sizeof(struct pollfd));
+#else
+  /* Can use the user fds directly */
+
+  kfds = fds;
+#endif
+
   nxsem_init(&sem, 0, 0);
-  ret = poll_setup(fds, nfds, &sem);
+  ret = poll_setup(kfds, nfds, &sem);
   if (ret >= 0)
     {
       if (timeout == 0)
@@ -519,7 +541,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
        * Preserve ret, if negative, since it holds the result of the wait.
        */
 
-      ret2 = poll_teardown(fds, nfds, &count, ret);
+      ret2 = poll_teardown(kfds, nfds, &count, ret);
       if (ret2 < 0 && ret >= 0)
         {
           ret = ret2;
@@ -527,6 +549,26 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
     }
 
   nxsem_destroy(&sem);
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Copy the events back to user */
+
+  if (ret == OK)
+    {
+      int i;
+      for (i = 0; i < nfds; i++)
+        {
+          fds[i].revents = kfds[i].revents;
+        }
+    }
+
+  /* Free the temporary buffer */
+
+  kmm_free(kfds);
+
+out_with_cancelpt:
+#endif
+
   leave_cancellation_point();
 
   if (ret < 0)
