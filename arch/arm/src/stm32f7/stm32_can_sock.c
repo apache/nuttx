@@ -1690,6 +1690,8 @@ static void stm32can_sceinterrupt_work(void *arg)
 
       memcpy(frame->data, data, CAN_ERR_DLC);
 
+      net_lock();
+
       /* Copy the buffer pointer to priv->dev..  Set amount of data
        * in priv->dev.d_len
        */
@@ -1711,6 +1713,7 @@ static void stm32can_sceinterrupt_work(void *arg)
        */
 
       priv->dev.d_buf = (uint8_t *)priv->txdesc;
+      net_unlock();
     }
 
   /* Re-enable CAN SCE interrupts */
