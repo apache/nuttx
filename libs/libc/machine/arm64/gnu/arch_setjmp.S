@@ -36,7 +36,7 @@
 	REG_PAIR (x25, x26, 48);	\
 	REG_PAIR (x27, x28, 64);	\
 	REG_PAIR (x29, x30, 80);	\
-	REG_ONE (x16,      96)
+	REG_ONE  (x16,      96)
 
 #define FPR_LAYOUT			\
 	REG_PAIR ( d8,  d9, 112);	\

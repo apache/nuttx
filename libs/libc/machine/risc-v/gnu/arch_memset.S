@@ -32,10 +32,12 @@ memset:
 	add a3, a3, a4
 
 #if __riscv_xlen == 64
-1:sd a1, 0(a4)
+1:
+	sd a1, 0(a4)
 	sd a1, 8(a4)
 #else
-1:sw a1, 0(a4)
+1:
+	sw a1, 0(a4)
 	sw a1, 4(a4)
 	sw a1, 8(a4)
 	sw a1, 12(a4)
@@ -49,7 +51,8 @@ memset:
 .Ltiny:
 	sub a3, t1, a2
 	sll a3, a3, 2
-1:auipc t0, %pcrel_hi(.Ltable)
+1:
+	auipc t0, %pcrel_hi(.Ltable)
 	add a3, a3, t0
 .option push
 .option norvc
@@ -88,7 +91,8 @@ memset:
 
 .Lmisaligned:
 	sll a3, a5, 2
-1:auipc t0, %pcrel_hi(.Ltable_misaligned)
+1:
+	auipc t0, %pcrel_hi(.Ltable_misaligned)
 	add a3, a3, t0
 	mv t0, ra
 	jalr a3, %pcrel_lo(1b)

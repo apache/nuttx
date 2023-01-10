@@ -342,7 +342,7 @@ memchr:
 	and	r1,r1,#0xff	@ r1 back to a single character
 	and	r2,r2,#7	@ Leave the count remaining as the number
 				@ after the double words have been done
- 
+
 20:
 	cbz	r2, 40f		@ 0 length or hit the end already then not found
 

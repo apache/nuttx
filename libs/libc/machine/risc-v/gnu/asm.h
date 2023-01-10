@@ -12,8 +12,8 @@
  *  http://www.opensource.org/licenses.
  ****************************************************************************/
 
-#ifndef _ASM_H
-#define _ASM_H
+#ifndef __LIBS_LIBC_MACHINE_RISCV_GNU_ASM_H
+#define __LIBS_LIBC_MACHINE_RISCV_GNU_ASM_H
 
 /****************************************************************************
  * Included Files
@@ -29,7 +29,7 @@
 #  define SZREG  8
 #  define REG_S sd
 #  define REG_L ld
-#elif defined(CONFIG_ARCH_RV32)
+#else
 #  define SZREG  4
 #  define REG_S sw
 #  define REG_L lw
@@ -49,4 +49,4 @@
 #  define FREG_L flw
 #endif
 
-#endif /* asm.h */
+#endif /* __LIBS_LIBC_MACHINE_RISCV_GNU_ASM_H */

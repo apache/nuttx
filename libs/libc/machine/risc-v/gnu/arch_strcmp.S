@@ -111,7 +111,8 @@ strcmp:
 	bnez  a1, 1f
 	ret
 
-1:and   a4, a4, 0xff
+1:
+	and   a4, a4, 0xff
 	and   a5, a5, 0xff
 	sub   a0, a4, a5
 	ret
@@ -130,21 +131,23 @@ strcmp:
 	srl   a5, a3, 16
 	bne   a4, a5, .Lmismatch_lower
 
-	srl	a4, a2, 8
+	srl   a4, a2, 8
 	srl   a5, a3, 8
 	bne   a4, a5, 1f
 	and   a4, a2, 0xff
 	and   a5, a3, 0xff
-1:sub	a0, a4, a5
+1:
+	sub   a0, a4, a5
 	ret
 
 .Lmismatch_lower:
-	srl	a2, a4, 8
+	srl   a2, a4, 8
 	srl   a3, a5, 8
 	bne   a2, a3, 1f
 	and   a2, a4, 0xff
 	and   a3, a5, 0xff
-1:sub	a0, a2, a3
+1:
+	sub   a0, a2, a3
 	ret
 
 #endif
