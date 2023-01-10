@@ -94,6 +94,22 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
     }
 #endif /* CONFIG_DEBUG_FEATURES */
 
+  /* Check if we are just be asked to allocate memory, i.e., MAP_ANONYMOUS
+   * set meaning that the memory is not backed up from a file.  The file
+   * descriptor should be -1 (or refer to opened /dev/zero) in this case.
+   * The file descriptor is ignored in either case.
+   */
+
+  if ((flags & MAP_ANONYMOUS) != 0)
+    {
+      return map_anonymous(&entry, kernel);
+    }
+
+  if (filep == NULL)
+    {
+      return -EBADF;
+    }
+
   if ((filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE)
     {
       ferr("ERROR: Unsupported options for read-only file descriptor,"
@@ -105,17 +121,6 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
     {
       ferr("ERROR: File descriptor does not have read permission\n");
       return -EACCES;
-    }
-
-  /* Check if we are just be asked to allocate memory, i.e., MAP_ANONYMOUS
-   * set meaning that the memory is not backed up from a file.  The file
-   * descriptor should be -1 (or refer to opened /dev/zero) in this case.
-   * The file descriptor is ignored in either case.
-   */
-
-  if ((flags & MAP_ANONYMOUS) != 0)
-    {
-      return map_anonymous(&entry, kernel);
     }
 
   /* Call driver's mmap to get the base address of the file in 'mapped'
@@ -218,7 +223,7 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
  *           MAP_NORESERVE  - Ignored
  *           MAP_POPULATE   - Ignored
  *           MAP_NONBLOCK   - Ignored
- *   fd      file descriptor of the backing file -- required.
+ *   fd      file descriptor of the backing file.
  *   offset  The offset into the file to map
  *
  * Returned Value:
@@ -247,11 +252,11 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
 FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                int fd, off_t offset)
 {
-  FAR struct file *filep;
+  FAR struct file *filep = NULL;
   FAR void *mapped;
   int ret;
 
-  if (fs_getfilep(fd, &filep) < 0)
+  if (fd != -1 && fs_getfilep(fd, &filep) < 0)
     {
       ferr("ERROR: Invalid file descriptor, fd=%d\n", fd);
       ret = -EBADF;
