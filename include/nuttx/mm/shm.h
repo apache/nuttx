@@ -164,23 +164,5 @@ FAR void *shm_alloc(FAR struct task_group_s *group, FAR void *vaddr,
 
 void shm_free(FAR struct task_group_s *group, FAR void *vaddr, size_t size);
 
-/****************************************************************************
- * Name: shmdt_priv
- *
- * Description:
- *   This is the shmdt internal implementation of the shm driver. It takes
- *   the task group struct as a parameter and can handle both normal detach
- *   and cleanup during process exit.
- *
- * Input Parameters:
- *   group   - A reference to the group structure from which to detach
- *   shmaddr - Virtual start address where the allocation starts.
- *   shmid   - Id of the allocation
- *
- ****************************************************************************/
-
-int shmdt_priv(FAR struct task_group_s *group, FAR const void *shmaddr,
-               int shmid);
-
 #endif /* CONFIG_MM_SHM */
 #endif /* __INCLUDE_NUTTX_MM_SHM_H */
