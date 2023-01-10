@@ -397,52 +397,6 @@ static bool tcp_rebuild_ofosegs(FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
- * Name: tcp_reorder_ofosegs
- *
- * Description:
- *   Sort out-of-order segments by left edge
- *
- * Input Parameters:
- *   nofosegs - Number of out-of-order semgnets
- *   ofosegs  - Pointer to out-of-order segments
- *
- * Returned Value:
- *   True if re-order occurs
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static bool tcp_reorder_ofosegs(int nofosegs,
-                                FAR struct tcp_ofoseg_s *ofosegs)
-{
-  struct tcp_ofoseg_s segs;
-  bool reordered = false;
-  int i;
-  int j;
-
-  /* Sort out-of-order segments by left edge */
-
-  for (i = 0; i < nofosegs - 1; i++)
-    {
-      for (j = 0; j < nofosegs - 1 - i; j++)
-        {
-          if (TCP_SEQ_GT(ofosegs[j].left,
-                         ofosegs[j + 1].left))
-            {
-              segs = ofosegs[j];
-              ofosegs[j] = ofosegs[j + 1];
-              ofosegs[j + 1] = segs;
-              reordered = true;
-            }
-        }
-    }
-
-  return reordered;
-}
-
-/****************************************************************************
  * Name: tcp_input_ofosegs
  *
  * Description:
@@ -636,6 +590,14 @@ static void tcp_parse_option(FAR struct net_driver_s *dev,
           conn->snd_scale = IPDATA(tcpiplen + 2 + i);
           conn->rcv_scale = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
           conn->flags    |= TCP_WSCALE;
+        }
+#endif
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+      else if (opt == TCP_OPT_SACK_PERM &&
+               IPDATA(tcpiplen + 1 + i) ==
+               TCP_OPT_SACK_PERM_LEN)
+        {
+          conn->flags    |= TCP_SACK;
         }
 #endif
       else
@@ -1626,6 +1588,51 @@ drop:
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_reorder_ofosegs
+ *
+ * Description:
+ *   Sort out-of-order segments by left edge
+ *
+ * Input Parameters:
+ *   nofosegs - Number of out-of-order semgnets
+ *   ofosegs  - Pointer to out-of-order segments
+ *
+ * Returned Value:
+ *   True if re-order occurs
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+bool tcp_reorder_ofosegs(int nofosegs, FAR struct tcp_ofoseg_s *ofosegs)
+{
+  struct tcp_ofoseg_s segs;
+  bool reordered = false;
+  int i;
+  int j;
+
+  /* Sort out-of-order segments by left edge */
+
+  for (i = 0; i < nofosegs - 1; i++)
+    {
+      for (j = 0; j < nofosegs - 1 - i; j++)
+        {
+          if (TCP_SEQ_GT(ofosegs[j].left,
+                         ofosegs[j + 1].left))
+            {
+              segs = ofosegs[j];
+              ofosegs[j] = ofosegs[j + 1];
+              ofosegs[j + 1] = segs;
+              reordered = true;
+            }
+        }
+    }
+
+  return reordered;
+}
 
 /****************************************************************************
  * Name: tcp_ipv4_input

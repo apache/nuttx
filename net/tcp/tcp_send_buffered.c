@@ -170,6 +170,80 @@ static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
 #  define psock_writebuffer_notify(conn)
 #endif
 
+static void retransmit_segment(FAR struct tcp_conn_s *conn,
+                               FAR struct tcp_wrbuffer_s *wrb)
+{
+  uint16_t sent;
+
+  /* Reset the number of bytes sent sent from the write buffer */
+
+  sent = TCP_WBSENT(wrb);
+  if (conn->tx_unacked > sent)
+    {
+      conn->tx_unacked -= sent;
+    }
+  else
+    {
+      conn->tx_unacked = 0;
+    }
+
+  if (conn->sent > sent)
+    {
+      conn->sent -= sent;
+    }
+  else
+    {
+      conn->sent = 0;
+    }
+
+  TCP_WBSENT(wrb) = 0;
+  ninfo("REXMIT: wrb=%p sent=%u, "
+        "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
+        wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
+
+  /* Free any write buffers that have exceed the retry count */
+
+  if (++TCP_WBNRTX(wrb) >= TCP_MAXRTX)
+    {
+      nwarn("WARNING: Expiring wrb=%p nrtx=%u\n",
+            wrb, TCP_WBNRTX(wrb));
+
+      /* Return the write buffer to the free list */
+
+      tcp_wrbuffer_release(wrb);
+
+      /* Notify any waiters if the write buffers have been
+       * drained.
+       */
+
+      psock_writebuffer_notify(conn);
+
+      /* NOTE expired is different from un-ACKed, it is designed
+       * to represent the number of segments that have been sent,
+       * retransmitted, and un-ACKed, if expired is not zero, the
+       * connection will be closed.
+       *
+       * field expired can only be updated at TCP_ESTABLISHED
+       * state
+       */
+
+      conn->expired++;
+    }
+  else
+    {
+      /* Insert the write buffer into the write_q (in sequence
+       * number order).  The retransmission will occur below
+       * when the write buffer with the lowest sequence number
+       * is pulled from the write_q again.
+       */
+
+      ninfo("REXMIT: Moving wrb=%p nrtx=%u\n",
+            wrb, TCP_WBNRTX(wrb));
+
+      psock_insert_segment(wrb, &conn->write_q);
+    }
+}
+
 /****************************************************************************
  * Name: psock_lost_connection
  *
@@ -286,6 +360,97 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: parse_sack
+ *
+ * Description:
+ *   Parse sack from incoming TCP options
+ *
+ * Input Parameters:
+ *   conn   - The TCP connection of interest
+ *   tcp    - Header of tcp structure
+ *   segs   - Segments edge of sacks
+ *
+ * Returned Value:
+ *   Number of sacks
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+static int parse_sack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp,
+                      FAR struct tcp_ofoseg_s *segs)
+{
+  FAR struct tcp_sack_s *sacks;
+  int nsack = 0;
+  uint8_t opt;
+  int i;
+
+  /* Get the size of the link layer header,
+   * the IP and TCP header
+   */
+
+  for (i = 0; i < ((tcp->tcpoffset >> 4) - 5) << 2 ; )
+    {
+      opt = *(tcp->optdata + i);
+      if (opt == TCP_OPT_END)
+        {
+          /* End of options. */
+
+          break;
+        }
+      else if (opt == TCP_OPT_NOOP)
+        {
+          /* NOP option. */
+
+          ++i;
+          continue;
+        }
+      else if (opt == TCP_OPT_SACK)
+        {
+          nsack = (*(tcp->optdata + 1 + i) -
+                   TCP_OPT_SACK_PERM_LEN) /
+                   (sizeof(uint32_t) * 2);
+          sacks = (FAR struct tcp_sack_s *)
+                  (tcp->optdata + i +
+                   TCP_OPT_SACK_PERM_LEN);
+
+          for (i = 0; i < nsack; i++)
+            {
+              segs[i].left = tcp_getsequence((uint8_t *)&sacks[i].left);
+              segs[i].right = tcp_getsequence((uint8_t *)&sacks[i].right);
+            }
+
+          tcp_reorder_ofosegs(nsack, segs);
+
+          break;
+        }
+      else
+        {
+          /* All other options have a length field,
+           * so that we easily can skip past them.
+           */
+
+          if (*(tcp->optdata + 1 + i) == 0)
+            {
+              /* If the length field is zero,
+               * the options are malformed and
+               * we don't process them further.
+               */
+
+              break;
+            }
+        }
+
+      i += *(tcp->optdata + 1 + i);
+    }
+
+  return nsack;
+}
+#endif /* CONFIG_NET_TCP_SELECTIVE_ACK */
+
+/****************************************************************************
  * Name: psock_send_eventhandler
  *
  * Description:
@@ -309,6 +474,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                                         FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_conn_s *conn = pvpriv;
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  struct tcp_ofoseg_s ofosegs[TCP_SACK_RANGES_MAX];
+  uint8_t nsacks = 0;
+#endif
 #ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   uint32_t rexmitno = 0;
 #endif
@@ -458,7 +627,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                         wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb));
                 }
             }
-#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
           else if (ackno == TCP_WBSEQNO(wrb))
             {
               /* Reset the duplicate ack counter */
@@ -472,16 +640,33 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
               if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
                 {
-                  /* Do fast retransmit */
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+                  if ((conn->flags & TCP_SACK) &&
+                      (tcp->tcpoffset & 0xf0) > 0x50)
+                    {
+                      /* Parse s-ack from tcp options */
 
-                  rexmitno = ackno;
+                      nsacks = parse_sack(conn, tcp, ofosegs);
 
-                  /* Reset counter */
+                      flags |= TCP_REXMIT;
+                    }
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
+                  else
+#endif
+#endif
+                    {
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
+                      /* Do fast retransmit */
 
-                  TCP_WBNACK(wrb) = 0;
+                      rexmitno = ackno;
+#endif
+
+                      /* Reset counter */
+
+                      TCP_WBNACK(wrb) = 0;
+                    }
                 }
             }
-#endif
         }
 
       /* A special case is the head of the write_q which may be partially
@@ -613,6 +798,57 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
     }
 #endif
 
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+
+  /* Check if we are being asked to retransmit s-ack data */
+
+  if (nsacks > 0)
+    {
+      FAR struct tcp_wrbuffer_s *wrb;
+      FAR sq_entry_t *entry;
+      FAR sq_entry_t *next;
+      uint32_t right;
+      int i;
+
+      /* Dump s-ack edge */
+
+      for (i = 0, right = 0; i < nsacks; i++)
+        {
+          ninfo("TCP SACK [%d]"
+                "[%" PRIu32 " : %" PRIu32 " : %" PRIu32 "]\n",
+                i, ofosegs[i].left, ofosegs[i].right,
+                TCP_SEQ_SUB(ofosegs[i].right, ofosegs[i].left));
+        }
+
+      for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
+        {
+          wrb  = (FAR struct tcp_wrbuffer_s *)entry;
+          next = sq_next(entry);
+
+          for (i = 0, right = 0; i < nsacks; i++)
+            {
+              /* Wrb seqno out of s-ack edge ? do retransmit ! */
+
+              if (TCP_SEQ_LT(TCP_WBSEQNO(wrb), ofosegs[i].left) &&
+                  TCP_SEQ_GTE(TCP_WBSEQNO(wrb), right))
+                {
+                  ninfo("TCP REXMIT "
+                        "[%" PRIu32 " : %" PRIu32 " : %d]\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_SEQ_ADD(TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb)),
+                        TCP_WBPKTLEN(wrb));
+                  sq_rem(entry, &conn->unacked_q);
+                  retransmit_segment(conn, (FAR void *)entry);
+                  break;
+                }
+
+              right = ofosegs[i].right;
+            }
+        }
+    }
+  else
+#endif
+
   /* Check if we are being asked to retransmit data */
 
   if ((flags & TCP_REXMIT) != 0)
@@ -706,75 +942,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       while ((entry = sq_remlast(&conn->unacked_q)) != NULL)
         {
-          wrb = (FAR struct tcp_wrbuffer_s *)entry;
-          uint16_t sent;
-
-          /* Reset the number of bytes sent sent from the write buffer */
-
-          sent = TCP_WBSENT(wrb);
-          if (conn->tx_unacked > sent)
-            {
-              conn->tx_unacked -= sent;
-            }
-          else
-            {
-              conn->tx_unacked = 0;
-            }
-
-          if (conn->sent > sent)
-            {
-              conn->sent -= sent;
-            }
-          else
-            {
-              conn->sent = 0;
-            }
-
-          TCP_WBSENT(wrb) = 0;
-          ninfo("REXMIT: wrb=%p sent=%u, "
-                "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
-                wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
-
-          /* Free any write buffers that have exceed the retry count */
-
-          if (++TCP_WBNRTX(wrb) >= TCP_MAXRTX)
-            {
-              nwarn("WARNING: Expiring wrb=%p nrtx=%u\n",
-                    wrb, TCP_WBNRTX(wrb));
-
-              /* Return the write buffer to the free list */
-
-              tcp_wrbuffer_release(wrb);
-
-              /* Notify any waiters if the write buffers have been
-               * drained.
-               */
-
-              psock_writebuffer_notify(conn);
-
-              /* NOTE expired is different from un-ACKed, it is designed to
-               * represent the number of segments that have been sent,
-               * retransmitted, and un-ACKed, if expired is not zero, the
-               * connection will be closed.
-               *
-               * field expired can only be updated at TCP_ESTABLISHED state
-               */
-
-              conn->expired++;
-              continue;
-            }
-          else
-            {
-              /* Insert the write buffer into the write_q (in sequence
-               * number order).  The retransmission will occur below
-               * when the write buffer with the lowest sequence number
-               * is pulled from the write_q again.
-               */
-
-              ninfo("REXMIT: Moving wrb=%p nrtx=%u\n", wrb, TCP_WBNRTX(wrb));
-
-              psock_insert_segment(wrb, &conn->write_q);
-            }
+          retransmit_segment(conn, (FAR void *)entry);
         }
     }
 
