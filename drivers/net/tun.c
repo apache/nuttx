@@ -61,6 +61,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mm/iob.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/tun.h>
@@ -98,12 +100,6 @@
 #  define CONFIG_TUN_NINTERFACES 1
 #endif
 
-/* Make sure that packet buffers include in configured guard size and are an
- * even multiple of 16-bits in length.
- */
-
-#define NET_TUN_PKTSIZE ((CONFIG_NET_TUN_PKTSIZE + CONFIG_NET_GUARDSIZE + 1) & ~1)
-
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header.
  */
@@ -137,8 +133,8 @@ struct tun_device_s
    * is assured only by the preceding wide data types.
    */
 
-  uint8_t           read_buf[NET_TUN_PKTSIZE];
-  uint8_t           write_buf[NET_TUN_PKTSIZE];
+  FAR struct iob_s *read_buf;
+  FAR struct iob_s *write_buf;
 
   /* This holds the information visible to the NuttX network */
 
@@ -310,7 +306,13 @@ static void tun_fd_transmit(FAR struct tun_device_s *priv)
 
 static int tun_txpoll(FAR struct net_driver_s *dev)
 {
+  FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
   int ret;
+
+  DEBUGASSERT(priv->read_buf == NULL);
+  priv->read_d_len = dev->d_len;
+  priv->read_buf   = dev->d_iob;
+  netdev_iob_clear(dev);
 
 #ifdef CONFIG_NET_ETHERNET
   if (dev->d_lltype == NET_LL_ETHERNET)
@@ -358,7 +360,6 @@ static int tun_txpoll_tap(FAR struct net_driver_s *dev)
 
   /* Send the packet */
 
-  priv->read_d_len = priv->dev.d_len;
   tun_fd_transmit(priv);
 
   return 1;
@@ -394,7 +395,6 @@ static int tun_txpoll_tun(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
 
-  priv->read_d_len = priv->dev.d_len;
   tun_fd_transmit(priv);
 
   return 1;
@@ -495,17 +495,6 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
     {
       arp_input(&priv->dev);
       NETDEV_RXARP(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          priv->write_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-          priv->dev.d_len = 0;
-        }
     }
   else
 #endif
@@ -522,7 +511,10 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
     {
       /* And send the packet */
 
+      DEBUGASSERT(priv->write_buf == NULL);
       priv->write_d_len = priv->dev.d_len;
+      priv->write_buf   = priv->dev.d_iob;
+      netdev_iob_clear(&priv->dev);
       tun_fd_transmit(priv);
     }
 }
@@ -599,7 +591,10 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
 
   if (dev->d_len > 0)
     {
+      DEBUGASSERT(priv->write_buf == NULL);
       priv->write_d_len = dev->d_len;
+      priv->write_buf   = dev->d_iob;
+      netdev_iob_clear(dev);
       tun_fd_transmit(priv);
     }
 }
@@ -629,7 +624,6 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 
   /* Then poll the network for new XMIT data */
 
-  priv->dev.d_buf = priv->read_buf;
   devif_poll(&priv->dev, tun_txpoll);
 }
 
@@ -751,7 +745,6 @@ static void tun_txavail_work(FAR void *arg)
     {
       /* Poll the network for new XMIT data */
 
-      priv->dev.d_buf = priv->read_buf;
       devif_poll(&priv->dev, tun_txpoll);
     }
 
@@ -965,12 +958,15 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct tun_device_s *priv = filep->f_priv;
   ssize_t nwritten = 0;
+  uint8_t llhdrlen;
   int ret;
 
   if (priv == NULL || buflen > CONFIG_NET_TUN_PKTSIZE)
     {
       return -EINVAL;
     }
+
+  llhdrlen = NET_LL_HDRLEN(&priv->dev);
 
   for (; ; )
     {
@@ -988,10 +984,24 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
 
       if (priv->write_d_len == 0)
         {
-          memcpy(priv->write_buf, buffer, buflen);
-
           net_lock();
-          priv->dev.d_buf = priv->write_buf;
+          ret = netdev_iob_prepare(&priv->dev, false, 0);
+          if (ret < 0)
+            {
+              nwritten = (nwritten == 0) ? ret : nwritten;
+              net_unlock();
+              break;
+            }
+
+          ret = iob_trycopyin(priv->dev.d_iob, (FAR const uint8_t *)buffer,
+                              buflen, -llhdrlen, false);
+          if (ret < 0)
+            {
+              nwritten = (nwritten == 0) ? ret : nwritten;
+              net_unlock();
+              break;
+            }
+
           priv->dev.d_len = buflen;
 
           tun_net_receive(priv);
@@ -1027,12 +1037,15 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct tun_device_s *priv = filep->f_priv;
   ssize_t nread = 0;
+  uint8_t llhdrlen;
   int ret;
 
   if (priv == NULL)
     {
       return -EINVAL;
     }
+
+  llhdrlen = NET_LL_HDRLEN(&priv->dev);
 
   for (; ; )
     {
@@ -1056,8 +1069,12 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
               break;
             }
 
-          memcpy(buffer, priv->write_buf, priv->write_d_len);
+          iob_copyout((FAR uint8_t *)buffer, priv->write_buf,
+                      priv->write_d_len, -llhdrlen);
           nread = priv->write_d_len;
+
+          iob_free_chain(priv->write_buf);
+          priv->write_buf   = NULL;
           priv->write_d_len = 0;
 
           NETDEV_TXDONE(&priv->dev);
@@ -1075,8 +1092,12 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
               break;
             }
 
-          memcpy(buffer, priv->read_buf, priv->read_d_len);
+          iob_copyout((FAR uint8_t *)buffer, priv->read_buf,
+                      priv->read_d_len, -llhdrlen);
           nread = priv->read_d_len;
+
+          iob_free_chain(priv->read_buf);
+          priv->read_buf   = NULL;
           priv->read_d_len = 0;
 
           net_lock();
