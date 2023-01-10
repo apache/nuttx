@@ -106,3 +106,8 @@ ifeq ($(CONFIG_ESP32S3_SPIRAM),y)
 CHIP_CSRCS += esp32s3_spiram.c
 CHIP_CSRCS += esp32s3_psram.c
 endif
+
+ifeq ($(CONFIG_ESP32S3_TOUCH),y)
+CHIP_CSRCS += esp32s3_touch.c
+endif
+
