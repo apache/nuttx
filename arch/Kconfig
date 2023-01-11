@@ -534,9 +534,13 @@ config ARCH_HEAP_VBASE
 	---help---
 		The virtual address of the beginning of the heap region.
 
+config ARCH_VMA_MAPPING
+	bool "Support runtime memory mapping into SHM area"
+	default n
+
 config ARCH_SHM_VBASE
 	hex "Shared memory base"
-	depends on MM_SHM
+	depends on ARCH_VMA_MAPPING
 	---help---
 		The virtual address of the beginning of the shared memory region.
 
@@ -564,7 +568,7 @@ config ARCH_HEAP_NPAGES
 		This, along with knowledge of the page size, determines the size of
 		the heap virtual address space. Default is 1.
 
-if MM_SHM
+if ARCH_VMA_MAPPING
 
 config ARCH_SHM_MAXREGIONS
 	int "Max shared memory regions"
@@ -592,7 +596,7 @@ config ARCH_SHM_NPAGES
 		maximum number of pages per region, and the configured size of
 		each page.
 
-endif # MM_SHM
+endif # ARCH_VMA_MAPPING
 
 config ARCH_STACK_DYNAMIC
 	bool "Dynamic user stack"
