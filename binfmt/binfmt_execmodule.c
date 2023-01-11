@@ -34,7 +34,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
-#include <nuttx/mm/shm.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
@@ -223,17 +222,6 @@ int exec_module(FAR const struct binary_s *binp,
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_kstackalloc() failed: %d\n", ret);
-      goto errout_with_tcbinit;
-    }
-#endif
-
-#ifdef CONFIG_MM_SHM
-  /* Initialize the shared memory virtual page allocator */
-
-  ret = shm_group_initialize(tcb->cmn.group);
-  if (ret < 0)
-    {
-      berr("ERROR: shm_group_initialize() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
 #endif

@@ -32,11 +32,21 @@
 #include <errno.h>
 
 #include <nuttx/pgalloc.h>
-#include <nuttx/mm/shm.h>
 
 #include "shm/shm.h"
 
 #ifdef CONFIG_MM_SHM
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* State of the all shared memory */
+
+struct shm_info_s g_shminfo =
+{
+  NXMUTEX_INITIALIZER
+};
 
 /****************************************************************************
  * Private Functions

@@ -40,7 +40,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
-#include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/map.h>
@@ -508,12 +507,6 @@ struct task_group_s
   /* Address Environment ****************************************************/
 
   group_addrenv_t tg_addrenv;       /* Task group address environment       */
-#endif
-
-#ifdef CONFIG_MM_SHM
-  /* Shared Memory **********************************************************/
-
-  struct group_shm_s tg_shm;        /* Task shared memory logic             */
 #endif
 
   /* Virtual memory mapping info ********************************************/
