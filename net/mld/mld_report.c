@@ -65,7 +65,7 @@ int mld_report(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_MLD_ROUTER
   /* Assure that the group address is an IPv6 multicast address */
 
-  if (!net_is_addr_mcast(mrec->ipv6mr_multiaddr.s6_addr16))
+  if (!net_is_addr_mcast(grpaddr))
     {
       return -EINVAL;
     }
