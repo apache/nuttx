@@ -58,6 +58,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NET_MLD_ROUTER
 static int mld_ngroups(FAR struct net_driver_s *dev)
 {
   FAR struct mld_group_s *group;
@@ -79,6 +80,7 @@ static int mld_ngroups(FAR struct net_driver_s *dev)
 
   return ngroups > 0 ? ngroups - 1 : 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions

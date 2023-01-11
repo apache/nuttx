@@ -280,7 +280,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
             {
               /* Update accumulated membership for all groups. */
 
-              mld_new_pollcycle(dev)
+              mld_new_pollcycle(dev);
             }
           else
             {

@@ -321,7 +321,7 @@ int mld_query(FAR struct net_driver_s *dev,
        * cycle
        */
 
-      mld_new_pollcycle(dev)
+      mld_new_pollcycle(dev);
 #endif
 
       /* Check MLDv1 compatibility mode */

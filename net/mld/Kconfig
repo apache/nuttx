@@ -16,7 +16,7 @@ menuconfig NET_MLD
 if NET_MLD
 
 config NET_MLD_ROUTER
-	bool # "MLD Router support"
+	bool "MLD Router support"
 	default n
 	---help---
 		Enables a few hooks that will be needed for router support in the

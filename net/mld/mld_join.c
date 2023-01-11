@@ -206,7 +206,7 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
        * perform the group startup operations.
        */
 
-      if (group->join == 0)
+      if (group->njoins == 0)
         {
           /* This is the for join from this host.  Perform out start up
            * operations.
