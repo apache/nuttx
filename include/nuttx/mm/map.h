@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/queue.h>
 #include <nuttx/mutex.h>
+#include <nuttx/mm/gran.h>
 
 /****************************************************************************
  * Forward declarations
@@ -73,6 +74,11 @@ struct mm_map_entry_s
 struct mm_map_s
 {
   sq_queue_t mm_map_sq;
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  GRAN_HANDLE mm_map_vpages;
+#endif
+
   rmutex_t mm_map_mutex;
 };
 
@@ -120,14 +126,15 @@ void mm_map_unlock(void);
  *   Initialization function, called only by group_initialize
  *
  * Input Parameters:
- *   mm - Pointer to the mm_map structure to be initialized
+ *   mm     - Pointer to the mm_map structure to be initialized
+ *   kernel - Indicates whether we are initializing a kernel task
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void mm_map_initialize(FAR struct mm_map_s *mm);
+void mm_map_initialize(FAR struct mm_map_s *mm, bool kernel);
 
 /****************************************************************************
  * Name: mm_map_destroy
@@ -161,6 +168,46 @@ void mm_map_destroy(FAR struct mm_map_s *mm);
  *   -ENOMEM:  Out of memory
  *
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+
+/****************************************************************************
+ * Name: vm_alloc_region
+ *
+ * Description:
+ *   Allocate virtual memory region from the process virtual memory area.
+ *
+ * Input Parameters:
+ *   mm    - A reference to the process mm_map struct
+ *   vaddr - Virtual start address where the allocation starts, if NULL, will
+ *           seek and return an address that satisfies the 'size' parameter
+ *   size - Size of the area to allocate
+ *
+ * Returned Value:
+ *   Pointer to reserved vaddr, or NULL if out-of-memory
+ *
+ ****************************************************************************/
+
+FAR void *vm_alloc_region(FAR struct mm_map_s *mm, FAR void *vaddr,
+                          size_t size);
+
+/****************************************************************************
+ * Name: vm_release_region
+ *
+ * Description:
+ *   Free a previously allocated virtual memory region
+ *
+ * Input Parameters:
+ *   mm    - A reference to the process' mm_map struct
+ *   vaddr - Virtual start address where the allocation starts.
+ *   size  - Size of the allocated area.
+ *
+ ****************************************************************************/
+
+void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr,
+                       size_t size);
+
+#endif
 
 int mm_map_add(FAR struct mm_map_entry_s *entry);
 

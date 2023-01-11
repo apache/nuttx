@@ -23,6 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/mm/map.h>
+#include <nuttx/pgalloc.h>
+#include <nuttx/addrenv.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <nuttx/sched.h>
@@ -87,10 +89,29 @@ void mm_map_unlock(void)
  *
  ****************************************************************************/
 
-void mm_map_initialize(FAR struct mm_map_s *mm)
+void mm_map_initialize(FAR struct mm_map_s *mm, bool kernel)
 {
   sq_init(&mm->mm_map_sq);
   nxrmutex_init(&mm->mm_map_mutex);
+
+  /* Create the virtual pages allocator for user process */
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  if (!kernel)
+    {
+      mm->mm_map_vpages = gran_initialize((FAR void *)CONFIG_ARCH_SHM_VBASE,
+                                          ARCH_SHM_MAXPAGES << MM_PGSHIFT,
+                                          MM_PGSHIFT, MM_PGSHIFT);
+      if (!mm->mm_map_vpages)
+        {
+          merr("gran_initialize() failed\n");
+        }
+    }
+  else
+    {
+      mm->mm_map_vpages = NULL;
+    }
+#endif
 }
 
 /****************************************************************************
@@ -131,6 +152,15 @@ void mm_map_destroy(FAR struct mm_map_s *mm)
     }
 
   nxrmutex_destroy(&mm->mm_map_mutex);
+
+  /* Release the virtual pages allocator */
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  if (mm->mm_map_vpages)
+    {
+      gran_release(mm->mm_map_vpages);
+    }
+#endif
 }
 
 /****************************************************************************
