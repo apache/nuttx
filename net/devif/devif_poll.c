@@ -898,13 +898,6 @@ static int devif_iob_poll(FAR struct net_driver_s *dev,
 {
   int bstop;
 
-  /* Device polling, prepare iob buffer */
-
-  if (netdev_iob_prepare(dev, false, 0) != OK)
-    {
-      return true;
-    }
-
   /* Perform all connections poll */
 
   bstop = devif_poll_connections(dev, callback);
@@ -997,15 +990,6 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   do
     {
-      /* Device polling, prepare iob buffer */
-
-      if (netdev_iob_prepare(dev, false, 0) != OK)
-        {
-          nwarn("WARNING: IOB Prepare failed for dev %s!\n", dev->d_ifname);
-          bstop = true;
-          break;
-        }
-
       /* Perform all connections poll */
 
       bstop = devif_poll_connections(dev, devif_poll_callback);

@@ -407,7 +407,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
     {
       uint16_t udpiplen = udpip_hdrsize(conn);
       FAR struct udp_wrbuffer_s *wrb;
-      size_t sndlen;
 
       /* Peek at the head of the write queue (but don't remove anything
        * from the write queue yet).  We know from the above test that
@@ -425,14 +424,20 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       udp_connect(conn, (FAR const struct sockaddr *)&wrb->wb_dest);
 
+      /* Then set-up to send that amount of data with the offset
+       * corresponding to the size of the IP-dependent address structure.
+       */
+
+      netdev_iob_replace(dev, wrb->wb_iob);
+
       /* Get the amount of data that we can send in the next packet.
        * We will send either the remaining data in the buffer I/O
        * buffer chain, or as much as will fit given the MSS and current
        * window size.
        */
 
-      sndlen = wrb->wb_iob->io_pktlen - udpiplen;
-      ninfo("wrb=%p sndlen=%zu\n", wrb, sndlen);
+      dev->d_sndlen = wrb->wb_iob->io_pktlen - udpiplen;
+      ninfo("wrb=%p sndlen=%d\n", wrb, dev->d_sndlen);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
       /* If both IPv4 and IPv6 support are enabled, then we will need to
@@ -443,16 +448,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       sendto_ipselect(dev, conn);
 #endif
-
-      /* Release current device buffer and bypass the iob to l2 driver */
-
-      netdev_iob_release(dev);
-
-      /* Then set-up to send that amount of data with the offset
-       * corresponding to the size of the IP-dependent address structure.
-       */
-
-      devif_iob_send(dev, wrb->wb_iob, sndlen, 0, udpiplen);
 
       /* Free the write buffer at the head of the queue and attempt to
        * setup the next transfer.

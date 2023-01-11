@@ -109,6 +109,13 @@ static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
+      /* Prepare device buffer */
+
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          return flags;
+        }
+
       /* It looks like we are good to send the data.
        *
        * Copy the packet data into the device packet buffer and send it.

@@ -87,6 +87,13 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   DEBUGASSERT(dev != NULL && conn != NULL && dev == conn->dev);
 
+  /* Prepare device buffer */
+
+  if (netdev_iob_prepare(dev, false, 0) != OK)
+    {
+      return;
+    }
+
   /* Discard any currently buffered data */
 
   if (conn->timeout)

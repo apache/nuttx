@@ -109,6 +109,13 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
 
   ninfo("msgid: %02x destipaddr: %08x\n", msgid, (int)*destipaddr);
 
+  /* Prepare device buffer */
+
+  if (netdev_iob_prepare(dev, false, 0) != OK)
+    {
+      return;
+    }
+
   /* The IGMP header immediately follows the IP header */
 
   iphdrlen          = IPv4_HDRLEN + RASIZE;
