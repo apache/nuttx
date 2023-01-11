@@ -263,7 +263,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_tryalloc(true);
+  wrb->wb_iob = iob_tryalloc(false);
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");

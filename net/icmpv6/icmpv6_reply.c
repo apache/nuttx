@@ -135,7 +135,7 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
 
       /* Re-prepare device buffer */
 
-      if (netdev_iob_prepare(dev, true, 0) != OK)
+      if (netdev_iob_prepare(dev, false, 0) != OK)
         {
           dev->d_len = 0;
           dev->d_iob = iob;
@@ -146,7 +146,7 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
       /* Copy ipv4 header to device buffer */
 
       if (iob_trycopyin(dev->d_iob, (FAR void *)ipv6,
-                        IPv6_HDRLEN, 0, true) != IPv6_HDRLEN)
+                        IPv6_HDRLEN, 0, false) != IPv6_HDRLEN)
         {
           dev->d_len = 0;
           netdev_iob_release(dev);
