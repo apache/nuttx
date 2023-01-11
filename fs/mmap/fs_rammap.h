@@ -59,7 +59,6 @@ struct fs_rammap_s
   FAR void           *addr;        /* Start of allocated memory */
   size_t              length;      /* Length of region */
   off_t               offset;      /* File offset */
-  FAR struct file    *file;        /* File pointer */
 };
 
 /* This structure defines all "mapped" files */
