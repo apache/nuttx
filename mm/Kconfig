@@ -26,16 +26,24 @@ config MM_CUSTOMIZE_MANAGER
 endchoice
 
 config MM_KERNEL_HEAP
-	bool "Support a protected, kernel heap"
-	default y
-	depends on !BUILD_FLAT
+	bool "Kernel dedicated heap"
+	default n if BUILD_FLAT
+	default y if BUILD_PROTECTED || BUILD_KERNEL
 	---help---
-		Partition heap memory into two parts:  (1) a protected, kernel-mode
-		heap accessible only by the NuttX kernel, and (2) an unprotected
-		user-mode heap for use by applications.  If you are only interested
-		in protected the kernel from read access, then this option is not
-		necessary.  If you wish to secure the kernel data as well, then
-		this option should be selected.
+		Under Flat build, this option will enable a separate heap for the kernel.
+		By separating the kernel and userspace heaps, the user is granted more
+		control over the heaps placement within the memory hierarchy, which is
+		specially useful for microcontrollers that provide External RAM.
+		Besides segregating the kernel and userspace allocations, this feature
+		does not prevent the userspace from accessing the kernel heap.
+
+		As for Protected and Kernel builds, this feature partitions heap memory
+		into two parts:
+		(1) a protected, kernel-mode heap accessible only by the NuttX kernel,
+		and (2) an unprotected user-mode heap for use by applications.
+		If you are only interested in protecting the kernel from read access,
+		then this option is not necessary. If you wish to secure the kernel data
+		as well, then this option should be selected.
 
 		The kernel heap size that is used is provided a a platform-specific
 		up_allocate_kheap() interface.  This configuration setting is made
