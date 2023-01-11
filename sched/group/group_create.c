@@ -240,7 +240,8 @@ void group_initialize(FAR struct task_tcb_s *tcb)
 
   /* Allocate mm_map list if required */
 
-  mm_map_initialize(&group->tg_mm_map);
+  mm_map_initialize(&group->tg_mm_map,
+                    (tcb->cmn.flags & TCB_FLAG_TTYPE_KERNEL) != 0);
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Assign the PID of this new task as a member of the group. */

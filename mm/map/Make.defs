@@ -22,6 +22,10 @@
 
 CSRCS += mm_map.c
 
+ifeq ($(CONFIG_ARCH_VMA_MAPPING),y)
+CSRCS += vm_region.c
+endif
+
 # Add the shared memory directory to the build
 
 DEPPATH += --dep-path map
