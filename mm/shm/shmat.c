@@ -47,7 +47,7 @@ static int munmap_shm(FAR struct task_group_s *group,
                       FAR void *start,
                       size_t length)
 {
-  FAR const void *shmaddr = entry->vaddr;
+  FAR void *shmaddr = entry->vaddr;
   int shmid = entry->priv.i;
   FAR struct shm_region_s *region;
   pid_t pid;
@@ -80,7 +80,8 @@ static int munmap_shm(FAR struct task_group_s *group,
     {
       /* Free the virtual address space */
 
-      shm_free(group, (FAR void *)shmaddr, region->sr_ds.shm_segsz);
+      vm_release_region(get_group_mm(group), shmaddr,
+                        region->sr_ds.shm_segsz);
 
       /* Convert the region size to pages */
 
@@ -237,10 +238,11 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Set aside a virtual address space to span this physical region */
 
-  vaddr = shm_alloc(group, NULL, region->sr_ds.shm_segsz);
+  vaddr = vm_alloc_region(get_group_mm(group), NULL,
+                          region->sr_ds.shm_segsz);
   if (vaddr == NULL)
     {
-      shmerr("ERROR: shm_alloc() failed\n");
+      shmerr("ERROR: vm_alloc_regioon() failed\n");
       ret = -ENOMEM;
       goto errout_with_lock;
     }
@@ -294,7 +296,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
   return vaddr;
 
 errout_with_vaddr:
-  shm_free(group, vaddr, region->sr_ds.shm_segsz);
+  vm_release_region(get_group_mm(group), vaddr, region->sr_ds.shm_segsz);
 
 errout_with_lock:
   nxmutex_unlock(&region->sr_lock);

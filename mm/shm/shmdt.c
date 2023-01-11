@@ -31,7 +31,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <nuttx/mm/shm.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/mm/map.h>
 
