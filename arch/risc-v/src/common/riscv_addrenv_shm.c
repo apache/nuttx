@@ -39,7 +39,7 @@
 #include "pgalloc.h"
 #include "riscv_mmu.h"
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ARCH_VMA_MAPPING)
 
 /****************************************************************************
  * Public Functions

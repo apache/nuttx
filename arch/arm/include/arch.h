@@ -95,7 +95,7 @@ do { \
 #  define ARCH_DATA_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
 #  define ARCH_HEAP_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
 
-#  ifdef CONFIG_MM_SHM
+#  ifdef CONFIG_ARCH_VMA_MAPPING
 #    define ARCH_SHM_NSECTS   ARCH_PG2SECT(ARCH_SHM_MAXPAGES)
 #  endif
 
@@ -138,7 +138,7 @@ struct group_addrenv_s
   uintptr_t *data[ARCH_DATA_NSECTS];
 #ifdef CONFIG_BUILD_KERNEL
   uintptr_t *heap[ARCH_HEAP_NSECTS];
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
   uintptr_t *shm[ARCH_SHM_NSECTS];
 #endif
 
@@ -169,7 +169,7 @@ struct save_addrenv_s
   uint32_t data[ARCH_DATA_NSECTS];
 #ifdef CONFIG_BUILD_KERNEL
   uint32_t heap[ARCH_HEAP_NSECTS];
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
   uint32_t shm[ARCH_SHM_NSECTS];
 #endif
 #endif

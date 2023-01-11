@@ -164,7 +164,7 @@
 
 /* Shared memory regions */
 
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
 #  ifndef CONFIG_ARCH_SHM_VBASE
 #    error CONFIG_ARCH_SHM_VBASE not defined
 #    define CONFIG_ARCH_SHM_VBASE __ARCH_SHM_VBASE

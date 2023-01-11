@@ -38,7 +38,7 @@
 #include "addrenv.h"
 #include "pgalloc.h"
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ARCH_VMA_MAPPING)
 
 /****************************************************************************
  * Public Functions
@@ -269,4 +269,4 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
   return OK;
 }
 
-#endif /* CONFIG_BUILD_KERNEL && CONFIG_MM_SHM */
+#endif /* CONFIG_BUILD_KERNEL && CONFIG_ARCH_VMA_MAPPING */
