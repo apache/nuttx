@@ -98,6 +98,14 @@ static void sendto_request(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_echo_request_s *icmpv6;
 
+  /* Set-up to send that amount of data. */
+
+  devif_send(dev, pstate->snd_buf, pstate->snd_buflen, IPv6_HDRLEN);
+  if (dev->d_sndlen != pstate->snd_buflen)
+    {
+      return;
+    }
+
   IFF_SET_IPv6(dev->d_flags);
 
   /* The total length to send is the size of the application data plus the
@@ -106,21 +114,12 @@ static void sendto_request(FAR struct net_driver_s *dev,
 
   dev->d_len = IPv6_HDRLEN + pstate->snd_buflen;
 
-  /* The total size of the data (including the size of the ICMPv6 header) */
-
-  dev->d_sndlen += pstate->snd_buflen;
-
   ipv6_build_header(IPv6BUF, pstate->snd_buflen, IP_PROTO_ICMP6,
                     dev->d_ipv6addr, pstate->snd_toaddr.s6_addr16, 255);
 
   /* Copy the ICMPv6 request and payload into place after the IPv6 header */
 
-  icmpv6         = IPBUF(IPv6_HDRLEN);
-
-  iob_update_pktlen(dev->d_iob, IPv6_HDRLEN);
-
-  iob_copyin(dev->d_iob, pstate->snd_buf,
-             pstate->snd_buflen, IPv6_HDRLEN, false);
+  icmpv6 = IPBUF(IPv6_HDRLEN);
 
   /* Calculate the ICMPv6 checksum over the ICMPv6 header and payload. */
 
@@ -200,8 +199,11 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
           ninfo("Send ICMPv6 ECHO request\n");
 
           sendto_request(dev, pstate);
-          pstate->snd_result = OK;
-          goto end_wait;
+          if (dev->d_sndlen > 0)
+            {
+              pstate->snd_result = OK;
+              goto end_wait;
+            }
         }
 
       /* Continue waiting */
