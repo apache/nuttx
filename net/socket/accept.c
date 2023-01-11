@@ -316,25 +316,3 @@ errout:
   _SO_SETERRNO(psock, errcode);
   return ERROR;
 }
-
-/****************************************************************************
- * Name: accept
- *
- * Description:
- *   The accept() call is identical to accept4() with a zero flags.
- *
- * Input Parameters:
- *   sockfd   The listening socket descriptor
- *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr',
- *            Return: returned size of 'addr'
- *
- * Returned Value:
- *  (see accept4)
- *
- ****************************************************************************/
-
-int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
-{
-  return accept4(sockfd, addr, addrlen, 0);
-}
