@@ -352,7 +352,6 @@ SYSCALL_LOOKUP(munmap,                     2)
 /* The following are defined only if networking AND sockets are supported */
 
 #ifdef CONFIG_NET
-  SYSCALL_LOOKUP(accept,                   3)
   SYSCALL_LOOKUP(accept4,                  4)
   SYSCALL_LOOKUP(bind,                     3)
   SYSCALL_LOOKUP(connect,                  3)
