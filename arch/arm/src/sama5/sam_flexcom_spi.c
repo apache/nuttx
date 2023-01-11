@@ -47,7 +47,6 @@
 #include "arm_internal.h"
 
 #include "chip.h"
-#include "sam_pio.h"
 #include "sam_dmac.h"
 #include "sam_memories.h"
 #include "sam_periphclks.h"
@@ -56,7 +55,6 @@
 #include "hardware/sam_flexcom_spi.h"
 #include "hardware/sam_flexcom.h"
 #include "sam_config.h"
-#include "hardware/sam_pinmap.h"
 
 #if defined(SAMA5_HAVE_FLEXCOM_SPI)
 
@@ -68,18 +66,18 @@
 
 /* When SPI DMA is enabled, small DMA transfers will still be performed by
  * polling logic.  But we need a threshold value to determine what is small.
- * That value is provided by CONFIG_SAMA5_SPI_DMATHRESHOLD.
+ * That value is provided by CONFIG_SAMA5_FLEXCOM_SPI_DMATHRESHOLD.
  */
 
-#  ifndef CONFIG_SAMA5_SPI_DMATHRESHOLD
-#    define CONFIG_SAMA5_SPI_DMATHRESHOLD 4
+#  ifndef CONFIG_SAMA5_FLEXCOM_SPI_DMATHRESHOLD
+#    define CONFIG_SAMA5_FLEXCOM_SPI_DMATHRESHOLD 4
 #  endif
 
 #  ifndef CONFIG_DEBUG_SPI_INFO
 #    undef CONFIG_SAMA5_SPI_REGDEBUG
 #  endif
 
-#  ifdef CONFIG_SAMA5_SPI_DMA
+#  ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 
 #  if defined(CONFIG_SAMA5_FLEXCOM0_SPI) && defined(CONFIG_SAMA5_XDMAC0)
 #    define SAMA5_FLEXCOM0_SPI_DMA true
@@ -113,8 +111,8 @@
 
 #endif
 
-#ifndef CONFIG_SAMA5_SPI_DMA
-#  undef CONFIG_SAMA5_SPI_DMADEBUG
+#ifndef CONFIG_SAMA5_FLEXCOM_SPI_DMA
+#  undef CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG
 #endif
 
 /* Clocking *****************************************************************/
@@ -138,7 +136,7 @@
 /* Check if SPI debug is enabled */
 
 #ifndef CONFIG_DEBUG_DMA
-#  undef CONFIG_SAMA5_SPI_DMADEBUG
+#  undef CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG
 #endif
 
 #define DMA_INITIAL      0
@@ -168,7 +166,7 @@ struct sam_flex_spics_s
 #endif
   uint8_t cs;                      /* Chip select number */
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
   bool candma;                     /* DMA is supported */
   sem_t dmawait;                   /* Used to wait for DMA completion */
   struct wdog_s dmadog;            /* Watchdog that handles DMA timeouts */
@@ -179,7 +177,7 @@ struct sam_flex_spics_s
 
   /* Debug stuff */
 
-#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG
   struct sam_dmaregs_s rxdmaregs[DMA_NSAMPLES];
   struct sam_dmaregs_s txdmaregs[DMA_NSAMPLES];
 #endif
@@ -199,7 +197,7 @@ struct sam_flex_spidev_s
   mutex_t spilock;             /* Assures mutually exclusive access to SPI */
   select_t select;             /* SPI select callout */
   bool initialized;            /* TRUE: Controller has been initialized */
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
   uint8_t pid;                 /* Peripheral ID */
 #endif
 
@@ -245,11 +243,11 @@ static inline uint32_t flex_spi_cs2pcs(struct sam_flex_spics_s *flex_spics);
 
 /* DMA support */
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 
-#  ifdef CONFIG_SAMA5_SPI_DMADEBUG
-#    define spi_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
-#    define spi_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
+#  ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG
+#    define flex_spi_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
+#    define flex_spi_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
 static void     flex_spi_dma_sampleinit(struct sam_flex_spics_s *flex_spics);
 static void     flex_spi_dma_sampledone(struct sam_flex_spics_s *flex_spics);
 
@@ -278,7 +276,7 @@ static void flex_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void flex_spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t flex_spi_send(struct spi_dev_s *dev, uint32_t wd);
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 static void flex_spi_exchange_nodma(struct spi_dev_s *dev,
                                     const void *txbuffer, void *rxbuffer,
                                     size_t nwords);
@@ -639,8 +637,8 @@ static void flex_spi_dumpregs(struct sam_flex_spidev_s *flex_spi,
   spiinfo("  CSR0:%08x CSR1:%08x \n",
           getreg32(flex_spi->base + SAM_FLEXCOM_SPI_CSR0_OFFSET),
           getreg32(flex_spi->base + SAM_FLEXCOM_SPI_CSR1_OFFSET));
-  spiinfo("  WPCR:%08x WPSR:%08x\n",
-          getreg32(flex_spi->base + SAM_FLEXCOM_SPI_WPCR_OFFSET),
+  spiinfo("  WPMR:%08x WPSR:%08x\n",
+          getreg32(flex_spi->base + SAM_FLEXCOM_SPI_WPMR_OFFSET),
           getreg32(flex_spi->base + SAM_FLEXCOM_SPI_WPSR_OFFSET));
 }
 #endif
@@ -759,7 +757,8 @@ static inline uint32_t flex_spi_cs2pcs(struct sam_flex_spics_s *flex_spics)
  * Name: flex_spi_dma_sampleinit
  *
  * Description:
- *   Initialize sampling of DMA registers (if CONFIG_SAMA5_SPI_DMADEBUG)
+ *   Initialize sampling of DMA registers
+ *     (if CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG)
  *
  * Input Parameters:
  *   flex_spics - Chip select doing the DMA
@@ -769,7 +768,7 @@ static inline uint32_t flex_spi_cs2pcs(struct sam_flex_spics_s *flex_spics)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG
 static void flex_spi_dma_sampleinit(struct sam_flex_spics_s *flex_spics)
 {
   /* Put contents of register samples into a known state */
@@ -800,7 +799,7 @@ static void flex_spi_dma_sampleinit(struct sam_flex_spics_s *flex_spics)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG
 static void flex_spi_dma_sampledone(struct sam_flex_spics_s *flex_spics)
 {
   /* Sample the final registers */
@@ -860,7 +859,7 @@ static void flex_spi_dma_sampledone(struct sam_flex_spics_s *flex_spics)
   sam_dmadump(flex_spics->txdma, &flex_spics->txdmaregs[DMA_END_TRANSFER],
               "TX: At End-of-Transfer");
 }
-#endif /* CONFIG_SAMA5_SPI_DMADEBUG */
+#endif /* CONFIG_SAMA5_FLEXCOM_SPI_DMADEBUG */
 
 /****************************************************************************
  * Name: flex_spi_dmatimeout
@@ -880,7 +879,7 @@ static void flex_spi_dma_sampledone(struct sam_flex_spics_s *flex_spics)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 static void flex_spi_dmatimeout(wdparm_t arg)
 {
   struct sam_flex_spics_s *flex_spics = (struct sam_flex_spics_s *)arg;
@@ -918,7 +917,7 @@ static void flex_spi_dmatimeout(wdparm_t arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 static void flex_spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 {
   struct sam_flex_spics_s *flex_spics = (struct sam_flex_spics_s *)arg;
@@ -967,10 +966,10 @@ static void flex_spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 static void flex_spi_txcallback(DMA_HANDLE handle, void *arg, int result)
 {
-  struct sam_flex_spics_s *flex_spics = (struct sam_spics_s *)arg;
+  struct sam_flex_spics_s *flex_spics = (struct sam_flex_spics_s *)arg;
   DEBUGASSERT(flex_spics != NULL);
 
   flex_spi_txdma_sample(flex_spics, DMA_CALLBACK);
@@ -997,7 +996,7 @@ static void flex_spi_txcallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 static inline uintptr_t flex_spi_physregaddr(struct sam_flex_spics_s
                                             *flex_spics, unsigned int offset)
 {
@@ -1380,12 +1379,14 @@ static uint32_t flex_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  * Description:
  *   Exchange a block of data from SPI.  There are two versions of this
- *   function:  (1) One that is enabled only when CONFIG_SAMA5_SPI_DMA=y
+ *   function:
+ *   (1) One that is enabled only when CONFIG_SAMA5_FLEXCOM_SPI_DMA=y
  *   that performs DMA SPI transfers, but only when a larger block of
  *   data is being transferred.  And (2) another version that does polled
- *   SPI transfers.  When CONFIG_SAMA5_SPI_DMA=n the latter is the only
- *   version available; when CONFIG_SAMA5_SPI_DMA=y, this version is only
- *   used for short SPI transfers and gets renamed as spi_exchange_nodma).
+ *   SPI transfers. When CONFIG_SAMA5_FLEXCOM_SPI_DMA=n the latter is the
+ *   only version available; when CONFIG_SAMA5_FLEXCOM_SPI_DMA=y, this
+ *   version is only used for short SPI transfers and gets renamed as
+ *   spi_exchange_nodma.
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -1402,12 +1403,13 @@ static uint32_t flex_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI_DMA
-static void spi_exchange_nodma(struct spi_dev_s *dev, const void *txbuffer,
-              void *rxbuffer, size_t nwords)
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
+static void flex_spi_exchange_nodma(struct spi_dev_s *dev,
+                                    const void *txbuffer,
+                                    void *rxbuffer, size_t nwords)
 #else
 static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
-              void *rxbuffer, size_t nwords)
+                              void *rxbuffer, size_t nwords)
 #endif
 {
   struct sam_flex_spics_s *flex_spics = (struct sam_flex_spics_s *)dev;
@@ -1515,7 +1517,7 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
 }
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
 static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                               void *rxbuffer, size_t nwords)
 {
@@ -1533,7 +1535,7 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    * spi_exchange_nodma() do the work.
    */
 
-  if (!flex_spics->candma || nwords <= CONFIG_SAMA5_SPI_DMATHRESHOLD)
+  if (!flex_spics->candma || nwords <= CONFIG_SAMA5_FLEXCOM_SPI_DMATHRESHOLD)
     {
       flex_spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
       return;
@@ -1541,8 +1543,6 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
-  flex_spics = (struct flex_sam_spics_s *)dev;
-  flex_spi = flex_spi_dev(flex_spics);
   DEBUGASSERT(flex_spics && flex_spi);
 
   /* Make sure that any previous transfer is flushed from the hardware */
@@ -1571,7 +1571,7 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             DMACH_FLAG_PERIPHPID(flex_spi->pid) |
             DMACH_FLAG_PERIPHH2SEL |
             DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHAHB_AHB_IF2 |
+            DMACH_FLAG_PERIPHAHB_AHB_IF1 |
             DMACH_FLAG_PERIPHWIDTH_8BITS |
             DMACH_FLAG_PERIPHCHUNKSIZE_1 |
             DMACH_FLAG_MEMPID_MAX |
@@ -1599,7 +1599,7 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             DMACH_FLAG_PERIPHPID(flex_spi->pid) |
             DMACH_FLAG_PERIPHH2SEL |
             DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHAHB_AHB_IF2 |
+            DMACH_FLAG_PERIPHAHB_AHB_IF1 |
             DMACH_FLAG_PERIPHWIDTH_8BITS |
             DMACH_FLAG_PERIPHCHUNKSIZE_1 |
             DMACH_FLAG_MEMPID_MAX |
@@ -1677,7 +1677,7 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       return;
     }
 
-  flex_spi_txdma_sample(spics, DMA_AFTER_START);
+  flex_spi_txdma_sample(flex_spics, DMA_AFTER_START);
 
   /* Wait for DMA completion.  This is done in a loop because there my be
    * false alarm semaphore counts that cause sam_wait() not fail to wait
@@ -1737,10 +1737,10 @@ static void flex_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   if (flex_spics->result)
     {
-      spierr("ERROR: DMA failed with result: %d\n", spics->result);
+      spierr("ERROR: DMA failed with result: %d\n", flex_spics->result);
     }
 }
-#endif /* CONFIG_SAMA5_SPI_DMA */
+#endif /* CONFIG_SAMA5_FLEXCOM_SPI_DMA */
 
 /****************************************************************************
  * Name: flex_spi_sndblock
@@ -1869,7 +1869,7 @@ struct spi_dev_s *sam_flex_spibus_initialize(int port)
    * were zeroed by kmm_zalloc().
    */
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
   switch (flex_spino)
     {
 #ifdef CONFIG_SAMA5_FLEXCOM0_SPI
@@ -1902,16 +1902,12 @@ struct spi_dev_s *sam_flex_spibus_initialize(int port)
         break;
     }
 
-  flex_spics->candma = flex_spino ? SAMA5_SPI1_DMA : SAMA5_SPI0_DMA;
-
-  /* Pre-allocate DMA channels.  These allocations exploit that fact that
-   * SPI0 is managed by DMAC0 and SPI1 is managed by DMAC1.  Hence,
-   * the SPI number (spino) is the same as the DMAC number.
-   */
+  /* Pre-allocate DMA channels. */
 
   if (flex_spics->candma)
     {
-      flex_spics->rxdma = sam_dmachannel(flex_spino, 0);
+      flex_spics->rxdma = sam_dmachannel(
+                           CONFIG_SAMA5_FLEXCOM_SPI_DMAC_NUMBER, 0);
       if (!flex_spics->rxdma)
         {
           spierr("ERROR: Failed to allocate the RX DMA channel\n");
@@ -1921,7 +1917,8 @@ struct spi_dev_s *sam_flex_spibus_initialize(int port)
 
   if (flex_spics->candma)
     {
-      flex_spics->txdma = sam_dmachannel(flex_spino, 0);
+      flex_spics->txdma = sam_dmachannel(
+                           CONFIG_SAMA5_FLEXCOM_SPI_DMAC_NUMBER, 0);
       if (!flex_spics->txdma)
         {
           spierr("ERROR: Failed to allocate the TX DMA channel\n");
@@ -1930,7 +1927,7 @@ struct spi_dev_s *sam_flex_spibus_initialize(int port)
           flex_spics->candma = false;
         }
     }
-#endif /* CONFIG_SAMA5_SPI_DMA */
+#endif /* CONFIG_SAMA5_FLEXCOM_SPI_DMA */
 
   /* Select the SPI operations */
 
@@ -2094,7 +2091,7 @@ struct spi_dev_s *sam_flex_spibus_initialize(int port)
 
       flex_spi->initialized = true;
 
-#ifdef CONFIG_SAMA5_SPI_DMA
+#ifdef CONFIG_SAMA5_FLEXCOM_SPI_DMA
       /* Initialize the SPI semaphore that is used to wake up the waiting
        * thread when the DMA transfer completes.  This semaphore is used for
        * signaling and, hence, should not have priority inheritance enabled.

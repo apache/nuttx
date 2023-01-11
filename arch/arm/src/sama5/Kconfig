@@ -3131,6 +3131,47 @@ config SAMA5_SPI_REGDEBUG
 endmenu # SPI device driver options
 endif # SAMA5_SPI0 || SAMA5_SPI1
 
+if SAMA5_FLEXCOM0_SPI || SAMA5_FLEXCOM1_SPI || SAMA5_FLEXCOM2_SPI || SAMA5_FLEXCOM3_SPI || SAMA5_FLEXCOM4_SPI
+
+menu "Flexcom SPI device driver options"
+
+config SAMA5_FLEXCOM_SPI_DMA
+	bool "Flexcom SPI DMA"
+	default n
+	depends on (SAMA5_XDMAC0 && SAMA5_FLEXCOM_SPI) || (SAMA5_XDMAC1 && SAMA5_FLEXCOM_SPI)
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMA5_FLEXCOM_SPI_DMAC_NUMBER
+	int "Flexcom SPI DMA Controller number"
+	default 0
+	range 0 1
+	depends on SAMA5_FLEXCOM_SPI_DMA
+	---help---
+		Select witch xdma controller to use for Flexcom SPI DMA.
+
+config SAMA5_FLEXCOM_SPI_DMATHRESHOLD
+	int "FLEXCOM SPI DMA threshold"
+	default 4
+	depends on SAMA5_FLEXCOM_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMA5_SPI_DMATHRESHOLD.
+
+config SAMA5_FLEXCOM_SPI_DMADEBUG
+	bool "FLEXCOM SPI DMA transfer debug"
+	depends on SAMA5_SPI_DMA && DEBUG_FEATURES && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+endmenu # Flexcom SPI device driver options
+endif # SAMA5_FLEXCOM0_SPI || SAMA5_FLEXCOM1_SPI || SAMA5_FLEXCOM2_SPI || SAMA5_FLEXCOM3_SPI || SAMA5_FLEXCOM4_SPI
+
 if SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
 
 menu "TWI device driver options"
