@@ -120,7 +120,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
   iob_update_pktlen(dev->d_iob, IPv6_HDRLEN);
 
   iob_copyin(dev->d_iob, pstate->snd_buf,
-             pstate->snd_buflen, IPv6_HDRLEN, true);
+             pstate->snd_buflen, IPv6_HDRLEN, false);
 
   /* Calculate the ICMPv6 checksum over the ICMPv6 header and payload. */
 

@@ -795,7 +795,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       if (nonblock)
         {
           ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                              len, udpiplen, true);
+                              len, udpiplen, false);
         }
       else
         {
@@ -809,7 +809,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
           blresult = net_breaklock(&count);
           ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                           len, udpiplen, true);
+                           len, udpiplen, false);
           if (blresult >= 0)
             {
               net_restorelock(count);
@@ -916,7 +916,7 @@ int psock_udp_cansend(FAR struct udp_conn_s *conn)
    * many more.
    */
 
-  if (udp_wrbuffer_test() < 0 || iob_navail(true) <= 0)
+  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
     {
       return -EWOULDBLOCK;
     }
