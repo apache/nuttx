@@ -329,6 +329,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
+         "   %p"
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
@@ -341,6 +342,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          , tcb->cpu
 #endif
+         , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
          , up_check_tcbstack(tcb)
@@ -391,11 +393,12 @@ static void show_tasks(void)
 
   /* Dump interesting properties of each task in the crash environment */
 
-  _alert("   PID    PRI"
+  _alert("   PID   PRI"
 #ifdef CONFIG_SMP
          "   CPU"
 #endif
-         "     STACK"
+         "    STACKBASE"
+         " STACKSIZE"
 #ifdef CONFIG_STACK_COLORATION
          "      USED   FILLED "
 #endif
@@ -405,10 +408,11 @@ static void show_tasks(void)
          "   COMMAND\n");
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  _alert("  ----   ----"
+  _alert("  ----   ---"
 #  ifdef CONFIG_SMP
          "  ----"
 #  endif
+         "   %p"
          "   %7u"
 #  ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
@@ -417,6 +421,7 @@ static void show_tasks(void)
          "     ----"
 #  endif
          "   irq\n"
+         , up_get_intstackbase()
          , CONFIG_ARCH_INTERRUPTSTACK
 #  ifdef CONFIG_STACK_COLORATION
          , stack_used
