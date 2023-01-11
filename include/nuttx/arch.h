@@ -644,6 +644,9 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
  *   as determined by CONFIG_MM_KERNEL_HEAP=y.  This function allocates (and
  *   protects) the kernel-space heap.
  *
+ *   For Flat build (CONFIG_BUILD_FLAT=y), this function enables a separate
+ *   (although unprotected) heap for the kernel.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP

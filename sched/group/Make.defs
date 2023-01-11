@@ -48,7 +48,7 @@ ifeq ($(CONFIG_BINFMT_LOADABLE),y)
 CSRCS += group_exitinfo.c
 endif
 
-ifneq ($(CONFIG_BUILD_FLAT),y)
+ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
 CSRCS += group_malloc.c group_realloc.c group_zalloc.c group_free.c
 endif
 
