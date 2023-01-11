@@ -93,19 +93,8 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
   if (conn->lport != 0)
     {
-      /* Set up for the callback.  We can't know in advance if the
-       * application is going to send a IPv4 or an IPv6 packet, so this setup
-       * may not actually be used.
-       */
-
-#if defined(CONFIG_NET_IPv4)
-      udp_ipv4_select(dev);
-#else /* if defined(CONFIG_NET_IPv6) */
-      udp_ipv6_select(dev);
-#endif
-
-      dev->d_len     = 0;
-      dev->d_sndlen  = 0;
+      dev->d_len    = 0;
+      dev->d_sndlen = 0;
 
       /* Perform the application callback */
 

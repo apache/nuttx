@@ -161,6 +161,11 @@ static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
 
       else
         {
+          /* Copy the user data into d_appdata and send it. */
+
+          devif_forward(fwd);
+          flags &= ~DEVPOLL_MASK;
+
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
           /* If both IPv4 and IPv6 support are enabled, then we will need to
            * select which one to use when generating the outgoing packet.
@@ -170,10 +175,6 @@ static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
 
           forward_ipselect(fwd);
 #endif
-          /* Copy the user data into d_appdata and send it. */
-
-          devif_forward(fwd);
-          flags &= ~DEVPOLL_MASK;
         }
 
       /* Free the allocated callback structure */

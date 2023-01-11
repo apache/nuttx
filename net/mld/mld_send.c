@@ -96,6 +96,13 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(msgtype == MLD_SEND_GENQUERY || group != NULL);
 
+  /* Prepare device buffer */
+
+  if (netdev_iob_prepare(dev, false, 0) != OK)
+    {
+      return;
+    }
+
   /* Select IPv6 */
 
   IFF_SET_IPv6(dev->d_flags);
