@@ -83,7 +83,7 @@ int gethostbyname2_r(FAR const char *name, int type,
 
   *result = NULL;
 
-  ret = gethostentbyname_r(name, &tmp, buf, buflen, h_errnop);
+  ret = gethostentbyname_r(name, &tmp, buf, buflen, h_errnop, 0);
   if (ret == OK)
     {
       if (convert_hostent(&tmp, type, host))

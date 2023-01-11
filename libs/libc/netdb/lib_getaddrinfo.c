@@ -306,10 +306,8 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       return EAI_MEMORY;
     }
 
-  /* REVISIT: no check for AI_NUMERICHOST flag. */
-
   gethostentbyname_r(hostname, &host,
-                     hostbuffer, CONFIG_NETDB_BUFSIZE, &ret);
+                     hostbuffer, CONFIG_NETDB_BUFSIZE, &ret, flags);
   if (ret != OK)
     {
       lib_free(hostbuffer);
