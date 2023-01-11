@@ -52,6 +52,8 @@ static int _regulator_do_set_voltage(FAR struct regulator_dev_s *rdev,
                                      int min_uv, int max_uv);
 static int _regulator_set_voltage_unlocked(FAR struct regulator_s *regulator,
                                            int min_uv, int max_uv);
+static int _regulator_do_enable_pulldown(FAR struct regulator_dev_s *rdev);
+static int _regulator_do_disable_pulldown(FAR struct regulator_dev_s *rdev);
 
 /****************************************************************************
  * Private Data
@@ -231,6 +233,38 @@ static int _regulator_get_voltage(FAR struct regulator_dev_s *rdev)
   else
     {
       return -EINVAL;
+    }
+
+  return ret;
+}
+
+static int _regulator_do_enable_pulldown(FAR struct regulator_dev_s *rdev)
+{
+  int ret = 0;
+
+  if (rdev->ops->enable_pulldown)
+    {
+      ret = rdev->ops->enable_pulldown(rdev);
+      if (ret < 0)
+        {
+          pwrerr("failed to get enable pulldown\n");
+        }
+    }
+
+  return ret;
+}
+
+static int _regulator_do_disable_pulldown(FAR struct regulator_dev_s *rdev)
+{
+  int ret = 0;
+
+  if (rdev->ops->disable_pulldown)
+    {
+      ret = rdev->ops->disable_pulldown(rdev);
+      if (ret < 0)
+        {
+          pwrerr("failed to get disable pulldown\n");
+        }
     }
 
   return ret;
@@ -743,13 +777,13 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
 
   if (regulator_ops->get_voltage && regulator_ops->get_voltage_sel)
     {
-      pwrerr("get_voltage and get_voltage_sel are assigned\n");
+      pwrerr("get_voltage and get_voltage_sel are both assigned\n");
       return NULL;
     }
 
   if (regulator_ops->set_voltage && regulator_ops->set_voltage_sel)
     {
-      pwrerr("set_voltage and set_voltage_sel are assigned\n");
+      pwrerr("set_voltage and set_voltage_sel are both assigned\n");
       return NULL;
     }
 
@@ -790,8 +824,17 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
 
   if (rdev->desc->apply_uv)
     {
-      _regulator_do_set_voltage(rdev, rdev->desc->apply_uv,
-                                rdev->desc->apply_uv);
+      _regulator_do_set_voltage(rdev, rdev->desc->min_uv,
+                                rdev->desc->max_uv);
+    }
+
+  if (rdev->desc->pulldown)
+    {
+      _regulator_do_enable_pulldown(rdev);
+    }
+  else
+    {
+      _regulator_do_disable_pulldown(rdev);
     }
 
   nxmutex_lock(&g_reg_lock);

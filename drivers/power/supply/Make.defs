@@ -37,6 +37,10 @@ ifeq ($(CONFIG_REGULATOR_RPMSG), y)
 CSRCS += regulator_rpmsg.c
 endif
 
+ifeq ($(CONFIG_REGULATOR_ACT8945A), y)
+CSRCS += act8945a.c
+endif
+
 endif
 
 DEPPATH += --dep-path power/supply
