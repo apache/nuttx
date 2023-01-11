@@ -369,7 +369,7 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
 
   arm_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
                              CONFIG_ARCH_HEAP_VBASE, false);
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
   /* Destroy the shared memory region (without freeing the physical page
    * data).
    */
@@ -615,7 +615,7 @@ int up_addrenv_select(const group_addrenv_t *addrenv,
         }
     }
 
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
   for (vaddr = CONFIG_ARCH_SHM_VBASE, i = 0;
        i < ARCH_SHM_NSECTS;
        vaddr += SECTION_SIZE, i++)
@@ -699,7 +699,7 @@ int up_addrenv_restore(const save_addrenv_t *oldenv)
       mmu_l1_restore(vaddr, oldenv->heap[i]);
     }
 
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
   for (vaddr = CONFIG_ARCH_SHM_VBASE, i = 0;
        i < ARCH_SHM_NSECTS;
        vaddr += SECTION_SIZE, i++)

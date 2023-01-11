@@ -71,7 +71,7 @@ ifeq ($(CONFIG_ARCH_ADDRENV),y)
   ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
     CMN_CSRCS += arm_addrenv_kstack.c
   endif
-  ifeq ($(CONFIG_MM_SHM),y)
+  ifeq ($(CONFIG_ARCH_VMA_MAPPING),y)
     CMN_CSRCS += arm_addrenv_shm.c
   endif
 endif

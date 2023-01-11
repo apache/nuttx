@@ -123,7 +123,7 @@ static inline bool arm_uservaddr(uintptr_t vaddr)
 #ifdef CONFIG_ARCH_STACK_DYNAMIC
        || (vaddr >= CONFIG_ARCH_STACK_VBASE && vaddr < ARCH_STACK_VEND)
 #endif
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
        || (vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND)
 #endif
       );

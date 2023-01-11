@@ -298,7 +298,7 @@ int exec_module(FAR const struct binary_s *binp,
 
   return (int)pid;
 
-#if defined(CONFIG_ARCH_ADDRENV) || defined(CONFIG_MM_SHM)
+#if defined(CONFIG_ARCH_ADDRENV) || defined(CONFIG_ARCH_VMA_MAPPING)
 errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
   nxsched_release_tcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);

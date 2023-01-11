@@ -74,7 +74,7 @@ endif
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
 CMN_CSRCS += arm64_addrenv_kstack.c
 endif
-ifeq ($(CONFIG_MM_SHM),y)
+ifeq ($(CONFIG_ARCH_VMA_MAPPING),y)
 CMN_CSRCS += arm64_addrenv_shm.c
 endif
 endif

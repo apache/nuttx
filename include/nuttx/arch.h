@@ -1346,7 +1346,7 @@ uintptr_t up_addrenv_va_to_pa(FAR void *va);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
 int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
 #endif
 
@@ -1367,7 +1367,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_SHM
+#ifdef CONFIG_ARCH_VMA_MAPPING
 int up_shmdt(uintptr_t vaddr, unsigned int npages);
 #endif
 
