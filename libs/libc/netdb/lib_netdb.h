@@ -113,7 +113,7 @@ ssize_t parse_hostfile(FAR FILE *stream, FAR struct hostent_s *host,
 
 int gethostentbyname_r(FAR const char *name,
                        FAR struct hostent_s *host, FAR char *buf,
-                       size_t buflen, FAR int *h_errnop);
+                       size_t buflen, FAR int *h_errnop, int flags);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -716,7 +716,7 @@ errorout_with_herrnocode:
 
 int gethostentbyname_r(FAR const char *name,
                        FAR struct hostent_s *host, FAR char *buf,
-                       size_t buflen, FAR int *h_errnop)
+                       size_t buflen, FAR int *h_errnop, int flags)
 {
   DEBUGASSERT(name != NULL && host != NULL && buf != NULL);
 
@@ -734,6 +734,12 @@ int gethostentbyname_r(FAR const char *name,
       /* Yes.. we are done */
 
       return OK;
+    }
+  else if ((flags & AI_NUMERICHOST) != 0)
+    {
+      *h_errnop = EAI_NONAME;
+
+      return ERROR;
     }
 
 #ifdef CONFIG_NET_LOOPBACK
