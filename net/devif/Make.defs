@@ -49,15 +49,6 @@ ifeq ($(CONFIG_MM_IOB),y)
   NET_CSRCS += devif_poll.c
   NET_CSRCS += devif_iobsend.c
 
-  # Raw packet socket support
-
-  ifeq ($(CONFIG_NET_PKT),y)
-    NET_CSRCS += devif_pktsend.c
-  endif
-
-  ifeq ($(CONFIG_NET_CAN),y)
-    NET_CSRCS += devif_cansend.c
-  endif
 endif
 
 # Include network device interface build support
