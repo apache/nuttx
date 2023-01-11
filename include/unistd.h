@@ -260,6 +260,7 @@
 /* Helpers and legacy compatibility definitions */
 
 #define link(p1, p2)                     symlink((p1), (p2))
+#define syncfs(f)                        fsync(f)
 #define fdatasync(f)                     fsync(f)
 #define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
 #define getpagesize(f)                   ((int)sysconf(_SC_PAGESIZE))
