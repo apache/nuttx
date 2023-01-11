@@ -46,6 +46,32 @@
 #define SRFLAG_INUSE     (1 << 0) /* Bit 0: Region is in use */
 #define SRFLAG_UNLINKED  (1 << 1) /* Bit 1: Region perists while references */
 
+#ifndef CONFIG_ARCH_ADDRENV
+#  error CONFIG_ARCH_ADDRENV must be selected with CONFIG_MM_SHM
+#endif
+
+#ifndef CONFIG_BUILD_KERNEL
+#  error CONFIG_BUILD_KERNEL must be selected with CONFIG_MM_SHM
+#endif
+
+#ifndef CONFIG_GRAN
+#  error CONFIG_GRAN must be selected with CONFIG_MM_SHM
+#endif
+
+#ifndef CONFIG_MM_PGALLOC
+#  error CONFIG_MM_PGALLOC must be selected with CONFIG_MM_SHM
+#endif
+
+/* Debug */
+
+#ifdef CONFIG_DEBUG_SHM
+#  define shmerr                    _err
+#  define shminfo                   _info
+#else
+#  define shmerr                    merr
+#  define shminfo                   minfo
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

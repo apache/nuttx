@@ -173,12 +173,6 @@ static inline void group_release(FAR struct task_group_s *group)
 
   mm_map_destroy(&group->tg_mm_map);
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
-  /* Release any resource held by shared memory virtual page allocator */
-
-  shm_group_release(group);
-#endif
-
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   /* Remove the group from the list of groups */
 
