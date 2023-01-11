@@ -78,12 +78,19 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
       return;
     }
 
-  iob_update_pktlen(dev->d_iob, offset);
-
   /* Copy in iob to target device buffer */
 
   if (len <= iob_navail(false) * CONFIG_IOB_BUFSIZE)
     {
+      /* Prepare device buffer before poll callback */
+
+      if (netdev_iob_prepare(dev, false, 0) != OK)
+        {
+          return;
+        }
+
+      iob_update_pktlen(dev->d_iob, offset);
+
       dev->d_sndlen = iob_trycopyin(dev->d_iob, buf, len, offset, false);
     }
   else
