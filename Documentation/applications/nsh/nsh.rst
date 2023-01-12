@@ -126,7 +126,7 @@ significant resources, they are disabled by default.
 
      .. code-block:: bash
 
-       set FOO myprogram $BAR
+       set FOO `myprogram $BAR`
 
      Will execute the program named ``myprogram`` passing it the
      value of the environment variable ``BAR``. The value of the
@@ -179,6 +179,16 @@ Where ``<cmd>`` is a `simple command <#cmdoverview>`__. The
 command success value of zero is treated true; a non-zero command
 failure value is treated false. The ```test`` <#cmdtest>`__
 command is frequently used for comparisons.
+
+Examples:
+
+.. code-block:: bash
+
+  nsh> if test 1 -eq 1; then echo "1 is equal 1"; else echo "1 is not equal 1"; fi
+  1 is equal 1
+
+  nsh> if test 1 -eq 0; then echo "1 is equal 0"; else echo "1 is not equal 0"; fi
+  1 is not equal 0
 
 Looping
 *******
