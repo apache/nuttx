@@ -354,7 +354,7 @@ void arm_l2ccinitialize(void)
     defined(CONFIG_PL310_TRCR_TWRLAT)
       /* Configure Tag RAM control */
 
-      regval = ((CONFIG_PL310_TRCR_TSETLAT - 1) << L2CC_TRCR_TSETLAT_SHIFT)
+      regval = ((CONFIG_PL310_TRCR_TSETLAT - 1) << L2CC_TRCR_TSETLAT_SHIFT) |
                ((CONFIG_PL310_TRCR_TRDLAT - 1) << L2CC_TRCR_TRDLAT_SHIFT) |
                ((CONFIG_PL310_TRCR_TWRLAT - 1) << L2CC_TRCR_TWRLAT_SHIFT);
       putreg32(regval, L2CC_TRCR);
