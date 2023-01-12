@@ -20,7 +20,15 @@ config NET_MLD_ROUTER
 	default n
 	---help---
 		Enables a few hooks that will be needed for router support in the
-		future.  Not yet ready for prime time.
+		future. Use IPv6 multicast routers to discover the presence of multicast
+		listeners (nodes configured to receive IPv6 multicast packets)
+		on its directly attached links and to discover which multicast packets
+		are of interest to neighboring nodes. All IPv6 multicast routers that
+		run MLD on the same subnet can monitor MLD listener report messages
+		(often called reports) from hosts. However, only one router can act as
+		the MLD querier to send MLD query messages (often called queries).
+		A querier election mechanism determines which router acts as the MLD
+		querier on the subnet.
 
 config NET_MLD_DEBUG
 	bool "Force MLD debug"
