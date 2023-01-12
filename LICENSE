@@ -5891,6 +5891,7 @@ POSSIBILITY OF SUCH DAMAGE.
 libs/libc/math/scalbnf.c
 libs/libc/math/scalbn.c
 libs/libc/math/scalbnl.c
+libs/libc/stdlib/lib_strtof.c
 ======================
 
    Copyright © 2005-2020 Rich Felker, et al.
