@@ -3360,11 +3360,6 @@ void cxd56_sdhci_mediachange(struct sdio_dev_s *dev)
 
   if (cdstatus != priv->cdstatus)
     {
-      if (priv->cdstatus & SDIO_STATUS_PRESENT)
-        {
-          priv->cbevents &= SDIOMEDIA_INSERTED;
-        }
-
       mediachange = 1;
     }
 
