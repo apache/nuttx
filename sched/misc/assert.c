@@ -328,7 +328,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
-         "   0x%08x"
+         "   0x%08" PRIxPTR
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
@@ -341,7 +341,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          , tcb->cpu
 #endif
-         , tcb->stack_base_ptr
+         , (uintptr_t)tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
          , up_check_tcbstack(tcb)
