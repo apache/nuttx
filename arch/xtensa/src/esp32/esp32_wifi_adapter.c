@@ -2094,9 +2094,18 @@ static void esp_free(void *ptr)
     }
   else
 #endif
+#ifdef CONFIG_MM_KERNEL_HEAP
+  if (kmm_heapmember(ptr))
+#endif
     {
       kmm_free(ptr);
     }
+#ifdef CONFIG_MM_KERNEL_HEAP
+  else
+    {
+      free(ptr);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -3463,7 +3472,9 @@ uint32_t esp_log_timestamp(void)
 
 static void *esp_malloc_internal(size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_malloc(size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
   return xtensa_imm_malloc(size);
 #else
   void *ptr = kmm_malloc(size);
@@ -3494,7 +3505,9 @@ static void *esp_malloc_internal(size_t size)
 
 static void *esp_realloc_internal(void *ptr, size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_realloc(ptr, size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
   return xtensa_imm_realloc(ptr, size);
 #else
   void *old_ptr = ptr;
@@ -3515,7 +3528,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
           return NULL;
         }
 
-      old_size = malloc_size(old_ptr);
+      old_size = kmm_malloc_size(old_ptr);
       DEBUGASSERT(old_size > 0);
       memcpy(new_ptr, old_ptr, MIN(old_size, size));
       kmm_free(old_ptr);
@@ -3543,8 +3556,10 @@ static void *esp_realloc_internal(void *ptr, size_t size)
 
 static void *esp_calloc_internal(size_t n, size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  return  xtensa_imm_calloc(n, size);
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_calloc(n, size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
+  return xtensa_imm_calloc(n, size);
 #else
   void *ptr = kmm_calloc(n, size);
   if (esp32_ptr_extram(ptr))
@@ -3573,7 +3588,9 @@ static void *esp_calloc_internal(size_t n, size_t size)
 
 static void *esp_zalloc_internal(size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_zalloc(size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
   return xtensa_imm_zalloc(size);
 #else
   void *ptr = kmm_zalloc(size);
