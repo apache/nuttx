@@ -237,7 +237,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
             int flags)
 {
-  FAR struct socket *psock;
+  FAR struct socket *psock = NULL;
   FAR struct socket *newsock;
   int oflags = O_RDWR;
   int errcode;
