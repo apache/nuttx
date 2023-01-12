@@ -174,16 +174,14 @@ static void board_sdcard_enable(void *arg)
         {
           g_sdhci.cb(true);
         }
+#else
+      /* Let the automounter know about the insertion event */
+
+      board_automount_event(0, board_sdcard_inserted(0));
 #endif /* CONFIG_CXD56_SDCARD_AUTOMOUNT */
 
       g_sdhci.initialized = true;
     }
-
-#ifdef CONFIG_CXD56_SDCARD_AUTOMOUNT
-  /* Let the automounter know about the insertion event */
-
-  board_automount_event(0, board_sdcard_inserted(0));
-#endif /* CONFIG_CXD56_SDCARD_AUTOMOUNT */
 
 release_frequency_lock:
 
@@ -229,14 +227,14 @@ static void board_sdcard_disable(void *arg)
 
       cxd56_sdhci_finalize(0);
 
+#ifdef CONFIG_CXD56_SDCARD_AUTOMOUNT
+      /* Let the automounter know about the removal event */
+
+      board_automount_event(0, board_sdcard_inserted(0));
+#endif /* CONFIG_CXD56_SDCARD_AUTOMOUNT */
+
       g_sdhci.initialized = false;
     }
-
-#ifdef CONFIG_CXD56_SDCARD_AUTOMOUNT
-  /* Let the automounter know about the insertion event */
-
-  board_automount_event(0, board_sdcard_inserted(0));
-#endif /* CONFIG_CXD56_SDCARD_AUTOMOUNT */
 }
 
 #ifdef CONFIG_MMCSD_HAVE_CARDDETECT
@@ -344,15 +342,12 @@ int board_sdcard_initialize(void)
   /* Configure Interrupt pin with internal pull-up */
 
   cxd56_pin_config(PINCONF_SDIO_CD_GPIO);
+  cxd56_gpioint_config(PIN_SDIO_CD, GPIOINT_PSEUDO_EDGE_BOTH,
+                       board_sdcard_detect_int, NULL);
 
   /* Handle the case when SD card is already inserted */
 
   board_sdcard_detect_int(PIN_SDIO_CD, NULL, NULL);
-
-  /* Configure Interrupt pin with internal pull-up */
-
-  cxd56_gpioint_config(PIN_SDIO_CD, GPIOINT_PSEUDO_EDGE_BOTH,
-                       board_sdcard_detect_int, NULL);
 
   /* Enabling Interrupt */
 
