@@ -4,7 +4,7 @@
 #
 
 config NET_IPFRAG
-	bool "IP fragment support"
+	bool "IP fragmentation support"
 	default n
 	depends on (NET_IPv4 || NET_IPv6)
 	---help---
@@ -14,7 +14,7 @@ config NET_IPFRAG
 if NET_IPFRAG
 
 config NET_IPFRAG_REASS_MAXAGE
-	int "IP fragment timeout"
+	int "IP fragmentation timeout"
 	default 20
 	---help---
 		The maximum time an IP fragment should wait in the reassembly buffer

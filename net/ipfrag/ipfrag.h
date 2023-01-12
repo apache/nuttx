@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IPFRAG_H
-#define __NET_IPFRAG_H
+#ifndef __NET_IPFRAG_IPFRAG_H
+#define __NET_IPFRAG_IPFRAG_H
 
 /****************************************************************************
  * Included Files
@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/queue.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
@@ -70,7 +71,7 @@ enum ip_fragverify_e
 struct ip_fraglink_s
 {
   /* This link is used to maintain a single-linked list of ip_fraglink_s,
-   * it links all framgents with the same IPID
+   * it links all framgents with the same IP ID
    */
 
   FAR struct ip_fraglink_s  *flink;
@@ -86,7 +87,7 @@ struct ip_fraglink_s
    * fragment header
    */
 
-  uint32_t                ipid;
+  uint32_t                   ipid;
 };
 
 struct ip_fragsnode_s
@@ -95,7 +96,7 @@ struct ip_fragsnode_s
    * Must be the first field in the structure due to flink type casting.
    */
 
-  FAR struct ip_fragsnode_s    *flink;
+  FAR struct ip_fragsnode_s *flink;
 
   /* Another link which connects all ip_fragsnode_s in order of addition
    * time
@@ -107,7 +108,7 @@ struct ip_fragsnode_s
 
   FAR struct net_driver_s   *dev;
 
-  /* IP Identification (IPID) field defined in ipv4 header or in ipv6
+  /* IP Identification (IP ID) field defined in ipv4 header or in ipv6
    * fragment header.
    */
 
@@ -125,9 +126,9 @@ struct ip_fragsnode_s
 
   uint32_t                   bufcnt;
 
-  /* Linked all fragments with the same IPID. */
+  /* Linked all fragments with the same IP ID. */
 
-  FAR struct ip_fraglink_s     *frags;
+  FAR struct ip_fraglink_s  *frags;
 
   /* Points to the reassembled outgoing IP frame */
 
@@ -150,7 +151,7 @@ extern "C"
  * at a time
  */
 
-extern sem_t g_ipfrag_mutex;
+extern mutex_t               g_ipfrag_lock;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -161,6 +162,10 @@ extern sem_t g_ipfrag_mutex;
  *
  * Description:
  *   free ip_fragsnode_s
+ *
+ * Input Parameters:
+ *   node - node of the upper-level linked list, it maintains
+ *          information about all fragments belonging to an IP datagram
  *
  * Returned Value:
  *   I/O buffer count of this node
@@ -177,6 +182,11 @@ uint32_t ip_frag_remnode(FAR struct ip_fragsnode_s *node);
  *   All fragments belonging to one IP frame are organized in a linked list
  *   form, that is a ip_fragsnode_s node. All ip_fragsnode_s nodes are also
  *   organized in an upper-level linked list.
+ *
+ * Input Parameters:
+ *   dev         - NIC Device instance
+ *   curfraglink - node of the lower-level linked list, it maintains
+ *                 information of one fragment
  *
  * Returned Value:
  *   Whether queue is empty before enqueue the new node
@@ -240,11 +250,11 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev);
  *  building the L3 header related to the fragmentation.
  *
  * Input Parameters:
- *   iob    - The data comes from
- *   domain - PF_INET or PF_INET6
- *   mtu    - MTU of given NIC
+ *   iob       - The data comes from
+ *   domain    - PF_INET or PF_INET6
+ *   mtu       - MTU of given NIC
  *   unfraglen - The starting position to fragmentation processing
- *   fragq  - Those output slices
+ *   fragq     - Those output slices
  *
  * Returned Value:
  *   Number of fragments
@@ -363,6 +373,9 @@ void ip_frag_remallfrags(void);
  * Input Parameters:
  *   dev    - The NIC device
  *
+ * Returned Value:
+ *   A non-negative value is returned on success; negative value on failure.
+ *
  ****************************************************************************/
 
 int32_t ip_fragout(FAR struct net_driver_s *dev);
@@ -372,4 +385,4 @@ int32_t ip_fragout(FAR struct net_driver_s *dev);
 #endif
 
 #endif /* CONFIG_NET_IPFRAG */
-#endif /* __NET_IPFRAG_H */
+#endif /* __NET_IPFRAG_IPFRAG_H */

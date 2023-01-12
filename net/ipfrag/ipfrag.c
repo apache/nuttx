@@ -39,7 +39,6 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -60,15 +59,15 @@
 if (expression) \
   { \
     goto to;  \
-  } \
+  }
 
 #define UPDATE_IOB(iob, off, len) \
 do  \
   { \
-    iob->io_offset = off; \
-    iob->io_len    = len; \
-    iob->io_pktlen = len; \
-  } while (0);  \
+    (iob)->io_offset = (off); \
+    (iob)->io_len    = (len); \
+    (iob)->io_pktlen = (len); \
+  } while (0);
 
 /* Defined the minimal timeout interval to avoid triggering timeout timer
  * too frequently, default: 0.5 seconds.
@@ -89,7 +88,7 @@ do  \
 
 /* Helper macro to count I/O buffer count for a given I/O buffer chain */
 
-#define IOBUF_CNT(ptr)    ((ptr->io_pktlen + CONFIG_IOB_BUFSIZE - 1)/ \
+#define IOBUF_CNT(ptr)    (((ptr)->io_pktlen + CONFIG_IOB_BUFSIZE - 1)/ \
                           CONFIG_IOB_BUFSIZE)
 
 /* The maximum I/O buffer occupied by fragment reassembly cache */
@@ -139,7 +138,7 @@ static sq_queue_t     g_assemblyhead_time;
  * at a time.
  */
 
-sem_t                 g_ipfrag_mutex = SEM_INITIALIZER(1);
+mutex_t               g_ipfrag_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -189,22 +188,22 @@ static void ip_fragin_timerout_expiry(wdparm_t arg)
 
 static void ip_fragin_timerwork(FAR void *arg)
 {
-  clock_t         curtick = clock_systime_ticks();
-  sclock_t        interval;
+  clock_t curtick = clock_systime_ticks();
+  sclock_t interval;
   FAR sq_entry_t *entry;
   FAR sq_entry_t *entrynext;
   FAR struct ip_fragsnode_s *node;
 
   ninfo("Start reassembly work queue\n");
 
-  nxsem_wait_uninterruptible(&g_ipfrag_mutex);
+  nxmutex_lock(&g_ipfrag_lock);
 
   /* Walk through the list, check the timetout and calculate the next timer
    * interval
    */
 
   entry = sq_peek(&g_assemblyhead_time);
-  while (entry)
+  while (entry != NULL)
     {
       entrynext = sq_next(entry);
 
@@ -226,7 +225,7 @@ static void ip_fragin_timerwork(FAR void *arg)
 
           ninfo("Reassembly timeout occurs!");
 #if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
-          if (node->verifyflag & IP_FRAGVERIFY_RECVDZEROFRAG)
+          if ((node->verifyflag & IP_FRAGVERIFY_RECVDZEROFRAG) != 0)
             {
               FAR struct net_driver_s *dev = node->dev;
 
@@ -319,14 +318,14 @@ static void ip_fragin_timerwork(FAR void *arg)
 
       ninfo("Reschedule reassembly work queue\n");
       wd_start(&g_wdfragtimeout, delay, ip_fragin_timerout_expiry,
-              (wdparm_t)NULL);
+               (wdparm_t)NULL);
     }
   else
     {
       ninfo("Stop reassembly work queue\n");
     }
 
-  nxsem_post(&g_ipfrag_mutex);
+  nxmutex_unlock(&g_ipfrag_lock);
 }
 
 /****************************************************************************
@@ -335,6 +334,10 @@ static void ip_fragin_timerwork(FAR void *arg)
  * Description:
  *   Free the I/O buffer and ip_fraglink_s buffer at the head of a
  *   ip_fraglink_s chain.
+ *
+ * Input Parameters:
+ *   fraglink - node of the lower-level linked list, it maintains
+ *              information of one fragment
  *
  * Returned Value:
  *   The link to the next ip_fraglink_s buffer in the chain.
@@ -360,8 +363,12 @@ ip_fragin_freelink(FAR struct ip_fraglink_s *fraglink)
  * Name: ip_fragin_check
  *
  * Description:
- *   Audit whether the fragment zero has been received or all fragments have
+ *   Check whether the zero fragment has been received or all fragments have
  *   been received.
+ *
+ * Input Parameters:
+ *   fragsnode - node of the upper-level linked list, it maintains
+ *               information bout all fragments belonging to an IP datagram
  *
  * Returned Value:
  *   None
@@ -376,7 +383,7 @@ static void ip_fragin_check(FAR struct ip_fragsnode_s *fragsnode)
   if (fragsnode->verifyflag & IP_FRAGVERIFY_RECVDTAILFRAG)
     {
       entry = fragsnode->frags;
-      while (entry)
+      while (entry != NULL)
         {
           if (entry->morefrags)
             {
@@ -404,6 +411,10 @@ static void ip_fragin_check(FAR struct ip_fragsnode_s *fragsnode)
  *   Check the reassembly cache buffer size, if it exceeds the configured
  *   threshold, some I/O buffers need to be freed
  *
+ * Input Parameters:
+ *   curnode - node of the upper-level linked list, it maintains information
+ *             about all fragments belonging to an IP datagram
+ *
  * Returned Value:
  *   none
  *
@@ -424,7 +435,7 @@ static void ip_fragin_cachemonitor(FAR struct ip_fragsnode_s *curnode)
       cleancnt = g_bufoccupy - REASSEMBLY_MAXOCCUPYIOB;
       entry = sq_peek(&g_assemblyhead_time);
 
-      while (entry && cleancnt > 0)
+      while (entry != NULL && cleancnt > 0)
         {
           entrynext = sq_next(entry);
 
@@ -441,7 +452,7 @@ static void ip_fragin_cachemonitor(FAR struct ip_fragsnode_s *curnode)
                 {
                   FAR struct ip_fraglink_s *fraglink = node->frags;
 
-                  while (fraglink)
+                  while (fraglink != NULL)
                     {
                       fraglink = ip_fragin_freelink(fraglink);
                     }
@@ -465,6 +476,9 @@ static void ip_fragin_cachemonitor(FAR struct ip_fragsnode_s *curnode)
  *
  * Description:
  *   Prepare one I/O buffer and enqueue it to a specified queue
+ *
+ * Input Parameters:
+ *   fragq - the queue head
  *
  * Returned Value:
  *   The pointer to I/O buffer
@@ -499,6 +513,10 @@ ip_fragout_allocfragbuf(FAR struct iob_queue_s *fragq)
  * Description:
  *   free ip_fragsnode_s
  *
+ * Input Parameters:
+ *   node - node of the upper-level linked list, it maintains
+ *          information about all fragments belonging to an IP datagram
+ *
  * Returned Value:
  *   I/O buffer count of this node
  *
@@ -524,6 +542,11 @@ uint32_t ip_frag_remnode(FAR struct ip_fragsnode_s *node)
  *   form, that is a ip_fragsnode_s node. All ip_fragsnode_s nodes are also
  *   organized in an upper-level linked list.
  *
+ * Input Parameters:
+ *   dev         - NIC Device instance
+ *   curfraglink - node of the lower-level linked list, it maintains
+ *                 information of one fragment
+ *
  * Returned Value:
  *   Whether queue is empty before enqueue the new node
  *
@@ -533,19 +556,19 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
                        FAR struct ip_fraglink_s *curfraglink)
 {
   FAR struct ip_fragsnode_s *node;
-  FAR sq_entry_t         *entry;
-  FAR sq_entry_t         *entrylast = NULL;
-  bool                    empty;
+  FAR sq_entry_t            *entry;
+  FAR sq_entry_t            *entrylast = NULL;
+  bool                       empty;
 
-  /* The linked list is ordered by IPID value, walk through it and try to
-   * find a node that has the same IPID value, otherwise need to create a
+  /* The linked list is ordered by IP ID value, walk through it and try to
+   * find a node that has the same IP ID value, otherwise need to create a
    * new node and insert it into the linked list.
    */
 
   entry = sq_peek(&g_assemblyhead_ipid);
   empty = (entry == NULL) ? true : false;
 
-  while (entry)
+  while (entry != NULL)
     {
       node = (struct ip_fragsnode_s *)entry;
 
@@ -558,7 +581,7 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
       entry = sq_next(entry);
     }
 
-  node = (struct ip_fragsnode_s *)entry;
+  node = (FAR struct ip_fragsnode_s *)entry;
 
   if (node != NULL && curfraglink->ipid == node->ipid)
     {
@@ -571,11 +594,11 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
 
       fraglink = node->frags;
 
-      /* A ip_fragsnode_s must have a ip_fraglink_s because we allocate a new
-       * ip_fraglink_s when caching a new ip_fraglink_s with a new IPID
+      /* An ip_fragsnode_s must have an ip_fraglink_s because we allocate a
+       * new ip_fraglink_s when caching a new ip_fraglink_s with a new IP ID
        */
 
-      while (fraglink)
+      while (fraglink != NULL)
         {
           /* The fragment list is ordered by fragment offset value */
 
@@ -648,7 +671,7 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
     }
   else
     {
-      /* It's a new IPID fragment, malloc a new node and insert it into the
+      /* It's a new IP ID fragment, malloc a new node and insert it into the
        * linked list
        */
 
@@ -743,11 +766,11 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
  *  building the L3 header related to the fragmentation.
  *
  * Input Parameters:
- *   iob    - The data comes from
- *   domain - PF_INET or PF_INET6
- *   mtu    - MTU of current NIC
+ *   iob       - The data comes from
+ *   domain    - PF_INET or PF_INET6
+ *   mtu       - MTU of current NIC
  *   unfraglen - The starting position to fragmentation processing
- *   fragq  - Those output slices
+ *   fragq     - Those output slices
  *
  * Returned Value:
  *   Number of fragments
@@ -760,12 +783,12 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
 int32_t ip_fragout_slice(FAR struct iob_s *iob, uint8_t domain, uint16_t mtu,
                          uint16_t unfraglen, FAR struct iob_queue_s *fragq)
 {
-  FAR uint8_t *leftstart;
-  uint16_t     leftlen = 0;
-  uint16_t     ncopy;
-  uint16_t     navail;
-  uint32_t     nfrags = 0;
-  bool         expand = false;
+  FAR uint8_t      *leftstart;
+  uint16_t          leftlen = 0;
+  uint16_t          ncopy;
+  uint16_t          navail;
+  uint32_t          nfrags = 0;
+  bool              expand = false;
   FAR struct iob_s *orig = NULL;
   FAR struct iob_s *reorg = NULL;
   FAR struct iob_s *head = NULL;
@@ -787,7 +810,7 @@ int32_t ip_fragout_slice(FAR struct iob_s *iob, uint8_t domain, uint16_t mtu,
        * must be a multiple of 8
        */
 
-      mtu = ((mtu - IPv4_HDRLEN) >> 3 << 3) + IPv4_HDRLEN;
+      mtu = ((mtu - IPv4_HDRLEN) & ~0x7) + IPv4_HDRLEN;
 
       /* Remember the number of resident bytes */
 
@@ -876,7 +899,7 @@ int32_t ip_fragout_slice(FAR struct iob_s *iob, uint8_t domain, uint16_t mtu,
               /* Then copy L4 data */
 
               GOTO_IF(iob_trycopyin(reorg, leftstart, ncopy,
-                    reorg->io_pktlen, false) < 0, allocfail);
+                     reorg->io_pktlen, false) < 0, allocfail);
 
               leftstart     += ncopy;
               leftlen       -= ncopy;
@@ -898,7 +921,7 @@ int32_t ip_fragout_slice(FAR struct iob_s *iob, uint8_t domain, uint16_t mtu,
        * alignment.
        */
 
-      mtu = mtu >> 3 << 3;
+      mtu = mtu & ~0x7;
 
       /* For IPv6 fragment, a fragment header needs to be inserted before
        * the l4 header, so all data must be reorganized, a space for IPv6
@@ -930,7 +953,7 @@ int32_t ip_fragout_slice(FAR struct iob_s *iob, uint8_t domain, uint16_t mtu,
    * I/O buffer chain 'reorg'
    */
 
-  while (orig)
+  while (orig != NULL)
     {
       leftstart = orig->io_data + orig->io_offset;
       leftlen = orig->io_len;
@@ -1089,13 +1112,13 @@ void ip_frag_stop(FAR struct net_driver_s *dev)
 
   ninfo("Stop frag processing for NIC:%p\n", dev);
 
-  nxsem_wait_uninterruptible(&g_ipfrag_mutex);
+  nxmutex_lock(&g_ipfrag_lock);
 
   entry = sq_peek(&g_assemblyhead_ipid);
 
   /* Drop those unassembled incoming fragments belonging to this NIC */
 
-  while (entry)
+  while (entry != NULL)
     {
       FAR struct ip_fragsnode_s *node = (FAR struct ip_fragsnode_s *)entry;
       entrynext = sq_next(entry);
@@ -1106,7 +1129,7 @@ void ip_frag_stop(FAR struct net_driver_s *dev)
             {
               FAR struct ip_fraglink_s *fraglink = node->frags;
 
-              while (fraglink)
+              while (fraglink != NULL)
                 {
                   fraglink = ip_fragin_freelink(fraglink);
                 }
@@ -1119,7 +1142,7 @@ void ip_frag_stop(FAR struct net_driver_s *dev)
       entry = entrynext;
     }
 
-  nxsem_post(&g_ipfrag_mutex);
+  nxmutex_unlock(&g_ipfrag_lock);
 
   /* Drop those unsent outgoing fragments belonging to this NIC */
 
@@ -1144,13 +1167,13 @@ void ip_frag_remallfrags(void)
   FAR sq_entry_t *entrynext;
   FAR struct net_driver_s *dev;
 
-  nxsem_wait_uninterruptible(&g_ipfrag_mutex);
+  nxmutex_lock(&g_ipfrag_lock);
 
   entry = sq_peek(&g_assemblyhead_ipid);
 
   /* Drop all unassembled incoming fragments */
 
-  while (entry)
+  while (entry != NULL)
     {
       FAR struct ip_fragsnode_s *node = (FAR struct ip_fragsnode_s *)entry;
       entrynext = sq_next(entry);
@@ -1159,7 +1182,7 @@ void ip_frag_remallfrags(void)
         {
           FAR struct ip_fraglink_s *fraglink = node->frags;
 
-          while (fraglink)
+          while (fraglink != NULL)
             {
               fraglink = ip_fragin_freelink(fraglink);
             }
@@ -1179,7 +1202,7 @@ void ip_frag_remallfrags(void)
   sq_init(&g_assemblyhead_time);
   g_bufoccupy = 0;
 
-  nxsem_post(&g_ipfrag_mutex);
+  nxmutex_unlock(&g_ipfrag_lock);
 
   /* Drop all unsent outgoing fragments */
 
@@ -1206,13 +1229,16 @@ void ip_frag_remallfrags(void)
  * Input Parameters:
  *   dev    - The NIC device
  *
+ * Returned Value:
+ *   A non-negative value is returned on success; negative value on failure.
+ *
  ****************************************************************************/
 
 int32_t ip_fragout(FAR struct net_driver_s *dev)
 {
   uint16_t mtu = dev->d_pktsize - dev->d_llhdrlen;
 
-  if (dev->d_iob == NULL)
+  if (dev->d_iob == NULL || dev->d_len == 0)
     {
       return -EINVAL;
     }

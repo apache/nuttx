@@ -117,7 +117,7 @@
 /* Codes for TIME_EXCEEDED. */
 
 #define ICMP_EXC_TTL                 0    /* TTL count exceeded */
-#define ICMP_EXC_FRAGTIME            1    /* Fragment Reass time exceeded */
+#define ICMP_EXC_FRAGTIME            1    /* Fragment Reassembly time exceeded */
 
 /****************************************************************************
  * Public Type Definitions

@@ -36,7 +36,6 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
@@ -70,6 +69,11 @@ ipv4_fragout_buildipv4header(FAR struct ipv4_hdr_s *ref,
  *
  * Description:
  *   Polulate fragment information from the input ipv4 packet data.
+ *
+ * Input Parameters:
+ *   iob      - An IPv4 fragment
+ *   fraglink - node of the lower-level linked list, it maintains information
+ *              of one fragment
  *
  * Returned Value:
  *   None
@@ -105,6 +109,10 @@ ipv4_fragin_getinfo(FAR struct iob_s *iob,
  * Description:
  *   Reassemble all ipv4 fragments to build an IP frame.
  *
+ * Input Parameters:
+ *   node - node of the upper-level linked list, it maintains
+ *          information about all fragments belonging to an IP datagram
+ *
  * Returned Value:
  *   The length of the reassembled IP frame
  *
@@ -123,7 +131,7 @@ static uint32_t ipv4_fragin_reassemble(FAR struct ip_fragsnode_s *node)
   fraglink    = node->frags;
   node->frags = NULL;
 
-  while (fraglink)
+  while (fraglink != NULL)
     {
       FAR struct ip_fraglink_s *linknext;
       FAR struct iob_s *iob = fraglink->frag;
@@ -189,10 +197,16 @@ static uint32_t ipv4_fragin_reassemble(FAR struct ip_fragsnode_s *node)
 }
 
 /****************************************************************************
- * Name: build_frag_ipv4_header
+ * Name: ipv4_fragout_buildipv4header
  *
  * Description:
  *   Build IPv4 header for an IPv4 fragment.
+ *
+ * Input Parameters:
+ *   ref    - The reference IPv4 Header
+ *   ipv4   - The pointer of the newly generated IPv4 Header
+ *   len    - Total Length of this IP frame
+ *   ipoff  - Fragment offset
  *
  * Returned Value:
  *   None
@@ -245,7 +259,7 @@ ipv4_fragout_buildipv4header(FAR struct ipv4_hdr_s *ref,
 int32_t ipv4_fragin(FAR struct net_driver_s *dev)
 {
   FAR struct ip_fragsnode_s *node;
-  FAR struct ip_fraglink_s  *fraginfo;
+  FAR struct ip_fraglink_s *fraginfo;
   bool restartwdog;
 
   if (dev->d_len != dev->d_iob->io_pktlen)
@@ -265,7 +279,7 @@ int32_t ipv4_fragin(FAR struct net_driver_s *dev)
 
   ipv4_fragin_getinfo(dev->d_iob, fraginfo);
 
-  nxsem_wait_uninterruptible(&g_ipfrag_mutex);
+  nxmutex_lock(&g_ipfrag_lock);
 
   /* Need to restart reassembly worker if the original linked list is empty */
 
@@ -287,7 +301,7 @@ int32_t ipv4_fragin(FAR struct net_driver_s *dev)
        * as possible
        */
 
-      nxsem_post(&g_ipfrag_mutex);
+      nxmutex_unlock(&g_ipfrag_lock);
 
       /* Reassemble fragments to one IP frame and set the resulting
        * IP frame to dev->d_iob
@@ -303,7 +317,7 @@ int32_t ipv4_fragin(FAR struct net_driver_s *dev)
       return ipv4_input(dev);
     }
 
-  nxsem_post(&g_ipfrag_mutex);
+  nxmutex_unlock(&g_ipfrag_lock);
 
   if (restartwdog)
     {

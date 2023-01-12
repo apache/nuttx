@@ -35,7 +35,6 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
@@ -85,6 +84,11 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
  * Description:
  *   Polulate fragment information from the input ipv6 packet data.
  *
+ * Input Parameters:
+ *   iob      - An IPv6 fragment
+ *   fraglink - node of the lower-level linked list, it maintains information
+ *              of one fragment
+ *
  * Returned Value:
  *   OK    - Got fragment information.
  *   EINVAL - The input ipv6 packet is not a fragment.
@@ -98,8 +102,8 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
                                 (iob->io_data + iob->io_offset);
   FAR struct ipv6_extension_s *exthdr;
   FAR uint8_t *payload;
-  uint16_t     paylen;
-  uint8_t      nxthdr;
+  uint16_t paylen;
+  uint8_t nxthdr;
 
   paylen  = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1];
   payload = (FAR uint8_t *)(ipv6 + 1);
@@ -156,6 +160,10 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
  * Description:
  *   Reassemble all ipv6 fragments to build an IP frame.
  *
+ * Input Parameters:
+ *   node - node of the upper-level linked list, it maintains
+ *          information about all fragments belonging to an IP datagram
+ *
  * Returned Value:
  *   The length of the reassembled IP frame
  *
@@ -163,7 +171,7 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
 
 static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
 {
-  FAR struct iob_s      *head;
+  FAR struct iob_s *head;
   FAR struct ipv6_hdr_s *ipv6;
   FAR struct ip_fraglink_s *fraglink;
 
@@ -174,10 +182,10 @@ static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
   fraglink = node->frags;
   node->frags = NULL;
 
-  while (fraglink)
+  while (fraglink != NULL)
     {
       FAR uint8_t *payload;
-      uint8_t      nxthdr;
+      uint8_t nxthdr;
       FAR struct iob_s *iob;
       FAR struct ip_fraglink_s *linknext;
       FAR struct ipv6_extension_s *exthdr;
@@ -279,6 +287,15 @@ static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
  * Description:
  *   Build IPv6 header for an IPv6 fragment.
  *
+ * Input Parameters:
+ *   ref    - The reference IPv6 Header
+ *   ipv6   - The pointer of the newly generated IPv6 Header
+ *   hdrlen - Including the length of IPv6 basic header and all
+ *            extention headers
+ *   datalen   - The data length follows the IPv6 basic header
+ *   nxthdroff - The offset of 'next header' to be updated
+ *   nxtprot   - The value of 'next header' to be updated
+ *
  * Returned Value:
  *   None
  *
@@ -316,6 +333,12 @@ ipv6_fragout_buildipv6header(FAR struct ipv6_hdr_s *ref,
  * Description:
  *   Build IPv6 fragment extension header for an IPv6 fragment.
  *
+ * Input Parameters:
+ *   frag    - The pointer of the newly generated IPv6 fragment Header
+ *   nxthdr  - The first header type in the fragmentable part
+ *   ipoff   - Fragment offset
+ *   ipid    - The value of IPv6 IP ID
+ *
  * Returned Value:
  *   None
  *
@@ -344,9 +367,9 @@ ipv6_fragout_buildipv6fragheader(FAR struct ipv6_fragment_extension_s *frag,
  *   Refer to rfc2460, section-4.1, section-4.5
  *
  * Input Parameters:
- *   iob    - Outgoing data waiting for fragment
- *   hdroff - The offset of the last next header position in the
- *              unfragmentable part
+ *   iob     - Outgoing data waiting for fragment
+ *   hdroff  - The offset of the last next header position in the
+ *             unfragmentable part
  *   hdrtype - The first header type in the fragmentable part
  *
  * Returned Value:
@@ -358,13 +381,13 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
                                            uint16_t *hdroff,
                                            uint16_t *hdrtype)
 {
-  uint32_t   iter = 0;
-  bool       destopt = false;
-  uint16_t   delta = sizeof(struct ipv6_hdr_s);
-  uint16_t   unfraglen = delta;
-  uint8_t    nxthdr;
-  FAR struct ipv6_hdr_s *ipv6;
-  FAR struct ipv6_extension_s *exthdr;
+  uint32_t     iter = 0;
+  bool         destopt = false;
+  uint16_t     delta = sizeof(struct ipv6_hdr_s);
+  uint16_t     unfraglen = delta;
+  uint8_t      nxthdr;
+  FAR struct   ipv6_hdr_s *ipv6;
+  FAR struct   ipv6_extension_s *exthdr;
   FAR uint8_t *payload;
 
   ipv6     = (FAR struct ipv6_hdr_s *)(iob->io_data + iob->io_offset);
@@ -442,7 +465,7 @@ done:
 int32_t ipv6_fragin(FAR struct net_driver_s *dev)
 {
   FAR struct ip_fragsnode_s *node = NULL;
-  FAR struct ip_fraglink_s  *fraginfo = NULL;
+  FAR struct ip_fraglink_s *fraginfo = NULL;
   bool restartwdog;
 
   if (dev->d_len != dev->d_iob->io_pktlen)
@@ -462,7 +485,7 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
 
   ipv6_fragin_getinfo(dev->d_iob, fraginfo);
 
-  nxsem_wait_uninterruptible(&g_ipfrag_mutex);
+  nxmutex_lock(&g_ipfrag_lock);
 
   /* Need to restart reassembly worker if the original linked list is empty */
 
@@ -483,7 +506,7 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
        * as possible
        */
 
-      nxsem_post(&g_ipfrag_mutex);
+      nxmutex_unlock(&g_ipfrag_lock);
 
       /* Reassemble fragments to one IP frame and set the resulting
        * IP frame to dev->d_iob
@@ -499,7 +522,7 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
       return ipv6_input(dev);
     }
 
-  nxsem_post(&g_ipfrag_mutex);
+  nxmutex_unlock(&g_ipfrag_lock);
 
   if (restartwdog)
     {

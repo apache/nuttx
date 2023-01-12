@@ -624,6 +624,13 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  * Description:
  *   Poll all ip fragments for available packets to send.
  *
+ * Input Parameters:
+ *   dev - NIC Device instance.
+ *   callback - the actual sending API provided by each NIC driver.
+ *
+ * Returned Value:
+ *   Zero indicated the polling will continue, else stop the polling.
+ *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
  *   locked.
@@ -631,8 +638,8 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFRAG
-static inline int devif_poll_ipfrag(FAR struct net_driver_s *dev,
-                                    devif_poll_callback_t callback)
+static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
+                             devif_poll_callback_t callback)
 {
   FAR struct iob_s *frag;
   bool reused = false;

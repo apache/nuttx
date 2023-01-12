@@ -553,6 +553,12 @@ drop:
  * Description:
  *   Return true if the next header value is an IPv6 extension header.
  *
+ * Input Parameters:
+ *   The next header value extracted from an IPv6 frame.
+ *
+ * Returned Value:
+ *   Return true if the next header value is an IPv6 extension header.
+ *
  ****************************************************************************/
 
 bool ipv6_exthdr(uint8_t nxthdr)
