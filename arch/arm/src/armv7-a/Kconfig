@@ -73,6 +73,41 @@ config PL310_ADDRESS_FILTERING
 	bool "PL310 Address Filtering by Line"
 	default n
 
+config PL310_TRCR
+	bool "PL310 TRCR set by usr"
+	default n
+
+if PL310_TRCR
+config PL310_TRCR_TSETLAT
+	int "PL310 TRCR setup latency"
+	default 1
+
+config PL310_TRCR_TRDLAT
+	bool "PL310 TRCR read access latency"
+	default 1
+
+config PL310_TRCR_WRLAT
+	bool "PL310 TRCR write access latency"
+	default 1
+endif # PL310_TRCR
+
+config PL310_DRCR
+	bool "PL310 DRCR set by usr"
+	default n
+
+if PL310_DRCR
+config PL310_DRCR_TSETLAT
+	int "PL310 DRCR setup latency"
+	default 1
+
+config PL310_DRCR_TRDLAT
+	bool "PL310 DRCR read access latency"
+	default 1
+
+config PL310_DRCR_WRLAT
+	bool "PL310 DRCR write access latency"
+	default 1
+endif # PL310_DRCR
 endif # ARMV7A_L2CC_PL310
 
 choice
