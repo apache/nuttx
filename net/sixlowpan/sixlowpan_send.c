@@ -246,12 +246,12 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           netdev_txnotify_dev(dev);
 
           /* Wait for the send to complete or an error to occur.
-           * net_timedwait will also terminate if a signal is received.
+           * net_sem_timedwait will also terminate if a signal is received.
            */
 
           ninfo("Wait for send complete\n");
 
-          ret = net_timedwait(&sinfo.s_waitsem, timeout);
+          ret = net_sem_timedwait(&sinfo.s_waitsem, timeout);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

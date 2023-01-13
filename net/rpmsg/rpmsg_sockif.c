@@ -681,7 +681,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
           return -EINPROGRESS;
         }
 
-      ret = net_timedwait(&conn->sendsem,
+      ret = net_sem_timedwait(&conn->sendsem,
                           _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
 
       if (ret < 0)
@@ -762,7 +762,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
 
           if (conn->sendsize == 0)
             {
-              net_lockedwait(&conn->sendsem);
+              net_sem_wait(&conn->sendsem);
             }
 
           newsock->s_domain = psock->s_domain;
@@ -783,7 +783,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
             }
           else
             {
-              ret = net_lockedwait(&server->recvsem);
+              ret = net_sem_wait(&server->recvsem);
               if (server->backlog == -1)
                 {
                   ret = -ECONNRESET;
@@ -950,7 +950,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
         {
           if (!nonblock)
             {
-              ret = net_timedwait(&conn->sendsem,
+              ret = net_sem_timedwait(&conn->sendsem,
                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (!conn->ept.rdev)
                 {
@@ -1049,7 +1049,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
 
       if (!nonblock)
         {
-          ret = net_timedwait(&conn->sendsem,
+          ret = net_sem_timedwait(&conn->sendsem,
                               _SO_TIMEOUT(conn->sconn.s_sndtimeo));
           if (!conn->ept.rdev)
             {
@@ -1231,7 +1231,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
 
   nxmutex_unlock(&conn->recvlock);
 
-  ret = net_timedwait(&conn->recvsem,
+  ret = net_sem_timedwait(&conn->recvsem,
                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
   if (!conn->ept.rdev)
     {

@@ -137,7 +137,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
     {
       do
         {
-          net_lockedwait_uninterruptible(&client->lc_waitsem);
+          net_sem_wait_uninterruptible(&client->lc_waitsem);
           ret = client->u.client.lc_result;
         }
       while (ret == -EBUSY);

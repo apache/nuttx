@@ -250,7 +250,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
 
   /* And wait for the Neighbor Advertisement (or a timeout). */
 
-  ret = net_timedwait(&notify->rn_sem, timeout);
+  ret = net_sem_timedwait(&notify->rn_sem, timeout);
   if (ret >= 0)
     {
       ret = notify->rn_result;

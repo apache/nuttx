@@ -683,7 +683,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
               goto errout_with_lock;
             }
 
-          ret = net_timedwait_uninterruptible(&conn->sndsem,
+          ret = net_sem_timedwait_uninterruptible(&conn->sndsem,
             udp_send_gettimeout(start, timeout));
           if (ret < 0)
             {

@@ -202,7 +202,7 @@ int usrsock_getpeername(FAR struct socket *psock,
     {
       /* Wait for completion of request. */
 
-      net_lockedwait_uninterruptible(&state.reqstate.recvsem);
+      net_sem_wait_uninterruptible(&state.reqstate.recvsem);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= *addrlen);

@@ -634,14 +634,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
           tcp_send_txnotify(psock, conn);
 
           /* Wait for the send to complete or an error to occur:  NOTES:
-           * net_lockedwait will also terminate if a signal is received.
+           * net_sem_wait will also terminate if a signal is received.
            */
 
           for (; ; )
             {
               uint32_t acked = state.snd_acked;
 
-              ret = net_timedwait(&state.snd_sem,
+              ret = net_sem_timedwait(&state.snd_sem,
                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
@@ -673,9 +673,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  /* If net_timedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_timedwait will have returned negated errno
-   * appropriately.
+  /* If net_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, net_sem_timedwait will have returned negated
+   * errno appropriately.
    */
 
   if (ret < 0)

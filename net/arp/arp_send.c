@@ -325,12 +325,12 @@ int arp_send(in_addr_t ipaddr)
       netdev_txnotify_dev(dev);
 
       /* Wait for the send to complete or an error to occur.
-       * net_lockedwait will also terminate if a signal is received.
+       * net_sem_wait will also terminate if a signal is received.
        */
 
       do
         {
-          ret = net_timedwait_uninterruptible(&state.snd_sem,
+          ret = net_sem_timedwait_uninterruptible(&state.snd_sem,
                                               CONFIG_ARP_SEND_DELAYMSEC);
           if (ret == -ETIMEDOUT)
             {

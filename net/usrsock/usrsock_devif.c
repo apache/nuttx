@@ -641,7 +641,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Set outstanding request for daemon to handle. */
 
-  net_lockedwait_uninterruptible(&req->lock);
+  net_sem_wait_uninterruptible(&req->lock);
   if (++req->newxid == 0)
     {
       ++req->newxid;
@@ -662,7 +662,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
       /* Wait ack for request. */
 
       ++req->nbusy; /* net_lock held. */
-      net_lockedwait_uninterruptible(&req->acksem);
+      net_sem_wait_uninterruptible(&req->acksem);
       --req->nbusy; /* net_lock held. */
     }
 
@@ -700,12 +700,12 @@ void usrsock_abort(void)
        * requests.
        */
 
-      ret = net_timedwait(&req->lock, 10);
+      ret = net_sem_timedwait(&req->lock, 10);
       if (ret < 0)
         {
           if (ret != -ETIMEDOUT && ret != -EINTR)
             {
-              ninfo("net_timedwait errno: %d\n", ret);
+              ninfo("net_sem_timedwait errno: %d\n", ret);
               DEBUGASSERT(false);
             }
         }

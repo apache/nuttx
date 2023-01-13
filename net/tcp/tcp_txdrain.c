@@ -144,7 +144,7 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
            * wait for it to drain or be be disconnected.
            */
 
-          ret = net_timedwait_uninterruptible(&waitsem, timeout);
+          ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
 
           /* Tear down the disconnect notifier */
 

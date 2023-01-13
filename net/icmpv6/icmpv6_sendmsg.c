@@ -383,10 +383,10 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       netdev_txnotify_dev(dev);
 
       /* Wait for either the send to complete or for timeout to occur.
-       * net_timedwait will also terminate if a signal is received.
+       * net_sem_timedwait will also terminate if a signal is received.
        */
 
-      ret = net_timedwait(&state.snd_sem,
+      ret = net_sem_timedwait(&state.snd_sem,
                           _SO_TIMEOUT(conn->sconn.s_sndtimeo));
       if (ret < 0)
         {

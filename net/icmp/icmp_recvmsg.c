@@ -391,11 +391,11 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           state.recv_cb->event = recvfrom_eventhandler;
 
           /* Wait for either the response to be received or for timeout to
-           * occur. net_timedwait will also terminate if a signal is
+           * occur. net_sem_timedwait will also terminate if a signal is
            * received.
            */
 
-          ret = net_timedwait(&state.recv_sem,
+          ret = net_sem_timedwait(&state.recv_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret < 0)
             {

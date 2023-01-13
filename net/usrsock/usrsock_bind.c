@@ -191,7 +191,7 @@ int usrsock_bind(FAR struct socket *psock,
     {
       /* Wait for completion of request. */
 
-      net_lockedwait_uninterruptible(&state.recvsem);
+      net_sem_wait_uninterruptible(&state.recvsem);
       ret = state.result;
     }
 

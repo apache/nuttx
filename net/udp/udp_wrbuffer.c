@@ -132,7 +132,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
    * buffer
    */
 
-  net_lockedwait_uninterruptible(&g_wrbuffer.sem);
+  net_sem_wait_uninterruptible(&g_wrbuffer.sem);
 
   /* Now, we are guaranteed to have a write buffer structure reserved
    * for us in the free list.
@@ -186,7 +186,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
    * buffer
    */
 
-  ret = net_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
+  ret = net_sem_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
   if (ret != OK)
     {
       return NULL;
