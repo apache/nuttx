@@ -628,6 +628,37 @@ found:
 
   dev->d_len -= (len + iplen);
 
+#if defined(CONFIG_NET_STATISTICS) && \
+    defined(CONFIG_NET_TCP_DEBUG_DROP_RECV)
+
+#pragma message \
+  "CONFIG_NET_TCP_DEBUG_DROP_RECV is selected, this is debug " \
+  "feature to drop the tcp received packet on the floor, " \
+  "please confirm the configuration again if you do not want " \
+  "debug the TCP stack."
+
+  /* Debug feature to drop the tcp received packet on the floor */
+
+  if (dev->d_len > 0)
+    {
+      if ((g_netstats.tcp.recv %
+          CONFIG_NET_TCP_DEBUG_DROP_RECV_PROBABILITY) == 0)
+        {
+          uint32_t seq = tcp_getsequence(tcp->seqno);
+
+          g_netstats.tcp.drop++;
+
+          ninfo("TCP DROP RCVPKT: "
+                "[%d][%" PRIu32 " : %" PRIu32 " : %d]\n",
+                g_netstats.tcp.drop, seq, TCP_SEQ_ADD(seq, dev->d_len),
+                dev->d_len);
+
+          dev->d_len = 0;
+          return;
+        }
+    }
+#endif
+
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
    * in, unless we are in the SYN_RCVD state and receive a SYN, in which
