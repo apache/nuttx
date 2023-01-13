@@ -31,48 +31,18 @@
 #include <debug.h>
 
 #include <alsa/asoundlib.h>
-#include <mad.h>
+
+#include "sim_offload.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define AUDMIN(a,b)     ((a) > (b) ? (b) : (a))
-#define AUDCODEC_DEC    0x01
-#define AUDCODEC_ENC    0x10
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct sim_codec_ops_s
-{
-  uint8_t format;
-  uint8_t flags;
-
-  /* init codec handle */
-
-  void    *(*init)(void);
-
-  /* return how much samples return from deocde.
-   * or encoder needed.
-   * */
-
-  int      (*get_samples)(void *handle);
-
-  /* perform dec or enc on [in] data with [insize] bytes
-   * [out] data with [outsize] is pcm data after decode, or
-   * compress data when encode.
-   * return: < 0 means failed. == 0 success
-   */
-
-  int      (*process)(void *handle, uint8_t *in, uint32_t insize,
-                      uint8_t **out, unsigned int *outsize);
-
-  /* uninit codec handle */
-
-  void     (*uninit)(void *handle);
-};
 
 struct sim_audio_s
 {
@@ -96,20 +66,9 @@ struct sim_audio_s
   snd_mixer_elem_t *volume;
 
   void *codec;
-  const struct sim_codec_ops_s *ops;
-};
+  const sim_codec_ops_s *ops;
 
-struct sim_decoder_mp3_s
-{
-  uint8_t *out;
-  struct mad_stream stream;
-  struct mad_frame frame;
-  struct mad_synth synth;
-};
-
-struct sim_codec_pcm_s
-{
-  uint32_t frame_size;
+  struct ap_buffer_s *aux;
 };
 
 /****************************************************************************
@@ -142,19 +101,6 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
 static int sim_audio_reserve(struct audio_lowerhalf_s *dev);
 static int sim_audio_release(struct audio_lowerhalf_s *dev);
 
-static void *sim_audio_mp3_init(void);
-static int   sim_audio_mp3_samples(void *handle);
-static int   sim_audio_mp3_decode(void *handle,
-                                  uint8_t *in, uint32_t insize,
-                                  uint8_t **out, uint32_t *outsize);
-static void  sim_audio_mp3_uninit(void *handle);
-
-static void *sim_audio_pcm_init(void);
-static int   sim_audio_pcm_process(void *handle,
-                                   uint8_t *in, uint32_t insize,
-                                   uint8_t **out, uint32_t *outsize);
-static void  sim_audio_pcm_uninit(void *handle);
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -176,26 +122,6 @@ static const struct audio_ops_s g_sim_audio_ops =
   .ioctl         = sim_audio_ioctl,
   .reserve       = sim_audio_reserve,
   .release       = sim_audio_release,
-};
-
-static const struct sim_codec_ops_s g_codec_ops[] =
-{
-  {
-    AUDIO_FMT_PCM,
-    AUDCODEC_DEC | AUDCODEC_ENC,
-    sim_audio_pcm_init,
-    NULL,
-    sim_audio_pcm_process,
-    sim_audio_pcm_uninit,
-  },
-  {
-    AUDIO_FMT_MP3,
-    AUDCODEC_DEC,
-    sim_audio_mp3_init,
-    sim_audio_mp3_samples,
-    sim_audio_mp3_decode,
-    sim_audio_mp3_uninit
-  }
 };
 
 static sq_queue_t g_sim_audio;
@@ -297,7 +223,7 @@ static void sim_audio_config_ops(struct sim_audio_s *priv, uint8_t fmt)
 {
   int i;
 
-  for (i = 0; i < sizeof(g_codec_ops) / sizeof(g_codec_ops[0]); i++)
+  for (i = 0; g_codec_ops[i].format != AUDIO_FMT_UNDEF; i++)
     {
       if (g_codec_ops[i].format == fmt &&
           ((priv->playback && g_codec_ops[i].flags & AUDCODEC_DEC) ||
@@ -536,8 +462,21 @@ static int sim_audio_shutdown(struct audio_lowerhalf_s *dev)
 static int sim_audio_start(struct audio_lowerhalf_s *dev)
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  struct audio_buf_desc_s buf_desc;
+  int ret;
 
-  priv->codec = priv->ops->init();
+  /* reserved aux buffer. */
+
+  buf_desc.numbytes  = priv->buffer_size * 2;
+  buf_desc.u.pbuffer = &priv->aux;
+
+  ret = apb_alloc(&buf_desc);
+  if (ret != sizeof(buf_desc))
+    {
+      return -ENOMEM;
+    }
+
+  priv->codec = priv->ops->init(NULL);
   if (priv->codec == NULL)
     {
       return -ENOSYS;
@@ -570,6 +509,9 @@ static int sim_audio_stop(struct audio_lowerhalf_s *dev)
 #else
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
 #endif
+
+  apb_free(priv->aux);
+  priv->aux = NULL;
 
   priv->ops->uninit(priv->codec);
   priv->ops = NULL;
@@ -665,12 +607,85 @@ static int sim_audio_release(struct audio_lowerhalf_s *dev)
   return 0;
 }
 
+static int sim_audio_process_playback(struct sim_audio_s *priv,
+                                      struct ap_buffer_s *apb,
+                                      bool *dequeue)
+{
+  struct ap_buffer_s *aux = priv->aux;
+  uint8_t *out = NULL;
+  uint8_t *in = NULL;
+  uint32_t outsize;
+  uint32_t insize;
+  int ret;
+
+  /* 1, copy apb buffer to aux when the apb buffer just enqueued.
+   * */
+
+  if (apb->flags & AUDIO_APB_OUTPUT_ENQUEUED)
+    {
+      memcpy(aux->samp + aux->nbytes, apb->samp, apb->nbytes);
+      aux->nbytes += apb->nbytes;
+      apb->flags  &= ~AUDIO_APB_OUTPUT_ENQUEUED;
+    }
+
+  in     = aux->samp   + aux->curbyte;
+  insize = aux->nbytes - aux->curbyte;
+
+  /* 2, decode or passthrough. */
+
+  ret = priv->ops->process(priv->codec, in, insize, &out, &outsize);
+  if (ret < 0)
+    {
+      /* 3, if return -ENODATA, means there is no enough data in aux apb.
+       * memmove the remaining data to aux->samp.
+       * */
+
+      if (ret == -ENODATA)
+        {
+            memmove(aux->samp, in, insize);
+            aux->curbyte = 0;
+            aux->nbytes  = insize;
+            *dequeue     = true;
+        }
+      else
+        {
+          /* 4, if other error, increase apb->curbyte and try again. */
+
+          aux->curbyte++;
+        }
+
+      ret = 0;
+    }
+  else
+    {
+      /* 5, decode success, process remain data. write to alsa. */
+
+      aux->curbyte += ret;
+
+      ret  = snd_pcm_writei(priv->pcm, out, outsize / priv->frame_size);
+      ret *= priv->frame_size;
+    }
+
+  /* 6, whether send DEQUEUE msg to apps. */
+
+  if (aux->curbyte == aux->nbytes)
+    {
+      aux->curbyte = 0;
+      aux->nbytes  = 0;
+      *dequeue     = true;
+    }
+
+  /* 7, return actual bytes which write to alsa driver. */
+
+  return ret;
+}
+
 static void sim_audio_process(struct sim_audio_s *priv)
 {
-  struct ap_buffer_s *apb;
   snd_pcm_sframes_t expect;
+  struct ap_buffer_s *apb;
   snd_pcm_sframes_t avail;
-  uint8_t *out = NULL;
+  bool dequeue = false;
   uint32_t outsize;
   int ret = 0;
 
@@ -705,15 +720,7 @@ static void sim_audio_process(struct sim_audio_s *priv)
 
   if (priv->playback)
     {
-      ret = priv->ops->process(priv->codec, apb->samp, apb->nbytes,
-                               &out, &outsize);
-      if (ret < 0)
-        {
-          return;
-        }
-
-      ret  = snd_pcm_writei(priv->pcm, out, outsize / priv->frame_size);
-      ret *= priv->frame_size;
+      ret = sim_audio_process_playback(priv, apb, &dequeue);
     }
   else
     {
@@ -730,16 +737,17 @@ static void sim_audio_process(struct sim_audio_s *priv)
           return;
         }
 
-      ret = outsize;
+      apb->curbyte += ret;
+      dequeue = true;
     }
 
-  if (ret >= 0)
+  if (dequeue)
     {
       bool final = false;
 
       dq_remfirst(&priv->pendq);
 
-      apb->nbytes = ret;
+      apb->nbytes = apb->curbyte;
       if (apb->flags & AUDIO_APB_FINAL)
         {
           final = true;
@@ -851,147 +859,6 @@ fail:
   up_irq_restore(flags);
   priv->mixer = NULL;
   return 0;
-}
-
-static int sim_audio_mp3_scale(mad_fixed_t sample)
-{
-  sample += 1L << (MAD_F_FRACBITS - 16);
-
-  if (sample >= MAD_F_ONE)
-    {
-      sample = MAD_F_ONE - 1;
-    }
-  else if (sample < -MAD_F_ONE)
-    {
-      sample = -MAD_F_ONE;
-    }
-
-  return sample >> (MAD_F_FRACBITS + 1 - 16);
-}
-
-static void *sim_audio_mp3_init(void)
-{
-  struct sim_decoder_mp3_s *codec;
-
-  codec = kmm_malloc(sizeof(struct sim_decoder_mp3_s));
-  if (codec == NULL)
-    {
-      return NULL;
-    }
-
-  mad_stream_init(&codec->stream);
-  mad_frame_init(&codec->frame);
-  mad_synth_init(&codec->synth);
-
-  codec->out = kmm_malloc(sizeof(codec->synth.pcm.samples));
-  if (codec->out == NULL)
-    {
-      goto out;
-    }
-
-  return codec;
-
-out:
-  mad_synth_finish(&(codec->synth));
-  mad_frame_finish(&(codec->frame));
-  mad_stream_finish(&(codec->stream));
-  kmm_free(codec);
-
-  return NULL;
-}
-
-static int sim_audio_mp3_samples(void *handle)
-{
-  struct sim_decoder_mp3_s *codec = (struct sim_decoder_mp3_s *)handle;
-
-  return sizeof(codec->synth.pcm.samples[0]) / sizeof(mad_fixed_t);
-}
-
-static int sim_audio_mp3_decode(void *handle,
-                                uint8_t *in, uint32_t insize,
-                                uint8_t **out, uint32_t *outsize)
-{
-  struct sim_decoder_mp3_s *codec = (struct sim_decoder_mp3_s *)handle;
-  const mad_fixed_t *right_ch;
-  const mad_fixed_t *left_ch;
-  int nchannels;
-  int nsamples;
-  uint8_t *ptr;
-  int i = 0;
-  int ret;
-
-  mad_stream_buffer(&codec->stream, in, insize);
-  ret = mad_frame_decode(&codec->frame, &codec->stream);
-  if (ret < 0)
-    {
-      aerr("%s mp3 decode failed error %d\n", __func__, codec->stream.error);
-      return ret;
-    }
-
-  mad_synth_frame(&codec->synth, &codec->frame);
-
-  nchannels = codec->synth.pcm.channels;
-  nsamples  = codec->synth.pcm.length;
-  left_ch   = codec->synth.pcm.samples[0];
-  right_ch  = codec->synth.pcm.samples[1];
-
-  ptr = codec->out;
-  while (nsamples--)
-    {
-      int sample;
-
-      /* output sample(s) in 16-bit signed little-endian PCM */
-
-      sample     = sim_audio_mp3_scale(*left_ch++);
-      ptr[i]     = (sample >> 0) & 0xff;
-      ptr[i + 1] = (sample >> 8) & 0xff;
-
-      if (nchannels == 2)
-        {
-          sample     = sim_audio_mp3_scale(*right_ch++);
-          ptr[i + 2] = (sample >> 0) & 0xff;
-          ptr[i + 3] = (sample >> 8) & 0xff;
-        }
-
-      i += sizeof(short) * nchannels;
-    }
-
-  *out = ptr;
-  *outsize = codec->synth.pcm.length * nchannels * sizeof(short);
-
-  return 0;
-}
-
-static void sim_audio_mp3_uninit(void *handle)
-{
-  struct sim_decoder_mp3_s *codec = (struct sim_decoder_mp3_s *)handle;
-
-  mad_synth_finish(&(codec->synth));
-  mad_frame_finish(&(codec->frame));
-  mad_stream_finish(&(codec->stream));
-
-  kmm_free(codec->out);
-  kmm_free(codec);
-}
-
-static void *sim_audio_pcm_init(void)
-{
-  return kmm_malloc(sizeof(struct sim_codec_pcm_s));
-}
-
-static int sim_audio_pcm_process(void *handle,
-                                 uint8_t *in, uint32_t insize,
-                                 uint8_t **out, uint32_t *outsize)
-{
-  *out     = in;
-  *outsize = insize;
-
-  return 0;
-}
-
-static void sim_audio_pcm_uninit(void *handle)
-{
-  kmm_free(handle);
 }
 
 /****************************************************************************
