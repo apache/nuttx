@@ -130,44 +130,34 @@ static int dsi_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       case MIPIDSI_GETDEVLANES:
-        {
           FAR uint16_t *planes = (FAR uint16_t *)((uintptr_t)arg);
           DEBUGASSERT(planes != NULL);
 
           *planes = priv->dsi_dev->lanes;
-        }
         break;
       case MIPIDSI_GETDEVFMT:
-        {
           FAR uint32_t *fmt = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(fmt != NULL);
 
           *fmt = priv->dsi_dev->format;
-        }
         break;
       case MIPIDSI_GETDEVMODE:
-        {
           FAR uint32_t *mode = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(mode != NULL);
 
           *mode = priv->dsi_dev->mode_flags;
-        }
         break;
       case MIPIDSI_GETDEVHSRATE:
-        {
           FAR uint32_t *hsrate = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(hsrate != NULL);
 
           *hsrate = priv->dsi_dev->hs_rate;
-        }
         break;
       case MIPIDSI_GETDEVLPRATE:
-        {
           FAR uint32_t *lprate = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(lprate != NULL);
 
           *lprate = priv->dsi_dev->lp_rate;
-        }
         break;
       default:
         ret = -ENOTTY;
