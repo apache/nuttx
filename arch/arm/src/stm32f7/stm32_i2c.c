@@ -433,6 +433,8 @@ struct stm32_i2c_config_s
 
 struct stm32_i2c_priv_s
 {
+  const struct i2c_ops_s  *ops; /* Standard I2C operations */
+
   /* Port configuration */
 
   const struct stm32_i2c_config_s *config;
@@ -468,14 +470,6 @@ struct stm32_i2c_priv_s
 #ifdef CONFIG_PM
   struct pm_callback_s pm_cb;  /* PM callbacks */
 #endif
-};
-
-/* I2C Device, Instance */
-
-struct stm32_i2c_inst_s
-{
-  const struct i2c_ops_s  *ops;  /* Standard I2C operations */
-  struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
 };
 
 /****************************************************************************
@@ -533,6 +527,16 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
  * Private Data
  ****************************************************************************/
 
+/* Device Structures, Instantiation */
+
+static const struct i2c_ops_s stm32_i2c_ops =
+{
+  .transfer      = stm32_i2c_transfer,
+#ifdef CONFIG_I2C_RESET
+  .reset         = stm32_i2c_reset,
+#endif
+};
+
 #ifdef CONFIG_STM32F7_I2C1
 static const struct stm32_i2c_config_s stm32_i2c1_config =
 {
@@ -549,6 +553,7 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
 
 static struct stm32_i2c_priv_s stm32_i2c1_priv =
 {
+  .ops           = &stm32_i2c_ops,
   .config        = &stm32_i2c1_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
@@ -585,6 +590,7 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
 
 static struct stm32_i2c_priv_s stm32_i2c2_priv =
 {
+  .ops           = &stm32_i2c_ops,
   .config        = &stm32_i2c2_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
@@ -621,6 +627,7 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
 
 static struct stm32_i2c_priv_s stm32_i2c3_priv =
 {
+  .ops           = &stm32_i2c_ops,
   .config        = &stm32_i2c3_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
@@ -657,6 +664,7 @@ static const struct stm32_i2c_config_s stm32_i2c4_config =
 
 static struct stm32_i2c_priv_s stm32_i2c4_priv =
 {
+  .ops           = &stm32_i2c_ops,
   .config        = &stm32_i2c4_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
@@ -676,16 +684,6 @@ static struct stm32_i2c_priv_s stm32_i2c4_priv =
 #endif
 };
 #endif
-
-/* Device Structures, Instantiation */
-
-static const struct i2c_ops_s stm32_i2c_ops =
-{
-  .transfer      = stm32_i2c_transfer,
-#ifdef CONFIG_I2C_RESET
-  .reset         = stm32_i2c_reset,
-#endif
-};
 
 /****************************************************************************
  * Private Functions
@@ -2273,8 +2271,7 @@ static int stm32_i2c_deinit(struct stm32_i2c_priv_s *priv)
 static int stm32_i2c_process(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgs, int count)
 {
-  struct stm32_i2c_inst_s     *inst = (struct stm32_i2c_inst_s *)dev;
-  struct stm32_i2c_priv_s *priv = inst->priv;
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
   uint32_t    status = 0;
   uint32_t    cr1;
   uint32_t    cr2;
@@ -2505,14 +2502,10 @@ static int stm32_i2c_process(struct i2c_master_s *dev,
 static int stm32_i2c_transfer(struct i2c_master_s *dev,
                               struct i2c_msg_s *msgs, int count)
 {
-  struct stm32_i2c_priv_s *priv;
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
   int ret;
 
   DEBUGASSERT(dev);
-
-  /* Get I2C private structure */
-
-  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
 
   /* Ensure that address or flags don't change meanwhile */
 
@@ -2536,7 +2529,7 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int stm32_i2c_reset(struct i2c_master_s *dev)
 {
-  struct stm32_i2c_priv_s *priv;
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
   uint32_t scl_gpio;
@@ -2545,10 +2538,6 @@ static int stm32_i2c_reset(struct i2c_master_s *dev)
   int ret;
 
   DEBUGASSERT(dev);
-
-  /* Get I2C private structure */
-
-  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
 
   /* Our caller must own a ref */
 
@@ -2748,7 +2737,6 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;  /* private data of device with multiple instances */
-  struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
 
 #if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
 # warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
@@ -2783,18 +2771,6 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
         return NULL;
     }
 
-  /* Allocate instance */
-
-  if (!(inst = kmm_malloc(sizeof(struct stm32_i2c_inst_s))))
-    {
-      return NULL;
-    }
-
-  /* Initialize instance */
-
-  inst->ops  = &stm32_i2c_ops;
-  inst->priv = priv;
-
   /* Init private data for the first time, increment refs count,
    * power-up hardware and configure GPIOs.
    */
@@ -2813,7 +2789,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
     }
 
   nxmutex_unlock(&priv->lock);
-  return (struct i2c_master_s *)inst;
+  return (struct i2c_master_s *)priv;
 }
 
 /****************************************************************************
@@ -2826,10 +2802,9 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 
 int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  struct stm32_i2c_priv_s *priv;
+  struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
 
   DEBUGASSERT(dev);
-  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
 
   /* Decrement refs and check for underflow */
 
@@ -2842,7 +2817,6 @@ int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
   if (--priv->refs)
     {
       nxmutex_unlock(&priv->lock);
-      kmm_free(dev);
       return OK;
     }
 
@@ -2857,7 +2831,6 @@ int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
   stm32_i2c_deinit(priv);
   nxmutex_unlock(&priv->lock);
 
-  kmm_free(dev);
   return OK;
 }
 
