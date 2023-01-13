@@ -169,3 +169,23 @@ config ARMV7A_DECODEFIQ
 		Select this option if your platform supports the function
 		arm_decodefiq().  This is used primarily to support secure TrustZone
 		interrupts received on the FIQ vector.
+
+config ARMV7A_ALIGNMENT_TRAP
+	bool "Enable Alignment Check at __start"
+	default n
+
+config ARMV7A_CACHE_ROUND_ROBIN
+	bool "Enable Cache Round Robin Replacement Policy at __start"
+	default n
+
+config ARMV7A_DCACHE_DISABLE
+	bool "Disable DCACHE at __start"
+	default n
+
+config ARMV7A_ICACHE_DISABLE
+	bool "Disable ICACHE at __start"
+	default n
+
+config ARMV7A_AFE_ENABLE
+	bool "Enable Access Flag at __start"
+	default n

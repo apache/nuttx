@@ -180,3 +180,43 @@ config ARMV7R_DECODEFIQ
 	---help---
 		Select this option if your platform supports the function
 		arm_decodefiq().
+
+config ARMV7R_ALIGNMENT_TRAP
+	bool "Enable Alignment Check at __start"
+	default n
+
+config ARMV7R_CACHE_ROUND_ROBIN
+	bool "Enable Cache Round Robin Replacement Policy at __start"
+	default n
+
+config ARMV7R_DCACHE_DISABLE
+	bool "Disable DCACHE at __start"
+	default n
+
+config ARMV7R_ICACHE_DISABLE
+	bool "Disable ICACHE at __start"
+	default n
+
+config ARMV7R_SCTLR_CCP15BEN
+	bool "Enable CP15 Barrier at __start"
+	default y
+
+config ARMV7R_BACKGROUND_REGION
+	bool "Enable MPU Background region at __start"
+	default y
+
+config ARMV7R_DIV0_FAULT
+	bool "Enable DIV0 Fault at __start"
+	default n
+
+config ARMV7R_FAST_INTERRUPT
+	bool "Enable Fast Interrupts at __start"
+	default n
+
+config ARMV7R_IMPL_VECTORS
+	bool "Enable Interrupt Vector at __start"
+	default n
+
+config ARMV7R_NONMASKABLE_FIQ
+	bool "Enable Non-maskable FIQ Support at __start"
+	default n

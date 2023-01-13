@@ -4,3 +4,23 @@
 #
 
 comment "ARM Configuration Options"
+
+config ARM_ALIGNMENT_TRAP
+	bool "Enable Alignment Check at __start"
+	default n
+
+config ARM_DCACHE_WRITETHROUGH
+	bool "Enable DCACHE Write-Through at __start"
+	default n
+
+config ARM_CACHE_ROUND_ROBIN
+	bool "Enable Cache Round Robin Replacement Policy at __start"
+	default n
+
+config ARM_DCACHE_DISABLE
+	bool "Disable DCACHE at __start"
+	default n
+
+config ARM_ICACHE_DISABLE
+	bool "Disable ICACHE at __start"
+	default n

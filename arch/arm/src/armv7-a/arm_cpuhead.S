@@ -42,14 +42,6 @@
  * Configuration
  ****************************************************************************/
 
-/* Hard-coded options */
-
-#undef CPU_ALIGNMENT_TRAP
-#undef CPU_CACHE_ROUND_ROBIN
-#undef CPU_DCACHE_DISABLE
-#undef CPU_ICACHE_DISABLE
-#undef CPU_AFE_ENABLE
-
 /* Check for the identity mapping:  For this configuration, this would be
  * the case where the virtual beginning of RAM is the same as the physical
  * beginning of RAM.
@@ -307,7 +299,7 @@ __cpu3_start:
 	orr		r0, r0, #(SCTLR_V)
 #endif
 
-#if defined(CPU_CACHE_ROUND_ROBIN) && !defined(CONFIG_ARCH_CORTEXA5)
+#if defined(CONFIG_ARMV7A_CACHE_ROUND_ROBIN) && !defined(CONFIG_ARCH_CORTEXA5)
 	/* Round Robin cache replacement
 	 *
 	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
@@ -321,7 +313,7 @@ __cpu3_start:
 	 * after SMP cache coherency has been setup.
 	 */
 
-#if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
+#if !defined(CONFIG_ARMV7A_DCACHE_DISABLE) && !defined(CONFIG_SMP)
 	/* Dcache enable
 	 *
 	 *   SCTLR_C    Bit 2:  DCache enable
@@ -330,7 +322,7 @@ __cpu3_start:
 	orr		r0, r0, #(SCTLR_C)
 #endif
 
-#if !defined(CPU_ICACHE_DISABLE) && !defined(CONFIG_SMP)
+#if !defined(CONFIG_ARMV7A_ICACHE_DISABLE) && !defined(CONFIG_SMP)
 	/* Icache enable
 	 *
 	 *   SCTLR_I    Bit 12: ICache enable
@@ -339,7 +331,7 @@ __cpu3_start:
 	orr		r0, r0, #(SCTLR_I)
 #endif
 
-#ifdef CPU_ALIGNMENT_TRAP
+#ifdef CONFIG_ARMV7A_ALIGNMENT_TRAP
 	/* Alignment abort enable
 	 *
 	 *   SCTLR_A    Bit 1:  Strict alignment enabled
@@ -357,7 +349,7 @@ __cpu3_start:
 	orr		r0, r0, #(SCTLR_EE)
 #endif
 
-#ifdef CPU_AFE_ENABLE
+#ifdef CONFIG_ARMV7A_AFE_ENABLE
 	/* AP[0:2] Permissions model
 	 *
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
