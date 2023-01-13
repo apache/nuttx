@@ -168,7 +168,7 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout)
 
   /* And wait for the Neighbor Advertisement (or a timeout). */
 
-  ret = net_timedwait(&notify->nt_sem, timeout);
+  ret = net_sem_timedwait(&notify->nt_sem, timeout);
   if (ret >= 0)
     {
       ret = notify->nt_result;

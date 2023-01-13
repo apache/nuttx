@@ -222,12 +222,12 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   netdev_txnotify_dev(dev);
 
   /* Wait for the send to complete or an error to occur
-   * net_lockedwait will also terminate if a signal is received.
+   * net_sem_wait will also terminate if a signal is received.
    */
 
   do
     {
-      net_lockedwait(&state.snd_sem);
+      net_sem_wait(&state.snd_sem);
     }
   while (!state.snd_sent);
 

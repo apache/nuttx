@@ -134,7 +134,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_timedalloc(unsigned int timeout)
    * buffer
    */
 
-  ret = net_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
+  ret = net_sem_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
   if (ret != OK)
     {
       return NULL;

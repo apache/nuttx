@@ -1218,7 +1218,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
               goto errout_with_lock;
             }
 
-          ret = net_timedwait_uninterruptible(&conn->snd_sem,
+          ret = net_sem_timedwait_uninterruptible(&conn->snd_sem,
             tcp_send_gettimeout(start, timeout));
           if (ret < 0)
             {

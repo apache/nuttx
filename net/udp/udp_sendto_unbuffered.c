@@ -462,11 +462,11 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       netdev_txnotify_dev(state.st_dev);
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  net_timedwait will also terminate if a signal
+       * occur. NOTES:  net_sem_timedwait will also terminate if a signal
        * is received.
        */
 
-      ret = net_timedwait(&state.st_sem,
+      ret = net_sem_timedwait(&state.st_sem,
                           _SO_TIMEOUT(conn->sconn.s_sndtimeo));
       if (ret >= 0)
         {

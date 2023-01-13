@@ -306,7 +306,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
           /* Wait for send-ready (or abort, or timeout, or signal). */
 
-          ret = net_timedwait(&state.recvsem,
+          ret = net_sem_timedwait(&state.recvsem,
                               _SO_TIMEOUT(conn->sconn.s_sndtimeo));
           usrsock_teardown_request_callback(&state);
           if (ret < 0)
@@ -323,7 +323,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
                 }
               else
                 {
-                  nerr("net_timedwait errno: %zd\n", ret);
+                  nerr("net_sem_timedwait errno: %zd\n", ret);
                   DEBUGPANIC();
                 }
 
@@ -371,7 +371,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
         {
           /* Wait for completion of request. */
 
-          net_lockedwait_uninterruptible(&state.recvsem);
+          net_sem_wait_uninterruptible(&state.recvsem);
           ret = state.result;
         }
 

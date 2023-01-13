@@ -160,7 +160,7 @@ static const rpmsg_ept_cb g_net_rpmsg_drv_handler[] =
 
 static void net_rpmsg_drv_wait(FAR sem_t *sem)
 {
-  net_lockedwait_uninterruptible(sem);
+  net_sem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************

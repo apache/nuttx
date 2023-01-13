@@ -210,7 +210,7 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
 
   /* Wait for completion of request (or signal). */
 
-  ret = net_lockedwait(&state.recvsem);
+  ret = net_sem_wait(&state.recvsem);
   if (ret < 0)
     {
       /* Wait interrupted, exit early. */
