@@ -88,7 +88,7 @@
 
 #define shgetc(f) (*(f)++)
 #define shunget(f) ((f)--)
-#define ifexist(a,b) do { if ((*a) != NULL) {*(a) = (b);} } while (0)
+#define ifexist(a,b) do { if ((a) != NULL) {*(a) = (b);} } while (0)
 
 /****************************************************************************
  * Private Functions
@@ -394,7 +394,7 @@ static long_double decfloat(FAR char *ptr, FAR char **endptr)
         }
     }
 
-  if (num_digit <= 9 && num_decimal == 0)
+  if (num_digit < 9 && num_decimal == 0)
     {
       return x;
     }
