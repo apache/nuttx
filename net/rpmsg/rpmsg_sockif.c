@@ -50,8 +50,9 @@
 
 #define RPMSG_SOCKET_CMD_SYNC           1
 #define RPMSG_SOCKET_CMD_DATA           2
-#define RPMSG_SOCKET_NAME_PREFIX        "rpmsg-socket:"
-#define RPMSG_SOCKET_NAME_PREFIX_LEN    13
+#define RPMSG_SOCKET_NAME_PREFIX        "sk:"
+#define RPMSG_SOCKET_NAME_PREFIX_LEN    3
+#define RPMSG_SOCKET_NAME_ID_LEN        13
 
 static_assert(RPMSG_SOCKET_NAME_SIZE + RPMSG_SOCKET_NAME_PREFIX_LEN
               <= RPMSG_NAME_SIZE, "socket name size config error");
@@ -90,6 +91,7 @@ struct rpmsg_socket_conn_s
   struct rpmsg_endpoint          ept;
 
   struct sockaddr_rpmsg          rpaddr;
+  char                           nameid[RPMSG_SOCKET_NAME_ID_LEN];
   uint16_t                       crefs;
 
   FAR struct pollfd              *fds[CONFIG_NET_RPMSG_NPOLLWAITERS];
@@ -197,7 +199,7 @@ const struct sock_intf_s g_rpmsg_sockif =
  * Private Data
  ****************************************************************************/
 
-static unsigned int g_rpmsg_id;
+static uint64_t g_rpmsg_id;
 
 /****************************************************************************
  * Private Functions
@@ -465,8 +467,8 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
     {
       conn->ept.priv = conn;
       conn->ept.ns_bound_cb = rpmsg_socket_ns_bound;
-      snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
-               conn->rpaddr.rp_name);
+      snprintf(buf, sizeof(buf), "%s%s%s", RPMSG_SOCKET_NAME_PREFIX,
+               conn->rpaddr.rp_name, conn->nameid);
 
       rpmsg_create_ept(&conn->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
@@ -605,12 +607,11 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
 
   if (suffix)
     {
-      size_t len;
-
-      rpaddr = &conn->rpaddr;
-      len = strlen(rpaddr->rp_name);
-      snprintf(&rpaddr->rp_name[len], sizeof(rpaddr->rp_name) - len - 1,
-               ":%u", g_rpmsg_id++);
+      snprintf(conn->nameid, sizeof(conn->nameid), ":%llx", g_rpmsg_id++);
+    }
+  else
+    {
+      conn->nameid[0] = 0;
     }
 
   return 0;
