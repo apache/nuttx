@@ -37,7 +37,7 @@
 struct mipi_dsi_hosts_s
 {
   int count;
-  struct mipi_dsi_host *hosts[0];
+  struct mipi_dsi_host *hosts[1];
 };
 
 /****************************************************************************
@@ -106,14 +106,13 @@ int mipi_dsi_host_register(FAR struct mipi_dsi_host *host)
 
   if (g_hosts == NULL)
     {
-      g_hosts = kmm_zalloc(sizeof(struct mipi_dsi_hosts_s) +
-                           sizeof(FAR struct mipi_dsi_host *));
+      g_hosts = kmm_zalloc(sizeof(struct mipi_dsi_hosts_s));
     }
   else
     {
       g_hosts = kmm_realloc(g_hosts, sizeof(struct mipi_dsi_hosts_s) +
                                      sizeof(FAR struct mipi_dsi_host *) *
-                                     (g_hosts->count + 1));
+                                     g_hosts->count);
     }
 
   if (g_hosts == NULL)

@@ -81,12 +81,12 @@ ssize_t mipi_dsi_transfer(FAR struct mipi_dsi_device *device,
       return -ENOSYS;
     }
 
-  if (device->mode_flags & MIPI_DSI_MODE_LPM)
+  if ((device->mode_flags & MIPI_DSI_MODE_LPM) != 0)
     {
       msg->flags |= MIPI_DSI_MSG_USE_LPM;
     }
 
-  if (device->mode_flags & MIPI_DSI_MODE_AFTER_FRAME)
+  if ((device->mode_flags & MIPI_DSI_MODE_AFTER_FRAME) != 0)
     {
       msg->flags |= MIPI_DSI_MSG_AFTER_FRAME;
     }
@@ -162,13 +162,18 @@ int mipi_dsi_detach(FAR struct mipi_dsi_device *device)
 
 int mipi_dsi_shutdown_peripheral(FAR struct mipi_dsi_device *device)
 {
-  struct mipi_dsi_msg msg =
+  struct mipi_dsi_msg msg;
+  uint8_t tx[2] =
   {
-    .channel = device->channel,
-    .type = MIPI_DSI_SHUTDOWN_PERIPHERAL,
-    .tx_buf = (uint8_t [2]) { 0, 0 },
-    .tx_len = 2,
+    0,
+    0
   };
+
+  msg.channel = device->channel;
+  msg.type = MIPI_DSI_SHUTDOWN_PERIPHERAL;
+  msg.tx_buf = tx;
+  msg.tx_len = sizeof(tx);
+  msg.flags = 0;
 
   int ret = mipi_dsi_transfer(device, &msg);
   return ret < 0 ? ret : 0;
@@ -191,14 +196,18 @@ int mipi_dsi_shutdown_peripheral(FAR struct mipi_dsi_device *device)
 int mipi_dsi_turn_on_peripheral(FAR struct mipi_dsi_device *device)
 {
   int ret;
-
-  struct mipi_dsi_msg msg =
+  struct mipi_dsi_msg msg;
+  uint8_t tx[2] =
   {
-    .channel = device->channel,
-    .type = MIPI_DSI_TURN_ON_PERIPHERAL,
-    .tx_buf = (uint8_t [2]) { 0, 0 },
-    .tx_len = 2,
+    0,
+    0
   };
+
+  msg.channel = device->channel;
+  msg.type = MIPI_DSI_TURN_ON_PERIPHERAL;
+  msg.tx_buf = tx;
+  msg.tx_len = sizeof(tx);
+  msg.flags = 0;
 
   ret = mipi_dsi_transfer(device, &msg);
   return ret < 0 ? ret : 0;
@@ -224,14 +233,18 @@ int mipi_dsi_set_maximum_return_packet_size(
                           FAR struct mipi_dsi_device *device, uint16_t value)
 {
   int ret;
-
-  struct mipi_dsi_msg msg =
+  struct mipi_dsi_msg msg;
+  uint8_t tx[2] =
   {
-    .channel = device->channel,
-    .type = MIPI_DSI_SET_MAXIMUM_RETURN_PACKET_SIZE,
-    .tx_len = 2,
-    .tx_buf = (uint8_t [2]) { value & 0xff, value >> 8 },
+    value & 0xff,
+    value >> 8
   };
+
+  msg.channel = device->channel;
+  msg.type = MIPI_DSI_SET_MAXIMUM_RETURN_PACKET_SIZE;
+  msg.tx_len = sizeof(tx);
+  msg.tx_buf = tx;
+  msg.flags = 0;
 
   ret = mipi_dsi_transfer(device, &msg);
   return ret < 0 ? ret : 0;
@@ -260,14 +273,18 @@ int mipi_dsi_compression_mode(FAR struct mipi_dsi_device *device,
   /* Note: Needs updating for non-default PPS or algorithm */
 
   int ret;
-
-  struct mipi_dsi_msg msg =
+  struct mipi_dsi_msg msg;
+  uint8_t tx[2] =
   {
-    .channel = device->channel,
-    .type = MIPI_DSI_COMPRESSION_MODE,
-    .tx_len = 2,
-    .tx_buf = (uint8_t [2]) { enable & 0xff, 0 },
+    enable & 0xff,
+    0
   };
+
+  msg.channel = device->channel;
+  msg.type = MIPI_DSI_COMPRESSION_MODE;
+  msg.tx_len = sizeof(tx);
+  msg.tx_buf = tx;
+  msg.flags = 0;
 
   ret = mipi_dsi_transfer(device, &msg);
   return ret < 0 ? ret : 0;
@@ -294,31 +311,30 @@ int mipi_dsi_generic_write(FAR struct mipi_dsi_device *device,
                            size_t size)
 {
   int ret;
+  struct mipi_dsi_msg msg;
 
-  struct mipi_dsi_msg msg =
-  {
-    .channel = device->channel,
-    .tx_buf = payload,
-    .tx_len = size
-  };
+  msg.channel = device->channel;
+  msg.tx_buf = payload;
+  msg.tx_len = size;
+  msg.flags = 0;
 
   switch (size)
     {
-    case 0:
-      msg.type = MIPI_DSI_GENERIC_SHORT_WRITE_0_PARAM;
-      break;
+      case 0:
+        msg.type = MIPI_DSI_GENERIC_SHORT_WRITE_0_PARAM;
+        break;
 
-    case 1:
-      msg.type = MIPI_DSI_GENERIC_SHORT_WRITE_1_PARAM;
-      break;
+      case 1:
+        msg.type = MIPI_DSI_GENERIC_SHORT_WRITE_1_PARAM;
+        break;
 
-    case 2:
-      msg.type = MIPI_DSI_GENERIC_SHORT_WRITE_2_PARAM;
-      break;
+      case 2:
+        msg.type = MIPI_DSI_GENERIC_SHORT_WRITE_2_PARAM;
+        break;
 
-    default:
-      msg.type = MIPI_DSI_LONG_GENERIC_WRITE;
-      break;
+      default:
+        msg.type = MIPI_DSI_LONG_GENERIC_WRITE;
+        break;
     }
 
   ret = mipi_dsi_transfer(device, &msg);
@@ -352,28 +368,28 @@ ssize_t mipi_dsi_generic_read(FAR struct mipi_dsi_device *device,
                               FAR void *data,
                               size_t size)
 {
-  struct mipi_dsi_msg msg =
-  {
-    .channel = device->channel,
-    .tx_len = num_params,
-    .tx_buf = params,
-    .rx_len = size,
-    .rx_buf = data
-  };
+  struct mipi_dsi_msg msg;
+
+  msg.channel = device->channel;
+  msg.tx_len = num_params;
+  msg.tx_buf = params;
+  msg.rx_len = size;
+  msg.rx_buf = data;
+  msg.flags = 0;
 
   switch (num_params)
     {
-    case 0:
-      msg.type = MIPI_DSI_GENERIC_READ_0_PARAM;
-      break;
-    case 1:
-      msg.type = MIPI_DSI_GENERIC_READ_1_PARAM;
-      break;
-    case 2:
-      msg.type = MIPI_DSI_GENERIC_READ_2_PARAM;
-      break;
-    default:
-      return -EINVAL;
+      case 0:
+        msg.type = MIPI_DSI_GENERIC_READ_0_PARAM;
+        break;
+      case 1:
+        msg.type = MIPI_DSI_GENERIC_READ_1_PARAM;
+        break;
+      case 2:
+        msg.type = MIPI_DSI_GENERIC_READ_2_PARAM;
+        break;
+      default:
+        return -EINVAL;
     }
 
   return mipi_dsi_transfer(device, &msg);
@@ -402,26 +418,26 @@ ssize_t mipi_dsi_dcs_write_buffer(FAR struct mipi_dsi_device *device,
                                   FAR const void *data,
                                   size_t len)
 {
-  struct mipi_dsi_msg msg =
-  {
-    .channel = device->channel,
-    .tx_buf = data,
-    .tx_len = len
-  };
+  struct mipi_dsi_msg msg;
+
+  msg.channel = device->channel;
+  msg.tx_buf = data;
+  msg.tx_len = len;
+  msg.flags = 0;
 
   switch (len)
     {
-    case 0:
-      return -EINVAL;
-    case 1:
-      msg.type = MIPI_DSI_DCS_SHORT_WRITE_0_PARAM;
-      break;
-    case 2:
-      msg.type = MIPI_DSI_DCS_SHORT_WRITE_1_PARAM;
-      break;
-    default:
-      msg.type = MIPI_DSI_DCS_LONG_WRITE;
-      break;
+      case 0:
+        return -EINVAL;
+      case 1:
+        msg.type = MIPI_DSI_DCS_SHORT_WRITE_0_PARAM;
+        break;
+      case 2:
+        msg.type = MIPI_DSI_DCS_SHORT_WRITE_1_PARAM;
+        break;
+      default:
+        msg.type = MIPI_DSI_DCS_LONG_WRITE;
+        break;
     }
 
   return mipi_dsi_transfer(device, &msg);
@@ -459,7 +475,7 @@ ssize_t mipi_dsi_dcs_write(FAR struct mipi_dsi_device *device,
   if (len > sizeof(stack_tx) - 1)
     {
       tx = kmm_malloc(len + 1);
-      if (!tx)
+      if (tx == NULL)
         {
           return -ENOMEM;
         }
@@ -468,7 +484,7 @@ ssize_t mipi_dsi_dcs_write(FAR struct mipi_dsi_device *device,
   /* concatenate the DCS command byte and the payload */
 
   tx[0] = cmd;
-  if (data)
+  if (data != NULL)
     {
       memcpy(&tx[1], data, len);
     }
@@ -505,15 +521,15 @@ ssize_t mipi_dsi_dcs_read(FAR struct mipi_dsi_device *device,
                           FAR void *data,
                           size_t len)
 {
-  struct mipi_dsi_msg msg =
-  {
-    .channel = device->channel,
-    .type = MIPI_DSI_DCS_READ_0_PARAM,
-    .tx_buf = &cmd,
-    .tx_len = 1,
-    .rx_buf = data,
-    .rx_len = len
-  };
+  struct mipi_dsi_msg msg;
+
+  msg.channel = device->channel;
+  msg.type = MIPI_DSI_DCS_READ_0_PARAM;
+  msg.tx_buf = &cmd;
+  msg.tx_len = 1;
+  msg.rx_buf = data;
+  msg.rx_len = len;
+  msg.flags = 0;
 
   return mipi_dsi_transfer(device, &msg);
 }
@@ -559,7 +575,6 @@ int mipi_dsi_dcs_soft_reset(FAR struct mipi_dsi_device *device)
   int ret;
 
   ret = mipi_dsi_dcs_write(device, MIPI_DCS_SOFT_RESET, NULL, 0);
-
   return ret < 0 ? ret : OK;
 }
 
