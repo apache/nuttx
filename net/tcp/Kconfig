@@ -233,4 +233,43 @@ config NET_SENDFILE
 		files out a TCP connection.
 
 endif # NET_TCP && !NET_TCP_NO_STACK
+
+if NET_STATISTICS
+
+config NET_TCP_DEBUG_DROP_RECV
+	bool "TCP/IP debug feature to drop receive packet"
+	default n
+	---help---
+		This is the debug feature to drop TCP/IP received packet
+
+if NET_TCP_DEBUG_DROP_RECV
+
+config NET_TCP_DEBUG_DROP_RECV_PROBABILITY
+	int "TCP/IP drop probability of received packet"
+	range 50 10000
+	default 50
+	---help---
+		This is the drop probability of received packet, Default: 1/50
+
+endif # NET_TCP_DEBUG_DROP_RECV
+
+config NET_TCP_DEBUG_DROP_SEND
+	bool "TCP/IP debug feature to drop send packet"
+	default n
+	---help---
+		This is the debug feature to drop TCP/IP send packet
+
+if NET_TCP_DEBUG_DROP_SEND
+
+config NET_TCP_DEBUG_DROP_SEND_PROBABILITY
+	int "TCP/IP drop probability of send packet"
+	range 50 10000
+	default 50
+	---help---
+		This is the drop probability of send packet, Default: 1/50
+
+endif # NET_TCP_DEBUG_DROP_SEND
+
+endif # NET_STATISTICS
+
 endmenu # TCP/IP Networking
