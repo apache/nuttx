@@ -100,7 +100,7 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
 
   /* Rewind to correct position. */
 
-  while (pos >= 0 && iovcnt > 0)
+  while (iovcnt > 0)
     {
       if (iov->iov_len <= pos)
         {
@@ -641,7 +641,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Set outstanding request for daemon to handle. */
 
-  net_lockedwait_uninterruptible(&req->lock);
+  net_mtxlockedwait_uninterruptible(&req->lock);
   if (++req->newxid == 0)
     {
       ++req->newxid;
@@ -664,6 +664,10 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
       ++req->nbusy; /* net_lock held. */
       net_lockedwait_uninterruptible(&req->acksem);
       --req->nbusy; /* net_lock held. */
+    }
+  else
+    {
+      nerr("error, usrsock request failed with %d\n", ret);
     }
 
   /* Free request line for next command. */
@@ -700,7 +704,7 @@ void usrsock_abort(void)
        * requests.
        */
 
-      ret = net_timedwait(&req->lock, 10);
+      ret = net_timedlock(&req->lock, 10);
       if (ret < 0)
         {
           if (ret != -ETIMEDOUT && ret != -EINTR)

@@ -42,6 +42,7 @@
 #define SEM_PRIO_INHERIT          1
 #define SEM_PRIO_PROTECT          2
 #define SEM_PRIO_MASK             3
+#define SEM_PRIO_MUTEX            4
 
 /* Value returned by sem_open() in the event of a failure. */
 
@@ -105,8 +106,9 @@ struct sem_s
    * tasks hold references to the semaphore.
    */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t flags;                 /* See PRIOINHERIT_FLAGS_* definitions */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 # else
