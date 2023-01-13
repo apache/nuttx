@@ -111,6 +111,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
       case IPV6_PKTINFO:
       case IPV6_RECVPKTINFO:
         {
@@ -139,6 +140,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
           ret = OK;
         }
         break;
+#endif
 
       /* The following IPv6 socket options are defined, but not implemented */
 
