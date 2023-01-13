@@ -308,7 +308,7 @@ ssize_t net_ioctl_arglen(int cmd);
  *
  *   net_lock()        - Locks the network via a re-entrant mutex.
  *   net_unlock()      - Unlocks the network.
- *   net_lockedwait()  - Like pthread_cond_wait() except releases the
+ *   net_sem_wait()    - Like pthread_cond_wait() except releases the
  *                       network momentarily to wait on another semaphore.
  *   net_ioballoc()    - Like iob_alloc() except releases the network
  *                       momentarily to wait for an IOB to become
@@ -369,7 +369,7 @@ int net_trylock(void);
 void net_unlock(void);
 
 /****************************************************************************
- * Name: net_timedwait
+ * Name: net_sem_timedwait
  *
  * Description:
  *   Atomically wait for sem (or a timeout( while temporarily releasing
@@ -390,10 +390,10 @@ void net_unlock(void);
  *
  ****************************************************************************/
 
-int net_timedwait(sem_t *sem, unsigned int timeout);
+int net_sem_timedwait(sem_t *sem, unsigned int timeout);
 
 /****************************************************************************
- * Name: net_lockedwait
+ * Name: net_sem_wait
  *
  * Description:
  *   Atomically wait for sem while temporarily releasing the network lock.
@@ -412,13 +412,13 @@ int net_timedwait(sem_t *sem, unsigned int timeout);
  *
  ****************************************************************************/
 
-int net_lockedwait(sem_t *sem);
+int net_sem_wait(sem_t *sem);
 
 /****************************************************************************
- * Name: net_timedwait_uninterruptible
+ * Name: net_sem_timedwait_uninterruptible
  *
  * Description:
- *   This function is wrapped version of net_timedwait(), which is
+ *   This function is wrapped version of net_sem_timedwait(), which is
  *   uninterruptible and convenient for use.
  *
  * Input Parameters:
@@ -431,13 +431,13 @@ int net_lockedwait(sem_t *sem);
  *
  ****************************************************************************/
 
-int net_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
+int net_sem_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
 
 /****************************************************************************
- * Name: net_lockedwait_uninterruptible
+ * Name: net_sem_wait_uninterruptible
  *
  * Description:
- *   This function is wrapped version of net_lockedwait(), which is
+ *   This function is wrapped version of net_sem_wait(), which is
  *   uninterruptible and convenient for use.
  *
  * Input Parameters:
@@ -449,7 +449,7 @@ int net_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
  *
  ****************************************************************************/
 
-int net_lockedwait_uninterruptible(sem_t *sem);
+int net_sem_wait_uninterruptible(sem_t *sem);
 
 #ifdef CONFIG_MM_IOB
 

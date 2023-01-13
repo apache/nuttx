@@ -163,7 +163,7 @@ int usrsock_close(FAR struct usrsock_conn_s *conn)
     {
       /* Wait for completion of request. */
 
-      net_lockedwait_uninterruptible(&state.recvsem);
+      net_sem_wait_uninterruptible(&state.recvsem);
 
       ret = state.result;
       if (ret < 0)

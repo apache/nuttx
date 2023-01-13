@@ -541,7 +541,7 @@ static void tcp_recvfrom_initialize(FAR struct tcp_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_timedwait operation (may indicate EINTR)
+ *   result   The result of the net_sem_timedwait operation (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -709,11 +709,11 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           state.ir_cb->event   = tcp_recvhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_timedwait will also terminate if a signal is
+           * to occur.  net_sem_timedwait will also terminate if a signal is
            * received.
            */
 
-          ret = net_timedwait(&state.ir_sem,
+          ret = net_sem_timedwait(&state.ir_sem,
                                _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret == -ETIMEDOUT)
             {

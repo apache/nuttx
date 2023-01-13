@@ -225,7 +225,7 @@ int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
     {
       /* Wait for completion of request. */
 
-      net_lockedwait_uninterruptible(&state.reqstate.recvsem);
+      net_sem_wait_uninterruptible(&state.reqstate.recvsem);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= *value_len);

@@ -199,7 +199,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
   nxsem_get_value(&priv->wait, &ret);
   if (ret <= 0)
     {
-      net_lockedwait_uninterruptible(&priv->wait);
+      net_sem_wait_uninterruptible(&priv->wait);
       nxsem_post(&priv->wait);
     }
 

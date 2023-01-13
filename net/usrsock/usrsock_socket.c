@@ -225,7 +225,7 @@ int usrsock_socket(int domain, int type, int protocol,
 
   /* Wait for completion of request. */
 
-  net_lockedwait_uninterruptible(&state.recvsem);
+  net_sem_wait_uninterruptible(&state.recvsem);
 
   if (state.result < 0)
     {

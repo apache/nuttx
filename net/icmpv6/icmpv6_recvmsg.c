@@ -396,13 +396,13 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           state.recv_cb->event = recvfrom_eventhandler;
 
           /* Wait for either the response to be received or for timeout to
-           * occur. (1) net_timedwait will also terminate if a signal is
+           * occur. (1) net_sem_timedwait will also terminate if a signal is
            * received, (2) interrupts may be disabled!  They will be
            * re-enabled while the task sleeps and automatically re-enabled
            * when the task restarts.
            */
 
-          ret = net_timedwait(&state.recv_sem,
+          ret = net_sem_timedwait(&state.recv_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret < 0)
             {

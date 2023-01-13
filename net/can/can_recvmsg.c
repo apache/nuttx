@@ -480,7 +480,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_lockedwait operation (may indicate EINTR)
+ *   result   The result of the net_sem_wait operation (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -504,8 +504,8 @@ static ssize_t can_recvfrom_result(int result,
       return pstate->pr_result;
     }
 
-  /* If net_lockedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_lockedwait will have returned negated errno
+  /* If net_sem_wait failed, then we were probably reawakened by a signal.
+   * In this case, net_sem_wait will have returned negated errno
    * appropriately.
    */
 
@@ -654,12 +654,12 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       state.pr_cb->event  = can_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  (1) net_lockedwait will also terminate if a signal
+       * occur. NOTES:  (1) net_sem_wait will also terminate if a signal
        * is received, (2) the network is locked!  It will be un-locked while
        * the task sleeps and automatically re-locked when the task restarts.
        */
 
-      ret = net_lockedwait(&state.pr_sem);
+      ret = net_sem_wait(&state.pr_sem);
 
       /* Make sure that no further events are processed */
 
