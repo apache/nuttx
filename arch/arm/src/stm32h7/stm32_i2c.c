@@ -2805,6 +2805,7 @@ int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
   if (--priv->refs)
     {
       nxmutex_unlock(&priv->lock);
+      kmm_free(dev);
       return OK;
     }
 
