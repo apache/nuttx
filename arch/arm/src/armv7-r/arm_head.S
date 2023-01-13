@@ -35,19 +35,6 @@
  * Configuration
  ****************************************************************************/
 
-/* Hard-coded options */
-
-#undef CPU_ALIGNMENT_TRAP
-#undef CPU_CACHE_ROUND_ROBIN
-#undef CPU_DCACHE_DISABLE
-#undef CPU_ICACHE_DISABLE
-#define CPU_SCTLR_CCP15BEN 1
-#define CPU_BACKGROUND_REGION 1
-#undef CPU_DIV0_FAULT
-#undef CPU_FAST_INTERRUPT
-#undef CPU_IMPL_VECTORS
-#undef CPU_NONMASKABLE_FIQ
-
 /* There are three operational memory configurations:
  *
  * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case
@@ -204,7 +191,7 @@ __start:
 
 	/* Set configured bits */
 
-#ifdef CPU_ALIGNMENT_TRAP
+#ifdef CONFIG_ARMV7R_ALIGNMENT_TRAP
 	/* Alignment abort enable
 	 *
 	 *   SCTLR_A Bit 1:  Strict alignment enabled
@@ -213,7 +200,7 @@ __start:
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
-#ifndef CPU_DCACHE_DISABLE
+#ifndef CONFIG_ARMV7R_DCACHE_DISABLE
 	/* Dcache enable
 	 *
 	 *   SCTLR_C    Bit 2:  DCache enable
@@ -222,7 +209,7 @@ __start:
 	orr		r0, r0, #(SCTLR_C)
 #endif
 
-#ifdef CPU_SCTLR_CCP15BEN
+#ifdef CONFIG_ARMV7R_SCTLR_CCP15BEN
 	/* Enable memory barriers
 	 *
 	 *  SCTLR_CCP15BEN Bit 5: CP15 barrier enable
@@ -231,7 +218,7 @@ __start:
 	orr		r0, r0, #(SCTLR_CCP15BEN)
 #endif
 
-#ifndef CPU_ICACHE_DISABLE
+#ifndef CONFIG_ARMV7R_ICACHE_DISABLE
 	/* Icache enable
 	 *
 	 *   SCTLR_I    Bit 12: ICache enable
@@ -249,7 +236,7 @@ __start:
 	orr		r0, r0, #(SCTLR_V)
 #endif
 
-#ifdef CPU_CACHE_ROUND_ROBIN
+#ifdef CONFIG_ARMV7R_CACHE_ROUND_ROBIN
 	/* Round Robin cache replacement
 	 *
 	 *   SCTLR_RR   Bit 14: Round-robin replacement strategy.
@@ -258,7 +245,7 @@ __start:
 	orr		r0, r0, #(SCTLR_RR)
 #endif
 
-#ifdef CPU_BACKGROUND_REGION
+#ifdef CONFIG_ARMV7R_BACKGROUND_REGION
 	/* Allow PL1 access to back region when MPU is enabled
 	 *
 	 *  SCTLR_BR Bit 17: Background Region bit
@@ -267,7 +254,7 @@ __start:
 	orr		r0, r0, #(SCTLR_BR)
 #endif
 
-#ifdef CPU_DIV0_FAULT
+#ifdef CONFIG_ARMV7R_DIV0_FAULT
 	/* Enable divide by zero faults
 	 *
 	 *   SCTLR_DZ Bit 19: Divide by Zero fault enable bit
@@ -276,7 +263,7 @@ __start:
 	orr		r0, r0, #(SCTLR_DZ)
 #endif
 
-#ifdef CPU_FAST_INTERRUPT
+#ifdef CONFIG_ARMV7R_FAST_INTERRUPT
 	/* Fast interrupts configuration enable bit
 	 *
 	 *   SCTLR_FI Bit 21: Fast interrupts configuration enable bit
@@ -285,7 +272,7 @@ __start:
 	orr		r0, r0, #(SCTLR_FI)
 #endif
 
-#ifdef CPU_IMPL_VECTORS
+#ifdef CONFIG_ARMV7R_IMPL_VECTORS
 	/* Implementation defined interrupt vectors
 	 *
 	 *   SCTLR_VE Bit 24: Interrupt Vectors Enable bit
@@ -303,7 +290,7 @@ __start:
 	orr		r0, r0, #(SCTLR_EE)
 #endif
 
-#ifdef CPU_NONMASKABLE_FIQ
+#ifdef CONFIG_ARMV7R_NONMASKABLE_FIQ
 	/* Non-maskable FIQ support
 	 *
 	 *   SCTLR_NMFI Bit 27: Non-maskable FIQ (NMFI) support
@@ -430,7 +417,7 @@ arm_data_initialize:
 	cmp		r1, r2
 	blt		3b
 
-#ifndef CPU_DCACHE_DISABLE
+#ifndef CONFIG_ARMV7R_DCACHE_DISABLE
 	/* Flush the copied RAM functions into physical RAM so that will
 	 * be available when fetched into the I-Cache.
 	 *
