@@ -76,7 +76,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   /* Get an inode for this file */
 
-  SETUP_SEARCH(&desc, path, false);
+  SETUP_SEARCH(&desc, path, (oflags & O_NOFOLLOW) != 0);
 
   ret = inode_find(&desc);
   if (ret < 0)
@@ -93,6 +93,11 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
+
+  if (desc.nofollow && INODE_IS_SOFTLINK(inode))
+    {
+      return -ELOOP;
+    }
 
 #if defined(CONFIG_BCH) && \
     !defined(CONFIG_DISABLE_MOUNTPOINT) && \

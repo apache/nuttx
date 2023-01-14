@@ -53,6 +53,7 @@
 #define O_DIRECT    (1 << 9)        /* Avoid caching, write directly to hardware */
 #define O_CLOEXEC   (1 << 10)       /* Close on execute */
 #define O_DIRECTORY (1 << 11)       /* Must be a directory */
+#define O_NOFOLLOW  (1 << 12)       /* Don't follow links */
 
 /* Unsupported, but required open flags */
 
