@@ -30,6 +30,12 @@
 #include <sched.h>
 #include <errno.h>
 
+#ifdef CONFIG_MM_PGSIZE
+#  define DEFAULT_MM_PGSIZE CONFIG_MM_PGSIZE
+#else
+#  define DEFAULT_MM_PGSIZE 4096
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -226,11 +232,7 @@ long sysconf(int name)
         return 1;
 
       case _SC_PAGESIZE:
-#ifdef CONFIG_MM_PGSIZE
-        return CONFIG_MM_PGSIZE;
-#else
-        return 1;
-#endif
+        return DEFAULT_MM_PGSIZE;
 
       default:
 #if 0 /* Assume valid but not implemented for the time being */
