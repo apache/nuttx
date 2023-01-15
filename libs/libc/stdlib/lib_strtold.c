@@ -714,6 +714,7 @@ static long_double strtox(FAR const char *str, FAR char **endptr, int flag)
 
   /* Process optional 0x prefix */
 
+  s -= i;
   if (*s == '0' && (*(s + 1) | 32) == 'x')
     {
       s += 2;
