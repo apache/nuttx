@@ -463,7 +463,7 @@ static void esp32_dumpregs(struct esp32_lowerhalf_s *priv,
          getreg32(PCNT_CNT_U(6)),
          getreg32(PCNT_CNT_U(7)));
   sninfo("  PCNT_CTRL_REF: %08x\n",
-         getreg32(PCNT_CTRL_REG);
+         getreg32(PCNT_CTRL_REG));
 }
 #endif
 
@@ -607,7 +607,7 @@ static int esp32_setup(struct qe_lowerhalf_s *lower)
   esp32_gpio_matrix_in(priv->config->ch0_gpio,
                        priv->config->ch1_ctrl_sig, 0);
 
-  /* Clear the Reset bit to nable the Pulse Counter */
+  /* Clear the Reset bit to enable the Pulse Counter */
 
   regval = getreg32(PCNT_CTRL_REG);
   regval &= ~(1 << (2 * priv->config->pcntid));
@@ -710,7 +710,13 @@ static int esp32_reset(struct qe_lowerhalf_s *lower)
 
   flags = spin_lock_irqsave(&priv->lock);
 
+  /* Reset RST bit */
+
   modifyreg32(PCNT_CTRL_REG, 0, PCNT_CNT_RST_U(priv->config->pcntid));
+
+  /* Clear RST bit to enable counting again */
+
+  modifyreg32(PCNT_CTRL_REG, PCNT_CNT_RST_U(priv->config->pcntid), 0);
 
   priv->position = 0;
 
