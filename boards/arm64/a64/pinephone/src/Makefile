@@ -41,4 +41,8 @@ ifeq ($(CONFIG_VIDEO_FB),y)
 CSRCS += pinephone_display.c pinephone_lcd.c
 endif
 
+ifeq ($(CONFIG_INPUT_GT9XX),y)
+CSRCS += pinephone_touch.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
