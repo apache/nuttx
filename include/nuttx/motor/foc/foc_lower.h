@@ -77,13 +77,15 @@ struct foc_callbacks_s
   /* FOC notifier callback
    *
    * Description:
-   *   Deliver the phase current samples and wake up the thread waiting.
-   *   Must be called by lower-half logic at a frequency determined by
-   *   configuration (notifier_freq in foc_cfg_s).
+   *   Deliver the phase current samples (and optional BEMF voltages)
+   *   and wake up the thread waiting. Must be called by lower-half
+   *   logic at a frequency determined by configuration (notifier_freq
+   *   in foc_cfg_s).
    */
 
   CODE int (*notifier)(FAR struct foc_dev_s *dev,
-                       FAR foc_current_t *current);
+                       FAR foc_current_t *current,
+                       FAR foc_voltage_t *voltage);
 };
 
 /* Lower-half FOC operations */

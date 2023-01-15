@@ -62,7 +62,8 @@ static int foc_info_get(FAR struct foc_dev_s *dev,
                         FAR struct foc_info_s *info);
 
 static int foc_notifier(FAR struct foc_dev_s *dev,
-                        FAR foc_current_t *current);
+                        FAR foc_current_t *current,
+                        FAR foc_voltage_t *voltage);
 
 /****************************************************************************
  * Private Data
@@ -726,7 +727,8 @@ static int foc_info_get(FAR struct foc_dev_s *dev,
  ****************************************************************************/
 
 static int foc_notifier(FAR struct foc_dev_s *dev,
-                        FAR foc_current_t *current)
+                        FAR foc_current_t *current,
+                        FAR foc_voltage_t *voltage)
 {
   int ret  = OK;
   int sval = 0;
@@ -742,6 +744,18 @@ static int foc_notifier(FAR struct foc_dev_s *dev,
   memcpy(&dev->state.curr,
          current,
          sizeof(foc_current_t) * CONFIG_MOTOR_FOC_PHASES);
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  /* Copy voltage */
+
+  memcpy(&dev->state.volt,
+         voltage,
+         sizeof(foc_voltage_t) * CONFIG_MOTOR_FOC_PHASES);
+#else
+  /* If BEMF sampling is not enabled then voltage must be NULL */
+
+  DEBUGASSERT(voltage == NULL);
+#endif
 
   /* Check if the previous cycle was handled */
 

@@ -79,6 +79,12 @@ struct foc_dummy_data_s
 
   foc_current_t current[CONFIG_MOTOR_FOC_PHASES];
 
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  /* BEMF voltage */
+
+  foc_voltage_t volt[CONFIG_MOTOR_FOC_PHASES];
+#endif
+
   /* FOC worker loop helpers */
 
   bool     state;
@@ -464,7 +470,11 @@ static void foc_dummy_notifier_handler(FAR struct foc_dev_s *dev)
     {
       /* Call FOC notifier */
 
-      sim->cb->notifier(dev, sim->current);
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+      sim->cb->notifier(dev, sim->current, sim->voltage);
+#else
+      sim->cb->notifier(dev, sim->current, NULL);
+#endif
     }
 
   /* Increase counter */
