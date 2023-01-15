@@ -234,6 +234,10 @@ endif
 ARCHCFLAGS += -Wstrict-prototypes
 ARCHCXXFLAGS += -nostdinc++
 
+ifneq ($(CONFIG_CXX_STANDARD),)
+  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+endif
+
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
 endif

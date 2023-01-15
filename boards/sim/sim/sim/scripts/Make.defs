@@ -106,6 +106,10 @@ ARCHCXXFLAGS += -ffunction-sections -fdata-sections
 ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHCXXFLAGS += -Wall -Wshadow -Wundef
 
+ifneq ($(CONFIG_CXX_STANDARD),)
+  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+endif
+
 ifeq ($(CONFIG_CXX_EXCEPTION),)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
 endif
