@@ -202,6 +202,10 @@ enum v4l2_scene_mode
 #define V4L2_3A_STATUS_AWB_OPERATING (1 << 1) /**< AWB is operating */
 #define V4L2_3A_STATUS_AF_OPERATING  (1 << 2) /**< AF  is operating */
 
+/** Spot position in spot exposure metering */
+
+#define V4L2_CID_EXPOSURE_METERING_SPOT_POSITION (22)
+
 /** Flash and privacy (indicator) light controls */
 
 #define V4L2_CID_FLASH_LED_MODE   (0)

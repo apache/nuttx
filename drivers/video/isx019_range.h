@@ -92,6 +92,10 @@
 #define MAX_METER        (3)
 #define STEP_METER       (1)
 
+#define MIN_SPOTPOS      (0x00000000)
+#define MAX_SPOTPOS      (0x050003c0)
+#define STEP_SPOTPOS     (1)
+
 #define MIN_PAN        (-32)
 #define MAX_PAN        (32)
 #define STEP_PAN       (1)

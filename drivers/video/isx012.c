@@ -152,6 +152,11 @@
 #define CLIP_SIZE_UNIT   (8)
 #define RESCALE_FOR_CLIP(v, a, b)  (((v) * (a)) / (b))
 
+/* The number of whole image splits for spot position decision. */
+
+#define ISX012_SPOT_POSITION_SPLIT_NUM_X (9)
+#define ISX012_SPOT_POSITION_SPLIT_NUM_Y (7)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1902,6 +1907,15 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
 
         break;
 
+      case IMGSENSOR_ID_SPOT_POSITION:
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
+        range->minimum       = ISX012_MIN_SPOTPOS;
+        range->maximum       = ISX012_MAX_SPOTPOS;
+        range->step          = ISX012_STEP_SPOTPOS;
+        range->default_value = ISX012_DEF_SPOTPOS;
+
+        break;
+
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
         value->type = IMGSENSOR_CTRL_TYPE_INTEGER_MENU;
         discrete->nr_values = ARRAY_NENTRIES(g_isx012_presetwb_actual);
@@ -1979,6 +1993,70 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
     }
 
   return ret;
+}
+
+static void get_current_framesize(FAR struct isx012_dev_s *priv,
+                                  FAR uint16_t *w,
+                                  FAR uint16_t *h)
+{
+  uint16_t w_addr = HSIZE_MONI;
+  uint16_t h_addr = VSIZE_MONI;
+
+  switch (priv->mode)
+    {
+      case REGVAL_MODESEL_MON:
+        w_addr = HSIZE_MONI;
+        h_addr = VSIZE_MONI;
+        break;
+
+      case REGVAL_MODESEL_MOV:
+        w_addr = HSIZE_MOVIE;
+        h_addr = VSIZE_MOVIE;
+        break;
+
+      case REGVAL_MODESEL_CAP:
+        w_addr = HSIZE_CAP;
+        h_addr = VSIZE_CAP;
+        break;
+
+      default:
+
+        /* It does not come here due to register specification. */
+
+        break;
+    }
+
+  *w = isx012_getreg(priv, w_addr, 2);
+  *h = isx012_getreg(priv, h_addr, 2);
+}
+
+static uint32_t restore_spot_position(uint8_t regval,
+                                      uint16_t w,
+                                      uint16_t split)
+{
+  return ((regval * w) / split + (w / split) / 2);
+}
+
+static int32_t get_spot_position(FAR struct isx012_dev_s *priv)
+{
+  uint16_t regval;
+  uint16_t reg_x;
+  uint16_t reg_y;
+  uint32_t x;
+  uint32_t y;
+  uint16_t w;
+  uint16_t h;
+
+  regval = isx012_getreg(priv, SPOT_FRM_NUM, 1);
+  reg_x = regval % ISX012_SPOT_POSITION_SPLIT_NUM_X;
+  reg_y = regval / ISX012_SPOT_POSITION_SPLIT_NUM_X;
+
+  get_current_framesize(priv, &w, &h);
+
+  x = restore_spot_position(reg_x, w, ISX012_SPOT_POSITION_SPLIT_NUM_X);
+  y = restore_spot_position(reg_y, h, ISX012_SPOT_POSITION_SPLIT_NUM_Y);
+
+  return (int32_t)((x << 16) | y);
 }
 
 static int isx012_get_value(FAR struct imgsensor_s *sensor,
@@ -2245,6 +2323,10 @@ static int isx012_get_value(FAR struct imgsensor_s *sensor,
 
         break;
 
+      case IMGSENSOR_ID_SPOT_POSITION:
+        value->value32 = get_spot_position(priv);
+        break;
+
       case IMGSENSOR_ID_3A_PARAMETER:
         if (value->p_u16 == NULL)
           {
@@ -2354,6 +2436,31 @@ static int set_clip(uint32_t size,
   target->height = val[IMGSENSOR_CLIP_INDEX_HEIGHT];
 
   return OK;
+}
+
+static int set_spot_position(FAR struct isx012_dev_s *priv, int32_t val)
+{
+  uint16_t w;
+  uint16_t h;
+  uint16_t x = (uint16_t)(val >> 16);
+  uint16_t y = (uint16_t)(val & 0xffff);
+  uint8_t reg_x;
+  uint8_t reg_y;
+  uint8_t reg;
+
+  get_current_framesize(priv, &w, &h);
+
+  if ((x >= w) || (y >= h))
+    {
+      return -EINVAL;
+    }
+
+  reg_x = (x * ISX012_SPOT_POSITION_SPLIT_NUM_X) / w;
+  reg_y = (y * ISX012_SPOT_POSITION_SPLIT_NUM_Y) / h;
+
+  reg = reg_y * ISX012_SPOT_POSITION_SPLIT_NUM_X + reg_x;
+
+  return isx012_putreg(priv, SPOT_FRM_NUM, reg, 1);
 }
 
 static int isx012_set_value(FAR struct imgsensor_s *sensor,
@@ -2852,6 +2959,19 @@ static int isx012_set_value(FAR struct imgsensor_s *sensor,
               }
           }
 
+        break;
+
+      case IMGSENSOR_ID_SPOT_POSITION:
+        ret = VALIDATE_VALUE(value.value32,
+                             ISX012_MIN_SPOTPOS,
+                             ISX012_MAX_SPOTPOS,
+                             ISX012_STEP_SPOTPOS);
+        if (ret != OK)
+          {
+            break;
+          }
+
+        ret = set_spot_position(priv, value.value32);
         break;
 
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
