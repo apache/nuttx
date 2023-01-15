@@ -222,6 +222,16 @@
 #define ISX012_REG_PHOTOMETRY     AE_SUB_SN1
 #define ISX012_SIZE_PHOTOMETRY    (1)
 
+/* Definition for control spot position */
+
+#define ISX012_TYPE_SPOTPOS       V4L2_CTRL_TYPE_INTEGER
+#define ISX012_DEF_SPOTPOS        (0x051003cc)
+#define ISX012_MIN_SPOTPOS        (0)
+#define ISX012_MAX_SPOTPOS        (0x0a200798)
+#define ISX012_STEP_SPOTPOS       (1)
+#define ISX012_REG_SPOTPOS        SPOT_FRM_NUM
+#define ISX012_SIZE_SPOTPOS       (1)
+
 /* Definition for control zoom */
 
 #define ISX012_TYPE_ZOOM            V4L2_CTRL_TYPE_U16FIXEDPOINT_Q8

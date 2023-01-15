@@ -154,6 +154,16 @@
 #define VTIME_PER_FRAME    (30518)
 #define INTERVAL_PER_FRAME (33333)
 
+/* ISX019 image sensor output frame size. */
+
+#define ISX019_WIDTH  (1280)
+#define ISX019_HEIGHT (960)
+
+/* The number of whole image splits for spot position decision. */
+
+#define ISX019_SPOT_POSITION_SPLIT_NUM_X (9)
+#define ISX019_SPOT_POSITION_SPLIT_NUM_Y (7)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -179,6 +189,7 @@ struct isx019_default_value_s
   int32_t iso;
   int32_t iso_auto;
   int32_t meter;
+  int32_t spot_pos;
   int32_t threealock;
   int32_t threeastatus;
   int32_t jpgquality;
@@ -1238,6 +1249,7 @@ static void store_default_value(FAR isx019_dev_t *priv)
   def->iso          = get_value32(priv, IMGSENSOR_ID_ISO_SENSITIVITY);
   def->iso_auto     = get_value32(priv, IMGSENSOR_ID_ISO_SENSITIVITY_AUTO);
   def->meter        = get_value32(priv, IMGSENSOR_ID_EXPOSURE_METERING);
+  def->spot_pos     = get_value32(priv, IMGSENSOR_ID_SPOT_POSITION);
   def->threealock   = get_value32(priv, IMGSENSOR_ID_3A_LOCK);
   def->threeastatus = get_value32(priv, IMGSENSOR_ID_3A_STATUS);
   def->jpgquality   = get_value32(priv, IMGSENSOR_ID_JPEG_QUALITY);
@@ -1888,6 +1900,12 @@ static int isx019_get_supported_value(FAR struct imgsensor_s *sensor,
                                 STEP_METER, def->meter);
         break;
 
+      case IMGSENSOR_ID_SPOT_POSITION:
+        val->type = IMGSENSOR_CTRL_TYPE_INTEGER;
+        SET_RANGE(val->u.range, MIN_SPOTPOS, MAX_SPOTPOS,
+                                STEP_SPOTPOS, def->spot_pos);
+        break;
+
       case IMGSENSOR_ID_3A_LOCK:
         val->type = IMGSENSOR_CTRL_TYPE_BITMASK;
         SET_RANGE(val->u.range, MIN_3ALOCK, MAX_3ALOCK,
@@ -2364,6 +2382,158 @@ static int set_meter(FAR isx019_dev_t *priv,
   return OK;
 }
 
+static void get_current_framesize(FAR isx019_dev_t *priv,
+                                  FAR uint16_t *w, FAR uint16_t *h)
+{
+  uint8_t frmsz;
+
+  DEBUGASSERT(w && h);
+
+  fpga_i2c_read(priv, FPGA_FORMAT_AND_SCALE, &frmsz, 1);
+
+  switch (frmsz & 0xf0)
+    {
+      case FPGA_SCALE_1280_960:
+        *w = 1280;
+        *h = 960;
+        break;
+
+      case FPGA_SCALE_640_480:
+        *w = 640;
+        *h = 480;
+        break;
+
+      case FPGA_SCALE_320_240:
+        *w = 320;
+        *h = 240;
+        break;
+
+      case FPGA_SCALE_160_120:
+        *w = 160;
+        *h = 120;
+        break;
+
+      default:
+
+        /* It may not come here due to register specification */
+
+        break;
+    }
+}
+
+static void get_current_clip_setting(FAR isx019_dev_t *priv,
+                                     FAR uint16_t *w,
+                                     FAR uint16_t *h,
+                                     FAR uint16_t *offset_x,
+                                     FAR uint16_t *offset_y)
+{
+  uint8_t sz;
+  uint8_t top;
+  uint8_t left;
+
+  fpga_i2c_read(priv, FPGA_CLIP_SIZE, &sz, 1);
+  fpga_i2c_read(priv, FPGA_CLIP_TOP,  &top, 1);
+  fpga_i2c_read(priv, FPGA_CLIP_LEFT, &left, 1);
+
+  *offset_x = left * FPGA_CLIP_UNIT;
+  *offset_y = top  * FPGA_CLIP_UNIT;
+
+  switch (sz)
+    {
+      case FPGA_CLIP_NON:
+        *w = 0;
+        *h = 0;
+        *offset_x = 0;
+        *offset_y = 0;
+        break;
+
+      case FPGA_CLIP_1280_720:
+        *w = 1280;
+        *h = 720;
+        break;
+
+      case FPGA_CLIP_640_360:
+        *w = 640;
+        *h = 360;
+        break;
+
+      default:
+
+        /* It may not come here due to register specification */
+
+        break;
+    }
+}
+
+static int calc_spot_position_regval(uint16_t val,
+                                     uint16_t basis,
+                                     uint16_t sz,
+                                     uint16_t offset,
+                                     int      split)
+{
+  int ret;
+  int ratio;
+
+  /* Change basis from `sz` to `basis` about `val` and `offset`. */
+
+  ratio = basis / sz;
+  ret = val * ratio;
+  ret += (offset * FPGA_CLIP_UNIT * ratio);
+
+  return (ret * split) / basis;
+}
+
+static int set_spot_position(FAR isx019_dev_t *priv,
+                             imgsensor_value_t val)
+{
+  uint8_t regval;
+  uint8_t reg_x;
+  uint8_t reg_y;
+  uint16_t w;
+  uint16_t h;
+  uint16_t clip_w;
+  uint16_t clip_h;
+  uint16_t offset_x;
+  uint16_t offset_y;
+  uint16_t x = (uint16_t)(val.value32 >> 16);
+  uint16_t y = (uint16_t)(val.value32 & 0xffff);
+  int split;
+
+  /* Spot position of ISX019 is divided into 9x7 sections.
+   * - Horizontal direction is devided into 9 sections.
+   * - Vertical  direction is divided into 7 sections.
+   * The register value 0 means left top.
+   * The register value 62 means right bottom.
+   * Then, the following ISX019 board flow.
+   * - image sensor output the 1280x960 image
+   * - FPGA scale
+   * - FPGA clipping
+   */
+
+  get_current_framesize(priv, &w, &h);
+  if ((x >= w) || (y >= h))
+    {
+      return -EINVAL;
+    }
+
+  get_current_clip_setting(priv, &clip_w, &clip_h, &offset_x, &offset_y);
+  if ((clip_w != 0) && (clip_h != 0))
+    {
+      if ((x >= clip_w) || (y >= clip_h))
+        {
+          return -EINVAL;
+        }
+    }
+
+  split = ISX019_SPOT_POSITION_SPLIT_NUM_X;
+  reg_x = calc_spot_position_regval(x, 1280, w, offset_x, split);
+  split = ISX019_SPOT_POSITION_SPLIT_NUM_Y;
+  reg_y = calc_spot_position_regval(y,  960, h, offset_y, split);
+
+  regval = reg_y * ISX019_SPOT_POSITION_SPLIT_NUM_X + reg_x;
+  return isx019_i2c_write(priv, CAT_CATAE, SPOT_FRM_NUM, &regval, 1);
+}
+
 static int set_3alock(FAR isx019_dev_t *priv,
                       imgsensor_value_t val)
 {
@@ -2783,6 +2953,10 @@ static setvalue_t set_value_func(uint32_t id)
         func = set_meter;
         break;
 
+      case IMGSENSOR_ID_SPOT_POSITION:
+        func = set_spot_position;
+        break;
+
       case IMGSENSOR_ID_3A_LOCK:
         func = set_3alock;
         break;
@@ -2969,6 +3143,83 @@ static int get_meter(FAR isx019_dev_t *priv,
         break;
     }
 
+  return OK;
+}
+
+static uint32_t restore_spot_position(uint16_t regval,
+                                      uint16_t basis,
+                                      uint16_t sz,
+                                      uint16_t clip_sz,
+                                      uint16_t offset,
+                                      uint16_t split)
+{
+  uint16_t ret;
+  uint16_t unit;
+  uint16_t border;
+
+  /* First, convert register value to coordinate value. */
+
+  unit = basis / split;
+
+  ret = (regval * unit) + (unit / 2);
+
+  /* Second, consider the ratio between basis size and frame size. */
+
+  ret = ret * sz / basis;
+
+  /* Third, consider offset value of clip setting. */
+
+  if  (ret > offset)
+    {
+      ret = ret - offset;
+    }
+  else
+    {
+      ret = 0;
+    }
+
+  /* If the coordinate protrudes from the frame,
+   * regard it as the boader of the frame.
+   */
+
+  border = (clip_sz != 0) ? (clip_sz - 1) : (sz - 1);
+  if (ret > border)
+    {
+      ret = border;
+    }
+
+  return ret;
+}
+
+static int get_spot_position(FAR isx019_dev_t *priv,
+                             FAR imgsensor_value_t *val)
+{
+  uint8_t regval;
+  uint8_t regx;
+  uint8_t regy;
+  uint16_t w;
+  uint16_t h;
+  uint32_t x;
+  uint32_t y;
+  uint16_t clip_w;
+  uint16_t clip_h;
+  uint16_t offset_x;
+  uint16_t offset_y;
+  int split;
+
+  isx019_i2c_read(priv, CAT_CATAE, SPOT_FRM_NUM, &regval, 1);
+
+  regx = regval % ISX019_SPOT_POSITION_SPLIT_NUM_X;
+  regy = regval / ISX019_SPOT_POSITION_SPLIT_NUM_X;
+
+  get_current_framesize(priv, &w, &h);
+  get_current_clip_setting(priv, &clip_w, &clip_h, &offset_x, &offset_y);
+  split = ISX019_SPOT_POSITION_SPLIT_NUM_X;
+  x = restore_spot_position(regx, ISX019_WIDTH,  w, clip_w, offset_x, split);
+  split = ISX019_SPOT_POSITION_SPLIT_NUM_Y;
+  y = restore_spot_position(regy, ISX019_HEIGHT, h, clip_h, offset_y, split);
+
+  val->value32 = (int32_t)((x << 16) | y);
   return OK;
 }
 
@@ -3202,6 +3453,10 @@ static getvalue_t get_value_func(uint32_t id)
 
       case IMGSENSOR_ID_EXPOSURE_METERING:
         func = get_meter;
+        break;
+
+      case IMGSENSOR_ID_SPOT_POSITION:
+        func = get_spot_position;
         break;
 
       case IMGSENSOR_ID_3A_LOCK:

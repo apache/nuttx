@@ -667,6 +667,7 @@
 #define AE_INIT_MASK_CNT            (AE_BASE+0x002B)
 #define AESPEED_INIT                (AE_BASE+0x0031)
 #define AESPEED_FAST                (AE_BASE+0x0032)
+#define SPOT_FRM_NUM                (AE_BASE+0x0033)
 #define FASTMOVE_TIMEOUT            (AE_BASE+0x003D)
 #define AE_START_LEVEL              (AE_BASE+0x0040)
 

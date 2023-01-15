@@ -171,6 +171,7 @@ struct video_scene_params_s
   enum v4l2_iso_sensitivity_auto_type iso_auto;
   int32_t iso;
   enum v4l2_exposure_metering meter;
+  int32_t spot_pos;
   int32_t threea_lock;
   enum v4l2_flash_led_mode led;
   int32_t jpeg_quality;
@@ -409,6 +410,7 @@ static const video_parameter_name_t g_video_parameter_name[] =
   {IMGSENSOR_ID_ISO_SENSITIVITY,      "ISO sensitivity"},
   {IMGSENSOR_ID_ISO_SENSITIVITY_AUTO, "Automatic ISO sensitivity"},
   {IMGSENSOR_ID_EXPOSURE_METERING,    "Photometry"},
+  {IMGSENSOR_ID_SPOT_POSITION,        "Spot position"},
   {IMGSENSOR_ID_3A_LOCK,              "Lock AWB/AE"},
   {IMGSENSOR_ID_AUTO_FOCUS_START,     "Start single Auto Focus"},
   {IMGSENSOR_ID_AUTO_FOCUS_STOP,      "Stop single Auto Focus"},
@@ -906,6 +908,7 @@ static void initialize_scene_parameter(video_scene_params_t *sp)
   sp->iso_auto        = get_default_value(IMGSENSOR_ID_ISO_SENSITIVITY_AUTO);
   sp->iso             = get_default_value(IMGSENSOR_ID_ISO_SENSITIVITY);
   sp->meter           = get_default_value(IMGSENSOR_ID_EXPOSURE_METERING);
+  sp->spot_pos        = get_default_value(IMGSENSOR_ID_SPOT_POSITION);
   sp->threea_lock     = get_default_value(IMGSENSOR_ID_3A_LOCK);
   sp->led             = get_default_value(IMGSENSOR_ID_FLASH_LED_MODE);
   sp->jpeg_quality    = get_default_value(IMGSENSOR_ID_JPEG_QUALITY);
@@ -2381,6 +2384,7 @@ static int reflect_scene_parameter(enum v4l2_scene_mode mode)
     }
 
   set_intvalue(IMGSENSOR_ID_EXPOSURE_METERING, sp->meter);
+  set_intvalue(IMGSENSOR_ID_SPOT_POSITION, sp->spot_pos);
   set_intvalue(IMGSENSOR_ID_3A_LOCK, sp->threea_lock);
   set_intvalue(IMGSENSOR_ID_FLASH_LED_MODE, sp->led);
   set_intvalue(IMGSENSOR_ID_JPEG_QUALITY, sp->jpeg_quality);
@@ -2619,6 +2623,10 @@ static int read_scene_param(enum v4l2_scene_mode mode,
 
       case IMGSENSOR_ID_EXPOSURE_METERING:
         control->value = sp->meter;
+        break;
+
+      case IMGSENSOR_ID_SPOT_POSITION:
+        control->value = sp->spot_pos;
         break;
 
       case IMGSENSOR_ID_3A_LOCK:
@@ -2930,6 +2938,10 @@ static int save_scene_param(enum v4l2_scene_mode mode,
 
       case IMGSENSOR_ID_EXPOSURE_METERING:
         sp->meter = control->value;
+        break;
+
+      case IMGSENSOR_ID_SPOT_POSITION:
+        sp->spot_pos = control->value;
         break;
 
       case IMGSENSOR_ID_3A_LOCK:

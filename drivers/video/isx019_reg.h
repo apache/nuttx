@@ -236,6 +236,7 @@
 /* For CAT_CATAE */
 
 #define AEMODE            (0x0000)
+#define SPOT_FRM_NUM      (0x0003)
 #define SHT_PRIMODE       (0x0008)
 #define GAIN_PRIMODE      (0x000c)
 
