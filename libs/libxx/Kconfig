@@ -85,6 +85,12 @@ endchoice
 
 endif
 
+config CXX_STANDARD
+	string "Language standard"
+	default "c++17"
+	---help---
+		Possible values: c++98, c++11, c++14, c++17 and c++20
+
 config CXX_EXCEPTION
 	bool "Enable Exception Support"
 
