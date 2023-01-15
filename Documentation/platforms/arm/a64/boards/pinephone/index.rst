@@ -12,7 +12,8 @@ Features
     - **GPU:** ARM Mali400 MP2
     - **Interrupt Controller:** ARM GIC PL400 (Generic Interrupt Controller v2)
     - **Display Engine:** Allwinner Display Engine 2.0 (MIPI DSI with DMA)
-- **Display:** Xingbangda XBD599 HD IPS Capacitive Touchscreen (5.95 inches, 1440x720 resolution, 16M colors, PWM Backlight)
+- **Display:** Xingbangda XBD599 HD IPS Display (5.95 inches, 1440x720 resolution, 16M colors, PWM Backlight)
+- **Touch Panel:** Goodix GT917S Capacitive Touch Panel (I2C)
 - **LCD Controller:** Sitronix ST7703 (MIPI DSI)
 - **RAM:** 2GB or 3GB LPDDR3 SDRAM
 - **Internal Storage:** 16GB or 32GB eMMC, extendable up to 2TB via microSD
@@ -25,7 +26,9 @@ Features
 - 2.4 GHz Wireless: Realtek RTL8723CS
     - **WLAN:** WiFi 802.11 b/g/n, single-band, hotspot
     - **Bluetooth:** 4.0, A2DP
-- **Sensors:** Accelerometer, Gyroscope, Proximity, Ambient Light, Compass
+- **Magnetometer:**	STMicroelectronics LIS3MDL
+- **Ambient Light / Proximity:** SensorTek STK3335
+- **Accelerometer / Gyroscope:** InvenSense MPU-6050 (I2C)
 - **Privacy Switches:** Modem, WiFi & Bluetooth, Microphone, Cameras, Headphone
 - **Battery:** Lithium-ion, rated capacity 2800mAh (10.64Wh), typical capacity 3000mAh (11.40Wh)
 - **I/O:** USB Type-C, USB Host, DisplayPort Alternate Mode output, 15W 5V 3A Quick Charge, follows USB PD specification
@@ -74,7 +77,7 @@ Configure the NuttX project and build the project:
 .. code:: console
 
    $ cd nuttx
-   $ tools/configure.sh pinephone:lcd
+   $ tools/configure.sh pinephone:lvgl
    $ make
    $ cp nuttx.bin Image
    $ rm -f Image.gz
@@ -114,6 +117,12 @@ To see the available commands in NuttShell:
 
    $ help
 
+To run the LVGL Touchscreen Demo:
+
+.. code:: console
+
+   $ lvgldemo widgets
+
 LEDs
 ====
 
@@ -139,6 +148,13 @@ Power Management Integrated Circuit (AXP803) and
 Reduced Serial Bus (RSB).
 Serial Console is enabled on UART0 at 115.2 kbps.
 
+lvgl
+____
+
+Supports all the features in ``lcd``,
+plus LVGL Graphics Library and Touch Panel (GT917S).
+Serial Console is enabled on UART0 at 115.2 kbps.
+
 nsh
 ---
 
@@ -147,14 +163,23 @@ This configuration is focused on low level, command-line driver testing.
 Built-in applications are supported, but none are enabled.
 Serial Console is enabled on UART0 at 115.2 kbps.
 
+sensor
+------
+
+Supports Accelerometer / Gyroscope (MPU-6050),
+Power Management Integrated Circuit (AXP803) and
+Reduced Serial Bus (RSB).
+Serial Console is enabled on UART0 at 115.2 kbps.
+
 Peripheral Support
 ==================
 
 NuttX for PinePhone supports these peripherals:
 
-======================= ======= =====
-Peripheral              Support NOTES
-======================= ======= =====
+======================== ======= =====
+Peripheral               Support NOTES
+======================== ======= =====
+Accelerometer (MPU-6050) Yes
 Backlight                Yes
 Display Engine           Yes
 Frame Buffer             Yes
@@ -166,6 +191,7 @@ PIO                      Yes
 PMIC (AXP803)            Yes
 RSB                      Yes
 TCON0                    Yes
-TWI                      Yes
-UART                     Yes    Only UART0 is supported
-======================= ======= =====
+TWI / I2C                Yes
+Touch Panel (GT917S)     Yes
+UART                     Yes     Only UART0 is supported
+======================== ======= =====

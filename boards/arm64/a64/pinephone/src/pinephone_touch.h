@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/gt9xx.h
+ * boards/arm64/a64/pinephone/src/pinephone_touch.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,65 +18,36 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_INPUT_GT9XX_H
-#define __INCLUDE_NUTTX_INPUT_GT9XX_H
+#ifndef __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_TOUCH_H
+#define __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_TOUCH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* Callback for Board-Specific Operations */
-
-struct gt9xx_board_s
-{
-  /* Attach the Interrupt Handler for Touch Panel */
-
-  int (*irq_attach) (const struct gt9xx_board_s *state,
-                     xcpt_t isr,
-                     FAR void *arg);
-
-  /* Enable or disable Interrupts for the Touch Panel */
-
-  void (*irq_enable) (const struct gt9xx_board_s *state, bool enable);
-
-  /* Power on or off the Touch Panel */
-
-  int (*set_power) (const struct gt9xx_board_s *state, bool on);
-};
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gt9xx_register
+ * Name: pinephone_touch_panel_register
  *
  * Description:
  *   Register the driver for Goodix GT9XX Touch Panel.  Attach the
  *   Interrupt Handler for the Touch Panel and disable Touch Interrupts.
  *
  * Input Parameters:
- *   devpath      - Device Path (e.g. "/dev/input0")
- *   dev          - I2C Bus
- *   i2c_devaddr  - I2C Address of Touch Panel
- *   board_config - Callback for Board-Specific Operations
+ *   devpath - Device Path (e.g. "/dev/input0")
+ *   i2c     - I2C Bus
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int gt9xx_register(FAR const char *devpath,
-                   FAR struct i2c_master_s *dev,
-                   uint8_t i2c_devaddr,
-                   const struct gt9xx_board_s *board_config);
+int pinephone_touch_panel_register(const char *devpath,
+                                   struct i2c_master_s *i2c);
 
-#endif /* __INCLUDE_NUTTX_INPUT_GT9XX_H */
+#endif /* __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_TOUCH_H */
