@@ -1717,7 +1717,11 @@ static int stm32_foc_worker_handler(struct foc_dev_s *dev)
 
       /* Call upper-half worker callback */
 
-      priv->cb->notifier(dev, priv->data.curr);
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+#  error BEMF sensing not supported yet
+#else
+      priv->cb->notifier(dev, priv->data.curr, NULL);
+#endif
     }
 
   return ret;
