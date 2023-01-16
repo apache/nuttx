@@ -1882,7 +1882,7 @@ static void tivacan_bittiming_set(struct can_dev_s *dev,
   DEBUGASSERT(timing->prescaler > TIVA_CAN_PRESCALER_MIN &&
               timing->prescaler < TIVA_CAN_PRESCALER_MAX);
   DEBUGASSERT(timing->tseg1 > TIVA_CAN_TSEG1_MIN &&
-              timing->tseg1 < TIVA_CAN_PRESCALER_MAX);
+              timing->tseg1 < TIVA_CAN_TSEG1_MAX);
   DEBUGASSERT(timing->tseg2 > TIVA_CAN_TSEG2_MIN &&
               timing->tseg2 < TIVA_CAN_TSEG2_MAX);
   DEBUGASSERT(timing->sjw > TIVA_CAN_SJW_MIN &&
