@@ -834,7 +834,7 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
   struct esp32_dmadesc_s *dma_tx_desc;
   struct esp32_dmadesc_s *dma_rx_desc;
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  uint8_t *alloctp;
+  uint8_t *alloctp = NULL;
   uint8_t *allocrp;
 #endif
 
@@ -1419,10 +1419,11 @@ static void esp32_spi_deinit(struct spi_dev_s *dev)
 
   if (priv->config->use_dma)
     {
+      modifyreg32(DPORT_PERIP_RST_EN_REG, 0, priv->config->dma_rst_bit);
       modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->dma_clk_bit, 0);
     }
 
-  modifyreg32(DPORT_PERIP_RST_EN_REG, 0, priv->config->clk_bit);
+  modifyreg32(DPORT_PERIP_RST_EN_REG, 0, priv->config->rst_bit);
   modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->clk_bit, 0);
 
   priv->frequency = 0;
