@@ -1361,7 +1361,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
               tcp_wrbuffer_release(wrb);
             }
 
-          if (nonblock)
+          if (nonblock || (timeout != UINT_MAX &&
+                           tcp_send_gettimeout(start, timeout) == 0))
             {
               nerr("ERROR: Failed to add data to the I/O chain\n");
               ret = -EAGAIN;
