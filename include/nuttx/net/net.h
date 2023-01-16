@@ -202,10 +202,6 @@ struct socket_conn_s
   FAR struct devif_callback_s *list;
   FAR struct devif_callback_s *list_tail;
 
-  /* Definitions of 8-bit socket flags */
-
-  uint8_t       s_flags;     /* See _SF_* definitions */
-
   /* Socket options */
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -213,14 +209,18 @@ struct socket_conn_s
   sockopt_t     s_options;   /* Selected socket options */
   socktimeo_t   s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
-#ifdef CONFIG_NET_SOLINGER
+#  ifdef CONFIG_NET_SOLINGER
   socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
-#endif
-#ifdef CONFIG_NET_BINDTODEVICE
+#  endif
+#  ifdef CONFIG_NET_BINDTODEVICE
   uint8_t       s_boundto;   /* Index of the interface we are bound to.
                               * Unbound: 0, Bound: 1-MAX_IFINDEX */
+#  endif
 #endif
-#endif
+
+  /* Definitions of 8-bit socket flags */
+
+  uint8_t       s_flags;     /* See _SF_* definitions */
 
   /* Connection-specific content may follow */
 };
