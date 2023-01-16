@@ -130,14 +130,13 @@ static int unmap_rammap(FAR struct task_group_s *group,
  *
  * Input Parameters:
  *   filep   file descriptor of the backing file -- required.
- *   length  The length of the mapping.  For exception #1 above, this length
- *           ignored:  The entire underlying media is always accessible.
- *   offset  The offset into the file to map
+ *   entry   mmap entry information.
+ *           field offset and length must be initialized correctly.
  *   kernel  kmm_zalloc or kumm_zalloc
- *   mapped  The pointer to the mapped area
  *
  * Returned Value:
- *  On success, rammmap returns 0. Otherwise errno is returned appropriately.
+ *  On success, rammap returns 0 and entry->vaddr points to memory mapped.
+ *     Otherwise errno is returned appropriately.
  *
  *     EBADF
  *      'fd' is not a valid file descriptor.
@@ -251,11 +250,11 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 errout_with_region:
   if (kernel)
     {
-      kmm_free(rdbuffer);
+      kmm_free(entry->vaddr);
     }
   else
     {
-      kumm_free(rdbuffer);
+      kumm_free(entry->vaddr);
     }
 
   return ret;
