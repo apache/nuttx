@@ -83,11 +83,11 @@ config PL310_TRCR_TSETLAT
 	default 1
 
 config PL310_TRCR_TRDLAT
-	bool "PL310 TRCR read access latency"
+	int "PL310 TRCR read access latency"
 	default 1
 
-config PL310_TRCR_WRLAT
-	bool "PL310 TRCR write access latency"
+config PL310_TRCR_TWRLAT
+	int "PL310 TRCR write access latency"
 	default 1
 endif # PL310_TRCR
 
@@ -96,16 +96,16 @@ config PL310_DRCR
 	default n
 
 if PL310_DRCR
-config PL310_DRCR_TSETLAT
+config PL310_DRCR_DSETLAT
 	int "PL310 DRCR setup latency"
 	default 1
 
-config PL310_DRCR_TRDLAT
-	bool "PL310 DRCR read access latency"
+config PL310_DRCR_DRDLAT
+	int "PL310 DRCR read access latency"
 	default 1
 
-config PL310_DRCR_WRLAT
-	bool "PL310 DRCR write access latency"
+config PL310_DRCR_DWRLAT
+	int "PL310 DRCR write access latency"
 	default 1
 endif # PL310_DRCR
 endif # ARMV7A_L2CC_PL310
