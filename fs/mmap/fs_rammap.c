@@ -179,6 +179,8 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
       return -ENOMEM;
     }
 
+  entry->vaddr = rdbuffer; /* save the buffer firstly */
+
   /* Seek to the specified file offset */
 
   fpos = file_seek(filep, entry->offset, SEEK_SET);
@@ -235,7 +237,6 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
   /* Add the buffer to the list of regions */
 
-  entry->vaddr = rdbuffer;
   entry->priv.i = kernel;
   entry->munmap = unmap_rammap;
 
