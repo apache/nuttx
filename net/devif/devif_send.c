@@ -68,6 +68,7 @@
 void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
                 int len, unsigned int offset)
 {
+#ifndef CONFIG_NET_IPFRAG
   unsigned int limit = NETDEV_PKTSIZE(dev) -
                        NET_LL_HDRLEN(dev) - offset;
 
@@ -77,6 +78,13 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
            dev, len, limit);
       return;
     }
+#else
+  if (dev == NULL || len == 0)
+    {
+      nerr("ERROR: devif_send fail: %p, sndlen: %u\n", dev, len);
+      return;
+    }
+#endif
 
   /* Copy in iob to target device buffer */
 
