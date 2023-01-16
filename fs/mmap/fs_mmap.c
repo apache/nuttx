@@ -102,7 +102,8 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 
   if ((flags & MAP_ANONYMOUS) != 0)
     {
-      return map_anonymous(&entry, kernel);
+      ret = map_anonymous(&entry, kernel);
+      goto out;
     }
 
   if (filep == NULL)
@@ -131,10 +132,6 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       filep->f_inode->u.i_ops->mmap != NULL)
     {
       ret = filep->f_inode->u.i_ops->mmap(filep, &entry);
-      if (ret == OK)
-        {
-          *mapped = entry.vaddr;
-        }
     }
   else
     {
@@ -146,10 +143,16 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
        * do much better in the KERNEL build using the MMU.
        */
 
-      return rammap(filep, &entry, kernel);
+      ret = rammap(filep, &entry, kernel);
     }
 
   /* Return */
+
+out:
+  if (ret == OK)
+    {
+      *mapped = entry.vaddr;
+    }
 
   return ret;
 }
