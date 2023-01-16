@@ -165,10 +165,7 @@ CLEANDIRS += openamp
 endif
 
 ifeq ($(CONFIG_MM_TLSF_MANAGER),y)
-KERNDEPDIRS += mm
 CONTEXTDIRS += mm
-else
-CLEANDIRS += mm
 endif
 
 CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)
