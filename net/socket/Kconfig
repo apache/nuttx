@@ -43,7 +43,6 @@ config NET_SOLINGER
 	bool "SO_LINGER socket option"
 	default n
 	depends on NET_TCP_WRITE_BUFFERS || NET_UDP_WRITE_BUFFERS
-	select NET_TCP_NOTIFIER if NET_TCP
 	select NET_UDP_NOTIFIER if NET_UDP
 	---help---
 		Enable or disable support for the SO_LINGER socket option.  Requires

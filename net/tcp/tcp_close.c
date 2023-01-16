@@ -267,35 +267,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
-#ifdef CONFIG_NET_SOLINGER
-  /* SO_LINGER
-   *   Lingers on a close() if data is present. This option controls the
-   *   action taken when unsent messages queue on a socket and close() is
-   *   performed. If SO_LINGER is set, the system shall block the calling
-   *   thread during close() until it can transmit the data or until the
-   *   time expires. If SO_LINGER is not specified, and close() is issued,
-   *   the system handles the call in a way that allows the calling thread
-   *   to continue as quickly as possible. This option takes a linger
-   *   structure, as defined in the <sys/socket.h> header, to specify the
-   *   state of the option and linger interval.
-   */
-
-  if (_SO_GETOPT(conn->sconn.s_options, SO_LINGER))
-    {
-      /* Wait until for the buffered TX data to be sent. */
-
-      ret = tcp_txdrain(psock, _SO_TIMEOUT(conn->sconn.s_linger));
-      if (ret < 0)
-        {
-          /* tcp_txdrain may fail, but that won't stop us from closing
-           * the socket.
-           */
-
-          nerr("ERROR: tcp_txdrain() failed: %d\n", ret);
-        }
-    }
-#endif
-
   /* Discard our reference to the connection */
 
   conn->crefs = 0;
@@ -317,6 +288,30 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       conn->clscb->flags = TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS;
       conn->clscb->event = tcp_close_eventhandler;
       conn->clscb->priv  = conn; /* reference for event handler to free cb */
+
+#ifdef CONFIG_NET_SOLINGER
+      /* SO_LINGER
+       *   Lingers on a close() if data is present. This option controls the
+       *   action taken when unsent messages queue on a socket and close() is
+       *   performed. If SO_LINGER is set, the system shall block the calling
+       *   thread during close() until it can transmit the data or until the
+       *   time expires. If SO_LINGER is not specified, and close() is
+       *   issued, the system handles the call in a way that allows the
+       *   calling thread to continue as quickly as possible. This option
+       *   takes a linger structure, as defined in the <sys/socket.h> header,
+       *   to specify the state of the option and linger interval.
+       */
+
+      if (_SO_GETOPT(conn->sconn.s_options, SO_LINGER))
+        {
+          conn->ltimeout = clock_systime_ticks() +
+                           DSEC2TICK(conn->sconn.s_linger);
+
+          /* Update RTO timeout if the work exceeds expire */
+
+          tcp_update_timer(conn);
+        }
+#endif
 
       /* Notify the device driver of the availability of TX data */
 

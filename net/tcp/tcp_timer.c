@@ -156,6 +156,10 @@ static void tcp_timer_expiry(FAR void *arg)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: tcp_update_timer
  *
  * Description:
@@ -174,13 +178,32 @@ static void tcp_timer_expiry(FAR void *arg)
  *
  ****************************************************************************/
 
-static void tcp_update_timer(FAR struct tcp_conn_s *conn)
+void tcp_update_timer(FAR struct tcp_conn_s *conn)
 {
   int timeout = tcp_get_timeout(conn);
 
   if (timeout > 0)
     {
-      if (TICK2HSEC(work_timeleft(&conn->work)) != timeout)
+#ifdef CONFIG_NET_SOLINGER
+      /* Re-update tcp timeout */
+
+      if (conn->ltimeout != 0)
+        {
+          sclock_t ticks = conn->ltimeout - clock_systime_ticks();
+
+          if (ticks <= 0)
+            {
+              timeout = 0;
+            }
+          else if (timeout > TICK2HSEC(ticks))
+            {
+              timeout = TICK2HSEC(ticks);
+            }
+        }
+#endif
+
+      if (work_available(&conn->work) ||
+          TICK2HSEC(work_timeleft(&conn->work)) != timeout)
         {
           work_queue(LPWORK, &conn->work, tcp_timer_expiry,
                      conn, HSEC2TICK(timeout));
@@ -191,10 +214,6 @@ static void tcp_update_timer(FAR struct tcp_conn_s *conn)
       work_cancel(LPWORK, &conn->work);
     }
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: tcp_update_retrantimer
@@ -351,6 +370,31 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
       return;
     }
+
+#ifdef CONFIG_NET_SOLINGER
+  /* Send reset immediately if linger timeout */
+
+  if (conn->ltimeout != 0 &&
+      ((sclock_t)(conn->ltimeout - clock_systime_ticks()) <= 0))
+    {
+      conn->tcpstateflags = TCP_CLOSED;
+      ninfo("TCP state: TCP_CLOSED\n");
+
+      /* We call tcp_callback() with TCP_TIMEDOUT to
+       * inform the application that the connection has
+       * timed out.
+       */
+
+      tcp_callback(dev, conn, TCP_TIMEDOUT);
+
+      /* We also send a reset packet to the remote host. */
+
+      tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
+
+      goto done;
+    }
+  else
+#endif
 
   /* Check if the connection is in a state in which we simply wait
    * for the connection to time out. If so, we increase the
