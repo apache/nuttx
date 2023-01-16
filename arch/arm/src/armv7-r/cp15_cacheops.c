@@ -94,16 +94,32 @@ static void cp15_dcache_op_mva(uintptr_t start, uintptr_t end, int op)
   uint32_t line;
 
   line = cp15_cache_get_info(NULL, NULL);
-  start &= ~(line - 1);
 
   ARM_DSB();
+
+  if ((start & (line - 1)) != 0)
+    {
+      start &= ~(line - 1);
+      if (op == CP15_CACHE_INVALIDATE)
+        {
+          cp15_cleaninvalidate_dcacheline_bymva(start);
+          start += line;
+        }
+    }
 
   while (start < end)
     {
       switch (op)
         {
           case CP15_CACHE_INVALIDATE:
-            cp15_invalidate_dcacheline_bymva(start);
+            if (start + line <= end)
+              {
+                cp15_invalidate_dcacheline_bymva(start);
+              }
+            else
+              {
+                cp15_cleaninvalidate_dcacheline_bymva(start);
+              }
             break;
           case CP15_CACHE_CLEAN:
             cp15_clean_dcache_bymva(start);
