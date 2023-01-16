@@ -110,6 +110,10 @@ static int cryptof_poll(FAR struct file *filep,
 static int cryptof_close(FAR struct file *filep);
 
 static int cryptoopen(FAR struct file *filep);
+static ssize_t cryptoread(FAR struct file *filep,
+                          FAR char *buffer, size_t len);
+static ssize_t cryptowrite(FAR struct file *filep,
+                           FAR const char *buffer, size_t len);
 static int cryptoclose(FAR struct file *filep);
 static int cryptoioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
@@ -134,8 +138,8 @@ static const struct file_operations g_cryptoops =
 {
   cryptoopen,          /* open   */
   cryptoclose,         /* close  */
-  NULL,                /* read   */
-  NULL,                /* write  */
+  cryptoread,          /* read   */
+  cryptowrite,         /* write  */
   NULL,                /* seek   */
   cryptoioctl,         /* ioctl  */
   NULL,                /* mmap   */
@@ -730,6 +734,18 @@ static int cryptoopen(FAR struct file *filep)
     }
 
   return 0;
+}
+
+static ssize_t cryptoread(FAR struct file *filep,
+                          FAR char *buffer, size_t len)
+{
+  return 0;
+}
+
+static ssize_t cryptowrite(FAR struct file *filep,
+                           FAR const char *buffer, size_t len)
+{
+  return len;
 }
 
 static int cryptoclose(FAR struct file *filep)
