@@ -467,9 +467,9 @@ static inline void sam_usbclockconfig(void)
 #else
 #  error Board oscillator frequency not compatible with use of UPLL
 #endif
-#endif
 
   putreg32(regval, (SAM_SFR_VBASE + SAM_SFR_UTMICKTRIM_OFFSET));
+#endif
 
   regval = PMC_CKGR_UCKR_UPLLCOUNT(BOARD_CKGR_UCKR_UPLLCOUNT);
   putreg32(regval, SAM_PMC_CKGR_UCKR);
