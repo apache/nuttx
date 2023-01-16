@@ -78,17 +78,8 @@
 int nxtask_terminate(pid_t pid)
 {
   FAR struct tcb_s *dtcb;
-  FAR dq_queue_t *tasklist;
+  uint8_t task_state;
   irqstate_t flags;
-#ifdef CONFIG_SMP
-  int cpu;
-#endif
-  int ret;
-
-  /* Make sure the task does not become ready-to-run while we are futzing
-   * with its TCB.  Within the critical section, no new task may be started
-   * or terminated (even in the SMP case).
-   */
 
   flags = enter_critical_section();
 
@@ -97,59 +88,15 @@ int nxtask_terminate(pid_t pid)
   dtcb = nxsched_get_tcb(pid);
   if (!dtcb)
     {
-      /* This PID does not correspond to any known task */
-
-      ret = -ESRCH;
-      goto errout_with_lock;
+      leave_critical_section(flags);
+      return -ESRCH;
     }
 
-  /* Verify our internal sanity */
+  /* Remove dtcb from tasklist, let remove_readtorun() do the job */
 
-#ifdef CONFIG_SMP
-  DEBUGASSERT(dtcb->task_state < NUM_TASK_STATES);
-#else
-  DEBUGASSERT(dtcb->task_state != TSTATE_TASK_RUNNING &&
-              dtcb->task_state < NUM_TASK_STATES);
-#endif
-
-  /* Remove the task from the OS's task lists.  We must be in a critical
-   * section and the must must not be running to do this.
-   */
-
-#ifdef CONFIG_SMP
-  /* In the SMP case, the thread may be running on another CPU.  If that is
-   * the case, then we will pause the CPU that the thread is running on.
-   */
-
-  cpu = nxsched_pause_cpu(dtcb);
-
-  /* Get the task list associated with the thread's state and CPU */
-
-  tasklist = TLIST_HEAD(dtcb, cpu);
-#else
-  /* In the non-SMP case, we can be assured that the task to be terminated
-   * is not running.  get the task list associated with the task state.
-   */
-
-  tasklist = TLIST_HEAD(dtcb);
-#endif
-
-  /* Remove the task from the task list */
-
-  dq_rem((FAR dq_entry_t *)dtcb, tasklist);
-
-  /* At this point, the TCB should no longer be accessible to the system */
-
-#ifdef CONFIG_SMP
-  /* Resume the paused CPU (if any) */
-
-  if (cpu >= 0)
-    {
-      /* I am not yet sure how to handle a failure here. */
-
-      DEBUGVERIFY(up_cpu_resume(cpu));
-    }
-#endif /* CONFIG_SMP */
+  task_state = dtcb->task_state;
+  nxsched_remove_readytorun(dtcb, false);
+  dtcb->task_state = task_state;
 
   leave_critical_section(flags);
 
@@ -172,8 +119,4 @@ int nxtask_terminate(pid_t pid)
   /* Deallocate its TCB */
 
   return nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
-
-errout_with_lock:
-  leave_critical_section(flags);
-  return ret;
 }
