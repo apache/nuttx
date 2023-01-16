@@ -31,6 +31,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
+#include <nuttx/fs/fs.h>
 
 #include <nuttx/timers/pwm.h>
 
@@ -305,6 +306,17 @@ int tm4c_bringup(void)
 
   tm4c_i2ctool();
 
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, TIVA_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             TIVA_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
 #ifdef HAVE_PWM
   /* Register PWM drivers */
 
@@ -315,6 +327,16 @@ int tm4c_bringup(void)
   /* Register QEI drivers */
 
   tm4c_qei();
+#endif
+
+#ifdef CONFIG_TIVA_CAN
+  /* Initialize CAN module and register the CAN driver(s) */
+
+  ret = tm4c_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: tm4c_can_setup failed %d\n", ret);
+    }
 #endif
 
 #ifdef HAVE_TIMER
