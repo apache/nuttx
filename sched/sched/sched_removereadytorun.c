@@ -63,7 +63,10 @@
 #ifndef CONFIG_SMP
 bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
 {
+  FAR dq_queue_t *tasklist;
   bool doswitch = false;
+
+  tasklist = TLIST_HEAD(rtcb);
 
   /* Check if the TCB to be removed is at the head of the ready to run list.
    * There is only one list, g_readytorun, and it always contains the
@@ -71,7 +74,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
    * then we are removing the currently active task.
    */
 
-  if (rtcb->blink == NULL)
+  if (rtcb->blink == NULL && TLIST_ISRUNNABLE(rtcb->task_state))
     {
       /* There must always be at least one task in the list (the IDLE task)
        * after the TCB being removed.
@@ -88,7 +91,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
    * is always the g_readytorun list.
    */
 
-  dq_rem((FAR dq_entry_t *)rtcb, &g_readytorun);
+  dq_rem((FAR dq_entry_t *)rtcb, tasklist);
 
   /* Since the TCB is not in any list, it is now invalid */
 
