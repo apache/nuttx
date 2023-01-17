@@ -20,6 +20,31 @@ menuconfig NETDEVICES
 
 if NETDEVICES
 
+comment "Upper-half Network Device Driver Options"
+
+choice
+	prompt "Netdev poll worker"
+
+config NETDEV_LPWORK_THREAD
+	bool "Use low-priority worker thread to do netdev poll"
+	depends on SCHED_LPWORK
+
+config NETDEV_HPWORK_THREAD
+	bool "Use high-priority worker thread to do netdev poll"
+	depends on SCHED_HPWORK
+
+config NETDEV_WORK_THREAD
+	bool "Use a dedicated work thread to do netdev poll"
+
+endchoice # Netdev poll worker
+
+config NETDEV_WORK_THREAD_PRIORITY
+	int "Priority of work poll thread"
+	default 100
+	depends on NETDEV_WORK_THREAD
+	---help---
+		The priority of work poll thread in netdev.
+
 comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV

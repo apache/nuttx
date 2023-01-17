@@ -27,19 +27,30 @@
 #include <debug.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define NETDEV_TX_CONTINUE 1 /* Return value for devif_poll */
+
+#define NETDEV_THREAD_NAME_FMT "netdev-%s"
+
+#ifdef CONFIG_NETDEV_HPWORK_THREAD
+#  define NETDEV_WORK HPWORK
+#else
+#  define NETDEV_WORK LPWORK
+#endif
 
 /****************************************************************************
  * Private Types
@@ -51,7 +62,15 @@ struct netdev_upperhalf_s
 {
   FAR struct netdev_lowerhalf_s *lower;
 
-  struct work_s work;  /* Deferring poll work to the work queue */
+  /* Deferring poll work to work queue or thread */
+
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  pid_t tid;
+  sem_t sem;
+  sem_t sem_exit;
+#else
+  struct work_s work;
+#endif
 };
 
 /****************************************************************************
@@ -394,9 +413,6 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
  * Input Parameters:
  *   arg - Reference to the upper half driver structure (cast to void *)
  *
- * TODO:
- *   Support working in a dedicated thread.
- *
  ****************************************************************************/
 
 static void netdev_upper_work(FAR void *arg)
@@ -410,6 +426,31 @@ static void netdev_upper_work(FAR void *arg)
   netdev_upper_txavail_work(upper);
   net_unlock();
 }
+
+/****************************************************************************
+ * Name: netdev_upper_loop
+ *
+ * Description:
+ *   The loop for dedicated thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_WORK_THREAD
+static int netdev_upper_loop(int argc, FAR char *argv[])
+{
+  FAR struct netdev_upperhalf_s *upper =
+    (FAR struct netdev_upperhalf_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
+
+  while (nxsem_wait(&upper->sem) == OK && upper->tid != INVALID_PROCESS_ID)
+    {
+      netdev_upper_work(upper);
+    }
+
+  nwarn("WARNING: Netdev work thread quitting.");
+  nxsem_post(&upper->sem_exit);
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: netdev_upper_queue_work
@@ -426,14 +467,20 @@ static inline void netdev_upper_queue_work(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
-  /* TODO: support trigger thread. */
-
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  int semcount;
+  if (nxsem_get_value(&upper->sem, &semcount) == OK && semcount <= 0)
+    {
+      nxsem_post(&upper->sem);
+    }
+#else
   if (work_available(&upper->work))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(LPWORK, &upper->work, netdev_upper_work, upper, 0);
+      work_queue(NETDEV_WORK, &upper->work, netdev_upper_work, upper, 0);
     }
+#endif
 }
 
 /****************************************************************************
@@ -465,7 +512,29 @@ static int netdev_upper_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
-  /* TODO: bring up a dedicated thread for work? */
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  /* Try to bring up a dedicated thread for work. */
+
+  if (upper->tid <= 0)
+    {
+      FAR char *argv[2];
+      char      arg1[32];
+      char      name[32];
+
+      snprintf(arg1, sizeof(arg1), "%p", upper);
+      snprintf(name, sizeof(name), NETDEV_THREAD_NAME_FMT, dev->d_ifname);
+      argv[0] = arg1;
+      argv[1] = NULL;
+
+      upper->tid = kthread_create(name, CONFIG_NETDEV_WORK_THREAD_PRIORITY,
+                                  CONFIG_DEFAULT_TASK_STACKSIZE,
+                                  netdev_upper_loop, argv);
+      if (upper->tid < 0)
+        {
+          return upper->tid;
+        }
+    }
+#endif
 
   if (upper->lower->ops->ifup)
     {
@@ -479,9 +548,9 @@ static int netdev_upper_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
-  /* TODO: Support dedicated thread? */
-
-  work_cancel(LPWORK, &upper->work);
+#ifndef CONFIG_NETDEV_WORK_THREAD
+  work_cancel(NETDEV_WORK, &upper->work);
+#endif
 
   if (upper->lower->ops->ifdown)
     {
@@ -593,6 +662,11 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       dev->netdev.d_private = NULL;
     }
 
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  nxsem_init(&upper->sem, 0, 0);
+  nxsem_init(&upper->sem_exit, 0, 0);
+#endif
+
   return ret;
 }
 
@@ -626,6 +700,20 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
     {
       return ret;
     }
+
+#ifdef CONFIG_NETDEV_WORK_THREAD
+  if (upper->tid > 0)
+    {
+      /* Try to tear down the dedicated thread for work. */
+
+      upper->tid = INVALID_PROCESS_ID;
+      nxsem_post(&upper->sem);
+      nxsem_wait(&upper->sem_exit);
+    }
+
+  nxsem_destroy(&upper->sem);
+  nxsem_destroy(&upper->sem_exit);
+#endif
 
   kmm_free(upper);
   dev->netdev.d_private = NULL;
