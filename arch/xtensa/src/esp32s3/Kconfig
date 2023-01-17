@@ -279,6 +279,12 @@ config ESP32S3_WDT
 	bool
 	default n
 
+config ESP32S3_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32-S3 efuse support.
+
 config ESP32S3_SPIRAM
 	bool "SPI RAM Support"
 	default n
