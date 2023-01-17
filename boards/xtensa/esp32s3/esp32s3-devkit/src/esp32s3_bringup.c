@@ -62,6 +62,10 @@
 #include <nuttx/video/fb.h>
 #endif
 
+#ifdef CONFIG_ESP32S3_EFUSE
+#  include "esp32s3_efuse.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -85,6 +89,14 @@
 int esp32s3_bringup(void)
 {
   int ret;
+
+#if defined(CONFIG_ESP32S3_EFUSE)
+  ret = esp32s3_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
