@@ -85,7 +85,8 @@ int udp_close(FAR struct socket *psock)
 
   if (_SO_GETOPT(conn->sconn.s_options, SO_LINGER))
     {
-      timeout = _SO_TIMEOUT(conn->sconn.s_linger);
+      timeout = (conn->sconn.s_linger == 0) ? 0 :
+                _SO_TIMEOUT(conn->sconn.s_linger);
     }
 #endif
 
