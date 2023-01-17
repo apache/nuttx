@@ -38,6 +38,7 @@
 #  define MM_PTR_FMT_WIDTH 19
 #endif
 
+#undef  ALIGN_UP
 #define ALIGN_UP(x, a) ((((x) + (a) - 1) / (a)) * (a))
 
 /****************************************************************************

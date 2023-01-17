@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 #define MIN(a, b)             ((a) < (b) ? (a) : (b))
+#undef  ALIGN_UP
 #define ALIGN_UP(x, a)        ((((size_t)x) + ((a) - 1)) & (~((a) - 1)))
 #define ALIGN_DOWN(x, a)      ((size_t)(x) & (~((a) - 1)))
 
