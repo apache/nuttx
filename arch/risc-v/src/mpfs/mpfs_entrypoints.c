@@ -27,10 +27,17 @@
 #ifdef CONFIG_MPFS_BOOTLOADER
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
+
+/****************************************************************************
+ * Extern Function Declarations
+ ****************************************************************************/
+
+extern void mpfs_opensbi_prepare_hart(void);
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,70 +60,47 @@ static uint64_t g_app_entrypoints[] =
   CONFIG_MPFS_HART4_ENTRYPOINT
 };
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static void jump_to_app(void) naked_function;
-static void jump_to_app(void)
-{
-  __asm__ __volatile__
-    (
-      "csrr a0, mhartid\n"           /* Hart ID */
-      "slli t1, a0, 3\n"             /* To entrypoint offset */
-      "la   t0, g_app_entrypoints\n" /* Entrypoint table base */
-      "add  t0, t0, t1\n"            /* Index in table */
-      "ld   t0, 0(t0)\n"             /* Load the address from table */
-      "jr   t0"                      /* Jump to entrypoint */
-    );
-}
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Default boot address for every hart */
-
-extern void mpfs_opensbi_prepare_hart(void);
-
-/* Trampoline functions, jump to SBI if so configured, to app if not */
-
-const uint64_t g_entrypoints[5] =
-{
-#ifdef CONFIG_MPFS_HART0_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  (uint64_t)jump_to_app,
-#endif
-
+static uint64_t g_hart_use_sbi =
 #ifdef CONFIG_MPFS_HART1_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  (uint64_t)jump_to_app,
+  (1 << 1) |
 #endif
 
 #ifdef CONFIG_MPFS_HART2_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  (uint64_t)jump_to_app,
+  (1 << 2) |
 #endif
 
 #ifdef CONFIG_MPFS_HART3_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  (uint64_t)jump_to_app,
+  (1 << 3) |
 #endif
 
 #ifdef CONFIG_MPFS_HART4_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  (uint64_t)jump_to_app,
+  (1 << 4) |
 #endif
-};
+  0;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void mpfs_jump_to_app(void) naked_function;
+void mpfs_jump_to_app(void)
+{
+  __asm__ __volatile__
+    (
+      "csrr a0, mhartid\n"                   /* Hart ID */
+#ifdef CONFIG_MPFS_OPENSBI
+      "ld   t0, g_hart_use_sbi\n"            /* Load sbi usage bitmask */
+      "srl  t0, t0, a0\n"                    /* Shift right by this hart */
+      "andi t0, t0, 1\n"                     /* Check the 0 bit */
+      "bgtz t0, mpfs_opensbi_prepare_hart\n" /* If bit was 1, jump to sbi */
+#endif
+      "slli t1, a0, 3\n"                     /* To entrypoint offset */
+      "la   t0, g_app_entrypoints\n"         /* Entrypoint table base */
+      "add  t0, t0, t1\n"                    /* Index in table */
+      "ld   t0, 0(t0)\n"                     /* Load the address from table */
+      "jr   t0\n"                            /* Jump to entrypoint */
+    );
+}
 
 /****************************************************************************
  * Name: mpfs_set_entrypt
@@ -166,6 +150,39 @@ uintptr_t mpfs_get_entrypt(uint64_t hartid)
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: mpfs_set_use_sbi
+ *
+ * Description:
+ *   Set booting via SBI.
+ *
+ * Input Parameters:
+ *   use_sbi - set to true if sbi is needed, false otherwise
+ *
+ * Returned value:
+ *   OK on success, ERROR on failure
+ *
+ ****************************************************************************/
+
+int mpfs_set_use_sbi(uint64_t hartid, bool use_sbi)
+{
+  if (hartid < ENTRYPT_CNT)
+    {
+      if (use_sbi)
+        {
+          g_hart_use_sbi |= (1 << hartid);
+        }
+      else
+        {
+          g_hart_use_sbi &= ~(1 << hartid);
+        }
+
+      return OK;
+    }
+
+  return ERROR;
 }
 
 #endif /* CONFIG_MPFS_BOOTLOADER */
