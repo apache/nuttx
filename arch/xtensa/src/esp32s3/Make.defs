@@ -47,6 +47,12 @@ CHIP_ASRCS  = esp32s3_cpuindex.S
 CHIP_CSRCS += esp32s3_cpuidlestack.c esp32s3_cpustart.c esp32s3_intercpu_interrupt.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_EFUSE),y)
+CHIP_CSRCS += esp32s3_efuse.c
+CHIP_CSRCS += esp32s3_efuse_table.c
+CHIP_CSRCS += esp32s3_efuse_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_USBSERIAL),y)
 CHIP_CSRCS += esp32s3_usbserial.c
 endif
