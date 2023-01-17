@@ -35,23 +35,43 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The d_type field of the dirent structure is not specified by POSIX.  It
+ * is a non-standard, 4.5BSD extension that is implemented by most OSs.  A
+ * POSIX compliant OS may not implement the d_type field at all.  Many OS's
+ * (including glibc) may use the following alternative naming for the file
+ * type names:
+ */
+
+#define DT_UNKNOWN                0
+#define DT_FIFO                   1
+#define DT_CHR                    2
+#define DT_SEM                    3
+#define DT_DIR                    4
+#define DT_MQ                     5
+#define DT_BLK                    6
+#define DT_SHM                    7
+#define DT_REG                    8
+#define DT_MTD                    9
+#define DT_LNK                    10
+#define DT_SOCK                   12
+
 /* File type code for the d_type field in dirent structure.
  * Note that because of the simplified filesystem organization of the NuttX,
  * top-level, pseudo-file system, an inode can be BOTH a file and a directory
  */
 
-#define DTYPE_UNKNOWN             0
-#define DTYPE_FIFO                1
-#define DTYPE_CHR                 2
-#define DTYPE_SEM                 3
-#define DTYPE_DIRECTORY           4
-#define DTYPE_MQ                  5
-#define DTYPE_BLK                 6
-#define DTYPE_SHM                 7
-#define DTYPE_FILE                8
-#define DTYPE_MTD                 9
-#define DTYPE_LINK                10
-#define DTYPE_SOCK                12
+#define DTYPE_UNKNOWN             DT_UNKNOWN
+#define DTYPE_FIFO                DT_FIFO
+#define DTYPE_CHR                 DT_CHR
+#define DTYPE_SEM                 DT_SEM
+#define DTYPE_DIRECTORY           DT_DIR
+#define DTYPE_MQ                  DT_MQ
+#define DTYPE_BLK                 DT_BLK
+#define DTYPE_SHM                 DT_SHM
+#define DTYPE_FILE                DT_REG
+#define DTYPE_MTD                 DT_MTD
+#define DTYPE_LINK                DT_LNK
+#define DTYPE_SOCK                DT_SOCK
 
 #define DIRENT_ISUNKNOWN(dtype)   ((dtype) == DTYPE_UNKNOWN)
 #define DIRENT_ISFIFO(dtype)      ((dtype) == DTYPE_FIFO)
@@ -65,26 +85,6 @@
 #define DIRENT_ISMTD(dtype)       ((dtype) == DTYPE_MTD)
 #define DIRENT_ISLINK(dtype)      ((dtype) == DTYPE_LINK)
 #define DIRENT_ISSOCK(dtype)      ((dtype) == DTYPE_SOCK)
-
-/* The d_type field of the dirent structure is not specified by POSIX.  It
- * is a non-standard, 4.5BSD extension that is implemented by most OSs.  A
- * POSIX compliant OS may not implement the d_type field at all.  Many OS's
- * (including glibc) may use the following alternative naming for the file
- * type names:
- */
-
-#define DT_UNKNOWN                DTYPE_UNKNOWN
-#define DT_FIFO                   DTYPE_FIFO
-#define DT_CHR                    DTYPE_CHR
-#define DT_SEM                    DTYPE_SEM
-#define DT_DIR                    DTYPE_DIRECTORY
-#define DT_MQ                     DTYPE_MQ
-#define DT_BLK                    DTYPE_BLK
-#define DT_SHM                    DTYPE_SHM
-#define DT_REG                    DTYPE_FILE
-#define DT_MTD                    DTYPE_MTD
-#define DT_LNK                    DTYPE_LINK
-#define DT_SOCK                   DTYPE_SOCK
 
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define dirent64                dirent
