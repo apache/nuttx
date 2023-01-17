@@ -42,6 +42,7 @@
 #define SEM_PRIO_INHERIT          1
 #define SEM_PRIO_PROTECT          2
 #define SEM_PRIO_MASK             3
+#define SEM_PRIO_MUTEX            4
 
 /* Value returned by sem_open() in the event of a failure. */
 
@@ -99,14 +100,15 @@ struct sem_s
   volatile int16_t semcount;     /* >0 -> Num counts available */
                                  /* <0 -> Num tasks waiting for semaphore */
 
-  dq_queue_t waitlist;
-
   /* If priority inheritance is enabled, then we have to keep track of which
    * tasks hold references to the semaphore.
    */
 
+  uint8_t flags;                 /* See SEM_PRIO_* definitions */
+
+  dq_queue_t waitlist;
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t flags;                 /* See PRIOINHERIT_FLAGS_* definitions */
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 # else
@@ -121,21 +123,21 @@ typedef struct sem_s sem_t;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
-/* semcount, waitlist, flags, hhead */
+/* semcount, flags, waitlist, hhead */
 
 #  define SEM_INITIALIZER(c) \
-    {(c), SEM_WAITLIST_INITIALIZER, 0, NULL}
+    {(c), 0, SEM_WAITLIST_INITIALIZER, NULL}
 # else
-/* semcount, waitlist, flags, holder[2] */
+/* semcount, flags, waitlist, holder[2] */
 
 #  define SEM_INITIALIZER(c) \
-    {(c), SEM_WAITLIST_INITIALIZER, 0, {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
+    {(c), 0, SEM_WAITLIST_INITIALIZER, {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
 # endif
 #else
-/* semcount, waitlist */
+/* semcount, flags, waitlist */
 
 #  define SEM_INITIALIZER(c) \
-    {(c), SEM_WAITLIST_INITIALIZER}
+    {(c), 0, SEM_WAITLIST_INITIALIZER}
 #endif
 
 # define SEM_WAITLIST(sem)        (&((sem)->waitlist))
