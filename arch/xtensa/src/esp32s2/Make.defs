@@ -42,6 +42,12 @@ ifeq ($(CONFIG_ESP32S2_UART),y)
 CHIP_CSRCS += esp32s2_serial.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_EFUSE),y)
+CHIP_CSRCS += esp32s2_efuse.c
+CHIP_CSRCS += esp32s2_efuse_table.c
+CHIP_CSRCS += esp32s2_efuse_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_ESP32S2_RNG),y)
 CHIP_CSRCS += esp32s2_rng.c
 endif
