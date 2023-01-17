@@ -575,3 +575,33 @@ Find your board IP using ``nsh> ifconfig`` and then from your computer::
 
 Where x and y are the last two numbers of the IP that your router gave to
 your board.
+
+Debugging with OpenOCD
+======================
+
+Akizukidenshi FT232HL
+---------------------
+
+Akizukidenshi's FT232HL, a FT232H based JTAG adapter
+(http://akizukidenshi.com/catalog/g/gK-06503/) with JP3 and JP4 closed,
+and connected to ESP32 as:
+
++------------------+-------------+
+| ESP32-DevKitC V4 | FT232HL     |
++=======+==========+=============+
+| J2    |  J3      | J2          |
++-------+----------+-------------+
+| IO13  |          | AD0   (TCK) |
++-------+----------+-------------+
+| IO12  |          | AD1   (TDI) |
++-------+----------+-------------+
+|       |  IO15    | AD2   (TDO) |
++-------+----------+-------------+
+| IO14  |          | AD3   (TMS) |
++-------+----------+-------------+
+| GND   |          | GND         |
++-------+----------+-------------+
+
+can be used with ESP-IDF version of openocd with::
+
+    % openocd -f board/esp32-wrover-kit-1.8v.cfg
