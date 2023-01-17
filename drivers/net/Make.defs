@@ -24,6 +24,10 @@ ifeq ($(CONFIG_NET),y)
 
 # Include network interface drivers
 
+ifeq ($(CONFIG_MM_IOB),y)
+  CSRCS += netdev_upperhalf.c
+endif
+
 ifeq ($(CONFIG_NET_LOOPBACK),y)
   CSRCS += loopback.c
 endif
