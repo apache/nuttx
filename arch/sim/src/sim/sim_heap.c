@@ -389,6 +389,21 @@ int mm_mallinfo(struct mm_heap_s *heap, struct mallinfo *info)
 }
 
 /****************************************************************************
+ * Name: mm_mallinfo_task
+ *
+ * Description:
+ *   mallinfo_task returns a copy of updated current task's heap information.
+ *
+ ****************************************************************************/
+
+int mm_mallinfo_task(struct mm_heap_s *heap, struct mallinfo_task *info)
+{
+  info->aordblks = 0;
+  info->uordblks = 0;
+  return 0;
+}
+
+/****************************************************************************
  * Name: mm_memdump
  *
  * Description:
