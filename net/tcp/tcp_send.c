@@ -279,6 +279,34 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   dev->d_len     = len;
   tcp->tcpoffset = (TCP_HDRLEN / 4) << 4;
   tcp_sendcommon(dev, conn, tcp);
+
+#if defined(CONFIG_NET_STATISTICS) && \
+    defined(CONFIG_NET_TCP_DEBUG_DROP_SEND)
+
+#pragma message \
+  "CONFIG_NET_TCP_DEBUG_DROP_SEND is selected, this is debug " \
+  "feature to drop the tcp send packet on the floor, " \
+  "please confirm the configuration again if you do not want " \
+  "debug the TCP stack."
+
+  /* Debug feature to drop the tcp received packet on the floor */
+
+  if ((flags & TCP_PSH) != 0)
+    {
+      if ((g_netstats.tcp.sent %
+          CONFIG_NET_TCP_DEBUG_DROP_SEND_PROBABILITY) == 0)
+        {
+          uint32_t seq = tcp_getsequence(tcp->seqno);
+
+          ninfo("TCP DROP SNDPKT: "
+                "[%d][%" PRIu32 " : %" PRIu32 " : %d]\n",
+                g_netstats.tcp.sent, seq, TCP_SEQ_ADD(seq, dev->d_sndlen),
+                dev->d_sndlen);
+
+          dev->d_len = 0;
+        }
+    }
+#endif
 }
 
 /****************************************************************************
@@ -575,34 +603,6 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   /* Complete the common portions of the TCP message */
 
   tcp_sendcommon(dev, conn, tcp);
-
-#if defined(CONFIG_NET_STATISTICS) && \
-    defined(CONFIG_NET_TCP_DEBUG_DROP_SEND)
-
-#pragma message \
-  "CONFIG_NET_TCP_DEBUG_DROP_SEND is selected, this is debug " \
-  "feature to drop the tcp send packet on the floor, " \
-  "please confirm the configuration again if you do not want " \
-  "debug the TCP stack."
-
-  /* Debug feature to drop the tcp received packet on the floor */
-
-  if ((flags & TCP_PSH) != 0)
-    {
-      if ((g_netstats.tcp.sent %
-          CONFIG_NET_TCP_DEBUG_DROP_SEND_PROBABILITY) == 0)
-        {
-          uint32_t seq = tcp_getsequence(tcp->seqno);
-
-          ninfo("TCP DROP SNDPKT: "
-                "[%d][%" PRIu32 " : %" PRIu32 " : %d]\n",
-                g_netstats.tcp.sent, seq, TCP_SEQ_ADD(seq, dev->d_sndlen),
-                dev->d_sndlen);
-
-          dev->d_len = 0;
-        }
-    }
-#endif
 }
 
 /****************************************************************************
