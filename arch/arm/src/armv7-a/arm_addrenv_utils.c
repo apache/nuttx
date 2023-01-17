@@ -171,10 +171,6 @@ void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
 
   for (i = 0; i < listlen; vaddr += SECTION_SIZE, i++)
     {
-      /* Unhook the L2 page table from the L1 page table */
-
-      mmu_l1_clrentry(vaddr);
-
       /* Has this page table been allocated? */
 
       paddr = (uintptr_t)list[i];
