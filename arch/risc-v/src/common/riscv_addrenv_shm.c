@@ -159,6 +159,10 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
       paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
       ptlast = riscv_pgvaddr(paddr);
+      if (!ptlast)
+        {
+          return -EFAULT;
+        }
 
       /* Then wipe the reference */
 
