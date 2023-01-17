@@ -469,14 +469,14 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
     }
 #endif
 
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
-
   /* This function can be re-entered in certain cases.  Set a flag
    * bit in the TCB to not that we have already completed this exit
    * processing.
    */
 
   tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }

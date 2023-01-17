@@ -58,9 +58,7 @@ void pthread_exit(FAR void *exit_value)
    * kicked off by actions taken during pthread_exit processing.
    */
 
-#ifdef CONFIG_CANCELLATION_POINTS
   task_setcancelstate(TASK_CANCEL_DISABLE, NULL);
-#endif
 
 #ifdef CONFIG_PTHREAD_CLEANUP
   pthread_cleanup_popall(tls_get_info());
