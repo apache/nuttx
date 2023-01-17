@@ -149,7 +149,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   /* Return */
 
 out:
-  if (ret == OK)
+  if (ret >= OK)
     {
       *mapped = entry.vaddr;
     }
