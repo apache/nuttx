@@ -58,6 +58,10 @@
 #  include "esp32s2_rt_timer.h"
 #endif
 
+#ifdef CONFIG_ESP32S2_EFUSE
+#  include "esp32s2_efuse.h"
+#endif
+
 #ifdef CONFIG_WATCHDOG
 #  include "esp32s2_board_wdt.h"
 #endif
@@ -108,6 +112,14 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
              CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#if defined(CONFIG_ESP32S2_EFUSE)
+  ret = esp32s2_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
     }
 #endif
 
