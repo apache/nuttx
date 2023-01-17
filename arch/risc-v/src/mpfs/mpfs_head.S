@@ -161,17 +161,8 @@ __start:
   csrw mie, zero
   csrw mip, zero
 
-  /* Offset to g_entrypoints vector, acc. to hart id */
-  li t1,8
-  mul t1, a0, t1
-
-  /* Load the entrypoint address */
-  la t0, g_entrypoints
-  add t0, t0, t1
-  ld t0, 0(t0)
-
-  /* Jump to app */
-  jr t0
+  /* Jump to application */
+  j mpfs_jump_to_app
 
 .continue_boot:
 
