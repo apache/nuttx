@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
-                               unsigned int len, unsigned int offset,
+                               unsigned int len, int offset,
                                bool throttled, bool can_block)
 {
   FAR struct iob_s *head = iob;
@@ -61,23 +61,30 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   unsigned int avail;
   unsigned int total = len;
 
-  iobinfo("iob=%p len=%u offset=%u\n", iob, len, offset);
+  iobinfo("iob=%p len=%u offset=%d\n", iob, len, offset);
   DEBUGASSERT(iob && src);
 
   /* The offset must applied to data that is already in the I/O buffer
    * chain
    */
 
-  if (offset > iob->io_pktlen)
+  if ((int)(offset - iob->io_pktlen) > 0)
     {
-      ioberr("ERROR: offset is past the end of data: %u > %u\n",
+      ioberr("ERROR: offset is past the end of data: %d > %u\n",
              offset, iob->io_pktlen);
+      return -ESPIPE;
+    }
+
+  if ((int)(offset + iob->io_offset) < 0)
+    {
+      ioberr("ERROR: offset is before the start of data: %d < %d\n",
+             offset, -(int)iob->io_offset);
       return -ESPIPE;
     }
 
   /* Skip to the I/O buffer containing the data offset */
 
-  while (offset > iob->io_len)
+  while ((int)(offset - iob->io_len) > 0)
     {
       offset -= iob->io_len;
       iob     = iob->io_flink;
@@ -216,7 +223,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset, bool throttled)
+               unsigned int len, int offset, bool throttled)
 {
   return iob_copyin_internal(iob, src, len, offset, throttled, true);
 }
@@ -232,7 +239,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-                  unsigned int len, unsigned int offset, bool throttled)
+                  unsigned int len, int offset, bool throttled)
 {
   return iob_copyin_internal(iob, src, len, offset, throttled, false);
 }
