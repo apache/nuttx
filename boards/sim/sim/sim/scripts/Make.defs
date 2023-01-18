@@ -67,6 +67,10 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
+ifeq ($(CONFIG_STACK_USAGE),y)
+  ARCHOPTIMIZATION += -fstack-usage
+endif
+
 ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif

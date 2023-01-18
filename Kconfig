@@ -1934,6 +1934,13 @@ config STACK_CANARIES
 		Enabling this option can result in a significant increase
 		in footprint and an associated decrease in performance.
 
+config STACK_USAGE
+	bool "Generate stack usage information"
+	help
+		Generate an extra file that specifies the maximum amount of stack used,
+		on a per-function basis. Please use https://github.com/HBehrens/puncover
+		or tools/showstack.sh to generate the more useful report.
+
 config ARCH_HAVE_HEAPCHECK
 	bool
 	default n
