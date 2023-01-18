@@ -1028,7 +1028,6 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
       nxmutex_unlock(&conn->sendlock);
       if (ret < 0)
         {
-          rpmsg_release_tx_buffer(&conn->ept, msg);
           break;
         }
 
@@ -1127,10 +1126,6 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
 
   ret = rpmsg_sendto_nocopy(&conn->ept, msg, total, conn->ept.dest_addr);
   nxmutex_unlock(&conn->sendlock);
-  if (ret < 0)
-    {
-      rpmsg_release_tx_buffer(&conn->ept, msg);
-    }
 
   return ret > 0 ? len : ret;
 }
