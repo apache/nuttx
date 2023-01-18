@@ -264,13 +264,13 @@ int bcmf_gspi_read_f2_frame(FAR struct bcmf_dev_s *priv,
 
         /* Queue frame and notify network layer frame is available */
 
-        if (nxsem_wait_uninterruptible(&gbus->queue_mutex) < 0)
+        if (nxmutex_lock(&gbus->queue_lock) < 0)
           {
             DEBUGPANIC();
           }
 
         list_add_tail(&gbus->rx_queue, &iframe->list_entry);
-        nxsem_post(&gbus->queue_mutex);
+        nxmutex_unlock(&gbus->queue_lock);
 
         bcmf_netdev_notify_rx(priv);
 
@@ -331,7 +331,7 @@ int bcmf_gspi_send_f2_frame(FAR struct bcmf_dev_s *priv)
       return -EAGAIN;
     }
 
-  if (nxsem_wait_uninterruptible(&gbus->queue_mutex) < 0)
+  if (nxmutex_lock(&gbus->queue_lock) < 0)
     {
       DEBUGPANIC();
     }
@@ -340,7 +340,7 @@ int bcmf_gspi_send_f2_frame(FAR struct bcmf_dev_s *priv)
                                  bcmf_interface_frame_t,
                                  list_entry);
 
-  nxsem_post(&gbus->queue_mutex);
+  nxmutex_unlock(&gbus->queue_lock);
 
   is_txframe = iframe->tx;
 

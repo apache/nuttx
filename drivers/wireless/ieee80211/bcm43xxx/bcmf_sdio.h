@@ -32,6 +32,7 @@
 
 #include <nuttx/list.h>
 #include <nuttx/sdio.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include "bcmf_chip_data.h"
@@ -53,6 +54,29 @@
  ****************************************************************************/
 
 /* SDIO bus structure extension */
+
+/* Note:
+ * The structure referred to above must as its first item:
+ *
+ *  struct bcmf_bus_dev_s  bus;            --- Default bcmf bus structure
+ *
+ * The structure must also contain the following items:
+ *
+ *  int                    cur_chip_id;    --- Chip ID read from the card
+ *  struct bcmf_chip_data *chip;           --- Chip specific configuration
+ *
+ *  sem_t                  thread_signal;  --- Thread event semaphore
+ *
+ *  uint32_t       backplane_current_addr; --- Current F1 backplane base addr
+ *
+ *  uint8_t                max_seq;        --- Maximum TX sequence allowed
+ *  uint8_t                tx_seq;         --- TX sequence number (next)
+ *
+ *  mutex_t                queue_lock;    --- Lock for TX/RX/free queues
+ *  struct list_node       tx_queue;       --- Queue of frames to transmit
+ *  struct list_node       rx_queue;       --- Queue of frames for receiving
+ *  volatile int           tx_queue_count; --- Count of items in TX queue
+ */
 
 struct bcmf_sdio_dev_s
 {
@@ -81,7 +105,7 @@ struct bcmf_sdio_dev_s
   uint8_t rx_seq;                  /* Receive sequence number (expected) */
   bool    flow_ctrl;               /* Current flow control status */
 
-  sem_t queue_mutex;               /* Lock for TX/RX/free queues */
+  mutex_t queue_lock;              /* Lock for TX/RX/free queues */
   struct list_node tx_queue;       /* Queue of frames to transmit */
   struct list_node rx_queue;       /* Queue of frames used to receive */
   volatile int tx_queue_count;     /* Count of items in TX queue */
