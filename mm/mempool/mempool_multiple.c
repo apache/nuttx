@@ -220,7 +220,7 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
   col = index - (row << mpool->dict_col_num_log2);
   if (mpool->dict[row] == NULL ||
       mpool->dict[row][col].addr != addr ||
-      blk - addr >= mpool->dict[row][col].size)
+      (FAR char *)blk - (FAR char *)addr >= mpool->dict[row][col].size)
     {
       return NULL;
     }
