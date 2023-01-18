@@ -256,7 +256,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                int fd, off_t offset)
 {
   FAR struct file *filep = NULL;
-  FAR void *mapped;
+  FAR void *mapped = NULL;
   int ret;
 
   if (fd != -1 && fs_getfilep(fd, &filep) < 0)
