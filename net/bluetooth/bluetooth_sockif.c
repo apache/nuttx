@@ -162,10 +162,10 @@ static int bluetooth_setup(FAR struct socket *psock)
    * connection structure, it is unallocated at this point.  It will not
    * actually be initialized until the socket is connected.
    *
-   * Only SOCK_RAW is supported
+   * SOCK_RAW and SOCK_CTRL are supported
    */
 
-  if (psock->s_type == SOCK_RAW)
+  if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
     {
       return bluetooth_sockif_alloc(psock);
     }
@@ -215,7 +215,7 @@ static void bluetooth_addref(FAR struct socket *psock)
   FAR struct bluetooth_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              psock->s_type == SOCK_RAW);
+              (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL));
 
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
   DEBUGASSERT(conn->bc_crefs > 0 && conn->bc_crefs < 255);
@@ -443,11 +443,11 @@ static int bluetooth_l2cap_bind(FAR struct socket *psock,
 
   /* Bind a PF_BLUETOOTH socket to an network device.
    *
-   * Only SOCK_RAW is supported
+   * SOCK_RAW and SOCK_CTRL are supported
    */
 
   if (psock == NULL || psock->s_conn == NULL ||
-      psock->s_type != SOCK_RAW)
+      (psock->s_type != SOCK_RAW && psock->s_type != SOCK_CTRL))
     {
       nerr("ERROR: Invalid socket type: %u\n", psock->s_type);
       return -EBADF;
@@ -516,11 +516,11 @@ static int bluetooth_hci_bind(FAR struct socket *psock,
 
   /* Bind a PF_BLUETOOTH socket to an network device.
    *
-   * Only SOCK_RAW is supported
+   * SOCK_RAW and SOCK_CTRL are supported
    */
 
   if (psock == NULL || psock->s_conn == NULL ||
-      psock->s_type != SOCK_RAW)
+      (psock->s_type != SOCK_RAW && psock->s_type != SOCK_CTRL))
     {
       nerr("ERROR: Invalid socket type: %u\n", psock->s_type);
       return -EBADF;
@@ -753,9 +753,10 @@ static int bluetooth_close(FAR struct socket *psock)
 
   switch (psock->s_type)
     {
-      /* Only SOCK_RAW is supported */
+      /* SOCK_RAW and SOCK_CTRL are supported */
 
       case SOCK_RAW:
+      case SOCK_CTRL:
         {
           FAR struct bluetooth_conn_s *conn = psock->s_conn;
 

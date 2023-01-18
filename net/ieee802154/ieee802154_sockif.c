@@ -152,10 +152,11 @@ static int ieee802154_setup(FAR struct socket *psock)
    * connection structure, it is unallocated at this point.  It will not
    * actually be initialized until the socket is connected.
    *
-   * Only SOCK_DGRAM is supported (since the MAC header is stripped)
+   * SOCK_DGRAM and SOCK_CTRL are supported
+   * (since the MAC header is stripped)
    */
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL)
     {
       return ieee802154_sockif_alloc(psock);
     }
@@ -205,7 +206,7 @@ static void ieee802154_addref(FAR struct socket *psock)
   FAR struct ieee802154_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              psock->s_type == SOCK_DGRAM);
+              (psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL));
 
   conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
@@ -376,7 +377,8 @@ static int ieee802154_bind(FAR struct socket *psock,
 
   /* Bind a PF_IEEE802154 socket to an network device. */
 
-  if (conn == NULL || psock->s_type != SOCK_DGRAM)
+  if (conn == NULL ||
+      (psock->s_type != SOCK_DGRAM && psock->s_type != SOCK_CTRL))
     {
       nerr("ERROR: Invalid socket type: %u\n", psock->s_type);
       return -EBADF;
@@ -626,6 +628,7 @@ static int ieee802154_close(FAR struct socket *psock)
   switch (psock->s_type)
     {
       case SOCK_DGRAM:
+      case SOCK_CTRL:
         {
           FAR struct ieee802154_conn_s *conn = psock->s_conn;
 

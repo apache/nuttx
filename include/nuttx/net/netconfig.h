@@ -104,52 +104,24 @@
 
 #define NET_SOCK_PROTOCOL  0
 
-/* SOCK_DGRAM is the preferred socket type to use when we just want a
- * socket for performing driver ioctls.  However, we can't use SOCK_DRAM
- * if UDP is disabled.
- *
- * Pick a socket type (and perhaps protocol) compatible with the currently
- * selected address family.
+/* SOCK_CTRL is the preferred socket type to use when we just want a
+ * socket for performing driver ioctls.
  */
 
+#define NET_SOCK_TYPE SOCK_CTRL
+
 #if NET_SOCK_FAMILY == AF_INET
-#  if defined(CONFIG_NET_UDP)
-#    define NET_SOCK_TYPE SOCK_DGRAM
-#  elif defined(CONFIG_NET_TCP)
-#   define NET_SOCK_TYPE SOCK_STREAM
-#  elif defined(CONFIG_NET_ICMP_SOCKET)
-#   define NET_SOCK_TYPE SOCK_DGRAM
+#  if !defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_TCP) && \
+      defined(CONFIG_NET_ICMP_SOCKET)
 #   undef NET_SOCK_PROTOCOL
 #   define NET_SOCK_PROTOCOL IPPROTO_ICMP
 #  endif
 #elif NET_SOCK_FAMILY == AF_INET6
-#  if defined(CONFIG_NET_UDP)
-#    define NET_SOCK_TYPE SOCK_DGRAM
-#  elif defined(CONFIG_NET_TCP)
-#   define NET_SOCK_TYPE SOCK_STREAM
-#  elif defined(CONFIG_NET_ICMPv6_SOCKET)
-#   define NET_SOCK_TYPE SOCK_DGRAM
+#  if !defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_TCP) && \
+      defined(CONFIG_NET_ICMPv6_SOCKET)
 #   undef NET_SOCK_PROTOCOL
 #   define NET_SOCK_PROTOCOL IPPROTO_ICMP6
 #  endif
-#elif NET_SOCK_FAMILY == AF_LOCAL
-#  if defined(CONFIG_NET_LOCAL_DGRAM)
-#    define NET_SOCK_TYPE SOCK_DGRAM
-#  elif defined(CONFIG_NET_LOCAL_STREAM)
-#     define NET_SOCK_TYPE SOCK_STREAM
-#  endif
-#elif NET_SOCK_FAMILY == AF_PACKET
-#  define NET_SOCK_TYPE SOCK_RAW
-#elif NET_SOCK_FAMILY == AF_CAN
-#  define NET_SOCK_TYPE SOCK_RAW
-#elif NET_SOCK_FAMILY == AF_IEEE802154
-#  define NET_SOCK_TYPE SOCK_DGRAM
-#elif NET_SOCK_FAMILY == AF_BLUETOOTH
-#  define NET_SOCK_TYPE SOCK_RAW
-#elif NET_SOCK_FAMILY == AF_NETLINK
-#  define NET_SOCK_TYPE SOCK_DGRAM
-#elif NET_SOCK_FAMILY == AF_RPMSG
-#  define NET_SOCK_TYPE SOCK_STREAM
 #endif
 
 /* Eliminate dependencies on other header files.  This should not harm
