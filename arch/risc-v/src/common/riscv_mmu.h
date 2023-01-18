@@ -405,4 +405,21 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
 void mmu_ln_map_region(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
                        uintptr_t vaddr, size_t size, uint32_t mmuflags);
 
+/****************************************************************************
+ * Name: mmu_ln_map_region
+ *
+ * Description:
+ *   Get (giga/mega) page size for level n.
+ *
+ * Input Parameters:
+ *   ptlevel - The translation table level, amount of levels is
+ *     MMU implementation specific
+ *
+ * Returned Value:
+ *   Region size for one page at level n.
+ *
+ ****************************************************************************/
+
+size_t mmu_get_region_size(uint32_t ptlevel);
+
 #endif /* ___ARCH_RISC_V_SRC_COMMON_RISCV_MMU_H_ */
