@@ -131,7 +131,7 @@ uint8_t rp2040_spi1status(struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int rp2040_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined (CONFIG_LCD_ST7789) || (CONFIG_LCD_ST7735)
+#if defined (CONFIG_LCD_ST7789) || defined (CONFIG_LCD_ST7735) || defined (CONFIG_LCD_GC9A01)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the
