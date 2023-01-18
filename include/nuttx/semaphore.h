@@ -40,21 +40,21 @@
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 # if CONFIG_SEM_PREALLOCHOLDERS > 0
-/* semcount, flags, waitlist, hhead */
+/* semcount, waitlist, flags, hhead */
 
 #  define NXSEM_INITIALIZER(c, f) \
-    {(c), (f), SEM_WAITLIST_INITIALIZER, NULL}
+    {(c), SEM_WAITLIST_INITIALIZER, (f), NULL}
 # else
-/* semcount, flags, waitlist, holder[2] */
+/* semcount, waitlist, flags, holder[2] */
 
 #  define NXSEM_INITIALIZER(c, f) \
-    {(c), (f), SEM_WAITLIST_INITIALIZER, {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
+    {(c), SEM_WAITLIST_INITIALIZER, (f), {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
 # endif
 #else /* CONFIG_PRIORITY_INHERITANCE */
-/* semcount, flags, waitlist */
+/* semcount, waitlist */
 
 #  define NXSEM_INITIALIZER(c, f) \
-    {(c), (f), SEM_WAITLIST_INITIALIZER}
+    {(c), SEM_WAITLIST_INITIALIZER}
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
 /* Most internal nxsem_* interfaces are not available in the user space in

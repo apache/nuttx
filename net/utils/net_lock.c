@@ -243,69 +243,6 @@ int net_sem_timedwait(sem_t *sem, unsigned int timeout)
 }
 
 /****************************************************************************
- * Name: net_mutex_timedlock
- *
- * Description:
- *   Atomically wait for mutex (or a timeout) while temporarily releasing
- *   the lock on the network.
- *
- *   Caution should be utilized.  Because the network lock is relinquished
- *   during the wait, there could be changes in the network state that occur
- *   before the lock is recovered.  Your design should account for this
- *   possibility.
- *
- * Input Parameters:
- *   mutex   - A reference to the mutex to be taken.
- *   timeout - The relative time to wait until a timeout is declared.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int net_mutex_timedlock(mutex_t *mutex, unsigned int timeout)
-{
-  unsigned int count;
-  irqstate_t   flags;
-  int          blresult;
-  int          ret;
-
-  flags = enter_critical_section(); /* No interrupts */
-  sched_lock();                     /* No context switches */
-
-  /* Release the network lock, remembering my count.  net_breaklock will
-   * return a negated value if the caller does not hold the network lock.
-   */
-
-  blresult = net_breaklock(&count);
-
-  /* Now take the mutex, waiting if so requested. */
-
-  if (timeout != UINT_MAX)
-    {
-      ret = nxmutex_timedlock(mutex, timeout);
-    }
-  else
-    {
-      /* Wait as long as necessary to get the lock */
-
-      ret = nxmutex_lock(mutex);
-    }
-
-  /* Recover the network lock at the proper count (if we held it before) */
-
-  if (blresult >= 0)
-    {
-      net_restorelock(count);
-    }
-
-  sched_unlock();
-  leave_critical_section(flags);
-  return ret;
-}
-
-/****************************************************************************
  * Name: net_sem_wait
  *
  * Description:
@@ -328,31 +265,6 @@ int net_mutex_timedlock(mutex_t *mutex, unsigned int timeout)
 int net_sem_wait(sem_t *sem)
 {
   return net_sem_timedwait(sem, UINT_MAX);
-}
-
-/****************************************************************************
- * Name: net_mutex_lock
- *
- * Description:
- *   Atomically wait for mutex while temporarily releasing the network lock.
- *
- *   Caution should be utilized.  Because the network lock is relinquished
- *   during the wait, there could be changes in the network state that occur
- *   before the lock is recovered.  Your design should account for this
- *   possibility.
- *
- * Input Parameters:
- *   mutex - A reference to the mutex to be taken.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int net_mutex_lock(mutex_t *mutex)
-{
-  return net_mutex_timedlock(mutex, UINT_MAX);
 }
 
 /****************************************************************************

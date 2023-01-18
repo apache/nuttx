@@ -191,7 +191,7 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
     {
       /* Wait indefinitely until work_queue has new items */
 
-      _SEM_WAIT(&wqueue->wake);
+      nxmutex_lock(&wqueue->wake);
     }
   else
     {

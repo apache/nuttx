@@ -29,7 +29,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/queue.h>
-#include <nuttx/mutex.h>
 #include <semaphore.h>
 #include <debug.h>
 #include <nuttx/irq.h>
@@ -286,7 +285,7 @@ typedef struct alt_evtbuf_inst_s
   uint16_t altcid;
   FAR void **outparam;
   size_t outparamlen;
-  mutex_t stat_lock;
+  sem_t stat_lock;
   alt_evtbuf_state_t stat;
 } alt_evtbuf_inst_t;
 
@@ -324,25 +323,25 @@ typedef struct altcom_fd_set_s altcom_fd_set;
 struct alt_queue_s
 {
   sq_queue_t queue;
-  mutex_t lock;
+  sem_t lock;
 };
 
 struct alt1250_dev_s
 {
   FAR struct spi_dev_s *spi;
   FAR const struct alt1250_lower_s *lower;
-  mutex_t refslock;
+  sem_t refslock;
   uint8_t crefs;
   struct alt_queue_s waitlist;
   struct alt_queue_s replylist;
   uint64_t evtbitmap;
-  mutex_t evtmaplock;
-  mutex_t pfdlock;
+  sem_t evtmaplock;
+  sem_t pfdlock;
   FAR struct pollfd *pfd;
   pthread_t recvthread;
   FAR struct alt_evtbuffer_s *evtbuff;
   uint32_t discardcnt;
-  mutex_t senddisablelock;
+  sem_t senddisablelock;
   bool senddisable;
   FAR alt_container_t *select_container;
   struct alt_evtbuf_inst_s select_inst;
