@@ -156,7 +156,7 @@ static int ieee802154_setup(FAR struct socket *psock, int protocol)
    * Only SOCK_DGRAM is supported (since the MAC header is stripped)
    */
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL)
     {
       return ieee802154_sockif_alloc(psock);
     }

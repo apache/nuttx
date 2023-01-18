@@ -286,6 +286,30 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 #endif
 #endif /* CONFIG_NET_UDP */
 
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+      case SOCK_CTRL:
+#  ifdef NET_UDP_HAVE_STACK
+        if (protocol == 0 || protocol == IPPROTO_UDP)
+          {
+             /* Allocate and attach the UDP connection structure */
+
+             return inet_udp_alloc(psock);
+          }
+
+#  endif
+#  ifdef NET_TCP_HAVE_STACK
+        if (protocol == 0 || protocol == IPPROTO_TCP)
+          {
+             /* Allocate and attach the TCP connection structure */
+
+             return inet_tcp_alloc(psock);
+          }
+
+#  endif
+        nerr("ERROR: Unsupported control protocol: %d\n", protocol);
+        return -EPROTONOSUPPORT;
+#endif /* CONFIG_NET_TCP || CONFIG_NET_UDP */
+
       default:
         nerr("ERROR: Unsupported type: %d\n", psock->s_type);
         return -EPROTONOSUPPORT;
@@ -2310,7 +2334,8 @@ FAR const struct sock_intf_s *
 #if defined(HAVE_PFINET_SOCKETS) && defined(CONFIG_NET_ICMP_SOCKET)
   /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
 
-  if (family == PF_INET && type == SOCK_DGRAM && protocol == IPPROTO_ICMP)
+  if (family == PF_INET && (type == SOCK_DGRAM || type == SOCK_CTRL) &&
+      protocol == IPPROTO_ICMP)
     {
       return &g_icmp_sockif;
     }
@@ -2319,7 +2344,8 @@ FAR const struct sock_intf_s *
 #if defined(HAVE_PFINET6_SOCKETS) && defined(CONFIG_NET_ICMPv6_SOCKET)
   /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
 
-  if (family == PF_INET6 && type == SOCK_DGRAM && protocol == IPPROTO_ICMP6)
+  if (family == PF_INET6 && (type == SOCK_DGRAM || type == SOCK_CTRL) &&
+      protocol == IPPROTO_ICMP6)
     {
       return &g_icmpv6_sockif;
     }
