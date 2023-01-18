@@ -145,3 +145,10 @@ void mmu_ln_map_region(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
       vaddr += page_size;
     }
 }
+
+size_t mmu_get_region_size(uint32_t ptlevel)
+{
+  DEBUGASSERT(ptlevel > 0 && ptlevel <= RV_MMU_PT_LEVELS);
+
+  return g_pgt_sizes[ptlevel - 1];
+}

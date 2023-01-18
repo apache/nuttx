@@ -63,6 +63,7 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 #include <nuttx/irq.h>
 #include <nuttx/pgalloc.h>
 
@@ -87,7 +88,11 @@
 
 /* Base address for address environment */
 
-#define ADDRENV_VBASE       (CONFIG_ARCH_DATA_VBASE)
+#if CONFIG_ARCH_TEXT_VBASE != 0
+#  define ADDRENV_VBASE       (CONFIG_ARCH_TEXT_VBASE)
+#else
+#  define ADDRENV_VBASE       (CONFIG_ARCH_DATA_VBASE)
+#endif
 
 /* Make sure the address environment virtual address boundary is valid */
 
@@ -313,6 +318,30 @@ static int create_region(group_addrenv_t *addrenv, uintptr_t vaddr,
 }
 
 /****************************************************************************
+ * Name: vaddr_is_shm
+ *
+ * Description:
+ *   Check if a vaddr is part of the SHM area
+ *
+ * Input Parameters:
+ *   vaddr - Virtual address to check
+ *
+ * Returned value:
+ *   true if it is; false if not
+ *
+ ****************************************************************************/
+
+static inline bool vaddr_is_shm(uintptr_t vaddr)
+{
+#if defined (CONFIG_ARCH_SHM_VBASE) && defined(ARCH_SHM_VEND)
+  return vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND;
+#else
+  UNUSED(vaddr);
+  return false;
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -490,6 +519,8 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
   uintptr_t *ptprev;
   uintptr_t *ptlast;
   uintptr_t  paddr;
+  uintptr_t  vaddr;
+  size_t     pgsize;
   int        i;
   int        j;
 
@@ -500,13 +531,25 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
   __ISB();
   __DMB();
 
+  /* Things start from the beginning of the user virtual memory */
+
+  vaddr  = ADDRENV_VBASE;
+  pgsize = mmu_get_region_size(ARCH_SPGTS);
+
   /* First destroy the allocated memory and the final level page table */
 
   ptprev = (uintptr_t *)riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   if (ptprev)
     {
-      for (i = 0; i < ENTRIES_PER_PGT; i++)
+      for (i = 0; i < ENTRIES_PER_PGT; i++, vaddr += pgsize)
         {
+          if (vaddr_is_shm(vaddr))
+            {
+              /* Do not free memory from SHM area */
+
+              continue;
+            }
+
           ptlast = (uintptr_t *)riscv_pgvaddr(mmu_pte_to_paddr(ptprev[i]));
           if (ptlast)
             {
