@@ -87,12 +87,10 @@ choice
 	
 config TM4C1294_LAUNCHPAD_UART2_RX_A6
 	bool "Use A6 as UART Rx pin"
-	default n
 	depends on TIVA_UART2 && !TM4C1294_LAUNCHPAD_JUMPERS_CAN
 	
 config TM4C1294_LAUNCHPAD_UART2_RX_D4
 	bool "Use D4 as UART Rx pin"
-	default n
 	depends on TIVA_UART2
 	
 endchoice # UART2 Rx pin selection
@@ -104,12 +102,10 @@ choice
 	
 config TM4C1294_LAUNCHPAD_UART2_TX_A7
 	bool "Use A7 as UART Tx pin"
-	default n
 	depends on TIVA_UART2 && !TM4C1294_LAUNCHPAD_JUMPERS_CAN
 	
 config TM4C1294_LAUNCHPAD_UART2_TX_D5
 	bool "Use D5 as UART Tx pin"
-	default n
 	depends on TIVA_UART2
 	
 endchoice # UART2 Tx pin selection
