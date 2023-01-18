@@ -26,7 +26,7 @@ CSRCS += lib_inetntop.c lib_inetpton.c lib_inetnetwork.c
 CSRCS += lib_etherntoa.c lib_etheraton.c
 
 ifeq ($(CONFIG_NET),y)
-CSRCS += lib_accept.c lib_shutdown.c
+CSRCS += lib_accept.c
 endif
 
 ifeq ($(CONFIG_NET_LOOPBACK),y)

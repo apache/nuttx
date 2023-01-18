@@ -152,6 +152,7 @@
 "shmctl","sys/shm.h","defined(CONFIG_MM_SHM)","int","int","int","FAR struct shmid_ds *"
 "shmdt","sys/shm.h","defined(CONFIG_MM_SHM)","int","FAR const void *"
 "shmget","sys/shm.h","defined(CONFIG_MM_SHM)","int","key_t","size_t","int"
+"shutdown","sys/socket.h","defined(CONFIG_NET)","int","int","int"
 "sigaction","signal.h","","int","int","FAR const struct sigaction *","FAR struct sigaction *"
 "sigpending","signal.h","","int","FAR sigset_t *"
 "sigprocmask","signal.h","","int","int","FAR const sigset_t *","FAR sigset_t *"
