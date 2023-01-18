@@ -482,7 +482,7 @@ if RP2040_PWM7
   endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
 
 endif # RP2040_PWM7
-		
+
 #####################################################################
 #  I2S Configuration
 #####################################################################
@@ -540,3 +540,43 @@ if RP2040_FLASH_FILE_SYSTEM
 			This is the overall amount of flash memory on the board.
 
 endif # RP2040_FLASH_FILE_SYSTEM
+
+#####################################################################
+#  LCD Configuration
+#####################################################################
+
+if LCD
+
+  config RP2040_LCD_SPI_CH
+    int "RP2040 LCD SPI channel number"
+    default 0
+    range 0 1
+    ---help---
+      Select SPI channel number to use LCD display.
+
+endif # LCD
+
+#####################################################################
+#  Ethernet Configuration
+#####################################################################
+
+if ENC28J60
+
+  config RP2040_ENC28J60_SPI_CH
+    int "ENC28J60 SPI channel number"
+    default 1
+    range 0 1
+    ---help---
+      Select SPI channel number to use ENC28J60 ethernet.
+
+  config RP2040_ENC28J60_INTR_GPIO
+    int "ENC28J60 interrupt GPIO pin assign"
+    default -1
+    range -1 29
+
+  config RP2040_ENC28J60_RESET_GPIO
+    int "ENC28J60 reset GPIO pin assign (optional)"
+    default -1
+    range -1 29
+
+endif # ENC28J60
