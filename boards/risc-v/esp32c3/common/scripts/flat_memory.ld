@@ -19,12 +19,13 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * ESP32-C3 Linker Script Memory Layout
+ *
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
  *
- * NOTE: That this is not the actual linker script but rather a "template"
- * for the esp32c3_out.ld script.  This template script is passed through
- * the C preprocessor to include selected configuration options.
+ * <legacy/mcuboot>_sections.ld contains output sections to link compiler
+ * output into these memory blocks.
  *
  ****************************************************************************/
 
