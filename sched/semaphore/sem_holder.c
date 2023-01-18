@@ -1049,6 +1049,12 @@ void nxsem_release_all(FAR struct tcb_s *htcb)
       FAR sem_t *sem = pholder->sem;
 
       nxsem_freeholder(sem, pholder);
+
+      /* Increment the count on the semaphore, to releases the count
+       * that was taken by sem_wait() or sem_post().
+       */
+
+      sem->semcount++;
     }
 }
 
