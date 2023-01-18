@@ -366,6 +366,7 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(sendto,                   6)
   SYSCALL_LOOKUP(sendmsg,                  3)
   SYSCALL_LOOKUP(setsockopt,               5)
+  SYSCALL_LOOKUP(shutdown,                 2)
   SYSCALL_LOOKUP(socket,                   3)
   SYSCALL_LOOKUP(socketpair,               4)
 #endif

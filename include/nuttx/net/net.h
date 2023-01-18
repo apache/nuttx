@@ -167,6 +167,7 @@ struct sock_intf_s
   CODE int        (*si_ioctl)(FAR struct socket *psock,
                     int cmd, unsigned long arg);
   CODE int        (*si_socketpair)(FAR struct socket *psocks[2]);
+  CODE int        (*si_shutdown)(FAR struct socket *psock, int how);
 #ifdef CONFIG_NET_SOCKOPTS
   CODE int        (*si_getsockopt)(FAR struct socket *psock, int level,
                     int option, FAR void *value, FAR socklen_t *value_len);
