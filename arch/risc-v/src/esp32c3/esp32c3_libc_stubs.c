@@ -174,13 +174,13 @@ void _raise_r(struct _reent *r)
 void _lock_init(_lock_t *lock)
 {
   nxmutex_init(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  nxsem_get_value(&g_nxlock_common, lock);
 }
 
 void _lock_init_recursive(_lock_t *lock)
 {
   nxmutex_init(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  nxsem_get_value(&g_nxlock_recursive, lock);
 }
 
 void _lock_close(_lock_t *lock)
@@ -198,39 +198,39 @@ void _lock_close_recursive(_lock_t *lock)
 void _lock_acquire(_lock_t *lock)
 {
   nxmutex_lock(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  nxsem_get_value(&g_nxlock_common, lock);
 }
 
 void _lock_acquire_recursive(_lock_t *lock)
 {
   nxmutex_lock(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  nxsem_get_value(&g_nxlock_recursive, lock);
 }
 
 int _lock_try_acquire(_lock_t *lock)
 {
   nxmutex_trylock(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  nxsem_get_value(&g_nxlock_common, lock);
   return 0;
 }
 
 int _lock_try_acquire_recursive(_lock_t *lock)
 {
   nxmutex_trylock(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  nxsem_get_value(&g_nxlock_recursive, lock);
   return 0;
 }
 
 void _lock_release(_lock_t *lock)
 {
   nxmutex_unlock(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  nxsem_get_value(&g_nxlock_common, lock);
 }
 
 void _lock_release_recursive(_lock_t *lock)
 {
   nxmutex_unlock(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  nxsem_get_value(&g_nxlock_recursive, lock);
 }
 
 struct _reent *__getreent(void)

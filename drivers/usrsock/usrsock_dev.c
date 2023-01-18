@@ -510,7 +510,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
   /* Set outstanding request for daemon to handle. */
 
-  net_mutex_lock(&dev->devlock);
+  net_sem_wait_uninterruptible(&dev->devlock);
 
   if (usrsockdev_is_opened(dev))
     {
