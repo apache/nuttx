@@ -53,7 +53,7 @@ endif
 NET_CSRCS += tcp_conn.c tcp_seqno.c tcp_devpoll.c tcp_finddev.c tcp_timer.c
 NET_CSRCS += tcp_send.c tcp_input.c tcp_appsend.c tcp_listen.c tcp_close.c
 NET_CSRCS += tcp_monitor.c tcp_callback.c tcp_backlog.c tcp_ipselect.c
-NET_CSRCS += tcp_recvwindow.c tcp_netpoll.c tcp_ioctl.c
+NET_CSRCS += tcp_recvwindow.c tcp_netpoll.c tcp_ioctl.c tcp_shutdown.c
 
 # TCP write buffering
 

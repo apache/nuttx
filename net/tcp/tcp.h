@@ -344,8 +344,9 @@ struct tcp_conn_s
   FAR struct devif_callback_s *connevents;
   FAR struct devif_callback_s *connevents_tail;
 
-  /* Reference to TCP close callback instance */
+  /* Reference to TCP shutdown/close callback instance */
 
+  FAR struct devif_callback_s *shdcb;
   FAR struct devif_callback_s *clscb;
   struct work_s                clswork;
 
@@ -766,6 +767,23 @@ void tcp_lost_connection(FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 int tcp_close(FAR struct socket *psock);
+
+/****************************************************************************
+ * Name: tcp_shutdown
+ *
+ * Description:
+ *   Gracefully shutdown a TCP connection by sending a SYN
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   how   - Specifies the type of shutdown.
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+int tcp_shutdown(FAR struct socket *psock, int how);
 
 /****************************************************************************
  * Name: tcp_ipv4_select
