@@ -150,10 +150,10 @@ static int pkt_setup(FAR struct socket *psock)
    * connection structure, it is unallocated at this point.  It will not
    * actually be initialized until the socket is connected.
    *
-   * Only SOCK_RAW is supported.
+   * SOCK_RAW and SOCK_CTRL are supported.
    */
 
-  if (psock->s_type == SOCK_RAW)
+  if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
     {
       return pkt_sockif_alloc(psock);
     }
@@ -203,7 +203,7 @@ static void pkt_addref(FAR struct socket *psock)
   FAR struct pkt_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              psock->s_type == SOCK_RAW);
+              (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL));
 
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
@@ -334,7 +334,7 @@ static int pkt_bind(FAR struct socket *psock,
 
   /* Bind a raw socket to a network device. */
 
-  if (psock->s_type == SOCK_RAW)
+  if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
     {
       FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
       FAR struct net_driver_s *dev;
@@ -517,6 +517,7 @@ static int pkt_close(FAR struct socket *psock)
   switch (psock->s_type)
     {
       case SOCK_RAW:
+      case SOCK_CTRL:
         {
           FAR struct pkt_conn_s *conn = psock->s_conn;
 

@@ -136,7 +136,8 @@ static int netlink_setup(FAR struct socket *psock)
 
   /* Verify the socket type (domain should always be PF_NETLINK here) */
 
-  if (domain == PF_NETLINK && (type == SOCK_RAW || type == SOCK_DGRAM))
+  if (domain == PF_NETLINK &&
+      (type == SOCK_RAW || type == SOCK_DGRAM || type == SOCK_CTRL))
     {
       /* Allocate the NetLink socket connection structure and save it in the
        * new socket instance.
