@@ -405,7 +405,7 @@ unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
  ****************************************************************************/
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset, bool throttled);
+               unsigned int len, int offset, bool throttled);
 
 /****************************************************************************
  * Name: iob_trycopyin
@@ -418,7 +418,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-                  unsigned int len, unsigned int offset, bool throttled);
+                  unsigned int len, int offset, bool throttled);
 
 /****************************************************************************
  * Name: iob_copyout
@@ -430,7 +430,7 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
-                unsigned int len, unsigned int offset);
+                unsigned int len, int offset);
 
 /****************************************************************************
  * Name: iob_tailroom
