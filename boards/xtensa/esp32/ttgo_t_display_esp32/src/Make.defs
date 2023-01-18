@@ -20,8 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
-
 CSRCS = esp32_boot.c esp32_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
