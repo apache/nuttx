@@ -24,8 +24,8 @@
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
  *
- * esp32s3_sections.ld contains output sections to link compiler output
- * into these memory blocks.
+ * <legacy/mcuboot>_sections.ld contains output sections to link compiler
+ * output into these memory blocks.
  *
  ****************************************************************************/
 
