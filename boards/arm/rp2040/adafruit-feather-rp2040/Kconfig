@@ -5,32 +5,4 @@
 
 if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 
-config RP2040_LCD_SPI_CH
-	int "RP2040 LCD SPI channel number"
-	default 0
-	range 0 1
-	depends on LCD
-	---help---
-		Select SPI channel number to use LCD display.
-
-config RP2040_ENC28J60_SPI_CH
-	int "ENC28J60 SPI channel number"
-	default 1
-	range 0 1
-	depends on ENC28J60
-	---help---
-		Select SPI channel number to use ENC28J60 ethernet.
-
-config RP2040_ENC28J60_INTR_GPIO
-	int "ENC28J60 interrupt GPIO pin assign"
-	default -1
-	range -1 29
-	depends on ENC28J60
-
-config RP2040_ENC28J60_RESET_GPIO
-	int "ENC28J60 reset GPIO pin assign (optional)"
-	default -1
-	range -1 29
-	depends on ENC28J60
-
 endif
