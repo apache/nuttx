@@ -106,6 +106,10 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   newnode->preceding = oldnode->size | MM_ALLOC_BIT;
 
   heap->mm_heapend[region] = newnode;
+
+  /* Finally, increase the total heap size accordingly */
+
+  heap->mm_heapsize += size;
   mm_unlock(heap);
 
   /* Finally "free" the new block of memory where the old terminal node was
