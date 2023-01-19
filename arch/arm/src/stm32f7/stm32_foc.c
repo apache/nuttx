@@ -591,6 +591,7 @@ static int stm32_foc_shutdown(struct foc_dev_s *dev);
 static int stm32_foc_start(struct foc_dev_s *dev, bool state);
 static int stm32_foc_pwm_duty_set(struct foc_dev_s *dev,
                                   foc_duty_t *duty);
+static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off);
 static int stm32_foc_ioctl(struct foc_dev_s *dev, int cmd,
                            unsigned long arg);
 static int stm32_foc_bind(struct foc_dev_s *dev,
@@ -657,6 +658,7 @@ static struct foc_lower_ops_s g_stm32_foc_ops =
   .shutdown       = stm32_foc_shutdown,
   .start          = stm32_foc_start,
   .pwm_duty_set   = stm32_foc_pwm_duty_set,
+  .pwm_off        = stm32_foc_pwm_off,
   .ioctl          = stm32_foc_ioctl,
   .bind           = stm32_foc_bind,
   .fault_clear    = stm32_foc_fault_clear,
@@ -1700,6 +1702,48 @@ static int stm32_foc_pwm_duty_set(struct foc_dev_s *dev,
 #if CONFIG_MOTOR_FOC_PHASES > 3
   putreg32(ccr[3], (foc_dev->pwm_base + STM32_GTIM_CCR4_OFFSET));
 #endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_foc_pwm_off
+ *
+ * Description:
+ *   Set the 3-phase bridge switches in off state.
+ *
+ ****************************************************************************/
+
+static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off)
+{
+  struct stm32_pwm_dev_s *pwm = PWM_FROM_FOC_DEV_GET(dev);
+
+  if (off)
+    {
+      /* Force all transistors to low state */
+
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN1, PWM_MODE_HIZ);
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN2, PWM_MODE_HIZ);
+#if CONFIG_MOTOR_FOC_PHASES > 2
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN3, PWM_MODE_HIZ);
+#endif
+#if CONFIG_MOTOR_FOC_PHASES > 3
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN4, PWM_MODE_HIZ);
+#endif
+    }
+  else
+    {
+      /* Restore FOC operation modes */
+
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN1, PWM_MODE_FOC);
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN2, PWM_MODE_FOC);
+#if CONFIG_MOTOR_FOC_PHASES > 2
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN3, PWM_MODE_FOC);
+#endif
+#if CONFIG_MOTOR_FOC_PHASES > 3
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN4, PWM_MODE_FOC);
+#endif
+    }
 
   return OK;
 }
