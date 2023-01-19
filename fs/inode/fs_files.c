@@ -269,6 +269,9 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
   int i;
   int j;
 
+  DEBUGASSERT(clist);
+  DEBUGASSERT(plist);
+
   ret = nxmutex_lock(&plist->fl_lock);
   if (ret < 0)
     {
@@ -298,7 +301,10 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 #endif
 
           filep = &plist->fl_files[i][j];
-          if (filep->f_inode == NULL || (filep->f_oflags & O_CLOEXEC) != 0)
+          DEBUGASSERT(filep);
+
+          if (filep && (filep->f_inode == NULL ||
+                       (filep->f_oflags & O_CLOEXEC) != 0))
             {
               continue;
             }
