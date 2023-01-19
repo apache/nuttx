@@ -83,6 +83,7 @@ struct foc_cfg_s
 
 struct foc_state_s
 {
+  bool          pwm_off;                       /* PWM switches disabled */
   uint8_t       fault;                         /* Fault state */
   foc_current_t curr[CONFIG_MOTOR_FOC_PHASES]; /* Phase current feedback */
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE

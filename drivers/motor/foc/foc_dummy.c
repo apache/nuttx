@@ -107,6 +107,7 @@ static int foc_dummy_shutdown(FAR struct foc_dev_s *dev);
 static int foc_dummy_start(FAR struct foc_dev_s *dev, bool state);
 static int foc_dummy_pwm_duty_set(FAR struct foc_dev_s *dev,
                                   FAR foc_duty_t *duty);
+static int foc_pwm_off(struct foc_dev_s *dev, bool off);
 static int foc_dummy_ioctl(FAR struct foc_dev_s *dev, int cmd,
                            unsigned long arg);
 static int foc_dummy_bind(FAR struct foc_dev_s *dev,
@@ -146,6 +147,7 @@ static struct foc_lower_ops_s g_foc_dummy_ops =
   foc_dummy_setup,
   foc_dummy_shutdown,
   foc_dummy_pwm_duty_set,
+  foc_pwm_off,
   foc_dummy_start,
   foc_dummy_ioctl,
   foc_dummy_bind,
@@ -514,6 +516,21 @@ static int foc_dummy_pwm_duty_set(FAR struct foc_dev_s *dev,
 #else
 #  error
 #endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: foc_pwm_off
+ *
+ * Description:
+ *   Set the 3-phase bridge switches in off state.
+ *
+ ****************************************************************************/
+
+static int foc_pwm_off(struct foc_dev_s *dev, bool off)
+{
+  mtrinfo("[PWM_OFF] %d\n", off);
 
   return OK;
 }
