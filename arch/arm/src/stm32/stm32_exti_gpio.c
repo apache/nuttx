@@ -312,6 +312,7 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   if (func)
     {
+      putreg32(exti, STM32_EXTI_PR);
       irq_attach(irq, handler, NULL);
       up_enable_irq(irq);
     }
