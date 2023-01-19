@@ -51,12 +51,6 @@
 #include "riscv_internal.h"
 
 /****************************************************************************
- * Forward Declarations
- ****************************************************************************/
-
-extern int devif_loopback(FAR struct net_driver_s *dev);
-
-/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -1517,20 +1511,17 @@ static int mpfs_txpoll(struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      if (!devif_loopback(&priv->dev))
+      /* Send the packet */
+
+      mpfs_transmit(priv);
+
+      /* Check if there is room in the device to hold another packet. If
+        * not, return a non-zero value to terminate the poll.
+        */
+
+      if (!MPFS_CAN_FD_TXNF(priv))
         {
-          /* Send the packet */
-
-          mpfs_transmit(priv);
-
-          /* Check if there is room in the device to hold another packet. If
-           * not, return a non-zero value to terminate the poll.
-           */
-
-          if (!MPFS_CAN_FD_TXNF(priv))
-            {
-              return -EBUSY;
-            }
+          return -EBUSY;
         }
     }
 
