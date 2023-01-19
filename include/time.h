@@ -46,11 +46,11 @@
  */
 
 #ifdef CONFIG_USEC_PER_TICK
-# define CLK_TCK           (1000000/CONFIG_USEC_PER_TICK)
-# define CLOCKS_PER_SEC    (1000000/CONFIG_USEC_PER_TICK)
+# define CLK_TCK                  (1000000/CONFIG_USEC_PER_TICK)
+# define CLOCKS_PER_SEC           (1000000/CONFIG_USEC_PER_TICK)
 #else
-# define CLK_TCK           (100)
-# define CLOCKS_PER_SEC    (100)
+# define CLK_TCK                  (100)
+# define CLOCKS_PER_SEC           (100)
 #endif
 
 /* CLOCK_REALTIME refers to the standard time source.  For most
@@ -64,28 +64,38 @@
  * forward and backward as the system time-of-day clock is changed.
  */
 
-#define CLOCK_REALTIME     0
+#define CLOCK_REALTIME            0
 
 /* Clock that cannot be set and represents monotonic time since some
  * unspecified starting point. It is not affected by changes in the
  * system time-of-day clock.
  */
 
-#define CLOCK_MONOTONIC    1
+#define CLOCK_MONOTONIC           1
+
+/* Clock that measures CPU time consumed by this process (i.e., CPU
+ * time consumed by all threads in the process).
+ */
+
+#define CLOCK_PROCESS_CPUTIME_ID  2
+
+/* Clock that measures CPU time consumed by this thread */
+
+#define CLOCK_THREAD_CPUTIME_ID   3
 
 /* Monotonic system-wide clock that includes time spent in suspension. */
 
-#define CLOCK_BOOTTIME     2
+#define CLOCK_BOOTTIME            4
 
 /* This is a flag that may be passed to the timer_settime() and
  * clock_nanosleep() functions.
  */
 
-#define TIMER_ABSTIME      1
+#define TIMER_ABSTIME             1
 
 /* Time base values for timespec_get.  */
 
-#define TIME_UTC           1
+#define TIME_UTC                  1
 
 /* Redirect the timelocal and strftime_l */
 
