@@ -51,6 +51,12 @@
 #include "riscv_internal.h"
 
 /****************************************************************************
+ * Forward Declarations
+ ****************************************************************************/
+
+extern int devif_loopback(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -1196,7 +1202,7 @@ static int mpfs_interrupt(int irq, void *context, void *arg)
 
   if (isr & MPFS_CANFD_INT_STAT_TXBHCI)
     {
-#if CONFIG_DEBUG_CAN_INFO
+#ifdef CONFIG_DEBUG_CAN_INFO
       caninfo("txb_sent=0x%08x txb_processed=0x%08x\n", priv->txb_sent,
               priv->txb_processed);
       for (int i = 0; i < priv->ntxbufs; i++)
