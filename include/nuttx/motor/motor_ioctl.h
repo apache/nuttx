@@ -49,5 +49,6 @@
 #define MTRIOC_SET_LIMITS     _MTRIOC(9)
 #define MTRIOC_SET_FAULT      _MTRIOC(10)
 #define MTRIOC_GET_FAULT      _MTRIOC(11)
+#define MTRIOC_PWM_OFF        _MTRIOC(12)
 
 #endif /* __INCLUDE_NUTTX_MOTOR_MOTOR_IOCTL_H */
