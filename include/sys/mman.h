@@ -68,7 +68,7 @@
 
 /* Failure return */
 
-#define MAP_FAILED      ((void*)-1)
+#define MAP_FAILED      ((FAR void*)-1)
 
 /* The following flags are used with msync() */
 
@@ -108,6 +108,12 @@
 #define POSIX_MADV_WILLNEED   (3)
 #define POSIX_MADV_DONTNEED   (4)
 
+#define MADV_NORMAL           POSIX_MADV_NORMAL
+#define MADV_SEQUENTIAL       POSIX_MADV_SEQUENTIAL
+#define MADV_RANDOM           POSIX_MADV_RANDOM
+#define MADV_WILLNEED         POSIX_MADV_WILLNEED
+#define MADV_DONTNEED         POSIX_MADV_DONTNEED
+
 /* The following flags are defined for posix_typed_mem_open():
  *
  * POSIX_TYPED_MEM_ALLOCATE
@@ -125,6 +131,8 @@
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define mmap64 mmap
 #endif
+
+#define madvise posix_madvise
 
 /****************************************************************************
  * Public Type Definitions
