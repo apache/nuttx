@@ -1444,6 +1444,7 @@ static int tmpfs_close(FAR struct file *filep)
        * have any other references.
        */
 
+      nxrmutex_destroy(&tfo->tfo_lock);
       kmm_free(tfo->tfo_data);
       kmm_free(tfo);
       return OK;
