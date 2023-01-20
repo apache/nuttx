@@ -112,11 +112,9 @@ No support for the following pthread interfaces is provided by NuttX:
   -  ``pthread_attr_getguardsize``. get and set the thread guardsize
      attribute.
   -  ``pthread_attr_getscope``. get and set the contentionscope attribute.
-  -  ``pthread_attr_getstackaddr``. get and set the stackaddr attribute.
   -  ``pthread_attr_setguardsize``. get and set the thread guardsize
      attribute.
   -  ``pthread_attr_setscope``. get and set the contentionscope attribute.
-  -  ``pthread_attr_setstackaddr``. get and set the stackaddr attribute.
   -  ``pthread_condattr_getpshared``. get the process-shared condition
      variable attribute.
   -  ``pthread_condattr_setpshared``. set the process-shared condition
