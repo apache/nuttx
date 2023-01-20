@@ -109,28 +109,15 @@ The main task thread does not have thread-specific data.
 
 No support for the following pthread interfaces is provided by NuttX:
 
-  -  ``pthread_atfork``. register fork handlers.
-  -  ``pthread_attr_getdetachstate``. get and set the detachstate
-     attribute.
   -  ``pthread_attr_getguardsize``. get and set the thread guardsize
      attribute.
-  -  ``pthread_attr_getinheritsched``. get and set the inheritsched
-     attribute.
   -  ``pthread_attr_getscope``. get and set the contentionscope attribute.
-  -  ``pthread_attr_getstack``. get and set stack attributes.
   -  ``pthread_attr_getstackaddr``. get and set the stackaddr attribute.
-  -  ``pthread_attr_setdetachstate``. get and set the detachstate
-     attribute.
   -  ``pthread_attr_setguardsize``. get and set the thread guardsize
      attribute.
   -  ``pthread_attr_setscope``. get and set the contentionscope attribute.
-  -  ``pthread_attr_setstack``. get and set stack attributes.
   -  ``pthread_attr_setstackaddr``. get and set the stackaddr attribute.
-  -  ``pthread_condattr_getclock``. set the clock selection condition
-     variable attribute.
   -  ``pthread_condattr_getpshared``. get the process-shared condition
-     variable attribute.
-  -  ``pthread_condattr_setclock``. set the clock selection condition
      variable attribute.
   -  ``pthread_condattr_setpshared``. set the process-shared condition
      variable attribute.
@@ -140,7 +127,6 @@ No support for the following pthread interfaces is provided by NuttX:
      a mutex.
   -  ``pthread_mutex_setprioceiling``. get and set the priority ceiling of
      a mutex.
-  -  ``pthread_mutex_timedlock``. lock a mutex.
   -  ``pthread_mutexattr_getprioceiling``. get and set the prioceiling
      attribute of the mutex attributes object.
   -  ``pthread_mutexattr_setprioceiling``. get and set the prioceiling
@@ -154,11 +140,6 @@ No support for the following pthread interfaces is provided by NuttX:
   -  ``pthread_rwlockattr_setpshared``. get and set the process-shared
      attribute of the read-write lock attributes object.
   -  ``pthread_setconcurrency``. get and set the level of concurrency.
-  -  ``pthread_spin_destroy``. destroy or initialize a spin lock object.
-  -  ``pthread_spin_init``. destroy or initialize a spin lock object.
-  -  ``pthread_spin_lock``. lock a spin lock object.
-  -  ``pthread_spin_trylock``. lock a spin lock object.
-  -  ``pthread_spin_unlock``. unlock a spin lock object.
 
 .. c:function:: int pthread_attr_init(pthread_attr_t *attr);
 
