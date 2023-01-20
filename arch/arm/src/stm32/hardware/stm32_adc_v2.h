@@ -686,6 +686,7 @@
 #  define ADC_CCR_DUAL_DUAL          (1 << ADC_CCR_DUAL_SHIFT)   /* Dual mode, master/slave ADCs together */
 #  define ADC_CCR_DUAL_SIMINJ        (1 << ADC_CCR_DUAL_SHIFT)   /* Combined regular sim. + injected sim. */
 #  define ADC_CCR_DUAL_SIMALT        (2 << ADC_CCR_DUAL_SHIFT)   /* Combined regular sim. + alternate trigger */
+#  define ADC_CCR_DUAL_INTINJ        (3 << ADC_CCR_DUAL_SHIFT)   /* Combined interl. mode + injected sim. */
 #  define ADC_CCR_DUAL_INJECTED      (5 << ADC_CCR_DUAL_SHIFT)   /* Injected simultaneous mode only */
 #  define ADC_CCR_DUAL_SIM           (6 << ADC_CCR_DUAL_SHIFT)   /* Regular simultaneous mode only */
 #  define ADC_CCR_DUAL_INTERLEAVE    (7 << ADC_CCR_DUAL_SHIFT)   /* Interleaved mode only */

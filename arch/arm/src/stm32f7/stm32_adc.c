@@ -376,6 +376,8 @@ static void adc_sampletime_set(struct stm32_adc_dev_s *dev,
 static void adc_sampletime_write(struct stm32_adc_dev_s *dev);
 #  endif
 static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev);
+static int  adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode);
+static void adc_llops_enable(struct stm32_adc_dev_s *dev, bool enable);
 #endif
 
 /****************************************************************************
@@ -425,7 +427,9 @@ static const struct stm32_adc_ops_s g_adc_llops =
   .stime_set     = adc_sampletime_set,
   .stime_write   = adc_sampletime_write,
 #  endif
-  .dump_regs     = adc_llops_dumpregs
+  .dump_regs     = adc_llops_dumpregs,
+  .multi_cfg     = adc_llops_multicfg,
+  .enable        = adc_llops_enable
 };
 #endif
 
@@ -2868,6 +2872,99 @@ static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   adc_dumpregs(priv);
+}
+
+/****************************************************************************
+ * Name: adc_llops_multicfg
+ *
+ * IMPORTANT: this interface is allowed only when the ADCs are disabled!
+ *
+ ****************************************************************************/
+
+static int adc_llops_multicfg(struct stm32_adc_dev_s *dev, uint8_t mode)
+{
+  struct stm32_dev_s *priv    = (struct stm32_dev_s *)dev;
+  int                 ret     = OK;
+  uint32_t            setbits = 0;
+  uint32_t            clrbits = 0;
+
+  switch (mode)
+    {
+      case ADC_MULTIMODE_INDEP:
+        setbits = ADC_CCR_MULTI_NONE;
+        break;
+
+      case ADC_MULTIMODE_RSISM2:
+        setbits = ADC_CCR_MULTI_RSISM2;
+        break;
+
+      case ADC_MULTIMODE_RSATM2:
+        setbits = ADC_CCR_MULTI_RSATM2;
+        break;
+
+      case ADC_MULTIMODE_ISM2:
+        setbits = ADC_CCR_MULTI_ISM2;
+        break;
+
+      case ADC_MULTIMODE_RSM2:
+        setbits = ADC_CCR_MULTI_ISM2;
+        break;
+
+      case ADC_MULTIMODE_IM2:
+        setbits = ADC_CCR_MULTI_IM2;
+        break;
+
+      case ADC_MULTIMODE_ATM2:
+        setbits = ADC_CCR_MULTI_ATM2;
+        break;
+
+      case ADC_MULTIMODE_RSISM3:
+        setbits = ADC_CCR_MULTI_RSISM3;
+        break;
+
+      case ADC_MULTIMODE_RSATM3:
+        setbits = ADC_CCR_MULTI_RSATM3;
+        break;
+
+      case ADC_MULTIMODE_ISM3:
+        setbits = ADC_CCR_MULTI_ISM3;
+        break;
+
+      case ADC_MULTIMODE_RSM3:
+        setbits = ADC_CCR_MULTI_ISM3;
+        break;
+
+      case ADC_MULTIMODE_IM3:
+        setbits = ADC_CCR_MULTI_IM3;
+        break;
+
+      case ADC_MULTIMODE_ATM3:
+        setbits = ADC_CCR_MULTI_ATM3;
+        break;
+
+      case ADC_MULTIMODE_IMIS2:
+      case ADC_MULTIMODE_IMIS3:
+      default:
+        ret = -EINVAL;
+        goto errout;
+    }
+
+  clrbits = ADC_CCR_MULTI_MASK;
+  adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: adc_llops_enable
+ ****************************************************************************/
+
+static void adc_llops_enable(struct stm32_adc_dev_s *dev, bool enable)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  adc_enable(priv, enable);
 }
 
 #endif /* CONFIG_STM32F7_ADC_LL_OPS */
