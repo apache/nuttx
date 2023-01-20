@@ -115,10 +115,6 @@ No support for the following pthread interfaces is provided by NuttX:
   -  ``pthread_attr_setguardsize``. get and set the thread guardsize
      attribute.
   -  ``pthread_attr_setscope``. get and set the contentionscope attribute.
-  -  ``pthread_condattr_getpshared``. get the process-shared condition
-     variable attribute.
-  -  ``pthread_condattr_setpshared``. set the process-shared condition
-     variable attribute.
   -  ``pthread_getconcurrency``. get and set the level of concurrency.
   -  ``pthread_getcpuclockid``. access a thread CPU-time clock.
   -  ``pthread_mutex_getprioceiling``. get and set the priority ceiling of
