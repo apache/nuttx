@@ -83,7 +83,6 @@
 #define ISE_SRC_VSIZE_MAX   (2160)
 #define ISE_DST_HSIZE_MAX   (768)
 #define ISE_DST_VSIZE_MAX   (1024)
-#define MAX_RATIO           (64)
 
 /* Command code */
 
@@ -228,53 +227,31 @@ static int intr_handler_rot(int irq, void *context, void *arg)
   return 0;
 }
 
-static int ratio_check(uint16_t src, uint16_t dest)
-{
-  uint16_t ratio = 1;
-
-  if (src > dest)
-    {
-      ratio = src / dest;
-    }
-  else if (src < dest)
-    {
-      ratio = dest / src;
-    }
-
-  if (ratio > MAX_RATIO)
-    {
-      return -1;
-    }
-
-  return 0;
-}
-
 static uint16_t calc_ratio(uint16_t src, uint16_t dest)
 {
   uint16_t r;
 
-  if (src > dest)
+  /* Calculate scale factor for the ratio
+   *
+   * ratio = 256 / scalefactor
+   *
+   * scalefactor is from 16383 (=x1/64) to 4 (=x64).
+   * Actually, scalefactor of x1/64 is 16384, but hardware
+   * can take 14 bits (0x3fff), so we need set 16383 for x1/64.
+   */
+
+  r = (uint32_t)src * 256 / dest;
+  if (r == 16384)
     {
-      r = src / dest;
-      if (r == 2 || r == 4 || r == 8 || r == 16 || r == 32 || r == 64)
-        {
-          return 256 * r;
-        }
-    }
-  else if (src < dest)
-    {
-      r = dest / src;
-      if (r == 2 || r == 4 || r == 8 || r == 16 || r == 32 || r == 64)
-        {
-          return 256 / r;
-        }
-    }
-  else
-    {
-      return 256;
+      r = 16383;
     }
 
-  return 0;
+  if (r < 4 || r > 16383)
+    {
+      return 0;
+    }
+
+  return r;
 }
 
 static void *set_rop_cmd(void *cmdbuf,
@@ -356,8 +333,8 @@ static void *set_rop_cmd(void *cmdbuf,
 
       sc->desth = destwidth - 1;
       sc->destv = destheight - 1;
-      sc->ratiov = rv - 1;
-      sc->ratioh = rh - 1;
+      sc->ratiov = rv;
+      sc->ratioh = rh;
       sc->hphaseinit = 1;
       sc->vphaseinit = 1;
       sc->intpmode = 0;         /* XXX: HV Linear interpolation */
@@ -629,15 +606,9 @@ int imageproc_resize(uint8_t * ibuf,
     }
 
   if ((ihsize > ISE_SRC_HSIZE_MAX || ihsize < HSIZE_MIN) ||
-      (ivsize > ISE_SRC_VSIZE_MAX || ihsize < VSIZE_MIN) ||
+      (ivsize > ISE_SRC_VSIZE_MAX || ivsize < VSIZE_MIN) ||
       (ohsize > ISE_DST_HSIZE_MAX || ohsize < HSIZE_MIN) ||
       (ovsize > ISE_DST_VSIZE_MAX || ovsize < VSIZE_MIN))
-    {
-      return -EINVAL;
-    }
-
-  if ((ratio_check(ihsize, ohsize) != 0) ||
-      (ratio_check(ivsize, ovsize) != 0))
     {
       return -EINVAL;
     }
@@ -714,7 +685,7 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
     }
 
   if ((ihsize > ISE_SRC_HSIZE_MAX || ihsize < HSIZE_MIN) ||
-      (ivsize > ISE_SRC_VSIZE_MAX || ihsize < VSIZE_MIN) ||
+      (ivsize > ISE_SRC_VSIZE_MAX || ivsize < VSIZE_MIN) ||
       (ohsize > ISE_DST_HSIZE_MAX || ohsize < HSIZE_MIN) ||
       (ovsize > ISE_DST_VSIZE_MAX || ovsize < VSIZE_MIN))
     {
@@ -737,24 +708,12 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
       clip_width = clip_rect->x2 - clip_rect->x1 + 1;
       clip_height = clip_rect->y2 - clip_rect->y1 + 1;
 
-      if ((ratio_check(clip_width, ohsize) != 0) ||
-          (ratio_check(clip_height, ovsize) != 0))
-        {
-          return -EINVAL;
-        }
-
       pix_bytes = bpp >> 3;
       ibuf = ibuf + (clip_rect->x1 * pix_bytes +
                      clip_rect->y1 * ihsize * pix_bytes);
     }
   else
     {
-      if ((ratio_check(ihsize, ohsize) != 0) ||
-          (ratio_check(ivsize, ovsize) != 0))
-        {
-          return -EINVAL;
-        }
-
       clip_width = ihsize;
       clip_height = ivsize;
     }

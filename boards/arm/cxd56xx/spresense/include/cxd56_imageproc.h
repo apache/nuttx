@@ -40,51 +40,51 @@ extern "C"
  * right bottom point.
  */
 
-  struct imageproc_rect_s
-    {
-      uint16_t x1;               /* X coordinate of left top point */
-      uint16_t y1;               /* Y coordinate of left top point */
-      uint16_t x2;               /* X coordinate of rignt bottom point */
-      uint16_t y2;               /* Y coordinate of rignt bottom point */
-    };
-  typedef struct imageproc_rect_s imageproc_rect_t;
+struct imageproc_rect_s
+{
+  uint16_t x1;               /* X coordinate of left top point */
+  uint16_t y1;               /* Y coordinate of left top point */
+  uint16_t x2;               /* X coordinate of rignt bottom point */
+  uint16_t y2;               /* Y coordinate of rignt bottom point */
+};
+typedef struct imageproc_rect_s imageproc_rect_t;
 
 /* Enumeration of image type */
 
-  enum imageproc_imginfo_e
-    {
-      IMAGEPROC_IMGTYPE_SINGLE = 0, /* All pixels have the same value */
-      IMAGEPROC_IMGTYPE_BINARY = 1, /* Each pixels have 0 or specific non-zero value */
-      IMAGEPROC_IMGTYPE_8BPP   = 2, /* Each pixels have 8bit value */
-      IMAGEPROC_IMGTYPE_16BPP  = 3, /* Each pixels have 16bit value */
-    };
+enum imageproc_imginfo_e
+{
+  IMAGEPROC_IMGTYPE_SINGLE = 0, /* All pixels have the same value */
+  IMAGEPROC_IMGTYPE_BINARY = 1, /* Each pixels have 0 or specific non-zero value */
+  IMAGEPROC_IMGTYPE_8BPP   = 2, /* Each pixels have 8bit value */
+  IMAGEPROC_IMGTYPE_16BPP  = 3, /* Each pixels have 16bit value */
+};
 
 /* Structure of binary image */
 
-  struct imageproc_binary_img_s
-    {
-      uint8_t *p_u8;      /* 1bpp image */
-      int     multiplier; /* specific non-zero value */
-    };
-  typedef struct imageproc_binary_img_s imageproc_binary_img_t;
+struct imageproc_binary_img_s
+{
+  uint8_t *p_u8;      /* 1bpp image */
+  int     multiplier; /* specific non-zero value */
+};
+typedef struct imageproc_binary_img_s imageproc_binary_img_t;
 
 /* Structure of image information. */
 
-  struct imageproc_imginfo_s
-    {
-      enum imageproc_imginfo_e type;     /* Type of image data    */
-      int  w;                            /* width  of total image */
-      int  h;                            /* height of total image */
-      imageproc_rect_t *rect;            /* clipped rectangle     */
-      union
-        {
-          int                    single; /* type = IMAGEPROC_IMGTYPE_SINGLE */
-          imageproc_binary_img_t binary; /* type = IMAGEPROC_IMGTYPE_BINARY */
-          uint8_t                *p_u8;  /* type = IMAGEPROC_IMGTYPE_8BPP   */
-          uint16_t               *p_u16; /* type = IMAGEPROC_IMGTYPE_16BPP  */
-        } img;
-    };
-  typedef struct imageproc_imginfo_s imageproc_imginfo_t;
+struct imageproc_imginfo_s
+{
+  enum imageproc_imginfo_e type;     /* Type of image data    */
+  int  w;                            /* width  of total image */
+  int  h;                            /* height of total image */
+  imageproc_rect_t *rect;            /* clipped rectangle     */
+  union
+  {
+    int                    single; /* type = IMAGEPROC_IMGTYPE_SINGLE */
+    imageproc_binary_img_t binary; /* type = IMAGEPROC_IMGTYPE_BINARY */
+    uint8_t                *p_u8;  /* type = IMAGEPROC_IMGTYPE_8BPP   */
+    uint16_t               *p_u16; /* type = IMAGEPROC_IMGTYPE_16BPP  */
+  } img;
+};
+typedef struct imageproc_imginfo_s imageproc_imginfo_t;
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -93,12 +93,12 @@ extern "C"
 /* Initialize imageproc library
  */
 
-  void imageproc_initialize(void);
+void imageproc_initialize(void);
 
 /* Finalize imageproc library
  */
 
-  void imageproc_finalize(void);
+void imageproc_finalize(void);
 
 /* Convert color format (YUV to RGB)
  *
@@ -111,8 +111,8 @@ extern "C"
  * return 0 on success, otherwise error code.
  */
 
-  int imageproc_convert_yuv2rgb(uint8_t * ibuf, uint32_t hsize,
-                                uint32_t vsize);
+int imageproc_convert_yuv2rgb(uint8_t * ibuf, uint32_t hsize,
+                              uint32_t vsize);
 
 /* Convert color format (RGB to YUV)
  *
@@ -123,8 +123,8 @@ extern "C"
  * return 0 on success, otherwise error code.
  */
 
-  int imageproc_convert_rgb2yuv(uint8_t * ibuf, uint32_t hsize,
-                                uint32_t vsize);
+int imageproc_convert_rgb2yuv(uint8_t * ibuf, uint32_t hsize,
+                              uint32_t vsize);
 
 /* Convert color format (YUV to grayscale)
  *
@@ -136,8 +136,8 @@ extern "C"
  *  [in] vsize: Vertical size
  */
 
-  void imageproc_convert_yuv2gray(uint8_t * ibuf, uint8_t * obuf,
-                                  size_t hsize, size_t vsize);
+void imageproc_convert_yuv2gray(uint8_t * ibuf, uint8_t * obuf,
+                                size_t hsize, size_t vsize);
 
 /* Resize image
  *
@@ -145,10 +145,10 @@ extern "C"
  * image will be stored to obuf.
  *
  * For ohsize and ovsize, specify output size calculated by multiply
- * in range 1/2^n to 2^n (n=0..5) against ihsize and ivsize.
+ * in range from x1/64 to x64 against ihsize and ivsize.
  *
  * This function can be processing for YUV422 color format.
- *  So all of specified sizes must be multiple of 2.
+ * So all of specified horizontal size must be multiple of 2.
  *
  * And there is limitation about output size below.
  *
@@ -168,11 +168,14 @@ extern "C"
  *  [in] bpp: Bits per pixel (16 or 8)
  *
  * return 0 on success, otherwise error code.
+ *
+ * CAUTION: In enlarge by higher scaling ratio, it may not be output
+ * all of the pixels.
  */
 
-  int imageproc_resize(uint8_t * ibuf, uint16_t ihsize, uint16_t ivsize,
-                       uint8_t * obuf, uint16_t ohsize, uint16_t ovsize,
-                       int bpp);
+int imageproc_resize(uint8_t * ibuf, uint16_t ihsize, uint16_t ivsize,
+                     uint8_t * obuf, uint16_t ohsize, uint16_t ovsize,
+                     int bpp);
 
 /* Clip and Resize image
  *
@@ -188,10 +191,10 @@ extern "C"
  * return 0 on success, otherwise error code.
  */
 
-  int imageproc_clip_and_resize(uint8_t * ibuf, uint16_t ihsize,
-                                uint16_t ivsize, uint8_t * obuf,
-                                uint16_t ohsize, uint16_t ovsize, int bpp,
-                                imageproc_rect_t * clip_rect);
+int imageproc_clip_and_resize(uint8_t * ibuf, uint16_t ihsize,
+                              uint16_t ivsize, uint8_t * obuf,
+                              uint16_t ohsize, uint16_t ovsize, int bpp,
+                              imageproc_rect_t * clip_rect);
 
 /* Execute alpha blending
  *
@@ -217,9 +220,9 @@ extern "C"
  * return 0 on success, otherwise error code.
  */
 
-  int imageproc_alpha_blend(imageproc_imginfo_t *dst, int pos_x, int pos_y,
-                            imageproc_imginfo_t *src,
-                            imageproc_imginfo_t *alpha);
+int imageproc_alpha_blend(imageproc_imginfo_t *dst, int pos_x, int pos_y,
+                          imageproc_imginfo_t *src,
+                          imageproc_imginfo_t *alpha);
 
 #ifdef __cplusplus
 }
