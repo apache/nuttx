@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_attr_getstack.c
+ * libs/libc/pthread/pthread_attr_getstackaddr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,16 +30,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  pthread_attr_getstack
+ * Name:  pthread_attr_getstackaddr
  *
  * Description:
  *   The pthread_attr_getstack() function shall get the thread creation stack
- *   attributes stackaddr and stacksize from the attr object.
+ *   attributes stackaddr from the attr object.
  *
  * Parameters:
  *   attr      - thread attributes to be queried.
  *   stackaddr - stack address pointer
- *   stacksize - stack size pointer
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -48,19 +47,18 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getstack(FAR const pthread_attr_t *attr,
-                          FAR void **stackaddr, FAR size_t *stacksize)
+int pthread_attr_getstackaddr(FAR const pthread_attr_t *attr,
+                              FAR void **stackaddr)
 {
   int ret;
 
-  if (!attr || !stackaddr || !stacksize)
+  if (!attr || !stackaddr)
     {
       ret = EINVAL;
     }
   else
     {
       *stackaddr = attr->stackaddr;
-      *stacksize = attr->stacksize;
       ret = OK;
     }
 

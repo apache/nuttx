@@ -22,11 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -37,10 +33,12 @@
  * Name:  pthread_attr_setstacksize
  *
  * Description:
+ *   The pthread_attr_setstack() function shall set the thread creation stack
+ *   attributes stacksize in the attr object.
  *
  * Input Parameters:
- *   attr
- *   stacksize
+ *   attr      - thread attributes to be modified.
+ *   stacksize - stack size
  *
  * Returned Value:
  *   0 if successful.  Otherwise, an error code.
@@ -53,8 +51,6 @@ int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize)
 {
   int ret;
 
-  linfo("attr=%p stacksize=%zu\n", attr, stacksize);
-
   if (!attr || stacksize < PTHREAD_STACK_MIN)
     {
       ret = EINVAL;
@@ -65,6 +61,5 @@ int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize)
       ret = OK;
     }
 
-  linfo("Returning %d\n", ret);
   return ret;
 }
