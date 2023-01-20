@@ -206,3 +206,65 @@ int at_quick_exit(CODE void (*func)(void))
 {
   return atexit_register(ATTYPE_ATQUICKEXIT, func, NULL, NULL);
 }
+
+/****************************************************************************
+ * Name: on_exit
+ *
+ * Description:
+ *    Registers a function to be called at program exit.
+ *    The on_exit() function registers the given function to be called
+ *    at normal process termination, whether via exit or via return from
+ *    the program's main(). The function is passed the status argument
+ *    given to the last call to exit and the arg argument from on_exit().
+ *
+ *    NOTE 1: This function comes from SunOS 4, but is also present in
+ *    libc4, libc5 and glibc. It no longer occurs in Solaris (SunOS 5).
+ *    Avoid this function, and use the standard atexit() instead.
+ *
+ *    Limitations in the current implementation:
+ *
+ *      1. Only a single on_exit function can be registered unless
+ *         CONFIG_LIBC_MAX_EXITFUNS defines a larger number.
+ *      2. on_exit functions are not inherited when a new task is
+ *         created.
+ *
+ * Input Parameters:
+ *   func - A pointer to the function to be called when the task exits.
+ *   arg -  An argument that will be provided to the on_exit() function when
+ *          the task exits.
+ *
+ * Returned Value:
+ *   Zero on success. Non-zero on failure.
+ *
+ ****************************************************************************/
+
+int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
+{
+  return atexit_register(ATTYPE_ONEXIT, (CODE void (*)(void))func, arg,
+                         NULL);
+}
+
+/****************************************************************************
+ * Name: __cxa_atexit
+ *
+ * Description:
+ *   __cxa_atexit() registers a destructor function to be called by exit().
+ *   On a call to exit(), the registered functions should be called with
+ *   the single argument 'arg'. Destructor functions shall always be
+ *   called in the reverse order to their registration (i.e. the most
+ *   recently registered function shall be called first),
+ *
+ *   If shared libraries were supported, the callbacks should be invoked
+ *   when the shared library is unloaded as well.
+ *
+ * Reference:
+ *   Linux base
+ *
+ ****************************************************************************/
+
+int __cxa_atexit(CODE void (*func)(FAR void *), FAR void *arg,
+                 FAR void *dso_handle)
+{
+  return atexit_register(ATTYPE_CXA, (CODE void (*)(void))func, arg,
+                         dso_handle);
+}
