@@ -34,16 +34,27 @@
 
 /* Touch channel to GPIO */
 
-#define TOUCH_PAD_NUM0_GPIO_NUM     4
-#define TOUCH_PAD_NUM1_GPIO_NUM     0
-#define TOUCH_PAD_NUM2_GPIO_NUM     2
-#define TOUCH_PAD_NUM3_GPIO_NUM     15
-#define TOUCH_PAD_NUM4_GPIO_NUM     13
-#define TOUCH_PAD_NUM5_GPIO_NUM     12
-#define TOUCH_PAD_NUM6_GPIO_NUM     14
-#define TOUCH_PAD_NUM7_GPIO_NUM     27
-#define TOUCH_PAD_NUM8_GPIO_NUM     33
-#define TOUCH_PAD_NUM9_GPIO_NUM     32
+#define TOUCH_PAD_NUM0_GPIO_NUM        4
+#define TOUCH_PAD_NUM1_GPIO_NUM        0
+#define TOUCH_PAD_NUM2_GPIO_NUM        2
+#define TOUCH_PAD_NUM3_GPIO_NUM        15
+#define TOUCH_PAD_NUM4_GPIO_NUM        13
+#define TOUCH_PAD_NUM5_GPIO_NUM        12
+#define TOUCH_PAD_NUM6_GPIO_NUM        14
+#define TOUCH_PAD_NUM7_GPIO_NUM        27
+#define TOUCH_PAD_NUM8_GPIO_NUM        33
+#define TOUCH_PAD_NUM9_GPIO_NUM        32
+
+#define TOUCH_PAD_NUM0_CHANNEL_NUM     10
+#define TOUCH_PAD_NUM1_CHANNEL_NUM     11
+#define TOUCH_PAD_NUM2_CHANNEL_NUM     12
+#define TOUCH_PAD_NUM3_CHANNEL_NUM     13
+#define TOUCH_PAD_NUM4_CHANNEL_NUM     14
+#define TOUCH_PAD_NUM5_CHANNEL_NUM     15
+#define TOUCH_PAD_NUM6_CHANNEL_NUM     16
+#define TOUCH_PAD_NUM7_CHANNEL_NUM     17
+#define TOUCH_PAD_NUM8_CHANNEL_NUM     8
+#define TOUCH_PAD_NUM9_CHANNEL_NUM     9
 
 /****************************************************************************
  * Public Types
