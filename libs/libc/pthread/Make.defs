@@ -31,6 +31,7 @@ CSRCS += pthread_attr_init.c pthread_attr_destroy.c
 CSRCS += pthread_attr_setschedpolicy.c pthread_attr_getschedpolicy.c
 CSRCS += pthread_attr_setinheritsched.c pthread_attr_getinheritsched.c
 CSRCS += pthread_attr_setdetachstate.c pthread_attr_getdetachstate.c
+CSRCS += pthread_attr_setstackaddr.c pthread_attr_getstackaddr.c
 CSRCS += pthread_attr_setstacksize.c pthread_attr_getstacksize.c
 CSRCS += pthread_attr_setstack.c pthread_attr_getstack.c
 CSRCS += pthread_attr_setschedparam.c pthread_attr_getschedparam.c

@@ -468,6 +468,12 @@ int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
 
 /* Set or obtain the default stack size */
 
+int pthread_attr_setstackaddr(FAR pthread_attr_t *attr, FAR void *stackaddr);
+int pthread_attr_getstackaddr(FAR const pthread_attr_t *attr,
+                              FAR void **stackaddr);
+
+/* Set or obtain the default stack size */
+
 int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize);
 int pthread_attr_getstacksize(FAR const pthread_attr_t *attr,
                               FAR size_t *stacksize);
@@ -476,7 +482,7 @@ int pthread_attr_getstacksize(FAR const pthread_attr_t *attr,
 
 int pthread_attr_setstack(FAR pthread_attr_t *attr,
                           FAR void *stackaddr, size_t stacksize);
-int pthread_attr_getstack(FAR pthread_attr_t *attr,
+int pthread_attr_getstack(FAR const pthread_attr_t *attr,
                           FAR void **stackaddr, FAR size_t *stacksize);
 
 /* Set or get the name of a thread */
