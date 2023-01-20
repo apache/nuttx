@@ -548,9 +548,9 @@ example.
 
 To test it, just run the following::
 
-  nsh> wdog -d /dev/watchdogx
+  nsh> wdog -i /dev/watchdogx
 
-Where x in the watchdog instance.
+Where x is the watchdog instance.
 
 wifinsh
 -------
