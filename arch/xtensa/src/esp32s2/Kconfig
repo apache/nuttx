@@ -886,13 +886,9 @@ config ESP32S2_APP_FORMAT_LEGACY
 config ESP32S2_APP_FORMAT_MCUBOOT
 	bool "MCUboot-bootable format"
 	select ESP32S2_HAVE_OTA_PARTITION
-	depends on EXPERIMENTAL
 	---help---
 		The Espressif port of MCUboot supports the loading of unsegmented firmware
 		images.
-
-comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
-	depends on !EXPERIMENTAL
 
 endchoice # Application Image Format
 
