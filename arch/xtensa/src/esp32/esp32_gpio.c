@@ -37,7 +37,6 @@
 
 #include "hardware/esp32_iomux.h"
 #include "hardware/esp32_gpio.h"
-#include "hardware/esp32_soc.h"
 
 #include "esp32_irq.h"
 #include "esp32_rtc_gpio.h"
@@ -48,11 +47,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NGPIO_HPINS      (ESP32_NIRQ_GPIO - 32)
-#define NGPIO_HMASK      ((UINT32_C(1) << NGPIO_HPINS) - 1)
-#define _NA_             0xff
-#define setbits(a, bs)   modifyreg32(a, 0, bs)
-#define resetbits(a, bs) modifyreg32(a, bs, 0)
+#define NGPIO_HPINS  (ESP32_NIRQ_GPIO - 32)
+#define NGPIO_HMASK  ((UINT32_C(1) << NGPIO_HPINS) - 1)
+#define _NA_         0xff
 
 /****************************************************************************
  * Private Data
@@ -71,45 +68,48 @@ static const uint8_t g_pin2func[40] =
   0x1c, 0x20, 0x14, 0x18, 0x04, 0x08, 0x0c, 0x10   /* 32-39 */
 };
 
-static const uint32_t rtc_gpio_to_addr[] =
-{
-  RTC_GPIO_PIN0_REG,
-  RTC_GPIO_PIN1_REG,
-  RTC_GPIO_PIN2_REG,
-  RTC_GPIO_PIN3_REG,
-  RTC_GPIO_PIN4_REG,
-  RTC_GPIO_PIN5_REG,
-  RTC_GPIO_PIN6_REG,
-  RTC_GPIO_PIN7_REG,
-  RTC_GPIO_PIN8_REG,
-  RTC_GPIO_PIN9_REG,
-  RTC_GPIO_PIN10_REG,
-  RTC_GPIO_PIN11_REG,
-  RTC_GPIO_PIN12_REG,
-  RTC_GPIO_PIN13_REG,
-  RTC_GPIO_PIN14_REG,
-  RTC_GPIO_PIN15_REG,
-  RTC_GPIO_PIN16_REG,
-  RTC_GPIO_PIN17_REG
-};
-
-static bool g_pin_rtc_controlled[RTC_GPIO_NUMBER];
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rtc_gpio_is_valid_gpio
+ * Name: gpio_is_valid_rtc_gpio
  *
  * Description:
  *   Determine if the specified GPIO is a valid RTC GPIO.
  *
+ * Input Parameters:
+ *   gpio_num - GPIO pin to be checked.
+ *
+ * Returned Value:
+ *   True if valid. False otherwise.
+ *
  ****************************************************************************/
 
-static inline bool rtc_gpio_is_valid_gpio(uint32_t gpio_num)
+static inline bool gpio_is_valid_rtc_gpio(uint32_t gpio_num)
 {
-  return (gpio_num < GPIO_PIN_COUNT && g_rtc_io_num_map[gpio_num] >= 0);
+  return (gpio_num < GPIO_PIN_COUNT && g_gpio_to_rtcio_map[gpio_num] >= 0);
+}
+
+/****************************************************************************
+ * Name: rtc_gpio_is_pull_supported
+ *
+ * Description:
+ *   Determine if the specified rtcio_num supports pull-up/pull-down.
+ *
+ * Input Parameters:
+ *   rtcio_num - RTC GPIO to be checked.
+ *
+ * Returned Value:
+ *   True if pull-up/pull-down supported. False otherwise.
+ *
+ ****************************************************************************/
+
+static inline bool rtc_gpio_is_pull_supported(uint32_t rtcio_num)
+{
+  /* Pins 34 through 39 use RTC channels 0 to 5 and don't support PU/PD */
+
+  return (rtcio_num > 5);
 }
 
 /****************************************************************************
@@ -212,8 +212,6 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   uintptr_t regaddr;
   uint32_t func;
   uint32_t cntrl;
-  uint32_t rtc_gpio_idx;
-  rtc_io_desc_t rtc_reg_desc;
 
   DEBUGASSERT(pin >= 0 && pin <= ESP32_NGPIOS);
 
@@ -222,258 +220,142 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   func  = 0;
   cntrl = 0;
 
-  if ((attr & FUNCTION_MASK) == FUNCTION_RTC) /* RTCIO */
+  if ((attr & INPUT) != 0)
     {
-      if (rtc_gpio_is_valid_gpio(pin) == 0)
+      if (pin < 32)
         {
-          gpioerr("Pin %d is not a valid RTC pin!\n", pin);
-          return -1;
-        }
-
-      rtc_gpio_idx = g_rtc_io_num_map[pin];
-      rtc_reg_desc = g_rtc_io_desc[rtc_gpio_idx];
-      g_pin_rtc_controlled[rtc_gpio_idx] = true;
-
-      setbits(rtc_reg_desc.reg, rtc_reg_desc.mux);
-
-      modifyreg32(rtc_reg_desc.reg,
-        ((RTC_IO_TOUCH_PAD1_FUN_SEL_V) << (rtc_reg_desc.func)),
-        (((RTCIO_PIN_FUNC) & RTC_IO_TOUCH_PAD1_FUN_SEL_V) <<
-        (rtc_reg_desc.func)));
-
-      if (rtc_reg_desc.pulldown)
-        {
-          resetbits(rtc_reg_desc.reg, rtc_reg_desc.pulldown);
-        }
-
-      if (rtc_reg_desc.pullup)
-        {
-          resetbits(rtc_reg_desc.reg, rtc_reg_desc.pullup);
-        }
-
-      if ((attr & PULLUP) != 0)
-        {
-          if (rtc_reg_desc.pullup)
-            {
-              setbits(rtc_reg_desc.reg, rtc_reg_desc.pullup);
-            }
-        }
-      else if ((attr & PULLDOWN) != 0)
-        {
-          if (rtc_reg_desc.pulldown)
-            {
-              setbits(rtc_reg_desc.reg, rtc_reg_desc.pulldown);
-            }
-        }
-
-      if ((attr & INPUT) != 0)
-        {
-          /* Enable Input */
-
-          setbits(rtc_reg_desc.reg, rtc_reg_desc.ie);
-
-          /* Disable Output */
-
-          putreg32((UINT32_C(1) << pin), RTC_GPIO_ENABLE_W1TC_REG);
-        }
-      else if ((attr & OUTPUT) != 0)
-        {
-          /* Disable Input */
-
-          resetbits(rtc_reg_desc.reg, rtc_reg_desc.ie);
-
-          /* Enable Output */
-
-          putreg32((UINT32_C(1) << pin), RTC_GPIO_ENABLE_W1TS_REG);
+          putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TC_REG);
         }
       else
         {
-          resetbits(rtc_reg_desc.reg, rtc_reg_desc.ie);
-          putreg32((UINT32_C(1) << pin), RTC_GPIO_ENABLE_W1TC_REG);
+          putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TC_REG);
         }
 
-      if ((attr & DRIVE_MASK) != 0)
+      /* Input enable */
+
+      func |= FUN_IE;
+
+      /* Some pins only support Pull-Up and Pull-Down resistor on RTC GPIO */
+
+      if (gpio_is_valid_rtc_gpio(pin))
         {
-          if (rtc_reg_desc.drv_v)
+          uint32_t rtc_gpio_idx = g_gpio_to_rtcio_map[pin];
+          uint32_t regval;
+          uint32_t rtc_gpio_pin;
+          bool en_pu = false;
+          bool en_pd = false;
+
+          if ((attr & PULLUP) != 0)
             {
-              uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
-              modifyreg32(rtc_reg_desc.reg,
-                ((rtc_reg_desc.drv_v) << (rtc_reg_desc.drv_s)),
-                (((val) & rtc_reg_desc.drv_v) << (rtc_reg_desc.drv_s)));
+              ASSERT(rtc_gpio_is_pull_supported(rtc_gpio_idx));
+              en_pu = true;
             }
-        }
-
-      if ((attr & OPEN_DRAIN) != 0)
-        {
-          /* All RTC GPIOs have the same position for the drive bits.
-           * We can use any RTC_GPIO_PINn_PAD_DRIVER.
-           */
-
-          REG_SET_FIELD(rtc_gpio_to_addr[rtc_gpio_idx],
-                        RTC_GPIO_PIN0_PAD_DRIVER,
-                        true);
-        }
-      else
-        {
-          REG_SET_FIELD(rtc_gpio_to_addr[rtc_gpio_idx],
-                        RTC_GPIO_PIN0_PAD_DRIVER,
-                        false);
-        }
-
-      return OK;
-    }
-  else /* GPIO */
-    {
-      if ((attr & INPUT) != 0)
-        {
-          if (pin < 32)
+          else if ((attr & PULLDOWN) != 0)
             {
-              putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TC_REG);
+              ASSERT(rtc_gpio_is_pull_supported(rtc_gpio_idx));
+              en_pd = true;
+            }
+
+          /* Get the pin register */
+
+          rtc_gpio_pin = g_rtc_io_desc[rtc_gpio_idx].reg;
+
+          /* Read the current value from RTC GPIO pin */
+
+          regval = getreg32(rtc_gpio_pin);
+
+          /* RTC_IO_X32P (GPIO32) uses different PU/PD bits */
+
+          if (rtc_gpio_idx == RTCIO_GPIO32_CHANNEL)
+            {
+              /* First, disable PU/PD */
+
+              regval &= ~SPECIAL_RTC_PU_BIT;
+              regval &= ~SPECIAL_RTC_PD_BIT;
+
+              /* Enable PU/PD, if needed */
+
+              regval |= en_pu ? SPECIAL_RTC_PU_BIT : 0;
+              regval |= en_pd ? SPECIAL_RTC_PD_BIT : 0;
             }
           else
             {
-              putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TC_REG);
+              /* First, disable PU/PD */
+
+              regval &= ~DEFAULT_RTC_PU_BIT;
+              regval &= ~DEFAULT_RTC_PD_BIT;
+
+              /* Enable PU/PD, if needed */
+
+              regval |= en_pu ? DEFAULT_RTC_PU_BIT : 0;
+              regval |= en_pd ? DEFAULT_RTC_PD_BIT : 0;
             }
 
-          /* Input enable */
-
-          func |= FUN_IE;
-
-          /* Some pins only support Pull-Up/Pull-Down resistor on RTC GPIO */
-
-          if (rtc_gpio_is_valid_gpio(pin))
-            {
-              rtc_gpio_idx = g_rtc_io_num_map[pin];
-              rtc_reg_desc = g_rtc_io_desc[rtc_gpio_idx];
-              g_pin_rtc_controlled[rtc_gpio_idx] = false;
-
-              /* Disable RTC control */
-
-              resetbits(rtc_reg_desc.reg, rtc_reg_desc.mux);
-
-              if (rtc_reg_desc.pullup == 0)
-                {
-                  gpioerr("Pins 34-39 don't support PullUp/PullDown\n");
-                  assert(0);
-                }
-              else
-                {
-                  uint32_t regval;
-                  uint32_t rtc_gpio_reg;
-                  bool en_pu = false;
-                  bool en_pd = false;
-
-                  if ((attr & PULLUP) != 0)
-                    {
-                      en_pu = true;
-                    }
-                  else if ((attr & PULLDOWN) != 0)
-                    {
-                      en_pd = true;
-                    }
-
-                  /* Get the pin register */
-
-                  rtc_gpio_reg = g_rtc_io_desc[rtc_gpio_idx].reg;
-
-                  /* Read the current value from RTC GPIO pin */
-
-                  regval = getreg32(rtc_gpio_reg);
-
-                  /* RTC_IO_X32P (GPIO32) uses different PU/PD bits */
-
-                  if (rtc_gpio_idx == RTCIO_GPIO32_CHANNEL)
-                    {
-                      /* First, disable PU/PD */
-
-                      regval &= ~SPECIAL_RTC_PU_BIT;
-                      regval &= ~SPECIAL_RTC_PD_BIT;
-
-                      /* Enable PU/PD, if needed */
-
-                      regval |= en_pu ? SPECIAL_RTC_PU_BIT : 0;
-                      regval |= en_pd ? SPECIAL_RTC_PD_BIT : 0;
-                    }
-                  else
-                    {
-                      /* First, disable PU/PD */
-
-                      regval &= ~DEFAULT_RTC_PU_BIT;
-                      regval &= ~DEFAULT_RTC_PD_BIT;
-
-                      /* Enable PU/PD, if needed */
-
-                      regval |= en_pu ? DEFAULT_RTC_PU_BIT : 0;
-                      regval |= en_pd ? DEFAULT_RTC_PD_BIT : 0;
-                    }
-
-                  putreg32(regval, rtc_gpio_reg);
-                }
-            }
-          else if ((attr & PULLUP) != 0)
-            {
-              func |= FUN_PU;
-            }
-          else if (attr & PULLDOWN)
-            {
-              func |= FUN_PD;
-            }
+          putreg32(regval, rtc_gpio_pin);
         }
-
-      /* Handle output pins */
-
-      if ((attr & OUTPUT) != 0)
+      else if ((attr & PULLUP) != 0)
         {
-          if (pin < 32)
-            {
-              putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
-            }
-          else
-            {
-              putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
-            }
+          func |= FUN_PU;
         }
-
-      /* Configure the pad's function */
-
-      if ((attr & FUNCTION_MASK) != 0)
+      else if (attr & PULLDOWN)
         {
-          uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
-          func |= val << MCU_SEL_S;
+          func |= FUN_PD;
         }
-      else
-        {
-          /* Function not provided, assuming function GPIO by default */
-
-          func |= (uint32_t)(PIN_FUNC_GPIO << MCU_SEL_S);
-        }
-
-      /* Configure the pad's drive strength */
-
-      if ((attr & DRIVE_MASK) != 0)
-        {
-          uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
-          func |= val << FUN_DRV_S;
-        }
-      else
-        {
-          /* Drive strength not provided, assuming strength 2 by default */
-
-          func |= UINT32_C(2) << FUN_DRV_S;
-        }
-
-      if ((attr & OPEN_DRAIN) != 0)
-        {
-          cntrl |= (1 << GPIO_PIN_PAD_DRIVER_S);
-        }
-
-      regaddr = DR_REG_IO_MUX_BASE + g_pin2func[pin];
-      putreg32(func, regaddr);
-
-      regaddr = GPIO_REG(pin);
-      putreg32(cntrl, regaddr);
-      return OK;
     }
+
+  /* Handle output pins */
+
+  if ((attr & OUTPUT) != 0)
+    {
+      if (pin < 32)
+        {
+          putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
+        }
+      else
+        {
+          putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
+        }
+    }
+
+  /* Configure the pad's function */
+
+  if ((attr & FUNCTION_MASK) != 0)
+    {
+      uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
+      func |= val << MCU_SEL_S;
+    }
+  else
+    {
+      /* Function not provided, assuming function GPIO by default */
+
+      func |= (uint32_t)(PIN_FUNC_GPIO << MCU_SEL_S);
+    }
+
+  /* Configure the pad's drive strength */
+
+  if ((attr & DRIVE_MASK) != 0)
+    {
+      uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
+      func |= val << FUN_DRV_S;
+    }
+  else
+    {
+      /* Drive strength not provided, assuming strength 2 by default */
+
+      func |= UINT32_C(2) << FUN_DRV_S;
+    }
+
+  if ((attr & OPEN_DRAIN) != 0)
+    {
+      cntrl |= (1 << GPIO_PIN_PAD_DRIVER_S);
+    }
+
+  regaddr = DR_REG_IO_MUX_BASE + g_pin2func[pin];
+  putreg32(func, regaddr);
+
+  regaddr = GPIO_REG(pin);
+  putreg32(cntrl, regaddr);
+  return OK;
 }
 
 /****************************************************************************

@@ -51,7 +51,7 @@
 #define TOUCH_PAD_FILTER_FACTOR_DEFAULT (4) /* IIR filter coefficient */
 #define TOUCH_PAD_SHIFT_DEFAULT         (4) /* Increase computing accuracy */
 #define TOUCH_PAD_SHIFT_ROUND_DEFAULT   (8) /* ROUND = 2^(n-1) */
-#define TOUCH_GET_IO_NUM(channel) (touch_channel_to_gpio[channel])
+#define TOUCH_GET_RTCIO_NUM(channel)    (touch_channel_to_rtcio[channel])
 
 /****************************************************************************
  * Private Types
@@ -540,8 +540,8 @@ static void touch_io_init(enum touch_pad_e tp)
 {
   DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
 
-  uint8_t gpio_num = TOUCH_GET_IO_NUM(tp);
-  esp32_configgpio(gpio_num, FUNCTION_RTC);
+  uint8_t rtcio_num = TOUCH_GET_RTCIO_NUM(tp);
+  esp32_configrtcio(rtcio_num, RTC_FUNCTION_RTCIO);
 }
 
 /****************************************************************************

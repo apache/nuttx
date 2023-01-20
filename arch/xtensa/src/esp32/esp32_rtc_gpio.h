@@ -38,7 +38,38 @@
 #define SPECIAL_RTC_PU_BIT          (1 << 22)
 #define SPECIAL_RTC_PD_BIT          (1 << 23)
 
-#define RTCIO_PIN_FUNC              0
+#define RTCIO_PIN_FUNC                  0
+
+#define RTC_MODE_SHIFT                  0
+#define RTC_MODE_MASK                   (3 << RTC_MODE_SHIFT)
+#  define RTC_INPUT                     (1 << (RTC_MODE_SHIFT + 0))
+#  define RTC_OUTPUT                    (1 << (RTC_MODE_SHIFT + 1))
+
+#define RTC_PULL_SHIFT                  2
+#define RTC_PULL_MASK                   (7 << RTC_PULL_SHIFT)
+#  define RTC_PULLUP                    (1 << (RTC_PULL_SHIFT + 0))
+#  define RTC_PULLDOWN                  (1 << (RTC_PULL_SHIFT + 1))
+#  define RTC_OPEN_DRAIN                (1 << (RTC_PULL_SHIFT + 2))
+
+#define RTC_FUNCTION_SHIFT              5
+#define RTC_FUNCTION_MASK               (3 << RTC_FUNCTION_SHIFT)
+#  define RTC_FUNCTION_RTCIO            (1 << RTC_FUNCTION_SHIFT)
+#  define RTC_FUNCTION_DIGITAL          (2 << RTC_FUNCTION_SHIFT)
+
+#define RTC_DRIVE_SHIFT                 7
+#define RTC_DRIVE_MASK                  (7 << RTC_DRIVE_SHIFT)
+#  define RTC_DRIVE_0                   (1 << RTC_DRIVE_SHIFT)
+#  define RTC_DRIVE_1                   (2 << RTC_DRIVE_SHIFT)
+#  define RTC_DRIVE_2                   (3 << RTC_DRIVE_SHIFT)
+#  define RTC_DRIVE_3                   (4 << RTC_DRIVE_SHIFT)
+
+#define RTC_INPUT_PULLUP                (RTC_INPUT | RTC_PULLUP)
+#define RTC_INPUT_PULLDOWN              (RTC_INPUT | RTC_PULLDOWN)
+#define RTC_OUTPUT_OPEN_DRAIN           (RTC_OUTPUT | RTC_OPEN_DRAIN)
+#define RTC_INPUT_FUNCTION_RTCIO        (RTC_INPUT | RTC_FUNCTION_RTCIO)
+#define RTC_INPUT_FUNCTION_DIGITAL      (RTC_INPUT | RTC_FUNCTION_DIGITAL)
+#define RTC_OUTPUT_FUNCTION_RTCIO       (RTC_OUTPUT | RTC_FUNCTION_RTCIO)
+#define RTC_OUTPUT_FUNCTION_DIGITAL     (RTC_OUTPUT | RTC_FUNCTION_DIGITAL)
 
 /* RTC GPIO channels */
 
@@ -102,7 +133,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef struct
+typedef struct rtc_io_desc_s
 {
   uint32_t reg;        /* Register of RTC pad, or 0 if not an RTC GPIO */
   uint32_t mux;        /* Bit mask for selecting digital pad or RTC pad */
@@ -124,11 +155,15 @@ typedef struct
   int rtc_num;         /* GPIO number (corresponds to RTC pad) */
 } rtc_io_desc_t;
 
+/* Must be big enough to hold the pin attributes */
+
+typedef uint16_t rtcio_pinattr_t;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-static const int g_rtc_io_num_map[GPIO_PIN_COUNT + 1] =
+static const int g_gpio_to_rtcio_map[GPIO_PIN_COUNT + 1] =
 {
   RTCIO_GPIO0_CHANNEL,        /* GPIO0 */
   -1,                         /* GPIO1 not supported */
@@ -477,5 +512,76 @@ static const rtc_io_desc_t g_rtc_io_desc[RTC_GPIO_NUMBER] =
     RTCIO_CHANNEL_17_GPIO_NUM
   }
 };
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_configrtcio
+ *
+ * Description:
+ *   Configure a RTCIO pin based on encoded pin attributes.
+ *
+ * Input Parameters:
+ *   rtcio_num     - RTCIO pin to be configured.
+ *   attr          - Attributes to be configured for the selected RTCIO pin.
+ *                   The following attributes are accepted:
+ *                   - Direction (OUTPUT or INPUT)
+ *                   - Pull (PULLUP, PULLDOWN or OPENDRAIN)
+ *                   - Function (if not provided, assume function RTCIO by
+ *                     default)
+ *                   - Drive strength (if not provided, assume DRIVE_2 by
+ *                     default)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
+ ****************************************************************************/
+
+int esp32_configrtcio(int rtcio_num, rtcio_pinattr_t attr);
+
+/****************************************************************************
+ * Name: esp32_rtcioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   RTC IRQs.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+void esp32_rtcioirqinitialize(void);
+#else
+#  define esp32_rtcioirqinitialize()
+#endif
+
+/****************************************************************************
+ * Name: esp32_rtcioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified RTC peripheral IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+void esp32_rtcioirqenable(int irq);
+#else
+#  define esp32_rtcioirqenable(irq)
+#endif
+
+/****************************************************************************
+ * Name: esp32_rtcioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified RTC peripheral IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+void esp32_rtcioirqdisable(int irq);
+#else
+#  define esp32_rtcioirqdisable(irq)
+#endif
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_RTC_GPIO_H */
