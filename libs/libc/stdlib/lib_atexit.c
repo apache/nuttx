@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-static FAR struct atexit_list_s * get_exitfuncs(void)
+static FAR struct atexit_list_s *get_exitfuncs(void)
 {
   FAR struct task_info_s *info;
 
@@ -105,7 +105,7 @@ int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
   return ret;
 }
 
-void atexit_call_exitfuncs(int status)
+void atexit_call_exitfuncs(int status, bool quick)
 {
   FAR struct atexit_list_s *aehead;
   CODE void               (*func)(void);
@@ -134,9 +134,14 @@ void atexit_call_exitfuncs(int status)
           continue;
         }
 
+      if (quick != (type == ATTYPE_ATQUICKEXIT))
+        {
+          continue;
+        }
+
       /* Call the atexit/on_exit/cxa_atexit() function */
 
-      if (type == ATTYPE_ATEXIT)
+      if (type == ATTYPE_ATEXIT || type == ATTYPE_ATQUICKEXIT)
         {
           (*func)();
         }
@@ -180,4 +185,24 @@ void atexit_call_exitfuncs(int status)
 int atexit(CODE void (*func)(void))
 {
   return atexit_register(ATTYPE_ATEXIT, func, NULL, NULL);
+}
+
+/****************************************************************************
+ * Name: at_quick_exit
+ *
+ * Description:
+ *    Registers the function pointed to by func to be called on quick
+ *    program termination (via quick_exit).
+ *
+ * Input Parameters:
+ *   func - A pointer to the function to be called when the task exits.
+ *
+ * Returned Value:
+ *   Zero on success. Non-zero on failure.
+ *
+ ****************************************************************************/
+
+int at_quick_exit(CODE void (*func)(void))
+{
+  return atexit_register(ATTYPE_ATQUICKEXIT, func, NULL, NULL);
 }
