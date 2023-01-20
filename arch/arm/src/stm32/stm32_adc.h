@@ -2056,6 +2056,10 @@
         (adc)->llops->setup(adc)
 #define STM32_ADC_SHUTDOWN(adc)                     \
         (adc)->llops->shutdown(adc)
+#define STM32_ADC_MULTICFG(adc, mode)               \
+        (adc)->llops->multi_cfg(adc, mode)
+#define STM32_ADC_ENABLE(adc, en)                   \
+        (adc)->llops->enable(adc, en)
 
 /****************************************************************************
  * Public Types
@@ -2103,6 +2107,35 @@ enum stm32_adc_resoluton_e
   ADC_RESOLUTION_10BIT = 1,     /* 10 bit */
   ADC_RESOLUTION_8BIT  = 2,     /* 8 bit */
   ADC_RESOLUTION_6BIT  = 3      /* 6 bit */
+};
+
+/* ADC multi mode selection */
+
+enum stm32_adc_multimode_e
+{
+  /* Independent mode */
+
+  ADC_MULTIMODE_INDEP  = 0,     /* Independent mode */
+
+  /* Dual mode */
+
+  ADC_MULTIMODE_RSISM2 = 1,     /* Dual combined regular sim. + injected sim. */
+  ADC_MULTIMODE_RSATM2 = 2,     /* Dual combined regular sim. + alternate trigger */
+  ADC_MULTIMODE_IMIS2  = 3,     /* Dual combined interl. mode + injected sim. */
+  ADC_MULTIMODE_ISM2   = 4,     /* Dual injected simultaneous mode only */
+  ADC_MULTIMODE_RSM2   = 5,     /* Dual degular simultaneous mode only */
+  ADC_MULTIMODE_IM2    = 6,     /* Dual interleaved mode only */
+  ADC_MULTIMODE_ATM2   = 7,     /* Dual alternate trigger mode only */
+
+  /* Triple mode */
+
+  ADC_MULTIMODE_RSISM3 = 8,     /* Triple combined regular sim. + injected sim. */
+  ADC_MULTIMODE_RSATM3 = 9,     /* Triple combined regular sim. + alternate trigger */
+  ADC_MULTIMODE_IMIS3  = 10,    /* Triple combined interl. mode + injected sim. */
+  ADC_MULTIMODE_ISM3   = 11,    /* Triple injected simultaneous mode only */
+  ADC_MULTIMODE_RSM3   = 12,    /* Triple degular simultaneous mode only */
+  ADC_MULTIMODE_IM3    = 13,    /* Triple interleaved mode only */
+  ADC_MULTIMODE_ATM3   = 14,    /* Triple alternate trigger mode only */
 };
 
 #ifdef CONFIG_STM32_ADC_LL_OPS
@@ -2229,6 +2262,14 @@ struct stm32_adc_ops_s
 #endif
 
   void (*dump_regs)(struct stm32_adc_dev_s *dev);
+
+  /* Configure ADC multi mode */
+
+  int  (*multi_cfg)(struct stm32_adc_dev_s *dev, uint8_t mode);
+
+  /* Enable/disable ADC */
+
+  void (*enable)(struct stm32_adc_dev_s *dev, bool enable);
 };
 
 #endif /* CONFIG_STM32_ADC_LL_OPS */
