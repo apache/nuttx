@@ -89,6 +89,23 @@ ifeq ($(GCCVER),12.2.1)
   libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-maybe-uninitialized
 endif
 
+# The following warning was observed with icicle:knsh config.
+# Looking at the code in question, it seems harmless to ignore.
+#
+# Note: For some reasons, GCC -Wall enables a different set of warnings
+# for C and C++.
+#
+# References:
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=10604
+# https://github.com/gcc-mirror/gcc/blob/e54375d85d4aa5889869c2672158083b2106b623/gcc/c-family/c.opt#L1285-L1287
+#
+# CXX:  libcxx/src/condition_variable.cpp
+# libcxx/src/condition_variable.cpp: In member function 'void std::__1::condition_variable::__do_timed_wait(std::__1::unique_lock<std::__1::mutex>&, std::__1::chrono::time_point<std::__1::chrono::system_clock, std::__1::chrono::duration<long long int, std::__1::ratio<1, 1000000000> > >)':
+# libcxx/src/condition_variable.cpp:64:19: error: comparison of integer expressions of different signedness: 'std::__1::chrono::duration<long long int>::rep' {aka 'long long int'} and 'std::__1::__libcpp_numeric_limits<long unsigned int, true>::type' {aka 'long unsigned int'} [-Werror=sign-compare]
+#      if (s.count() < ts_sec_max)
+#          ~~~~~~~~~~^~~~~~~~~~~~
+libcxx/src/condition_variable.cpp_CXXFLAGS += -Wno-sign-compare
+
 CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
