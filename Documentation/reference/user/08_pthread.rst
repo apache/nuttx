@@ -131,14 +131,6 @@ No support for the following pthread interfaces is provided by NuttX:
      attribute of the mutex attributes object.
   -  ``pthread_mutexattr_setprioceiling``. get and set the prioceiling
      attribute of the mutex attributes object.
-  -  ``pthread_rwlockattr_destroy``. destroy and initialize the read-write
-     lock attributes object.
-  -  ``pthread_rwlockattr_getpshared``. get and set the process-shared
-     attribute of the read-write lock attributes object.
-  -  ``pthread_rwlockattr_init``. destroy and initialize the read-write
-     lock attributes object.
-  -  ``pthread_rwlockattr_setpshared``. get and set the process-shared
-     attribute of the read-write lock attributes object.
   -  ``pthread_setconcurrency``. get and set the level of concurrency.
 
 .. c:function:: int pthread_attr_init(pthread_attr_t *attr);
