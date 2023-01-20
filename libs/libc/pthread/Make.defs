@@ -39,6 +39,7 @@ CSRCS += pthread_barrierattr_init.c pthread_barrierattr_destroy.c
 CSRCS += pthread_barrierattr_getpshared.c pthread_barrierattr_setpshared.c
 CSRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
 CSRCS += pthread_condattr_init.c pthread_condattr_destroy.c
+CSRCS += pthread_condattr_getpshared.c pthread_condattr_setpshared.c
 CSRCS += pthread_condattr_setclock.c pthread_condattr_getclock.c
 CSRCS += pthread_condinit.c pthread_conddestroy.c pthread_condtimedwait.c
 CSRCS += pthread_create.c pthread_exit.c

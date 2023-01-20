@@ -248,6 +248,7 @@ typedef pid_t pthread_t;
 
 struct pthread_condattr_s
 {
+  int pshared;
   clockid_t clockid;
 };
 
@@ -615,6 +616,9 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
 
 int pthread_condattr_init(FAR pthread_condattr_t *attr);
 int pthread_condattr_destroy(FAR pthread_condattr_t *attr);
+int pthread_condattr_getpshared(FAR const pthread_condattr_t *attr,
+                                FAR int *pshared);
+int pthread_condattr_setpshared(FAR pthread_condattr_t *attr, int pshared);
 int pthread_condattr_getclock(FAR const pthread_condattr_t *attr,
                               clockid_t *clock_id);
 int pthread_condattr_setclock(FAR pthread_condattr_t *attr,
