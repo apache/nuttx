@@ -501,7 +501,6 @@
 #define PWM_MODE_ADC_TRG   STM32_CHANMODE_PWM1
 #define PWM_MODE_HSLO_LSHI STM32_CHANMODE_OCREFHI
 #define PWM_MODE_HSHI_LSLO STM32_CHANMODE_OCREFLO
-#define PWM_MODE_HIZ       STM32_CHANMODE_FRZN
 
 /****************************************************************************
  * Private Types
@@ -868,9 +867,12 @@ static int stm32_foc_pwm_start(struct foc_dev_s *dev, bool state)
   DEBUGASSERT(board);
   DEBUGASSERT(pwm);
 
-  /* Configure outputs state */
+  if (!dev->state.pwm_off)
+    {
+      /* Configure outputs state */
 
-  PWM_ALL_OUTPUTS_ENABLE(pwm, state);
+      PWM_ALL_OUTPUTS_ENABLE(pwm, state);
+    }
 
   /* Call board-specific logic */
 
@@ -1722,18 +1724,24 @@ static int stm32_foc_pwm_off(struct foc_dev_s *dev, bool off)
     {
       /* Force all transistors to low state */
 
-      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN1, PWM_MODE_HIZ);
-      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN2, PWM_MODE_HIZ);
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN1, PWM_MODE_HSHI_LSLO);
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN2, PWM_MODE_HSHI_LSLO);
 #if CONFIG_MOTOR_FOC_PHASES > 2
-      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN3, PWM_MODE_HIZ);
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN3, PWM_MODE_HSHI_LSLO);
 #endif
 #if CONFIG_MOTOR_FOC_PHASES > 3
-      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN4, PWM_MODE_HIZ);
+      PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN4, PWM_MODE_HSHI_LSLO);
 #endif
+
+      /* Disable complementary output */
+
+      PWM_OUTPUTS_ENABLE(pwm, PMW_OUTPUTS_ALL_COMP, false);
     }
   else
     {
       /* Restore FOC operation modes */
+
+      PWM_ALL_OUTPUTS_ENABLE(pwm, true);
 
       PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN1, PWM_MODE_FOC);
       PWM_MODE_UPDATE(pwm, STM32_PWM_CHAN2, PWM_MODE_FOC);
