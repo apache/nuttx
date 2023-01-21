@@ -103,6 +103,11 @@
 #define GPIO_CANTERM (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
                       GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN14)
 
+/* GPIO_BEMF */
+
+#define GPIO_GPIOBEMF (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                       GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

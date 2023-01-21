@@ -138,6 +138,7 @@
 /* ADC sample time */
 
 #define CURRENT_SAMPLE_TIME ADC_SMPR_2p5
+#define VOLTAGE_SAMPLE_TIME ADC_SMPR_2p5
 #define VBUS_SAMPLE_TIME    ADC_SMPR_640p5
 #define POT_SAMPLE_TIME     ADC_SMPR_640p5
 
@@ -159,6 +160,14 @@
 
 #define ADC1_REGULAR   (BG431BESC1_FOC_VBUS + BG431BESC1_FOC_POT)
 #define ADC1_NCHANNELS (ADC1_INJECTED + ADC1_REGULAR)
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+/* ADC2 channels used for BEMF sensing */
+
+#  define ADC2_INJECTED  (CONFIG_MOTOR_FOC_PHASES)
+#  define ADC2_REGULAR   (0)
+#  define ADC2_NCHANNELS (ADC2_INJECTED + ADC2_REGULAR)
+#endif
 
 /* Check ADC1 configuration */
 
@@ -203,6 +212,11 @@ static int board_foc_pwm_start(struct foc_dev_s *dev, bool state);
 static int board_foc_current_get(struct foc_dev_s *dev,
                                  int16_t *curr_raw,
                                  foc_current_t *curr);
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+static int board_foc_voltage_get(struct foc_dev_s *dev,
+                                 int16_t *volt_raw,
+                                 foc_voltage_t *volt);
+#endif
 #ifdef CONFIG_MOTOR_FOC_TRACE
 static int board_foc_trace_init(struct foc_dev_s *dev);
 static void board_foc_trace(struct foc_dev_s *dev, int type, bool state);
@@ -300,6 +314,52 @@ static struct stm32_foc_adc_s g_adc_cfg =
   .intf  = 1
 };
 
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+static uint8_t g_adc2_chan[] =
+{
+  17,                            /* ADC2 INJ1 - PHASE 1 */
+  5,                             /* ADC2 INJ2 - PHASE 2 */
+  14,                            /* ADC2 INJ3 - PHASE 3 */
+};
+
+static uint32_t g_adc2_pins[] =
+{
+  GPIO_ADC2_IN17,
+  GPIO_ADC2_IN5,
+  GPIO_ADC2_IN14,
+};
+
+/* ADC2 sample time configuration */
+
+static adc_channel_t g_adc2_stime[] =
+{
+  {
+    .channel     = 17,
+    .sample_time = VOLTAGE_SAMPLE_TIME
+  },
+  {
+    .channel     = 5,
+    .sample_time = VOLTAGE_SAMPLE_TIME
+  },
+  {
+    .channel     = 14,
+    .sample_time = VOLTAGE_SAMPLE_TIME
+  },
+};
+
+/* Board specific ADC configuration for BEMF */
+
+static struct stm32_foc_adc_s g_vadc_cfg =
+{
+  .chan  = g_adc2_chan,
+  .pins  = g_adc2_pins,
+  .stime = g_adc2_stime,
+  .nchan = ADC2_NCHANNELS,
+  .regch = ADC2_REGULAR,
+  .intf  = 2
+};
+#endif
+
 /* Board specific ops */
 
 static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
@@ -310,6 +370,9 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
   .fault_clear = board_foc_fault_clear,
   .pwm_start   = board_foc_pwm_start,
   .current_get = board_foc_current_get,
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  .voltage_get = board_foc_voltage_get,
+#endif
 #ifdef CONFIG_MOTOR_FOC_TRACE
   .trace_init  = board_foc_trace_init,
   .trace       = board_foc_trace
@@ -321,6 +384,9 @@ static struct stm32_foc_board_ops_s g_stm32_foc_board_ops =
 static struct stm32_foc_board_data_s g_stm32_foc_board_data =
 {
   .adc_cfg   = &g_adc_cfg,
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  .vadc_cfg   = &g_vadc_cfg,
+#endif
   .duty_max  = (MAX_DUTY_B16),
   .pwm_dt    = (PWM_DEADTIME),
   .pwm_dt_ns = (PWM_DEADTIME_NS)
@@ -374,6 +440,9 @@ static int board_foc_setup(struct foc_dev_s *dev)
   stm32_configgpio(GPIO_OPAMP3_VINM0);
   stm32_configgpio(GPIO_OPAMP3_VINP0);
   stm32_configgpio(GPIO_OPAMP3_VOUT);
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  stm32_configgpio(GPIO_GPIOBEMF);
+#endif
 
   /* Configure OPAMP inputs */
 
@@ -404,6 +473,12 @@ static int board_foc_setup(struct foc_dev_s *dev)
   putreg32(regval, STM32_OPAMP1_CSR);
   putreg32(regval, STM32_OPAMP2_CSR);
   putreg32(regval, STM32_OPAMP3_CSR);
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  /* Keep GPIO_BEMF low to create BEMF voltage divider */
+
+  stm32_gpiowrite(GPIO_GPIOBEMF, false);
+#endif
 
   return OK;
 }
@@ -483,6 +558,29 @@ static int board_foc_current_get(struct foc_dev_s *dev,
 
   return OK;
 }
+
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+/****************************************************************************
+ * Name: board_foc_voltage_get
+ ****************************************************************************/
+
+static int board_foc_voltage_get(struct foc_dev_s *dev,
+                                 int16_t *volt_raw,
+                                 foc_voltage_t *volt)
+{
+  DEBUGASSERT(dev);
+  DEBUGASSERT(volt_raw);
+  DEBUGASSERT(volt);
+
+  /* Get voltages */
+
+  volt[0] = volt_raw[0];
+  volt[1] = volt_raw[1];
+  volt[2] = volt_raw[2];
+
+  return OK;
+}
+#endif
 
 #ifdef CONFIG_MOTOR_FOC_TRACE
 /****************************************************************************
