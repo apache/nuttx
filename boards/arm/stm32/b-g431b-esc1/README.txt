@@ -48,9 +48,13 @@ Configuration Sub-directories
     ENCO_Z/HALL_H3   TIM4_CH3           PB8
     BUTTON           GPIO_PC10          PC10
     PWM                                 PA15
-    CAN_RX                              PA11
-    CAN_TX                              PB9
+    CAN_RX           FDCAN1_RX          PA11
+    CAN_TX           FDCAN1_TX          PB9
     CAN_TERM                            PC14
+    GPIO_BEMF                           PB5
+    BEMF1            ADC2_IN17          PA4
+    BEMF2            ADC2_IN5           PC4
+    BEMF3            ADC2_IN14          PB11
 
     Current shunt resistance          = 0.003
     PGA gain                          = 16
@@ -59,6 +63,7 @@ Configuration Sub-directories
     Vbus min                          = ?
     Vbus max                          = 25V
     Iout max                          = 40A peak
+    BEMF sense gain = 2.2k/(10k+2.2k) = 0.18
 
     IPHASE_RATIO = 1/(R_shunt*gain) = -36.47
     VBUS_RATIO   = 1/VBUS_gain      = 10.4
