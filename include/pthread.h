@@ -117,7 +117,7 @@
 
 /* Default priority */
 
-#define PTHREAD_DEFAULT_PRIORITY      100
+#define PTHREAD_DEFAULT_PRIORITY      SCHED_PRIORITY_DEFAULT
 
 /* Cancellation states used by pthread_setcancelstate() */
 
