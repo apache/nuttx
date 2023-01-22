@@ -373,6 +373,7 @@ int     linkat(int olddirfd, FAR const char *path1,
 int     symlink(FAR const char *path1, FAR const char *path2);
 int     symlinkat(FAR const char *path1, int dirfd,
                   FAR const char *path2);
+int     link(FAR const char *path1, FAR const char *path2);
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
 ssize_t readlinkat(int dirfd, FAR const char *path, FAR char *buf,
                    size_t bufsize);
