@@ -33,7 +33,7 @@ CSRCS += fs_fsync.c fs_truncate.c
 endif
 
 ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
-CSRCS += fs_symlink.c fs_readlink.c
+CSRCS += fs_link.c fs_symlink.c fs_readlink.c
 endif
 
 # Stream support
