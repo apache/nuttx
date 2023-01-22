@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-LIBCXXABI_VERSION=12.0.0
+LIBCXXABI_VERSION=15.0.7
 
 libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION),libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz)
@@ -26,7 +26,7 @@ libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src libcxxabi
-	$(Q) patch -p0 < 0001-libc-abi-avoid-the-waring-__EXCEPTIONS-is-not-define.patch
+	$(Q) $(DELDIR) cmake
 	$(Q) touch $@
 
 
