@@ -7,7 +7,6 @@
 #
 # CONFIG_ARCH_LEDS is not set
 # CONFIG_NSH_ARGCAT is not set
-# CONFIG_NSH_CMDPARMS is not set
 # CONFIG_STANDARD_SERIAL is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="b-u585i-iot02a"
