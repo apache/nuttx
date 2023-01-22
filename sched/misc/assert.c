@@ -442,7 +442,7 @@ static void show_tasks(void)
  * Public Functions
  ****************************************************************************/
 
-void _assert(FAR const char *filename, int linenum)
+void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 {
   FAR struct tcb_s *rtcb = running_task();
   struct utsname name;
@@ -471,19 +471,20 @@ void _assert(FAR const char *filename, int linenum)
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed CPU%d at file: %s:%d task: %s %p\n",
-         up_cpu_index(), filename, linenum, rtcb->name, rtcb->entry.main);
+  _alert("Assertion failed: %s at file: %s:%d task(CPU%d): %s %p\n",
+         msg, filename, linenum, up_cpu_index(), rtcb->name,
+         rtcb->entry.main);
 #  else
-  _alert("Assertion failed CPU%d at file: %s:%d task: %p\n",
-         up_cpu_index(), filename, linenum, rtcb->entry.main);
+  _alert("Assertion failed: %s at file: %s:%d task(CPU%d): %p\n",
+         msg, filename, linenum, up_cpu_index(), rtcb->entry.main);
 #  endif
 #else
 #  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed at file: %s:%d task: %s %p\n",
-         filename, linenum, rtcb->name, rtcb->entry.main);
+  _alert("Assertion failed: %s at file: %s:%d task: %s %p\n",
+         msg, filename, linenum, rtcb->name, rtcb->entry.main);
 #  else
-  _alert("Assertion failed at file: %s:%d task: %p\n",
-         filename, linenum, rtcb->entry.main);
+  _alert("Assertion failed: %s at file: %s:%d task: %p\n",
+         msg, filename, linenum, rtcb->entry.main);
 #  endif
 #endif
 

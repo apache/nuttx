@@ -1,7 +1,7 @@
 "__errno","errno.h","defined(CONFIG_BUILD_FLAT)","FAR int *"
 "__stack_chk_fail","ssp/ssp.h","defined(CONFIG_STACK_CANARIES)","void","void"
 "_alert","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_ERROR)","void","FAR const char *","..."
-"_assert","assert.h","","void","FAR const char *","int"
+"__assert","assert.h","","void","FAR const char *","int","FAR const char *"
 "_err","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_ERROR)","void","FAR const char *","..."
 "_info","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_INFO)","void","FAR const char *","..."
 "_warn","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_WARN)","void","FAR const char *","..."
