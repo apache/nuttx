@@ -20,7 +20,7 @@
 
 if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
 
-  set(LIBCXXABI_VERSION 12.0.0)
+  set(LIBCXXABI_VERSION CONFIG_LIBCXXABI_VERSION)
 
   FetchContent_Declare(
     libcxxabi
