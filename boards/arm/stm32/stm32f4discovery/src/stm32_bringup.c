@@ -515,6 +515,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_FS_TMPFS
+  /* Mount the tmpfs file system */
+
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
+             CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
 #ifdef CONFIG_STM32_ROMFS
   ret = stm32_romfs_initialize();
   if (ret < 0)
