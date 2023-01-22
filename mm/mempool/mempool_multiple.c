@@ -50,7 +50,7 @@ struct mpool_dict_s
 
 struct mempool_multiple_s
 {
-  FAR struct mempool_s *   pools;       /* The memory pool array */
+  FAR struct mempool_s    *pools;       /* The memory pool array */
   size_t                   npools;      /* The number of memory pool array elements */
   size_t                   expandsize;  /* The number not will use it to init erery
                                          * pool expandsize
@@ -86,7 +86,7 @@ struct mempool_multiple_s
  * Private Functions
  ****************************************************************************/
 
-static inline struct mempool_s *
+static inline FAR struct mempool_s *
 mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
 {
   size_t right;
