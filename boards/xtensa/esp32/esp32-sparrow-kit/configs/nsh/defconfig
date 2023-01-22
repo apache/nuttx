@@ -12,7 +12,6 @@
 # CONFIG_MMCSD_MMCSUPPORT is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
-# CONFIG_NSH_CMDPARMS is not set
 # CONFIG_SPI_EXCHANGE is not set
 CONFIG_ARCH="xtensa"
 CONFIG_ARCH_BOARD="esp32-sparrow-kit"
