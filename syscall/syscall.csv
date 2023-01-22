@@ -1,5 +1,5 @@
 "_exit","unistd.h","","noreturn","int"
-"_assert","assert.h","","void","FAR const char *","int"
+"_assert","assert.h","","void","FAR const char *","int","FAR const char *"
 "accept4","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *","int"
 "adjtime","sys/time.h","defined(CONFIG_CLOCK_TIMEKEEPING)","int","FAR const struct timeval *","FAR struct timeval *"
 "aio_cancel","aio.h","defined(CONFIG_FS_AIO)","int","int","FAR struct aiocb *"

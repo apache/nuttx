@@ -25,7 +25,7 @@
  */
 
 SYSCALL_LOOKUP1(_exit,                     1)
-SYSCALL_LOOKUP(_assert,                    2)
+SYSCALL_LOOKUP(_assert,                    3)
 SYSCALL_LOOKUP(getpid,                     0)
 SYSCALL_LOOKUP(gettid,                     0)
 
