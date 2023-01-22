@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-LIBCXX_VERSION=12.0.0
+LIBCXX_VERSION=$(patsubst "%",%,$(CONFIG_LIBCXX_VERSION))
 
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard libcxx/.git),)
@@ -29,17 +29,12 @@ libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) tar -xf libcxx-$(LIBCXX_VERSION).src.tar.xz \
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(LIBCXX_VERSION).src libcxx
-	$(Q) patch -p0 < 0001-Remove-the-locale-fallback-for-NuttX.patch
-	$(Q) patch -p0 < 0001-libc-avoid-the-waring-__EXCEPTIONS-is-not-defined-ev.patch
-	$(Q) patch -p1 < 0001-libcxx-Rename-PS-macro-to-avoid-clashing-with-Xtensa.patch
-ifeq ($(CONFIG_LIBC_ARCH_ATOMIC),y)
-	$(Q) patch -p1 < 0002-Omit-atomic_-un-signed_lock_free-if-unsupported.patch
-endif
 	$(Q) touch $@
 endif
 
 $(TOPDIR)/include/libcxx: libcxx
 	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
+	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxx/__config_site
 
 context:: $(TOPDIR)/include/libcxx
 
@@ -51,6 +46,7 @@ ifeq ($(wildcard libcxx/.git),)
 endif
 
 CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_BUILDING_LIBRARY
+CXXFLAGS += ${INCDIR_PREFIX}$(CURDIR)/libcxx/src
 
 ifeq ($(CONFIG_LIBSUPCXX), y)
 CXXFLAGS += ${DEFINE_PREFIX}__GLIBCXX__
@@ -67,8 +63,6 @@ endif
 #       |                        ^~~~~~~~~~
 libcxx/src/barrier.cpp_CXXFLAGS += -Wno-shadow
 libcxx/src/locale.cpp_CXXFLAGS += -Wno-shadow
-
-libcxx/src/filesystem/directory_iterator.cpp_CXXFLAGS += -Wno-shadow
 libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-shadow
 
 # Workaround the following warning with "GCC 12"
@@ -131,14 +125,6 @@ libcxx/src/condition_variable.cpp_CXXFLAGS += -Wno-sign-compare
 #              std::
 libcxx/src/filesystem/directory_iterator.cpp_CXXFLAGS += -Wno-unqualified-std-cast-call
 
-CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
-CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
-CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
-
-DEPPATH += --dep-path libcxx/src
-DEPPATH += --dep-path libcxx/src/experimental
-DEPPATH += --dep-path libcxx/src/filesystem
-
-VPATH += libcxx/src
-VPATH += libcxx/src/experimental
-VPATH += libcxx/src/filesystem
+CPPSRCS += $(wildcard libcxx/src/*.cpp)
+CPPSRCS += $(wildcard libcxx/src/experimental/*.cpp)
+CPPSRCS += $(wildcard libcxx/src/filesystem/*.cpp)

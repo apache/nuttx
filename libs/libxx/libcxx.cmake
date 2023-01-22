@@ -20,7 +20,7 @@
 
 if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
 
-  set(LIBCXX_VERSION 12.0.0)
+  set(LIBCXX_VERSION ${CONFIG_LIBCXX_VERSION})
 
   # cmake-format: off
   set(LIBCXX_PATCH_COMMAND

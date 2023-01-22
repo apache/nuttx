@@ -51,17 +51,13 @@ config UCLIBCXX
 
 endchoice
 
-if LIBCXXMINI
-
 config ETL
 	bool "Embedded Template Library (ETL)"
-	depends on ALLOW_MIT_COMPONENTS
+	depends on LIBCXXMINI && ALLOW_MIT_COMPONENTS
 	---help---
 		ETL A C++ Template library for Embedded applications
 		Implements C++ templates such as containers, string
 		singleton math without C++ STL libraries
-
-endif
 
 if LIBCXX || UCLIBCXX
 
@@ -83,6 +79,12 @@ config LIBSUPCXX
 		level c++ library.
 
 endchoice
+
+config LIBCXXABI_VERSION
+	string "Select libcxxabi version"
+	depends on LIBCXXABI
+	default LIBCXX_VERSION if LIBCXX
+	default "15.0.7" if !LIBCXX
 
 endif
 
@@ -110,4 +112,10 @@ config UCLIBCXX_BUFSIZE
 	default 32
 
 endif
+
+config LIBCXX_VERSION
+	string "Select libcxx version"
+	depends on LIBCXX
+	default "15.0.7"
+
 endif
