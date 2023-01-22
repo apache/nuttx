@@ -44,10 +44,10 @@ typedef CODE FAR void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
 typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
                                     FAR void *addr);
 
-typedef CODE FAR void *(*mempool_multiple_alloc_t)(FAR void *args,
+typedef CODE FAR void *(*mempool_multiple_alloc_t)(FAR void *arg,
                                                    size_t alignment,
                                                    size_t size);
-typedef CODE void (*mempool_multiple_free_t)(FAR void *args, FAR void *addr);
+typedef CODE void (*mempool_multiple_free_t)(FAR void *arg, FAR void *addr);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 struct mempool_procfs_entry_s
@@ -90,12 +90,12 @@ struct mempool_s
 #if CONFIG_MM_BACKTRACE >= 0
   struct list_node alist;     /* The used block list in mempool */
 #else
-  size_t           nalloc;    /* The number of used block in mempool */
+  size_t     nalloc;    /* The number of used block in mempool */
 #endif
-  spinlock_t       lock;      /* The protect lock to mempool */
-  sem_t            waitsem;   /* The semaphore of waiter get free block */
-  size_t           nexpend;   /* The number of expend memory for mempool */
-  size_t           totalsize; /* Total size of the expend for mempoll */
+  spinlock_t lock;      /* The protect lock to mempool */
+  sem_t      waitsem;   /* The semaphore of waiter get free block */
+  size_t     nexpend;   /* The number of expend memory for mempool */
+  size_t     totalsize; /* Total size of the expend for mempoll */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
