@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_kill.c
+ * sched/signal/sig_tgkill.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,11 +24,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <signal.h>
-#include <pthread.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
@@ -41,22 +38,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_kill
+ * Name: tgkill
  *
  * Description:
- *   The pthread_kill() system call can be used to send any signal to a
- *   thread.  See nxsig_kill() for further information as this is just a
- *   simple wrapper around the nxsig_kill() function.
+ *   The tgkill() system call can be used to send any signal to a thread.
+ *   See kill() for further information as this is just a simple wrapper
+ *   around the kill() function.
  *
  * Input Parameters:
- *   thread - The id of the thread to receive the signal. Only positive,
- *     non-zero values of 'thread' are supported.
+ *   gid   - The id of the task to receive the signal.
+ *   tid   - The id of the thread to receive the signal. Only positive,
+ *           non-zero values of 'tid' are supported.
  *   signo - The signal number to send.  If 'signo' is zero, no signal is
- *    sent, but all error checking is performed.
+ *           sent, but all error checking is performed.
  *
  * Returned Value:
- *    On success the signal was send and zero is returned. On error one
- *    of the following error numbers is returned.
+ *    On success the signal was send and zero is returned. On error -1 is
+ *    returned, and errno is set one of the following error numbers:
  *
  *    EINVAL An invalid signal was specified.
  *    EPERM  The thread does not have permission to send the
@@ -67,14 +65,13 @@
  *
  ****************************************************************************/
 
-int pthread_kill(pthread_t thread, int signo)
+int tgkill(pid_t pid, pid_t tid, int signo)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  /* If group members are supported then pthread_kill() differs from
-   * nxsig_kill().  nxsig_kill(), in this case, must follow the POSIX rules
-   * for delivery of signals in the group environment.  Otherwise,
-   * nxsig_kill(), like pthread_kill() will just deliver the signal to the
-   * thread ID it is requested to use.
+  /* If group members are supported then tgkill() differs from kill().
+   * kill(), in this case, must follow the POSIX rules for delivery of
+   * signals in the group environment.  Otherwise, kill(), like tgkill()
+   * will just deliver the signal to the thread ID it is requested to use.
    */
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
@@ -109,7 +106,7 @@ int pthread_kill(pthread_t thread, int signo)
 
   /* Get the TCB associated with the thread */
 
-  stcb = nxsched_get_tcb((pid_t)thread);
+  stcb = nxsched_get_tcb(tid);
   if (!stcb)
     {
       ret = -ESRCH;
@@ -133,14 +130,14 @@ int pthread_kill(pthread_t thread, int signo)
 errout_with_lock:
   sched_unlock();
 errout:
-  return -ret;
+  set_errno(-ret);
+  return ERROR;
 
 #else
-  /* If group members are not supported then pthread_kill is basically the
-   * same as nxsig_kill() other than the sign of the returned value.
+  /* If group members are not supported then tgkill is basically the
+   * same as kill() other than the sign of the returned value.
    */
 
-  int ret = nxsig_kill((pid_t)thread, signo);
-  return (ret < 0) ? -ret : OK;
+  return kill(tid, signo);
 #endif
 }
