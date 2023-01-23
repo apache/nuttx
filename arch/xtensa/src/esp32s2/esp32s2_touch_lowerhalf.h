@@ -777,13 +777,13 @@ static inline void touch_lh_clear_channel_mask(uint16_t disable_mask)
  * Name: touch_lh_read_trigger_status_mask
  *
  * Description:
- *   Get the channels that triggered a touch interruption.
+ *   Get the channels that triggered a touch interrupt.
  *
  * Input Parameters:
  *   None.
  *
  * Returned Value:
- *   Bitmask of the channels that triggered a touch interruption.
+ *   Bitmask of the channels that triggered a touch interrupt.
  *
  ****************************************************************************/
 
@@ -796,7 +796,7 @@ static inline uint32_t touch_lh_read_trigger_status_mask(void)
  * Name: touch_lh_clear_trigger_status_mask
  *
  * Description:
- *   Clear the touch interruption channels bitmask.
+ *   Clear the touch interrupt channels bitmask.
  *
  * Input Parameters:
  *   None.

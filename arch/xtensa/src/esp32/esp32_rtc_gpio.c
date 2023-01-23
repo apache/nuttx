@@ -118,8 +118,8 @@ static inline bool is_valid_rtc_gpio(uint32_t rtcio_num)
  *
  * Input Parameters:
  *   irq - The IRQ number;
- *   status - The interruption status register;
- *   context - The interruption context.
+ *   status - The interrupt status register;
+ *   context - The interrupt context.
  *
  * Returned Value:
  *   None.
@@ -163,7 +163,7 @@ static void rtcio_dispatch(int irq, uint32_t status, uint32_t *context)
  *
  * Input Parameters:
  *   irq - The IRQ number;
- *   context - The interruption context;
+ *   context - The interrupt context;
  *   args - The arguments passed to the handler.
  *
  * Returned Value:
@@ -330,7 +330,7 @@ int esp32_configrtcio(int rtcio_num, rtcio_pinattr_t attr)
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for
- *   RTC interruptions.
+ *   RTC interrupts.
  *
  ****************************************************************************/
 
