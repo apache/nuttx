@@ -74,9 +74,10 @@ int riscv_exception(int mcause, void *regs, void *args)
 {
   uintptr_t cause = mcause & RISCV_IRQ_MASK;
 
-  _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", MTVAL: %" PRIxREG "\n",
+  _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
+         ", MTVAL: %" PRIxREG "\n",
          mcause > RISCV_MAX_EXCEPTION ? "Unknown" : g_reasons_str[cause],
-         cause, READ_CSR(CSR_TVAL));
+         cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
 
   _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
   up_irq_save();
