@@ -266,10 +266,10 @@
 
 /* SENS_TOUCH_XPD_WAIT : R/W; bitpos: [23:16]; default: 4; */
 
-#define SENS_TOUCH_XPD_WAIT    0x00000007
+#define SENS_TOUCH_XPD_WAIT    0x000000ff
 #define SENS_TOUCH_XPD_WAIT_M  (SENS_TOUCH_XPD_WAIT_V << \
                                 SENS_TOUCH_XPD_WAIT_S)
-#define SENS_TOUCH_XPD_WAIT_V  0x7
+#define SENS_TOUCH_XPD_WAIT_V  0xff
 #define SENS_TOUCH_XPD_WAIT_S  16
 
 /* SENS_TOUCH_MEAS_DELAY : R/W; bitpos: [15:0]; default: 0x1000; */
