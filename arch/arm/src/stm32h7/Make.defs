@@ -118,6 +118,10 @@ ifeq ($(CONFIG_STM32H7_SDMMC),y)
 CHIP_CSRCS += stm32_sdmmc.c
 endif
 
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += stm32_tim_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += stm32_otgdev.c
 endif
