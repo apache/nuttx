@@ -1127,8 +1127,8 @@ static int s32k1xx_interrupt(int irq, void *context, void *arg)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((usr & LPUART_STAT_TC) != 0 &&
-          (priv->ie & LPUART_CTRL_TCIE) != 0)
+      if ((usr & LPUART_STAT_TDRE) != 0 &&
+          (priv->ie & LPUART_CTRL_TIE) != 0)
         {
           uart_xmitchars(dev);
           handled = true;
@@ -1889,12 +1889,12 @@ static void s32k1xx_txint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ie |= LPUART_CTRL_TCIE;
+      priv->ie |= LPUART_CTRL_TIE;
 #endif
     }
   else
     {
-      priv->ie &= ~LPUART_CTRL_TCIE;
+      priv->ie &= ~LPUART_CTRL_TIE;
     }
 
   regval  = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET);
