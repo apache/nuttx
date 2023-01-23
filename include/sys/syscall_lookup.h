@@ -153,6 +153,7 @@ SYSCALL_LOOKUP(task_setcancelstate,        2)
  */
 
 SYSCALL_LOOKUP(kill,                       2)
+SYSCALL_LOOKUP(tgkill,                     3)
 SYSCALL_LOOKUP(sigaction,                  3)
 SYSCALL_LOOKUP(sigpending,                 1)
 SYSCALL_LOOKUP(sigprocmask,                3)
@@ -319,7 +320,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(pthread_getaffinity_np,   3)
 #endif
   SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
-  SYSCALL_LOOKUP(pthread_kill,             2)
   SYSCALL_LOOKUP(pthread_sigmask,          3)
 #endif
 

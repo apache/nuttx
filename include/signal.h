@@ -306,6 +306,8 @@
 #  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
 #endif
 
+#define tkill(tid, signo)            tgkill((pid_t)-1, tid, signo)
+
 #define sigisemptyset(set)           (!*(set))
 #define sigorset(dest, left, right)  (!(*(dest) = *(left) | *(right)))
 #define sigandset(dest, left, right) (!(*(dest) = *(left) & *(right)))
@@ -424,6 +426,7 @@ extern "C"
 #endif
 
 int  kill(pid_t pid, int signo);
+int  tgkill(pid_t pid, pid_t tid, int signo);
 void psignal(int signum, FAR const char *message);
 void psiginfo(FAR const siginfo_t *pinfo, FAR const char *message);
 int  raise(int signo);

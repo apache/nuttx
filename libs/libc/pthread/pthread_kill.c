@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/signal/sig_raise.c
+ * libs/libc/pthread/pthread_kill.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,23 +23,47 @@
  ****************************************************************************/
 
 #include <signal.h>
-#include <unistd.h>
+#include <pthread.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: raise
+ * Name: pthread_kill
  *
  * Description:
- *   The raise() function sends the signal signo to the executing thread or
- *   process. If a signal handler is called, the raise() function does not
- *   return until after the signal handler does.
+ *   The pthread_kill() system call can be used to send any signal to a
+ *   thread.  See nxsig_kill() for further information as this is just a
+ *   simple wrapper around the nxsig_kill() function.
+ *
+ * Input Parameters:
+ *   thread - The id of the thread to receive the signal. Only positive,
+ *     non-zero values of 'thread' are supported.
+ *   signo - The signal number to send.  If 'signo' is zero, no signal is
+ *    sent, but all error checking is performed.
+ *
+ * Returned Value:
+ *    On success the signal was send and zero is returned. On error one
+ *    of the following error numbers is returned.
+ *
+ *    EINVAL An invalid signal was specified.
+ *    EPERM  The thread does not have permission to send the
+ *           signal to the target thread.
+ *    ESRCH  No thread could be found corresponding to that
+ *           specified by the given thread ID
+ *    ENOSYS Do not support sending signals to process groups.
  *
  ****************************************************************************/
 
-int raise(int signo)
+int pthread_kill(pthread_t thread, int signo)
 {
-  return tkill(gettid(), signo);
+  int ret = tkill((pid_t)thread, signo);
+  if (ret < 0)
+    {
+      ret = get_errno();
+    }
+
+  return ret;
 }
