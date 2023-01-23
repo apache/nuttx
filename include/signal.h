@@ -31,10 +31,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#ifdef CONFIG_SIG_EVTHREAD
-#  include <pthread.h>  /* Needed for pthread_attr_t, includes this file */
-#endif
-
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
@@ -356,8 +352,8 @@ struct sigevent
   union sigval sigev_value;  /* Data passed with notification */
 
 #ifdef CONFIG_SIG_EVTHREAD
-  sigev_notify_function_t sigev_notify_function; /* Notification function */
-  FAR pthread_attr_t *sigev_notify_attributes;   /* Notification attributes (not used) */
+  sigev_notify_function_t sigev_notify_function;      /* Notification function */
+  FAR struct pthread_attr_s *sigev_notify_attributes; /* Notification attributes (not used) */
 #endif
 };
 
