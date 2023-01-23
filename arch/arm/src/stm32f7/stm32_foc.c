@@ -427,6 +427,9 @@
 #endif
 
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+
+#  warning not tested on HW
+
 /* Additional checks for BEMF sensing */
 
 #  if defined(CONFIG_STM32_FOC_FOC0) && defined(CONFIG_STM32_FOC_FOC1)
