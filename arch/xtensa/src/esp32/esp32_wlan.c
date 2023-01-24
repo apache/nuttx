@@ -289,8 +289,8 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
 static void wlan_ipv6multicast(struct wlan_priv_s *priv);
 #endif
 
-static struct wlan_pktbuf *wlan_recvframe(FAR struct wlan_priv_s *priv);
-static struct wlan_pktbuf *wlan_txframe(FAR struct wlan_priv_s *priv);
+static struct wlan_pktbuf *wlan_recvframe(struct wlan_priv_s *priv);
+static struct wlan_pktbuf *wlan_txframe(struct wlan_priv_s *priv);
 static inline void wlan_free_buffer(struct wlan_priv_s *priv,
                                     uint8_t *buffer);
 

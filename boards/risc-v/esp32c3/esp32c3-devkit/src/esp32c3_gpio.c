@@ -84,7 +84,7 @@ struct esp32c3gpint_dev_s
 #if BOARD_NGPIOOUT > 0
 static int gpout_read(struct gpio_dev_s *dev, bool *value);
 static int gpout_write(struct gpio_dev_s *dev, bool value);
-static int gpout_setpintype(FAR struct gpio_dev_s *dev,
+static int gpout_setpintype(struct gpio_dev_s *dev,
                             enum gpio_pintype_e pintype);
 #endif
 
@@ -93,7 +93,7 @@ static int gpint_read(struct gpio_dev_s *dev, bool *value);
 static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
 static int gpint_enable(struct gpio_dev_s *dev, bool enable);
-static int gpint_setpintype(FAR struct gpio_dev_s *dev,
+static int gpint_setpintype(struct gpio_dev_s *dev,
                             enum gpio_pintype_e pintype);
 #endif
 
@@ -184,7 +184,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
  * Name: gpout_setpintype
  ****************************************************************************/
 
-static int gpout_setpintype(FAR struct gpio_dev_s *dev,
+static int gpout_setpintype(struct gpio_dev_s *dev,
                             enum gpio_pintype_e pintype)
 {
   struct esp32c3gpio_dev_s *esp32c3gpio =
@@ -324,7 +324,7 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
  * Name: gpint_setpintype
  ****************************************************************************/
 
-static int gpint_setpintype(FAR struct gpio_dev_s *dev,
+static int gpint_setpintype(struct gpio_dev_s *dev,
                             enum gpio_pintype_e pintype)
 {
   struct esp32c3gpint_dev_s *esp32c3gpint =

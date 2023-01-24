@@ -386,7 +386,7 @@ static int a64_wait_dsi_transmit(void)
 
 ssize_t a64_mipi_dsi_write(uint8_t channel,
                            enum mipi_dsi_e cmd,
-                           FAR const uint8_t *txbuf,
+                           const uint8_t *txbuf,
                            size_t txlen)
 {
   int ret;

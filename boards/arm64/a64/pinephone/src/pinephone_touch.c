@@ -57,8 +57,7 @@
  ****************************************************************************/
 
 static int pinephone_gt9xx_irq_attach(const struct gt9xx_board_s *state,
-                                      xcpt_t isr,
-                                      FAR void *arg);
+                                      xcpt_t isr, void *arg);
 static void pinephone_gt9xx_irq_enable(const struct gt9xx_board_s *state,
                                        bool enable);
 static int pinephone_gt9xx_set_power(const struct gt9xx_board_s *state,
@@ -98,8 +97,7 @@ static const struct gt9xx_board_s g_pinephone_gt9xx =
  ****************************************************************************/
 
 static int pinephone_gt9xx_irq_attach(const struct gt9xx_board_s *state,
-                                      xcpt_t isr,
-                                      FAR void *arg)
+                                      xcpt_t isr, void *arg)
 {
   int ret;
 
