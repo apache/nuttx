@@ -351,6 +351,15 @@ config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 		This board includes the ESP32-C3-MINI-1 module, a 6DoF IMU, a temperature
 		and humidity sensor, a Li-Ion battery charger, and a Type-C USB.
 
+config ARCH_BOARD_ESP32C3_GENERIC
+	bool "Espressif ESP32-C3 Generic DevKit"
+	depends on ESPRESSIF_ESP32C3
+	---help---
+		The ESP32-C3 DevKit features the ESP32-C3 CPU with a RISC-V core.
+		It comes in two flavors, the ESP32-C3-DevKitM-1 and the ESP32-C3-DevKitC-02.
+		The ESP32-C3-DevKitM-1 version contains the ESP32-C3-MINI-1 module and the
+		ESP32-C3-DevKitC-02 version the ESP32-C3-WROOM-02.
+
 config ARCH_BOARD_ESP32S2_KALUGA_1
 	bool "Espressif ESP32-S2-Kaluga-1 V1.3"
 	depends on ARCH_CHIP_ESP32S2WROVER
@@ -2771,6 +2780,7 @@ config ARCH_BOARD
 	default "esp32-wrover-kit"          if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"            if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"     if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
+	default "esp32c3-generic"           if ARCH_BOARD_ESP32C3_GENERIC
 	default "esp32s2-kaluga-1"          if ARCH_BOARD_ESP32S2_KALUGA_1
 	default "esp32s2-saola-1"           if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "franzininho-wifi"          if ARCH_BOARD_FRANZININHO_WIFI
@@ -3748,6 +3758,9 @@ endif
 if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 source "boards/risc-v/esp32c3/esp32c3-devkit-rust-1/Kconfig"
 endif
+if ARCH_BOARD_ESP32C3_GENERIC
+source "boards/risc-v/espressif/esp32c3-generic/Kconfig"
+endif
 if ARCH_BOARD_ESP32S2_KALUGA_1
 source "boards/xtensa/esp32s2/esp32s2-kaluga-1/Kconfig"
 endif
@@ -3883,6 +3896,9 @@ source "boards/xtensa/esp32s3/common/Kconfig"
 endif
 if ARCH_CHIP_ESP32C3
 source "boards/risc-v/esp32c3/common/Kconfig"
+endif
+if ARCH_CHIP_ESPRESSIF
+source "boards/risc-v/espressif/common/Kconfig"
 endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"

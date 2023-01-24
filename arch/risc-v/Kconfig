@@ -110,6 +110,11 @@ config ARCH_CHIP_ESP32C6
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
+config ARCH_CHIP_ESPRESSIF
+	bool "Espressif ESP32 family"
+	---help---
+		Family of RISC-V based microcontrollers from Espressif Systems.
+
 config ARCH_CHIP_C906
 	bool "THEAD C906"
 	select ARCH_RV64
@@ -223,6 +228,7 @@ config ARCH_CHIP
 	default "bl602"		if ARCH_CHIP_BL602
 	default "esp32c3"	if ARCH_CHIP_ESP32C3
 	default "esp32c6"	if ARCH_CHIP_ESP32C6
+	default "espressif"	if ARCH_CHIP_ESPRESSIF
 	default "c906"		if ARCH_CHIP_C906
 	default "mpfs"		if ARCH_CHIP_MPFS
 	default "rv32m1"	if ARCH_CHIP_RV32M1
@@ -362,6 +368,9 @@ source "arch/risc-v/src/esp32c3/Kconfig"
 endif
 if ARCH_CHIP_ESP32C6
 source "arch/risc-v/src/esp32c6/Kconfig"
+endif
+if ARCH_CHIP_ESPRESSIF
+source "arch/risc-v/src/espressif/Kconfig"
 endif
 if ARCH_CHIP_C906
 source "arch/risc-v/src/c906/Kconfig"

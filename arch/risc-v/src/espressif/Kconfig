@@ -1,0 +1,282 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESPRESSIF
+
+choice ESPRESSIF_CHIP_SERIES
+	prompt "Chip Series"
+	default ESPRESSIF_ESP32C3
+
+config ESPRESSIF_ESP32C3
+	bool "ESP32-C3"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select LIBC_ARCH_ATOMIC
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	---help---
+		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
+
+endchoice # ESPRESSIF_CHIP_SERIES
+
+config ESPRESSIF_CHIP_SERIES
+	string
+	default "esp32c3" if ESPRESSIF_ESP32C3
+	default "unknown"
+
+choice ESPRESSIF_FLASH
+	prompt "Flash Size"
+	default ESPRESSIF_FLASH_4M if ESPRESSIF_ESP32C3
+
+config ESPRESSIF_FLASH_2M
+	bool "2 MB"
+
+config ESPRESSIF_FLASH_4M
+	bool "4 MB"
+
+endchoice # ESPRESSIF_FLASH
+
+config ESPRESSIF_FLASH_DETECT
+	bool "Auto-detect FLASH size"
+	default n
+	---help---
+		Auto detect flash size when flashing.
+
+choice ESPRESSIF_CPU_FREQ
+	prompt "CPU frequency"
+	default ESPRESSIF_CPU_FREQ_160 if ESPRESSIF_ESP32C3
+	---help---
+		CPU frequency to be set on application startup.
+
+config ESPRESSIF_CPU_FREQ_40
+	bool "40 MHz"
+	---help---
+		Set the CPU to 40 MHz. This frequency is obtained from the XTAL.
+
+config ESPRESSIF_CPU_FREQ_80
+	bool "80 MHz"
+	---help---
+		Set the CPU to 80 MHz. This frequency is obtained from the 480 MHz PLL.
+
+config ESPRESSIF_CPU_FREQ_160
+	bool "160 MHz"
+	---help---
+		Set the CPU to 160 MHz. This frequency is obtained from the 480 MHz PLL.
+
+endchoice # ESPRESSIF_CPU_FREQ
+
+config ESPRESSIF_CPU_FREQ_MHZ
+	int
+	default 40 if ESPRESSIF_CPU_FREQ_40
+	default 80 if ESPRESSIF_CPU_FREQ_80
+	default 160 if ESPRESSIF_CPU_FREQ_160
+
+config ESPRESSIF_REGION_PROTECTION
+	bool "Enable region protection"
+	default y
+	select ARCH_USE_MPU
+	---help---
+		Configure the MPU to disable access to invalid memory regions.
+
+config ESPRESSIF_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+	---help---
+		This loads all of NuttX inside IRAM. Used to test somewhat small
+		images that can fit entirely in IRAM.
+
+menu "Peripheral Support"
+
+config ESPRESSIF_UART
+	bool
+	default n
+
+config ESPRESSIF_UART0
+	bool "UART0"
+	default y
+	select ESPRESSIF_UART
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESPRESSIF_UART1
+	bool "UART1"
+	default n
+	select ESPRESSIF_UART
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESPRESSIF_BROWNOUT_DET
+	bool "Brownout Detector"
+	default y
+	---help---
+		A built-in brownout detector which can detect if the voltage is lower
+		than a specific value. If this happens, it will reset the chip in
+		order to prevent unintended behaviour.
+
+endmenu # Peripheral Support
+
+menu "UART Configuration"
+	depends on ESPRESSIF_UART
+
+if ESPRESSIF_UART0
+
+config ESPRESSIF_UART0_TXPIN
+	int "UART0 TX Pin"
+	default 21 if ESPRESSIF_ESP32C3
+
+config ESPRESSIF_UART0_RXPIN
+	int "UART0 RX Pin"
+	default 20 if ESPRESSIF_ESP32C3
+
+config ESPRESSIF_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 16 if ESPRESSIF_ESP32C3
+	range 0 21
+
+config ESPRESSIF_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 15 if ESPRESSIF_ESP32C3
+	range 0 21
+
+endif # ESPRESSIF_UART0
+
+if ESPRESSIF_UART1
+
+config ESPRESSIF_UART1_TXPIN
+	int "UART1 TX Pin"
+	default 8 if ESPRESSIF_ESP32C3
+
+config ESPRESSIF_UART1_RXPIN
+	int "UART1 RX Pin"
+	default 9 if ESPRESSIF_ESP32C3
+
+config ESPRESSIF_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 1 if ESPRESSIF_ESP32C3
+	range 0 21
+
+config ESPRESSIF_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 2 if ESPRESSIF_ESP32C3
+	range 0 21
+
+endif # ESPRESSIF_UART1
+
+endmenu # UART Configuration
+
+menu "SPI Flash Configuration"
+
+choice ESPRESSIF_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESPRESSIF_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+config ESPRESSIF_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
+
+config ESPRESSIF_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
+
+config ESPRESSIF_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
+
+config ESPRESSIF_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
+
+endchoice # ESPRESSIF_FLASH_MODE
+
+choice ESPRESSIF_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESPRESSIF_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency.
+
+config ESPRESSIF_FLASH_FREQ_80M
+	bool "80 MHz"
+
+config ESPRESSIF_FLASH_FREQ_40M
+	bool "40 MHz"
+
+config ESPRESSIF_FLASH_FREQ_26M
+	bool "26 MHz"
+
+config ESPRESSIF_FLASH_FREQ_20M
+	bool "20 MHz"
+
+endchoice # ESPRESSIF_FLASH_FREQ
+
+endmenu # SPI Flash Configuration
+
+menu "Application Image Configuration"
+
+config ESPRESSIF_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
+	default 0x8000
+
+endmenu # Application Image Configuration
+
+menu "Brownout Detector Configuration"
+	depends on ESPRESSIF_BROWNOUT_DET
+
+choice ESPRESSIF_BROWNOUT_DET_LVL_SEL
+	prompt "Brownout voltage level"
+	default ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
+	---help---
+		The brownout detector will reset the chip when the supply voltage is
+		approximately below this level. Note that there may be some variation
+		of brownout voltage level between each chip.
+
+	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
+		bool "2.51V"
+
+	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_6
+		bool "2.64V"
+
+	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_5
+		bool "2.76V"
+
+	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_4
+		bool "2.92V"
+
+	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_3
+		bool "3.10V"
+
+	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_2
+		bool "3.27V"
+endchoice
+
+config ESPRESSIF_BROWNOUT_DET_LVL
+	int
+	default 2 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_2
+	default 3 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_3
+	default 4 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_4
+	default 5 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_5
+	default 6 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_6
+	default 7 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
+
+endmenu # ESPRESSIF_BROWNOUT_DET
+
+endif # ARCH_CHIP_ESPRESSIF
