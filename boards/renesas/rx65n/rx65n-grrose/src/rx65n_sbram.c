@@ -229,7 +229,7 @@ extern int istack;
 
 static int hardfault_get_desc(struct sbramd_s *desc)
 {
-  FAR struct file filestruct;
+  struct file filestruct;
   int ret;
 
   ret = file_open(&filestruct, HARDFAULT_PATH, O_RDONLY);
@@ -332,17 +332,17 @@ int rx65n_sbram_int(void)
  ****************************************************************************/
 
 #if defined(CONFIG_RX65N_SAVE_CRASHDUMP)
-void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const char *filename, int lineno)
+void board_crashdump(uintptr_t currentsp, void *tcb,
+                     const char *filename, int lineno)
 {
   struct fullcontext *pdump ;
   pdump = (struct fullcontext *)&g_sdata;
-  FAR struct tcb_s *rtcb;
+  struct tcb_s *rtcb;
   int rv;
 
   enter_critical_section();
 
-  rtcb = (FAR struct tcb_s *)tcb;
+  rtcb = (struct tcb_s *)tcb;
 
   /* Zero out everything */
 

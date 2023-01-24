@@ -138,7 +138,7 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
        * will return an audio interface.
        */
 
-      lower = (FAR struct es8388_lower_s *)
+      lower = (struct es8388_lower_s *)
         kmm_zalloc(sizeof(struct es8388_lower_s));
 
       lower->address   = i2c_addr,

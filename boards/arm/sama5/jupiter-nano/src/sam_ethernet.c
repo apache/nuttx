@@ -241,7 +241,7 @@ void weak_function sam_netinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
                  phy_enable_t *enable)
 {
   irqstate_t flags;
