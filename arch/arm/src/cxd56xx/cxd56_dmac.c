@@ -731,7 +731,9 @@ void weak_function arm_dma_initialize(void)
   for (i = 0; i < NCHANNELS; i++)
     {
       g_dmach[i].chan = i;
+#ifndef CONFIG_CXD56_SUBCORE
       up_enable_irq(irq_map[i]);
+#endif
     }
 }
 
