@@ -5,6 +5,12 @@
 
 comment "LITEX Configuration Options"
 
+config LITEX_SYS_CORE_FREQ_HZ
+	int "Risc-V system core frequency (Hz)"
+	default 100000000
+	---help---
+		This value should match default frequency of the FPGA fabric system clock.
+
 menu "LITEX Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
