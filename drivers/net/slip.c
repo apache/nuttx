@@ -109,6 +109,11 @@
 
 #define SLIP_WDDELAY   (1*1000000)
 
+/* This is a helper pointer for accessing the contents of the ip header */
+
+#define IPv4HDR        ((FAR struct ipv4_hdr_s *)priv->dev.d_buf)
+#define IPv6HDR        ((FAR struct ipv6_hdr_s *)priv->dev.d_buf)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -588,7 +593,6 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 static int slip_rxtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
-  FAR struct net_driver_s *dev;
   unsigned int index = *(argv[1]) - '0';
   int ch;
 
@@ -604,7 +608,6 @@ static int slip_rxtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
-  dev = &priv->dev;
   for (; ; )
     {
       /* Wait for the next character to be available on the input stream. */
@@ -661,7 +664,8 @@ static int slip_rxtask(int argc, FAR char *argv[])
        */
 
 #ifdef CONFIG_NET_IPv4
-      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
+      if ((priv->rxlen >= IPv4_HDRLEN) &&
+          ((IPv4HDR->vhl & IP_VERSION_MASK) == IPv4_VERSION))
         {
           NETDEV_RXIPV4(&priv->dev);
           ipv4_input(&priv->dev);
@@ -679,7 +683,8 @@ static int slip_rxtask(int argc, FAR char *argv[])
       else
 #endif
 #ifdef CONFIG_NET_IPv6
-      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
+      if ((priv->rxlen >= IPv6_HDRLEN) &&
+          ((IPv6HDR->vtc & IP_VERSION_MASK) == IPv6_VERSION))
         {
           NETDEV_RXIPV6(&priv->dev);
           ipv6_input(&priv->dev);
@@ -899,7 +904,7 @@ static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 int slip_initialize(int intf, FAR const char *devname)
 {
   FAR struct slip_driver_s *priv;
-  char buffer[8];
+  char buffer[12];
   FAR char *argv[2];
   int ret;
 
@@ -935,7 +940,7 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Start the SLIP receiver kernel thread */
 
-  snprintf(buffer, 8, "%d", intf);
+  snprintf(buffer, sizeof(buffer), "%d", intf);
   argv[0] = buffer;
   argv[1] = NULL;
 
