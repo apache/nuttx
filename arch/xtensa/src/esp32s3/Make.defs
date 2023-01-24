@@ -53,6 +53,10 @@ CHIP_CSRCS += esp32s3_efuse_table.c
 CHIP_CSRCS += esp32s3_efuse_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_RNG),y)
+CHIP_CSRCS += esp32s3_rng.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_USBSERIAL),y)
 CHIP_CSRCS += esp32s3_usbserial.c
 endif
