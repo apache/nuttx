@@ -116,10 +116,8 @@
  * The ESP32-C3 CPU interrupt controller accepts 31 asynchronous interrupts.
  */
 
-#define ESP32C3_CPUINT_MIN             1
-#define ESP32C3_CPUINT_MAX             31
-
 #define ESP32C3_NCPUINTS               32
+#define ESP32C3_CPUINT_MAX             (ESP32C3_NCPUINTS - 1)
 
 #define ESP32C3_CPUINT_MAC             0
 #define ESP32C3_CPUINT_MAC_NMI         1

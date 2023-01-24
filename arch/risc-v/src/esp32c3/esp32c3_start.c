@@ -253,12 +253,6 @@ void __esp32c3_start(void)
   esp32c3_region_protection();
 #endif
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  /* Put the CPU Interrupts in initial state */
-
-  esp32c3_cpuint_initialize();
-#endif
-
   /* Initialize RTC parameters */
 
   esp32c3_rtc_init();
