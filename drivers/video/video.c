@@ -411,10 +411,10 @@ static const video_parameter_name_t g_video_parameter_name[] =
 };
 
 static FAR void *g_video_handler;
-static FAR const struct imgsensor_ops_s **g_video_registered_sensor;
+static FAR struct imgsensor_s **g_video_registered_sensor;
 static int g_video_registered_sensor_num;
-static FAR const struct imgsensor_ops_s *g_video_sensor_ops;
-static FAR const struct imgdata_ops_s *g_video_data_ops;
+static FAR struct imgsensor_s *g_video_sensor;
+static FAR struct imgdata_s *g_video_data;
 
 /****************************************************************************
  * Private Functions
@@ -655,14 +655,7 @@ static int start_capture(enum v4l2_buf_type type,
   imgdata_interval_t di;
   imgsensor_interval_t si;
 
-  ASSERT(fmt && interval && g_video_sensor_ops && g_video_data_ops);
-
-  if (g_video_sensor_ops->start_capture == NULL ||
-      g_video_data_ops->start_capture == NULL ||
-      g_video_data_ops->set_buf == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(fmt && interval && g_video_sensor && g_video_data);
 
   get_clipped_format(nr_fmt, fmt, clip, c_fmt);
 
@@ -673,32 +666,25 @@ static int start_capture(enum v4l2_buf_type type,
   convert_to_imgsensorfmt(&fmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
-  g_video_sensor_ops->start_capture(
+  IMGSENSOR_START_CAPTURE(g_video_sensor,
      type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
      IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
      nr_fmt, sf, &si);
-  g_video_data_ops->start_capture(nr_fmt, df, &di, video_complete_capture);
-  g_video_data_ops->set_buf((FAR uint8_t *)bufaddr, bufsize);
+  IMGDATA_START_CAPTURE(g_video_data,
+     nr_fmt, df, &di, video_complete_capture);
+  IMGDATA_SET_BUF(g_video_data, (FAR uint8_t *)bufaddr, bufsize);
 
   return OK;
 }
 
-static int stop_capture(enum v4l2_buf_type type)
+static void stop_capture(enum v4l2_buf_type type)
 {
-  ASSERT(g_video_sensor_ops && g_video_data_ops);
+  ASSERT(g_video_sensor && g_video_data);
 
-  if (g_video_data_ops->stop_capture == NULL ||
-      g_video_sensor_ops->stop_capture == NULL)
-    {
-      return -ENOTTY;
-    }
-
-  g_video_data_ops->stop_capture();
-  g_video_sensor_ops->stop_capture(
+  IMGDATA_STOP_CAPTURE(g_video_data);
+  IMGSENSOR_STOP_CAPTURE(g_video_sensor,
      type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
      IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL);
-
-  return OK;
 }
 
 static void change_video_state(FAR video_mng_t    *vmng,
@@ -782,15 +768,14 @@ static int32_t get_default_value(uint32_t id)
   imgsensor_supported_value_t value;
   int ret;
 
-  if (g_video_sensor_ops == NULL ||
-      g_video_sensor_ops->get_supported_value == NULL)
+  if (g_video_sensor == NULL)
     {
       /* Don't care(unsupported parameter) */
 
       return 0;
     }
 
-  ret = g_video_sensor_ops->get_supported_value(id, &value);
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor, id, &value);
   if (ret != OK)
     {
       /* Don't care(unsupported parameter) */
@@ -825,15 +810,9 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
 
   *gamma = NULL;
 
-  ASSERT(g_video_sensor_ops);
+  ASSERT(g_video_sensor);
 
-  if (g_video_sensor_ops->get_supported_value == NULL ||
-      g_video_sensor_ops->get_value == NULL)
-    {
-      return 0;
-    }
-
-  ret = g_video_sensor_ops->get_supported_value(
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor,
           IMGSENSOR_ID_GAMMA_CURVE, &sup_val);
   if (ret != OK)
     {
@@ -880,7 +859,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
 
   *gamma = kmm_malloc(sz);
   val.p_u8 = (FAR uint8_t *)*gamma;
-  g_video_sensor_ops->get_value(IMGSENSOR_ID_GAMMA_CURVE, sz, &val);
+  IMGSENSOR_GET_VALUE(g_video_sensor, IMGSENSOR_ID_GAMMA_CURVE, sz, &val);
   return sz;
 }
 
@@ -1004,22 +983,22 @@ static bool is_sem_waited(FAR sem_t *sem)
   return nxsem_get_value(sem, &semcount) == OK && semcount < 0;
 }
 
-static FAR const struct imgsensor_ops_s *get_connected_imgsensor(void)
+static FAR struct imgsensor_s *get_connected_imgsensor(void)
 {
-  FAR const struct imgsensor_ops_s *ops = NULL;
+  FAR struct imgsensor_s *sensor = NULL;
   int i;
 
   for (i = 0; i < g_video_registered_sensor_num; i++)
     {
       if (g_video_registered_sensor[i] &&
-          g_video_registered_sensor[i]->is_available())
+          IMGSENSOR_IS_AVAILABLE(g_video_registered_sensor[i]))
         {
-          ops = g_video_registered_sensor[i];
+          sensor = g_video_registered_sensor[i];
           break;
         }
     }
 
-  return ops;
+  return sensor;
 }
 
 static int video_open(FAR struct file *filep)
@@ -1033,13 +1012,13 @@ static int video_open(FAR struct file *filep)
     {
       /* Only in first execution, open device */
 
-      g_video_sensor_ops = get_connected_imgsensor();
-      if (g_video_sensor_ops != NULL)
+      g_video_sensor = get_connected_imgsensor();
+      if (g_video_sensor != NULL)
         {
-          ret = g_video_sensor_ops->init();
+          ret = IMGSENSOR_INIT(g_video_sensor);
           if (ret == OK)
             {
-              ret = g_video_data_ops->init();
+              ret = IMGDATA_INIT(g_video_data);
               if (ret == OK)
                 {
                   initialize_resources(priv);
@@ -1078,8 +1057,8 @@ static int video_close(FAR struct file *filep)
   if (--priv->open_num == 0)
     {
       cleanup_resources(priv);
-      g_video_sensor_ops->uninit();
-      g_video_data_ops->uninit();
+      IMGSENSOR_UNINIT(g_video_sensor);
+      IMGDATA_UNINIT(g_video_data);
     }
 
   nxmutex_unlock(&priv->lock_open_num);
@@ -1102,14 +1081,15 @@ static int video_querycap(FAR struct v4l2_capability *cap)
 {
   FAR const char *name;
 
-  ASSERT(g_video_sensor_ops);
+  ASSERT(g_video_sensor);
 
   if (cap == NULL)
     {
       return -EINVAL;
     }
 
-  if (g_video_sensor_ops->get_driver_name == NULL)
+  name = IMGSENSOR_GET_DRIVER_NAME(g_video_sensor);
+  if (name == NULL)
     {
       return -ENOTTY;
     }
@@ -1118,7 +1098,6 @@ static int video_querycap(FAR struct v4l2_capability *cap)
 
   /* cap->driver needs to be NULL-terminated. */
 
-  name = g_video_sensor_ops->get_driver_name();
   strlcpy((FAR char *)cap->driver, name, sizeof(cap->driver));
   cap->capabilities = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
 
@@ -1135,19 +1114,19 @@ static int video_enum_input(FAR struct v4l2_input *input)
 {
   FAR const char *name;
 
-  ASSERT(g_video_sensor_ops);
+  ASSERT(g_video_sensor);
 
   if (input->index > 0)
     {
       return -EINVAL;
     }
 
-  if (g_video_sensor_ops->get_driver_name == NULL)
+  name = IMGSENSOR_GET_DRIVER_NAME(g_video_sensor);
+  if (name == NULL)
     {
       return -ENOTTY;
     }
 
-  name = g_video_sensor_ops->get_driver_name();
   memset(input, 0, sizeof(struct v4l2_input));
   strlcpy((FAR char *)input->name, name, sizeof(input->name));
   input->type = V4L2_INPUT_TYPE_CAMERA;
@@ -1440,12 +1419,7 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
   int32_t id;
   int ret;
 
-  ASSERT(g_video_sensor_ops && vmng);
-
-  if (g_video_sensor_ops->set_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor && vmng);
 
   if (clip == NULL)
     {
@@ -1487,7 +1461,7 @@ static int video_s_selection(FAR struct video_mng_s    *vmng,
   p_u32[IMGSENSOR_CLIP_INDEX_HEIGHT] = clip->r.height;
 
   val.p_u32 = p_u32;
-  ret = g_video_sensor_ops->set_value(id, sizeof(p_u32), val);
+  ret = IMGSENSOR_SET_VALUE(g_video_sensor, id, sizeof(p_u32), val);
   if (ret != OK)
     {
       return ret;
@@ -1532,13 +1506,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   imgsensor_interval_t si;
   int ret;
 
-  ASSERT(vfmt && interval && g_video_sensor_ops && g_video_data_ops);
-
-  if (g_video_sensor_ops->validate_frame_setting == NULL ||
-      g_video_data_ops->validate_frame_setting == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(vfmt && interval && g_video_sensor && g_video_data);
 
   /* Return OK only in case both image data driver and
    * image sensor driver support.
@@ -1553,7 +1521,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   convert_to_imgsensorfmt(&vfmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
-  ret = g_video_sensor_ops->validate_frame_setting(
+  ret = IMGSENSOR_VALIDATE_FRAME_SETTING(g_video_sensor,
             type == V4L2_BUF_TYPE_VIDEO_CAPTURE ?
               IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
             nr_fmt, sf, &si);
@@ -1562,7 +1530,7 @@ static int validate_frame_setting(enum v4l2_buf_type type,
       return ret;
     }
 
-  return g_video_data_ops->validate_frame_setting(nr_fmt, df, &di);
+  return IMGDATA_VALIDATE_FRAME_SETTING(g_video_data, nr_fmt, df, &di);
 }
 
 static size_t get_bufsize(FAR video_format_t *vf)
@@ -1594,7 +1562,7 @@ static int video_try_fmt(FAR struct video_mng_s *priv,
   video_format_t vf[MAX_VIDEO_FMT];
   uint8_t nr_fmt;
 
-  ASSERT(priv && g_video_sensor_ops && g_video_data_ops);
+  ASSERT(priv && g_video_sensor && g_video_data);
 
   if (v4l2 == NULL)
     {
@@ -1730,7 +1698,7 @@ static int video_s_parm(FAR struct video_mng_s *priv,
   FAR video_type_inf_t *type_inf;
   int ret;
 
-  ASSERT(g_video_sensor_ops && g_video_data_ops);
+  ASSERT(g_video_sensor && g_video_data);
 
   type_inf = get_video_type_inf(priv, parm->type);
   if (type_inf == NULL)
@@ -1766,7 +1734,7 @@ static int video_g_parm(FAR struct video_mng_s *vmng,
   FAR video_type_inf_t *type_inf;
   int ret = -EINVAL;
 
-  DEBUGASSERT(vmng && g_video_sensor_ops);
+  DEBUGASSERT(vmng && g_video_sensor);
 
   type_inf = get_video_type_inf(vmng, parm->type);
   if (type_inf == NULL)
@@ -1776,15 +1744,13 @@ static int video_g_parm(FAR struct video_mng_s *vmng,
 
   memset(&parm->parm, 0, sizeof(parm->parm));
 
-  if (type_inf->state == VIDEO_STATE_CAPTURE &&
-      g_video_sensor_ops->get_frame_interval != NULL)
+  if (type_inf->state == VIDEO_STATE_CAPTURE)
     {
       /* If capture is started and lower driver has the get_frame_interval(),
        * query lower driver.
        */
 
-      ret = g_video_sensor_ops->get_frame_interval(
-              parm->type,
+      ret = IMGSENSOR_GET_FRAME_INTERVAL(g_video_sensor, parm->type,
               (imgsensor_interval_t *)&parm->parm.capture.timeperframe);
     }
 
@@ -2092,12 +2058,7 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
   imgsensor_capability_elems_t *elem = &value.u.elems;
   int ret;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->get_supported_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   if (attr == NULL)
     {
@@ -2123,7 +2084,7 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
     }
   else
     {
-      ret = g_video_sensor_ops->get_supported_value(
+      ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor,
               VIDEO_ID(attr->ctrl_class, attr->id),
               &value);
       if (ret < 0)
@@ -2171,12 +2132,7 @@ static int video_querymenu(FAR struct v4l2_querymenu *menu)
   imgsensor_supported_value_t value;
   int ret;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->get_supported_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   if (menu == NULL)
     {
@@ -2197,7 +2153,7 @@ static int video_querymenu(FAR struct v4l2_querymenu *menu)
     }
   else
     {
-      ret = g_video_sensor_ops->get_supported_value(
+      ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor,
               VIDEO_ID(menu->ctrl_class, menu->id),
               &value);
       if (ret < 0)
@@ -2290,12 +2246,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
   int ret = OK;
   int cnt;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->get_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   if (priv == NULL || ctrls == NULL)
     {
@@ -2306,7 +2257,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
        cnt < ctrls->count;
        cnt++, control++)
     {
-      ret = g_video_sensor_ops->get_value(
+      ret = IMGSENSOR_GET_VALUE(g_video_sensor,
               VIDEO_ID(ctrls->ctrl_class, control->id),
               control->size,
               (imgsensor_value_t *)&control->value64);
@@ -2326,30 +2277,20 @@ static int set_intvalue(uint32_t id, int32_t value32)
 {
   imgsensor_value_t value;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->set_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   value.value32 = value32;
-  return g_video_sensor_ops->set_value(id, sizeof(int32_t), value);
+  return IMGSENSOR_SET_VALUE(g_video_sensor, id, sizeof(int32_t), value);
 }
 
 static int set_pvalue(uint32_t id, int size, void *pval)
 {
   imgsensor_value_t value;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->set_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   value.p_u8 = (FAR uint8_t *)pval;
-  return g_video_sensor_ops->set_value(id, size, value);
+  return IMGSENSOR_SET_VALUE(g_video_sensor, id, size, value);
 }
 
 static video_scene_params_t *search_scene_param(enum v4l2_scene_mode mode)
@@ -2439,12 +2380,7 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
   int ret = OK;
   int cnt;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->set_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   if (priv == NULL || ctrls == NULL)
     {
@@ -2462,7 +2398,7 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
         }
       else
         {
-          ret = g_video_sensor_ops->set_value(
+          ret = IMGSENSOR_SET_VALUE(g_video_sensor,
                   VIDEO_ID(ctrls->ctrl_class, control->id),
                   control->size,
                   (imgsensor_value_t)control->value64);
@@ -2518,12 +2454,7 @@ static int read_scene_param(enum v4l2_scene_mode mode,
   video_scene_params_t *sp;
   int ret = OK;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->get_supported_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   if (control == NULL)
     {
@@ -2538,7 +2469,7 @@ static int read_scene_param(enum v4l2_scene_mode mode,
       return -EINVAL;
     }
 
-  ret = g_video_sensor_ops->get_supported_value(id, &value);
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor, id, &value);
   if (ret < 0)
     {
       /* Unsupported camera parameter */
@@ -2748,12 +2679,7 @@ static int save_scene_param(enum v4l2_scene_mode mode,
   int ret;
   int i;
 
-  ASSERT(g_video_sensor_ops);
-
-  if (g_video_sensor_ops->get_supported_value == NULL)
-    {
-      return -ENOTTY;
-    }
+  ASSERT(g_video_sensor);
 
   sp = search_scene_param(mode);
   if (sp == NULL)
@@ -2763,7 +2689,7 @@ static int save_scene_param(enum v4l2_scene_mode mode,
       return -EINVAL;
     }
 
-  ret = g_video_sensor_ops->get_supported_value(id, &value);
+  ret = IMGSENSOR_GET_SUPPORTED_VALUE(g_video_sensor, id, &value);
   if (ret < 0)
     {
       /* Unsupported camera parameter */
@@ -3374,8 +3300,9 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize)
         }
       else
         {
-          g_video_data_ops->set_buf((FAR uint8_t *)container->buf.m.userptr,
-                                    container->buf.length);
+          IMGDATA_SET_BUF(g_video_data,
+            (FAR uint8_t *)container->buf.m.userptr,
+            container->buf.length);
         }
     }
 
@@ -3413,16 +3340,16 @@ int video_uninitialize(void)
   return OK;
 }
 
-int imgsensor_register(FAR const struct imgsensor_ops_s *ops)
+int imgsensor_register(FAR struct imgsensor_s *sensor)
 {
-  FAR const struct imgsensor_ops_s **new_addr;
+  FAR struct imgsensor_s **new_addr;
   int ret = -ENOMEM;
 
-  new_addr = kmm_realloc(g_video_registered_sensor,
-                         sizeof(ops) * (g_video_registered_sensor_num + 1));
+  new_addr = kmm_realloc(g_video_registered_sensor, sizeof(sensor) *
+                         (g_video_registered_sensor_num + 1));
   if (new_addr != NULL)
     {
-      new_addr[g_video_registered_sensor_num++] = ops;
+      new_addr[g_video_registered_sensor_num++] = sensor;
       g_video_registered_sensor = new_addr;
       ret = OK;
     }
@@ -3430,7 +3357,7 @@ int imgsensor_register(FAR const struct imgsensor_ops_s *ops)
   return ret;
 }
 
-void imgdata_register(FAR const struct imgdata_ops_s *ops)
+void imgdata_register(FAR struct imgdata_s *data)
 {
-  g_video_data_ops = ops;
+  g_video_data = data;
 }

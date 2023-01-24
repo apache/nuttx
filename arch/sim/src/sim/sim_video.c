@@ -41,6 +41,8 @@
 
 typedef struct
 {
+  struct imgdata_s data;
+  struct imgsensor_s sensor;
   imgdata_capture_t capture_cb;
   uint32_t buf_size;
   uint8_t  *next_buf;
@@ -53,36 +55,39 @@ typedef struct
 
 /* Video image sensor operations */
 
-static bool sim_video_is_available(void);
-static int sim_video_init(void);
-static int sim_video_uninit(void);
-static const char *sim_video_get_driver_name(void);
-static int sim_video_validate_frame_setting(imgsensor_stream_type_t type,
+static bool sim_video_is_available(struct imgsensor_s *sensor);
+static int sim_video_init(struct imgsensor_s *sensor);
+static int sim_video_uninit(struct imgsensor_s *sensor);
+static const char *sim_video_get_driver_name(struct imgsensor_s *sensor);
+static int sim_video_validate_frame_setting(struct imgsensor_s *sensor,
+                                            imgsensor_stream_type_t type,
                                             uint8_t nr_datafmt,
                                             imgsensor_format_t *datafmts,
                                             imgsensor_interval_t *interval);
-static int sim_video_start_capture(imgsensor_stream_type_t type,
+static int sim_video_start_capture(struct imgsensor_s *sensor,
+                                   imgsensor_stream_type_t type,
                                    uint8_t nr_datafmt,
                                    imgsensor_format_t *datafmts,
                                    imgsensor_interval_t *interval);
-static int sim_video_stop_capture(imgsensor_stream_type_t type);
+static int sim_video_stop_capture(struct imgsensor_s *sensor,
+                                  imgsensor_stream_type_t type);
 
 /* Video image data operations */
 
-static int sim_video_data_init(void);
-static int sim_video_data_uninit(void);
-static int sim_video_data_validate_frame_setting(uint8_t nr_datafmt,
+static int sim_video_data_init(struct imgdata_s *data);
+static int sim_video_data_uninit(struct imgdata_s *data);
+static int sim_video_data_validate_frame_setting(struct imgdata_s *data,
+                                                 uint8_t nr_datafmt,
                                                  imgdata_format_t *datafmt,
                                                  imgdata_interval_t *interv);
-static int sim_video_data_start_capture(uint8_t nr_datafmt,
+static int sim_video_data_start_capture(struct imgdata_s *data,
+                                        uint8_t nr_datafmt,
                                         imgdata_format_t *datafmt,
                                         imgdata_interval_t *interval,
                                         imgdata_capture_t callback);
-static int sim_video_data_stop_capture(void);
-static int sim_video_data_validate_buf(uint8_t *addr, uint32_t size);
-static int sim_video_data_set_buf(uint8_t *addr, uint32_t size);
-
-static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat);
+static int sim_video_data_stop_capture(struct imgdata_s *data);
+static int sim_video_data_set_buf(struct imgdata_s *data,
+                                  uint8_t *addr, uint32_t size);
 
 /****************************************************************************
  * Private Data
@@ -109,140 +114,21 @@ static const struct imgdata_ops_s g_sim_video_data_ops =
   .stop_capture             = sim_video_data_stop_capture,
 };
 
-static sim_video_priv_t g_sim_video_priv;
+static sim_video_priv_t g_sim_video_priv =
+{
+  .data =
+  {
+    &g_sim_video_data_ops
+  },
+  .sensor =
+  {
+    &g_sim_video_ops
+  }
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/* Sensor op functions are mostly dummy */
-
-static bool sim_video_is_available(void)
-{
-  return host_video_is_available(CONFIG_HOST_VIDEO_DEV_PATH);
-}
-
-static int sim_video_init(void)
-{
-  return 0;
-}
-
-static int sim_video_uninit(void)
-{
-  return 0;
-}
-
-static const char *sim_video_get_driver_name(void)
-{
-  return "V4L2 NuttX Sim Driver";
-}
-
-static int sim_video_validate_frame_setting(imgsensor_stream_type_t type,
-                                            uint8_t nr_fmt,
-                                            imgsensor_format_t *fmt,
-                                            imgsensor_interval_t *interval)
-{
-  return 0;
-}
-
-static int sim_video_start_capture(imgsensor_stream_type_t type,
-                                   uint8_t nr_fmt,
-                                   imgsensor_format_t *fmt,
-                                   imgsensor_interval_t *interval)
-{
-  return 0;
-}
-
-static int sim_video_stop_capture(imgsensor_stream_type_t type)
-{
-  return 0;
-}
-
-/* Data op functions do all the real work */
-
-static int sim_video_data_init(void)
-{
-  memset(&g_sim_video_priv, 0, sizeof(g_sim_video_priv));
-  g_sim_video_priv.vdev = host_video_init(CONFIG_HOST_VIDEO_DEV_PATH);
-  if (g_sim_video_priv.vdev == NULL)
-    {
-      return -ENODEV;
-    }
-
-  return 0;
-}
-
-static int sim_video_data_uninit(void)
-{
-  return host_video_uninit(g_sim_video_priv.vdev);
-}
-
-static int sim_video_data_validate_buf(uint8_t *addr, uint32_t size)
-{
-  if (!addr || ((uintptr_t)(addr) & 0x1f))
-    {
-      return -EINVAL;
-    }
-
-  return 0;
-}
-
-static int sim_video_data_set_buf(uint8_t *addr, uint32_t size)
-{
-  if (sim_video_data_validate_buf(addr, size) < 0)
-    {
-      return -EINVAL;
-    }
-
-  g_sim_video_priv.next_buf = addr;
-  g_sim_video_priv.buf_size = size;
-  return 0;
-}
-
-static int sim_video_data_validate_frame_setting(uint8_t nr_datafmt,
-                                                 imgdata_format_t *datafmt,
-                                                 imgdata_interval_t *interv)
-{
-  uint32_t v4l2_fmt;
-
-  if (nr_datafmt > 1)
-    {
-      return -ENOTSUP;
-    }
-
-  v4l2_fmt = imgdata_fmt_to_v4l2(datafmt->pixelformat);
-  return host_video_try_fmt(g_sim_video_priv.vdev, datafmt->width,
-                            datafmt->height, v4l2_fmt, interv->denominator,
-                            interv->numerator);
-}
-
-static int sim_video_data_start_capture(uint8_t nr_datafmt,
-                                        imgdata_format_t *datafmt,
-                                        imgdata_interval_t *interval,
-                                        imgdata_capture_t callback)
-{
-  int ret;
-
-  ret = host_video_set_fmt(g_sim_video_priv.vdev,
-                           datafmt[IMGDATA_FMT_MAIN].width,
-                           datafmt[IMGDATA_FMT_MAIN].height,
-                           imgdata_fmt_to_v4l2(
-                             datafmt[IMGDATA_FMT_MAIN].pixelformat),
-                           interval->denominator, interval->numerator);
-  if (ret < 0 && ret != -EBUSY)
-    {
-      return ret;
-    }
-
-  g_sim_video_priv.capture_cb = callback;
-  return host_video_start_capture(g_sim_video_priv.vdev);
-}
-
-static int sim_video_data_stop_capture(void)
-{
-  g_sim_video_priv.next_buf = NULL;
-  return host_video_stop_capture(g_sim_video_priv.vdev);
-}
 
 /* Helper functions */
 
@@ -285,14 +171,160 @@ static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat)
   return fourcc;
 }
 
+/* Sensor op functions are mostly dummy */
+
+static bool sim_video_is_available(struct imgsensor_s *sensor)
+{
+  return host_video_is_available(CONFIG_HOST_VIDEO_DEV_PATH);
+}
+
+static int sim_video_init(struct imgsensor_s *sensor)
+{
+  return 0;
+}
+
+static int sim_video_uninit(struct imgsensor_s *sensor)
+{
+  return 0;
+}
+
+static const char *sim_video_get_driver_name(struct imgsensor_s *sensor)
+{
+  return "V4L2 NuttX Sim Driver";
+}
+
+static int sim_video_validate_frame_setting(struct imgsensor_s *sensor,
+                                            imgsensor_stream_type_t type,
+                                            uint8_t nr_fmt,
+                                            imgsensor_format_t *fmt,
+                                            imgsensor_interval_t *interval)
+{
+  return 0;
+}
+
+static int sim_video_start_capture(struct imgsensor_s *sensor,
+                                   imgsensor_stream_type_t type,
+                                   uint8_t nr_fmt,
+                                   imgsensor_format_t *fmt,
+                                   imgsensor_interval_t *interval)
+{
+  return 0;
+}
+
+static int sim_video_stop_capture(struct imgsensor_s *sensor,
+                                  imgsensor_stream_type_t type)
+{
+  return 0;
+}
+
+/* Data op functions do all the real work */
+
+static int sim_video_data_init(struct imgdata_s *data)
+{
+  sim_video_priv_t *priv = (sim_video_priv_t *)data;
+
+  priv->vdev = host_video_init(CONFIG_HOST_VIDEO_DEV_PATH);
+  if (priv->vdev == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return 0;
+}
+
+static int sim_video_data_uninit(struct imgdata_s *data)
+{
+  sim_video_priv_t *priv = (sim_video_priv_t *)data;
+
+  return host_video_uninit(priv->vdev);
+}
+
+static int sim_video_data_validate_buf(uint8_t *addr, uint32_t size)
+{
+  if (!addr || ((uintptr_t)(addr) & 0x1f))
+    {
+      return -EINVAL;
+    }
+
+  return 0;
+}
+
+static int sim_video_data_set_buf(struct imgdata_s *data,
+                                  uint8_t *addr, uint32_t size)
+{
+  sim_video_priv_t *priv = (sim_video_priv_t *)data;
+
+  if (sim_video_data_validate_buf(addr, size) < 0)
+    {
+      return -EINVAL;
+    }
+
+  priv->next_buf = addr;
+  priv->buf_size = size;
+  return 0;
+}
+
+static int sim_video_data_validate_frame_setting(struct imgdata_s *data,
+                                                 uint8_t nr_datafmt,
+                                                 imgdata_format_t *datafmt,
+                                                 imgdata_interval_t *interv)
+{
+  sim_video_priv_t *priv = (sim_video_priv_t *)data;
+  uint32_t v4l2_fmt;
+
+  if (nr_datafmt > 1)
+    {
+      return -ENOTSUP;
+    }
+
+  v4l2_fmt = imgdata_fmt_to_v4l2(datafmt->pixelformat);
+  return host_video_try_fmt(priv->vdev, datafmt->width,
+                            datafmt->height, v4l2_fmt, interv->denominator,
+                            interv->numerator);
+}
+
+static int sim_video_data_start_capture(struct imgdata_s *data,
+                                        uint8_t nr_datafmt,
+                                        imgdata_format_t *datafmt,
+                                        imgdata_interval_t *interval,
+                                        imgdata_capture_t callback)
+{
+  sim_video_priv_t *priv = (sim_video_priv_t *)data;
+  int ret;
+
+  ret = host_video_set_fmt(priv->vdev,
+                           datafmt[IMGDATA_FMT_MAIN].width,
+                           datafmt[IMGDATA_FMT_MAIN].height,
+                           imgdata_fmt_to_v4l2(
+                             datafmt[IMGDATA_FMT_MAIN].pixelformat),
+                           interval->denominator, interval->numerator);
+  if (ret < 0 && ret != -EBUSY)
+    {
+      return ret;
+    }
+
+  priv->capture_cb = callback;
+  return host_video_start_capture(priv->vdev);
+}
+
+static int sim_video_data_stop_capture(struct imgdata_s *data)
+{
+  sim_video_priv_t *priv = (sim_video_priv_t *)data;
+
+  priv->next_buf = NULL;
+  return host_video_stop_capture(priv->vdev);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 int sim_video_initialize(void)
 {
-  imgsensor_register(&g_sim_video_ops);
-  imgdata_register(&g_sim_video_data_ops);
+  sim_video_priv_t *priv = &g_sim_video_priv;
+
+  imgsensor_register(&priv->sensor);
+  imgdata_register(&priv->data);
   return 0;
 }
 
@@ -303,16 +335,15 @@ int sim_video_uninitialize(void)
 
 void sim_video_loop(void)
 {
+  sim_video_priv_t *priv = &g_sim_video_priv;
   int ret;
 
-  if (g_sim_video_priv.next_buf)
+  if (priv->next_buf)
     {
-      ret = host_video_dqbuf(g_sim_video_priv.vdev,
-                             g_sim_video_priv.next_buf,
-                             g_sim_video_priv.buf_size);
+      ret = host_video_dqbuf(priv->vdev, priv->next_buf, priv->buf_size);
       if (ret > 0)
         {
-          g_sim_video_priv.capture_cb(0, ret);
+          priv->capture_cb(0, ret);
         }
     }
 }
