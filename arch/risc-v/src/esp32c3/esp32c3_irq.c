@@ -189,8 +189,6 @@ static int esp32c3_getcpuint(void)
 
 void up_irqinitialize(void)
 {
-  int periphid;
-
   /* Indicate that no peripheral interrupts are assigned to CPU interrupts */
 
   for (int i = 0; i < NR_IRQS; i++)
@@ -213,16 +211,9 @@ void up_irqinitialize(void)
   g_cpu_intmap[ESP32C3_CPUINT_RWBLE] = CPUINT_ASSIGN(ESP32C3_IRQ_RWBLE);
 #endif
 
-  /* Clear all peripheral interrupts from "bootloader" */
+  /* Initialize CPU interrupts */
 
-  for (periphid = 0; periphid < ESP32C3_NPERIPHERALS; periphid++)
-    {
-      putreg32(0, DR_REG_INTERRUPT_BASE + periphid * 4);
-    }
-
-  /* Set CPU interrupt threshold level */
-
-  putreg32(ESP32C3_DEFAULT_INT_THRESHOLD, INTERRUPT_CPU_INT_THRESH_REG);
+  esp32c3_cpuint_initialize();
 
   /* Attach the common interrupt handler */
 
@@ -257,7 +248,7 @@ void up_enable_irq(int irq)
 
   irqinfo("irq=%d | cpuint=%d \n", irq, cpuint);
 
-  DEBUGASSERT(cpuint >= ESP32C3_CPUINT_MIN && cpuint <= ESP32C3_CPUINT_MAX);
+  DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32C3_CPUINT_MAX);
 
   irqstate = enter_critical_section();
   setbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
@@ -378,6 +369,10 @@ int esp32c3_cpuint_initialize(void)
     {
       putreg32(0, DR_REG_INTERRUPT_BASE + i * 4);
     }
+
+  /* Set CPU interrupt threshold level */
+
+  putreg32(ESP32C3_DEFAULT_INT_THRESHOLD, INTERRUPT_CPU_INT_THRESH_REG);
 
   /* Indicate that no peripheral interrupts are assigned to CPU interrupts */
 
