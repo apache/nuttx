@@ -285,6 +285,13 @@ config ESP32S3_EFUSE
 	---help---
 		Enable ESP32-S3 efuse support.
 
+config ESP32S3_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		ESP32-S3 supports a RNG that passed on Dieharder test suite.
+
 config ESP32S3_SPIRAM
 	bool "SPI RAM Support"
 	default n
