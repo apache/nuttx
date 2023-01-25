@@ -72,7 +72,6 @@ struct cxd56_sdhci_state_s
 #ifdef CONFIG_MMCSD_HAVE_CARDDETECT
   bool inserted;              /* TRUE: card is inserted */
 #endif
-  void (*cb)(bool);           /* Callback function pointer to application */
 };
 
 /****************************************************************************
@@ -148,33 +147,7 @@ static void board_sdcard_enable(void *arg)
 
       cxd56_sdhci_mediachange(g_sdhci.sdhci);
 
-#ifndef CONFIG_CXD56_SDCARD_AUTOMOUNT
-      if (nx_stat("/dev/mmcsd0", &stat_sdio, 1) == 0)
-        {
-          if (S_ISBLK(stat_sdio.st_mode))
-            {
-              ret = nx_mount("/dev/mmcsd0", "/mnt/sd0", "vfat", 0, NULL);
-              if (ret == 0)
-                {
-                  finfo(
-                     "Successfully mount a SDCARD via the MMC/SD driver\n");
-                }
-              else
-                {
-                  _err("ERROR: Failed to mount the SDCARD. %d\n", ret);
-                  cxd56_sdio_resetstatus(g_sdhci.sdhci);
-                  goto release_frequency_lock;
-                }
-            }
-        }
-
-      /* Callback to application to notice card is inserted */
-
-      if (g_sdhci.cb != NULL)
-        {
-          g_sdhci.cb(true);
-        }
-#else
+#ifdef CONFIG_CXD56_SDCARD_AUTOMOUNT
       /* Let the automounter know about the insertion event */
 
       board_automount_event(0, board_sdcard_inserted(0));
@@ -202,25 +175,6 @@ static void board_sdcard_disable(void *arg)
 {
   if (g_sdhci.initialized)
     {
-#ifndef CONFIG_CXD56_SDCARD_AUTOMOUNT
-      int ret;
-
-      /* un-mount */
-
-      ret = nx_umount2("/mnt/sd0", 0);
-      if (ret < 0)
-        {
-          ferr("ERROR: Failed to unmount the SD Card: %d\n", ret);
-        }
-
-      /* Callback to application to notice card is ejected */
-
-      if (g_sdhci.cb != NULL)
-        {
-          g_sdhci.cb(false);
-        }
-#endif /* CONFIG_CXD56_SDCARD_AUTOMOUNT */
-
       /* Report the new state to the SDIO driver */
 
       cxd56_sdhci_mediachange(g_sdhci.sdhci);
@@ -527,24 +481,3 @@ bool board_sdcard_inserted(int slotno)
   return !removed;
 }
 #endif
-
-/****************************************************************************
- * Name: board_sdcard_set_state_cb
- *
- * Description:
- *   Register callback function to notify state change of card slot.
- *   This function is called by board_ioctl()
- *    as BOARDIOC_SDCARD_SETNOTIFYCB command.
- *
- ****************************************************************************/
-
-int board_sdcard_set_state_cb(uintptr_t cb)
-{
-  if (g_sdhci.cb != NULL && cb != 0)
-    {
-      return -EBUSY;
-    }
-
-  g_sdhci.cb = (void (*)(bool))cb;
-  return OK;
-}
