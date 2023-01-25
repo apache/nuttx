@@ -75,7 +75,7 @@ choice
 				   E   	512
 				   G   	1024
 				   I   	2048
-				   K	3072
+				   K   	3072
 
 		This configuration option defaults to using the configuration based
 		on that designator or the default smaller size if there is no last
@@ -91,19 +91,19 @@ choice
 		   the larger FLASH part.
 
 config GD32F4_FLASH_CONFIG_DEFAULT
-			bool "Default"
+	bool "Default"
 
 config GD32F4_FLASH_CONFIG_E
-			bool "E 512KiB"
+	bool "E 512KiB"
 
 config GD32F4_FLASH_CONFIG_G
-			bool "G 1024KiB"
+	bool "G 1024KiB"
 
 config GD32F4_FLASH_CONFIG_I
-			bool "I 2048KiB"
+	bool "I 2048KiB"
 
 config GD32F4_FLASH_CONFIG_K
-			bool "K 3072KiB"
+	bool "K 3072KiB"
 
 endchoice
 
@@ -115,7 +115,6 @@ config GD32F4_GD32F4XX
 	select GD32F4_HAVE_TCM
 	select GD32F4_HAVE_OVERDRIVE
 	select GD32F4_HAVE_EXMC
-
 
 config GD32F4_GD32F405
 	bool

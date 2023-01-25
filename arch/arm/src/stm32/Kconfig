@@ -1242,40 +1242,40 @@ choice
 		   the larger FLASH part.
 
 config STM32_FLASH_CONFIG_DEFAULT
-			bool "Default"
+	bool "Default"
 
 config STM32_FLASH_CONFIG_4
-			bool "4 16KiB"
+	bool "4 16KiB"
 
 config STM32_FLASH_CONFIG_6
-			bool "6 32KiB"
+	bool "6 32KiB"
 
 config STM32_FLASH_CONFIG_8
-			bool "8 64KiB"
+	bool "8 64KiB"
 
 config STM32_FLASH_CONFIG_B
-			bool "B 128KiB"
+	bool "B 128KiB"
 
 config STM32_FLASH_CONFIG_Z
-			bool "Z 192KiB"
+	bool "Z 192KiB"
 
 config STM32_FLASH_CONFIG_C
-			bool "C 256KiB"
+	bool "C 256KiB"
 
 config STM32_FLASH_CONFIG_D
-			bool "D 384KiB"
+	bool "D 384KiB"
 
 config STM32_FLASH_CONFIG_E
-			bool "E 512KiB"
+	bool "E 512KiB"
 
 config STM32_FLASH_CONFIG_F
-			bool "F 768KiB"
+	bool "F 768KiB"
 
 config STM32_FLASH_CONFIG_G
-			bool "G 1024KiB"
+	bool "G 1024KiB"
 
 config STM32_FLASH_CONFIG_I
-			bool "I 2048KiB"
+	bool "I 2048KiB"
 
 endchoice
 
