@@ -466,8 +466,8 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 
   uname(&name);
   _alert("Current Version: %s %s %s %s %s\n",
-          name.sysname, name.nodename,
-          name.release, name.version, name.machine);
+         name.sysname, name.nodename,
+         name.release, name.version, name.machine);
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
