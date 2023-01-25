@@ -155,8 +155,8 @@ int shm_unlink(FAR const char *name)
   if (ret < 0)
     {
       set_errno(-ret);
-      return -1;
+      return ERROR;
     }
 
-  return 0;
+  return ret;
 }
