@@ -177,6 +177,33 @@ static void imxrt_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ156_159_PRIORITY));
 #endif
 #if IMXRT_IRQ_NEXTINT > 160
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ160_163_PRIORITY),
+          getreg32(NVIC_IRQ164_167_PRIORITY),
+          getreg32(NVIC_IRQ168_171_PRIORITY),
+          getreg32(NVIC_IRQ172_175_PRIORITY));
+#endif
+#if IMXRT_IRQ_NEXTINT > 176
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ176_179_PRIORITY),
+          getreg32(NVIC_IRQ180_183_PRIORITY),
+          getreg32(NVIC_IRQ184_187_PRIORITY),
+          getreg32(NVIC_IRQ188_191_PRIORITY));
+#endif
+#if IMXRT_IRQ_NEXTINT > 192
+  irqinfo("              %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ192_195_PRIORITY),
+          getreg32(NVIC_IRQ196_199_PRIORITY),
+          getreg32(NVIC_IRQ200_203_PRIORITY),
+          getreg32(NVIC_IRQ204_207_PRIORITY));
+#endif
+#if IMXRT_IRQ_NEXTINT > 208
+  irqinfo("              %08x %08x %08x\n",
+          getreg32(NVIC_IRQ208_211_PRIORITY),
+          getreg32(NVIC_IRQ212_215_PRIORITY),
+          getreg32(NVIC_IRQ216_219_PRIORITY));
+#endif
+#if IMXRT_IRQ_NEXTINT > 218
 #  warning Missing logic
 #endif
 
@@ -313,6 +340,22 @@ static int imxrt_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
       else
 #endif
 #if IMXRT_IRQ_NEXTINT > 160
+      if (extint < 192)
+        {
+           *regaddr = (NVIC_IRQ160_191_ENABLE + offset);
+           *bit     = 1 << (extint - 160);
+        }
+      else
+#endif
+#if IMXRT_IRQ_NEXTINT > 192
+      if (extint < 219)
+        {
+           *regaddr = (NVIC_IRQ192_223_ENABLE + offset);
+           *bit     = 1 << (extint - 192);
+        }
+      else
+#endif
+#if IMXRT_IRQ_NEXTINT > 218
 #  error Missing logic
 #endif
         {

@@ -130,6 +130,22 @@ int imxrt_lpspi4cmddata(struct spi_dev_s *dev,
                         uint32_t devid, bool cmd);
 #endif
 
+#ifdef CONFIG_IMXRT_LPSPI5
+void imxrt_lpspi5select(struct spi_dev_s *dev,
+                        uint32_t devid, bool selected);
+uint8_t imxrt_lpspi5status(struct spi_dev_s *dev, uint32_t devid);
+int imxrt_lpspi5cmddata(struct spi_dev_s *dev,
+                        uint32_t devid, bool cmd);
+#endif
+
+#ifdef CONFIG_IMXRT_LPSPI6
+void imxrt_lpspi6select(struct spi_dev_s *dev,
+                        uint32_t devid, bool selected);
+uint8_t imxrt_lpspi6status(struct spi_dev_s *dev, uint32_t devid);
+int imxrt_lpspi6cmddata(struct spi_dev_s *dev,
+                        uint32_t devid, bool cmd);
+#endif
+
 /****************************************************************************
  * Name: imxrt_lpspi1/2/...register
  *
@@ -171,6 +187,18 @@ int imxrt_lpspi3register(struct spi_dev_s *dev,
 
 #ifdef CONFIG_IMXRT_LPSPI4
 int imxrt_lpspi4register(struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
+                         void *arg);
+#endif
+
+#ifdef CONFIG_IMXRT_LPSPI5
+int imxrt_lpspi5register(struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
+                         void *arg);
+#endif
+
+#ifdef CONFIG_IMXRT_LPSPI6
+int imxrt_lpspi6register(struct spi_dev_s *dev,
                          spi_mediachange_t callback,
                          void *arg);
 #endif

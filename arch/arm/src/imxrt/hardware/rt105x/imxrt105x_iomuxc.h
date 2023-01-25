@@ -1813,7 +1813,7 @@
 
 #define GPR_GPR16_INIT_ITCM_EN                                  (1 << 0)
 #define GPR_GPR16_INIT_DTCM_EN                                  (1 << 1)
-#define GPR_GPR16_FLEXRAM_BANK_CFG_SELF                         (1 << 2)
+#define GPR_GPR16_FLEXRAM_BANK_CFG_SEL                          (1 << 2)
 #define GPR_GPR16_CM7_INIT_VTOR_SHIFT                           (7)
 #define GPR_GPR16_CM7_INIT_VTOR_MASK                            (0xffffff1 << GPR_GPR16_CM7_INIT_VTOR_SHIFT)
 #define GPR_GPR16_CM7_INIT_VTOR(n)                              (((uint32_t)(n) & 0x1ffffff)) << GPR_GPR16_CM7_INIT_VTOR_SHIFT)

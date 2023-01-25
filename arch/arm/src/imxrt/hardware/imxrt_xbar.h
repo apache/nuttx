@@ -35,6 +35,8 @@
 #  include "hardware/rt105x/imxrt105x_xbar.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
 #  include "hardware/rt106x/imxrt106x_xbar.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#  include "hardware/rt117x/imxrt117x_xbar.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
@@ -45,13 +47,7 @@
 
 #define IMXRT_SEL_PER_REG    2
 
-#define IMXRT_SEL0_SHIFTS    0    /* Bits 0-6: Input (XBARA_INn) to be muxed to
-                                   *           XBARA_OUTm */
-#define IMXRT_SEL0_MASK      (0x7f << IMXRT_SEL0_SHIFTS)
-                                  /* Bit 7: Reserved */
 #define IMXRT_SEL1_SHIFTS    8    /* Bits 8-14: Input (XBARA_INn) to be muxed to
                                    *   XBARA_OUTm */
-#define IMXRT_SEL1_MASK      (0x7f << IMXRT_SEL1_SHIFTS)
-                                  /* Bit 15 Reserved */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_XBAR_H */

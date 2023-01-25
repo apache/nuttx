@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imxrt/imxrt_clockconfig.c
+ * arch/arm/src/imxrt/imxrt_clockconfig_ver1.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,7 +28,7 @@
 #include <arch/board/board.h>
 #include "hardware/imxrt_ccm.h"
 #include "hardware/imxrt_dcdc.h"
-#include "imxrt_clockconfig.h"
+#include "imxrt_clockconfig_ver1.h"
 #include "imxrt_lcd.h"
 #include "hardware/imxrt_memorymap.h"
 #include "hardware/imxrt_iomuxc.h"
@@ -219,7 +219,9 @@ static void imxrt_pllsetup(void)
   uint32_t pll3reg;
   uint32_t reg;
 
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x))
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
+     defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+
   /* Init Arm PLL1 */
 
   reg = CCM_ANALOG_PLL_ARM_DIV_SELECT(IMXRT_ARM_PLL_DIV_SELECT) |
@@ -557,7 +559,9 @@ void imxrt_clockconfig(void)
             (CCM_PRED_FROM_DIVISOR(CONFIG_FLEXIO1_PRED_DIVIDER));
   putreg32(reg, IMXRT_CCM_CS1CDR);
 
-#elif (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+#elif (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
+       defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+
   /* Set FlEXIO1 source & divider */
 
   reg = getreg32(IMXRT_CCM_CDCDR);

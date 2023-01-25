@@ -33,6 +33,8 @@
 #  include "hardware/rt105x/imxrt105x_gpio.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
 #  include "hardware/rt106x/imxrt106x_gpio.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#  include "hardware/rt117x/imxrt117x_gpio.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
@@ -52,6 +54,12 @@
 #define GPIO8                     7      /* Port 8 index */
 #define GPIO9                     8      /* Port 9 index */
 #endif
+#if IMXRT_GPIO_NPORTS > 9
+#define GPIO10                    9      /* Port 10 index */
+#define GPIO11                   10      /* Port 11 index */
+#define GPIO12                   11      /* Port 12 index */
+#define GPIO13                   12      /* Port 13 index */
+#endif
 #define IMXRT_GPIO_NPINS         32      /* Up to 32 pins per port */
 
 /* Register bit definitions *************************************************/
@@ -63,7 +71,7 @@
 /* GPIO interrupt configuration register 1/2 */
 
 #define GPIO_ICR_INDEX(n)        (((n) >> 4) & 1)
-#define GPIO_ICR_OFFSET(n)       (GPIO_ICR1_OFFSET + (GPIO_ICR_INDEX(n) << 2))
+#define GPIO_ICR_OFFSET(n)       (IMXRT_GPIO_ICR1_OFFSET + (GPIO_ICR_INDEX(n) << 2))
 
 #define GPIO_ICR_LOWLEVEL        0          /* Interrupt is low-level sensitive */
 #define GPIO_ICR_HIGHLEVEL       1          /* Interrupt is high-level sensitive */

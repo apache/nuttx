@@ -24,15 +24,27 @@ include armv7-m/Make.defs
 
 # Required i.MX RT files
 
-CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_clockconfig.c
+CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_periphclks.c
 ifeq ($(CONFIG_IMXRT_PROGMEM),y)
 CHIP_CSRCS += imxrt_flash.c
 endif
-CHIP_CSRCS += imxrt_periphclks.c imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
-CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_iomuxc.c imxrt_serial.c
+CHIP_CSRCS += imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
+CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_serial.c
 CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
 
 # Configuration-dependent i.MX RT files
+
+ifeq ($(CONFIG_IMXRT_CLOCKCONFIG_VER2),y)
+CHIP_CSRCS += imxrt_clockconfig_ver2.c imxrt_pmu.c
+else
+CHIP_CSRCS += imxrt_clockconfig_ver1.c
+endif
+
+ifeq ($(CONFIG_IMXRT_IOMUX_VER2),y)
+CHIP_CSRCS += imxrt_iomuxc_ver2.c
+else
+CHIP_CSRCS += imxrt_iomuxc_ver1.c
+endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += imxrt_idle.c
@@ -120,5 +132,9 @@ CHIP_CSRCS += imxrt_usbdev.c
 endif
 
 ifeq ($(CONFIG_IMXRT_ADC),y)
-CHIP_CSRCS += imxrt_adc.c
+ifeq ($(CONFIG_IMXRT_ADC_VER2),y)
+CHIP_CSRCS += imxrt_adc_ver2.c
+else
+CHIP_CSRCS += imxrt_adc_ver1.c
+endif
 endif
