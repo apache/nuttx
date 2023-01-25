@@ -2202,6 +2202,15 @@ config ARCH_BOARD_STM32F746_WS
 	---help---
 		Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 
+config ARCH_BOARD_MEADOW_F7MICRO
+	bool "Meadow F7 Micro board"
+	depends on ARCH_CHIP_STM32F777ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Meadow board powered by STM32F777ZI
+
 config ARCH_BOARD_B_G474E_DPOW1
 	bool "ST Micro B-G474E-DPOW1 Discovery Kit"
 	depends on ARCH_CHIP_STM32G474R
@@ -2920,6 +2929,7 @@ config ARCH_BOARD
 	default "steval-eth001v1"           if ARCH_BOARD_STEVAL_ETH001V1
 	default "stm32h747i-disco"          if ARCH_BOARD_STM32H747I_DISCO
 	default "stm32f746-ws"              if ARCH_BOARD_STM32F746_WS
+        default "stm32f777zit6-meadow"      if ARCH_BOARD_MEADOW_F7MICRO
 	default "b-g474e-dpow1"             if ARCH_BOARD_B_G474E_DPOW1
 	default "b-g431b-esc1"              if ARCH_BOARD_B_G431B_ESC1
 	default "nucleo-g431kb"             if ARCH_BOARD_NUCLEO_G431KB
@@ -3351,6 +3361,9 @@ source "boards/arm/stm32f7/nucleo-144/Kconfig"
 endif
 if ARCH_BOARD_STM32F746_WS
 source "boards/arm/stm32f7/stm32f746-ws/Kconfig"
+endif
+if ARCH_BOARD_MEADOW_F7MICRO
+source "boards/arm/stm32f7/stm32f777zit6-meadow/Kconfig"
 endif
 if ARCH_BOARD_STM32F746G_DISCO
 source "boards/arm/stm32f7/stm32f746g-disco/Kconfig"
