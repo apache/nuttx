@@ -20,6 +20,8 @@
 
 /* XBAR Defines for IMXRT1050 */
 
+#define IMXRT_XBAR_SEL_MASKS {0x7f, 0x3f, 0x3f}  /* The select masks A, B2, B3 */
+
 /* XBARA1 Mux inputs (I values) *********************************************/
 
 #define IMXRT_XBARA1_IN_LOGIC_LOW                        IMXRT_XBARA1(XBAR_INPUT, 0)    /* LOGIC_LOW output assigned to XBARA1_IN0 input. */

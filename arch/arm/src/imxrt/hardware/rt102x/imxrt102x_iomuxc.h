@@ -1475,7 +1475,7 @@
 
 #define GPR_GPR16_INIT_ITCM_EN                                  (1 << 0)
 #define GPR_GPR16_INIT_DTCM_EN                                  (1 << 1)
-#define GPR_GPR16_FLEXRAM_BANK_CFG_SELF                         (1 << 2)
+#define GPR_GPR16_FLEXRAM_BANK_CFG_SEL                          (1 << 2)
 
 /* General Purpose Register 17 (GPR17) */
 

@@ -96,7 +96,7 @@
  * PRECLK_CLOCK_ROOT = IPG_CLOCK_ROOT / IMXRT_PERCLK_PODF_DIVIDER
  * where IPG_CLOCK_ROOT = 150 MHz and IMXRT_PERCLK_PODF_DIVIDER = 9
  *
- * Those clocks are set in imxrt_clockconfig.c, but makros are defined in
+ * Those clocks are set in imxrt_clockconfig, but makros are defined in
  * board level section (file board.h) so clock settings may actually vary
  * when using different boards.
  *

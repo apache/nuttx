@@ -77,6 +77,11 @@
 
 #  define IMXRT_OCRAM_SIZE            (1024 * 1024) /* 1024Kb OCRAM */
 #  define IMXRT_GPIO_NPORTS            9            /* Nine total ports */
+
+#elif defined(CONFIG_ARCH_CHIP_MIMXRT1176DVMAA)
+/* MIMXRT1170DVMA TODO
+ */
+#  define IMXRT_GPIO_NPORTS            13           /* Thirteen total ports */
 #else
 #  error "Unknown i.MX RT chip type"
 #endif

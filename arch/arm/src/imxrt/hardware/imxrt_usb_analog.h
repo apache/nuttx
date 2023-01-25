@@ -171,7 +171,12 @@
 #define USB_ANALOG_USB_VBUS_DETECT_STAT_BVALID             (1 << 1)   /* Bit: 1  Indicates VBus is valid for a B-peripheral. */
 #define USB_ANALOG_USB_VBUS_DETECT_STAT_AVALID             (1 << 2)   /* Bit: 2  Indicates VBus is valid for a A-peripheral. */
 #define USB_ANALOG_USB_VBUS_DETECT_STAT_VBUS_VALID         (1 << 3)   /* Bit: 3  VBus valid for USB OTG. */
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#define USB_ANALOG_USB_VBUS_DETECT_STAT_VBUS_3V_VALID      (1 << 4)   /* Bit: 4  VBUS_VALID_3V detector status */
+                                                                      /* Bits: 5-31  Reserved */
+#else
                                                                       /* Bits: 4-31  Reserved */
+#endif
 
 /* USB Charger Detect Status Register */
 
