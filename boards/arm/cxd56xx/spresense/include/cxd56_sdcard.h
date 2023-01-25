@@ -145,18 +145,6 @@ bool board_sdcard_inserted(int slotno);
 #  define board_sdcard_inserted(slotno) true
 #endif
 
-/****************************************************************************
- * Name: board_sdcard_set_state_cb
- *
- * Description:
- *   Register callback function to notify state change of card slot.
- *   This function is called by board_ioctl()
- *    as BOARDIOC_SDCARD_SETNOTIFYCB command.
- *
- ****************************************************************************/
-
-int board_sdcard_set_state_cb(uintptr_t cb);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
