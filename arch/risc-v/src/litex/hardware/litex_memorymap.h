@@ -22,6 +22,14 @@
 #define __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_MEMORYMAP_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#ifdef CONFIG_LITEX_USE_CUSTOM_MEMORY_MAP
+#include CONFIG_LITEX_CUSTOM_MEMORY_MAP_PATH
+#else
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -45,4 +53,5 @@
 #define LITEX_ETHMAC_RXBASE     0x80000000
 #define LITEX_ETHMAC_TXBASE     0x80001000
 
+#endif /* CONFIG_LITEX_USE_CUSTOM_MEMORY_MAP */
 #endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_MEMORYMAP_H */
