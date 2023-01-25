@@ -78,6 +78,7 @@ int tm4c_can_setup(void)
       goto configgpio_error;
     }
 
+#    ifdef CONFIG_TIVA_CHAR_DEV_CAN
   /* Call tiva_can_initialize() to get an instance of CAN interface 0
    * and register it.
    */
@@ -88,6 +89,20 @@ int tm4c_can_setup(void)
       canerr("ERROR:  Failed to get/register CAN interface 0\n");
       return ret;
     }
+#    endif /* CONFIG_TIVA_CHAR_DEV_CAN */
+
+#    if defined(CONFIG_TIVA_SOCKET_CAN)
+  /* Call tiva_cansockinitialize() to get an instance of CAN interface 0
+   * and register it.
+   */
+
+  ret = tiva_cansockinitialize(0);
+  if (ret < 0)
+    {
+      canerr("ERROR:  Failed to get/register CAN interface 0\n");
+      return ret;
+    }
+#    endif /* CONFIG_TIVA_SOCKET_CAN */
 #  endif /* CONFIG_TIVA_CAN0 */
 
 #  ifdef CONFIG_TIVA_CAN1
@@ -105,6 +120,7 @@ int tm4c_can_setup(void)
       goto configgpio_error;
     }
 
+#    ifdef CONFIG_TIVA_CHAR_DEV_CAN
   /* Call tiva_can_initialize() to get an instance of CAN interface 1
    * and register it.
    */
@@ -115,6 +131,20 @@ int tm4c_can_setup(void)
       canerr("ERROR:  Failed to get/register CAN interface 1\n");
       return ret;
     }
+
+#    endif /* CONFIG_TIVA_CHAR_DEV_CAN */
+#    if defined(CONFIG_TIVA_SOCKET_CAN)
+  /* Call tiva_cansockinitialize() to get an instance of CAN interface 0
+   * and register it.
+   */
+
+  ret = tiva_cansockinitialize(0);
+  if (ret < 0)
+    {
+      canerr("ERROR:  Failed to get/register CAN interface 0\n");
+      return ret;
+    }
+#    endif /* CONFIG_TIVA_SOCKET_CAN */
 #  endif /* CONFIG_TIVA_CAN1 */
 
   return OK;
