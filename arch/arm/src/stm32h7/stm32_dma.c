@@ -2246,7 +2246,7 @@ void weak_function arm_dma_initialize(void)
 
           default:
             {
-              ASSERT(0);
+              PANIC();
               break;
             }
         }

@@ -2958,7 +2958,7 @@ void IRAM_ATTR esp32c3_rtc_clk_cpu_freq_get_config(
             }
           else
             {
-              ASSERT(0);
+              PANIC();
             }
         }
         break;
@@ -2973,7 +2973,8 @@ void IRAM_ATTR esp32c3_rtc_clk_cpu_freq_get_config(
         break;
 
       default:
-        ASSERT(0);
+        PANIC();
+        break;
     }
 
   *out_config = (struct esp32c3_cpu_freq_config_s)
