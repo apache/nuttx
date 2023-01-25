@@ -45,7 +45,7 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
   object = kmm_zalloc(sizeof(struct shmfs_object_s) + length);
   if (object)
     {
-      object->paddr = (FAR char *)object + sizeof(struct shmfs_object_s);
+      object->paddr = (FAR char *)(object + 1);
       allocated = true;
     }
 
