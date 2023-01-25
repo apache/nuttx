@@ -332,17 +332,15 @@ int rx65n_sbram_int(void)
  ****************************************************************************/
 
 #if defined(CONFIG_RX65N_SAVE_CRASHDUMP)
-void board_crashdump(uintptr_t currentsp, void *tcb,
-                     const char *filename, int lineno)
+void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
+                     const char *filename, int lineno,
+                     const char *msg)
 {
-  struct fullcontext *pdump ;
+  struct fullcontext *pdump;
   pdump = (struct fullcontext *)&g_sdata;
-  struct tcb_s *rtcb;
   int rv;
 
   enter_critical_section();
-
-  rtcb = (struct tcb_s *)tcb;
 
   /* Zero out everything */
 
@@ -377,10 +375,10 @@ void board_crashdump(uintptr_t currentsp, void *tcb,
   /* Save Context */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  strlcpy(pdump->info.name, rtcb->name, sizeof(pdump->info.name));
+  strlcpy(pdump->info.name, tcb->name, sizeof(pdump->info.name));
 #endif
 
-  pdump->info.pid = rtcb->pid;
+  pdump->info.pid = tcb->pid;
 
   /* If  current_regs is not NULL then we are in an interrupt context
    * and the user context is in current_regs else we are running in
@@ -389,7 +387,7 @@ void board_crashdump(uintptr_t currentsp, void *tcb,
 
   if (g_current_regs)
     {
-      pdump->info.stacks.interrupt.sp = currentsp;
+      pdump->info.stacks.interrupt.sp = sp;
       pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | \
                             INTSTACK_PRESENT);
       memcpy((uint8_t *)pdump->info.regs, (void *)g_current_regs,
@@ -401,12 +399,12 @@ void board_crashdump(uintptr_t currentsp, void *tcb,
       /* users context */
 
       pdump->info.flags |= USERSTACK_PRESENT;
-      pdump->info.stacks.user.sp = currentsp;
+      pdump->info.stacks.user.sp = sp;
     }
 
-  pdump->info.stacks.user.top = (uint32_t)rtcb->stack_base_ptr +
-                                          rtcb->adj_stack_size;
-  pdump->info.stacks.user.size = (uint32_t)rtcb->adj_stack_size;
+  pdump->info.stacks.user.top = (uint32_t)tcb->stack_base_ptr +
+                                          tcb->adj_stack_size;
+  pdump->info.stacks.user.size = (uint32_t)tcb->adj_stack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Get the limits on the interrupt stack memory */
