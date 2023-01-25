@@ -38,321 +38,17 @@
 #include "imxrt_gpio.h"
 #include "hardware/imxrt_daisy.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IMXRT_PADMUX_INVALID    255
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const uint8_t g_gpio1_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_GPIO_AD_B0_00_INDEX,           /* GPIO1 Pin 0 */
-  IMXRT_PADMUX_GPIO_AD_B0_01_INDEX,           /* GPIO1 Pin 1 */
-  IMXRT_PADMUX_GPIO_AD_B0_02_INDEX,           /* GPIO1 Pin 2 */
-  IMXRT_PADMUX_GPIO_AD_B0_03_INDEX,           /* GPIO1 Pin 3 */
-  IMXRT_PADMUX_GPIO_AD_B0_04_INDEX,           /* GPIO1 Pin 4 */
-  IMXRT_PADMUX_GPIO_AD_B0_05_INDEX,           /* GPIO1 Pin 5 */
-  IMXRT_PADMUX_GPIO_AD_B0_06_INDEX,           /* GPIO1 Pin 6 */
-  IMXRT_PADMUX_GPIO_AD_B0_07_INDEX,           /* GPIO1 Pin 7 */
-
-  IMXRT_PADMUX_GPIO_AD_B0_08_INDEX,           /* GPIO1 Pin 8 */
-  IMXRT_PADMUX_GPIO_AD_B0_09_INDEX,           /* GPIO1 Pin 9 */
-  IMXRT_PADMUX_GPIO_AD_B0_10_INDEX,           /* GPIO1 Pin 10 */
-  IMXRT_PADMUX_GPIO_AD_B0_11_INDEX,           /* GPIO1 Pin 11 */
-  IMXRT_PADMUX_GPIO_AD_B0_12_INDEX,           /* GPIO1 Pin 12 */
-  IMXRT_PADMUX_GPIO_AD_B0_13_INDEX,           /* GPIO1 Pin 13 */
-  IMXRT_PADMUX_GPIO_AD_B0_14_INDEX,           /* GPIO1 Pin 14 */
-  IMXRT_PADMUX_GPIO_AD_B0_15_INDEX,           /* GPIO1 Pin 15 */
-
-  IMXRT_PADMUX_GPIO_AD_B1_00_INDEX,           /* GPIO1 Pin 16 */
-  IMXRT_PADMUX_GPIO_AD_B1_01_INDEX,           /* GPIO1 Pin 17 */
-  IMXRT_PADMUX_GPIO_AD_B1_02_INDEX,           /* GPIO1 Pin 18 */
-  IMXRT_PADMUX_GPIO_AD_B1_03_INDEX,           /* GPIO1 Pin 19 */
-  IMXRT_PADMUX_GPIO_AD_B1_04_INDEX,           /* GPIO1 Pin 20 */
-  IMXRT_PADMUX_GPIO_AD_B1_05_INDEX,           /* GPIO1 Pin 21 */
-  IMXRT_PADMUX_GPIO_AD_B1_06_INDEX,           /* GPIO1 Pin 22 */
-  IMXRT_PADMUX_GPIO_AD_B1_07_INDEX,           /* GPIO1 Pin 23 */
-
-  IMXRT_PADMUX_GPIO_AD_B1_08_INDEX,           /* GPIO1 Pin 24 */
-  IMXRT_PADMUX_GPIO_AD_B1_09_INDEX,           /* GPIO1 Pin 25 */
-  IMXRT_PADMUX_GPIO_AD_B1_10_INDEX,           /* GPIO1 Pin 26 */
-  IMXRT_PADMUX_GPIO_AD_B1_11_INDEX,           /* GPIO1 Pin 27 */
-  IMXRT_PADMUX_GPIO_AD_B1_12_INDEX,           /* GPIO1 Pin 28 */
-  IMXRT_PADMUX_GPIO_AD_B1_13_INDEX,           /* GPIO1 Pin 29 */
-  IMXRT_PADMUX_GPIO_AD_B1_14_INDEX,           /* GPIO1 Pin 30 */
-  IMXRT_PADMUX_GPIO_AD_B1_15_INDEX            /* GPIO1 Pin 31 */
-};
-
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
-     defined(CONFIG_ARCH_FAMILY_IMXRT106x))
-static const uint8_t g_gpio2_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_GPIO_B0_00_INDEX,              /* GPIO2 Pin 0 */
-  IMXRT_PADMUX_GPIO_B0_01_INDEX,              /* GPIO2 Pin 1 */
-  IMXRT_PADMUX_GPIO_B0_02_INDEX,              /* GPIO2 Pin 2 */
-  IMXRT_PADMUX_GPIO_B0_03_INDEX,              /* GPIO2 Pin 3 */
-  IMXRT_PADMUX_GPIO_B0_04_INDEX,              /* GPIO2 Pin 4 */
-  IMXRT_PADMUX_GPIO_B0_05_INDEX,              /* GPIO2 Pin 5 */
-  IMXRT_PADMUX_GPIO_B0_06_INDEX,              /* GPIO2 Pin 6 */
-  IMXRT_PADMUX_GPIO_B0_07_INDEX,              /* GPIO2 Pin 7 */
-
-  IMXRT_PADMUX_GPIO_B0_08_INDEX,              /* GPIO2 Pin 8 */
-  IMXRT_PADMUX_GPIO_B0_09_INDEX,              /* GPIO2 Pin 9 */
-  IMXRT_PADMUX_GPIO_B0_10_INDEX,              /* GPIO2 Pin 10 */
-  IMXRT_PADMUX_GPIO_B0_11_INDEX,              /* GPIO2 Pin 11 */
-  IMXRT_PADMUX_GPIO_B0_12_INDEX,              /* GPIO2 Pin 12 */
-  IMXRT_PADMUX_GPIO_B0_13_INDEX,              /* GPIO2 Pin 13 */
-  IMXRT_PADMUX_GPIO_B0_14_INDEX,              /* GPIO2 Pin 14 */
-  IMXRT_PADMUX_GPIO_B0_15_INDEX,              /* GPIO2 Pin 15 */
-
-  IMXRT_PADMUX_GPIO_B1_00_INDEX,              /* GPIO2 Pin 16 */
-  IMXRT_PADMUX_GPIO_B1_01_INDEX,              /* GPIO2 Pin 17 */
-  IMXRT_PADMUX_GPIO_B1_02_INDEX,              /* GPIO2 Pin 18 */
-  IMXRT_PADMUX_GPIO_B1_03_INDEX,              /* GPIO2 Pin 19 */
-  IMXRT_PADMUX_GPIO_B1_04_INDEX,              /* GPIO2 Pin 20 */
-  IMXRT_PADMUX_GPIO_B1_05_INDEX,              /* GPIO2 Pin 21 */
-  IMXRT_PADMUX_GPIO_B1_06_INDEX,              /* GPIO2 Pin 22 */
-  IMXRT_PADMUX_GPIO_B1_07_INDEX,              /* GPIO2 Pin 23 */
-
-  IMXRT_PADMUX_GPIO_B1_08_INDEX,              /* GPIO2 Pin 24 */
-  IMXRT_PADMUX_GPIO_B1_09_INDEX,              /* GPIO2 Pin 25 */
-  IMXRT_PADMUX_GPIO_B1_10_INDEX,              /* GPIO2 Pin 26 */
-  IMXRT_PADMUX_GPIO_B1_11_INDEX,              /* GPIO2 Pin 27 */
-  IMXRT_PADMUX_GPIO_B1_12_INDEX,              /* GPIO2 Pin 28 */
-  IMXRT_PADMUX_GPIO_B1_13_INDEX,              /* GPIO2 Pin 29 */
-  IMXRT_PADMUX_GPIO_B1_14_INDEX,              /* GPIO2 Pin 30 */
-  IMXRT_PADMUX_GPIO_B1_15_INDEX               /* GPIO2 Pin 31 */
-};
-
-#elif defined(CONFIG_ARCH_FAMILY_IMXRT102x)
-static const uint8_t g_gpio2_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_GPIO_EMC_00_INDEX,              /* GPIO2 Pin 0 */
-  IMXRT_PADMUX_GPIO_EMC_01_INDEX,              /* GPIO2 Pin 1 */
-  IMXRT_PADMUX_GPIO_EMC_02_INDEX,              /* GPIO2 Pin 2 */
-  IMXRT_PADMUX_GPIO_EMC_03_INDEX,              /* GPIO2 Pin 3 */
-  IMXRT_PADMUX_GPIO_EMC_04_INDEX,              /* GPIO2 Pin 4 */
-  IMXRT_PADMUX_GPIO_EMC_05_INDEX,              /* GPIO2 Pin 5 */
-  IMXRT_PADMUX_GPIO_EMC_06_INDEX,              /* GPIO2 Pin 6 */
-  IMXRT_PADMUX_GPIO_EMC_07_INDEX,              /* GPIO2 Pin 7 */
-
-  IMXRT_PADMUX_GPIO_EMC_08_INDEX,              /* GPIO2 Pin 8 */
-  IMXRT_PADMUX_GPIO_EMC_09_INDEX,              /* GPIO2 Pin 9 */
-  IMXRT_PADMUX_GPIO_EMC_10_INDEX,              /* GPIO2 Pin 10 */
-  IMXRT_PADMUX_GPIO_EMC_11_INDEX,              /* GPIO2 Pin 11 */
-  IMXRT_PADMUX_GPIO_EMC_12_INDEX,              /* GPIO2 Pin 12 */
-  IMXRT_PADMUX_GPIO_EMC_13_INDEX,              /* GPIO2 Pin 13 */
-  IMXRT_PADMUX_GPIO_EMC_14_INDEX,              /* GPIO2 Pin 14 */
-  IMXRT_PADMUX_GPIO_EMC_15_INDEX,              /* GPIO2 Pin 15 */
-
-  IMXRT_PADMUX_GPIO_EMC_16_INDEX,              /* GPIO2 Pin 16 */
-  IMXRT_PADMUX_GPIO_EMC_17_INDEX,              /* GPIO2 Pin 17 */
-  IMXRT_PADMUX_GPIO_EMC_18_INDEX,              /* GPIO2 Pin 18 */
-  IMXRT_PADMUX_GPIO_EMC_19_INDEX,              /* GPIO2 Pin 19 */
-  IMXRT_PADMUX_GPIO_EMC_20_INDEX,              /* GPIO2 Pin 20 */
-  IMXRT_PADMUX_GPIO_EMC_21_INDEX,              /* GPIO2 Pin 21 */
-  IMXRT_PADMUX_GPIO_EMC_22_INDEX,              /* GPIO2 Pin 22 */
-  IMXRT_PADMUX_GPIO_EMC_23_INDEX,              /* GPIO2 Pin 23 */
-
-  IMXRT_PADMUX_GPIO_EMC_24_INDEX,              /* GPIO2 Pin 24 */
-  IMXRT_PADMUX_GPIO_EMC_25_INDEX,              /* GPIO2 Pin 25 */
-  IMXRT_PADMUX_GPIO_EMC_26_INDEX,              /* GPIO2 Pin 26 */
-  IMXRT_PADMUX_GPIO_EMC_27_INDEX,              /* GPIO2 Pin 27 */
-  IMXRT_PADMUX_GPIO_EMC_28_INDEX,              /* GPIO2 Pin 28 */
-  IMXRT_PADMUX_GPIO_EMC_29_INDEX,              /* GPIO2 Pin 29 */
-  IMXRT_PADMUX_GPIO_EMC_30_INDEX,              /* GPIO2 Pin 30 */
-  IMXRT_PADMUX_GPIO_EMC_31_INDEX               /* GPIO2 Pin 31 */
-};
+#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+#  include "imxrt102x_gpio.c"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#  include "imxrt105x_gpio.c"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
+#  include "imxrt106x_gpio.c"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#  include "imxrt117x_gpio.c"
 #else
-#  error "Unrecognised IMXRT family member"
+#  error Unrecognized i.MX RT architecture
 #endif
-
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
-    defined(CONFIG_ARCH_FAMILY_IMXRT106x))
-static const uint8_t g_gpio3_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_GPIO_SD_B1_00_INDEX,           /* GPIO3 Pin 0 */
-  IMXRT_PADMUX_GPIO_SD_B1_01_INDEX,           /* GPIO3 Pin 1 */
-  IMXRT_PADMUX_GPIO_SD_B1_02_INDEX,           /* GPIO3 Pin 2 */
-  IMXRT_PADMUX_GPIO_SD_B1_03_INDEX,           /* GPIO3 Pin 3 */
-  IMXRT_PADMUX_GPIO_SD_B1_04_INDEX,           /* GPIO3 Pin 4 */
-  IMXRT_PADMUX_GPIO_SD_B1_05_INDEX,           /* GPIO3 Pin 5 */
-  IMXRT_PADMUX_GPIO_SD_B1_06_INDEX,           /* GPIO3 Pin 6 */
-  IMXRT_PADMUX_GPIO_SD_B1_07_INDEX,           /* GPIO3 Pin 7 */
-
-  IMXRT_PADMUX_GPIO_SD_B1_08_INDEX,           /* GPIO3 Pin 8 */
-  IMXRT_PADMUX_GPIO_SD_B1_09_INDEX,           /* GPIO3 Pin 9 */
-  IMXRT_PADMUX_GPIO_SD_B1_10_INDEX,           /* GPIO3 Pin 10 */
-  IMXRT_PADMUX_GPIO_SD_B1_11_INDEX,           /* GPIO3 Pin 11 */
-  IMXRT_PADMUX_GPIO_SD_B0_00_INDEX,           /* GPIO3 Pin 12 */
-  IMXRT_PADMUX_GPIO_SD_B0_01_INDEX,           /* GPIO3 Pin 13 */
-  IMXRT_PADMUX_GPIO_SD_B0_02_INDEX,           /* GPIO3 Pin 14 */
-  IMXRT_PADMUX_GPIO_SD_B0_03_INDEX,           /* GPIO3 Pin 15 */
-
-  IMXRT_PADMUX_GPIO_SD_B0_04_INDEX,           /* GPIO3 Pin 16 */
-  IMXRT_PADMUX_GPIO_SD_B0_05_INDEX,           /* GPIO3 Pin 17 */
-  IMXRT_PADMUX_GPIO_EMC_32_INDEX,             /* GPIO3 Pin 18 */
-  IMXRT_PADMUX_GPIO_EMC_33_INDEX,             /* GPIO3 Pin 19 */
-  IMXRT_PADMUX_GPIO_EMC_34_INDEX,             /* GPIO3 Pin 20 */
-  IMXRT_PADMUX_GPIO_EMC_35_INDEX,             /* GPIO3 Pin 21 */
-  IMXRT_PADMUX_GPIO_EMC_36_INDEX,             /* GPIO3 Pin 22 */
-  IMXRT_PADMUX_GPIO_EMC_37_INDEX,             /* GPIO3 Pin 23 */
-
-  IMXRT_PADMUX_GPIO_EMC_38_INDEX,             /* GPIO3 Pin 24 */
-  IMXRT_PADMUX_GPIO_EMC_39_INDEX,             /* GPIO3 Pin 25 */
-  IMXRT_PADMUX_GPIO_EMC_40_INDEX,             /* GPIO3 Pin 26 */
-  IMXRT_PADMUX_GPIO_EMC_41_INDEX,             /* GPIO3 Pin 27 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO3 Pin 28 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO3 Pin 29 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO3 Pin 30 */
-  IMXRT_PADMUX_INVALID                        /* GPIO3 Pin 31 */
-};
-#elif defined(CONFIG_ARCH_FAMILY_IMXRT102x)
-static const uint8_t g_gpio3_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_GPIO_EMC_32_INDEX,             /* GPIO3 Pin 0 */
-  IMXRT_PADMUX_GPIO_EMC_33_INDEX,             /* GPIO3 Pin 1 */
-  IMXRT_PADMUX_GPIO_EMC_34_INDEX,             /* GPIO3 Pin 2 */
-  IMXRT_PADMUX_GPIO_EMC_35_INDEX,             /* GPIO3 Pin 3 */
-  IMXRT_PADMUX_GPIO_EMC_36_INDEX,             /* GPIO3 Pin 4 */
-  IMXRT_PADMUX_GPIO_EMC_37_INDEX,             /* GPIO3 Pin 5 */
-  IMXRT_PADMUX_GPIO_EMC_38_INDEX,             /* GPIO3 Pin 6 */
-  IMXRT_PADMUX_GPIO_EMC_39_INDEX,             /* GPIO3 Pin 7 */
-
-  IMXRT_PADMUX_GPIO_EMC_40_INDEX,             /* GPIO3 Pin 8 */
-  IMXRT_PADMUX_GPIO_EMC_41_INDEX,             /* GPIO3 Pin 9 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO3 Pin 10 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO3 Pin 11 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO3 Pin 12 */
-  IMXRT_PADMUX_GPIO_SD_B0_00_INDEX,           /* GPIO3 Pin 13 */
-  IMXRT_PADMUX_GPIO_SD_B0_01_INDEX,           /* GPIO3 Pin 14 */
-  IMXRT_PADMUX_GPIO_SD_B0_02_INDEX,           /* GPIO3 Pin 15 */
-
-  IMXRT_PADMUX_GPIO_SD_B0_03_INDEX,           /* GPIO3 Pin 16 */
-  IMXRT_PADMUX_GPIO_SD_B0_04_INDEX,           /* GPIO3 Pin 17 */
-  IMXRT_PADMUX_GPIO_SD_B0_05_INDEX,           /* GPIO3 Pin 18 */
-  IMXRT_PADMUX_GPIO_SD_B0_06_INDEX,           /* GPIO3 Pin 19 */
-  IMXRT_PADMUX_GPIO_SD_B1_00_INDEX,           /* GPIO3 Pin 20 */
-  IMXRT_PADMUX_GPIO_SD_B1_01_INDEX,           /* GPIO3 Pin 21 */
-  IMXRT_PADMUX_GPIO_SD_B1_02_INDEX,           /* GPIO3 Pin 22 */
-  IMXRT_PADMUX_GPIO_SD_B1_03_INDEX,           /* GPIO3 Pin 23 */
-
-  IMXRT_PADMUX_GPIO_SD_B1_04_INDEX,           /* GPIO3 Pin 24 */
-  IMXRT_PADMUX_GPIO_SD_B1_05_INDEX,           /* GPIO3 Pin 25 */
-  IMXRT_PADMUX_GPIO_SD_B1_06_INDEX,           /* GPIO3 Pin 26 */
-  IMXRT_PADMUX_GPIO_SD_B1_07_INDEX,           /* GPIO3 Pin 27 */
-  IMXRT_PADMUX_GPIO_SD_B1_08_INDEX,           /* GPIO3 Pin 28 */
-  IMXRT_PADMUX_GPIO_SD_B1_09_INDEX,           /* GPIO3 Pin 29 */
-  IMXRT_PADMUX_GPIO_SD_B1_10_INDEX,           /* GPIO3 Pin 30 */
-  IMXRT_PADMUX_GPIO_SD_B1_11_INDEX,           /* GPIO3 Pin 31 */
-};
-#endif
-
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
-     defined(CONFIG_ARCH_FAMILY_IMXRT106x))
-static const uint8_t g_gpio4_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_GPIO_EMC_00_INDEX,             /* GPIO4 Pin 0 */
-  IMXRT_PADMUX_GPIO_EMC_01_INDEX,             /* GPIO4 Pin 1 */
-  IMXRT_PADMUX_GPIO_EMC_02_INDEX,             /* GPIO4 Pin 2 */
-  IMXRT_PADMUX_GPIO_EMC_03_INDEX,             /* GPIO4 Pin 3 */
-  IMXRT_PADMUX_GPIO_EMC_04_INDEX,             /* GPIO4 Pin 4 */
-  IMXRT_PADMUX_GPIO_EMC_05_INDEX,             /* GPIO4 Pin 5 */
-  IMXRT_PADMUX_GPIO_EMC_06_INDEX,             /* GPIO4 Pin 6 */
-  IMXRT_PADMUX_GPIO_EMC_07_INDEX,             /* GPIO4 Pin 7 */
-
-  IMXRT_PADMUX_GPIO_EMC_08_INDEX,             /* GPIO4 Pin 8 */
-  IMXRT_PADMUX_GPIO_EMC_09_INDEX,             /* GPIO4 Pin 9 */
-  IMXRT_PADMUX_GPIO_EMC_10_INDEX,             /* GPIO4 Pin 10 */
-  IMXRT_PADMUX_GPIO_EMC_11_INDEX,             /* GPIO4 Pin 11 */
-  IMXRT_PADMUX_GPIO_EMC_12_INDEX,             /* GPIO4 Pin 12 */
-  IMXRT_PADMUX_GPIO_EMC_13_INDEX,             /* GPIO4 Pin 13 */
-  IMXRT_PADMUX_GPIO_EMC_14_INDEX,             /* GPIO4 Pin 14 */
-  IMXRT_PADMUX_GPIO_EMC_15_INDEX,             /* GPIO4 Pin 15 */
-
-  IMXRT_PADMUX_GPIO_EMC_16_INDEX,             /* GPIO4 Pin 16 */
-  IMXRT_PADMUX_GPIO_EMC_17_INDEX,             /* GPIO4 Pin 17 */
-  IMXRT_PADMUX_GPIO_EMC_18_INDEX,             /* GPIO4 Pin 18 */
-  IMXRT_PADMUX_GPIO_EMC_19_INDEX,             /* GPIO4 Pin 19 */
-  IMXRT_PADMUX_GPIO_EMC_20_INDEX,             /* GPIO4 Pin 20 */
-  IMXRT_PADMUX_GPIO_EMC_21_INDEX,             /* GPIO4 Pin 21 */
-  IMXRT_PADMUX_GPIO_EMC_22_INDEX,             /* GPIO4 Pin 22 */
-  IMXRT_PADMUX_GPIO_EMC_23_INDEX,             /* GPIO4 Pin 23 */
-
-  IMXRT_PADMUX_GPIO_EMC_24_INDEX,             /* GPIO4 Pin 24 */
-  IMXRT_PADMUX_GPIO_EMC_25_INDEX,             /* GPIO4 Pin 25 */
-  IMXRT_PADMUX_GPIO_EMC_26_INDEX,             /* GPIO4 Pin 26 */
-  IMXRT_PADMUX_GPIO_EMC_27_INDEX,             /* GPIO4 Pin 27 */
-  IMXRT_PADMUX_GPIO_EMC_28_INDEX,             /* GPIO4 Pin 28 */
-  IMXRT_PADMUX_GPIO_EMC_29_INDEX,             /* GPIO4 Pin 29 */
-  IMXRT_PADMUX_GPIO_EMC_30_INDEX,             /* GPIO4 Pin 30 */
-  IMXRT_PADMUX_GPIO_EMC_31_INDEX              /* GPIO4 Pin 31 */
-};
-#endif
-
-static const uint8_t g_gpio5_padmux[IMXRT_GPIO_NPINS] =
-{
-  IMXRT_PADMUX_WAKEUP_INDEX,                  /* GPIO5 Pin 0 */
-  IMXRT_PADMUX_PMIC_ON_REQ_INDEX,             /* GPIO5 Pin 1 */
-  IMXRT_PADMUX_PMIC_STBY_REQ_INDEX,           /* GPIO5 Pin 2 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 3 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 4 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 5 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 6 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 7 */
-
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 8 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 9 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 10 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 11 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 12 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 13 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 14 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 15 */
-
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 16 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 17 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 18 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 19 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 20 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 21 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 22 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 23 */
-
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 24 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 25 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 26 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 27 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 28 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 29 */
-  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 30 */
-  IMXRT_PADMUX_INVALID                        /* GPIO5 Pin 31 */
-};
-
-static const uint8_t * const g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
-{
-  g_gpio1_padmux,                             /* GPIO1 */
-  g_gpio2_padmux,                             /* GPIO2 */
-  g_gpio3_padmux,                             /* GPIO3 */
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
-     defined(CONFIG_ARCH_FAMILY_IMXRT106x))
-  g_gpio4_padmux,                             /* GPIO4 */
-#else
-  NULL,                                       /* GPIO4 doesn't exist on 102x */
-#endif
-  g_gpio5_padmux,                             /* GPIO5 */
-#if IMXRT_GPIO_NPORTS > 5
-  g_gpio1_padmux,                             /* GPIO6 */
-  g_gpio2_padmux,                             /* GPIO7 */
-  g_gpio3_padmux,                             /* GPIO8 */
-  g_gpio4_padmux,                             /* GPIO9 */
-#endif
-  NULL                                        /* End of list */
-};
 
 /****************************************************************************
  * Public Data
@@ -372,8 +68,7 @@ const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
   , IMXRT_GPIO3_BASE
 #endif
 #if IMXRT_GPIO_NPORTS > 3
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || \
-     defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+#if defined(IMXRT_GPIO4_BASE)
   , IMXRT_GPIO4_BASE
 #else
   , 0
@@ -394,6 +89,18 @@ const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
 #if IMXRT_GPIO_NPORTS > 8
   , IMXRT_GPIO9_BASE
 #endif
+#if IMXRT_GPIO_NPORTS > 9
+  , IMXRT_GPIO10_BASE
+#endif
+#if IMXRT_GPIO_NPORTS > 10
+  , IMXRT_GPIO11_BASE
+#endif
+#if IMXRT_GPIO_NPORTS > 11
+  , IMXRT_GPIO12_BASE
+#endif
+#if IMXRT_GPIO_NPORTS > 12
+  , IMXRT_GPIO13_BASE
+#endif
 };
 
 /****************************************************************************
@@ -411,6 +118,13 @@ static uintptr_t imxrt_padmux_address(unsigned int index)
     {
       return (IMXRT_PAD1MUX_OFFSET(index -
                                    IMXRT_PADMUX_GPIO_SPI_B0_00_INDEX));
+    }
+
+#elif defined(IMXRT_PADMUX_OFFSET_LPSR)
+  if (index >= IMXRT_PADMUX_GPIO_LPSR_00_INDEX)
+    {
+      return (IMXRT_PADMUX_ADDRESS_LPSR(index -
+                                        IMXRT_PADMUX_GPIO_LPSR_00_INDEX));
     }
 
 #endif
@@ -436,12 +150,27 @@ static uintptr_t imxrt_padctl_address(unsigned int index)
                                    IMXRT_PADCTL_GPIO_SPI_B0_00_INDEX));
     }
 
+#elif defined(IMXRT_PADCTL_OFFSET_LPSR)
+  if (index >= IMXRT_PADCTL_GPIO_LPSR_00_INDEX)
+    {
+      return (IMXRT_PADCTL_ADDRESS_LPSR(index -
+                                        IMXRT_PADCTL_GPIO_LPSR_00_INDEX));
+    }
+
 #endif
+#if defined(IMXRT_PADCTL_TEST_MODE_INDEX)
+  if (index >= IMXRT_PADCTL_TEST_MODE_INDEX)
+    {
+      return (IMXRT_PADCTL_ADDRESS_SNVS(index -
+                                        IMXRT_PADCTL_TEST_MODE_INDEX));
+    }
+#else
   if (index >= IMXRT_PADCTL_WAKEUP_INDEX)
     {
       return (IMXRT_PADCTL_ADDRESS_SNVS(index -
                                         IMXRT_PADCTL_WAKEUP_INDEX));
     }
+#endif
 
   return (IMXRT_PADCTL_ADDRESS(index));
 }

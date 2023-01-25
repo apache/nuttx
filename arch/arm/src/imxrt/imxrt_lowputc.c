@@ -33,8 +33,10 @@
 #include "hardware/imxrt_ccm.h"
 #include "hardware/imxrt_lpuart.h"
 #include "imxrt_config.h"
+#include "imxrt_clockconfig.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_iomuxc.h"
+
 #include "imxrt_gpio.h"
 #include "imxrt_lowputc.h"
 #include "arm_internal.h"
@@ -96,6 +98,30 @@
 #    define IMXRT_CONSOLE_BITS     CONFIG_LPUART8_BITS
 #    define IMXRT_CONSOLE_PARITY   CONFIG_LPUART8_PARITY
 #    define IMXRT_CONSOLE_2STOP    CONFIG_LPUART8_2STOP
+#  elif defined(CONFIG_LPUART9_SERIAL_CONSOLE)
+#    define IMXRT_CONSOLE_BASE     IMXRT_LPUART9_BASE
+#    define IMXRT_CONSOLE_BAUD     CONFIG_LPUART9_BAUD
+#    define IMXRT_CONSOLE_BITS     CONFIG_LPUART9_BITS
+#    define IMXRT_CONSOLE_PARITY   CONFIG_LPUART9_PARITY
+#    define IMXRT_CONSOLE_2STOP    CONFIG_LPUART9_2STOP
+#  elif defined(CONFIG_LPUART10_SERIAL_CONSOLE)
+#    define IMXRT_CONSOLE_BASE     IMXRT_LPUART10_BASE
+#    define IMXRT_CONSOLE_BAUD     CONFIG_LPUART10_BAUD
+#    define IMXRT_CONSOLE_BITS     CONFIG_LPUART10_BITS
+#    define IMXRT_CONSOLE_PARITY   CONFIG_LPUART10_PARITY
+#    define IMXRT_CONSOLE_2STOP    CONFIG_LPUART10_2STOP
+#  elif defined(CONFIG_LPUART11_SERIAL_CONSOLE)
+#    define IMXRT_CONSOLE_BASE     IMXRT_LPUART11_BASE
+#    define IMXRT_CONSOLE_BAUD     CONFIG_LPUART11_BAUD
+#    define IMXRT_CONSOLE_BITS     CONFIG_LPUART11_BITS
+#    define IMXRT_CONSOLE_PARITY   CONFIG_LPUART11_PARITY
+#    define IMXRT_CONSOLE_2STOP    CONFIG_LPUART11_2STOP
+#  elif defined(CONFIG_LPUART12_SERIAL_CONSOLE)
+#    define IMXRT_CONSOLE_BASE     IMXRT_LPUART12_BASE
+#    define IMXRT_CONSOLE_BAUD     CONFIG_LPUART12_BAUD
+#    define IMXRT_CONSOLE_BITS     CONFIG_LPUART12_BITS
+#    define IMXRT_CONSOLE_PARITY   CONFIG_LPUART12_PARITY
+#    define IMXRT_CONSOLE_2STOP    CONFIG_LPUART12_2STOP
 #  endif
 #endif
 
@@ -184,6 +210,30 @@ void imxrt_lpuart_clock_enable (uint32_t base)
     {
       imxrt_clockall_lpuart8();
     }
+#ifdef CONFIG_IMXRT_LPUART9
+  else if (base == IMXRT_LPUART9_BASE)
+    {
+      imxrt_clockall_lpuart9();
+    }
+#endif
+#ifdef CONFIG_IMXRT_LPUART10
+  else if (base == IMXRT_LPUART10_BASE)
+    {
+      imxrt_clockall_lpuart10();
+    }
+#endif
+#ifdef CONFIG_IMXRT_LPUART11
+  else if (base == IMXRT_LPUART11_BASE)
+    {
+      imxrt_clockall_lpuart11();
+    }
+#endif
+#ifdef CONFIG_IMXRT_LPUART12
+  else if (base == IMXRT_LPUART12_BASE)
+    {
+      imxrt_clockall_lpuart12();
+    }
+#endif
 }
 
 /****************************************************************************
@@ -342,6 +392,74 @@ void imxrt_lowsetup(void)
 #endif
 #endif
 
+#ifdef CONFIG_IMXRT_LPUART9
+
+  /* Configure LPUART9 pins: RXD and TXD.
+   * Also configure RTS and CTS if flow control is enabled.
+   */
+
+  imxrt_config_gpio(GPIO_LPUART9_RX);
+  imxrt_config_gpio(GPIO_LPUART9_TX);
+#ifdef CONFIG_LPUART9_OFLOWCONTROL
+  imxrt_config_gpio(GPIO_LPUART9_CTS);
+#endif
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART9_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART9_IFLOWCONTROL)))
+  imxrt_config_gpio(GPIO_LPUART9_RTS);
+#endif
+#endif
+
+#ifdef CONFIG_IMXRT_LPUART10
+
+  /* Configure LPUART10 pins: RXD and TXD.
+   * Also configure RTS and CTS if flow control is enabled.
+   */
+
+  imxrt_config_gpio(GPIO_LPUART10_RX);
+  imxrt_config_gpio(GPIO_LPUART10_TX);
+#ifdef CONFIG_LPUART10_OFLOWCONTROL
+  imxrt_config_gpio(GPIO_LPUART10_CTS);
+#endif
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART10_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART10_IFLOWCONTROL)))
+  imxrt_config_gpio(GPIO_LPUART10_RTS);
+#endif
+#endif
+
+#ifdef CONFIG_IMXRT_LPUART11
+
+  /* Configure LPUART11 pins: RXD and TXD.
+   * Also configure RTS and CTS if flow control is enabled.
+   */
+
+  imxrt_config_gpio(GPIO_LPUART11_RX);
+  imxrt_config_gpio(GPIO_LPUART11_TX);
+#ifdef CONFIG_LPUART11_OFLOWCONTROL
+  imxrt_config_gpio(GPIO_LPUART11_CTS);
+#endif
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART11_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART11_IFLOWCONTROL)))
+  imxrt_config_gpio(GPIO_LPUART11_RTS);
+#endif
+#endif
+
+#ifdef CONFIG_IMXRT_LPUART12
+
+  /* Configure LPUART12 pins: RXD and TXD.
+   * Also configure RTS and CTS if flow control is enabled.
+   */
+
+  imxrt_config_gpio(GPIO_LPUART12_RX);
+  imxrt_config_gpio(GPIO_LPUART12_TX);
+#ifdef CONFIG_LPUART12_OFLOWCONTROL
+  imxrt_config_gpio(GPIO_LPUART12_CTS);
+#endif
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART12_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART12_IFLOWCONTROL)))
+  imxrt_config_gpio(GPIO_LPUART12_RTS);
+#endif
+#endif
+
 #ifdef HAVE_LPUART_CONSOLE
   /* Configure the serial console for initial, non-interrupt driver mode */
 
@@ -363,9 +481,11 @@ void imxrt_lowsetup(void)
 int imxrt_lpuart_configure(uint32_t base,
                            const struct uart_config_s *config)
 {
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
   uint32_t src_freq = 0;
   uint32_t pll3_div = 0;
   uint32_t uart_div = 0;
+#endif
   uint32_t lpuart_freq = 0;
   uint16_t sbr;
   uint16_t temp_sbr;
@@ -377,6 +497,93 @@ int imxrt_lpuart_configure(uint32_t base,
   uint32_t regval;
   uint32_t regval2;
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+  if (base == IMXRT_LPUART1_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART1, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART2_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART2, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART3_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART3, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART4_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART4, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART5_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART5, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        };
+    }
+  else if (base == IMXRT_LPUART6_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART6, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART7_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART7, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART8_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART8, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART9_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART9, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART10_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART10, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART11_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART11, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART12_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART12, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+
+#else
   if ((getreg32(IMXRT_CCM_CSCDR1) & CCM_CSCDR1_UART_CLK_SEL) != 0)
     {
       src_freq = BOARD_XTAL_FREQUENCY;
@@ -399,6 +606,7 @@ int imxrt_lpuart_configure(uint32_t base,
   uart_div    = (getreg32(IMXRT_CCM_CSCDR1) &
                  CCM_CSCDR1_UART_CLK_PODF_MASK) + 1;
   lpuart_freq = src_freq / uart_div;
+#endif
 
   /* This LPUART instantiation uses a slightly different baud rate
    * calculation.  The idea is to use the best OSR (over-sampling rate)

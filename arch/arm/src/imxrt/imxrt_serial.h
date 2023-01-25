@@ -67,6 +67,14 @@
 #  undef CONFIG_LPUART7_TXDMA
 #  undef CONFIG_LPUART8_RXDMA
 #  undef CONFIG_LPUART8_TXDMA
+#  undef CONFIG_LPUART9_RXDMA
+#  undef CONFIG_LPUART9_TXDMA
+#  undef CONFIG_LPUART10_RXDMA
+#  undef CONFIG_LPUART10_TXDMA
+#  undef CONFIG_LPUART11_RXDMA
+#  undef CONFIG_LPUART11_TXDMA
+#  undef CONFIG_LPUART12_RXDMA
+#  undef CONFIG_LPUART12_TXDMA
 #endif
 
 /* Disable the DMA configuration on all unused LPUARTs */
@@ -111,22 +119,46 @@
 #  undef CONFIG_LPUART8_TXDMA
 #endif
 
+#ifndef CONFIG_IMXRT_LPUART9
+#  undef CONFIG_LPUART9_RXDMA
+#  undef CONFIG_LPUART9_TXDMA
+#endif
+
+#ifndef CONFIG_IMXRT_LPUART10
+#  undef CONFIG_LPUART10_RXDMA
+#  undef CONFIG_LPUART10_TXDMA
+#endif
+
+#ifndef CONFIG_IMXRT_LPUART11
+#  undef CONFIG_LPUART11_RXDMA
+#  undef CONFIG_LPUART11_TXDMA
+#endif
+
+#ifndef CONFIG_IMXRT_LPUART12
+#  undef CONFIG_LPUART12_RXDMA
+#  undef CONFIG_LPUART12_TXDMA
+#endif
+
 /* Is RX DMA available on any (enabled) LPUART? */
 
 #undef SERIAL_HAVE_RXDMA
-#if defined(CONFIG_LPUART1_RXDMA) || defined(CONFIG_LPUART2_RXDMA) || \
-    defined(CONFIG_LPUART3_RXDMA) || defined(CONFIG_LPUART4_RXDMA) || \
-    defined(CONFIG_LPUART5_RXDMA) || defined(CONFIG_LPUART6_RXDMA) || \
-    defined(CONFIG_LPUART7_RXDMA) || defined(CONFIG_LPUART8_RXDMA)
+#if defined(CONFIG_LPUART1_RXDMA)  || defined(CONFIG_LPUART2_RXDMA)  || \
+    defined(CONFIG_LPUART3_RXDMA)  || defined(CONFIG_LPUART4_RXDMA)  || \
+    defined(CONFIG_LPUART5_RXDMA)  || defined(CONFIG_LPUART6_RXDMA)  || \
+    defined(CONFIG_LPUART7_RXDMA)  || defined(CONFIG_LPUART8_RXDMA)  || \
+    defined(CONFIG_LPUART9_RXDMA)  || defined(CONFIG_LPUART10_RXDMA) || \
+    defined(CONFIG_LPUART11_RXDMA) || defined(CONFIG_LPUART12_RXDMA)
 #  define SERIAL_HAVE_RXDMA 1
 #endif
 
 /* Is TX DMA available on any (enabled) LPUART? */
 #undef SERIAL_HAVE_TXDMA
-#if defined(CONFIG_LPUART1_TXDMA) || defined(CONFIG_LPUART2_TXDMA) || \
-    defined(CONFIG_LPUART3_TXDMA) || defined(CONFIG_LPUART4_TXDMA) || \
-    defined(CONFIG_LPUART5_TXDMA) || defined(CONFIG_LPUART6_TXDMA) || \
-    defined(CONFIG_LPUART7_TXDMA) || defined(CONFIG_LPUART8_TXDMA)
+#if defined(CONFIG_LPUART1_TXDMA)  || defined(CONFIG_LPUART2_TXDMA)  || \
+    defined(CONFIG_LPUART3_TXDMA)  || defined(CONFIG_LPUART4_TXDMA)  || \
+    defined(CONFIG_LPUART5_TXDMA)  || defined(CONFIG_LPUART6_TXDMA)  || \
+    defined(CONFIG_LPUART7_TXDMA)  || defined(CONFIG_LPUART8_TXDMA)  || \
+    defined(CONFIG_LPUART9_RXDMA)  || defined(CONFIG_LPUART10_RXDMA) || \
+    defined(CONFIG_LPUART11_RXDMA) || defined(CONFIG_LPUART12_RXDMA)
 #  define SERIAL_HAVE_TXDMA 1
 #endif
 
@@ -149,6 +181,14 @@
 #  undef SERIAL_HAVE_ONLY_RXDMA
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(CONFIG_LPUART8_RXDMA)
 #  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_IMXRT_LPUART9) && !defined(CONFIG_LPUART9_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_IMXRT_LPUART10) && !defined(CONFIG_LPUART10_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_IMXRT_LPUART11) && !defined(CONFIG_LPUART11_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_IMXRT_LPUART12) && !defined(CONFIG_LPUART12_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
 #endif
 
 /* Is TX DMA used on all (enabled) LPUARTs */
@@ -169,6 +209,14 @@
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(CONFIG_LPUART7_TXDMA)
 #  undef SERIAL_HAVE_ONLY_TXDMA
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(CONFIG_LPUART8_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_IMXRT_LPUART9) && !defined(CONFIG_LPUART9_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_IMXRT_LPUART10) && !defined(CONFIG_LPUART10_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_IMXRT_LPUART11) && !defined(CONFIG_LPUART11_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_IMXRT_LPUART12) && !defined(CONFIG_LPUART12_TXDMA)
 #  undef SERIAL_HAVE_ONLY_TXDMA
 #endif
 
@@ -191,14 +239,18 @@
  * lack of testing.
  */
 
-#  if (defined(CONFIG_LPUART1_RXDMA) && defined(CONFIG_LPUART1_RS485)) || \
-      (defined(CONFIG_LPUART2_RXDMA) && defined(CONFIG_LPUART2_RS485)) || \
-      (defined(CONFIG_LPUART3_RXDMA) && defined(CONFIG_LPUART3_RS485)) || \
-      (defined(CONFIG_LPUART4_RXDMA) && defined(CONFIG_LPUART4_RS485)) || \
-      (defined(CONFIG_LPUART5_RXDMA) && defined(CONFIG_LPUART5_RS485)) || \
-      (defined(CONFIG_LPUART6_RXDMA) && defined(CONFIG_LPUART6_RS485)) || \
-      (defined(CONFIG_LPUART7_RXDMA) && defined(CONFIG_LPUART7_RS485)) || \
-      (defined(CONFIG_LPUART8_RXDMA) && defined(CONFIG_LPUART8_RS485))
+#  if (defined(CONFIG_LPUART1_RXDMA)  && defined(CONFIG_LPUART1_RS485))  || \
+      (defined(CONFIG_LPUART2_RXDMA)  && defined(CONFIG_LPUART2_RS485))  || \
+      (defined(CONFIG_LPUART3_RXDMA)  && defined(CONFIG_LPUART3_RS485))  || \
+      (defined(CONFIG_LPUART4_RXDMA)  && defined(CONFIG_LPUART4_RS485))  || \
+      (defined(CONFIG_LPUART5_RXDMA)  && defined(CONFIG_LPUART5_RS485))  || \
+      (defined(CONFIG_LPUART6_RXDMA)  && defined(CONFIG_LPUART6_RS485))  || \
+      (defined(CONFIG_LPUART7_RXDMA)  && defined(CONFIG_LPUART7_RS485))  || \
+      (defined(CONFIG_LPUART8_RXDMA)  && defined(CONFIG_LPUART8_RS485))  || \
+      (defined(CONFIG_LPUART9_RXDMA)  && defined(CONFIG_LPUART9_RS485))  || \
+      (defined(CONFIG_LPUART10_RXDMA) && defined(CONFIG_LPUART10_RS485)) || \
+      (defined(CONFIG_LPUART11_RXDMA) && defined(CONFIG_LPUART11_RS485)) || \
+      (defined(CONFIG_LPUART12_RXDMA) && defined(CONFIG_LPUART12_RS485))
 #    error "RXDMA and RS-485 cannot be enabled at the same time for the same LPUART"
 #  endif
 #endif /* SERIAL_HAVE_RXDMA */
@@ -207,14 +259,18 @@
  * lack of testing.
  */
 
-#if (defined(CONFIG_LPUART1_TXDMA) && defined(CONFIG_LPUART1_RS485)) || \
-    (defined(CONFIG_LPUART2_TXDMA) && defined(CONFIG_LPUART2_RS485)) || \
-    (defined(CONFIG_LPUART3_TXDMA) && defined(CONFIG_LPUART3_RS485)) || \
-    (defined(CONFIG_LPUART4_TXDMA) && defined(CONFIG_LPUART4_RS485)) || \
-    (defined(CONFIG_LPUART5_TXDMA) && defined(CONFIG_LPUART5_RS485)) || \
-    (defined(CONFIG_LPUART6_TXDMA) && defined(CONFIG_LPUART6_RS485)) || \
-    (defined(CONFIG_LPUART7_TXDMA) && defined(CONFIG_LPUART7_RS485)) || \
-    (defined(CONFIG_LPUART8_TXDMA) && defined(CONFIG_LPUART8_RS485))
+#if (defined(CONFIG_LPUART1_TXDMA)  && defined(CONFIG_LPUART1_RS485))  || \
+    (defined(CONFIG_LPUART2_TXDMA)  && defined(CONFIG_LPUART2_RS485))  || \
+    (defined(CONFIG_LPUART3_TXDMA)  && defined(CONFIG_LPUART3_RS485))  || \
+    (defined(CONFIG_LPUART4_TXDMA)  && defined(CONFIG_LPUART4_RS485))  || \
+    (defined(CONFIG_LPUART5_TXDMA)  && defined(CONFIG_LPUART5_RS485))  || \
+    (defined(CONFIG_LPUART6_TXDMA)  && defined(CONFIG_LPUART6_RS485))  || \
+    (defined(CONFIG_LPUART7_TXDMA)  && defined(CONFIG_LPUART7_RS485))  || \
+    (defined(CONFIG_LPUART8_TXDMA)  && defined(CONFIG_LPUART8_RS485))  || \
+    (defined(CONFIG_LPUART9_TXDMA)  && defined(CONFIG_LPUART9_RS485))  || \
+    (defined(CONFIG_LPUART10_TXDMA) && defined(CONFIG_LPUART10_RS485)) || \
+    (defined(CONFIG_LPUART11_TXDMA) && defined(CONFIG_LPUART11_RS485)) || \
+    (defined(CONFIG_LPUART12_TXDMA) && defined(CONFIG_LPUART12_RS485))
 #  error "TXDMA and RS-485 cannot be enabled at the same time for the same LPUART"
 #endif
 

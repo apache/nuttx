@@ -37,6 +37,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define IMXRT_PADMUX_INVALID    255
+
 /* 32-bit Encoding:
  *
  *               3322 2222 2222 1111  1111 1100 0000 0000
@@ -78,8 +80,8 @@
  *   GPIO OUTPUT 01.. ...G GGG. ....  .... .... .... ....
  */
 
-#define GPIO_PORT_SHIFT        (21)      /* Bits 21-23: GPIO port index */
-#define GPIO_PORT_MASK         (7 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_SHIFT        (21)      /* Bits 21-24: GPIO port index */
+#define GPIO_PORT_MASK         (0x0f << GPIO_PORT_SHIFT)
 #  define GPIO_PORT1           (GPIO1 << GPIO_PORT_SHIFT) /* GPIO1 */
 #  define GPIO_PORT2           (GPIO2 << GPIO_PORT_SHIFT) /* GPIO2 */
 #  define GPIO_PORT3           (GPIO3 << GPIO_PORT_SHIFT) /* GPIO3 */
@@ -91,6 +93,13 @@
 #  define GPIO_PORT8           (GPIO8 << GPIO_PORT_SHIFT) /* GPIO8 */
 #  define GPIO_PORT9           (GPIO9 << GPIO_PORT_SHIFT) /* GPIO9 */
 #endif
+#if IMXRT_GPIO_NPORTS > 9
+#  define GPIO_PORT10          (GPIO10 << GPIO_PORT_SHIFT) /* GPIO10 */
+#  define GPIO_PORT11          (GPIO11 << GPIO_PORT_SHIFT) /* GPIO11 */
+#  define GPIO_PORT12          (GPIO12 << GPIO_PORT_SHIFT) /* GPIO12 */
+#  define GPIO_PORT13          (GPIO13 << GPIO_PORT_SHIFT) /* GPIO13 */
+#endif
+
 /* GPIO Pin Number:
  *
  *               3322 2222 2222 1111  1111 1100 0000 0000
@@ -100,7 +109,7 @@
  */
 
 #define GPIO_PIN_SHIFT         (16)      /* Bits 16-20: GPIO pin number */
-#define GPIO_PIN_MASK          (31 << GPIO_PIN_SHIFT)
+#define GPIO_PIN_MASK          (0x1f << GPIO_PIN_SHIFT)
 #  define GPIO_PIN0            (0 << GPIO_PIN_SHIFT)  /* Pin  0 */
 #  define GPIO_PIN1            (1 << GPIO_PIN_SHIFT)  /* Pin  1 */
 #  define GPIO_PIN2            (2 << GPIO_PIN_SHIFT)  /* Pin  2 */
@@ -142,17 +151,19 @@
  */
 
 #define GPIO_ALT_SHIFT         (26)      /* Bits 26-29: Peripheral alternate function */
-#define GPIO_ALT_MASK          (0xf << GPIO_ALT_SHIFT)
+#define GPIO_ALT_MASK          (0x0f << GPIO_ALT_SHIFT)
 #  define GPIO_ALT0            (0 << GPIO_ALT_SHIFT)  /* Alternate function 0 */
 #  define GPIO_ALT1            (1 << GPIO_ALT_SHIFT)  /* Alternate function 1 */
 #  define GPIO_ALT2            (2 << GPIO_ALT_SHIFT)  /* Alternate function 2 */
 #  define GPIO_ALT3            (3 << GPIO_ALT_SHIFT)  /* Alternate function 3 */
 #  define GPIO_ALT4            (4 << GPIO_ALT_SHIFT)  /* Alternate function 4 */
-#  define GPIO_ALT5            (5 << GPIO_ALT_SHIFT)  /* Alternate function 5 is GPIO */
+#  define GPIO_ALT5            (5 << GPIO_ALT_SHIFT)  /* Alternate function 5 */
 #  define GPIO_ALT6            (6 << GPIO_ALT_SHIFT)  /* Alternate function 6 */
 #  define GPIO_ALT7            (7 << GPIO_ALT_SHIFT)  /* Alternate function 7 */
 #  define GPIO_ALT8            (8 << GPIO_ALT_SHIFT)  /* Alternate function 8 */
 #  define GPIO_ALT9            (9 << GPIO_ALT_SHIFT)  /* Alternate function 9 */
+#  define GPIO_ALT10           (10 << GPIO_ALT_SHIFT) /* Alternate function 10 */
+#  define GPIO_ALT11           (11 << GPIO_ALT_SHIFT) /* Alternate function 11 */
 
 /* Peripheral Software Input On Field:
  *
