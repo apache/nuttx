@@ -61,7 +61,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
+#ifdef CONFIG_TIVA_CHAR_DEV_CAN
 /****************************************************************************
  * Name: tiva_can_initialize
  *
@@ -78,6 +78,23 @@ extern "C"
  ****************************************************************************/
 
 int tiva_can_initialize(char *devpath, int modnum);
+#elif CONFIG_TIVA_SOCKET_CAN
+/****************************************************************************
+ * Name: tiva_cansockinitialize
+ *
+ * Description:
+ *   Initialize the selected CAN module using socket net API
+ *
+ * Input Parameters:
+ *   Module number, for chips with multiple modules (typically 0 or 1)
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int tiva_cansockinitialize(int modnum);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

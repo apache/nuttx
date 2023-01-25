@@ -91,8 +91,12 @@ ifeq ($(CONFIG_TIVA_ADC),y)
   CHIP_CSRCS += tiva_adclib.c
 endif
 
-ifeq ($(CONFIG_TIVA_CAN),y)
+ifeq ($(CONFIG_TIVA_CHAR_DEV_CAN),y)
   CHIP_CSRCS += tiva_can.c
+endif
+
+ifeq ($(CONFIG_TIVA_SOCKET_CAN),y)
+  CHIP_CSRCS += tiva_sock_can.c
 endif
 
 ifeq ($(CONFIG_TIVA_ETHERNET),y)

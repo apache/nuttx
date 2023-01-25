@@ -436,7 +436,6 @@ config TIVA_CAN
 	bool
 	default n
 	select CAN
-	select ARCH_HAVE_CAN_ERRORS
 	select CAN_TXREADY
 	select CAN_USE_RTR
 
@@ -612,32 +611,11 @@ config TIVA_CAN0
 	default n
 	depends on TIVA_HAVE_CAN0
 	select TIVA_CAN
-
-config TIVA_CAN0_PRIO
-	int "CAN0 kthread priority"
-	default 300
-	depends on TIVA_CAN0
-	---help---
-		The Tiva CAN driver retrieves messages using a kthread rather
-		than in the ISR or using a work queue. The ISR signals the
-		kthread, but the kthread can be preempted if needed. This
-		option sets the thread priority for CAN module 0.
-
 config TIVA_CAN1
 	bool "CAN1"
 	default n
 	depends on TIVA_HAVE_CAN1
 	select TIVA_CAN
-
-config TIVA_CAN1_PRIO
-	int "CAN1 kthread priority"
-	default 300
-	depends on TIVA_CAN1
-	---help---
-		The Tiva CAN driver retrieves messages using a kthread rather
-		than in the ISR or using a work queue. The ISR signals the
-		kthread, but the kthread can be preempted if needed. This
-		option sets the thread priority for CAN module 1.
 
 config TIVA_QEI0
 	bool "QEI0"
@@ -1520,10 +1498,55 @@ endif # TIVA_ADC
 
 menu "CAN Driver Configuration"
 	depends on TIVA_CAN
+choice
+	prompt "CAN bus driver selection"
+	default TIVA_SOCKET_CAN
+	
+config TIVA_SOCKET_CAN
+	bool "Use SocketCAN driver"
+	depends on (TIVA_CAN0 || TIVA_CAN1) && NET_CAN
+	select NET_CAN_HAVE_ERRORS
+	
+config TIVA_CHAR_DEV_CAN
+	bool "Character device driver"
+	depends on (TIVA_CAN0 || TIVA_CAN1) && !NET_CAN
+	select ARCH_HAVE_CAN_ERRORS
+	
+endchoice # CAN driver selection
+
+config TIVA_CAN0_PRIO
+	int "CAN0 kthread priority"
+	default 300
+	depends on TIVA_CAN0 && TIVA_CHAR_DEV_CAN
+	---help---
+		The Tiva CAN driver retrieves messages using a kthread rather
+		than in the ISR or using a work queue. The ISR signals the
+		kthread, but the kthread can be preempted if needed. This
+		option sets the thread priority for CAN module 0.
+		
+config TIVA_CAN0_BAUD
+	int "CAN0 baud rate kb/s"
+	default 125
+	depends on TIVA_CAN0 && TIVA_SOCKET_CAN
+	
+config TIVA_CAN1_BAUD
+	int "CAN1 baud rate kb/s"
+	default 125
+	depends on TIVA_CAN1 && TIVA_SOCKET_CAN
+
+config TIVA_CAN1_PRIO
+	int "CAN1 kthread priority"
+	default 300
+	depends on TIVA_CAN1 && TIVA_CHAR_DEV_CAN
+	---help---
+		The Tiva CAN driver retrieves messages using a kthread rather
+		than in the ISR or using a work queue. The ISR signals the
+		kthread, but the kthread can be preempted if needed. This
+		option sets the thread priority for CAN module 1.
 
 config TIVA_CAN_REGDEBUG
 	bool "CAN register level debug"
-	depends on  DEBUG_CAN_INFO
+	depends on  DEBUG_CAN_INFO && TIVA_CHAR_DEV_CAN
 	default n
 	---help---
 		Output detailed register-level CAN device debug information.
@@ -1589,7 +1612,7 @@ config TIVA_CAN_ERR_HANDLER_PER
 	int "Rate-limited error handling period (milliseconds)"
 	range 10 1000
 	default 100
-	depends on CAN_ERRORS
+	depends on CAN_ERRORS || NET_CAN_ERRORS
 	---help---
 		When error messages (CAN_ERRORS) are enabled, the Tiva
 		CAN driver will disable interrupts for individual errors
