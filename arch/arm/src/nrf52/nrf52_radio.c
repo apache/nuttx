@@ -1032,7 +1032,7 @@ static int nrf52_radio_isr(int irq, void *context, void *arg)
 
       default:
         {
-          ASSERT(0);
+          PANIC();
           break;
         }
     }

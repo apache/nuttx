@@ -131,7 +131,7 @@ void up_disable_irq(int irq)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 }
@@ -181,7 +181,7 @@ void up_enable_irq(int irq)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 }

@@ -1997,7 +1997,7 @@ static int sam_attach(struct sdio_dev_s *dev)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 
