@@ -525,7 +525,7 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 #endif
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-      board_crashdump(up_getsp(), rtcb, filename, linenum);
+      board_crashdump(up_getsp(), rtcb, filename, linenum, msg);
 #endif
 
       /* Flush any buffered SYSLOG data */
