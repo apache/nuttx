@@ -39,7 +39,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -291,9 +290,9 @@ static const struct spi_ops_s esp32s3_spi2_ops =
 static struct esp32s3_spi_priv_s esp32s3_spi2_priv =
 {
   .spi_dev     =
-  {
-    .ops       = &esp32s3_spi2_ops
-  },
+    {
+      .ops     = &esp32s3_spi2_ops
+    },
   .config      = &esp32s3_spi2_config,
   .refs        = 0,
   .lock        = NXMUTEX_INITIALIZER,
@@ -366,9 +365,9 @@ static const struct spi_ops_s esp32s3_spi3_ops =
 static struct esp32s3_spi_priv_s esp32s3_spi3_priv =
 {
   .spi_dev     =
-  {
-    .ops       = &esp32s3_spi3_ops
-  },
+    {
+      .ops     = &esp32s3_spi3_ops
+    },
   .config      = &esp32s3_spi3_config,
   .refs        = 0,
   .lock        = NXMUTEX_INITIALIZER,
