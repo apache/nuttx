@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -165,7 +166,7 @@ int shm_open(FAR const char *name, int oflag, mode_t mode)
   if (ret < 0)
     {
       set_errno(-ret);
-      return -1;
+      return ERROR;
     }
 
   ret = file_allocate(shm.f_inode, shm.f_oflags, shm.f_pos, shm.f_priv, 0,
@@ -174,7 +175,7 @@ int shm_open(FAR const char *name, int oflag, mode_t mode)
     {
       set_errno(-ret);
       file_close(&shm);
-      return -1;
+      return ERROR;
     }
 
   return ret;
