@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/clicker2-stm32/kernel/stm32_userspace.c
+ * boards/arm/stm32f7/stm32f777zit6-meadow/kernel/stm32_userspace.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,16 +43,24 @@
 #  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#if CONFIG_NUTTX_USERSPACE != 0x08020000
-#  error "CONFIG_NUTTX_USERSPACE must be 0x08020000 to match memory.ld"
+#if CONFIG_NUTTX_USERSPACE != 0x08040000
+#  error "CONFIG_NUTTX_USERSPACE must be 0x08040000 to match memory.ld"
 #endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* These 'addresses' of these values are setup by
- * the linker script.
+/* These 'addresses' of these values are setup by the linker script.
+ * They are not actual uint32_t storage locations! They are only used
+ * meaningfully in the following way:
+ *
+ *  - The linker script defines, for example, the symbol_sdata.
+ *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
+ *    that the value _sdata is the address of a uint32_t variable _data
+ *    (it is not!).
+ *  - We can recover the linker value then by simply taking the address of
+ *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
 extern uint8_t _stext[];           /* Start of .text */
