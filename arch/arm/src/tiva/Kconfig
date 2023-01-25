@@ -435,6 +435,7 @@ config TIVA_HAVE_ADC1
 config TIVA_CAN
 	bool
 	default n
+	select CAN
 	select ARCH_HAVE_CAN_ERRORS
 	select CAN_TXREADY
 	select CAN_USE_RTR
@@ -610,7 +611,6 @@ config TIVA_CAN0
 	bool "CAN0"
 	default n
 	depends on TIVA_HAVE_CAN0
-	select CAN
 	select TIVA_CAN
 
 config TIVA_CAN0_PRIO
@@ -627,7 +627,6 @@ config TIVA_CAN1
 	bool "CAN1"
 	default n
 	depends on TIVA_HAVE_CAN1
-	select CAN
 	select TIVA_CAN
 
 config TIVA_CAN1_PRIO
