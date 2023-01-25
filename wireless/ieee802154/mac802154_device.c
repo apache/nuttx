@@ -274,7 +274,7 @@ static int mac802154dev_close(FAR struct file *filep)
     {
       wlerr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
-      goto errout_with_exclsem;
+      goto errout_with_lock;
     }
 
   /* Remove the structure from the device */
@@ -315,7 +315,7 @@ static int mac802154dev_close(FAR struct file *filep)
 
   ret = OK;
 
-errout_with_exclsem:
+errout_with_lock:
   nxmutex_unlock(&dev->md_lock);
   return ret;
 }
