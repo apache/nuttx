@@ -775,7 +775,7 @@ bool up_textheap_heapmember(FAR void *p);
  * Address Environment Interfaces
  *
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
- * environments.  These interfaces all operate on type group_addrenv_t which
+ * environments.  These interfaces all operate on type arch_addrenv_t which
  * is an abstract representation of a task group's address environment and
  * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
@@ -872,7 +872,7 @@ bool up_textheap_heapmember(FAR void *p);
 
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
-                      FAR group_addrenv_t *addrenv);
+                      FAR arch_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -892,7 +892,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_destroy(FAR group_addrenv_t *addrenv);
+int up_addrenv_destroy(FAR arch_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -914,7 +914,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
+int up_addrenv_vtext(FAR arch_addrenv_t *addrenv, FAR void **vtext);
 #endif
 
 /****************************************************************************
@@ -944,7 +944,7 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
+int up_addrenv_vdata(FAR arch_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata);
 #endif
 
@@ -967,7 +967,7 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-int up_addrenv_vheap(FAR const group_addrenv_t *addrenv, FAR void **vheap);
+int up_addrenv_vheap(FAR const arch_addrenv_t *addrenv, FAR void **vheap);
 #endif
 
 /****************************************************************************
@@ -990,7 +990,7 @@ int up_addrenv_vheap(FAR const group_addrenv_t *addrenv, FAR void **vheap);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);
+ssize_t up_addrenv_heapsize(FAR const arch_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -1011,7 +1011,7 @@ ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);
  *     This may be used with up_addrenv_restore() to restore the original
  *     address environment that was in place before up_addrenv_select() was
  *     called.  Note that this may be a task agnostic, platform-specific
- *     representation that may or may not be different from group_addrenv_t.
+ *     representation that may or may not be different from arch_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -1019,7 +1019,7 @@ ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_select(FAR const group_addrenv_t *addrenv,
+int up_addrenv_select(FAR const arch_addrenv_t *addrenv,
                       FAR save_addrenv_t *oldenv);
 #endif
 
@@ -1061,7 +1061,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_coherent(FAR const group_addrenv_t *addrenv);
+int up_addrenv_coherent(FAR const arch_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -1082,8 +1082,8 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_clone(FAR const group_addrenv_t *src,
-                     FAR group_addrenv_t *dest);
+int up_addrenv_clone(FAR const arch_addrenv_t *src,
+                     FAR arch_addrenv_t *dest);
 #endif
 
 /****************************************************************************
@@ -1157,7 +1157,7 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_mprot(FAR group_addrenv_t *addrenv, uintptr_t addr,
+int up_addrenv_mprot(FAR arch_addrenv_t *addrenv, uintptr_t addr,
                      size_t len, int prot);
 #endif
 

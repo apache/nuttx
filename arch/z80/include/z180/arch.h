@@ -57,7 +57,7 @@ typedef uint8_t save_addrenv_t;
  */
 
 struct z180_cbr_s;
-typedef FAR struct z180_cbr_s *group_addrenv_t;
+typedef FAR struct z180_cbr_s *arch_addrenv_t;
 #endif
 
 /****************************************************************************

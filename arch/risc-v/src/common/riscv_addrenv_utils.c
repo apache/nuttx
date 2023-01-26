@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-uintptr_t riscv_get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr)
+uintptr_t riscv_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 {
   uintptr_t paddr;
   uintptr_t ptprev;

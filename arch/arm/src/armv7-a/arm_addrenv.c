@@ -22,7 +22,7 @@
  * Address Environment Interfaces
  *
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
- * environments.  These interfaces all operate on type group_addrenv_t which
+ * environments.  These interfaces all operate on type arch_addrenv_t which
  * is an abstract representation of a task group's address environment and
  * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
@@ -223,7 +223,7 @@ static int up_addrenv_initdata(uintptr_t l2table)
  ****************************************************************************/
 
 int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
-                      group_addrenv_t *addrenv)
+                      arch_addrenv_t *addrenv)
 {
   int ret;
 
@@ -237,7 +237,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Initialize the address environment structure to all zeroes */
 
-  memset(addrenv, 0, sizeof(group_addrenv_t));
+  memset(addrenv, 0, sizeof(arch_addrenv_t));
 
   /* Back the allocation up with physical pages and set up the level 2
    * mapping (which of course does nothing until the L2 page table is hooked
@@ -326,7 +326,7 @@ errout:
  *
  ****************************************************************************/
 
-int up_addrenv_destroy(group_addrenv_t *addrenv)
+int up_addrenv_destroy(arch_addrenv_t *addrenv)
 {
   binfo("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
@@ -356,7 +356,7 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
 #endif
 #endif
 
-  memset(addrenv, 0, sizeof(group_addrenv_t));
+  memset(addrenv, 0, sizeof(arch_addrenv_t));
   return OK;
 }
 
@@ -378,7 +378,7 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_vtext(group_addrenv_t *addrenv, void **vtext)
+int up_addrenv_vtext(arch_addrenv_t *addrenv, void **vtext)
 {
   binfo("return=%p\n", (void *)CONFIG_ARCH_TEXT_VBASE);
 
@@ -411,7 +411,7 @@ int up_addrenv_vtext(group_addrenv_t *addrenv, void **vtext)
  *
  ****************************************************************************/
 
-int up_addrenv_vdata(group_addrenv_t *addrenv, uintptr_t textsize,
+int up_addrenv_vdata(arch_addrenv_t *addrenv, uintptr_t textsize,
                      void **vdata)
 {
   binfo("return=%p\n",
@@ -443,7 +443,7 @@ int up_addrenv_vdata(group_addrenv_t *addrenv, uintptr_t textsize,
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-int up_addrenv_vheap(const group_addrenv_t *addrenv, void **vheap)
+int up_addrenv_vheap(const arch_addrenv_t *addrenv, void **vheap)
 {
   DEBUGASSERT(addrenv && vheap);
   *vheap = (void *)CONFIG_ARCH_HEAP_VBASE;
@@ -471,7 +471,7 @@ int up_addrenv_vheap(const group_addrenv_t *addrenv, void **vheap)
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-ssize_t up_addrenv_heapsize(const group_addrenv_t *addrenv)
+ssize_t up_addrenv_heapsize(const arch_addrenv_t *addrenv)
 {
   DEBUGASSERT(addrenv);
   return (ssize_t)addrenv->heapsize;
@@ -496,14 +496,14 @@ ssize_t up_addrenv_heapsize(const group_addrenv_t *addrenv)
  *     This may be used with up_addrenv_restore() to restore the original
  *     address environment that was in place before up_addrenv_select() was
  *     called.  Note that this may be a task agnostic, platform-specific
- *     representation that may or may not be different from group_addrenv_t.
+ *     representation that may or may not be different from arch_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_select(const group_addrenv_t *addrenv,
+int up_addrenv_select(const arch_addrenv_t *addrenv,
                       save_addrenv_t *oldenv)
 {
   uintptr_t vaddr;
@@ -708,7 +708,7 @@ int up_addrenv_restore(const save_addrenv_t *oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_coherent(const group_addrenv_t *addrenv)
+int up_addrenv_coherent(const arch_addrenv_t *addrenv)
 {
   DEBUGASSERT(addrenv);
 
@@ -758,15 +758,15 @@ int up_addrenv_coherent(const group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_clone(const group_addrenv_t *src,
-                     group_addrenv_t *dest)
+int up_addrenv_clone(const arch_addrenv_t *src,
+                     arch_addrenv_t *dest)
 {
   binfo("src=%p dest=%p\n", src, dest);
   DEBUGASSERT(src && dest);
 
   /* Just copy the address environment from the source to the destination */
 
-  memcpy(dest, src, sizeof(group_addrenv_t));
+  memcpy(dest, src, sizeof(arch_addrenv_t));
   return OK;
 }
 
