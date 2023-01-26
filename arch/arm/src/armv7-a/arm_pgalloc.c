@@ -97,7 +97,7 @@ static uintptr_t alloc_pgtable(void)
  *
  ****************************************************************************/
 
-static int get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr)
+static int get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 {
   uint32_t l1entry;
   uintptr_t paddr;

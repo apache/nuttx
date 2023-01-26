@@ -22,7 +22,7 @@
  * Address Environment Interfaces
  *
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
- * environments.  These interfaces all operate on type group_addrenv_t which
+ * environments.  These interfaces all operate on type arch_addrenv_t which
  * is an abstract representation of a task group's address environment and
  * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
@@ -120,7 +120,7 @@ extern uintptr_t            g_kernel_mappings;
  *
  ****************************************************************************/
 
-static void map_spgtables(group_addrenv_t *addrenv, uintptr_t vaddr)
+static void map_spgtables(arch_addrenv_t *addrenv, uintptr_t vaddr)
 {
   int       i;
   uintptr_t prev;
@@ -161,7 +161,7 @@ static void map_spgtables(group_addrenv_t *addrenv, uintptr_t vaddr)
  *
  ****************************************************************************/
 
-static int create_spgtables(group_addrenv_t *addrenv)
+static int create_spgtables(arch_addrenv_t *addrenv)
 {
   int       i;
   uintptr_t paddr;
@@ -203,7 +203,7 @@ static int create_spgtables(group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-static int copy_kernel_mappings(group_addrenv_t *addrenv)
+static int copy_kernel_mappings(arch_addrenv_t *addrenv)
 {
   uintptr_t user_mappings = riscv_pgvaddr(addrenv->spgtables[0]);
 
@@ -238,7 +238,7 @@ static int copy_kernel_mappings(group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-static int create_region(group_addrenv_t *addrenv, uintptr_t vaddr,
+static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
                          size_t size, uint32_t mmuflags)
 {
   uintptr_t ptlast;
@@ -373,7 +373,7 @@ static inline bool vaddr_is_shm(uintptr_t vaddr)
  ****************************************************************************/
 
 int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
-                      group_addrenv_t *addrenv)
+                      arch_addrenv_t *addrenv)
 {
   int       ret;
   uintptr_t resvbase;
@@ -387,7 +387,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Make sure the address environment is wiped before doing anything */
 
-  memset(addrenv, 0, sizeof(group_addrenv_t));
+  memset(addrenv, 0, sizeof(arch_addrenv_t));
 
   /* Create the static page tables */
 
@@ -512,7 +512,7 @@ errout:
  *
  ****************************************************************************/
 
-int up_addrenv_destroy(group_addrenv_t *addrenv)
+int up_addrenv_destroy(arch_addrenv_t *addrenv)
 {
   /* Recursively destroy it all, need to table walk */
 
@@ -587,7 +587,7 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
   __ISB();
   __DMB();
 
-  memset(addrenv, 0, sizeof(group_addrenv_t));
+  memset(addrenv, 0, sizeof(arch_addrenv_t));
   return OK;
 }
 
@@ -609,7 +609,7 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_vtext(group_addrenv_t *addrenv, void **vtext)
+int up_addrenv_vtext(arch_addrenv_t *addrenv, void **vtext)
 {
   DEBUGASSERT(addrenv && vtext);
   *vtext = (void *)addrenv->textvbase;
@@ -638,7 +638,7 @@ int up_addrenv_vtext(group_addrenv_t *addrenv, void **vtext)
  *
  ****************************************************************************/
 
-int up_addrenv_vdata(group_addrenv_t *addrenv, uintptr_t textsize,
+int up_addrenv_vdata(arch_addrenv_t *addrenv, uintptr_t textsize,
                      void **vdata)
 {
   DEBUGASSERT(addrenv && vdata);
@@ -665,7 +665,7 @@ int up_addrenv_vdata(group_addrenv_t *addrenv, uintptr_t textsize,
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-int up_addrenv_vheap(const group_addrenv_t *addrenv, void **vheap)
+int up_addrenv_vheap(const arch_addrenv_t *addrenv, void **vheap)
 {
   DEBUGASSERT(addrenv && vheap);
   *vheap = (void *)addrenv->heapvbase;
@@ -693,7 +693,7 @@ int up_addrenv_vheap(const group_addrenv_t *addrenv, void **vheap)
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-ssize_t up_addrenv_heapsize(const group_addrenv_t *addrenv)
+ssize_t up_addrenv_heapsize(const arch_addrenv_t *addrenv)
 {
   DEBUGASSERT(addrenv);
   return (ssize_t)addrenv->heapsize;
@@ -718,14 +718,14 @@ ssize_t up_addrenv_heapsize(const group_addrenv_t *addrenv)
  *     This may be used with up_addrenv_restore() to restore the original
  *     address environment that was in place before up_addrenv_select() was
  *     called.  Note that this may be a task agnostic, hardware
- *     representation that is different from group_addrenv_t.
+ *     representation that is different from arch_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_select(const group_addrenv_t *addrenv,
+int up_addrenv_select(const arch_addrenv_t *addrenv,
                       save_addrenv_t *oldenv)
 {
   DEBUGASSERT(addrenv && addrenv->satp);
@@ -781,7 +781,7 @@ int up_addrenv_restore(const save_addrenv_t *oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_coherent(const group_addrenv_t *addrenv)
+int up_addrenv_coherent(const arch_addrenv_t *addrenv)
 {
   /* Flush the instruction and data caches */
 
@@ -807,11 +807,11 @@ int up_addrenv_coherent(const group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_clone(const group_addrenv_t *src,
-                     group_addrenv_t *dest)
+int up_addrenv_clone(const arch_addrenv_t *src,
+                     arch_addrenv_t *dest)
 {
   DEBUGASSERT(src && dest);
-  memcpy(dest, src, sizeof(group_addrenv_t));
+  memcpy(dest, src, sizeof(arch_addrenv_t));
   return OK;
 }
 

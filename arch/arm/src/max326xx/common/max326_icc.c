@@ -114,7 +114,7 @@ void max326_icc_invalidate(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_coherent(const group_addrenv_t *addrenv)
+int up_addrenv_coherent(const arch_addrenv_t *addrenv)
 {
   max326_icc_invalidate();
 }

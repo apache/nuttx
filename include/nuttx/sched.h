@@ -506,7 +506,7 @@ struct task_group_s
 #ifdef CONFIG_ARCH_ADDRENV
   /* Address Environment ****************************************************/
 
-  group_addrenv_t tg_addrenv;       /* Task group address environment       */
+  arch_addrenv_t  tg_addrenv;       /* Task group address environment       */
 #endif
 
   /* Virtual memory mapping info ********************************************/
