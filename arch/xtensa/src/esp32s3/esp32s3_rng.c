@@ -153,7 +153,7 @@ uint32_t IRAM_ATTR esp_random(void)
  ****************************************************************************/
 
 static ssize_t esp32s3_rng_read(struct file *filep, char *buffer,
-                              size_t buflen)
+                                size_t buflen)
 {
   struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
   ssize_t read_len;
