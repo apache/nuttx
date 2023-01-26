@@ -51,6 +51,7 @@
 #define TOUCH_PAD_FILTER_FACTOR_DEFAULT (4) /* IIR filter coefficient */
 #define TOUCH_PAD_SHIFT_DEFAULT         (4) /* Increase computing accuracy */
 #define TOUCH_PAD_SHIFT_ROUND_DEFAULT   (8) /* ROUND = 2^(n-1) */
+#define TOUCH_THRESHOLD_NO_USE          (0)
 #define TOUCH_GET_RTCIO_NUM(channel)    (touch_channel_to_rtcio[channel])
 
 /****************************************************************************
@@ -73,8 +74,8 @@ struct touch_config_meas_mode_s
 #ifdef CONFIG_ESP32_TOUCH_FILTER
 struct touch_filter_s
 {
-  struct rt_timer_args_s timer_args;
-  struct rt_timer_s *timer_handler;
+  struct rt_timer_args_s filter_timer_args;
+  struct rt_timer_s *filter_timer_handler;
   uint16_t filtered_val[TOUCH_SENSOR_PINS];
   uint16_t raw_val[TOUCH_SENSOR_PINS];
   uint32_t period_ms;
@@ -85,6 +86,10 @@ struct touch_filter_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+static int touch_interrupt(int irq, void *context, void *arg);
+static void touch_restore_irq(void *arg);
+#endif
 #ifdef CONFIG_ESP32_TOUCH_FILTER
 static uint32_t touch_filter_iir(uint32_t in_now,
                                  uint32_t out_last,
@@ -96,7 +101,7 @@ static uint16_t touch_read(enum touch_pad_e tp);
 static void touch_clear_group_mask(uint16_t set1_mask,
                                    uint16_t set2_mask,
                                    uint16_t en_mask);
-static void touch_config(enum touch_pad_e tp, uint16_t threshold);
+static void touch_config(enum touch_pad_e tp);
 static void touch_init(void);
 static void touch_set_group_mask(uint16_t set1_mask,
                                  uint16_t set2_mask,
@@ -113,14 +118,101 @@ static void touch_io_init(enum touch_pad_e tp);
 #ifdef CONFIG_ESP32_TOUCH_FILTER
 static struct touch_filter_s *touch_pad_filter = NULL;
 #endif
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+static uint16_t touch_pad_isr_enabled = 0x0000;
+static int touch_last_irq = -1;
+static int (*touch_release_cb)(int, void *, void *) = NULL;
+static struct rt_timer_args_s irq_timer_args;
+static struct rt_timer_s *irq_timer_handler = NULL;
+#endif
 static mutex_t *touch_mux = NULL;
 static uint16_t touch_pad_init_bit = 0x0000;
-static uint16_t touch_pad_logic_threshold = 0;
+static uint16_t touch_pad_logic_threshold[TOUCH_SENSOR_PINS];
 static spinlock_t lock;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: touch_interrupt
+ *
+ * Description:
+ *   Touch pads interrupt handler.
+ *
+ * Input Parameters:
+ *   irq - Interrupt request number;
+ *   context - Context data from the ISR;
+ *   arg - Opaque pointer to the internal driver state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+static int touch_interrupt(int irq, void *context, void *arg)
+{
+  uint32_t status;
+  int i;
+
+  touch_lh_intr_disable();
+  status = touch_lh_read_trigger_status_mask();
+  touch_lh_clear_trigger_status_mask();
+
+  rt_timer_start(irq_timer_handler,
+                 CONFIG_ESP32_TOUCH_IRQ_INTERVAL_MS * USEC_PER_MSEC,
+                 false);
+
+  /* Read and clear the touch interrupt status */
+
+  for (i = 0; i < ESP32_NIRQ_RTCIO_TOUCHPAD; i++)
+    {
+      if ((touch_pad_init_bit >> i) &
+          (touch_pad_isr_enabled >> i) &
+          (status >> i) & 0x1)
+        {
+          touch_last_irq = ESP32_FIRST_RTCIOIRQ_TOUCHPAD + i;
+          irq_dispatch(touch_last_irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: touch_restore_irq
+ *
+ * Description:
+ *   IRQ timer callback.
+ *   Re-enables touch IRQ after a certain time to avoid spam.
+ *
+ * Input Parameters:
+ *   arg - Pointer to a memory location containing the function arguments.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+static void touch_restore_irq(void *arg)
+{
+  if (touch_last_irq > 0 && touch_release_cb != NULL)
+    {
+      /* Call the button interrup handler again so we can detect touch pad
+       * releases
+       */
+
+      touch_release_cb(touch_last_irq, NULL, NULL);
+    }
+
+  touch_lh_intr_enable();
+}
+#endif
 
 /****************************************************************************
  * Name: touch_init
@@ -145,7 +237,7 @@ static void touch_init(void)
       if (touch_mux == NULL)
         {
           ierr("Failed to initialize touch pad driver.\n");
-          assert(0);
+          PANIC();
         }
 
       nxmutex_init(touch_mux);
@@ -164,6 +256,18 @@ static void touch_init(void)
       touch_lh_set_sleep_time(TOUCH_SLEEP_CYCLE_DEFAULT);
       touch_lh_set_fsm_mode(TOUCH_FSM_MODE_DEFAULT);
       touch_lh_start_fsm();
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+      irq_timer_args.arg = NULL;
+      irq_timer_args.callback = touch_restore_irq;
+      rt_timer_create(&(irq_timer_args), &(irq_timer_handler));
+
+      int ret = irq_attach(ESP32_IRQ_RTC_TOUCH, touch_interrupt, NULL);
+      if (ret < 0)
+        {
+          ierr("ERROR: irq_attach() failed: %d\n", ret);
+        }
+#endif
 
       spin_unlock_irqrestore(&lock, flags);
     }
@@ -245,7 +349,7 @@ static void touch_filter_cb(void *arg)
         }
     }
 
-  rt_timer_start(touch_pad_filter->timer_handler,
+  rt_timer_start(touch_pad_filter->filter_timer_handler,
                  touch_pad_filter->period_ms * USEC_PER_MSEC,
                  false);
   nxmutex_unlock(touch_mux);
@@ -287,10 +391,10 @@ static void touch_filter_start(uint32_t filter_period_ms)
           return;
         }
 
-      touch_pad_filter->timer_args.arg = NULL;
-      touch_pad_filter->timer_args.callback = touch_filter_cb;
-      rt_timer_create(&(touch_pad_filter->timer_args),
-                      &(touch_pad_filter->timer_handler));
+      touch_pad_filter->filter_timer_args.arg = NULL;
+      touch_pad_filter->filter_timer_args.callback = touch_filter_cb;
+      rt_timer_create(&(touch_pad_filter->filter_timer_args),
+                      &(touch_pad_filter->filter_timer_handler));
 
       touch_pad_filter->period_ms = filter_period_ms;
     }
@@ -372,14 +476,14 @@ static void touch_clear_group_mask(uint16_t set1_mask,
  *
  * Input Parameters:
  *   tp - The touch pad channel;
- *   threshold - The interruption threshold value.
+ *   threshold - The interrupt threshold value.
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void touch_config(enum touch_pad_e tp, uint16_t threshold)
+static void touch_config(enum touch_pad_e tp)
 {
   DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
 
@@ -395,7 +499,7 @@ static void touch_config(enum touch_pad_e tp, uint16_t threshold)
 
   touch_lh_set_slope(tp, TOUCH_SLOPE_DEFAULT);
   touch_lh_set_tie_option(tp, TOUCH_TIE_OPT_DEFAULT);
-  touch_lh_set_threshold(tp, threshold);
+  touch_lh_set_threshold(tp, TOUCH_THRESHOLD_NO_USE);
 
   spin_unlock_irqrestore(&lock, flags);
 
@@ -580,11 +684,14 @@ int esp32_configtouch(enum touch_pad_e tp, struct touch_config_s config)
 
   touch_init();
 
-  touch_config(tp, config.interrupt_threshold);
+  /* Make sure to set the mode before enabling the touch pad as it influences
+   * the configuration
+   */
+
   touch_set_meas_mode(tp, &meas_config);
   touch_lh_set_fsm_mode(config.fsm_mode);
   touch_set_voltage(&volt_config);
-  touch_pad_logic_threshold = config.logic_threshold;
+  touch_config(tp);
 
 #ifdef CONFIG_ESP32_TOUCH_FILTER
   touch_filter_start(config.filter_period);
@@ -609,6 +716,31 @@ int esp32_configtouch(enum touch_pad_e tp, struct touch_config_s config)
 
 bool esp32_touchread(enum touch_pad_e tp)
 {
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
+
+  uint16_t value = esp32_touchreadraw(tp);
+
+  return (value > touch_pad_logic_threshold[tp]);
+}
+
+/****************************************************************************
+ * Name: esp32_touchreadraw
+ *
+ * Description:
+ *   Read the analog value of a touch pad channel.
+ *
+ * Input Parameters:
+ *   tp - The touch pad channel.
+ *
+ * Returned Value:
+ *   The number of charge and discharge cycles done in the last measurement.
+ *
+ ****************************************************************************/
+
+uint16_t esp32_touchreadraw(enum touch_pad_e tp)
+{
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
+
 #ifdef CONFIG_ESP32_TOUCH_FILTER
   uint16_t value = touch_pad_filter->filtered_val[tp];
 #else
@@ -617,5 +749,105 @@ bool esp32_touchread(enum touch_pad_e tp)
 
   iinfo("Touch pad %d value: %u\n", tp, value);
 
-  return (value > touch_pad_logic_threshold);
+  return value;
+}
+
+/****************************************************************************
+ * Name: esp32_touchsetthreshold
+ *
+ * Description:
+ *   Configure the threshold for a touch pad channel.
+ *
+ * Input Parameters:
+ *   tp - The touch pad channel;
+ *   threshold - The threshold value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32_touchsetthreshold(enum touch_pad_e tp, uint16_t threshold)
+{
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
+
+  iinfo("Setting touch pad %d threshold to %u.\n", tp, threshold);
+
+  touch_lh_set_threshold(tp, threshold);
+  touch_pad_logic_threshold[tp] = threshold;
+}
+
+/****************************************************************************
+ * Name: esp32_touchirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified touch pad.
+ *
+ * Input Parameters:
+ *   irq - The touch pad irq number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+void esp32_touchirqenable(int irq)
+{
+  DEBUGASSERT(irq >= ESP32_FIRST_RTCIOIRQ_TOUCHPAD &&
+              irq <= ESP32_LAST_RTCIOIRQ_TOUCHPAD);
+
+  int bit = ESP32_IRQ2TOUCHPAD(irq);
+
+  touch_lh_intr_disable();
+
+  touch_pad_isr_enabled |= (UINT32_C(1) << bit);
+
+  touch_lh_intr_enable();
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32_touchirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified touch pad.
+ *
+ * Input Parameters:
+ *   irq - The touch pad irq number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+void esp32_touchirqdisable(int irq)
+{
+  DEBUGASSERT(irq >= ESP32_FIRST_RTCIOIRQ_TOUCHPAD &&
+              irq <= ESP32_LAST_RTCIOIRQ_TOUCHPAD);
+
+  int bit = ESP32_IRQ2TOUCHPAD(irq);
+
+  touch_lh_intr_disable();
+
+  touch_pad_isr_enabled &= (~(UINT32_C(1) << bit));
+
+  touch_lh_intr_enable();
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32_touchregisterreleasecb
+ *
+ * Description:
+ *   Register the release callback.
+ *
+ ****************************************************************************/
+
+void esp32_touchregisterreleasecb(int (*func)(int, void *, void *))
+{
+  DEBUGASSERT(func != NULL);
+
+  touch_release_cb = func;
 }
