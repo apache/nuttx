@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int up_addrenv_mprot(group_addrenv_t *addrenv, uintptr_t addr, size_t len,
+int up_addrenv_mprot(arch_addrenv_t *addrenv, uintptr_t addr, size_t len,
                      int prot)
 {
   /* Nothing needs to be done */

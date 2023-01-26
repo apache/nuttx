@@ -22,7 +22,7 @@ The CPU-specific logic must provide two categories in interfaces:
 
 #. **Binary Loader Support**. These are low-level interfaces used
    in ``binfmt/`` to instantiate tasks with address environments.
-   These interfaces all operate on type ``group_addrenv_t`` which
+   These interfaces all operate on type ``arch_addrenv_t`` which
    is an abstract representation of a task group's address
    environment and the type must be defined in\ ``arch/arch.h`` if
    ``CONFIG_ARCH_ADDRENV`` is defined. These low-level interfaces
@@ -89,7 +89,7 @@ The CPU-specific logic must provide two categories in interfaces:
    - :c:func:`up_addrenv_kstackalloc`: Allocate the process kernel stack.
 
 .. c:function:: int up_addrenv_create(size_t textsize, size_t datasize, \
-  size_t heapsize, FAR group_addrenv_t *addrenv);
+  size_t heapsize, FAR arch_addrenv_t *addrenv);
 
   This function is called when a new task is created in order to
   instantiate an address environment for the new task group.
@@ -109,7 +109,7 @@ The CPU-specific logic must provide two categories in interfaces:
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
-.. c:function:: int up_addrenv_destroy(group_addrenv_t *addrenv)
+.. c:function:: int up_addrenv_destroy(arch_addrenv_t *addrenv)
 
   This function is called when a final thread leaves the task
   group and the task group is destroyed. This function then destroys
@@ -121,7 +121,7 @@ The CPU-specific logic must provide two categories in interfaces:
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
-.. c:function:: int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext)
+.. c:function:: int up_addrenv_vtext(FAR arch_addrenv_t addrenv, FAR void **vtext)
 
   Return the virtual .text address associated with the newly create
   address environment. This function is used by the binary loaders
@@ -133,7 +133,7 @@ The CPU-specific logic must provide two categories in interfaces:
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
-.. c:function:: int up_addrenv_vdata(FAR group_addrenv_t *addrenv, size_t textsize, FAR void **vdata)
+.. c:function:: int up_addrenv_vdata(FAR arch_addrenv_t *addrenv, size_t textsize, FAR void **vdata)
 
   Return the virtual .text address associated with the newly create
   address environment. This function is used by the binary loaders
@@ -149,7 +149,7 @@ The CPU-specific logic must provide two categories in interfaces:
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
-.. c:function:: ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
+.. c:function:: ssize_t up_addrenv_heapsize(FAR const arch_addrenv_t *addrenv)
 
   Return the initial heap allocation size. That is the amount of
   memory allocated by up_addrenv_create() when the heap memory
@@ -162,7 +162,7 @@ The CPU-specific logic must provide two categories in interfaces:
   :return: The initial heap size allocated is returned on success;
     a negated errno value on failure.
 
-.. c:function:: int up_addrenv_select(group_addrenv_t *addrenv, save_addrenv_t *oldenv)
+.. c:function:: int up_addrenv_select(arch_addrenv_t *addrenv, save_addrenv_t *oldenv)
 
   After an address environment has been established for a task
   (via up_addrenv_create()), this function may be called to instantiate
@@ -178,7 +178,7 @@ The CPU-specific logic must provide two categories in interfaces:
     environment that was in place before ``up_addrenv_select()``
     was called. Note that this may be a task agnostic,
     platform-specific representation that may or may not be
-    different from ``group_addrenv_t``.
+    different from ``arch_addrenv_t``.
 
   :return: Zero (OK) on success; a negated errno value on failure.
 

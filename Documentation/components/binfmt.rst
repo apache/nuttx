@@ -123,7 +123,7 @@ pointer to a write-able instance of :c:struct:`binfmt_s`.
        */
 
     #ifdef CONFIG_ARCH_ADDRENV
-      group_addrenv_t addrenv;             /* Task group address environment */
+      arch_addrenv_t addrenv;              /* Task group address environment */
     #endif
 
       size_t mapsize;                      /* Size of the mapped address region (needed for munmap) */
