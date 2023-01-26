@@ -464,7 +464,7 @@ static ssize_t bat_charger_poll(FAR struct file *filep,
  ****************************************************************************/
 
 int battery_charger_changed(FAR struct battery_charger_dev_s *dev,
-                             uint32_t mask)
+                            uint32_t mask)
 {
   FAR struct battery_charger_priv_s *priv;
   int ret;

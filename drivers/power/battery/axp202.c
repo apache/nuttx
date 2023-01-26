@@ -186,7 +186,8 @@ static int axp202_putreg8(FAR struct axp202_dev_s *priv, uint8_t regaddr,
   return OK;
 }
 
-static int axp202_state(struct battery_charger_dev_s *dev, int *status)
+static int axp202_state(FAR struct battery_charger_dev_s *dev,
+                        FAR int *status)
 {
   FAR struct axp202_dev_s *priv = (FAR struct axp202_dev_s *)dev;
   uint8_t                  val  = 0;
@@ -284,7 +285,8 @@ static int axp202_health(FAR struct battery_charger_dev_s *dev,
  *
  ****************************************************************************/
 
-static int axp202_online(struct battery_charger_dev_s *dev, bool *status)
+static int axp202_online(FAR struct battery_charger_dev_s *dev,
+                         FAR bool *status)
 {
   FAR struct axp202_dev_s *priv = (FAR struct axp202_dev_s *)dev;
   uint8_t                  val  = 0;
