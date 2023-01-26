@@ -227,7 +227,7 @@ RUN mkdir wamrc && \
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL maintainer="dev@nuttx.apache.org"
 
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
