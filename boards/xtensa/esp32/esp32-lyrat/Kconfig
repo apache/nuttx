@@ -6,17 +6,40 @@
 if ARCH_BOARD_ESP32_LYRAT
 
 config ESP32_TOUCH
-	bool "Touch pads"
+	bool "Touch pad support"
 	default n
 	---help---
 		Enable ESP32 touch pad support.
 
+if ESP32_TOUCH
+
 config ESP32_TOUCH_FILTER
-	bool "Touch pad IIR filter"
+	bool "Enable touch pad IIR filter"
 	select ESP32_RT_TIMER
 	default n
-	depends on ESP32_TOUCH
 	---help---
 		Enable infinite impulse response filter for the touch pads.
+
+config ESP32_TOUCH_IRQ
+	bool "Enable touch pad interrupts"
+	select ESP32_RTCIO_IRQ
+	select ESP32_RT_TIMER
+	depends on ARCH_IRQBUTTONS
+	default n
+	---help---
+		Enable interrupt support for the touch pads.
+
+config ESP32_TOUCH_IRQ_INTERVAL_MS
+	int "Minimum interrupt interval (ms)"
+	depends on ESP32_TOUCH_IRQ
+	default 100
+	---help---
+		Minimum interval between touch pad interrupts (in milliseconds).
+		As the RTC interrupts are triggered by level, this interrupt
+		will be constantly set off as long as the touch pad is pressed.
+		To avoid that, we disable the interrupt when it is triggered and
+		set a timer for it to be re-enabled.
+
+endif # ESP32_TOUCH
 
 endif # ARCH_BOARD_ESP32_LYRAT

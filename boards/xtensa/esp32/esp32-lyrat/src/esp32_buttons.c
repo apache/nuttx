@@ -54,9 +54,12 @@
 #define TOUCHPAD_ATTEN              (TOUCH_HVOLT_ATTEN_1V)
 #define TOUCHPAD_SLOPE              (TOUCH_SLOPE_7)
 #define TOUCHPAD_TIE_OPT            (TOUCH_TIE_OPT_LOW)
-#define TOUCHPAD_FSM_MODE           (TOUCH_FSM_MODE_SW)
-#define TOUCHPAD_INTR_THR           (450)
-#define TOUCHPAD_LOGIC_THR          (450)
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+#  define TOUCHPAD_FSM_MODE         (TOUCH_FSM_MODE_TIMER)
+#else
+#  define TOUCHPAD_FSM_MODE         (TOUCH_FSM_MODE_SW)
+#endif
+#define TOUCHPAD_THRESHOLD_CALC(v)  (v * 2 / 3)
 #define TOUCHPAD_FILTER_PERIOD      (10)
 
 /****************************************************************************
@@ -70,7 +73,7 @@ typedef struct
   {
     int channel;
     int gpio;
-  };
+  } input;
 } button_type_t;
 
 /****************************************************************************
@@ -86,8 +89,6 @@ static const struct touch_config_s tp_config =
   .slope = TOUCHPAD_SLOPE,
   .tie_opt = TOUCHPAD_TIE_OPT,
   .fsm_mode = TOUCHPAD_FSM_MODE,
-  .interrupt_threshold = TOUCHPAD_INTR_THR,
-  .logic_threshold = TOUCHPAD_LOGIC_THR,
   .filter_period = TOUCHPAD_FILTER_PERIOD
 };
 #endif
@@ -96,28 +97,28 @@ static const button_type_t g_buttons[] =
 {
   {
     .is_touchpad = false,
-    .gpio = BUTTON_REC
+    .input.gpio = BUTTON_REC
   },
   {
     .is_touchpad = false,
-    .gpio = BUTTON_MODE
+    .input.gpio = BUTTON_MODE
   },
 #ifdef CONFIG_ESP32_TOUCH
   {
     .is_touchpad = true,
-    .channel = BUTTON_PLAY_TP_CHANNEL
+    .input.channel = BUTTON_PLAY_TP_CHANNEL
   },
   {
     .is_touchpad = true,
-    .channel = BUTTON_SET_TP_CHANNEL
+    .input.channel = BUTTON_SET_TP_CHANNEL
   },
   {
     .is_touchpad = true,
-    .channel = BUTTON_VOLM_TP_CHANNEL
+    .input.channel = BUTTON_VOLM_TP_CHANNEL
   },
   {
     .is_touchpad = true,
-    .channel = BUTTON_VOLP_TP_CHANNEL
+    .input.channel = BUTTON_VOLP_TP_CHANNEL
   },
 #endif
 };
@@ -139,14 +140,33 @@ static const button_type_t g_buttons[] =
 
 uint32_t board_button_initialize(void)
 {
-  /* GPIOs 36 and 39 do not support PULLUP/PULLDOWN */
-
 #ifdef CONFIG_ESP32_TOUCH
+  uint16_t raw_value;
+
   esp32_configtouch(BUTTON_PLAY_TP_CHANNEL, tp_config);
   esp32_configtouch(BUTTON_SET_TP_CHANNEL, tp_config);
   esp32_configtouch(BUTTON_VOLM_TP_CHANNEL, tp_config);
   esp32_configtouch(BUTTON_VOLP_TP_CHANNEL, tp_config);
+
+  raw_value = esp32_touchreadraw(BUTTON_PLAY_TP_CHANNEL);
+  esp32_touchsetthreshold(BUTTON_PLAY_TP_CHANNEL,
+                          TOUCHPAD_THRESHOLD_CALC(raw_value));
+
+  raw_value = esp32_touchreadraw(BUTTON_SET_TP_CHANNEL);
+  esp32_touchsetthreshold(BUTTON_SET_TP_CHANNEL,
+                          TOUCHPAD_THRESHOLD_CALC(raw_value));
+
+  raw_value = esp32_touchreadraw(BUTTON_VOLM_TP_CHANNEL);
+  esp32_touchsetthreshold(BUTTON_VOLM_TP_CHANNEL,
+                          TOUCHPAD_THRESHOLD_CALC(raw_value));
+
+  raw_value = esp32_touchreadraw(BUTTON_VOLP_TP_CHANNEL);
+  esp32_touchsetthreshold(BUTTON_VOLP_TP_CHANNEL,
+                          TOUCHPAD_THRESHOLD_CALC(raw_value));
 #endif
+
+  /* GPIOs 36 and 39 do not support PULLUP/PULLDOWN */
+
   esp32_configgpio(BUTTON_MODE, INPUT_FUNCTION_3);
   esp32_configgpio(BUTTON_REC, INPUT_FUNCTION_3);
   return NUM_BUTTONS;
@@ -176,45 +196,45 @@ uint32_t board_buttons(void)
 
       const button_type_t button_info = g_buttons[btn_id];
 
+      n = 0;
+
       if (button_info.is_touchpad)
         {
-          b0 = esp32_touchread(button_info.channel);
+          b0 = esp32_touchread(button_info.input.channel);
         }
       else
         {
-          b0 = esp32_gpioread(button_info.gpio);
-        }
+          b0 = esp32_gpioread(button_info.input.gpio);
 
-      n = 0;
-
-      for (int i = 0; i < 10; i++)
-        {
-          up_mdelay(1);
-
-          if (button_info.is_touchpad)
+          for (int i = 0; i < 10; i++)
             {
-              b1 = esp32_touchread(button_info.channel);
-            }
-          else
-            {
-              b1 = esp32_gpioread(button_info.gpio);
-            }
+              up_mdelay(1);
 
-          if (b0 == b1)
-            {
-              n++;
-            }
-          else
-            {
-              n = 0;
-            }
+              if (button_info.is_touchpad)
+                {
+                  b1 = esp32_touchread(button_info.input.channel);
+                }
+              else
+                {
+                  b1 = esp32_gpioread(button_info.input.gpio);
+                }
 
-          if (3 == n)
-            {
-              break;
-            }
+              if (b0 == b1)
+                {
+                  n++;
+                }
+              else
+                {
+                  n = 0;
+                }
 
-          b0 = b1;
+              if (3 == n)
+                {
+                  break;
+                }
+
+              b0 = b1;
+            }
         }
 
       iinfo("b=%d n=%d\n", b0, n);
@@ -250,42 +270,74 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
   int ret;
   button_type_t button_info = g_buttons[id];
 
+#ifdef CONFIG_ESP32_TOUCH_IRQ
   if (button_info.is_touchpad)
     {
-      iwarn("Touch pad interrupts not yet implemented\n");
-      return OK;
-    }
+      int channel = button_info.input.channel;
+      int irq = ESP32_TOUCHPAD2IRQ(channel);
 
-  int pin = button_info.gpio;
-  int irq = ESP32_PIN2IRQ(pin);
-
-  if (NULL != irqhandler)
-    {
-      /* Make sure the interrupt is disabled */
-
-      esp32_gpioirqdisable(irq);
-
-      ret = irq_attach(irq, irqhandler, arg);
-      if (ret < 0)
+      if (NULL != irqhandler)
         {
-          syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
-          return ret;
+          /* Make sure the interrupt is disabled */
+
+          esp32_touchirqdisable(irq);
+
+          esp32_touchregisterreleasecb(irqhandler);
+          ret = irq_attach(irq, irqhandler, arg);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
+              return ret;
+            }
+
+          iinfo("Attach %p to touch pad %d\n", irqhandler, channel);
+
+          iinfo("Enabling the interrupt\n");
+
+          esp32_touchirqenable(irq);
+        }
+      else
+        {
+          iinfo("Disabled interrupts from touch pad %d\n", channel);
+          esp32_touchirqdisable(irq);
         }
 
-      gpioinfo("Attach %p to pin %d\n", irqhandler, pin);
-
-      gpioinfo("Enabling the interrupt\n");
-
-      /* Configure the interrupt for rising and falling edges */
-
-      esp32_gpioirqenable(irq, CHANGE);
+      return OK;
     }
   else
+#endif
     {
-      gpioinfo("Disabled interrupts from pin %d\n", pin);
-      esp32_gpioirqdisable(irq);
-    }
+      int pin = button_info.input.gpio;
+      int irq = ESP32_PIN2IRQ(pin);
 
-  return OK;
+      if (NULL != irqhandler)
+        {
+          /* Make sure the interrupt is disabled */
+
+          esp32_gpioirqdisable(irq);
+
+          ret = irq_attach(irq, irqhandler, arg);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
+              return ret;
+            }
+
+          gpioinfo("Attach %p to pin %d\n", irqhandler, pin);
+
+          gpioinfo("Enabling the interrupt\n");
+
+          /* Configure the interrupt for rising and falling edges */
+
+          esp32_gpioirqenable(irq, CHANGE);
+        }
+      else
+        {
+          gpioinfo("Disabled interrupts from pin %d\n", pin);
+          esp32_gpioirqdisable(irq);
+        }
+
+      return OK;
+    }
 }
 #endif
