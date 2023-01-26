@@ -28,7 +28,7 @@ README
     PASSWORD:  Administrator
 
     nsh> cat /etc/passwd
-    admin:8Tv+Hbmr3pLddSjtzL0kwC:0:0:/
+    admin:8Tv+Hbmr3pLVb5HHZgd26D:0:0:/
 
   The encrypted passwords in the provided passwd file are only valid if the
   TEA key is set to:  012345678 9abcdef0 012345678 9abcdef0.  Changes to either
