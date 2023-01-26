@@ -70,13 +70,13 @@ $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(BIN1): $(PROXY_OBJS)
-	$(call ARCHIVE, $@, $^)
+	$(call ARCHIVE, $@, $(PROXY_OBJS))
 
 $(BIN2): $(STUB_OBJS)
-	$(call ARCHIVE, $@, $^)
+	$(call ARCHIVE, $@, $(STUB_OBJS))
 
 $(BIN3): $(WRAP_OBJS)
-	$(call ARCHIVE, $@, $^)
+	$(call ARCHIVE, $@, $(WRAP_OBJS))
 
 $(SYSCALLWRAPS): .context
 

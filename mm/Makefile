@@ -64,8 +64,8 @@ $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 # Memory manager for the flat build and
 # the user phase of the two-pass kernel build
 
-$(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $^)
+$(BIN):	$(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
 # Memory manager for the kernel phase of the two-pass kernel build
 
