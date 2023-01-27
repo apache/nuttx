@@ -1419,11 +1419,11 @@ config SIG_ILL
 		error in the executable file itself or an attempt to execute a data segment.
 		This signal may also be generated when the stack overflows.
 
-config SIG_SEGA
-	int "SIGSEGA"
+config SIG_SEGV
+	int "SIGSEGV"
 	default 18
 	---help---
-		The SIGSEGA is sent when an attempt is made to access memory that is
+		The SIGSEGV is sent when an attempt is made to access memory that is
 		not allocated to itself, or to write data to a memory address that does
 		not have write permission, or to illegally use the memory address signal.
 
