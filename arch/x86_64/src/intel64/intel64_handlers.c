@@ -133,8 +133,6 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
  *
  ****************************************************************************/
 
-#define SIGFPE 8
-
 uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
