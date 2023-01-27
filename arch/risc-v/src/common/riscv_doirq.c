@@ -28,12 +28,12 @@
 #include <assert.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
-#include "group/group.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -98,7 +98,7 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
     }
 #endif
 

@@ -560,7 +560,7 @@ int up_addrenv_clone(FAR const arch_addrenv_t *src,
  *   group.
  *
  * Input Parameters:
- *   group - The task group to which the new thread belongs.
+ *   ptcb  - The tcb of the parent task.
  *   tcb   - The tcb of the thread needing the address environment.
  *
  * Returned Value:
@@ -568,7 +568,7 @@ int up_addrenv_clone(FAR const arch_addrenv_t *src,
  *
  ****************************************************************************/
 
-int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
+int up_addrenv_attach(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb)
 {
   /* There is nothing that needs to be done */
 
@@ -590,7 +590,6 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
  *   may be sufficient.
  *
  * Input Parameters:
- *   group - The group to which the thread belonged.
  *   tcb - The TCB of the task or thread whose the address environment will
  *     be released.
  *
@@ -599,7 +598,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
+int up_addrenv_detach(FAR struct tcb_s *tcb)
 {
   /* There is nothing that needs to be done */
 

@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <syscall.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/addrenv.h>
@@ -38,7 +39,6 @@
 #include "addrenv.h"
 #include "arm.h"
 #include "arm_internal.h"
-#include "group/group.h"
 #include "signal/signal.h"
 
 /****************************************************************************
@@ -596,7 +596,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
     }
 #endif
 

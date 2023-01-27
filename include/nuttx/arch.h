@@ -1094,13 +1094,9 @@ int up_addrenv_clone(FAR const arch_addrenv_t *src,
  *   is created that needs to share the address environment of its task
  *   group.
  *
- *   NOTE: In some platforms, nothing will need to be done in this case.
- *   Simply being a member of the group that has the address environment
- *   may be sufficient.
- *
  * Input Parameters:
- *   group - The task group to which the new thread belongs.
- *   tcb   - The TCB of the thread needing the address environment.
+ *   ptcb  - The tcb of the parent task.
+ *   tcb   - The tcb of the thread needing the address environment.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -1108,7 +1104,7 @@ int up_addrenv_clone(FAR const arch_addrenv_t *src,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
+int up_addrenv_attach(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
@@ -1121,12 +1117,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  *   task group is itself destroyed.  Any resources unique to this thread
  *   may be destroyed now.
  *
- *   NOTE: In some platforms, nothing will need to be done in this case.
- *   Simply being a member of the group that has the address environment
- *   may be sufficient.
- *
  * Input Parameters:
- *   group - The group to which the thread belonged.
  *   tcb - The TCB of the task or thread whose the address environment will
  *     be released.
  *
@@ -1136,7 +1127,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
+int up_addrenv_detach(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************

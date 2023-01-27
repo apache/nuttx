@@ -51,7 +51,7 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+#if defined(HAVE_GROUP_MEMBERS)
 /* This is the head of a list of all group members */
 
 FAR struct task_group_s *g_grouphead;
@@ -231,7 +231,7 @@ errout_with_group:
 void group_initialize(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+#if defined(HAVE_GROUP_MEMBERS)
   irqstate_t flags;
 #endif
 
@@ -261,7 +261,7 @@ void group_initialize(FAR struct task_tcb_s *tcb)
 
   group->tg_nmembers = 1;
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+#if defined(HAVE_GROUP_MEMBERS)
   /* Add the initialized entry to the list of groups */
 
   flags = enter_critical_section();

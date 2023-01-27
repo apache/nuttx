@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_addrenv.c
+ * sched/addrenv/addrenv.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,33 +27,37 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
-#include "group/group.h"
-
-#ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* This variable holds the current task group.  This pointer is NULL
- * if the current task is a kernel thread that has no address environment
- * (other than the kernel context).
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This variable holds the current address environment. These contents are
+ * _never_ NULL, besides when the system is started and there are only the
+ * initial kernel mappings available.
  *
  * This must only be accessed with interrupts disabled.
+ *
+ * REVISIT: Try to get rid of this, global bookkeeping for this is dangerous.
  */
 
-FAR struct task_group_s *g_group_current[CONFIG_SMP_NCPUS];
+static FAR struct addrenv_s *g_addrenv[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_addrenv
+ * Name: addrenv_switch
  *
  * Description:
  *   Instantiate the group address environment for the current thread at the
@@ -80,10 +84,10 @@ FAR struct task_group_s *g_group_current[CONFIG_SMP_NCPUS];
  *
  ****************************************************************************/
 
-int group_addrenv(FAR struct tcb_s *tcb)
+int addrenv_switch(FAR struct tcb_s *tcb)
 {
-  FAR struct task_group_s *group;
-  FAR struct task_group_s *oldgroup;
+  FAR struct addrenv_s *curr;
+  FAR struct addrenv_s *next;
   irqstate_t flags;
   int cpu;
   int ret;
@@ -97,12 +101,12 @@ int group_addrenv(FAR struct tcb_s *tcb)
       tcb = this_task();
     }
 
-  DEBUGASSERT(tcb && tcb->group);
-  group = tcb->group;
+  DEBUGASSERT(tcb);
+  next = tcb->mm_curr;
 
   /* Does the group have an address environment? */
 
-  if ((group->tg_flags & GROUP_FLAG_ADDRENV) == 0)
+  if (!next)
     {
       /* No... just return perhaps leaving a different address environment
        * intact.
@@ -111,24 +115,24 @@ int group_addrenv(FAR struct tcb_s *tcb)
       return OK;
     }
 
-  /* Are we going to change address environments? */
-
   flags = enter_critical_section();
 
   cpu = this_cpu();
-  oldgroup = g_group_current[cpu];
-  if (group != oldgroup)
+  curr = g_addrenv[cpu];
+
+  /* Are we going to change address environments? */
+
+  if (curr != next)
     {
       /* Yes.. Is there a current address environment in place? */
 
-      if (oldgroup)
+      if (curr)
         {
           /* We need to flush the D-Cache and Invalidate the I-Cache for
            * the group whose environment is disappearing.
            */
 
-          DEBUGASSERT((oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
-          up_addrenv_coherent(&oldgroup->tg_addrenv);
+          up_addrenv_coherent(&curr->addrenv);
         }
 
       /* Instantiate the new address environment (removing the old
@@ -137,19 +141,115 @@ int group_addrenv(FAR struct tcb_s *tcb)
        * instantiated.
        */
 
-      ret = up_addrenv_select(&group->tg_addrenv, NULL);
+      ret = up_addrenv_select(&next->addrenv, NULL);
       if (ret < 0)
         {
           berr("ERROR: up_addrenv_select failed: %d\n", ret);
         }
 
-      /* Save the new, current group */
+      /* Save the new, current address environment group */
 
-      g_group_current[cpu] = group;
+      g_addrenv[cpu] = next;
     }
 
   leave_critical_section(flags);
   return OK;
 }
 
-#endif /* CONFIG_ARCH_ADDRENV */
+/****************************************************************************
+ * Name: addrenv_allocate
+ *
+ * Description:
+ *   Allocate an address environment for a new process.
+ *
+ * Input Parameters:
+ *   tcb   - The tcb of the newly created task.
+ *   ttype - The type of the task.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
+{
+  int ret = OK;
+
+  if ((ttype & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      tcb->addrenv_own = NULL;
+    }
+  else
+    {
+      tcb->addrenv_own = (FAR struct addrenv_s *)
+        kmm_zalloc(sizeof(struct addrenv_s));
+      if (tcb->addrenv_own == NULL)
+        {
+          ret = -ENOMEM;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: addrenv_free
+ *
+ * Description:
+ *   Free an address environment for a process.
+ *
+ * Input Parameters:
+ *   tcb - The tcb of the task.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_free(FAR struct tcb_s *tcb)
+{
+  if (tcb->addrenv_own != NULL)
+    {
+      kmm_free(tcb->addrenv_own);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: addrenv_attach
+ *
+ * Description:
+ *   Attach address environment to a newly created group. Called by exec()
+ *   right before injecting the new process into the system.
+ *
+ * Input Parameters:
+ *   tcb     - The tcb of the newly loaded task.
+ *   addrenv - The address environment that is attached.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_attach(FAR struct tcb_s *tcb,
+                   FAR const struct arch_addrenv_s *addrenv)
+{
+  int ret;
+
+  /* Clone the address environment for us */
+
+  ret = up_addrenv_clone(addrenv, &tcb->addrenv_own->addrenv);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_clone failed: %d\n", ret);
+    }
+
+  return OK;
+}

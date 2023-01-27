@@ -26,8 +26,9 @@
 
 #include <stdint.h>
 
+#include <nuttx/addrenv.h>
+
 #include "riscv_internal.h"
-#include "group/group.h"
 
 /****************************************************************************
  * Public Functions
@@ -52,7 +53,7 @@ void *riscv_perform_syscall(uintptr_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
     }
 #endif
 

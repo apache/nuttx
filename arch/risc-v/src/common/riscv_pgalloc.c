@@ -94,14 +94,14 @@
 
 uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 {
-  struct tcb_s        *tcb = nxsched_self();
-  struct task_group_s *group;
-  uintptr_t            ptlast;
-  uintptr_t            paddr;
-  uintptr_t            vaddr;
+  struct tcb_s          *tcb = nxsched_self();
+  struct arch_addrenv_s *addrenv;
+  uintptr_t              ptlast;
+  uintptr_t              paddr;
+  uintptr_t              vaddr;
 
-  DEBUGASSERT(tcb && tcb->group);
-  group = tcb->group;
+  DEBUGASSERT(tcb && tcb->addrenv_own);
+  addrenv = &tcb->addrenv_own->addrenv;
 
   /* The current implementation only supports extending the user heap
    * region as part of the implementation of user sbrk().  This function
@@ -109,13 +109,11 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
    * space and (2) extending the kernel memory regions as well.
    */
 
-  DEBUGASSERT((group->tg_flags & GROUP_FLAG_ADDRENV) != 0);
-
   /* brkaddr = 0 means that no heap has yet been allocated */
 
   if (!brkaddr)
     {
-      brkaddr = group->tg_addrenv.heapvbase;
+      brkaddr = addrenv->heapvbase;
     }
 
   /* Start mapping from the old heap break address */
@@ -124,14 +122,14 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
   /* Sanity checks */
 
-  DEBUGASSERT(brkaddr >= group->tg_addrenv.heapvbase);
+  DEBUGASSERT(brkaddr >= addrenv->heapvbase);
   DEBUGASSERT(MM_ISALIGNED(brkaddr));
 
   for (; npages > 0; npages--)
     {
       /* Get the address of the last level page table */
 
-      ptlast = riscv_pgvaddr(riscv_get_pgtable(&group->tg_addrenv, vaddr));
+      ptlast = riscv_pgvaddr(riscv_get_pgtable(addrenv, vaddr));
       if (!ptlast)
         {
           return 0;
