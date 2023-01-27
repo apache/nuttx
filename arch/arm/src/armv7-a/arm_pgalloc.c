@@ -136,7 +136,7 @@ static int get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
           /* And instantiate the modified environment */
 
-          up_addrenv_select(addrenv, NULL);
+          up_addrenv_select(addrenv);
         }
     }
 

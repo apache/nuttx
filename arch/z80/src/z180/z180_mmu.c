@@ -174,7 +174,6 @@ int z80_mmu_initialize(void)
  *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
- *   up_addrenv_restore  - Restore an address environment
  *   up_addrenv_clone    - Copy an address environment from one location to
  *                        another.
  *
@@ -443,58 +442,25 @@ ssize_t up_addrenv_heapsize(FAR const arch_addrenv_t *addrenv)
  * Input Parameters:
  *   addrenv - The representation of the task address environment previously
  *     returned by up_addrenv_create.
- *   oldenv
- *     The address environment that was in place before up_addrenv_select().
- *     This may be used with up_addrenv_restore() to restore the original
- *     address environment that was in place before up_addrenv_select() was
- *     called.  Note that this may be a task agnostic, hardware
- *     representation that is different from arch_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_select(FAR const arch_addrenv_t *addrenv,
-                      FAR save_addrenv_t *oldenv)
+int up_addrenv_select(FAR const arch_addrenv_t *addrenv)
 {
   FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
   irqstate_t flags;
 
-  DEBUGASSERT(cbr && oldenv);
-
-  /* Return the current CBR value from the CBR register */
+  DEBUGASSERT(cbr);
 
   flags = enter_critical_section();
-  *oldenv = (save_addrenv_t)inp(Z180_MMU_CBR);
 
   /* Write the new CBR value into CBR register */
 
   outp(Z180_MMU_CBR, cbr->cbr);
   leave_critical_section(flags);
-  return OK;
-}
-
-/****************************************************************************
- * Name: up_addrenv_restore
- *
- * Description:
- *   After an address environment has been temporarily instantiated by
- *   up_addrenv_select, this function may be called to restore the
- *   original address environment.
- *
- * Input Parameters:
- *   oldenv - The hardware representation of the address environment
- *     previously returned by up_addrenv_select.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
-{
-  outp(Z180_MMU_CBR, (uint8_t)*oldenv);
   return OK;
 }
 

@@ -102,31 +102,6 @@ struct arch_addrenv_s
   size_t heapsize;
 #endif
 };
-
-typedef struct arch_addrenv_s arch_addrenv_t;
-
-/* This type is used when the OS needs to temporarily instantiate a
- * different address environment.  Used in the implementation of
- *
- *   int up_addrenv_select(arch_addrenv_t addrenv, save_addrenv_t *oldenv);
- *   int up_addrenv_restore(save_addrenv_t oldenv);
- *
- * In this case, the saved valued in the L1 page table are returned
- */
-
-struct save_addrenv_s
-{
-  uint32_t text[ARCH_TEXT_NSECTS];
-  uint32_t data[ARCH_DATA_NSECTS];
-#ifdef CONFIG_BUILD_KERNEL
-  uint32_t heap[ARCH_HEAP_NSECTS];
-#ifdef CONFIG_ARCH_VMA_MAPPING
-  uint32_t shm[ARCH_SHM_NSECTS];
-#endif
-#endif
-};
-
-typedef struct save_addrenv_s save_addrenv_t;
 #endif
 
 /****************************************************************************

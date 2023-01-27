@@ -643,7 +643,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
    */
 
 #if 0 /* REVISIT... has some problems */
-  up_addrenv_coherent(&loadinfo->addrenv);
+  up_addrenv_coherent(&loadinfo->addrenv.addrenv);
 #else
   up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
   up_coherent_dcache(loadinfo->dataalloc, loadinfo->datasize);

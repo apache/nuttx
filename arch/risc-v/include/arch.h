@@ -101,12 +101,6 @@ struct arch_addrenv_s
 };
 
 typedef struct arch_addrenv_s arch_addrenv_t;
-
-/* If an address environment needs to be saved, saving the satp register
- * will suffice. The register width is architecture dependent
- */
-
-typedef uintptr_t save_addrenv_t;
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_ARCH_ADDRENV */
 
