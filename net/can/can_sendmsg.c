@@ -107,6 +107,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Copy the packet data into the device packet buffer and send it */
 
           devif_send(dev, pstate->snd_buffer, pstate->snd_buflen, 0);
+          dev->d_len = dev->d_sndlen;
           if (dev->d_sndlen == 0)
             {
               return flags;
