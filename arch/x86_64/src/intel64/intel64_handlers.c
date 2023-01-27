@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/signal.h>
@@ -99,7 +100,7 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
 #endif
     }
 #endif

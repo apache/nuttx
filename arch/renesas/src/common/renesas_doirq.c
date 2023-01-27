@@ -100,7 +100,7 @@ uint32_t *renesas_doirq(int irq, uint32_t * regs)
            * thread at the head of the ready-to-run list.
            */
 
-          group_addrenv(NULL);
+          addrenv_switch(NULL);
 #endif
         }
 

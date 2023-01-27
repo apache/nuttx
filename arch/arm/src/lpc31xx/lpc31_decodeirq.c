@@ -28,12 +28,12 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "group/group.h"
 
 #include "lpc31_intc.h"
 
@@ -105,7 +105,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
                * thread at the head of the ready-to-run list.
                */
 
-              group_addrenv(NULL);
+              addrenv_switch(NULL);
             }
 #endif
 

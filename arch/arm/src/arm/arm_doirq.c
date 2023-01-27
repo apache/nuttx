@@ -29,11 +29,11 @@
 #include <nuttx/arch.h>
 #include <assert.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "group/group.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,7 +95,7 @@ void arm_doirq(int irq, uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
     }
 #endif
 

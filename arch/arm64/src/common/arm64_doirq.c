@@ -28,13 +28,14 @@
 #include <assert.h>
 #include <sched.h>
 #include <debug.h>
+
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
 #include "task/task.h"
 #include "sched/sched.h"
-#include "group/group.h"
 #include "irq/irq.h"
 #include "arm64_arch.h"
 #include "arm64_internal.h"
@@ -88,7 +89,7 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
 #endif
 
       /* Restore the cpu lock */
