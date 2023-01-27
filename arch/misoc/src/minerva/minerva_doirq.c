@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -35,7 +36,6 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "group/group.h"
 #include "minerva.h"
 
 /****************************************************************************
@@ -87,7 +87,7 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
        * the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
 #  endif
     }
 #endif

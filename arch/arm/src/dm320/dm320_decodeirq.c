@@ -30,9 +30,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
+
 #include "chip.h"
 #include "arm_internal.h"
-#include "group/group.h"
 
 /****************************************************************************
  * Public Functions
@@ -99,7 +100,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
                * thread at the head of the ready-to-run list.
                */
 
-              group_addrenv(NULL);
+              addrenv_switch(NULL);
             }
 #endif
 

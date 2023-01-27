@@ -27,11 +27,12 @@
 #include <sched.h>
 #include <assert.h>
 #include <debug.h>
+
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
-#include "group/group.h"
 #include "clock/clock.h"
 #include "renesas_internal.h"
 
@@ -95,7 +96,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(tcb);
+      addrenv_switch(tcb);
 #endif
       /* Update scheduler parameters */
 
