@@ -66,7 +66,7 @@
 int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 {
   struct tcb_s *tcb = nxsched_self();
-  struct task_group_s *group;
+  struct arch_addrenv_s *addrenv;
   uintptr_t *l1entry;
   uint32_t *l2table;
   irqstate_t flags;
@@ -79,11 +79,11 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
   /* Sanity checks */
 
-  DEBUGASSERT(pages && npages > 0 && tcb && tcb->group);
+  DEBUGASSERT(pages && npages > 0 && tcb && tcb->addrenv_own);
   DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
-  group = tcb->group;
+  addrenv = &tcb->addrenv_own->addrenv;
 
   /* Loop until all pages have been mapped into the caller's address space. */
 
@@ -97,7 +97,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
        * address.
        */
 
-      l1entry = group->tg_addrenv.shm[shmndx];
+      l1entry = addrenv->shm[shmndx];
       if (l1entry == NULL)
         {
           /* No.. Allocate one physical page for the L2 page table */
@@ -115,7 +115,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            */
 
           flags = enter_critical_section();
-          group->tg_addrenv.shm[shmndx] = (uintptr_t *)paddr;
+          addrenv->shm[shmndx] = (uintptr_t *)paddr;
 
           /* Get the virtual address corresponding to the physical page
            * address.
@@ -189,7 +189,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 int up_shmdt(uintptr_t vaddr, unsigned int npages)
 {
   struct tcb_s *tcb = nxsched_self();
-  struct task_group_s *group;
+  struct arch_addrenv_s *addrenv;
   uintptr_t *l1entry;
   uint32_t *l2table;
   irqstate_t flags;
@@ -201,11 +201,11 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
   /* Sanity checks */
 
-  DEBUGASSERT(npages > 0 && tcb && tcb->group);
+  DEBUGASSERT(npages > 0 && tcb && tcb->addrenv_own);
   DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
-  group = tcb->group;
+  addrenv = &tcb->addrenv_own->addrenv;
 
   /* Loop until all pages have been unmapped from the caller's address
    * space.
@@ -219,7 +219,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
       /* Get the level 1 page table entry for this virtual address */
 
-      l1entry = group->tg_addrenv.shm[shmndx];
+      l1entry = addrenv->shm[shmndx];
       DEBUGASSERT(l1entry != NULL);
 
       /* Get the physical address of the L2 page table from the L1 page

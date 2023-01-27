@@ -824,7 +824,7 @@ int up_addrenv_clone(const arch_addrenv_t *src,
  *   group.
  *
  * Input Parameters:
- *   group - The task group to which the new thread belongs.
+ *   ptcb  - The tcb of the parent task.
  *   tcb   - The tcb of the thread needing the address environment.
  *
  * Returned Value:
@@ -832,7 +832,7 @@ int up_addrenv_clone(const arch_addrenv_t *src,
  *
  ****************************************************************************/
 
-int up_addrenv_attach(struct task_group_s *group, struct tcb_s *tcb)
+int up_addrenv_attach(struct tcb_s *ptcb, struct tcb_s *tcb)
 {
   /* There is nothing that needs to be done */
 
@@ -849,12 +849,7 @@ int up_addrenv_attach(struct task_group_s *group, struct tcb_s *tcb)
  *   task group is itself destroyed.  Any resources unique to this thread
  *   may be destroyed now.
  *
- *   NOTE: In some platforms, nothing will need to be done in this case.
- *   Simply being a member of the group that has the address environment
- *   may be sufficient.
- *
  * Input Parameters:
- *   group - The group to which the thread belonged.
  *   tcb - The TCB of the task or thread whose the address environment will
  *     be released.
  *
@@ -863,7 +858,7 @@ int up_addrenv_attach(struct task_group_s *group, struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_detach(struct task_group_s *group, struct tcb_s *tcb)
+int up_addrenv_detach(struct tcb_s *tcb)
 {
   /* There is nothing that needs to be done */
 

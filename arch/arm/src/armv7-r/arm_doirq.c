@@ -33,7 +33,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "group/group.h"
 
 /****************************************************************************
  * Public Functions

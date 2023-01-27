@@ -33,7 +33,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <nuttx/pgalloc.h>
-#  include <nuttx/addrenv.h>
 #endif
 
 /****************************************************************************

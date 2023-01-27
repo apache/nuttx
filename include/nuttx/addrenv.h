@@ -32,6 +32,8 @@
 #  include <nuttx/mm/mm.h>
 #endif
 
+#include <arch/arch.h>
+
 #ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
@@ -218,12 +220,24 @@
      (CONFIG_ARCH_PGPOOL_VBASE + CONFIG_ARCH_PGPOOL_SIZE)
 
 #endif
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct tcb_s;                  /* Forward reference to TCB */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+struct addrenv_s
+{
+  struct arch_addrenv_s addrenv; /* The address environment page directory  */
+};
+
+typedef struct addrenv_s addrenv_t;
 
 /* Reserved .bss/.data region.  In the kernel build (CONFIG_BUILD_KERNEL),
  * the region at the beginning of the .bss/.data region is reserved for use
@@ -268,6 +282,83 @@ struct addrenv_reserve_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: addrenv_allocate
+ *
+ * Description:
+ *   Allocate an address environment for a new process.
+ *
+ * Input Parameters:
+ *   tcb   - The tcb of the newly created task.
+ *   ttype - The type of the task.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_allocate(FAR struct tcb_s *tcb, uint8_t ttype);
+
+/****************************************************************************
+ * Name: addrenv_free
+ *
+ * Description:
+ *   Free an address environment for a process.
+ *
+ * Input Parameters:
+ *   tcb - The tcb of the task.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_free(FAR struct tcb_s *tcb);
+
+/****************************************************************************
+ * Name: addrenv_switch
+ *
+ * Description:
+ *   Switch to an address environment.
+ *
+ * Input Parameters:
+ *   tcb - The tcb of the task to switch to, or NULL to use the task at the
+ *         head of the ready-to-run list.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_switch(FAR struct tcb_s *tcb);
+
+/****************************************************************************
+ * Name: addrenv_attach
+ *
+ * Description:
+ *   Attach address environment to a newly process. Called by exec() right
+ *   before injecting the new process into the system.
+ *
+ * Input Parameters:
+ *   tcb     - The tcb of the newly loaded task.
+ *   addrenv - The address environment that is attached.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_attach(FAR struct tcb_s *tcb,
+                   FAR const struct arch_addrenv_s *addrenv);
 
 /****************************************************************************
  * Address Environment Interfaces
