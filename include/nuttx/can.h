@@ -221,6 +221,9 @@
 #define CAN_ERR_BUSOFF           (1 << 6) /* Bit 6: Bus off */
 #define CAN_ERR_BUSERROR         (1 << 7) /* Bit 7: Bus error */
 #define CAN_ERR_RESTARTED        (1 << 8) /* Bit 8: Controller restarted */
+#define CAN_ERR_CNT              (1 << 9) /* Tx error counter / data[6]
+                                           * Rx error counter / data[7]
+                                           */
 
 /* The remaining definitions described the error report payload that follows
  * the CAN header.
