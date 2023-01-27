@@ -365,7 +365,7 @@ int addrenv_switch(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 int addrenv_attach(FAR struct tcb_s *tcb,
-                   FAR const struct arch_addrenv_s *addrenv);
+                   FAR const struct addrenv_s *addrenv);
 
 /****************************************************************************
  * Name: addrenv_join
@@ -405,10 +405,11 @@ int addrenv_join(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb);
 int addrenv_leave(FAR struct tcb_s *tcb);
 
 /****************************************************************************
- * Name: addrenv_take
+ * Name: addrenv_select
  *
  * Description:
- *   Take a reference to an address environment.
+ *   Temporarily select a different address environment for the currently
+ *   running process.
  *
  * Input Parameters:
  *   addrenv - The address environment.
@@ -420,21 +421,54 @@ int addrenv_leave(FAR struct tcb_s *tcb);
  *
  ****************************************************************************/
 
+int addrenv_select(FAR struct addrenv_s *addrenv);
+
+/****************************************************************************
+ * Name: addrenv_restore
+ *
+ * Description:
+ *   Switch back to the procces's own address environment.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_restore(void);
+
+/****************************************************************************
+ * Name: addrenv_take
+ *
+ * Description:
+ *   Take a reference to an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
 void addrenv_take(FAR struct addrenv_s *addrenv);
 
 /****************************************************************************
  * Name: addrenv_give
  *
  * Description:
- *   Give back a reference to an address environment.
+ *   Give back a reference to an address environment, obtaining the resulting
+ *   reference counter as returned value.
  *
  * Input Parameters:
  *   addrenv - The address environment.
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   Remaining reference count.
  *
  ****************************************************************************/
 
@@ -452,9 +486,7 @@ int addrenv_give(FAR struct addrenv_s *addrenv);
  *              no:  The address environment can be dropped at once
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   None.
  *
  ****************************************************************************/
 
@@ -478,7 +510,6 @@ void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred);
  *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
- *   up_addrenv_restore  - Restore an address environment
  *   up_addrenv_clone    - Copy an address environment from one location to
  *                         another.
  *

@@ -34,7 +34,6 @@ The CPU-specific logic must provide two categories in interfaces:
    - :c:func:`up_addrenv_vdata()`: Returns the virtual base address of the ``.bss``/``.data`` address environment.
    - :c:func:`up_addrenv_heapsize()`: Return the initial heap size.
    - :c:func:`up_addrenv_select()`: Instantiate an address environment.
-   - :c:func:`up_addrenv_restore()`: Restore an address environment.
    - :c:func:`up_addrenv_clone()`: Copy an address environment from one location to another.
 
 #. **Tasking Support**. Other interfaces must be provided to
@@ -162,7 +161,7 @@ The CPU-specific logic must provide two categories in interfaces:
   :return: The initial heap size allocated is returned on success;
     a negated errno value on failure.
 
-.. c:function:: int up_addrenv_select(arch_addrenv_t *addrenv, save_addrenv_t *oldenv)
+.. c:function:: int up_addrenv_select(arch_addrenv_t *addrenv)
 
   After an address environment has been established for a task
   (via up_addrenv_create()), this function may be called to instantiate
@@ -172,24 +171,6 @@ The CPU-specific logic must provide two categories in interfaces:
 
   :param addrenv: The representation of the task address environment
     previously returned by ``up_addrenv_create()``.
-  :param oldenv: The address environment that was in place before
-    ``up_addrenv_select()`` was called. This may be used with
-    ``up_addrenv_restore()`` to restore the original address
-    environment that was in place before ``up_addrenv_select()``
-    was called. Note that this may be a task agnostic,
-    platform-specific representation that may or may not be
-    different from ``arch_addrenv_t``.
-
-  :return: Zero (OK) on success; a negated errno value on failure.
-
-.. c:function:: int up_addrenv_restore(save_addrenv_t oldenv)
-
-  After an address environment has been temporarily instantiated
-  by up_addrenv_select, this function may be called to restore
-  the original address environment.
-
-  :param oldenv: The platform-specific representation of the address
-    environment previously returned by ``up_addrenv_select()``.
 
   :return: Zero (OK) on success; a negated errno value on failure.
 

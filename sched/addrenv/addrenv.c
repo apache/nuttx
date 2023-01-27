@@ -87,6 +87,35 @@ static void addrenv_destroy(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: addrenv_clear_current
+ *
+ * Description:
+ *   Clear the current addrenv from g_addrenv, if it matches the input.
+ *
+ * Input Parameters:
+ *   addrenv - Pointer to the addrenv to free.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void addrenv_clear_current(FAR const addrenv_t *addrenv)
+{
+  int i;
+
+  /* Mark no address environment */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (addrenv == g_addrenv[i])
+        {
+          g_addrenv[i] = NULL;
+        }
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -136,7 +165,7 @@ int addrenv_switch(FAR struct tcb_s *tcb)
     }
 
   DEBUGASSERT(tcb);
-  next = tcb->mm_curr;
+  next = tcb->addrenv_curr;
 
   /* Does the group have an address environment? */
 
@@ -179,7 +208,7 @@ int addrenv_switch(FAR struct tcb_s *tcb)
        * instantiated.
        */
 
-      ret = up_addrenv_select(&next->addrenv, NULL);
+      ret = up_addrenv_select(&next->addrenv);
       if (ret < 0)
         {
           berr("ERROR: up_addrenv_select failed: %d\n", ret);
@@ -285,13 +314,13 @@ int addrenv_free(FAR struct tcb_s *tcb)
  ****************************************************************************/
 
 int addrenv_attach(FAR struct tcb_s *tcb,
-                   FAR const struct arch_addrenv_s *addrenv)
+                   FAR const struct addrenv_s *addrenv)
 {
   int ret;
 
   /* Clone the address environment for us */
 
-  ret = up_addrenv_clone(addrenv, &tcb->addrenv_own->addrenv);
+  ret = up_addrenv_clone(&addrenv->addrenv, &tcb->addrenv_own->addrenv);
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_clone failed: %d\n", ret);
@@ -379,6 +408,63 @@ int addrenv_leave(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
+ * Name: addrenv_select
+ *
+ * Description:
+ *   Temporarily select a different address environment for the currently
+ *   running process.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_select(FAR struct addrenv_s *addrenv)
+{
+  FAR struct tcb_s *tcb = this_task();
+  addrenv_take(addrenv);
+  tcb->addrenv_curr = addrenv;
+  return addrenv_switch(tcb);
+}
+
+/****************************************************************************
+ * Name: addrenv_restore
+ *
+ * Description:
+ *   Switch back to the procces's own address environment.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_restore(void)
+{
+  FAR struct tcb_s *tcb = this_task();
+  addrenv_give(tcb->addrenv_curr);
+
+  if (tcb->addrenv_own == NULL)
+    {
+      /* Kernel thread, clear g_addrenv, as it is not valid any more */
+
+      addrenv_clear_current(tcb->addrenv_curr);
+    }
+
+  tcb->addrenv_curr = tcb->addrenv_own;
+  return addrenv_switch(tcb);
+}
+
+/****************************************************************************
  * Name: addrenv_take
  *
  * Description:
@@ -388,9 +474,7 @@ int addrenv_leave(FAR struct tcb_s *tcb)
  *   addrenv - The address environment.
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   None.
  *
  ****************************************************************************/
 
@@ -405,15 +489,14 @@ void addrenv_take(FAR struct addrenv_s *addrenv)
  * Name: addrenv_give
  *
  * Description:
- *   Give back a reference to an address environment.
+ *   Give back a reference to an address environment, obtaining the resulting
+ *   reference counter as returned value.
  *
  * Input Parameters:
  *   addrenv - The address environment.
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   Remaining reference count.
  *
  ****************************************************************************/
 
@@ -441,9 +524,7 @@ int addrenv_give(FAR struct addrenv_s *addrenv)
  *              no:  The address environment can be dropped at once
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   None.
  *
  ****************************************************************************/
 
