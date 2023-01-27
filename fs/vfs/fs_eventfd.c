@@ -308,7 +308,7 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 
   /* Device ready for read */
 
-  if (filep->f_oflags & EFD_SEMAPHORE)
+  if ((filep->f_oflags & EFD_SEMAPHORE) != 0)
     {
       *(FAR eventfd_t *)buffer = 1;
       dev->counter -= 1;
@@ -506,7 +506,7 @@ int eventfd(unsigned int count, int flags)
   int new_fd;
   int ret;
 
-  if (flags & ~(EFD_NONBLOCK | EFD_SEMAPHORE | EFD_CLOEXEC))
+  if ((flags & ~(EFD_NONBLOCK | EFD_SEMAPHORE | EFD_CLOEXEC)) != 0)
     {
       ret = -EINVAL;
       goto exit_set_errno;

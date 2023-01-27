@@ -568,6 +568,7 @@
 
 #define XCHAL_HAVE_XEA1               0           /* Exception Architecture 1 */
 #define XCHAL_HAVE_XEA2               1           /* Exception Architecture 2 */
+#define XCHAL_HAVE_XEA3               0           /* Exception Architecture 3 */
 #define XCHAL_HAVE_XEAX               0           /* External Exception Arch. */
 #define XCHAL_HAVE_EXCEPTIONS         1           /* exception option */
 #define XCHAL_HAVE_HALT               0           /* halt architecture option */

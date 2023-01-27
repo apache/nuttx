@@ -207,7 +207,7 @@
 #  define ENET_MMFR_OP_WRNOTMII      (0 << ENET_MMFR_OP_SHIFT) /* Write frame, not MII compliant */
 #  define ENET_MMFR_OP_WRMII         (1 << ENET_MMFR_OP_SHIFT) /* Write frame, MII management frame */
 #  define ENET_MMFR_OP_RDMII         (2 << ENET_MMFR_OP_SHIFT) /* Read frame, MII management frame */
-#  define ENET_MMFR_OP_RdNOTMII      (3 << ENET_MMFR_OP_SHIFT) /* Read frame, not MII compliant */
+#  define ENET_MMFR_OP_RDNOTMII      (3 << ENET_MMFR_OP_SHIFT) /* Read frame, not MII compliant */
 
 #define ENET_MMFR_ST_SHIFT           (30)      /* Bits 30-31: Start of frame delimiter */
 #define ENET_MMFR_ST_MASK            (3 << ENET_MMFR_ST_SHIFT)

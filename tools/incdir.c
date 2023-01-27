@@ -21,8 +21,10 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
+#ifndef CONFIG_WINDOWS_NATIVE
 #include <sys/utsname.h>
+#endif
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -113,17 +115,13 @@ static void show_help(const char *progname, int exitcode)
   exit(exitcode);
 }
 
-static enum os_e get_os(char *ccname)
+static enum os_e get_os(void)
 {
+#ifdef CONFIG_WINDOWS_NATIVE
+  return OS_WINDOWS;
+#else
   struct utsname buf;
   int ret;
-
-  /* Check for MinGW which implies a Windows native environment */
-
-  if (strstr(ccname, "mingw") != NULL)
-    {
-      return OS_WINDOWS;
-    }
 
   /* Get the context names */
 
@@ -167,9 +165,10 @@ static enum os_e get_os(char *ccname)
               buf.sysname);
       return OS_UNKNOWN;
     }
+#endif
 }
 
-static enum compiler_e get_compiler(char *ccname, enum os_e os)
+static enum compiler_e get_compiler(char *ccname)
 {
   /* Let's assume that all GCC compiler paths contain the string gcc or
    * g++ and no non-GCC compiler paths include these substrings.
@@ -325,14 +324,14 @@ int main(int argc, char **argv, char **envp)
    * files.
    */
 
-  os = get_os(ccname);
+  os = get_os();
   if (os == OS_UNKNOWN)
     {
       fprintf(stderr, "ERROR:  Operating system not recognized\n");
       show_advice(progname, EXIT_FAILURE);
     }
 
-  compiler = get_compiler(ccname, os);
+  compiler = get_compiler(ccname);
   if (compiler == COMPILER_UNKNOWN)
     {
       fprintf(stderr, "ERROR:  Compiler not recognized.\n");

@@ -240,10 +240,12 @@ static int snoop_flush(FAR struct snoop_s *snoop)
     }
   while (snoop->next > 0);
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   if (snoop->autosync)
     {
       ret = file_fsync(&snoop->filep);
     }
+#endif
 
   return ret;
 }
@@ -292,6 +294,17 @@ static void snoop_flush_work(FAR void *arg)
  *
  * Description:
  *   This function open snoop file by datalink.
+ *
+ * Input Parameters:
+ *   snoop     The snoop driver struct
+ *   filename  Snoop file name
+ *   datalink  Snoop datalink type, such as SNOOP_DATALINK_TYPE_XX
+ *   autosync  whether do file_sync when snoop_dump
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
@@ -381,6 +394,18 @@ error:
  * Description:
  *   This function dump nbytes buf data into snoop file.
  *
+ * Input Parameters:
+ *   snoop     The snoop driver struct
+ *   buf       Snoop buffer
+ *   nbytes    Snoop buffer size
+ *   drops     cumulative number of dropped packets
+ *   flags     Packet Flags: 1 hci cmd , eg: btsnoop
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
  ****************************************************************************/
 
 int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
@@ -464,6 +489,14 @@ out_leave:
  * Description:
  *   This function sync snoop buffer.
  *
+ * Input Parameters:
+ *   snoop     The snoop driver struct
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
  ****************************************************************************/
 
 int snoop_sync(FAR struct snoop_s *snoop)
@@ -481,6 +514,14 @@ int snoop_sync(FAR struct snoop_s *snoop)
  *
  * Description:
  *   This function close snoop file.
+ *
+ * Input Parameters:
+ *   snoop     The snoop driver struct
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 

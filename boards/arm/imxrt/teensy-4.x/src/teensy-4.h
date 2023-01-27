@@ -78,7 +78,7 @@
 #define GPIO_LPSPI4_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
                               GPIO_PORT2 | GPIO_PIN0 | IOMUX_LPSPI4_CS)
 
-/* LCD dispay */
+/* LCD display */
 
 #define GPIO_LCD_RST        (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
                               GPIO_PORT2 | GPIO_PIN18 | IOMUX_LPSPI4_CS)    /* B1_02 */

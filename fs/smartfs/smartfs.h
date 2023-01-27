@@ -206,12 +206,12 @@
                                             (uint16_t)(v))
 
 #else
-#  define SMARTFS_NEXTSECTOR(h)        (*((uint16_t *)h->nextsector))
-#  define SMARTFS_SET_NEXTSECTOR(h, v) ((*((uint16_t *)h->nextsector)) = \
+#  define SMARTFS_NEXTSECTOR(h)        (*((FAR uint16_t *)h->nextsector))
+#  define SMARTFS_SET_NEXTSECTOR(h, v) ((*((FAR uint16_t *)h->nextsector)) = \
                                             (uint16_t)(v))
 
-#  define SMARTFS_USED(h)              (*((uint16_t *)h->used))
-#  define SMARTFS_SET_USED(h, v)       ((*((uint16_t *)h->used)) = \
+#  define SMARTFS_USED(h)              (*((FAR uint16_t *)h->used))
+#  define SMARTFS_SET_USED(h, v)       ((*((FAR uint16_t *)h->used)) = \
                                             (uint16_t)(v))
 #endif
 

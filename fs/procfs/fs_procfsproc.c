@@ -411,7 +411,7 @@ static FAR const char * const g_statenames[] =
   "Inactive",
   "Waiting,Semaphore",
   "Waiting,Signal"
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   , "Waiting,MQ empty"
   , "Waiting,MQ full"
 #endif
@@ -972,7 +972,6 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
                              &offset);
   return totalsize;
 }
-
 #endif
 
 #ifdef CONFIG_DEBUG_MM
@@ -1486,7 +1485,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   if (strncmp(relpath, "self", 4) == 0)
     {
-      tmp = (unsigned long)gettid();    /* Get the PID of the calling task */
+      tmp = gettid();                   /* Get the TID of the calling task */
       ptr = (FAR char *)relpath + 4;    /* Discard const */
     }
   else
@@ -1794,7 +1793,7 @@ static int proc_opendir(FAR const char *relpath,
 
   if (strncmp(relpath, "self", 4) == 0)
     {
-      tmp = (unsigned long)gettid();    /* Get the PID of the calling task */
+      tmp = gettid();                   /* Get the TID of the calling task */
       ptr = (FAR char *)relpath + 4;    /* Discard const */
     }
   else
@@ -2034,7 +2033,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   if (strncmp(relpath, "self", 4) == 0)
     {
-      tmp = (unsigned long)gettid();    /* Get the PID of the calling task */
+      tmp = gettid();                   /* Get the TID of the calling task */
       ptr = (FAR char *)relpath + 4;    /* Discard const */
     }
   else

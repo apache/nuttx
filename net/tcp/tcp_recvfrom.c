@@ -541,7 +541,8 @@ static void tcp_recvfrom_initialize(FAR struct tcp_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_sem_timedwait operation (may indicate EINTR)
+ *   result   The result of the net_sem_timedwait operation
+ *            (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:

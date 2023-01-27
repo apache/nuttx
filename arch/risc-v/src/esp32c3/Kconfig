@@ -86,47 +86,6 @@ config ESP32C3_FLASH_DETECT
 	---help---
 		Auto detect flash size when flashing.
 
-choice ESP32C3_FLASH_MODE
-	prompt "SPI FLASH mode"
-	default ESP32C3_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication with the attached SPI flash chip.
-		The option selected here is then used by esptool when flashing.
-
-config ESP32C3_FLASH_MODE_DIO
-	bool "Dual IO (DIO)"
-
-config ESP32C3_FLASH_MODE_DOUT
-	bool "Dual Output (DOUT)"
-
-config ESP32C3_FLASH_MODE_QIO
-	bool "Quad IO (QIO)"
-
-config ESP32C3_FLASH_MODE_QOUT
-	bool "Quad Output (QOUT)"
-
-endchoice # ESP32C3_FLASH_MODE
-
-choice ESP32C3_FLASH_FREQ
-	prompt "SPI FLASH frequency"
-	default ESP32C3_FLASH_FREQ_40M
-	---help---
-		SPI FLASH frequency
-
-config ESP32C3_FLASH_FREQ_80M
-	bool "80 MHz"
-
-config ESP32C3_FLASH_FREQ_40M
-	bool "40 MHz"
-
-config ESP32C3_FLASH_FREQ_26M
-	bool "26 MHz"
-
-config ESP32C3_FLASH_FREQ_20M
-	bool "20 MHz"
-
-endchoice # ESP32C3_FLASH_FREQ
-
 choice ESP32C3_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32C3_CPU_FREQ_160
@@ -944,7 +903,47 @@ config ESP32C3_BLE_TASK_PRIORITY
 endmenu # BLE Configuration
 
 menu "SPI Flash configuration"
-	depends on ESP32C3_SPIFLASH
+
+choice ESP32C3_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESP32C3_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+config ESP32C3_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
+
+config ESP32C3_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
+
+config ESP32C3_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
+
+config ESP32C3_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
+
+endchoice # ESP32C3_FLASH_MODE
+
+choice ESP32C3_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESP32C3_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency.
+
+config ESP32C3_FLASH_FREQ_80M
+	bool "80 MHz"
+
+config ESP32C3_FLASH_FREQ_40M
+	bool "40 MHz"
+
+config ESP32C3_FLASH_FREQ_26M
+	bool "26 MHz"
+
+config ESP32C3_FLASH_FREQ_20M
+	bool "20 MHz"
+
+endchoice # ESP32C3_FLASH_FREQ
 
 if ESP32C3_HAVE_OTA_PARTITION
 
@@ -989,6 +988,8 @@ config ESP32C3_OTA_SCRATCH_DEVPATH
 
 endif
 
+if ESP32C3_SPIFLASH
+
 comment "General storage MTD configuration"
 
 config ESP32C3_MTD
@@ -1029,7 +1030,9 @@ config ESP32C3_PARTITION_MOUNTPT
 	default "/dev/esp/partition/"
 	depends on ESP32C3_PARTITION_TABLE
 
-endif
+endif # ESP32C3_APP_FORMAT_LEGACY
+
+endif # ESP32C3_SPIFLASH
 
 endmenu # SPI Flash configuration
 
@@ -1077,13 +1080,9 @@ config ESP32C3_APP_FORMAT_LEGACY
 config ESP32C3_APP_FORMAT_MCUBOOT
 	bool "MCUboot-bootable format"
 	select ESP32C3_HAVE_OTA_PARTITION
-	depends on EXPERIMENTAL
 	---help---
 		The Espressif port of MCUboot supports the loading of unsegmented firmware
 		images.
-
-comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
-	depends on !EXPERIMENTAL
 
 endchoice # Application Image Format
 

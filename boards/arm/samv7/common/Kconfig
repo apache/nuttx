@@ -3,6 +3,15 @@
 # see the file kconfiglanguage.txt in the NuttX tools repository.
 #
 
+config SAMV7_GPIO_ENC
+	bool "GPIO driver based encoder"
+	default n
+	depends on SENSORS_QENCODER
+	---help---
+		This options allows the usage of an encoder based on a GPIO driver.
+		The encoder is initialized by sam_gpio_enc_init() function call
+		from board specific bringup code.
+
 config SAMV7_HSMCI0_AUTOMOUNT
 	bool "HSMCI0 automounter"
 	default n

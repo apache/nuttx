@@ -25,9 +25,9 @@
 
 MEMORY
 {
-    kflash (rx) : ORIGIN = 0x80000000, LENGTH = 1024K   /* w/ cache */
-    ksram (rwx) : ORIGIN = 0x80100000, LENGTH = 1024K   /* w/ cache */
-    pgram (rwx) : ORIGIN = 0x80200000, LENGTH = 4096K   /* w/ cache */
+    kflash (rx) : ORIGIN = 0x80000000, LENGTH = 2048K   /* w/ cache */
+    ksram (rwx) : ORIGIN = 0x80200000, LENGTH = 2048K   /* w/ cache */
+    pgram (rwx) : ORIGIN = 0x80400000, LENGTH = 4096K   /* w/ cache */
 }
 
 OUTPUT_ARCH("riscv")
@@ -97,7 +97,7 @@ SECTIONS
 
     /* Page tables here, align to 4K boundary */
 
-    .pgtables : ALIGN(0x1000) {
+    .pgtables (NOLOAD) : ALIGN(0x1000) {
         *(.pgtables)
         . = ALIGN(4);
     } > ksram

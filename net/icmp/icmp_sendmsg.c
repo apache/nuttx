@@ -304,7 +304,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   /* Get the device that will be used to route this ICMP ECHO request */
 
 #ifdef CONFIG_NET_BINDTODEVICE
-  if (conn->sconn.s_boundto)
+  if (conn->sconn.s_boundto != 0)
     {
       dev = net_bound_device(&conn->sconn);
     }

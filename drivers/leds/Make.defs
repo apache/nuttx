@@ -47,6 +47,12 @@ ifeq ($(CONFIG_RGBLED),y)
   LEDVPATH = :leds
 endif
 
+ifeq ($(CONFIG_LP503X),y)
+  CSRCS += lp503x.c
+  LEDDEPATH = --dep-path leds
+  LEDVPATH = :leds
+endif
+
 ifeq ($(CONFIG_PCA9635PW),y)
   CSRCS += pca9635pw.c
   LEDDEPATH = --dep-path leds

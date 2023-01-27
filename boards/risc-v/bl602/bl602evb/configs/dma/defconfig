@@ -9,7 +9,6 @@
 # CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_NDEBUG is not set
 # CONFIG_NSH_ARGCAT is not set
-# CONFIG_NSH_CMDPARMS is not set
 # CONFIG_NSH_DISABLE_LOSMART is not set
 CONFIG_ARCH="risc-v"
 CONFIG_ARCH_BOARD="bl602evb"

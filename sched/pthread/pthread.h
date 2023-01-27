@@ -88,8 +88,7 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
                                         pid_t pid);
 void pthread_release(FAR struct task_group_s *group);
 
-int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout,
-                     bool intr);
+int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout);
 #ifdef CONFIG_PTHREAD_MUTEX_UNSAFE
 int pthread_sem_trytake(sem_t *sem);
 #endif
@@ -97,12 +96,12 @@ int pthread_sem_give(sem_t *sem);
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
-                       FAR const struct timespec *abs_timeout, bool intr);
+                       FAR const struct timespec *abs_timeout);
 int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex);
 int pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
 void pthread_mutex_inconsistent(FAR struct tcb_s *tcb);
 #else
-#  define pthread_mutex_take(m,abs_timeout,i)  pthread_sem_take(&(m)->sem,(abs_timeout),(i))
+#  define pthread_mutex_take(m,abs_timeout)  pthread_sem_take(&(m)->sem,(abs_timeout))
 #  define pthread_mutex_trytake(m)             pthread_sem_trytake(&(m)->sem)
 #  define pthread_mutex_give(m)                pthread_sem_give(&(m)->sem)
 #endif

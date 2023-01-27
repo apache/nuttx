@@ -35,6 +35,27 @@ extern uint32_t osal_sys_tick;
  * Public Functions
  ****************************************************************************/
 
+extern volatile sysclk_t g_system_clk;
+uint32_t timer_sysclk_get_clk(void)
+{
+  switch (g_system_clk)
+    {
+      case SYS_CLK_RC_32M:
+      case SYS_CLK_DBL_32M:
+          return 32000000;
+      case SYS_CLK_XTAL_16M:
+          return 16000000;
+      case SYS_CLK_DLL_48M:
+          return 48000000;
+      case SYS_CLK_DLL_64M:
+          return 64000000;
+      default:
+          break;
+    }
+
+  return 16000000;
+}
+
 void hal_clk_gate_enable(MODULE_e module)
 {
   if (module < MOD_CP_CPU)

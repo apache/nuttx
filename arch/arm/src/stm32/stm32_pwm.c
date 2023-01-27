@@ -37,7 +37,8 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32_pwm.h"
-#include "stm32.h"
+#include "stm32_rcc.h"
+#include "stm32_gpio.h"
 
 /* This module then only compiles if there is at least one enabled timer
  * intended for use with the PWM upper half driver.
@@ -173,55 +174,6 @@
 #  define TIMEN_TIM19      RCC_APB2ENR_TIM19EN
 #  define TIMRCCRST_TIM19  STM32_RCC_APB2RSTR
 #  define TIMRST_TIM19     RCC_APB2RSTR_TIM19RST
-#elif defined(CONFIG_STM32_STM32G4XXX)
-#  define TIMCLK_TIM1      STM32_APB2_TIM1_CLKIN
-#  define TIMRCCEN_TIM1    STM32_RCC_APB2ENR
-#  define TIMEN_TIM1       RCC_APB2ENR_TIM1EN
-#  define TIMRCCRST_TIM1   STM32_RCC_APB2RSTR
-#  define TIMRST_TIM1      RCC_APB2RSTR_TIM1RST
-#  define TIMCLK_TIM2      STM32_APB1_TIM2_CLKIN
-#  define TIMRCCEN_TIM2    STM32_RCC_APB1ENR
-#  define TIMEN_TIM2       RCC_APB1ENR_TIM2EN
-#  define TIMRCCRST_TIM2   STM32_RCC_APB1RSTR
-#  define TIMRST_TIM2      RCC_APB1RSTR_TIM2RST
-#  define TIMCLK_TIM3      STM32_APB1_TIM3_CLKIN
-#  define TIMRCCEN_TIM3    STM32_RCC_APB1ENR
-#  define TIMEN_TIM3       RCC_APB1ENR1_TIM3EN
-#  define TIMRCCRST_TIM3   STM32_RCC_APB1RSTR
-#  define TIMRST_TIM3      RCC_APB1RSTR_TIM3RST
-#  define TIMCLK_TIM4      STM32_APB1_TIM4_CLKIN
-#  define TIMRCCEN_TIM4    STM32_RCC_APB1ENR
-#  define TIMEN_TIM4       RCC_APB1ENR_TIM4EN
-#  define TIMRCCRST_TIM4   STM32_RCC_APB1RSTR
-#  define TIMRST_TIM4      RCC_APB1RSTR_TIM4RST
-#  define TIMCLK_TIM5      STM32_APB1_TIM5_CLKIN
-#  define TIMRCCEN_TIM5    STM32_RCC_APB1ENR
-#  define TIMEN_TIM5       RCC_APB1ENR_TIM5EN
-#  define TIMRCCRST_TIM5   STM32_RCC_APB1RSTR
-#  define TIMRST_TIM5      RCC_APB1RSTR_TIM5RST
-#  define TIMCLK_TIM8      STM32_APB2_TIM8_CLKIN
-#  define TIMRCCEN_TIM8    STM32_RCC_APB2ENR
-#  define TIMEN_TIM8       RCC_APB2ENR_TIM8EN
-#  define TIMRCCRST_TIM8   STM32_RCC_APB2RSTR
-#  define TIMRST_TIM8      RCC_APB2RSTR_TIM8RST
-#  define TIMCLK_TIM15     STM32_APB2_TIM15_CLKIN
-#  define TIMRCCEN_TIM15   STM32_RCC_APB2ENR
-#  define TIMEN_TIM15      RCC_APB2ENR_TIM15EN
-#  define TIMRCCRST_TIM15  STM32_RCC_APB2RSTR
-#  define TIMRST_TIM15     RCC_APB2RSTR_TIM15RST
-#  define TIMCLK_TIM16     STM32_APB2_TIM16_CLKIN
-#  define TIMRCCEN_TIM16   STM32_RCC_APB1ENR
-#  define TIMEN_TIM16      RCC_APB2ENR_TIM16EN
-#  define TIMRCCRST_TIM16  STM32_RCC_APB1RSTR
-#  define TIMRST_TIM16     RCC_APB1RSTR_TIM16RST
-#  define TIMCLK_TIM17     STM32_APB2_TIM17_CLKIN
-#  define TIMRCCEN_TIM17   STM32_RCC_APB1ENR
-#  define TIMEN_TIM17      RCC_APB2ENR_TIM17EN
-#  define TIMRCCRST_TIM17  STM32_RCC_APB1RSTR
-#  define TIMRST_TIM17     RCC_APB1RSTR_TIM17RST
-#  define TIMCLK_TIM20     STM32_APB2_TIM20_CLKIN
-#  define TIMRCCEN_TIM20   STM32_RCC_APB2ENR
-#  define TIMEN_TIM20      RCC_APB2ENR_TIM20EN
 #else
 #  define TIMCLK_TIM1      STM32_APB2_TIM1_CLKIN
 #  define TIMRCCEN_TIM1    STM32_RCC_APB2ENR
@@ -423,7 +375,7 @@ struct stm32_pwmtimer_s
   uint8_t  chan_num:3;              /* Number of configured channels */
   uint8_t  timtype:3;               /* See the TIMTYPE_* definitions */
   uint8_t  mode:3;                  /* Timer mode (see stm32_pwm_tim_mode_e) */
-  uint8_t  lock:2;                  /* TODO: Lock configuration */
+  uint8_t  lock:2;                  /* Lock configuration */
   uint8_t  t_dts:3;                 /* Clock division for t_DTS */
   uint8_t  _res:5;                  /* Reserved */
 #ifdef HAVE_PWM_COMPLEMENTARY

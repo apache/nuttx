@@ -41,7 +41,7 @@
  * families
  */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX) || defined(CONFIG_STM32H7_STM32H7B3XX)
 
 /****************************************************************************
  * Public Data
@@ -530,4 +530,4 @@ void stm32_iocompensation(void)
 }
 #endif
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */
+#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */

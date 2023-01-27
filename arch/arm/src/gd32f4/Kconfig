@@ -75,7 +75,7 @@ choice
 				   E   	512
 				   G   	1024
 				   I   	2048
-				   K	3072
+				   K   	3072
 
 		This configuration option defaults to using the configuration based
 		on that designator or the default smaller size if there is no last
@@ -91,19 +91,19 @@ choice
 		   the larger FLASH part.
 
 config GD32F4_FLASH_CONFIG_DEFAULT
-			bool "Default"
+	bool "Default"
 
 config GD32F4_FLASH_CONFIG_E
-			bool "E 512KiB"
+	bool "E 512KiB"
 
 config GD32F4_FLASH_CONFIG_G
-			bool "G 1024KiB"
+	bool "G 1024KiB"
 
 config GD32F4_FLASH_CONFIG_I
-			bool "I 2048KiB"
+	bool "I 2048KiB"
 
 config GD32F4_FLASH_CONFIG_K
-			bool "K 3072KiB"
+	bool "K 3072KiB"
 
 endchoice
 
@@ -115,7 +115,6 @@ config GD32F4_GD32F4XX
 	select GD32F4_HAVE_TCM
 	select GD32F4_HAVE_OVERDRIVE
 	select GD32F4_HAVE_EXMC
-
 
 config GD32F4_GD32F405
 	bool
@@ -1447,7 +1446,6 @@ config GD32F4_DAC1_DMA_BUFFER_SIZE
 
 endmenu # DAC Configuration
 
-
 config GD32F4_USART_RXDMA
 	bool
 	default n
@@ -2028,7 +2026,51 @@ endmenu # USART Configuration
 menu "I2C Configuration"
 	depends on GD32F4_I2C
 
-endmenu
+config GD32F4_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on GD32F4_I2C
+
+config GD32F4_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout microseconds per Byte"
+	default 500
+	depends on GD32F4_I2C_DYNTIMEO
+
+config GD32F4_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/stop (milliseconds)"
+	default 1000
+	depends on GD32F4_I2C_DYNTIMEO
+
+config GD32F4_I2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on GD32F4_I2C
+
+config GD32F4_I2C_TIMEOMS
+	int "Timeout milliseconds"
+	default 500
+	depends on GD32F4_I2C && !GD32F4_I2C_DYNTIMEO
+
+config GD32F4_I2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on GD32F4_I2C && !GD32F4_I2C_DYNTIMEO
+
+config GD32F4_I2C_DUTY16_9
+	bool "Frequency with Tlow/Thigh = 16/9"
+	default n
+	depends on GD32F4_I2C
+
+config GD32F4_I2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on GD32F4_I2C && GD32F4_DMA0 && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value for the
+		I2C dma channel, else the default priority level is set to medium.
+
+endmenu # I2C Configuration
 
 
 config GD32F4_HAVE_RTC_COUNTER

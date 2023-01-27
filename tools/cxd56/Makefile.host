@@ -18,6 +18,7 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/Make.defs
 all: mkspk
 default: mkspk
 .PHONY: clean
@@ -32,5 +33,9 @@ mkspk:
 	@gcc $(CFLAGS) -o mkspk mkspk.c clefia.c
 
 clean:
-	@rm -f *.o *.a *.dSYM *~ .*.swp
-	@rm -f mkspk mkspk.exe
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+	$(Q) rm -rf *.dSYM
+endif
+	$(call DELFILE, mkspk)
+	$(call DELFILE, mkspk.exe)
+	$(call CLEAN)

@@ -67,8 +67,7 @@ pid_t getpid(void)
   rtcb = this_task();
   if (rtcb != NULL)
     {
-      /* Yes.. Return the Process ID
-      */
+      /* Yes.. Return the Process ID */
 
       return rtcb->group->tg_pid;
     }

@@ -18,13 +18,11 @@
 #
 ############################################################################
 
-# Include POSIX message queue support
+ifeq ($(CONFIG_FS_SHMFS),y)
 
-ifeq ($(CONFIG_FS_SHM),y)
+CSRCS += shm_open.c shm_unlink.c shmfs.c shmfs_alloc.c
 
-CSRCS += shm_open.c shm_close.c
-
-# Include POSIX message queue build support
+# Include POSIX shm build support
 
 DEPPATH += --dep-path shm
 VPATH += :shm

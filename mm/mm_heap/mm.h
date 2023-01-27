@@ -63,7 +63,7 @@
  *   minor performance losses.
  */
 
-#define MM_MIN_SHIFT      (LOG2_CEIL(sizeof(struct mm_freenode_s)))
+#define MM_MIN_SHIFT      LOG2_CEIL(sizeof(struct mm_freenode_s))
 #if defined(CONFIG_MM_SMALL) && UINTPTR_MAX <= UINT32_MAX
 #  define MM_MAX_SHIFT    (15)  /* 32 Kb */
 #else
@@ -88,15 +88,15 @@
          tcb = nxsched_get_tcb(tmp->pid); \
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \
-             int result = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
-             if (result < CONFIG_MM_BACKTRACE) \
+             int n = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
+             if (n < CONFIG_MM_BACKTRACE) \
                { \
-                 tmp->backtrace[result] = NULL; \
+                 tmp->backtrace[n] = NULL; \
                } \
            } \
          else \
            { \
-             tmp->backtrace[0] = 0; \
+             tmp->backtrace[0] = NULL; \
            } \
        } \
      while (0)

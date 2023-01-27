@@ -108,14 +108,6 @@ else
   STDLIBS += -lrt
 endif
 
-ifneq ($(CONFIG_LIBM),y)
-  STDLIBS += -lm
-endif
-
-ifeq ($(CONFIG_SIM_UBSAN),y)
-  STDLIBS += -lubsan
-endif
-
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += sim_checkstack.c
 endif
@@ -279,7 +271,7 @@ RELLIBS += -lboard
 
 all: sim_head$(OBJEXT) libarch$(LIBEXT)
 
-.PHONY: export_startup clean distclean cleanrel depend
+.PHONY: export_startup clean distclean cleanrel depend board/libboard$(LIBEXT)
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -326,7 +318,9 @@ nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 
 define LINK_ALLSYMS
-	$(Q)$(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp
+	$(if $(CONFIG_HOST_MACOS), \
+	$(Q) $(TOPDIR)/tools/mkallsyms.sh noconst $(NUTTX) $(CROSSDEV) > allsyms.tmp, \
+	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp)
 	$(Q) $(call COMPILE, -x c allsyms.tmp, allsyms$(OBJEXT))
 	$(if $(CONFIG_HAVE_CXX),\
 	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(NUTTX) \

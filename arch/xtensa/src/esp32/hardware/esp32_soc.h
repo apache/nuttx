@@ -107,13 +107,13 @@
  * used when _f is not left shifted by _f##_S
  */
 
-#define REG_GET_FIELD(_r, _f) ((REG_READ(_r) >> (_f##_S)) & (_f##_V))
+#define REG_GET_FIELD(addr, field) ((getreg32(addr) >> (field##_S)) & (field##_V))
 
 /* Set field to register,
  * used when _f is not left shifted by _f##_S
  */
 
-#define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f##_V) << (_f##_S)))|(((_v) & (_f##_V))<<(_f##_S)))))
+#define REG_SET_FIELD(addr, field, val) (modifyreg32((addr), (field##_M), (((uint32_t) val) & (field##_V)) << (field##_S)))
 
 /* Set field value from a variable,
  * used when _f is not left shifted by _f##_S
@@ -215,7 +215,7 @@
 #define DR_REG_FRC_TIMER_BASE                   0x3ff47000
 #define DR_REG_RTCCNTL_BASE                     0x3ff48000
 #define DR_REG_RTCIO_BASE                       0x3ff48400
-#define DR_REG_SARADC_BASE                      0x3ff48800
+#define DR_REG_SENS_BASE                        0x3ff48800
 #define DR_REG_IO_MUX_BASE                      0x3ff49000
 #define DR_REG_EFUSE_BASE                       0x3ff5a000
 #define DR_REG_RTCMEM0_BASE                     0x3ff61000

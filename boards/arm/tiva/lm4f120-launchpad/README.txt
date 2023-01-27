@@ -2,8 +2,8 @@ README
 ^^^^^^
 
 README for NuttX port to the Stellaris LM4F120 LaunchPad.
-The Stellaris® LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
-platform for ARM® Cortex™-M4F-based microcontrollers from Texas Instruments.
+The StellarisÂ® LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
+platform for ARMÂ® Cortexâ„¢-M4F-based microcontrollers from Texas Instruments.
 
 Contents
 ^^^^^^^^
@@ -20,19 +20,19 @@ Contents
 Stellaris LM4F120 LaunchPad
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The Stellaris® LM4F120 LaunchPad Evaluation Kit offers these features:
+The StellarisÂ® LM4F120 LaunchPad Evaluation Kit offers these features:
 
-o A Stellaris® LaunchPad Evaluation board (EK-LM4F120XL)
-o On-board Stellaris® In-Circuit Debug Interface (ICDI)
+o A StellarisÂ® LaunchPad Evaluation board (EK-LM4F120XL)
+o On-board StellarisÂ® In-Circuit Debug Interface (ICDI)
 o Programmable user buttons and an RGB LED for custom applications.
 o USB Micro-B plug to USB-A plug cable
 
 Features of the LM4F120H5QR Microcontroller
 
-o 32-bit ARM® Cortex™-M4F 80-MHz processor core.
+o 32-bit ARMÂ® Cortexâ„¢-M4F 80-MHz processor core.
 o On-chip memory, featuring 256 KB single-cycle Flash up to 40 MHz (a
   prefetch buffer improves performance above 40 MHz), 32 KB single-cycle
-  SRAM; internal ROM loaded with StellarisWare® software; 2KB EEPROM
+  SRAM; internal ROM loaded with StellarisWareÂ® software; 2KB EEPROM
 o Two Controller Area Network (CAN) modules, using CAN protocol version
   2.0 part A/B and with bit rates up to 1 Mbps
 o Universal Serial Bus (USB) controller with USB 2.0 full-speed (12 Mbps)
@@ -45,8 +45,8 @@ o Advanced serial integration, featuring: eight UARTs with IrDA, 9-bit, and
   interfaces; four Inter-Integrated Circuit (I2C) modules, providing
   Standard (100 Kbps) and Fast (400 Kbps) transmission and support for
   sending and receiving data as either a master or a slave
-o ARM PrimeCell® 32-channel configurable µDMA controller, providing a way to
-  offload data transfer tasks from the Cortex™-M4F processor, allowing for
+o ARM PrimeCellÂ® 32-channel configurable ÂµDMA controller, providing a way to
+  offload data transfer tasks from the Cortexâ„¢-M4F processor, allowing for
   more efficient use of the processor and the available bus bandwidth
 o Analog support, featuring: two 12-bit Analog-to-Digital Converters (ADC)
   with 12 analog input channels and a sample rate of one million
@@ -69,7 +69,7 @@ o Multiple clock sources for microcontroller system clock: Precision
   for the Hibernation Module, and Internal 30-kHz Oscillator
 o Full-featured debug solution with debug access via JTAG and Serial Wire
   interfaces, and IEEE 1149.1-1990 compliant Test Access Port (TAP) controller
-o Industrial-range (-40°C to 85°C) RoHS-compliant 64-pin LQFP
+o Industrial-range (-40Â°C to 85Â°C) RoHS-compliant 64-pin LQFP
 
 On-Board GPIO Usage
 ===================

@@ -670,9 +670,6 @@ static void s32k3xx_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t s32k3xx_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
-static uint32_t s32k3xx_waitesr2_change(uint32_t base,
-                                       uint32_t mask,
-                                       uint32_t target_state);
 
 /* Interrupt handling */
 
@@ -1379,26 +1376,6 @@ static void s32k3xx_setenable(uint32_t base, uint32_t enable)
   s32k3xx_waitmcr_change(base, CAN_MCR_LPMACK, 1);
 }
 
-static uint32_t s32k3xx_waitesr2_change(uint32_t base, uint32_t mask,
-                                       uint32_t target_state)
-{
-  const uint32_t timeout = 1000;
-  uint32_t wait_ack;
-
-  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
-    {
-      uint32_t state = (getreg32(base + S32K3XX_CAN_ESR2_OFFSET) & mask);
-      if (state == target_state)
-        {
-          return true;
-        }
-
-      up_udelay(10);
-    }
-
-  return false;
-}
-
 static void s32k3xx_setfreeze(uint32_t base, uint32_t freeze)
 {
   uint32_t regval;
@@ -1590,9 +1567,7 @@ static void s32k3xx_txavail_work(void *arg)
        * packet.
        */
 
-      if (s32k3xx_waitesr2_change(priv->base,
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS),
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS)))
+      if (!s32k3xx_txringfull(priv))
         {
           /* No, there is space for another transfer.  Poll the network for
            * new XMIT data.
@@ -1664,7 +1639,7 @@ static int s32k3xx_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CAN_BITRATE_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
                          unsigned long arg)
 {
@@ -1674,6 +1649,7 @@ static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
 
   switch (cmd)
     {
+#ifdef CONFIG_NETDEV_CAN_BITRATE_IOCTL
       case SIOCGCANBITRATE: /* Get bitrate from a CAN controller */
         {
           struct can_ioctl_data_s *req =
@@ -1738,6 +1714,7 @@ static int s32k3xx_ioctl(struct net_driver_s *dev, int cmd,
             }
         }
         break;
+#endif
 
       default:
         ret = -ENOTTY;

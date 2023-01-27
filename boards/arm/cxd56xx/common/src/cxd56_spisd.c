@@ -68,7 +68,7 @@ int board_spisd_initialize(int minor, int bus)
 
   cxd56_gpio_config(MMCSD_DETECT, true);
 
-  /* Initialize spi deivce */
+  /* Initialize spi device */
 
   spi = cxd56_spibus_initialize(bus);
   if (!spi)

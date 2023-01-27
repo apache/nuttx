@@ -1201,6 +1201,8 @@ menuconfig CXD56_SDIO
 	default n
 	select ARCH_HAVE_SDIO
 	select SDIO_BLOCKSETUP
+	select MMCSD
+	select MMCSD_SDIO
 	depends on SCHED_WORKQUEUE
 
 if CXD56_SDIO
@@ -1311,6 +1313,12 @@ config CXD56_GNSS_CEP_FILENAME
 	default "/mnt/sd0/gnss_cep.bin"
 	---help---
 		Specify the path and file name of cep data.
+
+config CXD56_GNSS_CEP_ON_SPIFLASH
+	bool "GNSS CEP file on SPI-Flash"
+	default n
+	---help---
+		Use a cep file on SPI-Flash.
 
 config CXD56_GNSS_FW_RTK
 	bool "Support carrier-phase data output for Real-Time Kinematic"

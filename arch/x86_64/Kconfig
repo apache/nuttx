@@ -37,7 +37,7 @@ choice
 	default ARCH_BOARD_QEMU
 
 config ARCH_BOARD_QEMU
-	bool "Qemu envrionment"
+	bool "Qemu environment"
 	---help---
 		Targeting virtualized qemu environment
 

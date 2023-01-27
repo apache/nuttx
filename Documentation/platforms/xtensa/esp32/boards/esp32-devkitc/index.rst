@@ -65,27 +65,36 @@ connect to an external PHY chip. Current driver also only supports RMII option.
 
 The RMII GPIO pins are fixed, but the SMI and functional GPIO pins are optional.
 
-RMII GPIO pins are as following::
+RMII GPIO pins are as following:
 
-    ESP32 GPIO          PHY Chip GPIO
-      IO25       <-->       RXD[0]
-      IO26       <-->       RXD[1]
-      IO27       <-->       CRS_DV
-      IO0        <-->       REF_CLK
-      IO19       <-->       TXD[0]
-      IO21       <-->       TX_EN
-      IO22       <-->       TXD[1]
+========== =============
+ESP32 GPIO PHY Chip GPIO
+========== =============
+IO25       RXD[0]
+IO26       RXD[1]
+IO27       CRS_DV
+IO0        REF_CLK
+IO19       TXD[0]
+IO21       TX_EN
+IO22       TXD[1]
+========== =============
 
-SMI GPIO pins (default option) are as following::
+SMI GPIO pins (default option) are as following:
 
-    ESP32 GPIO          PHY Chip GPIO
-      IO18       <-->       MDIO
-      IO23       <-->       MDC
+========== =============
+ESP32 GPIO PHY Chip GPIO
+========== =============
+IO18       MDIO
+IO23       MDC
+========== =============
 
-Functional GPIO pins(default option) are as following::
+Functional GPIO pins(default option) are as following:
 
-    ESP32 GPIO          PHY Chip GPIO
-      IO5        <-->      Reset_N
+========== =============
+ESP32 GPIO PHY Chip GPIO
+========== =============
+IO5        Reset_N
+========== =============
 
 Espressif has an `official Ethernet development
 board <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-ethernet-kit.html>`_.
@@ -94,6 +103,43 @@ This driver has been tested according to this board and ESP32 core
 board + LAN8720 module. If users have some issue about using this driver,
 please refer the upper official document, specially the issue that GPIO0
 causes failing to bring the ESP32 chip up.
+
+I2S
+===
+
+ESP32 has two I2S peripherals accessible using either the generic I2S audio
+driver or a specific audio codec driver
+(`CS4344 <https://www.cirrus.com/products/cs4344-45-48/>`__ bindings are
+available at the moment). The generic I2S audio driver enables using both
+the receiver module (RX) and the transmitter module (TX) without using any
+specific codec. Also, it's possible to use the I2S character device driver
+to bypass the audio subsystem and write directly to the I2S peripheral.
+
+.. note:: The I2S peripheral is able to work on two functional modes
+  internally: 16 and 32-bit width.
+  ESP32's I2S driver, however, uses an internal buffer to enable inserting
+  padding bytes and provide the ability to play 8, 16, 24 or 32-bits/sample
+  audio files. Sample rate and data width are automatically set by the upper
+  half audio driver.
+
+.. note:: Also, it's possible to use 8, 16, 24, and 32-bit-widths writing
+  directly to the I2S character device. Just make sure to set the bit-width::
+
+    $ make menuconfig
+    -> System Type
+        -> ESP32 Peripheral Selection
+            -> I2S
+                -> I2S0/1
+                    -> Bit Witdh
+
+  And make sure the data stream buffer being written to the I2S peripheral is
+  aligned to the next boundary i.e. 16 bits for the 8 and 16-bit-widths and
+  32 bits for 24 and 32-bit-widths.
+
+The following configurations use the I2S peripheral::
+  * :ref:`platforms/xtensa/esp32/boards/esp32-devkitc/index:audio`
+  * :ref:`platforms/xtensa/esp32/boards/esp32-devkitc/index:i2schar`
+  * :ref:`platforms/xtensa/esp32/boards/esp32-devkitc/index:nxlooper`
 
 Pin Mapping
 ===========
@@ -109,11 +155,97 @@ Pin   Signal     Notes
 Configurations
 ==============
 
-nsh
----
+audio
+-----
 
-Basic NuttShell configuration (console enabled in UART0, exposed via
-USB connection by means of CP2102 converter, at 115200 bps).
+This configuration uses the I2S0 peripheral and an externally connected audio
+codec to play an audio file streamed over an HTTP connection while connected
+to a Wi-Fi network.
+
+**Audio Codec Setup**
+
+The CS4344 audio codec is connected on the following pins:
+
+========== ========== =========================================
+ESP32 Pin  CS4344 Pin Description
+========== ========== =========================================
+0          MCLK       Master Clock
+4          SCLK       Serial Clock
+5          LRCK       Left Right Clock (Word Select)
+18         SDIN       Serial Data In on CS4344. (DOUT on ESP32)
+========== ========== =========================================
+
+**Simple HTTP server**
+
+Prepare a PCM-encoded (`.wav`) audio file with 16 or 24 bits/sample (sampled at
+16~48kHz). This file must be placed into a folder in a computer that could
+be accessed on the same Wi-Fi network the ESP32 will be connecting to.
+
+Python provides a simple HTTP server. `cd` to the audio file folder on the
+PC and run::
+
+  $ python3 -m http.server
+
+  Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/)
+
+Look for your PC IP address and test playing the prepared audio on your
+browser:
+
+.. figure:: esp32-audio-config-file.png
+          :align: center
+
+After successfully built and flashed, connect the board to the Wi-Fi network::
+
+  nsh> wapi psk wlan0 mypasswd 1
+  nsh> wapi essid wlan0 myssid 1
+  nsh> renew wlan0
+
+Once connected, open NuttX's player and play the file according to its file
+name and the IP address of the HTTP server::
+
+  nsh> nxplayer
+  nxplayer> play http://192.168.1.239:8000/tones.wav
+
+efuse
+-----
+
+A config with EFUSE enabled.
+
+i2schar
+-------
+
+This configuration enables the I2S character device and the i2schar example
+app, which provides an easy-to-use way of testing the I2S peripherals (I2S0
+and I2S1), enabling both the TX and the RX for those peripherals.
+
+**I2S0 pinout**
+
+========== ========== =========================================
+ESP32 Pin  Signal Pin Description
+========== ========== =========================================
+0          MCLK       Master Clock
+4          BCLK       Bit Clock (SCLK)
+5          WS         Word Select (LRCLK)
+18         DOUT       Data Out
+19         DIN        Data IN
+========== ========== =========================================
+
+**I2S1 pinout**
+
+========== ========== =========================================
+ESP32 Pin  Signal Pin Description
+========== ========== =========================================
+22         BCLK       Bit Clock (SCLK)
+23         WS         Word Select (LRCLK)
+25         DOUT       Data Out
+26         DIN        Data IN
+========== ========== =========================================
+
+After successfully built and flashed, run on the boards's terminal::
+
+  i2schar -p /dev/i2schar[0-1]
+
+The corresponding output should show related debug informations.
 
 knsh
 ----
@@ -137,47 +269,47 @@ Flash and PSRAM).
     * The PID Controller **does not** prevent the application from accessing
       CPU System Registers.
 
-wapi
-----
-
-Enables Wi-Fi support. You can define your credentials this way::
-
-    $ make menuconfig
-    -> Application Configuration
-        -> Network Utilities
-            -> Network initialization (NETUTILS_NETINIT [=y])
-                -> WAPI Configuration
-
-Or if you don't want to keep it saved in the firmware you can do it
-at runtime::
-
-    nsh> wapi psk wlan0 mypasswd 1
-    nsh> wapi essid wlan0 myssid 1
-    nsh> renew wlan0
-
-wifinsh
+mcp2515
 -------
 
-The ``wifinsh`` is similar to the ``wapi`` board example, but it will connect
-automatically to your Access Point (Wi-Fi Router) and will run telnet daemon
-in the board. Then you can connect to your board from your computer using the
-telnet program.
+This config is used to communicate with MCP2515 CAN over SPI chip.
+SPI3 is used and kept with the default IOMUX pins, i.e.:
 
-After configuring the ``esp32-devkit:wifinsh`` you need to define your creden-
-tials in the menuconfig. You can define your credentials this way::
+===== =======
+Pin   Signal
+===== =======
+5     CS
+18    SCK
+23    MOSI
+19    MISO
+===== =======
 
-    $ make menuconfig
-    -> Application Configuration
-        -> Network Utilities
-            -> Network initialization (NETUTILS_NETINIT [=y])
-                -> WAPI Configuration
+The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
+ESP32-Devkit.
 
-Find your board IP using ``nsh> ifconfig`` and then from your computer::
+mmcsdspi
+--------
 
-    $ telnet 192.168.x.y
+This config tests the SPI driver by connecting an SD Card reader over SPI.
+SPI2 is used and kept with the default IOMUX pins, i.e.:
 
-Where x and y are the last two numbers of the IP that your router gave to
-your board.
+===== =======
+Pin   Signal
+===== =======
+15    CS
+14    SCK
+13    MOSI
+12    MISO
+===== =======
+
+Once booted the following command is used to mount a FAT file system::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+
+module
+------
+
+This config is to run apps/examples/module.
 
 mqttc
 -----
@@ -211,6 +343,94 @@ outputted::
 
 From the host the message :code:`test` should be outputted.
 
+nsh
+---
+
+Basic NuttShell configuration (console enabled in UART0, exposed via
+USB connection by means of CP2102 converter, at 115200 bps).
+
+nxlooper
+--------
+
+This configuration uses the I2S1 peripheral as an I2S receiver and the I2S0
+peripheral as an I2S transmitter. The idea is to capture an I2S data frame
+using an I2S peripheral and reproduce the captured data on the other.
+
+**Receiving data on I2S1**
+
+The I2S1 will act as a receiver (master mode), capturing data from DIN, which
+needs to be connected to an external source as follows:
+
+========== ========== =========================================
+ESP32 Pin  Signal Pin Description
+========== ========== =========================================
+22         BCLK       Bit Clock (SCLK)
+23         WS         Word Select (LRCLK)
+26         DIN        Data IN
+========== ========== =========================================
+
+**Transmitting data on I2S0**
+
+The I2S0 will act as a transmitter (master mode), replicating the data
+captured on I2S1. The pinout for the transmitter is as follows:
+
+========== ========== =========================================
+ESP32 Pin  Signal Pin Description
+========== ========== =========================================
+0          MCLK       Master Clock
+4          BCLK       Bit Clock (SCLK)
+5          WS         Word Select (LRCLK)
+18         DOUT       Data Out
+========== ========== =========================================
+
+.. note:: The audio codec CS4344 can be connected to the transmitter pins
+  to reproduce the captured data if the receiver's source is an audio data.
+
+**nxlooper**
+
+The `nxlooper` application captures data from the audio device with receiving
+capabilities (the I2S1 on this example) and forwards the audio data frame to
+the audio device with transmitting capabilities (the I2S0 on this example).
+
+After successfully built and flashed, run on the boards's terminal::
+
+  nsh> nxlooper
+  nxlooper> loopback
+
+.. note:: `loopback` command default arguments for the channel configuration,
+  the data width and the sample rate are, respectively, 2 channels,
+  16 bits/sample and 48KHz. These arguments can be supplied to select
+  different audio formats, for instance::
+
+    nxlooper> loopback 2 8 44100
+
+ostest
+------
+
+This is the NuttX test at apps/testing/ostest that is run against all new
+architecture ports to assure a correct implementation of the OS.  The default
+version is for a single CPU but can be modified for an SMP test by adding::
+
+  CONFIG_SMP=y
+  CONFIG_SMP_NCPUS=2
+  CONFIG_SPINLOCK=y
+
+psram
+-----
+
+This config tests the PSRAM driver over SPIRAM interface.
+You can use the ramtest command to test the PSRAM memory. We are testing
+only 64KB on this example (64 * 1024), but you can change this number to
+2MB or 4MB depending on PSRAM chip used on your board::
+
+    nsh> ramtest -w 0x3F800000 65536
+    RAMTest: Marching ones: 3f800000 65536
+    RAMTest: Marching zeroes: 3f800000 65536
+    RAMTest: Pattern test: 3f800000 65536 55555555 aaaaaaaa
+    RAMTest: Pattern test: 3f800000 65536 66666666 99999999
+    RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc
+    RAMTest: Address-in-address test: 3f800000 65536
+
 smp
 ---
 
@@ -231,51 +451,6 @@ The apps/testing/smp test is included::
   CONFIG_TESTING_SMP_PRIORITY=100
   CONFIG_TESTING_SMP_STACKSIZE=2048
 
-ostest
-------
-
-This is the NuttX test at apps/testing/ostest that is run against all new
-architecture ports to assure a correct implementation of the OS.  The default
-version is for a single CPU but can be modified for an SMP test by adding::
-
-  CONFIG_SMP=y
-  CONFIG_SMP_NCPUS=2
-  CONFIG_SPINLOCK=y
-
-mcp2515
--------
-
-This config is used to communicate with MCP2515 CAN over SPI chip.
-SPI3 is used and kept with the default IOMUX pins, i.e.::
-
-    CS   --> 5
-    SCK  --> 18
-    MOSI --> 23
-    MISO --> 19
-
-The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
-ESP32-Devkit.
-
-mmcsdspi
---------
-
-This config tests the SPI driver by connecting an SD Card reader over SPI.
-SPI2 is used and kept with the default IOMUX pins, i.e.::
-
-    CS   --> 15
-    SCK  --> 14
-    MOSI --> 13
-    MISO --> 12
-
-Once booted the following command is used to mount a FAT file system::
-
-    nsh> mount -t vfat /dev/mmcsd0 /mnt
-
-module
-------
-
-This config is to run apps/examples/module.
-
 sotest
 ------
 
@@ -295,22 +470,6 @@ Once booted you can use the following commands to mount the file system::
 
 Note that mksmartfs is only needed the first time.
 
-psram
------
-
-This config tests the PSRAM driver over SPIRAM interface.
-You can use the ramtest command to test the PSRAM memory. We are testing
-only 64KB on this example (64 * 1024), but you can change this number to
-2MB or 4MB depending on PSRAM chip used on your board::
-
-    nsh> ramtest -w 0x3F800000 65536
-    RAMTest: Marching ones: 3f800000 65536
-    RAMTest: Marching zeroes: 3f800000 65536
-    RAMTest: Pattern test: 3f800000 65536 55555555 aaaaaaaa
-    RAMTest: Pattern test: 3f800000 65536 66666666 99999999
-    RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc
-    RAMTest: Address-in-address test: 3f800000 65536
-
 timer
 -----
 
@@ -323,19 +482,6 @@ To test it, just run the following::
   nsh> timer -d /dev/timerx
 
 Where x in the timer instance.
-
-watchdog
---------
-
-This config test the watchdog timers. It includes the 2 MWDTS,
-adds driver support, registers the WDTs as devices and includes the watchdog
-example.
-
-To test it, just run the following::
-
-  nsh> wdog -d /dev/watchdogx
-
-Where x in the watchdog instance.
 
 wamr_wasi_debug
 ---------------
@@ -375,7 +521,87 @@ This example uses littlefs on ESP32's SPI flash to store wasm modules.
       nsh> mount -t littlefs /dev/esp32flash /mnt
       nsh> iwasm /mnt/....
 
-efuse
------
+wapi
+----
 
-A config with EFUSE enabled.
+Enables Wi-Fi support. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Or if you don't want to keep it saved in the firmware you can do it
+at runtime::
+
+    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+watchdog
+--------
+
+This config test the watchdog timers. It includes the 2 MWDTS,
+adds driver support, registers the WDTs as devices and includes the watchdog
+example.
+
+To test it, just run the following::
+
+  nsh> wdog -i /dev/watchdogx
+
+Where x is the watchdog instance.
+
+wifinsh
+-------
+
+The ``wifinsh`` is similar to the ``wapi`` board example, but it will connect
+automatically to your Access Point (Wi-Fi Router) and will run telnet daemon
+in the board. Then you can connect to your board from your computer using the
+telnet program.
+
+After configuring the ``esp32-devkit:wifinsh`` you need to define your creden-
+tials in the menuconfig. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Find your board IP using ``nsh> ifconfig`` and then from your computer::
+
+    $ telnet 192.168.x.y
+
+Where x and y are the last two numbers of the IP that your router gave to
+your board.
+
+Debugging with OpenOCD
+======================
+
+Akizukidenshi FT232HL
+---------------------
+
+Akizukidenshi's FT232HL, a FT232H based JTAG adapter
+(http://akizukidenshi.com/catalog/g/gK-06503/) with JP3 and JP4 closed,
+and connected to ESP32 as:
+
++------------------+-------------+
+| ESP32-DevKitC V4 | FT232HL     |
++=======+==========+=============+
+| J2    |  J3      | J2          |
++-------+----------+-------------+
+| IO13  |          | AD0   (TCK) |
++-------+----------+-------------+
+| IO12  |          | AD1   (TDI) |
++-------+----------+-------------+
+|       |  IO15    | AD2   (TDO) |
++-------+----------+-------------+
+| IO14  |          | AD3   (TMS) |
++-------+----------+-------------+
+| GND   |          | GND         |
++-------+----------+-------------+
+
+can be used with ESP-IDF version of openocd with::
+
+    % openocd -f board/esp32-wrover-kit-1.8v.cfg

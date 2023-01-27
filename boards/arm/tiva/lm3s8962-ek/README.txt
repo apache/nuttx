@@ -25,17 +25,17 @@ The Stellaris LM3S8962 Evaluation Board includes the following features:
  o  User LED, navigation switches, and select pushbuttons
  o  Magnetic speaker
  o  LM3S8962 I/O available on labeled break-out pads
- o  Standard ARM® 20-pin JTAG debug connector with input and output modes
+ o  Standard ARMÂ® 20-pin JTAG debug connector with input and output modes
  o  USB interface for debugging and power supply
  o  MicroSD card slot
 
 Features of the LM3S8962 Microcontroller
 
- o  32-bit RISC performance using ARM® Cortex™-M3 v7M architecture
-    – 50-MHz operation
-    – Hardware-division and single-cycle-multiplication
-    – Integrated Nested Vectored Interrupt Controller (NVIC)
-    – 42 interrupt channels with eight priority levels
+ o  32-bit RISC performance using ARMÂ® Cortexâ„¢-M3 v7M architecture
+    - 50-MHz operation
+    - Hardware-division and single-cycle-multiplication
+    - Integrated Nested Vectored Interrupt Controller (NVIC)
+    - 42 interrupt channels with eight priority levels
  o  256 KB single-cycle flash
  o  64 KB single-cycle SRAM
  o  Four general-purpose 32-bit timers
@@ -45,10 +45,10 @@ Features of the LM3S8962 Microcontroller
  o  Two independent integrated analog comparators
  o  Two I2C modules
  o  Three PWM generator blocks
-    – One 16-bit counter
-    – Two comparators
-    – Produces two independent PWM signals
-    – One dead-band generator
+    - One 16-bit counter
+    - Two comparators
+    - Produces two independent PWM signals
+    - One dead-band generator
  o  Two QEI modules with position integrator for tracking encoder position
  o  0 to 42 GPIOs, depending on user configuration
  o  On-chip low drop-out (LDO) voltage regulator

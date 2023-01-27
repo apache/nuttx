@@ -540,24 +540,6 @@
 #define SDIO_CLOCK(dev,rate) ((dev)->clock(dev,rate))
 
 /****************************************************************************
- * Name: SDIO_GOTEXTCSD
- *
- * Description:
- *   Notify driver EXT CSD data
- *
- * Input Parameters:
- *   dev    - An instance of the SDIO device interface
- *   buffer - Ext Csd data
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#define SDIO_GOTEXTCSD(dev,buffer) \
-    ((dev)->gotextcsd?(dev)->gotextcsd(dev,buffer):OK)
-
-/****************************************************************************
  * Name: SDIO_ATTACH
  *
  * Description:

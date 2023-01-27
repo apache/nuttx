@@ -559,12 +559,12 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
 
       regval = rx65n_getreg(RX65N_RIIC0_ICMR1);
       regval &= RX65N_RIIC_ICMR1_CKS_MASK;
-      regval |= (uint8_t) ((cnt - 1) << 4);
+      regval |= (uint8_t)((cnt - 1) << 4);
       rx65n_putreg(regval, RX65N_RIIC0_ICMR1);
 
       /* Set value to ICBRL register */
 
-      regval = (uint8_t) ((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRL_MASK);
+      regval = (uint8_t)((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRL_MASK);
       rx65n_putreg(regval, RX65N_RIIC0_ICBRL);
     }
 
@@ -574,12 +574,12 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
 
       regval = rx65n_getreg(RX65N_RIIC1_ICMR1);
       regval &= RX65N_RIIC_ICMR1_CKS_MASK;
-      regval |= (uint8_t) ((cnt - 1) << 4);
+      regval |= (uint8_t)((cnt - 1) << 4);
       rx65n_putreg(regval, RX65N_RIIC1_ICMR1);
 
       /* Set value to ICBRL register */
 
-      regval = (uint8_t) ((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRL_MASK);
+      regval = (uint8_t)((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRL_MASK);
       rx65n_putreg(regval, RX65N_RIIC1_ICBRL);
     }
 
@@ -589,12 +589,12 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
 
       regval = rx65n_getreg(RX65N_RIIC2_ICMR1);
       regval &= RX65N_RIIC_ICMR1_CKS_MASK;
-      regval |= (uint8_t) ((cnt - 1) << 4);
+      regval |= (uint8_t)((cnt - 1) << 4);
       rx65n_putreg(regval, RX65N_RIIC2_ICMR1);
 
       /* Set value to ICBRL register */
 
-      regval = (uint8_t) ((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRL_MASK);
+      regval = (uint8_t)((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRL_MASK);
       rx65n_putreg(regval, RX65N_RIIC2_ICBRL);
     }
 
@@ -606,7 +606,7 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
   /* Calculation ICBRH value */
 
   calc_val = (calc_val_tmp / (d_cks[cnt - 1] / RX_PCLKB));
-  calc_val = (uint8_t) (calc_val + 0.5); /* Round off */
+  calc_val = (uint8_t)(calc_val + 0.5); /* Round off */
 
   /* If the calculated value is less than 1, it rounded up to 1. */
 
@@ -619,7 +619,7 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
     {
       /* Set value to ICBRH register */
 
-      regval = (uint8_t) ((uint8_t) (calc_val - 1) | RX65N_RIIC_ICBRH_MASK);
+      regval = (uint8_t)((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRH_MASK);
       rx65n_putreg(regval, RX65N_RIIC0_ICBRH);
     }
 
@@ -627,7 +627,7 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
     {
       /* Set value to ICBRH register */
 
-      regval = (uint8_t) ((uint8_t) (calc_val - 1) | RX65N_RIIC_ICBRH_MASK);
+      regval = (uint8_t)((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRH_MASK);
       rx65n_putreg(regval, RX65N_RIIC1_ICBRH);
     }
 
@@ -635,7 +635,7 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
     {
       /* Set value to ICBRH register */
 
-      regval = (uint8_t) ((uint8_t) (calc_val - 1) | RX65N_RIIC_ICBRH_MASK);
+      regval = (uint8_t)((uint8_t)(calc_val - 1) | RX65N_RIIC_ICBRH_MASK);
       rx65n_putreg(regval, RX65N_RIIC2_ICBRH);
     }
 }
@@ -1629,7 +1629,7 @@ static void rx65n_riic_send_slv_addr(struct rx65n_i2c_priv_s *priv)
       bit_addr = priv->msgv->addr;
       bit_addr &= RX65N_RIIC_10BIT_SARU_MASK;
       bit_addr >>= 8;
-      regval = (uint8_t) bit_addr;
+      regval = (uint8_t)bit_addr;
 
       rx65n_riic_set_sending_data(priv, regval);
 
@@ -1637,7 +1637,7 @@ static void rx65n_riic_send_slv_addr(struct rx65n_i2c_priv_s *priv)
 
       bit_addr = priv->msgv->addr;
       bit_addr &= RX65N_RIIC_10BIT_SARL_MASK;
-      regval = (uint8_t) bit_addr;
+      regval = (uint8_t)bit_addr;
     }
 
   else
@@ -1649,7 +1649,7 @@ static void rx65n_riic_send_slv_addr(struct rx65n_i2c_priv_s *priv)
 
           /* 7-bit slave address with READ code */
 
-          regval = (priv->msgv->addr);
+          regval = priv->msgv->addr;
           regval <<= 1U;
           regval |= RX65N_RIIC_READ_MASK;
 
@@ -1663,7 +1663,7 @@ static void rx65n_riic_send_slv_addr(struct rx65n_i2c_priv_s *priv)
 
           /* 7-bit slave address with WRITE code */
 
-          regval = (priv->msgv->addr);
+          regval = priv->msgv->addr;
           regval <<= 1U;
           regval &= ~(RX65N_RIIC_READ_MASK);
 
@@ -1925,7 +1925,7 @@ static void rx65n_riic_master_transmit(struct rx65n_i2c_priv_s *priv)
 
 static uint8_t rx65n_riic_read_data(struct rx65n_i2c_priv_s *priv)
 {
-  volatile uint8_t * regval;
+  volatile uint8_t *regval;
 
   if (0 == priv->bus)
     {

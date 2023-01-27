@@ -307,7 +307,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
               "%08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
               loadinfo->iobuffer, (uintptr_t)sym->st_value,
               (uintptr_t)symbol->sym_value,
-              (uintptr_t)(sym->st_value + symbol->sym_value));
+              (uintptr_t)(sym->st_value + (uintptr_t)symbol->sym_value));
 
         sym->st_value += ((uintptr_t)symbol->sym_value);
       }

@@ -215,7 +215,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART1_RX);
   s32k3xx_pinconfig(PIN_LPUART1_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART1_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART1_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
@@ -232,7 +232,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART2_RX);
   s32k3xx_pinconfig(PIN_LPUART2_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART2_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART2_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
@@ -249,7 +249,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART3_RX);
   s32k3xx_pinconfig(PIN_LPUART3_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART3_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART3_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)) || \
@@ -266,7 +266,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART4_RX);
   s32k3xx_pinconfig(PIN_LPUART4_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART4_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART4_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) || \
@@ -283,7 +283,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART5_RX);
   s32k3xx_pinconfig(PIN_LPUART5_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART5_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART5_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)) || \
@@ -300,7 +300,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART6_RX);
   s32k3xx_pinconfig(PIN_LPUART6_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART6_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART6_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)) || \
@@ -317,7 +317,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART7_RX);
   s32k3xx_pinconfig(PIN_LPUART7_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART7_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART7_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)) || \
@@ -334,7 +334,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART8_RX);
   s32k3xx_pinconfig(PIN_LPUART8_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART8_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART8_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) || \
@@ -351,7 +351,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART9_RX);
   s32k3xx_pinconfig(PIN_LPUART9_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART9_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART9_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART9_RS485RTSCONTROL)) || \
@@ -368,7 +368,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART10_RX);
   s32k3xx_pinconfig(PIN_LPUART10_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART10_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART10_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART10_RS485RTSCONTROL)) || \
@@ -385,7 +385,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART11_RX);
   s32k3xx_pinconfig(PIN_LPUART11_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART11_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART11_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART11_RS485RTSCONTROL)) || \
@@ -402,7 +402,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART12_RX);
   s32k3xx_pinconfig(PIN_LPUART12_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART12_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART12_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART12_RS485RTSCONTROL)) || \
@@ -419,7 +419,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART13_RX);
   s32k3xx_pinconfig(PIN_LPUART13_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART13_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART13_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART13_RS485RTSCONTROL)) || \
@@ -436,7 +436,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART14_RX);
   s32k3xx_pinconfig(PIN_LPUART14_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART14_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART14_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART14_RS485RTSCONTROL)) || \
@@ -453,7 +453,7 @@ void s32k3xx_lowsetup(void)
 
   s32k3xx_pinconfig(PIN_LPUART15_RX);
   s32k3xx_pinconfig(PIN_LPUART15_TX);
-#ifdef CONFIG_LPUART0_OFLOWCONTROL
+#ifdef CONFIG_LPUART15_OFLOWCONTROL
   s32k3xx_pinconfig(PIN_LPUART15_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART15_RS485RTSCONTROL)) || \
@@ -641,13 +641,13 @@ int s32k3xx_lpuart_configure(uint32_t base,
       regval |= LPUART_CTRL_PE | LPUART_CTRL_PT_EVEN;
     }
 
-  if (config->bits == 8)
-    {
-      regval &= ~LPUART_CTRL_M;
-    }
-  else if (config->bits == 9)
+  if (config->bits == 9 || (config->bits == 8 && config->parity != 0))
     {
       regval |= LPUART_CTRL_M;
+    }
+  else if ((config->bits == 8))
+    {
+      regval &= ~LPUART_CTRL_M;
     }
   else
     {

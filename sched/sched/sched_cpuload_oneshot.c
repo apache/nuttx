@@ -300,7 +300,15 @@ void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
   /* Get the maximum delay */
 
   DEBUGVERIFY(ONESHOT_MAX_DELAY(lower, &ts));
-  g_sched_oneshot.maxdelay = INT32_MAX;
+  if (ts.tv_sec >= 0)
+    {
+      g_sched_oneshot.maxdelay = INT32_MAX;
+    }
+  else
+    {
+      g_sched_oneshot.maxdelay = ts.tv_nsec / 1000;
+    }
+
   tmrinfo("madelay = %ld usec\n", (long)g_sched_oneshot.maxdelay);
   DEBUGASSERT(CPULOAD_ONESHOT_NOMINAL < g_sched_oneshot.maxdelay);
 

@@ -70,9 +70,9 @@ int nxsem_destroy(FAR sem_t *sem)
    * leave the count unchanged but still return OK.
    */
 
-  if (sem->semcount > 0)
+  if (sem->semcount >= 0)
     {
-      sem->semcount = 0;
+      sem->semcount = 1;
     }
 
   /* Release holders of the semaphore */

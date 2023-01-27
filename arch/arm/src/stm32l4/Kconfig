@@ -5287,53 +5287,6 @@ config STM32L4_ADC3_DMA_CFG
 	---help---
 		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
 
-config STM32L4_ADC1_OUTPUT_DFSDM
-	bool "ADC1 output to DFSDM"
-	depends on STM32L4_ADC1 && STM32L4_DFSDM1 && (STM32L4_STM32L496XX || STM32L4_STM32L4XR)
-	default n
-	---help---
-		Route ADC1 output directly to DFSDM parallel inputs.
-
-config STM32L4_ADC2_OUTPUT_DFSDM
-	bool "ADC2 output to DFSDM"
-	depends on STM32L4_ADC2 && STM32L4_DFSDM1 && STM32L4_STM32L496XX
-	default n
-	---help---
-		Route ADC2 output directly to DFSDM parallel inputs.
-
-config STM32L4_ADC3_OUTPUT_DFSDM
-	bool "ADC3 output to DFSDM"
-	depends on STM32L4_ADC3 && STM32L4_DFSDM1 && STM32L4_STM32L496XX
-	default n
-	---help---
-		Route ADC3 output directly to DFSDM parallel inputs.
-
-menu "STM32L4 ADCx triggering Configuration"
-
-config STM32L4_ADC1_TIMTRIG
-	int "ADC1 regular channel trigger"
-	default 0
-	range 0 4
-	depends on STM32L4_HAVE_ADC1_TIMER
-	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
-
-config STM32L4_ADC2_TIMTRIG
-	int "ADC2 Timer Trigger"
-	default 0
-	range 0 4
-	depends on STM32L4_HAVE_ADC2_TIMER
-	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
-
-config STM32L4_ADC3_TIMTRIG
-	int "ADC3 Timer Trigger"
-	default 0
-	range 0 4
-	depends on STM32L4_HAVE_ADC3_TIMER
-	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
-
 config STM32L4_ADC1_INJ_CHAN
 	int "ADC1 configured injected channels"
 	depends on STM32L4_ADC1
@@ -5358,39 +5311,188 @@ config STM32L4_ADC3_INJ_CHAN
 	---help---
 		Number of configured ADC3 injected channels.
 
+config STM32L4_ADC1_OUTPUT_DFSDM
+	bool "ADC1 output to DFSDM"
+	depends on STM32L4_ADC1 && STM32L4_DFSDM1 && (STM32L4_STM32L496XX || STM32L4_STM32L4XR)
+	default n
+	---help---
+		Route ADC1 output directly to DFSDM parallel inputs.
+
+config STM32L4_ADC2_OUTPUT_DFSDM
+	bool "ADC2 output to DFSDM"
+	depends on STM32L4_ADC2 && STM32L4_DFSDM1 && STM32L4_STM32L496XX
+	default n
+	---help---
+		Route ADC2 output directly to DFSDM parallel inputs.
+
+config STM32L4_ADC3_OUTPUT_DFSDM
+	bool "ADC3 output to DFSDM"
+	depends on STM32L4_ADC3 && STM32L4_DFSDM1 && STM32L4_STM32L496XX
+	default n
+	---help---
+		Route ADC3 output directly to DFSDM parallel inputs.
+
+menu "STM32L4 ADCx triggering Configuration"
+
+config STM32L4_ADC1_EXTTRIG
+	int "ADC1 External trigger configuration for regular channels"
+	default 0
+	range 0 4
+	depends on STM32L4_ADC1
+	---help---
+		Values 0: Hardware trigger detection disabled
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32L4_ADC1_EXTTRIG > 0
+
+config STM32L4_ADC1_EXTSEL
+	int "ADC1 External trigger selection for regular group"
+	default 0
+	range 0 15
+	depends on STM32L4_ADC1
+	---help---
+		 Select the external event used to trigger the start of conversion of
+		 a regular group. See Reference Manual for mor information.
+
+endif
+
+config STM32L4_ADC2_EXTTRIG
+	int "ADC2 External trigger configuration for regular channels"
+	default 0
+	range 0 4
+	depends on STM32L4_ADC2
+	---help---
+		Values 0: Hardware trigger detection disabled
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32L4_ADC2_EXTTRIG > 0
+
+config STM32L4_ADC2_EXTSEL
+	int "ADC2 External trigger selection for regular group"
+	default 0
+	range 0 15
+	depends on STM32L4_ADC2
+	---help---
+		 Select the external event used to trigger the start of conversion of
+		 a regular group. See Reference Manual for mor information.
+
+endif
+
+config STM32L4_ADC3_EXTTRIG
+	int "ADC3 External trigger configuration for regular channels"
+	default 0
+	range 0 4
+	depends on STM32L4_ADC3
+	---help---
+		Values 0: Hardware trigger detection disabled
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32L4_ADC3_EXTTRIG > 0
+
+config STM32L4_ADC3_EXTSEL
+	int "ADC3 External trigger selection for regular group"
+	default 0
+	range 0 15
+	depends on STM32L4_ADC3
+	---help---
+		 Select the external event used to trigger the start of conversion of
+		 a regular group. See Reference Manual for mor information.
+
+endif
+
 if STM32L4_ADC1_INJ_CHAN > 0
 
-config STM32L4_ADC1_JTIMTRIG
-	int "ADC1 external trigger for injected channels"
+config STM32L4_ADC1_JEXTTRIG
+	int "ADC1 External Trigger Enable and Polarity Selection for injected channels"
 	default 0
-	range 0 5
-	depends on STM32L4_HAVE_ADC1_TIMER
+	range 0 4
+	depends on STM32L4_ADC1
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
+		Values 0: Hardware and software trigger detection disabled, JQDIS=0
+		          (queue enabled)
+		       0: Hardware trigger detection disabled, JQDIS=1 (queue disabled)
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32L4_ADC1_JEXTTRIG > 0
+
+config STM32L4_ADC1_JEXTSEL
+	int "ADC1 External Trigger Selection for injected group"
+	default 0
+	range 0 15
+	depends on STM32L4_ADC1
+	---help---
+		Select the external event used to trigger the start of conversion of an
+		injected group
+
+endif
 
 endif
 
 if STM32L4_ADC2_INJ_CHAN > 0
 
-config STM32L4_ADC2_JTIMTRIG
-	int "ADC2 external trigger for injected channels"
+config STM32L4_ADC2_JEXTTRIG
+	int "ADC2 External Trigger Enable and Polarity Selection for injected channels"
+	default 0
+	range 0 4
+	depends on STM32L4_ADC2
+	---help---
+		Values 0: Hardware and software trigger detection disabled, JQDIS=0
+		          (queue enabled)
+		       0: Hardware trigger detection disabled, JQDIS=1 (queue disabled)
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32L4_ADC2_JEXTTRIG > 0
+
+config STM32L4_ADC2_JEXTSEL
+	int "ADC2 External Trigger Selection for injected group"
 	default 0
 	range 0 5
-	depends on STM32L4_HAVE_ADC2_TIMER
+	depends on STM32L4_ADC2
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
+		Select the external event used to trigger the start of conversion of an
+		injected group
+
+endif
 
 endif
 
 if STM32L4_ADC3_INJ_CHAN > 0
 
-config STM32L4_ADC3_JTIMTRIG
-	int "ADC3 external trigger for injected channels"
+config STM32L4_ADC3_JEXTTRIG
+	int "ADC3 External Trigger Enable and Polarity Selection for injected channels"
+	default 0
+	range 0 4
+	depends on STM32L4_ADC3
+	---help---
+		Values 0: Hardware and software trigger detection disabled, JQDIS=0
+		          (queue enabled)
+		       0: Hardware trigger detection disabled, JQDIS=1 (queue disabled)
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32L4_ADC3_JEXTTRIG > 0
+
+config STM32L4_ADC3_JEXTSEL
+	int "ADC3 External Trigger Selection for injected group"
 	default 0
 	range 0 5
-	depends on STM32L4_HAVE_ADC3_TIMER
+	depends on STM32L4_ADC3
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
+		Select the external event used to trigger the start of conversion of an
+		injected group
+
+endif
 
 endif
 

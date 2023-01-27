@@ -34,7 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ROUNDUP(x, y)   (((x) + (y) - 1) / (y) * (y))
+#define ROUNDUP(x, y)     (((x) + (y) - 1) / (y) * (y))
 
 /* Fix the I/O Buffer size with specified alignment size */
 

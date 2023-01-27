@@ -59,6 +59,10 @@ ifeq ($(CONFIG_CXD56_SDIO),y)
 CSRCS += cxd56_sdcard.c
 endif
 
+ifeq ($(CONFIG_CXD56_SDCARD_AUTOMOUNT),y)
+CSRCS += cxd56_automount.c
+endif
+
 ifeq ($(CONFIG_CXD56_GAUGE),y)
 CSRCS += cxd56_gauge.c
 endif
@@ -71,8 +75,8 @@ ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += cxd56_composite.c
 endif
 
-ifeq ($(CONFIG_MODEM_ALTMDM),y)
-CSRCS += cxd56_altmdm_power.c
+ifeq ($(CONFIG_MODEM_ALT1250),y)
+CSRCS += cxd56_alt1250_power.c
 endif
 
 DEPPATH += --dep-path board

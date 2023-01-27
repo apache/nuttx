@@ -87,6 +87,18 @@ ADC
 ADC driver with the successive approximation analog/digital converter. The lower-half of
 this driver is initialize by calling :c:func:`imxrt_adcinitialize`.
 
+ADC module can use either continous trigger (next conversion is started as soon as the
+previous is finished) or hardware trigger. This option is selected by IMXRT_ADCx_ETC
+(x = 1, 2) config option. If IMXRT_ADCx_ETC = -1 then continous trigger is used. If
+corresponding XBAR number is put in IMXRT_ADCx_ETC then that signal is used to trigger
+the ADC conversion (for example PWM signal can be used as a source). For PWM XBAR options
+please refer to PWM chapter of this documentation.
+
+Hardware triggering is currently limited to maximum of 8 channels. HW trigger is automatically
+disabled if there are more than 8 channels.
+
+DMA is currently not supported for ADC modules.
+
 CAN
 ---
 
@@ -167,6 +179,47 @@ PWM
 Pulse width modulator supported in i.MX RT1010 and higher. Multiple channels option is evailable.
 Output on pin B is currently supported only as a complementary option to pin A.
 The lower-half of this driver is initialize by calling :c:func:`imxrt_pwminitialize`.
+
+PWM module can be synchronized by an external signal. The external signal used for synchronization
+is selected by IMXRT_FLEXPWMx_MODx_SYNC_SRC config option. The number in IMXRT_FLEXPWM4_MOD4_SYNC_SRC
+corresponds with the XBAR number. Following numbers can be used for synchronization of PWMs with other
+PWM module when using iMXRT1020, iMXRT1050 or iMXRT1060.
+
+- PWM1 Module 1 = 40
+- PWM1 Module 2 = 41
+- PWM1 Module 3 = 42
+- PWM1 Module 4 = 43
+- PWM2 Module 1 = 44
+- PWM2 Module 2 = 45
+- PWM2 Module 3 = 46
+- PWM2 Module 4 = 47
+- PWM3 Module 1 = 48
+- PWM3 Module 2 = 49
+- PWM3 Module 3 = 50
+- PWM3 Module 4 = 51
+- PWM4 Module 1 = 52
+- PWM4 Module 2 = 53
+- PWM4 Module 3 = 54
+- PWM4 Module 4 = 55
+
+iMXRT1170 has different XBAR connections:
+
+- PWM1 Module 1 = 74
+- PWM1 Module 2 = 75
+- PWM1 Module 3 = 76
+- PWM1 Module 4 = 77
+- PWM2 Module 1 = 78
+- PWM2 Module 2 = 79
+- PWM2 Module 3 = 80
+- PWM2 Module 4 = 81
+- PWM3 Module 1 = 82
+- PWM3 Module 2 = 83
+- PWM3 Module 3 = 84
+- PWM3 Module 4 = 85
+- PWM4 Module 1 = 86
+- PWM4 Module 2 = 87
+- PWM4 Module 3 = 88
+- PWM4 Module 4 = 89
 
 SAI
 ---

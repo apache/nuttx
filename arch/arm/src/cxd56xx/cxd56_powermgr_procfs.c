@@ -773,7 +773,7 @@ static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir,
  *
  ****************************************************************************/
 
-static int cxd56_powermgr_procfs_rewinddir(FAR struct fs_dirent_s *dir)
+static int cxd56_powermgr_procfs_rewinddir(struct fs_dirent_s *dir)
 {
   struct cxd56_powermgr_procfs_dir_s *procfs;
 

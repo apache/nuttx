@@ -325,6 +325,60 @@ static int local_set_policy(FAR struct file *filep, unsigned long policy)
 }
 
 /****************************************************************************
+ * Name: local_set_pollinthreshold
+ *
+ * Description:
+ *   Set the local pollin threshold:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static int local_set_pollinthreshold(FAR struct file *filep,
+                                     unsigned long threshold)
+{
+  int ret;
+
+  /* Set the buffer poll threshold */
+
+  ret = file_ioctl(filep, PIPEIOC_POLLINTHRD, threshold);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to set FIFO pollin threshold: %lu\n",
+           threshold);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+/****************************************************************************
+ * Name: local_set_polloutthreshold
+ *
+ * Description:
+ *   Set the local pollout threshold:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static int local_set_polloutthreshold(FAR struct file *filep,
+                                      unsigned long threshold)
+{
+  int ret;
+
+  /* Set the buffer poll threshold */
+
+  ret = file_ioctl(filep, PIPEIOC_POLLOUTTHRD, threshold);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to set FIFO pollout threshold: %lu\n",
+           threshold);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -603,6 +657,17 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
       /* Policy: Free FIFO resources when the buffer is empty. */
 
       ret = local_set_policy(&conn->lc_infile, 1);
+
+      if (ret == 0)
+        {
+          /* Set POLLOUT threshold bigger than preamble len.
+           * This is to avoid non-blocking read failed with -EAGAIN when
+           * only preamble len is sent and read by reader.
+           */
+
+          ret = local_set_polloutthreshold(&conn->lc_infile,
+                                           sizeof(uint16_t));
+        }
     }
 
   return ret;
@@ -636,6 +701,16 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
       /* Policy: Free FIFO resources when the buffer is empty. */
 
       ret = local_set_policy(&conn->lc_outfile, 1);
+      if (ret == 0)
+        {
+          /* Set POLLIN threshold bigger than preamble len.
+           * This is to avoid non-blocking read failed with -EAGAIN when
+           * only preamble len is sent and read by reader.
+           */
+
+          ret = local_set_pollinthreshold(&conn->lc_outfile,
+                                          sizeof(uint16_t));
+        }
     }
 
   return ret;

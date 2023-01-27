@@ -30,6 +30,7 @@
 #include <nuttx/tls.h>
 
 #include <nuttx/panic_notifier.h>
+#include <nuttx/reboot_notifier.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 
@@ -109,10 +110,10 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       FAR uint32_t *ptr = (FAR uint32_t *)stack;
-      _alert("%" PRIxPTR ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+      _alert("%p: %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 "\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3],
+             (FAR void *)stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
@@ -128,8 +129,8 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
   uintptr_t top = base + size;
 
   _alert("%s Stack:\n", tag);
-  _alert("sp:     %08" PRIxPTR "\n", sp);
-  _alert("  base: %08" PRIxPTR "\n", base);
+  _alert("sp:     %p\n", (FAR void *)sp);
+  _alert("  base: %p\n", (FAR void *)base);
   _alert("  size: %08zu\n", size);
 
   if (sp >= base && sp < top)
@@ -328,7 +329,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
-         "   0x%08" PRIxPTR
+         "   %p"
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
@@ -341,7 +342,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SMP
          , tcb->cpu
 #endif
-         , (uintptr_t)tcb->stack_base_ptr
+         , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
          , up_check_tcbstack(tcb)
@@ -411,7 +412,7 @@ static void show_tasks(void)
 #  ifdef CONFIG_SMP
          "  ----"
 #  endif
-         "   0x%08x"
+         "   %p"
          "   %7u"
 #  ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
@@ -420,7 +421,7 @@ static void show_tasks(void)
          "     ----"
 #  endif
          "   irq\n"
-         , up_get_intstackbase()
+         , (FAR void *)up_get_intstackbase()
          , CONFIG_ARCH_INTERRUPTSTACK
 #  ifdef CONFIG_STACK_COLORATION
          , stack_used
@@ -465,8 +466,8 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 
   uname(&name);
   _alert("Current Version: %s %s %s %s %s\n",
-          name.sysname, name.nodename,
-          name.release, name.version, name.machine);
+         name.sysname, name.nodename,
+         name.release, name.version, name.machine);
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
@@ -524,13 +525,15 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 #endif
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-      board_crashdump(up_getsp(), rtcb, filename, linenum);
+      board_crashdump(up_getsp(), rtcb, filename, linenum, msg);
 #endif
 
       /* Flush any buffered SYSLOG data */
 
       syslog_flush();
       panic_notifier_call_chain(PANIC_KERNEL_FINAL, rtcb);
+
+      reboot_notifier_call_chain(SYS_HALT, NULL);
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);

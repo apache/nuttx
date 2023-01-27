@@ -20,7 +20,7 @@
 
 /* References:
  *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
- *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
+ *   Datasheet", Atmel-42181E-SAM-D21_Datasheet-02/2015
  */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD21_MEMORYMAP_H

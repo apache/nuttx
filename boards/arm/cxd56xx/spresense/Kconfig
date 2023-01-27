@@ -466,7 +466,7 @@ config SPRESENSE_EXTENSION
 		present, then the SPresense will need to run at a higher power mode,
 		selected by this option.
 
-if  SPRESENSE_EXTENSION
+if SPRESENSE_EXTENSION
 config SDCARD_TXS02612
 	bool "SD Card TXS02612 port expander with voltage level translation"
 	default y
@@ -756,6 +756,13 @@ config CXD56_LTE_SPI5_DMAC
 
 endif # CXD56_LTE_SPI5
 
+config CXD56_LTE_LATE_INITIALIZE
+	bool "Alt1250 driver late initialize"
+	default n
+	---help---
+		LTE driver can be initialized on an application code after system booted up
+		by enabling this configuration switch.
+
 endif # CXD56_LTE
 
 config CXD56_BINARY
@@ -764,5 +771,42 @@ config CXD56_BINARY
 	---help---
 		Create nuttx.spk binary format used on spresense board and boards
 		based on cxd56xx arch.
+
+config CXD56_CAMERA_LATE_INITIALIZE
+	bool "Camera drivers late initialization"
+	default n
+	depends on CXD56_CISIF
+	---help---
+		The camera drivers can be initialized on an application code after system booted up
+		by enabling this configuration switch.
+
+config CXD56_SDCARD_AUTOMOUNT
+	bool "SDCARD automounter"
+	default n
+	depends on FS_AUTOMOUNTER && CXD56_SDIO
+
+if CXD56_SDCARD_AUTOMOUNT
+
+config CXD56_SDCARD_AUTOMOUNT_FSTYPE
+	string "SDCARD file system type"
+	default "vfat"
+
+config CXD56_SDCARD_AUTOMOUNT_BLKDEV
+	string "SDCARD block device"
+	default "/dev/mmcsd0"
+
+config CXD56_SDCARD_AUTOMOUNT_MOUNTPOINT
+	string "SDCARD mount point"
+	default "/mnt/sd0"
+
+config CXD56_SDCARD_AUTOMOUNT_DDELAY
+	int "SDCARD debounce delay (milliseconds)"
+	default 1000
+
+config CXD56_SDCARD_AUTOMOUNT_UDELAY
+	int "SDCARD unmount retry delay (milliseconds)"
+	default 2000
+
+endif # CXD56_SDCARD_AUTOMOUNT
 
 endif

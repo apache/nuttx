@@ -1101,6 +1101,7 @@ found:
                     tcp_getsequence(conn->sndseq), ackseq, unackseq,
                     (uint32_t)conn->tx_unacked);
               tcp_setsequence(conn->sndseq, ackseq);
+              conn->nrtx = 0;
             }
         }
 #endif

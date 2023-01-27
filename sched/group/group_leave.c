@@ -129,7 +129,6 @@ static void group_remove(FAR struct task_group_s *group)
 static inline void group_release(FAR struct task_group_s *group)
 {
 #ifdef CONFIG_ARCH_ADDRENV
-  save_addrenv_t oldenv;
   int i;
 #endif
 
@@ -203,10 +202,6 @@ static inline void group_release(FAR struct task_group_s *group)
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* Switch the addrenv and also save the current addrenv */
-
-  up_addrenv_select(&group->tg_addrenv, &oldenv);
-
   /* Destroy the group address environment */
 
   up_addrenv_destroy(&group->tg_addrenv);
@@ -220,10 +215,6 @@ static inline void group_release(FAR struct task_group_s *group)
           g_group_current[i] = NULL;
         }
     }
-
-  /* Restore the previous addrenv */
-
-  up_addrenv_restore(&oldenv);
 #endif
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)

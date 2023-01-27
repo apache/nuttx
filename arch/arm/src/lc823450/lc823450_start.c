@@ -172,10 +172,6 @@ void __start(void)
       *dest++ = *src++;
     }
 
-  /* run as interrupt context, before scheduler running */
-
-  CURRENT_REGS = (uint32_t *)1;
-
 #ifdef CONFIG_LASTKMSG_LOWOUTS
 
   if (g_lastksg_buf.sig == LASTKMSG_SIG_REBOOT)
@@ -195,7 +191,7 @@ void __start(void)
 #ifdef CONFIG_LC823450_SPIFI_BOOT
 
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
+   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initialization code
    * at _framfuncs.  This should be done before lc823450_clockconfig() is
    * called (in case it has some dependency on initialized C variables).

@@ -2165,21 +2165,6 @@ static int up_interrupt(int irq, void *context, void *arg)
           handled = true;
         }
 
-#ifdef SERIAL_HAVE_RXDMA
-      else if (((priv->sr & USART_SR_IDLE) != 0) &&
-          ((priv->ie & USART_CR1_IDLEIE) != 0))
-        {
-          /*
-           * Clear IDLE Flag
-           */
-          up_serialout(priv, STM32_USART_ICR_OFFSET, USART_ICR_IDLECF);
-          if (priv->rxdma != NULL)
-            {
-              up_dma_rxcallback(priv->rxdma, 0, priv);
-            }
-        }
-#endif
-
       /* We may still have to read from the DR register to clear any pending
        * error conditions.
        */
@@ -2731,8 +2716,6 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags;
-  uint16_t ie;
 
   /* En/disable DMA reception.
    *
@@ -2743,26 +2726,6 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
    */
 
   priv->rxenable = enable;
-
-  /*
-   * Idle isr trigger read DMA buffer
-   *
-   */
-  flags = enter_critical_section();
-  ie = priv->ie;
-  if (enable)
-    {
-      ie |= USART_CR1_IDLEIE;
-    }
-  else
-    {
-      ie &= ~USART_CR1_TXEIE;
-    }
-
-  /* Then set the new interrupt state */
-
-  up_restoreusartint(priv, ie);
-  leave_critical_section(flags);
 }
 #endif
 

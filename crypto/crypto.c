@@ -284,7 +284,7 @@ int crypto_get_driverid(uint8_t flags)
     {
       crypto_drivers_num = CRYPTO_DRIVERS_INITIAL;
       crypto_drivers = kmm_calloc(crypto_drivers_num,
-          sizeof(struct cryptocap));
+                                  sizeof(struct cryptocap));
       if (crypto_drivers == NULL)
         {
           crypto_drivers_num = 0;
@@ -328,9 +328,9 @@ int crypto_get_driverid(uint8_t flags)
         }
 
       bcopy(crypto_drivers, newdrv,
-          crypto_drivers_num * sizeof(struct cryptocap));
+            crypto_drivers_num * sizeof(struct cryptocap));
       bzero(&newdrv[crypto_drivers_num],
-          crypto_drivers_num * sizeof(struct cryptocap));
+            crypto_drivers_num * sizeof(struct cryptocap));
 
       newdrv[i].cc_sessions = 1; /* Mark */
       newdrv[i].cc_flags = flags;

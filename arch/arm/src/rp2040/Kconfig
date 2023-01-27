@@ -689,3 +689,29 @@ config RP2040_BOARD_HAS_WS2812
 	---help---
 		See the Board Selection menu to configure the pins used
 		by ws2812.
+
+#####################################################################
+#  Flash File System Configuration
+#####################################################################
+
+config RP2040_FLASH_FILE_SYSTEM
+	bool "Configure a read/write filesystem on unused flash memory"
+	default n
+	select MTD
+	select MTD_SMART
+	select FS_SMARTFS
+	---help---
+		See the Board Selection menu to configure the size of the
+		flash chip for a particular board.
+
+if RP2040_FLASH_FILE_SYSTEM
+
+	config RP2040_FLASH_MOUNT_POINT
+		string "mount point for flash file system"
+		default "/flash"
+		---help---
+			This is the mount point where the flash file system will
+			be mounted.  Leave this string empty to prevent automatic
+			mounting of the filesystem.
+
+endif # RP2040_FLASH_FILE_SYSTEM

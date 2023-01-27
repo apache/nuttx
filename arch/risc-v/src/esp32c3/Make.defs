@@ -35,7 +35,7 @@ CMN_ASRCS := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
 # Specify our C code within this directory to be included
 
 CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_wdt.c esp32c3_idle.c
-CHIP_CSRCS += esp32c3_irq.c
+CHIP_CSRCS += esp32c3_irq.c esp32c3_libc_stubs.c
 CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c
 CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
 CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c

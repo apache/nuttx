@@ -45,6 +45,7 @@
 #define FOC_OPS_SETUP(d)                (d)->lower->ops->setup(d)
 #define FOC_OPS_SHUTDOWN(d)             (d)->lower->ops->shutdown(d)
 #define FOC_OPS_START(d, s)             (d)->lower->ops->start(d, s)
+#define FOC_OPS_PWMOFF(d, o)            (d)->lower->ops->pwm_off(d, o)
 #define FOC_OPS_DUTY(d, x)              (d)->lower->ops->pwm_duty_set(d, x)
 #define FOC_OPS_IOCTL(d, c, a)          (d)->lower->ops->ioctl(d, c, a)
 #define FOC_OPS_BIND(d, c)              (d)->lower->ops->bind(d, c)
@@ -77,13 +78,15 @@ struct foc_callbacks_s
   /* FOC notifier callback
    *
    * Description:
-   *   Deliver the phase current samples and wake up the thread waiting.
-   *   Must be called by lower-half logic at a frequency determined by
-   *   configuration (notifier_freq in foc_cfg_s).
+   *   Deliver the phase current samples (and optional BEMF voltages)
+   *   and wake up the thread waiting. Must be called by lower-half
+   *   logic at a frequency determined by configuration (notifier_freq
+   *   in foc_cfg_s).
    */
 
   CODE int (*notifier)(FAR struct foc_dev_s *dev,
-                       FAR foc_current_t *current);
+                       FAR foc_current_t *current,
+                       FAR foc_voltage_t *voltage);
 };
 
 /* Lower-half FOC operations */
@@ -107,6 +110,10 @@ struct foc_lower_ops_s
 
   CODE int (*pwm_duty_set)(FAR struct foc_dev_s *dev,
                            FAR foc_duty_t *duty);
+
+  /* Force all PWM switches to the off state */
+
+  CODE int (*pwm_off)(FAR struct foc_dev_s *dev, bool off);
 
   /* Lower-half start/stop */
 

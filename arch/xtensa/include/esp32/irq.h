@@ -312,9 +312,42 @@
 #  define ESP32_NIRQ_GPIO           0
 #endif
 
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+
+/* Second level RTC interrupts.  RTC interrupts are decoded and dispatched
+ * as a second level of decoding:  The first level dispatches to the RTC
+ * interrupt handler.  The second to the decoded RTC interrupt handler.
+ * A third level might be required to be implemented on the driver (e.g.
+ * Touch pads)
+ */
+
+#  define ESP32_NIRQ_RTCIO_PERIPH       9
+#  define ESP32_NIRQ_RTCIO_TOUCHPAD     10
+#  define ESP32_NIRQ_RTCIO              (ESP32_NIRQ_RTCIO_PERIPH+ESP32_NIRQ_RTCIO_TOUCHPAD)
+
+#  define ESP32_FIRST_RTCIOIRQ_PERIPH   (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH+ESP32_NIRQ_GPIO)
+#  define ESP32_LAST_RTCIOIRQ_PERIPH    (ESP32_FIRST_RTCIOIRQ_PERIPH+ESP32_NIRQ_RTCIO_PERIPH-1)
+#  define ESP32_IRQ_RTC_SLP_WAKEUP      (ESP32_FIRST_RTCIOIRQ_PERIPH+0)
+#  define ESP32_IRQ_RTC_SLP_REJECT      (ESP32_FIRST_RTCIOIRQ_PERIPH+1)
+#  define ESP32_IRQ_RTC_SDIO_IDLE       (ESP32_FIRST_RTCIOIRQ_PERIPH+2)
+#  define ESP32_IRQ_RTC_WDT             (ESP32_FIRST_RTCIOIRQ_PERIPH+3)
+#  define ESP32_IRQ_RTC_TIME_VALID      (ESP32_FIRST_RTCIOIRQ_PERIPH+4)
+#  define ESP32_IRQ_RTC_SAR             (ESP32_FIRST_RTCIOIRQ_PERIPH+5)
+#  define ESP32_IRQ_RTC_TOUCH           (ESP32_FIRST_RTCIOIRQ_PERIPH+6)
+#  define ESP32_IRQ_RTC_BROWN_OUT       (ESP32_FIRST_RTCIOIRQ_PERIPH+7)
+#  define ESP32_IRQ_RTC_MAIN_TIMER      (ESP32_FIRST_RTCIOIRQ_PERIPH+8)
+
+#  define ESP32_FIRST_RTCIOIRQ_TOUCHPAD (ESP32_LAST_RTCIOIRQ_PERIPH+1)
+#  define ESP32_LAST_RTCIOIRQ_TOUCHPAD  (ESP32_FIRST_RTCIOIRQ_TOUCHPAD+ESP32_NIRQ_RTCIO_TOUCHPAD-1)
+#  define ESP32_TOUCHPAD2IRQ(t)         ((t) + ESP32_FIRST_RTCIOIRQ_TOUCHPAD)
+#  define ESP32_IRQ2TOUCHPAD(i)         ((i) - ESP32_FIRST_RTCIOIRQ_TOUCHPAD)
+#else
+#  define ESP32_NIRQ_RTCIO              0
+#endif
+
 /* Total number of interrupts */
 
-#define NR_IRQS                     (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH+ESP32_NIRQ_GPIO)
+#define NR_IRQS                     (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH+ESP32_NIRQ_GPIO+ESP32_NIRQ_RTCIO)
 
 /* Xtensa CPU Interrupts.
  *

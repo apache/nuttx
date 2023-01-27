@@ -30,6 +30,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 #define HCI_VENDOR_MAILBOX_CMD 0xfc8f
 
 /* static net_buf_simple *Xiaomi_buf; */
@@ -110,9 +114,6 @@ void bt_coex_handle_specific_evt(uint8_t *p, uint8_t len)
   rltk_coex_mailbox_to_wifi(p, len);
 }
 
-#ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
-#endif
 static const char *bt_hex_real(const void *buf, size_t len)
 {
   static const char hex[] = "0123456789abcdef";

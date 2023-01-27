@@ -134,7 +134,7 @@ static int dsi_host_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       case MIPIDSI_TRANSFER:
-        {
+
           /* Get the reference to the mipi_dsi_msg structure */
 
           msg = (FAR struct mipi_dsi_msg *)((uintptr_t)arg);
@@ -145,7 +145,6 @@ static int dsi_host_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(host != NULL && msg != NULL);
 
           ret = host->ops->transfer(host, msg);
-        }
         break;
       default:
         ret = -ENOTTY;

@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* References:
- *   - UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
+ *   - UM10314 LPC3130/31 User manual Rev. 1.01 - 9 September 2009
  */
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_CGU_H

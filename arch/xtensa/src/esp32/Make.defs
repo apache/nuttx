@@ -25,7 +25,7 @@ include common/Make.defs
 
 HEAD_CSRC  = esp32_start.c esp32_wdt.c
 
-ifeq ($(CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS),y)
+ifeq ($(CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS),y)
 HEAD_ASRC += esp32_window_hooks.S
 endif
 
@@ -33,7 +33,7 @@ endif
 
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_gpio.c
 CHIP_CSRCS += esp32_systemreset.c esp32_resetcause.c
-CHIP_CSRCS += esp32_irq.c esp32_region.c
+CHIP_CSRCS += esp32_irq.c esp32_region.c esp32_rtc_gpio.c
 CHIP_CSRCS += esp32_user.c
 CHIP_CSRCS += esp32_dma.c
 
@@ -70,8 +70,16 @@ ifeq ($(CONFIG_ESP32_I2C),y)
 CHIP_CSRCS += esp32_i2c.c
 endif
 
+ifeq ($(CONFIG_ESP32_I2S),y)
+CHIP_CSRCS += esp32_i2s.c
+endif
+
 ifeq ($(CONFIG_ESP32_TWAI),y)
 CHIP_CSRCS += esp32_twai.c
+endif
+
+ifeq ($(CONFIG_ESP32_PCNT_AS_QE),y)
+CHIP_CSRCS += esp32_qencoder.c
 endif
 
 ifeq ($(CONFIG_ESP32_SPI),y)
@@ -97,6 +105,7 @@ ifeq ($(CONFIG_ESP32_SPIRAM),y)
 CHIP_CSRCS += esp32_spiram.c
 CHIP_CSRCS += esp32_psram.c
 CHIP_CSRCS += esp32_himem.c
+CHIP_CSRCS += esp32_himem_chardev.c
 endif
 
 ifeq ($(CONFIG_ESP32_EFUSE),y)
@@ -169,6 +178,10 @@ endif
 
 ifeq ($(CONFIG_ESP32_RT_TIMER),y)
 CHIP_CSRCS += esp32_rt_timer.c
+endif
+
+ifeq ($(CONFIG_ESP32_TOUCH),y)
+CHIP_CSRCS += esp32_touch.c
 endif
 
 ifeq ($(CONFIG_ESP32_AES_ACCELERATOR),y)

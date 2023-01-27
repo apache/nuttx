@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* References:
- *   "STMPE811 S-Touch® advanced resistive touchscreen controller with 8-bit
+ *   "STMPE811 S-TouchÂ® advanced resistive touchscreen controller with 8-bit
  *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
  */
 

@@ -34,6 +34,7 @@
 #define MIN(a, b)             ((a) < (b) ? (a) : (b))
 #undef  ALIGN_UP
 #define ALIGN_UP(x, a)        ((((size_t)x) + ((a) - 1)) & (~((a) - 1)))
+#undef  ALIGN_DOWN
 #define ALIGN_DOWN(x, a)      ((size_t)(x) & (~((a) - 1)))
 
 /****************************************************************************
@@ -219,7 +220,7 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
   col = index - (row << mpool->dict_col_num_log2);
   if (mpool->dict[row] == NULL ||
       mpool->dict[row][col].addr != addr ||
-      blk - addr >= mpool->dict[row][col].size)
+      (FAR char *)blk - (FAR char *)addr >= mpool->dict[row][col].size)
     {
       return NULL;
     }
@@ -654,7 +655,7 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
 
 void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
 {
-  int i;
+  size_t i;
 
   DEBUGASSERT(mpool != NULL);
 

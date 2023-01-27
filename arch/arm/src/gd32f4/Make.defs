@@ -55,3 +55,7 @@ endif
 ifeq ($(CONFIG_GD32F4_SPI),y)
 CHIP_CSRCS += gd32f4xx_spi.c
 endif
+
+ifeq ($(CONFIG_GD32F4_I2C),y)
+CHIP_CSRCS += gd32f4xx_i2c.c
+endif

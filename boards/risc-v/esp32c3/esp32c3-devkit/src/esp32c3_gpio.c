@@ -84,6 +84,8 @@ struct esp32c3gpint_dev_s
 #if BOARD_NGPIOOUT > 0
 static int gpout_read(struct gpio_dev_s *dev, bool *value);
 static int gpout_write(struct gpio_dev_s *dev, bool value);
+static int gpout_setpintype(struct gpio_dev_s *dev,
+                            enum gpio_pintype_e pintype);
 #endif
 
 #if BOARD_NGPIOINT > 0
@@ -91,6 +93,8 @@ static int gpint_read(struct gpio_dev_s *dev, bool *value);
 static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
 static int gpint_enable(struct gpio_dev_s *dev, bool enable);
+static int gpint_setpintype(struct gpio_dev_s *dev,
+                            enum gpio_pintype_e pintype);
 #endif
 
 /****************************************************************************
@@ -104,6 +108,7 @@ static const struct gpio_operations_s gpout_ops =
   .go_write  = gpout_write,
   .go_attach = NULL,
   .go_enable = NULL,
+  .go_setpintype = gpout_setpintype,
 };
 
 /* This array maps the GPIO pins used as OUTPUT */
@@ -123,6 +128,7 @@ static const struct gpio_operations_s gpint_ops =
   .go_write  = NULL,
   .go_attach = gpint_attach,
   .go_enable = gpint_enable,
+  .go_setpintype = gpint_setpintype,
 };
 
 /* This array maps the GPIO pins used as INTERRUPT INPUTS */
@@ -171,6 +177,49 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
   gpioinfo("Writing %d\n", (int)value);
 
   esp32c3_gpiowrite(g_gpiooutputs[esp32c3gpio->id], value);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpout_setpintype
+ ****************************************************************************/
+
+static int gpout_setpintype(struct gpio_dev_s *dev,
+                            enum gpio_pintype_e pintype)
+{
+  struct esp32c3gpio_dev_s *esp32c3gpio =
+    (struct esp32c3gpio_dev_s *)dev;
+
+  DEBUGASSERT(esp32c3gpio != NULL);
+  DEBUGASSERT(esp32c3gpio->id < BOARD_NGPIOOUT);
+  gpioinfo("Setting pintype: %d\n", (int)pintype);
+
+  esp32c3_gpio_matrix_out(g_gpiooutputs[esp32c3gpio->id],
+                        SIG_GPIO_OUT_IDX, 0, 0);
+
+  switch (pintype)
+  {
+  case GPIO_INPUT_PIN:
+    esp32c3_configgpio(g_gpiooutputs[esp32c3gpio->id], INPUT);
+    break;
+  case GPIO_INPUT_PIN_PULLUP:
+    esp32c3_configgpio(g_gpiooutputs[esp32c3gpio->id], INPUT_PULLUP);
+    break;
+  case GPIO_INPUT_PIN_PULLDOWN:
+    esp32c3_configgpio(g_gpiooutputs[esp32c3gpio->id], INPUT_PULLDOWN);
+    break;
+  case GPIO_OUTPUT_PIN:
+    esp32c3_configgpio(g_gpiooutputs[esp32c3gpio->id], INPUT | OUTPUT);
+    break;
+  case GPIO_OUTPUT_PIN_OPENDRAIN:
+    esp32c3_configgpio(g_gpiooutputs[esp32c3gpio->id], INPUT |
+                     OUTPUT_OPEN_DRAIN);
+    break;
+  default:
+    return ERROR;
+    break;
+  }
+
   return OK;
 }
 #endif
@@ -267,6 +316,37 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
       gpioinfo("Disable the interrupt\n");
       esp32c3_gpioirqdisable(irq);
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpint_setpintype
+ ****************************************************************************/
+
+static int gpint_setpintype(struct gpio_dev_s *dev,
+                            enum gpio_pintype_e pintype)
+{
+  struct esp32c3gpint_dev_s *esp32c3gpint =
+    (struct esp32c3gpint_dev_s *)dev;
+
+  DEBUGASSERT(esp32c3gpint != NULL);
+  DEBUGASSERT(esp32c3gpint->esp32c3gpio.id < BOARD_NGPIOINT);
+  gpioinfo("Setting pintype: %d\n", (int)pintype);
+  switch (pintype)
+  {
+  case GPIO_INTERRUPT_HIGH_PIN:
+    esp32c3_configgpio(g_gpiointinputs[esp32c3gpint->esp32c3gpio.id],
+                     INPUT_PULLUP);
+    break;
+  case GPIO_INTERRUPT_LOW_PIN:
+    esp32c3_configgpio(g_gpiointinputs[esp32c3gpint->esp32c3gpio.id],
+                     INPUT_PULLDOWN);
+    break;
+  default:
+    return ERROR;
+    break;
+  }
 
   return OK;
 }

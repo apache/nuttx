@@ -130,7 +130,11 @@
 #  define EDMA_CONFIG_LOOPSRC            (1 << EDMA_CONFIG_LOOP_SHIFT) /* Source looping */
 #  define EDMA_CONFIG_LOOPDEST           (2 << EDMA_CONFIG_LOOP_SHIFT) /* Dest looping */
 
-#define EDMA_CONFIG_INTHALF              (1 << 3) /* Bits 3: Int on HALF */
+#define EDMA_CONFIG_INTHALF              (1 << 4) /* Bits 4: Int on HALF */
+#define EDMA_CONFIG_INTMAJOR             (1 << 5) /* Bits 5: Int on all Major completion
+                                                   * Default is only on last completion
+                                                   * if using scatter gather
+                                                   */
 
 /****************************************************************************
  * Public Types
@@ -176,7 +180,6 @@ struct s32k3xx_edma_xfrconfig_s
     uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
     uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
     uint8_t  dsize;      /* Destination data transfer size. */
-    uint8_t  ttype;      /* Transfer type (see enum s32k3xx_edma_xfrtype_e). */
 #ifdef CONFIG_S32K3XX_EDMA_EMLIM
     uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else

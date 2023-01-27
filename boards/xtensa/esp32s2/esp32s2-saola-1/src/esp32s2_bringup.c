@@ -58,8 +58,16 @@
 #  include "esp32s2_rt_timer.h"
 #endif
 
+#ifdef CONFIG_ESP32S2_EFUSE
+#  include "esp32s2_efuse.h"
+#endif
+
 #ifdef CONFIG_WATCHDOG
 #  include "esp32s2_board_wdt.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+#  include "esp32s2_max6675.h"
 #endif
 
 #include "esp32s2-saola-1.h"
@@ -104,6 +112,14 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
              CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#if defined(CONFIG_ESP32S2_EFUSE)
+  ret = esp32s2_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
     }
 #endif
 
@@ -216,6 +232,63 @@ int esp32s2_bringup(void)
              "Failed to initialize BMP180 driver for I2C0: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_INPUT_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = board_max6675_initialize(0, 2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: MAX6675 initialization failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_I2S
+
+#ifdef CONFIG_AUDIO_CS4344
+
+  /* Configure CS4344 audio on I2S0 */
+
+  ret = esp32s2_cs4344_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize CS4344 audio: %d\n", ret);
+    }
+#else
+
+  bool i2s_enable_tx;
+  bool i2s_enable_rx;
+
+#ifdef CONFIG_ESP32S2_I2S_TX
+  i2s_enable_tx = true;
+#else
+  i2s_enable_tx = false;
+#endif /* CONFIG_ESP32S2_I2S_TX */
+
+#ifdef CONFIG_ESP32S2_I2S_RX
+    i2s_enable_rx = true;
+#else
+    i2s_enable_rx = false;
+#endif /* CONFIG_ESP32S2_I2S_RX */
+
+  /* Configure I2S generic audio on I2S0 */
+
+  ret = board_i2sdev_initialize(i2s_enable_tx, i2s_enable_rx);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S0 driver: %d\n", ret);
+    }
+#endif /* CONFIG_AUDIO_CS4344 */
+
+#endif /* CONFIG_ESP32S2_I2S */
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

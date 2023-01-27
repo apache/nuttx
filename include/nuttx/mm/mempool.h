@@ -191,7 +191,7 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk);
  *   OK on success; A negated errno value on any failure.
  ****************************************************************************/
 
-int mempool_info(FAR struct mempool_s *pool, struct mempoolinfo_s *info);
+int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info);
 
 /****************************************************************************
  * Name: mempool_memdump

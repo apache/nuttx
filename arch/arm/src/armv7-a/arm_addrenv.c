@@ -149,26 +149,15 @@ static int up_addrenv_initdata(uintptr_t l2table)
   irqstate_t flags;
   uint32_t *virtptr;
   uintptr_t paddr;
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-  uint32_t l1save;
-#endif
 
   DEBUGASSERT(l2table);
   flags = enter_critical_section();
 
-#ifdef CONFIG_ARCH_PGPOOL_MAPPING
   /* Get the virtual address corresponding to the physical page table
    * address
    */
 
   virtptr = (uint32_t *)arm_pgvaddr(l2table);
-#else
-  /* Temporarily map the page into the virtual address space */
-
-  l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-  mmu_l1_setentry(l2table & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-  virtptr = (uint32_t *)(ARCH_SCRATCH_VBASE | (l2table & SECTION_MASK));
-#endif
 
   /* Invalidate D-Cache so that we read from the physical memory */
 
@@ -180,16 +169,9 @@ static int up_addrenv_initdata(uintptr_t l2table)
   paddr = (uintptr_t)(*virtptr) & PTE_SMALL_PADDR_MASK;
   DEBUGASSERT(paddr);
 
-#ifdef CONFIG_ARCH_PGPOOL_MAPPING
   /* Get the virtual address corresponding to the physical page address */
 
   virtptr = (uint32_t *)arm_pgvaddr(paddr);
-#else
-  /* Temporarily map the page into the virtual address space */
-
-  mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-  virtptr = (uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
-#endif
 
   /* Finally, after of all of that, we can initialize the tiny region at
    * the beginning of .bss/.data by setting it to zero.
@@ -204,11 +186,6 @@ static int up_addrenv_initdata(uintptr_t l2table)
   up_flush_dcache((uintptr_t)virtptr,
                   (uintptr_t)virtptr + ARCH_DATA_RESERVE_SIZE);
 
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-  /* Restore the scratch section L1 page table entry */
-
-  mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
-#endif
   leave_critical_section(flags);
   return OK;
 }

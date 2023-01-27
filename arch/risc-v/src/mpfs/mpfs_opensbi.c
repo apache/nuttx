@@ -26,8 +26,8 @@
 #include <hardware/mpfs_memorymap.h>
 #include <hardware/mpfs_clint.h>
 #include <hardware/mpfs_sysreg.h>
-#ifdef CONFIG_MPFS_IHC
-#include <hardware/mpfs_ihc.h>
+#ifdef CONFIG_MPFS_IHC_SBI
+#include <hardware/mpfs_ihc_sbi.h>
 #endif
 
 #include <sbi/riscv_io.h>
@@ -41,7 +41,7 @@
 #include <sbi_utils/ipi/aclint_mswi.h>
 #include <sbi_utils/timer/aclint_mtimer.h>
 
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
 #include <mpfs_ihc.h>
 #endif
 
@@ -58,14 +58,6 @@
 
 #define MPFS_PMP_DEFAULT_ADDR      0xfffffffff
 #define MPFS_PMP_DEFAULT_PERM      0x000000009f
-
-/* The following define is not accessible with assember.  Make sure it's in
- * sync with the assembler usage in mpfs_opensbi_utils.S.
- */
-
-#if SBI_PLATFORM_DEFAULT_HART_STACK_SIZE != 8192
-#  error "Fix define in file mpfs_opensbi_utils.S"
-#endif
 
 #define MPFS_SYSREG_SOFT_RESET_CR     (MPFS_SYSREG_BASE + \
                                        MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
@@ -106,7 +98,7 @@ static int  mpfs_opensbi_console_init(void);
 static int  mpfs_irqchip_init(bool cold_boot);
 static int  mpfs_ipi_init(bool cold_boot);
 static int  mpfs_timer_init(bool cold_boot);
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
 static int  mpfs_opensbi_vendor_ext_check(long extid);
 static int  mpfs_opensbi_ecall_handler(long extid, long funcid,
                                        const struct sbi_trap_regs *regs,
@@ -123,6 +115,7 @@ static int  mpfs_opensbi_ecall_handler(long extid, long funcid,
  */
 
 extern void riscv_lowputc(char ch);
+extern uintptr_t mpfs_get_entrypt(uint64_t hartid);
 
 /* domains init implemented in board specific file */
 
@@ -174,7 +167,7 @@ static const struct sbi_platform_operations platform_ops =
   .ipi_exit            = NULL,
   .timer_init          = mpfs_timer_init,
   .timer_exit          = NULL,
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
   .vendor_ext_check    = mpfs_opensbi_vendor_ext_check,
   .vendor_ext_provider = mpfs_opensbi_ecall_handler,
 #endif
@@ -232,23 +225,8 @@ static const struct sbi_platform platform =
 
 /* This must go into l2_scratchpad region, starting at 0x0a000000. */
 
-static sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
+sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
                __attribute__((section(".l2_scratchpad")));
-
-/* These stacks are used in the mpfs_opensbi_utils.S */
-
-uint8_t g_hart_stacks[SBI_PLATFORM_DEFAULT_HART_STACK_SIZE * \
-                      MPFS_HART_COUNT] \
-                      __attribute__((section(".ddrstorage"), aligned(16)));
-
-static const uint64_t sbi_entrypoints[] =
-{
-  CONFIG_MPFS_HART0_ENTRYPOINT,
-  CONFIG_MPFS_HART1_ENTRYPOINT,
-  CONFIG_MPFS_HART2_ENTRYPOINT,
-  CONFIG_MPFS_HART3_ENTRYPOINT,
-  CONFIG_MPFS_HART4_ENTRYPOINT
-};
 
 /****************************************************************************
  * Private Functions
@@ -545,7 +523,7 @@ static void mpfs_opensbi_pmp_setup(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MPFS_IHC
+#ifdef CONFIG_MPFS_IHC_SBI
 static int mpfs_opensbi_vendor_ext_check(long extid)
 {
   return (SBI_EXT_MICROCHIP_TECHNOLOGY == extid);
@@ -632,7 +610,7 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 
   csr_write(mscratch, &g_scratches[hartid].scratch);
   g_scratches[hartid].scratch.next_mode = PRV_S;
-  g_scratches[hartid].scratch.next_addr = sbi_entrypoints[hartid];
+  g_scratches[hartid].scratch.next_addr = mpfs_get_entrypt(hartid);
   g_scratches[hartid].scratch.next_arg1 = 0;
 
   sbi_init(&g_scratches[hartid].scratch);

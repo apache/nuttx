@@ -192,7 +192,7 @@ static void nxsig_null_action(int signo)
 #ifdef HAVE_NXSIG_ABNORMAL_TERMINANTION
 static void nxsig_abnormal_termination(int signo)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
+  FAR struct tcb_s *rtcb = this_task();
 
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.
@@ -248,7 +248,7 @@ static void nxsig_abnormal_termination(int signo)
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
 static void nxsig_stop_task(int signo)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
+  FAR struct tcb_s *rtcb = this_task();
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct task_group_s *group;
 

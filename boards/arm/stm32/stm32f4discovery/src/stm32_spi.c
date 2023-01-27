@@ -61,6 +61,12 @@ void weak_function stm32_spidev_initialize(void)
   stm32_configgpio(GPIO_ENC28J60_INTR);
 #endif
 
+#ifdef CONFIG_NET_W5500
+  stm32_configgpio(GPIO_W5500_CS);
+  stm32_configgpio(GPIO_W5500_RESET);
+  stm32_configgpio(GPIO_W5500_INTR);
+#endif
+
 #ifdef CONFIG_STM32_SPI1
   stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
 #endif
@@ -131,6 +137,15 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
       /* Set the GPIO low to select and high to de-select */
 
       stm32_gpiowrite(GPIO_ENC28J60_CS, !selected);
+    }
+#endif
+
+#ifdef CONFIG_NET_W5500
+  if (devid == SPIDEV_ETHERNET(0))
+    {
+      /* Set the GPIO low to select and high to de-select */
+
+      stm32_gpiowrite(GPIO_W5500_CS, !selected);
     }
 #endif
 

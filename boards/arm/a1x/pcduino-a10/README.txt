@@ -56,7 +56,7 @@ README
   (See http://www.allwinnertech.com/en/product/a10.html):
 
   CPU
-    - ARM Cortex™-A8
+    - ARM Cortexâ„¢-A8
     - 32KB I-Cache
     - 32KB D-Cache
     - 256KB L2 Cache

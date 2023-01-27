@@ -838,19 +838,19 @@
 
 /* Analog ENET PLL Control Register */
 
-#define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT      (0)       /* Bits 0-1:    Controls the frequency of the ethernet0 reference clock */
-#define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_MASK       (0x3 << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_25MHZ    ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ    ((uint32_t)(1) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_100MHZ   ((uint32_t)(2) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_125MHZ   ((uint32_t)(3) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
+#define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT      (0)       /* Bits 0-1:    Controls the frequency of the ethernet0 reference clock */
+#define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_MASK       (0x3 << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
+#  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_25MHZ    ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
+#  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ    ((uint32_t)(1) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
+#  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_100MHZ   ((uint32_t)(2) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
+#  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_125MHZ   ((uint32_t)(3) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
 
 /*                                                                 Bits 2-11:
  *                                                                   Reserved
  */
-#define CCM_ANALOG_PLL_ENET_POWERDOWN                   (1 << 12) /* Bit 12:     Powers down the PLL */
-#define CCM_ANALOG_PLL_ENET_ENET1_125M_EN               (1 << 13) /* Bit 13:     Enable the PLL providing the ENET1 125 MHz reference clock */
-#define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT       (14)       /* Bits 14-15: Determines the bypass source */
+#define CCM_ANALOG_PLL_ENET_POWERDOWN                  (1 << 12) /* Bit 12:     Powers down the PLL */
+#define CCM_ANALOG_PLL_ENET_ENABLE                     (1 << 13) /* Bit 13:     Enable the PLL providing the ENET1 125 MHz reference clock */
+#define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT       (14)      /* Bits 14-15: Determines the bypass source */
 #define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_MASK        (0x3 << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_REF_24M   ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 

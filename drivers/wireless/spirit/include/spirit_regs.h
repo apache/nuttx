@@ -242,13 +242,13 @@
                                                           * low), default configuration after POR */
 #define CONF_GPIO_OUT_POR_Inv           ((uint8_t)0x08)  /* POR inverted (active low) */
 #define CONF_GPIO_OUT_WUT_Exp           ((uint8_t)0x10)  /* Wake-Up Timer expiration:
-                                                          * ‘1’ when WUT has expired */
-#define CONF_GPIO_OUT_LBD               ((uint8_t)0x18)  /* Low battery detection: ‘1’ when
+                                                          * '1' when WUT has expired */
+#define CONF_GPIO_OUT_LBD               ((uint8_t)0x18)  /* Low battery detection: '1' when
                                                           * battery is below threshold setting */
 #define CONF_GPIO_OUT_TX_Data           ((uint8_t)0x20)  /* TX data internal clock output (TX
                                                           * data are sampled on the rising edge
                                                           * of it) */
-#define CONF_GPIO_OUT_TX_State          ((uint8_t)0x28)  /* TX state indication: ‘1’ when
+#define CONF_GPIO_OUT_TX_State          ((uint8_t)0x28)  /* TX state indication: '1' when
                                                           * Spirit1 is transiting in the TX state */
 
 #define CONF_GPIO_OUT_TX_FIFO_ALMOST_EMPTY ((uint8_t)0x30) /* TX FIFO Almost Empty  Flag */
@@ -257,7 +257,7 @@
 #define CONF_GPIO_OUT_RX_Data           ((uint8_t)0x40)  /* RX data output */
 #define CONF_GPIO_OUT_RX_Clock          ((uint8_t)0x48)  /* RX clock output (recovered from
                                                           * received data) */
-#define CONF_GPIO_OUT_RX_State          ((uint8_t)0x50)  /* RX state indication: ‘1’ when
+#define CONF_GPIO_OUT_RX_State          ((uint8_t)0x50)  /* RX state indication: '1' when
                                                           * Spirit1 is transiting in the RX state */
 
 #define CONF_GPIO_OUT_RX_FIFO_ALMOST_FULL ((uint8_t)0x58)  /* RX FIFO Almost Full Flag */
@@ -407,7 +407,7 @@
  *                     The valid range depends on fXO and REFDIV settings;
  *                     for fXO=26MHz
  *                     REFDIV = 0 - SYNT[25:21] = 11...13
- *                     REFDIV = 1 - SYNT[25:21] = 22…27
+ *                     REFDIV = 1 - SYNT[25:21] = 22...27
  */
 
 #define SYNT3_BASE                      ((uint8_t)0x08)  /* [4:0] -> SYNT[25:21], highest 5
@@ -540,9 +540,9 @@
  *
  *   7:4  Reserved.
  *   3:0  FC_OFFSET[11:8]: Carrier offset. This value is the higher part of a
- *                         12-bit 2’s complement integer representing an
+ *                         12-bit 2's complement integer representing an
  *                         offset in 99Hz(2) units added/subtracted to the
- *                         carrier frequency set by registers SYNT3…SYNT0.
+ *                         carrier frequency set by registers SYNT3...SYNT0.
  *                         This register can be used to set a fixed
  *                         correction value obtained e.g. from crystal
  *                         measurements.
@@ -556,20 +556,20 @@
  *   Default value: 0x00
  *   Read Write
  *   7:0  FC_OFFSET[7:0]: Carrier offset. This value is the lower part of a
- *                        12-bit 2’s complement integer representing an
+ *                        12-bit 2's complement integer representing an
  *                        offset in 99Hz(2) units added/subtracted to the
- *                        carrier frequency set by registers SYNT3…SYNT0.
+ *                        carrier frequency set by registers SYNT3...SYNT0.
  *                        This register can be used to set a fixed correction
  *                        value obtained e.g. from crystal measurements.
  */
 
 #define FC_OFFSET0_BASE                 ((uint8_t)0x0f)  /* [7:0] -> [7:0] Carrier offset
                                                           * (lower part). This value is a 12-bit
-                                                          * 2’s complement integer representing
+                                                          * 2's complement integer representing
                                                           * an offset in fXO/2^18 (99Hz for 26
                                                           * MHz XO) units added/subtracted to
                                                           * the carrier frequency set by registers
-                                                          * SYNT3…SYNT0. Range is +/-200kHz with 26
+                                                          * SYNT3...SYNT0. Range is +/-200kHz with 26
                                                           * MHz XO */
 
 /* PA_LEVEL_x_Registers */
@@ -1338,7 +1338,7 @@
  *   Read Write
  *
  *   7   Reserved.
- *   6   RX_TIMEOUT_AND_OR_SELECT[0]: 1 - ‘OR’ logical function applied to
+ *   6   RX_TIMEOUT_AND_OR_SELECT[0]: 1 - 'OR' logical function applied to
  *                                        CS/SQI/PQI values (masked by 7:5
  *                                        bits in PROTOCOL register)
  *   5   CONTROL_FILTERING[0]:        1 - RX packet accepted if its control
@@ -1379,7 +1379,7 @@
                                                           * [RX] */
 #define PCKT_FLT_OPTIONS_CONTROL_FILTERING_MASK ((uint8_t)0x20)
                                                          /* Packet discarded if the x-byte
-                                                          * (x=1¸4) control field (masked by
+                                                          * (x=1,4) control field (masked by
                                                           * the CONTROLx_MASK register) differs
                                                           * from CONTROLx_FIELD register [RX] */
 #define PCKT_FLT_OPTIONS_RX_TIMEOUT_AND_OR_SELECT ((uint8_t)0x40)
@@ -1446,7 +1446,7 @@
  *
  *   7:0   RX_PCKT_LEN1[7:0]:  Length (number of bytes) of the received
  *                             packet:
- *                             RX_PCKT_LEN=RX_PCKT_LEN1 × 256 + RX_PCKT_LEN0
+ *                             RX_PCKT_LEN=RX_PCKT_LEN1 x 256 + RX_PCKT_LEN0
  *                             This value is packet_length/256
  */
 
@@ -1460,11 +1460,11 @@
  *
  *   7:0   RX_PCKT_LEN0[7:0]:  Length (number of bytes) of the received
  *                             packet:
- *                             RX_PCKT_LEN=RX_PCKT_LEN1 × 256 + RX_PCKT_LEN0
+ *                             RX_PCKT_LEN=RX_PCKT_LEN1 x 256 + RX_PCKT_LEN0
  *                             This value is packet_length%256
  */
 #define RX_PCKT_LEN0_BASE               ((uint8_t)0xca)  /* RX_PCKT_LEN=RX_PCKT_LEN1
-                                                          * × 256 + RX_PCKT_LEN0 */
+                                                          * x 256 + RX_PCKT_LEN0 */
 
 /* CRC_FIELD[2:0] registers
  *
@@ -1693,7 +1693,7 @@
  *   Read Write
  *   7:2     BU_PRESCALER[5:0]: Used to program the back-off unit BU
  *   1:0     CCA_PERIOD[1:0]: Used to program the Tcca time
- *                            (64 / 128 /256 / 512 × Tbit.
+ *                            (64 / 128 /256 / 512 x Tbit.
  */
 
 #define CSMA_CONFIG1_BASE               ((uint8_t)0x66)  /* CSMA/CA: Prescaler of the back-off
@@ -2184,7 +2184,7 @@
  *            27  |       TX circuitry start-up time
  *            28  |       RX circuitry start-up time
  *            29  |       RX operation timeout
- *            30  |       Others AES End–of –Operation
+ *            30  |       Others AES End-of-Operation
  *            31  |       Reserved
  */
 
@@ -2320,7 +2320,7 @@
  *            27  |       TX circuitry start-up time
  *            28  |       RX circuitry start-up time
  *            29  |       RX operation timeout
- *            30  |       Others AES End–of –Operation
+ *            30  |       Others AES End-of-Operation
  *            31  |       Reserved
  */
 

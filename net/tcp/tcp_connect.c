@@ -316,17 +316,17 @@ int psock_tcp_connect(FAR struct socket *psock,
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
       if (conn->domain == PF_INET6)
-#endif
         {
+#endif
           if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
             {
               net_ipv6addr_copy(conn->u.ipv6.laddr, conn->dev->d_ipv6addr);
             }
-        }
 #endif /* CONFIG_NET_IPv6 */
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
+        }
       else
 #endif
         {

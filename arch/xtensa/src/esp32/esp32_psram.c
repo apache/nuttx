@@ -715,7 +715,9 @@ psram_cmd_recv_start(psram_spi_num_t spi_num,
 
   while (getreg32(SPI_EXT2_REG(0)) != 0);
 
+#ifndef CONFIG_ESP32_PID
   modifyreg32(DPORT_HOST_INF_SEL_REG, 0, 1 << 14);
+#endif
 
   /* Start send data */
 
@@ -723,7 +725,9 @@ psram_cmd_recv_start(psram_spi_num_t spi_num,
 
   while ((getreg32(SPI_CMD_REG(spi_num)) & SPI_USR));
 
+#ifndef CONFIG_ESP32_PID
   modifyreg32(DPORT_HOST_INF_SEL_REG, 1 << 14, 0);
+#endif
 
   /* recover spi mode */
 

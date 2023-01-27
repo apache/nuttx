@@ -390,6 +390,7 @@ int parse_gpt_partition(FAR struct partition_state_s *state,
   FAR struct gpt_header_s *gpt;
   FAR struct gpt_entry_s *ptes;
   struct partition_s pentry;
+  blkcnt_t lastlba;
   int nb_part;
   int count;
   int ret;
@@ -462,12 +463,20 @@ int parse_gpt_partition(FAR struct partition_state_s *state,
       goto err;
     }
 
+  lastlba = gpt_last_lba(state);
   nb_part = le32toh(gpt->num_partition_entries);
   for (pentry.index = 0; pentry.index < nb_part; pentry.index++)
     {
+      /* Skip the empty or invalid entries */
+
+      if (!gpt_pte_is_valid(&ptes[pentry.index], lastlba))
+        {
+          continue;
+        }
+
       pentry.firstblock = GPT_LBA_TO_BLOCK(ptes[pentry.index].starting_lba,
                                            state->blocksize);
-      pentry.nblocks = GPT_LBA_TO_BLOCK(ptes[pentry.index].ending_lba,
+      pentry.nblocks = GPT_LBA_TO_BLOCK(ptes[pentry.index].ending_lba + 1,
                                         state->blocksize) -
                        pentry.firstblock;
       pentry.blocksize = state->blocksize;

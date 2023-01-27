@@ -39,6 +39,9 @@
 #include "cxd56_clock.h"
 #include "cxd56_pwm.h"
 
+#if defined(CONFIG_CXD56_PWM0) || defined(CONFIG_CXD56_PWM1) || \
+    defined(CONFIG_CXD56_PWM2) || defined(CONFIG_CXD56_PWM3)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -525,3 +528,5 @@ struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
 
   return (struct pwm_lowerhalf_s *)pwmch;
 }
+
+#endif

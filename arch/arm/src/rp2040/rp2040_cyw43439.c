@@ -31,6 +31,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
 
+#include "barriers.h"
+
 #include "rp2040_cyw43439.h"
 #include "rp2040_pio.h"
 #include "rp2040_pio_instructions.h"
@@ -122,7 +124,7 @@ static const rp2040_pio_program_t pio_program =
 
 static void dma_complete(DMA_HANDLE handle, uint8_t status, void *arg)
 {
-  FAR dma_info_t *dma_info = arg;
+  dma_info_t *dma_info = arg;
 
   /* Remember the status and post the dma complete event. */
 
@@ -138,9 +140,9 @@ static void dma_complete(DMA_HANDLE handle, uint8_t status, void *arg)
  *
  ****************************************************************************/
 
-static int my_init(FAR gspi_dev_t  *gspi)
+static int my_init(gspi_dev_t  *gspi)
 {
-  FAR rp2040_gspi_t *rp_io = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io = (rp2040_gspi_t *)(gspi->io_dev);
 
   uint32_t              divisor;
   irqstate_t            flags;
@@ -281,11 +283,11 @@ static int my_init(FAR gspi_dev_t  *gspi)
  *
  ****************************************************************************/
 
-static int my_set_isr(FAR gspi_dev_t  *gspi,
+static int my_set_isr(gspi_dev_t  *gspi,
                       xcpt_t           thread_isr,
-                      FAR void        *thread_isr_arg)
+                      void        *thread_isr_arg)
 {
-  FAR rp2040_gspi_t *rp_io = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io = (rp2040_gspi_t *)(gspi->io_dev);
 
   /* Set up, but do not enable, interrupt service for the data pin */
 
@@ -307,10 +309,10 @@ static int my_set_isr(FAR gspi_dev_t  *gspi,
  *
  ****************************************************************************/
 
-static int my_interrupt_enable(FAR gspi_dev_t  *gspi,
+static int my_interrupt_enable(gspi_dev_t  *gspi,
                                bool             enable)
 {
-  FAR rp2040_gspi_t *rp_io         = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io         = (rp2040_gspi_t *)(gspi->io_dev);
   static int         disable_count = 0;
 
   if (enable)
@@ -334,9 +336,9 @@ static int my_interrupt_enable(FAR gspi_dev_t  *gspi,
  *
  ****************************************************************************/
 
-static int my_deinit(FAR gspi_dev_t *gspi)
+static int my_deinit(gspi_dev_t *gspi)
 {
-  FAR rp2040_gspi_t *rp_io = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io = (rp2040_gspi_t *)(gspi->io_dev);
 
   rp2040_gpio_irq_attach(rp_io->gpio_data,
                          RP2040_GPIO_INTR_EDGE_LOW,
@@ -362,14 +364,14 @@ static int my_deinit(FAR gspi_dev_t *gspi)
  *
  ****************************************************************************/
 
-static int my_write(FAR struct gspi_dev_s  *gspi,
-                    bool                    increment,
-                    enum gspi_cmd_func_e    function,
-                    uint32_t                address,
-                    uint16_t                length,
-                    FAR const uint32_t     *data)
+static int my_write(struct gspi_dev_s   *gspi,
+                    bool                 increment,
+                    enum gspi_cmd_func_e function,
+                    uint32_t             address,
+                    uint16_t             length,
+                    const uint32_t      *data)
 {
-  FAR rp2040_gspi_t *rp_io      = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io      = (rp2040_gspi_t *)(gspi->io_dev);
   dma_info_t         dma_info;
   DMA_HANDLE         xfer_dma   = rp2040_dmachannel();
   uint32_t           command    =    (0x1                  << 31)
@@ -398,7 +400,7 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
 
   /* Claim the exclusive lock */
 
-  nxsem_wait(&gspi->exclsem);
+  nxmutex_lock(&gspi->lock);
 
   /* Reset the PIO state machine just to be sure. */
 
@@ -414,18 +416,25 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
                      rp_io->pio_sm,
                      pio_encode_jmp(rp_io->pio_location));
 
-  /* Set the PIO X (tx bit len) and Y (rx bit len) registers.
+  /* Set the PIO X and Y registers.
+   *
+   * We load X (the TX bit length) with one less than the number of
+   * bits to transmit to the chip. This length includes the 32-bit
+   * command word and all the 32-bit data words. Since the length
+   * parameter is a byte count we round up just to be sure.
+   *
+   * We load Y (the RX bit length) with zero as we're not reading
+   * any data.
+   *
    * This is slightly magical.  The way we load the X is to first
    * push the the number of bits to transmit onto the transmit fifo.
    * Then we force the PIO state machine to execute the instruction
    * "out x, 32" which transfers the word from the output shift
    * register (OSR) to the X register.  When this instruction executes
-   * the PIO will notice the the OSR is empty, so will automatically
+   * the PIO will notice that the OSR is empty, so will automatically
    * pull a value (the one we just added) from the input fifo.
    *
-   * Loading the Y works the same way, except we round the number of
-   * bits up to a multiple of 32, so the pio program will be sure to
-   * autopush the final data to the output fifo.
+   * Loading the Y works the same way.
    */
 
   rp2040_pio_sm_put(rp_io->pio, rp_io->pio_sm, 32 * ((length + 3) / 4) + 31);
@@ -487,6 +496,7 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
+  ARM_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -496,8 +506,22 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
 
   nxsem_wait(&dma_info.sem);
 
+  /* At this point all the data has been queued but my not have all been
+   * sent.  We know that the PIO program will make the data line an input
+   * once all the data is sent so we'll check for this.
+   */
+
+  while (getreg32(RP2040_IO_BANK0_GPIO_STATUS(rp_io->gpio_data))
+                  & RP2040_IO_BANK0_GPIO_STATUS_OEFROMPERI)
+    {
+      /* Just busy wait -- testing indicates a worst case of
+       * 20 loops (100 instructions).
+       */
+    }
+
   /* Un-assert select by pulling line high. */
 
+  ARM_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controller */
@@ -509,14 +533,15 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
 
   rp2040_pio_sm_set_enabled(rp_io->pio, rp_io->pio_sm, false);
 
-  /* At this point the data pin is input so it should be pulled high */
+  /* At this point the data pin is input so it should have been
+   * pulled high by rp2040's gpio pullup.
+   */
 
   my_interrupt_enable(gspi, true);
 
   /* Release the exclusive lock */
 
-  nxsem_post(&gspi->exclsem);
-
+  nxmutex_unlock(&gspi->lock);
   return dma_info.status;
 }
 
@@ -528,25 +553,25 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
  *
  ****************************************************************************/
 
-static int my_read(FAR struct gspi_dev_s  *gspi,
-                   bool                    increment,
-                   enum gspi_cmd_func_e    function,
-                   uint32_t                address,
-                   uint16_t                length,
-                   FAR uint32_t           *buffer)
+static int my_read(struct gspi_dev_s   *gspi,
+                   bool                 increment,
+                   enum gspi_cmd_func_e function,
+                   uint32_t             address,
+                   uint16_t             length,
+                   uint32_t            *buffer)
 {
-  FAR rp2040_gspi_t *rp_io      = (FAR rp2040_gspi_t *)(gspi->io_dev);
-  dma_info_t         dma_info;
-  DMA_HANDLE         xfer_dma   = rp2040_dmachannel();
-  DMA_HANDLE         ctrl_dma   = rp2040_dmachannel();
-  uint32_t           temp_word;
-  uint32_t           bit_length;
-  uint32_t           command    =    ((increment ? 1 : 0) << 30)
-                                   | ((function & 0x3)    << 28)
-                                   | ((address & 0x1ffff) << 11)
-                                   | (length & 0x7ff);
+  rp2040_gspi_t *rp_io      = (rp2040_gspi_t *)(gspi->io_dev);
+  dma_info_t     dma_info;
+  DMA_HANDLE     xfer_dma   = rp2040_dmachannel();
+  DMA_HANDLE     ctrl_dma   = rp2040_dmachannel();
+  uint32_t       temp_word;
+  uint32_t       bit_length;
+  uint32_t       command    = ((increment ? 1 : 0) << 30)
+                            | ((function & 0x3)    << 28)
+                            | ((address & 0x1ffff) << 11)
+                            | (length & 0x7ff);
 
-  uint32_t           pacing = rp2040_pio_get_dreq(rp_io->pio,
+  uint32_t       pacing     = rp2040_pio_get_dreq(rp_io->pio,
                                                   rp_io->pio_sm,
                                                   false);
 
@@ -590,7 +615,7 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
 
   /* Claim the exclusive lock */
 
-  nxsem_wait(&gspi->exclsem);
+  nxmutex_lock(&gspi->lock);
 
   /* Reset the PIO state machine just to be sure. */
 
@@ -606,32 +631,40 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
                      rp_io->pio_sm,
                      pio_encode_jmp(rp_io->pio_location));
 
-  /* Set the PIO X (tx bit len) and Y (rx bit len) registers.
+  /* Set the PIO X and Y registers.
+   *
+   * We load X (the TX bit length) with one less than the number of
+   * bits to transmit to the chip. Since we only send the 32-bit command
+   * word we set X to 31.
+   *
+   * We load Y with the number of bits to read.  This is based on the
+   * byte count in "length" which we round up to a 32-bit boundry so the
+   * pio program will be sure to autopush the final data to the output fifo.
+   *
    * This is slightly magical.  The way we load the X is to first
    * push the the number of bits to transmit onto the transmit fifo.
    * Then we force the PIO state machine to execute the instruction
    * "out x, 32" which transfers the word from the output shift
    * register (OSR) to the X register.  When this instruction executes
-   * the PIO will notice the the OSR is empty, so will automatically
+   * the PIO will notice that the OSR is empty, so will automatically
    * pull a value (the one we just added) from the input fifo.
    *
-   * Loading the Y works the same way, except we round the number of
-   * bits up to a multiple of 32, so the pio program will be sure to
-   * autopush the final data to the output fifo.
+   * Loading the Y works the same way.
    */
 
   rp2040_pio_sm_put(rp_io->pio, rp_io->pio_sm, 31);
   rp2040_pio_sm_exec(rp_io->pio, rp_io->pio_sm, pio_encode_out(pio_x, 32));
 
-  /* RX bit length is 32 bits for each 4 bytes requested
-   * plus 32 bits for status
-   */
+  /* RX bit length is 32 bits for each 4 bytes requested. */
 
   bit_length = 32 * ((length + 3) / 4);
 
-  /* For F1 reads and 32 bits for delay */
+  /* For F1 reads add 32 bits for delay */
 
-  if (function == gspi_f1_backplane) bit_length += 32;
+  if (function == gspi_f1_backplane)
+    {
+      bit_length += 32;
+    }
 
   rp2040_pio_sm_put(rp_io->pio, rp_io->pio_sm, bit_length);
   rp2040_pio_sm_exec(rp_io->pio, rp_io->pio_sm, pio_encode_out(pio_y, 32));
@@ -689,6 +722,7 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
+  ARM_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -704,6 +738,7 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
 
   /* Un-assert select by pulling line high. */
 
+  ARM_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controllers */
@@ -717,14 +752,15 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
 
   rp2040_pio_sm_set_enabled(rp_io->pio, rp_io->pio_sm, false);
 
-  /* At this point the data pin is input so it should be pulled high */
+  /* At this point the data pin is input so it should have been
+   * pulled high by rp2040's gpio pullup.
+   */
 
   my_interrupt_enable(gspi, true);
 
   /* Release the exclusive lock */
 
-  nxsem_post(&gspi->exclsem);
-
+  nxmutex_unlock(&gspi->lock);
   return dma_info.status;
 }
 
@@ -745,9 +781,9 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
                              uint8_t gpio_clock,
                              uint8_t gpio_intr)
 {
-  FAR gspi_dev_t    *gspi;
-  FAR rp2040_gspi_t *rp_io;
-  int                err;
+  gspi_dev_t    *gspi;
+  rp2040_gspi_t *rp_io;
+  int            err;
 
   wlinfo("entered.\n");
 
@@ -782,7 +818,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
   rp_io->gpio_clock  = gpio_clock;
   rp_io->gpio_intr   = gpio_intr;
 
-  nxsem_init(&gspi->exclsem, 0, 1);
+  nxmutex_init(&gspi->lock);
 
   /* Initialize the cyw43439 power-on and chip select lines. */
 
@@ -805,9 +841,9 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
       return NULL;
     }
 
-  wlinfo("setup complete. gspi = 0x%08lX\n", (uint32_t) gspi);
+  wlinfo("setup complete. gspi = 0x%p\n", gspi);
 
-  return (FAR void *) gspi;
+  return gspi;
 }
 
 /****************************************************************************
@@ -819,7 +855,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
 
 void rp2040_cyw_remove(gspi_dev_t *gspi)
 {
-  /* gspi_deregister((FAR gspi_dev_t *)gspi); */
+  /* gspi_deregister((gspi_dev_t *)gspi); */
 }
 
 /****************************************************************************

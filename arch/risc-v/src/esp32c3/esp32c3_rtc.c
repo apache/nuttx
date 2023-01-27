@@ -726,7 +726,8 @@ static uint32_t IRAM_ATTR esp32c3_rtc_clk_cal_internal(
     }
   else
     {
-      REG_SET_FIELD(TIMG_RTCCALICFG2_REG(0), TIMG_RTC_CALI_TIMEOUT_THRES,
+      REG_SET_FIELD(TIMG_RTCCALICFG2_REG(0),
+                    (uint32_t)TIMG_RTC_CALI_TIMEOUT_THRES,
                     RTC_SLOW_CLK_150K_CAL_TIMEOUT_THRES(slowclk_cycles));
       expected_freq = RTC_SLOW_CLK_FREQ_90K;
     }
@@ -2065,7 +2066,8 @@ enum esp32c3_rtc_xtal_freq_e IRAM_ATTR
 void IRAM_ATTR esp32c3_rtc_clk_slow_freq_set(
                            enum esp32c3_rtc_slow_freq_e slow_freq)
 {
-  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_ANA_CLK_RTC_SEL, slow_freq);
+  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, (uint32_t)RTC_CNTL_ANA_CLK_RTC_SEL,
+                slow_freq);
 
   /* Why we need to connect this clock to digital? Or maybe this clock
    * should be connected to digital when xtal 32k clock is enabled instead?
@@ -2193,7 +2195,8 @@ void IRAM_ATTR esp32c3_rtc_init(void)
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_XPD_DIG_REG, 0);
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_XPD_RTC_REG, 0);
   modifyreg32(RTC_CNTL_ANA_CONF_REG, RTC_CNTL_PVTMON_PU, 0);
-  REG_SET_FIELD(RTC_CNTL_TIMER1_REG, RTC_CNTL_PLL_BUF_WAIT, cfg.pll_wait);
+  REG_SET_FIELD(RTC_CNTL_TIMER1_REG, (uint32_t)RTC_CNTL_PLL_BUF_WAIT,
+                cfg.pll_wait);
   REG_SET_FIELD(RTC_CNTL_TIMER1_REG, RTC_CNTL_CK8M_WAIT, cfg.ck8m_wait);
   REG_SET_FIELD(RTC_CNTL_TIMER5_REG, RTC_CNTL_MIN_SLP_VAL,
                 RTC_CNTL_MIN_SLP_VAL_MIN);
@@ -2204,7 +2207,7 @@ void IRAM_ATTR esp32c3_rtc_init(void)
                 rtc_init_cfg.wifi_powerup_cycles);
   REG_SET_FIELD(RTC_CNTL_TIMER3_REG, RTC_CNTL_WIFI_WAIT_TIMER,
                 rtc_init_cfg.wifi_wait_cycles);
-  REG_SET_FIELD(RTC_CNTL_TIMER3_REG, RTC_CNTL_BT_POWERUP_TIMER,
+  REG_SET_FIELD(RTC_CNTL_TIMER3_REG, (uint32_t)RTC_CNTL_BT_POWERUP_TIMER,
                 rtc_init_cfg.bt_powerup_cycles);
   REG_SET_FIELD(RTC_CNTL_TIMER3_REG, RTC_CNTL_BT_WAIT_TIMER,
                 rtc_init_cfg.bt_wait_cycles);
@@ -2212,11 +2215,13 @@ void IRAM_ATTR esp32c3_rtc_init(void)
                 rtc_init_cfg.cpu_top_powerup_cycles);
   REG_SET_FIELD(RTC_CNTL_TIMER4_REG, RTC_CNTL_CPU_TOP_WAIT_TIMER,
                 rtc_init_cfg.cpu_top_wait_cycles);
-  REG_SET_FIELD(RTC_CNTL_TIMER4_REG, RTC_CNTL_DG_WRAP_POWERUP_TIMER,
+  REG_SET_FIELD(RTC_CNTL_TIMER4_REG,
+                (uint32_t)RTC_CNTL_DG_WRAP_POWERUP_TIMER,
                 rtc_init_cfg.dg_wrap_powerup_cycles);
   REG_SET_FIELD(RTC_CNTL_TIMER4_REG, RTC_CNTL_DG_WRAP_WAIT_TIMER,
                 rtc_init_cfg.dg_wrap_wait_cycles);
-  REG_SET_FIELD(RTC_CNTL_TIMER6_REG, RTC_CNTL_DG_PERI_POWERUP_TIMER,
+  REG_SET_FIELD(RTC_CNTL_TIMER6_REG,
+                (uint32_t)RTC_CNTL_DG_PERI_POWERUP_TIMER,
                 rtc_init_cfg.dg_peri_powerup_cycles);
   REG_SET_FIELD(RTC_CNTL_TIMER6_REG, RTC_CNTL_DG_PERI_WAIT_TIMER,
                 rtc_init_cfg.dg_peri_wait_cycles);
@@ -2953,7 +2958,7 @@ void IRAM_ATTR esp32c3_rtc_clk_cpu_freq_get_config(
             }
           else
             {
-              ASSERT(0);
+              PANIC();
             }
         }
         break;
@@ -2968,7 +2973,8 @@ void IRAM_ATTR esp32c3_rtc_clk_cpu_freq_get_config(
         break;
 
       default:
-        ASSERT(0);
+        PANIC();
+        break;
     }
 
   *out_config = (struct esp32c3_cpu_freq_config_s)

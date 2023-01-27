@@ -74,10 +74,10 @@
 /* INT0
  *
  * INT0 (only) has 3 different software programmable interrupt response
- * modes—Mode 0, Mode 1 and Mode 2.
+ * modes: Mode 0, Mode 1 and Mode 2.
  *
  * - INT0 Mode 0. During the interrupt acknowledge cycle, an instruction
- *   is fetched from the data bus (DO–D7) at the rising edge of T3.
+ *   is fetched from the data bus (DO-D7) at the rising edge of T3.
  *
  * - INT0 Mode 1. The PC is stacked and instruction execution restarts at
  *   logical address 0x0038.

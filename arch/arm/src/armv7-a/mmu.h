@@ -19,10 +19,10 @@
  ****************************************************************************/
 
 /* References:
- *  "Cortex-A5™ MPCore, Technical Reference Manual", Revision: r0p1,
- *   Copyright © 2010 ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
- *   Copyright © 1996-1998, 2000, 2004-2012 ARM.
+ *  "Cortex-A5â„¢ MPCore, Technical Reference Manual", Revision: r0p1,
+ *   Copyright Â© 2010 ARM. All rights reserved. ARM DDI 0434B (ID101810)
+ *  "ARMÂ® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright Â© 1996-1998, 2000, 2004-2012 ARM.
  *   All rights reserved. ARM DDI 0406C.b (ID072512)
  */
 
@@ -62,7 +62,7 @@
 
 /* MMU CP15 Register Bit Definitions ****************************************/
 
-/* Reference: Cortex-A5™ MPCore
+/* Reference: Cortex-A5â„¢ MPCore
  * Paragraph 6.7, "MMU software accessible registers."
  */
 

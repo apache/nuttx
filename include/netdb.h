@@ -221,8 +221,8 @@ struct protoent
   FAR char **p_aliases;    /* A pointer to an array of pointers to
                             * alternative protocol names, terminated by a
                             * null pointer. */
-  int        p_proto;      /* The protocol number. */
-  int        idx;          /* Index used by the local database, required
+  uint8_t    p_proto;      /* The protocol number. */
+  uint8_t    idx;          /* Index used by the local database, required
                             * by _r version APIs */
 };
 

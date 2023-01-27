@@ -2291,29 +2291,6 @@ static int mpfs_autonegotiate(struct mpfs_ethmac_s *priv)
       goto errout;
     }
 
-#ifndef CONFIG_MPFS_MAC_AUTONEG_DISABLE_1000MBPS
-  /* Modify the 1000Base-T control register to advertise 1000Base-T full
-   * and half duplex support.
-   */
-
-  ret = mpfs_phyread(priv, priv->phyaddr, GMII_1000BTCR, &btcr);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to read 1000BTCR register: %d\n", ret);
-      goto errout;
-    }
-
-  btcr |= GMII_1000BTCR_1000BASETFULL | GMII_1000BTCR_1000BASETHALF;
-
-  ret = mpfs_phywrite(priv, priv->phyaddr, GMII_1000BTCR, btcr);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to write 1000BTCR register: %d\n", ret);
-      goto errout;
-    }
-
-#endif
-
   /* Restart Auto_negotiation */
 
   ret = mpfs_phyread(priv, priv->phyaddr, GMII_MCR, &phyval);
@@ -2386,6 +2363,13 @@ static int mpfs_autonegotiate(struct mpfs_ethmac_s *priv)
       if (ret < 0)
         {
           nerr("ERROR: Failed to read 1000BTSR register: %d\n", ret);
+          goto errout;
+        }
+
+      ret = mpfs_phyread(priv, priv->phyaddr, GMII_1000BTCR, &btcr);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read 1000BTCR register: %d\n", ret);
           goto errout;
         }
 
@@ -3346,6 +3330,7 @@ static int mpfs_phyreset(struct mpfs_ethmac_s *priv)
   uint16_t mcr;
   int timeout;
   int ret;
+  uint16_t btcr;
 
   ninfo(" mpfs_phyreset\n");
 
@@ -3379,6 +3364,27 @@ static int mpfs_phyreset(struct mpfs_ethmac_s *priv)
         {
           ret = OK;
           break;
+        }
+    }
+
+  /* For gigabit PHYs, set or disable the autonegotiation advertisement for
+   * 1G speed
+   */
+
+  if (mpfs_phyread(priv, priv->phyaddr, GMII_1000BTCR, &btcr) == OK)
+    {
+#if defined(CONFIG_MPFS_MAC_AUTONEG_DISABLE_1000MBPS) || \
+            (!defined(CONFIG_MPFS_MAC_AUTONEG) && \
+             !defined(CONFIG_MPFS_MAC_ETH1000MBPS))
+      btcr &= ~(GMII_1000BTCR_1000BASETFULL | GMII_1000BTCR_1000BASETHALF);
+#else
+      btcr |= GMII_1000BTCR_1000BASETFULL | GMII_1000BTCR_1000BASETHALF;
+#endif
+
+      ret = mpfs_phywrite(priv, priv->phyaddr, GMII_1000BTCR, btcr);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to write 1000BTCR register: %d\n", ret);
         }
     }
 

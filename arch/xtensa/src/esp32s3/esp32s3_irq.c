@@ -43,6 +43,7 @@
 #ifdef CONFIG_SMP
 #include "esp32s3_smp.h"
 #endif
+#include "esp32s3_userspace.h"
 #include "hardware/esp32s3_interrupt_core0.h"
 #ifdef CONFIG_SMP
 #include "hardware/esp32s3_interrupt_core1.h"
@@ -420,9 +421,7 @@ void up_irqinitialize(void)
   /* Hard code special cases. */
 
   g_irqmap[XTENSA_IRQ_TIMER0] = IRQ_MKMAP(0, ESP32S3_CPUINT_TIMER0);
-
   g_irqmap[XTENSA_IRQ_SWINT]  = IRQ_MKMAP(0, ESP32S3_CPUINT_SOFTWARE1);
-
   g_irqmap[XTENSA_IRQ_SWINT]  = IRQ_MKMAP(1, ESP32S3_CPUINT_SOFTWARE1);
 
   /* Initialize CPU interrupts */
@@ -438,6 +437,10 @@ void up_irqinitialize(void)
   /* Initialize GPIO interrupt support */
 
   esp32s3_gpioirqinitialize();
+
+  /* Initialize interrupt handler for the PMS violation ISR */
+
+  esp32s3_pmsirqinitialize();
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts.  Also clears PS.EXCM */

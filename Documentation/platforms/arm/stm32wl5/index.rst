@@ -14,7 +14,7 @@ actions based on traffic received. All other peripherals are shared
 to be done only by one of them.
 
 Supported MCUs
-=============
+==============
 
 STM32WL5 has only two chips in family. STM32WL55 and STM32WL54. Only
 difference between them is that STM32WL55 has support for LoRa while

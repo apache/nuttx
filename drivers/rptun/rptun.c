@@ -1218,7 +1218,6 @@ void rpmsg_unregister_callback(FAR void *priv_,
                                     struct rptun_priv_s, node);
           device_destroy(&priv->rvdev.rdev, priv_);
         }
-
     }
 
   nxrmutex_unlock(&g_rptun_lockcb);

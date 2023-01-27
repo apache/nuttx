@@ -69,47 +69,6 @@
 
 uintptr_t g_idle_topstack = MPFS_IDLESTACK_TOP;
 
-/* Default boot address for every hart */
-
-#ifdef CONFIG_MPFS_BOOTLOADER
-
-extern void mpfs_opensbi_prepare_hart(void);
-
-const uint64_t g_entrypoints[5] =
-{
-#ifdef CONFIG_MPFS_HART0_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  CONFIG_MPFS_HART0_ENTRYPOINT,
-#endif
-
-#ifdef CONFIG_MPFS_HART1_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  CONFIG_MPFS_HART1_ENTRYPOINT,
-#endif
-
-#ifdef CONFIG_MPFS_HART2_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  CONFIG_MPFS_HART2_ENTRYPOINT,
-#endif
-
-#ifdef CONFIG_MPFS_HART3_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  CONFIG_MPFS_HART3_ENTRYPOINT,
-#endif
-
-#ifdef CONFIG_MPFS_HART4_SBI
-  (uint64_t)mpfs_opensbi_prepare_hart,
-#else
-  CONFIG_MPFS_HART4_ENTRYPOINT,
-#endif
-};
-
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -204,7 +163,7 @@ void __mpfs_start(uint64_t mhartid)
    * the CONFIG_MPFS_BOOTLOADER -option.
    */
 
-#ifdef CONFIG_MPFS_BOOTLOADER
+#ifdef CONFIG_MPFS_ENABLE_CACHE
   if (mhartid == 0)
     {
       mpfs_enable_cache();

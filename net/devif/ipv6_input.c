@@ -551,7 +551,7 @@ drop:
  * Name: ipv6_exthdr
  *
  * Description:
- *   Return true if the next header value is an IPv6 extension header.
+ *   Check whether it is an IPv6 extension header.
  *
  * Input Parameters:
  *   The next header value extracted from an IPv6 frame.

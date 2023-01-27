@@ -1391,7 +1391,8 @@ static int cromfs_readdir(FAR struct inode *mountpt,
  *
  ****************************************************************************/
 
-static int cromfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int cromfs_rewinddir(FAR struct inode *mountpt,
+                            FAR struct fs_dirent_s *dir)
 {
   FAR struct cromfs_dir_s *cdir;
 

@@ -54,7 +54,7 @@
 
 void seekdir(FAR DIR *dirp, off_t offset)
 {
-  if (dirp)
+  if (dirp != NULL)
     {
       lseek(dirp->fd, offset, SEEK_SET);
     }

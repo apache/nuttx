@@ -10,7 +10,6 @@
 # CONFIG_NET_ARP is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
-# CONFIG_NSH_CMDPARMS is not set
 # CONFIG_SPI_CALLBACK is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32f4discovery"

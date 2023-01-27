@@ -115,6 +115,16 @@ config ARMV8M_STACKCHECK_HARDWARE
 
 endchoice
 
+config ARMV8M_STACKCHECK_BREAKPOINT
+	bool "Breakpoint on stack overflow"
+	default n
+	depends on ARMV8M_STACKCHECK
+	---help---
+		If enabled, a hard-coded breakpoint will be inserted to the stack
+		overflow trap. This is useful to stop the execution of the program
+		and diagnose the issue before the hardfault handler is called (and
+		context information is lost).
+
 config ARMV8M_ITMSYSLOG
 	bool "ITM SYSLOG support"
 	default n

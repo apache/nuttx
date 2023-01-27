@@ -993,7 +993,7 @@
 #define GPR_GPR1_GINT                                           (1 << 12)
 #define GPR_GPR1_ENET1_CLK_SEL                                  (1 << 13)
 #define GPR_GPR1_USB_EXP_MODE_EN                                (1 << 15)
-#define GPR_GPR1_ENET1_TX_CLK_OUT_EN                            (1 << 17)
+#define GPR_GPR1_ENET1_TX_DIR_OUT                               (1 << 17)
 #define GPR_GPR1_SAI1_MCLK_DIR_IN                               (0 << 19)
 #define GPR_GPR1_SAI1_MCLK_DIR_OUT                              (1 << 19)
 #define GPR_GPR1_SAI2_MCLK_DIR_IN                               (0 << 20)

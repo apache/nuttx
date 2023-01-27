@@ -20,7 +20,7 @@
 
 CSRCS += sig_initialize.c
 CSRCS += sig_action.c sig_procmask.c sig_pending.c sig_suspend.c
-CSRCS += sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
+CSRCS += sig_kill.c sig_tgkill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
 CSRCS += sig_findaction.c sig_allocpendingsigaction.c
 CSRCS += sig_releasependingsigaction.c sig_unmaskpendingsignal.c
 CSRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c

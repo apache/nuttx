@@ -65,13 +65,13 @@ config I2C_BITBANG_GPIO_OVERHEAD
 	---help---
 		Overhead of GPIO toggling operation to consider when computing
 		delays. This overhead will be subtracted from sleep times to achieve
-		desired frquency.
+		desired frequency.
 
 config I2C_BITBANG_TIMEOUT
 	int "I2C timeout"
 	default 1000
 	---help---
-		Timeout (microseconds) to abort wait on slave
+		Timeout (microseconds) to abort wait on slave.
 
 config I2C_BITBANG_CLOCK_STRETCHING
 	bool "Support clock stretching"

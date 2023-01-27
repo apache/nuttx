@@ -255,11 +255,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
       ret++;
     }
 
-  if (stream.last_ch != '\n')
-    {
-      lib_stream_putc(&stream.public, '\n');
-    }
-
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style back to normal. */
 

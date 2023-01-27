@@ -132,21 +132,26 @@ extern "C"
 
 void      srand(unsigned int seed);
 int       rand(void);
-double    drand48(void);
-double    erand48(unsigned short xsubi[3]);
-long int  lrand48(void);
-long int  nrand48(unsigned short xsubi[3]);
-long int  mrand48(void);
-long int  jrand48(unsigned short xsubi[3]);
+void      lcong48(FAR unsigned short int param[7]);
+FAR unsigned short int *seed48(FAR unsigned short int seed16v[3]);
 void      srand48(long int seedval);
-void      lcong48(unsigned short param[7]);
-FAR unsigned short *seed48(unsigned short seed16v[3]);
+#ifdef CONFIG_HAVE_LONG_LONG
+long int  jrand48(FAR unsigned short int xsubi[3]);
+long int  lrand48(void);
+long int  mrand48(void);
+long int  nrand48(FAR unsigned short int xsubi[3]);
+#  ifdef CONFIG_HAVE_DOUBLE
+double    drand48(void);
+double    erand48(FAR unsigned short int xsubi[3]);
+#  endif
+#endif
 
 #define   srandom(s) srand(s)
 long      random(void);
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
 void      arc4random_buf(FAR void *bytes, size_t nbytes);
+uint32_t  arc4random(void);
 #endif
 
 /* Environment variable support */
@@ -161,8 +166,10 @@ int       unsetenv(FAR const char *name);
 /* Process exit functions */
 
 void      exit(int status) noreturn_function;
+void      quick_exit(int status) noreturn_function;
 void      abort(void) noreturn_function;
 int       atexit(CODE void (*func)(void));
+int       at_quick_exit(CODE void (*func)(void));
 int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 
 /* _Exit() is a stdlib.h equivalent to the unistd.h _exit() function */

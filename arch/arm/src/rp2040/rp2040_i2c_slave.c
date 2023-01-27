@@ -257,7 +257,7 @@ static int i2c_interrupt(int irq, void *context, void *arg)
        */
 
       modbits_reg32(RP2040_I2C_IC_INTR_MASK(priv->controller),
-                    0
+                    0,
                     RP2040_I2C_IC_INTR_MASK_M_TX_EMPTY);
     }
 

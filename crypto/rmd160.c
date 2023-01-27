@@ -87,7 +87,7 @@
 
 #define F0(x, y, z) ((x) ^ (y) ^ (z))
 #define F1(x, y, z) (((x) & (y)) | (~(x) & (z)))
-#define F2(x, y, z) (((x) | (~y)) ^ (z))
+#define F2(x, y, z) (((x) | ~(y)) ^ (z))
 #define F3(x, y, z) (((x) & (z)) | ((y) & ~(z)))
 #define F4(x, y, z) ((x) ^ ((y) | ~(z)))
 

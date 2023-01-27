@@ -3,9 +3,153 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig DRIVER_NOTE
+menuconfig SCHED_INSTRUMENTATION
+	bool "System performance monitor hooks"
+	default n
+	select SCHED_SUSPENDSCHEDULER
+	select SCHED_RESUMESCHEDULER
+	---help---
+		Enables instrumentation in scheduler to monitor system performance.
+		If enabled, then the board-specific logic must provide the following
+		functions (see include/sched.h):
+
+			void sched_note_start(FAR struct tcb_s *tcb);
+			void sched_note_stop(FAR struct tcb_s *tcb);
+
+		If CONFIG_SMP is enabled, then these additional interfaces are
+		expected:
+
+			void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_started(FAR struct tcb_s *tcb);
+
+if SCHED_INSTRUMENTATION
+
+config SCHED_INSTRUMENTATION_CPUSET
+	hex "CPU bit set"
+	default 0xffff
+	depends on SMP && SCHED_INSTRUMENTATION_FILTER
+	---help---
+		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
+
+config SCHED_INSTRUMENTATION_HIRES
+	bool "Use Hi-Res RTC for instrumentation"
+	default n
+	---help---
+		Use higher resolution system timer for instrumentation.
+
+config SCHED_INSTRUMENTATION_FILTER
+	bool "Instrumenation filter"
+	default n
+	---help---
+		Enables the filter logic for the instrumentation. If this option
+		is enabled, the instrumentation data passed to sched_note_add()
+		can be filtered by syscall and IRQ number.
+		The filter logic can be configured by sched_note_filter APIs defined in
+		include/nuttx/sched_note.h.
+
+config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	hex "Default instrumentation filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default 0x3f
+	---help---
+		Default mode of the instrumentation filter logic.
+			Bit 0 = Enable instrumentation
+			Bit 1 = Enable switch instrumentation
+			Bit 2 = Enable syscall instrumentation
+			Bit 3 = Enable IRQ instrumentation
+			Bit 4 = Enable dump instrumentation
+			Bit 5 = Enable collecting syscall arguments
+
+menu "System performance monitor hooks choose"
+
+config SCHED_INSTRUMENTATION_SWITCH
+	bool "Use note switch for instrumentation"
+	default n
+	---help---
+		Use note switch for instrumentation.
+
+			void sched_note_suspend(FAR struct tcb_s *tcb);
+			void sched_note_resume(FAR struct tcb_s *tcb);
+
+		If CONFIG_SMP is enabled, then these additional interfaces are
+		expected:
+
+			void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_paused(FAR struct tcb_s *tcb);
+			void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
+
+		NOTE: These are internal OS interfaces and are called at very
+		critical locations in the OS. There is very little that can be
+		done in these interfaces.  For example, normal devices may not be
+		used; syslog output cannot be performed.
+
+config SCHED_INSTRUMENTATION_PREEMPTION
+	bool "Preemption monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for changes to pre-emption state.  Board-
+		specific logic must provide this additional logic.
+
+			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
+
+config SCHED_INSTRUMENTATION_CSECTION
+	bool "Critical section monitor hooks"
+	default n
+	select IRQCOUNT
+	---help---
+		Enables additional hooks for entry and exit from critical sections.
+		Interrupts are disabled while within a critical section.  Board-
+		specific logic must provide this additional logic.
+
+			void sched_note_csection(FAR struct tcb_s *tcb, bool state);
+
+config SCHED_INSTRUMENTATION_SPINLOCKS
+	bool "Spinlock monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for spinlock state.  Board-specific logic
+		must provide this additional logic.
+
+		void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile spinlock_t *spinlock, int type)
+
+config SCHED_INSTRUMENTATION_SYSCALL
+	bool "System call monitor hooks"
+	default n
+	depends on ARCH_HAVE_SYSCALL_HOOKS
+	---help---
+		Enables additional hooks for entry and exit from system call.
+		Board-specific logic must provide this additional logic.
+
+			void sched_note_syscall_enter(int nr, int argc, ...);
+			void sched_note_syscall_leave(int nr, uintptr_t result);
+
+config SCHED_INSTRUMENTATION_IRQHANDLER
+	bool "Interrupt handler monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for interrupt handler. Board-specific logic
+		must provide this additional logic.
+
+			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
+
+config SCHED_INSTRUMENTATION_DUMP
+	bool "Use note dump for instrumentation"
+	default n
+	---help---
+		Use note dump for instrumentation.
+
+			void sched_note_string(FAR const char *buf);
+			void sched_note_dump(uint32_t module, uint8_t event, FAR const void *buf, size_t len);
+			void sched_note_vprintf(FAR const char *fmt, va_list va);
+			void sched_note_vbprintf(uint32_t module, uint8_t event, FAR const char *fmt, va_list va);
+			void sched_note_printf(FAR const char *fmt, ...) printf_like(1, 2);
+			void sched_note_bprintf(uint32_t module, uint8_t event, FAR const char *fmt, ...);
+
+endmenu # "System performance monitor hooks choose"
+
+config DRIVER_NOTE
 	bool "Note Driver Support"
-	depends on SCHED_INSTRUMENTATION
 	default n
 
 if DRIVER_NOTE
@@ -28,12 +172,17 @@ config DRIVER_NOTE_TASKNAME_BUFSIZE
 		If 0 is specified, this feature is disabled and trace dump shows only
 		the name of the newly created task.
 
-choice
-	prompt "Note driver selection"
-	default DRIVER_NOTERAM
+config DRIVER_NOTECTL
+	bool "Scheduler instrumentation filter control driver"
+	default n
+	depends on SCHED_INSTRUMENTATION_FILTER
+	---help---
+		If this option is selected, the instrumentation filter control device
+		/dev/notectl is provided.
 
 config DRIVER_NOTERAM
 	bool "Note RAM driver"
+	default y
 	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
 		If this option is selected, then in-memory buffering logic is
@@ -59,53 +208,29 @@ config DRIVER_NOTERAM
 		sched_note_get() causes several additional entries to be added from
 		the note buffer in order to remove one entry.
 
-config DRIVER_NOTEARCH
-	bool "Note Arch driver"
-	---help---
-		The note driver is provided by arch specific code.
-
-config DRIVER_NOTELOG
-	bool "Note syslog driver"
-	select SCHED_INSTRUMENTATION_EXTERNAL
-	---help---
-		The note driver output to syslog.
-
-config SEGGER_SYSVIEW
-	bool "Note SEGGER SystemView driver"
-	select SEGGER_RTT
-	select SCHED_INSTRUMENTATION_EXTERNAL
-	---help---
-		SystemView is a real-time recording and visualization tool for embedded
-		systems that reveals the true runtime behavior of an application,
-		going far deeper than the system insights provided by debuggers. This is
-		particularly effective when developing and working with complex embedded
-		systems comprising multiple threads and interrupts. SystemView can ensure
-		unintended interactions and resource conflicts.
-
-endchoice
+if DRIVER_NOTERAM
 
 config DRIVER_NOTERAM_BUFSIZE
 	int "Note RAM buffer size"
-	depends on DRIVER_NOTERAM
 	default 2048
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
 config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
 	bool "Disable overwrite by default"
-	depends on DRIVER_NOTERAM
 	default n
 	---help---
 		Disables overwriting old notes in the circular buffer when the buffer
 		is full by default. This is useful to keep instrumentation data of the
 		beginning of a system boot.
 
-config DRIVER_NOTECTL
-	bool "Scheduler instrumentation filter control driver"
-	default n
-	depends on SCHED_INSTRUMENTATION_FILTER
-	---help---
-		If this option is selected, the instrumentation filter control device
-		/dev/notectl is provided.
+endif # DRIVER_NOTERAM
 
-endif
+config DRIVER_NOTELOG
+	bool "Note syslog driver"
+	---help---
+		The note driver output to syslog.
+
+endif # DRIVER_NOTE
+
+endif # SCHED_INSTRUMENTATION

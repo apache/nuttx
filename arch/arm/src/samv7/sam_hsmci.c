@@ -118,12 +118,12 @@
  */
 
 #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
-#define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
+#undef  HSCMI_NOTXDMA              /* Define to disable TX DMA */
 
-/* Timing */
+/* Timing : 100mS short timeout, 2 seconds for long one */
 
-#define HSMCI_CMDTIMEOUT         (100000)
-#define HSMCI_LONGTIMEOUT        (0x7fffffff)
+#define HSMCI_CMDTIMEOUT         MSEC2TICK(100)
+#define HSMCI_LONGTIMEOUT        MSEC2TICK(2000)
 
 /* Big DTIMER setting */
 
@@ -204,7 +204,7 @@
   (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
    HSMCI_INT_DCRCE)
 
-#define HSMCI_DATA_DMASEND_ERRORS \
+#define HSMCI_DATA_SEND_ERRORS \
   (HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE)
 
 /* Data transfer status and interrupt mask bits.
@@ -228,7 +228,7 @@
 #define HSMCI_DMARECV_INTS \
   (HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 #define HSMCI_DMASEND_INTS \
-  (HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
+  (HSMCI_DATA_SEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 
 /* Event waiting interrupt mask bits.
  *
@@ -273,8 +273,13 @@
 
 /* Some semi-standard definitions */
 
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Types
@@ -401,16 +406,17 @@ static bool sam_checkreg(struct sam_dev_s *priv, bool wr,
 #endif
 
 static inline uint32_t sam_getreg(struct sam_dev_s *priv,
-                  unsigned int offset);
+                                  unsigned int offset);
 static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
-                  unsigned int offset);
+                              unsigned int offset);
 
 static inline void sam_configwaitints(struct sam_dev_s *priv,
-              uint32_t waitmask, sdio_eventset_t waitevents);
+                                      uint32_t waitmask,
+                                      sdio_eventset_t waitevents);
 static void sam_disablewaitints(struct sam_dev_s *priv,
-              sdio_eventset_t wkupevent);
+                                sdio_eventset_t wkupevent);
 static inline void sam_configxfrints(struct sam_dev_s *priv,
-              uint32_t xfrmask);
+                                     uint32_t xfrmask);
 static void sam_disablexfrints(struct sam_dev_s *priv);
 static inline void sam_enableints(struct sam_dev_s *priv);
 
@@ -455,14 +461,14 @@ static void sam_cmddump(struct sam_dev_s *priv);
 
 static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
 static inline uintptr_t hsmci_regaddr(struct sam_dev_s *priv,
-              unsigned int offset);
+                                      unsigned int offset);
 
 /* Data Transfer Helpers ****************************************************/
 
 static void sam_eventtimeout(wdparm_t arg);
 static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
 static void sam_endtransfer(struct sam_dev_s *priv,
-              sdio_eventset_t wkupevent);
+                            sdio_eventset_t wkupevent);
 static void sam_notransfer(struct sam_dev_s *priv);
 
 /* Interrupt Handling *******************************************************/
@@ -478,48 +484,48 @@ static sdio_capset_t sam_capabilities(struct sdio_dev_s *dev);
 static sdio_statset_t sam_status(struct sdio_dev_s *dev);
 static void sam_widebus(struct sdio_dev_s *dev, bool enable);
 static void sam_clock(struct sdio_dev_s *dev,
-              enum sdio_clock_e rate);
+                      enum sdio_clock_e rate);
 static int  sam_attach(struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
 static int  sam_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t arg);
+                        uint32_t arg);
 static void sam_blocksetup(struct sdio_dev_s *dev, unsigned int blocklen,
-              unsigned int nblocks);
+                           unsigned int nblocks);
 static int  sam_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
-              size_t nbytes);
+                          size_t nbytes);
 static int  sam_sendsetup(struct sdio_dev_s *dev,
-              const uint8_t *buffer, size_t nbytes);
+                          const uint8_t *buffer, size_t nbytes);
 static int  sam_cancel(struct sdio_dev_s *dev);
 static int  sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd);
 static int  sam_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t *rshort);
+                          uint32_t *rshort);
 static int  sam_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t rlong[4]);
+                         uint32_t rlong[4]);
 static int  sam_recvnotimpl(struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t *rnotimpl);
+                            uint32_t *rnotimpl);
 
 /* EVENT handler */
 
 static void sam_waitenable(struct sdio_dev_s *dev,
-              sdio_eventset_t eventset, uint32_t timeout);
+                           sdio_eventset_t eventset, uint32_t timeout);
 static sdio_eventset_t sam_eventwait(struct sdio_dev_s *dev);
 static void sam_callbackenable(struct sdio_dev_s *dev,
-              sdio_eventset_t eventset);
+                               sdio_eventset_t eventset);
 static int  sam_registercallback(struct sdio_dev_s *dev,
-              worker_t callback, void *arg);
+                                 worker_t callback, void *arg);
 
 /* DMA */
 
 #ifdef CONFIG_SAMV7_HSMCI_DMA
 #ifndef HSCMI_NORXDMA
 static int  sam_dmarecvsetup(struct sdio_dev_s *dev,
-              uint8_t *buffer, size_t buflen);
+                             uint8_t *buffer, size_t buflen);
 #endif
 #ifndef HSCMI_NOTXDMA
 static int  sam_dmasendsetup(struct sdio_dev_s *dev,
-              const uint8_t *buffer, size_t buflen);
+                             const uint8_t *buffer, size_t buflen);
 #endif
 #endif
 
@@ -1550,6 +1556,21 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
 
           else
             {
+              /* If buffer is not NULL that means that RX DMA is finished.
+               * We need to invalidate RX buffer
+               */
+
+              if (priv->buffer != NULL)
+                {
+                  DEBUGASSERT(priv->remaining > 0);
+
+                  up_invalidate_dcache((uintptr_t)priv->buffer,
+                                       (uintptr_t)priv->buffer +
+                                       priv->remaining);
+                  priv->buffer    = NULL;
+                  priv->remaining = 0;
+                }
+
               /* End the transfer */
 
               sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
@@ -1719,6 +1740,7 @@ static sdio_capset_t sam_capabilities(struct sdio_dev_s *dev)
 #ifdef CONFIG_SAMV7_HSMCI_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
+  caps |= SDIO_CAPS_DMABEFOREWRITE;
 
   return caps;
 }
@@ -2220,7 +2242,7 @@ static int sam_sendsetup(struct sdio_dev_s *dev,
       /* Check the HSMCI status */
 
       sr = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
-      if ((sr & HSMCI_DATA_DMASEND_ERRORS) != 0)
+      if ((sr & HSMCI_DATA_SEND_ERRORS) != 0)
         {
           /* Some fatal error has occurred */
 
@@ -2365,6 +2387,7 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t sr;
   uint32_t pending;
+  clock_t  watchtime;
   int32_t  timeout;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
@@ -2392,6 +2415,7 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
+  watchtime = clock_systime_ticks();
   for (; ; )
     {
       /* Did a Command-Response sequence termination event occur? */
@@ -2441,7 +2465,7 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
               return OK;
             }
        }
-      else if (--timeout <= 0)
+      else if (clock_systime_ticks() - watchtime > timeout)
         {
           mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
                 " SR: %08" PRIx32 "\n",
@@ -2531,7 +2555,7 @@ static int sam_recvshort(struct sdio_dev_s *dev,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2582,7 +2606,7 @@ static int sam_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2715,16 +2739,7 @@ static void sam_waitenable(struct sdio_dev_s *dev,
           return;
         }
 
-      /* Start the watchdog timer.  I am not sure why this is, but I am
-       * currently seeing some additional delays when DMA is used.
-       */
-
-      if (priv->txbusy)
-        {
-          /* TX transfers can be VERY long in the worst case */
-
-          timeout = MAX(5000, timeout);
-        }
+      /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
       ret   = wd_start(&priv->waitwdog, delay,
@@ -2958,7 +2973,7 @@ static int sam_dmarecvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 
   DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
 
-  /* Physical address of the HSCMI source register, either the TDR (for
+  /* Physical address of the HSCMI source register, either the RDR (for
    * single transfers) or the first FIFO register, and the physical address
    * of the buffer in RAM.
    */
@@ -2994,9 +3009,11 @@ static int sam_dmarecvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 
   /* Start the DMA */
 
-  priv->dmabusy = true;
-  priv->xfrbusy = true;
-  priv->txbusy  = false;
+  priv->dmabusy   = true;
+  priv->xfrbusy   = true;
+  priv->txbusy    = false;
+  priv->buffer    = (uint32_t *)buffer;
+  priv->remaining = buflen;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
@@ -3113,7 +3130,7 @@ static int sam_dmasendsetup(struct sdio_dev_s *dev,
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is start with an SD command (i.e.,
+   * enabled until after the transfer is started with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 

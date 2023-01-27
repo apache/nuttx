@@ -222,7 +222,8 @@ static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
       save          = ptr;
 
       /* Skip to the end of the user information and properly terminate it.
-       * The user information must be terminated with the field delimiter ':'.
+       * The user information must be terminated with the field delimiter
+       * ':'.
        */
 
       for (; *ptr != '\n' && *ptr != '\0' && *ptr != ':'; ptr++)

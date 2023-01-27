@@ -19,6 +19,13 @@
 ############################################################################
 
 export TOPDIR := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
+
+# Build any necessary tools needed early in the build.
+# incdir - Is needed immediately by all Make.defs file.
+
+DUMMY  := ${shell $(MAKE) -C tools -f Makefile.host incdir \
+          INCDIR="$(TOPDIR)/tools/incdir.sh"}
+
 include $(TOPDIR)/Make.defs
 
 # GIT directory present
@@ -702,12 +709,12 @@ ifeq ($(CONFIG_ARCH_HAVE_BOOTLOADER),y)
 	$(Q) $(MAKE) clean_bootloader
 endif
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) -C tools -f Makefile.host clean
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)
-	$(Q) $(MAKE) -C tools -f Makefile.host clean
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,

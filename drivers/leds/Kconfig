@@ -83,6 +83,55 @@ config RGBLED_LIGHTNESS_CORRECTION
 		correction which helps the RGB LED visually fade and blend
 		in a more linear, smooth, and visually appealing fashion.
 
+config LP503X
+
+	bool "LP503X I2C LED Driver"
+	default n
+	select I2C
+	---help---
+		Enable support for the TI LP503X LED driver which can be
+		utilized to drive up to 36 (12 RGB) LEDs.
+
+if LP503X
+
+config LP503X_LOG_MODE
+	bool "Enable logarithmic mode (y) or linear mode (n)"
+	default y
+	---help---
+		Determines whether brightness scale is logarithmic or linear
+
+config LP503X_POWER_SAVE
+	bool "Enable power save mode"
+	default y
+	---help---
+	Enable/disable automatic power saving mode
+
+config LP503X_DITHER_MODE
+	bool "Enable PWM dithering"
+	default y
+	---help---
+	Enable/disable PWM dithering mode
+
+config LP503X_MAX_CURRENT
+	bool "Enable Max current option (25.5mA (n), or 35mA (y))"
+	default n
+	---help---
+		Sets maximum output current to 25.5mA (default) or 35mA
+
+config LP503X_GLOBAL_SHUTDOWN
+	bool "Enable global LED shutdown"
+	default n
+	---help---
+		When enabled (y), all LEDs will be turned off/disabled until re-enabled
+
+config DEBUG_LP503X
+	bool "Enable debug support for the LP503X"
+	default n
+	---help---
+		Enables debug support for the LP503X 
+
+endif # LP503X
+
 config PCA9635PW
 	bool "PCA9635PW I2C LED Driver"
 	default n
@@ -148,9 +197,13 @@ config WS2812_FREQUENCY
 	default 800000
 	depends on WS2812
 	---help---
-		This is should be set to the bit frequency of the
-		ws2812s being used.  Newer chips use an 800 kHz
-		bit frequency (the default); although, some older
-		chips run at 400 kHz.
+		Frequency in Hz.
+		On SPI mode (WS2812_NON_SPI_DRIVER not selected), this is
+		the SPI frequency (commonly a few MHz) to generate the required
+		waveforms to represent a 0/1 symbol.
+		On non SPI mode (WS2812_NON_SPI_DRIVER selected), this should be set
+		to the bit frequency of the ws2812s being used. Newer chips use an
+		800 kHz bit frequency (the default); although, some older chips run
+		at 400 kHz.
 		
 endmenu # LED Support

@@ -79,9 +79,26 @@
 #define MSSIO_MUX_BANK_REG(bank,pin) (MPFS_SYSREG_BASE +                       \
                                       MSSIO_MUX_BANK_REG_OFFSET(bank,pin))
 
-/* Default EC configuration for all GPIOS */
-#define MSSIO_EC_DEFAULT (0x0428 << GPIO_EC_SHIFT)
-#define MSSIO_EC_USB_DEFAULT (0x0829 << GPIO_EC_SHIFT)
+/* Drive strenght configuration in mA
+ * The following bit combinations are from the reference design.
+ */
+
+#define MSSIO_DRV_STR_2  2
+#define MSSIO_DRV_STR_4  3
+#define MSSIO_DRV_STR_6  4
+#define MSSIO_DRV_STR_8  5
+#define MSSIO_DRV_STR_10 6
+#define MSSIO_DRV_STR_12 7
+#define MSSIO_DRV_STR_16 10
+#define MSSIO_DRV_STR_20 12
+
+/* Default EC drive strength configuration for all GPIOS is 2 mA */
+
+#define MSSIO_EC_DEFAULT     GPIO_EC_DRVSTR(MSSIO_DRV_STR_2)
+
+/* Default EC drive strength configuration for USB lines is 8 mA */
+
+#define MSSIO_EC_USB_DEFAULT (GPIO_EC_BUFM(1) | GPIO_EC_DRVSTR(MSSIO_DRV_STR_8) | GPIO_PULLUP)
 
 /* Basic GPIO definitions for MSSIO */
 

@@ -227,6 +227,14 @@
 
 #define GPIO_CS43L22_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
 
+/* Digital Joystick 5-WAY */
+
+#define GPIO_JOY_UP       (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN2)
+#define GPIO_JOY_CENTER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN3)
+#define GPIO_JOY_LEFT     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN4)
+#define GPIO_JOY_DOWN     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN5)
+#define GPIO_JOY_RIGHT    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN6)
+
 /* LoRa SX127x */
 
 #define GPIO_SX127X_DIO0    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
@@ -279,6 +287,17 @@
                              GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN1)
 
 #define GPIO_ENC28J60_INTR  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                             GPIO_OPENDRAIN|GPIO_PORTE|GPIO_PIN4)
+
+/* Use same pins as ENC28J60 to W5500 */
+
+#define GPIO_W5500_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                             GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+#define GPIO_W5500_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                             GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN1)
+
+#define GPIO_W5500_INTR     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
                              GPIO_OPENDRAIN|GPIO_PORTE|GPIO_PIN4)
 
 /* USB OTG FS
@@ -876,6 +895,18 @@ int hciuart_dev_initialize(void);
 
 #ifdef CONFIG_WL_GS2200M
 int stm32_gs2200m_initialize(const char *devpath, int bus);
+#endif
+
+/****************************************************************************
+ * Name: stm32_djoy_initialize
+ *
+ * Description:
+ *   Initialize and register the discrete joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_DJOYSTICK
+int stm32_djoy_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -178,48 +178,6 @@ config ESP32S2_FLASH_DETECT
 	---help---
 		Auto detect flash size when flashing.
 
-choice ESP32S2_FLASH_MODE
-	prompt "SPI FLASH mode"
-	default ESP32S2_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication
-		with the attached SPI flash chip.
-		The option selected here is then used by esptool when flashing.
-
-	config ESP32S2_FLASH_MODE_DIO
-	bool "Dual IO (DIO)"
-
-	config ESP32S2_FLASH_MODE_DOUT
-	bool "Dual Output (DOUT)"
-
-	config ESP32S2_FLASH_MODE_QIO
-	bool "Quad IO (QIO)"
-
-	config ESP32S2_FLASH_MODE_QOUT
-	bool "Quad Output (QOUT)"
-
-endchoice # SPI FLASH mode
-
-choice ESP32S2_FLASH_FREQ
-	prompt "SPI FLASH frequency"
-	default ESP32S2_FLASH_FREQ_40M
-	---help---
-		SPI FLASH frequency
-		
-	config ESP32S2_FLASH_FREQ_80M
-	bool "80 MHz"
-
-	config ESP32S2_FLASH_FREQ_40M
-	bool "40 MHz"
-
-	config ESP32S2_FLASH_FREQ_26M
-	bool "26 MHz"
-
-	config ESP32S2_FLASH_FREQ_20M
-	bool "20 MHz"
-
-endchoice # SPI FLASH frequency
-
 config ESP32S2_RUN_IRAM
 	bool "Run from IRAM"
 	default n
@@ -234,6 +192,10 @@ config ESP32S2_UART
 	default n
 
 config ESP32S2_I2C
+	bool
+	default n
+
+config ESP32S2_SPI
 	bool
 	default n
 
@@ -252,9 +214,151 @@ config ESP32S2_RNG
 	---help---
 		ESP32-S2 supports a RNG that passed on Dieharder test suite.
 
+config ESP32S2_I2S
+	bool "I2S"
+	default n
+	select I2S
+	select ARCH_DMA
+	select ESP32S2_GPIO_IRQ
+	---help---
+		See the Board Selection menu to configure the pins used by I2S.
+
+if ESP32S2_I2S
+
+config ESP32S2_I2S_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receive logic
+
+config ESP32S2_I2S_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmit logic
+
+choice
+	prompt "I2S role"
+	default ESP32S2_I2S_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S.
+
+config ESP32S2_I2S_ROLE_MASTER
+	bool "Master"
+
+config ESP32S2_I2S_ROLE_SLAVE
+	bool "Slave"
+
+endchoice
+
+choice
+	prompt "Bit width"
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32S2_I2S_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESP32S2_I2S_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESP32S2_I2S_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESP32S2_I2S_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice
+
+config ESP32S2_I2S_DATA_BIT_WIDTH
+	int
+	default 8 if ESP32S2_I2S_DATA_BIT_WIDTH_8BIT
+	default 16 if ESP32S2_I2S_DATA_BIT_WIDTH_16BIT
+	default 24 if ESP32S2_I2S_DATA_BIT_WIDTH_24BIT
+	default 32 if ESP32S2_I2S_DATA_BIT_WIDTH_32BIT
+
+config ESP32S2_I2S_SAMPLE_RATE
+	int "I2S sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32S2_I2S_BCLKPIN
+	int "I2S BCLK pin"
+	default 35
+	range 0 45 if ESP32S2_I2S_ROLE_MASTER
+	range 0 46 if ESP32S2_I2S_ROLE_SLAVE
+
+config ESP32S2_I2S_WSPIN
+	int "I2S WS pin"
+	default 34
+	range 0 45 if ESP32S2_I2S_ROLE_MASTER
+	range 0 46 if ESP32S2_I2S_ROLE_SLAVE
+
+config ESP32S2_I2S_DINPIN
+	int "I2S DIN pin"
+	depends on ESP32S2_I2S_RX
+	default 37
+	range 0 46
+
+config ESP32S2_I2S_DOUTPIN
+	int "I2S DOUT pin"
+	depends on ESP32S2_I2S_TX
+	default 36
+	range 0 45
+
+config ESP32S2_I2S_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESP32S2_I2S_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+config ESP32S2_I2S_MCLKPIN
+	int "I2S MCLK pin"
+	depends on ESP32S2_I2S_MCLK
+	default 33
+	range 0 45
+
+config I2S_DMADESC_NUM
+	int "I2S DMA maximum number of descriptors"
+	default 2
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a I2S DMA transfer.
+
+endif #ESP32S2_I2S
+
+config ESP32S2_SPI2
+	bool "SPI 2"
+	default n
+	select ESP32S2_SPI
+	select SPI
+
+config ESP32S2_SPI3
+	bool "SPI 3"
+	default n
+	select ESP32S2_SPI
+	select SPI
+
 config ESP32S2_SPIFLASH
 	bool "SPI Flash"
 	default n
+
+config ESP32S2_SPIRAM
+	bool "SPI RAM Support"
+	default n
+
+config ESP32S2_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32-S2 efuse support.
 
 config ESP32S2_TIMER0
 	bool "64-bit Timer 0 (Group 0 Timer 0)"
@@ -361,6 +465,95 @@ config ESP32S2_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins.
 
+menu "SPI configuration"
+	depends on ESP32S2_SPI
+
+config ESP32S2_SPI_SWCS
+	bool "SPI software CS"
+	default n
+	---help---
+		Use SPI software CS.
+
+config ESP32S2_SPI_UDCS
+	bool "User defined CS"
+	default n
+	depends on ESP32S2_SPI_SWCS
+	---help---
+		Use user-defined CS.
+
+config ESP32S2_SPI2_DMA
+	bool "SPI2 use DMA"
+	default y
+	depends on ESP32S2_SPI2
+
+config ESP32S2_SPI3_DMA
+	bool "SPI3 use DMA"
+	default y
+	depends on ESP32S2_SPI3
+
+config SPI_DMADESC_NUM
+	int "SPI DMA maximum number of descriptors"
+	default 2
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a SPI DMA transfer.
+
+config ESP32S2_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 64
+	depends on ESP32S2_SPI2_DMA || ESP32S2_SPI3_DMA
+	---help---
+		When SPI DMA is enabled, DMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
+if ESP32S2_SPI2
+
+config ESP32S2_SPI2_CSPIN
+	int "SPI2 CS Pin"
+	default 10
+	range 0 48
+
+config ESP32S2_SPI2_CLKPIN
+	int "SPI2 CLK Pin"
+	default 12
+	range 0 48
+
+config ESP32S2_SPI2_MOSIPIN
+	int "SPI2 MOSI Pin"
+	default 11
+	range 0 48
+
+config ESP32S2_SPI2_MISOPIN
+	int "SPI2 MISO Pin"
+	default 13
+	range 0 48
+
+endif # ESP32S2_SPI2
+
+if ESP32S2_SPI3
+config ESP32S2_SPI3_CSPIN
+	int "SPI3 CS Pin"
+	default 10
+	range 0 48
+
+config ESP32S2_SPI3_CLKPIN
+	int "SPI3 CLK Pin"
+	default 12
+	range 0 48
+
+config ESP32S2_SPI3_MOSIPIN
+	int "SPI3 MOSI Pin"
+	default 11
+	range 0 48
+
+config ESP32S2_SPI3_MISOPIN
+	int "SPI3 MISO Pin"
+	default 13
+	range 0 48
+
+endif # ESP32S2_SPI3
+endmenu
+
 menu "UART Configuration"
 	depends on ESP32S2_UART
 
@@ -460,7 +653,48 @@ config ESP32S2_I2CTIMEOMS
 endmenu # I2C Configuration
 
 menu "SPI Flash Configuration"
-	depends on ESP32S2_SPIFLASH
+
+choice ESP32S2_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESP32S2_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication
+		with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32S2_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
+
+	config ESP32S2_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
+
+	config ESP32S2_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
+
+	config ESP32S2_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
+
+endchoice # ESP32S2_FLASH_MODE
+
+choice ESP32S2_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESP32S2_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency.
+
+	config ESP32S2_FLASH_FREQ_80M
+	bool "80 MHz"
+
+	config ESP32S2_FLASH_FREQ_40M
+	bool "40 MHz"
+
+	config ESP32S2_FLASH_FREQ_26M
+	bool "26 MHz"
+
+	config ESP32S2_FLASH_FREQ_20M
+	bool "20 MHz"
+
+endchoice # ESP32S2_FLASH_FREQ
 
 if ESP32S2_HAVE_OTA_PARTITION
 
@@ -652,13 +886,9 @@ config ESP32S2_APP_FORMAT_LEGACY
 config ESP32S2_APP_FORMAT_MCUBOOT
 	bool "MCUboot-bootable format"
 	select ESP32S2_HAVE_OTA_PARTITION
-	depends on EXPERIMENTAL
 	---help---
 		The Espressif port of MCUboot supports the loading of unsegmented firmware
 		images.
-
-comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
-	depends on !EXPERIMENTAL
 
 endchoice # Application Image Format
 

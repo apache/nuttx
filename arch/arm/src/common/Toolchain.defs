@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/armv8-m/Toolchain.defs
+# arch/arm/src/common/Toolchain.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -160,7 +160,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
-  # https://github.com/apache/incubator-nuttx/pull/5971
+  # https://github.com/apache/nuttx/pull/5971
 
   ARCHOPTIMIZATION += -fno-builtin
 
@@ -180,7 +180,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
-  # https://github.com/apache/incubator-nuttx/pull/5971
+  # https://github.com/apache/nuttx/pull/5971
 
   ARCHOPTIMIZATION += -fno-builtin
   ARCHOPTIMIZATION += --target=arm-arm-none-eabi

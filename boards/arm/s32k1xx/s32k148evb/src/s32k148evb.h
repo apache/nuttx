@@ -64,10 +64,6 @@
 #define GPIO_SW3    (PIN_PTC12 | PIN_INT_BOTH)
 #define GPIO_SW4    (PIN_PTC13 | PIN_INT_BOTH)
 
-/* Count of peripheral clock user configurations */
-
-#define NUM_OF_PERIPHERAL_CLOCKS_0 18
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

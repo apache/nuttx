@@ -59,7 +59,7 @@
 #define RP2040_PWM_INTR_OFFSET    0x0000A4              /* PWM raw interrupt register */
 #define RP2040_PWM_INTE_OFFSET    0x0000A8              /* PWM interrupt enable register */
 #define RP2040_PWM_INTF_OFFSET    0x0000AC              /* PWM interrupt force register */
-#define RP2040_PWM_INTS_OFFSET    0x0000BO              /* PWM interrupt status register */
+#define RP2040_PWM_INTS_OFFSET    0x0000B0              /* PWM interrupt status register */
 
 /* Register definitions *****************************************************/
 

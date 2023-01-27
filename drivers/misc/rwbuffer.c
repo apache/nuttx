@@ -391,7 +391,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 #ifdef CONFIG_DRVR_READAHEAD
 static inline void rwb_resetrhbuffer(FAR struct rwbuffer_s *rwb)
 {
-  /* We assume that the caller holds the readAheadBufferSemphore */
+  /* We assume that the caller holds the readAheadBufferSemaphore */
 
   rwb->rhnblocks    = 0;
   rwb->rhblockstart = -1;
@@ -409,9 +409,10 @@ rwb_bufferread(FAR struct rwbuffer_s *rwb,  off_t startblock,
 {
   FAR uint8_t *rhbuffer;
 
-  /* We assume that (1) the caller holds the readAheadBufferSemphore, and (2)
-   * that the caller already knows that all of the blocks are in the
-   * read-ahead buffer.
+  /* We assume that:
+   * (1) the caller holds the readAheadBufferSemaphore, and
+   * (2) the caller already knows that all of the blocks are in the
+   *     read-ahead buffer.
    */
 
   /* Convert the units from blocks to bytes */

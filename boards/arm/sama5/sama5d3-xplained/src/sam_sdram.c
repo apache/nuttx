@@ -137,8 +137,8 @@ static inline void sam_sdram_delay(unsigned int loops)
  *   Per the SAMA5D3-Xplained User guide:
  *   "Two DDR2/SDRAM (MT47H64M16HR) used as main system memory (256 MByte).
  *   The board includes 2 Gbits of on-board soldered DDR2 (double data rate)
- *   SDRAM. The footprints can also host two DDR2(MT47H128M16RT) from Micron®
- *   for a total of 512 MBytes of DDR2 memory.
+ *   SDRAM. The footprints can also host two DDR2(MT47H128M16RT) from
+ *   MicronÂ® for a total of 512 MBytes of DDR2 memory.
  *   The memory bus is 32 bits wide and operates with a frequency of up
  *   to 166 MHz."
  *

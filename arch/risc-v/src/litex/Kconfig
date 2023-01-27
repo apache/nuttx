@@ -5,10 +5,54 @@
 
 comment "LITEX Configuration Options"
 
+config LITEX_SYS_CORE_FREQ_HZ
+	int "Risc-V system core frequency (Hz)"
+	default 100000000
+	---help---
+		This value should match default frequency of the FPGA fabric system clock.
+
 menu "LITEX Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
+
+config LITEX_USE_CUSTOM_MEMORY_MAP
+	bool "Custom peripheral memory mapping"
+	default n
+	---help---
+		Use a custom memory map for the peripheral base addresses defined in
+		arch/risc-v/src/litex/hardware/litex_memorymap.h.
+
+if LITEX_USE_CUSTOM_MEMORY_MAP
+
+config LITEX_CUSTOM_MEMORY_MAP_PATH
+	string "Path to custom memory map include file."
+	default ""
+	---help---
+		Specify the path to the file containing the peripheral memory mapping.
+		The path specified must be relative to arch/risc-v/src/litex/hardware/litex_memorymap.h.
+		The file must redefine any symbols which are intended to be overridden.
+
+endif
+
+config LITEX_USE_CUSTOM_IRQ_DEFINITIONS
+	bool "Custom IRQ mapping"
+	default n
+	---help---
+		Use custom definitions for risc-v IRQ numbers and sequence.
+		Allowing for the definitions in arch/risc-v/include/litex/irq.h to be overridden.
+		
+if LITEX_USE_CUSTOM_IRQ_DEFINITIONS
+
+config LITEX_CUSTOM_IRQ_DEFINITIONS_PATH
+	string "Path to custom IRQ mapping include file."
+	default ""
+	---help---
+		Specify the path to the file containing the custom IRQ definitions.
+		The path specified must be relative to arch/risc-v/include/litex/irq.
+		The file must redefine any symbols which are intended to be overridden.
+
+endif
 
 config LITEX_HAVE_UART0
 	bool

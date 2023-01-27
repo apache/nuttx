@@ -172,6 +172,9 @@ config ARCH_FAMILY_LPC408X
 config LPC17_40_HAVE_SPIFI
 	bool
 
+config LPC17_40_CAN
+	bool
+
 menu "LPC17xx/LPC40xx Peripheral Support"
 
 config LPC17_40_MAINOSC
@@ -262,13 +265,13 @@ config LPC17_40_UART4
 
 config LPC17_40_CAN1
 	bool "CAN1"
+	select LPC17_40_CAN
 	default n
-	select CAN
 
 config LPC17_40_CAN2
 	bool "CAN2"
+	select LPC17_40_CAN
 	default n
-	select CAN
 
 config LPC17_40_SPI
 	bool "SPI"
@@ -345,6 +348,7 @@ config LPC17_40_PWM0
 
 config LPC17_40_PWM1
 	bool "PWM1"
+	select ARCH_HAVE_PWM_MULTICHAN
 	default n
 
 config LPC17_40_PWM1_PIN
@@ -355,6 +359,48 @@ config LPC17_40_PWM1_PIN
 	---help---
 		If TIM1 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,..,4}
+
+config LPC17_40_PWM1_CHANNEL1
+	bool "PWM1 Channel 1"
+	default y
+	depends on LPC17_40_PWM1
+	---help---
+		Enable PWM1 channel 1, board has to define pin GPIO_PWM1p1
+
+config LPC17_40_PWM1_CHANNEL2
+	bool "PWM1 Channel 2"
+	default n
+	depends on LPC17_40_PWM1
+	---help---
+		Enable PWM1 channel 2, board has to define pin GPIO_PWM1p2
+
+config LPC17_40_PWM1_CHANNEL3
+	bool "PWM1 Channel 3"
+	default n
+	depends on LPC17_40_PWM1
+	---help---
+		Enable PWM1 channel 3, board has to define pin GPIO_PWM1p3
+
+config LPC17_40_PWM1_CHANNEL4
+	bool "PWM1 Channel 4"
+	default n
+	depends on LPC17_40_PWM1
+	---help---
+		Enable PWM1 channel 4, board has to define pin GPIO_PWM1p4
+
+config LPC17_40_PWM1_CHANNEL5
+	bool "PWM1 Channel 5"
+	default n
+	depends on LPC17_40_PWM1
+	---help---
+		Enable PWM1 channel 5, board has to define pin GPIO_PWM1p5
+
+config LPC17_40_PWM1_CHANNEL6
+	bool "PWM1 Channel 6"
+	default n
+	depends on LPC17_40_PWM1
+	---help---
+		Enable PWM1 channel 6, board has to define pin GPIO_PWM1p6
 
 config LPC17_40_MCPWM
 	bool "MCPWM"
@@ -649,7 +695,7 @@ config LPC17_40_ADC_NCHANNELS
 endmenu
 
 menu "CAN driver options"
-	depends on LPC17_40_CAN1 || LPC17_40_CAN2
+	depends on LPC17_40_CAN
 
 config LPC17_40_CAN1_BAUD
 	int "CAN1 BAUD"
@@ -996,8 +1042,14 @@ config LPC17_40_USBDEV_NOVBUS
 	---help---
 		Define if the hardware implementation does not support the VBUS signal
 
+config LPC17_40_USBDEV_NOSOFTCONNECT
+	bool "Disable Softconnect support"
+	default n
+	---help---
+		Define if the hardware implementation does not support the Softconnect signal
+
 config LPC17_40_USBDEV_NOLED
-	bool "Disable USB device LCD support"
+	bool "Disable USB device LED support"
 	default n
 	---help---
 		Define if the hardware implementation does not support the LED output

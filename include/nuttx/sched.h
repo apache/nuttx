@@ -52,22 +52,15 @@
 
 /* Configuration ************************************************************/
 
-/* Task groups currently only supported for retention of child status */
-
-#undef HAVE_GROUP_MEMBERS
-
-/* We need a group an group members if we are supporting the parent/child
- * relationship.
+/* We need to track group members at least for:
+ *
+ * - To signal all tasks in a group. (eg. SIGCHLD)
+ * - _exit() to collect siblings threads.
  */
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
+#undef HAVE_GROUP_MEMBERS
+#if !defined(CONFIG_DISABLE_PTHREAD)
 #  define HAVE_GROUP_MEMBERS  1
-#endif
-
-/* We don't need group members if support for pthreads is disabled */
-
-#ifdef CONFIG_DISABLE_PTHREAD
-#  undef HAVE_GROUP_MEMBERS
 #endif
 
 /* Sporadic scheduling */
@@ -222,7 +215,7 @@ enum tstate_e
   TSTATE_TASK_INACTIVE,       /* BLOCKED      - Initialized but not yet activated */
   TSTATE_WAIT_SEM,            /* BLOCKED      - Waiting for a semaphore */
   TSTATE_WAIT_SIG,            /* BLOCKED      - Waiting for a signal */
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   TSTATE_WAIT_MQNOTEMPTY,     /* BLOCKED      - Waiting for a MQ to become not empty. */
   TSTATE_WAIT_MQNOTFULL,      /* BLOCKED      - Waiting for a MQ to become not full. */
 #endif

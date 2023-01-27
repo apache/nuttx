@@ -48,7 +48,7 @@
 
 #define BLF_N 16                          /* Number of Subkeys */
 #define BLF_MAXKEYLEN ((BLF_N - 2) * 4)   /* 448 bits */
-#define BLF_MAXUTILIZED ((BLF_N + 2)*4)   /* 576 bits */
+#define BLF_MAXUTILIZED ((BLF_N + 2) * 4) /* 576 bits */
 
 /* Blowfish context */
 
@@ -86,8 +86,8 @@ uint32_t blowfish_stream2word(FAR const uint8_t *, uint16_t,
 void blf_ecb_encrypt(FAR blf_ctx *, FAR uint8_t *, uint32_t);
 void blf_ecb_decrypt(FAR blf_ctx *, FAR uint8_t *, uint32_t);
 
-void blf_cbc_encrypt(FAR blf_ctx *, FAR uint8_t *,
-                     FAR uint8_t *, uint32_t);
-void blf_cbc_decrypt(FAR blf_ctx *, FAR uint8_t *,
-                     FAR uint8_t *, uint32_t);
+void blf_cbc_encrypt(FAR blf_ctx *, FAR uint8_t *, FAR uint8_t *,
+                     uint32_t);
+void blf_cbc_decrypt(FAR blf_ctx *, FAR uint8_t *, FAR uint8_t *,
+                     uint32_t);
 #endif /* __INCLUDE_CRYPTO_BLF_H */

@@ -29,8 +29,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/irq.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -58,10 +56,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/* Return the current value of the stack pointer */
-
-chipreg_t up_getsp(void);
 
 #undef EXTERN
 #ifdef __cplusplus

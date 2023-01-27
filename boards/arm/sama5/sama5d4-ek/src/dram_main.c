@@ -151,7 +151,7 @@ int dram_main(int argc, char *argv[])
 
   /* Invalidate caches and TLBs */
 
-  cp15_invalidate_icache();
+  cp15_invalidate_icache_all();
   cp15_invalidate_dcache_all();
   cp15_invalidate_tlbs();
 

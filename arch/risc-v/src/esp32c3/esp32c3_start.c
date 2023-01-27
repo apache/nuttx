@@ -47,6 +47,7 @@
 #endif
 #include "hardware/esp32c3_cache_memory.h"
 #include "hardware/extmem_reg.h"
+#include "rom/esp32c3_libc_stubs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -252,6 +253,12 @@ void __esp32c3_start(void)
   esp32c3_region_protection();
 #endif
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Put the CPU Interrupts in initial state */
+
+  esp32c3_cpuint_initialize();
+#endif
+
   /* Initialize RTC parameters */
 
   esp32c3_rtc_init();
@@ -292,6 +299,10 @@ void __esp32c3_start(void)
     {
       *dest++ = 0;
     }
+
+  /* Setup the syscall table needed by the ROM code */
+
+  setup_syscall_table();
 
   showprogress('B');
 

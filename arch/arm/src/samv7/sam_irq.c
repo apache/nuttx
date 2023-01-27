@@ -34,7 +34,9 @@
 #include <arch/armv7-m/nvicpri.h>
 
 #include "nvic.h"
-#include "ram_vectors.h"
+#ifdef CONFIG_ARCH_RAMVECTORS
+#  include "ram_vectors.h"
+#endif
 #include "arm_internal.h"
 
 #ifdef CONFIG_SAMV7_GPIO_IRQ
@@ -81,7 +83,7 @@ static void sam_dumpnvic(const char *msg, int irq)
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
-        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+          getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
   irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x "
           "SYSTICK: %08x\n",
@@ -161,11 +163,10 @@ static int sam_nmi(int irq, void *context, void *arg)
   return 0;
 }
 
-static int sam_busfault(int irq, void *context, void *arg)
+static int sam_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
-  _err("PANIC!!! Bus fault received: %08" PRIx32 "\n",
-       getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
 }
@@ -360,6 +361,13 @@ void up_irqinitialize(void)
    */
 
   arm_ramvec_initialize();
+
+  /* At this moment both I- and D-Caches have been already enabled in
+   * __start so we need to flush RAM vectors table to memory.
+   */
+
+  up_clean_dcache((uintptr_t)g_ram_vectors,
+                  (uintptr_t)g_ram_vectors + sizeof(g_ram_vectors));
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

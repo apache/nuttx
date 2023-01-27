@@ -1498,8 +1498,15 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Copy data from the memory object to the user buffer */
 
-  memcpy(buffer, &tfo->tfo_data[startpos], nread);
-  filep->f_pos += nread;
+  if (tfo->tfo_data != NULL)
+    {
+      memcpy(buffer, &tfo->tfo_data[startpos], nread);
+      filep->f_pos += nread;
+    }
+  else
+    {
+      DEBUGASSERT(tfo->tfo_size == 0 && nread == 0);
+    }
 
   /* Release the lock on the file */
 
@@ -1555,8 +1562,15 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Copy data from the memory object to the user buffer */
 
-  memcpy(&tfo->tfo_data[startpos], buffer, nwritten);
-  filep->f_pos += nwritten;
+  if (tfo->tfo_data != NULL)
+    {
+      memcpy(&tfo->tfo_data[startpos], buffer, nwritten);
+      filep->f_pos += nwritten;
+    }
+  else
+    {
+      DEBUGASSERT(tfo->tfo_size == 0 && nwritten == 0);
+    }
 
   /* Release the lock on the file */
 

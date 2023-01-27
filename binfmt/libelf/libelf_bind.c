@@ -320,7 +320,8 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Calculate the relocation address. */
 
-      if (rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
+      if (rel->r_offset < 0 ||
+          rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("Section %d reloc %d: Relocation address out of range, "
                "offset %" PRIdPTR " size %jd\n",
@@ -504,7 +505,8 @@ static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Calculate the relocation address. */
 
-      if (rela->r_offset > dstsec->sh_size)
+      if (rela->r_offset < 0 ||
+          rela->r_offset > dstsec->sh_size)
         {
           berr("Section %d reloc %d: Relocation address out of range, "
                "offset %" PRIdPTR " size %jd\n",

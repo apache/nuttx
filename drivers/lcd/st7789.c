@@ -186,7 +186,7 @@ static void st7789_setarea(FAR struct st7789_dev_s *dev,
                            uint16_t x1, uint16_t y1);
 static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp);
 static void st7789_wrram(FAR struct st7789_dev_s *dev,
-                         FAR const uint16_t *buff, size_t size, size_t skip,
+                         FAR const uint8_t *buff, size_t size, size_t skip,
                          size_t count);
 #ifndef CONFIG_LCD_NOGETRUN
 static void st7789_rdram(FAR struct st7789_dev_s *dev,
@@ -202,7 +202,7 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
 static int st7789_putarea(FAR struct lcd_dev_s *dev,
                           fb_coord_t row_start, fb_coord_t row_end,
                           fb_coord_t col_start, fb_coord_t col_end,
-                          FAR const uint8_t *buffer);
+                          FAR const uint8_t *buffer, fb_coord_t stride);
 #ifndef CONFIG_LCD_NOGETRUN
 static int st7789_getrun(FAR struct lcd_dev_s *dev,
                          fb_coord_t row, fb_coord_t col,
@@ -448,7 +448,7 @@ static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp)
  ****************************************************************************/
 
 static void st7789_wrram(FAR struct st7789_dev_s *dev,
-                         FAR const uint16_t *buff, size_t size, size_t skip,
+                         FAR const uint8_t *buff, size_t size, size_t skip,
                          size_t count)
 {
   size_t i;
@@ -459,7 +459,8 @@ static void st7789_wrram(FAR struct st7789_dev_s *dev,
 
   for (i = 0; i < count; i++)
     {
-      SPI_SNDBLOCK(dev->spi, buff + (i * (size + skip)), size);
+      SPI_SNDBLOCK(dev->spi, buff + (i * (size + skip)),
+                   size / ST7789_BYTESPP);
     }
 
   st7789_deselect(dev->spi);
@@ -530,13 +531,12 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
                          FAR const uint8_t *buffer, size_t npixels)
 {
   FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
-  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   st7789_setarea(priv, col, row, col + npixels - 1, row);
-  st7789_wrram(priv, src, npixels, 0, 1);
+  st7789_wrram(priv, buffer, npixels * ST7789_BYTESPP, 0, 1);
 
   return OK;
 }
@@ -554,17 +554,22 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
  *   col_end   - Ending column to write to
  *               (range: col_start <= col_end < xres)
  *   buffer    - The buffer containing the area to be written to the LCD
+ *   stride    - Length of a line in bytes. This parameter may be necessary
+ *               to allow the LCD driver to calculate the offset for partial
+ *               writes when the buffer needs to be splited for row-by-row
+ *               writing.
  *
  ****************************************************************************/
 
 static int st7789_putarea(FAR struct lcd_dev_s *dev,
                           fb_coord_t row_start, fb_coord_t row_end,
                           fb_coord_t col_start, fb_coord_t col_end,
-                          FAR const uint8_t *buffer)
+                          FAR const uint8_t *buffer, fb_coord_t stride)
 {
   FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
-  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
-  fb_coord_t bsiz = col_end - col_start + 1;
+  size_t cols = col_end - col_start + 1;
+  size_t rows = row_end - row_start + 1;
+  size_t row_size = cols * ST7789_BYTESPP;
 
   ginfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
          row_start, row_end, col_start, col_end);
@@ -572,8 +577,26 @@ static int st7789_putarea(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   st7789_setarea(priv, col_start, row_start, col_end, row_end);
-  st7789_wrram(priv, src + (ST7789_XRES * row_start) + col_start,
-               bsiz, ST7789_XRES - bsiz, row_end - row_start + 1);
+
+  /* If the stride is the same of the row, a single SPI transfer is enough.
+   * That is always true for lcddev. For framebuffer, that indicates a full
+   * screen or full row update.
+   */
+
+  if (stride == row_size)
+    {
+      /* simpler case, we can just send the whole buffer */
+
+      ginfo("Using full screen/full row mode\n");
+      st7789_wrram(priv, buffer, rows * row_size, 0, 1);
+    }
+  else
+    {
+      /* We have to go row by row */
+
+      ginfo("Falling-back to row by row mode\n");
+      st7789_wrram(priv, buffer, row_size, stride - row_size, rows);
+    }
 
   return OK;
 }

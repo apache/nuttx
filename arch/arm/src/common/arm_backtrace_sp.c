@@ -77,12 +77,10 @@ static bool in_code_region(unsigned long pc)
 {
   int i = 0;
 
-#if 0
   if (pc >= (unsigned long)_START_TEXT && pc < (unsigned long)_END_TEXT)
     {
       return true;
     }
-#endif
 
   if (g_backtrace_code_regions)
     {
@@ -252,7 +250,7 @@ int up_backtrace(struct tcb_s *tcb,
 #  ifdef CONFIG_SMP
           top = arm_intstack_top();
 #  else
-          top = g_intstacktop;
+          top = (unsigned long)g_intstacktop;
 #  endif /* CONFIG_SMP */
 #else
           top = (unsigned long)rtcb->stack_base_ptr +

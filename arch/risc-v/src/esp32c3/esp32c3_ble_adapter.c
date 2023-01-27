@@ -675,7 +675,7 @@ static void interrupt_handler_set_wrapper(int n, void *fn, void *arg)
 
 static void interrupt_on_wrapper(int intr_num)
 {
-  up_enable_irq(intr_num);
+  up_enable_irq(intr_num + ESP32C3_IRQ_FIRSTPERIPH);
 }
 
 /****************************************************************************
@@ -694,7 +694,7 @@ static void interrupt_on_wrapper(int intr_num)
 
 static void interrupt_off_wrapper(int intr_num)
 {
-  up_disable_irq(intr_num);
+  up_disable_irq(intr_num + ESP32C3_IRQ_FIRSTPERIPH);
 }
 
 /****************************************************************************

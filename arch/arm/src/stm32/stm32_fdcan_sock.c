@@ -2122,7 +2122,9 @@ static void fdcan_error_work(void *arg)
 
   /* Report errors */
 
+  net_lock();
   fdcan_error(priv, pending & FDCAN_ANYERR_INTS);
+  net_unlock();
 
   /* Re-enable ERROR interrupts */
 
@@ -2233,7 +2235,8 @@ static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
               /* Receive CRC Error */
 
               errbits |= CAN_ERR_PROT;
-              data[3] |= (CAN_ERR_PROT_LOC_CRCSEQ | CAN_ERR_PROT_LOC_CRCDEL);
+              data[3] |= (CAN_ERR_PROT_LOC_CRC_SEQ |
+                          CAN_ERR_PROT_LOC_CRC_DEL);
             }
 
           if ((psr & FDCAN_PSR_LEC(FDCAN_PSR_EC_NO_CHANGE)) != 0)
@@ -2298,7 +2301,8 @@ static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
               /* Receive CRC Error */
 
               errbits |= CAN_ERR_PROT;
-              data[3] |= (CAN_ERR_PROT_LOC_CRCSEQ | CAN_ERR_PROT_LOC_CRCDEL);
+              data[3] |= (CAN_ERR_PROT_LOC_CRC_SEQ |
+                          CAN_ERR_PROT_LOC_CRC_DEL);
             }
 
           if ((psr & FDCAN_PSR_DLEC(FDCAN_PSR_EC_NO_CHANGE)) != 0)
@@ -2347,7 +2351,7 @@ static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
     {
       /* Timeout Occurred */
 
-      errbits |= CAN_ERR_TXTIMEOUT;
+      errbits |= CAN_ERR_TX_TIMEOUT;
     }
 
   if ((status & (FDCAN_INT_MRAF | FDCAN_INT_ELO)) != 0)
@@ -3306,11 +3310,15 @@ errout:
 void arm_netinitialize(void)
 {
 #ifdef CONFIG_STM32_CAN1
-  stm32_fdcansockinitialize(0);
+  stm32_fdcansockinitialize(FDCAN1);
 #endif
 
 #ifdef CONFIG_STM32_CAN2
-  stm32_fdcansockinitialize(1);
+  stm32_fdcansockinitialize(FDCAN2);
+#endif
+
+#ifdef CONFIG_STM32_CAN3
+  stm32_fdcansockinitialize(FDCAN3);
 #endif
 }
 #endif

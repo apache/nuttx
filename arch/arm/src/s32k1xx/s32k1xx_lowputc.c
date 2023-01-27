@@ -385,7 +385,7 @@ int s32k1xx_lpuart_configure(uint32_t base,
  *
  ****************************************************************************/
 
-#if defined(HAVE_LPUART_DEVICE) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(HAVE_LPUART_CONSOLE) && defined(CONFIG_DEBUG_FEATURES)
 void s32k1xx_lowputc(int ch)
 {
   while ((getreg32(S32K1XX_CONSOLE_BASE + S32K1XX_LPUART_STAT_OFFSET) &

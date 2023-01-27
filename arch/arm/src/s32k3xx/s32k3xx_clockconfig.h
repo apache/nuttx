@@ -53,6 +53,8 @@
  * Public Types
  ****************************************************************************/
 
+extern const unsigned int num_of_peripheral_clocks_0;
+
 /* Clock Configuration ******************************************************/
 
 enum cgm_system_clock_type_e

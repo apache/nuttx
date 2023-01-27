@@ -149,6 +149,7 @@ config ARCH_CHIP_STM32H747XI
 	select STM32H7_IO_CONFIG_X
 	select STM32H7_HAVE_FDCAN1
 	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_SMPS
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM
 		TFBGA240
@@ -215,7 +216,28 @@ config ARCH_CHIP_STM32H753ZI
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP144
 
+config ARCH_CHIP_STM32H7B3LI
+	bool "STM32H7B3LI"
+	select STM32H7_STM32H7B3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_L
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_SMPS
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1376 Kb SRAM,
+		with cryptographic accelerator, TFBGA225
+
 endchoice # STM32 H7 Chip Selection
+
+config STM32H7_HAVE_SMPS
+	bool
+	default n
+
+config STM32H7_PWR_DIRECT_SMPS_SUPPLY
+	bool "Use direct SMPS supply mode"
+	depends on STM32H7_HAVE_SMPS
+	default n
 
 config STM32H7_IO_CONFIG_A
 	bool
@@ -226,6 +248,10 @@ config STM32H7_IO_CONFIG_B
 	default n
 
 config STM32H7_IO_CONFIG_I
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_L
 	bool
 	default n
 
@@ -242,6 +268,23 @@ config STM32H7_IO_CONFIG_Z
 	default n
 
 config STM32H7_STM32H7X3XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32H7_HAVE_ETHERNET
+	select STM32H7_HAVE_FMC
+	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_SPI4
+	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_SPI6
+
+config STM32H7_STM32H7B3XX
 	bool
 	default n
 	select ARCH_HAVE_FPU
@@ -357,6 +400,11 @@ config STM32H7_AXI_SRAM_CORRUPTION_WAR
 		AXI_TARG7_FN_MOD register. This will reduce the read issuing capability
 		of the SRAM to 1 at AXI interconnect level and avoid data corruption.
 
+
+config STM32_HAVE_OTA_PARTITION
+	bool
+	default n
+
 config STM32H7_PROGMEM
 	bool "Flash progmem support"
 	default n
@@ -364,12 +412,45 @@ config STM32H7_PROGMEM
 		Add progmem support, start block and end block options are provided to
 		obtain an uniform flash memory mapping.
 
+menu "Application Image Configuration"
+choice
+	prompt "Application Image Format"
+	default STM32_APP_FORMAT_LEGACY
+	---help---
+		Depending on the chosen 2nd stage bootloader, the application may
+		be required to be perform a specific startup routine. Furthermore,
+		the image binary must be formatted according to the definition from
+		the 2nd stage bootloader.
+
+config STM32_APP_FORMAT_LEGACY
+	bool "Legacy format"
+	---help---
+		This is the legacy application image format.
+
+config STM32_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select STM32_HAVE_OTA_PARTITION
+	depends on EXPERIMENTAL
+	---help---
+		The MCUboot support of loading the firmware images.		
+
+comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
+	depends on !EXPERIMENTAL
+
+endchoice # Application Image Format
+
+endmenu # Application Image Configuration
+
 menu "STM32H7 Peripheral Selection"
 
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
 
 config STM32H7_HAVE_ETHERNET
+	bool
+	default n
+
+config STM32H7_HAVE_PHY_POLLED
 	bool
 	default n
 
@@ -538,6 +619,7 @@ config STM32H7_ETHMAC
 	depends on STM32H7_HAVE_ETHERNET
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+	select STM32H7_HAVE_PHY_POLLED
 
 config STM32H7_FMC
 	bool "FMC"
@@ -655,50 +737,47 @@ menu "STM32H7 SPI Selection"
 config STM32H7_SPI1
 	bool "SPI1"
 	default n
-	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI2
 	bool "SPI2"
 	default n
-	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI3
 	bool "SPI3"
 	default n
-	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI4
 	bool "SPI4"
 	default n
-	depends on STM32H7_HAVE_SPI4 && EXPERIMENTAL
+	depends on STM32H7_HAVE_SPI4
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI5
 	bool "SPI5"
 	default n
-	depends on STM32H7_HAVE_SPI5 && EXPERIMENTAL
+	depends on STM32H7_HAVE_SPI5
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI6
 	bool "SPI6"
 	default n
-	depends on STM32H7_HAVE_SPI6 && EXPERIMENTAL
+	depends on STM32H7_HAVE_SPI6
 	select SPI
 	select STM32H7_SPI
+
+endmenu # STM32H7 SPI Selection
 
 config STM32H7_SYSCFG
 	bool "SYSCFG"
 	default y
-
-endmenu # STM32H7 SPI Selection
 
 menu "STM32H7 Timer Selection"
 
@@ -5014,6 +5093,16 @@ config STM32H7_PHYINIT
 		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
 		one time before it first uses the PHY.
 
+config STM32H7_PHY_POLLING
+	bool "Support network monitoring by polling the PHY"
+	default n
+	depends on STM32H7_HAVE_PHY_POLLED
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the
+		the PHY for status.
+
 config STM32H7_MII
 	bool "Use MII interface"
 	default n
@@ -5486,5 +5575,67 @@ endchoice
 
 endmenu # FDCAN Driver
 
+
+menu "Progmem MTD configuration"
+
+if STM32_HAVE_OTA_PARTITION
+
+comment "Application Image OTA Update support"
+
+config STM32_PROGMEM_OTA_PARTITION
+ 	bool "MTD driver"
+ 	default n
+	select BCH
+ 	select MTD
+ 	select MTD_BYTE_WRITE
+ 	select MTD_PARTITION
+ 	select MTD_PROGMEM
+ 	select STM32H7_PROGMEM
+ 	---help---
+ 		Initialize an MTD driver for the Flash, which will
+ 		add an entry at /dev for application access from userspace.
+
+if STM32_PROGMEM_OTA_PARTITION
+config STM32_MCUBOOT_HEADER_SIZE
+	hex
+	default 0x200
+	depends on STM32_APP_FORMAT_MCUBOOT
+
+config STM32_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config STM32_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config STM32_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+config STM32_OTA_PRIMARY_SLOT_OFFSET
+	hex "MCUboot application image primary slot offset"
+	default "0x40000"
+
+config STM32_OTA_SECONDARY_SLOT_OFFSET
+	hex "MCUboot application image secondary slot offset"
+	default "0x100000"
+
+config STM32_OTA_SCRATCH_OFFSET
+	hex "MCUboot scratch partition offset"
+	default "0x1c0000"
+
+config STM32_OTA_SLOT_SIZE
+	hex "MCUboot application image slot size (in bytes)"
+	default "0xc0000"
+
+config STM32_OTA_SCRATCH_SIZE
+	hex "MCUboot scratch partition size (in bytes)"
+	default "0x40000"
+
+endif   #STM32_PROGMEM_OTA_PARTITION
+endif   #STM32_HAVE_OTA_PARTITION
+
+endmenu # Progmem configuration
 
 endif # ARCH_CHIP_STM32H7

@@ -1019,6 +1019,16 @@ config PIC32MX_GPIOIRQ
 	---help---
 		Build in support for interrupts based on GPIO inputs from IOPorts
 
+config PIC32MX_JTAG_ENABLE
+	bool "Enable JTAG"
+	default n
+	depends on ARCH_CHIP_PIC32MX3 || ARCH_CHIP_PIC32MX4 || ARCH_CHIP_PIC32MX5 || ARCH_CHIP_PIC32MX6 || ARCH_CHIP_PIC32MX7
+	---help---
+		Enable JTAG on power-up.  This is a run-time setting needed for the 3xx/4xx/5xx/6xx/7xx series.
+		PIC32MX devices are hardwired to enable JTAG by default at boot time.  NuttX disables JTAG by
+		default in order to prevent unintentional data leakage over JTAG.
+
+
 menu "SPI Driver Configuration"
 	depends on PIC32MX_SPI
 

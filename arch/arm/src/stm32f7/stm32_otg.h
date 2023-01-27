@@ -84,7 +84,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32_otghost_initialize
+ * Name: stm32_otgfshost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -110,7 +110,7 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
-struct usbhost_connection_s *stm32_otghost_initialize(int controller);
+struct usbhost_connection_s *stm32_otgfshost_initialize(int controller);
 #endif
 
 /****************************************************************************

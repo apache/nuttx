@@ -65,7 +65,7 @@
 
 /* Configuration register */
 
-#define WDT_CONFIG_PER_SHIFT       (0)                              /* Bits 0–3: Time-Out Period */
+#define WDT_CONFIG_PER_SHIFT       (0)                              /* Bits 0-3: Time-Out Period */
 #define WDT_CONFIG_PER_MASK        (15 << WDT_CONFIG_PER_SHIFT)
 #  define WDT_CONFIG_PER_8         (0  << WDT_CONFIG_PER_SHIFT)     /* 8 clock cycles */
 #  define WDT_CONFIG_PER_16        (1  << WDT_CONFIG_PER_SHIFT)     /* 16 clock cycles */

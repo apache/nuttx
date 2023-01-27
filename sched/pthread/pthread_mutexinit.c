@@ -44,12 +44,11 @@
  *   Create a mutex
  *
  * Input Parameters:
- *   None
+ *   mutex - A reference to the mutex to be initialized
+ *   attr - Mutex attribute object to be used
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   0 if successful.  Otherwise, an error code.
  *
  ****************************************************************************/
 
@@ -61,7 +60,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
   uint8_t type = PTHREAD_MUTEX_DEFAULT;
 #endif
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  ifdef PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
+#  ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
   uint8_t proto = PTHREAD_PRIO_INHERIT;
 #  else
   uint8_t proto = PTHREAD_PRIO_NONE;

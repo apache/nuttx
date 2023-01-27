@@ -1,5 +1,6 @@
 /****************************************************************************
  * tools/b16.c
+ * Convert b16 fixed precision value to float or vice versa
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,10 +37,11 @@ static void show_usage(const char *progname)
   fprintf(stderr, "  <b16_t>:\n");
   fprintf(stderr, "    A b16 fixed precision value in hexadecimal form:\n");
   fprintf(stderr, "    E.g., 0x00010000\n");
-  fprintf(stderr, "    Any value begininning with '0'\n");
-  fprintf(stderr, "    will assumed by be hexadecimal format\n");
+  fprintf(stderr, "    Any value beginning with '0' will be assumed to\n");
+  fprintf(stderr, "    be in hexadecimal format\n");
   fprintf(stderr, "  <float>:\n");
-  fprintf(stderr, "    A floating value in standard form: E.g., 5.1\n");
+  fprintf(stderr, "    A floating point value in standard form:\n");
+  fprintf(stderr, "    E.g., 5.1\n");
   exit(EXIT_FAILURE);
 }
 

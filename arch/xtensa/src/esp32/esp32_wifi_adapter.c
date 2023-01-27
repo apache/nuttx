@@ -2094,9 +2094,18 @@ static void esp_free(void *ptr)
     }
   else
 #endif
+#ifdef CONFIG_MM_KERNEL_HEAP
+  if (kmm_heapmember(ptr))
+#endif
     {
       kmm_free(ptr);
     }
+#ifdef CONFIG_MM_KERNEL_HEAP
+  else
+    {
+      free(ptr);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -2142,6 +2151,24 @@ static int esp_event_id_map(int event_id)
 
       case WIFI_EVENT_STA_STOP:
         id = WIFI_ADPT_EVT_STA_STOP;
+        break;
+#endif
+
+#ifdef ESP32_WLAN_HAS_SOFTAP
+      case WIFI_EVENT_AP_START:
+        id = WIFI_ADPT_EVT_AP_START;
+        break;
+
+      case WIFI_EVENT_AP_STOP:
+        id = WIFI_ADPT_EVT_AP_STOP;
+        break;
+
+      case WIFI_EVENT_AP_STACONNECTED:
+        id = WIFI_ADPT_EVT_AP_STACONNECTED;
+        break;
+
+      case WIFI_EVENT_AP_STADISCONNECTED:
+        id = WIFI_ADPT_EVT_AP_STADISCONNECTED;
         break;
 #endif
       default:
@@ -2222,6 +2249,24 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_STOP:
             wlinfo("Wi-Fi sta stop\n");
             g_sta_connected = false;
+            break;
+#endif
+
+#ifdef ESP32_WLAN_HAS_SOFTAP
+          case WIFI_ADPT_EVT_AP_START:
+            wlinfo("INFO: Wi-Fi softap start\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STOP:
+            wlinfo("INFO: Wi-Fi softap stop\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STACONNECTED:
+            wlinfo("INFO: Wi-Fi station join\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STADISCONNECTED:
+            wlinfo("INFO: Wi-Fi station leave\n");
             break;
 #endif
           default:
@@ -3427,7 +3472,9 @@ uint32_t esp_log_timestamp(void)
 
 static void *esp_malloc_internal(size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_malloc(size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
   return xtensa_imm_malloc(size);
 #else
   void *ptr = kmm_malloc(size);
@@ -3458,7 +3505,9 @@ static void *esp_malloc_internal(size_t size)
 
 static void *esp_realloc_internal(void *ptr, size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_realloc(ptr, size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
   return xtensa_imm_realloc(ptr, size);
 #else
   void *old_ptr = ptr;
@@ -3479,7 +3528,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
           return NULL;
         }
 
-      old_size = malloc_size(old_ptr);
+      old_size = kmm_malloc_size(old_ptr);
       DEBUGASSERT(old_size > 0);
       memcpy(new_ptr, old_ptr, MIN(old_size, size));
       kmm_free(old_ptr);
@@ -3507,8 +3556,10 @@ static void *esp_realloc_internal(void *ptr, size_t size)
 
 static void *esp_calloc_internal(size_t n, size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  return  xtensa_imm_calloc(n, size);
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_calloc(n, size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
+  return xtensa_imm_calloc(n, size);
 #else
   void *ptr = kmm_calloc(n, size);
   if (esp32_ptr_extram(ptr))
@@ -3537,7 +3588,9 @@ static void *esp_calloc_internal(size_t n, size_t size)
 
 static void *esp_zalloc_internal(size_t size)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
+  return kmm_zalloc(size);
+#elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
   return xtensa_imm_zalloc(size);
 #else
   void *ptr = kmm_zalloc(size);

@@ -596,7 +596,7 @@ static int nrf52_radio_pkt_cfg(struct nrf52_radio_dev_s *dev,
 
   pcnf1 |= (cfg->bal_len << RADIO_PCNF1_BALEN_SHIFT);
 
-  /* Configure on-air endianess of packet */
+  /* Configure on-air endianness of packet */
 
   pcnf1 |= (cfg->endian << RADIO_PCNF1_ENDIAN_SHIFT);
 
@@ -1032,7 +1032,7 @@ static int nrf52_radio_isr(int irq, void *context, void *arg)
 
       default:
         {
-          ASSERT(0);
+          PANIC();
           break;
         }
     }

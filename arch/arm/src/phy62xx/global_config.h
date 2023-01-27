@@ -156,7 +156,7 @@
 
 #define   RC32_TRACKINK_ALLOW              0x00000001       /* enable tracking RC 32KHz clock with 16MHz hclk */
 #define   SLAVE_LATENCY_ALLOW              0x00000002       /* slave latency allow switch */
-#define   LL_DEBUG_ALLOW                   0x00000004       /* enable invoke RAM project debug output fucntion */
+#define   LL_DEBUG_ALLOW                   0x00000004       /* enable invoke RAM project debug output function */
 #define   LL_WHITELIST_ALLOW               0x00000008       /* enable whitelist filter */
 #define   LL_RC32K_SEL                     0x00000010       /* select RC32K RTC, otherwise select crystal 32K RTC */
 #define   SIMUL_CONN_ADV_ALLOW             0x00000020       /* allow send adv in connect state */

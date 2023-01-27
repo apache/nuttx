@@ -56,20 +56,13 @@ void *sim_doirq(int irq, void *context)
 
       irq_dispatch(irq, regs);
 
-      if (regs != CURRENT_REGS)
-        {
-          /* Restore the cpu lock */
+      /* If a context switch occurred while processing the interrupt then
+       * CURRENT_REGS may have change value.  If we return any value
+       * different from the input regs, then the lower level will know that
+       * context switch occurred during interrupt processing.
+       */
 
-          restore_critical_section();
-
-          /* If a context switch occurred while processing the interrupt then
-           * CURRENT_REGS may have change value.  If we return any value
-           * different from the input regs, then the lower level will know
-           * that context switch occurred during interrupt processing.
-           */
-
-          regs = (void *)CURRENT_REGS;
-        }
+      regs = (void *)CURRENT_REGS;
 
       /* Restore the previous value of CURRENT_REGS.  NULL would indicate
        * that we are no longer in an interrupt handler.  It will be non-NULL

@@ -38,7 +38,7 @@
  * Name: task_init_info
  *
  * Description:
- *   Allocate and initilize task_info_s structure.
+ *   Allocate and initialize task_info_s structure.
  *
  * Input Parameters:
  *   - group: The group of new task

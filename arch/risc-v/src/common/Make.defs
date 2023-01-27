@@ -1,5 +1,5 @@
 ############################################################################
-# nuttx/arch/risc-v/src/common/Make.defs
+# arch/risc-v/src/common/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -101,4 +101,5 @@ endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c
+CMN_CSRCS += riscv_addrenv_utils.c riscv_addrenv_shm.c
 endif

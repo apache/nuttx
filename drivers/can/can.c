@@ -506,7 +506,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
   FAR struct can_dev_s     *dev = inode->i_private;
 #endif
 
-  caninfo("buflen: %d\n", buflen);
+  caninfo("buflen: %zu\n", buflen);
 
   /* The caller must provide enough memory to catch the smallest possible
    * message.  This is not a system error condition, but we won't permit
@@ -743,7 +743,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
   int                      msglen;
   int                      ret   = 0;
 
-  caninfo("buflen: %d\n", buflen);
+  caninfo("buflen: %zu\n", buflen);
 
   /* Interrupts must disabled throughout the following */
 

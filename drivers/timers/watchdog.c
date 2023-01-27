@@ -56,7 +56,7 @@
       !defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
 #    if CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL == 0
 #      define WATCHDOG_AUTOMONITOR_PING_INTERVAL \
-         (CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT / 2)
+         (CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL / 2)
 #    else
 #      define WATCHDOG_AUTOMONITOR_PING_INTERVAL \
          CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL
@@ -436,6 +436,7 @@ static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
+#ifdef CONFIG_WATCHDOG_MAGIC_V
   FAR struct inode                *inode = filep->f_inode;
   FAR struct watchdog_upperhalf_s *upper;
   FAR struct watchdog_lowerhalf_s *lower;
@@ -473,6 +474,8 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
     {
       return err;
     }
+
+#endif
 
   return buflen;
 }

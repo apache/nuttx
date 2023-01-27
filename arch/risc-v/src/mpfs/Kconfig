@@ -126,6 +126,44 @@ config MPFS_DDR_INIT
 	---help---
 		Initializes and performs DDR training on the associated DDR memory.
 
+choice
+	prompt "Choose DDR type"
+	depends on MPFS_DDR_INIT
+	default MPFS_DDR_TYPE_LPDDR4
+	
+config MPFS_DDR_TYPE_DDR3
+	bool "Use DDR3"
+
+config MPFS_DDR_TYPE_DDR3L
+	bool "Use DDR3L"
+
+config MPFS_DDR_TYPE_DDR4
+	bool "Use DDR4"
+
+config MPFS_DDR_TYPE_LPDDR3
+	bool "Use LPDDR3"
+
+config MPFS_DDR_TYPE_LPDDR4
+	bool "Use LPDDR4"
+
+endchoice
+
+config MPFS_DDR_TYPE
+	int
+	depends on MPFS_DDR_INIT
+	default 0 if MPFS_DDR_TYPE_DDR3
+	default 1 if MPFS_DDR_TYPE_DDR3L
+	default 2 if MPFS_DDR_TYPE_DDR4
+	default 3 if MPFS_DDR_TYPE_LPDDR3
+	default 4 if MPFS_DDR_TYPE_LPDDR4
+
+config MPFS_ENABLE_CACHE
+	bool "Enable L2 cache"
+	depends on MPFS_BOOTLOADER
+	default y
+	---help---
+		Enables L2 cache in L2LIM memory
+
 config MPFS_EMMCSD_MUX_GPIO
 	bool "GPIO driven EMMCSD mux"
 	default n
@@ -142,6 +180,12 @@ config MPFS_EMMCSD_MUX_EMMC
 	bool "eMMC"
 
 endchoice
+
+config MPFS_EMMCSD_CD
+	bool "Board supports card detect"
+	default y
+	---help---
+		Set to n if SD-card detect line is not connected
 
 config MPFS_ROMFS_MOUNT
 	bool "Mount the ROMFS file system"
@@ -250,16 +294,23 @@ config MPFS_EMMCSD
 	---help---
 		Selects the MPFS eMMCSD driver.
 
-config MPFS_IHC
+config MPFS_IHC_CLIENT
 	bool "IHC slave"
-	depends on RPTUN
+	depends on RPTUN && !MPFS_BOOTLOADER
 	default n
 	---help---
 		Selects and enables the Inter-Hart-Communication (IHC) slave driver.
 
+config MPFS_IHC_SBI
+        bool "IHC OpenSBI handler"
+        depends on MPFS_BOOTLOADER
+        default n
+        ---help---
+                Selects and enables the Inter-Hart-Communication (IHC) driver on hart0.
+
 config MPFS_IHC_LINUX_ON_HART1
 	int "Linux on hart1"
-	depends on MPFS_IHC
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
 	default 0
 	range 0 1
 	---help---
@@ -267,7 +318,7 @@ config MPFS_IHC_LINUX_ON_HART1
 
 config MPFS_IHC_LINUX_ON_HART2
 	int "Linux on hart2"
-	depends on MPFS_IHC
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
 	default 0
 	range 0 1
 	---help---
@@ -275,7 +326,7 @@ config MPFS_IHC_LINUX_ON_HART2
 
 config MPFS_IHC_LINUX_ON_HART3
 	int "Linux on hart3"
-	depends on MPFS_IHC
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
 	default 1
 	range 0 1
 	---help---
@@ -283,7 +334,7 @@ config MPFS_IHC_LINUX_ON_HART3
 
 config MPFS_IHC_LINUX_ON_HART4
 	int "Linux on hart4"
-	depends on MPFS_IHC
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
 	default 1
 	range 0 1
 	---help---
@@ -291,7 +342,7 @@ config MPFS_IHC_LINUX_ON_HART4
 
 config MPFS_IHC_NUTTX_ON_HART1
 	int "NuttX on hart1"
-	depends on MPFS_IHC
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
 	default 0
 	range 0 1
 	---help---
@@ -299,27 +350,43 @@ config MPFS_IHC_NUTTX_ON_HART1
 
 config MPFS_IHC_NUTTX_ON_HART2
 	int "NuttX on hart2"
-	depends on MPFS_IHC
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
 	default 1
 	range 0 1
 	---help---
 		Set this to 1 if NuttX is running on hart2
 
 config MPFS_IHC_NUTTX_ON_HART3
-        int "NuttX on hart3"
-        depends on MPFS_IHC
-        default 0
+	int "NuttX on hart3"
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
+	default 0
 	range 0 1
 	---help---
 		Set this to 1 if NuttX is running on hart3
 
 config MPFS_IHC_NUTTX_ON_HART4
         int "NuttX on hart4"
-        depends on MPFS_IHC
+        depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
         default 0
 	range 0 1
 	---help---
 		Set this to 1 if NuttX is running on hart4
+
+config MPFS_IHC_TWO_RPMSG_CHANNELS
+	bool "Two rpmsg channels"
+	depends on MPFS_IHC_SBI
+	default n
+	---help---
+		Use this only if using 2 x RPMSG channels.  This is only associated with the
+		OpenSBI (hart0) bootloader code that handles the traps from the Linux kernel.
+
+config MPFS_IHC_RPMSG_CH2
+	bool "Mark this NuttX as RPMSG channel 2"
+	depends on MPFS_IHC_CLIENT
+	default n
+	---help---
+		Use this only if using 2 x RPMSG channels.  This makes the NuttX work as the
+		RPMSG channel 2 client.
 
 config MPFS_ETHMAC
 	bool

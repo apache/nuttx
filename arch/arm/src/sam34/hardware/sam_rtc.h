@@ -120,11 +120,11 @@
 #    define RTC_MR_THIGH_31MS        (0 << RTC_MR_THIGH_SHIFT) /* 31.2 ms */
 #    define RTC_MR_THIGH_16MS        (1 << RTC_MR_THIGH_SHIFT) /* 15.6 ms */
 #    define RTC_MR_THIGH_4MS         (2 << RTC_MR_THIGH_SHIFT) /* 3.91 ms */
-#    define RTC_MR_THIGH_976US       (3 << RTC_MR_THIGH_SHIFT) /* 976 µs */
-#    define RTC_MR_THIGH_488US       (4 << RTC_MR_THIGH_SHIFT) /* 488 µs */
-#    define RTC_MR_THIGH_22US        (5 << RTC_MR_THIGH_SHIFT) /* 122 µs */
-#    define RTC_MR_THIGH_0US         (6 << RTC_MR_THIGH_SHIFT) /* 30.5 µs */
-#    define RTC_MR_THIGH_15US        (7 << RTC_MR_THIGH_SHIFT) /* 15.2 µs */
+#    define RTC_MR_THIGH_976US       (3 << RTC_MR_THIGH_SHIFT) /* 976 Âµs */
+#    define RTC_MR_THIGH_488US       (4 << RTC_MR_THIGH_SHIFT) /* 488 Âµs */
+#    define RTC_MR_THIGH_22US        (5 << RTC_MR_THIGH_SHIFT) /* 122 Âµs */
+#    define RTC_MR_THIGH_0US         (6 << RTC_MR_THIGH_SHIFT) /* 30.5 Âµs */
+#    define RTC_MR_THIGH_15US        (7 << RTC_MR_THIGH_SHIFT) /* 15.2 Âµs */
 
 #  define RTC_MR_TPERIOD_SHIFT       (28)      /* Bits 28-29: Period of the Output Pulse */
 #  define RTC_MR_TPERIOD_MASK        (3 << RTC_MR_TPERIOD_SHIFT)

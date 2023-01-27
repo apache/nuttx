@@ -1208,12 +1208,15 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
-  config.ttype  = EDMA_PERIPH2MEM;
   config.nbytes = adjust;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
 #endif
   kinetis_dmach_xfrsetup(priv->rxdma, &config);
+
+  up_invalidate_dcache((uintptr_t)config.daddr,
+                       (uintptr_t)config.daddr +
+                       config.iter * config.nbytes);
 
   config.saddr  = (uint32_t) (txbuffer ? txbuffer : &txdummy);
   config.daddr  = priv->spibase + KINETIS_SPI_PUSHR_OFFSET;
@@ -1223,11 +1226,14 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
-  config.ttype  = EDMA_MEM2PERIPH;
   config.nbytes = adjust;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
 #endif
+
+  up_clean_dcache((uintptr_t)config.saddr,
+                  (uintptr_t)config.saddr + nbytes * adjust);
+
   kinetis_dmach_xfrsetup(priv->txdma, &config);
 
   spi_modifyreg(priv, KINETIS_SPI_RSER_OFFSET, 0 ,

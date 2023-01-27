@@ -188,7 +188,7 @@ files into a single .hex file.  Here is how you can do that.
 The 'tail' of the nuttx.hex file should look something like this
 (with my comments added beginning with #):
 
-.. code-block:: console::
+.. code-block:: console
 
   $ tail nuttx.hex
   #xx xxxx 00 data records
@@ -206,7 +206,7 @@ Use an editor such as vi to remove the 05 and 01 records.
 The 'head' of the nuttx_user.hex file should look something like
 this (again with my comments added beginning with #):
 
-.. code-block:: console::
+.. code-block:: console
 
   $ head nuttx_user.hex
   #xx xxxx 04 Extended Linear Address Record
@@ -223,7 +223,7 @@ be fine.
 Combine the edited nuttx.hex and un-edited nuttx_user.hex
 file to produce a single combined hex file:
 
-.. code-block:: console::
+.. code-block:: console
 
   $ cat nuttx.hex nuttx_user.hex >combined.hex
 

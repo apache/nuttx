@@ -27,7 +27,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <nuttx/wireless/wireless.h>
+#include <sys/types.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/net/sms.h>
 
 /****************************************************************************
@@ -47,7 +48,7 @@
  *                  the SMS has been delivered to the destination device.
  */
 
-#define SIOCSMSENSTREP         _LTEIOC(1)
+#define SIOCSMSENSTREP        _LTEIOC(1)
 
 /* SIOCSMSGREFID
  *   Description:   Obtain the ID associated with the submitted SMS.
@@ -56,13 +57,13 @@
  *                  otherwise, a single ID will be obtained.
  */
 
-#define SIOCSMSGREFID          _LTEIOC(2)
+#define SIOCSMSGREFID         _LTEIOC(2)
 
 /* SIOCSMSSSCA
  *   Description:   Set the service center address of the destination.
  */
 
-#define SIOCSMSSSCA            _LTEIOC(3)
+#define SIOCSMSSSCA           _LTEIOC(3)
 
 /* for cmdid */
 

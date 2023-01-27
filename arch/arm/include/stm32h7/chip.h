@@ -70,7 +70,8 @@
     defined (CONFIG_ARCH_CHIP_STM32H753II) || \
     defined (CONFIG_ARCH_CHIP_STM32H753VI) || \
     defined (CONFIG_ARCH_CHIP_STM32H753XI) || \
-    defined (CONFIG_ARCH_CHIP_STM32H753ZI)
+    defined (CONFIG_ARCH_CHIP_STM32H753ZI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H7B3LI)
 #elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
 #  error STM32 H7 chip not identified
@@ -106,6 +107,60 @@
 #      define STM32H7_NGPIO               (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_I)
 #      define STM32H7_NGPIO               (9)         /* GPIOA-GPIOI */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_V)
+#      define STM32H7_NGPIO               (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_X)
+#      define STM32H7_NGPIO               (11)        /* GPIOA-GPIOK */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
+#      define STM32H7_NGPIO               (8)         /* GPIOA-GPIOH */
+#  else
+#      error CONFIG_STM32H7_IO_CONFIG_x Not Set
+#  endif
+
+#  define STM32H7_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
+#  define STM32H7_NADC                    (3)         /* (3) ADC1-3*/
+#  define STM32H7_NDAC                    (2)         /* (2) DAC1-2*/
+#  define STM32H7_NCMP                    (2)         /* (2) ultra-low power comparators */
+#  define STM32H7_NPGA                    (2)         /* (2) Operational amplifiers: OPAMP */
+#  define STM32H7_NDFSDM                  (1)         /* (1) digital filters for sigma delta modulator */
+#  define STM32H7_NUSART                  (4)         /* (4) USART1-3, 6 */
+#  define STM32H7_NSPI                    (6)         /* (6) SPI1-6 */
+#  define STM32H7_NI2S                    (3)         /* (3) I2S1-3 */
+#  define STM32H7_NUART                   (4)         /* (4) UART4-5, 7-8 */
+#  define STM32H7_NI2C                    (4)         /* (4) I2C1-4 */
+#  define STM32H7_NSAI                    (4)         /* (4) SAI1-4*/
+#  define STM32H7_NCAN                    (2)         /* (2) CAN1-2 */
+#  define STM32H7_NSDIO                   (2)         /* (2) SDIO */
+#elif defined(CONFIG_STM32H7_STM32H7B3XX)
+/* Memory */
+
+#    define STM32H7_SRAM_SIZE             (1024*1024) /* 1024Kb SRAM on AXI bus Matrix (D1) */
+#    define STM32H7_SRAM1_SIZE            (64*1024)   /*   64Kb SRAM1 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM2_SIZE            (64*1024)   /*   64Kb SRAM2 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM3_SIZE            (0*1024)    /*     No SRAM3 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM123_SIZE          (128*1024)  /*  128Kb SRAM123 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM4_SIZE            (32*1024)   /*   32Kb SRAM2 on AHB bus Matrix (D3) */
+#  if defined(CONFIG_ARMV7M_HAVE_DTCM)
+#      define STM32H7_DTCM_SRAM_SIZE      (128*1024)  /* 128Kb DTCM SRAM on TCM interface */
+#  else
+#      define STM32H7_DTCM_SRAM_SIZE      (0)         /* No DTCM SRAM on TCM interface */
+#  endif
+#  if defined(CONFIG_ARMV7M_HAVE_ITCM)
+#      define STM32H7_ITCM_SRAM_SIZE      (64*1024)   /*  64b ITCM SRAM on TCM interface */
+#  else
+#      define STM32H7_ITCM_SRAM_SIZE      (0)         /* No ITCM SRAM on TCM interface */
+#  endif
+
+/* Peripherals */
+
+#  if defined(CONFIG_STM32H7_IO_CONFIG_A)
+#      define STM32H7_NGPIO               (10)        /* GPIOA-GPIOJ */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_B)
+#      define STM32H7_NGPIO               (11)        /* GPIOA-GPIOK */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_I)
+#      define STM32H7_NGPIO               (9)         /* GPIOA-GPIOI */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_L)
+#      define STM32H7_NGPIO               (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_V)
 #      define STM32H7_NGPIO               (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_X)

@@ -614,7 +614,7 @@ void lpc17_40_dmastop(DMA_HANDLE handle)
 
   /* Disable this channel and mask any further interrupts from the channel.
    * this channel.  The channel is disabled by clearning the channel
-   * enable bit. Any outstanding data in the FIFO’s is lost.
+   * enable bit. Any outstanding data in the FIFO's is lost.
    */
 
   regaddr = LPC17_40_DMACH_CONFIG((uint32_t)dmach->chn);

@@ -259,4 +259,18 @@ endchoice # "SPI BUS 3 Clock Mode"
 
 endif # NUCLEO_SPI3_TEST
 endif # NUCLEO_SPI_TEST
+
+choice
+	prompt "CAN1 pins selection"
+	default NUCLEO_CAN1_MAP_PD0PD1
+	depends on STM32F7_CAN1
+
+config NUCLEO_144_CAN1_MAP_D14D15
+	bool "CAN1_TX=D14 CAN1_RX=D15"
+
+config NUCLEO_CAN1_MAP_PD0PD1
+	bool "CAN1_RX=PD0 CAN1_TX=PD1"
+
+endchoice # CAN1 pins selection
+
 endif # ARCH_BOARD_NUCLEO_144

@@ -23,6 +23,14 @@ ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 CSRCS += rp2040_common_bringup.c
 CSRCS += rp2040_common_initialize.c
 
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += rp2040_reset.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+CSRCS += rp2040_spi.c
+endif
+
 ifeq ($(CONFIG_RP2040_I2C_DRIVER),y)
 CSRCS += rp2040_i2cdev.c
 endif
@@ -49,6 +57,10 @@ endif
 
 ifeq ($(CONFIG_LCD_ST7735),y)
 CSRCS += rp2040_st7735.c
+endif
+
+ifeq ($(CONFIG_LCD_GC9A01),y)
+CSRCS += rp2040_gc9a01.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

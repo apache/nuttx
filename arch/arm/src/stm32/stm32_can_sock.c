@@ -1204,12 +1204,11 @@ static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
   if ((regval & CAN_RIR_IDE) != 0)
     {
       frame->can_id  = (regval & CAN_RIR_EXID_MASK) >> CAN_RIR_EXID_SHIFT;
-      frame->can_id &= ~CAN_EFF_FLAG;
+      frame->can_id |= CAN_EFF_FLAG;
     }
   else
     {
       frame->can_id  = (regval & CAN_RIR_STID_MASK) >> CAN_RIR_STID_SHIFT;
-      frame->can_id |= CAN_EFF_FLAG;
     }
 #else
   if ((regval & CAN_RIR_IDE) != 0)
@@ -1629,7 +1628,7 @@ static void stm32can_sceinterrupt_work(void *arg)
               /* Receive CRC Error */
 
               errbits |= CAN_ERR_PROT;
-              data[3] |= CAN_ERR_PROT_LOC_CRCSEQ;
+              data[3] |= CAN_ERR_PROT_LOC_CRC_SEQ;
             }
         }
 
@@ -1667,6 +1666,8 @@ static void stm32can_sceinterrupt_work(void *arg)
 
       memcpy(frame->data, data, CAN_ERR_DLC);
 
+      net_lock();
+
       /* Copy the buffer pointer to priv->dev..  Set amount of data
        * in priv->dev.d_len
        */
@@ -1688,6 +1689,7 @@ static void stm32can_sceinterrupt_work(void *arg)
        */
 
       priv->dev.d_buf = (uint8_t *)priv->txdesc;
+      net_unlock();
     }
 
   /* Re-enable CAN SCE interrupts */
@@ -2474,11 +2476,11 @@ errout:
 void arm_netinitialize(void)
 {
 #ifdef CONFIG_STM32_CAN1
-  stm32_cansockinitialize(0);
+  stm32_cansockinitialize(1);
 #endif
 
 #ifdef CONFIG_STM32_CAN2
-  stm32_cansockinitialize(1);
+  stm32_cansockinitialize(2);
 #endif
 }
 #endif

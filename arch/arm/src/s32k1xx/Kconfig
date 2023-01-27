@@ -200,6 +200,7 @@ menu "S32K1XX Peripheral Selection"
 config S32K1XX_EDMA
 	bool "eDMA"
 	default n
+	select ARCH_DMA
 
 config S32K1XX_ENET
 	bool "Ethernet"
@@ -627,12 +628,58 @@ config S32K1XX_EDMA_EDBG
 
 endmenu # eDMA Global Configuration
 
+menu "LPUART Configuration"
+	depends on S32K1XX_LPUART
+	
+config S32K1XX_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+endmenu	
+
 menu "LPSPI Configuration"
 	depends on S32K1XX_LPSPI
 	
 config S32K1XX_LPSPI_DWORD
 	bool "DWORD up to 64 bit transfer support"
 	default n
+
+config S32K1XX_LPSPI_DMA
+	bool "SPI DMA"
+	depends on S32K1XX_EDMA
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config S32K1XX_LPSPI0_DMA
+	bool "LPSPI0 DMA"
+	default n
+	depends on S32K1XX_LPSPI0 && S32K1XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI0 transfer performance.
+
+config S32K1XX_LPSPI1_DMA
+	bool "LPSPI1 DMA"
+	default n
+	depends on S32K1XX_LPSPI1 && S32K1XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI1 transfer performance.
+
+config S32K1XX_LPSPI2_DMA
+	bool "LPSPI2 DMA"
+	default n
+	depends on S32K1XX_LPSPI2 && S32K1XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI2 transfer performance.
+
+config S32K1XX_LPSPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on S32K1XX_LPSPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
 
 config S32K1XX_LPSPI_HWPCS
 	bool "Use native hardware peripheral chip selects instead of GPIO pins"
@@ -770,6 +817,22 @@ config LPI2C1_SLAVE_BUS
 
 endmenu # LPI2C1 Slave Configuration
 endmenu # LPI2C Configuration
+
+menu "LPUART Configuration"
+comment "LP Uart Driver Configuration"
+
+
+config S32K1XX_LPUART_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 64
+	depends on LPUART0_RXDMA || LPUART1_RXDMA || LPUART2_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+endmenu # LPUART Configuration
 
 menu "Ethernet Configuration"
 	depends on S32K1XX_ENET

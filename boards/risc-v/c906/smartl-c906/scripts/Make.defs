@@ -33,7 +33,7 @@ ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 # The following options are for the toolchain from T-HEAD.
 # For more info ahout the T-HEAD ISA extensions, please refer to the C906 user guide.
 # ARCHCPUFLAGS = -march=rv64gcxthead -mabi=lp64d -mtune=c906 -mcmodel=medany
-# TODO: We are not going to enable this at this time for the CI compatiblity.
+# TODO: We are not going to enable this at this time for the CI compatibility.
 
 ARCHCPUFLAGS += -mcmodel=medany
 

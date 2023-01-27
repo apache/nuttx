@@ -179,7 +179,7 @@
 	rsr		a0, EPC_1 + \level - 1           /* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
 
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS
 	/* Perform chip-specific exception entry operations */
 
 	exception_entry_hook \level sp a0
@@ -207,7 +207,7 @@
 	l32i	a0, a2, (4 * REG_PC)      /* Retrieve interruptee's PC */
 	wsr		a0, EPC_1 + \level - 1
 
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS
 	/* Perform chip-specific exception exit operations */
 
 	exception_exit_hook \level a2 a0 a1

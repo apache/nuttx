@@ -16,11 +16,11 @@ Stellaris EKK-LM3S9B96 Evaluation Kit
 The EKK-LM3S9B96 evaluation kit provides the following features:
 
  o LM3S9B96 high-performance Stellaris microcontroller and large memory
-    – 32-bit ARM® Cortex™-M3 core
-    – 256 KB single-cycle Flash memory, 96 KB single-cycle SRAM, 23.7 KB single-cycle ROM
+    - 32-bit ARMÂ® Cortexâ„¢-M3 core
+    - 256 KB single-cycle Flash memory, 96 KB single-cycle SRAM, 23.7 KB single-cycle ROM
  o Ethernet 10/100 port with two LED indicators
  o USB 2.0 Full-Speed OTG port
- o SAFERTOS™ operating system in microcontroller ROM
+ o SAFERTOSâ„¢ operating system in microcontroller ROM
  o Virtual serial communications port capability
  o Oversized board pads for GPIO access
  o User pushbutton and LED
@@ -29,10 +29,10 @@ The EKK-LM3S9B96 evaluation kit provides the following features:
 
 Features of the LM3S9B96 Microcontroller
 
- o  ARM® Cortex™-M3  architecture
-    – 80-MHz operation
-    – ARM Cortex SysTick Timer
-    – Integrated Nested Vectored Interrupt Controller (NVIC)
+ o  ARMÂ® Cortexâ„¢-M3  architecture
+    - 80-MHz operation
+    - ARM Cortex SysTick Timer
+    - Integrated Nested Vectored Interrupt Controller (NVIC)
  o  External Peripheral Interface (EPI)
  o  256 KB single-cycle flash
  o  96 KB single-cycle SRAM
@@ -46,10 +46,10 @@ Features of the LM3S9B96 Microcontroller
  o  Two SSI modules
  o  Two Watchdog Timers (32-bit)
  o  Three PWM generator blocks
-    – One 16-bit counter
-    – Two comparators
-    – Produces eight independent PWM signals
-    – One dead-band generator
+    - One 16-bit counter
+    - Two comparators
+    - Produces eight independent PWM signals
+    - One dead-band generator
  o  Two QEI modules with position integrator for tracking encoder position
  o  Up to 65 GPIOs, depending on user configuration
  o  On-chip low drop-out (LDO) voltage regulator

@@ -56,7 +56,7 @@ config SIM_WTGAHRS2_UARTN
 	default -1
 	depends on SENSORS_WTGAHRS2 && SIM_UART_NUMBER > 0
 	---help---
-		We can select the number accoding to which SIM_UARTX_NAME is uesd to sensor.
+		We can select the number according to which SIM_UARTX_NAME is used to sensor.
 		This range is 0-4.
 
 endif

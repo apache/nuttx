@@ -219,7 +219,14 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
    * There is extensive documentation about this time issue elsewhere.
    */
 
-  delay++;
+  if (delay <= 0)
+    {
+      delay = 1;
+    }
+  else if (++delay <= 0)
+    {
+      delay--;
+    }
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Cancel the interval timer that drives the timing events.  This will

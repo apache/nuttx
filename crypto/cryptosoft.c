@@ -211,7 +211,8 @@ int swcr_authcompute(FAR struct cryptop *crp,
       return -EINVAL;
     }
 
-  err = axf->update(&sw->sw_ctx, (FAR uint8_t *)buf + crd->crd_skip, crd->crd_len);
+  err = axf->update(&sw->sw_ctx, (FAR uint8_t *)buf + crd->crd_skip,
+                    crd->crd_len);
 
   if (err)
     {
@@ -271,15 +272,13 @@ int swcr_authenc(FAR struct cryptop *crp)
   FAR const struct enc_xform *exf = NULL;
   caddr_t buf = (caddr_t)crp->crp_buf;
   FAR uint32_t *blkp;
+  int blksz = 0;
+  int ivlen = 0;
+  int iskip = 0;
+  int oskip = 0;
   int aadlen;
-  int blksz;
-  int i;
-  int ivlen;
   int len;
-  int iskip;
-  int oskip;
-
-  ivlen = blksz = iskip = oskip = 0;
+  int i;
 
   for (crd = crp->crp_desc; crd; crd = crd->crd_next)
     {

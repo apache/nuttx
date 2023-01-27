@@ -3277,7 +3277,7 @@ struct sdio_dev_s *cxd56_sdhci_finalize(int slotno)
 
   /* SD clock disable */
 
-  cxd56_sdio_clock(&(priv->dev), CLOCK_SDIO_DISABLED);
+  cxd56_sdio_clock(&priv->dev, CLOCK_SDIO_DISABLED);
 
   /* Power OFF for SDIO */
 
@@ -3360,11 +3360,6 @@ void cxd56_sdhci_mediachange(struct sdio_dev_s *dev)
 
   if (cdstatus != priv->cdstatus)
     {
-      if (priv->cdstatus & SDIO_STATUS_PRESENT)
-        {
-          priv->cbevents &= SDIOMEDIA_INSERTED;
-        }
-
       mediachange = 1;
     }
 

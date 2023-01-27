@@ -24,14 +24,6 @@ CSRCS = rp2040_boardinitialize.c
 CSRCS += rp2040_appinit.c
 CSRCS += rp2040_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += rp2040_reset.c
-endif
-
-ifeq ($(CONFIG_SPI),y)
-CSRCS += rp2040_spi.c
-endif
-
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += rp2040_gpio.c
 endif

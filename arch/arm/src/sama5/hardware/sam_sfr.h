@@ -144,6 +144,8 @@
 #define SFR_SECURE_ROM              (1 << 0)  /* Bit 0:  Disable Access to ROM Code */
 #define SFR_SECURE_FUSE             (1 << 8)  /* Bit 8:  Disable Access to Fuse Controller */
 
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
+
 /* UTMI Clock Trimming Register */
 
 #define SFR_UTMICKTRIM_FREQ_SHIFT   (0)       /* Bits 0-1: UTMI Reference Clock Frequency */
@@ -151,17 +153,14 @@
 #  define SFR_UTMICKTRIM_FREQ_12MHZ (0 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 12 MHz reference clock */
 #  define SFR_UTMICKTRIM_FREQ_16MHZ (1 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 16 MHz reference clock */
 #  define SFR_UTMICKTRIM_FREQ_24MHZ (2 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 24 MHz reference clock */
-#ifndef ATSAMA5D2
+#ifdef ATSAMA5D3
 #  define SFR_UTMICKTRIM_FREQ_48MHZ (3 << SFR_UTMICKTRIM_FREQ_SHIFT) /* 48 MHz reference clock */
 #endif
 
-#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 #  define SFR_UTMICKTRIM_VBG_SHIFT  (16)     /* Bits 16-19: UTMI Band Gap Voltage Trimming */
 #  define SFR_UTMICKTRIM_VBG_MASK   (15 << SFR_UTMICKTRIM_VBG_SHIFT)
 #    define SFR_UTMICKTRIM_VBG(n)   ((uint32_t)(n) << SFR_UTMICKTRIM_VBG_SHIFT)
-#endif
 
-#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* UTMI High Speed Trimming Register */
 
 #  define SFR_UTMIHSTRIM_SQUELCH_SHIFT (0)   /* Bits 0-2: UTMI HS SQUELCH Voltage Trimming */
@@ -179,9 +178,7 @@
 #  define SFR_UTMIHSTRIM_SLOPE2_SHIFT  (16)  /* Bits 16-18: UTMI HS PORT2 Transceiver Slope Trimming */
 #  define SFR_UTMIHSTRIM_SLOPE2_MASK   (7 << SFR_UTMIHSTRIM_SLOPE2_SHIFT)
 #    define SFR_UTMIHSTRIM_SLOPE2(n)   ((uint32_t)(n) << SFR_UTMIHSTRIM_SLOPE2_SHIFT)
-#endif
 
-#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* UTMI Full Speed Trimming Register */
 
 #  define SFR_UTMIFSTRIM_RISE_SHIFT (0)      /* Bits 0-2: FS Transceiver Output Rising Slope Trimming */
@@ -199,16 +196,15 @@
 #  define SFR_UTMIFSTRIM_ZP_SHIFT   (20)     /* Bits 20-22: FS Transceiver PMOS Impedance Trimming */
 #  define SFR_UTMIFSTRIM_ZP_MASK    (7 << SFR_UTMIHSTRIM_SLOPE2_SHIFT)
 #    define SFR_UTMIFSTRIM_ZP(n)    ((uint32_t)(n) << SFR_UTMIHSTRIM_SLOPE2_SHIFT)
-#endif
 
-#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* UTMI DP/DM Pin Swapping Register */
 
 #  define SFR_UTMISWAP_PORT(n)     (1 << (n)) /* Bit n:  PORT n DP/DM Pin Swapping */
 #    define SFR_UTMISWAP_PORT0     (1 << 0)   /* Bit 0:  PORT 0 DP/DM Pin Swapping */
 #    define SFR_UTMISWAP_PORT1     (1 << 1)   /* Bit 1:  PORT 1 DP/DM Pin Swapping */
 #    define SFR_UTMISWAP_PORT2     (1 << 2)   /* Bit 2:  PORT 2 DP/DM Pin Swapping */
-#endif
+
+#endif /* if defined(ATSAMA5D2) || defined(ATSAMA5D3) */
 
 /* EBI Configuration Register */
 

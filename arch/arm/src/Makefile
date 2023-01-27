@@ -123,7 +123,7 @@ else
 endif
 
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
-LDFLAGS += $(addprefix $(SCRIPT_OPT),$(ARCHSCRIPT).tmp) $(EXTRALINKCMDS)
+LDFLAGS += $(addprefix $(SCRIPT_OPT),$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 LIBPATHS += $(LIBPATH_OPT) $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)

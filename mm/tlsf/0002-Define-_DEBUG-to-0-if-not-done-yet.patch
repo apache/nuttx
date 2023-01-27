@@ -1,0 +1,31 @@
+From 9d731cb125205ead7b80ab6ddb89c250978a86eb Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Wed, 10 Mar 2021 01:05:42 +0800
+Subject: [PATCH 2/8] Define _DEBUG to 0 if not done yet
+
+to avoid the preprocess warning
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: I4ae1eb8533563d377ec8614f0c9428c8734e1f2c
+---
+ tlsf.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tlsf.c tlsf/tlsf/tlsf.c
+index e344dd5..ea8d640 100644
+--- a/tlsf.c
++++ tlsf/tlsf/tlsf.c
+@@ -7,6 +7,10 @@
+ 
+ #include "tlsf.h"
+ 
++#if !defined(_DEBUG)
++#define _DEBUG 0
++#endif
++
+ #if defined(__cplusplus)
+ #define tlsf_decl inline
+ #else
+-- 
+2.34.1
+

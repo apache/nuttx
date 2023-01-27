@@ -62,7 +62,7 @@ It is possible to run the LVGL Demo directly in the NuttX simulator ::
 
     $ make distclean
 
-    $ ./tools/configure.sh sim:lvgl
+    $ ./tools/configure.sh sim:lvgl_fb
 
     $ make -j
 

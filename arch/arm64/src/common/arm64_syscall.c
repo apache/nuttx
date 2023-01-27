@@ -297,7 +297,7 @@ int arm64_syscall(uint64_t *regs)
 
           if (index == 0 && rtcb->xcp.ustkptr != NULL)
             {
-              regs[REG_SP]      = (uint32_t)rtcb->xcp.ustkptr;
+              regs[REG_SP]      = (uint64_t)rtcb->xcp.ustkptr;
               rtcb->xcp.ustkptr = NULL;
             }
 #endif
@@ -413,7 +413,7 @@ int arm64_syscall(uint64_t *regs)
            * unprivileged mode.
            */
 
-          regs[REG_PC]   = (uint32_t)ARCH_DATA_RESERVE->ar_sigtramp;
+          regs[REG_PC]   = (uint64_t)ARCH_DATA_RESERVE->ar_sigtramp;
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
 
@@ -436,11 +436,31 @@ int arm64_syscall(uint64_t *regs)
 
           if (rtcb->xcp.kstack != NULL)
             {
-              DEBUGASSERT(rtcb->xcp.kstkptr == NULL &&
-                          rtcb->xcp.ustkptr != NULL);
+              uint64_t usp;
 
-              rtcb->xcp.kstkptr = (uint32_t *)regs[REG_SP];
-              regs[REG_SP]      = (uint32_t)rtcb->xcp.ustkptr;
+              DEBUGASSERT(rtcb->xcp.kstkptr == NULL);
+
+              /* Copy "info" into user stack */
+
+              if (rtcb->xcp.sigdeliver)
+                {
+                  usp = rtcb->xcp.saved_regs[REG_SP];
+                }
+              else
+                {
+                  usp = rtcb->xcp.regs[REG_SP];
+                }
+
+              /* Create a frame for info and copy the kernel info */
+
+              usp = usp - sizeof(siginfo_t);
+              memcpy((void *)usp, (void *)regs[REG_R2], sizeof(siginfo_t));
+
+              /* Now set the updated SP and user copy of "info" to R2 */
+
+              rtcb->xcp.kstkptr = (uint64_t *)regs[REG_SP];
+              regs[REG_SP]      = usp;
+              regs[REG_R2]      = usp;
             }
 #endif
         }
@@ -478,10 +498,9 @@ int arm64_syscall(uint64_t *regs)
 
           if (rtcb->xcp.kstack != NULL)
             {
-              DEBUGASSERT(rtcb->xcp.kstkptr != NULL &&
-                          (uint32_t)rtcb->xcp.ustkptr == regs[REG_SP]);
+              DEBUGASSERT(rtcb->xcp.kstkptr != NULL);
 
-              regs[REG_SP]      = (uint32_t)rtcb->xcp.kstkptr;
+              regs[REG_SP]      = (uint64_t)rtcb->xcp.kstkptr;
               rtcb->xcp.kstkptr = NULL;
             }
 #endif
@@ -517,7 +536,7 @@ int arm64_syscall(uint64_t *regs)
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
 
-          regs[REG_PC]   = (uint32_t)dispatch_syscall;
+          regs[REG_PC]   = (uint64_t)dispatch_syscall;
 #ifdef CONFIG_BUILD_KERNEL
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_SVC;
@@ -537,9 +556,16 @@ int arm64_syscall(uint64_t *regs)
 
           if (index == 0 && rtcb->xcp.kstack != NULL)
             {
-              rtcb->xcp.ustkptr = (uint32_t *)regs[REG_SP];
-              regs[REG_SP]      = (uint32_t)rtcb->xcp.kstack +
+              rtcb->xcp.ustkptr = (uint64_t *)regs[REG_SP];
+              if (rtcb->xcp.kstkptr != NULL)
+                {
+                  regs[REG_SP]  = (uint64_t)rtcb->xcp.kstkptr;
+                }
+              else
+                {
+                  regs[REG_SP]  = (uint64_t)rtcb->xcp.kstack +
                                   ARCH_KERNEL_STACKSIZE;
+                }
             }
 #endif
 

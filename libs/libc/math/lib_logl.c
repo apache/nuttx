@@ -78,12 +78,12 @@ long double logl(long double x)
 
   if (y == LDBL_MAX_EXP_X)
     {
-      return INFINITY;
+      return INFINITY_L;
     }
 
   if (y == -LDBL_MAX_EXP_X)
     {
-      return INFINITY;
+      return INFINITY_L;
     }
 
   return y;

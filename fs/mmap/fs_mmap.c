@@ -135,7 +135,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
     }
   else
     {
-      /* Caller request the privated mapping. Or not directly mappable,
+      /* Caller request the private mapping. Or not directly mappable,
        * probably because the underlying media doesn't support random access.
        */
 

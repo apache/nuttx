@@ -46,13 +46,13 @@ struct lpc31_header_s
                                *    valid image header. This field should always
                                *    be set to 0x41676d69. */
   uint32_t execution_crc32;   /* 0x08    CRC32 value of execution part of the image. If
-                               *    the ‘image_type’ is set to ‘0xA’, this field
+                               *    the 'image_type' is set to '0xA', this field
                                *    is ignored by boot ROM. */
   uint32_t reserved0[4];      /* 0x0c-0x18: Should be zero. */
   uint32_t imagetype;         /* 0x1c Specifies whether CRC check should be done
                                *    on the image or not:
-                               *      0xA – No CRC check required.
-                               *      0xB – Do CRC32 check on both header and
+                               *      0xA - No CRC check required.
+                               *      0xB - Do CRC32 check on both header and
                                *            execution part of the image. */
   uint32_t imagelength;       /* 0x20    Total image length including header rounded
                                *    up to the nearest 512 byte boundary. In C
@@ -68,8 +68,8 @@ struct lpc31_header_s
   uint32_t sbzbootparameter;  /* 0x2c    hould be zero. */
   uint32_t cust_reserved[15]; /* 0x30-0x68: Reserved for customer use (60 bytes) */
   uint32_t header_crc32;      /* 0x6c CRC32 value of the header (bytes 0x00 to 0x6C
-                               *    of the image). If the ‘image_type’ is set
-                               *    to ‘0xA’, this field is ignored by boot ROM. */
+                               *    of the image). If the 'image_type' is set
+                               *    to '0xA', this field is ignored by boot ROM. */
   uint32_t reserved1[4];      /* 0x70-0x7c: Should be zero. */
                               /* 0x80    Start of program code (128Kb max).  The final
                                *    image has to be padded to the nearest 512

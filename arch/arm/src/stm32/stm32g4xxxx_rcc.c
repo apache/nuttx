@@ -961,6 +961,25 @@ static void stm32_stdclockconfig(void)
   regval |= STM32_CCIPR_FDCANSRC;
   putreg32(regval, STM32_RCC_CCIPR);
 #endif
+
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2)
+  /* Configure ADC12 clock */
+
+  regval = getreg32(STM32_RCC_CCIPR);
+  regval &= ~RCC_CCIPR_ADC12SEL_MASK;
+  regval |= RCC_CCIPR_ADC12SEL_PLLP;
+  putreg32(regval, STM32_RCC_CCIPR);
+#endif
+
+#if defined(CONFIG_STM32_ADC3) || defined(CONFIG_STM32_ADC4) || \
+    defined(CONFIG_STM32_ADC5)
+  /* Configure ADC345 clock */
+
+  regval = getreg32(STM32_RCC_CCIPR);
+  regval &= ~RCC_CCIPR_ADC345SEL_MASK;
+  regval |= RCC_CCIPR_ADC345SEL_PLLP;
+  putreg32(regval, STM32_RCC_CCIPR);
+#endif
 }
 
 /****************************************************************************

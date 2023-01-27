@@ -4,4 +4,17 @@
 #
 
 if ARCH_BOARD_PINEPHONE
-endif
+
+config PINEPHONE_LCD
+	bool "LCD Display"
+	default n
+	select A64_DE
+	select A64_RSB
+	select DRIVERS_VIDEO
+	select VIDEO_FB
+	select FB_OVERLAY
+	select FB_UPDATE
+	---help---
+		Select to enable support for LCD Display.
+
+endif # ARCH_BOARD_PINEPHONE

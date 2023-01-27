@@ -72,7 +72,7 @@ SECTIONS
     PROVIDE(_rstored_ = . );
     PROVIDE(_code_size_ = .);
 
-    /* __LOAD_FLASH for MCU RUN IN Flash 0x100 alighned, must greater
+    /* __LOAD_FLASH for MCU RUN IN Flash 0x100 aligned, must greater
      * than or equal to : 0x808000 + ram_code_size + irq_vector(0x100) +
      * IC_tag(0x100) + IC_cache(0x800) == 0x808a00 + ram_code_size
      *

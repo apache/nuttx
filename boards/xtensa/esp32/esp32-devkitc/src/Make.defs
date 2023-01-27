@@ -20,8 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
-
 CSRCS = esp32_boot.c esp32_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
@@ -55,17 +53,9 @@ ifeq ($(CONFIG_ESP32_TWAI),y)
 CSRCS += esp32_twai.c
 endif
 
-SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
-
-.PHONY = context distclean
-
-$(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_COMMON_DIR)$(DELIM)scripts -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
-
-context:: $(SCRIPTOUT)
-
-distclean::
-	$(call DELFILE, $(SCRIPTOUT))
+ifeq ($(CONFIG_NET_W5500),y)
+CSRCS += esp32_w5500.c
+endif
 
 DEPPATH += --dep-path board
 VPATH += :board

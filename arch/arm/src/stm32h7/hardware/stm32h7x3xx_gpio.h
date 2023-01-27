@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include <arch/stm32h7/chip.h>
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX) || defined(CONFIG_STM32H7_STM32H7B3XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -384,5 +384,5 @@
 #define GPIO_AFRH15_SHIFT          (28)
 #define GPIO_AFRH15_MASK           (15 << GPIO_AFRH15_SHIFT)
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */
+#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_GPIO_H */

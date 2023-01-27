@@ -17,6 +17,134 @@ config ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
 comment "[demo] LED on button interrupt requires NSH_ARCHINIT"
 	depends on !NSH_ARCHINIT || !ARCH_BUTTONS
 
+config ARCH_BOARD_ENABLE_CPU2
+	bool "Enable CPU2 on startup"
+	default n
+	---help---
+		When enabled, CPU2 (cortex-m0) will be started up. CPU2
+		will be booted after all initialization on CPU1 is done.
+
+menuconfig ARCH_BOARD_IPCC
+	bool "Enabled IPCC"
+	select IPCC
+	select STM32WL5_IPCC
+	default n
+	---help---
+		Enables IPCC (inter processor communication controller)
+		to exchange data between CPU1 and CPU2. Channels are
+		indexed from 0. IPCC will be accessible as character
+		device under "/dev/ipccN" path, where N is an ipcc channel.
+
+if ARCH_BOARD_IPCC
+
+comment "IPCC buffering is off, enable IPCC_BUFFERED to configure buffers"
+	depends on !IPCC_BUFFERED
+
+comment "IPCC channel 1 enabled by default"
+
+config ARCH_BOARD_IPCC_CHAN1_RXBUF
+	int "Channel 1 RX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN1_TXBUF
+	int "Channel 1 TX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN2
+	bool "Enable channel 2"
+	default n
+	select STM32WL5_IPCC_CHAN2
+
+if ARCH_BOARD_IPCC_CHAN2
+
+config ARCH_BOARD_IPCC_CHAN2_RXBUF
+	int "Channel 2 RX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN2_TXBUF
+	int "Channel 2 TX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN3
+	bool "Enable channel 3"
+	default n
+	select STM32WL5_IPCC_CHAN3
+
+if ARCH_BOARD_IPCC_CHAN3
+
+config ARCH_BOARD_IPCC_CHAN3_RXBUF
+	int "Channel 3 RX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN3_TXBUF
+	int "Channel 3 TX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN4
+	bool "Enable channel 4"
+	default n
+	select STM32WL5_IPCC_CHAN4
+
+if ARCH_BOARD_IPCC_CHAN4
+
+config ARCH_BOARD_IPCC_CHAN4_RXBUF
+	int "Channel 4 RX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN4_TXBUF
+	int "Channel 4 TX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN5
+	bool "Enable channel 5"
+	default n
+	select STM32WL5_IPCC_CHAN5
+
+if ARCH_BOARD_IPCC_CHAN5
+
+config ARCH_BOARD_IPCC_CHAN5_RXBUF
+	int "Channel 5 RX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN5_TXBUF
+	int "Channel 5 TX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN6
+	bool "Enable channel 6"
+	default n
+	select STM32WL5_IPCC_CHAN6
+
+if ARCH_BOARD_IPCC_CHAN6
+
+config ARCH_BOARD_IPCC_CHAN2_RXBUF
+	int "Channel 6 RX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+config ARCH_BOARD_IPCC_CHAN6_TXBUF
+	int "Channel 6 TX buffer size"
+	default 256
+	depends on IPCC_BUFFERED
+
+endif # ARCH_BOARD_IPCC_CHAN6
+endif # ARCH_BOARD_IPCC_CHAN5
+endif # ARCH_BOARD_IPCC_CHAN4
+endif # ARCH_BOARD_IPCC_CHAN3
+endif # ARCH_BOARD_IPCC_CHAN2
+
+endif # ARCH_BOARD_IPCC
+
 menuconfig ARCH_BOARD_FLASH_MOUNT
 	bool "Enable FLASH partitioning and mounting"
 	depends on !DISABLE_MOUNTPOINT
@@ -138,7 +266,7 @@ config ARCH_BOARD_FLASH_PART1_FS_SMARTFS
 		when flashing new software, unless you exceeded reserved
 		memory for program code.
 
-		Smartfs uses quite substential ammount of FLASH data to
+		Smartfs uses quite substential amount of FLASH data to
 		get to workable state and mount. Looks like 8 page sizes
 		is absolute minimum (so a 16KiB!).
 

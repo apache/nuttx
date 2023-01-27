@@ -259,9 +259,7 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Free the address environment */
 
-  elf_addrenv_select(loadinfo);
   ret = up_addrenv_destroy(&loadinfo->addrenv);
-  elf_addrenv_restore(loadinfo);
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_destroy failed: %d\n", ret);

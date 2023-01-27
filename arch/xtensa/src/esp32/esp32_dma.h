@@ -89,6 +89,32 @@ struct esp32_dmadesc_s
 uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
                         uint8_t *pbuf, uint32_t len);
 
+/****************************************************************************
+ * Name: esp32_dma_init_with_padding
+ *
+ * Description:
+ *   Initialize DMA outlink descriptors and bind the target buffer to
+ *   these DMA descriptors. If len is not word-aligned, add a new descriptor
+ *   containing a 4-byte variable to make the outlink data world-aligned.
+ *
+ * Input Parameters:
+ *   dmadesc - DMA descriptions pointer
+ *   num     - DMA descriptions number
+ *   pbuf    - RX/TX buffer pointer
+ *   len     - RX/TX buffer length
+ *   stuff   - Value to be padded with the buffer
+ *
+ * Returned Value:
+ *   Binded pbuf data bytes
+ *
+ ****************************************************************************/
+
+uint32_t esp32_dma_init_with_padding(struct esp32_dmadesc_s *dmadesc,
+                                     uint32_t num,
+                                     uint8_t *pbuf,
+                                     uint32_t len,
+                                     uint32_t *stuff);
+
 #ifdef __cplusplus
 }
 #endif

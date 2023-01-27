@@ -33,7 +33,7 @@
  * families
  */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX) || defined(CONFIG_STM32H7_STM32H7B3XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -237,5 +237,5 @@
 #define EXTI_EVENT_ETHWKUP          86        /* Ethernet wakeup */
 #define EXTI_EVENT_HSECSS           87        /* HSECSS interrupt */
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */
+#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_EXTI_H */

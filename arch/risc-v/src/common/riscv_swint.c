@@ -366,8 +366,7 @@ int riscv_swint(int irq, void *context, void *arg)
 #if defined (CONFIG_BUILD_PROTECTED)
           regs[REG_EPC]        = (uintptr_t)USERSPACE->signal_handler;
 #else
-          regs[REG_EPC]        =
-              (uintptr_t)ARCH_DATA_RESERVE->ar_sigtramp;
+          regs[REG_EPC]        = (uintptr_t)ARCH_DATA_RESERVE->ar_sigtramp;
 #endif
           regs[REG_INT_CTX]   &= ~STATUS_PPP; /* User mode */
 
@@ -390,11 +389,31 @@ int riscv_swint(int irq, void *context, void *arg)
 
           if (rtcb->xcp.kstack != NULL)
             {
-              DEBUGASSERT(rtcb->xcp.kstkptr == NULL &&
-                          rtcb->xcp.ustkptr != NULL);
+              uintptr_t usp;
+
+              DEBUGASSERT(rtcb->xcp.kstkptr == NULL);
+
+              /* Copy "info" into user stack */
+
+              if (rtcb->xcp.sigdeliver)
+                {
+                  usp = rtcb->xcp.saved_regs[REG_SP];
+                }
+              else
+                {
+                  usp = rtcb->xcp.regs[REG_SP];
+                }
+
+              /* Create a frame for info and copy the kernel info */
+
+              usp = usp - sizeof(siginfo_t);
+              memcpy((void *)usp, (void *)regs[REG_A2], sizeof(siginfo_t));
+
+              /* Now set the updated SP and user copy of "info" to A2 */
 
               rtcb->xcp.kstkptr = (uintptr_t *)regs[REG_SP];
-              regs[REG_SP]      = (uintptr_t)rtcb->xcp.ustkptr;
+              regs[REG_SP]      = usp;
+              regs[REG_A2]      = usp;
             }
 #endif
         }
@@ -431,8 +450,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
           if (rtcb->xcp.kstack != NULL)
             {
-              DEBUGASSERT(rtcb->xcp.kstkptr != NULL &&
-                          (uintptr_t)rtcb->xcp.ustkptr == regs[REG_SP]);
+              DEBUGASSERT(rtcb->xcp.kstkptr != NULL);
 
               regs[REG_SP]      = (uintptr_t)rtcb->xcp.kstkptr;
               rtcb->xcp.kstkptr = NULL;
@@ -497,8 +515,15 @@ int riscv_swint(int irq, void *context, void *arg)
           if (index == 0 && rtcb->xcp.kstack != NULL)
             {
               rtcb->xcp.ustkptr = (uintptr_t *)regs[REG_SP];
-              regs[REG_SP]      = (uintptr_t)rtcb->xcp.kstack +
+              if (rtcb->xcp.kstkptr != NULL)
+                {
+                  regs[REG_SP]  = (uintptr_t)rtcb->xcp.kstkptr;
+                }
+              else
+                {
+                  regs[REG_SP]  = (uintptr_t)rtcb->xcp.kstack +
                                   ARCH_KERNEL_STACKSIZE;
+                }
             }
 #endif
         }

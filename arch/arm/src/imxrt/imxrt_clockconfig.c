@@ -269,13 +269,26 @@ static void imxrt_pllsetup(void)
   imxrt_lcd_clockconfig();
 #endif
 
+#if defined(CONFIG_IMXRT_ENET)
   /* Init ENET PLL6 */
-
-  reg    = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ |
-           CCM_ANALOG_PLL_ENET_ENET1_125M_EN          |
-           CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN        |
-           CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN       |
-           CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ;
+#   if defined(CONFIG_IMXRT_ENET1)
+  reg    = CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ |
+           CCM_ANALOG_PLL_ENET_ENABLE                 |
+#     if defined(IMXRT_MAC_PROVIDES_TXC)
+           CCM_ANALOG_PLL_ENET_ENET1_25M_REF_EN;
+#     else
+           0;
+#     endif
+#   endif
+#   if defined(CONFIG_IMXRT_ENET2)
+  reg    = CCM_ANALOG_PLL_ENET_ENET2_DIV_SELECT_50MHZ |
+           CCM_ANALOG_PLL_ENET_ENABLE                 |
+#     if defined(IMXRT_MAC_PROVIDES_TXC)
+           CCM_ANALOG_PLL_ENET_ENET2_25M_REF_EN;
+#     else
+           0;
+#     endif
+#   endif
 
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
 
@@ -283,7 +296,7 @@ static void imxrt_pllsetup(void)
           CCM_ANALOG_PLL_ENET_LOCK) == 0)
     {
     }
-
+#endif
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT102x)
   /* Init Sys PLL2 */
 
@@ -345,8 +358,8 @@ static void imxrt_pllsetup(void)
 
   /* Init ENET PLL6 */
 
-  reg = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ |
-        CCM_ANALOG_PLL_ENET_ENET1_125M_EN          |
+  reg = CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ |
+        CCM_ANALOG_PLL_ENET_ENABLE                 |
         CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN        |
         CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN;
 

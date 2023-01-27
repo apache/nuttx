@@ -271,7 +271,113 @@
 #    define DMACH_FLAG_MEMBURST_8             (2 << DMACH_FLAG_MEMBURST_SHIFT)
 #    define DMACH_FLAG_MEMBURST_16            (3 << DMACH_FLAG_MEMBURST_SHIFT)
 
-#endif /* ATSAMA5D4 */
+#elif defined(ATSAMA5D2)
+/* .... .... .... MMMM .PPP PPPP PPPP PPPP
+ * .... .... .... .... .... .... .... ....       Configurable properties of
+ *                                               the channel
+ * .... .... .... .... .PPP PPPP PPPP PPPP       Peripheral endpoint
+ *                                               characteristics
+ * .... .... .... MMMM .... .... .... ....       Memory endpoint
+ *                                               characteristics
+ */
+
+/* Bits 0-1: Configurable properties of the channel
+ *
+ * .... .... .... .... .... .... .... ....       Configurable properties
+ *                                               of the channel
+ *
+ * NOTE: Many "peripheral" attributes are really "channel" attributes for
+ * the SAMA5D4's XDMAC since it does not support peripheral-to-peripheral
+ * DMA.
+ */
+
+#  define DMACH_FLAG_FIFOCFG_LARGEST        (0) /* No FIFO controls */
+#  define DMACH_FLAG_FIFOCFG_HALF           (0)
+#  define DMACH_FLAG_FIFOCFG_SINGLE         (0)
+
+/* Bits 0-15: Peripheral endpoint characteristics
+ *
+ * .... .... .... .... .PPP PPPP PPPP PPPP       Peripheral endpoint
+ *                                               characteristics
+ * .... .... .... .... .... .... .III IIII       Peripheral ID, range 0-67
+ * .... .... .... .... .... .... .... ....       No HW Handshaking
+ * .... .... .... .... .... .... P... ....       0=memory; 1=peripheral
+ * .... .... .... .... .... ...N .... ....       Peripheral ABH layer number
+ * .... .... .... .... .... .WW. .... ....       Peripheral width
+ * .... .... .... .... .... A... .... ....       Auto-increment peripheral
+ *                                               address
+ * .... .... .... .... .SSS .... .... ....       Peripheral chunk size
+ */
+
+#  define DMACH_FLAG_PERIPHPID_SHIFT          (0)       /* Bits 0-7: Peripheral PID */
+#  define DMACH_FLAG_PERIPHPID_MASK           (0x7f << DMACH_FLAG_PERIPHPID_SHIFT)
+#    define DMACH_FLAG_PERIPHPID(n)           ((uint32_t)(n) << DMACH_FLAG_PERIPHPID_SHIFT)
+#    define DMACH_FLAG_PERIPHPID_MAX          DMACH_FLAG_PERIPHPID_MASK
+#  define DMACH_FLAG_PERIPHH2SEL              (0)       /* No HW handshaking */
+#  define DMACH_FLAG_PERIPHISPERIPH           (1 << 7)  /* Bit 7:  0=memory; 1=peripheral */
+#  define DMACH_FLAG_PERIPHAHB_MASK           (1 << 8)  /* Bit 8:  Peripheral ABH layer 1 */
+#    define DMACH_FLAG_PERIPHAHB_AHB_IF0      (0)
+#    define DMACH_FLAG_PERIPHAHB_AHB_IF1      DMACH_FLAG_PERIPHAHB_MASK
+#  define DMACH_FLAG_PERIPHWIDTH_SHIFT        (9)       /* Bits 9-10: Peripheral width */
+#  define DMACH_FLAG_PERIPHWIDTH_MASK         (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT)
+#    define DMACH_FLAG_PERIPHWIDTH_8BITS      (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
+#    define DMACH_FLAG_PERIPHWIDTH_16BITS     (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
+#    define DMACH_FLAG_PERIPHWIDTH_32BITS     (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 32 bits */
+#    define DMACH_FLAG_PERIPHWIDTH_64BITS     (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 64 bits */
+
+#  define DMACH_FLAG_PERIPHINCREMENT          (1 << 11) /* Bit 11: Auto-increment peripheral address */
+#  define DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT    (12)      /* Bits 12-14: Peripheral chunk size */
+#  define DMACH_FLAG_PERIPHCHUNKSIZE_MASK     (7 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT)
+#    define DMACH_FLAG_PERIPHCHUNKSIZE_1      (0 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize=1 */
+#    define DMACH_FLAG_PERIPHCHUNKSIZE_2      (1 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* No chunksize=2 */
+#    define DMACH_FLAG_PERIPHCHUNKSIZE_4      (2 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize=4 */
+#    define DMACH_FLAG_PERIPHCHUNKSIZE_8      (3 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize=8 */
+#    define DMACH_FLAG_PERIPHCHUNKSIZE_16     (4 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize=16 */
+
+/* Bits 16-19: Memory endpoint characteristics
+ *
+ * .... .... .... MMMM .... .... .... ....      Memory endpoint
+ *                                              characteristics
+ * .... .... .... .... .... .... .... ....      No memory peripheral ID,
+ *                                              range 0-49
+ * .... .... .... .... .... .... .... ....      No HW Handshaking
+ * .... .... .... .... .... .... .... ....      No peripheral-to-peripheral
+ * .... .... .... ...N .... .... .... ....      Memory ABH layer number
+ * .... .... .... .... .... .... .... ....      No memory width
+ * .... .... .... ..A. .... .... .... ....      Auto-increment memory address
+ * .... .... .... .... .... .... .... ....      No memory chunk size
+ * .... .... .... BB.. .... .... .... ....      Memory burst size
+ */
+
+#  define DMACH_FLAG_MEMPID(n)                (0)       /* No memory peripheral identifier */
+#    define DMACH_FLAG_MEMPID_MAX             (0)
+#  define DMACH_FLAG_MEMH2SEL                 (0)       /* No HW handshaking */
+#  define DMACH_FLAG_MEMISPERIPH              (0)       /* No peripheral-to-peripheral */
+#  define DMACH_FLAG_MEMAHB_MASK              (1 << 16) /* Bit 16: Memory ABH layer 1 */
+#    define DMACH_FLAG_MEMAHB_AHB_IF0         (0)
+#    define DMACH_FLAG_MEMAHB_AHB_IF1         DMACH_FLAG_MEMAHB_MASK
+
+#  define DMACH_FLAG_MEMWIDTH_8BITS           (0) /* Only peripheral data width */
+#  define DMACH_FLAG_MEMWIDTH_16BITS          (0)
+#  define DMACH_FLAG_MEMWIDTH_32BITS          (0)
+#  define DMACH_FLAG_MEMWIDTH_64BITS          (0)
+
+#  define DMACH_FLAG_MEMINCREMENT             (1 << 17) /* Bit 17: Auto-increment memory address */
+
+#  define DMACH_FLAG_MEMCHUNKSIZE_1           (0) /* Only peripheral chunk size */
+#  define DMACH_FLAG_MEMCHUNKSIZE_2           (0)
+#  define DMACH_FLAG_MEMCHUNKSIZE_4           (0)
+#  define DMACH_FLAG_MEMCHUNKSIZE_8           (0)
+#  define DMACH_FLAG_MEMCHUNKSIZE_16          (0)
+
+#  define DMACH_FLAG_MEMBURST_SHIFT           (18)      /* Bits 18-19: Memory burst size */
+#  define DMACH_FLAG_MEMBURST_MASK            (3 << DMACH_FLAG_MEMBURST_SHIFT)
+#    define DMACH_FLAG_MEMBURST_1             (0 << DMACH_FLAG_MEMBURST_SHIFT)
+#    define DMACH_FLAG_MEMBURST_4             (1 << DMACH_FLAG_MEMBURST_SHIFT)
+#    define DMACH_FLAG_MEMBURST_8             (2 << DMACH_FLAG_MEMBURST_SHIFT)
+#    define DMACH_FLAG_MEMBURST_16            (3 << DMACH_FLAG_MEMBURST_SHIFT)
+
+#endif /* ATSAMA5D2 */
 
 /****************************************************************************
  * Public Types

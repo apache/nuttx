@@ -23,10 +23,23 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32s3/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx7/Toolchain.defs
 
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_out.ld
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3.ld
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_rom.ld
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_peripherals.ld
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_peripherals.ld
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32s3_rom.ld
+
+# Pick the linker scripts from the board level if they exist, if not
+# pick the common linker scripts.
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,protected_memory.ld)
+  ARCHSCRIPT += $(call FINDSCRIPT,kernel-space.ld)
+else
+  ARCHSCRIPT += $(call FINDSCRIPT,flat_memory.ld)
+  ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
+    ARCHSCRIPT += $(call FINDSCRIPT,mcuboot_sections.ld)
+  else
+    ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
+  endif
+endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -fno-strength-reduce

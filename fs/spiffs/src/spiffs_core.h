@@ -423,7 +423,7 @@ begin_packed_struct struct spiffs_page_objndx_s
   struct spiffs_page_header_s phdr;
   uint8_t _align[4 - ((sizeof(struct spiffs_page_header_s) & 3) ==
                  0 ? 4 : (sizeof(struct spiffs_page_header_s) & 3))];
-} begin_packed_struct;
+} end_packed_struct;
 
 /* callback func for object lookup visitor */
 

@@ -53,7 +53,7 @@
  * Name: task_init_info
  *
  * Description:
- *   Allocate and initilize task_info_s structure.
+ *   Allocate and initialize task_info_s structure.
  *
  * Input Parameters:
  *   - group: The group of new task
@@ -85,7 +85,7 @@ void task_uninit_info(FAR struct task_group_s *group);
  * Name: tls_init_info
  *
  * Description:
- *   Allocate and initilize tls_info_s structure.
+ *   Allocate and initialize tls_info_s structure.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task

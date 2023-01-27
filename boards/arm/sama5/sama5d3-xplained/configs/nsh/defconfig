@@ -7,7 +7,6 @@
 #
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
-# CONFIG_NSH_CMDPARMS is not set
 # CONFIG_SAMA5_UART0 is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="sama5d3-xplained"

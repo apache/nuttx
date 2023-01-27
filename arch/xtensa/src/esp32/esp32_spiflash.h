@@ -101,6 +101,22 @@ struct mtd_dev_s *esp32_spiflash_get_mtd(void);
 
 struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void);
 
+/****************************************************************************
+ * Name: esp32_flash_encryption_enabled
+ *
+ * Description:
+ *   Check if ESP32 enables SPI Flash encryption.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True: SPI Flash encryption is enable, False if not.
+ *
+ ****************************************************************************/
+
+bool esp32_flash_encryption_enabled(void);
+
 #ifdef __cplusplus
 }
 #endif

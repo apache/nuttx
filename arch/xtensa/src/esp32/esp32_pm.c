@@ -66,7 +66,7 @@
 #define LIGHT_SLEEP_MIN_TIME_US    200
 
 #ifndef MAX
-#define MAX(a,b) a > b ? a : b
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 /* Time from VDD_SDIO power up to first flash read in ROM code */

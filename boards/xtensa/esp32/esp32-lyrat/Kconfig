@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32_LYRAT
+
+config ESP32_TOUCH
+	bool "Touch pads"
+	default n
+	---help---
+		Enable ESP32 touch pad support.
+
+config ESP32_TOUCH_FILTER
+	bool "Touch pad IIR filter"
+	select ESP32_RT_TIMER
+	default n
+	depends on ESP32_TOUCH
+	---help---
+		Enable infinite impulse response filter for the touch pads.
+
+endif # ARCH_BOARD_ESP32_LYRAT

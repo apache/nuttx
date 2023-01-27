@@ -43,6 +43,13 @@
 #  define BOARD_CLOCK_FREQUENCY 80000000
 #endif
 
+/* Button definitions *******************************************************/
+
+#define BUTTON_BTN1                 0 /* BUTTON_BOOT */
+#define BUTTON_BTN1_BIT             (1 << BUTTON_BTN1)
+
+#define NUM_BUTTONS                 1
+
 /* LED definitions **********************************************************/
 
 /* Define how many LEDs this board has (needed by userleds) */

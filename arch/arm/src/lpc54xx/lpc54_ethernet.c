@@ -256,7 +256,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
+#define BUF ((struct eth_hdr_s *)&dev->d_buf[0])
 
 /****************************************************************************
  * Private Types

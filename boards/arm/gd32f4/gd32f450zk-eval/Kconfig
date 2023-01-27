@@ -87,7 +87,7 @@ config GD32F4_120MHZ
 endchoice # CPU Frequency
 
 
-config GD32F4_GD25_BLOCKMOUNT
+config GD32F450ZK_EVAL_GD25_BLOCKMOUNT
 	bool "GD25 serial FLASH auto-mount"
 	default n
 	depends on GD32F4_SPI5 && MTD_GD25
@@ -96,18 +96,18 @@ config GD32F4_GD25_BLOCKMOUNT
 
 choice
 	prompt "GD25 SPI FLASH configuration"
-	default GD32F4_GD25_NXFFS
-	depends on GD32F4_GD25_BLOCKMOUNT
+	default GD32F450ZK_EVAL_GD25_NXFFS
+	depends on GD32F450ZK_EVAL_GD25_BLOCKMOUNT
 
-config GD32F4_GD25_FTL
+config GD32F450ZK_EVAL_GD25_FTL
 	bool "Create GD25 SPI FLASH block driver"
 	---help---
 		Create the MTD driver for the GD25 and "wrap" the GD25 as a standard
 		block driver that could then, for example, be mounted using FAT or
-		any other file system.  Any file system may be used, but there will
+		any other file system. Any file system may be used, but there will
 		be no wear-leveling.
 
-config GD32F4_GD25_NXFFS
+config GD32F450ZK_EVAL_GD25_NXFFS
 	bool "Create GD25 serial FLASH NXFFS file system"
 	depends on FS_NXFFS
 	---help---
@@ -117,5 +117,20 @@ config GD32F4_GD25_NXFFS
 
 endchoice # GD25 serial FLASH configuration
 
+config GD32F450ZK_EVAL_AT24_TEST
+	bool "I2C0 EEPROM AT2402 write and read test"
+	default n
+	depends on NSH_ARCHINIT && GD32F4_I2C0 && MTD_AT24XX
+	---help---
+		Automatically initialize and test the AT24 I2C EEPROM driver when
+		NSH starts. After test the I2C0 will be released.
+
+config AT24XX_MTD_BLOCKSIZE
+	int "AT24xx MTD block size"
+	default 8
+	depends on GD32F450ZK_EVAL_AT24_TEST
+	---help---
+		The block size must be an even multiple of the pages.
+		The page size of AT2402 on the board is 8 Byte.
 
 endif # ARCH_BOARD_GD32F450ZK_EVAL

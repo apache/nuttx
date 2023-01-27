@@ -71,8 +71,9 @@ static int     binfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int     binfs_fstat(FAR const struct file *filep,
                            FAR struct stat *buf);
 
-static int     binfs_opendir(struct inode *mountpt, const char *relpath,
-                             struct fs_dirent_s **dir);
+static int     binfs_opendir(FAR struct inode *mountpt,
+                             FAR const char *relpath,
+                             FAR struct fs_dirent_s **dir);
 static int     binfs_closedir(FAR struct inode *mountpt,
                               FAR struct fs_dirent_s *dir);
 static int     binfs_readdir(FAR struct inode *mountpt,
@@ -289,8 +290,8 @@ static int binfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
  *
  ****************************************************************************/
 
-static int binfs_opendir(struct inode *mountpt, const char *relpath,
-                         struct fs_dirent_s **dir)
+static int binfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
+                         FAR struct fs_dirent_s **dir)
 {
   FAR struct binfs_dir_s *bdir;
 

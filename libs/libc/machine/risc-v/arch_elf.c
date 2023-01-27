@@ -563,7 +563,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
       default:
         berr("ERROR: Unsupported relocation: %ld\n",
              ARCH_ELF_RELTYPE(rel->r_info));
-        ASSERT(false);
+        PANIC();
         return -EINVAL;
     }
 

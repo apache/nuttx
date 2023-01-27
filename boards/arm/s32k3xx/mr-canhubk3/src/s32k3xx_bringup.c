@@ -103,7 +103,7 @@ int s32k3xx_bringup(void)
     }
   else
     {
-      _info("s32k3xx_spidev_initialize() succesful\n");
+      _info("s32k3xx_spidev_initialize() successful\n");
     }
 #endif
 
@@ -117,7 +117,7 @@ int s32k3xx_bringup(void)
     }
   else
     {
-      _info("btn_lower_initialize() succesful\n");
+      _info("btn_lower_initialize() successful\n");
     }
 #endif
 
@@ -131,7 +131,7 @@ int s32k3xx_bringup(void)
     }
   else
     {
-      _info("userled_lower_initialize() succesful\n");
+      _info("userled_lower_initialize() successful\n");
     }
 #endif
 
@@ -145,7 +145,7 @@ int s32k3xx_bringup(void)
     }
   else
     {
-      _info("Mounting procfs at /proc succesful\n");
+      _info("Mounting procfs at /proc successful\n");
     }
 #endif
 
@@ -159,8 +159,48 @@ int s32k3xx_bringup(void)
     }
   else
     {
-      _info("s32k3xx_i2cdev_initialize() succesful\n");
+      _info("s32k3xx_i2cdev_initialize() successful\n");
     }
+#endif
+
+#ifdef CONFIG_S32K3XX_PROGMEM
+  struct mtd_dev_s *mtd;
+
+  mtd = progmem_initialize();
+  if (mtd == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: progmem_initialize() failed\n");
+    }
+
+  ret = register_mtddriver("/dev/progmem0", mtd, 0755, NULL);
+
+  if (ret != OK)
+    {
+      _err("register_mtddriver() failed: %d\n", ret);
+    }
+#  ifdef CONFIG_FS_LITTLEFS
+  else
+    {
+      _info("register_mtddriver() succesful\n");
+
+      ret = nx_mount("/dev/progmem0", "/mnt/progmem", "littlefs", 0, NULL);
+
+      if (ret < 0)
+        {
+          ret = nx_mount("/dev/progmem0", "/mnt/progmem", "littlefs", 0,
+                    "forceformat");
+
+          if (ret < 0)
+            {
+              _err("nx_mount() failed: %d\n", ret);
+            }
+          else
+            {
+              _info("nx_mount() succesful\n");
+            }
+        }
+    }
+#  endif
 #endif
 
 #ifdef HAVE_MX25L
@@ -173,7 +213,7 @@ int s32k3xx_bringup(void)
     }
   else
     {
-      _info("s32k3xx_qspi_initialize() succesful\n");
+      _info("s32k3xx_qspi_initialize() successful\n");
 
       /* Use the QSPI device instance to initialize the MX25 device */
 
@@ -184,7 +224,7 @@ int s32k3xx_bringup(void)
         }
       else
         {
-          _info("mx25rxx_initialize() succesful\n");
+          _info("mx25rxx_initialize() successful\n");
 
 #  ifdef HAVE_MX25L_LITTLEFS
           /* Configure the device with no partition support */
@@ -199,7 +239,7 @@ int s32k3xx_bringup(void)
             }
           else
             {
-              _info("register_mtddriver() succesful\n");
+              _info("register_mtddriver() successful\n");
 
               ret = nx_mount(blockdev, "/mnt/qspi", "littlefs", 0, NULL);
               if (ret < 0)
@@ -212,7 +252,7 @@ int s32k3xx_bringup(void)
                     }
                   else
                     {
-                      _info("nx_mount() succesful\n");
+                      _info("nx_mount() successful\n");
                     }
                 }
             }
@@ -227,7 +267,7 @@ int s32k3xx_bringup(void)
             }
           else
             {
-              _info("nxffs_initialize() succesful\n");
+              _info("nxffs_initialize() successful\n");
 
               /* Mount the file system at /mnt/qspi */
 
@@ -238,7 +278,7 @@ int s32k3xx_bringup(void)
                 }
               else
                 {
-                  _info("nx_mount() succesful\n");
+                  _info("nx_mount() successful\n");
                 }
             }
 
@@ -253,7 +293,7 @@ int s32k3xx_bringup(void)
 #    ifdef CONFIG_BCH
           else
             {
-              _info("ftl_initialize() succesful\n");
+              _info("ftl_initialize() successful\n");
 
               /* Use the minor number to create device paths */
 
@@ -271,7 +311,7 @@ int s32k3xx_bringup(void)
                 }
               else
                 {
-                  _info("bchdev_register %s succesful\n", chardev);
+                  _info("bchdev_register %s successful\n", chardev);
                 }
             }
 #    endif /* CONFIG_BCH */

@@ -194,13 +194,13 @@ static int systic_timerisr(int irq, uint32_t *regs, void *arg)
   return 0;
 }
 
-extern uint32_t sysclk_get_clk(void);
+extern uint32_t timer_sysclk_get_clk(void);
 
 void up_timer_initialize(void)
 {
   irq_attach(PHY62XX_IRQ_SYSTICK, (xcpt_t)systic_timerisr, NULL);
 
-  putreg32((sysclk_get_clk() / 100 - 1), ARMV6M_SYSTICK_RVR);  /* 10ms tick */
+  putreg32((timer_sysclk_get_clk() / 100 - 1), ARMV6M_SYSTICK_RVR);  /* 10ms tick */
   putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE |
       SYSTICK_CSR_CLKSOURCE), ARMV6M_SYSTICK_CSR);
 

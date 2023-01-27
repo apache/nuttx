@@ -31,7 +31,7 @@
 #include <arch/board/board.h>
 #include <nuttx/progmem.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "gd32f4xx_progmem.h"
 #include "gd32f4xx_fmc.h"
@@ -126,7 +126,7 @@ typedef struct
 static const size_t sector_sizes[FMC_PROGMEM_SECTOR_NUM] =
                                                FMC_PROGMEM_SECTOR_SIZES;
 
-static sem_t g_gd32_progmem_sem = SEM_INITIALIZER(1);
+static mutex_t g_gd32_progmem_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -246,37 +246,6 @@ static fmc_sector_info_struct gd32_fmc_sector_info_get(uint32_t addr)
       sector_info.sector_end_addr = FMC_INVALID_ADDR;
     }
   return sector_info;
-}
-
-/****************************************************************************
- * Name: gd32_progmem_sem_lock
- *
- * Description:
- *   Lock semaphore
- *
- * Return Value:
- *   Zero(OK)  - On success
- *   EINVAL    - Invalid attempt to get the semaphore
- *   ECANCELED - May be returned if the thread is canceled while waiting
- *
- ****************************************************************************/
-
-static int gd32_progmem_sem_lock(void)
-{
-  return nxsem_wait_uninterruptible(&g_gd32_progmem_sem);
-}
-
-/****************************************************************************
- * Name: gd32_progmem_sem_unlock
- *
- * Description:
- *   Lock semaphore
- *
- ****************************************************************************/
-
-static void gd32_progmem_sem_unlock(void)
-{
-  nxsem_post(&g_gd32_progmem_sem);
 }
 
 /****************************************************************************
@@ -572,8 +541,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
-  ret = gd32_progmem_sem_lock();
-
+  ret = nxmutex_lock(&g_gd32_progmem_lock);
   if (ret < 0)
     {
       return -EFAULT;
@@ -590,7 +558,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       if (getreg8(addr) != *byte)
         {
           gd32_fmc_lock();
-          gd32_progmem_sem_unlock();
+          nxmutex_unlock(&g_gd32_progmem_lock);
           return -EIO;
         }
 
@@ -599,8 +567,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
     }
 
   gd32_fmc_lock();
-
-  gd32_progmem_sem_unlock();
+  nxmutex_unlock(&g_gd32_progmem_lock);
 
   return count;
 }
@@ -653,8 +620,7 @@ ssize_t up_progmem_read(size_t addr, void *buf, size_t count)
       return -EFAULT;
     }
 
-  ret = gd32_progmem_sem_lock();
-
+  ret = nxmutex_lock(&g_gd32_progmem_lock);
   if (ret < 0)
     {
       return -EFAULT;
@@ -668,7 +634,7 @@ ssize_t up_progmem_read(size_t addr, void *buf, size_t count)
       addr++;
     }
 
-  gd32_progmem_sem_unlock();
+  nxmutex_unlock(&g_gd32_progmem_lock);
 }
 #endif
 

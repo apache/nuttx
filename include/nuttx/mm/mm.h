@@ -86,10 +86,16 @@
 #  define MM_KERNEL_USRHEAP_INIT 1
 #endif
 
-/* The kernel heap is never accessible from user code */
+/* When building the Userspace image under CONFIG_BUILD_KERNEL or
+ * CONFIG_BUILD_PROTECTED (i.e. !defined(__KERNEL__)), CONFIG_MM_KERNEL_HEAP
+ * must be undefined to ensure the kernel heap is never accessible from user
+ * code.
+ */
 
-#ifndef __KERNEL__
-#  undef CONFIG_MM_KERNEL_HEAP
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)
+#  ifndef __KERNEL__
+#    undef CONFIG_MM_KERNEL_HEAP
+#  endif
 #endif
 
 /****************************************************************************

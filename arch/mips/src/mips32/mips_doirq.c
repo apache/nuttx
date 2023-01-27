@@ -108,20 +108,13 @@ uint32_t *mips_doirq(int irq, uint32_t *regs)
     }
 #endif
 
-  if (regs != CURRENT_REGS)
-    {
-      /* Restore the cpu lock */
+  /* If a context switch occurred while processing the interrupt then
+   * g_current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
 
-      restore_critical_section();
-
-      /* If a context switch occurred while processing the interrupt then
-       * CURRENT_REGS may have change value.  If we return any value
-       * different from the input regs, then the lower level will know
-       * that a context switch occurred during interrupt processing.
-       */
-
-      regs = (uint32_t *)CURRENT_REGS;
-    }
+  regs = (uint32_t *)CURRENT_REGS;
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.

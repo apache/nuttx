@@ -131,7 +131,13 @@ void weak_function up_allocate_heap(void **heap_start, size_t *heap_size)
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (void *)g_idle_topstack;
+
+#ifdef CONFIG_ARCH_PGPOOL_PBASE
+  *heap_size  = CONFIG_ARCH_PGPOOL_PBASE - g_idle_topstack;
+#else
   *heap_size  = CONFIG_RAM_END - g_idle_topstack;
+#endif
+
 #endif
 }
 

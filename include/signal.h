@@ -31,10 +31,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#ifdef CONFIG_SIG_EVTHREAD
-#  include <pthread.h>  /* Needed for pthread_attr_t, includes this file */
-#endif
-
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
@@ -288,8 +284,7 @@
                                   * being masked in the handler */
 #define SA_RESETHAND    (1 << 6) /* Clears the handler when the signal
                                   * is delivered */
-#define SA_KERNELHAND   (1 << 7) /* Invoke the handler in kernel space
-                                    directly */
+#define SA_KERNELHAND   (1 << 7) /* Invoke the handler in kernel space directly */
 
 /* These are the possible values of the signfo si_code field */
 
@@ -329,6 +324,8 @@
 #  define SIG_DFL       ((_sa_handler_t)0)   /* Default is SIG_IGN for all signals */
 #  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
 #endif
+
+#define tkill(tid, signo)            tgkill((pid_t)-1, tid, signo)
 
 #define sigisemptyset(set)           (!*(set))
 #define sigorset(dest, left, right)  (!(*(dest) = *(left) | *(right)))
@@ -376,8 +373,8 @@ struct sigevent
   union sigval sigev_value;  /* Data passed with notification */
 
 #ifdef CONFIG_SIG_EVTHREAD
-  sigev_notify_function_t sigev_notify_function; /* Notification function */
-  FAR pthread_attr_t *sigev_notify_attributes;   /* Notification attributes (not used) */
+  sigev_notify_function_t sigev_notify_function;      /* Notification function */
+  FAR struct pthread_attr_s *sigev_notify_attributes; /* Notification attributes (not used) */
 #endif
 };
 
@@ -448,6 +445,7 @@ extern "C"
 #endif
 
 int  kill(pid_t pid, int signo);
+int  tgkill(pid_t pid, pid_t tid, int signo);
 void psignal(int signum, FAR const char *message);
 void psiginfo(FAR const siginfo_t *pinfo, FAR const char *message);
 int  raise(int signo);

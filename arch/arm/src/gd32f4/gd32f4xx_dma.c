@@ -90,82 +90,98 @@ static struct gd32_dma_channel_s g_dmachan[DMA_NCHANNELS] =
   {
     .chan_num  = GD32_DMA_CH0,
     .irq       = GD32_IRQ_DMA0_CHANNEL0,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH1,
     .irq       = GD32_IRQ_DMA0_CHANNEL1,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH2,
     .irq       = GD32_IRQ_DMA0_CHANNEL2,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH3,
     .irq       = GD32_IRQ_DMA0_CHANNEL3,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH4,
     .irq       = GD32_IRQ_DMA0_CHANNEL4,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH5,
     .irq       = GD32_IRQ_DMA0_CHANNEL5,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH6,
     .irq       = GD32_IRQ_DMA0_CHANNEL6,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH7,
     .irq       = GD32_IRQ_DMA0_CHANNEL7,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
 
   {
     .chan_num  = GD32_DMA_CH0,
     .irq       = GD32_IRQ_DMA1_CHANNEL0,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH1,
     .irq       = GD32_IRQ_DMA1_CHANNEL1,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH2,
     .irq       = GD32_IRQ_DMA1_CHANNEL2,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH3,
     .irq       = GD32_IRQ_DMA1_CHANNEL3,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH4,
     .irq       = GD32_IRQ_DMA1_CHANNEL4,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH5,
     .irq       = GD32_IRQ_DMA1_CHANNEL5,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH6,
     .irq       = GD32_IRQ_DMA1_CHANNEL6,
-    .dmabase    = GD32_DMA1,
+    .chsem     = SEM_INITIALIZER(1),
+    .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH7,
     .irq       = GD32_IRQ_DMA1_CHANNEL7,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
 };
@@ -209,68 +225,6 @@ static void gd32_dma_clock_enable(uint32_t dmabase)
   /* Enable AHB1 clock for DMA */
 
   modifyreg32(regaddr, 0, rcu_en);
-}
-
-/****************************************************************************
- * Name: gd32_dmasem_take
- *
- * Description:
- *   Used to request exclusive access to a DMA channel.
- *
- ****************************************************************************/
-
-static int gd32_dmasem_take(struct gd32_dma_channel_s *dmachan)
-{
-  return nxsem_wait_uninterruptible(&dmachan->chsem);
-}
-
-/****************************************************************************
- * Name: gd32_dmasem_give
- *
- * Description:
- *   Used to free exclusive access to a DMA channel.
- *
- ****************************************************************************/
-
-static inline void gd32_dmasem_give(struct gd32_dma_channel_s *dmachan)
-{
-  nxsem_post(&dmachan->chsem);
-}
-
-/****************************************************************************
- * Name: gd32_dma_channel_get
- *
- * Description:
- *   Get the g_dmachan table entry associated with a DMA controller and
- *   a channel number
- ****************************************************************************/
-
-static inline struct gd32_dma_channel_s
-                        *gd32_dma_channel_get(uint32_t channelx,
-                                              uint32_t dma_periph)
-{
-  int index;
-
-  DEBUGASSERT(channelx < DMA0_NCHANNELS);
-
-  DEBUGASSERT(dma_periph == GD32_DMA0_BASE && dma_periph == GD32_DMA1_BASE);
-
-  /* Convert the dma_periph + chan_num based on the fact that there are
-   * 8 channel per dma_periph.
-   */
-
-  if (dma_periph == GD32_DMA0_BASE)
-    {
-      index = channelx;
-    }
-  else
-    {
-      index = channelx + DMA0_NCHANNELS;
-    }
-
-  /* Then return the chan_num structure associated with the chan_num index */
-
-  return &g_dmachan[index];
 }
 
 /****************************************************************************
@@ -579,8 +533,6 @@ void weak_function arm_dma_initialize(void)
 
       DEBUGASSERT(dmachan != NULL);
 
-      nxsem_init(&dmachan->chsem, 0, 1);
-
       /* Attach DMA interrupt vectors */
 
       irq_attach(dmachan->irq, gd32_dma_interrupt, dmachan);
@@ -647,10 +599,9 @@ DMA_HANDLE gd32_dma_channel_alloc(uint8_t periph_req)
 
   /* Get exclusive access to the DMA channel */
 
-  ret = gd32_dmasem_take(dmachan);
+  ret = nxsem_wait_uninterruptible(&dmachan->chsem);
   if (ret < 0)
     {
-      gd32_dmasem_give(dmachan);
       return NULL;
     }
 
@@ -692,7 +643,7 @@ void gd32_dma_channel_free(DMA_HANDLE handle)
 
   /* Release the channel */
 
-  gd32_dmasem_give(dmachan);
+  nxsem_post(&dmachan->chsem);
 }
 
 /****************************************************************************
@@ -763,21 +714,17 @@ void gd32_dma_singlemode_setup(struct gd32_dma_channel_s *dmachan,
 
   regval |= init_struct->direction;
 
-  if (DMA_WIDTH_8BITS_SELECT == init_struct->periph_memory_width)
+  if (DMA_WIDTH_32BITS_SELECT == init_struct->periph_memory_width)
     {
-      regval |= DMA_MEMORY_WIDTH_8BIT;
+      regval |= DMA_MEMORY_WIDTH_32BIT | DMA_PERIPH_WIDTH_32BIT;
     }
   else if (DMA_WIDTH_16BITS_SELECT == init_struct->periph_memory_width)
     {
-      regval |= DMA_MEMORY_WIDTH_16BIT;
-    }
-  else if (DMA_WIDTH_32BITS_SELECT == init_struct->periph_memory_width)
-    {
-      regval |= DMA_MEMORY_WIDTH_32BIT;
+      regval |= DMA_MEMORY_WIDTH_16BIT | DMA_PERIPH_WIDTH_16BIT;
     }
   else
     {
-      regval |= DMA_MEMORY_WIDTH_8BIT;
+      regval |= DMA_MEMORY_WIDTH_8BIT | DMA_PERIPH_WIDTH_8BIT;
     }
 
   if (DMA_PRIO_LOW_SELECT == init_struct->priority)

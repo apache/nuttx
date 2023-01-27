@@ -21,9 +21,24 @@
 # tlfs memory allocator
 
 ifeq ($(CONFIG_MM_TLSF_MANAGER),y)
+
+TLSF = tlsf/tlsf/.git
+$(TLSF):
+	$(Q) echo "Downloading: tlsf"
+	$(Q) git clone git@github.com:mattconte/tlsf.git tlsf/tlsf
+	$(Q) patch -p0 < tlsf/0001-Add-TLSF_API-and-tlsf_printf.patch
+	$(Q) patch -p0 < tlsf/0002-Define-_DEBUG-to-0-if-not-done-yet.patch
+	$(Q) patch -p0 < tlsf/0003-Support-customize-FL_INDEX_MAX-to-reduce-the-memory-.patch
+	$(Q) patch -p0 < tlsf/0004-Add-tlsf_extend_pool-function.patch
+	$(Q) patch -p0 < tlsf/0005-Fix-warnining-on-implicit-pointer-conversion.patch
+context::$(TLSF)
+
+distclean::
+	$(Q) rm -rf tlsf/tlsf
+
 CSRCS += mm_tlsf.c tlsf.c
 
-CFLAGS += ${shell $(DEFINE) "$(CC)" tlsf_printf=merr}
+CFLAGS += ${shell $(DEFINE) "$(CC)" tlsf_printf=\"if\(0\)printf\"}
 
 # Add the tlsf directory to the build
 

@@ -55,8 +55,8 @@ These steps are given in the setup guide in
 Flashing
 ========
 
-Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool. 
-It's a two step process where the first converts the ELF file into a ESP32-compatible binary 
+Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool.
+It's a two step process where the first converts the ELF file into a ESP32-compatible binary
 and the second flashes it to the board.  These steps are included into the build system and you can
 flash your NuttX firmware simply by running::
 
@@ -68,7 +68,7 @@ Bootloader and partitions
 -------------------------
 
 ESP32 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
-(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary. 
+(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`__. In there you will find instructions to rebuild these if necessary.
 Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
 
 .. code-block:: console
@@ -79,7 +79,7 @@ Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BIN
    SPI FLASH erase.
 
    .. code-block:: console
-       
+
       $ esptool.py erase_flash
 
 Peripheral Support
@@ -90,12 +90,12 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-GPIO         Yes       
+GPIO         Yes
 UART         Yes
-SPI          Yes       
-I2C          Yes       
-DMA          Yes       
-Wifi         Yes       
+SPI          Yes
+I2C          Yes
+DMA          Yes
+Wifi         Yes
 Ethernet     Yes
 SPIFLASH     Yes
 SPIRAM       Yes
@@ -109,13 +109,14 @@ ADC          No
 Bluetooth    Yes
 SDIO         No
 SD/MMC       No
-I2S          No
-LED_PWM      No
+I2S          Yes
+LED_PWM      Yes
 RMT          No
 MCPWM        No
 Pulse_CNT    No
 SHA          No
 RSA          No
+CAN/TWAI     Yes
 ========== ======= =====
 
 Memory Map
@@ -290,18 +291,19 @@ Wi-Fi SoftAP
 ============
 
 It is possible to use ESP32 as an Access Point (SoftAP). Actually there are some
-boards with a ``sta_softap`` which enables this support.
+boards config examples called sta_softap which enables this support
 
 If you are using this board config profile you can run these commands to be able
 to connect your smartphone or laptop to your board::
 
     nsh> ifup wlan1
     nsh> dhcpd_start wlan1
-    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi psk wlan1 mypasswd 3
     nsh> wapi essid wlan1 nuttxap 1
 
 In this case, you are creating the access point ``nuttxapp`` in your board and to
-connect to it on your smartphone you will be required to type the password ``mypasswd``.
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Bluetooth
@@ -350,10 +352,23 @@ Enter in the NSH shell using your preferred serial console tool and run the scan
         advertiser data: 1e ff 06 00 01 09 20 02 7c 33 a3 a7 cd c9 44 5b
     nsh>
 
+I2S
+===
+
+The I2S peripheral is accessible using either the generic I2S audio driver or a specific
+audio codec driver. Also, it's possible to use the I2S character driver to bypass the
+audio subsystem and develop specific usages of the I2S peripheral.
+
+.. note:: Note that the bit-width and sample rate can be modified "on-the-go" when using
+   audio-related drivers. That is not the case for the I2S character device driver and
+   such parameters are set on compile time through `make menuconfig`.
+
+Please check for usage examples using the :doc:`ESP32 DevKitC </platforms/xtensa/esp32/boards/esp32-devkitc/index>`.
+
 Using QEMU
 ==========
 
-First follow the instructions `here <https://github.com/espressif/qemu/wiki>`_ to build QEMU.
+First follow the instructions `here <https://github.com/espressif/qemu/wiki>`__ to build QEMU.
 
 Enable the ``ESP32_QEMU_IMAGE`` config found in :menuselection:`Board Selection --> ESP32 binary image for QEMU`.
 
@@ -367,6 +382,114 @@ Build and generate the QEMU image::
 A QEMU-compatible ``nuttx.merged.bin`` binary image will be created. It can be run as::
 
  $ qemu-system-xtensa -nographic -machine esp32 -drive file=nuttx.merged.bin,if=mtd,format=raw
+
+Secure Boot and Flash Encryption
+================================
+
+Secure Boot
+-----------
+
+Secure Boot protects a device from running any unauthorized (i.e., unsigned) code by checking that
+each piece of software that is being booted is signed. On an ESP32, these pieces of software include
+the second stage bootloader and each application binary. Note that the first stage bootloader does not
+require signing as it is ROM code thus cannot be changed. This is achieved using specific hardware in
+conjunction with MCUboot (read more about MCUboot `here <https://docs.mcuboot.com/>`__).
+
+The Secure Boot process on the ESP32 involves the following steps performed:
+
+1. The first stage bootloader verifies the second stage bootloader's RSA-PSS signature. If the verification is successful,
+   the first stage bootloader loads and executes the second stage bootloader.
+
+2. When the second stage bootloader loads a particular application image, the application's signature (RSA, ECDSA or ED25519) is verified
+   by MCUboot.
+   If the verification is successful, the application image is executed.
+
+.. warning:: Once enabled, Secure Boot will not boot a modified bootloader. The bootloader will only boot an
+   application firmware image if it has a verified digital signature. There are implications for reflashing
+   updated images once Secure Boot is enabled. You can find more information about the ESP32's Secure boot
+   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/secure-boot-v2.html>`__.
+
+.. note:: As the bootloader image is built on top of the Hardware Abstraction Layer component
+   of `ESP-IDF <https://github.com/espressif/esp-idf>`_, the
+   `API port by Espressif <https://docs.mcuboot.com/readme-espressif.html>`_ will be used
+   by MCUboot rather than the original NuttX port.
+
+Flash Encryption
+----------------
+
+Flash encryption is intended for encrypting the contents of the ESP32's off-chip flash memory. Once this feature is enabled,
+firmware is flashed as plaintext, and then the data is encrypted in place on the first boot. As a result, physical readout
+of flash will not be sufficient to recover most flash contents.
+
+.. warning::  After enabling Flash Encryption, an encryption key is generated internally by the device and
+   cannot be accessed by the user for re-encrypting data and re-flashing the system, hence it will be permanently encrypted.
+   Re-flashing an encrypted system is complicated and not always possible. You can find more information about the ESP32's Flash Encryption
+   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html>`__.
+
+Prerequisites
+-------------
+
+First of all, we need to install ``imgtool`` (a MCUboot utility application to manipulate binary
+images) and ``esptool`` (the ESP32 toolkit)::
+
+    $ pip install imgtool esptool
+
+We also need to make sure that the python modules are added to ``PATH``::
+
+    $ echo "PATH=$PATH:/home/$USER/.local/bin" >> ~/.bashrc
+
+Now, we will create a folder to store the generated keys (such as ``~/signing_keys``)::
+
+    $ mkdir ~/signing_keys && cd ~/signing_keys
+
+With all set up, we can now generate keys to sign the bootloader and application binary images,
+respectively, of the compiled project::
+
+    $ espsecure.py generate_signing_key --version 2 bootloader_signing_key.pem
+    $ imgtool keygen --key app_signing_key.pem --type rsa-3072
+
+.. important:: The contents of the key files must be stored securely and kept secret.
+
+Enabling Secure Boot and Flash Encryption
+-----------------------------------------
+
+To enable Secure Boot for the current project, go to the project's NuttX directory, execute ``make menuconfig`` and the following steps:
+
+   1. Enable experimental features in :menuselection:`Build Setup --> Show experimental options`;
+
+   2. Enable MCUboot in :menuselection:`Application Configuration --> Bootloader Utilities --> MCUboot`;
+
+   3. Change image type to ``MCUboot-bootable format`` in :menuselection:`System Type --> Application Image Configuration --> Application Image Format`;
+
+   4. Enable building MCUboot from the source code by selecting ``Build binaries from source``;
+      in :menuselection:`System Type --> Application Image Configuration --> Source for bootloader binaries`;
+
+   5. Enable Secure Boot in :menuselection:`System Type --> Application Image Configuration --> Enable hardware Secure Boot in bootloader`;
+
+   6. If you want to protect the SPI Bus against data sniffing, you can enable Flash Encryption in
+      :menuselection:`System Type --> Application Image Configuration --> Enable Flash Encryption on boot`.
+
+Now you can design an update and confirm agent to your application. Check the `MCUboot design guide <https://docs.mcuboot.com/design.html>`_ and the
+`MCUboot Espressif port documentation <https://docs.mcuboot.com/readme-espressif.html>`_ for
+more information on how to apply MCUboot. Also check some `notes about the NuttX MCUboot port <https://github.com/mcu-tools/mcuboot/blob/main/docs/readme-nuttx.md>`_,
+the `MCUboot porting guide <https://github.com/mcu-tools/mcuboot/blob/main/docs/PORTING.md>`_ and some
+`examples of MCUboot applied in Nuttx applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
+
+After you developed an application which implements all desired functions, you need to flash it into the primary image slot
+of the device (it will automatically be in the confirmed state, you can learn more about image
+confirmation `here <https://docs.mcuboot.com/design.html#image-swapping>`_).
+To flash to the primary image slot, select ``Application image primary slot`` in
+:menuselection:`System Type --> Application Image Configuration --> Target slot for image flashing`
+and compile it using ``make -j ESPSEC_KEYDIR=~/signing_keys``.
+
+When creating update images, make sure to change :menuselection:`System Type --> Application Image Configuration --> Target slot for image flashing`
+to ``Application image secondary slot``.
+
+.. important:: When deploying your application, make sure to disable UART Download Mode by selecting ``Permanently disabled`` in
+   :menuselection:`System Type --> Application Image Configuration --> UART ROM download mode`
+   and change usage mode to ``Release`` in `System Type --> Application Image Configuration --> Enable usage mode`.
+   **After disabling UART Download Mode you will not be able to flash other images through UART.**
+
 
 Things to Do
 ============

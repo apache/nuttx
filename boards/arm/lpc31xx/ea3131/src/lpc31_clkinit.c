@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* References:
- *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
+ *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 - 9 September 2009
  *   - NXP lpc313x.cdl.drivers.zip example driver code
  */
 

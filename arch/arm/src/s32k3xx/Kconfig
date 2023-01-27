@@ -190,8 +190,16 @@ config S32K3XX_HAVE_ENET
 	bool
 	default n
 	select ARCH_HAVE_PHY
-	select ARCH_PHY_INTERRUPT
+	select ARCH_PHY_POLLED
 	select ARCH_HAVE_NETDEV_STATISTICS
+
+# Select MPU when D-cache is enabled for ARM errata 1624041
+
+config S32K3XX_NEEDS_MPU
+    bool
+    default y
+	depends on ARMV7M_DCACHE
+	select ARM_MPU
 
 config S32K3XX_HAVE_FLEXCAN3
 	bool
@@ -366,6 +374,7 @@ config S32K3XX_ENET
 config S32K3XX_QSPI
 	bool "QSPI Flash"
 	default n
+	select ARCH_USE_MPU
 	depends on S32K3XX_HAVE_QSPI
 	
 menu "FlexCAN"
@@ -590,6 +599,14 @@ config S32K3XX_FS26
 		Disables the FS26 watchdog so that the S32K3XX MCU does not get resetted.
 		Engineering development purpose only, not for use in production.
 		Please refer to the FS26 Datasheet.
+
+config S32K3XX_PROGMEM
+	bool "PROGMEM"
+	default n
+	select ARCH_HAVE_PROGMEM
+	---help---
+		Use the Data Flash data memory as a
+		Memory-Technology-Device (MTD).
 
 endmenu # S32K3XX Peripheral Selection
 
@@ -1201,12 +1218,69 @@ config S32K3XX_LPSPI5_PINCFG
 	
 endmenu # LPSPI Configuration
 
+menu "LPI2C Configuration"
+	depends on S32K3XX_LPI2C
+
+config S32K3XX_LPI2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on S32K3XX_LPI2C && S32K3XX_EDMA && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value
+		for the I2C dma streams, else the default priority level is set to
+		medium.
+
+config S32K3XX_LPI2C_DMA_MAXMSG
+	int "Maximum number messages that will be DMAed"
+	default 8
+	depends on S32K3XX_LPI2C_DMA
+	---help---
+		This option set the mumber of mesg that can be in a transfer.
+		It is used to allocate space for the 16 bit LPI2C commands
+		that will be DMA-ed to the LPI2C device.
+
+config S32K3XX_LPI2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on S32K3XX_LPI2C
+
+config S32K3XX_LPI2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on S32K3XX_LPI2C_DYNTIMEO
+
+config S32K3XX_LPI2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on S32K3XX_LPI2C_DYNTIMEO
+
+config S32K3XX_LPI2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on S32K3XX_LPI2C
+
+config S32K3XX_LPI2C_TIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on S32K3XX_LPI2C && !S32K3XX_LPI2C_DYNTIMEO
+
+config S32K3XX_LPI2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on S32K3XX_LPI2C && !S32K3XX_LPI2C_DYNTIMEO
+
 menu "LPI2C0 Configuration"
 	depends on S32K3XX_LPI2C0
 
 config LPI2C0_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
+
+config LPI2C0_DMA
+	bool "Enable DMA for I2C0"
+	default n
+	depends on S32K3XX_LPI2C_DMA
 
 config LPI2C0_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
@@ -1225,6 +1299,11 @@ config LPI2C1_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
 
+config LPI2C1_DMA
+	bool "Enable DMA for I2C1"
+	default n
+	depends on S32K3XX_LPI2C_DMA
+
 config LPI2C1_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
 	default 0
@@ -1234,7 +1313,7 @@ config LPI2C1_FILTSDA
 	default 0
 
 endmenu # LPI2C1 Configuration
-
+endmenu # LPI2C Configuration
 
 menu "LPUART Configuration"
 	depends on S32K3XX_LPUART
@@ -1247,6 +1326,21 @@ config S32K3XX_LPUART_SINGLEWIRE
 	bool "Signal Wire Support"
 	default n
 	
+config S32K3XX_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 64
+	depends on LPUART0_RXDMA || LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || \
+	           LPUART4_RXDMA || LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || \
+	           LPUART8_RXDMA || LPUART9_RXDMA || LPUART10_RXDMA || LPUART11_RXDMA || \
+	           LPUART12_RXDMA || LPUART13_RXDMA ||LPUART14_RXDMA || LPUART15_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
 endmenu
 
 menu "Ethernet Configuration"
@@ -1580,6 +1674,19 @@ menu "FS26 Configuration"
 config FS26_SPI_FREQUENCY
 	int "FS26 Spi frequency"
 	default 100000
+
+endmenu
+
+
+menu "Progmem (Data-flash) Configuration"
+	depends on S32K3XX_PROGMEM
+
+config S32K3XX_PROGMEM_SIZE
+	int "Progmem size"
+	default 128
+	---help---
+		Size of the Data Flash data memory used as a
+		Memory-Technology-Device (MTD).
 
 endmenu
 

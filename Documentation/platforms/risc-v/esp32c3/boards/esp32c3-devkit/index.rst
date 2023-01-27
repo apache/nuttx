@@ -70,6 +70,74 @@ We can use the interrupt pin to send a signal when the interrupt fires::
 The pin is configured as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.
 
+ble
+---
+
+This configuration is used to enable the Bluetooth Low Energy (BLE) of
+ESP32C3 chip.
+
+To test it, just run the following command below...
+
+Confirm that bnep interface exist:
+
+    nsh> ifconfig
+    bnep0   Link encap:UNSPEC at DOWN
+        inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+
+Get basic information from it:
+
+    nsh> bt bnep0 info
+    Device: bnep0
+    BDAddr: 86:f7:03:09:41:4d
+    Flags:  0000
+    Free:   20
+      ACL:  20
+      SCO:  0
+    Max:
+      ACL:  24
+      SCO:  0
+    MTU:
+      ACL:  70
+      SCO:  70
+    Policy: 0
+    Type:   0
+
+Start the scanning process:
+
+    nsh> bt bnep0 scan start
+
+Wait a little bit before stopping it.
+
+Then after some minutes stop it:
+
+    nsh> bt bnep0 scan stop
+
+Get the list of BLE devices found around you:
+
+    nsh> bt bnep0 scan get
+    Scan result:
+    1.     addr:           d7:c4:e6:xx:xx:xx type: 0
+           rssi:            -62
+           response type:   4
+           advertiser data: 10 09 4d 69 20 XX XX XX XX XX XX XX XX XX XX 20                      e
+    2.     addr:           cb:23:18:xx:xx:xx type: 0
+           rssi:            -60
+           response type:   0
+           advertiser data: 02 01 06 1b ff XX XX XX ff ff ff ff ff ff ff ff                      8
+    3.     addr:           cb:23:18:xx:xx:xx type: 0
+           rssi:            -60
+           response type:   4
+           advertiser data: 10 09 4d 69 20 XX XX XX XX XX XX XX XX XX XX 20                      e
+    4.     addr:           d7:c4:e6:xx:xx:xx type: 0
+           rssi:            -62
+           response type:   0
+           advertiser data: 02 01 06 1b ff XX XX XX ff ff ff ff ff ff ff ff                      e
+    5.     addr:           d7:c4:e6:xx:xx:xx type: 0
+           rssi:            -62
+           response type:   4
+           advertiser data: 10 09 4d 69 20 XX XX XX XX XX XX XX XX XX XX 20                      e
+    nsh>
+
 watchdog
 --------
 

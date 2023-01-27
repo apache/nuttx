@@ -86,12 +86,12 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    */
 
 #else
-  /* These values come from the linker scripts (esp32c3.ld and
-   * flat.template.ld).
+  /* These values come from the linker scripts
+   * (<legacy/mcuboot>_sections.ld and flat_memory.ld).
    * Check boards/risc-v/esp32c3.
    */
 
-  extern uint8_t *_sheap;
+  extern uint8_t _sheap[];
   extern const struct esp32c3_rom_layout_s *ets_rom_layout_p;
 
   board_autoled_on(LED_HEAPALLOCATE);
@@ -119,11 +119,11 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
   /* These values come from the linker scripts (kernel-space.ld and
-   * protected.template.ld).
+   * protected_memory.ld).
    * Check boards/risc-v/esp32c3.
    */
 
-  extern uint8_t *_sheap;
+  extern uint8_t _sheap[];
 
   uintptr_t kbase = (uintptr_t)_sheap;
   uintptr_t ktop  = KDRAM_END;

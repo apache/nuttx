@@ -138,7 +138,6 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
     {
       /* Select the IPv6 domain */
 
-      DEBUGASSERT(conn->domain == PF_INET6);
       tcp_ipv6_select(dev);
     }
 }
@@ -219,7 +218,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       if (conn->domain == PF_INET)
 #endif
         {
-          DEBUGASSERT(IFF_IS_IPv4(dev->d_flags));
           tcp = TCPIPv4BUF;
         }
 #endif /* CONFIG_NET_IPv4 */
@@ -229,7 +227,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          DEBUGASSERT(IFF_IS_IPv6(dev->d_flags));
           tcp = TCPIPv6BUF;
         }
 #endif /* CONFIG_NET_IPv6 */
@@ -676,9 +673,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  /* If net_sem_timedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_timedwait will have returned negated errno
-   * appropriately.
+  /* If net_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, net_sem_timedwait will have returned negated
+   * errno appropriately.
    */
 
   if (ret < 0)

@@ -48,5 +48,24 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: riscv_get_pgtable
+ *
+ * Description:
+ *   Get the physical address of the final level page table corresponding to
+ *   'vaddr'. If one does not exist, it will be allocated.
+ *
+ * Input Parameters:
+ *   addrenv - Pointer to a structure describing the address environment
+ *   vaddr - Virtual address to query for
+ *
+ * Returned Value:
+ *   The physical address of the corresponding final level page table, or
+ *   NULL if one does not exist, and there is no free memory to allocate one
+ *
+ ****************************************************************************/
+
+uintptr_t riscv_get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr);
+
 #endif /* CONFIG_ARCH_ADDRENV */
 #endif /* __ARCH_RISC_V_SRC_COMMON_ADDRENV_H */

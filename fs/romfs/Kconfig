@@ -22,6 +22,7 @@ config FS_ROMFS_CACHE_NODE
 
 config FS_ROMFS_CACHE_FILE_NSECTORS
 	int "The number of file cache sector"
+	range 1 256
 	default 1
 	---help---
 		The number of file cache sector

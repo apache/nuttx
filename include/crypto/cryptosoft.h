@@ -79,8 +79,7 @@ struct swcr_data
 int swcr_encdec(FAR struct cryptop *, FAR struct cryptodesc *,
                 FAR struct swcr_data *, caddr_t);
 int swcr_authcompute(FAR struct cryptop *, FAR struct cryptodesc *,
-                     FAR struct swcr_data *,
-                     caddr_t);
+                     FAR struct swcr_data *, caddr_t);
 int swcr_authenc(FAR struct cryptop *);
 int swcr_compdec(FAR struct cryptodesc *, FAR struct swcr_data *,
                  caddr_t, int);

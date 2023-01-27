@@ -22,17 +22,15 @@ config MOTOR_FOC_SHUNTS
 		Number of shunts supported (or other types of current sensors).
 		Any current reconstruction must be done on the lower-half side.
 
+config MOTOR_FOC_BEMF_SENSE
+	bool "FOC support for Back-EMF sensing"
+	default n
+
 config MOTOR_FOC_TRACE
 	bool "FOC trace support"
 	default n
 	---help---
 		Enables FOC driver trace interface.
-
-config MOTOR_FOC_DUMMY
-	bool "Simulated FOC device"
-	default n
-	---help---
-		Build a simulated lower-half FOC device
 
 config MOTOR_FOC_DUMMY
 	bool "Simulated FOC device"

@@ -29,7 +29,7 @@ CSRCS += lib_strerror.c lib_strncasecmp.c lib_strncat.c lib_strncmp.c
 CSRCS += lib_strndup.c lib_strcasestr.c lib_strpbrk.c lib_strrchr.c
 CSRCS += lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c
 CSRCS += lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c lib_strsignal.c
-CSRCS += lib_index.c lib_rindex.c lib_strverscmp.c
+CSRCS += lib_index.c lib_rindex.c lib_timingsafe_bcmp.c lib_strverscmp.c
 
 ifneq ($(CONFIG_LIBC_ARCH_MEMCHR),y)
 CSRCS += lib_memchr.c

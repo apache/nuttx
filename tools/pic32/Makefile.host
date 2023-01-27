@@ -18,6 +18,7 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/Make.defs
 all: mkpichex
 default: mkpichex
 .PHONY: clean
@@ -32,5 +33,9 @@ mkpichex: mkpichex.c
 	@gcc $(CFLAGS) -o mkpichex mkpichex.c
 
 clean:
-	@rm -f *.o *.a *.dSYM *~ .*.swp
-	@rm -f mkpichex mkpichex.exe
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+	$(Q) rm -rf *.dSYM
+endif
+	$(call DELFILE, mkpichex)
+	$(call DELFILE, mkpichex.exe)
+	$(call CLEAN)

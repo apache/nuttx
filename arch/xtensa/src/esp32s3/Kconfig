@@ -250,48 +250,6 @@ config ESP32S3_PSRAM_8M
 	bool
 	default n
 
-choice ESP32S3_FLASH_MODE
-	prompt "SPI FLASH mode"
-	default ESP32S3_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication
-		with the attached SPI flash chip.
-		The option selected here is then used by esptool when flashing.
-
-	config ESP32S3_FLASH_MODE_DIO
-		bool "Dual IO (DIO)"
-
-	config ESP32S3_FLASH_MODE_DOUT
-		bool "Dual Output (DOUT)"
-
-	config ESP32S3_FLASH_MODE_QIO
-		bool "Quad IO (QIO)"
-
-	config ESP32S3_FLASH_MODE_QOUT
-		bool "Quad Output (QOUT)"
-
-endchoice # ESP32S3_FLASH_MODE
-
-choice ESP32S3_FLASH_FREQ
-	prompt "SPI FLASH frequency"
-	default ESP32S3_FLASH_FREQ_40M
-	---help---
-		SPI FLASH frequency
-
-	config ESP32S3_FLASH_FREQ_120M
-		bool "120 MHz"
-
-	config ESP32S3_FLASH_FREQ_80M
-		bool "80 MHz"
-
-	config ESP32S3_FLASH_FREQ_40M
-		bool "40 MHz"
-
-	config ESP32S3_FLASH_FREQ_20M
-		bool "20 MHz"
-
-endchoice # ESP32S3_FLASH_FREQ
-
 config ESP32S3_RUN_IRAM
 	bool "Run from IRAM"
 	default n
@@ -320,6 +278,12 @@ config ESP32S3_SPI
 config ESP32S3_WDT
 	bool
 	default n
+
+config ESP32S3_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32-S3 efuse support.
 
 config ESP32S3_SPIRAM
 	bool "SPI RAM Support"
@@ -441,6 +405,12 @@ config ESP32S3_RT_TIMER
 	default n
 	---help---
 		Real-Time Timer is relying upon the Systimer 1.
+
+config ESP32S3_WCL
+	bool "World Controller"
+	default n
+	select ARCH_USE_MPU
+	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if BUILD_PROTECTED
 
 endmenu # ESP32-S3 Peripheral Selection
 
@@ -826,7 +796,92 @@ config ESP32S3_SPIFLASH
 	default n
 
 menu "SPI Flash configuration"
-	depends on ESP32S3_SPIFLASH
+
+choice ESP32S3_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESP32S3_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication
+		with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32S3_FLASH_MODE_DIO
+		bool "Dual IO (DIO)"
+
+	config ESP32S3_FLASH_MODE_DOUT
+		bool "Dual Output (DOUT)"
+
+	config ESP32S3_FLASH_MODE_QIO
+		bool "Quad IO (QIO)"
+
+	config ESP32S3_FLASH_MODE_QOUT
+		bool "Quad Output (QOUT)"
+
+endchoice # ESP32S3_FLASH_MODE
+
+choice ESP32S3_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESP32S3_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency
+
+	config ESP32S3_FLASH_FREQ_120M
+		bool "120 MHz"
+
+	config ESP32S3_FLASH_FREQ_80M
+		bool "80 MHz"
+
+	config ESP32S3_FLASH_FREQ_40M
+		bool "40 MHz"
+
+	config ESP32S3_FLASH_FREQ_20M
+		bool "20 MHz"
+
+endchoice # ESP32S3_FLASH_FREQ
+
+config ESP32S3_HAVE_OTA_PARTITION
+	bool
+	default n
+
+if ESP32S3_HAVE_OTA_PARTITION
+
+comment "Application Image OTA Update support"
+
+config ESP32S3_OTA_PRIMARY_SLOT_OFFSET
+	hex "Application image primary slot offset"
+	default 0x10000
+
+config ESP32S3_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config ESP32S3_OTA_SECONDARY_SLOT_OFFSET
+	hex "Application image secondary slot offset"
+	default 0x110000
+
+config ESP32S3_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config ESP32S3_OTA_SLOT_SIZE
+	hex "Application image slot size (in bytes)"
+	default 0x100000
+
+config ESP32S3_OTA_SCRATCH_OFFSET
+	hex "Scratch partition offset"
+	default 0x210000
+
+config ESP32S3_OTA_SCRATCH_SIZE
+	hex "Scratch partition size"
+	default 0x40000
+
+config ESP32S3_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+endif
+
+if ESP32S3_SPIFLASH
 
 comment "General storage MTD configuration"
 
@@ -853,6 +908,8 @@ config ESP32S3_STORAGE_MTD_DEBUG
 		If this option is enabled, Storage MTD driver read and write functions
 		will output input parameters and return values (if applicable).
 
+endif # ESP32S3_SPIFLASH
+
 endmenu # SPI Flash configuration
 
 menu "Application Image Configuration"
@@ -871,6 +928,13 @@ config ESP32S3_APP_FORMAT_LEGACY
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
+
+config ESP32S3_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select ESP32S3_HAVE_OTA_PARTITION
+	---help---
+		The Espressif port of MCUboot supports the loading of unsegmented firmware
+		images.
 
 endchoice # Application Image Format
 
@@ -898,10 +962,50 @@ config ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
 
 endchoice
 
+choice
+	prompt "Target slot for image flashing"
+	default ESP32S3_ESPTOOL_TARGET_PRIMARY
+	depends on ESP32S3_HAVE_OTA_PARTITION
+	---help---
+		Slot to which ESPTOOL will flash the generated binary image.
+
+config ESP32S3_ESPTOOL_TARGET_PRIMARY
+	bool "Application image primary slot"
+	---help---
+		This assumes that the generated image is already pre-validated.
+		This is the recommended option for the initial stages of the
+		application firmware image development.
+
+config ESP32S3_ESPTOOL_TARGET_SECONDARY
+	bool "Application image secondary slot"
+	---help---
+		The application needs to confirm the generated image as valid,
+		otherwise the bootloader may consider it invalid and perform the
+		rollback of the update after a reset.
+		This is the choice most suitable for the development and verification
+		of a secure firmware update workflow.
+
+endchoice
+
+config ESP32S3_APP_MCUBOOT_HEADER_SIZE
+	int "Application image header size (in bytes)"
+	default 32
+	depends on ESP32S3_APP_FORMAT_MCUBOOT
+
 config ESP32S3_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
 	default 0x8000
 	depends on ESP32S3_APP_FORMAT_LEGACY
+
+if BUILD_PROTECTED
+
+config ESP32S3_USER_IMAGE_OFFSET
+	hex "User image offset"
+	default 0x90000
+	---help---
+		Offset in SPI Flash for flashing the User application firmware image.
+
+endif
 
 endmenu # Application Image Configuration
 

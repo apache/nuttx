@@ -209,7 +209,7 @@ void __start(void)
     }
 
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
+   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initialization code
    * at _framfuncs.  This should be done before stm32_clockconfig() is
    * called (in case it has some dependency on initialized C variables).
@@ -245,6 +245,10 @@ void __start(void)
   up_enable_icache();
   up_enable_dcache();
   showprogress('C');
+
+#ifdef CONFIG_SCHED_IRQMONITOR
+  up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
+#endif
 
   /* Perform early serial initialization */
 

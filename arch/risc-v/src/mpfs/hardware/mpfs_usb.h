@@ -27,7 +27,7 @@
 
 #define SOFT_RESET_REG_MASK               0x03u
 
-#define MPFS_USB_NENDPOINTS               8   /* 4 IN and 4 OUT endpoints */
+#define MPFS_USB_NENDPOINTS               9  /* EP0 + 4x IN and 4x OUT EPs */
 #define MPFS_USB_MAXPACKETSIZE(ep)        64
 #define MPFS_USB_MAXPACKETSIZE_HS(ep)     512
 #define MPFS_EP0_MAXPACKET                64
@@ -393,8 +393,8 @@ struct mpfs_req_s
 {
   struct usbdev_req_s   req;          /* Standard USB request */
   struct mpfs_req_s    *flink;        /* Supports a singly linked list */
-  uint16_t              inflight;     /* Number of TX bytes tansmitting or
-                                      * number of RX bytes we are waiting */
+  uint16_t              inflight;     /* Number of TX bytes transmitting or
+                                       * number of RX bytes we are waiting */
 };
 
 union wb_u

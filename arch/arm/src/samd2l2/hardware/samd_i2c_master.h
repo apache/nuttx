@@ -20,7 +20,7 @@
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
- *   Datasheet", 42129J–SAM–12/2013
+ *   Datasheet", 42129J-SAM-12/2013
  */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_MASTER_H
@@ -203,9 +203,9 @@
 #define I2C_CTRLA_INACTOUT_SHIFT   (28)      /* Bits 28-29: Inactive Time-Out */
 #define I2C_CTRLA_INACTOUT_MASK    (7 << I2C_CTRLA_INACTOUT_SHIFT)
 #  define I2C_CTRLA_INACTOUT_DIS   (0 << I2C_CTRLA_INACTOUT_SHIFT) /* Disabled */
-#  define I2C_CTRLA_INACTOUT_55US  (1 << I2C_CTRLA_INACTOUT_SHIFT) /* 5-6 SCL cycle time-out (50-60µs) */
-#  define I2C_CTRLA_INACTOUT_105US (2 << I2C_CTRLA_INACTOUT_SHIFT) /* 10-11 SCL cycle time-out (100-110µs) */
-#  define I2C_CTRLA_INACTOUT_205US (3 << I2C_CTRLA_INACTOUT_SHIFT) /* 20-21 SCL cycle time-out (200-210µs) */
+#  define I2C_CTRLA_INACTOUT_55US  (1 << I2C_CTRLA_INACTOUT_SHIFT) /* 5-6 SCL cycle time-out (50-60Âµs) */
+#  define I2C_CTRLA_INACTOUT_105US (2 << I2C_CTRLA_INACTOUT_SHIFT) /* 10-11 SCL cycle time-out (100-110Âµs) */
+#  define I2C_CTRLA_INACTOUT_205US (3 << I2C_CTRLA_INACTOUT_SHIFT) /* 20-21 SCL cycle time-out (200-210Âµs) */
 
 #define I2C_CTRLA_LOWTOUT          (1 << 30)  /* Bit 30: SCL Low Time-Out */
 

@@ -149,6 +149,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 
       if (ret < 0)
         {
+          leave_critical_section(flags);
           return ret;
         }
 
@@ -161,6 +162,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 
           if (ret < 0)
             {
+              leave_critical_section(flags);
               return ret;
             }
 

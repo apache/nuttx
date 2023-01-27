@@ -226,6 +226,29 @@
   ((d)->ops->i2s_send ? (d)->ops->i2s_send(d,b,c,a,t) : -ENOTTY)
 
 /****************************************************************************
+ * Name: I2S_MCLKFREQUENCY
+ *
+ * Description:
+ *   Set the master clock frequency. Usually, the MCLK is a multiple of the
+ *   sample rate. Most of the audio codecs require setting specific MCLK
+ *   frequency according to the sample rate. NOTE: this parameter may not
+ *   be implemented on I2S driver. If not implemented, the I2S may set
+ *   internally any value to the master clock (or even does not support it).
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   frequency  - The I2S master clock's frequency
+ *
+ * Returned Value:
+ *   Returns the resulting master clock or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2S_MCLKFREQUENCY(d,f) \
+  ((d)->ops->i2s_mclkfrequency ? \
+   (d)->ops->i2s_mclkfrequency(d,f) : -ENOTTY)
+
+/****************************************************************************
  * Name: I2S_IOCTL
  *
  * Description:
@@ -285,6 +308,11 @@ struct i2s_ops_s
                             i2s_callback_t callback,
                             FAR void *arg,
                             uint32_t timeout);
+
+  /* Master Clock methods */
+
+  CODE uint32_t (*i2s_mclkfrequency)(FAR struct i2s_dev_s *dev,
+                                     uint32_t frequency);
 
   /* Ioctl */
 

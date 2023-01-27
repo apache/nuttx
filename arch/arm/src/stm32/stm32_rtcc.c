@@ -815,7 +815,7 @@ int up_rtc_getdatetime(struct tm *tp)
 
   tmp = (dr & RTC_DR_WDU_MASK) >> RTC_DR_WDU_SHIFT;
   tp->tm_wday = tmp % 7;
-  tp->tm_yday = tp->tm_mday +
+  tp->tm_yday = tp->tm_mday - 1 +
                 clock_daysbeforemonth(tp->tm_mon,
                                       clock_isleapyear(tp->tm_year + 1900));
   tp->tm_isdst = 0;

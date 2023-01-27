@@ -46,7 +46,7 @@
 #define A1X_SRAMC_PSECTION   0x01d00000 /* SRAM C          0x01d0:0000-0x01df:ffff Module sram */
 #define A1X_DE_PSECTION      0x01e00000 /* DE, MP, AVG     0x01e0:0000-0x01eb:ffff  */
 #define A1X_DDR_PSECTION     0x40000000 /* DDR-II/DDR-III  0x4000:0000-0xbfff:ffff 2G */
-#define A1X_BROM_PSECTION    0xfff00000 /* BROM            0xffff:0000—0xffff:7fff 32K */
+#define A1X_BROM_PSECTION    0xfff00000 /* BROM            0xffff:0000-0xffff:7fff 32K */
 
 /* A1X Offsets from the internal memory section base address */
 
@@ -136,7 +136,7 @@
 
 /* A1X offsets from the BRROM section base address */
 
-#define A1X_BROM_OFFSET      0x000f0000 /* BROM            0xffff:0000—0xffff:7fff 32K */
+#define A1X_BROM_OFFSET      0x000f0000 /* BROM            0xffff:0000-0xffff:7fff 32K */
 
 /* A1X internal memory physical base addresses */
 
@@ -239,7 +239,7 @@
 #define A1X_PERIPH_SIZE      0x00050000 /* Peripherals     0x01c0:0000-0x01c4:ffff */
 #define A1X_SRAMC_SIZE       0x00100000 /* SRAM C          0x01d0:0000-0x01df:ffff Module sram */
 #define A1X_DE_SIZE          0x000c0000 /* DE, MP, AVG     0x01e0:0000-0x01eb:ffff  */
-#define A1X_BROM_SIZE        0x000f8000 /* BROM            0xfff0:0000—0xffff:7fff 32K */
+#define A1X_BROM_SIZE        0x000f8000 /* BROM            0xfff0:0000-0xffff:7fff 32K */
 
 /* Force configured sizes that might exceed 2GB to be unsigned long */
 
@@ -303,7 +303,7 @@
 #define A1X_SRAMC_VSECTION   0x01d00000 /* SRAM C          0x01d0:0000-0x01df:ffff Module sram */
 #define A1X_DE_VSECTION      0x01e00000 /* DE, MP, AVG     0x01e0:0000-0x01eb:ffff  */
 #define A1X_DDR_VSECTION     0x40000000 /* DDR-II/DDR-III  0x4000:0000-0xbfff:ffff 2G */
-#define A1X_BROM_VSECTION    0xfff00000 /* BROM            0xffff:0000—0xffff:7fff 32K */
+#define A1X_BROM_VSECTION    0xfff00000 /* BROM            0xffff:0000-0xffff:7fff 32K */
 
 #endif
 

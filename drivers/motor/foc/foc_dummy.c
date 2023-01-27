@@ -79,6 +79,12 @@ struct foc_dummy_data_s
 
   foc_current_t current[CONFIG_MOTOR_FOC_PHASES];
 
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+  /* BEMF voltage */
+
+  foc_voltage_t volt[CONFIG_MOTOR_FOC_PHASES];
+#endif
+
   /* FOC worker loop helpers */
 
   bool     state;
@@ -101,6 +107,7 @@ static int foc_dummy_shutdown(FAR struct foc_dev_s *dev);
 static int foc_dummy_start(FAR struct foc_dev_s *dev, bool state);
 static int foc_dummy_pwm_duty_set(FAR struct foc_dev_s *dev,
                                   FAR foc_duty_t *duty);
+static int foc_pwm_off(struct foc_dev_s *dev, bool off);
 static int foc_dummy_ioctl(FAR struct foc_dev_s *dev, int cmd,
                            unsigned long arg);
 static int foc_dummy_bind(FAR struct foc_dev_s *dev,
@@ -140,6 +147,7 @@ static struct foc_lower_ops_s g_foc_dummy_ops =
   foc_dummy_setup,
   foc_dummy_shutdown,
   foc_dummy_pwm_duty_set,
+  foc_pwm_off,
   foc_dummy_start,
   foc_dummy_ioctl,
   foc_dummy_bind,
@@ -464,7 +472,11 @@ static void foc_dummy_notifier_handler(FAR struct foc_dev_s *dev)
     {
       /* Call FOC notifier */
 
-      sim->cb->notifier(dev, sim->current);
+#ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
+      sim->cb->notifier(dev, sim->current, sim->voltage);
+#else
+      sim->cb->notifier(dev, sim->current, NULL);
+#endif
     }
 
   /* Increase counter */
@@ -504,6 +516,21 @@ static int foc_dummy_pwm_duty_set(FAR struct foc_dev_s *dev,
 #else
 #  error
 #endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: foc_pwm_off
+ *
+ * Description:
+ *   Set the 3-phase bridge switches in off state.
+ *
+ ****************************************************************************/
+
+static int foc_pwm_off(struct foc_dev_s *dev, bool off)
+{
+  mtrinfo("[PWM_OFF] %d\n", off);
 
   return OK;
 }
@@ -647,13 +674,8 @@ void foc_dummy_update(void)
 {
   FAR struct foc_dev_s        *dev  = NULL;
   FAR struct foc_dummy_data_s *sim  = NULL;
-  static uint32_t              cntr = 0;
   int                          i    = 0;
   irqstate_t                   flags;
-
-  /* Increase local counter */
-
-  cntr += 1;
 
   flags = enter_critical_section();
 

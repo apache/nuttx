@@ -26,13 +26,13 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout nuttx repo
         uses: actions/checkout@v3
         with:
-          repository: apache/incubator-nuttx
+          repository: apache/nuttx
           path: nuttx
           fetch-depth: 0
 

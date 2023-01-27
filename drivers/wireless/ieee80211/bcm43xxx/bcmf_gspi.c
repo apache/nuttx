@@ -71,9 +71,9 @@ extern const struct bcmf_chip_data g_cyw43439_config_data;
 
 /* Chip-common registers */
 
-#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x06c) )
-#define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504) )
-#define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508) )
+#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x06c))
+#define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504))
+#define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508))
 
 /****************************************************************************
  * Private Data
@@ -321,9 +321,9 @@ static int bcmf_gspi_bus_lowpower(FAR bcmf_gspi_dev_t *gbus, bool enable)
  * Name: bcmf_gspi_thread_isr
  ****************************************************************************/
 
-static int bcmf_gspi_thread_isr(int isr, void *context, void *arg)
+static int bcmf_gspi_thread_isr(int isr, FAR void *context, FAR void *arg)
 {
-  FAR bcmf_gspi_dev_t *gbus = (FAR bcmf_gspi_dev_t  *) arg;
+  FAR bcmf_gspi_dev_t *gbus = (FAR bcmf_gspi_dev_t *)arg;
   FAR gspi_dev_t      *gspi = gbus->gspi;
   int                 semcount;
 
@@ -597,9 +597,9 @@ static int bcmf_gspi_init_device(FAR bcmf_gspi_dev_t *gbus)
 
 static int bcmf_gspi_probe_chip(FAR bcmf_gspi_dev_t *gbus)
 {
-  uint32_t        value;
-  int             chipid;
-  int             ret;
+  uint32_t value;
+  int      chipid;
+  int      ret;
 
   wlinfo("entered\n");
 
@@ -801,11 +801,10 @@ static int bcmf_gspi_hw_uninitialize(FAR bcmf_gspi_dev_t *gbus)
  *
  ****************************************************************************/
 
-static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
-                                    FAR struct gspi_dev_s  *gspi)
+static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s *priv,
+                                    FAR struct gspi_dev_s *gspi)
 {
   FAR bcmf_gspi_dev_t *gbus;
-  int                  ret;
 
   wlinfo("entered.\n");
 
@@ -840,11 +839,7 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
 
   /* Init transmit frames queue */
 
-  if ((ret = nxmutex_init(&gbus->queue_lock)) != OK)
-    {
-      goto exit_free_bus;
-    }
-
+  nxmutex_init(&gbus->queue_lock);
   list_initialize(&gbus->tx_queue);
   list_initialize(&gbus->rx_queue);
 
@@ -854,10 +849,7 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
 
   /* Init thread semaphore */
 
-  if ((ret = nxsem_init(&gbus->thread_signal, 0, 0)) != OK)
-    {
-      goto exit_free_bus;
-    }
+  nxsem_init(&gbus->thread_signal, 0, 0);
 
   /* Register sdio bus */
 
@@ -870,14 +862,6 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
   wlinfo("complete.\n");
 
   return OK;
-
-exit_free_bus:
-
-  wlinfo("failed.\n");
-
-  kmm_free(gbus);
-  priv->bus = NULL;
-  return ret;
 }
 
 /****************************************************************************
@@ -932,11 +916,11 @@ exit_free_device:
 int bcmf_bus_gspi_active(FAR struct bcmf_dev_s *priv,
                          bool                   active)
 {
-  FAR bcmf_gspi_dev_t  *gbus = (FAR bcmf_gspi_dev_t *)priv->bus;
-  FAR gspi_dev_t       *gspi = gbus->gspi;
-  int                   ret  = OK;
-  FAR char             *argv[2];
-  char                  arg1[32];
+  FAR bcmf_gspi_dev_t *gbus = (FAR bcmf_gspi_dev_t *)priv->bus;
+  FAR gspi_dev_t      *gspi = gbus->gspi;
+  int                  ret  = OK;
+  FAR char            *argv[2];
+  char                 arg1[32];
 
   wlinfo("entered.  active = %d\n", active);
 
@@ -1067,7 +1051,7 @@ int bcmf_transfer_bytes(FAR bcmf_gspi_dev_t *gbus,
                         function,
                         address,
                         len,
-                        (FAR uint32_t *) buf);
+                        (FAR uint32_t *)buf);
 
       return ret;
     }
@@ -1079,7 +1063,7 @@ int bcmf_transfer_bytes(FAR bcmf_gspi_dev_t *gbus,
                    function,
                    address,
                    len,
-                   (FAR uint32_t *) buf);
+                   (FAR uint32_t *)buf);
 
   return ret;
 }

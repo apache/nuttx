@@ -87,7 +87,7 @@ int gd32_gd25_automount(int minor)
           return -ENODEV;
         }
 
-#if defined(CONFIG_GD32F4_GD25_FTL)
+#if defined(CONFIG_GD32F450ZK_EVAL_GD25_FTL)
       /* And finally, use the FTL layer to wrap the MTD driver as a block
        * driver at /dev/mtdblockN, where N=minor device number.
        */
@@ -100,7 +100,7 @@ int gd32_gd25_automount(int minor)
           return ret;
         }
 
-#elif defined(CONFIG_GD32F4_GD25_NXFFS)
+#elif defined(CONFIG_GD32F450ZK_EVAL_GD25_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
       ret = nxffs_initialize(mtd);

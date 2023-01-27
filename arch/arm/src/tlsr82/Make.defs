@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tc32/src/tlsr82/Make.defs
+# arch/arm/src/tlsr82/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

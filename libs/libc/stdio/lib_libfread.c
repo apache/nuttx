@@ -55,8 +55,14 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
   /* Make sure that reading from this stream is allowed */
 
-  if (!stream || (stream->fs_oflags & O_RDOK) == 0)
+  if (!stream)
     {
+      _NX_SETERRNO(EBADF);
+      return ERROR;
+    }
+  else if ((stream->fs_oflags & O_RDOK) == 0)
+    {
+      stream->fs_flags |= __FS_FLAG_ERROR;
       _NX_SETERRNO(EBADF);
       return ERROR;
     }

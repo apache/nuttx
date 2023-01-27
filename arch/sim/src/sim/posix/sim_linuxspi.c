@@ -191,7 +191,7 @@ static int linux_spi_lock(struct spi_dev_s *dev, bool lock)
 static void linux_spi_select(struct spi_dev_s *dev, uint32_t devid,
                              bool selected)
 {
-  if (selected == false)
+  if (!selected)
     {
       struct linux_spi_dev_s *priv = (struct linux_spi_dev_s *)dev;
 
@@ -203,8 +203,8 @@ static void linux_spi_select(struct spi_dev_s *dev, uint32_t devid,
 
       struct spi_ioc_transfer transfer_data =
         {
-          .tx_buf = NULL,
-          .rx_buf = NULL,
+          .tx_buf = (unsigned long)NULL,
+          .rx_buf = (unsigned long)NULL,
           .len = 0,
           .cs_change = false,
         };

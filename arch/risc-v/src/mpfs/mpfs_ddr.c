@@ -225,7 +225,6 @@ typedef struct
 
 struct mpfs_ddr_priv_s
 {
-  enum ddr_type_e        ddr_type;
   int                    error;
   uint32_t               timeout;
   uint32_t               retry_count;
@@ -336,19 +335,6 @@ static void mpfs_wait_cycles(uint32_t n)
 }
 
 /****************************************************************************
- * Name: mpfs_ddr_pll_config_scb_turn_off
- *
- * Description:
- *   Turns off the PLL
- *
- ****************************************************************************/
-
-static void mpfs_ddr_pll_config_scb_turn_off(void)
-{
-  modifyreg32(MPFS_IOSCB_MSS_PLL_CTRL, 0x01, 0);
-}
-
-/****************************************************************************
  * Name: mpfs_ddr_off_mode
  *
  * Description:
@@ -356,6 +342,7 @@ static void mpfs_ddr_pll_config_scb_turn_off(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MPFS_DDR_OFF_MODE
 static void mpfs_ddr_off_mode(void)
 {
   /* Sets the mode register to off mode */
@@ -390,8 +377,9 @@ static void mpfs_ddr_off_mode(void)
 
   /* REG_POWERDOWN_B on PLL turn-off, in case was turned on */
 
-  mpfs_ddr_pll_config_scb_turn_off();
+  modifyreg32(MPFS_IOSCB_MSS_PLL_CTRL, 0x01, 0);
 }
+#endif
 
 /****************************************************************************
  * Name: mpfs_set_ddr_mode_reg_and_vs_bits
@@ -406,8 +394,10 @@ static void mpfs_ddr_off_mode(void)
 
 static void mpfs_set_ddr_mode_reg_and_vs_bits(struct mpfs_ddr_priv_s *priv)
 {
-  if ((priv->ddr_type == DDR4) &&
-      (LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_ECC_MASK) ==
+  uint32_t ddrphy_mode = LIBERO_SETTING_DDRPHY_MODE;
+
+#ifdef MPFS_DDR_TYPE_DDR4
+  if ((LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_ECC_MASK) ==
        DDRPHY_MODE_ECC_ON)
     {
       /* For ECC on when DDR4, and data mask on during training, training
@@ -415,14 +405,11 @@ static void mpfs_set_ddr_mode_reg_and_vs_bits(struct mpfs_ddr_priv_s *priv)
        * DM will not be allowed for DDR4 with ECC.
        */
 
-      putreg32((LIBERO_SETTING_DDRPHY_MODE & DMI_DBI_MASK),
-               MPFS_CFG_DDR_SGMII_PHY_DDRPHY_MODE);
+      ddrphy_mode &= DMI_DBI_MASK;
     }
-  else
-    {
-      putreg32((LIBERO_SETTING_DDRPHY_MODE),
-               MPFS_CFG_DDR_SGMII_PHY_DDRPHY_MODE);
-    }
+#endif
+
+  putreg32(ddrphy_mode, MPFS_CFG_DDR_SGMII_PHY_DDRPHY_MODE);
 
   mpfs_wait_cycles(100);
 
@@ -442,7 +429,8 @@ static void mpfs_set_ddr_mode_reg_and_vs_bits(struct mpfs_ddr_priv_s *priv)
 
 static void mpfs_config_ddr_io_pull_up_downs(struct mpfs_ddr_priv_s *priv)
 {
-  if (priv->ddr_type == LPDDR4 && priv->en_addcmd0_ovrt9)
+#ifdef CONFIG_MPFS_DDR_TYPE_LPDDR4
+  if (priv->en_addcmd0_ovrt9)
     {
       /* set overrides (associated bit set to 1 if I/O not being used */
 
@@ -505,6 +493,7 @@ static void mpfs_config_ddr_io_pull_up_downs(struct mpfs_ddr_priv_s *priv)
       putreg32(LIBERO_SETTING_RPC250_WPU_ECC,
                MPFS_CFG_DDR_SGMII_PHY_RPC250);
     }
+#endif
 }
 
 /****************************************************************************
@@ -526,78 +515,68 @@ static void mpfs_config_ddr_io_pull_up_downs(struct mpfs_ddr_priv_s *priv)
 
 static void mpfs_set_ddr_rpc_regs(struct mpfs_ddr_priv_s *priv)
 {
-  switch (priv->ddr_type)
+#if defined(CONFIG_MPFS_DDR_TYPE_DDR3) || defined(CONFIG_MPFS_DDR_TYPE_DDR3L)
+  /* Required when rank x 2 */
+
+  if ((LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_RANK_MASK) ==
+      DDRPHY_MODE_TWO_RANKS)
     {
-      default:
-      case DDR_OFF_MODE:
-        putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
-        break;
-
-      case DDR3L:
-      case DDR3:
-
-        /* Required when rank x 2 */
-
-        if ((LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_RANK_MASK) ==
-            DDRPHY_MODE_TWO_RANKS)
-          {
-            putreg32(1, MPFS_CFG_DDR_SGMII_PHY_SPIO253);
-          }
-
-        putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-        putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
-        break;
-
-      case DDR4:
-        putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC10_ODT);
-        putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC11_ODT);
-        putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-        putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
-        break;
-
-      case LPDDR3:
-        putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC10_ODT);
-        putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC11_ODT);
-        putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-        putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
-        break;
-
-      case LPDDR4:
-
-        /* OVRT_EN_ADDCMD1 (default 0xf00), register named ovrt11 */
-
-        if (!priv->en_addcmd0_ovrt9)
-          {
-            /* If this define is not present, indicates older
-             * Libero core (pre 2.0.109), so we run this code.
-             */
-
-            putreg32(LIBERO_SETTING_RPC_EN_ADDCMD1_OVRT10,
-                     MPFS_CFG_DDR_SGMII_PHY_OVRT10);
-
-            /* Use pull-ups to set the CMD/ADD ODT */
-
-            putreg32(0, MPFS_CFG_DDR_SGMII_PHY_RPC245);
-            putreg32(0xffffffff, MPFS_CFG_DDR_SGMII_PHY_RPC237);
-
-            /* OVRT_EN_ADDCMD2 (default 0xE06U), register named ovrt12 */
-
-            putreg32(LIBERO_SETTING_RPC_EN_ADDCMD2_OVRT11,
-                     MPFS_CFG_DDR_SGMII_PHY_OVRT11);
-          }
-
-            /* Required when rank x 2 */
-
-          if ((LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_RANK_MASK) ==
-              DDRPHY_MODE_TWO_RANKS)
-            {
-              putreg32(1, MPFS_CFG_DDR_SGMII_PHY_SPIO253);
-            }
-
-        putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
-        putreg32(0xa000, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
-        break;
+      putreg32(1, MPFS_CFG_DDR_SGMII_PHY_SPIO253);
     }
+
+  putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+
+#elif defined(CONFIG_MPFS_DDR_TYPE_DDR4)
+
+  putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC10_ODT);
+  putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC11_ODT);
+  putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+
+#elif defined(CONFIG_MPFS_DDR_TYPE_LPDDR3)
+
+  putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC10_ODT);
+  putreg32(2, MPFS_CFG_DDR_SGMII_PHY_RPC11_ODT);
+  putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
+  putreg32(0, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+
+#elif defined(CONFIG_MPFS_DDR_TYPE_LPDDR4)
+
+  /* OVRT_EN_ADDCMD1 (default 0xf00), register named ovrt11 */
+
+  if (!priv->en_addcmd0_ovrt9)
+    {
+      /* If this define is not present, indicates older
+       * Libero core (pre 2.0.109), so we run this code.
+       */
+
+      putreg32(LIBERO_SETTING_RPC_EN_ADDCMD1_OVRT10,
+               MPFS_CFG_DDR_SGMII_PHY_OVRT10);
+
+      /* Use pull-ups to set the CMD/ADD ODT */
+
+      putreg32(0, MPFS_CFG_DDR_SGMII_PHY_RPC245);
+      putreg32(0xffffffff, MPFS_CFG_DDR_SGMII_PHY_RPC237);
+
+      /* OVRT_EN_ADDCMD2 (default 0xE06U), register named ovrt12 */
+
+      putreg32(LIBERO_SETTING_RPC_EN_ADDCMD2_OVRT11,
+               MPFS_CFG_DDR_SGMII_PHY_OVRT11);
+    }
+
+  /* Required when rank x 2 */
+
+  if ((LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_RANK_MASK) ==
+      DDRPHY_MODE_TWO_RANKS)
+    {
+      putreg32(1, MPFS_CFG_DDR_SGMII_PHY_SPIO253);
+    }
+
+  putreg32(0x04, MPFS_CFG_DDR_SGMII_PHY_RPC98);
+  putreg32(0xa000, MPFS_CFG_DDR_SGMII_PHY_SPARE_0);
+
+#endif
 
   putreg32(0x2, MPFS_CFG_DDR_SGMII_PHY_RPC27);
   putreg32(0, MPFS_CFG_DDR_SGMII_PHY_RPC203);
@@ -1601,30 +1580,19 @@ static uint8_t mpfs_ddr_manual_addcmd_refclk_offset(
   uint8_t refclk_offset;
   uint8_t type_array_index;
 
-  type_array_index = (uint8_t)priv->ddr_type;
-  switch (priv->ddr_type)
+  type_array_index = (uint8_t)CONFIG_MPFS_DDR_TYPE;
+
+#if defined(CONFIG_MPFS_DDR_TYPE_DDR3) || defined(CONFIG_MPFS_DDR_TYPE_DDR3L)
+  if (LIBERO_SETTING_DDR_CLK + DDR_FREQ_MARGIN < DDR_1333_MHZ)
     {
-      case DDR3L:
-      case DDR3:
-        if (LIBERO_SETTING_DDR_CLK + DDR_FREQ_MARGIN < DDR_1333_MHZ)
-          {
-            type_array_index = type_array_index + (uint8_t)LPDDR4 + 1;
-          }
-          break;
-
-        case DDR4:
-        case LPDDR3:
-        case LPDDR4:
-          if (LIBERO_SETTING_DDR_CLK + DDR_FREQ_MARGIN < DDR_1600_MHZ)
-            {
-              type_array_index = type_array_index + (uint8_t)LPDDR4 + 1;
-            }
-          break;
-
-        default:
-        case DDR_OFF_MODE:
-          break;
+      type_array_index = type_array_index + (uint8_t)LPDDR4 + 1;
     }
+#else
+  if (LIBERO_SETTING_DDR_CLK + DDR_FREQ_MARGIN < DDR_1600_MHZ)
+    {
+      type_array_index = type_array_index + (uint8_t)LPDDR4 + 1;
+    }
+#endif
 
   DEBUGASSERT(type_array_index < sizeof(refclk_offsets) /
               sizeof(refclk_offsets[0]));
@@ -1691,6 +1659,7 @@ static uint8_t mpfs_get_num_lanes(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MPFS_DDR_TYPE_LPDDR4
 static void mpfs_load_dq(uint8_t lane)
 {
   if (lane < 4)
@@ -1731,6 +1700,7 @@ static void mpfs_load_dq(uint8_t lane)
 
   putreg32(0x08, MPFS_CFG_DDR_SGMII_PHY_EXPERT_MODE_EN);
 }
+#endif
 
 /****************************************************************************
  * Name: mpfs_mtc_test
@@ -3019,7 +2989,6 @@ static void mpfs_ddr_manual_addcmd_training(struct mpfs_ddr_priv_s *priv)
 
 static void mpfs_ddr_sm_init(struct mpfs_ddr_priv_s *priv)
 {
-  priv->ddr_type            = LIBERO_SETTING_DDRPHY_MODE & DDRPHY_MODE_MASK;
   priv->write_latency       = LIBERO_SETTING_CFG_WRITE_LATENCY_SET;
   priv->tip_cfg_params      = LIBERO_SETTING_TIP_CFG_PARAMS;
   priv->dpc_bits            = LIBERO_SETTING_DPC_BITS;
@@ -3056,11 +3025,6 @@ static void mpfs_ddr_fail(struct mpfs_ddr_priv_s *priv)
 
   putreg32(0, MPFS_DDR_CSR_APB_CTRLR_INIT);
   putreg32(0, MPFS_CFG_DDR_SGMII_PHY_TRAINING_START);
-
-  if (priv->ddr_type == DDR_OFF_MODE)
-    {
-      mpfs_ddr_off_mode();
-    }
 }
 
 /****************************************************************************
@@ -3321,13 +3285,12 @@ static void mpfs_training_start(struct mpfs_ddr_priv_s *priv)
   putreg32(LIBERO_SETTING_TRAINING_SKIP_SETTING,
            MPFS_CFG_DDR_SGMII_PHY_TRAINING_SKIP);
 
-  if ((priv->ddr_type == DDR3) || (priv->ddr_type == LPDDR4) ||
-      (priv->ddr_type == DDR4))
-    {
-      /* RX_MD_CLKN */
+#if defined(CONFIG_MPFS_DDR_TYPE_LPDDR4) || defined(CONFIG_MPFS_DDR_TYPE_DDR3) || \
+    defined(CONFIG_MPFS_DDR_TYPE_DDR4)
+  /* RX_MD_CLKN */
 
-      putreg32(0x00, MPFS_CFG_DDR_SGMII_PHY_RPC168);
-    }
+  putreg32(0x00, MPFS_CFG_DDR_SGMII_PHY_RPC168);
+#endif
 
   /* Release reset to training */
 
@@ -3718,31 +3681,27 @@ static int mpfs_dq_dqs(void)
 
 static int mpfs_training_write_calibration(struct mpfs_ddr_priv_s *priv)
 {
-  uint32_t nr_lanes = mpfs_get_num_lanes();
   int error;
 
   /* Now start the write calibration as training has been successful */
 
-  if (priv->ddr_type == LPDDR4)
+#ifdef CONFIG_MPFS_DDR_TYPE_LPDDR4
+  uint32_t nr_lanes;
+  uint8_t lane;
+
+  /* Changed default value to centre dq/dqs on window */
+
+  putreg32(0x0c, MPFS_CFG_DDR_SGMII_PHY_RPC220);
+
+  nr_lanes = mpfs_get_num_lanes();
+  for (lane = 0; lane < nr_lanes; lane++)
     {
-      uint8_t lane;
-
-      /* Changed default value to centre dq/dqs on window */
-
-      putreg32(0x0c, MPFS_CFG_DDR_SGMII_PHY_RPC220);
-
-      for (lane = 0; lane < nr_lanes; lane++)
-        {
-          mpfs_load_dq(lane);
-        }
-
-      error = mpfs_write_calibration_using_mtc(priv);
-    }
-  else
-    {
-      error = mpfs_write_calibration_using_mtc(priv);
+      mpfs_load_dq(lane);
     }
 
+#endif
+
+  error = mpfs_write_calibration_using_mtc(priv);
   if (error)
     {
       merr("Will retry..\n");

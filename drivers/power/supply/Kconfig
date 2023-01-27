@@ -53,7 +53,7 @@ config REGULATOR
 	bool "Regulator core driver support"
 	default n
 	---help---
-		The regulator core driver implements the uper layer framework that the lower
+		The regulator core driver implements the upper layer framework that the lower
 		layer driver can register with, and the common regulator APIs that are easy
 		for other drivers to call for the control of their power supply.
 
@@ -76,6 +76,489 @@ config REGULATOR_RPMSG
 		the rpmsg channel. The remote device(namely server) is responsible for
 		the parse and the completion.
 
-endif
+menuconfig REGULATOR_ACT8945A
+	bool "Qorvo ACT8945A regulator support - MAKE CHANGES WITH CARE"
+	default n
+	---help---
+		-----------------------------------------------------------------------
+		TAKE GREAT CARE - BOARD DAMAGE MAY RESULT FROM INNAPPROPIATE CHANGES
+		-----------------------------------------------------------------------
+
+		The ACT8945A regulator driver implements the lower regulator ops thats
+		use I2C to control the regulator functions.
+
+if REGULATOR_ACT8945A
+
+menu "ACT8945A Regulator System Functions"
+
+choice
+	prompt "ACT8945A SYSLEV threshold"
+	default ACT8945A_SYSLEV_3000
+		---help---
+		The SYSLEV voltage below which the configured SYSLEV mode will be triggered.
+
+config ACT8945A_SYSLEV_2300
+	bool "2.3V"
+
+config ACT8945A_SYSLEV_2400
+	bool "2.4V"
+
+config ACT8945A_SYSLEV_2500
+	bool "2.5"
+
+config ACT8945A_SYSLEV_2600
+	bool "2.6V"
+
+config ACT8945A_SYSLEV_2700
+	bool "2.7V"
+
+config ACT8945A_SYSLEV_2800
+	bool "2.8V"
+
+config ACT8945A_SYSLEV_2900
+	bool "2.9V"
+
+config ACT8945A_SYSLEV_3000
+	bool "3.0V"
+
+config ACT8945A_SYSLEV_3100
+	bool "3.1V"
+
+config ACT8945A_SYSLEV_3200
+	bool "3.2V"
+
+config ACT8945A_SYSLEV_3300
+	bool "3.3V"
+
+config ACT8945A_SYSLEV_3400
+	bool "3.4V"
+
+config ACT8945A_SYSLEV_3500
+	bool "3.5V"
+
+config ACT8945A_SYSLEV_3600
+	bool "3.6V"
+
+config ACT8945A_SYSLEV_3700
+	bool "3.7V"
+
+config ACT8945A_SYSLEV_3800
+	bool "3.8V"
+
+endchoice # ACT8945A SYSLEV threshold
+
+choice 
+	prompt "ACT8945A SYSLEV mode"
+	default ACT8945A_SYSLEV_MODE_INTERRUPT
+	---help---
+		Determines the response to the SYSLEV voltage detector
+		- Generate an interrupt when Vsys < SYSLEV threshold, or
+		- Automatic shutdown    when Vsys < SYSLEV threshold
+
+config ACT8945A_SYSLEV_MODE_INTERRUPT
+	bool "Interrupt"
+	---help---
+		Generates an interrupt when Vsys < SYSLEV threshold.
+		Selecting this will unmask the SYSLEV interrupt as well.
+
+config ACT8945A_SYSLEV_MODE_SHUTDOWN
+	bool "Shutdown"
+	---help---
+		Automatic shutdown when Vsys < SYSLEV threshold
+
+endchoice # ACT8945A_SYSLEV_MODE
+
+choice
+	prompt "ACT8945A Reset Timer Setting"
+	default ACT8945A_TRST_64
+	---help---
+		Defines the reset timeout threshold.
+
+config ACT8945A_TRST_64
+	bool "64ms"
+
+config ACT8945A_TRST_260
+	bool "260ms"
+
+endchoice # ACT8945A Reset Timer Setting
+
+endmenu # ACT8945A System Functions
+
+menu "ACT8945A DCDC1 Configuration"
+
+config ACT8945A_DCDC1_NAME
+	string "DCDC1 name"
+	default "ACT8945A_DCDC1"
+	---help---
+		This is the name used for the ACT8945A DCDC converter output 1.
+		It is used as the consumer name when you get or put a regulator.
+
+config ACT8945A_DCDC1_BOOT_ON
+	bool "Enable DCDC1"
+	default y
+
+config ACT8945A_DCDC1_APPLY_UV
+	bool "Apply DCDC1 new voltage at initialisation"
+	default n
+	---help---
+		If set, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If not set, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+		DO NOT CHANGE THIS UNLESS YOU KNOW WHAT YOU ARE DOING! It is usually
+		a critical processor voltage rail.
+
+config ACT8945A_DCDC1_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_DCDC1_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+endmenu # ACT8945A DCDC1 Configuration
+
+menu "ACT8945A DCDC2 Configuration"
+
+config ACT8945A_DCDC2_NAME
+	string "DCDC2 name"
+	default "ACT8945A_DCDC2"
+	---help---
+		This is the name used for the ACT8945A DCDC converter output 2.
+		It is used as the consumer name when you get or put a regulator.
+	
+config ACT8945A_DCDC2_BOOT_ON
+	bool "Enable DCDC2"
+	default y
+
+config ACT8945A_DCDC2_APPLY_UV
+	bool "Apply DCDC2 new voltage at initialisation"
+	default n
+	---help---
+		If set, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If not set, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=Y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+		DO NOT CHANGE THIS UNLESS YOU KNOW WHAT YOU ARE DOING! It is usually
+		a critical processor voltage rail.
+
+config ACT8945A_DCDC2_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_DCDC2_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+endmenu # ACT8945A DCDC2 Configuration
+
+menu "ACT8945A DCDC3 Configuration"
+
+config ACT8945A_DCDC3_NAME
+	string "DCDC3 name"
+	default "ACT8945A_DCDC3"
+	---help---
+		This is the name used for the ACT8945A DCDC converter output 3.
+		It is used as the consumer name when you get or put a regulator.
+
+config ACT8945A_DCDC3_BOOT_ON
+	bool "Enable DCDC3"
+	default y
+
+config ACT8945A_DCDC3_APPLY_UV
+	bool "Apply DCDC3 new voltage at initialisation"
+	default n
+	---help---
+		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If set to 0, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+		DO NOT CHANGE THIS UNLESS YOU KNOW WHAT YOU ARE DOING! It is usually
+		a critical processor voltage rail.
+
+config ACT8945A_DCDC3_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 3300
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_DCDC3_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 3300
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+endmenu # ACT8945A DCDC 3 Configuration
+
+menu "ACT8945A LDO Output 1 Configuration"
+
+config ACT8945A_LDO1_NAME
+	string "LDO1 name"
+	default "ACT8945A_LDO1"
+	---help---
+		This is the name used for the ACT8945A LDO converter output 1.
+		It is used as the consumer name when you get or put a regulator.
+
+config ACT8945A_LDO1_BOOT_ON
+	bool "Enable LDO1"
+	default y
+
+config ACT8945A_LDO1_APPLY_UV
+	bool "Apply LDO1 new voltage at initialisation"
+	default n
+	---help---
+		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If set to 0, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+config ACT8945A_LDO1_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 2500
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_LDO1_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 2500
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+config ACT8945A_LDO1_PULLDOWN
+	bool "Enable LDO1 pulldown when disabled"
+	default y
+	---help---
+		If enabled, the LDO output is discharged through a 1k5 resistor
+		when the LDO is in shutdown
+
+endmenu # ACT8945A LDO Output 1 Configuration
+
+menu "ACT8945A LDO Output 2 Configuration"
+
+config ACT8945A_LDO2_NAME
+	string "LDO2 name"
+	default "ACT8945A_LDO2"
+	---help---
+		This is the name used for the ACT8945A LDO converter output 2.
+		It is used as the consumer name when you get or put a regulator.
+
+config ACT8945A_LDO2_BOOT_ON
+	bool "Enable LDO2"
+	default y
+
+config ACT8945A_LDO2_APPLY_UV
+	bool "Apply LDO2 new voltage at initialisation"
+	default n
+	---help---
+		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If set to 0, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+config ACT8945A_LDO2_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 3300
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_LDO2_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 3300
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+config ACT8945A_LDO2_PULLDOWN
+	bool "Enable LDO2 pulldown when disabled"
+	default y
+	---help---
+		If enabled, the LDO output is discharged through a 1k5 resistor
+		when the LDO is in shutdown
+
+endmenu # ACT8945A LDO Output 2 Configuration
+
+menu "ACT8945A LDO Output 3 Configuration"
+
+config ACT8945A_LDO3_NAME
+	string "LDO3 name"
+	default "ACT8945A_LDO3"
+	---help---
+		This is the name used for the ACT8945A LDO converter output 2.
+		It is used as the consumer name when you get or put a regulator.
+
+config ACT8945A_LDO3_BOOT_ON
+	bool "Enable LDO3"
+	default n
+
+config ACT8945A_LDO3_APPLY_UV
+	bool "Apply LDO3 new voltage at initialisation"
+	default n
+	---help---
+		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If set to 0, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+config ACT8945A_LDO3_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_LDO3_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+config ACT8945A_LDO3_PULLDOWN
+	bool "Enable LDO3 pulldown when disabled"
+	default y
+	---help---
+		If enabled, the LDO output is discharged through a 1k5 resistor
+		when the LDO is in shutdown
+
+endmenu # ACT8945A LDO Output 3 Configuration
+
+menu "ACT8945A LDO Output 4 Configuration"
+
+config ACT8945A_LDO4_NAME
+	string "LDO4 name"
+	default "ACT8945A_LDO4"
+	---help---
+		This is the name used for the ACT8945A LDO converter output 2.
+		It is used as the consumer name when you get or put a regulator.
+
+config ACT8945A_LDO4_BOOT_ON
+	bool "Enable LDO4"
+	default n
+
+config ACT8945A_LDO4_APPLY_UV
+	bool "Apply LDO4 new voltage at initialisation"
+	default n
+	---help---
+		If set, the driver will attempt to set the voltage nearest to MIN_UV,
+		that is also lower than MAX_UV, during initialisation.
+		
+		If not, MIN_UV and MAX_UV values will be ignored
+		during initialisation.
+
+		If the regulator is enabled here, and APPLY_UV=y, the board
+		voltage will actually change during initialisation.
+
+		If the regulator is not enabled here, and APPLY_UV=y, the
+		regulator voltage will be applied to the device in readiness for
+		the regulator being enabled later.
+
+config ACT8945A_LDO4_MIN_UV
+	int "The minimum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If =1, the voltage nearest to this, and less than
+		MAX_UV will be applied during initialisation.
+
+config ACT8945A_LDO4_MAX_UV
+	int "The maximum acceptable output voltage (600-3900mV)"
+	default 600
+	range 600 3900
+	---help---
+		If APPLY_UV=Y, this is the maximum voltage that will be
+		applied during initialisation.
+
+config ACT8945A_LDO4_PULLDOWN
+	bool "Enable LDO4 pulldown when disabled"
+	default y
+	---help---
+		If enabled, the LDO output is discharged through a 1k5 resistor
+		when the LDO is in shutdown
+
+endmenu # ACT8945A LDO4 Configuration
+
+endif # REGULATOR_ACT8945A
+
+endif # REGULATOR
 
 endmenu

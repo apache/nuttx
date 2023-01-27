@@ -135,47 +135,6 @@ config ESP32_ESP32DXWDXX
 	select ESP32_DUAL_CPU
 	select ARCH_HAVE_I2CRESET
 
-choice ESP32_FLASH_MODE
-	prompt "SPI FLASH mode"
-	default ESP32_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication with the attached SPI flash chip.
-		The option selected here is then used by esptool when flashing.
-
-config ESP32_FLASH_MODE_DIO
-	bool "Dual IO (DIO)"
-
-config ESP32_FLASH_MODE_DOUT
-	bool "Dual Output (DOUT)"
-
-config ESP32_FLASH_MODE_QIO
-	bool "Quad IO (QIO)"
-
-config ESP32_FLASH_MODE_QOUT
-	bool "Quad Output (QOUT)"
-
-endchoice # ESP32_FLASH_MODE
-
-choice ESP32_FLASH_FREQ
-	prompt "SPI FLASH frequency"
-	default ESP32_FLASH_FREQ_40M
-	---help---
-		SPI FLASH frequency
-
-config ESP32_FLASH_FREQ_80M
-	bool "80 MHz"
-
-config ESP32_FLASH_FREQ_40M
-	bool "40 MHz"
-
-config ESP32_FLASH_FREQ_26M
-	bool "26 MHz"
-
-config ESP32_FLASH_FREQ_20M
-	bool "20 MHz"
-
-endchoice # ESP32_FLASH_FREQ
-
 choice ESP32_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32_DEFAULT_CPU_FREQ_240
@@ -223,16 +182,6 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
-config ESP32_RTC_HEAP
-	bool "Use the RTC memory as a separate heap"
-	select ARCH_HAVE_EXTRA_HEAPS
-	default n
-
-config ESP32_IRAM_HEAP
-	bool "Use the rest of IRAM as a separate heap"
-	select ARCH_HAVE_EXTRA_HEAPS
-	default n
-
 menu "ESP32 Peripheral Selection"
 
 config ESP32_UART
@@ -276,20 +225,6 @@ config ESP32_TWAI
 	default n
 	select CAN
 
-config ESP32_I2S0
-	bool "I2S 0"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
-
-config ESP32_I2S1
-	bool "I2S 2"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
-
 config ESP32_LEDC
 	bool "LEDC (PWM)"
 	default n
@@ -299,9 +234,8 @@ config ESP32_LEDC
 		Enable support to PWM on ESP32 using LEDC peripheral.
 
 config ESP32_PCNT
-	bool "Pulse Count Module (PCNT)"
+	bool "Pulse Counter (PCNT / QE) Module"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		No yet implemented
 
@@ -333,6 +267,282 @@ config ESP32_SDMMC
 	---help---
 		No yet implemented
 
+config ESP32_I2S
+	bool "I2S"
+	select I2S
+	---help---
+		See the Board Selection menu to configure the pins used by I2S.
+
+if ESP32_I2S
+
+config ESP32_I2S0
+	bool "I2S 0"
+	default n
+	select ARCH_DMA
+	select ESP32_GPIO_IRQ
+
+if ESP32_I2S0
+
+config ESP32_I2S0_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receive logic
+
+config ESP32_I2S0_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmit logic
+
+choice
+	prompt "I2S0 role"
+	default ESP32_I2S0_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S0.
+
+config ESP32_I2S0_ROLE_MASTER
+	bool "Master"
+
+config ESP32_I2S0_ROLE_SLAVE
+	bool "Slave"
+
+endchoice
+
+choice
+	prompt "Bit width"
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S0_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESP32_I2S0_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESP32_I2S0_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESP32_I2S0_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice
+
+config ESP32_I2S0_DATA_BIT_WIDTH
+	int
+	default 8 if ESP32_I2S0_DATA_BIT_WIDTH_8BIT
+	default 16 if ESP32_I2S0_DATA_BIT_WIDTH_16BIT
+	default 24 if ESP32_I2S0_DATA_BIT_WIDTH_24BIT
+	default 32 if ESP32_I2S0_DATA_BIT_WIDTH_32BIT
+
+config ESP32_I2S0_SAMPLE_RATE
+	int "I2S0 sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S0_BCLKPIN
+	int "I2S0 BCLK pin"
+	default 4
+	range 0 33 if ESP32_I2S0_ROLE_MASTER
+	range 0 39 if ESP32_I2S0_ROLE_SLAVE
+
+config ESP32_I2S0_WSPIN
+	int "I2S0 WS pin"
+	default 5
+	range 0 33 if ESP32_I2S0_ROLE_MASTER
+	range 0 39 if ESP32_I2S0_ROLE_SLAVE
+
+config ESP32_I2S0_DINPIN
+	int "I2S0 DIN pin"
+	depends on ESP32_I2S0_RX
+	default 19
+	range 0 39
+
+config ESP32_I2S0_DOUTPIN
+	int "I2S0 DOUT pin"
+	depends on ESP32_I2S0_TX
+	default 18
+	range 0 33
+
+config ESP32_I2S0_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESP32_I2S0_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+choice
+	prompt "I2S0 MCLK pin"
+	depends on ESP32_I2S0_MCLK
+	default ESP32_I2S0_MCLKPIN_GPIO0
+	---help---
+		Selects the pin to output master clock.
+
+config ESP32_I2S0_MCLKPIN_GPIO0
+	bool "GPIO0"
+
+config ESP32_I2S0_MCLKPIN_GPIO1
+	bool "GPIO1 (U0TXD)"
+
+config ESP32_I2S0_MCLKPIN_GPIO3
+	bool "GPIO3 [U0RXD]"
+
+endchoice
+
+config ESP32_I2S0_MCLKPIN
+	int
+	default 0
+	default 0 if ESP32_I2S0_MCLKPIN_GPIO0
+	default 1 if ESP32_I2S0_MCLKPIN_GPIO1
+	default 3 if ESP32_I2S0_MCLKPIN_GPIO3
+
+endif #ESP32_I2S0
+
+config ESP32_I2S1
+	bool "I2S 1"
+	default n
+	select ARCH_DMA
+	select ESP32_GPIO_IRQ
+
+if ESP32_I2S1
+
+config ESP32_I2S1_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receive logic
+
+config ESP32_I2S1_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmit logic
+
+choice
+	prompt "I2S1 role"
+	default ESP32_I2S1_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S1.
+
+config ESP32_I2S1_ROLE_MASTER
+	bool "Master"
+
+config ESP32_I2S1_ROLE_SLAVE
+	bool "Slave"
+
+endchoice
+
+choice
+	prompt "Bit width"
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S1_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESP32_I2S1_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESP32_I2S1_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESP32_I2S1_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice
+
+config ESP32_I2S1_DATA_BIT_WIDTH
+	int
+	default 8 if ESP32_I2S1_DATA_BIT_WIDTH_8BIT
+	default 16 if ESP32_I2S1_DATA_BIT_WIDTH_16BIT
+	default 24 if ESP32_I2S1_DATA_BIT_WIDTH_24BIT
+	default 32 if ESP32_I2S1_DATA_BIT_WIDTH_32BIT
+
+config ESP32_I2S1_SAMPLE_RATE
+	int "I2S1 sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S1_BCLKPIN
+	int "I2S1 BCLK pin"
+	default 22
+	range 0 33 if ESP32_I2S1_ROLE_MASTER
+	range 0 39 if ESP32_I2S1_ROLE_SLAVE
+
+config ESP32_I2S1_WSPIN
+	int "I2S1 WS pin"
+	default 23
+	range 0 33 if ESP32_I2S1_ROLE_MASTER
+	range 0 39 if ESP32_I2S1_ROLE_SLAVE
+
+config ESP32_I2S1_DINPIN
+	int "I2S1 DIN pin"
+	depends on ESP32_I2S1_RX
+	default 26
+	range 0 39
+
+config ESP32_I2S1_DOUTPIN
+	int "I2S1 DOUT pin"
+	depends on ESP32_I2S1_TX
+	default 25
+	range 0 33
+
+config ESP32_I2S1_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESP32_I2S1_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+choice
+	prompt "I2S1 MCLK pin"
+	depends on ESP32_I2S1_MCLK
+	default ESP32_I2S1_MCLKPIN_GPIO0
+	---help---
+		Selects the pin to output master clock.
+
+config ESP32_I2S1_MCLKPIN_GPIO0
+	bool "GPIO0"
+
+config ESP32_I2S1_MCLKPIN_GPIO1
+	bool "GPIO1 (U0TXD)"
+
+config ESP32_I2S1_MCLKPIN_GPIO3
+	bool "GPIO3 [U0RXD]"
+
+endchoice
+
+config ESP32_I2S1_MCLKPIN
+	int
+	default 0
+	default 0 if ESP32_I2S1_MCLKPIN_GPIO0
+	default 1 if ESP32_I2S1_MCLKPIN_GPIO1
+	default 3 if ESP32_I2S1_MCLKPIN_GPIO3
+
+endif #ESP32_I2S1
+
+config I2S_DMADESC_NUM
+	int "I2S DMA maximum number of descriptors"
+	default 2
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a I2S DMA transfer.
+
+endif #ESP32_I2S
+
+
 config ESP32_SPI
 	bool
 	default n
@@ -359,10 +569,9 @@ config ESP32_SPI3
 	select SPI
 
 config ESP32_SPIRAM
-	bool "SPI RAM Support"
+	bool "SPI RAM"
 	default n
 	select ARCH_HAVE_HEAP2
-	select XTENSA_IMEM_USE_SEPARATE_HEAP
 
 if ESP32_SPIRAM && SMP
 
@@ -438,6 +647,7 @@ config ESP32_RWDT
 	bool "RTC Watchdog Timer"
 	default n
 	select ESP32_WDT
+	select ESP32_RTCIO_IRQ
 	---help---
 		Includes RWDT. This watchdog timer is from the RTC module.
 		When it is selected, if the developer sets it to reset on expiration
@@ -518,7 +728,8 @@ config ESP32_PID
 	bool "PID Controller"
 	default n
 	select ARCH_USE_MPU
-	select XTENSA_HAVE_EXCEPTION_HOOKS if BUILD_PROTECTED
+	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if BUILD_PROTECTED
+	select XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS if BUILD_PROTECTED
 	depends on EXPERIMENTAL
 
 endmenu # ESP32 Peripheral Selection
@@ -543,6 +754,41 @@ config ESP32_ULP_COPROC_RESERVE_MEM
 	int "Reserved ULP co-processor DRAM"
 	default 0
 
+comment "Additional Heaps"
+
+choice ESP32_SPIRAM_HEAP
+	prompt "SPI RAM heap function"
+	default ESP32_SPIRAM_COMMON_HEAP if BUILD_FLAT
+	default ESP32_SPIRAM_USER_HEAP if BUILD_PROTECTED
+	depends on ESP32_SPIRAM
+	---help---
+		Select how the SPI RAM will be used as heap.
+
+	config ESP32_SPIRAM_COMMON_HEAP
+		bool "Additional region to kernel heap"
+
+	config ESP32_SPIRAM_USER_HEAP
+		bool "Separated userspace heap"
+		select MM_KERNEL_HEAP
+		select ESP32_USER_DATA_EXTMEM if BUILD_PROTECTED
+
+endchoice
+
+config ESP32_IMM_HEAP
+	bool "Reserve part of DRAM as a separate heap"
+	select XTENSA_IMEM_USE_SEPARATE_HEAP
+	default n
+
+config ESP32_RTC_HEAP
+	bool "Use the RTC memory as a separate heap"
+	select ARCH_HAVE_EXTRA_HEAPS
+	default n
+
+config ESP32_IRAM_HEAP
+	bool "Use the rest of IRAM as a separate heap"
+	select ARCH_HAVE_EXTRA_HEAPS
+	default n
+
 endmenu # Memory Configuration
 
 config ESP32_GPIO_IRQ
@@ -551,7 +797,13 @@ config ESP32_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
-menu "UART configuration"
+config ESP32_RTCIO_IRQ
+	bool "RTC IO interrupts"
+	default n
+	---help---
+		Enable support for interrupting RTC peripherals
+
+menu "UART Configuration"
 	depends on ESP32_UART
 
 if ESP32_UART0
@@ -608,6 +860,7 @@ config ESP32_UART0_TXDMA
 	bool "Enable UART0 TX DMA"
 	select ARCH_DMA
 	select UART0_TXDMA
+	select ESP32_IMM_HEAP if ESP32_SPIRAM
 	depends on EXPERIMENTAL
 	---help---
 		Due to a hardware bug on the DMA used by the UART
@@ -674,6 +927,7 @@ config ESP32_UART1_TXDMA
 	bool "Enable UART1 TX DMA"
 	select ARCH_DMA
 	select UART1_TXDMA
+	select ESP32_IMM_HEAP if ESP32_SPIRAM
 	depends on EXPERIMENTAL
 	---help---
 		Due to a hardware bug on the DMA used by the UART
@@ -740,6 +994,7 @@ config ESP32_UART2_TXDMA
 	bool "Enable UART2 TX DMA"
 	select ARCH_DMA
 	select UART2_TXDMA
+	select ESP32_IMM_HEAP if ESP32_SPIRAM
 	depends on EXPERIMENTAL
 	---help---
 		Due to a hardware bug on the DMA used by the UART
@@ -779,7 +1034,7 @@ config UART_DMADESC_NUM
 
 endmenu # UART configuration
 
-menu "I2C configuration"
+menu "I2C Configuration"
 	depends on ESP32_I2C
 
 if ESP32_I2C0
@@ -872,7 +1127,7 @@ config ESP32_TWAI_REGDEBUG
 
 endmenu #ESP32_TWAI
 
-menu "SPI configuration"
+menu "SPI Configuration"
 	depends on ESP32_SPI
 
 config ESP32_SPI_SWCS
@@ -891,11 +1146,15 @@ config ESP32_SPI_UDCS
 config ESP32_SPI2_DMA
 	bool "SPI2 use DMA"
 	default y
+	select ARCH_DMA
+	select ESP32_IMM_HEAP if ESP32_SPIRAM
 	depends on ESP32_SPI2
 
 config ESP32_SPI3_DMA
 	bool "SPI3 use DMA"
 	default y
+	select ARCH_DMA
+	select ESP32_IMM_HEAP if ESP32_SPIRAM
 	depends on ESP32_SPI3
 
 config SPI_DMADESC_NUM
@@ -937,6 +1196,37 @@ config ESP32_SPI2_MISOPIN
 	default 12
 	range 0 39
 
+choice ESP32_SPI2_MASTER_IO
+	prompt "SPI2 master I/O mode"
+	default ESP32_SPI2_MASTER_IO_RW
+
+config ESP32_SPI2_MASTER_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI2_MASTER_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI2_MASTER_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI2_MASTER_IO
+
+choice ESP32_SPI2_SLAVE_IO
+	prompt "SPI2 slave I/O mode"
+	default ESP32_SPI2_SLAVE_IO_RW
+	depends on SPI_SLAVE
+
+config ESP32_SPI2_SLAVE_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI2_SLAVE_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI2_SLAVE_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI2_SLAVE_IO
+
 endif # ESP32_SPI2
 
 if ESP32_SPI3
@@ -961,12 +1251,492 @@ config ESP32_SPI3_MISOPIN
 	default 19
 	range 0 39
 
+choice ESP32_SPI3_MASTER_IO
+	prompt "SPI3 master I/O mode"
+	default ESP32_SPI3_MASTER_IO_RW
+
+config ESP32_SPI3_MASTER_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI3_MASTER_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI3_MASTER_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI3_MASTER_IO
+
+choice ESP32_SPI3_SLAVE_IO
+	prompt "SPI3 slave I/O mode"
+	default ESP32_SPI3_SLAVE_IO_RW
+	depends on SPI_SLAVE
+
+config ESP32_SPI3_SLAVE_IO_RW
+	bool "Read & Write"
+
+config ESP32_SPI3_SLAVE_IO_RO
+	bool "Read Only"
+
+config ESP32_SPI3_SLAVE_IO_WO
+	bool "Write Only"
+
+endchoice # ESP32_SPI3_SLAVE_IO
+
 endif # ESP32_SPI3
 
 endmenu # ESP32_SPI
 
-menu "SPI Flash configuration"
-	depends on ESP32_SPIFLASH
+menu "Pulse Counter (PCNT) Configuration"
+	depends on ESP32_PCNT
+
+config ESP32_PCNT_AS_QE
+	bool
+	default n
+
+config ESP32_PCNT_U0
+	bool "Enable PCNT Unit 0"
+	default n
+
+if ESP32_PCNT_U0
+
+config ESP32_PCNT_U0_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U0_CH0_EDGE_PIN
+	int "PCNT_U0 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U0_CH0_LEVEL_PIN
+	int "PCNT_U0 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U0_QE
+
+config ESP32_PCNT_U0_CH1_EDGE_PIN
+	int "PCNT_U0 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U0_QE
+
+config ESP32_PCNT_U0_CH1_LEVEL_PIN
+	int "PCNT_U0 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U0_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U0_FILTER_EN
+
+config ESP32_PCNT_U0_FILTER_THRES
+	int "PCNT_U0 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U0_FILTER_EN
+
+endif # ESP32_PCNT_U0
+
+config ESP32_PCNT_U1
+	bool "Enable PCNT Unit 1"
+	default n
+
+if ESP32_PCNT_U1
+
+config ESP32_PCNT_U1_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U1_CH0_EDGE_PIN
+	int "PCNT_U1 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U1_CH0_LEVEL_PIN
+	int "PCNT_U1 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U1_QE
+
+config ESP32_PCNT_U1_CH1_EDGE_PIN
+	int "PCNT_U1 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U1_QE
+
+config ESP32_PCNT_U1_CH1_LEVEL_PIN
+	int "PCNT_U1 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U1_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U1_FILTER_EN
+
+config ESP32_PCNT_U1_FILTER_THRES
+	int "PCNT_U1 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U1_FILTER_EN
+
+endif # ESP32_PCNT_U1
+
+config ESP32_PCNT_U2
+	bool "Enable PCNT Unit 2"
+	default n
+
+if ESP32_PCNT_U2
+
+config ESP32_PCNT_U2_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U2_CH0_EDGE_PIN
+	int "PCNT_U2 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U2_CH0_LEVEL_PIN
+	int "PCNT_U2 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U2_QE
+
+config ESP32_PCNT_U2_CH1_EDGE_PIN
+	int "PCNT_U2 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U2_QE
+
+config ESP32_PCNT_U2_CH1_LEVEL_PIN
+	int "PCNT_U2 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U2_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U2_FILTER_EN
+
+config ESP32_PCNT_U2_FILTER_THRES
+	int "PCNT_U2 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U2_FILTER_EN
+
+endif # ESP32_PCNT_U2
+
+config ESP32_PCNT_U3
+	bool "Enable PCNT Unit 3"
+	default n
+
+if ESP32_PCNT_U3
+
+config ESP32_PCNT_U3_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U3_CH0_EDGE_PIN
+	int "PCNT_U3 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U3_CH0_LEVEL_PIN
+	int "PCNT_U3 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U3_QE
+
+config ESP32_PCNT_U3_CH1_EDGE_PIN
+	int "PCNT_U3 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U3_QE
+
+config ESP32_PCNT_U3_CH1_LEVEL_PIN
+	int "PCNT_U3 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U3_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U3_FILTER_EN
+
+config ESP32_PCNT_U3_FILTER_THRES
+	int "PCNT_U3 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U3_FILTER_EN
+
+endif # ESP32_PCNT_U3
+
+config ESP32_PCNT_U4
+	bool "Enable PCNT Unit 4"
+	default n
+
+if ESP32_PCNT_U4
+
+config ESP32_PCNT_U4_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U4_CH0_EDGE_PIN
+	int "PCNT_U4 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U4_CH0_LEVEL_PIN
+	int "PCNT_U4 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U4_QE
+
+config ESP32_PCNT_U4_CH1_EDGE_PIN
+	int "PCNT_U4 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U4_QE
+
+config ESP32_PCNT_U4_CH1_LEVEL_PIN
+	int "PCNT_U4 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U4_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U4_FILTER_EN
+
+config ESP32_PCNT_U4_FILTER_THRES
+	int "PCNT_U4 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U4_FILTER_EN
+
+endif # ESP32_PCNT_U4
+
+config ESP32_PCNT_U5
+	bool "Enable PCNT Unit 5"
+	default n
+	select ESP32_PCNT_AS_QE
+
+if ESP32_PCNT_U5
+
+config ESP32_PCNT_U5_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+
+config ESP32_PCNT_U5_CH0_EDGE_PIN
+	int "PCNT_U5 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U5_CH0_LEVEL_PIN
+	int "PCNT_U5 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U5_QE
+
+config ESP32_PCNT_U5_CH1_EDGE_PIN
+	int "PCNT_U5 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U5_QE
+
+config ESP32_PCNT_U5_CH1_LEVEL_PIN
+	int "PCNT_U5 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U5_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U5_FILTER_EN
+
+config ESP32_PCNT_U5_FILTER_THRES
+	int "PCNT_U5 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U5_FILTER_EN
+
+endif # ESP32_PCNT_U5
+
+config ESP32_PCNT_U6
+	bool "Enable PCNT Unit 6"
+	default n
+
+if ESP32_PCNT_U6
+
+config ESP32_PCNT_U6_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U6_CH0_EDGE_PIN
+	int "PCNT_U6 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U6_CH0_LEVEL_PIN
+	int "PCNT_U6 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U6_QE
+
+config ESP32_PCNT_U6_CH1_EDGE_PIN
+	int "PCNT_U6 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U6_QE
+
+config ESP32_PCNT_U6_CH1_LEVEL_PIN
+	int "PCNT_U6 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U6_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U6_FILTER_EN
+
+config ESP32_PCNT_U6_FILTER_THRES
+	int "PCNT_U6 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U6_FILTER_EN
+
+endif # ESP32_PCNT_U6
+
+config ESP32_PCNT_U7
+	bool "Enable PCNT Unit 7"
+	default n
+
+if ESP32_PCNT_U7
+
+config ESP32_PCNT_U7_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP32_PCNT_AS_QE
+
+config ESP32_PCNT_U7_CH0_EDGE_PIN
+	int "PCNT_U7 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP32_PCNT_U7_CH0_LEVEL_PIN
+	int "PCNT_U7 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP32_PCNT_U7_QE
+
+config ESP32_PCNT_U7_CH1_EDGE_PIN
+	int "PCNT_U7 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP32_PCNT_U7_QE
+
+config ESP32_PCNT_U7_CH1_LEVEL_PIN
+	int "PCNT_U7 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP32_PCNT_U7_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP32_PCNT_U7_FILTER_EN
+
+config ESP32_PCNT_U7_FILTER_THRES
+	int "PCNT_U7 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP32_PCNT_U7_FILTER_EN
+
+endif # ESP32_PCNT_U7
+
+endmenu # ESP32_PCNT
+
+menu "SPI Flash Configuration"
+
+choice ESP32_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESP32_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+config ESP32_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
+
+config ESP32_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
+
+config ESP32_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
+
+config ESP32_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
+
+endchoice # ESP32_FLASH_MODE
+
+choice ESP32_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESP32_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency.
+
+config ESP32_FLASH_FREQ_80M
+	bool "80 MHz"
+
+config ESP32_FLASH_FREQ_40M
+	bool "40 MHz"
+
+config ESP32_FLASH_FREQ_26M
+	bool "26 MHz"
+
+config ESP32_FLASH_FREQ_20M
+	bool "20 MHz"
+
+endchoice # ESP32_FLASH_FREQ
 
 if ESP32_HAVE_OTA_PARTITION
 
@@ -1011,7 +1781,9 @@ config ESP32_OTA_SCRATCH_DEVPATH
 
 endif
 
-comment "General storage MTD configuration"
+if ESP32_SPIFLASH
+
+comment "General storage MTD Configuration"
 
 config ESP32_STORAGE_MTD_ENCRYPT
 	bool "Encrypt Storage MTD partition"
@@ -1041,7 +1813,7 @@ config ESP32_SPIFLASH_DEBUG
 
 if ESP32_APP_FORMAT_LEGACY
 
-comment "Partition Table configuration"
+comment "Partition Table Configuration"
 
 config ESP32_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
@@ -1054,11 +1826,13 @@ config ESP32_PARTITION_MOUNTPT
 	default "/dev/esp/partition/"
 	depends on ESP32_PARTITION_TABLE
 
-endif
+endif # ESP32_PARTITION_TABLE
 
-endmenu # ESP32_SPIFLASH
+endif # ESP32_SPIFLASH
 
-menu "SPI RAM Config"
+endmenu # SPI Flash configuration
+
+menu "SPI RAM Configuration"
 	depends on ESP32_SPIRAM
 
 choice ESP32_SPIRAM_TYPE
@@ -1099,7 +1873,7 @@ endchoice # ESP32_SPIRAM_SPEED
 
 config ESP32_SPIRAM_BOOT_INIT
 	bool "Initialize SPI RAM during startup"
-	depends on ESP32_SPIRAM
+	depends on ESP32_SPIRAM && !ESP32_USER_DATA_EXTMEM
 	default y
 	---help---
 		If this is enabled, the SPI RAM will be enabled during initial
@@ -1163,7 +1937,7 @@ config SPIRAM_BANKSWITCH_RESERVE
 
 endmenu #SPI RAM Config
 
-menu "Ethernet configuration"
+menu "Ethernet Configuration"
 	depends on ESP32_EMAC
 
 config ESP32_ETH_NRXDESC
@@ -1186,10 +1960,15 @@ config ESP32_ETH_MDIOPIN
 	default 18
 	range 0 39
 
+config ESP32_ETH_ENABLE_PHY_RSTPIN
+	bool "Enable Reset PHY Pin"
+	default y
+
 config ESP32_ETH_PHY_RSTPIN
 	int "Reset PHY Pin"
 	default 5
 	range 0 39
+	depends on ESP32_ETH_ENABLE_PHY_RSTPIN
 
 config ESP32_ETH_PHY_ADDR
 	int "PHY address"
@@ -1197,7 +1976,7 @@ config ESP32_ETH_PHY_ADDR
 
 endmenu # ESP32_EMAC
 
-menu "Wi-Fi configuration"
+menu "Wi-Fi Configuration"
 	depends on ESP32_WIFI
 
 choice
@@ -1334,6 +2113,12 @@ choice EXAMPLE_POWER_SAVE_MODE
 		bool "maximum modem"
 endchoice
 
+config ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
+	bool "Enable optimization of WLAN driver buffer"
+	default n
+	---help---
+		Enable optimization of WLAN memory
+
 endmenu # ESP32_WIFI
 
 menu "BLE Configuration"
@@ -1445,7 +2230,7 @@ config ESP32_RTC_CLK_SRC_INT_8MD256
 endchoice
 endmenu # "RTC Configuration"
 
-menu "LEDC configuration"
+menu "LEDC Configuration"
 	depends on ESP32_LEDC
 
 menuconfig ESP32_LEDC_TIM0
@@ -1554,13 +2339,9 @@ config ESP32_APP_FORMAT_LEGACY
 config ESP32_APP_FORMAT_MCUBOOT
 	bool "MCUboot-bootable format"
 	select ESP32_HAVE_OTA_PARTITION
-	depends on EXPERIMENTAL
 	---help---
 		The ESP32 port of MCUboot supports the loading of unsegmented firmware
 		images.
-
-comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
-	depends on !EXPERIMENTAL
 
 endchoice # Application Image Format
 
@@ -1630,6 +2411,22 @@ config ESP32_USER_IMAGE_OFFSET
 	default 0x90000
 	---help---
 		Offset in SPI Flash for flashing the User application firmware image.
+
+config ESP32_USER_DATA_EXTMEM
+	bool "Allocate user data in SPI RAM (READ HELP FIRST)"
+	default n
+	depends on ESP32_SPIRAM && EXPERIMENTAL
+	---help---
+		Allocate all data from User application firmware image in the external
+		SPI RAM.
+
+		Enabling this configuration comes with the restriction of running the Userspace
+		with high privilege (same as Kernel space), which in turn makes the execution
+		under Protected Mode not really protected.
+
+		This feature is intended to allow experimentation of Protected Mode on ESP32 and
+		should not be used in production. Protected mode on ESP32 is only supported with
+		PSRAM disabled.
 
 endif
 

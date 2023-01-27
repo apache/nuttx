@@ -149,7 +149,7 @@ void __start(void)
     }
 
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
+   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
    * temporary location is in flash after the data initialization code
    * at _framfuncs.  This must be done before sam_clockconfig() can be
    * called (at least for the SAM4L family).

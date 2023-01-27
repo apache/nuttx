@@ -79,14 +79,11 @@ void up_irqinitialize(void)
   riscv_exception_attach();
 
 #ifdef CONFIG_SMP
-  /* Clear MSOFT for CPU0 */
+  /* Clear RISCV_IPI for CPU0 */
 
-  putreg32(0, RISCV_CLINT_MSIP);
+  putreg32(0, RISCV_IPI);
 
-  /* Setup MSOFT for CPU0 with pause handler */
-
-  irq_attach(RISCV_IRQ_MSOFT, riscv_pause_handler, NULL);
-  up_enable_irq(RISCV_IRQ_MSOFT);
+  up_enable_irq(RISCV_IRQ_SOFT);
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -134,7 +131,7 @@ void up_disable_irq(int irq)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 }
@@ -163,6 +160,14 @@ void up_enable_irq(int irq)
 
       SET_CSR(CSR_IE, IE_TIE);
     }
+#ifdef CONFIG_BUILD_KERNEL
+  else if (irq == RISCV_IRQ_MTIMER)
+    {
+      /* Read m/sstatus & set timer interrupt enable in m/sie */
+
+      SET_CSR(mie, MIE_MTIE);
+    }
+#endif
   else if (irq > RISCV_IRQ_EXT)
     {
       extirq = irq - RISCV_IRQ_EXT;
@@ -176,7 +181,7 @@ void up_enable_irq(int irq)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 }

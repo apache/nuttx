@@ -1681,6 +1681,7 @@ static int adb_char_blocking_io(FAR struct usbdev_adb_s *priv,
         }
 
       leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return ret;
     }
 

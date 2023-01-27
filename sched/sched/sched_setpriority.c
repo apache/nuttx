@@ -56,7 +56,7 @@
 #ifdef CONFIG_SMP
 static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
 {
-  FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)tcb->flink;
+  FAR struct tcb_s *nxttcb = tcb->flink;
   FAR struct tcb_s *rtrtcb;
 
   /* Which task should run next?  It will be either the next tcb in the
@@ -74,7 +74,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
 
       for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
            rtrtcb != NULL && !CPU_ISSET(tcb->cpu, &rtrtcb->affinity);
-           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+           rtrtcb = rtrtcb->flink);
 
       /* Return the TCB from the readyt-to-run list if it is the next
        * highest priority task.
@@ -128,7 +128,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 #ifdef CONFIG_SMP
   nxttcb = nxsched_nexttcb(tcb);
 #else
-  nxttcb = (FAR struct tcb_s *)tcb->flink;
+  nxttcb = tcb->flink;
 #endif
 
   DEBUGASSERT(nxttcb != NULL);

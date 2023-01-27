@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef ALIGN_UP
@@ -98,6 +98,85 @@ uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
         }
 
       pdata += data_len;
+    }
+
+  dmadesc[i].ctrl |= DMA_CTRL_EOF;
+  dmadesc[i].next  = NULL;
+
+  return len - bytes;
+}
+
+/****************************************************************************
+ * Name: esp32_dma_init_with_padding
+ *
+ * Description:
+ *   Initialize DMA outlink descriptors and bind the target buffer to
+ *   these DMA descriptors. If len is not word-aligned, add a new descriptor
+ *   containing a 4-byte variable to make the outlink data world-aligned.
+ *
+ * Input Parameters:
+ *   dmadesc - DMA descriptions pointer
+ *   num     - DMA descriptions number
+ *   pbuf    - RX/TX buffer pointer
+ *   len     - RX/TX buffer length
+ *   stuff   - Value to be padded with the buffer
+ *
+ * Returned Value:
+ *   Binded pbuf data bytes
+ *
+ ****************************************************************************/
+
+uint32_t esp32_dma_init_with_padding(struct esp32_dmadesc_s *dmadesc,
+                                     uint32_t num,
+                                     uint8_t *pbuf,
+                                     uint32_t len,
+                                     uint32_t *stuff)
+{
+  int i;
+  uint32_t bytes = len;
+  uint8_t *pdata = pbuf;
+  uint32_t data_len = 0;
+  uint32_t buf_len = 0;
+
+  DEBUGASSERT(dmadesc != NULL);
+  DEBUGASSERT(pbuf != NULL);
+  DEBUGASSERT(len > 0);
+
+  for (i = 0; i < num - 1; i++)
+    {
+      data_len = MIN(bytes, ESP32_DMA_DATALEN_MAX);
+
+      /* Buffer length must be rounded to next 32-bit boundary. */
+
+      buf_len = ALIGN_UP(data_len, sizeof(uintptr_t));
+
+      dmadesc[i].ctrl = (data_len << DMA_CTRL_DATALEN_S) |
+                        (buf_len << DMA_CTRL_BUFLEN_S) |
+                        DMA_CTRL_OWN;
+      dmadesc[i].pbuf = pdata;
+      dmadesc[i].next = &dmadesc[i + 1];
+
+      bytes -= data_len;
+      if (bytes == 0)
+        {
+          break;
+        }
+
+      pdata += data_len;
+    }
+
+  /* Check if the data_len of the last descriptor is different from buf_len.
+   * If so, it's necessary to add the padding bytes to a new descriptor on
+   * outlink.
+   */
+
+  if (data_len != buf_len)
+    {
+      i++;
+      dmadesc[i].ctrl = ((buf_len - data_len) << DMA_CTRL_DATALEN_S) |
+                        (4 << DMA_CTRL_BUFLEN_S) |
+                        DMA_CTRL_OWN;
+      dmadesc[i].pbuf = (uint8_t *)stuff;
     }
 
   dmadesc[i].ctrl |= DMA_CTRL_EOF;

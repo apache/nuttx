@@ -51,7 +51,9 @@
  * Public Data
  ****************************************************************************/
 
-/* These 'addresses' of these values are setup by the linker script. */
+/* These 'addresses' of these values are setup by
+ * the linker script.
+ */
 
 extern uint8_t _stext[];           /* Start of .text */
 extern uint8_t _etext[];           /* End_1 of .text + .rodata */

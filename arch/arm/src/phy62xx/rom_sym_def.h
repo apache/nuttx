@@ -68,6 +68,7 @@
   #define g_currentLocalRpa _symrom_g_currentLocalRpa
   #define g_currentPeerRpa _symrom_g_currentPeerRpa
   #define llProcessSlaveControlProcedures0 _symrom_llProcessSlaveControlProcedures0
+  #define llProcessSlaveControlPacket0 _symrom_llProcessSlaveControlPacket0
   #define g_rfTxPathCompensation _symrom_g_rfTxPathCompensation
   #define ll_isLegacyAdv _symrom_ll_isLegacyAdv
   #define g_llScanMode _symrom_g_llScanMode

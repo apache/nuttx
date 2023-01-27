@@ -155,30 +155,58 @@ struct sam_xdmac_s
 
 static const struct sam_pidmap_s g_xdmac0_rxchan[] =
 {
-  { SAM_PID_HSMCI0, XDMAC0_CH_HSMCI0    }, /* HSMCI0 Receive/Transmit */
-  { SAM_PID_HSMCI1, XDMAC0_CH_HSMCI1    }, /* HSMCI1 Receive/Transmit */
-  { SAM_PID_TWI0,   XDMAC0_CH_TWI0_RX   }, /* TWI0 Receive */
-  { SAM_PID_TWI1,   XDMAC0_CH_TWI1_RX   }, /* TWI1 Receive */
-  { SAM_PID_TWI2,   XDMAC0_CH_TWI2_RX   }, /* TWI2 Receive */
-  { SAM_PID_TWI3,   XDMAC0_CH_TWI3_RX   }, /* TWI3 Receive */
-  { SAM_PID_SPI0,   XDMAC0_CH_SPI0_RX   }, /* SPI0 Receive */
-  { SAM_PID_SPI1,   XDMAC0_CH_SPI1_RX   }, /* SPI1 Receive */
-  { SAM_PID_SPI2,   XDMAC0_CH_SPI2_RX   }, /* SPI2 Receive */
-  { SAM_PID_USART2, XDMAC0_CH_USART2_RX }, /* USART2 Receive */
-  { SAM_PID_USART3, XDMAC0_CH_USART3_RX }, /* USART3 Receive */
-  { SAM_PID_USART4, XDMAC0_CH_USART4_RX }, /* USART4 Receive */
-  { SAM_PID_UART0,  XDMAC0_CH_UART0_RX  }, /* UART0 Receive */
-  { SAM_PID_UART1,  XDMAC0_CH_UART1_RX  }, /* UART1 Receive */
-  { SAM_PID_SSC0,   XDMAC0_CH_SSC0_RX   }, /* SSC0 Receive */
-  { SAM_PID_SSC1,   XDMAC0_CH_SSC1_RX   }, /* SSC1 Receive */
-  { SAM_PID_DBGU,   XDMAC0_CH_DBGU_RX   }, /* DBGU Receive */
-  { SAM_PID_ADC,    XDMAC0_CH_ADC_RX    }, /* ADC Receive */
-  { SAM_PID_SMD,    XDMAC0_CH_SMD_RX    }, /* SMD Receive */
-  { SAM_PID_USART0, XDMAC0_CH_USART0_RX }, /* USART0 Receive */
-  { SAM_PID_USART1, XDMAC0_CH_USART1_RX }, /* USART1 Receive */
-  { SAM_PID_AES,    XDMAC0_CH_AES_RX    }, /* AES Receive */
-  { SAM_PID_TDES,   XDMAC0_CH_TDES_RX   }, /* TDES Receive */
-  { SAM_PID_CATB,   XDMAC0_CH_CATB_RX   }, /* CATB Receive */
+#if defined(ATSAMA5D2)
+  { SAM_PID_TWI0,     XDMAC0_CH_TWI0_RX     }, /* TWI0  Receive */
+  { SAM_PID_TWI1,     XDMAC0_CH_TWI1_RX     }, /* TWI1  Receive */
+  { SAM_PID_QSPI0,    XDMAC0_CH_QSPI0_RX    }, /* QSPI0 Receive */
+  { SAM_PID_SPI0,     XDMAC0_CH_SPI0_RX     }, /* SPI0  Receive */
+  { SAM_PID_SPI1,     XDMAC0_CH_SPI1_RX     }, /* SPI1  Receive */
+  { SAM_PID_FLEXCOM0, XDMAC0_CH_FLEXCOM0_RX }, /* FLEXCOM0 Receive */
+  { SAM_PID_FLEXCOM1, XDMAC0_CH_FLEXCOM1_RX }, /* FLEXCOM1 Receive */
+  { SAM_PID_FLEXCOM2, XDMAC0_CH_FLEXCOM2_RX }, /* FLEXCOM2 Receive */
+  { SAM_PID_FLEXCOM3, XDMAC0_CH_FLEXCOM3_RX }, /* FLEXCOM3 Receive */
+  { SAM_PID_FLEXCOM4, XDMAC0_CH_FLEXCOM4_RX }, /* FLEXCOM4 Receive */
+  { SAM_PID_SSC0,     XDMAC0_CH_SSC0_RX     }, /* SSC0  Receive */
+  { SAM_PID_SSC1,     XDMAC0_CH_SSC1_RX     }, /* SSC1  Receive */
+  { SAM_PID_ADC,      XDMAC0_CH_ADC_RX      }, /* ADC   Receive */
+  { SAM_PID_AES,      XDMAC0_CH_AES_RX      }, /* AES   Receive */
+  { SAM_PID_TDES,     XDMAC0_CH_TDES_RX     }, /* TDES  Receive */
+  { SAM_PID_I2SC0,    XDMAC0_CH_I2SC0_RX    }, /* I2SC0 Receive */
+  { SAM_PID_I2SC1,    XDMAC0_CH_I2SC1_RX    }, /* I2SC1 Receive */
+  { SAM_PID_UART0,    XDMAC0_CH_UART0_RX    }, /* UART0 Receive */
+  { SAM_PID_UART1,    XDMAC0_CH_UART1_RX    }, /* UART1 Receive */
+  { SAM_PID_UART2,    XDMAC0_CH_UART2_RX    }, /* UART2 Receive */
+  { SAM_PID_UART3,    XDMAC0_CH_UART3_RX    }, /* UART3 Receive */
+  { SAM_PID_UART4,    XDMAC0_CH_UART4_RX    }, /* UART4 Receive */
+  { SAM_PID_TC0,      XDMAC0_CH_TC0_RX      }, /* TC0   Receive */
+  { SAM_PID_TC1,      XDMAC0_CH_TC1_RX      }, /* TC1   Receive */
+  { SAM_PID_QSPI1,    XDMAC0_CH_QSPI1_RX    }, /* QSPI1 Receive */
+  { SAM_PID_PDMIC,    XDMAC0_CH_PDMIC_RX    }, /* PDMIC Receive */
+#elif defined(ATSAMA5D4)
+  { SAM_PID_HSMCI0,   XDMAC0_CH_HSMCI0      }, /* HSMCI0 Receive/Transmit */
+  { SAM_PID_HSMCI1,   XDMAC0_CH_HSMCI1      }, /* HSMCI1 Receive/Transmit */
+  { SAM_PID_TWI0,     XDMAC0_CH_TWI0_RX     }, /* TWI0 Receive */
+  { SAM_PID_TWI1,     XDMAC0_CH_TWI1_RX     }, /* TWI1 Receive */
+  { SAM_PID_TWI2,     XDMAC0_CH_TWI2_RX     }, /* TWI2 Receive */
+  { SAM_PID_TWI3,     XDMAC0_CH_TWI3_RX     }, /* TWI3 Receive */
+  { SAM_PID_SPI0,     XDMAC0_CH_SPI0_RX     }, /* SPI0 Receive */
+  { SAM_PID_SPI1,     XDMAC0_CH_SPI1_RX     }, /* SPI1 Receive */
+  { SAM_PID_SPI2,     XDMAC0_CH_SPI2_RX     }, /* SPI2 Receive */
+  { SAM_PID_USART2,   XDMAC0_CH_USART2_RX   }, /* USART2 Receive */
+  { SAM_PID_USART3,   XDMAC0_CH_USART3_RX   }, /* USART3 Receive */
+  { SAM_PID_USART4,   XDMAC0_CH_USART4_RX   }, /* USART4 Receive */
+  { SAM_PID_UART0,    XDMAC0_CH_UART0_RX    }, /* UART0 Receive */
+  { SAM_PID_UART1,    XDMAC0_CH_UART1_RX    }, /* UART1 Receive */
+  { SAM_PID_SSC0,     XDMAC0_CH_SSC0_RX     }, /* SSC0 Receive */
+  { SAM_PID_SSC1,     XDMAC0_CH_SSC1_RX     }, /* SSC1 Receive */
+  { SAM_PID_DBGU,     XDMAC0_CH_DBGU_RX     }, /* DBGU Receive */
+  { SAM_PID_ADC,      XDMAC0_CH_ADC_RX      }, /* ADC  Receive */
+  { SAM_PID_SMD,      XDMAC0_CH_SMD_RX      }, /* SMD  Receive */
+  { SAM_PID_USART0,   XDMAC0_CH_USART0_RX   }, /* USART0 Receive */
+  { SAM_PID_USART1,   XDMAC0_CH_USART1_RX   }, /* USART1 Receive */
+  { SAM_PID_AES,      XDMAC0_CH_AES_RX      }, /* AES  Receive */
+  { SAM_PID_TDES,     XDMAC0_CH_TDES_RX     }, /* TDES Receive */
+#endif
 };
 #define NXDMAC0_RXCHANNELS (sizeof(g_xdmac0_rxchan) / sizeof(struct sam_pidmap_s))
 
@@ -186,30 +214,57 @@ static const struct sam_pidmap_s g_xdmac0_rxchan[] =
 
 static const struct sam_pidmap_s g_xdmac0_txchan[] =
 {
-  { SAM_PID_HSMCI0, XDMAC0_CH_HSMCI0    }, /* HSMCI0 Receive/Transmit */
-  { SAM_PID_HSMCI1, XDMAC0_CH_HSMCI1    }, /* HSMCI1 Receive/Transmit */
-  { SAM_PID_TWI0,   XDMAC0_CH_TWI0_TX   }, /* TWI0 Transmit */
-  { SAM_PID_TWI1,   XDMAC0_CH_TWI1_TX   }, /* TWI1 Transmit */
-  { SAM_PID_TWI2,   XDMAC0_CH_TWI2_TX   }, /* TWI2 Transmit */
-  { SAM_PID_TWI3,   XDMAC0_CH_TWI3_TX   }, /* TWI3 Transmit */
-  { SAM_PID_SPI0,   XDMAC0_CH_SPI0_TX   }, /* SPI0 Transmit */
-  { SAM_PID_SPI1,   XDMAC0_CH_SPI1_TX   }, /* SPI1 Transmit */
-  { SAM_PID_SPI2,   XDMAC0_CH_SPI2_TX   }, /* SPI2 Transmit */
-  { SAM_PID_USART2, XDMAC0_CH_USART2_TX }, /* USART2 Transmit */
-  { SAM_PID_USART3, XDMAC0_CH_USART3_TX }, /* USART3 Transmit */
-  { SAM_PID_USART4, XDMAC0_CH_USART4_TX }, /* USART4 Transmit */
-  { SAM_PID_UART0,  XDMAC0_CH_UART0_TX  }, /* UART0 Transmit */
-  { SAM_PID_UART1,  XDMAC0_CH_UART1_TX  }, /* UART1 Transmit */
-  { SAM_PID_SSC0,   XDMAC0_CH_SSC0_TX   }, /* SSC0 Transmit */
-  { SAM_PID_SSC1,   XDMAC0_CH_SSC1_TX   }, /* SSC1 Transmit */
-  { SAM_PID_DBGU,   XDMAC0_CH_DBGU_TX   }, /* DBGU Transmit */
-  { SAM_PID_SMD,    XDMAC0_CH_SMD_TX    }, /* SMD Transmit */
-  { SAM_PID_USART0, XDMAC0_CH_USART0_TX }, /* USART0 Transmit */
-  { SAM_PID_USART1, XDMAC0_CH_USART1_TX }, /* USART1 Transmit */
-  { SAM_PID_AES,    XDMAC0_CH_AES_TX    }, /* AES Transmit */
-  { SAM_PID_TDES,   XDMAC0_CH_TDES_TX   }, /* TDES Transmit */
-  { SAM_PID_SHA,    XDMAC0_CH_SHA_TX    }, /* SHA Transmit */
-  { SAM_PID_CATB,   XDMAC0_CH_CATB_TX   }, /* CATB Transmit */
+#if defined(ATSAMA5D2)
+  { SAM_PID_TWI0,     XDMAC0_CH_TWI0_TX     }, /* TWI0  Transmit */
+  { SAM_PID_TWI1,     XDMAC0_CH_TWI1_TX     }, /* TWI1  Transmit */
+  { SAM_PID_QSPI0,    XDMAC0_CH_QSPI0_TX    }, /* QSPI0 Transmit */
+  { SAM_PID_SPI0,     XDMAC0_CH_SPI0_TX     }, /* SPI0  Transmit */
+  { SAM_PID_SPI1,     XDMAC0_CH_SPI1_TX     }, /* SPI1  Transmit */
+  { SAM_PID_PWM,      XDMAC0_CH_PWM_TX      }, /* PWM   Transmit */
+  { SAM_PID_FLEXCOM0, XDMAC0_CH_FLEXCOM0_TX }, /* FLEXCOM0 Transmit */
+  { SAM_PID_FLEXCOM1, XDMAC0_CH_FLEXCOM1_TX }, /* FLEXCOM1 Transmit */
+  { SAM_PID_FLEXCOM2, XDMAC0_CH_FLEXCOM2_TX }, /* FLEXCOM2 Transmit */
+  { SAM_PID_FLEXCOM3, XDMAC0_CH_FLEXCOM3_TX }, /* FLEXCOM3 Transmit */
+  { SAM_PID_FLEXCOM4, XDMAC0_CH_FLEXCOM4_TX }, /* FLEXCOM4 Transmit */
+  { SAM_PID_SSC0,     XDMAC0_CH_SSC0_TX     }, /* SSC0 Transmit */
+  { SAM_PID_SSC1,     XDMAC0_CH_SSC1_TX     }, /* SSC1 Transmit */
+  { SAM_PID_AES,      XDMAC0_CH_AES_TX      }, /* AES  Transmit */
+  { SAM_PID_TDES,     XDMAC0_CH_TDES_TX     }, /* TDES Transmit */
+  { SAM_PID_SHA,      XDMAC0_CH_SHA_TX      }, /* SHA  Transmit */
+  { SAM_PID_I2SC0,    XDMAC0_CH_I2SC0_TX    }, /* I2SC0  Transmit */
+  { SAM_PID_I2SC1,    XDMAC0_CH_I2SC1_TX    }, /* I2SC1  Transmit */
+  { SAM_PID_UART0,    XDMAC0_CH_UART0_TX    }, /* UART0  Transmit */
+  { SAM_PID_UART1,    XDMAC0_CH_UART1_TX    }, /* UART1  Transmit */
+  { SAM_PID_UART2,    XDMAC0_CH_UART2_TX    }, /* UART2  Transmit */
+  { SAM_PID_UART3,    XDMAC0_CH_UART3_TX    }, /* UART3  Transmit */
+  { SAM_PID_UART4,    XDMAC0_CH_UART4_TX    }, /* UART4  Transmit */
+  { SAM_PID_CLASSD,   XDMAC0_CH_CLASSD_TX   }, /* CLASSD Transmit */
+  { SAM_PID_QSPI1,    XDMAC0_CH_QSPI1_TX    }, /* QSPI1  Transmit */
+#elif defined(ATSAMA5D4)
+  { SAM_PID_HSMCI0,   XDMAC0_CH_HSMCI0      }, /* HSMCI0 Receive/Transmit */
+  { SAM_PID_HSMCI1,   XDMAC0_CH_HSMCI1      }, /* HSMCI1 Receive/Transmit */
+  { SAM_PID_TWI0,     XDMAC0_CH_TWI0_TX     }, /* TWI0 Transmit */
+  { SAM_PID_TWI1,     XDMAC0_CH_TWI1_TX     }, /* TWI1 Transmit */
+  { SAM_PID_TWI2,     XDMAC0_CH_TWI2_TX     }, /* TWI2 Transmit */
+  { SAM_PID_TWI3,     XDMAC0_CH_TWI3_TX     }, /* TWI3 Transmit */
+  { SAM_PID_SPI0,     XDMAC0_CH_SPI0_TX     }, /* SPI0 Transmit */
+  { SAM_PID_SPI1,     XDMAC0_CH_SPI1_TX     }, /* SPI1 Transmit */
+  { SAM_PID_SPI2,     XDMAC0_CH_SPI2_TX     }, /* SPI2 Transmit */
+  { SAM_PID_USART2,   XDMAC0_CH_USART2_TX   }, /* USART2 Transmit */
+  { SAM_PID_USART3,   XDMAC0_CH_USART3_TX   }, /* USART3 Transmit */
+  { SAM_PID_USART4,   XDMAC0_CH_USART4_TX   }, /* USART4 Transmit */
+  { SAM_PID_UART0,    XDMAC0_CH_UART0_TX    }, /* UART0 Transmit */
+  { SAM_PID_UART1,    XDMAC0_CH_UART1_TX    }, /* UART1 Transmit */
+  { SAM_PID_SSC0,     XDMAC0_CH_SSC0_TX     }, /* SSC0 Transmit */
+  { SAM_PID_SSC1,     XDMAC0_CH_SSC1_TX     }, /* SSC1 Transmit */
+  { SAM_PID_DBGU,     XDMAC0_CH_DBGU_TX     }, /* DBGU Transmit */
+  { SAM_PID_SMD,      XDMAC0_CH_SMD_TX      }, /* SMD  Transmit */
+  { SAM_PID_USART0,   XDMAC0_CH_USART0_TX   }, /* USART0 Transmit */
+  { SAM_PID_USART1,   XDMAC0_CH_USART1_TX   }, /* USART1 Transmit */
+  { SAM_PID_AES,      XDMAC0_CH_AES_TX      }, /* AES  Transmit */
+  { SAM_PID_TDES,     XDMAC0_CH_TDES_TX     }, /* TDES Transmit */
+  { SAM_PID_SHA,      XDMAC0_CH_SHA_TX      }, /* SHA  Transmit */
+#endif
 };
 #define NXDMAC0_TXCHANNELS (sizeof(g_xdmac0_txchan) / sizeof(struct sam_pidmap_s))
 #endif
@@ -219,25 +274,54 @@ static const struct sam_pidmap_s g_xdmac0_txchan[] =
 
 static const struct sam_pidmap_s g_xdmac1_rxchan[] =
 {
-  { SAM_PID_HSMCI0, XDMAC1_CH_HSMCI0    }, /* HSMCI0 Receive/Transmit */
-  { SAM_PID_HSMCI1, XDMAC1_CH_HSMCI1    }, /* HSMCI1 Receive/Transmit */
-  { SAM_PID_TWI0,   XDMAC1_CH_TWI0_RX   }, /* TWI0 Receive */
-  { SAM_PID_TWI1,   XDMAC1_CH_TWI1_RX   }, /* TWI1 Receive */
-  { SAM_PID_TWI2,   XDMAC1_CH_TWI2_RX   }, /* TWI2 Receive */
-  { SAM_PID_TWI3,   XDMAC1_CH_TWI3_RX   }, /* TWI3 Receive */
-  { SAM_PID_SPI0,   XDMAC1_CH_SPI0_RX   }, /* SPI0 Receive */
-  { SAM_PID_SPI1,   XDMAC1_CH_SPI1_RX   }, /* SPI1 Receive */
-  { SAM_PID_SPI2,   XDMAC1_CH_SPI2_RX   }, /* SPI2 Receive */
-  { SAM_PID_USART2, XDMAC1_CH_USART2_RX }, /* USART2 Receive */
-  { SAM_PID_USART3, XDMAC1_CH_USART3_RX }, /* USART3 Receive */
-  { SAM_PID_USART4, XDMAC1_CH_USART4_RX }, /* USART4 Receive */
-  { SAM_PID_UART0,  XDMAC1_CH_UART0_RX  }, /* UART0 Receive */
-  { SAM_PID_UART1,  XDMAC1_CH_UART1_RX  }, /* UART1 Receive */
-  { SAM_PID_SSC0,   XDMAC1_CH_SSC0_RX   }, /* SSC0 Receive */
-  { SAM_PID_SSC1,   XDMAC1_CH_SSC1_RX   }, /* SSC1 Receive */
-  { SAM_PID_DBGU,   XDMAC1_CH_DBGU_RX   }, /* DBGU Receive */
-  { SAM_PID_ADC,    XDMAC1_CH_ADC_RX    }, /* ADC Receive */
-  { SAM_PID_SMD,    XDMAC1_CH_SMD_RX    }, /* SMD Receive */
+#if defined(ATSAMA5D2)
+  { SAM_PID_TWI0,     XDMAC1_CH_TWI0_RX     }, /* TWI0  Receive */
+  { SAM_PID_TWI1,     XDMAC1_CH_TWI1_RX     }, /* TWI1  Receive */
+  { SAM_PID_QSPI0,    XDMAC1_CH_QSPI0_RX    }, /* QSPI0 Receive */
+  { SAM_PID_SPI0,     XDMAC1_CH_SPI0_RX     }, /* SPI0  Receive */
+  { SAM_PID_SPI1,     XDMAC1_CH_SPI1_RX     }, /* SPI1  Receive */
+  { SAM_PID_FLEXCOM0, XDMAC1_CH_FLEXCOM0_RX }, /* FLEXCOM0 Receive */
+  { SAM_PID_FLEXCOM1, XDMAC1_CH_FLEXCOM1_RX }, /* FLEXCOM1 Receive */
+  { SAM_PID_FLEXCOM2, XDMAC1_CH_FLEXCOM2_RX }, /* FLEXCOM2 Receive */
+  { SAM_PID_FLEXCOM3, XDMAC1_CH_FLEXCOM3_RX }, /* FLEXCOM3 Receive */
+  { SAM_PID_FLEXCOM4, XDMAC1_CH_FLEXCOM4_RX }, /* FLEXCOM4 Receive */
+  { SAM_PID_SSC0,     XDMAC1_CH_SSC0_RX     }, /* SSC0  Receive */
+  { SAM_PID_SSC1,     XDMAC1_CH_SSC1_RX     }, /* SSC1  Receive */
+  { SAM_PID_ADC,      XDMAC1_CH_ADC_RX      }, /* ADC   Receive */
+  { SAM_PID_AES,      XDMAC1_CH_AES_RX      }, /* AES   Receive */
+  { SAM_PID_TDES,     XDMAC1_CH_TDES_RX     }, /* TDES  Receive */
+  { SAM_PID_I2SC0,    XDMAC1_CH_I2SC0_RX    }, /* I2SC0 Receive */
+  { SAM_PID_I2SC1,    XDMAC1_CH_I2SC1_RX    }, /* I2SC1 Receive */
+  { SAM_PID_UART0,    XDMAC1_CH_UART0_RX    }, /* UART0 Receive */
+  { SAM_PID_UART1,    XDMAC1_CH_UART1_RX    }, /* UART1 Receive */
+  { SAM_PID_UART2,    XDMAC1_CH_UART2_RX    }, /* UART2 Receive */
+  { SAM_PID_UART3,    XDMAC1_CH_UART3_RX    }, /* UART3 Receive */
+  { SAM_PID_UART4,    XDMAC1_CH_UART4_RX    }, /* UART4 Receive */
+  { SAM_PID_TC0,      XDMAC1_CH_TC0_RX      }, /* TC0   Receive */
+  { SAM_PID_TC1,      XDMAC1_CH_TC1_RX      }, /* TC1   Receive */
+  { SAM_PID_QSPI1,    XDMAC1_CH_QSPI1_RX    }, /* QSPI1 Receive */
+  { SAM_PID_PDMIC,    XDMAC1_CH_PDMIC_RX    }, /* PDMIC Receive */
+#elif defined(ATSAMA5D4)
+  { SAM_PID_HSMCI0,   XDMAC1_CH_HSMCI0      }, /* HSMCI0 Receive/Transmit */
+  { SAM_PID_HSMCI1,   XDMAC1_CH_HSMCI1      }, /* HSMCI1 Receive/Transmit */
+  { SAM_PID_TWI0,     XDMAC1_CH_TWI0_RX     }, /* TWI0 Receive */
+  { SAM_PID_TWI1,     XDMAC1_CH_TWI1_RX     }, /* TWI1 Receive */
+  { SAM_PID_TWI2,     XDMAC1_CH_TWI2_RX     }, /* TWI2 Receive */
+  { SAM_PID_TWI3,     XDMAC1_CH_TWI3_RX     }, /* TWI3 Receive */
+  { SAM_PID_SPI0,     XDMAC1_CH_SPI0_RX     }, /* SPI0 Receive */
+  { SAM_PID_SPI1,     XDMAC1_CH_SPI1_RX     }, /* SPI1 Receive */
+  { SAM_PID_SPI2,     XDMAC1_CH_SPI2_RX     }, /* SPI2 Receive */
+  { SAM_PID_USART2,   XDMAC1_CH_USART2_RX   }, /* USART2 Receive */
+  { SAM_PID_USART3,   XDMAC1_CH_USART3_RX   }, /* USART3 Receive */
+  { SAM_PID_USART4,   XDMAC1_CH_USART4_RX   }, /* USART4 Receive */
+  { SAM_PID_UART0,    XDMAC1_CH_UART0_RX    }, /* UART0 Receive */
+  { SAM_PID_UART1,    XDMAC1_CH_UART1_RX    }, /* UART1 Receive */
+  { SAM_PID_SSC0,     XDMAC1_CH_SSC0_RX     }, /* SSC0  Receive */
+  { SAM_PID_SSC1,     XDMAC1_CH_SSC1_RX     }, /* SSC1  Receive */
+  { SAM_PID_DBGU,     XDMAC1_CH_DBGU_RX     }, /* DBGU  Receive */
+  { SAM_PID_ADC,      XDMAC1_CH_ADC_RX      }, /* ADC   Receive */
+  { SAM_PID_SMD,      XDMAC1_CH_SMD_RX      }, /* SMD   Receive */
+#endif
 };
 #define NXDMAC1_RXCHANNELS (sizeof(g_xdmac1_rxchan) / sizeof(struct sam_pidmap_s))
 
@@ -245,24 +329,52 @@ static const struct sam_pidmap_s g_xdmac1_rxchan[] =
 
 static const struct sam_pidmap_s g_xdmac1_txchan[] =
 {
-  { SAM_PID_HSMCI0, XDMAC1_CH_HSMCI0    }, /* HSMCI0 Receive/Transmit */
-  { SAM_PID_HSMCI1, XDMAC1_CH_HSMCI1    }, /* HSMCI1 Receive/Transmit */
-  { SAM_PID_TWI0,   XDMAC1_CH_TWI0_TX   }, /* TWI0 Transmit */
-  { SAM_PID_TWI1,   XDMAC1_CH_TWI1_TX   }, /* TWI1 Transmit */
-  { SAM_PID_TWI2,   XDMAC1_CH_TWI2_TX   }, /* TWI2 Transmit */
-  { SAM_PID_TWI3,   XDMAC1_CH_TWI3_TX   }, /* TWI3 Transmit */
-  { SAM_PID_SPI0,   XDMAC1_CH_SPI0_TX   }, /* SPI0 Transmit */
-  { SAM_PID_SPI1,   XDMAC1_CH_SPI1_TX   }, /* SPI1 Transmit */
-  { SAM_PID_SPI2,   XDMAC1_CH_SPI2_TX   }, /* SPI2 Transmit */
-  { SAM_PID_USART2, XDMAC1_CH_USART2_TX }, /* USART2 Transmit */
-  { SAM_PID_USART3, XDMAC1_CH_USART3_TX }, /* USART3 Transmit */
-  { SAM_PID_USART4, XDMAC1_CH_USART4_TX }, /* USART4 Transmit */
-  { SAM_PID_UART0,  XDMAC1_CH_UART0_TX  }, /* UART0 Transmit */
-  { SAM_PID_UART1,  XDMAC1_CH_UART1_TX  }, /* UART1 Transmit */
-  { SAM_PID_SSC0,   XDMAC1_CH_SSC0_TX   }, /* SSC0 Transmit */
-  { SAM_PID_SSC1,   XDMAC1_CH_SSC1_TX   }, /* SSC1 Transmit */
-  { SAM_PID_DBGU,   XDMAC1_CH_DBGU_TX   }, /* DBGU Transmit */
-  { SAM_PID_SMD,    XDMAC1_CH_SMD_TX    }, /* SMD Transmit */
+#if defined(ATSAMA5D2)
+  { SAM_PID_TWI0,     XDMAC1_CH_TWI0_TX     }, /* TWI0  Transmit */
+  { SAM_PID_TWI1,     XDMAC1_CH_TWI1_TX     }, /* TWI1  Transmit */
+  { SAM_PID_QSPI0,    XDMAC1_CH_QSPI0_TX    }, /* QSPI0 Transmit */
+  { SAM_PID_SPI0,     XDMAC1_CH_SPI0_TX     }, /* SPI0  Transmit */
+  { SAM_PID_SPI1,     XDMAC1_CH_SPI1_TX     }, /* SPI1  Transmit */
+  { SAM_PID_PWM,      XDMAC1_CH_PWM_TX      }, /* PWM   Transmit */
+  { SAM_PID_FLEXCOM0, XDMAC1_CH_FLEXCOM0_TX }, /* FLEXCOM0 Transmit */
+  { SAM_PID_FLEXCOM1, XDMAC1_CH_FLEXCOM1_TX }, /* FLEXCOM1 Transmit */
+  { SAM_PID_FLEXCOM2, XDMAC1_CH_FLEXCOM2_TX }, /* FLEXCOM2 Transmit */
+  { SAM_PID_FLEXCOM3, XDMAC1_CH_FLEXCOM3_TX }, /* FLEXCOM3 Transmit */
+  { SAM_PID_FLEXCOM4, XDMAC1_CH_FLEXCOM4_TX }, /* FLEXCOM4 Transmit */
+  { SAM_PID_SSC0,     XDMAC1_CH_SSC0_TX     }, /* SSC0 Transmit */
+  { SAM_PID_SSC1,     XDMAC1_CH_SSC1_TX     }, /* SSC1 Transmit */
+  { SAM_PID_AES,      XDMAC1_CH_AES_TX      }, /* AES  Transmit */
+  { SAM_PID_TDES,     XDMAC1_CH_TDES_TX     }, /* TDES Transmit */
+  { SAM_PID_SHA,      XDMAC1_CH_SHA_TX      }, /* SHA  Transmit */
+  { SAM_PID_I2SC0,    XDMAC1_CH_I2SC0_TX    }, /* I2SC0  Transmit */
+  { SAM_PID_I2SC1,    XDMAC1_CH_I2SC1_TX    }, /* I2SC1  Transmit */
+  { SAM_PID_UART0,    XDMAC1_CH_UART0_TX    }, /* UART0  Transmit */
+  { SAM_PID_UART1,    XDMAC1_CH_UART1_TX    }, /* UART1  Transmit */
+  { SAM_PID_UART2,    XDMAC1_CH_UART2_TX    }, /* UART2  Transmit */
+  { SAM_PID_UART3,    XDMAC1_CH_UART3_TX    }, /* UART3  Transmit */
+  { SAM_PID_UART4,    XDMAC1_CH_UART4_TX    }, /* UART4  Transmit */
+  { SAM_PID_CLASSD,   XDMAC1_CH_CLASSD_TX   }, /* CLASSD Transmit */
+  { SAM_PID_QSPI1,    XDMAC1_CH_QSPI1_TX    }, /* QSPI1  Transmit */
+#elif defined(ATSAMA5D4)
+  { SAM_PID_HSMCI0,   XDMAC1_CH_HSMCI0      }, /* HSMCI0 Receive/Transmit */
+  { SAM_PID_HSMCI1,   XDMAC1_CH_HSMCI1      }, /* HSMCI1 Receive/Transmit */
+  { SAM_PID_TWI0,     XDMAC1_CH_TWI0_TX     }, /* TWI0 Transmit */
+  { SAM_PID_TWI1,     XDMAC1_CH_TWI1_TX     }, /* TWI1 Transmit */
+  { SAM_PID_TWI2,     XDMAC1_CH_TWI2_TX     }, /* TWI2 Transmit */
+  { SAM_PID_TWI3,     XDMAC1_CH_TWI3_TX     }, /* TWI3 Transmit */
+  { SAM_PID_SPI0,     XDMAC1_CH_SPI0_TX     }, /* SPI0 Transmit */
+  { SAM_PID_SPI1,     XDMAC1_CH_SPI1_TX     }, /* SPI1 Transmit */
+  { SAM_PID_SPI2,     XDMAC1_CH_SPI2_TX     }, /* SPI2 Transmit */
+  { SAM_PID_USART2,   XDMAC1_CH_USART2_TX   }, /* USART2 Transmit */
+  { SAM_PID_USART3,   XDMAC1_CH_USART3_TX   }, /* USART3 Transmit */
+  { SAM_PID_USART4,   XDMAC1_CH_USART4_TX   }, /* USART4 Transmit */
+  { SAM_PID_UART0,    XDMAC1_CH_UART0_TX    }, /* UART0 Transmit */
+  { SAM_PID_UART1,    XDMAC1_CH_UART1_TX    }, /* UART1 Transmit */
+  { SAM_PID_SSC0,     XDMAC1_CH_SSC0_TX     }, /* SSC0 Transmit */
+  { SAM_PID_SSC1,     XDMAC1_CH_SSC1_TX     }, /* SSC1 Transmit */
+  { SAM_PID_DBGU,     XDMAC1_CH_DBGU_TX     }, /* DBGU Transmit */
+  { SAM_PID_SMD,      XDMAC1_CH_SMD_TX      }, /* SMD Transmit */
+#endif
 };
 #define NXDMAC1_TXCHANNELS (sizeof(g_xdmac1_txchan) / sizeof(struct sam_pidmap_s))
 #endif
@@ -1060,7 +1172,7 @@ static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
       /* Look up the DMA channel code for TX:  Peripheral is the sink. */
 
       field   = sam_sink_channel(xdmach, pid);
-      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+      regval |= (field << XDMACH_CC_PERID_SHIFT);
 
 #if 0 /* Not supported */
       /* 10. Set SWREQ to use software request (only relevant for a
@@ -1191,7 +1303,7 @@ static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
    */
 
   if ((xdmach->flags & DMACH_FLAG_PERIPHAHB_MASK) ==
-      DMACH_FLAG_PERIPHAHB_AHB_IF1)
+       DMACH_FLAG_PERIPHAHB_AHB_IF1)
     {
       regval |= XDMACH_CC_SIF;
     }
@@ -1219,7 +1331,7 @@ static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
       /* Look up the DMA channel code for RX:  Peripheral is the source. */
 
       field   = sam_source_channel(xdmach, pid);
-      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+      regval |= (field << XDMACH_CC_PERID_SHIFT);
 
 #if 0 /* Not supported */
       /* 10. Set SWREQ to use software request (only relevant for a
@@ -1338,12 +1450,12 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
               xdmach->lltail = descr;
 
               /* Assume that we will be doing multiple buffer transfers and
-               * that that hardware will be accessing the descriptor via DMA.
+               * that hardware will be accessing the descriptor via DMA.
                */
 
               up_clean_dcache((uintptr_t)descr,
                               (uintptr_t)descr +
-                              sizeof(struct chnext_view1_s));
+                               sizeof(struct chnext_view1_s));
               break;
             }
         }
@@ -2275,12 +2387,22 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (xdmach->llhead)
     {
-      /* Save the callback info.  This will be invoked whent the DMA
+      /* Save the callback info.  This will be invoked when the DMA
        * completes
        */
 
       xdmach->callback = callback;
       xdmach->arg      = arg;
+
+      /* If this is an RX DMA (peripheral-to-memory), then flush and
+       * invalidate the data cache to force reloading from memory when the
+       * DMA completes.
+       */
+
+      if (xdmach->rx)
+        {
+          up_flush_dcache(xdmach->rxaddr, xdmach->rxaddr + xdmach->rxsize);
+        }
 
       /* Is this a single block transfer?  Or a multiple block transfer? */
 

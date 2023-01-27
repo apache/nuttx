@@ -28,8 +28,9 @@ HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c
 # Required ESP32-S2 files (arch/xtensa/src/esp32s2)
 
 CHIP_CSRCS  = esp32s2_allocateheap.c esp32s2_clockconfig.c esp32s2_irq.c
-CHIP_CSRCS += esp32s2_gpio.c esp32s2_region.c esp32s2_user.c
+CHIP_CSRCS += esp32s2_gpio.c esp32s2_rtc_gpio.c esp32s2_region.c esp32s2_user.c
 CHIP_CSRCS += esp32s2_timerisr.c esp32s2_lowputc.c esp32s2_systemreset.c
+CHIP_CSRCS += esp32s2_dma.c
 
 # Configuration-dependent ESP32-S2 files
 
@@ -41,12 +42,26 @@ ifeq ($(CONFIG_ESP32S2_UART),y)
 CHIP_CSRCS += esp32s2_serial.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_EFUSE),y)
+CHIP_CSRCS += esp32s2_efuse.c
+CHIP_CSRCS += esp32s2_efuse_table.c
+CHIP_CSRCS += esp32s2_efuse_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_ESP32S2_RNG),y)
 CHIP_CSRCS += esp32s2_rng.c
 endif
 
 ifeq ($(CONFIG_ESP32S2_I2C),y)
 CHIP_CSRCS += esp32s2_i2c.c
+endif
+
+ifeq ($(CONFIG_ESP32S2_I2S),y)
+CHIP_CSRCS += esp32s2_i2s.c
+endif
+
+ifeq ($(CONFIG_ESP32S2_SPI),y)
+CHIP_CSRCS += esp32s2_spi.c
 endif
 
 ifeq ($(CONFIG_ESP32S2_TIMER),y)
@@ -66,6 +81,10 @@ endif
 
 ifeq ($(CONFIG_ESP32S2_RT_TIMER),y)
 CHIP_CSRCS += esp32s2_rt_timer.c
+endif
+
+ifeq ($(CONFIG_ESP32S2_TOUCH),y)
+CHIP_CSRCS += esp32s2_touch.c
 endif
 
 ifeq ($(CONFIG_ESP32S2_ONESHOT),y)

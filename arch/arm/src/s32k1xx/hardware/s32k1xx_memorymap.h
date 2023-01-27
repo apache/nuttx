@@ -34,8 +34,8 @@
 #define S32K1XX_AIPS_LITE_BASE   0x40000000  /* Peripheral bridge (AIPS-Lite) */
 #  define S32K1XX_FLASHCFG_BASE  0x40000400  /* FLASH Configuration bytes */
 #  define S32K1XX_MSCM_BASE      0x40001000  /* MSCM */
-#  define S32K1XX_DMAC_BASE      0x40008000  /* DMA controller */
-#  define S32K1XX_DMADESC_BASE   0x40008000  /* DMA transfer control descriptors */
+#  define S32K1XX_EDMA_BASE      0x40008000  /* EDMA controller */
+#  define S32K1XX_EDMADESC_BASE  0x40008000  /* EDMA transfer control descriptors */
 #  define S32K1XX_MPU_BASE       0x4000d000  /* MPU */
 #  define S32K1XX_GPIOCTL_BASE   0x4000f000  /* GPIO controller */
 #  define S32K1XX_GPIOALIAS_BASE 0x400ff000  /* GPIO controller (alias) */

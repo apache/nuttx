@@ -35,7 +35,7 @@
  * Name: tls_init_info
  *
  * Description:
- *   Allocate and initilize tls_info_s structure.
+ *   Allocate and initialize tls_info_s structure.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task

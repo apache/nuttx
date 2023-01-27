@@ -91,6 +91,8 @@
 #define WLAN_WPA_OUI_TYPE     0x01
 #define WLAN_WPA_SEL(x)       (((x) << 24) | WLAN_WPA_OUI)
 #define WLAN_AKM_PSK          0x02
+#define SUITE(oui, id)        (((oui) << 8) | (id))
+#define WLAN_AKM_SUITE_PSK    SUITE(0x000FAC, WLAN_AKM_PSK)
 
 /****************************************************************************
  * Private Types
@@ -161,7 +163,7 @@ begin_packed_struct struct wpa_ie_fixed
       uint8_t low;
       uint8_t high;
     }
-  end_packed_struct version;  /* IE version */
+  end_packed_struct version;    /* IE version */
 } end_packed_struct;
 
 typedef struct wpa_ie_fixed wpa_ie_fixed_t;
@@ -470,7 +472,7 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
   out_len = 4;
   value   = PM_OFF;
   ret     = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_PM,
-                           (uint8_t *)&value, &out_len);
+                           (FAR uint8_t *)&value, &out_len);
   if (ret != OK)
     {
       goto errout_in_sdio_active;
@@ -481,7 +483,7 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
   out_len = 4;
   value = GMODE_AUTO;
   ret = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_GMODE,
-                       (uint8_t *)&value, &out_len);
+                       (FAR uint8_t *)&value, &out_len);
   if (ret != OK)
     {
       goto errout_in_sdio_active;
@@ -529,7 +531,7 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
 
   /* Remove line feed */
 
-  out_len = strlen((char *)tmp_buf);
+  out_len = strlen((FAR char *)tmp_buf);
   if (out_len > 0 && tmp_buf[out_len - 1] == '\n')
     {
       tmp_buf[out_len - 1] = 0;
@@ -554,7 +556,6 @@ errout_in_sdio_active:
 
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
-
   /*  Register radio event */
 
   bcmf_event_register(priv, bcmf_wl_radio_event_handler, WLC_E_RADIO);
@@ -811,7 +812,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
           switch (ie_buffer[ie_offset])
             {
-              case WLAN_EID_DS_PARAMS:
+              case IEEE80211_ELEMID_DSPARMS:
                 {
                   if (bss->ctl_ch == 0)
                     {
@@ -821,7 +822,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                   break;
                 }
 
-              case WLAN_EID_RSN:
+              case IEEE80211_ELEMID_RSN:
                 {
                   FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)
                                        &ie_buffer[ie_offset + 2];
@@ -854,12 +855,14 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                   break;
                 }
 
-              case WLAN_EID_VENDOR_SPECIFIC:
+              case IEEE80211_ELEMID_VENDOR:
                 {
-                  FAR wpa_ie_fixed_t *ie = (wpa_ie_fixed_t *)
+                  FAR wpa_ie_fixed_t *ie = (FAR wpa_ie_fixed_t *)
                                            &ie_buffer[ie_offset];
                   FAR wpa_akm_t *akm;
                   FAR wpa_rsn_t *rsn;
+
+                  /* WPA_OUI */
 
                   if (memcmp(&ie->oui[0], WPA_OUI "\x01", 4))
                     {
@@ -868,8 +871,8 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
                   vaild_bss = false;
 
-                  rsn = (wpa_rsn_t *)&ie_buffer[ie_offset +
-                                                sizeof(wpa_ie_fixed_t) - 2];
+                  rsn = (FAR wpa_rsn_t *)&ie_buffer[ie_offset +
+                        sizeof(wpa_ie_fixed_t) - 2];
                   suitelen = sizeof(wpa_ie_fixed_t) +
                              sizeof(*rsn) + rsn->scount *
                              sizeof(wpa_cipher_suite_t) - 2;
@@ -1217,7 +1220,7 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 
   out_len = 0;
   ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
-                         enable ? WLC_UP : WLC_DOWN, NULL, &out_len);
+                       enable ? WLC_UP : WLC_DOWN, NULL, &out_len);
 
   /* TODO wait for WLC_E_RADIO event */
 
@@ -1306,7 +1309,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
   value = scan_params.params.scan_type;
   out_len = 4;
   if (bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,
-                         WLC_SET_PASSIVE_SCAN, (uint8_t *)&value, &out_len))
+                     WLC_SET_PASSIVE_SCAN, (FAR uint8_t *)&value, &out_len))
     {
       ret = -EIO;
       goto exit_failed;
@@ -1987,7 +1990,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   out_len = sizeof(scbval);
   memset(&scbval, 0x0, out_len);
   ret = bcmf_cdc_ioctl(priv, interface, true,
-                       WLC_DISASSOC, (uint8_t *)&scbval, &out_len);
+                       WLC_DISASSOC, (FAR uint8_t *)&scbval, &out_len);
   if (ret < 0 || !iwr->u.essid.flags)
     {
       goto errout_with_auth;
@@ -1998,7 +2001,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       out_len = sizeof(priv->auth_pmk);
       ret = bcmf_cdc_ioctl(priv, interface, true,
                            WLC_SET_WSEC_PMK,
-                           (uint8_t *)&priv->auth_pmk, &out_len);
+                           (FAR uint8_t *)&priv->auth_pmk, &out_len);
       if (ret < 0)
         {
           goto errout_with_auth;
@@ -2018,7 +2021,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   out_len = sizeof(ssid);
   ret = bcmf_cdc_ioctl(priv, interface, true,
                        WLC_SET_SSID,
-                       (uint8_t *)&ssid, &out_len);
+                       (FAR uint8_t *)&ssid, &out_len);
   if (ret == OK)
     {
       ret = nxsem_tickwait_uninterruptible(priv->auth_signal,
@@ -2089,7 +2092,7 @@ int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(ssid);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_SSID, (uint8_t *)&ssid, &out_len);
+                       WLC_GET_SSID, (FAR uint8_t *)&ssid, &out_len);
   if (ret == OK)
     {
       iwr->u.essid.flags  = iwr->u.data.flags = 1;
@@ -2112,6 +2115,7 @@ int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
 {
   uint8_t country[4] =
     {
+      0
     };
 
   uint32_t out_len;
@@ -2213,11 +2217,9 @@ int bcmf_wl_set_dtim(FAR struct bcmf_dev_s *priv,
       return OK;
     }
 
-  syslog(LOG_WARNING, "--- [wifi] DTIM interval"
-                      " -> %" PRIu32 " ms ---\n", interval_ms);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                IOVAR_STR_LISTEN_INTERVAL_DTIM,
-                               (uint8_t *)&value, &out_len);
+                               (FAR uint8_t *)&value, &out_len);
   if (ret == OK)
     {
       priv->lp_dtim = interval_ms;

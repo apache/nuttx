@@ -206,6 +206,56 @@ config CS4344_WORKER_STACKSIZE
 
 endif # AUDIO_CS4344
 
+config AUDIO_ES8388
+	bool "ES8388 codec chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the ES8388 Audio codec by Everest
+		Semiconductor.
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
+
+if AUDIO_ES8388
+
+config ES8388_INPUT_INITVOLUME
+	int "ES8388 initial input volume setting"
+	default 1000
+
+config ES8388_OUTPUT_INITVOLUME
+	int "ES8388 initial output volume setting"
+	default 400
+
+config ES8388_INFLIGHT
+	int "ES8388 maximum in-flight audio buffers"
+	default 2
+
+config ES8388_MSG_PRIO
+	int "ES8388 message priority"
+	default 1
+
+config ES8388_BUFFER_SIZE
+	int "ES8388 preferred buffer size"
+	default 8192
+
+config ES8388_NUM_BUFFERS
+	int "ES8388 preferred number of buffers"
+	default 4
+
+config ES8388_WORKER_STACKSIZE
+	int "ES8388 worker thread stack size"
+	default 2048
+
+config ES8388_REGDUMP
+	bool "ES8388 register dump"
+	default n
+	depends on DEBUG_FEATURES
+	---help---
+		Enable logic to dump the contents of all ES8388 registers.
+
+endif # AUDIO_ES8388
+
 config AUDIO_WM8776
 	bool "WM8776 audio chip"
 	default n

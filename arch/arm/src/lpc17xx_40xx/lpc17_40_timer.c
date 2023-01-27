@@ -68,7 +68,7 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-#  define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
+#  define pwm_dumpgpio(p,m) lpc17_40_dumpgpio(p,m)
 #else
 #  define pwm_dumpgpio(p,m)
 #endif
@@ -220,25 +220,25 @@ static void timer_dumpregs(struct lpc17_40_timer_s *priv,
 {
   pwminfo("%s:\n", msg);
   pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-          timer_getreg(priv, LPC17_40_PWM_MR0_OFFSET),
-          timer_getreg(priv, LPC17_40_PWM_MR1_OFFSET),
-          timer_getreg(priv, LPC17_40_PWM_MR2_OFFSET),
-          timer_getreg(priv, LPC17_40_PWM_MR3_OFFSET));
+          timer_getreg(priv, LPC17_40_TMR_MR0_OFFSET),
+          timer_getreg(priv, LPC17_40_TMR_MR1_OFFSET),
+          timer_getreg(priv, LPC17_40_TMR_MR2_OFFSET),
+          timer_getreg(priv, LPC17_40_TMR_MR3_OFFSET));
 #if defined(CONFIG_LPC17_40_TMR0)
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
       pwminfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-              timer_getreg(priv, LPC17_40_PWM_MR0_OFFSET),
-              timer_getreg(priv, LPC17_40_PWM_MR1_OFFSET),
-              timer_getreg(priv, LPC17_40_PWM_MR2_OFFSET),
-              timer_getreg(priv, LPC17_40_PWM_MR3_OFFSET));
+              timer_getreg(priv, LPC17_40_TMR_MR0_OFFSET),
+              timer_getreg(priv, LPC17_40_TMR_MR1_OFFSET),
+              timer_getreg(priv, LPC17_40_TMR_MR2_OFFSET),
+              timer_getreg(priv, LPC17_40_TMR_MR3_OFFSET));
     }
   else
 #endif
     {
       pwminfo("  DCR: %04x DMAR: %04x\n",
-              timer_getreg(priv, LPC17_40_PWM_MR2_OFFSET),
-              timer_getreg(priv, LPC17_40_PWM_MR3_OFFSET));
+              timer_getreg(priv, LPC17_40_TMR_MR2_OFFSET),
+              timer_getreg(priv, LPC17_40_TMR_MR3_OFFSET));
     }
 }
 #endif

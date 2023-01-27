@@ -648,7 +648,8 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           memset(fixinfo, 0, sizeof(struct fb_fix_screeninfo));
 #ifdef CONFIG_FB_MODULEINFO
-          strlcpy(fixinfo->id, vinfo.moduleinfo, sizeof(fixinfo->id));
+          strlcpy(fixinfo->id, (FAR const char *)vinfo.moduleinfo,
+                  sizeof(fixinfo->id));
 #endif
           fixinfo->smem_start  = (unsigned long)pinfo.fbmem;
           fixinfo->smem_len    = pinfo.fblen;

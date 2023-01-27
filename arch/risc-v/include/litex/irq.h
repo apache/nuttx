@@ -25,6 +25,10 @@
  * Included Files
  ****************************************************************************/
 
+#ifdef CONFIG_LITEX_USE_CUSTOM_IRQ_DEFINITIONS
+#include CONFIG_LITEX_CUSTOM_IRQ_DEFINITIONS_PATH
+#else
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -40,4 +44,5 @@
 
 #define NR_IRQS            (LITEX_IRQ_SDCARD + 1)
 
+#endif /* CONFIG_LITEX_USE_CUSTOM_IRQ_DEFINITIONS */
 #endif /* __ARCH_RISCV_INCLUDE_LITEX_IRQ_H */

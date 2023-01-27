@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -161,20 +160,20 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
    * following:
    */
 
-  value   = days  / (4 * 365 + 1); /* Number of 4-years periods since the epoch */
-  days   -= value * (4 * 365 + 1); /* Remaining days */
-  value <<= 2;                     /* Years since the epoch */
+  value   = days  / (4 * DAYSPERNYEAR + 1); /* Number of 4-years periods since the epoch */
+  days   -= value * (4 * DAYSPERNYEAR + 1); /* Remaining days */
+  value <<= 2;                              /* Years since the epoch */
 
   /* Then we will brute force the next 0-3 years
    *
    * Is this year a leap year? (we'll need this later too)
    */
 
-  leapyear = clock_isleapyear(value + 1970);
+  leapyear = clock_isleapyear(value + EPOCH_YEAR);
 
   /* Get the number of days in the year */
 
-  tmp = (leapyear ? 366 : 365);
+  tmp = (leapyear ? DAYSPERLYEAR : DAYSPERNYEAR);
 
   /* Do we have that many days left to account for? */
 
@@ -187,11 +186,11 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
 
       /* Is the next year a leap year? */
 
-      leapyear = clock_isleapyear(value + 1970);
+      leapyear = clock_isleapyear(value + EPOCH_YEAR);
 
       /* Get the number of days in the next year */
 
-      tmp = (leapyear ? 366 : 365);
+      tmp = (leapyear ? DAYSPERLYEAR : DAYSPERNYEAR);
     }
 
   /* At this point, 'value' has the years since 1970 and 'days' has number
@@ -199,7 +198,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
    * a leap year.
    */
 
-  *year = 1970 + value;
+  *year = EPOCH_YEAR + value;
 
   /* Handle the month (zero based) */
 
@@ -314,27 +313,25 @@ FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
 
   sec    = epoch;
 
-  linfo("hour=%d min=%d sec=%d\n",
-        (int)hour, (int)min, (int)sec);
+  linfo("hour=%d min=%d sec=%d\n", hour, min, sec);
 
   /* Convert the days since the EPOCH to calendar day */
 
   clock_utc2calendar(jdn, &year, &month, &day);
 
-  linfo("jdn=%d year=%d month=%d day=%d\n",
-        (int)jdn, (int)year, (int)month, (int)day);
+  linfo("jdn=%d year=%d month=%d day=%d\n", (int)jdn, year, month, day);
 
   /* Then return the struct tm contents */
 
-  result->tm_year   = (int)year - 1900; /* Relative to 1900 */
-  result->tm_mon    = (int)month - 1;   /* zero-based */
-  result->tm_mday   = (int)day;         /* one-based */
-  result->tm_hour   = (int)hour;
-  result->tm_min    = (int)min;
-  result->tm_sec    = (int)sec;
+  result->tm_year   = year - TM_YEAR_BASE; /* Relative to 1900 */
+  result->tm_mon    = month - 1;           /* zero-based */
+  result->tm_mday   = day;                 /* one-based */
+  result->tm_hour   = hour;
+  result->tm_min    = min;
+  result->tm_sec    = sec;
 
   result->tm_wday   = clock_dayoftheweek(day, month, year);
-  result->tm_yday   = day +
+  result->tm_yday   = day - 1 +
                       clock_daysbeforemonth(result->tm_mon,
                                             clock_isleapyear(year));
   result->tm_isdst  = 0;

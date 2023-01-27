@@ -22,26 +22,18 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_leds.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_ARCH_BOARD_FLASH_MOUNT),y)
-CSRCS += stm32_flash.c
-endif
-
-ifeq ($(CONFIG_SPI_DRIVER),y)
-  CSRCS += stm32_spi.c
-endif
+CSRCS-$(CONFIG_BOARDCTL) += stm32_appinit.c
+CSRCS-$(CONFIG_ARCH_BUTTONS) += stm32_buttons.c
+CSRCS-$(CONFIG_ARCH_BOARD_FLASH_MOUNT) += stm32_flash.c
+CSRCS-$(CONFIG_SPI_DRIVER) += stm32_spi.c
+CSRCS-$(CONFIG_ARCH_BOARD_IPCC) += stm32_ipcc.c
 
 ifeq ($(CONFIG_VIDEO_FB),y)
 ifeq ($(CONFIG_LCD_SSD1680),y)
   CSRCS += stm32_ssd1680.c
 endif
 endif
+
+CSRCS += $(CSRCS-y)
 
 include $(TOPDIR)/boards/Board.mk

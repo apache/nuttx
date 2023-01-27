@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/scripts/ld.script
+ * boards/risc-v/mpfs/icicle/scripts/ld-ihc.script
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

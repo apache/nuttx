@@ -45,7 +45,9 @@
 
 #include <stdint.h>
 #include <debug.h>
+#include <sys/random.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 
@@ -142,6 +144,41 @@ uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len)
 
 void tcp_initsequence(FAR uint8_t *seqno)
 {
+  int ret;
+
+  /* If g_tcpsequence is already initialized, just copy it */
+
+  if (g_tcpsequence == 0)
+    {
+      /* Get a random TCP sequence number */
+
+      ret = getrandom(&g_tcpsequence, sizeof(uint32_t), 0);
+      if (ret < 0)
+        {
+          ret = getrandom(&g_tcpsequence, sizeof(uint32_t), GRND_RANDOM);
+        }
+
+      /* If getrandom() failed use sys ticks, use about half of allowed
+       * values
+       */
+
+      if (ret != sizeof(uint32_t))
+        {
+          g_tcpsequence = clock_systime_ticks() % 2000000000;
+        }
+      else
+        {
+          g_tcpsequence = g_tcpsequence % 2000000000;
+        }
+
+      /* If the random value is "small" increase it */
+
+      if (g_tcpsequence < 1000000000)
+        {
+          g_tcpsequence += 1000000000;
+        }
+    }
+
   tcp_setsequence(seqno, g_tcpsequence);
 }
 

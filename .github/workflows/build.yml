@@ -24,6 +24,9 @@ on:
       - 'releases/*'
     tags:
 
+permissions:
+  contents: read
+
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -63,13 +66,13 @@ jobs:
             # Determine the repo and leave that unset to use the normal checkout behavior
             # of using the merge commit instead of HEAD
             case $GITHUB_REPOSITORY in
-              "apache/incubator-nuttx")
+              "apache/nuttx")
                 # OS
                 echo "Triggered by change in OS"
                 APPS_REF=$REF_NAME
                 ;;
 
-              "apache/incubator-nuttx-apps" )
+              "apache/nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
@@ -87,7 +90,7 @@ jobs:
       - name: Checkout nuttx repo
         uses: actions/checkout@v3
         with:
-          repository: apache/incubator-nuttx
+          repository: apache/nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
@@ -97,7 +100,7 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v3
         with:
-          repository: apache/incubator-nuttx-apps
+          repository: apache/nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
@@ -139,7 +142,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Pull
-        run: docker pull ghcr.io/apache/incubator-nuttx/apache-nuttx-ci-linux
+        run: docker pull ghcr.io/apache/nuttx/apache-nuttx-ci-linux
 
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
@@ -151,18 +154,15 @@ jobs:
         with:
           run: |
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
-            export CCACHE_DIR=`pwd`/ccache
-            mkdir $CCACHE_DIR
             export ARTIFACTDIR=`pwd`/buildartifacts
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
-                ./cibuild.sh -A -R -c --codechecker testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -R --codechecker testlist/${{matrix.boards}}.dat
             else
-              ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -R testlist/${{matrix.boards}}.dat
             fi
-            ccache -s
 
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
@@ -174,7 +174,7 @@ jobs:
   macOS:
     permissions:
       contents: none
-    runs-on: macos-10.15
+    runs-on: macos-12
     needs: Fetch-Source
     strategy:
       matrix:
@@ -195,21 +195,23 @@ jobs:
         env:
           cache-name: ${{ runner.os }}-cache-tools
         with:
-          path: prebuilt
+          path: ./sources/tools
           key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/cibuild.sh') }}
 
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
 
+      # Released version of Cython has issues with Python 11. Set runner to use Python 3.10
+      # https://github.com/cython/cython/issues/4500
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
-          export CCACHE_DIR=`pwd`/ccache
-          mkdir $CCACHE_DIR
           export ARTIFACTDIR=`pwd`/buildartifacts
           cd sources/nuttx/tools/ci
-          ./cibuild.sh -i -A -R -c testlist/${{matrix.boards}}.dat
-          ccache -s
+          ./cibuild.sh -i -c -A -R testlist/${{matrix.boards}}.dat
 
       - uses: actions/upload-artifact@v3
         with:

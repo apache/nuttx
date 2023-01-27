@@ -61,8 +61,8 @@
 
 int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
 {
-  int ret = OK;
   int semcount;
+  int ret = OK;
 
   if (!barrier)
     {
@@ -70,16 +70,19 @@ int pthread_barrier_destroy(FAR pthread_barrier_t *barrier)
     }
   else
     {
-      sem_getvalue(&barrier->sem, &semcount);
-      if (semcount == 0)
+      ret = sem_getvalue(&barrier->sem, &semcount);
+      if (ret != OK)
         {
-          sem_destroy(&barrier->sem);
-          barrier->count = 0;
+          return ret;
         }
-      else
+
+      if (semcount < 0)
         {
-          ret = EBUSY;
+          return EBUSY;
         }
+
+      sem_destroy(&barrier->sem);
+      barrier->count = 0;
     }
 
   return ret;

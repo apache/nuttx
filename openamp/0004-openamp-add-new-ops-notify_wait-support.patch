@@ -167,17 +167,10 @@ index 169e5b5f..4375c4c3 100644
  	/*
  	 * We suppose here that the vdev is in a shared memory so that can
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-<<<<<<< HEAD:openamp/0005-openamp-add-new-ops-notify_wait-support.patch
-index d19d3b1..c555101 100644
---- a/lib/rpmsg/rpmsg_virtio.c
-+++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -339,6 +339,13 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
-=======
 index c56e0cea..4960aa8a 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -373,6 +373,13 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
->>>>>>> 7ad4b573fb... openamp: update openmap lib version to 2022.10.0:openamp/0004-openamp-add-new-ops-notify_wait-support.patch
  		metal_mutex_release(&rdev->lock);
  		if (rp_hdr || !tick_count)
  			break;

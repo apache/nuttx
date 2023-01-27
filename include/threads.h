@@ -38,11 +38,11 @@
 
 /* Indicates thread error status */
 
-#define thrd_success  ((FAR void *)OK)
-#define thrd_timedout ((FAR void *)ETIMEDOUT)
-#define thrd_busy     ((FAR void *)EBUSY)
-#define thrd_nomem    ((FAR void *)ENOMEM)
-#define thrd_error    ((FAR void *)ERROR)
+#define thrd_success  (OK)
+#define thrd_timedout (ETIMEDOUT)
+#define thrd_busy     (EBUSY)
+#define thrd_nomem    (ENOMEM)
+#define thrd_error    (ERROR)
 
 /* Defines the type of a mutex */
 

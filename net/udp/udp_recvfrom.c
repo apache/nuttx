@@ -500,7 +500,8 @@ static void udp_recvfrom_initialize(FAR struct udp_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_sem_timedwait operation (may indicate EINTR)
+ *   result   The result of the net_sem_timedwait operation
+ *            (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -525,9 +526,9 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
       return pstate->ir_result;
     }
 
-  /* If net_sem_timedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_timedwait will have returned negated errno
-   * appropriately.
+  /* If net_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, net_sem_timedwait will have returned negated
+   * errno appropriately.
    */
 
   if (result < 0)

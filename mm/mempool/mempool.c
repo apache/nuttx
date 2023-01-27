@@ -39,7 +39,7 @@
 #endif
 
 #undef  ALIGN_UP
-#define ALIGN_UP(x, a) ((((x) + (a) - 1) / (a)) * (a))
+#define ALIGN_UP(x, a) (((x) + ((a) - 1)) & (~((a) - 1)))
 
 /****************************************************************************
  * Private Types
@@ -91,7 +91,7 @@ static inline void mempool_add_queue(FAR sq_queue_t *queue,
                                      FAR char *base, size_t nblks,
                                      size_t blocksize)
 {
-  while (nblks--)
+  while (nblks-- > 0)
     {
       sq_addfirst((FAR sq_entry_t *)(base + blocksize * nblks), queue);
     }
@@ -385,7 +385,7 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
  *   OK on success; A negated errno value on any failure.
  ****************************************************************************/
 
-int mempool_info(FAR struct mempool_s *pool, struct mempoolinfo_s *info)
+int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
 {
   irqstate_t flags;
 

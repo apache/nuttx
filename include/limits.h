@@ -309,4 +309,9 @@
 
 #define HOST_NAME_MAX  32
 
+/* ptrdiff_t limits */
+
+#define PTRDIFF_MAX PTR_MAX
+#define PTRDIFF_MIN PTR_MIN
+
 #endif /* __INCLUDE_LIMITS_H */

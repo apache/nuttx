@@ -700,6 +700,7 @@ static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
         break;
 
       default:
+        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }

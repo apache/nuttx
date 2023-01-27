@@ -100,7 +100,7 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
 
   /* Rewind to correct position. */
 
-  while (iovcnt > 0)
+  while (pos >= 0 && iovcnt > 0)
     {
       if (iov->iov_len <= pos)
         {

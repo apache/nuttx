@@ -32,6 +32,7 @@
 #include <nuttx/arch.h>
 
 #include "riscv_internal.h"
+#include "chip.h"
 
 /****************************************************************************
  * Private Data
@@ -73,9 +74,10 @@ int riscv_exception(int mcause, void *regs, void *args)
 {
   uintptr_t cause = mcause & RISCV_IRQ_MASK;
 
-  _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", MTVAL: %" PRIxREG "\n",
+  _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
+         ", MTVAL: %" PRIxREG "\n",
          mcause > RISCV_MAX_EXCEPTION ? "Unknown" : g_reasons_str[cause],
-         cause, READ_CSR(CSR_TVAL));
+         cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
 
   _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
   up_irq_save();
@@ -133,7 +135,7 @@ void riscv_exception_attach(void)
   irq_attach(RISCV_IRQ_STOREPF, riscv_exception, NULL);
 
 #ifdef CONFIG_SMP
-  irq_attach(RISCV_IRQ_MSOFT, riscv_pause_handler, NULL);
+  irq_attach(RISCV_IRQ_SOFT, riscv_pause_handler, NULL);
 #else
   irq_attach(RISCV_IRQ_MSOFT, riscv_exception, NULL);
 #endif

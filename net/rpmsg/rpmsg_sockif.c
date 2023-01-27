@@ -1024,7 +1024,6 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
       conn->lastpos  = conn->recvpos;
       conn->sendpos += msg->len;
 
-
       ret = rpmsg_sendto_nocopy(&conn->ept, msg, block + sizeof(*msg),
                                 conn->ept.dest_addr);
       nxmutex_unlock(&conn->sendlock);
@@ -1126,7 +1125,6 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
 
   conn->lastpos  = conn->recvpos;
   conn->sendpos += len + sizeof(uint32_t);
-
 
   ret = rpmsg_sendto_nocopy(&conn->ept, msg, total, conn->ept.dest_addr);
   nxmutex_unlock(&conn->sendlock);

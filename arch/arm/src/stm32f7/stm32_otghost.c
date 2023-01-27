@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -51,6 +52,8 @@
 #include <arch/board/board.h> /* May redefine GPIO settings */
 
 #include "arm_internal.h"
+#include "hardware/stm32_pwr.h"
+#include "stm32_gpio.h"
 #include "stm32_otg.h"
 #include "stm32_usbhost.h"
 
@@ -66,9 +69,9 @@
  *
  * Pre-requisites
  *
- *  CONFIG_USBHOST      - Enable general USB host support
- *  CONFIG_STM32F7_OTGFS  - Enable the STM32 USB OTG FS block
- *  CONFIG_STM32F7_SYSCFG - Needed
+ *  CONFIG_USBHOST                       - Enable general USB host support
+ *  CONFIG_STM32F7_OTGFS                 - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32F7_SYSCFG_IOCOMPENSATION - Needed
  *
  * Options:
  *
@@ -89,8 +92,8 @@
 
 /* Pre-requisites (partial) */
 
-#ifndef CONFIG_STM32F7_SYSCFG
-#  error "CONFIG_STM32F7_SYSCFG is required"
+#ifndef CONFIG_STM32F7_SYSCFG_IOCOMPENSATION
+#  error "CONFIG_STM32F7_SYSCFG_IOCOMPENSATION is required"
 #endif
 
 /* Default RxFIFO size */
@@ -501,7 +504,7 @@ static struct usbhost_connection_s g_usbconn =
 #ifdef CONFIG_STM32F7_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  llerr("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -551,7 +554,7 @@ static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              llerr("[repeats %d more times]\n", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -2456,7 +2459,8 @@ static inline void stm32_gint_hcinisr(struct stm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08" PRIx32 " pending: %08" PRIx32 "\n",
+        chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted interrupt */
 
@@ -2710,7 +2714,8 @@ static inline void stm32_gint_hcoutisr(struct stm32_usbhost_s *priv,
   /* AND the two to get the set of enabled, pending HC interrupts */
 
   pending &= regval;
-  uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
+  uinfo("HCINTMSK%d: %08" PRIx32 " pending: %08" PRIx32 "\n",
+        chidx, regval, pending);
 
   /* Check for a pending ACK response received/transmitted interrupt */
 
@@ -3030,7 +3035,7 @@ static inline void stm32_gint_rxflvlisr(struct stm32_usbhost_s *priv)
   /* Read and pop the next status from the Rx FIFO */
 
   grxsts = stm32_getreg(STM32_OTG_GRXSTSP);
-  uinfo("GRXSTS: %08x\n", grxsts);
+  uinfo("GRXSTS: %08" PRIx32 "\n", grxsts);
 
   /* Isolate the channel number/index in the status word */
 
@@ -3184,7 +3189,7 @@ static inline void stm32_gint_nptxfeisr(struct stm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  uinfo("HNPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d "
+  uinfo("HNPTXSTS: %08" PRIx32 " chidx: %d avail: %d buflen: %d xfrd: %d "
         "wrsize: %d\n",
         regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
@@ -3274,8 +3279,9 @@ static inline void stm32_gint_ptxfeisr(struct stm32_usbhost_s *priv)
 
   /* Write the next group of packets into the Tx FIFO */
 
-  uinfo("HPTXSTS: %08x chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
-           regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
+  uinfo("HPTXSTS: %08" PRIx32
+        " chidx: %d avail: %d buflen: %d xfrd: %d wrsize: %d\n",
+        regval, chidx, avail, chan->buflen, chan->xfrd, wrsize);
 
   stm32_gint_wrpacket(priv, chan->buffer, chidx, wrsize);
 }
@@ -4635,6 +4641,7 @@ static ssize_t stm32_transfer(struct usbhost_driver_s *drvr,
   struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   unsigned int chidx = (unsigned int)ep;
   ssize_t nbytes;
+  int ret;
 
   uinfo("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
@@ -5301,17 +5308,11 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 
   /* Deactivate the power down */
 
-  regval  = (OTG_GCCFG_PWRDWN | OTG_GCCFG_VBUSASEN | OTG_GCCFG_VBUSBSEN);
-#ifndef CONFIG_USBDEV_VBUSSENSING
-  regval |= OTG_GCCFG_NOVBUSSENS;
-#endif
-#ifdef CONFIG_STM32F7_OTG_SOFOUTPUT
-  regval |= OTG_GCCFG_SOFOUTEN;
-#endif
+  regval  = (OTG_GCCFG_PWRDWN | OTG_GCCFG_VBDEN);
   stm32_putreg(STM32_OTG_GCCFG, regval);
   up_mdelay(20);
 
-  /* Initialize OTG features:  In order to support OTP, the HNPCAP and SRPCAP
+  /* Initialize OTG features:  In order to support OTG, the HNPCAP and SRPCAP
    * bits would need to be set in the GUSBCFG register about here.
    */
 

@@ -303,7 +303,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
   for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
     {
-      if (totalsize < buflen)
+      if (buflen > 0)
         {
           struct mallinfo minfo;
 
@@ -329,7 +329,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
     }
 
 #ifdef CONFIG_MM_PGALLOC
-  if (totalsize < buflen)
+  if (buflen > 0)
     {
       struct pginfo_s pginfo;
       unsigned long total;
@@ -360,7 +360,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 #endif
 
 #if defined(CONFIG_ARCH_HAVE_PROGMEM) && defined(CONFIG_FS_PROCFS_INCLUDE_PROGMEM)
-  if (totalsize < buflen)
+  if (buflen > 0)
     {
       struct progmem_info_s progmem;
 
@@ -609,6 +609,11 @@ static int meminfo_stat(FAR const char *relpath, FAR struct stat *buf)
 
 void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
 {
+  if (NULL == entry->name)
+    {
+      return;
+    }
+
   entry->next = g_procfs_meminfo;
   g_procfs_meminfo = entry;
 }

@@ -5,6 +5,27 @@ README
   LaunchPad (more correctly, the EK-TM4C129EXL). For more information about this
   board, see https://www.ti.com/tool/EK-TM4C129EXL.
 
+Contents
+========
+
+  - EK-TM4C1294XL and DK-TM4C129X
+  - Status
+  - Directory Structure
+  - Development Environment
+    - Toolchains
+    - Debugging
+  - Hardware
+    - MCU Clocking
+    - Serial Console
+    - GPIOs
+    - Buttons
+    - LEDs
+    - GPIOs
+  - Configurations
+    - nsh
+    - ipv6
+    - ostest
+
 EK-TM4C1294XL and DK-TM4C129X
 =============================
 
@@ -14,6 +35,11 @@ EK-TM4C1294XL and DK-TM4C129X
 
     boards/arm/tiva/tm4c1294-launchpad/README.txt
     boards/arm/tiva/dk-tm4c129x/README.txt
+
+Status
+======
+
+  This port boots NuttX through to a functional NSH prompt.
 
 Directory Structure
 ===================
@@ -33,15 +59,80 @@ Within chip subdirectory:
     configs/        - Subdirectory for one or more board configuration(s)
       <config_1..n> - Configuration for use with tools/configure.sh or .bat
 
-Serial Console
-==============
+Development Environment
+=======================
 
-  These configurations use UART0 for the serial console. UART0 is connected to
-  the on-board TM4C123G-based debugger and is forwarded through the ICDI virtual
-  UART.
+  Toolchains
+  ----------
+  An appropriate ARM toolchain is needed, such as:
 
-Buttons and LEDs
-================
+  * The toolchain built with the customized NuttX buildroot
+
+  * The ready-made GNU Tools for Arm Embedded Processors:
+    https://developer.arm.com/Tools%20and%20Software/GNU%20Toolchain
+
+  * The toolchain that installs with Texas Instruments Code Composer Studio
+    (CCS): https://www.ti.com/tool/CCSTUDIO
+
+  Debugging
+  ---------
+
+  The board incorporates an In-Circuit Debug Interface (ICDI) which allows
+  FLASH programming and JTAG debugging. This is accessible via the Micro-USB
+  Type B connector labeled DEBUG (opposite end of the board from the Ethernet
+  port). The ICDI interface is implemented by a TM4C123G microcontroller.
+
+  To debug with OpenOCD and arm-nuttx-eabi-gdb:
+
+  * Use 'make menuconfig' to set CONFIG_DEBUG_SYMBOLS and CONFIG_DEBUG_NOOPT.
+    To see debug output, e.g., the "ABCDE" printed in __start(), also set
+    CONFIG_DEBUG_FEATURES.
+
+  * Build NuttX.
+
+  * Flash the code using:
+    $ openocd -f board/ek-tm4c1294xl.cfg -c "init" -c "reset halt" \
+      -c "stellaris mass_erase 0" -c "flash write_bank 0 nuttx.bin"
+
+    NOTE: The above command might fail unless either: udev rules have been
+    configured on the development system (preferred) or the command is run as
+    root with 'sudo' (not encouraged). See:
+    - https://openocd.org/doc/html/Running.html
+    - https://forgge.github.io/theCore/guides/running-openocd-without-sudo.html
+
+  * Start GDB with:
+    $ arm-nuttx-eabi-gdb -tui nuttx
+
+  * In GDB:
+    (gdb) target remote localhost:3333
+    (gdb) monitor reset halt
+    (gdb) load
+
+Hardware
+========
+
+  MCU Clocking
+  ------------
+
+    By default, the MCU on this board is clocked from 25 MHz crystal Y1, also
+    required for clocking the TM4C129's internal Ethernet MAC and PHY. For core
+    and peripheral timing, the MCU's internal PLL multiplies this 25 MHz clock
+    to 120 MHz.
+
+    The MCU's Hibernation peripheral is clocked from 32.768-KHz crystal Y3.
+
+  Serial Console
+  --------------
+
+    These configurations use UART0 for the serial console.
+
+    By default (check jumper settings on the board), UART0 is connected to the
+    on-board ICDI interface and is forwarded through the ICDI virtual UART. On
+    the PC, this appears a Virtual COM Port over the same Micro-USB Type B
+    connection used for programming/debugging.
+
+    On Debian Linux, this shows up as /dev/ttyACM0. Other operating systems may
+    differ.
 
   Buttons
   -------
@@ -62,6 +153,12 @@ Buttons and LEDs
     connected to GPIOs PN1 and PN0 and are dedicated for software use. LEDs D3
     and D4 are connected to GPIOs PF4 and PF0 and can be controlled either by
     software or by the integrated Ethernet PHY of the TM4C129ENCPDT.
+
+  GPIOs
+  -----
+
+    The board exposes almost all MCU pins to the breadboard and BoosterPack
+    connectors.
 
 Configurations
 ==============
@@ -224,3 +321,11 @@ Where <subdir> is one of the following:
        - CONFIG_NSH_IPv6NETMASK_6=0xffff
        - CONFIG_NSH_IPv6NETMASK_7=0xffff
        - CONFIG_NSH_IPv6NETMASK_8=0xff80
+
+  ostest:
+  ------
+    This configuration is the same as 'nsh' described above, with the addition
+    of CONFIG_TESTING_OSTEST. This enables the built-in program 'ostest' which
+    runs a series of tests to exercise features of the operating system. This
+    configuration also enables several debugging options to assist with
+    diagnosing any failures.

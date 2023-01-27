@@ -35,13 +35,13 @@
  * Call user-supplied function SEGGER_SYSVIEW_X_GetInterruptId().
  */
 
-#define SEGGER_SYSVIEW_GET_INTERRUPT_ID    sysview_get_interrupt_id
+#define SEGGER_SYSVIEW_GET_INTERRUPT_ID    note_sysview_get_interrupt_id
 
 /* Function macro to retrieve a system timestamp for SYSVIEW events.
  * Call user-supplied function SEGGER_SYSVIEW_X_GetTimestamp().
  */
 
-#define SEGGER_SYSVIEW_GET_TIMESTAMP       sysview_get_timestamp
+#define SEGGER_SYSVIEW_GET_TIMESTAMP       note_sysview_get_timestamp
 
 /* The RTT channel that SystemView will use. */
 
@@ -72,8 +72,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-unsigned int sysview_get_interrupt_id(void);
-unsigned int sysview_get_timestamp(void);
+unsigned int note_sysview_get_interrupt_id(void);
+unsigned int note_sysview_get_timestamp(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

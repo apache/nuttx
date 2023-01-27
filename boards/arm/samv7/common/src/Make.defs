@@ -42,6 +42,10 @@ ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
 CSRCS += sam_automount.c
 endif
 
+ifeq ($(CONFIG_SAMV7_GPIO_ENC),y)
+CSRCS += sam_gpio_enc.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

@@ -1385,12 +1385,12 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
     {
       /* Disable the provided CPU Interrupt to configure it. */
 
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->config->irq);
     }
 
-  priv->cpuint = esp32c3_request_irq(priv->config->periph,
-                                     ESP32C3_INT_PRIO_DEF,
-                                     ESP32C3_INT_LEVEL);
+  priv->cpuint = esp32c3_setup_irq(priv->config->periph,
+                                   ESP32C3_INT_PRIO_DEF,
+                                   ESP32C3_INT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
@@ -1403,7 +1403,7 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
     {
       /* Failed to attach IRQ, so CPU interrupt must be freed. */
 
-      esp32c3_free_cpuint(priv->config->periph);
+      esp32c3_teardown_irq(priv->config->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
       nxmutex_unlock(&priv->lock);
 
@@ -1412,7 +1412,7 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
 
   /* Enable the CPU interrupt that is linked to the SPI device. */
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(priv->config->irq);
 #endif
 
   esp32c3_spi_init(spi_dev);
@@ -1455,8 +1455,8 @@ int esp32c3_spibus_uninitialize(struct spi_dev_s *dev)
     }
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-  up_disable_irq(priv->cpuint);
-  esp32c3_free_cpuint(priv->config->periph);
+  up_disable_irq(priv->config->irq);
+  esp32c3_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 #endif
 

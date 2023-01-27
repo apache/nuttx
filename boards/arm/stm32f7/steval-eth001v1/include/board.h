@@ -35,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking */
+/* Clocking *****************************************************************/
 
 /* HSI: 16 MHz RC factory-trimmed
  * LSI: 32 KHz RC
@@ -176,7 +176,13 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* Alternate function pin selections */
+/* DMA Channel/Stream Selections ********************************************/
+
+/* ADC 1 */
+
+#define ADC1_DMA_CHAN           DMAMAP_ADC1_1
+
+/* Alternate function pin selections ****************************************/
 
 /* USART3
  * TX - PB10
@@ -200,12 +206,13 @@
 
 /* PWM1 - FOC */
 
-#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_1 /* PA8 */
-#define GPIO_TIM1_CH1N   GPIO_TIM1_CH1N_2   /* PB13 */
-#define GPIO_TIM1_CH2OUT GPIO_TIM1_CH2OUT_1 /* PA9 */
-#define GPIO_TIM1_CH2N   GPIO_TIM1_CH2N_1   /* PB0 */
-#define GPIO_TIM1_CH3OUT GPIO_TIM1_CH3OUT_1 /* PA10 */
-#define GPIO_TIM1_CH3N   GPIO_TIM1_CH3N_1   /* PB1 */
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_1   /* PA8 */
+#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1NOUT_2  /* PB13 */
+#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_1   /* PA9 */
+#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2NOUT_1  /* PB0 */
+#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_1   /* PA10 */
+#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_1  /* PB1 */
+#define GPIO_TIM1_CH4OUT  0                    /* not used as output */
 
 /* TIM2 - QENCO */
 

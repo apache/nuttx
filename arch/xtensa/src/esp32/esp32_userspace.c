@@ -36,6 +36,9 @@
 #include "chip.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
+#ifdef CONFIG_ESP32_USER_DATA_EXTMEM
+#include "esp32_spiram.h"
+#endif
 #include "esp32_userspace.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_pid.h"
@@ -189,6 +192,49 @@ static noinline_function IRAM_ATTR void configure_flash_mmu(void)
 }
 
 /****************************************************************************
+ * Name: configure_sram_mmu
+ *
+ * Description:
+ *   Configure the External SRAM MMU and Cache for enabling access to the
+ *   data of the userspace image.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_USER_DATA_EXTMEM
+static noinline_function IRAM_ATTR void configure_sram_mmu(void)
+{
+#ifdef CONFIG_SMP
+  uint32_t regval;
+#endif
+
+  /* Enable external RAM in MMU */
+
+  ASSERT(cache_sram_mmu_set(0, PIDCTRL_PID_KERNEL, SOC_EXTRAM_DATA_LOW, 0,
+                            32, 128) == 0);
+  ASSERT(cache_sram_mmu_set(0, PIDCTRL_PID_USER, SOC_EXTRAM_DATA_LOW, 0,
+                            32, 128) == 0);
+
+  /* Flush and enable icache for APP CPU */
+
+#ifdef CONFIG_SMP
+  regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
+  regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
+  putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
+  ASSERT(cache_sram_mmu_set(1, PIDCTRL_PID_KERNEL, SOC_EXTRAM_DATA_LOW, 0,
+                            32, 128) == 0);
+  ASSERT(cache_sram_mmu_set(1, PIDCTRL_PID_USER, SOC_EXTRAM_DATA_LOW, 0,
+                            32, 128) == 0);
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: map_flash
  *
  * Description:
@@ -322,6 +368,24 @@ static void configure_mpu(void)
   REG_SET_FIELD(DPORT_IMMU_TABLE14_REG, DPORT_IMMU_TABLE14, 0x0e);
   REG_SET_FIELD(DPORT_IMMU_TABLE15_REG, DPORT_IMMU_TABLE15, 0x0f);
 
+#ifdef CONFIG_ESP32_USER_DATA_EXTMEM
+  REG_SET_FIELD(DPORT_DMMU_TABLE0_REG,  DPORT_DMMU_TABLE0,  0x00);
+  REG_SET_FIELD(DPORT_DMMU_TABLE1_REG,  DPORT_DMMU_TABLE1,  0x01);
+  REG_SET_FIELD(DPORT_DMMU_TABLE2_REG,  DPORT_DMMU_TABLE2,  0x02);
+  REG_SET_FIELD(DPORT_DMMU_TABLE3_REG,  DPORT_DMMU_TABLE3,  0x03);
+  REG_SET_FIELD(DPORT_DMMU_TABLE4_REG,  DPORT_DMMU_TABLE4,  0x04);
+  REG_SET_FIELD(DPORT_DMMU_TABLE5_REG,  DPORT_DMMU_TABLE5,  0x05);
+  REG_SET_FIELD(DPORT_DMMU_TABLE6_REG,  DPORT_DMMU_TABLE6,  0x06);
+  REG_SET_FIELD(DPORT_DMMU_TABLE7_REG,  DPORT_DMMU_TABLE7,  0x07);
+  REG_SET_FIELD(DPORT_DMMU_TABLE8_REG,  DPORT_DMMU_TABLE8,  0x08);
+  REG_SET_FIELD(DPORT_DMMU_TABLE9_REG,  DPORT_DMMU_TABLE9,  0x09);
+  REG_SET_FIELD(DPORT_DMMU_TABLE10_REG, DPORT_DMMU_TABLE10, 0x0a);
+  REG_SET_FIELD(DPORT_DMMU_TABLE11_REG, DPORT_DMMU_TABLE11, 0x0b);
+  REG_SET_FIELD(DPORT_DMMU_TABLE12_REG, DPORT_DMMU_TABLE12, 0x0c);
+  REG_SET_FIELD(DPORT_DMMU_TABLE13_REG, DPORT_DMMU_TABLE13, 0x0d);
+  REG_SET_FIELD(DPORT_DMMU_TABLE14_REG, DPORT_DMMU_TABLE14, 0x0e);
+  REG_SET_FIELD(DPORT_DMMU_TABLE15_REG, DPORT_DMMU_TABLE15, 0x0f);
+#else
   REG_SET_FIELD(DPORT_DMMU_TABLE0_REG,  DPORT_DMMU_TABLE0,  0x00);
   REG_SET_FIELD(DPORT_DMMU_TABLE1_REG,  DPORT_DMMU_TABLE1,  0x01);
   REG_SET_FIELD(DPORT_DMMU_TABLE2_REG,  DPORT_DMMU_TABLE2,  0x02);
@@ -338,6 +402,7 @@ static void configure_mpu(void)
   REG_SET_FIELD(DPORT_DMMU_TABLE13_REG, DPORT_DMMU_TABLE13, 0x5d);
   REG_SET_FIELD(DPORT_DMMU_TABLE14_REG, DPORT_DMMU_TABLE14, 0x5e);
   REG_SET_FIELD(DPORT_DMMU_TABLE15_REG, DPORT_DMMU_TABLE15, 0x5f);
+#endif
 
   /* Configure interrupt vector addresses in PID Controller */
 
@@ -398,6 +463,19 @@ void esp32_userspace(void)
   /* Configure the Flash MMU for enabling access to the userspace image */
 
   configure_flash_mmu();
+
+#ifdef CONFIG_ESP32_USER_DATA_EXTMEM
+  if (esp_spiram_init() != OK)
+    {
+      mwarn("SPI RAM initialization failed!\n");
+
+      PANIC();
+    }
+
+  /* Configure the SRAM MMU for enabling access to the userspace image */
+
+  configure_sram_mmu();
+#endif
 
   /* Clear all of userspace .bss */
 

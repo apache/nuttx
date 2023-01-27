@@ -43,8 +43,10 @@
  *
  *   CONFIG_BUILD_FLAT:
  *     There is only kernel mode "blob" containing both kernel and
- *     application code.  There is only one heap that is used by both the
- *     kernel and application logic.
+ *     application code. Depending upon the setting of CONFIG_MM_KERNEL_HEAP
+ *     there may be a single shared heap (used by both the kernel and
+ *     application logic) or there may be separate (although unprotected)
+ *     kernel and user heaps.
  *
  *     In this configuration, this function is called early in nx_start()
  *     to initialize the common heap.
@@ -81,7 +83,11 @@
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
+#ifdef CONFIG_BUILD_KERNEL
+  USR_HEAP = mm_initialize(NULL, heap_start, heap_size);
+#else
   USR_HEAP = mm_initialize("Umem", heap_start, heap_size);
+#endif
 }
 
 /****************************************************************************

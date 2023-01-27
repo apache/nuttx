@@ -94,7 +94,7 @@ EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
-LDFLAGS += $(addprefix -T,$(ARCHSCRIPT).tmp) $(EXTRALINKCMDS)
+LDFLAGS += $(addprefix -T,$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
 ifeq ($(LD),$(CC))
   LDSTARTGROUP ?= -Wl,--start-group
@@ -152,7 +152,7 @@ board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 define LINK_ALLSYMS
-	$(Q)$(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp
+	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp
 	$(Q) $(call COMPILE, -x c allsyms.tmp, allsyms$(OBJEXT))
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) allsyms$(OBJEXT) $(EXTRA_OBJS) \

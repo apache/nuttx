@@ -32,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS
 	/* PID Controller is configured to switch to PID 0 when the CPU fetches
 	 * instruction from the following window exception vectors:
 	 * - Window Overflow 4: mapped as Level 2 vector entry address
@@ -131,4 +131,4 @@ _underflow8_exit_hook:
 	rsr 	a1, misc1
 	rfwu
 
-#endif /* CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS */
+#endif /* CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS */

@@ -68,12 +68,12 @@ FAR void *operator new[](std::size_t nbytes)
   FAR void *alloc = lib_malloc(nbytes);
 
 #ifdef CONFIG_DEBUG_ERROR
-  if (alloc == nullptr)
+  if (alloc == 0)
     {
       // Oh my.. we are required to return a valid pointer and
       // we cannot throw an exception!  We are bad.
 
-      _err("ERROR: Failed to allocate, size:%zu\n", nbytes);
+      _err("ERROR: Failed to allocate\n");
     }
 #endif
 

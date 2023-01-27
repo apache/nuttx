@@ -27,6 +27,14 @@
 #include "sim_internal.h"
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_COVERAGE
+void __gcov_dump(void);
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -47,6 +55,12 @@ extern int backtrace(void **array, int size);
 void host_abort(int status)
 {
   uint64_t flags = up_irq_save();
+
+#ifdef CONFIG_ARCH_COVERAGE
+  /* Dump gcov data. */
+
+  __gcov_dump();
+#endif
 
   /* exit the simulation */
 

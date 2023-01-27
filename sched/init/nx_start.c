@@ -549,7 +549,7 @@ void nx_start(void)
 
   task_initialize();
 
-  /* Disables context switching beacuse we need take the memory manager
+  /* Disables context switching because we need take the memory manager
    * semaphore on this CPU so that it will not be available on the other
    * CPUs until we have finished initialization.
    */
@@ -576,7 +576,7 @@ void nx_start(void)
 
   nxsig_initialize();
 
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Initialize the named message queue facility (if in link) */
 
   nxmq_initialize();

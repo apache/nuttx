@@ -66,10 +66,10 @@ FAR void *obstack_finish(FAR struct obstack *h)
     {
       chsize = h->next_free - (FAR char *)h->chunk;
       h->chunk = lib_obstack_realloc(h->chunk, chsize);
-      h->chunk->limit = (FAR void *)h->chunk + chsize;
+      h->chunk->limit = (FAR char *)h->chunk + chsize;
       h->object_base = h->chunk->limit;
       h->next_free = h->chunk->limit;
-      return (FAR void *)h->chunk + sizeof(struct _obstack_chunk);
+      return (FAR char *)h->chunk + sizeof(struct _obstack_chunk);
     }
 
   return obstack_finish_norealloc(h);

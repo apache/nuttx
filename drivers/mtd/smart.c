@@ -146,6 +146,28 @@
 #define CLR_BITMAP(m, n) do { (m)[(n) / 8] &= ~(1 << ((n) % 8)); } while (0)
 #define ISSET_BITMAP(m, n) ((m)[(n) / 8] & (1 << ((n) % 8)))
 
+#ifdef CONFIG_SMARTFS_ALIGNED_ACCESS
+#  define SMARTFS_NEXTSECTOR(h) \
+  (uint16_t)((FAR const uint8_t *)(h)->nextsector)[1] << 8 | \
+  (uint16_t)((FAR const uint8_t *)(h)->nextsector)[0]
+
+#  define SMARTFS_SET_NEXTSECTOR(h, v) \
+  do \
+    { \
+      ((FAR uint8_t *)(h)->nextsector)[0] = (v) & 0xff; \
+      ((FAR uint8_t *)(h)->nextsector)[1] = (v) >> 8;   \
+    } while (0)
+
+#else
+#  define SMARTFS_NEXTSECTOR(h) (*((FAR uint16_t *)(h)->nextsector))
+#  define SMARTFS_SET_NEXTSECTOR(h, v) \
+  do \
+    { \
+      ((*((FAR uint16_t *)(h)->nextsector)) = (uint16_t)(v)); \
+    } while (0)
+
+#endif
+
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
 
 /****************************************************************************
@@ -5736,7 +5758,7 @@ static int smart_fsck_file(FAR struct smart_struct_s *dev,
 
       /* next logical sector */
 
-      logsector = *(uint16_t *)chain->nextsector;
+      logsector = SMARTFS_NEXTSECTOR(chain);
     }
   while (logsector != 0xffff);
 
@@ -5864,7 +5886,7 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
   /* Check next sector recursively */
 
-  nextsector = *(uint16_t *)chain->nextsector;
+  nextsector = SMARTFS_NEXTSECTOR(chain);
 
   if (nextsector != 0xffff)
     {
@@ -5878,7 +5900,7 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
           ferr("Invalidate next log sector %d\n", nextsector);
 
-          *(uint16_t *)chain->nextsector = 0xffff;
+          SMARTFS_SET_NEXTSECTOR(chain, 0xffff);
 
           /* Set flag to relocate later */
 

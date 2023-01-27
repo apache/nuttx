@@ -647,7 +647,6 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   /* Enable the hardware interrupt */
 
   priv->bc_bifup = true;
-  syslog(LOG_WARNING, "--- [wifi] power on ---\n");
 
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
   bcmf_lowpower_poll(priv);
@@ -716,8 +715,6 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
       bcmf_wl_enable(priv, false);
       priv->bc_bfwload = false;
       bcmf_wl_active(priv, false);
-
-      syslog(LOG_WARNING, "--- [wifi] power off ---\n");
     }
 
   leave_critical_section(flags);
@@ -786,7 +783,6 @@ static void bcmf_lowpower_ifdown_work(FAR void *arg)
     {
       if (priv->bc_bifup)
         {
-          syslog(LOG_WARNING, "--- [wifi] power off by 10m timeout ---\n");
           netdev_ifdown(&priv->bc_dev);
         }
     }

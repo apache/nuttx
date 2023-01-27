@@ -1,0 +1,316 @@
+From f413f7d60212a925078748e800f381ced51b9e9a Mon Sep 17 00:00:00 2001
+From: Nodir Temirkhodjaev <nodir.temir@gmail.com>
+Date: Fri, 3 Jan 2020 14:41:23 +0500
+Subject: [PATCH 1/8] Add TLSF_API and tlsf_printf.
+
+Needed for static building.
+---
+ tlsf.c | 58 +++++++++++++++++++++++++++++++---------------------------
+ tlsf.h | 46 ++++++++++++++++++++++++++--------------------
+ 2 files changed, 57 insertions(+), 47 deletions(-)
+
+diff --git a/tlsf.c tlsf/tlsf/tlsf.c
+index af57573..e344dd5 100644
+--- a/tlsf.c
++++ tlsf/tlsf/tlsf.c
+@@ -13,6 +13,10 @@
+ #define tlsf_decl static
+ #endif
+ 
++#if !defined(tlsf_printf)
++#define tlsf_printf printf
++#endif
++
+ /*
+ ** Architecture-specific bit manipulation routines.
+ **
+@@ -841,7 +845,7 @@ static void integrity_walker(void* ptr, size_t size, int used, void* user)
+ 	integ->status += status;
+ }
+ 
+-int tlsf_check(tlsf_t tlsf)
++TLSF_API int tlsf_check(tlsf_t tlsf)
+ {
+ 	int i, j;
+ 
+@@ -898,10 +902,10 @@ int tlsf_check(tlsf_t tlsf)
+ static void default_walker(void* ptr, size_t size, int used, void* user)
+ {
+ 	(void)user;
+-	printf("\t%p %s size: %x (%p)\n", ptr, used ? "used" : "free", (unsigned int)size, block_from_ptr(ptr));
++	tlsf_printf("\t%p %s size: %x (%p)\n", ptr, used ? "used" : "free", (unsigned int)size, block_from_ptr(ptr));
+ }
+ 
+-void tlsf_walk_pool(pool_t pool, tlsf_walker walker, void* user)
++TLSF_API void tlsf_walk_pool(pool_t pool, tlsf_walker walker, void* user)
+ {
+ 	tlsf_walker pool_walker = walker ? walker : default_walker;
+ 	block_header_t* block =
+@@ -918,7 +922,7 @@ void tlsf_walk_pool(pool_t pool, tlsf_walker walker, void* user)
+ 	}
+ }
+ 
+-size_t tlsf_block_size(void* ptr)
++TLSF_API size_t tlsf_block_size(void* ptr)
+ {
+ 	size_t size = 0;
+ 	if (ptr)
+@@ -929,7 +933,7 @@ size_t tlsf_block_size(void* ptr)
+ 	return size;
+ }
+ 
+-int tlsf_check_pool(pool_t pool)
++TLSF_API int tlsf_check_pool(pool_t pool)
+ {
+ 	/* Check that the blocks are physically correct. */
+ 	integrity_t integ = { 0, 0 };
+@@ -942,22 +946,22 @@ int tlsf_check_pool(pool_t pool)
+ ** Size of the TLSF structures in a given memory block passed to
+ ** tlsf_create, equal to the size of a control_t
+ */
+-size_t tlsf_size(void)
++TLSF_API size_t tlsf_size(void)
+ {
+ 	return sizeof(control_t);
+ }
+ 
+-size_t tlsf_align_size(void)
++TLSF_API size_t tlsf_align_size(void)
+ {
+ 	return ALIGN_SIZE;
+ }
+ 
+-size_t tlsf_block_size_min(void)
++TLSF_API size_t tlsf_block_size_min(void)
+ {
+ 	return block_size_min;
+ }
+ 
+-size_t tlsf_block_size_max(void)
++TLSF_API size_t tlsf_block_size_max(void)
+ {
+ 	return block_size_max;
+ }
+@@ -967,17 +971,17 @@ size_t tlsf_block_size_max(void)
+ ** tlsf_add_pool, equal to the overhead of a free block and the
+ ** sentinel block.
+ */
+-size_t tlsf_pool_overhead(void)
++TLSF_API size_t tlsf_pool_overhead(void)
+ {
+ 	return 2 * block_header_overhead;
+ }
+ 
+-size_t tlsf_alloc_overhead(void)
++TLSF_API size_t tlsf_alloc_overhead(void)
+ {
+ 	return block_header_overhead;
+ }
+ 
+-pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
++TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
+ {
+ 	block_header_t* block;
+ 	block_header_t* next;
+@@ -987,7 +991,7 @@ pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
+ 
+ 	if (((ptrdiff_t)mem % ALIGN_SIZE) != 0)
+ 	{
+-		printf("tlsf_add_pool: Memory must be aligned by %u bytes.\n",
++		tlsf_printf("tlsf_add_pool: Memory must be aligned by %u bytes.\n",
+ 			(unsigned int)ALIGN_SIZE);
+ 		return 0;
+ 	}
+@@ -995,11 +999,11 @@ pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
+ 	if (pool_bytes < block_size_min || pool_bytes > block_size_max)
+ 	{
+ #if defined (TLSF_64BIT)
+-		printf("tlsf_add_pool: Memory size must be between 0x%x and 0x%x00 bytes.\n", 
++		tlsf_printf("tlsf_add_pool: Memory size must be between 0x%x and 0x%x00 bytes.\n", 
+ 			(unsigned int)(pool_overhead + block_size_min),
+ 			(unsigned int)((pool_overhead + block_size_max) / 256));
+ #else
+-		printf("tlsf_add_pool: Memory size must be between %u and %u bytes.\n", 
++		tlsf_printf("tlsf_add_pool: Memory size must be between %u and %u bytes.\n", 
+ 			(unsigned int)(pool_overhead + block_size_min),
+ 			(unsigned int)(pool_overhead + block_size_max));
+ #endif
+@@ -1026,7 +1030,7 @@ pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes)
+ 	return mem;
+ }
+ 
+-void tlsf_remove_pool(tlsf_t tlsf, pool_t pool)
++TLSF_API void tlsf_remove_pool(tlsf_t tlsf, pool_t pool)
+ {
+ 	control_t* control = tlsf_cast(control_t*, tlsf);
+ 	block_header_t* block = offset_to_block(pool, -(int)block_header_overhead);
+@@ -1046,7 +1050,7 @@ void tlsf_remove_pool(tlsf_t tlsf, pool_t pool)
+ */
+ 
+ #if _DEBUG
+-int test_ffs_fls()
++static int test_ffs_fls()
+ {
+ 	/* Verify ffs/fls work properly. */
+ 	int rv = 0;
+@@ -1067,13 +1071,13 @@ int test_ffs_fls()
+ 
+ 	if (rv)
+ 	{
+-		printf("test_ffs_fls: %x ffs/fls tests failed.\n", rv);
++		tlsf_printf("test_ffs_fls: %x ffs/fls tests failed.\n", rv);
+ 	}
+ 	return rv;
+ }
+ #endif
+ 
+-tlsf_t tlsf_create(void* mem)
++TLSF_API tlsf_t tlsf_create(void* mem)
+ {
+ #if _DEBUG
+ 	if (test_ffs_fls())
+@@ -1084,7 +1088,7 @@ tlsf_t tlsf_create(void* mem)
+ 
+ 	if (((tlsfptr_t)mem % ALIGN_SIZE) != 0)
+ 	{
+-		printf("tlsf_create: Memory must be aligned to %u bytes.\n",
++		tlsf_printf("tlsf_create: Memory must be aligned to %u bytes.\n",
+ 			(unsigned int)ALIGN_SIZE);
+ 		return 0;
+ 	}
+@@ -1094,25 +1098,25 @@ tlsf_t tlsf_create(void* mem)
+ 	return tlsf_cast(tlsf_t, mem);
+ }
+ 
+-tlsf_t tlsf_create_with_pool(void* mem, size_t bytes)
++TLSF_API tlsf_t tlsf_create_with_pool(void* mem, size_t bytes)
+ {
+ 	tlsf_t tlsf = tlsf_create(mem);
+ 	tlsf_add_pool(tlsf, (char*)mem + tlsf_size(), bytes - tlsf_size());
+ 	return tlsf;
+ }
+ 
+-void tlsf_destroy(tlsf_t tlsf)
++TLSF_API void tlsf_destroy(tlsf_t tlsf)
+ {
+ 	/* Nothing to do. */
+ 	(void)tlsf;
+ }
+ 
+-pool_t tlsf_get_pool(tlsf_t tlsf)
++TLSF_API pool_t tlsf_get_pool(tlsf_t tlsf)
+ {
+ 	return tlsf_cast(pool_t, (char*)tlsf + tlsf_size());
+ }
+ 
+-void* tlsf_malloc(tlsf_t tlsf, size_t size)
++TLSF_API void* tlsf_malloc(tlsf_t tlsf, size_t size)
+ {
+ 	control_t* control = tlsf_cast(control_t*, tlsf);
+ 	const size_t adjust = adjust_request_size(size, ALIGN_SIZE);
+@@ -1120,7 +1124,7 @@ void* tlsf_malloc(tlsf_t tlsf, size_t size)
+ 	return block_prepare_used(control, block, adjust);
+ }
+ 
+-void* tlsf_memalign(tlsf_t tlsf, size_t align, size_t size)
++TLSF_API void* tlsf_memalign(tlsf_t tlsf, size_t align, size_t size)
+ {
+ 	control_t* control = tlsf_cast(control_t*, tlsf);
+ 	const size_t adjust = adjust_request_size(size, ALIGN_SIZE);
+@@ -1177,7 +1181,7 @@ void* tlsf_memalign(tlsf_t tlsf, size_t align, size_t size)
+ 	return block_prepare_used(control, block, adjust);
+ }
+ 
+-void tlsf_free(tlsf_t tlsf, void* ptr)
++TLSF_API void tlsf_free(tlsf_t tlsf, void* ptr)
+ {
+ 	/* Don't attempt to free a NULL pointer. */
+ 	if (ptr)
+@@ -1205,7 +1209,7 @@ void tlsf_free(tlsf_t tlsf, void* ptr)
+ ** - an extended buffer size will leave the newly-allocated area with
+ **   contents undefined
+ */
+-void* tlsf_realloc(tlsf_t tlsf, void* ptr, size_t size)
++TLSF_API void* tlsf_realloc(tlsf_t tlsf, void* ptr, size_t size)
+ {
+ 	control_t* control = tlsf_cast(control_t*, tlsf);
+ 	void* p = 0;
+diff --git a/tlsf.h tlsf/tlsf/tlsf.h
+index e9b5a91..c2c4161 100644
+--- a/tlsf.h
++++ tlsf/tlsf/tlsf.h
+@@ -40,6 +40,12 @@
+ 
+ #include <stddef.h>
+ 
++/* Definition of the TLSF_API. */
++/* Provide the ability to override linkage features of the interface. */
++#if !defined(TLSF_API)
++#define TLSF_API
++#endif
++
+ #if defined(__cplusplus)
+ extern "C" {
+ #endif
+@@ -50,38 +56,38 @@ typedef void* tlsf_t;
+ typedef void* pool_t;
+ 
+ /* Create/destroy a memory pool. */
+-tlsf_t tlsf_create(void* mem);
+-tlsf_t tlsf_create_with_pool(void* mem, size_t bytes);
+-void tlsf_destroy(tlsf_t tlsf);
+-pool_t tlsf_get_pool(tlsf_t tlsf);
++TLSF_API tlsf_t tlsf_create(void* mem);
++TLSF_API tlsf_t tlsf_create_with_pool(void* mem, size_t bytes);
++TLSF_API void tlsf_destroy(tlsf_t tlsf);
++TLSF_API pool_t tlsf_get_pool(tlsf_t tlsf);
+ 
+ /* Add/remove memory pools. */
+-pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes);
+-void tlsf_remove_pool(tlsf_t tlsf, pool_t pool);
++TLSF_API pool_t tlsf_add_pool(tlsf_t tlsf, void* mem, size_t bytes);
++TLSF_API void tlsf_remove_pool(tlsf_t tlsf, pool_t pool);
+ 
+ /* malloc/memalign/realloc/free replacements. */
+-void* tlsf_malloc(tlsf_t tlsf, size_t bytes);
+-void* tlsf_memalign(tlsf_t tlsf, size_t align, size_t bytes);
+-void* tlsf_realloc(tlsf_t tlsf, void* ptr, size_t size);
+-void tlsf_free(tlsf_t tlsf, void* ptr);
++TLSF_API void* tlsf_malloc(tlsf_t tlsf, size_t bytes);
++TLSF_API void* tlsf_memalign(tlsf_t tlsf, size_t align, size_t bytes);
++TLSF_API void* tlsf_realloc(tlsf_t tlsf, void* ptr, size_t size);
++TLSF_API void tlsf_free(tlsf_t tlsf, void* ptr);
+ 
+ /* Returns internal block size, not original request size */
+-size_t tlsf_block_size(void* ptr);
++TLSF_API size_t tlsf_block_size(void* ptr);
+ 
+ /* Overheads/limits of internal structures. */
+-size_t tlsf_size(void);
+-size_t tlsf_align_size(void);
+-size_t tlsf_block_size_min(void);
+-size_t tlsf_block_size_max(void);
+-size_t tlsf_pool_overhead(void);
+-size_t tlsf_alloc_overhead(void);
++TLSF_API size_t tlsf_size(void);
++TLSF_API size_t tlsf_align_size(void);
++TLSF_API size_t tlsf_block_size_min(void);
++TLSF_API size_t tlsf_block_size_max(void);
++TLSF_API size_t tlsf_pool_overhead(void);
++TLSF_API size_t tlsf_alloc_overhead(void);
+ 
+ /* Debugging. */
+ typedef void (*tlsf_walker)(void* ptr, size_t size, int used, void* user);
+-void tlsf_walk_pool(pool_t pool, tlsf_walker walker, void* user);
++TLSF_API void tlsf_walk_pool(pool_t pool, tlsf_walker walker, void* user);
+ /* Returns nonzero if any internal consistency check fails. */
+-int tlsf_check(tlsf_t tlsf);
+-int tlsf_check_pool(pool_t pool);
++TLSF_API int tlsf_check(tlsf_t tlsf);
++TLSF_API int tlsf_check_pool(pool_t pool);
+ 
+ #if defined(__cplusplus)
+ };
+-- 
+2.34.1
+

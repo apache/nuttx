@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_LPC17_40_EMC is not set
-# CONFIG_NSH_CMDPARMS is not set
 # CONFIG_NSH_DISABLE_IFCONFIG is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="lpc4088-quickstart"

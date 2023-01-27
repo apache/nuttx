@@ -831,14 +831,12 @@
  * Public Types
  ****************************************************************************/
 
-/* In-memory representation of the 32-byte Transfer Control Descriptor
- * (TCD)
+/* Hardware representation of the 32-byte Transfer
+ * Control Descriptor (TCD)
  */
 
 struct kinetis_edmatcd_s
 {
-  sq_entry_t node;
-  uint8_t    flags;         /* See EDMA_CONFIG_* definitions */
   uint32_t   saddr;         /* Offset: 0x0000  TCD Source Address */
   uint16_t   soff;          /* Offset: 0x0004  TCD Signed Source Address Offset */
   uint16_t   attr;          /* Offset: 0x0006  TCD Transfer Attributes */

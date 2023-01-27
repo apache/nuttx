@@ -22,6 +22,10 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_bringup.c
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
@@ -34,6 +38,18 @@ endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CSRCS += stm32_qencoder.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL_RESET),y)

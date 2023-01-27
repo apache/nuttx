@@ -1133,7 +1133,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
       /* Set frame size */
 
-      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
+      DEBUGASSERT(priv->dev.d_len <= CONFIG_STM32_ETH_BUFSIZE);
       txdesc->tdes1 = priv->dev.d_len;
 
       /* Set the Buffer1 address pointer */

@@ -43,8 +43,7 @@
  */
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-      defined(CONFIG_STM32_STM32G4XXX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32_rtcc.h"
 #endif
 
@@ -95,13 +94,7 @@
 #  define CONFIG_STM32_RTC_MAGIC_REG      (0)
 #endif
 
-#if defined(CONFIG_STM32_STM32G4XXX)
-#  define RTC_MAGIC_REG                   STM32_TAMP_BKR(CONFIG_STM32_RTC_MAGIC_REG)
-
-#else
-#  define RTC_MAGIC_REG                   STM32_RTC_BKR(CONFIG_STM32_RTC_MAGIC_REG)
-
-#endif/* CONFIG_STM32_STM32G4XXX */
+#define RTC_MAGIC_REG                     STM32_RTC_BKR(CONFIG_STM32_RTC_MAGIC_REG)
 
 #endif /* CONFIG_STM32_STM32F10XX */
 

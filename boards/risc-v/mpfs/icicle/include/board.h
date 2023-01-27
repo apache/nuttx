@@ -37,6 +37,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+#  define MPFS_EMMC_CLK_MODE MPFS_EMMCSD_MODE_HS200
+#endif
+
+#ifdef CONFIG_MMCSD_SDIO
+#  define MPFS_SD_CLOCK_4BIT MPFS_MMC_CLOCK_25MHZ
+#endif
+
 /* Clocking TODO: */
 
 #define MPFS_MSS_EXT_SGMII_REF_CLK (125000000UL)

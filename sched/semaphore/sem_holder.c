@@ -322,7 +322,7 @@ static int nxsem_recoverholders(FAR struct semholder_s *pholder,
 static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
                                  FAR sem_t *sem, FAR void *arg)
 {
-  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
+  FAR struct tcb_s *htcb = pholder->htcb;
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)arg;
 
   /* If the priority of the thread that is waiting for a count is less than
@@ -357,7 +357,7 @@ static int nxsem_verifyholder(FAR struct semholder_s *pholder,
    */
 
 #if 0
-  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
+  FAR struct tcb_s *htcb = pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore
    * could be non-negative, and there is no thread waiting for the count.
@@ -836,7 +836,7 @@ void nxsem_release_holder(FAR sem_t *sem)
 
   if (total == 1)
     {
-      /* If the sempahore has only one holder, we can decrement the counts
+      /* If the semaphore has only one holder, we can decrement the counts
        * simply.
        */
 
@@ -900,12 +900,12 @@ void nxsem_restore_baseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
 
   if (stcb != NULL)
     {
-      /* Handler semaphore counts posed from an interrupt handler differently
-       * from interrupts posted from threads.  The primary difference is that
-       * if the semaphore is posted from a thread, then the poster thread is
-       * a player in the priority inheritance scheme.  The interrupt handler
-       * externally injects the new count without otherwise participating
-       * itself.
+      /* Handler semaphore counts posted from an interrupt handler
+       * differently from interrupts posted from threads.  The primary
+       * difference is that if the semaphore is posted from a thread, then
+       * the poster thread is a player in the priority inheritance scheme.
+       * The interrupt handler externally injects the new count without
+       * otherwise participating itself.
        */
 
       if (up_interrupt_context())

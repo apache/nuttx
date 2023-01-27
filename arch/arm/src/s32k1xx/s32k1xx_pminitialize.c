@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/power/pm.h>
 
+#include "s32k1xx_clockconfig.h"
 #include "arm_internal.h"
 
 #ifdef CONFIG_PM
@@ -56,6 +57,10 @@ void arm_pminitialize(void)
   /* Initialize the NuttX power management subsystem proper */
 
   pm_initialize();
+
+  /* Register clockconfig first to receive power management callbacks */
+
+  s32k1xx_clock_pm_register();
 }
 
 #endif /* CONFIG_PM */

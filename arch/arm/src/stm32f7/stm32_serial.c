@@ -3639,10 +3639,10 @@ void arm_serialinit(void)
 
 #if !defined(SERIAL_HAVE_ONLY_DMA)
 #  if defined(SERIAL_HAVE_RXDMA)
-  UNUSED(&g_uart_rxdma_ops);
+  UNUSED(g_uart_rxdma_ops);
 #  endif
 #  if defined(SERIAL_HAVE_TXDMA)
-  UNUSED(&g_uart_txdma_ops);
+  UNUSED(g_uart_txdma_ops);
 #  endif
 #endif
 

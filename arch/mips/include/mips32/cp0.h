@@ -41,7 +41,7 @@
 #  define MIPS32_CP0_ENTRYLO11      $3,0   /* LS TLB entry for odd-numbered pages */
 #  define MIPS32_CP0_CONTEXT2       $4,0   /* Page table address */
 #  define MIPS32_CP0_PAGEMASK1      $5,0   /* Variable page sizes in TLB entries */
-#  define MIPS32_CP0_WIRED1         $6,0   /* umber of fixed (“wired”) TLB entries */
+#  define MIPS32_CP0_WIRED1         $6,0   /* Number of fixed ('wired') TLB entries */
 #  define MIPS32_CP0_BADVADDR       $8,0   /* Address of most recent exception */
 #  define MIPS32_CP0_COUNT          $9,0   /* Processor cycle count */
 #  define MIPS32_CP0_ENTRYHI1       $10,0  /* High-order portion of the TLB entry */
@@ -140,7 +140,7 @@
 #  define CP0_PAGEMASK_256MB        (0xffff << CP0_PAGEMASK_SHIFT)
 
 /* Register Number: 6 Sel: 0 Name: Wired
- * Function: Controls the number of fixed (“wired”) TLB entries
+ * Function: Controls the number of fixed ('wired') TLB entries
  * Compliance Level: Required for TLB-based MMUs; Optional otherwise.
  *
  *   This is a 32-bit register containing the TLB wired boundary.
@@ -232,7 +232,7 @@
 #define CP0_STATUS_TS               (1 << 21) /* Bit 21: TLB detected match on multiple entries */
 #define CP0_STATUS_BEV              (1 << 22) /* Bit 22: Location of exception vectors 1->Bootstrap */
 #define CP0_STATUS_PX               (1 << 23) /* Bit 23: Enables 64-bit operations (Not MIPS32) */
-#define CP0_STATUS_MX               (1 << 24) /* Bit 24: Enables MDMX™ (Not MIPS32) */
+#define CP0_STATUS_MX               (1 << 24) /* Bit 24: Enables MDMXâ„¢ (Not MIPS32) */
 #define CP0_STATUS_RE               (1 << 25) /* Bit 25: Enable reverse-endian memory in user mode */
 #define CP0_STATUS_FR               (1 << 26) /* Bit 26: Controls the floating point register mode (Not MIPS32) */
 #define CP0_STATUS_RP               (1 << 27) /* Bit 27: Enables reduced power mode */
@@ -432,12 +432,12 @@
  */
 
 #define CP0_CONFIG3_TL              (1 << 0)  /* Bit 0:  Trace Logic implemented */
-#define CP0_CONFIG3_SM              (1 << 1)  /* Bit 1:  SmartMIPS™ ASE implemented */
+#define CP0_CONFIG3_SM              (1 << 1)  /* Bit 1:  SmartMIPSâ„¢ ASE implemented */
 #define CP0_CONFIG3_CDMM            (1 << 3)  /* Bit 3:  Common Device Memory Map */
 #define CP0_CONFIG3_SP              (1 << 4)  /* Bit 4:  Small page bit */
 #define CP0_CONFIG3_VINT            (1 << 5)  /* Bit 5:  Vector interrupt bit */
 #define CP0_CONFIG3_VEIC            (1 << 6)  /* Bit 6:  External interrupt controller supported */
-#define CP0_CONFIG3_ITL             (1 << 8)  /* Bit 8:  Flowtrace® Hardware bit */
+#define CP0_CONFIG3_ITL             (1 << 8)  /* Bit 8:  FlowtraceÂ® Hardware bit */
 #define CP0_CONFIG3_DSPP            (1 << 10) /* Bit 10: MIPS DSP ASE Presence bit */
 #define CP0_CONFIG3_DSP2            (1 << 11) /* Bit 11: MIPS DSP ASE Revision 2 Presence bit */
 #define CP0_CONFIG3_RXI             (1 << 12) /* Bit 12: RIE and XIE Implemented in PageGrain bit */

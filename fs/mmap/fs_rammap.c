@@ -51,9 +51,9 @@ static int unmap_rammap(FAR struct task_group_s *group,
                         size_t length)
 {
   FAR void *newaddr;
-  unsigned int offset;
-  bool kernel = entry->priv.i != 0 ? true : false;
-  int ret;
+  off_t offset;
+  bool kernel = entry->priv.i;
+  int ret = OK;
 
   /* Get the offset from the beginning of the region and the actual number
    * of bytes to "unmap".  All mappings must extend to the end of the region.
@@ -62,7 +62,7 @@ static int unmap_rammap(FAR struct task_group_s *group,
    * simulate the unmapping.
    */
 
-  offset = start - entry->vaddr;
+  offset = (uintptr_t)start - (uintptr_t)entry->vaddr;
   if (offset + length < entry->length)
     {
       ferr("ERROR: Cannot umap without unmapping to the end\n");
@@ -111,9 +111,8 @@ static int unmap_rammap(FAR struct task_group_s *group,
         }
 
       DEBUGASSERT(newaddr == entry->vaddr);
-      UNUSED(newaddr); /* May not be used */
+      entry->vaddr = newaddr;
       entry->length = length;
-      ret = OK;
     }
 
   return ret;
@@ -175,7 +174,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   rdbuffer = kernel ? kmm_malloc(length) : kumm_malloc(length);
   if (!rdbuffer)
     {
-      ferr("ERROR: Region allocation failed, length: %d\n", (int)length);
+      ferr("ERROR: Region allocation failed, length: %zu\n", length);
       return -ENOMEM;
     }
 
@@ -190,7 +189,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
        * the correct response.
        */
 
-      ferr("ERROR: Seek to position %d failed\n", (int)entry->offset);
+      ferr("ERROR: Seek to position %zu failed\n", (size_t)entry->offset);
       ret = fpos;
       goto errout_with_region;
     }
@@ -210,8 +209,8 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
             {
               /* All other read errors are bad. */
 
-              ferr("ERROR: Read failed: offset=%d ret=%d\n",
-                   (int)entry->offset, (int)nread);
+              ferr("ERROR: Read failed: offset=%zu ret=%zd\n",
+                   (size_t)entry->offset, nread);
 
               ret = nread;
               goto errout_with_region;
@@ -237,7 +236,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
   /* Add the buffer to the list of regions */
 
-  entry->priv.i = kernel ? 1 : 0;
+  entry->priv.i = kernel;
   entry->munmap = unmap_rammap;
 
   ret = mm_map_add(entry);

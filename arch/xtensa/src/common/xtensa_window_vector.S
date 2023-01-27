@@ -98,7 +98,7 @@ _window_overflow4:
 	s32e	a1, a5, -12		/* Save a1 to call[j+1]'s stack frame */
 	s32e	a2, a5,  -8		/* Save a2 to call[j+1]'s stack frame */
 	s32e	a3, a5,  -4		/* Save a3 to call[j+1]'s stack frame */
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS
 	j   	_overflow4_exit_hook
 #else
 	rfwo					/* Rotates back to call[i] position */
@@ -125,7 +125,7 @@ _window_underflow4:
 	l32e	a1, a5, -12		/* Restore a1 from call[i+1]'s stack frame */
 	l32e	a2, a5,  -8		/* Restore a2 from call[i+1]'s stack frame */
 	l32e	a3, a5,  -4		/* Restore a3 from call[i+1]'s stack frame */
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS
 	j   	_underflow4_exit_hook
 #else
 	rfwu
@@ -188,7 +188,7 @@ _window_overflow8:
 	s32e	a5, a0, -28		/* Save a5 to call[j]'s stack frame */
 	s32e	a6, a0, -24		/* Save a6 to call[j]'s stack frame */
 	s32e	a7, a0, -20		/* Save a7 to call[j]'s stack frame */
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS
 	j   	_overflow8_exit_hook
 #else
 	rfwo					/* Rotates back to call[i] position */
@@ -221,7 +221,7 @@ _window_underflow8:
 	l32e	a5, a7, -28		/* Restore a5 from call[i]'s stack frame */
 	l32e	a6, a7, -24		/* Restore a6 from call[i]'s stack frame */
 	l32e	a7, a7, -20		/* Restore a7 from call[i]'s stack frame */
-#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+#ifdef CONFIG_XTENSA_HAVE_WINDOW_EXCEPTION_HOOKS
 	j   	_underflow8_exit_hook
 #else
 	rfwu

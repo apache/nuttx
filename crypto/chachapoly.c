@@ -165,7 +165,7 @@ void chacha20poly1305_encrypt(
   poly1305_update(&poly1305_ctx, ad, ad_len);
   poly1305_update(&poly1305_ctx, pad0, (0x10 - ad_len) & 0xf);
 
-  chacha_encrypt_bytes(&ctx, (FAR uint8_t *) src, dst, src_len);
+  chacha_encrypt_bytes(&ctx, (FAR uint8_t *)src, dst, src_len);
 
   poly1305_update(&poly1305_ctx, dst, src_len);
   poly1305_update(&poly1305_ctx, pad0, (0x10 - src_len) & 0xf);

@@ -52,6 +52,15 @@
 #  error "STM32_SYSCLK_FREQUENCY is out of range!"
 #endif
 
+/* Max ADC clock frequency is 72MHz */
+
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || \
+    defined(CONFIG_STM32_ADC3) || defined(CONFIG_STM32_ADC4)
+#  if STM32_PLL_FREQUENCY > 72000000
+#    error ADCxxPRES is hardcoded to 1 - PLL frequency is too high
+#  endif
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -186,7 +195,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_USB
   /* USB clock divider. This bit must be valid before enabling the USB
-   * clock in the RCC_APB1ENR register. This bit can’t be reset if the USB
+   * clock in the RCC_APB1ENR register. This bit can't be reset if the USB
    * clock is enabled.
    */
 
@@ -416,124 +425,13 @@ static inline void rcc_enableapb2(void)
  * Name: stm32_stdclockconfig
  *
  * Description:
- *   Called to change to new clock based on settings in board.h.  This
- *   version is for the Connectivity Line parts.
+ *   Called to change to new clock based on settings in board.h.
  *
  *   NOTE:  This logic would need to be extended if you need to select low-
  *   power clocking modes!
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG) && defined(CONFIG_STM32_CONNECTIVITYLINE)
-static void stm32_stdclockconfig(void)
-{
-  uint32_t regval;
-
-  /* Enable HSE */
-
-  regval  = getreg32(STM32_RCC_CR);
-  regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
-  regval |= RCC_CR_HSEON;           /* Enable HSE */
-  putreg32(regval, STM32_RCC_CR);
-
-  /* Enable FLASH prefetch buffer and set FLASH wait states */
-
-  regval  = getreg32(STM32_FLASH_ACR);
-  regval &= ~FLASH_ACR_LATENCY_MASK;
-  regval |= (FLASH_ACR_LATENCY_SETTING | FLASH_ACR_PRTFBE);
-  putreg32(regval, STM32_FLASH_ACR);
-
-  /* Set up PLL input scaling (with source = PLL2) */
-
-  regval = getreg32(STM32_RCC_CFGR2);
-  regval &= ~(RCC_CFGR2_PREDIV2_MASK | RCC_CFGR2_PLL2MUL_MASK |
-              RCC_CFGR2_PREDIV1SRC_MASK | RCC_CFGR2_PREDIV1_MASK);
-  regval |=  (STM32_PLL_PREDIV2 | STM32_PLL_PLL2MUL |
-              RCC_CFGR2_PREDIV1SRC_PLL2 | STM32_PLL_PREDIV1);
-  putreg32(regval, STM32_RCC_CFGR2);
-
-  /* Set the PCLK2 divider */
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_PPRE2_MASK | RCC_CFGR_HPRE_MASK);
-  regval |= STM32_RCC_CFGR_PPRE2;
-  regval |= RCC_CFGR_HPRE_SYSCLK;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Set the PCLK1 divider */
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_PPRE1_MASK;
-  regval |= STM32_RCC_CFGR_PPRE1;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Enable PLL2 */
-
-  regval = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_PLL2ON;
-  putreg32(regval, STM32_RCC_CR);
-
-  /* Wait for PLL2 ready */
-
-  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0);
-
-  /* Setup PLL3 for MII/RMII clock on MCO */
-
-#if defined(CONFIG_STM32_MII_MCO) || defined(CONFIG_STM32_RMII_MCO)
-  regval = getreg32(STM32_RCC_CFGR2);
-  regval &= ~(RCC_CFGR2_PLL3MUL_MASK);
-  regval |= STM32_PLL_PLL3MUL;
-  putreg32(regval, STM32_RCC_CFGR2);
-
-  /* Switch PLL3 on */
-
-  regval = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_PLL3ON;
-  putreg32(regval, STM32_RCC_CR);
-
-  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL3RDY) == 0);
-#endif
-
-  /* Set main PLL source and multiplier */
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLMUL_MASK);
-  regval |= (RCC_CFGR_PLLSRC | STM32_PLL_PLLMUL);
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Switch main PLL on */
-
-  regval = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_PLLON;
-  putreg32(regval, STM32_RCC_CR);
-
-  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
-
-  /* Select PLL as system clock source */
-
-  regval  = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_SW_MASK;
-  regval |= RCC_CFGR_SW_PLL;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Wait until PLL is used as the system clock source */
-
-  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_PLL) == 0);
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_stdclockconfig
- *
- * Description:
- *   Called to change to new clock based on settings in board.h.  This
- *   version is for the non-Connectivity Line parts.
- *
- *   NOTE:  This logic would need to be extended if you need to select low-
- *   power clocking modes!
- ****************************************************************************/
-
-#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG) && \
-    !defined(CONFIG_STM32_CONNECTIVITYLINE)
+#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -576,30 +474,6 @@ static void stm32_stdclockconfig(void)
         }
     }
 
-# if defined(CONFIG_STM32_VALUELINE) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC)
-  /* If this is a value-line part and we are using the HSE as the PLL */
-
-# if (STM32_CFGR_PLLXTPRE >> 17) != (STM32_CFGR2_PREDIV1 & 1)
-#  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
-# endif
-
-  /* Set the HSE prescaler */
-
-  regval = STM32_CFGR2_PREDIV1;
-  putreg32(regval, STM32_RCC_CFGR2);
-
-# endif
-#endif
-
-#ifndef CONFIG_STM32_VALUELINE
-  /* Value-line devices don't implement flash prefetch/waitstates */
-
-  /* Enable FLASH prefetch buffer and set FLASH wait states */
-
-  regval  = getreg32(STM32_FLASH_ACR);
-  regval &= ~FLASH_ACR_LATENCY_MASK;
-  regval |= (FLASH_ACR_LATENCY_SETTING | FLASH_ACR_PRTFBE);
-  putreg32(regval, STM32_FLASH_ACR);
 #endif
 
   /* Set the HCLK source/divider */
@@ -689,6 +563,24 @@ static void stm32_stdclockconfig(void)
    */
 
   stm32_rcc_enablelse();
+#endif
+
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2)
+  /* Configure ADC12 clock */
+
+  regval  = getreg32(STM32_RCC_CFGR2);
+  regval &= ~RCC_CFGR2_ADC12PRES_MASK;
+  regval |= RCC_CFGR2_ADC12PRESd1;
+  putreg32(regval, STM32_RCC_CFGR2);
+#endif
+
+#if defined(CONFIG_STM32_ADC3) || defined(CONFIG_STM32_ADC4)
+  /* Configure ADC34 clock */
+
+  regval  = getreg32(STM32_RCC_CFGR2);
+  regval &= ~RCC_CFGR2_ADC34PRES_MASK;
+  regval |= RCC_CFGR2_ADC34PRESd1;
+  putreg32(regval, STM32_RCC_CFGR2);
 #endif
 }
 #endif

@@ -67,7 +67,7 @@ int note_initialize(void)
 #endif
 
 #ifdef CONFIG_SEGGER_SYSVIEW
-  ret = sysview_initialize();
+  ret = note_sysview_initialize();
   if (ret < 0)
     {
       return ret;

@@ -54,6 +54,10 @@
 #  include <nuttx/usb/rndis.h>
 #endif
 
+#ifdef CONFIG_SENSORS_APDS9960
+#include "stm32_apds9960.h"
+#endif
+
 #include "stm32f4discovery.h"
 
 /* Conditional logic in stm32f4discovery.h will determine if certain features
@@ -378,6 +382,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_DJOYSTICK
+  ret = stm32_djoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to register djoystick driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_INPUT_NUNCHUCK
   /* Register the Nunchuck driver */
 
@@ -417,6 +429,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_APDS9960
+  /* Register the APDS-9960 gesture sensor */
+
+  ret = board_apds9960_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -489,6 +512,17 @@ int stm32_bringup(void)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n",
            STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_TMPFS
+  /* Mount the tmpfs file system */
+
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
+             CONFIG_LIBC_TMPDIR, ret);
     }
 #endif
 

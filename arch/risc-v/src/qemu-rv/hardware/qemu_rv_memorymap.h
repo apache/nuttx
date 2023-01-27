@@ -28,6 +28,7 @@
 /* Register Base Address ****************************************************/
 
 #define QEMU_RV_CLINT_BASE   0x02000000
+#define QEMU_RV_ACLINT_BASE  0x02f00000
 #define QEMU_RV_PLIC_BASE    0x0c000000
 
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_MEMORYMAP_H */

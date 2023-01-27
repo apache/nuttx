@@ -1091,7 +1091,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    * have to addref() here (but does have to release in ubind().
    */
 
-  nxrmutex_init(&rm->rm_lock);   /* Initialize the mutex that controls access */
+  nxrmutex_init(&rm->rm_lock);  /* Initialize the mutex that controls access */
   rm->rm_blkdriver = blkdriver; /* Save the block driver reference */
 
   /* Get the hardware configuration and setup buffering appropriately */

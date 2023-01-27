@@ -46,19 +46,30 @@
 
 #define PGT_L1_PBASE    (uint64_t)&m_l1_pgtable
 #define PGT_L2_PBASE    (uint64_t)&m_l2_pgtable
-#define PGT_L3_ROMPBASE (uint64_t)&m_l3_romtbl
-#define PGT_L3_RAMPBASE (uint64_t)&m_l3_ramtbl
+#define PGT_L3_PBASE    (uint64_t)&m_l3_pgtable
 #define PGT_L1_VBASE    PGT_L1_PBASE
 #define PGT_L2_VBASE    PGT_L2_PBASE
-#define PGT_L3_ROMVBASE PGT_L3_ROMPBASE
-#define PGT_L3_RAMVBASE PGT_L3_RAMPBASE
+#define PGT_L3_VBASE    PGT_L3_PBASE
 
 #define PGT_L1_SIZE     (512)  /* Enough to map 512 GiB */
 #define PGT_L2_SIZE     (512)  /* Enough to map 1 GiB */
-#define PGT_L3_SIZE     (512)  /* Enough to map 2 MiB */
+#define PGT_L3_SIZE     (1024) /* Enough to map 4 MiB */
+
+#define SLAB_COUNT      (sizeof(m_l3_pgtable) / RV_MMU_PAGE_SIZE)
 
 /****************************************************************************
- * Private Functions
+ * Private Types
+ ****************************************************************************/
+
+struct pgalloc_slab_s
+{
+  sq_entry_t  *next;
+  void        *memory;
+};
+typedef struct pgalloc_slab_s pgalloc_slab_t;
+
+/****************************************************************************
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -84,13 +95,35 @@ static void configure_mpu(void);
 static void configure_mmu(void);
 
 /****************************************************************************
+ * Name: slab_init
+ *
+ * Description:
+ *   Initialize slab allocator for L3 page table entries
+ *
+ * Input Parameters:
+ *   start - Beginning of the L3 page table pool
+ *
+ ****************************************************************************/
+
+static void slab_init(uintptr_t start);
+
+/****************************************************************************
+ * Name: slab_alloc
+ *
+ * Description:
+ *   Allocate single slab for L3 page table entry
+ *
+ ****************************************************************************/
+
+static uintptr_t slab_alloc(void);
+
+/****************************************************************************
  * Name: map_region
  *
  * Description:
  *   Map a region of physical memory to the L3 page table
  *
  * Input Parameters:
- *   l3base - L3 page table physical base address
  *   paddr - Beginning of the physical address mapping
  *   vaddr - Beginning of the virtual address mapping
  *   size - Size of the region in bytes
@@ -98,8 +131,8 @@ static void configure_mmu(void);
  *
  ****************************************************************************/
 
-static void map_region(uintptr_t l3base, uintptr_t paddr, uintptr_t vaddr,
-                       size_t size, uint32_t mmuflags);
+static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
+                       uint32_t mmuflags);
 
 /****************************************************************************
  * Private Data
@@ -116,11 +149,12 @@ static void map_region(uintptr_t l3base, uintptr_t paddr, uintptr_t vaddr,
 
 static uint64_t         m_l1_pgtable[PGT_L1_SIZE] locate_data(".pgtables");
 static uint64_t         m_l2_pgtable[PGT_L2_SIZE] locate_data(".pgtables");
+static uint64_t         m_l3_pgtable[PGT_L3_SIZE] locate_data(".pgtables");
 
-/* Allocate separate tables for ROM/RAM mappings */
+/* L3 page table allocator */
 
-static uint64_t         m_l3_romtbl[PGT_L3_SIZE]  locate_data(".pgtables");
-static uint64_t         m_l3_ramtbl[PGT_L3_SIZE]  locate_data(".pgtables");
+static sq_queue_t       g_free_slabs;
+static pgalloc_slab_t   g_slabs[SLAB_COUNT];
 
 /****************************************************************************
  * Public Functions
@@ -205,17 +239,14 @@ static void configure_mpu(void)
 
 static void configure_mmu(void)
 {
-  /* Setup MMU for user */
+  /* Setup MMU for user. First granule allocator for L3 entries */
 
-  /* Setup the L3 references for executable memory */
+  slab_init(PGT_L3_PBASE);
 
-  map_region(PGT_L3_ROMPBASE, UFLASH_START, UFLASH_START, UFLASH_SIZE,
-             MMU_UTEXT_FLAGS);
+  /* Setup the L3 references for text and data */
 
-  /* Setup the L3 references for data memory */
-
-  map_region(PGT_L3_RAMPBASE, USRAM_START, USRAM_START, USRAM_SIZE,
-             MMU_UDATA_FLAGS);
+  map_region(UFLASH_START, UFLASH_START, UFLASH_SIZE, MMU_UTEXT_FLAGS);
+  map_region(USRAM_START, USRAM_START, USRAM_SIZE, MMU_UDATA_FLAGS);
 
   /* Connect the L1 and L2 page tables */
 
@@ -227,13 +258,51 @@ static void configure_mmu(void)
 }
 
 /****************************************************************************
+ * Name: slab_init
+ *
+ * Description:
+ *   Initialize slab allocator for L3 page table entries
+ *
+ * Input Parameters:
+ *   start - Beginning of the L3 page table pool
+ *
+ ****************************************************************************/
+
+static void slab_init(uintptr_t start)
+{
+  int i;
+
+  sq_init(&g_free_slabs);
+
+  for (i = 0; i < SLAB_COUNT; i++)
+    {
+      g_slabs[i].memory = (void *)start;
+      sq_addlast((sq_entry_t *)&g_slabs[i], (sq_queue_t *)&g_free_slabs);
+      start += RV_MMU_PAGE_SIZE;
+    }
+}
+
+/****************************************************************************
+ * Name: slab_alloc
+ *
+ * Description:
+ *   Allocate single slab for L3 page table entry
+ *
+ ****************************************************************************/
+
+static uintptr_t slab_alloc(void)
+{
+  pgalloc_slab_t *slab = (pgalloc_slab_t *)sq_remfirst(&g_free_slabs);
+  return slab ? (uintptr_t)slab->memory : 0;
+}
+
+/****************************************************************************
  * Name: map_region
  *
  * Description:
  *   Map a region of physical memory to the L3 page table
  *
  * Input Parameters:
- *   l3base - L3 page table physical base address
  *   paddr - Beginning of the physical address mapping
  *   vaddr - Beginning of the virtual address mapping
  *   size - Size of the region in bytes
@@ -241,23 +310,45 @@ static void configure_mmu(void)
  *
  ****************************************************************************/
 
-static void map_region(uintptr_t l3base, uintptr_t paddr, uintptr_t vaddr,
-                       size_t size, uint32_t mmuflags)
+static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
+                       uint32_t mmuflags)
 {
-  uintptr_t end_vaddr;
+  uintptr_t endaddr;
+  uintptr_t l3pbase;
+  int npages;
+  int i;
+  int j;
 
-  /* Map the region to the L3 table as a whole */
+  /* How many pages */
 
-  mmu_ln_map_region(3, l3base, paddr, vaddr, size, mmuflags);
+  npages = (size + RV_MMU_PAGE_MASK) >> RV_MMU_PAGE_SHIFT;
+  endaddr = vaddr + size;
 
-  /* Connect to L2 table */
-
-  end_vaddr = vaddr + size;
-  while (vaddr < end_vaddr)
+  for (i = 0; i < npages; i += RV_MMU_PAGE_ENTRIES)
     {
-      mmu_ln_setentry(2, PGT_L2_VBASE, l3base, vaddr, PTE_G);
-      l3base += RV_MMU_L3_PAGE_SIZE;
-      vaddr += RV_MMU_L2_PAGE_SIZE;
+      /* See if a L3 mapping exists ? */
+
+      l3pbase = mmu_pte_to_paddr(mmu_ln_getentry(2, PGT_L2_VBASE, vaddr));
+      if (!l3pbase)
+        {
+          /* No, allocate 1 page, this must not fail */
+
+          l3pbase = slab_alloc();
+          DEBUGASSERT(l3pbase);
+
+          /* Map it to the L3 table */
+
+          mmu_ln_setentry(2, PGT_L2_VBASE, l3pbase, vaddr, MMU_UPGT_FLAGS);
+        }
+
+      /* Then add the L3 mappings */
+
+      for (j = 0; j < RV_MMU_PAGE_ENTRIES && vaddr < endaddr; j++)
+        {
+          mmu_ln_setentry(3, l3pbase, paddr, vaddr, mmuflags);
+          paddr += RV_MMU_L3_PAGE_SIZE;
+          vaddr += RV_MMU_L3_PAGE_SIZE;
+        }
     }
 }
 

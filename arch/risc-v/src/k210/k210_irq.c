@@ -85,11 +85,11 @@ void up_irqinitialize(void)
   riscv_exception_attach();
 
 #ifdef CONFIG_SMP
-  /* Clear MSOFT for CPU0 */
+  /* Clear RISCV_IPI for CPU0 */
 
-  putreg32(0, K210_CLINT_MSIP);
+  putreg32(0, RISCV_IPI);
 
-  up_enable_irq(RISCV_IRQ_MSOFT);
+  up_enable_irq(RISCV_IRQ_SOFT);
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -137,7 +137,7 @@ void up_disable_irq(int irq)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 }
@@ -179,7 +179,7 @@ void up_enable_irq(int irq)
         }
       else
         {
-          ASSERT(false);
+          PANIC();
         }
     }
 }

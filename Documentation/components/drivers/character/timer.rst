@@ -56,7 +56,7 @@ Timer Example
 
 The previously selected example will basically consult the timer status, set a timer alarm interval, set a timer signal handler function to be notified at the alarm, which only increments a variable, and then it will start the timer. The application will periodically consult the timer status at the sample rate previously configured through the ``menuconfig`` to follow the time left until the timer expires. After the samples have been read, the application stops de timer.
 
-The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/timer/timer_main.c>`_  may be explored, its path is at ``/examples/timer/timer_main.c`` in the apps' repository.
+The `example code <https://github.com/apache/nuttx-apps/blob/master/examples/timer/timer_main.c>`_  may be explored, its path is at ``/examples/timer/timer_main.c`` in the apps' repository.
 
 In NuttX, the timer driver is a character driver and when a chip supports multiple timers, each one is accessible through its respective file in ``/dev`` directory. Each timer is registered using a unique numeric identifier (i.e. ``/dev/timer0``, ``/dev/timer1``, ...).
 
