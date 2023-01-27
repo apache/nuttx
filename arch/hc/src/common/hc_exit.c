@@ -140,7 +140,7 @@ void up_exit(int status)
    * the ready-to-run list.
    */
 
-  group_addrenv(tcb);
+  addrenv_switch(tcb);
 #endif
 
   /* Then switch contexts */

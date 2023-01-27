@@ -29,13 +29,13 @@
 #include <nuttx/arch.h>
 #include <assert.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <arch/chip/core-isa.h>
 
 #include "xtensa.h"
 
-#include "group/group.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -80,7 +80,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
 #endif
     }
 #endif

@@ -27,6 +27,7 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #ifdef CONFIG_DUMP_ON_EXIT
@@ -141,7 +142,7 @@ void up_exit(int status)
    * the ready-to-run list.
    */
 
-  group_addrenv(tcb);
+  addrenv_switch(tcb);
 #endif
 
   /* Then switch contexts */

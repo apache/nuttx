@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -37,8 +38,6 @@
 #include "mips_internal.h"
 #include "pic32mx_int.h"
 #include "pic32mx.h"
-
-#include "group/group.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -157,7 +156,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
 #endif
     }
 #endif

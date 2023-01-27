@@ -211,7 +211,7 @@ uint64_t *arm64_syscall_switch(uint64_t * regs)
        * thread at the head of the ready-to-run list.
        */
 
-      group_addrenv(NULL);
+      addrenv_switch(NULL);
 #endif
 
     /* Restore the cpu lock */
