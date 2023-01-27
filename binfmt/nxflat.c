@@ -202,7 +202,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
    * needed when the module is executed.
    */
 
-  up_addrenv_clone(&loadinfo.addrenv, &binp->addrenv);
+  up_addrenv_clone(&loadinfo.addrenv.addrenv, &binp->addrenv.addrenv);
 #endif
 
   nxflat_dumpbuffer("Entry code", (FAR const uint8_t *)binp->entrypt,

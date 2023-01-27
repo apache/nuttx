@@ -34,7 +34,6 @@
  *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
- *   up_addrenv_restore  - Restore an address environment
  *   up_addrenv_clone    - Copy an address environment from one location to
  *                         another.
  *
