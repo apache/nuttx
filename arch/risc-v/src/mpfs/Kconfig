@@ -335,7 +335,7 @@ config MPFS_IHC_LINUX_ON_HART3
 config MPFS_IHC_LINUX_ON_HART4
 	int "Linux on hart4"
 	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
-	default 1
+	default 0
 	range 0 1
 	---help---
 		Set this to 1 if U-boot / Linux is running on hart4
