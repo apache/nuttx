@@ -242,7 +242,7 @@ static void get_argv_str(FAR struct tcb_s *tcb, FAR char *args, size_t size)
 #ifdef CONFIG_ARCH_ADDRENV
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      if ((tcb->group->tg_flags & GROUP_FLAG_ADDRENV) == 0)
+      if (tcb->addrenv_own == NULL)
         {
           /* Process should have address environment, but doesn't */
 
@@ -250,7 +250,7 @@ static void get_argv_str(FAR struct tcb_s *tcb, FAR char *args, size_t size)
           return;
         }
 
-      up_addrenv_select(&tcb->group->tg_addrenv, &oldenv);
+      up_addrenv_select(&tcb->addrenv_own->addrenv, &oldenv);
       saved = true;
     }
 #endif

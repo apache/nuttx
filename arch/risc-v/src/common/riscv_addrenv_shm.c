@@ -66,21 +66,21 @@
 
 int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 {
-  struct tcb_s        *tcb = nxsched_self();
-  struct task_group_s *group;
-  uintptr_t            ptlast;
-  uintptr_t            ptlevel;
-  uintptr_t            paddr;
+  struct tcb_s          *tcb = nxsched_self();
+  struct arch_addrenv_s *addrenv;
+  uintptr_t              ptlast;
+  uintptr_t              ptlevel;
+  uintptr_t              paddr;
 
   /* Sanity checks */
 
-  DEBUGASSERT(tcb && tcb->group);
+  DEBUGASSERT(tcb && tcb->addrenv_own);
   DEBUGASSERT(pages != NULL && npages > 0);
   DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
-  group   = tcb->group;
-  ptlevel = RV_MMU_PT_LEVELS;
+  addrenv = &tcb->addrenv_own->addrenv;
+  ptlevel =  RV_MMU_PT_LEVELS;
 
   /* Add the references to pages[] into the caller's address environment */
 
@@ -88,7 +88,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
     {
       /* Get the address of the last level page table */
 
-      ptlast = riscv_pgvaddr(riscv_get_pgtable(&group->tg_addrenv, vaddr));
+      ptlast = riscv_pgvaddr(riscv_get_pgtable(addrenv, vaddr));
       if (!ptlast)
         {
           return -ENOMEM;
@@ -127,23 +127,23 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
 int up_shmdt(uintptr_t vaddr, unsigned int npages)
 {
-  struct tcb_s        *tcb = nxsched_self();
-  struct task_group_s *group;
-  uintptr_t            ptlast;
-  uintptr_t            ptprev;
-  uintptr_t            ptlevel;
-  uintptr_t            paddr;
+  struct tcb_s          *tcb = nxsched_self();
+  struct arch_addrenv_s *addrenv;
+  uintptr_t              ptlast;
+  uintptr_t              ptprev;
+  uintptr_t              ptlevel;
+  uintptr_t              paddr;
 
   /* Sanity checks */
 
-  DEBUGASSERT(tcb && tcb->group);
+  DEBUGASSERT(tcb && tcb->addrenv_own);
   DEBUGASSERT(npages > 0);
   DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
-  group   = tcb->group;
-  ptlevel = ARCH_SPGTS;
-  ptprev  = riscv_pgvaddr(group->tg_addrenv.spgtables[ARCH_SPGTS - 1]);
+  addrenv = &tcb->addrenv_own->addrenv;
+  ptlevel =  ARCH_SPGTS;
+  ptprev  =  riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   if (!ptprev)
     {
       /* Something is very wrong */

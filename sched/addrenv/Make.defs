@@ -1,5 +1,5 @@
 ############################################################################
-# sched/group/Make.defs
+# sched/addrenv/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,11 @@
 #
 ############################################################################
 
-CSRCS += group_create.c group_join.c group_leave.c group_find.c
-CSRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
-CSRCS += group_foreachchild.c group_killchildren.c group_signal.c
-
-ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
-ifeq ($(CONFIG_SCHED_CHILD_STATUS),y)
-CSRCS += group_childstatus.c
-endif
-else
-ifeq ($(CONFIG_SCHED_WAITPID),y)
-CSRCS += group_waiter.c
-endif
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
+CSRCS += addrenv.c
 endif
 
-ifeq ($(CONFIG_SCHED_USER_IDENTITY),y)
-CSRCS += group_setuid.c group_setgid.c group_getuid.c group_getgid.c
-endif
+# Include addrenv build support
 
-ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)
-CSRCS += group_suspendchildren.c group_continue.c
-endif
-
-ifeq ($(CONFIG_BINFMT_LOADABLE),y)
-CSRCS += group_exitinfo.c
-endif
-
-ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
-CSRCS += group_malloc.c group_realloc.c group_zalloc.c group_free.c
-endif
-
-# Include group build support
-
-DEPPATH += --dep-path group
-VPATH += :group
+DEPPATH += --dep-path addrenv
+VPATH += :addrenv

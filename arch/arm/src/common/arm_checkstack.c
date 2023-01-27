@@ -207,7 +207,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      up_addrenv_select(&tcb->group->tg_addrenv, &oldenv);
+      up_addrenv_select(&tcb->addrenv_own->addrenv, &oldenv);
       saved = true;
     }
 #endif

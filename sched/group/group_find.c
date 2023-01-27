@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+#if defined(HAVE_GROUP_MEMBERS)
 FAR struct task_group_s *group_findbypid(pid_t pid)
 {
   FAR struct task_group_s *group;

@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+#if defined(HAVE_GROUP_MEMBERS)
 static void group_remove(FAR struct task_group_s *group)
 {
   FAR struct task_group_s *curr;
@@ -128,10 +128,6 @@ static void group_remove(FAR struct task_group_s *group)
 
 static inline void group_release(FAR struct task_group_s *group)
 {
-#ifdef CONFIG_ARCH_ADDRENV
-  int i;
-#endif
-
 #if CONFIG_TLS_TASK_NELEM > 0
   task_tls_destruct();
 #endif
@@ -172,7 +168,7 @@ static inline void group_release(FAR struct task_group_s *group)
 
   mm_map_destroy(&group->tg_mm_map);
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+#if defined(HAVE_GROUP_MEMBERS)
   /* Remove the group from the list of groups */
 
   group_remove(group);
@@ -198,22 +194,6 @@ static inline void group_release(FAR struct task_group_s *group)
     {
       binfmt_exit(group->tg_bininfo);
       group->tg_bininfo = NULL;
-    }
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Destroy the group address environment */
-
-  up_addrenv_destroy(&group->tg_addrenv);
-
-  /* Mark no address environment */
-
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      if (group == g_group_current[i])
-        {
-          g_group_current[i] = NULL;
-        }
     }
 #endif
 

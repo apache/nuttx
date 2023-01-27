@@ -96,12 +96,22 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   DEBUGASSERT(tcb && ttype != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Allocate address environment for the task */
+
+  ret = addrenv_allocate(&tcb->cmn, tcb->cmn.flags);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
   /* Create a new task group */
 
   ret = group_allocate(tcb, tcb->cmn.flags);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_addrenv;
     }
 
   /* Duplicate the parent tasks environment */
@@ -190,6 +200,11 @@ errout_with_group:
     }
 
   group_leave(&tcb->cmn);
+
+errout_with_addrenv:
+#ifdef CONFIG_ARCH_ADDRENV
+  addrenv_free(&tcb->cmn);
+#endif
   return ret;
 }
 
