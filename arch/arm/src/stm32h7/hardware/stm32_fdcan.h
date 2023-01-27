@@ -329,22 +329,33 @@
 
 /* ***************  Bit definition for FDCAN_ECR register  ******************/
 #define FDCAN_ECR_TEC_SHIFT       (0U)
-#define FDCAN_ECR_TEC_MASK        (0xFU << FDCAN_ECR_TEC_SHIFT)                 /* 0x0000000F */
+#define FDCAN_ECR_TEC_MASK        (0xFFU << FDCAN_ECR_TEC_SHIFT)                /* 0x0000000FF */
 #define FDCAN_ECR_TEC             FDCAN_ECR_TEC_MASK                            /* Transmit Error Counter                   */
 #define FDCAN_ECR_TREC_SHIFT      (8U)
 #define FDCAN_ECR_TREC_MASK       (0x7FU << FDCAN_ECR_TREC_SHIFT)               /* 0x00007F00 */
 #define FDCAN_ECR_TREC            FDCAN_ECR_TREC_MASK                           /* Receive Error Counter                    */
 #define FDCAN_ECR_RP_SHIFT        (15U)
-#define FDCAN_ECR_RP_MASK         (0 x1U << FDCAN_ECR_RP_SHIFT)                 /* 0x00008000 */
+#define FDCAN_ECR_RP_MASK         (0x1U << FDCAN_ECR_RP_SHIFT)                  /* 0x00008000 */
 #define FDCAN_ECR_RP              FDCAN_ECR_RP_MASK                             /* Receive Error Passive                    */
 #define FDCAN_ECR_CEL_SHIFT       (16U)
 #define FDCAN_ECR_CEL_MASK        (0xFFU << FDCAN_ECR_CEL_SHIFT)                /* 0x00FF0000 */
 #define FDCAN_ECR_CEL             FDCAN_ECR_CEL_MASK                            /* CAN Error Logging                        */
 
+/* Error codes */
+
+#define FDCAN_PSR_EC_NO_ERROR       (0)                                    /* No error occurred since LEC has been reset */
+#define FDCAN_PSR_EC_STUFF_ERROR    (1)                                    /* More than 5 equal bits in a sequence */
+#define FDCAN_PSR_EC_FORM_ERROR     (2)                                    /* Part of a received frame has wrong format */
+#define FDCAN_PSR_EC_ACK_ERROR      (3)                                    /* Message not acknowledged by another node */
+#define FDCAN_PSR_EC_BIT1_ERROR     (4)                                    /* Send with recessive level, but bus value was dominant */
+#define FDCAN_PSR_EC_BIT0_ERROR     (5)                                    /* Send with dominant level, but bus value was recessive */
+#define FDCAN_PSR_EC_CRC_ERROR      (6)                                    /* CRC received message incorrect */
+#define FDCAN_PSR_EC_NO_CHANGE      (7)                                    /* No CAN bus event was detected since last read */
+
 /* ***************  Bit definition for FDCAN_PSR register  ******************/
 #define FDCAN_PSR_LEC_SHIFT       (0U)
 #define FDCAN_PSR_LEC_MASK        (0x7U << FDCAN_PSR_LEC_SHIFT)                 /* 0x00000007 */
-#define FDCAN_PSR_LEC             FDCAN_PSR_LEC_MASK                            /* Last Error Code                          */
+#define FDCAN_PSR_LEC(n)          ((uint32_t)(n) << FDCAN_PSR_LEC_SHIFT)        /* See error codes above */
 #define FDCAN_PSR_ACT_SHIFT       (3U)
 #define FDCAN_PSR_ACT_MASK        (0x3U << FDCAN_PSR_ACT_SHIFT)                 /* 0x00000018 */
 #define FDCAN_PSR_ACT             FDCAN_PSR_ACT_MASK                            /* Activity                                 */
@@ -359,7 +370,7 @@
 #define FDCAN_PSR_BO              FDCAN_PSR_BO_MASK                             /* Bus_Off Status                           */
 #define FDCAN_PSR_DLEC_SHIFT      (8U)
 #define FDCAN_PSR_DLEC_MASK       (0x7U << FDCAN_PSR_DLEC_SHIFT)                /* 0x00000700 */
-#define FDCAN_PSR_DLEC            FDCAN_PSR_DLEC_MASK                           /* Data Last Error Code                     */
+#define FDCAN_PSR_DLEC(n)        ((uint32_t)(n) << FDCAN_PSR_DLEC_SHIFT)        /* See error codes above */
 #define FDCAN_PSR_RESI_SHIFT      (11U)
 #define FDCAN_PSR_RESI_MASK       (0x1U << FDCAN_PSR_RESI_SHIFT)                /* 0x00000800 */
 #define FDCAN_PSR_RESI            FDCAN_PSR_RESI_MASK                           /* ESI flag of last received FDCAN Message  */

@@ -57,6 +57,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define FDCAN_CMNERR_INTS   (FDCAN_IE_MRAFE | FDCAN_IE_TOOE | FDCAN_IE_EPE | \
+                            FDCAN_IE_BOE | FDCAN_IE_WDIE | FDCAN_IE_PEAE | \
+                            FDCAN_IE_PEDE)
+
+#define FDCAN_RXERR_INTS    (FDCAN_IE_RF0LE | FDCAN_IE_RF1LE)
+
+#define FDCAN_TXERR_INTS    (FDCAN_IE_TEFLE | FDCAN_IE_PEAE | FDCAN_IE_PEDE)
+
+/* Common-, TX- and RX-Error-Mask */
+
+#define FDCAN_ANYERR_INTS (FDCAN_CMNERR_INTS | FDCAN_RXERR_INTS | FDCAN_TXERR_INTS)
+
+#define CAN_ERROR_PASSIVE_THRESHOLD 128
+
+#define CAN_ERROR_WARNING_THRESHOLD 96
+
 /* General Configuration ****************************************************/
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
@@ -368,6 +384,9 @@ struct fdcan_driver_s
   struct work_s txcwork;
   struct work_s txdwork;
   struct work_s pollwork;
+#ifdef CONFIG_NET_CAN_ERRORS
+  struct work_s irqwork;
+#endif
 
   uint32_t irflags;                     /* Used to copy IR flags from IRQ context to work_queue */
 
@@ -465,6 +484,16 @@ static int  fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
 
 static int  fdcan_initialize(struct fdcan_driver_s *priv);
 static void fdcan_reset(struct fdcan_driver_s *priv);
+
+#ifdef CONFIG_NET_CAN_ERRORS
+
+/* CAN errors interrupt handling */
+
+static void fdcan_error_work(void *arg);
+static void fdcan_error(struct fdcan_driver_s *priv, uint32_t status,
+                        uint32_t psr);
+static void fdcan_errint(struct fdcan_driver_s *priv, bool enable);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1211,6 +1240,16 @@ static void fdcan_receive_work(void *arg)
 
   fdcan_check_errors(priv);
 
+#ifdef CONFIG_NET_CAN_ERRORS
+          uint32_t regval;
+
+          /* Turning back on all configured RX error interrupts */
+
+          regval = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
+          regval |= FDCAN_RXERR_INTS;
+          putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
+#endif
+
   leave_critical_section(flags);
 }
 
@@ -1312,6 +1351,16 @@ static void fdcan_txdone_work(void *arg)
 
   fdcan_check_errors(priv);
 
+#ifdef CONFIG_NET_CAN_ERRORS
+  uint32_t regval = 0;
+
+  /* Turning back on PEA and PED error interrupts */
+
+  regval = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
+  regval |= (FDCAN_IE_PEAE | FDCAN_IE_PEDE);
+  putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
+#endif
+
   /* There should be space for a new TX in any event
    * Poll the network for new data to transmit
    */
@@ -1340,41 +1389,43 @@ static void fdcan_txdone_work(void *arg)
 static int fdcan_interrupt(int irq, void *context,
                            void *arg)
 {
-  switch (irq)
+  struct fdcan_driver_s *priv    = (struct fdcan_driver_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+#ifdef CONFIG_NET_CAN_ERRORS
+  uint32_t              pending = 0;
+
+  /* Get the set of pending interrupts. */
+
+  pending = getreg32(priv->base + STM32_FDCAN_IR_OFFSET);
+
+  /* Check for any errors */
+
+  if ((pending & FDCAN_ANYERR_INTS) != 0)
     {
-#ifdef CONFIG_STM32H7_FDCAN1
-      case STM32_IRQ_FDCAN1_0:
-        fdcan_receive(&g_fdcan0);
-        break;
+      /* Disable further CAN ERROR interrupts and schedule
+       * to perform the interrupt processing on the worker
+       * thread
+       */
 
-      case STM32_IRQ_FDCAN1_1:
-        fdcan_txdone(&g_fdcan0);
-        break;
+      fdcan_errint(priv, false);
+      work_queue(CANWORK, &priv->irqwork, fdcan_error_work, priv, 0);
+    }
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN2
-      case STM32_IRQ_FDCAN2_0:
-        fdcan_receive(&g_fdcan1);
-        break;
-
-      case STM32_IRQ_FDCAN2_1:
-        fdcan_txdone(&g_fdcan1);
-        break;
-#endif
-
-#ifdef CONFIG_STM32H7_FDCAN3
-      case STM32_IRQ_FDCAN3_0:
-        fdcan_receive(&g_fdcan2);
-        break;
-
-      case STM32_IRQ_FDCAN3_1:
-        fdcan_txdone(&g_fdcan2);
-        break;
-#endif
-
-      default:
-        nerr("Unexpected IRQ [%d]\n", irq);
-        return -EINVAL;
+  if (irq == priv->config->mb_irq[0])
+    {
+      fdcan_receive(priv);
+    }
+  else if (irq == priv->config->mb_irq[1])
+    {
+      fdcan_txdone(priv);
+    }
+  else
+    {
+      nerr("Unexpected IRQ [%d]\n", irq);
+      return -EINVAL;
     }
 
   return OK;
@@ -2124,6 +2175,10 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
          | FDCAN_IE_RF1FE;  /* Rx FIFO 1 FIFO full */
   putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
 
+#ifdef CONFIG_NET_CAN_ERRORS
+  fdcan_errint(priv, true);
+#endif
+
   /* Keep Rx interrupts on Line 0; move Tx to Line 1
    * TC (Tx Complete) interrupt on line 1
    */
@@ -2451,7 +2506,7 @@ int stm32_fdcansockinitialize(int intf)
 
   /* Attach the fdcan interrupt handlers */
 
-  if (irq_attach(priv->config->mb_irq[0], fdcan_interrupt, NULL))
+  if (irq_attach(priv->config->mb_irq[0], fdcan_interrupt, priv))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -2459,7 +2514,7 @@ int stm32_fdcansockinitialize(int intf)
       return -EAGAIN;
     }
 
-  if (irq_attach(priv->config->mb_irq[1], fdcan_interrupt, NULL))
+  if (irq_attach(priv->config->mb_irq[1], fdcan_interrupt, priv))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -2524,3 +2579,456 @@ void arm_netinitialize(void)
 #endif
 }
 #endif
+
+#ifdef CONFIG_NET_CAN_ERRORS
+/****************************************************************************
+ * Name: fdcan_error_work
+ ****************************************************************************/
+
+static void fdcan_error_work(void *arg)
+{
+  struct fdcan_driver_s *priv    = (struct fdcan_driver_s *)arg;
+  uint32_t              pending = 0;
+  uint32_t              ir      = 0;
+  uint32_t              ie      = 0;
+  uint32_t              psr     = 0;
+
+  /* Get the set of pending interrupts. */
+
+  ir = getreg32(priv->base + STM32_FDCAN_IR_OFFSET);
+  ie = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
+  psr = getreg32(priv->base + STM32_FDCAN_PSR_OFFSET);
+
+  pending = (ir);
+
+  /* Check for common errors */
+
+  if ((pending & FDCAN_CMNERR_INTS) != 0)
+    {
+      /* When a protocol error ocurrs, the problem is recorded in
+       * the LEC/DLEC fields of the PSR register. In lieu of
+       * seprate interrupt flags for each error, the hardware
+       * groups procotol errors under a single interrupt each for
+       * arbitration and data phases.
+       *
+       * These errors have a tendency to flood the system with
+       * interrupts, so they are disabled here until we get a
+       * successful transfer/receive on the hardware
+       */
+
+      if ((psr & FDCAN_PSR_LEC_MASK) != 0)
+        {
+          ie &= ~(FDCAN_IE_PEAE | FDCAN_IE_PEDE);
+          putreg32(ie, priv->base + STM32_FDCAN_IE_OFFSET);
+        }
+
+      /* Clear the error indications */
+
+      putreg32(FDCAN_CMNERR_INTS, priv->base + STM32_FDCAN_IR_OFFSET);
+    }
+
+  /* Check for transmission errors */
+
+  if ((pending & FDCAN_TXERR_INTS) != 0)
+    {
+      /* An Acknowledge-Error will occur if for example the device
+       * is not connected to the bus.
+       *
+       * The CAN-Standard states that the Chip has to retry the
+       * message forever, which will produce an ACKE every time.
+       * To prevent this Interrupt-Flooding and the high CPU-Load
+       * we disable the ACKE here as long we didn't transfer at
+       * least one message successfully (see FDCAN_INT_TC below).
+       */
+
+      /* Clear the error indications */
+
+      putreg32(FDCAN_TXERR_INTS, priv->base + STM32_FDCAN_IR_OFFSET);
+    }
+
+  /* Check for reception errors */
+
+  if ((pending & FDCAN_RXERR_INTS) != 0)
+    {
+      /* To prevent Interrupt-Flooding the current active
+       * RX error interrupts are disabled. After successfully
+       * receiving at least one CAN packet all RX error interrupts
+       * are turned back on.
+       *
+       * The Interrupt-Flooding can for example occur if the
+       * configured CAN speed does not match the speed of the other
+       * CAN nodes in the network.
+       */
+
+      ie &= ~(pending & FDCAN_RXERR_INTS);
+      putreg32(ie, priv->base + STM32_FDCAN_IE_OFFSET);
+
+      /* Clear the error indications */
+
+      putreg32(FDCAN_RXERR_INTS, priv->base + STM32_FDCAN_IR_OFFSET);
+    }
+
+  /* Report errors */
+
+  net_lock();
+  fdcan_error(priv, pending & FDCAN_ANYERR_INTS, psr);
+  net_unlock();
+
+  /* Re-enable ERROR interrupts */
+
+  fdcan_errint(priv, true);
+}
+
+/****************************************************************************
+ * Name: fdcan_error
+ *
+ * Description:
+ *   Report a CAN error
+ *
+ * Input Parameters:
+ *   dev        - CAN-common state data
+ *   status     - Interrupt status with error bits set
+ *   psr        - psr register content
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void fdcan_error(struct fdcan_driver_s *priv, uint32_t status,
+                        uint32_t psr)
+{
+  struct can_frame *frame = (struct can_frame *)priv->rx_pool;
+  uint32_t          errbits = 0;
+  uint8_t           data[CAN_ERR_DLC];
+  uint32_t regval;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Encode error bits */
+
+  errbits = 0;
+  memset(data, 0, sizeof(data));
+
+  /* Always fill in "static" error conditions, but set the signaling bit
+   * only if the condition has changed (see IRQ-Flags below)
+   * They have to be filled in every time CAN_ERROR_CONTROLLER is set.
+   */
+
+  errbits |= CAN_ERR_CNT;
+  regval = getreg32(priv->base + STM32_FDCAN_ECR_OFFSET);
+  data[6] = (uint8_t)((regval & FDCAN_ECR_TEC_MASK) >> FDCAN_ECR_TEC_SHIFT);
+  data[7] = (uint8_t)((regval & FDCAN_ECR_TREC_MASK) >>
+                      FDCAN_ECR_TREC_SHIFT);
+
+  if ((psr & FDCAN_PSR_EP) != 0)
+    {
+      if ((regval & FDCAN_ECR_RP) != 0)
+        {
+          data[1] |= (CAN_ERR_CRTL_RX_PASSIVE);
+        }
+
+      if (data[6] >= CAN_ERROR_PASSIVE_THRESHOLD)
+        {
+          data[1] |= (CAN_ERR_CRTL_TX_PASSIVE);
+        }
+    }
+
+  if ((psr & FDCAN_PSR_EW) != 0)
+    {
+      if ((data[6] >= CAN_ERROR_WARNING_THRESHOLD))
+        {
+          data[1] |= CAN_ERR_CRTL_TX_WARNING;
+        }
+
+      if ((data[7] >= CAN_ERROR_WARNING_THRESHOLD))
+        {
+          data[1] |= CAN_ERR_CRTL_RX_WARNING;
+        }
+    }
+
+  if ((status & (FDCAN_IR_EP | FDCAN_IR_EW)) != 0)
+    {
+      /* "Error Passive" or "Error Warning" status changed */
+
+      errbits |= CAN_ERR_CRTL;
+    }
+
+  if ((status & FDCAN_IR_PEA) != 0)
+    {
+      /* Protocol Error in Arbitration Phase */
+
+      if ((psr & FDCAN_PSR_ACT) == FDCAN_PSR_ACT)
+        {
+          /* transmit error */
+
+          data[2] |= CAN_ERR_PROT_TX;
+        }
+
+      switch (psr & FDCAN_PSR_LEC_MASK)
+        {
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_STUFF_ERROR):
+
+            /* Stuff Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_STUFF;
+            break;
+
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_FORM_ERROR):
+
+            /* Format Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_FORM;
+            break;
+
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_ACK_ERROR):
+
+            /* Acknowledge Error */
+
+            errbits |= (CAN_ERR_PROT | CAN_ERR_ACK);
+            break;
+
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_BIT0_ERROR):
+
+            /* Bit0 Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_BIT0;
+            break;
+
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_BIT1_ERROR):
+
+            /* Bit1 Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_BIT1;
+            break;
+
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_CRC_ERROR):
+
+            /* Receive CRC Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[3] |= (CAN_ERR_PROT_LOC_CRC_SEQ | CAN_ERR_PROT_LOC_CRC_DEL);
+            break;
+
+          case FDCAN_PSR_LEC(FDCAN_PSR_EC_NO_CHANGE):
+
+            /* No change (nothing has cleared the error) */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_UNSPEC;
+            break;
+
+          default:
+
+            /* no error  */
+
+            break;
+        }
+    }
+
+  if ((status & FDCAN_IR_PED) != 0)
+    {
+      /* Protocol Error in Data Phase */
+
+      if ((psr & FDCAN_PSR_ACT) == FDCAN_PSR_ACT)
+        {
+          /* transmit error */
+
+          data[2] |= CAN_ERR_PROT_TX;
+        }
+
+      switch (psr & FDCAN_PSR_DLEC_MASK)
+        {
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_STUFF_ERROR):
+
+            /* Stuff Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_STUFF;
+            break;
+
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_FORM_ERROR):
+
+            /* Format Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_FORM;
+            break;
+
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_ACK_ERROR):
+
+            /* Acknowledge Error */
+
+            errbits |= (CAN_ERR_ACK | CAN_ERR_PROT);
+            break;
+
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_BIT0_ERROR):
+
+            /* Bit0 Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_BIT0;
+            break;
+
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_BIT1_ERROR):
+
+            /* Bit1 Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_BIT1;
+            break;
+
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_CRC_ERROR):
+
+            /* Receive CRC Error */
+
+            errbits |= CAN_ERR_PROT;
+            data[3] |= (CAN_ERR_PROT_LOC_CRC_SEQ | CAN_ERR_PROT_LOC_CRC_DEL);
+            break;
+
+          case FDCAN_PSR_DLEC(FDCAN_PSR_EC_NO_CHANGE):
+
+            /* No change (nothing has cleared the error) */
+
+            errbits |= CAN_ERR_PROT;
+            data[2] |= CAN_ERR_PROT_UNSPEC;
+            break;
+
+          default:
+
+            /* no error */
+
+            break;
+        }
+    }
+
+  if ((status & FDCAN_IR_BO) != 0)
+    {
+      /* Bus_Off Status changed */
+
+      if ((psr & FDCAN_PSR_BO) != 0)
+        {
+          errbits |= CAN_ERR_BUSOFF;
+        }
+      else
+        {
+          errbits |= CAN_ERR_RESTARTED;
+        }
+    }
+
+  if ((status & (FDCAN_IR_RF0L | FDCAN_IR_RF1L)) != 0)
+    {
+      /* Receive FIFO 0/1 Message Lost
+       * Receive FIFO 1 Message Lost
+       */
+
+      errbits |= CAN_ERR_CRTL;
+      data[1] |= CAN_ERR_CRTL_RX_OVERFLOW;
+    }
+
+  if ((status & FDCAN_IR_TEFL) != 0)
+    {
+      /* Tx Event FIFO Element Lost */
+
+      errbits |= CAN_ERR_CRTL;
+      data[1] |= CAN_ERR_CRTL_TX_OVERFLOW;
+    }
+
+  if ((status & FDCAN_IR_TOO) != 0)
+    {
+      /* Timeout Occurred */
+
+      errbits |= CAN_ERR_TX_TIMEOUT;
+    }
+
+  if ((status & (FDCAN_IR_MRAF | FDCAN_IR_ELO)) != 0)
+    {
+      /* Message RAM Access Failure
+       * Error Logging Overflow
+       */
+
+      errbits |= CAN_ERR_CRTL;
+      data[1] |= CAN_ERR_CRTL_UNSPEC;
+    }
+
+  errbits |= CAN_ERR_FLAG;
+
+  if (errbits != 0)
+    {
+      nerr("ERROR: errbits = %lx" PRIx16 "\n", errbits);
+
+      /* Copy frame */
+
+      frame->can_id  = errbits;
+      frame->can_dlc = CAN_ERR_DLC;
+
+      memcpy(frame->data, data, CAN_ERR_DLC);
+
+      /* Copy the buffer pointer to priv->dev..  Set amount of data
+       * in priv->dev.d_len
+       */
+
+      priv->dev.d_len = sizeof(struct can_frame);
+      priv->dev.d_buf = (uint8_t *)frame;
+
+      /* Send to socket interface */
+
+      NETDEV_ERRORS(&priv->dev);
+
+      can_input(&priv->dev);
+
+      /* Point the packet buffer back to the next Tx buffer that will be
+       * used during the next write.  If the write queue is full, then
+       * this will point at an active buffer, which must not be written
+       * to.  This is OK because devif_poll won't be called unless the
+       * queue is not full.
+       */
+
+      priv->dev.d_buf = (uint8_t *)priv->tx_pool;
+    }
+}
+
+/****************************************************************************
+ * Name: fdcan_errint
+ *
+ * Description:
+ *   Call to enable or disable CAN error interrupts.
+ *
+ * Input Parameters:
+ *   priv - reference to the private CAN driver state structure
+ *   enable - enable or disable
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void fdcan_errint(struct fdcan_driver_s *priv, bool enable)
+{
+  const struct fdcan_config_s *config = NULL;
+  uint32_t regval = 0;
+
+  DEBUGASSERT(priv);
+  config = priv->config;
+  DEBUGASSERT(config);
+
+  /* Enable/disable the transmit mailbox interrupt */
+
+  regval  = getreg32(priv->base + STM32_FDCAN_IE_OFFSET);
+  if (enable)
+    {
+      regval |= FDCAN_ANYERR_INTS;
+    }
+  else
+    {
+      regval &= ~FDCAN_ANYERR_INTS;
+    }
+
+  putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
+}
+#endif
+
