@@ -438,7 +438,7 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
     }
   else
     {
-      g_vq_idx = (message[0] >> 16);
+      g_vq_idx = message[0];
 
       DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
                   (g_vq_idx == VRING1_NOTIFYID));
@@ -983,7 +983,7 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
 
   if (notifyid == VRING0_NOTIFYID)
     {
-      tx_msg[0] = (notifyid << 16);
+      tx_msg[0] = notifyid;
       tx_msg[1] = 0;
 
       return mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
@@ -1142,7 +1142,6 @@ static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
   struct rpmsg_virtio_device *vdev = container_of(rdev,
                                                   struct rpmsg_virtio_device,
                                                   rdev);
-
   g_mpfs_virtio_device = vdev;
   g_mpfs_rpmsg_device  = rdev;
 
@@ -1256,6 +1255,12 @@ int mpfs_ihc_init(void)
 
   ihcinfo("Waiting for the master online...\n");
   ret = mpfs_rptun_init(MPFS_RPTUN_SHMEM_NAME, MPFS_RPTUN_CPU_NAME);
+  if (ret < 0)
+    {
+      ihcerr("ERROR: Not able to init RPTUN\n");
+      goto init_error;
+    }
+
   ihcinfo("..master is online\n");
 
   /* Register callback to notify when rpmsg device is ready */
