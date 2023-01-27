@@ -131,6 +131,8 @@
                                            * confinement state */
 #define SIOCGCANLISTENONLY _SIOC(0x0046)  /* Get bus monitoring mode */
 #define SIOCSCANLISTENONLY _SIOC(0x0047)  /* Set bus monitoring mode */
+#define SIOCGCANABORTTX    _SIOC(0x0048)  /* Get abort TX frame on TX error */
+#define SIOCSCANABORTTX    _SIOC(0x0049)  /* Set abort TX frame on TX error */
 
 /* Network socket control ***************************************************/
 

@@ -783,6 +783,8 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
       case SIOCGCANERRORS:
       case SIOCGCANLISTENONLY:
       case SIOCSCANLISTENONLY:
+      case SIOCGCANABORTTX:
+      case SIOCSCANABORTTX:
       case SIOCSIFNAME:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
@@ -1288,6 +1290,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGCANERRORS:     /* Get CAN error counters and state */
       case SIOCGCANLISTENONLY: /* Get listen-only mode from a CAN controller */
       case SIOCSCANLISTENONLY: /* Set listen-only mode of a CAN controller */
+      case SIOCGCANABORTTX:    /* Get abort CAN TX frame on TX error */
+      case SIOCSCANABORTTX:    /* Set abort CAN TX frame on TX error */
         if (dev->d_ioctl)
           {
             /* Every CAN ioctl argument struct is a member of the
