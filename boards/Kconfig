@@ -2709,8 +2709,8 @@ config ARCH_BOARD
 	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "bl602evb"                 if ARCH_BOARD_BL602EVB
-	default "ch32v307evt"              if ARCH_BOARD_CH32V307EVT
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
+	default "ch32v307evt"              if ARCH_BOARD_CH32V307EVT
 	default "circuit-express"          if ARCH_BOARD_CIRCUIT_EXPRESS
 	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
