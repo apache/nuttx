@@ -83,13 +83,13 @@
 #define DL_END                0x0004
 
 #define WPA_OUI_LEN           3               /* WPA OUI length */
+#define WPA_VERSION           1               /* WPA version */
 #define WPA_VERSION_LEN       2               /* WPA version length */
 #define WLAN_WPA_OUI          0xf25000
 #define WLAN_WPA_OUI_TYPE     0x01
 #define WLAN_WPA_SEL(x)       (((x) << 24) | WLAN_WPA_OUI)
 #define WLAN_AKM_PSK          0x02
 #define SUITE(oui, id)        (((oui) << 8) | (id))
-#define WLAN_AKM_SUITE_PSK    SUITE(0x000FAC, WLAN_AKM_PSK)
 
 /****************************************************************************
  * Private Types
@@ -800,7 +800,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
           switch (ie_buffer[ie_offset])
             {
-              case IEEE80211_ELEMID_RSN:
+              case WLAN_EID_RSN:
                 {
                   FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)
                                        &ie_buffer[ie_offset + 2];
@@ -833,7 +833,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                   break;
                 }
 
-              case IEEE80211_ELEMID_VENDOR:
+              case WLAN_EID_VENDOR_SPECIFIC:
                 {
                   FAR wpa_ie_fixed_t *ie = (FAR wpa_ie_fixed_t *)
                                            &ie_buffer[ie_offset];
