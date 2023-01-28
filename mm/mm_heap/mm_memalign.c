@@ -146,11 +146,18 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
     {
       FAR struct mm_allocnode_s *newnode;
       FAR struct mm_allocnode_s *next;
+      FAR struct mm_freenode_s *prev;
       size_t precedingsize;
+
+      /* Mark node free */
+
+      node->preceding &= ~MM_MASK_BIT;
 
       /* Get the node the next node after the allocation. */
 
       next = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size);
+      prev = (FAR struct mm_freenode_s *)
+        ((FAR char *)node - node->preceding);
 
       /* Make sure that there is space to convert the preceding
        * mm_allocnode_s into an mm_freenode_s.  I think that this should
@@ -184,15 +191,33 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
           precedingsize = (uintptr_t)newnode - (uintptr_t)node;
         }
 
+      /* If the previous node is free, merge node and previous node, then
+       * set up the node size.
+       */
+
+      if ((prev->preceding & MM_ALLOC_BIT) == 0)
+        {
+          /* Remove the node.  There must be a predecessor, but there may
+           * not be a successor node.
+           */
+
+          DEBUGASSERT(prev->blink);
+          prev->blink->flink = prev->flink;
+          if (prev->flink)
+            {
+              prev->flink->blink = prev->blink;
+            }
+
+          precedingsize += prev->size;
+          node = (FAR struct mm_allocnode_s *)prev;
+        }
+
+      node->size = precedingsize;
+
       /* Set up the size of the new node */
 
       newnode->size = (uintptr_t)next - (uintptr_t)newnode;
       newnode->preceding = precedingsize | MM_ALLOC_BIT;
-
-      /* Reduce the size of the original chunk and mark it not allocated, */
-
-      node->size = precedingsize;
-      node->preceding &= ~MM_MASK_BIT;
 
       /* Fix the preceding size of the next node */
 
