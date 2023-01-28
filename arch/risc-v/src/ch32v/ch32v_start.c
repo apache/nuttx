@@ -199,18 +199,22 @@ void bfl_main(void)
     ;
 }
 
-#else
+#else // BOOGER
 
 void ch32v_main(void)
 {
   /* Configure FPU */
-
-  riscv_fpuconfig();
+// 2023-01-18: Day 0 on CH32V. This forces a hard exception. {shrug}
+//  riscv_fpuconfig();
 
   /* set interrupt vector */
   // TODO: this might not be right, but it neeeds to be SOMETHING.
 
 //  asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
+
+  /* Configure IDLE stack */
+
+  g_idle_topstack = ((uint32_t)g_idle_stack + CH32V_IDLESTACK_SIZE);
 
   /* Configure the UART so we can get debug output */
 #if 1

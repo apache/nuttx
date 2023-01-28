@@ -8,9 +8,50 @@
 * SPDX-License-Identifier: Apache-2.0
 *******************************************************************************/
 
+	.data
+panic_epc:
+	.word 0
+panic_status:
+	.word 0
+panic_cause:
+	.word 0
+panic_string:
+	.word 0
+
+	// TODO: this should be optimized for size since it's potentially
+	// repeated a zillion times.
+	.macro low_panic name
+	.data
+	\name: .string "\name"
+
+//	.text
+	.section	.text.handle_reset,"ax",@progbits
+	la t6, panic_epc
+	csrr t5, mepc
+	sw t5, (t6)
+
+	la t6, panic_status
+	csrr t5, mstatus
+	sw t5, (t6)
+
+	la t6, panic_cause
+	csrr t5, mcause
+	sw t5, (t6)
+
+	la t6, panic_string
+	la t5, \name
+	sw t5, (t6)
+	1 : wfi; j 1b
+	.endm
+
 	.section	.init,"ax",@progbits
 	.global	__start
 	.align	1
+
+	# Uncomment for inspection testing. Will make device not boot!
+	# low_panic  "booger"
+	# low_panic  "frogface"
+
 __start:
 	j	handle_reset
 	.word 0x00000013
@@ -236,7 +277,8 @@ _vector_base:
     .weak   DMA2_Channel11_IRQHandler  /* DMA2 Channel 11 */
 
 NMI_Handler:  1:  j 1b
-HardFault_Handler:  1:  j 1b
+// HardFault_Handler:  1:  j 1b
+HardFault_Handler:  low_panic HardFault_Handler_Panic;
 Ecall_M_Mode_Handler:  1:  j 1b
 Ecall_U_Mode_Handler:  1:  j 1b
 Break_Point_Handler:  1:  j 1b
@@ -336,9 +378,8 @@ DMA2_Channel11_IRQHandler:  1:  j 1b
 	.weak	handle_reset
 	.align	1
 handle_reset:
-.option push
-.option	norelax
-    csrw mepc, t0
+	.option push
+	.option	norelax
 	la gp, __global_pointer$
 .option	pop
 1:
@@ -356,7 +397,7 @@ handle_reset:
 	addi a1, a1, 4
 	bltu a1, a2, 1b
 2:
-	/* Clear bss section */
+	/* Clear bss section. It's word-aligned. */
 	la a0, _sbss
 	la a1, _ebss
 	bgeu a0, a1, 2f
@@ -365,25 +406,49 @@ handle_reset:
 	addi a0, a0, 4
 	bltu a0, a1, 1b
 2:
-    li t0, 0x1f
-    csrw 0xbc0, t0
+	li t0, 0x1f
+	csrw 0xbc0, t0
 
     /* Enable nested and hardware stack */
 //	li t0, 0x1f
 //#	csrw 0x804, zero
 //	csrw 0x804, t0
 
-    /* Enable floating point and interrupt */
-//   	li t0, 0x7800
-//   	csrs mstatus, t0
+	/* Enable floating point and interrupt */
+	// FIXME: use normal RISC-V bit constants here.
+	// Code doesn't match comments.
+	li t0, 0x6088
+	csrs mstatus, t0
 
- 	la t0, _vector_base
-    ori t0, t0, 3
+	la t0, _vector_base
+	ori t0, t0, 3
 	csrw mtvec, t0
 
-//    jal  SystemInit
+#if 0
+   // Come back to this. The CH32V startup code seems to treat
+   // main() as an exception handler and then mret out of it. That's
+   // really weird. I need to figure out if that's justifiably wierd.
+	jal  SystemInit
 	la t0, ch32v_main
 	csrw mepc, t0
 	mret
+#endif
+
+	// Prepare a normal stack frame to keep GDB happy.
+	auipc ra, 0
+	addi sp, sp, -16
+	sw ra, 8(sp)
+
+	// Empty argc/argvp[]/environmentp[]
+	li a0, 0
+	li a1, 0
+	li a2, 0
+	call ch32v_main
+
+	// Recommend a breakpoint here. Nuttx should never return
+	// from scheduler which is called from our version of main().
+ch32v_entry_deadloop:
+	j ch32v_entry_deadloop
+
 
 

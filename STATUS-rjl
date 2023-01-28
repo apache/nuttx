@@ -1,0 +1,51 @@
+2020-01-23
+
+Starts, crashes inside nx_init(). I think it's trying to add ROM to the
+memory allocator inside mm_addregion(). Crash is alignment issue:
+
+Breakpoint 5, mm_malloc (heap=0x200020c0 <g_idle_topstack>, size=size@entry=16) at mm_heap/mm_malloc.c:222
+222	          next->preceding = remaining | (next->preceding & MM_MASK_BIT);
+(gdb) p next
+$4 = (struct mm_freenode_s *) 0x200021c2 <g_idletcb+98>
+(gdb) n
+Error: unable to resume hart 0
+unable to resume hart 0
+Error:   dmstatus =0x00030c82
+Error:   was stepping, halting
+  dmstatus =0x00030c82
+  was stepping, halting
+
+Breakpoint 2, HardFault_Handler () at chip/ch32v_head.S:281
+281	HardFault_Handler:  low_panic HardFault_Handler_Panic;
+
+Issue is that node->size is computed not word-aligned:
+$11 = {size = 0x8a, preceding = 0x200020c0, flink = 0x20002148,
+  blink = 0x20002128}
+
+
+
+TODO - table stakes :
+Exceptions
+Timers/interrupts
+GPIO (80!)
+Polled serial, fixed speed
+AUTOLED
+
+Base drivers:
+SPI
+i2c
+DMA
+Real Serial (* 8)
+Watchdog ?
+CONFIG_ARCH_BUTTONS for button that ISN'T reset button. :-/
+
+Advanced drivers (not me):
+USB
+Ethernet
+Flash for filesystem
+ADC
+DAC
+
+Hardware configuration
+Use single USB cable on 307 board at top for power, debug, console.
+Jump  LED1, LED2 on 4ar left to PA0, PA1 on connector near them. for AUTOLED

@@ -40,7 +40,7 @@
 // #include "hardware/ch32v_hbn.h"
 // #include "hardware/ch32v_uart.h"
 
-// #include "ch32v_lowputc.h"
+#include "ch32v_lowputc.h"
 // #include "ch32v_gpio.h"
 // #include "ch32v_hbn.h"
 #include "riscv_internal.h"
