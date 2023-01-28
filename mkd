@@ -1,0 +1,1 @@
+riscv64-unknown-elf-objdump -lSg   nuttx  | less

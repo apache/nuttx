@@ -1,0 +1,8 @@
+--color
+--sort-files
+
+# Make.dep
+--ignore-file=ext:dep
+
+# Object disassemblies.
+--ignore-file=ext:dis
