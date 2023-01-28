@@ -25,7 +25,7 @@
 
 #define FLL_STK_EN					1
 #define ZERO_IC_TAG_EN					1
-#define IC_TAG_CACEH_ADDR_EQU_EN			0
+#define IC_TAG_CACHE_ADDR_EQU_EN			0
 #define FLASH_WAKEUP_EN					1
 #define COPY_DATA_EN					1
 #define MULTI_ADDRESS_START				1
