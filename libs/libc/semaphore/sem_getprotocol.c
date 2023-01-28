@@ -54,11 +54,6 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol)
 {
   DEBUGASSERT(sem != NULL && protocol != NULL);
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
   *protocol = sem->flags;
-#else
-  *protocol = SEM_PRIO_NONE;
-#endif
-
   return OK;
 }
