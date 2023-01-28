@@ -12,7 +12,7 @@ config APPSDIR
 menu "License Setup"
 config ALLOW_BSD_COMPONENTS
 	bool "Use components that have BSD licenses"
-	default n
+	default y
 	---help---
 		When this option is enabled the project will allow the use
 		of components that have BSD licenses.
@@ -42,7 +42,7 @@ config ALLOW_GPL_COMPONENTS
 
 config ALLOW_MIT_COMPONENTS
 	bool "Use components that have MIT licenses"
-	default n
+	default y
 	---help---
 		When this option is enabled the project will allow the use
 		of components that have MIT licenses.
