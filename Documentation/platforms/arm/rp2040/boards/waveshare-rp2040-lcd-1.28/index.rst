@@ -5,6 +5,7 @@ Waveshare RP2040 LCD 1.28
 The `Waveshare RP2040 LCD 1.28 <https://www.waveshare.com/wiki/RP2040-LCD-1.28>`_
 is a low-cost, high-performance MCU board designed by Waveshare based on RP2040
 with onboard 1.28 inch LCD.
+
 .. figure:: RP2040-LCD-1.28.jpg
    :align: center
 
