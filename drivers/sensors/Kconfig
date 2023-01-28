@@ -763,8 +763,8 @@ config MPU60X0_GYRO_FS_SEL
 	int "MPU60x0 Gyro FS_SEL"
 	default 2
 	---help---
-		Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per 
-		the	datasheet, the meaning of @fs_sel is as follows:
+		Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per
+		the datasheet, the meaning of @fs_sel is as follows:
 		GYRO_CONFIG(0x1b) :   XG_ST YG_ST ZG_ST FS_SEL1 FS_SEL0 x  x  x
 		XG_ST, YG_ST, ZG_ST  :  self-test (unsupported in this driver)
 				1 -> activate self-test on X, Y, and/or Z gyros
