@@ -154,6 +154,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_SMART_DEV_LOOP
+int smart_loop_register_driver(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
