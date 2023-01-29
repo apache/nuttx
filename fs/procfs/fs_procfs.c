@@ -339,6 +339,34 @@ static void procfs_enum(FAR struct tcb_s *tcb, FAR void *arg)
   dir->pid[index] = tcb->pid;
   dir->base.nentries = index + 1;
 }
+
+/****************************************************************************
+ * Name: procfs_sort_pid
+ ****************************************************************************/
+
+static void procfs_sort_pid(FAR struct procfs_level0_s *level0)
+{
+  pid_t pid;
+  int i;
+  int j;
+
+  /* Sort the process id by Bubble.
+   * FIXME: improve searching algorithm.
+   */
+
+  for (i = 0; i < level0->base.nentries; i++)
+    {
+      for (j = 0; j < level0->base.nentries - 1 - i; j++)
+        {
+          if (level0->pid[j] > level0->pid[j + 1])
+            {
+              pid = level0->pid[j];
+              level0->pid[j] = level0->pid[j + 1];
+              level0->pid[j + 1] = pid;
+            }
+        }
+    }
+}
 #endif
 
 /****************************************************************************
@@ -570,6 +598,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
       nxsched_foreach(procfs_enum, level0);
+      procfs_sort_pid(level0);
 #else
       level0->base.index = 0;
       level0->base.nentries = 0;
