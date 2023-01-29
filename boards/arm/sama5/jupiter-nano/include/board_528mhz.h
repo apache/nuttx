@@ -97,7 +97,7 @@
 
 #define BOARD_ADC_PRESCAL          (7)
 #define BOARD_TSD_STARTUP          (40)        /* 40 nanoseconds */
-#define BOARD_TSD_TRACKTIM         (2000)      /* Min 1µs at 8MHz */
+#define BOARD_TSD_TRACKTIM         (2000)      /* Min 1us at 8MHz */
 #define BOARD_TSD_DEBOUNCE         (10000000)  /* 10 milliseconds (units nanoseconds) */
 
 /* Resulting frequencies */
