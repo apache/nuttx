@@ -330,30 +330,14 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
   /* Set up for the callback.  We can't know in advance if the application
    * is going to send a IPv4 or an IPv6 packet, so this setup may not
    * actually be used.  Furthermore, the TCP logic is required to call
-   * tcp_ipv4_select() or tcp_ipv6_select() prior to sending any packets.
+   * tcp_ip_select() prior to sending any packets.
    * We will try to set the correct value here basic on the binding of
    * the connection.
    */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
-#endif
-    {
-      hdrlen = IPv4TCP_HDRLEN;
-      tcp_ipv4_select(dev);
-    }
-#endif /* CONFIG_NET_IPv4 */
+  tcp_ip_select(conn);
 
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      hdrlen = IPv6TCP_HDRLEN;
-      tcp_ipv6_select(dev);
-    }
-#endif /* CONFIG_NET_IPv6 */
+  hdrlen = tcpip_hdrsize(conn);
 
   /* Increase the TCP sequence number */
 
@@ -640,29 +624,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                     }
                   else
                     {
-                      unsigned int tcpiplen;
-
-                      /* No.. we need to send another probe.
-                       * Get the size of the IP and TCP header.
-                       */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-                      if (conn->domain == PF_INET)
-#endif
-                        {
-                          tcpiplen = IPv4_HDRLEN + TCP_HDRLEN;
-                        }
-#endif
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-                      else
-#endif
-                        {
-                          tcpiplen = IPv6_HDRLEN + TCP_HDRLEN;
-                        }
-#endif
-
                       /* And send the probe.
                        * The packet we send must have these properties:
                        *
@@ -679,7 +640,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                       saveseq = tcp_getsequence(conn->sndseq);
                       tcp_setsequence(conn->sndseq, saveseq - 1);
 
-                      tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                      tcp_send(dev, conn, TCP_ACK, hdrlen);
 
                       tcp_setsequence(conn->sndseq, saveseq);
 

@@ -57,17 +57,9 @@
 #ifdef CONFIG_NET_IPv4
 void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
 {
-  FAR struct net_driver_s *dev;
-
   /* Find the device driver that serves the subnet of the remote address */
 
-  dev = netdev_findby_ripv4addr(lipaddr, ripaddr);
-  if (dev && dev->d_txavail)
-    {
-      /* Notify the device driver that new TX data is available. */
-
-      dev->d_txavail(dev);
-    }
+  netdev_txnotify_dev(netdev_findby_ripv4addr(lipaddr, ripaddr));
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -91,17 +83,9 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
 void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
                           FAR const net_ipv6addr_t ripaddr)
 {
-  FAR struct net_driver_s *dev;
-
   /* Find the device driver that serves the subnet of the remote address */
 
-  dev = netdev_findby_ripv6addr(lipaddr, ripaddr);
-  if (dev && dev->d_txavail)
-    {
-      /* Notify the device driver that new TX data is available. */
-
-      dev->d_txavail(dev);
-    }
+  netdev_txnotify_dev(netdev_findby_ripv6addr(lipaddr, ripaddr));
 }
 #endif /* CONFIG_NET_IPv6 */
 

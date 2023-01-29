@@ -115,22 +115,8 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
        * setup may not actually be used.
        */
 
-#if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_IPv4)
-      if (conn->domain == PF_INET)
-        {
-          tcp_ipv4_select(dev);
-        }
-      else
-        {
-          tcp_ipv6_select(dev);
-        }
+      tcp_ip_select(conn);
 
-#elif defined(CONFIG_NET_IPv4)
-      tcp_ipv4_select(dev);
-
-#else /* if defined(CONFIG_NET_IPv6) */
-      tcp_ipv6_select(dev);
-#endif
       /* Perform the callback */
 
       result = tcp_callback(dev, conn, TCP_POLL);

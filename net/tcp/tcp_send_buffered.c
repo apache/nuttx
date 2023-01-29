@@ -318,48 +318,6 @@ static inline void psock_lost_connection(FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
- * Name: send_ipselect
- *
- * Description:
- *   If both IPv4 and IPv6 support are enabled, then we will need to select
- *   which one to use when generating the outgoing packet.  If only one
- *   domain is selected, then the setup is already in place and we need do
- *   nothing.
- *
- * Input Parameters:
- *   dev   - The structure of the network driver that caused the event
- *   psock - Socket state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef NEED_IPDOMAIN_SUPPORT
-static inline void send_ipselect(FAR struct net_driver_s *dev,
-                                 FAR struct tcp_conn_s *conn)
-{
-  /* Which domain the socket support */
-
-  if (conn->domain == PF_INET)
-    {
-      /* Select the IPv4 domain */
-
-      tcp_ipv4_select(dev);
-    }
-  else /* if (conn->domain == PF_INET6) */
-    {
-      /* Select the IPv6 domain */
-
-      tcp_ipv6_select(dev);
-    }
-}
-#endif
-
-/****************************************************************************
  * Name: parse_sack
  *
  * Description:
@@ -774,7 +732,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * place and we need do nothing.
            */
 
-          send_ipselect(dev, conn);
+          tcp_ip_select(conn);
 #endif
           /* Then set-up to send that amount of data. (this won't actually
            * happen until the polling cycle completes).
@@ -1043,15 +1001,15 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb));
 
-    #ifdef NEED_IPDOMAIN_SUPPORT
+#ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to
            * select which one to use when generating the outgoing packet.
            * If only one domain is selected, then the setup is already in
            * place and we need do nothing.
            */
 
-          send_ipselect(dev, conn);
-    #endif
+          tcp_ip_select(conn);
+#endif
           /* Then set-up to send that amount of data with the offset
            * corresponding to the amount of data already sent. (this
            * won't actually happen until the polling cycle completes).
