@@ -782,6 +782,16 @@ void tcp_ipv6_select(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
+ * Name: tcp_ip_select
+ *
+ * Description:
+ *   Configure to send or receive an TCP IPv[4|6] packet for connection
+ *
+ ****************************************************************************/
+
+void tcp_ip_select(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
  * Name: tcp_setsequence
  *
  * Description:

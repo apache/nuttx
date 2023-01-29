@@ -102,48 +102,6 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcpsend_ipselect
- *
- * Description:
- *   If both IPv4 and IPv6 support are enabled, then we will need to select
- *   which one to use when generating the outgoing packet.  If only one
- *   domain is selected, then the setup is already in place and we need do
- *   nothing.
- *
- * Input Parameters:
- *   dev    - The structure of the network driver that caused the event
- *   pstate - sendto state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef NEED_IPDOMAIN_SUPPORT
-static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
-                                    FAR struct tcp_conn_s *conn)
-{
-  /* Which domain does the socket support */
-
-  if (conn->domain == PF_INET)
-    {
-      /* Select the IPv4 domain */
-
-      tcp_ipv4_select(dev);
-    }
-  else /* if (conn->domain == PF_INET6) */
-    {
-      /* Select the IPv6 domain */
-
-      tcp_ipv6_select(dev);
-    }
-}
-#endif
-
-/****************************************************************************
  * Name: tcpsend_eventhandler
  *
  * Description:
@@ -319,7 +277,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * place and we need do nothing.
        */
 
-      tcpsend_ipselect(dev, conn);
+      tcp_ip_select(conn);
 #endif
       /* Then set-up to send that amount of data. (this won't actually
        * happen until the polling cycle completes).
@@ -401,7 +359,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
            * place and we need do nothing.
            */
 
-          tcpsend_ipselect(dev, conn);
+          tcp_ip_select(conn);
 #endif
           /* Then set-up to send that amount of data. (this won't actually
            * happen until the polling cycle completes).
