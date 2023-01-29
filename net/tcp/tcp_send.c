@@ -575,43 +575,21 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       return;
     }
 
-  /* Get values that vary with the underlying IP domain */
+  /* Get the offset TCP header address for this packet */
 
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  if (IFF_IS_IPv6(dev->d_flags))
-#endif
-    {
-      /* Get the offset TCP header address for this packet */
+  tcp = tcp_header(dev);
 
-      tcp     = TCPIPv6BUF;
+  /* Set the packet length for the TCP Maximum Segment Size */
 
-      /* Set the packet length for the TCP Maximum Segment Size */
+  dev->d_len = tcpip_hdrsize(conn);
 
-      dev->d_len  = IPv6TCP_HDRLEN;
-    }
-#endif /* CONFIG_NET_IPv6 */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  else
-#endif
-    {
-      /* Get the offset TCP header address for this packet */
-
-      tcp     = TCPIPv4BUF;
-
-      /* Set the packet length for the TCP Maximum Segment Size */
-
-      dev->d_len  = IPv4TCP_HDRLEN;
-    }
-#endif /* CONFIG_NET_IPv4 */
+  /* Set the packet length for the TCP Maximum Segment Size */
 
   tcp_mss = tcp_rx_mss(dev);
 
   /* Save the ACK bits */
 
-  tcp->flags      = ack;
+  tcp->flags = ack;
 
   /* We send out the TCP Maximum Segment Size option with our ACK. */
 
