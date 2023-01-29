@@ -228,7 +228,8 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Verify that this is a connected peer socket */
 
-  if (conn->lc_state != LOCAL_STATE_CONNECTED)
+  if (conn->lc_state != LOCAL_STATE_CONNECTED ||
+      conn->lc_infile.f_inode == NULL)
     {
       if (conn->lc_state == LOCAL_STATE_CONNECTING)
         {
@@ -238,10 +239,6 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       nerr("ERROR: not connected\n");
       return -ENOTCONN;
     }
-
-  /* The incoming FIFO should be open */
-
-  DEBUGASSERT(conn->lc_infile.f_inode != NULL);
 
   /* Read the packet */
 
