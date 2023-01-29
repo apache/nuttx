@@ -983,10 +983,43 @@ errout:
 
 static int local_shutdown(FAR struct socket *psock, int how)
 {
-  /* TODO: implement this. */
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              psock->s_domain == PF_LOCAL);
 
-  nerr("ERROR: local_shutdown is not implemented");
-  return -ENOTSUP;
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_LOCAL_STREAM
+      case SOCK_STREAM:
+        {
+          FAR struct local_conn_s *conn = psock->s_conn;
+          if (how & SHUT_RD)
+            {
+              if (conn->lc_infile.f_inode != NULL)
+                {
+                  file_close(&conn->lc_infile);
+                  conn->lc_infile.f_inode = NULL;
+                }
+            }
+
+          if (how & SHUT_WR)
+            {
+              if (conn->lc_outfile.f_inode != NULL)
+                {
+                  file_close(&conn->lc_outfile);
+                  conn->lc_outfile.f_inode = NULL;
+                }
+            }
+        }
+
+        return OK;
+#endif
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      case SOCK_DGRAM:
+        return -EOPNOTSUPP;
+#endif
+      default:
+        return -EBADF;
+    }
 }
 
 /****************************************************************************
