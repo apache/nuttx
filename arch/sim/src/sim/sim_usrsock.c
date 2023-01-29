@@ -361,6 +361,15 @@ static int usrsock_ioctl_handler(struct usrsock_s *usrsock,
                            req->arglen, req->arglen);
 }
 
+static int usrsock_shutdown_handler(struct usrsock_s *usrsock,
+                                    const void *data, size_t len)
+{
+  const struct usrsock_request_shutdown_s *req = data;
+  int ret = host_usrsock_shutdown(req->usockid, req->how);
+
+  return usrsock_send_ack(usrsock, req->head.xid, ret);
+}
+
 static const usrsock_handler_t g_usrsock_handler[] =
 {
   [USRSOCK_REQUEST_SOCKET]      = usrsock_socket_handler,
@@ -376,6 +385,7 @@ static const usrsock_handler_t g_usrsock_handler[] =
   [USRSOCK_REQUEST_LISTEN]      = usrsock_listen_handler,
   [USRSOCK_REQUEST_ACCEPT]      = usrsock_accept_handler,
   [USRSOCK_REQUEST_IOCTL]       = usrsock_ioctl_handler,
+  [USRSOCK_REQUEST_SHUTDOWN]    = usrsock_shutdown_handler,
 };
 
 /****************************************************************************

@@ -85,6 +85,7 @@ enum usrsock_request_types_e
   USRSOCK_REQUEST_LISTEN,
   USRSOCK_REQUEST_ACCEPT,
   USRSOCK_REQUEST_IOCTL,
+  USRSOCK_REQUEST_SHUTDOWN,
   USRSOCK_REQUEST__MAX
 };
 
@@ -217,6 +218,14 @@ begin_packed_struct struct usrsock_request_ioctl_s
   int16_t usockid;
   int32_t cmd;
   uint16_t arglen;
+} end_packed_struct;
+
+begin_packed_struct struct usrsock_request_shutdown_s
+{
+  struct usrsock_request_common_s head;
+
+  int16_t usockid;
+  int16_t how;
 } end_packed_struct;
 
 /* Response/event message structures (kernel <= /dev/usrsock <= daemon) */
