@@ -37,11 +37,7 @@
 
 /* Default pthread attribute initializer */
 
-#if CONFIG_RR_INTERVAL == 0
-#  define PTHREAD_DEFAULT_POLICY SCHED_FIFO
-#else
-#  define PTHREAD_DEFAULT_POLICY SCHED_RR
-#endif
+#define PTHREAD_DEFAULT_POLICY SCHED_NORMAL
 
 /* A lot of hassle to use the old-fashioned struct initializers.  But this
  * gives us backward compatibility with some very old compilers.
