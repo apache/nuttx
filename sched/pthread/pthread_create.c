@@ -421,12 +421,12 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   switch (policy)
     {
       default:
-        DEBUGPANIC();
       case SCHED_FIFO:
         ptcb->cmn.flags    |= TCB_FLAG_SCHED_FIFO;
         break;
 
 #if CONFIG_RR_INTERVAL > 0
+      case SCHED_OTHER:
       case SCHED_RR:
         ptcb->cmn.flags    |= TCB_FLAG_SCHED_RR;
         ptcb->cmn.timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
@@ -436,12 +436,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 #ifdef CONFIG_SCHED_SPORADIC
       case SCHED_SPORADIC:
         ptcb->cmn.flags    |= TCB_FLAG_SCHED_SPORADIC;
-        break;
-#endif
-
-#if 0 /* Not supported */
-      case SCHED_OTHER:
-        ptcb->cmn.flags    |= TCB_FLAG_SCHED_OTHER;
         break;
 #endif
     }

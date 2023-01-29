@@ -102,13 +102,21 @@ void posix_spawnattr_dump(posix_spawnattr_t *attr)
   _err("  priority: %d\n", attr->priority);
 
   _err("  policy:   %d\n", attr->policy);
-  if (attr->policy == SCHED_FIFO)
+  if (attr->policy == SCHED_OTHER)
+    {
+      _err("            SCHED_OTHER\n");
+    }
+  else if (attr->policy == SCHED_FIFO)
     {
       _err("            SCHED_FIFO\n");
     }
   else if (attr->policy == SCHED_RR)
     {
       _err("            SCHED_RR\n");
+    }
+  else if (attr->policy == SCHED_SPORADIC)
+    {
+      _err("            SCHED_SPORADIC\n");
     }
   else
     {
