@@ -204,20 +204,18 @@ void bfl_main(void)
 void ch32v_main(void)
 {
   /* Configure FPU */
-// 2023-01-18: Day 0 on CH32V. This forces a hard exception. {shrug}
-//  riscv_fpuconfig();
+  // TODO: this will need to be #ifdef'ed away (or something)
+  // for CH203 and CH205.
+  riscv_fpuconfig();
 
-  /* set interrupt vector */
-  // TODO: this might not be right, but it neeeds to be SOMETHING.
-
-//  asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
+  // Clear .bss.
+  memset(&_sbss, 0, (int)&_ebss - (int)&_sbss);
 
   /* Configure IDLE stack */
 
   g_idle_topstack = ((uint32_t)g_idle_stack + CH32V_IDLESTACK_SIZE);
 
   /* Configure the UART so we can get debug output */
-#if 1
   ch32v_lowsetup();
 
 #ifdef USE_EARLYSERIALINIT
@@ -231,8 +229,6 @@ void ch32v_main(void)
   /* Call nx_start() */
 
   nx_start();
-#endif
-
 }
 
 uint32_t noinstrument_function boot2_get_flash_addr(void)
@@ -242,7 +238,7 @@ void board_app_initialize() {assert(0);}
 void riscv_sigdeliver() {assert(0);}
 void nxsched_get_streams() {assert(0);}
 void up_timer_initialize() {assert(0);}
-void up_irqinitialize() {assert(0);}
+// void up_irqinitialize() {assert(0);}
 
 
 #endif // BOOGER
