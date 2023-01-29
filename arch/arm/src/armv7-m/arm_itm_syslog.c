@@ -80,7 +80,7 @@ static const struct syslog_channel_ops_s g_itm_channel_ops =
 
 /* This structure describes the ITM SYSLOG channel */
 
-static const struct syslog_channel_s g_itm_channel =
+static struct syslog_channel_s g_itm_channel =
 {
   .sc_ops   = &g_itm_channel_ops
 };
