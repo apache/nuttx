@@ -234,6 +234,13 @@
 #define SNIOC_READROMCODE          _SNIOC(0x0067)  /* Arg: uint64_t* pointer */
 #define SNIOC_SETALARM             _SNIOC(0x0068)  /* Arg: struct ds18b20_alarm_s* */
 
+/* IOCTL commands for accelerators */
+
+#define SNIOC_SIMPLE_CHECK         _SNIOC(0x0069)  /* Simple check */
+#define SNIOC_FULL_CHECK           _SNIOC(0x006a)  /* Full check */
+#define SNIOC_FEAT_MANAGE          _SNIOC(0x006b)  /* Feature manage command */
+#define SNIOC_SET_SCALE_XL         _SNIOC(0x006c)  /* Set accelerator scale command */
+
 /* Command:      SNIOC_GET_STATE
  * Description:  Get state for all subscribers, include min_interval,
  *               min_latency and the number of subscribers.
