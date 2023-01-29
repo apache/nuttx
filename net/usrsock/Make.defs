@@ -23,7 +23,7 @@
 ifeq ($(CONFIG_NET_USRSOCK),y)
 
 NET_CSRCS += usrsock_close.c usrsock_conn.c usrsock_bind.c usrsock_connect.c
-NET_CSRCS += usrsock_getpeername.c usrsock_devif.c
+NET_CSRCS += usrsock_getpeername.c usrsock_devif.c usrsock_shutdown.c
 NET_CSRCS += usrsock_event.c usrsock_getsockname.c usrsock_getsockopt.c
 NET_CSRCS += usrsock_poll.c usrsock_recvmsg.c usrsock_sendmsg.c
 NET_CSRCS += usrsock_setsockopt.c usrsock_socket.c usrsock_sockif.c

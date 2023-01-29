@@ -642,6 +642,29 @@ int usrsock_getpeername(FAR struct socket *psock,
 
 int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 
+/****************************************************************************
+ * Name: usrsock_shutdown
+ *
+ * Description:
+ *   The shutdown() function will cause all or part of a full-duplex
+ *   connection on the socket associated with the file descriptor socket to
+ *   be shut down.
+ *
+ *   The shutdown() function disables subsequent send and/or receive
+ *   operations on a socket, depending on the value of the how argument.
+ *
+ * Input Parameters:
+ *   psock    A reference to the socket structure of the socket
+ *   how      Specifies the type of shutdown. The values are as follows:
+ *
+ *     SHUT_RD   - Disables further receive operations.
+ *     SHUT_WR   - Disables further send operations.
+ *     SHUT_RDWR - Disables further send and receive operations.
+ *
+ ****************************************************************************/
+
+int usrsock_shutdown(FAR struct socket *psock, int how);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

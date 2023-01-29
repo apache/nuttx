@@ -1270,6 +1270,40 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap);
 int psock_ioctl(FAR struct socket *psock, int cmd, ...);
 
 /****************************************************************************
+ * Name: psock_shutdown
+ *
+ * Description:
+ *   The shutdown() function will cause all or part of a full-duplex
+ *   connection on the socket associated with the file descriptor socket to
+ *   be shut down.
+ *
+ *   The shutdown() function disables subsequent send and/or receive
+ *   operations on a socket, depending on the value of the how argument.
+ *
+ * Input Parameters:
+ *   sockfd - Specifies the file descriptor of the socket.
+ *   how    - Specifies the type of shutdown. The values are as follows:
+ *
+ *     SHUT_RD   - Disables further receive operations.
+ *     SHUT_WR   - Disables further send operations.
+ *     SHUT_RDWR - Disables further send and receive operations.
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.  One of:
+ *
+ *     EINVAL     - The how argument is invalid.
+ *     ENOTCONN   - The socket is not connected.
+ *     ENOTSOCK   - The socket argument does not refer to a socket.
+ *     ENOBUFS    - Insufficient resources were available in the system to
+ *                  perform the operation.
+ *     EOPNOTSUPP - The operation is not supported for this socket's protocol
+ *
+ ****************************************************************************/
+
+int psock_shutdown(FAR struct socket *psock, int how);
+
+/****************************************************************************
  * Name: psock_poll
  *
  * Description:
