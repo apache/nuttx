@@ -14,6 +14,7 @@ b ch32v_uart_gpio_init
 b ch32v_uart_configure
 b riscv_lowputc
 b ch32v_lowsetup
+b __assert
 
 
 file nuttx
