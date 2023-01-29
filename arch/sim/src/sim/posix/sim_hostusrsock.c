@@ -469,6 +469,26 @@ int host_usrsock_ioctl(int fd, unsigned long request, ...)
   return 0;
 }
 
+int host_usrsock_shutdown(int sockfd, int how)
+{
+  switch (how)
+    {
+      case NUTTX_SHUT_RD:
+        how = SHUT_RD;
+        break;
+      case NUTTX_SHUT_WR:
+        how = SHUT_WR;
+        break;
+      case NUTTX_SHUT_RDWR:
+        how = SHUT_RDWR;
+        break;
+      default:
+        return -EINVAL;
+    }
+
+  return shutdown(sockfd, how) < 0 ? -errno : 0;
+}
+
 void host_usrsock_loop(void)
 {
   struct timeval timeout;

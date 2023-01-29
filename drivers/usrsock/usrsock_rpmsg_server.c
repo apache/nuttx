@@ -110,6 +110,9 @@ static int usrsock_rpmsg_accept_handler(FAR struct rpmsg_endpoint *ept,
 static int usrsock_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                        FAR void *data, size_t len,
                                        uint32_t src, FAR void *priv_);
+static int usrsock_rpmsg_shutdown_handler(FAR struct rpmsg_endpoint *ept,
+                                          FAR void *data, size_t len,
+                                          uint32_t src, FAR void *priv_);
 static int usrsock_rpmsg_dns_handler(FAR struct rpmsg_endpoint *ept,
                                      FAR void *data, size_t len,
                                      uint32_t src, FAR void *priv_);
@@ -148,6 +151,7 @@ static const rpmsg_ept_cb g_usrsock_rpmsg_handler[] =
   usrsock_rpmsg_listen_handler,
   usrsock_rpmsg_accept_handler,
   usrsock_rpmsg_ioctl_handler,
+  usrsock_rpmsg_shutdown_handler,
   usrsock_rpmsg_dns_handler,
 };
 
@@ -878,6 +882,23 @@ static int usrsock_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
 
   return usrsock_rpmsg_send_data_ack(ept,
            ack, 0, req->head.xid, ret, req->arglen, req->arglen, ret);
+}
+
+static int usrsock_rpmsg_shutdown_handler(FAR struct rpmsg_endpoint *ept,
+                                       FAR void *data, size_t len,
+                                       uint32_t src, FAR void *priv_)
+{
+  FAR struct usrsock_request_shutdown_s *req = data;
+  FAR struct usrsock_rpmsg_s *priv = priv_;
+  int ret = -EBADF;
+
+  if (req->usockid >= 0 &&
+      req->usockid < CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS)
+    {
+      ret = psock_shutdown(&priv->socks[req->usockid], req->how);
+    }
+
+  return usrsock_rpmsg_send_ack(ept, 0, req->head.xid, ret);
 }
 
 static int usrsock_rpmsg_dns_handler(FAR struct rpmsg_endpoint *ept,

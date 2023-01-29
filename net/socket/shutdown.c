@@ -55,12 +55,15 @@
  *     SHUT_RDWR - Disables further send and receive operations.
  *
  * Returned Value:
- *   EINVAL     - The how argument is invalid.
- *   ENOTCONN   - The socket is not connected.
- *   ENOTSOCK   - The socket argument does not refer to a socket.
- *   ENOBUFS    - Insufficient resources were available in the system to
- *                perform the operation.
- *   EOPNOTSUPP - The operation is not supported for this socket's protocol.
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.  One of:
+ *
+ *     EINVAL     - The how argument is invalid.
+ *     ENOTCONN   - The socket is not connected.
+ *     ENOTSOCK   - The socket argument does not refer to a socket.
+ *     ENOBUFS    - Insufficient resources were available in the system to
+ *                  perform the operation.
+ *     EOPNOTSUPP - The operation is not supported for this socket's protocol
  *
  ****************************************************************************/
 

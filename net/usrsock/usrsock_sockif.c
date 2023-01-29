@@ -68,7 +68,7 @@ const struct sock_intf_s g_usrsock_sockif =
   usrsock_sockif_close,       /* si_close */
   usrsock_ioctl,              /* si_ioctl */
   NULL,                       /* si_socketpair */
-  NULL                        /* si_shutdown */
+  usrsock_shutdown            /* si_shutdown */
 #ifdef CONFIG_NET_SOCKOPTS
   , usrsock_getsockopt        /* si_getsockopt */
   , usrsock_setsockopt        /* si_setsockopt */

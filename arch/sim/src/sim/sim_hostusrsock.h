@@ -285,6 +285,7 @@ int host_usrsock_listen(int sockfd, int backlog);
 int host_usrsock_accept(int sockfd, struct nuttx_sockaddr *addr,
                         nuttx_socklen_t *addrlen);
 int host_usrsock_ioctl(int fd, unsigned long request, ...);
+int host_usrsock_shutdown(int sockfd, int how);
 #else
 int host_usrsock_socket(int domain, int type, int protocol);
 int host_usrsock_close(int sockfd);
@@ -311,6 +312,7 @@ int host_usrsock_listen(int sockfd, int backlog);
 int host_usrsock_accept(int sockfd, struct sockaddr *addr,
                         socklen_t *addrlen);
 int host_usrsock_ioctl(int fd, unsigned long request, ...);
+int host_usrsock_shutdown(int sockfd, int how);
 void host_usrsock_loop(void);
 #endif /* __SIM__ */
 
