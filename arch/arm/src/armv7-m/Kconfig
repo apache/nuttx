@@ -130,7 +130,6 @@ config ARMV7M_ITMSYSLOG
 	bool "ITM SYSLOG support"
 	default n
 	select ARCH_SYSLOG
-	select SYSLOG
 	---help---
 		Enable hooks to support ITM syslog output.  This requires additional
 		MCU support in order to be used.  See arch/arm/src/armv7-m/itm_syslog.h
