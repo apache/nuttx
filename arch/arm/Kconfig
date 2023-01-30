@@ -1245,8 +1245,7 @@ if SCHED_BACKTRACE
 
 choice
 	prompt "Choose ARM unwinder"
-	default UNWINDER_STACK_POINTER if ARM_THUMB
-	default UNWINDER_FRAME_POINTER if !ARM_THUMB
+	default UNWINDER_ARM
 	---help---
 		This determines which method will be used for unwinding nuttx stack
 		traces for debug.
