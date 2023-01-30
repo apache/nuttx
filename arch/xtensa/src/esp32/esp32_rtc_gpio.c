@@ -63,6 +63,7 @@ enum rtcio_lh_out_mode_e
 
 #ifdef CONFIG_ESP32_RTCIO_IRQ
 static int g_rtcio_cpuint;
+static uint32_t last_status;
 #endif
 
 static const uint32_t rtc_gpio_to_addr[] =
@@ -114,12 +115,11 @@ static inline bool is_valid_rtc_gpio(uint32_t rtcio_num)
  * Name: rtcio_dispatch
  *
  * Description:
- *   Second level dispatch for RTC interrupt handling.
+ *   Second level dispatch for the RTC interrupt.
  *
  * Input Parameters:
  *   irq - The IRQ number;
- *   status - The interrupt status register;
- *   context - The interrupt context.
+ *   reg_status - Pointer to a copy of the interrupt status register.
  *
  * Returned Value:
  *   None.
@@ -127,8 +127,9 @@ static inline bool is_valid_rtc_gpio(uint32_t rtcio_num)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_RTCIO_IRQ
-static void rtcio_dispatch(int irq, uint32_t status, uint32_t *context)
+static void rtcio_dispatch(int irq, uint32_t *reg_status)
 {
+  uint32_t status = *reg_status;
   uint32_t mask;
   int i;
 
@@ -141,9 +142,11 @@ static void rtcio_dispatch(int irq, uint32_t status, uint32_t *context)
       mask = (UINT32_C(1) << i);
       if ((status & mask) != 0)
         {
-          /* Yes... perform the second level dispatch */
+          /* Yes... perform the second level dispatch. The IRQ context will
+           * contain the contents of the status register.
+           */
 
-          irq_dispatch(irq + i, context);
+          irq_dispatch(irq + i, (void *)reg_status);
 
           /* Clear the bit in the status so that we might execute this loop
            * sooner.
@@ -174,16 +177,14 @@ static void rtcio_dispatch(int irq, uint32_t status, uint32_t *context)
 #ifdef CONFIG_ESP32_RTCIO_IRQ
 static int rtcio_interrupt(int irq, void *context, void *arg)
 {
-  uint32_t status;
-
   /* Read and clear the lower RTC interrupt status */
 
-  status = getreg32(RTC_CNTL_INT_ST_REG);
-  putreg32(status, RTC_CNTL_INT_CLR_REG);
+  last_status = getreg32(RTC_CNTL_INT_ST_REG);
+  putreg32(last_status, RTC_CNTL_INT_CLR_REG);
 
   /* Dispatch pending interrupts in the RTC status register */
 
-  rtcio_dispatch(ESP32_FIRST_RTCIOIRQ_PERIPH, status, (uint32_t *)context);
+  rtcio_dispatch(ESP32_FIRST_RTCIOIRQ_PERIPH, &last_status);
 
   return OK;
 }
