@@ -204,6 +204,7 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   CSRCS += sim_offload.c
   STDLIBS += -lasound
   STDLIBS += -lmad
+  STDLIBS += -lmp3lame
 endif
 
 ifeq ($(CONFIG_SIM_VIDEO_V4L2),y)
