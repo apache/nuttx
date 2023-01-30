@@ -737,7 +737,10 @@ int gethostentbyname_r(FAR const char *name,
     }
   else if ((flags & AI_NUMERICHOST) != 0)
     {
-      *h_errnop = EAI_NONAME;
+      if (h_errnop)
+        {
+          *h_errnop = EAI_NONAME;
+        }
 
       return ERROR;
     }
