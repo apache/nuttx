@@ -784,12 +784,11 @@ static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
       bytecount += msgs[i].length;
     }
 
-  /* Then return a number of ticks based on a user provided scaling
-   * factor, rounded up.
+  /* Then return a number of microseconds based on a user provided scaling
+   * factor.
    */
 
-  return USEC2TICK(CONFIG_STM32F7_I2C_DYNTIMEO_USECPERBYTE * bytecount +
-                   CONFIG_USEC_PER_TICK / 2 - 1);
+  return USEC2TICK(CONFIG_STM32F7_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
