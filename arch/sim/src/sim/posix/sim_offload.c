@@ -25,6 +25,7 @@
 #include <nuttx/kmalloc.h>
 #include <debug.h>
 
+#include <lame/lame.h>
 #include <mad.h>
 
 #include "sim_offload.h"
@@ -33,18 +34,25 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void *sim_audio_mp3_init(struct audio_info_s *info);
-static int   sim_audio_mp3_samples(void *handle);
-static int   sim_audio_mp3_decode(void *handle,
-                                  uint8_t *in, uint32_t insize,
-                                  uint8_t **out, uint32_t *outsize);
-static void  sim_audio_mp3_uninit(void *handle);
-
 static void *sim_audio_pcm_init(struct audio_info_s *info);
 static int   sim_audio_pcm_process(void *handle,
                                    uint8_t *in, uint32_t insize,
                                    uint8_t **out, uint32_t *outsize);
 static void  sim_audio_pcm_uninit(void *handle);
+
+static void *sim_audio_mad_init(struct audio_info_s *info);
+static int   sim_audio_mad_samples(void *handle);
+static int   sim_audio_mad_decode(void *handle,
+                                  uint8_t *in, uint32_t insize,
+                                  uint8_t **out, uint32_t *outsize);
+static void  sim_audio_mad_uninit(void *handle);
+
+static void *sim_audio_lame_init(struct audio_info_s *info);
+static int   sim_audio_lame_samples(void *handle);
+static int   sim_audio_lame_encode(void *handle,
+                                  uint8_t *in, uint32_t insize,
+                                  uint8_t **out, uint32_t *outsize);
+static void  sim_audio_lame_uninit(void *handle);
 
 /****************************************************************************
  * Public Data
@@ -63,10 +71,18 @@ const struct sim_codec_ops_s g_codec_ops[] =
   {
       AUDIO_FMT_MP3,
       AUDCODEC_DEC,
-      sim_audio_mp3_init,
-      sim_audio_mp3_samples,
-      sim_audio_mp3_decode,
-      sim_audio_mp3_uninit
+      sim_audio_mad_init,
+      sim_audio_mad_samples,
+      sim_audio_mad_decode,
+      sim_audio_mad_uninit
+  },
+  {
+      AUDIO_FMT_MP3,
+      AUDCODEC_ENC,
+      sim_audio_lame_init,
+      sim_audio_lame_samples,
+      sim_audio_lame_encode,
+      sim_audio_lame_uninit
   },
   {
       AUDIO_FMT_UNDEF,
@@ -82,7 +98,12 @@ const struct sim_codec_ops_s g_codec_ops[] =
  * Private Types
  ****************************************************************************/
 
-struct sim_decoder_mp3_s
+struct sim_codec_pcm_s
+{
+  uint32_t frame_size;
+};
+
+struct sim_mad_s
 {
   uint8_t *out;
   struct mad_stream stream;
@@ -90,21 +111,23 @@ struct sim_decoder_mp3_s
   struct mad_synth synth;
 };
 
-struct sim_codec_pcm_s
+struct sim_lame_s
 {
-  uint32_t frame_size;
+  uint8_t *out;
+  uint32_t max;
+  lame_global_flags *gfp;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const uint16_t g_mpa_freq_tab[3] =
+static const uint16_t g_mad_freq_tab[3] =
 {
   44100, 48000, 32000
 };
 
-static const uint16_t g_mpa_bitrate_tab[2][3][15] =
+static const uint16_t g_mad_bitrate_tab[2][3][15] =
 {
   {
     {
@@ -134,7 +157,27 @@ static const uint16_t g_mpa_bitrate_tab[2][3][15] =
  * Private Functions
  ****************************************************************************/
 
-static int sim_audio_mp3_scale(mad_fixed_t sample)
+static void *sim_audio_pcm_init(struct audio_info_s *info)
+{
+  return kmm_malloc(sizeof(struct sim_codec_pcm_s));
+}
+
+static int sim_audio_pcm_process(void *handle,
+                          uint8_t *in, uint32_t insize,
+                          uint8_t **out, uint32_t *outsize)
+{
+  *out     = in;
+  *outsize = insize;
+
+  return *outsize;
+}
+
+static void sim_audio_pcm_uninit(void *handle)
+{
+  kmm_free(handle);
+}
+
+static int sim_mad_scale(mad_fixed_t sample)
 {
   sample += 1L << (MAD_F_FRACBITS - 16);
 
@@ -150,7 +193,7 @@ static int sim_audio_mp3_scale(mad_fixed_t sample)
   return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
-static int sim_audio_check_mpeg(uint32_t header)
+static int sim_mad_check_mpeg(uint32_t header)
 {
   /* header */
 
@@ -190,7 +233,7 @@ static int sim_audio_check_mpeg(uint32_t header)
   return 0;
 }
 
-static int sim_audio_mp3_check(uint32_t header)
+static int sim_mad_check(uint32_t header)
 {
   int sample_rate;
   int frame_size;
@@ -202,7 +245,7 @@ static int sim_audio_mp3_check(uint32_t header)
   int lsf;
   int ret;
 
-  ret = sim_audio_check_mpeg(header);
+  ret = sim_mad_check_mpeg(header);
   if (ret < 0)
     {
       return ret;
@@ -224,17 +267,17 @@ static int sim_audio_mp3_check(uint32_t header)
   sr_idx  = (header >> 10) & 3;
   padding = (header >> 9) & 1;
 
-  if (sr_idx >= sizeof(g_mpa_freq_tab) / sizeof(g_mpa_freq_tab[0]) ||
+  if (sr_idx >= sizeof(g_mad_freq_tab) / sizeof(g_mad_freq_tab[0]) ||
       br_idx >= 0xf)
     {
       return -EINVAL;
     }
 
-  sample_rate = g_mpa_freq_tab[sr_idx] >> (lsf + mpeg25);
+  sample_rate = g_mad_freq_tab[sr_idx] >> (lsf + mpeg25);
 
   if (br_idx != 0)
     {
-      frame_size = g_mpa_bitrate_tab[lsf][layer - 1][br_idx];
+      frame_size = g_mad_bitrate_tab[lsf][layer - 1][br_idx];
 
       switch (layer)
         {
@@ -265,12 +308,12 @@ static int sim_audio_mp3_check(uint32_t header)
   return frame_size;
 }
 
-static void *sim_audio_mp3_init(struct audio_info_s *info)
+static void *sim_audio_mad_init(struct audio_info_s *info)
 {
-  struct sim_decoder_mp3_s *codec;
+  struct sim_mad_s *codec;
 
-  codec = kmm_malloc(sizeof(struct sim_decoder_mp3_s));
-  if (codec == NULL)
+  codec = kmm_malloc(sizeof(struct sim_mad_s));
+  if (!codec)
     {
       return NULL;
     }
@@ -280,7 +323,7 @@ static void *sim_audio_mp3_init(struct audio_info_s *info)
   mad_synth_init(&codec->synth);
 
   codec->out = kmm_malloc(sizeof(codec->synth.pcm.samples));
-  if (codec->out == NULL)
+  if (!codec->out)
     {
       goto out;
     }
@@ -296,24 +339,24 @@ out:
   return NULL;
 }
 
-static int sim_audio_mp3_samples(void *handle)
+static int sim_audio_mad_samples(void *handle)
 {
-  struct sim_decoder_mp3_s *codec = (struct sim_decoder_mp3_s *)handle;
+  struct sim_mad_s *codec = (struct sim_mad_s *)handle;
 
   return sizeof(codec->synth.pcm.samples[0]) / sizeof(mad_fixed_t);
 }
 
-static int sim_audio_mp3_decode(void *handle,
+static int sim_audio_mad_decode(void *handle,
                                 uint8_t *in, uint32_t insize,
                                 uint8_t **out, uint32_t *outsize)
 {
-  struct sim_decoder_mp3_s *codec = (struct sim_decoder_mp3_s *)handle;
+  struct sim_mad_s *codec = (struct sim_mad_s *)handle;
   const mad_fixed_t *right_ch;
   const mad_fixed_t *left_ch;
-  int mpa_header;
   int nchannels;
   int nsamples;
   uint8_t *ptr;
+  int header;
   int i = 0;
   int size;
   int ret;
@@ -323,11 +366,11 @@ static int sim_audio_mp3_decode(void *handle,
       return -ENODATA;
     }
 
-  mpa_header = in[0] << 24 | in[1] << 16 | in[2] << 8 | in[3];
-  size = sim_audio_mp3_check(mpa_header);
+  header = in[0] << 24 | in[1] << 16 | in[2] << 8 | in[3];
+  size = sim_mad_check(header);
   if (size < 0)
     {
-      return -EINVAL;
+      return size;
     }
 
   if (insize < size + 8)
@@ -357,13 +400,13 @@ static int sim_audio_mp3_decode(void *handle,
 
       /* output sample(s) in 16-bit signed little-endian PCM */
 
-      sample     = sim_audio_mp3_scale(*left_ch++);
+      sample     = sim_mad_scale(*left_ch++);
       ptr[i]     = (sample >> 0) & 0xff;
       ptr[i + 1] = (sample >> 8) & 0xff;
 
       if (nchannels == 2)
         {
-          sample     = sim_audio_mp3_scale(*right_ch++);
+          sample     = sim_mad_scale(*right_ch++);
           ptr[i + 2] = (sample >> 0) & 0xff;
           ptr[i + 3] = (sample >> 8) & 0xff;
         }
@@ -377,9 +420,9 @@ static int sim_audio_mp3_decode(void *handle,
   return size;
 }
 
-static void sim_audio_mp3_uninit(void *handle)
+static void sim_audio_mad_uninit(void *handle)
 {
-  struct sim_decoder_mp3_s *codec = (struct sim_decoder_mp3_s *)handle;
+  struct sim_mad_s *codec = (struct sim_mad_s *)handle;
 
   mad_synth_finish(&(codec->synth));
   mad_frame_finish(&(codec->frame));
@@ -389,22 +432,101 @@ static void sim_audio_mp3_uninit(void *handle)
   kmm_free(codec);
 }
 
-static void *sim_audio_pcm_init(struct audio_info_s *info)
+void *sim_audio_lame_init(struct audio_info_s *info)
 {
-  return kmm_malloc(sizeof(struct sim_codec_pcm_s));
+  struct sim_lame_s *codec;
+  int samples;
+  int ret;
+
+  codec = kmm_zalloc(sizeof(struct sim_lame_s));
+  if (codec == NULL)
+    {
+      return NULL;
+    }
+
+  codec->gfp = lame_init();
+  if (codec->gfp == NULL)
+    {
+      goto error;
+    }
+
+  if (info)
+    {
+      lame_set_num_channels(codec->gfp, info->channels);
+      lame_set_mode(codec->gfp, info->channels > 1 ? STEREO : MONO);
+
+      lame_set_in_samplerate (codec->gfp, info->samplerate);
+      lame_set_out_samplerate(codec->gfp, info->samplerate);
+    }
+
+  ret = lame_init_params(codec->gfp);
+  if (ret < 0)
+    {
+      goto error;
+    }
+
+  samples    = lame_get_framesize(codec->gfp);
+  codec->max = samples + samples / 4 + 7200;
+
+  codec->out = kmm_malloc(codec->max);
+  if (codec->out == NULL)
+    {
+      goto error;
+    }
+
+  return codec;
+
+error:
+  if (codec->gfp)
+    {
+      lame_close(codec->gfp);
+    }
+
+  if (codec->out)
+    {
+      kmm_free(codec->out);
+    }
+
+  kmm_free(codec);
+  return NULL;
 }
 
-static int sim_audio_pcm_process(void *handle,
-                          uint8_t *in, uint32_t insize,
-                          uint8_t **out, uint32_t *outsize)
+static int sim_audio_lame_samples(void *handle)
 {
-  *out     = in;
-  *outsize = insize;
+  struct sim_lame_s *codec = (struct sim_lame_s *)handle;
 
-  return *outsize;
+  return lame_get_framesize(codec->gfp);
 }
 
-static void sim_audio_pcm_uninit(void *handle)
+static int sim_audio_lame_encode(void *handle,
+                           uint8_t *in, uint32_t insize,
+                           uint8_t **out, uint32_t *outsize)
 {
-  kmm_free(handle);
+  struct sim_lame_s *codec = (struct sim_lame_s *)handle;
+  int samples;
+  int ret;
+  int chs;
+
+  chs = lame_get_num_channels(codec->gfp);
+  samples = insize / (sizeof(short int) * chs);
+
+  ret = lame_encode_buffer_interleaved(codec->gfp, (short int *)in, samples,
+                                       codec->out, codec->max);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  *out = codec->out;
+  *outsize = ret;
+  return insize;
+}
+
+static void sim_audio_lame_uninit(void *handle)
+{
+  struct sim_lame_s *codec = (struct sim_lame_s *)handle;
+
+  kmm_free(codec->out);
+  lame_close(codec->gfp);
+  kmm_free(codec);
 }
