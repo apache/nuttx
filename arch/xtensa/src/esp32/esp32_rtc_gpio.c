@@ -179,11 +179,12 @@ static int rtcio_interrupt(int irq, void *context, void *arg)
   /* Read and clear the lower RTC interrupt status */
 
   status = getreg32(RTC_CNTL_INT_ST_REG);
-  putreg32(status, RTC_CNTL_INT_CLR_REG);
 
   /* Dispatch pending interrupts in the RTC status register */
 
   rtcio_dispatch(ESP32_FIRST_RTCIOIRQ_PERIPH, status, (uint32_t *)context);
+
+  putreg32(status, RTC_CNTL_INT_CLR_REG);
 
   return OK;
 }
