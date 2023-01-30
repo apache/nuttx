@@ -2344,7 +2344,6 @@ static int  tivacan_initfilter(struct can_dev_s *dev,
 int tiva_can_initialize(char *devpath, int modnum)
 {
   struct can_dev_s *dev;
-  struct tiva_canmod_s *canmod;
   int ret;
   caninfo("tiva_can_initialize module %d\n", modnum);
 
@@ -2371,8 +2370,6 @@ int tiva_can_initialize(char *devpath, int modnum)
       return -ENODEV;
     }
 #endif
-
-  canmod = dev->cd_priv;
 
   /* Register the driver */
 
