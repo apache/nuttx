@@ -441,7 +441,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
    * FIFO when buffer can accept more than d_polloutthrd bytes.
    */
 
-  if (pipecommon_bufferused(dev) < (dev->d_bufsize - dev->d_polloutthrd))
+  if (pipecommon_bufferused(dev) < (dev->d_bufsize - 1 - dev->d_polloutthrd))
     {
       poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLOUT);
     }
@@ -699,7 +699,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       eventset = 0;
       if ((filep->f_oflags & O_WROK) &&
-          nbytes < (dev->d_bufsize - dev->d_polloutthrd))
+          nbytes < (dev->d_bufsize - 1 - dev->d_polloutthrd))
         {
           eventset |= POLLOUT;
         }
