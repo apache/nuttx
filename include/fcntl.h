@@ -82,24 +82,25 @@
 
 /* fcntl() commands */
 
-#define F_DUPFD     0  /* Duplicate a file descriptor */
-#define F_GETFD     1  /* Read the file descriptor flags */
-#define F_GETFL     2  /* Read the file status flags */
-#define F_GETLEASE  3  /* Indicates what type of lease is held on fd (linux) */
-#define F_GETLK     4  /* Check if we could place a lock */
-#define F_GETOWN    5  /* Get the pid receiving  SIGIO and SIGURG signals for fd */
-#define F_GETSIG    6  /* Get the signal sent */
-#define F_NOTIFY    7  /* Provide notification when directory referred to by fd changes (linux)*/
-#define F_SETFD     8  /* Set the file descriptor flags to value */
-#define F_SETFL     9  /* Set the file status flags to the value */
-#define F_SETLEASE  10 /* Set or remove file lease (linux) */
-#define F_SETLK     11 /* Acquire or release a lock on range of bytes */
-#define F_SETLKW    12 /* Like F_SETLK, but wait for lock to become available */
-#define F_SETOWN    13 /* Set pid that will receive SIGIO and SIGURG signals for fd */
-#define F_SETSIG    14 /* Set the signal to be sent */
-#define F_GETPATH   15 /* Get the path of the file descriptor(BSD/macOS) */
-#define F_ADD_SEALS 16 /* Add the bit-mask argument arg to the set of seals of the inode */
-#define F_GET_SEALS 17 /* Get (as the function result) the current set of seals of the inode */
+#define F_DUPFD         0  /* Duplicate a file descriptor */
+#define F_GETFD         1  /* Read the file descriptor flags */
+#define F_GETFL         2  /* Read the file status flags */
+#define F_GETLEASE      3  /* Indicates what type of lease is held on fd (linux) */
+#define F_GETLK         4  /* Check if we could place a lock */
+#define F_GETOWN        5  /* Get the pid receiving  SIGIO and SIGURG signals for fd */
+#define F_GETSIG        6  /* Get the signal sent */
+#define F_NOTIFY        7  /* Provide notification when directory referred to by fd changes (linux)*/
+#define F_SETFD         8  /* Set the file descriptor flags to value */
+#define F_SETFL         9  /* Set the file status flags to the value */
+#define F_SETLEASE      10 /* Set or remove file lease (linux) */
+#define F_SETLK         11 /* Acquire or release a lock on range of bytes */
+#define F_SETLKW        12 /* Like F_SETLK, but wait for lock to become available */
+#define F_SETOWN        13 /* Set pid that will receive SIGIO and SIGURG signals for fd */
+#define F_SETSIG        14 /* Set the signal to be sent */
+#define F_GETPATH       15 /* Get the path of the file descriptor(BSD/macOS) */
+#define F_ADD_SEALS     16 /* Add the bit-mask argument arg to the set of seals of the inode */
+#define F_GET_SEALS     17 /* Get (as the function result) the current set of seals of the inode */
+#define F_DUPFD_CLOEXEC 18 /* Duplicate file descriptor with close-on-exit set.  */
 
 /* For posix fcntl() and lockf() */
 

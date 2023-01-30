@@ -108,22 +108,25 @@
  * recognized by Linux, not all are supported by NuttX.
  */
 
-#define MSG_OOB        0x0001 /* Process out-of-band data.  */
-#define MSG_PEEK       0x0002 /* Peek at incoming messages.  */
-#define MSG_DONTROUTE  0x0004 /* Don't use local routing.  */
-#define MSG_CTRUNC     0x0008 /* Control data lost before delivery.  */
-#define MSG_PROXY      0x0010 /* Supply or ask second address.  */
-#define MSG_TRUNC      0x0020
-#define MSG_DONTWAIT   0x0040 /* Enable nonblocking IO.  */
-#define MSG_EOR        0x0080 /* End of record.  */
-#define MSG_WAITALL    0x0100 /* Wait for a full request.  */
-#define MSG_FIN        0x0200
-#define MSG_SYN        0x0400
-#define MSG_CONFIRM    0x0800 /* Confirm path validity.  */
-#define MSG_RST        0x1000
-#define MSG_ERRQUEUE   0x2000 /* Fetch message from error queue.  */
-#define MSG_NOSIGNAL   0x4000 /* Do not generate SIGPIPE.  */
-#define MSG_MORE       0x8000 /* Sender will send more.  */
+#define MSG_OOB          0x000001 /* Process out-of-band data.  */
+#define MSG_PEEK         0x000002 /* Peek at incoming messages.  */
+#define MSG_DONTROUTE    0x000004 /* Don't use local routing.  */
+#define MSG_CTRUNC       0x000008 /* Control data lost before delivery.  */
+#define MSG_PROXY        0x000010 /* Supply or ask second address.  */
+#define MSG_TRUNC        0x000020
+#define MSG_DONTWAIT     0x000040 /* Enable nonblocking IO.  */
+#define MSG_EOR          0x000080 /* End of record.  */
+#define MSG_WAITALL      0x000100 /* Wait for a full request.  */
+#define MSG_FIN          0x000200
+#define MSG_SYN          0x000400
+#define MSG_CONFIRM      0x000800 /* Confirm path validity.  */
+#define MSG_RST          0x001000
+#define MSG_ERRQUEUE     0x002000 /* Fetch message from error queue.  */
+#define MSG_NOSIGNAL     0x004000 /* Do not generate SIGPIPE.  */
+#define MSG_MORE         0x008000 /* Sender will send more.  */
+#define MSG_CMSG_CLOEXEC 0x100000 /* Set close_on_exit for file
+                                   * descriptor received through SCM_RIGHTS.
+                                   */
 
 /* Protocol levels supported by get/setsockopt(): */
 
