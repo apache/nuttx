@@ -389,6 +389,25 @@
 #define RTNLGRP_NSID          28
 #define RTNLGRP_MAX           29
 
+/**
+ * nla_type (16 bits)
+ * +---+---+-------------------------------+
+ * | N | O | Attribute Type                |
+ * +---+---+-------------------------------+
+ * N := Carries nested attributes
+ * O := Payload stored in network byte order
+ *
+ * Note: The N and O flag are mutually exclusive.
+ */
+
+#define NLA_F_NET_BYTEORDER (1 << 14)
+#define NLA_F_NESTED        (1 << 15)
+#define NLA_TYPE_MASK       ~(NLA_F_NESTED | NLA_F_NET_BYTEORDER)
+
+#define NLA_ALIGNTO    4
+#define NLA_ALIGN(len) (((len) + NLA_ALIGNTO - 1) & ~(NLA_ALIGNTO - 1))
+#define NLA_HDRLEN     (NLA_ALIGN(sizeof(struct nlattr)))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -501,6 +520,41 @@ struct rtmsg
   uint8_t  rtm_scope;     /* See RT_SCOPE_* definitions */
   uint8_t  rtm_type;      /* See RTN_* definitions */
   uint32_t rtm_flags;
+};
+
+/**
+ *  <------- NLA_HDRLEN ------> <-- NLA_ALIGN(payload)-->
+ * +---------------------+- - -+- - - - - - - - - -+- - -+
+ * |        Header       | Pad |     Payload       | Pad |
+ * |   (struct nlattr)   | ing |                   | ing |
+ * +---------------------+- - -+- - - - - - - - - -+- - -+
+ *  <-------------- nlattr->nla_len -------------->
+ */
+
+struct nlattr
+{
+  uint16_t nla_len;
+  uint16_t nla_type;
+};
+
+/* Generic 32 bitflags attribute content sent to the kernel.
+ *
+ * The value is a bitmap that defines the values being set
+ * The selector is a bitmask that defines which value is legit
+ *
+ * Examples:
+ *  value = 0x0, and selector = 0x1
+ *  implies we are selecting bit 1 and we want to set its value to 0.
+ *
+ *  value = 0x2, and selector = 0x2
+ *  implies we are selecting bit 2 and we want to set its value to 1.
+ *
+ */
+
+struct nla_bitfield32
+{
+  uint32_t value;
+  uint32_t selector;
 };
 
 /****************************************************************************

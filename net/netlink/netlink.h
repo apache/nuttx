@@ -44,10 +44,141 @@
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_ROUTE
-  #define netlink_device_notify(dev)
+#  define netlink_device_notify(dev)
+#  define netlink_device_notify_ipaddr(dev, type, domain)
 #endif
 
 #ifdef CONFIG_NET_NETLINK
+
+/**
+ * nla_for_each_attr - iterate over a stream of attributes
+ * @pos: loop counter, set to current attribute
+ * @head: head of attribute stream
+ * @len: length of attribute stream
+ * @rem: initialized to len, holds bytes currently remaining in stream
+ */
+
+#define nla_for_each_attr(pos, head, len, rem)  \
+  for (pos = head, rem = len; nla_ok(pos, rem); \
+       pos = nla_next(pos, &(rem)))
+
+/* Always use this macro, this allows later putting the
+ * message into a separate section or such for things
+ * like translation or listing all possible messages.
+ * Currently string formatting is not supported (due
+ * to the lack of an output buffer.)
+ */
+
+#define nl_set_err_msg_attr(extack, attr, msg)         \
+  do                                                   \
+    {                                                  \
+      static const char __msg[] = (msg);               \
+      FAR struct netlink_ext_ack *__extack = (extack); \
+      if (__extack)                                    \
+        {                                              \
+          __extack->_msg = __msg;                      \
+          __extack->bad_attr = (attr);                 \
+        }                                              \
+    }                                                  \
+  while (0)
+
+/**
+ * nla_data - head of payload
+ * @nla: netlink attribute
+ */
+
+#define nla_data(nla) ((FAR void *)((FAR char *)(nla) + NLA_HDRLEN))
+
+/**
+ * nla_len - length of payload
+ * @nla: netlink attribute
+ */
+
+#define nla_len(nla) ((nla)->nla_len - NLA_HDRLEN)
+
+/**
+ * nla_type - attribute type
+ * @nla: netlink attribute
+ */
+
+#define nla_type(nla) ((nla)->nla_type & NLA_TYPE_MASK)
+
+/**
+ * nla_ok - check if the netlink attribute fits into the remaining bytes
+ * @nla: netlink attribute
+ * @remaining: number of bytes remaining in attribute stream
+ */
+
+#define nla_ok(nla, remaining)        \
+  ((remaining) >= sizeof(*(nla)) &&   \
+  (nla)->nla_len >= sizeof(*(nla)) && \
+  (nla)->nla_len <= (remaining))
+
+/**
+ * nlmsg_msg_size - length of netlink message not including padding
+ * @payload: length of message payload
+ */
+
+#define nlmsg_msg_size(payload) (NLMSG_HDRLEN + (payload))
+
+/**
+ * nlmsg_len - length of message payload
+ * @nlh: netlink message header
+ */
+
+#define nlmsg_len(nlh) ((nlh)->nlmsg_len - NLMSG_HDRLEN)
+
+/**
+ * nlmsg_attrlen - length of attributes data
+ * @nlh: netlink message header
+ * @hdrlen: length of family specific header
+ */
+
+#define nlmsg_attrlen(nlh, hdrlen) (nlmsg_len(nlh) - NLMSG_ALIGN(hdrlen))
+
+/**
+ * nlmsg_data - head of message payload
+ * @nlh: netlink message header
+ */
+
+#define nlmsg_data(nlh) ((FAR void *)((FAR char *)(nlh) + NLMSG_HDRLEN))
+
+/**
+ * nla_get_in_addr - return payload of IPv4 address attribute
+ * @nla: IPv4 address netlink attribute
+ */
+
+#define nla_get_in_addr(nla) (*(FAR uint32_t *)nla_data(nla))
+
+/**
+ * nlmsg_attrdata - head of attributes data
+ * @nlh: netlink message header
+ * @hdrlen: length of family specific header
+ */
+
+#define nlmsg_attrdata(nlh, hdrlen) \
+  ((FAR struct nlattr *)((FAR char *)nlmsg_data(nlh) + NLMSG_ALIGN(hdrlen)))
+
+/**
+ * nlmsg_parse - parse attributes of a netlink message
+ * @nlh: netlink message header
+ * @hdrlen: length of family specific header
+ * @tb: destination array with maxtype+1 elements
+ * @maxtype: maximum attribute type to be expected
+ * @policy: validation policy
+ * @extack: extended ACK report struct
+ *
+ * See nla_parse()
+ */
+
+#define nlmsg_parse(nlh, hdrlen, tb, maxtype, policy, extack)            \
+  ((nlh)->nlmsg_len < nlmsg_msg_size(hdrlen) ? -EINVAL :                 \
+                     nla_parse(tb, maxtype, nlmsg_attrdata(nlh, hdrlen), \
+                               nlmsg_attrlen(nlh, hdrlen), policy, extack))
+
+/* this can be increased when necessary - don't expose to userland */
+
+#define NETLINK_MAX_COOKIE_LEN  20
 
 /****************************************************************************
  * Public Type Definitions
@@ -77,6 +208,92 @@ struct netlink_conn_s
   /* Queued response data */
 
   sq_queue_t resplist;               /* Singly linked list of responses */
+};
+
+/**
+ * Standard attribute types to specify validation policy
+ */
+
+enum
+{
+  NLA_UNSPEC,
+  NLA_U8,
+  NLA_U16,
+  NLA_U32,
+  NLA_U64,
+  NLA_STRING,
+  NLA_FLAG,
+  NLA_MSECS,
+  NLA_NESTED,
+  NLA_NESTED_COMPAT,
+  NLA_NUL_STRING,
+  NLA_BINARY,
+  NLA_S8,
+  NLA_S16,
+  NLA_S32,
+  NLA_S64,
+  NLA_BITFIELD32,
+  NLA_TYPE_MAX = NLA_BITFIELD32,
+};
+
+/**
+ * struct netlink_ext_ack - netlink extended ACK report struct
+ * @_msg: message string to report - don't access directly, use
+ *  %nl_set_err_msg_attr
+ * @bad_attr: attribute with error
+ * @cookie: cookie data to return to userspace (for success)
+ * @cookie_len: actual cookie data length
+ */
+
+struct netlink_ext_ack
+{
+  FAR const char *_msg;
+  FAR const struct nlattr *bad_attr;
+  uint8_t cookie[NETLINK_MAX_COOKIE_LEN];
+  uint8_t cookie_len;
+};
+
+/**
+ * struct nla_policy - attribute validation policy
+ * @type: Type of attribute or NLA_UNSPEC
+ * @len: Type specific length of payload
+ *
+ * Policies are defined as arrays of this struct, the array must be
+ * accessible by attribute type up to the highest identifier to be expected.
+ *
+ * Meaning of `len' field:
+ *    NLA_STRING           Maximum length of string
+ *    NLA_NUL_STRING       Maximum length of string (excluding NUL)
+ *    NLA_FLAG             Unused
+ *    NLA_BINARY           Maximum length of attribute payload
+ *    NLA_NESTED           Don't use `len' field -- length verification is
+ *                         done by checking len of nested header (or empty)
+ *    NLA_NESTED_COMPAT    Minimum length of structure payload
+ *    NLA_U8, NLA_U16,
+ *    NLA_U32, NLA_U64,
+ *    NLA_S8, NLA_S16,
+ *    NLA_S32, NLA_S64,
+ *    NLA_MSECS            Leaving the length field zero will verify the
+ *                         given type fits, using it verifies minimum length
+ *                         just like "All other"
+ *    NLA_BITFIELD32      A 32-bit bitmap/bitselector attribute
+ *    All other            Minimum length of attribute payload
+ *
+ * Example:
+ * static const struct nla_policy my_policy[ATTR_MAX + 1] = {
+ *  [ATTR_FOO] = { .type = NLA_U16 },
+ *  [ATTR_BAR] = { .type = NLA_STRING, .len = BARSIZ },
+ *  [ATTR_BAZ] = { .len = sizeof(struct mystruct) },
+ *  [ATTR_GOO] = { .type = NLA_BITFIELD32, .validation_data =
+ *                                                          &myvalidflags },
+ * };
+ */
+
+struct nla_policy
+{
+  uint16_t type;
+  uint16_t len;
+  FAR void *validation_data;
 };
 
 /****************************************************************************
@@ -275,6 +492,49 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 void netlink_device_notify(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netlink_device_notify_ipaddr()
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
+                                  int type, int domain);
+
+/****************************************************************************
+ * Name: nla_next
+ *
+ * Description:
+ *   Next netlink attribute in attribute stream.
+ *
+ * Input Parameters:
+ *   nla - netlink attribute.
+ *   remaining - number of bytes remaining in attribute stream.
+ *
+ * Returned Value:
+ *   Returns the next netlink attribute in the attribute stream and
+ *   decrements remaining by the size of the current attribute.
+ *
+ ****************************************************************************/
+
+FAR struct nlattr *nla_next(FAR const struct nlattr *nla,
+                            FAR int *remaining);
+
+/****************************************************************************
+ * Name: nla_parse
+ *
+ * Description:
+ *   Parse the nested netlink attribute.
+ *
+ ****************************************************************************/
+
+int nla_parse(FAR struct nlattr **tb, int maxtype,
+              FAR const struct nlattr *head,
+              int len, FAR const struct nla_policy *policy,
+              FAR struct netlink_ext_ack *extack);
 #endif
 
 #undef EXTERN

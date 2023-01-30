@@ -26,7 +26,7 @@ SOCK_CSRCS += netlink_sockif.c
 NET_CSRCS += netlink_conn.c netlink_notifier.c
 
 ifeq ($(CONFIG_NETLINK_ROUTE),y)
-NET_CSRCS += netlink_route.c
+NET_CSRCS += netlink_route.c netlink_attr.c
 endif
 
 # Include netlink build support
