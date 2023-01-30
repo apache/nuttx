@@ -272,7 +272,7 @@ define PREPROCESS
 endef
 
 # COMPILE - Default macro to compile one C file
-# Example: $(call COMPILE, in-file, out-file)
+# Example: $(call COMPILE, in-file, out-file, flags)
 #
 # Depends on these settings defined in board-specific Make.defs file
 # installed at $(TOPDIR)/Make.defs:
@@ -285,11 +285,11 @@ endef
 
 define COMPILE
 	@echo "CC: $1"
-	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $($(strip $1)_CFLAGS) $1 -o $2
+	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $3 $($(strip $1)_CFLAGS) $1 -o $2
 endef
 
 # COMPILEXX - Default macro to compile one C++ file
-# Example: $(call COMPILEXX, in-file, out-file)
+# Example: $(call COMPILEXX, in-file, out-file, flags)
 #
 # Depends on these settings defined in board-specific Make.defs file
 # installed at $(TOPDIR)/Make.defs:
@@ -303,7 +303,7 @@ endef
 
 define COMPILEXX
 	@echo "CXX: $1"
-	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $($(strip $1)_CXXFLAGS) $1 -o $2
+	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $3 $($(strip $1)_CXXFLAGS) $1 -o $2
 endef
 
 # COMPILERUST - Default macro to compile one Rust file
