@@ -699,7 +699,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       eventset = 0;
       if ((filep->f_oflags & O_WROK) &&
-          nbytes < (dev->d_bufsize - dev->d_polloutthrd))
+          nbytes < (dev->d_bufsize - 1 - dev->d_polloutthrd))
         {
           eventset |= POLLOUT;
         }
