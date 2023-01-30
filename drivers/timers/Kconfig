@@ -356,7 +356,7 @@ config WATCHDOG_DEVPATH
 
 config CONFIG_WATCHDOG_MAGIC_V
 	bool "Watchdog Device Magic num"
-	default Y
+	default y
 	---help---
 		The watchdog can be stopped by writing 'V' to the watchdog's device node
 
