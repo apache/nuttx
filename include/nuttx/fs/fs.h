@@ -810,7 +810,7 @@ int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
  *
  ****************************************************************************/
 
-int file_dup(FAR struct file *filep, int minfd);
+int file_dup(FAR struct file *filep, int minfd, bool cloexec);
 
 /****************************************************************************
  * Name: file_dup2
