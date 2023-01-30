@@ -675,13 +675,67 @@ static int sim_audio_process_playback(struct sim_audio_s *priv,
   return ret;
 }
 
+static int sim_audio_process_capture(struct sim_audio_s *priv,
+                                     struct ap_buffer_s *apb,
+                                     int expect, bool *dequeue)
+{
+  struct ap_buffer_s *aux = priv->aux;
+  uint8_t *out = NULL;
+  uint32_t outsize;
+  int frames = 0;
+  int ret;
+
+  frames = snd_pcm_readi(priv->pcm, apb->samp, expect);
+  if (frames < 0)
+    {
+      return frames;
+    }
+
+  ret = priv->ops->process(priv->codec, apb->samp,
+                           frames * priv->frame_size, &out, &outsize);
+  if (ret < 0)
+    {
+      return 0;
+    }
+
+  /* pcm, process bypass */
+
+  if (out == apb->samp)
+    {
+      apb->nbytes = outsize;
+      *dequeue = true;
+      goto out;
+    }
+
+  memcpy(aux->samp + aux->curbyte, out, outsize);
+  aux->curbyte += outsize;
+
+  if (aux->curbyte >= apb->nmaxbytes)
+    {
+      /* memcpy from aux to apb, and dequeue to apps */
+
+      memcpy(apb->samp, aux->samp, apb->nmaxbytes);
+      apb->nbytes = apb->nmaxbytes;
+      *dequeue = true;
+
+      /* memmove the remain data to beginning of aux */
+
+      memmove(aux->samp,
+              aux->samp + apb->nmaxbytes,
+              aux->curbyte - apb->nmaxbytes);
+      aux->curbyte -= apb->nmaxbytes;
+    }
+
+out:
+  return frames * priv->frame_size;
+}
+
 static void sim_audio_process(struct sim_audio_s *priv)
 {
   snd_pcm_sframes_t expect;
   struct ap_buffer_s *apb;
   snd_pcm_sframes_t avail;
   bool dequeue = false;
-  uint32_t outsize;
   int ret = 0;
 
   if (!priv->pcm)
@@ -709,8 +763,7 @@ static void sim_audio_process(struct sim_audio_s *priv)
   avail = snd_pcm_avail(priv->pcm);
   if (avail < expect)
     {
-      ret = avail;
-      goto out;
+      return;
     }
 
   if (priv->playback)
@@ -719,21 +772,12 @@ static void sim_audio_process(struct sim_audio_s *priv)
     }
   else
     {
-      ret = snd_pcm_readi(priv->pcm, apb->samp, expect);
-      if (ret < 0)
-        {
-          goto out;
-        }
+      ret = sim_audio_process_capture(priv, apb, expect, &dequeue);
+    }
 
-      ret = priv->ops->process(priv->codec, apb->samp,
-                               ret * priv->frame_size, &apb->samp, &outsize);
-      if (ret < 0)
-        {
-          return;
-        }
-
-      apb->curbyte += ret;
-      dequeue = true;
+  if (ret < 0)
+    {
+      goto out;
     }
 
   if (dequeue)
@@ -742,7 +786,6 @@ static void sim_audio_process(struct sim_audio_s *priv)
 
       dq_remfirst(&priv->pendq);
 
-      apb->nbytes = apb->curbyte;
       if (apb->flags & AUDIO_APB_FINAL)
         {
           final = true;
@@ -761,6 +804,8 @@ static void sim_audio_process(struct sim_audio_s *priv)
         }
     }
 
+  return;
+
 out:
   if (ret == -EPIPE)
     {
@@ -768,7 +813,7 @@ out:
       snd_pcm_prepare(priv->pcm);
       snd_pcm_start(priv->pcm);
     }
-  else if (ret < 0 && ret != -EAGAIN)
+  else if (ret != -EAGAIN)
     {
       aerr("pcm writei/readi failed %d, %s\n", ret, snd_strerror(ret));
     }
