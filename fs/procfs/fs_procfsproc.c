@@ -153,7 +153,7 @@ struct proc_envinfo_s
 
 static FAR const char *g_policy[4] =
 {
-  "SCHED_FIFO", "SCHED_RR", "SCHED_SPORADIC", "SCHED_OTHER"
+  "SCHED_FIFO", "SCHED_RR", "SCHED_SPORADIC"
 };
 
 /****************************************************************************
@@ -483,8 +483,7 @@ static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
  *                                   MQ full}
  *   Flags:      xxx                N,P,X
  *   Priority:   nnn                Decimal, 0-255
- *   Scheduler:  xxxxxxxxxxxxxx     {SCHED_FIFO, SCHED_RR, SCHED_SPORADIC,
- *                                   SCHED_OTHER}
+ *   Scheduler:  xxxxxxxxxxxxxx     {SCHED_FIFO, SCHED_RR, SCHED_SPORADIC}
  *   Sigmask:    nnnnnnnn           Hexadecimal, 32-bit
  *
  ****************************************************************************/

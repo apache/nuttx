@@ -95,7 +95,6 @@
 #  define TCB_FLAG_SCHED_FIFO      (0 << TCB_FLAG_POLICY_SHIFT)  /* FIFO scheding policy */
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT)  /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT)  /* Sporadic scheding policy */
-#  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT)  /* Other scheding policy */
 #define TCB_FLAG_CPU_LOCKED        (1 << 8)                      /* Bit 7: Locked to this CPU */
 #define TCB_FLAG_SIGNAL_ACTION     (1 << 9)                      /* Bit 8: In a signal handler */
 #define TCB_FLAG_SYSCALL           (1 << 10)                     /* Bit 9: In a system call */
