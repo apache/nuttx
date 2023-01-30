@@ -44,6 +44,7 @@
 #include "neighbor/neighbor.h"
 #include "route/route.h"
 #include "netlink/netlink.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NETLINK_ROUTE
 
@@ -150,6 +151,26 @@ struct getroute_recvfrom_ipv6resplist_s
   struct getroute_recvfrom_ipv6response_s payload;
 };
 
+/* RTM_GETADDR:  Get the specified network device address info */
+
+struct getaddr_recvfrom_response_s
+{
+  struct nlmsghdr  hdr;
+  struct ifaddrmsg ifaddr;
+  struct rtattr    attr;
+#ifndef CONFIG_NET_IPv6
+  struct in_addr   local_addr;  /* IFA_LOCAL is the only attribute supported */
+#else
+  struct in6_addr  local_addr;  /* IFA_LOCAL is the only attribute supported */
+#endif
+};
+
+struct getaddr_recvfrom_rsplist_s
+{
+  sq_entry_t flink;
+  struct getaddr_recvfrom_response_s payload;
+};
+
 /* netdev_foreach() callback */
 
 struct nlroute_sendto_request_s
@@ -163,6 +184,54 @@ struct nlroute_info_s
   NETLINK_HANDLE handle;
   FAR const struct nlroute_sendto_request_s *req;
 };
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_VALIDATE_POLICY
+#  ifdef CONFIG_NET_IPv4
+static const struct nla_policy g_ifa_ipv4_policy[] =
+{
+  {0},                                              /* IFA_UNSPEC */
+  {NLA_U32, 0, NULL},                               /* IFA_ADDRESS */
+  {NLA_U32, 0, NULL},                               /* IFA_LOCAL */
+  {NLA_STRING, IFNAMSIZ - 1, NULL},                 /* IFA_LABEL */
+  {NLA_U32, 0, NULL},                               /* IFA_BROADCAST */
+  {0},                                              /* IFA_ANYCAST */
+  {NLA_UNSPEC, sizeof(struct ifa_cacheinfo), NULL}, /* IFA_CACHEINFO */
+  {0},                                              /* IFA_MULTICAST */
+  {NLA_U32, 0, NULL},                               /* IFA_FLAGS */
+  {NLA_U32, 0, NULL},                               /* IFA_RT_PRIORITY */
+};
+
+static_assert(sizeof(g_ifa_ipv4_policy) / sizeof(g_ifa_ipv4_policy[0]) ==
+              IFA_MAX + 1, "The policy definition has changed,"
+              " please check it");
+#  endif
+#  ifdef CONFIG_NET_IPv6
+static const struct nla_policy g_ifa_ipv6_policy[] =
+{
+  {0},                                              /* IFA_UNSPEC */
+  {0, sizeof(struct in6_addr), NULL},               /* IFA_ADDRESS */
+  {0, sizeof(struct in6_addr), NULL},               /* IFA_LOCAL */
+  {0},                                              /* IFA_LABEL */
+  {0},                                              /* IFA_BROADCAST */
+  {0},                                              /* IFA_ANYCAST */
+  {NLA_UNSPEC, sizeof(struct ifa_cacheinfo), NULL}, /* IFA_CACHEINFO */
+  {0},                                              /* IFA_MULTICAST */
+  {0, sizeof(uint32_t), NULL},                      /* IFA_FLAGS */
+  {0, sizeof(uint32_t), NULL},                      /* IFA_RT_PRIORITY */
+};
+
+static_assert(sizeof(g_ifa_ipv6_policy) / sizeof(g_ifa_ipv6_policy[0]) ==
+              IFA_MAX + 1, "The policy definition has changed,"
+              " please check it");
+#  endif
+#else
+#  define g_ifa_ipv4_policy NULL
+#  define g_ifa_ipv6_policy NULL
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -217,6 +286,96 @@ netlink_get_device(FAR struct net_driver_s *dev,
   resp->attr.rta_type    = IFLA_IFNAME;
 
   strlcpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
+
+  /* Finally, return the response */
+
+  return (FAR struct netlink_response_s *)alloc;
+}
+#endif
+
+#ifdef CONFIG_NET_IPv4
+static uint32_t make_mask(int prefixlen)
+{
+  if (prefixlen)
+    {
+      return HTONL(UINT32_MAX << (32 - prefixlen));
+    }
+
+  return 0;
+}
+
+static uint8_t mask_len(uint32_t nmask)
+{
+  uint8_t prefixlen = 0;
+  uint32_t hmask = NTOHL(nmask);
+
+  for (; hmask; ++prefixlen, hmask <<= 1);
+
+  return prefixlen;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_get_ifaddr
+ *
+ * Description:
+ *   Generate one interface address response.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETLINK
+static FAR struct netlink_response_s *
+netlink_get_ifaddr(FAR struct net_driver_s *dev, int domain, int type,
+                   FAR const struct nlroute_sendto_request_s *req)
+{
+  FAR struct getaddr_recvfrom_rsplist_s *alloc;
+  FAR struct getaddr_recvfrom_response_s *resp;
+
+  /* Allocate the response buffer */
+
+  alloc = (FAR struct getaddr_recvfrom_rsplist_s *)
+    kmm_zalloc(sizeof(struct getaddr_recvfrom_rsplist_s));
+  if (alloc == NULL)
+    {
+      nerr("ERROR: Failed to allocate response buffer.\n");
+      return NULL;
+    }
+
+  /* Initialize the response buffer */
+
+  resp                    = &alloc->payload;
+
+  resp->hdr.nlmsg_len     = sizeof(struct getaddr_recvfrom_response_s);
+  resp->hdr.nlmsg_type    = type;
+  resp->hdr.nlmsg_flags   = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq     = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid     = req ? req->hdr.nlmsg_pid : 0;
+
+  resp->ifaddr.ifa_family = domain;
+#ifdef CONFIG_NETDEV_IFINDEX
+  resp->ifaddr.ifa_index  = dev->d_ifindex;
+#endif
+  resp->ifaddr.ifa_flags  = IFA_F_PERMANENT;
+  resp->ifaddr.ifa_scope  = RT_SCOPE_UNIVERSE;
+
+  resp->attr.rta_type     = IFA_LOCAL;
+#ifdef CONFIG_NET_IPv4
+  if (domain == AF_INET)
+    {
+      resp->attr.rta_len = RTA_LENGTH(sizeof(struct in_addr));
+      memcpy(&resp->local_addr, &dev->d_ipaddr, sizeof(struct in_addr));
+      resp->ifaddr.ifa_prefixlen = mask_len(dev->d_netmask);
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  if (domain == AF_INET6)
+    {
+      resp->attr.rta_len = RTA_LENGTH(sizeof(struct in6_addr));
+      memcpy(&resp->local_addr, dev->d_ipv6addr, sizeof(struct in6_addr));
+      resp->ifaddr.ifa_prefixlen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+    }
+#endif
 
   /* Finally, return the response */
 
@@ -685,6 +844,251 @@ static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
 #endif
 
 /****************************************************************************
+ * Name: netlink_new_ipv4addr
+ *
+ * Description:
+ *   Set the ipv4 address.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_NEWADDR)
+static int netlink_new_ipv4addr(NETLINK_HANDLE handle,
+                                FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct ifaddrmsg *ifm = NLMSG_DATA(nlmsg);
+  FAR struct nlattr *tb[IFA_MAX + 1];
+  struct netlink_ext_ack extack;
+  int ret;
+
+  ret = nlmsg_parse(nlmsg, sizeof(*ifm), tb, IFA_MAX, g_ifa_ipv4_policy,
+                    &extack);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (ifm->ifa_prefixlen > 32 || !tb[IFA_LOCAL])
+    {
+      return -EINVAL;
+    }
+
+  net_lock();
+  dev = netdev_findbyindex(ifm->ifa_index);
+
+  if (dev == NULL)
+    {
+      net_unlock();
+      return -ENODEV;
+    }
+
+  dev->d_ipaddr  = nla_get_in_addr(tb[IFA_LOCAL]);
+  dev->d_netmask = make_mask(ifm->ifa_prefixlen);
+
+  netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET);
+  net_unlock();
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_new_ipv6addr
+ *
+ * Description:
+ *   Set the ipv6 address.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_NEWADDR)
+static int netlink_new_ipv6addr(NETLINK_HANDLE handle,
+                                FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct ifaddrmsg *ifm = NLMSG_DATA(nlmsg);
+  FAR struct nlattr *tb[IFA_MAX + 1];
+  struct netlink_ext_ack extack;
+  int ret;
+
+  ret = nlmsg_parse(nlmsg, sizeof(*ifm), tb, IFA_MAX, g_ifa_ipv6_policy,
+                    &extack);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (ifm->ifa_prefixlen > 128 || !tb[IFA_LOCAL])
+    {
+      return -EINVAL;
+    }
+
+  net_lock();
+  dev = netdev_findbyindex(ifm->ifa_index);
+
+  if (dev == NULL)
+    {
+      net_unlock();
+      return -ENODEV;
+    }
+
+  memcpy(dev->d_ipv6addr, nla_data(tb[IFA_LOCAL]), 16);
+  net_ipv6_pref2mask(ifm->ifa_prefixlen, dev->d_ipv6netmask);
+
+  netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET6);
+  net_unlock();
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_del_ipv4addr
+ *
+ * Description:
+ *   Clear the ipv4 address.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_DELADDR)
+static int netlink_del_ipv4addr(NETLINK_HANDLE handle,
+                                FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct ifaddrmsg *ifm = NLMSG_DATA(nlmsg);
+  FAR struct nlattr *tb[IFA_MAX + 1];
+  struct netlink_ext_ack extack;
+  int ret;
+
+  ret = nlmsg_parse(nlmsg, sizeof(*ifm), tb, IFA_MAX, g_ifa_ipv4_policy,
+                    &extack);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  net_lock();
+  dev = netdev_findbyindex(ifm->ifa_index);
+
+  if (dev == NULL)
+    {
+      net_unlock();
+      return -ENODEV;
+    }
+
+  if (tb[IFA_LOCAL] && dev->d_ipaddr != nla_get_in_addr(tb[IFA_LOCAL]))
+    {
+      net_unlock();
+      return -EADDRNOTAVAIL;
+    }
+
+  dev->d_ipaddr  = 0;
+
+  netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET);
+  net_unlock();
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_del_ipv6addr
+ *
+ * Description:
+ *   Clear the ipv6 address.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_DELADDR)
+static int netlink_del_ipv6addr(NETLINK_HANDLE handle,
+                                FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct ifaddrmsg *ifm = NLMSG_DATA(nlmsg);
+  FAR struct nlattr *tb[IFA_MAX + 1];
+  struct netlink_ext_ack extack;
+  int ret;
+
+  ret = nlmsg_parse(nlmsg, sizeof(*ifm), tb, IFA_MAX, g_ifa_ipv6_policy,
+                    &extack);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  net_lock();
+  dev = netdev_findbyindex(ifm->ifa_index);
+
+  if (dev == NULL)
+    {
+      net_unlock();
+      return -ENODEV;
+    }
+
+  if (tb[IFA_LOCAL] && dev->d_ipaddr != nla_get_in_addr(tb[IFA_LOCAL]))
+    {
+      net_unlock();
+      return -EADDRNOTAVAIL;
+    }
+
+  memset(&dev->d_ipv6addr, 0, sizeof(net_ipv6addr_t));
+
+  netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET6);
+  net_unlock();
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_get_addr
+ *
+ * Description:
+ *   Clear the ipv4/ipv6 address.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETADDR
+static int netlink_addr_callback(FAR struct net_driver_s *dev,
+                                   FAR void *arg)
+{
+  FAR struct nlroute_info_s *info = arg;
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_ifaddr(dev, info->req->gen.rtgen_family, RTM_NEWADDR,
+                            info->req);
+  if (resp == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  netlink_add_response(info->handle, resp);
+  return OK;
+}
+
+static int netlink_get_addr(NETLINK_HANDLE handle,
+                            FAR const struct nlroute_sendto_request_s *req)
+{
+  struct nlroute_info_s info;
+  int ret;
+
+  /* Visit each device */
+
+  info.handle = handle;
+  info.req    = req;
+
+  net_lock();
+  ret = netdev_foreach(netlink_addr_callback, &info);
+  net_unlock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return netlink_add_terminator(handle, req);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -780,6 +1184,78 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
         break;
 #endif
 
+#ifndef CONFIG_NETLINK_DISABLE_NEWADDR
+      /* Set the IPv4 or IPv6 address */
+
+      case RTM_NEWADDR:
+#ifdef CONFIG_NET_IPv4
+        if (req->gen.rtgen_family == AF_INET)
+          {
+            ret = netlink_new_ipv4addr(handle, nlmsg);
+          }
+        else
+#endif
+#ifdef CONFIG_NET_IPv6
+        if (req->gen.rtgen_family == AF_INET6)
+          {
+            ret = netlink_new_ipv6addr(handle, nlmsg);
+          }
+        else
+#endif
+          {
+            ret = -EAFNOSUPPORT;
+          }
+        break;
+#endif
+
+#ifndef CONFIG_NETLINK_DISABLE_DELADDR
+      /* Clear the IPv4 or IPv6 address */
+
+      case RTM_DELADDR:
+#ifdef CONFIG_NET_IPv4
+        if (req->gen.rtgen_family == AF_INET)
+          {
+            ret = netlink_del_ipv4addr(handle, nlmsg);
+          }
+        else
+#endif
+#ifdef CONFIG_NET_IPv6
+        if (req->gen.rtgen_family == AF_INET6)
+          {
+            ret = netlink_del_ipv6addr(handle, nlmsg);
+          }
+        else
+#endif
+          {
+            ret = -EAFNOSUPPORT;
+          }
+        break;
+#endif
+
+#ifndef CONFIG_NETLINK_DISABLE_GETADDR
+      /* Get the IPv4 or IPv6 address */
+
+      case RTM_GETADDR:
+#ifdef CONFIG_NET_IPv4
+        if (req->gen.rtgen_family == AF_INET)
+          {
+            ret = netlink_get_addr(handle, req);
+          }
+        else
+#endif
+#ifdef CONFIG_NET_IPv6
+        if (req->gen.rtgen_family == AF_INET6)
+          {
+            ret = netlink_get_addr(handle, req);
+          }
+        else
+#endif
+          {
+            ret = -EAFNOSUPPORT;
+          }
+        break;
+#endif
+
       default:
         ret = -ENOSYS;
         break;
@@ -819,6 +1295,59 @@ void netlink_device_notify(FAR struct net_driver_s *dev)
       if (resp != NULL)
         {
           netlink_add_broadcast(RTNLGRP_LINK, resp);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_device_notify_ipaddr()
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETLINK_DISABLE_NEWADDR) || \
+    !defined(CONFIG_NETLINK_DISABLE_DELADDR) || \
+    !defined(CONFIG_NETLINK_DISABLE_GETADDR)
+void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
+                                  int type, int domain)
+{
+  FAR struct netlink_response_s *resp;
+  int group;
+
+  DEBUGASSERT(dev != NULL);
+
+  resp = netlink_get_ifaddr(dev, domain, type, NULL);
+  if (resp != NULL)
+    {
+#ifdef CONFIG_NET_IPv4
+      if (domain == AF_INET)
+        {
+          group = RTNLGRP_IPV4_IFADDR;
+        }
+      else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (domain == AF_INET6)
+        {
+          group = RTNLGRP_IPV6_IFADDR;
+        }
+      else
+#endif
+        {
+          nwarn("netlink_device_notify_ipaddr unknown type %d domain %d\n",
+                type, domain);
+          return;
+        }
+
+      netlink_add_broadcast(group, resp);
+
+      resp = netlink_get_terminator(NULL);
+      if (resp != NULL)
+        {
+          netlink_add_broadcast(group, resp);
         }
     }
 }

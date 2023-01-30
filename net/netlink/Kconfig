@@ -91,6 +91,31 @@ config NETLINK_DISABLE_GETROUTE
 	---help---
 		RTM_GETROUTE is used to retrieve routing tables.
 
+config NETLINK_DISABLE_NEWADDR
+	bool "Disable RTM_NEWADDR support"
+	default n
+	---help---
+		RTM_NEWADDR is used to set netdev address.
+
+config NETLINK_DISABLE_DELADDR
+	bool "Disable RTM_DELADDR support"
+	default n
+	---help---
+		RTM_DELADDR is used to delete netdev address.
+
+config NETLINK_DISABLE_GETADDR
+	bool "Disable RTM_GETADDR support"
+	default n
+	---help---
+		RTM_GETADDR is used to get netdev address.
+
+config NETLINK_VALIDATE_POLICY
+	bool "Enable netlink message policy verification"
+	default n
+	---help---
+		VALIDATE_POLICY is used to make sure the parameters
+		you pass in are valid.
+
 endif # NETLINK_ROUTE
 endmenu # Netlink Protocols
 endif # NET_NETLINK
