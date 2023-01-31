@@ -28,7 +28,7 @@ menuconfig MMCSD
 if MMCSD
 
 config MMCSD_IOCSUPPORT
-	int "Enable MMC/SD ioctl support"
+	bool "Enable MMC/SD ioctl support"
 	default y
 	---help---
 		Disable it to save some code size if required.
