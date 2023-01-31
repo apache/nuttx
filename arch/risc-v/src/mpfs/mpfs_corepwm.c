@@ -49,10 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef OK
-#  define OK 0
-#endif
-
 /* This module only compiles if at least one CorePWM instance
  * is configured to the FPGA
  */
