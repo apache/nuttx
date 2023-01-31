@@ -279,6 +279,8 @@ ENV PIP_NO_CACHE_DIR=0
 RUN pip3 install setuptools wheel
 # Install CodeChecker and use it to statically analyze the code.
 RUN pip3 install CodeChecker
+# Install cvt2utf to check for non-UTF characters.
+RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
 RUN pip3 install esptool
