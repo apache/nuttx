@@ -59,6 +59,17 @@ is_rust_file() {
 }
 
 check_file() {
+  if [ -x $@ ]; then
+    case $@ in
+    *.bat | *.sh | *.py)
+      ;;
+    *)
+      echo "$@: error: execute permissions detected!"
+      fail=1
+      ;;
+    esac
+  fi
+
   if [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
       fail=1
