@@ -20,6 +20,10 @@
 
 export TOPDIR := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
 
+ifeq ($(V),)
+  MAKE := $(MAKE) -s --no-print-directory
+endif
+
 # Build any necessary tools needed early in the build.
 # incdir - Is needed immediately by all Make.defs file.
 
@@ -664,7 +668,7 @@ savedefconfig: apps_preconfig
 # that the archiver is 'ar'
 
 export: $(NUTTXLIBS)
-	$(Q) MAKE=${MAKE} $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
+	$(Q) MAKE="${MAKE}" $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
 #
