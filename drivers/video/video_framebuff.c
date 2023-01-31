@@ -120,6 +120,11 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
   return OK;
 }
 
+int video_framebuff_is_empty(video_framebuff_t *fbuf)
+{
+  return fbuf->vbuf_top == NULL || fbuf->vbuf_top == fbuf->vbuf_next;
+}
+
 vbuf_container_t *video_framebuff_get_container(video_framebuff_t *fbuf)
 {
   vbuf_container_t *ret;
