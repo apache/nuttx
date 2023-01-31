@@ -631,6 +631,15 @@ config DEBUG_ASSERTIONS
 		set CONFIG_DEBUG_ASSERTIONS=y during debug, but disable the
 		assertions on a final, buckled up system.
 
+config DEBUG_ASSERTIONS_EXPRESSION
+	bool "Enable Deubg Assertions show expression"
+	default n
+	depends on DEBUG_ASSERTIONS
+	---help---
+		This option can display the content information of the ASSERT()
+		function when it is triggered. This option maybe will take up a lot
+		of space.
+
 comment "Subsystem Debug Options"
 
 config DEBUG_AUDIO
