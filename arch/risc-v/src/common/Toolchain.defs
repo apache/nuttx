@@ -141,7 +141,7 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   endif
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)
-      ARCHRVISAD = d
+    ARCHRVISAD = d
   endif
 
   # Detect abi type
