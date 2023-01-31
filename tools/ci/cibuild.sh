@@ -283,6 +283,7 @@ function python-tools {
   # cache restoration.
   pip3 install --force-reinstall \
     CodeChecker \
+    cvt2utf \
     cxxfilt \
     esptool==3.3.1 \
     imgtool==1.9.0 \
