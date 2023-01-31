@@ -66,6 +66,10 @@
 #  include "esp32s3_efuse.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_LEDC
+#  include "esp32s3_ledc.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -118,6 +122,14 @@ int esp32s3_bringup(void)
              CONFIG_LIBC_TMPDIR, ret);
     }
 #endif
+
+#ifdef CONFIG_ESP32S3_LEDC
+  ret = esp32s3_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32s3_pwm_setup() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESP32S3_LEDC */
 
 #ifdef CONFIG_ESP32S3_TIMER
   /* Configure general purpose timers */
