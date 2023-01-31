@@ -305,7 +305,7 @@ lc823450_i2c_sem_waitdone(struct lc823450_i2c_priv_s *priv)
 
   /* Get the timeout value */
 
-  timeout = MSEC2TICK(priv->timeoms + (MSEC_PER_TICK / 2));
+  timeout = MSEC2TICK(priv->timeoms);
   timeout += SEC2TICK(CONFIG_LC823450_I2C_TIMEOSEC);
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
