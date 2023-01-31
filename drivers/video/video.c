@@ -119,6 +119,7 @@ struct video_type_inf_s
   struct v4l2_fract    frame_interval;
   video_framebuff_t    bufinf;
   FAR uint8_t          *bufheap;   /* for V4L2_MEMORY_MMAP buffers */
+  FAR struct pollfd    *fds;
   uint32_t             seqnum;
 };
 
@@ -200,6 +201,8 @@ static ssize_t video_write(FAR struct file *filep,
 static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int video_mmap(FAR struct file *filep,
                       FAR struct mm_map_entry_s *map);
+static int video_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                      bool setup);
 
 /* Common function */
 
@@ -290,6 +293,8 @@ static const struct file_operations g_video_fops =
   NULL,                     /* seek */
   video_ioctl,              /* ioctl */
   video_mmap,               /* mmap */
+  NULL,                     /* truncate */
+  video_poll,               /* poll */
 };
 
 static bool g_video_initialized = false;
@@ -3154,6 +3159,53 @@ static int video_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   return ret;
 }
 
+static int video_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+{
+  FAR struct inode     *inode = filep->f_inode;
+  FAR video_mng_t      *priv  = (FAR video_mng_t *)inode->i_private;
+  FAR video_type_inf_t *type_inf;
+  enum v4l2_buf_type   buf_type;
+  irqstate_t           flags;
+
+  buf_type = priv->still_inf.state == VIDEO_STATE_CAPTURE ?
+                V4L2_BUF_TYPE_STILL_CAPTURE : V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+  type_inf = get_video_type_inf(priv, buf_type);
+  if (type_inf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+
+  if (setup)
+    {
+      if (type_inf->fds == NULL)
+        {
+          type_inf->fds = fds;
+          fds->priv     = &type_inf->fds;
+          if (!video_framebuff_is_empty(&type_inf->bufinf))
+            {
+              poll_notify(&type_inf->fds, 1, POLLIN);
+            }
+        }
+      else
+        {
+          leave_critical_section(flags);
+          return -EBUSY;
+        }
+    }
+  else if (fds->priv)
+    {
+      type_inf->fds = NULL;
+      fds->priv     = NULL;
+    }
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
 static FAR void *video_register(FAR const char *devpath)
 {
   FAR video_mng_t *priv;
@@ -3258,6 +3310,8 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
       leave_critical_section(flags);
       return -EINVAL;
     }
+
+  poll_notify(&type_inf->fds, 1, POLLIN);
 
   if (err_code == 0)
     {
