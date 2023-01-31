@@ -442,6 +442,14 @@ config ESP32S2_I2C1
 	select ESP32S2_I2C
 	select I2C
 
+config ESP32S2_LEDC
+	bool "LEDC (PWM)"
+	default n
+	select PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Enable support to PWM on ESP32S2 using LEDC peripheral.
+
 config ESP32S2_RT_TIMER
 	bool "Real-time Timer"
 	select ESP32S2_TIMER
@@ -868,6 +876,91 @@ config ESP32S2_FREERUN
 		support freerun timer.
 
 endmenu # Timer/Counter Configuration
+
+menu "LEDC Configuration"
+	depends on ESP32S2_LEDC
+
+menuconfig ESP32S2_LEDC_TIM0
+	bool "Timer 0"
+	default n
+
+if ESP32S2_LEDC_TIM0
+
+config ESP32S2_LEDC_TIM0_CHANNELS
+	int "Number of Timer 0 channels"
+	default 2
+
+endif # ESP32S2_LEDC_TIM0
+
+menuconfig ESP32S2_LEDC_TIM1
+	bool "Timer 1"
+	default n
+
+if ESP32S2_LEDC_TIM1
+
+config ESP32S2_LEDC_TIM1_CHANNELS
+	int "Number of Timer 1 channels"
+	default 2
+
+endif # ESP32S2_LEDC_TIM1
+
+menuconfig ESP32S2_LEDC_TIM2
+	bool "Timer 2"
+	default n
+
+if ESP32S2_LEDC_TIM2
+
+config ESP32S2_LEDC_TIM2_CHANNELS
+	int "Number of Timer 2 channels"
+	default 2
+
+endif # ESP32S2_LEDC_TIM2
+
+menuconfig ESP32S2_LEDC_TIM3
+	bool "Timer 3"
+	default n
+
+if ESP32S2_LEDC_TIM3
+
+config ESP32S2_LEDC_TIM3_CHANNELS
+	int "Number of Timer 3 channels"
+	default 2
+
+endif # ESP32S2_LEDC_TIM2
+
+config ESP32S2_LEDC_CHANNEL0_PIN
+	int "Channel 0 pin"
+	default 2
+
+config ESP32S2_LEDC_CHANNEL1_PIN
+	int "Channel 1 pin"
+	default 3
+
+config ESP32S2_LEDC_CHANNEL2_PIN
+	int "Channel 2 pin"
+	default 4
+
+config ESP32S2_LEDC_CHANNEL3_PIN
+	int "Channel 3 pin"
+	default 5
+
+config ESP32S2_LEDC_CHANNEL4_PIN
+	int "Channel 4 pin"
+	default 6
+
+config ESP32S2_LEDC_CHANNEL5_PIN
+	int "Channel 5 pin"
+	default 7
+
+config ESP32S2_LEDC_CHANNEL6_PIN
+	int "Channel 6 pin"
+	default 8
+
+config ESP32S2_LEDC_CHANNEL7_PIN
+	int "Channel 7 pin"
+	default 9
+
+endmenu # LEDC configuration
 
 config ESP32S2_HAVE_OTA_PARTITION
 	bool
