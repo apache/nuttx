@@ -39,10 +39,28 @@
 #define LITEX_IRQ_TIMER0   (RISCV_IRQ_MEXT + 2)
 #define LITEX_IRQ_ETHMAC   (RISCV_IRQ_MEXT + 3)
 #define LITEX_IRQ_SDCARD   (RISCV_IRQ_MEXT + 4)
+#define LITEX_IRQ_GPIO     (RISCV_IRQ_MEXT + 5)
+
+/* The last hardware IRQ number */
+
+#define LITEX_IRQ_LAST     (LITEX_IRQ_GPIO)
+
+/* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
+ * as a second level of decoding:  The first level dispatches to the GPIO
+ * interrupt handler.  The second to the decoded GPIO interrupt handler.
+ */
+
+#ifdef CONFIG_LITEX_GPIO_IRQ
+#  define LITEX_NIRQ_GPIO           32
+#  define LITEX_FIRST_GPIOIRQ       (LITEX_IRQ_LAST + 1)
+#  define LITEX_LAST_GPIOIRQ        (LITES_FIRST_GPIOIRQ + LITEX_NIRQ_GPIO)
+#else
+#  define LITEX_NIRQ_GPIO           0
+#endif
 
 /* Total number of IRQs */
 
-#define NR_IRQS            (LITEX_IRQ_SDCARD + 1)
+#define NR_IRQS            (LITEX_IRQ_LAST + LITEX_NIRQ_GPIO + 1)
 
 #endif /* CONFIG_LITEX_USE_CUSTOM_IRQ_DEFINITIONS */
 #endif /* __ARCH_RISCV_INCLUDE_LITEX_IRQ_H */

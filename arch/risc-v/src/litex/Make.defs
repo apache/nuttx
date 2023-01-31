@@ -31,6 +31,11 @@ CHIP_CSRCS += litex_lowputc.c litex_serial.c
 CHIP_CSRCS += litex_start.c litex_timerisr.c
 CHIP_ASRCS += litex_cache.S
 
+
+ifeq ($(CONFIG_LITEX_GPIO),y)
+CHIP_CSRCS += litex_gpio.c
+endif
+
 ifeq ($(CONFIG_LITEX_SDIO),y)
 CHIP_CSRCS += litex_sdio.c
 endif
