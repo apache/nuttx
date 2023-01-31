@@ -158,7 +158,7 @@ struct esp32s3_ledc_s
   const uint8_t num;                    /* Timer ID */
 
   const uint8_t channels;               /* Timer channels number */
-  struct esp32s3_ledc_chan_s *chans;      /* Timer channels pointer */
+  struct esp32s3_ledc_chan_s *chans;    /* Timer channels pointer */
 
   uint32_t frequency;                   /* Timer current frequency */
   uint32_t reload;                      /* Timer current reload */
