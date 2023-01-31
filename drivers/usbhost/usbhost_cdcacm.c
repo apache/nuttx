@@ -1223,7 +1223,7 @@ static void usbhost_destroy(FAR void *arg)
   /* Unregister the serial lower half driver */
 
   usbhost_mkdevname(priv, devname);
-#warning Missing logic
+  unregister_driver(devname);
 
   /* Release the device name used by this connection */
 
@@ -2661,11 +2661,10 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
                                   unsigned int nbuffered, bool upper)
 {
   FAR struct usbhost_cdcacm_s *priv;
-  bool newrts;
   int ret;
 
   DEBUGASSERT(uartdev && uartdev->priv);
-  priv = (FAR struct usbhost_cdcacm_s *)uartdev->priv
+  priv = (FAR struct usbhost_cdcacm_s *)uartdev->priv;
 
   /* Is RX flow control enabled? */
 
@@ -2713,9 +2712,9 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
           DEBUGASSERT(ret >= 0);
           UNUSED(ret);
         }
-
-      return false;
     }
+
+  return false;
 }
 #endif
 
