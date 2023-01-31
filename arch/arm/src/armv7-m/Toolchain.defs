@@ -27,6 +27,7 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16
   endif
+  ZARCHCPUFLAGS := -mcpu=cortex_m4
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
   TOOLCHAIN_MTUNE    := -mtune=cortex-m7
@@ -38,11 +39,13 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
       TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
     endif
   endif
+  ZARCHCPUFLAGS := -mcpu=cortex_m7
 else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
   TOOLCHAIN_ARM7EM   := n
   TOOLCHAIN_MTUNE    := -mtune=cortex-m3
   TOOLCHAIN_MARCH    := -march=armv7-m
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
+  ZARCHCPUFLAGS      := -mcpu=cortex_m3
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

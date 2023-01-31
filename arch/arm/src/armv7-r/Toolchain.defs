@@ -20,10 +20,13 @@
 
 ifeq ($(CONFIG_ARCH_CORTEXR4),y)
   ARCHCPUFLAGS += -mcpu=cortex-r4
+  ZARCHCPUFLAGS := -mcpu=cortex_r4
 else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
   ARCHCPUFLAGS += -mcpu=cortex-r5
+  ZARCHCPUFLAGS := -mcpu=cortex_r5
 else ifeq ($(CONFIG_ARCH_CORTEXR7),y)
   ARCHCPUFLAGS += -mcpu=cortex-r7
+  ZARCHCPUFLAGS := -mcpu=cortex_r7
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
