@@ -196,5 +196,17 @@ int board_i2sdev_initialize(bool enable_tx, bool enable_rx);
 int esp32s2_cs4344_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32s2_ledc_setup
+ *
+ * Description:
+ *   Initialize LEDC PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_LEDC
+int esp32s2_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_SRC_ESP32S2_SAOLA_1_H */
