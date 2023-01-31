@@ -54,6 +54,23 @@ config LITEX_CUSTOM_IRQ_DEFINITIONS_PATH
 
 endif
 
+config LITEX_GPIO
+	bool "GPIO"
+	default n
+	---help---
+		Select if gateware configuration has a GPIO interface available.
+
+
+if LITEX_GPIO
+
+config LITEX_GPIO_IRQ
+	bool "Enable GPIO IRQ"
+	default n
+	---help---
+		Select if gateware configuration has support for GPIO IRQ events.
+
+endif
+
 config LITEX_HAVE_UART0
 	bool
 	default y
