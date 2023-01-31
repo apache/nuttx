@@ -22,12 +22,9 @@
 
 .SUFFIXES:
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-export SHELL=cmd
-endif
-
 # Control build verbosity
 #
+#  V=0:   Exit silent mode
 #  V=1,2: Enable echo of commands
 #  V=2:   Enable bug/verbose options in tools and scripts
 
@@ -37,6 +34,22 @@ else ifeq ($(V),2)
 export Q :=
 else
 export Q := @
+endif
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  export SHELL=cmd
+else ifeq ($(V),)
+  BASHCMD := $(shell command -v bash 2> /dev/null)
+  ifneq ($(BASHCMD),)
+    export SHELL=$(BASHCMD)
+    export ECHO_BEGIN=@echo -ne "\033[1K\r"
+    export ECHO_END=$(ECHO_BEGIN)
+  endif
+endif
+
+ifeq ($(ECHO_BEGIN),)
+  export ECHO_BEGIN=@echo 
+  export ECHO_END=
 endif
 
 # These are configuration variables that are quoted by configuration tool
@@ -267,8 +280,9 @@ endif
 # <filename>.S)
 
 define PREPROCESS
-	@echo "CPP: $1->$2"
+	$(ECHO_BEGIN)"CPP: $1->$2 "
 	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $(abspath $1) -o $(abspath $2)
+	$(ECHO_END)
 endef
 
 # COMPILE - Default macro to compile one C file
@@ -284,8 +298,9 @@ endef
 # change the options used with the single file <filename>.c
 
 define COMPILE
-	@echo "CC: $1"
+	$(ECHO_BEGIN)"CC: $1 "
 	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $3 $($(strip $1)_CFLAGS) $(abspath $1) -o $(abspath $2)
+	$(ECHO_END)
 endef
 
 # COMPILEXX - Default macro to compile one C++ file
@@ -302,8 +317,9 @@ endef
 # extension .cpp could also be used.  The same applies mutatis mutandis.
 
 define COMPILEXX
-	@echo "CXX: $1"
+	$(ECHO_BEGIN)"CXX: $1 "
 	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $3 $($(strip $1)_CXXFLAGS) $(abspath $1) -o $(abspath $2)
+	$(ECHO_END)
 endef
 
 # COMPILERUST - Default macro to compile one Rust file
@@ -320,8 +336,9 @@ endef
 # applies mutatis mutandis.
 
 define COMPILERUST
-	@echo "RUSTC: $1"
+	$(ECHO_BEGIN)"RUSTC: $1 "
 	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $(abspath $1) -o $(abspath $2)
+	$(ECHO_END)
 endef
 
 # COMPILEZIG - Default macro to compile one Zig file
@@ -338,8 +355,9 @@ endef
 # applies mutatis mutandis.
 
 define COMPILEZIG
-	@echo "ZIG: $1"
+	$(ECHO_BEGIN)"ZIG: $1 "
 	$(Q) $(ZIG) build-obj $(ZIGFLAGS) $($(strip $1)_ZIGFLAGS) --name $(basename $2) $1
+	$(ECHO_END)
 endef
 
 # ASSEMBLE - Default macro to assemble one assembly language file
@@ -363,16 +381,18 @@ endef
 # is used by some toolchains.  The same applies mutatis mutandis.
 
 define ASSEMBLE
-	@echo "AS: $1"
+	$(ECHO_BEGIN)"AS: $1 "
 	$(Q) $(CCACHE) $(CC) -c $(AFLAGS) $(abspath $1) $($(strip $1)_AFLAGS) -o $(abspath $2)
+	$(ECHO_END)
 endef
 
 # INSTALL_LIB - Install a library $1 into target $2
 # Example: $(call INSTALL_LIB, libabc.a, $(TOPDIR)/staging/)
 
 define INSTALL_LIB
-	@echo "IN: $1 -> $2"
+	$(ECHO_BEGIN)"IN: $1 -> $2 "
 	$(Q) install -m 0644 $(abspath $1) $(abspath $2)
+	$(ECHO_END)
 endef
 
 # ARCHIVE_ADD - Add a list of files to an archive
@@ -392,8 +412,9 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE_ADD
-	@echo "AR (add): ${shell basename $(1)} $(2)"
+	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} $(2) "
 	$(Q) $(AR) $(abspath $1) $(abspath $2)
+	$(ECHO_END)
 endef
 
 # ARCHIVE - Same as above, but ensure the archive is
