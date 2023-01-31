@@ -33,6 +33,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32s2_gpio.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += esp32s2_ledc.c
+endif
+
 ifeq ($(CONFIG_ONESHOT),y)
 CSRCS += esp32s2_oneshot.c
 endif

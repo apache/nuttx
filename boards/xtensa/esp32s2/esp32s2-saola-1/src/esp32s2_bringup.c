@@ -62,6 +62,10 @@
 #  include "esp32s2_efuse.h"
 #endif
 
+#ifdef CONFIG_ESP32S2_LEDC
+#  include "esp32s2_ledc.h"
+#endif
+
 #ifdef CONFIG_WATCHDOG
 #  include "esp32s2_board_wdt.h"
 #endif
@@ -132,6 +136,14 @@ int esp32s2_bringup(void)
       syslog(LOG_ERR, "Failed to initialize watchdog timer: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_ESP32S2_LEDC
+  ret = esp32s2_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32s2_pwm_setup() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESP32S2_LEDC */
 
 #ifdef CONFIG_DEV_GPIO
   ret = esp32s2_gpio_init();
