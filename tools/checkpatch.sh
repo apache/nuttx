@@ -93,6 +93,15 @@ check_file() {
       echo "$@: error: Non-UTF8 characters detected!"
       fail=1
     fi
+
+    if [ $encoding != 0 ]; then
+      md5="$(md5sum $@)"
+      cvt2utf convert --nobak "$@" &> /dev/null
+      if [ "$md5" != "$(md5sum $@)" ]; then
+        echo "$@: error: Non-UTF8 characters detected!"
+        fail=1
+      fi
+    fi
   fi
 }
 
