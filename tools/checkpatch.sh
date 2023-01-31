@@ -62,29 +62,25 @@ check_file() {
   if [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
       fail=1
-    else
-      if ! rustfmt --edition 2021 --check $@ 2>&1; then
-        fail=1
-      fi
-    fi
-  else
-    if ! $TOOLDIR/nxstyle $@ 2>&1; then
+    elif ! rustfmt --edition 2021 --check $@ 2>&1; then
       fail=1
     fi
+  elif ! $TOOLDIR/nxstyle $@ 2>&1; then
+    fail=1
+  fi
 
-    if [ $spell != 0 ]; then
-      if ! codespell -q 7 ${@: -1}; then
-        fail=1
-      fi
+  if [ $spell != 0 ]; then
+    if ! codespell -q 7 ${@: -1}; then
+      fail=1
     fi
+  fi
 
-    if [ $encoding != 0 ]; then
-      md5="$(md5sum $@)"
-      cvt2utf convert --nobak "$@" &> /dev/null
-      if [ "$md5" != "$(md5sum $@)" ]; then
-        echo "$@: error: Non-UTF8 characters detected!"
-        fail=1
-      fi
+  if [ $encoding != 0 ]; then
+    md5="$(md5sum $@)"
+    cvt2utf convert --nobak "$@" &> /dev/null
+    if [ "$md5" != "$(md5sum $@)" ]; then
+      echo "$@: error: Non-UTF8 characters detected!"
+      fail=1
     fi
   fi
 }
