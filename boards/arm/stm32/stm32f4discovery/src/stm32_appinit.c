@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <nuttx/board.h>
 
 #include "stm32f4discovery.h"
@@ -31,10 +32,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef OK
-#  define OK 0
-#endif
 
 /****************************************************************************
  * Public Functions

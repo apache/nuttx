@@ -55,10 +55,6 @@
 
 #if defined(CONFIG_NET) && defined(CONFIG_MPFS_ETHMAC)
 
-#ifndef OK
-#  define OK 0
-#endif
-
 #define MPFS_PMPCFG_ETH0_0   (MPFS_MPUCFG_BASE + 0x400)
 #define MPFS_PMPCFG_ETH0_1   (MPFS_MPUCFG_BASE + 0x408)
 #define MPFS_PMPCFG_ETH0_2   (MPFS_MPUCFG_BASE + 0x410)
