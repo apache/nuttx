@@ -229,6 +229,10 @@ else
   endif
 endif
 
+# Zig compiler
+
+ZIG := zig
+
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHOPTIMIZATION += -fshort-enums
 endif
@@ -257,6 +261,20 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 else
   LDFLAGS += -nostdlib
 endif
+
+ifeq ($(CONFIG_ARM_THUMB),y)
+  ZARCH := thumb
+else
+  ZARCH := arm
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  ZEABI := gnueabihf
+else
+  ZEABI := gnueabi
+endif
+
+ZIGFLAGS = -target $(ZARCH)-freestanding-$(ZEABI)
 
 # Optimization of unused sections
 
