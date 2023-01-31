@@ -93,7 +93,7 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
 
   /* Append the send buffer after device buffer */
 
-  if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE &&
+  if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE ||
       netdev_iob_prepare(dev, false, 0) != OK)
     {
       ret = -ENOMEM;
