@@ -275,7 +275,7 @@ static inline int note_isenabled(void)
 #ifdef CONFIG_SMP
   /* Ignore notes that are not in the set of monitored CPUs */
 
-  if (CPU_ISSET(&g_note_filter.mode.cpuset, this_cpu()) == 0)
+  if (CPU_ISSET(this_cpu(), &g_note_filter.mode.cpuset) == 0)
     {
       /* Not in the set of monitored CPUs.  Do not log the note. */
 
