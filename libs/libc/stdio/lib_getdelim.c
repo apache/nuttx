@@ -22,9 +22,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <sys/types.h>
 
 #include "libc.h"
 
@@ -50,14 +52,14 @@
 #define BUFSIZE_INCR   32
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getdelim()
+ * Name: getdelimx()
  *
  * Description:
- *   The getdelim() function will read from stream until it encounters a
+ *   The getdelimx() function will read from stream until it encounters a
  *   character matching the delimiter character.  The delimiter argument
  *   is an int, the value of which the application will ensure is a
  *   character representable as an unsigned char of equal value that
@@ -80,6 +82,9 @@
  *   read, including any delimiter, will be stored in the object, and a
  *   terminating NUL added when the delimiter or end-of-file is encountered.
  *
+ *   If output stream is not NULL, the contents from it will be sent to
+ *   output stream (it's useful for interactive console application).
+ *
  * Returned Value:
  *  Upon successful completion, the getline() and getdelim() functions will
  *  return the number of bytes written into the buffer, including the
@@ -93,8 +98,8 @@
  *
  ****************************************************************************/
 
-ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
-                 FAR FILE *stream)
+static ssize_t getdelimx(FAR char **lineptr, size_t *n, int delimiter,
+                 FAR FILE *stream, FAR FILE *output)
 {
   FAR char *dest;
   size_t bufsize;
@@ -193,6 +198,18 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
           return -1;
         }
 
+      if (output != NULL)
+        {
+          /* Put character to output stream */
+
+          if (fputc(ch, output) == EOF)
+            {
+              return -1;
+            }
+
+          fflush(output);
+        }
+
       /* Save the character in the user buffer and increment the number of
        * bytes transferred.
        */
@@ -219,6 +236,20 @@ errout:
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
+                 FAR FILE *stream)
+{
+  return getdelimx(lineptr, n, delimiter, stream, NULL);
+}
+
+/****************************************************************************
+ * Name: getdelim()
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: getline()
  *
  * Description:
@@ -235,6 +266,7 @@ errout:
 #ifdef HAVE_GETLINE
 ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream)
 {
-  return getdelim(lineptr, n, EOLCH, stream);
+  return getdelimx(lineptr, n, EOLCH, stream,
+    stream == stdin ? stdout : NULL);
 }
 #endif
