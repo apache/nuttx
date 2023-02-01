@@ -328,7 +328,9 @@ mempool_multiple_init(FAR const char *name,
       pools[i].alloc = mempool_multiple_alloc_callback;
       pools[i].free = mempool_multiple_free_callback;
       pools[i].calibrate = calibrate;
-
+#if CONFIG_MM_BACKTRACE >= 0
+      pools[i].blockalign = mpool->minpoolsize;
+#endif
       ret = mempool_init(pools + i, name);
       if (ret < 0)
         {
@@ -509,7 +511,7 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
 
   blk = (FAR char *)blk - (((FAR char *)blk -
                            ((FAR char *)dict->addr + mpool->minpoolsize)) %
-                           dict->pool->blocksize);
+                           MEMPOOL_REALBLOCKSIZE(dict->pool));
   mempool_free(dict->pool, blk);
   return 0;
 }
