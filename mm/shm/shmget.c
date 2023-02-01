@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/pgalloc.h>
+#include <nuttx/sched.h>
 
 #include "shm/shm.h"
 
@@ -268,7 +269,7 @@ static int shm_create(key_t key, size_t size, int shmflg)
   /* Save the process ID of the creator */
 
   region = &g_shminfo.si_region[shmid];
-  region->sr_ds.shm_cpid = getpid();
+  region->sr_ds.shm_cpid = _SCHED_GETPID();
 
   /* Return the shared memory ID */
 

@@ -583,7 +583,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
           /* Save the notification events */
 
           dev->md_notify_event      = macarg->event;
-          dev->md_notify_pid        = getpid();
+          dev->md_notify_pid        = nxsched_getpid();
           dev->md_notify_registered = true;
 
           ret = OK;

@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/signal.h>
+#include <nuttx/sched.h>
 
 #include "libc.h"
 #include "aio/aio.h"
@@ -234,7 +235,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   sighand->list = list;
   sighand->sig  = *sig;
   sighand->nent = nent;
-  sighand->pid  = getpid();
+  sighand->pid  = _SCHED_GETPID();
 
   /* Save this structure as the private data attached to each aiocb */
 
@@ -664,7 +665,7 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
         }
       else
         {
-          status = nxsig_notification(getpid(), sig,
+          status = nxsig_notification(_SCHED_GETPID(), sig,
                                       SI_ASYNCIO, &aiocbp->aio_sigwork);
           if (status < 0 && ret == OK)
             {

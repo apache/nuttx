@@ -939,7 +939,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                   /* Save the notification events */
 
                   priv->md_notify_event       = netmac->u.event;
-                  priv->md_notify_pid         = getpid();
+                  priv->md_notify_pid         = nxsched_getpid();
                   priv->md_notify_registered  = true;
                   ret = OK;
                 }

@@ -607,7 +607,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             opriv->bo_notify.bn_press   = notify->bn_press;
             opriv->bo_notify.bn_release = notify->bn_release;
             opriv->bo_notify.bn_event   = notify->bn_event;
-            opriv->bo_pid               = getpid();
+            opriv->bo_pid               = nxsched_getpid();
 
             /* Enable/disable interrupt handling */
 

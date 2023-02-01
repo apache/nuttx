@@ -69,7 +69,7 @@ int _fstat_r(struct _reent *r, int fd, struct stat *statbuf)
 
 int _getpid_r(struct _reent *r)
 {
-  return getpid();
+  return nxsched_getpid();
 }
 
 int _kill_r(struct _reent *r, int pid, int sig)

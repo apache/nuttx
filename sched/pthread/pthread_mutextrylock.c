@@ -76,7 +76,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
   if (mutex != NULL)
     {
-      pid_t mypid = gettid();
+      pid_t mypid = nxsched_gettid();
 
       /* Make sure the semaphore is stable while we make the following
        * checks.  This all needs to be one atomic action.

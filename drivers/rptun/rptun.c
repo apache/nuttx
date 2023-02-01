@@ -255,7 +255,7 @@ static void rptun_wakeup_rx(FAR struct rptun_priv_s *priv)
 
 static void rptun_in_recursive(int tid, FAR void *arg)
 {
-  *((FAR bool *)arg) = (gettid() == tid);
+  *((FAR bool *)arg) = (nxsched_gettid() == tid);
 }
 
 static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
@@ -271,7 +271,7 @@ static int rptun_thread(int argc, FAR char *argv[])
   FAR struct rptun_priv_s *priv;
 
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
-  priv->tid = gettid();
+  priv->tid = nxsched_gettid();
 
   while (1)
     {
@@ -295,7 +295,7 @@ static void rptun_wakeup_rx(FAR struct rptun_priv_s *priv)
 
 static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
 {
-  return gettid() == priv->tid;
+  return nxsched_gettid() == priv->tid;
 }
 #endif
 

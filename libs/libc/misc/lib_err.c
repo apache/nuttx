@@ -27,6 +27,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <nuttx/sched.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -66,9 +68,10 @@ void vwarn(FAR const char *fmt, va_list ap)
 #endif
 
 #ifdef CONFIG_FILE_STREAM
-  fprintf(stderr, "%d: %pV: %s\n", gettid(), &vaf, strerror(error));
+  fprintf(stderr, "%d: %pV: %s\n", _SCHED_GETTID(), &vaf, strerror(error));
 #else
-  dprintf(STDERR_FILENO, "%d: %pV: %s\n", gettid(), &vaf, strerror(error));
+  dprintf(STDERR_FILENO, "%d: %pV: %s\n", _SCHED_GETTID(),
+                                          &vaf, strerror(error));
 #endif
 
 #ifdef va_copy
@@ -97,9 +100,9 @@ void vwarnx(FAR const char *fmt, va_list ap)
 #endif
 
 #ifdef CONFIG_FILE_STREAM
-  fprintf(stderr, "%d: %pV\n", gettid(), &vaf);
+  fprintf(stderr, "%d: %pV\n", _SCHED_GETTID(), &vaf);
 #else
-  dprintf(STDERR_FILENO, "%d: %pV\n", gettid(), &vaf);
+  dprintf(STDERR_FILENO, "%d: %pV\n", _SCHED_GETTID(), &vaf);
 #endif
 
 #ifdef va_copy
