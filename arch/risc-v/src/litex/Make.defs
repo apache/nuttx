@@ -43,3 +43,7 @@ endif
 ifeq ($(CONFIG_LITEX_ETHMAC),y)
 CHIP_CSRCS += litex_emac.c
 endif
+
+ifeq ($(CONFIG_LITEX_PWM),y)
+CHIP_CSRCS += litex_pwm.c
+endif
