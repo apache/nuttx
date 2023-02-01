@@ -48,6 +48,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -198,7 +199,7 @@ static void tcp_snd_wnd_init(FAR struct tcp_conn_s *conn,
   ninfo("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
 }
 
-static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
+static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
                                FAR struct tcp_hdr_s *tcp)
 {
   uint32_t ackseq = tcp_getsequence(tcp->ackno);
@@ -254,7 +255,11 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
       conn->snd_wl1 = seq;
       conn->snd_wl2 = ackseq;
       conn->snd_wnd = wnd;
+
+      return true;
     }
+
+  return false;
 }
 
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
@@ -1141,7 +1146,16 @@ found:
   if ((tcp->flags & TCP_ACK) != 0 &&
       (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD)
     {
-      tcp_snd_wnd_update(conn, tcp);
+      if (tcp_snd_wnd_update(conn, tcp))
+        {
+          /* Window updated, set the acknowledged flag. */
+
+          flags |= TCP_ACKDATA;
+
+          /* Reset the retransmission timer. */
+
+          tcp_update_retrantimer(conn, conn->rto);
+        }
     }
 
   /* Do different things depending on in what state the connection is. */
