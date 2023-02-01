@@ -245,6 +245,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libasound2-dev libasound2-dev:i386 \
   libc6-dev-i386 \
   libcurl4-openssl-dev \
+  libmp3lame-dev:i386 \
   libmad0-dev:i386 \
   libncurses5-dev \
   libpulse-dev libpulse-dev:i386 \
