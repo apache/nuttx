@@ -24,6 +24,7 @@
 
 # Control build verbosity
 #
+#  V=0:   Exit silent mode
 #  V=1,2: Enable echo of commands
 #  V=2:   Enable bug/verbose options in tools and scripts
 
@@ -31,24 +32,18 @@ ifeq ($(V),1)
 export Q :=
 else ifeq ($(V),2)
 export Q :=
-else ifeq ($(V),3)
-export Q := @
 else
 export Q := @
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   export SHELL=cmd
-else ifeq ($(BASH),)
+else ifeq ($(V),)
   BASHCMD := $(shell command -v bash 2> /dev/null)
   ifneq ($(BASHCMD),)
-    ifneq ($(Q),)
-      ifneq ($(V),3)
-        export BASH=$(BASHCMD)
-        export ECHO_BEGIN=@echo -ne "\033[1K\r"
-        export ECHO_END=$(ECHO_BEGIN)
-      endif
-    endif
+    export SHELL=$(BASHCMD)
+    export ECHO_BEGIN=@echo -ne "\033[1K\r"
+    export ECHO_END=$(ECHO_BEGIN)
   endif
 endif
 
@@ -285,7 +280,6 @@ endif
 # <filename>.S)
 
 define PREPROCESS
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"CPP: $1->$2 "
 	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 	$(ECHO_END)
@@ -304,7 +298,6 @@ endef
 # change the options used with the single file <filename>.c
 
 define COMPILE
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"CC: $1 "
 	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $3 $($(strip $1)_CFLAGS) $1 -o $2
 	$(ECHO_END)
@@ -324,7 +317,6 @@ endef
 # extension .cpp could also be used.  The same applies mutatis mutandis.
 
 define COMPILEXX
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"CXX: $1 "
 	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $3 $($(strip $1)_CXXFLAGS) $1 -o $2
 	$(ECHO_END)
@@ -344,7 +336,6 @@ endef
 # applies mutatis mutandis.
 
 define COMPILERUST
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"RUSTC: $1 "
 	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $1 -o $2
 	$(ECHO_END)
@@ -364,7 +355,6 @@ endef
 # applies mutatis mutandis.
 
 define COMPILEZIG
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"ZIG: $1 "
 	$(Q) $(ZIG) build-obj $(ZIGFLAGS) $($(strip $1)_ZIGFLAGS) --name $(basename $2) $1
 	$(ECHO_END)
@@ -391,7 +381,6 @@ endef
 # is used by some toolchains.  The same applies mutatis mutandis.
 
 define ASSEMBLE
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"AS: $1 "
 	$(Q) $(CCACHE) $(CC) -c $(AFLAGS) $1 $($(strip $1)_AFLAGS) -o $2
 	$(ECHO_END)
@@ -401,7 +390,6 @@ endef
 # Example: $(call INSTALL_LIB, libabc.a, $(TOPDIR)/staging/)
 
 define INSTALL_LIB
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"IN: $1 -> $2 "
 	$(Q) install -m 0644 $1 $2
 	$(ECHO_END)
@@ -424,7 +412,6 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE_ADD
-	$(if $(BASH),$(eval SHELL=$(BASH)))
 	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} $(2) "
 	$(Q) $(AR) $1 $(2)
 	$(ECHO_END)
