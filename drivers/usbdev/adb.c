@@ -1189,11 +1189,11 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                     }
                     break;
 
+#ifdef CONFIG_USBDEV_DUALSPEED
                   case USB_DESC_TYPE_DEVICEQUALIFIER:
                     break;
                   case USB_DESC_TYPE_OTHERSPEEDCONFIG:
-                    break;
-
+#endif /* CONFIG_USBDEV_DUALSPEED */
                   /* If the serial device is used in as part of a composite
                    * device, then the configuration descriptor is provided by
                    * logic in the composite device implementation.

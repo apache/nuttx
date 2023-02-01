@@ -1353,11 +1353,29 @@ static void cdcecm_mkepdesc(int epidx,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_USBDEV_DUALSPEED
+static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
+                                FAR struct usbdev_devinfo_s *devinfo,
+                                uint8_t speed, uint8_t type)
+#else
 static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
                                 FAR struct usbdev_devinfo_s *devinfo)
+#endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = NULL;
   int16_t len = 0;
+  bool is_high_speed = false;
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+  is_high_speed = (speed == USB_SPEED_HIGH);
+
+  /* Check for switches between high and full speed */
+
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
+    {
+      is_high_speed = !is_high_speed;
+    }
+#endif
 
 #ifndef CONFIG_CDCECM_COMPOSITE
   if (desc)
@@ -1529,12 +1547,6 @@ static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
 
   len += USB_SIZEOF_IFDESC;
 
-  #ifdef CONFIG_USBDEV_DUALSPEED
-  bool is_high_speed = USB_SPEED_HIGH;
-  #else
-  bool is_high_speed = USB_SPEED_LOW;
-  #endif
-
   if (desc)
     {
       FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)desc;
@@ -1601,9 +1613,17 @@ static int cdcecm_getdescriptor(FAR struct cdcecm_driver_s *self,
       break;
 #endif
 
+#ifdef CONFIG_USBDEV_DUALSPEED
+    case USB_DESC_TYPE_OTHERSPEEDCONFIG:
+#endif /* CONFIG_USBDEV_DUALSPEED */
     case USB_DESC_TYPE_CONFIG:
       {
+#ifdef CONFIG_USBDEV_DUALSPEED
+        return cdcecm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
+                                self->usbdev.speed, type);
+#else
         return cdcecm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo);
+#endif
       }
       break;
 
