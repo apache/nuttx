@@ -35,6 +35,18 @@
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if CONFIG_MM_BACKTRACE >= 0
+#define MEMPOOL_REALBLOCKSIZE(pool) (ALIGN_UP(pool->blocksize + \
+                                     sizeof(struct mempool_backtrace_s), \
+                                     pool->blockalign))
+#else
+#define MEMPOOL_REALBLOCKSIZE(pool) (pool->blocksize)
+#endif
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -70,6 +82,9 @@ struct mempool_procfs_entry_s
 struct mempool_s
 {
   size_t     blocksize;     /* The size for every block in mempool */
+#if CONFIG_MM_BACKTRACE >= 0
+  size_t     blockalign;    /* The alignment of the blocksize */
+#endif
   size_t     initialsize;   /* The initialize size in normal mempool */
   size_t     interruptsize; /* The initialize size in interrupt mempool */
   size_t     expandsize;    /* The size of expand block every time for mempool */
@@ -100,6 +115,18 @@ struct mempool_s
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
 };
+
+#if CONFIG_MM_BACKTRACE >= 0
+struct mempool_backtrace_s
+{
+  FAR struct list_node node;
+  pid_t pid;
+#  if CONFIG_MM_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_MM_BACKTRACE];
+#  endif
+};
+#endif
+
 
 struct mempoolinfo_s
 {
