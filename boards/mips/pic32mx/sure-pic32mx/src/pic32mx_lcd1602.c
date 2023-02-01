@@ -57,6 +57,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -95,16 +96,6 @@
 
 #ifndef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 100
-#endif
-
-/* The ever-present MIN/MAX macros ******************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
 /* LCD **********************************************************************/

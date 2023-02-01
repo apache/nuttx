@@ -26,22 +26,11 @@
 
 #include <assert.h>
 #include <fixedmath.h>
+#include <sys/param.h>
 
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types

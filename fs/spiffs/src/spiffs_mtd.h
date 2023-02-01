@@ -32,6 +32,8 @@ extern "C"
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
+
 #include <nuttx/mtd/mtd.h>
 
 /****************************************************************************
@@ -57,16 +59,6 @@ extern "C"
 #  define spiffs_mtdinfo                _info
 #else
 #  define spiffs_mtdinfo                _none
-#endif
-
-/* Commonly used Macros */
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 /****************************************************************************

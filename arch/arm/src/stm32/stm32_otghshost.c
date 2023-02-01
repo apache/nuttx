@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -149,16 +150,6 @@
 #define STM32_FLUSH_DELAY         200000      /* In loop counts */
 #define STM32_SETUP_DELAY         SEC2TICK(5) /* 5 seconds in system ticks */
 #define STM32_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
-
-/* Ever-present MIN/MAX macros */
-
-#ifndef MIN
-#  define  MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define  MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types

@@ -31,10 +31,6 @@
 #include <crypto/aes.h>
 #include <crypto/cmac.h>
 
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
 #define LSHIFT(v, r) do \
   { \
     int i; \

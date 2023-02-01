@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -216,16 +217,6 @@
 #define STM32L4_TRACEINTID_WKUP               0x001e
 #define STM32L4_TRACEINTID_EP0SETUPOUT        0x001f
 #define STM32L4_TRACEINTID_EP0SETUPOUTDATA    0x0020
-
-/* Ever-present MIN and MAX macros */
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /* Byte ordering in host-based values */
 

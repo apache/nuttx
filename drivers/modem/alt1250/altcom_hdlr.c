@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <nuttx/modem/alt1250.h>
 #include <nuttx/wireless/lte/lte_ioctl.h>
@@ -50,10 +51,6 @@
 
 #ifndef ARRAY_SZ
 #  define ARRAY_SZ(array) (sizeof(array)/sizeof(array[0]))
-#endif
-
-#ifndef MIN
-#  define MIN(a,b)  (((a) < (b)) ? (a) : (b))
 #endif
 
 #define ALTCOM_GETEDRX_TYPE_UE         0

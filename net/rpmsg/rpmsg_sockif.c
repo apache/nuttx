@@ -28,6 +28,7 @@
 #include <poll.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/param.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -45,10 +46,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
 
 #define RPMSG_SOCKET_CMD_SYNC           1
 #define RPMSG_SOCKET_CMD_DATA           2

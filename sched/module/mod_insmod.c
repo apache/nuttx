@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
@@ -37,14 +38,6 @@
 #include <nuttx/lib/modlib.h>
 
 #ifdef CONFIG_MODULE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Functions

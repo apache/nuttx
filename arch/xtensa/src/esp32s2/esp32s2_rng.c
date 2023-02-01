@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/param.h>
 #include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -46,14 +47,6 @@
 
 #if defined(CONFIG_ESP32S2_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Function Prototypes

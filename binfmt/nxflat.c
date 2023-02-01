@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
@@ -55,10 +56,6 @@
 # define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
-#endif
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 /****************************************************************************

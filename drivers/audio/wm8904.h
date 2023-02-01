@@ -31,6 +31,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/param.h>
+
 #include <nuttx/compiler.h>
 
 #include <pthread.h>
@@ -1052,16 +1055,6 @@
 
 #define WM8904_FRAMELEN8              14        /* Bits per frame for 8-bit data */
 #define WM8904_FRAMELEN16             32        /* Bits per frame for 16-bit data */
-
-/* Commonly defined and redefined macros */
-
-#ifndef MIN
-#  define MIN(a,b)                   (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b)                   (((a) > (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Public Types

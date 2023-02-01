@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
@@ -54,10 +55,6 @@
 
 #define SET_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, 0, (_b))
 #define CLR_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, (_b), 0)
-
-#ifndef MIN
-#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #ifndef ALIGN_UP
 #  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))

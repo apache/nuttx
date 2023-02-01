@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/param.h>
 #include <nuttx/efuse/efuse.h>
 
 #include "xtensa.h"
@@ -41,8 +42,6 @@
 #define EFUSE_CONF_READ    0x5aa5 /* eFuse_read_op_ena, release force. */
 #define EFUSE_CMD_PGM      0x02   /* Command to program. */
 #define EFUSE_CMD_READ     0x01   /* Command to read. */
-
-#define MIN(a, b)          ((a) < (b) ? (a) : (b))
 
 /****************************************************************************
  * Private Data

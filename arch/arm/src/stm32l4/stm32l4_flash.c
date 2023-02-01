@@ -41,6 +41,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "stm32l4_rcc.h"
 #include "stm32l4_waste.h"
@@ -87,10 +88,6 @@
 #define FLASH_SR_ALLERRS   (FLASH_SR_PGSERR | FLASH_SR_SIZERR | \
                             FLASH_SR_PGAERR | FLASH_SR_WRPERR | \
                             FLASH_SR_PROGERR)
-
-#ifndef MIN
-#  define MIN(a, b)        ((a) < (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Data

@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sys/param.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
@@ -36,18 +37,6 @@
 #include "pcf8574.h"
 
 #ifdef CONFIG_IOEXPANDER_PCF8574
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Function Prototypes

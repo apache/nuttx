@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <sys/param.h>
 
 #include <nuttx/userspace.h>
 
@@ -36,18 +37,6 @@
 #include "sam_mpuinit.h"
 
 #ifdef CONFIG_ARM_MPU
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Data

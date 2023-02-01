@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
@@ -73,10 +74,6 @@
 
 #define EMMC_MSIZE                (6)         /* Burst size is 512B */
 #define EMMC_FIFO_DEPTH           (0x100)     /* FIFO size is 1KB */
-
-#ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types
