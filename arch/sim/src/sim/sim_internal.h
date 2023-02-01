@@ -177,7 +177,8 @@ void host_mallinfo(int *aordblks, int *uordblks);
 uint64_t host_gettime(bool rtc);
 void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
-int host_settimer(int *irq);
+int host_timerirq(void);
+int host_settimer(uint64_t nsec);
 
 /* sim_sigdeliver.c *********************************************************/
 
