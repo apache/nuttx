@@ -1179,6 +1179,13 @@ config LCD_RLANDSCAPE
 		refers one of two orientations where the display is wider than it is
 		tall (LCD_LANDSCAPE is the other).
 
+config LCD_DYN_ORIENTATION
+	bool "Dynamic orientation"
+	---help---
+		Instead of deciding for a fixed orientation while compile time, choose to
+		have the possibility to switch the orientation while runtime. Orientation
+		is a parameter of lcdinitialize().
+
 endchoice
 
 config LCD_LPM013M091A
