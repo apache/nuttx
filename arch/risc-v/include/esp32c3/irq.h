@@ -46,8 +46,7 @@
 
 /* RESERVED interrupts: 0 to 14 */
 
-#define ESP32C3_PERIPH_MAC                 0  /* Reserved, but needed by WiFi driver */
-#define ESP32C3_PERIPH_MAC_NMI             1  /* Reserved, but needed by WiFi driver */
+#define ESP32C3_PERIPH_WMAC                1  /* Reserved, but needed by WiFi driver */
 
 #define ESP32C3_PERIPH_BT_BB               5 /* Reserved, but needed by BLE driver */
 #define ESP32C3_PERIPH_RWBLE               8 /* Reserved, but needed by BLE driver */
@@ -119,11 +118,7 @@
 #define ESP32C3_NCPUINTS               32
 #define ESP32C3_CPUINT_MAX             (ESP32C3_NCPUINTS - 1)
 
-#define ESP32C3_CPUINT_MAC             0
-#define ESP32C3_CPUINT_MAC_NMI         1
-
-#define ESP32C3_CPUINT_BT_BB           5
-#define ESP32C3_CPUINT_RWBLE_IRQ       8
+#define ESP32C3_CPUINT_ALWAYS_RSVD     0
 
 #define ESP32C3_CPUINT_PERIPHSET       0xffffffff
 
@@ -149,8 +144,7 @@
 
 /* Peripheral IRQs */
 
-#define ESP32C3_IRQ_MAC                 (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_MAC)
-#define ESP32C3_IRQ_MAC_NMI             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_MAC_NMI)
+#define ESP32C3_IRQ_WMAC                (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_WMAC)
 
 #define ESP32C3_IRQ_BT_BB               (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_BT_BB)
 #define ESP32C3_IRQ_RWBLE               (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_RWBLE)
