@@ -42,21 +42,6 @@
 #define ALIGN_UP(x, a) (((x) + ((a) - 1)) & (~((a) - 1)))
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-#if CONFIG_MM_BACKTRACE >= 0
-struct mempool_backtrace_s
-{
-  FAR struct list_node node;
-  pid_t pid;
-#  if CONFIG_MM_BACKTRACE > 0
-  FAR void *backtrace[CONFIG_MM_BACKTRACE];
-#  endif
-};
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -143,13 +128,7 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
 
 int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 {
-#if CONFIG_MM_BACKTRACE >= 0
-  size_t blocksize = ALIGN_UP(pool->blocksize +
-                              sizeof(struct mempool_backtrace_s),
-                              pool->blocksize);
-#else
-  size_t blocksize = pool->blocksize;
-#endif
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
 
   sq_init(&pool->queue);
   sq_init(&pool->iqueue);
@@ -262,13 +241,7 @@ retry:
           spin_unlock_irqrestore(&pool->lock, flags);
           if (pool->expandsize > sizeof(sq_entry_t))
             {
-#if CONFIG_MM_BACKTRACE >= 0
-              size_t blocksize = ALIGN_UP(pool->blocksize +
-                                 sizeof(struct mempool_backtrace_s),
-                                 pool->blocksize);
-#else
-              size_t blocksize = pool->blocksize;
-#endif
+              size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
               size_t nexpand = (pool->expandsize - sizeof(sq_entry_t)) /
                                blocksize;
               size_t size = nexpand * blocksize + sizeof(sq_entry_t);
@@ -326,17 +299,13 @@ out_with_lock:
 void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 {
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
 #if CONFIG_MM_BACKTRACE >= 0
-  size_t blocksize =  ALIGN_UP(pool->blocksize +
-                               sizeof(struct mempool_backtrace_s),
-                               pool->blocksize);
   FAR struct mempool_backtrace_s *buf =
     (FAR struct mempool_backtrace_s *)((FAR char *)blk + pool->blocksize);
 
   list_delete(&buf->node);
 #else
-  size_t blocksize = pool->blocksize;
-
   pool->nalloc--;
 #endif
 
@@ -557,13 +526,7 @@ void mempool_memdump(FAR struct mempool_s *pool, pid_t pid)
 
 int mempool_deinit(FAR struct mempool_s *pool)
 {
-#if CONFIG_MM_BACKTRACE >= 0
-  size_t blocksize = ALIGN_UP(pool->blocksize +
-                              sizeof(struct mempool_backtrace_s),
-                              pool->blocksize);
-#else
-  size_t blocksize = pool->blocksize;
-#endif
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
   FAR sq_entry_t *blk;
   size_t count = 0;
 
