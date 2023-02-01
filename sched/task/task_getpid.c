@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpid
+ * Name: nxsched_getpid
  *
  * Description:
  *   Get the Process ID of the currently executing task.
@@ -44,14 +44,14 @@
  *   None
  *
  * Returned Value:
- *   Normally when called from user applications, getpid() will return the
- *   Process ID of the currently executing task. that is, the main task
- *   for the task groups. There is no specification for any errors
- *   returned from getpid().
+ *   Normally when called from user applications, nxsched_getpid() will
+ *   return the Process ID of the currently executing task. that is,
+ *   the main task for the task groups. There is no specification for
+ *   any errors returned from nxsched_getpid().
  *
  ****************************************************************************/
 
-pid_t getpid(void)
+pid_t nxsched_getpid(void)
 {
   FAR struct tcb_s *rtcb;
 
@@ -77,4 +77,26 @@ pid_t getpid(void)
    */
 
   return IDLE_PROCESS_ID;
+}
+
+/****************************************************************************
+ * Name: getpid
+ *
+ * Description:
+ *   Get the Process ID of the currently executing task.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Normally when called from user applications, getpid() will return the
+ *   Process ID of the currently executing task. that is, the main task
+ *   for the task groups. There is no specification for any errors
+ *   returned from getpid().
+ *
+ ****************************************************************************/
+
+pid_t getpid(void)
+{
+  return nxsched_getpid();
 }
