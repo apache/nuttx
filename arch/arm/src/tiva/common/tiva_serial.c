@@ -871,12 +871,36 @@ static void up_set_format(struct uart_dev_s *dev)
 
   up_serialout(priv, TIVA_UART_LCRH_OFFSET, lcrh);
 
+  /* Enable or disable CTS/RTS, if applicable */
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL)
+  if (priv->iflow)
+    {
+      ctl |= UART_CTL_RTSEN;
+    }
+  else
+    {
+      ctl &= ~UART_CTL_RTSEN;
+    }
+#endif
+
+#if defined(CONFIG_SERIAL_OFLOWCONTROL)
+  if (priv->oflow)
+    {
+      ctl |= UART_CTL_CTSEN;
+    }
+  else
+    {
+      ctl &= ~UART_CTL_CTSEN;
+    }
+#endif
+
   if (was_active)
     {
-      ctl  = up_serialin(priv, TIVA_UART_CTL_OFFSET);
       ctl |= UART_CTL_UARTEN;
-      up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
     }
+
+  up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
 }
 
 /****************************************************************************
@@ -923,32 +947,10 @@ static int up_setup(struct uart_dev_s *dev)
   lcrh |= UART_LCRH_FEN;
   up_serialout(priv, TIVA_UART_LCRH_OFFSET, lcrh);
 
-  /* Enable Rx, Tx, CTS/RTS (if requested), and the UART */
+  /* Enable Rx, Tx, and the UART */
 
   ctl = up_serialin(priv, TIVA_UART_CTL_OFFSET);
   ctl |= (UART_CTL_UARTEN | UART_CTL_TXE | UART_CTL_RXE);
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL)
-  if (priv->iflow)
-    {
-      ctl |= UART_CTL_RTSEN;
-    }
-  else
-    {
-      ctl &= ~(UART_CTL_RTSEN);
-    }
-#endif
-
-#if defined(CONFIG_SERIAL_OFLOWCONTROL)
-  if (priv->oflow)
-    {
-      ctl |= UART_CTL_CTSEN;
-    }
-  else
-    {
-      ctl &= ~(UART_CTL_CTSEN);
-    }
-#endif
 
   up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
 
@@ -1156,8 +1158,22 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             ccflag |= PARENB | PARODD;
           }
 
-        /* TODO append support for HUPCL, CLOCAL and flow control bits
-         * as well as os-compliant break sequence
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        if (priv->oflow)
+          {
+            ccflag |= CCTS_OFLOW;
+          }
+#endif
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        if (priv->iflow)
+          {
+            ccflag |= CRTS_IFLOW;
+          }
+#endif
+
+        /* TODO append support for HUPCL and CLOCAL as well as os-compliant
+         * break sequence
          */
 
         termiosp->c_cflag = ccflag;
@@ -1200,6 +1216,13 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
         priv->bits      = (termiosp->c_cflag & CSIZE) + 5;
         priv->baud      = cfgetispeed(termiosp);
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+#endif
 
         /* Effect the changes immediately - note that we do not implement
          * TCSADRAIN / TCSAFLUSH
