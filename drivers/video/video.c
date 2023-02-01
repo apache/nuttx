@@ -236,7 +236,8 @@ static int video_reqbufs(FAR struct video_mng_s *vmng,
 static int video_qbuf(FAR struct video_mng_s *vmng,
                       FAR struct v4l2_buffer *buf);
 static int video_dqbuf(FAR struct video_mng_s *vmng,
-                       FAR struct v4l2_buffer *buf);
+                       FAR struct v4l2_buffer *buf,
+                       int oflags);
 static int video_cancel_dqbuf(FAR struct video_mng_s *vmng,
                               enum v4l2_buf_type type);
 static int video_g_fmt(FAR struct video_mng_s *priv,
@@ -1304,7 +1305,8 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
 }
 
 static int video_dqbuf(FAR struct video_mng_s *vmng,
-                       FAR struct v4l2_buffer *buf)
+                       FAR struct v4l2_buffer *buf,
+                       int oflags)
 {
   irqstate_t           flags;
   FAR video_type_inf_t *type_inf;
@@ -1326,6 +1328,11 @@ static int video_dqbuf(FAR struct video_mng_s *vmng,
   container = video_framebuff_dq_valid_container(&type_inf->bufinf);
   if (container == NULL)
     {
+      if (oflags & O_NONBLOCK)
+        {
+          return -EAGAIN;
+        }
+
       /* Not yet done capture. Wait done */
 
       dqbuf_wait_flg = &type_inf->wait_capture.dqbuf_wait_flg;
@@ -3009,7 +3016,8 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case VIDIOC_DQBUF:
-        ret = video_dqbuf(priv, (FAR struct v4l2_buffer *)arg);
+        ret = video_dqbuf(priv, (FAR struct v4l2_buffer *)arg,
+                          filep->f_oflags);
         break;
 
       case VIDIOC_CANCEL_DQBUF:
