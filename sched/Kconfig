@@ -1365,6 +1365,14 @@ if SIG_DEFAULT
 
 comment "Per-signal Default Actions"
 
+config SIG_SIGKILL_ACTION
+	bool "Enable all SIGKILL signals"
+	default y
+	---help---
+		Enable the default action for SIGHUP SIGILL SIGTRAP SIGABRT SIGBUS
+		SIGFPE SIGINT SIGKILL SIGSEGV SIGQUIT SIGTERM SIGXCPU AND
+		SIGXFSZ (terminate the task).
+
 config SIG_SIGUSR1_ACTION
 	bool "SIGUSR1"
 	default n
@@ -1383,14 +1391,36 @@ config SIG_SIGUSR2_ACTION
 		Backward compatible behavior would require that the application use
 		sigaction() to ignore SIGUSR2.
 
-config SIG_SIGALRM_ACTION
-	bool "SIGALRM"
+config SIG_SIGPIPE_ACTION
+	bool "SIGPIPE"
 	default n
 	---help---
-		Enable the default action for SIGALRM (terminate the task)
+		Enable the default action for SIGPIPE (terminate the task).
+
+config SIG_SIGALRM_ACTION
+	bool "SIGALRM SIGVTALRM"
+	default n
+	---help---
+		Enable the default action for SIGALRM AND SIGVTALRM(terminate the task)
 		Make sure that your applications are expecting this POSIX behavior.
 		Backward compatible behavior would require that the application use
 		sigaction() to ignore SIGALRM.
+
+config SIG_SIGSTOP_ACTION
+	bool "SIGSTOP SIGTSTP SIGCONT SIGTTIN SIGTTOU"
+	default y
+	---help---
+		Enable the default action for SIGSTOP SIGTSTP SIGCONT SIGTTIN SIGTTOU
+		(suspend the task) and SIGCONT (resume the task).
+
+config SIG_SIGPROF_ACTION
+	bool "SIGPROF"
+	default n
+	---help---
+		Enable the default action for SIGPROF (nxsig_abnormal_termination)
+		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGPROF.
 
 config SIG_SIGPOLL_ACTION
 	bool "SIGPOLL"
@@ -1402,120 +1432,99 @@ config SIG_SIGPOLL_ACTION
 		Backward compatible behavior would require that the application use
 		sigaction() to ignore SIGPOLL.
 
-config SIG_SIGSTOP_ACTION
-	bool "SIGSTOP SIGTSTP, and SIGCONT"
-	default y
-	---help---
-		Enable the default action for SIGSTOP and SIGTSTP (suspend the
-		task) and SIGCONT (resume the task).
-
-config SIG_SIGKILL_ACTION
-	bool "SIGINT SIGKILL SIGQUIT and SIGTERM"
-	default y
-	---help---
-		Enable the default action for SIGINT and SIGKILL (terminate the
-		task).
-
-config SIG_SIGPIPE_ACTION
-	bool "SIGPIPE"
-	default y
-	---help---
-		Enable the default action for SIGPIPE (terminate the task).
-
 endif # SIG_DEFAULT
 
 menu "Signal Numbers"
 
 comment "Standard Signal Numbers"
 
-config SIG_SIGUSR1
-	int "SIGUSR1"
+config SIG_HUP
+	int "SIGHUP"
 	default 1
 	---help---
-		Value of standard user signal 1 (SIGUSR1). Default: 1
-
-config SIG_SIGUSR2
-	int "SIGUSR2"
-	default 2
-	---help---
-		Value of standard user signal 2 (SIGUSR2). Default: 2
-
-config SIG_SIGALRM
-	int "SIGALRM"
-	default 3
-	---help---
-		Default the signal number used with POSIX timers (SIGALRM).
-		Default: 3
-
-config SIG_SIGCHLD
-	int "SIGCHLD"
-	default 4
-	depends on SCHED_HAVE_PARENT
-	---help---
-		The SIGCHLD signal is sent to the parent of a child process when it
-		exits, is interrupted (stopped), or resumes after being interrupted.
-		Default: 4
-
-config SIG_POLL
-	int "SIGPOLL"
-	default 5
-	depends on FS_AIO
-	---help---
-		The SIGPOLL signal is sent to a process when an asynchronous I/O
-		event occurs (meaning it has been polled).  Default: 5
-
-if SIG_DEFAULT
-
-config SIG_STOP
-	int "SIGSTOP"
-	default 6
-	---help---
-		Suspend/pause a task.  SIGSTOP may not be caught or ignored.
-
-config SIG_TSTP
-	int "SIGTSTP"
-	default 7
-	---help---
-		Suspend/pause a task.  Unlike SIGSTOP, this signal can be caught or
-		ignored.
-
-config SIG_CONT
-	int "SIGCONT"
-	default 8
-	---help---
-		Resume a suspended/paused task.  SIGSTOP only has an action when
-		send to a stopped task.  SIGCONT is ignored by other task.  SIGCONT
-		may not be caught or ignored by a stopped task.
-
-config SIG_KILL
-	int "SIGKILL"
-	default 9
-	---help---
-		The SIGKILL signal is sent to cause a task termination event.
-		SIGKILL may not be caught or ignored.
+		The SIGHUP would be sent to programs when the serial line was dropped,
+		often because the connected user terminated the connection by hanging up
+		the modem. The system would detect the line was dropped via the lost
+		Data Carrier Detect (DCD) signal.
 
 config SIG_INT
 	int "SIGINT"
-	default 10
+	default 2
 	---help---
 		The SIGINT signal is sent to cause a task termination event.
 		SIGINT may be ignored or caught by the receiving task.
 
 config SIG_QUIT
 	int "SIGQUIT"
+	default 3
+	---help---
+		Similar to SIGINT, but controlled by the QUIT character (usually Ctrl+\).
+		When a process exits due to a SIGQUIT will generate a core file when it exits,
+		in the sense that it is similar to a program error signal.
+
+
+config SIG_ILL
+	int "SIGILL"
+	default 4
+	---help---
+		The SIGILL executed an illegal instruction. It is usually because of an
+		error in the executable file itself or an attempt to execute a data segment.
+		This signal may also be generated when the stack overflows.
+
+config SIG_TRAP
+	int "SIGTRAP"
+	default 5
+	---help---
+		Trace trap signal, generated by a breakpoint or other trap instruction.
+		Used by debugger.
+
+config SIG_ABRT
+	int "SIGABRT"
+	default 6
+	---help---
+
+config SIG_BUS
+	int "SIGBUS"
+	default 7
+	---help---
+		Signal generated by system bus error, illegal address, including memory
+		address alignment (alignment) error. eg: Accessing an integer four words long,
+		but its address is not a multiple of 4.
+
+config SIG_FPE
+	int "SIGFPE"
+	default 8
+	---help---
+		Issued in case of a fatal arithmetic error. This includes not only
+		floating point errors, but also overflow and all other arithmetic errors such
+		as division by zero.
+
+config SIG_KILL
+	int "SIGKILL"
+	default 9
+	---help---
+		A signal that can terminate any process and can only be sent by the administrator;
+		the signal will not be captured and ignored.
+
+config SIG_USR1
+	int "SIGUSR1"
+	default 10
+	---help---
+		Value of standard user signal 1 (SIGUSR1). Default: 10
+
+config SIG_SEGV
+	int "SIGSEGV"
 	default 11
 	---help---
-		The SIGINT signal is sent to cause a task termination event.
-		SIGQUIT may be ignored or caught by the receiving task.
+		Illegal use of memory address signal by attempting to access memory that is not
+		allocated to you, or attempting to write to a memory address that does not have
+		write permission.
 
-config SIG_TERM
-	int "SIGTERM"
+config SIG_USR2
+	int "SIGUSR2"
 	default 12
 	---help---
-		The SIGINT signal is sent to cause a task termination event.
-		SIGTERM may be ignored or caught by the receiving task.
-
-endif # SIG_DEFAULT
+		Value of standard user signal 2 (SIGUSR2). Default: 12
 
 config SIG_PIPE
 	int "SIGPIPE"
@@ -1525,18 +1534,53 @@ config SIG_PIPE
 		This signal is generated when write on a pipe with no one to read it.
 		SIGPIPE may be ignored.
 
-config SIG_HUP
-	int "SIGHUP"
+config SIG_ALRM
+	int "SIGALRM"
 	default 14
 	---help---
-		The SIGHUP would be sent to programs when the serial line was dropped,
-		often because the connected user terminated the connection by hanging up
-		the modem. The system would detect the line was dropped via the lost
-		Data Carrier Detect (DCD) signal.
+		Default the signal number used with POSIX timers (SIGALRM).
+		Default: 14
+
+config SIG_TERM
+	int "SIGTERM"
+	default 15
+	---help---
+		The SIGINT signal is sent to cause a task termination event.
+		SIGTERM may be ignored or caught by the receiving task.
+
+config SIG_CHLD
+	int "SIGCHLD"
+	default 17
+	depends on SCHED_HAVE_PARENT
+	---help---
+		The SIGCHLD signal is sent to the parent of a child process when it
+		exits, is interrupted (stopped), or resumes after being interrupted.
+
+config SIG_CONT
+	int "SIGCONT"
+	default 18
+	---help---
+		Resume a suspended/paused task.  SIGSTOP only has an action when
+		send to a stopped task.  SIGCONT is ignored by other task.  SIGCONT
+		may not be caught or ignored by a stopped task.
+
+config SIG_STOP
+	int "SIGSTOP"
+	default 19
+	---help---
+		Enable the default action for SIGSTOP and SIGTSTP (suspend the
+		task) and SIGCONT (resume the task).
+
+config SIG_TSTP
+	int "SIGTSTP"
+	default 20
+	---help---
+		Suspend pause a task.  Unlike SIGSTOP, this signal can be caught or
+		ignored.
 
 config SIG_TTIN
 	int "SIGTTIN"
-	default 15
+	default 21
 	---help---
 		A process cannot read from the user’s terminal while it is running as a
 		background job. When any process in a background job tries to read from
@@ -1545,48 +1589,76 @@ config SIG_TTIN
 		information about how this interacts with the terminal driver, see Access
 		to the Controlling Terminal.
 
-config SIG_FPE
-	int "SIGFPE"
-	default 16
+config SIG_TTOU
+	int "SIGTTOU"
+	default 22
 	---help---
-		The SIGFPE is issued when fatal arithmetic operation errors occur.
-		It includes not only floating-point operation errors, but also all other
-		arithmetic errors such as overflow and divisor zero.
+		Similar to SIGTTIN, the signal generated by the interrupt driver when a
+		background job wants to read data from the user terminal. The signal does
+		not occur and a read error occurs when the process reading the data blocks
+		or ignores the signal, or when the process group in which the data is being
+		read is an isolated process group. errno is set to ETO. The only difference
+		is that the process can choose to write in the background.
 
-config SIG_ILL
-	int "SIGILL"
-	default 17
+config SIG_URG
+	int "SIGURG"
+	default 23
 	---help---
-		The SIGILL executed an illegal instruction. It is usually because of an
-		error in the executable file itself or an attempt to execute a data segment.
-		This signal may also be generated when the stack overflows.
+		An emergency situation on the socket is the message sent.
 
-config SIG_SEGV
-	int "SIGSEGV"
-	default 18
+config SIG_XCPU
+	int "SIGXCPU"
+	default 24
 	---help---
-		The SIGSEGV is sent when an attempt is made to access memory that is
-		not allocated to itself, or to write data to a memory address that does
-		not have write permission, or to illegally use the memory address signal.
+		Exceeding the CPU time resource limit. This limit can be read/changed by
+		getrlimit/setrlimit
+
+config SIG_XFSZ
+	int "SIGXFSZ"
+	default 25
+	---help---
+		Exceed the file size resource limit.
+
+config SIG_VTALRM
+	int "SIGVTALRM"
+	default 26
+	---help---
+		Virtual clock signal. Similar to SIGALRM, but calculates the CPU time
+		occupied by the process.
+
+config SIG_PROF
+	int "SIGPROF"
+	default 27
+	---help---
+		Similar to SIGALRM/SIGVTALRM, but includes the CPU time used by the process
+		and the time of system calls.
+
+config SIG_POLL
+	int "SIGPOLL"
+	default 29
+	depends on FS_AIO
+	---help---
+		The SIGPOLL signal is sent to a process when an asynchronous I/O
+		event occurs (meaning it has been polled).
 
 comment "Non-standard Signal Numbers"
 
 config SIG_SIGCONDTIMEDOUT
 	int "SIGCONDTIMEDOUT"
-	default 19
+	default 30
 	depends on !DISABLE_PTHREAD
 	---help---
 		This non-standard signal number is used the implementation of
-		pthread_cond_timedwait(). Default 16.
+		pthread_cond_timedwait(). Default 30.
 
 config SIG_SIGWORK
 	int "SIGWORK"
-	default 20
+	default 31
 	depends on SCHED_WORKQUEUE || LIBC_USRWORK
 	---help---
 		SIGWORK is a non-standard signal used to wake up various internal
 		NuttX worker threads.  This setting specifies the signal number
-		that will be used for SIGWORK.  Default: 17
+		that will be used for SIGWORK.  Default: 31
 
 endmenu # Signal Numbers
 endmenu # Signal Configuration
