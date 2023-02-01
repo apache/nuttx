@@ -701,6 +701,7 @@ config TIVA_UART0_NONE
 config TIVA_UART0
 	bool "Standard serial driver"
 	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART0_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -751,6 +752,7 @@ config TIVA_UART1_NONE
 config TIVA_UART1
 	bool "Standard serial driver"
 	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART1_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -796,6 +798,7 @@ config TIVA_UART2_NONE
 config TIVA_UART2
 	bool "Standard serial driver"
 	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART2_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -841,6 +844,7 @@ config TIVA_UART3_NONE
 config TIVA_UART3
 	bool "Standard serial driver"
 	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART3_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -886,6 +890,7 @@ config TIVA_UART4_NONE
 config TIVA_UART4
 	bool "Standard serial driver"
 	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART4_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -931,6 +936,7 @@ config TIVA_UART5_NONE
 config TIVA_UART5
 	bool "Standard serial driver"
 	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART5_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -976,6 +982,7 @@ config TIVA_UART6_NONE
 config TIVA_UART6
 	bool "Standard serial driver"
 	select UART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART6_HCIUART
 	bool "Bluetooth HCI-UART"
@@ -1021,6 +1028,7 @@ config TIVA_UART7_NONE
 config TIVA_UART7
 	bool "Standard serial driver"
 	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config TIVA_UART7_HCIUART
 	bool "Bluetooth HCI-UART"
