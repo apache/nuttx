@@ -123,6 +123,52 @@ static inline void sim_timer_current(struct timespec *ts)
 }
 
 /****************************************************************************
+ * Name: sim_update_hosttimer
+ *
+ * Description:
+ *   Ths function is called periodically to deliver the tick events to the
+ *   NuttX simulation.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_WALLTIME_SIGNAL
+static void sim_update_hosttimer(void)
+{
+  struct timespec *next = NULL;
+  struct timespec current;
+  sq_entry_t *entry;
+  uint64_t nsec;
+
+  for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
+    {
+      struct sim_oneshot_lowerhalf_s *priv =
+        container_of(entry, struct sim_oneshot_lowerhalf_s, link);
+
+      if (next == NULL)
+        {
+          next = &priv->alarm;
+          continue;
+        }
+
+      if (clock_timespec_compare(next, &priv->alarm) > 0)
+        {
+          next = &priv->alarm;
+        }
+    }
+
+  sim_timer_current(&current);
+  clock_timespec_subtract(next, &current, &current);
+
+  nsec  = current.tv_sec * NSEC_PER_SEC;
+  nsec += current.tv_nsec;
+
+  host_settimer(nsec);
+}
+#else
+#  define sim_update_hosttimer()
+#endif
+
+/****************************************************************************
  * Name: sim_timer_update_internal
  *
  * Description:
@@ -134,11 +180,18 @@ static inline void sim_timer_current(struct timespec *ts)
 static void sim_timer_update_internal(void)
 {
   sq_entry_t *entry;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
 
   for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
     {
       sim_process_tick(entry);
     }
+
+  sim_update_hosttimer();
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -244,14 +297,21 @@ static int sim_start(struct oneshot_lowerhalf_s *lower,
   struct sim_oneshot_lowerhalf_s *priv =
     (struct sim_oneshot_lowerhalf_s *)lower;
   struct timespec current;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
+
+  flags = enter_critical_section();
 
   sim_timer_current(&current);
   clock_timespec_add(&current, ts, &priv->alarm);
 
   priv->callback = callback;
   priv->arg      = arg;
+
+  sim_update_hosttimer();
+
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -286,14 +346,24 @@ static int sim_cancel(struct oneshot_lowerhalf_s *lower,
   struct sim_oneshot_lowerhalf_s *priv =
     (struct sim_oneshot_lowerhalf_s *)lower;
   struct timespec current;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && ts != NULL);
+
+  flags = enter_critical_section();
 
   sim_timer_current(&current);
   clock_timespec_subtract(&priv->alarm, &current, ts);
 
+  priv->alarm.tv_sec  = UINT_MAX;
+  priv->alarm.tv_nsec = NSEC_PER_SEC - 1;
+
+  sim_update_hosttimer();
+
   priv->callback = NULL;
   priv->arg      = NULL;
+
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -329,7 +399,7 @@ static int sim_current(struct oneshot_lowerhalf_s *lower,
 
 #ifdef CONFIG_SIM_WALLTIME_SIGNAL
 /****************************************************************************
- * Name: sim_alarm_handler
+ * Name: sim_timer_handler
  *
  * Description:
  *   The signal handler is called periodically and is used to deliver TICK
@@ -342,7 +412,7 @@ static int sim_current(struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sim_alarm_handler(int irq, void *context, void *arg)
+static int sim_timer_handler(int irq, void *context, void *arg)
 {
   sim_timer_update_internal();
   return OK;
@@ -408,14 +478,12 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 void up_timer_initialize(void)
 {
 #ifdef CONFIG_SIM_WALLTIME_SIGNAL
-  int host_alarm_irq;
-
-  host_settimer(&host_alarm_irq);
+  int timer_irq = host_timerirq();
 
   /* Enable the alarm handler and attach the interrupt to the NuttX logic */
 
-  up_enable_irq(host_alarm_irq);
-  irq_attach(host_alarm_irq, sim_alarm_handler, NULL);
+  up_enable_irq(timer_irq);
+  irq_attach(timer_irq, sim_timer_handler, NULL);
 #endif
 
   up_alarm_set_lowerhalf(oneshot_initialize(0, 0));
