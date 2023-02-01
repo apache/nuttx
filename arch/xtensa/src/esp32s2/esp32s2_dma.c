@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <sys/param.h>
 #include <sys/types.h>
 
 #include "hardware/esp32s2_dma.h"
@@ -33,10 +34,6 @@
 /****************************************************************************
  * Preprocessor Definitions
  ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 #ifndef ALIGN_UP
 #  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))

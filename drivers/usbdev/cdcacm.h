@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/param.h>
 
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>
@@ -164,18 +165,6 @@
 
 #define CDCACM_DEVNAME_FORMAT      "/dev/ttyACM%d"
 #define CDCACM_DEVNAME_SIZE        16
-
-/* Misc Macros **************************************************************/
-
-/* MIN/MAX macros */
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /* Trace values *************************************************************/
 

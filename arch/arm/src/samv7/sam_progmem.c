@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <sys/param.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -137,16 +138,6 @@
 #define SAMV7_PROGMEM_STARTSEC   (SAMV7_PROGMEM_ENDSEC - CONFIG_SAMV7_PROGMEM_NSECTORS)
 
 #define SAMV7_PROGMEM_ERASEDVAL  (0xffu)
-
-/* Misc stuff */
-
-#ifndef MIN
-#  define MIN(a, b)              ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a, b)              ((a) > (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Functions

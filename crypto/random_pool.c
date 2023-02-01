@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/param.h>
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
@@ -40,10 +41,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 #define ROTL_32(x,n) (((x) << (n)) | ((x) >> (32 - (n))))
 #define ROTR_32(x,n) (((x) >> (n)) | ((x) << (32 - (n))))

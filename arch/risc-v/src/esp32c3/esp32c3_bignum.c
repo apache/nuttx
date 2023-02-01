@@ -46,10 +46,6 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-#undef MIN
-#undef MAX
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define SOC_RSA_MAX_BIT_LEN (3072)
 
 #define CIL  (sizeof(uint32_t))             /* chars in limb */

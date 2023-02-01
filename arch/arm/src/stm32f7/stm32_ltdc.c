@@ -30,6 +30,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <sys/param.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -573,10 +574,6 @@
                                     FB_ACCL_COLOR
 #  endif
 #endif
-
-/* Helper */
-
-#define MIN(x,y)                    ((x) < (y) ? (x) : (y))
 
 /* Color normalization */
 

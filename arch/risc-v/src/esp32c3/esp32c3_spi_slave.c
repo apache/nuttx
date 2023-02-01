@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -106,10 +107,6 @@
 /* SPI Slave maximum buffer size in bytes */
 
 #define SPI_SLAVE_HW_BUF_SIZE   (64)
-
-#ifndef MIN
-#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #define WORDS2BYTES(_priv, _wn)   ((_wn) * ((_priv)->nbits / 8))
 #define BYTES2WORDS(_priv, _bn)   ((_bn) / ((_priv)->nbits / 8))

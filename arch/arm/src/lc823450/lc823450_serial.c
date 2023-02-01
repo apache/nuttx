@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -139,10 +140,6 @@ int g_console_disable;
 #  define HS_DMAACT_STOP2     1
 #  define HS_DMAACT_ACT1      2
 #  define HS_DMAACT_ACT2      3
-#endif
-
-#ifndef MIN
-#  define MIN(a, b) ((a) > (b) ? (b) : (a))
 #endif
 
 /****************************************************************************

@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <errno.h>
 
@@ -90,10 +91,6 @@
 #define MMU_ALIGNUP_SIZE(_s)        (((_s) + SPI_FLASH_MMU_PAGE_SIZE - 1) \
                                      & ~(SPI_FLASH_MMU_PAGE_SIZE - 1))
 #define MMU_ALIGNDOWN_SIZE(_s)      ((_s) & ~(SPI_FLASH_MMU_PAGE_SIZE - 1))
-
-#ifndef MIN
-#  define  MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 /* Flash MMU table for PRO CPU */
 

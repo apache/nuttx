@@ -25,20 +25,13 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/param.h>
 #include <string.h>
 #include <assert.h>
 
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Public Functions

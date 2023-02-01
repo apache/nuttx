@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -51,10 +52,6 @@
 
 #ifdef CONFIG_SPI_EXCHANGE
 # error "SPI_EXCHANGE is not supported"
-#endif
-
-#ifndef MIN
-#  define MIN(a, b) ((a) > (b) ? (b) : (a))
 #endif
 
 /****************************************************************************

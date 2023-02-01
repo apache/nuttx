@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <inttypes.h>
@@ -39,14 +40,6 @@
 
 #include "socket/socket.h"
 #include "local/local.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Functions

@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/param.h>
 #include <nuttx/efuse/efuse.h>
 #include <arch/esp32c3/chip.h>
 
@@ -45,8 +46,6 @@
 #define EFUSE_CMD_PGM      0x02   /* Command to program. */
 #define EFUSE_CMD_READ     0x01   /* Command to read. */
 #define EFUSE_MAX_BLK_LEN  256    /* Max length of efuse block. */
-
-#define MIN(a, b)          ((a) < (b) ? (a) : (b))
 
 /****************************************************************************
  * Private Data

@@ -33,6 +33,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -239,16 +240,6 @@
 
 #define PHYS_ADDR(va) ((uint32_t)(va) & 0x1fffffff)
 #define VIRT_ADDR(pa) (KSEG1_BASE | (uint32_t)(pa))
-
-/* Ever-present MIN and MAX macros */
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /* Byte ordering in host-based values */
 

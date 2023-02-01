@@ -23,8 +23,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
 #include <string.h>
+#include <sys/param.h>
 #include <debug.h>
 #include <stdio.h>
 #include <errno.h>
@@ -79,10 +81,6 @@
 /* Partition encrypted flag */
 
 #define PARTITION_FLAG_ENCRYPTED          (1 << 0)
-
-#ifndef MAX
-#  define MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types

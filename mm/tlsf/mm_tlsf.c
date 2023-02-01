@@ -33,6 +33,7 @@
 #include <sched.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/procfs.h>
@@ -53,8 +54,6 @@
 #elif UINTPTR_MAX <= UINT64_MAX
 #  define MM_PTR_FMT_WIDTH 19
 #endif
-
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
 #  define MEMPOOL_NPOOLS (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / tlsf_align_size())

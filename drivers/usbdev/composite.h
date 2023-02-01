@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 
@@ -113,16 +114,6 @@
 #define COMPOSITE_PRODUCTSTRID        (2)
 #define COMPOSITE_SERIALSTRID         (3)
 #define COMPOSITE_CONFIGSTRID         (4)
-
-/* Everpresent MIN/MAX macros ***********************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Public Types

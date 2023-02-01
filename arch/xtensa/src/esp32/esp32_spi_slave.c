@@ -26,6 +26,7 @@
 
 #ifdef CONFIG_ESP32_SPI
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,10 +109,6 @@
 
 #define SPI_DMA_RESET_MASK (SPI_AHBM_RST_M | SPI_AHBM_FIFO_RST_M | \
                             SPI_OUT_RST_M | SPI_IN_RST_M)
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #define WORDS2BYTES(_priv, _wn)   (_wn * ((_priv)->nbits / 8))
 #define BYTES2WORDS(_priv, _bn)   (_bn / ((_priv)->nbits / 8))

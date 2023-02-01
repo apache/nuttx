@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include <semaphore.h>
+#include <sys/param.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -139,16 +140,6 @@
 #define SAMD5E5_PROGMEM_STARTSEC   (SAMD5E5_PROGMEM_ENDSEC - CONFIG_SAMD5E5_PROGMEM_NSECTORS)
 
 #define SAMD5E5_PROGMEM_ERASEDVAL  (0xffu)
-
-/* Misc stuff */
-
-#ifndef MIN
-#  define MIN(a, b)              ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a, b)              ((a) > (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Functions
