@@ -52,18 +52,18 @@ all: $(BIN)
 .PHONY: context depend clean distclean
 
 $(AOBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.S
-	$(call ASSEMBLE, $(realpath $<), $@)
+	$(call ASSEMBLE, $<, $@)
 
 # REVISIT: Backslash causes problems in $(COBJS) target
 
 $(COBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.c
-	$(call COMPILE, $(realpath $<), $@)
+	$(call COMPILE, $<, $@)
 
 # Memory manager for the flat build and
 # the user phase of the two-pass kernel build
 
 $(BIN):	$(OBJS)
-	$(call ARCHIVE, $@, $(realpath $(OBJS)))
+	$(call ARCHIVE, $@, $(OBJS))
 
 # Memory manager for the kernel phase of the two-pass kernel build
 
