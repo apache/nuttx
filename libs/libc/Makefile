@@ -127,18 +127,18 @@ all: $(BIN)
 .PHONY: clean distclean
 
 $(AOBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.S
-	$(call ASSEMBLE, $(realpath $<), $@)
+	$(call ASSEMBLE, $<, $@)
 
 # REVISIT: Backslash causes problems in $(COBJS) target
 
 $(COBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.c
-	$(call COMPILE, $(realpath $<), $@)
+	$(call COMPILE, $<, $@)
 
 # C library for the flat build and
 # the user phase of the two-pass kernel build
 
 $(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(realpath $(OBJS)))
+	$(call ARCHIVE, $@, $(OBJS))
 ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo all BIN=$(BIN)
 endif
