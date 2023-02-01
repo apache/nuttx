@@ -31,6 +31,8 @@ ifeq ($(V),1)
 export Q :=
 else ifeq ($(V),2)
 export Q :=
+else ifeq ($(V),3)
+export Q := @
 else
 export Q := @
 endif
@@ -41,15 +43,17 @@ else ifeq ($(BASH),)
   BASHCMD := $(shell command -v bash 2> /dev/null)
   ifneq ($(BASHCMD),)
     ifneq ($(Q),)
-      export BASH=$(BASHCMD)
-      export ECHO_BEGIN=@echo -ne "\033[1K\r"
-      export ECHO_END=$(ECHO_BEGIN)
+      ifneq ($(V),3)
+        export BASH=$(BASHCMD)
+        export ECHO_BEGIN=@echo -ne "\033[1K\r"
+        export ECHO_END=$(ECHO_BEGIN)
+      endif
     endif
   endif
 endif
 
 ifeq ($(ECHO_BEGIN),)
-  export ECHO_BEGIN=@echo
+  export ECHO_BEGIN=@echo 
   export ECHO_END=
 endif
 
