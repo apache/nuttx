@@ -372,7 +372,7 @@ endef
 
 define INSTALL_LIB
 	@echo "IN: $1 -> $2"
-	$(Q) install -m 0644 $1 $2
+	$(Q) install -m 0644 $(abspath $1) $(abspath $2)
 endef
 
 # ARCHIVE_ADD - Add a list of files to an archive
@@ -393,7 +393,7 @@ endef
 
 define ARCHIVE_ADD
 	@echo "AR (add): ${shell basename $(1)} $(2)"
-	$(Q) $(AR) $1 $(2)
+	$(Q) $(AR) $(abspath $1) $(abspath $2)
 endef
 
 # ARCHIVE - Same as above, but ensure the archive is
@@ -401,7 +401,7 @@ endef
 
 define ARCHIVE
 	$(Q) $(RM) $1
-	$(Q) $(AR) $1 $(2)
+	$(Q) $(AR) $(abspath $1)  $(abspath $2)
 endef
 
 # PRELINK - Prelink a list of files
