@@ -354,7 +354,7 @@ config WATCHDOG_DEVPATH
 		Please, check how your specific chip or board uses this symbol.
 		FYI: It's NOT used by the Auto-monitor feature.
 
-config CONFIG_WATCHDOG_MAGIC_V
+config WATCHDOG_MAGIC_V
 	bool "Watchdog Device Magic num"
 	default y
 	---help---
