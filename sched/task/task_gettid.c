@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gettid
+ * Name: nxsched_gettid
  *
  * Description:
  *   Get the thread ID of the currently executing thread.
@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-pid_t gettid(void)
+pid_t nxsched_gettid(void)
 {
   FAR struct tcb_s *rtcb;
 
@@ -88,4 +88,23 @@ pid_t gettid(void)
    */
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: gettid
+ *
+ * Description:
+ *   Get the thread ID of the currently executing thread.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, returns the thread ID of the calling process.
+ *
+ ****************************************************************************/
+
+pid_t gettid(void)
+{
+  return nxsched_gettid();
 }

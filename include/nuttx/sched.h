@@ -166,6 +166,16 @@
 #  define _SCHED_ERRVAL(r)           (-errno)
 #endif
 
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _SCHED_GETTID()            nxsched_gettid()
+#  define _SCHED_GETPID()            nxsched_getpid()
+#  define _SCHED_GETPPID()           nxsched_getppid()
+#else
+#  define _SCHED_GETTID()            gettid()
+#  define _SCHED_GETPID()            getpid()
+#  define _SCHED_GETPPID()           getppid()
+#endif
+
 #ifdef CONFIG_DEBUG_TCBINFO
 #  define TCB_PID_OFF                offsetof(struct tcb_s, pid)
 #  define TCB_STATE_OFF              offsetof(struct tcb_s, task_state)
@@ -1407,6 +1417,67 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
 #ifdef CONFIG_SCHED_WAITPID
 pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options);
 #endif
+
+/****************************************************************************
+ * Name: nxsched_gettid
+ *
+ * Description:
+ *   Get the thread ID of the currently executing thread.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, returns the thread ID of the calling process.
+ *
+ ****************************************************************************/
+
+pid_t nxsched_gettid(void);
+
+/****************************************************************************
+ * Name: nxsched_getpid
+ *
+ * Description:
+ *   Get the Process ID of the currently executing task.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Normally when called from user applications, nxsched_getpid() will
+ *   return the Process ID of the currently executing task. that is,
+ *   the main task for the task groups. There is no specification for
+ *   any errors returned from nxsched_getpid().
+ *
+ ****************************************************************************/
+
+pid_t nxsched_getpid(void);
+
+/****************************************************************************
+ * Name: nxsched_getppid
+ *
+ * Description:
+ *   Get the parent task ID of the currently executing task.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Normally when called from user applications, nxsched_getppid() will
+ *   return the parent task ID of the currently executing task, that is,
+ *   the task at the head of the ready-to-run list.
+ *   There is no specification for any errors returned from
+ *   nxsched_getppid().
+ *
+ *   nxsched_getppid(), however, may be called from within the OS in some
+ *   cases. There are certain situations during context switching when the
+ *   OS data structures are in flux and where the current task at the head
+ *   of the ready-to-run task list is not actually running.
+ *   In that case, nxsched_getppid() will return the error: -ESRCH
+ *
+ ****************************************************************************/
+
+pid_t nxsched_getppid(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
