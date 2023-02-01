@@ -418,7 +418,7 @@ cd "${TOPDIR}" || \
   { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
 
 if [ -e "${APPDIR}/Makefile" ]; then
-  "${MAKE}" -C "${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
+  ${MAKE} -C "${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
       { echo "MK: call make export for APPDIR not supported"; }
 fi
 
