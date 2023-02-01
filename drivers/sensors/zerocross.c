@@ -424,7 +424,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               /* Save the notification events */
 
               opriv->do_event = *event;
-              opriv->do_pid   = getpid();
+              opriv->do_pid   = nxsched_getpid();
 
               /* Enable/disable interrupt handling */
 

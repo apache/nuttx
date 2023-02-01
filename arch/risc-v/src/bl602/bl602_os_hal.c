@@ -359,7 +359,7 @@ void bl_os_task_delete(void *task_handle)
 
 void *bl_os_task_get_current_task(void)
 {
-  pid_t pid = getpid();
+  pid_t pid = nxsched_getpid();
 
   return (void *)((uintptr_t)pid);
 }

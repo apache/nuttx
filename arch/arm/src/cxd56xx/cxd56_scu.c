@@ -2244,7 +2244,7 @@ static int seq_seteventnotifier(struct scufifo_s *fifo,
 
   flags = enter_critical_section();
   priv->event[mid].signo = ev->signo;
-  priv->event[mid].pid = getpid();
+  priv->event[mid].pid = nxsched_getpid();
   priv->event[mid].arg = ev->arg;
   priv->event[mid].fifo = fifo;
   leave_critical_section(flags);
@@ -2327,7 +2327,7 @@ static int seq_setwatermark(struct seq_s *seq, int fifoid,
 
   flags = enter_critical_section();
   notify->signo = wm->signo;
-  notify->pid = getpid();
+  notify->pid = nxsched_getpid();
   notify->ts = wm->ts;
   notify->fifo = fifo;
 

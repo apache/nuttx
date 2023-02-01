@@ -358,7 +358,7 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
               opriv->ao_notify.an_mount  = notify->an_mount;
               opriv->ao_notify.an_umount = notify->an_umount;
               opriv->ao_notify.an_event  = notify->an_event;
-              opriv->ao_pid              = getpid();
+              opriv->ao_pid              = nxsched_getpid();
               ret = OK;
             }
         }

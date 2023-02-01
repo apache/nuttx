@@ -519,7 +519,7 @@ int cxd56_iccnotify(int cpuid, int signo, void *sigdata)
       return -ESRCH;
     }
 
-  priv->pid     = getpid();
+  priv->pid     = nxsched_getpid();
   priv->signo   = signo;
   priv->sigdata = sigdata;
 

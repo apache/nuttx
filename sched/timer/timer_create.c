@@ -178,7 +178,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
 
   ret->pt_clock = clockid;
   ret->pt_crefs = 1;
-  ret->pt_owner = getpid();
+  ret->pt_owner = nxsched_getpid();
   ret->pt_delay = 0;
 
   /* Was a struct sigevent provided? */

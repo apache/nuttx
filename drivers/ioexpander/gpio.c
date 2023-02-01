@@ -350,7 +350,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case GPIOC_REGISTER:
         if (arg && dev->gp_pintype >= GPIO_INTERRUPT_PIN)
           {
-            pid = getpid();
+            pid = nxsched_getpid();
             flags = spin_lock_irqsave(NULL);
             for (i = 0; i < CONFIG_DEV_GPIO_NSIGNALS; i++)
               {
@@ -402,7 +402,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case GPIOC_UNREGISTER:
         if (dev->gp_pintype >= GPIO_INTERRUPT_PIN)
           {
-            pid = getpid();
+            pid = nxsched_getpid();
             flags = spin_lock_irqsave(NULL);
             for (i = 0; i < CONFIG_DEV_GPIO_NSIGNALS; i++)
               {

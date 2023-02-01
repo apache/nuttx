@@ -40,6 +40,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -367,7 +368,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
           pstate->snd_sent += sndlen;
           ninfo("pid: %d SEND: acked=%" PRId32 " sent=%zd flen=%zu\n",
-                getpid(),
+                nxsched_getpid(),
                 pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
         }
       else
