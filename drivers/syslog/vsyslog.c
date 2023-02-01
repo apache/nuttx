@@ -83,7 +83,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   struct lib_syslogstream_s stream;
   int ret;
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
-  FAR struct tcb_s *tcb = nxsched_get_tcb(gettid());
+  FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid());
 #endif
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
@@ -218,7 +218,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Prepend the Thread ID */
 
-                    , (int)gettid()
+                    , (int)nxsched_gettid()
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)

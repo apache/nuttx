@@ -75,7 +75,7 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         tmp->pid = gettid(); \
+         tmp->pid = _SCHED_GETTID(); \
        } \
      while (0)
 #elif CONFIG_MM_BACKTRACE > 0
@@ -84,7 +84,7 @@
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          FAR struct tcb_s *tcb; \
-         tmp->pid = gettid(); \
+         tmp->pid = _SCHED_GETTID(); \
          tcb = nxsched_get_tcb(tmp->pid); \
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \

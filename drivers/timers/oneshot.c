@@ -209,7 +209,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           pid = start->pid;
           if (pid == 0)
             {
-              pid = getpid();
+              pid = nxsched_getpid();
             }
 
           priv->od_pid = pid;

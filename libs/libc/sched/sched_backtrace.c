@@ -31,6 +31,8 @@
 #include <execinfo.h>
 #include <unwind.h>
 
+#include <nuttx/sched.h>
+
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
@@ -110,7 +112,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 {
   struct trace_arg arg;
 
-  if (tid != gettid())
+  if (tid != _SCHED_GETTID())
     {
       return 0;
     }

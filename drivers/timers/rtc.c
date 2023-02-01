@@ -470,7 +470,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             pid = alarminfo->pid;
             if (pid == 0)
               {
-                pid = getpid();
+                pid = nxsched_getpid();
               }
 
             /* Save the signal info to be used to notify the caller when the
@@ -541,7 +541,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             pid = alarminfo->pid;
             if (pid == 0)
               {
-                pid = getpid();
+                pid = nxsched_getpid();
               }
 
             /* Save the signal info to be used to notify the caller when the
@@ -675,7 +675,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             pid = alarminfo->pid;
             if (pid == 0)
               {
-                pid = getpid();
+                pid = nxsched_getpid();
               }
 
             /* Save the signal info to be used to notify the caller when the

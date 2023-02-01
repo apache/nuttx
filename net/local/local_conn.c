@@ -131,7 +131,7 @@ FAR struct local_conn_s *local_alloc(void)
       nxmutex_init(&conn->lc_sendlock);
 
 #ifdef CONFIG_NET_LOCAL_SCM
-      conn->lc_cred.pid = getpid();
+      conn->lc_cred.pid = nxsched_getpid();
       conn->lc_cred.uid = getuid();
       conn->lc_cred.gid = getgid();
 #endif

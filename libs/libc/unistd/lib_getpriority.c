@@ -29,6 +29,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -73,7 +75,7 @@ int getpriority(int which, id_t who)
 
   if (who == 0)
     {
-      who = gettid();
+      who = _SCHED_GETTID();
     }
 
   ret = sched_getparam(who, &param);

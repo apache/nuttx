@@ -939,7 +939,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                   /* Save the notification events */
 
                   priv->xd_notify_event       = netmac->u.event;
-                  priv->xd_notify_pid         = getpid();
+                  priv->xd_notify_pid         = nxsched_getpid();
                   priv->xd_notify_registered  = true;
                   ret = OK;
                 }

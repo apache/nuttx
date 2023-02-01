@@ -1577,7 +1577,7 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
     }
 
   sig = NULL;
-  pid = getpid();
+  pid = nxsched_getpid();
   for (i = 0; i < CONFIG_CXD56_GNSS_NSIGNALRECEIVERS; i++)
     {
       checksig = &priv->sigs[i];
