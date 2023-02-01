@@ -102,6 +102,10 @@ config LITEX_SDIO1
 	select LITEX_SDIO_DMA
 	depends on LITEX_SDIO
 
+config LITEX_PWM
+	bool "Enable PWM controller"
+	default n
+
 if LITEX_SDIO1
 
 config LITEX_IDMODE_FREQ

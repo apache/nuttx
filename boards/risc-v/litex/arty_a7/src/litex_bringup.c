@@ -102,5 +102,14 @@ int litex_bringup(void)
 
 #endif /* CONFIG_LITEX_SDIO */
 
+#ifdef CONFIG_LITEX_PWM
+  ret = litex_pwm_setup();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to setup PWM driver \n");
+    }
+
+#endif /* CONFIG_LITEX_PWM */
+
   return ret;
 }
