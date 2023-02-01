@@ -26,6 +26,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <sys/param.h>
 #include <fcntl.h>
 
 #include <nuttx/arch.h>
@@ -45,10 +46,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MAX
-#  define MAX(a,b)                  ((a) > (b) ? (a) : (b))
-#endif
 
 #ifndef ALIGN_UP
 #  define ALIGN_UP(s, a)            (((s) + (a) - 1) & ~((a) - 1))

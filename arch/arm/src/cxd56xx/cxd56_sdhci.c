@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/param.h>
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
@@ -210,10 +211,6 @@
 
 #define SDIO_OCR_NUM_FUNCTIONS(ocr) (((ocr) >> 28) & 0x7)
 #define SDIO_FUNC_NUM_MAX       (7)
-
-#ifndef MIN
-#  define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
 
 #define SDIO_BLOCK_TIMEOUT      200
 #define SDIO_BLOCK_SIZE         512

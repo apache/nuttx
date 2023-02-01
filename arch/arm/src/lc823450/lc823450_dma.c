@@ -26,6 +26,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -74,10 +75,6 @@
 #define DMACCFG_DSTPERI_SHIFT           6
 #define DMACCFG_SRCPERI_SHIFT           1
 #define DMACCFG_E                       (1 << 0)
-
-#ifndef MIN
-#  define MIN(a, b) ((a) > (b) ? (b) : (a))
-#endif /* MIN */
 
 #define LC823450_DMA_EN                 (1 << 26)
 

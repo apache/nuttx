@@ -32,6 +32,7 @@
 #include <crypto/cryptodev.h>
 #include <crypto/cryptosoft.h>
 #include <crypto/xform.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -40,8 +41,6 @@
 #ifndef howmany
 #  define howmany(x, y)  (((x) + ((y) - 1)) / (y))
 #endif
-
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
 /****************************************************************************
  * Private Data

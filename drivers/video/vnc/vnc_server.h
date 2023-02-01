@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/param.h>
 #include <pthread.h>
 
 #include <nuttx/queue.h>
@@ -148,16 +149,6 @@
 #define RFB_PORT_BASE       5900
 #define RFB_MAX_DISPLAYS    CONFIG_VNCSERVER_NDISPLAYS
 #define RFB_DISPLAY_PORT(d) (RFB_PORT_BASE + (d))
-
-/* Miscellaneous */
-
-#ifndef MIN
-#  define MIN(a,b)          (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b)          (((a) > (b)) ? (a) : (b))
-#endif
 
 /* Debug */
 

@@ -27,18 +27,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/param.h>
 #include <assert.h>
 
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
 #include "kasan/kasan.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 /****************************************************************************
  * Public Functions

@@ -31,16 +31,13 @@
 
 #include <sys/dir.h>
 #include <sys/errno.h>
+#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #define MAX_NAME_LEN     16
 #define MAX_SECTOR_DATA  (1024 - 10)

@@ -47,6 +47,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <sys/param.h>
 #include <math.h>
 #include <assert.h>
 
@@ -57,14 +58,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /* Use the maximim precision with %g format if no precision is specified.
  * NOTE:  This may result in numbers with precision that exceeds the

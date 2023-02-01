@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sys/param.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
@@ -36,18 +37,6 @@
 #include "tca64xx.h"
 
 #ifdef CONFIG_IOEXPANDER_TCA64XX
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Function Prototypes

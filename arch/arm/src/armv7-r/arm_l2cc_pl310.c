@@ -31,6 +31,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/param.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -223,14 +224,6 @@
 #define PL310_GULP_SIZE            4096
 
 /* Misc commoly defined and re-defined things */
-
-#ifndef MIN
-#  define MIN(a,b)                 (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b)                 (((a) > (b)) ? (a) : (b))
-#endif
 
 #ifndef OK
 #  define OK                       0

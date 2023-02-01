@@ -29,6 +29,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -45,8 +47,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define MIN(a, b)                       ((a) > (b) ? (b) : (a))
 
 /* MASKS AND SHIFT FOR ADDRESSES
  * an address in nvs is an uint32_t where:

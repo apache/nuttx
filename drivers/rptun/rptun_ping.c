@@ -27,20 +27,13 @@
 
 #include <inttypes.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include "rptun.h"
 
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-
-#ifndef MIN
-  #define MIN(n,m)                  (((n) < (m)) ? (n) : (m))
-#endif
-
-#ifndef MAX
-  #define MAX(n,m)                  (((n) < (m)) ? (m) : (n))
-#endif
 
 #define RPTUN_PING_EPT_NAME         "rpmsg-ping"
 #define RPTUN_PING_SEND             1

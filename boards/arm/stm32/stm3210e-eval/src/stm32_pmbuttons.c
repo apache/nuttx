@@ -30,6 +30,7 @@
 #include <arch/irq.h>
 
 #include <stdbool.h>
+#include <sys/param.h>
 #include <debug.h>
 
 #include "arm_internal.h"
@@ -97,14 +98,6 @@
 #endif
 
 /* Miscellaneous Definitions ************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 #define MIN_BUTTON MIN(CONFIG_PM_BUTTONS_MIN, CONFIG_PM_IRQBUTTONS_MIN)
 #define MAX_BUTTON MAX(CONFIG_PM_BUTTONS_MAX, CONFIG_PM_IRQBUTTONS_MAX)

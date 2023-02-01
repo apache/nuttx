@@ -66,6 +66,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -210,16 +211,6 @@
 #define SAM_TRACEINTID_EPINTEN            0x0029
 #define SAM_TRACEINTID_EP0WRSTATUS        0x002a
 #define SAM_TRACEINTID_EPTRCPT0_LEN       0x002b
-
-/* Ever-present MIN and MAX macros */
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 
 /* Byte ordering in host-based values */
 

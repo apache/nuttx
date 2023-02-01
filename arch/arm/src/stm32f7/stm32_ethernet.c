@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/param.h>
 #include <time.h>
 #include <string.h>
 #include <assert.h>
@@ -216,10 +217,6 @@
 #endif
 #ifndef CONFIG_STM32F7_ETH_NTXDESC
 #  define CONFIG_STM32F7_ETH_NTXDESC 4
-#endif
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /* We need at least one more free buffer than transmit buffers */

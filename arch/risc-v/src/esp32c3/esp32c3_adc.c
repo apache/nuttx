@@ -26,6 +26,7 @@
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <sys/param.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -113,14 +114,6 @@
 #endif
 
 #define ADC_WORK_DELAY          (1)
-
-#ifndef MIN
-#  define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types

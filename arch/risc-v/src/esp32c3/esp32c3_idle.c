@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <debug.h>
+#include <sys/param.h>
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
@@ -66,10 +67,6 @@
 
 #ifndef CONFIG_PM_SLEEP_WAKEUP_NSEC
 #  define CONFIG_PM_SLEEP_WAKEUP_NSEC 0
-#endif
-
-#ifndef MIN
-#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #define EXPECTED_IDLE_TIME_US (800)

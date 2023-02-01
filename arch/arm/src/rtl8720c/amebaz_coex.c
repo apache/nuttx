@@ -24,15 +24,13 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/param.h>
+
 #include "amebaz_coex.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #define HCI_VENDOR_MAILBOX_CMD 0xfc8f
 

@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <sys/param.h>
 #include <sys/time.h>
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_uart.h"
@@ -64,10 +65,6 @@
 /* Minimal amount of time we can sleep for. */
 
 #define LIGHT_SLEEP_MIN_TIME_US    200
-
-#ifndef MAX
-#  define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
 
 /* Time from VDD_SDIO power up to first flash read in ROM code */
 

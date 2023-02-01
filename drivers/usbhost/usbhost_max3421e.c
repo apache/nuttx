@@ -31,6 +31,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -111,16 +112,6 @@
 #define MAX3421E_SETUP_DELAY         SEC2TICK(5) /* 5 seconds in system ticks */
 #define MAX3421E_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
 #define MAX3421E_RETRY_COUNT         5           /* Number of tries before giving up */
-
-/* Ever-present MIN/MAX macros */
-
-#ifndef MIN
-#  define  MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define  MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
 
 #define NO_HOLDER               (INVALID_PROCESS_ID)
 
