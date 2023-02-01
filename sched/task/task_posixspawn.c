@@ -407,7 +407,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    * for use within the OS.
    */
 
-  ret = nx_waitpid((pid_t)proxy, &status, 0);
+  ret = nxsched_waitpid((pid_t)proxy, &status, 0);
   if (ret < 0)
     {
       serr("ERROR: waitpid() failed: %d\n", ret);

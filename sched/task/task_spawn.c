@@ -425,7 +425,7 @@ int task_spawn(FAR const char *name, main_t entry,
    * for use within the OS.
    */
 
-  ret = nx_waitpid(proxy, &status, 0);
+  ret = nxsched_waitpid(proxy, &status, 0);
   if (ret < 0)
     {
       serr("ERROR: waitpid() failed: %d\n", ret);
