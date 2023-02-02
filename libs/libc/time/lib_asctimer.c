@@ -26,15 +26,9 @@
 
 #include <stdio.h>
 
+#include <sys/param.h>
+
 #include <nuttx/time.h>
-
-/****************************************************************************
- * Pre-processor definitions
- ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)         (sizeof(x) / sizeof((x)[0]))
-#endif
 
 /****************************************************************************
  * Private Data
@@ -82,8 +76,8 @@ FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf)
   char tmp[128];
 
   if (tp == NULL ||
-      tp->tm_wday >= ARRAY_SIZE(g_wday_name) ||
-      tp->tm_mon >= ARRAY_SIZE(g_mon_name))
+      tp->tm_wday >= nitems(g_wday_name) ||
+      tp->tm_mon >= nitems(g_mon_name))
     {
       return NULL;
     }

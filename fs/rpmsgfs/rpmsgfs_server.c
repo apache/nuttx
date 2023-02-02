@@ -904,7 +904,7 @@ static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
   struct rpmsgfs_header_s *header = data;
   uint32_t command = header->command;
 
-  if (command < ARRAY_SIZE(g_rpmsgfs_handler))
+  if (command < nitems(g_rpmsgfs_handler))
     {
       return g_rpmsgfs_handler[command](ept, data, len, src, priv);
     }

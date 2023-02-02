@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -119,7 +120,7 @@
 
 #define CXD56_PIN_CONFIGS(pin) do { \
   uint32_t p[] = pin; \
-  cxd56_pin_configs((p), sizeof(p) / sizeof((p)[0])); \
+  cxd56_pin_configs((p), nitems(p)); \
 } while (0)
 
 /****************************************************************************

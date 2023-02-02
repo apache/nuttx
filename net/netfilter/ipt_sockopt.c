@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <sys/param.h>
+
 #include <nuttx/kmalloc.h>
 
 #include "netfilter/iptables.h"
@@ -36,10 +38,6 @@
  ****************************************************************************/
 
 #define SWAP(a,b,t)    do { t = a; a = b; b = t; } while (0)
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -116,7 +114,7 @@ static void ipt_table_init(FAR struct ipt_table_s *table)
 static FAR struct ipt_table_s *ipt_table(FAR const char *name)
 {
   int i;
-  for (i = 0; i < ARRAY_SIZE(g_tables); i++)
+  for (i = 0; i < nitems(g_tables); i++)
     {
       ipt_table_init(&g_tables[i]);
       if (g_tables[i].repl != NULL &&

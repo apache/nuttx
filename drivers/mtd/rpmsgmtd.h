@@ -27,14 +27,11 @@
 
 #include <nuttx/compiler.h>
 #include <sys/types.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)         (sizeof(x) / sizeof((x)[0]))
-#endif
 
 #define RPMSGMTD_NAME_PREFIX     "rpmsgmtd-"
 #define RPMSGMTD_NAME_PREFIX_LEN 9

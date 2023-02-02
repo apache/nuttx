@@ -328,7 +328,7 @@
   .user_data = (&(struct _bt_gatt_ccc_s) \
                { \
                  .cfg          = _cfg, \
-                 .cfg_len      = ARRAY_SIZE(_cfg), \
+                 .cfg_len      = nitems(_cfg), \
                  .value_handle = _value_handle, \
                  .cfg_changed  = _cfg_changed, \
                }),\

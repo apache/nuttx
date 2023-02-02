@@ -36,6 +36,8 @@
 #include <debug.h>
 #include <syslog.h>
 
+#include <sys/param.h>
+
 #include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
 #include "renesas_internal.h"
@@ -101,15 +103,13 @@
   0 \
 }
 
-#define ARRAYSIZE(a) (sizeof((a))/sizeof(a[0]))
-
 /* For Assert keep this much of the file name */
 
 #define MAX_FILE_PATH_LENGTH 40
 
 #define HEADER_TIME_FMT      "%Y-%m-%d-%H:%M:%S"
 #define HEADER_TIME_FMT_NUM  (2+ 0+ 0+ 0+ 0+ 0)
-#define HEADER_TIME_FMT_LEN  (((ARRAYSIZE(HEADER_TIME_FMT)-1) + \
+#define HEADER_TIME_FMT_LEN  (((nitems(HEADER_TIME_FMT)-1) + \
                                 HEADER_TIME_FMT_NUM))
 
 /****************************************************************************
@@ -418,8 +418,8 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
       copy_reverse((stack_word_t *)pdump->istack,
-                        &ps[ARRAYSIZE(pdump->istack) / 2],
-                    ARRAYSIZE(pdump->istack));
+                        &ps[nitems(pdump->istack) / 2],
+                    nitems(pdump->istack));
     }
 
   /* Is it Invalid? */
@@ -440,8 +440,8 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.user.sp;
       copy_reverse((stack_word_t *)pdump->ustack,
-                        &ps[ARRAYSIZE(pdump->ustack) / 2],
-                    ARRAYSIZE(pdump->ustack));
+                        &ps[nitems(pdump->ustack) / 2],
+                    nitems(pdump->ustack));
     }
 
   /* Is it Invalid? */

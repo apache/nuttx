@@ -26,6 +26,7 @@
 #include <sys/uio.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -38,12 +39,6 @@
 #include <netinet/in.h>
 
 #include "sim_hostusrsock.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Data

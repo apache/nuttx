@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <termios.h>
 #include <assert.h>
 #include <errno.h>
@@ -33,8 +34,6 @@
 
 #define CBAUD          0010017  /* Baud speed mask (not in POSIX) */
 #define BOTHER         0010000  /* Magic token for custom baud rate */
-
-#define ARRAYSIZE(a)   (sizeof((a))/sizeof(a[0]))
 
 /****************************************************************************
  * Private Type Definitions
@@ -147,7 +146,7 @@ int cfsetspeed(FAR struct termios *termiosp, speed_t speed)
   size_t idx;
 
   DEBUGASSERT(termiosp);
-  for (idx = 0; idx < ARRAYSIZE(g_baud_table); idx++)
+  for (idx = 0; idx < nitems(g_baud_table); idx++)
     {
       if (speed == g_baud_table[idx].mask)
         {
@@ -162,7 +161,7 @@ int cfsetspeed(FAR struct termios *termiosp, speed_t speed)
         }
     }
 
-  if (idx == ARRAYSIZE(g_baud_table))
+  if (idx == nitems(g_baud_table))
     {
       termiosp->c_speed = speed;
       speed = BOTHER;

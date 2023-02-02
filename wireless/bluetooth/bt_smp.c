@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <sys/param.h>
+
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_core.h>
 
@@ -60,8 +62,6 @@
 
 #define RECV_KEYS (BT_SMP_DIST_ID_KEY | BT_SMP_DIST_ENC_KEY)
 #define SEND_KEYS (BT_SMP_DIST_ENC_KEY)
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Types
@@ -326,7 +326,7 @@ static const char *h(FAR const void *buf, size_t len)
   int i;
 
   str     = hexbufs[curbuf++];
-  curbuf %= ARRAY_SIZE(hexbufs);
+  curbuf %= nitems(hexbufs);
 
   maxlen  = (sizeof(hexbufs[0]) - 1) / 2;
   if (len > maxlen)
