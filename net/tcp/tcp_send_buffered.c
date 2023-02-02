@@ -273,47 +273,44 @@ static inline void psock_lost_connection(FAR struct tcp_conn_s *conn,
       conn->sndcb->event = NULL;
     }
 
-  if (conn != NULL)
+  /* Free all queued write buffers */
+
+  for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
     {
-      /* Free all queued write buffers */
+      next = sq_next(entry);
+      tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+    }
 
-      for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
-        {
-          next = sq_next(entry);
-          tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
-        }
-
-      for (entry = sq_peek(&conn->write_q); entry; entry = next)
-        {
-          next = sq_next(entry);
-          tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
-        }
+  for (entry = sq_peek(&conn->write_q); entry; entry = next)
+    {
+      next = sq_next(entry);
+      tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+    }
 
 #if CONFIG_NET_SEND_BUFSIZE > 0
-      /* Notify the send buffer available */
+  /* Notify the send buffer available */
 
-      tcp_sendbuffer_notify(conn);
+  tcp_sendbuffer_notify(conn);
 #endif /* CONFIG_NET_SEND_BUFSIZE */
 
-      /* Reset write buffering variables */
+  /* Reset write buffering variables */
 
-      sq_init(&conn->unacked_q);
-      sq_init(&conn->write_q);
+  sq_init(&conn->unacked_q);
+  sq_init(&conn->write_q);
 
-      /* Notify any waiters if the write buffers have been drained. */
+  /* Notify any waiters if the write buffers have been drained. */
 
-      psock_writebuffer_notify(conn);
+  psock_writebuffer_notify(conn);
 
-      conn->sent       = 0;
-      conn->sndseq_max = 0;
+  conn->sent       = 0;
+  conn->sndseq_max = 0;
 
-      /* Force abort the connection. */
+  /* Force abort the connection. */
 
-      if (abort)
-        {
-          conn->tx_unacked = 0;
-          conn->tcpstateflags = TCP_CLOSED;
-        }
+  if (abort)
+    {
+      conn->tx_unacked = 0;
+      conn->tcpstateflags = TCP_CLOSED;
     }
 }
 
