@@ -28,14 +28,11 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)         (sizeof(x) / sizeof((x)[0]))
-#endif
 
 #define RPMSGFS_NAME_PREFIX     "rpmsgfs-"
 

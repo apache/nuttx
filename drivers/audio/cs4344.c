@@ -247,7 +247,7 @@ static int cs4344_setmclkfrequency(FAR struct cs4344_dev_s *priv)
 
   priv->mclk_freq = 0;
 
-  for (i = 0; i < ARRAY_SIZE(mclk_rate); i++)
+  for (i = 0; i < nitems(mclk_rate); i++)
     {
       if (mclk_rate[i].sample_rate == priv->samprate)
         {

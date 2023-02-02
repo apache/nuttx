@@ -62,7 +62,7 @@ static const struct arm_mmu_region mmu_regions[] =
 
 const struct arm_mmu_config mmu_config =
 {
-  .num_regions = ARRAY_SIZE(mmu_regions),
+  .num_regions = nitems(mmu_regions),
   .mmu_regions = mmu_regions,
 };
 

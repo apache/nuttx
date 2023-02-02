@@ -29,15 +29,13 @@
 #include <sys/time.h>
 #include <string.h>
 
+#include <sys/param.h>
+
 #include <nuttx/net/snoop.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
 
 #define SNOOP_VERSION_1 1
 #define SNOOP_VERSION_2 2
@@ -336,7 +334,7 @@ int snoop_open(FAR struct snoop_s *snoop, FAR const char *filename,
               's', 'n', 'o', 'o', 'p', '\0', '\0', '\0'
             };
 
-          memcpy(header.magic, snoop_magic, ARRAY_SIZE(snoop_magic));
+          memcpy(header.magic, snoop_magic, nitems(snoop_magic));
           header.version = htobe32(SNOOP_VERSION_2);
           break;
         };
@@ -351,7 +349,7 @@ int snoop_open(FAR struct snoop_s *snoop, FAR const char *filename,
               'b', 't', 's', 'n', 'o', 'o', 'p', '\0'
             };
 
-          memcpy(header.magic, btsnoop_magic, ARRAY_SIZE(btsnoop_magic));
+          memcpy(header.magic, btsnoop_magic, nitems(btsnoop_magic));
           header.version = htobe32(SNOOP_VERSION_1);
           break;
         }

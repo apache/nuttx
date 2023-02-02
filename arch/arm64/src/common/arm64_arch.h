@@ -145,10 +145,6 @@
 
 #define STRINGIFY(x)    #x
 
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)   (sizeof(x) / sizeof((x)[0]))
-#endif
-
 #define GET_EL(mode)  (((mode) >> MODE_EL_SHIFT) & MODE_EL_MASK)
 
 /* MPIDR_EL1, Multiprocessor Affinity Register */

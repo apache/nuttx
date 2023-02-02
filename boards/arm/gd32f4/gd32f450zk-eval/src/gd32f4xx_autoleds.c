@@ -27,18 +27,14 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "gd32f4xx_gpio.h"
 #include "gd32f450z_eval.h"
 #ifdef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Data
@@ -87,7 +83,7 @@ void board_autoled_initialize(void)
 
   /* Configure the LED GPIO for output. */
 
-  for (i = 0; i < ARRAYSIZE(g_led_map); i++)
+  for (i = 0; i < nitems(g_led_map); i++)
     {
       gd32_gpio_config(g_led_map[i]);
     }

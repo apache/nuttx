@@ -31,10 +31,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 /****************************************************************************
  * To use FMC, you must first enable it in configuration:
@@ -265,7 +265,7 @@ void stm32_fmc_init(void)
 
   /* Set up FMC GPIOs */
 
-  for (regval = 0; regval < ARRAY_SIZE(fmc_gpios); regval++)
+  for (regval = 0; regval < nitems(fmc_gpios); regval++)
     stm32_configgpio(fmc_gpios[regval]);
 
   /* Set up FMC registers */

@@ -39,6 +39,8 @@
 #include <debug.h>
 #include <pthread.h>
 
+#include <sys/param.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 #include <nuttx/queue.h>
@@ -52,14 +54,6 @@
 #include <nuttx/audio/es8388.h>
 
 #include "es8388.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -465,7 +459,7 @@ static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv)
 {
   priv->mclk = 0;
 
-  for (int i = 0; i < ARRAY_SIZE(es8388_mclk_rate); i++)
+  for (int i = 0; i < nitems(es8388_mclk_rate); i++)
     {
       if (es8388_mclk_rate[i].sample_rate == priv->samprate)
         {
