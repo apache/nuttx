@@ -469,24 +469,24 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
          name.sysname, name.nodename,
          name.release, name.version, name.machine);
 
+  _alert("Assertion failed %s: at file: %s:%d task"
 #ifdef CONFIG_SMP
-#  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed: %s at file: %s:%d task(CPU%d): %s %p\n",
-         msg, filename, linenum, up_cpu_index(), rtcb->name,
-         rtcb->entry.main);
-#  else
-  _alert("Assertion failed: %s at file: %s:%d task(CPU%d): %p\n",
-         msg, filename, linenum, up_cpu_index(), rtcb->entry.main);
-#  endif
-#else
-#  if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Assertion failed: %s at file: %s:%d task: %s %p\n",
-         msg, filename, linenum, rtcb->name, rtcb->entry.main);
-#  else
-  _alert("Assertion failed: %s at file: %s:%d task: %p\n",
-         msg, filename, linenum, rtcb->entry.main);
-#  endif
+         "(CPU%d)"
 #endif
+         ": "
+#if CONFIG_TASK_NAME_SIZE > 0
+         "%s "
+#endif
+         "%p\n",
+         msg ? msg : "",
+         filename ? filename : "", linenum,
+#ifdef CONFIG_SMP
+         up_cpu_index(),
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+         rtcb->name,
+#endif
+         rtcb->entry.main);
 
   /* Show back trace */
 
