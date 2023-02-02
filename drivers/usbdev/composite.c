@@ -1049,11 +1049,6 @@ void composite_uninitialize(FAR void *handle)
 
   priv = &alloc->dev;
 
-  for (i = 0; i < priv->ndevices; i++)
-    {
-      priv->device[i].compdesc.uninitialize(priv->device[i].dev);
-    }
-
   /* Then unregister and destroy the composite class */
 
   usbdev_unregister(&alloc->drvr.drvr);
