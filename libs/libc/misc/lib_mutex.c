@@ -29,6 +29,34 @@
 #include <nuttx/mutex.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NXMUTEX_RESET          ((pid_t)-2)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxmutex_is_reset
+ *
+ * Description:
+ *   This function check whether the mutex is reset
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static bool nxmutex_is_reset(FAR mutex_t *mutex)
+{
+  return mutex->holder == NXMUTEX_RESET;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -300,6 +328,11 @@ int nxmutex_unlock(FAR mutex_t *mutex)
 {
   int ret;
 
+  if (nxmutex_is_reset(mutex))
+    {
+      return OK;
+    }
+
   DEBUGASSERT(nxmutex_is_hold(mutex));
 
   mutex->holder = NXMUTEX_NO_HOLDER;
@@ -307,7 +340,8 @@ int nxmutex_unlock(FAR mutex_t *mutex)
   ret = _SEM_POST(&mutex->sem);
   if (ret < 0)
     {
-      return _SEM_ERRVAL(ret);
+      mutex->holder = _SCHED_GETTID();
+      ret = _SEM_ERRVAL(ret);
     }
 
   return ret;
@@ -322,22 +356,14 @@ int nxmutex_unlock(FAR mutex_t *mutex)
  * Parameters:
  *   mutex - mutex descriptor.
  *
- * Return Value:
- *
  ****************************************************************************/
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-int nxmutex_reset(FAR mutex_t *mutex)
+void nxmutex_reset(FAR mutex_t *mutex)
 {
-  int ret;
+  mutex->holder = NXMUTEX_RESET;
 
-  ret = nxsem_reset(&mutex->sem, 1);
-  if (ret >= 0)
-    {
-      mutex->holder = NXMUTEX_NO_HOLDER;
-    }
-
-  return ret;
+  nxsem_reset(&mutex->sem, 1);
 }
 #endif
 
@@ -659,22 +685,13 @@ int nxrmutex_unlock(FAR rmutex_t *rmutex)
  * Parameters:
  *   rmutex - rmutex descriptor.
  *
- * Return Value:
- *
  ****************************************************************************/
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-int nxrmutex_reset(FAR rmutex_t *rmutex)
+void nxrmutex_reset(FAR rmutex_t *rmutex)
 {
-  int ret;
-
-  ret = nxmutex_reset(&rmutex->mutex);
-  if (ret >= 0)
-    {
-      rmutex->count = 0;
-    }
-
-  return ret;
+  rmutex->count = 0;
+  nxmutex_reset(&rmutex->mutex);
 }
 #endif
 
