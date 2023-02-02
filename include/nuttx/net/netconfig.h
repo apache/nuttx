@@ -316,16 +316,6 @@
 
 /* UDP configuration options */
 
-/* The maximum amount of concurrent UDP connection, Default: 10 */
-
-#ifndef CONFIG_NET_UDP_CONNS
-#  ifdef CONFIG_NET_UDP
-#    define CONFIG_NET_UDP_CONNS 10
-#  else
-#    define CONFIG_NET_UDP_CONNS  0
-#  endif
-#endif
-
 /* The UDP maximum packet size. This should not be set to more than
  * NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(dev) - __UDP_HDRLEN - IPv*_HDRLEN.
  */
@@ -460,7 +450,7 @@
 
 #ifndef CONFIG_NET_NACTIVESOCKETS
 #  define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_PREALLOC_CONNS + \
-                                     CONFIG_NET_UDP_CONNS)
+                                     CONFIG_NET_UDP_PREALLOC_CONNS)
 #endif
 
 /* The initial retransmission timeout counted in timer pulses.
