@@ -159,7 +159,7 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
                                            FAR void *pvpriv, uint16_t flags)
 {
   struct tcp_connect_s *pstate = pvpriv;
-  FAR struct tcp_conn_s *conn = pstate->tc_conn;
+  FAR struct tcp_conn_s *conn;
 
   ninfo("flags: %04x\n", flags);
 
@@ -167,6 +167,8 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
+      conn = pstate->tc_conn;
+
       /* The following errors should be detected here (someday)
        *
        *     ECONNREFUSED
