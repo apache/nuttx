@@ -64,9 +64,10 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
+#include "inet/inet.h"
 #include "nat/nat.h"
 #include "netdev/netdev.h"
-#include "inet/inet.h"
+#include "socket/socket.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -98,6 +99,13 @@ static dq_queue_t g_active_udp_connections;
  * Description:
  *   Find the UDP connection that uses this local port number.
  *
+ * Input Parameters:
+ *   domain - IP domain (PF_INET or PF_INET6)
+ *   ipaddr - The IP address to use in the lookup
+ *   portno - The port to use in the lookup
+ *   opt    - The option from another conn to match the conflict conn
+ *              SO_REUSEADDR: If both sockets have this, they never confilct.
+ *
  * Assumptions:
  *   This function must be called with the network locked.
  *
@@ -105,14 +113,28 @@ static dq_queue_t g_active_udp_connections;
 
 static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
                                             FAR union ip_binding_u *ipaddr,
-                                            uint16_t portno)
+                                            uint16_t portno, sockopt_t opt)
 {
   FAR struct udp_conn_s *conn = NULL;
+#ifdef CONFIG_NET_SOCKOPTS
+  bool skip_reusable = _SO_GETOPT(opt, SO_REUSEADDR);
+#endif
 
   /* Now search each connection structure. */
 
   while ((conn = udp_nextconn(conn)) != NULL)
     {
+      /* With SO_REUSEADDR set for both sockets, we do not need to check its
+       * address and port.
+       */
+
+#ifdef CONFIG_NET_SOCKOPTS
+      if (skip_reusable && _SO_GETOPT(conn->sconn.s_options, SO_REUSEADDR))
+        {
+          continue;
+        }
+#endif
+
       /* If the port local port number assigned to the connections matches
        * AND the IP address of the connection matches, then return a
        * reference to the connection structure.  INADDR_ANY is a special
@@ -534,7 +556,7 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
           g_last_udp_port = 4096;
         }
     }
-  while (udp_find_conn(domain, u, HTONS(g_last_udp_port)) != NULL
+  while (udp_find_conn(domain, u, HTONS(g_last_udp_port), 0) != NULL
 #if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
          || (domain == PF_INET &&
              ipv4_nat_port_inuse(IP_PROTO_UDP, u->ipv4.laddr,
@@ -823,7 +845,13 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        * and port ?
        */
 
-      if (udp_find_conn(conn->domain, &conn->u, portno) == NULL
+      if (udp_find_conn(conn->domain, &conn->u, portno,
+#ifdef CONFIG_NET_SOCKOPTS
+                        conn->sconn.s_options
+#else
+                        0
+#endif
+                       ) == NULL
 #if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
           && !(conn->domain == PF_INET &&
                ipv4_nat_port_inuse(IP_PROTO_UDP, conn->u.ipv4.laddr,
