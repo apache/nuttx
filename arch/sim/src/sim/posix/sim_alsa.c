@@ -29,16 +29,11 @@
 #include <nuttx/nuttx.h>
 
 #include <debug.h>
+#include <sys/param.h>
 
 #include <alsa/asoundlib.h>
 
 #include "sim_offload.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define AUDMIN(a,b)     ((a) > (b) ? (b) : (a))
 
 /****************************************************************************
  * Private Types
@@ -707,7 +702,7 @@ static void sim_audio_process(struct sim_audio_s *priv)
   else
     {
       expect = priv->playback ? apb->nbytes / priv->frame_size
-                              : AUDMIN(apb->nmaxbytes, priv->buffer_size)
+                              : MIN(apb->nmaxbytes, priv->buffer_size)
                               / priv->frame_size;
     }
 
