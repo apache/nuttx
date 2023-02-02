@@ -30,6 +30,8 @@
 #include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
 
+#include <sys/param.h>
+
 #include <termios.h>
 #include <math.h>
 #include <fcntl.h>
@@ -39,8 +41,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define WTGAHRS2_ARRAYSIZE(a)      (sizeof((a))/sizeof(a[0]))
 
 #define WTGAHRS2_ACCEL_IDX         0
 #define WTGAHRS2_GYRO_IDX          1
@@ -170,7 +170,7 @@ static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
   FAR struct wtgahrs2_sensor_s *dev = (FAR struct wtgahrs2_sensor_s *)lower;
   int idx = 0;
 
-  for (; idx < WTGAHRS2_ARRAYSIZE(g_wtgahrs2_interval) - 1; idx++)
+  for (; idx < nitems(g_wtgahrs2_interval) - 1; idx++)
     {
       if (*interval >= g_wtgahrs2_interval[idx])
         {

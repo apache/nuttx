@@ -28,6 +28,8 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
@@ -36,12 +38,6 @@
 #include "pinephone.h"
 
 #ifdef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Data
@@ -116,7 +112,7 @@ void board_autoled_initialize(void)
 
   /* Configure the LED GPIO for output. */
 
-  for (i = 0; i < ARRAYSIZE(g_led_map); i++)
+  for (i = 0; i < nitems(g_led_map); i++)
     {
       ret = a64_pio_config(g_led_map[i]);
       DEBUGASSERT(ret == OK);

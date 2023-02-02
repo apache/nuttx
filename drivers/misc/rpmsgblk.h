@@ -27,13 +27,11 @@
 
 #include <nuttx/compiler.h>
 
+#include <sys/param.h>
+
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)         (sizeof(x) / sizeof((x)[0]))
-#endif
 
 #define RPMSGBLK_NAME_PREFIX     "rpmsgblk-"
 #define RPMSGBLK_NAME_PREFIX_LEN 9

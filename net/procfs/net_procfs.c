@@ -37,6 +37,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -47,12 +49,6 @@
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ARRAY_SIZE(x)   (sizeof(x) / sizeof((x)[0]))
 
 /****************************************************************************
  * Private Type Definitions
@@ -214,7 +210,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* For each net entries */
 
-  for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
+  for (i = 0; i < nitems(g_net_entries); i++)
     {
       if (strncmp(relpath + 4, g_net_entries[i].name,
                   strlen(g_net_entries[i].name)))
@@ -230,7 +226,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       break;
     }
 
-  if (i == ARRAY_SIZE(g_net_entries) - 1)
+  if (i == nitems(g_net_entries) - 1)
     {
       FAR char *devname;
       FAR char *copy;
@@ -395,7 +391,7 @@ static int netprocfs_opendir(FAR const char *relpath,
 
   if (strlen(relpath) > 4)
     {
-      for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
+      for (i = 0; i < nitems(g_net_entries); i++)
         {
           if (strncmp(relpath + 4, g_net_entries[i].name,
                       strlen(g_net_entries[i].name)))
@@ -439,7 +435,7 @@ static int netprocfs_opendir(FAR const char *relpath,
 
       /* Add other enabled net components, except netdev */
 
-      level1->base.nentries += ARRAY_SIZE(g_net_entries) - 1;
+      level1->base.nentries += nitems(g_net_entries) - 1;
     }
   else
     {
@@ -517,7 +513,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
 
       /* Process other enabled net components, except netdev */
 
-      if (index < ARRAY_SIZE(g_net_entries) - 1)
+      if (index < nitems(g_net_entries) - 1)
         {
           entry->d_type = g_net_entries[index].type;
           strlcpy(entry->d_name,
@@ -558,7 +554,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
            * entry of last g_net_entries(-1) and start the devidx from 1)
            */
 
-          ifindex = index + 2 - ARRAY_SIZE(g_net_entries);
+          ifindex = index + 2 - nitems(g_net_entries);
 #endif
           /* Find the device corresponding to this device index */
 
@@ -637,7 +633,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
     }
   else
     {
-      for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
+      for (i = 0; i < nitems(g_net_entries); i++)
         {
           if (strcmp(relpath + 4, g_net_entries[i].name) == 0)
             {

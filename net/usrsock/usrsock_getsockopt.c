@@ -134,7 +134,7 @@ static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
   bufs[0].iov_base = (FAR void *)&req;
   bufs[0].iov_len = sizeof(req);
 
-  return usrsock_do_request(conn, bufs, ARRAY_SIZE(bufs));
+  return usrsock_do_request(conn, bufs, nitems(bufs));
 }
 
 /****************************************************************************
@@ -216,7 +216,7 @@ int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
   inbufs[0].iov_base = (FAR void *)value;
   inbufs[0].iov_len = *value_len;
 
-  usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
+  usrsock_setup_datain(conn, inbufs, nitems(inbufs));
 
   /* Request user-space daemon to handle request. */
 

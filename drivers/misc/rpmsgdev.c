@@ -1109,7 +1109,7 @@ static int rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_header_s *header = data;
   uint32_t command = header->command;
 
-  if (command < ARRAY_SIZE(g_rpmsgdev_handler))
+  if (command < nitems(g_rpmsgdev_handler))
     {
       return g_rpmsgdev_handler[command](ept, data, len, src, priv);
     }

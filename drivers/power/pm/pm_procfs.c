@@ -30,6 +30,8 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <sys/param.h>
+
 #include <nuttx/nuttx.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -61,10 +63,6 @@
  */
 
 #define PM_LINELEN 128
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
 
 typedef ssize_t (*pm_read_t)(FAR struct file *filep,
                              FAR char *buffer, size_t buflen);
@@ -193,7 +191,7 @@ static int pm_open(FAR struct file *filep, FAR const char *relpath,
     }
 
   relpath += strlen("pm/");
-  for (i = 0; i < ARRAY_SIZE(g_pm_files); i++)
+  for (i = 0; i < nitems(g_pm_files); i++)
     {
       if (strncmp(relpath, g_pm_files[i].name,
                   strlen(g_pm_files[i].name)) == 0)
@@ -462,7 +460,7 @@ static int pm_opendir(FAR const char *relpath, FAR struct fs_dirent_s **dir)
   /* Initialize base structure components */
 
   level1->level    = 1;
-  level1->nentries = CONFIG_PM_NDOMAINS * ARRAY_SIZE(g_pm_files);
+  level1->nentries = CONFIG_PM_NDOMAINS * nitems(g_pm_files);
 
   *dir = (FAR struct fs_dirent_s *)level1;
   return OK;
@@ -511,8 +509,8 @@ static int pm_readdir(FAR struct fs_dirent_s *dir,
       return -ENOENT;
     }
 
-  domain = index / ARRAY_SIZE(g_pm_files);
-  fpos   = index % ARRAY_SIZE(g_pm_files);
+  domain = index / nitems(g_pm_files);
+  fpos   = index % nitems(g_pm_files);
 
   entry->d_type = DTYPE_FILE;
   snprintf(entry->d_name, NAME_MAX + 1, "%s%d",

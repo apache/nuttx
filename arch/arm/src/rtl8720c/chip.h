@@ -29,15 +29,15 @@
 #  include <stdint.h>
 #  include <sys/types.h>
 #endif
+
+#include <sys/param.h>
+
 #include <arch/chip/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)               (sizeof(x) / sizeof((x)[0]))
-#endif
 /* If the common ARMv7-M vector handling logic is used,
  * then it expects the following
  * definition in this file that provides the number of

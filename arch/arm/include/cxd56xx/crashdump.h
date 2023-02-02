@@ -29,6 +29,8 @@
 
 #include <stdint.h>
 
+#include <sys/param.h>
+
 #include <nuttx/irq.h>
 
 /****************************************************************************
@@ -53,8 +55,6 @@
                             sizeof(stack_word_t))
 #define CONFIG_USTACK_SIZE (CRASHLOG_LEFTOVER / NUMBER_STACKS / \
                             sizeof(stack_word_t))
-
-#define ARRAYSIZE(a) (sizeof((a))/sizeof(a[0]))
 
 /* For Assert keep this much of the file name */
 

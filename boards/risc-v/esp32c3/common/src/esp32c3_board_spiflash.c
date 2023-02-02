@@ -34,6 +34,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
@@ -51,8 +53,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
 
 #ifdef CONFIG_ESP32C3_OTA_PARTITION_ENCRYPT
 #  define OTA_ENCRYPT true
@@ -147,7 +147,7 @@ static int init_ota_partitions(void)
 #endif
   int ret = OK;
 
-  for (int i = 0; i < ARRAYSIZE(g_ota_partition_table); ++i)
+  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
     {
       const struct ota_partition_s *part = &g_ota_partition_table[i];
       mtd = esp32c3_spiflash_alloc_mtdpart(part->offset, part->size,

@@ -200,8 +200,8 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   if ((pdump->info.flags & INTSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
-      copy_reverse(pdump->istack, &ps[ARRAYSIZE(pdump->istack) / 2],
-                   ARRAYSIZE(pdump->istack));
+      copy_reverse(pdump->istack, &ps[nitems(pdump->istack) / 2],
+                   nitems(pdump->istack));
     }
 
   /* Is it Invalid? */
@@ -221,8 +221,8 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   if ((pdump->info.flags & USERSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.user.sp;
-      copy_reverse(pdump->ustack, &ps[ARRAYSIZE(pdump->ustack) / 2],
-                   ARRAYSIZE(pdump->ustack));
+      copy_reverse(pdump->ustack, &ps[nitems(pdump->ustack) / 2],
+                   nitems(pdump->ustack));
     }
 
   /* Is it Invalid? */

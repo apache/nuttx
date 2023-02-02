@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+#include <sys/param.h>
+
 #include <nuttx/clk/clk.h>
 #include <nuttx/clk/clk_provider.h>
 #include <nuttx/kmalloc.h>
@@ -47,10 +49,6 @@
 #define CLK_RPMSG_GETRATE           5
 #define CLK_RPMSG_ROUNDRATE         6
 #define CLK_RPMSG_ISENABLED         7
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x)             (sizeof(x) / sizeof((x)[0]))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -606,7 +604,7 @@ static int clk_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
           ret = 0;
         }
     }
-  else if (cmd < ARRAY_SIZE(g_clk_rpmsg_handler)
+  else if (cmd < nitems(g_clk_rpmsg_handler)
            && g_clk_rpmsg_handler[cmd])
     {
       hdr->response = 1;

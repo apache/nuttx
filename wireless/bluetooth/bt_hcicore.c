@@ -50,6 +50,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
 #include <nuttx/spinlock.h>
@@ -68,8 +70,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 /* Wait up to 2.5 seconds for a response.  This delay is arbitrary and
  * intended only to avoid hangs while waiting for a response.  It may need
@@ -2139,7 +2139,7 @@ FAR const char *bt_addr_str(FAR const bt_addr_t *addr)
   FAR char *str;
 
   str  = bufs[cur++];
-  cur %= ARRAY_SIZE(bufs);
+  cur %= nitems(bufs);
   bt_addr_to_str(addr, str, sizeof(bufs[cur]));
 
   return str;
@@ -2152,7 +2152,7 @@ FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr)
   FAR char *str;
 
   str  = bufs[cur++];
-  cur %= ARRAY_SIZE(bufs);
+  cur %= nitems(bufs);
   bt_addr_le_to_str(addr, str, sizeof(bufs[cur]));
 
   return str;
