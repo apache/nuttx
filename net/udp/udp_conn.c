@@ -76,8 +76,8 @@
 
 /* The array containing all UDP connections. */
 
-#ifndef CONFIG_NET_ALLOC_CONNS
-struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_CONNS];
+#if CONFIG_NET_UDP_PREALLOC_CONNS > 0
+struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_PREALLOC_CONNS];
 #endif
 
 /* A list of all free UDP connections */
@@ -462,7 +462,7 @@ static inline FAR struct udp_conn_s *
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_UDP_ALLOC_CONNS > 0
 FAR struct udp_conn_s *udp_alloc_conn(void)
 {
   FAR struct udp_conn_s *conn;
@@ -472,8 +472,16 @@ FAR struct udp_conn_s *udp_alloc_conn(void)
 
   if (dq_peek(&g_free_udp_connections) == NULL)
     {
+#if CONFIG_NET_UDP_MAX_CONNS > 0
+      if (dq_count(&g_active_udp_connections) + CONFIG_NET_UDP_ALLOC_CONNS
+          >= CONFIG_NET_UDP_MAX_CONNS)
+        {
+          return NULL;
+        }
+#endif
+
       conn = kmm_zalloc(sizeof(struct udp_conn_s) *
-                        CONFIG_NET_UDP_CONNS);
+                        CONFIG_NET_UDP_ALLOC_CONNS);
       if (conn == NULL)
         {
           return conn;
@@ -481,7 +489,7 @@ FAR struct udp_conn_s *udp_alloc_conn(void)
 
       /* Now initialize each connection structure */
 
-      for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
+      for (i = 0; i < CONFIG_NET_UDP_ALLOC_CONNS; i++)
         {
           /* Mark the connection closed and move it to the free list */
 
@@ -585,10 +593,10 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
 
 void udp_initialize(void)
 {
-#ifndef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_UDP_PREALLOC_CONNS > 0
   int i;
 
-  for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
+  for (i = 0; i < CONFIG_NET_UDP_PREALLOC_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
 
@@ -614,11 +622,16 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
   /* The free list is protected by a mutex. */
 
   nxmutex_lock(&g_free_lock);
-#ifndef CONFIG_NET_ALLOC_CONNS
+
   conn = (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
-#else
-  conn = udp_alloc_conn();
+
+#if CONFIG_NET_UDP_ALLOC_CONNS > 0
+  if (conn == NULL)
+    {
+      conn = udp_alloc_conn();
+    }
 #endif
+
   if (conn)
     {
       /* Make sure that the connection is marked as uninitialized */
@@ -703,9 +716,23 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   memset(conn, 0, sizeof(*conn));
 
-  /* Free the connection */
+  /* Free the connection.
+   * If this is a preallocated or a batch allocated connection store it in
+   * the free connections list. Else free it.
+   */
 
-  dq_addlast(&conn->sconn.node, &g_free_udp_connections);
+#if CONFIG_NET_UDP_ALLOC_CONNS == 1
+  if (conn < g_udp_connections || conn >= (g_udp_connections +
+      CONFIG_NET_UDP_PREALLOC_CONNS))
+    {
+      kmm_free(conn);
+    }
+  else
+#endif
+    {
+      dq_addlast(&conn->sconn.node, &g_free_udp_connections);
+    }
+
   nxmutex_unlock(&g_free_lock);
 }
 
