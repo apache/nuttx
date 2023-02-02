@@ -334,6 +334,28 @@ static const struct adb_cfgdesc_s g_adb_cfgdesc =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: usbclass_freereq
+ *
+ * Description:
+ *   Free a request instance along with its buffer
+ *
+ ****************************************************************************/
+
+static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
+                             FAR struct usbdev_req_s *req)
+{
+  if (ep != NULL && req != NULL)
+    {
+      if (req->buf != NULL)
+        {
+          EP_FREEBUFFER(ep, req->buf);
+        }
+
+      EP_FREEREQ(ep, req);
+    }
+}
+
+/****************************************************************************
  * Name: usbclass_allocreq
  *
  * Description:
@@ -1103,9 +1125,94 @@ errout:
 static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
                             FAR struct usbdev_s *dev)
 {
+  FAR struct usbdev_adb_s *priv;
+  int i;
+
   usbtrace(TRACE_CLASSUNBIND, 0);
 
-  #warning Missing logic
+#ifdef CONFIG_DEBUG_FEATURES
+  if (!driver || !dev || !dev->ep0)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return;
+    }
+#endif
+
+  /* Extract reference to private data */
+
+  priv = &((FAR struct adb_driver_s *)driver)->dev;
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (!priv)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
+      return;
+    }
+#endif
+
+  /* Make sure that we are not already unbound */
+
+  if (priv != NULL)
+    {
+      /* Make sure that the endpoints have been unconfigured.  If
+       * we were terminated gracefully, then the configuration should
+       * already have been reset.  If not, then calling usbclass_resetconfig
+       * should cause the endpoints to immediately terminate all
+       * transfers and return the requests to us (with result == -ESHUTDOWN)
+       */
+
+      usbclass_resetconfig(priv);
+
+      /* Free the bulk IN endpoint */
+
+      if (priv->epbulkin)
+        {
+          DEV_FREEEP(dev, priv->epbulkin);
+          priv->epbulkin = NULL;
+        }
+
+      /* Free the bulk OUT endpoint */
+
+      if (priv->epbulkout)
+        {
+          DEV_FREEEP(dev, priv->epbulkout);
+          priv->epbulkout = NULL;
+        }
+
+      /* Free the pre-allocated control request */
+
+      if (priv->ctrlreq != NULL)
+        {
+          usbclass_freereq(dev->ep0, priv->ctrlreq);
+          priv->ctrlreq = NULL;
+        }
+
+      /* Free write requests that are not in use (which should be all
+       * of them
+       */
+
+      for (i = 0; i < CONFIG_USBADB_NRDREQS; i++)
+        {
+          FAR struct usbadb_rdreq_s *rdcontainer;
+
+          rdcontainer = &priv->rdreqs[i];
+          if (rdcontainer->req != NULL)
+            {
+              usbclass_freereq(priv->epbulkout, rdcontainer->req);
+            }
+        }
+
+      for (i = 0; i < CONFIG_USBADB_NWRREQS; i++)
+        {
+          FAR struct usbadb_wrreq_s *wrcontainer;
+
+          wrcontainer = &priv->wrreqs[i];
+          if (wrcontainer->req != NULL)
+            {
+              usbclass_freereq(priv->epbulkin, wrcontainer->req);
+            }
+        }
+    }
 }
 
 /****************************************************************************
