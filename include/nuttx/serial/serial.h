@@ -288,8 +288,8 @@ struct uart_dev_s
 
   tcflag_t             tc_iflag;     /* Input modes */
   tcflag_t             tc_oflag;     /* Output modes */
-  tcflag_t             tc_lflag;     /* Local modes */
 #endif
+  tcflag_t             tc_lflag;     /* Local modes */
 
   /* Semaphores & mutex */
 

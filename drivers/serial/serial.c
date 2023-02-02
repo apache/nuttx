@@ -784,7 +784,7 @@ static ssize_t uart_read(FAR struct file *filep,
 
           /* Specifically not handled:
            *
-           * All of the local modes; echo, line editing, etc.
+           * All of the local modes; line editing, etc.
            * Anything to do with break or parity errors.
            * ISTRIP - we should be 8-bit clean.
            * IUCLC - Not Posix
@@ -796,6 +796,13 @@ static ssize_t uart_read(FAR struct file *filep,
 
           *buffer++ = ch;
           recvd++;
+
+          /* Echo the character */
+
+          if (dev->tc_lflag & ECHO)
+            {
+              uart_putc(dev, ch);
+            }
         }
 
 #ifdef CONFIG_DEV_SERIAL_FULLBLOCKS
@@ -1381,7 +1388,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
     }
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Append any higher level TTY flags */
 
   if (ret == OK || ret == -ENOTTY)
@@ -1400,8 +1406,10 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               /* And update with flags from this layer */
 
+#ifdef CONFIG_SERIAL_TERMIOS
               termiosp->c_iflag = dev->tc_iflag;
               termiosp->c_oflag = dev->tc_oflag;
+#endif
               termiosp->c_lflag = dev->tc_lflag;
 
               ret = 0;
@@ -1420,8 +1428,10 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               /* Update the flags we keep at this layer */
 
+#ifdef CONFIG_SERIAL_TERMIOS
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
+#endif
               dev->tc_lflag = termiosp->c_lflag;
 
               ret = 0;
@@ -1429,7 +1439,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
         }
     }
-#endif
 
   return ret;
 }
