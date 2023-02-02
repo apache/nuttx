@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_HPM6750EVK2
+
+choice
+	prompt "HPM6750EVK2 Build Type Selection"
+	default HPM_BUILD_TYPE_DEBUG
+
+config HPM_BUILD_TYPE_DEBUG
+	bool "debug"
+
+config HPM_BUILD_TYPE_FLASH_XIP
+	bool "flash_xip"
+	select INCLUDE_BOOTHEADER
+
+config HPM_BUILD_TYPE_FLASH_SDRAM_XIP
+	bool "flash_sdram_xip"
+	select INCLUDE_BOOTHEADER
+
+endchoice
+
+config INCLUDE_BOOTHEADER
+	bool
+	default y
+
+endif
