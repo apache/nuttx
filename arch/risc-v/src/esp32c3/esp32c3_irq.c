@@ -88,6 +88,14 @@
 #  define ESP32C3_WIFI_RESERVE_INT  (1 << ESP32C3_CPUINT_ALWAYS_RSVD)
 #endif
 
+#ifdef CONFIG_ESP32C3_BLE
+#  define ESP32C3_BLE_RESERVE_INT ((1 << ESP32C3_CPUINT_ALWAYS_RSVD) | \
+                                   (1 << ESP32C3_CPUINT_BT_BB) | \
+                                   (1 << ESP32C3_CPUINT_RWBLE))
+#else
+#  define ESP32C3_BLE_RESERVE_INT  (1 << ESP32C3_CPUINT_ALWAYS_RSVD)
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -103,7 +111,8 @@ static volatile uint8_t g_irqmap[NR_IRQS];
  */
 
 static uint32_t g_cpu_freeints = ESP32C3_CPUINT_PERIPHSET &
-                                 (~ESP32C3_WIFI_RESERVE_INT);
+                                 (~ESP32C3_WIFI_RESERVE_INT &
+                                  ~ESP32C3_BLE_RESERVE_INT);
 
 /****************************************************************************
  * Private Functions
