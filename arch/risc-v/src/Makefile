@@ -99,11 +99,15 @@ LDFLAGS += $(addprefix -T,$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 ifeq ($(LD),$(CC))
   LDSTARTGROUP ?= -Wl,--start-group
   LDENDGROUP   ?= -Wl,--end-group
+  LDWHOLEARCHIVE     ?= -Wl,--whole-archive
+  LDNOWHOLEARCHIVE   ?= -Wl,--no-whole-archive
   LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
   LDFLAGS      += $(CFLAGS)
 else
   LDSTARTGROUP ?= --start-group
   LDENDGROUP   ?= --end-group
+  LDWHOLEARCHIVE     ?= --whole-archive
+  LDNOWHOLEARCHIVE   ?= --no-whole-archive
 endif
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
@@ -156,7 +160,7 @@ define LINK_ALLSYMS
 	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) allsyms$(OBJEXT) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
+		$(LDSTARTGROUP) $(LDWHOLEARCHIVE) $(LDLIBS) $(LDNOWHOLEARCHIVE) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
@@ -168,7 +172,7 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(addsuffix .tmp,$(ARCHSCRIP
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
+		$(LDSTARTGROUP) $(LDWHOLEARCHIVE) $(LDLIBS) $(LDNOWHOLEARCHIVE) $(EXTRA_LIBS) $(LDENDGROUP)
 else
 	$(Q) # Link and generate default table
 	$(Q) $(if $(wildcard $(shell echo $(NUTTX))),,$(call LINK_ALLSYMS,$^))
