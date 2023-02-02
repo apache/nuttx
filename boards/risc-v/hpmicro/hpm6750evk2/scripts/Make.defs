@@ -1,0 +1,76 @@
+############################################################################
+# boards/risc-v/fe310/hifive1-revb/scripts/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS += $(CFLAGS) -D__ASSEMBLY__
+
+CROSSDEV = riscv32-unknown-elf-
+
+ifeq ($(CONFIG_ARCH_CHIP_HPM6750),y)
+  HPM_CHIP_SELECT = HPM6750
+endif
+
+ifeq ($(CONFIG_ARCH_CHIP_HPM6360),y)
+  HPM_CHIP_SELECT = HPM6360
+endif
+
+ifeq ($(CONFIG_ARCH_BOARD_HPM6750EVK2),y)
+  HPM_BOARD_SELECT = hpm6750evk2
+  CONFIG_XIP_FLASH_SIZE = 16M
+  CONFIG_SDRAM_SIZE = 32M
+endif
+
+ifeq ($(CONFIG_HPM_BUILD_TYPE_DEBUG),y)
+  LDSCRIPT = ram.ld
+endif
+
+ifeq ($(CONFIG_HPM_BUILD_TYPE_FLASH_XIP),y)
+  LDSCRIPT = flash_xip.ld
+  CFLAGS += -DFLASH_XIP
+  LDFLAGS += --defsym=_flash_size=$(CONFIG_XIP_FLASH_SIZE)
+endif
+
+ifeq ($(CONFIG_HPM_BUILD_TYPE_FLASH_SDRAM_XIP),y)
+  LDSCRIPT = flash_sdram_xip.ld
+  CFLAGS += -DFLASH_XIP -DINIT_EXT_RAM_FOR_DATA
+  LDFLAGS += --defsym=_flash_size=$(CONFIG_XIP_FLASH_SIZE)
+  LDFLAGS += --defsym=_extram_size=$(CONFIG_SDRAM_SIZE)
+endif
+
+LDFLAGS += --defsym=_stack_size=$(CONFIG_IDLETHREAD_STACKSIZE)
+ARCHSCRIPT += $(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)toolchains$(DELIM)gcc$(DELIM)$(LDSCRIPT)
+
+# Add include directories
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)arch
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)boot
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)ip
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)inc
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)boards$(DELIM)$(HPM_BOARD_SELECT)
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm_sdk$(DELIM)components$(DELIM)debug_console
+CFLAGS += $(INCDIR_PREFIX)$(CHIP_DIR)$(DELIM)hpm6750

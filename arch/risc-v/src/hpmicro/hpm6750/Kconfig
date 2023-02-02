@@ -1,0 +1,42 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "HPM6750 Peripheral Support"
+
+config HPM_FEMC
+	bool "FEMC"
+	select HPM_FEMC_DRV
+	default n
+
+config HPM_SDP
+	bool "SDP"
+	select HPM_SDP_DRV
+	default n
+
+config HPM_LCDC
+	bool "LCDC"
+	select HPM_LCDC_DRV
+	default n
+
+config HPM_I2C0
+	bool "I2C0"
+	select HPM_I2C_DRV
+	default n
+
+config HPM_I2C1
+	bool "I2C1"
+	select HPM_I2C_DRV
+	default n
+
+config HPM_UART0
+	bool "UART0"
+	select HPM_UART_DRV
+	select ARCH_HAVE_UART0
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	default y
+
+endmenu
+

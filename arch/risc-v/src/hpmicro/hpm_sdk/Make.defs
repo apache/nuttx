@@ -1,0 +1,169 @@
+############################################################################
+# arch/risc-v/src/hpmicro/hpm_sdk/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+HEAD_ASRC = hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)toolchains$(DELIM)gcc$(DELIM)start.S
+
+# Include soc files
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)system.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)hpm_sysctl_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)hpm_l1c_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)hpm_clock_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)hpm_otp_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)toolchains$(DELIM)gcc$(DELIM)initfini.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)toolchains$(DELIM)reset.c
+ifeq ($(CONFIG_INCLUDE_BOOTHEADER),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)soc$(DELIM)$(HPM_CHIP_SELECT)$(DELIM)boot$(DELIM)hpm_bootheader.c
+endif
+
+# Include driver files
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_uart_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pmp_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pllctl_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pcfg_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_mchtmr_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_gpio_drv.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_femc_drv.c
+
+ifeq ($(CONFIG_HPM_SDP_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_sdp_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_LCDC_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_lcdc_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_I2C_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_i2c_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_RNG_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_rng_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_SPI_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_spi_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_PDMA_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pdma_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_WDG_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_wdg_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_DMA_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_dma_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_GPTMR_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_gptmr_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_PWM_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pwm_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_PLLCTLV2_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pllctlv2_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_USB_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_usb_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_RTC_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_rtc_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_ACMP_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_acmp_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_I2S_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_i2s_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_DAO_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_dao_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_PDM_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_pdm_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_VAD_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_vad_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_CAM_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_cam_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_CAN_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_can_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_JPEG_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_jpeg_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_ENET_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_enet_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_SDXC_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_sdxc_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_ADC12_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_adc12_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_ADC16_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_adc16_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_PTPC_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_ptpc_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_FFA_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_ffa_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_TSNS_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_tsns_drv.c
+endif
+
+ifeq ($(CONFIG_HPM_DAC_DRV),y)
+  CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)drivers$(DELIM)src$(DELIM)hpm_dac_drv.c
+endif
+
+
+# Include board files
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)boards$(DELIM)$(HPM_BOARD_SELECT)$(DELIM)board.c
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)boards$(DELIM)$(HPM_BOARD_SELECT)$(DELIM)pinmux.c
+
+# Include components files
+CHIP_CSRCS += hpmicro$(DELIM)hpm_sdk$(DELIM)components$(DELIM)debug_console$(DELIM)hpm_debug_console.c

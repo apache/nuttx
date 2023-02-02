@@ -146,6 +146,11 @@ config ARCH_CHIP_QEMU_RV
 	---help---
 		QEMU Generic RV32/RV64 processor
 
+config ARCH_CHIP_HPMICRO
+	bool "HPMicro Chip"
+	---help---
+		HPMicro processor selection.
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -192,6 +197,7 @@ config ARCH_CHIP
 	default "mpfs"		if ARCH_CHIP_MPFS
 	default "rv32m1"	if ARCH_CHIP_RV32M1
 	default "qemu-rv"	if ARCH_CHIP_QEMU_RV
+	default "hpmicro"	if ARCH_CHIP_HPMICRO
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -328,5 +334,8 @@ source "arch/risc-v/src/rv32m1/Kconfig"
 endif
 if ARCH_CHIP_QEMU_RV
 source "arch/risc-v/src/qemu-rv/Kconfig"
+endif
+if ARCH_CHIP_HPMICRO
+source "arch/risc-v/src/hpmicro/Kconfig"
 endif
 endif
