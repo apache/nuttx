@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <sys/param.h>
+
 #include <nuttx/compiler.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -76,14 +78,6 @@
     region##_val &= PMP_CFG_FLAG_MASK; \
     region##_val; \
   })
-
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -680,7 +674,7 @@ int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size)
             {
               /* Found matching region that allows access */
 
-              size -= min(end, entry.end) - max(base, entry.base);
+              size -= MIN(end, entry.end) - MAX(base, entry.base);
             }
           else
             {

@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <sys/param.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/cache.h>
 #include <nuttx/clock.h>
@@ -87,9 +89,6 @@
 #ifndef CONFIG_LITEX_SD4BIT_FREQ
 #  define CONFIG_LITEX_SD4BIT_FREQ 50000000  /* 25MHz SD 4-bit, normal clocking */
 #endif
-
-#define max(x, y) (((x) > (y)) ? (x) : (y))
-#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 /****************************************************************************
  * Private Types
@@ -626,7 +625,7 @@ static void litex_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
   uint32_t divider;
   divider = clk_freq ? litex_get_hfclk() / clk_freq : MAX_DIVIDER;
   divider = litex_pow2roundup(divider);
-  divider = min(max(divider, 2), MAX_DIVIDER);
+  divider = MIN(MAX(divider, 2), MAX_DIVIDER);
 
   /* this is the *effective* new clk_freq */
 

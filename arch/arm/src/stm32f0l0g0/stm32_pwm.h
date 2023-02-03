@@ -50,6 +50,8 @@
 #include <nuttx/config.h>
 #include <arch/board/board.h>
 
+#include <sys/param.h>
+
 #include "chip.h"
 #include "hardware/stm32_tim.h"
 
@@ -326,15 +328,13 @@
 #endif
 #define PWM_TIM17_NCHANNELS PWM_TIM17_CHANNEL1
 
-#define PWM_MAX(a, b) ((a) > (b) ? (a) : (b))
-
-#define PWM_NCHANNELS PWM_MAX(PWM_TIM1_NCHANNELS, \
-                      PWM_MAX(PWM_TIM2_NCHANNELS, \
-                      PWM_MAX(PWM_TIM3_NCHANNELS, \
-                      PWM_MAX(PWM_TIM14_NCHANNELS, \
-                      PWM_MAX(PWM_TIM15_NCHANNELS, \
-                      PWM_MAX(PWM_TIM16_NCHANNELS, \
-                              PWM_TIM17_NCHANNELS))))))
+#define PWM_NCHANNELS MAX(PWM_TIM1_NCHANNELS, \
+                      MAX(PWM_TIM2_NCHANNELS, \
+                      MAX(PWM_TIM3_NCHANNELS, \
+                      MAX(PWM_TIM14_NCHANNELS, \
+                      MAX(PWM_TIM15_NCHANNELS, \
+                      MAX(PWM_TIM16_NCHANNELS, \
+                          PWM_TIM17_NCHANNELS))))))
 
 #else  /* !CONFIG_PWM_MULTICHAN */
 
