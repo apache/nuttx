@@ -78,33 +78,28 @@ void host_uart_close(int fd)
  * Name: host_uart_putc
  ****************************************************************************/
 
-int host_uart_putc(int fd, int ch)
+ssize_t host_uart_puts(int fd, const char *buf, size_t size)
 {
   DWORD nwritten;
+  int ret;
 
-  if (WriteConsole(g_stdout_handle, &ch, 1, &nwritten, NULL))
-    {
-      return ch;
-    }
+  ret = WriteConsole(g_stdout_handle, buf, size, &nwritten, NULL);
 
-  return -EIO;
+  return ret == 0 ? -EIO : nwritten;
 }
 
 /****************************************************************************
  * Name: host_uart_getc
  ****************************************************************************/
 
-int host_uart_getc(int fd)
+ssize_t host_uart_gets(int fd, char *buf, size_t size)
 {
-  unsigned char ch;
   DWORD nread;
+  int ret;
 
-  if (ReadConsole(g_stdin_handle, &ch, 1, &nread, 0))
-    {
-      return ch;
-    }
+  ret = ReadConsole(g_stdin_handle, buf, size, &nread, 0);
 
-  return -EIO;
+  return ret == 0 ? -EIO : nread;
 }
 
 /****************************************************************************
