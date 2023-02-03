@@ -40,6 +40,7 @@
 #ifdef CONFIG_ESP32S2_GPIO_IRQ
 #include "esp32s2_gpio.h"
 #endif
+#include "esp32s2_rtc_gpio.h"
 #include "esp32s2_irq.h"
 #include "hardware/esp32s2_soc.h"
 #include "hardware/esp32s2_system.h"
@@ -298,6 +299,10 @@ void up_irqinitialize(void)
 
   esp32s2_gpioirqinitialize();
 #endif
+
+  /* Initialize RTCIO interrupt support */
+
+  esp32s2_rtcioirqinitialize();
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts.  Also clears PS.EXCM */

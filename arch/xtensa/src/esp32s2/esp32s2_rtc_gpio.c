@@ -31,8 +31,10 @@
 #include <sys/types.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 
 #include "xtensa.h"
+#include "esp32s2_irq.h"
 #include "esp32s2_rtc_gpio.h"
 #include "hardware/esp32s2_rtc_io.h"
 #include "hardware/esp32s2_sens.h"
@@ -57,6 +59,11 @@ enum rtcio_lh_out_mode_e
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTCIO_IRQ
+static int g_rtcio_cpuint;
+static uint32_t last_status;
+#endif
 
 static const uint32_t rtc_gpio_to_addr[] =
 {
@@ -94,12 +101,97 @@ static const uint32_t rtc_gpio_to_addr[] =
  * Description:
  *   Determine if the specified rtcio_num is a valid RTC GPIO.
  *
+ * Input Parameters:
+ *   rtcio_num - RTC GPIO to be checked.
+ *
+ * Returned Value:
+ *   True if valid. False otherwise.
+ *
  ****************************************************************************/
 
 static inline bool is_valid_rtc_gpio(uint32_t rtcio_num)
 {
   return (rtcio_num < RTC_GPIO_NUMBER);
 }
+
+/****************************************************************************
+ * Name: rtcio_dispatch
+ *
+ * Description:
+ *   Second level dispatch for the RTC interrupt.
+ *
+ * Input Parameters:
+ *   irq - The IRQ number;
+ *   reg_status - Pointer to a copy of the interrupt status register.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTCIO_IRQ
+static void rtcio_dispatch(int irq, uint32_t *reg_status)
+{
+  uint32_t status = *reg_status;
+  uint32_t mask;
+  int i;
+
+  /* Check each bit in the status register */
+
+  for (i = 0; i < ESP32S2_NIRQ_RTCIO_PERIPH && status != 0; i++)
+    {
+      /* Check if there is an interrupt pending for this type */
+
+      mask = (UINT32_C(1) << i);
+      if ((status & mask) != 0)
+        {
+          /* Yes... perform the second level dispatch. The IRQ context will
+           * contain the contents of the status register.
+           */
+
+          irq_dispatch(irq + i, (void *)reg_status);
+
+          /* Clear the bit in the status so that we might execute this loop
+           * sooner.
+           */
+
+          status &= ~mask;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: rtcio_interrupt
+ *
+ * Description:
+ *   RTC interrupt handler.
+ *
+ * Input Parameters:
+ *   irq - The IRQ number;
+ *   context - The interrupt context;
+ *   args - The arguments passed to the handler.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTCIO_IRQ
+static int rtcio_interrupt(int irq, void *context, void *arg)
+{
+  /* Read and clear the lower RTC interrupt status */
+
+  last_status = getreg32(RTC_CNTL_INT_ST_RTC_REG);
+  putreg32(last_status, RTC_CNTL_INT_CLR_RTC_REG);
+
+  /* Dispatch pending interrupts in the RTC status register */
+
+  rtcio_dispatch(ESP32S2_FIRST_RTCIOIRQ_PERIPH, &last_status);
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -249,3 +341,94 @@ int esp32s2_configrtcio(int rtcio_num, rtcio_pinattr_t attr)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: esp32s2_rtcioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   RTC interrupts.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTCIO_IRQ
+void esp32s2_rtcioirqinitialize(void)
+{
+  /* Setup the RTCIO interrupt. */
+
+  g_rtcio_cpuint = esp32s2_setup_irq(ESP32S2_PERIPH_RTC_CORE,
+                                     1, ESP32S2_CPUINT_LEVEL);
+  DEBUGASSERT(g_rtcio_cpuint >= 0);
+
+  /* Attach and enable the interrupt handler */
+
+  DEBUGVERIFY(irq_attach(ESP32S2_IRQ_RTC_CORE, rtcio_interrupt, NULL));
+  up_enable_irq(ESP32S2_IRQ_RTC_CORE);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_rtcioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for a specified RTC IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTCIO_IRQ
+void esp32s2_rtcioirqenable(int irq)
+{
+  uintptr_t regaddr = RTC_CNTL_INT_ENA_RTC_REG;
+  uint32_t regval;
+  int bit;
+
+  DEBUGASSERT(irq >= ESP32S2_FIRST_RTCIOIRQ_PERIPH &&
+              irq <= ESP32S2_LAST_RTCIOIRQ_PERIPH);
+
+  /* Convert the IRQ number to the corresponding bit */
+
+  bit = irq - ESP32S2_FIRST_RTCIOIRQ_PERIPH;
+
+  /* Get the address of the GPIO PIN register for this pin */
+
+  up_disable_irq(ESP32S2_IRQ_RTC_CORE);
+
+  regval = getreg32(regaddr) | (UINT32_C(1) << bit);
+  putreg32(regval, regaddr);
+
+  up_enable_irq(ESP32S2_IRQ_RTC_CORE);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_rtcioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for a specified RTC IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTCIO_IRQ
+void esp32s2_rtcioirqdisable(int irq)
+{
+  uintptr_t regaddr = RTC_CNTL_INT_ENA_RTC_REG;
+  uint32_t regval;
+  int bit;
+
+  DEBUGASSERT(irq >= ESP32S2_FIRST_RTCIOIRQ_PERIPH &&
+              irq <= ESP32S2_LAST_RTCIOIRQ_PERIPH);
+
+  /* Convert the IRQ number to the corresponding bit */
+
+  bit = irq - ESP32S2_FIRST_RTCIOIRQ_PERIPH;
+
+  /* Disable IRQ */
+
+  up_disable_irq(ESP32S2_IRQ_RTC_CORE);
+
+  regval = getreg32(regaddr) & (~(UINT32_C(1) << bit));
+  putreg32(regval, regaddr);
+
+  up_enable_irq(ESP32S2_IRQ_RTC_CORE);
+}
+#endif
