@@ -214,7 +214,7 @@ static int sim_loop_task(int argc, char **argv)
 
       /* Sleep minimal time, let the idle run */
 
-      usleep(USEC_PER_TICK);
+      usleep(CONFIG_SIM_LOOPTASK_INTERVAL);
     }
 
   return 0;

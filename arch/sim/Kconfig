@@ -140,6 +140,12 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+config SIM_LOOPTASK_INTERVAL
+	int "looptask interval in us"
+	default 10000
+	---help---
+		Looptask sleep time
+
 config SIM_STACKSIZE_ADJUSTMENT
 	int "The adjustment of stack size for sim"
 	default 65536
