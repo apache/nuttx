@@ -196,7 +196,7 @@ int host_bthcisock_open(int dev_idx)
 
   /* We must bring the device down before binding to user channel */
 
-  err = ioctl(fd, HCIDEVDOWN, 0);
+  err = ioctl(fd, HCIDEVDOWN, dev_idx);
   if (err < 0)
     {
       return err;
