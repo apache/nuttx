@@ -35,6 +35,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <sys/param.h>
+
 #include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -95,14 +97,6 @@
 /* Work queue to use for network operations. LPWORK should be used here */
 
 #define ETHWORK                 LPWORK
-
-#ifndef min
-#  define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
-#ifndef max
-#  define max(a,b) ((a)>(b)?(a):(b))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -813,7 +807,7 @@ static uint16_t rndis_fillrequest(FAR struct rndis_dev_s *priv,
 
   req->len = 0;
 
-  datalen = min(priv->netdev.d_len,
+  datalen = MIN(priv->netdev.d_len,
                 CONFIG_RNDIS_BULKIN_REQLEN - RNDIS_PACKET_HDR_SIZE);
   if (datalen > 0)
     {
@@ -1135,7 +1129,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
         {
           size_t index = priv->current_rx_received -
                          priv->current_rx_datagram_offset;
-          size_t copysize = min(reqlen,
+          size_t copysize = MIN(reqlen,
                                 priv->current_rx_datagram_size - index);
 
           /* Check if the received packet exceeds request buffer */
@@ -2442,7 +2436,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
   if (ret >= 0)
     {
-      ctrlreq->len   = min(len, ret);
+      ctrlreq->len   = MIN(len, ret);
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
       ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)

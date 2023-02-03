@@ -27,6 +27,8 @@
 #include <errno.h>
 #include <time.h>
 
+#include <sys/param.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
@@ -41,10 +43,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef min
-#  define min(a,b) (a < b ? a : b)
-#endif
 
 #define COUNTER_MAX 0x0000ffffffffffffllu
 
@@ -468,13 +466,13 @@ static bool lpc54_set_calc_arm(uint64_t curr, uint64_t to_set, bool arm)
 
   if (curr < g_to_reset_next)
     {
-      calc_time = min(g_to_reset_next, to_set);
+      calc_time = MIN(g_to_reset_next, to_set);
     }
   else
     {
       if (curr < g_to_end)
         {
-          calc_time = min(curr + g_reset_ticks, to_set);
+          calc_time = MIN(curr + g_reset_ticks, to_set);
         }
       else
         {
