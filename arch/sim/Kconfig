@@ -504,6 +504,14 @@ endif
 
 menu "Simulated UART"
 
+config SIM_UART_DMA
+	bool "SIM UART use DMA mode"
+	default y
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
+	---help---
+		console use DMA mode or single char mode
+
 config SIM_UART_NUMBER
 	int "Number of simulated UART ports"
 	default 0

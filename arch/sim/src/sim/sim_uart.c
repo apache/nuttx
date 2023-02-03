@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/wqueue.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -36,22 +37,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define SIM_UART_WORK_DELAY           USEC2TICK(1000)
+
 #ifndef CONFIG_SIM_UART_BUFFER_SIZE
   #define CONFIG_SIM_UART_BUFFER_SIZE 256
 #endif
-
-#define TTY_RECVSEND(port) \
-  if (g_##port##_priv.fd >= 0) \
-    { \
-      if (g_##port##_priv.rxint) \
-        { \
-          uart_recvchars(&g_##port##_dev); \
-        } \
-      if (g_##port##_priv.txint) \
-        { \
-          uart_xmitchars(&g_##port##_dev); \
-        } \
-    } \
 
 /****************************************************************************
  * Private Types
@@ -61,19 +51,23 @@ struct tty_priv_s
 {
   /* tty-port path name */
 
-  const char *path;
+  const char    *path;
 
   /* The file descriptor. It is returned by open */
 
-  int         fd;
+  int           fd;
 
   /* TX interrupt enable or not */
 
-  bool        txint;
+  bool          txint;
 
   /* RX interrupt enable or not */
 
-  bool        rxint;
+  bool          rxint;
+
+  /* Work queue for transmit */
+
+  struct work_s worker;
 };
 
 /****************************************************************************
@@ -91,6 +85,12 @@ static void tty_rxint(struct uart_dev_s *dev, bool enable);
 static bool tty_rxavailable(struct uart_dev_s *dev);
 static bool tty_rxflowcontrol(struct uart_dev_s *dev,
                               unsigned int nbuffered, bool upper);
+#ifdef CONFIG_SIM_UART_DMA
+static void tty_dmatxavail(FAR struct uart_dev_s *dev);
+static void tty_dmasend(FAR struct uart_dev_s *dev);
+static void tty_dmarxfree(FAR struct uart_dev_s *dev);
+static void tty_dmareceive(FAR struct uart_dev_s *dev);
+#endif
 static void tty_send(struct uart_dev_s *dev, int ch);
 static void tty_txint(struct uart_dev_s *dev, bool enable);
 static bool tty_txready(struct uart_dev_s *dev);
@@ -111,6 +111,12 @@ static const struct uart_ops_s g_tty_ops =
   .rxint          = tty_rxint,
   .rxavailable    = tty_rxavailable,
   .rxflowcontrol  = tty_rxflowcontrol,
+#ifdef CONFIG_SIM_UART_DMA
+  .dmatxavail     = tty_dmatxavail,
+  .dmasend        = tty_dmasend,
+  .dmarxfree      = tty_dmarxfree,
+  .dmareceive     = tty_dmareceive,
+#endif
   .send           = tty_send,
   .txint          = tty_txint,
   .txready        = tty_txready,
@@ -388,9 +394,52 @@ static int tty_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int tty_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct tty_priv_s *priv = dev->priv;
+  char ch = 0;
 
   *status = 0;
-  return host_uart_getc(priv->fd);
+  host_uart_gets(priv->fd, &ch, 1);
+
+  return ch;
+}
+
+/****************************************************************************
+ * Name: tty_work
+ *
+ * Description:
+ * Notify DMA that there is data to be transferred in the TX buffer
+ *
+ ****************************************************************************/
+
+static void tty_work(void *arg)
+{
+  struct uart_dev_s *dev = arg;
+  struct tty_priv_s *priv = dev->priv;
+
+  if (priv->fd < 0)
+    {
+      return;
+    }
+
+  if (priv->txint && host_uart_checkout(dev->isconsole ? 1 : priv->fd))
+    {
+#ifdef CONFIG_SIM_UART_DMA
+      uart_xmitchars_dma(dev);
+#else
+      uart_xmitchars(dev);
+#endif
+    }
+
+  if (priv->rxint && host_uart_checkin(priv->fd))
+    {
+#ifdef CONFIG_SIM_UART_DMA
+      uart_recvchars_dma(dev);
+#else
+      uart_recvchars(dev);
+#endif
+    }
+
+  work_queue(HPWORK, &priv->worker,
+             tty_work, dev, SIM_UART_WORK_DELAY);
 }
 
 /****************************************************************************
@@ -406,6 +455,10 @@ static void tty_rxint(struct uart_dev_s *dev, bool enable)
   struct tty_priv_s *priv = dev->priv;
 
   priv->rxint = enable;
+  if (enable)
+    {
+      work_queue(HPWORK, &priv->worker, tty_work, dev, 0);
+    }
 }
 
 /****************************************************************************
@@ -445,6 +498,101 @@ static bool tty_rxflowcontrol(struct uart_dev_s *dev,
   return false;
 }
 
+#ifdef CONFIG_SIM_UART_DMA
+
+/****************************************************************************
+ * Name: tty_dmatxavail
+ *
+ * Description:
+ * Notify DMA that there is data to be transferred in the TX buffer
+ *
+ ****************************************************************************/
+
+static void tty_dmatxavail(FAR struct uart_dev_s *dev)
+{
+}
+
+/****************************************************************************
+ * Name: tty_dmasend
+ *
+ * Description:
+ *   Start transfer bytes from the TX circular buffer using DMA
+ *
+ ****************************************************************************/
+
+static void tty_dmasend(FAR struct uart_dev_s *dev)
+{
+  struct tty_priv_s *priv = dev->priv;
+  struct uart_dmaxfer_s *xfer = &dev->dmatx;
+  int fd = dev->isconsole ? 1 : priv->fd;
+  int ret;
+
+  xfer->nbytes = 0;
+  ret = host_uart_puts(fd, xfer->buffer, xfer->length);
+  if (ret > 0)
+    {
+      xfer->nbytes = ret;
+
+      if (ret == xfer->length && xfer->nlength > 0)
+        {
+          ret = host_uart_puts(fd, xfer->nbuffer, xfer->nlength);
+          if (ret > 0)
+            {
+              xfer->nbytes += ret;
+            }
+        }
+    }
+
+  uart_xmitchars_done(dev);
+}
+
+/****************************************************************************
+ * Name: tty_dmarxfree
+ *
+ * Description:
+ *   Notify DMA that there is free space in the RX buffer
+ *
+ ****************************************************************************/
+
+static void tty_dmarxfree(FAR struct uart_dev_s *dev)
+{
+}
+
+/****************************************************************************
+ * Name: tty_dmareceive
+ *
+ * Description:
+ *   Start receive bytes from the RX circular buffer using DMA
+ *
+ ****************************************************************************/
+
+static void tty_dmareceive(FAR struct uart_dev_s *dev)
+{
+  struct tty_priv_s *priv = dev->priv;
+  struct uart_dmaxfer_s *xfer = &dev->dmarx;
+  int ret;
+
+  xfer->nbytes = 0;
+  ret = host_uart_gets(priv->fd, xfer->buffer, xfer->length);
+  if (ret > 0)
+    {
+      xfer->nbytes = ret;
+
+      if (ret == xfer->length && xfer->nlength > 0)
+        {
+          ret = host_uart_gets(priv->fd, xfer->nbuffer, xfer->nlength);
+          if (ret > 0)
+            {
+              xfer->nbytes += ret;
+            }
+        }
+    }
+
+  uart_recvchars_done(dev);
+}
+
+#endif
+
 /****************************************************************************
  * Name: tty_send
  *
@@ -456,8 +604,9 @@ static bool tty_rxflowcontrol(struct uart_dev_s *dev,
 static void tty_send(struct uart_dev_s *dev, int ch)
 {
   struct tty_priv_s *priv = dev->priv;
+  char c = ch;
 
-  host_uart_putc(dev->isconsole ? 1 : priv->fd, ch);
+  host_uart_puts(dev->isconsole ? 1 : priv->fd, &c, 1);
 }
 
 /****************************************************************************
@@ -473,10 +622,9 @@ static void tty_txint(struct uart_dev_s *dev, bool enable)
   struct tty_priv_s *priv = dev->priv;
 
   priv->txint = enable;
-
   if (enable)
     {
-      uart_xmitchars(dev);
+      work_queue(HPWORK, &priv->worker, tty_work, dev, 0);
     }
 }
 
@@ -547,29 +695,25 @@ void sim_uartinit(void)
 }
 
 /****************************************************************************
- * Name: sim_uartloop
+ * Name: up_nputs
+ *
+ * Description:
+ *   This is a low-level helper function used to support debug.
+ *
  ****************************************************************************/
 
-void sim_uartloop(void)
+void up_nputs(const char *str, size_t len)
 {
 #ifdef USE_DEVCONSOLE
-  TTY_RECVSEND(console)
-#endif
-
-#ifdef CONFIG_SIM_UART0_NAME
-  TTY_RECVSEND(tty0)
-#endif
-
-#ifdef CONFIG_SIM_UART1_NAME
-  TTY_RECVSEND(tty1)
-#endif
-
-#ifdef CONFIG_SIM_UART2_NAME
-  TTY_RECVSEND(tty2)
-#endif
-
-#ifdef CONFIG_SIM_UART3_NAME
-  TTY_RECVSEND(tty3)
+  if (str[len - 1] == '\n')
+    {
+      host_uart_puts(1, str, len - 1);
+      host_uart_puts(1, "\r\n", 2);
+    }
+  else
+    {
+      host_uart_puts(1, str, len);
+    }
 #endif
 }
 
@@ -580,28 +724,9 @@ void sim_uartloop(void)
 int up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
-  if (ch == '\n')
-    {
-      tty_send(&g_console_dev, '\r');
-    }
-
-  tty_send(&g_console_dev, ch);
+  char c = ch;
+  up_nputs(&c, 1);
 #endif
   return 0;
 }
 
-/****************************************************************************
- * Name: up_nputs
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
-
-void up_nputs(const char *str, size_t len)
-{
-  while (len-- > 0 && *str)
-    {
-      up_putc(*str++);
-    }
-}

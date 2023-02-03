@@ -106,6 +106,7 @@ config ARCH_SIM
 	select ONESHOT
 	select SERIAL_CONSOLE
 	select SERIAL_IFLOWCONTROL
+	select SCHED_HPWORK
 	---help---
 		Linux/Cygwin user-mode simulation.
 
