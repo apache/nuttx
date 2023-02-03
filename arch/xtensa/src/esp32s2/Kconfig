@@ -408,6 +408,7 @@ config ESP32S2_RWDT
 	bool "RTC Watchdog Timer"
 	default n
 	select ESP32S2_WDT
+	select ESP32S2_RTCIO_IRQ
 	---help---
 		Includes RWDT. This watchdog timer is from the RTC module.
 		When it is selected, if the developer sets it to reset on expiration
@@ -464,6 +465,12 @@ config ESP32S2_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	---help---
 		Enable support for interrupting GPIO pins.
+
+config ESP32S2_RTCIO_IRQ
+	bool "RTC IO interrupts"
+	default n
+	---help---
+		Enable support for RTC peripherals interruptions.
 
 menu "SPI configuration"
 	depends on ESP32S2_SPI
