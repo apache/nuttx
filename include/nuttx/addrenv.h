@@ -32,6 +32,11 @@
 #  include <nuttx/mm/mm.h>
 #endif
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include <nuttx/wqueue.h>
+
 #include <arch/arch.h>
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -235,6 +240,8 @@ struct tcb_s;                  /* Forward reference to TCB */
 struct addrenv_s
 {
   struct arch_addrenv_s addrenv; /* The address environment page directory  */
+  struct work_s         work;    /* Worker to free address environment      */
+  int                   refs;    /* Users of address environment            */
 };
 
 typedef struct addrenv_s addrenv_t;
@@ -359,6 +366,99 @@ int addrenv_switch(FAR struct tcb_s *tcb);
 
 int addrenv_attach(FAR struct tcb_s *tcb,
                    FAR const struct arch_addrenv_s *addrenv);
+
+/****************************************************************************
+ * Name: addrenv_join
+ *
+ * Description:
+ *   Join the parent process's address environment.
+ *
+ * Input Parameters:
+ *   ptcb - The tcb of the parent process.
+ *   tcb  - The tcb of the child process.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_join(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb);
+
+/****************************************************************************
+ * Name: addrenv_leave
+ *
+ * Description:
+ *   Leave a process's address environment.
+ *
+ * Input Parameters:
+ *   tcb  - The tcb of the process.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_leave(FAR struct tcb_s *tcb);
+
+/****************************************************************************
+ * Name: addrenv_take
+ *
+ * Description:
+ *   Take a reference to an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+void addrenv_take(FAR struct addrenv_s *addrenv);
+
+/****************************************************************************
+ * Name: addrenv_give
+ *
+ * Description:
+ *   Give back a reference to an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_give(FAR struct addrenv_s *addrenv);
+
+/****************************************************************************
+ * Name: addrenv_drop
+ *
+ * Description:
+ *   Drop an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *   deferred - yes: The address environment should be dropped by the worker
+ *              no:  The address environment can be dropped at once
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred);
 
 /****************************************************************************
  * Address Environment Interfaces
