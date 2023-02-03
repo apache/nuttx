@@ -131,25 +131,37 @@ void host_uart_close(int fd)
 }
 
 /****************************************************************************
- * Name: host_uart_putc
+ * Name: host_uart_puts
  ****************************************************************************/
 
-int host_uart_putc(int fd, int ch)
+ssize_t host_uart_puts(int fd, const char *buf, size_t size)
 {
-  return write(fd, &ch, 1) == 1 ? ch : -1;
+  ssize_t ret;
+
+  do
+    {
+      ret = write(fd, buf, size);
+    }
+  while (ret < 0 && errno == EINTR);
+
+  return ret < 0 ? -errno : ret;
 }
 
 /****************************************************************************
- * Name: host_uart_getc
+ * Name: host_uart_gets
  ****************************************************************************/
 
-int host_uart_getc(int fd)
+ssize_t host_uart_gets(int fd, char *buf, size_t size)
 {
-  int ret;
-  unsigned char ch;
+  ssize_t ret;
 
-  ret = read(fd, &ch, 1);
-  return ret < 0 ? ret : ch;
+  do
+    {
+      ret = read(fd, buf, size);
+    }
+  while (ret < 0 && errno == EINTR);
+
+  return ret < 0 ? -errno : ret;
 }
 
 /****************************************************************************
