@@ -280,7 +280,7 @@ endif
 # <filename>.S)
 
 define PREPROCESS
-	$(ECHO_BEGIN)"CPP: $1->$2 "
+	$(ECHO_BEGIN) "CPP: $1->$2 "
 	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
@@ -298,7 +298,7 @@ endef
 # change the options used with the single file <filename>.c
 
 define COMPILE
-	$(ECHO_BEGIN)"CC: $1 "
+	$(ECHO_BEGIN) "CC: $1 "
 	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $3 $($(strip $1)_CFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
@@ -317,7 +317,7 @@ endef
 # extension .cpp could also be used.  The same applies mutatis mutandis.
 
 define COMPILEXX
-	$(ECHO_BEGIN)"CXX: $1 "
+	$(ECHO_BEGIN) "CXX: $1 "
 	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $3 $($(strip $1)_CXXFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
@@ -336,7 +336,7 @@ endef
 # applies mutatis mutandis.
 
 define COMPILERUST
-	$(ECHO_BEGIN)"RUSTC: $1 "
+	$(ECHO_BEGIN) "RUSTC: $1 "
 	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
@@ -355,7 +355,7 @@ endef
 # applies mutatis mutandis.
 
 define COMPILEZIG
-	$(ECHO_BEGIN)"ZIG: $1 "
+	$(ECHO_BEGIN) "ZIG: $1 "
 	$(Q) $(ZIG) build-obj $(ZIGFLAGS) $($(strip $1)_ZIGFLAGS) --name $(basename $2) $1
 	$(ECHO_END)
 endef
@@ -381,7 +381,7 @@ endef
 # is used by some toolchains.  The same applies mutatis mutandis.
 
 define ASSEMBLE
-	$(ECHO_BEGIN)"AS: $1 "
+	$(ECHO_BEGIN) "AS: $1 "
 	$(Q) $(CCACHE) $(CC) -c $(AFLAGS) $1 $($(strip $1)_AFLAGS) -o $2
 	$(ECHO_END)
 endef
@@ -390,7 +390,7 @@ endef
 # Example: $(call INSTALL_LIB, libabc.a, $(TOPDIR)/staging/)
 
 define INSTALL_LIB
-	$(ECHO_BEGIN)"IN: $1 -> $2 "
+	$(ECHO_BEGIN) "IN: $1 -> $2 "
 	$(Q) install -m 0644 $1 $2
 	$(ECHO_END)
 endef
@@ -412,7 +412,7 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE_ADD
-	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} $(2) "
+	$(ECHO_BEGIN) "AR (add): ${shell basename $(1)} $(2) "
 	$(Q) $(AR) $1 $2
 	$(ECHO_END)
 endef

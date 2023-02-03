@@ -285,7 +285,7 @@ $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(HOSTOBJS) $(HEADOBJ): %$(OBJEXT): %.c
-	$(Q) $(ECHO_BEGIN)"CC:  $<"
+	$(Q) $(ECHO_BEGIN) "CC:  $<"
 	$(Q) "$(CC)" -c $(HOSTCFLAGS) $< -o $@
 	$(Q) $(ECHO_END)
 
