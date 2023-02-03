@@ -30,6 +30,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
+#include <nuttx/wqueue.h>
 
 #include "sched/sched.h"
 
@@ -51,6 +52,39 @@
  */
 
 static FAR struct addrenv_s *g_addrenv[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: addrenv_destroy
+ *
+ * Description:
+ *   Deferred service routine for destroying an address environment. This is
+ *   so that the heavy lifting is not done when the context is switching, or
+ *   from ISR.
+ *
+ * Input Parameters:
+ *   arg - Contains pointer to the address environment that is freed.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void addrenv_destroy(FAR void *arg)
+{
+  FAR struct addrenv_s *addrenv = (FAR struct addrenv_s *)arg;
+
+  /* Destroy the address environment */
+
+  up_addrenv_destroy(&addrenv->addrenv);
+
+  /* Then finally release the memory */
+
+  kmm_free(addrenv);
+}
 
 /****************************************************************************
  * Public Functions
@@ -135,6 +169,10 @@ int addrenv_switch(FAR struct tcb_s *tcb)
           up_addrenv_coherent(&curr->addrenv);
         }
 
+      /* While the address environment is instantiated, it cannot be freed */
+
+      addrenv_take(next);
+
       /* Instantiate the new address environment (removing the old
        * environment in the process).  For the case of kernel threads,
        * the old mappings will be removed and no new mappings will be
@@ -145,6 +183,13 @@ int addrenv_switch(FAR struct tcb_s *tcb)
       if (ret < 0)
         {
           berr("ERROR: up_addrenv_select failed: %d\n", ret);
+        }
+
+      /* This is a safe spot to drop the current address environment */
+
+      if (curr)
+        {
+          addrenv_drop(curr, true);
         }
 
       /* Save the new, current address environment group */
@@ -215,6 +260,7 @@ int addrenv_free(FAR struct tcb_s *tcb)
   if (tcb->addrenv_own != NULL)
     {
       kmm_free(tcb->addrenv_own);
+      tcb->addrenv_own = NULL;
     }
 
   return OK;
@@ -249,7 +295,182 @@ int addrenv_attach(FAR struct tcb_s *tcb,
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_clone failed: %d\n", ret);
+      return ret;
     }
 
+  /* Attach the address environment */
+
+  tcb->addrenv_curr = tcb->addrenv_own;
+  tcb->addrenv_own->refs = 1;
+
   return OK;
+}
+
+/****************************************************************************
+ * Name: addrenv_join
+ *
+ * Description:
+ *   Join the parent process's address environment.
+ *
+ * Input Parameters:
+ *   ptcb - The tcb of the parent process
+ *   tcb  - The tcb of the child process
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_join(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb)
+{
+  int ret;
+
+  ret = up_addrenv_attach(ptcb, tcb);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_attach failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Take a reference to the address environment */
+
+  addrenv_take(ptcb->addrenv_own);
+
+  /* Share the parent's address environment */
+
+  tcb->addrenv_own = ptcb->addrenv_own;
+  tcb->addrenv_curr = tcb->addrenv_own;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: addrenv_leave
+ *
+ * Description:
+ *   Leave a process's address environment.
+ *
+ * Input Parameters:
+ *   tcb  - The tcb of the process
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_leave(FAR struct tcb_s *tcb)
+{
+  int ret;
+
+  /* Detach from the address environment */
+
+  ret = up_addrenv_detach(tcb);
+
+  /* Then drop the address environment */
+
+  addrenv_drop(tcb->addrenv_own, false);
+  tcb->addrenv_own = NULL;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: addrenv_take
+ *
+ * Description:
+ *   Take a reference to an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+void addrenv_take(FAR struct addrenv_s *addrenv)
+{
+  irqstate_t flags = enter_critical_section();
+  addrenv->refs++;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: addrenv_give
+ *
+ * Description:
+ *   Give back a reference to an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_give(FAR struct addrenv_s *addrenv)
+{
+  irqstate_t flags;
+  int refs;
+
+  flags = enter_critical_section();
+  refs = --addrenv->refs;
+  leave_critical_section(flags);
+
+  return refs;
+}
+
+/****************************************************************************
+ * Name: addrenv_drop
+ *
+ * Description:
+ *   Drop an address environment.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *   deferred - yes: The address environment should be dropped by the worker
+ *              no:  The address environment can be dropped at once
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred)
+{
+  if (addrenv == NULL)
+    {
+      /* No address environment, get out */
+
+      return;
+    }
+
+  /* If no more users, the address environment can be dropped */
+
+  if (addrenv_give(addrenv) == 0)
+    {
+      /* Defer dropping if requested to do so, otherwise drop at once */
+
+      if (deferred)
+        {
+          /* Let the DSR do the heavy lifting */
+
+          work_queue(LPWORK, &addrenv->work, addrenv_destroy, addrenv, 0);
+        }
+      else
+        {
+          addrenv_destroy(addrenv);
+        }
+    }
 }

@@ -540,6 +540,7 @@ struct tcb_s
 
 #ifdef CONFIG_ARCH_ADDRENV
   FAR struct addrenv_s *addrenv_own;    /* Task (group) own memory mappings */
+  FAR struct addrenv_s *addrenv_curr;   /* Current active memory mappings   */
 #endif
 
   /* Task Management Fields *************************************************/

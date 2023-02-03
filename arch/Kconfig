@@ -514,7 +514,7 @@ config ARCH_USE_TEXT_HEAP
 menuconfig ARCH_ADDRENV
 	bool "Address environments"
 	default n
-	depends on ARCH_HAVE_ADDRENV
+	depends on ARCH_HAVE_ADDRENV && SCHED_LPWORK
 	---help---
 		Support per-task address environments using the MMU... i.e., support
 		"processes"
