@@ -35,6 +35,8 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <sys/param.h>
+
 #include <arpa/inet.h>
 
 #include <nuttx/wdog.h>
@@ -136,10 +138,6 @@
 
 #if ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
 #  warning "You are using an incomplete/untested configuration"
-#endif
-
-#ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /* We need at least one more free buffer than transmit buffers */
@@ -1319,7 +1317,7 @@ static int s32k3xx_recvframe(struct s32k3xx_driver_s *priv)
 
                   up_invalidate_dcache((uintptr_t)dev->d_buf,
                                       (uintptr_t)dev->d_buf +
-                                      min(dev->d_len, ALIGNED_BUFSIZE));
+                                      MIN(dev->d_len, ALIGNED_BUFSIZE));
 
                   ninfo("rxhead: %p d_buf: %p d_len: %d\n",
                       priv->rxhead, dev->d_buf, dev->d_len);

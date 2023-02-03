@@ -37,6 +37,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <sys/param.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
@@ -198,18 +200,6 @@
 
 #define PL2303_RWREQUEST_TYPE      (0x40)
 #define PL2303_RWREQUEST           (0x01) /* IN/OUT, Recipient device */
-
-/* Misc Macros **************************************************************/
-
-/* min/max macros */
-
-#ifndef min
-#  define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
-#ifndef max
-#  define max(a,b) ((a)>(b)?(a):(b))
-#endif
 
 /* Trace values *************************************************************/
 
@@ -617,7 +607,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
 
   /* Get the maximum number of bytes that will fit into one bulk IN request */
 
-  reqlen = max(CONFIG_PL2303_BULKIN_REQLEN, ep->maxpacket);
+  reqlen = MAX(CONFIG_PL2303_BULKIN_REQLEN, ep->maxpacket);
 
   while (!sq_empty(&priv->reqlist))
     {
@@ -1809,7 +1799,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
               {
               case PL2303_SETLINEREQUEST:
                 {
-                   memcpy(priv->linest, ctrlreq->buf, min(len, 7));
+                   memcpy(priv->linest, ctrlreq->buf, MIN(len, 7));
                    ret = 0;
                 }
                 break;
@@ -1897,7 +1887,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
   if (ret >= 0)
     {
-      ctrlreq->len   = min(len, ret);
+      ctrlreq->len   = MIN(len, ret);
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
       ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)

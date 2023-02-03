@@ -30,6 +30,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <sys/param.h>
+
 #include "hardware/s32k3xx_pflash.h"
 #include "hardware/s32k3xx_xrdc.h"
 
@@ -50,11 +52,6 @@
 #if CONFIG_S32K3XX_PROGMEM_SIZE % 8 != 0
 # error Progmem must be a multiple of 8
 #endif
-
-#define min(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-      __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b; })
 
 /****************************************************************************
  * Private Functions
@@ -392,7 +389,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
       execute_init_sequence(dest);
 
-      for (i = 0; i < min(32, words_to_write); i++)
+      for (i = 0; i < MIN(32, words_to_write); i++)
         {
           if (offset > 0)
             {

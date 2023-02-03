@@ -1023,7 +1023,7 @@ static int bcmf_wl_scan_format_results(FAR struct bcmf_dev_s *priv,
   for (i = 0; i < priv->scan_result_entries; i++)
     {
       scan_result[i] = &priv->scan_result[i];
-      len += (min(strlen((FAR const char *)scan_result[i]->SSID),
+      len += (MIN(strlen((FAR const char *)scan_result[i]->SSID),
                          32) + 3) & ~3;
     }
 
@@ -1071,7 +1071,7 @@ static int bcmf_wl_scan_format_results(FAR struct bcmf_dev_s *priv,
       iwe = (FAR struct iw_event *)pointer;
       iwe->cmd = SIOCGIWESSID;
       iwe->u.essid.flags = 0;
-      iwe->u.essid.length = min(strlen((FAR const char *)info->SSID), 32);
+      iwe->u.essid.length = MIN(strlen((FAR const char *)info->SSID), 32);
       iwe->u.essid.pointer = (FAR void *)sizeof(iwe->u.essid);
       memcpy(&iwe->u.essid + 1, info->SSID, iwe->u.essid.length);
       iwe->len = IW_EV_LEN(essid) + ((iwe->u.essid.length + 3) & ~3);

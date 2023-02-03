@@ -33,6 +33,8 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <sys/param.h>
+
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
@@ -211,10 +213,6 @@
 #endif
 #ifndef CONFIG_STM32H7_ETH_NTXDESC
 #  define CONFIG_STM32H7_ETH_NTXDESC 4
-#endif
-
-#ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /* We need at least one more free buffer than transmit buffers */
@@ -1795,7 +1793,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
                       up_invalidate_dcache((uintptr_t)dev->d_buf,
                                            (uintptr_t)dev->d_buf +
-                                           min(dev->d_len, ALIGNED_BUFSIZE));
+                                           MIN(dev->d_len, ALIGNED_BUFSIZE));
 
                       ninfo("rxhead: %p d_buf: %p d_len: %d\n",
                             priv->rxhead, dev->d_buf, dev->d_len);
