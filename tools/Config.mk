@@ -48,7 +48,7 @@ else ifeq ($(V),)
 endif
 
 ifeq ($(ECHO_BEGIN),)
-  export ECHO_BEGIN=@echo
+  export ECHO_BEGIN=@echo # keep a trailing space here
   export ECHO_END=
 endif
 
