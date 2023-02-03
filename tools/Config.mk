@@ -48,7 +48,7 @@ else ifeq ($(V),)
 endif
 
 ifeq ($(ECHO_BEGIN),)
-  export ECHO_BEGIN=@echo 
+  export ECHO_BEGIN=@echo
   export ECHO_END=
 endif
 
@@ -281,7 +281,7 @@ endif
 
 define PREPROCESS
 	$(ECHO_BEGIN)"CPP: $1->$2 "
-	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $(abspath $1) -o $(abspath $2)
+	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
 
@@ -299,7 +299,7 @@ endef
 
 define COMPILE
 	$(ECHO_BEGIN)"CC: $1 "
-	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $3 $($(strip $1)_CFLAGS) $(abspath $1) -o $(abspath $2)
+	$(Q) $(CCACHE) $(CC) -c $(CFLAGS) $3 $($(strip $1)_CFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
 
@@ -318,7 +318,7 @@ endef
 
 define COMPILEXX
 	$(ECHO_BEGIN)"CXX: $1 "
-	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $3 $($(strip $1)_CXXFLAGS) $(abspath $1) -o $(abspath $2)
+	$(Q) $(CCACHE) $(CXX) -c $(CXXFLAGS) $3 $($(strip $1)_CXXFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
 
@@ -337,7 +337,7 @@ endef
 
 define COMPILERUST
 	$(ECHO_BEGIN)"RUSTC: $1 "
-	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $(abspath $1) -o $(abspath $2)
+	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $1 -o $2
 	$(ECHO_END)
 endef
 
@@ -382,7 +382,7 @@ endef
 
 define ASSEMBLE
 	$(ECHO_BEGIN)"AS: $1 "
-	$(Q) $(CCACHE) $(CC) -c $(AFLAGS) $(abspath $1) $($(strip $1)_AFLAGS) -o $(abspath $2)
+	$(Q) $(CCACHE) $(CC) -c $(AFLAGS) $1 $($(strip $1)_AFLAGS) -o $2
 	$(ECHO_END)
 endef
 
@@ -391,7 +391,7 @@ endef
 
 define INSTALL_LIB
 	$(ECHO_BEGIN)"IN: $1 -> $2 "
-	$(Q) install -m 0644 $(abspath $1) $(abspath $2)
+	$(Q) install -m 0644 $1 $2
 	$(ECHO_END)
 endef
 
@@ -413,7 +413,7 @@ endef
 
 define ARCHIVE_ADD
 	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} $(2) "
-	$(Q) $(AR) $(abspath $1) $(abspath $2)
+	$(Q) $(AR) $1 $2
 	$(ECHO_END)
 endef
 
@@ -422,7 +422,7 @@ endef
 
 define ARCHIVE
 	$(Q) $(RM) $1
-	$(Q) $(AR) $(abspath $1)  $(abspath $2)
+	$(Q) $(AR) $1  $2
 endef
 
 # PRELINK - Prelink a list of files
