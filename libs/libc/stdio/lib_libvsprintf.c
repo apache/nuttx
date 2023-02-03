@@ -1145,10 +1145,10 @@ str_lpad:
                       continue;
                     }
 
-#ifdef CONFIG_ALLSYMS
                   case 'S':
                   case 's':
                     {
+#ifdef CONFIG_ALLSYMS
                       FAR const struct symtab_s *symbol;
                       FAR void *addr = (FAR void *)(uintptr_t)x;
                       size_t symbolsize;
@@ -1171,10 +1171,9 @@ str_lpad:
 
                           continue;
                         }
-
+#endif
                       break;
                     }
-#endif
 
                   default:
                     fmt_ungetc(fmt);
