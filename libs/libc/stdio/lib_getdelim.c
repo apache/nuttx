@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "libc.h"
@@ -33,33 +34,40 @@
  ****************************************************************************/
 
 /* Some environments may return CR as end-of-line, others LF, and others
- * both.  Because of the definition of the getline() function, it can handle
- * only single character line terminators.
+ * both.
  */
 
-#undef HAVE_GETLINE
 #if defined(CONFIG_EOL_IS_CR)
-#  define HAVE_GETLINE 1
-#  define EOLCH        '\r'
+static const int eol[] =
+{
+  '\r'
+};
 #elif defined(CONFIG_EOL_IS_LF)
-#  define HAVE_GETLINE 1
-#  define EOLCH        '\n'
+static const int eol[] =
+{
+  '\n'
+};
+#else
+static const int eol[] =
+{
+  '\r', '\n'
+};
 #endif
 
 #define BUFSIZE_INIT   64
 #define BUFSIZE_INCR   32
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getdelim()
+ * Name: getdelimx()
  *
  * Description:
- *   The getdelim() function will read from stream until it encounters a
- *   character matching the delimiter character.  The delimiter argument
- *   is an int, the value of which the application will ensure is a
+ *   The getdelimx() function will read from stream until it encounters a
+ *   character matching the delimiter character or sequence. The delimiter
+ *   argument is an int, the value of which the application will ensure is a
  *   character representable as an unsigned char of equal value that
  *   terminates the read process. If the delimiter argument has any other
  *   value, the behavior is undefined.
@@ -93,8 +101,8 @@
  *
  ****************************************************************************/
 
-ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
-                 FAR FILE *stream)
+static ssize_t getdelimx(FAR char **lineptr, size_t *n, const int *delimiter,
+                         int ndelim, bool sequence, FAR FILE *stream)
 {
   FAR char *dest;
   size_t bufsize;
@@ -203,8 +211,55 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
       /* Terminate the loop when the delimiter is found or we have hit the
        * end of the buffer (reserving a byte for the NUL terminator)
        */
+
+      /* If delimter is a sequence, and copied character less than the
+       * number of delimeter, then continue.
+       */
+
+      if (ncopied < ndelim && sequence)
+        {
+          continue;
+        }
+
+      /* Clear break flags (no characters matched) */
+
+      ret = 0;
+
+      for (ch = 0; ch < ndelim; ch++)
+        {
+          if (*(dest - ch) != delimiter[ndelim - ch - 1])
+            {
+              /* Delimiter not matched, break the EOL detect loop
+               * if it's a sequence.
+               */
+
+              if (sequence)
+                {
+                  ret = 0;
+                  break;
+                }
+            }
+          else
+            {
+              /* Mark a delimeter is matched. */
+
+              ret = 1;
+
+              /* Break while the a character matched. */
+
+              if (sequence == false)
+                {
+                  break;
+                }
+            }
+        }
+
+      if (ret)
+        {
+          break;
+        }
     }
-  while (ch != delimiter);
+  while (1);
 
   /* Add a NUL terminator character (but don't report this in the number of
    * bytes transferred).
@@ -216,6 +271,20 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
 errout:
   set_errno(ret);
   return -1;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: getdelim()
+ ****************************************************************************/
+
+ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
+                 FAR FILE *stream)
+{
+  return getdelimx(lineptr, n, &delimiter, 1, false, stream);
 }
 
 /****************************************************************************
@@ -232,9 +301,13 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef HAVE_GETLINE
 ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream)
 {
-  return getdelim(lineptr, n, EOLCH, stream);
-}
+  return getdelimx(lineptr, n, eol, sizeof(eol) / sizeof(int),
+#if defined (CONFIG_EOL_IS_EITHER_CRLF)
+                   false,
+#else
+                   true,
 #endif
+                   stream);
+}
