@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_utimes.c
+ * libs/libc/misc/lib_getfullpath.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,9 +22,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <errno.h>
-#include <sys/stat.h>
-#include <sys/time.h>
+#include <nuttx/config.h>
+
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "libc.h"
 
@@ -32,34 +34,60 @@
  * Public Functions
  ****************************************************************************/
 
-int utimes(FAR const char *path, const struct timeval tv[2])
-{
-  struct timespec times[2];
+/****************************************************************************
+ * Name: lib_getfullpath
+ *
+ * Description:
+ *   Given the directory path from dirfd.
+ *
+ ****************************************************************************/
 
-  if (tv == NULL)
+int lib_getfullpath(int dirfd, FAR const char *path, FAR char *fullpath)
+{
+  if (path == NULL || fullpath == NULL)
     {
-      return utimens(path, NULL);
+      return -EINVAL;
+    }
+  else if (path[0] == '/')
+    {
+      /* The path is absolute, then dirfd is ignored. */
+
+      strlcpy(fullpath, path, PATH_MAX);
+      return 0;
     }
 
-  times[0].tv_sec  = tv[0].tv_sec;
-  times[0].tv_nsec = tv[0].tv_usec * 1000;
-  times[1].tv_sec  = tv[1].tv_sec;
-  times[1].tv_nsec = tv[1].tv_usec * 1000;
-
-  return utimens(path, times);
-}
-
-int futimesat(int dirfd, FAR const char *path, const struct timeval tv[2])
-{
-  char fullpath[PATH_MAX];
-  int ret;
-
-  ret = lib_getfullpath(dirfd, path, fullpath);
-  if (ret < 0)
+  if (dirfd == AT_FDCWD)
     {
-      set_errno(-ret);
-      return ERROR;
-    }
+      /* The dirfd is the special value AT_FDCWD, then pathname is
+       * interpreted relative to the current working directory of the
+       * calling process.
+       */
 
-  return utimes(fullpath, tv);
+      FAR char *pwd = "";
+
+#ifndef CONFIG_DISABLE_ENVIRON
+      pwd = getenv("PWD");
+      if (pwd == NULL)
+        {
+          pwd = CONFIG_LIBC_HOMEDIR;
+        }
+#endif
+
+      sprintf(fullpath, "%s/%s", pwd, path);
+      return 0;
+    }
+  else
+    {
+      int ret;
+
+      /* Get real directory path by dirfd */
+
+      ret = fcntl(dirfd, F_GETPATH, fullpath);
+      if (ret >= 0)
+        {
+          strlcat(fullpath, path, PATH_MAX);
+        }
+
+      return 0;
+    }
 }

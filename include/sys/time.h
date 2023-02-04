@@ -373,6 +373,8 @@ int setitimer(int which, FAR const struct itimerval *value,
 
 int utimes(FAR const char *path, const struct timeval times[2]);
 int lutimes(FAR const char *path, const struct timeval times[2]);
+int futimesat(int dirfd, FAR const char *path,
+              const struct timeval times[2]);
 
 /****************************************************************************
  * Name: futimes
