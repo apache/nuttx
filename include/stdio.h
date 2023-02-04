@@ -188,6 +188,8 @@ int    putc(int c, FAR FILE *stream);
 int    putchar(int c);
 int    puts(FAR const IPTR char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
+int    renameat(int olddirfd, FAR const char *oldpath,
+                int newdirfd, FAR const char *newpath);
 int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
        printf_like(2, 3);
 int    asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)

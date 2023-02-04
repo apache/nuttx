@@ -112,6 +112,18 @@
 
 #define FD_CLOEXEC  1
 
+/* The flag for openat, faccessat, ... */
+
+#define AT_FDCWD              -100   /* Special value used to indicate openat should use the current
+                                      * working directory.
+                                      */
+#define AT_SYMLINK_NOFOLLOW   0x0100 /* Do not follow symbolic links. */
+#define AT_EACCESS            0x0200 /* Test access permitted for effective IDs, not real IDs. */
+#define AT_REMOVEDIR          0x0200 /* Remove directory instead of unlinking file. */
+#define AT_SYMLINK_FOLLOW     0x0400 /* Follow symbolic links. */
+#define AT_NO_AUTOMOUNT       0x0800 /* Suppress terminal automount traversal */
+#define AT_EMPTY_PATH         0x1000 /* Allow empty relative pathname */
+
 /* These are the notifications that can be received from F_NOTIFY (linux) */
 
 #define DN_ACCESS   0  /* A file was accessed */
@@ -185,6 +197,7 @@ extern "C"
 /* POSIX-like File System Interfaces */
 
 int open(FAR const char *path, int oflag, ...);
+int openat(int dirfd, FAR const char *path, int oflag, ...);
 int fcntl(int fd, int cmd, ...);
 
 int posix_fallocate(int fd, off_t offset, off_t len);

@@ -368,14 +368,24 @@ FAR char *getcwd(FAR char *buf, size_t size);
 /* File path operations */
 
 int     access(FAR const char *path, int amode);
+int     faccessat(int dirfd, FAR const char *path, int mode, int flags);
 int     rmdir(FAR const char *pathname);
 int     unlink(FAR const char *pathname);
+int     unlinkat(int dirfd, FAR const char *pathname, int flags);
 int     truncate(FAR const char *path, off_t length);
 int     link(FAR const char *path1, FAR const char *path2);
+int     linkat(int olddirfd, FAR const char *path1,
+               int newdirfd, FAR const char *path2, int flags);
 int     symlink(FAR const char *path1, FAR const char *path2);
+int     symlinkat(FAR const char *path1, int dirfd,
+                  FAR const char *path2);
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
+ssize_t readlinkat(int dirfd, FAR const char *path, FAR char *buf,
+                   size_t bufsize);
 int     chown(FAR const char *path, uid_t owner, gid_t group);
 int     lchown(FAR const char *path, uid_t owner, gid_t group);
+int     fchownat(int dirfd, FAR const char *path, uid_t owner,
+                 gid_t group, int flags);
 
 /* Execution of programs from files */
 

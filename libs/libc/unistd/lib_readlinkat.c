@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_mkfifo.c
+ * libs/libc/unistd/lib_readlinkat.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,71 +22,23 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <nuttx/fs/fs.h>
+#include <unistd.h>
 
 #include "libc.h"
 
-#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mkfifo
+ * Name: readlinkat
  *
  * Description:
- *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
- *   Linux, a NuttX FIFO is not a special file type but simply a device
- *   driver instance.  'mode' specifies the FIFO's permissions.
- *
- *   Once the FIFO has been created by mkfifo(), any thread can open it for
- *   reading or writing, in the same way as an ordinary file. However, it
- *   must have been opened from both reading and writing before input or
- *   output can be performed.  This FIFO implementation will block all
- *   attempts to open a FIFO read-only until at least one thread has opened
- *   the FIFO for  writing.
- *
- *   If all threads that write to the FIFO have closed, subsequent calls to
- *   read() on the FIFO will return 0 (end-of-file).
- *
- * Input Parameters:
- *   pathname - The full path to the FIFO instance to attach to or to create
- *     (if not already created).
- *   mode - Ignored for now
- *
- * Returned Value:
- *   0 is returned on success; otherwise, -1 is returned with errno set
- *   appropriately.
- *
- ****************************************************************************/
-
-int mkfifo(FAR const char *pathname, mode_t mode)
-{
-  int ret;
-
-  ret = nx_mkfifo(pathname, mode, CONFIG_DEV_FIFO_SIZE);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: mkfifoat
- *
- * Description:
- *   The mkfifoat() system call operates in exactly the same way as mkfifo(),
- *   except for  the  differences described here.
+ *   The readlinkat() system call operates in exactly the same way as
+ *   readlink(), except for  the  differences described here.
  *
  *   If the pathname given in pathname is relative, then it is interpreted
  *   relative to the directory referred to by the file descriptor dirfd
@@ -95,22 +47,26 @@ int mkfifo(FAR const char *pathname, mode_t mode)
  *
  *   If pathname is relative and dirfd is the special value AT_FDCWD, then
  *   pathname is interpreted relative to the current working directory of
- *   the calling process (like mkfifo()).
+ *   the calling process (like readlink()).
  *
  *   If pathname is absolute, then dirfd is ignored.
  *
  * Input Parameters:
- *   dirfd - The file descriptor of directory.
- *   path  - a pointer to the path.
- *   mode  - the access mode.
+ *   dirfd   - The file descriptor of directory.
+ *   path    - The full path to the symbolic link
+ *   buf     - The user-provided buffer in which to return the path to the
+ *             link target.
+ *   bufsize - The size of 'buf'
  *
  * Returned Value:
- *   Return zero on success, or -1 if an error occurred (in which case,
- *   errno is set appropriately).
+ *   Upon successful completion, readlinkat() will return the count of bytes
+ *   placed in the buffer. Otherwise, it will return a value of -1, leave the
+ *   buffer unchanged, and set errno to indicate the error.
  *
  ****************************************************************************/
 
-int mkfifoat(int dirfd, FAR const char *path, mode_t mode)
+ssize_t readlinkat(int dirfd, FAR const char *path, FAR char *buf,
+                   size_t bufsize)
 {
   char fullpath[PATH_MAX];
   int ret;
@@ -122,7 +78,7 @@ int mkfifoat(int dirfd, FAR const char *path, mode_t mode)
       return ERROR;
     }
 
-  return mkfifo(fullpath, mode);
+  return readlink(fullpath, buf, bufsize);
 }
 
-#endif /* CONFIG_PIPES && CONFIG_DEV_FIFO_SIZE > 0 */
+#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
