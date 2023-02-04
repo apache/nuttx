@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>

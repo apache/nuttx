@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>

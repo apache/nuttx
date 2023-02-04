@@ -54,6 +54,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>

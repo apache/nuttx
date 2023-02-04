@@ -38,7 +38,6 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>
 
 /****************************************************************************
  * Pre-processor Definitions

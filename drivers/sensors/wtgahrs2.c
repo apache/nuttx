@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <debug.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Pre-processor Definitions

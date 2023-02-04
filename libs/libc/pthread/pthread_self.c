@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_rewind.c
+ * libs/libc/pthread/pthread_self.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,33 +22,18 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
+#include <pthread.h>
 #include <unistd.h>
-
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rewind
+ * Name: pthread_self
  ****************************************************************************/
 
-void rewind(FAR FILE *stream)
+pthread_t pthread_self(void)
 {
-  /* Verify that we were provided with a stream */
-
-  if (!stream)
-    {
-      set_errno(EBADF);
-      return;
-    }
-
-  flockfile(stream);
-  fseek(stream, 0L, SEEK_SET);
-  stream->fs_flags &= ~__FS_FLAG_ERROR;
-  funlockfile(stream);
+  return gettid();
 }
