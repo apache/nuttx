@@ -27,6 +27,7 @@ CSRCS += lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c lib_vprintf.c
 CSRCS += lib_perror.c lib_putchar.c lib_getchar.c lib_puts.c
 CSRCS += lib_sscanf.c lib_vsscanf.c lib_libvscanf.c lib_libvsprintf.c
 CSRCS += lib_remove.c lib_tempnam.c lib_tmpnam.c lib_ultoa_invert.c
+CSRCS += lib_renameat.c
 
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa_engine.c lib_dtoa_data.c

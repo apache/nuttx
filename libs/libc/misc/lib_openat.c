@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_utimes.c
+ * libs/libc/misc/lib_openat.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,9 +22,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdarg.h>
 #include <errno.h>
-#include <sys/stat.h>
-#include <sys/time.h>
+#include <fcntl.h>
 
 #include "libc.h"
 
@@ -32,26 +32,39 @@
  * Public Functions
  ****************************************************************************/
 
-int utimes(FAR const char *path, const struct timeval tv[2])
-{
-  struct timespec times[2];
+/****************************************************************************
+ * Name: openat
+ *
+ * Description:
+ *   The openat() system call operates in exactly the same way as open(),
+ *   except for the differences:
+ *   If the pathname given in pathname is relative, then it is interpreted
+ *   relative to the directory referred to by the file descriptor dirfd
+ *   (rather than relative to the current working directory of the calling
+ *   process).
+ *
+ *   If pathname is relative and dirfd is the special value AT_FDCWD, then
+ *   pathname is interpreted relative to the current working directory of
+ *   the calling process.
+ *
+ *   If pathname is absolute, then dirfd is ignored.
+ *
+ * Input Parameters:
+ *   dirfd  - The file descriptor of directory.
+ *   path   - a pointer to the path
+ *   oflags - the flag of open.
+ *   amode  - the access mode
+ *
+ * Returned Value:
+ *   Return the new file descriptor (a nonnegative integer), or -1 if an
+ *   error occurred (in which case, errno is set appropriately).
+ *
+ ****************************************************************************/
 
-  if (tv == NULL)
-    {
-      return utimens(path, NULL);
-    }
-
-  times[0].tv_sec  = tv[0].tv_sec;
-  times[0].tv_nsec = tv[0].tv_usec * 1000;
-  times[1].tv_sec  = tv[1].tv_sec;
-  times[1].tv_nsec = tv[1].tv_usec * 1000;
-
-  return utimens(path, times);
-}
-
-int futimesat(int dirfd, FAR const char *path, const struct timeval tv[2])
+int openat(int dirfd, FAR const char *path, int oflags, ...)
 {
   char fullpath[PATH_MAX];
+  mode_t mode = 0;
   int ret;
 
   ret = lib_getfullpath(dirfd, path, fullpath);
@@ -61,5 +74,14 @@ int futimesat(int dirfd, FAR const char *path, const struct timeval tv[2])
       return ERROR;
     }
 
-  return utimes(fullpath, tv);
+  if ((oflags & O_CREAT) != 0)
+    {
+      va_list ap;
+
+      va_start(ap, oflags);
+      mode = va_arg(ap, mode_t);
+      va_end(ap);
+    }
+
+  return open(fullpath, oflags, mode);
 }
