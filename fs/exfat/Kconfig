@@ -1,7 +1,0 @@
-config FS_EXFAT
-	bool "EXFAT File System"
-	default n
-        select FS_LARGEFILE
-	depends on !DISABLE_MOUNTPOINT
-	---help---
-		Build the EXFAT file system. https://en.wikipedia.org/wiki/ExFAT
