@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import time
+from itertools import groupby
 
 import pexpect
 import pexpect.fdpexpect
@@ -252,6 +253,23 @@ def runCmd(cmd):
     return stdout
 
 
+# read case from builtin_list.h file
+def getCaseList(buildinfile, board, flag):
+    f = open(buildinfile, "r")
+    lines = f.readlines()
+    f.close()
+    clist = []
+    for line in lines:
+        if flag in line:
+            # line: { "ltp_interfaces_mq_setattr_1_1", \
+            # SCHED_PRIORITY_DEFAULT, 8192, \
+            # ltp_test_interfaces_mq_setattr_1_1_main },
+            # get ltp_interfaces_mq_setattr_1_1
+            obj = re.search(r'.*("%s.*")(.*)' % flag, line, re.M | re.I)
+            clist.append(obj.group(1))
+    return clist
+
+
 # find file
 def findFile(path, flag, board, core=None, match=True):
     fList = []
@@ -283,6 +301,67 @@ def getConfigValue(path, board, core, flag):
             value = value.strip('"').strip()
     print(value)
     return value
+
+
+# get test suite name
+def getTsName(tsFile):
+    # get test suite name from tsfile
+    # nsh_test_result_20201027.csv
+    # ts name: nsh_test
+    ts = "_".join(os.path.basename(tsFile).split("_")[:-2])
+    return ts
+
+
+# get case list from buildin_list.h and write to testsuite_list.txt
+def readBuildInList(path, log, board, core, flag=None):
+    flist = findFile(path, "builtin_list.h", board, core)
+    today = time.strftime("%Y%m%d", time.localtime())
+    for bfile in flist:
+        if flag:
+            l1 = getCaseList(bfile, board, flag)
+
+            # get test suite list
+            tsList = [list(g) for k, g in groupby(l1, lambda x: "%s" % flag in x) if k]
+            tsFile = "%s_list_%s.txt" % (flag, today)
+            if tsList:
+                writeListToFile(os.path.join(log, tsFile), tsList)
+
+        else:
+            # get ltp test case list
+            l1 = getCaseList(bfile, board, "ltp")
+            # get open_posix list
+            opList = [
+                list(g)
+                for k, g in groupby(l1, lambda x: "%s" % "ltp_syscalls" in x)
+                if not k
+            ]
+            opFile = "%s_list_%s.txt" % ("open_posix", today)
+            if opList:
+                writeListToFile(os.path.join(log, opFile), opList)
+
+            # get syscalls list
+            sysList = [
+                list(g)
+                for k, g in groupby(l1, lambda x: "%s" % "ltp_syscalls" in x)
+                if k
+            ]
+            sysFile = "%s_list_%s.txt" % ("ltp_syscalls", today)
+            if sysList:
+                writeListToFile(os.path.join(log, sysFile), sysList)
+
+    return
+
+
+# write runlist to file
+def writeListToFile(filename, newlist):
+    if newlist:
+        f = open(filename, "w")
+        tmplist = set([i for j in newlist for i in j])
+        for ts in tmplist:
+            f.write(ts.strip('"'))
+            f.write("\n")
+        f.close()
+        return f
 
 
 # read log and extract timestamp
