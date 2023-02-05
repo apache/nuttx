@@ -78,6 +78,11 @@
 #  define assert(f) ASSERT(f)
 #endif
 
+/* Suppress 3rd party library redefine _assert/__assert */
+
+#define _assert _assert
+#define __assert __assert
+
 /* Definition required for C11 compile-time assertion checking.  The
  * static_assert macro simply expands to the _Static_assert keyword.
  */
