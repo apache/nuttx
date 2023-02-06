@@ -609,30 +609,13 @@ index b15becbb51..3ad4d13ad7 100644
 2. Please note that QEMU does not report PL310 (L2CC) related
    registers correctly, so if you enable CONFIG_DEBUG_ASSERTION
    the nuttx will stop with DEBUGASSERT(). To avoid this,
-   comment out the following lines.
+   comment out the following configs in defconfig
 
---- a/arch/arm/src/armv7-a/arm_l2cc_pl310.c
-+++ b/arch/arm/src/armv7-a/arm_l2cc_pl310.c
-@@ -333,7 +333,7 @@ void arm_l2ccinitialize(void)
- #if defined(CONFIG_ARMV7A_ASSOCIATIVITY_8WAY)
-   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 0);
- #elif defined(CONFIG_ARMV7A_ASSOCIATIVITY_16WAY)
-- DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
-+ //DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
- #else
- # error No associativity selected
- #endif
-@@ -345,8 +345,8 @@ void arm_l2ccinitialize(void)
-   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
-               L2CC_ACR_WAYSIZE_32KB);
- #elif defined(CONFIG_ARMV7A_WAYSIZE_64KB)
-- DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
-- L2CC_ACR_WAYSIZE_64KB);
-+ // DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
-+ // L2CC_ACR_WAYSIZE_64KB);
- #elif defined(CONFIG_ARMV7A_WAYSIZE_128KB)
-   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
-               L2CC_ACR_WAYSIZE_128KB);
+-CONFIG_ARMV7A_ASSOCIATIVITY_16WAY=y
+-CONFIG_ARMV7A_L2CC_PL310=y
+-CONFIG_ARMV7A_WAYSIZE_64KB=y
+-CONFIG_PL310_LOCKDOWN_BY_LINE=y
+-CONFIG_PL310_LOCKDOWN_BY_MASTER=y
 
 3. Run QEMU
 
