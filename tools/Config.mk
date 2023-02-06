@@ -560,6 +560,10 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
 	EXTRA = *.gcno *.gcda
 endif
 
+ifeq ($(CONFIG_STACK_USAGE),y)
+	EXTRA += *.su
+endif
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
