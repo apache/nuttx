@@ -412,8 +412,8 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE_ADD
-	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} $(2) "
-	$(Q) $(AR) $1 $(2)
+	$(ECHO_BEGIN)"AR (add): ${shell basename $(1)} "
+	$(Q) $(AR) $1 $2
 	$(ECHO_END)
 endef
 
