@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/signal.h>
 
 #include <debug.h>
 #include <errno.h>
@@ -40,7 +41,7 @@
 #include "bcmf_bdc.h"
 #include "bcmf_utils.h"
 
- #include "bcmf_netdev.h"
+#include "bcmf_netdev.h"
 
 #include "bcmf_sdio_regs.h"
 
@@ -327,8 +328,8 @@ int bcmf_gspi_send_f2_frame(FAR struct bcmf_dev_s *priv)
     {
       /* TODO handle this case */
 
-      wlerr("No credit to send frame\n");
-      return -EAGAIN;
+      wlwarn("No credit to send frame\n");
+      nxsig_usleep(10 * 1000);
     }
 
   if (nxmutex_lock(&gbus->queue_lock) < 0)
