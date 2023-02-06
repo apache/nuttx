@@ -373,7 +373,7 @@ static void cisif_callback_for_intlev(uint8_t code)
 
   /* Notify and get next addr */
 
-  g_cxd56_cisif_complete_capture(0, size);
+  g_cxd56_cisif_complete_capture(0, size, NULL);
 
   g_jpgint_receive = false;
 
@@ -413,7 +413,7 @@ static void cisif_ycc_axi_trdn_int(uint8_t code)
   else
     {
       size = cisif_reg_read(CISIF_YCC_DSTRG_CONT);
-      g_cxd56_cisif_complete_capture(0, size);
+      g_cxd56_cisif_complete_capture(0, size, NULL);
       cisif_reg_write(CISIF_YCC_DREAD_CONT, 0);
     }
 }
@@ -463,7 +463,7 @@ static void cisif_jpg_axi_trdn_int(uint8_t code)
   else
     {
       size = cisif_reg_read(CISIF_JPG_DSTRG_CONT);
-      g_cxd56_cisif_complete_capture(0, size);
+      g_cxd56_cisif_complete_capture(0, size, NULL);
       cisif_reg_write(CISIF_JPG_DREAD_CONT, 0);
     }
 }
@@ -495,7 +495,7 @@ static void cisif_ycc_err_int(uint8_t code)
 #endif
 
   size = cisif_reg_read(CISIF_YCC_DSTRG_CONT);
-  g_cxd56_cisif_complete_capture(code, size);
+  g_cxd56_cisif_complete_capture(code, size, NULL);
   cisif_reg_write(CISIF_YCC_DREAD_CONT, 0);
   g_errint_receive = true;
 }
@@ -513,7 +513,7 @@ static void cisif_jpg_err_int(uint8_t code)
 #endif
 
   size = cisif_reg_read(CISIF_JPG_DSTRG_CONT);
-  g_cxd56_cisif_complete_capture(code, size);
+  g_cxd56_cisif_complete_capture(code, size, NULL);
   cisif_reg_write(CISIF_JPG_DREAD_CONT, 0);
   g_errint_receive = true;
 }
