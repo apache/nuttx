@@ -623,7 +623,7 @@ int up_backtrace(struct tcb_s *tcb,
 #  ifdef CONFIG_SMP
           frame.stack_top = arm_intstack_top();
 #  else
-          frame.stack_top = &g_intstacktop;
+          frame.stack_top = (unsigned long)&g_intstacktop;
 #  endif /* CONFIG_SMP */
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
