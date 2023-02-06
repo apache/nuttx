@@ -90,7 +90,6 @@ struct can_conn_s
 
   /* CAN-specific content follows */
 
-  uint8_t protocol;                  /* Selected CAN protocol */
   int16_t crefs;                     /* Reference count */
 
   /* The following is a list of poll structures of threads waiting for

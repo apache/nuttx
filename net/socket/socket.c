@@ -95,7 +95,7 @@ int psock_socket(int domain, int type, int protocol,
 
   /* Get the socket interface */
 
-  sockif = net_sockif(domain, psock->s_type, protocol);
+  sockif = net_sockif(domain, psock->s_type, psock->s_proto);
   if (sockif == NULL)
     {
       nerr("ERROR: socket address family unsupported: %d\n", domain);
@@ -109,7 +109,7 @@ int psock_socket(int domain, int type, int protocol,
   DEBUGASSERT(sockif->si_setup != NULL);
   psock->s_sockif = sockif;
 
-  ret = sockif->si_setup(psock, protocol);
+  ret = sockif->si_setup(psock);
   if (ret >= 0)
     {
       FAR struct socket_conn_s *conn = psock->s_conn;

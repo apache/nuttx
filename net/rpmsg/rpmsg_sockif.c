@@ -127,7 +127,7 @@ struct rpmsg_socket_conn_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int        rpmsg_socket_setup(FAR struct socket *psock, int protocol);
+static int        rpmsg_socket_setup(FAR struct socket *psock);
 static sockcaps_t rpmsg_socket_sockcaps(FAR struct socket *psock);
 static void       rpmsg_socket_addref(FAR struct socket *psock);
 static int        rpmsg_socket_bind(FAR struct socket *psock,
@@ -590,7 +590,7 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
   return 0;
 }
 
-static int rpmsg_socket_setup(FAR struct socket *psock, int protocol)
+static int rpmsg_socket_setup(FAR struct socket *psock)
 {
   FAR struct rpmsg_socket_conn_s *conn;
 
