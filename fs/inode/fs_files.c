@@ -35,6 +35,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/mutex.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
 
@@ -96,6 +97,39 @@ static int files_extend(FAR struct filelist *list, size_t row)
   DEBUGASSERT(list->fl_rows == row);
   return 0;
 }
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+
+static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  FAR struct filelist *list;
+  int i;
+  int j;
+
+  list = &tcb->group->tg_filelist;
+  if (nxmutex_lock(&list->fl_lock) < 0)
+    {
+      return;
+    }
+
+  for (i = 0; i < list->fl_rows; i++)
+    {
+      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
+        {
+          FAR struct file *filep;
+
+          filep = &list->fl_files[i][j];
+          if (filep != NULL && filep->f_inode != NULL)
+            {
+              file_fsync(filep);
+            }
+        }
+    }
+
+  nxmutex_unlock(&list->fl_lock);
+}
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT */
 
 /****************************************************************************
  * Public Functions
@@ -603,3 +637,21 @@ int close(int fd)
   leave_cancellation_point();
   return ret;
 }
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+
+/****************************************************************************
+ * Name: sync
+ *
+ * Description:
+ *   sync() causes all pending modifications to filesystem metadata and
+ *   cached file data to be written to the underlying filesystems.
+ *
+ ****************************************************************************/
+
+void sync(void)
+{
+  nxsched_foreach(task_fssync, NULL);
+}
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT */
