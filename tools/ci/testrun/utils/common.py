@@ -214,7 +214,7 @@ class start:
                 "bash",
                 [
                     "-c",
-                    "qemu-system-arm -M sabrelite -smp 1 -bios none -kernel ./nuttx -nographic | tee %s"
+                    "qemu-system-arm -semihosting -M sabrelite -m 1024 -smp 4 -kernel ./nuttx -nographic | tee %s"
                     % self.log,
                 ],
             )
