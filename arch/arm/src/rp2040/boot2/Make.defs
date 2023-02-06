@@ -48,7 +48,7 @@ $(BOOT_STAGE2).bin: %.bin: %.elf
 $(BOOT_STAGE2).elf: $(BOOT2SRC)
 	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base/include/pico/version.h
 	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base/include/pico/config_autogen.h
-	$(CC) -nostdlib $(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
+	$(CC) -nostdlib -T$(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
 	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base/include/pico/version.h
 	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base/include/pico/config_autogen.h
 
