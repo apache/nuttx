@@ -356,7 +356,6 @@ static int bcmf_gspi_thread(int argc, char **argv)
   uint16_t               intr_flags;
   int                    ret;
   int                    length;
-  int                    wait_count      = 0;
   bool                   wait_for_event;
   bool                   enter_low_power = false;
 
@@ -424,7 +423,10 @@ static int bcmf_gspi_thread(int argc, char **argv)
 
           /* If we don't have a frame leave the loop */
 
-          if (length == 0) break;
+          if (length == 0)
+            {
+              break;
+            }
 
           /* Read and process frame. This updates gspi->status */
 
@@ -436,43 +438,21 @@ static int bcmf_gspi_thread(int argc, char **argv)
             }
           else
             {
-              wlerr("error reading f2 frame: %d\n", ret);
+              wlwarn("error reading f2 frame: %d\n", ret);
             }
         }
-      else
+
+      if (wait_for_event)
         {
-          /* If we don't have anything to read, try sending a packet */
+          /* Send the frame */
 
-          while ((status & CYW_REG_STATUS_F2_RECEIVE_RDY) == 0)
+          do
             {
-              /* Oops! no room for a packet.  We'll wait a bit to see
-               * if room shows up.
-               */
-
-              wlinfo(">>>> not ready to receive\n");
-
-              if (++wait_count > 100)
-                {
-                  wlerr("Chip cannot receive F2 frame\n");
-                  break;
-                }
-
-              /* No room at the inn for an f2 frame -- wait a bit */
-
-              usleep(10000);
-
+              ret = bcmf_gspi_send_f2_frame(priv);
               status = bcmf_gspi_read_reg_32(gspi,
-                                             gspi_f0_bus,
-                                             CYW_REG_STATUS);
+                                             gspi_f0_bus, CYW_REG_STATUS);
             }
-
-          /* reset the count for next time  */
-
-          wait_count = 0;
-
-          /* We have space, send the frame */
-
-          ret = bcmf_gspi_send_f2_frame(priv);
+          while (ret == OK && (status & CYW_REG_STATUS_F2_RECEIVE_RDY));
 
           if (ret == OK)
             {
@@ -480,12 +460,13 @@ static int bcmf_gspi_thread(int argc, char **argv)
             }
           else
             {
-#ifdef CONFIG_DEBUG_WIRELESS_ERROR
               if (ret != -ENODATA)
                 {
+#ifdef CONFIG_DEBUG_WIRELESS_ERROR
                   wlerr("error sending f2 frame: %d\n", ret);
-                }
 #endif
+                  nxsig_usleep(10 * 1000);
+                }
             }
         }
 
@@ -511,7 +492,10 @@ static int bcmf_gspi_thread(int argc, char **argv)
                             &gbus->thread_signal,
                             BCMF_GSPI_LOWPOWER_TIMEOUT_TICK);
 
-              if (ret == -ETIMEDOUT) enter_low_power = true;
+              if (ret == -ETIMEDOUT)
+                {
+                  enter_low_power = true;
+                }
             }
         }
     }
