@@ -44,7 +44,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int        icmpv6_setup(FAR struct socket *psock, int protocol);
+static int        icmpv6_setup(FAR struct socket *psock);
 static sockcaps_t icmpv6_sockcaps(FAR struct socket *psock);
 static void       icmpv6_addref(FAR struct socket *psock);
 static int        icmpv6_bind(FAR struct socket *psock,
@@ -100,7 +100,6 @@ const struct sock_intf_s g_icmpv6_sockif =
  * Input Parameters:
  *   psock    A pointer to a user allocated socket structure to be
  *            initialized.
- *   protocol (see sys/socket.h)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
@@ -108,11 +107,11 @@ const struct sock_intf_s g_icmpv6_sockif =
  *
  ****************************************************************************/
 
-static int icmpv6_setup(FAR struct socket *psock, int protocol)
+static int icmpv6_setup(FAR struct socket *psock)
 {
   /* Only SOCK_DGRAM and IPPROTO_ICMP6 are supported */
 
-  if (psock->s_type == SOCK_DGRAM && protocol == IPPROTO_ICMP6)
+  if (psock->s_type == SOCK_DGRAM && psock->s_proto == IPPROTO_ICMP6)
     {
       /* Allocate the IPPROTO_ICMP6 socket connection structure and save in
        * the new socket instance.
