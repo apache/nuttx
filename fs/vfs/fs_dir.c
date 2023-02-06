@@ -599,7 +599,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
     }
 
   inode_getpath(inode, path_prefix);
-  asprintf(&dir->fd_path, "%s%s", path_prefix, relpath);
+  asprintf(&dir->fd_path, "%s%s/", path_prefix, relpath);
   filep->f_inode  = &g_dir_inode;
   filep->f_priv   = dir;
   inode_addref(&g_dir_inode);
