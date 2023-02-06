@@ -44,9 +44,11 @@ There is currently no direct user mode access to these RP2040 hardware features:
 Installation
 ============
 
-1. Download Raspberry Pi Pico SDK
+1. Download Raspberry Pi Pico SDK and update submodule(cyw43-driver)
 
-  $ git clone -b 1.1.2 https://github.com/raspberrypi/pico-sdk.git
+  $ git clone -b 1.4.0 https://github.com/raspberrypi/pico-sdk.git
+  $ cd pico-sdk
+  $ git submodule update --init --recursive lib/cyw43-driver
 
 2. Set PICO_SDK_PATH environment variable
 
