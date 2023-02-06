@@ -89,8 +89,7 @@ void bcmf_interface_free_frame(FAR struct bcmf_dev_s  *priv,
 
 bcmf_interface_frame_t
 *bcmf_interface_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                        bool                   block,
-                                        bool                   tx)
+                               bool block, bool tx)
 {
   FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *) priv->bus;
   bcmf_interface_frame_t   *iframe;
@@ -122,13 +121,13 @@ bcmf_interface_frame_t
 
       nxmutex_unlock(&ibus->queue_lock);
 
+      nxsig_usleep(10 * 1000);
+
       if (!block)
         {
-          wlinfo("No avail buffer\n");
+          wlwarn("No avail buffer\n");
           return NULL;
         }
-
-      nxsig_usleep(10 * 1000);
     }
 
 #if defined(CONFIG_IEEE80211_BROADCOM_FULLMAC_GSPI)
