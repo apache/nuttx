@@ -45,7 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TOUCH_GET_IO_NUM(channel) (touch_channel_to_gpio[channel])
+#define TOUCH_GET_IO_NUM(channel) (touch_channel_to_rtcio[channel])
 
 /****************************************************************************
  * Private Types
@@ -68,6 +68,11 @@ struct touch_config_meas_mode_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+static void touch_ensure_scan_done_isr(uint32_t *intr_mask);
+static int touch_interrupt(int irq, void *context, void *arg);
+static void touch_restore_irq(void *arg);
+#endif
 static void touch_config(enum touch_pad_e tp);
 static void touch_init(struct touch_config_s *config);
 static void touch_set_meas_mode(enum touch_pad_e tp,
@@ -82,9 +87,150 @@ static void touch_io_init(enum touch_pad_e tp);
 static mutex_t *touch_mux = NULL;
 static uint32_t touch_pad_logic_threshold[TOUCH_SENSOR_PINS];
 
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+static uint16_t touch_pad_isr_enabled;
+static enum touch_intr_mask_e touch_pad_isr_types;
+static int touch_last_irq = -1;
+static int (*touch_release_cb)(int, void *, void *);
+static struct rt_timer_args_s irq_timer_args;
+static struct rt_timer_s *irq_timer_handler;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: touch_ensure_scan_done_isr
+ *
+ * Description:
+ *   Fix for internal scan done interrupt issue.
+ *   Generally, the SCAN_DONE interrupt will be triggered for the last
+ *   two enabled channels, instead of the last one, this workaround is to
+ *   ignore the first SCAN_DONE interrupt.
+ *
+ * Input Parameters:
+ *   intr_mask - Pointer containing a copy of the interrupt register.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+void touch_ensure_scan_done_isr(uint32_t *intr_mask)
+{
+  uint16_t ch_mask = 0;
+  int pad_num = touch_lh_get_current_meas_channel();
+  int i;
+
+  /* Make sure that the scan done interrupt is generated after the last
+   * channel measurement is completed.
+   */
+
+  if (*intr_mask & TOUCH_INTR_MASK_SCAN_DONE)
+    {
+      ch_mask = touch_lh_get_channel_mask();
+      for (i = TOUCH_SENSOR_PINS - 1; i >= 0; i--)
+        {
+          if (BIT(i) & ch_mask)
+            {
+              if (pad_num != i)
+                {
+                  *intr_mask &= (~RTC_CNTL_TOUCH_SCAN_DONE_INT_ST_M);
+                }
+
+              break;
+            }
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: touch_interrupt
+ *
+ * Description:
+ *   Touch pads interrupt handler.
+ *
+ * Input Parameters:
+ *   irq - Interrupt request number;
+ *   context - Context data from the ISR;
+ *   arg - Opaque pointer to the internal driver state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+static int touch_interrupt(int irq, void *context, void *arg)
+{
+  uint32_t *context_ptr = (uint32_t *) context;
+  touch_ensure_scan_done_isr(context_ptr);
+
+  uint32_t intr_mask = *(context_ptr);
+  enum touch_pad_e pad_num = touch_lh_get_current_meas_channel();
+  touch_last_irq = ESP32S2_TOUCHPAD2IRQ(pad_num);
+
+  touch_lh_intr_disable(touch_pad_isr_types);
+
+  rt_timer_start(irq_timer_handler,
+                 CONFIG_ESP32S2_TOUCH_IRQ_INTERVAL_MS * USEC_PER_MSEC,
+                 false);
+
+  /* Read and clear the touch interrupt status */
+
+  if (intr_mask & TOUCH_INTR_MASK_TIMEOUT)
+    {
+      touch_lh_timer_force_done();
+    }
+
+  if (intr_mask & (TOUCH_INTR_MASK_ACTIVE |
+                   TOUCH_INTR_MASK_INACTIVE))
+    {
+      if ((touch_pad_isr_enabled >> pad_num) & 0x1)
+        {
+          irq_dispatch(touch_last_irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: touch_restore_irq
+ *
+ * Description:
+ *   IRQ timer callback.
+ *   Re-enables touch IRQ after a certain time to avoid spam.
+ *
+ * Input Parameters:
+ *   arg - Pointer to a memory location containing the function arguments.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+static void touch_restore_irq(void *arg)
+{
+  if (touch_last_irq > 0 && touch_release_cb != NULL)
+    {
+      /* Call the button interrup handler again so we can detect touch pad
+       * releases
+       */
+
+      touch_release_cb(touch_last_irq, NULL, NULL);
+    }
+
+  touch_lh_intr_enable(touch_pad_isr_types);
+}
+#endif
 
 /****************************************************************************
  * Name: touch_init
@@ -163,6 +309,43 @@ static void touch_init(struct touch_config_s *config)
   touch_lh_denoise_set_cap_level(config->denoise_cap_level);
   touch_lh_denoise_set_grade(config->denoise_grade);
   touch_lh_denoise_enable();
+#endif
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+      irq_timer_args.arg = NULL;
+      irq_timer_args.callback = touch_restore_irq;
+      rt_timer_create(&(irq_timer_args), &(irq_timer_handler));
+
+      touch_pad_isr_types = TOUCH_INTR_MASK_ACTIVE |
+                            TOUCH_INTR_MASK_INACTIVE |
+                            TOUCH_INTR_MASK_TIMEOUT;
+
+      int ret = 0;
+
+      ret |= irq_attach(ESP32S2_IRQ_RTC_TOUCH_DONE,
+                        touch_interrupt,
+                        NULL);
+
+      ret |= irq_attach(ESP32S2_IRQ_RTC_TOUCH_ACTIVE,
+                        touch_interrupt,
+                        NULL);
+
+      ret |= irq_attach(ESP32S2_IRQ_RTC_TOUCH_INACTIVE,
+                        touch_interrupt,
+                        NULL);
+
+      ret |= irq_attach(ESP32S2_IRQ_RTC_TOUCH_SCAN_DONE,
+                        touch_interrupt,
+                        NULL);
+
+      ret |= irq_attach(ESP32S2_IRQ_RTC_TOUCH_TIMEOUT,
+                        touch_interrupt,
+                        NULL);
+
+      if (ret < 0)
+        {
+          ierr("ERROR: irq_attach() failed.\n");
+        }
 #endif
 
   leave_critical_section(flags);
@@ -298,6 +481,8 @@ static void touch_io_init(enum touch_pad_e tp)
 
 int esp32s2_configtouch(enum touch_pad_e tp, struct touch_config_s config)
 {
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
+
   struct touch_config_volt_s volt_config =
     {
       .refh = config.refh,
@@ -313,10 +498,10 @@ int esp32s2_configtouch(enum touch_pad_e tp, struct touch_config_s config)
 
   touch_init(&config);
 
-  touch_config(tp);
   touch_set_meas_mode(tp, &meas_config);
   touch_lh_set_fsm_mode(config.fsm_mode);
   touch_set_voltage(&volt_config);
+  touch_config(tp);
   touch_lh_start_fsm();
 
   return OK;
@@ -338,7 +523,34 @@ int esp32s2_configtouch(enum touch_pad_e tp, struct touch_config_s config)
 
 bool esp32s2_touchread(enum touch_pad_e tp)
 {
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
+
   irqstate_t flags = enter_critical_section();
+
+  uint32_t value = esp32s2_touchreadraw(tp);
+
+  leave_critical_section(flags);
+
+  return (value > touch_pad_logic_threshold[tp]);
+}
+
+/****************************************************************************
+ * Name: esp32s2_touchreadraw
+ *
+ * Description:
+ *   Read the analog value of a touch pad channel.
+ *
+ * Input Parameters:
+ *   tp - The touch pad channel.
+ *
+ * Returned Value:
+ *   The number of charge cycles in the last measurement.
+ *
+ ****************************************************************************/
+
+uint32_t esp32s2_touchreadraw(enum touch_pad_e tp)
+{
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
 
 #ifdef CONFIG_ESP32S2_TOUCH_FILTER
   uint32_t value = touch_lh_filter_read_smooth(tp);
@@ -346,11 +558,9 @@ bool esp32s2_touchread(enum touch_pad_e tp)
   uint32_t value = touch_lh_read_raw_data(tp);
 #endif
 
-  leave_critical_section(flags);
-
   iinfo("Touch pad %d value: %u\n", tp, value);
 
-  return (value > touch_pad_logic_threshold[tp]);
+  return value;
 }
 
 /****************************************************************************
@@ -371,11 +581,7 @@ bool esp32s2_touchread(enum touch_pad_e tp)
 
 uint32_t esp32s2_touchbenchmark(enum touch_pad_e tp)
 {
-  if (tp >= TOUCH_SENSOR_PINS)
-    {
-      ierr("Invalid touch pad!\n");
-      return 0;
-    }
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
 
   irqstate_t flags = enter_critical_section();
 
@@ -405,6 +611,8 @@ uint32_t esp32s2_touchbenchmark(enum touch_pad_e tp)
 
 void esp32s2_touchsetthreshold(enum touch_pad_e tp, uint32_t threshold)
 {
+  DEBUGASSERT(tp < TOUCH_SENSOR_PINS);
+
   irqstate_t flags = enter_critical_section();
 
   touch_lh_set_threshold(tp, threshold);
@@ -413,4 +621,79 @@ void esp32s2_touchsetthreshold(enum touch_pad_e tp, uint32_t threshold)
   leave_critical_section(flags);
 
   iinfo("Touch pad %d threshold set to: %u\n", tp, threshold);
+}
+
+/****************************************************************************
+ * Name: esp32s2_touchirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified touch pad.
+ *
+ * Input Parameters:
+ *   irq - The touch pad irq number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+void esp32s2_touchirqenable(int irq)
+{
+  DEBUGASSERT(irq >= ESP32S2_FIRST_RTCIOIRQ_TOUCHPAD &&
+              irq <= ESP32S2_LAST_RTCIOIRQ_TOUCHPAD);
+
+  int bit = ESP32S2_IRQ2TOUCHPAD(irq);
+
+  touch_lh_intr_disable(touch_pad_isr_types);
+
+  touch_pad_isr_enabled |= (UINT32_C(1) << bit);
+
+  touch_lh_intr_enable(touch_pad_isr_types);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_touchirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified touch pad.
+ *
+ * Input Parameters:
+ *   irq - The touch pad irq number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+void esp32s2_touchirqdisable(int irq)
+{
+  DEBUGASSERT(irq >= ESP32S2_FIRST_RTCIOIRQ_TOUCHPAD &&
+              irq <= ESP32S2_LAST_RTCIOIRQ_TOUCHPAD);
+
+  int bit = ESP32S2_IRQ2TOUCHPAD(irq);
+
+  touch_lh_intr_disable(touch_pad_isr_types);
+
+  touch_pad_isr_enabled &= (~(UINT32_C(1) << bit));
+
+  touch_lh_intr_enable(touch_pad_isr_types);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_touchregisterreleasecb
+ *
+ * Description:
+ *   Register the release callback.
+ *
+ ****************************************************************************/
+
+void esp32s2_touchregisterreleasecb(int (*func)(int, void *, void *))
+{
+  DEBUGASSERT(func != NULL);
+
+  touch_release_cb = func;
 }

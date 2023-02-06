@@ -31,6 +31,7 @@
 
 #define TOUCH_SENSOR_PINS           15
 #define TOUCH_MEASURE_WAIT_MAX      (0xff)
+#define TOUCH_THRESHOLD_NO_USE      (0)
 
 /* The waterproof function includes a shielded channel (TOUCH_PAD_NUM14) */
 
@@ -49,6 +50,21 @@
 /* Note: T0 is an internal channel that does not have a corresponding
  * external GPIO.
  */
+
+#define TOUCH_PAD_NUM1_CHANNEL_NUM     1
+#define TOUCH_PAD_NUM2_CHANNEL_NUM     2
+#define TOUCH_PAD_NUM3_CHANNEL_NUM     3
+#define TOUCH_PAD_NUM4_CHANNEL_NUM     4
+#define TOUCH_PAD_NUM5_CHANNEL_NUM     5
+#define TOUCH_PAD_NUM6_CHANNEL_NUM     6
+#define TOUCH_PAD_NUM7_CHANNEL_NUM     7
+#define TOUCH_PAD_NUM8_CHANNEL_NUM     8
+#define TOUCH_PAD_NUM9_CHANNEL_NUM     9
+#define TOUCH_PAD_NUM10_CHANNEL_NUM    10
+#define TOUCH_PAD_NUM11_CHANNEL_NUM    11
+#define TOUCH_PAD_NUM12_CHANNEL_NUM    12
+#define TOUCH_PAD_NUM13_CHANNEL_NUM    13
+#define TOUCH_PAD_NUM14_CHANNEL_NUM    14
 
 #define TOUCH_PAD_NUM1_GPIO_NUM     1
 #define TOUCH_PAD_NUM2_GPIO_NUM     2

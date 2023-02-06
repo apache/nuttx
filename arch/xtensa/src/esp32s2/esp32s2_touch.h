@@ -85,23 +85,23 @@ struct touch_config_s
  * external GPIO.
  */
 
-static const int touch_channel_to_gpio[] =
+static const int touch_channel_to_rtcio[] =
 {
   -1,
-  TOUCH_PAD_NUM1_GPIO_NUM,
-  TOUCH_PAD_NUM2_GPIO_NUM,
-  TOUCH_PAD_NUM3_GPIO_NUM,
-  TOUCH_PAD_NUM4_GPIO_NUM,
-  TOUCH_PAD_NUM5_GPIO_NUM,
-  TOUCH_PAD_NUM6_GPIO_NUM,
-  TOUCH_PAD_NUM7_GPIO_NUM,
-  TOUCH_PAD_NUM8_GPIO_NUM,
-  TOUCH_PAD_NUM9_GPIO_NUM,
-  TOUCH_PAD_NUM10_GPIO_NUM,
-  TOUCH_PAD_NUM11_GPIO_NUM,
-  TOUCH_PAD_NUM12_GPIO_NUM,
-  TOUCH_PAD_NUM13_GPIO_NUM,
-  TOUCH_PAD_NUM14_GPIO_NUM
+  TOUCH_PAD_NUM1_CHANNEL_NUM,
+  TOUCH_PAD_NUM2_CHANNEL_NUM,
+  TOUCH_PAD_NUM3_CHANNEL_NUM,
+  TOUCH_PAD_NUM4_CHANNEL_NUM,
+  TOUCH_PAD_NUM5_CHANNEL_NUM,
+  TOUCH_PAD_NUM6_CHANNEL_NUM,
+  TOUCH_PAD_NUM7_CHANNEL_NUM,
+  TOUCH_PAD_NUM8_CHANNEL_NUM,
+  TOUCH_PAD_NUM9_CHANNEL_NUM,
+  TOUCH_PAD_NUM10_CHANNEL_NUM,
+  TOUCH_PAD_NUM11_CHANNEL_NUM,
+  TOUCH_PAD_NUM12_CHANNEL_NUM,
+  TOUCH_PAD_NUM13_CHANNEL_NUM,
+  TOUCH_PAD_NUM14_CHANNEL_NUM
 };
 
 #undef EXTERN
@@ -155,6 +155,22 @@ int esp32s2_configtouch(enum touch_pad_e tp, struct touch_config_s config);
 bool esp32s2_touchread(enum touch_pad_e tp);
 
 /****************************************************************************
+ * Name: esp32s2_touchreadraw
+ *
+ * Description:
+ *   Read the analog value of a touch pad channel.
+ *
+ * Input Parameters:
+ *   tp - The touch pad channel.
+ *
+ * Returned Value:
+ *   The number of charge cycles in the last measurement.
+ *
+ ****************************************************************************/
+
+uint32_t esp32s2_touchreadraw(enum touch_pad_e tp);
+
+/****************************************************************************
  * Name: esp32s2_touchbenchmark
  *
  * Description:
@@ -186,6 +202,64 @@ uint32_t esp32s2_touchbenchmark(enum touch_pad_e tp);
  ****************************************************************************/
 
 void esp32s2_touchsetthreshold(enum touch_pad_e tp, uint32_t threshold);
+
+/****************************************************************************
+ * Name: esp32s2_touchirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified touch pad.
+ *
+ * Input Parameters:
+ *   irq - The touch pad irq number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+void esp32s2_touchirqenable(int irq);
+#else
+#  define esp32s2_touchirqenable(irq)
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_touchirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified touch pad.
+ *
+ * Input Parameters:
+ *   irq - The touch pad irq number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+void esp32s2_touchirqdisable(int irq);
+#else
+#  define esp32s2_touchirqdisable(irq)
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_touchregisterreleasecb
+ *
+ * Description:
+ *   Register the release callback.
+ *
+ * Input Parameters:
+ *   func - The handler function to be used.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_TOUCH_IRQ
+void esp32s2_touchregisterreleasecb(int (*func)(int, void *, void *));
+#endif
 
 #ifdef __cplusplus
 }
