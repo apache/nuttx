@@ -401,12 +401,10 @@ static long_double decfloat(FAR char *ptr, FAR char **endptr)
   else if (num_digit + num_decimal > ldbl_max_10_exp)
     {
       errno = ERANGE;
-      return ldbl_max * ldbl_max;
     }
   else if (num_digit + num_decimal < ldbl_min_10_exp)
     {
       errno = ERANGE;
-      return ldbl_min * ldbl_min;
     }
 
   if (k % 9)
