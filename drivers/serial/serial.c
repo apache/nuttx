@@ -140,6 +140,13 @@ static struct work_s g_serial_work;
  * Private Functions
  ****************************************************************************/
 
+static void uart_poll_notify(FAR uart_dev_t *dev, pollevent_t eventset)
+{
+  nxmutex_lock(&dev->polllock);
+  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, eventset);
+  nxmutex_unlock(&dev->polllock);
+}
+
 /****************************************************************************
  * Name: uart_putxmitchar
  ****************************************************************************/
@@ -1446,7 +1453,7 @@ static int uart_poll(FAR struct file *filep,
   FAR uart_dev_t   *dev   = inode->i_private;
   pollevent_t       eventset;
   int               ndx;
-  int               ret;
+  int               ret = 0;
   int               i;
 
   /* Some sanity checking */
@@ -1460,18 +1467,10 @@ static int uart_poll(FAR struct file *filep,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = nxmutex_lock(&dev->polllock);
-  if (ret < 0)
-    {
-      /* A signal received while waiting for access to the poll data
-       * will abort the operation.
-       */
-
-      return ret;
-    }
-
   if (setup)
     {
+      nxmutex_lock(&dev->polllock);
+
       /* This is a request to set up the poll.  Find an available
        * slot for the poll structure reference
        */
@@ -1484,8 +1483,8 @@ static int uart_poll(FAR struct file *filep,
             {
               /* Bind the poll structure and this slot */
 
-              dev->fds[i]  = fds;
-              fds->priv    = &dev->fds[i];
+              dev->fds[i] = fds;
+              fds->priv   = &dev->fds[i];
               break;
             }
         }
@@ -1493,9 +1492,13 @@ static int uart_poll(FAR struct file *filep,
       if (i >= CONFIG_SERIAL_NPOLLWAITERS)
         {
           fds->priv = NULL;
+          nxmutex_unlock(&dev->polllock);
+
           ret       = -EBUSY;
           goto errout;
         }
+
+      nxmutex_unlock(&dev->polllock);
 
       /* Should we immediately notify on any of the requested events?
        * First, check if the xmit buffer is full.
@@ -1545,7 +1548,7 @@ static int uart_poll(FAR struct file *filep,
         }
 #endif
 
-      poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, eventset);
+      uart_poll_notify(dev, eventset);
     }
   else if (fds->priv != NULL)
     {
@@ -1561,14 +1564,26 @@ static int uart_poll(FAR struct file *filep,
         }
 #endif
 
+      nxmutex_lock(&dev->polllock);
+
       /* Remove all memory of the poll setup */
 
+      for (i = 0; i < CONFIG_SERIAL_NPOLLWAITERS; i++)
+        {
+          if (fds == dev->fds[i])
+            {
+              dev->fds[i] = NULL;
+              fds->priv   = NULL;
+              break;
+            }
+        }
+
       *slot     = NULL;
-      fds->priv = NULL;
+
+      nxmutex_unlock(&dev->polllock);
     }
 
 errout:
-  nxmutex_unlock(&dev->polllock);
   return ret;
 }
 
@@ -1692,7 +1707,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
 {
   /* Notify all poll/select waiters that they can read from the recv buffer */
 
-  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLIN);
+  uart_poll_notify(dev, POLLIN);
 
   /* Is there a thread waiting for read data?  */
 
@@ -1730,7 +1745,7 @@ void uart_datasent(FAR uart_dev_t *dev)
 {
   /* Notify all poll/select waiters that they can write to xmit buffer */
 
-  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLOUT);
+  uart_poll_notify(dev, POLLOUT);
 
   /* Is there a thread waiting for space in xmit.buffer?  */
 
@@ -1780,7 +1795,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
     {
       /* Notify all poll/select waiters that a hangup occurred */
 
-      poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLERR | POLLHUP);
+      uart_poll_notify(dev, POLLERR | POLLHUP);
 
       /* Yes.. wake up all waiting threads.  Each thread should detect the
        * disconnection and return the ENOTCONN error.
