@@ -448,7 +448,7 @@ static void usart1_detach(struct uart_dev_s *dev)
  *
  * Description:
  *   This is the USART RX interrupt handler.  It will be invoked when an
- *   RX interrupt received.  It will call uart_receivechar to perform the RX
+ *   RX interrupt received.  It will call uart_recvchars to perform the RX
  *   data transfers.
  *
  ****************************************************************************/

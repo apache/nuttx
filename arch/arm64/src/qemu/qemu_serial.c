@@ -536,9 +536,11 @@ static int qemu_pl011_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: qemu_pl011_irq_handler (and front-ends)
  *
  * Description:
- *   This is the common UART interrupt handler.  It should cal
- *   uart_transmitchars or uart_receivechar to perform the appropriate data
- *   transfers.
+ *   This is the UART interrupt handler.  It will be invoked when an
+ *   interrupt is received on the 'irq'.  It should call uart_xmitchars or
+ *   uart_recvchars to perform the appropriate data transfers.  The
+ *   interrupt handling logic must be able to map the 'arg' to the
+ *   appropriate uart_dev_s structure in order to call these functions.
  *
  ***************************************************************************/
 
