@@ -1707,12 +1707,12 @@ static int hciuart_configure(const struct hciuart_config_s *config)
  * Name: hciuart_interrupt
  *
  * Description:
- *   This is the USART interrupt callback.  It will be invoked when an
- *   interrupt received on the 'irq'  It should call uart_transmitchars or
- *   uart_receivechar to perform the appropriate data transfers.  The
- *   interrupt handling logic must be able to map the 'irq' number into the
- *   appropriate btuart_lowerhalf_s structure in order to call these
- *   functions.
+ *   This is the HCIUART interrupt handler.  It will be invoked when an
+ *   interrupt is received on the 'irq'.  It should call
+ *   hciuart_copytotxfifo or hciuart_copytorxbuffer to perform the
+ *   appropriate data transfers.  The interrupt handling logic must be able
+ *   to map the 'arg' to the appropriate hciuart_lowerhalf_s structure in
+ *   order to call these functions.
  *
  ****************************************************************************/
 

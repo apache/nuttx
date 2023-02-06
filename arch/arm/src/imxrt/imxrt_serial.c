@@ -1734,9 +1734,11 @@ static void imxrt_detach(struct uart_dev_s *dev)
  * Name: imxrt_interrupt (and front-ends)
  *
  * Description:
- *   This is the common UART interrupt handler.  It should call
- *   uart_transmitchars or uart_receivechar to perform the appropriate data
- *   transfers.
+ *   This is the UART interrupt handler.  It will be invoked when an
+ *   interrupt is received on the 'irq'.  It should call uart_xmitchars or
+ *   uart_recvchars to perform the appropriate data transfers.  The
+ *   interrupt handling logic must be able to map the 'arg' to the
+ *   appropriate imxrt_uart_s structure in order to call these functions.
  *
  ****************************************************************************/
 

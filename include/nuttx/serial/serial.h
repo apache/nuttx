@@ -368,7 +368,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev);
 void uart_xmitchars(FAR uart_dev_t *dev);
 
 /****************************************************************************
- * Name: uart_receivechars
+ * Name: uart_recvchars
  *
  * Description:
  *  This function is called from the UART interrupt handler when an interrupt

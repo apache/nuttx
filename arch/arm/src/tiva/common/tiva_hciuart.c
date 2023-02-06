@@ -1098,7 +1098,7 @@ static int hciuart_configure(const struct hciuart_config_s *config)
  *
  * Description:
  *   This is the UART interrupt callback.  It will be invoked when an
- *   interrupt received on the 'irq'  It should call hciuart_copytorxbuffer
+ *   interrupt received on the 'irq'.  It should call hciuart_copytorxbuffer
  *   or hciuart_copytotxfifo to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
  *   appropriate btuart_lowerhalf_s structure in order to call these
