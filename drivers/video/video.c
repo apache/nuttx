@@ -219,7 +219,8 @@ static bool is_sem_waited(FAR sem_t *sem);
 static int save_scene_param(enum v4l2_scene_mode mode,
                             uint32_t id,
                             struct v4l2_ext_control *control);
-static int video_complete_capture(uint8_t err_code, uint32_t datasize);
+static int video_complete_capture(uint8_t err_code, uint32_t datasize,
+                                  FAR const struct timeval *ts);
 static int validate_frame_setting(enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
                                   FAR video_format_t *vfmt,
@@ -3286,7 +3287,8 @@ static int video_unregister(FAR video_mng_t *priv)
 
 /* Callback function which device driver call when capture has done. */
 
-static int video_complete_capture(uint8_t err_code, uint32_t datasize)
+static int video_complete_capture(uint8_t err_code, uint32_t datasize,
+                                  FAR const struct timeval *ts)
 {
   FAR video_mng_t      *vmng = (FAR video_mng_t *)g_video_handler;
   FAR video_type_inf_t *type_inf;
@@ -3322,6 +3324,11 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize)
     }
 
   type_inf->bufinf.vbuf_curr->buf.bytesused = datasize;
+  if (ts != NULL)
+    {
+      type_inf->bufinf.vbuf_curr->buf.timestamp = *ts;
+    }
+
   video_framebuff_capture_done(&type_inf->bufinf);
 
   if (is_sem_waited(&type_inf->wait_capture.dqbuf_wait_flg))
