@@ -242,7 +242,7 @@ static uart_dev_t g_uart1_dev =
  *
  * Description:
  *   This is the UART interrupt handler.  It will be invoked when an
- *   interrupt is received on the 'irq'  It should call uart_xmitchars or
+ *   interrupt is received on the 'irq'.  It should call uart_xmitchars or
  *   uart_recvchars to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
  *   appropriate uart_dev_s structure in order to call these functions.
