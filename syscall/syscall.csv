@@ -165,6 +165,7 @@
 "stat","sys/stat.h","","int","FAR const char *","FAR struct stat *"
 "statfs","sys/statfs.h","","int","FAR const char *","FAR struct statfs *"
 "symlink","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","int","FAR const char *","FAR const char *"
+"sync","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","void"
 "sysinfo","sys/sysinfo.h","","int","FAR struct sysinfo *"
 "task_create","sched.h","!defined(CONFIG_BUILD_KERNEL)", "int","FAR const char *","int","int","main_t","FAR char * const []|FAR char * const *"
 "task_delete","sched.h","!defined(CONFIG_BUILD_KERNEL)","int","pid_t"

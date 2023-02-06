@@ -270,6 +270,7 @@ SYSCALL_LOOKUP(munmap,                     2)
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   SYSCALL_LOOKUP(mount,                    5)
+  SYSCALL_LOOKUP(sync,                     0)
   SYSCALL_LOOKUP(fsync,                    1)
   SYSCALL_LOOKUP(ftruncate,                2)
   SYSCALL_LOOKUP(mkdir,                    2)
