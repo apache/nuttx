@@ -27,6 +27,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mount.h>
 #include <stdint.h>
 #include <fcntl.h>
 #include <string.h>
@@ -37,6 +38,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/fs/loopmtd.h>
 #include <nuttx/mtd/mtd.h>
 
 /****************************************************************************
@@ -117,6 +119,31 @@ static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
 #endif
 static int     filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                  unsigned long arg);
+
+#ifdef CONFIG_MTD_LOOP
+static ssize_t mtd_loop_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t mtd_loop_write(FAR struct file *filep,
+                 FAR const char *buffer, size_t buflen);
+static int     mtd_loop_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
+#endif /* CONFIG_MTD_LOOP */
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+static const struct file_operations g_fops =
+{
+  NULL,                 /* open */
+  NULL,                 /* close */
+  mtd_loop_read,        /* read */
+  mtd_loop_write,       /* write */
+  NULL,                 /* seek */
+  mtd_loop_ioctl,       /* ioctl */
+};
+#endif /* CONFIG_MTD_LOOP */
 
 /****************************************************************************
  * Private Functions
@@ -496,6 +523,179 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 }
 
 /****************************************************************************
+ * Name: mtd_loop_setup
+ *
+ * Description: Dynamically setups up a FILEMTD enabled loop device that
+ *              is backed by a file.  The resulting loop device is a
+ *              MTD type block device vs. a generic block device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
+                          int sectsize, int erasesize, off_t offset)
+{
+  FAR struct mtd_dev_s *mtd;
+  int ret;
+
+  mtd = filemtd_initialize(filename, offset, sectsize, erasesize);
+  if (mtd == NULL)
+    {
+      return -ENOENT;
+    }
+
+  ret = register_mtddriver(devname, mtd, 0755, NULL);
+  if (ret != OK)
+    {
+      filemtd_teardown(mtd);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_MTD_LOOP */
+
+/****************************************************************************
+ * Name: mtd_loop_teardown
+ *
+ * Description:
+ *   Undo the setup performed by loopmtd_setup
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+static int mtd_loop_teardown(FAR const char *devname)
+{
+  FAR struct file_dev_s *dev;
+  FAR struct inode *inode;
+  int ret;
+
+  /* Open the block driver associated with devname so that we can get the
+   * inode reference.
+   */
+
+  ret = open_blockdriver(devname, MS_RDONLY, &inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to open %s: %d\n", devname, -ret);
+      return ret;
+    }
+
+  /* Inode private data is a reference to the loop device structure */
+
+  dev = (FAR struct file_dev_s *)inode->u.i_mtd;
+
+  /* Validate this is a filemtd backended device */
+
+  if (!filemtd_isfilemtd(&dev->mtd))
+    {
+      ferr("ERROR: Device is not a FILEMTD loop: %s\n", devname);
+      return -EINVAL;
+    }
+
+  close_blockdriver(inode);
+
+  /* Now teardown the filemtd */
+
+  filemtd_teardown(&dev->mtd);
+  unregister_blockdriver(devname);
+  kmm_free(dev);
+
+  return OK;
+}
+#endif /* CONFIG_MTD_LOOP */
+
+/****************************************************************************
+ * Name: mtd_loop_read
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+static ssize_t mtd_loop_read(FAR struct file *filep, FAR char *buffer,
+                               size_t len)
+{
+  return 0; /* Return EOF */
+}
+#endif /* CONFIG_MTD_LOOP */
+
+/****************************************************************************
+ * Name: mtd_loop_write
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+static ssize_t mtd_loop_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t len)
+{
+  return len; /* Say that everything was written */
+}
+#endif /* CONFIG_MTD_LOOP */
+
+/****************************************************************************
+ * Name: mtd_loop_ioctl
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg)
+{
+  int ret;
+
+  switch (cmd)
+    {
+    /* Command:      LOOPIOC_SETUP
+     * Description:  Setup the loop device
+     * Argument:     A pointer to a read-only instance of struct losetup_s.
+     * Dependencies: The loop device must be enabled (CONFIG_MTD_LOOP=y)
+     */
+
+    case MTD_LOOPIOC_SETUP:
+      {
+        FAR struct mtd_losetup_s *setup =
+          (FAR struct mtd_losetup_s *)((uintptr_t)arg);
+
+        if (setup == NULL)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            ret = mtd_loop_setup(setup->devname, setup->filename,
+                                setup->sectsize, setup->erasesize,
+                                setup->offset);
+          }
+      }
+      break;
+
+    /* Command:      LOOPIOC_TEARDOWN
+     * Description:  Teardown a loop device previously setup via
+     *               LOOPIOC_SETUP
+     * Argument:     A read-able pointer to the path of the device to be
+     *               torn down
+     * Dependencies: The loop device must be enabled (CONFIG_MTD_LOOP=y)
+     */
+
+    case MTD_LOOPIOC_TEARDOWN:
+      {
+        FAR const char *devname = (FAR const char *)((uintptr_t)arg);
+
+        if (devname == NULL)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            ret = mtd_loop_teardown(devname);
+          }
+       }
+       break;
+
+     default:
+       ret = -ENOTTY;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_MTD_LOOP */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -708,3 +908,17 @@ bool filemtd_isfilemtd(FAR struct mtd_dev_s *dev)
 
   return (priv->mtd.erase == filemtd_erase);
 }
+
+/****************************************************************************
+ * Name: mtd_loop_register_driver
+ *
+ * Description:
+ *   Registers MTD Loop Driver
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_LOOP
+int mtd_loop_register(void)
+{
+  return register_driver("/dev/loopmtd", &g_fops, 0666, NULL);
+}
+#endif

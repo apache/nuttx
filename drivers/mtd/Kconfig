@@ -331,6 +331,10 @@ config FILEMTD_ERASESTATE
 	hex "Simulated erase state"
 	default 0xff
 
+config MTD_LOOP
+	bool "Enable MTD loop device"
+	default n
+
 endif # FILEMTD
 
 config NULLMTD
