@@ -142,7 +142,7 @@ struct pollfd;  /* Forward reference */
 
 struct sock_intf_s
 {
-  CODE int        (*si_setup)(FAR struct socket *psock, int protocol);
+  CODE int        (*si_setup)(FAR struct socket *psock);
   CODE sockcaps_t (*si_sockcaps)(FAR struct socket *psock);
   CODE void       (*si_addref)(FAR struct socket *psock);
   CODE int        (*si_bind)(FAR struct socket *psock,

@@ -62,7 +62,7 @@ union sockaddr_u
 
 #if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
 
-static int        inet_setup(FAR struct socket *psock, int protocol);
+static int        inet_setup(FAR struct socket *psock);
 static sockcaps_t inet_sockcaps(FAR struct socket *psock);
 static void       inet_addref(FAR struct socket *psock);
 static int        inet_bind(FAR struct socket *psock,
@@ -239,7 +239,7 @@ static int inet_udp_alloc(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int inet_setup(FAR struct socket *psock, int protocol)
+static int inet_setup(FAR struct socket *psock)
 {
   /* Allocate the appropriate connection structure.  This reserves the
    * the connection structure is is unallocated at this point.  It will
@@ -252,9 +252,9 @@ static int inet_setup(FAR struct socket *psock, int protocol)
     {
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
-        if (protocol != 0 && protocol != IPPROTO_TCP)
+        if (psock->s_proto != 0 && psock->s_proto != IPPROTO_TCP)
           {
-            nerr("ERROR: Unsupported stream protocol: %d\n", protocol);
+            nerr("ERROR: Unsupported stream protocol: %d\n", psock->s_proto);
             return -EPROTONOSUPPORT;
           }
 
@@ -270,9 +270,10 @@ static int inet_setup(FAR struct socket *psock, int protocol)
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-        if (protocol != 0 && protocol != IPPROTO_UDP)
+        if (psock->s_proto != 0 && psock->s_proto != IPPROTO_UDP)
           {
-            nerr("ERROR: Unsupported datagram protocol: %d\n", protocol);
+            nerr("ERROR: Unsupported datagram protocol: %d\n",
+                 psock->s_proto);
             return -EPROTONOSUPPORT;
           }
 
@@ -2303,7 +2304,7 @@ int inet_close(FAR struct socket *psock)
  ****************************************************************************/
 
 FAR const struct sock_intf_s *
-  inet_sockif(sa_family_t family, int type, int protocol)
+inet_sockif(sa_family_t family, int type, int protocol)
 {
   DEBUGASSERT(family == PF_INET || family == PF_INET6);
 

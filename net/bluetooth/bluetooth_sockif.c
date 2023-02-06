@@ -48,7 +48,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int        bluetooth_setup(FAR struct socket *psock, int protocol);
+static int        bluetooth_setup(FAR struct socket *psock);
 static sockcaps_t bluetooth_sockcaps(FAR struct socket *psock);
 static void       bluetooth_addref(FAR struct socket *psock);
 static int        bluetooth_bind(FAR struct socket *psock,
@@ -149,7 +149,6 @@ static int bluetooth_sockif_alloc(FAR struct socket *psock)
  * Input Parameters:
  *   psock    A pointer to a user allocated socket structure to be
  *            initialized.
- *   protocol (see sys/socket.h)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
@@ -157,7 +156,7 @@ static int bluetooth_sockif_alloc(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int bluetooth_setup(FAR struct socket *psock, int protocol)
+static int bluetooth_setup(FAR struct socket *psock)
 {
   /* Allocate the appropriate connection structure.  This reserves the
    * connection structure, it is unallocated at this point.  It will not
