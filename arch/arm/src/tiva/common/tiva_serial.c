@@ -1193,15 +1193,25 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Perform some sanity checks before accepting any changes */
 
-        if (termiosp->c_cflag & CRTSCTS)
+#ifndef CONFIG_SERIAL_OFLOWCONTROL
+        if (termiosp->c_cflag & CCTS_OFLOW)
           {
-            /* We don't support for flow control right now, so we report an
-             * error
-             */
+            /* CTS not supported in this build, so report error */
 
             ret = -EINVAL;
             break;
           }
+#endif /* !CONFIG_SERIAL_OFLOWCONTROL */
+
+#ifndef CONFIG_SERIAL_IFLOWCONTROL
+        if (termiosp->c_cflag & CRTS_IFLOW)
+          {
+            /* RTS not supported in this build, so report error */
+
+            ret = -EINVAL;
+            break;
+          }
+#endif /* !CONFIG_SERIAL_IFLOWCONTROL */
 
         if (termiosp->c_cflag & PARENB)
           {
