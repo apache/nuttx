@@ -32,7 +32,7 @@ MEMORY
     /* The PIC32MZ2048ECH144 and PIC32MZ2048ECM144 chips have 160Kb of boot
      * FLASH:  80Kb at physical address 0x1fc4000 (Boot Flash 1, boot1) and
      * 80Kb at physical address 0x1fc60000 (Boot Flash 2, boot2).  Either
-     * may be mappled to the lower boot alias region (0x1fc00000,
+     * may be mapped to the lower boot alias region (0x1fc00000,
      * boolalias1) or the upper boot alias region (0x1fc20000, bootalias2).
      * This linker script assumes that Boot Flash 1 is mapped to the lower
      * alias region and Boot Flash 2 to the upper region.
