@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/pkt.h>
 
@@ -38,6 +39,66 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pkt_datahandler
+ *
+ * Description:
+ *   Handle packet that are not accepted by the application.
+ *
+ * Input Parameters:
+ *   dev    - Device instance only the input packet in d_buf, length = d_len;
+ *   conn   - A pointer to the PKT connection structure
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
+ *
+ ****************************************************************************/
+
+static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
+                                FAR struct pkt_conn_s *conn)
+{
+  FAR struct iob_s *iob = iob_tryalloc(true);
+  int ret;
+
+  if (iob == NULL)
+    {
+      return 0;
+    }
+
+  /* Clone an I/O buffer chain of the L2 data, use throttled IOB to avoid
+   * overconsumption.
+   * TODO: Optimize IOB clone after we support shared IOB.
+   */
+
+  ret = iob_clone_partial(dev->d_iob, dev->d_len, -NET_LL_HDRLEN(dev),
+                          iob, 0, true, false);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to clone the I/O buffer chain: %d\n", ret);
+      goto errout;
+    }
+
+  /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
+   * without waiting).
+   */
+
+  if ((ret = iob_tryadd_queue(iob, &conn->readahead)) < 0)
+    {
+      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      goto errout;
+    }
+  else
+    {
+      ninfo("Buffered %d bytes\n", dev->d_len);
+      return dev->d_len;
+    }
+
+errout:
+  iob_free_chain(iob);
+  return 0;
+}
 
 /****************************************************************************
  * Name: pkt_in
@@ -93,14 +154,17 @@ static int pkt_in(FAR struct net_driver_s *dev)
 
       if ((flags & PKT_NEWDATA) != 0)
         {
-          /* No.. the packet was not processed now.  Return -EAGAIN so
-           * that the driver may retry again later.  We still need to
-           * set d_len to zero so that the driver is aware that there
-           * is nothing to be sent.
-           */
+          /* Add the PKT to the socket read-ahead buffer. */
 
-           nwarn("WARNING: Packet not processed\n");
-           ret = -EAGAIN;
+          if (pkt_datahandler(dev, conn) == 0)
+            {
+              /* No.. the packet was not processed now.  Return -EAGAIN so
+               * that the driver may retry again later.
+               */
+
+              nwarn("WARNING: Packet not processed\n");
+              ret = -EAGAIN;
+            }
         }
     }
   else

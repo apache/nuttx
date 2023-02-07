@@ -305,7 +305,11 @@ static int pkt_close(FAR struct socket *psock)
 
           if (conn->crefs <= 1)
             {
-              /* Yes... free the connection structure */
+              /* Yes... free any read-ahead data */
+
+              iob_free_queue(&conn->readahead);
+
+              /* Then free the connection structure */
 
               conn->crefs = 0;          /* No more references on the connection */
               pkt_free(psock->s_conn);  /* Free network resources */

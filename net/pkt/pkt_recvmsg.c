@@ -305,6 +305,57 @@ static ssize_t pkt_recvfrom_result(int result,
 }
 
 /****************************************************************************
+ * Name: pkt_readahead
+ *
+ * Description:
+ *   Copy the buffered read-ahead data to the user buffer.
+ *
+ * Input Parameters:
+ *   conn  -  PKT socket connection structure containing the read-
+ *            ahead data.
+ *   buf      target buffer.
+ *
+ * Returned Value:
+ *   Number of bytes copied to the user buffer
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static inline ssize_t pkt_readahead(FAR struct pkt_conn_s *conn,
+                                    FAR void *buf, size_t buflen)
+{
+  FAR struct iob_s *iob;
+  ssize_t ret = -ENODATA;
+
+  /* Check there is any packets already buffered in a read-ahead buffer. */
+
+  if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
+    {
+      DEBUGASSERT(iob->io_pktlen > 0);
+
+      /* Copy to user */
+
+      ret = iob_copyout(buf, iob, buflen, 0);
+
+      ninfo("Received %zd bytes (of %u)\n", ret, iob->io_pktlen);
+
+      /* Remove the I/O buffer chain from the head of the read-ahead
+       * buffer queue.
+       */
+
+      iob_remove_queue(&conn->readahead);
+
+      /* And free the I/O buffer chain */
+
+      iob_free_chain(iob);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -370,59 +421,80 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    */
 
   net_lock();
-  pkt_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
 
-  /* Get the device driver that will service this transfer */
-
-  dev  = pkt_find_device(conn);
-  if (dev == NULL)
-    {
-      ret = -ENODEV;
-      goto errout_with_state;
-    }
-
-  /* TODO pkt_recvfrom_initialize() expects from to be of type sockaddr_in,
-   * but in our case is sockaddr_ll
+  /* Check if there is buffered read-ahead data for this socket.  We may have
+   * already received the response to previous command.
    */
 
-#if 0
-  ret = pkt_connect(conn, NULL);
-  if (ret < 0)
+  if (!IOB_QEMPTY(&conn->readahead))
     {
-      goto errout_with_state;
+      ret = pkt_readahead(conn, buf, len);
     }
-#endif
-
-  /* Set up the callback in the connection */
-
-  state.pr_cb = pkt_callback_alloc(dev, conn);
-  if (state.pr_cb)
+  else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+           (flags & MSG_DONTWAIT) != 0)
     {
-      state.pr_cb->flags  = (PKT_NEWDATA | PKT_POLL);
-      state.pr_cb->priv   = (FAR void *)&state;
-      state.pr_cb->event  = pkt_recvfrom_eventhandler;
+      /* Handle non-blocking PKT sockets */
 
-      /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  (1) net_sem_wait will also terminate if a signal
-       * is received, (2) the network is locked!  It will be un-locked while
-       * the task sleeps and automatically re-locked when the task restarts.
-       */
-
-      ret = net_sem_wait(&state.pr_sem);
-
-      /* Make sure that no further events are processed */
-
-      pkt_callback_free(dev, conn, state.pr_cb);
-      ret = pkt_recvfrom_result(ret, &state);
+      ret = -EAGAIN;
     }
   else
     {
-      ret = -EBUSY;
-    }
+      pkt_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
+
+      /* Get the device driver that will service this transfer */
+
+      dev  = pkt_find_device(conn);
+      if (dev == NULL)
+        {
+          ret = -ENODEV;
+          goto errout_with_state;
+        }
+
+      /* TODO pkt_recvfrom_initialize() expects from to be of type
+       * sockaddr_in, but in our case is sockaddr_ll
+       */
+
+#if 0
+      ret = pkt_connect(conn, NULL);
+      if (ret < 0)
+        {
+          goto errout_with_state;
+        }
+#endif
+
+      /* Set up the callback in the connection */
+
+      state.pr_cb = pkt_callback_alloc(dev, conn);
+      if (state.pr_cb)
+        {
+          state.pr_cb->flags  = (PKT_NEWDATA | PKT_POLL);
+          state.pr_cb->priv   = (FAR void *)&state;
+          state.pr_cb->event  = pkt_recvfrom_eventhandler;
+
+          /* Wait for either the receive to complete or for an error/timeout
+           * to occur. NOTES:  (1) net_sem_wait will also terminate if a
+           * signal is received, (2) the network is locked!  It will be
+           * un-locked while the task sleeps and automatically re-locked when
+           * the task restarts.
+           */
+
+          ret = net_sem_wait(&state.pr_sem);
+
+          /* Make sure that no further events are processed */
+
+          pkt_callback_free(dev, conn, state.pr_cb);
+          ret = pkt_recvfrom_result(ret, &state);
+        }
+      else
+        {
+          ret = -EBUSY;
+        }
 
 errout_with_state:
+      pkt_recvfrom_uninitialize(&state);
+    }
+
   net_unlock();
-  pkt_recvfrom_uninitialize(&state);
   return ret;
 }
 
