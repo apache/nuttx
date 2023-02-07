@@ -1,0 +1,45 @@
+# ##############################################################################
+# mm/mm_gran/CMakeLists.txt
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements.  See the NOTICE file distributed with this work for
+# additional information regarding copyright ownership.  The ASF licenses this
+# file to you under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# ##############################################################################
+
+# An optional granule allocator
+
+if(CONFIG_GRAN)
+  set(SRCS)
+
+  list(
+    APPEND
+    SRCS
+    mm_graninit.c
+    mm_granrelease.c
+    mm_granreserve.c
+    mm_granalloc.c
+    mm_granmark.c
+    mm_granfree.c
+    mm_graninfo.c
+    mm_grancritical.c)
+
+  # A page allocator based on the granule allocator
+
+  if(CONFIG_MM_PGALLOC)
+    list(APPEND SRCS mm_pgalloc.c)
+  endif()
+
+  target_sources(mm PRIVATE ${SRCS})
+endif()

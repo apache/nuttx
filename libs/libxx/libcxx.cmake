@@ -1,0 +1,119 @@
+# ##############################################################################
+# libs/libxx/libcxx.cmake
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements.  See the NOTICE file distributed with this work for
+# additional information regarding copyright ownership.  The ASF licenses this
+# file to you under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# ##############################################################################
+
+if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx/.git)
+
+  set(LIBCXX_VERSION 12.0.0)
+
+  FetchContent_Declare(
+    libcxx
+    DOWNLOAD_NAME "libcxx-${LIBCXX_VERSION}.src.tar.xz"
+    DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
+    URL "https://github.com/llvm/llvm-project/releases/download/llvmorg-${LIBCXX_VERSION}/libcxx-${LIBCXX_VERSION}.src.tar.xz"
+        SOURCE_DIR
+        ${CMAKE_CURRENT_LIST_DIR}/libcxx
+        BINARY_DIR
+        ${CMAKE_BINARY_DIR}/libs/libc/libcxx
+        CONFIGURE_COMMAND
+        ""
+        BUILD_COMMAND
+        ""
+        INSTALL_COMMAND
+        ""
+        TEST_COMMAND
+        ""
+    DOWNLOAD_NO_PROGRESS true
+    TIMEOUT 30)
+
+  FetchContent_GetProperties(libcxx)
+
+  if(NOT libcxx_POPULATED)
+    FetchContent_Populate(libcxx)
+  endif()
+
+  add_custom_target(libcxx_patch)
+
+  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/.libcxx_patch)
+    add_custom_command(
+      TARGET libcxx_patch
+      PRE_BUILD
+      COMMAND touch ${CMAKE_CURRENT_LIST_DIR}/.libcxx_patch
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-Remove-the-locale-fallback-for-NuttX.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libc-avoid-the-waring-__EXCEPTIONS-is-not-defined-ev.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-Rename-PS-macro-to-avoid-clashing-with-Xtensa.patch
+        > /dev/null || (exit 0) DEPENDS libcxx)
+
+    if(CONFIG_LIBC_ARCH_ATOMIC)
+      add_custom_command(
+        TARGET libcxx_patch
+        POST_BUILD
+        COMMAND
+          patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
+          ${CMAKE_CURRENT_LIST_DIR}/0002-Omit-atomic_-un-signed_lock_free-if-unsupported.patch
+          > /dev/null || (exit 0))
+    endif()
+
+  endif()
+
+endif()
+
+set_property(
+  TARGET nuttx
+  APPEND
+  PROPERTY NUTTX_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/libcxx/include)
+
+add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
+if(CONFIG_LIBSUPCXX)
+  add_compile_definitions(__GLIBCXX__)
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(SRCS)
+set(SRCSTMP)
+
+file(GLOB SRCS ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/*.cpp)
+file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/*.cpp)
+list(APPEND SRCS ${SRCSTMP})
+file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/filesystem/*.cpp)
+list(APPEND SRCS ${SRCSTMP})
+
+set_source_files_properties(libcxx/src/barrier.cpp PROPERTIES COMPILE_FLAGS
+                                                              -Wno-shadow)
+set_source_files_properties(libcxx/src/locale.cpp PROPERTIES COMPILE_FLAGS
+                                                             -Wno-shadow)
+set_source_files_properties(libcxx/src/filesystem/directory_iterator.cpp
+                            PROPERTIES COMPILE_FLAGS -Wno-shadow)
+set_source_files_properties(libcxx/src/filesystem/operations.cpp
+                            PROPERTIES COMPILE_FLAGS -Wno-shadow)
+
+nuttx_add_system_library(libcxx)
+target_sources(libcxx PRIVATE ${SRCS})
+
+add_dependencies(libcxx libcxx_patch)
