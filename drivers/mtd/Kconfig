@@ -927,6 +927,54 @@ config RAMTRON_CHUNKING
 		Some Re-RAMs like MB85AS4MT have write buffer size limitation and
 		require smaller, "chunked" writes.
 
+config RAMTRON_EMULATE_SECTOR_SHIFT
+	int "RAMTRON emulates sector size by setting shift value"
+	default 9
+	---help---
+		RAMTRON devices do not have pages and sectors.
+		For purpose of the VFAT file system, we emulate them.
+
+		Specify sector shift value to determine emulated sector size.
+		The relationship between sector shift value and emulated sector size is
+		described in the equation:
+		RAMTRON_EMULATE_SECTOR_SIZE = (1 << RAMTRON_EMULATE_SECTOR_SHIFT)
+
+		sector shift value	: sector size in bytes
+						0	: 1
+						1	: 2
+						2	: 4
+						3	: 8
+						4	: 16
+						5	: 32
+						6	: 64
+						7	: 128
+						8	: 256
+						9	: 512
+
+config RAMTRON_EMULATE_PAGE_SHIFT
+	int "RAMTRON emulates page size by setting shift value"
+	default 9
+	---help---
+		RAMTRON devices do not have pages and sectors.
+		For purpose of the VFAT file system, we emulate them.
+
+		Specify page shift value to determine emulated page size.
+		The relationship between page shift value and emulated page size is
+		described in the equation:
+		RAMTRON_EMULATE_PAGE_SIZE = (1 << RAMTRON_EMULATE_PAGE_SHIFT)
+
+		page shift value	: page size in bytes
+						0	: 1
+						1	: 2
+						2	: 4
+						3	: 8
+						4	: 16
+						5	: 32
+						6	: 64
+						7	: 128
+						8	: 256
+						9	: 512
+
 endif # MTD_RAMTRON
 
 config MTD_SST25
