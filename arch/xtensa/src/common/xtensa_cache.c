@@ -41,6 +41,27 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_get_icache_linesize
+ *
+ * Description:
+ *   Get icache linesize
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache line size
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_ICACHE
+size_t up_get_icache_linesize(void)
+{
+  return XCHAL_ICACHE_LINESIZE;
+}
+#endif
+
+/****************************************************************************
  * Name: up_enable_icache
  *
  * Description:
@@ -242,6 +263,27 @@ void up_unlock_icache_all(void)
     };
 
   __asm__ __volatile__ ("isync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_get_dcache_linesize
+ *
+ * Description:
+ *   Get dcache linesize
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache line size
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_DCACHE
+size_t up_get_dcache_linesize(void)
+{
+  return XCHAL_DCACHE_LINESIZE;
 }
 #endif
 

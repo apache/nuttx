@@ -269,3 +269,8 @@ uint32_t cp15_cache_size(void)
 
   return sets * ways * line;
 }
+
+uint32_t cp15_cache_linesize(void)
+{
+  return cp15_cache_get_info(NULL, NULL);
+}
