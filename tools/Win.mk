@@ -571,33 +571,38 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # location: https://bitbucket.org/nuttx/tools/downloads/.  See
 # misc\tools\README.txt for additional information.
 
+KCONFIG_ENV = set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR}) & \
+              set EXTERNALDIR=$(EXTERNALDIR) & \
+              set APPSBINDIR=$(patsubst "%",%,${CONFIG_APPS_DIR}) & \
+              set BINDIR=$(patsubst "%",%,${TOPDIR}) &
+
 config:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf Kconfig
+	$(Q) $(KCONFIG_ENV) kconfig-conf Kconfig
 
 oldconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --oldconfig Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf --oldconfig Kconfig
 
 olddefconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --olddefconfig Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf --olddefconfig Kconfig
 
 menuconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-mconf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-mconf Kconfig
 
 nconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-nconf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-nconf Kconfig
 
 savedefconfig: apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --savedefconfig defconfig.tmp Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) kconfig-tweak --file defconfig.tmp -u CONFIG_APPS_DIR
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	-$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp
