@@ -476,8 +476,8 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2,
  ****************************************************************************/
 
 int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
-                      unsigned int offset1, FAR struct iob_s *iob2,
-                      unsigned int offset2, bool throttled, bool block);
+                      int offset1, FAR struct iob_s *iob2,
+                      int offset2, bool throttled, bool block);
 
 /****************************************************************************
  * Name: iob_concat
