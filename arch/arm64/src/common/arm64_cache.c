@@ -267,6 +267,25 @@ static inline int arm64_dcache_all(int op)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_get_icache_linesize
+ *
+ * Description:
+ *   Get icache linesize
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache line size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_linesize(void)
+{
+  return g_dcache_line_size;
+}
+
+/****************************************************************************
  * Name: up_invalidate_dcache
  *
  * Description:
@@ -333,6 +352,25 @@ void up_invalidate_dcache_all(void)
 void up_invalidate_icache_all(void)
 {
   __ic_ialluis();
+}
+
+/****************************************************************************
+ * Name: up_get_dcache_linesize
+ *
+ * Description:
+ *   Get dcache linesize
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache line size
+ *
+ ****************************************************************************/
+
+size_t up_get_dcache_linesize(void)
+{
+  return g_dcache_line_size;
 }
 
 /****************************************************************************

@@ -397,6 +397,25 @@ void arm_l2ccinitialize(void)
 }
 
 /****************************************************************************
+ * Name: l2cc_get_linesize
+ *
+ * Description:
+ *    Get L2CC-P310 L2 cache linesize
+ *
+ * Input Parameters:
+ *    None
+ *
+ * Returned Value:
+ *    L2 cache linesize
+ *
+ ****************************************************************************/
+
+uint32_t l2cc_get_linesize(void)
+{
+  return PL310_CACHE_LINE_SIZE;
+}
+
+/****************************************************************************
  * Name: l2cc_enable
  *
  * Description:

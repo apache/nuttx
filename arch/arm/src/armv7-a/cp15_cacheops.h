@@ -1106,6 +1106,22 @@ void cp15_flush_dcache_all(void);
 
 uint32_t cp15_cache_size(void);
 
+/****************************************************************************
+ * Name: cp15_cache_linesize
+ *
+ * Description:
+ *   Get cp15 cache linesize in byte
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache linesize in byte
+ *
+ ****************************************************************************/
+
+uint32_t cp15_cache_linesize(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
