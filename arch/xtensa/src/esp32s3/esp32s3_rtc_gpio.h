@@ -575,5 +575,66 @@ static const rtc_io_desc_t g_rtc_io_desc[RTC_GPIO_NUMBER] =
 
 int esp32s3_configrtcio(int rtcio_num, rtcio_pinattr_t attr);
 
+/****************************************************************************
+ * Name: esp32s3_rtcioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   RTC IRQs.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_RTCIO_IRQ
+void esp32s3_rtcioirqinitialize(void);
+#else
+#  define esp32s3_rtcioirqinitialize()
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_rtcioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified RTC peripheral IRQ
+ *
+ * Input Parameters:
+ *   irq - The IRQ number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_RTCIO_IRQ
+void esp32s3_rtcioirqenable(int irq);
+#else
+#  define esp32s3_rtcioirqenable(irq)
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_rtcioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified RTC peripheral IRQ.
+ *
+ * Input Parameters:
+ *   irq - The IRQ number.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_RTCIO_IRQ
+void esp32s3_rtcioirqdisable(int irq);
+#else
+#  define esp32s3_rtcioirqdisable(irq)
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_RTC_GPIO_H */
