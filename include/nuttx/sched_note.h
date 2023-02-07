@@ -125,6 +125,10 @@
           sched_note_printf(SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
 #  define SCHED_NOTE_BPRINTF(event, fmt, ...) \
           sched_note_bprintf(SCHED_NOTE_IP, event, fmt, ##__VA_ARGS__)
+#  define SCHED_NOTE_BEGINEX(str) \
+          sched_note_printf(SCHED_NOTE_IP, "B|%d|%s", gettid(), str)
+#  define SCHED_NOTE_ENDEX(str) \
+          sched_note_printf(SCHED_NOTE_IP, "E|%d|%s", gettid(), str)
 #  define SCHED_NOTE_BEGIN() \
           sched_note_begin(SCHED_NOTE_IP)
 #  define SCHED_NOTE_END() \
