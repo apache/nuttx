@@ -103,8 +103,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
         {
           memcpy(newmem, oldmem, size);
           mm_free(heap, oldmem);
-          return newmem;
         }
+
+      return newmem;
     }
 #endif
 
