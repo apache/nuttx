@@ -171,7 +171,7 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
 
 static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
 {
-  FAR struct iob_s *head;
+  FAR struct iob_s *head = NULL;
   FAR struct ipv6_hdr_s *ipv6;
   FAR struct ip_fraglink_s *fraglink;
 
