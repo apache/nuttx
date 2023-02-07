@@ -1065,7 +1065,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
 
         /* TODO:  Handle other termios settings.
-         * Note that only cfgetispeed is used besued we have knowledge
+         * Note that only cfgetispeed is used because we have knowledge
          * that only one speed is supported.
          */
 
