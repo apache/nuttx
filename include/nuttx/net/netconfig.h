@@ -659,18 +659,6 @@
 #  define CONFIG_NET_ARP_MAXAGE 120
 #endif
 
-/* Usrsock configuration options */
-
-/* The maximum amount of concurrent usrsock connections, Default: 6 */
-
-#ifndef CONFIG_NET_USRSOCK_CONNS
-#  ifdef CONFIG_NET_USRSOCK
-#    define CONFIG_NET_USRSOCK_CONNS 6
-#  else
-#    define CONFIG_NET_USRSOCK_CONNS 0
-#  endif
-#endif
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
