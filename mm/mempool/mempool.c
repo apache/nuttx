@@ -394,6 +394,8 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
 int mempool_info_task(FAR struct mempool_s *pool,
                       FAR struct mempoolinfo_task *info)
 {
+  irqstate_t flags = spin_lock_irqsave(&pool->lock);
+
   DEBUGASSERT(info);
   if (info->pid == -2)
     {
@@ -438,6 +440,7 @@ int mempool_info_task(FAR struct mempool_s *pool,
     }
 #endif
 
+  spin_unlock_irqrestore(&pool->lock, flags);
   return OK;
 }
 
