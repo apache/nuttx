@@ -39,6 +39,7 @@
 #include "xtensa.h"
 
 #include "esp32s3_gpio.h"
+#include "esp32s3_rtc_gpio.h"
 #include "esp32s3_irq.h"
 #ifdef CONFIG_SMP
 #include "esp32s3_smp.h"
@@ -437,6 +438,10 @@ void up_irqinitialize(void)
   /* Initialize GPIO interrupt support */
 
   esp32s3_gpioirqinitialize();
+
+  /* Initialize RTCIO interrupt support */
+
+  esp32s3_rtcioirqinitialize();
 
   /* Initialize interrupt handler for the PMS violation ISR */
 
