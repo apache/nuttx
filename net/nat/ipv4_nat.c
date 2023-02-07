@@ -63,10 +63,6 @@
 #define L4_HDR(ipv4) \
   (FAR void *)((FAR uint8_t *)(ipv4) + (((ipv4)->vhl & IPv4_HLMASK) << 2))
 
-#define L4_HDRLEN(proto) \
-  ((proto) == IP_PROTO_TCP ? TCP_HDRLEN : \
-       (proto) == IP_PROTO_UDP ? UDP_HDRLEN : ICMP_HDRLEN)
-
 #if defined(CONFIG_NET_TCP)
 #  define L4_MAXHDRLEN TCP_HDRLEN
 #elif defined(CONFIG_NET_UDP)
@@ -87,6 +83,41 @@ static FAR struct ipv4_nat_entry *
 ipv4_nat_outbound_internal(FAR struct net_driver_s *dev,
                            FAR struct ipv4_hdr_s *ipv4,
                            enum nat_manip_type_e manip_type);
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv4_nat_l4_hdrlen
+ *
+ * Description:
+ *   Get L4 header length
+ *
+ ****************************************************************************/
+
+static inline uint16_t ipv4_nat_l4_hdrlen(uint8_t proto)
+{
+  switch (proto)
+    {
+#ifdef CONFIG_NET_TCP
+      case IP_PROTO_TCP:
+        return TCP_HDRLEN;
+#endif
+#ifdef CONFIG_NET_UDP
+      case IP_PROTO_UDP:
+        return UDP_HDRLEN;
+#endif
+#ifdef CONFIG_NET_ICMP
+      case IP_PROTO_ICMP:
+        return ICMP_HDRLEN;
+#endif
+      default:
+        DEBUGASSERT(false);
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Private Functions
@@ -320,7 +351,8 @@ ipv4_nat_inbound_icmp(FAR struct ipv4_hdr_s *ipv4,
 
             /* Try backup origin L4 header for later checksum update. */
 
-            inner_l4hdrlen = MIN(inner_l4len, L4_HDRLEN(inner->proto));
+            inner_l4hdrlen = MIN(inner_l4len,
+                                 ipv4_nat_l4_hdrlen(inner->proto));
             DEBUGASSERT((intptr_t)inner_l4 - (intptr_t)ipv4 + inner_l4hdrlen
                         <= CONFIG_IOB_BUFSIZE);
             memcpy(inner_l4hdrbak, inner_l4, inner_l4hdrlen);
@@ -541,7 +573,8 @@ ipv4_nat_outbound_icmp(FAR struct net_driver_s *dev,
 
             /* Try backup origin L4 header for later checksum update. */
 
-            inner_l4hdrlen = MIN(inner_l4len, L4_HDRLEN(inner->proto));
+            inner_l4hdrlen = MIN(inner_l4len,
+                                 ipv4_nat_l4_hdrlen(inner->proto));
             DEBUGASSERT((intptr_t)inner_l4 - (intptr_t)ipv4 + inner_l4hdrlen
                         <= CONFIG_IOB_BUFSIZE);
             memcpy(inner_l4hdrbak, inner_l4, inner_l4hdrlen);

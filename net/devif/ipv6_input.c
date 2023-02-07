@@ -54,12 +54,6 @@
 #include "ipfrag/ipfrag.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define PAYLOAD ((FAR uint8_t *)TCPIPv6BUF)
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -273,9 +267,9 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 
   /* Parse IPv6 extension headers (parsed but ignored) */
 
-  payload  = PAYLOAD;     /* Assume payload starts right after IPv6 header */
-  iphdrlen = IPv6_HDRLEN; /* Total length of the IPv6 header */
-  nxthdr   = ipv6->proto; /* Next header determined by IPv6 header prototype */
+  payload  = IPBUF(IPv6_HDRLEN); /* Assume payload starts right after IPv6 header */
+  iphdrlen = IPv6_HDRLEN;        /* Total length of the IPv6 header */
+  nxthdr   = ipv6->proto;        /* Next header determined by IPv6 header prototype */
 
   while (ipv6_exthdr(nxthdr))
     {
