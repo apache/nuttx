@@ -4,6 +4,6 @@
 #
 
 if SPECIFIC_DRIVERS
-source "drivers/platform/audio/Kconfig"
-source "drivers/platform/sensors/Kconfig"
+source "$BINDIR/drivers/platform/audio/Kconfig"
+source "$BINDIR/drivers/platform/sensors/Kconfig"
 endif

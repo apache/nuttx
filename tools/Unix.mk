@@ -602,43 +602,46 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 # location: https://bitbucket.org/nuttx/tools/downloads/.  See README.txt
 # file in the NuttX tools GIT repository for additional information.
 
+KCONFIG_ENV  = APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR)
+KCONFIG_ENV += APPSBINDIR=${CONFIG_APPS_DIR} BINDIR=${TOPDIR}
+
 config:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf Kconfig
 
 oldconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf --oldconfig Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf --oldconfig Kconfig
 
 olddefconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf --olddefconfig Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf --olddefconfig Kconfig
 
 menuconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-mconf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-mconf Kconfig
 
 nconfig: apps_preconfig
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-nconf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-nconf Kconfig
 
 qconfig: apps_preconfig
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-qconf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-qconf Kconfig
 
 gconfig: apps_preconfig
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-gconf Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-gconf Kconfig
 
 savedefconfig: apps_preconfig
-	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf --savedefconfig defconfig.tmp Kconfig
+	$(Q) ${KCONFIG_ENV} kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) kconfig-tweak --file defconfig.tmp -u CONFIG_APPS_DIR
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
