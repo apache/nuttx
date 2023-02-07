@@ -49,6 +49,11 @@ config STM32F4DISCO_QETIMER
 	default 2
 	depends on SENSORS_QENCODER
 
+config STM32F4DISCO_TIMER
+	int "Timer to use with timer driver"
+	default 4
+	depends on TIMER
+
 config STM32F4DISCO_LIS3DSH
 	bool "Enable LIS3DSH driver for the IMU on STM32F4Discovery (rev. MB997C)"
 	default n
