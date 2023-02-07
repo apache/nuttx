@@ -48,8 +48,8 @@
 
 /* The array containing all IPPROTO_ICMP socket connections */
 
-#ifndef CONFIG_NET_ALLOC_CONNS
-static struct icmp_conn_s g_icmp_connections[CONFIG_NET_ICMP_NCONNS];
+#if CONFIG_NET_ICMP_PREALLOC_CONNS > 0
+static struct icmp_conn_s g_icmp_connections[CONFIG_NET_ICMP_PREALLOC_CONNS];
 #endif
 
 /* A list of all free IPPROTO_ICMP socket connections */
@@ -76,10 +76,10 @@ static dq_queue_t g_active_icmp_connections;
 
 void icmp_sock_initialize(void)
 {
-#ifndef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_ICMP_PREALLOC_CONNS > 0
   int i;
 
-  for (i = 0; i < CONFIG_NET_ICMP_NCONNS; i++)
+  for (i = 0; i < CONFIG_NET_ICMP_PREALLOC_CONNS; i++)
     {
       /* Move the connection structure to the free list */
 
@@ -109,13 +109,22 @@ FAR struct icmp_conn_s *icmp_alloc(void)
   ret = nxmutex_lock(&g_free_lock);
   if (ret >= 0)
     {
-#ifdef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_ICMP_ALLOC_CONNS > 0
       if (dq_peek(&g_free_icmp_connections) == NULL)
         {
-          conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_ICMP_NCONNS);
+#if CONFIG_NET_ICMP_MAX_CONNS > 0
+          if (dq_count(&g_active_icmp_connections) +
+              CONFIG_NET_ICMP_ALLOC_CONNS >= CONFIG_NET_ICMP_MAX_CONNS)
+            {
+              nxmutex_unlock(&g_free_lock);
+              return NULL;
+            }
+#endif
+
+          conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_ICMP_ALLOC_CONNS);
           if (conn != NULL)
             {
-              for (ret = 0; ret < CONFIG_NET_ICMP_NCONNS; ret++)
+              for (ret = 0; ret < CONFIG_NET_ICMP_ALLOC_CONNS; ret++)
                 {
                   dq_addlast(&conn[ret].sconn.node,
                              &g_free_icmp_connections);
@@ -177,9 +186,21 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
       memset(conn, 0, sizeof(*conn));
 
-      /* Free the connection */
+      /* If this is a preallocated or a batch allocated connection store it
+       * in the free connections list. Else free it.
+       */
 
-      dq_addlast(&conn->sconn.node, &g_free_icmp_connections);
+#if CONFIG_NET_ICMP_ALLOC_CONNS == 1
+      if (conn < g_icmp_connections || conn >= (g_icmp_connections +
+          CONFIG_NET_ICMP_PREALLOC_CONNS))
+        {
+          kmm_free(conn);
+        }
+      else
+#endif
+        {
+          dq_addlast(&conn->sconn.node, &g_free_icmp_connections);
+        }
     }
 
   nxmutex_unlock(&g_free_lock);
