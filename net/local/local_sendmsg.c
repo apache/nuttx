@@ -65,10 +65,10 @@ static int local_sendctl(FAR struct local_conn_s *conn,
   FAR struct file *filep2;
   FAR struct file *filep;
   struct cmsghdr *cmsg;
-  int count;
+  int count = 0;
   int *fds;
   int ret;
-  int i;
+  int i = 0;
 
   net_lock();
 
@@ -412,7 +412,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   size_t len = msg->msg_iovlen;
 #ifdef CONFIG_NET_LOCAL_SCM
   FAR struct local_conn_s *conn = psock->s_conn;
-  int count;
+  int count = 0;
 
   if (msg->msg_control &&
       msg->msg_controllen > sizeof(struct cmsghdr))
