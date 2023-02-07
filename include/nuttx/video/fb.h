@@ -286,12 +286,14 @@
                                                * Argument: read-only struct
                                                *           fb_planeinfo_s* */
 
+#define FBIO_CLEARNOTIFY      _FBIOC(0x0017)  /* Clear notify signal */
+
 /* Linux Support ************************************************************/
 
-#define FBIOGET_VSCREENINFO   _FBIOC(0x0017)  /* Get video variable info */
+#define FBIOGET_VSCREENINFO   _FBIOC(0x0018)  /* Get video variable info */
                                               /* Argument: writable struct
                                                *           fb_var_screeninfo */
-#define FBIOGET_FSCREENINFO   _FBIOC(0x0018)  /* Get video fix info */
+#define FBIOGET_FSCREENINFO   _FBIOC(0x0019)  /* Get video fix info */
                                               /* Argument: writable struct
                                                *           fb_fix_screeninfo */
 
