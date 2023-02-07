@@ -64,6 +64,16 @@ struct pkt_conn_s
   uint8_t    ifindex;
   uint16_t   proto;
   uint8_t    crefs;    /* Reference counts on this instance */
+
+  /* Read-ahead buffering.
+   *
+   *   readahead - A singly linked list of type struct iob_qentry_s
+   *               where the PKT read-ahead data is retained.
+   *
+   * TODO: Maybe support PACKET_MMAP for further optimize.
+   */
+
+  struct iob_queue_s readahead;   /* Read-ahead buffering */
 };
 
 /****************************************************************************
@@ -231,7 +241,7 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   Select the network driver to use with the PKT transaction.
  *
  * Input Parameters:
- *   conn - PKT connection structure (not currently used).
+ *   conn - PKT connection structure.
  *
  * Returned Value:
  *   A pointer to the network driver to use.

@@ -110,6 +110,12 @@ static void netdriver_send(struct net_driver_s *dev)
 
   UNUSED(devidx);
 
+#ifdef CONFIG_NET_PKT
+  /* When packet sockets are enabled, feed the tx frame into it */
+
+  pkt_input(dev);
+#endif
+
   sim_netdev_send(devidx, buf, dev->d_len);
 }
 

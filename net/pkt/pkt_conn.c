@@ -210,7 +210,8 @@ FAR struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf)
     {
       /* FIXME lmac in conn should have been set by pkt_bind() */
 
-      if (eth_addr_cmp(buf->dest, conn->lmac))
+      if (eth_addr_cmp(buf->dest, conn->lmac) ||
+          eth_addr_cmp(buf->src, conn->lmac))
         {
           /* Matching connection found.. return a reference to it */
 
