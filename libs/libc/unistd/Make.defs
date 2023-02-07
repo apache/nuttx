@@ -29,8 +29,8 @@ CSRCS += lib_usleep.c lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
 CSRCS += lib_setreuid.c lib_setregid.c lib_getrusage.c lib_utime.c lib_utimes.c
 CSRCS += lib_setrlimit.c lib_getrlimit.c lib_setpriority.c lib_getpriority.c
 CSRCS += lib_futimes.c lib_lutimes.c lib_gethostname.c lib_sethostname.c
-CSRCS += lib_sync.c lib_fchownat.c lib_linkat.c lib_readlinkat.c
-CSRCS += lib_symlinkat.c lib_unlinkat.c
+CSRCS += lib_fchownat.c lib_linkat.c lib_readlinkat.c lib_symlinkat.c
+CSRCS += lib_unlinkat.c
 
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c
