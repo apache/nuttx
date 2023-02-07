@@ -120,6 +120,7 @@ struct video_type_inf_s
   video_framebuff_t    bufinf;
   FAR uint8_t          *bufheap;   /* for V4L2_MEMORY_MMAP buffers */
   FAR struct pollfd    *fds;
+  uint32_t             seqnum;
 };
 
 typedef struct video_type_inf_s video_type_inf_t;
@@ -707,6 +708,7 @@ static void change_video_state(FAR video_mng_t    *vmng,
               video_framebuff_get_vacant_container(&vmng->video_inf.bufinf);
       if (container != NULL)
         {
+          vmng->video_inf.seqnum = 0;
           start_capture(V4L2_BUF_TYPE_VIDEO_CAPTURE,
                         vmng->video_inf.nr_fmt,
                         vmng->video_inf.fmt,
@@ -1286,6 +1288,7 @@ static int video_qbuf(FAR struct video_mng_s *vmng,
             video_framebuff_get_vacant_container(&type_inf->bufinf);
           if (container != NULL)
             {
+              type_inf->seqnum = 0;
               start_capture(buf->type,
                             type_inf->nr_fmt,
                             type_inf->fmt,
@@ -3372,6 +3375,7 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
           IMGDATA_SET_BUF(g_video_data,
             (FAR uint8_t *)container->buf.m.userptr,
             container->buf.length);
+          container->buf.sequence = type_inf->seqnum++;
         }
     }
 
