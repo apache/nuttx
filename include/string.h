@@ -95,6 +95,7 @@ int        strverscmp(FAR const char *s1, FAR const char *s2);
 
 FAR void  *memchr(FAR const void *s, int c, size_t n);
 FAR void  *memrchr(FAR const void *s, int c, size_t n);
+FAR void  *rawmemchr(FAR const void *s, int c);
 FAR void  *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n);
 int        memcmp(FAR const void *s1, FAR const void *s2, size_t n);
 FAR void  *memcpy(FAR void *dest, FAR const void *src, size_t n);
