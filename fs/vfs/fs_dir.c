@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -549,7 +550,7 @@ static int dir_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (cmd == FIOC_FILEPATH)
     {
-      strcpy((FAR char *)(uintptr_t)arg, dir->fd_path);
+      strlcpy((FAR char *)(uintptr_t)arg, dir->fd_path, PATH_MAX);
       ret = OK;
     }
 

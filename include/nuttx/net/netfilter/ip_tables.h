@@ -68,7 +68,8 @@
       (e)->entry.target_offset = sizeof((e)->entry); \
       (e)->entry.next_offset = sizeof(*(e)); \
       (e)->target.target.u.target_size = sizeof(*(e)) - sizeof((e)->entry); \
-      strcpy((e)->target.target.u.user.name, (target_name)); \
+      strlcpy((e)->target.target.u.user.name, (target_name), \
+              sizeof((e)->target.target.u.user.name)); \
     } \
   while(0)
 

@@ -69,9 +69,16 @@ int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
                FAR char *buf, size_t buflen, FAR struct passwd **result)
 {
   size_t reqdlen;
+  size_t nsize;
+  size_t gsize;
+  size_t dsize;
+  size_t ssize;
 
-  reqdlen = strlen(name) + 1 + strlen(gecos) + 1 + strlen(dir) + 1 +
-            strlen(shell) + 1;
+  nsize = strlen(name) + 1;
+  gsize = strlen(gecos) + 1;
+  dsize = strlen(dir) + 1;
+  ssize = strlen(shell) + 1;
+  reqdlen = nsize + gsize + dsize + ssize;
 
   if (buflen < reqdlen)
     {
@@ -82,16 +89,16 @@ int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
     }
 
   pwd->pw_name  = buf;
-  pwd->pw_gecos = &buf[strlen(name) + 1];
-  pwd->pw_dir   = &buf[strlen(name) + strlen(gecos) + 2];
-  pwd->pw_shell = &buf[strlen(name) + strlen(gecos) + strlen(dir) + 3];
+  pwd->pw_gecos = &buf[nsize];
+  pwd->pw_dir   = &buf[nsize + gsize];
+  pwd->pw_shell = &buf[nsize + gsize + dsize];
 
   pwd->pw_uid = uid;
   pwd->pw_gid = gid;
-  strcpy(pwd->pw_name, name);
-  strcpy(pwd->pw_gecos, gecos);
-  strcpy(pwd->pw_dir, dir);
-  strcpy(pwd->pw_shell, shell);
+  strlcpy(pwd->pw_name, name, nsize);
+  strlcpy(pwd->pw_gecos, gecos, gsize);
+  strlcpy(pwd->pw_dir, dir, dsize);
+  strlcpy(pwd->pw_shell, shell, ssize);
 
   *result = pwd;
   return 0;

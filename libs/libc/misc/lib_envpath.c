@@ -84,6 +84,7 @@ ENVPATH_HANDLE envpath_init(FAR const char *name)
 {
   FAR struct envpath_s *envpath;
   FAR char *path;
+  size_t size;
 
   /* Get the value of the PATH variable */
 
@@ -99,8 +100,9 @@ ENVPATH_HANDLE envpath_init(FAR const char *name)
 
   /* Allocate a container for the PATH variable contents */
 
+  size = strlen(path) + 1;
   envpath = (FAR struct envpath_s *)
-    lib_malloc(SIZEOF_ENVPATH_S(strlen(path) + 1));
+    lib_malloc(SIZEOF_ENVPATH_S(size));
 
   if (!envpath)
     {
@@ -111,7 +113,7 @@ ENVPATH_HANDLE envpath_init(FAR const char *name)
 
   /* Populate the container */
 
-  strcpy(envpath->path, path);
+  strlcpy(envpath->path, path, size);
   envpath->next = envpath->path;
 
   /* And return the containing cast to an opaque handle */

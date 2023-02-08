@@ -1546,7 +1546,7 @@ static int add_interface(FAR const char *path,
 
   /* Start with calling @path the interface name. */
 
-  strcpy(buf, path);
+  strlcpy(buf, path, sizeof(buf));
 
   /* Is the interface actually in a directory named @path? */
 

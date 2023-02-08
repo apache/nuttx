@@ -951,8 +951,8 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   /* This is the simple case ... No need to make a directory */
 
-  strcpy(path, "/dev/");
-  strcat(path, name);
+  strlcpy(path, "/dev/", sizeof(path));
+  strlcat(path, name, sizeof(path));
 
 #else
   /* Ensure the path begins with "/dev" as we don't support placing device
@@ -973,7 +973,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
           ptr++;
         }
 
-      strcpy(path, "/dev/");
+      strlcpy(path, "/dev/", sizeof(path));
       pathptr = &path[5];
 
       /* Do mkdir for each segment of the path */
@@ -1009,13 +1009,13 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   /* Now build the path for registration */
 
-  strcpy(path, devname);
+  strlcpy(path, devname, sizeof(path));
   if (devname[sizeof(devname)-1] != '/')
     {
-      strcat(path, "/");
+      strlcat(path, "/", sizeof(path));
     }
 
-  strcat(path, name);
+  strlcat(path, name, sizeof(path));
 
 #endif /* CONFIG_AUDIO_DEV_PATH=="/dev" */
 
@@ -1036,10 +1036,9 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   /* Register the Audio device */
 
-  memset(path, 0, AUDIO_MAX_DEVICE_PATH);
-  strcpy(path, devname);
-  strcat(path, "/");
-  strncat(path, name, AUDIO_MAX_DEVICE_PATH - 11);
+  strlcpy(path, devname, sizeof(path));
+  strlcat(path, "/", sizeof(path));
+  strlcat(path, name, sizeof(path));
 #endif
 
   /* Give the lower-half a context to the upper half */

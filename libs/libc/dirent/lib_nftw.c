@@ -201,7 +201,7 @@ do_nftw(FAR char *path, nftw_cb_t fn, int fdlimit, int flags, int level)
               return -1;
             }
 
-          strcpy(path + j, de->d_name);
+          strlcpy(path + j, de->d_name, PATH_MAX - j);
           r = do_nftw(path, fn, fdlimit - 1, flags, level + 1);
           if (r)
             {

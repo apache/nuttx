@@ -855,7 +855,7 @@ void riscv_serialinit(void)
 
   /* Register all UARTs */
 
-  strcpy(devname, "/dev/ttySx");
+  strlcpy(devname, "/dev/ttySx", sizeof(devname));
   for (i = 0; i < sizeof(g_uart_devs) / sizeof(g_uart_devs[0]); i++)
     {
       if (g_uart_devs[i] == 0)

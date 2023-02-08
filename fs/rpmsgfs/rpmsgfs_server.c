@@ -600,6 +600,7 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct dirent *entry;
   int ret = -ENOENT;
   FAR void *dir;
+  size_t size;
 
   dir = rpmsgfs_get_dir(priv, msg->fd);
   if (dir)
@@ -607,9 +608,12 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
       entry = readdir(dir);
       if (entry)
         {
+          size = MIN(rpmsg_virtio_get_buffer_size(ept->rdev),
+                     rpmsg_virtio_get_rx_buffer_size(ept->rdev));
+          size = MIN(size - len, strlen(entry->d_name) + 1);
           msg->type = entry->d_type;
-          strcpy(msg->name, entry->d_name);
-          len += strlen(entry->d_name) + 1;
+          strlcpy(msg->name, entry->d_name, size);
+          len += size;
           ret = 0;
         }
     }

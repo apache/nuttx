@@ -121,7 +121,7 @@ FAR char *getcwd(FAR char *buf, size_t size)
 
   /* Copy the cwd to the user buffer */
 
-  strcpy(buf, pwd);
+  strlcpy(buf, pwd, size);
   return buf;
 }
 #endif /* !CONFIG_DISABLE_ENVIRON */
