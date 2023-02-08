@@ -526,7 +526,7 @@ static int regulator_rpmsg_enable(FAR struct regulator_dev_s *rdev)
       return -ENOMEM;
     }
 
-  strcpy(msg->name, name);
+  strlcpy(msg->name, name, len - sizeof(*msg));
   return regulator_rpmsg_sendrecv(ept, REGULATOR_RPMSG_ENABLE,
                                  (struct regulator_rpmsg_header_s *)msg,
                                   len);
@@ -552,7 +552,7 @@ static int regulator_rpmsg_disable(FAR struct regulator_dev_s *rdev)
       return -ENOMEM;
     }
 
-  strcpy(msg->name, name);
+  strlcpy(msg->name, name, len - sizeof(*msg));
   return regulator_rpmsg_sendrecv(ept, REGULATOR_RPMSG_DISABLE,
                                  (struct regulator_rpmsg_header_s *)msg,
                                  len);
@@ -580,7 +580,7 @@ static int regulator_rpmsg_set_voltage(FAR struct regulator_dev_s *rdev,
       return -ENOMEM;
     }
 
-  strcpy(msg->name, name);
+  strlcpy(msg->name, name, len - sizeof(*msg));
   msg->min_uv = min_uv;
   msg->max_uv = max_uv;
 
@@ -609,7 +609,7 @@ static int regulator_rpmsg_get_voltage(FAR struct regulator_dev_s *rdev)
       return -ENOMEM;
     }
 
-  strcpy(msg->name, name);
+  strlcpy(msg->name, name, len - sizeof(*msg));
   return regulator_rpmsg_sendrecv(ept, REGULATOR_RPMSG_GET_VOLTAGE,
                                  (struct regulator_rpmsg_header_s *)msg,
                                   len);
@@ -635,7 +635,7 @@ static int regulator_rpmsg_is_enabled(FAR struct regulator_dev_s *rdev)
       return -ENOMEM;
     }
 
-  strcpy(msg->name, name);
+  strlcpy(msg->name, name, len - sizeof(*msg));
   return regulator_rpmsg_sendrecv(ept, REGULATOR_RPMSG_IS_ENABLED,
                                  (struct regulator_rpmsg_header_s *)msg,
                                   len);

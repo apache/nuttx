@@ -3160,7 +3160,7 @@ void arm_serialinit(void)
 
   /* Register all remaining USARTs */
 
-  strcpy(devname, "/dev/ttySx");
+  strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
   for (i = 0; i < STM32L4_NLPUART + STM32L4_NUSART + STM32L4_NUART; i++)
     {

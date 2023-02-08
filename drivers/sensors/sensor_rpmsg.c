@@ -1300,13 +1300,15 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct sensor_rpmsg_ept_s *sre;
   FAR struct sensor_rpmsg_dev_s *dev;
+  size_t size;
 
   if (lower->ops->fetch)
     {
       return lower;
     }
 
-  dev = kmm_zalloc(sizeof(*dev) + strlen(path));
+  size = strlen(path);
+  dev = kmm_zalloc(sizeof(*dev) + size);
   if (!dev)
     {
       return NULL;
@@ -1316,7 +1318,7 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
 
   list_initialize(&dev->stublist);
   list_initialize(&dev->proxylist);
-  strcpy(dev->path, path);
+  strlcpy(dev->path, path, size + 1);
 
   dev->nadvertisers   = !!lower->ops->activate;
   dev->push_event     = lower->push_event;

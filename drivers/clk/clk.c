@@ -1136,6 +1136,7 @@ FAR struct clk_s *clk_register(FAR const char *name,
                                FAR void *private_data, size_t private_size)
 {
   FAR struct clk_s *clk;
+  size_t size;
   size_t off;
   size_t len;
   int i;
@@ -1163,14 +1164,15 @@ FAR struct clk_s *clk_register(FAR const char *name,
     }
   else
     {
-      clk = kmm_zalloc(len + strlen(name) + 1);
+      size = strlen(name) + 1;
+      clk = kmm_zalloc(len + size);
       if (!clk)
         {
           return NULL;
         }
 
       clk->name = (char *)clk + len;
-      strcpy((char *)clk->name, name);
+      strlcpy((char *)clk->name, name, size);
     }
 
   clk->ops = ops;
@@ -1190,7 +1192,7 @@ FAR struct clk_s *clk_register(FAR const char *name,
       else
         {
           clk->parent_names[i] = (char *)clk + off;
-          strcpy((char *)clk->parent_names[i], parent_names[i]);
+          strlcpy((char *)clk->parent_names[i], parent_names[i], len - off);
           off += strlen(parent_names[i]) + 1;
         }
     }
