@@ -102,7 +102,7 @@
 #endif
 
 #ifndef CONFIG_USBDEV_DMA
-#  warning Currently CONFIG_USBDEV_DMA must be set to make all endpoints working
+#  pragma message "Currently CONFIG_USBDEV_DMA must be set to make all endpoints working"
 #endif
 
 #if defined(CONFIG_USBDEV_DUALSPEED) && defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
@@ -110,7 +110,7 @@
 #endif
 
 #if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_SAMV7_USBDEVHS_LOWPOWER)
-#  warning CONFIG_USBDEV_DUALSPEED should be defined for high speed support
+#  pragma message "CONFIG_USBDEV_DUALSPEED should be defined for high speed support"
 #endif
 
 /* Not yet supported */
@@ -184,7 +184,7 @@
 #  define USBHS_ALIGN_UP(n)   (((n) + USBHS_ALIGN_MASK) & ~USBHS_ALIGN_MASK)
 
 #  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-#    warning !!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!
+#    pragma message "!!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!"
 #  endif
 
 #else

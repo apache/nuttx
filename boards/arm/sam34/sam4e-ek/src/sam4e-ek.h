@@ -58,14 +58,14 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_HSMCI
 #endif
 
 /* We need PIO interrupts on GPIOA to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAM34_GPIOA_IRQ)
-#  warning PIOA interrupts not enabled.  No MMC/SD support.
+#  pragma message "PIOA interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_HSMCI
 #endif
 
@@ -98,8 +98,8 @@
 #endif
 
 #if defined(CONFIG_SAM4EEK_AT25_FTL) && defined(CONFIG_SAM4EEK_AT25_NXFFS)
-#  warning Both CONFIG_SAM4EEK_AT25_FTL and CONFIG_SAM4EEK_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAM4EEK_AT25_NXFFS
+#  pragma message "Both CONFIG_SAM4EEK_AT25_FTL and CONFIG_SAM4EEK_AT25_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAM4EEK_AT25_NXFFS"
 #  undef CONFIG_SAM4EEK_AT25_NXFFS
 #endif
 

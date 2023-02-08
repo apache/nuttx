@@ -95,7 +95,7 @@
  */
 
 #ifndef CONFIG_SCHED_LPWORK
-#  warning Low priority work thread support is necessary (CONFIG_SCHED_LPWORK)
+#  pragma message "Low priority work thread support is necessary (CONFIG_SCHED_LPWORK)"
 #endif
 
 /* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
@@ -1154,7 +1154,7 @@ static void max3421e_chan_free(FAR struct max3421e_usbhost_s *priv,
   DEBUGASSERT((unsigned)chidx < MAX3421E_NHOST_CHANNELS);
 
   /* Halt the channel */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Mark the channel available */
 
@@ -3500,7 +3500,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
 
   max3421e_lock(priv);
 
-#warning REVISIT:  Isn't this already done?
+#pragma message "REVISIT:  Isn't this already done?"
 
 #ifdef CONFIG_USBHOST_HUB
   if (ROOTHUB(hport))
@@ -4343,7 +4343,7 @@ static int max3421e_cancel(FAR struct usbhost_driver_s *drvr,
   flags = enter_critical_section();
 
   /* Halt the channel */
-#warning Missing logic
+#pragma message "Missing logic"
   UNUSED(chan);  /* For now */
 
   priv->result = -ESHUTDOWN;

@@ -177,7 +177,7 @@ static void imxrt_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ156_159_PRIORITY));
 #endif
 #if IMXRT_IRQ_NEXTINT > 160
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   leave_critical_section(flags);

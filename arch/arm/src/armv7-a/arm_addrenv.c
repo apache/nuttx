@@ -615,7 +615,7 @@ int up_addrenv_coherent(const arch_addrenv_t *addrenv)
    * do now for the heap region).
    */
 
-#warning REVISIT... causes crashes
+#pragma message "REVISIT... causes crashes"
 #if 0
   up_clean_dcache(CONFIG_ARCH_TEXT_VBASE,
                   CONFIG_ARCH_TEXT_VBASE +

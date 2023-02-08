@@ -195,7 +195,7 @@ static inline int ov2640_camera_initialize(void)
 
   /* Configure the ISI peripheral */
 
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Initialize the OV2640 camera */
 

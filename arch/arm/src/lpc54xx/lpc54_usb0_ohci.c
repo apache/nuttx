@@ -65,7 +65,7 @@
  */
 
 #if LPC54_IOBUFFERS < 1
-#  warning "No IO buffers allocated"
+#  pragma message "No IO buffers allocated"
 #endif
 
 #ifndef CONFIG_LPC54_OHCI_NPREALLOC
@@ -1506,7 +1506,7 @@ static inline int lpc54_addisoced(struct lpc54_usbhost_s *priv,
                                   struct lpc54_ed_s *ed)
 {
 #ifndef CONFIG_OHCI_ISOC_DISABLE
-#  warning "Isochronous endpoints not yet supported"
+#  pragma message "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
 }
@@ -1523,7 +1523,7 @@ static inline int lpc54_remisoced(struct lpc54_usbhost_s *priv,
                                   struct lpc54_ed_s *ed)
 {
 #ifndef CONFIG_OHCI_ISOC_DISABLE
-#  warning "Isochronous endpoints not yet supported"
+#  pragma message "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
 }
@@ -3850,7 +3850,7 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
    * Interrupts: The USB0_IRQ interrupt is connected to interrupt slot #28
    *   in the NVIC.  The USB0_NEEDCLK signal is connected to slot #27.
    */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Set the OTG status and control register.  Bits 0:1 apparently mean:
    *

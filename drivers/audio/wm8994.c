@@ -559,7 +559,7 @@ static void wm8994_setvolume(FAR struct wm8994_dev_s *priv, uint16_t volume,
 static void wm8994_setbass(FAR struct wm8994_dev_s *priv, uint8_t bass)
 {
   audinfo("bass=%u\n", bass);
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
@@ -577,7 +577,7 @@ static void wm8994_setbass(FAR struct wm8994_dev_s *priv, uint8_t bass)
 static void wm8994_settreble(FAR struct wm8994_dev_s *priv, uint8_t treble)
 {
   audinfo("treble=%u\n", treble);
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 

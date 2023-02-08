@@ -35,15 +35,15 @@
 
 /* Register Offsets *********************************************************/
 
-#warning "To be provided"
+#pragma message "To be provided"
 
 /* Register Addresses *******************************************************/
 
-#warning "To be provided"
+#pragma message "To be provided"
 
 /* Register Bit-Field Definitions *******************************************/
 
-#warning "To be provided"
+#pragma message "To be provided"
 
 /****************************************************************************
  * Public Types

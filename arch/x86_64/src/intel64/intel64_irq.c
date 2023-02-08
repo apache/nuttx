@@ -557,7 +557,7 @@ void up_enable_irq(int irq)
 #ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority)
 {
-#warning "Missing Logic"
+#pragma message "Missing Logic"
   return OK;
 }
 #endif

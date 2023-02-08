@@ -195,9 +195,9 @@
 #if defined(CONFIG_NET) && defined(CONFIG_STM32_ETHMAC)
 
 #  if !defined(CONFIG_STM32_MII)
-#    warning "CONFIG_STM32_MII required for Ethernet"
+#    pragma message "CONFIG_STM32_MII required for Ethernet"
 #  elif !defined(CONFIG_STM32_MII_MCO1)
-#    warning "CONFIG_STM32_MII_MCO1 required for Ethernet MII"
+#    pragma message "CONFIG_STM32_MII_MCO1 required for Ethernet MII"
 #  else
 
   /* Output HSE clock (25MHz) on MCO1 pin (PA8) to clock the PHY */

@@ -53,7 +53,7 @@
 #undef HAVE_SPI_CALLBACK
 #ifdef CONFIG_SPI_CALLBACK
 #  ifndef CONFIG_LPC17_40_GPIOIRQ
-#    warning "CONFIG_LPC17_40_GPIOIRQ is required to support CONFIG_SPI_CALLBACK"
+#    pragma message "CONFIG_LPC17_40_GPIOIRQ is required to support CONFIG_SPI_CALLBACK"
 #  else
 #    define HAVE_SPI_CALLBACK 1
 #  endif

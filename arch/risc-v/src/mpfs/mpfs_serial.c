@@ -639,7 +639,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Auto-Flow Control in the Modem Control Register */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
 #endif

@@ -39,5 +39,5 @@ float fabsf(float x)
 }
 
 #else
-#  warning fabsf() not built
+#  pragma message "fabsf() not built"
 #endif

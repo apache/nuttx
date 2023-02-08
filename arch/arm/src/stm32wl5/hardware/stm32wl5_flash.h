@@ -57,7 +57,7 @@
     !defined(CONFIG_STM32WL5_FLASH_CONFIG_E) && \
     !defined(CONFIG_STM32WL5_FLASH_CONFIG_G)
 #  define CONFIG_STM32WL5_FLASH_OVERRIDE_E
-#  warning "Flash size not defined defaulting to 512KiB (E)"
+#  pragma message "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
 /* Override of the Flash has been chosen */

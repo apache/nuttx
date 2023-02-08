@@ -121,7 +121,7 @@
 #endif
 
 #if CONFIG_LCD_MAXCONTRAST < 255
-#  warning "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
+#  pragma message "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
 #endif
 
 /* Check power setting */
@@ -131,7 +131,7 @@
 #endif
 
 #if CONFIG_LCD_MAXPOWER != 1
-#  warning "CONFIG_LCD_MAXPOWER exceeds supported maximum"
+#  pragma message "CONFIG_LCD_MAXPOWER exceeds supported maximum"
 #  undef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
@@ -139,7 +139,7 @@
 /* Color is 1bpp monochrome with leftmost column contained in bits 0  */
 
 #ifdef CONFIG_NX_DISABLE_1BPP
-#  warning "1 bit-per-pixel support needed"
+#  pragma message "1 bit-per-pixel support needed"
 #endif
 
 /* Orientation */
@@ -162,7 +162,7 @@
 #  undef CONFIG_LCD_RLANDSCAPE
 #else
 #  define CONFIG_LCD_LANDSCAPE 1
-#  warning "Assuming landscape orientation"
+#  pragma message "Assuming landscape orientation"
 #endif
 
 /* Some important "colors" */

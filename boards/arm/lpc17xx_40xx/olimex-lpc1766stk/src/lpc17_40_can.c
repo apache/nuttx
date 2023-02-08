@@ -44,12 +44,12 @@
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_LPC17_40_CAN1) && defined(CONFIG_LPC17_40_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
+#  pragma message "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
 #  undef CONFIG_LPC17_40_CAN2
 #endif
 
 #ifdef CONFIG_LPC17_40_CAN2
-#  warning "CAN2 is not connected on the LPC1766-STK"
+#  pragma message "CAN2 is not connected on the LPC1766-STK"
 #endif
 
 #ifdef CONFIG_LPC17_40_CAN1

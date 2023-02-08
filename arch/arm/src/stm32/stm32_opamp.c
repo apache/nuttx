@@ -1252,7 +1252,7 @@ static int stm32_opampgain_set(struct stm32_opamp_s *priv, uint8_t gain)
 #if 0
 static int stm32_opampcalibrate(struct stm32_opamp_s *priv)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   return OK;
 }
@@ -1275,7 +1275,7 @@ static int stm32_opampcalibrate(struct stm32_opamp_s *priv)
 
 static void opamp_shutdown(struct opamp_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -1295,7 +1295,7 @@ static void opamp_shutdown(struct opamp_dev_s *dev)
 
 static int opamp_setup(struct opamp_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 
@@ -1317,7 +1317,7 @@ static int opamp_setup(struct opamp_dev_s *dev)
 static int opamp_ioctl(struct opamp_dev_s *dev, int cmd,
                        unsigned long arg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOTTY;
 }
 

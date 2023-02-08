@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#warning REVISIT these clock settings
+#pragma message "REVISIT these clock settings"
 
 /* Select MCU-specific settings
  *

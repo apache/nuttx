@@ -89,7 +89,7 @@
 #endif
 
 #if !defined(CONFIG_LPC43_MII) && !defined(CONFIG_LPC43_RMII)
-#  warning "Neither CONFIG_LPC43_MII nor CONFIG_LPC43_RMII defined"
+#  pragma message "Neither CONFIG_LPC43_MII nor CONFIG_LPC43_RMII defined"
 #endif
 
 #if defined(CONFIG_LPC43_MII) && defined(CONFIG_LPC43_RMII)
@@ -133,7 +133,7 @@
 #endif
 
 #ifdef CONFIG_LPC43_ETH_PTP
-#  warning "CONFIG_LPC43_ETH_PTP is not yet supported"
+#  pragma message "CONFIG_LPC43_ETH_PTP is not yet supported"
 #endif
 
 /* This driver does not use enhanced descriptors.  Enhanced descriptors must
@@ -165,7 +165,7 @@
 #endif
 
 #if CONFIG_LPC43_ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
-#  warning "You using an incomplete/untested configuration"
+#  pragma message "You using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_LPC43_ETH_NRXDESC
@@ -2670,7 +2670,7 @@ static int lpc43_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int lpc43_phyintenable(struct lpc43_ethmac_s *priv)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif

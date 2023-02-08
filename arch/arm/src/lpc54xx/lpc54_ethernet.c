@@ -849,7 +849,7 @@ static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
       /* Check for an outgoing 802.1q VLAN packet */
-#warning Missing Logic
+#pragma message "Missing Logic"
 #endif
 
       /* And send the packet */

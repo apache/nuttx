@@ -63,7 +63,7 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    * memory region.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 
 #else

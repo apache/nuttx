@@ -115,7 +115,7 @@ void  lpc17_40_ssp1select(struct spi_dev_s *dev, uint32_t devid,
           selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_40_ssp1select() Entry");
 
-#warning "Assert CS here (false)"
+#pragma message "Assert CS here (false)"
 
   ssp_dumpgpio("lpc17_40_ssp1select() Exit");
 }

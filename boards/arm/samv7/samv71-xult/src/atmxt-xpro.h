@@ -52,14 +52,14 @@
 /* maXTouch is only available if the maXTouch driver is enabled */
 
 #if defined(HAVE_MAXTOUCH) && !defined(CONFIG_INPUT_MXT)
-#  warning maXTouch support not enabled (CONFIG_INPUT_MXT)
+#  pragma message "maXTouch support not enabled (CONFIG_INPUT_MXT)"
 #  undef HAVE_MAXTOUCH
 #endif
 
 /* The maXTouch interface requires TWIHS0 */
 
 #if defined(HAVE_MAXTOUCH) && !defined(CONFIG_SAMV7_TWIHS0)
-#  warning maXTouch support requires TWIHS0
+#  pragma message "maXTouch support requires TWIHS0"
 #  undef HAVE_MAXTOUCH
 #endif
 
@@ -70,7 +70,7 @@
 
 #  if defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1)
 #    ifndef CONFIG_SAMV7_GPIOD_IRQ
-#      warning maXTouch on EXT1 requires CONFIG_SAMV7_GPIOD_IRQ
+#      pragma message "maXTouch on EXT1 requires CONFIG_SAMV7_GPIOD_IRQ"
 #      undef HAVE_MAXTOUCH
 #    endif
 
@@ -78,7 +78,7 @@
 
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
 #    ifndef CONFIG_SAMV7_GPIOA_IRQ
-#      warning maXTouch on EXT2 requires CONFIG_SAMV7_GPIOA_IRQ
+#      pragma message "maXTouch on EXT2 requires CONFIG_SAMV7_GPIOA_IRQ"
 #      undef HAVE_MAXTOUCH
 #    endif
 
@@ -86,12 +86,12 @@
 
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_LCD)
 #    ifndef CONFIG_SAMV7_GPIOD_IRQ
-#      warning maXTouch on EXT4 requires CONFIG_SAMV7_GPIOD_IRQ
+#      pragma message "maXTouch on EXT4 requires CONFIG_SAMV7_GPIOD_IRQ"
 #      undef HAVE_MAXTOUCH
 #    endif
 
 #  else
-#    warning maXTouch requires CONFIG_SAMV71XULT_MXTXPLND_EXT1 or EXT2
+#    pragma message "maXTouch requires CONFIG_SAMV71XULT_MXTXPLND_EXT1 or EXT2"
 #    undef HAVE_MAXTOUCH
 #  endif
 #endif
@@ -105,19 +105,19 @@
  */
 
 #  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
-#    warning The ILI8488 LCD must be connected on LCD EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
+#    pragma message "The ILI8488 LCD must be connected on LCD EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)"
 #    undef HAVE_ILI9488_SMC
 #  endif
 
 /* ILI9488 parallel mode requires SMC/EBI and XDMAC support */
 
 #  ifndef CONFIG_SAMV7_SMC
-#    warning The ILI8488 LCD requires SMC support (CONFIG_SAMV7_SMC)
+#    pragma message "The ILI8488 LCD requires SMC support (CONFIG_SAMV7_SMC)"
 #    undef HAVE_ILI9488_SMC
 #  endif
 
 #  ifndef CONFIG_SAMV7_XDMAC
-#    warning The ILI8488 LCD requires DMA support (CONFIG_SAMV7_XDMAC)
+#    pragma message "The ILI8488 LCD requires DMA support (CONFIG_SAMV7_XDMAC)"
 #    undef HAVE_ILI9488_SMC
 #  endif
 #endif
@@ -127,14 +127,14 @@
 /* ILI9488 serial mode requires use of EXT1 or EXT2 connector */
 
 #  if !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1) && !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
-#    warning serial ILI9488 must be connected or EXT1 or EXT2 (CONFIG_SAMV71XULT_MXTXPLND_EXT1/2)
+#    pragma message "serial ILI9488 must be connected or EXT1 or EXT2 (CONFIG_SAMV71XULT_MXTXPLND_EXT1/2)"
 #    undef HAVE_ILI9488_SPI
 #  endif
 
 /* ILI9488 serial mode requires SPI0 */
 
 #  ifndef CONFIG_SAMV7_SPI0
-#    warning Serial ILI9488 requires SPI0 support
+#    pragma message "Serial ILI9488 requires SPI0 support"
 #    undef HAVE_ILI9488_SPI
 #  endif
 #endif

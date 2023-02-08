@@ -640,7 +640,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
   if (nintfs < 3 && nmerged == 0)
     {
       /* Do the special case checks */
-#warning Missing logic
+#pragma message "Missing logic"
     }
 #endif
 

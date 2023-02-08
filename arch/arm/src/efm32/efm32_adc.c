@@ -71,7 +71,7 @@
 
 #ifdef CONFIG_ADC_DMA
 #  define ADC_MAX_SAMPLES 16
-#  warning "not tested !"
+#  pragma message "not tested !"
 #else
 #  define ADC_MAX_SAMPLES 1
 #endif

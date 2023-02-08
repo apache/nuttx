@@ -363,7 +363,7 @@
 #  define HAVE_USART_CONSOLE 1
 #else
 #  ifdef CONFIG_DEV_CONSOLE
-#    warning "No valid CONFIG_[LP]USART[n]_SERIAL_CONSOLE Setting"
+#    pragma message "No valid CONFIG_[LP]USART[n]_SERIAL_CONSOLE Setting"
 #  endif
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE

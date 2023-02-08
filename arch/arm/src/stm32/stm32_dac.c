@@ -131,27 +131,27 @@
     defined(CONFIG_STM32_DAC2CH1_DMA)
 # if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #   ifndef CONFIG_STM32_DMA2
-#     warning "STM32 F1/F3 DAC DMA support requires CONFIG_STM32_DMA2"
+#     pragma message "STM32 F1/F3 DAC DMA support requires CONFIG_STM32_DMA2"
 #     undef CONFIG_STM32_DAC1CH1_DMA
 #     undef CONFIG_STM32_DAC1CH2_DMA
 #     undef CONFIG_STM32_DAC2CH1_DMA
 #   endif
 # elif defined(CONFIG_STM32_STM32F33XX)
 #   ifndef CONFIG_STM32_DMA1
-#     warning "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
+#     pragma message "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
 #     undef CONFIG_STM32_DAC1CH1_DMA
 #     undef CONFIG_STM32_DAC1CH2_DMA
 #     undef CONFIG_STM32_DAC2CH1_DMA
 #   endif
 # elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #   ifndef CONFIG_STM32_DMA1
-#     warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
+#     pragma message "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
 #     undef CONFIG_STM32_DAC1CH1_DMA
 #     undef CONFIG_STM32_DAC1CH2_DMA
 #     undef CONFIG_STM32_DAC2CH1_DMA
 #   endif
 # else
-#   warning "No DAC DMA information for this STM32 family"
+#   pragma message "No DAC DMA information for this STM32 family"
 #   undef CONFIG_STM32_DAC1CH1_DMA
 #   undef CONFIG_STM32_DAC1CH2_DMA
 #   undef CONFIG_STM32_DAC2CH1_DMA
@@ -177,11 +177,11 @@
 #if defined(CONFIG_STM32_DAC1CH1_DMA) && !defined(DAC1CH1_HRTIM) && \
     !defined(CONFIG_STM32_DAC1CH1_DMA_EXTERNAL)
 #  if !defined(CONFIG_STM32_DAC1CH1_TIMER)
-#    warning "A timer number must be specified in CONFIG_STM32_DAC1CH1_TIMER"
+#    pragma message "A timer number must be specified in CONFIG_STM32_DAC1CH1_TIMER"
 #    undef CONFIG_STM32_DAC1CH1_DMA
 #    undef CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specified in CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY"
+#    pragma message "A timer frequency must be specified in CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY"
 #    undef CONFIG_STM32_DAC1CH1_DMA
 #    undef CONFIG_STM32_DAC1CH1_TIMER
 #  endif
@@ -190,11 +190,11 @@
 #if defined(CONFIG_STM32_DAC1CH2_DMA) && !defined(DAC1CH2_HRTIM) && \
     !defined(CONFIG_STM32_DAC1CH2_DMA_EXTERNAL)
 #  if !defined(CONFIG_STM32_DAC1CH2_TIMER)
-#    warning "A timer number must be specified in CONFIG_STM32_DAC1CH2_TIMER"
+#    pragma message "A timer number must be specified in CONFIG_STM32_DAC1CH2_TIMER"
 #    undef CONFIG_STM32_DAC1CH2_DMA
 #    undef CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specified in CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY"
+#    pragma message "A timer frequency must be specified in CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY"
 #    undef CONFIG_STM32_DAC1CH2_DMA
 #    undef CONFIG_STM32_DAC1CH2_TIMER
 #  endif
@@ -203,11 +203,11 @@
 #if defined(CONFIG_STM32_DAC2CH1_DMA) && !defined(DAC2CH1_HRTIM) && \
     !defined(CONFIG_STM32_DAC2CH1_DMA_EXTERNAL)
 #  if !defined(CONFIG_STM32_DAC2CH1_TIMER)
-#    warning "A timer number must be specified in CONFIG_STM32_DAC2CH1_TIMER"
+#    pragma message "A timer number must be specified in CONFIG_STM32_DAC2CH1_TIMER"
 #    undef CONFIG_STM32_DAC2CH1_DMA
 #    undef CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specified in CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY"
+#    pragma message "A timer frequency must be specified in CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY"
 #    undef CONFIG_STM32_DAC2CH1_DMA
 #    undef CONFIG_STM32_DAC2CH1_TIMER
 #  endif
@@ -520,7 +520,7 @@
  * CONFIG_STM32_DACn_TIMER_FREQUENCY.
  */
 
-#warning "Missing Logic"
+#pragma message "Missing Logic"
 
 /* DMA stream/channel configuration */
 
@@ -972,7 +972,7 @@ static void tim_modifyreg(struct stm32_chan_s *chan, int offset,
 #if 0 /* defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) */
 static int dac_interrupt(int irq, void *context, void *arg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 #endif
@@ -1003,7 +1003,7 @@ static void dac_reset(struct dac_dev_s *dev)
 
   flags   = enter_critical_section();
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
 }
@@ -1026,7 +1026,7 @@ static void dac_reset(struct dac_dev_s *dev)
 
 static int dac_setup(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 
@@ -1046,7 +1046,7 @@ static int dac_setup(struct dac_dev_s *dev)
 
 static void dac_shutdown(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -1064,7 +1064,7 @@ static void dac_shutdown(struct dac_dev_s *dev)
 
 static void dac_txint(struct dac_dev_s *dev, bool enable)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************

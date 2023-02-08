@@ -62,9 +62,9 @@
 #    error SSC0 conflicts with the Itead PIO usage
 #    undef CONFIG_INPUT_AJOYSTICK
 #  elif defined(CONFIG_SAMA5_SPI1)
-#    warning SPI1 may conflict with the Itead PIO usage
+#    pragma message "SPI1 may conflict with the Itead PIO usage"
 #  elif defined(CONFIG_SAMA5_ISI)
-#    warning ISI may conflict with the Itead PIO usage
+#    pragma message "ISI may conflict with the Itead PIO usage"
 #  endif
 #endif /* CONFIG_INPUT_AJOYSTICK */
 

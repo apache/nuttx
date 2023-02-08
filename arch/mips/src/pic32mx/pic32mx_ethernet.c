@@ -103,7 +103,7 @@
  */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
-#  warning "Only a single ethernet controller is supported"
+#  pragma message "Only a single ethernet controller is supported"
 #  undef CONFIG_PIC32MX_NINTERFACES
 #  define CONFIG_PIC32MX_NINTERFACES 1
 #endif
@@ -231,7 +231,7 @@
 #  define PIC32MX_PHYID2       MII_PHYID2_LAN8720
 #  define PIC32MX_HAVE_PHY     1
 #else
-#  warning "No PHY specified!"
+#  pragma message "No PHY specified!"
 #  undef PIC32MX_HAVE_PHY
 #endif
 
@@ -2339,7 +2339,7 @@ static int pic32mx_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Not implemented"
+#pragma message "Not implemented"
   return OK;
 }
 #endif
@@ -2369,7 +2369,7 @@ static int pic32mx_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Not implemented"
+#pragma message "Not implemented"
   return OK;
 }
 #endif
@@ -2740,7 +2740,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
    */
 
 #ifdef CONFIG_ETH0_PHY_DP83848C
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
 #endif
@@ -2973,7 +2973,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
       }
   }
 #else
-#  warning "PHY Unknown: speed and duplex are bogus"
+#  pragma message "PHY Unknown: speed and duplex are bogus"
 #endif
 
   ninfo("%dBase-T %s duplex\n",

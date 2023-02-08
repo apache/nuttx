@@ -177,7 +177,7 @@
  */
 
 #ifdef CONFIG_ARCH_LOWVECTORS
-#  warning "REVISIT"
+#  pragma message "REVISIT"
 #endif
 
 //#ifndef CONFIG_ARCH_LOWVECTORS

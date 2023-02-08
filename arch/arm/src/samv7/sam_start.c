@@ -105,7 +105,7 @@ static inline void sam_tcmenable(void)
   ARM_ISB();
 
   /* Assure that GPNVM 7-8 settings are as expected */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Enabled/disabled ITCM */
 
@@ -133,7 +133,7 @@ static inline void sam_tcmenable(void)
 #ifdef CONFIG_ARMV7M_ITCM
   /* Copy TCM code from flash to ITCM */
 
-#warning Missing logic
+#pragma message "Missing logic"
 #endif
 }
 

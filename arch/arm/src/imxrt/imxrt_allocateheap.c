@@ -195,7 +195,7 @@
 #  define REGION1_RAM_SIZE     (CONFIG_IMXRT_SRAM_SIZE   - CONFIG_IMXRT_SRAM_HEAPOFFSET)
 #  define IMXRT_SDRAM_ASSIGNED 1
 #else
-#  warning CONFIG_MM_REGIONS > 1 but no available memory region
+#  pragma message "CONFIG_MM_REGIONS > 1 but no available memory region"
 #endif
 
 #define REGION1_RAM_END        (REGION1_RAM_START + REGION1_RAM_SIZE)
@@ -224,14 +224,14 @@
 #  define REGION2_RAM_SIZE     (CONFIG_IMXRT_SRAM_SIZE   - CONFIG_IMXRT_SRAM_HEAPOFFSET)
 #  define IMXRT_SDRAM_ASSIGNED 1
 #else
-#  warning CONFIG_MM_REGIONS > 2 but no available memory region
+#  pragma message "CONFIG_MM_REGIONS > 2 but no available memory region"
 #endif
 
 #define REGION2_RAM_END        (REGION2_RAM_START + REGION2_RAM_SIZE)
 #endif
 
 #if CONFIG_MM_REGIONS > 3
-#  warning CONFIG_MM_REGIONS > 3 but no available memory region
+#  pragma message "CONFIG_MM_REGIONS > 3 but no available memory region"
 #endif
 
 /****************************************************************************

@@ -445,7 +445,7 @@ cs43l22_setvolume(FAR struct cs43l22_dev_s *priv, uint16_t volume, bool mute)
 static void cs43l22_setbass(FAR struct cs43l22_dev_s *priv, uint8_t bass)
 {
   audinfo("bass=%u\n", bass);
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
@@ -463,7 +463,7 @@ static void cs43l22_setbass(FAR struct cs43l22_dev_s *priv, uint8_t bass)
 static void cs43l22_settreble(FAR struct cs43l22_dev_s *priv, uint8_t treble)
 {
   audinfo("treble=%u\n", treble);
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
@@ -1517,7 +1517,7 @@ static int cs43l22_release(FAR struct audio_lowerhalf_s *dev)
 static void cs43l22_interrupt_work(FAR void *arg)
 {
   /* TODO */
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif
 
@@ -1535,7 +1535,7 @@ static int
 cs43l22_interrupt(FAR const struct cs43l22_lower_s *lower, FAR void *arg)
 {
   /* TODO */
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif
 
@@ -1793,7 +1793,7 @@ static void cs43l22_audio_output(FAR struct cs43l22_dev_s *priv)
 static void cs43l22_audio_input(FAR struct cs43l22_dev_s *priv)
 {
   /* TODO */
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif
 
@@ -1815,7 +1815,7 @@ static void cs43l22_audio_input(FAR struct cs43l22_dev_s *priv)
 static void cs43l22_configure_ints(FAR struct cs43l22_dev_s *priv)
 {
   /* TODO */
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif
 

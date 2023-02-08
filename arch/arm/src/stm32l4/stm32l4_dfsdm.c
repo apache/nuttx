@@ -1225,7 +1225,7 @@ static int dfsdm_setup(struct adc_dev_s *dev)
   /* TODO: timers would require injected conversions, which are
    * not implemented at the moment.
    */
-#  warning "DFSDM Timer not fully implemented!"
+#  pragma message "DFSDM Timer not fully implemented!"
 
   if (priv->tbase != 0)
     {
@@ -1805,7 +1805,7 @@ struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
   if (cchannels > 1)
     {
       cchannels = 1;
-#  warning "Only one channel supported at the moment!"
+#  pragma message "Only one channel supported at the moment!"
     }
 #endif
 

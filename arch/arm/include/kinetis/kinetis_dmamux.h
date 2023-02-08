@@ -135,7 +135,7 @@
 
 #  define KINETIS_DMAMUX_HAS_MONOTONIC_CHCFG     1   /* SoC has reg in 0,1,2,3..KINETIS_NDMACH */
 #  if defined(CONFIG_KINETIS_DMA)
-#    warning "DMAMUX Assuming monotonic CHCFG addressing!"
+#    pragma message "DMAMUX Assuming monotonic CHCFG addressing!"
 #  endif
 #endif
 

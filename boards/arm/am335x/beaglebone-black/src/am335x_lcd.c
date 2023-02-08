@@ -73,7 +73,7 @@ static const strurct tda19988_lower_s g_lower;
 static int am335x_attach(const struct tda19988_lower_s *lower,
                          xcpt_t handler, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif
@@ -89,7 +89,7 @@ static int am335x_attach(const struct tda19988_lower_s *lower,
 #ifdef HAVE_TDA19988
 static int am335x_enable(const struct tda19988_lower_s *lower, bool enable)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif
@@ -134,7 +134,7 @@ int up_fbinitialize(int display)
    * Free the allocated EDID buffer
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
 #else
   /* Lookup the video mode corresponding to the default video mode */
 

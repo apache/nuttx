@@ -145,21 +145,21 @@ static void stm32_idlepm(void)
 #ifdef CONFIG_RTC_ALARM
             /* Disable RTC Alarm interrupt */
 
-#warning "missing logic"
+#pragma message "missing logic"
 
             /* Configure the RTC alarm to Auto Wake the system */
 
-#warning "missing logic"
+#pragma message "missing logic"
 
             /* The tv_nsec value must not exceed 1,000,000,000. That
              * would be an invalid time.
              */
 
-#warning "missing logic"
+#pragma message "missing logic"
 
             /* Set the alarm */
 
-#warning "missing logic"
+#pragma message "missing logic"
 #endif
             /* Call the STM32 stop mode */
 
@@ -171,7 +171,7 @@ static void stm32_idlepm(void)
              */
 
 #ifdef CONFIG_RTC_ALARM
-#warning "missing logic"
+#pragma message "missing logic"
 #endif
             /* Resume normal operation */
 

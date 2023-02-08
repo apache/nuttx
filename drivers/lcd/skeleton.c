@@ -235,7 +235,7 @@ static int skel_putrun(FAR struct lcd_dev_s *dev,
   /* Set up to write the run. */
 
   /* Write the run to GRAM. */
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 
@@ -263,7 +263,7 @@ static int skel_getrun(FAR struct lcd_dev_s *dev,
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 
@@ -319,7 +319,7 @@ static int skel_getpower(struct lcd_dev_s *dev)
 {
   struct skel_dev_s *priv = (struct skel_dev_s *)dev;
   ginfo("power: %d\n", 0);
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
@@ -341,7 +341,7 @@ static int skel_setpower(FAR struct lcd_dev_s *dev, int power)
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   return OK;
 }
@@ -357,7 +357,7 @@ static int skel_setpower(FAR struct lcd_dev_s *dev, int power)
 static int skel_getcontrast(FAR struct lcd_dev_s *dev)
 {
   ginfo("Not implemented\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 
@@ -372,7 +372,7 @@ static int skel_getcontrast(FAR struct lcd_dev_s *dev)
 static int skel_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
 {
   ginfo("contrast: %d\n", contrast);
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 
@@ -396,13 +396,13 @@ FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
   ginfo("Initializing\n");
 
   /* Configure GPIO pins */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   /* Enable clocking */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   /* Configure and enable LCD */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   return &g_lcddev.dev;
 }

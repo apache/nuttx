@@ -53,7 +53,7 @@
 /* #define CFG_FLASH_ENABLE_DEEP_SLEEP */
 
 #ifdef CFG_FLASH_ENABLE_DEEP_SLEEP
-    #warning "CONFIG FLASH ENABLE DEEP SLEEP !!!"
+    #pragma message "CONFIG FLASH ENABLE DEEP SLEEP !!!"
 #endif
 
 typedef struct _pwrmgr_Context_t

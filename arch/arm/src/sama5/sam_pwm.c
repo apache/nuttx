@@ -63,7 +63,7 @@
 /* Pulse counting is not supported by this driver */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-#  warning CONFIG_PWM_PULSECOUNT no supported by this driver.
+#  pragma message "CONFIG_PWM_PULSECOUNT no supported by this driver."
 #endif
 
 /* Are we using CLKA? CLKB?  If so, at what frequency? */
@@ -830,7 +830,7 @@ static int pwm_interrupt(int irq, void *context, void *arg)
 {
   /* No PWM interrupts are used in the current design */
 
-#warning Missing logic
+#pragma message "Missing logic"
   return OK;
 }
 #endif

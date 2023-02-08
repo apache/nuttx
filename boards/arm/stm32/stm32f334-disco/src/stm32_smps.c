@@ -75,7 +75,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_FPU
-#  warning Set CONFIG_ARCH_FPU for hardware FPU support
+#  pragma message "Set CONFIG_ARCH_FPU for hardware FPU support"
 #endif
 
 #if !defined(CONFIG_STM32_HRTIM1) || !defined(CONFIG_STM32_HRTIM)
@@ -760,7 +760,7 @@ static void smps_duty_set(struct smps_priv_s *priv,
 
           duty = out / priv->v_in;
 
-#warning TODO: current limit in buck mode
+#pragma message "TODO: current limit in buck mode"
 
           per = HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMA);
 
@@ -784,7 +784,7 @@ static void smps_duty_set(struct smps_priv_s *priv,
 
           duty = 1.0 - priv->v_in / out;
 
-#warning TODO: current limit in boost mode
+#pragma message "TODO: current limit in boost mode"
 
           cmp = (uint16_t)(per * duty);
 
@@ -808,7 +808,7 @@ static void smps_duty_set(struct smps_priv_s *priv,
 
           duty = 1.0 - priv->v_in / out;
 
-#warning TODO: current limit in buck boost mode
+#pragma message "TODO: current limit in buck boost mode"
 
           cmp = (uint16_t)(per * duty);
 

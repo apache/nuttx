@@ -76,7 +76,7 @@
 /* Work queue support is required */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  warning Work queue support is required (CONFIG_SCHED_WORKQUEUE=y)
+#  pragma message "Work queue support is required (CONFIG_SCHED_WORKQUEUE=y)"
 #endif
 
 /* CONFIG_TOUCHSCREEN_THRESHX and CONFIG_TOUCHSCREEN_THRESHY

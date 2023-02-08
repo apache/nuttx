@@ -658,7 +658,7 @@ static int local_connect(FAR struct socket *psock,
         {
           /* Perform the datagram connection logic */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
           return -ENOSYS;
         }

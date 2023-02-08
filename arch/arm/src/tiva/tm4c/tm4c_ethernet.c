@@ -106,7 +106,7 @@
 /* Internal PHY */
 
 #  if defined(CONFIG_TIVA_PHY_MII) ||defined(CONFIG_TIVA_PHY_RMII)
-#    warning CONFIG_TIVA_PHY_MII or CONFIG_TIVA_PHY_RMII defined with internal PHY
+#    pragma message "CONFIG_TIVA_PHY_MII or CONFIG_TIVA_PHY_RMII defined with internal PHY"
 #  endif
 
 #  undef CONFIG_TIVA_PHY_MII
@@ -138,7 +138,7 @@
 /* External PHY. Properties must be provided in the configuration */
 
 #  if !defined(CONFIG_TIVA_PHY_MII) && !defined(CONFIG_TIVA_PHY_RMII)
-#    warning None of CONFIG_TIVA_PHY_INTERNAL, CONFIG_TIVA_PHY_MII, or CONFIG_TIVA_PHY_RMII defined
+#    pragma message "None of CONFIG_TIVA_PHY_INTERNAL, CONFIG_TIVA_PHY_MII, or CONFIG_TIVA_PHY_RMII defined"
 #  endif
 
 #  if defined(CONFIG_TIVA_PHY_MII) && defined(CONFIG_TIVA_PHY_RMII)
@@ -187,7 +187,7 @@
 #endif
 
 #ifdef CONFIG_TIVA_EMAC_PTP
-#  warning CONFIG_TIVA_EMAC_PTP is not yet supported
+#  pragma message "CONFIG_TIVA_EMAC_PTP is not yet supported"
 #endif
 
 /* This driver does not use enhanced descriptors.  Enhanced descriptors must
@@ -225,7 +225,7 @@
 #endif
 
 #if OPTIMAL_EMAC_BUFSIZE != OPTIMAL_EMAC_BUFSIZE
-#  warning You using an incomplete/untested configuration
+#  pragma message "You using an incomplete/untested configuration"
 #endif
 
 /* We need at least one more free buffer than transmit buffers */
@@ -2860,7 +2860,7 @@ static void tiva_phy_intenable(bool enable)
    * particular PHY part connected.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 #endif
 }
@@ -4108,7 +4108,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
 #if TIVA_NETHCONTROLLERS > 1
   /* REVISIT: Additional logic needed if there are multiple EMACs */
 
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
   priv = g_tiva_ethmac;
 

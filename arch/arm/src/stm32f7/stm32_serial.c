@@ -382,32 +382,32 @@
  */
 
 # if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_IFLOWCONTROL)
-#    warning "RXDMA and IFLOWCONTROL both enabled for USART1. \
+#    pragma message "RXDMA and IFLOWCONTROL both enabled for USART1. \
               This combination can lead to data loss."
 #  endif
 
 #  if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_IFLOWCONTROL)
-#    warning "RXDMA and IFLOWCONTROL both enabled for USART2. \
+#    pragma message "RXDMA and IFLOWCONTROL both enabled for USART2. \
               This combination can lead to data loss."
 #  endif
 
 #  if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_IFLOWCONTROL)
-#    warning "RXDMA and IFLOWCONTROL both enabled for USART3. \
+#    pragma message "RXDMA and IFLOWCONTROL both enabled for USART3. \
               This combination can lead to data loss."
 #  endif
 
 #  if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_IFLOWCONTROL)
-#    warning "RXDMA and IFLOWCONTROL both enabled for USART6. \
+#    pragma message "RXDMA and IFLOWCONTROL both enabled for USART6. \
               This combination can lead to data loss."
 #  endif
 
 #  if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_IFLOWCONTROL)
-#    warning "RXDMA and IFLOWCONTROL both enabled for UART7. \
+#    pragma message "RXDMA and IFLOWCONTROL both enabled for UART7. \
               This combination can lead to data loss."
 #  endif
 
 #  if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_IFLOWCONTROL)
-#    warning "RXDMA and IFLOWCONTROL both enabled for UART8. \
+#    pragma message "RXDMA and IFLOWCONTROL both enabled for UART8. \
               This combination can lead to data loss."
 #  endif
 #endif /* CONFIG_STM32F7_FLOWCONTROL_BROKEN */

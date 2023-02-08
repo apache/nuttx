@@ -49,5 +49,5 @@ float rintf(float x)
 }
 
 #else
-#  warning rintf() not built
+#  pragma message "rintf() not built"
 #endif

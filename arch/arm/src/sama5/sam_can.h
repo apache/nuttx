@@ -58,7 +58,7 @@
 #    define CONFIG_SAMA5_CAN0_NRECVMB 1
 #  endif
 #  if CONFIG_SAMA5_CAN0_NRECVMB > 3
-#    warning Current implementation only supports up to three receive mailboxes
+#    pragma message "Current implementation only supports up to three receive mailboxes"
 #    undef  CONFIG_SAMA5_CAN0_NRECVMB
 #    define CONFIG_SAMA5_CAN0_NRECVMB 3
 #  endif
@@ -73,7 +73,7 @@
 #    define CONFIG_SAMA5_CAN1_NRECVMB 1
 #  endif
 #  if CONFIG_SAMA5_CAN1_NRECVMB > 3
-#    warning Current implementation only supports up to three receive mailboxes
+#    pragma message "Current implementation only supports up to three receive mailboxes"
 #    undef  CONFIG_SAMA5_CAN1_NRECVMB
 #    define CONFIG_SAMA5_CAN1_NRECVMB 3
 #  endif

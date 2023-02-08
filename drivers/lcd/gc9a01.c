@@ -131,7 +131,7 @@
 #    define GC9A01_BPP           16
 #    define GC9A01_COLORFMT      FB_FMT_RGB16_565
 #    define GC9A01_BYTESPP       2
-#    warning "Invalid color depth.  Falling back to 16bpp"
+#    pragma message "Invalid color depth.  Falling back to 16bpp"
 #  endif
 #endif
 

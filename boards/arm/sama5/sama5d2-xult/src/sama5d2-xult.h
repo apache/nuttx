@@ -61,14 +61,14 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_SDMMC) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_SDMCC
 #endif
 
 /* We need PIO interrupts on PIOD to support card detect interrupts */
 
 #if defined(HAVE_SDMMC) && !defined(CONFIG_SAMA5_PIOA_IRQ)
-#  warning PIOA interrupts not enabled.  No MMC/SD support.
+#  pragma message "PIOA interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_SDMMC
 #endif
 
@@ -113,8 +113,8 @@
 #endif
 
 #if defined(CONFIG_SAMA5D2XULT_NAND_FTL) && defined(CONFIG_SAMA5D2XULT_NAND_NXFFS)
-#  warning Both CONFIG_SAMA5D2XULT_NAND_FTL and CONFIG_SAMA5D2XULT_NAND_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D2XULT_NAND_NXFFS
+#  pragma message "Both CONFIG_SAMA5D2XULT_NAND_FTL and CONFIG_SAMA5D2XULT_NAND_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D2XULT_NAND_NXFFS"
 #  undef CONFIG_SAMA5DXULT_NAND_NXFFS
 #endif
 
@@ -147,8 +147,8 @@
 #endif
 
 #if defined(CONFIG_SAMA5D2XULT_AT25_FTL) && defined(CONFIG_SAMA5D2XULT_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D2XULT_AT25_FTL and CONFIG_SAMA5D2XULT_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D2XULT_AT25_NXFFS
+#  pragma message "Both CONFIG_SAMA5D2XULT_AT25_FTL and CONFIG_SAMA5D2XULT_AT25_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D2XULT_AT25_NXFFS"
 #  undef CONFIG_SAMA5D2XULT_AT25_NXFFS
 #endif
 
@@ -224,7 +224,7 @@
 
 #if defined(CONFIG_USBHOST)
 #  if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
-#    warning CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined
+#    pragma message "CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined"
 #  endif
 #else
 #  undef CONFIG_SAMA5_OHCI

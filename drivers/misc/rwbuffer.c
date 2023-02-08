@@ -1166,7 +1166,7 @@ ssize_t rwb_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
 
   /* Adjust counts and offsets for the next time through the loop */
 
-#warning Not Implemented
+#pragma message "Not Implemented"
   return -ENOSYS;
 }
 #endif

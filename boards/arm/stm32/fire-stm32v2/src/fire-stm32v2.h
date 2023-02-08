@@ -48,7 +48,7 @@
 /* There is only CAN1 on the M3 Wildfire board */
 
 #if defined(CONFIG_STM32_CAN2)
-#  warning "The M3 Wildfire only supports CAN1"
+#  pragma message "The M3 Wildfire only supports CAN1"
 #endif
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */
@@ -220,7 +220,7 @@
  */
 
 #if defined(CONFIG_STM32_FSMC) && defined(CONFIG_ENC28J60)
-#  warning "TFT LCD and ENCJ2860 shared PE1"
+#  pragma message "TFT LCD and ENCJ2860 shared PE1"
 #endif
 
 /* CS and Reset are active low.  Initial states are not selected and in

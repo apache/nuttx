@@ -77,7 +77,7 @@ int board_usbmsc_initialize(int port)
    */
 
 #ifndef CONFIG_NSH_BUILTIN_APPS
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
   return OK;

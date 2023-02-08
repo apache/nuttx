@@ -52,7 +52,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARCH_CHIP_STM32F103VC
-#  warning This only only been verified with CONFIG_ARCH_CHIP_STM32F103VC
+#  pragma message "This only only been verified with CONFIG_ARCH_CHIP_STM32F103VC"
 #endif
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -68,12 +68,12 @@
 #endif
 
 #ifndef CONFIG_VIEWTOOL_TIM6_FREQUENCY
-#  warning CONFIG_VIEWTOOL_TIM6_FREQUENCY defaulting to STM32_APB1_TIM6_CLKIN
+#  pragma message "CONFIG_VIEWTOOL_TIM6_FREQUENCY defaulting to STM32_APB1_TIM6_CLKIN"
 #  define CONFIG_VIEWTOOL_TIM6_FREQUENCY STM32_APB1_TIM6_CLKIN
 #endif
 
 #ifndef CONFIG_VIEWTOOL_TIM6_PERIOD
-#  warning CONFIG_VIEWTOOL_TIM6_PERIOD defaulting to 1MS
+#  pragma message "CONFIG_VIEWTOOL_TIM6_PERIOD defaulting to 1MS"
 #  define CONFIG_VIEWTOOL_TIM6_PERIOD (CONFIG_VIEWTOOL_TIM6_FREQUENCY / 1000)
 #endif
 

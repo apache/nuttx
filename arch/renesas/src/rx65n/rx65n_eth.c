@@ -98,7 +98,7 @@
 #endif
 
 #if !defined(CONFIG_RX65N_EMAC0_MII) && !defined(CONFIG_RX65N_EMAC0_RMII)
-#  warning "Neither CONFIG_RX65N_EMAC0_MII nor CONFIG_RX65N_EMAC0_RMII defined"
+#  pragma message "Neither CONFIG_RX65N_EMAC0_MII nor CONFIG_RX65N_EMAC0_RMII defined"
 #endif
 
 #if defined(CONFIG_RX65N_EMAC0_MII) && defined(CONFIG_RX65N_EMAC0_RMII)
@@ -166,7 +166,7 @@
 #endif
 
 #if CONFIG_RX65N_ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
-#  warning "You using an incomplete/untested configuration"
+#  pragma message "You using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_RX65N_ETH_NRXDESC

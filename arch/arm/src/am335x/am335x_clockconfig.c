@@ -610,6 +610,6 @@ void am335x_clockconfig(void)
   am335x_dmtimer1ms_clockconfig();
 
 #ifndef CONFIG_AM335X_BOOT_SDRAM
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 }

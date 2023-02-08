@@ -58,7 +58,7 @@
 /* Is there at least one USART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_USART_DEVICE
-#  warning "No USARTs enabled"
+#  pragma message "No USARTs enabled"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must
@@ -1104,7 +1104,7 @@ static int lpc54_interrupt(int irq, void *context, void *arg)
       if ((regval & CCR_ERROR_EVENTS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
-#warning Missing logic
+#pragma message "Missing logic"
         }
 #endif
     }

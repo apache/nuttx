@@ -121,7 +121,7 @@
 #  endif
 
 #  if !defined(CONFIG_SAMV7_EMAC0_MII) && !defined(CONFIG_SAMV7_EMAC0_RMII)
-#    warning "Neither CONFIG_SAMV7_EMAC0_MII nor CONFIG_SAMV7_EMAC0_RMII defined"
+#    pragma message "Neither CONFIG_SAMV7_EMAC0_MII nor CONFIG_SAMV7_EMAC0_RMII defined"
 #  endif
 
 #  if defined(CONFIG_SAMV7_EMAC0_MII) && defined(CONFIG_SAMV7_EMAC0_RMII)
@@ -215,7 +215,7 @@
 #  endif
 
 #  if !defined(CONFIG_SAMV7_EMAC1_MII) && !defined(CONFIG_SAMV7_EMAC1_RMII)
-#    warning "Neither CONFIG_SAMV7_EMAC1_MII nor CONFIG_SAMV7_EMAC1_RMII defined"
+#    pragma message "Neither CONFIG_SAMV7_EMAC1_MII nor CONFIG_SAMV7_EMAC1_RMII defined"
 #  endif
 
 #  if defined(CONFIG_SAMV7_EMAC1_MII) && defined(CONFIG_SAMV7_EMAC1_RMII)

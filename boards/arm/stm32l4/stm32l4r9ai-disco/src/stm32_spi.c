@@ -101,7 +101,7 @@ void weak_function stm32_spiinitialize(void)
   spi_register(g_spi2, 2);
 #endif
 
-#warning No devices specified on SPI2
+#pragma message "No devices specified on SPI2"
 #endif
 
 #ifdef CONFIG_STM32L4_SPI3
@@ -117,7 +117,7 @@ void weak_function stm32_spiinitialize(void)
   spi_register(g_spi3, 3);
 #endif
 
-#warning No devices specified on SPI3
+#pragma message "No devices specified on SPI3"
 #endif
 }
 

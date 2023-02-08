@@ -760,7 +760,7 @@ static void adc_timstart(struct stm32_dev_s *priv, bool enable)
 #ifdef ADC_HAVE_TIMER
 static int adc_timinit(struct stm32_dev_s *priv)
 {
-#warning TODO: adc_timinit
+#pragma message "TODO: adc_timinit"
 }
 #endif
 

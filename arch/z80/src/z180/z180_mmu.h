@@ -40,12 +40,12 @@
 /* Virtual addresses */
 
 #ifndef CONFIG_Z180_BANKAREA_VIRTBASE
-#  warning "Assuming Bank Area at virtual address 0x8000"
+#  pragma message "Assuming Bank Area at virtual address 0x8000"
 #  define CONFIG_Z180_BANKAREA_VIRTBASE 0x8000
 #endif
 
 #ifndef CONFIG_Z180_COMMON1AREA_VIRTBASE
-#  warning "Assuming Common Area 1 at virtual address 0xc000"
+#  pragma message "Assuming Common Area 1 at virtual address 0xc000"
 #  define CONFIG_Z180_COMMON1AREA_VIRTBASE 0xc000
 #endif
 
@@ -56,17 +56,17 @@
 /* Physical addresses */
 
 #ifndef CONFIG_Z180_BANKAREA_PHYSBASE
-#  warning "Assuming Bank Area 1 at physical address 0x080000"
+#  pragma message "Assuming Bank Area 1 at physical address 0x080000"
 #  define CONFIG_Z180_BANKAREA_PHYSBASE 0x08000
 #endif
 
 #ifndef CONFIG_Z180_PHYSHEAP_START
-#  warning "Assuming physical heap starts at physical address 0x0c000"
+#  pragma message "Assuming physical heap starts at physical address 0x0c000"
 #  define CONFIG_Z180_PHYSHEAP_START 0x0c000
 #endif
 
 #ifndef CONFIG_Z180_PHYSHEAP_END
-#  warning "Assuming physical heap ends at physical address 0x100000"
+#  pragma message "Assuming physical heap ends at physical address 0x100000"
 #  define CONFIG_Z180_PHYSHEAP_END 0x100000
 #endif
 

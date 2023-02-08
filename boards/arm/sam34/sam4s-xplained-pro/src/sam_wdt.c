@@ -54,7 +54,7 @@
 /* Watchdog hardware should be enabled */
 
 #if !defined(CONFIG_SAM34_WDT)
-#  warning "CONFIG_SAM34_WDT must be defined"
+#  pragma message "CONFIG_SAM34_WDT must be defined"
 #endif
 
 /* Select the path to the registered watchdog timer device */

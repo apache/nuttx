@@ -94,7 +94,7 @@
 #     undef  HAVE_SDRAM_REGION
 #     define HAVE_SDRAM_REGION 1
 #  else
-#    warning "CONFIG_MM_REGIONS < 2: SDRAM not included in HEAP"
+#    pragma message "CONFIG_MM_REGIONS < 2: SDRAM not included in HEAP"
 #  endif
 #endif
 
@@ -103,7 +103,7 @@
 #     undef  HAVE_EXTSRAM0_REGION
 #     define HAVE_EXTSRAM0_REGION 1
 #  else
-#    warning "CONFIG_MM_REGIONS too small: External SRAM0 not included in HEAP"
+#    pragma message "CONFIG_MM_REGIONS too small: External SRAM0 not included in HEAP"
 #  endif
 #endif
 
@@ -112,7 +112,7 @@
 #     undef  HAVE_EXTSRAM1_REGION
 #     define HAVE_EXTSRAM1_REGION 1
 #  else
-#    warning "CONFIG_MM_REGIONS too small: External SRAM1 not included in HEAP"
+#    pragma message "CONFIG_MM_REGIONS too small: External SRAM1 not included in HEAP"
 #  endif
 #endif
 
@@ -121,7 +121,7 @@
 #     undef  HAVE_EXTSRAM2_REGION
 #     define HAVE_EXTSRAM2_REGION 1
 #  else
-#    warning "CONFIG_MM_REGIONS too small: External SRAM2 not included in HEAP"
+#    pragma message "CONFIG_MM_REGIONS too small: External SRAM2 not included in HEAP"
 #  endif
 #endif
 
@@ -130,7 +130,7 @@
 #     undef  HAVE_EXTSRAM3_REGION
 #     define HAVE_EXTSRAM3_REGION 1
 #  else
-#    warning "CONFIG_MM_REGIONS too small: External SRAM3 not included in HEAP"
+#    pragma message "CONFIG_MM_REGIONS too small: External SRAM3 not included in HEAP"
 #  endif
 #endif
 
@@ -147,7 +147,7 @@
 #  undef CONFIG_RAM_END
 #  define CONFIG_RAM_END (SRAM_BASE+SAMV7_SRAM_SIZE)
 #elif CONFIG_RAM_END < (SRAM_BASE+SAMV7_SRAM_SIZE)
-#  warning "CONFIG_RAM_END is before end of SRAM... not all of SRAM used"
+#  pragma message "CONFIG_RAM_END is before end of SRAM... not all of SRAM used"
 #endif
 
 /****************************************************************************

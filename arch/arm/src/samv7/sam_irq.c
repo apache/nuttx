@@ -134,7 +134,7 @@ static void sam_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ76_79_PRIORITY));
 #endif
 #if SAM_IRQ_NEXTINT > 79
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   leave_critical_section(flags);
@@ -268,7 +268,7 @@ static int sam_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
 #else
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
         {
           return ERROR; /* Invalid interrupt */

@@ -232,7 +232,7 @@ int board_app_initialize(uintptr_t arg)
       return -ENODEV;
     }
 
-#warning "Now what are we going to do with this SPI FLASH driver?"
+#pragma message "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */

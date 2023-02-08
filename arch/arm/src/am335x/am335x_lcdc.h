@@ -69,7 +69,7 @@
 /* Background color */
 
 #ifndef CONFIG_AM335X_LCDC_BACKCOLOR
-#  warning "Assuming background color == 16"
+#  pragma message "Assuming background color == 16"
 #  define CONFIG_AM335X_LCDC_BACKCOLOR 0  /* Initial background color */
 #endif
 
@@ -102,19 +102,19 @@
 #  define AM335X_BPP                    24 RGB */
 #  define AM335X_COLOR_FMT              FB_FMT_RGB24
 #else
-#  warning "Assuming 16 BPP 5:6:5"
+#  pragma message "Assuming 16 BPP 5:6:5"
 #  define AM335X_BPP                    16
 #  define CONFIG_AM335X_LCDC_BPP16_565   1
 #  define AM335X_COLOR_FMT              FB_FMT_RGB16_565
 #endif
 
 #ifndef CONFIG_AM335X_LCDC_ACBIAS
-#  warning "Assuming AC bias == 255"
+#  pragma message "Assuming AC bias == 255"
 #  define CONFIG_AM335X_LCDC_ACBIAS 255
 #endif
 
 #ifndef CONFIG_AM335X_LCDC_ACBIAS_PINT
-#  warning "Assuming AC bias per interrupt == 0"
+#  pragma message "Assuming AC bias per interrupt == 0"
 #  define CONFIG_AM335X_LCDC_ACBIAS_PINT 0
 #endif
 
@@ -129,18 +129,18 @@
 #elif defined(CONFIG_AM335X_LCDC_DMA_BURST16)
 #  define AM335X_LCD_DMA_BURSTSZ 16
 #else
-#  warning "Assuming DMA burst size == 16"
+#  pragma message "Assuming DMA burst size == 16"
 #  define CONFIG_AM335X_LCDC_DMA_BURST16 1
 #  define AM335X_LCD_DMA_BURSTSZ 16
 #endif
 
 #ifndef CONFIG_AM335X_LCDC_FDD
-#  warning "Assuming FDD == 128"
+#  pragma message "Assuming FDD == 128"
 #  define CONFIG_AM335X_LCDC_FDD 128
 #endif
 
 #if (CONFIG_AM335X_LCDC_FB_SIZE & 0x000fffff) != 0
-#  warning "Framebuffer size must be a multiple of 1Mb"
+#  pragma message "Framebuffer size must be a multiple of 1Mb"
 #endif
 
 #define AM335X_LCDC_FB_SIZE \

@@ -142,7 +142,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
   int ret = -ENOSYS;
 
-#warning Missing Implementation!
+#pragma message "Missing Implementation!"
 
   return ret;
 }

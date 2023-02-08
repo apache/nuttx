@@ -57,7 +57,7 @@
 #elif defined(CONFIG_ARCH_CHIP_AT32UC3B)
 #  define AVR32_VECTOR_BASE     AVR32_P2_BASE
 #else
-#  warning "Unknown vector base address"
+#  pragma message "Unknown vector base address"
 #endif
 
 /* Peripheral Address Map */

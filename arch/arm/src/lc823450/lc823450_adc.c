@@ -69,7 +69,7 @@
 #endif
 
 #if defined(CONFIG_DVFS) && !defined(CONFIG_ADC_POLLED)
-#  warning "ADCCLK may be changed during A/D conversion"
+#  pragma message "ADCCLK may be changed during A/D conversion"
 #endif
 
 /****************************************************************************

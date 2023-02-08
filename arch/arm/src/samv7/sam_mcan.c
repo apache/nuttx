@@ -104,14 +104,14 @@
 #  define MCAN_ALIGN_UP(n)  (((n) + MCAN_ALIGN_MASK) & ~MCAN_ALIGN_MASK)
 
 #  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-#    warning !!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!
+#    pragma message "!!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!"
 #  endif
 #endif
 
 /* General Configuration ****************************************************/
 
 #ifndef CONFIG_CAN_TXREADY
-#  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
+#  pragma message "WARNING!!! CONFIG_CAN_TXREADY is required by this driver"
 #endif
 
 /* MCAN0 Configuration ******************************************************/

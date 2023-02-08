@@ -49,5 +49,5 @@ double ceil(double x)
 }
 
 #else
-#  warning ceil() not built
+#  pragma message "ceil() not built"
 #endif

@@ -40,7 +40,7 @@
 
 #ifdef CONFIG_LIBDSP_DEBUG
 #  ifndef CONFIG_DEBUG_ASSERTIONS
-#    warning "Need CONFIG_DEBUG_ASSERTIONS to work properly"
+#    pragma message "Need CONFIG_DEBUG_ASSERTIONS to work properly"
 #  endif
 #  define LIBDSP_DEBUGASSERT(x) DEBUGASSERT(x)
 #else

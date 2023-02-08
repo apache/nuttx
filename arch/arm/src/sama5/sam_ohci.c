@@ -1400,7 +1400,7 @@ static inline int sam_addisoced(const struct usbhost_epdesc_s *epdesc,
                                 struct sam_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
-#  warning "Isochronous endpoints not yet supported"
+#  pragma message "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
 }
@@ -1416,7 +1416,7 @@ static inline int sam_addisoced(const struct usbhost_epdesc_s *epdesc,
 static inline int sam_remisoced(struct sam_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
-#  warning "Isochronous endpoints not yet supported"
+#  pragma message "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
 }
@@ -1872,7 +1872,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport,
        * or we will deadlock while waiting (because the working thread that
        * wakes this thread up needs the lock).
        */
-#warning REVISIT
+#pragma message "REVISIT"
       nxmutex_unlock(&g_ohci.lock);
 
       /* Wait for the Writeback Done Head interrupt  Loop to handle any false
@@ -3396,7 +3396,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
    * wakes this thread up needs the lock).
    */
 
-#warning REVISIT
+#pragma message "REVISIT"
   nxmutex_unlock(&g_ohci.lock);
 
   /* Wait for the Writeback Done Head interrupt  Loop to handle any false

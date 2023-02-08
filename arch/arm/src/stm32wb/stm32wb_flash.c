@@ -47,7 +47,7 @@
 #include "stm32wb_flash.h"
 
 #if !defined(CONFIG_STM32WB_FLASH_OVERRIDE_DEFAULT)
-#  warning "Flash Configuration has been overridden - make sure it is correct"
+#  pragma message "Flash Configuration has been overridden - make sure it is correct"
 #endif
 
 /****************************************************************************

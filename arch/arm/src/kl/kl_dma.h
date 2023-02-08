@@ -62,13 +62,13 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 #ifdef CONFIG_DEBUG_DMA
 struct kl_dmaglobalregs_s
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   /* Global Registers */
 };
 
 struct kl_dmachanregs_s
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   /* Channel Registers */
 };
 

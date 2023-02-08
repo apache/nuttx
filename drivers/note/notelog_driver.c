@@ -313,7 +313,7 @@ static void notelog_cpu_resumed(FAR struct note_driver_s *drv,
  * and does use critical sections.
  */
 
-#warning CONFIG_SCHED_INSTRUMENTATION_PREEMPTION is a bad idea
+#pragma message "CONFIG_SCHED_INSTRUMENTATION_PREEMPTION is a bad idea"
 
 static void notelog_premption(FAR struct note_driver_s *drv,
                               FAR struct tcb_s *tcb, bool locked)
@@ -344,7 +344,7 @@ static void notelog_premption(FAR struct note_driver_s *drv,
  * and does use critical sections.
  */
 
-#warning CONFIG_SCHED_INSTRUMENTATION_CSECTION is a bad idea
+#pragma message "CONFIG_SCHED_INSTRUMENTATION_CSECTION is a bad idea"
 
 static void notelog_csection(FAR struct note_driver_s *drv,
                              FAR struct tcb_s *tcb, bool enter)

@@ -52,7 +52,7 @@
 int board_lcd_initialize(void)
 {
   ginfo("Initializing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 
@@ -68,7 +68,7 @@ int board_lcd_initialize(void)
 struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
-#warning "Missing logic"
+#pragma message "Missing logic"
   return NULL;
 }
 
@@ -82,5 +82,5 @@ struct lcd_dev_s *board_lcd_getdev(int lcddev)
 
 void board_lcd_uninitialize(void)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }

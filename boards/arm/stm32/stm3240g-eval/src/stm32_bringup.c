@@ -276,7 +276,7 @@ int stm32_bringup(void)
         }
     }
 
-#warning "Now what are we going to do with this SPI FLASH driver?"
+#pragma message "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
 #ifdef HAVE_MMCSD

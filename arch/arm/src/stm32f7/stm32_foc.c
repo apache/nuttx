@@ -428,7 +428,7 @@
 
 #ifdef CONFIG_MOTOR_FOC_BEMF_SENSE
 
-#  warning not tested on HW
+#  pragma message "not tested on HW"
 
 /* Additional checks for BEMF sensing */
 

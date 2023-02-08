@@ -73,17 +73,17 @@
 /* Logical endpoint numbers / max packet sizes */
 
 #ifndef CONFIG_PL2303_EPINTIN
-#  warning "EPINTIN not defined in the configuration"
+#  pragma message "EPINTIN not defined in the configuration"
 #  define CONFIG_PL2303_EPINTIN 1
 #endif
 
 #ifndef CONFIG_PL2303_EPBULKOUT
-#  warning "EPBULKOUT not defined in the configuration"
+#  pragma message "EPBULKOUT not defined in the configuration"
 #  define CONFIG_PL2303_EPBULKOUT 2
 #endif
 
 #ifndef CONFIG_PL2303_EPBULKIN
-#  warning "EPBULKIN not defined in the configuration"
+#  pragma message "EPBULKIN not defined in the configuration"
 #  define CONFIG_PL2303_EPBULKIN 3
 #endif
 
@@ -114,12 +114,12 @@
 #endif
 
 #ifndef CONFIG_PL2303_VENDORSTR
-#  warning "No Vendor string specified"
+#  pragma message "No Vendor string specified"
 #  define CONFIG_PL2303_VENDORSTR  "NuttX"
 #endif
 
 #ifndef CONFIG_PL2303_PRODUCTSTR
-#  warning "No Product string specified"
+#  pragma message "No Product string specified"
 #  define CONFIG_PL2303_PRODUCTSTR "USBdev Serial"
 #endif
 

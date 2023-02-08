@@ -53,7 +53,7 @@
 /* There is only CAN1 on the STM3210E-EVAL board */
 
 #if defined(CONFIG_STM32_CAN2)
-#  warning "The STM3210E-EVAL only supports CAN1"
+#  pragma message "The STM3210E-EVAL only supports CAN1"
 #endif
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */

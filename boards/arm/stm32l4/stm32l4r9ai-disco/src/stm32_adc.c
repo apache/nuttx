@@ -110,7 +110,7 @@
 #define ADC1_NCHANNELS 4
 
 #if ADC1_NCHANNELS > 1 && !defined(CONFIG_STM32L4_ADC1_DMA)
-#  warning "Reading multiple channels without DMA might cause overruns!"
+#  pragma message "Reading multiple channels without DMA might cause overruns!"
 #endif
 
 /****************************************************************************

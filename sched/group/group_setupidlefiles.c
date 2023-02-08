@@ -108,7 +108,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
    * It's a common practice to keep 0-2 always open even if they are
    * /dev/null to avoid that kind of problems. Thus the following warning.
    */
-#warning file descriptors 0-2 are not opened
+#pragma message "file descriptors 0-2 are not opened"
 #endif /* defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_DEV_NULL) */
 
   /* Allocate file/socket streams for the TCB */

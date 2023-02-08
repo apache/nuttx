@@ -56,7 +56,7 @@
  */
 
 #if (CONFIG_NUTTX_USERSPACE & 3) != 0
-#  warning "CONFIG_NUTTX_USERSPACE is not aligned to a 4-byte boundary"
+#  pragma message "CONFIG_NUTTX_USERSPACE is not aligned to a 4-byte boundary"
 #endif
 
 /* Helper Macros ************************************************************/

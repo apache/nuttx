@@ -136,7 +136,7 @@
 #  endif
 
 #  ifndef STM32_QENCODER_ICF
-#    warning "Invalid encoder filter combination, filter disabled"
+#    pragma message "Invalid encoder filter combination, filter disabled"
 #  endif
 #endif
 

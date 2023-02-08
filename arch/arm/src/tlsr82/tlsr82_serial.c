@@ -85,7 +85,7 @@
 #  endif
 
 #  if UART0_TXDMA_BUF_SIZE < UART0_TX_BUF_SIZE
-#    warning "UART0 Tx dma buffer size better larger than tx buffer size"
+#    pragma message "UART0 Tx dma buffer size better larger than tx buffer size"
 #  endif
 #endif
 
@@ -99,7 +99,7 @@
 #  endif
 
 #  if UART0_RXDMA_BUF_SIZE < UART0_RX_BUF_SIZE
-#    warning "UART0 Rx dma buffer size better larger than rx buffer size"
+#    pragma message "UART0 Rx dma buffer size better larger than rx buffer size"
 #  endif
 #endif
 

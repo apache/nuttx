@@ -126,7 +126,7 @@
 
 #ifdef CONFIG_DEBUG_PWM_INFO
 #  define pwm_dumpgpio(p,m)
-#  warning "pwm_dumpgpio not implemented"
+#  pragma message "pwm_dumpgpio not implemented"
 #else
 #  define pwm_dumpgpio(p,m)
 #endif

@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_STM32F7_FMC
-#  warning "FMC is not enabled"
+#  pragma message "FMC is not enabled"
 #endif
 
 #if STM32F7_NGPIO < 7

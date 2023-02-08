@@ -1601,7 +1601,7 @@ static int stm32serial_ioctl(struct file *filep, int cmd,
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_USART_SINGLEWIRE
-#warning please review the potential use of ALTERNATE_FUNCTION_OPENDRAIN
+#pragma message "please review the potential use of ALTERNATE_FUNCTION_OPENDRAIN"
     case TIOCSSINGLEWIRE:
       {
         /* Change the TX port to be open-drain/push-pull and

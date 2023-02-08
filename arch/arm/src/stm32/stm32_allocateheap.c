@@ -123,7 +123,7 @@
 
 #  ifdef CONFIG_STM32_EXTERNAL_RAM
 #    if CONFIG_MM_REGIONS < 2
-#      warning "FSMC SRAM not included in the heap"
+#      pragma message "FSMC SRAM not included in the heap"
 #      undef CONFIG_STM32_EXTERNAL_RAM
 #    elif CONFIG_MM_REGIONS > 2
 #      error "CONFIG_MM_REGIONS > 2 but I don't know what some of the region(s) are"
@@ -178,7 +178,7 @@
 
 #    ifndef CONFIG_STM32_CCMEXCLUDE
 #      ifdef CONFIG_STM32_HAVE_CCM
-#        warning "CCM SRAM excluded from the heap"
+#        pragma message "CCM SRAM excluded from the heap"
 #      endif
 #      define CONFIG_STM32_CCMEXCLUDE 1
 #    endif
@@ -206,7 +206,7 @@
 /* Configuration 2: DMA should be disabled */
 
 #      ifdef CONFIG_ARCH_DMA
-#        warning "CCM SRAM is included in the heap AND DMA is enabled"
+#        pragma message "CCM SRAM is included in the heap AND DMA is enabled"
 #      endif
 #    endif
 #  endif
@@ -248,7 +248,7 @@
 
 #    ifndef CONFIG_STM32_CCMEXCLUDE
 #      ifdef CONFIG_STM32_HAVE_CCM
-#        warning "CCM SRAM excluded from the heap"
+#        pragma message "CCM SRAM excluded from the heap"
 #      endif
 #      define CONFIG_STM32_CCMEXCLUDE 1
 #    endif
@@ -276,7 +276,7 @@
 /* Configuration 2: DMA should be disabled */
 
 #      ifdef CONFIG_ARCH_DMA
-#        warning "CCM SRAM is included in the heap AND DMA is enabled"
+#        pragma message "CCM SRAM is included in the heap AND DMA is enabled"
 #      endif
 #    endif
 #  endif
@@ -407,7 +407,7 @@
 
 /* Only one memory region.  Force Configuration 1 */
 
-#      warning "FSMC SRAM (and CCM SRAM) excluded from the heap"
+#      pragma message "FSMC SRAM (and CCM SRAM) excluded from the heap"
 #      undef CONFIG_STM32_EXTERNAL_RAM
 #      undef CONFIG_STM32_CCMEXCLUDE
 #      define CONFIG_STM32_CCMEXCLUDE 1
@@ -434,7 +434,7 @@
  */
 
 #        ifdef CONFIG_ARCH_DMA
-#          warning "CCM SRAM is included in the heap AND DMA is enabled"
+#          pragma message "CCM SRAM is included in the heap AND DMA is enabled"
 #        endif
 
 #        if CONFIG_MM_REGIONS != 3
@@ -461,7 +461,7 @@
  */
 
 #    ifdef CONFIG_ARCH_DMA
-#      warning "CCM SRAM is included in the heap AND DMA is enabled"
+#      pragma message "CCM SRAM is included in the heap AND DMA is enabled"
 #    endif
 
 #    if CONFIG_MM_REGIONS < 2

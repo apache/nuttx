@@ -102,7 +102,7 @@
 #  if defined(CONFIG_SPI_DMAPRIO)
 #    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
 #  elif defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1
-#warning "Verify, read doc and Implement"
+#pragma message "Verify, read doc and Implement"
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  else
 #    error "Unknown STM32WL5 DMA"

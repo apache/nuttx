@@ -209,7 +209,7 @@ void a1x_lowsetup(void)
 {
 #ifdef HAVE_UART_DEVICE
   /* Enable power and clocking to the UART peripheral */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure UART pins for the selected CONSOLE.  If there are multiple
    * pin options for a given UART, the applicable option must be

@@ -435,7 +435,7 @@ void weak_function mpfs_spi0_select(struct spi_dev_s *dev,
 #ifdef CONFIG_SPI_CS_CONTROL
   mpfs_spi_select(dev, devid, selected);
 #else
-# warning "Missing logic"
+# pragma message "Missing logic"
 #endif
 }
 #endif /* CONFIG_MPFS_SPI0 */
@@ -447,7 +447,7 @@ void weak_function mpfs_spi1_select(struct spi_dev_s *dev,
 #ifdef CONFIG_SPI_CS_CONTROL
   mpfs_spi_select(dev, devid, selected);
 #else
-# warning "Missing logic"
+# pragma message "Missing logic"
 #endif
 }
 #endif /* CONFIG_MPFS_SPI1 */

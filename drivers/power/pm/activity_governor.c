@@ -182,7 +182,7 @@ struct pm_activity_governor_s g_pm_activity_governor =
     , CONFIG_PM_GOVERNOR_COEF5
 #endif
 #if CONFIG_PM_GOVERNOR_MEMORY > 6
-#  warning "This logic needs to be extended"
+#  pragma message "This logic needs to be extended"
 #endif
   }
 #endif

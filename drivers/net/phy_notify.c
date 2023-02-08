@@ -59,7 +59,7 @@
  */
 
 #if CONFIG_PHY_NOTIFICATION_NCLIENTS > 4
-#  warning Fix me!! Support currently limited to 4 clients
+#  pragma message "Fix me!! Support currently limited to 4 clients"
 #  undef  CONFIG_PHY_NOTIFICATION_NCLIENTS
 #  define CONFIG_PHY_NOTIFICATION_NCLIENTS 4
 #endif

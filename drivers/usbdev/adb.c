@@ -1105,7 +1105,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
 {
   usbtrace(TRACE_CLASSUNBIND, 0);
 
-  #warning Missing logic
+  #pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -1316,7 +1316,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
    * Hence ADB driver cannot submit to ep0; composite has to handle it.
    */
 
-  #warning composite_ep0submit() seems broken so skip it in case of composite
+  #pragma message "composite_ep0submit() seems broken so skip it in case of composite"
 #endif /* !CONFIG_USBADB_COMPOSITE */
 
   /* Returning a negative value will cause a STALL */
@@ -1511,7 +1511,7 @@ static void usbclass_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   FAR struct adb_driver_s *alloc = container_of(
     classdev, FAR struct adb_driver_s, drvr);
 
-  #warning FIXME Maybe missing logic here
+  #pragma message "FIXME Maybe missing logic here"
 
   unregister_driver(USBADB_CHARDEV_PATH);
 

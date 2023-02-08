@@ -46,11 +46,11 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARCH_ADDRENV
-#  warning "OS address environment support is required (CONFIG_ARCH_ADDRENV)"
+#  pragma message "OS address environment support is required (CONFIG_ARCH_ADDRENV)"
 #endif
 
 #ifndef CONFIG_GRAN
-#  warning "This file requires the granual allocator (CONFIG_GRAN)"
+#  pragma message "This file requires the granual allocator (CONFIG_GRAN)"
 #endif
 
 /****************************************************************************

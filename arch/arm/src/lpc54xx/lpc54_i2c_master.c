@@ -880,7 +880,7 @@ static int lpc54_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int lpc54_i2c_reset(struct i2c_master_s *dev)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return OK;
 }
 #endif /* CONFIG_I2C_RESET */

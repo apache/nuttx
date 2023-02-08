@@ -825,7 +825,7 @@ static int comp_enable(struct stm32_comp_s *priv, bool enable)
 #ifdef CONFIG_COMP
 static int comp_setup(struct comp_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   return OK;
 }
@@ -849,7 +849,7 @@ static int comp_setup(struct comp_dev_s *dev)
 #ifdef CONFIG_COMP
 static void comp_shutdown(struct comp_dev_s *dev)
 {
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 }
 #endif
 
@@ -899,7 +899,7 @@ static int comp_read(struct comp_dev_s *dev)
 #ifdef CONFIG_COMP
 static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOTTY;
 }
 #endif

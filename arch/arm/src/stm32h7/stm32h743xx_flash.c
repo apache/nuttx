@@ -99,7 +99,7 @@
     !defined(CONFIG_STM32H7_FLASH_CONFIG_G) && \
     !defined(CONFIG_STM32H7_FLASH_CONFIG_I)
 #  define CONFIG_STM32H7_FLASH_OVERRIDE_B
-#  warning "Flash size not defined defaulting to 128KiB (B)"
+#  pragma message "Flash size not defined defaulting to 128KiB (B)"
 #endif
 
 #if !defined(CONFIG_STM32H7_FLASH_OVERRIDE_DEFAULT)

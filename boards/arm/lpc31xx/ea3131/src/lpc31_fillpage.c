@@ -457,7 +457,7 @@ int up_fillpage(struct tcb_s *tcb, void *vpage)
 
 #else /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX && !CONFIG_PAGING_AT45DB */
 
-# warning "Not implemented"
+# pragma message "Not implemented"
   return -ENOSYS;
 
 #endif /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX && !CONFIG_PAGING_AT45DB */
@@ -479,7 +479,7 @@ int up_fillpage(struct tcb_s *tcb, void *vpage,
 #elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 #  error "SPI FLASH paging must always be implemented with blocking calls"
 #else
-#  warning "Not implemented"
+#  pragma message "Not implemented"
 #endif
 
   return -ENOSYS;

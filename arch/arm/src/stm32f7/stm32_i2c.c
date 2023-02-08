@@ -274,25 +274,25 @@
 
 #ifdef CONFIG_STM32F7_I2C1
 #  if STM32_RCC_DCKCFGR2_I2C1SRC != RCC_DCKCFGR2_I2C1SEL_HSI
-#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C1SRC must be HSI"
+#    pragma message "Clock Source STM32_RCC_DCKCFGR2_I2C1SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
 #  endif
 #endif
 #ifdef CONFIG_STM32F7_I2C2
 #  if STM32_RCC_DCKCFGR2_I2C2SRC != RCC_DCKCFGR2_I2C2SEL_HSI
-#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C2SRC must be HSI"
+#    pragma message "Clock Source STM32_RCC_DCKCFGR2_I2C2SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
 #  endif
 #endif
 #ifdef CONFIG_STM32F7_I2C3
 #  if STM32_RCC_DCKCFGR2_I2C3SRC != RCC_DCKCFGR2_I2C3SEL_HSI
-#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C3SRC must be HSI"
+#    pragma message "Clock Source STM32_RCC_DCKCFGR2_I2C3SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
 #  endif
 #endif
 #ifdef CONFIG_STM32F7_I2C4
 #  if STM32_RCC_DCKCFGR2_I2C4SRC != RCC_DCKCFGR2_I2C4SEL_HSI
-#    warning "Clock Source STM32_RCC_DCKCFGR2_I2C4SRC must be HSI"
+#    pragma message "Clock Source STM32_RCC_DCKCFGR2_I2C4SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
 #  endif
 #endif
@@ -306,7 +306,7 @@
 #if !defined(CONFIG_STM32F7_I2CTIMEOSEC) && !defined(CONFIG_STM32F7_I2CTIMEOMS)
 #  define CONFIG_STM32F7_I2CTIMEOSEC 0
 #  define CONFIG_STM32F7_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#  warning "Using Default 500 Ms Timeout"
+#  pragma message "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32F7_I2CTIMEOSEC)
 #  define CONFIG_STM32F7_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32F7_I2CTIMEOMS)
@@ -2751,7 +2751,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
   struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
 
 #if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
-# warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
+# pragma message "STM32_I2C_INIT": Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
   return NULL;
 #endif
 

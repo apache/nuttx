@@ -79,7 +79,7 @@ int stm32_sdinitialize(int minor)
   int ret;
 
   /* Configure the card-detect GPIO */
-#warning REVISIT: Missing logic
+#pragma message "REVISIT: Missing logic"
 
   /* First, get an instance of the SDIO interface */
 
@@ -109,8 +109,8 @@ int stm32_sdinitialize(int minor)
    * check to see if the M3 Wildfire board supports a GPIO to detect if there
    * is a card in the slot.
    */
-#warning REVISIT: Need to read the current state of the card-detect pin
-#warning REVISIT: Need to support interrupts from the card-detect pin
+#pragma message "REVISIT: Need to read the current state of the card-detect pin"
+#pragma message "REVISIT: Need to support interrupts from the card-detect pin"
   sdio_mediachange(sdio, true);
 #endif
   return OK;

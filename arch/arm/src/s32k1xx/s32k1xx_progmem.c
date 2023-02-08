@@ -40,8 +40,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 #ifdef CONFIG_MTD_SMART
-#  warning FlexNVM does not support back-to-back programming \
-         thus SmartFS willt not work
+#  pragma message "FlexNVM does not support back-to-back programming" \
+         "thus SmartFS willt not work"
 #endif
 
 /****************************************************************************

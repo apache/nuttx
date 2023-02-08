@@ -629,7 +629,7 @@ void tiva_adc_proc_trig(uint8_t adc, uint8_t sse_mask)
   uintptr_t pssireg = TIVA_ADC_PSSI(adc);
   putreg32((sse_mask & ADC_PSSI_TRIG_MASK), pssireg);
 #ifdef CONFIG_TIVA_ADC_SYNC
-#  warning CONFIG_TIVA_ADC_SYNC unsupported at this time.
+#  pragma message "CONFIG_TIVA_ADC_SYNC unsupported at this time."
 #endif
 }
 

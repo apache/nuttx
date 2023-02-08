@@ -64,7 +64,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAMV7_HSMCI_DMA
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #else
 #  ifndef CONFIG_SAMV7_XDMAC
 #    error "CONFIG_SAMV7_HSMCI_DMA support requires CONFIG_SAMV7_XDMAC"

@@ -55,7 +55,7 @@
 
 uint32_t board_button_initialize(void)
 {
-# warning Missing logic
+# pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -71,7 +71,7 @@ uint32_t board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-# warning Missing logic
+# pragma message "Missing logic"
 }
 
 /****************************************************************************

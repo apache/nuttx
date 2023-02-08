@@ -49,7 +49,7 @@
 #include "arm_internal.h"
 
 #if !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_DEFAULT)
-#  warning "Flash Configuration has been overridden - make sure it is correct"
+#  pragma message "Flash Configuration has been overridden - make sure it is correct"
 #endif
 
 /****************************************************************************

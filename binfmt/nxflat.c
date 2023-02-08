@@ -192,7 +192,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-#  warning "REVISIT"
+#  pragma message "REVISIT"
 #else
   binp->alloc[0]  = (FAR void *)loadinfo.dspace;
 #endif

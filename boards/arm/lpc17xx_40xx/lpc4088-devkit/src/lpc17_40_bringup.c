@@ -75,14 +75,14 @@
 
 #ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
-#     warning "Assuming slot MMC/SD slot 0"
+#     pragma message "Assuming slot MMC/SD slot 0"
 #     define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #endif
 
 #ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDMINOR)
-#     warning "Assuming /dev/mmcsd0"
+#     pragma message "Assuming /dev/mmcsd0"
 #     define CONFIG_NSH_MMCSDMINOR 0
 #  endif
 #endif

@@ -1144,7 +1144,7 @@ static int can_send(struct can_dev_s *dev, struct can_msg_s *msg)
    */
 
 #ifdef CONFIG_ENDIAN_BIG
-#  warning REVISIT
+#  pragma message "REVISIT"
 #endif
 
   /* The message buffer is probably not properaly aligned for 32-bit
@@ -1283,7 +1283,7 @@ static inline void can_rxinterrupt(struct can_dev_s *dev, int mbndx,
    */
 
 #ifdef CONFIG_ENDIAN_BIG
-#  warning REVISIT
+#  pragma message "REVISIT"
 #endif
 
   md[0] = can_getreg(priv, SAM_CAN_MNDH_OFFSET(mbndx));
@@ -1740,7 +1740,7 @@ static int can_autobaud(struct sam_can_s *priv)
    */
 
   /* Configure a Mailbox in Reception Mode */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Loop, adjusting bit rate parameters until no errors are reported in
    * either CAR_SR or the CAN_MSRx registers.
@@ -1749,7 +1749,7 @@ static int can_autobaud(struct sam_can_s *priv)
   do
     {
       /* Adjust baud rate setting */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
       /* Autobaud Mode. The autobaud feature is enabled by setting the ABM
        * field in the CAN_MR register. In this mode, the CAN controller is
@@ -1763,7 +1763,7 @@ static int can_autobaud(struct sam_can_s *priv)
       regval |= (CAN_MR_CANEN | CAN_MR_ABM);
       can_putreg(priv, SAM_CAN_MR_OFFSET, regval);
 
-#warning Missing logic
+#pragma message "Missing logic"
     }
   while (no errors reported);
 

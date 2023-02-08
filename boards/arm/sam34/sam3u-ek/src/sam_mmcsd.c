@@ -49,7 +49,7 @@
  */
 
 #ifdef GPIO_MCI_CD
-#  warning "Card detect interrupt handling needed"
+#  pragma message "Card detect interrupt handling needed"
 #endif
 
 /* Usually defined in NuttX header files */

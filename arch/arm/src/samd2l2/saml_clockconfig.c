@@ -63,7 +63,7 @@
 /* BOARD_GCLK_ENABLE looks optional, but it is not */
 
 #ifndef BOARD_GCLK_ENABLE
-#  warning BOARD_GCLK_ENABLE must be defined
+#  pragma message "BOARD_GCLK_ENABLE must be defined"
 #  define BOARD_GCLK_ENABLE 1
 #endif
 
@@ -72,15 +72,15 @@
 #ifdef BOARD_FDPLL96M_ENABLE
 #  if BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_XOSC && \
       !defined(BOARD_XOSC_ENABLE)
-#    warning Forcing BOARD_XOSC_ENABLE for FDPLL96M
+#    pragma message "Forcing BOARD_XOSC_ENABLE for FDPLL96M"
 #    define BOARD_XOSC_ENABLE 1
 #  elif BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_XOSCK32K && \
         !defined(BOARD_XOSC32K_ENABLE)
-#    warning Forcing BOARD_XOSC32K_ENABLE for FDPLL96M
+#    pragma message "Forcing BOARD_XOSC32K_ENABLE for FDPLL96M"
 #    define BOARD_XOSC32K_ENABLE 1
 #  elif BOARD_FDPLL96M_REFCLK == OSCCTRL_DPLLCTRLB_REFLCK_GLCK && \
         !defined(BOARD_GCLK_ENABLE)
-#    warning Forcing BOARD_GCLK_ENABLE for FDPLL96M
+#    pragma message "Forcing BOARD_GCLK_ENABLE for FDPLL96M"
 #    define BOARD_GCLK_ENABLE 1
 #  endif
 #endif
@@ -1276,7 +1276,7 @@ static inline void sam_config_gclks(void)
 
 static inline void sam_periph_clocks(void)
 {
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 /****************************************************************************

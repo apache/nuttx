@@ -84,7 +84,7 @@
 #  ifdef LPC214X_PLL_M
 #    define CONFIG_PLLCFG_MSEL (LPC214X_PLL_M-1)
 #  else
-#    warning "PLL_M not specified"
+#    pragma message "PLL_M not specified"
 #    define CONFIG_PLLCFG_MSEL (5-1)
 #  endif
 #  ifdef LPC214X_PLL_P
@@ -100,7 +100,7 @@
 #      error "Unrecognized value for PLL_P"
 #    endif
 #  else
-#    warning "PLL_P not specified"
+#    pragma message "PLL_P not specified"
 #    define CONFIG_PLLCFG_PSEL LPC214X_PLL_CFG_PSEL2
 #  endif
 #  define CONFIG_PLLCFG_VALUE (CONFIG_PLLCFG_PSEL|CONFIG_PLLCFG_MSEL)
@@ -113,7 +113,7 @@
 #    ifdef LPC214X_USBPLL_M
 #      define LPC214X_USBPLLCFG_MSEL (LPC214X_USBPLL_M-1)
 #    else
-#      warning "PLL_M not specified"
+#      pragma message "PLL_M not specified"
 #      define LPC214X_USBPLLCFG_MSEL 0x00000004
 #    endif
 #    ifdef LPC214X_USBPLL_P

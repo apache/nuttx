@@ -3008,7 +3008,7 @@ static inline void efm32_gint_sofisr(struct efm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
 
-#warning "Do what?"
+#pragma message "Do what?"
 
   /* Clear pending SOF interrupt */
 
@@ -5319,7 +5319,7 @@ static inline int efm32_hw_initialize(struct efm32_usbhost_s *priv)
    *  13. Program the USB_HPTXFSIZ register to select the size and start
    *      address of the Periodic Transmit FIFO for periodic transactions."
    */
-#warning Review for missing logic
+#pragma message "Review for missing logic"
 
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
    * IDLE state.
@@ -5445,7 +5445,7 @@ struct usbhost_connection_s *efm32_usbhost_initialize(int controller)
    *     non-zero value. This takes approximately 20 48-MHz cycles.
    *  10. Start initializing the USB core ..."
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Make sure that interrupts from the OTG FS core are disabled */
 

@@ -147,7 +147,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ108_111_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 111
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   /* TODO: Make sure this covers all interrupts that are available. */
@@ -332,7 +332,7 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
 #else
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
         {
           return ERROR; /* Invalid interrupt */

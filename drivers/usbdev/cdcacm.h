@@ -53,7 +53,7 @@
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_COMPOSITE_IAD)
-#  warning "CONFIG_COMPOSITE_IAD may be needed"
+#  pragma message "CONFIG_COMPOSITE_IAD may be needed"
 #endif
 
 /* Packet and request buffer sizes */

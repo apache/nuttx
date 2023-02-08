@@ -83,7 +83,7 @@
  */
 
 #ifndef CONFIG_STM32L4_SDMMC_DMA
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #else
 #  if !defined(CONFIG_STM32L4_DMA2) && !defined(CONFIG_STM32L4_DMAMUX)
 #    error "CONFIG_STM32L4_SDMMC_DMA support requires CONFIG_STM32L4_DMA2"

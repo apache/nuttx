@@ -83,7 +83,7 @@
  */
 
 #if !defined(CONFIG_STM32_SDIO_DMA)
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #else
 #  ifndef CONFIG_STM32_DMA2
 #    error "CONFIG_STM32_SDIO_DMA support requires CONFIG_STM32_DMA2"
@@ -94,7 +94,7 @@
 #endif
 
 #ifndef CONFIG_STM32_SDIO_DMA
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE

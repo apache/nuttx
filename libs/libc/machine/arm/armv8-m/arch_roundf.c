@@ -49,5 +49,5 @@ float roundf(float x)
 }
 
 #else
-#  warning roundf() not built
+#  pragma message "roundf() not built"
 #endif

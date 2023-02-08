@@ -119,7 +119,7 @@
 
 #ifdef CONFIG_ARCH_HAVE_HEAP2
 #  if CONFIG_HEAP2_BASE == 0 || CONFIG_HEAP2_SIZE == 0
-#    warning "CONFIG_HEAP2_BASE or CONFIG_HEAP2_SIZE are zero. No HEAP2 enabled!"
+#    pragma message "CONFIG_HEAP2_BASE or CONFIG_HEAP2_SIZE are zero. No HEAP2 enabled!"
 #    undef CONFIG_ARCH_HAVE_HEAP2
 #  endif
 #endif
@@ -151,26 +151,26 @@
 
 #if CONFIG_MM_REGIONS < 2
 #  ifdef CONFIG_ARCH_HAVE_HEAP2
-#    warning "FMC external RAM excluded from the heap"
+#    pragma message "FMC external RAM excluded from the heap"
 #    undef CONFIG_ARCH_HAVE_HEAP2
 #  endif
 #  ifdef HAVE_DTCM
-#    warning "DTCM excluded from the heap"
+#    pragma message "DTCM excluded from the heap"
 #    undef HAVE_DTCM
 #  endif
-#  warning "SRAM2 excluded from the heap"
+#  pragma message "SRAM2 excluded from the heap"
 #elif CONFIG_MM_REGIONS < 3
 #  ifdef CONFIG_ARCH_HAVE_HEAP2
-#    warning "FMC external RAM excluded from the heap"
+#    pragma message "FMC external RAM excluded from the heap"
 #    undef CONFIG_ARCH_HAVE_HEAP2
 #  endif
 #  ifdef HAVE_DTCM
-#    warning "DTCM excluded from the heap"
+#    pragma message "DTCM excluded from the heap"
 #    undef HAVE_DTCM
 #  endif
 #elif CONFIG_MM_REGIONS < 4
 #  if defined(CONFIG_ARCH_HAVE_HEAP2) && defined(HAVE_DTCM)
-#    warning "CONFIG_MM_REGIONS == 3 but have both FMC external RAM and DTCM. DTCM excluded from the heap."
+#    pragma message "CONFIG_MM_REGIONS == 3 but have both FMC external RAM and DTCM. DTCM excluded from the heap."
 #    undef  HAVE_DTCM
 #  elif !defined(CONFIG_ARCH_HAVE_HEAP2) && !defined(HAVE_DTCM)
 #    error  "CONFIG_MM_REGIONS == 3 but I do not know what some of the region(s) are"

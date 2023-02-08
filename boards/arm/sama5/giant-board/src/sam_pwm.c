@@ -80,16 +80,16 @@
 
 #ifndef CONFIG_GIANT_BOARD_CHANNEL
 #  if defined(CONFIG_SAMA5_PWM_CHAN0)
-#    warning Assuming PWM channel 0
+#    pragma message "Assuming PWM channel 0"
 #    define CONFIG_GIANT_BOARD_CHANNEL 0
 #  elif defined(CONFIG_SAMA5_PWM_CHAN1)
-#    warning Assuming PWM channel 1
+#    pragma message "Assuming PWM channel 1"
 #    define CONFIG_GIANT_BOARD_CHANNEL 1
 #  elif defined(CONFIG_SAMA5_PWM_CHAN2)
-#    warning Assuming PWM channel 2
+#    pragma message "Assuming PWM channel 2"
 #    define CONFIG_GIANT_BOARD_CHANNEL 2
 #  elif defined(CONFIG_SAMA5_PWM_CHAN3)
-#    warning Assuming PWM channel 3
+#    pragma message "Assuming PWM channel 3"
 #    define CONFIG_GIANT_BOARD_CHANNEL 3
 #  endif
 #endif

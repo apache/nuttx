@@ -1794,7 +1794,7 @@ static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
    * but would not work for devices connected to downstream hubs.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
   hubaddr = rhport->ep0.devaddr;
   hubport = rhpndx + 1;
 #else
@@ -1820,7 +1820,7 @@ static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
        * all the same interrupt queue.  That should work but will not give
        * any control over polling rates.
        */
-#warning REVISIT
+#pragma message "REVISIT"
 
       regval |= ((uint32_t)1               << QH_EPCAPS_SSMASK_SHIFT);
     }
@@ -4391,7 +4391,7 @@ static ssize_t imxrt_transfer(struct usbhost_driver_s *drvr,
 
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
       case USB_EP_ATTR_XFER_ISOC:
-# warning "Isochronous endpoint support not emplemented"
+# pragma message "Isochronous endpoint support not emplemented"
 #endif
       case USB_EP_ATTR_XFER_CONTROL:
       default:
@@ -4503,7 +4503,7 @@ static int imxrt_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
       case USB_EP_ATTR_XFER_ISOC:
-# warning "Isochronous endpoint support not emplemented"
+# pragma message "Isochronous endpoint support not emplemented"
 #endif
       case USB_EP_ATTR_XFER_CONTROL:
       default:
@@ -4677,7 +4677,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
       case USB_EP_ATTR_XFER_ISOC:
-# warning "Isochronous endpoint support not emplemented"
+# pragma message "Isochronous endpoint support not emplemented"
 #endif
       default:
         usbhost_trace1(EHCI_TRACE1_BADXFRTYPE, epinfo->xfrtype);

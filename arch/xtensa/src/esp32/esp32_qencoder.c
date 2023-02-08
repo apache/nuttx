@@ -59,49 +59,49 @@
 
 #ifdef CONFIG_ESP32_PCNT_U0_QE
 #  ifndef CONFIG_ESP32_PCNT_U0_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U0"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U0"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U1_QE
 #  ifndef CONFIG_ESP32_PCNT_U1_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U1"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U1"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U2_QE
 #  ifndef CONFIG_ESP32_PCNT_U2_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U2"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U2"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U3_QE
 #  ifndef CONFIG_ESP32_PCNT_U3_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U3"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U3"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U4_QE
 #  ifndef CONFIG_ESP32_PCNT_U4_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U4"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U4"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U5_QE
 #  ifndef CONFIG_ESP32_PCNT_U5_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U5"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U5"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U6_QE
 #  ifndef CONFIG_ESP32_PCNT_U6_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U6"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U6"
 #  endif
 #endif
 
 #ifdef CONFIG_ESP32_PCNT_U7_QE
 #  ifndef CONFIG_ESP32_PCNT_U7_FILTER_EN
-#    warning "Glitch Filter is recommended for Quadrature Encoder on PCNT_U7"
+#    pragma message "Glitch Filter is recommended for Quadrature Encoder on PCNT_U7"
 #  endif
 #endif
 

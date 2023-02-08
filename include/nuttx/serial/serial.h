@@ -68,7 +68,7 @@
 
 #  if CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK > \
       CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK
-#    warning Lower watermark pct exceeds upper watermark pct
+#    pragma message "Lower watermark pct exceeds upper watermark pct"
 #  endif
 #endif
 

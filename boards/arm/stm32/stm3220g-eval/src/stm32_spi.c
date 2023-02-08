@@ -53,7 +53,7 @@
 
 void weak_function stm32_spidev_initialize(void)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************

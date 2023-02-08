@@ -221,7 +221,7 @@ int stm32_bringup(void)
 
   syslog(LOG_INFO,
          "Successfully bound SPI port 0 to the SPI FLASH driver\n");
-#warning "Now what are we going to do with this SPI FLASH driver?"
+#pragma message "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
   /* Create the SPI FLASH MTD instance */

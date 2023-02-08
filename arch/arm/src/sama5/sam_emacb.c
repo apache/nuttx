@@ -119,7 +119,7 @@
 #  endif
 
 #  if !defined(CONFIG_SAMA5_EMAC0_MII) && !defined(CONFIG_SAMA5_EMAC0_RMII)
-#    warning "Neither CONFIG_SAMA5_EMAC0_MII nor CONFIG_SAMA5_EMAC0_RMII defined"
+#    pragma message "Neither CONFIG_SAMA5_EMAC0_MII nor CONFIG_SAMA5_EMAC0_RMII defined"
 #  endif
 
 #  if defined(CONFIG_SAMA5_EMAC0_MII) && defined(CONFIG_SAMA5_EMAC0_RMII)
@@ -202,7 +202,7 @@
 #  endif
 
 #  if !defined(CONFIG_SAMA5_EMAC1_MII) && !defined(CONFIG_SAMA5_EMAC1_RMII)
-#    warning "Neither CONFIG_SAMA5_EMAC1_MII nor CONFIG_SAMA5_EMAC1_RMII defined"
+#    pragma message "Neither CONFIG_SAMA5_EMAC1_MII nor CONFIG_SAMA5_EMAC1_RMII defined"
 #  endif
 
 #  if defined(CONFIG_SAMA5_EMAC1_MII) && defined(CONFIG_SAMA5_EMAC1_RMII)
@@ -1660,7 +1660,7 @@ static void sam_txdone(struct sam_emac_s *priv)
       /* Is this TX descriptor still in use? */
 
 #ifndef __NO_KLUDGES__
-# warning REVISIT
+# pragma message "REVISIT"
       /* I have seen cases where we receive interrupts, but the USED
        * bit is never set in the TX descriptor.  This logic assumes
        * that if we got the interrupt, then there most be at least
@@ -1682,7 +1682,7 @@ static void sam_txdone(struct sam_emac_s *priv)
            */
 
 #if 0 /* The issue does not exist in the current configuration, but may return */
-#warning REVISIT
+#pragma message "REVISIT"
           if (priv->txtail == 0 &&
               sam_physramaddr((uintptr_t)txdesc) !=
               sam_getreg(priv, SAM_EMAC_TBQB_OFFSET))

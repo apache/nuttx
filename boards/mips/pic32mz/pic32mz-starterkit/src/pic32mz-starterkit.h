@@ -70,7 +70,7 @@
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO)
 #    define CONFIG_NSH_MMCSDSPIPORTNO PIC32MZ_MMCSDSPIPORTNO
 #  elif CONFIG_NSH_MMCSDSPIPORTNO != PIC32MZ_MMCSDSPIPORTNO
-#    warning "CONFIG_PIC32MZ_MMCSDSPIPORTNO does not match CONFIG_NSH_MMCSDSPIPORTNO"
+#    pragma message "CONFIG_PIC32MZ_MMCSDSPIPORTNO does not match CONFIG_NSH_MMCSDSPIPORTNO"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO PIC32MZ_MMCSDSPIPORTNO
 #  endif
@@ -80,7 +80,7 @@
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
-#    warning "The PIC32 Starter Kit has only one slot (0)"
+#    pragma message "The PIC32 Starter Kit has only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
@@ -88,16 +88,16 @@
 /* Make sure that the correct SPI is enabled in the configuration */
 
 #  if PIC32MZ_MMCSDSPIPORTNO == 1 && !defined(CONFIG_PIC32MZ_SPI1)
-#    warning "CONFIG_PIC32MZ_SPI1 is not enabled"
+#    pragma message "CONFIG_PIC32MZ_SPI1 is not enabled"
 #    undef PIC32MZ_HAVE_MMCSD
 #  elif PIC32MZ_MMCSDSPIPORTNO == 2 && !defined(CONFIG_PIC32MZ_SPI2)
-#    warning "CONFIG_PIC32MZ_SPI2 is not enabled"
+#    pragma message "CONFIG_PIC32MZ_SPI2 is not enabled"
 #    undef PIC32MZ_HAVE_MMCSD
 #  elif PIC32MZ_MMCSDSPIPORTNO == 3 && !defined(CONFIG_PIC32MZ_SPI3)
-#    warning "CONFIG_PIC32MZ_SPI3 is not enabled"
+#    pragma message "CONFIG_PIC32MZ_SPI3 is not enabled"
 #    undef PIC32MZ_HAVE_MMCSD
 #  elif PIC32MZ_MMCSDSPIPORTNO == 4 && !defined(CONFIG_PIC32MZ_SPI4)
-#    warning "CONFIG_PIC32MZ_SPI4 is not enabled"
+#    pragma message "CONFIG_PIC32MZ_SPI4 is not enabled"
 #    undef PIC32MZ_HAVE_MMCSD
 #  endif
 

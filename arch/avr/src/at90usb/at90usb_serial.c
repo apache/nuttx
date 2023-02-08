@@ -52,7 +52,7 @@
 /* Is there at least one USART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_USART_DEVICE
-#  warning "No USARTs enabled as RS-232 devices"
+#  pragma message "No USARTs enabled as RS-232 devices"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must

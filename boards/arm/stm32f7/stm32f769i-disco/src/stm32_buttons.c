@@ -89,7 +89,7 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif

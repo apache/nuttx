@@ -234,7 +234,7 @@ static void pbist_stop(void)
 
 void tms570_memtest_selftest(void)
 {
-#warning Missing Logic
+#pragma message "Missing Logic"
 }
 
 /****************************************************************************
@@ -303,7 +303,7 @@ int tms570_memtest_complete(void)
 
 void tms570_efc_selftest_start(void)
 {
-#warning Missing Logic
+#pragma message "Missing Logic"
 }
 
 /****************************************************************************
@@ -320,7 +320,7 @@ void tms570_efc_selftest_start(void)
 
 int tms570_efc_selftest_complete(void)
 {
-#warning Missing Logic
+#pragma message "Missing Logic"
   return OK;
 }
 
@@ -346,7 +346,7 @@ int tms570_efc_selftest_complete(void)
 #if 0 /* Needs change to data abort handler */
 int tms570_cpuecc_selftest(void)
 {
-#warning Missing Logic
+#pragma message "Missing Logic"
   return OK;
 }
 #endif

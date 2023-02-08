@@ -47,7 +47,7 @@
 #ifdef CONFIG_USBDEV
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32_USB is enabled but CONFIG_USBDEV is not"
+#  pragma message "CONFIG_STM32_USB is enabled but CONFIG_USBDEV is not"
 #  undef HAVE_USB
 #endif
 

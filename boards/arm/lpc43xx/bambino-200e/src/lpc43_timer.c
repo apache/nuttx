@@ -50,7 +50,7 @@
 
 #if !(defined(CONFIG_LPC43_TMR0) || defined(CONFIG_LPC43_TMR1) || defined(CONFIG_LPC43_TMR2) \
      || defined(CONFIG_LPC43_TMR3) )
-#  warning "CONFIG_LPC43_TMRx must be defined"
+#  pragma message "CONFIG_LPC43_TMRx must be defined"
 #endif
 
 /* Select the path to the registered watchdog timer device */

@@ -126,7 +126,7 @@
 #endif
 
 #if !defined(BOARD_CLOCK_FREQUENCY) && !defined(XT_BOARD)
-#  warning "BOARD_CLOCK_FREQUENCY must be defined for the target platform."
+#  pragma message "BOARD_CLOCK_FREQUENCY must be defined for the target platform."
 #endif
 
 /* Default number of timer "ticks" per second (default 100 for 10ms tick).

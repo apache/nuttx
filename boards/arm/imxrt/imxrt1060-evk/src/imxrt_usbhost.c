@@ -288,7 +288,7 @@ int imxrt_setup_overcurrent(xcpt_t handler, void *arg)
 
   /* Configure the interrupt */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
   return OK;

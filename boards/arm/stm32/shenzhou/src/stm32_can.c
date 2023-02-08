@@ -47,7 +47,7 @@
 /* The STM32F107VC supports CAN1 and CAN2 */
 
 #if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
+#  pragma message "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
 #  undef CONFIG_STM32_CAN2
 #endif
 

@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
-# warning "You probably need to define CONFIG_ARCH_LOWCONSOLE"
+# pragma message "You probably need to define CONFIG_ARCH_LOWCONSOLE"
 void up_earlyconsoleinit(void)
 {
   /* There is probably a problem if we are here */
@@ -88,7 +88,7 @@ void up_earlyconsoleinit(void)
  ****************************************************************************/
 
 #if USE_SERIALDRIVER
-# warning "You probably need to define CONFIG_ARCH_LOWCONSOLE"
+# pragma message "You probably need to define CONFIG_ARCH_LOWCONSOLE"
 void up_consoleinit(void)
 {
   /* There is probably a problem if we are here */

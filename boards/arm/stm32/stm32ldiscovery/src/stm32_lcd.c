@@ -364,7 +364,7 @@ static struct stm32_slcdstate_s g_slcdstate;
  * { E , D , P , N,   M , C , COL , DP,   B , A , K , J,   G , F , Q , H }
  */
 
-#warning "Encodings for all punctuation are incomplete"
+#pragma message "Encodings for all punctuation are incomplete"
 
 /* Space and ASCII punctuation: 0x20-0x2f */
 

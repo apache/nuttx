@@ -54,7 +54,7 @@
 /* Up to 1 DAC interface for up to 2 channels are supported */
 
 #if STM32L4_NDAC > 2
-#  warning "Extra DAC channels. Only DAC1 and DAC2 are supported"
+#  pragma message "Extra DAC channels. Only DAC1 and DAC2 are supported"
 #endif
 
 #if STM32L4_NDAC < 2
@@ -86,12 +86,12 @@
 #    define CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE 1
 #  endif
 #  if !defined(CONFIG_STM32L4_DAC1_TIMER)
-#    warning "A timer number must be specified in CONFIG_STM32L4_DAC1_TIMER"
+#    pragma message "A timer number must be specified in CONFIG_STM32L4_DAC1_TIMER"
 #    undef CONFIG_STM32L4_DAC1_DMA
 #    undef CONFIG_STM32L4_DAC1_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32L4_DAC1_TIMER_FREQUENCY) || \
         (CONFIG_STM32L4_DAC1_TIMER_FREQUENCY < 1)
-#    warning "A timer frequency (>0) must be specified in CONFIG_STM32L4_DAC1_TIMER_FREQUENCY"
+#    pragma message "A timer frequency (>0) must be specified in CONFIG_STM32L4_DAC1_TIMER_FREQUENCY"
 #    undef CONFIG_STM32L4_DAC1_DMA
 #    undef CONFIG_STM32L4_DAC1_TIMER
 #  endif
@@ -102,12 +102,12 @@
 #    define CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE 1
 #  endif
 #  if !defined(CONFIG_STM32L4_DAC2_TIMER)
-#    warning "A timer number must be specified in CONFIG_STM32L4_DAC2_TIMER"
+#    pragma message "A timer number must be specified in CONFIG_STM32L4_DAC2_TIMER"
 #    undef CONFIG_STM32L4_DAC2_DMA
 #    undef CONFIG_STM32L4_DAC2_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32L4_DAC2_TIMER_FREQUENCY) || \
         (CONFIG_STM32L4_DAC2_TIMER_FREQUENCY < 1)
-#    warning "A timer frequency (>0) must be specified in CONFIG_STM32L4_DAC2_TIMER_FREQUENCY"
+#    pragma message "A timer frequency (>0) must be specified in CONFIG_STM32L4_DAC2_TIMER_FREQUENCY"
 #    undef CONFIG_STM32L4_DAC2_DMA
 #    undef CONFIG_STM32L4_DAC2_TIMER
 #  endif
@@ -278,7 +278,7 @@
  * CONFIG_STM32L4_DACn_TIMER_FREQUENCY.
  */
 
-#warning "Missing Logic"
+#pragma message "Missing Logic"
 
 /* DMA stream/channel configuration */
 
@@ -666,7 +666,7 @@ static void dac_reset(struct dac_dev_s *dev)
 
   flags   = enter_critical_section();
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
 }
@@ -708,7 +708,7 @@ static int dac_setup(struct dac_dev_s *dev)
 
 static void dac_shutdown(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -726,7 +726,7 @@ static void dac_shutdown(struct dac_dev_s *dev)
 
 static void dac_txint(struct dac_dev_s *dev, bool enable)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************

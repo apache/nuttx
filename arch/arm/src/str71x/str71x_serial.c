@@ -170,7 +170,7 @@
 #    define TTYS1_DEV   g_uart2port       /* UART2 is tty1 */
 #  endif
 #else
-#  warning "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#  pragma message "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
 /* Select RX interrupt enable bits.  There are two models:  (1) We interrupt

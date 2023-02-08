@@ -105,7 +105,7 @@
 #endif
 
 #ifndef CONFIG_STM32F7_SDMMC_DMA
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #else
 #  ifndef CONFIG_STM32F7_DMA2
 #    error "CONFIG_STM32F7_SDMMC_DMA support requires CONFIG_STM32F7_DMA2"

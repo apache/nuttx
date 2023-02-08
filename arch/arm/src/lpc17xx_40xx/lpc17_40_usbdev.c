@@ -1124,7 +1124,7 @@ static int lpc17_40_wrrequest(struct lpc17_40_ep_s *privep)
   /* Otherwise send the data in the packet (in the DMA on case, we
    * may be resuming transfer already in progress.
    */
-#warning REVISIT... If the EP supports double buffering, then we can do better
+#pragma message "REVISIT... If the EP supports double buffering, then we can do better"
 
   /* Get the number of bytes left to be sent in the packet */
 
@@ -2480,7 +2480,7 @@ static int lpc17_40_usbinterrupt(int irq, void *context, void *arg)
                 {
                   usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EPDMA),
                           (uint16_t)epphy);
-#warning DO WHAT?
+#pragma message "DO WHAT?"
                 }
             }
         }

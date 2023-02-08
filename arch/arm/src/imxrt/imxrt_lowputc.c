@@ -538,7 +538,7 @@ int imxrt_lpuart_configure(uint32_t base,
     {
       /* Here should be added support of other bit modes. */
 
-#warning missing logic
+#pragma message "missing logic"
       return ERROR;
     }
 

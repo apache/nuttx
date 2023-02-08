@@ -49,7 +49,7 @@ extern "C"
 #elif defined (__CSMC__)
 /* anonymous unions are enabled by default */
 #else
-#warning Not supported compiler type
+#pragma message "Not supported compiler type"
 #endif
 
 /* Configuration of the Cortex-M0 Processor and Core Peripherals */
@@ -95,7 +95,7 @@ extern "C"
 #elif defined (__CSMC__)
 /* anonymous unions are enabled by default */
 #else
-#warning Not supported compiler type
+#pragma message "Not supported compiler type"
 #endif
 
 #ifdef __cplusplus

@@ -268,7 +268,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
         }
 
       ginfo("first=%d len=%d\n", vcmap->first, cmap->len);
-#warning Missing logic
+#pragma message "Missing logic"
 
       return OK;
     }
@@ -307,7 +307,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable,
         }
 
       ginfo("first=%d len=%d\n", vcmap->first, cmap->len);
-#warning Missing logic
+#pragma message "Missing logic"
 
       return OK;
     }
@@ -345,7 +345,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
           return -ENOTCONN;
         }
 
-#warning Missing logic
+#pragma message "Missing logic"
 
       return OK;
     }
@@ -386,20 +386,20 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
       ginfo("flags:   %02x\n", settings->flags);
       if ((settings->flags & FB_CUR_SETPOSITION) != 0)
         {
-#warning Missing logic
+#pragma message "Missing logic"
         }
 
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((settings->flags & FB_CUR_SETSIZE) != 0)
         {
-#warning Missing logic
+#pragma message "Missing logic"
         }
 #endif
 
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((settings->flags & FB_CUR_SETIMAGE) != 0)
         {
-#warning Missing logic
+#pragma message "Missing logic"
         }
 #endif
 

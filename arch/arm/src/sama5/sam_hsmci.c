@@ -66,9 +66,9 @@
 /* Configuration ************************************************************/
 
 #if !defined(CONFIG_SAMA5_HSMCI_DMA)
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #elif !defined(CONFIG_SDIO_DMA)
-#  warning CONFIG_SDIO_DMA should be defined with CONFIG_SAMA5_HSMCI_DMA
+#  pragma message "CONFIG_SDIO_DMA should be defined with CONFIG_SAMA5_HSMCI_DMA"
 #endif
 
 #ifndef CONFIG_DEBUG_MEMCARD_INFO

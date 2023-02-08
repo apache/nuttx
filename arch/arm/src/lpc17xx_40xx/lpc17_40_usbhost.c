@@ -67,7 +67,7 @@
  */
 
 #if LPC17_40_IOBUFFERS < 1
-#  warning "No IO buffers allocated"
+#  pragma message "No IO buffers allocated"
 #endif
 
 #ifndef CONFIG_LPC17_40_USBHOST_NPREALLOC
@@ -1406,7 +1406,7 @@ static inline int lpc17_40_addisoced(struct lpc17_40_usbhost_s *priv,
                                      struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
-#  warning "Isochronous endpoints not yet supported"
+#  pragma message "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
 }
@@ -1423,7 +1423,7 @@ static inline int lpc17_40_remisoced(struct lpc17_40_usbhost_s *priv,
                                      struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
-#  warning "Isochronous endpoints not yet supported"
+#  pragma message "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
 }

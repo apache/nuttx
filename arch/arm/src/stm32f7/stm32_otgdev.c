@@ -3521,7 +3521,7 @@ static inline void stm32_isocininterrupt(struct stm32_usbdev_s *priv)
        */
 
       stm32_req_complete(privep, -EIO);
-#    warning "Will clear OTG_DIEPCTL_USBAEP too"
+#    pragma message "Will clear OTG_DIEPCTL_USBAEP too"
       stm32_epin_disable(privep);
       break;
     }
@@ -3604,7 +3604,7 @@ static inline void stm32_isocoutinterrupt(struct stm32_usbdev_s *priv)
        */
 
       stm32_req_complete(privep, -EIO);
-#    warning "Will clear OTG_DOEPCTL_USBAEP too"
+#    pragma message "Will clear OTG_DOEPCTL_USBAEP too"
       stm32_epout_disable(privep);
       break;
     }
@@ -3622,7 +3622,7 @@ static inline void stm32_isocoutinterrupt(struct stm32_usbdev_s *priv)
 #  ifdef CONFIG_USBDEV_VBUSSENSING
 static inline void stm32_sessioninterrupt(struct stm32_usbdev_s *priv)
 {
-#    warning "Missing logic"
+#    pragma message "Missing logic"
 }
 #  endif
 
@@ -3644,7 +3644,7 @@ static inline void stm32_otginterrupt(struct stm32_usbdev_s *priv)
   regval = stm32_getreg(STM32_OTG_GOTGINT);
   if ((regval & OTG_GOTGINT_SEDET) != 0)
     {
-#    warning "Missing logic"
+#    pragma message "Missing logic"
     }
 
   /* Clear OTG interrupt */

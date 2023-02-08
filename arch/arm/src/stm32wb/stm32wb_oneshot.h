@@ -47,7 +47,7 @@
 #endif
 
 #if CONFIG_STM32WB_ONESHOT_MAXTIMERS > 8
-#  warning Additional logic required to handle more than 8 timers
+#  pragma message "Additional logic required to handle more than 8 timers"
 #  undef CONFIG_STM32WB_ONESHOT_MAXTIMERS
 #  define CONFIG_STM32WB_ONESHOT_MAXTIMERS 8
 #endif

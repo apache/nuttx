@@ -92,7 +92,7 @@ void weak_function stm32_spiinitialize(void)
       spierr("ERROR: [boot] FAILED to initialize SPI port 2\n");
     }
 
-#warning No devices specified on SPI2
+#pragma message "No devices specified on SPI2"
 #endif
 
 #ifdef CONFIG_STM32_SPI2
@@ -104,7 +104,7 @@ void weak_function stm32_spiinitialize(void)
       spierr("ERROR: [boot] FAILED to initialize SPI port 3\n");
     }
 
-#warning No devices specified on SPI3
+#pragma message "No devices specified on SPI3"
 #endif
 }
 

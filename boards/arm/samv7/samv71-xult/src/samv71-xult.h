@@ -71,14 +71,14 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_HSMCI
 #endif
 
 /* We need GPIO interrupts on GPIOD to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOD_IRQ)
-#  warning GPIOD interrupts not enabled.  No MMC/SD support.
+#  pragma message "GPIOD interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_HSMCI
 #endif
 
@@ -236,32 +236,32 @@
 
 #ifdef HAVE_WM8904
 #  ifndef CONFIG_SAMV7_TWIHS0
-#    warning CONFIG_SAMV7_TWIHS0 is required for audio support
+#    pragma message "CONFIG_SAMV7_TWIHS0 is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_SAMV7_SSC0
-#    warning CONFIG_SAMV7_SSC0 is required for audio support
+#    pragma message "CONFIG_SAMV7_SSC0 is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  if !defined(CONFIG_SAMV7_GPIOD_IRQ)
-#    warning CONFIG_SAMV7_GPIOD_IRQ is required for audio support
+#    pragma message "CONFIG_SAMV7_GPIOD_IRQ is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
-#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    pragma message "CONFIG_AUDIO_FORMAT_PCM is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY
-#    warning Defaulting to maximum WM8904 I2C frequency
+#    pragma message "Defaulting to maximum WM8904 I2C frequency"
 #    define CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY 400000
 #  endif
 
 #  if CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY > 400000
-#    warning WM8904 I2C frequency cannot exceed 400KHz
+#    pragma message "WM8904 I2C frequency cannot exceed 400KHz"
 #    undef CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY
 #    define CONFIG_SAMV71XULT_WM8904_I2CFREQUENCY 400000
 #  endif
@@ -279,7 +279,7 @@
 
 #ifdef HAVE_AUDIO_NULL
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
-#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    pragma message "CONFIG_AUDIO_FORMAT_PCM is required for audio support"
 #    undef HAVE_AUDIO_NULL
 #  endif
 #endif

@@ -2047,7 +2047,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
             if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
               {
                 /* Disable HNP */
-#warning Missing Logic
+#pragma message "Missing Logic"
               }
 
             /* Disable A device HNP support */
@@ -2055,7 +2055,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
             else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
               {
                 /* Disable HNP support */
-#warning Missing Logic
+#pragma message "Missing Logic"
               }
 
             /* Disable alternate HNP support */
@@ -2063,7 +2063,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
             else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
               {
                 /* Disable alternate HNP */
-#warning Missing Logic
+#pragma message "Missing Logic"
               }
             else
 #endif
@@ -2132,7 +2132,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
             if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
               {
                 /* Enable HNP */
-#warning "Missing logic"
+#pragma message "Missing logic"
               }
 
             /* Enable A device HNP supports */
@@ -2140,7 +2140,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
             else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
               {
                 /* Enable HNP support */
-#warning "Missing logic"
+#pragma message "Missing logic"
               }
 
             /* Another port on the A device supports HNP */
@@ -2148,7 +2148,7 @@ static void pic32mx_ep0setup(struct pic32mx_usbdev_s *priv)
             else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
               {
                 /* Enable alternate HNP */
-#warning "Missing logic"
+#pragma message "Missing logic"
               }
             else
 #endif
@@ -2712,7 +2712,7 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
   /* Session Request Protocol (SRP) Time Out Check */
 
   /* if USB OTG SRP is ready */
-#  warning "Missing logic"
+#  pragma message "Missing logic"
     {
       /* Check if the 1 millisecond timer has expired */
 
@@ -2721,10 +2721,10 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
           usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_T1MSEC), otgir);
 
           /* Check for the USB OTG SRP timeout */
-#  warning "Missing logic"
+#  pragma message "Missing logic"
             {
               /* Handle OTG events of the SRP timeout has expired */
-#  warning "Missing logic"
+#  pragma message "Missing logic"
             }
 
           /* Clear Interrupt 1 msec timer Flag */
@@ -2761,7 +2761,7 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
       usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_OTGID), otgir);
 
       /* Re-detect and re-initialize */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       pic32mx_putreg(USBOTG_INT_ID, PIC32MX_USBOTG_IR);
     }
@@ -2812,7 +2812,7 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
 
 #ifdef CONFIG_USBOTG
       /* Disable and deactivate HNP */
-#warning Missing Logic
+#pragma message "Missing Logic"
 #endif
       /* Acknowledge the reset interrupt */
 
@@ -2828,7 +2828,7 @@ static int pic32mx_interrupt(int irq, void *context, void *arg)
 
 #ifdef CONFIG_USBOTG
       /* If Suspended, Try to switch to Host */
-#warning "Missing logic"
+#pragma message "Missing logic"
 #else
       pic32mx_suspend(priv);
 
@@ -4080,7 +4080,7 @@ static void pic32mx_detach(struct pic32mx_usbdev_s *priv)
   pic32mx_putreg(regval, PIC32MX_USBOTG_CON);
 
   /* Disable and deactivate HNP */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Check if the ID Pin Changed State */
 
@@ -4088,7 +4088,7 @@ static void pic32mx_detach(struct pic32mx_usbdev_s *priv)
        pic32mx_getreg(PIC32MX_USBOTG_IE) & USBOTG_INT_ID) != 0)
     {
       /* Re-detect & Initialize */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       /* Clear ID Interrupt Flag */
 

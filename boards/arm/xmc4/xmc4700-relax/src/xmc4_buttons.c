@@ -37,7 +37,7 @@
 
 uint32_t board_button_initialize(void)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return 0;
 }
 
@@ -47,7 +47,7 @@ uint32_t board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return 0;
 }
 
@@ -58,7 +58,7 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_ARCH_IRQBUTTONS */

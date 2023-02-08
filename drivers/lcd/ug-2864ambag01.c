@@ -135,13 +135,13 @@
 /* Limitations of the current configuration that I hope to fix someday */
 
 #if CONFIG_UG2864AMBAG01_NINTERFACES != 1
-#  warning "This implementation supports only a single OLED device"
+#  pragma message "This implementation supports only a single OLED device"
 #  undef CONFIG_UG2864AMBAG01_NINTERFACES
 #  define CONFIG_UG2864AMBAG01_NINTERFACES 1
 #endif
 
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
-#  warning "No support yet for portrait modes"
+#  pragma message "No support yet for portrait modes"
 #  define CONFIG_LCD_LANDSCAPE 1
 #  undef CONFIG_LCD_PORTRAIT
 #  undef CONFIG_LCD_RLANDSCAPE

@@ -566,10 +566,10 @@ static inline void am335x_uart0config(void)
   /* Step 1: Enable power to UART0 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART0 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -587,10 +587,10 @@ static inline void am335x_uart1config(void)
   /* Step 1: Enable power to UART1 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART1 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -608,10 +608,10 @@ static inline void am335x_uart2config(void)
   /* Step 1: Enable power to UART2 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking on UART2 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -629,10 +629,10 @@ static inline void am335x_uart3config(void)
   /* Step 1: Enable power to UART3 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART3 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -650,10 +650,10 @@ static inline void am335x_uart4config(void)
   /* Step 1: Enable power to UART4 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART4 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -671,10 +671,10 @@ static inline void am335x_uart5config(void)
   /* Step 1: Enable power to UART5 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART5 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -806,7 +806,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Auto-Flow Control in the Modem Control Register */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   up_serialout(priv, AM335X_UART_MDR1_OFFSET, UART_MDR1_MODE_16X);

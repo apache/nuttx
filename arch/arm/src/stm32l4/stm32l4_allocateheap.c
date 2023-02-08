@@ -123,7 +123,7 @@
 #if CONFIG_MM_REGIONS > defined(CONFIG_STM32L4_SRAM2_HEAP) + \
                         defined(CONFIG_STM32L4_SRAM3_HEAP) + \
                         defined(CONFIG_STM32L4_FSMC_SRAM_HEAP) + 1
-#  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
+#  pragma message "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
 
 /* If FSMC SRAM is going to be used as heap, then verify that the starting

@@ -245,13 +245,13 @@
 #if defined(CONFIG_STM32H7_I2C1) || defined(CONFIG_STM32H7_I2C2) || \
     defined(CONFIG_STM32H7_I2C3)
 #  if STM32_RCC_D2CCIP2R_I2C123SRC != RCC_D2CCIP2R_I2C123SEL_HSI
-#    warning "Clock Source STM32_RCC_D2CCIP2R_I2C123SRC must be HSI"
+#    pragma message "Clock Source STM32_RCC_D2CCIP2R_I2C123SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
 #  endif
 #endif
 #ifdef CONFIG_STM32H7_I2C4
 #  if STM32_RCC_D3CCIPR_I2C4SRC != RCC_D3CCIPR_I2C4SEL_HSI
-#    warning "Clock Source STM32_RCC_D3CCIPR_I2C4SRC must be HSI"
+#    pragma message "Clock Source STM32_RCC_D3CCIPR_I2C4SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
 #  endif
 #endif
@@ -265,7 +265,7 @@
 #if !defined(CONFIG_STM32H7_I2CTIMEOSEC) && !defined(CONFIG_STM32H7_I2CTIMEOMS)
 #  define CONFIG_STM32H7_I2CTIMEOSEC 0
 #  define CONFIG_STM32H7_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#  warning "Using Default 500 Ms Timeout"
+#  pragma message "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32H7_I2CTIMEOSEC)
 #  define CONFIG_STM32H7_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32H7_I2CTIMEOMS)
@@ -2715,7 +2715,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
   struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
 
 #if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
-#   warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
+#   pragma message "STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone."
   return NULL;
 #endif
 

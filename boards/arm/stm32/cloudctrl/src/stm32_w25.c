@@ -61,7 +61,7 @@
 /* Can't support both FAT and NXFFS */
 
 #if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
-#  warning "Can't support both FAT and NXFFS -- using FAT"
+#  pragma message "Can't support both FAT and NXFFS -- using FAT"
 #endif
 
 /****************************************************************************

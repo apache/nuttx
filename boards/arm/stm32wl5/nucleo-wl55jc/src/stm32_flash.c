@@ -86,7 +86,7 @@
      CONFIG_ARCH_BOARD_FLASH_PART2_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART3_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART4_SIZE) < 128
-#   warning "There is unused space on flash"
+#   pragma message "There is unused space on flash"
 #endif
 
 #define FLASH_PAGE_SIZE    STM32WL5_FLASH_PAGESIZE

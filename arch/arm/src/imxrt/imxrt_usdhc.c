@@ -70,9 +70,9 @@
 #endif
 
 #if !defined(CONFIG_IMXRT_USDHC_DMA)
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #elif !defined(CONFIG_SDIO_DMA)
-#  warning CONFIG_SDIO_DMA should be defined with CONFIG_IMXRT_USDHC_DMA
+#  pragma message "CONFIG_SDIO_DMA should be defined with CONFIG_IMXRT_USDHC_DMA"
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)

@@ -75,13 +75,13 @@
 /* Configuration ************************************************************/
 
 #if !defined(CONFIG_SAM34_HSMCI_DMA)
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #elif !defined(CONFIG_SDIO_DMA)
-#  warning CONFIG_SDIO_DMA should be defined with CONFIG_SAM34_HSMCI_DMA
+#  pragma message "CONFIG_SDIO_DMA should be defined with CONFIG_SAM34_HSMCI_DMA"
 #endif
 
 #if !(defined(CONFIG_SAM34_DMAC0) || defined(CONFIG_SAM34_PDCA))
-#  warning "HSMCI driver requires CONFIG_SAM34_DMAC0 or CONFIG_SAM34_PDCA"
+#  pragma message "HSMCI driver requires CONFIG_SAM34_DMAC0 or CONFIG_SAM34_PDCA"
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE

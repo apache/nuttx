@@ -57,7 +57,7 @@
                           CONFIG_BLUETOOTH_TXCONN_NMSGS)
 
 #if BT_NMSGS > CONFIG_PREALLOC_MQ_MSGS
-#  warning WARNING: not enough pre-allocated messages
+#  pragma message "WARNING: not enough pre-allocated messages"
 #endif
 
 /****************************************************************************

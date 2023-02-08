@@ -174,7 +174,7 @@ void arm_ack_irq(int irq)
 #ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority)
 {
-#warning "Not implemented"
+#pragma message "Not implemented"
   return OK;
 }
 #endif

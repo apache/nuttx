@@ -84,18 +84,18 @@
 
 #if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
 #  if !defined(CONFIG_STM32_TIM1)
-#    warning "CONFIG_STM3210E_LCD_PWM requires CONFIG_STM32_TIM1"
+#    pragma message "CONFIG_STM3210E_LCD_PWM requires CONFIG_STM32_TIM1"
 #    undef CONFIG_STM3210E_LCD_PWM
 #  endif
 #  if defined(CONFIG_STM32_TIM1_FULL_REMAP)
-#    warning "PA8 cannot be configured as TIM1 CH1 with full remap"
+#    pragma message "PA8 cannot be configured as TIM1 CH1 with full remap"
 #    undef CONFIG_STM3210E_LCD_PWM
 #  endif
 #endif
 
 #if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
 #  if CONFIG_LCD_MAXPOWER < 2
-#    warning "A larger value of CONFIG_LCD_MAXPOWER is recommended"
+#    pragma message "A larger value of CONFIG_LCD_MAXPOWER is recommended"
 #  endif
 #endif
 

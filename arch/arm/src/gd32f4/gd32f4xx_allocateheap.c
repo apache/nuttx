@@ -135,7 +135,7 @@
 #  elif CONFIG_MM_REGIONS < 2
 /* Only one memory region.  Force Case 0 */
 
-#    warning "EXMC SRAM (and TCMSRAM) excluded from the heap"
+#    pragma message "EXMC SRAM (and TCMSRAM) excluded from the heap"
 #    undef CONFIG_GD32F4_EXTERNAL_RAM
 #    undef CONFIG_GD32F4_TCMEXCLUDE
 #    define CONFIG_GD32F4_TCMEXCLUDE 1

@@ -187,7 +187,7 @@ static int skel_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     }
 
   /* Set the pin direction in the I/O Expander */
-#warning Missing logic
+#pragma message "Missing logic"
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -235,7 +235,7 @@ static int skel_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
         }
 
       /* Set the pin option */
-#warning Missing logic
+#pragma message "Missing logic"
 
       nxmutex_unlock(&priv->lock);
     }
@@ -279,7 +279,7 @@ static int skel_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     }
 
   /* Write the pin value */
-#warning Missing logic
+#pragma message "Missing logic"
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -324,10 +324,10 @@ static int skel_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     }
 
   /* Read the pin value */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Return the pin value via the value pointer */
-#warning Missing logic
+#pragma message "Missing logic"
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -365,7 +365,7 @@ static int skel_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     }
 
   /* Read the buffered pin level */
-#warning Missing logic
+#pragma message "Missing logic"
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -389,7 +389,7 @@ static int skel_getmultibits(FAR struct skel_dev_s *priv, FAR uint8_t *pins,
   int i;
 
   /* Read the pinset from the IO-Expander hardware */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Read the requested bits */
 
@@ -444,7 +444,7 @@ static int skel_multiwritepin(FAR struct ioexpander_dev_s *dev,
     }
 
   /* Read the pinset from the IO-Expander hardware */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Apply the user defined changes */
 
@@ -468,7 +468,7 @@ static int skel_multiwritepin(FAR struct ioexpander_dev_s *dev,
     }
 
   /* Now write back the new pins states */
-#warning Missing logic
+#pragma message "Missing logic"
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -669,7 +669,7 @@ static void skel_irqworker(void *arg)
   int i;
 
   /* Read the pinset from the IO-Expander hardware */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Perform pin interrupt callbacks */
 
@@ -694,7 +694,7 @@ static void skel_irqworker(void *arg)
     }
 
   /* Re-enable interrupts */
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #endif
 
@@ -738,7 +738,7 @@ static void skel_interrupt(FAR void *arg)
   if (work_available(&priv->work))
     {
       /* Disable interrupts */
-#warning Missing logic
+#pragma message "Missing logic"
 
       /* Schedule interrupt related work on the high priority worker
        * thread.
@@ -801,7 +801,7 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
   /* Attach the I/O expander interrupt handler and enable interrupts */
-#warning Missing logic
+#pragma message "Missing logic"
 
 #endif
 

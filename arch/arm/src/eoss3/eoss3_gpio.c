@@ -183,7 +183,7 @@ bool eoss3_gpioread(gpio_pinset_t cfgset)
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int eoss3_dumpgpio(uint32_t pinset, const char *msg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif

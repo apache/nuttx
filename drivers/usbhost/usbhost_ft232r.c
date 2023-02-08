@@ -54,33 +54,33 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_USBHOST
-#  warning USB host support not enabled (CONFIG_USBHOST)
+#  pragma message "USB host support not enabled (CONFIG_USBHOST)"
 #endif
 
 #ifdef CONFIG_USBHOST_BULK_DISABLE
-#  warning USB bulk endpoint support is disabled (CONFIG_USBHOST_BULK_DISABLE)
+#  pragma message "USB bulk endpoint support is disabled (CONFIG_USBHOST_BULK_DISABLE)"
 #endif
 
 #ifdef CONFIG_USBHOST_INT_DISABLE
-#  warning USB interrupt endpoint support is disabled (CONFIG_USBHOST_INT_DISABLE)
+#  pragma message "USB interrupt endpoint support is disabled (CONFIG_USBHOST_INT_DISABLE)"
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
-#  warning Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
+#  pragma message "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #else
 #  ifndef CONFIG_SCHED_HPWORK
-#    warning High priority work thread support is required (CONFIG_SCHED_HPWORK)
+#    pragma message "High priority work thread support is required (CONFIG_SCHED_HPWORK)"
 #  endif
 #  ifndef CONFIG_SCHED_LPWORK
-#    warning Low priority work thread support is required (CONFIG_SCHED_LPWORK)
+#    pragma message "Low priority work thread support is required (CONFIG_SCHED_LPWORK)"
 #  endif
 #  if CONFIG_SCHED_LPNTHREADS < 2
-#    warning Multiple low priority work threads recommended for performance (CONFIG_SCHED_LPNTHREADS > 1)
+#    pragma message "Multiple low priority work threads recommended for performance (CONFIG_SCHED_LPNTHREADS > 1)"
 #  endif
 #endif
 
 #ifndef CONFIG_SERIAL_REMOVABLE
-#  warning Removable serial device support is required (CONFIG_SERIAL_REMOVABLE)
+#  pragma message "Removable serial device support is required (CONFIG_SERIAL_REMOVABLE)"
 #endif
 
 #ifdef CONFIG_USBHOST_FT232R_RXDELAY

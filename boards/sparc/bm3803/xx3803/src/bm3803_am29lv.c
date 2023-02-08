@@ -62,7 +62,7 @@
 /* Can't support both FAT and SMARTFS */
 
 #if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_SMARTFS)
-#  warning "Can't support both FAT and SMARTFS -- using FAT"
+#  pragma message "Can't support both FAT and SMARTFS -- using FAT"
 #endif
 
 /****************************************************************************

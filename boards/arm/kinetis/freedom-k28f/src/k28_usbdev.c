@@ -123,5 +123,5 @@ int kinetis_usbpullup(struct usbdev_s *dev, bool enable)
 void kinetis_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
-#warning "Missing logic"
+#pragma message "Missing logic"
 }

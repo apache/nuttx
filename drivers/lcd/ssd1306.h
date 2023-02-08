@@ -51,7 +51,7 @@
 #endif
 
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
-#  warning "No support for portrait modes"
+#  pragma message "No support for portrait modes"
 #  undef CONFIG_LCD_LANDSCAPE
 #  define CONFIG_LCD_LANDSCAPE 1
 #  undef CONFIG_LCD_PORTRAIT

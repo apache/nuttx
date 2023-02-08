@@ -105,7 +105,7 @@
 #endif
 
 #if !defined(CONFIG_STM32_MII) && !defined(CONFIG_STM32_RMII)
-#  warning "Neither CONFIG_STM32_MII nor CONFIG_STM32_RMII defined"
+#  pragma message "Neither CONFIG_STM32_MII nor CONFIG_STM32_RMII defined"
 #endif
 
 #if defined(CONFIG_STM32_MII) && defined(CONFIG_STM32_RMII)
@@ -115,14 +115,14 @@
 #ifdef CONFIG_STM32_MII
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    if !defined(CONFIG_STM32_MII_MCO1) && !defined(CONFIG_STM32_MII_MCO2) && !defined(CONFIG_STM32_MII_EXTCLK)
-#      warning "Neither CONFIG_STM32_MII_MCO1, CONFIG_STM32_MII_MCO2, nor CONFIG_STM32_MII_EXTCLK defined"
+#      pragma message "Neither CONFIG_STM32_MII_MCO1, CONFIG_STM32_MII_MCO2, nor CONFIG_STM32_MII_EXTCLK defined"
 #    endif
 #    if defined(CONFIG_STM32_MII_MCO1) && defined(CONFIG_STM32_MII_MCO2)
 #      error "Both CONFIG_STM32_MII_MCO1 and CONFIG_STM32_MII_MCO2 defined"
 #    endif
 #  elif defined(CONFIG_STM32_CONNECTIVITYLINE)
 #    if !defined(CONFIG_STM32_MII_MCO) && !defined(CONFIG_STM32_MII_EXTCLK)
-#      warning "Neither CONFIG_STM32_MII_MCO nor CONFIG_STM32_MII_EXTCLK defined"
+#      pragma message "Neither CONFIG_STM32_MII_MCO nor CONFIG_STM32_MII_EXTCLK defined"
 #    endif
 #  endif
 #endif
@@ -130,14 +130,14 @@
 #ifdef CONFIG_STM32_RMII
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    if !defined(CONFIG_STM32_RMII_MCO1) && !defined(CONFIG_STM32_RMII_MCO2) && !defined(CONFIG_STM32_RMII_EXTCLK)
-#      warning "Neither CONFIG_STM32_RMII_MCO1, CONFIG_STM32_RMII_MCO2, nor CONFIG_STM32_RMII_EXTCLK defined"
+#      pragma message "Neither CONFIG_STM32_RMII_MCO1, CONFIG_STM32_RMII_MCO2, nor CONFIG_STM32_RMII_EXTCLK defined"
 #    endif
 #    if defined(CONFIG_STM32_RMII_MCO1) && defined(CONFIG_STM32_RMII_MCO2)
 #      error "Both CONFIG_STM32_RMII_MCO1 and CONFIG_STM32_RMII_MCO2 defined"
 #    endif
 #  elif defined(CONFIG_STM32_CONNECTIVITYLINE)
 #    if !defined(CONFIG_STM32_RMII_MCO) && !defined(CONFIG_STM32_RMII_EXTCLK)
-#      warning "Neither CONFIG_STM32_RMII_MCO nor CONFIG_STM32_RMII_EXTCLK defined"
+#      pragma message "Neither CONFIG_STM32_RMII_MCO nor CONFIG_STM32_RMII_EXTCLK defined"
 #    endif
 #  endif
 #endif
@@ -217,7 +217,7 @@
 #endif
 
 #ifdef CONFIG_STM32_ETH_PTP
-#  warning "CONFIG_STM32_ETH_PTP is not yet supported"
+#  pragma message "CONFIG_STM32_ETH_PTP is not yet supported"
 #endif
 
 /* This driver does not use enhanced descriptors.  Enhanced descriptors must
@@ -249,7 +249,7 @@
 #endif
 
 #if CONFIG_STM32_ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
-#  warning "You using an incomplete/untested configuration"
+#  pragma message "You using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_STM32_ETH_NRXDESC

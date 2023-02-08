@@ -141,7 +141,7 @@
 /* DMA Register Configuration */
 
 #if defined(CONFIG_KINETIS_DMA)
-#  warning "DMA Unsupported on this Kinetis device!"
+#  pragma message "DMA Unsupported on this Kinetis device!"
 #endif
 
 #elif KINETIS_DMA_VERSION == KINETIS_DMA_VERSION_01

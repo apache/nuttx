@@ -48,7 +48,7 @@ static const nxgl_mxpixel_t g_bgcolor[CONFIG_NX_NPLANES] =
   CONFIG_NX_BGCOLOR
 
 #if CONFIG_NX_NPLANES > 1
-#  warning Missing logic for multiple color planes
+#  pragma message "Missing logic for multiple color planes"
 #endif
 };
 

@@ -215,7 +215,7 @@ static ssize_t local_send(FAR struct socket *psock,
         {
           /* Local UDP packet send */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
           ret = -ENOSYS;
         }

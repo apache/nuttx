@@ -89,14 +89,14 @@
 
 #ifndef CONFIG_USBMSC_COMPOSITE
 #  ifndef CONFIG_USBMSC_EPBULKOUT
-#    warning "EPBULKOUT not defined in the configuration"
+#    pragma message "EPBULKOUT not defined in the configuration"
 #    define CONFIG_USBMSC_EPBULKOUT 2
 #  endif
 #endif
 
 #ifndef CONFIG_USBMSC_COMPOSITE
 #  ifndef CONFIG_USBMSC_EPBULKIN
-#    warning "EPBULKIN not defined in the configuration"
+#    pragma message "EPBULKIN not defined in the configuration"
 #    define CONFIG_USBMSC_EPBULKIN 3
 #  endif
 #endif
@@ -118,13 +118,13 @@
 #else
 #  ifdef CONFIG_USBDEV_DUALSPEED
 #    if CONFIG_USBMSC_BULKINREQLEN < 512
-#      warning "Bulk in buffer size smaller than max packet"
+#      pragma message "Bulk in buffer size smaller than max packet"
 #      undef CONFIG_USBMSC_BULKINREQLEN
 #      define CONFIG_USBMSC_BULKINREQLEN 512
 #    endif
 #  else
 #    if CONFIG_USBMSC_BULKINREQLEN < 64
-#      warning "Bulk in buffer size smaller than max packet"
+#      pragma message "Bulk in buffer size smaller than max packet"
 #      undef CONFIG_USBMSC_BULKINREQLEN
 #      define CONFIG_USBMSC_BULKINREQLEN 64
 #    endif
@@ -140,13 +140,13 @@
 #else
 #  ifdef CONFIG_USBDEV_DUALSPEED
 #    if CONFIG_USBMSC_BULKOUTREQLEN < 512
-#      warning "Bulk in buffer size smaller than max packet"
+#      pragma message "Bulk in buffer size smaller than max packet"
 #      undef CONFIG_USBMSC_BULKOUTREQLEN
 #      define CONFIG_USBMSC_BULKOUTREQLEN 512
 #    endif
 #  else
 #    if CONFIG_USBMSC_BULKOUTREQLEN < 64
-#      warning "Bulk in buffer size smaller than max packet"
+#      pragma message "Bulk in buffer size smaller than max packet"
 #      undef CONFIG_USBMSC_BULKOUTREQLEN
 #      define CONFIG_USBMSC_BULKOUTREQLEN 64
 #    endif
@@ -157,12 +157,12 @@
 
 #ifndef CONFIG_USBMSC_COMPOSITE
 #  ifndef CONFIG_USBMSC_VENDORID
-#    warning "CONFIG_USBMSC_VENDORID not defined"
+#    pragma message "CONFIG_USBMSC_VENDORID not defined"
 #    define CONFIG_USBMSC_VENDORID 0x584e
 #  endif
 
 #  ifndef CONFIG_USBMSC_PRODUCTID
-#    warning "CONFIG_USBMSC_PRODUCTID not defined"
+#    pragma message "CONFIG_USBMSC_PRODUCTID not defined"
 #    define CONFIG_USBMSC_PRODUCTID 0x5342
 #  endif
 
@@ -171,12 +171,12 @@
 #  endif
 
 #  ifndef CONFIG_USBMSC_VENDORSTR
-#    warning "No Vendor string specified"
+#    pragma message "No Vendor string specified"
 #    define CONFIG_USBMSC_VENDORSTR  "NuttX"
 # endif
 
 #  ifndef CONFIG_USBMSC_PRODUCTSTR
-#    warning "No Product string specified"
+#    pragma message "No Product string specified"
 #    define CONFIG_USBMSC_PRODUCTSTR "USBdev Storage"
 #  endif
 

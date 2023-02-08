@@ -159,7 +159,7 @@
 #  define LPC43_NADC10_CHANNELS    (4)         /* Four ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4320FBD144)
-#  warning "Data sheet and user manual are consistement for the LPC4320"
+#  pragma message "Data sheet and user manual are consistement for the LPC4320"
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
 #  define LPC43_LOCSRAM_BANK0_SIZE (128*1024)  /* 168Kb Local SRAM */
@@ -186,7 +186,7 @@
 #  define LPC43_NADC10_CHANNELS    (8)         /* Eight ADC channels */
 #  undef  LPC43_NADC12                         /* No 12-bit ADC controllers */
 #elif defined(CONFIG_ARCH_CHIP_LPC4320FET100)
-#  warning "Data sheet and user manual are consistement for the LPC4320"
+#  pragma message "Data sheet and user manual are consistement for the LPC4320"
 #  define LPC43_FLASH_BANKA_SIZE   (0)         /* Flashless */
 #  define LPC43_FLASH_BANKB_SIZE   (0)
 #  define LPC43_LOCSRAM_BANK0_SIZE (128*1024)  /* 168Kb Local SRAM */

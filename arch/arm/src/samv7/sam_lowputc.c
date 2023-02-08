@@ -326,8 +326,8 @@ void sam_lowsetup(void)
    */
 
 #  if defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
-#    warning CONFIG_SAMV7_JTAG_FULL_ENABLE is incompatible with CONFIG_SAMV7_USART1.
-#    warning The SYSIO Pin4 must be bound to PB4 to use USART1
+#    pragma message "CONFIG_SAMV7_JTAG_FULL_ENABLE is incompatible with CONFIG_SAMV7_USART1."
+#    pragma message "The SYSIO Pin4 must be bound to PB4 to use USART1"
 #  endif
 
   regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);

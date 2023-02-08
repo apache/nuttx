@@ -49,7 +49,7 @@
 #if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2) || \
     defined(CONFIG_STM32H7_ADC3)
 #ifndef CONFIG_STM32H7_ADC1
-#  warning "Channel information only available for ADC1"
+#  pragma message "Channel information only available for ADC1"
 #endif
 
 /* The number of ADC channels in the conversion list */

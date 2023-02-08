@@ -202,7 +202,7 @@ static void ehci_hwinit(void)
 #  elif (BOARD_EXTAL_FREQ == 12000000)
   regval |= USBPHY_PLL_SICN_PLL_DIV_SEL_12MHZ;
 #  else
-#    warning Not supported.
+#    pragma message "Not supported."
 #  endif
   putreg32(regval, KINETIS_USBHSPHY_PLL_SIC);
 
@@ -564,7 +564,7 @@ int kinetis_setup_overcurrent(xcpt_t handler, void *arg)
 
   /* Configure the interrupt */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
   return OK;

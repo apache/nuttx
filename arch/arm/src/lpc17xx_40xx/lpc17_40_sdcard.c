@@ -85,7 +85,7 @@
  */
 
 #ifndef CONFIG_LPC17_40_SDCARD_DMA
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #else
 #  ifndef CONFIG_LPC17_40_GPDMA
 #    error "CONFIG_LPC17_40_SDCARD_DMA support requires CONFIG_LPC17_40_GPDMA"

@@ -99,7 +99,7 @@
 #endif
 
 #if CONFIG_UG9664HSWAG01_NINTERFACES != 1
-#  warning "Only a single UG-9664HSWAG01 interface is supported"
+#  pragma message "Only a single UG-9664HSWAG01 interface is supported"
 #  undef CONFIG_UG9664HSWAG01_NINTERFACES
 #  define CONFIG_UG9664HSWAG01_NINTERFACES 1
 #endif
@@ -107,7 +107,7 @@
 /* Orientation */
 
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
-#  warning "No support for portrait modes"
+#  pragma message "No support for portrait modes"
 #  define CONFIG_LCD_LANDSCAPE 1
 #  undef CONFIG_LCD_PORTRAIT
 #  undef CONFIG_LCD_RLANDSCAPE
@@ -125,7 +125,7 @@
 #endif
 
 #if CONFIG_LCD_MAXCONTRAST < 255
-#  warning "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
+#  pragma message "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
 #endif
 
 /* Check power setting */
@@ -135,7 +135,7 @@
 #endif
 
 #if CONFIG_LCD_MAXPOWER != 2
-#  warning "CONFIG_LCD_MAXPOWER should be 2"
+#  pragma message "CONFIG_LCD_MAXPOWER should be 2"
 #  undef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 2
 #endif

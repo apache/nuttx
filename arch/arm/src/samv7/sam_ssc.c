@@ -316,7 +316,7 @@
  * REVISIT:  I believe that the SAMV1 has only a single APB.
  */
 
-#warning REVISIT
+#pragma message "REVISIT"
 #define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF0
 #define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
 
@@ -1240,7 +1240,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
       /* Invalidate the data cache so that nothing gets flush into the
        * DMA buffer after starting the DMA transfer.
        */
-#warning Not yet supported
+#pragma message "Not yet supported"
 #if 0
       up_invalidate_dcache((uintptr_t)apb->samp,
                            (uintptr_t)apb->samp + apb->nmaxbytes);
@@ -1659,7 +1659,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
       /* Flush the data cache so that everything is in the physical memory
        * before starting the DMA.
        */
-#warning REVISIT
+#pragma message "REVISIT"
 #if 1
       up_invalidate_dcache_all();
 #else

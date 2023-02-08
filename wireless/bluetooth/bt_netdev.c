@@ -296,21 +296,21 @@ static void btnet_l2cap_connected(FAR struct bt_conn_s *conn,
                                   FAR void *context, uint16_t cid)
 {
   wlinfo("Connected\n");
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 static void btnet_l2cap_disconnected(FAR struct bt_conn_s *conn,
                                      FAR void *context, uint16_t cid)
 {
   wlinfo("Disconnected\n");
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 static void btnet_l2cap_encrypt_change(FAR struct bt_conn_s *conn,
                                        FAR void *context, uint16_t cid)
 {
   wlinfo("Encryption change\n");
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -463,14 +463,14 @@ static void btnet_hci_connected(FAR struct bt_conn_s *conn,
                                 FAR void *context)
 {
   wlinfo("Connected\n");
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
                                    FAR void *context)
 {
   wlinfo("Disconnected\n");
-#warning Missing logic
+#pragma message "Missing logic"
 }
 #else
 

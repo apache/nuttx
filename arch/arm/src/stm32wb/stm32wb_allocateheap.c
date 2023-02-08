@@ -99,7 +99,7 @@
 
 #if CONFIG_MM_REGIONS > defined(CONFIG_STM32WB_SRAM2A_HEAP) + \
                         defined(CONFIG_STM32WB_SRAM2B_HEAP) + 1
-#  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
+#  pragma message "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
 
 /****************************************************************************

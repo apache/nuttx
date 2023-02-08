@@ -256,11 +256,11 @@ static void ieee802154_meta_data(FAR struct radio_driver_s *radio,
   meta->handle = radio->r_msdu_handle++;
 
 #ifdef CONFIG_IEEE802154_SECURITY
-#  warning CONFIG_IEEE802154_SECURITY not yet supported
+#  pragma message "CONFIG_IEEE802154_SECURITY not yet supported"
 #endif
 
 #ifdef CONFIG_IEEE802154_UWB
-#  warning CONFIG_IEEE802154_UWB not yet supported
+#  pragma message "CONFIG_IEEE802154_UWB not yet supported"
 #endif
 
   /* Ranging left zero */
@@ -292,7 +292,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
 
   /* Make sure that this is the driver to which the socket is connected. */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;

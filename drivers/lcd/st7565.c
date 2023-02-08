@@ -75,7 +75,7 @@
 #endif
 
 #if CONFIG_ST7565_NINTERFACES != 1
-#  warning "Only a single ST7565 interface is supported"
+#  pragma message "Only a single ST7565 interface is supported"
 #  undef CONFIG_ST7565_NINTERFACES
 #  define CONFIG_ST7565_NINTERFACES 1
 #endif
@@ -102,7 +102,7 @@
 #endif
 
 #if CONFIG_LCD_MAXCONTRAST < 255
-#  warning "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
+#  pragma message "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
 #endif
 
 /* Color Properties *********************************************************/

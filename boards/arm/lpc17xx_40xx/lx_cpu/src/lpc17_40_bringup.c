@@ -76,14 +76,14 @@
 
 #ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
-#     warning "Assuming slot MMC/SD slot 0"
+#     pragma message "Assuming slot MMC/SD slot 0"
 #     define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #endif
 
 #ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDMINOR)
-#     warning "Assuming /dev/mmcsd0"
+#     pragma message "Assuming /dev/mmcsd0"
 #     define CONFIG_NSH_MMCSDMINOR 0
 #  endif
 #endif
@@ -104,7 +104,7 @@
 
 #if defined(NSH_HAVE_MMCSD_CD) && \
     (defined(CONFIG_LPC17_40_SSP1) || defined(CONFIG_LPC17_40_USBDEV))
-#  warning "Use of SD Card Detect pin conflicts with SSP1 and/or USB device"
+#  pragma message "Use of SD Card Detect pin conflicts with SSP1 and/or USB device"
 #endif
 
 /* USB Host */

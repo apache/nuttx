@@ -105,7 +105,7 @@
 #  define REGION1_RAM_SIZE     (DTCM_END_ADDR - DTCM_BASE_ADDR)
 #  define S32K3XX_DCTM_ASSIGNED 1
 #else
-#  warning CONFIG_MM_REGIONS > 1 but no available memory region
+#  pragma message "CONFIG_MM_REGIONS > 1 but no available memory region"
 #endif
 
 #define REGION1_RAM_END        (REGION1_RAM_START + REGION1_RAM_SIZE)

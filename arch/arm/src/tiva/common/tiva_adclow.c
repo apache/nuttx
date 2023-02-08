@@ -106,7 +106,7 @@
 #endif
 
 #ifdef CONFIG_TIVA_ADC_ALT_CLK
-#  warning CONFIG_TIVA_ADC_ALT_CLK unsupported.
+#  pragma message "CONFIG_TIVA_ADC_ALT_CLK unsupported."
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -643,7 +643,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
       /* PWM triggering */
 
-#warning Missing Logic
+#pragma message "Missing Logic"
 
       /* TODO: Needs to be tested */
 
@@ -666,7 +666,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
         break;
 #endif
 
-#warning Missing Logic
+#pragma message "Missing Logic"
 
       /* Unsupported or invalid command */
 

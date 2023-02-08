@@ -58,7 +58,7 @@
 /* Some I/O buffers should be allocated */
 
 #if !defined(CONFIG_IOB_NBUFFERS)
-#  warning CONFIG_IOB_NBUFFERS not defined
+#  pragma message "CONFIG_IOB_NBUFFERS not defined"
 #  define CONFIG_IOB_NBUFFERS 0
 #endif
 

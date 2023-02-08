@@ -137,7 +137,7 @@
 #endif
 
 #if ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
-#  warning "You are using an incomplete/untested configuration"
+#  pragma message "You are using an incomplete/untested configuration"
 #endif
 
 /* We need at least one more free buffer than transmit buffers */

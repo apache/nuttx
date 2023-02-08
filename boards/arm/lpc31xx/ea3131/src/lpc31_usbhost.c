@@ -131,19 +131,19 @@ void weak_function lpc31_usbhost_bootinitialize(void)
    * This will be needed to control the PCA9532 GPIO expander.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Use the I2C interface to initialize the PCA9532 GPIO expander driver */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure pin to drive VBUS power using the PCA8532 GPIO expander */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure pin to detect overrcurrent errors */
 
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -262,13 +262,13 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable)
         {
           /* Enable the Power Switch by driving the enable pin low */
 
-#warning Missing logic
+#pragma message "Missing logic"
         }
       else
         {
           /* Disable the Power Switch by driving the enable pin high */
 
-#warning Missing logic
+#pragma message "Missing logic"
         }
     }
 }
@@ -303,7 +303,7 @@ int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
 
   /* Configure the interrupt */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
   return OK;

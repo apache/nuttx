@@ -53,12 +53,12 @@
 
 #ifndef CONFIG_COMPOSITE_COMPOSITE
 #  ifndef CONFIG_COMPOSITE_VENDORID
-#    warning "CONFIG_COMPOSITE_VENDORID not defined"
+#    pragma message "CONFIG_COMPOSITE_VENDORID not defined"
 #    define CONFIG_COMPOSITE_VENDORID 0x03eb
 #  endif
 
 #  ifndef CONFIG_COMPOSITE_PRODUCTID
-#    warning "CONFIG_COMPOSITE_PRODUCTID not defined"
+#    pragma message "CONFIG_COMPOSITE_PRODUCTID not defined"
 #    define CONFIG_COMPOSITE_PRODUCTID 0x2022
 #  endif
 
@@ -67,12 +67,12 @@
 #  endif
 
 #  ifndef CONFIG_COMPOSITE_VENDORSTR
-#    warning "No Vendor string specified"
+#    pragma message "No Vendor string specified"
 #    define CONFIG_COMPOSITE_VENDORSTR  "NuttX"
 # endif
 
 #  ifndef CONFIG_COMPOSITE_PRODUCTSTR
-#    warning "No Product string specified"
+#    pragma message "No Product string specified"
 #    define CONFIG_COMPOSITE_PRODUCTSTR "Composite Device"
 #  endif
 

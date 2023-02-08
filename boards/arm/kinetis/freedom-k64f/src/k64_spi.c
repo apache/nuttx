@@ -55,7 +55,7 @@
 
 void weak_function k64_spidev_initialize(void)
 {
-# warning "Missing logic"
+# pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -96,12 +96,12 @@ void kinetis_spi0select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-# warning "Missing logic"
+# pragma message "Missing logic"
 }
 
 uint8_t kinetis_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
-# warning "Missing logic"
+# pragma message "Missing logic"
   return SPI_STATUS_PRESENT;
 }
 #endif
@@ -112,12 +112,12 @@ void kinetis_spi1select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-# warning "Missing logic"
+# pragma message "Missing logic"
 }
 
 uint8_t kinetis_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
-# warning "Missing logic"
+# pragma message "Missing logic"
   return SPI_STATUS_PRESENT;
 }
 #endif
@@ -128,12 +128,12 @@ void kinetis_spi2select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-# warning "Missing logic"
+# pragma message "Missing logic"
 }
 
 uint8_t kinetis_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
-# warning "Missing logic"
+# pragma message "Missing logic"
   return SPI_STATUS_PRESENT;
 }
 #endif

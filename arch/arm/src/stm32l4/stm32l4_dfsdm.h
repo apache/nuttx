@@ -125,7 +125,7 @@
 #  endif
 #  ifndef CONFIG_STM32L4_DFSDM_TIMTRIG
 #    error "CONFIG_STM32L4_DFSDM_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2"
 #  endif
 #endif
 

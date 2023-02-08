@@ -1166,7 +1166,7 @@ static void spirit_interrupt_work(FAR void *arg)
   if (irqstatus.IRQ_TX_FIFO_ALMOST_EMPTY != 0)
     {
       wlinfo("TX FIFO almost empty\n");
-#warning Missing logic
+#pragma message "Missing logic"
     }
 #endif
 

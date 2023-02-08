@@ -59,7 +59,7 @@
 #if !defined(CONFIG_STM32_OTGFS) && !defined(CONFIG_STM32_USB)
 #  undef HAVE_USBDEV
 #elif !defined(CONFIG_USBDEV)
-#  warning CONFIG_STM32_OTGFS (F107) or CONFIG_STM32_USB (F103) is enabled but CONFIG_USBDEV is not
+#  pragma message "CONFIG_STM32_OTGFS (F107) or CONFIG_STM32_USB (F103) is enabled but CONFIG_USBDEV is not"
 #  undef HAVE_USB
 #endif
 

@@ -44,7 +44,7 @@
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_SAMA5_CAN0) && defined(CONFIG_SAMA5_CAN1)
-#  warning "Both CAN0 and CAN1 are enabled.  Assuming only CAN0."
+#  pragma message "Both CAN0 and CAN1 are enabled.  Assuming only CAN0."
 #  undef CONFIG_SAMA5_CAN1
 #endif
 

@@ -104,7 +104,7 @@ void up_initial_state(struct tcb_s *tcb)
    */
 
 #ifdef CONFIG_PIC
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
   /* Set privileged- or unprivileged-mode, depending on how NuttX is
@@ -115,7 +115,7 @@ void up_initial_state(struct tcb_s *tcb)
    */
 
 #ifdef CONFIG_BUILD_KERNEL
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
   /* Set the initial value of the status register.  It will be the same

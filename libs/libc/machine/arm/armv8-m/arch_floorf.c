@@ -49,5 +49,5 @@ float floorf(float x)
 }
 
 #else
-#  warning floorf() not built
+#  pragma message "floorf() not built"
 #endif

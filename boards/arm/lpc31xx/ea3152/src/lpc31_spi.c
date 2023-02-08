@@ -94,7 +94,7 @@ void lpc31_spiselect(struct spi_dev_s *dev,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 uint8_t lpc31_spistatus(struct spi_dev_s *dev, uint32_t devid)

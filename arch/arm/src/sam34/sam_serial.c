@@ -98,7 +98,7 @@
  */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-#  warning PDC or DMAC support is required for RTS hardware flow control
+#  pragma message "PDC or DMAC support is required for RTS hardware flow control"
 #  undef CONFIG_SERIAL_IFLOWCONTROL
 #  undef CONFIG_USART0_IFLOWCONTROL
 #  undef CONFIG_USART1_IFLOWCONTROL
@@ -152,7 +152,7 @@
 #  define HAVE_CONSOLE 1
 #else
 #  ifndef CONFIG_NO_SERIAL_CONSOLE
-#    warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
+#    pragma message "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
 #  endif
 
 #  undef CONFIG_UART0_SERIAL_CONSOLE

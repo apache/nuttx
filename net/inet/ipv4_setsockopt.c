@@ -226,7 +226,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
       case IP_MULTICAST_ALL:          /* Modify the delivery policy of
                                        * multicast messages bound to
                                        * INADDR_ANY */
-#warning Missing logic
+#pragma message "Missing logic"
         nwarn("WARNING: Unimplemented IPv4 option: %d\n", option);
         ret = -ENOSYS;
         break;

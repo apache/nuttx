@@ -206,7 +206,7 @@ int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos)
    * be we don't have the definitions exposed to get it.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
   set_errno(ENOSYS);
   return ERROR;
 }

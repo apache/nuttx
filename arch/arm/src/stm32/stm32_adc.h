@@ -401,7 +401,7 @@
 #  endif
 #  ifndef CONFIG_STM32_ADC1_TIMTRIG
 #    error "CONFIG_STM32_ADC1_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -454,7 +454,7 @@
 #  endif
 #  ifndef CONFIG_STM32_ADC2_TIMTRIG
 #    error "CONFIG_STM32_ADC2_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -511,7 +511,7 @@
 #  endif
 #  ifndef CONFIG_STM32_ADC3_TIMTRIG
 #    error "CONFIG_STM32_ADC3_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -561,7 +561,7 @@
 #  endif
 #  ifndef CONFIG_STM32_ADC4_TIMTRIG
 #    error "CONFIG_STM32_ADC4_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -569,7 +569,7 @@
     defined(ADC3_HAVE_TIMER) || defined(ADC4_HAVE_TIMER)
 #  define ADC_HAVE_TIMER 1
 #  if defined(CONFIG_STM32_STM32F10XX) && !defined(CONFIG_STM32_FORCEPOWER)
-#    warning "CONFIG_STM32_FORCEPOWER must be defined to enable the timer(s)"
+#    pragma message "CONFIG_STM32_FORCEPOWER must be defined to enable the timer(s)"
 #  endif
 #else
 #  undef ADC_HAVE_TIMER

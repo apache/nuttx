@@ -171,7 +171,7 @@
 #  endif
 #  ifndef CONFIG_STM32_SDADC1_TIMTRIG
 #    error "CONFIG_STM32_SDADC1_TIMTRIG not defined"
-#    warning "Values 0:TIM13_CH1 1:TIM14_CH1 2:TIM15_CH2 3:TIM3_CH1 4:TIM4_CH1 5:TIM19_CH2"
+#    pragma message "Values 0:TIM13_CH1 1:TIM14_CH1 2:TIM15_CH2 3:TIM3_CH1 4:TIM4_CH1 5:TIM19_CH2"
 #  endif
 #endif
 
@@ -209,7 +209,7 @@
 #  endif
 #  ifndef CONFIG_STM32_SDADC2_TIMTRIG
 #    error "CONFIG_STM32_SDADC2_TIMTRIG not defined"
-#    warning "Values 0:TIM17_CH1 1:TIM12_CH1 2:TIM2_CH3 3:TIM3_CH2 4:TIM4_CH2 5:TIM19_CH3"
+#    pragma message "Values 0:TIM17_CH1 1:TIM12_CH1 2:TIM2_CH3 3:TIM3_CH2 4:TIM4_CH2 5:TIM19_CH3"
 #  endif
 #endif
 
@@ -247,7 +247,7 @@
 #  endif
 #  ifndef CONFIG_STM32_SDADC3_TIMTRIG
 #    error "CONFIG_STM32_SDADC3_TIMTRIG not defined"
-#    warning "Values 0:TIM16_CH1 1:TIM12_CH2 2:TIM2_CH4 3:TIM3_CH3 4:TIM4_CH3 5:TIM19_CH4"
+#    pragma message "Values 0:TIM16_CH1 1:TIM12_CH2 2:TIM2_CH4 3:TIM3_CH3 4:TIM4_CH3 5:TIM19_CH4"
 #  endif
 #endif
 
@@ -255,7 +255,7 @@
     defined(SDADC3_HAVE_TIMER)
 #  define SDADC_HAVE_TIMER 1
 #  if defined(CONFIG_STM32_STM32F37XX) && !defined(CONFIG_STM32_FORCEPOWER)
-#    warning "CONFIG_STM32_FORCEPOWER must be defined to enable the timer(s)"
+#    pragma message "CONFIG_STM32_FORCEPOWER must be defined to enable the timer(s)"
 #  endif
 #else
 #  undef SDADC_HAVE_TIMER

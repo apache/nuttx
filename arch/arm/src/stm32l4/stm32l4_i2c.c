@@ -306,7 +306,7 @@
 #if !defined(CONFIG_STM32L4_I2CTIMEOSEC) && !defined(CONFIG_STM32L4_I2CTIMEOMS)
 #  define CONFIG_STM32L4_I2CTIMEOSEC 0
 #  define CONFIG_STM32L4_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#  warning "Using Default 500 Ms Timeout"
+#  pragma message "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32L4_I2CTIMEOSEC)
 #  define CONFIG_STM32L4_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32L4_I2CTIMEOMS)
@@ -1285,7 +1285,7 @@ static void stm32l4_i2c_setclock(struct stm32l4_i2c_priv_s *priv,
 #elif STM32L4_PCLK1_FREQUENCY == 120000000
       i2cclk_mhz = 120;
 #else
-#   warning STM32_I2C_INIT: Peripheral clock is PCLK and the speed/timing calculations need to be redone.
+#   pragma message "STM32_I2C_INIT: Peripheral clock is PCLK and the speed/timing calculations need to be redone."
 #endif
 
       if (i2cclk_mhz == 80)

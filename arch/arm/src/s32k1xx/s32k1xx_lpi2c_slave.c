@@ -58,15 +58,15 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_CHIP_S32K11X
-#warning LPI2C slave logic does not support S32K11X (yet)
+#pragma message "LPI2C slave logic does not support S32K11X (yet)"
 #endif
 
 #ifdef CONFIG_I2C_POLLED
-#warning LPI2C slave logic does not support polling (yet)
+#pragma message "LPI2C slave logic does not support polling (yet)"
 #endif
 
 #ifdef CONFIG_I2C_TRACE
-#warning LPI2C slave logic does not support I2C trace debugging (yet)
+#pragma message "LPI2C slave logic does not support I2C trace debugging (yet)"
 #endif
 
 /****************************************************************************

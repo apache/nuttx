@@ -45,13 +45,13 @@
 
 static const uint8_t ble_firmware[] =
 {
-#warning Missing CC2564 ble firmware.
+#pragma message "Missing CC2564 ble firmware."
   0
 };
 
 static const uint8_t cc256x_firmware[] =
 {
-#warning Missing CC2564 bluetooth firmware
+#pragma message "Missing CC2564 bluetooth firmware"
   0
 };
 

@@ -708,10 +708,10 @@ static inline void a1x_uart0config(void)
   /* Step 1: Enable power to UART0 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART0 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -729,10 +729,10 @@ static inline void a1x_uart1config(void)
   /* Step 1: Enable power to UART1 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART1 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -750,10 +750,10 @@ static inline void a1x_uart2config(void)
   /* Step 1: Enable power to UART2 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking on UART2 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -771,10 +771,10 @@ static inline void a1x_uart3config(void)
   /* Step 1: Enable power to UART3 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART3 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -792,10 +792,10 @@ static inline void a1x_uart4config(void)
   /* Step 1: Enable power to UART4 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART4 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -813,10 +813,10 @@ static inline void a1x_uart5config(void)
   /* Step 1: Enable power to UART5 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART5 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -834,10 +834,10 @@ static inline void a1x_uart6config(void)
   /* Step 1: Enable power to UART6 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART6 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -855,10 +855,10 @@ static inline void a1x_uart7config(void)
   /* Step 1: Enable power to UART7 */
 
   flags   = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 2: Enable clocking to UART7 */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Step 3: Configure I/O pins */
 
@@ -979,7 +979,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Auto-Flow Control in the Modem Control Register */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
 #endif

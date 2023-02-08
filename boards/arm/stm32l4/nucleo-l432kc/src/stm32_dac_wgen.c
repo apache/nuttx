@@ -57,7 +57,7 @@
 /* Assertions ***************************************************************/
 
 #ifndef CONFIG_ARCH_CHIP_STM32L432KC
-#  warning "This only have been verified with CONFIG_ARCH_CHIP_STM32L432KC"
+#  pragma message "This only have been verified with CONFIG_ARCH_CHIP_STM32L432KC"
 #endif
 
 #ifndef CONFIG_DAC

@@ -104,7 +104,7 @@
 #endif
 
 #if !defined(CONFIG_SAM34_EMAC_MII) && !defined(CONFIG_SAM34_EMAC_RMII)
-#  warning "Neither CONFIG_SAM34_EMAC_MII nor CONFIG_SAM34_EMAC_RMII defined"
+#  pragma message "Neither CONFIG_SAM34_EMAC_MII nor CONFIG_SAM34_EMAC_RMII defined"
 #endif
 
 #if defined(CONFIG_SAM34_EMAC_MII) && defined(CONFIG_SAM34_EMAC_RMII)
@@ -1292,7 +1292,7 @@ static void sam_txdone(struct sam_emac_s *priv)
            */
 
 #if 0 /* The issue does not exist in the current configuration, but may return */
-#warning REVISIT
+#pragma message "REVISIT"
           if (priv->txtail == 0 &&
               sam_physramaddr((uintptr_t)txdesc) !=
               sam_getreg(priv, SAM_EMAC_TBQB))
@@ -2360,7 +2360,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
   return ret;
 
 #else
-#  warning Missing logic
+#  pragma message "Missing logic"
   return -ENOSYS;
 #endif
 }

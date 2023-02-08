@@ -115,7 +115,7 @@
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
-#    warning "Only one MMC/SD slot, slot 0"
+#    pragma message "Only one MMC/SD slot, slot 0"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
 #  endif

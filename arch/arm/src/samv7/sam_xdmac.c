@@ -60,7 +60,7 @@
  */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAMV7 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  pragma message "SAMV7 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
 /* Check the number of link list descriptors to allocate */
@@ -70,7 +70,7 @@
 #endif
 
 #if CONFIG_SAMV7_NLLDESC < SAMV7_NDMACHAN
-#  warning "At least SAMV7_NDMACHAN descriptors must be allocated"
+#  pragma message "At least SAMV7_NDMACHAN descriptors must be allocated"
 
 #  undef CONFIG_SAMV7_NLLDESC
 #  define CONFIG_SAMV7_NLLDESC SAMV7_NDMACHAN
@@ -439,13 +439,13 @@ static inline struct sam_xdmac_s *sam_controller(struct sam_xdmach_s *xdmach)
 
 static inline uintptr_t sam_physramaddr(uintptr_t virtaddr)
 {
-#warning REVISIT -- Do DCTM address need to be remapped for DMA?
+#pragma message "REVISIT -- Do DCTM address need to be remapped for DMA?"
   return virtaddr;
 }
 
 static inline uintptr_t sam_virtramaddr(uintptr_t physaddr)
 {
-#warning REVISIT -- Do DCTM address need to be remapped for DMA?
+#pragma message "REVISIT -- Do DCTM address need to be remapped for DMA?"
   return physaddr;
 }
 

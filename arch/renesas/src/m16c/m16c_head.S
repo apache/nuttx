@@ -207,7 +207,7 @@ __start:
 	showprogress 'B'
 
 #ifdef CONFIG_M16C_HAVEFARRAM
-# warning "Far RAM support not implemented"
+# pragma message "Far RAM support not implemented"
 #endif
 
 /* Initialize near .data sections (.rodata is not moved) */
@@ -224,7 +224,7 @@ __start:
 	showprogress 'C'
 
 #ifdef CONFIG_M16C_HAVEFARRAM
-# warning "Far RAM support not implemented"
+# pragma message "Far RAM support not implemented"
 #endif
 
 /* Perform early console initialization */
@@ -238,7 +238,7 @@ __start:
 /* Call C++ constructors */
 
 #ifdef CONFIG_CPLUSPLUS
-#  warning "No C++ support yet"
+#  pragma message "No C++ support yet"
 	showprogress 'E'
 #endif
 

@@ -251,7 +251,7 @@
 #    define HAVE_LPUART_CONSOLE 1
 #  else
 #    ifdef CONFIG_DEV_CONSOLE
-#      warning "No valid CONFIG_[LP]UART[n]_SERIAL_CONSOLE Setting"
+#      pragma message "No valid CONFIG_[LP]UART[n]_SERIAL_CONSOLE Setting"
 #    endif
 #    undef CONFIG_UART0_SERIAL_CONSOLE
 #    undef CONFIG_UART1_SERIAL_CONSOLE

@@ -264,7 +264,7 @@ static int comp_read(struct comp_dev_s *dev)
 
 static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOTTY;
 }
 

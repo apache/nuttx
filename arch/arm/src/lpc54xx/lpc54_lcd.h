@@ -87,12 +87,12 @@
 #  endif
 #else
 #  ifndef CONFIG_LPC54_LCD_TFTPANEL
-#    warning "Assuming 24 BPP"
+#    pragma message "Assuming 24 BPP"
 #    define LPC54_BPP                  24
 #    define CONFIG_LPC54_LCD_BPP24     1
 #    define LPC54_COLOR_FMT            FB_FMT_RGB24
 #  else
-#    warning "Assuming 16 BPP 5:6:5"
+#    pragma message "Assuming 16 BPP 5:6:5"
 #    define LPC54_BPP                  16
 #    define CONFIG_LPC54_LCD_BPP16_565 1
 #    define LPC54_COLOR_FMT            FB_FMT_RGB16_565

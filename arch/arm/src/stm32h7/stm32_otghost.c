@@ -2987,7 +2987,7 @@ static inline void stm32_gint_sofisr(struct stm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
 
-#warning "Do what?"
+#pragma message "Do what?"
 
   /* Clear pending SOF interrupt */
 

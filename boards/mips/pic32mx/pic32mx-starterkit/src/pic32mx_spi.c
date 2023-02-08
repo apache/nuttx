@@ -56,7 +56,7 @@ void weak_function pic32mx_spidev_initialize(void)
 {
   /* Configure the SPI chip select GPIOs */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -98,13 +98,13 @@ void  pic32mx_spi1select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n",
          (int)devid, selected ? "assert" : "de-assert");
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 uint8_t pic32mx_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
@@ -112,7 +112,7 @@ uint8_t pic32mx_spi1status(struct spi_dev_s *dev, uint32_t devid)
 int pic32mx_spi1cmddata(struct spi_dev_s *dev,
                         uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 #endif
@@ -124,20 +124,20 @@ void  pic32mx_spi1select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 uint8_t pic32mx_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 #endif
@@ -149,20 +149,20 @@ void  pic32mx_spi3select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 uint8_t pic32mx_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 #endif
@@ -174,20 +174,20 @@ void  pic32mx_spi4select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 uint8_t pic32mx_spi4status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 #endif

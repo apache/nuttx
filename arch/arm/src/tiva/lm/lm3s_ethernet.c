@@ -1452,7 +1452,7 @@ static int tiva_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+#pragma message "Multicast MAC support not implemented"
   return OK;
 }
 #endif
@@ -1482,7 +1482,7 @@ static int tiva_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+#pragma message "Multicast MAC support not implemented"
   return OK;
 }
 #endif

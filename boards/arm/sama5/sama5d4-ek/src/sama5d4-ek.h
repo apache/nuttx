@@ -69,14 +69,14 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_HSMCI
 #endif
 
 /* We need PIO interrupts on PIOE to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOE_IRQ)
-#  warning PIOE interrupts not enabled.  No MMC/SD support.
+#  pragma message "PIOE interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_HSMCI
 #endif
 
@@ -121,8 +121,8 @@
 #endif
 
 #if defined(CONFIG_SAMA5D4EK_NAND_FTL) && defined(CONFIG_SAMA5D4EK_NAND_NXFFS)
-#  warning Both CONFIG_SAMA5D4EK_NAND_FTL and CONFIG_SAMA5D4EK_NAND_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D4EK_NAND_NXFFS
+#  pragma message "Both CONFIG_SAMA5D4EK_NAND_FTL and CONFIG_SAMA5D4EK_NAND_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D4EK_NAND_NXFFS"
 #  undef CONFIG_SAMA5D4EK_NAND_NXFFS
 #endif
 
@@ -156,20 +156,20 @@
 #endif
 
 #if defined(CONFIG_SAMA5D4EK_AT25_FTL) && defined(CONFIG_SAMA5D4EK_AT25_CHARDEV)
-#  warning Both CONFIG_SAMA5D4EK_AT25_CHARDEV and CONFIG_SAMA5D4EK_AT25_FTL are set
-#  warning Ignoring CONFIG_SAMA5D4EK_AT25_FTL
+#  pragma message "Both CONFIG_SAMA5D4EK_AT25_CHARDEV and CONFIG_SAMA5D4EK_AT25_FTL are set"
+#  pragma message "Ignoring CONFIG_SAMA5D4EK_AT25_FTL"
 #  undef CONFIG_SAMA5D4EK_AT25_FTL
 #endif
 
 #if defined(CONFIG_SAMA5D4EK_AT25_FTL) && defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D4EK_AT25_FTL and CONFIG_SAMA5D4EK_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D4EK_AT25_NXFFS
+#  pragma message "Both CONFIG_SAMA5D4EK_AT25_FTL and CONFIG_SAMA5D4EK_AT25_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D4EK_AT25_NXFFS"
 #  undef CONFIG_SAMA5D4EK_AT25_NXFFS
 #endif
 
 #if defined(CONFIG_SAMA5D4EK_AT25_CHARDEV) && defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D4EK_AT25_CHARDEV and CONFIG_SAMA5D4EK_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D4EK_AT25_NXFFS
+#  pragma message "Both CONFIG_SAMA5D4EK_AT25_CHARDEV and CONFIG_SAMA5D4EK_AT25_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D4EK_AT25_NXFFS"
 #  undef CONFIG_SAMA5D4EK_AT25_NXFFS
 #endif
 
@@ -306,7 +306,7 @@
 
 #if defined(CONFIG_USBHOST)
 #  if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
-#    warning CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined
+#    pragma message "CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined"
 #  endif
 #else
 #  undef CONFIG_SAMA5_OHCI
@@ -320,7 +320,7 @@
 #if defined(HAVE_USBHOST) && !defined(CONFIG_SAMA5_UHPHS_RHPORT1) && \
     !defined(CONFIG_SAMA5_UHPHS_RHPORT2) && !defined(CONFIG_SAMA5_UHPHS_RHPORT3)
 #  undef HAVE_USBHOST
-#  warning No ports defined for USB host
+#  pragma message "No ports defined for USB host"
 #endif
 
 #ifndef HAVE_USBHOST
@@ -337,7 +337,7 @@
 
 #if defined(HAVE_USBHOST) && !defined(CONFIG_SAMA5_PIOE_IRQ)
 #  undef HAVE_USBOVCUR
-#  warning CONFIG_SAMA5_PIOE_IRQ need for USB host overcurrent support
+#  pragma message "CONFIG_SAMA5_PIOE_IRQ need for USB host overcurrent support"
 #endif
 
 /* Check if we should enable the USB monitor before starting NSH */
@@ -372,12 +372,12 @@
 
 #ifdef HAVE_MAXTOUCH
 #  ifndef CONFIG_SAMA5_TWI0
-#    warning CONFIG_SAMA5_TWI0 is required for touchscreen support
+#    pragma message "CONFIG_SAMA5_TWI0 is required for touchscreen support"
 #    undef HAVE_MAXTOUCH
 #  endif
 
 #  ifndef CONFIG_SAMA5_PIOE_IRQ
-#    warning PIOE interrupts not enabled.  No touchsreen support.
+#    pragma message "PIOE interrupts not enabled.  No touchsreen support."
 #    undef HAVE_MAXTOUCH
 #  endif
 #endif
@@ -392,36 +392,36 @@
 
 #ifdef HAVE_WM8904
 #  ifdef CONFIG_SAMA5D4_MB_REVC
-#    warning WM8904 should not be used with the Rev C. board
+#    pragma message "WM8904 should not be used with the Rev C. board"
 #  endif
 
 #  ifndef CONFIG_SAMA5_TWI0
-#    warning CONFIG_SAMA5_TWI0 is required for audio support
+#    pragma message "CONFIG_SAMA5_TWI0 is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_SAMA5_SSC0
-#    warning CONFIG_SAMA5_SSC0 is required for audio support
+#    pragma message "CONFIG_SAMA5_SSC0 is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  if !defined(CONFIG_SAMA5_PIOE_IRQ)
-#    warning CONFIG_SAMA5_PIOE_IRQ is required for audio support
+#    pragma message "CONFIG_SAMA5_PIOE_IRQ is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
-#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    pragma message "CONFIG_AUDIO_FORMAT_PCM is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY
-#    warning Defaulting to maximum WM8904 I2C frequency
+#    pragma message "Defaulting to maximum WM8904 I2C frequency"
 #    define CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY 400000
 #  endif
 
 #  if CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY > 400000
-#    warning WM8904 I2C frequency cannot exceed 400KHz
+#    pragma message "WM8904 I2C frequency cannot exceed 400KHz"
 #    undef CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY
 #    define CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY 400000
 #  endif
@@ -439,7 +439,7 @@
 
 #ifdef HAVE_AUDIO_NULL
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
-#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    pragma message "CONFIG_AUDIO_FORMAT_PCM is required for audio support"
 #    undef HAVE_AUDIO_NULL
 #  endif
 #endif

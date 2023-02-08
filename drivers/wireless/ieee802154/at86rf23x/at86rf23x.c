@@ -1120,7 +1120,7 @@ static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
-#warning at86rf23x_getcca not implemented.
+#pragma message "at86rf23x_getcca not implemented."
 
   UNUSED(dev);
   UNUSED(cca);
@@ -1139,7 +1139,7 @@ static int at86rf23x_getcca(FAR struct ieee802154_radio_s *ieee,
 static int at86rf23x_energydetect(FAR struct ieee802154_radio_s *ieee,
                                   FAR uint8_t *energy)
 {
-#warning at86rf23x_energydetect not implemented.
+#pragma message "at86rf23x_energydetect not implemented."
 
   /* Not yet implemented */
 

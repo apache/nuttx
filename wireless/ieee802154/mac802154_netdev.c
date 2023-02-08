@@ -99,7 +99,7 @@
 #endif
 
 #if (CONFIG_MAC802154_NTXDESC < CONFIG_IOB_NBUFFERS)
-#  warning "CONFIG_MAC802154_NTXDESC should probably be equal to" \
+#  pragma message "CONFIG_MAC802154_NTXDESC should probably be equal to" \
            "CONFIG_IOB_NBUFFERS to avoid waiting on req_data"
 #endif
 

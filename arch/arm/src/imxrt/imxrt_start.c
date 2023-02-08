@@ -117,7 +117,7 @@ static inline void imxrt_tcmenable(void)
 #ifdef CONFIG_ARMV7M_ITCM
   /* Copy TCM code from flash to ITCM */
 
-#warning Missing logic
+#pragma message "Missing logic"
 #endif
 }
 

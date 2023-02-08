@@ -87,7 +87,7 @@
  */
 
 #if defined(ADC_HAVE_TIMER) && defined(CONFIG_STM32_STM32L15XX)
-#  warning "There is no proper implementation for TIMER TRIGGERS at the moment"
+#  pragma message "There is no proper implementation for TIMER TRIGGERS at the moment"
 #endif
 
 /* If ADC use HSI as clock-source and HSI is not used for PLL and system

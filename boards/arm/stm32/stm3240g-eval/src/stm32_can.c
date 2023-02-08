@@ -45,7 +45,7 @@
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
+#  pragma message "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
 #  undef CONFIG_STM32_CAN2
 #endif
 

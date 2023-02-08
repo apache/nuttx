@@ -916,7 +916,7 @@ static void stm32_mdma_disable(DMA_CHANNEL dmachan)
 
   DEBUGASSERT(controller == MDMA);
 
-#warning stm32_mdma_disable
+#pragma message "stm32_mdma_disable"
 }
 
 /****************************************************************************
@@ -929,7 +929,7 @@ static void stm32_mdma_disable(DMA_CHANNEL dmachan)
 
 static int stm32_mdma_interrupt(int irq, void *context, void *arg)
 {
-#warning stm32_mdma_interrupt
+#pragma message "stm32_mdma_interrupt"
 }
 
 /****************************************************************************
@@ -947,7 +947,7 @@ static void stm32_mdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
 
   DEBUGASSERT(controller == MDMA);
 
-#warning stm32_mdma_setup not implemented
+#pragma message "stm32_mdma_setup not implemented"
 }
 
 /****************************************************************************
@@ -965,7 +965,7 @@ static void stm32_mdma_start(DMA_HANDLE handle, dma_callback_t callback,
 
   DEBUGASSERT(controller == MDMA);
 
-#warning stm32_mdma_start not implemented
+#pragma message "stm32_mdma_start not implemented"
 }
 
 /****************************************************************************
@@ -1004,7 +1004,7 @@ static bool stm32_mdma_capable(stm32_dmacfg_t *cfg)
   dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 " 0x%08" PRIx32 "\n",
           cfg->maddr, cfg->ndata, ccr, ctcr);
 
-#warning stm32_mdma_capable not implemented
+#pragma message "stm32_mdma_capable not implemented"
 
   return true;
 }

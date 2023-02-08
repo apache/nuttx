@@ -62,7 +62,7 @@
 /* Is there at least one LPUART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_LPUART_DEVICE
-#  warning "No LPUARTs enabled"
+#  pragma message "No LPUARTs enabled"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must

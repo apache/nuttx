@@ -65,7 +65,7 @@
 #define MPFS_PMPCFG_ETH1_3   (MPFS_MPUCFG_BASE + 0x518)
 
 #if defined(CONFIG_MPFS_ETHMAC_0) && defined(CONFIG_MPFS_ETHMAC_1)
-#  warning "Using 2 MACs is not yet supported."
+#  pragma message "Using 2 MACs is not yet supported."
 #  define MPFS_NETHERNET     (2)
 #else
 #  define MPFS_NETHERNET     (1)
@@ -93,7 +93,7 @@
 #endif
 
 #if !defined(CONFIG_MPFS_MAC_SGMII) && !defined(CONFIG_MPFS_MAC_GMII)
-#  warning "Neither CONFIG_MPFS_MAC_SGMII nor CONFIG_MPFS_MAC_GMII defined"
+#  pragma message "Neither CONFIG_MPFS_MAC_SGMII nor CONFIG_MPFS_MAC_GMII defined"
 #endif
 
 #if defined(CONFIG_MPFS_MAC_SGMII) && defined(CONFIG_MPFS_MAC_GMII)

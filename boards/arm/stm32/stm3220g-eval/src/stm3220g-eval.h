@@ -53,7 +53,7 @@
  */
 
 #if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-#  warning "The STM3250G-EVAL will only support one of CAN1 and CAN2"
+#  pragma message "The STM3250G-EVAL will only support one of CAN1 and CAN2"
 #endif
 
 /* You can't use CAN1 with FSMC:
@@ -63,7 +63,7 @@
  */
 
 #if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_FSMC)
-#  warning "The STM3250G-EVAL will only support one of CAN1 and FSMC"
+#  pragma message "The STM3250G-EVAL will only support one of CAN1 and FSMC"
 #endif
 
 /* The USB OTG HS ULPI bus is shared with CAN2 bus:
@@ -73,7 +73,7 @@
  */
 
 #if defined(CONFIG_STM32_CAN2) && defined(CONFIG_STM32_OTGHS)
-#  warning "The STM3250G-EVAL will only support one of CAN2 and USB OTG HS"
+#  pragma message "The STM3250G-EVAL will only support one of CAN2 and USB OTG HS"
 #endif
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */

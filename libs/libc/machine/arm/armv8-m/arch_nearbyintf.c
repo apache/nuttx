@@ -49,5 +49,5 @@ float nearbyintf(float x)
 }
 
 #else
-#  warning nearbyintf() not built
+#  pragma message "nearbyintf() not built"
 #endif

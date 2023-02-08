@@ -76,15 +76,15 @@ int pic32mx_adcinitialize(void)
 {
   /* Configure the pin 19 as an analog input */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   /* Initialize the PGA117 amplifier multiplexer */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   /* Register the ADC device driver */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   return OK;
 }

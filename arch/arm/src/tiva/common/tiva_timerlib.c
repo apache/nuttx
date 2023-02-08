@@ -949,13 +949,13 @@ tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *
    * TODO: Not implemented
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Enable wait-on-trigger?
    *
    * TODO: Not implemented
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Enable count down? */
 
@@ -993,7 +993,7 @@ tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
   /* In addition, if using CCP pins, the TCACT field can be programmed to
    * configure the compare action.
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* TODO: Enable and configure uDMA trigger outputs */
 
@@ -1160,13 +1160,13 @@ tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *
    * TODO: Not implemented
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Enable wait-on-trigger?
    *
    * TODO: Not implemented
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* Enable count down? */
 
@@ -1207,7 +1207,7 @@ tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
   /* In addition, if using CCP pins, the TCACT field can be programmed to
    * configure the compare action.
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* 5. Load the start value into the GPTM Timer n Interval Load Register
    *    (GPTMTnILR).
@@ -1406,7 +1406,7 @@ tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
   /* 6. If interrupts are required, set the CnMIM bit in the GPTM Interrupt
    *    Mask (GPTMIMR) register.
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* 7. Set the TnEN bit in the GPTMCTL register to enable the timer and
    *     begin waiting for edge events.
@@ -1489,7 +1489,7 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
   /* 7. If interrupts are required, set the CnEIM bit in the GPTM Interrupt
    *    Mask (GPTMIMR) register.
    */
-#warning Missing Logic
+#pragma message "Missing Logic"
 
   /* 8. Set the TnEN bit in the GPTM Control (GPTMCTL) register to enable the
    *    timer and start counting.

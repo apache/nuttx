@@ -781,7 +781,7 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
    */
 
   SPIS_DEV_SELECT(dev, false);
-#warning Missing logic
+#pragma message "Missing logic"
   SPIS_DEV_CMDDATA(dev, false);
 
   /* Discard any queued data */

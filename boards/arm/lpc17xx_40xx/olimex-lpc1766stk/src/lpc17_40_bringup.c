@@ -99,7 +99,7 @@
 
 #ifdef CONFIG_LPC17_40_USBHOST
 #  ifndef CONFIG_USBHOST
-#    warning "CONFIG_USBHOST is not selected"
+#    pragma message "CONFIG_USBHOST is not selected"
 #  endif
 #endif
 

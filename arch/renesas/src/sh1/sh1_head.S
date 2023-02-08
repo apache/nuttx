@@ -422,7 +422,7 @@ __start0:
 	/* Call C++ constructors */
 
 #ifdef CONFIG_CPLUSPLUS
-#  warning "No C++ support yet"
+#  pragma message "No C++ support yet"
 	showprogress 'C'
 #endif
 	showprogress '\n'
@@ -446,7 +446,7 @@ __start0:
 	/* Call destructors  -- never get here */
 
 #ifdef CONFIG_CPLUSPLUS
-#  warning "No C++ support yet"
+#  pragma message "No C++ support yet"
 #endif
 
 4:  nop

@@ -56,7 +56,7 @@
 /* If SAMD/L support is enabled, then OS DMA support should also be enabled */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAMD2L2 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  pragma message "SAMD2L2 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
 /* Number of additional DMA descriptors in LPRAM */

@@ -63,14 +63,14 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_HSMCI
 #endif
 
 /* We need PIO interrupts on PIOD to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#  pragma message "PIOD interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_HSMCI
 #endif
 
@@ -115,8 +115,8 @@
 #endif
 
 #if defined(CONFIG_SAMA5D3XEK_NAND_FTL) && defined(CONFIG_SAMA5D3XEK_NAND_NXFFS)
-#  warning Both CONFIG_SAMA5D3XEK_NAND_FTL and CONFIG_SAMA5D3XEK_NAND_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3XEK_NAND_NXFFS
+#  pragma message "Both CONFIG_SAMA5D3XEK_NAND_FTL and CONFIG_SAMA5D3XEK_NAND_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D3XEK_NAND_NXFFS"
 #  undef CONFIG_SAMA5D3XEK_NAND_NXFFS
 #endif
 
@@ -149,8 +149,8 @@
 #endif
 
 #if defined(CONFIG_SAMA5D3XEK_AT25_FTL) && defined(CONFIG_SAMA5D3XEK_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D3XEK_AT25_FTL and CONFIG_SAMA5D3XEK_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3XEK_AT25_NXFFS
+#  pragma message "Both CONFIG_SAMA5D3XEK_AT25_FTL and CONFIG_SAMA5D3XEK_AT25_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D3XEK_AT25_NXFFS"
 #  undef CONFIG_SAMA5D3XEK_AT25_NXFFS
 #endif
 
@@ -199,8 +199,8 @@
 #endif
 
 #if defined(CONFIG_SAMA5D3XEK_AT24_FTL) && defined(CONFIG_SAMA5D3XEK_AT24_NXFFS)
-#  warning Both CONFIG_SAMA5D3XEK_AT24_FTL and CONFIG_SAMA5D3XEK_AT24_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3XEK_AT24_NXFFS
+#  pragma message "Both CONFIG_SAMA5D3XEK_AT24_FTL and CONFIG_SAMA5D3XEK_AT24_NXFFS are set"
+#  pragma message "Ignoring CONFIG_SAMA5D3XEK_AT24_NXFFS"
 #  undef CONFIG_SAMA5D3XEK_AT24_NXFFS
 #endif
 
@@ -274,7 +274,7 @@
 
 #if defined(CONFIG_USBHOST)
 #  if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
-#    warning CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined
+#    pragma message "CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined"
 #  endif
 #else
 #  undef CONFIG_SAMA5_OHCI
@@ -319,32 +319,32 @@
 
 #ifdef HAVE_WM8904
 #  ifndef CONFIG_SAMA5_TWI0
-#    warning CONFIG_SAMA5_TWI0 is required for audio support
+#    pragma message "CONFIG_SAMA5_TWI0 is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_SAMA5_SSC0
-#    warning CONFIG_SAMA5_SSC0 is required for audio support
+#    pragma message "CONFIG_SAMA5_SSC0 is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  if !defined(CONFIG_SAMA5_PIOD_IRQ)
-#    warning CONFIG_SAMA5_PIOD_IRQ is required for audio support
+#    pragma message "CONFIG_SAMA5_PIOD_IRQ is required for audio support"
 #    undef HAVE_HSMCI
 #  endif
 
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
-#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    pragma message "CONFIG_AUDIO_FORMAT_PCM is required for audio support"
 #    undef HAVE_WM8904
 #  endif
 
 #  ifndef CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY
-#    warning Defaulting to maximum WM8904 I2C frequency
+#    pragma message "Defaulting to maximum WM8904 I2C frequency"
 #    define CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY 400000
 #  endif
 
 #  if CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY > 400000
-#    warning WM8904 I2C frequency cannot exceed 400KHz
+#    pragma message "WM8904 I2C frequency cannot exceed 400KHz"
 #    undef CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY
 #    define CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY 400000
 #  endif
@@ -359,12 +359,12 @@
 #endif
 
 #if defined(HAVE_CAMERA) && !defined(CONFIG_SAMA5_ISI)
-#  warning OV2640 camera demo requires CONFIG_SAMA5_ISI
+#  pragma message "OV2640 camera demo requires CONFIG_SAMA5_ISI"
 #  undef HAVE_CAMERA
 #endif
 
 #if defined(HAVE_CAMERA) && !defined(CONFIG_SAMA5_TWI1)
-#  warning OV2640 camera demo requires CONFIG_SAMA5_TWI1
+#  pragma message "OV2640 camera demo requires CONFIG_SAMA5_TWI1"
 #  undef HAVE_CAMERA
 #endif
 

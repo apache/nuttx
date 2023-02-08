@@ -42,7 +42,7 @@
 #if !defined(CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE)
 #  define CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE 8
 #elif CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE > 65535
-#  warning "CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE value does not fit into uint16_t, limiting it to 65535"
+#  pragma message "CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE value does not fit into uint16_t, limiting it to 65535"
 #  undef  CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE
 #  define CONFIG_SAMV7_DAC_DMA_BUFFER_SIZE (65535)
 #endif
@@ -63,13 +63,13 @@
 #if !defined(CONFIG_SAMV7_DAC_PRESCAL)
 #define CONFIG_SAMV7_DAC_PRESCAL          (7)
 #elif CONFIG_SAMV7_DAC_PRESCAL > 15
-#  warning "Maximum valid CONFIG_SAMV7_DAC_PRESCAL value is 15"
+#  pragma message "Maximum valid CONFIG_SAMV7_DAC_PRESCAL value is 15"
 #endif
 
 #if !defined(CONFIG_SAMV7_DAC_TRIGGER_SELECT)
 #define CONFIG_SAMV7_DAC_TRIGGER_SELECT (3)
 #elif CONFIG_SAMV7_DAC_TRIGGER_SELECT < 1 || CONFIG_SAMV7_DAC_TRIGGER_SELECT > 3
-#  warning "Only CONFIG_SAMV7_DAC_TRIGGER_SELECT == [1-3] is supported"
+#  pragma message "Only CONFIG_SAMV7_DAC_TRIGGER_SELECT == [1-3] is supported"
 #endif
 
 /****************************************************************************

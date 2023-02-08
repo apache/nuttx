@@ -59,7 +59,7 @@
 #endif
 
 #if (CONFIG_IMX6_DDRCS_PGHEAP_OFFSET & MM_PGMASK) != 0
-#  warning CONFIG_IMX6_DDRCS_PGHEAP_OFFSET is not aligned to a page boundary
+#  pragma message "CONFIG_IMX6_DDRCS_PGHEAP_OFFSET is not aligned to a page boundary"
 #endif
 
 #ifndef CONFIG_IMX6_DDRCS_PGHEAP_SIZE
@@ -67,7 +67,7 @@
 #endif
 
 #if (CONFIG_IMX6_DDRCS_PGHEAP_SIZE & MM_PGMASK) != 0
-#  warning CONFIG_IMX6_DDRCS_PGHEAP_SIZE is not aligned to a page boundary
+#  pragma message "CONFIG_IMX6_DDRCS_PGHEAP_SIZE is not aligned to a page boundary"
 #endif
 
 /****************************************************************************

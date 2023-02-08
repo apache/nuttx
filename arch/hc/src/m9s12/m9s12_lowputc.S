@@ -60,7 +60,7 @@
 #  define HCS12_CONSOLE_PARITY   CONFIG_SCI1_PARITY
 #  define HCS12_CONSOLE_2STOP    CONFIG_SCI1_2STOP
 #else
-#  warning "No CONFIG_SCIn_SERIAL_CONSOLE Setting"
+#  pragma message "No CONFIG_SCIn_SERIAL_CONSOLE Setting"
 #endif
 
 /* Selete the SCIBR register value */
@@ -74,7 +74,7 @@
 #elif HCS12_CONSOLE_BITS == 8
 #  define UART_SCICR1_NBITS      0
 #else
-#  warning "Number of bits not supported"
+#  pragma message "Number of bits not supported"
 #endif
 
 #if HCS12_CONSOLE_PARITY == 0
@@ -88,7 +88,7 @@
 #endif
 
 #if HCS12_CONSOLE_2STOP != 0
-#  warning "Only a single stop bit supported"
+#  pragma message "Only a single stop bit supported"
 #endif
 
 #define CONSOLE_SCICR_VALUE      (UART_SCICR1_NBITS|UART_SCICR1_PARITY)

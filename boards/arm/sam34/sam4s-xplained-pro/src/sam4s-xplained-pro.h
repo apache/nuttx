@@ -69,19 +69,19 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_HSMCI
 #endif
 
 #if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No procfs support
+#  pragma message "Mountpoints disabled.  No procfs support"
 #  undef HAVE_PROC
 #endif
 
 /* We need PIO interrupts on PIOC to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAM34_GPIOC_IRQ)
-#  warning PIOC interrupts not enabled.  No MMC/SD support.
+#  pragma message "PIOC interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_HSMCI
 #endif
 

@@ -55,7 +55,7 @@
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
-#  warning "No UARTs enabled"
+#  pragma message "No UARTs enabled"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must

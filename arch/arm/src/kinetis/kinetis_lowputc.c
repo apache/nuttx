@@ -459,16 +459,16 @@ void kinetis_lowsetup(void)
 #endif
 
 #if defined(CONFIG_KINETIS_LPUART1)
-#  warning REVISIT
+#  pragma message "REVISIT"
 #endif
 #if defined(CONFIG_KINETIS_LPUART2)
-#  warning REVISIT
+#  pragma message "REVISIT"
 #endif
 #if defined(CONFIG_KINETIS_LPUART3)
-#  warning REVISIT
+#  pragma message "REVISIT"
 #endif
 #if defined(CONFIG_KINETIS_LPUART4)
-#  warning REVISIT
+#  pragma message "REVISIT"
 #endif
 
   /* Configure UART pins for the all enabled UARTs */

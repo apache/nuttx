@@ -795,7 +795,7 @@ static int c5471_phyinit (void)
 
 #else
 #  define c5471_phyinit()
-#  warning "Assuming no PHY"
+#  pragma message "Assuming no PHY"
 #endif
 
 /****************************************************************************
@@ -1919,7 +1919,7 @@ static int c5471_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+#pragma message "Multicast MAC support not implemented"
   return OK;
 }
 #endif
@@ -1950,7 +1950,7 @@ static int c5471_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+#pragma message "Multicast MAC support not implemented"
   return OK;
 }
 #endif

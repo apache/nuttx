@@ -45,7 +45,7 @@
 #if defined(CONFIG_USBDEV)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32_OTGFS is enabled but not CONFIG_USBDEV"
+#  pragma message "CONFIG_STM32_OTGFS is enabled but not CONFIG_USBDEV"
 #  undef HAVE_USB
 #endif
 

@@ -235,12 +235,12 @@
 
 #if defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_LANDSCAPE)
 # define STM32_ILI9341_MADCTL_PARAM  ILI9341_MADCTL_LANDSCAPE_PARAM1
-# warning "ILI9341 doesn't support full landscape with RGB interface"
+# pragma message "ILI9341 doesn't support full landscape with RGB interface"
 #elif defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_PORTRAIT)
 # define STM32_ILI9341_MADCTL_PARAM  ILI9341_MADCTL_PORTRAIT_PARAM1
 #elif defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_RLANDSCAPE)
 # define STM32_ILI9341_MADCTL_PARAM  ILI9341_MADCTL_RLANDSCAPE_PARAM1
-# warning "ILI9341 doesn't support full landscape with RGB interface"
+# pragma message "ILI9341 doesn't support full landscape with RGB interface"
 #elif defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_RPORTRAIT)
 # define STM32_ILI9341_MADCTL_PARAM  ILI9341_MADCTL_RPORTRAIT_PARAM1
 #else

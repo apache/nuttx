@@ -1134,7 +1134,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
 
 static int stm32l4can_remoterequest(struct can_dev_s *dev, uint16_t id)
 {
-#warning "Remote request not implemented"
+#pragma message "Remote request not implemented"
   return -ENOSYS;
 }
 

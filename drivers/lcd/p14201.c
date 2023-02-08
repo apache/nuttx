@@ -118,7 +118,7 @@
 #endif
 
 #if CONFIG_LCD_MAXPOWER != 1
-#  warning "CONFIG_LCD_MAXPOWER exceeds supported maximum"
+#  pragma message "CONFIG_LCD_MAXPOWER exceeds supported maximum"
 #  undef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 1
 #endif

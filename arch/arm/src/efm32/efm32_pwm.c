@@ -438,7 +438,7 @@ static int pwm_timer(struct efm32_pwmtimer_s *priv,
                                        defined(CONFIG_EFM32_TIMER2_PWM) || \
                                        defined(CONFIG_EFM32_TIMER3_PWM) \
                                        )
-#warning "not yet implemented"
+#pragma message "not yet implemented"
 static int pwm_interrupt(int irq, void *context, void *arg)
 {
   /* TODO pwm_interrupt */

@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_STM32_FSMC
-#  warning "FSMC is not enabled"
+#  pragma message "FSMC is not enabled"
 #endif
 
 #if STM32_NGPIO_PORTS < 6

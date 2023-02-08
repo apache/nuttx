@@ -2178,7 +2178,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
                     if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
                       {
                         /* Disable HNP */
-        #warning Missing Logic
+        #pragma message "Missing Logic"
                       }
 
                     /* Disable A device HNP support */
@@ -2186,7 +2186,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
                     else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
                       {
                         /* Disable HNP support */
-        #warning Missing Logic
+        #pragma message "Missing Logic"
                       }
 
                     /* Disable alternate HNP support */
@@ -2194,7 +2194,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
                     else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
                       {
                         /* Disable alternate HNP */
-        #warning Missing Logic
+        #pragma message "Missing Logic"
                       }
                     else
         #endif
@@ -2267,7 +2267,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
                     if (value.w == USBOTG_FEATURE_B_HNP_ENABLE)
                       {
                         /* Enable HNP */
-        #warning "Missing logic"
+        #pragma message "Missing logic"
                       }
 
                     /* Enable A device HNP supports */
@@ -2275,7 +2275,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
                     else if (value.w == USBOTG_FEATURE_A_HNP_SUPPORT)
                       {
                         /* Enable HNP support */
-        #warning "Missing logic"
+        #pragma message "Missing logic"
                       }
 
                     /* Another port on the A device supports HNP */
@@ -2283,7 +2283,7 @@ static void khci_ep0setup(struct khci_usbdev_s *priv)
                     else if (value.w == USBOTG_FEATURE_A_ALT_HNP_SUPPORT)
                       {
                         /* Enable alternate HNP */
-        #warning "Missing logic"
+        #pragma message "Missing logic"
                       }
                     else
         #endif
@@ -2892,7 +2892,7 @@ static int khci_interrupt(int irq, void *context, void *arg)
   /* Session Request Protocol (SRP) Time Out Check */
 
   /* Check if USB OTG SRP is ready */
-#  warning "Missing logic"
+#  pragma message "Missing logic"
   {
     /* Check if the 1 millisecond timer has expired */
 
@@ -2901,10 +2901,10 @@ static int khci_interrupt(int irq, void *context, void *arg)
         usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_T1MSEC), otgir);
 
         /* Check for the USB OTG SRP timeout */
-#  warning "Missing logic"
+#  pragma message "Missing logic"
           {
               /* Handle OTG events of the SRP timeout has expired */
-#  warning "Missing logic"
+#  pragma message "Missing logic"
           }
 
           /* Clear Interrupt 1 msec timer Flag */
@@ -2965,7 +2965,7 @@ static int khci_interrupt(int irq, void *context, void *arg)
 
 #ifdef CONFIG_KINETIS_USBOTG
         /* Disable and deactivate HNP */
-#warning Missing Logic
+#pragma message "Missing Logic"
 #endif
       /* Acknowledge the reset interrupt */
 
@@ -2981,7 +2981,7 @@ static int khci_interrupt(int irq, void *context, void *arg)
       usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_OTGID), otgir);
 
       /* Re-detect and re-initialize */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       khci_putreg(USB_OTGISTAT_IDCHG, KINETIS_USB0_OTGISTAT);
     }
@@ -3042,7 +3042,7 @@ static int khci_interrupt(int irq, void *context, void *arg)
 
 #ifdef CONFIG_KINETIS_USBOTG
       /* If Suspended, Try to switch to Host */
-#warning "Missing logic"
+#pragma message "Missing logic"
 #else
       khci_suspend(priv);
 

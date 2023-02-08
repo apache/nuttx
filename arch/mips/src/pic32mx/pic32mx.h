@@ -122,13 +122,13 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 struct pic32mx_dmaglobalregs_s
 {
   /* Global Registers */
-#warning "Missing definitions"
+#pragma message "Missing definitions"
 };
 
 struct pic32mx_dmachanregs_s
 {
   /* Channel Registers */
-#warning "Missing definitions"
+#pragma message "Missing definitions"
 };
 
 struct pic32mx_dmaregs_s

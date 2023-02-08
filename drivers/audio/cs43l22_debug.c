@@ -163,7 +163,7 @@ void cs43l22_dump_registers(FAR struct audio_lowerhalf_s *dev,
 void cs43l22_clock_analysis(FAR struct audio_lowerhalf_s *dev,
                            FAR const char *msg)
 {
-  #warning Missing logic
+  #pragma message "Missing logic"
   /* TODO */
 }
 #endif /* CONFIG_CS43L22_CLKDEBUG */

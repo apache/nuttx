@@ -622,7 +622,7 @@ imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
 
       else
         {
-    #warning Missing logic for I2C Slave mode
+    #pragma message "Missing logic for I2C Slave mode"
         }
 
       /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts

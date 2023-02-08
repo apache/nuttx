@@ -72,7 +72,7 @@
  */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAMA5 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  pragma message "SAMA5 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
 /* Check the number of link list descriptors to allocate */
@@ -82,7 +82,7 @@
 #endif
 
 #if CONFIG_SAMA5_NLLDESC < SAM_NDMACHAN
-#  warning "At least SAM_NDMACHAN descriptors must be allocated"
+#  pragma message "At least SAM_NDMACHAN descriptors must be allocated"
 
 #  undef CONFIG_SAMA5_NLLDESC
 #  define CONFIG_SAMA5_NLLDESC SAM_NDMACHAN

@@ -54,14 +54,14 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_HSMCI
 #endif
 
 /* We need PIO interrupts on GPIOD to support card detect interrupts */
 
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAMV7_GPIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#  pragma message "PIOD interrupts not enabled.  No MMC/SD support."
 #  undef HAVE_HSMCI
 #endif
 

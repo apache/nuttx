@@ -156,16 +156,16 @@ int sam_isi_initialize(void)
   sam_pck_enable(ISI_PCKID, true);
 
   /* Configure the pixel clock */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure color */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure decimation */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure DMA */
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 #endif /* CONFIG_SAMA5_ISI */

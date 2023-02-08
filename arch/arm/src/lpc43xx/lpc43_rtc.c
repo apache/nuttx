@@ -196,7 +196,7 @@ static int rtc_setup(void)
 #ifdef CONFIG_RTC_ALARM
 static int rtc_interrupt(int irq, void *context)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 #endif
@@ -372,11 +372,11 @@ int lpc43_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 
       /* Break out the time values */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       /* The set the alarm */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       ret = OK;
     }

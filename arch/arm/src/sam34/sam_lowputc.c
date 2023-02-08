@@ -117,7 +117,7 @@
 #  define HAVE_CONSOLE 1
 #else
 #  if !defined(CONFIG_NO_SERIAL_CONSOLE)
-#    warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
+#    pragma message "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
 #  endif
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE

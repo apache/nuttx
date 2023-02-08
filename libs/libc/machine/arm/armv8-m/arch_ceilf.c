@@ -49,5 +49,5 @@ float ceilf(float x)
 }
 
 #else
-#  warning ceilf() not built
+#  pragma message "ceilf() not built"
 #endif

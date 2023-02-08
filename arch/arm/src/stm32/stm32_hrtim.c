@@ -83,21 +83,21 @@
 #if !defined(CONFIG_STM32_HRTIM_TIMA_PWM) && !defined(CONFIG_STM32_HRTIM_TIMB_PWM) && \
     !defined(CONFIG_STM32_HRTIM_TIMC_PWM) && !defined(CONFIG_STM32_HRTIM_TIMD_PWM) && \
     !defined(CONFIG_STM32_HRTIM_TIME_PWM)
-#    warning "CONFIG_STM32_HRTIM_PWM enabled but no timer selected"
+#    pragma message "CONFIG_STM32_HRTIM_PWM enabled but no timer selected"
 #  endif
 #endif
 #if defined(CONFIG_STM32_HRTIM_DAC)
 #if !defined(CONFIG_STM32_HRTIM_MASTER_DAC) && !defined(CONFIG_STM32_HRTIM_TIMA_DAC) && \
     !defined(CONFIG_STM32_HRTIM_TIMB_DAC)   && !defined(CONFIG_STM32_HRTIM_TIMC_DAC) && \
     !defined(CONFIG_STM32_HRTIM_TIMD_DAC)   && !defined(CONFIG_STM32_HRTIM_TIME_DAC)
-#    warning "CONFIG_STM32_HRTIM_DAC enabled but no timer selected"
+#    pragma message "CONFIG_STM32_HRTIM_DAC enabled but no timer selected"
 #  endif
 #endif
 #if defined(CONFIG_STM32_HRTIM_CAPTURE)
 #if !defined(CONFIG_STM32_HRTIM_TIMA_CAP) && !defined(CONFIG_STM32_HRTIM_TIMB_CAP) && \
     !defined(CONFIG_STM32_HRTIM_TIMC_CAP) && !defined(CONFIG_STM32_HRTIM_TIMD_CAP) && \
     !defined(CONFIG_STM32_HRTIM_TIME_CAP)
-#    warning "CONFIG_STM32_HRTIM_CAPTURE enabled but no timer selected"
+#    pragma message "CONFIG_STM32_HRTIM_CAPTURE enabled but no timer selected"
 #  endif
 #endif
 #if defined(CONFIG_STM32_HRTIM_INTERRUPTS)
@@ -105,21 +105,21 @@
     !defined(CONFIG_STM32_HRTIM_TIMB_IRQ) && !defined(CONFIG_STM32_HRTIM_TIMC_IRQ) && \
     !defined(CONFIG_STM32_HRTIM_TIMD_IRQ) && !defined(CONFIG_STM32_HRTIM_TIME_IRQ) && \
     !defined(CONFIG_STM32_HRTIM_COMMON_IRQ)
-#    warning "CONFIG_STM32_HRTIM_INTERRUPTS enabled but no timer selected"
+#    pragma message "CONFIG_STM32_HRTIM_INTERRUPTS enabled but no timer selected"
 #  endif
 #endif
 #if defined(CONFIG_STM32_HRTIM_DEADTIME)
 #if !defined(CONFIG_STM32_HRTIM_TIMA_DT) && !defined(CONFIG_STM32_HRTIM_TIMB_DT) && \
     !defined(CONFIG_STM32_HRTIM_TIMC_DT) && !defined(CONFIG_STM32_HRTIM_TIMD_DT) && \
     !defined(CONFIG_STM32_HRTIM_TIME_DT)
-#    warning "CONFIG_STM32_HRTIM_DEADTIME enabled but no timer selected"
+#    pragma message "CONFIG_STM32_HRTIM_DEADTIME enabled but no timer selected"
 #  endif
 #endif
 #if defined(CONFIG_STM32_HRTIM_CHOPPER)
 #if !defined(CONFIG_STM32_HRTIM_TIMA_CHOP) && !defined(CONFIG_STM32_HRTIM_TIMB_CHOP) && \
     !defined(CONFIG_STM32_HRTIM_TIMC_CHOP) && !defined(CONFIG_STM32_HRTIM_TIMD_CHOP) && \
     !defined(CONFIG_STM32_HRTIM_TIME_CHOP)
-#    warning "CONFIG_STM32_HRTIM_CHOPPER enabled but no timer selected"
+#    pragma message "CONFIG_STM32_HRTIM_CHOPPER enabled but no timer selected"
 #  endif
 #endif
 
@@ -216,69 +216,69 @@
 /* HRTIM default configuration **********************************************/
 
 #if defined(CONFIG_STM32_HRTIM_MASTER) && !defined(HRTIM_MASTER_MODE)
-#  warning "HRTIM_MASTER_MODE is not set. Set the default value 0"
+#  pragma message "HRTIM_MASTER_MODE is not set. Set the default value 0"
 #  define HRTIM_MASTER_MODE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMA) && !defined( HRTIM_TIMA_MODE)
-#  warning "HRTIM_TIMA_MODE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMA_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMA_MODE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMB) && !defined(HRTIM_TIMB_MODE)
-#  warning "HRTIM_TIMB_MODE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMB_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMB_MODE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMC) && !defined(HRTIM_TIMC_MODE)
-#  warning "HRTIM_TIMC_MODE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMC_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMC_MODE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMD) && !defined(HRTIM_TIMD_MODE)
-#  warning "HRTIM_TIMD_MODE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMD_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMD_MODE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIME) && !defined(HRTIM_TIME_MODE)
-#  warning "HRTIM_TIME_MODE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIME_MODE is not set. Set the default value 0"
 #  define HRTIM_TIME_MODE 0
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_TIMA) && !defined(HRTIM_TIMA_UPDATE)
-#  warning "HRTIM_TIMA_UPDATE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMA_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMA_UPDATE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMB) && !defined(HRTIM_TIMB_UPDATE)
-#  warning "HRTIM_TIMB_UPDATE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMB_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMB_UPDATE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMC) && !defined(HRTIM_TIMC_UPDATE)
-#  warning "HRTIM_TIMC_UPDATE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMC_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMC_UPDATE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMD) && !defined(HRTIM_TIMD_UPDATE)
-#  warning "HRTIM_TIMD_UPDATE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMD_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMD_UPDATE 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIME) && !defined(HRTIM_TIME_UPDATE)
-#  warning "HRTIM_TIME_UPDATE is not set. Set the default value 0"
+#  pragma message "HRTIM_TIME_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIME_UPDATE 0
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_TIMA) && !defined( HRTIM_TIMA_RESET)
-#  warning "HRTIM_TIMA_RESET is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMA_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMA_RESET 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMB) && !defined(HRTIM_TIMB_RESET)
-#  warning "HRTIM_TIMB_RESET is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMB_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMB_RESET 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMC) && !defined(HRTIM_TIMC_RESET)
-#  warning "HRTIM_TIMC_RESET is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMC_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMC_RESET 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIMD) && !defined(HRTIM_TIMD_RESET)
-#  warning "HRTIM_TIMD_RESET is not set. Set the default value 0"
+#  pragma message "HRTIM_TIMD_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMD_RESET 0
 #endif
 #if defined(CONFIG_STM32_HRTIM_TIME) && !defined(HRTIM_TIME_RESET)
-#  warning "HRTIM_TIME_RESET is not set. Set the default value 0"
+#  pragma message "HRTIM_TIME_RESET is not set. Set the default value 0"
 #  define HRTIM_TIME_RESET 0
 #endif
 
@@ -1637,7 +1637,7 @@ struct hrtim_dev_s g_hrtim1dev =
 
 static int stm32_hrtim_open(struct file *filep)
 {
-#warning "stm32_hrtim_open: missing logic"
+#pragma message "stm32_hrtim_open: missing logic"
   return OK;
 }
 
@@ -1651,7 +1651,7 @@ static int stm32_hrtim_open(struct file *filep)
 
 static int stm32_hrtim_close(struct file *filep)
 {
-#warning "smt32_hrtim_close: missing logic"
+#pragma message "smt32_hrtim_close: missing logic"
   return OK;
 }
 
@@ -1678,7 +1678,7 @@ static int stm32_hrtim_ioctl(struct file *filep, int cmd,
 
   UNUSED(hrtim);
 
-#warning "smt32_hrtim_ioctl: missing logic"
+#pragma message "smt32_hrtim_ioctl: missing logic"
 
   /* Handle HRTIM ioctl commands */
 
@@ -2840,7 +2840,7 @@ errout:
 #if defined(CONFIG_STM32_HRTIM_SYNC)
 static int hrtim_synch_config(struct stm32_hrtim_s *priv)
 {
-#warning "hrtim_synch_config: missing logic"
+#pragma message "hrtim_synch_config: missing logic"
   return OK;
 }
 #endif

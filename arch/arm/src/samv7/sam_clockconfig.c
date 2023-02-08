@@ -298,7 +298,7 @@ static inline void sam_pmcsetup(void)
 
 static inline void sam_enabledefaultmaster(void)
 {
-#warning REVISIT
+#pragma message "REVISIT"
 #if 0 /* REVISIT -- this is stuff left over from SAM3/4 */
   uint32_t regval;
 

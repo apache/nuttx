@@ -69,7 +69,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_TEXT_NPAGES
-#  warning CONFIG_ARCH_TEXT_NPAGES not defined
+#  pragma message "CONFIG_ARCH_TEXT_NPAGES not defined"
 #  define CONFIG_ARCH_TEXT_NPAGES 1
 #endif
 
@@ -88,7 +88,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_DATA_NPAGES
-#  warning CONFIG_ARCH_DATA_NPAGES not defined
+#  pragma message "CONFIG_ARCH_DATA_NPAGES not defined"
 #  define CONFIG_ARCH_DATA_NPAGES 1
 #endif
 
@@ -125,7 +125,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_HEAP_NPAGES
-#  warning CONFIG_ARCH_HEAP_NPAGES not defined
+#  pragma message "CONFIG_ARCH_HEAP_NPAGES not defined"
 #  define CONFIG_ARCH_HEAP_NPAGES 1
 #endif
 
@@ -145,7 +145,7 @@
 #  endif
 
 #  ifndef CONFIG_ARCH_STACK_NPAGES
-#    warning CONFIG_ARCH_STACK_NPAGES not defined
+#    pragma message "CONFIG_ARCH_STACK_NPAGES not defined"
 #    define CONFIG_ARCH_STACK_NPAGES 1
 #  endif
 
@@ -182,12 +182,12 @@
 #  endif
 
 #  ifndef CONFIG_ARCH_SHM_MAXREGIONS
-#    warning CONFIG_ARCH_SHM_MAXREGIONS not defined
+#    pragma message "CONFIG_ARCH_SHM_MAXREGIONS not defined"
 #    define CONFIG_ARCH_SHM_MAXREGIONS 1
 #  endif
 
 #  ifndef CONFIG_ARCH_SHM_NPAGES
-#    warning CONFIG_ARCH_SHM_NPAGES not defined
+#    pragma message "CONFIG_ARCH_SHM_NPAGES not defined"
 #    define CONFIG_ARCH_SHM_NPAGES 1
 #  endif
 

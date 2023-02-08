@@ -76,7 +76,7 @@
 #elif defined(CONFIG_STM32H7_RTC_LSECLOCK)
 #  define  RCC_BDCR_RTCSEL RCC_BDCR_RTCSEL_LSE
 #else
-#  warning "RCC_BDCR_RTCSEL_NOCLK has been selected - RTC will not count"
+#  pragma message "RCC_BDCR_RTCSEL_NOCLK has been selected - RTC will not count"
 #endif
 
 #define SYNCHRO_TIMEOUT      (0x00020000)

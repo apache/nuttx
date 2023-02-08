@@ -123,7 +123,7 @@
 /* General Configuration */
 
 #ifndef CONFIG_CAN_TXREADY
-#  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
+#  pragma message "WARNING!!! CONFIG_CAN_TXREADY is required by this driver"
 #endif
 
 /* MCAN0 Configuration */

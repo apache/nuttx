@@ -382,7 +382,7 @@ bool efm32_gpioread(gpio_pinset_t pinset)
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int efm32_dumpgpio(uint32_t pinset, const char *msg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif

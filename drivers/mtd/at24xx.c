@@ -67,15 +67,15 @@
  */
 
 #ifndef CONFIG_AT24XX_SIZE
-#  warning "Assuming AT24 size 64"
+#  pragma message "Assuming AT24 size 64"
 #  define CONFIG_AT24XX_SIZE 64
 #endif
 #if !defined(CONFIG_AT24XX_ADDR) && !defined(CONFIG_AT24XX_MULTI)
-#  warning "Assuming AT24 I2C address of 0x50"
+#  pragma message "Assuming AT24 I2C address of 0x50"
 #  define CONFIG_AT24XX_ADDR 0x50
 #endif
 #ifndef CONFIG_AT24XX_FREQUENCY
-#  warning "Assuming AT24 I2C frequency of 100KHz"
+#  pragma message "Assuming AT24 I2C frequency of 100KHz"
 #  define CONFIG_AT24XX_FREQUENCY 100000
 #endif
 
@@ -131,7 +131,7 @@
  */
 
 #ifndef CONFIG_AT24XX_MTD_BLOCKSIZE
-#  warning "Assuming MTD driver block size is the same as the FLASH page size"
+#  pragma message "Assuming MTD driver block size is the same as the FLASH page size"
 #  define CONFIG_AT24XX_MTD_BLOCKSIZE AT24XX_PAGESIZE
 #endif
 

@@ -55,7 +55,7 @@
 /* Asserions ****************************************************************/
 
 #ifndef CONFIG_ARCH_CHIP_STM32F334R8
-#  warning "This only have been verified with CONFIG_ARCH_CHIP_STM32F334R8"
+#  pragma message "This only have been verified with CONFIG_ARCH_CHIP_STM32F334R8"
 #endif
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -71,7 +71,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_FPU
-#  warning "Set CONFIG_ARCH_FPU for hardware FPU support"
+#  pragma message "Set CONFIG_ARCH_FPU for hardware FPU support"
 #endif
 
 /* Check the configuration for TIM1 */

@@ -109,7 +109,7 @@
 #endif
 
 #if !defined(CONFIG_GD32F4_MII) && !defined(CONFIG_GD32F4_RMII)
-#  warning "Neither CONFIG_GD32F4_MII nor CONFIG_GD32F4_RMII defined"
+#  pragma message "Neither CONFIG_GD32F4_MII nor CONFIG_GD32F4_RMII defined"
 #endif
 
 #if defined(CONFIG_GD32F4_MII) && defined(CONFIG_GD32F4_RMII)
@@ -118,7 +118,7 @@
 
 #ifdef CONFIG_GD32F4_MII
 #  if !defined(CONFIG_GD32F4_MII_CKOUT0) && !defined(CONFIG_GD32F4_MII_CKOUT1) && !defined(CONFIG_GD32F4_MII_EXTCLK)
-#    warning "Neither CONFIG_GD32F4_MII_CKOUT0, CONFIG_GD32F4_MII_CKOUT1, nor CONFIG_GD32F4_MII_EXTCLK defined"
+#    pragma message "Neither CONFIG_GD32F4_MII_CKOUT0, CONFIG_GD32F4_MII_CKOUT1, nor CONFIG_GD32F4_MII_EXTCLK defined"
 #  endif
 #  if defined(CONFIG_GD32F4_MII_CKOUT0) && defined(CONFIG_GD32F4_MII_CKOUT1)
 #    error "Both CONFIG_GD32F4_MII_CKOUT0 and CONFIG_GD32F4_MII_CKOUT1 defined"
@@ -127,7 +127,7 @@
 
 #ifdef CONFIG_GD32F4_RMII
 #  if !defined(CONFIG_GD32F4_RMII_CKOUT0) && !defined(CONFIG_GD32F4_RMII_CKOUT1) && !defined(CONFIG_GD32F4_RMII_EXTCLK)
-#    warning "Neither CONFIG_GD32F4_RMII_CKOUT0, CONFIG_GD32F4_RMII_CKOUT1, nor CONFIG_GD32F4_RMII_EXTCLK defined"
+#    pragma message "Neither CONFIG_GD32F4_RMII_CKOUT0, CONFIG_GD32F4_RMII_CKOUT1, nor CONFIG_GD32F4_RMII_EXTCLK defined"
 #  endif
 #  if defined(CONFIG_GD32F4_RMII_CKOUT0) && defined(CONFIG_GD32F4_RMII_CKOUT1)
 #    error "Both CONFIG_GD32F4_RMII_CKOUT0 and CONFIG_GD32F4_RMII_CKOUT1 defined"
@@ -205,15 +205,15 @@
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-#warning "CONFIG_NET_ICMPv6 is not yet supported"
+#pragma message "CONFIG_NET_ICMPv6 is not yet supported"
 #endif
 
 #ifdef CONFIG_NET_IPv6
-#  warning "CONFIG_NET_IPv6 is not yet supported"
+#  pragma message "CONFIG_NET_IPv6 is not yet supported"
 #endif
 
 #ifdef CONFIG_GD32F4_ENET_PTP
-#  warning "CONFIG_GD32F4_ENET_PTP is not yet supported"
+#  pragma message "CONFIG_GD32F4_ENET_PTP is not yet supported"
 #endif
 
 /* This driver does not use enhanced descriptors.  Enhanced descriptors must
@@ -245,7 +245,7 @@
 #endif
 
 #if CONFIG_GD32F4_ENET_BUFSIZE != OPTIMAL_ENET_BUFSIZE
-#  warning "You using an incomplete/untested configuration"
+#  pragma message "You using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_GD32F4_ENET_NRXDESC

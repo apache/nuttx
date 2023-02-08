@@ -130,7 +130,7 @@
 #endif
 
 #if !defined(CONFIG_STM32H7_SDMMC_IDMA)
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #elif defined(CONFIG_STM32H7_SDMMC1)
 #  define SRAM123_START STM32_SRAM123_BASE
 #  define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)

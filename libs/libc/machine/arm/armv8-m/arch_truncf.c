@@ -49,5 +49,5 @@ float truncf(float x)
 }
 
 #else
-#  warning truncf() not built
+#  pragma message "truncf() not built"
 #endif

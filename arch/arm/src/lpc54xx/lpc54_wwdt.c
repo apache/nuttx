@@ -631,7 +631,7 @@ void lpc54_wwdt_initialize(const char *devpath)
    */
 
   lpc54_wdtosc_powerup();
-#warning "Missing WDTOSCCTRL setup"
+#pragma message "Missing WDTOSCCTRL setup"
 
   /* Enable the register interface (WWDT bus clock):  Set the WWDT bit in the
    * AHBCLKCTRL0 register.

@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_STM32L4_CAN1)
-#  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
+#  pragma message "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
 #endif
 
 #ifdef CONFIG_STM32L4_CAN1

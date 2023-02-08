@@ -258,7 +258,7 @@
 
 #undef INVALID_CLOCK_SOURCE
 
-#warning TODO: check I2C clock source. It must be HSI!
+#pragma message "TODO: check I2C clock source. It must be HSI!"
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
  * Instead, CPU-intensive polling will be used.
@@ -269,7 +269,7 @@
 #if !defined(CONFIG_STM32_I2CTIMEOSEC) && !defined(CONFIG_STM32_I2CTIMEOMS)
 #  define CONFIG_STM32_I2CTIMEOSEC 0
 #  define CONFIG_STM32_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#  warning "Using Default 500 Ms Timeout"
+#  pragma message "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32_I2CTIMEOSEC)
 #  define CONFIG_STM32_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32_I2CTIMEOMS)
@@ -2714,7 +2714,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
   struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
 
 #if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
-#  warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
+#  pragma message "STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone."
   return NULL;
 #endif
 

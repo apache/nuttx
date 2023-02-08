@@ -709,7 +709,7 @@ int up_rtc_initialize(void)
 int stm32_rtc_irqinitialize(void)
 {
 #ifdef CONFIG_RTC_ALARM
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
   return OK;
@@ -1062,11 +1062,11 @@ int stm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 
       /* Break out the time values */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       /* The set the alarm */
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
       ret = OK;
     }

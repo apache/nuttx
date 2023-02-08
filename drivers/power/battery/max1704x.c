@@ -63,7 +63,7 @@
  */
 
 #if !defined(CONFIG_I2C_MAX17040) && !defined(CONFIG_I2C_MAX17041)
-#  warning "Assuming CONFIG_I2C_MAX17040"
+#  pragma message "Assuming CONFIG_I2C_MAX17040"
 #  define CONFIG_I2C_MAX17040 1
 #endif
 

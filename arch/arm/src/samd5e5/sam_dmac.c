@@ -56,7 +56,7 @@
 /* If SAMD/L support is enabled, then OS DMA support should also be enabled */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAMD5E5 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  pragma message "SAMD5E5 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
 /* Number of additional DMA descriptors in LPRAM */
@@ -742,7 +742,7 @@ void weak_function arm_dma_initialize(void)
   putreg32((uint32_t)g_writeback_desc, SAM_DMAC_WRBADDR);
 
   /* Setup the Priority control register for each priority level */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Enable the DMA controller and all priority levels */
 

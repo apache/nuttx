@@ -83,7 +83,7 @@ static int cc13xx_gpio_interrupt(int irq, void *context, void *arg)
   evflags = getreg32(TIVA_GPIO_EVFLAGS);
 
   /* Clear pending events that will be processing here */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Now process each pending DIO edge event */
 

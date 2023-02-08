@@ -768,7 +768,7 @@ static int spi_interrupt(int irq, void *context, void *arg)
   if ((pending & SPI_INT_RXC) != 0)
     {
       /* Received data ready... process incoming SPI ata */
-#warning Missing logic
+#pragma message "Missing logic"
     }
 
   /* Handle outgoing, transmit bytes. The DRE flag is set when the DATA
@@ -781,7 +781,7 @@ static int spi_interrupt(int irq, void *context, void *arg)
   if ((pending & SPI_INT_DRE) != 0)
     {
       /* Transmit data register empty ... process outgoing bytes */
-#warning Missing logic
+#pragma message "Missing logic"
     }
 
   return OK;

@@ -735,7 +735,7 @@ static void sam_disable_backlight(void)
   /* PWM support is not yet available.
    * Backlight is currently just configured as a GPIO output.
    */
-#warning Missing logic
+#pragma message "Missing logic"
 
   sam_gpiowrite(GPIO_ILI9488_BKL, false);
 }
@@ -756,7 +756,7 @@ static int sam_set_backlight(unsigned int power)
   /* PWM support is not yet available.  Backlight is currently just
    * configured as a GPIO output.
    */
-#warning Missing logic
+#pragma message "Missing logic"
 
   if (power > 0)
     {

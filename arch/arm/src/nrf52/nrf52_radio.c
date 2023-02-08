@@ -40,7 +40,7 @@
 
 #include "hardware/nrf52_radio.h"
 
-#warning NRF52 RADIO support is EXPERIMENTAL!
+#pragma message "NRF52 RADIO support is EXPERIMENTAL!"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -387,7 +387,7 @@ static int nrf52_radio_addr_set(struct nrf52_radio_dev_s *dev, uint8_t i,
 
   if (basereg == NRF52_RADIO_BASE1_OFFSET)
     {
-#warning missing logic!
+#pragma message "missing logic!"
     }
 
   /* Get new BASE */

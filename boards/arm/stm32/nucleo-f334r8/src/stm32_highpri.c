@@ -71,7 +71,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_FPU
-#  warning Set CONFIG_ARCH_FPU for hardware FPU support
+#  pragma message "Set CONFIG_ARCH_FPU for hardware FPU support"
 #endif
 
 #ifdef CONFIG_STM32_ADC1_DMA

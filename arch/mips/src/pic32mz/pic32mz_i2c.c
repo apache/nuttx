@@ -100,7 +100,7 @@
 #endif
 
 #if defined(CONFIG_I2C_TRACE) && defined(CONFIG_I2C_POLLED)
-#  warning Default trace events might not be enough during polling.
+#  pragma message "Default trace events might not be enough during polling."
 #endif
 
 #ifdef CONFIG_I2C_SLAVE

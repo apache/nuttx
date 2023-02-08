@@ -2396,7 +2396,7 @@ static int sam_phyintenable(struct sam_gmac_s *priv)
   return ret;
 
 #else
-#  warning Missing logic
+#  pragma message "Missing logic"
   return -ENOSYS;
 #endif
 }

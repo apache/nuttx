@@ -684,7 +684,7 @@ static void stm32l4_stdclockconfig(void)
 
   if (timeout > 0)
     {
-#warning todo: regulator voltage according to clock freq
+#pragma message "todo: regulator voltage according to clock freq"
 #if 0
       /* Ensure Power control is enabled before modifying it. */
 

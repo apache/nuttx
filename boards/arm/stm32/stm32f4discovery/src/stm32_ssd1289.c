@@ -249,7 +249,7 @@ static void stm32_write(struct ssd1289_lcd_s *dev, uint16_t data)
 
 static void stm32_backlight(struct ssd1289_lcd_s *dev, int power)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************

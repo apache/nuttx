@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_I2C
-#  warning I2C support is required (CONFIG_I2C)
+#  pragma message "I2C support is required (CONFIG_I2C)"
 #endif
 
 #if (!defined CONFIG_SCHED_WORKQUEUE) && (defined CONFIG_MCP23X17_INT_ENABLE)

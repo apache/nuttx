@@ -186,7 +186,7 @@ void am335x_lowsetup(void)
 #ifdef HAVE_UART_DEVICE
   /* Enable power and clocking to the UART peripheral */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* Configure UART pins for the selected CONSOLE.  If there are multiple
    * pin options for a given UART, the the applicable option must be
@@ -275,7 +275,7 @@ void am335x_lowsetup(void)
   /* Enable Auto-Flow Control in the Modem Control Register */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   putreg32(UART_MDR1_MODE_16X, CONSOLE_BASE + AM335X_UART_MDR1_OFFSET);

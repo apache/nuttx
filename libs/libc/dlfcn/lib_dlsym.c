@@ -171,7 +171,7 @@ FAR void *dlsym(FAR void *handle, FAR const char *name)
    * memory region.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
   return NULL;
 #endif
 }

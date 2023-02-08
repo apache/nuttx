@@ -305,7 +305,7 @@ static uart_dev_t g_escca_port =
 
 static inline uint8_t z180_serialin(struct z180_dev_s *priv, uint8_t regaddr)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -315,7 +315,7 @@ static inline uint8_t z180_serialin(struct z180_dev_s *priv, uint8_t regaddr)
 static inline void z180_serialout(struct z180_dev_s *priv, uint8_t regaddr,
                                   uint8_t value)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -324,7 +324,7 @@ static inline void z180_serialout(struct z180_dev_s *priv, uint8_t regaddr,
 
 static inline void z180_disableuartint(struct z180_dev_s *priv)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -333,7 +333,7 @@ static inline void z180_disableuartint(struct z180_dev_s *priv)
 
 static inline void z180_restoreuartint(struct z180_dev_s *priv, uint8_t bits)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -342,7 +342,7 @@ static inline void z180_restoreuartint(struct z180_dev_s *priv, uint8_t bits)
 
 static inline void z180_waittxready(struct z180_dev_s *priv)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -351,7 +351,7 @@ static inline void z180_waittxready(struct z180_dev_s *priv)
 
 static inline void z180_setbaud(struct z180_dev_s *priv, uint24_t baud)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -366,7 +366,7 @@ static inline void z180_setbaud(struct z180_dev_s *priv, uint24_t baud)
 static int z180_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
   return OK;
 }
@@ -381,7 +381,7 @@ static int z180_setup(struct uart_dev_s *dev)
 
 static void z180_shutdown(struct uart_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -402,7 +402,7 @@ static void z180_shutdown(struct uart_dev_s *dev)
 
 static int z180_attach(struct uart_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -417,7 +417,7 @@ static int z180_attach(struct uart_dev_s *dev)
 
 static void z180_detach(struct uart_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -434,7 +434,7 @@ static void z180_detach(struct uart_dev_s *dev)
 
 static int z180_interrupt(int irq, void *context)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -447,7 +447,7 @@ static int z180_interrupt(int irq, void *context)
 
 static int z180_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -462,7 +462,7 @@ static int z180_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int z180_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -475,7 +475,7 @@ static int z180_receive(struct uart_dev_s *dev, unsigned int *status)
 
 static void z180_rxint(struct uart_dev_s *dev, bool enable)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -488,7 +488,7 @@ static void z180_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool z180_rxavailable(struct uart_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -501,7 +501,7 @@ static bool z180_rxavailable(struct uart_dev_s *dev)
 
 static void z180_send(struct uart_dev_s *dev, int ch)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -514,7 +514,7 @@ static void z180_send(struct uart_dev_s *dev, int ch)
 
 static void z180_txint(struct uart_dev_s *dev, bool enable)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -527,7 +527,7 @@ static void z180_txint(struct uart_dev_s *dev, bool enable)
 
 static bool z180_txready(struct uart_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -540,7 +540,7 @@ static bool z180_txready(struct uart_dev_s *dev)
 
 static bool z180_txempty(struct uart_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -558,20 +558,20 @@ static bool z180_txempty(struct uart_dev_s *dev)
 void z80_serial_initialize(void)
 {
   /* Make sure that all UART interrupts are disabled */
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   /* Configure for usage of [E]SCC channels */
 
 #ifdef CONFIG_Z180_SCC
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
 #ifdef CONFIG_Z180_ESCCA
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
 #ifdef CONFIG_Z180_ESCCB
-#  warning "Missing logic"
+#  pragma message "Missing logic"
 #endif
 
   /* If there is a console, then configure the console now */

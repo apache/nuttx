@@ -45,7 +45,7 @@
 #endif
 
 #if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No procfs support
+#  pragma message "Mountpoints disabled.  No procfs support"
 #  undef HAVE_PROC
 #endif
 

@@ -231,7 +231,7 @@ static void dac_reset(struct dac_dev_s *dev)
 
   flags   = enter_critical_section();
 
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
 }
@@ -254,7 +254,7 @@ static void dac_reset(struct dac_dev_s *dev)
 
 static int dac_setup(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return OK;
 }
 
@@ -274,7 +274,7 @@ static int dac_setup(struct dac_dev_s *dev)
 
 static void dac_shutdown(struct dac_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************

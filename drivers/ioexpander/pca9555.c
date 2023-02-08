@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_I2C
-#  warning I2C support is required (CONFIG_I2C)
+#  pragma message "I2C support is required (CONFIG_I2C)"
 #endif
 
 /****************************************************************************

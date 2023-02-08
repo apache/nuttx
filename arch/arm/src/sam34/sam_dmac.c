@@ -58,7 +58,7 @@
 /* If SAM3/4 support is enabled, then OS DMA support should also be enabled */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAM3/4 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  pragma message "SAM3/4 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
 /* Check the number of link list descriptors to allocate */
@@ -68,7 +68,7 @@
 #endif
 
 #if CONFIG_SAM34_NLLDESC < SAM34_NDMACHAN
-#  warning "At least SAM34_NDMACHAN descriptors must be allocated"
+#  pragma message "At least SAM34_NDMACHAN descriptors must be allocated"
 
 #  undef CONFIG_SAM34_NLLDESC
 #  define CONFIG_SAM34_NLLDESC SAM34_NDMACHAN

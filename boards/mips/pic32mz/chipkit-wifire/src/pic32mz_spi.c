@@ -187,14 +187,14 @@ void  pic32mz_spi5select(struct spi_dev_s *dev, uint32_t devid,
 uint8_t pic32mz_spi5status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 #endif
@@ -206,20 +206,20 @@ void  pic32mz_spi6select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
            selected ? "assert" : "de-assert");
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 uint8_t pic32mz_spi6status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi6cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return 0;
 }
 #endif
@@ -250,7 +250,7 @@ int pic32mz_spi6cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 int pic32mz_spi1register(struct spi_dev_s *dev,
                          spi_mediachange_t callback, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_PIC32MZ_SPI1 */
@@ -259,7 +259,7 @@ int pic32mz_spi1register(struct spi_dev_s *dev,
 int pic32mz_spi2register(struct spi_dev_s *dev,
                          spi_mediachange_t callback, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_PIC32MZ_SPI2 */
@@ -268,7 +268,7 @@ int pic32mz_spi2register(struct spi_dev_s *dev,
 int pic32mz_spi3register(struct spi_dev_s *dev,
                          spi_mediachange_t callback, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_PIC32MZ_SPI3 */
@@ -277,7 +277,7 @@ int pic32mz_spi3register(struct spi_dev_s *dev,
 int pic32mz_spi4register(struct spi_dev_s *dev,
                          spi_mediachange_t callback, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_PIC32MZ_SPI4 */
@@ -286,7 +286,7 @@ int pic32mz_spi4register(struct spi_dev_s *dev,
 int pic32mz_spi5register(struct spi_dev_s *dev,
                          spi_mediachange_t callback, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_PIC32MZ_SPI5 */
@@ -295,7 +295,7 @@ int pic32mz_spi5register(struct spi_dev_s *dev,
 int pic32mz_spi6register(struct spi_dev_s *dev,
                          spi_mediachange_t callback, void *arg)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif /* CONFIG_PIC32MZ_SPI6 */

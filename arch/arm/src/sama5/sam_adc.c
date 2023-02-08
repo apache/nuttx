@@ -366,7 +366,7 @@
 #elif !defined(CONFIG_SAMA5_ADC_DMASAMPLES)
 #  error CONFIG_SAMA5_ADC_DMASAMPLES must be defined
 #elif CONFIG_SAMA5_ADC_DMASAMPLES < 2
-#  warning Values of ONFIG_SAMA5_ADC_DMASAMPLES < 2 are inefficient
+#  pragma message "Values of ONFIG_SAMA5_ADC_DMASAMPLES < 2 are inefficient"
 #endif
 
 #define SAMA5_ADC_SAMPLES (CONFIG_SAMA5_ADC_DMASAMPLES * SAMA5_NCHANNELS)

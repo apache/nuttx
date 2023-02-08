@@ -97,7 +97,7 @@
  */
 
 #ifdef CONFIG_MAX326XX_GPIOIRQ
-#warning Missing logic
+#pragma message "Missing logic"
 #else
 #  define MAX326_IRQ_NPININT   0
 #endif

@@ -67,7 +67,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_USBDEV) && !defined(CONFIG_USBHOST)
-#  warning "CONFIG_STM32_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
+#  pragma message "CONFIG_STM32_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
 #endif
 
 #ifndef CONFIG_STM32F411DISCO_USBHOST_PRIO

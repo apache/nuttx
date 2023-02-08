@@ -62,7 +62,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_CXD56_SDIO_DMA
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#  pragma message "Large Non-DMA transfer may result in RX overrun failures"
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)

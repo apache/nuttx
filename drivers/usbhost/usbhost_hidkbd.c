@@ -81,7 +81,7 @@
  */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#  pragma message "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 /* Provide some default values for other configuration settings */

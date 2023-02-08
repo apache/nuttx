@@ -68,7 +68,7 @@
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO)
 #    define CONFIG_NSH_MMCSDSPIPORTNO CONFIG_PIC32MX_MMCSDSPIPORTNO
 #  elif CONFIG_NSH_MMCSDSPIPORTNO != CONFIG_PIC32MX_MMCSDSPIPORTNO
-#    warning "CONFIG_PIC32MX_MMCSDSPIPORTNO does not match CONFIG_NSH_MMCSDSPIPORTNO"
+#    pragma message "CONFIG_PIC32MX_MMCSDSPIPORTNO does not match CONFIG_NSH_MMCSDSPIPORTNO"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO CONFIG_PIC32MX_MMCSDSPIPORTNO
 #  endif
@@ -80,7 +80,7 @@
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
-#    warning "The Mikroelektronika PIC32MX7 MMB has only one slot (0)"
+#    pragma message "The Mikroelektronika PIC32MX7 MMB has only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
@@ -88,16 +88,16 @@
 /* Make sure that the correct SPI is enabled in the configuration */
 
 #  if CONFIG_PIC32MX_MMCSDSPIPORTNO == 1 && !defined(CONFIG_PIC32MX_SPI1)
-#    warning "CONFIG_PIC32MX_SPI1 is not enabled"
+#    pragma message "CONFIG_PIC32MX_SPI1 is not enabled"
 #    undef NSH_HAVEMMCSD
 #  elif CONFIG_PIC32MX_MMCSDSPIPORTNO == 2 && !defined(CONFIG_PIC32MX_SPI2)
-#    warning "CONFIG_PIC32MX_SPI2 is not enabled"
+#    pragma message "CONFIG_PIC32MX_SPI2 is not enabled"
 #    undef NSH_HAVEMMCSD
 #  elif CONFIG_PIC32MX_MMCSDSPIPORTNO == 3 && !defined(CONFIG_PIC32MX_SPI3)
-#    warning "CONFIG_PIC32MX_SPI3 is not enabled"
+#    pragma message "CONFIG_PIC32MX_SPI3 is not enabled"
 #    undef NSH_HAVEMMCSD
 #  elif CONFIG_PIC32MX_MMCSDSPIPORTNO == 4 && !defined(CONFIG_PIC32MX_SPI4)
-#    warning "CONFIG_PIC32MX_SPI4 is not enabled"
+#    pragma message "CONFIG_PIC32MX_SPI4 is not enabled"
 #    undef NSH_HAVEMMCSD
 #  endif
 #endif
@@ -125,7 +125,7 @@
 
 #ifdef CONFIG_PIC32MX_USBHOST
 #  ifndef CONFIG_USBHOST
-#    warning "CONFIG_USBHOST is not selected"
+#    pragma message "CONFIG_USBHOST is not selected"
 #    undef NSH_HAVEUSBHOST
 #  endif
 #endif

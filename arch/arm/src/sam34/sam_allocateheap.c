@@ -94,7 +94,7 @@
 #    if CONFIG_MM_REGIONS > 1
 #      define HAVE_SRAM1_REGION 1
 #    else
-#      warning "CONFIG_MM_REGIONS < 2: SRAM1 not included in HEAP"
+#      pragma message "CONFIG_MM_REGIONS < 2: SRAM1 not included in HEAP"
 #    endif
 #  endif
 
@@ -102,14 +102,14 @@
 #    if CONFIG_MM_REGIONS > 2
 #      define HAVE_NFCSRAM_REGION
 #    else
-#      warning "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
+#      pragma message "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
 #    endif
 
 #    if CONFIG_SAM34_EXTSRAM0SIZE > 0
 #      if CONFIG_MM_REGIONS > 3
 #        define HAVE_EXTSRAM0_REGION 1
 #      else
-#        warning "CONFIG_MM_REGIONS < 4: External SRAM not included in HEAP"
+#        pragma message "CONFIG_MM_REGIONS < 4: External SRAM not included in HEAP"
 #      endif
 #    endif
 
@@ -117,7 +117,7 @@
 #    if CONFIG_MM_REGIONS > 2
 #       define HAVE_EXTSRAM0_REGION 1
 #    else
-#      warning "CONFIG_MM_REGIONS < 3: External SRAM not included in HEAP"
+#      pragma message "CONFIG_MM_REGIONS < 3: External SRAM not included in HEAP"
 #    endif
 #  endif
 #else
@@ -128,7 +128,7 @@
 #    if CONFIG_MM_REGIONS > 1
 #       define HAVE_EXTSRAM0_REGION 1
 #    else
-#      warning "CONFIG_MM_REGIONS < 2: External SRAM not included in HEAP"
+#      pragma message "CONFIG_MM_REGIONS < 2: External SRAM not included in HEAP"
 #    endif
 #  endif
 #endif
@@ -140,7 +140,7 @@
 #  undef CONFIG_RAM_END
 #  define CONFIG_RAM_END (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
 #elif CONFIG_RAM_END < (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
-#  warning "CONFIG_RAM_END is before end of SRAM0... not all of SRAM0 used"
+#  pragma message "CONFIG_RAM_END is before end of SRAM0... not all of SRAM0 used"
 #endif
 
 /****************************************************************************

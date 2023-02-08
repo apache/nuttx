@@ -60,7 +60,7 @@
 #elif FD_SETSIZE <= 256
 #  define __SELECT_NUINT32 8
 #else
-#  warning "Larger fd_set needed"
+#  pragma message "Larger fd_set needed"
 #endif
 
 /* These macros map a file descriptor to an index and bit number */

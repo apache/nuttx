@@ -42,7 +42,7 @@
 /* Nx Console prerequistes */
 
 #ifndef CONFIG_NX
-#  warning "NX is not enabled (CONFIG_NX)
+#  pragma message "NX is not enabled (CONFIG_NX)"
 #endif
 
 /* Nx Console configuration options:

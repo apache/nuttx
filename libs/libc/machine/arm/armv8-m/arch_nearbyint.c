@@ -49,5 +49,5 @@ double nearbyint(double x)
 }
 
 #else
-#  warning nearbyint() not built
+#  pragma message "nearbyint() not built"
 #endif

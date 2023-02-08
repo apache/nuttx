@@ -49,5 +49,5 @@ double trunc(double x)
 }
 
 #else
-#  warning trunc() not built
+#  pragma message "trunc() not built"
 #endif

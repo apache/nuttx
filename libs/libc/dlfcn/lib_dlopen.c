@@ -297,7 +297,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
 static inline FAR void *dlinsert(FAR const char *filename)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return NULL;
 }
 #endif

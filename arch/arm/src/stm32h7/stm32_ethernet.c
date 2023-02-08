@@ -113,7 +113,7 @@
 #endif
 
 #if !defined(CONFIG_STM32H7_MII) && !defined(CONFIG_STM32H7_RMII)
-#  warning "Neither CONFIG_STM32H7_MII nor CONFIG_STM32H7_RMII defined"
+#  pragma message "Neither CONFIG_STM32H7_MII nor CONFIG_STM32H7_RMII defined"
 #endif
 
 #if defined(CONFIG_STM32H7_MII) && defined(CONFIG_STM32H7_RMII)
@@ -123,7 +123,7 @@
 #ifdef CONFIG_STM32H7_MII
 #  if !defined(CONFIG_STM32H7_MII_MCO1) && !defined(CONFIG_STM32H7_MII_MCO2) && \
       !defined(CONFIG_STM32H7_MII_EXTCLK)
-#    warning "Neither CONFIG_STM32H7_MII_MCO1, CONFIG_STM32H7_MII_MCO2, nor CONFIG_STM32H7_MII_EXTCLK defined"
+#    pragma message "Neither CONFIG_STM32H7_MII_MCO1, CONFIG_STM32H7_MII_MCO2, nor CONFIG_STM32H7_MII_EXTCLK defined"
 #  endif
 #  if defined(CONFIG_STM32H7_MII_MCO1) && defined(CONFIG_STM32H7_MII_MCO2)
 #    error "Both CONFIG_STM32H7_MII_MCO1 and CONFIG_STM32H7_MII_MCO2 defined"
@@ -133,7 +133,7 @@
 #ifdef CONFIG_STM32H7_RMII
 #  if !defined(CONFIG_STM32H7_RMII_MCO1) && !defined(CONFIG_STM32H7_RMII_MCO2) && \
       !defined(CONFIG_STM32H7_RMII_EXTCLK)
-#    warning "Neither CONFIG_STM32H7_RMII_MCO1, CONFIG_STM32H7_RMII_MCO2, nor CONFIG_STM32H7_RMII_EXTCLK defined"
+#    pragma message "Neither CONFIG_STM32H7_RMII_MCO1, CONFIG_STM32H7_RMII_MCO2, nor CONFIG_STM32H7_RMII_EXTCLK defined"
 #  endif
 #  if defined(CONFIG_STM32H7_RMII_MCO1) && defined(CONFIG_STM32H7_RMII_MCO2)
 #    error "Both CONFIG_STM32H7_RMII_MCO1 and CONFIG_STM32H7_RMII_MCO2 defined"
@@ -177,7 +177,7 @@
 #endif
 
 #ifdef CONFIG_STM32H7_ETH_PTP
-#  warning "CONFIG_STM32H7_ETH_PTP is not yet supported"
+#  pragma message "CONFIG_STM32H7_ETH_PTP is not yet supported"
 #endif
 
 #undef CONFIG_STM32H7_ETH_HWCHECKSUM
@@ -205,7 +205,7 @@
 #endif
 
 #if ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
-#  warning "You are using an incomplete/untested configuration"
+#  pragma message "You are using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_STM32H7_ETH_NRXDESC
@@ -3013,7 +3013,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int stm32_phyintenable(struct stm32_ethmac_s *priv)
 {
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 #endif

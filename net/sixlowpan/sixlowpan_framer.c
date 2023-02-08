@@ -218,11 +218,11 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
   meta->handle = radio->r_msdu_handle++;
 
 #ifdef CONFIG_IEEE802154_SECURITY
-#  warning CONFIG_IEEE802154_SECURITY not yet supported
+#  pragma message "CONFIG_IEEE802154_SECURITY not yet supported"
 #endif
 
 #ifdef CONFIG_IEEE802154_UWB
-#  warning CONFIG_IEEE802154_UWB not yet supported
+#  pragma message "CONFIG_IEEE802154_UWB not yet supported"
 #endif
 
   /* Ranging left zero */

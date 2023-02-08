@@ -34,7 +34,7 @@
 
 #ifdef CONFIG_BUILD_PROTECTED
 
-#warning Protected build for STM32 H7 is WIP
+#pragma message "Protected build for STM32 H7 is WIP"
 #ifndef CONFIG_EXPERIMENTAL
 #  error Protected build requires CONFIG_EXPERIMENTAL for now
 #endif

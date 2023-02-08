@@ -49,5 +49,5 @@ double rint(double x)
 }
 
 #else
-#  warning rint() not built
+#  pragma message "rint() not built"
 #endif

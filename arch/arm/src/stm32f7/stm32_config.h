@@ -145,7 +145,7 @@
 /* Hardware flow control requires using DMAC channel (not yet supported) */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-#  warning PDC or DMAC support is required for RTS hardware flow control
+#  pragma message "PDC or DMAC support is required for RTS hardware flow control"
 #  undef CONFIG_SERIAL_IFLOWCONTROL
 #  undef CONFIG_USART0_IFLOWCONTROL
 #  undef CONFIG_USART1_IFLOWCONTROL

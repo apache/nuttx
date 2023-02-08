@@ -600,7 +600,7 @@ static int ieee802154_poll_local(FAR struct socket *psock,
    * feature.
    */
 
-#warning Missing logic
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 

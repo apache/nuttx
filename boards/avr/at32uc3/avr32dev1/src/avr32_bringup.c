@@ -51,7 +51,7 @@ int avr32_bringup(void)
 {
   int ret = OK;
 
-  #warning "Not Implemented"
+  #pragma message "Not Implemented"
 
   return ret;
 }

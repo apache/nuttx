@@ -1428,7 +1428,7 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
   ft80x_write_byte(priv, FT80X_REG_GPIO, regval8);
 
   /* 7. Enable back light control for display */
-#warning Missing logic
+#pragma message "Missing logic"
 
   /* 8. Write FT80X_REG_PCLK, video output with the first display list */
 

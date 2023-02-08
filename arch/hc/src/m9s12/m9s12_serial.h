@@ -38,7 +38,7 @@
 
 #if defined(CONFIG_SCI0_DISABLE) && defined(CONFIG_SCI1_DISABLE)
 #  undef HAVE_SERIAL_DEVICE
-#  warning "No SCIs enabled"
+#  pragma message "No SCIs enabled"
 #else
 #  define HAVE_SERIAL_DEVICE 1
 #endif
@@ -52,7 +52,7 @@
 #  undef CONFIG_SCI0_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #else
-#  warning "No valid CONFIG_SCIn_SERIAL_CONSOLE Setting"
+#  pragma message "No valid CONFIG_SCIn_SERIAL_CONSOLE Setting"
 #  undef CONFIG_SCI0_SERIAL_CONSOLE
 #  undef CONFIG_SCI1_SERIAL_CONSOLE
 #  undef HAVE_SERIAL_CONSOLE
@@ -62,13 +62,13 @@
 
 #ifndef CONFIG_SCI0_DISABLE
 #  ifndef CONFIG_SCI0_PARITY
-#    warning "CONFIG_SCI0_PARITY not defined -- Assuming none"
+#    pragma message "CONFIG_SCI0_PARITY not defined -- Assuming none"
 #    define CONFIG_SCI0_PARITY 0
 #  elif CONFIG_SCI0_PARITY != 0 && CONFIG_SCI0_PARITY != 2 && CONFIG_SCI0_PARITY != 2
 #    error "CONFIG_SCI0_PARITY value not recognized"
 #  endif
 #  ifndef CONFIG_SCI0_BITS
-#    warning "CONFIG_SCI0_BITS not defined -- Assuming 8"
+#    pragma message "CONFIG_SCI0_BITS not defined -- Assuming 8"
 #    define CONFIG_SCI0_BITS 8
 #  elif CONFIG_SCI0_BITS != 8 && CONFIG_SCI0_BITS != 9
 #    error "CONFIG_SCI0_BITS value not supported"
@@ -80,13 +80,13 @@
 
 #ifndef CONFIG_SCI1_DISABLE
 #  ifndef CONFIG_SCI1_PARITY
-#    warning "CONFIG_SCI1_PARITY not defined -- Assuming none"
+#    pragma message "CONFIG_SCI1_PARITY not defined -- Assuming none"
 #    define CONFIG_SCI1_PARITY 0
 #  elif CONFIG_SCI1_PARITY != 0 && CONFIG_SCI1_PARITY != 2 && CONFIG_SCI1_PARITY != 2
 #    error "CONFIG_SCI1_PARITY value not recognized"
 #  endif
 #  ifndef CONFIG_SCI1_BITS
-#    warning "CONFIG_SCI1_BITS not defined -- Assuming 8"
+#    pragma message "CONFIG_SCI1_BITS not defined -- Assuming 8"
 #    define CONFIG_SCI1_BITS 8
 #  elif CONFIG_SCI1_BITS != 8 && CONFIG_SCI1_BITS != 9
 #    error "CONFIG_SCI1_BITS value not supported"

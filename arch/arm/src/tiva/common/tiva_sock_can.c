@@ -96,7 +96,7 @@
  * may bring the system to its knees!
  */
 #if !defined(CONFIG_SCHED_LPWORK)
-#  warning "SocketCAN will run on HPWORK queue (not recommended). Consider enabling LPWORK queue."
+#  pragma message "SocketCAN will run on HPWORK queue (not recommended). Consider enabling LPWORK queue."
 #endif /* !CONFIG_SCHED_LPWORK */
 #define CANWORK LPWORK
 
@@ -522,7 +522,7 @@ static int tivacan_netdev_ioctl(struct net_driver_s *dev, int cmd,
 
   /* TODO: The IOCTL commands are not implemented yet. */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   switch (cmd)
   {

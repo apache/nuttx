@@ -101,7 +101,7 @@ static void sam_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ160_191_ENABLE));
 #endif
 #if SAM_IRQ_NEXTINT > 191
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
@@ -170,7 +170,7 @@ static void sam_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ140_143_PRIORITY));
 #endif
 #if SAM_IRQ_NEXTINT > 143
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   leave_critical_section(flags);
@@ -353,7 +353,7 @@ static int sam_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
 #else
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
         {
           return ERROR; /* Invalid interrupt */

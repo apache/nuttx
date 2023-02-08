@@ -51,7 +51,7 @@
 /* The configured RAM start address must be the beginning of CPU SRAM */
 
 #if CONFIG_RAM_START != LPC17_40_SRAM_BASE
-#  warning "CONFIG_RAM_START is not at LPC17_40_SRAM_BASE"
+#  pragma message "CONFIG_RAM_START is not at LPC17_40_SRAM_BASE"
 #  undef CONFIG_RAM_START
 #  undef CONFIG_RAM_END
 #  define CONFIG_RAM_START LPC17_40_SRAM_BASE
@@ -61,13 +61,13 @@
 /* The configured RAM size must be less then or equal to the CPU SRAM size */
 
 #if CONFIG_RAM_SIZE > LPC17_40_CPUSRAM_SIZE
-#  warning "CONFIG_RAM_SIZE is larger than the size of CPU SRAM"
+#  pragma message "CONFIG_RAM_SIZE is larger than the size of CPU SRAM"
 #  undef CONFIG_RAM_SIZE
 #  undef CONFIG_RAM_END
 #  define CONFIG_RAM_SIZE LPC17_40_CPUSRAM_SIZE
 #  define CONFIG_RAM_END (LPC17_40_SRAM_BASE+LPC17_40_CPUSRAM_SIZE)
 #elif CONFIG_RAM_SIZE < LPC17_40_CPUSRAM_SIZE
-#  warning "CONFIG_RAM_END is before end of CPU SRAM... not all of CPU SRAM used"
+#  pragma message "CONFIG_RAM_END is before end of CPU SRAM... not all of CPU SRAM used"
 #endif
 
 /* Figure out how much heap be have in AHB SRAM (if any).  Complications:
@@ -151,15 +151,15 @@
 
 #ifdef LPC17_40_AHB_HEAPBASE
 #  if CONFIG_MM_REGIONS < 2 + LPC17_40_EXT_MM_REGIONS
-#    warning "CONFIG_MM_REGIONS < 2: Available AHB SRAM Bank(s) not included in HEAP"
+#    pragma message "CONFIG_MM_REGIONS < 2: Available AHB SRAM Bank(s) not included in HEAP"
 #  endif
 #  if (CONFIG_MM_REGIONS > 2 + LPC17_40_EXT_MM_REGIONS)
-#    warning "CONFIG_MM_REGIONS > 2: Are additional regions handled by application?"
+#    pragma message "CONFIG_MM_REGIONS > 2: Are additional regions handled by application?"
 #  endif
 #else
 #  if CONFIG_MM_REGIONS > 1 + LPC17_40_EXT_MM_REGIONS
-#    warning "CONFIG_MM_REGIONS > 1: This configuration has no available AHB SRAM Bank0/1"
-#    warning "CONFIG_MM_REGIONS > 1: Are additional regions handled by application?"
+#    pragma message "CONFIG_MM_REGIONS > 1: This configuration has no available AHB SRAM Bank0/1"
+#    pragma message "CONFIG_MM_REGIONS > 1: Are additional regions handled by application?"
 #  endif
 #endif
 

@@ -489,7 +489,7 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
    * would be destroyed.
    */
 
-#  warning Missing logic
+#  pragma message "Missing logic"
   return OK;
 
 #else

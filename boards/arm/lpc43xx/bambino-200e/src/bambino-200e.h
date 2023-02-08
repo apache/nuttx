@@ -101,17 +101,17 @@
 #ifdef CONFIG_LPC43_SDMMC
 
 #  ifndef CONFIG_MMCSD
-#    warning MMC/SD support requires CONFIG_MMCSD
+#    pragma message "MMC/SD support requires CONFIG_MMCSD"
 #    undef HAVE_MMCSD
 #  endif
 
 #  ifndef CONFIG_MMCSD_SDIO
-#    warning MMC/SD support requires CONFIG_MMCSD_SDIO
+#    pragma message "MMC/SD support requires CONFIG_MMCSD_SDIO"
 #    undef HAVE_MMCSD
 #  endif
 
 #  ifdef CONFIG_DISABLE_MOUNTPOINT
-#    warning MMC/SD cannot be supported with CONFIG_DISABLE_MOUNTPOINT
+#    pragma message "MMC/SD cannot be supported with CONFIG_DISABLE_MOUNTPOINT"
 #    undef HAVE_MMCSD
 #  endif
 

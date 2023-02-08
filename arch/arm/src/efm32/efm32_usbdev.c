@@ -3416,7 +3416,7 @@ static inline void efm32_isocininterrupt(struct efm32_usbdev_s *priv)
        */
 
       efm32_req_complete(privep, -EIO);
-#warning "Will clear USB_DIEPCTL_USBACTEP too"
+#pragma message "Will clear USB_DIEPCTL_USBACTEP too"
       efm32_epin_disable(privep);
       break;
     }
@@ -3499,7 +3499,7 @@ static inline void efm32_isocoutinterrupt(struct efm32_usbdev_s *priv)
        */
 
       efm32_req_complete(privep, -EIO);
-#warning "Will clear USB_DOEPCTL_USBACTEP too"
+#pragma message "Will clear USB_DOEPCTL_USBACTEP too"
       efm32_epout_disable(privep);
       break;
     }
@@ -3517,7 +3517,7 @@ static inline void efm32_isocoutinterrupt(struct efm32_usbdev_s *priv)
 #ifdef CONFIG_USBDEV_VBUSSENSING
 static inline void efm32_sessioninterrupt(struct efm32_usbdev_s *priv)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 #endif
 
@@ -3539,7 +3539,7 @@ static inline void efm32_otginterrupt(struct efm32_usbdev_s *priv)
   regval = efm32_getreg(EFM32_USB_GOTGINT);
   if ((regval & OTGFS_GOTGINT_SEDET) != 0)
     {
-#warning "Missing logic"
+#pragma message "Missing logic"
     }
 
   /* Clear OTG interrupt */

@@ -54,7 +54,7 @@
 #endif
 
 #if !defined(CONFIG_STM32L4_FLASH_OVERRIDE_DEFAULT)
-#  warning "Flash Configuration has been overridden - make sure it is correct"
+#  pragma message "Flash Configuration has been overridden - make sure it is correct"
 #endif
 
 /****************************************************************************

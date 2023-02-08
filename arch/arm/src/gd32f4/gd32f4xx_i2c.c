@@ -2577,11 +2577,11 @@ struct i2c_master_s *gd32_i2cbus_initialize(int port)
   struct gd32_i2c_priv_s * priv = NULL;
 
 #if GD32_PCLK1_FREQUENCY < 4000000
-#   warning GD32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
+#   pragma message "GD32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation."
 #endif
 
 #if GD32_PCLK1_FREQUENCY < 2000000
-#   warning GD32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
+#   pragma message "GD32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation."
   return NULL;
 #endif
 

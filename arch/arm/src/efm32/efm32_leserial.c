@@ -53,7 +53,7 @@
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_LEUART_DEVICE
-#  warning "No LEUARTs enabled"
+#  pragma message "No LEUARTs enabled"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must

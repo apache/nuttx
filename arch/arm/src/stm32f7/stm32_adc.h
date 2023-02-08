@@ -185,7 +185,7 @@
 #  endif
 #  ifndef CONFIG_STM32F7_ADC1_TIMTRIG
 #    error "CONFIG_STM32F7_ADC1_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -227,7 +227,7 @@
 #  endif
 #  ifndef CONFIG_STM32F7_ADC2_TIMTRIG
 #    error "CONFIG_STM32F7_ADC2_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -265,7 +265,7 @@
 #  endif
 #  ifndef CONFIG_STM32F7_ADC3_TIMTRIG
 #    error "CONFIG_STM32F7_ADC3_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 

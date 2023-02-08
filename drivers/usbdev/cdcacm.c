@@ -2351,7 +2351,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_CDCACM_OFLOWCONTROL
         /* Report state of output flow control */
 
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
         /* Report state of input flow control */
@@ -2387,7 +2387,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_CDCACM_OFLOWCONTROL
         /* Handle changes to output flow control */
 
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
 #ifdef CONFIG_CDCACM_IFLOWCONTROL

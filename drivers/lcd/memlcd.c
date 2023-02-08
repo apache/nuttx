@@ -52,7 +52,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_HAVE_SPI_BITORDER
-#  warning This platform does not support SPI LSB-bit order
+#  pragma message "This platform does not support SPI LSB-bit order"
 #endif
 
 /* Display resolution */

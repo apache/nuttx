@@ -53,7 +53,7 @@
 /* Assertions ***************************************************************/
 
 #ifndef CONFIG_ARCH_CHIP_STM32L432KC
-#  warning "This only have been verified with CONFIG_ARCH_CHIP_STM32L432KC"
+#  pragma message "This only have been verified with CONFIG_ARCH_CHIP_STM32L432KC"
 #endif
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -69,7 +69,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_FPU
-#  warning "Set CONFIG_ARCH_FPU for hardware FPU support"
+#  pragma message "Set CONFIG_ARCH_FPU for hardware FPU support"
 #endif
 
 /* Check the configuration for TIM1 */

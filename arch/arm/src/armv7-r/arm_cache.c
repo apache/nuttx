@@ -372,7 +372,7 @@ void up_coherent_dcache(uintptr_t addr, size_t len)
 #ifdef CONFIG_ARCH_L2CACHE
       /* If we have an L2 cache, then there more things that need to done */
 
-#  warning This is insufficient
+#  pragma message "This is insufficient"
 #endif
     }
 }

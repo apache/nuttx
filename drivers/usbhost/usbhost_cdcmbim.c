@@ -79,11 +79,11 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#  pragma message "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 #ifndef CONFIG_USBHOST_ASYNCH
-#  warning Asynchronous transfer support is required (CONFIG_USBHOST_ASYNCH)
+#  pragma message "Asynchronous transfer support is required (CONFIG_USBHOST_ASYNCH)"
 #endif
 
 #ifdef CONFIG_USBHOST_CDCMBIM_NTDELAY

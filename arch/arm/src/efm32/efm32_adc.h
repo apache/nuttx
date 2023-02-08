@@ -142,7 +142,7 @@
 /* DMA support is not yet implemented for this driver */
 
 #ifdef CONFIG_ADC_DMA
-#  warning "DMA is not supported by the current driver"
+#  pragma message "DMA is not supported by the current driver"
 #endif
 
 /* Timer configuration:
@@ -183,7 +183,7 @@
 #  endif
 #  ifndef CONFIG_EFM32_ADC1_TIMTRIG
 #    error "CONFIG_EFM32_ADC1_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -221,7 +221,7 @@
 #  endif
 #  ifndef CONFIG_EFM32_ADC2_TIMTRIG
 #    error "CONFIG_EFM32_ADC2_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
@@ -259,14 +259,14 @@
 #  endif
 #  ifndef CONFIG_EFM32_ADC3_TIMTRIG
 #    error "CONFIG_EFM32_ADC3_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    pragma message "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
 #  endif
 #endif
 
 #if defined(ADC1_HAVE_TIMER) || defined(ADC2_HAVE_TIMER) || defined(ADC3_HAVE_TIMER)
 #  define ADC_HAVE_TIMER 1
 #  if defined(CONFIG_EFM32_EFM32F10XX) && !defined(CONFIG_EFM32_FORCEPOWER)
-#    warning "CONFIG_EFM32_FORCEPOWER must be defined to enable the timer(s)"
+#    pragma message "CONFIG_EFM32_FORCEPOWER must be defined to enable the timer(s)"
 #  endif
 #else
 #  undef ADC_HAVE_TIMER

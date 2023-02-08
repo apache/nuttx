@@ -229,7 +229,7 @@ static int wdt_interrupt(int irq, void *context, void *arg)
   wdinfo("  Test only\n");
 #  else
   wdinfo("  Re-booting\n");
-#    warning "Add logic to reset CPU here"
+#    pragma message "Add logic to reset CPU here"
 #  endif
 #else
   wdinfo("  No reboot\n");

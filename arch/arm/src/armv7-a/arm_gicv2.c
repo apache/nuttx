@@ -277,7 +277,7 @@ void arm_gic_initialize(void)
    * for interrupts in both security states.
    */
 
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
 #if !defined(CONFIG_ARCH_HAVE_TRUSTZONE)
@@ -334,7 +334,7 @@ void arm_gic_initialize(void)
    * REVISIT: Initial implementation operates only in secure state.
    */
 
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 
   /* Write the ICDDCR value to enable the forwarding of interrupt by the

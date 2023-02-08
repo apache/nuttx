@@ -1292,7 +1292,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv,
   bytesleft         = privreq->req.len - privreq->req.xfrd;
   nbytes            = bytesleft;
 
-#warning "REVISIT: If the EP supports double buffering, then we can do better"
+#pragma message "REVISIT: If the EP supports double buffering, then we can do better"
 
   /* Either
    * (1) we are committed to sending the null packet
@@ -2809,7 +2809,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
       break;
 
     case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
-#warning "REVISIT: Need to review isochronous EP setup"
+#pragma message "REVISIT: Need to review isochronous EP setup"
       setting = USB_EPR_EPTYPE_ISOC;
       break;
 
@@ -2827,7 +2827,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
 
   /* Get the address of the PMA buffer allocated for this endpoint */
 
-#warning "REVISIT: Should configure BULK EPs using double buffer feature"
+#pragma message "REVISIT: Should configure BULK EPs using double buffer feature"
   pma = STM32_BUFNO2BUF(privep->bufno);
 
   /* Get the maxpacket size of the endpoint. */
@@ -3307,7 +3307,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev,
 
   /* Allocate a PMA buffer for this endpoint */
 
-#warning "REVISIT: Should configure BULK EPs using double buffer feature"
+#pragma message "REVISIT: Should configure BULK EPs using double buffer feature"
   bufno = stm32_epallocpma(priv);
   if (bufno < 0)
     {

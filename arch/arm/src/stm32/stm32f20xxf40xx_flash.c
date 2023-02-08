@@ -48,7 +48,7 @@
 #if defined(CONFIG_STM32_STM32F20XX) || defined (CONFIG_STM32_STM32F4XXX)
 
 #if defined(CONFIG_STM32_FLASH_CONFIG_DEFAULT)
-#  warning "Default Flash Configuration Used - See Override Flash Size Designator"
+#  pragma message "Default Flash Configuration Used - See Override Flash Size Designator"
 #endif
 
 /****************************************************************************

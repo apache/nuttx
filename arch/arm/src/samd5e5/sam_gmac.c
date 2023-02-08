@@ -1283,7 +1283,7 @@ static void sam_txdone(struct sam_gmac_s *priv)
            * descriptor address. If it is not, then treat is as used anyway.
            */
 
-#warning REVISIT
+#pragma message "REVISIT"
           if (priv->txtail == 0 &&
               (uintptr_t)txdesc != sam_getreg(priv, SAM_GMAC_TBQB))
             {
@@ -2355,7 +2355,7 @@ static int sam_phyintenable(struct sam_gmac_s *priv)
   return ret;
 
 #else
-#  warning Missing logic
+#  pragma message "Missing logic"
   return -ENOSYS;
 #endif
 }

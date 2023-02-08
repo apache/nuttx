@@ -49,5 +49,5 @@ double floor(double x)
 }
 
 #else
-#  warning floor() not built
+#  pragma message "floor() not built"
 #endif

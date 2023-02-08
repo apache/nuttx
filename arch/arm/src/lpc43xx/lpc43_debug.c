@@ -49,7 +49,7 @@
 
 int lpc43_pin_dump(uint32_t pinconf, const char *msg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 
@@ -64,7 +64,7 @@ int lpc43_pin_dump(uint32_t pinconf, const char *msg)
 
 int lpc43_gpio_dump(uint16_t gpiocfg, const char *msg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOSYS;
 }
 

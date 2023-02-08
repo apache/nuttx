@@ -81,6 +81,6 @@
 #ifdef HAVE_UART_CONSOLE
 void z180_putc(uint8_t ch)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 #endif

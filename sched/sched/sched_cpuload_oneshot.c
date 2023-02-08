@@ -62,7 +62,7 @@
  */
 
 #ifndef CONFIG_CPULOAD_ENTROPY
-#  warning CONFIG_CPULOAD_ENTROPY not defined
+#  pragma message "CONFIG_CPULOAD_ENTROPY not defined"
 #  define CONFIG_CPULOAD_ENTROPY 0
 #endif
 

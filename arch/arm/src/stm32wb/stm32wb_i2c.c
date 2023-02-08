@@ -203,7 +203,7 @@
 #if !defined(CONFIG_STM32WB_I2CTIMEOSEC) && !defined(CONFIG_STM32WB_I2CTIMEOMS)
 #  define CONFIG_STM32WB_I2CTIMEOSEC 0
 #  define CONFIG_STM32WB_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#  warning "Using Default 500 Ms Timeout"
+#  pragma message "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32WB_I2CTIMEOSEC)
 #  define CONFIG_STM32WB_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32WB_I2CTIMEOMS)

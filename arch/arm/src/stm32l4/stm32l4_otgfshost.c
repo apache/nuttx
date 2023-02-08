@@ -3008,7 +3008,7 @@ static inline void stm32l4_gint_sofisr(struct stm32l4_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
 
-#warning "Do what?"
+#pragma message "Do what?"
 
   /* Clear pending SOF interrupt */
 
@@ -4260,7 +4260,7 @@ static int stm32l4_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *
  ****************************************************************************/
 
-#warning this function name is too generic
+#pragma message "this function name is too generic"
 static int stm32l4_alloc(struct usbhost_driver_s *drvr,
                          uint8_t **buffer, size_t *maxlen)
 {
@@ -4307,7 +4307,7 @@ static int stm32l4_alloc(struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-#warning this function name is too generic
+#pragma message "this function name is too generic"
 static int stm32l4_free(struct usbhost_driver_s *drvr,
                         uint8_t *buffer)
 {
@@ -4347,7 +4347,7 @@ static int stm32l4_free(struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-#warning this function name is too generic
+#pragma message "this function name is too generic"
 static int stm32l4_ioalloc(struct usbhost_driver_s *drvr,
                            uint8_t **buffer, size_t buflen)
 {

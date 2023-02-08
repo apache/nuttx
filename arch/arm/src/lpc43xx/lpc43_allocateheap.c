@@ -239,7 +239,7 @@
  * used by USB and/or Ethernet (if any).
  */
 
-#warning "Missing Logic"
+#pragma message "Missing Logic"
 
 #ifdef CONFIG_LPC43_AHBSRAM_BANK2
 #  define MM_USE_AHBSRAM_BANK2 1

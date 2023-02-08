@@ -72,7 +72,7 @@
 
 #else
 
-#  warning "Unsupported compiler"
+#  pragma message "Unsupported compiler"
 #  define begin_packed_struct
 #  define end_packed_struct
 

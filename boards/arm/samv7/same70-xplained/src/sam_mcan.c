@@ -43,7 +43,7 @@
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_SAMV7_MCAN0) && defined(CONFIG_SAMV7_MCAN1)
-#  warning "Both MCAN0 and MCAN1 are enabled.  Assuming only CAN1."
+#  pragma message "Both MCAN0 and MCAN1 are enabled.  Assuming only CAN1."
 #  undef CONFIG_SAMV7_MCAN0
 #endif
 

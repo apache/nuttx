@@ -112,7 +112,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ128_159_ENABLE));
 #endif
 #if TIVA_IRQ_NEXTINT > 159
-#  warning Missing output
+#  pragma message "Missing output"
 #endif
 
   irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
@@ -184,7 +184,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
         getreg32(NVIC_IRQ156_159_PRIORITY));
 #endif
 #if TIVA_IRQ_NEXTINT > 159
-#  warning Missing output
+#  pragma message "Missing output"
 #endif
   leave_critical_section(flags);
 }
@@ -312,7 +312,7 @@ static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 128);
         }
 #if TIVA_IRQ_NEXTINT > 159
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif /* TIVA_IRQ_NEXTINT > 159 */
 #endif /* TIVA_IRQ_NEXTINT > 127 */
 #endif /* TIVA_IRQ_NEXTINT > 95 */

@@ -116,7 +116,7 @@
 
 #ifdef CONFIG_ETH0_PHY_KSZ8081
 #  ifdef GPIO_LED
-#    warning LED interferes with ETH reset unless R323 is removed.
+#    pragma message "LED interferes with ETH reset unless R323 is removed."
 #  endif
 #endif
 

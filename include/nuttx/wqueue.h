@@ -171,7 +171,7 @@
    */
 
 #  if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_HPWORKPRIORITY
-#    warning "The Lower priority worker thread has the higher priority"
+#    pragma message "The Lower priority worker thread has the higher priority"
 #  endif
 #endif
 

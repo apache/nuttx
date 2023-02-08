@@ -79,11 +79,11 @@
  */
 
 #if !defined(CONFIG_EFM32_EFM32GG)
-#  warning "Tested only on EFM32GG family"
+#  pragma message "Tested only on EFM32GG family"
 #endif
 
 #ifndef CONFIG_I2C_POLLED
-#  warning "Not tested with interrupt"
+#  pragma message "Not tested with interrupt"
 #endif
 
 /* Interrupt wait timeout in seconds and milliseconds */

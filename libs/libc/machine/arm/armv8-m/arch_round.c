@@ -49,5 +49,5 @@ double round(double x)
 }
 
 #else
-#  warning round() not built
+#  pragma message "round() not built"
 #endif

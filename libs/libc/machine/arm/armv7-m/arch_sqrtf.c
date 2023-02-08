@@ -39,5 +39,5 @@ float sqrtf(float x)
 }
 
 #else
-#  warning sqrtf() not built
+#  pragma message "sqrtf() not built"
 #endif

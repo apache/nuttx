@@ -72,7 +72,7 @@
 #if defined(CONFIG_UART0_RXDMA) || defined(CONFIG_UART1_RXDMA) || \
     defined(CONFIG_UART2_RXDMA) || defined(CONFIG_UART3_RXDMA) || \
     defined(CONFIG_UART4_RXDMA)
-# warning RX DMA is currently supported only for USART driver.
+# pragma message "RX DMA is currently supported only for USART driver."
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA) && !defined(CONFIG_SAMV7_XDMAC)
@@ -87,7 +87,7 @@
     defined(CONFIG_UART2_TXDMA) || defined(CONFIG_UART3_TXDMA) || \
     defined(CONFIG_UART4_TXDMA) || defined(CONFIG_USART0_TXDMA) || \
     defined(CONFIG_USART1_TXDMA) || defined(CONFIG_USART2_TXDMA)
-# warning TX DMA is currently not supported.
+# pragma message "TX DMA is currently not supported."
 #endif
 
 #ifndef CONFIG_SAMV7_SERIAL_DMA_TIMEOUT

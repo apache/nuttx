@@ -58,6 +58,6 @@ void imx_clockconfig(void)
    */
 
 #ifndef CONFIG_IMX6_BOOT_SDRAM
-#  warning Missing logic
+#  pragma message "Missing logic"
 #endif
 }

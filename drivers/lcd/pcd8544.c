@@ -86,7 +86,7 @@
 #endif
 
 #if CONFIG_PCD8544_NINTERFACES != 1
-#  warning "Only a single PCD8544 interface is supported"
+#  pragma message "Only a single PCD8544 interface is supported"
 #  undef CONFIG_PCD8544_NINTERFACES
 #  define CONFIG_PCD8544_NINTERFACES 1
 #endif
@@ -115,7 +115,7 @@
 #endif
 
 #if CONFIG_LCD_MAXCONTRAST < 60
-#  warning "Optimal setting of CONFIG_LCD_MAXCONTRAST is 60"
+#  pragma message "Optimal setting of CONFIG_LCD_MAXCONTRAST is 60"
 #endif
 
 /* Check power setting */
@@ -125,7 +125,7 @@
 #endif
 
 #if CONFIG_LCD_MAXPOWER != 1
-#  warning "CONFIG_LCD_MAXPOWER should be 1"
+#  pragma message "CONFIG_LCD_MAXPOWER should be 1"
 #  undef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 1
 #endif

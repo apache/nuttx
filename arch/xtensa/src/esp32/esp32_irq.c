@@ -194,7 +194,7 @@ static void esp32_irq_dump(const char *msg, int irq)
   irqstate_t flags;
 
   flags = enter_critical_section();
-#warning Missing logic
+#pragma message "Missing logic"
   leave_critical_section(flags);
 }
 #else

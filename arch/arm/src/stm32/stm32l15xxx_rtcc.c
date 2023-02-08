@@ -69,9 +69,9 @@
 #endif
 
 #if defined(CONFIG_STM32_RTC_HSECLOCK)
-#  warning "RTC with HSE clock not yet tested on STM32L15XXX"
+#  pragma message "RTC with HSE clock not yet tested on STM32L15XXX"
 #elif defined(CONFIG_STM32_RTC_LSICLOCK)
-#  warning "RTC with LSI clock not yet tested on STM32L15XXX"
+#  pragma message "RTC with LSI clock not yet tested on STM32L15XXX"
 #endif
 
 #if !defined(CONFIG_STM32_RTC_MAGIC)

@@ -74,7 +74,7 @@
 #endif
 
 #ifndef CONFIG_ARCH_IRQBUTTONS
-#  warning "CONFIG_ARCH_IRQBUTTONS is not defined in the configuration"
+#  pragma message "CONFIG_ARCH_IRQBUTTONS is not defined in the configuration"
 #endif
 
 #ifndef CONFIG_PM_IRQBUTTONS_MIN

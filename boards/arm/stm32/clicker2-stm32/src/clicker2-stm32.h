@@ -54,7 +54,7 @@
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(HAVE_MMCSD) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
+#  pragma message "Mountpoints disabled.  No MMC/SD support"
 #  undef HAVE_MMCSD
 #endif
 

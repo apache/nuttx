@@ -76,7 +76,7 @@
 #    define COMP2_LOCK COMP_LOCK_DEFAULT
 #  endif
 #  ifndef GPIO_COMP2_INM
-#    warning "GPIO_COMP2_INM not selected. Set default value to GPIO_COMP2_INM1"
+#    pragma message "GPIO_COMP2_INM not selected. Set default value to GPIO_COMP2_INM1"
 #    define GPIO_COMP2_INM GPIO_COMP2_INM_1
 #  endif
 #endif
@@ -100,7 +100,7 @@
 #    define COMP4_LOCK COMP_LOCK_DEFAULT
 #  endif
 #  ifndef GPIO_COMP4_INM
-#    warning "GPIO_COMP4_INM not selected. Set default value to GPIO_COMP4_INM1"
+#    pragma message "GPIO_COMP4_INM not selected. Set default value to GPIO_COMP4_INM1"
 #    define GPIO_COMP4_INM GPIO_COMP4_INM_1
 #  endif
 #endif
@@ -124,7 +124,7 @@
 #    define COMP6_LOCK COMP_LOCK_DEFAULT
 #  endif
 #  ifndef GPIO_COMP6_INM
-#    warning "GPIO_COMP6_INM not selected. Set default value to GPIO_COMP6_INM1"
+#    pragma message "GPIO_COMP6_INM not selected. Set default value to GPIO_COMP6_INM1"
 #    define GPIO_COMP6_INM GPIO_COMP6_INM_1
 #  endif
 #endif
@@ -884,7 +884,7 @@ static int stm32_compenable(struct stm32_comp_s *priv, bool enable)
 
 static int comp_setup(struct comp_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 
   return OK;
 }
@@ -906,7 +906,7 @@ static int comp_setup(struct comp_dev_s *dev)
 
 static void comp_shutdown(struct comp_dev_s *dev)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -952,7 +952,7 @@ static int comp_read(struct comp_dev_s *dev)
 
 static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
 {
-#warning "Missing logic"
+#pragma message "Missing logic"
   return -ENOTTY;
 }
 

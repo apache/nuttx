@@ -1554,7 +1554,7 @@ static int dm9x_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+#pragma message "Multicast MAC support not implemented"
   return OK;
 }
 #endif
@@ -1585,7 +1585,7 @@ static int dm9x_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+#pragma message "Multicast MAC support not implemented"
   return OK;
 }
 #endif

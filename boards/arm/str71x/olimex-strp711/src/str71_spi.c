@@ -67,15 +67,15 @@
 #endif
 
 #if defined(CONFIG_STR71X_UART3) && defined (CONFIG_STR71X_BSPI0)
-#  warning "BSPI0 GPIO usage conflicts with UART3"
+#  pragma message "BSPI0 GPIO usage conflicts with UART3"
 #endif
 
 #if defined(CONFIG_STR71X_IC21) && defined (CONFIG_STR71X_BSPI0)
-#  warning "BSPI0 GPIO usage conflicts with IC21"
+#  pragma message "BSPI0 GPIO usage conflicts with IC21"
 #endif
 
 #if defined(CONFIG_STR71X_HDLC) && defined (CONFIG_STR71X_BSPI1)
-#  warning "BSPI1 GPIO usage conflicts with HDLC"
+#  pragma message "BSPI1 GPIO usage conflicts with HDLC"
 #endif
 
 /****************************************************************************
@@ -149,7 +149,7 @@
  */
 
 #  ifdef CONFIG_STR71X_BSPI1
-#    warning "CONFIG_STR71X_BSPI1 cannot be used in this configuration"
+#    pragma message "CONFIG_STR71X_BSPI1 cannot be used in this configuration"
 #  endif
 
 /* ENC28J60 additional pins
@@ -179,7 +179,7 @@
 
 #else
 #  ifdef CONFIG_STR71X_BSPI0
-#    warning "CONFIG_STR71X_BSPI0 has no function in this configuration"
+#    pragma message "CONFIG_STR71X_BSPI0 has no function in this configuration"
 #    undef CONFIG_STR71X_BSPI0
 #  endif
 

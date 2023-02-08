@@ -46,11 +46,11 @@
  ****************************************************************************/
 
 #if CONFIG_FS_TMPFS_DIRECTORY_FREEGUARD <= CONFIG_FS_TMPFS_DIRECTORY_ALLOCGUARD
-#  warning CONFIG_FS_TMPFS_DIRECTORY_FREEGUARD needs to be > ALLOCGUARD
+#  pragma message "CONFIG_FS_TMPFS_DIRECTORY_FREEGUARD needs to be > ALLOCGUARD"
 #endif
 
 #if CONFIG_FS_TMPFS_FILE_FREEGUARD <= CONFIG_FS_TMPFS_FILE_ALLOCGUARD
-#  warning CONFIG_FS_TMPFS_FILE_FREEGUARD needs to be > ALLOCGUARD
+#  pragma message "CONFIG_FS_TMPFS_FILE_FREEGUARD needs to be > ALLOCGUARD"
 #endif
 
 #define tmpfs_lock(fs) \

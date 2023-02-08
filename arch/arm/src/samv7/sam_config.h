@@ -157,7 +157,7 @@
 /* Hardware flow control requires using a DMAC channel (not yet supported) */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-#  warning XDMAC support is required for RTS hardware flow control
+#  pragma message "XDMAC support is required for RTS hardware flow control"
 #  undef CONFIG_SERIAL_IFLOWCONTROL
 #  undef CONFIG_USART0_IFLOWCONTROL
 #  undef CONFIG_USART1_IFLOWCONTROL

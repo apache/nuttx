@@ -34,7 +34,7 @@
 #include "gd32f4xx.h"
 
 #if defined(CONFIG_GD32F4_FLASH_CONFIG_DEFAULTT)
-#  warning "Default Flash Configuration Used - See Override Flash Size Designator"
+#  pragma message "Default Flash Configuration Used - See Override Flash Size Designator"
 #endif
 
 /****************************************************************************

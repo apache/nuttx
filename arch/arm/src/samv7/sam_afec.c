@@ -76,7 +76,7 @@
 #elif !defined(CONFIG_SAMV7_AFEC_DMASAMPLES)
 #  error CONFIG_SAMV7_AFEC_DMASAMPLES must be defined
 #elif CONFIG_SAMV7_AFEC_DMASAMPLES < 2
-#  warning Values of CONFIG_SAMV7_AFEC_DMASAMPLES < 2 are inefficient
+#  pragma message "Values of CONFIG_SAMV7_AFEC_DMASAMPLES < 2 are inefficient"
 #endif
 
 #define SAMV7_AFEC_SAMPLES (CONFIG_SAMV7_AFEC_DMASAMPLES * ADC_MAX_CHANNELS)

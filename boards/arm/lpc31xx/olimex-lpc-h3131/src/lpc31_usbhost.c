@@ -144,7 +144,7 @@ void weak_function lpc31_usbhost_bootinitialize(void)
 
   /* Configure to receive interrupts on the overrcurrent input pin */
 
-#warning Missing logic
+#pragma message "Missing logic"
 }
 
 /****************************************************************************
@@ -303,7 +303,7 @@ int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
 
   /* Configure the interrupt */
 
-#warning Missing logic
+#pragma message "Missing logic"
 
   leave_critical_section(flags);
   return oldhandler;

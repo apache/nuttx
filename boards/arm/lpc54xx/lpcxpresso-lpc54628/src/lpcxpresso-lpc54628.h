@@ -44,12 +44,12 @@
 #ifdef CONFIG_SYSTEM_I2CTOOL
 
 #  ifndef CONFIG_I2C_DRIVER
-#    warning CONFIG_SYSTEM_I2CTOOL requires CONFIG_I2C_DRIVER
+#    pragma message "CONFIG_SYSTEM_I2CTOOL requires CONFIG_I2C_DRIVER"
 #    undef HAVE_I2CTOOL
 #  endif
 
 #  ifndef HAVE_I2C_MASTER_DEVICE
-#    warning CONFIG_SYSTEM_I2CTOOL requires HAVE_I2C_MASTER_DEVICE
+#    pragma message "CONFIG_SYSTEM_I2CTOOL requires HAVE_I2C_MASTER_DEVICE"
 #    undef HAVE_I2CTOOL
 #  endif
 
@@ -62,12 +62,12 @@
 #ifdef CONFIG_INPUT_FT5X06
 
 #  ifndef CONFIG_LPC54_I2C2_MASTER
-#    warning CONFIG_INPUT_FT5X06 requires CONFIG_LPC54_I2C2_MASTER
+#    pragma message "CONFIG_INPUT_FT5X06 requires CONFIG_LPC54_I2C2_MASTER"
 #    undef HAVE_FT5x06
 #  endif
 
 #  ifndef CONFIG_FT5X06_POLLMODE
-#    warning CONFIG_INPUT_FT5X06 requires CONFIG_FT5X06_POLLMODE
+#    pragma message "CONFIG_INPUT_FT5X06 requires CONFIG_FT5X06_POLLMODE"
 #    undef HAVE_FT5x06
 #  endif
 
@@ -80,17 +80,17 @@
 #ifdef CONFIG_LPC54_SDMMC
 
 #  ifndef CONFIG_MMCSD
-#    warning MMC/SD support requires CONFIG_MMCSD
+#    pragma message "MMC/SD support requires CONFIG_MMCSD"
 #    undef HAVE_MMCSD
 #  endif
 
 #  ifndef CONFIG_MMCSD_SDIO
-#    warning MMC/SD support requires CONFIG_MMCSD_SDIO
+#    pragma message "MMC/SD support requires CONFIG_MMCSD_SDIO"
 #    undef HAVE_MMCSD
 #  endif
 
 #  ifdef CONFIG_DISABLE_MOUNTPOINT
-#    warning MMC/SD cannot be supported with CONFIG_DISABLE_MOUNTPOINT
+#    pragma message "MMC/SD cannot be supported with CONFIG_DISABLE_MOUNTPOINT"
 #    undef HAVE_MMCSD
 #  endif
 

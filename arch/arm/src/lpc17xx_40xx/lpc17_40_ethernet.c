@@ -106,7 +106,7 @@
  */
 
 #if CONFIG_LPC17_40_NINTERFACES > 1
-#  warning "Only a single ethernet controller is supported"
+#  pragma message "Only a single ethernet controller is supported"
 #  undef CONFIG_LPC17_40_NINTERFACES
 #  define CONFIG_LPC17_40_NINTERFACES 1
 #endif
@@ -194,7 +194,7 @@
 #  define LPC17_40_PHYID2       MII_PHYID2_KSZ8081
 #  define LPC17_40_HAVE_PHY     1
 #else
-#  warning "No PHY specified!"
+#  pragma message "No PHY specified!"
 #  undef LPC17_40_HAVE_PHY
 #endif
 
@@ -1113,7 +1113,7 @@ static int lpc17_40_interrupt(int irq, void *context, void *arg)
 #ifdef CONFIG_LPC17_40_ETH_WOL
       if ((status & ETH_INT_WKUP) != 0)
         {
-#         warning "Missing logic"
+#         pragma message "Missing logic"
         }
       else
 #endif
@@ -2741,7 +2741,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
   }
 
 #else
-#  warning "PHY Unknown: speed and duplex are bogus"
+#  pragma message "PHY Unknown: speed and duplex are bogus"
 #endif
 
   ninfo("%dBase-T %s duplex\n",
