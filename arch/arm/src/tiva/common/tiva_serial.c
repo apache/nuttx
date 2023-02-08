@@ -301,6 +301,9 @@ struct up_dev_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool     oflow;     /* output flow control (CTS) enabled */
 #endif
+#ifdef CONFIG_TIVA_UART_BREAKS
+  bool     brk;       /* true: Line break in progress */
+#endif
 };
 
 /****************************************************************************
@@ -1099,11 +1102,12 @@ static int up_interrupt(int irq, void *context, void *arg)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
+#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS) \
+    || defined(CONFIG_TIVA_UART_BREAKS)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
-#if defined(CONFIG_SERIAL_TERMIOS)
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_TIVA_UART_BREAKS)
   struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
 #endif
   int                ret   = OK;
@@ -1242,6 +1246,52 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
+#ifdef CONFIG_TIVA_UART_BREAKS
+    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
+      {
+        irqstate_t flags;
+        uint32_t tx_break;
+
+        flags = enter_critical_section();
+
+        /* Disable any further tx activity */
+
+        priv->brk = true;
+        up_txint(dev, false);
+
+        /* Send a break signal */
+
+        tx_break = up_serialin(priv, TIVA_UART_LCRH_OFFSET);
+        tx_break |= UART_LCRH_BRK;
+        up_serialout(priv, TIVA_UART_LCRH_OFFSET, tx_break);
+
+        leave_critical_section(flags);
+      }
+      break;
+
+    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
+      {
+        irqstate_t flags;
+        uint32_t tx_break;
+
+        flags = enter_critical_section();
+
+        /* Stop sending the break signal */
+
+        tx_break = up_serialin(priv, TIVA_UART_LCRH_OFFSET);
+        tx_break &= ~UART_LCRH_BRK;
+        up_serialout(priv, TIVA_UART_LCRH_OFFSET, tx_break);
+
+        /* Enable further tx activity */
+
+        priv->brk = false;
+        up_txint(dev, true);
+
+        leave_critical_section(flags);
+      }
+      break;
+#endif /* CONFIG_TIVA_UART_BREAKS */
+
     default:
       ret = -ENOTTY;
       break;
@@ -1351,6 +1401,16 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       /* Set to receive an interrupt when the TX fifo is half emptied */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
+#  ifdef CONFIG_TIVA_UART_BREAKS
+      /* Do not enable TX interrupt if line break in progress */
+
+      if (priv->brk)
+        {
+          leave_critical_section(flags);
+          return;
+        }
+#  endif
+
       priv->im |= UART_IM_TXIM;
       up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
 
