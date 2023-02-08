@@ -428,7 +428,7 @@ static int skel_readdir(FAR struct fs_dirent_s *dir,
 
       /* TODO:  Add device specific entries */
 
-      strcpy(filename, "dummy");
+      strlcpy(filename, "dummy", sizeof(filename));
 
       /* TODO:  Specify the type of entry */
 

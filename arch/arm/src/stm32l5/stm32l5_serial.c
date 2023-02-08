@@ -3093,7 +3093,7 @@ void arm_serialinit(void)
 
   /* Register all remaining USARTs */
 
-  strcpy(devname, "/dev/ttySx");
+  strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
   for (i = 0; i < STM32L5_NLPUART + STM32L5_NUSART + STM32L5_NUART; i++)
     {

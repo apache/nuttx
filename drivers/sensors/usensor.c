@@ -98,9 +98,11 @@ static int usensor_register(FAR struct usensor_context_s *usensor,
                             FAR const struct sensor_reginfo_s *info)
 {
   FAR struct usensor_lowerhalf_s *lower;
+  size_t size;
   int ret;
 
-  lower = kmm_zalloc(sizeof(*lower) + strlen(info->path));
+  size = strlen(info->path);
+  lower = kmm_zalloc(sizeof(*lower) + size);
   if (!lower)
     {
       return -ENOMEM;
@@ -109,7 +111,7 @@ static int usensor_register(FAR struct usensor_context_s *usensor,
   lower->driver.nbuffer = info->nbuffer;
   lower->driver.persist = info->persist;
   lower->driver.ops = &g_usensor_ops;
-  strcpy(lower->path, info->path);
+  strlcpy(lower->path, info->path, size + 1);
   ret = sensor_custom_register(&lower->driver, lower->path, info->esize);
   if (ret < 0)
     {

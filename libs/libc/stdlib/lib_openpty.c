@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include <nuttx/serial/pty.h>
 
@@ -162,7 +163,7 @@ int openpty(FAR int *master, FAR int *slave, FAR char *name,
 
   if (name != NULL)
     {
-      strcpy(name, buf);
+      strlcpy(name, buf, NAME_MAX);
     }
 
   /* Configure the pseudo terminal slave */

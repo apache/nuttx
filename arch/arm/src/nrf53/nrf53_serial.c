@@ -782,7 +782,7 @@ void arm_serialinit(void)
 
   /* Register all remaining UARTs */
 
-  strcpy(devname, "/dev/ttySx");
+  strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
   for (i = 0; i < NRF53_NUART; i++)
     {
