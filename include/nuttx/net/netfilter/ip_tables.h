@@ -117,7 +117,7 @@ struct ipt_entry
 
   struct xt_counters counters; /* Packet and byte counters. */
 
-  unsigned char elems[0];      /* The matches (if any), then the target. */
+  unsigned char elems[1];      /* The matches (if any), then the target. */
 };
 
 /* Note 1: How entries are organized in following interface arguments.

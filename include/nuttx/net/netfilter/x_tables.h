@@ -62,7 +62,7 @@ struct xt_entry_target
       uint16_t target_size; /* Total length */
     } u;
 
-  unsigned char data[0];
+  unsigned char data[1];
 };
 
 struct xt_standard_target
