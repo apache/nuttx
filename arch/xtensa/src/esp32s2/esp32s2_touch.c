@@ -689,6 +689,12 @@ void esp32s2_touchirqdisable(int irq)
  * Description:
  *   Register the release callback.
  *
+ * Input Parameters:
+ *   func - The handler function to be used.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s2_touchregisterreleasecb(int (*func)(int, void *, void *))
