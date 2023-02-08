@@ -26,6 +26,10 @@ ifeq ($(CONFIG_FUSB301),y)
   CSRCS += fusb301.c
 endif
 
+ifeq ($(CONFIG_FUSB302),y)
+  CSRCS += fusb302.c
+endif
+
 ifeq ($(CONFIG_FUSB303),y)
   CSRCS += fusb303.c
 endif
