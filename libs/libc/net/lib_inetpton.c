@@ -107,7 +107,7 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
 
   memset(dest, 0, sizeof(struct in_addr));
 
-  ip        = (uint8_t *)dest;
+  ip        = (FAR uint8_t *)dest;
   srcoffset = 0;
   numoffset = 0;
   ndots     = 0;
@@ -297,7 +297,8 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
 
               if (nrsep > 0)
                 {
-                  memcpy(dest + (16 - (nrsep << 1)), &rip[0], nrsep << 1);
+                  memcpy((FAR uint8_t *)dest +
+                         (16 - (nrsep << 1)), &rip[0], nrsep << 1);
                 }
 
               /* Return 1 if the conversion succeeds */
