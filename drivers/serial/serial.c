@@ -1395,7 +1395,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           case TCGETS:
             {
-              FAR struct termios *termiosp = (FAR struct termios *)arg;
+              FAR struct termios *termiosp = (FAR struct termios *)
+                                                (uintptr_t)arg;
 
               if (!termiosp)
                 {
@@ -1415,7 +1416,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCSETS:
             {
-              FAR struct termios *termiosp = (FAR struct termios *)arg;
+              FAR struct termios *termiosp = (FAR struct termios *)
+                                                (uintptr_t)arg;
 
               if (!termiosp)
                 {
