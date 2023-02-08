@@ -36,7 +36,7 @@ CMN_ASRCS := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
 
 CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_wdt.c esp32c3_idle.c
 CHIP_CSRCS += esp32c3_irq.c esp32c3_libc_stubs.c
-CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c
+CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c esp32c3_rtc_gpio.c
 CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
 CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c
 CHIP_CSRCS += esp32c3_uid.c esp32c3_perf.c
