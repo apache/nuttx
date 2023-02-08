@@ -39,6 +39,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 
 #include <arch/board/board.h>
@@ -810,27 +811,38 @@ static int up_interrupt(int irq, void *context, void *arg)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_SERIAL_TERMIOS
-  struct inode      *inode;
-  struct uart_dev_s *dev;
-  struct up_dev_s   *priv;
-  int                ret = OK;
-
-  DEBUGASSERT(filep, filep->f_inode);
-  inode = filep->f_inode;
-  dev   = inode->i_private;
-
-  DEBUGASSERT(dev, dev->priv);
-  priv = (struct up_dev_s *)dev->priv;
+#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
+  struct inode      *inode = filep->f_inode;
+  struct uart_dev_s *dev   = inode->i_private;
+#endif
+#if defined(CONFIG_SERIAL_TERMIOS)
+  struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
+#endif
+  int                ret   = OK;
 
   switch (cmd)
     {
-    case xxx: /* Add commands here */
-      break;
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
+    case TIOCSERGSTRUCT:
+      {
+         struct up_dev_s *user = (struct up_dev_s *)arg;
+         if (!user)
+           {
+             ret = -EINVAL;
+           }
+         else
+           {
+             memcpy(user, dev, sizeof(struct up_dev_s));
+           }
+       }
+       break;
+#endif
 
+#ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
         struct termios *termiosp = (struct termios *)arg;
+        tcflag_t ccflag = 0;
 
         if (!termiosp)
           {
@@ -838,10 +850,35 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* TODO:  Other termios fields are not yet returned.
-         * Note that only cfsetospeed is not necessary because we have
+        if (priv->bits >= 5 && priv->bits <= 8)
+          {
+            ccflag |= (CS5 + (priv->bits - 5));
+          }
+
+        if (priv->stopbits2)
+          {
+            ccflag |= CSTOPB;
+          }
+
+        if (priv->parity == 1)
+          {
+            ccflag |= PARENB;
+          }
+        else if (priv->parity == 2)
+          {
+            ccflag |= PARENB | PARODD;
+          }
+
+        /* TODO: Other termios fields are not yet returned.
+         *
+         * TODO: append support for CCTS_OFLOW, CRTS_IFLOW, HUPCL, and
+         *       CLOCAL as well as os-compliant break sequence.
+         *
+         * Note that cfsetospeed is not necessary because we have
          * knowledge that only one speed is supported.
          */
+
+        termiosp->c_cflag = ccflag;
 
         cfsetispeed(termiosp, priv->baud);
       }
@@ -850,12 +887,51 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TCSETS:
       {
         struct termios *termiosp = (struct termios *)arg;
+        unsigned int nbits;
 
         if (!termiosp)
           {
             ret = -EINVAL;
             break;
           }
+
+        /* Perform some sanity checks before accepting any changes */
+
+        if (termiosp->c_cflag & CRTSCTS)
+          {
+            /* We don't support flow control right now, so we report an
+             * error
+             */
+
+            ret = -EINVAL;
+            break;
+          }
+
+        nbits = (termiosp->c_cflag & CSIZE) + 5;
+        if ((nbits < 8) || (nbits > 9))
+          {
+            /* We only support 8 or 9 data bits on this arch, so we
+             * report an error
+             */
+
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Sanity checks passed; apply settings. */
+
+        priv->bits = nbits;
+
+        if (termiosp->c_cflag & PARENB)
+          {
+            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            priv->parity = 0;
+          }
+
+        priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 
         /* TODO:  Handle other termios settings.
          * Note that only cfgetispeed is used because we have knowledge
@@ -867,6 +943,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                               priv->bits, priv->stopbits2);
       }
       break;
+#endif /* CONFIG_SERIAL_TERMIOS */
 
     default:
       ret = -ENOTTY;
@@ -874,9 +951,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     }
 
   return ret;
-#else
-  return -ENOTTY;
-#endif
 }
 
 /****************************************************************************
