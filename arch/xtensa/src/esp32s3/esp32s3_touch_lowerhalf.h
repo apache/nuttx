@@ -996,7 +996,7 @@ static inline enum touch_conn_type_e
  *
  ****************************************************************************/
 
-static inline enum touch_pad_e touch_ll_get_current_meas_channel(void)
+static inline enum touch_pad_e touch_lh_get_current_meas_channel(void)
 {
   return (enum touch_pad_e)
     REG_GET_FIELD(SENS_SAR_TOUCH_STATUS0_REG,
