@@ -207,8 +207,7 @@ static int can_setup(FAR struct socket *psock, int protocol)
 
   /* Verify the socket type (domain should always be PF_CAN here) */
 
-  if (domain == PF_CAN &&
-      (type == SOCK_RAW || type == SOCK_DGRAM || type == SOCK_CTRL))
+  if (domain == PF_CAN && (type == SOCK_RAW || type == SOCK_DGRAM))
     {
       /* Allocate the CAN socket connection structure and save it in the
        * new socket instance.

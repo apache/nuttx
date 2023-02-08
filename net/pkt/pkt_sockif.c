@@ -154,7 +154,7 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
    * Only SOCK_RAW is supported.
    */
 
-  if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
+  if (psock->s_type == SOCK_RAW)
     {
       return pkt_sockif_alloc(psock);
     }
