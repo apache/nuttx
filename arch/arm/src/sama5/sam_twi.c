@@ -74,9 +74,15 @@
 #include "sam_periphclks.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
+#include "hardware/sam_flexcom.h"
 
 #if defined(CONFIG_SAMA5_TWI0) || defined(CONFIG_SAMA5_TWI1) || \
-    defined(CONFIG_SAMA5_TWI2) || defined(CONFIG_SAMA5_TWI3)
+    defined(CONFIG_SAMA5_TWI2) || defined(CONFIG_SAMA5_TWI3) || \
+    defined(CONFIG_SAMA5_FLEXCOM0_TWI) || \
+    defined(CONFIG_SAMA5_FLEXCOM1_TWI) || \
+    defined(CONFIG_SAMA5_FLEXCOM2_TWI) || \
+    defined(CONFIG_SAMA5_FLEXCOM3_TWI) || \
+    defined(CONFIG_SAMA5_FLEXCOM4_TWI)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -329,6 +335,117 @@ static struct twi_dev_s g_twi3 =
 };
 #endif
 
+#ifdef CONFIG_SAMA5_FLEXCOM0_TWI
+static const struct twi_attr_s g_twi4attr =
+    {
+        .twi     = 4,
+        .pid     = SAM_PID_FLEXCOM0,
+        .irq     = SAM_IRQ_FLEXCOM0,
+        .sclcfg  = PIO_TWI4_CK,
+        .sdacfg  = PIO_TWI4_D,
+        .base    = SAM_FLEXCOM0_VBASE + SAM_FLEXCOM_TWI_OFFSET
+    };
+
+static struct twi_dev_s g_twi4 =
+    {
+        .dev     =
+            {
+                .ops   = &g_twiops,
+            },
+        .attr    = &g_twi4attr,
+        .lock    = NXMUTEX_INITIALIZER,
+        .waitsem = SEM_INITIALIZER(0),
+    };
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM1_TWI
+static const struct twi_attr_s g_twi5attr =
+    {
+        .twi     = 5,
+        .pid     = SAM_PID_FLEXCOM1,
+        .irq     = SAM_IRQ_FLEXCOM1,
+        .sclcfg  = PIO_TWI5_CK,
+        .sdacfg  = PIO_TWI5_D,
+        .base    = SAM_FLEXCOM1_VBASE + SAM_FLEXCOM_TWI_OFFSET
+    };
+
+static struct twi_dev_s g_twi4 =
+    {
+        .dev     =
+            {
+                .ops   = &g_twiops,
+            },
+        .attr    = &g_twi5attr,
+        .lock    = NXMUTEX_INITIALIZER,
+        .waitsem = SEM_INITIALIZER(0),
+    };
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM2_TWI
+static const struct twi_attr_s g_twi6attr =
+    {
+        .twi     = 6,
+        .pid     = SAM_PID_FLEXCOM2,
+        .irq     = SAM_IRQ_FLEXCOM2,
+        .sclcfg  = PIO_TWI6_CK,
+        .sdacfg  = PIO_TWI6_D,
+        .base    = SAM_FLEXCOM2_VBASE + SAM_FLEXCOM_TWI_OFFSET
+    };
+
+static struct twi_dev_s g_twi6 =
+    {
+        .dev     =
+            {
+                .ops   = &g_twiops,
+            },
+        .attr    = &g_twi6attr,
+        .lock    = NXMUTEX_INITIALIZER,
+        .waitsem = SEM_INITIALIZER(0),
+    };
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM3_TWI
+static const struct twi_attr_s g_twi7attr =
+    {
+        .twi     = 7,
+        .pid     = SAM_PID_FLEXCOM3,
+        .irq     = SAM_IRQ_FLEXCOM3,
+        .sclcfg  = PIO_TWI7_CK,
+        .sdacfg  = PIO_TWI7_D,
+        .base    = SAM_FLEXCOM3_VBASE + SAM_FLEXCOM_TWI_OFFSET
+    };
+
+static struct twi_dev_s g_twi7 =
+    {
+        .dev     =
+            {
+                .ops   = &g_twiops,
+            },
+        .attr    = &g_twi7attr,
+        .lock    = NXMUTEX_INITIALIZER,
+        .waitsem = SEM_INITIALIZER(0),
+    };
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM4_TWI
+static const struct twi_attr_s g_twi8attr =
+    {
+        .twi     = 8,
+        .pid     = SAM_PID_FLEXCOM3,
+        .irq     = SAM_IRQ_FLEXCOM3,
+        .sclcfg  = PIO_TWI8_CK,
+        .sdacfg  = PIO_TWI8_D,
+        .base    = SAM_FLEXCOM4_VBASE + SAM_FLEXCOM_TWI_OFFSET
+    };
+
+static struct twi_dev_s g_twi8 =
+    {
+        .dev     =
+            {
+                .ops   = &g_twiops,
+            },
+        .attr    = &g_twi8attr,
+        .lock    = NXMUTEX_INITIALIZER,
+        .waitsem = SEM_INITIALIZER(0),
+    };
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -348,10 +465,9 @@ static struct twi_dev_s g_twi3 =
  *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
-
 #ifdef CONFIG_SAMA5_TWI_REGDEBUG
 static bool twi_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
-                         uint32_t address)
+                         uintptr_t address)
 {
   if (wr      == priv->wrlast &&   /* Same kind of access? */
       value   == priv->vallast &&  /* Same value? */
@@ -1247,6 +1363,61 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
       priv      = &g_twi3;
       frequency = CONFIG_SAMA5_TWI3_FREQUENCY;
+    }
+  else
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM0_TWI
+  if (bus == 4)
+    {
+      /* Select up TWI4 (Flexcom-0) and the (initial) TWI frequency */
+
+      putreg32(FLEX_MR_OPMODE_TWI, SAM_FLEX0_MR);
+      priv      = &g_twi4;
+      frequency = CONFIG_SAMA5_TWI_FC0_FREQUENCY;
+    }
+  else
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM1_TWI
+  if (bus == 5)
+    {
+      /* Select up TWI5 (Flexcom-1) and the (initial) TWI frequency */
+
+      putreg32(FLEX_MR_OPMODE_TWI, SAM_FLEX1_MR);
+     priv      = &g_twi5;
+      frequency = CONFIG_SAMA5_TWI_FC1_FREQUENCY;
+    }
+  else
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM2_TWI
+  if (bus == 6)
+    {
+      /* Select up TWI6 (Flexcom-2) and the (initial) TWI frequency */
+
+      putreg32(FLEX_MR_OPMODE_TWI, SAM_FLEX2_MR);
+      priv      = &g_twi6;
+      frequency = CONFIG_SAMA5_TWI_FC2_FREQUENCY;
+    }
+  else
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM3_TWI
+  if (bus == 7)
+    {
+      /* Select up TWI7 (Flexcom-3) and the (initial) TWI frequency */
+
+      putreg32(FLEX_MR_OPMODE_TWI, SAM_FLEX3_MR);
+      priv      = &g_twi7;
+      frequency = CONFIG_SAMA5_TWI_FC3_FREQUENCY;
+    }
+  else
+#endif
+#ifdef CONFIG_SAMA5_FLEXCOM4_TWI
+  if (bus == 8)
+    {
+      /* Select up TWI8 (Flexcom-4) and the (initial) TWI frequency */
+
+      putreg32(FLEX_MR_OPMODE_TWI, SAM_FLEX4_MR);
+      priv      = &g_twi8;
+      frequency = CONFIG_SAMA5_TWI_FC4_FREQUENCY;
     }
   else
 #endif
