@@ -4055,6 +4055,7 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
 
 static int sam_pullup(struct usbdev_s *dev, bool enable)
 {
+#ifndef CONFIG_SAMA5_USB_DRP
   struct sam_usbdev_s *priv = (struct sam_usbdev_s *)dev;
   uint32_t regval;
 
@@ -4102,7 +4103,7 @@ static int sam_pullup(struct usbdev_s *dev, bool enable)
           priv->devstate = UDPHS_DEVSTATE_POWERED;
         }
     }
-
+#endif /* CONFIG_SAMA5_USB_DRP */
   return OK;
 }
 

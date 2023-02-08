@@ -3827,7 +3827,7 @@ if SAMA5_OHCI || SAMA5_EHCI
 config SAMA5_UHPHS_RHPORT1
 	bool "Use Port A"
 	default y
-	depends on !SAMA5_UDPHS
+	depends on !SAMA5_UDPHS || SAMA5_USB_DRP
 
 config SAMA5_UHPHS_RHPORT2
 	bool "Use Port B"
