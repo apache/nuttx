@@ -74,15 +74,19 @@
 
 /* General Constants ********************************************************/
 
-#define INFINITY    (1.0/0.0)
-#define NAN         (0.0/0.0)
-#define HUGE_VAL    INFINITY
+#ifndef _HUGE_ENUF
+#  define _HUGE_ENUF (1e+300)  /* _HUGE_ENUF*_HUGE_ENUF must overflow */
+#endif
 
-#define INFINITY_F  (1.0F/0.0F)
-#define NAN_F       (0.0F/0.0F)
+#define INFINITY   ((double)(_HUGE_ENUF * _HUGE_ENUF))
+#define NAN        ((double)(INFINITY * 0.0F))
+#define HUGE_VAL   INFINITY
 
-#define INFINITY_L  (1.0L/0.0L)
-#define NAN_L       (0.0L/0.0L)
+#define INFINITY_F ((float)INFINITY)
+#define NAN_F      ((float)(INFINITY * 0.0F))
+
+#define INFINITY_L ((long double)INFINITY)
+#define NAN_L      ((long double)(INFINITY * 0.0F))
 
 #define isnan(x)   ((x) != (x))
 #define isnanf(x)  ((x) != (x))
