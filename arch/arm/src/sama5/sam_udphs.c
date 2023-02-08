@@ -371,9 +371,13 @@ struct sam_usbdev_s
    * of valid dat in the buffer is given by ctrlreg.len[].  For the
    * case of EP0 SETUP IN transaction, the normal request mechanism is
    * used and the class driver provides the buffering.
+   *
+   * A buffer 4* the EP0_MAXPACKETSIZE is used to allow for data that
+   * is sent in consecutive packets although for the same transaction.
    */
 
-  uint8_t                  ep0out[SAM_EP0_MAXPACKET];
+  uint8_t                  ep0out[4 * SAM_EP0_MAXPACKET];
+  uint16_t                 ep0datlen;
 };
 
 /****************************************************************************
@@ -2637,10 +2641,6 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
         {
           uint16_t len;
 
-          /* Yes.. back to the IDLE state */
-
-          privep->epstate = UDPHS_EPSTATE_IDLE;
-
           /* Get the size of the packet that we just received */
 
           pktsize = (uint16_t)
@@ -2650,27 +2650,32 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           /* Get the size that we expected to receive */
 
           len = GETUINT16(priv->ctrl.len);
-          if (len == pktsize)
+
+          /* Copy the OUT data from the EP0 FIFO into the EP0 buffer. */
+
+          sam_ep0_read(priv->ep0out + priv->ep0datlen, pktsize);
+
+          priv->ep0datlen += pktsize;
+
+          if (priv->ep0datlen == len)
             {
-              /* Copy the OUT data from the EP0 FIFO into a special EP0
-               * buffer and clear RXRDYTXKL in order to receive more data.
+              /* Back to the IDLE state and clear RXRDYTXKL
+               * in order to receive more data.
                */
 
-              sam_ep0_read(priv->ep0out, len);
+              privep->epstate = UDPHS_EPSTATE_IDLE;
+
               sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
 
               /* And handle the EP0 SETUP now. */
 
               sam_ep0_setup(priv);
+              priv->ep0datlen = 0;
             }
           else
             {
-              usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPOUTSIZE),
-                       pktsize);
+              /* Clear RXRDYTXKL in order to receive more data. */
 
-              /* STALL and discard received data. */
-
-              sam_ep_stall(&privep->ep, false);
               sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
             }
         }
