@@ -209,8 +209,33 @@
 #  define ESP32C3_NIRQ_GPIO           0
 #endif
 
-/* Total number of IRQs: ecall + Number of peripheral IRQs + GPIOs IRQs. */
+#ifdef CONFIG_ESP32C3_RTCIO_IRQ
 
-#define NR_IRQS  (RISCV_NIRQ_INTERRUPTS + ESP32C3_NIRQ_PERIPH + ESP32C3_NIRQ_GPIO)
+/* Second level RTC interrupts.  RTC interrupts are decoded and dispatched
+ * as a second level of decoding:  The first level dispatches to the RTC
+ * interrupt handler.  The second to the decoded RTC interrupt handler.
+ * A third level might be required to be implemented on the driver.
+ */
+
+#  define ESP32C3_NIRQ_RTCIO              9
+
+#  define ESP32C3_FIRST_RTCIOIRQ          (RISCV_NIRQ_INTERRUPTS+ESP32C3_NIRQ_PERIPH+ESP32C3_NIRQ_GPIO)
+#  define ESP32C3_LAST_RTCIOIRQ           (ESP32C3_FIRST_RTCIOIRQ+ESP32C3_NIRQ_RTCIO-1)
+#  define ESP32C3_IRQ_RTC_SLP_WAKEUP      (ESP32C3_FIRST_RTCIOIRQ+0)
+#  define ESP32C3_IRQ_RTC_SLP_REJECT      (ESP32C3_FIRST_RTCIOIRQ+1)
+#  define ESP32C3_IRQ_RTC_WDT             (ESP32C3_FIRST_RTCIOIRQ+2)
+#  define ESP32C3_IRQ_RTC_BROWN_OUT       (ESP32C3_FIRST_RTCIOIRQ+3)
+#  define ESP32C3_IRQ_RTC_MAIN_TIMER      (ESP32C3_FIRST_RTCIOIRQ+4)
+#  define ESP32C3_IRQ_RTC_SWD             (ESP32C3_FIRST_RTCIOIRQ+5)
+#  define ESP32C3_IRQ_RTC_XTAL32K_DEAD    (ESP32C3_FIRST_RTCIOIRQ+6)
+#  define ESP32C3_IRQ_RTC_GLITCH_DET      (ESP32C3_FIRST_RTCIOIRQ+7)
+#  define ESP32C3_IRQ_RTC_BBPLL_CAL       (ESP32C3_FIRST_RTCIOIRQ+8)
+#else
+#  define ESP32C3_NIRQ_RTCIO              0
+#endif
+
+/* Total number of IRQs: ecall + Peripheral IRQs + GPIOs IRQs + RTCIO IRQs. */
+
+#define NR_IRQS  (RISCV_NIRQ_INTERRUPTS + ESP32C3_NIRQ_PERIPH + ESP32C3_NIRQ_GPIO + ESP32C3_NIRQ_RTCIO)
 
 #endif /* __ARCH_RISCV_INCLUDE_ESP32C3_IRQ_H */

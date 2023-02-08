@@ -40,6 +40,7 @@
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
 #include "esp32c3_gpio.h"
+#include "esp32c3_rtc_gpio.h"
 
 #include "esp32c3_irq.h"
 
@@ -233,6 +234,10 @@ void up_irqinitialize(void)
 
   esp32c3_gpioirqinitialize();
 #endif
+
+  /* Initialize RTCIO interrupt support */
+
+  esp32c3_rtcioirqinitialize();
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 

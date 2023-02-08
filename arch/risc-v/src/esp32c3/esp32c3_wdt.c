@@ -36,6 +36,7 @@
 
 #include "esp32c3_irq.h"
 #include "esp32c3_rtc.h"
+#include "esp32c3_rtc_gpio.h"
 #include "esp32c3_wdt.h"
 
 /****************************************************************************
@@ -177,7 +178,7 @@ struct esp32c3_wdt_priv_s g_esp32c3_rwdt_priv =
   .ops    = &esp32c3_rwdt_ops,
   .base   = RTC_CNTL_OPTIONS0_REG,
   .periph = ESP32C3_PERIPH_RTC_CORE,
-  .irq    = ESP32C3_IRQ_RTC_CORE,
+  .irq    = ESP32C3_IRQ_RTC_WDT,
   .cpuint = -ENOMEM,
   .inuse  = false,
 };
@@ -738,16 +739,26 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
 
   if (handler == NULL)
     {
+#ifdef CONFIG_ESP32C3_RWDT
+      if (wdt->irq == ESP32C3_IRQ_RTC_WDT)
+        {
+          esp32c3_rtcioirqdisable(wdt->irq);
+          irq_detach(wdt->irq);
+        }
+      else
+#endif
       if (wdt->cpuint != -ENOMEM)
         {
-          /* If a CPU Interrupt was previously allocated,
-           * then deallocate it.
-           */
+            {
+              /* If a CPU Interrupt was previously allocated,
+               * then deallocate it.
+               */
 
-          up_disable_irq(wdt->cpuint);
-          irq_detach(wdt->irq);
-          esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
-          wdt->cpuint = -ENOMEM;
+              up_disable_irq(wdt->cpuint);
+              irq_detach(wdt->irq);
+              esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
+              wdt->cpuint = -ENOMEM;
+            }
         }
     }
 
@@ -755,43 +766,60 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
 
   else
     {
-      if (wdt->cpuint != -ENOMEM)
+#ifdef CONFIG_ESP32C3_RWDT
+      if (wdt->irq == ESP32C3_IRQ_RTC_WDT)
         {
-          /* Disable the provided CPU interrupt to configure it. */
+          ret = irq_attach(wdt->irq, handler, arg);
 
-          up_disable_irq(wdt->cpuint);
+          if (ret != OK)
+            {
+              esp32c3_rtcioirqdisable(wdt->irq);
+              tmrerr("ERROR: Failed to associate an IRQ Number");
+            }
 
-          /* Free CPU interrupt that is attached to this peripheral
-           * because we will get another from esp32c3_setup_irq()
-           */
-
-          esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
+          esp32c3_rtcioirqenable(wdt->irq);
         }
-
-      wdt->cpuint = esp32c3_setup_irq(wdt->periph,
-                                        ESP32C3_INT_PRIO_DEF,
-                                        ESP32C3_INT_LEVEL);
-
-      if (wdt->cpuint < 0)
+      else
+#endif
         {
-          return wdt->cpuint;
+          if (wdt->cpuint != -ENOMEM)
+            {
+              /* Disable the provided CPU interrupt to configure it. */
+
+              up_disable_irq(wdt->cpuint);
+
+              /* Free CPU interrupt that is attached to this peripheral
+               * because we will get another from esp32c3_setup_irq()
+               */
+
+              esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
+            }
+
+          wdt->cpuint = esp32c3_setup_irq(wdt->periph,
+                                            ESP32C3_INT_PRIO_DEF,
+                                            ESP32C3_INT_LEVEL);
+
+          if (wdt->cpuint < 0)
+            {
+              return wdt->cpuint;
+            }
+
+          /* Attach and enable the IRQ. */
+
+          ret = irq_attach(wdt->irq, handler, arg);
+          if (ret != OK)
+            {
+              /* Failed to attach IRQ, so CPU interrupt must be freed. */
+
+              esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
+              wdt->cpuint = -ENOMEM;
+              return ret;
+            }
+
+          /* Enable the CPU interrupt that is linked to the WDT. */
+
+          up_enable_irq(wdt->cpuint);
         }
-
-      /* Attach and enable the IRQ. */
-
-      ret = irq_attach(wdt->irq, handler, arg);
-      if (ret != OK)
-        {
-          /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-          esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
-          wdt->cpuint = -ENOMEM;
-          return ret;
-        }
-
-      /* Enable the CPU interrupt that is linked to the WDT. */
-
-      up_enable_irq(wdt->cpuint);
     }
 
   return ret;

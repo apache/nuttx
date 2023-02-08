@@ -193,6 +193,12 @@ config ESP32C3_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
+config ESP32C3_RTCIO_IRQ
+	bool "RTC IO interrupts"
+	default n
+	---help---
+		Enable support for RTC peripherals interrupts.
+
 config ESP32C3_UART0
 	bool "UART0"
 	default y
@@ -279,6 +285,7 @@ config ESP32C3_RWDT
 	bool "RTC Watchdog Timer"
 	default n
 	select ESP32C3_WDT
+	select ESP32C3_RTCIO_IRQ
 	---help---
 		Includes RWDT. This watchdog timer is from the RTC module.
 		When it is selected, if the developer sets it to reset on expiration
