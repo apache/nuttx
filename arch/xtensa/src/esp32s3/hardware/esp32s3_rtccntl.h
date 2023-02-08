@@ -1761,6 +1761,8 @@
 
 #define RTC_CNTL_RTC_STORE1_REG (DR_REG_RTCCNTL_BASE + 0x54)
 
+#define RTC_SLOW_CLK_CAL_REG    RTC_CNTL_RTC_STORE1_REG
+
 /* RTC_CNTL_RTC_SCRATCH1 : R/W; bitpos: [31:0]; default: 0;
  * Reserved register
  */

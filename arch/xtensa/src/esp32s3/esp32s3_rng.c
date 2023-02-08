@@ -220,7 +220,7 @@ void devrandom_register(void)
 #ifdef CONFIG_DEV_URANDOM_ARCH
 void devurandom_register(void)
 {
-  register_driver("dev/urandom", &g_rngops, 0444, NULL);
+  register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 
