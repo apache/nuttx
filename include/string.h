@@ -98,6 +98,7 @@ FAR void  *memrchr(FAR const void *s, int c, size_t n);
 FAR void  *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n);
 int        memcmp(FAR const void *s1, FAR const void *s2, size_t n);
 FAR void  *memcpy(FAR void *dest, FAR const void *src, size_t n);
+FAR void  *mempcpy(FAR void *dest, FAR const void *src, size_t n);
 FAR void  *memmove(FAR void *dest, FAR const void *src, size_t count);
 FAR void  *memset(FAR void *s, int c, size_t n);
 FAR void  *memmem(FAR const void *haystack, size_t haystacklen,
