@@ -110,17 +110,15 @@
 #undef CONFIG_USBHOST_ISOC_DISABLE
 #define CONFIG_USBHOST_ISOC_DISABLE 1
 
-/* If UDPHS is enabled, then don't use port A */
-
-#ifdef CONFIG_SAMA5_UDPHS
-#  undef CONFIG_SAMA5_UHPHS_RHPORT1
-#endif
-
-/* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
- * would prefer that the board not try to drive VBUS on that port!
+/* Suppress use of PORTA unless board-specific dual-role-port support
+ * has been included. Generally port A is used as a device-only port,
+ * typically for SAM-BA and the possibility of enabling host VBUS power
+ * for this port would be a BAD idea
  */
 
-#undef CONFIG_SAMA5_UHPHS_RHPORT1
+#if defined(CONFIG_SAMA5_UDPHS) && !defined(CONFIG_SAMA5_USBA_DRP)
+#  undef CONFIG_SAMA5_UHPHS_RHPORT1
+#endif
 
 /* Driver-private Definitions ***********************************************/
 
