@@ -60,8 +60,8 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
   int addrlen = (domain == PF_INET) ?
                 INET_ADDRSTRLEN : INET6_ADDRSTRLEN;
   FAR struct udp_conn_s *conn = NULL;
-  char remote[addrlen + 1];
-  char local[addrlen + 1];
+  char remote[INET6_ADDRSTRLEN + 1];
+  char local[INET6_ADDRSTRLEN + 1];
   int len = 0;
   void *laddr;
   void *raddr;
