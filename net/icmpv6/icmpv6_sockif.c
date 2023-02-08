@@ -110,10 +110,9 @@ const struct sock_intf_s g_icmpv6_sockif =
 
 static int icmpv6_setup(FAR struct socket *psock, int protocol)
 {
-  /* Only SOCK_DGRAM or SOCK_CTRL and IPPROTO_ICMP6 are supported */
+  /* Only SOCK_DGRAM and IPPROTO_ICMP6 are supported */
 
-  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL) &&
-      protocol == IPPROTO_ICMP6)
+  if (psock->s_type == SOCK_DGRAM && protocol == IPPROTO_ICMP6)
     {
       /* Allocate the IPPROTO_ICMP6 socket connection structure and save in
        * the new socket instance.

@@ -110,10 +110,9 @@ const struct sock_intf_s g_icmp_sockif =
 
 static int icmp_setup(FAR struct socket *psock, int protocol)
 {
-  /* Only SOCK_DGRAM or SOCK_CTRL and IPPROTO_ICMP are supported */
+  /* Only SOCK_DGRAM and IPPROTO_ICMP are supported */
 
-  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL) &&
-       protocol == IPPROTO_ICMP)
+  if (psock->s_type == SOCK_DGRAM && protocol == IPPROTO_ICMP)
     {
       /* Allocate the IPPROTO_ICMP socket connection structure and save in
        * the new socket instance.

@@ -205,27 +205,6 @@ static int local_setup(FAR struct socket *psock, int protocol)
         return local_sockif_alloc(psock);
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
-      case SOCK_CTRL:
-#ifdef CONFIG_NET_LOCAL_STREAM
-        if (protocol == 0 || protocol == IPPROTO_TCP)
-          {
-            /* Allocate and attach the local connection structure */
-
-            return local_sockif_alloc(psock);
-          }
-
-#endif
-#ifdef CONFIG_NET_LOCAL_DGRAM
-        if (protocol == 0 || protocol == IPPROTO_UDP)
-          {
-            /* Allocate and attach the local connection structure */
-
-            return local_sockif_alloc(psock);
-          }
-
-#endif
-        return -EPROTONOSUPPORT;
-
       default:
         return -EPROTONOSUPPORT;
     }

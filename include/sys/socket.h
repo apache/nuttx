@@ -92,10 +92,6 @@
                                  * required to read an entire packet with each read
                                  * system call.
                                  */
-#define SOCK_CTRL      6        /* SOCK_CTRL is the preferred socket type to use
-                                 * when we just want a socket for performing driver
-                                 * ioctls. This definition is not POSIX compliant.
-                                 */
 #define SOCK_PACKET   10        /* Obsolete and should not be used in new programs */
 
 #define SOCK_CLOEXEC  02000000  /* Atomically set close-on-exec flag for the new
