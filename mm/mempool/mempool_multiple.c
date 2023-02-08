@@ -177,7 +177,7 @@ static void mempool_multiple_free_callback(FAR struct mempool_s *pool,
 {
   FAR struct mempool_multiple_s *mpool = pool->priv;
 
-  return mpool->free(mpool->arg, (FAR char *)addr - mpool->minpoolsize);
+  mpool->free(mpool->arg, (FAR char *)addr - mpool->minpoolsize);
 }
 
 /****************************************************************************
