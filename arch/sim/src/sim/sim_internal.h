@@ -215,15 +215,15 @@ void sim_uartinit(void);
 
 /* sim_hostuart.c ***********************************************************/
 
-void    host_uart_start(void);
-int     host_uart_open(const char *pathname);
-void    host_uart_close(int fd);
-ssize_t host_uart_puts(int fd, const char *buf, size_t size);
-ssize_t host_uart_gets(int fd, char *buf, size_t size);
-bool    host_uart_checkin(int fd);
-bool    host_uart_checkout(int fd);
-int     host_uart_setcflag(int fd, unsigned int cflag);
-int     host_uart_getcflag(int fd, unsigned int *cflag);
+void host_uart_start(void);
+int  host_uart_open(const char *pathname);
+void host_uart_close(int fd);
+int  host_uart_puts(int fd, const char *buf, size_t size);
+int  host_uart_gets(int fd, char *buf, size_t size);
+bool host_uart_checkin(int fd);
+bool host_uart_checkout(int fd);
+int  host_uart_setcflag(int fd, unsigned int cflag);
+int  host_uart_getcflag(int fd, unsigned int *cflag);
 
 /* sim_deviceimage.c ********************************************************/
 
