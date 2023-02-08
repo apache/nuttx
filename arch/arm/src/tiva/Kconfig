@@ -1081,6 +1081,19 @@ config TIVA_HCIUART_SW_TXFLOW
 
 endmenu # HCI UART Driver Configuration
 
+config TIVA_UART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on TIVA_UART0 || TIVA_UART1 || TIVA_UART2 || TIVA_UART3 || TIVA_UART4 || TIVA_UART5 || TIVA_UART6 || TIVA_UART7
+	default n
+	---help---
+		Add TIOCxBRK routines to send a BSD compatible line break.
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		This implementation uses the BRK bit (bit 0) of the UART Line
+		Control register (UARTLCRH) to send the break. The break begins
+		after the UART finishes shifting out the current character in
+		progress, if any, including its stop bit(s), and continues
+		indefinitely until stopped by software.
+
 config TIVA_SSI0
 	bool "SSI0"
 	default n
