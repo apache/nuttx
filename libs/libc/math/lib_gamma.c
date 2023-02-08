@@ -32,9 +32,12 @@
  *
  ****************************************************************************/
 
-/* "A Precision Approximation of the Gamma Function" - Cornelius Lanczos (1964)
- * "Lanczos Implementation of the Gamma Function" - Paul Godfrey (2001)
- * "An Analysis of the Lanczos Gamma Approximation" - Glendon Ralph Pugh (2004)
+/* "A Precision Approximation of the Gamma Function"
+ *   - Cornelius Lanczos (1964)
+ * "Lanczos Implementation of the Gamma Function"
+ *   - Paul Godfrey (2001)
+ * "An Analysis of the Lanczos Gamma Approximation"
+ *   - Glendon Ralph Pugh (2004)
  *
  * Approximation method:
  *
@@ -133,9 +136,10 @@ static const double g_sden[N + 1] =
 static const double g_fact[] =
 {
   1, 1, 2, 6, 24, 120, 720, 5040.0, 40320.0, 362880.0, 3628800.0, 39916800.0,
-  479001600.0, 6227020800.0, 87178291200.0, 1307674368000.0, 20922789888000.0,
-  355687428096000.0, 6402373705728000.0, 121645100408832000.0,
-  2432902008176640000.0, 51090942171709440000.0, 1124000727777607680000.0,
+  479001600.0, 6227020800.0, 87178291200.0, 1307674368000.0,
+  20922789888000.0, 355687428096000.0, 6402373705728000.0,
+  121645100408832000.0, 2432902008176640000.0, 51090942171709440000.0,
+  1124000727777607680000.0,
 };
 
 /* S(x) rational function for positive x */
@@ -151,6 +155,7 @@ static double sinpi(double x)
   int n;
 
   /* argument reduction: x = |x| mod 2 */
+
   /* spurious inexact when x is odd int */
 
   x = x * 0.5;
@@ -205,7 +210,7 @@ static double s(double x)
         }
     }
 
-  return num/den;
+  return num / den;
 }
 
 /****************************************************************************
@@ -219,6 +224,7 @@ double tgamma(double x)
       double f;
       uint64_t i;
     } u;
+
   u.f = x;
 
   double absx;
@@ -241,17 +247,19 @@ double tgamma(double x)
   if (ix < (0x3ff - 54) << 20)
     {
       /* |x| < 2^-54: tgamma(x) ~ 1/x, +-0 raises div-by-zero */
+
       return 1 / x;
     }
 
   /* integer arguments */
+
   /* raise inexact when non-integer */
 
   if (x == floor(x))
     {
       if (sign)
         {
-          return 0 / 0.0;
+          return NAN;
         }
 
       if (x <= sizeof g_fact / sizeof *g_fact)
@@ -261,6 +269,7 @@ double tgamma(double x)
     }
 
   /* x >= 172: tgamma(x)=inf with overflow */
+
   /* x =< -184: tgamma(x)=+-0 with underflow */
 
   if (ix >= 0x40670000)
@@ -269,11 +278,13 @@ double tgamma(double x)
 
       if (sign)
         {
-          FORCE_EVAL((float)(0x1p-126 / x));
+          FORCE_EVAL((float)(ldexp(1.0, -126) / x));
+
           if (floor(x) * 0.5 == floor(x * 0.5))
             {
               return 0;
             }
+
           return -0.0;
         }
 
@@ -302,6 +313,7 @@ double tgamma(double x)
   if (x < 0)
     {
       /* reflection formula for negative x */
+
       /* sinpi(absx) is not 0, integers are already handled */
 
       r = -pi / (sinpi(absx) * absx * r);
