@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "HPM6750 Configuration Options"
+
+menu "HPM6750 Peripheral Support"
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+config HPM6750_HAVE_UART0
+	bool
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+# These are the peripheral selections proper
+
+config HPM6750_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select HPM6750_UART
+
+endmenu
