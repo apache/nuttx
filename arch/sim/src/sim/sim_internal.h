@@ -88,10 +88,11 @@
 #define sim_saveusercontext(saveregs)                           \
     ({                                                          \
        irqstate_t flags = up_irq_flags();                       \
-       uint32_t *env = (uint32_t *)saveregs + JB_FLAG;          \
+       xcpt_reg_t *env = saveregs;                              \
+       uint32_t *val = (uint32_t *)&env[JB_FLAG];               \
                                                                 \
-       env[0] = flags & UINT32_MAX;                             \
-       env[1] = (flags >> 32) & UINT32_MAX;                     \
+       val[0] = flags & UINT32_MAX;                             \
+       val[1] = (flags >> 32) & UINT32_MAX;                     \
                                                                 \
        setjmp(saveregs);                                        \
     })
