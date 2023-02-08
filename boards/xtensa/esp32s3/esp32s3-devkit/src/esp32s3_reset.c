@@ -24,10 +24,19 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
+#include <debug.h>
+#include <assert.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
+#include "esp32s3_systemreset.h"
+
 #ifdef CONFIG_BOARDCTL_RESET
+
+#if CONFIG_BOARD_ASSERT_RESET_VALUE == EXIT_SUCCESS
+#  error "CONFIG_BOARD_ASSERT_RESET_VALUE must not be equal to EXIT_SUCCESS"
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -55,6 +64,19 @@
 
 int board_reset(int status)
 {
+  syslog(LOG_INFO, "reboot status=%d\n", status);
+
+  switch (status)
+    {
+      case EXIT_SUCCESS:
+        up_shutdown_handler();
+        break;
+      case CONFIG_BOARD_ASSERT_RESET_VALUE:
+        break;
+      default:
+        break;
+    }
+
   up_systemreset();
 
   return 0;
