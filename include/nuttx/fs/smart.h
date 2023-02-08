@@ -114,6 +114,8 @@ struct smart_procfs_data_s
 #ifdef CONFIG_MTD_SMART_ERASE_DEBUG
   const uint16_t  *erasecounts;   /* Pointer to the erase counts array */
   uint16_t        erasesize;      /* Number of entries in the erase counts array */
+#else
+  uint8_t         __pad;
 #endif
 };
 #endif
