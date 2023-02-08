@@ -39,6 +39,27 @@ config FUSB301_NPOLLWAITERS
 
 endif
 
+config FUSB302
+	bool "On Semiconductor FUSB302 USB Type-C controller support"
+	default n
+	select I2C
+	---help---
+		Enable device driver for Fairchild/On Semiconductor USB Type-C controller
+
+if FUSB302
+
+config FUSB302_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+config DEBUG_FUSB302_REG
+	bool "Enable register dumps for debug"
+	default n
+
+endif
+
 config FUSB303
 	bool "On Semiconductor FUSB303 USB Type-C controller support"
 	default n
