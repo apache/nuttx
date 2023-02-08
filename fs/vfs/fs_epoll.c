@@ -453,7 +453,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
             eph->size += eph->size;
           }
 
-        epn = list_remove_head_type(&eph->free, epoll_node_t, node);
+        epn = container_of(list_remove_head(&eph->free), epoll_node_t, node);
         epn->data        = ev->data;
         epn->pfd.events  = ev->events;
         epn->pfd.fd      = fd;
