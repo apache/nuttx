@@ -522,6 +522,10 @@
 #define SAM_PIOC_VBASE           SAM_PIO_IOGROUPC_VBASE
 #define SAM_PIOD_VBASE           SAM_PIO_IOGROUPD_VBASE
 
+#define SAM_FLEXCOM_USART_OFFSET (0x200)
+#define SAM_FLEXCOM_SPI_OFFSET   (0x400)
+#define SAM_FLEXCOM_TWI_OFFSET   (0x600)
+
 /* NuttX virtual base address
  *
  * The boot logic will create a temporarily mapping based on where NuttX is

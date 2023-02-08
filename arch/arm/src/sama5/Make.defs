@@ -187,6 +187,9 @@ else
 ifeq ($(CONFIG_SAMA5_TWI2),y)
 CHIP_CSRCS += sam_twi.c
 endif
+ifeq ($(CONFIG_SAMA5_FLEXCOM_TWI),y)
+CHIP_CSRCS += sam_twi.c
+endif
 endif
 endif
 

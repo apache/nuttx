@@ -203,6 +203,26 @@ config SAMA5_FLEXCOM_TWI
 	bool
 	default n
 
+config SAMA5_FLEXCOM_TWI0
+	bool
+	default n
+
+config SAMA5_FLEXCOM_TWI1
+	bool
+	default n
+
+config SAMA5_FLEXCOM_TWI2
+	bool
+	default n
+
+config SAMA5_FLEXCOM_TWI3
+	bool
+	default n
+
+config SAMA5_FLEXCOM_TWI4
+	bool
+	default n
+
 # Chip Selection
 
 config ARCH_CHIP_SAMA5D2
@@ -864,6 +884,7 @@ config SAMA5_FLEXCOM0_SPI
 config SAMA5_FLEXCOM0_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
+	select SAMA5_FLEXCOM_TWI0
 
 endchoice # FLEXCOM0 Configuration
 
@@ -885,6 +906,7 @@ config SAMA5_FLEXCOM1_SPI
 config SAMA5_FLEXCOM1_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
+	select SAMA5_FLEXCOM_TWI1
 
 endchoice # FLEXCOM1 Configuration
 
@@ -906,6 +928,7 @@ config SAMA5_FLEXCOM2_SPI
 config SAMA5_FLEXCOM2_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
+	select SAMA5_FLEXCOM_TWI2
 
 endchoice # FLEXCOM2 Configuration
 
@@ -927,6 +950,7 @@ config SAMA5_FLEXCOM3_SPI
 config SAMA5_FLEXCOM3_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
+	select SAMA5_FLEXCOM_TWI3
 
 endchoice # FLEXCOM3 Configuration
 
@@ -948,6 +972,7 @@ config SAMA5_FLEXCOM4_SPI
 config SAMA5_FLEXCOM4_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
+	select SAMA5_FLEXCOM_TWI4
 
 endchoice # FLEXCOM4 Configuration
 endmenu # Flexcom Configuration
@@ -3172,7 +3197,7 @@ config SAMA5_FLEXCOM_SPI_DMADEBUG
 endmenu # Flexcom SPI device driver options
 endif # SAMA5_FLEXCOM0_SPI || SAMA5_FLEXCOM1_SPI || SAMA5_FLEXCOM2_SPI || SAMA5_FLEXCOM3_SPI || SAMA5_FLEXCOM4_SPI
 
-if SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
+if SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3 || SAMA5_FLEXCOM_TWI
 
 menu "TWI device driver options"
 
@@ -3196,6 +3221,32 @@ config SAMA5_TWI3_FREQUENCY
 	default 100000
 	depends on SAMA5_TWI3
 
+config SAMA5_TWI_FC0_FREQUENCY
+    int "TWI4 (flexcom-0) Frequency"
+    default 100000
+    depends on SAMA5_FLEXCOM_TWI0
+
+config SAMA5_TWI_FC1_FREQUENCY
+    int "TWI5 (flexcom-1) Frequency"
+    default 100000
+    depends on SAMA5_FLEXCOM_TWI1
+
+config SAMA5_TWI_FC2_FREQUENCY
+    int "TWI6 (flexcom-2) Frequency"
+    default 100000
+    depends on SAMA5_FLEXCOM_TWI2
+
+config SAMA5_TWI_FC3_FREQUENCY
+    int "TWI7 (flexcom-3) Frequency"
+    default 100000
+    depends on SAMA5_FLEXCOM_TWI3
+
+config SAMA5_TWI_FC4_FREQUENCY
+    int "TWI8 (flexcom-4) Frequency"
+    default 100000
+    depends on SAMA5_FLEXCOM_TWI4
+
+
 config SAMA5_TWI_REGDEBUG
 	bool "TWI register level debug"
 	depends on DEBUG_I2C_INFO
@@ -3205,7 +3256,7 @@ config SAMA5_TWI_REGDEBUG
 		Very invasive! Requires also CONFIG_DEBUG_I2C_INFO.
 
 endmenu # TWI device driver options
-endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3
+endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2 || SAMA5_TWI3 | SAMA5_FLEXCOM_TWI
 
 if SAMA5_SSC0 || SAMA5_SSC1
 menu "SSC Configuration"
