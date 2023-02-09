@@ -85,7 +85,6 @@ end_packed_struct cnt_rx_t;
 
 #define MCSSET_LEN 16
 
-begin_packed_struct
 typedef struct wl_bss_info
 {
   uint32_t      version;                /* version field */
@@ -122,8 +121,7 @@ typedef struct wl_bss_info
   /* Add new fields here */
 
   /* variable length Information Elements */
-}
-end_packed_struct wl_bss_info_t;
+} wl_bss_info_t;
 
 #define DOT11_CAP_ESS     0x0001
 #define DOT11_CAP_IBSS    0x0002
@@ -179,15 +177,13 @@ end_packed_struct wl_iscan_params_t;
 
 #define WL_ISCAN_PARAMS_FIXED_SIZE (offsetof(wl_iscan_params_t, params) + sizeof(wlc_ssid_t))
 
-begin_packed_struct
 typedef struct wl_scan_results
 {
   uint32_t       buflen;
   uint32_t       version;
   uint32_t       count;
   wl_bss_info_t  bss_info[1];
-}
-end_packed_struct wl_scan_results_t;
+} wl_scan_results_t;
 
 #define WL_SCAN_RESULTS_FIXED_SIZE  (12)
 #define WL_SCAN_RESULTS_SUCCESS         (0)
@@ -209,7 +205,6 @@ end_packed_struct wl_escan_params_t;
 
 #define WL_ESCAN_PARAMS_FIXED_SIZE (offsetof(wl_escan_params_t, params) + sizeof(wlc_ssid_t))
 
-begin_packed_struct
 typedef struct wl_escan_result
 {
   uint32_t       buflen;
@@ -217,8 +212,7 @@ typedef struct wl_escan_result
   uint16_t       sync_id;
   uint16_t       bss_count;
   wl_bss_info_t  bss_info[1];
-}
-end_packed_struct wl_escan_result_t;
+} wl_escan_result_t;
 
 #define WL_ESCAN_RESULTS_FIXED_SIZE (sizeof(wl_escan_result_t) - sizeof(wl_bss_info_t))
 
