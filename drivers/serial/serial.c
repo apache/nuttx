@@ -91,6 +91,10 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
 static int     uart_tcdrain(FAR uart_dev_t *dev,
                             bool cancelable, clock_t timeout);
 
+static int     uart_tcsendbreak(FAR uart_dev_t *dev,
+                                FAR struct file *filep,
+                                unsigned int ms);
+
 /* Character driver methods */
 
 static int     uart_open(FAR struct file *filep);
@@ -483,6 +487,87 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
       leave_cancellation_point();
     }
 
+  return ret;
+}
+
+/****************************************************************************
+ * Name: uart_tcsendbreak
+ *
+ * Description:
+ *   Request a serial line Break by calling the lower half driver's
+ *   BSD-compatible Break IOCTLs TIOCSBRK and TIOCCBRK, with a sleep of the
+ *   specified duration between them.
+ *
+ * Input Parameters:
+ *   dev      - Serial device.
+ *   filep    - Required for issuing lower half driver IOCTL call.
+ *   ms       - If non-zero, duration of the Break in milliseconds; if
+ *              zero, duration is 400 milliseconds.
+ *
+ * Returned Value:
+ *   0 on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int uart_tcsendbreak(FAR uart_dev_t *dev, FAR struct file *filep,
+                            unsigned int ms)
+{
+  int ret;
+
+  /* tcsendbreak is a cancellation point */
+
+  if (enter_cancellation_point())
+    {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      leave_cancellation_point();
+      return -ECANCELED;
+#endif
+    }
+
+  /* REVISIT: Do we need to perform the equivalent of tcdrain() before
+   * beginning the Break to avoid corrupting the transmit data? If so, note
+   * that just calling uart_tcdrain() here would create a race condition,
+   * since new transmit data could be written after uart_tcdrain() returns
+   * but before we re-acquire the dev->xmit.lock here. Therefore, we would
+   * need to refactor the functional portion of uart_tcdrain() to a separate
+   * function and call it from both uart_tcdrain() and uart_tcsendbreak()
+   * in critical section and with xmit lock already held.
+   */
+
+  if (dev->ops->ioctl)
+    {
+      ret = nxmutex_lock(&dev->xmit.lock);
+      if (ret >= 0)
+        {
+          /* Request lower half driver to start the Break */
+
+          ret = dev->ops->ioctl(filep, TIOCSBRK, 0);
+          if (ret >= 0)
+            {
+              /* Wait 400 ms or the requested Break duration */
+
+              nxsig_usleep((ms == 0) ? 400000 : ms * 1000);
+
+              /* Request lower half driver to end the Break */
+
+              ret = dev->ops->ioctl(filep, TIOCCBRK, 0);
+            }
+        }
+
+      nxmutex_unlock(&dev->xmit.lock);
+    }
+  else
+    {
+      /* With no lower half IOCTL, we cannot request Break at all. */
+
+      ret = -ENOTTY;
+    }
+
+  leave_cancellation_point();
   return ret;
 }
 
@@ -1350,6 +1435,22 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case TCDRN:
             {
               ret = uart_tcdrain(dev, true, 10 * TICK_PER_SEC);
+            }
+            break;
+
+          case TCSBRK:
+            {
+              /* Non-standard Break specifies duration in milliseconds */
+
+              ret = uart_tcsendbreak(dev, filep, arg);
+            }
+            break;
+
+          case TCSBRKP:
+            {
+              /* POSIX Break specifies duration in units of 100ms */
+
+              ret = uart_tcsendbreak(dev, filep, arg * 100);
             }
             break;
 
