@@ -3012,7 +3012,8 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case VIDIOC_DQBUF:
-        ret = video_dqbuf(priv, (FAR struct v4l2_buffer *)arg, filep->f_oflags);
+        ret = video_dqbuf(priv, (FAR struct v4l2_buffer *)arg,
+                          filep->f_oflags);
         break;
 
       case VIDIOC_CANCEL_DQBUF:
