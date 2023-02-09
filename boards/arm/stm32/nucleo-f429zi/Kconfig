@@ -36,13 +36,11 @@ config NUCLEO_F429ZI_CONSOLE_ARDUINO
 	bool "Arduino Connector"
 	select STM32_USART6
 	select USART6_SERIALDRIVER
-	select USART6_SERIAL_CONSOLE
 
 config NUCLEO_F429ZI_CONSOLE_VIRTUAL
 	bool "Virtual Comport"
 	select STM32_USART3
 	select USART3_SERIALDRIVER
-	select USART3_SERIAL_CONSOLE
 
 config NUCLEO_F429ZI_CONSOLE_NONE
 	bool "No Console"

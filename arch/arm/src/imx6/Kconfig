@@ -181,19 +181,19 @@ choice
 
 config IMX6_BOOT_OCRAM
 	bool "Running from internal OCRAM"
-	select BOOT_RUNFROMISRAM
+	depends on BOOT_RUNFROMISRAM
 
 config IMX6_BOOT_SDRAM
 	bool "Running from external SDRAM"
-	select BOOT_RUNFROMSDRAM
+	depends on BOOT_RUNFROMSDRAM
 
 config IMX6_BOOT_NOR
 	bool "Running from external NOR FLASH"
-	select BOOT_RUNFROMFLASH
+	depends on BOOT_RUNFROMFLASH
 
 config IMX6_BOOT_SRAM
 	bool "Running from external SRAM"
-	select BOOT_RUNFROMEXTSRAM
+	depends on BOOT_RUNFROMEXTSRAM
 
 endchoice # i.MX6 Boot Configuration
 
