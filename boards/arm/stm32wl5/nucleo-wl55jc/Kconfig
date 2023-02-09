@@ -238,7 +238,7 @@ config ARCH_BOARD_FLASH_PART1_FS
 
 choice
 	prompt "Filesystem of user partition 1"
-	default ARCH_BOARD_FLASH_PART1_FS_RAW
+	default ARCH_BOARD_FLASH_PART1_FS_RAWFS
 
 config ARCH_BOARD_FLASH_PART1_FS_RAWFS
 	bool "rawfs"
@@ -304,7 +304,7 @@ config ARCH_BOARD_FLASH_PART2_FS
 
 choice
 	prompt "Filesystem of user partition 2"
-	default ARCH_BOARD_FLASH_PART2_FS_RAW
+	default ARCH_BOARD_FLASH_PART2_FS_RAWFS
 
 config ARCH_BOARD_FLASH_PART2_FS_RAWFS
 	bool "rawfs"
@@ -347,7 +347,7 @@ config ARCH_BOARD_FLASH_PART3_FS
 
 choice
 	prompt "Filesystem of user partition 3"
-	default ARCH_BOARD_FLASH_PART3_FS_RAW
+	default ARCH_BOARD_FLASH_PART3_FS_RAWFS
 
 config ARCH_BOARD_FLASH_PART3_FS_RAWFS
 	bool "rawfs"
@@ -390,7 +390,7 @@ config ARCH_BOARD_FLASH_PART4_FS
 
 choice
 	prompt "Filesystem of user partition 4"
-	default ARCH_BOARD_FLASH_PART4_FS_RAW
+	default ARCH_BOARD_FLASH_PART4_FS_RAWFS
 
 config ARCH_BOARD_FLASH_PART4_FS_RAWFS
 	bool "rawfs"

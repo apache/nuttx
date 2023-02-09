@@ -315,9 +315,7 @@ config ARCH_BOARD_TTGO_T5V2_ESP32
 	select LCD
 	select LCD_DEV
 	select LCD_FRAMEBUFFER
-	select LCD_PORTRAIT
 	select LCD_SSD1680
-	select LCD_SSD1680_2_90
 	---help---
 		TTGO T5v2 is an ESP32 board with e-ink 2.9 inch display.
 		Display resolution 128/296. More info:
@@ -1444,7 +1442,7 @@ config ARCH_BOARD_NUCLEO_F446RE
 
 
 config ARCH_BOARD_STM32G071B_DISCO
-	bool "STM32G071 STM32G071B-DISO "
+	bool "STM32G071 STM32G071B-DISO"
 	depends on ARCH_CHIP_STM32G071RB
 	select ARCH_HAVE_LEDS
 	---help---
@@ -1797,7 +1795,6 @@ config ARCH_BOARD_SAMA5D2_XULT
 config ARCH_BOARD_GIANT_BOARD
 	bool "Groboards Giant Board (SAMA5D27C-D1G)"
 	depends on ARCH_CHIP_ATSAMA5D27
-	select SAMA5D27_GIANT_BOARD_492MHZ
 	select ARCH_HAVE_LEDS
 	---help---
 		This options selects support for NuttX on the Groboards Giant Board,

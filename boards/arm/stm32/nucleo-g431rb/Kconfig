@@ -7,7 +7,7 @@ if ARCH_BOARD_NUCLEO_G431RB
 
 choice
 	prompt "PLL Clock source"
-	default BOARD_NUCLEO_G431RB_HSI
+	default BOARD_NUCLEO_G431RB_USE_HSI
 
 config BOARD_NUCLEO_G431RB_USE_HSI
 	bool "HSI"

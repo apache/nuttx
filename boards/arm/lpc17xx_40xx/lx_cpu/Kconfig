@@ -7,7 +7,7 @@ if ARCH_BOARD_LX_CPU
 
 choice
 	prompt "LX_CPU ode and boot memory selection"
-	default LX_CPU_BOOT_APP
+	default LX_CPU_BOOT_FLASH_APP
 	depends on ARCH_BOARD_LX_CPU
 	---help---
 		Select where NuttX code/text is stored and how it is started.

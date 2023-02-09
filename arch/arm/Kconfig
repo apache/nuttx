@@ -60,7 +60,7 @@ config ARCH_CHIP_A1X
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_SDRAM
-	select BOOT_RUNFROMSDRAM
+	depends on BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
@@ -74,7 +74,7 @@ config ARCH_CHIP_AM335X
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_SDRAM
-	select BOOT_RUNFROMSDRAM
+	depends on BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
@@ -144,7 +144,7 @@ config ARCH_CHIP_IMX6
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_SDRAM
-	select BOOT_RUNFROMSDRAM
+	depends on BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
@@ -1358,7 +1358,7 @@ if ARCH_CHIP_S32K1XX
 source "arch/arm/src/s32k1xx/Kconfig"
 endif
 if ARCH_CHIP_S32K3XX
-source arch/arm/src/s32k3xx/Kconfig
+source "arch/arm/src/s32k3xx/Kconfig"
 endif
 if ARCH_CHIP_MAX326XX
 source "arch/arm/src/max326xx/Kconfig"
@@ -1415,7 +1415,7 @@ if ARCH_CHIP_STM32U5
 source "arch/arm/src/stm32u5/Kconfig"
 endif
 if ARCH_CHIP_STM32WB
-source arch/arm/src/stm32wb/Kconfig
+source "arch/arm/src/stm32wb/Kconfig"
 endif
 if ARCH_CHIP_STM32WL5
 source "arch/arm/src/stm32wl5/Kconfig"

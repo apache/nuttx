@@ -308,14 +308,14 @@ choice
 config LEUART0_SERIAL_CONSOLE
 	bool "Use LEUART0 as the serial console"
 	depends on EFM32_LEUART0
-	select OTHER_SERIAL_CONSOLE
+	depends on OTHER_SERIAL_CONSOLE
 	---help---
 		Use the LEUART0 device as the serial console
 
 config LEUART1_SERIAL_CONSOLE
 	bool "Use LEUART1 as the serial console"
 	depends on EFM32_LEUART1
-	select OTHER_SERIAL_CONSOLE
+	depends on OTHER_SERIAL_CONSOLE
 	---help---
 		Use the LEUART0 device as the serial console
 

@@ -199,7 +199,7 @@ config TTY_LAUNCH_PRIORITY
 	default INIT_PRIORITY
 
 config TTY_LAUNCH_STACKSIZE
-	hex "TTY launch program stack size"
+	int "TTY launch program stack size"
 	default INIT_STACKSIZE
 
 choice
