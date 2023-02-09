@@ -71,9 +71,9 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   FAR struct task_group_s *group;
   FAR char *pvar;
   FAR char **envp;
-  int envc = 0;
+  ssize_t envc = 0;
+  ssize_t ret = OK;
   int varlen;
-  int ret = OK;
 
   /* Verify input parameter */
 
@@ -134,6 +134,10 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
       env_removevar(group, ret);
     }
 
+  /* Check current envirments count */
+
+  DEBUGASSERT(group->tg_envc < SSIZE_MAX);
+
   /* Get the size of the new name=value string.
    * The +2 is for the '=' and for null terminator
    */
@@ -151,11 +155,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
   if (group->tg_envp)
     {
-      while (group->tg_envp[envc] != NULL)
-        {
-          envc++;
-        }
-
+      envc = group->tg_envc;
       envp = group_realloc(group, group->tg_envp,
                            sizeof(*envp) * (envc + 2));
       if (envp == NULL)
@@ -177,9 +177,10 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   envp[envc++] = pvar;
   envp[envc]   = NULL;
 
-  /* Save the new buffer */
+  /* Save the new buffer and count */
 
   group->tg_envp = envp;
+  group->tg_envc = envc;
 
   /* Now, put the new name=value string into the environment buffer */
 

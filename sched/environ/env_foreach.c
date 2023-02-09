@@ -66,7 +66,7 @@ int env_foreach(FAR struct task_group_s *group,
                 FAR void *arg)
 {
   int ret = OK;
-  int i;
+  size_t i;
 
   /* Verify input parameters */
 
@@ -92,6 +92,8 @@ int env_foreach(FAR struct task_group_s *group,
           break;
         }
     }
+
+  DEBUGASSERT(ret != OK || group->tg_envc == i);
 
   return ret;
 }

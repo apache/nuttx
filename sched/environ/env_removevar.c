@@ -59,27 +59,30 @@
  *
  ****************************************************************************/
 
-void env_removevar(FAR struct task_group_s *group, int index)
+void env_removevar(FAR struct task_group_s *group, ssize_t index)
 {
-  DEBUGASSERT(group != NULL && index >= 0);
+  DEBUGASSERT(group != NULL && index >= 0 && index < group->tg_envc);
 
   /* Free the allocate environment string */
 
   group_free(group, group->tg_envp[index]);
 
-  /* Move all of the environment strings after the removed one 'down.'
-   * this is inefficient, but robably not high duty.
-   */
+  /* Exchange the last env and the index env */
 
-  do
+  group->tg_envc--;
+  if (index == group->tg_envc)
     {
-      group->tg_envp[index] = group->tg_envp[index + 1];
+      group->tg_envp[index] = NULL;
     }
-  while (group->tg_envp[++index] != NULL);
+  else
+    {
+      group->tg_envp[index] = group->tg_envp[group->tg_envc];
+      group->tg_envp[group->tg_envc] = NULL;
+    }
 
   /* Free the old environment (if there was one) */
 
-  if (index == 1)
+  if (group->tg_envc == 0)
     {
       group_free(group, group->tg_envp);
       group->tg_envp = NULL;
@@ -89,7 +92,8 @@ void env_removevar(FAR struct task_group_s *group, int index)
       /* Reallocate the environment to reclaim a little memory */
 
       group->tg_envp = group_realloc(group, group->tg_envp,
-                                     sizeof(*group->tg_envp) * (index + 1));
+                                     sizeof(*group->tg_envp) *
+                                     (group->tg_envc + 1));
       DEBUGASSERT(group->tg_envp != NULL);
     }
 }

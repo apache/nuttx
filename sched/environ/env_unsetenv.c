@@ -61,7 +61,7 @@ int unsetenv(FAR const char *name)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  int idx;
+  ssize_t idx;
 
   DEBUGASSERT(group);
 
