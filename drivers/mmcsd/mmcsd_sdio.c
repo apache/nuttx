@@ -1188,7 +1188,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 
   /* First, check if the card has been removed. */
 
-  if (!SDIO_PRESENT(priv->dev))
+  if (IS_EMPTY(priv) || !SDIO_PRESENT(priv->dev))
     {
       ferr("ERROR: Card has been removed\n");
       return -ENODEV;
