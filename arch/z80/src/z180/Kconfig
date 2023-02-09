@@ -533,7 +533,7 @@ endmenu
 
 choice
 	prompt "Serial console"
-	default Z180_NO_SERIAL_CONSOLE
+	default Z180_UART0_SERIAL_CONSOLE
 	depends on DEV_CONSOLE
 
 config Z180_UART0_SERIAL_CONSOLE

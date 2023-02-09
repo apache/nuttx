@@ -11,14 +11,14 @@ choice
 
 config SAME54_XPLAINED_PRO_RUNFROMFLASH
 	bool "Run from FLASH"
-	select BOOT_RUNFROMFLASH
+	depends on BOOT_RUNFROMFLASH
 	---help---
 		This is the normal configuration for building SAM E54 Xplained
 		Pro code.
 
 config SAME54_XPLAINED_PRO_RUNFROMSRAM
 	bool "Run from SRAM"
-	select BOOT_RUNFROMISRAM
+	depends on BOOT_RUNFROMISRAM
 	---help---
 		During early bring-up, it is safer to execute entirely from
 		SRAM until you are confident in the initialization logic.

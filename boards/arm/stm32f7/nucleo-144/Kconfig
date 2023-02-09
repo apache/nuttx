@@ -81,25 +81,21 @@ config NUCLEO_CONSOLE_ARDUINO
 	bool "Arduino Connector"
 	select STM32F7_USART6
 	select USART6_SERIALDRIVER
-	select USART6_SERIAL_CONSOLE
 
 config NUCLEO_CONSOLE_VIRTUAL
 	bool "Virtual Comport"
 	select STM32F7_USART3
 	select USART3_SERIALDRIVER
-	select USART3_SERIAL_CONSOLE
 
 config NUCLEO_CONSOLE_MORPHO
 	bool "Morpho Connector"
 	select STM32F7_UART8
 	select UART8_SERIALDRIVER
-	select UART8_SERIAL_CONSOLE
 
 config NUCLEO_CONSOLE_MORPHO_UART4
 	bool "Morpho Connector UART4"
 	select STM32F7_UART4
 	select UART4_SERIALDRIVER
-	select UART4_SERIAL_CONSOLE
 
 config NUCLEO_CONSOLE_NONE
 	bool "No Console"

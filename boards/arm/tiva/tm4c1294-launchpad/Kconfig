@@ -75,7 +75,7 @@ endif # TIVA_TIMER32_PERIODIC
 config TM4C1294_LAUNCHPAD_JUMPERS_CAN
 	bool "Use CAN jumpers configuration"
 	default n
-	select TIVA_UART2
+	depends on TIVA_UART2
 	---help---
 		If set, NuttX will assume the jumpers JP4 and JP5 are set in CAN configuration.
 		This means UART2 will be connected to the ICDI serial port.

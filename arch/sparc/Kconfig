@@ -62,9 +62,9 @@ config ARCH_CHIP
 	default "bm3823"	if ARCH_CHIP_BM3823
 	default "s698pm"	if ARCH_CHIP_S698PM
 
-source arch/sparc/src/sparc_v8/Kconfig
-source arch/sparc/src/bm3803/Kconfig
-source arch/sparc/src/bm3823/Kconfig
-source arch/sparc/src/s698pm/Kconfig
+source "arch/sparc/src/sparc_v8/Kconfig"
+source "arch/sparc/src/bm3803/Kconfig"
+source "arch/sparc/src/bm3823/Kconfig"
+source "arch/sparc/src/s698pm/Kconfig"
 
 endif

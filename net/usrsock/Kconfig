@@ -42,7 +42,6 @@ config NET_USRSOCK_UDP
 	bool "User-space daemon provides UDP sockets"
 	default n
 	select NET_UDP_NO_STACK
-	---help---
 
 config NET_USRSOCK_TCP
 	bool "User-space daemon provides TCP sockets"

@@ -63,7 +63,7 @@ menu "Atmel AVR Toolchain options"
 config AVR_HAS_MEMX_PTR
 	bool "Enable in-flash static const stings"
 	depends on AVR_ATMEL_AVR_TOOLCHAIN
-	select ARCH_DEBUG_H
+	depends on ARCH_DEBUG_H
 	default y
 	---help---
 		Enabling this option (recommended) will place all constant

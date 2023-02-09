@@ -4415,7 +4415,7 @@ if SAMA5_ADC_PWMTRIG
 
 choice
 	prompt "PWM Event Line Selection"
-	default SAMA5_ADC_PWMTRIG_LINE0
+	default SAMA5_ADC_PWM_TRIG_LINE0
 
 config SAMA5_ADC_PWM_TRIG_LINE0
 	bool "PWM event Line 0"

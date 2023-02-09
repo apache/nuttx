@@ -206,7 +206,7 @@ source "libs/libc/machine/renesas/Kconfig"
 endif
 
 if ARCH_SPARC
-source libs/libc/machine/sparc/Kconfig
+source "libs/libc/machine/sparc/Kconfig"
 endif
 
 endmenu # Architecture-Specific Support

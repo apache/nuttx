@@ -664,8 +664,7 @@ menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	select ARMV7M_USEBASEPRI
 	select ARCH_RAMVECTORS
 	select ARCH_IRQPRIO
-	select NRF52_USE_LFCLK
-	select NRF52_LFCLK_XTAL
+	depends on NRF52_LFCLK_XTAL
 	---help---
 		This enables use of Nordic SoftDevice controller
 		(SDC). It is a library version of a subset of 

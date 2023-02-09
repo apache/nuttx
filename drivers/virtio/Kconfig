@@ -7,27 +7,22 @@ menuconfig DRIVERS_VIRTIO
 	bool "Virtio Device Support"
 	depends on !OPENAMP
 	default n
-	---help---
 
 if DRIVERS_VIRTIO
 menuconfig DRIVERS_VIRTIO_MMIO_NUM
 	int "The number of virtio mmio devices"
 	default 1
-	---help---
 
 if DRIVERS_VIRTIO_MMIO_NUM != 0
 menuconfig DRIVERS_VIRTIO_MMIO_BASE
 	hex "Virtio-mmio base address"
-	---help---
 
 menuconfig DRIVERS_VIRTIO_MMIO_REGSIZE
 	hex "Virtio-mmio register size"
 	default 0
-	---help---
 
 menuconfig DRIVERS_VIRTIO_MMIO_IRQ
 	int "Virtio-mmio irq number"
-	---help---
 
 endif
 
@@ -36,13 +31,11 @@ menuconfig DRIVERS_VIRTIO_NET
 	default n
 	depends on DRIVERS_VIRTIO_MMIO_NUM > 0
 	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
 
 if DRIVERS_VIRTIO_NET
 config DRIVERS_VIRTIO_NET_QUEUE_LEN
 	int "Queue length"
 	default 16
-	---help---
 
 endif
 endif
