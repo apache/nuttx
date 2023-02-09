@@ -31,6 +31,7 @@
 #include <nuttx/userspace.h>
 
 #include <arch/board/board_memorymap.h>
+#include "hardware/mpfs_clint.h"
 
 #include "mpfs_userspace.h"
 #include "riscv_internal.h"
@@ -247,6 +248,10 @@ static void configure_mmu(void)
 
   map_region(UFLASH_START, UFLASH_START, UFLASH_SIZE, MMU_UTEXT_FLAGS);
   map_region(USRAM_START, USRAM_START, USRAM_SIZE, MMU_UDATA_FLAGS);
+
+  /* Map the MTIME counter to the start of USR IO region */
+
+  map_region(MPFS_CLINT_MTIME & (~RV_MMU_PAGE_MASK), USRIO_START, RV_MMU_PAGE_SIZE, PTE_R | PTE_U | PTE_G);
 
   /* Connect the L1 and L2 page tables */
 
