@@ -87,6 +87,8 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
           envc++;
         }
 
+      group->tg_envc = envc;
+
       /* A special case is that the parent has an "empty" environment
        * allocation, i.e., there is an allocation in place but it
        * contains no variable definitions and, hence, envc == 0.

@@ -61,7 +61,7 @@ FAR char *getenv(FAR const char *name)
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;
   FAR char *pvalue = NULL;
-  int ret = OK;
+  ssize_t ret = OK;
 
   /* Verify that a string was passed */
 
