@@ -676,6 +676,7 @@ static int fatfs_stat_i(FAR const char *path, FAR struct stat *buf)
   int ret;
 
   memset(buf, 0, sizeof(struct stat));
+  buf->st_mode |= S_IRWXO | S_IRWXG | S_IRWXU;
   if (path[2] == '\0')
     {
       buf->st_mode |= S_IFDIR;
