@@ -53,12 +53,6 @@ else ifeq ($(CONFIG_NET_ICMPv6),y)
   endif
 endif
 
-# Bound device find
-
-ifeq ($(CONFIG_NET_BINDTODEVICE),y)
-NET_CSRCS += net_bounddev.c
-endif
-
 # Include utility build support
 
 DEPPATH += --dep-path utils

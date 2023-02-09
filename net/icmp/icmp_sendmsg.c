@@ -306,7 +306,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_BINDTODEVICE
   if (conn->sconn.s_boundto != 0)
     {
-      dev = net_bound_device(&conn->sconn);
+      dev = netdev_findbyindex(conn->sconn.s_boundto);
     }
   else
 #endif
