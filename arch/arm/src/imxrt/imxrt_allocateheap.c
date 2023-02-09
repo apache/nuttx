@@ -36,6 +36,7 @@
 
 #include <arch/imxrt/chip.h>
 
+#include "mpu.h"
 #include "arm_internal.h"
 #include "hardware/imxrt_memorymap.h"
 #include "imxrt_mpuinit.h"
@@ -309,14 +310,30 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
                      CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = PRIMARY_RAM_END - ubase;
+  int       log2;
 
   DEBUGASSERT(ubase < (uintptr_t)PRIMARY_RAM_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the PRIMARY_RAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((PRIMARY_RAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = PRIMARY_RAM_END - usize;
 
   /* Return the user-space heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (void *)ubase;
   *heap_size  = usize;
+
+  /* Allow user-mode access to the user heap memory */
+
+  imxrt_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -348,7 +365,20 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
                     CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = PRIMARY_RAM_END - ubase;
+  int       log2;
   DEBUGASSERT(ubase < (uintptr_t)PRIMARY_RAM_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((PRIMARY_RAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = PRIMARY_RAM_END - usize;
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).
