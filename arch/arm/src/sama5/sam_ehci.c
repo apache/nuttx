@@ -116,7 +116,7 @@
  * for this port would be a BAD idea
  */
 
-#if defined(CONFIG_SAMA5_UDPHS) && !defined(CONFIG_SAMA5_USBA_DRP)
+#if defined(CONFIG_SAMA5_UDPHS) && !defined(CONFIG_SAMA5_USB_DRP)
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
