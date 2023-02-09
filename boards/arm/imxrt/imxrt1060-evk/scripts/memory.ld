@@ -61,7 +61,8 @@ MEMORY
 
   /* 1MiB of OCRAM */
 
-  dtcm   (rwx) : ORIGIN = 0x20000000, LENGTH = 512K
-  kocram (rwx) : ORIGIN = 0x20200000, LENGTH = 512K
-  uocram (rwx) : ORIGIN = 0x20240000, LENGTH = 512K
+  itcm   (rwx) : ORIGIN = 0x00000000, LENGTH = 128K
+  dtcm   (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+  kocram (rwx) : ORIGIN = 0x20200000, LENGTH = 256K
+  uocram (rwx) : ORIGIN = 0x20240000, LENGTH = 256K
 }

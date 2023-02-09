@@ -24,10 +24,31 @@
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
+EXTERN(g_flash_config)
+EXTERN(g_image_vector_table)
+EXTERN(g_boot_data)
+
 ENTRY(_stext)
 
 SECTIONS
 {
+    /* Image Vector Table and Boot Data for booting from external flash */
+
+    .boot_hdr : ALIGN(4)
+    {
+        FILL(0xff)
+        __boot_hdr_start__ = ABSOLUTE(.) ;
+        KEEP(*(.boot_hdr.conf))
+        . = 0x1000 ;
+        KEEP(*(.boot_hdr.ivt))
+        . = 0x1020 ;
+        KEEP(*(.boot_hdr.boot_data))
+        . = 0x1030 ;
+        KEEP(*(.boot_hdr.dcd_data))
+        __boot_hdr_end__ = ABSOLUTE(.) ;
+        . = 0x2000 ;
+    } > kflash
+
   .text :
   {
     _stext = ABSOLUTE(.);
