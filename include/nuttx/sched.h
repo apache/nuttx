@@ -454,6 +454,9 @@ struct task_group_s
 #else
   uint16_t tg_nchildren;                  /* This is the number active children */
 #endif
+  /* Group exit status ******************************************************/
+
+  int tg_exitcode;                        /* Exit code (status) for group   */
 #endif /* CONFIG_SCHED_HAVE_PARENT */
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
