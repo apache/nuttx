@@ -663,8 +663,15 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       default:
-        gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
-        ret = -ENOTTY;
+        if (fb->vtable->ioctl)
+          {
+            ret = fb->vtable->ioctl(fb->vtable, cmd, arg);
+          }
+        else
+          {
+            gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
+            ret = -ENOTTY;
+          }
         break;
     }
 
