@@ -53,6 +53,8 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
+  int ret;
+
   sinfo("Unblocking TCB=%p\n", tcb);
 
   /* Update scheduler parameters */
@@ -80,6 +82,8 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
       /* Then switch contexts */
 
       sim_restorestate(tcb->xcp.regs);
+
+      return;
     }
 
   /* Copy the exception context into the TCB of the task that was
@@ -87,7 +91,8 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
    * then this is really the previously running task restarting!
    */
 
-  else if (!sim_saveusercontext(rtcb->xcp.regs))
+  sim_saveusercontext(rtcb->xcp.regs, ret);
+  if (ret == 0)
     {
       sinfo("New Active Task TCB=%p\n", tcb);
 
