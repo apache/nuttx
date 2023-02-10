@@ -793,6 +793,10 @@ struct fb_vtable_s
 
   int (*setpower)(FAR struct fb_vtable_s *vtable, int power);
 
+  /* Passthrough the unknown ioctl commands. */
+
+  int (*ioctl)(FAR struct fb_vtable_s *vtable, int cmd, unsigned long arg);
+
   /* Pointer to framebuffer device private data. */
 
   FAR void *priv;
