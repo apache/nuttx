@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
@@ -82,10 +83,15 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_ASAN
+nosanitize_address
+#endif
 pid_t up_vfork(const xcpt_reg_t *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
+  unsigned char *pout;
+  unsigned char *pin;
   xcpt_reg_t newsp;
   xcpt_reg_t newfp;
   xcpt_reg_t newtop;
@@ -130,7 +136,9 @@ pid_t up_vfork(const xcpt_reg_t *context)
   newtop = (xcpt_reg_t)child->cmn.stack_base_ptr +
                        child->cmn.adj_stack_size;
   newsp = newtop - stackutil;
-  memcpy((void *)newsp, (const void *)context[JB_SP], stackutil);
+  pout = (unsigned char *)newsp;
+  pin  = (unsigned char *)context[JB_SP];
+  while (stackutil-- > 0) *pout++ = *pin++;
 
   /* Was there a frame pointer in place before? */
 
