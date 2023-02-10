@@ -98,8 +98,6 @@ static int files_extend(FAR struct filelist *list, size_t row)
   return 0;
 }
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct filelist *list;
@@ -128,8 +126,6 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 
   nxmutex_unlock(&list->fl_lock);
 }
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT */
 
 /****************************************************************************
  * Public Functions
@@ -638,8 +634,6 @@ int close(int fd)
   return ret;
 }
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 /****************************************************************************
  * Name: sync
  *
@@ -653,5 +647,3 @@ void sync(void)
 {
   nxsched_foreach(task_fssync, NULL);
 }
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT */
