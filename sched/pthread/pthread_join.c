@@ -75,7 +75,6 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct join_s *pjoin;
-  FAR struct tcb_s *tcb;
   int ret;
 
   sinfo("thread=%d group=%p\n", thread, group);
@@ -85,18 +84,11 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   enter_cancellation_point();
 
-  tcb = nxsched_get_tcb(thread);
-  if (tcb != NULL && tcb->group != group)
-    {
-      leave_cancellation_point();
-      return EINVAL;
-    }
-
   /* First make sure that this is not an attempt to join to
    * ourself.
    */
 
-  if (tcb == rtcb)
+  if ((pid_t)thread == gettid())
     {
       leave_cancellation_point();
       return EDEADLK;
@@ -121,6 +113,8 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   if (pjoin == NULL)
     {
       /* Determine what kind of error to return */
+
+      FAR struct tcb_s *tcb = nxsched_get_tcb((pthread_t)thread);
 
       swarn("WARNING: Could not find thread data\n");
 
