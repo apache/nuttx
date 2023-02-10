@@ -245,6 +245,13 @@ static inline void dmast_putreg(struct stm32_dma_s *dmast, uint32_t offset,
   putreg32(value, dmast->base + offset);
 }
 
+static inline void dmast_modifyreg32(struct stm32_dma_s *dmast,
+                                     uint32_t offset, uint32_t clrbits,
+                                     uint32_t setbits)
+{
+  modifyreg32(dmast->base + offset, clrbits, setbits);
+}
+
 /****************************************************************************
  * Name: stm32_dmastream
  *
@@ -581,6 +588,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
   struct stm32_dma_s *dmast = (struct stm32_dma_s *)handle;
   uint32_t regoffset;
   uint32_t regval;
+  uint32_t timeout;
 
   dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32
           " ntransfers: %zu scr: %08" PRIx32 "\n",
@@ -600,7 +608,36 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    * configuration..."
    */
 
-  while ((dmast_getreg(dmast, STM32_DMA_SCR_OFFSET) & DMA_SCR_EN) != 0);
+  /* Drivers using DMA should manage the streams. If a DMA request
+   * is not made on an error or an abort occurs. The driver should
+   * stop the DMA. If it fails to do so we can not just hang waiting
+   * on the HW that will not change state.
+   *
+   * If at the end of waiting the HW is still not ready there is a HW problem
+   * or a SW usage problem.
+   *
+   * Enable DEBUGASSERT to detect this.
+   */
+
+  if ((dmast_getreg(dmast, STM32_DMA_SCR_OFFSET) & DMA_SCR_EN) != 0)
+    {
+      /* Attempt to disable the DMA stream and wait up to a 100 us for it
+       * to stop.
+       */
+
+      dmast_modifyreg32(dmast, STM32_DMA_SCR_OFFSET, DMA_SCR_EN, 0);
+      timeout = 100;
+      while (timeout != 0 &&
+             (dmast_getreg(dmast, STM32_DMA_SCR_OFFSET) & DMA_SCR_EN) != 0)
+        {
+          up_udelay(1);
+          timeout--;
+        }
+
+        DEBUGASSERT(timeout != 0 &&
+                    (dmast_getreg(dmast, STM32_DMA_SCR_OFFSET) &
+                     DMA_SCR_EN) == 0);
+    }
 
   /* "... All the stream dedicated bits set in the status register (DMA_LISR
    * and DMA_HISR) from the previous data block DMA transfer should be
