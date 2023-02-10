@@ -180,9 +180,6 @@ static void sim_update_hosttimer(void)
 static void sim_timer_update_internal(void)
 {
   sq_entry_t *entry;
-  irqstate_t flags;
-
-  flags = enter_critical_section();
 
   for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
     {
@@ -190,8 +187,6 @@ static void sim_timer_update_internal(void)
     }
 
   sim_update_hosttimer();
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
