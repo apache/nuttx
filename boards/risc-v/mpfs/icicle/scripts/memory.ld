@@ -25,4 +25,6 @@ MEMORY
 
   ksram (rwx)  : ORIGIN = 0x80080000, LENGTH = 256K /* w/ cache */
   usram (rwx)  : ORIGIN = 0x800C0000, LENGTH = 256K /* w/ cache */
+
+  usrio  (r)   : ORIGIN = 0x80100000, LENGTH = 32K
 }
