@@ -43,12 +43,14 @@ void *sim_doirq(int irq, void *context)
 
   xcpt_reg_t tmp[XCPTCONTEXT_REGS];
   void *regs = (void *)tmp;
+  int ret;
 
   /* CURRENT_REGS non-zero indicates that we are processing an interrupt.
    * CURRENT_REGS is also used to manage interrupt level context switches.
    */
 
-  if (sim_saveusercontext(regs) == 0)
+  sim_saveusercontext(regs, ret);
+  if (ret == 0)
     {
       CURRENT_REGS = regs;
 

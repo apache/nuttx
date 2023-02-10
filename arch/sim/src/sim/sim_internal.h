@@ -85,17 +85,20 @@
 #define sim_savestate(regs) sim_copyfullstate(regs, (xcpt_reg_t *)CURRENT_REGS)
 #define sim_restorestate(regs) (CURRENT_REGS = regs)
 
-#define sim_saveusercontext(saveregs)                           \
-    ({                                                          \
-       irqstate_t flags = up_irq_flags();                       \
-       xcpt_reg_t *env = saveregs;                              \
-       uint32_t *val = (uint32_t *)&env[JB_FLAG];               \
+#define sim_saveusercontext(saveregs, ret)                      \
+    do                                                          \
+      {                                                         \
+        irqstate_t flags = up_irq_flags();                      \
+        xcpt_reg_t *env = saveregs;                             \
+        uint32_t *val = (uint32_t *)&env[JB_FLAG];              \
                                                                 \
-       val[0] = flags & UINT32_MAX;                             \
-       val[1] = (flags >> 32) & UINT32_MAX;                     \
+        val[0] = flags & UINT32_MAX;                            \
+        val[1] = (flags >> 32) & UINT32_MAX;                    \
                                                                 \
-       setjmp(saveregs);                                        \
-    })
+        ret = setjmp(saveregs);                                 \
+      }                                                         \
+    while (0)
+
 #define sim_fullcontextrestore(restoreregs)                     \
     do                                                          \
       {                                                         \

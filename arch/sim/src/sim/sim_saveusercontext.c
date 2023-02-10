@@ -48,5 +48,9 @@
 
 int up_saveusercontext(void *saveregs)
 {
-  return sim_saveusercontext(saveregs);
+  int ret;
+
+  sim_saveusercontext(saveregs, ret);
+
+  return ret;
 }
