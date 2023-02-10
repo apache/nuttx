@@ -505,7 +505,6 @@ void up_timer_initialize(void)
 
 void sim_timer_update(void)
 {
-#ifdef CONFIG_SIM_WALLTIME_SLEEP
   static uint64_t until;
 
   /* Wait a bit so that the timing is close to the correct rate. */
@@ -513,6 +512,7 @@ void sim_timer_update(void)
   until += NSEC_PER_TICK;
   host_sleepuntil(until);
 
+#ifdef CONFIG_SIM_WALLTIME_SLEEP
   sim_timer_update_internal();
 #endif
 }
