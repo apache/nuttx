@@ -209,16 +209,16 @@ function elf-toolchain {
 }
 
 function gen-romfs {
-  add_path "${tools}"/genromfs/usr/bin
-
-  if [ ! -f "${tools}/genromfs/usr/bin/genromfs" ]; then
-    git clone https://bitbucket.org/nuttx/tools.git "${tools}"/nuttx-tools
-    cd "${tools}"/nuttx-tools
-    tar zxf genromfs-0.5.2.tar.gz -C "${tools}"
-    cd "${tools}"/genromfs-0.5.2
-    make install PREFIX="${tools}"/genromfs
-    cd "${tools}"
-    rm -rf genromfs-0.5.2
+  if ! type genromfs &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew tap PX4/px4
+        brew install genromfs
+        ;;
+      Linux)
+        apt-get install -y genromfs
+        ;;
+    esac
   fi
 }
 
@@ -242,6 +242,7 @@ function kconfig-frontends {
   add_path "${tools}"/kconfig-frontends/bin
 
   if [ ! -f "${tools}/kconfig-frontends/bin/kconfig-conf" ]; then
+    git clone https://bitbucket.org/nuttx/tools.git "${tools}"/nuttx-tools
     cd "${tools}"/nuttx-tools/kconfig-frontends
     ./configure --prefix="${tools}"/kconfig-frontends \
       --disable-kconfig --disable-nconf --disable-qconf \
