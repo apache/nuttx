@@ -45,6 +45,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* CONFIG_SPI_CMDDATA has to be set */
+
+#ifndef CONFIG_SPI_CMDDATA
+#  error "CONFIG_SPI_CMDDATA option has to be set for SPI communication"
+#endif
+
 /* Verify that all configuration requirements have been met */
 
 #ifndef CONFIG_LCD_ST7789_SPIMODE
