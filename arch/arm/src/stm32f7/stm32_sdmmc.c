@@ -2009,7 +2009,7 @@ static void stm32_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
       default:
       case CLOCK_SDIO_DISABLED:
         clckr = STM32_CLCKCR_INIT;
-        return;
+        break;
 
       /* Enable in initial ID mode clocking (<400KHz) */
 
