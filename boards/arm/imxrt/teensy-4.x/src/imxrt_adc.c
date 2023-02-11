@@ -40,7 +40,11 @@
 
 /* channels 1 and 2 have the same number of pins on Teensy */
 
+#ifdef CONFIG_TEENSY_41_PIKRON_BB
+#define ADC_NCHANNELS 3
+#else
 #define ADC_NCHANNELS 16
+#endif
 
 /****************************************************************************
  * Private Data
@@ -48,7 +52,11 @@
 
 static const uint8_t g_chanlist[ADC_NCHANNELS] =
   {
+#ifdef CONFIG_TEENSY_41_PIKRON_BB
+    4, 2, 9
+#else
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15
+#endif
   };
 
 /****************************************************************************
