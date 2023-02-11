@@ -276,7 +276,8 @@ ENV PIP_NO_CACHE_DIR=0
 # We are using the minimal python installation from the system so include
 # setuptools and also wheel so we can use the binary releases of packages
 # instead of requiring them to be compiled.
-RUN pip3 install setuptools wheel
+RUN pip3 install setuptools
+RUN pip3 install wheel
 # Install CodeChecker and use it to statically analyze the code.
 RUN pip3 install CodeChecker
 # Install cvt2utf to check for non-UTF characters.
@@ -285,6 +286,7 @@ RUN pip3 install cvt2utf
 RUN pip3 install cxxfilt
 RUN pip3 install esptool
 RUN pip3 install imgtool
+RUN pip3 install kconfiglib
 RUN pip3 install pexpect==4.8.0
 RUN pip3 install pyelftools
 RUN pip3 install pyserial==3.5
