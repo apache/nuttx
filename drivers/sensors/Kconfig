@@ -60,6 +60,32 @@ config APDS9960_I2C_FREQUENCY
 	default 400000
 	depends on SENSORS_APDS9960
 
+config SENSORS_APDS9922
+	bool "Broadcom APDS-9922 Proximity and Ambient Light Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Broadcom APDS-9922 proximity and ambient light sensor.
+
+config APDS9922_I2C_FREQUENCY
+	int "APDS-9922 I2C frequency"
+	default 400000
+	depends on SENSORS_APDS9922
+
+config APDS9922_ALS_NPOLLWAITERS
+	int "APDS-9922 - number of ALS poll waiters"
+	default 2
+	depends on SENSORS_APDS9922
+	---help---
+		Sets the number of poll waiters for the ambient light sensor
+
+config APDS9922_PS_NPOLLWAITERS
+	int "APDS-9922 - number of PS poll waiters"
+	default 2
+	depends on SENSORS_APDS9922  
+	---help---
+		Sets the number of poll waiters for the proximity sensor
+
 config SENSORS_AK09912
 	bool "Asahi AK09911/AK09912 Compass Sensor"
 	default n
