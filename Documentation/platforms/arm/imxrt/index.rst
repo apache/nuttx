@@ -181,7 +181,7 @@ Output on pin B is currently supported only as a complementary option to pin A.
 The lower-half of this driver is initialize by calling :c:func:`imxrt_pwminitialize`.
 
 PWM module can be synchronized by an external signal. The external signal used for synchronization
-is selected by IMXRT_FLEXPWMx_MODx_SYNC_SRC config option. The number in IMXRT_FLEXPWM4_MOD4_SYNC_SRC
+is selected by IMXRT_FLEXPWMx_MODx_SYNC_SRC config option. The number in IMXRT_FLEXPWMx_MODx_SYNC_SRC
 corresponds with the XBAR number. Following numbers can be used for synchronization of PWMs with other
 PWM module when using iMXRT1020, iMXRT1050 or iMXRT1060.
 
@@ -220,6 +220,9 @@ iMXRT1170 has different XBAR connections:
 - PWM4 Module 2 = 87
 - PWM4 Module 3 = 88
 - PWM4 Module 4 = 89
+
+Option IMXRT_FLEXPWMx_MODx_TRIG allows the module to generate a trigger signal. The trigger is generated on
+timer capture of either period or duty cycle value based on the configuration.
 
 SAI
 ---
