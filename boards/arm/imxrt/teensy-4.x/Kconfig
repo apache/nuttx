@@ -39,4 +39,14 @@ config NET_USE_OTP_ETHERNET_MAC
 		(the vendor ID of 'PJRC.COM, LLC') when this feature is enabled.
 		It may also be used with other boards that have the OCOTP programmed with a valid MAC.
 
+if TEENSY_41
+
+config TEENSY_41_PIKRON_BB
+	bool "Base board for Teensy 4.1 configuration"
+	---help---
+		Configuration pikron-bb contains setup for open hardware based board fo Teensy 4.1. This option
+		sets up HW pinout as ADC channels for example.
+
+endif
+
 endif

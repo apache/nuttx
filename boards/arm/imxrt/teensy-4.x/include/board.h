@@ -281,6 +281,14 @@
 #define GPIO_FLEXPWM2_MOD1_A (GPIO_FLEXPWM2_PWMA00_1|IOMUX_PWM_DEFAULT) /* GPIO_EMC_06 */
 #define GPIO_FLEXPWM2_MOD2_A (GPIO_FLEXPWM2_PWMA01_1|IOMUX_PWM_DEFAULT) /* GPIO_EMC_08 */
 
+/* FlexPWM setup for PMSM control - used in pikron-bb configuration */
+
+#define GPIO_FLEXPWM3_MOD2_A (GPIO_FLEXPWM3_PWMA01_1 | IOMUX_PWM_DEFAULT) /* GPIO_EMC_31 */
+#define GPIO_FLEXPWM2_MOD3_A (GPIO_FLEXPWM2_PWMA02_2 | IOMUX_PWM_DEFAULT) /* GPIO_B0_10 */
+#define GPIO_FLEXPWM1_MOD4_A (GPIO_FLEXPWM1_PWMA03_5 | IOMUX_PWM_DEFAULT) /* GPIO_B1_00 */
+
+#define GPIO_FLEXPWM4_MOD3_A (IOMUX_PWM_DEFAULT) /* PWM: ADC Trigger */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
