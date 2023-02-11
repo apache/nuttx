@@ -287,6 +287,7 @@ function python-tools {
     cxxfilt \
     esptool==3.3.1 \
     imgtool==1.9.0 \
+    kconfiglib \
     pexpect==4.8.0 \
     pyelftools \
     pyserial==3.5 \
