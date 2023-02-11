@@ -88,9 +88,11 @@ void exit(int status)
 
   atexit_call_exitfuncs(status, false);
 
+#ifdef CONFIG_FILE_STREAM
   /* Flush all streams */
 
   fflush(NULL);
+#endif
 
   /* Then perform the exit */
 
