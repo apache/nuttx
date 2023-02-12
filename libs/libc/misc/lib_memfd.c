@@ -22,8 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/memfd.h>
+#include <sys/mman.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 
