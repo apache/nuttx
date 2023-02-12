@@ -128,6 +128,27 @@
 #define POSIX_TYPED_MEM_ALLOCATE_CONTIG  (1)
 #define POSIX_TYPED_MEM_MAP_ALLOCATABLE  (2)
 
+/* Flags for memfd_create(). */
+
+#define MFD_CLOEXEC       O_CLOEXEC
+#define MFD_ALLOW_SEALING (1 << 16)
+#define MFD_HUGETLB       (1 << 17)
+
+#define MFD_HUGE_SHIFT    26
+#define MFD_HUGE_MASK     0x3f
+#define MFD_HUGE_64KB     (16 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_512KB    (19 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_1MB      (20 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_2MB      (21 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_8MB      (23 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_16MB     (24 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_32MB     (25 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_256MB    (28 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_512MB    (29 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_1GB      (30 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_2GB      (31 << MFD_HUGE_SHIFT)
+#define MFD_HUGE_16GB     (34 << MFD_HUGE_SHIFT)
+
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define mmap64 mmap
 #endif
@@ -180,6 +201,7 @@ int posix_typed_mem_get_info(int fildes,
 int posix_typed_mem_open(FAR const char *name, int oflag, int tflag);
 int shm_open(FAR const char *name, int oflag, mode_t mode);
 int shm_unlink(FAR const char *name);
+int memfd_create(FAR const char *name, unsigned int flags);
 
 #undef EXTERN
 #if defined(__cplusplus)
