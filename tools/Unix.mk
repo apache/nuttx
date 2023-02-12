@@ -629,7 +629,8 @@ else
   KCONFIG_GCONFIG       = ${KCONFIG_NCONFIG}
   KCONFIG_SAVEDEFCONFIG = savedefconfig --out
 define kconfig_tweak_disable
-	sed -i '/$2/d' $1
+	$(Q) sed -i'.orig' '/$2/d' $1
+	$(Q) rm -f $1.orig
 endef
 endif
 
