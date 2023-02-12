@@ -8,6 +8,5 @@ if ARCH_BOARD_ESP32C6_DEVKIT
 config ESP32C6_DEVKIT_RUN_IRAM
 	bool "Run from IRAM"
 	default n
-	---help---
 
 endif # ARCH_BOARD_ESP32C6_DEVKIT
