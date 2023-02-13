@@ -443,16 +443,6 @@
 #  define CONFIG_NET_MAX_LISTENPORTS 20
 #endif
 
-/* Define the maximum number of concurrently active UDP and TCP
- * ports.  This number must be greater than the number of open
- * sockets in order to support multi-threaded read/write operations.
- */
-
-#ifndef CONFIG_NET_NACTIVESOCKETS
-#  define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_PREALLOC_CONNS + \
-                                     CONFIG_NET_UDP_PREALLOC_CONNS)
-#endif
-
 /* The initial retransmission timeout counted in timer pulses.
  * REVISIT:  TCP RTO really should be calculated dynamically for each TCP
  * connection.
