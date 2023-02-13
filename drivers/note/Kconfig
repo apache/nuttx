@@ -3,20 +3,20 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config DRIVER_NOTE
+config DRIVERS_NOTE
 	bool "Note Driver Support"
 	depends on SCHED_INSTRUMENTATION
 	default n
 
-if DRIVER_NOTE
+if DRIVERS_NOTE
 
-config DRIVER_NOTE_MAX
+config DRIVERS_NOTE_MAX
 	int "Maximum number of sched_note drivers"
 	default 1
 	---help---
 		sched_note supports the maximum number of drivers
 
-config DRIVER_NOTE_TASKNAME_BUFSIZE
+config DRIVERS_NOTE_TASKNAME_BUFSIZE
 	int "Note task name buffer size"
 	default 256 if TASK_NAME_SIZE > 0
 	default 0 if TASK_NAME_SIZE = 0
@@ -28,7 +28,7 @@ config DRIVER_NOTE_TASKNAME_BUFSIZE
 		If 0 is specified, this feature is disabled and trace dump shows only
 		the name of the newly created task.
 
-config DRIVER_NOTECTL
+config DRIVERS_NOTECTL
 	bool "Scheduler instrumentation filter control driver"
 	default n
 	depends on SCHED_INSTRUMENTATION_FILTER
@@ -36,7 +36,7 @@ config DRIVER_NOTECTL
 		If this option is selected, the instrumentation filter control device
 		/dev/notectl is provided.
 
-config DRIVER_NOTERAM
+config DRIVERS_NOTERAM
 	bool "Note RAM driver"
 	default y
 	---help---
@@ -63,15 +63,15 @@ config DRIVER_NOTERAM
 		sched_note_get() causes several additional entries to be added from
 		the note buffer in order to remove one entry.
 
-if DRIVER_NOTERAM
+if DRIVERS_NOTERAM
 
-config DRIVER_NOTERAM_BUFSIZE
+config DRIVERS_NOTERAM_BUFSIZE
 	int "Note RAM buffer size"
 	default 2048
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
-config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
+config DRIVERS_NOTERAM_DEFAULT_NOOVERWRITE
 	bool "Disable overwrite by default"
 	default n
 	---help---
@@ -79,11 +79,11 @@ config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
 		is full by default. This is useful to keep instrumentation data of the
 		beginning of a system boot.
 
-endif # DRIVER_NOTERAM
+endif # DRIVERS_NOTERAM
 
-config DRIVER_NOTELOG
+config DRIVERS_NOTELOG
 	bool "Note syslog driver"
 	---help---
 		The note driver output to syslog.
 
-endif # DRIVER_NOTE
+endif # DRIVERS_NOTE
