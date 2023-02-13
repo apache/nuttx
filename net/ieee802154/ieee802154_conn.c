@@ -51,9 +51,9 @@
  * network lock.
  */
 
-#ifndef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_IEEE802154_PREALLOC_CONNS > 0
 static struct ieee802154_conn_s
-  g_ieee802154_connections[CONFIG_NET_IEEE802154_NCONNS];
+  g_ieee802154_connections[CONFIG_NET_IEEE802154_PREALLOC_CONNS];
 #endif
 
 /* A list of all free packet socket connections */
@@ -82,10 +82,10 @@ static dq_queue_t g_active_ieee802154_connections;
 
 void ieee802154_conn_initialize(void)
 {
-#ifndef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_IEEE802154_PREALLOC_CONNS > 0
   int i;
 
-  for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
+  for (i = 0; i < CONFIG_NET_IEEE802154_PREALLOC_CONNS; i++)
     {
       /* Link each pre-allocated connection structure into the free list. */
 
@@ -107,20 +107,30 @@ void ieee802154_conn_initialize(void)
 FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 {
   FAR struct ieee802154_conn_s *conn;
-#ifdef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_IEEE802154_ALLOC_CONNS > 0
   int i;
 #endif
 
   /* The free list is protected by the network lock. */
 
   net_lock();
-#ifdef CONFIG_NET_ALLOC_CONNS
+#if CONFIG_NET_IEEE802154_ALLOC_CONNS > 0
   if (dq_peek(&g_free_ieee802154_connections) == NULL)
     {
-      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_IEEE802154_NCONNS);
+#if CONFIG_NET_IEEE802154_MAX_CONNS > 0
+      if (dq_count(&g_active_ieee802154_connections) +
+          CONFIG_NET_IEEE802154_ALLOC_CONNS
+          >= CONFIG_NET_IEEE802154_MAX_CONNS)
+        {
+          net_unlock();
+          return NULL;
+        }
+#endif
+
+      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_IEEE802154_ALLOC_CONNS);
       if (conn != NULL)
         {
-          for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
+          for (i = 0; i < CONFIG_NET_IEEE802154_ALLOC_CONNS; i++)
             {
               dq_addlast(&conn[i].sconn.node,
                          &g_free_ieee802154_connections);
@@ -188,9 +198,22 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   memset(conn, 0, sizeof(*conn));
 
-  /* Free the connection */
+  /* If this is a preallocated or a batch allocated connection store it in
+   * the free connections list. Else free it.
+   */
 
-  dq_addlast(&conn->sconn.node, &g_free_ieee802154_connections);
+#if CONFIG_NET_IEEE802154_ALLOC_CONNS == 1
+  if (conn < g_ieee802154_connections || conn >= (g_ieee802154_connections +
+      CONFIG_NET_IEEE802154_PREALLOC_CONNS))
+    {
+      kmm_free(conn);
+    }
+  else
+#endif
+    {
+      dq_addlast(&conn->sconn.node, &g_free_ieee802154_connections);
+    }
+
   net_unlock();
 }
 
