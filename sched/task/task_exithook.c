@@ -77,6 +77,8 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
           child->ch_status = status;
         }
     }
+
+  group->tg_exitcode = status;
 }
 #else
 
