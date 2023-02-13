@@ -22,9 +22,46 @@ config NET_PKT
 
 if NET_PKT
 
-config NET_PKT_CONNS
-	int "Max packet sockets"
+config NET_PKT_PREALLOC_CONNS
+	int "Preallocated packet sockets"
 	default 1
+	---help---
+		Number of packet connections (all tasks).
+		
+		This number of connections will be pre-allocated during system boot.
+		If dynamic connections allocation is enabled, more connections may
+		be allocated at a later time, as the system needs them. Else this
+		will be the maximum number of connections available to the system
+		at all times.
+
+		Set to 0 to disable (and rely only on dynamic allocations).
+
+config NET_PKT_ALLOC_CONNS
+	int "Dynamic packet connections allocation"
+	default 0
+	---help---
+		Dynamic memory allocations for packet sockets.
+
+		When set to 0 all dynamic allocations are disabled.
+
+		When set to 1 a new connection will be allocated every time,
+		and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the connections in
+		batches (with batch size equal to this config). When a
+		connection is no longer needed, it will be returned to the
+		free connections pool, and it will never be deallocated!
+
+config NET_PKT_MAX_CONNS
+	int "Maximum number of packet connections"
+	default 0
+	depends on NET_PKT_ALLOC_CONNS > 0
+	---help---
+		If dynamic connections allocation is selected (NET_PKT_ALLOC_CONNS > 0)
+		this will limit the number of connections that can be allocated.
+		
+		This is useful in case the system is under very heavy load (or
+		under attack), ensuring that the heap will not be exhausted.
 
 endif # NET_PKT
 endmenu # Raw Socket Support
