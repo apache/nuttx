@@ -825,3 +825,11 @@ config MPFS_CORERMII_ADDRESS
 	int "CoreRMII Phy address"
 	default 1
 	depends on MPFS_HAVE_CORERMII
+
+config MPFS_CRYPTO
+	bool "Enable MPFS HW crypto
+	default n
+
+#if MPFS_CRYPTO
+source crypto/Kconfig
+#endif
