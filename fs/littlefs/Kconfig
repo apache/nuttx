@@ -6,17 +6,69 @@ config FS_LITTLEFS
 		Build the LITTLEFS file system. https://github.com/littlefs-project/littlefs.
 
 if FS_LITTLEFS
-config FS_LITTLEFS_BLOCK_FACTOR
-	int "LITTLEFS Block size multiple factor"
+config FS_LITTLEFS_PROGRAM_SIZE_FACTOR
+	int "LITTLEFS Program size multiplication factor"
 	default 4
 	---help---
-		Configure the cache size of the LITTLEFS file system with a multiple factor of the block size.
-	
+		A factor used for multiplying program size.
+
+		The result is used as the minimum size of a block program in bytes.
+		All program operations will be a multiple of the result.
+
+config FS_LITTLEFS_READ_SIZE_FACTOR
+	int "LITTLEFS Read size multiplication factor"
+	default FS_LITTLEFS_PROGRAM_SIZE_FACTOR
+	---help---
+		A factor used for multiplying read size.
+
+		The result is used as the minimum size of a block read in bytes.
+		All read operations will be a multiple of the result.
+
+config FS_LITTLEFS_BLOCK_SIZE_FACTOR
+	int "LITTLEFS Block size multiplication factor"
+	default 1
+	---help---
+		A factor used for multiplying block size and dividing block count.
+
+		The result is size of an erasable block in bytes. This does not impact ram consumption
+		and may be larger than the physical erase size. However, non-inlined
+		files take up at minimum one block. Must be a multiple of the read and
+		program sizes.
+
+config FS_LITTLEFS_CACHE_SIZE_FACTOR
+	int "LITTLEFS Cache size multiplication factor"
+	default FS_LITTLEFS_READ_SIZE_FACTOR
+	---help---
+		A factor used for multiplying cache size.
+
+		The result is size of block caches in bytes.
+		Each cache buffers a portion of a block in RAM.
+		The littlefs needs a read cache, a program cache, and one additional
+		cache per file. A larger cache can improve performance by storing more
+		data and reducing the number of disk accesses. It must be a multiple of the
+		read and program sizes, and a factor of the block size.
+
+config FS_LITTLEFS_LOOKAHEAD_SIZE
+	int "LITTLEFS Lookahead size"
+	default 0
+	---help---
+		Size of the lookahead buffer in bytes. A larger lookahead buffer
+		increases the number of blocks found during an allocation pass. The
+		lookahead buffer is stored as a compact bitmap, so each byte of RAM
+		can track 8 blocks. Must be a multiple of 8.
+
+		Set value 0 for enabling internal calculation.
+
 config FS_LITTLEFS_BLOCK_CYCLE
-	int "LITTLEFS Block Cycle"
+	int "LITTLEFS Block cycle"
 	default 200
 	---help---
-		Configure the block cycle of the LITTLEFS file system.
+		Number of erase cycles before littlefs evicts metadata logs and moves
+		the metadata to another block. Suggested values are in the
+		range 100-1000, with large values having better performance at the cost
+		of less consistent wear distribution.
+
+		Set to -1 to disable block-level wear-leveling.
 
 config FS_LITTLEFS_NAME_MAX
 	int "LITTLEFS LFS_NAME_MAX"
