@@ -267,16 +267,9 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
        * happen until the polling cycle completes).
        */
 
-      ret = file_seek(pstate->snd_file,
-                      pstate->snd_foffset + pstate->snd_acked, SEEK_SET);
-      if (ret < 0)
-        {
-          nerr("ERROR: Failed to lseek: %d\n", ret);
-          pstate->snd_sent = ret;
-          goto end_wait;
-        }
-
-      ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
+      ret = devif_file_send(dev, pstate->snd_file, sndlen,
+                            pstate->snd_foffset + pstate->snd_acked,
+                            tcpip_hdrsize(conn));
       if (ret < 0)
         {
           nerr("ERROR: Failed to read from input file: %d\n", (int)ret);
@@ -345,16 +338,9 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
            * happen until the polling cycle completes).
            */
 
-          ret = file_seek(pstate->snd_file,
-                          pstate->snd_foffset + pstate->snd_sent, SEEK_SET);
-          if (ret < 0)
-            {
-              nerr("ERROR: Failed to lseek: %d\n", ret);
-              pstate->snd_sent = ret;
-              goto end_wait;
-            }
-
-          ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
+          ret = devif_file_send(dev, pstate->snd_file, sndlen,
+                                pstate->snd_foffset + pstate->snd_sent,
+                                tcpip_hdrsize(conn));
           if (ret < 0)
             {
               nerr("ERROR: Failed to read from input file: %d\n", (int)ret);

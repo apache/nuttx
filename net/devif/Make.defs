@@ -48,6 +48,7 @@ ifeq ($(CONFIG_MM_IOB),y)
 
   NET_CSRCS += devif_poll.c
   NET_CSRCS += devif_iobsend.c
+  NET_CSRCS += devif_filesend.c
 
 endif
 
