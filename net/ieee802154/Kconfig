@@ -33,9 +33,46 @@ config NET_IEEE802154_FRAMELEN
 		This setting is currently used only for detection data transfers
 		that would exceed the radio frame length.
 
-config NET_IEEE802154_NCONNS
-	int "Max IEEE 802.15.4 sockets"
+config NET_IEEE802154_PREALLOC_CONNS
+	int "Preallocated IEEE 802.15.4 sockets"
 	default 4
+	---help---
+		Number of IEEE 802.15.4 connections (all tasks).
+		
+		This number of connections will be pre-allocated during system boot.
+		If dynamic connections allocation is enabled, more connections may
+		be allocated at a later time, as the system needs them. Else this
+		will be the maximum number of connections available to the system
+		at all times.
+
+		Set to 0 to disable (and rely only on dynamic allocations).
+
+config NET_IEEE802154_ALLOC_CONNS
+	int "Dynamic IEEE 802.15.4 connections allocation"
+	default 0
+	---help---
+		Dynamic memory allocations for IEEE 802.15.4.
+
+		When set to 0 all dynamic allocations are disabled.
+
+		When set to 1 a new connection will be allocated every time,
+		and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the connections in
+		batches (with batch size equal to this config). When a
+		connection is no longer needed, it will be returned to the
+		free connections pool, and it will never be deallocated!
+
+config NET_IEEE802154_MAX_CONNS
+	int "Maximum number of IEEE 802.15.4 connections"
+	default 0
+	depends on NET_IEEE802154_ALLOC_CONNS > 0
+	---help---
+		If dynamic connections allocation is selected (NET_IEEE802154_ALLOC_CONNS > 0)
+		this will limit the number of connections that can be allocated.
+		
+		This is useful in case the system is under very heavy load (or
+		under attack), ensuring that the heap will not be exhausted.
 
 config NET_IEEE802154_NCONTAINERS
 	int "Number of pre-allocated frame containers"
