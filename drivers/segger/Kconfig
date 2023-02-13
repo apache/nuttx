@@ -94,7 +94,7 @@ config SYSLOG_RTT
 	---help---
 		Use Segger J-Link RTT as a SYSLOG output device.
 
-if DRIVER_NOTE
+if DRIVERS_NOTE
 config SEGGER_SYSVIEW
 	bool "Note SEGGER SystemView driver"
 	select SEGGER_RTT
@@ -106,7 +106,7 @@ config SEGGER_SYSVIEW
 		systems comprising multiple threads and interrupts. SystemView can ensure
 		unintended interactions and resource conflicts.
 
-endif # DRIVER_NOTE
+endif # DRIVERS_NOTE
 
 if SEGGER_SYSVIEW
 
