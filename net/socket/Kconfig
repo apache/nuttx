@@ -5,13 +5,36 @@
 
 menu "Socket Support"
 
-config NET_NACTIVESOCKETS
-	int "Max socket operations"
+config NET_PREALLOC_DEVIF_CALLBACKS
+	int "Preallocated socket callbacks"
 	default 16 if !DEFAULT_SMALL
 	default 4 if DEFAULT_SMALL
 	---help---
-		Maximum number of concurrent socket operations (recv, send,
-		connection monitoring, etc.). Default: 16
+		Number of preallocated socket callbacks (all tasks).
+		
+		This number of callbacks will be pre-allocated during system boot.
+		If dynamic callbacks allocation is enabled, more callbacks may be
+		allocated at a later time, as the system needs them. Else this
+		will be the maximum number of callbacks available to the system
+		at all times.
+
+		Set to 0 to disable (and rely only on dynamic allocations).
+
+config NET_ALLOC_DEVIF_CALLBACKS
+	int "Dynamic socket callbacks allocation"
+	default 0
+	---help---
+		Dynamic memory allocations for socket callbacks.
+
+		When set to 0 all dynamic allocations are disabled.
+
+		When set to 1 a new callback will be allocated every time, and
+		it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the callbacks in batches
+		(with batch size equal to this config). When a callback is no
+		longer needed, it will be returned to the free callbacks pool,
+		and it will never be deallocated!
 
 config NET_SOCKOPTS
 	bool "Socket options"
