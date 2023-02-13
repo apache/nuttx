@@ -136,11 +136,11 @@
 
 #else /* CONFIG_SMALL_MEMORY */
 
-#define _POSIX_SIZE_MAX       4294967295UL /* See sys/types.h */
+#define _POSIX_SIZE_MAX       ULONG_MAX
 #define _POSIX_SIZE_MIN       0
 
-#define _POSIX_SSIZE_MAX      2147483647L  /* See sys/types.h */
-#define _POSIX_SSIZE_MIN      -2147483648L
+#define _POSIX_SSIZE_MAX      LONG_MAX
+#define _POSIX_SSIZE_MIN      LONG_MIN
 
 #endif /* CONFIG_SMALL_MEMORY */
 
