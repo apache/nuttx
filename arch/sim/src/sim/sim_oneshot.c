@@ -123,6 +123,20 @@ static inline void sim_timer_current(struct timespec *ts)
 }
 
 /****************************************************************************
+ * Name: sim_reset_alarm
+ *
+ * Description:
+ *   Reset the alarm to MAX
+ *
+ ****************************************************************************/
+
+static inline void sim_reset_alarm(struct timespec *alarm)
+{
+  alarm->tv_sec  = UINT_MAX;
+  alarm->tv_nsec = NSEC_PER_SEC - 1;
+}
+
+/****************************************************************************
  * Name: sim_update_hosttimer
  *
  * Description:
@@ -180,6 +194,9 @@ static void sim_update_hosttimer(void)
 static void sim_timer_update_internal(void)
 {
   sq_entry_t *entry;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
 
   for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
     {
@@ -187,6 +204,8 @@ static void sim_timer_update_internal(void)
     }
 
   sim_update_hosttimer();
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -212,16 +231,18 @@ static void sim_process_tick(sq_entry_t *entry)
 
   DEBUGASSERT(priv != NULL);
 
+  struct timespec current;
+
+  sim_timer_current(&current);
+  if (clock_timespec_compare(&priv->alarm, &current) > 0)
+    {
+      return; /* Alarm doesn't expire yet */
+    }
+
+  sim_reset_alarm(&priv->alarm);
+
   if (priv->callback)
     {
-      struct timespec current;
-
-      sim_timer_current(&current);
-      if (clock_timespec_compare(&priv->alarm, &current) > 0)
-        {
-          return; /* Alarm doesn't expire yet */
-        }
-
       /* Sample and nullify BEFORE executing callback (in case the callback
        * restarts the oneshot).
        */
@@ -350,9 +371,7 @@ static int sim_cancel(struct oneshot_lowerhalf_s *lower,
   sim_timer_current(&current);
   clock_timespec_subtract(&priv->alarm, &current, ts);
 
-  priv->alarm.tv_sec  = UINT_MAX;
-  priv->alarm.tv_nsec = NSEC_PER_SEC - 1;
-
+  sim_reset_alarm(&priv->alarm);
   sim_update_hosttimer();
 
   priv->callback = NULL;
