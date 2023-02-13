@@ -1,0 +1,14 @@
+MPFS_CRYPTO = mpfs/crypto/.git
+$(MPFS_CRYPTO):
+	$(Q) echo "Cloning PolarFire crypto driver"
+	$(Q) git clone git@github.com:tiiuae/pf_crypto mpfs/crypto
+
+context::$(MPFS_CRYPTO)
+
+distclean::
+	$(Q) rm -rf mpfs/crypto
+
+CHIP_CSRCS += mpfs_crypto.c
+
+DEPPATH += --dep-path crypto --dep-path mpfs/crypto
+VPATH += :crypto:mpfs/crypto
