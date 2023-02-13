@@ -1267,15 +1267,23 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
   fs->cfg.erase          = littlefs_erase_block;
   fs->cfg.sync           = littlefs_sync_block;
   fs->cfg.read_size      = fs->geo.blocksize *
-                           CONFIG_FS_LITTLEFS_BLOCK_FACTOR;
-  fs->cfg.prog_size      = fs->geo.blocksize;
-  fs->cfg.block_size     = fs->geo.erasesize;
-  fs->cfg.block_count    = fs->geo.neraseblocks;
+                           CONFIG_FS_LITTLEFS_READ_SIZE_FACTOR;
+  fs->cfg.prog_size      = fs->geo.blocksize *
+                           CONFIG_FS_LITTLEFS_PROGRAM_SIZE_FACTOR;
+  fs->cfg.block_size     = fs->geo.erasesize *
+                           CONFIG_FS_LITTLEFS_BLOCK_SIZE_FACTOR;
+  fs->cfg.block_count    = fs->geo.neraseblocks /
+                           CONFIG_FS_LITTLEFS_BLOCK_SIZE_FACTOR;
   fs->cfg.block_cycles   = CONFIG_FS_LITTLEFS_BLOCK_CYCLE;
   fs->cfg.cache_size     = fs->geo.blocksize *
-                           CONFIG_FS_LITTLEFS_BLOCK_FACTOR;
+                           CONFIG_FS_LITTLEFS_CACHE_SIZE_FACTOR;
+
+#if CONFIG_FS_LITTLEFS_LOOKAHEAD_SIZE == 0
   fs->cfg.lookahead_size = lfs_min(lfs_alignup(fs->cfg.block_count, 64) / 8,
                                    fs->cfg.read_size);
+#else
+  fs->cfg.lookahead_size = CONFIG_FS_LITTLEFS_LOOKAHEAD_SIZE;
+#endif
 
   /* Then get information about the littlefs filesystem on the devices
    * managed by this driver.
