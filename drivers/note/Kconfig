@@ -39,7 +39,6 @@ config DRIVER_NOTECTL
 config DRIVER_NOTERAM
 	bool "Note RAM driver"
 	default y
-	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
 		If this option is selected, then in-memory buffering logic is
 		enabled to capture scheduler instrumentation data.  This has
