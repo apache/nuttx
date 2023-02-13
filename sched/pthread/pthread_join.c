@@ -114,7 +114,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
     {
       /* Determine what kind of error to return */
 
-      FAR struct tcb_s *tcb = nxsched_get_tcb((pthread_t)thread);
+      FAR struct tcb_s *tcb = nxsched_get_tcb((pid_t)thread);
 
       swarn("WARNING: Could not find thread data\n");
 

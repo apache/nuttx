@@ -138,7 +138,7 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
 
   if (pjoin == NULL)
     {
-      FAR struct tcb_s *tcb = nxsched_get_tcb((pthread_t)pid);
+      FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
 
       if (tcb != NULL && (tcb->flags & TCB_FLAG_DETACHED) == 0 &&
           (tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD &&
