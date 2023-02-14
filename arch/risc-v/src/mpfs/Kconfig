@@ -707,7 +707,7 @@ config ARCH_MPU_HAS_NAPOT
 	default y
 
 config MPFS_CRYPTO
-	bool "Enable MPFS HW crypto
+	bool "Enable MPFS HW crypto"
 	default n
 
 #if MPFS_CRYPTO
