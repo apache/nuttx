@@ -131,11 +131,6 @@ ssize_t psock_sendfile(FAR struct socket *psock, FAR struct file *infile,
       ret = psock->s_sockif->si_sendfile(psock, infile, offset, count);
     }
 
-  if (ret < 0)
-    {
-      _SO_SETERRNO(psock, -ret);
-    }
-
   return ret;
 }
 

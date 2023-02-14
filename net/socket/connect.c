@@ -237,7 +237,7 @@ int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      set_errno(-ret);
       ret = ERROR;
     }
 
