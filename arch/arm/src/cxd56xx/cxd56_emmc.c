@@ -673,7 +673,7 @@ static int emmc_hwinitialize(void)
 
 errout:
   up_disable_irq(CXD56_IRQ_EMMC);
-  emmc_pincontrol(true);
+  emmc_pincontrol(false);
   cxd56_emmc_clock_disable();
 
   return ret;
