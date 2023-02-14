@@ -67,7 +67,6 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
                                       FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_poll_s *info = pvpriv;
-  int reason;
 
   ninfo("flags: %04x\n", flags);
 
@@ -97,6 +96,9 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
+#ifdef CONFIG_NET_SOCKOPTS
+          int reason;
+
           /* TCP_TIMEDOUT: Connection aborted due to too many
            *               retransmissions.
            */
@@ -129,6 +131,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
             }
 
           _SO_CONN_SETERRNO(info->conn, reason);
+#endif
 
           /* Mark that the connection has been lost */
 

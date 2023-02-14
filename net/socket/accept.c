@@ -313,6 +313,6 @@ errout_with_alloc:
 errout:
   leave_cancellation_point();
 
-  _SO_SETERRNO(psock, errcode);
+  set_errno(errcode);
   return ERROR;
 }
