@@ -28,6 +28,7 @@ MEMORY
     kflash (rx) : ORIGIN = 0x80000000, LENGTH = 2048K   /* w/ cache */
     ksram (rwx) : ORIGIN = 0x80200000, LENGTH = 2048K   /* w/ cache */
     pgram (rwx) : ORIGIN = 0x80400000, LENGTH = 4096K   /* w/ cache */
+    usrio (r)   : ORIGIN = 0x80800000, LENGTH = 32K     /* w/ cache */
 }
 
 OUTPUT_ARCH("riscv")
@@ -44,6 +45,11 @@ __ksram_end = ORIGIN(ksram) + LENGTH(ksram);
 
 __pgheap_start = ORIGIN(pgram);
 __pgheap_size = LENGTH(pgram);
+
+/* User I/O */
+
+__usrio_start = ORIGIN(usrio);
+__usrio_size = LENGTH(usrio);
 
 ENTRY(_stext)
 EXTERN(__start)
