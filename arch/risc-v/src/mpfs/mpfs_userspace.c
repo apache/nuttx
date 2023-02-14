@@ -251,7 +251,8 @@ static void configure_mmu(void)
 
   /* Map the MTIME counter to the start of USR IO region */
 
-  map_region(MPFS_CLINT_MTIME & (~RV_MMU_PAGE_MASK), USRIO_START, RV_MMU_PAGE_SIZE, PTE_R | PTE_U | PTE_G);
+  map_region(MPFS_CLINT_MTIME & (~RV_MMU_PAGE_MASK), USRIO_START,
+             RV_MMU_PAGE_SIZE, PTE_R | PTE_U | PTE_G);
 
   /* Connect the L1 and L2 page tables */
 
