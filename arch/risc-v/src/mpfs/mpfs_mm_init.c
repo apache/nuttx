@@ -54,9 +54,9 @@
 #define PGT_L2_VBASE    PGT_L2_PBASE
 #define PGT_L3_VBASE    PGT_L3_PBASE
 
-#define PGT_L1_SIZE     (512)  /* Enough to map 512 GiB */
-#define PGT_L2_SIZE     (512)  /* Enough to map 1 GiB */
-#define PGT_L3_SIZE     (1024) /* Enough to map 4 MiB */
+#define PGT_L1_SIZE     (512)       /* Enough to map 512 GiB */
+#define PGT_L2_SIZE     (512)       /* Enough to map 1 GiB */
+#define PGT_L3_SIZE     (40 * 1024) /* Enough to map 40 MiB */
 
 /* Calculate the minimum size for the L3 table */
 
@@ -251,4 +251,9 @@ void mpfs_kernel_mappings(void)
 
   mmu_ln_map_region(2, PGT_L2_VBASE, PGPOOL_START, PGPOOL_START, PGPOOL_SIZE,
                     MMU_KDATA_FLAGS);
+
+  /* Map the MTIME counter to the start of USR IO region */
+
+  map_region(MPFS_CLINT_MTIME & (~RV_MMU_PAGE_MASK), USRIO_START,
+             RV_MMU_PAGE_SIZE, PTE_R | PTE_U | PTE_G);
 }
