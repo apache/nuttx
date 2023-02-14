@@ -763,6 +763,12 @@ static void sim_audio_process(struct sim_audio_s *priv)
   avail = snd_pcm_avail(priv->pcm);
   if (avail < expect)
     {
+      if (avail < 0)
+        {
+          ret = avail;
+          goto out;
+        }
+
       return;
     }
 
