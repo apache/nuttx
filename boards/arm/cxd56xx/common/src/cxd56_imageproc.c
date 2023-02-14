@@ -499,10 +499,10 @@ static void *get_blendarea(imageproc_imginfo_t *imginfo, int offset)
         return imginfo->img.p_u8 + offset;
 
       case IMAGEPROC_IMGTYPE_16BPP:
-        return imginfo->img.p_u16 + offset;
+        return imginfo->img.p_u8 + (offset * 2);
 
-      case IMAGEPROC_IMGTYPE_BINARY:
-        return imginfo->img.binary.p_u8 + offset / 8;
+      case IMAGEPROC_IMGTYPE_1BPP:
+        return imginfo->img.binary.p_u8 + (offset / 8);
 
       default:
         return NULL;
@@ -833,11 +833,11 @@ int imageproc_alpha_blend(imageproc_imginfo_t *dst,
   switch (alpha->type)
     {
       case IMAGEPROC_IMGTYPE_SINGLE:
-        fixed_alpha = 0x0800 | (uint8_t)alpha->img.single;
+        fixed_alpha = 0x0800 | alpha->img.single;
         break;
 
-      case IMAGEPROC_IMGTYPE_BINARY:
-        fixed_alpha = (uint8_t)alpha->img.binary.multiplier;
+      case IMAGEPROC_IMGTYPE_1BPP:
+        fixed_alpha = alpha->img.binary.multiplier;
         options |= ALPHA1BPP;
 
         break;
@@ -855,8 +855,14 @@ int imageproc_alpha_blend(imageproc_imginfo_t *dst,
   switch (src->type)
     {
       case IMAGEPROC_IMGTYPE_SINGLE:
+
+        /* WORKAROUND: Hardware can take Y and Cb but Cr is not.
+         * So it can not use full color.
+         * Allow only Y value to use fixed src color. (monotone)
+         */
+
         options   |= FIXEDSRC;
-        fixed_src =  src->img.single;
+        fixed_src =  (uint16_t)src->img.single << 8 | 0x80 ;
         break;
 
       case IMAGEPROC_IMGTYPE_16BPP:
