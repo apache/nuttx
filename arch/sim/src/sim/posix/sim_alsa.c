@@ -934,6 +934,12 @@ static void sim_audio_process(struct sim_audio_s *priv)
   avail = host_uninterruptible(snd_pcm_avail, priv->pcm);
   if (avail < expect)
     {
+      if (avail < 0)
+        {
+          ret = avail;
+          goto out;
+        }
+
       return;
     }
 
