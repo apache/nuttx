@@ -335,16 +335,6 @@ source "net/ipfrag/Kconfig"
 
 endmenu # Internet Protocol Selection
 
-config NET_ALLOC_CONNS
-	bool "Allocate connect instance dynamically"
-	default n
-	---help---
-		Enable to allocate connection instances dynamically.
-		Use this feature if the number of connections can not be determined at
-		compile time. When enabled the stack will be compiled without the static
-		pre-allocate connection list and all connection instances will be dynamically
-		allocated from heap at run time.
-
 source "net/socket/Kconfig"
 source "net/inet/Kconfig"
 source "net/pkt/Kconfig"
