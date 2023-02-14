@@ -54,9 +54,10 @@ typedef struct imageproc_rect_s imageproc_rect_t;
 enum imageproc_imginfo_e
 {
   IMAGEPROC_IMGTYPE_SINGLE = 0, /* All pixels have the same value */
-  IMAGEPROC_IMGTYPE_BINARY = 1, /* Each pixels have 0 or specific non-zero value */
-  IMAGEPROC_IMGTYPE_8BPP   = 2, /* Each pixels have 8bit value */
-  IMAGEPROC_IMGTYPE_16BPP  = 3, /* Each pixels have 16bit value */
+  IMAGEPROC_IMGTYPE_1BPP   = 1, /* 1 bit per pixel */
+  IMAGEPROC_IMGTYPE_BINARY = 1, /* deprecated, use 1BPP instead. */
+  IMAGEPROC_IMGTYPE_8BPP   = 2, /* 8 bits per pixel */
+  IMAGEPROC_IMGTYPE_16BPP  = 3, /* 16 bits per pixel */
 };
 
 /* Structure of binary image */
@@ -64,7 +65,7 @@ enum imageproc_imginfo_e
 struct imageproc_binary_img_s
 {
   uint8_t *p_u8;      /* 1bpp image */
-  int     multiplier; /* specific non-zero value */
+  uint8_t multiplier; /* alpha value (255 = 100% src, 0 = 0%) */
 };
 typedef struct imageproc_binary_img_s imageproc_binary_img_t;
 
@@ -72,16 +73,15 @@ typedef struct imageproc_binary_img_s imageproc_binary_img_t;
 
 struct imageproc_imginfo_s
 {
-  enum imageproc_imginfo_e type;     /* Type of image data    */
-  int  w;                            /* width  of total image */
-  int  h;                            /* height of total image */
-  imageproc_rect_t *rect;            /* clipped rectangle     */
+  enum imageproc_imginfo_e type;     /* Type of image data */
+  int  w;                            /* Image width */
+  int  h;                            /* Image height */
+  imageproc_rect_t *rect;            /* Clipping rectangle */
   union
   {
-    int                    single; /* type = IMAGEPROC_IMGTYPE_SINGLE */
-    imageproc_binary_img_t binary; /* type = IMAGEPROC_IMGTYPE_BINARY */
-    uint8_t                *p_u8;  /* type = IMAGEPROC_IMGTYPE_8BPP   */
-    uint16_t               *p_u16; /* type = IMAGEPROC_IMGTYPE_16BPP  */
+    uint8_t                single; /* for IMAGEPROC_IMGTYPE_SINGLE */
+    imageproc_binary_img_t binary; /* for IMAGEPROC_IMGTYPE_1BPP */
+    uint8_t                *p_u8;  /* for IMAGEPROC_IMGTYPE_{8,16}BPP */
   } img;
 };
 typedef struct imageproc_imginfo_s imageproc_imginfo_t;
@@ -111,7 +111,7 @@ void imageproc_finalize(void);
  * return 0 on success, otherwise error code.
  */
 
-int imageproc_convert_yuv2rgb(uint8_t * ibuf, uint32_t hsize,
+int imageproc_convert_yuv2rgb(uint8_t *ibuf, uint32_t hsize,
                               uint32_t vsize);
 
 /* Convert color format (RGB to YUV)
@@ -123,7 +123,7 @@ int imageproc_convert_yuv2rgb(uint8_t * ibuf, uint32_t hsize,
  * return 0 on success, otherwise error code.
  */
 
-int imageproc_convert_rgb2yuv(uint8_t * ibuf, uint32_t hsize,
+int imageproc_convert_rgb2yuv(uint8_t *ibuf, uint32_t hsize,
                               uint32_t vsize);
 
 /* Convert color format (YUV to grayscale)
@@ -136,7 +136,7 @@ int imageproc_convert_rgb2yuv(uint8_t * ibuf, uint32_t hsize,
  *  [in] vsize: Vertical size
  */
 
-void imageproc_convert_yuv2gray(uint8_t * ibuf, uint8_t * obuf,
+void imageproc_convert_yuv2gray(uint8_t *ibuf, uint8_t *obuf,
                                 size_t hsize, size_t vsize);
 
 /* Resize image
@@ -173,8 +173,8 @@ void imageproc_convert_yuv2gray(uint8_t * ibuf, uint8_t * obuf,
  * all of the pixels.
  */
 
-int imageproc_resize(uint8_t * ibuf, uint16_t ihsize, uint16_t ivsize,
-                     uint8_t * obuf, uint16_t ohsize, uint16_t ovsize,
+int imageproc_resize(uint8_t *ibuf, uint16_t ihsize, uint16_t ivsize,
+                     uint8_t *obuf, uint16_t ohsize, uint16_t ovsize,
                      int bpp);
 
 /* Clip and Resize image
@@ -191,31 +191,46 @@ int imageproc_resize(uint8_t * ibuf, uint16_t ihsize, uint16_t ivsize,
  * return 0 on success, otherwise error code.
  */
 
-int imageproc_clip_and_resize(uint8_t * ibuf, uint16_t ihsize,
-                              uint16_t ivsize, uint8_t * obuf,
+int imageproc_clip_and_resize(uint8_t *ibuf, uint16_t ihsize,
+                              uint16_t ivsize, uint8_t *obuf,
                               uint16_t ohsize, uint16_t ovsize, int bpp,
-                              imageproc_rect_t * clip_rect);
+                              imageproc_rect_t *clip_rect);
 
 /* Execute alpha blending
  *
- * Execute alpha blending.
- * dst buffer is overwritten by blended image.
+ * dst image will be overwritten by src image masked with alpha.
  *
  *  [in,out] dst: Destination image.
  *                dst->type = IMAGEPROC_IMGTYPE_16BPP.
- *  [in] pos_x:   x-coordinate of blended position.
- *                Minus value means
- *                the left of the destination image origin.
- *  [in] pos_y:   y-coordinate of blended position.
- *                Minus value means
- *                the upper of the destination image origin.
- *  [in] src:     Source image.
- *                src->type = IMAGEPROC_IMGTYPE_16BPP or
- *                IMAGEPROC_IMGTYPE_SINGLE.
- *  [in] alpha:   Alpha plane.
- *                alpha->type = IMAGEPROC_IMGTYPE_SINGLE,
- *                IMAGEPROC_IMGTYPE_BINARY,
- *                or IMAGEPROC_IMGTYPE_8BPP.
+ *                rect parameter can specify the blending area.
+ *
+ *  [in] pos_x:   x-coordinate of blending position from origin.
+ *                Negative value is allowed, out of bounds src image will
+ *                be clipped.
+ *  [in] pos_y:   y-coordinate of blending position from origin.
+ *                Negative value is allowed, out of bounds src image will
+ *                be clipped.
+ *  [in] src:     Source image can be input as following formats.
+ *
+ *                - IMAGEPROC_IMGTYPE_16BPP
+ *                - IMAGEPROC_IMGTYPE_SINGLE
+ *
+ *                single image is emulated a fixed monotone color image
+ *                without image buffer.
+ *  [in] alpha:   Alpha plane can be input as following formats.
+ *
+ *                - IMAGEPROC_IMGTYPE_SINGLE
+ *                - IMAGEPROC_IMGTYPE_1BPP
+ *                - IMAGEPROC_IMGTYPE_8BPP
+ *
+ *                SINGLE is specify a fixed alpha value (255 = 100%,
+ *                0 = 0%) applying whole image size.
+ *                1BPP is 1 bit per pixel map. 0 will be masked and 1 is
+ *                blending with multiplier (255 = 100%).
+ *                1bpp bit order is LSB first.
+ *
+ *                       (0,0)         (7,0)  (x, y)
+ *                0x03 =  |1|1|0|0|0|0|0|0|
  *
  * return 0 on success, otherwise error code.
  */
