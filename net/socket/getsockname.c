@@ -155,11 +155,11 @@ int getsockname(int sockfd, FAR struct sockaddr *addr,
 
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
-      return ERROR;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_NET */

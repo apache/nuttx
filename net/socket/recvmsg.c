@@ -168,7 +168,7 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      set_errno(-ret);
       ret = ERROR;
     }
 

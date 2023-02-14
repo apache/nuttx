@@ -362,10 +362,10 @@ int getsockopt(int sockfd, int level, int option,
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS */
