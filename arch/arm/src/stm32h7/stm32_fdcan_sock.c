@@ -2236,9 +2236,22 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
   putreg32(regval, priv->base + STM32_FDCAN_SIDFC_OFFSET);
   ram_offset += n_stdid;
 
-  /* Extended ID Filters: Allow space for 128 filters (128 words) */
+  /* Extended ID Filters: Allow space for 64 filters (64 words)
+   * The register definition of FDCAN_XIDFC:LSE - List size extended, in the
+   * reference manual (RM0433 Rev 8) is defined as 8 bits and claims that a
+   * value of 0-128 (Number of extended ID filter elements) are possible, but
+   * in the text in section 56.4.22 and in STM32CubeH7's HAL it's only 64.
+   *
+   * HAL source:
+   * https://github.com/STMicroelectronics/STM32CubeH7/blob/
+   * 43c9e552ba1c038577c48723d96ca8c825b11987/Drivers/STM32H7xx_HAL_Driver/
+   * Inc/stm32h7xx_hal_fdcan.h#L112-L113
+   *
+   * Discussion:
+   * https://community.st.com/s/question/0D73W000001nzqFSAQ
+   */
 
-  const uint8_t n_extid = 128;
+  const uint8_t n_extid = 64;
   priv->message_ram.filt_extid_addr = gl_ram_base + ram_offset * WORD_LENGTH;
 
   regval = (n_extid << FDCAN_XIDFC_LSE_SHIFT) & FDCAN_XIDFC_LSE_MASK;
