@@ -698,7 +698,7 @@
 /* ***************  Bit definition for FDCAN_XIDFC register  ****************/
 #define FDCAN_XIDFC_FLESA_SHIFT   (2U)
 #define FDCAN_XIDFC_FLESA_MASK    (0x3FFFU << FDCAN_XIDFC_FLESA_SHIFT)          /* 0x0000FFFC */
-#define FDCAN_XIDFC_FLESA         FDCAN_XIDFC_FLESA_MASK                        /* Filter List Standard Start Address        */
+#define FDCAN_XIDFC_FLESA         FDCAN_XIDFC_FLESA_MASK                        /* Filter List Extended Start Address        */
 #define FDCAN_XIDFC_LSE_SHIFT     (16U)
 #define FDCAN_XIDFC_LSE_MASK      (0xFFU << FDCAN_XIDFC_LSE_SHIFT)              /* 0x00FF0000 */
 #define FDCAN_XIDFC_LSE           FDCAN_XIDFC_LSE_MASK                          /* List Size Extended                        */
