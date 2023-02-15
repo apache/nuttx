@@ -317,7 +317,7 @@ void pic32mz_consoleinit(void)
 
   /* Setup up pin selection registers for all configured UARTs.  The board.h
    * header file must provide these definitions to select the correct pin
-   * configuration for each enabled UARt.
+   * configuration for each enabled UART.
    */
 
 #ifdef CONFIG_PIC32MZ_UART1
