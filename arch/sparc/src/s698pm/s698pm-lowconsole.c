@@ -212,7 +212,7 @@ void s698pm_consoleinit(void)
 
   /* Setup up pin selection registers for all configured UARTs.  The board.h
    * header file must provide these definitions to select the correct pin
-   * configuration for each enabled UARt.
+   * configuration for each enabled UART.
    */
 
   gpreg = getreg32(S698PM_GPREG_BASE);
