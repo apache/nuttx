@@ -144,7 +144,7 @@
 #  define PIC32MZ_RPD15R_OFFSET          0x15fc
 #define PIC32MZ_RPEnR_OFFSET(n)          (0x1600 + ((n) << 2)) /* n=3,5,8-9 */
 #  define PIC32MZ_RPE3R_OFFSET           0x160c
-#  define PIC32MZ_RPE4R_OFFSET           0x1614
+#  define PIC32MZ_RPE5R_OFFSET           0x1614
 #  define PIC32MZ_RPE8R_OFFSET           0x1620
 #  define PIC32MZ_RPE9R_OFFSET           0x1624
 #define PIC32MZ_RPFnR_OFFSET(n)          (0x1640 + ((n) << 2)) /* n=0-5,8,12-13 */
@@ -278,7 +278,7 @@
 #  define PIC32MZ_RPD15R                 (PIC32MZ_SFR_K1BASE+PIC32MZ_RPD15R_OFFSET)
 #define PIC32MZ_RPEnR(n)                 (PIC32MZ_SFR_K1BASE+PIC32MZ_RPEnR_OFFSET(n))
 #  define PIC32MZ_RPE3R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPE3R_OFFSET)
-#  define PIC32MZ_RPE4R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPE4R_OFFSET)
+#  define PIC32MZ_RPE5R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPE5R_OFFSET)
 #  define PIC32MZ_RPE8R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPE8R_OFFSET)
 #  define PIC32MZ_RPE9R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPE9R_OFFSET)
 #define PIC32MZ_RPFnR(n)                 (PIC32MZ_SFR_K1BASE+PIC32MZ_RPFnR_OFFSET(n))
