@@ -69,7 +69,7 @@
 /* SPI Chip Selects
  *
  * SPI1 is available on pins D5,D7,D35,D36 of the Arduino Shield connectors
- * where you would expect then.  The SPI connector is configured as follows:
+ * where you would expect them.  The SPI connector is configured as follows:
  *
  *   Pin J7&10 Board Signal PIC32MZ
  *   --- --    ------------ -------
@@ -82,7 +82,7 @@
 #define GPIO_ARD_SPI1_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | GPIO_PIN9)
 
 /* SPI2 is available on pins D10-D13 of the Arduino Shield connectors where
- * you would expect then.  The SPI connector is configured as follows:
+ * you would expect them.  The SPI connector is configured as follows:
  *
  *   Pin J7&10 Board Signal PIC32MZ
  *   --- --    ------------ -------
