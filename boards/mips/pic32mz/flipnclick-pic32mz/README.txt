@@ -236,7 +236,7 @@ SPI
 ===
 
    SPI3 is available on pins D10-D13 of the Arduino Shield connectors where
-   you would expect then.  The SPI connector is configured as follows:
+   you would expect them.  The SPI connector is configured as follows:
 
      Pin J1 Board Signal PIC32MZ
      --- -- ------------ -------

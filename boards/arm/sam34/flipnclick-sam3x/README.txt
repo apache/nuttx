@@ -133,7 +133,7 @@ SPI
 
    SPI0 is available on the Arduino compatible SPI connector (but no SPI is
    available on pins D10-D13 of the main Arduino Shield connectors where
-   you might expect then).  The SPI connector is configured as follows:
+   you might expect them).  The SPI connector is configured as follows:
 
      Pin Board Signal SAM3X  Pin Board Signal SAM3X
      --- ------------ -----  --- ------------ -----
@@ -165,7 +165,7 @@ I2C
 ===
 
    I2C0 is available on pins D16-D17 of the Arduino Shield connectors where
-   you would expect then.  The SPI connector is configured as follows:
+   you would expect them.  The SPI connector is configured as follows:
 
      Pin Label J1 Board Signal SAM3X
      --- ----- -- ------------ -----
