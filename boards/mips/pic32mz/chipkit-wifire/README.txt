@@ -58,11 +58,40 @@ Programming Flash
   chipKIT Wi-FIRE board, the original chipKIT bootloader can be found here:
   https://reference.digilentinc.com/_media/chipkit_wifire/chipkit-wifire-v01000303.zip
 
-  Flash memory can be programmed by pic32prog utility
-  (https://github.com/sergev/pic32prog.git) and PICkit 2 programmer
-  (via 6-pin ICSP (JP1) of chipKIT Wi-FIRE board) as follows:
+  Flash memory can be programmed with a PICkit 2 programmer via the
+  6-pin ICSP connector JP1 of chipKIT Wi-FIRE board.
 
-    $ sudo pic32prog nuttx.hex
+  A program is needed to interface to the PICkit 2. One such program
+  is the pic32prog utility:
+  https://github.com/sergev/pic32prog.git
+
+  It is recommended to configure udev rules so that root privileges
+  are not needed to use pic32prog; root privileges will only be needed
+  for this one-time setup:
+
+  1.  On most Linux distributions, add the user to the plugdev group:
+
+      $ sudo useradd -G plugdev $(whoami)
+
+  2.  Create the file /etc/udev/rules.d/60-pickit.rules with this
+      content (from http://kair.us/projects/pickitminus/):
+
+      # PICkit 2
+      ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="0033", MODE="0660", GROUP="plugdev"
+
+      # PICkit 3
+      ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="900a", MODE="0660", GROUP="plugdev"
+
+  3.  Restart udev (or restart the computer):
+
+      Debian: $ sudo udevadm trigger
+      Arch:   $ sudo udevadm control --reload && sudo udevadm trigger
+
+  4.  If PICkit was already plugged into USB, unplug and replug it.
+
+  Now NuttX can be flashed to the board as follows:
+
+    $ pic32prog nuttx.hex
 
 Serial console
 ==============
