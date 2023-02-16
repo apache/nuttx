@@ -241,6 +241,13 @@ static DMA_CHANNEL stm32_dma_channel_get(uint8_t channel,
 static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
                                   uint8_t *last);
 
+static inline void dmachan_modifyreg32(DMA_CHANNEL dmachan,
+                                       uint32_t offset, uint32_t clrbits,
+                                       uint32_t setbits)
+{
+  modifyreg32(dmachan->base + offset, clrbits, setbits);
+}
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -1210,6 +1217,7 @@ static int stm32_sdma_interrupt(int irq, void *context, void *arg)
 
 static void stm32_sdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
 {
+  uint32_t timeout;
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   uint32_t regoffset  = 0;
   uint32_t regval     = 0;
@@ -1235,7 +1243,37 @@ static void stm32_sdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
    * for the EN bit to be cleared before starting any stream configuration."
    */
 
-  while ((dmachan_getreg(dmachan, STM32_DMA_SCR_OFFSET) & DMA_SCR_EN) != 0);
+  /* Drivers using DMA should manage the streams. If a DMA request
+   * is not made on an error or an abort occurs. The driver should
+   * stop the DMA. If it fails to do so we can not just hang waiting
+   * on the HW that will not change state.
+   *
+   * If at the end of waiting the HW is still not ready there is a HW problem
+   * or a SW usage problem.
+   *
+   * Enable DEBUGASSERT to detect this.
+   */
+
+  if ((dmachan_getreg(dmachan, STM32_DMA_SCR_OFFSET) & DMA_SCR_EN) != 0)
+    {
+      /* Attempt to disable the DMA stream and wait up to a 100 us for it
+       * to stop.
+       */
+
+      dmachan_modifyreg32(dmachan, STM32_DMA_SCR_OFFSET, DMA_SCR_EN, 0);
+      timeout = 100;
+      while (timeout != 0 &&
+             (dmachan_getreg(dmachan, STM32_DMA_SCR_OFFSET) &
+              DMA_SCR_EN) != 0)
+        {
+          up_udelay(1);
+          timeout--;
+        }
+
+        DEBUGASSERT(timeout != 0 &&
+                    (dmachan_getreg(dmachan, STM32_DMA_SCR_OFFSET) &
+                     DMA_SCR_EN) == 0);
+    }
 
   /* "... All the stream dedicated bits set in the status register (DMA_LISR
    * and DMA_HISR) from the previous data block DMA transfer should be
@@ -1804,6 +1842,7 @@ static inline int32_t stm32_sdma_scr_2_bdma_ccr(int32_t scr)
 
 static void stm32_bdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
 {
+  uint32_t    timeout;
   DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
   uint32_t    regval     = 0;
   uint32_t    scr        = cfg->cfg1;
@@ -1829,12 +1868,37 @@ static void stm32_bdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
    * for the EN bit to be cleared before starting any stream configuration."
    */
 
-  regval =  dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET);
-  regval &= ~BDMA_CCR_EN;
-  dmachan_putreg(dmachan, STM32_BDMACH_CCR_OFFSET, regval);
+  /* Drivers using DMA should manage the streams. If a DMA request
+   * is not made on an error or an abort occurs. The driver should
+   * stop the DMA. If it fails to do so we can not just hang waiting
+   * on the HW that will not change state.
+   *
+   * If at the end of waiting the HW is still not ready there is a HW problem
+   * or a SW usage problem.
+   *
+   * Enable DEBUGASSERT to detect this.
+   */
 
-  while ((dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) &
-          BDMA_CCR_EN) != 0);
+  if ((dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) & BDMA_CCR_EN) != 0)
+    {
+      /* Attempt to disable the DMA stream and wait up to a 100 us for it
+       * to stop.
+       */
+
+      dmachan_modifyreg32(dmachan, STM32_BDMACH_CCR_OFFSET, BDMA_CCR_EN, 0);
+      timeout = 100;
+      while (timeout != 0 &&
+             (dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) &
+              BDMA_CCR_EN) != 0)
+        {
+          up_udelay(1);
+          timeout--;
+        }
+
+        DEBUGASSERT(timeout != 0 &&
+                    (dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) &
+                        BDMA_CCR_EN) == 0);
+    }
 
   /* "... All the stream dedicated bits set in the status register BDMA_ISR
    * from the previous data block DMA transfer should be cleared before the
