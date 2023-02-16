@@ -174,7 +174,11 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       base = pool->alloc(pool, size);
       if (base == NULL)
         {
-          mempool_free(pool, pool->ibase);
+          if (pool->ibase)
+            {
+              pool->free(pool, pool->ibase);
+            }
+
           return -ENOMEM;
         }
 
