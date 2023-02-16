@@ -110,6 +110,7 @@
 #define GROUP_FLAG_NOCLDWAIT       (1 << 0)                      /* Bit 0: Do not retain child exit status */
 #define GROUP_FLAG_PRIVILEGED      (1 << 1)                      /* Bit 1: Group is privileged */
 #define GROUP_FLAG_DELETED         (1 << 2)                      /* Bit 2: Group has been deleted but not yet freed */
+#define GROUP_FLAG_EXITING         (1 << 3)                      /* Bit 3: Group exit is in progress */
                                                                  /* Bits 3-7: Available */
 
 /* Values for struct child_status_s ch_flags */
