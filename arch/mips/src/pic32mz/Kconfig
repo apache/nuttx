@@ -261,6 +261,27 @@ config PIC32MZ_UART6
 	select UART6_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config PIC32MZ_UART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on PIC32MZ_UART1 || PIC32MZ_UART2 || PIC32MZ_UART3 || PIC32MZ_UART4 || PIC32MZ_UART5 || PIC32MZ_UART6
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the PIC32MZ manual.
+		The break consists of a start bit, 12 zero bits, and a stop bit.
+		This is not a BSD compatible break.
+
+config PIC32MZ_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO to send Break"
+	depends on PIC32MZ_UART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break. The
+		current PIC32MZ UARTS have no way to leave the break on (TX=LOW)
+		because software starts the break and then the hardware
+		automatically clears the break. This makes it difficult to send a
+		long break.
+
 config PIC32MZ_ADC
 	bool "ADC1"
 	default n
