@@ -323,6 +323,7 @@ bool check_cancellation_point(void)
 bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
+  bool ret = false;
 
   /* We need perform the following operations from within a critical section
    * because it can compete with interrupt level activity.
@@ -362,9 +363,11 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 
   if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
     {
-      /* Then we cannot cancel the task asynchronously.
-       * Mark the cancellation as pending.
-       */
+      /* Then we cannot cancel the task asynchronously. */
+
+      ret = true;
+
+      /* Mark the cancellation as pending. */
 
       tcb->flags |= TCB_FLAG_CANCEL_PENDING;
 
@@ -405,11 +408,17 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 #endif
         }
 
-      leave_critical_section(flags);
-      return true;
+#ifdef HAVE_GROUP_MEMBERS
+      else if (tcb->group && (tcb->group->tg_flags & GROUP_FLAG_EXITING))
+        {
+          /* Exit in progress, do asynchronous cancel instead */
+
+          ret = false;
+        }
+#endif
     }
 #endif
 
   leave_critical_section(flags);
-  return false;
+  return ret;
 }
