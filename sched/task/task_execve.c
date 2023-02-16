@@ -132,7 +132,7 @@ int execve(FAR const char *path, FAR char * const argv[],
 
   /* Then exit */
 
-  exit(0);
+  _exit(0);
 
   /* We should not get here, but might be needed by some compilers.  Other,
    * smarter compilers might complain that this code is unreachable.  You
