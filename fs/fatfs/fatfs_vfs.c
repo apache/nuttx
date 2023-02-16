@@ -1155,8 +1155,9 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
           goto errout_with_open;
         }
 
-      g_drv[fs->pdrv].ratio = (1 << sector[FATFS_BytesPerSectorShift_FIELD]) /
-                          geo.geo_sectorsize;
+      g_drv[fs->pdrv].ratio = (1 <<
+                               sector[FATFS_BytesPerSectorShift_FIELD]) /
+                               geo.geo_sectorsize;
       if (g_drv[fs->pdrv].ratio != 1 &&
           g_drv[fs->pdrv].ratio != CONFIG_FS_FATFS_SECTOR_RATIO)
         {
@@ -1184,7 +1185,8 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
           if (ret == -EIO && CONFIG_FS_FATFS_SECTOR_RATIO != 1)
             {
               g_drv[fs->pdrv].ratio = 1;
-              ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
+              ret = fatfs_convert_result(f_mkfs(path, &opt,
+                                                NULL, FF_MAX_SS));
             }
 
           if (ret < 0)
@@ -1215,7 +1217,8 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
           if (ret == -EIO && CONFIG_FS_FATFS_SECTOR_RATIO != 1)
             {
               g_drv[fs->pdrv].ratio = 1;
-              ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
+              ret = fatfs_convert_result(f_mkfs(path, &opt,
+                                                NULL, FF_MAX_SS));
             }
 
           if (ret < 0)
