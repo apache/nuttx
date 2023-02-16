@@ -105,7 +105,7 @@ int task_setcanceltype(int type, FAR int *oldtype)
           else
 #endif
             {
-              exit(EXIT_FAILURE);
+              _exit(EXIT_FAILURE);
             }
         }
 #endif

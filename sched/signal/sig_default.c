@@ -224,9 +224,9 @@ static void nxsig_abnormal_termination(int signo)
     {
       UNUSED(rtcb);
 
-      /* Exit to terminate the task (note that exit() vs. _exit() is used. */
+      /* Exit to terminate the task. */
 
-      exit(EXIT_FAILURE);
+      _exit(EXIT_FAILURE);
     }
 }
 #endif

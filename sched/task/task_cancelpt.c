@@ -145,7 +145,7 @@ bool enter_cancellation_point(void)
               else
 #endif
                 {
-                  exit(EXIT_FAILURE);
+                  _exit(EXIT_FAILURE);
                 }
             }
         }
@@ -232,7 +232,7 @@ void leave_cancellation_point(void)
               else
 #endif
                 {
-                  exit(EXIT_FAILURE);
+                  _exit(EXIT_FAILURE);
                 }
             }
         }
