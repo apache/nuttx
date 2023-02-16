@@ -2853,15 +2853,21 @@ static int stm32_phyread(uint16_t phydevaddr,
   volatile uint32_t timeout;
   uint32_t regval;
 
+  regval = stm32_getreg(STM32_ETH_MACMIIAR);
+
+  /* Clear the busy bit before accessing the MACMIIAR register. */
+
+  regval &= ~ETH_MACMIIAR_MB;
+  stm32_putreg(regval, STM32_ETH_MACMIIAR);
+
   /* Configure the MACMIIAR register,
    * preserving CSR Clock Range CR[2:0] bits
    */
 
-  regval  = stm32_getreg(STM32_ETH_MACMIIAR);
   regval &= ETH_MACMIIAR_CR_MASK;
 
-  /* Set the PHY device address, PHY register address, and set the buy bit.
-   * the  ETH_MACMIIAR_MW is clear, indicating a read operation.
+  /* Set the PHY device address, PHY register address, and set the busy bit.
+   * the ETH_MACMIIAR_MW is clear, indicating a read operation.
    */
 
   regval |= (phydevaddr << ETH_MACMIIAR_PA_SHIFT) & ETH_MACMIIAR_PA_MASK;
@@ -2912,15 +2918,21 @@ static int stm32_phywrite(uint16_t phydevaddr,
   volatile uint32_t timeout;
   uint32_t regval;
 
+  regval = stm32_getreg(STM32_ETH_MACMIIAR);
+
+  /* Clear the busy bit before accessing the MACMIIAR register. */
+
+  regval &= ~ETH_MACMIIAR_MB;
+  stm32_putreg(regval, STM32_ETH_MACMIIAR);
+
   /* Configure the MACMIIAR register,
    * preserving CSR Clock Range CR[2:0] bits
    */
 
-  regval  = stm32_getreg(STM32_ETH_MACMIIAR);
   regval &= ETH_MACMIIAR_CR_MASK;
 
   /* Set the PHY device address, PHY register address, and set the busy bit.
-   * the  ETH_MACMIIAR_MW is set, indicating a write operation.
+   * the ETH_MACMIIAR_MW is set, indicating a write operation.
    */
 
   regval |= (phydevaddr << ETH_MACMIIAR_PA_SHIFT) & ETH_MACMIIAR_PA_MASK;
