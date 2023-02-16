@@ -1220,7 +1220,7 @@ static int yaffs_vfs_unbind(FAR void *handle, FAR struct inode **driver,
 
   /* Unmount */
 
-  ret = yaffs_unmount(dev->param.name);
+  ret = yaffs_unmount_reldev(dev);
   if (ret >= 0)
     {
       /* Remove and release dev */
