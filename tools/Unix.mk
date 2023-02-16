@@ -605,7 +605,10 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 KCONFIG_ENV  = APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR)
 KCONFIG_ENV += APPSBINDIR=${CONFIG_APPS_DIR} BINDIR=${TOPDIR}
 
-KCONFIG_LIB = $(shell command -v menuconfig 2> /dev/null)
+LOADABLE = $(shell grep "=m$$" $(TOPDIR)/.config)
+ifeq ($(CONFIG_BUILD_LOADABLE)$(LOADABLE),)
+  KCONFIG_LIB = $(shell command -v menuconfig 2> /dev/null)
+endif
 
 # Prefer "kconfiglib" if host OS supports it
 
@@ -616,18 +619,19 @@ ifeq ($(KCONFIG_LIB),)
   KCONFIG_NCONFIG       = kconfig-nconf Kconfig
   KCONFIG_QCONFIG       = kconfig-qconf Kconfig
   KCONFIG_GCONFIG       = kconfig-gconf Kconfig
-  KCONFIG_SAVEDEFCONFIG = kconfig-conf Kconfig --savedefconfig
+  KCONFIG_SAVEDEFCONFIG = kconfig-conf Kconfig --savedefconfig defconfig.tmp
 define kconfig_tweak_disable
 	kconfig-tweak --file $1 -u $2
 endef
 else
-  KCONFIG_OLDCONFIG     = oldconfig
-  KCONFIG_OLDDEFCONFIG  = olddefconfig
-  KCONFIG_MENUCONFIG    = menuconfig
-  KCONFIG_NCONFIG       = guiconfig
+  PURGE_MODULE_WARNING  = 2>&1 | grep -v "warning: the 'modules' option is not supported"
+  KCONFIG_OLDCONFIG     = oldconfig ${PURGE_MODULE_WARNING}
+  KCONFIG_OLDDEFCONFIG  = olddefconfig ${PURGE_MODULE_WARNING}
+  KCONFIG_MENUCONFIG    = menuconfig ${PURGE_MODULE_WARNING}
+  KCONFIG_NCONFIG       = guiconfig ${PURGE_MODULE_WARNING}
   KCONFIG_QCONFIG       = ${KCONFIG_NCONFIG}
   KCONFIG_GCONFIG       = ${KCONFIG_NCONFIG}
-  KCONFIG_SAVEDEFCONFIG = savedefconfig --out
+  KCONFIG_SAVEDEFCONFIG = savedefconfig --out defconfig.tmp ${PURGE_MODULE_WARNING}
 define kconfig_tweak_disable
 	$(Q) sed -i'.orig' '/$2/d' $1
 	$(Q) rm -f $1.orig
@@ -672,7 +676,7 @@ gconfig: apps_preconfig
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_GCONFIG}
 
 savedefconfig: apps_preconfig
-	$(Q) ${KCONFIG_ENV} ${KCONFIG_SAVEDEFCONFIG} defconfig.tmp
+	$(Q) ${KCONFIG_ENV} ${KCONFIG_SAVEDEFCONFIG}
 	$(Q) $(call kconfig_tweak_disable,defconfig.tmp,CONFIG_APPS_DIR)
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
