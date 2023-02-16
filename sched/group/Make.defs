@@ -21,6 +21,7 @@
 CSRCS += group_create.c group_join.c group_leave.c group_find.c
 CSRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
 CSRCS += group_foreachchild.c group_killchildren.c group_signal.c
+CSRCS += group_argvstr.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 ifeq ($(CONFIG_SCHED_CHILD_STATUS),y)

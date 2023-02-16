@@ -1081,6 +1081,25 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
 void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
 
 /****************************************************************************
+ * Name: group_argvstr
+ *
+ * Description:
+ *   Safely read the contents of a task's argument vector, into a a safe
+ *   buffer. Function skips the process's name.
+ *
+ * Input Parameters:
+ *   tcb  - tcb of the task.
+ *   args - Output buffer for the argument vector.
+ *   size - Size of the buffer.
+ *
+ * Returned Value:
+ *   The actual string length that was written.
+ *
+ ****************************************************************************/
+
+size_t group_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size);
+
+/****************************************************************************
  * Name: group_exitinfo
  *
  * Description:
