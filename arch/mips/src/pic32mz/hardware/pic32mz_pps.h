@@ -76,6 +76,74 @@
 #define __PPS_OUTPUT_REGVAL(a,b)  ((uint32_t)(a))
 #define PPS_OUTPUT_REGVAL(a)  __PPS_OUTPUT_REGVAL(a)
 
+/* The following macro converts from a peripheral output pin mapping to the
+ * corresponding GPIO port and pin. This allows drivers to do things like
+ * temporarily change a pin's configuration from peripheral to GPIO to
+ * override some hardware behavior. Having this macro available to driver
+ * code relieves the board's include/board.h from redundantly defining both
+ * the PPS mapping and the GPIO port/pin information.
+ *
+ * NOTE: This is written in the same odd macro forms as above for the same
+ * reason.
+ */
+#define __PPS_OUTPUT_REGADDR_TO_GPIO(a,b) ((uint32_t)( \
+          ((b) == PIC32MZ_RPA14R) ? (GPIO_PORTA | GPIO_PIN14) : \
+          ((b) == PIC32MZ_RPA15R) ? (GPIO_PORTA | GPIO_PIN15) : \
+          ((b) == PIC32MZ_RPB0R)  ? (GPIO_PORTB | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPB10R) ? (GPIO_PORTB | GPIO_PIN10) : \
+          ((b) == PIC32MZ_RPB14R) ? (GPIO_PORTB | GPIO_PIN14) : \
+          ((b) == PIC32MZ_RPB15R) ? (GPIO_PORTB | GPIO_PIN15) : \
+          ((b) == PIC32MZ_RPB1R)  ? (GPIO_PORTB | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPB2R)  ? (GPIO_PORTB | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPB3R)  ? (GPIO_PORTB | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPB5R)  ? (GPIO_PORTB | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPB6R)  ? (GPIO_PORTB | GPIO_PIN6)  : \
+          ((b) == PIC32MZ_RPB7R)  ? (GPIO_PORTB | GPIO_PIN7)  : \
+          ((b) == PIC32MZ_RPB8R)  ? (GPIO_PORTB | GPIO_PIN8)  : \
+          ((b) == PIC32MZ_RPB9R)  ? (GPIO_PORTB | GPIO_PIN9)  : \
+          ((b) == PIC32MZ_RPC13R) ? (GPIO_PORTC | GPIO_PIN13) : \
+          ((b) == PIC32MZ_RPC14R) ? (GPIO_PORTC | GPIO_PIN14) : \
+          ((b) == PIC32MZ_RPC1R)  ? (GPIO_PORTC | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPC2R)  ? (GPIO_PORTC | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPC3R)  ? (GPIO_PORTC | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPC4R)  ? (GPIO_PORTC | GPIO_PIN4)  : \
+          ((b) == PIC32MZ_RPD0R)  ? (GPIO_PORTD | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPD10R) ? (GPIO_PORTD | GPIO_PIN10) : \
+          ((b) == PIC32MZ_RPD11R) ? (GPIO_PORTD | GPIO_PIN11) : \
+          ((b) == PIC32MZ_RPD12R) ? (GPIO_PORTD | GPIO_PIN12) : \
+          ((b) == PIC32MZ_RPD14R) ? (GPIO_PORTD | GPIO_PIN14) : \
+          ((b) == PIC32MZ_RPD15R) ? (GPIO_PORTD | GPIO_PIN15) : \
+          ((b) == PIC32MZ_RPD1R)  ? (GPIO_PORTD | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPD2R)  ? (GPIO_PORTD | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPD3R)  ? (GPIO_PORTD | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPD4R)  ? (GPIO_PORTD | GPIO_PIN4)  : \
+          ((b) == PIC32MZ_RPD5R)  ? (GPIO_PORTD | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPD6R)  ? (GPIO_PORTD | GPIO_PIN6)  : \
+          ((b) == PIC32MZ_RPD7R)  ? (GPIO_PORTD | GPIO_PIN7)  : \
+          ((b) == PIC32MZ_RPD9R)  ? (GPIO_PORTD | GPIO_PIN9)  : \
+          ((b) == PIC32MZ_RPE3R)  ? (GPIO_PORTE | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPE5R)  ? (GPIO_PORTE | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPE8R)  ? (GPIO_PORTE | GPIO_PIN8)  : \
+          ((b) == PIC32MZ_RPE9R)  ? (GPIO_PORTE | GPIO_PIN9)  : \
+          ((b) == PIC32MZ_RPF0R)  ? (GPIO_PORTF | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPF12R) ? (GPIO_PORTF | GPIO_PIN12) : \
+          ((b) == PIC32MZ_RPF13R) ? (GPIO_PORTF | GPIO_PIN13) : \
+          ((b) == PIC32MZ_RPF1R)  ? (GPIO_PORTF | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPF2R)  ? (GPIO_PORTF | GPIO_PIN2)  : \
+          ((b) == PIC32MZ_RPF3R)  ? (GPIO_PORTF | GPIO_PIN3)  : \
+          ((b) == PIC32MZ_RPF4R)  ? (GPIO_PORTF | GPIO_PIN4)  : \
+          ((b) == PIC32MZ_RPF5R)  ? (GPIO_PORTF | GPIO_PIN5)  : \
+          ((b) == PIC32MZ_RPF8R)  ? (GPIO_PORTF | GPIO_PIN8)  : \
+          ((b) == PIC32MZ_RPG0R)  ? (GPIO_PORTG | GPIO_PIN0)  : \
+          ((b) == PIC32MZ_RPG1R)  ? (GPIO_PORTG | GPIO_PIN1)  : \
+          ((b) == PIC32MZ_RPG6R)  ? (GPIO_PORTG | GPIO_PIN6)  : \
+          ((b) == PIC32MZ_RPG7R)  ? (GPIO_PORTG | GPIO_PIN7)  : \
+          ((b) == PIC32MZ_RPG8R)  ? (GPIO_PORTG | GPIO_PIN8)  : \
+          ((b) == PIC32MZ_RPG9R)  ? (GPIO_PORTG | GPIO_PIN9)  : \
+          0                                                     \
+        ))
+#define PPS_OUTPUT_REGADDR_TO_GPIO(a) __PPS_OUTPUT_REGADDR_TO_GPIO(a)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
