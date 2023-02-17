@@ -485,12 +485,10 @@
  * ETH_DMAOMR_ST    Start/stop transmission      0 (not running)
  * ETH_DMAOMR_TTC   Transmit threshold control   0 (64 bytes)
  * ETH_DMAOMR_FTF   Flush transmit FIFO          0 (no flush)
- * ETH_DMAOMR_TSF   Transmit store and forward   Depends on
- *                                               CONFIG_STM32_ETH_HWCHECKSUM
+ * ETH_DMAOMR_TSF   Transmit store and forward   1 (enabled)
  * ETH_DMAOMR_DFRF  Disable flushing of received 0 (enabled)
  *                  frames
- * ETH_DMAOMR_RSF   Receive store and forward    Depends on
- *                                               CONFIG_STM32_ETH_HWCHECKSUM
+ * ETH_DMAOMR_RSF   Receive store and forward    1 (enabled)
  * TH_DMAOMR_DTCEFD Dropping of TCP/IP checksum  Depends on
  *                  error frames disable         CONFIG_STM32_ETH_HWCHECKSUM
  *
@@ -507,7 +505,7 @@
 #else
 #  define DMAOMR_SET_MASK \
     (ETH_DMAOMR_OSF | ETH_DMAOMR_RTC_64 | ETH_DMAOMR_TTC_64 | \
-     ETH_DMAOMR_DTCEFD)
+     ETH_DMAOMR_TSF | ETH_DMAOMR_RSF | ETH_DMAOMR_DTCEFD)
 #endif
 
 /* Clear the DMABMR bits that will be setup during MAC initialization (or
