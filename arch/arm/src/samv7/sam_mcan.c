@@ -4220,6 +4220,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 struct can_dev_s *sam_mcan_initialize(int port)
 {
   struct sam_mcan_s *priv;
+  struct can_dev_s *dev;
   uint32_t regval;
 
   caninfo("MCAN%d\n", port);
@@ -4243,13 +4244,14 @@ struct can_dev_s *sam_mcan_initialize(int port)
     {
       /* Select the MCAN0 device structure */
 
-      priv = &g_mcan0priv;
+      dev = &g_mcan0dev;
+      priv = dev->cd_priv;
 
       /* Configure MCAN0 Message RAM Base Address */
 
       regval  = getreg32(SAM_MATRIX_CAN0);
       regval &= MATRIX_CAN0_RESERVED;
-      regval |= (uint32_t)config->msgram.stdfilters &
+      regval |= (uint32_t)priv->config->msgram.stdfilters &
                 MATRIX_CAN0_CAN0DMABA_MASK;
       putreg32(regval, SAM_MATRIX_CAN0);
     }
@@ -4260,13 +4262,14 @@ struct can_dev_s *sam_mcan_initialize(int port)
     {
       /* Select the MCAN1 device structure */
 
-      priv = &g_mcan1priv;
+      dev = &g_mcan1dev;
+      priv = dev->cd_priv;
 
       /* Configure MCAN1 Message RAM Base Address */
 
       regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
       regval &= ~MATRIX_CCFG_CAN1DMABA_MASK;
-      regval |= (uint32_t)config->msgram.stdfilters &
+      regval |= (uint32_t)priv->config->msgram.stdfilters &
                 MATRIX_CCFG_CAN1DMABA_MASK;
       putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
     }
