@@ -76,7 +76,7 @@ endif
 
 EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}
 
-ifneq ($(CONFIG_LIBM),y)
+ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
 endif
 

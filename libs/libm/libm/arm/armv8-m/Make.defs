@@ -1,0 +1,70 @@
+############################################################################
+# libs/libm/libm/arm/armv8-m/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_LIBM_ARCH_CEIL),y)
+CSRCS += arch_ceil.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_CEILF),y)
+CSRCS += arch_ceilf.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_FLOOR),y)
+CSRCS += arch_floor.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_FLOORF),y)
+CSRCS += arch_floorf.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_NEARBYINT),y)
+CSRCS += arch_nearbyint.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_NEARBYINTF),y)
+CSRCS += arch_nearbyintf.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_RINTF),y)
+CSRCS += arch_rintf.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_ROUNDF),y)
+CSRCS += arch_roundf.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_TRUNCF),y)
+CSRCS += arch_truncf.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_RINT),y)
+CSRCS += arch_rint.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_ROUND),y)
+CSRCS += arch_round.c
+endif
+
+ifeq ($(CONFIG_LIBM_ARCH_TRUNC),y)
+CSRCS += arch_trunc.c
+endif
+
+DEPPATH += --dep-path libm/arm/armv8-m
+VPATH += :libm/arm/armv8-m

@@ -7,7 +7,6 @@ comment "Standard C Library Options"
 
 source "libs/libc/stdio/Kconfig"
 source "libs/libc/audio/Kconfig"
-source "libs/libc/math/Kconfig"
 source "libs/libc/machine/Kconfig"
 source "libs/libc/stdlib/Kconfig"
 source "libs/libc/unistd/Kconfig"
