@@ -48,7 +48,7 @@
                                             /* Bit 1:  Reserved */
 #define X86_64_RFLAGS_PF          (1 << 2)  /* Bit 2:  Parity Flag */
                                             /* Bit 3:  Reserved */
-#define X86_64_RFLAGS_AF          (1 << 4)  /* Bit 4:  Auxillary carry Flag */
+#define X86_64_RFLAGS_AF          (1 << 4)  /* Bit 4:  Auxiliary carry Flag */
                                             /* Bit 5:  Reserved */
 #define X86_64_RFLAGS_ZF          (1 << 6)  /* Bit 6:  Zero Flag */
 #define X86_64_RFLAGS_SF          (1 << 7)  /* Bit 7:  Sign Flag */
@@ -295,11 +295,11 @@ begin_packed_struct struct gdt_entry_s
 {
   uint16_t limit_low;            /* Lower 16-bits of segment limit */
   uint32_t base_low:24;          /* Lower 24-bits of base address */
-  uint8_t  AC:1;                 /* 1: CPU accessed this segement */
-  uint8_t  RW:1;                 /* 1: Data Segement 0: Code Segement */
+  uint8_t  AC:1;                 /* 1: CPU accessed this segment */
+  uint8_t  RW:1;                 /* 1: Data Segment 0: Code Segment */
   uint8_t  DC:1;                 /* Direction bit/Conforming bit.  */
   uint8_t  EX:1;                 /* 1: Segment can be executed  */
-  uint8_t  S:1;                  /* S: 0:TSS 1:Code/Data Segement */
+  uint8_t  S:1;                  /* S: 0:TSS 1:Code/Data Segment */
   uint8_t  DPL:2;                /* DPL */
   uint8_t  P:1;                  /* Present? 1:Segment is preset */
   uint8_t  limit_high:4;         /* Upper 4-bits of segment limit */

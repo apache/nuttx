@@ -58,16 +58,16 @@ bl602_start:
     la a0, __boot2_pt_addr_src
     la a1, __boot2_pt_addr_start
     la a2, __boot2_pt_addr_end
-    bgeu a1, a2, bl602_entry_load_boot2_partiton_address_end
+    bgeu a1, a2, bl602_entry_load_boot2_partition_address_end
 
-bl602_entry_load_boot2_partiton_address_loop:
+bl602_entry_load_boot2_partition_address_loop:
     lw t0, (a0)
     sw t0, (a1)
     addi a0, a0, 4
     addi a1, a1, 4
-    bltu a1, a2, bl602_entry_load_boot2_partiton_address_loop
+    bltu a1, a2, bl602_entry_load_boot2_partition_address_loop
 
-bl602_entry_load_boot2_partiton_address_end:
+bl602_entry_load_boot2_partition_address_end:
 
     /* Load boot2 flashCfg address */
 

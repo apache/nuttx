@@ -45,7 +45,7 @@
 #define S32K3XX_MC_RGM_ERCTRL_OFFSET  (0x20) /* External Reset Control Register (ERCTRL) */
 #define S32K3XX_MC_RGM_RDSS_OFFSET    (0x24) /* Reset During Standby Status Register (RDSS) */
 #define S32K3XX_MC_RGM_FRENTC_OFFSET  (0x28) /* Functional Reset Entry Timeout Control Register (FRENTC) */
-#define S32K3XX_MC_RGM_LPDEBUG_OFFSET (0x2c) /* Low Power Debug Control Reguster (LPDEBUG) */
+#define S32K3XX_MC_RGM_LPDEBUG_OFFSET (0x2c) /* Low Power Debug Control Register (LPDEBUG) */
 
 /* MC_RGM Register Addresses ************************************************/
 
@@ -165,8 +165,8 @@
 
 /* Reset During Standby Status Register (RDSS) */
 
-#define MC_RGM_RDSS_DES_RES              (1 << 0)  /* Bit 0: Destructive reset event occured during standby mode (DES_RES) */
-#define MC_RGM_RDSS_FES_RES              (1 << 1)  /* Bit 1: Functional reset event occured during standby mode (FES_RES) */
+#define MC_RGM_RDSS_DES_RES              (1 << 0)  /* Bit 0: Destructive reset event occurred during standby mode (DES_RES) */
+#define MC_RGM_RDSS_FES_RES              (1 << 1)  /* Bit 1: Functional reset event occurred during standby mode (FES_RES) */
                                                    /* Bits 2-31: Reserved */
 
 /* Functional Reset Entry Timeout Control Register (FRENTC) */
@@ -175,7 +175,7 @@
 #define MC_RGM_FRENTC_FRET_TIMEOUT_SHIFT (1)       /* Bits 1-31: Functional Reset Entry Timer Value (FRET_TIMEOUT) */
 #define MC_RGM_FRENTC_FRET_TIMEOUT_MASK  (0x7fffffff << MC_RGM_FRENTC_FRET_TIMEOUT_SHIFT) 
 
-/* Low Power Debug Control Reguster (LPDEBUG) */
+/* Low Power Debug Control Register (LPDEBUG) */
 
 #define MC_RGM_LPDEBUG_LP_DBG_EN         (1 << 0)  /* Bit 0: Low-Power Debug Enable (LP_DBG_EN) */
                                                    /* Bits 1-31: Reserved */

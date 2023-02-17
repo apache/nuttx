@@ -97,7 +97,7 @@ void bt_coex_handle_cmd_complete_evt(uint16_t opcode, uint16_t cause,
       total_len--;
       if (total_len <= 1)
         {
-          printf("bt_coex_handle_cmd_complete_evt: not reprot to wifi");
+          printf("bt_coex_handle_cmd_complete_evt: not report to wifi");
           return ;
         }
 

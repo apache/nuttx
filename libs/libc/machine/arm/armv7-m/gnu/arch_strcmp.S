@@ -99,7 +99,7 @@ def_fn strcmp
 	   both cases the other bits in RESULT are all zero.  For DATA2 the
 	   interesting byte is at the other end of the word, but the
 	   other bits are not necessarily zero.	 We need a signed result
-	   representing the differnece in the unsigned bytes, so for the
+	   representing the difference in the unsigned bytes, so for the
 	   little-endian case we can't just shift the interesting bits
 	   up.	*/
 #ifdef __ARM_BIG_ENDIAN
@@ -113,7 +113,7 @@ def_fn strcmp
 
 
 #if 0
-	/* The assembly code below is based on the following alogrithm.	 */
+	/* The assembly code below is based on the following algorithm.	 */
 #ifdef __ARM_BIG_ENDIAN
 #define RSHIFT <<
 #define LSHIFT >>

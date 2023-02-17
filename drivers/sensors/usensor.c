@@ -220,7 +220,7 @@ static int usensor_ioctl(FAR struct file *filep, int cmd,
  * Description:
  *   This function registers usensor character node "/dev/usensor", so that
  *   application can register user sensor by this node. The node will
- *   manager all user sensors in this character dirver.
+ *   manager all user sensors in this character driver.
  ****************************************************************************/
 
 int usensor_initialize(void)

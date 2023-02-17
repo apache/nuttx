@@ -98,7 +98,7 @@ struct arp_hdr_s
   uint16_t ah_hwtype;        /* 16-bit Hardware type (Ethernet=0x001) */
   uint16_t ah_protocol;      /* 16-bit Protocol type (IP=0x0800) */
   uint8_t  ah_hwlen;         /*  8-bit Hardware address size (6) */
-  uint8_t  ah_protolen;      /*  8-bit Procotol address size (4) */
+  uint8_t  ah_protolen;      /*  8-bit Protocol address size (4) */
   uint16_t ah_opcode;        /* 16-bit Operation */
   uint8_t  ah_shwaddr[6];    /* 48-bit Sender hardware address */
   uint16_t ah_sipaddr[2];    /* 32-bit Sender IP address */

@@ -1513,7 +1513,7 @@ void up_timer_initialize(void);
  *
  * Description:
  *   Return the elapsed time since power-up (or, more correctly, since
- *   the archtecture-specific timer was initialized).  This function is
+ *   the architecture-specific timer was initialized).  This function is
  *   functionally equivalent to:
  *
  *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
@@ -2103,7 +2103,7 @@ char up_romgetc(FAR const char *ptr);
  * Name: up_mdelay and up_udelay
  *
  * Description:
- *   Some device drivers may require that the plaform-specific logic
+ *   Some device drivers may require that the platform-specific logic
  *   provides these timing loops for short delays.
  *
  ****************************************************************************/
@@ -2211,7 +2211,7 @@ void nxsched_process_cpuload_ticks(uint32_t ticks);
  * Name: irq_dispatch
  *
  * Description:
- *   This function must be called from the achitecture-specific logic in
+ *   This function must be called from the architecture-specific logic in
  *   order to dispatch an interrupt to the appropriate, registered handling
  *   logic.
  *

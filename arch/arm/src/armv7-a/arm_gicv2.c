@@ -219,7 +219,7 @@ void arm_gic_initialize(void)
    *
    * NOTE: Only for processors that operate in both secure and non-secure
    * state.
-   * REVISIT: This is here only for superstituous reasons.  I don't think
+   * REVISIT: This is here only for superstitious reasons.  I don't think
    * I need this setting in this configuration.
    */
 

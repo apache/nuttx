@@ -29,7 +29,7 @@
 #define RTRAP(_vector, _handler)  mov   %g0, %l0 ; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 #define TRAP(_vector, _handler)   mov   %psr, %l0; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 
-/* Unexcpected trap will halt the processor by forcing it to error state */
+/* Unexpected trap will halt the processor by forcing it to error state */
 #define BAD_TRAP          ta 0; nop; nop; nop;
 #define SOFT_TRAP         BAD_TRAP   /* Software trap. Treat as BAD_TRAP */
 
@@ -87,7 +87,7 @@ _hardreset:
     RTRAP(0,__start);            ! 00 reset trap
     BAD_TRAP;			 ! 01 instruction_access_exception
     BAD_TRAP;			 ! 02 illegal_instruction
-    BAD_TRAP;			 ! 03 priveleged_instruction
+    BAD_TRAP;			 ! 03 privileged_instruction
     TRAP(4,_fpdis_enable);	 ! 04 fp_disabled
     WOTRAP(5,_window_overflow);	 ! 05 window_overflow
     WUTRAP(6,_window_underflow); ! 06 window_underflow
@@ -313,7 +313,7 @@ __start:
         ldd    [%g1], %f30
 	nop
 
-	! initial cache controler
+	! initial cache controller
         set   EXTER_REG,   %g1
         set     0x81000f,%g2		!open dcache,icache, dcache snoop,icache burst
         ! set   0x80000f,%g2		!open dcache,icache, dcache snoop

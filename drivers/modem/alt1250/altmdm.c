@@ -81,7 +81,7 @@ typedef enum altmdm_state_e
   ALTMDM_STATE_V4SET,            /* Altcom version 4 command setting state */
   ALTMDM_STATE_SLEEPSET,         /* Sleep packet setting state */
   ALTMDM_STATE_TXPREPARE,        /* Normal packet setting state */
-  ALTMDM_STATE_TXREQ,            /* TX request signal assersion state */
+  ALTMDM_STATE_TXREQ,            /* TX request signal assertion state */
   ALTMDM_STATE_HDRSREQ,          /* Waiting for Slave request signal state */
   ALTMDM_STATE_HDRTRX,           /* SPI Header transaction state */
   ALTMDM_STATE_SLEEPPKT,         /* Sleep Packet body size adjustment

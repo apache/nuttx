@@ -111,7 +111,7 @@ g_intstacktop:
  *
  * Exit Conditions:
  *   This macro will use registers a2, a3 and a4.
- *   a2 - Points to the, possbily, new register save area.
+ *   a2 - Points to the, possibly, new register save area.
  *
  ****************************************************************************/
 

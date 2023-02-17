@@ -81,7 +81,7 @@
                                  LPC17_40_PWM1_CHANNEL6)
 
 #if CONFIG_PWM_NCHANNELS > LPC17_40_PWM1_NCHANNELS
-#  error "PWM subystem has more channels then physical channels enabled"
+#  error "PWM subsystem has more channels then physical channels enabled"
 #endif
 
 /****************************************************************************
