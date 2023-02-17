@@ -55,5 +55,19 @@ int getrlimit(int resource, FAR struct rlimit *rlp)
   /* This is a dummy realization to make the compiler happy */
 
   memset(rlp, 0, sizeof(*rlp));
+
+  switch (resource)
+    {
+      case RLIMIT_NOFILE:
+        {
+          rlp->rlim_cur = 128;
+          rlp->rlim_max = 1024 * 1024; /* dummy */
+        }
+        break;
+
+      default:
+        break;
+    }
+
   return OK;
 }
