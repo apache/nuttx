@@ -230,7 +230,7 @@
 #  define STM32L4_CAN2_FS1R         (STM32L4_CAN2_BASE+STM32L4_CAN_FS1R_OFFSET)
 #  define STM32L4_CAN2_FFA1R        (STM32L4_CAN2_BASE+STM32L4_CAN_FFA1R_OFFSET)
 #  define STM32L4_CAN2_FA1R         (STM32L4_CAN2_BASE+STM32L4_CAN_FA1R_OFFSET)
-#  define STM32L4_CAN2_FIR(b,i)     (STM32L4_CAN2_BASE+STM32_CAN_FIR_OFFSET(b,i))
+#  define STM32L4_CAN2_FIR(b,i)     (STM32L4_CAN2_BASE+STM32L4_CAN_FIR_OFFSET(b,i))
 #endif
 
 /* Register Bitfield Definitions ********************************************/
