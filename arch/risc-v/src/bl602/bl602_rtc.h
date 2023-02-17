@@ -89,9 +89,9 @@ void bl602_hbn_clear_rtc_int(void);
  *
  * Input Parameters:
  *   delay: RTC interrupt delay 32 clocks
- *   compval_low: RTC interrupt commpare value low 32 bits
- *   compval_high: RTC interrupt commpare value high 32 bits
- *   comp_mode: RTC interrupt commpare
+ *   compval_low: RTC interrupt compare value low 32 bits
+ *   compval_high: RTC interrupt compare value high 32 bits
+ *   comp_mode: RTC interrupt compare
  *
  * Returned Value:
  *   None.

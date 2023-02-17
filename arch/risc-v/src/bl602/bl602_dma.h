@@ -213,7 +213,7 @@ int bl602_dma_channel_stop(uint8_t channel_id);
  * Name: bl602_dma_init
  *
  * Description:
- *   Intialize DMA controller.
+ *   Initialize DMA controller.
  *
  * Input Parameters:
  *   None

@@ -112,8 +112,8 @@ void up_timer_initialize(void)
 
   /* Calculate timer reload value (continuous mode)
    *
-   *   timer_period    = reload_value * divisor / system_clock_freqency
-   *   timer_frequency = system_clock_freqency / divisor / reload_value
+   *   timer_period    = reload_value * divisor / system_clock_frequency
+   *   timer_frequency = system_clock_frequency / divisor / reload_value
    * or
    *   reload_value = (system_clock_frequency / timer_frequency / divisor
    *

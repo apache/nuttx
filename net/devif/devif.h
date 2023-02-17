@@ -583,7 +583,7 @@ int devif_loopback(FAR struct net_driver_s *dev);
  *           pkt/ipv[4|6]_input()/...
  *                     |
  *                     |
- *     NICs io vector receive(Orignal flat buffer)
+ *     NICs io vector receive(Original flat buffer)
  *
  * Input Parameters:
  *   callback - Input callback of L3 stack

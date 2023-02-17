@@ -389,7 +389,7 @@ struct motor_phy_params_f32_s
   float   one_by_p;            /* Inverse number of motor pole pairs */
 };
 
-/* PMSM motor physcial parameters */
+/* PMSM motor physical parameters */
 
 struct pmsm_phy_params_f32_s
 {
@@ -397,7 +397,7 @@ struct pmsm_phy_params_f32_s
   float                         iner;        /* Rotor inertia */
   float                         ind_d;       /* d-inductance */
   float                         ind_q;       /* q-inductance */
-  float                         one_by_iner; /* One by intertia */
+  float                         one_by_iner; /* One by inertia */
   float                         one_by_indd; /* One by Ld */
   float                         one_by_indq; /* One by Lq */
 };

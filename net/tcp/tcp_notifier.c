@@ -83,7 +83,7 @@ int tcp_readahead_notifier_setup(worker_t worker,
       return 0;
     }
 
-  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
+  /* Otherwise, this is just a simple wrapper around work_notifier_setup(). */
 
   info.evtype    = WORK_TCP_READAHEAD;
   info.qid       = LPWORK;
@@ -139,7 +139,7 @@ int tcp_writebuffer_notifier_setup(worker_t worker,
       return 0;
     }
 
-  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
+  /* Otherwise, this is just a simple wrapper around work_notifier_setup(). */
 
   info.evtype    = WORK_TCP_WRITEBUFFER;
   info.qid       = LPWORK;
@@ -192,7 +192,7 @@ int tcp_disconnect_notifier_setup(worker_t worker,
       return 0;
     }
 
-  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
+  /* Otherwise, this is just a simple wrapper around work_notifier_setup(). */
 
   info.evtype    = WORK_TCP_DISCONNECT;
   info.qid       = LPWORK;

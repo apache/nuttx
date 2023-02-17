@@ -68,7 +68,7 @@ struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port);
  *
  * Description:
  *   Decrease the reference counter of the I2C slave device.  When there are
- *   no more references left the I2C slave device is unitialized.
+ *   no more references left the I2C slave device is uninitialized.
  *
  * Input Parameters:
  *   dev - Device structure as returned by s32k1xx_i2cbus_slave_initialize().

@@ -123,7 +123,7 @@ tc32_switchcontext:
 	tmov		r3, r13
 	tstorer		r3, [r0]
 
-	/* r0 = r1 = next task tcb->regs (actualy sp) */
+	/* r0 = r1 = next task tcb->regs (actually sp) */
 
 	tmov		r0, r1
 
