@@ -1321,6 +1321,12 @@ Configuration sub-directories
     DMA to transfer samples. Number of transferred samples can be set
     by configuring CONFIG_SAMV7_AFEC_DMASAMPLES.
 
+  can
+
+    An nsh configuration (see below) with added support fo MCAN driver.
+    The purpose of the configuration is mainly to track whether changes
+    to SAMv7 MCAN driver do not cause build errors and warnings.
+
   mrf24j40-starhub
 
     This configuration implements a hub node in a 6LoWPAN start network.
