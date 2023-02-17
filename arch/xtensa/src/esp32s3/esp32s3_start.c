@@ -45,6 +45,7 @@
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_extmem.h"
+#include "rom/esp32s3_libc_stubs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -350,6 +351,10 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
       esp_spiram_test();
     }
 #endif
+
+  /* Setup the syscall table needed by the ROM code */
+
+  esp_setup_syscall_table();
 
   /* Initialize onboard resources */
 
