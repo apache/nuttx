@@ -50,6 +50,13 @@ NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libmm$(LIBEXT) staging$(DELIM)libarch$(LIBEXT)
 
+# Add libraries for math support.
+
+ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
+NUTTXLIBS += staging$(DELIM)libkm$(LIBEXT)
+USERLIBS  += staging$(DELIM)libm$(LIBEXT)
+endif
+
 # Add library for system call instrumentation if needed
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)

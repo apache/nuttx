@@ -46,14 +46,6 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
-ifeq ($(CONFIG_LIBM_ARCH_FABSF),y)
-CSRCS += arch_fabsf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_SQRTF),y)
-CSRCS += arch_sqrtf.c
-endif
-
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
 DEPPATH += --dep-path machine/arm/armv7-m/gnu
 VPATH += :machine/arm/armv7-m/gnu
