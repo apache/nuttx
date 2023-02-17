@@ -59,17 +59,44 @@ config ESPRESSIF_ESP32C6
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
+config ESPRESSIF_ESP32H2
+	bool "ESP32-H2"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select LIBC_ARCH_ATOMIC
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	select ESPRESSIF_ESPTOOLPY_NO_STUB
+	---help---
+		Espressif ESP32-H2 (RV32IMC).
+
 endchoice # ESPRESSIF_CHIP_SERIES
 
 config ESPRESSIF_CHIP_SERIES
 	string
 	default "esp32c3" if ESPRESSIF_ESP32C3
 	default "esp32c6" if ESPRESSIF_ESP32C6
+	default "esp32h2" if ESPRESSIF_ESP32H2
 	default "unknown"
 
 choice ESPRESSIF_FLASH
 	prompt "Flash Size"
-	default ESPRESSIF_FLASH_4M if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default ESPRESSIF_FLASH_4M if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2
 
 config ESPRESSIF_FLASH_2M
 	bool "2 MB"
@@ -88,30 +115,55 @@ config ESPRESSIF_FLASH_DETECT
 choice ESPRESSIF_CPU_FREQ
 	prompt "CPU frequency"
 	default ESPRESSIF_CPU_FREQ_160 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default ESPRESSIF_CPU_FREQ_96 if ESPRESSIF_ESP32H2
 	---help---
 		CPU frequency to be set on application startup.
 
 config ESPRESSIF_CPU_FREQ_40
 	bool "40 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 	---help---
-		Set the CPU to 40 MHz. This frequency is obtained from the XTAL.
+		Set the CPU frequency to 40 MHz.
+
+config ESPRESSIF_CPU_FREQ_48
+	bool "48 MHz"
+	depends on ESPRESSIF_ESP32H2
+	---help---
+		Set the CPU frequency to 48 MHz.
+
+config ESPRESSIF_CPU_FREQ_64
+	bool "64 MHz"
+	depends on ESPRESSIF_ESP32H2
+	---help---
+		Set the CPU frequency to 64 MHz.
 
 config ESPRESSIF_CPU_FREQ_80
 	bool "80 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 	---help---
-		Set the CPU to 80 MHz. This frequency is obtained from the 480 MHz PLL.
+		Set the CPU frequency to 80 MHz.
+
+config ESPRESSIF_CPU_FREQ_96
+	bool "96 MHz"
+	depends on ESPRESSIF_ESP32H2
+	---help---
+		Set the CPU frequency to 96 MHz.
 
 config ESPRESSIF_CPU_FREQ_160
 	bool "160 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 	---help---
-		Set the CPU to 160 MHz. This frequency is obtained from the 480 MHz PLL.
+		Set the CPU frequency to 160 MHz.
 
 endchoice # ESPRESSIF_CPU_FREQ
 
 config ESPRESSIF_CPU_FREQ_MHZ
 	int
 	default 40 if ESPRESSIF_CPU_FREQ_40
+	default 48 if ESPRESSIF_CPU_FREQ_48
+	default 64 if ESPRESSIF_CPU_FREQ_64
 	default 80 if ESPRESSIF_CPU_FREQ_80
+	default 96 if ESPRESSIF_CPU_FREQ_96
 	default 160 if ESPRESSIF_CPU_FREQ_160
 
 config ESPRESSIF_REGION_PROTECTION
@@ -127,6 +179,16 @@ config ESPRESSIF_RUN_IRAM
 	---help---
 		This loads all of NuttX inside IRAM. Used to test somewhat small
 		images that can fit entirely in IRAM.
+
+config ESPRESSIF_ESPTOOLPY_NO_STUB
+	bool "Disable download stub"
+	default n
+	---help---
+		The flasher tool sends a precompiled download stub first by default.
+		That stub allows things like compressed downloads and more.
+		Usually you should not need to disable that feature.
+		It is only required to be disabled in certain scenarios when either
+		Secure Boot V2 or Flash Encryption is enabled.
 
 menu "Peripheral Support"
 
@@ -167,31 +229,39 @@ config ESPRESSIF_UART0_TXPIN
 	int "UART0 TX Pin"
 	default 21 if ESPRESSIF_ESP32C3
 	default 16 if ESPRESSIF_ESP32C6
+	default 24 if ESPRESSIF_ESP32H2
 	range 0 21 if ESPRESSIF_ESP32C3
 	range 0 30 if ESPRESSIF_ESP32C6
+	range 0 27 if ESPRESSIF_ESP32H2
 
 config ESPRESSIF_UART0_RXPIN
 	int "UART0 RX Pin"
 	default 20 if ESPRESSIF_ESP32C3
 	default 17 if ESPRESSIF_ESP32C6
+	default 23 if ESPRESSIF_ESP32H2
 	range 0 21 if ESPRESSIF_ESP32C3
 	range 0 30 if ESPRESSIF_ESP32C6
+	range 0 27 if ESPRESSIF_ESP32H2
 
 config ESPRESSIF_UART0_RTSPIN
 	int "UART0 RTS Pin"
 	depends on SERIAL_IFLOWCONTROL
 	default 16 if ESPRESSIF_ESP32C3
 	default 15 if ESPRESSIF_ESP32C6
+	default 22 if ESPRESSIF_ESP32H2
 	range 0 21 if ESPRESSIF_ESP32C3
 	range 0 30 if ESPRESSIF_ESP32C6
+	range 0 27 if ESPRESSIF_ESP32H2
 
 config ESPRESSIF_UART0_CTSPIN
 	int "UART0 CTS Pin"
 	depends on SERIAL_OFLOWCONTROL
 	default 15 if ESPRESSIF_ESP32C3
 	default 14 if ESPRESSIF_ESP32C6
+	default 21 if ESPRESSIF_ESP32H2
 	range 0 21 if ESPRESSIF_ESP32C3
 	range 0 30 if ESPRESSIF_ESP32C6
+	range 0 27 if ESPRESSIF_ESP32H2
 
 endif # ESPRESSIF_UART0
 
@@ -199,25 +269,27 @@ if ESPRESSIF_UART1
 
 config ESPRESSIF_UART1_TXPIN
 	int "UART1 TX Pin"
-	default 8 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default 8 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2
 
 config ESPRESSIF_UART1_RXPIN
 	int "UART1 RX Pin"
-	default 9 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default 9 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2
 
 config ESPRESSIF_UART1_RTSPIN
 	int "UART1 RTS Pin"
 	depends on SERIAL_IFLOWCONTROL
-	default 1 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default 1 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2
 	range 0 21 if ESPRESSIF_ESP32C3
 	range 0 30 if ESPRESSIF_ESP32C6
+	range 0 27 if ESPRESSIF_ESP32H2
 
 config ESPRESSIF_UART1_CTSPIN
 	int "UART1 CTS Pin"
 	depends on SERIAL_OFLOWCONTROL
-	default 2 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default 2 if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2
 	range 0 21 if ESPRESSIF_ESP32C3
 	range 0 30 if ESPRESSIF_ESP32C6
+	range 0 27 if ESPRESSIF_ESP32H2
 
 endif # ESPRESSIF_UART1
 
@@ -249,20 +321,29 @@ endchoice # ESPRESSIF_FLASH_MODE
 choice ESPRESSIF_FLASH_FREQ
 	prompt "SPI Flash frequency"
 	default ESPRESSIF_FLASH_FREQ_80M if ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+	default ESPRESSIF_FLASH_FREQ_48M if ESPRESSIF_ESP32H2
 	---help---
 		SPI Flash frequency.
 
 config ESPRESSIF_FLASH_FREQ_80M
 	bool "80 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
+
+config ESPRESSIF_FLASH_FREQ_48M
+	bool "48 MHz"
+	depends on ESPRESSIF_ESP32H2
 
 config ESPRESSIF_FLASH_FREQ_40M
 	bool "40 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 
 config ESPRESSIF_FLASH_FREQ_26M
 	bool "26 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 
 config ESPRESSIF_FLASH_FREQ_20M
 	bool "20 MHz"
+	depends on ESPRESSIF_ESP32C3 || ESPRESSIF_ESP32C6
 
 endchoice # ESPRESSIF_FLASH_FREQ
 
