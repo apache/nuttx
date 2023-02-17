@@ -2132,6 +2132,7 @@ endmenu
 
 menu "Library Routines"
 source "libs/libc/Kconfig"
+source "libs/libm/Kconfig"
 source "libs/libxx/Kconfig"
 source "libs/libdsp/Kconfig"
 endmenu

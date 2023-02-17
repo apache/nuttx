@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_ARMV7M
+
+config ARMV7M_LIBM
+	bool "Architecture specific FPU optimizations"
+	default n
+	select LIBM_ARCH_FABSF
+	select LIBM_ARCH_SQRTF
+	depends on ARCH_FPU
+	depends on LIBM
+	---help---
+		Enable ARMv7E-M specific floating point optimizations
+		for fabsf() and fsqrtf()
+
+endif

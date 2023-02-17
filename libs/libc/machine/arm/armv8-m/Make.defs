@@ -22,58 +22,6 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
-ifeq ($(CONFIG_ARMV8M_LIBM),y)
-
-ifeq ($(CONFIG_LIBM_ARCH_CEIL),y)
-CSRCS += arch_ceil.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_CEILF),y)
-CSRCS += arch_ceilf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_FLOOR),y)
-CSRCS += arch_floor.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_FLOORF),y)
-CSRCS += arch_floorf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_NEARBYINT),y)
-CSRCS += arch_nearbyint.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_NEARBYINTF),y)
-CSRCS += arch_nearbyintf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_RINTF),y)
-CSRCS += arch_rintf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_ROUNDF),y)
-CSRCS += arch_roundf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_TRUNCF),y)
-CSRCS += arch_truncf.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_RINT),y)
-CSRCS += arch_rint.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_ROUND),y)
-CSRCS += arch_round.c
-endif
-
-ifeq ($(CONFIG_LIBM_ARCH_TRUNC),y)
-CSRCS += arch_trunc.c
-endif
-
-endif # CONFIG_ARMV8M_LIBM
-
 ifeq ($(CONFIG_ARMV8M_MEMCHR),y)
 ASRCS += arch_memchr.S
 endif

@@ -53,23 +53,4 @@ config ARMV7M_STRLEN
 	---help---
 		Enable optimized ARMv7-M specific strlen() library function
 
-config ARMV7M_LIBM
-	bool "Architecture specific FPU optimizations"
-	default n
-	select LIBM_ARCH_FABSF
-	select LIBM_ARCH_SQRTF
-	depends on ARCH_FPU
-	depends on LIBM
-	---help---
-		Enable ARMv7E-M specific floating point optimizations
-		for fabsf() and fsqrtf()
-
-config LIBM_ARCH_FABSF
-	bool
-	default n
-
-config LIBM_ARCH_SQRTF
-	bool
-	default n
-
 endif

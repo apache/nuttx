@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+choice
+	prompt "Select math library"
+	default LIBM_NONE if DEFAULT_SMALL
+	default LIBM_TOOLCHAIN if !DEFAULT_SMALL
+
+config LIBM
+	bool "Math library from NuttX"
+	depends on !ARCH_MATH_H
+	select ARCH_FLOAT_H
+	---help---
+		By default, no math library will be provided by NuttX.  In this
+		case, it is assumed that (1) no math library is required, or (2) you
+		will be using the math.h and float.h headers file and the libm
+		library provided by your toolchain.
+
+		This is may be a very good choice is possible because your toolchain
+		may have have a highly optimized version of libm.
+
+		Another possibility is that you have a custom, architecture-specific
+		math library and that the corresponding math.h file resides at
+		arch/<architecture>/include/math.h.  The option is selected via
+		CONFIG_ARCH_MATH_H.  If ARCH_MATH_H is selected,then the
+		include/nuttx/libmath.h header file will be copied to include/math.h
+		where it can be used by your applications.
+
+		If ARCH_MATH_H is not defined, then this option can be selected to
+		build a generic, math library built into NuttX.  This math library
+		comes from the Rhombus OS and was written by Nick Johnson.  The
+		Rhombus OS math library port was contributed by Darcy Gong.
+
+config LIBM_TOOLCHAIN
+	bool "Math library from toolchain"
+
+config LIBM_NONE
+	bool "No math library"
+
+endchoice
+
+if LIBM
+source "libs/libm/libm/Kconfig"
+endif

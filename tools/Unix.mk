@@ -171,7 +171,7 @@ all: $(BIN)
 # include/nuttx/lib/math.h will hand the redirection to the architecture-
 # specific math.h header file.
 #
-# If the CONFIG_LIBM is defined, the Rhombus libm will be built at libc/math.
+# If the CONFIG_LIBM is defined, the Rhombus libm will be built at libm/libm.
 # Definitions and prototypes for the Rhombus libm are also contained in
 # include/nuttx/lib/math.h and so the file must also be copied in that case.
 #

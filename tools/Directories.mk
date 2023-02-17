@@ -67,6 +67,13 @@ CLEANDIRS += pass1
 ifeq ($(CONFIG_BUILD_FLAT),y)
 
 KERNDEPDIRS += libs$(DELIM)libc mm
+
+ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
+KERNDEPDIRS += libs$(DELIM)libm
+else
+CLEANDIRS += libs$(DELIM)libm
+endif
+
 ifeq ($(CONFIG_HAVE_CXX),y)
 KERNDEPDIRS += libs$(DELIM)libxx
 else
@@ -76,6 +83,13 @@ endif
 else
 
 USERDEPDIRS += libs$(DELIM)libc mm
+
+ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
+USERDEPDIRS += libs$(DELIM)libm
+else
+CLEANDIRS += libs$(DELIM)libm
+endif
+
 ifeq ($(CONFIG_HAVE_CXX),y)
 USERDEPDIRS += libs$(DELIM)libxx
 else
@@ -97,6 +111,11 @@ endif
 endif
 
 CONTEXTDIRS += libs$(DELIM)libc
+
+ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
+CONTEXTDIRS += libs$(DELIM)libm
+endif
+
 ifeq ($(CONFIG_HAVE_CXX),y)
 CONTEXTDIRS += libs$(DELIM)libxx
 endif

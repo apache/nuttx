@@ -44,8 +44,15 @@ NUTTXLIBS += staging$(DELIM)libboards$(LIBEXT)
 
 # Add libraries for syscall support.
 
-NUTTXLIBS += staging$(DELIM)libc$(LIBEXT) staging$(DELIM)libmm$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libc$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libmm$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libarch$(LIBEXT)
+
+# Add libraries for math support.
+
+ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
+NUTTXLIBS += staging$(DELIM)libm$(LIBEXT)
+endif
 
 ifeq ($(CONFIG_LIB_SYSCALL),y)
 NUTTXLIBS += staging$(DELIM)libstubs$(LIBEXT)

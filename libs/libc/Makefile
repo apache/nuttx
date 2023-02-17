@@ -37,7 +37,6 @@ include libgen/Make.defs
 include locale/Make.defs
 include lzf/Make.defs
 include machine/Make.defs
-include math/Make.defs
 include misc/Make.defs
 include modlib/Make.defs
 include net/Make.defs

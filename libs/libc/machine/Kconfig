@@ -121,66 +121,6 @@ config LIBC_ARCH_ELF_64BIT
 	default n
 	depends on LIBC_ARCH_ELF
 
-config LIBM_ARCH_CEIL
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_FLOOR
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_NEARBYINT
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_RINT
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_ROUND
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_TRUNC
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_CEILF
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_FLOORF
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_NEARBYINTF
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_RINTF
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_ROUNDF
-	bool
-	default n
-	depends on LIBM
-
-config LIBM_ARCH_TRUNCF
-	bool
-	default n
-	depends on LIBM
-
 # One or more the of above may be selected by architecture specific logic
 
 if ARCH_ARM

@@ -108,7 +108,7 @@ else
   STDLIBS += -lrt
 endif
 
-ifneq ($(CONFIG_LIBM),y)
+ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   STDLIBS += -lm
 endif
 

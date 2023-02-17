@@ -1,0 +1,85 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+# These are library functions that may be overridden by architecture-
+# specific implementations.  Not all architectures support implementations
+# for every library function.
+
+# Default settings for C library functions that may be replaced with
+# architecture-specific versions.
+
+config LIBM_ARCH_CEIL
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_FLOOR
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_NEARBYINT
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_RINT
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_ROUND
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_TRUNC
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_CEILF
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_FLOORF
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_NEARBYINTF
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_RINTF
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_ROUNDF
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_TRUNCF
+	bool
+	default n
+	depends on LIBM
+
+config LIBM_ARCH_FABSF
+	bool
+	default n
+
+config LIBM_ARCH_SQRTF
+	bool
+	default n
+
+# One or more the of above may be selected by architecture specific logic
+
+if ARCH_ARM
+source "libs/libm/libm/arm/Kconfig"
+endif
