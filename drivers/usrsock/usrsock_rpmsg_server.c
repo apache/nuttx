@@ -129,8 +129,8 @@ static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                 FAR void *priv);
 
 static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds);
-static int usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
-                                    pollevent_t events);
+static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
+                                     pollevent_t events);
 
 /****************************************************************************
  * Private Data
@@ -1021,8 +1021,8 @@ static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   return -EINVAL;
 }
 
-static int usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
-                                    pollevent_t events)
+static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
+                                     pollevent_t events)
 {
   FAR struct usrsock_rpmsg_s *priv = (FAR struct usrsock_rpmsg_s *)pfds->arg;
   int ret = 0;
@@ -1050,7 +1050,7 @@ static int usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
 
   net_unlock();
 
-  return ret;
+  DEBUGASSERT(ret >= 0);
 }
 
 static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
