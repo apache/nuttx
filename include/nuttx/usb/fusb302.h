@@ -50,11 +50,11 @@ extern "C"
 
 /* IOCTL Commands ***********************************************************/
 
-#define USBCIOC_READ_DEVID   _USBCIOC(0x0001)  /* Arg: uint8_t* pointer */
-#define USBCIOC_SETUP        _USBCIOC(0x0002)  /* Arg: uint8_t* pointer */
-#define USBCIOC_SET_MODE     _USBCIOC(0x0003)  /* Arg: uint8_t value */
-#define USBCIOC_READ_STATUS  _USBCIOC(0x0004)  /* Arg: uint8_t* pointer*/
-#define USBCIOC_RESET        _USBCIOC(0x0005)  /* Arg: None */
+#define USBCIOC_READ_DEVID    _USBCIOC(0x0001)  /* Arg: uint8_t* pointer */
+#define USBCIOC_SETUP         _USBCIOC(0x0002)  /* Arg: uint8_t* pointer */
+#define USBCIOC_READ_STATUS   _USBCIOC(0x0005)  /* Arg: uint8_t* pointer*/
+#define USBCIOC_RESET         _USBCIOC(0x0007)  /* Arg: None */
+#define USBCIOC_SET_POLL_MODE _USBCIOC(0x0008)  /* Arg: uint8_t value */
 
 /****************************************************************************
  * Public Types
