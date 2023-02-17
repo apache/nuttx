@@ -493,6 +493,12 @@ static const char *g_white_list[] =
   "FlushConsoleInputBuffer",
   "GetNumberOfConsoleInputEvents",
 
+  /* Ref:
+   * apps/testing/drivertest/drivertest_xxx.c
+   */
+
+  "CMUnitTest",
+
   NULL
 };
 
