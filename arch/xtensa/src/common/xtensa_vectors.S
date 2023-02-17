@@ -242,7 +242,7 @@ _double_exception_vector:
 	break	1, 4							/* Unhandled double exception */
 #endif
 
-	/* Can't use excetpion_entry because there is no relationship between EPC1
+	/* Can't use exception_entry because there is no relationship between EPC1
 	 * DEPC and the current level.  This can be handled by a separate ifeq
 	 * block in the macro, however this part is not used, so let's not add
 	 * this special case until we have an application for it.

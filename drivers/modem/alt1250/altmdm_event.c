@@ -143,7 +143,7 @@ uint32_t altmdm_event_wait(FAR struct altmdm_event_s *evt,
 
       leave_critical_section(flags);
 
-      /* Wait for any event is occured related on the semaphore.. */
+      /* Wait for any event is occurred related on the semaphore.. */
 
       if (timeout_ms > 0)
         {

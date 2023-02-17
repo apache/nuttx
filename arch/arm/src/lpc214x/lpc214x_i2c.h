@@ -83,13 +83,13 @@
 #  define I2C_STAT_MXSLAWNAK     (4 << I2C_STAT_SHIFT)  /* SLA+W transmitted + NAK received */
 #  define I2C_STAT_MXDATAACK     (5 << I2C_STAT_SHIFT)  /* Data transmitted + ACK received */
 #  define I2C_STAT_MXDATANAK     (6 << I2C_STAT_SHIFT)  /* Data transmitted + NAK received */
-#  define I2C_STAT_MXARBLOST     (7 << I2C_STAT_SHIFT)  /* Abritration lost in SLA+W or data */
+#  define I2C_STAT_MXARBLOST     (7 << I2C_STAT_SHIFT)  /* Arbitration lost in SLA+W or data */
 
 /* Master receive mode */
 
 #  define I2C_STAT_MRSTART       (0 << I2C_STAT_SHIFT)  /* Start transmitted */
 #  define I2C_STAT_MRRSTART      (2 << I2C_STAT_SHIFT)  /* Repeated start transmitted */
-#  define I2C_STAT_MRARBLOST     (7 << I2C_STAT_SHIFT)  /* Abritration lost in NAK bit */
+#  define I2C_STAT_MRARBLOST     (7 << I2C_STAT_SHIFT)  /* Arbitration lost in NAK bit */
 #  define I2C_STAT_MRSLARACK     (8 << I2C_STAT_SHIFT)  /* SLA+R transmitted + ACK received */
 #  define I2C_STAT_MRSLARNAK     (9 << I2C_STAT_SHIFT)  /* SLA+R transmitted + NAK received */
 #  define I2C_STAT_MRDATAACK     (10 << I2C_STAT_SHIFT) /* Data received + send ACK */

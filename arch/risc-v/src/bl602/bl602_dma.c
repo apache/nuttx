@@ -269,7 +269,7 @@ int bl602_dma_channel_start(uint8_t channel_id)
   /* Unmask interrupts for:
    *  - DMA_INT_TCOMPLETED
    *  - DMA_INT_ERR
-   * Note it is expected that the TC interupt to be enabled prior to this
+   * Note it is expected that the TC interrupt to be enabled prior to this
    * function call if needed as it is nominally controlled via the LLI
    * mechanism.
    */
@@ -333,7 +333,7 @@ int bl602_dma_channel_stop(uint8_t channel_id)
  * Name: riscv_dma_initialize
  *
  * Description:
- *   Intialize DMA controller.
+ *   Initialize DMA controller.
  *
  * Input Parameters:
  *   None
@@ -370,7 +370,7 @@ void weak_function riscv_dma_initialize(void)
       putreg32(0, BL602_DMA_CH_N_REG(BL602_DMA_CONFIG_OFFSET, ch));
     }
 
-  /* Attach DMA tranfer complete interrupt handler */
+  /* Attach DMA transfer complete interrupt handler */
 
   irq_attach(BL602_IRQ_DMA_ALL, bl602_dma_int_handler, NULL);
   up_enable_irq(BL602_IRQ_DMA_ALL);

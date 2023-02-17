@@ -186,7 +186,7 @@
 #define TWI_STAT_TX_SAW_ACK         (0xd0) /* Second Address byte+Write bit transmitted,ACK received */
 #define TWI_STAT_TX_SAW_NAK         (0xd8) /* Second Address byte+Write bit transmitted,ACK not received */
 
-#define TWI_STAT_IDLE               (0xf8) /* No relevant status infomation,INT_FLAG = 0 */
+#define TWI_STAT_IDLE               (0xf8) /* No relevant status information,INT_FLAG = 0 */
 
 /****************************************************************************
  * Public Types

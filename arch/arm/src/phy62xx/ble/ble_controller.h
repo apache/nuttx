@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _BLE_CONROLLER_H_
-#define _BLE_CONROLLER_H_
+#ifndef _BLE_CONTROLLER_H_
+#define _BLE_CONTROLLER_H_
 
 /****************************************************************************
  * Included Files
@@ -423,7 +423,7 @@ typedef struct
     uint32_t accessAddr;                             /* saved synchronization word to be used by Slave */
     uint32_t initCRC;                                /* connection CRC initialization value (24 bits) */
 
-    uint8_t          sleepClkAccuracy;               /* peer's sleep clock accurracy; used by own device to determine timer drift */
+    uint8_t          sleepClkAccuracy;               /* peer's sleep clock accuracy; used by own device to determine timer drift */
     connParam_t     curParam;
 
     /* current connection parameters */

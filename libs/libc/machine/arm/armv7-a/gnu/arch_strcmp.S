@@ -113,7 +113,7 @@ strcmp:
 	 * both cases the other bits in r0 are all zero.  For r3 the
 	 * interesting byte is at the other end of the word, but the
 	 * other bits are not necessarily zero.  We need a signed result
-	 * representing the differnece in the unsigned bytes, so for the
+	 * representing the difference in the unsigned bytes, so for the
 	 * little-endian case we can't just shift the interesting bits up.
 	 */
 #ifdef __ARMEB__

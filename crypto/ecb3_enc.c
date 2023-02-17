@@ -10,7 +10,7 @@
  * The implementation was written so as to conform with Netscapes SSL
  * specification.  This library and applications are
  * FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
- * as long as the following conditions are aheared to.
+ * as long as the following conditions are adhered to.
  *
  * Copyright remains Eric Young's, and as such any Copyright notices in
  * the code are not to be removed.  If this code is used in a product,

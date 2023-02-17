@@ -56,7 +56,7 @@ Header Files
 
 The interface to the binary loader is described in the header file
 ``include/nuttx/binfmt/binfmt.h``.
-A brief summary of the data structurs and interfaces prototyped in that
+A brief summary of the data structures and interfaces prototyped in that
 header file are listed below.
 
 Data Structures

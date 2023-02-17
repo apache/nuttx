@@ -550,7 +550,7 @@
 /* Input Terminal Types */
 
 #define ADC_INTERM_UNDEF            0x0200     /* Undefined Type */
-#define ADC_INTERM_MIC              0x0201     /* A generic microhpone */
+#define ADC_INTERM_MIC              0x0201     /* A generic microphone */
 #define ADC_INTERM_DESKTOP_MIC      0x0202     /* A desktop microphone */
 #define ADC_INTERM_PERSONAL_MIC     0x0203     /* Head-mounted or clip-on microphone */
 #define ADC_INTERM_OMNI_MIC         0x0204     /* Omni-directional microphone */

@@ -34,12 +34,12 @@
  *
  * Description:
  *   The task_setcanceltype() function atomically both sets the calling
- *   task's cancelability type to the indicated type and returns the
- *   previous cancelability type at the location referenced by oldtype
+ *   task's cancellability type to the indicated type and returns the
+ *   previous cancellability type at the location referenced by oldtype
  *   Legal values for type are TASK_CANCEL_DEFERRED and
  *   TASK_CANCEL_ASYNCHRONOUS.
  *
- *   The cancelability state and type of any newly created tasks are
+ *   The cancellability state and type of any newly created tasks are
  *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
  *
  ****************************************************************************/

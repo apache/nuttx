@@ -553,7 +553,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 /****************************************************************************
  * Name: am335x_uart0config, uart1config, uart2config, ..., uart5config
  *
- * Descrption:
+ * Description:
  *   Configure the UART
  *
  ****************************************************************************/

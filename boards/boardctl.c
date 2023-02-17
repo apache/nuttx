@@ -560,7 +560,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       /* CMD:           BOARDIOC_OS_SYMTAB
        * DESCRIPTION:   Select the OS symbol table.  This symbol table
        *                provides the symbol definitions exported by the OS to
-       *                kernal modules.
+       *                kernel modules.
        * ARG:           A pointer to an instance of struct boardioc_symtab_s
        * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
        * DEPENDENCIES:  None
