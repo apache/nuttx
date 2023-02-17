@@ -70,6 +70,19 @@
 
 static uint8_t g_last_regs[XCPTCONTEXT_SIZE];
 
+static FAR const char *g_policy[4] =
+{
+  "FIFO", "RR", "SPORADIC"
+};
+
+static FAR const char * const g_ttypenames[4] =
+{
+  "Task",
+  "pthread",
+  "Kthread",
+  "Invalid"
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -221,6 +234,8 @@ static void show_stacks(FAR struct tcb_s *rtcb)
 static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 {
   char args[64] = "";
+  char state[32];
+  FAR char *s;
 #ifdef CONFIG_STACK_COLORATION
   size_t stack_filled = 0;
   size_t stack_used;
@@ -255,13 +270,24 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 
   group_argvstr(tcb, args, sizeof(args));
 
+  /* get the task_state */
+
+  nxsched_get_stateinfo(tcb, state, sizeof(state));
+  if ((s = strchr(state, ',')) != NULL)
+    {
+      *s = ' ';
+    }
+
   /* Dump interesting properties of this task */
 
-  _alert("  %4d   %4d"
+  _alert("   %4d %5d"
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
-         "   %p"
+         " %3d %-8s %-7s %c%c%c"
+         " %-18s"
+         " %08" PRIx32
+         " %p"
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"
@@ -270,10 +296,21 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          "   %3zu.%01zu%%"
 #endif
          "   %s%s\n"
-         , tcb->pid, tcb->sched_priority
+         , tcb->pid
+         , tcb->group ? tcb->group->tg_pid : -1
 #ifdef CONFIG_SMP
          , tcb->cpu
 #endif
+         , tcb->sched_priority
+         , g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
+                    TCB_FLAG_POLICY_SHIFT]
+         , g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
+                        >> TCB_FLAG_TTYPE_SHIFT]
+         , tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-'
+         , tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-'
+         , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
+         , state
+         , tcb->sigprocmask
          , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
@@ -325,12 +362,15 @@ static void show_tasks(void)
 
   /* Dump interesting properties of each task in the crash environment */
 
-  _alert("   PID   PRI"
+  _alert("   PID GROUP"
 #ifdef CONFIG_SMP
          "   CPU"
 #endif
-         "    STACKBASE"
-         " STACKSIZE"
+         " PRI POLICY   TYPE    NPX"
+         " STATE   EVENT"
+         "      SIGMASK"
+         "  STACKBASE"
+         "  STACKSIZE"
 #ifdef CONFIG_STACK_COLORATION
          "      USED   FILLED "
 #endif
@@ -344,7 +384,11 @@ static void show_tasks(void)
 #  ifdef CONFIG_SMP
          "  ----"
 #  endif
-         "   %p"
+         " --- --------"
+         " ------- ---"
+         " ------- ----------"
+         " --------"
+         " %p"
          "   %7u"
 #  ifdef CONFIG_STACK_COLORATION
          "   %7zu   %3zu.%1zu%%%c"

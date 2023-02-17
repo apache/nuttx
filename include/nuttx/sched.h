@@ -991,8 +991,7 @@ int nxtask_delete(pid_t pid);
  *   scheduler.
  *
  * Input Parameters:
- *   tcb - The TCB for the task for the task (same as the nxtask_init
- *         argument).
+ *   tcb - The TCB for the task (same as the nxtask_init argument).
  *
  * Returned Value:
  *   None
@@ -1391,6 +1390,22 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
  ****************************************************************************/
 
 int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
+
+/****************************************************************************
+ * Name: nxsched_get_stateinfo
+ *
+ * Description:
+ *   Report information about a thread's state
+ *
+ * Input Parameters:
+ *   tcb    - The TCB for the task (same as the nxtask_init argument).
+ *   state  - User-provided location to return the state information.
+ *   length - The size of the state
+ *
+ ****************************************************************************/
+
+void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
+                           size_t length);
 
 /****************************************************************************
  * Name: nxsched_waitpid
