@@ -613,35 +613,6 @@ FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
 
 /****************************************************************************
- * Name: blockmtd_initialize
- *
- * Description:
- *   Create and initialize a BLOCK MTD device instance.
- *
- * Input Parameters:
- *   path - Path name of the block device backing the MTD device
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
-                                          size_t offset, size_t mtdlen,
-                                          int16_t sectsize,
-                                          int32_t erasesize);
-
-/****************************************************************************
- * Name: blockmtd_teardown
- *
- * Description:
- *   Teardown a previously created blockmtd device.
- *
- * Input Parameters:
- *   dev - Pointer to the mtd driver instance.
- *
- ****************************************************************************/
-
-void blockmtd_teardown(FAR struct mtd_dev_s *dev);
-
-/****************************************************************************
  * Name: filemtd_initialize
  *
  * Description:
