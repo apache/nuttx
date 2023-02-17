@@ -143,7 +143,7 @@ struct ramtron_dev_s
   FAR struct spi_dev_s *dev;               /* Saved SPI interface instance */
   uint8_t sectorshift;
   uint8_t pageshift;
-  uint16_t nsectors;
+  uint32_t nsectors;
   uint32_t npages;
   uint32_t speed;                          /* Overridable via ioctl */
   FAR const struct ramtron_parts_s *part;  /* Part instance */
