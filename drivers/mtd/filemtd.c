@@ -500,25 +500,43 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: blockmtd_initialize
+ * Name: filemtd_initialize
  *
  * Description:
- *   Create and initialize a BLOCK MTD device instance.
+ *   Create and initialize a FILE MTD device instance.
  *
  * Input Parameters:
- *   path - Path name of the block device backing the MTD device
+ *   path - Path name of the file backing the MTD device
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
-                                          size_t offset, size_t mtdlen,
-                                          int16_t sectsize,
-                                          int32_t erasesize)
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+                                         int16_t sectsize, int32_t erasesize)
 {
   FAR struct file_dev_s *priv;
+  struct stat sb;
   size_t nblocks;
+  size_t filelen;
   int mode;
   int ret;
+
+  /* Stat the file */
+
+  ret = nx_stat(path, &sb, 1);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to stat %s: %d\n", path, ret);
+      return NULL;
+    }
+
+  filelen = sb.st_size;
+  if (offset > filelen)
+    {
+      ferr("ERROR: Offset beyond end of file\n");
+      return NULL;
+    }
+
+  filelen = filelen - offset;
 
   /* Create an instance of the FILE MTD device state structure */
 
@@ -578,7 +596,7 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
 
   /* Force the size to be an even number of the erase block size */
 
-  nblocks = mtdlen / priv->erasesize;
+  nblocks = filelen / priv->erasesize;
   if (nblocks < 3)
     {
       ferr("ERROR: Need to provide at least three full erase block\n");
@@ -607,17 +625,17 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
 }
 
 /****************************************************************************
- * Name: blockmtd_teardown
+ * Name: filemtd_teardown
  *
  * Description:
- *   Teardown a previously created blockmtd device.
+ *   Teardown a previously created filemtd device.
  *
  * Input Parameters:
  *   dev - Pointer to the mtd driver instance.
  *
  ****************************************************************************/
 
-void blockmtd_teardown(FAR struct mtd_dev_s *dev)
+void filemtd_teardown(FAR struct mtd_dev_s *dev)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
 
@@ -637,65 +655,10 @@ void blockmtd_teardown(FAR struct mtd_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: filemtd_initialize
- *
- * Description:
- *   Create and initialize a FILE MTD device instance.
- *
- * Input Parameters:
- *   path - Path name of the file backing the MTD device
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
-                                         int16_t sectsize, int32_t erasesize)
-{
-  size_t filelen;
-  struct stat sb;
-  int ret;
-
-  /* Stat the file */
-
-  ret = nx_stat(path, &sb, 1);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to stat %s: %d\n", path, ret);
-      return NULL;
-    }
-
-  filelen = sb.st_size;
-
-  if (offset > filelen)
-    {
-      ferr("ERROR: Offset beyond end of file\n");
-      return NULL;
-    }
-
-  return blockmtd_initialize(path, offset, filelen - offset, sectsize,
-                             erasesize);
-}
-
-/****************************************************************************
- * Name: filemtd_teardown
- *
- * Description:
- *   Teardown a previously created filemtd device.
- *
- * Input Parameters:
- *   dev - Pointer to the mtd driver instance.
- *
- ****************************************************************************/
-
-void filemtd_teardown(FAR struct mtd_dev_s *dev)
-{
-  blockmtd_teardown(dev);
-}
-
-/****************************************************************************
  * Name: filemtd_isfilemtd
  *
  * Description:
- *   Tests if the provided mtd is a filemtd or blockmtd device.
+ *   Tests if the provided mtd is a filemtd device.
  *
  * Input Parameters:
  *   mtd - Pointer to the mtd.
