@@ -1721,7 +1721,7 @@ static int fusb302_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
     break;
 
-  case USBCIOC_SET_MODE:
+  case USBCIOC_SET_POLL_MODE:
     {
       ret = fusb302_set_mode(priv, (uint8_t)arg);
     }
