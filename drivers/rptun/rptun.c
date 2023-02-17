@@ -738,9 +738,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
         }
     }
 
-  /* Add priv to list */
-
-  metal_list_add_tail(&g_rptun_priv, &priv->node);
   nxrmutex_unlock(&g_rptun_lockcb);
 
   virtqueue_enable_cb(priv->rvdev.svq);
@@ -1068,6 +1065,11 @@ int rpmsg_register_callback(FAR void *priv_,
       FAR struct rptun_priv_s *priv;
 
       priv = metal_container_of(node, struct rptun_priv_s, node);
+      if (priv->rproc.state != RPROC_RUNNING)
+        {
+          continue;
+        }
+
       if (device_created)
         {
           device_created(&priv->rvdev.rdev, priv_);
@@ -1144,7 +1146,11 @@ void rpmsg_unregister_callback(FAR void *priv_,
 
           priv = metal_container_of(pnode,
                                     struct rptun_priv_s, node);
-          device_destroy(&priv->rvdev.rdev, priv_);
+
+          if (priv->rproc.state == RPROC_RUNNING)
+            {
+              device_destroy(&priv->rvdev.rdev, priv_);
+            }
         }
     }
 
@@ -1221,6 +1227,12 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 #endif
 
   nxsem_init(&priv->semtx, 0, 0);
+
+  /* Add priv to list */
+
+  nxrmutex_lock(&g_rptun_lockcb);
+  metal_list_add_tail(&g_rptun_priv, &priv->node);
+  nxrmutex_unlock(&g_rptun_lockcb);
 
   return OK;
 
