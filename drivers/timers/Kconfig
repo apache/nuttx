@@ -9,6 +9,10 @@ config ARCH_HAVE_PWM_PULSECOUNT
 	bool
 	default n
 
+config ARCH_HAVE_PWM_OVERWRITE
+	bool
+	default n
+
 config ARCH_HAVE_PWM_MULTICHAN
 	bool
 	default n
@@ -31,6 +35,16 @@ config PWM_PULSECOUNT
 		This might be used, for example to support a stepper motor.  If the
 		hardware will support a fixed pulse count, then this configuration
 		should be set to enable the capability.
+
+config PWM_OVERWRITE
+	bool "PWM Overwrite Support"
+	default n
+	depends on ARCH_HAVE_PWM_OVERWRITE
+	---help---
+		Some hardware will support generation of a pin overwrite with 0 or
+		1 without the need to wait for an end of cycle. The overwrite is
+		controlled from an application level the same way duty cycle or
+		frequency is modified.
 
 config PWM_MULTICHAN
 	bool "PWM Multiple Output Channel Support"

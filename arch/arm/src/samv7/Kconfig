@@ -313,6 +313,7 @@ config SAMV7_PWM
 	bool
 	default n
 	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_PWM_OVERWRITE
 
 config SAMV7_HAVE_SDRAMC
 	bool
