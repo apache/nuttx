@@ -337,7 +337,7 @@ int sam_bringup(void)
   /* Initialize the HSMCI0 driver */
 
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR, GPIO_HSMCI0_CD,
-                             IRQ_HSMCI0_CD);
+                             IRQ_HSMCI0_CD, true);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
