@@ -77,7 +77,6 @@ config LIBC_LONG_LONG
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default n
-	depends on LIBC_FLOATINGPOINT || LIBC_LONG_LONG
 	---help---
 		Enables support for numbered arguments in printf.
 
