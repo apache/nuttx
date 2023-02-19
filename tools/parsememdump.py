@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # tools/parsememdump.py
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
