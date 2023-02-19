@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <limits.h>
 #include <stdint.h>
 #include <signal.h>
 #include <sys/time.h>
@@ -37,7 +38,7 @@
 
 /* Get the total number of descriptors that we will have to support */
 
-#define FD_SETSIZE 256
+#define FD_SETSIZE OPEN_MAX
 
 /* We will use a 32-bit bitsets to represent the set of descriptors.  How
  * many uint32_t's do we need to span all descriptors?

@@ -145,7 +145,7 @@ config LIBC_HOSTNAME
 
 config LIBC_OPEN_MAX
 	int "OPEN_MAX for this device"
-	default 255
+	default 256
 	---help---
 		The maximum number of files that a process can have open
 		at any time.  Must not be less than _POSIX_OPEN_MAX.
