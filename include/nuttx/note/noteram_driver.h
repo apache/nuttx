@@ -52,18 +52,18 @@
  *                          exist.
  */
 
-#ifdef CONFIG_DRIVER_NOTERAM
+#ifdef CONFIG_DRIVERS_NOTERAM
 #define NOTERAM_CLEAR           _NOTERAMIOC(0x01)
 #define NOTERAM_GETMODE         _NOTERAMIOC(0x02)
 #define NOTERAM_SETMODE         _NOTERAMIOC(0x03)
-#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 #define NOTERAM_GETTASKNAME     _NOTERAMIOC(0x04)
 #endif
 #endif
 
 /* Overwrite mode definitions */
 
-#ifdef CONFIG_DRIVER_NOTERAM
+#ifdef CONFIG_DRIVERS_NOTERAM
 #define NOTERAM_MODE_OVERWRITE_DISABLE      0
 #define NOTERAM_MODE_OVERWRITE_ENABLE       1
 #define NOTERAM_MODE_OVERWRITE_OVERFLOW     2
@@ -110,7 +110,7 @@ extern struct note_driver_s g_noteram_driver;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DRIVER_NOTERAM
+#ifdef CONFIG_DRIVERS_NOTERAM
 int noteram_register(void);
 #endif
 

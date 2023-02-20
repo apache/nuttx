@@ -65,7 +65,7 @@
  *                          note_filter_irq_s
  */
 
-#ifdef CONFIG_DRIVER_NOTECTL
+#ifdef CONFIG_DRIVERS_NOTECTL
 
 #define NOTECTL_GETMODE             _NOTECTLIOC(0x01)
 #define NOTECTL_SETMODE             _NOTECTLIOC(0x02)
@@ -105,7 +105,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DRIVER_NOTECTL
+#ifdef CONFIG_DRIVERS_NOTECTL
 int notectl_register(void);
 #endif
 

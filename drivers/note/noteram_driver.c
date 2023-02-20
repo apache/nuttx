@@ -48,7 +48,7 @@ struct noteram_info_s
   volatile unsigned int ni_head;
   volatile unsigned int ni_tail;
   volatile unsigned int ni_read;
-  uint8_t ni_buffer[CONFIG_DRIVER_NOTERAM_BUFSIZE];
+  uint8_t ni_buffer[CONFIG_DRIVERS_NOTERAM_BUFSIZE];
 };
 
 /****************************************************************************
@@ -78,7 +78,7 @@ static const struct file_operations g_noteram_fops =
 
 static struct noteram_info_s g_noteram_info =
 {
-#ifdef CONFIG_DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
+#ifdef CONFIG_DRIVERS_NOTERAM_DEFAULT_NOOVERWRITE
   NOTERAM_MODE_OVERWRITE_DISABLE
 #else
   NOTERAM_MODE_OVERWRITE_ENABLE
@@ -149,9 +149,9 @@ static inline unsigned int noteram_next(unsigned int ndx,
                                         unsigned int offset)
 {
   ndx += offset;
-  if (ndx >= CONFIG_DRIVER_NOTERAM_BUFSIZE)
+  if (ndx >= CONFIG_DRIVERS_NOTERAM_BUFSIZE)
     {
-      ndx -= CONFIG_DRIVER_NOTERAM_BUFSIZE;
+      ndx -= CONFIG_DRIVERS_NOTERAM_BUFSIZE;
     }
 
   return ndx;
@@ -178,7 +178,7 @@ static unsigned int noteram_length(void)
 
   if (tail > head)
     {
-      head += CONFIG_DRIVER_NOTERAM_BUFSIZE;
+      head += CONFIG_DRIVERS_NOTERAM_BUFSIZE;
     }
 
   return head - tail;
@@ -205,7 +205,7 @@ static unsigned int noteram_unread_length(void)
 
   if (read > head)
     {
-      head += CONFIG_DRIVER_NOTERAM_BUFSIZE;
+      head += CONFIG_DRIVERS_NOTERAM_BUFSIZE;
     }
 
   return head - read;
@@ -236,7 +236,7 @@ static void noteram_remove(void)
   /* Get the tail index of the circular buffer */
 
   tail = g_noteram_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_DRIVER_NOTERAM_BUFSIZE);
+  DEBUGASSERT(tail < CONFIG_DRIVERS_NOTERAM_BUFSIZE);
 
   /* Get the length of the note at the tail index */
 
@@ -295,7 +295,7 @@ static ssize_t noteram_get(FAR uint8_t *buffer, size_t buflen)
   /* Get the read index of the circular buffer */
 
   read    = g_noteram_info.ni_read;
-  DEBUGASSERT(read < CONFIG_DRIVER_NOTERAM_BUFSIZE);
+  DEBUGASSERT(read < CONFIG_DRIVERS_NOTERAM_BUFSIZE);
 
   /* Get the length of the note at the read index */
 
@@ -370,7 +370,7 @@ static ssize_t noteram_size(void)
   /* Get the read index of the circular buffer */
 
   read = g_noteram_info.ni_read;
-  DEBUGASSERT(read < CONFIG_DRIVER_NOTERAM_BUFSIZE);
+  DEBUGASSERT(read < CONFIG_DRIVERS_NOTERAM_BUFSIZE);
 
   /* Get the length of the note at the read index */
 
@@ -580,7 +580,7 @@ static void noteram_add(FAR struct note_driver_s *drv,
 
   /* Get the index to the head of the circular buffer */
 
-  DEBUGASSERT(note != NULL && notelen < CONFIG_DRIVER_NOTERAM_BUFSIZE);
+  DEBUGASSERT(note != NULL && notelen < CONFIG_DRIVERS_NOTERAM_BUFSIZE);
   head = g_noteram_info.ni_head;
 
   /* Loop until all bytes have been transferred to the circular buffer */

@@ -48,7 +48,7 @@ extern "C"
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_DRIVER_NOTELOG
+#ifdef CONFIG_DRIVERS_NOTELOG
 extern struct note_driver_s g_notelog_driver;
 #endif
 
