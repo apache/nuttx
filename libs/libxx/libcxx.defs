@@ -71,6 +71,21 @@ libcxx/src/locale.cpp_CXXFLAGS += -Wno-shadow
 libcxx/src/filesystem/directory_iterator.cpp_CXXFLAGS += -Wno-shadow
 libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-shadow
 
+# Workaround the following warning with "GCC 12.2"
+#
+# ...
+# include/libcxx/string:2156:35: warning: '__temp' may be used uninitialized [-Wmaybe-uninitialized]
+#  2156 |         this->__throw_length_error();
+#       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+# include/libcxx/string:614:1: note: by argument 1 of type 'const std::__1::__basic_string_common<true>*' to 'void std::__1::__basic_string_common<<anonymous> >::__throw_length_error() const [with bool <anonymous> = true]' declared here
+#   614 | __basic_string_common<__b>::__throw_length_error() const
+#       | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+# include/libcxx/string:2676:32: note: '__temp' declared here
+#  2676 |             const basic_string __temp (__first, __last, __alloc());
+#       |                                ^~~~~~
+
+libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-maybe-uninitialized
+
 CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
