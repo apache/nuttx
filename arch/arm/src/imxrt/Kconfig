@@ -2070,7 +2070,8 @@ config IMXRT_ENET_NTXBUFFERS
 
 config IMXRT_ENET_ENHANCEDBD
 	bool # not optional
-	default n
+	default n if ARMV7M_DCACHE_WRITETHROUGH
+	default y if !ARMV7M_DCACHE_WRITETHROUGH
 
 config IMXRT_ENET_NETHIFS
 	int  # Not optional
