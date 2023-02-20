@@ -227,6 +227,17 @@ else
       ARCHOPTIMIZATION += -fno-builtin
     endif
   endif
+
+  # Workaround to skip -Warray-bounds check due to bug of GCC-12.2:
+  # Wrong warning array subscript [0] is outside array bounds:
+  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
+
+  GCCVER = $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+
+  ifeq ($(GCCVER),12.2.1)
+    ARCHOPTIMIZATION += --param=min-pagesize=0
+  endif
+
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
