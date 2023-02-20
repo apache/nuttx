@@ -159,7 +159,8 @@
  * REVISIT: The size of descriptors and buffers must also be in even units
  * of the cache line size  That is because the operations to clean and
  * invalidate the cache will operate on a full 32-byte cache line.  If
- * CONFIG_ENET_ENHANCEDBD is selected, then the size of the descriptor is
+ * CONFIG_IMXRT_ENET_ENHANCEDBD is selected,
+ * then the size of the descriptor is
  * 32-bytes (and probably already the correct size for the cache line);
  * otherwise, the size of the descriptors much smaller, only 8 bytes.
  */
@@ -665,7 +666,7 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
    */
 
   txdesc->length   = imxrt_swap16(priv->dev.d_len);
-#ifdef CONFIG_IMXRT_ENETENHANCEDBD
+#ifdef CONFIG_IMXRT_ENET_ENHANCEDBD
   txdesc->bdu      = 0x00000000;
   txdesc->status2  = TXDESC_INT | TXDESC_TS; /* | TXDESC_IINS | TXDESC_PINS; */
 #endif
@@ -1343,7 +1344,7 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Select legacy of enhanced buffer descriptor format */
 
-#ifdef CONFIG_IMXRT_ENETENHANCEDBD
+#ifdef CONFIG_IMXRT_ENET_ENHANCEDBD
   imxrt_enet_putreg32(priv, ENET_ECR_EN1588, IMXRT_ENET_ECR_OFFSET);
 #else
   imxrt_enet_putreg32(priv, 0, IMXRT_ENET_ECR_OFFSET);
@@ -2608,7 +2609,7 @@ static void imxrt_initbuffers(struct imxrt_driver_s *priv)
       priv->txdesc[i].status1 = 0;
       priv->txdesc[i].length  = 0;
       priv->txdesc[i].data    = (uint8_t *)imxrt_swap32((uint32_t)addr);
-#ifdef CONFIG_IMXRT_ENETENHANCEDBD
+#ifdef CONFIG_IMXRT_ENET_ENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
       addr                   += ALIGNED_BUFSIZE;
@@ -2621,7 +2622,7 @@ static void imxrt_initbuffers(struct imxrt_driver_s *priv)
       priv->rxdesc[i].status1 = RXDESC_E;
       priv->rxdesc[i].length  = 0;
       priv->rxdesc[i].data    = (uint8_t *)imxrt_swap32((uint32_t)addr);
-#ifdef CONFIG_IMXRT_ENETENHANCEDBD
+#ifdef CONFIG_IMXRT_ENET_ENHANCEDBD
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
 #endif
