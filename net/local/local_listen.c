@@ -111,10 +111,6 @@ int local_listen(FAR struct socket *psock, int backlog)
 
   if (server->lc_state == LOCAL_STATE_BOUND)
     {
-      /* The connection should not reside in any other list */
-
-      DEBUGASSERT(server->lc_conn.node.flink == NULL);
-
       /* And change the server state to listing */
 
       server->lc_state = LOCAL_STATE_LISTENING;
