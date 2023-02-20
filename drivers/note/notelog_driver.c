@@ -308,13 +308,6 @@ static void notelog_cpu_resumed(FAR struct note_driver_s *drv,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-/* This does not work well... it interferes with the operation of the
- * simulated /dev/console device which, of course, does disable preemption
- * and does use critical sections.
- */
-
-#warning CONFIG_SCHED_INSTRUMENTATION_PREEMPTION is a bad idea
-
 static void notelog_premption(FAR struct note_driver_s *drv,
                               FAR struct tcb_s *tcb, bool locked)
 {
@@ -339,13 +332,6 @@ static void notelog_premption(FAR struct note_driver_s *drv,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-/* This does not work well... it interferes with the operation of the
- * simulated /dev/console device which, of course, does disable preemption
- * and does use critical sections.
- */
-
-#warning CONFIG_SCHED_INSTRUMENTATION_CSECTION is a bad idea
-
 static void notelog_csection(FAR struct note_driver_s *drv,
                              FAR struct tcb_s *tcb, bool enter)
 {
