@@ -954,6 +954,24 @@ not been converted to use the kconfig-frontends tools!  This will
 damage your configuration (see
 <https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf>).
 
+NuttX also supports kconfiglib(https://github.com/ulfalizer/Kconfiglib) by default,
+which is a Kconfig tool implemented in Python 2/3. Compared with kconfig-frontends,
+kconfiglib provides NuttX with the possibility of multi-platform support(configure
+NuttX in Winodws native/Visual Studio), and also kconfiglib has a stronger Kconfig
+syntax check, this will help developers to avoid some Kconfig syntax errors.
+Install kconfiglib via following command:
+
+    pip install kconfiglib
+
+If you are a working on Windows, which also need the support of windows-curses:
+
+    pip install windows-curses
+
+**NOTE**:  It should be noted that kconfiglib does not support **modules** attributes.
+(<https://github.com/ulfalizer/Kconfiglib/blob/master/kconfiglib.py#L3239-L3254>,
+the community seems to have stopped updating), if the features depends on
+`CONFIG_BUILD_LOADABLE`, kconfiglib may not be a good choice.
+
 How do we tell a new configuration from an old one? See "Incompatibilities
 with Older Configurations" below.
 
