@@ -84,8 +84,8 @@ static int mountpoint_filter(FAR struct inode *node,
        * name and the path to the directory containing the inode.
        */
 
-      pathlen = strlen(dirpath);
-      namlen  = strlen(node->i_name) + 1;
+      pathlen = strnlen(dirpath, PATH_MAX);
+      namlen  = strnlen(node->i_name, PATH_MAX) + 1;
 
       /* Make sure that this would not exceed the maximum path length */
 
