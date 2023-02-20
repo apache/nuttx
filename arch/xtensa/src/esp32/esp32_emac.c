@@ -470,6 +470,29 @@ static int emac_read_mac(uint8_t *mac)
       return -EINVAL;
     }
 
+#ifdef CONFIG_ESP_MAC_ADDR_UNIVERSE_ETH
+  mac[5] += 3;
+#else
+  mac[5] += 1;
+  uint8_t tmp = mac[0];
+  for (i = 0; i < 64; i++)
+    {
+      mac[0] = tmp | 0x02;
+      mac[0] ^= i << 2;
+
+      if (mac[0] != tmp)
+        {
+          break;
+        }
+    }
+
+  if (i >= 64)
+    {
+      wlerr("Failed to generate ethernet MAC\n");
+      return -1;
+    }
+#endif
+
   return 0;
 }
 
