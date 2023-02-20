@@ -122,7 +122,7 @@ struct note_startalloc_s
 #  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
 #endif
 
-#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 struct note_taskname_info_s
 {
   uint8_t size;
@@ -134,7 +134,7 @@ struct note_taskname_s
 {
   size_t head;
   size_t tail;
-  char buffer[CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE];
+  char buffer[CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE];
 };
 #endif
 
@@ -158,18 +158,19 @@ static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
 #endif
 #endif
 
-FAR static struct note_driver_s *g_note_drivers[CONFIG_DRIVER_NOTE_MAX + 1] =
+FAR static struct note_driver_s *
+  g_note_drivers[CONFIG_DRIVERS_NOTE_MAX + 1] =
 {
-#ifdef CONFIG_DRIVER_NOTERAM
+#ifdef CONFIG_DRIVERS_NOTERAM
   &g_noteram_driver,
 #endif
-#ifdef CONFIG_DRIVER_NOTELOG
+#ifdef CONFIG_DRIVERS_NOTELOG
   &g_notelog_driver,
 #endif
   NULL
 };
 
-#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 static struct note_taskname_s g_note_taskname;
 #endif
 
@@ -464,7 +465,7 @@ static inline int note_isenabled_dump(void)
 }
 #endif
 
-#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 
 /****************************************************************************
  * Name: note_find_taskname
@@ -496,9 +497,9 @@ static FAR struct note_taskname_info_s *note_find_taskname(pid_t pid)
         }
 
       n += ti->size;
-      if (n >= CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE)
+      if (n >= CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE)
         {
-          n -= CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE;
+          n -= CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE;
         }
     }
 
@@ -533,7 +534,7 @@ static void note_record_taskname(pid_t pid, FAR const char *name)
   tilen = sizeof(struct note_taskname_info_s) + namelen;
   DEBUGASSERT(tilen <= UCHAR_MAX);
 
-  skiplen = CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE - g_note_taskname.head;
+  skiplen = CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE - g_note_taskname.head;
   if (skiplen >= tilen + sizeof(struct note_taskname_info_s))
     {
       skiplen = 0; /* Have enough space at the tail - needn't skip */
@@ -541,7 +542,7 @@ static void note_record_taskname(pid_t pid, FAR const char *name)
 
   if (g_note_taskname.head >= g_note_taskname.tail)
     {
-      remain = CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE -
+      remain = CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE -
                (g_note_taskname.head - g_note_taskname.tail);
     }
   else
@@ -556,7 +557,7 @@ static void note_record_taskname(pid_t pid, FAR const char *name)
       ti = (FAR struct note_taskname_info_s *)
             &g_note_taskname.buffer[g_note_taskname.tail];
       g_note_taskname.tail = (g_note_taskname.tail + ti->size) %
-                             CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE;
+                             CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE;
       remain += ti->size;
     }
 
@@ -673,7 +674,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
   FAR struct note_driver_s **driver;
   bool formatted = false;
 
-#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
   note_record_taskname(tcb->pid, tcb->name);
 #endif
 
@@ -1861,7 +1862,7 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
-#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 
 /****************************************************************************
  * Name: note_get_taskname
@@ -1917,7 +1918,7 @@ int note_driver_register(FAR struct note_driver_s *driver)
   int i;
   DEBUGASSERT(driver);
 
-  for (i = 0; i < CONFIG_DRIVER_NOTE_MAX; i++)
+  for (i = 0; i < CONFIG_DRIVERS_NOTE_MAX; i++)
     {
       if (g_note_drivers[i] == NULL)
         {

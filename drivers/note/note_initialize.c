@@ -50,7 +50,7 @@ int note_initialize(void)
 {
   int ret = 0;
 
-#ifdef CONFIG_DRIVER_NOTERAM
+#ifdef CONFIG_DRIVERS_NOTERAM
   ret = noteram_register();
   if (ret < 0)
     {
@@ -58,7 +58,7 @@ int note_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_DRIVER_NOTECTL
+#ifdef CONFIG_DRIVERS_NOTECTL
   ret = notectl_register();
   if (ret < 0)
     {
