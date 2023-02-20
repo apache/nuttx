@@ -73,8 +73,20 @@ ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
-ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common -nostdinc++
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_ALL),y)
+  ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+endif
+
+ARCHCFLAGS += -fanalyzer -fno-common
+ARCHCXXFLAGS += -fanalyzer -fno-common -nostdinc++
 
 ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHCXXFLAGS += -Wall -Wshadow -Wundef
@@ -204,18 +216,6 @@ else
   else ifeq ($(ARCHCPUEXTFLAGS), imafdc)
     LLVM_CPUTYPE := sifive-u54
   endif
-endif
-
-ifeq ($(CONFIG_MM_KASAN_ALL),y)
-  ARCHOPTIMIZATION += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_MM_UBSAN_ALL),y)
-  ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
-endif
-
-ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
-  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
 endif
 
 # Default toolchain
