@@ -624,7 +624,7 @@ define kconfig_tweak_disable
 	kconfig-tweak --file $1 -u $2
 endef
 else
-  PURGE_MODULE_WARNING  = 2>&1 | grep -v "warning: the 'modules' option is not supported"
+  PURGE_MODULE_WARNING  = 2> >(grep -v "warning: the 'modules' option is not supported")
   KCONFIG_OLDCONFIG     = oldconfig ${PURGE_MODULE_WARNING}
   KCONFIG_OLDDEFCONFIG  = olddefconfig ${PURGE_MODULE_WARNING}
   KCONFIG_MENUCONFIG    = menuconfig ${PURGE_MODULE_WARNING}
