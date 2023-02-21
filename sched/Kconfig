@@ -1482,6 +1482,10 @@ config SIG_ABRT
 	int "SIGABRT"
 	default 6
 	---help---
+		The SIGABRT signal is sent to a process to tell it to abort, i.e. to
+		terminate. The signal is usually initiated by the process itself when
+		it calls abort function of the C Standard Library, but it can be sent
+		to the process from outside like any other signal.
 
 config SIG_BUS
 	int "SIGBUS"
