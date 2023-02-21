@@ -49,10 +49,6 @@
 #define bcopy(b1,b2,len) memmove(b2,b1,len)
 #endif
 
-#ifndef bzero /* See mm/README.txt */
-#define bzero(s,n)       memset(s,0,n)
-#endif
-
 #define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)
 #define strncasecmp_l(s1, s2, n, l) strncasecmp(s1, s2, n)
 
@@ -94,6 +90,8 @@ FAR char *rindex(FAR const char *s, int c);
 
 int strcasecmp(FAR const char *, FAR const char *);
 int strncasecmp(FAR const char *, FAR const char *, size_t);
+
+void bzero(FAR void *s, size_t n);
 
 #undef EXTERN
 #if defined(__cplusplus)
