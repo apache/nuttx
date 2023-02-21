@@ -335,7 +335,8 @@ static long_double decfloat(FAR char *ptr, FAR char **endptr)
         }
     }
 
-  if ((c | 32) == 'e')
+  if ((c | 32) == 'e' && (isdigit(*f) || ((*f == '+' || *f == '-') &&
+                                          (isdigit(*(f + 1))))))
     {
       num_decimal = scanexp(&f, 1) + num_decimal;
       if (num_decimal <= llong_min / 100)
