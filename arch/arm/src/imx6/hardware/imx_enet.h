@@ -645,7 +645,7 @@
 
 /* Legacy Buffer Descriptor */
 
-#ifdef CONFIG_ENET_ENHANCEDBD
+#ifdef CONFIG_IMX_ENET_ENHANCEDBD
 #ifdef IMX_USE_DBSWAP
 /* When DBSWP is used to swap the bytes in hardware, it is done 32-bits
  * at a time.  Therefore, all 16 bit elements need to be swapped to
@@ -680,7 +680,7 @@ struct enet_desc_s
   uint32_t reserved2;   /* unused */
 };
 #endif /* IMX_USE_DBSWAP */
-#else /* CONFIG_ENET_ENHANCEDBD */
+#else /* CONFIG_IMX_ENET_ENHANCEDBD */
 #ifdef IMX_USE_DBSWAP
 struct enet_desc_s
 {
@@ -696,6 +696,6 @@ struct enet_desc_s
   uint8_t  *data;       /* Buffer address */
 };
 #endif /* IMX_USE_DBSWAP */
-#endif /* CONFIG_ENET_ENHANCEDBD */
+#endif /* CONFIG_IMX_ENET_ENHANCEDBD */
 
 #endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_ENET_H */
