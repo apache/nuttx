@@ -63,8 +63,8 @@ void abort(void)
    * a conformant version of abort() at this time.  This version does not
    * signal the calling thread all.
    *
-   * exit() will flush and close all open files and terminate the thread.
+   * _exit() will close all open files and terminate the thread.
    */
 
-  exit(EXIT_FAILURE);
+  _exit(EXIT_FAILURE);
 }
