@@ -1058,6 +1058,7 @@ endif # DEBUG_WIRELESS
 config DEBUG_SCHED
 	bool "Scheduler Debug Features"
 	default n
+	depends on !SYSLOG_TIMESTAMP
 	---help---
 		Enable OS scheduler debug features.
 
