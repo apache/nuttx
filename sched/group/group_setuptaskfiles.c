@@ -28,6 +28,7 @@
 #include <assert.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/trace.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -57,11 +58,12 @@
 int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->cmn.group;
+  int ret = OK;
 #ifndef CONFIG_FDCLONE_DISABLE
   FAR struct tcb_s *rtcb = this_task();
-  int ret;
 #endif
 
+  sched_trace_begin();
   DEBUGASSERT(group);
 #ifndef CONFIG_DISABLE_PTHREAD
   DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
@@ -76,6 +78,7 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
   ret = files_duplist(&rtcb->group->tg_filelist, &group->tg_filelist);
   if (ret < 0)
     {
+      sched_trace_end();
       return ret;
     }
 #endif
@@ -83,8 +86,9 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
   /* Allocate file/socket streams for the new TCB */
 
 #ifdef CONFIG_FILE_STREAM
-  return group_setupstreams(tcb);
-#else
-  return OK;
+  ret = group_setupstreams(tcb);
 #endif
+
+  sched_trace_end();
+  return ret;
 }
