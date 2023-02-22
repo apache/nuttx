@@ -128,57 +128,52 @@
  * These are the semi-standard signal definitions:
  */
 
-#ifndef CONFIG_SIG_SIGUSR1
-#  define SIGUSR1       1  /* User signal 1 */
+#ifndef CONFIG_SIG_HUP
+#  define SIGHUP        1
 #else
-#  define SIGUSR1       CONFIG_SIG_SIGUSR1
+#  define SIGHUP        CONFIG_SIG_HUP
 #endif
 
-#ifndef CONFIG_SIG_SIGUSR2
-#  define SIGUSR2       2  /* User signal 2 */
+#ifndef CONFIG_SIG_INT
+#  define SIGINT        2
 #else
-#  define SIGUSR2       CONFIG_SIG_SIGUSR2
+#  define SIGINT        CONFIG_SIG_INT
 #endif
 
-#ifndef CONFIG_SIG_SIGALRM
-#  define SIGALRM       3  /* Default signal used with POSIX timers (used only */
-                           /* no other signal is provided) */
+#ifndef CONFIG_SIG_QUIT
+#  define SIGQUIT       3
 #else
-#  define SIGALRM       CONFIG_SIG_SIGALRM
+#  define SIGQUIT       CONFIG_SIG_QUIT
 #endif
 
-#ifdef CONFIG_SCHED_HAVE_PARENT
-#  ifndef CONFIG_SIG_SIGCHLD
-#    define SIGCHLD     4  /* Used by child threads to signal parent thread */
-#  else
-#    define SIGCHLD     CONFIG_SIG_SIGCHLD
-#  endif
-#endif
-
-#ifdef CONFIG_FS_AIO
-#  ifndef CONFIG_SIG_POLL
-#    define SIGPOLL     5  /* Sent when an asynchronous I/O event occurs */
-#  else
-#    define SIGPOLL     CONFIG_SIG_POLL
-#  endif
-#endif
-
-#ifndef CONFIG_SIG_STOP
-#  define SIGSTOP       6
+#ifndef CONFIG_SIG_ILL
+#  define SIGILL        4
 #else
-#  define SIGSTOP       CONFIG_SIG_STOP
+#  define SIGILL        CONFIG_SIG_ILL
 #endif
 
-#ifndef CONFIG_SIG_TSTP
-#  define SIGTSTP       7
+#ifndef CONFIG_SIG_TRAP
+#  define SIGTRAP       5
 #else
-#  define SIGTSTP       CONFIG_SIG_TSTP
+#  define SIGTRAP      CONFIG_SIG_TRAP
 #endif
 
-#ifndef CONFIG_SIG_CONT
-#  define SIGCONT       8
+#ifndef CONFIG_SIG_ABRT
+#  define SIGABRT       6
 #else
-#  define SIGCONT       CONFIG_SIG_CONT
+#  define SIGABRT      CONFIG_SIG_ABRT
+#endif
+
+#ifndef CONFIG_SIG_BUS
+#  define SIGBUS        7
+#else
+#  define SIGBUS        CONFIG_SIG_BUS
+#endif
+
+#ifndef CONFIG_SIG_FPE
+#  define SIGFPE        8
+#else
+#  define SIGFPE        CONFIG_SIG_FPE
 #endif
 
 #ifndef CONFIG_SIG_KILL
@@ -187,22 +182,22 @@
 #  define SIGKILL       CONFIG_SIG_KILL
 #endif
 
-#ifndef CONFIG_SIG_INT
-#  define SIGINT        10
+#ifndef CONFIG_SIG_USR1
+#  define SIGUSR1       10  /* User signal 1 */
 #else
-#  define SIGINT        CONFIG_SIG_INT
+#  define SIGUSR1       CONFIG_SIG_USR1
 #endif
 
-#ifndef CONFIG_SIG_QUIT
-#  define SIGQUIT       11
+#ifndef CONFIG_SIG_SEGV
+#  define SIGSEGV       11
 #else
-#  define SIGQUIT       CONFIG_SIG_QUIT
+#  define SIGSEGV       CONFIG_SIG_SEGV
 #endif
 
-#ifndef CONFIG_SIG_TERM
-#  define SIGTERM       12
+#ifndef CONFIG_SIG_USR2
+#  define SIGUSR2       12  /* User signal 2 */
 #else
-#  define SIGTERM       CONFIG_SIG_TERM
+#  define SIGUSR2       CONFIG_SIG_USR2
 #endif
 
 #ifndef CONFIG_SIG_PIPE
@@ -211,41 +206,96 @@
 #  define SIGPIPE       CONFIG_SIG_PIPE
 #endif
 
-#ifndef CONFIG_SIG_HUP
-#  define SIGHUP        14
+#ifndef CONFIG_SIG_ALRM
+#  define SIGALRM       14  /* Default signal used with POSIX timers (used only */
+                            /* no other signal is provided) */
 #else
-#  define SIGHUP        CONFIG_SIG_HUP
+#  define SIGALRM       CONFIG_SIG_ALRM
+#endif
+
+#ifndef CONFIG_SIG_TERM
+#  define SIGTERM       15
+#else
+#  define SIGTERM       CONFIG_SIG_TERM
+#endif
+
+#ifndef CONFIG_SIG_CHLD
+#  define SIGCHLD       17
+#else
+#  define SIGCHLD       CONFIG_SIG_CHLD
+#endif
+
+#ifndef CONFIG_SIG_CONT
+#  define SIGCONT       18
+#else
+#  define SIGCONT       CONFIG_SIG_CONT
+#endif
+
+#ifndef CONFIG_SIG_STOP
+#  define SIGSTOP       19
+#else
+#  define SIGSTOP       CONFIG_SIG_STOP
+#endif
+
+#ifndef CONFIG_SIG_TSTP
+#  define SIGTSTP       20
+#else
+#  define SIGTSTP       CONFIG_SIG_TSTP
 #endif
 
 #ifndef CONFIG_SIG_TTIN
-#  define SIGTTIN       15
+#  define SIGTTIN       21
 #else
 #  define SIGTTIN       CONFIG_SIG_TTIN
 #endif
 
-#ifndef CONFIG_SIG_FPE
-#  define SIGFPE        16
+#ifndef CONFIG_SIG_TTOU
+#  define SIGTTOU       22
 #else
-#  define SIGFPE       CONFIG_SIG_FPE
+#  define SIGTTOU       CONFIG_SIG_TTOU
 #endif
 
-#ifndef CONFIG_SIG_ILL
-#  define SIGILL        17
+#ifndef CONFIG_SIG_URG
+#  define SIGURG        23
 #else
-#  define SIGILL       CONFIG_SIG_ILL
+#  define SIGURG        CONFIG_SIG_URG
 #endif
 
-#ifndef CONFIG_SIG_SEGV
-#  define SIGSEGV       18
+#ifndef CONFIG_SIG_XCPU
+#  define SIGXCPU       24
 #else
-#  define SIGSEGV       CONFIG_SIG_SEGV
+#  define SIGXCPU       CONFIG_SIG_XCPU
+#endif
+
+#ifndef CONFIG_SIG_XFSZ
+#  define SIGXFSZ       25
+#else
+#  define SIGXFSZ       CONFIG_SIG_XFSZ
+#endif
+
+#ifndef CONFIG_SIG_VTALRM
+#  define SIGVTALRM     26
+#else
+#  define SIGVTALRM     CONFIG_SIG_VTALRM
+#endif
+
+#ifndef CONFIG_SIG_PROF
+#  define SIGPROF       27
+#else
+#  define SIGPROF       CONFIG_SIG_PROF
+#endif
+
+#ifndef CONFIG_SIG_POLL
+#  define SIGPOLL       29
+#else
+#  define SIGPOLL       CONFIG_SIG_POLL
 #endif
 
 /* The following are non-standard signal definitions */
 
 #ifndef CONFIG_DISABLE_PTHREAD
 #  ifndef CONFIG_SIG_SIGCONDTIMEDOUT
-#    define SIGCONDTIMEDOUT 19  /* Used in the implementation of pthread_cond_timedwait */
+#    define SIGCONDTIMEDOUT 30  /* Used in the implementation of pthread_cond_timedwait */
 #  else
 #    define SIGCONDTIMEDOUT CONFIG_SIG_SIGCONDTIMEDOUT
 #  endif
@@ -255,7 +305,7 @@
 
 #if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_PAGING)
 #  ifndef CONFIG_SIG_SIGWORK
-#    define SIGWORK     20  /* Used to wake up the work queue */
+#    define SIGWORK     31  /* Used to wake up the work queue */
 #  else
 #    define SIGWORK     CONFIG_SIG_SIGWORK
 #  endif

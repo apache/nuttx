@@ -105,31 +105,46 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
 
 static const struct nxsig_defaction_s g_defactions[] =
 {
+#ifdef CONFIG_SIG_SIGKILL_ACTION
+  { SIGHUP,    0,                nxsig_abnormal_termination },
+  { SIGINT,    0,                nxsig_abnormal_termination },
+  { SIGQUIT,   0,                nxsig_abnormal_termination },
+  { SIGILL,    0,                nxsig_abnormal_termination },
+  { SIGTRAP,   0,                nxsig_abnormal_termination },
+  { SIGABRT,   0,                nxsig_abnormal_termination },
+  { SIGBUS,    0,                nxsig_abnormal_termination },
+  { SIGFPE,    0,                nxsig_abnormal_termination },
+  { SIGKILL,   SIG_FLAG_NOCATCH, nxsig_abnormal_termination },
+  { SIGSEGV,   0,                nxsig_abnormal_termination },
+  { SIGTERM,   0,                nxsig_abnormal_termination },
+  { SIGXCPU,   0,                nxsig_abnormal_termination },
+  { SIGXFSZ,   0,                nxsig_abnormal_termination },
+#endif
 #ifdef CONFIG_SIG_SIGUSR1_ACTION
-  { SIGUSR1, 0,                nxsig_abnormal_termination },
+  { SIGUSR1,   0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGUSR2_ACTION
-  { SIGUSR2, 0,                nxsig_abnormal_termination },
-#endif
-#ifdef CONFIG_SIG_SIGALRM_ACTION
-  { SIGALRM, 0,                nxsig_abnormal_termination },
-#endif
-#ifdef CONFIG_SIG_SIGPOLL_ACTION
-  { SIGPOLL, 0,                nxsig_abnormal_termination },
-#endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-  { SIGSTOP, SIG_FLAG_NOCATCH, nxsig_stop_task },
-  { SIGTSTP, 0,                nxsig_stop_task },
-  { SIGCONT, SIG_FLAG_NOCATCH, nxsig_null_action },
-#endif
-#ifdef CONFIG_SIG_SIGKILL_ACTION
-  { SIGINT,  0,                nxsig_abnormal_termination },
-  { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination },
-  { SIGQUIT, 0,                nxsig_abnormal_termination },
-  { SIGTERM, 0,                nxsig_abnormal_termination },
+  { SIGUSR2,   0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGPIPE_ACTION
-  { SIGPIPE, 0,                nxsig_abnormal_termination }
+  { SIGPIPE,   0,                nxsig_abnormal_termination },
+#endif
+#ifdef CONFIG_SIG_SIGALRM_ACTION
+  { SIGALRM,   0,                nxsig_abnormal_termination },
+  { SIGVTALRM, 0,                nxsig_abnormal_termination },
+#endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  { SIGCONT,   SIG_FLAG_NOCATCH, nxsig_null_action },
+  { SIGSTOP,   SIG_FLAG_NOCATCH, nxsig_stop_task },
+  { SIGTSTP,   0,                nxsig_stop_task },
+  { SIGTTIN,   0,                nxsig_stop_task },
+  { SIGTTOU,   0,                nxsig_stop_task },
+#endif
+#ifdef CONFIG_SIG_SIGPROF_ACTION
+  { SIGPROF,   0,                nxsig_abnormal_termination },
+#endif
+#ifdef CONFIG_SIG_SIGPOLL_ACTION
+  { SIGPOLL,   0,                nxsig_abnormal_termination },
 #endif
 };
 
