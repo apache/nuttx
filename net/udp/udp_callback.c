@@ -79,6 +79,9 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
     {
       iob = iob_remove_queue(&conn->readahead);
       iob_free_chain(iob);
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.udp.drop++;
+#endif
     }
 #endif
 
