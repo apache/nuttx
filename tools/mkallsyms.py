@@ -101,7 +101,7 @@ class SymbolTables(object):
             if self.symbol_filter(symbol) is not None:
                 symbol_name = cxxfilt.demangle(symbol.name)
                 func_name = re.sub(r"\(.*$", "", symbol_name)
-                self.symbol_list.append((symbol["st_value"], func_name))
+                self.symbol_list.append((symbol["st_value"] & ~0x01, func_name))
         self.symbol_list = sorted(self.symbol_list, key=lambda item: item[0])
 
     def emitline(self, s=""):
