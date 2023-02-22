@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/trace.h>
 
 #include "irq/irq.h"
 
@@ -68,6 +69,8 @@ void irq_initialize(void)
 {
   int i;
 
+  sched_trace_begin();
+
   /* Point all interrupt vectors to the unexpected interrupt */
 
   for (i = 0; i < TAB_SIZE; i++)
@@ -82,4 +85,5 @@ void irq_initialize(void)
 #endif
 
   up_irqinitialize();
+  sched_trace_end();
 }

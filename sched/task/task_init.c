@@ -33,6 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/queue.h>
 #include <nuttx/sched.h>
+#include <nuttx/trace.h>
 
 #include "sched/sched.h"
 #include "environ/environ.h"
@@ -90,6 +91,8 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
   int ret;
 
+  sched_trace_begin();
+
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Only tasks and kernel threads can be initialized in this way */
 
@@ -110,6 +113,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   ret = group_allocate(tcb, tcb->cmn.flags);
   if (ret < 0)
     {
+      sched_trace_end();
       return ret;
     }
 
@@ -175,6 +179,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   /* Now we have enough in place that we can join the group */
 
   group_initialize(tcb);
+  sched_trace_end();
   return ret;
 
 errout_with_group:
@@ -200,6 +205,7 @@ errout_with_group:
 
   group_leave(&tcb->cmn);
 
+  sched_trace_end();
   return ret;
 }
 
