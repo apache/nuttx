@@ -182,6 +182,13 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
       if (ch == '\n' || ch == '\r')
 #endif
         {
+          /* Convert \r\n to \n */
+
+          if (nch > 0 && buf[nch - 1] == '\r')
+            {
+              --nch;
+            }
+
           if (keepnl)
             {
               /* Store newline is stored in the buffer */
@@ -201,7 +208,7 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
         {
           /* End of file with no data? */
 
-          if (!nch)
+          if (nch == 0)
             {
               /* Yes.. return NULL as the end of file mark */
 
