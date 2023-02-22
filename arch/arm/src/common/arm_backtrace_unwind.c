@@ -470,7 +470,11 @@ int unwind_frame(struct unwind_frame_s *frame)
 
   /* Check the personality routine */
 
-  if ((*ctrl.insn & 0xff000000) == 0x80000000)
+  if (((uintptr_t)ctrl.insn & 0x3) != 0)
+    {
+      return -1;
+    }
+  else if ((*ctrl.insn & 0xff000000) == 0x80000000)
     {
       ctrl.byte = 2;
       ctrl.entries = 1;
