@@ -175,7 +175,7 @@ command line but is primarily intended for use within NSH scripts
     [sequence of <cmd>]
   fi
 
-Where ``<cmd>`` is a `simple command <#cmdoverview>`__. The
+Where ``<cmd>`` is a `simple command <#command-overview>`__. The
 command success value of zero is treated true; a non-zero command
 failure value is treated false. The ```test`` <#cmdtest>`__
 command is frequently used for comparisons.
@@ -220,7 +220,7 @@ the ```sh`` <#cmdsh>`__ command).
         [sequence of <cmd>]
       done
 
-Where ``<cmd>`` is a `simple command <#cmdoverview>`__. The
+Where ``<cmd>`` is a `simple command <#command-overview>`__. The
 command success value of zero is treated true; a non-zero command
 failure value is treated false. The ```test`` <#cmdtest>`__
 command is frequently used for comparisons.
@@ -266,9 +266,9 @@ NSH Start-Up Script
 **NSH Start-Up Script**. NSH supports options to provide a start
 up script for NSH. In general this capability is enabled with
 ``CONFIG_NSH_ROMFSETC``, but has several other related
-configuration options as described with the `NSH-specific
-configuration settings <#nshconfiguration>`__. This capability
-also depends on:
+configuration options as described with the
+:doc:`NSH specific configuration settings <config>`.
+This capability also depends on:
 
   -  ``CONFIG_DISABLE_MOUNTPOINT`` not set
   -  ``CONFIG_FS_ROMFS`` enabled
@@ -330,8 +330,7 @@ start-up behavior, there are three things to study:
 
   #. **Configuration Options.** The additional
      ``CONFIG_NSH_ROMFSETC`` configuration options discussed with
-     the other `NSH-specific configuration
-     settings <#nshconfiguration>`__.
+     the other :doc:`NSH specific configuration settings <config>`.
   #. `tools/mkromfsimg.sh`` **Script**. The script
      ``tools/mkromfsimg.sh`` creates ``nsh_romfsimg.h``. It is not
      automatically executed. If you want to change the configuration
@@ -377,7 +376,7 @@ the final ``rc.sysinit``, and ``rc.sysinit.template`` to create the final
 ``rcS`` and (2) to generate the header file ``nsh_romfsimg.h``
 containing the ROMFS file system image.
 
-**Further Information**. See the section on `Customizing the
-NuttShell <#customizingnsh>`__ for additional, more detailed
+**Further Information**. See the section on 
+:doc:`Customizing the NuttShell <customizing>` for additional, more detailed
 information about the NSH start-up script and how to modify it.
 
