@@ -63,13 +63,13 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
             }
           else
             {
-              iob->io_len = 0;
               ret = OK;
             }
         }
       while (ret == -EINTR);
     }
 
+  iob->io_len = 0;
   return ret;
 }
 #endif
