@@ -87,6 +87,7 @@
 #define VRING_ALIGN              0x1000      /* Vring alignment           */
 #define VRING_NR                 256         /* Number of descriptors     */
 #define VRING_SIZE               612         /* Size of one descriptor    */
+#define VDEV_NOTIFYID            4           /* virtio device notify id   */
 
 #ifndef CONFIG_MPFS_IHC_RPMSG_CH2
 /* This is the RPMSG default channel used with only one RPMSG channel */
@@ -843,6 +844,7 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
                                                rpmsg_vdev);
       rsc->rpmsg_vdev.type          = RSC_VDEV;
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
+      rsc->rpmsg_vdev.notifyid      = VDEV_NOTIFYID;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
                                       1 << VIRTIO_RPMSG_F_ACK |
                                       VIRTIO_RING_F_EVENT_IDX;
