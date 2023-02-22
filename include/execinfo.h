@@ -25,8 +25,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/sched.h>
+
 #include <sys/types.h>
-#include <sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
