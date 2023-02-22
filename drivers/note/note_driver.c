@@ -237,11 +237,24 @@ static void note_common(FAR struct tcb_s *tcb,
 
   note->nc_length   = length;
   note->nc_type     = type;
-  note->nc_priority = tcb->sched_priority;
+
+  if (tcb == NULL)
+    {
+      note->nc_priority = CONFIG_INIT_PRIORITY;
 #ifdef CONFIG_SMP
-  note->nc_cpu      = tcb->cpu;
+      note->nc_cpu = 0;
 #endif
-  sched_note_flatten(note->nc_pid, &tcb->pid, sizeof(tcb->pid));
+      memset(note->nc_pid, 0, sizeof(tcb->pid));
+    }
+  else
+    {
+      note->nc_priority = tcb->sched_priority;
+#ifdef CONFIG_SMP
+      note->nc_cpu      = tcb->cpu;
+#endif
+      sched_note_flatten(note->nc_pid, &tcb->pid, sizeof(tcb->pid));
+    }
+
   sched_note_flatten(note->nc_systime_nsec, &ts.tv_nsec, sizeof(ts.tv_nsec));
   sched_note_flatten(note->nc_systime_sec, &ts.tv_sec, sizeof(ts.tv_sec));
 }
