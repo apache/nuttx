@@ -24,7 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <poll.h>
 #include <string.h>
 
@@ -1048,9 +1050,15 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
       ret = psock_poll(&priv->socks[pfds->fd], pfds, false);
     }
 
-  net_unlock();
+  if (ret < 0)
+    {
+      nerr("psock_poll failed. ret %d domain %u type %u pfds->fd %d"
+           ", pfds->events %08" PRIx32 ", pfds->revents %08" PRIx32,
+           ret, priv->socks[pfds->fd].s_domain, priv->socks[pfds->fd].s_type,
+           pfds->fd, pfds->events, pfds->revents);
+    }
 
-  DEBUGASSERT(ret >= 0);
+  net_unlock();
 }
 
 static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
