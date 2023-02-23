@@ -754,7 +754,7 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
                * then deallocate it.
                */
 
-              up_disable_irq(wdt->cpuint);
+              up_disable_irq(wdt->irq);
               irq_detach(wdt->irq);
               esp32c3_teardown_irq(wdt->periph, wdt->cpuint);
               wdt->cpuint = -ENOMEM;
@@ -818,7 +818,7 @@ static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
 
           /* Enable the CPU interrupt that is linked to the WDT. */
 
-          up_enable_irq(wdt->cpuint);
+          up_enable_irq(wdt->irq);
         }
     }
 
