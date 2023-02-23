@@ -291,6 +291,8 @@
 #  define SIGPOLL       CONFIG_SIG_POLL
 #endif
 
+#define   SIGIO         SIGPOLL
+
 /* The following are non-standard signal definitions */
 
 #ifndef CONFIG_DISABLE_PTHREAD
