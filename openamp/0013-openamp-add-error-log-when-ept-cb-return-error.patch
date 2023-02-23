@@ -1,0 +1,33 @@
+From c47e2e05a8402997657bd0680621ffcecaaa9971 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Fri, 10 Feb 2023 17:05:54 +0800
+Subject: [PATCH 3/6] openamp: add error log when ept->cb return error
+
+Change-Id: Id750dc9518a7f861a74965c34a6491e5b3463e95
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index fcf24cd..357d821 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -571,8 +571,12 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 			status = ept->cb(ept, RPMSG_LOCATE_DATA(rp_hdr),
+ 					 rp_hdr->len, rp_hdr->src, ept->priv);
+ 
+-			RPMSG_ASSERT(status >= 0,
+-				     "unexpected callback status\r\n");
++			if (status < 0) {
++				metal_log(METAL_LOG_ERROR,
++					  "ept %s, cb %p, return status %d\r\n",
++					  ept->name, ept->cb, status);
++				RPMSG_ASSERT(0, "unexpected callback status\r\n");
++			}
+ 		}
+ 
+ 		metal_mutex_acquire(&rdev->lock);
+-- 
+2.25.1
+

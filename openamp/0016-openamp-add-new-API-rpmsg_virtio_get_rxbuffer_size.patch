@@ -1,0 +1,105 @@
+From b03e398fb8c2016029500f058e1cdaa7cc4cb92f Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Mon, 20 Feb 2023 21:08:35 +0800
+Subject: [PATCH 6/6] openamp: add new API rpmsg_virtio_get_rxbuffer_size()
+
+Change-Id: If98c7260be8524627cd1c272c164c22a9548198c
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/include/openamp/rpmsg_virtio.h | 11 ++++++++++-
+ lib/rpmsg/rpmsg_virtio.c           | 25 +++++++++++++++++++++----
+ 2 files changed, 31 insertions(+), 5 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 11cb6df..bdc6cc6 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -158,7 +158,7 @@ rpmsg_virtio_notify_wait(struct rpmsg_virtio_device *rvdev,
+ }
+ 
+ /**
+- * rpmsg_virtio_get_buffer_size - get rpmsg virtio buffer size
++ * rpmsg_virtio_get_buffer_size - get rpmsg virtio Tx buffer size
+  *
+  * @rdev - pointer to the rpmsg device
+  *
+@@ -166,6 +166,15 @@ rpmsg_virtio_notify_wait(struct rpmsg_virtio_device *rvdev,
+  */
+ int rpmsg_virtio_get_buffer_size(struct rpmsg_device *rdev);
+ 
++/**
++ * rpmsg_virtio_get_rx_buffer_size - get rpmsg virtio Rx buffer size
++ *
++ * @rdev - pointer to the rpmsg device
++ *
++ * @return - next available buffer size for text, negative value for failure
++ */
++int rpmsg_virtio_get_rx_buffer_size(struct rpmsg_device *rdev);
++
+ /**
+  * rpmsg_init_vdev - initialize rpmsg virtio device
+  * Host side:
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 13fd496..c44b4fd 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -275,11 +275,12 @@ static int rpmsg_virtio_wait_remote_ready(struct rpmsg_virtio_device *rvdev)
+  * Returns buffer size available for sending messages.
+  *
+  * @param rvdev - pointer to rpmsg device
++ *        tx    - tx or rx
+  *
+  * @return - buffer size
+  *
+  */
+-static int _rpmsg_virtio_get_buffer_size(struct rpmsg_virtio_device *rvdev)
++static int _rpmsg_virtio_get_buffer_size(struct rpmsg_virtio_device *rvdev, bool tx)
+ {
+ 	unsigned int role = rpmsg_virtio_get_role(rvdev);
+ 	int length = 0;
+@@ -290,7 +291,9 @@ static int _rpmsg_virtio_get_buffer_size(struct rpmsg_virtio_device *rvdev)
+ 		 * If device role is host then buffers are provided by us,
+ 		 * so just provide the macro.
+ 		 */
+-		length = rvdev->config.h2r_buf_size - sizeof(struct rpmsg_hdr);
++		length =
++		    tx ? rvdev->config.h2r_buf_size : rvdev->config.r2h_buf_size
++		    - sizeof(struct rpmsg_hdr);
+ 	}
+ #endif /*!VIRTIO_DEVICE_ONLY*/
+ 
+@@ -301,7 +304,7 @@ static int _rpmsg_virtio_get_buffer_size(struct rpmsg_virtio_device *rvdev)
+ 		 * so get the buffer size from the virtqueue.
+ 		 */
+ 		length =
+-		    (int)virtqueue_get_desc_size(rvdev->svq) -
++		    (int)virtqueue_get_desc_size(tx ? rvdev->svq : rvdev->rvq) -
+ 		    sizeof(struct rpmsg_hdr);
+ 	}
+ #endif /*!VIRTIO_DRIVER_ONLY*/
+@@ -700,7 +703,21 @@ int rpmsg_virtio_get_buffer_size(struct rpmsg_device *rdev)
+ 		return RPMSG_ERR_PARAM;
+ 	metal_mutex_acquire(&rdev->lock);
+ 	rvdev = (struct rpmsg_virtio_device *)rdev;
+-	size = _rpmsg_virtio_get_buffer_size(rvdev);
++	size = _rpmsg_virtio_get_buffer_size(rvdev, true);
++	metal_mutex_release(&rdev->lock);
++	return size;
++}
++
++int rpmsg_virtio_get_rx_buffer_size(struct rpmsg_device *rdev)
++{
++	int size;
++	struct rpmsg_virtio_device *rvdev;
++
++	if (!rdev)
++		return RPMSG_ERR_PARAM;
++	metal_mutex_acquire(&rdev->lock);
++	rvdev = (struct rpmsg_virtio_device *)rdev;
++	size = _rpmsg_virtio_get_buffer_size(rvdev, false);
+ 	metal_mutex_release(&rdev->lock);
+ 	return size;
+ }
+-- 
+2.25.1
+

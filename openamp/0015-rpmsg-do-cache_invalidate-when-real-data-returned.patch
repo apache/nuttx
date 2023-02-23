@@ -1,0 +1,28 @@
+From 7588713482056dcb8395da1d6fa470559f139e94 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Thu, 16 Feb 2023 17:41:57 +0800
+Subject: [PATCH 5/6] rpmsg: do cache_invalidate() when real data returned
+
+Change-Id: Ib5788c3974e40421deda2d100a46f61348ccafbd
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 1a510e6..3db86e6 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -239,7 +239,8 @@ static void *rpmsg_virtio_get_rx_buffer(struct rpmsg_virtio_device *rvdev,
+ 
+ #ifdef VIRTIO_CACHED_BUFFERS
+ 	/* Invalidate the buffer before returning it */
+-	metal_cache_invalidate(data, *len);
++	if (data)
++		metal_cache_invalidate(data, *len);
+ #endif /* VIRTIO_CACHED_BUFFERS */
+ 
+ 	return data;
+-- 
+2.25.1
+
