@@ -973,6 +973,14 @@ config SCHED_INSTRUMENTATION_CPUSET
 	---help---
 		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
 
+config SCHED_INSTRUMENTATION_PERFCOUNT
+	bool "Use perf count for instrumentation"
+	default n
+	---help---
+		Enabling this option will use perfcount as the clock source for tv_nsec
+		to achieve higher precision time.
+		This requires calling up_perf_init at system startup.
+
 config SCHED_INSTRUMENTATION_FILTER
 	bool "Instrumentation filter"
 	default n
