@@ -42,10 +42,6 @@ The following configurations are configurable parameters for trace.
     - Bit 2 = Enable IRQ instrumentation
     - Bit 3 = Enable collecting syscall arguments
 
-- ``CONFIG_SCHED_INSTRUMENTATION_HIRES``
-
-  - If enabled, use higher resolution system timer for instrumentation.
-
 - ``CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE``
 
   - Specify the task name buffer size in bytes.

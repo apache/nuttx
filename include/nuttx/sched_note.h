@@ -217,12 +217,13 @@ struct note_common_s
 #endif
   uint8_t nc_pid[sizeof(pid_t)]; /* ID of the thread/task */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
-  uint8_t nc_systime_sec[sizeof(time_t)]; /* Time when note was buffered (sec) */
-  uint8_t nc_systime_nsec[sizeof(long)];  /* Time when note was buffered (nsec) */
-#else
-  uint8_t nc_systime[sizeof(clock_t)]; /* Time when note was buffered */
-#endif
+  /* Time when note was buffered (sec) */
+
+  uint8_t nc_systime_sec[sizeof(time_t)];
+
+  /* Time when note was buffered (nsec) */
+
+  uint8_t nc_systime_nsec[sizeof(long)];
 };
 
 /* This is the specific form of the NOTE_START note */
