@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifndef __KERNEL__
+#if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 
 /****************************************************************************
  * Private Data
