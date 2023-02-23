@@ -223,8 +223,15 @@ static void note_common(FAR struct tcb_s *tcb,
                         FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PERFCOUNT
+  struct timespec perftime;
+#endif
   struct timespec ts;
   clock_systime_timespec(&ts);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PERFCOUNT
+  up_perf_convert(up_perf_gettime(), &perftime);
+  ts.tv_nsec = perftime.tv_nsec;
+#endif
 
   /* Save all of the common fields */
 
