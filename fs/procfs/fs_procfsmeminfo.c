@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <ctype.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
@@ -523,6 +524,11 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
         break;
 #if CONFIG_MM_BACKTRACE >= 0
       default:
+        if (!isdigit(buffer[0]))
+          {
+            return buflen;
+          }
+
         pid = atoi(buffer);
 #endif
     }
