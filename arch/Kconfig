@@ -104,7 +104,6 @@ config ARCH_SIM
 	select ARCH_SETJMP_H
 	select ALARM_ARCH
 	select ONESHOT
-	select SCHED_TICKLESS
 	select SCHED_HPWORK
 	select SERIAL_CONSOLE
 	select SERIAL_IFLOWCONTROL
