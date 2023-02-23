@@ -710,6 +710,8 @@ config MPFS_CRYPTO
 	bool "Enable MPFS HW crypto"
 	default n
 
-#if MPFS_CRYPTO
-source crypto/Kconfig
-#endif
+if MPFS_CRYPTO
+config MPFS_CRYPTO_DMA
+	bool "Enable MPFS HW crypto DMA"
+	default y
+endif
