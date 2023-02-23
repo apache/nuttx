@@ -973,12 +973,6 @@ config SCHED_INSTRUMENTATION_CPUSET
 	---help---
 		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
 
-config SCHED_INSTRUMENTATION_HIRES
-	bool "Use Hi-Res RTC for instrumentation"
-	default n
-	---help---
-		Use higher resolution system timer for instrumentation.
-
 config SCHED_INSTRUMENTATION_FILTER
 	bool "Instrumentation filter"
 	default n
