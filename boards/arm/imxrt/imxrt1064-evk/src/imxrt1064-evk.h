@@ -40,6 +40,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#define HAVE_PROGMEM_CHARDEV 1
+
+#if !defined(CONFIG_IMXRT_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
+#  undef HAVE_PROGMEM_CHARDEV
+#endif
+
 /* Touchscreen definitions **************************************************/
 
 /* The IMXRT 1050/1060 have connectors for the LCD model RK043FN02H-CT.
@@ -315,6 +323,13 @@ int imxrt_usbhost_initialize(void);
 
 #ifdef CONFIG_IMXRT_FLEXSPI
 int imxrt_flexspi_nor_initialize(void);
+#endif
+
+#ifdef CONFIG_MTD
+
+#ifdef HAVE_PROGMEM_CHARDEV
+int imxrt_progmem_init(void);
+#endif  /* HAVE_PROGMEM_CHARDEV */
 #endif
 
 #endif /* __ASSEMBLY__ */

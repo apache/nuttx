@@ -22,10 +22,18 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
-  LDSCRIPT = flash.ld
-else ifeq ($(CONFIG_BOOT_RUNFROMISRAM),y)
-  LDSCRIPT = flash-ocram.ld
+ifeq ($(CONFIG_IMXRT_APP_FORMAT_MCUBOOT),y)
+  ifeq ($(CONFIG_MCUBOOT_BOOTLOADER),y)
+    LDSCRIPT = flash-mcuboot-loader.ld
+  else
+    LDSCRIPT = flash-mcuboot-app.ld
+  endif
+else
+  ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
+    LDSCRIPT = flash.ld
+  else ifeq ($(CONFIG_BOOT_RUNFROMISRAM),y)
+    LDSCRIPT = flash-ocram.ld
+  endif
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
