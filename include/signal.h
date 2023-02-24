@@ -51,6 +51,7 @@
 #define SIGRTMIN        (SIGSTDMAX + 1) /* First real time signal */
 #define SIGRTMAX        MAX_SIGNO       /* Last real time signal */
 #define _NSIG           (MAX_SIGNO + 1) /* Biggest signal number + 1 */
+#define NSIG            _NSIG           /* _NSIG variant commonly used */
 
 /* sigset_t is represented as an array of 32-b unsigned integers.
  * _SIGSET_NELEM is the allocated isze of the array
