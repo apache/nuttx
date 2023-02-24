@@ -32,19 +32,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_wdt_early_deinit
+ * Name: esp_wdt_initialize
  *
  * Description:
- *   Disable watchdog timers enabled by the bootloader.
+ *   Initialize the watchdog timer.
  *
  * Input Parameters:
  *   None.
  *
- * Returned Value:
- *   None.
+ * Returned Values:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void esp_wdt_early_deinit(void);
+int esp_wdt_initialize(void);
 
 #endif /* __ARCH_RISCV_SRC_ESPRESSIF_ESP_WDT_H */

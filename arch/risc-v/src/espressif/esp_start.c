@@ -35,11 +35,11 @@
 #include "esp_libc_stubs.h"
 #include "esp_lowputc.h"
 #include "esp_start.h"
-#include "esp_wdt.h"
 
 #include "brownout.h"
 #include "esp_clk_internal.h"
 #include "esp_cpu.h"
+#include "hal/wdt_hal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,9 +120,15 @@ void __esp_start(void)
 
   showprogress('B');
 
-  /* Disable watchdog timers enabled by the bootloader */
+  /* The 2nd stage bootloader enables RTC WDT to monitor any issues that may
+   * prevent the startup sequence from finishing correctly. Hence disable it
+   * as NuttX is about to start.
+   */
 
-  esp_wdt_early_deinit();
+  wdt_hal_context_t rwdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
+  wdt_hal_write_protect_disable(&rwdt_ctx);
+  wdt_hal_disable(&rwdt_ctx);
+  wdt_hal_write_protect_enable(&rwdt_ctx);
 
   /* Initialize onboard resources */
 
