@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/note/note_initialize.c
+ * include/nuttx/note/notesnap_driver.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,70 +18,38 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NOTESNAP_DRIVER_H
+#define __INCLUDE_NUTTX_NOTESNAP_DRIVER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/note/note_driver.h>
-#include <nuttx/note/noteram_driver.h>
-#include <nuttx/note/notectl_driver.h>
-#include <nuttx/note/notesnap_driver.h>
-#include <nuttx/segger/sysview.h>
+#include <nuttx/streams.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: note_initialize
- *
- * Description:
- *   Register sched note related drivers at /dev folder that can be used by
- *   an application to read or filter the note data.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero on succress. A negated errno value is returned on a failure.
- *
- ****************************************************************************/
-
-int note_initialize(void)
-{
-  int ret = 0;
-
-#ifdef CONFIG_DRIVERS_NOTERAM
-  ret = noteram_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_DRIVERS_NOTECTL
-  ret = notectl_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_SEGGER_SYSVIEW
-  ret = note_sysview_initialize();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
 
 #ifdef CONFIG_DRIVERS_NOTESNAP
-  ret = notesnap_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
 
-  return ret;
-}
+/****************************************************************************
+ * Name: notesnap_register
+ ****************************************************************************/
+
+int notesnap_register(void);
+
+/****************************************************************************
+ * Name: notesnap_dump_with_stream
+ ****************************************************************************/
+
+void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream);
+
+/****************************************************************************
+ * Name: notesnap_dump
+ ****************************************************************************/
+
+void notesnap_dump(void);
+
+#endif
+#endif /* __INCLUDE_NUTTX_NOTESNAP_DRIVER_H */

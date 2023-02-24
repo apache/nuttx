@@ -86,4 +86,18 @@ config DRIVERS_NOTELOG
 	---help---
 		The note driver output to syslog.
 
+config DRIVERS_NOTESNAP
+	bool "Last scheduling information"
+	default n
+	---help---
+		Record the last scheduling information.
+
+if DRIVERS_NOTESNAP
+config DRIVERS_NOTESNAP_NBUFFERS
+	int "Number of last scheduling information buffers"
+	default 128
+	---help---
+		Number of last scheduling information buffers.
+endif
+
 endif # DRIVERS_NOTE
