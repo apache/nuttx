@@ -1278,6 +1278,7 @@ static int mpfs_spi_irq(int cpuint, void *context, void *arg)
   if (status & MPFS_SPI_TXDONEMSKINT)
     {
       remaining = priv->txwords - priv->tx_pos;
+      putreg32(MPFS_SPI_TXDONECLR, MPFS_SPI_INT_CLEAR);
 
       if (remaining == 0)
         {
@@ -1300,8 +1301,6 @@ static int mpfs_spi_irq(int cpuint, void *context, void *arg)
               mpfs_spi_load_tx_fifo(priv, priv->txbuf, priv->fifolevel);
             }
         }
-
-      putreg32(MPFS_SPI_TXDONECLR, MPFS_SPI_INT_CLEAR);
     }
 
   if (status & MPFS_SPI_RXCHOVRFMSKINT)
