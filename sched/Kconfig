@@ -1484,6 +1484,7 @@ config SIG_ABRT
 	int "SIGABRT"
 	default 6
 	---help---
+		Abort signal from abort().
 
 config SIG_BUS
 	int "SIGBUS"
