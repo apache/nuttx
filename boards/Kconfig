@@ -411,6 +411,12 @@ config ARCH_BOARD_ESP32S3_EYE
 		featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display,
 		a microphone, an 8 MB Octal PSRAM and an 8 MB flash.
 
+config ARCH_BOARD_ESP32C6_GENERIC
+	bool "Espressif ESP32-C6 Generic DevKit"
+	depends on ESPRESSIF_ESP32C6
+	---help---
+		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
+
 config ARCH_BOARD_ET_STM32_STAMP
 	bool "Futurlec: ET-STM32 Stamp"
 	depends on ARCH_CHIP_STM32F103RE
@@ -2787,6 +2793,7 @@ config ARCH_BOARD
 	default "esp32s3-devkit"            if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
+	default "esp32c6-generic"           if ARCH_BOARD_ESP32C6_GENERIC
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"            if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"           if ARCH_BOARD_EZ80F910200KITG
@@ -3778,6 +3785,9 @@ source "boards/xtensa/esp32s3/esp32s3-eye/Kconfig"
 endif
 if ARCH_BOARD_ESP32C6_DEVKIT
 source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
+endif
+if ARCH_BOARD_ESP32C6_GENERIC
+source "boards/risc-v/espressif/esp32c6-generic/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "boards/sim/sim/sim/Kconfig"
