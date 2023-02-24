@@ -58,6 +58,7 @@ struct fb_chardev_s
   size_t fblen;                   /* Size of the framebuffer */
   uint8_t plane;                  /* Video plan number */
   uint8_t bpp;                    /* Bits per pixel */
+  volatile bool pollready;        /* Poll ready flag */
 };
 
 /****************************************************************************
@@ -159,6 +160,8 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
+
+  fb->pollready = false;
 
   /* Get the start and size of the transfer */
 
@@ -526,6 +529,14 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(pinfo != NULL && fb->vtable != NULL &&
                       fb->vtable->pandisplay != NULL);
           ret = fb->vtable->pandisplay(fb->vtable, pinfo);
+          fb->pollready = false;
+        }
+        break;
+
+      case FBIO_CLEARNOTIFY:
+        {
+          fb->pollready = false;
+          ret = OK;
         }
         break;
 
@@ -725,6 +736,11 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
         {
           return -EBUSY;
         }
+
+      if (fb->pollready)
+        {
+          poll_notify(&fb->fds, 1, POLLOUT);
+        }
     }
   else if (fds->priv)
     {
@@ -753,6 +769,8 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
   DEBUGASSERT(vtable != NULL);
 
   fb = vtable->priv;
+
+  fb->pollready = true;
 
   /* Notify framebuffer is writable. */
 
