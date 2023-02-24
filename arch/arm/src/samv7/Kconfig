@@ -387,7 +387,15 @@ config SAMV7_ADC
 	bool "12-bit ADC Controller (ADC)"
 	default n
 
+config SAMV7_AFEC_SWTRIG
+	bool
+	default n
+
 config SAMV7_AFEC_TIOATRIG
+	bool
+	default n
+
+config SAMV7_AFEC_PWMTRIG
 	bool
 	default n
 
@@ -437,8 +445,15 @@ config SAMV7_AFEC0_TIOATRIG
 	---help---
 		Use output of Timer/Counter as a trigger.
 
+config SAMV7_AFEC0_PWMTRIG
+	bool "PWM trigger"
+	select SAMV7_AFEC_PWMTRIG
+	---help---
+		Use output of PWM as a trigger.
+
 config SAMV7_AFEC0_SWTRIG
 	bool "Software trigger"
+	select SAMV7_AFEC_SWTRIG
 	---help---
 		Use software trigger.
 
@@ -461,6 +476,17 @@ config SAMV7_AFEC0_TIOACHAN
 		Number of TC channel to trigger the AFEC conversion.
 
 endif #SAMV7_AFEC0_TIOATRIG
+
+if SAMV7_AFEC0_PWMTRIG
+
+config SAMV7_AFEC0_PWMEVENT
+	int "PWM Event Line"
+	default 0
+	range 0 1
+	---help---
+		PWM event line used for AFEC triggering. Can be either 0 or 1.
+
+endif # SAMV7_AFEC0_PWM_TRIG
 
 endif # SAMV7_AFEC0
 
@@ -510,8 +536,15 @@ config SAMV7_AFEC1_TIOATRIG
 	---help---
 		Use output of Timer/Counter as a trigger.
 
+config SAMV7_AFEC1_PWMTRIG
+	bool "PWM trigger"
+	select SAMV7_AFEC_PWMTRIG
+	---help---
+		Use output of PWM as a trigger.
+
 config SAMV7_AFEC1_SWTRIG
 	bool "Software trigger"
+	select SAMV7_AFEC_SWTRIG
 	---help---
 		Use software trigger.
 
@@ -534,6 +567,17 @@ config SAMV7_AFEC1_TIOACHAN
 		Number of TC channel to trigger the AFEC conversion.
 
 endif #SAMV7_AFEC1_TIOATRIG
+
+if SAMV7_AFEC1_PWMTRIG
+
+config SAMV7_AFEC1_PWMEVENT
+	int "PWM Event Line"
+	default 0
+	range 0 1
+	---help---
+		PWM event line used for AFEC triggering. Can be either 0 or 1.
+
+endif # SAMV7_AFEC1_PWM_TRIG
 
 endif # SAMV7_AFEC1
 
@@ -656,6 +700,94 @@ config SAMV7_PWM0_CH3_COMP
 
 endif
 
+menu "PWM Comparison units"
+
+config SAMV7_PWM0_TRIG0
+	int "PWM0 Comparison Unit 0 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG1
+	int "PWM0 Comparison Unit 1 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG2
+	int "PWM0 Comparison Unit 2 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG3
+	int "PWM0 Comparison Unit 3 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG4
+	int "PWM0 Comparison Unit 4 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG5
+	int "PWM0 Comparison Unit 5 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG6
+	int "PWM0 Comparison Unit 6 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM0_TRIG7
+	int "PWM0 Comparison Unit 7 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM
+
+endmenu
+
+config SAMV7_PWM0_EVENT0
+	bool "Generate trigger on Event Line 0"
+	default n
+	---help---
+		PWM allows trigger generation on event lines. This can be
+		used for ADC conversion triggering for example. It is
+		necessary to set a comparison unit in order to generate an
+		event.
+
+config SAMV7_PWM0_EVENT1
+	bool "Generate trigger on Event Line 1"
+	default n
+	---help---
+		PWM allows trigger generation on event lines. This can be
+		used for ADC conversion triggering for example. It is
+		necessary to set a comparison unit in order to generate an
+		event.
+
 endif
 
 menuconfig SAMV7_PWM1
@@ -714,6 +846,92 @@ config SAMV7_PWM1_CH3_COMP
 	default n
 
 endif
+
+menu "PWM Comparison units"
+
+config SAMV7_PWM1_TRIG0
+	int "PWM1 Comparison Unit 0 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG1
+	int "PWM1 Comparison Unit 1 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG2
+	int "PWM1 Comparison Unit 2 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG3
+	int "PWM1 Comparison Unit 3 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG4
+	int "PWM1 Comparison Unit 4 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG5
+	int "PWM1 Comparison Unit 5 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG6
+	int "PWM1 Comparison Unit 6 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+config SAMV7_PWM1_TRIG7
+	int "PWM1 Comparison Unit 7 value"
+	range 0 100
+	default 0
+	---help---
+		Timer value on which the comparison unit generates
+		an event. Value is in percentages.
+
+endmenu
+
+config SAMV7_PWM1_EVENT0
+	bool "Generate trigger on Event Line 0"
+	default n
+	---help---
+		PWM allows trigger generation on event lines. This can be
+		used for ADC conversion triggering for example. It is
+		necessary to set a comparison unit in order to generate an
+		event.
+
+config SAMV7_PWM1_EVENT1
+	bool "Generate trigger on Event Line 1"
+	default n
+	---help---
+		PWM allows trigger generation on event lines. This can be
+		used for ADC conversion triggering for example. It is
+		necessary to set a comparison unit in order to generate an
+		event.
 
 endif
 
