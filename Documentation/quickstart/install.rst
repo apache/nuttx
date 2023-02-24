@@ -22,7 +22,7 @@ First, install the following set of system dependencies according to your Operat
     .. code-block:: console
 
       $ sudo apt install \
-      bison flex gettext texinfo libncurses5-dev libncursesw5-dev \
+      bison flex gettext texinfo libncurses5-dev libncursesw5-dev xxd \
       gperf automake libtool pkg-config build-essential gperf genromfs \
       libgmp-dev libmpc-dev libmpfr-dev libisl-dev binutils-dev libelf-dev \
       libexpat-dev gcc-multilib g++-multilib picocom u-boot-tools util-linux
