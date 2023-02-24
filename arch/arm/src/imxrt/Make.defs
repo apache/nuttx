@@ -25,6 +25,9 @@ include armv7-m/Make.defs
 # Required i.MX RT files
 
 CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_clockconfig.c
+ifeq ($(CONFIG_IMXRT_PROGMEM),y)
+CHIP_CSRCS += imxrt_flash.c
+endif
 CHIP_CSRCS += imxrt_periphclks.c imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
 CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_iomuxc.c imxrt_serial.c
 CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
