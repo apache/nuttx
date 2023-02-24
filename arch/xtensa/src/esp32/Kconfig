@@ -1811,6 +1811,16 @@ config ESP32_SPIFLASH_DEBUG
 		Enable this option, read and write of SPI Flash
 		will show input arguments and result.
 
+config ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
+	bool "Support PSRAM As Task Stack"
+	default n
+	depends on ESP32_SPIRAM
+	select SCHED_LPWORK
+	---help---
+		Enable this option, Tasks which use PSRAM as stack
+		can do SPI Flash read/write/erase/map/unmap.
+		Otherwise, it may cause exception.
+
 if ESP32_APP_FORMAT_LEGACY
 
 comment "Partition Table Configuration"
