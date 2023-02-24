@@ -420,8 +420,6 @@ void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb);
 
 void up_exit(int status) noreturn_function;
 
-/* Prototype is in unistd.h */
-
 /****************************************************************************
  * Name: up_dump_register
  *

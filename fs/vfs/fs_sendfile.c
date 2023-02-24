@@ -27,6 +27,7 @@
 #include <sys/sendfile.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>

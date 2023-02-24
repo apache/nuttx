@@ -32,6 +32,7 @@
 #include <nuttx/spi/qspi_flash.h>
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "sim_internal.h"
 #include "sim_hostusrsock.h"

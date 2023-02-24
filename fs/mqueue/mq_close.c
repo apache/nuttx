@@ -28,6 +28,7 @@
 #include <mqueue.h>
 #include <assert.h>
 #include <debug.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>

@@ -26,6 +26,8 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/list.h>
 
+#include <unistd.h>
+
 #include "sim_internal.h"
 
 /****************************************************************************

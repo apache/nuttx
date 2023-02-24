@@ -40,7 +40,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <unistd.h>
+#include <nuttx/compiler.h>
+#include <limits.h>
 
 /****************************************************************************
  * Pre-processor Definitions

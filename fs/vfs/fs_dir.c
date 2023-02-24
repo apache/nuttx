@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>

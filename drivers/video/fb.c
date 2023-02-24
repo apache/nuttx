@@ -34,6 +34,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <poll.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>

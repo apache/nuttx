@@ -31,7 +31,6 @@
 #include <sys/types.h>       /* Needed for general types */
 #include <stdint.h>          /* C99 fixed width integer types */
 #include <stdbool.h>         /* C99 boolean types */
-#include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <time.h>            /* Needed for struct timespec */
 #include <semaphore.h>       /* For sem_t and SEM_PRIO_* defines */
@@ -543,7 +542,7 @@ void pthread_yield(void);
 
 /* A thread may obtain a copy of its own thread handle. */
 
-#define pthread_self()            ((pthread_t)gettid())
+pthread_t pthread_self(void);
 #define pthread_gettid_np(thread) ((pid_t)(thread))
 
 /* Compare two thread IDs. */

@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>

@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <string.h>
 #include <debug.h>
+#include <unistd.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
