@@ -34,6 +34,10 @@
 
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_WATCHDOG
+#  include "esp_wdt.h"
+#endif
+
 #include "esp32h2-generic.h"
 
 /****************************************************************************
@@ -86,6 +90,14 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to mount tmpfs at %s: %d\n", CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#ifdef CONFIG_WATCHDOG
+  ret = esp_wdt_initialize();
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
     }
 #endif
 

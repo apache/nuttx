@@ -36,7 +36,11 @@ CHIP_ASRCS  = esp_vectors.S
 CHIP_CSRCS  = esp_allocateheap.c esp_start.c esp_idle.c
 CHIP_CSRCS += esp_irq.c esp_gpio.c esp_libc_stubs.c
 CHIP_CSRCS += esp_lowputc.c esp_serial.c
-CHIP_CSRCS += esp_timerisr.c esp_wdt.c
+CHIP_CSRCS += esp_timerisr.c
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += esp_wdt.c
+endif
 
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
