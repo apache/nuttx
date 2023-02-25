@@ -46,7 +46,7 @@
 #define ESP_IW_EVENT_SIZE(field) \
   (offsetof(struct iw_event, u) + sizeof(((union iwreq_data *)0)->field))
 
-#ifdef CONFIG_ESP32C3_WIFI_SCAN_RESULT_SIZE 
+#ifdef CONFIG_ESP32C3_WIFI_SCAN_RESULT_SIZE
 #  define WIFI_SCAN_RESULT_SIZE      CONFIG_ESP32C3_WIFI_SCAN_RESULT_SIZE
 #else
 #  define WIFI_SCAN_RESULT_SIZE      (4096)

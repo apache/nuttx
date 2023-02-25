@@ -59,7 +59,7 @@ void rp2040_boardearlyinitialize(void)
 {
   #ifdef CONFIG_ARCH_BOARD_COMMON
   rp2040_common_earlyinitialize();
-  #endif 
+  #endif
 
   /* --- Place any board specific early initialization here --- */
 }
@@ -75,7 +75,7 @@ void rp2040_boardinitialize(void)
 {
   #ifdef CONFIG_ARCH_BOARD_COMMON
   rp2040_common_initialize();
-  #endif 
+  #endif
 
   /* --- Place any board specific initialization here --- */
 }

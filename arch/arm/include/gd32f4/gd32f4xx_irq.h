@@ -219,7 +219,7 @@
 #elif defined(CONFIG_GD32F4_GD32F405)
 #  define GD32_IRQ_NEXTINT      (82)
 #  define NR_IRQS                (GD32_IRQ_EXINT + GD32_IRQ_NEXTINT)
-#else 
+#else
 #  error "Unknown GD32F4xx chip!"
 #endif
 

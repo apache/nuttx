@@ -67,7 +67,7 @@ SECTIONS
                 *(.tdata .tdata.* .gnu.linkonce.td.*);
                 _etdata = ABSOLUTE(.);
         } > flash
-        
+
         .tbss : {
                 _stbss = ABSOLUTE(.);
                 *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);

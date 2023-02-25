@@ -44,7 +44,7 @@
 #  define RV32M1_WDOG_BASE       RV32M1_WDOG0_BASE
 #elif defined(CONFIG_ARCH_CHIP_RV32M1_ZERORISCY)
 #  define RV32M1_WDOG_BASE       RV32M1_WDOG1_BASE
-#else 
+#else
 #  error "Unsupported RV32M1 Watch dog"
 #endif
 

@@ -189,7 +189,6 @@ The nuttx ELF image can be debugged with QEMU.
    $ qemu-system-aarch64 -cpu cortex-a53 -smp 4 -nographic -machine virt,virtualization=on,gic-version=3 \
      -net none -chardev stdio,id=con,mux=on -serial chardev:con -mon chardev=con,mode=readline \
      -kernel ./nuttx -S -s
-   
 
 3. Run gdb with TUI, connect to QEMU, load nuttx and continue (at shell terminal 2)
 
@@ -220,9 +219,9 @@ The nuttx ELF image can be debugged with QEMU.
    (gdb)
 
    Note:
-   1. it will make your debugging more easier in source level if you setting 
-      CONFIG_DEBUG_FULLOPT=n. but there is a risk of stack overflow when the 
-      option is disabled. Just enlarging your stack size will avoid the 
+   1. it will make your debugging more easier in source level if you setting
+      CONFIG_DEBUG_FULLOPT=n. but there is a risk of stack overflow when the
+      option is disabled. Just enlarging your stack size will avoid the
       issue (eg. enlarging CONFIG_DEFAULT_TASK_STACKSIZE)
    2. TODO: ARMv8-A Supporting for tools/nuttx-gdbinit
 
@@ -240,17 +239,17 @@ need to be considered:
     In many cases, the FPU trap is triggered by va_start() that copies
 the content of FP registers used for floating point argument passing
 into the va_list object in case there were actual float arguments from
-the caller. But In practice this is almost never the case. 
+the caller. But In practice this is almost never the case.
 Seeing the save_count/restore_count at the g_cpu_fpu_ctx, which will
 be increase when saving/restoring FPU context. After running ostest,
 we can see the count with GDB:
-   
+
 (gdb) p g_cpu_fpu_ctx
   $1 = {{fpu_owner = 0x0, idle_thread = 0x402b3110 <g_idletcb>,
       save_count = 1293, restore_count = 2226, switch_count = 4713,
       exe_depth_count = 0}}
 (gdb)
-     
+
     adding -mgeneral-regs-only option will make compiler not use the FPU
 register, we can use the following patch to syslog:
 
@@ -263,8 +262,8 @@ index c58fb45512..acac6febaa
  DEPPATH += --dep-path syslog
  VPATH += :syslog
 +syslog/lib_syslog.c_CFLAGS += -mgeneral-regs-only
-   
-    With the option to make NuttX and booting. After running ostest, see 
+
+    With the option to make NuttX and booting. After running ostest, see
 the count with GDB again:
 
 (gdb) p g_cpu_fpu_ctx
@@ -276,7 +275,7 @@ $1 = {{fpu_owner = 0x0, idle_thread = 0x402b3110 <g_idletcb>, save_count = 141,
 add this compile option. Almost all of FPU accessing switch is argument passing
 at the syslog.
     I cannot commit the patch for NuttX mainline because it's very special case
-since ostest is using syslog for lots of information printing. but this is 
+since ostest is using syslog for lots of information printing. but this is
 a clue for FPU performance analysis. va_list object is using for many C code to
 handle argument passing, but if it's not passing floating point argument indeed.
 Add the option to your code maybe increase FPU performance
@@ -311,7 +310,7 @@ SMP Support
              for every CPU core
              ->up_cpu_start
                ->arm64_start_cpu(call PCSI to boot CPU)
-               ->waiting for every core to boot 
+               ->waiting for every core to boot
            ->nx_bringup
 
    Secondary Core call sequence
@@ -321,7 +320,7 @@ SMP Support
          ->Initialize GIC: Secondary core GICR
          ->Notify Primary core booting is Ready
          ->nx_idle_trampoline
-         
+
 2. interrupt
 
 SGI
@@ -339,7 +338,7 @@ SPI
  should be enabled at every core.
 
  But for NuttX, it's design only for primary core to handle timer
- interrupt and call nxsched_process_timer at timer tick mode. 
+ interrupt and call nxsched_process_timer at timer tick mode.
  So we need only enable timer for primary core
 
  IMX6 use GPT which is a SPI rather than generic timer to handle

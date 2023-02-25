@@ -630,15 +630,15 @@ endmenu # eDMA Global Configuration
 
 menu "LPUART Configuration"
 	depends on S32K1XX_LPUART
-	
+
 config S32K1XX_LPUART_INVERT
 	bool "Signal Invert Support"
 	default n
-endmenu	
+endmenu
 
 menu "LPSPI Configuration"
 	depends on S32K1XX_LPSPI
-	
+
 config S32K1XX_LPSPI_DWORD
 	bool "DWORD up to 64 bit transfer support"
 	default n
@@ -684,7 +684,7 @@ config S32K1XX_LPSPI_DMATHRESHOLD
 config S32K1XX_LPSPI_HWPCS
 	bool "Use native hardware peripheral chip selects instead of GPIO pins"
 	default n
-	
+
 endmenu # LPSPI Configuration
 
 menu "LPI2C Configuration"

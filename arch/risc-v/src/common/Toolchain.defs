@@ -133,7 +133,7 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHRVISAA = a
     ZARCHRVISAA := +a
   endif
-  
+
   ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
     ARCHRVISAC = c
     ZARCHRVISAC := +c

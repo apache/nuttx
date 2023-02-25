@@ -62,7 +62,7 @@
 
 /* GPIO definitions *********************************************************/
 
-#undef BOARD_GPIO_LED_PIN     
+#undef BOARD_GPIO_LED_PIN
 #define BOARD_NGPIOOUT          1
 #define BOARD_NGPIOIN           1
 #define BOARD_NGPIOINT          1

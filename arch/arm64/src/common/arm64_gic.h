@@ -110,7 +110,7 @@
 #define GICD_TYPER_RSS              BIT(26)
 #define GICD_TYPER_LPIS             BIT(17)
 #define GICD_TYPER_MBIS             BIT(16)
-#define GICD_TYPER_ESPI             BIT(8) 
+#define GICD_TYPER_ESPI             BIT(8)
 #define GICD_TYPER_ID_BITS(typer)   ((((typer) >> 19) & 0x1f) + 1)
 #define GICD_TYPER_NUM_LPIS(typer)  ((((typer) >> 11) & 0x1f) + 1)
 #define GICD_TYPER_SPIS(typer)      ((((typer) & 0x1f) + 1) * 32)

@@ -197,7 +197,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM4_QE   
+#ifdef CONFIG_STM32F7_TIM4_QE
   sprintf(buf, "/dev/qe3");
   ret = stm32_qencoder_initialize(buf, 4);
   if (ret < 0)

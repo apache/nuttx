@@ -41,7 +41,7 @@ config NET_UDP_PREALLOC_CONNS
 	default 8
 	---help---
 		Number of UDP connections (all tasks).
-		
+
 		This number of connections will be pre-allocated during system boot.
 		If dynamic connections allocation is enabled, more connections may
 		be allocated at a later time, as the system needs them. Else this
@@ -73,7 +73,7 @@ config NET_UDP_MAX_CONNS
 	---help---
 		If dynamic connections allocation is selected (NET_UDP_ALLOC_CONNS > 0)
 		this will limit the number of connections that can be allocated.
-		
+
 		This is useful in case the system is under very heavy load (or
 		under attack), ensuring that the heap will not be exhausted.
 

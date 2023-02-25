@@ -150,7 +150,7 @@
 #  define USART_CTL0_PM_ODD        USART_CTL0_PMEN(3)
 
 #define USART_WL_9BIT              USART_CTL0_WL
-#define USART_WL_8BIT              (0)       
+#define USART_WL_8BIT              (0)
 
 #define USART_CTL0_INT_SHIFT       (4)
 #define USART_CTL0_INT_MASK        (0x1f << USART_CTL0_INT_SHIFT)

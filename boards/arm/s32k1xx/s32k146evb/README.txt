@@ -32,7 +32,7 @@ Status
     for recovery from this condition at the NXP Community Forums, but none of
     those options are working for me:
     https://community.nxp.com/thread/505593
-    
+
     Given the success running from SRAM and the success of the same fixes
     on the S32K118, I believe that the NSH configuration should now run out
     of FLASH.  Unfortunately, I cannot demonstrate that.
@@ -43,7 +43,7 @@ Status
     configuration options, with a proven default state.
 
   2019-11-07:  A s32k146.cfg configuration file (for OpenOCD) was added to
-    the scripts/ folder. 
+    the scripts/ folder.
 
   2020-06-15:  Added FlexCAN driver with SocketCAN support to the S32K1XX
     arch.  Should work also on the S32K146EVB board, but remains untested.
@@ -132,7 +132,7 @@ Thread-Aware Debugging with Eclipse
 
   Thread-aware debugging is possible with openocd-nuttx
   ( https://github.com/sony/openocd-nuttx ) and was tested together with the
-  Eclipse-based S32 Design Studio for Arm:  
+  Eclipse-based S32 Design Studio for Arm:
   https://www.nxp.com/design/software/development-software/s32-design-studio-ide/s32-design-studio-for-arm:S32DS-ARM
 
   NOTE: This method was last tested with NuttX 8.2 and S32DS for Arm 2018.R1.

@@ -123,7 +123,7 @@
  * deprecated. Use LTE_IPTYPE_V4 instead.
  */
 
-#define LTE_APN_IPTYPE_IP     LTE_IPTYPE_V4 
+#define LTE_APN_IPTYPE_IP     LTE_IPTYPE_V4
 
 /* Internet protocol type: IPv6
  * deprecated. Use LTE_IPTYPE_V6 instead.

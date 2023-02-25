@@ -520,7 +520,7 @@ static int phyplus_parse_params_and_action(char *buff)
           return -1;
         }
     }
-#if 0  
+#if 0
   else if (0 == strncmp(buff, "reg_timer", 9))
     {
       p += 10;

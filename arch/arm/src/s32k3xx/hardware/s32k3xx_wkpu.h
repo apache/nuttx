@@ -95,7 +95,7 @@
 #define WKPU_NCR_NFEE0                (1 << 25)  /* Bit 25: NMI Falling-edge Events Enable 0 (NFEE0) */
 #define WKPU_NCR_NREE0                (1 << 26)  /* Bit 26: NMI Rising-Edge Events Enable 0 (NREE0) */
                                                  /* Bit 27: Reserved */
-#define WKPU_NCR_NWRE0                (1 << 28)  /* Bit 28: NMI Wakeup Request Enable 0 (NWRE0) */     
+#define WKPU_NCR_NWRE0                (1 << 28)  /* Bit 28: NMI Wakeup Request Enable 0 (NWRE0) */
 #define WKPU_NCR_NDSS0_SHIFT          (29)       /* Bits 29-30: NMI Destination Source Select 0 (NDSS0) */
 #define WKPU_NCR_NDSS0_MASK           (0x03 << WKPU_NCR_NDSS0_SHIFT)
 #  define WKPU_NCR_NDSS0_NMI          (0x00 << WKPU_NCR_NDSS0_SHIFT) /* Non-maskable interrupt */

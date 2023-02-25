@@ -81,7 +81,7 @@ Defconfigs
 
 - nshsram
     Load NuttX binary to SRAM
-  
+
 - smp
     Enable SMP mode. Both Core 0 and Core 1 are used by NuttX.
 

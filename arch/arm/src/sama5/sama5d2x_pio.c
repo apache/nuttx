@@ -214,7 +214,7 @@ static uint32_t sam_configcommon(pio_pinset_t cfgset)
     {
       if ((cfgset & PIO_CFG_SLOWCLK) != 0)
         {
-          regval |= (PIO_CFGR_IFEN | PIO_CFG_SLOWCLK); 
+          regval |= (PIO_CFGR_IFEN | PIO_CFG_SLOWCLK);
         }
       else
         {

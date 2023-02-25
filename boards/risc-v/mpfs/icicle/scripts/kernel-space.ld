@@ -21,7 +21,7 @@
 /* NOTE:  This depends on the memory.ld script having been included prior to
  * this script.
  */
- 
+
 OUTPUT_ARCH("riscv")
 
 /* Provide these so there is no need for using config files for this */

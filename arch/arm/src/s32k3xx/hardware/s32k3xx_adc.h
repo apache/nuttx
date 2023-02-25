@@ -170,7 +170,7 @@
 #define S32K3XX_ADC_STAW2R_OFFSET         (0x038c) /* Self-Test Analog Watchdog S2 Register (STAW2R) */
 #define S32K3XX_ADC_STAW4R_OFFSET         (0x0394) /* Self-Test Analog Watchdog C0 Register (STAW4R) */
 #define S32K3XX_ADC_STAW5R_OFFSET         (0x0398) /* Self-Test Analog Watchdog C Register (STAW5R) */
-#define S32K3XX_ADC_AMSIO_OFFSET          (0x039c) /* Analog Miscellaneous In/Out Register (AMSIO) */ 
+#define S32K3XX_ADC_AMSIO_OFFSET          (0x039c) /* Analog Miscellaneous In/Out Register (AMSIO) */
 #define S32K3XX_ADC_CALBISTREG_OFFSET     (0x03a0) /* Control and Calibration Status Register (CALBISTREG) */
 #define S32K3XX_ADC_OFSGNUSR_OFFSET       (0x03a8) /* Offset and Gain User Register (OFSGNUSR) */
 #define S32K3XX_ADC_CAL2_OFFSET           (0x03b4) /* Calibration Value 2 (CAL2) */

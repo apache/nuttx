@@ -7,7 +7,7 @@ STM32L476JG MCU. The board features:
 
   - LSM6DSM, 6DoF inertial measurement unit (IMU),
   - LSM303AGR, 3D accelerometer and 3D magnetometer,
-  - LPS22HB, pressure sensor, 
+  - LPS22HB, pressure sensor,
   - MP34DT05-A, omni-directional digital microphone
   - BlueNRG-MS, SPI based BLE Network Processor
 

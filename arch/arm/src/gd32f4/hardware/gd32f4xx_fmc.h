@@ -153,7 +153,7 @@
 
 #define FMC_CTL_SN_SHIFT                 (3)                    /* Bits 3-7: select which sector number to be erased */
 #define FMC_CTL_SN_MASK                  (31 << FMC_CTL_SN_SHIFT)
-#define FMC_CTL_SN(n)                    ((n) << FMC_CTL_SN_SHIFT)     /* Sector n, n=0..11 */                 
+#define FMC_CTL_SN(n)                    ((n) << FMC_CTL_SN_SHIFT)     /* Sector n, n=0..11 */
 #define FMC_CTL_SN_0_11(n)               ((n) << FMC_CTL_SN_SHIFT)     /* Sector n, n=0..11 */
 #define FMC_CTL_SN_12_23(n)              ((n+4) << FMC_CTL_SN_SHIFT))  /* Sector n, n=12..23 */
 #define FMC_CTL_SN_24_27(n)              ((n-12) << FMC_CTL_SN_SHIFT)) /* Sector n, n=24..27 */

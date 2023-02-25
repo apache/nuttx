@@ -180,7 +180,7 @@
 
 /* PWR Disable backup domain register */
 
-#define PWR_DBPR_DBP             (1 <<  0)                 /* Bit  0: Disable Backup domain write protection. */ 
+#define PWR_DBPR_DBP             (1 <<  0)                 /* Bit  0: Disable Backup domain write protection. */
 
 /* PWR Supply voltage monitoring status register */
 

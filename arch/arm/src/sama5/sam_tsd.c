@@ -1564,7 +1564,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
    * been initialised. It's the only option allowed and that works.
    */
 
-#ifndef SAMA5_TSD_PENDET_TRIG_ALLOWED  
+#ifndef SAMA5_TSD_PENDET_TRIG_ALLOWED
   /* if we're allowed to use pendet trigger no need to do this */
 
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);

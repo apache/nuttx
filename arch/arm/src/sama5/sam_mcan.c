@@ -78,7 +78,7 @@
 #  define SAMA5_MCAN_CLKSRC           PMC_PCR_GCKCSS_PLLA
 #  define SAMA5_MCAN_CLKSRC_FREQUENCY BOARD_PLLA_FREQUENCY
 #elif defined(CONFIG_SAMA5_MCAN_CLKSRC_UPLL)
-#  define SAMA5_MCAN_CLKSRC           PMC_PCR_GCKCSS_UPLL 
+#  define SAMA5_MCAN_CLKSRC           PMC_PCR_GCKCSS_UPLL
 #  define SAMA5_MCAN_CLKSRC_FREQUENCY BOARD_UPLL_FREQUENCY
 #elif defined(CONFIG_SAMA5_MCAN_CLKSRC_MCK)
 #  define SAMA5_MCAN_CLKSRC           PMC_PCR_GCKCSS_MCK
@@ -1016,7 +1016,7 @@ static const struct sam_config_s g_mcan0const =
   .pid              = SAM_PID_MCAN00,
   .irq0             = SAM_IRQ_MCAN00,
   .irq1             = SAM_IRQ_MCAN01,
-#if defined(CONFIG_SAMA5_MCAN0_ISO11898_1) 
+#if defined(CONFIG_SAMA5_MCAN0_ISO11898_1)
   .mode             = MCAN_ISO11898_1_MODE,
 #elif defined(CONFIG_SAMA5_MCAN0_FD)
   .mode             = MCAN_FD_MODE,

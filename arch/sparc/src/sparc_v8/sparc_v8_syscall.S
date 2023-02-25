@@ -164,9 +164,9 @@ sys_call5:	/* %o0 holds the syscall number, arguments in %o1, %o2, %o3, %o4 and 
 
 	/* Issue the ECALL opcode to perform a SW interrupt to the OS */
 	ta 8;   ! syscall 8
-	nop; 
-	nop; 
-	nop;	
+	nop;
+	nop;
+	nop;
 
 	jmp     %o7 + 8
 	nop

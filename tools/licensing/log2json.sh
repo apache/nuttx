@@ -19,8 +19,8 @@
 #
 ############################################################################
 
-# We define a replacement for the quote character (") 
-# since we cannot escape quote characters found inside 
+# We define a replacement for the quote character (")
+# since we cannot escape quote characters found inside
 # the commit message
 
 Q='^@^'
@@ -30,7 +30,7 @@ function getlog
   (echo -n '['
    git --no-pager log --follow --simplify-merges \
      --pretty=format:'{ '$Q'commit'$Q': '$Q'%H'$Q', '$Q'author'$Q': '$Q'%aN'$Q', '$Q'author-email'$Q': '$Q'%aE'$Q', '$Q'date'$Q': '$Q'%ad'$Q', '$Q'committer'$Q': '$Q'%cn'$Q', '$Q'committer-email'$Q': '$Q'%ce'$Q', '$Q'message'$Q': '$Q'%s'$Q', '$Q'body'$Q': '$Q'%b'$Q', '$Q'signed'$Q': '$Q'%G?'$Q', '$Q'signer'$Q': '$Q'%GS'$Q', '$Q'key'$Q': '$Q'%GK'$Q' },' -- "$1"
-  echo -n ']') | 
+  echo -n ']') |
     sed -r 's|\\|\\\\|g' |      # escape backquotes
     sed -r 's|"|\\"|g' |        # replace quotes with escaped quotes
     tr '\r\n' ' ' |             # replace newlines with spaces (otherwise strings) are broken

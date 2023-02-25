@@ -52,7 +52,7 @@
 #  define LOCATE_ITCM   locate_code(SECTION_ITCM)    /* System ITCM */
 #  define LOCATE_UITCM  locate_code(SECTION_UITCM)   /* User ITCM */
 #else
-#  define LOCATE_ITCM  
+#  define LOCATE_ITCM
 #  define LOCATE_UITCM
 #endif
 

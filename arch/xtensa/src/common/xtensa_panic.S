@@ -132,7 +132,7 @@ _xtensa_panic:
 
 	ps_setup XCHAL_EXCM_LEVEL a0
 
-	/* Call C panic handler: 
+	/* Call C panic handler:
 	 *  Arg1 = Exception code.
 	 *  Arg2 = Start of the register save area.
 	 */

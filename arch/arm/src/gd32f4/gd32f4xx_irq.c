@@ -129,7 +129,7 @@ static void gd32_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ84_87_PRIORITY),
           getreg32(NVIC_IRQ88_91_PRIORITY),
           getreg32(NVIC_IRQ92_95_PRIORITY));
-#endif      
+#endif
 
   leave_critical_section(flags);
 }

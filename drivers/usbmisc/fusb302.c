@@ -75,7 +75,7 @@
 #define SWITCHES0_VCONN_CC2           (1 << 5)
 #define SWITCHES0_VCONN_SHIFT         (4)
 #define SWITCHES0_VCONN_MASK          (3 << SWITCHES0_VCONN_SHIFT)
-#define SWITCHES0_PULLUP_CC1          (1 << 6)   
+#define SWITCHES0_PULLUP_CC1          (1 << 6)
 #define SWITCHES0_PULLUP_CC2          (1 << 7)
 #define SWITCHES0_PULLUP_SHIFT        (6)
 #define SWITCHES0_PULLUP_MASK         (3 << SWITCHES0_PULLUP_SHIFT)
@@ -96,7 +96,7 @@
 #define MEASURE_MDAC_SHIFT            (0)        /* Bits 5:0 MDAC */
 #define MEASURE_MDAC_MASK             (0b111111 << MEASURE_MDAC_SHIFT)
 #define MEASURE_MDAC(n)               ((uint8_t)(n)) << MEASURE_MDAC_SHIFT
-#define MEASURE_VBUS_BY_MDAC          (1 << 6) 
+#define MEASURE_VBUS_BY_MDAC          (1 << 6)
 #define SET_MDAC(n)                   ((uint8_t)(n)) << MEASURE_MDAC_SHIFT)
 
 /* Slice - 0x05 */
@@ -104,14 +104,14 @@
 #define MEASURE_SDAC_SHIFT            (0)      /* Bits 5:0 SDAC */
 #define MEASURE_SDAC_MASK             (0b111111 < MEASURE_SDAC_SHIFT)
 #define MEASURE_SDAC(n)               ((uint8_t)(n)) << MEASURE_SDAC_SHIFT)
-#define MEASURE_SDAC_HYS_SHIFT        (6)     /* Bits 7:6 SDAC hysteris */                                        
+#define MEASURE_SDAC_HYS_SHIFT        (6)     /* Bits 7:6 SDAC hysteris */
 #define MEASURE_SDAC_HYS_MASK         (0b11 << MEASURE_SDAC_HYS_SHIFT)
 #define SDAC_HYS_VAL(n)               ((uint8)t)(n)) << MEASURE_SDAC_HYS_SHIFT)
 
 /* Control0 - 0x06 */
 
 #define CONTROL0_TX_START_MASK        (1 << 0)
-#define CONTROL0_AUTO_PRE_SHIFT       (1) 
+#define CONTROL0_AUTO_PRE_SHIFT       (1)
 #define CONTROL0_HOST_CUR_SHIFT       (2) /* Bits 3:2 Host Current mode */
 #define CONTROL0_HOST_CUR_MASK        (3 << CONTROL0_HOST_CUR_SHIFT)
 #define HOST_CURRENT_NONE             (0) /* no current */
@@ -119,8 +119,8 @@
 #define HOST_CURRENT_180UA            (2) /* medium power, 1.5A */
 #define HOST_CURRENT_330UA            (3) /* high power, 3A */
 #define HOST_CURRENT(n)               ((uint8_t)(n) << CONTROL0_HOST_CUR_SHIFT)
-#define CONTROL0_INT_MASK             (1 << 5) 
-#define CONTROL0_TX_FLUSH             (1 << 6) 
+#define CONTROL0_INT_MASK             (1 << 5)
+#define CONTROL0_TX_FLUSH             (1 << 6)
 
 /* Control1 - 0x07 */
 
@@ -143,7 +143,7 @@
 #define CONTROL2_WAKE_EN              (1 << 3)
 #define CONTROL2_TOG_RD_ONLY          (1 << 5)
 #define CONTROL2_TOG_SAVE_PWR_SHIFT   (6) /* Bits 7:6 */
-#define CONTROL2_TOG_SAVE_PWR_MASK    (0b11 << CONTROL2_TOG_SAVE_PWR_SHIFT 
+#define CONTROL2_TOG_SAVE_PWR_MASK    (0b11 << CONTROL2_TOG_SAVE_PWR_SHIFT
 #define WAIT_NONE                     (0b00)
 #define WAIT_40MS                     (0b01)
 #define WAIT_80MS                     (0b10)
@@ -152,7 +152,7 @@
 
 /* Control3 - 0x09 */
 
-#define CONTROL3_AUTO_RETRY           (0) 
+#define CONTROL3_AUTO_RETRY           (0)
 #define CONTROL3_N_RETRIES_SHIFT      (1)   /* Bits 2:1 */
 #define CONTROL3_N_RETRIES_MASK       (0b11 << CONTROL3_N_RETRIES_SHIFT)
 #define NO_RETRIES                    (0b00)
@@ -161,8 +161,8 @@
 #define THREE_RETRIES                 (0b11)
 #define SET_NUM_RETRIES(n)            ((uint8_t(n) << CONTROL3_N_RETRIES_SHIFT)
 #define CONTROL3_AUTO_SOFTRESET       (1 << 3)
-#define CONTROL3_AUTO_HARDRESET       (1 << 4) 
-#define CONTROL3_SEND_HARDRESET       (1 << 6) 
+#define CONTROL3_AUTO_HARDRESET       (1 << 4)
+#define CONTROL3_SEND_HARDRESET       (1 << 6)
 
 /* Mask - 0x0A */
 

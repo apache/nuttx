@@ -64,7 +64,7 @@ struct rv32m1_tty_s
 
 #ifdef USE_SERIALDRIVER
 
-#ifdef HAVE_UART 
+#ifdef HAVE_UART
 
 #if defined(CONFIG_RV32M1_LPUART0)
 #  define RV32M1_LPUART0_DEV     g_uart0dev

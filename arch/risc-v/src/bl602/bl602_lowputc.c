@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 #define UART_PARITY_NONE (0)
-#define UART_PARITY_ODD  (1)   
+#define UART_PARITY_ODD  (1)
 #define UART_PARITY_EVEN (2)
 
 /* Select UART parameters for the selected console */

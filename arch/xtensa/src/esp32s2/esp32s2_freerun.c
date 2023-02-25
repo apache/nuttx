@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #define MAX_TIMERS 4
-#define MAX_US_RESOLUTION 819 /* MAX_US = (PREmax * USEC_PER_SEC) / CLKmin */ 
+#define MAX_US_RESOLUTION 819 /* MAX_US = (PREmax * USEC_PER_SEC) / CLKmin */
 #define TIMER_WIDTH 64
 
 /****************************************************************************

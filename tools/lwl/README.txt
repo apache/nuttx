@@ -79,15 +79,15 @@ Info : stm32f4x.cpu: hardware has 6 breakpoints, 4 watchpoints
 Info : Listening on port 3333 for gdb connections
 Info : accepting 'tcl' connection on tcp/6666
 invalid command name "ocd_mdw"
-0x20000000: 000000ff 
+0x20000000: 000000ff
 
-0x20000000: 000000ff 
+0x20000000: 000000ff
 
-0x20000004: 7216a318 
+0x20000004: 7216a318
 
-0x2000000c: 994b5b1b 
+0x2000000c: 994b5b1b
 
-0x2000000c: 994b5b1b 
+0x2000000c: 994b5b1b
 
 0x2000000c: 994b5b1b
 ...

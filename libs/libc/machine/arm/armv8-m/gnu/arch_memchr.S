@@ -298,7 +298,7 @@ memchr:
 	and	r1,r1,#0xff	@ Don't trust the caller to pass a char
 
 	cmp	r2,#16		@ If short don't bother with anything clever
-	blt	20f 
+	blt	20f
 
 	tst	r0, #7		@ If it's already aligned skip the next bit
 	beq	10f
@@ -312,7 +312,7 @@ memchr:
 	tst	r0, #7
 	cbz	r2, 40f		@ If we run off the end, exit not found
 	bne	5b		@ If not aligned yet then do next byte
-	
+
 10:
 	@ We are aligned, we know we have at least 8 bytes to work with
 	push	{r4,r5,r6,r7}
@@ -321,7 +321,7 @@ memchr:
 	bic	r4, r2, #7	@ Number of double words to work with * 8
 	mvns	r7, #0		@ all F's
 	movs	r3, #0
-	
+
 15:
 	ldrd    r5,r6,[r0],#8
 	subs	r4, r4, #8
@@ -340,7 +340,7 @@ memchr:
 	and	r1,r1,#0xff	@ r1 back to a single character
 	and	r2,r2,#7	@ Leave the count remaining as the number
 				@ after the double words have been done
- 
+
 20:
 	cbz	r2, 40f		@ 0 length or hit the end already then not found
 
@@ -359,7 +359,7 @@ memchr:
 	subs	r0,r0,#1	@ found
 	bx	lr
 
-60:  @ We're here because the fast path found a hit 
+60:  @ We're here because the fast path found a hit
      @ now we have to track down exactly which word it was
 	@ r0 points to the start of the double word after the one tested
 	@ r5 has the 00/ff pattern for the first word, r6 has the chained value

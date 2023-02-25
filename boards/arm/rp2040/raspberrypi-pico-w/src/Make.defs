@@ -63,11 +63,11 @@ $(FIRMWARE_SRC):
  $(FIRMWARE): $(FIRMWARE_SRC)
 	$(call CATFILE, $(FIRMWARE), $(FIRMWARE_SRC))
 
-src$(DELIM)rp2040_firmware.c: $(FIRMWARE) 
+src$(DELIM)rp2040_firmware.c: $(FIRMWARE)
 
-#depend: $(FIRMWARE) 
+#depend: $(FIRMWARE)
 
-distclean:: 
+distclean::
 	$(call DELFILE, src$(DELIM)cyw43439.firmware.image)
 
 endif

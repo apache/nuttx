@@ -173,7 +173,7 @@
 
 #define MC_RGM_FRENTC_FRET_EN            (1 << 0)  /* Bit 0: Functional Reset Entry Timer Enable (FRET_EN) */
 #define MC_RGM_FRENTC_FRET_TIMEOUT_SHIFT (1)       /* Bits 1-31: Functional Reset Entry Timer Value (FRET_TIMEOUT) */
-#define MC_RGM_FRENTC_FRET_TIMEOUT_MASK  (0x7fffffff << MC_RGM_FRENTC_FRET_TIMEOUT_SHIFT) 
+#define MC_RGM_FRENTC_FRET_TIMEOUT_MASK  (0x7fffffff << MC_RGM_FRENTC_FRET_TIMEOUT_SHIFT)
 
 /* Low Power Debug Control Register (LPDEBUG) */
 

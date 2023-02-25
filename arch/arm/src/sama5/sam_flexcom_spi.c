@@ -681,7 +681,7 @@ static inline struct sam_flex_spidev_s *flex_spi_dev(struct sam_flex_spics_s
       case 4:
         return &g_flexcom4dev;
         break;
-#endif 
+#endif
       default:
 
         /* shouldn't get here */

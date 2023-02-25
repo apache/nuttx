@@ -29,7 +29,7 @@ CMN_CSRCS  = avr_allocateheap.c avr_copystate.c avr_createstack.c avr_exit.c
 CMN_CSRCS += avr_mdelay.c avr_udelay.c avr_initialize.c avr_initialstate.c avr_idle.c
 CMN_CSRCS += avr_modifyreg8.c avr_modifyreg16.c avr_modifyreg32.c avr_releasestack.c
 CMN_CSRCS += avr_schedulesigaction.c avr_sigdeliver.c avr_stackframe.c avr_switchcontext.c
-CMN_CSRCS += avr_usestack.c avr_doirq.c avr_nputs.c avr_registerdump.c avr_getintstack.c 
+CMN_CSRCS += avr_usestack.c avr_doirq.c avr_nputs.c avr_registerdump.c avr_getintstack.c
 
 # Required AT32UC3 files
 

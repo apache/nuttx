@@ -79,35 +79,35 @@ config TM4C1294_LAUNCHPAD_JUMPERS_CAN
 	---help---
 		If set, NuttX will assume the jumpers JP4 and JP5 are set in CAN configuration.
 		This means UART2 will be connected to the ICDI serial port.
-		
+
 choice
 	prompt "UART2 Rx pin selection"
 	depends on TIVA_UART2
 	default TM4C1294_LAUNCHPAD_UART2_RX_A6
-	
+
 config TM4C1294_LAUNCHPAD_UART2_RX_A6
 	bool "Use A6 as UART Rx pin"
 	depends on TIVA_UART2 && !TM4C1294_LAUNCHPAD_JUMPERS_CAN
-	
+
 config TM4C1294_LAUNCHPAD_UART2_RX_D4
 	bool "Use D4 as UART Rx pin"
 	depends on TIVA_UART2
-	
+
 endchoice # UART2 Rx pin selection
 
 choice
 	prompt "UART2 Tx pin selection"
 	default TM4C1294_LAUNCHPAD_UART2_TX_A7
 	depends on TIVA_UART2
-	
+
 config TM4C1294_LAUNCHPAD_UART2_TX_A7
 	bool "Use A7 as UART Tx pin"
 	depends on TIVA_UART2 && !TM4C1294_LAUNCHPAD_JUMPERS_CAN
-	
+
 config TM4C1294_LAUNCHPAD_UART2_TX_D5
 	bool "Use D5 as UART Tx pin"
 	depends on TIVA_UART2
-	
+
 endchoice # UART2 Tx pin selection
 
 endif # ARCH_BOARD_TM4C1294_LAUNCHPAD

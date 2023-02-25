@@ -3,7 +3,7 @@ README
 
 This README discusses issues unique to NuttX configurations for the
 OPEN ISA RV32M1-VEGA development board featuring the RV32M1 MCU. The
-RV32M1 is a heterogeneous soc including an ARM Cortex-M4 CPU, an ARM 
+RV32M1 is a heterogeneous soc including an ARM Cortex-M4 CPU, an ARM
 Cortex-M0+ CPU, a RISC-V RI5CY CPU, and a RISC-V ZERO_RISCY CPU. the
 SOC integrates 1.25 MB flash, 384 KB SRAM, and varieties of peripherals.
 The RV32M1-VEGA board features:
@@ -39,13 +39,13 @@ Contents
 LEDs
 ====
 
-The RV32M1-VEGA board has ONE user RGB LED; Only the red part led is used to 
+The RV32M1-VEGA board has ONE user RGB LED; Only the red part led is used to
 indicate an interrupt request is being serviced.
 
   SYMBOL                Meaning                 RED*    GREEN     BLUE
   -------------------  -----------------------  -------  -------  -----
-  LED_STARTED          NuttX has been started   OFF      OFF      OFF 
-  LED_HEAPALLOCATE     Heap has been allocated  OFF      OFF      OFF 
+  LED_STARTED          NuttX has been started   OFF      OFF      OFF
+  LED_HEAPALLOCATE     Heap has been allocated  OFF      OFF      OFF
   LED_IRQSENABLED      Interrupts enabled       OFF      OFF      OFF
   LED_STACKCREATED     Idle stack created       OFF      OFF      OFF
   LED_INIRQ            In an interrupt**        OFF      OFF      OFF
@@ -108,7 +108,7 @@ TSTMR
 ====
 
 TSTMR Module is embedded in RV32M1 to provide system time stamp. It runs off 1MHz
-with a 56-bit counter, and can be adopted to get more accurate delay counting. If 
+with a 56-bit counter, and can be adopted to get more accurate delay counting. If
 the Module is selected, a hardware delay method will replace mdealy and udelay,
 the built-in software delay methods.
 
@@ -116,7 +116,7 @@ TOOLCHAIN
 ========
 
 It is preferable to use OPEN ISA gcc Toolchain to exploit RV32M1 RI5CY capabi-
-lities, though the generic GNU RVG Toolchain can generate binary codes running 
+lities, though the generic GNU RVG Toolchain can generate binary codes running
 on RV32M1 RI5CY without any problems. To switch generic GNU RVG Toolchain to
 OPEN ISA Toolchain, the following option must be selected:
 
@@ -162,9 +162,9 @@ Program
 ====
 
 To program RV32M1, openocd from OPEN ISA and an external jtag adapter are pre-
-requisite. There are 2 tested jtag adapters: Segger Jlink EDU mini and SiPEED 
-USB Jtag Adapter. The Segger Jlink EDU mini can connect J55 header on RV32M1-VEGA 
-board directly while SiPEED USB Jtag Adpater has to co-operate with an Adapter 
+requisite. There are 2 tested jtag adapters: Segger Jlink EDU mini and SiPEED
+USB Jtag Adapter. The Segger Jlink EDU mini can connect J55 header on RV32M1-VEGA
+board directly while SiPEED USB Jtag Adpater has to co-operate with an Adapter
 board to setup wires connection.
 Compared to Segger Jlink EDU Mini Adapter, SiPEED USB Jtag Adpater is cheaper but
 not inferior.
@@ -200,8 +200,8 @@ https://open-isa.org/downloads/
 Debug
 ====
 
-riscv64-unknonw-elf-gdb can not debug RV32M1 RISC-V Cores currently. GDB from 
-OPEN ISA Toolchain seems the only option and even can debug elf files generated 
+riscv64-unknonw-elf-gdb can not debug RV32M1 RISC-V Cores currently. GDB from
+OPEN ISA Toolchain seems the only option and even can debug elf files generated
 by risc64-unknown-elf-* tools.
 
 Configuration Sub-directories
@@ -218,8 +218,8 @@ buttons
 
   a. Start the buttons daemon:
      nsh> buttons
- 
-  b. Press and release SW2, SW3, SW4, SW5 freely, the button pressed 
+
+  b. Press and release SW2, SW3, SW4, SW5 freely, the button pressed
      and released messages will display correspondingly.
 
 nsh
@@ -234,6 +234,6 @@ nsh-itcm
   Interrupt Service Routines are placed in ITCM. Performance can be calculated
   by getprime, and you might find it deteriorated a little ironically. The drawback
   may be caused by long jump frequently between ITCM and flash. Besides, an instr-
-  uction cache is enabled always after RI5CY resets, and amelioration could not be 
+  uction cache is enabled always after RI5CY resets, and amelioration could not be
   achieved with even ITCM enabled.
   What if codes fulfill the 64KB ITCM ?

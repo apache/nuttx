@@ -645,7 +645,7 @@ config GD32F4_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	default n
 	---help---
 		In debug configuration, disables the WFI instruction in the IDLE loop
-		to prevent the JTAG from disconnecting. 
+		to prevent the JTAG from disconnecting.
 
 config GD32F4_FORCEPOWER
 	bool "Force power"
@@ -774,8 +774,8 @@ config GD32F4_TIMER0_FDTS
 	range 0 2
 	depends on GD32F4_TIMER0_PWM
 	---help---
-		The CKDIV bits can be configured by software to specify division ratio 
-		between the timer clock (TIMER_CK) and the dead-time and sampling clock (DTS), 
+		The CKDIV bits can be configured by software to specify division ratio
+		between the timer clock (TIMER_CK) and the dead-time and sampling clock (DTS),
 		which is used by the dead-time generators and the digital filters.
 
 config GD32F4_TIMER0_DEADTIME
@@ -784,7 +784,7 @@ config GD32F4_TIMER0_DEADTIME
 	range 0 255
 	depends on GD32F4_TIMER0_PWM
 	---help---
-		This controls the value of the dead-time, which is inserted before the 
+		This controls the value of the dead-time, which is inserted before the
 		output transitions.
 
 
@@ -801,7 +801,7 @@ config GD32F4_TIMER0_CH1MODE
 	range 0 7
 	depends on GD32F4_TIMER0_CHANNEL0
 	---help---
-		This controls the behavior of the output reference signal O0CPRE 
+		This controls the behavior of the output reference signal O0CPRE
 		which drives CH0_O and CH0_ON.
 
 config GD32F4_TIMER0_CH0O
@@ -831,7 +831,7 @@ config GD32F4_TIMER0_CH1MODE
 	range 0 7
 	depends on GD32F4_TIMER0_CHANNEL1
 	---help---
-		This controls the behavior of the output reference signal O1CPRE 
+		This controls the behavior of the output reference signal O1CPRE
 		which drives CH1_O and CH1_ON.
 
 config GD32F4_TIMER0_CH1O
@@ -861,7 +861,7 @@ config GD32F4_TIMER0_CH2MODE
 	range 0 7
 	depends on GD32F4_TIMER0_CHANNEL2
 	---help---
-		This controls the behavior of the output reference signal O2CPRE 
+		This controls the behavior of the output reference signal O2CPRE
 		which drives CH2_O and CH2_ON.
 
 config GD32F4_TIMER0_CH2O
@@ -891,7 +891,7 @@ config GD32F4_TIMER0_CH3MODE
 	range 0 7
 	depends on GD32F4_TIMER0_CHANNEL3
 	---help---
-		This controls the behavior of the output reference signal O3CPRE 
+		This controls the behavior of the output reference signal O3CPRE
 		which drives CH3_O and CH3_ON.
 
 config GD32F4_TIMER0_CH3O
@@ -917,9 +917,9 @@ config GD32F4_TIMER0_ADC
 		Reserve timer 0 for use by ADC
 
 		Timer can be used for different purposes. When the timer0
-		is intended to be used for ADC conversion, the GD32F4_TIMER0 
+		is intended to be used for ADC conversion, the GD32F4_TIMER0
 		and GD32F4_ADC should be defined before. There requires two
-		definition for ADC usage:  First, assign which timer is used to 
+		definition for ADC usage:  First, assign which timer is used to
 		trigger the ADC. Second, and configure which ADC to sample.
 
 choice
@@ -1020,9 +1020,9 @@ config GD32F4_TIMER0_DAC
 		Reserve timer 0 for use by DAC
 
 		Timer can be used for different purposes. When the timer0
-		is intended to be used for DAC conversion, the GD32F4_TIMER0 
+		is intended to be used for DAC conversion, the GD32F4_TIMER0
 		and GD32F4_DAC should be defined before. There requires two
-		definition for DAC usage:  First, assign which timer is used to 
+		definition for DAC usage:  First, assign which timer is used to
 		trigger the DAC. Second, and configure which DAC channel to work.
 
 choice
@@ -1050,7 +1050,7 @@ config GD32F4_TIMER0_CAP
 	---help---
 		Reserve timer 0 for use by Capture
 
-		Timer can be used for different purposes. To capture input is 
+		Timer can be used for different purposes. To capture input is
 		one of the usual purpose.
 
 
@@ -1102,7 +1102,7 @@ config GD32F4_ADC0_RESOLUTION
 	default 0
 	range 0 3
 	---help---
-		ADC0 data resolution. 0: 12 bit, 1: 10 bit, 
+		ADC0 data resolution. 0: 12 bit, 1: 10 bit,
 		2: 8 bit, 3: 6 bit
 
 config GD32F4_ADC1_RESOLUTION
@@ -1111,7 +1111,7 @@ config GD32F4_ADC1_RESOLUTION
 	default 0
 	range 0 3
 	---help---
-		ADC1 data resolution. 0: 12 bit, 1: 10 bit, 
+		ADC1 data resolution. 0: 12 bit, 1: 10 bit,
 		2: 8 bit, 3: 6 bit
 
 config GD32F4_ADC2_RESOLUTION
@@ -1120,7 +1120,7 @@ config GD32F4_ADC2_RESOLUTION
 	default 0
 	range 0 3
 	---help---
-		ADC2 data resolution. 0: 12 bit, 1: 10 bit, 
+		ADC2 data resolution. 0: 12 bit, 1: 10 bit,
 		2: 8 bit, 3: 6 bit
 
 config GD32F4_ADC_MAX_SAMPLES
@@ -1128,9 +1128,9 @@ config GD32F4_ADC_MAX_SAMPLES
 	default 16
 	---help---
 		The ADC supports 19 multiplexed channels and two groups: regular and inserted channel group.
-		The maximum number of samples for regular group can be 16, for inserted channel group 
+		The maximum number of samples for regular group can be 16, for inserted channel group
 		can be 4.
-		User can change the default value according to the board initialize.  The user should 
+		User can change the default value according to the board initialize.  The user should
 		correctly configure this value.
 
 config GD32F4_ADC_NOINT
@@ -1331,7 +1331,7 @@ config GD32F4_DAC0_OUTPUT_BUFFER
 	depends on GD32F4_DAC0
 	default y
 	---help---
-		DAC0 output buffer configuration	
+		DAC0 output buffer configuration
 
 config GD32F4_DAC0_DATA
 	int "DAC0 data configuration"
@@ -1348,7 +1348,7 @@ config GD32F4_DAC0_TRIG
 	depends on GD32F4_DAC0
 	default y
 	---help---
-		DAC0 trigger configuration	
+		DAC0 trigger configuration
 
 config GD32F4_DAC0_TRIG_MODE
 	int "DAC0 trigger source select"
@@ -1365,7 +1365,7 @@ config GD32F4_DAC0_TIMER_FREQUENCY
 	depends on GD32F4_DAC0 && GD32F4_DAC0_TRIG
 	default 1000
 	---help---
-		DAC0 output frequency, only in timer triggrer mode is useful.  
+		DAC0 output frequency, only in timer triggrer mode is useful.
 		Default:  1000Hz
 
 config GD32F4_DAC0_DMA
@@ -1375,10 +1375,10 @@ config GD32F4_DAC0_DMA
 	---help---
 		When the external trigger is enabled, the DMA request can be enabled by setting the
 		DDMAENx bits of the DAC_CTL register. A DMA request will be generated by DAC when an
-		external hardware trigger (not a software trigger) occurs. The user should note that 
+		external hardware trigger (not a software trigger) occurs. The user should note that
 		when use DMA.
 		The timer and output frequency must also be provided to support the DMA transfer,
-		when the timer is selected to trigger DAC DMA.  
+		when the timer is selected to trigger DAC DMA.
 
 config GD32F4_DAC0_DMA_BUFFER_SIZE
 	int "DAC0 DMA buffer size"
@@ -1390,7 +1390,7 @@ config GD32F4_DAC1_OUTPUT_BUFFER
 	depends on GD32F4_DAC1
 	default y
 	---help---
-		DAC0 output buffer configuration	
+		DAC0 output buffer configuration
 
 config GD32F4_DAC1_DATA
 	int "DAC1 data configuration"
@@ -1407,7 +1407,7 @@ config GD32F4_DAC1_TRIG
 	depends on GD32F4_DAC1
 	default y
 	---help---
-		DAC1 trigger configuration	
+		DAC1 trigger configuration
 
 config GD32F4_DAC1_TRIG_MODE
 	int "DAC1 trigger source select"
@@ -1424,7 +1424,7 @@ config GD32F4_DAC1_TIMER_FREQUENCY
 	depends on GD32F4_DAC1 && GD32F4_DAC1_TRIG
 	default 1000
 	---help---
-		DAC1 output frequency, only in timer triggrer mode is useful.  
+		DAC1 output frequency, only in timer triggrer mode is useful.
 		Default:  1000Hz
 
 config GD32F4_DAC1_DMA
@@ -1434,10 +1434,10 @@ config GD32F4_DAC1_DMA
 	---help---
 		When the external trigger is enabled, the DMA request can be enabled by setting the
 		DDMAENx bits of the DAC_CTL register. A DMA request will be generated by DAC when an
-		external hardware trigger (not a software trigger) occurs. The user should note that 
+		external hardware trigger (not a software trigger) occurs. The user should note that
 		when use DMA.
 		The timer and output frequency must also be provided to support the DMA transfer,
-		when the timer is selected to trigger DAC DMA.  
+		when the timer is selected to trigger DAC DMA.
 
 config GD32F4_DAC1_DMA_BUFFER_SIZE
 	int "DAC1 DMA buffer size"
@@ -1487,8 +1487,8 @@ config USART0_RS485
 	default n
 	---help---
 		USART0 RS-485 function configuration. If the user configure the RS-485 on
-		USART, the user's should to provide GPIO_USART0_RS485_DIR pin definition 
-		in board initialization. 
+		USART, the user's should to provide GPIO_USART0_RS485_DIR pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_USART0_RXDMA currently.
 
 config USART0_RS485_DIR_POLARITY
@@ -1497,7 +1497,7 @@ config USART0_RS485_DIR_POLARITY
 	range 0 1
 	depends on USART0_RS485
 	---help---
-		Polarity of GPIO_USART0_RS485_DIR pin for RS-485 on USART0. 
+		Polarity of GPIO_USART0_RS485_DIR pin for RS-485 on USART0.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_USART0_RXDMA
@@ -1507,7 +1507,7 @@ config GD32F4_USART0_RXDMA
 	select GD32F4_USART_RXDMA
 	select USART0_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_USART0_TXDMA
@@ -1517,7 +1517,7 @@ config GD32F4_USART0_TXDMA
 	select GD32F4_USART_TXDMA
 	select USART0_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmitting data buffer.
 
 endif # GD32F4_USART0_SERIALDRIVER
@@ -1546,8 +1546,8 @@ config USART1_RS485
 	default n
 	---help---
 		USART1 RS-485 function configuration. If the user configure the RS-485 on
-		USART, the user's should to provide GPIO_USART0_RS485_DIR pin definition 
-		in board initialization. 
+		USART, the user's should to provide GPIO_USART0_RS485_DIR pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_USART1_RXDMA currently.
 
 config USART1_RS485_DIR_POLARITY
@@ -1556,7 +1556,7 @@ config USART1_RS485_DIR_POLARITY
 	range 0 1
 	depends on USART1_RS485
 	---help---
-		Polarity of GPIO_USART1_RS485_DIR pin for RS-485 on USART1. 
+		Polarity of GPIO_USART1_RS485_DIR pin for RS-485 on USART1.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_USART1_RXDMA
@@ -1566,7 +1566,7 @@ config GD32F4_USART1_RXDMA
 	select GD32F4_USART_RXDMA
 	select USART1_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_USART1_TXDMA
@@ -1576,7 +1576,7 @@ config GD32F4_USART1_TXDMA
 	select GD32F4_USART_TXDMA
 	select USART1_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmitting data buffer.
 
 endif # GD32F4_USART1_SERIALDRIVER
@@ -1605,8 +1605,8 @@ config USART2_RS485
 	default n
 	---help---
 		USART2 RS-485 function configuration. If the user configure the RS-485 on
-		USART, the user's should to provide GPIO_USART2_RS485_DIR pin definition 
-		in board initialization. 
+		USART, the user's should to provide GPIO_USART2_RS485_DIR pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_USART2_RXDMA currently.
 
 config USART2_RS485_DIR_POLARITY
@@ -1615,7 +1615,7 @@ config USART2_RS485_DIR_POLARITY
 	range 0 1
 	depends on USART1_RS485
 	---help---
-		Polarity of GPIO_USART2_RS485_DIR pin for RS-485 on USART2. 
+		Polarity of GPIO_USART2_RS485_DIR pin for RS-485 on USART2.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_USART2_RXDMA
@@ -1625,7 +1625,7 @@ config GD32F4_USART2_RXDMA
 	select GD32F4_USART_RXDMA
 	select USART2_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_USART2_TXDMA
@@ -1635,7 +1635,7 @@ config GD32F4_USART2_TXDMA
 	select GD32F4_USART_TXDMA
 	select USART2_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmitting data buffer.
 
 endif # GD32F4_USART2_SERIALDRIVER
@@ -1664,8 +1664,8 @@ config UART3_RS485
 	default n
 	---help---
 		UART3 RS-485 function configuration. If the user configure the RS-485 on
-		UART, the user's should to provide UART3_RS485_DIR_POLARITY pin definition 
-		in board initialization. 
+		UART, the user's should to provide UART3_RS485_DIR_POLARITY pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_UART3_RXDMA currently.
 
 config UART3_RS485_DIR_POLARITY
@@ -1674,7 +1674,7 @@ config UART3_RS485_DIR_POLARITY
 	range 0 1
 	depends on UART3_RS485
 	---help---
-		Polarity of GPIO_UART3_RS485_DIR pin for RS-485 on UART3. 
+		Polarity of GPIO_UART3_RS485_DIR pin for RS-485 on UART3.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_UART3_RXDMA
@@ -1684,7 +1684,7 @@ config GD32F4_UART3_RXDMA
 	select GD32F4_USART_RXDMA
 	select UART3_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_UART3_TXDMA
@@ -1694,7 +1694,7 @@ config GD32F4_UART3_TXDMA
 	select GD32F4_USART_TXDMA
 	select UART3_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmit data buffer.
 
 endif # GD32F4_UART3_SERIALDRIVER
@@ -1723,8 +1723,8 @@ config UART4_RS485
 	default n
 	---help---
 		UART4 RS-485 function configuration. If the user configure the RS-485 on
-		UART, the user's should to provide UART4_RS485_DIR_POLARITY pin definition 
-		in board initialization. 
+		UART, the user's should to provide UART4_RS485_DIR_POLARITY pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_UART4_RXDMA currently.
 
 config UART4_RS485_DIR_POLARITY
@@ -1733,7 +1733,7 @@ config UART4_RS485_DIR_POLARITY
 	range 0 1
 	depends on UART4_RS485
 	---help---
-		Polarity of GPIO_UART4_RS485_DIR pin for RS-485 on UART4. 
+		Polarity of GPIO_UART4_RS485_DIR pin for RS-485 on UART4.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_UART4_RXDMA
@@ -1743,7 +1743,7 @@ config GD32F4_UART4_RXDMA
 	select GD32F4_USART_RXDMA
 	select UART4_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_UART4_TXDMA
@@ -1753,7 +1753,7 @@ config GD32F4_UART4_TXDMA
 	select GD32F4_USART_TXDMA
 	select UART4_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmit data buffer.
 
 endif # GD32F4_UART4_SERIALDRIVER
@@ -1782,8 +1782,8 @@ config USART5_RS485
 	default n
 	---help---
 		USART5 RS-485 function configuration. If the user configure the RS-485 on
-		USART, the user's should to provide GPIO_USART5_RS485_DIR pin definition 
-		in board initialization. 
+		USART, the user's should to provide GPIO_USART5_RS485_DIR pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_USART5_RXDMA currently.
 
 config USART5_RS485_DIR_POLARITY
@@ -1792,7 +1792,7 @@ config USART5_RS485_DIR_POLARITY
 	range 0 1
 	depends on USART1_RS485
 	---help---
-		Polarity of GPIO_USART5_RS485_DIR pin for RS-485 on USART5. 
+		Polarity of GPIO_USART5_RS485_DIR pin for RS-485 on USART5.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_USART5_RXDMA
@@ -1802,7 +1802,7 @@ config GD32F4_USART5_RXDMA
 	select GD32F4_USART_RXDMA
 	select USART5_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_USART5_TXDMA
@@ -1812,7 +1812,7 @@ config GD32F4_USART5_TXDMA
 	select GD32F4_USART_TXDMA
 	select USART5_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmitting data buffer.
 
 endif # GD32F4_USART5_SERIALDRIVER
@@ -1842,8 +1842,8 @@ config UART6_RS485
 	default n
 	---help---
 		UART6 RS-485 function configuration. If the user configure the RS-485 on
-		UART, the user's should to provide UART6_RS485_DIR_POLARITY pin definition 
-		in board initialization. 
+		UART, the user's should to provide UART6_RS485_DIR_POLARITY pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_UART6_RXDMA currently.
 
 config UART6_RS485_DIR_POLARITY
@@ -1852,7 +1852,7 @@ config UART6_RS485_DIR_POLARITY
 	range 0 1
 	depends on UART6_RS485
 	---help---
-		Polarity of GPIO_UART6_RS485_DIR pin for RS-485 on UART6. 
+		Polarity of GPIO_UART6_RS485_DIR pin for RS-485 on UART6.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_UART6_RXDMA
@@ -1862,7 +1862,7 @@ config GD32F4_UART6_RXDMA
 	select GD32F4_USART_RXDMA
 	select UART6_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_UART6_TXDMA
@@ -1872,7 +1872,7 @@ config GD32F4_UART6_TXDMA
 	select GD32F4_USART_TXDMA
 	select UART6_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmit data buffer.
 
 endif # GD32F4_UART6_SERIALDRIVER
@@ -1902,8 +1902,8 @@ config UART7_RS485
 	default n
 	---help---
 		UART7 RS-485 function configuration. If the user configure the RS-485 on
-		UART, the user's should to provide UART7_RS485_DIR_POLARITY pin definition 
-		in board initialization. 
+		UART, the user's should to provide UART7_RS485_DIR_POLARITY pin definition
+		in board initialization.
 		And it cannot be used with GD32F4_UART7_RXDMA currently.
 
 config UART7_RS485_DIR_POLARITY
@@ -1912,7 +1912,7 @@ config UART7_RS485_DIR_POLARITY
 	range 0 1
 	depends on UART7_RS485
 	---help---
-		Polarity of GPIO_UART7_RS485_DIR pin for RS-485 on UART7. 
+		Polarity of GPIO_UART7_RS485_DIR pin for RS-485 on UART7.
 		The state on DIR pin: 0 - receive , 1 - transmit.
 
 config GD32F4_UART7_RXDMA
@@ -1922,7 +1922,7 @@ config GD32F4_UART7_RXDMA
 	select GD32F4_USART_RXDMA
 	select UART7_RXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the receiving data buffer.
 
 config GD32F4_UART7_TXDMA
@@ -1932,7 +1932,7 @@ config GD32F4_UART7_TXDMA
 	select GD32F4_USART_TXDMA
 	select UART7_TXDMA
 	---help---
-		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		To reduce the burden of the processor in fast data transmit, DMA can be used to
 		access the transmit data buffer.
 
 endif # GD32F4_UART7_SERIALDRIVER
@@ -2003,7 +2003,7 @@ config GD32F4_USART_INVERT
 	default n
 	depends on GD32F4_USART0 || GD32F4_USART1 || GD32F4_USART1 || GD32F4_USART5
 	---help---
-		Enable signal inversion support for USART RX/TX pin . The option enables 
+		Enable signal inversion support for USART RX/TX pin . The option enables
 		support for the TIOCSINVERT ioctl in the gd32f4 serial driver.
 		RX/TX inversion only support for USART0, 1, 2, 5
 
@@ -2161,8 +2161,8 @@ config GD32F4_SPI_DMATHRESHOLD
 	default 4
 	depends on GD32F4_SPI_DMA
 	---help---
-		When SPI DMA is enabled, if transfers size is less than GD32F4_SPI_DMATHRESHOLD, 
-		the data transfer will still be performed by polling logic. 
+		When SPI DMA is enabled, if transfers size is less than GD32F4_SPI_DMATHRESHOLD,
+		the data transfer will still be performed by polling logic.
 
 config GD32F4_SPI0_DMA
 	bool "SPI0 DMA"
@@ -2307,7 +2307,7 @@ config GD32F4_MII
 	bool "Use the media-independent interface (MII) interface"
 	default n
 	---help---
-		Select Ethernet MII interface. The application can only select one of 
+		Select Ethernet MII interface. The application can only select one of
 		the MII or RMII mode.
 
 choice
@@ -2360,9 +2360,9 @@ config GD32F4_PHY_SR
 	int "PHY Status Register Address (decimal)"
 	depends on GD32F4_AUTO_NEGOTIATION
 	---help---
-		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. Because of the 
-		PHY status register address may different from PHY to PHY, the user should set 
-		the address of the PHY status register according to the PHY on board. 
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. Because of the
+		PHY status register address may different from PHY to PHY, the user should set
+		the address of the PHY status register according to the PHY on board.
 
 config GD32F4_PHY_SR_ALTCONFIG
 	bool "PHY Status Alternate Bit Layout"
@@ -2450,7 +2450,7 @@ config GD32F4_RMII
 	bool "Use the reduced media-independent interface (RMII) interface"
 	default y if !GD32F4_MII
 	---help---
-		Select Ethernet MII interface. The application can only select one of 
+		Select Ethernet MII interface. The application can only select one of
 		the MII or RMII mode.
 
 choice
@@ -2471,7 +2471,7 @@ config GD32F4_RMII_CKOUT1
 config GD32F4_RMII_EXTCLK
 	bool "External RMII clock"
 	---help---
-		Clocking is provided by external clock. And not use CKOUT for 
+		Clocking is provided by external clock. And not use CKOUT for
 		RMII clock.
 
 endchoice # RMII clock configuration

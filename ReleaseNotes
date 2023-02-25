@@ -30421,7 +30421,7 @@ USER_LDFLAGS = -Wl,--undefined=$(ENTRYPT) -Wl,--entry=$(ENTRYPT) $(USER_LDSCRIPT
 ```
 
 Change:
- 
+
 ```
 $(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) --start-group $(USER_LDLIBS) --end-group $(USER_LIBGCC)
 ```
@@ -31802,7 +31802,7 @@ NuttX-11.0.0 Release Notes
  * [#5966](https://github.com/apache/nuttx/pull/5966) arch:tcbinfo: update tcbinfo as xcpcontext update
  * [#5865](https://github.com/apache/nuttx/pull/5865) arch: Add -fsanitize=kernel-address to ARCHCPUFLAGS if CONFIG_MM_KASAN=y
  * [#5864](https://github.com/apache/nuttx/pull/5864) arch/Toolchain.defs: add wildcard for EXTRA_LIBS
- * [#5920](https://github.com/apache/nuttx/pull/5920) ARCH_ADDRENV: Add guard against mis-configuration 
+ * [#5920](https://github.com/apache/nuttx/pull/5920) ARCH_ADDRENV: Add guard against mis-configuration
  * [#6105](https://github.com/apache/nuttx/pull/6105) arch/clang: add support for Clang LTO
  * [#6089](https://github.com/apache/nuttx/pull/6089) arch: Move group_addrenv to common place
  * [#6183](https://github.com/apache/nuttx/pull/6183) arch: Remvoe the error message when toolchain can't find
@@ -31815,7 +31815,7 @@ NuttX-11.0.0 Release Notes
  * [#6254](https://github.com/apache/nuttx/pull/6254) arch: Remove board/libboard$(LIBEXT) from the rerequest of export_startup
  * [#6276](https://github.com/apache/nuttx/pull/6276) arch: Move "-nostartfiles -nodefaultlibs" from Make.defs to Toolchian.defs
  * [#6351](https://github.com/apache/nuttx/pull/6351) arch: Define WCHAR_[MIN|MAX] in arch/include/limits.h
- * [#6286](https://github.com/apache/nuttx/pull/6286) arch: inline up_interrupt_context() 
+ * [#6286](https://github.com/apache/nuttx/pull/6286) arch: inline up_interrupt_context()
  * [#6284](https://github.com/apache/nuttx/pull/6284) arch/addrenv: Add missing FAR qualifier to addrenv_mprot
  * [#6277](https://github.com/apache/nuttx/pull/6277) arch/i2c: Change xxx_i2c_tousecs to xxx_i2c_toticks
  * [#6416](https://github.com/apache/nuttx/pull/6416) Fix CONFIG_ALLSYMS for arm, risc-v and xtensa after #5496
@@ -31870,7 +31870,7 @@ NuttX-11.0.0 Release Notes
  * [#5983](https://github.com/apache/nuttx/pull/5983) arch/risc-v: Remove the unnecessary inclusion of board header files
  * [#5754](https://github.com/apache/nuttx/pull/5754) arch/risc-v: Correct stack coloration in riscv_cpu_boot
  * [#5758](https://github.com/apache/nuttx/pull/5758) RISC-V: Prepare CONFIG_BUILD_KERNEL part 1
- * [#5760](https://github.com/apache/nuttx/pull/5760) ESP32-S3: Fix UART IRQ setup hardcoded to CPU 0 
+ * [#5760](https://github.com/apache/nuttx/pull/5760) ESP32-S3: Fix UART IRQ setup hardcoded to CPU 0
  * [#5766](https://github.com/apache/nuttx/pull/5766) arch/risc-v: Rework riscv_get_newintctx
  * [#5773](https://github.com/apache/nuttx/pull/5773) risc-v/esp32c3: Remove deprecated option for disabling atomics support
  * [#5775](https://github.com/apache/nuttx/pull/5775) arch/risc-v: Merge riscv_getnewintctx into common
@@ -31934,7 +31934,7 @@ NuttX-11.0.0 Release Notes
  * [#6069](https://github.com/apache/nuttx/pull/6069) RISC-V: Add support for CONFIG_BUILD_KERNEL
  * [#6005](https://github.com/apache/nuttx/pull/6005) ESP32C3 TWAI (CAN) controller support.
  * [#5740](https://github.com/apache/nuttx/pull/5740) Add ethernet support for risc-v/MPFS
- * [#5749](https://github.com/apache/nuttx/pull/5749) risc-v/mpfs: usb: fix ep0 stall/resume and rx reads 
+ * [#5749](https://github.com/apache/nuttx/pull/5749) risc-v/mpfs: usb: fix ep0 stall/resume and rx reads
  * [#5783](https://github.com/apache/nuttx/pull/5783) risc-v/mpfs: usb: fix ep0 read done
  * [#5881](https://github.com/apache/nuttx/pull/5881) MPFS: Fix issue with external interrupt detection
  * [#5875](https://github.com/apache/nuttx/pull/5875) MPFS: Fix error in flat build linker script
@@ -31961,7 +31961,7 @@ NuttX-11.0.0 Release Notes
  * [#6530](https://github.com/apache/nuttx/pull/6530) mpfs: Fix IHC memory locations to native width type
  * [#6490](https://github.com/apache/nuttx/pull/6490) mpfs: Allow mapping of RAM/ROM regions from different memory areas
  * [#6602](https://github.com/apache/nuttx/pull/6602) risc-v/mpfs: usb: fix illegal reads
- * [#6535](https://github.com/apache/nuttx/pull/6535) risc-v/mpfs: ihc: don't start rptun automatically 
+ * [#6535](https://github.com/apache/nuttx/pull/6535) risc-v/mpfs: ihc: don't start rptun automatically
  * [#6361](https://github.com/apache/nuttx/pull/6361) arch/risc-v: re-add missing riscv_udelay source
  * [#6343](https://github.com/apache/nuttx/pull/6343) Some cleanup for risc-v
  * [#6342](https://github.com/apache/nuttx/pull/6342) arch/risc-v: Unify common source include
@@ -32081,7 +32081,7 @@ NuttX-11.0.0 Release Notes
  * [#6379](https://github.com/apache/nuttx/pull/6379) arm/tlsr82: gpio driver bug fix and optimize
  * [#6334](https://github.com/apache/nuttx/pull/6334) arm/tlsr82: ble performance optimize and problems solve
  * [#6238](https://github.com/apache/nuttx/pull/6238) tlsr82/tc32: optimize the irq process
- * [#6332](https://github.com/apache/nuttx/pull/6332) arch: imx6: add support kernel build and smp 
+ * [#6332](https://github.com/apache/nuttx/pull/6332) arch: imx6: add support kernel build and smp
  * [#6429](https://github.com/apache/nuttx/pull/6429) arch: imx6: Enable imx_idle.c to reduce CPU load
  * [#6234](https://github.com/apache/nuttx/pull/6234) arm/tc32/Make.defs: filter-out arm_udelay.c
  * [#6736](https://github.com/apache/nuttx/pull/6736) arm/allocateheap: fix multiple definition of 'up_allocate_heap'
@@ -32100,9 +32100,9 @@ NuttX-11.0.0 Release Notes
  * [#6775](https://github.com/apache/nuttx/pull/6775) arch/stm32/stm32_foc.c: fix some ADC and PWM ifdefs
  * [#6769](https://github.com/apache/nuttx/pull/6769) arch/stm32f0l0g0: add SPI3 support (STM32G0B0 chips)
  * [#6218](https://github.com/apache/nuttx/pull/6218) STM32F746G-Disco, Audiosupport, Bugfix
- * [#6715](https://github.com/apache/nuttx/pull/6715) stm32wb: adding BLE support 
+ * [#6715](https://github.com/apache/nuttx/pull/6715) stm32wb: adding BLE support
  * [#6729](https://github.com/apache/nuttx/pull/6729) stm32f7: add showprogress in __start
- * [#6078](https://github.com/apache/nuttx/pull/6078) Stm32f746 audio 
+ * [#6078](https://github.com/apache/nuttx/pull/6078) Stm32f746 audio
  * [#6413](https://github.com/apache/nuttx/pull/6413) stm32wl5: add gpio exti support
  * [#6426](https://github.com/apache/nuttx/pull/6426) stm32wl5: add flash progmem driver support
  * [#6788](https://github.com/apache/nuttx/pull/6788) LPC17xx_40xx PWM multichannel support
@@ -32289,7 +32289,7 @@ NuttX-11.0.0 Release Notes
  * [#6138](https://github.com/apache/nuttx/pull/6138) boards/boardctl: correct boarctl return value
  * [#6141](https://github.com/apache/nuttx/pull/6141) boards/risc-v: Remove "MAXOPTIMIZATION = -Os" from Make.defs
  * [#6143](https://github.com/apache/nuttx/pull/6143) boards: Move -fno-common from Make.defs to Toolchain.defs
- * [#6144](https://github.com/apache/nuttx/pull/6144) boards: Move -g from Make.defs to Toolchain.defs 
+ * [#6144](https://github.com/apache/nuttx/pull/6144) boards: Move -g from Make.defs to Toolchain.defs
  * [#6146](https://github.com/apache/nuttx/pull/6146) boards: Move "-fno-exceptions -fcheck-new" from Make.defs to Toolchain.defs
  * [#6155](https://github.com/apache/nuttx/pull/6155) boards: Move -fno-strict-aliasing from Make.defs to Toolchain.defs
  * [#6195](https://github.com/apache/nuttx/pull/6195) boards: rv-virt: Add support ELF to nsh and nsh64 defconfigs

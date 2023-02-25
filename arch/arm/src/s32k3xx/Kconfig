@@ -376,7 +376,7 @@ config S32K3XX_QSPI
 	default n
 	select ARCH_USE_MPU
 	depends on S32K3XX_HAVE_QSPI
-	
+
 menu "FlexCAN"
 
 config S32K3XX_FLEXCAN0
@@ -591,7 +591,7 @@ endmenu # LPUART
 config S32K3XX_RTC
 	bool "RTC"
 	default n
-	
+
 config S32K3XX_FS26
 	bool "FS26 SBC Disable watchdog"
 	default n
@@ -1085,11 +1085,11 @@ endmenu # eDMA Global Configuration
 
 menu "LPSPI Configuration"
 	depends on S32K3XX_LPSPI
-	
+
 config S32K3XX_LPSPI_DWORD
 	bool "DWORD up to 64 bit transfer support"
 	default n
-	
+
 config S32K3XX_LPSPI_DMA
 	bool "SPI DMA"
 	depends on S32K3XX_EDMA
@@ -1131,7 +1131,6 @@ config S32K3XX_LPSPI4_DMA
 	depends on S32K3XX_LPSPI4 && S32K3XX_LPSPI_DMA
 	---help---
 		Use DMA to improve LPSPI4 transfer performance.
-		
 
 config S32K3XX_LPSPI5_DMA
 	bool "LPSPI5 DMA"
@@ -1149,13 +1148,13 @@ config S32K3XX_LPSPI_DMATHRESHOLD
 		When SPI DMA is enabled, small DMA transfers will still be performed
 		by polling logic.  But we need a threshold value to determine what
 		is small.
-	
+
 config S32K3XX_LPSPI0_PINCFG
 	int "LPSPI0 input & data pin config"
 	depends on S32K3XX_LPSPI0
 	default 0
 	---help---
-		Configures which pins are used for input and output data during serial transfers. 
+		Configures which pins are used for input and output data during serial transfers.
 		0 - SIN is used for input data and SOUT is used for output data
 		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
 		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
@@ -1166,7 +1165,7 @@ config S32K3XX_LPSPI1_PINCFG
 	depends on S32K3XX_LPSPI1
 	default 0
 	---help---
-		Configures which pins are used for input and output data during serial transfers. 
+		Configures which pins are used for input and output data during serial transfers.
 		0 - SIN is used for input data and SOUT is used for output data
 		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
 		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
@@ -1177,7 +1176,7 @@ config S32K3XX_LPSPI2_PINCFG
 	depends on S32K3XX_LPSPI2
 	default 0
 	---help---
-		Configures which pins are used for input and output data during serial transfers. 
+		Configures which pins are used for input and output data during serial transfers.
 		0 - SIN is used for input data and SOUT is used for output data
 		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
 		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
@@ -1188,7 +1187,7 @@ config S32K3XX_LPSPI3_PINCFG
 	depends on S32K3XX_LPSPI3
 	default 0
 	---help---
-		Configures which pins are used for input and output data during serial transfers. 
+		Configures which pins are used for input and output data during serial transfers.
 		0 - SIN is used for input data and SOUT is used for output data
 		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
 		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
@@ -1199,7 +1198,7 @@ config S32K3XX_LPSPI4_PINCFG
 	depends on S32K3XX_LPSPI4
 	default 0
 	---help---
-		Configures which pins are used for input and output data during serial transfers. 
+		Configures which pins are used for input and output data during serial transfers.
 		0 - SIN is used for input data and SOUT is used for output data
 		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
 		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
@@ -1210,12 +1209,12 @@ config S32K3XX_LPSPI5_PINCFG
 	depends on S32K3XX_LPSPI5
 	default 0
 	---help---
-		Configures which pins are used for input and output data during serial transfers. 
+		Configures which pins are used for input and output data during serial transfers.
 		0 - SIN is used for input data and SOUT is used for output data
 		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
 		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
 		3 - SOUT is used for input data and SIN is used for output data
-	
+
 endmenu # LPSPI Configuration
 
 menu "LPI2C Configuration"
@@ -1317,15 +1316,15 @@ endmenu # LPI2C Configuration
 
 menu "LPUART Configuration"
 	depends on S32K3XX_LPUART
-	
+
 config S32K3XX_LPUART_INVERT
 	bool "Signal Invert Support"
 	default n
-		
+
 config S32K3XX_LPUART_SINGLEWIRE
 	bool "Signal Wire Support"
 	default n
-	
+
 config S32K3XX_SERIAL_RXDMA_BUFFER_SIZE
 	int "RX DMA buffer size"
 	default 64

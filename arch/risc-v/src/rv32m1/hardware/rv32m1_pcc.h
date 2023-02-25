@@ -92,7 +92,7 @@
 /* Register Bitfield Definitions ********************************************/
 
 #define PCC_CLKCFG_PCD_SHIFT         (0)
-#define PCC_CLKCFG_PCD_MASK          (7 << PCC_CLKCFG_PCD_SHIFT)       
+#define PCC_CLKCFG_PCD_MASK          (7 << PCC_CLKCFG_PCD_SHIFT)
 #define PCC_CLKCFG_PCD_DIV1          (0 << PCC_CLKCFG_PCD_SHIFT)
 #define PCC_CLKCFG_PCD_DIV2          (1 << PCC_CLKCFG_PCD_SHIFT)
 #define PCC_CLKCFG_PCD_DIV3          (2 << PCC_CLKCFG_PCD_SHIFT)

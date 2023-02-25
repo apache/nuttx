@@ -39,7 +39,7 @@ LEDs
   include/board.h and src/stm32_autoleds.c. The LEDs are used to encode OS
   related events as follows when the LEDs are available:
 
-  SYMBOL                Meaning                  RED  GREEN 
+  SYMBOL                Meaning                  RED  GREEN
   -------------------  -----------------------   ---  -----
 
   LED_STARTED          NuttX has been started    OFF  OFF
@@ -127,7 +127,7 @@ TrustedFirmware-M
   @@ -306,6 +306,9 @@ void jumper(struct arm_vector_table *vector)
      /* set the secure vector */
      SCB->VTOR = (uint32_t)vector;
-   
+
   +  /* Stay in Non-Secure mode for BusFault, HardFault, and NMI exceptions */
   +  SCB->AIRCR = (SCB->AIRCR & 0x0000FFFF) | 0x05FA0000 | SCB_AIRCR_BFHFNMINS_Msk;
   +

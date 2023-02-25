@@ -83,7 +83,7 @@ Defconfigs
 
 - nshsram
     Load NuttX binary to SRAM
-  
+
 - smp
     Enable SMP mode. Both Core 0 and Core 1 are used by NuttX.
 
@@ -95,8 +95,8 @@ Defconfigs
            VCC ----- 3V3 OUT        (Pin 36)
            SDA ----- GP4 (I2C0 SDA) (Pin 6)
            SCL ----- GP5 (I2C0 SCL) (Pin 7)
-           
-- lcd1602 
+
+- lcd1602
     LCD 1602 Segment LCD Disaply (I2C)
     Connection:
     PCF8574 BackPack Raspberry Pi Pico
@@ -119,7 +119,7 @@ Defconfigs
     * Card hot swapping is not supported.
 
 - st7735
-    st7735 SPI LCD support      
+    st7735 SPI LCD support
     Connection:
       st7735         Raspberry Pi Pico
            GND ----- GND             (Pin 3 or 38 or ...)
@@ -129,7 +129,7 @@ Defconfigs
             CS ----- GP13 (SPI1 CSn) (Pin 17)
        AO(D/C) ----- GP12 (SPI1 RX)  (Pin 16)
             BL ----- GP11            (Pin 15)
-         RESET ----- GP10            (Pin 14)  
+         RESET ----- GP10            (Pin 14)
 
 - enc28j60
     ENC28J60 SPI ethernet controller support

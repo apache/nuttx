@@ -432,7 +432,7 @@ config STM32_APP_FORMAT_MCUBOOT
 	select STM32_HAVE_OTA_PARTITION
 	depends on EXPERIMENTAL
 	---help---
-		The MCUboot support of loading the firmware images.		
+		The MCUboot support of loading the firmware images.
 
 comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
 	depends on !EXPERIMENTAL

@@ -50,7 +50,7 @@ config FS_AUTOMOUNTER_DRIVER
 		Enabling this option will lead to registering of a character driver
 		on FS_AUTOMOUNTER_VFS_PATH + mount point path for auto-mounter.
 		Example: /var/mnt/sdcard0
-		
+
 config FS_AUTOMOUNTER_VFS_PATH
 	string "Path to auto-mounter driver"
 	default "/var"

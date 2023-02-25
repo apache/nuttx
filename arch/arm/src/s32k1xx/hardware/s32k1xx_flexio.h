@@ -329,7 +329,7 @@
 #define FLEXIO_TIMCTL_PINPOL              (1 << 7)  /* Bit 7: Timer Pin Polarity (PINPOL) */
 #  define FLEXIO_TIMCTL_PINPOL_HI         (0 << 7)  /*        Pin is active high */
 #  define FLEXIO_TIMCTL_PINPOL_LO         (1 << 7)  /*        Pin is active low */
-#define FLEXIO_TIMCTL_PINSEL_SHIFT        (8)       /* Bits 8-10: Timer Pin Select (PINSEL) */ 
+#define FLEXIO_TIMCTL_PINSEL_SHIFT        (8)       /* Bits 8-10: Timer Pin Select (PINSEL) */
 #define FLEXIO_TIMCTL_PINSEL_MASK         (0x07 << FLEXIO_TIMCTL_PINSEL_SHIFT)
 #  define FLEXIO_TIMCTL_PINSEL(n)         (((n) << FLEXIO_TIMCTL_PINSEL_SHIFT) & FLEXIO_TIMCTL_PINSEL_MASK)
                                                     /* Bits 11-15: Reserved */
@@ -363,7 +363,7 @@
 #  define FLEXIO_TIMCFG_TSTART_DIS        (0 << 1)  /*        Start bit disabled */
 #  define FLEXIO_TIMCFG_TSTART_ENA        (1 << 1)  /*        Start bit enabled */
                                                     /* Bits 2-3: Reserved */
-#define FLEXIO_TIMCFG_TSTOP_SHIFT         (4)       /* Bits 4-5: Timer Stop Bit (TSTOP) */ 
+#define FLEXIO_TIMCFG_TSTOP_SHIFT         (4)       /* Bits 4-5: Timer Stop Bit (TSTOP) */
 #define FLEXIO_TIMCFG_TSTOP_MASK          (0x03 << FLEXIO_TIMCFG_TSTOP_SHIFT)
 #  define FLEXIO_TIMCFG_TSTOP_DIS         (0x00 << FLEXIO_TIMCFG_TSTOP_SHIFT) /* Stop bit disabled */
 #  define FLEXIO_TIMCFG_TSTOP_TIMCMP      (0x01 << FLEXIO_TIMCFG_TSTOP_SHIFT) /* Stop bit is enabled on timer compare */
@@ -371,7 +371,7 @@
 #  define FLEXIO_TIMCFG_TSTOP_BOTH        (0x03 << FLEXIO_TIMCFG_TSTOP_SHIFT) /* Stop bit is enabled on timer compare and timer disable */
 
                                                     /* Bits 6-7: Reserved */
-#define FLEXIO_TIMCFG_TIMENA_SHIFT        (8)       /* Bits 8-10: Timer Enable (TIMENA) */ 
+#define FLEXIO_TIMCFG_TIMENA_SHIFT        (8)       /* Bits 8-10: Timer Enable (TIMENA) */
 #define FLEXIO_TIMCFG_TIMENA_MASK         (0x07 << FLEXIO_TIMCFG_TIMENA_SHIFT)
 #  define FLEXIO_TIMCFG_TIMENA_ALWAYS     (0x00 << FLEXIO_TIMCFG_TIMENA_SHIFT) /* Timer always enabled */
 #  define FLEXIO_TIMCFG_TIMENA_TIMENA     (0x01 << FLEXIO_TIMCFG_TIMENA_SHIFT) /* Timer enabled on Timer N-1 enable */
@@ -404,7 +404,7 @@
 #  define FLEXIO_TIMCFG_TIMRST_TRGBOTH    (0x07 << FLEXIO_TIMCFG_TIMRST_SHIFT) /* Timer reset on Trigger rising or falling edge */
 
                                                     /* Bit 19: Reserved */
-#define FLEXIO_TIMCFG_TIMDEC_SHIFT             (20) /* Bits 20-21: Timer Decrement (TIMDEC) */ 
+#define FLEXIO_TIMCFG_TIMDEC_SHIFT             (20) /* Bits 20-21: Timer Decrement (TIMDEC) */
 #define FLEXIO_TIMCFG_TIMDEC_MASK              (0x03 << FLEXIO_TIMCFG_TIMDEC_SHIFT)
 #  define FLEXIO_TIMCFG_TIMDEC_CLKTIMOUT       (0x00 << FLEXIO_TIMCFG_TIMDEC_SHIFT) /* Decrement counter on FlexIO clock, Shift clock equals Timer output */
 #  define FLEXIO_TIMCFG_TIMDEC_TRGINBOTHTIMOUT (0x01 << FLEXIO_TIMCFG_TIMDEC_SHIFT) /* Decrement counter on Trigger input (both edges), Shift clock equals Timer output */
@@ -412,7 +412,7 @@
 #  define FLEXIO_TIMCFG_TIMDEC_TRGINBOTHTRGIN  (0x03 << FLEXIO_TIMCFG_TIMDEC_SHIFT) /* Decrement counter on Trigger input (both edges), Shift clock equals Trigger input */
 
                                                     /* Bit 23: Reserved */
-#define FLEXIO_TIMCFG_TIMOUT_SHIFT        (24)      /* Bits 24-25: Timer Output (TIMOUT) */ 
+#define FLEXIO_TIMCFG_TIMOUT_SHIFT        (24)      /* Bits 24-25: Timer Output (TIMOUT) */
 #define FLEXIO_TIMCFG_TIMOUT_MASK         (0x03 << FLEXIO_TIMCFG_TIMOUT_SHIFT)
 #  define FLEXIO_TIMCFG_TIMOUT_ONE        (0x00 << FLEXIO_TIMCFG_TIMOUT_SHIFT) /* Timer output is logic one when enabled and is not affected by timer reset */
 #  define FLEXIO_TIMCFG_TIMOUT_ZERO       (0x01 << FLEXIO_TIMCFG_TIMOUT_SHIFT) /* Timer output is logic zero when enabled and is not affected by timer reset */

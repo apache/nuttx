@@ -99,7 +99,7 @@
 
 #if defined(CONFIG_GD32F4_SPI_PRIQ)
 #  define SPI_DMA_PRIO  CONFIG_GD32F4_SPI_PRIQ
-#else 
+#else
 #  define SPI_DMA_PRIO  DMA_PRIO_MEDIUM_SELECT
 #endif
 

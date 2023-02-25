@@ -69,7 +69,7 @@
  * Private Functions
  ****************************************************************************/
 
-#if defined (CONFIG_IMXRT_USDHC) && (CONFIG_TEENSY_41) 
+#if defined (CONFIG_IMXRT_USDHC) && (CONFIG_TEENSY_41)
 static int nsh_sdmmc_initialize(void)
 {
   struct sdio_dev_s *sdmmc;
