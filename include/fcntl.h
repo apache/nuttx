@@ -148,7 +148,7 @@
 
 #define creat(path, mode) open(path, O_WRONLY|O_CREAT|O_TRUNC, mode)
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define F_GETLK64         F_GETLK
 #  define F_SETLK64         F_SETLK
 #  define F_SETLKW64        F_SETLKW

@@ -95,7 +95,7 @@
 #define CROMFS_MAGIC          0x4d4f5243
 #define RPMSGFS_MAGIC         0x54534f47
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define statfs64            statfs
 #  define fstatfs64           fstatfs
 #endif

@@ -265,7 +265,7 @@
 #define optind                           (*(getoptindp()))
 #define optopt                           (*(getoptoptp()))
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define lseek64                        lseek
 #  define pread64                        pread
 #  define pwrite64                       pwrite

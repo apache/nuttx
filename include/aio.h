@@ -97,7 +97,7 @@
 #define LIO_NOWAIT      0
 #define LIO_WAIT        1
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define aiocb64       aiocb
 #  define aio_read64    aio_read
 #  define aio_write64   aio_write

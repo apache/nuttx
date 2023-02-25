@@ -149,7 +149,7 @@
 #define MFD_HUGE_2GB      (31 << MFD_HUGE_SHIFT)
 #define MFD_HUGE_16GB     (34 << MFD_HUGE_SHIFT)
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define mmap64 mmap
 #endif
 

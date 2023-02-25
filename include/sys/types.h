@@ -83,7 +83,7 @@
 #define SCHED_PRIORITY_MIN       1
 #define SCHED_PRIORITY_IDLE      0
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define fsblkcnt64_t           fsblkcnt_t
 #  define fsfilcnt64_t           fsfilcnt_t
 #  define blkcnt64_t             blkcnt_t
@@ -193,7 +193,7 @@ typedef int wint_t;
 
 typedef int wctype_t;
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 /* Large file versions */
 
 typedef uint64_t     fsblkcnt_t;
