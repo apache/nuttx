@@ -8,6 +8,7 @@ Guides
   nfs.rst
   usbtrace.rst
   simulator.rst
+  qemugdb.rst
   rndis.rst
   drivers.rst
   tasktrace.rst
