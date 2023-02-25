@@ -593,7 +593,7 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
 int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
                              FAR const char *pinname)
 {
-  char devname[32];
+  char devname[64];
   int ret;
 
   DEBUGASSERT(dev != NULL && dev->gp_ops != NULL && pinname != NULL);
@@ -691,7 +691,7 @@ int gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor)
 int gpio_pin_unregister_byname(FAR struct gpio_dev_s *dev,
                                FAR const char *pinname)
 {
-  char devname[32];
+  char devname[64];
 
   snprintf(devname, sizeof(devname), "/dev/%s", pinname);
 
