@@ -151,7 +151,7 @@
 #  elif defined(CONFIG_SAMA5_UART4)
 #    define TTYS0_DEV           g_uart4port  /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_SAMA5_USART0) 
+#  elif defined(CONFIG_SAMA5_USART0)
 #    define TTYS0_DEV           g_usart0port /* USART0 is ttyS0 */
 #    define USART0_ASSIGNED     1
 #  elif defined(CONFIG_SAMA5_USART1)

@@ -24,7 +24,7 @@ CMN_CSRCS  = renesas_allocateheap.c renesas_createstack.c renesas_doirq.c
 CMN_CSRCS += renesas_exit.c renesas_getintstack.c renesas_initialize.c
 CMN_CSRCS += renesas_idle.c renesas_initialstate.c renesas_lowputs.c
 CMN_CSRCS += renesas_mdelay.c renesas_nputs.c renesas_releasestack.c
-CMN_CSRCS += renesas_stackframe.c renesas_switchcontext.c renesas_udelay.c 
+CMN_CSRCS += renesas_stackframe.c renesas_switchcontext.c renesas_udelay.c
 CMN_CSRCS += renesas_usestack.c sh1_schedulesigaction.c sh1_sigdeliver.c
 
 CHIP_ASRCS  = sh1_vector.S sh1_saveusercontext.S

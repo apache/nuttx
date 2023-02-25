@@ -242,7 +242,7 @@ fix_pil:
         cmp     %l4, %g0
         be      do_irq
         nop
-        add     %l4, 240, %l3          ! l3 = extended vector number     
+        add     %l4, 240, %l3          ! l3 = extended vector number
 do_irq:
                                        ! o1 = 2nd arg = address of the ISF
                                        !   WAS LOADED WHEN ISF WAS SAVED!!!

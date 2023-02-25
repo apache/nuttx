@@ -128,17 +128,17 @@
                                                 : (UART_CONTROL &= ~(MSK_UART_ENABLE_RXIT |  MSK_UART_ENABLE_TXIT))\
                                                 )                                                                  \
                                               )                                                                    \
-                                            ) 
+                                            )
 
 #define uart1_flow_ctrl_config(uart_flow)    ( uart_flow    ==  ON                     \
                                             ? (BM3803_REG.uart_ctrl1 |=  MSK_UART_ENABLE_FLOW) \
                                             : (BM3803_REG.uart_ctrl1 &= ~MSK_UART_ENABLE_FLOW) \
-                                            )      
+                                            )
 
 #define uart1_loopback_config(uart_loopb)    ( uart_loopb   ==  ON                     \
                                             ? (BM3803_REG.uart_ctrl1 |=  MSK_UART_LOOPBACK)    \
                                             : (BM3803_REG.uart_ctrl1 &= ~MSK_UART_LOOPBACK)    \
-                                            )    
+                                            )
 
 #define uart1_enable()                       (BM3803_REG.uart_ctrl1 |=  (MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))
 #define uart1_disable()                      (BM3803_REG.uart_ctrl1 &= ~(MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))
@@ -161,12 +161,12 @@
 #define uart2_flow_ctrl_config(uart_flow)    ( uart_flow    ==  ON                     \
                                             ? (BM3803_REG.uart_ctrl2 |=  MSK_UART_ENABLE_FLOW) \
                                             : (BM3803_REG.uart_ctrl2 &= ~MSK_UART_ENABLE_FLOW) \
-                                            )      
+                                            )
 
 #define uart2_loopback_config(uart_loopb)    ( uart_loopb   ==  ON                     \
                                             ? (BM3803_REG.uart_ctrl2 |=  MSK_UART_LOOPBACK)    \
                                             : (BM3803_REG.uart_ctrl2 &= ~MSK_UART_LOOPBACK)    \
-                                            )    
+                                            )
 
 #define uart2_enable()                       (BM3803_REG.uart_ctrl2 |=  (MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))
 #define uart2_disable()                      (BM3803_REG.uart_ctrl2 &= ~(MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))
@@ -189,12 +189,12 @@
 #define uart3_flow_ctrl_config(uart_flow)    ( uart_flow    ==  ON                     \
                                             ? (BM3803_REG.uart_ctrl3 |=  MSK_UART_ENABLE_FLOW) \
                                             : (BM3803_REG.uart_ctrl3 &= ~MSK_UART_ENABLE_FLOW) \
-                                            )      
+                                            )
 
 #define uart3_loopback_config(uart_loopb)    ( uart_loopb   ==  ON                     \
                                             ? (BM3803_REG.uart_ctrl3 |=  MSK_UART_LOOPBACK)    \
                                             : (BM3803_REG.uart_ctrl3 &= ~MSK_UART_LOOPBACK)    \
-                                            )    
+                                            )
 
 #define uart3_enable()                       (BM3803_REG.uart_ctrl3 |=  (MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))
 #define uart3_disable()                      (BM3803_REG.uart_ctrl3 &= ~(MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))

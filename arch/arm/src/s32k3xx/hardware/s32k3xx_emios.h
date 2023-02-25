@@ -312,7 +312,7 @@
                                                /* Bits 5-13: Reserved */
 #define EMIOS_C2_UCPRECLK            (1 << 14) /* Bit 14: Prescaler Clock Source (UCPRECLK) */
                                                /* Bit 15: Reserved */
-#define EMIOS_C2_UCEXTPRE_SHIFT      (16)      /* Bits 16-19: Extended Prescaler (UCEXTPRE) */ 
+#define EMIOS_C2_UCEXTPRE_SHIFT      (16)      /* Bits 16-19: Extended Prescaler (UCEXTPRE) */
 #define EMIOS_C2_UCEXTPRE_MASK       (0x0f << EMIOS_C2_UCEXTPRE_SHIFT)
 #define EMIOS_C2_UCEXTPRE(n)         (((n) << EMIOS_C2_UCEXTPRE_SHIFT) & EMIOS_C2_UCEXTPRE_MASK)
                                                /* Bits 20-31: Reserved */

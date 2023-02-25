@@ -41,7 +41,7 @@ config LITEX_USE_CUSTOM_IRQ_DEFINITIONS
 	---help---
 		Use custom definitions for risc-v IRQ numbers and sequence.
 		Allowing for the definitions in arch/risc-v/include/litex/irq.h to be overridden.
-		
+
 if LITEX_USE_CUSTOM_IRQ_DEFINITIONS
 
 config LITEX_CUSTOM_IRQ_DEFINITIONS_PATH

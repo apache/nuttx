@@ -1,4 +1,4 @@
-# HSS Payload Generator 
+# HSS Payload Generator
 
 # First, we can optionally set a name for our image, otherwise one will be created dynamically
 set-name: 'PolarFire-SoC-HSS::nuttx'
@@ -6,7 +6,7 @@ set-name: 'PolarFire-SoC-HSS::nuttx'
 # Next, we'll define the entry point addresses for each hart, as follows:
 hart-entry-points: {u54_1: '0x80000000', u54_2: '0x80000000', u54_3: '0x80000000', u54_4: '0x80000000'}
 
-# 
+#
 payloads:
  nuttx.bin: {exec-addr: '0x80000000', owner-hart: u54_1, priv-mode: prv_m}
 

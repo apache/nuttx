@@ -17,7 +17,7 @@ Steps 2 and 3 are based on heuristics. The attributions may not match the regula
 used so there may be misdetections. Authors on headers are easier to detect. In fact, this will
 pick up various false positives (non-author strings) which will have to be ignored by the user.
 
-All of these authorship information is aggregated and in a final step, the names are used 
+All of these authorship information is aggregated and in a final step, the names are used
 to check for ICLAs, based on the ICLA databases (see below), which need to be manually downloaded.
 If a given author name is not matched, their email searched for in the `author_mappings.json` file,
 which is a dictionary of email to real name. This allows to handle users with alternative email

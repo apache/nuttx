@@ -220,7 +220,7 @@ function compressartifacts {
   pushd $target_path >/dev/null
 
   tar zcf ${target_name}.tar.gz ${target_name}
-  rm -rf ${target_name} 
+  rm -rf ${target_name}
 
   popd >/dev/null
 }

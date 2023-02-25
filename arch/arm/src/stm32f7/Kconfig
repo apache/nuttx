@@ -2689,7 +2689,7 @@ config STM32F7_DMACAPABLE_ASSUME_CACHE_ALIGNED
 		This option configures the stm32_dmacapable to not disqualify
 		DMA operations on memory that is not dcache aligned based solely
 		on the starting address and byte count.
-		
+
 		Use this when ALL buffer extents are known to be aligned, but the
 		the count does not use the complete buffer.
 

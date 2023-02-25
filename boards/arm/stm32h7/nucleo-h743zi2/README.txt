@@ -108,7 +108,7 @@ Configurations
       Testing:
        - OS Test with FPU support
        - Filesystem testing
-      
+
       USB Host:
        - USB Hub support
        - Mass Storage Device
@@ -121,14 +121,14 @@ NuttX  10.0.1 3ab35e48ff-dirty Mar 28 2021 15:35:29 arm nucleo-h743zi2
 nsh> ?
 help usage:  help [-v] [<cmd>]
 
-  .         cd        dmesg     hexdump   mkrd      reboot    telnetd   xd        
-  [         cp        echo      ifconfig  mh        rm        time      
-  ?         cmp       env       irqinfo   mount     rmdir     true      
-  addroute  dirname   exec      kill      mv        route     uname     
-  arp       date      exit      ls        mw        set       umount    
-  basename  dd        false     mb        nslookup  sleep     unset     
-  break     delroute  free      mkdir     ps        source    usleep    
-  cat       df        help      mkfatfs   pwd       test      wget      
+  .         cd        dmesg     hexdump   mkrd      reboot    telnetd   xd
+  [         cp        echo      ifconfig  mh        rm        time
+  ?         cmp       env       irqinfo   mount     rmdir     true
+  addroute  dirname   exec      kill      mv        route     uname
+  arp       date      exit      ls        mw        set       umount
+  basename  dd        false     mb        nslookup  sleep     unset
+  break     delroute  free      mkdir     ps        source    usleep
+  cat       df        help      mkfatfs   pwd       test      wget
 
 Builtin Apps:
   fstest    getprime  nsh       ostest    ping      renew     sh
@@ -202,7 +202,7 @@ PING 172.217.14.196 56 bytes of data
 56 bytes from 172.217.14.196: icmp_seq=8 time=0 ms
 56 bytes from 172.217.14.196: icmp_seq=9 time=0 ms
 10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
-nsh> 
+nsh>
 nsh> ls /dev
 /dev:
  console
@@ -236,7 +236,7 @@ nsh> ls /mnt/sda
  afile
 nsh> cat /mnt/sda/afile
 This will stay on the USB drive
-nsh> 
+nsh>
 ```
 
 ```
@@ -257,5 +257,5 @@ nsh> ps
     6 100 RR       Task    --- Waiting  Semaphore 00000000 002012 000648  32.2%    0.0% Telnet daemon 0x38005600
     9 100 RR       Kthread --- Waiting  Semaphore 00000000 001004 000448  44.6%    0.0% telnet_io
    10 100 RR       Task    --- Running            00000000 002028 001328  65.4%    0.0% Telnet session
-nsh> 
+nsh>
 ```

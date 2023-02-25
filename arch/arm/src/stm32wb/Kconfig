@@ -348,7 +348,7 @@ config STM32WB_SRAM2A_INIT
 		memory can trigger parity faults from the random data.  This can be
 		avoided by first writing to all locations to force the parity into a valid
 		state.
-		However, if the SRAM2a is being retained in Standby mode, this may be 
+		However, if the SRAM2a is being retained in Standby mode, this may be
 		undesirable (because it will destroy the contents).  In that case, the board
 		should handle the initialization itself at the appropriate time.
 
@@ -359,7 +359,7 @@ config STM32WB_SRAM2B_HEAP
 config STM32WB_SRAM2B_USER_SIZE
 	int "SRAM2b user application size"
 	default 32768
-	range 0 32768	
+	range 0 32768
 	depends on STM32WB_SRAM2B_HEAP
 	---help---
 		For any CPU2 firmware supporting the BLE protocol the ending part of
@@ -1013,7 +1013,7 @@ config STM32WB_BLE_SLAVE_SCA
 	---help---
 		Sleep clock accuracy (ppm value) in slave mode.
 
-choice 
+choice
 	prompt "Sleep clock accuracy in master mode"
 	default STM32WB_BLE_MASTER_SCA_0
 	---help---
@@ -1056,7 +1056,7 @@ config STM32WB_BLE_MASTER_SCA
 	default 1 if STM32WB_BLE_MASTER_SCA_1
 	default 0
 
-choice 
+choice
 	prompt "Low speed clock source"
 	default STM32WB_BLE_LS_CLK_SRC_LSE
 	---help---
@@ -1112,7 +1112,7 @@ config STM32WB_BLE_CHAN_SEL_ALG2
 	bool "Enable channel selection algorithm 2"
 	default n
 
-choice 
+choice
 	prompt "Power class"
 	default STM32WB_BLE_POWER_CLASS_2_3
 
@@ -1134,7 +1134,7 @@ config STM32WB_BLE_MAX_TX_POWER
 	range -127 20
 	default 0
 
-choice 
+choice
 	prompt "AGC RSSI model"
 	default STM32WB_BLE_AGC_RSSI_LEGACY
 

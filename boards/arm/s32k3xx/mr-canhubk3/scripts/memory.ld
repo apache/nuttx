@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* 
+/*
  *
  *   0x00400000 - 0x007fffff  4194304  Program Flash (last 64K sBAF)
  *   0x10000000 - 0x1003ffff   262144  Data Flash (last 32K HSE_NVM)
@@ -54,7 +54,7 @@ MEMORY
   /* 4096KB FLASH*/
 
   BOOT_HEADER (R)   : ORIGIN = 0x00400000, LENGTH = 0x00001000  /* 0x00400000 - 0x00400fff */
-  flash       (rx)  : ORIGIN = 0x00401000, LENGTH = 0x003cffff 
+  flash       (rx)  : ORIGIN = 0x00401000, LENGTH = 0x003cffff
   kflash      (rx)  : ORIGIN = 0x00401000, LENGTH = 1024K
   uflash      (rx)  : ORIGIN = 0x00401000+1024K, LENGTH = 0x003cffff-1024K
 

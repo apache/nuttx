@@ -381,14 +381,14 @@
 #define   WM8994_MICB2_ENA_ENABLE                 (WM8994_MICB2_ENA)                          /* Enabled */
                                                                                               /* Bits 6-7: Reserved */
 #define WM8994_HPOUT1R_ENA                        (1 << 8)                                    /* Bit 8: Enables HPOUT1R input stage */
-#define   WM8994_HPOUT1R_ENA_DISABLE              (0)                                         /* Disabled */ 
+#define   WM8994_HPOUT1R_ENA_DISABLE              (0)                                         /* Disabled */
 #define   WM8994_HPOUT1R_ENA_ENABLE               (WM8994_HPOUT1R_ENA)                        /* Enabled */
 #define WM8994_HPOUT1L_ENA                        (1 << 9)                                    /* Bit 9: Enables HPOUT1L input stage */
-#define   WM8994_HPOUT1L_ENA_DISABLE              (0)                                         /* Disabled */ 
+#define   WM8994_HPOUT1L_ENA_DISABLE              (0)                                         /* Disabled */
 #define   WM8994_HPOUT1L_ENA_ENABLE               (WM8994_HPOUT1L_ENA)                        /* Enabled */
                                                                                               /* Bit 10: Reserved */
 #define WM8994_HPOUT2_ENA                         (1 << 11)                                   /* Bit 11: Enables HPOUT2 input stage */
-#define   WM8994_HPOUT2_ENA_DISABLE               (0)                                         /* Disabled */ 
+#define   WM8994_HPOUT2_ENA_DISABLE               (0)                                         /* Disabled */
 #define   WM8994_HPOUT2_ENA_ENABLE                (WM8994_HPOUT2_ENA)                         /* Enabled */
 #define WM8994_SPKOUTL_ENA                        (1 << 12)                                   /* Bit 12: SPKMIXL Mixer, SPKLVOL PGA and SPKOUTL Output Enable */
 #define   WM8994_SPKOUTL_ENA_DISABLE              (0)                                         /* Disabled */
@@ -427,11 +427,11 @@
 #define   WM8994_OPCLK_ENA_ENABLE                 (WM8994_OPCLK_ENA)                          /* Enabled */
                                                                                               /* Bit 12: Reserved */
 #define WM8994_TSHUT_OPDIS                        (1 << 13)                                   /* Bit 13: Thermal shutdown control */
-#define   WM8994_TSHUT_OPDIS_DISABLE              (0)                                         /* Disabled */ 
-#define   WM8994_TSHUT_OPDIS_ENABLE               (WM8994_TSHUT_OPDIS)                        /* Enabled */       
+#define   WM8994_TSHUT_OPDIS_DISABLE              (0)                                         /* Disabled */
+#define   WM8994_TSHUT_OPDIS_ENABLE               (WM8994_TSHUT_OPDIS)                        /* Enabled */
 #define WM8994_TSHUT_ENA                          (1 << 14)                                   /* Bit 14: Thermal sensor enable */
-#define   WM8994_TSHUT_ENA_DISABLE                (0)                                         /* Disabled */ 
-#define   WM8994_TSHUT_ENA_ENABLE                 (WM8994_TSHUT_ENA)                          /* Enabled */       
+#define   WM8994_TSHUT_ENA_DISABLE                (0)                                         /* Disabled */
+#define   WM8994_TSHUT_ENA_ENABLE                 (WM8994_TSHUT_ENA)                          /* Enabled */
                                                                                               /* Bit 15: Reserved */
 
 /* R3 (0x03) - Power Management (3)
@@ -440,22 +440,22 @@
                                                   /* Bits 0-3: Reserved */
 #define WM8994_MIXOUTR_ENA                        (1 << 4)                                    /* Bit 4: MIXOUTR Right Output Mixer Enable */
 #define   WM8994_MIXOUTR_ENA_DISABLE              (0)                                         /* Disabled */
-#define   WM8994_MIXOUTR_ENA_ENABLE               (WM8994_MIXOUTR_ENA)                        /* Enabled */ 
+#define   WM8994_MIXOUTR_ENA_ENABLE               (WM8994_MIXOUTR_ENA)                        /* Enabled */
 #define WM8994_MIXOUTL_ENA                        (1 << 5)                                    /* Bit 5: MIXOUTL Left Output Mixer Enable */
 #define   WM8994_MIXOUTL_ENA_DISABLE              (0)                                         /* Disabled */
-#define   WM8994_MIXOUTL_ENA_ENABLE               (WM8994_MIXOUTL_ENA)                        /* Enabled */ 
+#define   WM8994_MIXOUTL_ENA_ENABLE               (WM8994_MIXOUTL_ENA)                        /* Enabled */
 #define WM8994_MIXOUTRVOL_ENA                     (1 << 6)                                    /* Bit 6: MIXOUTR Right Volume Control Enable */
 #define   WM8994_MIXOUTRVOL_ENA_DISABLE           (0)                                         /* Disabled */
-#define   WM8994_MIXOUTRVOL_ENA_ENABLE            (WM8994_MIXOUTRVOL_ENA)                     /* Enabled */ 
+#define   WM8994_MIXOUTRVOL_ENA_ENABLE            (WM8994_MIXOUTRVOL_ENA)                     /* Enabled */
 #define WM8994_MIXOUTLVOL_ENA                     (1 << 7)                                    /* Bit 7: MIXOUTL Left Volume Control Enable */
 #define   WM8994_MIXOUTLVOL_ENA_DISABLE           (0)                                         /* Disabled */
-#define   WM8994_MIXOUTLVOL_ENA_ENABLE            (WM8994_MIXOUTLVOL_ENA)                     /* Enabled */ 
+#define   WM8994_MIXOUTLVOL_ENA_ENABLE            (WM8994_MIXOUTLVOL_ENA)                     /* Enabled */
 #define WM8994_SPKLVOL_ENA                        (1 << 8)                                    /* Bit 8: SPKMIXL Mixer and SPKLVOL PGA Enable */
 #define   WM8994_SPKLVOL_ENA_DISABLE              (0)                                         /* Disabled */
-#define   WM8994_SPKLVOL_ENA_ENABLE               (WM8994_SPKLVOL_ENA)                        /* Enabled */ 
+#define   WM8994_SPKLVOL_ENA_ENABLE               (WM8994_SPKLVOL_ENA)                        /* Enabled */
 #define WM8994_SPKRVOL_ENA                        (1 << 9)                                    /* Bit 9: SPKMIXR Mixer and SPKRVOL PGA Enable */
 #define   WM8994_SPKRVOL_ENA_DISABLE              (0)                                         /* Disabled */
-#define   WM8994_SPKRVOL_ENA_ENABLE               (WM8994_SPKRVOL_ENA)                        /* Enabled */ 
+#define   WM8994_SPKRVOL_ENA_ENABLE               (WM8994_SPKRVOL_ENA)                        /* Enabled */
 #define WM8994_LINEOUT2P_ENA                      (1 << 10)                                   /* Bit 10: LINEOUT2P Line Out and LINEOUT2PMIX Enable */
 #define   WM8994_LINEOUT2P_ENA_DISABLE            (0)                                         /* Disabled */
 #define   WM8994_LINEOUT2P_ENA_ENABLE             (WM8994_LINEOUT2P_ENA)                      /* Enabled */
@@ -481,16 +481,16 @@
 #define   WM8994_ADCL_ENA_ENABLE                  (WM8994_ADCL_ENA)                           /* Enabled */
 #define WM8994_DMIC1R_ENA                         (1 << 2)                                    /* Bit 2: Digital microphone DMICDAT1 Right channel enable */
 #define   WM8994_DMIC1R_ENA_DISABLE               (0)                                         /* Disabled */
-#define   WM8994_DMIC1R_ENA_ENABLE                (WM8994_DMIC1R_ENA)                         /* Enabled */ 
+#define   WM8994_DMIC1R_ENA_ENABLE                (WM8994_DMIC1R_ENA)                         /* Enabled */
 #define WM8994_DMIC1L_ENA                         (1 << 3)                                    /* Bit 3: Digital microphone DMICDAT1 Left channel enable */
 #define   WM8994_DMIC1L_ENA_DISABLE               (0)                                         /* Disabled */
-#define   WM8994_DMIC1L_ENA_ENABLE                (WM8994_DMIC1L_ENA)                         /* Enabled */ 
+#define   WM8994_DMIC1L_ENA_ENABLE                (WM8994_DMIC1L_ENA)                         /* Enabled */
 #define WM8994_DMIC2R_ENA                         (1 << 4)                                    /* Bit 4: Digital microphone DMICDAT2 Right channel enable */
 #define   WM8994_DMIC2R_ENA_DISABLE               (0)                                         /* Disabled */
-#define   WM8994_DMIC2R_ENA_ENABLE                (WM8994_DMIC2R_ENA)                         /* Enabled */ 
+#define   WM8994_DMIC2R_ENA_ENABLE                (WM8994_DMIC2R_ENA)                         /* Enabled */
 #define WM8994_DMIC2L_ENA                         (1 << 5)                                    /* Bit 5: Digital microphone DMICDAT2 Left channel enable */
 #define   WM8994_DMIC2L_ENA_DISABLE               (0)                                         /* Disabled */
-#define   WM8994_DMIC2L_ENA_ENABLE                (WM8994_DMIC2L_ENA)                         /* Enabled */ 
+#define   WM8994_DMIC2L_ENA_ENABLE                (WM8994_DMIC2L_ENA)                         /* Enabled */
                                                                                               /* Bits 6-7: Reserved */
 #define WM8994_AIF1ADC1R_ENA                      (1 << 8)                                    /* Bit 8: Enable AIF1ADC1(Right) output path (AIF1, Timeslot 0) */
 #define   WM8994_AIF1ADC1R_ENA_DISABLE            (0)                                         /* Disabled */
@@ -568,7 +568,7 @@
 #define   WM8994_IN1L_VOL_DEFAULT                 (11 << 0)                                   /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN1L_VOL_MAX                     (31 << 0)                                   /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN1L_ZC                            (1 << 6)                                    /* Bit 6: IN1L PGA Zero Cross Detector */ 
+#define WM8994_IN1L_ZC                            (1 << 6)                                    /* Bit 6: IN1L PGA Zero Cross Detector */
 #define   WM8994_IN1L_ZC_NO                       (0)                                         /* Change gain immediately */
 #define   WM8994_IN1L_ZC_YES                      (WM8994_IN1L_ZC)                            /* Change gain on zero cross only */
 #define WM8994_IN1L_MUTE                          (1 << 7)                                    /* Bit 7: IN1L PGA Mute */
@@ -586,7 +586,7 @@
 #define   WM8994_IN2L_VOL_DEFAULT                 (11 << WM8994_IN2L_VOL_SHIFT)               /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN2L_VOL_MAX                     (31 << WM8994_IN2L_VOL_SHIFT)               /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN2L_ZC                            (1 << 6)                                    /* Bit 6: IN2L PGA Zero Cross Detector */ 
+#define WM8994_IN2L_ZC                            (1 << 6)                                    /* Bit 6: IN2L PGA Zero Cross Detector */
 #define   WM8994_IN2L_ZC_NO                       (0)                                         /* Change gain immediately */
 #define   WM8994_IN2L_ZC_YES                      (WM8994_IN2L_ZC)                            /* Change gain on zero cross only */
 #define WM8994_IN2L_MUTE                          (1 << 7)                                    /* Bit 7: IN2L PGA Mute */
@@ -604,7 +604,7 @@
 #define   WM8994_IN1R_VOL_DEFAULT                 (11 << WM8994_IN1R_VOL_SHIFT)               /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN1R_VOL_MAX                     (31 << WM8994_IN1R_VOL_SHIFT)               /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN1R_ZC_SHIFT                      (6)                                         /* Bit 6: IN1R PGA Zero Cross Detector */ 
+#define WM8994_IN1R_ZC_SHIFT                      (6)                                         /* Bit 6: IN1R PGA Zero Cross Detector */
 #define   WM8994_IN1R_ZC_NO                       (0)                                         /* Change gain immediately */
 #define   WM8994_IN1R_ZC_YES                      (1 << WM8994_IN1R_ZC_SHIFT)                 /* Change gain on zero cross only */
 #define WM8994_IN1R_MUTE_SHIFT                    (7)                                         /* Bit 7: IN1R PGA Mute */
@@ -623,7 +623,7 @@
 #define   WM8994_IN2R_VOL_DEFAULT                 (11 << WM8994_IN2R_VOL_SHIFT)               /* -16.5dB to +30dB in 1.5dB steps */
 #define   WM8994_IN2R_VOL_MAX                     (31 << WM8994_IN2R_VOL_SHIFT)               /* +30dB */
                                                                                               /* Bit 5: Reserved */
-#define WM8994_IN2R_ZC_SHIFT                      (6)                                         /* Bit 6: IN2R PGA Zero Cross Detector */ 
+#define WM8994_IN2R_ZC_SHIFT                      (6)                                         /* Bit 6: IN2R PGA Zero Cross Detector */
 #define   WM8994_IN2R_ZC_NO                       (0)                                         /* Change gain immediately */
 #define   WM8994_IN2R_ZC_YES                      (1 << WM8994_IN2R_ZC_SHIFT)                 /* Change gain on zero cross only */
 #define WM8994_IN2R_MUTE_SHIFT                    (7)                                         /* Bit 7: IN2R PGA Mute */
@@ -648,7 +648,7 @@
 #define   WM8994_HPOUT1L_ZC_DIABLED               (0)                                         /* Zero cross disabled */
 #define   WM8994_HPOUT1L_ZC_ENABLED               (1 << WM8994_HPOUT1L_ZC_SHIFT)              /* Zero cross enabled */
 #define WM8994_HPOUT1_VU_SHIFT                    (8)                                         /* Bit 8: Headphone Output PGA Volume Update */
-#define   WM8994_HPOUT1_VU_DISABLE                (0) 
+#define   WM8994_HPOUT1_VU_DISABLE                (0)
 #define   WM8994_HPOUT1_VU_ENABLED                (1 << WM8994_HPOUT1_VU_SHIFT)               /* Writing a 1 to this bit will update HPOUT1LVOL and
                                                                                                * HPOUT1RVOL volumes simultaneously */
 
@@ -734,10 +734,10 @@
 #define   WM8994_IN2LP_TO_MIXOUTL_UNMUTE          (WM8994_IN2LP_TO_MIXOUTL)                   /* Un-mute */
 #define WM8994_IN1L_TO_MIXOUTL                    (1 << 2)                                    /* Bit 2: IN1L PGA Output to MIXOUTL Mute */
 #define   WM8994_IN1L_TO_MIXOUTL_MUTE             (0)                                         /* Mute */
-#define   WM8994_IN1L_TO_MIXOUTL_UNMUTE           (WM8994_IN1L_TO_MIXOUTL_MUTE)               /* Un-mute */                 
+#define   WM8994_IN1L_TO_MIXOUTL_UNMUTE           (WM8994_IN1L_TO_MIXOUTL_MUTE)               /* Un-mute */
 #define WM8994_IN1R_TO_MIXOUTL                    (1 << 3)                                    /* Bit 3: IN1R PGA Output to MIXOUTL Mute */
 #define   WM8994_IN1R_TO_MIXOUTL_MUTE             (0)                                         /* Mute */
-#define   WM8994_IN1R_TO_MIXOUTL_UNMUTE           (WM8994_IN1R_TO_MIXOUTL_MUTE)               /* Un-mute */            
+#define   WM8994_IN1R_TO_MIXOUTL_UNMUTE           (WM8994_IN1R_TO_MIXOUTL_MUTE)               /* Un-mute */
 #define WM8994_IN2LN_TO_MIXOUTL                   (1 << 4)                                    /* Bit 4: IN2LN to MIXOUTL Mute */
 #define   WM8994_IN2LN_TO_MIXOUTL_MUTE            (0)                                         /* Mute */
 #define   WM8994_IN2LN_TO_MIXOUTL_UNMUTE          (WM8994_IN2LN_TO_MIXOUTL)                   /* Un-mute */
@@ -862,8 +862,8 @@
 #define   WM8994_VMID_DISCH_DISABLE               (0)                                         /* Disabled */
 #define   WM8994_VMID_DISCH_ENABLE                WM8994_VMID_DISCH                           /* Enabled */
 #define WM8994_BIAS_SRC                           (1 << 1)                                    /* Bit 1: Selects the bias current source */
-#  define WM8994_BIAS_SRC_NORMAL_BIAS             (0)                                         /* Normal bias */ 
-#  define WM8994_BIAS_SRC_STARTUP_BIAS            WM8994_BIAS_SRC                             /* Start-Up bias */ 
+#  define WM8994_BIAS_SRC_NORMAL_BIAS             (0)                                         /* Normal bias */
+#  define WM8994_BIAS_SRC_STARTUP_BIAS            WM8994_BIAS_SRC                             /* Start-Up bias */
 #define WM8994_STARTUP_BIAS_ENA                   (1 << 2)                                    /* Bit 2: Enables the Start-Up bias current generator */
 #define WM8994_VMID_BUF_ENA                       (1 << 3)                                    /* Bit 3: VMID Buffer Enable */
 #define WM8994_VMID_RAMP_SHIFT                    (5)                                         /* Bits 5-6: VMID soft start enable/slew rate control */
@@ -1036,7 +1036,7 @@
 /* R512 (0x200) - AIF1 Clocking (1)
  */
 
-#define WM8994_AIF1CLK_ENA                        (1 << 0)                                    /* Bit 0: AIF1CLK Enable */ 
+#define WM8994_AIF1CLK_ENA                        (1 << 0)                                    /* Bit 0: AIF1CLK Enable */
 #define WM8994_AIF1CLK_DIV                        (1 << 1)                                    /* Bit 1: AIF1CLK Divider */
 #define   WM8994_AIF1CLK_DIV_0                    (0)                                         /* AIF1CLK/1 */
 #define   WM8994_AIF1CLK_DIV_1                    (WM8994_AIF1CLK_DIV)                        /* AIF1CLK/2 */
@@ -1079,7 +1079,7 @@
  */
 
 #define WM8994_AIF1CLK_RATE_SHIFT                 (0)                                         /* Bits 0-3: Selects the AIF1CLK/fs ratio */
-#define WM8994_AIF1CLK_RATE_MASK                  (0xf << WM8994_AIF1CLK_RATE_SHIFT) 
+#define WM8994_AIF1CLK_RATE_MASK                  (0xf << WM8994_AIF1CLK_RATE_SHIFT)
 #define   WM8994_AIF1CLK_RATE_0                   (0 << WM8994_AIF1CLK_RATE_SHIFT)            /* Reserved */
 #define   WM8994_AIF1CLK_RATE_1                   (1 << WM8994_AIF1CLK_RATE_SHIFT)            /* 128 */
 #define   WM8994_AIF1CLK_RATE_2                   (2 << WM8994_AIF1CLK_RATE_SHIFT)            /* 192 */
@@ -1158,8 +1158,8 @@
 
                                                   /* Bits 0-2: Reserved */
 #define WM8994_AIF1_FMT_SHIFT                     (3)                                         /* Bits 3-4: AIF1 Digital Audio Interface Format */
-#define WM8994_AIF1_FMT_MASK                      (3 << WM8994_AIF1_FMT_SHIFT) 
-#define   WM8994_AIF1_FMT_RIGHT                   (0 << WM8994_AIF1_FMT_SHIFT)                /* Right justified */ 
+#define WM8994_AIF1_FMT_MASK                      (3 << WM8994_AIF1_FMT_SHIFT)
+#define   WM8994_AIF1_FMT_RIGHT                   (0 << WM8994_AIF1_FMT_SHIFT)                /* Right justified */
 #define   WM8994_AIF1_FMT_LEFT                    (1 << WM8994_AIF1_FMT_SHIFT)                /* Left justified */
 #define   WM8994_AIF1_FMT_I2S                     (2 << WM8994_AIF1_FMT_SHIFT)                /* I2S Format */
 #define   WM8994_AIF1_FMT_DSP                     (3 << WM8994_AIF1_FMT_SHIFT)                /* DSP Mode */
@@ -1172,10 +1172,10 @@
 #define WM8994_AIF1ADC_TDM                        (1 << 13)                                   /* Bit 13: AIF1 transmit (ADC) TDM control */
 #define   WM8994_AIF1ADC_TDM_0                    (0)                                         /* ADCDAT1 driver logic '0' when not transmit data */
 #define   WM8994_AIF1ADC_TDM_TRI                  (WM8994_AIF1ADC_TDM)                        /* ADCDAT1 is tri-stated when not transmit data */
-#define WM8994_AIF1ADCR_SRC                       (1 << 14)                                   /* Bit 14: AIF1 Right Audio Interface Source */                                           
+#define WM8994_AIF1ADCR_SRC                       (1 << 14)                                   /* Bit 14: AIF1 Right Audio Interface Source */
 #define   WM8994_AIF1ADCR_LEFT_ADC                (0)                                         /* Left ADC data is output on right channel */
 #define   WM8994_AIF1ADCR_RIGHT_ADC               (WM8994_AIF1ADCR_SRC)                       /* Right ADC data is output on right channel */
-#define WM8994_AIF1ADCL_SRC                       (1 << 15)                                   /* Bit 15: AIF1 Left Audio Interface Source */                                           
+#define WM8994_AIF1ADCL_SRC                       (1 << 15)                                   /* Bit 15: AIF1 Left Audio Interface Source */
 #define   WM8994_AIF1ADCL_LEFT_ADC                (0)                                         /* Left ADC data is output on left channel */
 #define   WM8994_AIF1ADCL_RIGHT_ADC               (WM8994_AIF1ADCL_SRC)                       /* Right ADC data is output on left channel */
 
@@ -1196,7 +1196,7 @@
 #define   WM8994_AIF1_MSTR_SLAVE_MODE             (0)                                         /* Slave Mode */
 #define   WM8994_AIF1_MSTR_MASTER_MODE            (WM8994_AIF1_MSTR)                          /* Master Mode */
 #define WM8994_AIF1_TRI                           (1 << 15)                                   /* Bit 15: AIF1 Audio Interface tri-state */
-#define   WM8994_AIF1_TRI_NORMAL                  (0)                                         /* AIF1 pins operate normally */ 
+#define   WM8994_AIF1_TRI_NORMAL                  (0)                                         /* AIF1 pins operate normally */
 #define   WM8994_AIF1_TRI_TRI                     (WM8994_AIF1_TRI)                           /* Tri-state all AIF1 interface pins */
 
 /* R771 (0x303) - AIF1 BCLK
@@ -1778,7 +1778,7 @@
 #define WM8994_AUDIO_FREQUENCY_96K              96000UL
 #define WM8994_AUDIO_FREQUENCY_192K            192000UL
 
-#define WM8994_DEFAULT_SAMPRATE                 (WM8994_AUDIO_FREQUENCY_48K) 
+#define WM8994_DEFAULT_SAMPRATE                 (WM8994_AUDIO_FREQUENCY_48K)
 
 #define WM8994_DEFAULT_NCHANNELS      0
 #define WM8994_DEFAULT_BPSAMP      0

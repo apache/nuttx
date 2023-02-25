@@ -125,7 +125,7 @@
 #define EXTI_17                          GD32_EXTI_BIT(17)     /* EXTI line 17 */
 #define EXTI_18                          GD32_EXTI_BIT(18)     /* EXTI line 18 */
 #define EXTI_19                          GD32_EXTI_BIT(19)     /* EXTI line 19 */
-#define EXTI_20                          GD32_EXTI_BIT(20)     /* EXTI line 20 */    
+#define EXTI_20                          GD32_EXTI_BIT(20)     /* EXTI line 20 */
 #define EXTI_21                          GD32_EXTI_BIT(21)     /* EXTI line 21 */
 #define EXTI_22                          GD32_EXTI_BIT(22)     /* EXTI line 22 */
 

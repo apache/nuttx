@@ -144,17 +144,17 @@
                                                     (reg &= ~(MSK_UART_ENABLE_RXIT |  MSK_UART_ENABLE_TXIT))   \
                                                    )                                                           \
                                                   )                                                            \
-                                                 ) 
+                                                 )
 
 #define uart_flow_ctrl_config(reg, uart_flow)    ((uart_flow    ==  ON) ?         \
                                                   (reg |= MSK_UART_ENABLE_FLOW) : \
                                                   (reg &= ~MSK_UART_ENABLE_FLOW)  \
-                                                 )      
+                                                 )
 
 #define uart_loopback_config(reg, uart_loopb)    ((uart_loopb == ON) ?            \
                                                   (reg |=  MSK_UART_LOOPBACK) :   \
                                                   (reg &= ~MSK_UART_LOOPBACK)     \
-                                                 )    
+                                                 )
 
 #define uart_enable(reg)                         (reg |=  (MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))
 #define uart_disable(reg)                        (reg &= ~(MSK_UART_ENABLE_RX | MSK_UART_ENABLE_TX))

@@ -418,9 +418,9 @@
 #define QSPI_LUT_OPRND0(n)                (((n) << QSPI_LUT_OPRND0_SHIFT) & QSPI_LUT_OPRND0_MASK)
 #define QSPI_LUT_PAD0_SHIFT               (8)       /* Bits 8-9: Pad information for INSTR0 (PAD0) */
 #define QSPI_LUT_PAD0_MASK                (0x03 << QSPI_LUT_PAD0_SHIFT)
-#  define QSPI_LUT_PAD0_1                 (0x00 << QSPI_LUT_PAD0_SHIFT) /* 1 Pad */ 
-#  define QSPI_LUT_PAD0_2                 (0x01 << QSPI_LUT_PAD0_SHIFT) /* 2 Pad */ 
-#  define QSPI_LUT_PAD0_4                 (0x02 << QSPI_LUT_PAD0_SHIFT) /* 4 Pad */ 
+#  define QSPI_LUT_PAD0_1                 (0x00 << QSPI_LUT_PAD0_SHIFT) /* 1 Pad */
+#  define QSPI_LUT_PAD0_2                 (0x01 << QSPI_LUT_PAD0_SHIFT) /* 2 Pad */
+#  define QSPI_LUT_PAD0_4                 (0x02 << QSPI_LUT_PAD0_SHIFT) /* 4 Pad */
 
 #define QSPI_LUT_INSTR0_SHIFT             (10)      /* Bits 10-15: Instruction 0 (INSTR0) */
 #define QSPI_LUT_INSTR0_MASK              (0x3f << QSPI_LUT_INSTR0_SHIFT)
@@ -431,9 +431,9 @@
 #define QSPI_LUT_OPRND1(n)                (((n) << QSPI_LUT_OPRND1_SHIFT) & QSPI_LUT_OPRND1_MASK)
 #define QSPI_LUT_PAD1_SHIFT               (24)       /* Bits 24-25: Pad information for INSTR1 (PAD1) */
 #define QSPI_LUT_PAD1_MASK                (0x03 << QSPI_LUT_PAD1_SHIFT)
-#  define QSPI_LUT_PAD1_1                 (0x00 << QSPI_LUT_PAD1_SHIFT) /* 1 Pad */ 
-#  define QSPI_LUT_PAD1_2                 (0x01 << QSPI_LUT_PAD1_SHIFT) /* 2 Pad */ 
-#  define QSPI_LUT_PAD1_4                 (0x02 << QSPI_LUT_PAD1_SHIFT) /* 4 Pad */ 
+#  define QSPI_LUT_PAD1_1                 (0x00 << QSPI_LUT_PAD1_SHIFT) /* 1 Pad */
+#  define QSPI_LUT_PAD1_2                 (0x01 << QSPI_LUT_PAD1_SHIFT) /* 2 Pad */
+#  define QSPI_LUT_PAD1_4                 (0x02 << QSPI_LUT_PAD1_SHIFT) /* 4 Pad */
 
 #define QSPI_LUT_INSTR1_SHIFT             (26)      /* Bits 26-31: Instruction 1 (INSTR1) */
 #define QSPI_LUT_INSTR1_MASK              (0x3f << QSPI_LUT_INSTR1_SHIFT)

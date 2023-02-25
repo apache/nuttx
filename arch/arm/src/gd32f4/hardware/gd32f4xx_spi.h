@@ -98,7 +98,7 @@
 #define SPI_CTL0_CKPH              (1 << 0)            /* Bit 0: clock phase selection*/
 #define SPI_CTL0_CKPL              (1 << 1)            /* Bit 1: clock polarity selection */
 #define SPI_CTL0_MSTMOD            (1 << 2)            /* Bit 2: master mode enable */
-#define SPI_CTL0_PSC_SHIFT         (3)                 /* Bit 3-5: master clock prescaler selection */ 
+#define SPI_CTL0_PSC_SHIFT         (3)                 /* Bit 3-5: master clock prescaler selection */
 #define SPI_CTL0_PSC_MASK          (7 << SPI_CTL0_PSC_SHIFT)
 #define SPI_CTL0_PSC(n)            ((n) << SPI_CTL0_PSC_SHIFT)
 #  define SPI_CTL0_PSC_2           SPI_CTL0_PSC(0)     /* 000: SPI clock prescale factor is 2 */

@@ -667,7 +667,7 @@ menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	depends on NRF52_LFCLK_XTAL
 	---help---
 		This enables use of Nordic SoftDevice controller
-		(SDC). It is a library version of a subset of 
+		(SDC). It is a library version of a subset of
 		full SoftDevice, which only includes the BLE
 		controller implementation.
 

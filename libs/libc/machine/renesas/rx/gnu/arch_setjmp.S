@@ -83,7 +83,7 @@ _setjmp:
 
 	/* save return address */
         mov.l   	r2, 0x24[r1]
-	
+
 	/* return 0 */
         mov     	#0, r1
 	rts

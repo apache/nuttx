@@ -45,7 +45,7 @@
 #error PWM puslecount not supported for Litex.
 #endif
 #ifdef CONFIG_PWM_MULTICHAN
-#error PWM multichannel not supported for Litex. 
+#error PWM multichannel not supported for Litex.
 #endif
 
 /* Control register offsets from peripheral base address */

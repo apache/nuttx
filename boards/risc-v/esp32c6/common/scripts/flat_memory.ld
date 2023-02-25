@@ -54,7 +54,7 @@ MEMORY
 {
   /* All these values assume the flash cache is on, and have the blocks it
    * uses subtracted from the length of the various regions. The 'data access
-   * port' dram/drom regions map to the same iram/irom regions but are 
+   * port' dram/drom regions map to the same iram/irom regions but are
    * connected to the data port of the CPU and eg allow byte-wise access.
    */
 

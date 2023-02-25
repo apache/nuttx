@@ -80,7 +80,7 @@
 /* USART DMA priority */
 #if defined(CONFIG_GD32F4_USART_PRIQ)
 #  define USART_DMA_PRIO  CONFIG_GD32F4_USART_PRIQ
-#else 
+#else
 #  define USART_DMA_PRIO  DMA_PRIO_MEDIUM_SELECT
 #endif
 #endif

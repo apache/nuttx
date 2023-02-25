@@ -2856,7 +2856,7 @@ void usb_hstd_brdy_pipe_process(uint16_t bitsts)
          (NULL == g_rx65n_edlist[i].xfrinfo->callback))
 #else
       if (i == g_kbdpipe)
-#endif                  
+#endif
                     {
                       usb_cstd_clr_stall(i);
                     }

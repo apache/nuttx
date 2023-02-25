@@ -147,7 +147,7 @@ config ACT8945A_SYSLEV_3800
 
 endchoice # ACT8945A SYSLEV threshold
 
-choice 
+choice
 	prompt "ACT8945A SYSLEV mode"
 	default ACT8945A_SYSLEV_MODE_INTERRUPT
 	---help---
@@ -203,7 +203,7 @@ config ACT8945A_DCDC1_APPLY_UV
 	---help---
 		If set, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If not set, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 
@@ -243,7 +243,7 @@ config ACT8945A_DCDC2_NAME
 	---help---
 		This is the name used for the ACT8945A DCDC converter output 2.
 		It is used as the consumer name when you get or put a regulator.
-	
+
 config ACT8945A_DCDC2_BOOT_ON
 	bool "Enable DCDC2"
 	default y
@@ -254,7 +254,7 @@ config ACT8945A_DCDC2_APPLY_UV
 	---help---
 		If set, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If not set, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 
@@ -305,7 +305,7 @@ config ACT8945A_DCDC3_APPLY_UV
 	---help---
 		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If set to 0, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 
@@ -356,7 +356,7 @@ config ACT8945A_LDO1_APPLY_UV
 	---help---
 		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If set to 0, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 
@@ -411,7 +411,7 @@ config ACT8945A_LDO2_APPLY_UV
 	---help---
 		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If set to 0, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 
@@ -466,7 +466,7 @@ config ACT8945A_LDO3_APPLY_UV
 	---help---
 		If set to 1, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If set to 0, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 
@@ -521,7 +521,7 @@ config ACT8945A_LDO4_APPLY_UV
 	---help---
 		If set, the driver will attempt to set the voltage nearest to MIN_UV,
 		that is also lower than MAX_UV, during initialisation.
-		
+
 		If not, MIN_UV and MAX_UV values will be ignored
 		during initialisation.
 

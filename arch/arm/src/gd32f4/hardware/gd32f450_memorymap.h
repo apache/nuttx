@@ -84,7 +84,7 @@
 
 /* Peripheral Base Addresses ************************************************/
 
-#define GD32_APB1_BUS_BASE   0x40000000     /* APB1 base address */                                          
+#define GD32_APB1_BUS_BASE   0x40000000     /* APB1 base address */
 #define GD32_APB2_BUS_BASE   0x40010000     /* APB2 base address */
 #define GD32_AHB1_BUS_BASE   0x40020000     /* AHB1 base address */
 #define GD32_AHB2_BUS_BASE   0x50000000     /* AHB2 base address */

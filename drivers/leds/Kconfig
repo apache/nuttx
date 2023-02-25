@@ -128,7 +128,7 @@ config DEBUG_LP503X
 	bool "Enable debug support for the LP503X"
 	default n
 	---help---
-		Enables debug support for the LP503X 
+		Enables debug support for the LP503X
 
 endif # LP503X
 
@@ -178,7 +178,7 @@ config WS2812_LED_COUNT
 	range 1 65535
 	depends on WS2812
 	---help---
-		The number of ws2812s chained to this port.  Although the 
+		The number of ws2812s chained to this port.  Although the
 		driver allows up to 65,535 ws2812s the practical limit will
 		depend on processor speed and other resources.
 
@@ -205,5 +205,5 @@ config WS2812_FREQUENCY
 		to the bit frequency of the ws2812s being used. Newer chips use an
 		800 kHz bit frequency (the default); although, some older chips run
 		at 400 kHz.
-		
+
 endmenu # LED Support

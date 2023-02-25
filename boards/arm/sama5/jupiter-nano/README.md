@@ -32,19 +32,19 @@ Segger J-Link. You may have to adapt them for other JTAG debuggers.
 There is a mini-JTAG connector on the board, labeled J4 JTAG. You will need
 a mini-JTAG adapter board and cable.
 
-1. Start the GDB server 
-2. Start GDB 
-3. Use the 'target remote localhost:xxxx' command to attach to the GDB 
-   server 
-4. Do 'mon reset' then 'mon go' to start the internal boot loader (maybe 
-   U-Boot). 
-5. Let the boot loader run until it completes SDRAM initialization, then 
-   do 'mon halt'. 
-6. Now you have SDRAM initialized and you use 'load nuttx' to load the 
-   ELF file into SDRAM. 
-7. Use 'file nuttx' to load symbols 
-8. Set the PC to the NuttX entry point 'mon pc 0x20008E20' and start 
-   nuttx using 'mon go'. 
+1. Start the GDB server
+2. Start GDB
+3. Use the 'target remote localhost:xxxx' command to attach to the GDB
+   server
+4. Do 'mon reset' then 'mon go' to start the internal boot loader (maybe
+   U-Boot).
+5. Let the boot loader run until it completes SDRAM initialization, then
+   do 'mon halt'.
+6. Now you have SDRAM initialized and you use 'load nuttx' to load the
+   ELF file into SDRAM.
+7. Use 'file nuttx' to load symbols
+8. Set the PC to the NuttX entry point 'mon pc 0x20008E20' and start
+   nuttx using 'mon go'.
 
 ### Loading Code into SRAM from SD Card
 
@@ -168,9 +168,9 @@ U-Boot, and then from the U-Boot prompt do the following:
 
 Two buttons, labeled S1 RESET, and S2 WAKEUP are available on the Jupiter Nano.
 Both are connected to the Power Management Integrated Circuit (PMIC) and are
-not available to user programs. Pressing RESET will reset the SAMA5D27C-LD1G and the 
+not available to user programs. Pressing RESET will reset the SAMA5D27C-LD1G and the
 ACT8945A PMIC chips. WAKEUP is used to wake up the board if it has been put
-into a sleep state. 
+into a sleep state.
 
 You can add your own buttons, support for pollable buttons is enabled with:
 
@@ -224,7 +224,7 @@ is, apparently, running normally. If LED is flashing at approximately
 ## Serial Console
 
 The default serial console is UART1. UART1 is connected to the MCP2200
-USB-UART converter, and is available as a USB serial connection on the 
+USB-UART converter, and is available as a USB serial connection on the
 micro-USB connector labeled CONSOLE. This is the default serial console.
 
     ------------------------ -------------
@@ -490,7 +490,7 @@ Board Selection -> CPU Frequency
 ### Configuration Sub-directories
 
 Summary:  Some of the descriptions below are long and wordy. Here is the
-concise summary of the available Jupiter Nano configurations: 
+concise summary of the available Jupiter Nano configurations:
 - nsh:
 
     This is a basic NuttShell (NSH) configuration.
@@ -630,29 +630,29 @@ concise summary of the available Jupiter Nano configurations:
 
     This is a configuration based on the NuttShell (NSH). Internet networking
     and the SDMMC peripheral is enabled. NuttX can read and write to a VFAT
-    filesystem on the SD Card. 
+    filesystem on the SD Card.
 
     NuttX will mount the SD Card at `/mnt/mmcsd1`.
 
 ## Networking
 
-   Jupiter Nano has support for Ethernet over USB using CDC-ECM protocol. (All the 
-   SAMA5D27C boards do, actually.) The Jupiter Nano will appear as an Ethernet USB 
-   Gadget on the Linux side. This is a high performance link and can transfer 30MB/s 
+   Jupiter Nano has support for Ethernet over USB using CDC-ECM protocol. (All the
+   SAMA5D27C boards do, actually.) The Jupiter Nano will appear as an Ethernet USB
+   Gadget on the Linux side. This is a high performance link and can transfer 30MB/s
    of data to or from a host computer.
 
-   The netnsh sdmmcnsh, or sdmmc-nsh-net-resolvconf configurations will set up the  
-   Ethernet over USB interface to be `10.0.0.2`, and set up default routing via 
+   The netnsh sdmmcnsh, or sdmmc-nsh-net-resolvconf configurations will set up the
+   Ethernet over USB interface to be `10.0.0.2`, and set up default routing via
    `10.0.0.1`. The sdmmc-nsh-net-resolvconf also sets up the /etc/resolv.conf file
    and configures NuttX to support it, which enables DNS resolution using Google's
    open DNS servers.
 
-   The tools/netusb.sh script can set up a Linux computer with IP tables NAT rules 
-   and proper routes to allow the NuttX computer to access the Internet, setting 
-   the Linux side of the Ethernet over USB link to have the IP address of 
+   The tools/netusb.sh script can set up a Linux computer with IP tables NAT rules
+   and proper routes to allow the NuttX computer to access the Internet, setting
+   the Linux side of the Ethernet over USB link to have the IP address of
    `10.0.0.1`.
 
-   In the commands below, replace the interface identifier `wlp0s20f3` with the 
+   In the commands below, replace the interface identifier `wlp0s20f3` with the
    interface that you use to access the Internet.
 
     $./tools/netusb.sh show
@@ -665,11 +665,11 @@ concise summary of the available Jupiter Nano configurations:
             TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
     $ sudo ./tools/netusb.sh wlp0s20f3 enx020000112233 on
-    default via 192.168.1.1 dev wlp0s20f3 proto dhcp metric 600 
-    169.254.0.0/16 dev br-cc496150b4da scope link metric 1000 linkdown 
-    172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
-    172.18.0.0/16 dev br-cc496150b4da proto kernel scope link src 172.18.0.1 linkdown 
-    192.168.1.0/24 dev wlp0s20f3 proto kernel scope link src 192.168.1.209 metric 600 
+    default via 192.168.1.1 dev wlp0s20f3 proto dhcp metric 600
+    169.254.0.0/16 dev br-cc496150b4da scope link metric 1000 linkdown
+    172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown
+    172.18.0.0/16 dev br-cc496150b4da proto kernel scope link src 172.18.0.1 linkdown
+    192.168.1.0/24 dev wlp0s20f3 proto kernel scope link src 192.168.1.209 metric 600
 
     enx020000112233: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
             ether 02:00:00:11:22:33  txqueuelen 1000  (Ethernet)
@@ -679,15 +679,15 @@ concise summary of the available Jupiter Nano configurations:
             TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 
-    default via 192.168.1.1 dev wlp0s20f3 proto dhcp metric 600 
-    10.0.0.0/24 dev enx020000112233 scope link src 10.0.0.1 
-    10.0.0.0/24 dev enx020000112233 proto kernel scope link src 10.0.0.1 metric 100 
-    10.0.0.0/8 dev enx020000112233 proto kernel scope link src 10.0.0.1 
-    10.0.0.2 dev enx020000112233 scope link src 10.0.0.1 
-    169.254.0.0/16 dev br-cc496150b4da scope link metric 1000 linkdown 
-    172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
-    172.18.0.0/16 dev br-cc496150b4da proto kernel scope link src 172.18.0.1 linkdown 
-    192.168.1.0/24 dev wlp0s20f3 proto kernel scope link src 192.168.1.209 metric 600 
+    default via 192.168.1.1 dev wlp0s20f3 proto dhcp metric 600
+    10.0.0.0/24 dev enx020000112233 scope link src 10.0.0.1
+    10.0.0.0/24 dev enx020000112233 proto kernel scope link src 10.0.0.1 metric 100
+    10.0.0.0/8 dev enx020000112233 proto kernel scope link src 10.0.0.1
+    10.0.0.2 dev enx020000112233 scope link src 10.0.0.1
+    169.254.0.0/16 dev br-cc496150b4da scope link metric 1000 linkdown
+    172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown
+    172.18.0.0/16 dev br-cc496150b4da proto kernel scope link src 172.18.0.1 linkdown
+    192.168.1.0/24 dev wlp0s20f3 proto kernel scope link src 192.168.1.209 metric 600
 
     PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
     64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=0.187 ms

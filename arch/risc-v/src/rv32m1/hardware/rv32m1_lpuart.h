@@ -156,7 +156,7 @@
 #define LPUART_CTRL_RIE                 (1 << 21) /* Bit21: Receiver Interrupt Enable */
 #define LPUART_CTRL_ILIE                (1 << 20) /* Bit20: Idle Line Interrupt Enable */
 #define LPUART_CTRL_TE                  (1 << 19) /* Bit19: Transmitter Enable */
-#define LPUART_CTRL_RE                  (1 << 18) /* Bit18: Receiver Enable */ 
+#define LPUART_CTRL_RE                  (1 << 18) /* Bit18: Receiver Enable */
 #define LPUART_CTRL_RWU                 (1 << 17) /* Bit17: Receiver Wakeup Control */
 #define LPUART_CTRL_SBK                 (1 << 16) /* Bit16: Send Break */
 #define LPUART_CTRL_MA1IE               (1 << 15) /* Bit15: Match 1 Interrupt Enable */

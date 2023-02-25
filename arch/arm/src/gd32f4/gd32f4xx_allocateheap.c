@@ -144,9 +144,9 @@
 /* Two memory regions.  Case 1 or 2 */
 
 #    if !defined(CONFIG_GD32F4_TCMEXCLUDE) && defined(CONFIG_GD32F4_EXTERNAL_RAM)
-#      error "Can not support both TCM SRAM and EXMC SRAM, when CONFIG_MM_REGIONS is 2 " 
+#      error "Can not support both TCM SRAM and EXMC SRAM, when CONFIG_MM_REGIONS is 2 "
 #      undef CONFIG_GD32F4_TCMEXCLUDE
-#      define CONFIG_GD32F4_TCMEXCLUDE 1  
+#      define CONFIG_GD32F4_TCMEXCLUDE 1
 #    endif
 
 /* Case 1, TCMSRAM is used. In this case, DMA should not be used  */

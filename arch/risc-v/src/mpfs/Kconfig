@@ -130,7 +130,7 @@ choice
 	prompt "Choose DDR type"
 	depends on MPFS_DDR_INIT
 	default MPFS_DDR_TYPE_LPDDR4
-	
+
 config MPFS_DDR_TYPE_DDR3
 	bool "Use DDR3"
 

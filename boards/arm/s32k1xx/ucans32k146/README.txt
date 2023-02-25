@@ -91,7 +91,7 @@ Thread-Aware Debugging with Eclipse
 
   Thread-aware debugging is possible with openocd-nuttx
   ( https://github.com/sony/openocd-nuttx ) and was tested together with the
-  Eclipse-based S32 Design Studio for Arm:  
+  Eclipse-based S32 Design Studio for Arm:
   https://www.nxp.com/design/software/development-software/s32-design-studio-ide/s32-design-studio-for-arm:S32DS-ARM
 
   NOTE: This method was last tested with NuttX 8.2 and S32DS for Arm 2018.R1.

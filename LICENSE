@@ -3018,7 +3018,7 @@ arch/arm/src/lc823450/lc823450_sddrv_dep.c
 arch/arm/src/lc823450/lc823450_sddrv_if.h
 arch/arm/src/lc823450/lc823450_sddrv_type.h
 arch/arm/src/lc823450/lc823450_symbols.ld
-============================================ 
+============================================
 
   Copyright (C) 2014-2015 ON Semiconductor. All rights reserved.
   Copyright 2014,2015,2016,2017 Sony Video & Sound Products Inc.
@@ -7199,7 +7199,7 @@ include/sys/queue.h
    $NetBSD: queue.h,v 1.11 1996/05/16 05:17:14 mycroft Exp $
    Copyright (c) 1991, 1993
    The Regents of the University of California.  All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:

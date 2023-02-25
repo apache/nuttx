@@ -37,7 +37,7 @@
 
 /x86_64/intel64/qemu-intel64/configs/nsh
 
-# The gcc 11.2 toolcain for MACOS maybe fail when compile 
+# The gcc 11.2 toolcain for MACOS maybe fail when compile
 # with float, disable the cibuild check for MACOS
 # it will be enbaled while new toolchain release
 

@@ -548,12 +548,12 @@
 #define DCM_GPR_DCMRWD3_PRAM1_ECC_ERR_EN  (1 << 24) /* Bit 24: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from SRAM1 (PRAM1_ECC_ERR_EN) */
 #define DCM_GPR_DCMRWD3_PRAM0_ECC_ERR_EN  (1 << 25) /* Bit 25: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from SRAM0 (PRAM0_ECC_ERR_EN) */
 
-#define DCM_GPR_DCMRWD3_CM7_0_DCDATA_ECC_ERR_EN (1 << 26) /* Bit 26: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_0 DCache data memory (CM7_0_DCDATA_ECC_ERR_EN) */ 
-#define DCM_GPR_DCMRWD3_CM7_1_DCDATA_ECC_ERR_EN (1 << 27) /* Bit 27: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_1 DCache data memory (CM7_1_DCDATA_ECC_ERR_EN) */ 
-#define DCM_GPR_DCMRWD3_CM7_0_DCTAG_ECC_ERR_EN  (1 << 28) /* Bit 28: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_0 DCache tag memory (CM7_0_DCTAG_ECC_ERR_EN) */ 
-#define DCM_GPR_DCMRWD3_CM7_1_DCTAG_ECC_ERR_EN  (1 << 29) /* Bit 29: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_1 DCache tag memory (CM7_1_DCTAG_ECC_ERR_EN) */ 
-#define DCM_GPR_DCMRWD3_CM7_0_ICDATA_ECC_ERR_EN (1 << 30) /* Bit 30: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_0 ICache data memory (CM7_0_DCDATA_ECC_ERR_EN) */ 
-#define DCM_GPR_DCMRWD3_CM7_1_ICDATA_ECC_ERR_EN (1 << 31) /* Bit 31: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_1 ICache data memory (CM7_1_DCDATA_ECC_ERR_EN) */ 
+#define DCM_GPR_DCMRWD3_CM7_0_DCDATA_ECC_ERR_EN (1 << 26) /* Bit 26: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_0 DCache data memory (CM7_0_DCDATA_ECC_ERR_EN) */
+#define DCM_GPR_DCMRWD3_CM7_1_DCDATA_ECC_ERR_EN (1 << 27) /* Bit 27: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_1 DCache data memory (CM7_1_DCDATA_ECC_ERR_EN) */
+#define DCM_GPR_DCMRWD3_CM7_0_DCTAG_ECC_ERR_EN  (1 << 28) /* Bit 28: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_0 DCache tag memory (CM7_0_DCTAG_ECC_ERR_EN) */
+#define DCM_GPR_DCMRWD3_CM7_1_DCTAG_ECC_ERR_EN  (1 << 29) /* Bit 29: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_1 DCache tag memory (CM7_1_DCTAG_ECC_ERR_EN) */
+#define DCM_GPR_DCMRWD3_CM7_0_ICDATA_ECC_ERR_EN (1 << 30) /* Bit 30: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_0 ICache data memory (CM7_0_DCDATA_ECC_ERR_EN) */
+#define DCM_GPR_DCMRWD3_CM7_1_ICDATA_ECC_ERR_EN (1 << 31) /* Bit 31: Enable fault monitoring at FCCU NCF 2 for multi bit ECC error from CM7_1 ICache data memory (CM7_1_DCDATA_ECC_ERR_EN) */
 
 /* Read Write GPR On Destructive Reset Register 4 (DCMRWD4) */
 
@@ -809,7 +809,7 @@
 #  define DCM_GPR_DCMRWF5_BOOT_MODE_FAST   (1 << 0) /*        Fast Standby */
 
 #define DCM_GPR_DCMRWF5_BOOT_ADDRESS_SHIFT (1)      /* Bits 1-31: Cortex-M7_0 base address of vector table to be used after exiting (fast) standby mode (BOOT_ADDRESS) */
-#define DCM_GPR_DCMRWF5_BOOT_ADDRESS_MASK  (0x7fffffff << DCM_GPR_DCMRWF5_BOOT_ADDRESS_SHIFT) 
+#define DCM_GPR_DCMRWF5_BOOT_ADDRESS_MASK  (0x7fffffff << DCM_GPR_DCMRWF5_BOOT_ADDRESS_SHIFT)
 
 /* Read Only GPR On PMCPOR Reset Register 1 (DCMROPP1) */
 

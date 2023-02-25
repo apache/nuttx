@@ -228,7 +228,7 @@
 #define FLASH_NSCR_PNB_MASK       (0x7F << FLASH_NSCR_PNB_SHIFT)
 #define FLASH_NSCR_PNB(n)         ((n)  << FLASH_NSCR_PNB_SHIFT) /* Page n, n = 0..127 */
 #define FLASH_NSCR_BKER           (1 << 11)                      /* Bit 11: Non-secure bank selection for page erase */
-#define FLASH_NSCR_BWR            (1 << 14)                      /* Bit 14: Non-secure burst write programming mode */ 
+#define FLASH_NSCR_BWR            (1 << 14)                      /* Bit 14: Non-secure burst write programming mode */
 #define FLASH_NSCR_MER2           (1 << 15)                      /* Bit 15: Non-secure bank 2 mass erase */
 #define FLASH_NSCR_STRT           (1 << 16)                      /* Bit 16: Non-secure start */
 #define FLASH_NSCR_OPTSTRT        (1 << 17)                      /* Bit 17: Options modification start */

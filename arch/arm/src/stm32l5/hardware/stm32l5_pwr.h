@@ -141,7 +141,7 @@
 #  define PWR_CR3_RRS_4K_ON      (2 << PWE_CR3_RRS_SHIFT) /* 10: Upper 4KB of SRAM2 powered on in Standby-mode */
 #define PWR_CR3_APC              (1 << 10)                /* Bit 10: Apply pull-up and pull-down configuration */
 #define PWR_CR3_ULPMEN           (1 << 11)                /* Bit 11: Ultra-low-power mode enable */
-#define PWR_CR3_UCPD_STBY        (1 << 13)                /* Bit 13: USB Type-C power delivery Standby-mode */ 
+#define PWR_CR3_UCPD_STBY        (1 << 13)                /* Bit 13: USB Type-C power delivery Standby-mode */
 #define PWR_CR3_UCPD_DBDIS       (1 << 14)                /* Bit 14: USB Type-C power delivery dead battery disable */
 
 /* Power control register 4 */

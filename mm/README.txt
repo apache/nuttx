@@ -101,7 +101,7 @@ This directory contains the NuttX memory management logic.  This include:
 
     2.Implement xxx_malloc, xxx_free, xxx_memcpy... in source code, you can:
       a.Modify some arguments(e.g. extend the allocation size for redzone)
-      d.Check the critical arguments(e.g. pointer and length) in the range 
+      d.Check the critical arguments(e.g. pointer and length) in the range
       b.Forward to the original implementation(call malloc/free/memcpy)
       c.Attach the context info(e.g. file and line) before return
 

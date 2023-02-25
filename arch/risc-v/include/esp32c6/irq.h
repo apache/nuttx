@@ -107,9 +107,9 @@
 #define ESP32C6_SYSTIMER_TARGET2_EDGE_PERIPH 59     /* interrupt of system timer 2, EDGE */
 #define ESP32C6_APB_ADC_PERIPH               60     /* interrupt of APB ADC, level */
 #define ESP32C6_MCPWM0_PERIPH                61     /* interrupt of MCPWM0, level */
-#define ESP32C6_PCNT_PERIPH                  62 
+#define ESP32C6_PCNT_PERIPH                  62
 #define ESP32C6_PARL_IO_PERIPH               63
-#define ESP32C6_SLC0_PERIPH                  64 
+#define ESP32C6_SLC0_PERIPH                  64
 #define ESP32C6_SLC_PERIPH                   65
 #define ESP32C6_DMA_IN_CH0_PERIPH            66     /* interrupt of general DMA IN channel 0, level */
 #define ESP32C6_DMA_IN_CH1_PERIPH            67     /* interrupt of general DMA IN channel 1, level */
@@ -117,7 +117,7 @@
 #define ESP32C6_DMA_OUT_CH0_PERIPH           69     /* interrupt of general DMA OUT channel 0, level */
 #define ESP32C6_DMA_OUT_CH1_PERIPH           70     /* interrupt of general DMA OUT channel 1, level */
 #define ESP32C6_DMA_OUT_CH2_PERIPH           71     /* interrupt of general DMA OUT channel 2, level */
-#define ESP32C6_GSPI2_PERIPH                 72 
+#define ESP32C6_GSPI2_PERIPH                 72
 #define ESP32C6_AES_PERIPH                   73     /* interrupt of AES accelerator, level */
 #define ESP32C6_SHA_PERIPH                   74     /* interrupt of SHA accelerator, level */
 #define ESP32C6_RSA_PERIPH                   75     /* interrupt of RSA accelerator, level */

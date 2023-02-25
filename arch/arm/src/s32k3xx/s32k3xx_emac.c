@@ -73,7 +73,7 @@
 
 /* Memory synchronization */
 
-#define MEMORY_SYNC() //do { ARM_DSB(); ARM_ISB(); } while (0)                                                                                                                                                                                                                                    
+#define MEMORY_SYNC() //do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* If processing is not done at the interrupt level, then work queue support
  * is required.

@@ -196,7 +196,7 @@
 #define DMA_CHXCTL_TM(n)               ((n) << DMA_CHXCTL_TM_SHIFT)
 #  define DMA_PERIPH_TO_MEMORY         DMA_CHXCTL_TM(0)                /* 00: read from peripheral and write to memory */
 #  define DMA_MEMORY_TO_PERIPH         DMA_CHXCTL_TM(1)                /* 01: read from peripheral and write to memory */
-#  define DMA_MEMORY_TO_MEMORY         DMA_CHXCTL_TM(2)                /* 02: read from peripheral and write to memory */   
+#  define DMA_MEMORY_TO_MEMORY         DMA_CHXCTL_TM(2)                /* 02: read from peripheral and write to memory */
 
 #define DMA_CHXCTL_CMEN                (1 << 8)                        /* Bit 8: circulation mode */
 #define DMA_CHXCTL_PNAGA               (1 << 9)                        /* Bit 9: next address generation algorithm of peripheral */
@@ -229,7 +229,7 @@
 #define DMA_CHXCTL_MBS                 (1 << 19)                       /* Bit19: memory buffer select */
 
 #define DMA_CHXCTL_PBURST_SHIFT        (21)                            /* Bit 21-22: transfer burst type of peripheral */
-#define DMA_CHXCTL_PBURST_MASK         (3 << DMA_CHXCTL_PBURST_SHIFT) 
+#define DMA_CHXCTL_PBURST_MASK         (3 << DMA_CHXCTL_PBURST_SHIFT)
 #define DMA_CHXCTL_PBURST(n)           ((n) << DMA_CHXCTL_PBURST_SHIFT)
 #  define DMA_PERIPH_BURST_SINGLE      DMA_CHXCTL_PBURST(0)            /* single burst */
 #  define DMA_PERIPH_BURST_4_BEAT      DMA_CHXCTL_PBURST(1)            /* 4-beat burst */

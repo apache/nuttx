@@ -114,7 +114,7 @@ static const struct timer_ops_s g_timer_ops =
   .getstatus   = phyplus_getstatus,
 #else
   .getstatus   = NULL,
-#endif  
+#endif
   .settimeout  = phyplus_settimeout,
   .setcallback = phyplus_setcallback,
 #if 1

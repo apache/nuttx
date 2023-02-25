@@ -52,7 +52,7 @@ ARCHSTDINCLUDES =
 
 ARCHCPUFLAGS = -Dinterrupt="__attribute__((__interrupt__))" -ffreestanding
 ARCHCPUFLAGS += -Wa,-march=ez80
-ARCHLIST = 
+ARCHLIST =
 ARCHWARNINGS = -Wall -Wextra -Wno-incompatible-library-redeclaration
 ARCHWARNINGS += -Wno-main-return-type -Wno-unused-parameter
 ARCHWARNINGS += -Wno-invalid-noreturn -Wimplicit-int-conversion

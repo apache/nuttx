@@ -357,23 +357,23 @@ config LCD_SSD1306_CUSTOM
 
 if LCD_SSD1306_CUSTOM
 
-config LCD_SSD1306_CUSTOM_DEV_NATIVE_XRES 
+config LCD_SSD1306_CUSTOM_DEV_NATIVE_XRES
 	int "Custom LCD native X-resolution"
 	default 128
 
-config LCD_SSD1306_CUSTOM_DEV_NATIVE_YRES 
+config LCD_SSD1306_CUSTOM_DEV_NATIVE_YRES
 	int "Custom LCD native Y-resolution"
 	default 32
 
-config LCD_SSD1306_CUSTOM_DEV_XOFFSET 
+config LCD_SSD1306_CUSTOM_DEV_XOFFSET
 	int "Custom LCD X-offset"
 	default 0
 
-config LCD_SSD1306_CUSTOM_DEV_PAGES 
+config LCD_SSD1306_CUSTOM_DEV_PAGES
 	int "Custom LCD number of pages"
 	default 4
 
-config LCD_SSD1306_CUSTOM_DEV_CMNPAD 
+config LCD_SSD1306_CUSTOM_DEV_CMNPAD
 	int "Custom LCD COM configuration (cmnpad)"
 	default 2
 
@@ -1584,7 +1584,7 @@ config SSD1680_FREQUENCY
 	default 5000000
 	range 100000 20000000
 	---help---
-		Selects the SPI bus frequency used with the SSD1680 device. 
+		Selects the SPI bus frequency used with the SSD1680 device.
 		Max for read mode is 2.5 MHz, for write mode is 20 HHz
 endif # LCD_SSD1680
 

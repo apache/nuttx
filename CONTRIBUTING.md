@@ -14,10 +14,10 @@ it is very important you follow these guidelines:
         <first line (up to ~80 characters)>
 
         <more paragraphs here>
-        
+
     * The first line should have a prefix to give context
       (unless context is really clear), such as:
-      
+
           <keyword>: <message>
           i.e sched: Fixed compiler warning
 

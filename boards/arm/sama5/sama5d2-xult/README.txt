@@ -881,7 +881,7 @@ Configurations
        from the SD card:
 
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
-         U-Boot> go 0x20008E20 
+         U-Boot> go 0x20008E20
 
     6. Board LEDs and buttons are supported as described under "Buttons and
        LEDs".  The interrupt button test is also enabled as an NSH built-in

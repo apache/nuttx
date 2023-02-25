@@ -38,7 +38,7 @@
 #include "phyplus_gpio.h"
 #include "errno.h"
 
-#if defined(CONFIG_DEV_GPIO) 
+#if defined(CONFIG_DEV_GPIO)
 
 /****************************************************************************
  * phy6222  internal used functions..
@@ -171,7 +171,7 @@ static int phyplus_gpin_read(struct gpio_dev_s *dev, bool *value)
   gpioinfo("Reading...\n");
 
   *value = stm32_gpioread(g_gpioinputs[stm32gpio->id]);
-#endif 
+#endif
   struct phyplus_gpio_dev_s *phyplus_gpin =
                         (struct phyplus_gpio_dev_s *)dev;
 
@@ -195,7 +195,7 @@ static int phyplus_gpout_read(struct gpio_dev_s *dev, bool *value)
   gpioinfo("Reading...\n");
 
   *value = stm32_gpioread(g_gpiooutputs[stm32gpio->id]);
-#endif	
+#endif
 
   struct phyplus_gpio_dev_s *phyplus_gpout =
                 (struct phyplus_gpio_dev_s *)dev;

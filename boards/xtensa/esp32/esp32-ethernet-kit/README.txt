@@ -76,4 +76,3 @@ A new image "esp32_qemu_image.bin" will be created.  It can be run as:
  ~/PATH_TO_QEMU/qemu/build/xtensa-softmmu/qemu-system-xtensa -nographic \
     -machine esp32 \
     -drive file=esp32_qemu_image.bin,if=mtd,format=raw
- 

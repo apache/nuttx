@@ -386,7 +386,7 @@ static int pwm_timer(struct lpc17_40_pwmtimer_s *priv,
              putreg32(ub16mulub16(info->channels[i].duty, mr0_freq),
                       LPC17_40_PWM1_MR6); /* Set PWM cycle */
              break;
-#endif      
+#endif
 
          default:
            {

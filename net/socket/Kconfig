@@ -11,7 +11,7 @@ config NET_PREALLOC_DEVIF_CALLBACKS
 	default 4 if DEFAULT_SMALL
 	---help---
 		Number of preallocated socket callbacks (all tasks).
-		
+
 		This number of callbacks will be pre-allocated during system boot.
 		If dynamic callbacks allocation is enabled, more callbacks may be
 		allocated at a later time, as the system needs them. Else this

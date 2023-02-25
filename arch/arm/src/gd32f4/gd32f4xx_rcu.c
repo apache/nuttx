@@ -83,7 +83,7 @@
  * Pravite Functions
  ****************************************************************************/
 
-#ifdef GD32_BOARD_SYSCLK_IRC16MEN 
+#ifdef GD32_BOARD_SYSCLK_IRC16MEN
 /****************************************************************************
  * Name: gd32_system_clock_irc16m
  *
@@ -512,7 +512,7 @@ static void gd32_system_clock_pll_hxtal(void)
 
 static void gd32_system_clock_config(void)
 {
-#ifdef GD32_BOARD_SYSCLK_IRC16MEN  
+#ifdef GD32_BOARD_SYSCLK_IRC16MEN
 
   /* Select IRC16M as SYSCLK based on board.h setting. */
 

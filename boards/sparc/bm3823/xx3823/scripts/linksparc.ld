@@ -37,7 +37,7 @@
  * +--------------------+
  * |    heap space      |
  * |        _ENDHEAP    |
- * |    stack space     | 
+ * |    stack space     |
  * |        __stack     | top of stack
  * +--------------------+ <- high memory
  */
@@ -117,7 +117,7 @@ SECTIONS
 
     *(.eh_frame)
     . = ALIGN (16);
-    
+
    /* *(.gnu.linkonce.t*) */
 
     /*
@@ -148,7 +148,7 @@ SECTIONS
     . = ALIGN (16);
     _endtext = .;
   } >ram
-  
+
   /*
   .dynamic	  : { *(.dynamic) 	} >ram
   .got		  : { *(.got) 		} >ram
@@ -159,7 +159,7 @@ SECTIONS
   .dynstr	  : { *(.dynstr)	} >ram
   .hash		  : { *(.hash)		} >ram
   */
-  
+
   .data :
   {
     data_start = .;
@@ -177,7 +177,7 @@ SECTIONS
   .shbss :
   {
     *(.shbss)
-  } 
+  }
   .bss :
   {
     __bss_start = ALIGN(0x10);
@@ -189,10 +189,9 @@ SECTIONS
     _end = ALIGN(0x10);
     __end = ALIGN(0x10);
   }  > ram
-  
-  
+
    .jcr . (NOLOAD)  : { *(.jcr) 		}
-  
+
   .stab . (NOLOAD) :
   {
     [ .stab ]
@@ -201,6 +200,4 @@ SECTIONS
   {
     [ .stabstr ]
   }
-  
-  
 }
