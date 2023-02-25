@@ -563,7 +563,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
 {
-  char devname[32];
+  char devname[16];
 
   snprintf(devname, sizeof(devname), "gpio%u", (unsigned int)minor);
   return gpio_pin_register_byname(dev, devname);
@@ -663,7 +663,7 @@ int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
 
 int gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor)
 {
-  char devname[32];
+  char devname[16];
   snprintf(devname, sizeof(devname), "gpio%u", (unsigned int)minor);
   return gpio_pin_unregister_byname(dev, devname);
 }
