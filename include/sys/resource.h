@@ -58,7 +58,7 @@
 #define RLIMIT_STACK    6           /* Limit on stack size */
 #define RLIMIT_AS       7           /* Limit on address space size */
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define RLIM_INFINITY    UINT64_MAX /* No limit */
 #  define RLIM_SAVED_MAX   UINT64_MAX /* Unrepresentable saved hard limit */
 #  define RLIM_SAVED_CUR   UINT64_MAX /* Unrepresentable saved soft limit */
@@ -95,7 +95,7 @@
  * It must be an unsigned integral type.
  */
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 typedef uint64_t rlim_t;
 #else
 typedef uint32_t rlim_t;

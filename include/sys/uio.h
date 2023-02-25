@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define preadv64  preadv
 #  define pwritev64 pwritev
 #endif

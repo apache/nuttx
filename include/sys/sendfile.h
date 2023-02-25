@@ -39,7 +39,7 @@
 #  define CONFIG_SENDFILE_BUFSIZE 512
 #endif
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define sendfile64              sendfile
 #endif
 

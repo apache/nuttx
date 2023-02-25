@@ -87,7 +87,7 @@
 
 #define TMP_MAX 56800235584ull
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define tmpfile64 tmpfile
 #  define fopen64   fopen
 #  define freopen64 freopen

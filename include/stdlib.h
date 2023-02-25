@@ -68,7 +68,7 @@
 #  define environ get_environ_ptr()
 #endif
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #  define mkstemp64            mkstemp
 #  define mkostemp64           mkostemp
 #  define mkstemps64           mkstemps

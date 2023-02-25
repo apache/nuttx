@@ -308,7 +308,7 @@
 
 /* off_t */
 
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_FS_LARGEFILE)
 #define PRIdOFF     PRId64
 #define PRIiOFF     PRIi64
 #define PRIoOFF     PRIo64
