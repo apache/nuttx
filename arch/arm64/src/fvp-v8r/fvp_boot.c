@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/qemu/qemu_boot.c
+ * arch/arm64/src/fvp-v8r/fvp_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,11 +28,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/cache.h>
-#ifdef CONFIG_PAGING
-#  include <nuttx/page.h>
-#endif
-
 #include <arch/chip/chip.h>
 
 #ifdef CONFIG_SMP
@@ -41,34 +36,82 @@
 
 #include "arm64_arch.h"
 #include "arm64_internal.h"
-#include "arm64_mmu.h"
-#include "qemu_boot.h"
-#include "qemu_serial.h"
+#include "arm64_mpu.h"
+#include "chip.h"
+#include "fvp_boot.h"
+#include "serial_pl011.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct arm_mmu_region g_mmu_regions[] =
+static const struct arm64_mpu_region g_mpu_regions[] =
 {
-  MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
-                        CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
-                        MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
+  /* Region 0 NuttX text */
 
-  MMU_REGION_FLAT_ENTRY("DRAM0_S0",
-                        CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
-                        MT_NORMAL | MT_RW | MT_SECURE),
+  MPU_REGION_ENTRY("nx_code",
+     (uint64_t)_stext,
+     (uint64_t)_etext,
+     REGION_RAM_TEXT_ATTR),
+
+  /* Region 1 NuttX rodata */
+
+  MPU_REGION_ENTRY("nx_rodata",
+     (uint64_t)_srodata,
+     (uint64_t)_erodata,
+     REGION_RAM_RO_ATTR),
+
+  /* Region 2 NuttX data */
+
+  MPU_REGION_ENTRY("nx_data",
+     (uint64_t)_sdata,
+     (uint64_t)CONFIG_RAMBANK_END,
+     REGION_RAM_ATTR),
+
+  /* Region 3 device region */
+
+  MPU_REGION_ENTRY("DEVICE1",
+     (uint64_t)CONFIG_DEVICEIO1_BASEADDR,
+     (uint64_t)CONFIG_DEVICEIO1_END,
+     REGION_DEVICE_ATTR),
+
+  /* Region 4 device region */
+
+  MPU_REGION_ENTRY("DEVICE2",
+     (uint64_t)CONFIG_DEVICEIO2_BASEADDR,
+     (uint64_t)CONFIG_DEVICEIO2_END,
+     REGION_DEVICE_ATTR)
 };
 
-const struct arm_mmu_config g_mmu_config =
+const struct arm64_mpu_config g_mpu_config =
 {
-  .num_regions = nitems(g_mmu_regions),
-  .mmu_regions = g_mmu_regions,
+  .num_regions = nitems(g_mpu_regions),
+  .mpu_regions = g_mpu_regions,
 };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm64_el_init
+ *
+ * Description:
+ *   The function called from arm64_head.S at very early stage for these
+ * platform, it's use to:
+ *   - Handling special hardware initialize routine which is need to
+ *     run at high ELs
+ *   - Initialize system software such as hypervisor or security firmware
+ *     which is need to run at high ELs
+ *
+ ****************************************************************************/
+
+void arm64_el_init(void)
+{
+  write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
+
+  ARM64_ISB();
+}
 
 #ifdef CONFIG_SMP
 
@@ -124,26 +167,6 @@ uint64_t arm64_get_mpid(int cpu)
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
- * Name: arm64_el_init
- *
- * Description:
- *   The function called from arm64_head.S at very early stage for these
- * platform, it's use to:
- *   - Handling special hardware initialize routine which is need to
- *     run at high ELs
- *   - Initialize system software such as hypervisor or security firmware
- *     which is need to run at high ELs
- *
- ****************************************************************************/
-
-void arm64_el_init(void)
-{
-  write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
-
-  ARM64_ISB();
-}
-
-/****************************************************************************
  * Name: arm64_chip_boot
  *
  * Description:
@@ -155,24 +178,28 @@ void arm64_chip_boot(void)
 {
   /* MAP IO and DRAM, enable MMU. */
 
-  arm64_mmu_init(true);
+  uint64_t cpumpid;
+  cpumpid = read_sysreg(mpidr_el1);
 
-#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_HAVE_PSCI)
+  sinfo("Main CPU 0x%-16"PRIx64"", cpumpid);
+
+  arm64_mpu_init(true);
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_HAVE_PCSI)
   arm64_psci_init("smc");
-
 #endif
 
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
 
-  qemu_board_initialize();
+  fvp_board_initialize();
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
    * driver.
    */
 
-  qemu_earlyserialinit();
+  fvp_earlyserialinit();
 #endif
 }

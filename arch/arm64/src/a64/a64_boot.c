@@ -49,7 +49,7 @@
  * Private Data
  ****************************************************************************/
 
-static const struct arm_mmu_region mmu_regions[] =
+static const struct arm_mmu_region g_mmu_regions[] =
 {
   MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
                         CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
@@ -60,10 +60,10 @@ static const struct arm_mmu_region mmu_regions[] =
                         MT_NORMAL | MT_RW | MT_SECURE),
 };
 
-const struct arm_mmu_config mmu_config =
+const struct arm_mmu_config g_mmu_config =
 {
-  .num_regions = nitems(mmu_regions),
-  .mmu_regions = mmu_regions,
+  .num_regions = nitems(g_mmu_regions),
+  .mmu_regions = g_mmu_regions,
 };
 
 /****************************************************************************

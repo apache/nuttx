@@ -206,7 +206,7 @@ void arm64_mpu_init(bool is_primary_core)
       return;
     }
 
-  if (mpu_config.num_regions > get_num_regions())
+  if (g_mpu_config.num_regions > get_num_regions())
     {
       /* Attempt to configure more MPU regions than
        * what is supported by hardware. As this operation
@@ -216,7 +216,7 @@ void arm64_mpu_init(bool is_primary_core)
        */
 
       __MPU_ASSERT(0, "Request to configure: %u regions (supported: %u)\n",
-                   mpu_config.num_regions, get_num_regions());
+                   g_mpu_config.num_regions, get_num_regions());
       return;
     }
 
@@ -228,14 +228,14 @@ void arm64_mpu_init(bool is_primary_core)
 
   /* Program fixed regions configured at SOC definition. */
 
-  for (r_index = 0U; r_index < mpu_config.num_regions; r_index++)
+  for (r_index = 0U; r_index < g_mpu_config.num_regions; r_index++)
     {
-      region_init(r_index, &mpu_config.mpu_regions[r_index]);
+      region_init(r_index, &g_mpu_config.mpu_regions[r_index]);
     }
 
   /* Update the number of programmed MPU regions. */
 
-  static_regions_num = mpu_config.num_regions;
+  static_regions_num = g_mpu_config.num_regions;
 
   arm64_core_mpu_enable();
 }

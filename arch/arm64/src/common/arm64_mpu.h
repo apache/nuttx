@@ -288,7 +288,7 @@ struct arm64_mpu_config
  * regions enabled during kernel initialization.
  */
 
-extern const struct arm64_mpu_config mpu_config;
+extern const struct arm64_mpu_config g_mpu_config;
 
 /****************************************************************************
  * Public Function Prototypes

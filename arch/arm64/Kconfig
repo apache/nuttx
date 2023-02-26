@@ -44,6 +44,11 @@ config ARCH_CHIP_QEMU
 	---help---
 		QEMU virt platform (ARMv8a)
 
+config ARCH_CHIP_FVP_ARMV8R
+	bool "ARM FVP virt platform (ARMv8r)"
+	select ARCH_CORTEX_R82
+	---help---
+		ARM FVP virt platform (ARMv8r)
 endchoice
 
 config ARCH_ARMV8A
@@ -167,6 +172,7 @@ config ARCH_CHIP
 	string
 	default "a64"       if ARCH_CHIP_A64
 	default "qemu"      if ARCH_CHIP_QEMU
+	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 
 config ARCH_HAVE_TRUSTZONE
 	bool
@@ -198,4 +204,7 @@ if ARCH_CHIP_QEMU
 source "arch/arm64/src/qemu/Kconfig"
 endif
 
+if ARCH_CHIP_FVP_ARMV8R
+source "arch/arm64/src/fvp-v8r/Kconfig"
+endif
 endif # ARCH_ARM64

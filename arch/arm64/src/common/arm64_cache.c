@@ -98,7 +98,7 @@ static inline void __ic_ialluis(void)
   __asm__ volatile ("ic  ialluis" : : : "memory");
 }
 
-size_t dcache_line_size;
+size_t g_dcache_line_size;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -111,7 +111,7 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
 {
   /* Align address to line size */
 
-  start_addr = LINE_ALIGN_DOWN(start_addr, dcache_line_size);
+  start_addr = LINE_ALIGN_DOWN(start_addr, g_dcache_line_size);
 
   while (start_addr < end_addr)
     {
@@ -140,7 +140,7 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
             DEBUGASSERT(0);
           }
         }
-      start_addr += dcache_line_size;
+      start_addr += g_dcache_line_size;
     }
 
   ARM64_DSB();
@@ -358,7 +358,7 @@ void up_invalidate_icache_all(void)
 
 void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
-  if (dcache_line_size < (end - start))
+  if (g_dcache_line_size < (end - start))
     {
       arm64_dcache_range(start, end, CACHE_OP_WB);
     }
@@ -419,7 +419,7 @@ void up_clean_dcache_all(void)
 
 void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
-  if (dcache_line_size < (end - start))
+  if (g_dcache_line_size < (end - start))
     {
       arm64_dcache_range(start, end, CACHE_OP_WB_INVD);
     }
