@@ -1232,10 +1232,12 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   uint16_t value;
   uint16_t len;
   int ret = -EOPNOTSUPP;
-  bool cfg_req = true;
 
   FAR struct usbdev_adb_s *priv;
+#ifndef CONFIG_USBADB_COMPOSITE
   FAR struct usbdev_req_s *ctrlreq;
+  bool cfg_req = true;
+#endif
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0 || !ctrl)
@@ -1258,7 +1260,9 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
     }
 #endif
 
+#ifndef CONFIG_USBADB_COMPOSITE
   ctrlreq = priv->ctrlreq;
+#endif
 
   /* Extract the little-endian 16-bit values to host order */
 
@@ -1365,7 +1369,9 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 if (ctrl->type == 0)
                   {
                     ret = usbclass_setconfig(priv, value);
+#ifndef CONFIG_USBADB_COMPOSITE
                     cfg_req = false;
+#endif
                   }
               }
               break;
