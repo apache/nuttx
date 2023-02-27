@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <sys/param.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/mm/iob.h>
 
@@ -172,6 +173,33 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
           *ptr = '\0';
           syslog(LOG_DEBUG, "  %04x: %s\n", offset, buf);
         }
+    }
+}
+
+/****************************************************************************
+ * Name: iob_pad_check
+ *
+ * Description:
+ *   Check iob pad value
+ *
+ * Returns:
+ *   0 is vaild
+ *
+ ****************************************************************************/
+
+void iob_pad_check(FAR const struct iob_s *iob)
+{
+  for (; iob; iob = iob->io_flink)
+    {
+      DEBUGASSERT(iob->io_pad == 0);
+    }
+}
+
+void iobq_pad_check(FAR const struct iob_qentry_s *iobq)
+{
+  for (; iobq; iobq = iobq->qe_flink)
+    {
+      DEBUGASSERT(iobq->qe_pad == 0);
     }
 }
 

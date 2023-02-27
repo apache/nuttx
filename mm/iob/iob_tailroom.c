@@ -43,6 +43,7 @@
 
 unsigned int iob_tailroom(FAR struct iob_s *iob)
 {
+  iob_pad_check(iob);
   while (iob->io_flink != NULL)
     {
       iob = iob->io_flink;

@@ -115,6 +115,7 @@ struct iob_s
   unsigned int io_pktlen; /* Total length of the packet */
 
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+  uint32_t io_pad;
 };
 
 #if CONFIG_IOB_NCHAINS > 0
@@ -131,6 +132,11 @@ struct iob_qentry_s
   /* Payload -- Head of the I/O buffer chain */
 
   FAR struct iob_s *qe_head;
+
+  /* Private data */
+
+  FAR void *qe_priv;
+  uint32_t qe_pad;
 };
 
 /* The I/O buffer queue head structure */

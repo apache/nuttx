@@ -70,6 +70,7 @@ static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 /* A list of all free, unallocated I/O buffers */
 
 FAR struct iob_s *g_iob_freelist;
+FAR struct iob_s *g_iob_list[CONFIG_IOB_NBUFFERS];
 
 /* A list of I/O buffers that are committed for allocation */
 
@@ -138,7 +139,10 @@ void iob_initialize(void)
 
       iob->io_flink  = g_iob_freelist;
       g_iob_freelist = iob;
+      g_iob_list[i] = iob;
     }
+
+  iob_pad_check(g_iob_freelist);
 
 #if CONFIG_IOB_NCHAINS > 0
   /* Add each I/O buffer chain queue container to the free list */

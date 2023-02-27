@@ -160,6 +160,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
 #if CONFIG_IOB_THROTTLE > 0
           else
             {
+  iob_pad_check(iob);
               if (throttled)
                 {
                   g_iob_sem.semcount--;
@@ -270,6 +271,8 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
            * counting semaphore(s) that tracks the number of available
            * IOBs.
            */
+
+          iob_pad_check(iob);
 
           g_iob_freelist = iob->io_flink;
 

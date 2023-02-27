@@ -74,6 +74,7 @@ static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
     }
 
   leave_critical_section(flags);
+  iobq_pad_check(iobq);
   return iobq;
 }
 
@@ -144,6 +145,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
         }
     }
 
+  iobq_pad_check(qentry);
   leave_critical_section(flags);
   return qentry;
 }
@@ -203,6 +205,7 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
   iobq  = g_iob_freeqlist;
   if (iobq)
     {
+  iobq_pad_check(iobq);
       /* Remove the I/O buffer chain container from the free list and
        * decrement the counting semaphore that tracks the number of free
        * containers.

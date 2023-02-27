@@ -50,6 +50,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
   iobinfo("iob=%p trimlen=%d\n", iob, trimlen);
 
+  iob_pad_check(iob);
   if (iob && trimlen > 0)
     {
       /* Trim from the head of the I/O buffer chain */
@@ -114,5 +115,6 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
       iob->io_pktlen = pktlen;
     }
 
+  iob_pad_check(iob);
   return iob;
 }

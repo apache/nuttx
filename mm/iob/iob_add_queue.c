@@ -105,6 +105,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
       return -ENOMEM;
     }
 
+  iobq_pad_check(qentry);
   return iob_add_queue_internal(iob, iobq, qentry);
 }
 
@@ -130,6 +131,7 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
       return -ENOMEM;
     }
 
+  iobq_pad_check(qentry);
   return iob_add_queue_internal(iob, iobq, qentry);
 }
 #endif /* CONFIG_IOB_NCHAINS > 0 */

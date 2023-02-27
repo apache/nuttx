@@ -55,6 +55,7 @@
 /* A list of all free, unallocated I/O buffers */
 
 extern FAR struct iob_s *g_iob_freelist;
+extern FAR struct iob_s *g_iob_list[];
 
 /* A list of I/O buffers that are committed for allocation */
 
@@ -142,6 +143,9 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 #ifdef CONFIG_IOB_NOTIFIER
 void iob_notifier_signal(void);
 #endif
+
+void iob_pad_check(FAR const struct iob_s *iob);
+void iobq_pad_check(FAR const struct iob_qentry_s *iobq);
 
 #endif /* CONFIG_MM_IOB */
 #endif /* __MM_IOB_IOB_H */

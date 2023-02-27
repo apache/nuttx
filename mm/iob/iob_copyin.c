@@ -63,6 +63,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
   iobinfo("iob=%p len=%u offset=%d\n", iob, len, offset);
   DEBUGASSERT(iob && src);
+  iob_pad_check(iob);
 
   /* The offset must applied to data that is already in the I/O buffer
    * chain

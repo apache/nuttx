@@ -53,6 +53,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
   /* Handle special cases, preserve at least one iob. */
 
+  iob_pad_check(iob);
   while (iob->io_len <= 0 && iob->io_flink != NULL)
     {
       iob = iob_free(iob);
@@ -125,5 +126,6 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
       iob = next;
     }
 
+  iob_pad_check(iob);
   return head;
 }

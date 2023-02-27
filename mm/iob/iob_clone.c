@@ -119,6 +119,8 @@ int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
   unsigned int avail2;
   int ret;
 
+  iob_pad_check(iob1);
+  iob_pad_check(iob2);
   /* Copy the total packet size from the I/O buffer at the head of the
    * chain.
    */
@@ -232,6 +234,8 @@ int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
         }
     }
 
+  iob_pad_check(iob1);
+  iob_pad_check(iob2);
   return 0;
 }
 

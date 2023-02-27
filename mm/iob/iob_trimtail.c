@@ -51,6 +51,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
   int len;
 
   iobinfo("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
+  iob_pad_check(iob);
 
   if (iob && trimlen > 0)
     {
@@ -119,5 +120,6 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
         }
     }
 
+  iob_pad_check(iob);
   return iob;
 }

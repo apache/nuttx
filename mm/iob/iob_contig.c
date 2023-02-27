@@ -57,6 +57,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
    * then you will need to increase CONFIG_IOB_BUFSIZE.
    */
 
+  iob_pad_check(iob);
   DEBUGASSERT(len <= CONFIG_IOB_BUFSIZE);
 
   /* Check if there is already sufficient, contiguous space at the beginning
@@ -135,4 +136,6 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
       ioberr("ERROR: pktlen=%u < requested len=%u\n", iob->io_pktlen, len);
       return -ENOSPC;
     }
+
+  iob_pad_check(iob);
 }

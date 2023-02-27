@@ -65,6 +65,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
 
   /* Skip to the I/O buffer containing the offset */
 
+  iob_pad_check(iob);
   while ((int)(offset - iob->io_len) >= 0)
     {
       offset -= iob->io_len;

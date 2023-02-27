@@ -48,6 +48,8 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 
   iob1->io_pktlen += iob2->io_pktlen;
   iob2->io_pktlen  = 0;
+  iob_pad_check(iob1);
+  iob_pad_check(iob2);
 
   /* Find the last buffer in the iob1 buffer chain */
 

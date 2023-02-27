@@ -75,12 +75,24 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
   FAR struct iob_s *next = iob->io_flink;
   irqstate_t flags;
+  int i;
 #ifdef CONFIG_IOB_NOTIFIER
   int16_t navail;
 #endif
 
   iobinfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
           iob, iob->io_pktlen, iob->io_len, next);
+
+  for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
+    {
+      if (g_iob_list[i] == iob)
+        {
+          break;
+        }
+    }
+
+  DEBUGASSERT(i < CONFIG_IOB_NBUFFERS);
+  iob_pad_check(iob);
 
   /* Copy the data that only exists in the head of a I/O buffer chain into
    * the next entry.
