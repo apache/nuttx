@@ -21,4 +21,8 @@ config STREAM_LZF_BLOG
 
 endif
 
+config STREAM_OUT_BUFFER_SIZE
+	int "Output stream buffer size"
+	default 64
+
 endmenu # Locale Support

@@ -217,6 +217,14 @@ struct lib_rawsostream_s
   int                    fd;
 };
 
+struct lib_bufferedoutstream_s
+{
+  struct lib_outstream_s      public;
+  FAR struct lib_outstream_s *backend;
+  int                         pending;
+  char                        buffer[CONFIG_STREAM_OUT_BUFFER_SIZE];
+};
+
 /* This is a special stream that does buffered character I/O.  NOTE that is
  * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
  * lib_outstream_s
@@ -371,6 +379,26 @@ void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd);
 void lib_rawoutstream(FAR struct lib_rawoutstream_s *outstream, int fd);
 void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd);
 void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
+
+/****************************************************************************
+ * Name: lib_bufferedoutstream
+ *
+ * Description:
+ *   Wrap a raw output stream to a buffered output stream.
+ *
+ * Input Parameters:
+ *   outstream - User allocated, uninitialized instance of struct
+ *               lib_bufferedoutstream_s to be initialized.
+ *   backend   - User allocated, initialized instance of struct
+ *               lib_outstream_s to be buffered.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void lib_bufferedoutstream(FAR struct lib_bufferedoutstream_s *outstream,
+                           FAR struct lib_outstream_s *backend);
 
 /****************************************************************************
  * Name: lib_lowoutstream
