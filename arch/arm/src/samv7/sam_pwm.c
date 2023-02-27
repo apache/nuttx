@@ -60,6 +60,7 @@
 
 #define CHANNEL_OFFSET   0x20
 #define COMP_OFFSET      0x10
+#define FAULT_SEL_OFFSET 0x8
 #define CLK_FREQ         BOARD_MCK_FREQUENCY
 #define PWM_RES          65535
 #define COMP_UNITS_NUM   8
@@ -86,11 +87,21 @@ struct sam_pwm_comparison_s
   int event1;
 };
 
+struct sam_pwm_fault_s
+{
+  uint8_t source;                 /* Source of fault input */
+  uint8_t polarity;
+  gpio_pinset_t gpio_0;           /* GPIO 1 fault input */
+  gpio_pinset_t gpio_1;           /* GPIO 2 fault input */
+  gpio_pinset_t gpio_2;           /* GPIO 3 fault input */
+};
+
 struct sam_pwm_s
 {
   const struct pwm_ops_s *ops;    /* PWM operations */
   const struct sam_pwm_channel_s *channels;
   const struct sam_pwm_comparison_s *comparison;
+  const struct sam_pwm_fault_s *fault;
   uint8_t channels_num;           /* Number of channels */
   uintptr_t base;                 /* Base address of peripheral register */
 };
@@ -189,11 +200,21 @@ static struct sam_pwm_comparison_s g_pwm0_comparison =
 #endif
 };
 
+static struct sam_pwm_fault_s g_pwm0_fault =
+{
+  .source = PWM0_FAULTS,
+  .polarity = PWM0_POL,
+  .gpio_0 = GPIO_PWMC0_FI0,
+  .gpio_1 = GPIO_PWMC0_FI1,
+  .gpio_2 = GPIO_PWMC0_FI2,
+};
+
 static struct sam_pwm_s g_pwm0 =
 {
   .ops = &g_pwmops,
   .channels = g_pwm0_channels,
   .comparison = &g_pwm0_comparison,
+  .fault = &g_pwm0_fault,
   .channels_num = PWM0_NCHANNELS,
   .base = SAM_PWM0_BASE,
 };
@@ -270,17 +291,26 @@ static struct sam_pwm_comparison_s g_pwm1_comparison =
 #endif
 };
 
+static struct sam_pwm_fault_s g_pwm1_fault =
+{
+  .source = PWM1_FAULTS,
+  .polarity = PWM1_POL,
+  .gpio_0 = GPIO_PWMC1_FI0,
+  .gpio_1 = GPIO_PWMC1_FI1,
+  .gpio_2 = GPIO_PWMC1_FI2,
+};
+
 static struct sam_pwm_s g_pwm1 =
 {
   .ops = &g_pwmops,
   .channels = g_pwm1_channels,
   .comparison = &g_pwm1_comparison,
+  .fault = &g_pwm1_fault,
   .channels_num = PWM1_NCHANNELS,
   .base = SAM_PWM1_BASE,
 };
 
 #endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -566,12 +596,44 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
 
       pwm_putreg(priv, SAMV7_PWM_DTX + (channel * CHANNEL_OFFSET), 0);
 
-      /* Fault protection registers */
+      /* Enable fault protection if configured. The protection has to
+       * be enabled for every configured channel separately.
+       */
 
-      pwm_putreg(priv, SAMV7_PWM_FPV1, 0);
-      pwm_putreg(priv, SAMV7_PWM_FPV2, 0);
-      pwm_putreg(priv, SAMV7_PWM_FPE, 0);
+      regval = pwm_getreg(priv, SAMV7_PWM_FPE);
+      regval |= priv->fault->source << (FAULT_SEL_OFFSET * channel);
+      pwm_putreg(priv, SAMV7_PWM_FPE, regval);
     }
+
+  /* Configure fault GPIOs if used */
+
+  if (priv->fault->source & 1)
+    {
+      sam_configgpio(priv->fault->gpio_0);
+    }
+
+  if (priv->fault->source & (1 << 1))
+    {
+      sam_configgpio(priv->fault->gpio_1);
+    }
+
+  if (priv->fault->source & (1 << 2))
+    {
+      sam_configgpio(priv->fault->gpio_2);
+    }
+
+  /* Set fault polarity. This has to be 1 for peripheral fault
+   * generation (from ADC for example), GPIO generated fault
+   * is set via configuration options.
+   */
+
+  regval = FMR_FPOL_SEL(priv->fault->polarity);
+  pwm_putreg(priv, SAMV7_PWM_FMR, regval);
+
+  /* Force both outputs to 0 if fault occurs */
+
+  pwm_putreg(priv, SAMV7_PWM_FPV1, 0);
+  pwm_putreg(priv, SAMV7_PWM_FPV2, 0);
 
   return OK;
 }
@@ -653,7 +715,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                            info->frequency);
               pwm_set_output(dev, priv->channels[index - 1].channel,
                              info->channels[i].duty);
-
 #ifdef CONFIG_PWM_OVERWRITE
               if (info->channels[i].ch_outp_ovrwr)
                 {
