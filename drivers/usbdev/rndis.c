@@ -34,6 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include <sys/param.h>
 
@@ -1242,7 +1243,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
       if (priv->current_rx_datagram_size > (CONFIG_NET_ETH_PKTSIZE + 4) ||
           priv->current_rx_datagram_size <= (ETH_HDRLEN + 4))
         {
-          uerr("ERROR: Bad packet size dropped (%d)\n",
+          uerr("ERROR: Bad packet size dropped (%zu)\n",
                priv->current_rx_datagram_size);
           NETDEV_RXERRORS(&priv->netdev);
           priv->current_rx_datagram_size = 0;

@@ -471,9 +471,6 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 
   DEBUGASSERT(priv != NULL && rdcontainer != NULL);
 
-  uinfo("head=%d tail=%d nrdq=%d reqlen=%d\n",
-        priv->serdev.recv.head, priv->serdev.recv.tail, priv->nrdq, reqlen);
-
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   DEBUGASSERT(priv->rxenabled && !priv->iactive);
 #else
@@ -485,6 +482,9 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 
   reqbuf = &req->buf[rdcontainer->offset];
   reqlen = req->xfrd - rdcontainer->offset;
+
+  uinfo("head=%d tail=%d nrdq=%d reqlen=%d\n",
+        priv->serdev.recv.head, priv->serdev.recv.tail, priv->nrdq, reqlen);
 
   serdev = &priv->serdev;
   recv   = &serdev->recv;
