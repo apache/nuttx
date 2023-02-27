@@ -44,7 +44,7 @@ SECTIONS
 
     .init_section : {
         _sinit = ABSOLUTE(.);
-        *(.init_array .init_array.*)
+        KEEP(*(.init_array .init_array.*))
         _einit = ABSOLUTE(.);
     } > kflash
 
