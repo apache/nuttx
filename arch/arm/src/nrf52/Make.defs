@@ -129,11 +129,13 @@ chip/$(NRFXLIB_UNPACK): $(NRFXLIB_TGZ)
 	$(Q) mv chip/$(NRFXLIB_UNPACK)-$(NRFXLIB_VER)* chip/$(NRFXLIB_UNPACK)
 	$(Q) touch chip/$(NRFXLIB_UNPACK)
 
+ifeq ($(wildcard chip/$(NRFXLIB_UNPACK)/.git),)
 context:: chip/$(NRFXLIB_UNPACK)
 
 distclean::
 	$(call DELFILE, chip/$(NRFXLIB_TGZ))
 	$(call DELDIR, chip/$(NRFXLIB_UNPACK))
+endif
 
 CHIP_CSRCS += nrf52_sdc.c
 

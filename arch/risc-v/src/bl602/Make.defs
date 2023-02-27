@@ -81,11 +81,13 @@ chip/$(WIRELESS_DRV_UNPACK): $(WIRELESS_DRV_ZIP)
 	$(Q) mv chip/$(WIRELESS_DRV_UNPACK)-$(WIRELESS_DRV_VERSION)/* chip/$(WIRELESS_DRV_UNPACK)
 	$(Q) touch chip/$(WIRELESS_DRV_UNPACK)
 
+ifeq ($(wildcard chip/$(WIRELESS_DRV_UNPACK)/.git),)
 context:: chip/$(WIRELESS_DRV_UNPACK)
 
 distclean::
 	$(call DELFILE, chip/$(WIRELESS_DRV_ZIP))
 	$(call DELDIR, chip/$(WIRELESS_DRV_UNPACK))
+endif
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(WIRELESS_DRV_UNPACK)$(DELIM)includes$(DELIM)BL602$(DELIM)nuttx)
 CHIP_CSRCS += bl602_netdev.c
