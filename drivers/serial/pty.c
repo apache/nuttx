@@ -955,11 +955,18 @@ int pty_register2(int minor, bool susv1)
   nxsem_init(&devpair->pp_slavesem, 0, 0);
   nxmutex_init(&devpair->pp_lock);
 
+  /* Map CR -> NL from terminal input (master)
+   * For some usage like adb shell:
+   *   adb shell write \r -> nsh read \n
+   *   nsh write \n -> adb shell read \r\n
+   */
+
   devpair->pp_susv1             = susv1;
   devpair->pp_minor             = minor;
   devpair->pp_locked            = true;
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
+  devpair->pp_master.pd_oflag   = OPOST | OCRNL;
   devpair->pp_slave.pd_devpair  = devpair;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
 
