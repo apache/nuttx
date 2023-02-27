@@ -770,6 +770,75 @@ config SAMV7_PWM
 
 endmenu
 
+menu "PWM Fault inputs"
+
+config SAMV7_PWM0_PA9
+	bool "External fault input from PA9"
+	default n
+
+if SAMV7_PWM1_PA9
+
+config SAMV7_PWM1_PA9_POL
+	bool "Inverted polarity"
+	default n
+	---help---
+		Fault input is by default active on high level. This config
+		inverts the logic and makes fault active on low level.
+
+endif
+
+config SAMV7_PWM0_PD8
+	bool "External fault input from PD8"
+	default n
+
+if SAMV7_PWM1_PD8
+
+config SAMV7_PWM1_PD8_POL
+	bool "Inverted polarity"
+	default n
+	---help---
+		Fault input is by default active on high level. This config
+		inverts the logic and makes fault active on low level.
+
+endif
+
+config SAMV7_PWM0_PD9
+	bool "External fault input from PD9"
+	default n
+
+if SAMV7_PWM1_PD9
+
+config SAMV7_PWM1_PD9_POL
+	bool "Inverted polarity"
+	default n
+	---help---
+		Fault input is by default active on high level. This config
+		inverts the logic and makes fault active on low level.
+
+endif
+
+config SAMV7_PWM0_PMC
+	bool "External fault input from PMC"
+	default n
+
+config SAMV7_PWM0_AFEC0
+	bool "External fault input from AFEC0"
+	default n
+
+config SAMV7_PWM0_AFEC1
+	bool "External fault input from AFEC1"
+	default n
+
+config SAMV7_PWM0_ACC
+	bool "External fault input from ACC"
+	default n
+
+config SAMV7_PWM0_TIM0
+	bool "External fault input from Timer 0"
+	default n
+
+endmenu
+
 config SAMV7_PWM0_EVENT0
 	bool "Generate trigger on Event Line 0"
 	default n
@@ -914,6 +983,76 @@ config SAMV7_PWM1_TRIG7
 		an event. Value is in percentages.
 
 endmenu
+
+menu "PWM Fault inputs"
+
+config SAMV7_PWM1_PA21
+	bool "External fault input from PA21"
+	default n
+
+if SAMV7_PWM1_PA21
+
+config SAMV7_PWM1_PA21_POL
+	bool "Inverted polarity"
+	default n
+	---help---
+		Fault input is by default active on high level. This config
+		inverts the logic and makes fault active on low level.
+
+endif
+
+config SAMV7_PWM1_PA26
+	bool "External fault input from PA26"
+	default n
+
+if SAMV7_PWM1_PA26
+
+config SAMV7_PWM1_PA26_POL
+	bool "Inverted polarity"
+	default n
+	---help---
+		Fault input is by default active on high level. This config
+		inverts the logic and makes fault active on low level.
+
+endif
+
+config SAMV7_PWM1_PA28
+	bool "External fault input from PA28"
+	default n
+
+if SAMV7_PWM1_PA28
+
+config SAMV7_PWM1_PA28_POL
+	bool "Inverted polarity"
+	default n
+	---help---
+		Fault input is by default active on high level. This config
+		inverts the logic and makes fault active on low level.
+
+endif
+
+config SAMV7_PWM1_PMC
+	bool "External fault input from PMC"
+	default n
+
+config SAMV7_PWM1_AFEC0
+	bool "External fault input from AFEC0"
+	default n
+
+config SAMV7_PWM1_AFEC1
+	bool "External fault input from AFEC1"
+	default n
+
+config SAMV7_PWM1_ACC
+	bool "External fault input from ACC"
+	default n
+
+config SAMV7_PWM1_TIM0
+	bool "External fault input from Timer 0"
+	default n
+
+endmenu
+
 
 config SAMV7_PWM1_EVENT0
 	bool "Generate trigger on Event Line 0"
