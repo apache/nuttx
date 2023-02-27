@@ -297,9 +297,19 @@
 
 #define SENSOR_TYPE_GAS                             33
 
+/* Force
+ * A sensor of this type measures the force on it, and additionally
+ * compares the force with one or more specified thresholds. The sensor
+ * can output the force value directly. Moreover, it's usually applied
+ * as a press key. In that case, when it detects a force greater than
+ * some given threshold, a corresponding event is reported.
+ */
+
+#define SENSOR_TYPE_FORCE                           34
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           34
+#define SENSOR_TYPE_COUNT                           35
 
 /* The additional sensor open flags */
 
@@ -606,6 +616,13 @@ struct sensor_gas           /* Type: Gas */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float gas_resistance;     /* Gas resistance in kOhm */
+};
+
+struct sensor_force         /* Type: Force */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  float force;              /* Force value, units is N */
+  int32_t event;            /* Force event */
 };
 
 /* The sensor lower half driver interface */
