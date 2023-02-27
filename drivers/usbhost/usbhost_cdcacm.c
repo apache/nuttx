@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
@@ -324,7 +325,6 @@ static int  usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 /* (Little Endian) Data helpers */
 
 static inline uint16_t usbhost_getle16(FAR const uint8_t *val);
-static inline uint16_t usbhost_getbe16(FAR const uint8_t *val);
 static inline void usbhost_putle16(FAR uint8_t *dest, uint16_t val);
 #ifdef HAVE_CTRL_INTERFACE
 static void usbhost_putle32(FAR uint8_t *dest, uint32_t val);
@@ -1627,25 +1627,6 @@ static inline uint16_t usbhost_getle16(FAR const uint8_t *val)
 }
 
 /****************************************************************************
- * Name: usbhost_getbe16
- *
- * Description:
- *   Get a (possibly unaligned) 16-bit big endian value.
- *
- * Input Parameters:
- *   val - A pointer to the first byte of the big endian value.
- *
- * Returned Value:
- *   A uint16_t representing the whole 16-bit integer value
- *
- ****************************************************************************/
-
-static inline uint16_t usbhost_getbe16(FAR const uint8_t *val)
-{
-  return (uint16_t)val[0] << 8 | (uint16_t)val[1];
-}
-
-/****************************************************************************
  * Name: usbhost_putle16
  *
  * Description:
@@ -1733,7 +1714,7 @@ static int usbhost_alloc_buffers(FAR struct usbhost_cdcacm_s *priv)
                      sizeof(struct cdc_linecoding_s));
   if (ret < 0)
     {
-      uerr("ERROR: DRVR_IOALLOC of line coding failed: %d (%d bytes)\n",
+      uerr("ERROR: DRVR_IOALLOC of line coding failed: %d (%zu bytes)\n",
            ret, sizeof(struct cdc_linecoding_s));
       goto errout;
     }
