@@ -50,10 +50,15 @@
 
 int vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 {
+  int ret;
   struct lib_rawoutstream_s rawoutstream;
+  struct lib_bufferedoutstream_s outstream;
 
   /* Wrap the fd in a stream object and let lib_vsprintf do the work. */
 
   lib_rawoutstream(&rawoutstream, fd);
-  return lib_vsprintf(&rawoutstream.public, fmt, ap);
+  lib_bufferedoutstream(&outstream, &rawoutstream.public);
+  ret = lib_vsprintf(&outstream.public, fmt, ap);
+  lib_stream_flush(&outstream.public);
+  return ret;
 }
