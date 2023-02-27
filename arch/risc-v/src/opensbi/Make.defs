@@ -52,11 +52,13 @@ $(OPENSBI_TARBALL):
 	$(Q) mv opensbi/$(OPENSBI_DIR) opensbi/$(OPENSBI_UNPACK)
 	$(Q) touch opensbi/.opensbi_unpack
 
+ifeq ($(wildcard opensbi/$(OPENSBI_UNPACK)/.git),)
 context:: .opensbi_unpack
 
 distclean::
 	$(call DELFILE, opensbi/.opensbi_unpack)
 	$(call DELFILE, opensbi/$(OPENSBI_TARBALL))
 	$(call DELDIR, opensbi/$(OPENSBI_UNPACK))
+endif
 
 endif
