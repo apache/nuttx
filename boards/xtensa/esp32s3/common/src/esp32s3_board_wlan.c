@@ -68,6 +68,15 @@ int board_wlan_init(void)
     }
 #endif /* ESP32S3_WLAN_HAS_STA */
 
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+  ret = esp32s3_wlan_softap_initialize();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
+      return ret;
+    }
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
   return ret;
 }
 

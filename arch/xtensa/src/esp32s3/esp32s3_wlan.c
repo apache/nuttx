@@ -175,6 +175,29 @@ static const struct wlan_ops g_sta_ops =
 };
 #endif /* ESP32S3_WLAN_HAS_STA */
 
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+static const struct wlan_ops g_softap_ops =
+{
+  .start      = esp_wifi_softap_start,
+  .send       = esp_wifi_softap_send_data,
+  .essid      = esp_wifi_softap_essid,
+  .bssid      = esp_wifi_softap_bssid,
+  .passwd     = esp_wifi_softap_password,
+  .mode       = esp_wifi_softap_mode,
+  .auth       = esp_wifi_softap_auth,
+  .freq       = esp_wifi_softap_freq,
+  .bitrate    = esp_wifi_softap_bitrate,
+  .txpower    = esp_wifi_softap_txpower,
+  .channel    = esp_wifi_softap_channel,
+  .country    = esp_wifi_softap_country,
+  .rssi       = esp_wifi_softap_rssi,
+  .connect    = esp_wifi_softap_connect,
+  .disconnect = esp_wifi_softap_disconnect,
+  .event      = esp_wifi_notify_subscribe,
+  .stop       = esp_wifi_softap_stop
+};
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -1347,7 +1370,6 @@ static int wlan_sta_rx_done(void *buffer, uint16_t len, void *eb)
  *   station sending next packet.
  *
  * Input Parameters:
- *   ifidx  - The interface id that the tx callback has been triggered from.
  *   data   - Pointer to the data transmitted.
  *   len    - Length of the data transmitted.
  *   status - True if data was transmitted successfully or false if failed.
@@ -1366,10 +1388,59 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
 #endif /* ESP32S3_WLAN_HAS_STA */
 
 /****************************************************************************
- * Public Functions
+ * Function: wlan_softap_rx_done
+ *
+ * Description:
+ *   Wi-Fi softAP RX done callback function. If this is called, it means
+ *   softAP receiveing packet.
+ *
+ * Input Parameters:
+ *   buffer - Wi-Fi received packet buffer
+ *   len    - Length of received packet
+ *   eb     - Wi-Fi receive callback input eb pointer
+ *
+ * Returned Value:
+ *   0 on success or a negated errno on failure
+ *
  ****************************************************************************/
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+static int wlan_softap_rx_done(void *buffer, uint16_t len, void *eb)
+{
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32S3_WLAN_SOFTAP_DEVNO];
+
+  return wlan_rx_done(priv, buffer, len, eb);
+}
+
+/****************************************************************************
+ * Name: wlan_softap_tx_done
+ *
+ * Description:
+ *   Wi-Fi softAP TX done callback function. If this is called, it means
+ *   softAP sending next packet.
+ *
+ * Input Parameters:
+ *   ifidx  - The interface ID that the TX callback has been triggered from.
+ *   data   - Pointer to the data transmitted.
+ *   len    - Length of the data transmitted.
+ *   status - True if data was transmitted successfully or false if failed.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
+{
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32S3_WLAN_SOFTAP_DEVNO];
+
+  wlan_tx_done(priv);
+}
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: esp32s3_wlan_sta_set_linkstatus
@@ -1387,6 +1458,7 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  ****************************************************************************/
 
+#ifdef ESP32S3_WLAN_HAS_STA
 int esp32s3_wlan_sta_set_linkstatus(bool linkstatus)
 {
   int ret = -EINVAL;
@@ -1470,5 +1542,66 @@ int esp32s3_wlan_sta_initialize(void)
   return OK;
 }
 #endif /* ESP32S3_WLAN_HAS_STA */
+
+/****************************************************************************
+ * Name: esp32s3_wlan_softap_initialize
+ *
+ * Description:
+ *   Initialize the ESP32-S3 WLAN softAP netcard driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+int esp32s3_wlan_softap_initialize(void)
+{
+  int ret;
+  uint8_t eth_mac[6];
+
+  ret = esp_wifi_adapter_init();
+  if (ret < 0)
+    {
+      nerr("ERROR: Initialize Wi-Fi adapter error: %d\n", ret);
+      return ret;
+    }
+
+  ret = esp_wifi_softap_read_mac(eth_mac);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read MAC address\n");
+      return ret;
+    }
+
+  ninfo("Wi-Fi softAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+        eth_mac[0], eth_mac[1], eth_mac[2],
+        eth_mac[3], eth_mac[4], eth_mac[5]);
+
+  ret = esp32s3_net_initialize(ESP32S3_WLAN_SOFTAP_DEVNO, eth_mac,
+                             &g_softap_ops);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize net\n");
+      return ret;
+    }
+
+  ret = esp_wifi_softap_register_recv_cb(wlan_softap_rx_done);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to register RX callback\n");
+      return ret;
+    }
+
+  esp_wifi_softap_register_txdone_cb(wlan_softap_tx_done);
+
+  ninfo("INFO: Initialize Wi-Fi softAP net success\n");
+
+  return OK;
+}
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
 
 #endif  /* CONFIG_ESP32S3_WIFI */

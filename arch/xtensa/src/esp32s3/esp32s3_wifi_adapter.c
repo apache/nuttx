@@ -371,7 +371,28 @@ static bool g_sta_connected;
 /* Wi-Fi station TX done callback function */
 
 static wifi_txdone_cb_t g_sta_txdone_cb;
+
+/* Wi-Fi interface configuration */
+
+static wifi_config_t g_sta_wifi_cfg;
+
 #endif /* ESP32S3_WLAN_HAS_STA */
+
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+
+/* If Wi-Fi SoftAP starts */
+
+static bool g_softap_started;
+
+/* Wi-Fi SoftAP TX done callback function */
+
+static wifi_txdone_cb_t g_softap_txdone_cb;
+
+/* Wi-Fi interface configuration */
+
+static wifi_config_t g_softap_wifi_cfg;
+
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
 
 /* Device specific lock */
 
@@ -2012,6 +2033,24 @@ static int esp_event_id_map(int event_id)
         break;
 #endif /* ESP32S3_WLAN_HAS_STA */
 
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+      case WIFI_EVENT_AP_START:
+        id = WIFI_ADPT_EVT_AP_START;
+        break;
+
+      case WIFI_EVENT_AP_STOP:
+        id = WIFI_ADPT_EVT_AP_STOP;
+        break;
+
+      case WIFI_EVENT_AP_STACONNECTED:
+        id = WIFI_ADPT_EVT_AP_STACONNECTED;
+        break;
+
+      case WIFI_EVENT_AP_STADISCONNECTED:
+        id = WIFI_ADPT_EVT_AP_STADISCONNECTED;
+        break;
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
       default:
         return -1;
     }
@@ -2105,6 +2144,23 @@ static void esp_evt_work_cb(void *arg)
             break;
 #endif /* ESP32S3_WLAN_HAS_STA */
 
+#ifdef ESP32S3_WLAN_HAS_STA
+          case WIFI_ADPT_EVT_AP_START:
+            wlinfo("INFO: Wi-Fi softap start\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STOP:
+            wlinfo("INFO: Wi-Fi softap stop\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STACONNECTED:
+            wlinfo("INFO: Wi-Fi station join\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STADISCONNECTED:
+            wlinfo("INFO: Wi-Fi station leave\n");
+            break;
+#endif
           default:
             break;
         }
@@ -4642,14 +4698,23 @@ int esp_wifi_sta_start(void)
       wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
-  mode = WIFI_MODE_STA;
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+  if (g_softap_started)
+    {
+      mode = WIFI_MODE_APSTA;
+    }
+  else
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+    {
+      mode = WIFI_MODE_STA;
+    }
 
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
       wlerr("Failed to set Wi-Fi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
-      goto errout_set_mode;
+      goto errout;
     }
 
   ret = esp_wifi_start();
@@ -4657,17 +4722,14 @@ int esp_wifi_sta_start(void)
     {
       wlerr("Failed to start Wi-Fi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
-      goto errout_set_mode;
+      goto errout;
     }
 
   g_sta_started = true;
 
   wlinfo("OK to start Wi-Fi station\n");
 
-  esp_wifi_lock(false);
-  return OK;
-
-errout_set_mode:
+errout:
   esp_wifi_lock(false);
   return ret;
 }
@@ -4701,10 +4763,35 @@ int esp_wifi_sta_stop(void)
 
   g_sta_started = false;
 
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+  if (g_softap_started)
+    {
+      ret = esp_wifi_set_mode(WIFI_MODE_AP);
+      if (ret)
+        {
+          wlerr("Failed to set Wi-Fi AP mode ret=%d\n", ret);
+          ret = wifi_errno_trans(ret);
+          goto errout;
+        }
+
+      ret = esp_wifi_start();
+      if (ret)
+        {
+          wlerr("Failed to start Wi-Fi AP ret=%d\n", ret);
+          ret = wifi_errno_trans(ret);
+          goto errout;
+        }
+    }
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
   wlinfo("OK to stop Wi-Fi station\n");
 
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+errout:
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
   esp_wifi_lock(false);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -5101,7 +5188,7 @@ int esp_wifi_sta_connect(void)
     {
       wlerr("Failed to connect ret=%d\n", ret);
       ret = wifi_errno_trans(ret);
-      goto errout_wifi_connect;
+      goto errout;
     }
 
   esp_wifi_lock(false);
@@ -5127,7 +5214,7 @@ int esp_wifi_sta_connect(void)
 
   return OK;
 
-errout_wifi_connect:
+errout:
   g_sta_reconnect = false;
   esp_wifi_lock(false);
   return ret;
@@ -5644,6 +5731,785 @@ int esp_wifi_sta_rssi(struct iwreq *iwr, bool set)
   return OK;
 }
 #endif /* ESP32S3_WLAN_HAS_STA */
+
+/****************************************************************************
+ * SoftAP functions
+ ****************************************************************************/
+
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+
+/****************************************************************************
+ * Name: esp_wifi_softap_start
+ *
+ * Description:
+ *   Start Wi-Fi SoftAP.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_start(void)
+{
+  int ret;
+  wifi_mode_t mode;
+
+  esp_wifi_lock(true);
+
+  ret = esp_wifi_stop();
+  if (ret)
+    {
+      wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
+    }
+
+#ifdef ESP32S3_WLAN_HAS_STA
+  if (g_sta_started)
+    {
+      mode = WIFI_MODE_APSTA;
+    }
+  else
+#endif /* ESP32S3_WLAN_HAS_STA */
+    {
+      mode = WIFI_MODE_AP;
+    }
+
+  ret = esp_wifi_set_mode(mode);
+  if (ret)
+    {
+      wlerr("Failed to set Wi-Fi mode=%d ret=%d\n", mode, ret);
+      ret = wifi_errno_trans(ret);
+      goto errout;
+    }
+
+  ret = esp_wifi_start();
+  if (ret)
+    {
+      wlerr("Failed to start Wi-Fi with mode=%d ret=%d\n", mode, ret);
+      ret = wifi_errno_trans(ret);
+      goto errout;
+    }
+
+  g_softap_started = true;
+
+  wlinfo("OK to start Wi-Fi SoftAP\n");
+
+errout:
+  esp_wifi_lock(false);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_stop
+ *
+ * Description:
+ *   Stop Wi-Fi SoftAP.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_stop(void)
+{
+  int ret;
+
+  esp_wifi_lock(true);
+
+  ret = esp_wifi_stop();
+  if (ret)
+    {
+      wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
+    }
+
+  g_softap_started = false;
+
+#ifdef ESP32S3_WLAN_HAS_STA
+  if (g_sta_started)
+    {
+      ret = esp_wifi_set_mode(WIFI_MODE_STA);
+      if (ret)
+        {
+          wlerr("Failed to set Wi-Fi AP mode ret=%d\n", ret);
+          ret = wifi_errno_trans(ret);
+          goto errout;
+        }
+
+      ret = esp_wifi_start();
+      if (ret)
+        {
+          wlerr("Failed to start Wi-Fi STA ret=%d\n", ret);
+          ret = wifi_errno_trans(ret);
+          goto errout;
+        }
+    }
+#endif /* ESP32S3_WLAN_HAS_STA */
+
+  wlinfo("OK to stop Wi-Fi SoftAP\n");
+
+#ifdef ESP32S3_WLAN_HAS_STA
+errout:
+#endif /* ESP32S3_WLAN_HAS_STA */
+
+  esp_wifi_lock(false);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_send_data
+ *
+ * Description:
+ *   Use Wi-Fi SoftAP interface to send 802.3 frame
+ *
+ * Input Parameters:
+ *   pbuf - Packet buffer pointer
+ *   len  - Packet length
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_send_data(void *pbuf, size_t len)
+{
+  int ret;
+
+  ret = esp_wifi_internal_tx(WIFI_IF_AP, pbuf, len);
+
+  return wifi_errno_trans(ret);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_register_recv_cb
+ *
+ * Description:
+ *   Register Wi-Fi SoftAP receive packet callback function
+ *
+ * Input Parameters:
+ *   recv_cb - Receive callback function
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_register_recv_cb(int (*recv_cb)(void *buffer,
+                                                    uint16_t len,
+                                                    void *eb))
+{
+  int ret;
+
+  ret = esp_wifi_internal_reg_rxcb(ESP_IF_WIFI_AP, (wifi_rxcb_t)recv_cb);
+
+  return wifi_errno_trans(ret);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_register_txdone_cb
+ *
+ * Description:
+ *   Register the SoftAP TX done callback function.
+ *
+ * Input Parameters:
+ *   cb - The callback function
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_softap_register_txdone_cb(wifi_txdone_cb_t cb)
+{
+  g_softap_txdone_cb = cb;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_read_mac
+ *
+ * Description:
+ *   Read SoftAP interface MAC address from efuse
+ *
+ * Input Parameters:
+ *   mac  - MAC address buffer pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_read_mac(uint8_t *mac)
+{
+  return esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_password
+ *
+ * Description:
+ *   Set/Get Wi-Fi SoftAP password
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_password(struct iwreq *iwr, bool set)
+{
+  int ret;
+  int size;
+  wifi_config_t wifi_cfg;
+  struct iw_encode_ext *ext = iwr->u.encoding.pointer;
+  uint8_t *pdata;
+  uint8_t len;
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  char buf[PWD_MAX_LEN + 1];
+#endif
+
+  DEBUGASSERT(ext != NULL);
+
+  pdata = ext->key;
+  len = ext->key_len;
+
+  if (set && len > PWD_MAX_LEN)
+    {
+      return -EINVAL;
+    }
+
+  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+  ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
+  pdata = ext->key;
+  len   = ext->key_len;
+  if (set)
+    {
+      /* Clear the password field and copy the user password to it */
+
+      memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
+      if (len)
+        {
+          memcpy(wifi_cfg.ap.password, pdata, len);
+          switch (ext->alg)
+            {
+              case IW_ENCODE_ALG_NONE:
+                wifi_cfg.ap.authmode = WIFI_AUTH_OPEN;
+                break;
+
+              case IW_ENCODE_ALG_WEP:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WEP;
+                break;
+
+              case IW_ENCODE_ALG_TKIP:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WPA_PSK;
+                break;
+
+              case IW_ENCODE_ALG_CCMP:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
+                break;
+
+              case IW_ENCODE_ALG_PMK:
+              case IW_ENCODE_ALG_AES_CMAC:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+                break;
+
+              default:
+                wlerr("Failed to transfer wireless authmode: %d",
+                      ext->alg);
+                return -EINVAL;
+            }
+        }
+
+      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+    }
+  else
+    {
+      size = strnlen((char *)wifi_cfg.ap.password, PWD_MAX_LEN);
+      if (len < size)
+        {
+          return -EINVAL;
+        }
+      else
+        {
+          len = size;
+          memcpy(pdata, wifi_cfg.ap.password, len);
+        }
+    }
+
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  memcpy(buf, pdata, len);
+  buf[len] = 0;
+  wlinfo("Wi-Fi SoftAP password=%s len=%d\n", buf, len);
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_essid
+ *
+ * Description:
+ *   Set/Get Wi-Fi SoftAP ESSID
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
+{
+  int ret;
+  int size;
+  wifi_config_t wifi_cfg;
+  struct iw_point *essid = &iwr->u.essid;
+  uint8_t *pdata;
+  uint8_t len;
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  char buf[SSID_MAX_LEN + 1];
+#endif
+
+  DEBUGASSERT(essid != NULL);
+
+  pdata = essid->pointer;
+  len   = essid->length;
+
+  if (set && len > SSID_MAX_LEN)
+    {
+      return -EINVAL;
+    }
+
+  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+  ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
+  if (set)
+    {
+      memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
+      memcpy(wifi_cfg.ap.ssid, pdata, len);
+      wifi_cfg.ap.ssid_len = len;
+      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+    }
+  else
+    {
+      size = strnlen((char *)wifi_cfg.ap.ssid, SSID_MAX_LEN);
+      if (len < size)
+        {
+          return -EINVAL;
+        }
+      else
+        {
+          len = size;
+          memcpy(pdata, wifi_cfg.ap.ssid, len);
+        }
+    }
+
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  memcpy(buf, pdata, len);
+  buf[len] = 0;
+  wlinfo("Wi-Fi SoftAP ssid=%s len=%d\n", buf, len);
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_bssid
+ *
+ * Description:
+ *   Set/Get Wi-Fi softAP BSSID
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set   - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_bssid(struct iwreq *iwr, bool set)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_connect
+ *
+ * Description:
+ *   Trigger Wi-Fi SoftAP accept connection action
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_connect(void)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_disconnect
+ *
+ * Description:
+ *   Trigger Wi-Fi SoftAP drop connection action
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_disconnect(void)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_mode
+ *
+ * Description:
+ *   Set/Get Wi-Fi SoftAP mode code.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_mode(struct iwreq *iwr, bool set)
+{
+  if (set == false)
+    {
+      iwr->u.mode = IW_MODE_MASTER;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_auth
+ *
+ * Description:
+ *   Set/get authentication mode params.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
+{
+  int ret;
+  int cmd;
+  wifi_config_t wifi_cfg;
+
+  if (set)
+    {
+      memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+      ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+
+      cmd = iwr->u.param.flags & IW_AUTH_INDEX;
+      switch (cmd)
+        {
+          case IW_AUTH_WPA_VERSION:
+            {
+              switch (iwr->u.param.value)
+                {
+                  case IW_AUTH_WPA_VERSION_DISABLED:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_OPEN;
+                    break;
+
+                  case IW_AUTH_WPA_VERSION_WPA:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA_PSK;
+                    break;
+
+                  case IW_AUTH_WPA_VERSION_WPA2:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
+                    break;
+
+                  default:
+                    wlerr("Invalid wpa version %" PRId32 "\n",
+                          iwr->u.param.value);
+                    return -EINVAL;
+                }
+            }
+
+            break;
+          case IW_AUTH_CIPHER_PAIRWISE:
+          case IW_AUTH_CIPHER_GROUP:
+            {
+              switch (iwr->u.param.value)
+                {
+                  case IW_AUTH_CIPHER_NONE:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_OPEN;
+                    break;
+
+                  case IW_AUTH_CIPHER_WEP40:
+                  case IW_AUTH_CIPHER_WEP104:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_WEP;
+                    break;
+
+                  case IW_AUTH_CIPHER_TKIP:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA_PSK;
+                    break;
+
+                  case IW_AUTH_CIPHER_CCMP:
+                  case IW_AUTH_CIPHER_AES_CMAC:
+                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
+                    break;
+
+                  default:
+                    wlerr("Invalid cipher mode %" PRId32 "\n",
+                          iwr->u.param.value);
+                    return -EINVAL;
+                }
+            }
+
+            break;
+          case IW_AUTH_KEY_MGMT:
+          case IW_AUTH_TKIP_COUNTERMEASURES:
+          case IW_AUTH_DROP_UNENCRYPTED:
+          case IW_AUTH_80211_AUTH_ALG:
+          case IW_AUTH_WPA_ENABLED:
+          case IW_AUTH_RX_UNENCRYPTED_EAPOL:
+          case IW_AUTH_ROAMING_CONTROL:
+          case IW_AUTH_PRIVACY_INVOKED:
+          default:
+            wlerr("Unknown cmd %d\n", cmd);
+            return -EINVAL;
+        }
+
+      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+    }
+  else
+    {
+      return -ENOSYS;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_freq
+ *
+ * Description:
+ *   Set/Get SoftAP frequency.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
+{
+  int ret;
+  wifi_config_t wifi_cfg;
+
+  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+  ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
+  if (set)
+    {
+      int channel = esp_freq_to_channel(iwr->u.freq.m);
+
+      wifi_cfg.ap.channel = channel;
+
+      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+    }
+  else
+    {
+      iwr->u.freq.flags = IW_FREQ_FIXED;
+      iwr->u.freq.e     = 0;
+      iwr->u.freq.m     = 2407 + 5 * wifi_cfg.ap.channel;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_get_bitrate
+ *
+ * Description:
+ *   Get SoftAP default bit rate (Mbps).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_bitrate(struct iwreq *iwr, bool set)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_txpower
+ *
+ * Description:
+ *   Get SoftAP transmit power (dBm).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_txpower(struct iwreq *iwr, bool set)
+{
+  return esp_wifi_sta_txpower(iwr, set);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_channel
+ *
+ * Description:
+ *   Get SoftAP range of channel parameters.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_channel(struct iwreq *iwr, bool set)
+{
+  return esp_wifi_sta_channel(iwr, set);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_country
+ *
+ * Description:
+ *   Configure country info.
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_country(struct iwreq *iwr, bool set)
+{
+  return esp_wifi_sta_country(iwr, set);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_softap_rssi
+ *
+ * Description:
+ *   Get Wi-Fi sensitivity (dBm).
+ *
+ * Input Parameters:
+ *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
+{
+  return -ENOSYS;
+}
+
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
 
 /****************************************************************************
  * Name: esp_wifi_stop_callback
