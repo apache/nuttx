@@ -151,7 +151,6 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
   /* Reset structure */
 
   nxsem_destroy(&conn->resp.sem);
-  memset(conn, 0, sizeof(*conn));
 
   /* If this is a preallocated or a batch allocated connection store it in
    * the free connections list. Else free it.
@@ -166,6 +165,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
   else
 #endif
     {
+      memset(conn, 0, sizeof(*conn));
       dq_addlast(&conn->sconn.node, &g_free_usrsock_connections);
     }
 

@@ -712,10 +712,6 @@ void udp_free(FAR struct udp_conn_s *conn)
 
 #endif
 
-  /* Clear the connection structure */
-
-  memset(conn, 0, sizeof(*conn));
-
   /* Free the connection.
    * If this is a preallocated or a batch allocated connection store it in
    * the free connections list. Else free it.
@@ -730,6 +726,7 @@ void udp_free(FAR struct udp_conn_s *conn)
   else
 #endif
     {
+      memset(conn, 0, sizeof(*conn));
       dq_addlast(&conn->sconn.node, &g_free_udp_connections);
     }
 

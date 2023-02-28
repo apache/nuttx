@@ -205,10 +205,6 @@ void netlink_free(FAR struct netlink_conn_s *conn)
       kmm_free(resp);
     }
 
-  /* Reset structure */
-
-  memset(conn, 0, sizeof(*conn));
-
   /* If this is a preallocated or a batch allocated connection store it in
    * the free connections list. Else free it.
    */
@@ -222,6 +218,7 @@ void netlink_free(FAR struct netlink_conn_s *conn)
   else
 #endif
     {
+      memset(conn, 0, sizeof(*conn));
       dq_addlast(&conn->sconn.node, &g_free_netlink_connections);
     }
 
