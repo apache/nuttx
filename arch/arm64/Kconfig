@@ -84,6 +84,21 @@ config ARCH_HAVE_EL3
 		runing at EL3 is not necessary and system register for EL3
 		is not accessible
 
+config ARCH_SET_VMPIDR_EL2
+	bool "Set VMPIDR_EL2 at EL2 stage"
+	help
+		VMPIDR_EL2 holds the value of the Virtualization Multiprocessor ID.
+		From architecture manual of AArch64, the behave is:
+		  -reading register MPIDR_EL1 in EL2, it's return real MPIDR_EL1
+		  -reading register MPIDR_EL1 in EL1, it's return VMPIDR_EL2
+		So since NuttX for SMP is running at EL1 to read MPIDR_EL1 for
+		identify CPU id, it's need to set VMPIDR_EL2 to MPIDR_EL1 for
+		every CPU at boot EL2 stage.
+		For some platform, the bootloader or hypervisor will do that at
+		the EL2 stage, but not all.
+		ARM FVP and VDK should set it since these platform will boot
+		without BootLoader.
+
 config ARCH_EARLY_PRINT
 	bool "arch early print support"
 	default n
