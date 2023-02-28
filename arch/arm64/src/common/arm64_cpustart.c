@@ -149,7 +149,6 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 {
   uint64_t cpu_mpid = cpu_num;
 
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
   /* Notify of the start event */

@@ -130,6 +130,11 @@ void arm64_boot_el2_init(void)
   zero_sysreg(cnthp_ctl_el2);
 #endif
 
+#ifdef CONFIG_ARCH_SET_VMPIDR_EL2
+  reg = read_sysreg(mpidr_el1);
+  write_sysreg(reg, vmpidr_el2);
+#endif
+
   /* Enable this if/when we use the hypervisor timer.
    * write_cnthp_cval_el2(~(uint64_t)0);
    */
