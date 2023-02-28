@@ -31,6 +31,7 @@ config ARCH_CHIP_A64
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_RESET
+	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		Allwinner A64 SoC
@@ -52,6 +53,17 @@ config ARCH_ARMV8A
 config ARCH_ARMV8R
 	bool
 	default n
+
+config ARCH_HAVE_PSCI
+	bool "ARM PCSI (Power State Coordination Interface) Support"
+	default n
+	---help---
+		This Power State Coordination Interface (PSCI) defines
+		a standard interface for power management. the PCSI need
+		to implement handling firmware at EL2 or EL3. The option
+		maybe not applicable for arm core without PCSI firmware
+		interface implement
+
 
 config ARCH_CORTEX_A53
 	bool

@@ -51,7 +51,7 @@ void up_systemreset(void)
 
   /* Set up for the system reset */
 
-  ret = pcsi_cpu_reset();
+  ret = psci_cpu_reset();
   if (ret)
     {
       sinfo("Failed to reset CPU, error code: %d\n", ret);

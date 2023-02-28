@@ -150,7 +150,7 @@ uint32_t psci_version(void)
   return psci_data.version;
 }
 
-int pcsi_cpu_off(void)
+int psci_cpu_off(void)
 {
   int ret;
 
@@ -164,7 +164,7 @@ int pcsi_cpu_off(void)
   return psci_to_dev_err(ret);
 }
 
-int pcsi_cpu_reset(void)
+int psci_cpu_reset(void)
 {
   int ret;
 
@@ -178,7 +178,7 @@ int pcsi_cpu_reset(void)
   return psci_to_dev_err(ret);
 }
 
-int pcsi_cpu_on(unsigned long cpuid, uintptr_t entry_point)
+int psci_cpu_on(unsigned long cpuid, uintptr_t entry_point)
 {
   int ret;
 
