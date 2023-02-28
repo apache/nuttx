@@ -106,6 +106,19 @@
   memset((s), 0, sizeof(struct note_filter_irq_s))
 #endif
 
+/* Helper macros for dump instrumentation filter */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+#  define NOTE_FILTER_DUMPMASK_SET(tag, s) \
+  ((s)->tag_mask[(tag) / 8] |= (1 << ((tag) % 8)))
+#  define NOTE_FILTER_DUMPMASK_CLR(tag, s) \
+  ((s)->tag_mask[(tag) / 8] &= ~(1 << ((tag) % 8)))
+#  define NOTE_FILTER_DUMPMASK_ISSET(tag, s) \
+  ((s)->tag_mask[(tag) / 8] & (1 << ((tag) % 8)))
+#  define NOTE_FILTER_DUMPMASK_ZERO(s) \
+  memset((s), 0, sizeof(struct note_filter_tag_s));
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 #  define SCHED_NOTE_LABEL__(x, y) x ## y
 #  define SCHED_NOTE_LABEL_(x, y) SCHED_NOTE_LABEL__(x, y)
@@ -113,35 +126,36 @@
           SCHED_NOTE_LABEL_(sched_note_here, __LINE__)
 #  define SCHED_NOTE_IP \
           ({SCHED_NOTE_LABEL: (uintptr_t)&&SCHED_NOTE_LABEL;})
-#  define SCHED_NOTE_STRING(buf) \
-          sched_note_string(SCHED_NOTE_IP, buf)
-#  define SCHED_NOTE_DUMP(event, buf, len) \
-          sched_note_dump(SCHED_NOTE_IP, event, buf, len)
-#  define SCHED_NOTE_VPRINTF(fmt, va) \
-          sched_note_vprintf(SCHED_NOTE_IP, fmt, va)
-#  define SCHED_NOTE_VBPRINTF(event, fmt, va) \
-          sched_note_vbprintf(SCHED_NOTE_IP, event, fmt, va)
-#  define SCHED_NOTE_PRINTF(fmt, ...) \
-          sched_note_printf(SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
-#  define SCHED_NOTE_BPRINTF(event, fmt, ...) \
-          sched_note_bprintf(SCHED_NOTE_IP, event, fmt, ##__VA_ARGS__)
-#  define SCHED_NOTE_BEGINEX(str) \
-          sched_note_printf(SCHED_NOTE_IP, "B|%d|%s", gettid(), str)
-#  define SCHED_NOTE_ENDEX(str) \
-          sched_note_printf(SCHED_NOTE_IP, "E|%d|%s", gettid(), str)
-#  define SCHED_NOTE_BEGIN() \
-          sched_note_begin(SCHED_NOTE_IP)
-#  define SCHED_NOTE_END() \
-          sched_note_end(SCHED_NOTE_IP)
+#  define sched_note_string(tag, buf) \
+          sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
+#  define sched_note_dump(tag, event, buf, len) \
+          sched_note_dump_ip(tag, SCHED_NOTE_IP, event, buf, len)
+#  define sched_note_vprintf(tag, fmt, va) \
+          sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, va)
+#  define sched_note_vbprintf(event, fmt, va) \
+          sched_note_vbprintf_ip(tag, SCHED_NOTE_IP, event, fmt, va)
+#  define sched_note_printf(tag, fmt, ...) \
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
+#  define sched_note_bprintf(tag, event, fmt, ...) \
+          sched_note_bprintf_ip(tag, SCHED_NOTE_IP, event, \
+                                fmt, ##__VA_ARGS__)
+#  define sched_note_beginex(tag, str) \
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "B|%d|%s", gettid(), str)
+#  define sched_note_endex(tag, str) \
+          sched_note_printf_ip(tag, SCHED_NOTE_IP, "E|%d|%s", gettid(), str)
+#  define sched_note_begin(tag, ip) \
+          sched_note_string_ip(tag, SCHED_NOTE_IP, "B")
+#  define sched_note_end(tag, ip) \
+          sched_note_string_ip(tag, SCHED_NOTE_IP, "E")
 #else
-#  define SCHED_NOTE_STRING(buf)
-#  define SCHED_NOTE_DUMP(event, buf, len)
-#  define SCHED_NOTE_VPRINTF(fmt, va)
-#  define SCHED_NOTE_VBPRINTF(event, fmt, va)
-#  define SCHED_NOTE_PRINTF(fmt, ...)
-#  define SCHED_NOTE_BPRINTF(event, fmt, ...)
-#  define SCHED_NOTE_BEGIN()
-#  define SCHED_NOTE_END()
+#  define sched_note_string(tag, buf)
+#  define sched_note_dump(tag, event, buf, len)
+#  define sched_note_vprintf(tag, fmt, va)
+#  define sched_note_vbprintf(tag, event, fmt, va)
+#  define sched_note_printf(tag, fmt, ...)
+#  define sched_note_bprintf(tag, event, fmt, ...)
+#  define sched_note_begin(tag)
+#  define sched_note_end(tag)
 #endif
 
 /****************************************************************************
@@ -203,6 +217,30 @@ enum note_type_e
   NOTE_DUMP_STRING     = 22,
   NOTE_DUMP_BINARY     = 23
 #endif
+};
+
+enum note_tag_e
+{
+  NOTE_TAG_ALWAYS = 0,
+  NOTE_TAG_APP,
+  NOTE_TAG_ARCH,
+  NOTE_TAG_AUDIO,
+  NOTE_TAG_BOARD,
+  NOTE_TAG_CRYPTO,
+  NOTE_TAG_DRIVERS,
+  NOTE_TAG_FS,
+  NOTE_TAG_GRAPHICS,
+  NOTE_TAG_INPUT,
+  NOTE_TAG_MM,
+  NOTE_TAG_NET,
+  NOTE_TAG_SCHED,
+  NOTE_TAG_VIDEO,
+  NOTE_TAG_WIRLESS,
+
+  /* Always last */
+
+  NOTE_TAG_LAST,
+  NOTE_TAG_MAX = NOTE_TAG_LAST + 16
 };
 
 /* This structure provides the common header of each note */
@@ -439,6 +477,13 @@ struct note_filter_irq_s
 };
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+struct note_filter_tag_s
+{
+  uint8_t tag_mask[(NOTE_TAG_MAX + 7) / 8];
+};
+#endif
+
 #endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
 /****************************************************************************
@@ -540,24 +585,25 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 
-void sched_note_string(uintptr_t ip, FAR const char *buf);
-void sched_note_dump(uintptr_t ip, uint8_t event,
-                     FAR const void *buf, size_t len);
-void sched_note_vprintf(uintptr_t ip, FAR const char *fmt,
-                        va_list va) printf_like(2, 0);
-void sched_note_vbprintf(uintptr_t ip, uint8_t event,
-                         FAR const char *fmt, va_list va) printf_like(3, 0);
-void sched_note_printf(uintptr_t ip,
-                       FAR const char *fmt, ...) printf_like(2, 3);
-void sched_note_bprintf(uintptr_t ip, uint8_t event,
-                        FAR const char *fmt, ...) printf_like(3, 4);
+void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf);
+void sched_note_dump_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+                        FAR const void *buf, size_t len);
+void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
+                           va_list va) printf_like(3, 0);
+void sched_note_vbprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+                            FAR const char *fmt,
+                            va_list va) printf_like(4, 0);
+void sched_note_printf_ip(uint32_t tag, uintptr_t ip,
+                          FAR const char *fmt, ...) printf_like(3, 4);
+void sched_note_bprintf_ip(uint32_t tag, uintptr_t ip, uint8_t event,
+                           FAR const char *fmt, ...) printf_like(4, 5);
 #else
-#  define sched_note_string(ip,b)
-#  define sched_note_dump(ip,e,b,l)
-#  define sched_note_vprintf(ip,f,v)
-#  define sched_note_vbprintf(ip,e,f,v)
-#  define sched_note_printf(ip,f,...)
-#  define sched_note_bprintf(ip,e,f,...)
+#  define sched_note_string_ip(t,ip,b)
+#  define sched_note_dump_ip(t,ip,e,b,l)
+#  define sched_note_vprintf_ip(t,ip,f,v)
+#  define sched_note_vbprintf_ip(t,ip,e,f,v)
+#  define sched_note_printf_ip(t,ip,f,...)
+#  define sched_note_bprintf_ip(t,ip,e,f,...)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
@@ -639,6 +685,12 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
                            FAR struct note_filter_irq_s *newf);
 #endif
 
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER)
+void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
+                           FAR struct note_filter_tag_s *newf);
+#endif
+
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
 #undef EXTERN
@@ -648,14 +700,14 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
-#  define SCHED_NOTE_STRING(buf)
-#  define SCHED_NOTE_DUMP(event, buf, len)
-#  define SCHED_NOTE_VPRINTF(fmt, va)
-#  define SCHED_NOTE_VBPRINTF(event, fmt, va)
-#  define SCHED_NOTE_PRINTF(fmt, ...)
-#  define SCHED_NOTE_BPRINTF(event, fmt, ...)
-#  define SCHED_NOTE_BEGIN()
-#  define SCHED_NOTE_END()
+#  define sched_note_string(buf)
+#  define sched_note_dump(event, buf, len)
+#  define sched_note_vprintf(fmt, va)
+#  define sched_note_vbprintf(event, fmt, va)
+#  define sched_note_printf(fmt, ...)
+#  define sched_note_bprintf(event, fmt, ...)
+#  define sched_note_begin()
+#  define sched_note_end()
 
 #  define sched_note_start(t)
 #  define sched_note_stop(t)
@@ -673,16 +725,13 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
 #  define sched_note_syscall_enter(n,a,...)
 #  define sched_note_syscall_leave(n,r)
 #  define sched_note_irqhandler(i,h,e)
-#  define sched_note_string(ip,b)
-#  define sched_note_dump(ip,e,b,l)
-#  define sched_note_vprintf(ip,f,v)
-#  define sched_note_vbprintf(ip,e,f,v)
-#  define sched_note_printf(ip,f,...)
-#  define sched_note_bprintf(ip,e,f,...)
+#  define sched_note_string_ip(t,ip,b)
+#  define sched_note_dump_ip(t,ip,e,b,l)
+#  define sched_note_vprintf_ip(t,ip,f,v)
+#  define sched_note_vbprintf_ip(t,ip,e,f,v)
+#  define sched_note_printf_ip(t,ip,f,...)
+#  define sched_note_bprintf_ip(t,ip,e,f,...)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
-
-#define sched_note_begin(ip) sched_note_string(ip, "B")
-#define sched_note_end(ip) sched_note_string(ip, "E")
 
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */
