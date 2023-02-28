@@ -44,7 +44,7 @@
 
 #define CONFIG_GICD_BASE          0x8000000
 #define CONFIG_GICR_BASE          0x80a0000
-
+#define CONFIG_GICR_OFFSET        0x20000
 #else
 
 #error CONFIG_ARM_GIC_VERSION should be 2, 3 or 4
