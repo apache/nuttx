@@ -128,7 +128,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
    * in memory.
    */
 
-  if ((flags & MAP_PRIVATE) == 0 && filep->f_inode &&
+  if (filep->f_inode &&
       filep->f_inode->u.i_ops->mmap != NULL)
     {
       ret = filep->f_inode->u.i_ops->mmap(filep, &entry);
