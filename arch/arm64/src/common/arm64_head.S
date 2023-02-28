@@ -48,7 +48,7 @@
 #define __HEAD_FLAGS            ((__HEAD_FLAG_PAGE_SIZE << 1) | \
                                  (__HEAD_FLAG_PHYS_BASE << 3))
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_ARCH_EARLY_PRINT
 
 #define RODATA_STR(label, msg)                  \
 .pushsection .rodata.str, "aMS", %progbits, 1 ; \
@@ -66,7 +66,7 @@ label:  .asciz msg;                             \
     RODATA_STR(boot_string_##sym, _s)
 #else
 #define PRINT(sym, s)
-#endif /* CONFIG_DEBUG_FEATURES */
+#endif /* CONFIG_ARCH_EARLY_PRINT */
 
 /****************************************************************************
  * Private Functions
@@ -166,7 +166,7 @@ primary_core:
 
     bl     __reset_prep_c
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_ARCH_EARLY_PRINT
     /* Initialize the UART for early print.
      * Should only be called on the boot CPU
      */
@@ -228,8 +228,9 @@ jump_to_c_entry:
 /* Fail-stop */
 
 fail:
-    PRINT(fail, "- Boot failed -\r\n")
-1:      wfe
+    /* Boot failed */
+
+1:  wfe
     b     1b
 
 /* Set the minimum necessary to safely call C code */
@@ -283,7 +284,7 @@ out:
 
     ret   x23
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_ARCH_EARLY_PRINT
 
 /* Print early debug messages.
  * x0: Nul-terminated string to print.
@@ -303,4 +304,4 @@ boot_stage_puts:
 
 .type boot_low_puts, %function;
 
-#endif /* !CONFIG_DEBUG_FEATURES */
+#endif /* !CONFIG_ARCH_EARLY_PRINT */
