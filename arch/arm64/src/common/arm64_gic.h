@@ -145,15 +145,38 @@
 
 #define GIC_INT_DEF_PRI_X4          0xa0a0a0a0
 
-/* Register bit definitions */
+/* GICD_CTLR : Distributor Control Register
+ *
+ * [31](RO)  RWP Register Write Pending:
+ *            -- 0 No register write in progress
+ *            -- 1 Register write in progress
+ * [30:8]    - Reserved -
+ * [7](RW)   E1NWF Enable 1 of N Wakeup Functionality  0
+ * [6](RO)   DS Disable Security status:
+ *            -- 0 The gicd_ctlr_ds signal was LOW when the GIC
+ *                 exited reset. Therefore, the Distributor supports
+ *                 two Security states and Non-secure accesses cannot
+ *                 access and modify registers that control Group 0
+ *                 interrupts.
+ *            -- 1 The gicd_ctlr_ds signal was HIGH when the GIC
+ *                 exited reset. Therefore, the Distributor only supports
+ *                 a single Security state and Non-secure accesses
+ *                 can access and modify registers that control
+ *                 Group 0 interrupts.
+ * [5](RO)   ARE_NS Affinity Routing Enable, Non-secure state
+ * [4](RO)   ARE_S Affinity Routing Enable, Secure state
+ * [3]       - Reserved -
+ * [2](RW)   EnableGrp1S Enable Secure Group 1 interrupts
+ * [1](RW)   EnableGrp1NS Enable Non-secure Group 1 interrupts
+ * [0](RW)   EnableGrp0 Enable Group 0 interrupts
+ */
 
-/* GICD_CTLR Interrupt group definitions */
 #define GICD_CTLR_ENABLE_G0         0
 #define GICD_CTLR_ENABLE_G1NS       1
 #define GICD_CTLR_ENABLE_G1S        2
 #define GICD_CTRL_ARE_S             4
 #define GICD_CTRL_ARE_NS            5
-#define GICD_CTRL_NS                6
+#define GICD_CTRL_DS                6
 #define GICD_CGRL_E1NWF             7
 
 /* GICD_CTLR Register write progress bit */

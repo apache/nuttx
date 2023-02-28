@@ -359,6 +359,7 @@ void arm64_fatal_error(unsigned int reason, struct regs_context * reg)
               break;
             }
 
+#ifdef CONFIG_ARCH_HAVE_EL3
           case MODE_EL3:
             {
               sinfo("CurrentEL: MODE_EL3\n");
@@ -367,6 +368,7 @@ void arm64_fatal_error(unsigned int reason, struct regs_context * reg)
               __asm__ volatile ("mrs %0, elr_el3" : "=r" (elr));
               break;
             }
+#endif
 
           default:
             {
