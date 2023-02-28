@@ -70,6 +70,58 @@ const struct arm_mmu_config mmu_config =
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ *   If TLS is enabled, then the RTOS can get this information from the TLS
+ *   info structure.  Otherwise, the MCU-specific logic must provide some
+ *   mechanism to provide the CPU index.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ ****************************************************************************/
+
+int up_cpu_index(void)
+{
+  /* Read the Multiprocessor Affinity Register (MPIDR)
+   * And return the CPU ID field
+   */
+
+  return MPID_TO_CORE(GET_MPIDR(), 0);
+}
+
+/****************************************************************************
+ * Name: arm64_get_mpid
+ *
+ * Description:
+ *   The function from cpu index to get cpu mpid which is reading
+ * from mpidr_el1 register. Different ARM64 Core will use different
+ * Affn define, the mpidr_el1 value is not CPU number, So we need
+ * to change CPU number to mpid and vice versa
+ *
+ ****************************************************************************/
+
+uint64_t arm64_get_mpid(int cpu)
+{
+  return CORE_TO_MPID(cpu, 0);
+}
+
+#endif /* CONFIG_SMP */
 /****************************************************************************
  * Name: arm64_el_init
  *

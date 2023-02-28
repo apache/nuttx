@@ -156,12 +156,31 @@
 #define MPIDR_AFF2_SHIFT    (16)
 #define MPIDR_AFF3_SHIFT    (32)
 
+/* mpidr_el1 register, the register is define:
+ *   - bit 0~7:   Aff0
+ *   - bit 8~15:  Aff1
+ *   - bit 16~23: Aff2
+ *   - bit 24:    MT, multithreading
+ *   - bit 25~29: RES0
+ *   - bit 30:    U, multiprocessor/Uniprocessor
+ *   - bit 31:    RES1
+ *   - bit 32~39: Aff3
+ *   - bit 40~63: RES0
+ *   Different ARM64 Core will use different Affn define, the mpidr_el1
+ *  value is not CPU number, So we need to change CPU number to mpid
+ *  and vice versa
+ */
+
+#define GET_MPIDR()             read_sysreg(mpidr_el1)
+
 #define MPIDR_AFFLVL(mpidr, aff_level) \
   (((mpidr) >> MPIDR_AFF ## aff_level ## _SHIFT) & MPIDR_AFFLVL_MASK)
 
-#define GET_MPIDR()             read_sysreg(mpidr_el1)
-#define MPIDR_TO_CORE(mpidr)    MPIDR_AFFLVL((mpidr), 0)
-#define IS_PRIMARY_CORE()       (!MPIDR_TO_CORE(GET_MPIDR()))
+#define MPID_TO_CORE(mpid, aff_level) \
+  (((mpid) >> MPIDR_AFF ## aff_level ## _SHIFT) & MPIDR_AFFLVL_MASK)
+
+#define CORE_TO_MPID(core, aff_level) \
+  (((core) << MPIDR_AFF ## aff_level ## _SHIFT))
 
 /* System register interface to GICv3 */
 
@@ -528,6 +547,21 @@ void arm64_cpu_enable(void);
 #else
 #  define arm64_cpu_enable()
 #endif
+
+/****************************************************************************
+ * Name: arm64_get_mpid
+ *
+ * Description:
+ *   The function from cpu index to get cpu mpid which is reading
+ * from mpidr_el1 register. Different ARM64 Core will use different
+ * Affn define, the mpidr_el1 value is not CPU number, So we need
+ * to change CPU number to mpid and vice versa
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+uint64_t arm64_get_mpid(int cpu);
+#endif /* CONFIG_SMP */
 
 #endif /* __ASSEMBLY__ */
 

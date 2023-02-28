@@ -145,6 +145,13 @@ static int gic_wait_rwp(uint32_t intid)
   return 0;
 }
 
+static inline void arm64_gic_write_irouter(uint64_t val, unsigned int intid)
+{
+  unsigned long addr = IROUTER(GET_DIST_BASE(intid), intid);
+
+  putreg64(val, addr);
+}
+
 void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags)
 {
@@ -195,8 +202,7 @@ void arm64_gic_irq_enable(unsigned int intid)
 
   if (GIC_IS_SPI(intid))
     {
-      putreg64(MPIDR_TO_CORE(GET_MPIDR()),
-              IROUTER(GET_DIST_BASE(intid), intid));
+      arm64_gic_write_irouter(up_cpu_index(), intid);
     }
 }
 
@@ -608,7 +614,7 @@ static void arm64_gic_init(void)
 
   cpu               = this_cpu();
   gic_rdists[cpu]   = CONFIG_GICR_BASE +
-                     MPIDR_TO_CORE(GET_MPIDR()) * 0x20000;
+                     up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
