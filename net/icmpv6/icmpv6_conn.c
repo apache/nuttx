@@ -172,13 +172,10 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_icmpv6_connections);
 
-  /* Clear the connection structure */
-
-  memset(conn, 0, sizeof(*conn));
-
   /* If this is a preallocated or a batch allocated connection store it in
    * the free connections list. Else free it.
    */
+
 #if CONFIG_NET_ICMPv6_ALLOC_CONNS == 1
   if (conn < g_icmpv6_connections || conn >= (g_icmpv6_connections +
       CONFIG_NET_ICMPv6_PREALLOC_CONNS))
@@ -188,6 +185,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
   else
 #endif
     {
+      memset(conn, 0, sizeof(*conn));
       dq_addlast(&conn->sconn.node, &g_free_icmpv6_connections);
     }
 

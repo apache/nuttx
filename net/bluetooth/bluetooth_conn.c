@@ -205,13 +205,10 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
       bluetooth_container_free(container);
     }
 
-  /* Reset structure */
-
-  memset(conn, 0, sizeof(*conn));
-
   /* If this is a preallocated or a batch allocated connection store it in
    * the free connections list. Else free it.
    */
+
 #if CONFIG_NET_BLUETOOTH_ALLOC_CONNS == 1
   if (conn < g_bluetooth_connections || conn >= (g_bluetooth_connections +
       CONFIG_NET_BLUETOOTH_PREALLOC_CONNS))
@@ -221,6 +218,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
   else
 #endif
     {
+      memset(conn, 0, sizeof(*conn));
       dq_addlast(&conn->bc_conn.node, &g_free_bluetooth_connections);
     }
 

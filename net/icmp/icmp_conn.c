@@ -182,10 +182,6 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
       dq_rem(&conn->sconn.node, &g_active_icmp_connections);
 
-      /* Clear the connection structure */
-
-      memset(conn, 0, sizeof(*conn));
-
       /* If this is a preallocated or a batch allocated connection store it
        * in the free connections list. Else free it.
        */
@@ -199,6 +195,7 @@ void icmp_free(FAR struct icmp_conn_s *conn)
       else
 #endif
         {
+          memset(conn, 0, sizeof(*conn));
           dq_addlast(&conn->sconn.node, &g_free_icmp_connections);
         }
     }

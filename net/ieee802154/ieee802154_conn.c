@@ -194,10 +194,6 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
       ieee802154_container_free(container);
     }
 
-  /* Enqueue the connection into the active list */
-
-  memset(conn, 0, sizeof(*conn));
-
   /* If this is a preallocated or a batch allocated connection store it in
    * the free connections list. Else free it.
    */
@@ -211,6 +207,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
   else
 #endif
     {
+      memset(conn, 0, sizeof(*conn));
       dq_addlast(&conn->sconn.node, &g_free_ieee802154_connections);
     }
 
