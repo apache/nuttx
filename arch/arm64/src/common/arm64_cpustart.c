@@ -153,21 +153,16 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
   flush_end     = flush_start + sizeof(cpu_boot_params);
   up_flush_dcache(flush_start, flush_end);
 
-  if (pcsi_cpu_on(cpu_mpid, (uint64_t)__start))
+#ifdef CONFIG_ARCH_HAVE_PSCI
+  if (psci_cpu_on(cpu_mpid, (uint64_t)__start))
     {
       sinfo("Failed to boot secondary CPU core %d (MPID:%#lx)\n", cpu_num,
             cpu_mpid);
       return;
     }
-
-  /* Wait secondary cores up, see z_arm64_secondary_start */
-
-  while (cpu_boot_params.func)
-    {
-      SP_WFE();
-    }
-
-  sinfo("Secondary CPU core %d (MPID:%#lx) is up\n", cpu_num, cpu_mpid);
+#else
+  SP_SEV();
+#endif
 }
 
 /****************************************************************************
