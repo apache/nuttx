@@ -706,10 +706,6 @@ static int esp32c3_tim_setisr(struct esp32c3_tim_dev_s *dev,
 
       if (priv->cpuint != -ENOMEM)
         {
-          /* Disable cpu interrupt */
-
-          up_disable_irq(priv->cpuint);
-
           /* Disable CPU Interrupt, free a previously allocated
            * CPU Interrupt
            */
