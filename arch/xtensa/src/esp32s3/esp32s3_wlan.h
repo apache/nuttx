@@ -83,6 +83,24 @@ int esp32s3_wlan_sta_set_linkstatus(bool linkstatus);
 int esp32s3_wlan_sta_initialize(void);
 #endif /* ESP32S3_WLAN_HAS_STA */
 
+/****************************************************************************
+ * Name: esp32s3_wlan_softap_initialize
+ *
+ * Description:
+ *   Initialize the ESP32-S3 WLAN softAP netcard driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+int esp32s3_wlan_softap_initialize(void);
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
 #endif /* CONFIG_ESP32S3_WIFI */
 #ifdef __cplusplus
 }
