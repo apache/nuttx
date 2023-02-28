@@ -49,10 +49,12 @@ endchoice
 config ARCH_ARMV8A
 	bool
 	default n
+	select ARCH_HAVE_EL3
 
 config ARCH_ARMV8R
 	bool
 	default n
+	select ARCH_SINGLE_SECURITY_STATE
 
 config ARCH_HAVE_PSCI
 	bool "ARM PCSI (Power State Coordination Interface) Support"
@@ -63,6 +65,24 @@ config ARCH_HAVE_PSCI
 		to implement handling firmware at EL2 or EL3. The option
 		maybe not applicable for arm core without PCSI firmware
 		interface implement
+
+config ARCH_SINGLE_SECURITY_STATE
+	bool "ARM Single Security State Support"
+	default n
+	---help---
+		Some ARM aarch64 Cortex-family processors only supports single
+		security state(eg. Cortex-R82). For these Processors,
+		GIC or other ARM architecture feature will with different
+		configure
+
+config ARCH_HAVE_EL3
+	bool
+	default n
+	---help---
+		Some ARM aarch64 Cortex-family processors only supports
+		EL0~El2(eg. Cortex-R82). For these Processors, the code
+		runing at EL3 is not necessary and system register for EL3
+		is not accessible
 
 config ARCH_EARLY_PRINT
 	bool "arch early print support"

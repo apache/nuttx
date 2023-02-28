@@ -176,10 +176,14 @@ primary_core:
 
 cpu_boot:
     PRINT(cpu_boot, "- Ready to Boot CPU\r\n")
+    /* Platform hook for highest EL */
+
+    bl  arm64_el_init
 
 switch_el:
     switch_el x0, 3f, 2f, 1f
 3:
+#ifdef CONFIG_ARCH_HAVE_EL3
     PRINT(switch_el3, "- Boot from EL3\r\n")
 
     /* EL3 init */
@@ -191,7 +195,7 @@ switch_el:
     adr   x0, switch_el
     bl    arm64_boot_el3_get_next_el
     eret
-
+#endif
 2:
     PRINT(switch_el2, "- Boot from EL2\r\n")
 
@@ -243,10 +247,12 @@ __reset_prep_c:
 
     switch_el x0, 3f, 2f, 1f
 3:
+#ifdef CONFIG_ARCH_HAVE_EL3
     /* Reinitialize SCTLR from scratch in EL3 */
 
     ldr   w0, =(SCTLR_EL3_RES1 | SCTLR_I_BIT | SCTLR_SA_BIT)
     msr   sctlr_el3, x0
+#endif
 
     /* Set SP_EL1 */
 

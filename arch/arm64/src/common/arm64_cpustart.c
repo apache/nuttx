@@ -43,7 +43,12 @@
 #include "arm64_arch_timer.h"
 #include "arm64_smp.h"
 #include "arm64_cpu_psci.h"
+
+#ifdef CONFIG_ARCH_HAVE_MPU
+#include "arm64_mpu.h"
+#else
 #include "arm64_mmu.h"
+#endif
 
 /****************************************************************************
  * Public data
@@ -58,6 +63,7 @@ struct arm64_boot_params
   arm64_cpustart_t func;
   void *arg;
   int cpu_num;
+  volatile long cpu_ready_flag;
 };
 
 volatile struct arm64_boot_params aligned_data(L1_CACHE_BYTES)
@@ -76,8 +82,6 @@ volatile uint64_t *g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
  * Private data
  ****************************************************************************/
 
-static volatile long cpu_ready_flag;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -89,11 +93,27 @@ static inline void local_delay(void)
     }
 }
 
+#ifdef CONFIG_ARCH_HAVE_MMU
+static void flush_boot_params(void)
+{
+  uintptr_t flush_start;
+  uintptr_t flush_end;
+
+  flush_start   = (uintptr_t)&cpu_boot_params;
+  flush_end     = flush_start + sizeof(cpu_boot_params);
+
+  up_flush_dcache(flush_start, flush_end);
+}
+#else
+static void flush_boot_params(void)
+{
+  /* TODO: Flush at MPU platform */
+}
+#endif
+
 static void arm64_smp_init_top(void *arg)
 {
   struct tcb_s *tcb = this_task();
-
-  cpu_ready_flag = 1;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
@@ -118,6 +138,9 @@ static void arm64_smp_init_top(void *arg)
   write_sysreg(tcb, tpidr_el1);
   write_sysreg(tcb, tpidr_el0);
 
+  cpu_boot_params.cpu_ready_flag = 1;
+  SP_SEV();
+
   nx_idle_trampoline();
 }
 
@@ -126,8 +149,6 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 {
   uint64_t cpu_mpid = cpu_num;
 
-  uintptr_t flush_start;
-  uintptr_t flush_end;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
@@ -149,9 +170,7 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 
   cpu_boot_params.mpid = cpu_num;
 
-  flush_start   = (uintptr_t)&cpu_boot_params;
-  flush_end     = flush_start + sizeof(cpu_boot_params);
-  up_flush_dcache(flush_start, flush_end);
+  flush_boot_params();
 
 #ifdef CONFIG_ARCH_HAVE_PSCI
   if (psci_cpu_on(cpu_mpid, (uint64_t)__start))
@@ -216,15 +235,16 @@ int up_cpu_start(int cpu)
   arm64_stack_color(g_cpu_idlestackalloc[cpu], SMP_STACK_SIZE);
 #endif
 
-  cpu_ready_flag = 0;
+  cpu_boot_params.cpu_ready_flag = 0;
   arm64_start_cpu(cpu, (char *)g_cpu_idlestackalloc[cpu], SMP_STACK_SIZE,
                   arm64_smp_init_top);
 
   /* Waiting for this CPU to be boot complete */
 
-  while (!cpu_ready_flag)
+  while (!cpu_boot_params.cpu_ready_flag)
     {
-      local_delay();
+      SP_WFE();
+      flush_boot_params();
     }
 
   return 0;
@@ -237,7 +257,13 @@ void arm64_boot_secondary_c_routine(void)
   arm64_cpustart_t  func;
   void              *arg;
 
+#ifdef CONFIG_ARCH_HAVE_MPU
+  arm64_mpu_init(false);
+#endif
+
+#ifdef CONFIG_ARCH_HAVE_MMU
   arm64_mmu_init(false);
+#endif
 
   arm64_gic_secondary_init();
 
@@ -263,7 +289,6 @@ void arm64_boot_secondary_c_routine(void)
 int arm64_smp_sgi_init(void)
 {
   irq_attach(SGI_CPU_PAUSE, arm64_pause_handler, 0);
-  arm64_gic_irq_set_priority(SGI_CPU_PAUSE, IRQ_DEFAULT_PRIORITY, 0);
   up_enable_irq(SGI_CPU_PAUSE);
 
   return 0;

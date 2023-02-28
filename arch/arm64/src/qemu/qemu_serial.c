@@ -612,7 +612,6 @@ static int qemu_pl011_attach(struct uart_dev_s *dev)
   data  = &sport->data;
 
   ret = irq_attach(sport->irq_num, qemu_pl011_irq_handler, dev);
-  arm64_gic_irq_set_priority(sport->irq_num, IRQ_TYPE_LEVEL, 0);
 
   if (ret == OK)
     {
