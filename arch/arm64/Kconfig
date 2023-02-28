@@ -64,6 +64,19 @@ config ARCH_HAVE_PSCI
 		maybe not applicable for arm core without PCSI firmware
 		interface implement
 
+config ARCH_EARLY_PRINT
+	bool "arch early print support"
+	default n
+	---help---
+		The aarch64 have EL0~El3 execute level and NS/S (security state),
+		the NuttX should be execute at EL1 in NS(ARmv8-A) or S(ARmv8-R)
+		state. but booting NuttX have different ELs and state while with
+		different platform, if NuttX runing at wrong ELs or state it will
+		be not normal anymore. So we need to print something in arm64_head.S
+		to debug this situation.
+		Enabling this option will need to implement up_earlyserialinit and
+		up_lowputc functions just you see in qemu, if you not sure,
+		keeping the option disable.
 
 config ARCH_CORTEX_A53
 	bool
