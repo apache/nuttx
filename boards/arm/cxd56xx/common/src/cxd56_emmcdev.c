@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
+
 #include <stdio.h>
 #include <errno.h>
 #include <debug.h>
@@ -80,6 +82,47 @@ int board_emmc_initialize(void)
   if (ret < 0)
     {
       ferr("ERROR: Failed to mount the eMMC. %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_emmc_finalize
+ *
+ * Description:
+ *   Finalize the eMMC device and umount the file system.
+ *
+ ****************************************************************************/
+
+int board_emmc_finalize(void)
+{
+  int ret;
+
+  /* Un-mount the eMMC device */
+
+  ret = nx_umount2("/mnt/emmc", MNT_DETACH);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to umount the eMMC. %d\n", ret);
+      return ret;
+    }
+
+  /* Uninitialize the eMMC device */
+
+  ret = cxd56_emmcuninitialize();
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to uninitialize eMMC. %d\n", ret);
+      return ret;
+    }
+
+  /* Power off the eMMC device */
+
+  ret = board_power_control(POWER_EMMC, false);
+  if (ret)
+    {
+      ferr("ERROR: Failed to power off eMMC. %d\n", ret);
     }
 
   return ret;
