@@ -497,6 +497,12 @@ choice
 	prompt "LCD SPI connection"
 	default LCD_ON_EXTENSION_BOARD
 
+config LCD_ON_LTE_EXTENSION_BOARD
+	bool "LTE extension board: SPI3"
+	select CXD56_SPI3
+	---help---
+		Display connected to LTE extension board.
+
 config LCD_ON_EXTENSION_BOARD
 	bool "Extension board: SPI4"
 	select CXD56_SPI4
@@ -609,7 +615,7 @@ endchoice
 
 endif
 
-if LCD_ON_EXTENSION_BOARD
+if LCD_ON_EXTENSION_BOARD || LCD_ON_LTE_EXTENSION_BOARD
 
 choice
 	prompt "LCD ILI934x RST Pin selection"
