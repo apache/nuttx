@@ -114,7 +114,7 @@ endif
 ifeq ($(CONFIG_NRF52_SOFTDEVICE_CONTROLLER),y)
 
 NRFXLIB_UNPACK  := sdk-nrfxlib
-NRFXLIB_VER     := 1.4.2
+NRFXLIB_VER     := 2.3.0
 NRFXLIB_REF     := v$(NRFXLIB_VER)
 NRFXLIB_TGZ     := $(NRFXLIB_REF).tar.gz
 NRFXLIB_URL     := https://github.com/nrfconnect/sdk-nrfxlib/archive
@@ -148,13 +148,7 @@ INCLUDES += \
 	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)include) \
 	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)include)
 
-ifeq ($(CONFIG_ARCH_CHIP_NRF52832),y)
-	CFLAGS += -DNRF52832_XXAB
-else
-	ifeq ($(CONFIG_ARCH_CHIP_NRF52840),y)
-		CFLAGS += -DNRF52840_XXAB
-	endif
-endif
+CFLAGS += -DNRF52_SERIES
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 	LIB_VARIANT=hard-float
@@ -166,6 +160,13 @@ EXTRA_LIBPATHS += \
 	-L $(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)lib$(DELIM)cortex-m4$(DELIM)$(LIB_VARIANT) \
 	-L $(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)lib$(DELIM)cortex-m4$(DELIM)$(LIB_VARIANT)
 
-EXTRA_LIBS += -lmpsl -lsoftdevice_controller_s$(CONFIG_NRF52_SDC_VERSION)
+EXTRA_LIBS += -lmpsl
+ifeq ($(CONFIG_NRF52_SDC_PERIPHERAL),y)
+  EXTRA_LIBS += -lsoftdevice_controller_peripheral
+else ifeq ($(CONFIG_NRF52_SDC_CENTRAL),y)
+  EXTRA_LIBS += -lsoftdevice_controller_central
+else ifeq ($(CONFIG_NRF52_SDC_MULTIROLE),y)
+  EXTRA_LIBS += -lsoftdevice_controller_multirole
+endif
 
 endif

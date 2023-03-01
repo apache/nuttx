@@ -664,6 +664,8 @@ menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	select ARMV7M_USEBASEPRI
 	select ARCH_RAMVECTORS
 	select ARCH_IRQPRIO
+	select CRYPTO
+	select CRYPTO_RANDOM_POOL
 	depends on NRF52_LFCLK_XTAL
 	---help---
 		This enables use of Nordic SoftDevice controller
@@ -671,11 +673,26 @@ menuconfig NRF52_SOFTDEVICE_CONTROLLER
 		full SoftDevice, which only includes the BLE
 		controller implementation.
 
-		It makes use of RTC0, TIMER0, RADIO and RNG, so
+		It makes use of RTC0, TIMER0 and RADIO so
 		these will be unavailable for direct use by user.
 		It also makes use of PPI channel range 17-31.
 
 if NRF52_SOFTDEVICE_CONTROLLER
+
+choice
+	prompt "BLE Controller role"
+	default NRF52_SDC_PERIPHERAL
+
+config NRF52_SDC_PERIPHERAL
+	bool "BLE Peripheral role"
+
+config NRF52_SDC_MULTIROLE
+	bool "BLE Multi role"
+
+config NRF52_SDC_CENTRAL
+	bool "BLE Central role"
+
+endchoice
 
 config NRF52_SDC_CLOCK_ACCURACY
 	int "Clock Accuracy [PPM]"
@@ -684,24 +701,37 @@ config NRF52_SDC_CLOCK_ACCURACY
 		Select the clock accuracy depending on the chosen low-frequency clock
 		source
 
-config NRF52_SDC_SLAVE_COUNT
-	int "Number of slave roles to support (also master)"
-	default 1
+config NRF52_SDC_PERIPHERAL_COUNT
+	int "Number of peripheral roles to support (also central)"
+	default 1 if !NRF52_SDC_CENTRAL
+	default 0 if NRF52_SDC_CENTRAL
 	---help---
-		This controls how many slave connections will be supported. It also
-		determines the number of master roles from the following:
+		This controls how many peripheral connections will be supported. It also
+		determines the number of central roles from the following:
 
-		MASTER_ROLES = CONFIG_BLUETOOTH_MAX_CONN - NRF52_SDC_SLAVE_COUNT
+		CENTRAL_ROLES = CONFIG_BLUETOOTH_MAX_CONN - NRF52_SDC_PERIPHERAL_COUNT
 
 		So by choosing these two variables you can control both capabilities.
 
 config NRF52_SDC_ADVERTISING
 	bool "Support advertising"
 	default y
+	depends on !NRF52_SDC_CENTRAL
 
 config NRF52_SDC_SCANNING
 	bool "Support scanning"
 	default y
+	depends on !NRF52_SDC_PERIPHERAL
+
+if NRF52_SDC_SCANNING
+
+config NRF52_SDC_SCAN_BUFFER_COUNT
+	int "Scanning buffer count"
+	default 3
+	---help---
+		The minimum allowed number of buffers is 2.
+
+endif
 
 config NRF52_SDC_LE_2M_PHY
 	bool "Support LE 2M PHY"
@@ -711,19 +741,11 @@ config NRF52_SDC_LE_CODED_PHY
 	bool "Support LE Coded PHY"
 	default n if ARCH_CHIP_NRF52832
 	default y if ARCH_CHIP_NRF52840
+	depends on NRF52_SDC_MULTIROLE
 
 config NRF52_SDC_DLE
 	bool "Support Data Length Extension (DLE)"
 	default y
-
-config NRF52_SDC_VERSION
-	int "SoftDevice version"
-	default 132 if ARCH_CHIP_NRF52832
-	default 140 if ARCH_CHIP_NRF52840
-	---help---
-		The softdevice version to use. This depends on the particular chip
-		to use. See official Nordic documentation on which chips are supported
-		in each version.
 
 config NRF52_BLE_TTY_NAME
 	string "BLE TTY device name"
