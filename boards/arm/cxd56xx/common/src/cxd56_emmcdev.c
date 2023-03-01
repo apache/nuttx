@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <arch/board/board.h>
 #include "cxd56_emmc.h"
@@ -41,6 +42,10 @@
 #ifndef CONFIG_SFC_DEVNO
 #  define CONFIG_SFC_DEVNO 0
 #endif
+
+/* EMMC power-on time in ms */
+
+#define EMMC_POWER_ON_WAIT_MSEC 10
 
 /****************************************************************************
  * Public Functions
@@ -67,12 +72,19 @@ int board_emmc_initialize(void)
       return -ENODEV;
     }
 
+  if (POWER_EMMC != PMIC_NONE)
+    {
+      /* Wait time until eMMC device is turned power on */
+
+      nxsig_usleep(EMMC_POWER_ON_WAIT_MSEC * USEC_PER_MSEC);
+    }
+
   /* Initialize the eMMC device */
 
   ret = cxd56_emmcinitialize();
   if (ret < 0)
     {
-      ferr("ERROR: Failed to initialize eMMC. %d\n ", ret);
+      ferr("ERROR: Failed to initialize eMMC. %d\n", ret);
       return -ENODEV;
     }
 
