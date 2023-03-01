@@ -440,6 +440,16 @@ int cxd56_bringup(void)
   board_automount_initialize();
 #endif
 
+#if defined(CONFIG_CXD56_EMMC) && !defined(CONFIG_CXD56_EMMC_LATE_INITIALIZE)
+  /* Mount the eMMC block driver */
+
+  ret = board_emmc_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize eMMC: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_CPUFREQ_RELEASE_LOCK
   /* Enable dynamic clock control and CPU clock down for power saving */
 
