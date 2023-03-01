@@ -396,6 +396,11 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
 
       case MPFS_I2C_ST_LOST_ARB:
+
+        /* Clear interrupt. */
+
+        modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+        clear_irq = 0u;
         modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK,
                     MPFS_I2C_CTRL_STA_MASK);
         break;
@@ -416,6 +421,10 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
           }
         else if (msg->flags & I2C_M_NOSTOP)
           {
+            /* Clear interrupt. */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            clear_irq = 0u;
             modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK,
                         MPFS_I2C_CTRL_STA_MASK);
 
