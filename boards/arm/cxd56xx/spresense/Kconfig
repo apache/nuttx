@@ -765,6 +765,14 @@ config CXD56_LTE_LATE_INITIALIZE
 
 endif # CXD56_LTE
 
+config CXD56_EMMC_LATE_INITIALIZE
+	bool "eMMC driver late initialize"
+	default n
+	depends on CXD56_EMMC
+	---help---
+		eMMC driver can be initialized on an application code after system booted up
+		by enabling this configuration switch.
+
 config CXD56_BINARY
 	bool "spk binary format"
 	default n
