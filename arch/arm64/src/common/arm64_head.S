@@ -196,11 +196,7 @@ primary_core:
     bl    up_earlyserialinit
 #endif
 
-#ifdef CONFIG_SMP
     PRINT(primary_boot, "- Ready to Boot Primary CPU\r\n")
-#else
-    PRINT(cpu_boot, "- Ready to Boot CPU\r\n")
-#endif
 
 cpu_boot:
 
