@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <ctype.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -37,6 +38,7 @@
 #include <spawn.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/ascii.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/sched.h>
@@ -887,6 +889,45 @@ static ssize_t uart_read(FAR struct file *filep,
 
           *buffer++ = ch;
           recvd++;
+
+          if (dev->isconsole
+#ifdef CONFIG_SERIAL_TERMIOS
+              || (dev->tc_iflag & ECHO)
+#endif
+             )
+            {
+              /* Check for the beginning of a VT100 escape sequence, 3 byte */
+
+              if (ch == ASCII_ESC)
+                {
+                  /* Mark that we should skip 2 more bytes */
+
+                  dev->escape = 2;
+                  continue;
+                }
+              else if (dev->escape == 2 && ch != ASCII_LBRACKET)
+                {
+                  /* It's not an <esc>[x 3 byte sequence, show it */
+
+                  dev->escape = 0;
+                }
+
+              /* Echo if the character is not a control byte */
+
+              if ((!iscntrl(ch & 0xff) || (ch == '\n')) && dev->escape == 0)
+                {
+                    {
+                      uart_putxmitchar(dev, ch, true);
+                    }
+                }
+
+              /* Skipping character count down */
+
+              if (dev->escape > 0)
+                {
+                  dev->escape--;
+                }
+            }
         }
 
 #ifdef CONFIG_DEV_SERIAL_FULLBLOCKS
@@ -1068,6 +1109,14 @@ static ssize_t uart_read(FAR struct file *filep,
               uart_enablerxint(dev);
             }
         }
+    }
+
+  if (recvd > 0)
+    {
+#ifdef CONFIG_SERIAL_TXDMA
+      uart_dmatxavail(dev);
+#endif
+      uart_enabletxint(dev);
     }
 
 #ifdef CONFIG_SERIAL_RXDMA
@@ -1770,7 +1819,11 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
       /* Convert CR to LF by default for console */
 
-      dev->tc_iflag |= ICRNL;
+      dev->tc_iflag |= ICRNL | ECHO;
+
+      /* Clear escape counter */
+
+      dev->escape = 0;
     }
 #endif
 
