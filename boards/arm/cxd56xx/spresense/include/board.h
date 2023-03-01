@@ -201,7 +201,13 @@ enum board_power_device
 
   POWER_BTBLE           = PMIC_NONE,
   POWER_SENSOR          = PMIC_NONE,
+#if defined(CONFIG_CXD56_EMMC_POWER_PIN_I2S0_BCK)
+  POWER_EMMC            = CHIP_GPIO(PIN_I2S0_BCK),
+#elif defined(CONFIG_CXD56_EMMC_POWER_PIN_UART2_CTS)
+  POWER_EMMC            = CHIP_GPIO(PIN_UART2_CTS),
+#else
   POWER_EMMC            = PMIC_NONE,
+#endif
   POWER_LTE             = PMIC_GPO(2),
 };
 
