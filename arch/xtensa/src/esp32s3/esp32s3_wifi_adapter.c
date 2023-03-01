@@ -2100,11 +2100,19 @@ static void esp_evt_work_cb(void *arg)
 #ifdef ESP32S3_WLAN_HAS_STA
           case WIFI_ADPT_EVT_STA_START:
             wlinfo("Wi-Fi sta start\n");
+
             g_sta_connected = false;
             ret = esp_wifi_set_ps(WIFI_PS_NONE);
             if (ret)
               {
                 wlerr("Failed to set power save type\n");
+                break;
+              }
+
+            ret = esp_wifi_get_config(WIFI_IF_STA, &g_sta_wifi_cfg);
+            if (ret)
+              {
+                wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
               }
             break;
 
@@ -2144,9 +2152,14 @@ static void esp_evt_work_cb(void *arg)
             break;
 #endif /* ESP32S3_WLAN_HAS_STA */
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
           case WIFI_ADPT_EVT_AP_START:
             wlinfo("INFO: Wi-Fi softap start\n");
+            ret = esp_wifi_get_config(WIFI_IF_AP, &g_softap_wifi_cfg);
+            if (ret)
+              {
+                wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+              }
             break;
 
           case WIFI_ADPT_EVT_AP_STOP:
@@ -2160,7 +2173,7 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_AP_STADISCONNECTED:
             wlinfo("INFO: Wi-Fi station leave\n");
             break;
-#endif
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
           default:
             break;
         }
@@ -3889,6 +3902,8 @@ static uint8_t wifi_coex_get_schm_curr_period(void)
 
 static void *wifi_coex_get_schm_curr_phase(void)
 {
+  DEBUGPANIC();
+
   return NULL;
 }
 
@@ -4921,12 +4936,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       return -EINVAL;
     }
 
-  ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
-  if (ret)
-    {
-      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-      return wifi_errno_trans(ret);
-    }
+  wifi_cfg = g_sta_wifi_cfg;
 
   if (set)
     {
@@ -4936,12 +4946,31 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       wifi_cfg.sta.pmf_cfg.capable = true;
       wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
 
-      ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
-      if (ret)
+      if (g_sta_connected)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_sta_disconnect();
+          if (ret)
+            {
+              wlerr("Failed to disconnect from Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
+
+          ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
+
+          ret = esp_wifi_sta_connect();
+          if (ret)
+            {
+              wlerr("Failed to connect to Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
         }
+
+      g_sta_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -5046,12 +5075,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
       return -EINVAL;
     }
 
-  ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
-  if (ret)
-    {
-      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-      return wifi_errno_trans(ret);
-    }
+  wifi_cfg = g_sta_wifi_cfg;
 
   if (set)
     {
@@ -5060,12 +5084,31 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
       wifi_cfg.sta.threshold.authmode = WIFI_AUTH_OPEN;
       wifi_cfg.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
-      ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
-      if (ret)
+      if (g_sta_connected)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_sta_disconnect();
+          if (ret)
+            {
+              wlerr("Failed to disconnect from Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
+
+          ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
+
+          ret = esp_wifi_sta_connect();
+          if (ret)
+            {
+              wlerr("Failed to connect to Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
         }
+
+      g_sta_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -5122,27 +5165,41 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
   struct sockaddr *sockaddr;
   char *pdata;
 
-  ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
-  if (ret)
-    {
-      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-      return wifi_errno_trans(ret);
-    }
-
   sockaddr = &iwr->u.ap_addr;
   pdata    = sockaddr->sa_data;
+
+  wifi_cfg = g_sta_wifi_cfg;
 
   if (set)
     {
       wifi_cfg.sta.bssid_set = true;
       memcpy(wifi_cfg.sta.bssid, pdata, MAC_LEN);
 
-      ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
-      if (ret)
+      if (g_sta_connected)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_sta_disconnect();
+          if (ret)
+            {
+              wlerr("Failed to disconnect from Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
+
+          ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
+
+          ret = esp_wifi_sta_connect();
+          if (ret)
+            {
+              wlerr("Failed to connect to Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
         }
+
+      g_sta_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -5182,6 +5239,13 @@ int esp_wifi_sta_connect(void)
     }
 
   g_sta_reconnect = true;
+
+  ret = esp_wifi_set_config(WIFI_IF_STA, &g_sta_wifi_cfg);
+  if (ret)
+    {
+      wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
 
   ret = esp_wifi_connect();
   if (ret)
@@ -5376,24 +5440,38 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
 int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
 {
   int ret;
-  wifi_config_t wifi_cfg;
 
   if (set && (iwr->u.freq.flags == IW_FREQ_FIXED))
     {
-      ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
-      if (ret)
-        {
-          wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
-        }
+      wifi_config_t wifi_cfg = g_sta_wifi_cfg;
 
       wifi_cfg.sta.channel = esp_freq_to_channel(iwr->u.freq.m);
-      ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
-      if (ret)
+
+      if (g_sta_connected)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_sta_disconnect();
+          if (ret)
+            {
+              wlerr("Failed to disconnect from Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
+
+          ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
+
+          ret = esp_wifi_sta_connect();
+          if (ret)
+            {
+              wlerr("Failed to connect to Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
         }
+
+      g_sta_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -5989,16 +6067,11 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
       return -EINVAL;
     }
 
-  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
-  ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
-  if (ret)
-    {
-      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-      return wifi_errno_trans(ret);
-    }
-
   pdata = ext->key;
   len   = ext->key_len;
+
+  wifi_cfg = g_softap_wifi_cfg;
+
   if (set)
     {
       /* Clear the password field and copy the user password to it */
@@ -6037,12 +6110,17 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
             }
         }
 
-      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
-      if (ret)
+      if (g_softap_started)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
         }
+
+      g_softap_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -6105,25 +6183,24 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
       return -EINVAL;
     }
 
-  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
-  ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
-  if (ret)
-    {
-      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-      return wifi_errno_trans(ret);
-    }
+  wifi_cfg = g_softap_wifi_cfg;
 
   if (set)
     {
       memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.ap.ssid, pdata, len);
       wifi_cfg.ap.ssid_len = len;
-      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
-      if (ret)
+      if (g_softap_started)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
         }
+
+      g_softap_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -6186,6 +6263,15 @@ int esp_wifi_softap_bssid(struct iwreq *iwr, bool set)
 
 int esp_wifi_softap_connect(void)
 {
+  int ret;
+
+  ret = esp_wifi_set_config(WIFI_IF_AP, &g_softap_wifi_cfg);
+  if (ret)
+    {
+      wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
   return OK;
 }
 
@@ -6256,16 +6342,10 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
   int cmd;
   wifi_config_t wifi_cfg;
 
+  wifi_cfg = g_softap_wifi_cfg;
+
   if (set)
     {
-      memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
-      ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
-      if (ret)
-        {
-          wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
-        }
-
       cmd = iwr->u.param.flags & IW_AUTH_INDEX;
       switch (cmd)
         {
@@ -6337,12 +6417,19 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
             return -EINVAL;
         }
 
-      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
-      if (ret)
+      if (g_softap_started &&
+          (strlen((const char *)wifi_cfg.ap.password) ||
+           wifi_cfg.ap.authmode == WIFI_AUTH_OPEN))
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
         }
+
+      g_softap_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -6373,13 +6460,7 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
   int ret;
   wifi_config_t wifi_cfg;
 
-  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
-  ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
-  if (ret)
-    {
-      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
-      return wifi_errno_trans(ret);
-    }
+  wifi_cfg = g_softap_wifi_cfg;
 
   if (set)
     {
@@ -6387,12 +6468,17 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
 
       wifi_cfg.ap.channel = channel;
 
-      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
-      if (ret)
+      if (g_softap_started)
         {
-          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
         }
+
+      g_softap_wifi_cfg = wifi_cfg;
     }
   else
     {
