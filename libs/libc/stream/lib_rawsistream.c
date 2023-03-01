@@ -67,6 +67,33 @@ static int rawsistream_getc(FAR struct lib_sistream_s *this)
 }
 
 /****************************************************************************
+ * Name: rawsistream_gets
+ ****************************************************************************/
+
+static int rawsistream_gets(FAR struct lib_instream_s *this,
+                            FAR void *buffer, int len)
+{
+  FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
+  int nread;
+
+  DEBUGASSERT(this && rthis->fd >= 0);
+
+  /* Attempt to read a buffer */
+
+  nread = _NX_READ(rthis->fd, buffer, len);
+  if (nread >= 0)
+    {
+      this->nget += nread;
+    }
+  else
+    {
+      nread = _NX_GETERRVAL(nread);
+    }
+
+  return nread;
+}
+
+/****************************************************************************
  * Name: rawsistream_seek
  ****************************************************************************/
 
@@ -103,6 +130,7 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
 void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd)
 {
   instream->public.getc = rawsistream_getc;
+  instream->public.gets = rawsistream_gets;
   instream->public.seek = rawsistream_seek;
   instream->public.nget = 0;
   instream->fd          = fd;

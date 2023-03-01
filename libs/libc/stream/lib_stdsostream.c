@@ -64,6 +64,42 @@ static void stdsostream_putc(FAR struct lib_sostream_s *this, int ch)
 }
 
 /****************************************************************************
+ * Name: stdsostream_puts
+ ****************************************************************************/
+
+static int stdsostream_puts(FAR struct lib_sostream_s *this,
+                            FAR const void *buffer, int len)
+{
+  FAR struct lib_stdsostream_s *sthis = (FAR struct lib_stdsostream_s *)this;
+  int result;
+
+  DEBUGASSERT(this && sthis->stream);
+
+  /* Loop until the character is successfully transferred or an irrecoverable
+   * error occurs.
+   */
+
+  do
+    {
+      result = lib_fwrite(buffer, len, sthis->stream);
+      if (result >= 0)
+        {
+          this->nput += result;
+          return result;
+        }
+
+      result = _NX_GETERRVAL(result);
+
+      /* EINTR (meaning that fputc was interrupted by a signal) is the only
+       * recoverable error.
+       */
+    }
+  while (result == -EINTR);
+
+  return result;
+}
+
+/****************************************************************************
  * Name: stdsostream_flush
  ****************************************************************************/
 
@@ -117,6 +153,7 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
   /* Select the putc operation */
 
   outstream->public.putc = stdsostream_putc;
+  outstream->public.puts = stdsostream_puts;
 
   /* Select the correct flush operation.  This flush is only called when
    * a newline is encountered in the output stream.  However, we do not

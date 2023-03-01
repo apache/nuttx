@@ -74,6 +74,44 @@ static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
 }
 
 /****************************************************************************
+ * Name: rawsostream_puts
+ ****************************************************************************/
+
+static int rawsostream_puts(FAR struct lib_sostream_s *this,
+                            FAR const void *buffer, int len)
+{
+  FAR struct lib_rawsostream_s *rthis = (FAR struct lib_rawsostream_s *)this;
+  int nwritten;
+
+  DEBUGASSERT(this && rthis->fd >= 0);
+
+  /* Loop until the buffer is successfully transferred or until an
+   * irrecoverable error occurs.
+   */
+
+  do
+    {
+      nwritten = _NX_WRITE(rthis->fd, buffer, len);
+      if (nwritten >= 0)
+        {
+          this->nput += nwritten;
+          return nwritten;
+        }
+
+      /* The only expected error is EINTR, meaning that the write operation
+       * was awakened by a signal.  Zero would not be a valid return value
+       * from _NX_WRITE().
+       */
+
+      nwritten = _NX_GETERRVAL(nwritten);
+      DEBUGASSERT(nwritten < 0);
+    }
+  while (nwritten == -EINTR);
+
+  return nwritten;
+}
+
+/****************************************************************************
  * Name: rawsostream_seek
  ****************************************************************************/
 
@@ -110,6 +148,7 @@ static off_t rawsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
 void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd)
 {
   outstream->public.putc  = rawsostream_putc;
+  outstream->public.puts  = rawsostream_puts;
   outstream->public.flush = lib_snoflush;
   outstream->public.seek  = rawsostream_seek;
   outstream->public.nput  = 0;

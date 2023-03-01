@@ -58,6 +58,35 @@ static int memsistream_getc(FAR struct lib_sistream_s *this)
 }
 
 /****************************************************************************
+ * Name: meminstream_gets
+ ****************************************************************************/
+
+static int memsistream_gets(FAR struct lib_instream_s *this,
+                            FAR void *buffer, int len)
+{
+  FAR struct lib_memsistream_s *mthis = (FAR struct lib_memsistream_s *)this;
+  int ret;
+
+  DEBUGASSERT(this);
+
+  /* Get the buffer (if any) from the stream */
+
+  if (this->nget < mthis->buflen)
+    {
+      ret = mthis->buflen - this->nget;
+      ret = ret < len ? ret : len;
+      this->nget += ret;
+      memcpy(buffer, mthis->buffer, ret);
+    }
+  else
+    {
+      ret = EOF;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: memsistream_seek
  ****************************************************************************/
 
@@ -125,6 +154,7 @@ void lib_memsistream(FAR struct lib_memsistream_s *instream,
                      FAR const char *bufstart, int buflen)
 {
   instream->public.getc = memsistream_getc;
+  instream->public.gets = memsistream_gets;
   instream->public.seek = memsistream_seek;
   instream->public.nget = 0;          /* Total number of characters read */
   instream->buffer      = bufstart;   /* Start of buffer */
