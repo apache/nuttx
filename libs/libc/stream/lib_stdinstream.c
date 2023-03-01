@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <assert.h>
+#include <stdio.h>
 
 #include "libc.h"
 
@@ -53,6 +54,33 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
 }
 
 /****************************************************************************
+ * Name: stdinstream_gets
+ ****************************************************************************/
+
+static int stdinstream_gets(FAR struct lib_instream_s *this,
+                            FAR void *buffer, int len)
+{
+  FAR struct lib_stdinstream_s *sthis = (FAR struct lib_stdinstream_s *)this;
+  int nread = 0;
+
+  DEBUGASSERT(this);
+
+  /* Get the buffer from the incoming stream */
+
+  nread = fread(buffer, len, 1, sthis->stream);
+  if (nread >= 0)
+    {
+      this->nget += nread;
+    }
+  else
+    {
+      nread = _NX_GETERRVAL(nread);
+    }
+
+  return nread;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -77,6 +105,7 @@ void lib_stdinstream(FAR struct lib_stdinstream_s *instream,
                      FAR FILE *stream)
 {
   instream->public.getc = stdinstream_getc;
+  instream->public.gets = stdinstream_gets;
   instream->public.nget = 0;
   instream->stream      = stream;
 }

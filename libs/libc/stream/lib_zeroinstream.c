@@ -36,6 +36,14 @@ static int zeroinstream_getc(FAR struct lib_instream_s *this)
   return 0;
 }
 
+static int zeroinstream_gets(FAR struct lib_instream_s *this,
+                             FAR void *buffer, int len)
+{
+  this->nget += len;
+  memset(buffer, 0, len);
+  return len;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,5 +67,6 @@ static int zeroinstream_getc(FAR struct lib_instream_s *this)
 void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream)
 {
   zeroinstream->getc = zeroinstream_getc;
+  zeroinstream->gets = zeroinstream_gets;
   zeroinstream->nget = 0;
 }

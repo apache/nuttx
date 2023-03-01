@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "libc.h"
 
@@ -62,6 +63,43 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
        */
     }
   while (get_errno() == EINTR);
+}
+
+/****************************************************************************
+ * Name: stdoutstream_puts
+ ****************************************************************************/
+
+static int stdoutstream_puts(FAR struct lib_outstream_s *this,
+                             FAR const void *buffer, int len)
+{
+  FAR struct lib_stdoutstream_s *sthis =
+                               (FAR struct lib_stdoutstream_s *)this;
+  int result;
+
+  DEBUGASSERT(this && sthis->stream);
+
+  /* Loop until the buffer is successfully transferred or an irrecoverable
+   * error occurs.
+   */
+
+  do
+    {
+      result = fwrite(buffer, len, 1, sthis->stream);
+      if (result >= 0)
+        {
+          this->nput += result;
+          return result;
+        }
+
+      result = _NX_GETERRVAL(result);
+
+      /* EINTR (meaning that fputc was interrupted by a signal) is the only
+       * recoverable error.
+       */
+    }
+  while (result == -EINTR);
+
+  return result;
 }
 
 /****************************************************************************
@@ -106,6 +144,7 @@ void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
   /* Select the putc operation */
 
   outstream->public.putc = stdoutstream_putc;
+  outstream->public.puts = stdoutstream_puts;
 
   /* Select the correct flush operation.  This flush is only called when
    * a newline is encountered in the output stream.  However, we do not

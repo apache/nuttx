@@ -55,6 +55,31 @@ static void memsostream_putc(FAR struct lib_sostream_s *this, int ch)
 }
 
 /****************************************************************************
+ * Name: memoutstream_puts
+ ****************************************************************************/
+
+static int memsostream_puts(FAR struct lib_sostream_s *this,
+                            FAR const void *buf, int len)
+{
+  int ncopy;
+  FAR struct lib_memsostream_s *mthis = (FAR struct lib_memsostream_s *)this;
+
+  DEBUGASSERT(this);
+
+  ncopy = mthis->offset + len + 1 < mthis->buflen ? len :
+          mthis->buflen - mthis->offset - 1;
+  if (ncopy > 0)
+    {
+      memcpy(mthis->buffer + mthis->offset, buf, ncopy);
+      mthis->public.nput += ncopy;
+      mthis->offset += ncopy;
+      mthis->buffer[mthis->offset] = '\0';
+    }
+
+  return ncopy;
+}
+
+/****************************************************************************
  * Name: memsostream_seek
  ****************************************************************************/
 
@@ -122,6 +147,7 @@ void lib_memsostream(FAR struct lib_memsostream_s *outstream,
                      FAR char *bufstart, int buflen)
 {
   outstream->public.putc  = memsostream_putc;
+  outstream->public.puts  = memsostream_puts;
   outstream->public.flush = lib_snoflush;
   outstream->public.seek  = memsostream_seek;
   outstream->public.nput  = 0;          /* Total number of characters written */

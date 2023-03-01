@@ -37,6 +37,14 @@ static int nullinstream_getc(FAR struct lib_instream_s *this)
   return EOF;
 }
 
+static int nullinstream_gets(FAR struct lib_instream_s *this,
+                             FAR void *buffer, int len)
+{
+  UNUSED(buffer);
+  UNUSED(len);
+  return EOF;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,5 +68,6 @@ static int nullinstream_getc(FAR struct lib_instream_s *this)
 void lib_nullinstream(FAR struct lib_instream_s *nullinstream)
 {
   nullinstream->getc = nullinstream_getc;
+  nullinstream->gets = nullinstream_gets;
   nullinstream->nget = 0;
 }

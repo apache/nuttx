@@ -67,6 +67,33 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
 }
 
 /****************************************************************************
+ * Name: rawinstream_getc
+ ****************************************************************************/
+
+static int rawinstream_gets(FAR struct lib_instream_s *this,
+                            FAR void *buffer, int len)
+{
+  FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
+  int nread;
+
+  DEBUGASSERT(this && rthis->fd >= 0);
+
+  /* Attempt to read one character */
+
+  nread = _NX_READ(rthis->fd, buffer, len);
+  if (nread >= 0)
+    {
+      this->nget += nread;
+    }
+  else
+    {
+      nread = _NX_GETERRVAL(nread);
+    }
+
+  return nread;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -90,6 +117,7 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
 void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd)
 {
   instream->public.getc = rawinstream_getc;
+  instream->public.gets = rawinstream_gets;
   instream->public.nget = 0;
   instream->fd          = fd;
 }
