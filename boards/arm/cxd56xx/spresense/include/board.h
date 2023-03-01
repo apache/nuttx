@@ -29,6 +29,7 @@
 #include <nuttx/irq.h>
 #include <sys/boardctl.h>
 #include <stdbool.h>
+#include <arch/chip/pin.h>
 
 #include "board_lcdpins.h"
 
@@ -166,11 +167,13 @@
 #define PMIC_TYPE_LSW       (1u << 8)
 #define PMIC_TYPE_GPO       (1u << 9)
 #define PMIC_TYPE_DDCLDO    (1u << 10)
+#define CHIP_TYPE_GPIO      (1u << 11)
 #define PMIC_GET_TYPE(v)    ((v) & 0xff00)
 #define PMIC_GET_CH(v)      ((v) & 0x00ff)
 #define PMIC_LSW(n)         (PMIC_TYPE_LSW | (1u << (n)))
 #define PMIC_GPO(n)         (PMIC_TYPE_GPO | (1u << (n)))
 #define PMIC_DDCLDO(n)      (PMIC_TYPE_DDCLDO | (1u << (n)))
+#define CHIP_GPIO(n)        (CHIP_TYPE_GPIO | (n))
 
 enum board_power_device
 {
