@@ -229,7 +229,9 @@ static void *create_image(struct elf_file *elf, int core, char *savename,
   Elf32_Sym *sym;
   char *name;
   int snlen;
-  int nphs, psize, imgsize;
+  int nphs;
+  int psize;
+  int imgsize;
   int i;
   int j;
   uint32_t offset;
