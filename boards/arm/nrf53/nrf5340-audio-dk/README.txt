@@ -1,5 +1,5 @@
-nRF5340-DONGLE
-===============
+nRF5340-AUDIO-DK
+================
 
 README for NuttX port to NRF5340 Audio DK (PCA10121) boards.
 
