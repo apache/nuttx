@@ -200,6 +200,9 @@ int board_power_control(int target, bool en)
       pfunc = cxd56_pmic_set_ddc_ldo;
       break;
 #endif /* CONFIG_CXD56_PMIC */
+    case CHIP_TYPE_GPIO:
+      board_gpio_write(PMIC_GET_CH(target), en ? 1 : 0);
+      break;
     default:
       break;
     }
@@ -253,6 +256,10 @@ int board_power_control_tristate(int target, int value)
           usleep(1);
         }
     }
+  else if (PMIC_GET_TYPE(target) == CHIP_TYPE_GPIO)
+    {
+      board_gpio_write(PMIC_GET_CH(target), value);
+    }
   else
     {
       en = value ? true : false;
@@ -274,6 +281,7 @@ bool board_power_monitor(int target)
 {
   bool ret = false;
   bool (*pfunc)(uint8_t chset) = NULL;
+  int  status;
 
   switch (PMIC_GET_TYPE(target))
     {
@@ -288,6 +296,10 @@ bool board_power_monitor(int target)
       pfunc = cxd56_pmic_get_ddc_ldo;
       break;
 #endif /* CONFIG_CXD56_PMIC */
+    case CHIP_TYPE_GPIO:
+      status = board_gpio_read(PMIC_GET_CH(target));
+      ret = (status == 1);
+      break;
     default:
       break;
     }
