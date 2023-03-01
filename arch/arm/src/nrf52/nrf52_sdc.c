@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <stdlib.h>
 
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
@@ -49,46 +50,118 @@
 #include <mpsl.h>
 #include <sdc.h>
 #include <sdc_hci.h>
+#include <sdc_soc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_SDC_SLAVE_COUNT) && \
-    CONFIG_SDC_SLAVE_COUNT > CONFIG_BLUETOOTH_MAX_CONN
-#  error "Cannot support more BLE slave roles than connections"
+/* Connections configuration ************************************************/
+
+#if defined(CONFIG_SDC_PERIPHERAL_COUNT) && \
+    CONFIG_SDC_PERIPHERAL_COUNT > CONFIG_BLUETOOTH_MAX_CONN
+#  error "Cannot support more BLE peripheral roles than connections"
 #endif
 
-#define SDC_MASTER_COUNT (CONFIG_BLUETOOTH_MAX_CONN - \
-                          CONFIG_NRF52_SDC_SLAVE_COUNT)
+#define SDC_CENTRAL_COUNT (CONFIG_BLUETOOTH_MAX_CONN - \
+                           CONFIG_NRF52_SDC_PERIPHERAL_COUNT)
 
-/* Todo: check central/peripheral against master/slave count */
+/* Validate number of connections for Peripheral and Central roles */
 
-#define MASTER_MEM_SIZE  (SDC_MEM_PER_MASTER_LINK( \
-                          SDC_DEFAULT_TX_PACKET_SIZE, \
-                          SDC_DEFAULT_RX_PACKET_SIZE, \
-                          SDC_DEFAULT_TX_PACKET_COUNT, \
-                          SDC_DEFAULT_RX_PACKET_COUNT) \
-                          + SDC_MEM_MASTER_LINKS_SHARED)
+#ifdef CONFIG_NRF52_SDC_PERIPHERAL
+#  if CONFIG_NRF52_SDC_PERIPHERAL_COUNT == 0
+#    error Peripheral role configured but peripheral count is 0
+#  endif
+#endif
+#ifdef CONFIG_NRF52_SDC_CENTRAL
+#  if SDC_CENTRAL_COUNT == 0
+#    error Central role configured but central count is 0
+#  endif
+#endif
 
-#define SLAVE_MEM_SIZE (SDC_MEM_PER_SLAVE_LINK( \
-                        SDC_DEFAULT_TX_PACKET_SIZE, \
-                        SDC_DEFAULT_RX_PACKET_SIZE, \
-                        SDC_DEFAULT_TX_PACKET_COUNT, \
-                        SDC_DEFAULT_RX_PACKET_COUNT) \
-                        + SDC_MEM_SLAVE_LINKS_SHARED)
+/* Memory configuration *****************************************************/
 
-#define MEMPOOL_SIZE  ((CONFIG_NRF52_SDC_SLAVE_COUNT * SLAVE_MEM_SIZE) + \
-                       (SDC_MASTER_COUNT * MASTER_MEM_SIZE))
+#define CENTRAL_MEM_SIZE  (SDC_MEM_PER_CENTRAL_LINK(        \
+                             SDC_DEFAULT_TX_PACKET_SIZE,    \
+                             SDC_DEFAULT_RX_PACKET_SIZE,    \
+                             SDC_DEFAULT_TX_PACKET_COUNT,   \
+                             SDC_DEFAULT_RX_PACKET_COUNT) + \
+                           SDC_MEM_CENTRAL_LINKS_SHARED)
+
+#define PERIPHERAL_MEM_SIZE (SDC_MEM_PER_PERIPHERAL_LINK(     \
+                               SDC_DEFAULT_TX_PACKET_SIZE,    \
+                               SDC_DEFAULT_RX_PACKET_SIZE,    \
+                               SDC_DEFAULT_TX_PACKET_COUNT,   \
+                               SDC_DEFAULT_RX_PACKET_COUNT) + \
+                             SDC_MEM_PERIPHERAL_LINKS_SHARED)
+
+/* Scan supported if central present */
+
+#ifdef CONFIG_NRF52_SDC_SCANNING
+#  if SDC_CENTRAL_COUNT == 0
+#    error Scanning enabled but central count is 0
+#  endif
+#endif
+
+/* Advertising supported if peripheral present */
+
+#ifdef CONFIG_NRF52_SDC_ADVERTISING
+#  if CONFIG_NRF52_SDC_PERIPHERAL_COUNT == 0
+#    error Advertising enabled but peripheral count is 0
+#  endif
+#endif
+
+/* Observer configuration */
+
+#ifdef CONFIG_NRF52_SDC_SCANNING
+#  if CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT < 2
+#    error The minimum allowed number of scan buffers is 2.
+#  endif
+#  define SCAN_MEM_SIZE (SDC_MEM_SCAN_BUFFER(CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT))
+#else
+#  define SCAN_MEM_SIZE (0)
+#endif
+
+/* Broadcaster configuration */
+
+#ifdef CONFIG_NRF52_SDC_ADVERTISING
+/* Advertising extensions not supported for now */
+
+#  define ADV_SET_COUNT (1)
+#  define ADV_BUF_SIZE  (SDC_DEFAULT_ADV_BUF_SIZE)
+#  define ADV_MEM_SIZE  (ADV_SET_COUNT * SDC_MEM_PER_ADV_SET(ADV_BUF_SIZE))
+#else
+#  define ADV_SET_COUNT (0)
+#  define ADV_MEM_SIZE  (0)
+#endif
+
+/* Periodic advertising not supported */
+
+#define PERIODIC_ADV_MEM_SIZE      (0)
+#define PERIODIC_ADV_RESP_MEM_SIZE (0)
+#define PERIODIC_ADV_LIST_MEM_SIZE (0)
+#define PERIODIC_SYNC_MEM_SIZE     (0)
+
+/* Memory poll size */
+
+#define MEMPOOL_SIZE  ((CONFIG_NRF52_SDC_PERIPHERAL_COUNT * PERIPHERAL_MEM_SIZE) + \
+                       (SDC_CENTRAL_COUNT * CENTRAL_MEM_SIZE)+ \
+                       SCAN_MEM_SIZE+ \
+                       ADV_MEM_SIZE + \
+                       PERIODIC_ADV_MEM_SIZE + \
+                       PERIODIC_ADV_RESP_MEM_SIZE + \
+                       PERIODIC_ADV_LIST_MEM_SIZE +\
+                       PERIODIC_SYNC_MEM_SIZE)
+
+/* BT address configuration *************************************************/
 
 #if (CONFIG_NRF52_SDC_PUB_ADDR > 0) ||          \
   defined(CONFIG_NRF52_SDC_FICR_STATIC_ADDR)
 #  define HAVE_BTADDR_CONFIGURE
 #endif
 
-/* Calls to sdc */
+/* Calls to MPSL ************************************************************/
 
-#define SDC_RNG_IRQHANDLER      sdc_RNG_IRQHandler
 #define MPSL_IRQ_CLOCK_HANDLER  MPSL_IRQ_CLOCK_Handler
 #define MPSL_IRQ_RTC0_HANDLER   MPSL_IRQ_RTC0_Handler
 #define MPSL_IRQ_TIMER0_HANDLER MPSL_IRQ_TIMER0_Handler
@@ -100,7 +173,7 @@
 
 struct nrf52_sdc_dev_s
 {
-  uint8_t mempool[MEMPOOL_SIZE];
+  uint8_t *mempool;  /* Must be 8 bytes aligned */
   uint8_t msg_buffer[HCI_MSG_BUFFER_MAX_SIZE];
 
   mutex_t lock;
@@ -146,7 +219,6 @@ static void low_prio_worker(void *arg);
 static int swi_isr(int irq, void *context, void *arg);
 static int power_clock_isr(int irq, void *context, void *arg);
 
-static void rng_handler(void);
 static void rtc0_handler(void);
 static void timer0_handler(void);
 static void radio_handler(void);
@@ -171,8 +243,13 @@ static const mpsl_clock_lfclk_cfg_t g_clock_config =
   .skip_wait_lfclk_started  = false
 };
 
+/* Must be 8 bytes aligned */
+
+static uint8_t g_sdc_mempool[MEMPOOL_SIZE] aligned_data(8);
+
 static struct nrf52_sdc_dev_s g_sdc_dev =
 {
+  .mempool = g_sdc_mempool,
   .lock = NXMUTEX_INITIALIZER,
 };
 
@@ -286,6 +363,7 @@ static void on_hci_worker(void *arg)
 
 static void on_hci(void)
 {
+  sdc_hci_msg_type_t type;
   bool check_again;
   size_t len;
   int ret;
@@ -298,56 +376,54 @@ static void on_hci(void)
        * buffer and then create an actual bt_buf_s, depending on msg length
        */
 
-      ret = sdc_hci_evt_get(g_sdc_dev.msg_buffer);
-
+      ret = sdc_hci_get(g_sdc_dev.msg_buffer, &type);
       if (ret == 0)
         {
-          struct bt_hci_evt_hdr_s *hdr =
-              (struct bt_hci_evt_hdr_s *)g_sdc_dev.msg_buffer;
+          if (type == SDC_HCI_MSG_TYPE_EVT)
+            {
+              struct bt_hci_evt_hdr_s *hdr =
+                (struct bt_hci_evt_hdr_s *)g_sdc_dev.msg_buffer;
 
-          len = sizeof(*hdr) + hdr->len;
+              len = sizeof(*hdr) + hdr->len;
 
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
-          if (hdr->evt == BT_HCI_EVT_CMD_COMPLETE)
-            {
-              struct hci_evt_cmd_complete_s *cmd_complete =
-                  (struct hci_evt_cmd_complete_s *)
-                      (g_sdc_dev.msg_buffer + sizeof(*hdr));
-              uint8_t *status = (uint8_t *)cmd_complete + 3;
+              if (hdr->evt == BT_HCI_EVT_CMD_COMPLETE)
+                {
+                  struct hci_evt_cmd_complete_s *cmd_complete =
+                    (struct hci_evt_cmd_complete_s *)
+                    (g_sdc_dev.msg_buffer + sizeof(*hdr));
+                  uint8_t *status = (uint8_t *)cmd_complete + 3;
 
-              wlinfo("received CMD_COMPLETE from softdevice "
-                     "(opcode: 0x%x, status: 0x%x)\n",
-                     cmd_complete->opcode, *status);
-            }
-          else
-            {
-              wlinfo("received HCI EVT from softdevice "
-                     "(evt: %d, len: %zu)\n", hdr->evt, len);
-            }
+                  wlinfo("received CMD_COMPLETE from softdevice "
+                         "(opcode: 0x%x, status: 0x%x)\n",
+                         cmd_complete->opcode, *status);
+                }
+              else
+                {
+                  wlinfo("received HCI EVT from softdevice "
+                         "(evt: %d, len: %zu)\n", hdr->evt, len);
+                }
 #endif
 
-          bt_netdev_receive(&g_bt_driver, BT_EVT,
-                            g_sdc_dev.msg_buffer, len);
-          check_again = true;
-        }
+              bt_netdev_receive(&g_bt_driver, BT_EVT,
+                                g_sdc_dev.msg_buffer, len);
+              check_again = true;
+            }
 
-      /* Same for ACL */
+          if (type == SDC_HCI_MSG_TYPE_DATA)
+            {
+              struct bt_hci_acl_hdr_s *hdr =
+                (struct bt_hci_acl_hdr_s *)g_sdc_dev.msg_buffer;
 
-      ret = sdc_hci_data_get(g_sdc_dev.msg_buffer);
+              wlinfo("received HCI ACL from softdevice (handle: %d)\n",
+                     hdr->handle);
 
-      if (ret == 0)
-        {
-          struct bt_hci_acl_hdr_s *hdr =
-              (struct bt_hci_acl_hdr_s *)g_sdc_dev.msg_buffer;
+              len = sizeof(*hdr) + hdr->len;
 
-          wlinfo("received HCI ACL from softdevice (handle: %d)\n",
-                 hdr->handle);
-
-          len = sizeof(*hdr) + hdr->len;
-
-          bt_netdev_receive(&g_bt_driver, BT_ACL_IN,
-                            g_sdc_dev.msg_buffer, len);
-          check_again = true;
+              bt_netdev_receive(&g_bt_driver, BT_ACL_IN,
+                                g_sdc_dev.msg_buffer, len);
+              check_again = true;
+            }
         }
     }
   while (check_again);
@@ -362,15 +438,6 @@ static int swi_isr(int irq, void *context, void *arg)
   work_queue(LPWORK, &g_sdc_dev.work, low_prio_worker, NULL, 0);
 
   return 0;
-}
-
-/****************************************************************************
- * Name: rng_handler
- ****************************************************************************/
-
-static void rng_handler(void)
-{
-  SDC_RNG_IRQHANDLER();
 }
 
 /****************************************************************************
@@ -418,18 +485,15 @@ static void radio_handler(void)
 
 static int nrf52_sdc_btaddr_configure(void)
 {
-#ifdef CONFIG_NRF52_SDC_FICR_STATIC_ADDR
-  struct sdc_hci_cmd_le_set_random_address_s   rand_addr;
-#endif
 #if CONFIG_NRF52_SDC_PUB_ADDR > 0
   struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s pub_addr;
 #endif
 #ifdef CONFIG_NRF52_SDC_FICR_STATIC_ADDR
-  uint32_t                              regval   = 0;
-  uint32_t                              addr[2];
-  uint32_t                              addrtype = 0;
+  struct sdc_hci_cmd_le_set_random_address_s   rand_addr;
+  uint32_t                                     addr[2];
+  uint32_t                                     addrtype = 0;
 #endif
-  int                                   ret      = OK;
+  int                                          ret      = OK;
 
 #ifdef CONFIG_NRF52_SDC_FICR_STATIC_ADDR
   /* Get device address type */
@@ -491,14 +555,275 @@ errout:
 #endif
 
 /****************************************************************************
+ * Name: nrf52_rand_prio_low_get
+ ****************************************************************************/
+
+static uint8_t nrf52_rand_prio_low_get(uint8_t *p_buff, uint8_t length)
+{
+  arc4random_buf(p_buff, length);
+  return length;
+}
+
+/****************************************************************************
+ * Name: nrf52_rand_prio_high_get
+ ****************************************************************************/
+
+static uint8_t nrf52_rand_prio_high_get(uint8_t *p_buff, uint8_t length)
+{
+  arc4random_buf(p_buff, length);
+  return length;
+}
+
+/****************************************************************************
+ * Name: nrf52_rand_poll
+ ****************************************************************************/
+
+static void nrf52_rand_poll(uint8_t *p_buff, uint8_t length)
+{
+  arc4random_buf(p_buff, length);
+}
+
+/****************************************************************************
+ * Name: nrf52_configure_features
+ ****************************************************************************/
+
+static int nrf52_configure_features(void)
+{
+  int ret = OK;
+
+  /* Turn on specific features */
+
+#ifdef CONFIG_NRF52_SDC_ADVERTISING
+  ret = sdc_support_adv();
+  if (ret < 0)
+    {
+      wlerr("Could not enable advertising feature: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SDC_SCANNING
+  ret = sdc_support_scan();
+  if (ret < 0)
+    {
+      wlerr("Could not enable scanning feature: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#if SDC_CENTRAL_COUNT > 0
+  ret = sdc_support_central();
+  if (ret < 0)
+    {
+      wlerr("Could not enable central feature: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#if CONFIG_NRF52_SDC_PERIPHERAL_COUNT > 0
+  ret = sdc_support_peripheral();
+  if (ret < 0)
+    {
+      wlerr("Could not enable peripheral feature: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SDC_DLE
+#  if SDC_CENTRAL_COUNT > 0
+  ret = sdc_support_dle_central();
+  if (ret < 0)
+    {
+      wlerr("Could not enable DLE central feature: %d\n", ret);
+      goto errout;
+    }
+#  endif
+
+#  if CONFIG_NRF52_SDC_PERIPHERAL_COUNT > 0
+  ret = sdc_support_dle_peripheral();
+  if (ret < 0)
+    {
+      wlerr("Could not enable DLE peripheral feature: %d\n", ret);
+      goto errout;
+    }
+#  endif
+#endif
+
+#ifdef CONFIG_NRF52_SDC_LE_2M_PHY
+  ret = sdc_support_le_2m_phy();
+  if (ret < 0)
+    {
+      wlerr("Could not enable 2M PHY feature: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SDC_LE_CODED_PHY
+  ret = sdc_support_le_coded_phy();
+  if (ret < 0)
+    {
+      wlerr("Could not enable Coded PHY feature: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#ifdef HAVE_BTADDR_CONFIGURE
+  /* Configure BT address */
+
+  ret = nrf52_sdc_btaddr_configure();
+  if (ret < 0)
+    {
+      wlerr("Could not configure BT addr: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nrf52_configure_memory
+ ****************************************************************************/
+
+static int nrf52_configure_memory(void)
+{
+  int32_t   required_memory = 0;
+  int       ret             = OK;
+  sdc_cfg_t cfg;
+
+  /* Configure SoftDevice memory.
+   * NOTE: sdc_cfg_set() API must be set before sdc_enable() and
+   *       sdc_support_*() calls.
+   */
+
+#ifdef CONFIG_NRF52_SDC_SCANNING
+  /* Configure scanner memory */
+
+  cfg.scan_buffer_cfg.count = CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT;
+  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
+                    SDC_CFG_TYPE_SCAN_BUFFER_CFG, &cfg);
+  if (ret < 0)
+    {
+      wlerr("Failed to set scan count: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SDC_ADVERTISING
+  /* Configure advertisers memory */
+
+  cfg.adv_count.count = ADV_SET_COUNT;
+  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
+                    SDC_CFG_TYPE_ADV_COUNT, &cfg);
+  if (ret < 0)
+    {
+      wlerr("Failed to set advertising count: %d\n", ret);
+      goto errout;
+    }
+
+  cfg.adv_buffer_cfg.max_adv_data = ADV_BUF_SIZE;
+  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
+                    SDC_CFG_TYPE_ADV_BUFFER_CFG, &cfg);
+  if (ret < 0)
+    {
+      wlerr("Failed to set advertising buffer: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#if SDC_CENTRAL_COUNT > 0
+  /* Configure central connections memory */
+
+  cfg.central_count.count = SDC_CENTRAL_COUNT;
+  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
+                    SDC_CFG_TYPE_CENTRAL_COUNT, &cfg);
+  if (ret < 0)
+    {
+      wlerr("Failed to set central role count: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+#if CONFIG_NRF52_SDC_PERIPHERAL_COUNT > 0
+  /* Configure peripheral connections memory */
+
+  cfg.peripheral_count.count = CONFIG_NRF52_SDC_PERIPHERAL_COUNT;
+  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
+                    SDC_CFG_TYPE_PERIPHERAL_COUNT, &cfg);
+  if (ret < 0)
+    {
+      wlerr("Failed to set peripheral role count: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+  /* Configure buffers memory and get the final required memory */
+
+  cfg.buffer_cfg.rx_packet_size = SDC_DEFAULT_RX_PACKET_SIZE;
+  cfg.buffer_cfg.tx_packet_size = SDC_DEFAULT_TX_PACKET_SIZE;
+  cfg.buffer_cfg.rx_packet_count = SDC_DEFAULT_RX_PACKET_COUNT;
+  cfg.buffer_cfg.tx_packet_count = SDC_DEFAULT_TX_PACKET_COUNT;
+
+  required_memory =
+      sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
+                  SDC_CFG_TYPE_BUFFER_CFG, &cfg);
+
+  if (required_memory < 0)
+    {
+      wlerr("Failed to set packet size/count: %ld\n", required_memory);
+      goto errout;
+    }
+
+  /* Verify we have enough memory for our configuration */
+
+  ASSERT(required_memory <= MEMPOOL_SIZE);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nrf52_configure_rand
+ ****************************************************************************/
+
+static int nrf52_configure_rand(void)
+{
+  sdc_rand_source_t rand_func;
+  int               ret = OK;
+
+  /* REVISIT: should we feed entropy poll with some data,
+   *          or leave it to be handled by user ?
+   */
+
+  /* Enable rand source */
+
+  rand_func.rand_prio_low_get = nrf52_rand_prio_low_get;
+  rand_func.rand_prio_high_get = nrf52_rand_prio_high_get;
+  rand_func.rand_poll = nrf52_rand_poll;
+
+  ret = sdc_rand_source_register(&rand_func);
+  if (ret < 0)
+    {
+      wlerr("sdc_rand_source_register failed %d\n", ret);
+      goto errout;
+    }
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_sdc_initialize
  ****************************************************************************/
 
 int nrf52_sdc_initialize(void)
 {
-  int ret;
-  int32_t required_memory;
-  sdc_cfg_t cfg;
+  int ret = OK;
 
   /* Register interrupt handler for normal-priority events. SWI5 will be
    * used by MPSL to delegate low-priority work
@@ -513,13 +838,14 @@ int nrf52_sdc_initialize(void)
   up_prioritize_irq(NRF52_IRQ_SWI5_EGU5, NVIC_SYSH_PRIORITY_DEFAULT);
   up_prioritize_irq(NRF52_IRQ_POWER_CLOCK, NVIC_SYSH_PRIORITY_DEFAULT);
 
-  /* Use zero-latency interrupt for RNG as we're expected to not add any
-   * processing to the ISR
-   */
+  /* Configure SoftDevice random sources */
 
-  arm_ramvec_attach(NRF52_IRQ_RNG, rng_handler);
-  up_prioritize_irq(NRF52_IRQ_RNG, NVIC_SYSH_MAXNORMAL_PRIORITY);
-  up_enable_irq(NRF52_IRQ_RNG);
+  ret = nrf52_configure_rand();
+  if (ret < 0)
+    {
+      wlerr("nrf52_configure_rand failed: %d\n", ret);
+      return ret;
+    }
 
   /* Register high-priority interrupts for specific peripherals */
 
@@ -543,7 +869,7 @@ int nrf52_sdc_initialize(void)
                   &mpsl_assert_handler);
   if (ret < 0)
     {
-      wlerr("mpsl init failed: %d\n", ret);
+      wlerr("mpsl_init failed: %d\n", ret);
       return ret;
     }
 
@@ -552,131 +878,34 @@ int nrf52_sdc_initialize(void)
   ret = sdc_init(&sdc_fault_handler);
   if (ret < 0)
     {
-      wlerr("mpsl init failed: %d\n", ret);
+      wlerr("sdc_init failed: %d\n", ret);
       return ret;
     }
 
-  /* Set some parameters */
+  /* Configure SoftDevice features */
 
-  cfg.master_count.count = SDC_MASTER_COUNT;
-  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
-                    SDC_CFG_TYPE_MASTER_COUNT, &cfg);
+  ret = nrf52_configure_features();
   if (ret < 0)
     {
-      wlerr("Failed to set master role count: %d\n", ret);
+      wlerr("nrf52_configure_features failed: %d\n", ret);
       return ret;
     }
 
-  cfg.slave_count.count = CONFIG_NRF52_SDC_SLAVE_COUNT;
-  ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
-                    SDC_CFG_TYPE_SLAVE_COUNT, &cfg);
+  /* Configure SoftDevice memory */
+
+  ret = nrf52_configure_memory();
   if (ret < 0)
     {
-      wlerr("Failed to set slave role count: %d\n", ret);
+      wlerr("nrf52_configure_memory failed: %d\n", ret);
       return ret;
     }
-
-  cfg.buffer_cfg.rx_packet_size = SDC_DEFAULT_RX_PACKET_SIZE;
-  cfg.buffer_cfg.tx_packet_size = SDC_DEFAULT_TX_PACKET_SIZE;
-  cfg.buffer_cfg.rx_packet_count = SDC_DEFAULT_RX_PACKET_COUNT;
-  cfg.buffer_cfg.tx_packet_count = SDC_DEFAULT_TX_PACKET_COUNT;
-
-  required_memory =
-      sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
-                  SDC_CFG_TYPE_BUFFER_CFG, &cfg);
-
-  if (required_memory < 0)
-    {
-      wlerr("Failed to set packet size/count: %ld\n", required_memory);
-      return ret;
-    }
-
-  /* Verify we have enough memory for our configuration */
-
-  ASSERT(required_memory <= sizeof(g_sdc_dev.mempool));
-
-  /* Turn on specific features */
-
-#ifdef CONFIG_NRF52_SDC_ADVERTISING
-  ret = sdc_support_adv();
-  if (ret < 0)
-    {
-      wlerr("Could not enable advertising feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_NRF52_SDC_SCANNING
-  ret = sdc_support_scan();
-  if (ret < 0)
-    {
-      wlerr("Could not enable scanning feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#if SDC_MASTER_COUNT > 0
-  ret = sdc_support_master();
-  if (ret < 0)
-    {
-      wlerr("Could not enable master feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#if CONFIG_NRF52_SDC_SLAVE_COUNT > 0
-  ret = sdc_support_slave();
-  if (ret < 0)
-    {
-      wlerr("Could not enable slave feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_NRF52_SDC_DLE
-  ret = sdc_support_dle();
-  if (ret < 0)
-    {
-      wlerr("Could not enable DLE feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_NRF52_SDC_LE_2M_PHY
-  ret = sdc_support_le_2m_phy();
-  if (ret < 0)
-    {
-      wlerr("Could not enable 2M PHY feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_NRF52_SDC_LE_CODED_PHY
-  ret = sdc_support_le_coded_phy();
-  if (ret < 0)
-    {
-      wlerr("Could not enable Coded PHY feature: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_BTADDR_CONFIGURE
-  /* Configure BT address */
-
-  ret = nrf52_sdc_btaddr_configure();
-  if (ret < 0)
-    {
-      wlerr("Could not configure BT addr: %d\n", ret);
-      return ret;
-    }
-#endif
 
   /* Finally enable SoftDevice Controller */
 
   ret = sdc_enable(on_hci, g_sdc_dev.mempool);
   if (ret < 0)
     {
-      wlerr("SoftDevice controller enable failed: %d\n", ret);
+      wlerr("sdc_enable failed: %d\n", ret);
       return ret;
     }
 
