@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/barriers.h
+ * arch/arm/src/armv7-r/arm_cpuindex.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,29 +18,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_R_BARRIERS_H
-#define __ARCH_ARM_SRC_ARMV7_R_BARRIERS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+
+#include "cp15.h"
+#include "sctlr.h"
+
+#ifdef CONFIG_SMP
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-/* ARMv7-R memory barriers */
+/****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ *   If TLS is enabled, then the RTOS can get this information from the TLS
+ *   info structure.  Otherwise, the MCU-specific logic must provide some
+ *   mechanism to provide the CPU index.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ ****************************************************************************/
 
-#define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
-#define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
-#define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
-#define arm_nop()  __asm__ __volatile__ ("nop\n")
-#define arm_sev()  __asm__ __volatile__ ("sev\n")
+int up_cpu_index(void)
+{
+  /* Read the Multiprocessor Affinity Register (MPIDR) */
 
-#define ARM_DSB()  arm_dsb(15)
-#define ARM_ISB()  arm_isb(15)
-#define ARM_DMB()  arm_dmb(15)
-#define ARM_NOP()  arm_nop()
-#define ARM_SEV()  arm_sev()
+  uint32_t mpidr = cp15_rdmpidr();
 
-#endif /* __ARCH_ARM_SRC_ARMV7_R_BARRIERS_H */
+  /* And return the CPU ID field */
+
+  return (mpidr & MPIDR_CPUID_MASK) >> MPIDR_CPUID_SHIFT;
+}
+
+#endif /* CONFIG_SMP */
