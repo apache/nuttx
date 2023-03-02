@@ -63,9 +63,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin      (&lib_get_streams()->sl_std[0])
-#define stdout     (&lib_get_streams()->sl_std[1])
-#define stderr     (&lib_get_streams()->sl_std[2])
+#define stdin      lib_get_stream(0)
+#define stdout     lib_get_stream(1)
+#define stderr     lib_get_stream(2)
 
 /* Path to the directory where temporary files can be created */
 
