@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/nrf52/hardware/nrf52_saadc.h
+ * arch/arm/src/nrf53/hardware/nrf53_saadc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,15 +18,15 @@
  *
  ***************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SAADC_H
-#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SAADC_H
+#ifndef __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_SAADC_H
+#define __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_SAADC_H
 
 /***************************************************************************
  * Included Files
  ***************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/nrf52_memorymap.h"
+#include "hardware/nrf53_memorymap.h"
 
 /***************************************************************************
  * Pre-processor Definitions
@@ -34,33 +34,35 @@
 
 /* Register offsets for SAADC **********************************************/
 
-#define NRF52_SAADC_TASKS_START_OFFSET        0x0000                 /* Start the SAADCM */
-#define NRF52_SAADC_TASKS_SAMPLE_OFFSET       0x0004                 /* Takes one SAADC sample */
-#define NRF52_SAADC_TASKS_STOP_OFFSET         0x0008                 /* Stop the SAADC */
-#define NRF52_SAADC_TASKS_CALOFFSET_OFFSET    0x000c                 /* Starts offset auto-calibration */
-#define NRF52_SAADC_EVENTS_STARTED_OFFSET     0x0100                 /* The SAADC has started */
-#define NRF52_SAADC_EVENTS_END_OFFSET         0x0104                 /* The SAADC has filled up the result buffer */
-#define NRF52_SAADC_EVENTS_DONE_OFFSET        0x0108                 /* A conversion task has been completed */
-#define NRF52_SAADC_EVENTS_RESDONE_OFFSET     0x010c                 /* Result ready for transfer to RAM */
-#define NRF52_SAADC_EVENTS_CALDONE_OFFSET     0x0110                 /* Calibration is complete */
-#define NRF52_SAADC_EVENTS_STOPPED_OFFSET     0x0114                 /* The SAADC has stopped */
-#define NRF52_SAADC_EVENTS_CHLIMH_OFFSET(x)   (0x118 + ((x) * 0x8))  /* Limit high event for channel x */
-#define NRF52_SAADC_EVENTS_CHLIML_OFFSET(x)   (0x11c + ((x) * 0x8))  /* Limit low event for channel x */
-#define NRF52_SAADC_INTEN_OFFSET              0x0300                 /* Enable or disable interrupt */
-#define NRF52_SAADC_INTENSET_OFFSET           0x0304                 /* Enable interrupt */
-#define NRF52_SAADC_INTENCLR_OFFSET           0x0308                 /* Disable interrupt */
-#define NRF52_SAADC_STATUS_OFFSET             0x0400                 /* Status */
-#define NRF52_SAADC_ENABLE_OFFSET             0x0500                 /* Enable or disable SAADC */
-#define NRF52_SAADC_CHPSELP_OFFSET(x)         (0x510 + ((x) * 0x10)) /* Input positive pin for CH[x] */
-#define NRF52_SAADC_CHPSELN_OFFSET(x)         (0x514 + ((x) * 0x10)) /* Input negative pin for CH[x] */
-#define NRF52_SAADC_CHCONFIG_OFFSET(x)        (0x518 + ((x) * 0x10)) /* Input configuration for CH[x] */
-#define NRF52_SAADC_CHLIMIT_OFFSET(x)         (0x51c + ((x) * 0x10)) /* High/low limits for event monitoring of a CH[x] */
-#define NRF52_SAADC_RESOLUTION_OFFSET         0x05f0                 /* Resolution configuration */
-#define NRF52_SAADC_OVERSAMPLE_OFFSET         0x05f4                 /* Oversampling configuration */
-#define NRF52_SAADC_SAMPLERATE_OFFSET         0x05f8                 /* Controls normal or continuous sample rate */
-#define NRF52_SAADC_PTR_OFFSET                0x062c                 /* Data pointer */
-#define NRF52_SAADC_MAXCNT_OFFSET             0x0630                 /* Maximum number of 16-bit samples */
-#define NRF52_SAADC_AMOUNT_OFFSET             0x0634                 /* Number of 16-bit samples written to buffer */
+#define NRF53_SAADC_TASKS_START_OFFSET        0x0000                 /* Start the SAADCM */
+#define NRF53_SAADC_TASKS_SAMPLE_OFFSET       0x0004                 /* Takes one SAADC sample */
+#define NRF53_SAADC_TASKS_STOP_OFFSET         0x0008                 /* Stop the SAADC */
+#define NRF53_SAADC_TASKS_CALOFFSET_OFFSET    0x000c                 /* Starts offset auto-calibration */
+                                                                     /* TODO: 0x080 - 0x08c */
+#define NRF53_SAADC_EVENTS_STARTED_OFFSET     0x0100                 /* The SAADC has started */
+#define NRF53_SAADC_EVENTS_END_OFFSET         0x0104                 /* The SAADC has filled up the result buffer */
+#define NRF53_SAADC_EVENTS_DONE_OFFSET        0x0108                 /* A conversion task has been completed */
+#define NRF53_SAADC_EVENTS_RESDONE_OFFSET     0x010c                 /* Result ready for transfer to RAM */
+#define NRF53_SAADC_EVENTS_CALDONE_OFFSET     0x0110                 /* Calibration is complete */
+#define NRF53_SAADC_EVENTS_STOPPED_OFFSET     0x0114                 /* The SAADC has stopped */
+#define NRF53_SAADC_EVENTS_CHLIMH_OFFSET(x)   (0x118 + ((x) * 0x8))  /* Limit high event for channel x */
+#define NRF53_SAADC_EVENTS_CHLIML_OFFSET(x)   (0x11c + ((x) * 0x8))  /* Limit low event for channel x */
+                                                                     /* TODO: 0x180 - 0x19c */
+#define NRF53_SAADC_INTEN_OFFSET              0x0300                 /* Enable or disable interrupt */
+#define NRF53_SAADC_INTENSET_OFFSET           0x0304                 /* Enable interrupt */
+#define NRF53_SAADC_INTENCLR_OFFSET           0x0308                 /* Disable interrupt */
+#define NRF53_SAADC_STATUS_OFFSET             0x0400                 /* Status */
+#define NRF53_SAADC_ENABLE_OFFSET             0x0500                 /* Enable or disable SAADC */
+#define NRF53_SAADC_CHPSELP_OFFSET(x)         (0x510 + ((x) * 0x10)) /* Input positive pin for CH[x] */
+#define NRF53_SAADC_CHPSELN_OFFSET(x)         (0x514 + ((x) * 0x10)) /* Input negative pin for CH[x] */
+#define NRF53_SAADC_CHCONFIG_OFFSET(x)        (0x518 + ((x) * 0x10)) /* Input configuration for CH[x] */
+#define NRF53_SAADC_CHLIMIT_OFFSET(x)         (0x51c + ((x) * 0x10)) /* High/low limits for event monitoring of a CH[x] */
+#define NRF53_SAADC_RESOLUTION_OFFSET         0x05f0                 /* Resolution configuration */
+#define NRF53_SAADC_OVERSAMPLE_OFFSET         0x05f4                 /* Oversampling configuration */
+#define NRF53_SAADC_SAMPLERATE_OFFSET         0x05f8                 /* Controls normal or continuous sample rate */
+#define NRF53_SAADC_PTR_OFFSET                0x062c                 /* Data pointer */
+#define NRF53_SAADC_MAXCNT_OFFSET             0x0630                 /* Maximum number of 16-bit samples */
+#define NRF53_SAADC_AMOUNT_OFFSET             0x0634                 /* Number of 16-bit samples written to buffer */
 
 /* Register Bitfield Definitions for SAADC *********************************/
 
@@ -187,4 +189,4 @@
 #define SAADC_AMOUNT_SHIFT             (0)       /* Bits 0-14: Number of 16-bit samples written to output buffer */
 #define SAADC_AMOUNT_MASK              (0x7fff)
 
-#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SAADC_H */
+#endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_SAADC_H */
