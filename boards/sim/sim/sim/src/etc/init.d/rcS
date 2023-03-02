@@ -17,3 +17,9 @@
  * under the License.
  *
  ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#ifdef CONFIG_FS_HOSTFS
+mount -t hostfs -o fs=. /data
+#endif
