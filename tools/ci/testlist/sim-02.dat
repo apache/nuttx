@@ -15,3 +15,7 @@
 
 # Do not build Windows configs
 -,sim:windows
+
+# macOS doesn't support simusb simhost
+-Darwin,sim:usbdev
+-Darwin,sim:usbhost
