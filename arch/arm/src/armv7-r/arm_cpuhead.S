@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/arm_head.S
+ * arch/arm/src/armv7-r/arm_cpuhead.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,18 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+
 #include "arm.h"
 #include "cp15.h"
 #include "sctlr.h"
+#include "smp.h"
+#include "chip.h"
 #include "arm_internal.h"
 
-	.file	"arm_head.S"
+#ifdef CONFIG_SMP
+
+	.file	"arm_cpuhead.S"
 
 /****************************************************************************
  * Configuration
@@ -75,93 +81,130 @@
  * not require initialization (such as internal SRAM)
  */
 
-#ifndef IDLE_STACK_BASE
-#  ifdef CONFIG_SMP
-#    define IDLE_STACK_BASE _enoinit
-#  else
-#    define IDLE_STACK_BASE _ebss
-#  endif
-#endif
-
-#define IDLE_STACK_TOP  IDLE_STACK_BASE+CONFIG_IDLETHREAD_STACKSIZE
-
 /****************************************************************************
- * Global Symbols
+ * .text
  ****************************************************************************/
-
-/* Imported symbols */
-
-	.global	arm_boot			/* Branch to continue initialization in C */
-
-	.global	_sbss				/* Start of .bss in RAM */
-	.global	_ebss				/* End+1 of .bss in RAM */
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-	.global	_eronly				/* Where .data defaults are stored in FLASH */
-	.global	_sdata				/* Where .data needs to reside in SDRAM */
-	.global	_edata
-#endif
-#ifdef CONFIG_ARCH_RAMFUNCS
-	.global	_framfuncs			/* Where RAM functions are stored in FLASH */
-	.global	_sramfuncs			/* Where RAM functions needs to reside in RAM */
-	.global	_eramfuncs
-#endif
-
-/* Exported symbols */
-
-	.global	__start				/* Power-up/Reset entry point */
-	.global	arm_data_initialize	/* Perform C data initialization */
-	.global	g_idle_topstack		/* Top of the initial/IDLE stack */
-
-/****************************************************************************
- * Name: __start
- ****************************************************************************/
-
-/* We assume the bootloader has already initialized most of the h/w for
- * us and that only leaves us having to do some os specific things
- * below.
- */
 
 	.text
 	.syntax	unified
 	.arm
-	.global	__start
-	.type	__start, #function
 
-__start:
-#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
-	/* Get cpuindex, cpu0 continue boot, others wait event from cpu0 */
+/****************************************************************************
+ * Name: __cpu[n]_start
+ *
+ * Description:
+ *   Boot functions for each CPU (other than CPU0).  These functions set up
+ *   the ARM operating mode, the initial stack, and configure co-processor
+ *   registers.  At the end of the boot, arm_cpu_boot() is called.
+ *
+ *   These functions are provided by the common ARMv7-R logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Do not return.
+ *
+ ****************************************************************************/
 
-	mrc		CP15_MPIDR(r0)
-	and		r0, r0, #0x3
-	cmp		r0, #0
-	beq		__cpu0_start
-	wfe
-	cmp		r0, #1
-	beq		__cpu1_start
-#  if CONFIG_SMP_NCPUS > 2
-	cmp		r0, #2
-	beq		__cpu2_start
-#  endif
-#  if CONFIG_SMP_NCPUS > 3
-	cmp		r0, #3
-	beq		__cpu3_start
-#  endif
-#  if CONFIG_SMP_NCPUS > 4
-	cmp		r0, #4
-	beq		__cpu4_start
-#  endif
+#if CONFIG_SMP_NCPUS > 1
+	.global	__cpu1_start
+	.type	__cpu1_start, #function
 
-__cpu0_start:
-#endif
-
+__cpu1_start:
 	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
 
 	cpsid		if, #PSR_MODE_SYS
 
-	/* Set up the stack pointer and clear the frame pointer. */
+	/* Set up the stack pointer and the CPU index */
 
-	ldr		sp, .Lstackpointer
-	mov		fp, #0
+	ldr		sp, .Lcpu1_stackpointer
+	sub		sp, sp, #XCPTCONTEXT_SIZE
+	mov		r5, #1
+
+	/* Then branch to the common startup logic (PC-relative) */
+
+	b		.Lcpu_start
+
+.Lcpu1_stackpointer:
+	.long	.Lcpu1_stacktop
+	.size	__cpu1_start, .-__cpu1_start
+
+#if CONFIG_SMP_NCPUS > 2
+	.global	__cpu2_start
+	.type	__cpu2_start, #function
+
+__cpu2_start:
+	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
+
+	cpsid		if, #PSR_MODE_SYS
+
+	/* Set up the stack pointer and the CPU index */
+
+	ldr		sp, .Lcpu2_stackpointer
+	sub		sp, sp, #XCPTCONTEXT_SIZE
+	mov		r5, #2
+
+	/* Then branch to the common startup logic (PC-relative) */
+
+	b		.Lcpu_start
+
+.Lcpu2_stackpointer:
+	.long	.Lcpu2_stacktop
+	.size	__cpu2_start, .-__cpu2_start
+
+#if CONFIG_SMP_NCPUS > 3
+	.global	__cpu3_start
+	.type	__cpu3_start, #function
+
+__cpu3_start:
+	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
+
+	cpsid		if, #PSR_MODE_SYS
+
+	/* Set up the stack pointer and the CPU index */
+
+	ldr		sp, .Lcpu3_stackpointer
+	sub		sp, sp, #XCPTCONTEXT_SIZE
+	mov		r5, #3
+
+	/* Then branch to the common startup logic (PC-relative) */
+
+	b		.Lcpu_start
+
+.Lcpu3_stackpointer:
+	.long	.Lcpu3_stacktop
+	.size	__cpu3_start, .-__cpu3_start
+
+#if CONFIG_SMP_NCPUS > 4
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 4
+
+#endif /* CONFIG_SMP_NCPUS > 4 */
+#endif /* CONFIG_SMP_NCPUS > 3 */
+#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_SMP_NCPUS > 1 */
+
+/****************************************************************************
+ * Name: .Lcpu_start
+ *
+ * Description:
+ *   Common CPUn startup logic (n > 0)
+ *
+ * On input:
+ *   SP = Set to top of CPU IDLE stack
+ *   R5 = CPU number
+ *
+ ****************************************************************************/
+
+	.type	.Lcpu_start, #function
+
+.Lcpu_start:
+	/* The MPU and caches should be disabled */
+
+	mrc		CP15_SCTLR(r0)
+	bic		r0, r0, #(SCTLR_M | SCTLR_C)
+	bic		r0, r0, #(SCTLR_I)
+	mcr		CP15_SCTLR(r0)
 
 	/* Invalidate caches and TLBs.
 	 *
@@ -182,9 +225,13 @@ __cpu0_start:
 	mcr		CP15_DCIALLU(r0)	/* Invalidate D-cache */
 	isb
 
+	/* Set lr = Resume at .Lcpu_vstart with the MMU enabled */
+
+	ldr		lr, .LCcpu_vstart		/* Abs. address */
+
 	/* Configure the system control register (see sctrl.h) */
 
-	mrc		CP15_SCTLR(r0)		/* Get control register */
+	mrc		CP15_SCTLR(r0)			/* Get control register */
 
 	/* Clear bits to reset values.  This is only necessary in situations like, for
 	 * example, we get here via a bootloader and the control register is in some
@@ -212,21 +259,17 @@ __cpu0_start:
 	 *   SCTLR_TE       Bit 30: All exceptions handled in ARM state.
 	 */
 
-	/* Clear all configurable bits */
-
 	bic		r0, r0, #(SCTLR_A  | SCTLR_C  | SCTLR_CCP15BEN | SCTLR_B)
 	bic		r0, r0, #(SCTLR_SW | SCTLR_I  | SCTLR_V        | SCTLR_RR)
 	bic		r0, r0, #(SCTLR_BR | SCTLR_DZ | SCTLR_FI)
 	bic		r0, r0, #(SCTLR_VE | SCTLR_EE | SCTLR_NMFI     | SCTLR_TE)
 
-#ifndef CONFIG_SMP
 	/* Set bits to enable the MPU
 	 *
 	 *   SCTLR_M     Bit 0:  Enable the MPU
 	 */
 
 	orr		r0, r0, #(SCTLR_M)
-#endif
 
 	/* Set configured bits */
 
@@ -239,15 +282,6 @@ __cpu0_start:
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
-#if !defined(CONFIG_ARMV7R_DCACHE_DISABLE) && !defined(CONFIG_SMP)
-	/* Dcache enable
-	 *
-	 *   SCTLR_C    Bit 2:  DCache enable
-	 */
-
-	orr		r0, r0, #(SCTLR_C)
-#endif
-
 #ifdef CONFIG_ARMV7R_SCTLR_CCP15BEN
 	/* Enable memory barriers
 	 *
@@ -255,15 +289,6 @@ __cpu0_start:
 	 */
 
 	orr		r0, r0, #(SCTLR_CCP15BEN)
-#endif
-
-#if !defined(CONFIG_ARMV7R_ICACHE_DISABLE) && !defined(CONFIG_SMP)
-	/* Icache enable
-	 *
-	 *   SCTLR_I    Bit 12: ICache enable
-	 */
-
-	orr		r0, r0, #(SCTLR_I)
 #endif
 
 #ifndef CONFIG_ARCH_LOWVECTORS
@@ -346,193 +371,124 @@ __cpu0_start:
 	nop
 	.endr
 
-#if 0
-	/* Cortex-R/RF Errata Work-Around
-	 *
-	 * Errata 754269: Register corruption during a load-multiple instruction
-	 *                at an exception vector.
-	 * Workaround:    To workaround this erratum, set bit [7] of the
-	 *                Auxiliary Control Register to disable out-of-order
-	 *                completion for divide instructions. Code performance
-	 *                may be reduced depending on how often divide
-	 *                operations are used.
-	 * NOTE:          The ARMv7-A/R Architecture reference many lists the bits
-	 *                bits of the ACTLR as "implementation defined"
-	 *
-	 * REVISIT: I do not think this is needed because the NuttX vectors do not
-	 * begin with an LDM instruction.
+	/* And "jump" to .Lcpu_vstart in the newly mapped virtual address space */
+
+	mov		pc, lr
+
+/****************************************************************************
+ * PC_Relative Data
+ ****************************************************************************/
+
+	/* The start address of the second phase boot logic */
+
+	.type	.LCcpu_vstart, %object
+.LCcpu_vstart:
+	.long	.Lcpu_vstart
+	.size	.LCcpu_vstart, . -.LCcpu_vstart
+
+	.size	.Lcpu_start, .-.Lcpu_start
+
+/****************************************************************************
+ * Name: .Lcpu_vstart
+ *
+ * Description:
+ *   Continue initialization after the MPU has been enabled.
+ *
+ *   The following is executed after the MPU has been enabled. This uses
+ *   absolute addresses; this is not position independent.
+ *
+ * On input:
+ *   SP = Set to top of CPU IDLE stack
+ *   R5 = CPU number
+ *
+ ****************************************************************************/
+
+	.align	8
+	.globl	arm_cpu_boot
+	.type	.Lcpu_vstart, %function
+
+.Lcpu_vstart:
+
+#ifdef CONFIG_STACK_COLORATION
+	/* Write a known value to the IDLE thread stack to support stack
+	 * monitoring logic
 	 */
 
-	mrc		CP15_ACTLR(r0)			/* Read Auxiliary Control register */
-	orr		r0, r0, #(1 << 7)		/* Disable out-of-order completion */
-	mcr		CP15_ACTLR(r0)			/* Write Auxiliary Control register */
+	adr		r3, .Lstkinit
+	mov		r0, sp		/* R0 = end of IDLE stack */
+	ldmia		r3, {r1, r2}	/* R1 = Size of stack; R2 = coloration */
+
+1:							/* Top of the loop */
+	sub		r1, r1, #1			/* R1 = Number of words remaining */
+	cmp		r1, #0				/* Check (nwords == 0) */
+	str		r2, [r0, #-4]!			/* Save stack color word, increment stack address */
+	bne		1b				/* Bottom of the loop */
 #endif
 
-#ifndef CONFIG_ARMV7R_MEMINIT
-	/* Initialize .bss and .data ONLY if .bss and .data lie in RAM that is
-	 * ready to use.  Other memory, such as SDRAM, must be initialized before
-	 * it can be used.  arm_boot() will perform that memory initialization and
-	 * .bss and .data can be initialized by arm_boot() by calling this
-	 * arm_data_initialize() later.
-	 */
+	/* Branch to continue C level CPU initialization */
 
-	bl		arm_data_initialize
-#endif
-
-	/* Perform early C-level, platform-specific initialization.  Logic
-	 * within arm_boot() must configure SDRAM and call arm_data_initialize()
-	 * if CONFIG_ARMV7R_MEMINIT=y.
-	 *
-	 * This function does not return.  It must give control to nx_start()
-	 * at the completion of its initialization.
-	 *
-	 * Why not just call arm_boot() and branch to nx_start() when it returns?
-	 * If the stack pointer initialized above lies in SDRAM, then that may
-	 * not be possible.  Also, in the special case of the TMS570, it may
-	 * perform a destructive test, losing the pushed content of the stack.
-	 */
-
-	b		arm_boot
-
-	/* .text Data */
-
-.Lstackpointer:
-	.long	IDLE_STACK_TOP
-	.size	__start, .-__start
-
-/***************************************************************************
- * Name: arm_data_initialize
- ***************************************************************************/
-
-	.global	arm_data_initialize
-	.type	arm_data_initialize, #function
-
-arm_data_initialize:
-
-	/* Zero BSS */
-
-	adr		r0, .Linitparms
-	ldmia		r0, {r0, r1}
-
-	mov		r2, #0
-1:
-	cmp		r0, r1				/* Clear up to _bss_end_ */
-	strcc		r2, [r0], #4
-	bcc		1b
-
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-	/* If the .data section is in a separate, uninitialized address space,
-	 * then we will also need to copy the initial values of the .data
-	 * section from the .text region into that .data region.  This would
-	 * be the case if we are executing from FLASH and the .data section
-	 * lies in a different physical address region OR if we are support
-	 * on-demand paging and the .data section lies in a different virtual
-	 * address region.
-	 */
-
-	adr		r3, .Ldatainit
-	ldmia		r3, {r0, r1, r2}
-
-2:
-	ldr		r3, [r0], #4
-	str		r3, [r1], #4
-	cmp		r1, r2
-	blt		2b
-#endif
-
-#ifdef CONFIG_ARCH_RAMFUNCS
-	/* Copy any necessary code sections from FLASH to RAM.  The correct
-	 * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
-	 * temporary location is in flash after the data initialization code
-	 * at _framfuncs
-	 */
-
-	adr		r3, .Lfuncinit
-	ldmia		r3, {r0, r1, r2}
-
-3:
-	ldr		r3, [r0], #4
-	str		r3, [r1], #4
-	cmp		r1, r2
-	blt		3b
-
-#ifndef CONFIG_ARMV7R_DCACHE_DISABLE
-	/* Flush the copied RAM functions into physical RAM so that will
-	 * be available when fetched into the I-Cache.
-	 *
-	 * Note that this is a branch, not a call and so will return
-	 * directly to the caller without returning here.
-	 */
-
-	adr		r3, ..Lramfunc
-	ldmia		r3, {r0, r1}
-	ldr		r3, =up_clean_dcache
-	b		r3
-#else
-	/* Otherwise return to the caller */
-
-	bx		lr
-#endif
-#else
-	/* Return to the caller */
-
-	bx		lr
-#endif
+	mov		fp, #0				/* Clear framepointer */
+	mov		lr, #0				/* LR = return address (none) */
+	mov		r0, r5				/* Input parameter = CPU index */
+	b		arm_cpu_boot			/* Branch to C level CPU initialization */
+	.size	.Lcpu_vstart, .-.Lcpu_vstart
 
 /***************************************************************************
  * Text-section constants
  ***************************************************************************/
 
-	/* Text-section constants:
-	 *
-	 *   _sbss is the start of the BSS region (see linker script)
-	 *   _ebss is the end of the BSS region (see linker script)
-	 *
-	 * Typical Configuration:
-	 * The idle task stack usually starts at the end of BSS and is of size
-	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the
-	 * end of memory.  See g_idle_topstack below.
-	 */
+	/* Text-section constants: */
 
-	.type	.Linitparms, %object
-.Linitparms:
-	.long	_sbss
-	.long	_ebss
-
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-	.type	.Ldatainit, %object
-.Ldatainit:
-	.long	_eronly					/* Where .data defaults are stored in FLASH */
-	.long	_sdata					/* Where .data needs to reside in SDRAM */
-	.long	_edata
+#ifdef CONFIG_STACK_COLORATION
+	.type	.Lstkinit, %object
+.Lstkinit:
+	.long	SMP_STACK_WORDS - (XCPTCONTEXT_SIZE / 4)
+	.long	STACK_COLOR				/* Stack coloration word */
+	.size	.Lstkinit, . -.Lstkinit
 #endif
-
-#ifdef CONFIG_ARCH_RAMFUNCS
-	.type	.Lfuncinit, %object
-.Lfuncinit:
-	.long	_framfuncs				/* Where RAM functions are stored in FLASH */
-.Lramfuncs:
-	.long	_sramfuncs				/* Where RAM functions needs to reside in RAM */
-	.long	_eramfuncs
-#endif
-	.size	arm_data_initialize, . - arm_data_initialize
 
 /***************************************************************************
- * Data section variables
+ * .noinit section data
  ***************************************************************************/
 
-	/* This global variable is unsigned long g_idle_topstack and is
-	 * exported from here only because of its coupling to .Lstackpointer
-	 * above.
-	 */
+	.section	.noinit, "aw"
 
-	.section	.rodata, "a"
-	.align	4
-	.globl	g_idle_topstack
-	.type	g_idle_topstack, object
+#if CONFIG_SMP_NCPUS > 1
+	.align	8
+	.globl	g_cpu1_idlestack
+	.type	g_cpu1_idlestack, object
 
-g_idle_topstack:
+g_cpu1_idlestack:
+	.space	SMP_STACK_SIZE
+.Lcpu1_stacktop:
+	.size	g_cpu1_idlestack, .Lcpu1_stacktop-g_cpu1_idlestack
 
-	.long	IDLE_STACK_TOP
-	.size	g_idle_topstack, .-g_idle_topstack
+#if CONFIG_SMP_NCPUS > 2
+	.align	8
+	.globl	g_cpu2_idlestack
+	.type	g_cpu2_idlestack, object
+
+g_cpu2_idlestack:
+	.space	SMP_STACK_SIZE
+.Lcpu2_stacktop:
+	.size	g_cpu2_idlestack, .Lcpu2_stacktop-g_cpu2_idlestack
+
+#if CONFIG_SMP_NCPUS > 3
+	.align	8
+	.globl	g_cpu3_idlestack
+	.type	g_cpu3_idlestack, object
+
+g_cpu3_idlestack:
+	.space	SMP_STACK_SIZE
+.Lcpu3_stacktop:
+	.size	g_cpu3_idlestack, .Lcpu3_stacktop-g_cpu3_idlestack
+
+#if CONFIG_SMP_NCPUS > 4
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 4
+
+#endif /* CONFIG_SMP_NCPUS > 4 */
+#endif /* CONFIG_SMP_NCPUS > 3 */
+#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_SMP_NCPUS > 1 */
+#endif /* CONFIG_SMP */
 	.end

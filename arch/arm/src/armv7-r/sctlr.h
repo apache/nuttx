@@ -61,9 +61,19 @@
  * TODO: To be provided
  */
 
-/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5
- * TODO: To be provided
- */
+/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5 */
+
+#define MPIDR_CPUID_SHIFT        (0)       /* Bits 0-1: CPU ID */
+#define MPIDR_CPUID_MASK         (3 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU0       (0 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU1       (1 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU2       (2 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU3       (3 << MPIDR_CPUID_SHIFT)
+                                           /* Bits 2-7: Reserved */
+#define MPIDR_CLUSTID_SHIFT      (8)       /* Bits 8-11: Cluster ID value */
+#define MPIDR_CLUSTID_MASK       (15 << MPIDR_CLUSTID_SHIFT)
+                                           /* Bits 12-29: Reserved */
+#define MPIDR_U                  (1 << 30) /* Bit 30: Multiprocessing Extensions. */
 
 /* Revision ID Register (REVIDR): CRn=c0, opc1=0, CRm=c0, opc2=6
  * TODO: To be provided
@@ -160,9 +170,19 @@
                                      /* Bits 28-29: Reserved */
 #define SCTLR_TE           (1 << 30) /* Bit 30: Thumb exception enable */
 
-/* Auxiliary Control Register (ACTLR): CRn=c1, opc1=0, CRm=c0, opc2=1
- * Implementation defined
- */
+/* Auxiliary Control Register (ACTLR): CRn=c1, opc1=0, CRm=c0, opc2=1 */
+
+#define ACTLR_FW                 (1 << 0)  /* Bit 0: Enable Cache/TLB maintenance broadcast */
+                                           /* Bits 1-2: Reserved */
+#define ACTLR_MRP                (1 << 3)  /* Bit 3: Enable MRP */
+                                           /* Bits 4-5: Reserved */
+#define ACTLR_SMP                (1 << 6)  /* Bit 6: Cortex-A9 taking part in coherency */
+                                           /* Bits 7: Reserved */
+#define ACTLR_ALLOC_1WAY         (1 << 8)  /* Bit 8: Allocation in 1-way cache only */
+#define ACTLR_DTCM_ECC           (1 << 9)  /* Bit 9: ECC on caches and DTCM */
+#define ACTLR_ITCM_ECC           (1 << 10) /* Bit 10: ECC on caches and ITCM */
+#define ACTLR_ITCM_QOS           (1 << 11) /* Bit 11: Enable QoS*/
+                                           /* Bits 12-31: Reserved */
 
 /* Coprocessor Access Control Register (CPACR):
  * CRn=c1, opc1=0, CRm=c0, opc2=2
