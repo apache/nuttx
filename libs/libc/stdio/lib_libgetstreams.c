@@ -57,4 +57,18 @@ FAR struct streamlist *lib_get_streams(void)
   return &info->ta_streamlist;
 }
 
+/****************************************************************************
+ * Name: lib_get_stream
+ *
+ * Description:
+ *   Return a pointer to the file stream for this thread and given fd。
+ *   Note: only reserved fd number 0/1/2 is valid.
+ *
+ ****************************************************************************/
+
+FAR struct file_struct *lib_get_stream(int fd)
+{
+  return &lib_get_streams()->sl_std[fd];
+}
+
 #endif /* CONFIG_FILE_STREAM */
