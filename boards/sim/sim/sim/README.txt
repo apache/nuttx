@@ -1372,3 +1372,66 @@ vncserver
 vpnkit
 
   This is a configuration with VPNKit support.  See NETWORK-VPNKIT.txt.
+
+wamr
+
+  This is a configuration for WebAssembly sample.
+
+  1. Compile Toolchain
+
+   1> Download WASI sdk and export the WASI_SDK_PATH path:
+
+  $ wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz
+  $ tar xf wasi-sdk-19.0-linux.tar.gz
+  Put wasi-sdk-19.0 to your host WASI_SDK_PATH environment variable, like:
+  $ export WASI_SDK_PATH=`pwd`/wasi-sdk-19.0
+
+   2> Download Wamr "wamrc" AOT compiler and export to the PATH:
+
+  $ mkdir wamrc
+  $ wget https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
+  $ tar xf wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
+  $ export PATH=$PATH:$PWD
+
+  2. Configuring and running
+
+   1> Configuring sim/wamr and compile:
+
+  nuttx$ ./tools/configure.sh  sim/wamr
+  nuttx$ make
+  ...
+  Wamrc Generate AoT: /home/archer/code/nuttx/n5/apps/wasm/hello.aot
+  Wamrc Generate AoT: /home/archer/code/nuttx/n5/apps/wasm/coremark.aot
+  LD:  nuttx
+
+   2> Copy the generated wasm file(Interpreter/AoT)
+
+  nuttx$ cp ../apps/wasm/hello.aot .
+  nuttx$ cp ../apps/wasm/hello.wasm .
+  nuttx$ cp ../apps/wasm/coremark.wasm .
+
+   3> Run iwasm
+
+  nuttx$ ./nuttx
+  NuttShell (NSH) NuttX-10.4.0
+  nsh> iwasm /data/hello.wasm
+  Hello, World!!
+  nsh> iwasm /data/hello.aot
+  Hello, World!!
+  nsh> iwasm /data/coremark.wasm
+  2K performance run parameters for coremark.
+  CoreMark Size    : 666
+  Total ticks      : 12000
+  Total time (secs): 12.000000
+  Iterations/Sec   : 5.000000
+  Iterations       : 60
+  Compiler version : Clang 15.0.7
+  Compiler flags   : Using NuttX compilation options
+  Memory location  : Defined by the NuttX configuration
+  seedcrc          : 0xe9f5
+  [0]crclist       : 0xe714
+  [0]crcmatrix     : 0x1fd7
+  [0]crcstate      : 0x8e3a
+  [0]crcfinal      : 0xa14c
+  Correct operation validated. See README.md for run and reporting rules.
+  CoreMark 1.0 : 5.000000 / Clang 15.0.7 Using NuttX compilation options / Defined by the NuttX configuration
