@@ -34,8 +34,6 @@
 
 /* WDT Register Offsets *****************************************************/
 
-/* Registers for the WDT function: */
-
 #define NRF52_WDT_TASKS_START_OFFSET      0x0000  /* Start the watchdog */
 #define NRF52_WDT_EVENTS_TIMEOUT_OFFSET   0x0100  /* Watchdog timeout */
 #define NRF52_WDT_INTENSET_OFFSET         0x0304  /* Enable interrupt */
