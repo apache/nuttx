@@ -212,6 +212,20 @@ RUN mkdir -p /tools/blobs && cd /tools/blobs \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s3.bin" -o partition-table-esp32s3.bin
 
 ###############################################################################
+# Build image for tool required by WASM builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-wasm
+# Download the latest WASI-enabled WebAssembly C/C++ toolchain prebuilt by WASM
+RUN mkdir wasi-sdk && \
+  curl -s -L  "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz" \
+  | tar -C wasi-sdk --strip-components 1 -xz
+
+# Download the latest "wamrc" AOT compiler prebuilt by WAMR
+RUN mkdir wamrc && \
+  curl -s -L  "https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz" \
+  | tar -C wamrc -xz
+
+###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
@@ -349,6 +363,11 @@ ENV PATH="/tools/xtensa-esp32s3-elf-gcc/bin:$PATH"
 
 RUN mkdir -p /tools/blobs/esp-bins
 COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
+
+# WASI-enabled WebAssembly C/C++ toolchain
+COPY --from=nuttx-toolchain-wasm /tools/wasi-sdk/ wasi-sdk/
+ENV WASI_SDK_PATH="/tools/wasi-sdk"
+ENV PATH="/tools/wamr:$PATH"
 
 # Configure ccache
 RUN mkdir -p /tools/ccache/bin && \

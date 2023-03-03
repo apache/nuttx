@@ -447,6 +447,39 @@ function u-boot-tools {
   fi
 }
 
+function wasi-sdk {
+  add_path "${tools}"/wamrc
+
+  if [ ! -f "${tools}/wasi-sdk/bin/clang" ]; then
+    cd "${tools}"
+    mkdir wamrc
+
+    case ${os} in
+      Darwin)
+        wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-macos.tar.gz
+        tar xzf wasi-sdk-19.0-macos.tar.gz
+        mv wasi-sdk-19.0 wasi-sdk
+        cd wamrc
+        wget --quiet https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-macos-latest.tar.gz
+        tar xzf wamrc-1.1.2-x86_64-macos-latest.tar.gz
+        ;;
+      Linux)
+        wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz
+        tar xzf wasi-sdk-19.0-linux.tar.gz
+        mv wasi-sdk-19.0 wasi-sdk
+        cd wamrc
+        wget --quiet https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
+        tar xzf wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
+        ;;
+    esac
+  fi
+
+  export WASI_SDK_PATH="${tools}/wasi-sdk"
+
+  ${WASI_SDK_PATH}/bin/clang --version
+  wamrc --version
+}
+
 function usage {
   echo ""
   echo "USAGE: $0 [-i] [-s] [-c] [-*] <testlist>"
@@ -516,7 +549,7 @@ function install_tools {
 
 case ${os} in
   Darwin)
-    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools c-cache"
+    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"
     mkdir -p "${tools}"/homebrew
     export HOMEBREW_CACHE=${tools}/homebrew
     # https://github.com/apache/arrow/issues/15025
@@ -535,7 +568,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools c-cache"
+    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"
     ;;
 esac
 
