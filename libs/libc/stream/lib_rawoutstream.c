@@ -46,27 +46,27 @@ static int rawoutstream_puts(FAR struct lib_outstream_s *this,
   FAR struct lib_rawoutstream_s *rthis =
                                 (FAR struct lib_rawoutstream_s *)this;
   int nwritten = 0;
-  int ret = 0;
 
-  while (nwritten != len)
+  do
     {
-      ret = _NX_WRITE(rthis->fd, (FAR const char *)buf + nwritten,
-                      len - nwritten);
-      if (ret <= 0)
+      nwritten = _NX_WRITE(rthis->fd, buf, len);
+      if (nwritten >= 0)
         {
-          if (_NX_GETERRNO(ret) == EINTR)
-            {
-              continue;
-            }
-
-          break;
+          this->nput += nwritten;
+          return nwritten;
         }
 
-      this->nput += ret;
-      nwritten   += ret;
-    }
+      /* The only expected error is EINTR, meaning that the write operation
+       * was awakened by a signal.  Zero would not be a valid return value
+       * from _NX_WRITE().
+       */
 
-  return nwritten > 0 ? nwritten : ret;
+      nwritten = _NX_GETERRVAL(nwritten);
+      DEBUGASSERT(nwritten < 0);
+    }
+  while (nwritten == -EINTR);
+
+  return nwritten;
 }
 
 /****************************************************************************

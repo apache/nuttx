@@ -71,6 +71,10 @@ static int stdsistream_gets(FAR struct lib_instream_s *this,
     {
       this->nget += nread;
     }
+  else
+    {
+      nread = _NX_GETERRVAL(nread);
+    }
 
   return nread;
 }
