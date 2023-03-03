@@ -61,6 +61,10 @@ endif # NRF53_NET_BOOT
 
 endif # NRF53_APPCORE
 
+config NRF53_ENABLE_APPROTECT
+	bool "NRF53 enable APPROTECT"
+	default n
+
 # Peripheral Selection
 
 config NRF53_UART
