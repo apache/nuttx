@@ -5,6 +5,8 @@
 
 comment "NRF53 Configuration Options"
 
+# NRF53 Families
+
 choice
 	prompt "NRF53 Chip Selection"
 	default ARCH_CHIP_NRF5340
@@ -15,8 +17,13 @@ config ARCH_CHIP_NRF5340
 
 endchoice # NRF53 Chip Selection
 
-# NRF53 Families
+config NRF53_APPCORE
+	bool
+	default n
 
+config NRF53_NETCORE
+	bool
+	default n
 
 choice
 	prompt "NRF5340 Core Selection"
@@ -25,9 +32,12 @@ choice
 
 config ARCH_CHIP_NRF5340_CPUAPP
 	bool "NRF53 App core"
+	select NRF53_APPCORE
+	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_NRF5340_CPUNET
 	bool "NRF53 Net core"
+	select NRF53_NETCORE
 
 endchoice # NRF5340 Core Selection
 
