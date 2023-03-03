@@ -31,3 +31,7 @@ endif
 ifeq ($(CONFIG_NRF53_UART),y)
 CHIP_CSRCS += nrf53_serial.c
 endif
+
+ifeq ($(CONFIG_NRF53_APPCORE),y)
+CHIP_CSRCS += nrf53_cpunet.c
+endif

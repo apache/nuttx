@@ -41,6 +41,26 @@ config ARCH_CHIP_NRF5340_CPUNET
 
 endchoice # NRF5340 Core Selection
 
+if NRF53_APPCORE
+
+config NRF53_NET_BOOT
+	bool "NRF53 Net core configuration"
+	default y
+
+if NRF53_NET_BOOT
+
+config NRF53_NET_POWER_ON_BOOT
+	bool "NRF53 Power Net core on App core boot"
+	default y
+
+config NRF53_NET_GPIO_ALLOW_ALL
+	bool "NRF53 allow all GPIO for Net core"
+	default y
+
+endif # NRF53_NET_BOOT
+
+endif # NRF53_APPCORE
+
 # Peripheral Selection
 
 config NRF53_UART
