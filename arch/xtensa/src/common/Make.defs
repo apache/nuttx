@@ -38,6 +38,10 @@ CMN_CSRCS += xtensa_schedsigaction.c xtensa_udelay.c xtensa_usestack.c
 
 # Configuration-dependent common Xtensa files
 
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+  CMN_ASRCS += xtensa_loadstore.S
+endif
+
 ifeq ($(CONFIG_DEBUG_TCBINFO),y)
   CMN_CSRCS += xtensa_tcbinfo.c
 endif
