@@ -890,9 +890,11 @@ static ssize_t uart_read(FAR struct file *filep,
           *buffer++ = ch;
           recvd++;
 
-          if (dev->isconsole
+          if (
 #ifdef CONFIG_SERIAL_TERMIOS
-              || (dev->tc_iflag & ECHO)
+              dev->tc_iflag & ECHO
+#else
+              dev->isconsole
 #endif
              )
             {
