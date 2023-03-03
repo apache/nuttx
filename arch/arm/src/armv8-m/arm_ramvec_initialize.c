@@ -147,7 +147,7 @@ void arm_ramvec_initialize(void)
    * the table alignment is insufficient.
    */
 
-  irqinfo("NVIC_VECTAB=%08x\n", getreg32(NVIC_VECTAB));
+  irqinfo("NVIC_VECTAB=%08" PRIx32 "\n", getreg32(NVIC_VECTAB));
   DEBUGASSERT(getreg32(NVIC_VECTAB) == (uint32_t)g_ram_vectors);
 }
 
