@@ -4941,7 +4941,11 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
   if (set)
     {
       memset(wifi_cfg.sta.password, 0x0, PWD_MAX_LEN);
-      memcpy(wifi_cfg.sta.password, pdata, len);
+
+      if (ext->alg != IW_ENCODE_ALG_NONE)
+        {
+          memcpy(wifi_cfg.sta.password, pdata, len);
+        }
 
       wifi_cfg.sta.pmf_cfg.capable = true;
       wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
@@ -5081,7 +5085,6 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
     {
       memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
-      wifi_cfg.sta.threshold.authmode = WIFI_AUTH_OPEN;
       wifi_cfg.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
       if (g_sta_connected)
@@ -5368,11 +5371,114 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
 {
   int ret;
   int cmd;
+  wifi_config_t wifi_cfg;
   wifi_ap_record_t ap_info;
+
+  wifi_cfg = g_sta_wifi_cfg;
 
   if (set)
     {
-      return OK;
+      cmd = iwr->u.param.flags & IW_AUTH_INDEX;
+      switch (cmd)
+        {
+          case IW_AUTH_WPA_VERSION:
+            {
+              switch (iwr->u.param.value)
+                {
+                  case IW_AUTH_WPA_VERSION_DISABLED:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_OPEN;
+                    break;
+
+                  case IW_AUTH_WPA_VERSION_WPA:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA_PSK;
+                    break;
+
+                  case IW_AUTH_WPA_VERSION_WPA2:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+                    break;
+
+                  default:
+                    wlerr("Invalid wpa version %" PRId32 "\n",
+                          iwr->u.param.value);
+                    return -EINVAL;
+                }
+            }
+
+            break;
+          case IW_AUTH_CIPHER_PAIRWISE:
+          case IW_AUTH_CIPHER_GROUP:
+            {
+              switch (iwr->u.param.value)
+                {
+                  case IW_AUTH_CIPHER_NONE:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_OPEN;
+                    break;
+
+                  case IW_AUTH_CIPHER_WEP40:
+                  case IW_AUTH_CIPHER_WEP104:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WEP;
+                    break;
+
+                  case IW_AUTH_CIPHER_TKIP:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA_PSK;
+                    break;
+
+                  case IW_AUTH_CIPHER_CCMP:
+                  case IW_AUTH_CIPHER_AES_CMAC:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+                    break;
+
+                  default:
+                    wlerr("Invalid cipher mode %" PRId32 "\n",
+                          iwr->u.param.value);
+                    return -EINVAL;
+                }
+            }
+
+            break;
+          case IW_AUTH_KEY_MGMT:
+          case IW_AUTH_TKIP_COUNTERMEASURES:
+          case IW_AUTH_DROP_UNENCRYPTED:
+          case IW_AUTH_80211_AUTH_ALG:
+          case IW_AUTH_WPA_ENABLED:
+          case IW_AUTH_RX_UNENCRYPTED_EAPOL:
+          case IW_AUTH_ROAMING_CONTROL:
+          case IW_AUTH_PRIVACY_INVOKED:
+          default:
+            wlerr("Unknown cmd %d\n", cmd);
+            return -EINVAL;
+        }
+
+      size_t password_len = strlen((const char *)wifi_cfg.sta.password);
+      wifi_auth_mode_t authmode = wifi_cfg.sta.threshold.authmode;
+
+      if (g_sta_connected &&
+          ((password_len > 0 && authmode != WIFI_AUTH_OPEN) ||
+           (password_len == 0 && authmode == WIFI_AUTH_OPEN)))
+        {
+          ret = esp_wifi_sta_disconnect();
+          if (ret)
+            {
+              wlerr("Failed to disconnect from Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
+
+          ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
+
+          ret = esp_wifi_sta_connect();
+          if (ret)
+            {
+              wlerr("Failed to connect to Wi-Fi AP ret=%d\n", ret);
+              return ret;
+            }
+        }
+
+      g_sta_wifi_cfg = wifi_cfg;
     }
   else
     {
@@ -6417,9 +6523,11 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
             return -EINVAL;
         }
 
+      size_t password_len = strlen((const char *)wifi_cfg.ap.password);
+
       if (g_softap_started &&
-          (strlen((const char *)wifi_cfg.ap.password) ||
-           wifi_cfg.ap.authmode == WIFI_AUTH_OPEN))
+          ((password_len > 0 && wifi_cfg.ap.authmode != WIFI_AUTH_OPEN) ||
+           (password_len == 0 && wifi_cfg.ap.authmode == WIFI_AUTH_OPEN)))
         {
           ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
           if (ret)
