@@ -26,6 +26,10 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += nrf53_appinit.c
 endif
 
+ifeq ($(CONFIG_NRF53_APPCORE),y)
+CSRCS += nrf53_cpunet_boot.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += nrf53_autoleds.c
 else
