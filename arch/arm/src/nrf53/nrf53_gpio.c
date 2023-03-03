@@ -253,6 +253,8 @@ static inline void nrf53_gpio_drive(nrf53_pinset_t cfgset,
   putreg32(regval, offset);
 }
 
+#ifdef CONFIG_NRF53_APPCORE
+
 /****************************************************************************
  * Name: nrf53_gpio_mcusel
  *
@@ -293,6 +295,7 @@ static inline void nrf53_gpio_mcusel(nrf53_pinset_t cfgset,
 
   putreg32(regval, offset);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -344,11 +347,13 @@ int nrf53_gpio_config(nrf53_pinset_t cfgset)
 
       nrf53_gpio_drive(cfgset, port, pin);
 
+#ifdef CONFIG_NRF53_APPCORE
       /* Select which MCU/Subsystem controls this pin.
-       * NOTE: accessible only from secure code.
+       * NOTE: accessible only from secure code and from the app core.
        */
 
       nrf53_gpio_mcusel(cfgset, port, pin);
+#endif
 
       /* Handle according to pin function */
 
