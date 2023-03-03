@@ -493,3 +493,55 @@ void nrf53_gpio_detectmode(int port, enum nrf53_gpio_detectmode_e mode)
            GPIO_DETECTMODE_DEFAULT :
            GPIO_DETECTMODE_LDETECT, offset);
 }
+
+#ifdef CONFIG_NRF53_APPCORE
+/****************************************************************************
+ * Name: nrf53_gpio_cpunet_allow
+ *
+ * Description:
+ *  Allow GPIO to be used by the net core.
+ *  Can be used only with te app core.
+ *
+ ****************************************************************************/
+
+void nrf53_gpio_cpunet_allow(uint32_t gpio)
+{
+  unsigned int port;
+  unsigned int pin;
+
+  /* Get port and pin number */
+
+  pin  = GPIO_PIN_DECODE(gpio);
+  port = GPIO_PORT_DECODE(gpio);
+
+  nrf53_gpio_mcusel(GPIO_MCUSEL_NET, port, pin);
+}
+
+/****************************************************************************
+ * Name: nrf53_gpio_cpunet_allow_all
+ *
+ * Description:
+ *  Allow all GPIO to be used by the net core.
+ *  This can be overwritten by the app core.
+ *
+ ****************************************************************************/
+
+void nrf53_gpio_cpunet_allow_all(void)
+{
+  int i = 0;
+
+  /* Port 0 */
+
+  for (i = 0; i < NRF53_GPIO_NPINS; i += 1)
+    {
+      nrf53_gpio_mcusel(GPIO_MCUSEL_NET, 0, i);
+    }
+
+  /* Port 1 */
+
+  for (i = 0; i < NRF53_GPIO_NPINS; i += 1)
+    {
+      nrf53_gpio_mcusel(GPIO_MCUSEL_NET, 1, i);
+    }
+}
+#endif

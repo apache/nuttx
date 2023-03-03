@@ -269,6 +269,30 @@ int nrf53_gpio_dump(nrf53_pinset_t pinset, const char *msg);
 #  define nrf53_gpio_dump(p,m)
 #endif
 
+#ifdef CONFIG_NRF53_APPCORE
+/****************************************************************************
+ * Name: nrf53_gpio_cpunet_allow
+ *
+ * Description:
+ *  Allow GPIO to be used by the net core.
+ *  Can be used only with te app core.
+ *
+ ****************************************************************************/
+
+void nrf53_gpio_cpunet_allow(uint32_t gpio);
+
+/****************************************************************************
+ * Name: nrf53_gpio_cpunet_allow_all
+ *
+ * Description:
+ *  Allow all GPIO to be used by the net core.
+ *  This can be overwritten by the app core.
+ *
+ ****************************************************************************/
+
+void nrf53_gpio_cpunet_allow_all(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
