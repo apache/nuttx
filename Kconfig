@@ -2006,6 +2006,65 @@ config FRAME_POINTER
 
 endmenu # Debug Options
 
+menuconfig  TRACE
+	bool "Enable tracepoints"
+	default n
+	depends on SCHED_INSTRUMENTATION
+	---help---
+		If this option is enabled, tracepoints at critical code in
+		the kernel will be enabled.
+
+if TRACE
+config TRACE_AUDIO
+	bool "Enable tracepoints in audio"
+	default n
+
+config TRACE_ARCH
+	bool "Enable tracepoints in arch"
+	default n
+
+config TRACE_BOARDS
+	bool "Enable tracepoints in boards"
+	default n
+
+config TRACE_CRYPTO
+	bool "Enable tracepoints in crypto"
+	default n
+
+config TRACE_DRIVERS
+	bool "Enable tracepoints in drivers"
+	default n
+
+config TRACE_FS
+	bool "Enable tracepoints in fs"
+	default n
+
+config TRACE_GRAPHICS
+	bool "Enable tracepoints in graphics"
+	default n
+
+config TRACE_LIBS
+	bool "Enable tracepoints in libs"
+	default n
+
+config TRACE_NET
+	bool "Enable tracepoints in net"
+	default n
+
+config TRACE_SCHED
+	bool "Enable tracepoints in sched"
+	default n
+
+config TRACE_VIDEO
+	bool "Enable tracepoints in video"
+	default n
+
+config TRACE_WIRELESS
+	bool "Enable tracepoints in wireless"
+	default n
+
+endif #TRACE
+
 config ARCH_HAVE_CUSTOMOPT
 	bool
 	default n
