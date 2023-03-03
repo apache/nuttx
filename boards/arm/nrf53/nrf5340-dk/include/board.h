@@ -103,10 +103,25 @@
  * driver can set up the UART for the serial console properly.
  */
 
-#define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(0))
-#define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN(1))
+#ifdef CONFIG_ARCH_CHIP_NRF5340_CPUAPP
+#  define BOARD_UART0_RX_PIN  (GPIO_MCUSEL_APP | GPIO_INPUT  | \
+                               GPIO_PORT1 | GPIO_PIN(0))
+#  define BOARD_UART0_TX_PIN  (GPIO_MCUSEL_APP | GPIO_OUTPUT | \
+                               GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN(1))
 
-#define BOARD_UART1_RX_PIN  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(22))
-#define BOARD_UART1_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(20))
+/* Declarations for the Net core */
+
+#  define BOARD_NET_UART0_RX_PIN  (GPIO_MCUSEL_NET | GPIO_INPUT  |  \
+                                   GPIO_PORT0 | GPIO_PIN(22))
+#  define BOARD_NET_UART0_TX_PIN  (GPIO_MCUSEL_NET | GPIO_OUTPUT |      \
+                                   GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(20))
+#endif
+
+#ifdef CONFIG_ARCH_CHIP_NRF5340_CPUNET
+#  define BOARD_UART0_RX_PIN  (GPIO_MCUSEL_NET | GPIO_INPUT  | \
+                               GPIO_PORT0 | GPIO_PIN(22))
+#  define BOARD_UART0_TX_PIN  (GPIO_MCUSEL_NET | GPIO_OUTPUT | \
+                               GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(20))
+#endif
 
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_INCLUDE_BOARD_H */

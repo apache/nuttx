@@ -21,3 +21,22 @@ Tool Issues
 
     (gdb_app) target remote localhost:2331
     (gdb_net) target remote localhost:2334
+
+  Flashing locked device
+  ----------------------
+
+  1. Unlock the Net core:
+
+    nrfjprog --recover --coprocessor CP_NETWORK
+
+  2. Unlock the App core:
+
+    nrfjprog --recover
+
+  3. Flash the Net core:
+
+    nrfjprog --coprocessor CP_NETWORK --program nuttx_net.hex --verify --chiperase
+
+  4. Flash the App core:
+
+    nrfjprog --program nuttx_app.hex --verify --chiperase
