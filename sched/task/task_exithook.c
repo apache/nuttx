@@ -461,7 +461,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
   nxsig_cleanup(tcb); /* Deallocate Signal lists */
 
 #ifdef CONFIG_SCHED_DUMP_LEAK
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       kmm_memdump(tcb->pid);
     }
