@@ -918,9 +918,12 @@ static ssize_t uart_read(FAR struct file *filep,
 
               if ((!iscntrl(ch & 0xff) || (ch == '\n')) && dev->escape == 0)
                 {
+                  if (ch == '\n')
                     {
-                      uart_putxmitchar(dev, ch, true);
+                      uart_putxmitchar(dev, '\r', true);
                     }
+
+                  uart_putxmitchar(dev, ch, true);
                 }
 
               /* Skipping character count down */
