@@ -20,6 +20,7 @@ endchoice # NRF53 Chip Selection
 config NRF53_APPCORE
 	bool
 	default n
+	select ARM_HAVE_DSP
 
 config NRF53_NETCORE
 	bool

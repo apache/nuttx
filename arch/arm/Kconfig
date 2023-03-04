@@ -481,6 +481,7 @@ config ARCH_CHIP_STM32L5
 	bool "STMicro STM32 L5"
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_DSP
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_PROGMEM
@@ -495,6 +496,7 @@ config ARCH_CHIP_STM32U5
 	bool "STMicro STM32 U5"
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_DSP
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_PROGMEM
@@ -1035,6 +1037,12 @@ config ARM_HAVE_NEON
 	---help---
 		Decide whether support NEON instruction
 
+config ARM_HAVE_DSP
+	bool
+	default n
+	---help---
+		Decide whether support DSP instruction
+
 config ARM_HAVE_MVE
 	bool
 	default n
@@ -1061,6 +1069,7 @@ config ARM_NEON
 config ARM_DSP
 	bool "Advanced DSP Extension"
 	default y
+	depends on ARM_HAVE_DSP
 	---help---
 		Enables DSP Extension
 
