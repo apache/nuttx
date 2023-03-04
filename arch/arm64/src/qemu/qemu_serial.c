@@ -786,22 +786,15 @@ static struct uart_dev_s    g_uart1port =
  ***************************************************************************/
 
 /***************************************************************************
- * Name: qemu_earlyserialinit
+ * Name: arm64_earlyserialinit
  *
  * Description:
- *   Performs the low level UART initialization early in
- *   debug so that the serial console will be available
- *   during bootup.  This must be called before arm_serialinit.
+ *   see arm64_internal.h
  *
  ***************************************************************************/
 
-void qemu_earlyserialinit(void)
+void arm64_earlyserialinit(void)
 {
-  /* NOTE: This function assumes that low level hardware configuration
-   * -- including all clocking and pin configuration -- was performed by the
-   * function imx8_lowsetup() earlier in the boot sequence.
-   */
-
   /* Enable the console UART.  The other UARTs will be initialized if and
    * when they are first opened.
    */
@@ -839,8 +832,7 @@ int up_putc(int ch)
  * Name: arm64_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that imx_earlyserialinit was called previously.
+ *   see arm64_internal.h
  *
  ***************************************************************************/
 

@@ -589,7 +589,7 @@ static struct uart_dev_s    g_uart1port =
  ***************************************************************************/
 
 /***************************************************************************
- * Name: a64_earlyserialinit
+ * Name: arm64_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in
@@ -601,7 +601,7 @@ static struct uart_dev_s    g_uart1port =
  *
  ***************************************************************************/
 
-void a64_earlyserialinit(void)
+void arm64_earlyserialinit(void)
 {
   /* NOTE: This function assumes that low level hardware configuration
    * -- including all clocking and pin configuration -- was performed

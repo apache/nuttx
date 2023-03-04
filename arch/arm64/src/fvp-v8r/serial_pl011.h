@@ -64,19 +64,5 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: fvp_earlyserialinit
- *
- * Description:
- *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
- *   before arm_serialinit.
- *
- ****************************************************************************/
-
-#ifdef USE_EARLYSERIALINIT
-void fvp_earlyserialinit(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM64_SRC_FVP_V8R_SERIAL_PL011_H */
