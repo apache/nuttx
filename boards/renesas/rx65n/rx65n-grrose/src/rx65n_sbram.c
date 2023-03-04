@@ -467,14 +467,14 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
 
       while (*dead)
         {
-          up_lowputc(*dead++);
+          renesas_lowputc(*dead++);
         }
     }
   else if (rv == -ENOSPC)
     {
       /* hard fault again */
 
-      up_lowputc('!');
+      renesas_lowputc('!');
     }
 }
 #endif /* CONFIG_RX65N_SAVE_CRASHDUMP */

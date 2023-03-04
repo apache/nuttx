@@ -326,7 +326,7 @@ boot_stage_puts:
     cmp   w0, 0
     beq   1f                 /* Exit on nul */
     stp   xzr, x30, [sp, #-16]!
-    bl    up_lowputc
+    bl    arm64_lowputc
     ldp   xzr, x30, [sp], #16
     b     boot_stage_puts
 1:

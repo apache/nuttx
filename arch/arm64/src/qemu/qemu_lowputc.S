@@ -93,8 +93,8 @@ SECTION_FUNC(text, up_earlyserialinit)
  * x0: character to print
  */
 
-GTEXT(up_lowputc)
-SECTION_FUNC(text, up_lowputc)
+GTEXT(arm64_lowputc)
+SECTION_FUNC(text, arm64_lowputc)
     ldr   x15, =UART1_BASE_ADDRESS
     early_uart_ready x15, w2
     early_uart_transmit x15, w0

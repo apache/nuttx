@@ -115,7 +115,7 @@ config ARCH_EARLY_PRINT
 		be not normal anymore. So we need to print something in arm64_head.S
 		to debug this situation.
 		Enabling this option will need to implement up_earlyserialinit and
-		up_lowputc functions just you see in qemu, if you not sure,
+		arm64_lowputc functions just you see in qemu, if you not sure,
 		keeping the option disable.
 
 config ARCH_CORTEX_A53

@@ -297,6 +297,8 @@ void arm64_serialinit(void);
 void arm64_earlyserialinit(void);
 #endif
 
+void arm64_lowputc(char c);
+
 /* DMA */
 
 #ifdef CONFIG_ARCH_DMA

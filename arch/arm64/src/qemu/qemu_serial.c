@@ -828,10 +828,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      arm64_lowputc('\r');
     }
 
-  up_lowputc((uint8_t)ch);
+  arm64_lowputc((uint8_t)ch);
   return ch;
 }
 
@@ -876,10 +876,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      arm64_lowputc('\r');
     }
 
-  up_lowputc((uint8_t)ch);
+  arm64_lowputc((uint8_t)ch);
   return ch;
 }
 
