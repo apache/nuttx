@@ -290,10 +290,35 @@ uint64_t * arm64_syscall_switch(uint64_t *regs);
 int arm64_syscall(uint64_t *regs);
 
 #ifdef USE_SERIALDRIVER
+/****************************************************************************
+ * Name: arm64_serialinit
+ *
+ * Description:
+ *   Register serial console and serial ports.  This assumes
+ *   that arm64_earlyserialinit was called previously.
+ *
+ ****************************************************************************/
+
 void arm64_serialinit(void);
 #endif
 
 #ifdef USE_EARLYSERIALINIT
+
+/****************************************************************************
+ * Name: arm64_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before arm64_serialinit.
+ *
+ * Note:
+ *   This function assumes that low level hardware configuration
+ *   including all clocking and pin configuration -- was performed
+ *   earlier in the boot sequence(eg bootloader).
+ *
+ ****************************************************************************/
+
 void arm64_earlyserialinit(void);
 #endif
 

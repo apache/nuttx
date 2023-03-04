@@ -57,19 +57,5 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: a64_earlyserialinit
- *
- * Description:
- *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
- *   before arm64_serialinit.
- *
- ****************************************************************************/
-
-#ifdef USE_EARLYSERIALINIT
-void a64_earlyserialinit(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM64_SRC_A64_A64_SERIAL_H */

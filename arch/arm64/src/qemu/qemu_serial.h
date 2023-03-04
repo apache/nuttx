@@ -57,19 +57,5 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: qemu_earlyserialinit
- *
- * Description:
- *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
- *   before arm_serialinit.
- *
- ****************************************************************************/
-
-#ifdef USE_EARLYSERIALINIT
-void qemu_earlyserialinit(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM64_SRC_QEMU_QEMU_SERIAL_H */
