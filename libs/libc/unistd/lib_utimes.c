@@ -54,7 +54,7 @@ int futimesat(int dirfd, FAR const char *path, const struct timeval tv[2])
   char fullpath[PATH_MAX];
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath);
+  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
   if (ret < 0)
     {
       set_errno(-ret);

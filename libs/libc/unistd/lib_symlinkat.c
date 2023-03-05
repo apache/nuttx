@@ -68,7 +68,7 @@ int symlinkat(FAR const char *path1, int dirfd, FAR const char *path2)
   char fullpath[PATH_MAX];
   int ret;
 
-  ret = lib_getfullpath(dirfd, path2, fullpath);
+  ret = lib_getfullpath(dirfd, path2, fullpath, sizeof(fullpath));
   if (ret < 0)
     {
       set_errno(-ret);

@@ -42,7 +42,8 @@
  *
  ****************************************************************************/
 
-int lib_getfullpath(int dirfd, FAR const char *path, FAR char *fullpath)
+int lib_getfullpath(int dirfd, FAR const char *path,
+                    FAR char *fullpath, size_t fulllen)
 {
   if (path == NULL || fullpath == NULL)
     {
@@ -52,7 +53,7 @@ int lib_getfullpath(int dirfd, FAR const char *path, FAR char *fullpath)
     {
       /* The path is absolute, then dirfd is ignored. */
 
-      strlcpy(fullpath, path, PATH_MAX);
+      strlcpy(fullpath, path, fulllen);
       return 0;
     }
 
@@ -73,7 +74,7 @@ int lib_getfullpath(int dirfd, FAR const char *path, FAR char *fullpath)
         }
 #endif
 
-      sprintf(fullpath, "%s/%s", pwd, path);
+      snprintf(fullpath, fulllen, "%s/%s", pwd, path);
       return 0;
     }
   else
@@ -85,7 +86,7 @@ int lib_getfullpath(int dirfd, FAR const char *path, FAR char *fullpath)
       ret = fcntl(dirfd, F_GETPATH, fullpath);
       if (ret >= 0)
         {
-          strlcat(fullpath, path, PATH_MAX);
+          strlcat(fullpath, path, fulllen);
         }
 
       return 0;
