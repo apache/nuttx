@@ -105,7 +105,7 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
       case FIOC_FILEPATH:
         if (ret == -ENOTTY && !INODE_IS_MOUNTPT(inode))
           {
-            ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg);
+            ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg, PATH_MAX);
           }
         break;
 

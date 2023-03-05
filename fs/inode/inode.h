@@ -279,7 +279,7 @@ int inode_chstat(FAR struct inode *inode,
  *
  ****************************************************************************/
 
-int inode_getpath(FAR struct inode *node, FAR char *path);
+int inode_getpath(FAR struct inode *node, FAR char *path, size_t len);
 
 /****************************************************************************
  * Name: inode_free
