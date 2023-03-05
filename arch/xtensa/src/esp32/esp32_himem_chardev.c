@@ -314,7 +314,7 @@ int himem_chardev_register(char *name, size_t size)
 
   dev->size = size;
 
-  strncpy(dev->name, name, 32);
+  strlcpy(dev->name, name, 32);
   ret = esp_himem_alloc(dev->size, &dev->mem_handle);
   if (ret != 0)
     {

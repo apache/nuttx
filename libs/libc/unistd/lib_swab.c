@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strncpy
+ * Name: swab
  *
  * Description:
  *   The swab() function will copy nbytes bytes, which are pointed to by

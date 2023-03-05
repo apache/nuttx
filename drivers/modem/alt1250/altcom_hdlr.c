@@ -790,9 +790,9 @@ int32_t altcombs_set_pdninfo(struct apicmd_pdnset_s *cmd_pdn,
   for (i = 0; i < lte_pdn->ipaddr_num; i++)
     {
       lte_pdn->address[i].ip_type = cmd_pdn->ip_address[i].iptype;
-      strncpy(lte_pdn->address[i].address,
+      strlcpy(lte_pdn->address[i].address,
               (FAR char *)cmd_pdn->ip_address[i].address,
-              LTE_IPADDR_MAX_LEN - 1);
+              LTE_IPADDR_MAX_LEN);
     }
 
   lte_pdn->ims_register = cmd_pdn->imsregister == APICMD_PDN_IMS_REG ?
@@ -826,9 +826,9 @@ int32_t altcombs_set_pdninfo_v4(FAR struct apicmd_pdnset_v4_s *cmd_pdn,
   for (i = 0; i < lte_pdn->ipaddr_num; i++)
     {
       lte_pdn->address[i].ip_type = cmd_pdn->ip_address[i].iptype;
-      strncpy(lte_pdn->address[i].address,
+      strlcpy(lte_pdn->address[i].address,
               (FAR char *)cmd_pdn->ip_address[i].address,
-              LTE_IPADDR_MAX_LEN - 1);
+              LTE_IPADDR_MAX_LEN);
     }
 
   lte_pdn->ims_register = cmd_pdn->imsregister;
@@ -1420,10 +1420,10 @@ static void getver_parse_response(FAR struct apicmd_cmddat_getverres_s *resp,
                                   FAR lte_version_t *version)
 {
   memset(version, 0, sizeof(*version));
-  strncpy(version->bb_product,
-          (FAR const char *)resp->bb_product, LTE_VER_BB_PRODUCT_LEN - 1);
-  strncpy(version->np_package,
-          (FAR const char *)resp->np_package, LTE_VER_NP_PACKAGE_LEN - 1);
+  strlcpy(version->bb_product,
+          (FAR const char *)resp->bb_product, LTE_VER_BB_PRODUCT_LEN);
+  strlcpy(version->np_package,
+          (FAR const char *)resp->np_package, LTE_VER_NP_PACKAGE_LEN);
 }
 
 static void getpinset_parse_response(
@@ -1822,7 +1822,7 @@ static int copy_logfilename(FAR char *filename, size_t fnamelen,
 
       if (pathlen <= fnamelen)
         {
-          strncpy(filename, path, fnamelen);
+          strlcpy(filename, path, fnamelen);
         }
       else
         {
@@ -1977,7 +1977,7 @@ static int32_t setpinlock_pkt_compose(FAR void **arg,
     (FAR struct apicmd_cmddat_setpinlock_s *)pktbuf;
 
   out->mode = *enable;
-  strncpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
+  strlcpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
 
   size = sizeof(struct apicmd_cmddat_setpinlock_s);
 
@@ -2018,9 +2018,8 @@ static int32_t setpincode_pkt_compose(FAR void **arg,
       out->chgtype = APICMD_SETPINCODE_CHGTYPE_PIN2;
     }
 
-  strncpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
-
-  strncpy((FAR char *)out->newpincode, new_pincode, sizeof(out->newpincode));
+  strlcpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
+  strlcpy((FAR char *)out->newpincode, new_pincode, sizeof(out->newpincode));
 
   size = sizeof(struct apicmd_cmddat_setpincode_s);
 
@@ -2051,11 +2050,11 @@ static int32_t enterpin_pkt_compose(FAR void **arg,
   FAR struct apicmd_cmddat_enterpin_s *out =
     (FAR struct apicmd_cmddat_enterpin_s *)pktbuf;
 
-  strncpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
+  strlcpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
   if (new_pincode)
     {
       out->newpincodeuse = APICMD_ENTERPIN_NEWPINCODE_USE;
-      strncpy((FAR char *)out->newpincode,
+      strlcpy((FAR char *)out->newpincode,
               new_pincode, sizeof(out->newpincode));
     }
   else
@@ -2531,14 +2530,14 @@ static int32_t actpdn_pkt_compose(FAR void **arg,
   out->iptype  = apn->ip_type;
   out->authtype  = apn->auth_type;
 
-  strncpy((FAR char *)out->apnname, (FAR const char *)apn->apn,
+  strlcpy((FAR char *)out->apnname, (FAR const char *)apn->apn,
     sizeof(out->apnname));
   if (apn->auth_type != LTE_APN_AUTHTYPE_NONE)
     {
-      strncpy((FAR char *)out->username, (FAR const char *)apn->user_name,
-        sizeof(out->username));
-      strncpy((FAR char *)out->password, (FAR const char *)apn->password,
-        sizeof(out->password));
+      strlcpy((FAR char *)out->username, (FAR const char *)apn->user_name,
+              sizeof(out->username));
+      strlcpy((FAR char *)out->password, (FAR const char *)apn->password,
+              sizeof(out->password));
     }
 
   size = sizeof(struct apicmd_cmddat_activatepdn_s);
@@ -4248,7 +4247,7 @@ static int32_t getphone_pkt_parse(FAR struct alt1250_dev_s *dev,
             }
         }
 
-      strncpy(phoneno, (FAR const char *)in->phoneno, LTE_PHONENO_LEN);
+      strlcpy(phoneno, (FAR const char *)in->phoneno, LTE_PHONENO_LEN);
     }
 
   return 0;
@@ -4285,7 +4284,7 @@ static int32_t getimsi_pkt_parse(FAR struct alt1250_dev_s *dev,
             }
         }
 
-      strncpy(imsi, (FAR const char *)in->imsi, APICMD_IMSI_LEN);
+      strlcpy(imsi, (FAR const char *)in->imsi, APICMD_IMSI_LEN);
     }
 
   return 0;
@@ -4319,7 +4318,7 @@ static int32_t getimei_pkt_parse(FAR struct alt1250_dev_s *dev,
             }
         }
 
-      strncpy(imei, (FAR const char *)in->imei, LTE_IMEI_LEN);
+      strlcpy(imei, (FAR const char *)in->imei, LTE_IMEI_LEN);
     }
 
   return 0;
@@ -4455,7 +4454,7 @@ static int32_t getoper_pkt_parse(FAR struct alt1250_dev_s *dev,
                 }
             }
 
-          strncpy(oper, (FAR const char *)in->oper, LTE_OPERATOR_LEN);
+          strlcpy(oper, (FAR const char *)in->oper, LTE_OPERATOR_LEN);
         }
     }
   else if (altver == ALTCOM_VER4)
@@ -4482,7 +4481,7 @@ static int32_t getoper_pkt_parse(FAR struct alt1250_dev_s *dev,
                 }
             }
 
-          strncpy(oper, (FAR const char *)in->oper, LTE_OPERATOR_LEN);
+          strlcpy(oper, (FAR const char *)in->oper, LTE_OPERATOR_LEN);
         }
     }
 

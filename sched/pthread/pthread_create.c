@@ -92,8 +92,7 @@ static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
 
-  strncpy(ptcb->cmn.name, parent->name, CONFIG_TASK_NAME_SIZE);
-  ptcb->cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
+  strlcpy(ptcb->cmn.name, parent->name, CONFIG_TASK_NAME_SIZE);
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* For pthreads, args are strictly pass-by-value; that actual
