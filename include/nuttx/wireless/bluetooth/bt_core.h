@@ -204,7 +204,7 @@ static inline int bt_addr_le_to_str(FAR const bt_addr_le_t *addr, char *str,
       break;
 
     default:
-      sprintf(type, "0x%02x", addr->type);
+      snprintf(type, sizeof(type), "0x%02x", addr->type);
       break;
   }
 

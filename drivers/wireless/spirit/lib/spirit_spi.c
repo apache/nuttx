@@ -87,7 +87,7 @@ static void spirit_dump_buffer(FAR const uint8_t *buffer, unsigned int buflen)
               *ptr++ = ' ';
             }
 
-          sprintf(ptr, "%02x ", *buffer++);
+          snprintf(ptr, sizeof(outbuf) - (ptr - outbuf), "%02x ", *buffer++);
           ptr += 3;
         }
 

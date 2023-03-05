@@ -862,7 +862,7 @@ void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 
       for (i = 0, j = 0; i < readsize; i++, j += 3)
         {
-          sprintf(&outbuf[j], " %02x", regbuf[i]);
+          snprintf(&outbuf[j], sizeof(outbuf) - j, " %02x", regbuf[i]);
         }
 
       /* Dump the formatted data to the syslog output */

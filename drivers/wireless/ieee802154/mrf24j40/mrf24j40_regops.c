@@ -142,13 +142,16 @@ int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
     {
       if ((i & 15) == 0)
         {
-          len = sprintf(buf, "%02" PRIx32 ": ", i & 0xff);
+          snprintf(buf, sizeof(buf), "%02" PRIx32 ": ", i & 0xff);
+          len = strlen(buf);
         }
 
-      len += sprintf(buf + len, "%02x ", mrf24j40_getreg(dev->spi, i));
+      snprintf(buf + len, sizeof(buf) - len,
+               "%02x ", mrf24j40_getreg(dev->spi, i));
+      len += strlen(buf + len);
       if ((i & 15) == 15)
         {
-          sprintf(buf + len, "\n");
+          snprintf(buf + len, sizeof(buf) - len, "\n");
           wlinfo("%s", buf);
         }
     }
@@ -159,13 +162,16 @@ int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
     {
       if ((i & 15) == 0)
         {
-          len = sprintf(buf, "%02" PRIx32 ": ", i & 0xff);
+          snprintf(buf, sizeof(buf), "%02" PRIx32 ": ", i & 0xff);
+          len = strlen(buf);
         }
 
-      len += sprintf(buf + len, "%02x ", mrf24j40_getreg(dev->spi, i));
+      snprintf(buf + len, sizeof(buf) - len,
+               "%02x ", mrf24j40_getreg(dev->spi, i));
+      len += strlen(buf + len);
       if ((i & 15) == 15)
         {
-          sprintf(buf + len, "\n");
+          snprintf(buf + len, sizeof(buf) - len, "\n");
           wlinfo("%s", buf);
         }
     }

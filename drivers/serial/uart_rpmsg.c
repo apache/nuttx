@@ -323,7 +323,8 @@ static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
   if (strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
       priv->ept.priv = dev;
-      sprintf(eptname, "%s%s", UART_RPMSG_EPT_PREFIX, priv->devname);
+      snprintf(eptname, sizeof(eptname), "%s%s",
+               UART_RPMSG_EPT_PREFIX, priv->devname);
       rpmsg_create_ept(&priv->ept, rdev, eptname,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        uart_rpmsg_ept_cb, NULL);
@@ -451,7 +452,8 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
     }
 
   nxmutex_init(&priv->lock);
-  sprintf(dev_name, "%s%s", UART_RPMSG_DEV_PREFIX, devname);
+  snprintf(dev_name, sizeof(dev_name), "%s%s",
+           UART_RPMSG_DEV_PREFIX, devname);
   uart_register(dev_name, dev);
 
   if (dev->isconsole)

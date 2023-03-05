@@ -55,7 +55,7 @@ struct inode_path_s
 {
   foreach_inode_t handler;
   FAR void       *arg;
-  char            path[CONFIG_PATH_MAX];
+  char            path[PATH_MAX];
 };
 
 /****************************************************************************
@@ -110,7 +110,7 @@ static int foreach_inodelevel(FAR struct inode *node,
 
           /* Make sure that this would not exceed the maximum path length */
 
-          if (pathlen + namlen > PATH_MAX)
+          if (pathlen + namlen >= PATH_MAX)
             {
               ret = -ENAMETOOLONG;
               break;
@@ -118,7 +118,8 @@ static int foreach_inodelevel(FAR struct inode *node,
 
           /* Append the path segment to this inode and recurse */
 
-          sprintf(&info->path[pathlen], "/%s", node->i_name);
+          snprintf(&info->path[pathlen], sizeof(info->path) - pathlen,
+                   "/%s", node->i_name);
           ret = foreach_inodelevel(node->i_child, info);
 
           /* Truncate the path name back to the correct length */

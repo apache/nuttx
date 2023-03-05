@@ -250,8 +250,8 @@ static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
   wdinfo("buflen=%d\n", buflen);
   if (buflen >= 18)
     {
-      sprintf(buffer, "%08" PRIx32 " %08" PRIx32 "\n",
-              c5471_wdt_cntl, c5471_wdt_count);
+      snprintf(buffer, buflen, "%08" PRIx32 " %08" PRIx32 "\n",
+               c5471_wdt_cntl, c5471_wdt_count);
       return 18;
     }
 

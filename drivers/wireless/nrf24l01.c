@@ -210,8 +210,8 @@ static void nrf24l01_worker(FAR void *arg);
 #endif
 
 #ifdef CONFIG_DEBUG_WIRELESS
-static void binarycvt(FAR char *deststr, FAR const uint8_t *srcbin,
-                      size_t srclen);
+static void binarycvt(FAR char *deststr, size_t destlen,
+                      FAR const uint8_t *srcbin, size_t srclen);
 #endif
 
 /* POSIX API */
@@ -912,13 +912,13 @@ out:
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_WIRELESS
-static void binarycvt(FAR char *deststr, FAR const uint8_t *srcbin,
-                      size_t srclen)
+static void binarycvt(FAR char *deststr, size_t destlen,
+                      FAR const uint8_t *srcbin, size_t srclen)
 {
   int i = 0;
-  while (i < srclen)
+  while (i < srclen && 2 * (i + 1) < destlen)
     {
-      sprintf(deststr + i * 2, "%02x", srcbin[i]);
+      snprintf(deststr + i * 2, destlen - i * 2, "%02x", srcbin[i]);
       ++i;
     }
 
@@ -2084,7 +2084,7 @@ void nrf24l01_dumpregs(FAR struct nrf24l01_dev_s *dev)
          nrf24l01_readregbyte(dev, NRF24L01_OBSERVE_TX));
 
   nrf24l01_readreg(dev, NRF24L01_TX_ADDR, addr, dev->addrlen);
-  binarycvt(addrstr, addr, dev->addrlen);
+  binarycvt(addrstr, sizeof(addrstr), addr, dev->addrlen);
   syslog(LOG_INFO, "TX_ADDR:   %s\n", addrstr);
 
   syslog(LOG_INFO, "CD:        %02x\n",

@@ -422,8 +422,9 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #  if CONFIG_MM_BACKTRACE > 0
           for (i = 0; i < CONFIG_MM_BACKTRACE && dump->backtrace[i]; i++)
             {
-              sprintf(buf + i * MM_PTR_FMT_WIDTH, format,
-                      MM_PTR_FMT_WIDTH - 1, dump->backtrace[i]);
+              snprintf(buf + i * MM_PTR_FMT_WIDTH,
+                       sizeof(buf) - i * MM_PTR_FMT_WIDTH,
+                       format, MM_PTR_FMT_WIDTH - 1, dump->backtrace[i]);
             }
 #  endif
 

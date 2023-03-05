@@ -62,9 +62,10 @@ void bcmf_hexdump(FAR uint8_t *data, unsigned int len, unsigned long offset)
           char_count = 0;
         }
 
-      sprintf(hex_line + 3 * char_count, "%02x ", data[i]);
-      sprintf(char_line + char_count, "%c",
-              data[i] < 0x20 || data[i] >= 0x7f? '.': data[i]);
+      snprintf(hex_line + 3 * char_count, sizeof(hex_line) - 3 * char_count,
+               "%02x ", data[i]);
+      snprintf(char_line + char_count, sizeof(char_line) - char_count,
+               "%c", data[i] < 0x20 || data[i] >= 0x7f? '.' : data[i]);
       char_count++;
     }
 
