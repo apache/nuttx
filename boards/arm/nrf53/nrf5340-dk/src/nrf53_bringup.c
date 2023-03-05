@@ -31,6 +31,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
+#  include "nrf53_sdc.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,6 +64,15 @@ int nrf53_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
+  ret = nrf53_sdc_initialize();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_sdc_initialize() failed: %d\n", ret);
     }
 #endif
 
