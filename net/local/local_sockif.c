@@ -833,7 +833,7 @@ static int local_close(FAR struct socket *psock)
 static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   FAR struct local_conn_s *conn;
-  int ret = OK;
+  int ret = -ENOTTY;
 
   conn = (FAR struct local_conn_s *)psock->s_conn;
 
