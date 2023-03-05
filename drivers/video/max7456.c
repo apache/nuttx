@@ -1554,11 +1554,11 @@ static int add_interface(FAR const char *path,
     {
       /* Convert @path to a directory name. */
 
-      strcat(buf, "/");
+      strlcat(buf, "/", sizeof(buf));
 
       /* Append the real interface name. */
 
-      strcat(buf, name);
+      strlcat(buf, name, sizeof(buf));
     }
 
   /* Register the interface in the usual way. NuttX will build the
