@@ -666,7 +666,7 @@ menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	select ARCH_IRQPRIO
 	select CRYPTO
 	select CRYPTO_RANDOM_POOL
-	depends on NRF52_LFCLK_XTAL
+	select NRF52_USE_LFCLK
 	---help---
 		This enables use of Nordic SoftDevice controller
 		(SDC). It is a library version of a subset of
