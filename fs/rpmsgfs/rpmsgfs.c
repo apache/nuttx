@@ -247,7 +247,7 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
 
   if (depth >= 0)
     {
-      strncat(path, &relpath[first], pathlen - strlen(path) - 1);
+      strlcat(path, &relpath[first], pathlen - strlen(path));
     }
 
   while (fs->timeout > 0)
