@@ -78,6 +78,13 @@ config MCP23X17_INT_ENABLE
 	---help---
 		Enable driver interrupt functionality
 
+config MCP23X17_INT_MIRROR
+	bool "Enable MCP23x17 Interrupt Mirror"
+	default n
+	select MCP23X17_INT_ENABLE
+	---help---
+		Enable driver interrupt mirror functionality
+
 config MCP23X17_INT_NCALLBACKS
 	int "Max number of interrupt callbacks"
 	default 4
