@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/nrf53/hardware/nrf53_uicr.h
+ * arch/arm/src/nrf53/hardware/nrf53_ficr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ***************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_UICR_H
-#define __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_UICR_H
+#ifndef __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_FICR_H
+#define __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_FICR_H
 
 /***************************************************************************
  * Included Files
@@ -28,9 +28,9 @@
 #include <nuttx/config.h>
 
 #ifdef CONFIG_NRF53_APPCORE
-#  include "hardware/nrf53_uicr_cpuapp.h"
+#  include "hardware/nrf53_ficr_cpuapp.h"
 #else
-#  include "hardware/nrf53_uicr_cpunet.h"
+#  include "hardware/nrf53_ficr_cpunet.h"
 #endif
 
-#endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_UICR_H */
+#endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_FICR_H */
