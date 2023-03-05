@@ -83,7 +83,8 @@ FAR char *__dtoa(double d, int mode, int ndigits, FAR int *decpt,
 
 /* Defined in lib_getfullpath.c */
 
-int lib_getfullpath(int dirfd, FAR const char *path, FAR char *fullpath);
+int lib_getfullpath(int dirfd, FAR const char *path,
+                    FAR char *fullpath, size_t fulllen);
 
 /* Defined in lib_fopen.c */
 

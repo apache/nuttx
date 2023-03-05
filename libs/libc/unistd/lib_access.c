@@ -138,7 +138,7 @@ int faccessat(int dirfd, FAR const char *path, int amode, int flags)
   char fullpath[PATH_MAX];
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath);
+  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
   if (ret < 0)
     {
       set_errno(-ret);
