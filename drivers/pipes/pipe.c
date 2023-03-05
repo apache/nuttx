@@ -169,21 +169,22 @@ static int pipe_register(size_t bufsize, int flags,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pipe2
+ * Name: file_pipe
  *
  * Description:
- *   pipe2() creates a pair of file descriptors, pointing to a pipe inode,
- *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
- *   fd[1] is for writing.
+ *   file_pipe() creates a pair of file descriptors, pointing to a pipe
+ *   inode, and places them in the array pointed to by 'filep'. filep[0]
+ *   is for reading, filep[1] is for writing.
  *
  * Input Parameters:
- *   fd[2] - The user provided array in which to catch the pipe file
+ *   filep[2] - The user provided array in which to catch the pipe file
  *   descriptors
+ *   bufsize - The size of the in-memory, circular buffer in bytes.
  *   flags - The file status flags.
  *
  * Returned Value:
- *   0 is returned on success; -1 (ERROR) is returned on a failure
- *   with the errno value set appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 
@@ -229,10 +230,30 @@ errout_with_driver:
   return ret;
 }
 
+/****************************************************************************
+ * Name: pipe2
+ *
+ * Description:
+ *   pipe2() creates a pair of file descriptors, pointing to a pipe inode,
+ *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
+ *   fd[1] is for writing.
+ *
+ * Input Parameters:
+ *   fd[2] - The user provided array in which to catch the pipe file
+ *   descriptors
+ *   flags - The file status flags.
+ *
+ * Returned Value:
+ *   0 is returned on success; -1 (ERROR) is returned on a failure
+ *   with the errno value set appropriately.
+ *
+ ****************************************************************************/
+
 int pipe2(int fd[2], int flags)
 {
   char devname[32];
   int ret;
+  bool blocking;
 
   /* Register a new pipe device */
 
@@ -243,12 +264,27 @@ int pipe2(int fd[2], int flags)
       return ERROR;
     }
 
-  /* Get a write file descriptor */
+  /* Check for the O_NONBLOCK bit on flags */
 
-  fd[1] = open(devname, O_WRONLY | flags);
+  blocking = (flags & O_NONBLOCK) == 0;
+
+  /* Get a write file descriptor setting O_NONBLOCK temporarily */
+
+  fd[1] = open(devname, O_WRONLY | O_NONBLOCK | flags);
   if (fd[1] < 0)
     {
       goto errout_with_driver;
+    }
+
+  /* Clear O_NONBLOCK if it was set previously */
+
+  if (blocking)
+    {
+      ret = fcntl(fd[1], F_SETFL, flags & (~O_NONBLOCK));
+      if (ret < 0)
+        {
+          goto errout_with_driver;
+        }
     }
 
   /* Get a read file descriptor */

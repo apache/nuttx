@@ -171,8 +171,9 @@ int pipecommon_open(FAR struct file *filep)
     {
       dev->d_nwriters++;
 
-      /* If this is the first writer, then the read semaphore indicates the
-       * number of readers waiting for the first writer.  Wake them all up.
+      /* If this is the first writer, then the n-readers semaphore
+       * indicates the number of readers waiting for the first writer.
+       * Wake them all up!
        */
 
       if (dev->d_nwriters == 1)
@@ -184,6 +185,51 @@ int pipecommon_open(FAR struct file *filep)
         }
     }
 
+  while ((filep->f_oflags & O_NONBLOCK) == 0 &&     /* Blocking */
+         (filep->f_oflags & O_RDWR) == O_WRONLY &&  /* Write-only */
+         dev->d_nreaders < 1 &&                     /* No readers on the pipe */
+         dev->d_wrndx == dev->d_rdndx)              /* Buffer is empty */
+    {
+      /* If opened for write-only, then wait for at least one reader
+       * on the pipe.
+       */
+
+      nxmutex_unlock(&dev->d_bflock);
+
+      /* NOTE: d_wrsem is normally used to check if the write buffer is full
+       * and wait for it being read and being able to receive more data. But,
+       * until the first reader has opened the pipe, the meaning is different
+       * and it is used prevent O_WRONLY open calls from returning until
+       * there is at least one reader on the pipe.
+       */
+
+      ret = nxsem_wait(&dev->d_wrsem);
+      if (ret < 0)
+        {
+          ferr("ERROR: nxsem_wait failed: %d\n", ret);
+
+          /* Immediately close the pipe that we just opened */
+
+          pipecommon_close(filep);
+          return ret;
+        }
+
+      /* The nxmutex_lock() call should fail if we are awakened by a
+       * signal or if the task is canceled.
+       */
+
+      ret = nxmutex_lock(&dev->d_bflock);
+      if (ret < 0)
+        {
+          ferr("ERROR: nxmutex_lock failed: %d\n", ret);
+
+          /* Immediately close the pipe that we just opened */
+
+          pipecommon_close(filep);
+          return ret;
+        }
+    }
+
   /* If opened for reading, increment the count of reader on on the pipe
    * instance.
    */
@@ -191,16 +237,28 @@ int pipecommon_open(FAR struct file *filep)
   if ((filep->f_oflags & O_RDOK) != 0)
     {
       dev->d_nreaders++;
+
+      /* If this is the first reader, then the n-writers semaphore
+       * indicates the number of writers waiting for the first reader.
+       * Wake them all up.
+       */
+
+      if (dev->d_nreaders == 1)
+        {
+          while (nxsem_get_value(&dev->d_wrsem, &sval) == 0 && sval <= 0)
+            {
+              nxsem_post(&dev->d_wrsem);
+            }
+        }
     }
 
-  while ((filep->f_oflags & O_NONBLOCK) == 0 &&    /* Non-blocking */
-         (filep->f_oflags & O_RDWR) == O_RDONLY && /* Read-only */
-         dev->d_nwriters < 1 &&                    /* No writers on the pipe */
-         dev->d_wrndx == dev->d_rdndx)             /* Buffer is empty */
+  while ((filep->f_oflags & O_NONBLOCK) == 0 &&     /* Blocking */
+         (filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
+         dev->d_nwriters < 1 &&                     /* No writers on the pipe */
+         dev->d_wrndx == dev->d_rdndx)              /* Buffer is empty */
     {
-      /* If opened for read-only, then wait for either (1) at least one
-       * writer on the pipe (policy == 0), or (2) until there is buffered
-       * data to be read (policy == 1).
+      /* If opened for read-only, then wait for either at least one writer
+       * on the pipe.
        */
 
       nxmutex_unlock(&dev->d_bflock);
@@ -215,12 +273,23 @@ int pipecommon_open(FAR struct file *filep)
        */
 
       ret = nxsem_wait(&dev->d_rdsem);
-      if (ret < 0 || (ret = nxmutex_lock(&dev->d_bflock)) < 0)
+      if (ret < 0)
         {
-          /* The nxmutex_lock() call should fail if we are awakened by a
-           * signal or if the task is canceled.
-           */
+          ferr("ERROR: nxsem_wait failed: %d\n", ret);
 
+          /* Immediately close the pipe that we just opened */
+
+          pipecommon_close(filep);
+          return ret;
+        }
+
+      /* The nxmutex_lock() call should fail if we are awakened by a
+       * signal or if the task is canceled.
+       */
+
+      ret = nxmutex_lock(&dev->d_bflock);
+      if (ret < 0)
+        {
           ferr("ERROR: nxmutex_lock failed: %d\n", ret);
 
           /* Immediately close the pipe that we just opened */
@@ -305,8 +374,8 @@ int pipecommon_close(FAR struct file *filep)
 
                   poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS,
                               POLLERR);
-                  while (nxsem_get_value(&dev->d_wrsem, &sval) == 0
-                         && sval <= 0)
+                  while (nxsem_get_value(&dev->d_wrsem, &sval) == 0 &&
+                         sval <= 0)
                     {
                       nxsem_post(&dev->d_wrsem);
                     }
