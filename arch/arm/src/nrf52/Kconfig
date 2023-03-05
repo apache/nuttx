@@ -675,7 +675,7 @@ menuconfig NRF52_SOFTDEVICE_CONTROLLER
 
 		It makes use of RTC0, TIMER0 and RADIO so
 		these will be unavailable for direct use by user.
-		It also makes use of PPI channel range 19-31.
+		It also makes use of PPI channel range 17-31.
 
 if NRF52_SOFTDEVICE_CONTROLLER
 
