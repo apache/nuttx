@@ -316,7 +316,7 @@ int board_app_initialize(uintptr_t arg)
   index = 0;
 
 #ifdef CONFIG_STM32L4_TIM1_QE
-  sprintf(buf, "/dev/qe%d", index++);
+  snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 1);
   if (ret != OK)
     {
@@ -327,7 +327,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_STM32L4_TIM2_QE
-  sprintf(buf, "/dev/qe%d", index++);
+  snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 2);
   if (ret != OK)
     {
@@ -338,7 +338,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_STM32L4_TIM3_QE
-  sprintf(buf, "/dev/qe%d", index++);
+  snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 3);
   if (ret != OK)
     {
@@ -349,7 +349,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_STM32L4_TIM4_QE
-  sprintf(buf, "/dev/qe%d", index++);
+  snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 4);
   if (ret != OK)
     {
@@ -360,7 +360,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_STM32L4_TIM5_QE
-  sprintf(buf, "/dev/qe%d", index++);
+  snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 5);
   if (ret != OK)
     {
@@ -371,7 +371,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_STM32L4_TIM8_QE
-  sprintf(buf, "/dev/qe%d", index++);
+  snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 8);
   if (ret != OK)
     {

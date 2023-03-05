@@ -220,7 +220,7 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
 
       /* Construct the full path */
 
-      sprintf(fullpath, "%s/%s", path, relpath);
+      snprintf(fullpath, pathlen, "%s/%s", path, relpath);
 
       /* Verify that a regular file exists at this path */
 

@@ -292,13 +292,16 @@ static void tlsr82_flash_print(const char *msg, const uint8_t *buf,
     {
       if (i % 16 == 0)
         {
-          off += sprintf(&print_buf[off], "0x%08x:", i);
+          snprintf(&print_buf[off],
+                   sizeof(print_buf) - off, "0x%08x:", i);
+          off += strlen(&print_buf[off]);
         }
 
-      off += sprintf(&print_buf[off], "0x%02x ", buf[i]);
-      i++;
+      snprintf(&print_buf[off],
+               sizeof(print_buf) - off, "0x%02x ", buf[i]);
+      off += strlen(&print_buf[off]);
 
-      if (i % 16 == 0)
+      if (++i % 16 == 0)
         {
           ferr("%s\n", print_buf);
           off = 0;
@@ -320,7 +323,7 @@ static void tlsr82_flash_print(const char *msg, const uint8_t *buf,
 static int tlsr82_flash_test(struct tlsr82_flash_dev_s *priv)
 {
   struct mtd_geometry_s geo;
-  int ret      = OK;
+  int ret      = 0;
   int npages   = 0;
   int i        = 0;
   int j        = 0;
@@ -329,13 +332,16 @@ static int tlsr82_flash_test(struct tlsr82_flash_dev_s *priv)
 
   /* 1. print the manufacture id and unique id */
 
-  ret = 0;
   ferr("Flash information print:\n");
   ferr("    Flash MID: 0x%08lx\n", g_flash_mid);
-  ret += sprintf(&print_buf[ret], "    Flash UID: ");
+  snprintf(&print_buf[ret],
+           sizeof(print_buf) - ret, "    Flash UID: ");
+  ret += strlen(&print_buf[ret]);
   for (i = 1; i < 16; i++)
     {
-      ret += sprintf(&print_buf[ret], "0x%x ", g_flash_uid[i]);
+      snprintf(&print_buf[ret],
+               sizeof(print_buf) - ret, "0x%x ", g_flash_uid[i]);
+      ret += strlen(&print_buf[ret]);
     }
 
   ferr("%s\n", print_buf);

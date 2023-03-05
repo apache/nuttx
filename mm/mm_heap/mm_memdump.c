@@ -80,8 +80,9 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 #  if CONFIG_MM_BACKTRACE > 0
           for (i = 0; i < CONFIG_MM_BACKTRACE && node->backtrace[i]; i++)
             {
-              sprintf(buf + i * MM_PTR_FMT_WIDTH, format,
-                      MM_PTR_FMT_WIDTH - 1, node->backtrace[i]);
+              snprintf(buf + i * MM_PTR_FMT_WIDTH,
+                       sizeof(buf) - i * MM_PTR_FMT_WIDTH,
+                       format, MM_PTR_FMT_WIDTH - 1, node->backtrace[i]);
             }
 #  endif
 

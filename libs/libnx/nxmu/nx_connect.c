@@ -116,7 +116,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
   conn->cid = g_nxcid++;
   nxmutex_unlock(&g_nxliblock);
 
-  sprintf(climqname, NX_CLIENT_MQNAMEFMT, conn->cid);
+  snprintf(climqname, sizeof(climqname), NX_CLIENT_MQNAMEFMT, conn->cid);
 
   /* Open the client MQ for reading */
 

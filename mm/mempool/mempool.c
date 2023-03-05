@@ -503,8 +503,9 @@ void mempool_memdump(FAR struct mempool_s *pool, pid_t pid)
 #  if CONFIG_MM_BACKTRACE > 0
               for (i = 0; i < CONFIG_MM_BACKTRACE && buf->backtrace[i]; i++)
                 {
-                  sprintf(bt + i * MM_PTR_FMT_WIDTH, format,
-                          MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
+                  snprintf(bt + i * MM_PTR_FMT_WIDTH,
+                           sizeof(bt) - i * MM_PTR_FMT_WIDTH,
+                           format, MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
                 }
 #  endif
 

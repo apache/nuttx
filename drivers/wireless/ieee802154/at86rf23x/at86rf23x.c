@@ -1302,12 +1302,15 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
 
       if ((i & 0x0f) == 0)
         {
-          len = sprintf(buf, "%02x: ", i & 0xff);
+          snprintf(buf, sizeof(buf), "%02x: ", i & 0xff);
+          len = strlen(buf);
         }
 
       /* Print the register value */
 
-      len += sprintf(buf + len, "%02x ", at86rf23x_getreg(dev->spi, i));
+      snprintf(buf + len, sizeof(buf) - len,
+               "%02x ", at86rf23x_getreg(dev->spi, i));
+      len += strlen(buf + len);
 
       /* At the end of each 15 regs or end of rf233s regs and actually print
        * debug message.
@@ -1315,7 +1318,7 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
 
       if ((i & 15) == 15 || i == 0x2f)
         {
-          sprintf(buf + len, "\n");
+          snprintf(buf + len, sizeof(buf) - len, "\n");
           wlinfo("%s", buf);
         }
     }

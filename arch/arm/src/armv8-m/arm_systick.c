@@ -302,7 +302,7 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
     {
       char devname[32];
 
-      sprintf(devname, "/dev/timer%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/timer%d", minor);
       timer_register(devname, (struct timer_lowerhalf_s *)lower);
     }
 

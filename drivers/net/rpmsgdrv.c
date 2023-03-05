@@ -373,8 +373,8 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 
   /* Save pointers into argv */
 
-  sprintf(arg1, "%p", ept);
-  sprintf(arg2, "%p", data);
+  snprintf(arg1, sizeof(arg1), "%p", ept);
+  snprintf(arg2, sizeof(arg2), "%p", data);
 
   argv[0] = arg1;
   argv[1] = arg2;
@@ -565,7 +565,8 @@ static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
   if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
     {
       priv->ept.priv = dev;
-      sprintf(eptname, NET_RPMSG_EPT_NAME, priv->devname);
+      snprintf(eptname, sizeof(eptname),
+               NET_RPMSG_EPT_NAME, priv->devname);
 
       rpmsg_create_ept(&priv->ept, rdev, eptname,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,

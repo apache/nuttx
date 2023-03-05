@@ -3900,7 +3900,9 @@ retry:
             {
               for (j = 0, k = 0; j < 8 && j < remaining ; j++)
                 {
-                  k += sprintf(&buffer[k], "%12d", dev->freecount[i + j]);
+                  snprintf(&buffer[k], sizeof(buffer) - k,
+                           "%12d", dev->freecount[i + j]);
+                  k += strlen(&buffer[k]);
                 }
 
               ferr("%04x:%s\n", i, buffer);

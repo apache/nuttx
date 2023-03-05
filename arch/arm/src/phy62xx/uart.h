@@ -165,7 +165,15 @@ int hal_uart_set_tx_buf(UART_INDEX_e uart_index, uint8_t *buf,
     uint16_t size);
 int hal_uart_get_tx_ready(UART_INDEX_e uart_index);
 int hal_uart_send_buff(UART_INDEX_e uart_index, uint8_t *buff, uint16_t len);
-#define logx(...) {char tmp_str[128]; sprintf(tmp_str, __VA_ARGS__); hal_uart_send_buff(0, &tmp_str, strlen(tmp_str) + 1);}
+#define logx(...) \
+  do \
+    { \
+      char tmp_str[128]; \
+      snprintf(tmp_str, sizeof(tmp_str), __VA_ARGS__); \
+      hal_uart_send_buff(0, &tmp_str, strlen(tmp_str) + 1); \
+    } \
+  while (0)
+
 int hal_uart_send_byte(UART_INDEX_e uart_index, unsigned char data);
 void __attribute__((weak)) hal_UART0_IRQHandler(void);
 void __attribute__((weak)) hal_UART1_IRQHandler(void);
