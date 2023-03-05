@@ -117,9 +117,11 @@
 #  if CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT < 2
 #    error The minimum allowed number of scan buffers is 2.
 #  endif
-#  define SCAN_MEM_SIZE (SDC_MEM_SCAN_BUFFER(CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT))
+#  define SCAN_MEM_SIZE  (SDC_MEM_SCAN_BUFFER(CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT))
+#  define SCAN_MEM_COUNT (CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT)
 #else
-#  define SCAN_MEM_SIZE (0)
+#  define SCAN_MEM_SIZE  (0)
+#  define SCAN_MEM_COUNT (0)
 #endif
 
 /* Broadcaster configuration */
@@ -132,6 +134,7 @@
 #  define ADV_MEM_SIZE  (ADV_SET_COUNT * SDC_MEM_PER_ADV_SET(ADV_BUF_SIZE))
 #else
 #  define ADV_SET_COUNT (0)
+#  define ADV_BUF_SIZE  (0)
 #  define ADV_MEM_SIZE  (0)
 #endif
 
@@ -697,10 +700,10 @@ static int nrf52_configure_memory(void)
    *       sdc_support_*() calls.
    */
 
-#ifdef CONFIG_NRF52_SDC_SCANNING
+#ifndef CONFIG_NRF52_SDC_PERIPHERAL
   /* Configure scanner memory */
 
-  cfg.scan_buffer_cfg.count = CONFIG_NRF52_SDC_SCAN_BUFFER_COUNT;
+  cfg.scan_buffer_cfg.count = SCAN_MEM_COUNT;
   ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
                     SDC_CFG_TYPE_SCAN_BUFFER_CFG, &cfg);
   if (ret < 0)
@@ -710,7 +713,7 @@ static int nrf52_configure_memory(void)
     }
 #endif
 
-#ifdef CONFIG_NRF52_SDC_ADVERTISING
+#ifndef CONFIG_NRF52_SDC_CENTRAL
   /* Configure advertisers memory */
 
   cfg.adv_count.count = ADV_SET_COUNT;
@@ -732,7 +735,7 @@ static int nrf52_configure_memory(void)
     }
 #endif
 
-#if SDC_CENTRAL_COUNT > 0
+#ifndef CONFIG_NRF52_SDC_PERIPHERAL
   /* Configure central connections memory */
 
   cfg.central_count.count = SDC_CENTRAL_COUNT;
@@ -745,7 +748,7 @@ static int nrf52_configure_memory(void)
     }
 #endif
 
-#if CONFIG_NRF52_SDC_PERIPHERAL_COUNT > 0
+#ifndef CONFIG_NRF52_SDC_CENTRAL
   /* Configure peripheral connections memory */
 
   cfg.peripheral_count.count = CONFIG_NRF52_SDC_PERIPHERAL_COUNT;
