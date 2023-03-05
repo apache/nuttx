@@ -163,3 +163,90 @@ config NRF53_SYSTIMER_SYSTICK
 endchoice
 
 endmenu # System Timer
+
+menuconfig NRF53_SOFTDEVICE_CONTROLLER
+	bool "SoftDevice Controller"
+	depends on ALLOW_BSDNORDIC_COMPONENTS
+	depends on NRF53_NETCORE
+	select ARMV8M_USEBASEPRI
+	select ARCH_RAMVECTORS
+	select ARCH_IRQPRIO
+	select CRYPTO
+	select CRYPTO_RANDOM_POOL
+	select NRF53_USE_LFCLK
+	---help---
+		This enables use of Nordic SoftDevice controller
+		(SDC). It is a library version of a subset of
+		full SoftDevice, which only includes the BLE
+		controller implementation.
+
+		It makes use of RTC0, TIMER0 and RADIO so
+		these will be unavailable for direct use by user.
+		It also makes use of DPPI channel range 0-13.
+
+if NRF53_SOFTDEVICE_CONTROLLER
+
+config NRF53_SDC_CLOCK_ACCURACY
+	int "Clock Accuracy [PPM]"
+	default 250
+	---help---
+		Select the clock accuracy depending on the chosen low-frequency clock
+		source
+
+config NRF53_SDC_PERIPHERAL_COUNT
+	int "Number of peripheral roles to support (also central)"
+	default 1
+	---help---
+		This controls how many peripheral connections will be supported. It also
+		determines the number of central roles from the following:
+
+		CENTRAL_ROLES = CONFIG_BLUETOOTH_MAX_CONN - NRF53_SDC_PERIPHERAL_COUNT
+
+		So by choosing these two variables you can control both capabilities.
+
+config NRF53_SDC_ADVERTISING
+	bool "Support advertising"
+	default y
+
+config NRF53_SDC_SCANNING
+	bool "Support scanning"
+	default y
+
+if NRF53_SDC_SCANNING
+
+config NRF53_SDC_SCAN_BUFFER_COUNT
+	int "Scanning buffer count"
+	default 3
+	---help---
+		The minimum allowed number of buffers is 2.
+
+endif
+
+config NRF53_SDC_LE_2M_PHY
+	bool "Support LE 2M PHY"
+	default y
+
+config NRF53_SDC_LE_CODED_PHY
+	bool "Support LE Coded PHY"
+	default n if ARCH_CHIP_NRF53832
+	default y if ARCH_CHIP_NRF53840
+	depends on NRF53_SDC_MULTIROLE
+
+config NRF53_SDC_DLE
+	bool "Support Data Length Extension (DLE)"
+	default y
+
+config NRF53_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config NRF53_SDC_FICR_STATIC_ADDR
+	bool "Configure factory generated static random address"
+	default n
+
+config NRF53_SDC_PUB_ADDR
+	hex "Configure BT public address"
+	default 0x0000000000
+
+endif

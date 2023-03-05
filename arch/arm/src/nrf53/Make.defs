@@ -41,3 +41,53 @@ endif
 ifeq ($(CONFIG_NRF53_APPCORE),y)
 CHIP_CSRCS += nrf53_cpunet.c
 endif
+
+ifeq ($(CONFIG_NRF53_SOFTDEVICE_CONTROLLER),y)
+
+NRFXLIB_UNPACK  := sdk-nrfxlib
+NRFXLIB_VER     := 2.3.0
+NRFXLIB_REF     := v$(NRFXLIB_VER)
+NRFXLIB_TGZ     := $(NRFXLIB_REF).tar.gz
+NRFXLIB_URL     := https://github.com/nrfconnect/sdk-nrfxlib/archive
+
+$(NRFXLIB_TGZ):
+	$(Q) echo "Downloading: NRFXLIB"
+	$(Q) curl -L $(NRFXLIB_URL)/$(NRFXLIB_TGZ) -o chip/$(NRFXLIB_TGZ)
+
+chip/$(NRFXLIB_UNPACK): $(NRFXLIB_TGZ)
+	$(Q) echo "Unpacking: NRXFLIB"
+	$(Q) cd chip && tar zxf $(NRFXLIB_TGZ)
+	$(Q) mv chip/$(NRFXLIB_UNPACK)-$(NRFXLIB_VER)* chip/$(NRFXLIB_UNPACK)
+	$(Q) touch chip/$(NRFXLIB_UNPACK)
+
+ifeq ($(wildcard chip/$(NRFXLIB_UNPACK)/.git),)
+context:: chip/$(NRFXLIB_UNPACK)
+
+distclean::
+	$(call DELFILE, chip/$(NRFXLIB_TGZ))
+	$(call DELDIR, chip/$(NRFXLIB_UNPACK))
+endif
+
+CHIP_CSRCS += nrf53_sdc.c
+
+NRFX_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)nrfx
+NRFXLIB_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdk-nrfxlib
+CMSIS_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)CMSIS_5
+
+INCLUDES += \
+	$(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdc) \
+	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)include) \
+	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)include)
+
+CFLAGS += -DNRF53_SERIES
+
+LIB_VARIANT=soft-float
+
+EXTRA_LIBPATHS += \
+	-L $(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)lib$(DELIM)cortex-m33+nodsp$(DELIM)$(LIB_VARIANT) \
+	-L $(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)lib$(DELIM)cortex-m33+nodsp$(DELIM)$(LIB_VARIANT)
+
+EXTRA_LIBS += -lmpsl
+EXTRA_LIBS += -lsoftdevice_controller_multirole
+
+endif

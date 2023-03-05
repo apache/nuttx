@@ -68,7 +68,7 @@ config ALLOW_MIT_COMPONENTS
 
 config ALLOW_BSDNORDIC_COMPONENTS
 	bool "Use components that have 5-Clause Nordic licenses"
-	depends on ARCH_CHIP_NRF52
+	depends on ARCH_CHIP_NRF52 || ARCH_CHIP_NRF53
 	default n
 	---help---
 		When this option is enabled the project will allow the use
