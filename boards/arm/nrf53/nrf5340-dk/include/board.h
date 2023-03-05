@@ -32,6 +32,8 @@
 #  include <nuttx/irq.h>
 #endif
 
+#include "hardware/nrf53_osc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -39,6 +41,7 @@
 /* Clocking *****************************************************************/
 
 #define BOARD_SYSTICK_CLOCK         (64000000)
+#define BOARD_OSC_XOSC32KI_INTCAP   (OSC_XOSC32KI_INTCAP_C7PF)
 
 /* LED definitions **********************************************************/
 

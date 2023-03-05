@@ -87,3 +87,48 @@ config NRF53_UART1
 	select NRF53_UART
 
 endmenu # NRF53 Peripheral Selection
+
+menu "Clock Configuration"
+
+config NRF53_HFCLK_XTAL
+	bool "Enable HFCLK from external crystal"
+	default n
+	---help---
+		If the board includes an external high-frequency crystal, enable this
+		option to supply the HFCLK. If this option is disabled, the internal
+		oscillator will be used.
+		Note that the RADIO peripheral requires the HFCLK to be used.
+
+config NRF53_USE_LFCLK
+	bool "Enable LFCLK"
+	default n
+	---help---
+		Enable low-frequency clock.
+
+if NRF53_USE_LFCLK
+
+choice
+	prompt "LFCLK source"
+	default NRF53_LFCLK_XTAL
+
+config NRF53_LFCLK_XTAL
+	bool "External 32.768Khz crystal"
+
+config NRF53_LFCLK_RC
+	bool "Internal RC oscillator"
+
+config NRF53_LFCLK_SYNTH
+	bool "Synthesized from HFCLK"
+
+endchoice
+
+endif # NRF53_USE_LFCLK
+
+config NRF53_OSCILLATOR_LFXO
+	bool "Configure LFXO oscillator"
+	default y if NRF53_LFCLK_XTAL
+	depends on NRF53_APPCORE
+	---help---
+		Configure LFXO oscillator
+
+endmenu # Clock Configuration

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf53/nrf53_clockconfig.c
+ * arch/arm/src/nrf53/nrf53_oscconfig.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,77 +31,45 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "nrf53_clockconfig.h"
-#include "hardware/nrf53_clock.h"
-#include "hardware/nrf53_power.h"
-#include "hardware/nrf53_gpio.h"
-
-#ifdef CONFIG_NRF53_APPCORE
-#  include "nrf53_oscconfig.h"
-#endif
+#include "nrf53_oscconfig.h"
+#include "nrf53_gpio.h"
+#include "hardware/nrf53_osc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_NRF53_NETCORE
+#  error Oscillators configuration availalbe only for the App core
+#endif
+
+/* LFXO pins */
+
+#define LFXO_XL1_GPIO_PIN  (GPIO_MCUSEL_PERIP | GPIO_PORT0 | GPIO_PIN(0))
+#define LFXO_XL2_GPIO_PIN  (GPIO_MCUSEL_PERIP | GPIO_PORT0 | GPIO_PIN(1))
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf53_clockconfig
- *
- * Description:
- *   Called to initialize the NRF53xxx.  This does whatever setup is needed
- *   to put the MCU in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.  This function also performs
- *   other low-level chip as necessary.
- *
+ * Name: nrf53_oscconfig
  ****************************************************************************/
 
-void nrf53_clockconfig(void)
+void nrf53_oscconfig(void)
 {
-#ifdef CONFIG_NRF53_APPCORE
-  /* Configure oscillators */
+#ifdef CONFIG_NRF53_OSCILLATOR_LFXO
+  /* Configure LFXO pins */
 
-  nrf53_oscconfig();
+  nrf53_gpio_config(LFXO_XL1_GPIO_PIN);
+  nrf53_gpio_config(LFXO_XL2_GPIO_PIN);
+
+  /* Configure internal capacitors for LFXO */
+
+  putreg32(BOARD_OSC_XOSC32KI_INTCAP, NRF53_OSC_XOSC32KI_INTCAP);
 #endif
 
 #ifdef CONFIG_NRF53_HFCLK_XTAL
-  /* Initialize HFCLK crystal oscillator */
-
-  putreg32(0x0, NRF53_CLOCK_EVENTS_HFCLKSTARTED);
-  putreg32(0x1, NRF53_CLOCK_TASKS_HFCLKSTART);
-
-  while (!getreg32(NRF53_CLOCK_EVENTS_HFCLKSTARTED))
-    {
-      /* wait for external oscillator to start */
-    }
-#endif
-
-#ifdef CONFIG_NRF53_USE_LFCLK
-  /* Initialize LFCLK */
-
-#if defined(CONFIG_NRF53_LFCLK_XTAL)
-  putreg32(CLOCK_LFCLKSRC_SRC_LFXO, NRF53_CLOCK_LFCLKSRC);
-#elif defined(CONFIG_NRF53_LFCLK_SYNTH)
-  putreg32(CLOCK_LFCLKSRC_SRC_LFSYNT, NRF53_CLOCK_LFCLKSRC);
-#else
-  putreg32(CLOCK_LFCLKSRC_SRC_LFRC, NRF53_CLOCK_LFCLKSRC);
-#endif
-
-  /* Trigger LFCLK start */
-
-  putreg32(0x0, NRF53_CLOCK_EVENTS_LFCLKSTARTED);
-  putreg32(0x1, NRF53_CLOCK_TASKS_LFCLKSTART);
-
-  while (!getreg32(NRF53_CLOCK_EVENTS_LFCLKSTARTED))
-    {
-      /* Wait for LFCLK to be running */
-    }
-
-#if defined(CONFIG_NRF53_LFCLK_RC)
-  /* TODO: calibrate LFCLK RC oscillator */
-#endif
+#  warning TODO: missing HFCLK XTAL oscillator config
 #endif
 }
