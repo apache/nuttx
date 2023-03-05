@@ -530,6 +530,13 @@ static const char *g_white_list[] =
   "idVendor",
   "idProduct",
 
+  /* Ref:
+   * arch/arm/src/nrf52/sdc/nrf.h
+   * arch/arm/src/nrf53/sdc/nrf.h
+   */
+
+  "IRQn_Type",
+
   NULL
 };
 
