@@ -1002,7 +1002,7 @@ static int hostfs_rewinddir(FAR struct inode *mountpt,
 static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                        FAR void **handle)
 {
-  FAR struct hostfs_mountpt_s  *fs;
+  FAR struct hostfs_mountpt_s *fs;
   FAR char *options;
   char *saveptr;
   char *ptr;
@@ -1080,7 +1080,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   if (fs->fs_root[len - 1] != '/')
     {
-      strcat(fs->fs_root, "/");
+      strlcat(fs->fs_root, "/", sizeof(fs->fs_root));
     }
 
   *handle = (FAR void *)fs;
