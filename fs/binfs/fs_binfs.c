@@ -224,13 +224,14 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
       else
         {
-          ret = inode_getpath(filep->f_inode, ptr);
+          ret = inode_getpath(filep->f_inode, ptr, PATH_MAX);
           if (ret < 0)
             {
               return ret;
             }
 
-          strcat(ptr, builtin_getname((int)((uintptr_t)filep->f_priv)));
+          strlcat(ptr, builtin_getname((int)((uintptr_t)filep->f_priv)),
+                  PATH_MAX);
         }
     }
   else

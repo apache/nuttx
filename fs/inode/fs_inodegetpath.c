@@ -42,7 +42,7 @@
  *
  ****************************************************************************/
 
-int inode_getpath(FAR struct inode *node, FAR char *path)
+int inode_getpath(FAR struct inode *node, FAR char *path, size_t len)
 {
   if (path == NULL)
     {
@@ -55,17 +55,17 @@ int inode_getpath(FAR struct inode *node, FAR char *path)
     }
   else
     {
-      int ret = inode_getpath(node->i_parent, path);
+      int ret = inode_getpath(node->i_parent, path, len);
       if (ret < 0)
         {
           return ret;
         }
     }
 
-  strcat(path, node->i_name);
+  strlcat(path, node->i_name, len);
   if (node->i_child || INODE_IS_MOUNTPT(node))
     {
-      strcat(path, "/");
+      strlcat(path, "/", len);
     }
 
   return OK;
