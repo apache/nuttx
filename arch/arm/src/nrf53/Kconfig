@@ -132,3 +132,34 @@ config NRF53_OSCILLATOR_LFXO
 		Configure LFXO oscillator
 
 endmenu # Clock Configuration
+
+menu "System Timer"
+
+config NRF53_SYSTIMER
+	bool
+	default y
+
+choice
+	prompt "System Timer Source"
+	default NRF53_SYSTIMER_SYSTICK
+	---help---
+		Choose which hardware resource will drive NuttX
+		system time
+
+config NRF53_SYSTIMER_SYSTICK
+	bool "SysTick"
+	select TIMER_ARCH
+	select TIMER
+	select ARMV8M_SYSTICK
+	---help---
+		Use ARM SysTick. It can be used for tickless and
+		non-tickless mode.
+
+		NOTE: nrf53 implementation of WFE/WFI involves is
+		incompatible with SysTick. This means that if
+		you choose this option, WFE/WFI will not be used
+		in idle loop.
+
+endchoice
+
+endmenu # System Timer
