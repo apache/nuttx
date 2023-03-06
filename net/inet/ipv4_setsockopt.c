@@ -175,7 +175,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
       case IP_MULTICAST_TTL:          /* Set/read the time-to-live value of
                                        * outgoing multicast packets */
         {
@@ -232,7 +232,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         break;
 #endif /* CONFIG_NET_IGMP */
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
       case IP_PKTINFO:
         {
           FAR struct udp_conn_s *conn;

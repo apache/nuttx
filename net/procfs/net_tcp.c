@@ -41,7 +41,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+#ifdef NET_TCP_HAVE_STACK
 
 #ifdef CONFIG_NET_IPv6
 #  define TCP_LINELEN 180
@@ -215,4 +215,4 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
   return len;
 }
 
-#endif /* CONFIG_NET_TCP && !CONFIG_NET_TCP_NO_STACK */
+#endif /* NET_TCP_HAVE_STACK */

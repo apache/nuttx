@@ -127,7 +127,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         ret = -ENOSYS;
         break;
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
       case IPV6_PKTINFO:
       case IPV6_RECVPKTINFO:
         {

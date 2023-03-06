@@ -41,7 +41,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
 
 #ifdef CONFIG_NET_IPv6
 #  define UDP_LINELEN 180
