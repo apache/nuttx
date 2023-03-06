@@ -134,8 +134,12 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
   /* Let the address family's connect() method handle the operation */
 
-  DEBUGASSERT(psock->s_sockif != NULL &&
-              psock->s_sockif->si_connect != NULL);
+  DEBUGASSERT(psock->s_sockif != NULL);
+  if (psock->s_sockif->si_connect == NULL)
+    {
+      return -EOPNOTSUPP;
+    }
+
   ret = psock->s_sockif->si_connect(psock, addr, addrlen);
   if (ret >= 0)
     {

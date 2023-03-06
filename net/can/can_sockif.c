@@ -53,8 +53,6 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock);
 static void can_addref(FAR struct socket *psock);
 static int  can_bind(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  can_connect(FAR struct socket *psock,
-              FAR const struct sockaddr *addr, socklen_t addrlen);
 static int  can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               FAR socklen_t *addrlen, FAR struct socket *newsock);
 static int  can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
@@ -74,7 +72,7 @@ const struct sock_intf_s g_can_sockif =
   NULL,             /* si_getsockname */
   NULL,             /* si_getpeername */
   NULL,             /* si_listen */
-  can_connect,      /* si_connect */
+  NULL,             /* si_connect */
   can_accept,       /* si_accept */
   can_poll_local,   /* si_poll */
   can_sendmsg,      /* si_sendmsg */
@@ -335,32 +333,6 @@ static int can_bind(FAR struct socket *psock,
 #endif
 
   return OK;
-}
-
-/****************************************************************************
- * Name: can_connect
- *
- * Description:
- *   Perform a can connection
- *
- * Input Parameters:
- *   psock   A reference to the socket structure of the socket
- *           to be connected
- *   addr    The address of the remote server to connect to
- *   addrlen Length of address buffer
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int can_connect(FAR struct socket *psock,
-                       FAR const struct sockaddr *addr,
-                       socklen_t addrlen)
-{
-  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
