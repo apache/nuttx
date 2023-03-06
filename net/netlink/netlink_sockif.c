@@ -58,9 +58,6 @@ static int  netlink_getpeername(FAR struct socket *psock,
               FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int  netlink_connect(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  netlink_accept(FAR struct socket *psock,
-              FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-              FAR struct socket *newsock);
 static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
 static ssize_t netlink_sendmsg(FAR struct socket *psock,
@@ -83,7 +80,7 @@ const struct sock_intf_s g_netlink_sockif =
   netlink_getpeername,  /* si_getpeername */
   NULL,                 /* si_listen */
   netlink_connect,      /* si_connect */
-  netlink_accept,       /* si_accept */
+  NULL,                 /* si_accept */
   netlink_poll,         /* si_poll */
   netlink_sendmsg,      /* si_sendmsg */
   netlink_recvmsg,      /* si_recvmsg */
@@ -401,57 +398,6 @@ static int netlink_connect(FAR struct socket *psock,
   conn->dst_groups = nladdr->nl_groups;
 
   return OK;
-}
-
-/****************************************************************************
- * Name: netlink_accept
- *
- * Description:
- *   The netlink_accept function is used with connection-based socket
- *   types (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
- *   connection request on the queue of pending connections, creates a new
- *   connected socket with mostly the same properties as 'sockfd', and
- *   allocates a new socket descriptor for the socket, which is returned. The
- *   newly created socket is no longer in the listening state. The original
- *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an inet_accept.
- *
- *   The 'sockfd' argument is a socket descriptor that has been created with
- *   socket(), bound to a local address with bind(), and is listening for
- *   connections after a call to listen().
- *
- *   On return, the 'addr' structure is filled in with the address of the
- *   connecting entity. The 'addrlen' argument initially contains the size
- *   of the structure pointed to by 'addr'; on return it will contain the
- *   actual length of the address returned.
- *
- *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, accept blocks the caller until a
- *   connection is present. If the socket is marked non-blocking and no
- *   pending connections are present on the queue, inet_accept returns
- *   EAGAIN.
- *
- * Input Parameters:
- *   psock    Reference to the listening socket structure
- *   addr     Receives the address of the connecting client
- *   addrlen  Input:  Allocated size of 'addr'
- *            Return: Actual size returned size of 'addr'
- *   newsock  Location to return the accepted socket information.
- *
- * Returned Value:
- *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a description of the appropriate error value.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int netlink_accept(FAR struct socket *psock,
-                          FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                          FAR struct socket *newsock)
-{
-  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
