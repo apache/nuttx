@@ -76,7 +76,7 @@ static int        inet_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        inet_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                    FAR struct socket *newsock);
+                    FAR struct socket *newsock, int flags);
 static int        inet_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
@@ -1369,7 +1369,8 @@ static int inet_connect(FAR struct socket *psock,
  ****************************************************************************/
 
 static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                       FAR socklen_t *addrlen, FAR struct socket *newsock)
+                       FAR socklen_t *addrlen, FAR struct socket *newsock,
+                       int flags)
 {
 #if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
   int ret;
