@@ -13,6 +13,10 @@ config ARCH_HAVE_PWM_OVERWRITE
 	bool
 	default n
 
+config ARCH_HAVE_PWM_DEADTIME
+	bool
+	default n
+
 config ARCH_HAVE_PWM_MULTICHAN
 	bool
 	default n
@@ -45,6 +49,20 @@ config PWM_OVERWRITE
 		1 without the need to wait for an end of cycle. The overwrite is
 		controlled from an application level the same way duty cycle or
 		frequency is modified.
+
+config PWM_DEADTIME
+	bool "PWM Deadtime Support"
+	default n
+	depends on ARCH_HAVE_PWM_DEADTIME
+	---help---
+		Some hardware will support deadtime generators that automatically
+		insert output activation delay for complementary PWM outputs. This
+		is usefull for H-bridge motor control for example. The deadtime
+		values are set from application level via the same IOCTL that sets
+		up duty cycle and frequency.
+
+		For detailed description about deadtime functionality please refer
+		to architecture manuals and datasheets.
 
 config PWM_MULTICHAN
 	bool "PWM Multiple Output Channel Support"

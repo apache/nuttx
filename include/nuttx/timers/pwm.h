@@ -124,6 +124,10 @@ struct pwm_chan_s
   bool ch_outp_ovrwr;
   bool ch_outp_ovrwr_val;
 #endif
+#ifdef CONFIG_PWM_DEADTIME
+  ub16_t dead_time_a;
+  ub16_t dead_time_b;
+#endif
   int8_t channel;
 };
 #endif
@@ -143,6 +147,10 @@ struct pwm_info_s
   ub16_t             duty;      /* Duty of the pulse train, "1"-to-"0" duration.
                                  * Maximum: 65535/65536 (0x0000ffff)
                                  * Minimum:     1/65536 (0x00000001) */
+#ifdef CONFIG_PWM_DEADTIME
+  ub16_t dead_time_a;           /* Dead time value for main output */
+  ub16_t dead_time_b;           /* Dead time value for complementary output */
+#endif
 #  ifdef CONFIG_PWM_PULSECOUNT
   uint32_t           count;     /* The number of pulse to generate.  0 means to
                                  * generate an indefinite number of pulses */
