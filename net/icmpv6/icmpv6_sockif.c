@@ -47,8 +47,6 @@
 static int        icmpv6_setup(FAR struct socket *psock);
 static sockcaps_t icmpv6_sockcaps(FAR struct socket *psock);
 static void       icmpv6_addref(FAR struct socket *psock);
-static int        icmpv6_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        icmpv6_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        icmpv6_getpeername(FAR struct socket *psock,
@@ -72,7 +70,7 @@ const struct sock_intf_s g_icmpv6_sockif =
   icmpv6_setup,       /* si_setup */
   icmpv6_sockcaps,    /* si_sockcaps */
   icmpv6_addref,      /* si_addref */
-  icmpv6_bind,        /* si_bind */
+  NULL,               /* si_bind */
   icmpv6_getsockname, /* si_getsockname */
   icmpv6_getpeername, /* si_getpeername */
   icmpv6_listen,      /* si_listen */
@@ -277,35 +275,6 @@ static int icmpv6_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EAFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: icmpv6_bind
- *
- * Description:
- *   icmpv6_bind() gives the socket 'psock' the local address 'addr'.  'addr'
- *   is 'addrlen' bytes long.  Traditionally, this is called "assigning a
- *   name to a socket."  When a socket is created with socket(), it exists
- *   in a name space (address family) but has no name assigned.
- *
- * Input Parameters:
- *   psock    Socket structure of the socket to bind
- *   addr     Socket local address
- *   addrlen  Length of 'addr'
- *
- * Returned Value:
- *   0 on success;  A negated errno value is returned on failure.  See
- *   bind() for a list a appropriate error values.
- *
- ****************************************************************************/
-
-static int icmpv6_bind(FAR struct socket *psock,
-                       FAR const struct sockaddr *addr,
-                       socklen_t addrlen)
-{
-  /* An ICMPv6 socket cannot be bound to a local address */
-
-  return -EBADF;
 }
 
 /****************************************************************************
