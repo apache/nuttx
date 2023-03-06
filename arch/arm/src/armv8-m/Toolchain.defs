@@ -35,6 +35,7 @@ else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
+  ZARCHCPUFLAGS      := -mcpu=cortex_m33
 else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m35p
   TOOLCHAIN_MARCH    := -march=armv8-m.main$(EXTCPUFLAGS)
