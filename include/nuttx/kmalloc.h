@@ -33,7 +33,6 @@
 #include <stdlib.h>
 
 #include <nuttx/mm/mm.h>
-#include <nuttx/userspace.h>
 
 /****************************************************************************
  * Public Types
