@@ -326,6 +326,11 @@ static void pwm_set_output(struct pwm_lowerhalf_s *dev, uint8_t channel,
 static void pwm_set_freq(struct pwm_lowerhalf_s *dev, uint8_t channel,
                          uint32_t frequency);
 static void pwm_set_comparison(struct pwm_lowerhalf_s *dev);
+#ifdef CONFIG_PWM_DEADTIME
+static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
+                             ub16_t dead_time_a, ub16_t dead_time_b,
+                             ub16_t duty);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -531,6 +536,90 @@ static void pwm_set_comparison(struct pwm_lowerhalf_s *dev)
 }
 
 /****************************************************************************
+ * Name: pwm_set_deadtime
+ *
+ * Description:
+ *   Set deadtime generator values.
+ *
+ * Input Parameters:
+ *   dev         - A reference to the lower half PWM driver state structure
+ *   channel     - Channel to by updated
+ *   dead_time_a - dead time value for output A
+ *   dead_time_b - dead time value for output B
+ *   duty        - channel duty cycle
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM_DEADTIME
+static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
+                             ub16_t dead_time_a, ub16_t dead_time_b,
+                             ub16_t duty)
+{
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
+  uint16_t period;
+  uint16_t width_1;
+  uint16_t width_2;
+  uint16_t regval;
+
+  /* Get the period value */
+
+  period = pwm_getreg(priv, SAMV7_PWM_CPRDX + (channel * CHANNEL_OFFSET));
+
+  /* Compute channel's duty cycle value. Dead time counter has only 12 bits
+   * and not 16 as duty cycle or period counter. Therefore a 12 bits recount
+   * is necessary to set the dead time value corresponding to selected
+   * frequency. This expects the dead time value selected in the application
+   * is moved left by 12 and devided by 100. For example:
+   *      dead_time_a = (selected_dead_time_duty << 12) / 100
+   * This aproach is the same as with duty cycle setup in the application
+   * but with 12 bits.
+   *
+   * Also note that it might not be possible to get correct delay on lower
+   * frequencies since dead time register has only 12 bits.
+   */
+
+  width_1 = (dead_time_a * period) >> 12;
+  width_2 = (dead_time_b * period) >> 12;
+
+  regval = b16toi(duty * period + b16HALF);
+
+  /* It is required width_1 < (CORD - CDTY) and
+   * width_2 < CDTY
+   */
+
+  if (width_1 > (period - regval))
+    {
+      pwmerr("ERROR: Dead Time value DTH has to be < period - duty! " \
+             "Setting DTH to 0\n");
+      width_1 = 0;
+    }
+
+  if (width_2 > regval)
+    {
+      pwmerr("ERROR: Dead Time value DTL has to be < duty! " \
+             "Setting DTL to 0\n");
+      width_2 = 0;
+    }
+
+  /* Update dead time value */
+
+  if (pwm_getreg(priv, SAMV7_PWM_SR) & CHID_SEL(1 << channel))
+    {
+      pwm_putreg(priv, SAMV7_PWM_DTUPDX + (channel * CHANNEL_OFFSET),
+                 DTUPD_DTHUPD_SEL(width_1) | DTUPD_DTLUPD_SEL(width_2));
+    }
+  else
+    {
+      pwm_putreg(priv, SAMV7_PWM_DTX + (channel * CHANNEL_OFFSET),
+                 DT_DTH_SEL(width_1) | DT_DTL_SEL(width_2));
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: pwm_setup
  *
  * Description:
@@ -581,7 +670,11 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
 
       channel = priv->channels[i].channel;
 
-      regval = CMR_CPOL | CMR_DPOLI;
+      regval = CMR_DPOLI;
+#ifdef CONFIG_PWM_DEADTIME
+      regval |= CMR_DTE;
+#endif
+
       pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), regval);
 
       /* Reset duty cycle register */
@@ -713,6 +806,12 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
 
               pwm_set_freq(dev, priv->channels[index - 1].channel,
                            info->frequency);
+#ifdef CONFIG_PWM_DEADTIME
+              pwm_set_deadtime(dev, priv->channels[index - 1].channel,
+                               info->channels[i].dead_time_a,
+                               info->channels[i].dead_time_b,
+                               info->channels[i].duty);
+#endif
               pwm_set_output(dev, priv->channels[index - 1].channel,
                              info->channels[i].duty);
 #ifdef CONFIG_PWM_OVERWRITE
@@ -740,6 +839,10 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
       /* Set the frequency and enable PWM output just for first channel */
 
       pwm_set_freq(dev, priv->channels[0].channel, info->frequency);
+#ifdef CONFIG_PWM_DEADTIME
+      pwm_set_deadtime(dev, priv->channels[index - 1].channel,
+                       info->dead_time_a, info->dead_time_b);
+#endif
       pwm_set_output(dev, priv->channels[0].channel, info->duty);
 #endif
 
