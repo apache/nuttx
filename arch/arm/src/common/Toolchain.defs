@@ -285,7 +285,7 @@ else
   ZEABI := gnueabi
 endif
 
-ZIGFLAGS = -target $(ZARCH)-freestanding-$(ZEABI)
+ZIGFLAGS = -target $(ZARCH)-freestanding-$(ZEABI) $(ZARCHCPUFLAGS)
 
 # Optimization of unused sections
 
