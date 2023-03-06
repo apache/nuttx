@@ -53,8 +53,6 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock);
 static void can_addref(FAR struct socket *psock);
 static int  can_bind(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  can_getsockname(FAR struct socket *psock,
-              FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int  can_getpeername(FAR struct socket *psock,
               FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int  can_listen(FAR struct socket *psock, int backlog);
@@ -76,7 +74,7 @@ const struct sock_intf_s g_can_sockif =
   can_sockcaps,     /* si_sockcaps */
   can_addref,       /* si_addref */
   can_bind,         /* si_bind */
-  can_getsockname,  /* si_getsockname */
+  NULL,             /* si_getsockname */
   can_getpeername,  /* si_getpeername */
   can_listen,       /* si_listen */
   can_connect,      /* si_connect */
@@ -340,35 +338,6 @@ static int can_bind(FAR struct socket *psock,
 #endif
 
   return OK;
-}
-
-/****************************************************************************
- * Name: can_getsockname
- *
- * Description:
- *   The getsockname() function retrieves the locally-bound name of the
- *   specified socket, stores this address in the sockaddr structure pointed
- *   to by the 'addr' argument, and stores the length of this address in the
- *   object pointed to by the 'addrlen' argument.
- *
- *   If the actual length of the address is greater than the length of the
- *   supplied sockaddr structure, the stored address will be truncated.
- *
- *   If the socket has not been bound to a local name, the value stored in
- *   the object pointed to by address is unspecified.
- *
- * Input Parameters:
- *   conn     CAN socket connection structure
- *   addr     sockaddr structure to receive data [out]
- *   addrlen  Length of sockaddr structure [in/out]
- *
- ****************************************************************************/
-
-static int can_getsockname(FAR struct socket *psock,
-                           FAR struct sockaddr *addr,
-                           FAR socklen_t *addrlen)
-{
-  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
