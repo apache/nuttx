@@ -258,23 +258,32 @@
 #  define ACT8945A_LDO4_PULLDOWN 0
 #endif
 
-#define ACT8945A_REG(_id, _vsel)                      \
+/* Ramp times are fixed for this regulator */
+
+#define ETIME_0   0
+#define ETIME_400 400
+#define ETIME_800 800
+
+#define ACT8945A_REG(_id, _vsel, _etime)              \
   [ACT8945A_##_id] =                                  \
   {                                                   \
-    .name          = CONFIG_ACT8945A_##_id##_NAME,    \
-    .id            = ACT8945A_##_id,                  \
     .n_voltages    = ACT8945A_NUM_VOLTAGES,           \
     .vsel_reg      = ACT8945A_##_id##_##_vsel,        \
     .vsel_mask     = ACT8945A_VSET_MASK,              \
+    .name          = CONFIG_ACT8945A_##_id##_NAME,    \
+    .id            = ACT8945A_##_id,                  \
     .enable_reg    = ACT8945A_##_id##_CONTROL,        \
     .enable_mask   = ACT8945A_EN_MASK,                \
-    .boot_on       = ACT8945A_##_id##_BOOT_ON,        \
+    .enable_time   = (_etime),                        \
+    .ramp_delay    = 400,                             \
+    .uv_step       = 0,                               \
     .min_uv        = CONFIG_ACT8945A_##_id##_MIN_UV,  \
     .max_uv        = CONFIG_ACT8945A_##_id##_MAX_UV,  \
-    .apply_uv      = ACT8945A_##_id##_APPLY_UV,       \
     .pulldown      = ACT8945A_##_id##_PULLDOWN,       \
     .pulldown_reg  = ACT8945A_##_id##_CONTROL,        \
     .pulldown_mask = ACT8945A_PULLDOWN_MASK,          \
+    .apply_uv      = ACT8945A_##_id##_APPLY_UV,       \
+    .boot_on       = ACT8945A_##_id##_BOOT_ON,        \
   }
 /****************************************************************************
  * Private type
@@ -368,24 +377,24 @@ static const int mv_list[] =
 
 static const struct regulator_desc_s g_act8945a_regulators[] =
 {
-  ACT8945A_REG(DCDC1, VSET0),
-  ACT8945A_REG(DCDC2, VSET0),
-  ACT8945A_REG(DCDC3, VSET0),
-  ACT8945A_REG(LDO1, VSET),
-  ACT8945A_REG(LDO2, VSET),
-  ACT8945A_REG(LDO3, VSET),
-  ACT8945A_REG(LDO4, VSET),
+  ACT8945A_REG(DCDC1, VSET0, ETIME_0),
+  ACT8945A_REG(DCDC2, VSET0, ETIME_400),
+  ACT8945A_REG(DCDC3, VSET0, ETIME_0),
+  ACT8945A_REG(LDO1, VSET, ETIME_800),
+  ACT8945A_REG(LDO2, VSET, ETIME_0),
+  ACT8945A_REG(LDO3, VSET, ETIME_0),
+  ACT8945A_REG(LDO4, VSET, ETIME_0),
 };
 
 static const struct regulator_desc_s g_alt_act8945a_regulators[] =
 {
-  ACT8945A_REG(DCDC1, VSET1),
-  ACT8945A_REG(DCDC2, VSET1),
-  ACT8945A_REG(DCDC3, VSET1),
-  ACT8945A_REG(LDO1, VSET),
-  ACT8945A_REG(LDO2, VSET),
-  ACT8945A_REG(LDO3, VSET),
-  ACT8945A_REG(LDO4, VSET),
+  ACT8945A_REG(DCDC1, VSET1, ETIME_0),
+  ACT8945A_REG(DCDC2, VSET1, 400000),
+  ACT8945A_REG(DCDC3, VSET1, ETIME_0),
+  ACT8945A_REG(LDO1, VSET, 800000),
+  ACT8945A_REG(LDO2, VSET, ETIME_0),
+  ACT8945A_REG(LDO3, VSET, ETIME_0),
+  ACT8945A_REG(LDO4, VSET, ETIME_0),
 };
 
 /* Regulator operations */
@@ -1000,8 +1009,9 @@ int act8945a_initialize(FAR struct i2c_master_s *i2c, unsigned int vsel)
 
   uint8_t scratch;
   int regnum;
+  bool reg_failed = false;
 
-  DEBUGASSERT(vsel != 0 && vsel != 1);
+  DEBUGASSERT(vsel == 0 || vsel == 1);
 
   if (!i2c)
     {
@@ -1062,9 +1072,15 @@ int act8945a_initialize(FAR struct i2c_master_s *i2c, unsigned int vsel)
                                       &g_act8945a_ops, priv);
       if (priv->rdev == NULL)
         {
-          pwrerr("ERROR: failed to register act8945a device %d\n");
-          goto error;
+          reg_failed = true;
+          pwrerr("ERROR: failed to register act8945a regulator %s\n",
+                 priv->regulators[regnum].name);
         }
+    }
+
+  if (reg_failed)
+    {
+      goto error;
     }
 
   act89845a_set_sysmode(priv, ACT8945A_SYSLEV_MODE);
