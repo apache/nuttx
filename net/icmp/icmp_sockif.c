@@ -47,8 +47,6 @@
 static int        icmp_setup(FAR struct socket *psock);
 static sockcaps_t icmp_sockcaps(FAR struct socket *psock);
 static void       icmp_addref(FAR struct socket *psock);
-static int        icmp_connect(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        icmp_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
@@ -69,7 +67,7 @@ const struct sock_intf_s g_icmp_sockif =
   NULL,             /* si_getsockname */
   NULL,             /* si_getpeername */
   NULL,             /* si_listen */
-  icmp_connect,     /* si_connect */
+  NULL,             /* si_connect */
   icmp_accept,      /* si_accept */
   icmp_netpoll,     /* si_poll */
   icmp_sendmsg,     /* si_sendmsg */
@@ -182,44 +180,6 @@ static void icmp_addref(FAR struct socket *psock)
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
   conn->crefs++;
-}
-
-/****************************************************************************
- * Name: icmp_connect
- *
- * Description:
- *   icmp_connect() connects the local socket referred to by the structure
- *   'psock' to the address specified by 'addr'. The addrlen argument
- *   specifies the size of 'addr'.  The format of the address in 'addr' is
- *   determined by the address space of the socket 'psock'.
- *
- *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
- *   to which datagrams are sent by default, and the only address from which
- *   datagrams are received. If the socket is of type SOCK_STREAM or
- *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
- *   that is bound to the address specified by 'addr'.
- *
- *   Generally, connection-based protocol sockets may successfully
- *   icmp_connect() only once; connectionless protocol sockets may use
- *   icmp_connect() multiple times to change their association.
- *   Connectionless sockets may dissolve the association by connecting to
- *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
- *
- * Input Parameters:
- *   psock     Pointer to a socket structure initialized by psock_socket()
- *   addr      Server address (form depends on type of socket)
- *   addrlen   Length of actual 'addr'
- *
- * Returned Value:
- *   0 on success; a negated errno value on failure.  See connect() for the
- *   list of appropriate errno values to be returned.
- *
- ****************************************************************************/
-
-static int icmp_connect(FAR struct socket *psock,
-                       FAR const struct sockaddr *addr, socklen_t addrlen)
-{
-  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
