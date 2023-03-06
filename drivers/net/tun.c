@@ -105,7 +105,7 @@
  */
 
 #ifdef CONFIG_NET_ETHERNET
-#  define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+#  define ETHBUF ((FAR struct eth_hdr_s *)NETLLBUF)
 #endif
 
 /****************************************************************************
@@ -452,6 +452,8 @@ static void tun_net_receive(FAR struct tun_device_s *priv)
 #ifdef CONFIG_NET_ETHERNET
 static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 {
+  FAR struct net_driver_s *dev = &priv->dev;
+
   /* Copy the data data from the hardware to priv->dev.d_buf.  Set amount of
    * data in priv->dev.d_len
    */
@@ -467,7 +469,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   /* We only accept IP packets of the configured type and ARP packets */
 
 #if defined(CONFIG_NET_IPv4)
-  if (BUF->type == HTONS(ETHTYPE_IP))
+  if (ETHBUF->type == HTONS(ETHTYPE_IP))
     {
       ninfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->dev);
@@ -479,7 +481,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
+  if (ETHBUF->type == HTONS(ETHTYPE_IP6))
     {
       ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
@@ -491,7 +493,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (BUF->type == HTONS(ETHTYPE_ARP))
+  if (ETHBUF->type == HTONS(ETHTYPE_ARP))
     {
       arp_input(&priv->dev);
       NETDEV_RXARP(&priv->dev);
@@ -986,6 +988,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
         {
           net_lock();
           ret = netdev_iob_prepare(&priv->dev, false, 0);
+          priv->dev.d_buf = NULL;
           if (ret < 0)
             {
               nwritten = (nwritten == 0) ? ret : nwritten;
