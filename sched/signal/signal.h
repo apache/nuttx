@@ -25,12 +25,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <sched.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
@@ -100,6 +102,8 @@ struct sigq_s
   uint8_t   type;                /* (Used to manage allocations) */
 };
 typedef struct sigq_s sigq_t;
+
+struct tcb_s;                    /* Forward declaration */
 
 /****************************************************************************
  * Public Data

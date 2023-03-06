@@ -24,10 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
+#include <sched.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "libc.h"
 

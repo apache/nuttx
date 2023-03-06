@@ -24,14 +24,15 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <sys/param.h>
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <poll.h>
 #include <fcntl.h>
+#include <poll.h>
+#include <stdio.h>
+#include <sys/param.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/circbuf.h>

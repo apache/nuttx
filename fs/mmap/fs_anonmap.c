@@ -23,8 +23,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/kmalloc.h>
+
 #include <debug.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/mm/map.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Private Functions

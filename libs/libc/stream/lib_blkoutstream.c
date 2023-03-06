@@ -24,7 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <unistd.h>
+
 #include <nuttx/streams.h>
 
 #include "libc.h"

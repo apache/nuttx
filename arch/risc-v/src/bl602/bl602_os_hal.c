@@ -47,6 +47,7 @@
 #include <clock/clock.h>
 #include <syslog.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>

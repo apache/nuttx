@@ -24,14 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
-#include <sched.h>
 #include <assert.h>
+#include <errno.h>
+#include <sched.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 

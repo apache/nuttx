@@ -22,19 +22,22 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/mutex.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/config.h>
 
 #include <fcntl.h>
-#include <string.h>
 #include <poll.h>
+#include <string.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mm/circbuf.h>
+#include <nuttx/mutex.h>
+#include <nuttx/semaphore.h>
+
+#include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
-#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Private Types

@@ -22,15 +22,18 @@
  * Included Files
  ****************************************************************************/
 
-#include <netinet/in.h>
+#include <nuttx/config.h>
+
 #include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
 #include <unistd.h>
-#include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 

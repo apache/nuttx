@@ -25,8 +25,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 
@@ -87,6 +90,11 @@
 #ifndef CONFIG_NET_SNOOP_BUFSIZE
 #  define CONFIG_NET_SNOOP_BUFSIZE 4096
 #endif
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 struct snoop_s
 {
   bool             autosync;

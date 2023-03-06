@@ -22,7 +22,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <assert.h>
+#include <string.h>
 
 #include "libc.h"
 

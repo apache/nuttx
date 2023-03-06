@@ -23,13 +23,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/audio/audio.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/queue.h>
-#include <nuttx/nuttx.h>
 
 #include <debug.h>
 #include <sys/param.h>
+
+#include <nuttx/audio/audio.h>
+#include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
+#include <nuttx/nuttx.h>
 
 #include <alsa/asoundlib.h>
 

@@ -23,16 +23,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <string.h>
 #include <assert.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
+#include <nuttx/sched.h>
 
 #include "local/local.h"
 

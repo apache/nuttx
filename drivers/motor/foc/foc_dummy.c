@@ -24,13 +24,14 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
-#include <errno.h>
-#include <assert.h>
-#include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/motor/foc/foc_lower.h>
 

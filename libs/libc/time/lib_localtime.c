@@ -50,20 +50,22 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
-
+#include <fcntl.h>
+#include <limits.h>
+#include <sched.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/param.h>
+#include <unistd.h>
 
-#include <nuttx/time.h>
-#include <nuttx/init.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/init.h>
+#include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/time.h>
 
 #include "libc.h"
 

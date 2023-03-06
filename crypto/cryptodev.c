@@ -35,21 +35,21 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/queue.h>
-#include <stdbool.h>
-#include <string.h>
-#include <poll.h>
-#include <errno.h>
-
-#include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/drivers/drivers.h>
-
-#include <crypto/xform.h>
 #include <crypto/cryptodev.h>
 #include <crypto/cryptosoft.h>
+#include <crypto/xform.h>
+#include <errno.h>
+#include <poll.h>
+#include <stdbool.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/types.h>
+#include <sys/queue.h>
+
+#include <nuttx/crypto/crypto.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Public Data

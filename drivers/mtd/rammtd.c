@@ -24,15 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
+#include <sys/types.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
 
 /****************************************************************************

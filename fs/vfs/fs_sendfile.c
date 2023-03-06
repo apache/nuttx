@@ -24,11 +24,12 @@
 
 #include <nuttx/config.h>
 
-#include <sys/sendfile.h>
-#include <stdbool.h>
 #include <errno.h>
+#include <stdbool.h>
+#include <sys/sendfile.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
 /****************************************************************************

@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <string.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 

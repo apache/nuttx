@@ -24,16 +24,18 @@
 
 #include <stdio.h>
 
+#include <fcntl.h>
+#include <signal.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <signal.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/mutex.h>
+
 #include "rom/esp32c3_libc_stubs.h"
 
 /****************************************************************************

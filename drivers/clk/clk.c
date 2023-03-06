@@ -22,6 +22,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <debug.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+
 #include <nuttx/clk/clk.h>
 #include <nuttx/clk/clk_provider.h>
 #include <nuttx/fs/fs.h>
@@ -29,11 +37,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
-
-#include <debug.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <sys/stat.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -27,10 +27,11 @@
 #include <assert.h>
 #include <debug.h>
 #include <stdint.h>
+#include <sys/syscall.h>
 
 #include <arch/xtensa/xtensa_specregs.h>
 #include <nuttx/arch.h>
-#include <sys/syscall.h>
+#include <nuttx/userspace.h>
 
 #include "chip.h"
 #include "signal/signal.h"

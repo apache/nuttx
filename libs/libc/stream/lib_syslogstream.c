@@ -22,9 +22,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/streams.h>

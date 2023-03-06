@@ -29,6 +29,8 @@
 #include <sched.h>
 #include <stdlib.h>
 
+#include <nuttx/arch.h>
+
 #include "libc.h"
 
 /****************************************************************************

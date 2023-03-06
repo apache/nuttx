@@ -26,6 +26,7 @@
 
 #include <debug.h>
 #include <stdio.h>
+#include <strings.h>
 
 #include "ubsan.h"
 

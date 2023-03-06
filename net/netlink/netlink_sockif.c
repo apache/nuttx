@@ -24,20 +24,21 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <stdbool.h>
-#include <string.h>
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
 #include <poll.h>
 #include <sched.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdbool.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/net/net.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/net/net.h>
 
 #include "netlink/netlink.h"
 

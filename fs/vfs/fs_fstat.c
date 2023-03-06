@@ -24,14 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sched.h>
 #include <assert.h>
 #include <errno.h>
+#include <sched.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/net/net.h>
+
 #include "inode/inode.h"
 
 /****************************************************************************

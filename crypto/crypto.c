@@ -28,13 +28,15 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdbool.h>
-#include <string.h>
-#include <poll.h>
+#include <crypto/cryptodev.h>
 #include <debug.h>
 #include <errno.h>
-#include <crypto/cryptodev.h>
+#include <poll.h>
+#include <stdbool.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/types.h>
+
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>

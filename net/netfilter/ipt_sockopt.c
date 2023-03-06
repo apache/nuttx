@@ -22,11 +22,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
+#include <strings.h>
 #include <sys/param.h>
 
 #include <nuttx/kmalloc.h>

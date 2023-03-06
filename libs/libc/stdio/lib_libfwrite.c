@@ -24,12 +24,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 
 #include <nuttx/fs/fs.h>
 

@@ -22,13 +22,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <debug.h>
 #include <stdatomic.h>
 #include <string.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/snoop.h>
-
 #include <nuttx/wireless/bluetooth/bt_bridge.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_ioctl.h>

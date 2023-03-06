@@ -22,6 +22,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 

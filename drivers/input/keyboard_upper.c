@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/input/keyboard.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>

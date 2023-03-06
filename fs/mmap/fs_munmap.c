@@ -23,17 +23,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mm/map.h>
 
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 
-#include <stdint.h>
-#include <errno.h>
-#include <assert.h>
-#include <debug.h>
-
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/map.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
 #include "fs_rammap.h"

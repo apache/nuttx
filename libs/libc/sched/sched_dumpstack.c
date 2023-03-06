@@ -23,12 +23,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/allsyms.h>
 
-#include <sys/types.h>
-
+#include <sched.h>
 #include <stdio.h>
 #include <syslog.h>
+#include <sys/types.h>
+
+#include <nuttx/allsyms.h>
 
 /****************************************************************************
  * Pre-processor Definitions

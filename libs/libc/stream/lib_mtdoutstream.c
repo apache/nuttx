@@ -24,10 +24,12 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <unistd.h>
-#include <nuttx/streams.h>
+
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/streams.h>
 
 #include "libc.h"
 

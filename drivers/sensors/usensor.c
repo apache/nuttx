@@ -23,6 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <string.h>
+
 #include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
 #include <nuttx/kmalloc.h>

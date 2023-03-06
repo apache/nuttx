@@ -26,16 +26,17 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sys/types.h>
-#include <sched.h>
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <sched.h>
+#include <string.h>
+#include <sys/types.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 
-#include "sched/sched.h"
 #include "environ/environ.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions

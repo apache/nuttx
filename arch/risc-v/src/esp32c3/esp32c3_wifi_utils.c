@@ -29,6 +29,7 @@
 #include <netinet/arp.h>
 #include <sys/param.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
 

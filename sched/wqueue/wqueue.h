@@ -26,8 +26,9 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <semaphore.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>

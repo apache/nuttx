@@ -22,9 +22,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
-#include <unistd.h>
+#include <string.h>
 #include <sys/uio.h>
+#include <unistd.h>
 
 #include "libc.h"
 

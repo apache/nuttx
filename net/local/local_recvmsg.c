@@ -25,14 +25,15 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <inttypes.h>
-#include <unistd.h>
-#include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <string.h>
+#include <sys/param.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>

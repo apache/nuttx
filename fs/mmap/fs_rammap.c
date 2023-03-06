@@ -23,15 +23,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 
 #include "fs_rammap.h"
 

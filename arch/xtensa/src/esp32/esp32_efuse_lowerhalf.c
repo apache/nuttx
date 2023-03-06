@@ -22,14 +22,19 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdlib.h>
-#include <debug.h>
-#include <assert.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/efuse/efuse.h>
+#include <nuttx/config.h>
 
-#include "hardware/esp32_soc.h"
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+#include <stdlib.h>
+
+#include <nuttx/efuse/efuse.h>
+#include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
+
 #include "esp32_efuse.h"
+#include "hardware/esp32_soc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

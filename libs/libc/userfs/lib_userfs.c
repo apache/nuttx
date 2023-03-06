@@ -24,20 +24,19 @@
 
 #include <nuttx/config.h>
 
+#include <arpa/inet.h>
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/socket.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include <unistd.h>
 
 #include <nuttx/fs/userfs.h>
 #include <nuttx/mutex.h>

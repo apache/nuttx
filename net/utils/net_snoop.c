@@ -31,6 +31,7 @@
 
 #include <sys/param.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/net/snoop.h>
 
 /****************************************************************************

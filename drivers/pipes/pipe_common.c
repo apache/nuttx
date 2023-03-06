@@ -24,23 +24,24 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sched.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sched.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "pipe_common.h"
 

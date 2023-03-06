@@ -25,14 +25,15 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <fcntl.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <assert.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <nuttx/motor/motor_ioctl.h>
 #include <nuttx/motor/foc/foc_lower.h>
+#include <nuttx/motor/motor_ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions

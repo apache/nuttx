@@ -22,8 +22,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
+#include <nuttx/config.h>
+
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "libc.h"
 
 /****************************************************************************

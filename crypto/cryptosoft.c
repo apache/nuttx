@@ -25,14 +25,18 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <assert.h>
-#include <errno.h>
-#include <endian.h>
-#include <nuttx/kmalloc.h>
 #include <crypto/cryptodev.h>
 #include <crypto/cryptosoft.h>
 #include <crypto/xform.h>
+#include <endian.h>
+#include <errno.h>
+#include <strings.h>
 #include <sys/param.h>
+
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
