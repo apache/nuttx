@@ -377,3 +377,8 @@ void __ubsan_handle_pointer_overflow(FAR void *data,
 {
   ubsan_prologue_epilogue(data, "pointer-overflow");
 }
+
+void __ubsan_handle_invalid_builtin(FAR void *data)
+{
+  ubsan_prologue_epilogue(data, "invalid-builtin");
+}
