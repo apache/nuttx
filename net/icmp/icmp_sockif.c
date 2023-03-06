@@ -47,8 +47,6 @@
 static int        icmp_setup(FAR struct socket *psock);
 static sockcaps_t icmp_sockcaps(FAR struct socket *psock);
 static void       icmp_addref(FAR struct socket *psock);
-static int        icmp_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        icmp_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        icmp_getpeername(FAR struct socket *psock,
@@ -72,7 +70,7 @@ const struct sock_intf_s g_icmp_sockif =
   icmp_setup,       /* si_setup */
   icmp_sockcaps,    /* si_sockcaps */
   icmp_addref,      /* si_addref */
-  icmp_bind,        /* si_bind */
+  NULL,             /* si_bind */
   icmp_getsockname, /* si_getsockname */
   icmp_getpeername, /* si_getpeername */
   icmp_listen,      /* si_listen */
@@ -277,35 +275,6 @@ static int icmp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EAFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: icmp_bind
- *
- * Description:
- *   icmp_bind() gives the socket 'psock' the local address 'addr'.  'addr'
- *   is 'addrlen' bytes long.  Traditionally, this is called "assigning a
- *   name to a socket."  When a socket is created with socket(), it exists
- *   in a name space (address family) but has no name assigned.
- *
- * Input Parameters:
- *   psock    Socket structure of the socket to bind
- *   addr     Socket local address
- *   addrlen  Length of 'addr'
- *
- * Returned Value:
- *   0 on success;  A negated errno value is returned on failure.  See
- *   bind() for a list a appropriate error values.
- *
- ****************************************************************************/
-
-static int icmp_bind(FAR struct socket *psock,
-                     FAR const struct sockaddr *addr,
-                     socklen_t addrlen)
-{
-  /* An ICMP socket cannot be bound to a local address */
-
-  return -EBADF;
 }
 
 /****************************************************************************
