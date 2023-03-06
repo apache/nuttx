@@ -22,4 +22,4 @@ bp.pl011_uart3.unbuffered_output=1
 bp.terminal_3.start_telnet=0
 bp.vis.disable_visualisation=1
 bp.vis.rate_limit-enable=0
-cache_state_modelled=0
+cache_state_modelled=1
