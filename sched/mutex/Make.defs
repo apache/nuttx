@@ -20,8 +20,9 @@
 
 # Add mutex-related files to the build
 
-CSRCS += mutex_destroy.c mutex_lock.c mutex_reset.c
-CSRCS += mutex_timedlock.c mutex_trylock.c mutex_unlock.c
+CSRCS += mutex_clocklock.c mutex_destroy.c mutex_lock.c
+CSRCS += mutex_reset.c mutex_set_protocol.c mutex_timedlock.c
+CSRCS += mutex_trylock.c mutex_unlock.c
 
 # Include mutex build support
 

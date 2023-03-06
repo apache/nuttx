@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/semaphore/sem_getprotocol.c
+ * libs/libc/mutex/mutex_get_protocol.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,38 +22,32 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_getprotocol
+ * Name: nxmutex_get_protocol
  *
  * Description:
- *    Return the value of the semaphore protocol attribute.
+ *    Return the value of the mutex protocol attribute.
  *
  * Input Parameters:
- *    sem      - A pointer to the semaphore whose attributes are to be
+ *    mutex    - A pointer to the mutex whose attributes are to be
  *               queried.
  *    protocol - The user provided location in which to store the protocol
  *               value.
  *
  * Returned Value:
- *   This function is exposed as a non-standard application interface.  It
- *   returns zero (OK).  Otherwise, an error code.
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sem_getprotocol(FAR sem_t *sem, FAR int *protocol)
+int nxmutex_get_protocol(FAR mutex_t *mutex, FAR int *protocol)
 {
-  DEBUGASSERT(sem != NULL && protocol != NULL);
-
-  *protocol = sem->flags & SEM_PRIO_MASK;
-  return OK;
+  return nxsem_get_protocol(&mutex->sem, protocol);
 }

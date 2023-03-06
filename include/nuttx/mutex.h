@@ -240,6 +240,34 @@ int nxmutex_trylock(FAR mutex_t *mutex);
 int nxmutex_timedlock(FAR mutex_t *mutex, unsigned int timeout);
 
 /****************************************************************************
+ * Name: nxmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex. If the mutex value
+ *   is (<=) zero,then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   mutex       - Mutex object
+ *   clockid     - The timing source to use in the conversion
+ *   abs_timeout - The abs time when mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxmutex_clocklock(FAR mutex_t *mutex, clockid_t clockid,
+                      FAR const struct timespec *abs_timeout);
+
+/****************************************************************************
  * Name: nxmutex_unlock
  *
  * Description:
@@ -314,6 +342,47 @@ int nxmutex_breaklock(FAR mutex_t *mutex, FAR bool *locked);
  ****************************************************************************/
 
 int nxmutex_restorelock(FAR mutex_t *mutex, bool locked);
+
+/****************************************************************************
+ * Name: nxmutex_set_protocol
+ *
+ * Description:
+ *    Set mutex protocol attribute.
+ *
+ * Input Parameters:
+ *    mutex    - A pointer to the mutex whose attributes are to be
+ *               modified
+ *    protocol - The new protocol to use
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmutex_set_protocol(FAR mutex_t *mutex, int protocol);
+
+/****************************************************************************
+ * Name: nxmutex_get_protocol
+ *
+ * Description:
+ *    Return the value of the mutex protocol attribute.
+ *
+ * Input Parameters:
+ *    mutex    - A pointer to the mutex whose attributes are to be
+ *               queried.
+ *    protocol - The user provided location in which to store the protocol
+ *               value.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmutex_get_protocol(FAR mutex_t *mutex, FAR int *protocol);
 
 /****************************************************************************
  * Name: nxrmutex_init
@@ -461,6 +530,34 @@ int nxrmutex_trylock(FAR rmutex_t *rmutex);
 int nxrmutex_timedlock(FAR rmutex_t *rmutex, unsigned int timeout);
 
 /****************************************************************************
+ * Name: nxrmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex. If the mutex value
+ *   is (<=) zero,then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   rmutex      - Rmutex object
+ *   clockid     - The timing source to use in the conversion
+ *   abs_timeout - The abs time when mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxrmutex_clocklock(FAR rmutex_t *rmutex, clockid_t clockid,
+                       FAR const struct timespec *abs_timeout);
+
+/****************************************************************************
  * Name: nxrmutex_unlock
  *
  * Description:
@@ -537,6 +634,47 @@ int nxrmutex_breaklock(FAR rmutex_t *rmutex, FAR unsigned int *count);
  ****************************************************************************/
 
 int nxrmutex_restorelock(FAR rmutex_t *rmutex, unsigned int count);
+
+/****************************************************************************
+ * Name: nxrmutex_set_protocol
+ *
+ * Description:
+ *    Set mutex protocol attribute.
+ *
+ * Input Parameters:
+ *    rmutex   - Recursive mutex descriptor.
+ *    protocol - The new protocol to use
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#define nxrmutex_set_protocol(rmutex, protocol) \
+  nxmutex_set_protocol(&(rmutex)->mutex, protocol)
+
+/****************************************************************************
+ * Name: nxrmutex_get_protocol
+ *
+ * Description:
+ *    Return the value of the mutex protocol attribute.
+ *
+ * Input Parameters:
+ *    rmutex   - Recursive mutex descriptor.
+ *    protocol - The user provided location in which to store the protocol
+ *               value.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#define nxrmutex_get_protocol(rmutex, protocol) \
+  nxmutex_get_protocol(&(rmutex)->mutex, protocol)
 
 #undef EXTERN
 #ifdef __cplusplus

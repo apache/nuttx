@@ -141,7 +141,7 @@ typedef struct sem_s sem_t;
     {(c), 0, SEM_WAITLIST_INITIALIZER}
 #endif
 
-# define SEM_WAITLIST(sem)        (&((sem)->waitlist))
+#define SEM_WAITLIST(sem)       (&((sem)->waitlist))
 
 /****************************************************************************
  * Public Data

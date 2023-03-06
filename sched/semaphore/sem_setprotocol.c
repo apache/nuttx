@@ -76,7 +76,8 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 {
   DEBUGASSERT(sem != NULL);
 
-  switch (protocol & SEM_PRIO_MASK)
+  protocol &= SEM_PRIO_MASK;
+  switch (protocol)
     {
       case SEM_PRIO_NONE:
 
@@ -99,7 +100,8 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
         return -EINVAL;
     }
 
-  sem->flags = protocol;
+  sem->flags &= ~SEM_PRIO_MASK;
+  sem->flags |= protocol;
   return OK;
 }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/semaphore/sem_getprotocol.c
+ * libs/libc/mutex/mutex_clocklock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,38 +22,54 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/mutex.h>
 
 #include <assert.h>
-
-#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_getprotocol
+ * Name: nxrmutex_clocklock
  *
  * Description:
- *    Return the value of the semaphore protocol attribute.
+ *   This function attempts to lock the mutex .  If the mutex value
+ *   is (<=) zero,then the calling task will not return until it
+ *   successfully acquires the lock or timed out
  *
  * Input Parameters:
- *    sem      - A pointer to the semaphore whose attributes are to be
- *               queried.
- *    protocol - The user provided location in which to store the protocol
- *               value.
+ *   rmutex      - Rmutex object
+ *   clockid     - The timing source to use in the conversion
+ *   abs_timeout - The abs time when mutex lock timed out
  *
  * Returned Value:
- *   This function is exposed as a non-standard application interface.  It
- *   returns zero (OK).  Otherwise, an error code.
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
  *
  ****************************************************************************/
 
-int sem_getprotocol(FAR sem_t *sem, FAR int *protocol)
+int nxrmutex_clocklock(FAR rmutex_t *rmutex, clockid_t clockid,
+                       FAR const struct timespec *abs_timeout)
 {
-  DEBUGASSERT(sem != NULL && protocol != NULL);
+  int ret = OK;
 
-  *protocol = sem->flags & SEM_PRIO_MASK;
-  return OK;
+  if (!nxrmutex_is_hold(rmutex))
+    {
+      ret = nxmutex_clocklock(&rmutex->mutex, clockid, abs_timeout);
+    }
+
+  if (ret >= 0)
+    {
+      DEBUGASSERT(rmutex->count < UINT_MAX);
+      ++rmutex->count;
+    }
+
+  return ret;
 }
