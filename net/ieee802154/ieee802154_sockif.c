@@ -57,8 +57,6 @@ static int        ieee802154_getpeername(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        ieee802154_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        ieee802154_poll_local(FAR struct socket *psock,
-                    FAR struct pollfd *fds, bool setup);
 static int        ieee802154_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -76,7 +74,7 @@ const struct sock_intf_s g_ieee802154_sockif =
   NULL,                   /* si_listen */
   ieee802154_connect,     /* si_connect */
   NULL,                   /* si_accept */
-  ieee802154_poll_local,  /* si_poll */
+  NULL,                   /* si_poll */
   ieee802154_sendmsg,     /* si_sendmsg */
   ieee802154_recvmsg,     /* si_recvmsg */
   ieee802154_close        /* si_close */
@@ -488,35 +486,6 @@ static int ieee802154_getpeername(FAR struct socket *psock,
 
   *addrlen = copylen;
   return OK;
-}
-
-/****************************************************************************
- * Name: ieee802154_poll
- *
- * Description:
- *   The standard poll() operation redirects operations on socket descriptors
- *   to net_poll which, indiectly, calls to function.
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *   setup - true: Setup up the poll; false: Teardown the poll
- *
- * Returned Value:
- *  0: Success; Negated errno on failure
- *
- ****************************************************************************/
-
-static int ieee802154_poll_local(FAR struct socket *psock,
-                                 FAR struct pollfd *fds, bool setup)
-{
-  /* We should need to support some kind of write ahead buffering for this
-   * feature.
-   */
-
-#warning Missing logic
-  return -ENOSYS;
 }
 
 /****************************************************************************
