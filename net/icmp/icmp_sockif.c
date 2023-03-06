@@ -47,8 +47,6 @@
 static int        icmp_setup(FAR struct socket *psock);
 static sockcaps_t icmp_sockcaps(FAR struct socket *psock);
 static void       icmp_addref(FAR struct socket *psock);
-static int        icmp_getpeername(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        icmp_listen(FAR struct socket *psock, int backlog);
 static int        icmp_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
@@ -70,7 +68,7 @@ const struct sock_intf_s g_icmp_sockif =
   icmp_addref,      /* si_addref */
   NULL,             /* si_bind */
   NULL,             /* si_getsockname */
-  icmp_getpeername, /* si_getpeername */
+  NULL,             /* si_getpeername */
   icmp_listen,      /* si_listen */
   icmp_connect,     /* si_connect */
   icmp_accept,      /* si_accept */
@@ -271,40 +269,6 @@ static int icmp_connect(FAR struct socket *psock,
 
 static int icmp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen, FAR struct socket *newsock)
-{
-  return -EAFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: icmp_getpeername
- *
- * Description:
- *   The icmp_getpeername() function retrieves the remote-connected name of
- *   the specified packet socket, stores this address in the sockaddr
- *   structure pointed to by the 'addr' argument, and stores the length of
- *   this address in the object pointed to by the 'addrlen' argument.
- *
- *   If the actual length of the address is greater than the length of the
- *   supplied sockaddr structure, the stored address will be truncated.
- *
- *   If the socket has not been bound to a local name, the value stored in
- *   the object pointed to by address is unspecified.
- *
- * Parameters:
- *   psock    Socket structure of the socket to be queried
- *   addr     sockaddr structure to receive data [out]
- *   addrlen  Length of sockaddr structure [in/out]
- *
- * Returned Value:
- *   On success, 0 is returned, the 'addr' argument points to the address
- *   of the socket, and the 'addrlen' argument points to the length of the
- *   address.  Otherwise, a negated errno value is returned.  See
- *   getpeername() for the list of appropriate error numbers.
- *
- ****************************************************************************/
-
-static int icmp_getpeername(FAR struct socket *psock,
-                           FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   return -EAFNOSUPPORT;
 }
