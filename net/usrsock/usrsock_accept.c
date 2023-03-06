@@ -213,7 +213,8 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                   FAR socklen_t *addrlen, FAR struct socket *newsock)
+                   FAR socklen_t *addrlen, FAR struct socket *newsock,
+                   int flags)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_data_reqstate_s state =

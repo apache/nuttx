@@ -141,7 +141,7 @@ static int        rpmsg_socket_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        rpmsg_socket_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                    FAR struct socket *newsock);
+                    FAR struct socket *newsock, int flags);
 static int        rpmsg_socket_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
@@ -737,7 +737,8 @@ static int rpmsg_socket_connect(FAR struct socket *psock,
 static int rpmsg_socket_accept(FAR struct socket *psock,
                                FAR struct sockaddr *addr,
                                FAR socklen_t *addrlen,
-                               FAR struct socket *newsock)
+                               FAR struct socket *newsock,
+                               int flags)
 {
   FAR struct rpmsg_socket_conn_s *server = psock->s_conn;
   int ret = 0;
@@ -787,7 +788,6 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           newsock->s_conn   = conn;
 
           rpmsg_socket_getaddr(conn, addr, addrlen);
-
           break;
         }
       else

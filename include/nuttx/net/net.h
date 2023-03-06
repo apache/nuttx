@@ -156,7 +156,7 @@ struct sock_intf_s
                     FAR const struct sockaddr *addr, socklen_t addrlen);
   CODE int        (*si_accept)(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                    FAR struct socket *newsock);
+                    FAR struct socket *newsock, int flags);
   CODE int        (*si_poll)(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
   CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
