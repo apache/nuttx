@@ -309,6 +309,48 @@ void up_invalidate_icache_all(void)
 }
 
 /****************************************************************************
+ * Name: up_enable_icache
+ *
+ * Description:
+ *   Enable the I-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_enable_icache(void)
+{
+  uint64_t value = read_sysreg(sctlr_el1);
+  write_sysreg((value | SCTLR_I_BIT), sctlr_el1);
+  ARM64_ISB();
+}
+
+/****************************************************************************
+ * Name: up_disable_icache
+ *
+ * Description:
+ *   Disable the I-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_disable_icache(void)
+{
+  uint64_t value = read_sysreg(sctlr_el1);
+  write_sysreg((value & ~SCTLR_I_BIT), sctlr_el1);
+  ARM64_ISB();
+}
+
+/****************************************************************************
  * Name: up_invalidate_dcache
  *
  * Description:
@@ -373,8 +415,8 @@ void up_invalidate_dcache_all(void)
 
 size_t up_get_dcache_linesize(void)
 {
-  uint64_t  ctr_el0;
-  uint32_t  dminline;
+  uint64_t ctr_el0;
+  uint32_t dminline;
 
   if (g_dcache_line_size != 0)
     {
@@ -451,6 +493,48 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 void up_clean_dcache_all(void)
 {
   arm64_dcache_all(CACHE_OP_WB);
+}
+
+/****************************************************************************
+ * Name: up_enable_dcache
+ *
+ * Description:
+ *   Enable the D-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_enable_dcache(void)
+{
+  uint64_t value = read_sysreg(sctlr_el1);
+  write_sysreg((value | SCTLR_C_BIT), sctlr_el1);
+  ARM64_ISB();
+}
+
+/****************************************************************************
+ * Name: up_disable_dcache
+ *
+ * Description:
+ *   Disable the D-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_disable_dcache(void)
+{
+  uint64_t value = read_sysreg(sctlr_el1);
+  write_sysreg((value & ~SCTLR_C_BIT), sctlr_el1);
+  ARM64_ISB();
 }
 
 /****************************************************************************
