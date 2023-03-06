@@ -1049,6 +1049,12 @@ config ARM_HAVE_MVE
 	---help---
 		Decide whether support MVE instruction
 
+config ARM_HAVE_PACBTI
+	bool
+	default n
+	---help---
+		Decide whether support PACBTI(Pointer Authentication and Branch Target Identification) Extension
+
 config ARM_FPU_ABI_SOFT
 	bool "Soft Float ABI"
 	default n
@@ -1072,6 +1078,13 @@ config ARM_DSP
 	depends on ARM_HAVE_DSP
 	---help---
 		Enables DSP Extension
+
+config ARM_PACBTI
+	bool "Advanced PACBTI Extension"
+	default y
+	depends on ARM_HAVE_PACBTI
+	---help---
+		Enables PACBTI(Pointer Authentication and Branch Target Identification) Extension
 
 config ARM_HAVE_MPU_UNIFIED
 	bool
