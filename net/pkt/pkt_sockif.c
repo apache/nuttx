@@ -52,8 +52,6 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
 static void       pkt_addref(FAR struct socket *psock);
 static int        pkt_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        pkt_poll_local(FAR struct socket *psock,
-                    FAR struct pollfd *fds, bool setup);
 static int        pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -71,7 +69,7 @@ const struct sock_intf_s g_pkt_sockif =
   NULL,            /* si_listen */
   NULL,            /* si_connect */
   NULL,            /* si_accept */
-  pkt_poll_local,  /* si_poll */
+  NULL,            /* si_poll */
   pkt_sendmsg,     /* si_sendmsg */
   pkt_recvmsg,     /* si_recvmsg */
   pkt_close        /* si_close */
@@ -272,30 +270,6 @@ static int pkt_bind(FAR struct socket *psock,
     {
       return -EBADF;
     }
-}
-
-/****************************************************************************
- * Name: pkt_poll
- *
- * Description:
- *   The standard poll() operation redirects operations on socket descriptors
- *   to net_poll which, indiectly, calls to function.
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *   setup - true: Setup up the poll; false: Teardown the poll
- *
- * Returned Value:
- *  0: Success; Negated errno on failure
- *
- ****************************************************************************/
-
-static int pkt_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
-                          bool setup)
-{
-  return -ENOSYS;
 }
 
 /****************************************************************************
