@@ -241,7 +241,6 @@ struct arm_mmu_ptables
  */
 
 extern const struct arm_mmu_config g_mmu_config;
-extern size_t g_dcache_line_size;
 
 /****************************************************************************
  * Public Function Prototypes
