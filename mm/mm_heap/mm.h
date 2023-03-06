@@ -111,7 +111,7 @@
 #define MM_NNODES        (MM_MAX_SHIFT - MM_MIN_SHIFT + 1)
 
 #if CONFIG_MM_DFAULT_ALIGNMENT == 0
-#  define MM_ALIGN       sizeof(uintptr_t)
+#  define MM_ALIGN       (2 * sizeof(uintptr_t))
 #else
 #  define MM_ALIGN       CONFIG_MM_DFAULT_ALIGNMENT
 #endif
