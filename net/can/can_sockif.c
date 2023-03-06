@@ -53,8 +53,6 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock);
 static void can_addref(FAR struct socket *psock);
 static int  can_bind(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-              FAR socklen_t *addrlen, FAR struct socket *newsock);
 static int  can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
 static int can_close(FAR struct socket *psock);
@@ -73,7 +71,7 @@ const struct sock_intf_s g_can_sockif =
   NULL,             /* si_getpeername */
   NULL,             /* si_listen */
   NULL,             /* si_connect */
-  can_accept,       /* si_accept */
+  NULL,             /* si_accept */
   can_poll_local,   /* si_poll */
   can_sendmsg,      /* si_sendmsg */
   can_recvmsg,      /* si_recvmsg */
@@ -333,56 +331,6 @@ static int can_bind(FAR struct socket *psock,
 #endif
 
   return OK;
-}
-
-/****************************************************************************
- * Name: can_accept
- *
- * Description:
- *   The can_accept function is used with connection-based socket
- *   types (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
- *   connection request on the queue of pending connections, creates a new
- *   connected socket with mostly the same properties as 'sockfd', and
- *   allocates a new socket descriptor for the socket, which is returned. The
- *   newly created socket is no longer in the listening state. The original
- *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an inet_accept.
- *
- *   The 'sockfd' argument is a socket descriptor that has been created with
- *   socket(), bound to a local address with bind(), and is listening for
- *   connections after a call to listen().
- *
- *   On return, the 'addr' structure is filled in with the address of the
- *   connecting entity. The 'addrlen' argument initially contains the size
- *   of the structure pointed to by 'addr'; on return it will contain the
- *   actual length of the address returned.
- *
- *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, inet_accept blocks the caller until a
- *   connection is present. If the socket is marked non-blocking and no
- *   pending connections are present on the queue, inet_accept returns
- *   EAGAIN.
- *
- * Input Parameters:
- *   psock    Reference to the listening socket structure
- *   addr     Receives the address of the connecting client
- *   addrlen  Input:  Allocated size of 'addr'
- *            Return: Actual size returned size of 'addr'
- *   newsock  Location to return the accepted socket information.
- *
- * Returned Value:
- *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a description of the appropriate error value.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                      FAR socklen_t *addrlen, FAR struct socket *newsock)
-{
-  return -EOPNOTSUPP;
 }
 
 /****************************************************************************

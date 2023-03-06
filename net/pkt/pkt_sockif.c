@@ -52,9 +52,6 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
 static void       pkt_addref(FAR struct socket *psock);
 static int        pkt_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        pkt_accept(FAR struct socket *psock,
-                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                    FAR struct socket *newsock);
 static int        pkt_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static int        pkt_close(FAR struct socket *psock);
@@ -73,7 +70,7 @@ const struct sock_intf_s g_pkt_sockif =
   NULL,            /* si_getpeername */
   NULL,            /* si_listen */
   NULL,            /* si_connect */
-  pkt_accept,      /* si_accept */
+  NULL,            /* si_accept */
   pkt_poll_local,  /* si_poll */
   pkt_sendmsg,     /* si_sendmsg */
   pkt_recvmsg,     /* si_recvmsg */
@@ -201,56 +198,6 @@ static void pkt_addref(FAR struct socket *psock)
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
   conn->crefs++;
-}
-
-/****************************************************************************
- * Name: pkt_accept
- *
- * Description:
- *   The pkt_accept function is used with connection-based socket types
- *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
- *   connection request on the queue of pending connections, creates a new
- *   connected socket with mostly the same properties as 'sockfd', and
- *   allocates a new socket descriptor for the socket, which is returned. The
- *   newly created socket is no longer in the listening state. The original
- *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an pkt_accept.
- *
- *   The 'sockfd' argument is a socket descriptor that has been created with
- *   socket(), bound to a local address with bind(), and is listening for
- *   connections after a call to listen().
- *
- *   On return, the 'addr' structure is filled in with the address of the
- *   connecting entity. The 'addrlen' argument initially contains the size
- *   of the structure pointed to by 'addr'; on return it will contain the
- *   actual length of the address returned.
- *
- *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, pkt_accept blocks the caller until a
- *   connection is present. If the socket is marked non-blocking and no
- *   pending connections are present on the queue, pkt_accept returns
- *   EAGAIN.
- *
- * Input Parameters:
- *   psock    Reference to the listening socket structure
- *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of
- *            'addr'
- *   newsock  Location to return the accepted socket information.
- *
- * Returned Value:
- *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a description of the appropriate error value.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                      FAR socklen_t *addrlen, FAR struct socket *newsock)
-{
-  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
