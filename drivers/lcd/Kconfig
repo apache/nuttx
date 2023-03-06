@@ -1039,6 +1039,11 @@ config MEMLCD_LS013B7DH03
 	---help---
 		Selects the LS013B7DH03 model
 
+config MEMLCD_LS027B7DH01A
+	bool "LS027B7DH01A"
+	---help---
+		Selects the LS027B7DH01A model
+
 endchoice
 
 config MEMLCD_NINTERFACES
