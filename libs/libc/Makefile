@@ -39,6 +39,7 @@ include lzf/Make.defs
 include machine/Make.defs
 include misc/Make.defs
 include modlib/Make.defs
+include mutex/Make.defs
 include net/Make.defs
 include netdb/Make.defs
 include obstack/Make.defs

@@ -380,3 +380,10 @@ SYSCALL_LOOKUP(munmap,                     2)
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
   SYSCALL_LOOKUP(arc4random_buf,           2)
 #endif
+
+SYSCALL_LOOKUP(nxmutex_breaklock,          2)
+SYSCALL_LOOKUP(nxmutex_destroy,            1)
+SYSCALL_LOOKUP(nxmutex_lock,               1)
+SYSCALL_LOOKUP(nxmutex_timedlock,          2)
+SYSCALL_LOOKUP(nxmutex_trylock,            1)
+SYSCALL_LOOKUP(nxmutex_unlock,             1)

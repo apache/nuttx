@@ -29,6 +29,7 @@ include irq/Make.defs
 include misc/Make.defs
 include mqueue/Make.defs
 include module/Make.defs
+include mutex/Make.defs
 include paging/Make.defs
 include pthread/Make.defs
 include sched/Make.defs
