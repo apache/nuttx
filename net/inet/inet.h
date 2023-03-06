@@ -103,9 +103,6 @@ EXTERN const struct ether_addr g_ipv6_ethallrouters;  /* All link local routers 
  * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
-struct tcp_conn_s; /* Forward reference */
-#endif
 struct socket; /* Forward reference */
 
 /****************************************************************************
