@@ -1089,7 +1089,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 #endif
   uint32_t regval;
 
-  spiinfo("frequency=%"PRId32"\n", frequency);
+  spiinfo("frequency=%"PRIu32"\n", frequency);
   DEBUGASSERT(priv);
 
   /* Check if the requested frequency is the same as the frequency
@@ -1179,14 +1179,14 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   /* Calculate the new actual frequency */
 
   actual = SAM_QSPI_CLOCK / scbr;
-  spiinfo("SCBR=%"PRId32" actual=%"PRId32"\n", scbr, actual);
+  spiinfo("SCBR=%"PRIu32" actual=%"PRIu32"\n", scbr, actual);
 
   /* Save the frequency setting */
 
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %"PRId32"->%"PRId32"\n", frequency, actual);
+  spiinfo("Frequency %"PRIu32"->%"PRIu32"\n", frequency, actual);
   return actual;
 }
 
@@ -1548,7 +1548,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
          (unsigned long)meminfo->addr, meminfo->addrlen);
   spiinfo("  %s Data:\n",
           QSPIMEM_ISWRITE(meminfo->flags) ? "Write" : "Read");
-  spiinfo("    buffer/length: %p/%"PRId32"\n",
+  spiinfo("    buffer/length: %p/%"PRIu32"\n",
           meminfo->buffer, meminfo->buflen);
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
