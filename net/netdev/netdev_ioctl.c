@@ -1462,72 +1462,6 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 /****************************************************************************
- * Name: netdev_file_ioctl
- *
- * Description:
- *   Perform file ioctl operations.
- *
- * Parameters:
- *   psock    Socket structure
- *   cmd      The ioctl command
- *   arg      The argument of the ioctl cmd
- *
- * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
-                             unsigned long arg)
-{
-  int ret = OK;
-
-  switch (cmd)
-    {
-      case FIONBIO:
-        {
-          FAR struct socket_conn_s *conn = psock->s_conn;
-          FAR int *nonblock = (FAR int *)(uintptr_t)arg;
-          sockcaps_t sockcaps;
-
-           /* Non-blocking is the only configurable option.  And it applies
-            * only Unix domain sockets and to read operations on TCP/IP
-            * and UDP/IP sockets when read-ahead is enabled.
-            */
-
-          DEBUGASSERT(psock->s_sockif != NULL &&
-                      psock->s_sockif->si_sockcaps != NULL);
-          sockcaps = psock->s_sockif->si_sockcaps(psock);
-
-          if ((sockcaps & SOCKCAP_NONBLOCKING) != 0)
-            {
-               if (nonblock && *nonblock)
-                 {
-                   conn->s_flags |= _SF_NONBLOCK;
-                 }
-               else
-                 {
-                   conn->s_flags &= ~_SF_NONBLOCK;
-                 }
-            }
-          else
-            {
-              nerr("ERROR: Non-blocking not supported for this socket\n");
-              ret = -ENOSYS;
-            }
-        }
-        break;
-
-      default:
-        ret = -ENOTTY;
-        break;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: netdev_ioctl
  *
  * Description:
@@ -1547,14 +1481,62 @@ static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
 static int netdev_ioctl(FAR struct socket *psock, int cmd,
                         unsigned long arg)
 {
+  int ret = -ENOTTY;
+
   if (psock->s_sockif && psock->s_sockif->si_ioctl)
     {
-      return psock->s_sockif->si_ioctl(psock, cmd, arg);
+      ret = psock->s_sockif->si_ioctl(psock, cmd, arg);
     }
-  else
+
+  if (ret != OK && ret != -ENOTTY)
     {
-      return -ENOTTY;
+      return ret;
     }
+
+  switch (cmd)
+    {
+      case FIONBIO:
+        {
+          FAR struct socket_conn_s *conn = psock->s_conn;
+          FAR int *nonblock = (FAR int *)(uintptr_t)arg;
+          sockcaps_t sockcaps;
+
+          /* Non-blocking is the only configurable option.  And it applies
+           * only Unix domain sockets and to read operations on TCP/IP
+           * and UDP/IP sockets when read-ahead is enabled.
+           */
+
+          DEBUGASSERT(psock->s_sockif != NULL &&
+                      psock->s_sockif->si_sockcaps != NULL);
+          sockcaps = psock->s_sockif->si_sockcaps(psock);
+
+          if ((sockcaps & SOCKCAP_NONBLOCKING) != 0)
+            {
+              if (nonblock && *nonblock)
+                {
+                  conn->s_flags |= _SF_NONBLOCK;
+                }
+              else
+                {
+                  conn->s_flags &= ~_SF_NONBLOCK;
+                }
+
+              ret = OK;
+            }
+          else
+            {
+              nerr("ERROR: Non-blocking not supported for this socket\n");
+              ret = -ENOSYS;
+            }
+        }
+
+        break;
+
+      default:
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1695,13 +1677,6 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
   /* Check for socket specific ioctl command */
 
   ret = netdev_ioctl(psock, cmd, arg);
-
-  /* Check for file ioctl command */
-
-  if (ret == -ENOTTY)
-    {
-      ret = netdev_file_ioctl(psock, cmd, arg);
-    }
 
   /* Check for a standard network IOCTL command. */
 
