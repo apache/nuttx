@@ -47,7 +47,6 @@
 static int        icmpv6_setup(FAR struct socket *psock);
 static sockcaps_t icmpv6_sockcaps(FAR struct socket *psock);
 static void       icmpv6_addref(FAR struct socket *psock);
-static int        icmpv6_listen(FAR struct socket *psock, int backlog);
 static int        icmpv6_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        icmpv6_accept(FAR struct socket *psock,
@@ -69,7 +68,7 @@ const struct sock_intf_s g_icmpv6_sockif =
   NULL,               /* si_bind */
   NULL,               /* si_getsockname */
   NULL,               /* si_getpeername */
-  icmpv6_listen,      /* si_listen */
+  NULL,               /* si_listen */
   icmpv6_connect,     /* si_connect */
   icmpv6_accept,      /* si_accept */
   icmpv6_netpoll,     /* si_poll */
@@ -271,36 +270,6 @@ static int icmpv6_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EAFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: icmpv6_listen
- *
- * Description:
- *   To accept connections, a socket is first created with psock_socket(), a
- *   willingness to accept incoming connections and a queue limit for
- *   incoming connections are specified with psock_listen(), and then the
- *   connections are accepted with psock_accept().  For the case of raw
- *   packet sockets, psock_listen() calls this function.  The psock_listen()
- *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
- *
- * Input Parameters:
- *   psock    Reference to an internal, boound socket structure.
- *   backlog  The maximum length the queue of pending connections may grow.
- *            If a connection request arrives with the queue full, the client
- *            may receive an error with an indication of ECONNREFUSED or,
- *            if the underlying protocol supports retransmission, the request
- *            may be ignored so that retries succeed.
- *
- * Returned Value:
- *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See listen() for the set of appropriate error values.
- *
- ****************************************************************************/
-
-int icmpv6_listen(FAR struct socket *psock, int backlog)
-{
-  return -EOPNOTSUPP;
 }
 
 /****************************************************************************

@@ -56,9 +56,6 @@ static int        local_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        local_getpeername(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-#ifndef CONFIG_NET_LOCAL_STREAM
-static int        local_listen(FAR struct socket *psock, int backlog);
-#endif
 static int        local_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 #ifndef CONFIG_NET_LOCAL_STREAM
@@ -92,7 +89,11 @@ const struct sock_intf_s g_local_sockif =
   local_bind,        /* si_bind */
   local_getsockname, /* si_getsockname */
   local_getpeername, /* si_getpeername */
+#ifdef CONFIG_NET_LOCAL_STREAM
   local_listen,      /* si_listen */
+#else
+  NULL,              /* si_listen */
+#endif
   local_connect,     /* si_connect */
   local_accept,      /* si_accept */
   local_poll,        /* si_poll */
@@ -546,38 +547,6 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
   return -ENOPROTOOPT;
 }
 
-#endif
-
-/****************************************************************************
- * Name: local_listen
- *
- * Description:
- *   To accept connections, a socket is first created with psock_socket(), a
- *   willingness to accept incoming connections and a queue limit for
- *   incoming connections are specified with psock_listen(), and then the
- *   connections are accepted with psock_accept().  For the case of local
- *   unix sockets, psock_listen() calls this function.  The psock_listen()
- *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
- *
- * Input Parameters:
- *   psock    Reference to an internal, boound socket structure.
- *   backlog  The maximum length the queue of pending connections may grow.
- *            If a connection request arrives with the queue full, the client
- *            may receive an error with an indication of ECONNREFUSED or,
- *            if the underlying protocol supports retransmission, the request
- *            may be ignored so that retries succeed.
- *
- * Returned Value:
- *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See listen() for the set of appropriate error values.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_NET_LOCAL_STREAM
-int local_listen(FAR struct socket *psock, int backlog)
-{
-  return -EOPNOTSUPP;
-}
 #endif
 
 /****************************************************************************

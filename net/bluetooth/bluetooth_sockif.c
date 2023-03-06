@@ -57,7 +57,6 @@ static int        bluetooth_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        bluetooth_getpeername(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-static int        bluetooth_listen(FAR struct socket *psock, int backlog);
 static int        bluetooth_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        bluetooth_accept(FAR struct socket *psock,
@@ -87,7 +86,7 @@ const struct sock_intf_s g_bluetooth_sockif =
   bluetooth_bind,        /* si_bind */
   bluetooth_getsockname, /* si_getsockname */
   bluetooth_getpeername, /* si_getpeername */
-  bluetooth_listen,      /* si_listen */
+  NULL,                  /* si_listen */
   bluetooth_connect,     /* si_connect */
   bluetooth_accept,      /* si_accept */
   bluetooth_poll_local,  /* si_poll */
@@ -670,36 +669,6 @@ static int bluetooth_getpeername(FAR struct socket *psock,
 
   *addrlen = copylen;
   return OK;
-}
-
-/****************************************************************************
- * Name: bluetooth_listen
- *
- * Description:
- *   To accept connections, a socket is first created with psock_socket(), a
- *   willingness to accept incoming connections and a queue limit for
- *   incoming connections are specified with psock_listen(), and then the
- *   connections are accepted with psock_accept().  For the case of
- *   PF_BLUETOOTH sockets, psock_listen() calls this function.  The listen()
- *   call does not apply only to PF_BLUETOOTH sockets.
- *
- * Input Parameters:
- *   psock    Reference to an internal, boound socket structure.
- *   backlog  The maximum length the queue of pending connections may grow.
- *            If a connection request arrives with the queue full, the client
- *            may receive an error with an indication of ECONNREFUSED or,
- *            if the underlying protocol supports retransmission, the request
- *            may be ignored so that retries succeed.
- *
- * Returned Value:
- *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See listen() for the set of appropriate error values.
- *
- ****************************************************************************/
-
-int bluetooth_listen(FAR struct socket *psock, int backlog)
-{
-  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
