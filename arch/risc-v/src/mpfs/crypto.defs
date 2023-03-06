@@ -1,7 +1,7 @@
 MPFS_CRYPTO = mpfs/crypto/.git
 $(MPFS_CRYPTO):
-	$(Q) echo "Cloning PolarFire crypto driver"
-	$(Q) git clone git@github.com:tiiuae/pf_crypto mpfs/crypto
+	$(Q) echo "Symlink PolarFire crypto driver submodule"
+	$(Q) $(DIRLINK) $(CURDIR)/../../../../extern/pf_crypto mpfs/crypto
 
 context::$(MPFS_CRYPTO)
 
