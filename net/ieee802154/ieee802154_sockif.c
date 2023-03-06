@@ -55,7 +55,6 @@ static int        ieee802154_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        ieee802154_getpeername(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-static int        ieee802154_listen(FAR struct socket *psock, int backlog);
 static int        ieee802154_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        ieee802154_accept(FAR struct socket *psock,
@@ -77,7 +76,7 @@ const struct sock_intf_s g_ieee802154_sockif =
   ieee802154_bind,        /* si_bind */
   ieee802154_getsockname, /* si_getsockname */
   ieee802154_getpeername, /* si_getpeername */
-  ieee802154_listen,      /* si_listen */
+  NULL,                   /* si_listen */
   ieee802154_connect,     /* si_connect */
   ieee802154_accept,      /* si_accept */
   ieee802154_poll_local,  /* si_poll */
@@ -544,36 +543,6 @@ static int ieee802154_getpeername(FAR struct socket *psock,
 
   *addrlen = copylen;
   return OK;
-}
-
-/****************************************************************************
- * Name: ieee802154_listen
- *
- * Description:
- *   To accept connections, a socket is first created with psock_socket(), a
- *   willingness to accept incoming connections and a queue limit for
- *   incoming connections are specified with psock_listen(), and then the
- *   connections are accepted with psock_accept().  For the case of
- *   PF_IEEE802154 sockets, psock_listen() calls this function.  The listen()
- *   call does not apply only to PF_IEEE802154 sockets.
- *
- * Input Parameters:
- *   psock    Reference to an internal, boound socket structure.
- *   backlog  The maximum length the queue of pending connections may grow.
- *            If a connection request arrives with the queue full, the client
- *            may receive an error with an indication of ECONNREFUSED or,
- *            if the underlying protocol supports retransmission, the request
- *            may be ignored so that retries succeed.
- *
- * Returned Value:
- *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See listen() for the set of appropriate error values.
- *
- ****************************************************************************/
-
-int ieee802154_listen(FAR struct socket *psock, int backlog)
-{
-  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
