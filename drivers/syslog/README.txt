@@ -468,8 +468,6 @@ RAM Logging Device
 
   Other miscellaneous settings
 
-    * CONFIG_RAMLOG_CRLF - Pre-pend a carriage return before every linefeed
-      that goes into the RAM log.
     * CONFIG_RAMLOG_NONBLOCKING - Reading from the RAMLOG will never block
       if the RAMLOG is empty.  If the RAMLOG is empty, then zero is returned
       (usually interpreted as end-of-file).  If you do not define this, the

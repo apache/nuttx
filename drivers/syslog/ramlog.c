@@ -286,25 +286,6 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   flags = enter_critical_section();
 
-#ifdef CONFIG_RAMLOG_CRLF
-  /* Ignore carriage returns */
-
-  if (ch == '\r')
-    {
-      leave_critical_section(flags);
-      return OK;
-    }
-
-  /* Pre-pend a carriage before a linefeed */
-
-  if (ch == '\n')
-    {
-      ch = '\r';
-    }
-
-again:
-#endif
-
   /* Calculate the write index AFTER the next byte is written */
 
   nexthead = priv->rl_head + 1;
@@ -338,14 +319,6 @@ again:
 
   priv->rl_buffer[priv->rl_head] = ch;
   priv->rl_head = nexthead;
-
-#ifdef CONFIG_RAMLOG_CRLF
-  if (ch == '\r')
-    {
-      ch = '\n';
-      goto again;
-    }
-#endif
 
   leave_critical_section(flags);
   return OK;
