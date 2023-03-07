@@ -120,8 +120,7 @@ NRFXLIB_TGZ     := $(NRFXLIB_REF).tar.gz
 NRFXLIB_URL     := https://github.com/nrfconnect/sdk-nrfxlib/archive
 
 $(NRFXLIB_TGZ):
-	$(Q) echo "Downloading: NRFXLIB"
-	$(Q) curl -L $(NRFXLIB_URL)/$(NRFXLIB_TGZ) -o chip/$(NRFXLIB_TGZ)
+	$(call DOWNLOAD,$(NRFXLIB_URL),$(NRFXLIB_TGZ),chip/$(NRFXLIB_TGZ))
 
 chip/$(NRFXLIB_UNPACK): $(NRFXLIB_TGZ)
 	$(Q) echo "Unpacking: NRXFLIB"

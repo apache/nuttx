@@ -26,7 +26,7 @@ VERSION=0.1.9
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard libsamplerate/.git),)
 libsamplerate:
-	$(Q) curl -L https://codeload.github.com/libsndfile/libsamplerate/zip/master -o libsamplerate.zip
+	$(call DOWNLOAD,https://codeload.github.com/libsndfile/libsamplerate/zip,master,libsamplerate.zip)
 	$(Q) unzip -o libsamplerate.zip
 	$(Q) mv libsamplerate-master libsamplerate
 endif

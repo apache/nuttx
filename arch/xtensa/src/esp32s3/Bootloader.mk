@@ -110,8 +110,7 @@ BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/
 ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
 
 bootloader:
-	$(Q) echo "Downloading Bootloader binaries"
-	$(Q) curl -L $(BOOTLOADER_URL)/mcuboot-esp32s3.bin -o $(TOPDIR)/mcuboot-esp32s3.bin
+	$(call DOWNLOAD,$(BOOTLOADER_URL),mcuboot-esp32s3.bin,$(TOPDIR)/mcuboot-esp32s3.bin)
 
 clean_bootloader:
 	$(call DELFILE,$(TOPDIR)/mcuboot-esp32s3.bin)
@@ -119,9 +118,8 @@ clean_bootloader:
 else ifeq ($(CONFIG_ESP32S3_APP_FORMAT_LEGACY),y)
 
 bootloader:
-	$(Q) echo "Downloading Bootloader binaries"
-	$(Q) curl -L $(BOOTLOADER_URL)/bootloader-esp32s3.bin -o $(TOPDIR)/bootloader-esp32s3.bin
-	$(Q) curl -L $(BOOTLOADER_URL)/partition-table-esp32s3.bin -o $(TOPDIR)/partition-table-esp32s3.bin
+	$(call DOWNLOAD,$(BOOTLOADER_URL),mcuboot-esp32s3.bin,$(TOPDIR)/mcuboot-esp32s3.bin)
+	$(call DOWNLOAD,$(BOOTLOADER_URL),partition-table-esp32s3.bin,$(TOPDIR)/partition-table-esp32s3.bin)
 
 clean_bootloader:
 	$(call DELFILE,$(TOPDIR)/bootloader-esp32s3.bin)
