@@ -35,6 +35,22 @@ config LIBC_LOCALE_PATH
 		This is the default search path to the location where
 		the message catalog file is expected to be found.
 
+config LIBC_LOCALE_CHINESE
+	bool "Enable chinese encoding"
+	default n
+
+config LIBC_LOCALE_CODEPAGES
+	bool "Enable codepages encoding"
+	default n
+
+config LIBC_LOCALE_JAPANESE
+	bool "Enable japanese encoding"
+	default n
+
+config LIBC_LOCALE_KOREAN
+	bool "Enable korean encoding"
+	default n
+
 endif
 
 endmenu # Locale Support
