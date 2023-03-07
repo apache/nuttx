@@ -457,6 +457,18 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
   if (dev->isconsole)
     {
       uart_register(UART_RPMSG_DEV_CONSOLE, dev);
+
+      /* Override default flags by uart_register since:
+       *   1. UART from other core will send \r\n as new line,
+       *     but by default we convert \r -> \n, then we get \n\n
+       *   2. Disable ECHO since remote machine will echo on terminal itself
+       *
+       * RIVISIT: Pass ioctl from remote to local?
+       */
+
+#ifdef CONFIG_SERIAL_TERMIOS
+      dev->tc_iflag = IGNCR;
+#endif
     }
 
   return OK;
