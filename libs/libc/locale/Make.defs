@@ -24,7 +24,7 @@ ifeq ($(CONFIG_LIBC_LOCALE),y)
 
 CSRCS += lib_duplocale.c lib_freelocale.c lib_localeconv.c
 CSRCS += lib_newlocale.c lib_setlocale.c lib_uselocale.c
-CSRCS += lib_catalog.c lib_gettext.c lib_langinfo.c
+CSRCS += lib_catalog.c lib_gettext.c lib_langinfo.c lib_iconv.c
 
 # Add the locale directory to the build
 
