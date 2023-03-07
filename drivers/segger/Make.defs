@@ -47,7 +47,7 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard $(SGDIR)/RTT/.git),)
 $(SGDIR)/RTT.zip:
-	$(Q) curl -L https://github.com/SEGGERMicro/RTT/archive/refs/tags/V$(RTT_VERSION).zip -o $(SGDIR)/RTT.zip
+	$(call DOWNLOAD,https://github.com/SEGGERMicro/RTT/archive/refs/tags,V$(RTT_VERSION).zip,$(SGDIR)/RTT.zip)
 	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
 	$(Q) mv $(SGDIR)/RTT-$(RTT_VERSION) $(SGDIR)/RTT
 	$(Q) patch -p0 < segger/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
@@ -78,7 +78,7 @@ ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard $(SGDIR)/SystemView/.git),)
 $(SGDIR)/SystemView.zip:
-	$(Q) curl -L https://github.com/SEGGERMicro/SystemView/archive/refs/tags/V$(SYSVIEW_VERSION).zip -o $(SGDIR)/SystemView.zip
+	$(call DOWNLOAD,https://github.com/SEGGERMicro/SystemView/archive/refs/tags,V$(SYSVIEW_VERSION).zip,$(SGDIR)/SystemView.zip)
 	$(Q) unzip -o $(SGDIR)/SystemView.zip -d $(SGDIR)
 	$(Q) mv $(SGDIR)/SystemView-$(SYSVIEW_VERSION) $(SGDIR)/SystemView
 

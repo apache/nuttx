@@ -43,8 +43,7 @@ OPENSBI_TARBALL = opensbi.tar.gz
 OPENSBI_DIR     = riscv-software-src-opensbi-4998a71
 
 $(OPENSBI_TARBALL):
-	$(Q) echo "Downloading: OpenSBI"
-	$(Q) curl -L $(OPENSBI_URL)/$(OPENSBI_COMMIT) -o opensbi/$(OPENSBI_TARBALL)
+	$(call DOWNLOAD,$(OPENSBI_URL),$(OPENSBI_COMMIT),opensbi/$(OPENSBI_TARBALL))
 
 .opensbi_unpack: $(OPENSBI_TARBALL)
 	$(Q) echo "Unpacking: OpenSBI"

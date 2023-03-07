@@ -45,7 +45,7 @@ LITTLEFS_VERSION ?= 2.4.0
 LITTLEFS_TARBALL = v$(LITTLEFS_VERSION).tar.gz
 
 $(LITTLEFS_TARBALL):
-	$(Q) curl -L -o littlefs/$(LITTLEFS_TARBALL) https://github.com/ARMmbed/littlefs/archive/$(LITTLEFS_TARBALL)
+	$(call DOWNLOAD,https://github.com/ARMmbed/littlefs/archive,$(LITTLEFS_TARBALL),littlefs/$(LITTLEFS_TARBALL))
 
 .littlefsunpack: $(LITTLEFS_TARBALL)
 	$(Q) tar zxf littlefs/$(LITTLEFS_TARBALL) -C littlefs

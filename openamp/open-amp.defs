@@ -32,7 +32,7 @@ CSRCS += open-amp/lib/virtio/virtqueue.c
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard open-amp/.git),)
 open-amp.zip:
-	$(Q) curl -L https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -o open-amp.zip
+	$(call DOWNLOAD,https://github.com/OpenAMP/open-amp/archive,v$(VERSION).zip,open-amp.zip)
 	$(Q) unzip -o open-amp.zip
 	$(Q) mv open-amp-$(VERSION) open-amp
 	$(Q) patch -p0 < 0001-ns-acknowledge-the-received-creation-message.patch

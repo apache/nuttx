@@ -23,7 +23,7 @@ LIBCXX_VERSION=12.0.0
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard libcxx/.git),)
 libcxx-$(LIBCXX_VERSION).src.tar.xz:
-	$(Q) curl -O -L https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXX_VERSION)/libcxx-$(LIBCXX_VERSION).src.tar.xz
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXX_VERSION),libcxx-$(LIBCXX_VERSION).src.tar.xz)
 
 libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) tar -xf libcxx-$(LIBCXX_VERSION).src.tar.xz \

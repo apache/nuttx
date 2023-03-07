@@ -21,7 +21,7 @@
 LIBCXXABI_VERSION=12.0.0
 
 libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
-	$(Q) curl -O -L https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION)/libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION),libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz)
 
 libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz

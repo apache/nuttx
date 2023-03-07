@@ -83,10 +83,10 @@ tzbin:
 	mkdir tzbin
 
 tzcode-latest.tar.gz:
-	$(Q) curl -L -O ftp://ftp.iana.org/tz/tzcode-latest.tar.gz
+	$(call DOWNLOAD,ftp://ftp.iana.org/tz,tzcode-latest.tar.gz)
 
 tzdata-latest.tar.gz:
-	$(Q) curl -L -O ftp://ftp.iana.org/tz/tzdata-latest.tar.gz
+	$(call DOWNLOAD,ftp://ftp.iana.org/tz,tzdata-latest.tar.gz)
 
 .tzunpack: tzcode tzcode-latest.tar.gz tzdata-latest.tar.gz
 	$(Q) tar zx -C tzcode -f tzcode-latest.tar.gz

@@ -555,6 +555,18 @@ define FINDSCRIPT
 	$(if $(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(1)),$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(1),$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(1))
 endef
 
+# DOWNLOAD - Download file. The URL base is joined with TARBALL by '/' and
+#            downloaded to the TARBALL file.
+#            The third argument is an output path. The second argument is used
+#            if it is not provided or is empty.
+# Example: $(call DOWNLOAD,$(FOO_URL_BASE),$(FOO_TARBALL),foo.out,foo-)
+
+define DOWNLOAD
+	$(ECHO_BEGIN)"Downloading: $(if $3,$3,$2) "
+	$(Q) curl -L $(if $(V),,-Ss) $(1)/$(2) -o $(if $(3),$(3),$(2))
+	$(ECHO_END)
+endef
+
 # CLEAN - Default clean target
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
