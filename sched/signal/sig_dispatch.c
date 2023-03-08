@@ -372,15 +372,6 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
   if (masked == 1)
 #endif
     {
-#ifdef CONFIG_LIB_SYSCALL
-      /* If the thread is in syscall, schedule the sigaction here */
-
-      if ((stcb->flags & TCB_FLAG_SYSCALL) != 0)
-        {
-          nxsig_add_pendingsignal(stcb, info);
-        }
-#endif
-
       /* Check if the task is waiting for this pending signal. If so, then
        * unblock it. This must be performed in a critical section because
        * signals can be queued from the interrupt level.
