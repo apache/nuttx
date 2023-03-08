@@ -776,6 +776,7 @@ static ssize_t uart_read(FAR struct file *filep,
 #endif
   irqstate_t flags;
   ssize_t recvd = 0;
+  bool echoed = false;
   int16_t tail;
   char ch;
   int ret;
@@ -924,6 +925,13 @@ static ssize_t uart_read(FAR struct file *filep,
                     }
 
                   uart_putxmitchar(dev, ch, true);
+
+                  /* Mark the tx buffer have echoed content here,
+                   * to avoid the tx buffer is empty such as special escape
+                   * sequence received, but enable the tx interrupt.
+                   */
+
+                  echoed = true;
                 }
 
               /* Skipping character count down */
@@ -1116,7 +1124,7 @@ static ssize_t uart_read(FAR struct file *filep,
         }
     }
 
-  if (recvd > 0)
+  if (echoed)
     {
 #ifdef CONFIG_SERIAL_TXDMA
       uart_dmatxavail(dev);
