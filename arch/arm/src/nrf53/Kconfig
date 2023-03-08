@@ -68,6 +68,10 @@ config NRF53_ENABLE_APPROTECT
 
 # Peripheral Selection
 
+config NRF53_IPC
+	bool
+	default y if RPTUN
+
 config NRF53_UART
 	bool
 	default n
