@@ -27,7 +27,9 @@
 # command-line selection.
 #
 
-ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RVG)),y)
+ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV64)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
+else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)),y)
   CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 endif
 
@@ -120,7 +122,11 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   # Generic GNU RVG toolchain
 
-  CROSSDEV ?= riscv64-unknown-elf-
+  ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
+    CROSSDEV ?= riscv32-unknown-elf-
+  else
+    CROSSDEV ?= riscv64-unknown-elf-
+  endif
 
   # Detect cpu ISA support flags
 
