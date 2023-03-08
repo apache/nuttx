@@ -185,7 +185,7 @@ clean_bootloader:
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 
 bootloader:
-	$(call DOWNLOAD,$(BOOTLOADER_URL),mcuboot-esp32.bin,$(TOPDIR)/mcuboot-esp32.bin)
+	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-esp32.bin,$(TOPDIR)/bootloader-esp32.bin)
 	$(call DOWNLOAD,$(BOOTLOADER_URL),partition-table-esp32.bin,$(TOPDIR)/partition-table-esp32.bin)
 
 clean_bootloader:
