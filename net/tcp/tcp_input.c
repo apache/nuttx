@@ -586,6 +586,13 @@ static void tcp_parse_option(FAR struct net_driver_s *dev,
 
           tmp16 = ((uint16_t)IPDATA(tcpiplen + 2 + i) << 8) |
                    (uint16_t)IPDATA(tcpiplen + 3 + i);
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+          if (conn->user_mss > 0 && conn->user_mss < tcp_mss)
+            {
+              tcp_mss = conn->user_mss;
+            }
+#endif
+
           conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
         }
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE

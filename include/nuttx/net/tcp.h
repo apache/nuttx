@@ -137,6 +137,12 @@
 #define TCP_DEFAULT_IPv4_MSS  536
 #define TCP_DEFAULT_IPv6_MSS  1220
 
+/* Minimal accepted MSS. It is (60+60+8) - (20+20).
+ * (MAX_IP_HDR + MAX_TCP_HDR + MIN_IP_FRAG) - (MIN_IP_HDR + MIN_TCP_HDR)
+ */
+
+#define TCP_MIN_MSS           88
+
 /* However, we do need to make allowance for certain links such as SLIP that
  * have unusually small MTUs.
  */
