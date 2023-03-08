@@ -73,6 +73,7 @@ libmetal.zip:
 	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,v$(VERSION).zip,libmetal.zip)
 	$(Q) unzip -o libmetal.zip
 	$(Q) mv libmetal-$(VERSION) libmetal
+	$(Q) patch -d libmetal -p1 < 0001-nuttx-Add-missing-include-header-in-IRQ-implementati.patch
 
 .libmetal_headers: libmetal.zip
 else

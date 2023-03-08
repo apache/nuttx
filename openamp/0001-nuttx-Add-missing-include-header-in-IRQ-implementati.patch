@@ -1,0 +1,28 @@
+From d9374a177eb2e53f42d150c69da9031ae2e184b7 Mon Sep 17 00:00:00 2001
+From: Gustavo Henrique Nihei <gustavo.nihei@espressif.com>
+Date: Tue, 7 Mar 2023 10:25:53 -0300
+Subject: [PATCH] nuttx: Add missing include header in IRQ implementation
+
+Missing header became evident after a code refactor in another NuttX
+component, which resulted in build warnings.
+
+Signed-off-by: Gustavo Henrique Nihei <gustavo.nihei@espressif.com>
+---
+ lib/system/nuttx/irq.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/system/nuttx/irq.c b/lib/system/nuttx/irq.c
+index 64cf535..34e0edb 100644
+--- a/lib/system/nuttx/irq.c
++++ b/lib/system/nuttx/irq.c
+@@ -12,6 +12,7 @@
+ #include <metal/errno.h>
+ #include <metal/irq_controller.h>
+ #include <metal/alloc.h>
++#include <nuttx/arch.h>
+ #include <nuttx/irq.h>
+ 
+ unsigned int metal_irq_save_disable(void)
+-- 
+2.37.2
+
