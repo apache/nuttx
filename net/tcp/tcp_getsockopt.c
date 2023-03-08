@@ -82,11 +82,6 @@
 int tcp_getsockopt(FAR struct socket *psock, int option,
                    FAR void *value, FAR socklen_t *value_len)
 {
-#ifdef CONFIG_NET_TCP_KEEPALIVE
-  /* Keep alive options are the only TCP protocol socket option currently
-   * supported.
-   */
-
   FAR struct tcp_conn_s *conn;
   int ret;
 
@@ -118,6 +113,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
        * all of the clones that may use the underlying connection.
        */
 
+#ifdef CONFIG_NET_TCP_KEEPALIVE
       case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
                            * periodic transmission of probes */
         if (*value_len < sizeof(int))
@@ -221,6 +217,26 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
             ret              = OK;
           }
         break;
+#endif /* CONFIG_NET_TCP_KEEPALIVE */
+
+      case TCP_MAXSEG:   /* The maximum segment size */
+        if (*value_len < sizeof(int))
+          {
+            /* REVISIT: POSIX says that we should truncate the value if it
+             * is larger than value_len.   That just doesn't make sense
+             * to me in this case.
+             */
+
+            ret          = -EINVAL;
+          }
+        else
+          {
+            FAR int *mss = (FAR int *)value;
+            *mss         = conn->mss;
+            *value_len   = sizeof(int);
+            ret          = OK;
+          }
+        break;
 
       default:
         nerr("ERROR: Unrecognized TCP option: %d\n", option);
@@ -229,9 +245,6 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
     }
 
   return ret;
-#else
-  return -ENOPROTOOPT;
-#endif /* CONFIG_NET_TCP_KEEPALIVE */
 }
 
 #endif /* CONFIG_NET_TCPPROTO_OPTIONS */

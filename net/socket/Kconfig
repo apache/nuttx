@@ -43,7 +43,7 @@ config NET_SOCKOPTS
 		Enable or disable support for socket options
 
 config NET_TCPPROTO_OPTIONS
-	bool
+	bool "TCP proto socket options"
 	default n
 	---help---
 		Enable or disable support for TCP protocol level socket options.

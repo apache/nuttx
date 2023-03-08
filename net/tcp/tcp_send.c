@@ -585,7 +585,16 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* Set the packet length for the TCP Maximum Segment Size */
 
-  tcp_mss = tcp_rx_mss(dev);
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+  if (conn->user_mss != 0 && conn->user_mss < tcp_rx_mss(dev))
+    {
+      tcp_mss = conn->user_mss;
+    }
+  else
+#endif
+    {
+      tcp_mss = tcp_rx_mss(dev);
+    }
 
   /* Save the ACK bits */
 

@@ -72,11 +72,6 @@
 int tcp_setsockopt(FAR struct socket *psock, int option,
                    FAR const void *value, socklen_t value_len)
 {
-#ifdef CONFIG_NET_TCP_KEEPALIVE
-  /* Keep alive options are the only TCP protocol socket option currently
-   * supported.
-   */
-
   FAR struct tcp_conn_s *conn;
   int ret = OK;
 
@@ -107,6 +102,7 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
        * all of the clones that may use the underlying connection.
        */
 
+#ifdef CONFIG_NET_TCP_KEEPALIVE
       case SO_KEEPALIVE: /* Verifies TCP connections active by enabling the
                           * periodic transmission of probes */
         if (value_len != sizeof(int))
@@ -233,6 +229,35 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
               }
           }
         break;
+#endif /* CONFIG_NET_TCP_KEEPALIVE */
+
+      case TCP_MAXSEG: /* The maximum segment size */
+        if (value_len != sizeof(int))
+          {
+            ret = -EFAULT;
+          }
+        else
+          {
+            int mss = *(FAR int *)value;
+
+            if (conn->tcpstateflags != TCP_ALLOCATED)
+              {
+                /* Set TCP_MAXSEG in the wrong state, direct return success */
+
+                return OK;
+              }
+
+            if (mss < TCP_MIN_MSS || mss > UINT16_MAX)
+              {
+                nerr("ERROR: TCP_MAXSEG value out of range: %d\n", mss);
+                return -EINVAL;
+              }
+            else
+              {
+                conn->user_mss = mss;
+              }
+          }
+        break;
 
       default:
         nerr("ERROR: Unrecognized TCP option: %d\n", option);
@@ -241,9 +266,6 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
     }
 
   return ret;
-#else
-  return -ENOPROTOOPT;
-#endif /* CONFIG_NET_TCP_KEEPALIVE */
 }
 
 #endif /* CONFIG_NET_TCPPROTO_OPTIONS */
