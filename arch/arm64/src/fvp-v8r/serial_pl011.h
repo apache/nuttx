@@ -35,21 +35,6 @@
  * Public Types
  ****************************************************************************/
 
-#ifdef CONFIG_FVP_UART_PL011
-#define CONFIG_UART0_BASE      0x9c090000
-#define CONFIG_UART0_IRQ       (GIC_SPI_INT_BASE + 5)
-
-#define CONFIG_UART1_BASE      0x9c0a0000
-#define CONFIG_UART1_IRQ       (GIC_SPI_INT_BASE + 6)
-
-#define CONFIG_UART2_BASE      0x9c0b0000
-#define CONFIG_UART2_IRQ       (GIC_SPI_INT_BASE + 7)
-
-#define CONFIG_UART3_BASE      0x9c0c0000
-#define CONFIG_UART3_IRQ       (GIC_SPI_INT_BASE + 8)
-
-#endif
-
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/

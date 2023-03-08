@@ -41,6 +41,14 @@ config SERIAL_CONSOLE
 	bool
 	default n
 
+menuconfig UART_PL011
+	bool "PL011 Chip support"
+	default n
+
+if UART_PL011
+source "drivers/serial/Kconfig-pl011"
+endif
+
 menuconfig 16550_UART
 	bool "16550 UART Chip support"
 	select ARCH_HAVE_SERIAL_TERMIOS

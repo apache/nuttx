@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm64/src/qemu/qemu_serial.c
+ * arch/arm64/src/fvp-v8r/fvp_serial.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,6 +36,7 @@
 #include "arm64_internal.h"
 
 #ifdef USE_SERIALDRIVER
+
 /***************************************************************************
  * Public Functions
  ***************************************************************************/

@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm64/src/fvp-v8r/serial_pl011.c
+ * drivers/serial/serial_pl011.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,16 +43,9 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/serial/uart_pl011.h>
 
-#include "arm64_arch.h"
-#include "arm64_internal.h"
-#include "serial_pl011.h"
-#include "arm64_arch_timer.h"
-#include "fvp_boot.h"
-#include "arm64_gic.h"
-#include "chip.h"
-
-#ifdef USE_SERIALDRIVER
+#ifdef CONFIG_UART_PL011
 
 /***************************************************************************
  * Pre-processor Definitions
@@ -72,6 +65,7 @@
 #endif
 
 #define PL011_BIT_MASK(x, y)  (((2 << (x)) - 1) << (y))
+#define BIT(n)                ((1UL) << (n))
 
 /* PL011 Uart Flags Register */
 #define PL011_FR_CTS                    BIT(0)  /* clear to send - inverted */
@@ -284,8 +278,6 @@ static int pl011_set_baudrate(const struct pl011_uart_port_s *sport,
 
   config->uart->ibrd    = bauddiv >> PL011_FBRD_WIDTH;
   config->uart->fbrd    = bauddiv & ((1U << PL011_FBRD_WIDTH) - 1U);
-
-  ARM64_DMB();
 
   /* In order to internally update the contents of ibrd or fbrd, a
    * lcr_h write must always be performed at the end
@@ -697,10 +689,8 @@ static int pl011_setup(struct uart_dev_s *dev)
   if (!data->sbsa)
     {
       config->uart->dmacr = 0U;
-      ARM64_ISB();
       config->uart->cr  &= ~(BIT(14) | BIT(15) | BIT(1));
       config->uart->cr  |= PL011_CR_RXE | PL011_CR_TXE;
-      ARM64_ISB();
     }
 
   up_irq_restore(i_flags);
@@ -781,14 +771,14 @@ static struct uart_dev_s    g_uart1port =
  ***************************************************************************/
 
 /***************************************************************************
- * Name: arm64_earlyserialinit
+ * Name: pl011_earlyserialinit
  *
  * Description:
- *   see arm64_internal.h
+ *   see nuttx/serial/uart_pl011.h
  *
  ***************************************************************************/
 
-void arm64_earlyserialinit(void)
+void pl011_earlyserialinit(void)
 {
   /* Enable the console UART.  The other UARTs will be initialized if and
    * when they are first opened.
@@ -829,14 +819,14 @@ int up_putc(int ch)
 }
 
 /***************************************************************************
- * Name: arm64_serialinit
+ * Name: pl011_serialinit
  *
  * Description:
- *   see arm64_internal.h
+ *   see nuttx/serial/uart_pl011.h
  *
  ***************************************************************************/
 
-void arm64_serialinit(void)
+void pl011_serialinit(void)
 {
 #ifdef CONSOLE_DEV
   int ret;
