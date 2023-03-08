@@ -35,6 +35,10 @@
 #  include "nrf53_sdc.h"
 #endif
 
+#ifdef CONFIG_RPTUN
+#  include "nrf53_rptun.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -65,6 +69,14 @@ int nrf53_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_RPTUN
+#ifdef CONFIG_NRF53_APPCORE
+  nrf53_rptun_init("nrf53-shmem", "appcore");
+#else
+  nrf53_rptun_init("nrf53-shmem", "netcore");
+#endif
 #endif
 
 #ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
