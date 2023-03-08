@@ -42,6 +42,14 @@ ifeq ($(CONFIG_NRF53_APPCORE),y)
 CHIP_CSRCS += nrf53_cpunet.c
 endif
 
+ifeq ($(CONFIG_NRF53_IPC),y)
+CHIP_CSRCS += nrf53_ipc.c
+endif
+
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += nrf53_rptun.c
+endif
+
 ifeq ($(CONFIG_NRF53_SOFTDEVICE_CONTROLLER),y)
 
 NRFXLIB_UNPACK  := sdk-nrfxlib
