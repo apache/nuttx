@@ -1,5 +1,5 @@
 /****************************************************************************
-* boards/arm/nrf53/nrf5340-dk/scripts/flash_config_net.ld
+ * boards/arm/nrf53/nrf5340-dk/scripts/flash_app.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

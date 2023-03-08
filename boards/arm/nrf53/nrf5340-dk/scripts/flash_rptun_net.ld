@@ -1,5 +1,5 @@
 /****************************************************************************
-* boards/arm/nrf53/nrf5340-dk/scripts/flash_config_net.ld
+ * boards/arm/nrf53/nrf5340-dk/scripts/flash_rptun_net.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,7 +21,8 @@
 MEMORY
 {
     app_progmem (rx)  : ORIGIN = 0x00000000, LENGTH = 1024K
-    app_datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K
+    app_datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K-32K
+    shared (rwx)  : ORIGIN = 0x20078000, LENGTH = 32K
     progmem (rx)  : ORIGIN = 0x01000000, LENGTH = 256K
     datamem (rwx) : ORIGIN = 0x21000000, LENGTH = 64K
 }
