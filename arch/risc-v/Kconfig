@@ -306,14 +306,21 @@ config ARCH_MPU_HAS_NAPOT
 
 choice
 	prompt "Toolchain Selection"
-	default RISCV_TOOLCHAIN_GNU_RVG
+	default RISCV_TOOLCHAIN_GNU_RV64
 
-config RISCV_TOOLCHAIN_GNU_RVG
-	bool "Generic GNU RVG toolchain"
+config RISCV_TOOLCHAIN_GNU_RV64
+	bool "Generic GNU RV64 toolchain"
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv64-unknown-elf.
+
+config RISCV_TOOLCHAIN_GNU_RV32
+	bool "Generic GNU RV32 toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
+		configured for riscv32-unknown-elf.
 
 endchoice
 
