@@ -1,0 +1,60 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if UART_PL011
+
+config UART0_PL011
+	bool "UART0 PL011"
+	select UART0_SERIALDRIVER
+	default n
+
+config UART1_PL011
+	bool "UART1 PL011"
+	select UART1_SERIALDRIVER
+	default n
+
+config UART2_PL011
+	bool "UART2 PL011"
+	select UART2_SERIALDRIVER
+	default n
+
+config UART3_PL011
+	bool "UART3 PL011"
+	select UART3_SERIALDRIVER
+	default n
+
+config UART0_BASE
+	hex "UART0 base address"
+	depends on UART0_PL011
+
+config UART1_BASE
+	hex "UART1 base address"
+	depends on UART1_PL011
+
+config UART2_BASE
+	hex "UART2 base address"
+	depends on UART2_PL011
+
+config UART3_BASE
+	hex "UART3 base address"
+	depends on UART3_PL011
+
+config UART0_IRQ
+	int "PL011 UART0 IRQ number"
+	depends on UART0_PL011
+
+config UART1_IRQ
+	int "PL011 UART1 IRQ number"
+	depends on UART1_PL011
+
+config UART2_IRQ
+	int "PL011 UART2 IRQ number"
+	depends on UART2_PL011
+
+config UART3_IRQ
+	int "PL011 UART3 IRQ number"
+	depends on UART3_PL011
+
+endif # UART_PL011

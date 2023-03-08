@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/fvp-v8r/fvp_boot.h
+ * include/nuttx/serial/uart_pl011.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,63 +18,39 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_FVP_V8R_FVP_BOOT_H
-#define __ARCH_ARM64_SRC_FVP_V8R_FVP_BOOT_H
+#ifndef __INCLUDE_NUTTX_SERIAL_UART_PL011_H
+#define __INCLUDE_NUTTX_SERIAL_UART_PL011_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <arch/chip/chip.h>
+
+#ifdef CONFIG_UART_PL011
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC  100000000
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
- * Name: fvp_board_initialize
- *
- * Description:
- *   All fvp architectures must provide the following entry point.  This
- *   entry point is called in the initialization phase -- after
- *   imx_memory_initialize and after all memory has been configured and
- *   mapped but before any devices have been initialized.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
+ * Public Functions Definitions
  ****************************************************************************/
 
-void fvp_board_initialize(void);
+void pl011_earlyserialinit(void);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+void pl011_serialinit(void);
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM64_SRC_FVP_V8R_FVP_BOOT_H */
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+#endif  /* CONFIG_UART_PL011 */
+#endif /* __INCLUDE_NUTTX_SERIAL_UART_PL011_H */

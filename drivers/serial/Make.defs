@@ -22,6 +22,10 @@
 
 CSRCS += serial.c serial_io.c
 
+ifeq ($(CONFIG_UART_PL011),y)
+  CSRCS += serial_pl011.c
+endif
+
 ifeq ($(CONFIG_SERIAL_RXDMA),y)
   CSRCS += serial_dma.c
 else ifeq ($(CONFIG_SERIAL_TXDMA),y)

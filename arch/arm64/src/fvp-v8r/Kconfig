@@ -21,11 +21,4 @@ endchoice # FVP Chip Selection
 
 endmenu # "FVP Chip Selection"
 
-menu "FVP Peripheral Selection"
-config FVP_UART_PL011
-	bool "UART"
-	default n
-	select UART1_SERIALDRIVER
-endmenu # FVP Peripheral Selection
-
 endif # ARCH_CHIP_FVP_ARMV8R
