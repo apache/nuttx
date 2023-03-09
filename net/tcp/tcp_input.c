@@ -748,9 +748,9 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 #endif
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if (tcp_islistener(&uaddr, tmp16, domain))
+      if ((conn = tcp_findlistener(&uaddr, tmp16, domain)) != NULL)
 #else
-      if (tcp_islistener(&uaddr, tmp16))
+      if ((conn = tcp_findlistener(&uaddr, tmp16)) != NULL)
 #endif
         {
           /* We matched the incoming packet with a connection in LISTEN.
@@ -762,7 +762,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
            * any user application to accept it.
            */
 
-          conn = tcp_alloc_accept(dev, tcp);
+          conn = tcp_alloc_accept(dev, tcp, conn);
           if (conn)
             {
               /* The connection structure was successfully allocated and has
