@@ -597,7 +597,8 @@ int tcp_remote_ipv6_device(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
-                                        FAR struct tcp_hdr_s *tcp);
+                                        FAR struct tcp_hdr_s *tcp,
+                                        FAR struct tcp_conn_s *listener);
 
 /****************************************************************************
  * Name: tcp_selectport
