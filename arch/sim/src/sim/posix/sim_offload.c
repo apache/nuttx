@@ -50,8 +50,8 @@ static void  sim_audio_mad_uninit(void *handle);
 static void *sim_audio_lame_init(struct audio_info_s *info);
 static int   sim_audio_lame_samples(void *handle);
 static int   sim_audio_lame_encode(void *handle,
-                                  uint8_t *in, uint32_t insize,
-                                  uint8_t **out, uint32_t *outsize);
+                                   uint8_t *in, uint32_t insize,
+                                   uint8_t **out, uint32_t *outsize);
 static void  sim_audio_lame_uninit(void *handle);
 
 /****************************************************************************
@@ -163,8 +163,8 @@ static void *sim_audio_pcm_init(struct audio_info_s *info)
 }
 
 static int sim_audio_pcm_process(void *handle,
-                          uint8_t *in, uint32_t insize,
-                          uint8_t **out, uint32_t *outsize)
+                                 uint8_t *in, uint32_t insize,
+                                 uint8_t **out, uint32_t *outsize)
 {
   *out     = in;
   *outsize = insize;
@@ -499,8 +499,8 @@ static int sim_audio_lame_samples(void *handle)
 }
 
 static int sim_audio_lame_encode(void *handle,
-                           uint8_t *in, uint32_t insize,
-                           uint8_t **out, uint32_t *outsize)
+                                 uint8_t *in, uint32_t insize,
+                                 uint8_t **out, uint32_t *outsize)
 {
   struct sim_lame_s *codec = (struct sim_lame_s *)handle;
   int samples;

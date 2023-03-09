@@ -337,113 +337,113 @@ static struct twi_dev_s g_twi3 =
 
 #ifdef CONFIG_SAMA5_FLEXCOM0_TWI
 static const struct twi_attr_s g_twi4attr =
-    {
-        .twi     = 4,
-        .pid     = SAM_PID_FLEXCOM0,
-        .irq     = SAM_IRQ_FLEXCOM0,
-        .sclcfg  = PIO_TWI4_CK,
-        .sdacfg  = PIO_TWI4_D,
-        .base    = SAM_FLEXCOM0_VBASE + SAM_FLEXCOM_TWI_OFFSET
-    };
+{
+  .twi     = 4,
+  .pid     = SAM_PID_FLEXCOM0,
+  .irq     = SAM_IRQ_FLEXCOM0,
+  .sclcfg  = PIO_TWI4_CK,
+  .sdacfg  = PIO_TWI4_D,
+  .base    = SAM_FLEXCOM0_VBASE + SAM_FLEXCOM_TWI_OFFSET
+};
 
 static struct twi_dev_s g_twi4 =
-    {
-        .dev     =
-            {
-                .ops   = &g_twiops,
-            },
-        .attr    = &g_twi4attr,
-        .lock    = NXMUTEX_INITIALIZER,
-        .waitsem = SEM_INITIALIZER(0),
-    };
+{
+  .dev     =
+  {
+    .ops   = &g_twiops,
+  },
+  .attr    = &g_twi4attr,
+  .lock    = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_SAMA5_FLEXCOM1_TWI
 static const struct twi_attr_s g_twi5attr =
-    {
-        .twi     = 5,
-        .pid     = SAM_PID_FLEXCOM1,
-        .irq     = SAM_IRQ_FLEXCOM1,
-        .sclcfg  = PIO_TWI5_CK,
-        .sdacfg  = PIO_TWI5_D,
-        .base    = SAM_FLEXCOM1_VBASE + SAM_FLEXCOM_TWI_OFFSET
-    };
+{
+  .twi     = 5,
+  .pid     = SAM_PID_FLEXCOM1,
+  .irq     = SAM_IRQ_FLEXCOM1,
+  .sclcfg  = PIO_TWI5_CK,
+  .sdacfg  = PIO_TWI5_D,
+  .base    = SAM_FLEXCOM1_VBASE + SAM_FLEXCOM_TWI_OFFSET
+};
 
 static struct twi_dev_s g_twi4 =
-    {
-        .dev     =
-            {
-                .ops   = &g_twiops,
-            },
-        .attr    = &g_twi5attr,
-        .lock    = NXMUTEX_INITIALIZER,
-        .waitsem = SEM_INITIALIZER(0),
-    };
+{
+  .dev     =
+  {
+    .ops   = &g_twiops,
+  },
+  .attr    = &g_twi5attr,
+  .lock    = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_SAMA5_FLEXCOM2_TWI
 static const struct twi_attr_s g_twi6attr =
-    {
-        .twi     = 6,
-        .pid     = SAM_PID_FLEXCOM2,
-        .irq     = SAM_IRQ_FLEXCOM2,
-        .sclcfg  = PIO_TWI6_CK,
-        .sdacfg  = PIO_TWI6_D,
-        .base    = SAM_FLEXCOM2_VBASE + SAM_FLEXCOM_TWI_OFFSET
-    };
+{
+  .twi     = 6,
+  .pid     = SAM_PID_FLEXCOM2,
+  .irq     = SAM_IRQ_FLEXCOM2,
+  .sclcfg  = PIO_TWI6_CK,
+  .sdacfg  = PIO_TWI6_D,
+  .base    = SAM_FLEXCOM2_VBASE + SAM_FLEXCOM_TWI_OFFSET
+};
 
 static struct twi_dev_s g_twi6 =
-    {
-        .dev     =
-            {
-                .ops   = &g_twiops,
-            },
-        .attr    = &g_twi6attr,
-        .lock    = NXMUTEX_INITIALIZER,
-        .waitsem = SEM_INITIALIZER(0),
-    };
+{
+  .dev     =
+  {
+    .ops   = &g_twiops,
+  },
+  .attr    = &g_twi6attr,
+  .lock    = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_SAMA5_FLEXCOM3_TWI
 static const struct twi_attr_s g_twi7attr =
-    {
-        .twi     = 7,
-        .pid     = SAM_PID_FLEXCOM3,
-        .irq     = SAM_IRQ_FLEXCOM3,
-        .sclcfg  = PIO_TWI7_CK,
-        .sdacfg  = PIO_TWI7_D,
-        .base    = SAM_FLEXCOM3_VBASE + SAM_FLEXCOM_TWI_OFFSET
-    };
+{
+  .twi     = 7,
+  .pid     = SAM_PID_FLEXCOM3,
+  .irq     = SAM_IRQ_FLEXCOM3,
+  .sclcfg  = PIO_TWI7_CK,
+  .sdacfg  = PIO_TWI7_D,
+  .base    = SAM_FLEXCOM3_VBASE + SAM_FLEXCOM_TWI_OFFSET
+};
 
 static struct twi_dev_s g_twi7 =
-    {
-        .dev     =
-            {
-                .ops   = &g_twiops,
-            },
-        .attr    = &g_twi7attr,
-        .lock    = NXMUTEX_INITIALIZER,
-        .waitsem = SEM_INITIALIZER(0),
-    };
+{
+  .dev     =
+  {
+    .ops   = &g_twiops,
+  },
+  .attr    = &g_twi7attr,
+  .lock    = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_SAMA5_FLEXCOM4_TWI
 static const struct twi_attr_s g_twi8attr =
-    {
-        .twi     = 8,
-        .pid     = SAM_PID_FLEXCOM3,
-        .irq     = SAM_IRQ_FLEXCOM3,
-        .sclcfg  = PIO_TWI8_CK,
-        .sdacfg  = PIO_TWI8_D,
-        .base    = SAM_FLEXCOM4_VBASE + SAM_FLEXCOM_TWI_OFFSET
-    };
+{
+  .twi     = 8,
+  .pid     = SAM_PID_FLEXCOM3,
+  .irq     = SAM_IRQ_FLEXCOM3,
+  .sclcfg  = PIO_TWI8_CK,
+  .sdacfg  = PIO_TWI8_D,
+  .base    = SAM_FLEXCOM4_VBASE + SAM_FLEXCOM_TWI_OFFSET
+};
 
 static struct twi_dev_s g_twi8 =
-    {
-        .dev     =
-            {
-                .ops   = &g_twiops,
-            },
-        .attr    = &g_twi8attr,
-        .lock    = NXMUTEX_INITIALIZER,
-        .waitsem = SEM_INITIALIZER(0),
-    };
+{
+  .dev     =
+  {
+    .ops   = &g_twiops,
+  },
+  .attr    = &g_twi8attr,
+  .lock    = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 #endif
 
 /****************************************************************************

@@ -3044,10 +3044,10 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
     {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
-    {
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+        {
           struct mii_ioctl_notify_s *req =
-        (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+            (struct mii_ioctl_notify_s *)((uintptr_t)arg);
 
           ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
           if (ret == OK)
@@ -3063,7 +3063,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
       case SIOCGMIIPHY: /* Get MII PHY address */
         {
           struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
           req->phy_id = priv->phyaddr;
           ret = OK;
         }
@@ -3072,7 +3072,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
       case SIOCGMIIREG: /* Get register from MII PHY */
         {
           struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
           uint32_t regval;
 
           /* Enable management port */
@@ -3093,7 +3093,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
       case SIOCSMIIREG: /* Set register in MII PHY */
         {
           struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
           uint32_t regval;
 
           /* Enable management port */
