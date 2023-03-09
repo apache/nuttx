@@ -119,7 +119,7 @@ struct mempool_s
 #if CONFIG_MM_BACKTRACE >= 0
 struct mempool_backtrace_s
 {
-  FAR struct list_node node;
+  struct list_node node;
   pid_t pid;
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE];
