@@ -1059,13 +1059,6 @@ static void mpfs_interrupt_work(void *arg)
       uint32_t rx_error = 0;
       ninfo("RX: rsr=0x%X\n", rsr);
 
-      if ((rsr & RECEIVE_STATUS_FRAME_RECEIVED) != 0)
-        {
-          /* Handle the received packet */
-
-          mpfs_receive(priv, queue);
-        }
-
       /* Check for Receive Overrun */
 
       if ((rsr & RECEIVE_STATUS_RECEIVE_OVERRUN) != 0)
@@ -1106,6 +1099,12 @@ static void mpfs_interrupt_work(void *arg)
           regval = mac_getreg(priv, NETWORK_CONTROL);
           regval |= NETWORK_CONTROL_ENABLE_RECEIVE;
           mac_putreg(priv, NETWORK_CONTROL, regval);
+        }
+      else if ((rsr & RECEIVE_STATUS_FRAME_RECEIVED) != 0)
+        {
+          /* Handle the received packet only in case there are no RX errors */
+
+          mpfs_receive(priv, queue);
         }
     }
 
