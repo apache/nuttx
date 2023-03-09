@@ -114,7 +114,7 @@ config ARCH_EARLY_PRINT
 		different platform, if NuttX runing at wrong ELs or state it will
 		be not normal anymore. So we need to print something in arm64_head.S
 		to debug this situation.
-		Enabling this option will need to implement up_earlyserialinit and
+		Enabling this option will need to implement arm64_earlyserialinit and
 		arm64_lowputc functions just you see in qemu, if you not sure,
 		keeping the option disable.
 

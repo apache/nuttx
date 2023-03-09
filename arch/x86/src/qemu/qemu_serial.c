@@ -93,13 +93,13 @@ int up_putc(int ch)
 #ifdef USE_EARLYSERIALINIT
 void x86_earlyserialinit(void)
 {
-  up_earlyserialinit();
+  u16550_earlyserialinit();
 }
 #endif
 
 #ifdef USE_SERIALDRIVER
 void x86_serialinit(void)
 {
-  up_serialinit();
+  u16550_serialinit();
 }
 #endif

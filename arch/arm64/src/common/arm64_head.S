@@ -193,7 +193,7 @@ primary_core:
      * Should only be called on the boot CPU
      */
 
-    bl    up_earlyserialinit
+    bl    arm64_earlyserialinit
 #endif
 
     PRINT(primary_boot, "- Ready to Boot Primary CPU\r\n")

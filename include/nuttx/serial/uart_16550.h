@@ -331,6 +331,32 @@ typedef uint64_t uart_addrwidth_t;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: u16550_earlyserialinit
+ *
+ * Description:
+ *   Performs the low level UART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before uart_serialinit.
+ *
+ *   NOTE: Configuration of the CONSOLE UART was performed by uart_lowsetup()
+ *   very early in the boot sequence.
+ *
+ ****************************************************************************/
+
+void u16550_earlyserialinit(void);
+
+/****************************************************************************
+ * Name: u16550_serialinit
+ *
+ * Description:
+ *   Register serial console and serial ports.  This assumes that
+ *   u16550_earlyserialinit was called previously.
+ *
+ ****************************************************************************/
+
+void u16550_serialinit(void);
+
+/****************************************************************************
  * Name: uart_getreg(), uart_putreg(), uart_ioctl()
  *
  * Description:

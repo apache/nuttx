@@ -1276,7 +1276,7 @@ static void u16550_putc(FAR struct u16550_s *priv, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: u16550_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1288,7 +1288,7 @@ static void u16550_putc(FAR struct u16550_s *priv, int ch)
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void u16550_earlyserialinit(void)
 {
   /* Configuration whichever one is the console */
 
@@ -1301,15 +1301,15 @@ void up_earlyserialinit(void)
 }
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: u16550_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes that
- *   up_earlyserialinit was called previously.
+ *   u16550_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void u16550_serialinit(void)
 {
 #ifdef CONSOLE_DEV
   uart_register("/dev/console", &CONSOLE_DEV);
