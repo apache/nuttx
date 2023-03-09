@@ -188,7 +188,7 @@ void nostackprotect_function sim_stack_color(void *stackbase,
     }
 
   stkend = STACK_ALIGN_DOWN(stkend);
-  nwords = (stkend - (uintptr_t)stackbase) >> 2;
+  nwords = (stkend - (uintptr_t)stkptr) >> 2;
   nwords = nwords > STACK_MARGIN_WORDS ? nwords - STACK_MARGIN_WORDS : 0;
 
   /* Set the entire stack to the coloration value */
