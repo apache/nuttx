@@ -73,11 +73,6 @@ config RPMSG_UART
 	select SERIAL_REMOVABLE
 	select SERIAL_IFLOWCONTROL
 
-config RPMSG_SERIALINIT
-	bool "Add dummy up_serialinit for UART rpmsg"
-	default y if !16550_UART && !MCU_SERIAL
-	depends on RPMSG_UART
-
 #
 # Standard serial driver configuration
 #

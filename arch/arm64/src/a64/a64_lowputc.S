@@ -49,15 +49,6 @@
  * Public Functions
  ****************************************************************************/
 
-/* Initialize A64 UART
- * xb: Register that contains the UART Base Address
- * c:  Scratch register number
- */
-
-GTEXT(up_earlyserialinit)
-SECTION_FUNC(text, up_earlyserialinit)
-    ret  /* Do nothing because U-Boot has already initialized UART */
-
 /* Wait for A64 UART to be ready to transmit
  * xb: Register that contains the UART Base Address
  * wt: Scratch register number

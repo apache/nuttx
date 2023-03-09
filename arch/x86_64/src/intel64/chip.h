@@ -43,9 +43,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-/* Serial initial function defined in uart_16550.c */
-
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
-
 #endif /* __ARCH_X86_64_SRC_INTEL64_CHIP_H */

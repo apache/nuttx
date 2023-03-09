@@ -29,17 +29,6 @@
 
 #include <arch/qemu-rv/chip.h>
 
-#ifndef __ASSEMBLY__
-
-/* Include the chip interrupt definition file */
-
-/* Serial initial function defined in uart_16550.c */
-
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
-
-#endif /* __ASSEMBLY__  */
-
 #include "qemu_rv_memorymap.h"
 
 #include "hardware/qemu_rv_clint.h"
