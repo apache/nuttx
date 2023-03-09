@@ -52,7 +52,7 @@ extern "C"
 #  define ESP32C3_WLAN_HAS_SOFTAP
 #  define ESP32C3_WLAN_SOFTAP_DEVNO 0
 #  define ESP32C3_WLAN_DEVS         1
-#elif defined(CONFIG_ESP32C3_WIFI_STATION_SOFTAP_COEXISTENCE)
+#elif defined(CONFIG_ESP32C3_WIFI_STATION_SOFTAP)
 #  define ESP32C3_WLAN_HAS_STA
 #  define ESP32C3_WLAN_HAS_SOFTAP
 #  define ESP32C3_WLAN_STA_DEVNO    0
@@ -716,6 +716,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set);
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
+ *   set - true: set data; false: get data
  *
  * Returned Value:
  *   OK on success (positive non-zero values are cmd-specific)

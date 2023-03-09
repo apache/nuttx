@@ -733,8 +733,8 @@ config ESP32C3_WIFI_STATION
 config ESP32C3_WIFI_SOFTAP
 	bool "SoftAP mode"
 
-config ESP32C3_WIFI_STATION_SOFTAP_COEXISTENCE
-	bool "Station + SoftAP coexistence"
+config ESP32C3_WIFI_STATION_SOFTAP
+	bool "Station + SoftAP"
 
 endchoice # ESP32-C3 Wi-Fi mode
 

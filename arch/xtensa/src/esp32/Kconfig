@@ -1989,8 +1989,8 @@ config ESP32_WIFI_STATION
 config ESP32_WIFI_SOFTAP
 	bool "SoftAP mode"
 
-config ESP32_WIFI_STATION_SOFTAP_COEXISTENCE
-	bool "Station + SoftAP coexistence"
+config ESP32_WIFI_STATION_SOFTAP
+	bool "Station + SoftAP"
 
 endchoice # ESP32 Wi-Fi mode
 

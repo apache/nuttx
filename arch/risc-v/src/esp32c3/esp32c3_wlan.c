@@ -1368,7 +1368,6 @@ static int wlan_sta_rx_done(void *buffer, uint16_t len, void *eb)
  *   station sending next packet.
  *
  * Input Parameters:
- *   ifidx  - The interface ID that the TX callback has been triggered from.
  *   data   - Pointer to the data transmitted.
  *   len    - Length of the data transmitted.
  *   status - True if data was transmitted successfully or false if failed.
