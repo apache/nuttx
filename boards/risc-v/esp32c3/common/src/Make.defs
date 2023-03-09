@@ -88,6 +88,10 @@ ifeq ($(CONFIG_LCD_APA102),y)
   CSRCS += esp32c3_board_apa102.c
 endif
 
+ifeq ($(CONFIG_MPU60X0_I2C),y)
+  CSRCS += esp32c3_board_mpu60x0_i2c.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

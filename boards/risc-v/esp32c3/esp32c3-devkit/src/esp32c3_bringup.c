@@ -53,6 +53,7 @@
 #include "esp32c3_board_twai.h"
 #include "esp32c3_board_wdt.h"
 #include "esp32c3_board_wlan.h"
+#include "esp32c3_board_mpu60x0_i2c.h"
 
 #ifdef CONFIG_SPI
 #  include "esp32c3_spi.h"
@@ -370,6 +371,18 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MPU60X0_I2C
+  /* Try to register MPU60x0 device in I2C0 */
+
+  ret = board_mpu60x0_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MPU60x0 "
+                       "Driver for I2C0: %d\n", ret);
     }
 #endif
 
