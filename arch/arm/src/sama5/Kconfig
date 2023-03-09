@@ -3222,29 +3222,29 @@ config SAMA5_TWI3_FREQUENCY
 	depends on SAMA5_TWI3
 
 config SAMA5_TWI_FC0_FREQUENCY
-    int "TWI4 (flexcom-0) Frequency"
-    default 100000
-    depends on SAMA5_FLEXCOM_TWI0
+	int "TWI4 (flexcom-0) Frequency"
+	default 100000
+	depends on SAMA5_FLEXCOM_TWI0
 
 config SAMA5_TWI_FC1_FREQUENCY
-    int "TWI5 (flexcom-1) Frequency"
-    default 100000
-    depends on SAMA5_FLEXCOM_TWI1
+	int "TWI5 (flexcom-1) Frequency"
+	default 100000
+	depends on SAMA5_FLEXCOM_TWI1
 
 config SAMA5_TWI_FC2_FREQUENCY
-    int "TWI6 (flexcom-2) Frequency"
-    default 100000
-    depends on SAMA5_FLEXCOM_TWI2
+	int "TWI6 (flexcom-2) Frequency"
+	default 100000
+	depends on SAMA5_FLEXCOM_TWI2
 
 config SAMA5_TWI_FC3_FREQUENCY
-    int "TWI7 (flexcom-3) Frequency"
-    default 100000
-    depends on SAMA5_FLEXCOM_TWI3
+	int "TWI7 (flexcom-3) Frequency"
+	default 100000
+	depends on SAMA5_FLEXCOM_TWI3
 
 config SAMA5_TWI_FC4_FREQUENCY
-    int "TWI8 (flexcom-4) Frequency"
-    default 100000
-    depends on SAMA5_FLEXCOM_TWI4
+	int "TWI8 (flexcom-4) Frequency"
+	default 100000
+	depends on SAMA5_FLEXCOM_TWI4
 
 
 config SAMA5_TWI_REGDEBUG
