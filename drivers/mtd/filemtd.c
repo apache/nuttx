@@ -98,35 +98,35 @@ struct file_dev_s
  ****************************************************************************/
 
 static ssize_t filemtd_read(FAR struct file_dev_s *priv,
-                 FAR unsigned char *buffer, size_t offsetbytes,
-                 unsigned int nbytes);
+                            FAR unsigned char *buffer, size_t offsetbytes,
+                            unsigned int nbytes);
 static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
-                 FAR const void *src, size_t len);
+                             FAR const void *src, size_t len);
 
 /* MTD driver methods */
 
-static int     filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
-                 size_t nblocks);
+static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                         size_t nblocks);
 static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                 size_t nblocks, FAR uint8_t *buf);
+                             size_t nblocks, FAR uint8_t *buf);
 static ssize_t filemtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                 size_t nblocks, FAR const uint8_t *buf);
+                              size_t nblocks, FAR const uint8_t *buf);
 static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
-                 size_t nbytes, FAR uint8_t *buf);
+                                size_t nbytes, FAR uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
 static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
-                 size_t nbytes, FAR const uint8_t *buf);
+                              size_t nbytes, FAR const uint8_t *buf);
 #endif
-static int     filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
-                 unsigned long arg);
+static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                         unsigned long arg);
 
 #ifdef CONFIG_MTD_LOOP
 static ssize_t mtd_loop_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                             size_t buflen);
 static ssize_t mtd_loop_write(FAR struct file *filep,
-                 FAR const char *buffer, size_t buflen);
+                              FAR const char *buffer, size_t buflen);
 static int     mtd_loop_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                              unsigned long arg);
 #endif /* CONFIG_MTD_LOOP */
 
 /****************************************************************************
@@ -610,7 +610,7 @@ static int mtd_loop_teardown(FAR const char *devname)
 
 #ifdef CONFIG_MTD_LOOP
 static ssize_t mtd_loop_read(FAR struct file *filep, FAR char *buffer,
-                               size_t len)
+                             size_t len)
 {
   return 0; /* Return EOF */
 }
@@ -622,7 +622,7 @@ static ssize_t mtd_loop_read(FAR struct file *filep, FAR char *buffer,
 
 #ifdef CONFIG_MTD_LOOP
 static ssize_t mtd_loop_write(FAR struct file *filep,
-                                FAR const char *buffer, size_t len)
+                              FAR const char *buffer, size_t len)
 {
   return len; /* Say that everything was written */
 }
@@ -658,8 +658,8 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
         else
           {
             ret = mtd_loop_setup(setup->devname, setup->filename,
-                                setup->sectsize, setup->erasesize,
-                                setup->offset);
+                                 setup->sectsize, setup->erasesize,
+                                 setup->offset);
           }
       }
       break;

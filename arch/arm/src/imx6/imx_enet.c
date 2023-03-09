@@ -136,7 +136,7 @@
 
 /* TX timeout = 1 minute */
 
-#define IMX_TXTIMEOUT   (60 * CLK_TCK)
+#define IMX_TXTIMEOUT     (60 * CLK_TCK)
 #define MII_MAXPOLLS      (0x1ffff)
 #define LINK_WAITUS       (500 * 1000)
 #define LINK_NLOOPS       (10)

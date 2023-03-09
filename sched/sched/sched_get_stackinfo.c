@@ -100,7 +100,7 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 
   stackinfo->adj_stack_size  = qtcb->adj_stack_size;
   stackinfo->stack_alloc_ptr = qtcb->stack_alloc_ptr;
-  stackinfo->stack_base_ptr   = qtcb->stack_base_ptr;
+  stackinfo->stack_base_ptr  = qtcb->stack_base_ptr;
 
   return OK;
 }

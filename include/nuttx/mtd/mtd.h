@@ -610,7 +610,7 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
  ****************************************************************************/
 
 FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
-                                         bool unprotect);
+                                           bool unprotect);
 
 /****************************************************************************
  * Name: filemtd_initialize
