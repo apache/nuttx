@@ -4073,11 +4073,6 @@ static unsigned long esp_random_ulong(void)
 static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
                                           uint16_t *len, bool txstatus)
 {
-#if 0
-  wlinfo("ifidx=%d data=%p *len=%p txstatus=%d\n",
-         ifidx, data, len, txstatus);
-#endif
-
 #ifdef ESP32_WLAN_HAS_STA
   if (ifidx == ESP_IF_WIFI_STA)
     {
