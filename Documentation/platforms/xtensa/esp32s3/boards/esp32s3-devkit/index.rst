@@ -50,6 +50,9 @@ and USB activity.  None of these are available for use by software.
 Configurations
 ==============
 
+.. tip:: Please check commonly used configurations for
+  :ref:`ESP32-S3 Peripherals <esp32s3_peripheral_support>`
+
 nsh
 ---
 
@@ -57,7 +60,7 @@ Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
 
 mcuboot_nsh
----
+-----------
 
 Similar configuration as nsh, except that it enables booting from
 MCUboot and the experimental features configuration.

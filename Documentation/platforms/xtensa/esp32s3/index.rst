@@ -78,7 +78,7 @@ Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BIN
 .. note:: It is recommended that if this is the first time you are using the board with NuttX that you perform a complete SPI FLASH erase.
 
    .. code-block:: console
- 
+
       $ esptool.py erase_flash
 
 Peripheral Support
@@ -95,7 +95,7 @@ SPI          Yes
 I2C          No
 CAN/TWAI     No
 DMA          Yes
-Wifi         No
+Wi-Fi        Yes   WPA3-SAE supported
 SPIFLASH     Yes
 SPIRAM       Yes
 Timers       Yes
@@ -120,6 +120,45 @@ RSA          No
 USB SERIAL   Yes
 USB OTG      No
 ========== ======= =====
+
+.. _esp32s3_peripheral_support:
+
+Wi-Fi
+-----
+
+.. tip:: Boards usually expose a ``wapi`` defconfig which enables Wi-Fi
+
+A standard network interface will be configured and can be initialized such as::
+
+    nsh> ifup wlan0
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd`` as
+password. IP address is obtained via DHCP using ``renew`` command. You can check
+the result by running ``ifconfig`` afterwards.
+
+Wi-Fi SoftAP
+------------
+
+It is possible to use ESP32 as an Access Point (SoftAP).
+
+.. tip:: Boards usually expose a ``sta_softap`` defconfig which enables Wi-Fi
+   (STA + SoftAP)
+
+If you are using this board config profile you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+    nsh> ifup wlan1
+    nsh> dhcpd_start wlan1
+    nsh> wapi psk wlan1 mypasswd 3
+    nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Memory Map
 ==========
