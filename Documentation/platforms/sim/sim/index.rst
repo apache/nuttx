@@ -102,3 +102,12 @@ You should see some squares in different colors displayed in remmina:
    :width: 100%
 
    remmina connected to sim's VNC Server
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
