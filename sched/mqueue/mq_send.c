@@ -22,18 +22,19 @@
  * Included Files
  ****************************************************************************/
 
-#include  <nuttx/config.h>
+#include <nuttx/config.h>
 
-#include  <sys/types.h>
-#include  <mqueue.h>
-#include  <errno.h>
-#include  <debug.h>
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
+#include <mqueue.h>
+#include <sys/types.h>
 
-#include  <nuttx/irq.h>
-#include  <nuttx/arch.h>
-#include  <nuttx/cancelpt.h>
+#include <nuttx/arch.h>
+#include <nuttx/cancelpt.h>
+#include <nuttx/irq.h>
 
-#include  "mqueue/mqueue.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Public Functions

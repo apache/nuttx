@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
+#include <assert.h>
 #include <debug.h>
 
 /****************************************************************************
