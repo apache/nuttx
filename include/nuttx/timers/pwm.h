@@ -64,6 +64,14 @@
  *   debug the PWM driver.
  */
 
+/* Channel Numbers **********************************************************/
+
+/* PWM channels should use numbers from 1 to CONFIG_PWM_NCHANNELS. Channel
+ * number 0 indicates the channel not used and therefore is skipped by
+ * the driver (its output remains at the value defined by the peripheral),
+ * number -1 indicates the channel and all following channels are not used.
+ */
+
 /* IOCTL Commands ***********************************************************/
 
 /* The PWM module uses a standard character driver framework.  However, since
