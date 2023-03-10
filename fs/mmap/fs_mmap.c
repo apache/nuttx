@@ -50,7 +50,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
                       size_t length, int prot, int flags,
                       off_t offset, bool kernel, FAR void **mapped)
 {
-  int ret;
+  int ret = -ENOTTY;
 
   /* Pass the information about the mapping in mm_map_entry_s structure.
    * The driver may alter the structure, and if it supports unmap, it
@@ -133,7 +133,8 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
     {
       ret = filep->f_inode->u.i_ops->mmap(filep, &entry);
     }
-  else
+
+  if (ret == -ENOTTY)
     {
       /* Caller request the private mapping. Or not directly mappable,
        * probably because the underlying media doesn't support random access.

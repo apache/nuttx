@@ -612,7 +612,6 @@ static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s *rf;
-  int ret = -EINVAL;
 
   /* Sanity checks */
 
@@ -631,10 +630,10 @@ static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
       map->length != 0 && map->offset + map->length <= rf->rf_size)
     {
       map->vaddr = rm->rm_xipbase + rf->rf_startoffset + map->offset;
-      ret = OK;
+      return OK;
     }
 
-  return ret;
+  return -ENOTTY;
 }
 
 /****************************************************************************
