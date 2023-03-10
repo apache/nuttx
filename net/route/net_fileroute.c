@@ -56,13 +56,13 @@
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 /* Used to lock a routing table for exclusive write-only access */
 
-static rmutex_t g_ipv4_lock = RMUTEX_INITIALIZER;
+static rmutex_t g_ipv4_lock = NXRMUTEX_INITIALIZER;
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 /* Used to lock a routing table for exclusive write-only access */
 
-static rmutex_t g_ipv6_lock = RMUTEX_INITIALIZER;
+static rmutex_t g_ipv6_lock = NXRMUTEX_INITIALIZER;
 #endif
 
 /****************************************************************************
