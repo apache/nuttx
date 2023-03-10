@@ -8485,7 +8485,6 @@ static inline void sam_sw_initialize(struct sam_usbhost_s *priv)
     {
       priv->pipelist[epno].idx = epno;
       nxsem_init(&priv->pipelist[epno].waitsem, 0, 0);
-      sem_setprotocol(&priv->pipelist[epno].waitsem, SEM_PRIO_NONE);
 
       sam_putreg8(USBHOST_PSTATUS_PFREEZE, SAM_USBHOST_PSTATUSSET(epno));
 

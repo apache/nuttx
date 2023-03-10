@@ -71,12 +71,6 @@ int pthread_cond_init(FAR pthread_cond_t *cond,
     }
   else
     {
-      /* The contained semaphore is used for signaling and, hence, should
-       * not have priority inheritance enabled.
-       */
-
-      sem_setprotocol(&cond->sem, SEM_PRIO_NONE);
-
       cond->clockid = attr ? attr->clockid : CLOCK_REALTIME;
     }
 
