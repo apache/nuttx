@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <endian.h>
 #include <fcntl.h>
 #include <stdint.h>

@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <execinfo.h>
 #include <stdbool.h>
 #include <stdio.h>

@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/mm/gran.h>
 
