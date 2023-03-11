@@ -62,6 +62,12 @@
 
 /* Connections configuration ************************************************/
 
+/* If NET_BLUETOOTH not defined */
+
+#ifndef CONFIG_NET_BLUETOOTH
+#  define CONFIG_BLUETOOTH_MAX_CONN CONFIG_NRF53_SDC_MAX_COUNT
+#endif
+
 #if defined(CONFIG_SDC_PERIPHERAL_COUNT) && \
     CONFIG_SDC_PERIPHERAL_COUNT > CONFIG_BLUETOOTH_MAX_CONN
 #  error "Cannot support more BLE peripheral roles than connections"
@@ -261,7 +267,7 @@ static int bt_open(struct bt_driver_s *btdev)
 }
 
 /****************************************************************************
- * Name: bt_open
+ * Name: bt_hci_send
  ****************************************************************************/
 
 static int bt_hci_send(struct bt_driver_s *btdev,
