@@ -48,6 +48,14 @@ ifeq ($(CONFIG_BLUETOOTH_NULL),y)
 CSRCS += bt_null.c
 endif
 
+ifeq ($(CONFIG_BLUETOOTH_RPMSG_SERVER),y)
+CSRCS += bt_rpmsghci_server.c
+endif
+
+ifeq ($(CONFIG_BLUETOOTH_RPMSG),y)
+CSRCS += bt_rpmsghci.c
+endif
+
 # Include common Bluetooth driver build support
 
 DEPPATH += --dep-path wireless$(DELIM)bluetooth
