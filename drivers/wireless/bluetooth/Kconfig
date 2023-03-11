@@ -75,4 +75,14 @@ config BLUETOOTH_NULL
 		loop" and nothing more:  It is a just a bit-bucket for outgoing
 		packets; it generates no incoming packets.
 
+config BLUETOOTH_RPMSG_SERVER
+	bool "RPMSG Bluetooth HCI server support"
+	depends on EXPERIMENTAL
+	default n
+
+config BLUETOOTH_RPMSG
+	bool "RPMSG Bluetooth HCI client support"
+	depends on EXPERIMENTAL
+	default n
+
 endif # DRIVERS_BLUETOOTH
