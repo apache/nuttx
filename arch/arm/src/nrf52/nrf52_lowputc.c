@@ -74,12 +74,6 @@ static const struct uart_config_s g_console_config =
   .parity    = CONSOLE_PARITY,
   .bits      = CONSOLE_BITS,
   .stopbits2 = CONSOLE_2STOP,
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .iflow     = CONSOLE_IFLOW,
-#endif
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
-  .oflow     = CONSOLE_OFLOW,
-#endif
   .txpin     = CONSOLE_TX_PIN,
   .rxpin     = CONSOLE_RX_PIN,
 };
