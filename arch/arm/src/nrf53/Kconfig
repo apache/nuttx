@@ -24,6 +24,7 @@ config NRF53_APPCORE
 	select ARCH_HAVE_FPU
 	select NRF53_HAVE_PWM
 	select NRF53_HAVE_SAADC
+	select NRF53_HAVE_UART1
 
 config NRF53_NETCORE
 	bool
@@ -70,6 +71,10 @@ config NRF53_ENABLE_APPROTECT
 
 # Peripheral support
 
+config NRF53_HAVE_UART1
+	bool
+	default n
+
 config NRF53_HAVE_PWM
 	bool
 	default n
@@ -107,6 +112,7 @@ config NRF53_UART0
 config NRF53_UART1
 	bool "UART1"
 	default n
+	depends on NRF53_HAVE_UART1
 	select UART1_SERIALDRIVER
 	select NRF53_UART
 
