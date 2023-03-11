@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <sys/types.h>
 #include <syslog.h>
 
@@ -31,6 +32,9 @@
 
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
+#endif
+#ifdef CONFIG_RPMSG_UART
+#  include <nuttx/serial/uart_rpmsg.h>
 #endif
 
 #ifdef CONFIG_INPUT_BUTTONS
@@ -42,6 +46,13 @@
 #endif
 
 #ifdef CONFIG_RPTUN
+#  include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
+#  ifdef CONFIG_UART_BTH4
+#    include <nuttx/serial/uart_bth4.h>
+#  endif
+#  ifdef CONFIG_NET_BLUETOOTH
+#    include <nuttx/wireless/bluetooth/bt_driver.h>
+#  endif
 #  include "nrf53_rptun.h"
 #endif
 
@@ -54,8 +65,99 @@
 #define NRF53_TIMER (0)
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF53_APPCORE
+
+/****************************************************************************
+ * Name: nrf53_appcore_bleinit
+ ****************************************************************************/
+
+static int nrf53_appcore_bleinit(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_BLUETOOTH_RPMSG
+  struct bt_driver_s *bt_dev = NULL;
+
+  bt_dev = rpmsghci_register("appcore", "bthci");
+  if (bt_dev == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: rpmsghci_register() failed: %d\n", -errno);
+      return -ENOMEM;
+    }
+
+#  ifdef CONFIG_UART_BTH4
+  /* Register UART BT H4 device */
+
+  ret = uart_bth4_register("/dev/ttyHCI", bt_dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "bt_bth4_register error: %d\n", ret);
+    }
+#  elif defined(CONFIG_NET_BLUETOOTH)
+  /* Register network device */
+
+  ret = bt_netdev_register(bt_dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "bt_netdev_register error: %d\n", ret);
+    }
+#  else
+#    error
+#  endif
+#endif
+
+  return ret;
+}
+
+#else
+
+/****************************************************************************
+ * Name: nrf53_netcore_bleinit
+ ****************************************************************************/
+
+static int nrf53_netcore_bleinit(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
+#  ifdef CONFIG_BLUETOOTH_RPMSG_SERVER
+  ret = nrf53_rpmsghci_server_initialize("bthci");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: nrf53_rpmsghci_server_initialize() failed: %d\n",
+             ret);
+    }
+#  else
+  ret = nrf53_sdc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_sdc_initialize() failed: %d\n", ret);
+    }
+#  endif
+#endif
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void)
+{
+#ifdef CONFIG_NRF53_APPCORE
+  uart_rpmsg_init("appcore", "proxy", 4096, false);
+#else
+  uart_rpmsg_init("netcore", "proxy", 4096, true);
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: nrf53_bringup
@@ -150,12 +252,19 @@ int nrf53_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
-  ret = nrf53_sdc_initialize();
+  /* Initialize BLE */
 
+#ifdef CONFIG_NRF53_APPCORE
+  ret = nrf53_appcore_bleinit();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: nrf53_sdc_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: nrf53_appcore_bleinit failed: %d\n", ret);
+    }
+#else
+  ret = nrf53_netcore_bleinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_netcore_bleinit failed: %d\n", ret);
     }
 #endif
 
