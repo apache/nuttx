@@ -34,6 +34,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define NRF53_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define NRF53_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 /* LED definitions **********************************************************/
 
 /* Definitions to configure LED GPIO as outputs */
