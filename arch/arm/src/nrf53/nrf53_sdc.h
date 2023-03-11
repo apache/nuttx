@@ -56,6 +56,9 @@ extern "C"
  ****************************************************************************/
 
 int nrf53_sdc_initialize(void);
+#ifdef CONFIG_BLUETOOTH_RPMSG_SERVER
+int nrf53_rpmsghci_server_initialize(const char *name);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
