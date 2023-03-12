@@ -106,7 +106,7 @@
 #endif
 
 #ifdef CONFIG_DRIVERS_WIEGAND
-#   include "esp32_wiegand.h"
+#  include "board_wiegand.h"
 #endif
 
 #include "esp32-wrover-kit.h"
@@ -151,7 +151,15 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 #endif
+#ifdef CONFIG_DRIVERS_WIEGAND
+  ret = board_wiegand_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+            "ERROR: Failed to wiegand_initialize failed : %d\n", ret);
+    }
 
+#endif
 #ifdef CONFIG_FS_TMPFS
   /* Mount the tmpfs file system */
 

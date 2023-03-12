@@ -64,6 +64,36 @@ struct wiegand_config_s
     struct wiegand_gpio_s g_data[2];
 };
 
+struct wiegand_lowerhalf_s;
+struct wiegand_ops_s
+{
+
+    /**
+     * 
+    */
+    CODE int (*setup)(FAR struct wiegand_lowerhalf_s *lower);
+
+    /**
+     * 
+    */
+    CODE bool (*getdata)(FAR struct wiegand_lowerhalf_s *lower, int data);
+
+    /**
+     * 
+    */
+    CODE int (*interrupt) (FAR struct wiegand_lowerhalf_s *lower, CODE xcpt_t isr,
+                            FAR void *arg);
+
+    /**
+     * 
+    */
+    CODE int (*ioctl)(FAR struct wiegand_lowerhalf_s *lower, int cmd, unsigned long arg);
+};
+
+struct wiegand_lowerhalf_s
+{
+    FAR const struct wiegand_ops_s *ops; 
+};
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -84,5 +114,5 @@ struct wiegand_config_s
  ****************************************************************************/
 
 int wiegand_register(FAR const char  *devpath,
-                     FAR struct wiegand_config_s *config);
+                     FAR struct wiegand_lowerhalf_s *config);
 #endif /* __INCLUDE_NUTTX_WIEGAND_WIEGAND_H */

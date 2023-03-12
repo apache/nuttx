@@ -151,6 +151,10 @@ endif
   CSRCS += esp32_board_dac.c
 #endif
 
+#ifeq ($(CONFIG_DRIVERS_WIEGAND),y)
+  CSRCS += esp32_wiegand.c
+#endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

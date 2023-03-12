@@ -54,89 +54,117 @@
 #define WIEGAND_ID_CARD_BIT 16
 #endif
 
-struct wiegand_dev_s
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+struct wiegand_upperhalf_s
 {
-  FAR struct wiegand_config_s *config;
-  uint8_t raw_data[WIEGAND_FORMAT_BIT];
-  mutex_t devlock;
-  int bit_index;
-  bool wait_bit;
-  int odd;
-  int even;
+  uint8_t index; /**/
+  bool wait;     /* */
+  uint8_t buffer[WIEGAND_FORMAT_BIT];
+  mutex_t lock;                          /**/
+  FAR struct wiegand_lowerhalf_s *lower; /**/
 };
 
 static int wiegand_open(FAR struct file *filep);
 static int wiegand_close(FAR struct file *filep);
 static ssize_t wiegand_read(FAR struct file *filep,
                             FAR char *buffer, size_t buflen);
+static int wiegand_ioctl(FAR struct file *filep, int cmd,
+                         unsigned long arg);
+
 static const struct file_operations g_wiegandops =
-{
-  wiegand_open,  /* open */
-  wiegand_close, /* close */
-  wiegand_read,  /* read */
-  NULL,          /* write */
+    {
+        wiegand_open,  /* open */
+        wiegand_close, /* close */
+        wiegand_read,  /* read */
+        NULL,          /* write */
+        NULL,          /* seek */
+        wiegand_ioctl, /* ioctl */
 };
+
+static int wiegand_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct wiegand_upperhalf_s *priv = (struct wiegand_upperhalf_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  bool data0 = priv->lower->ops->getdata(priv->lower, 0);
+  bool data1 = priv->lower->ops->getdata(priv->lower, 1);
+
+  if (data0 == data1)
+  {
+    return OK;
+  }
+
+  if (priv->index >= WIEGAND_FORMAT_BIT)
+  {
+    return OK;
+  }
+
+  priv->buffer[priv->index++] = (data0 ? 0x01 : 0x00);
+  priv->wait = true;
+
+  return OK;
+}
 
 static int wiegand_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct wiegand_dev_s *priv = inode->i_private;
+  FAR struct wiegand_upperhalf_s *upper = inode->i_private;
   int ret;
 
-  ret = nxmutex_lock(&priv->devlock);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
-    {
-      return ret;
-    }
+  {
+    return ret;
+  }
 
-  nxmutex_unlock(&priv->devlock);
+  FAR struct wiegand_lowerhalf_s *lower = upper->lower;
+
+  ret = lower->ops->interrupt(lower, wiegand_interrupt, upper);
+  if (ret < 0)
+  {
+    return ret;
+  }
+
+  ret = lower->ops->setup(lower);
+  if (ret < 0)
+  {
+    return ret;
+  }
+
+  memset(&upper->buffer, 0, sizeof(upper->buffer));
+  upper->index = 0;
+
+  nxmutex_unlock(&upper->lock);
+
   return OK;
+}
+
+static int wiegand_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  return 0;
 }
 
 static int wiegand_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct wiegand_dev_s *priv = inode->i_private;
+  FAR struct wiegand_upperhalf_s *priv = inode->i_private;
   int ret;
 
-  ret = nxmutex_lock(&priv->devlock);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
-    {
-      return ret;
-    }
+  {
+    return ret;
+  }
 
-  nxmutex_unlock(&priv->devlock);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
-static int wiegand_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-    FAR struct wiegand_dev_s *priv =
-        (FAR struct wiegand_dev_s *)arg;
-
-  DEBUGASSERT(priv != NULL);
-
-  bool data0 = priv->config->get_data(priv->config, 0);
-  bool data1 = priv->config->get_data(priv->config, 1);
-
-  if (data0 == data1)
-    {
-      return OK;
-    }
-
-    if (priv->bit_index >= WIEGAND_FORMAT_BIT)
-    {
-      return OK;
-    }
-
-  priv->raw_data[priv->bit_index] = (data0 ? 0x01 : 0x00);
-  priv->bit_index++;
-  priv->wait_bit = true;
-
-  return OK;
-}
-
-static void wiegand_wait_frame(FAR struct wiegand_dev_s *priv)
+static void wiegand_wait_frame(FAR struct wiegand_upperhalf_s *priv)
 {
   clock_t timeout;
   clock_t start;
@@ -147,99 +175,79 @@ static void wiegand_wait_frame(FAR struct wiegand_dev_s *priv)
 
   do
   {
-    if (priv->wait_bit)
-      {
-        start = clock_systime_ticks();
-        priv->wait_bit = false;
-      }
+    if (priv->wait)
+    {
+      start = clock_systime_ticks();
+      priv->wait = false;
+    }
     elapsed = clock_systime_ticks() - start;
-  }
-  while (elapsed < timeout);
+  } while (elapsed < timeout);
 }
 
-static int wiegand_check_parity(FAR struct wiegand_dev_s *priv)
-{
-  int ret = OK;
-
-  if ((priv->even % 2) && priv->raw_data[0] == 0)
-    {
-      return ERROR;
-    }
-
-  if ((!(priv->odd % 2) && priv->raw_data[WIEGAND_FORMAT_BIT - 1]) == 0)
-    {
-      return ERROR;
-    }
-
-  return ret;
-}
-
-static int wiegand_start_read_frame(FAR struct wiegand_dev_s *priv,
-                                FAR struct wiegand_data_s *data)
+static int wiegand_start_read_frame(FAR struct wiegand_upperhalf_s *priv,
+                                    FAR struct wiegand_data_s *data)
 {
   int i;
-  int ret = OK;
-  int facility_index = WIEGAND_FACILITY_CODE_BIT + 1;
-  int id_index = WIEGAND_FACILITY_CODE_BIT + WIEGAND_FACILITY_CODE_BIT + 1;
+
+  // int facility_index = WIEGAND_FACILITY_CODE_BIT + 1;
+  // int id_index = WIEGAND_FACILITY_CODE_BIT + WIEGAND_FACILITY_CODE_BIT + 1;
 
   data->id = data->aba_code = data->facility_code = 0;
 
-  if (priv->bit_index <= 0 || priv->bit_index < WIEGAND_FORMAT_BIT)
-    {
-      return ERROR;
-    }
+  if (priv->index <= 0 || priv->index < WIEGAND_FORMAT_BIT)
+  {
+    return ERROR;
+  }
 
-  for (i = 1; i < facility_index; i++)
+  for (i = 1; i < WIEGAND_FORMAT_BIT; i++)
+  {
+    if (i <= WIEGAND_FACILITY_CODE_BIT)
     {
       data->facility_code <<= 1;
-      data->facility_code |= priv->raw_data[i];
-
-      if (priv->raw_data[i])
-        {
-          priv->even++;
-        }
+      data->facility_code |= priv->buffer[i];
     }
-
-  for (i = facility_index; i < id_index; i++)
+    else
     {
       data->id <<= 1;
-      data->id |= priv->raw_data[i];
-
-      if (priv->raw_data[i])
-        {
-          priv->odd++;
-        }
+      data->id |= priv->buffer[i];
     }
-
+  }
   data->aba_code = (data->facility_code << WIEGAND_FACILITY_CODE_BIT);
   data->aba_code |= data->id;
 
-  return ret;
+  return OK;
 }
 
 static ssize_t wiegand_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
-  int ret = OK;
+  int ret = 0;
   FAR struct inode *inode = filep->f_inode;
-  FAR struct wiegand_dev_s *priv = inode->i_private;
+  FAR struct wiegand_upperhalf_s *upper;
+  FAR struct wiegand_lowerhalf_s *lower;
+
   FAR struct wiegand_data_s *data = (FAR struct wiegand_data_s *)buffer;
 
-  ret = nxmutex_lock(&priv->devlock);
+  upper = inode->i_private;
+  DEBUGASSERT(upper != NULL);
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
+
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
-    {
-      return (ssize_t)ret;
-    }
+  {
+    return (ssize_t)ret;
+  }
 
   if (buflen < sizeof(FAR struct wiegand_data_s))
-    {
-      snerr("ERROR: Not enough memory to read data sample.\n");
-      return -ENOSYS;
-    }
+  {
+    snerr("ERROR: Not enough memory to read data sample.\n");
+    return -ENOSYS;
+  }
 
-  wiegand_wait_frame(priv);
+  wiegand_wait_frame(upper);
 
-  ret = wiegand_start_read_frame(priv, data);
+  ret = wiegand_start_read_frame(upper, data);
   if (ret < 0)
     {
       data->status = WIEGAND_READ_UNCOMPLETED;
@@ -248,16 +256,10 @@ static ssize_t wiegand_read(FAR struct file *filep, FAR char *buffer,
   else
     {
       data->status = WIEGAND_SUCCESS;
+     }
 
-      ret = (wiegand_check_parity(priv) < 0);
-      if (ret < 0)
-        {
-          data->status = WIEGAND_PARITY_ERROR;
-        }
-    }
-
-  priv->bit_index = priv->even = priv->odd = 0;
-  nxmutex_unlock(&priv->devlock);
+  upper->index = 0;
+  nxmutex_unlock(&upper->lock);
 
   return ret;
 }
@@ -267,36 +269,30 @@ static ssize_t wiegand_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 int wiegand_register(FAR const char *devpath,
-                     FAR struct wiegand_config_s *config)
+                     FAR struct wiegand_lowerhalf_s *lower)
 {
-  int ret = 0;
-  FAR struct wiegand_dev_s *priv;
+  // FAR struct wiegand_dev_s *priv;
+  FAR struct wiegand_upperhalf_s *upper;
 
-  priv = (FAR struct wiegand_dev_s *)
-        kmm_malloc(sizeof(struct wiegand_dev_s));
-  if (priv == NULL)
-    {
-      snerr("ERROR: Failed to allocate instance\n");
-      return -ENOMEM;
-    }
+  upper = (FAR struct wiegand_upperhalf_s *)
+      kmm_malloc(sizeof(struct wiegand_upperhalf_s));
+  if (upper == NULL)
+  {
+    snerr("ERROR: Failed to allocate instance\n");
+    return -ENOMEM;
+  }
 
-  priv->config = config;
-  memset(&priv->raw_data, 0x00, sizeof(priv->raw_data));
-  priv->bit_index = 0;
+  nxmutex_init(&upper->lock);
+  upper->lower = lower;
 
-  nxmutex_init(&priv->devlock);
-
-  ret = register_driver(devpath, &g_wiegandops, 0666, priv);
+  int ret = register_driver(devpath, &g_wiegandops, 0666, upper);
   if (ret < 0)
-    {
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      snerr("ERROR: Failed to register driver: %d\n", ret);
-      return ret;
-    }
-
-  priv->config->irq_attach(priv->config, wiegand_interrupt, priv);
-  priv->config->irq_enable(priv->config, true);
+  {
+    nxmutex_destroy(&upper->lock);
+    kmm_free(upper);
+    snerr("ERROR: Failed to register driver: %d\n", ret);
+    return ret;
+  }
 
   return ret;
 }

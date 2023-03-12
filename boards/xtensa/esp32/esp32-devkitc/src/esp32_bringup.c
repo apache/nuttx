@@ -171,6 +171,10 @@
 #  include "esp32_board_dac.h"
 #endif
 
+#ifdef CONFIG_DRIVERS_WIEGAND
+#  include "board_wiegand.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -700,17 +704,7 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_DRIVERS_WIEGAND
-  ret = wiegand_initialize(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-            "ERROR: Failed to wiegand_initialize failed : %d\n", ret);
-    }
-
-#endif
-
-#ifdef CONFIG_DRIVERS_WIEGAND
-  ret = wiegand_initialize(0);
+  ret = board_wiegand_initialize(0);
   if (ret < 0)
     {
       syslog(LOG_ERR,

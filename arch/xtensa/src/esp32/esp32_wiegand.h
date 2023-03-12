@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_wiegand.c
+ * arch/xtensa/src/esp32/esp32_wiegand.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,41 +21,9 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_WIEGAND_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_WIEGAND_H
 
-#include <nuttx/config.h>
+int esp32_wiegand_initialize(char *devpath);
 
-#include <assert.h>
-#include <debug.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-
-#include <esp32_wiegand.h>
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: wiegand_initialize
- *
- * Description:
- *   Initialize and register the GPIO pins.
- *
- ****************************************************************************/
-int board_wiegand_initialize(int devno)
-{
-  char devpath[12];
-
-  sninfo("Initializing the Wiegand\n");
-  snprintf(devpath, 12, "/dev/wiega%d", devno);
-
-  /* Initialize Wiegand interface */
-
-  int ret  = esp32_wiegand_initialize(devpath);
-  if (ret < 0)
-  {
-    snerr("esp32_wiegand_initialize falied: %d\n"); 
-  }
-  return ret;
-}
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WIEGAND_H */

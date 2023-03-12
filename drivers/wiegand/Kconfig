@@ -24,6 +24,6 @@ config WIEGAND_FORMAT_34_BIT
 	bool "34-bit Wiegand format"
 	---help---
 		Enables support for wiegand 34 bit ouput
-
 endchoice
+
 endif
