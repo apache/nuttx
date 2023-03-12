@@ -55,7 +55,7 @@
 
 /* Creates a mask of @m bits, i.e. MASK(2) -> 00000011 */
 
-#define MASK(m) (BIT((m) + 1) - 1)
+#define MASK(m) (BIT(m) - 1)
 
 /* Masks and shifts @v into bit field @m */
 
@@ -90,14 +90,11 @@ enum mpu_regaddr_e
 
   CONFIG = 0x1a,
   CONFIG__EXT_SYNC_SET__SHIFT = 3,
-  CONFIG__EXT_SYNC_SET__WIDTH = 2,
+  CONFIG__EXT_SYNC_SET__WIDTH = 3,
   CONFIG__DLPF_CFG__SHIFT = 0,
-  CONFIG__DLPF_CFG__WIDTH = 2,
+  CONFIG__DLPF_CFG__WIDTH = 3,
 
   GYRO_CONFIG = 0x1b,
-  GYRO_CONFIG__XG_ST = BIT(7),
-  GYRO_CONFIG__YG_ST = BIT(6),
-  GYRO_CONFIG__ZG_ST = BIT(5),
   GYRO_CONFIG__FS_SEL__SHIFT = 3,
   GYRO_CONFIG__FS_SEL__WIDTH = 2,
 
