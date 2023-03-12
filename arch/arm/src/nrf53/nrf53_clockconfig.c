@@ -95,6 +95,8 @@ void nrf53_clockconfig(void)
   putreg32(0x0, NRF53_CLOCK_EVENTS_LFCLKSTARTED);
   putreg32(0x1, NRF53_CLOCK_TASKS_LFCLKSTART);
 
+  /* NOTE: Oscillator must be configured on the app core */
+
   while (!getreg32(NRF53_CLOCK_EVENTS_LFCLKSTARTED))
     {
       /* Wait for LFCLK to be running */
