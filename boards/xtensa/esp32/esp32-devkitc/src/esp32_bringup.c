@@ -157,6 +157,10 @@
 #  include "esp32_rmt.h"
 #endif
 
+#ifdef CONFIG_DRIVERS_WIEGAND
+#   include "esp32_wiegand.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -667,6 +671,16 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "Failed to initialize ws2812 driver\n");
     }
 #  endif
+#endif
+
+#ifdef CONFIG_DRIVERS_WIEGAND
+  ret = wiegand_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+            "ERROR: Failed to wiegand_initialize failed : %d\n", ret);
+    }
+
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
