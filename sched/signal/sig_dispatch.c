@@ -321,8 +321,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
   int masked;
   int ret = OK;
 
-  sinfo("TCB=%p signo=%d code=%d value=%d mask=%08" PRIx32 "\n",
-        stcb, info->si_signo, info->si_code,
+  sinfo("TCB=%p pid=%d signo=%d code=%d value=%d mask=%08" PRIx32 "\n",
+        stcb, stcb->pid, info->si_signo, info->si_code,
         info->si_value.sival_int, stcb->sigprocmask);
 
   DEBUGASSERT(stcb != NULL && info != NULL);
@@ -404,6 +404,15 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
             }
 
           leave_critical_section(flags);
+
+#ifdef CONFIG_LIB_SYSCALL
+          /* Must also add signal action if in system call */
+
+          if (masked == 0)
+            {
+              nxsig_add_pendingsignal(stcb, info);
+            }
+#endif
         }
 
       /* Its not one we are waiting for... Add it to the list of pending
