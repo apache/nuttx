@@ -106,6 +106,10 @@ config NRF53_PWM
 	bool
 	default n
 
+config NRF53_RTC
+	bool
+	default n
+
 menu "NRF53 Peripheral Selection"
 
 config NRF53_GPIOTE
@@ -157,6 +161,17 @@ config NRF53_PWM2
 
 config NRF53_SAADC
 	bool "SAADC"
+	default n
+
+config NRF53_RTC0
+	bool "RTC0"
+	select NRF53_RTC
+	depends on !NRF53_SOFTDEVICE_CONTROLLER
+	default n
+
+config NRF53_RTC1
+	bool "RTC1"
+	select NRF53_RTC
 	default n
 
 endmenu # NRF53 Peripheral Selection

@@ -70,6 +70,10 @@ ifeq ($(CONFIG_NRF53_SAADC),y)
 CHIP_CSRCS += nrf53_adc.c
 endif
 
+ifeq ($(CONFIG_NRF53_RTC),y)
+CHIP_CSRCS += nrf53_rtc.c
+endif
+
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += nrf53_pminitialize.c
 endif
