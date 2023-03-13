@@ -94,5 +94,17 @@ int nrf53_bringup(void);
 int nrf53_timer_driver_setup(const char *devpath, int timer);
 #endif
 
+/****************************************************************************
+ * Name: nrf53_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int nrf53_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF53_NRF5340_DK_H */
