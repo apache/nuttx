@@ -66,288 +66,150 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/netdev.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
 
 #include "sim_internal.h"
 
-#if CONFIG_IOB_BUFSIZE >= (MAX_NETDEV_PKTSIZE + \
-    CONFIG_NET_GUARDSIZE + CONFIG_NET_LL_GUARDSIZE)
-#  define SIM_NETDEV_IOB_OFFLOAD
+#define SIM_NETDEV_BUFSIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+
+/* We don't know packet length before receiving, so we can only offload it
+ * when netpkt's buffer is long enough.
+ */
+
+#if NETPKT_BUFLEN >= SIM_NETDEV_BUFSIZE
+#  define SIM_NETDEV_RECV_OFFLOAD
 #endif
+
+/* Get index / buffer from dev pointer. */
+
+#define DEVIDX(p) ((struct sim_netdev_s *)(p) - g_sim_dev)
+#define DEVBUF(p) (((struct sim_netdev_s *)(p))->buf)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct sim_netdev_s
+{
+  struct netdev_lowerhalf_s dev;
+  uint8_t buf[SIM_NETDEV_BUFSIZE]; /* Used when packet buffer is fragmented */
+};
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static void netdriver_txdone_interrupt(void *priv);
+static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
+static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev);
+static int netdriver_ifup(struct netdev_lowerhalf_s *dev);
+static int netdriver_ifdown(struct netdev_lowerhalf_s *dev);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* Net driver worker */
-
-static struct work_s g_avail_work[CONFIG_SIM_NETDEV_NUMBER];
-static struct work_s g_recv_work[CONFIG_SIM_NETDEV_NUMBER];
-
 /* Ethernet peripheral state */
 
-static struct net_driver_s g_sim_dev[CONFIG_SIM_NETDEV_NUMBER];
+static struct sim_netdev_s g_sim_dev[CONFIG_SIM_NETDEV_NUMBER];
+static const struct netdev_ops_s g_ops =
+{
+  netdriver_ifup,   /* ifup */
+  netdriver_ifdown, /* ifdown */
+  netdriver_send,   /* transmit */
+  netdriver_recv    /* receive */
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void netdriver_send(struct net_driver_s *dev)
+static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 {
-  int devidx = (intptr_t)dev->d_private;
-#ifdef SIM_NETDEV_IOB_OFFLOAD
-  uint8_t *buf = NETLLBUF;
-#else
-  uint8_t *buf = dev->d_buf;
-#endif
+  unsigned int len  = netpkt_getdatalen(dev, pkt);
 
-  UNUSED(devidx);
-
-#ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the tx frame into it */
-
-  pkt_input(dev);
-#endif
-
-  sim_netdev_send(devidx, buf, dev->d_len);
-}
-
-static void netdriver_reply(struct net_driver_s *dev)
-{
-  /* If the receiving resulted in data that should be sent out on
-   * the network, the field d_len is set to a value > 0.
-   */
-
-  if (dev->d_len > 0)
+  if (netpkt_is_fragmented(pkt))
     {
-      /* Send the packet */
-
-      NETDEV_TXPACKETS(dev);
-      netdriver_send(dev);
-      NETDEV_TXDONE(dev);
+      netpkt_copyout(dev, DEVBUF(dev), pkt, len, 0);
+      sim_netdev_send(DEVIDX(dev), DEVBUF(dev), len);
     }
+  else
+    {
+      sim_netdev_send(DEVIDX(dev), netpkt_getdata(dev, pkt), len);
+    }
+
+  netpkt_free(dev, pkt, NETPKT_TX);
+  return OK;
 }
 
-static void netdriver_recv_work(void *arg)
+static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 {
-  struct net_driver_s *dev = arg;
-  struct eth_hdr_s *eth;
-  int devidx = (intptr_t)dev->d_private;
+  netpkt_t *pkt = NULL;
+  unsigned int len;
 
-  UNUSED(devidx);
-
-  net_lock();
-
-  /* Retrieve all the queued RX frames from the network device
-   * to prevent RX data stream congestion.
-   */
-
-  while (sim_netdev_avail(devidx))
+  if (sim_netdev_avail(DEVIDX(dev)))
     {
-#ifdef SIM_NETDEV_IOB_OFFLOAD
-      if (netdev_iob_prepare(dev, false, 0) != OK)
+      pkt = netpkt_alloc(dev, NETPKT_RX);
+      if (pkt == NULL)
         {
-          netdriver_txdone_interrupt(dev);
-          break;
+          return NULL;
         }
-#endif
 
       /* sim_netdev_read will return 0 on a timeout event and > 0
        * on a data received event
        */
 
-      dev->d_len = sim_netdev_read(devidx,
-                               (unsigned char *)dev->d_buf,
-                               dev->d_pktsize);
-      if (dev->d_len > 0)
+#ifdef SIM_NETDEV_RECV_OFFLOAD
+      len = sim_netdev_read(DEVIDX(dev), netpkt_getbase(pkt),
+                            SIM_NETDEV_BUFSIZE);
+#else
+      len = sim_netdev_read(DEVIDX(dev), DEVBUF(dev), SIM_NETDEV_BUFSIZE);
+#endif
+      if (len == 0)
         {
-          NETDEV_RXPACKETS(dev);
-
-#ifdef SIM_NETDEV_IOB_OFFLOAD
-          iob_update_pktlen(dev->d_iob, dev->d_len - NET_LL_HDRLEN(dev));
-#endif
-
-          /* Data received event.  Check for valid Ethernet header with
-           * destination == our MAC address
-           */
-
-          eth = (struct eth_hdr_s *)dev->d_buf;
-          if (dev->d_len > ETH_HDRLEN)
-            {
-#ifdef CONFIG_NET_PKT
-              /* When packet sockets are enabled, feed the frame into
-               * the packet tap.
-               */
-
-              pkt_input(dev);
-#endif /* CONFIG_NET_PKT */
-
-              /* We only accept IP packets of the configured type
-               * and ARP packets
-               */
-
-#ifdef CONFIG_NET_IPv4
-              if (eth->type == HTONS(ETHTYPE_IP))
-                {
-                  ninfo("IPv4 frame\n");
-                  NETDEV_RXIPV4(dev);
-
-                  /* Receive an IPv4 packet from the network device */
-
-                  ipv4_input(dev);
-
-                  /* Check for a reply to the IPv4 packet */
-
-                  netdriver_reply(dev);
-                }
-              else
-#endif /* CONFIG_NET_IPv4 */
-#ifdef CONFIG_NET_IPv6
-              if (eth->type == HTONS(ETHTYPE_IP6))
-                {
-                  ninfo("IPv6 frame\n");
-                  NETDEV_RXIPV6(dev);
-
-                  /* Give the IPv6 packet to the network layer */
-
-                  ipv6_input(dev);
-
-                  /* Check for a reply to the IPv6 packet */
-
-                  netdriver_reply(dev);
-                }
-              else
-#endif/* CONFIG_NET_IPv6 */
-#ifdef CONFIG_NET_ARP
-              if (eth->type == HTONS(ETHTYPE_ARP))
-                {
-                  ninfo("ARP frame\n");
-                  NETDEV_RXARP(dev);
-
-                  arp_input(dev);
-
-                  /* If the above function invocation resulted in data that
-                   * should be sent out on the network, the global variable
-                   * d_len is set to a value > 0.
-                   */
-
-                  if (dev->d_len > 0)
-                    {
-                      netdriver_send(dev);
-                    }
-                }
-              else
-#endif
-                {
-                  NETDEV_RXDROPPED(dev);
-                  nwarn("WARNING: Unsupported Ethernet type %u\n",
-                        eth->type);
-                }
-            }
-          else
-            {
-              NETDEV_RXERRORS(dev);
-            }
+          netpkt_free(dev, pkt, NETPKT_RX);
+          return NULL;
         }
 
-#ifdef SIM_NETDEV_IOB_OFFLOAD
-      netdev_iob_release(dev);
+#ifdef SIM_NETDEV_RECV_OFFLOAD
+      netpkt_reset_reserved(dev, pkt, 0); /* No overhead before data. */
+      netpkt_setdatalen(dev, pkt, len);
+#else
+      netpkt_copyin(dev, pkt, DEVBUF(dev), len, 0);
 #endif
     }
 
-  net_unlock();
+  return pkt;
 }
 
-static int netdriver_txpoll(struct net_driver_s *dev)
+static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 {
-  /* Send the packet */
-
-  NETDEV_TXPACKETS(dev);
-  netdriver_send(dev);
-  NETDEV_TXDONE(dev);
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
-}
-
-static int netdriver_ifup(struct net_driver_s *dev)
-{
-  int devidx = (intptr_t)dev->d_private;
-
-  UNUSED(devidx);
 #ifdef CONFIG_NET_IPv4
-  sim_netdev_ifup(devidx, &dev->d_ipaddr);
+  sim_netdev_ifup(DEVIDX(dev), &dev->netdev.d_ipaddr);
 #else /* CONFIG_NET_IPv6 */
-  sim_netdev_ifup(devidx, &dev->d_ipv6addr);
+  sim_netdev_ifup(DEVIDX(dev), &dev->netdev.d_ipv6addr);
 #endif /* CONFIG_NET_IPv4 */
-  netdev_carrier_on(dev);
+  netdev_lower_carrier_on(dev);
   return OK;
 }
 
-static int netdriver_ifdown(struct net_driver_s *dev)
+static int netdriver_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  int devidx = (intptr_t)dev->d_private;
-
-  UNUSED(devidx);
-  netdev_carrier_off(dev);
-  sim_netdev_ifdown(devidx);
-  return OK;
-}
-
-static void netdriver_txavail_work(void *arg)
-{
-  struct net_driver_s *dev = arg;
-
-  net_lock();
-  if (IFF_IS_UP(dev->d_flags))
-    {
-      devif_poll(dev, netdriver_txpoll);
-    }
-
-  net_unlock();
-}
-
-static int netdriver_txavail(struct net_driver_s *dev)
-{
-  int devidx = (intptr_t)dev->d_private;
-  if (work_available(&g_avail_work[devidx]))
-    {
-      work_queue(LPWORK, &g_avail_work[devidx], netdriver_txavail_work,
-                 dev, 0);
-    }
-
+  netdev_lower_carrier_off(dev);
+  sim_netdev_ifdown(DEVIDX(dev));
   return OK;
 }
 
 static void netdriver_txdone_interrupt(void *priv)
 {
-  struct net_driver_s *dev = (struct net_driver_s *)priv;
-  int devidx = (intptr_t)dev->d_private;
-  if (work_available(&g_avail_work[devidx]))
-    {
-      work_queue(LPWORK, &g_avail_work[devidx], netdriver_txavail_work,
-                 dev, 0);
-    }
+  struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
+  netdev_lower_txdone(dev);
 }
 
 static void netdriver_rxready_interrupt(void *priv)
 {
-  struct net_driver_s *dev = (struct net_driver_s *)priv;
-  int devidx = (intptr_t)dev->d_private;
-  if (work_available(&g_recv_work[devidx]))
-    {
-      work_queue(LPWORK, &g_recv_work[devidx], netdriver_recv_work, dev, 0);
-    }
+  struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
+  netdev_lower_rxready(dev);
 }
 
 /****************************************************************************
@@ -356,42 +218,30 @@ static void netdriver_rxready_interrupt(void *priv)
 
 int sim_netdriver_init(void)
 {
-  struct net_driver_s *dev;
+  struct netdev_lowerhalf_s *dev;
   int devidx;
 
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      dev = &g_sim_dev[devidx];
+      dev = &g_sim_dev[devidx].dev;
 
       /* Internal initialization */
 
       sim_netdev_init(devidx, dev,
-                  netdriver_txdone_interrupt,
-                  netdriver_rxready_interrupt);
+                      netdriver_txdone_interrupt,
+                      netdriver_rxready_interrupt);
 
-      /* Allocate packet buffer */
+      /* 1TX + 1RX is enough for sim. */
 
-#ifndef SIM_NETDEV_IOB_OFFLOAD
-      dev->d_buf = kmm_malloc(dev->d_pktsize != 0 ?
-                              dev->d_pktsize :
-                              (MAX_NETDEV_PKTSIZE +
-                               CONFIG_NET_GUARDSIZE));
-      if (dev->d_buf == NULL)
-        {
-          return -ENOMEM;
-        }
-#endif
-
-      dev->d_ifup    = netdriver_ifup;
-      dev->d_ifdown  = netdriver_ifdown;
-      dev->d_txavail = netdriver_txavail;
-      dev->d_private = (void *)(intptr_t)devidx;
+      dev->quota[NETPKT_TX] = 1;
+      dev->quota[NETPKT_RX] = 1;
+      dev->ops              = &g_ops;
 
       /* Register the device with the OS so that socket IOCTLs can be
        * performed
        */
 
-      netdev_register(dev, NET_LL_ETHERNET);
+      netdev_lower_register(dev, NET_LL_ETHERNET);
     }
 
   return OK;
@@ -399,13 +249,13 @@ int sim_netdriver_init(void)
 
 void sim_netdriver_setmacaddr(int devidx, unsigned char *macaddr)
 {
-  memcpy(g_sim_dev[devidx].d_mac.ether.ether_addr_octet, macaddr,
+  memcpy(g_sim_dev[devidx].dev.netdev.d_mac.ether.ether_addr_octet, macaddr,
          IFHWADDRLEN);
 }
 
 void sim_netdriver_setmtu(int devidx, int mtu)
 {
-  g_sim_dev[devidx].d_pktsize = mtu + ETH_HDRLEN;
+  g_sim_dev[devidx].dev.netdev.d_pktsize = mtu + ETH_HDRLEN;
 }
 
 void sim_netdriver_loop(void)
@@ -413,10 +263,9 @@ void sim_netdriver_loop(void)
   int devidx;
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      if (work_available(&g_recv_work[devidx]) && sim_netdev_avail(devidx))
+      if (sim_netdev_avail(devidx))
         {
-          work_queue(LPWORK, &g_recv_work[devidx], netdriver_recv_work,
-                     &g_sim_dev[devidx], 0);
+          netdev_lower_rxready(&g_sim_dev[devidx].dev);
         }
     }
 }
