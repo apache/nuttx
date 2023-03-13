@@ -25,6 +25,7 @@ CHIP_CSRCS += nrf53_systick.c
 endif
 CHIP_CSRCS += nrf53_start.c nrf53_clockconfig.c nrf53_irq.c nrf53_utils.c
 CHIP_CSRCS += nrf53_allocateheap.c nrf53_lowputc.c nrf53_gpio.c
+CHIP_CSRCS += nrf53_uid.c
 
 ifeq ($(CONFIG_NRF53_APPCORE),y)
 CHIP_CSRCS += nrf53_oscconfig.c
