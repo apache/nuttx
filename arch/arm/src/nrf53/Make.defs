@@ -35,6 +35,10 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += nrf53_idle.c
 endif
 
+ifeq ($(CONFIG_NRF53_GPIOTE),y)
+CHIP_CSRCS += nrf53_gpiote.c
+endif
+
 ifeq ($(CONFIG_NRF53_UART),y)
 CHIP_CSRCS += nrf53_serial.c
 endif
