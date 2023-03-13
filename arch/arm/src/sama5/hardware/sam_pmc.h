@@ -548,6 +548,9 @@
 #    define PMC_PCR_GCKCSS_UPLL        (3 << PMC_PCR_GCKCSS_SHIFT) /* UPLL Clock is selected */
 #    define PMC_PCR_GCKCSS_MCK         (4 << PMC_PCR_GCKCSS_SHIFT) /* Master Clock is selected */
 #    define PMC_PCR_GCKCSS_AUDIO       (5 << PMC_PCR_GCKCSS_SHIFT) /* Audio PLL clock is selected */
+#  define PMC_GCK_DIV_SHIFT            (24)
+#  define PMC_GCK_DIV_MASK             (16)
+#    define PMC_GCK_DIV(n)             ((uint32_t)(n) << PMC_GCK_DIV_SHIFT)
 #endif
 
 #define PMC_PCR_CMD                    (1 << 12) /* Bit 12: Command */
@@ -645,21 +648,26 @@
 #  define PMC_AUDIO_PLL0_PMCEN         (1 << 2) /* Bit 2:  PMC Clock Enable */
 #  define PMC_AUDIO_PLL0_RESETN        (1 << 3) /* Bit 3:  Audio PLL Reset */
 #  define PMC_AUDIO_PLL0_ND_SHIFT      (8)      /* Bits 8-14: Loop Divider Ratio */
+#  define PMC_AUDIO_PLL0_FLT_SHIFT     (4)      /* Bits 4-7: PLL Loop filter Selection */
+#  define PMC_AUDIO_PLL0_FLT_MASK      (0x0F << PMC_AUDIO_PLL0_FLT_SHIFT)
+#    define PMC_AUDIO_PLL0_FLT(n)      ((uint32_t)(n) << PMC_AUDIO_PLL0_FLT_SHIFT)
+#  define PMC_AUDIO_PLL0_PLLFLT_STD    (13)
 #  define PMC_AUDIO_PLL0_ND_MASK       (0x7f << PMC_AUDIO_PLL0_ND_SHIFT)
 #    define PMC_AUDIO_PLL0_ND(n)       ((uint32_t)(n) << PMC_AUDIO_PLL0_ND_SHIFT)
 #  define PMC_AUDIO_PLL0_QDPMC_SHIFT   (16)     /* Bitx 16-22: Output Divider Ratio for PMC Clock */
 #  define PMC_AUDIO_PLL0_QDPMC_MASK    (0x7f << PMC_AUDIO_PLL0_QDPMC_SHIFT)
 #    define PMC_AUDIO_PLL0_QDPMC(n)    ((uint32_t)(n) << PMC_AUDIO_PLL0_QDPMC_SHIFT)
-#endif
 
-#ifdef ATSAMA5D2
 /* Audio PLL Register 1 */
 
 #  define PMC_AUDIO_PLL1_FRACR_SHIFT   (0)      /* Bits 0-21: Fractional Loop Divider Setting */
 #  define PMC_AUDIO_PLL1_FRACR_MASK    (0x3fffff << PMC_AUDIO_PLL1_FRACR_SHIFT)
 #    define PMC_AUDIO_PLL1_FRACR(n)    ((uint32_t)(n) << PMC_AUDIO_PLL1_FRACR_SHIFT)
-#  define PMC_AUDIO_PLL1_QDAUDIO_SHIFT (24)     /* Bits 24-30: Output Divider Ratio for Pad Clock */
-#  define PMC_AUDIO_PLL1_QDAUDIO_MASK  (0x7f << PMC_AUDIO_PLL1_QDAUDIO_SHIFT)
+#  define PMC_AUDIO_PLL1_DIV_SHIFT     (24)     /* Bits 24-25: Loop divider setting */
+#  define PMC_AUDIO_PLL1_DIV_MASK      (3 << PMC_AUDIO_PLL1_DIV_SHIFT)
+#    define PMC_AUDIO_PLL1_DIV(n)      ((uint32_t)(n) << PMC_AUDIO_PLL1_DIV_SHIFT)
+#  define PMC_AUDIO_PLL1_QDAUDIO_SHIFT (26)     /* Bits 24-30: Output Divider Ratio for Pad Clock */
+#  define PMC_AUDIO_PLL1_QDAUDIO_MASK  (0x1f << PMC_AUDIO_PLL1_QDAUDIO_SHIFT)
 #    define PMC_AUDIO_PLL1_QDAUDIO(n)  ((uint32_t)(n) << PMC_AUDIO_PLL1_QDAUDIO_SHIFT)
 #endif
 

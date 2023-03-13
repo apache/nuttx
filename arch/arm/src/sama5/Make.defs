@@ -93,6 +93,10 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5D2_CLASSD), y)
+CHIP_CSRCS += sam_classd.c
+endif
+
 ifeq ($(CONFIG_SAMA5_SSC0),y)
 CHIP_CSRCS += sam_ssc.c
 else

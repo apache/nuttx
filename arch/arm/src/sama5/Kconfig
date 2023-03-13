@@ -13,6 +13,10 @@ config SAMA5_HAVE_AESB
 	bool
 	default n
 
+config SAMA5_HAVE_CLASSD
+	bool
+	default n
+
 config SAMA5_HAVE_ICM
 	bool
 	default n
@@ -302,6 +306,7 @@ choice
 config ARCH_CHIP_ATSAMA5D21
 	bool "Atmel ATSAMA5D21"
 	select ARCH_CHIP_SAMA5D2
+	select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D22
 	bool "Atmel ATSAMA5D22"
@@ -312,16 +317,19 @@ config ARCH_CHIP_ATSAMA5D23
 	bool "Atmel ATSAMA5D23"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_MCAN0
+	select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D24
 	bool "Atmel ATSAMA5D24"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_DDR32
+	select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D26
 	bool "Atmel ATSAMA5D26"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_DDR32
+	select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D27
 	bool "Atmel ATSAMA5D27"
@@ -331,6 +339,7 @@ config ARCH_CHIP_ATSAMA5D27
 	select SAMA5_HAVE_DDR32
 	select SAMA5_HAVE_SDMMC
 	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D28
 	bool "Atmel ATSAMA5D28"
@@ -338,6 +347,7 @@ config ARCH_CHIP_ATSAMA5D28
 	select SAMA5_HAVE_MCAN0
 	select SAMA5_HAVE_MCAN1
 	select SAMA5_HAVE_DDR32
+	select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
@@ -420,6 +430,11 @@ menu "SAMA5 Peripheral Support"
 config SAMA5_AES
 	bool "Advanced Encryption Standard (AES)"
 	default n
+
+config SAMA5D2_CLASSD
+	bool "Class D Audio (CLASSD)"
+	default n
+	depends on SAMA5_HAVE_CLASSD
 
 config SAMA5_TDES
 	bool "Triple Data Encryption Standard (TDES)"
@@ -1027,6 +1042,220 @@ config SAMA5_DBGU_PARITY
 
 endif # !SAMA5_DBGU_NOCONFIG
 endmenu #DBGU Configuration
+
+if SAMA5D2_CLASSD
+
+menu "Class D Peripheral Configuration"
+
+menu "Class D DMA options"
+
+config SAMA5D2_CLASSD_DMA_DMAC_NUMBER
+	int "Class D DMA Controller number"
+	default 0
+	range 0 1
+	---help---
+		Select which xdma controller to use for Class D DMA.
+
+config SAMA5D2_CLASSD_DMADEBUG
+	bool "Class D DMA transfer debug"
+	depends on DEBUG_FEATURES && DEBUG_DMA && DEBUG_DMA_INFO
+	default n
+	---help---
+		Enable special debug instrumentation analyze Class D DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+endmenu # "Class D DMA options"
+
+config SAMA5D2_CLASSD_INFLIGHT
+	int "SAMA5 Class D maximum in-flight audio buffers"
+	default 2
+
+config SAMA5D2_CLASSD_PAD_CLK
+	bool "Enable Audio Clock Output pin"
+	default n
+
+config SAMA5D2_CLASSD_LEN
+	bool "Left Channel Enable (LEN)"
+	default y
+
+config SAMA5D2_CLASSD_REN
+	bool "Right Channel Enable (REN)"
+	default y
+
+choice
+	prompt "Class D PWM Modulation Type"
+	default SAMA5D2_CLASSD_PWM_TRAILING
+	---help---
+		TRAILING EDGE: The signal is single-ended.
+			If bit NON_OVERLAP is cleared, the signal is sent to 
+			CLASSD_L0 and CLASSD_R0.
+
+			If bit NON_OVERLAP is set, the signal is sent to
+			CLASSD_L0/L1 and CLASSD_R0/R1.
+		UNIFORM: The signal is differential.
+			If bit NON_OVERLAP is cleared, the signal is sent to 
+			CLASSD_L0/L2 and CLASSD_R0/R2.
+			
+			If bit NON_OVERLAP is set, the signal is sent to 
+			CLASSD_L0/L1/L2/L3 and CLASSD_R0/R1/R2/R3.
+
+config SAMA5D2_CLASSD_PWM_TRAILING
+bool "Trailing"
+
+config SAMA5D2_CLASSD_PWM_UNIFORM
+bool "Uniform"
+
+endchoice # Class D PWM Modulation Type
+		
+config SAMA5D2_CLASSD_NON_OVERLAP_MODE
+	bool "Non-overlapping Circuit Enable (NON_OVERLAP)"
+	default n
+
+choice
+	depends on SAMA5D2_CLASSD_NON_OVERLAP_MODE
+	prompt "Non-overlapping Value (NOVRVAL)"
+	default SAMA5D2_CLASSD_NON_OVERLAP_5NS
+	---help---	
+		Non-overlapping time
+
+config SAMA5D2_CLASSD_NON_OVERLAP_5NS
+	bool "5ns"
+
+config SAMA5D2_CLASSD_NON_OVERLAP_10NS
+	bool "10ns"
+
+config SAMA5D2_CLASSD_NON_OVERLAP_15NS
+	bool "15ns"
+
+config SAMA5D2_CLASSD_NON_OVERLAP_20NS
+	bool "20ns"
+
+endchoice # Non-overlapping Value (NOVRVAL)
+
+config SAMA5D2_CLASSD_DEEMP
+	bool "Enable De-emphasis Filter (DEEMP)"
+	default n
+	
+config SAMA5D2_CLASSD_SWAP
+	bool "Swap Left and Right Channels (SWAP)"
+	default n
+
+choice
+	prompt "Default Data Sampling Frequency (FRAME)"
+	default SAMA5D2_CLASSD_FRAME_8K
+	---help---	
+		Incoming Data Sampling Frequency default
+
+config SAMA5D2_CLASSD_FRAME_8K
+	bool "8kHz"
+
+config SAMA5D2_CLASSD_FRAME_16K
+	bool "16kHz"
+
+config SAMA5D2_CLASSD_FRAME_32K
+	bool "32kHz"
+
+config SAMA5D2_CLASSD_FRAME_48K
+	bool "48kHz"
+
+config SAMA5D2_CLASSD_FRAME_96K
+	bool "96kHz"
+
+config SAMA5D2_CLASSD_FRAME_22K05
+	bool "22.05kHz"
+
+config SAMA5D2_CLASSD_FRAME_44K1
+	bool "44.1kHz"
+
+config SAMA5D2_CLASSD_FRAME_88K2
+	bool "88.2kHz"
+
+endchoice # Incoming Data Sampling Frequency (FRAME)
+
+choice
+	prompt "Equalisation Selection (EQCFG)"
+	default SAMA5D2_CLASSD_EQ_FLAT
+	---help---	
+		Equalisation selection
+
+config SAMA5D2_CLASSD_EQ_FLAT
+	bool "Flat response"
+
+config SAMA5D2_CLASSD_EQ_BB12
+	bool "Bass Boost +12dB"
+
+config SAMA5D2_CLASSD_EQ_BB6
+	bool "Bass Boost +6dB"
+
+config SAMA5D2_CLASSD_EQ_BC12
+	bool "Bass Cut -12dB"
+
+config SAMA5D2_CLASSD_EQ_BC6
+	bool "Bass Cut -6dB"
+
+config SAMA5D2_CLASSD_EQ_MB3
+	bool "Medium Boost +3dB"
+
+config SAMA5D2_CLASSD_EQ_MB8
+	bool "Medium Boost +8dB"
+
+config SAMA5D2_CLASSD_EQ_MC3
+	bool "Medium Cut -3dB"
+
+config SAMA5D2_CLASSD_EQ_MC8
+	bool "Medium Cut -8dB"
+
+config SAMA5D2_CLASSD_EQ_TB12
+	bool "Treble Boost +12dB"
+
+config SAMA5D2_CLASSD_EQ_TB6
+	bool "Treble Boost +6dB"
+
+config SAMA5D2_CLASSD_EQ_TC12
+	bool "Treble Cut -12dB"
+
+config SAMA5D2_CLASSD_EQ_TC6
+	bool "Treble Cut -6dB"
+
+endchoice # Equalisation Selection (EQCFG)
+
+config SAMA5D2_CLASSD_MONO
+	bool "Enable Mono Mode (MONO)"
+	default 0
+	---help---
+		Disabled. The signal is sent stereo to the left and right channels.
+		Enabled.  The same signal is sent on both left and right channels. 
+				  The sent signal is defined by the MONOMODE field value. 
+
+choice
+	prompt "Mono Mode Selection (MONOMODE)"
+	default SAMA5D2_CLASSD_MONOMODE_MIX
+	depends on SAMA5D2_CLASSD_MONO
+	---help---	
+		Selects which signals are used in mono mode
+
+config SAMA5D2_CLASSD_MONOMODE_MIX
+bool "(L+R)/2 -> channels"
+
+config SAMA5D2_CLASSD_MONOMODE_SAT
+bool "(L+R)   -> both channels, saturated on overrange"
+
+config SAMA5D2_CLASSD_MONOMODE_LEFT
+bool "L       -> both channels"
+
+	config SAMA5D2_CLASSD_MONOMODE_RIGHT
+	bool "R       -> both channels"
+
+endchoice # Mono Mode Selection (MONOMODE)
+
+config SAMA5D2_CLASSD_REGDEBUG
+	bool "Enable Register Debug"
+	default 0
+	
+endmenu # Class D Default Configuration
+endif # SAMA5D2_CLASSD
 
 if SAMA5_LCDC
 menu "LCDC Configuration"

@@ -205,11 +205,12 @@
 #define AUDIO_SAMP_RATE_32K         0x0010
 #define AUDIO_SAMP_RATE_44K         0x0020
 #define AUDIO_SAMP_RATE_48K         0x0040
-#define AUDIO_SAMP_RATE_96K         0x0080
-#define AUDIO_SAMP_RATE_128K        0x0100
-#define AUDIO_SAMP_RATE_160K        0x0200
-#define AUDIO_SAMP_RATE_172K        0x0400
-#define AUDIO_SAMP_RATE_192K        0x0800
+#define AUDIO_SAMP_RATE_88K         0x0080
+#define AUDIO_SAMP_RATE_96K         0x0100
+#define AUDIO_SAMP_RATE_128K        0x0200
+#define AUDIO_SAMP_RATE_160K        0x0400
+#define AUDIO_SAMP_RATE_172K        0x0800
+#define AUDIO_SAMP_RATE_192K        0x1000
 
 /* Audio Sub-sampling Ratios  ***********************************************/
 
