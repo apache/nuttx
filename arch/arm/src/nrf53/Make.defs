@@ -51,6 +51,13 @@ ifeq ($(CONFIG_RPTUN),y)
 CHIP_CSRCS += nrf53_rptun.c
 endif
 
+ifeq ($(CONFIG_NRF53_TIMER),y)
+CHIP_CSRCS += nrf53_tim.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += nrf53_tim_lowerhalf.c
+endif
+endif
+
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += nrf53_pminitialize.c
 endif

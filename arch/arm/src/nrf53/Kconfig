@@ -76,6 +76,10 @@ config NRF53_UART
 	bool
 	default n
 
+config NRF53_TIMER
+	bool
+	default n
+
 menu "NRF53 Peripheral Selection"
 
 config NRF53_UART0
@@ -89,6 +93,22 @@ config NRF53_UART1
 	default n
 	select UART1_SERIALDRIVER
 	select NRF53_UART
+
+config NRF53_TIMER0
+	bool "TIMER0"
+	select NRF53_TIMER
+	depends on !NRF53_SOFTDEVICE_CONTROLLER
+	default n
+
+config NRF53_TIMER1
+	bool "TIMER1"
+	select NRF53_TIMER
+	default n
+
+config NRF53_TIMER2
+	bool "TIMER2"
+	select NRF53_TIMER
+	default n
 
 endmenu # NRF53 Peripheral Selection
 
