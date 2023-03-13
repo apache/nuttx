@@ -248,7 +248,28 @@ config NRF53_SYSTIMER_SYSTICK
 		you choose this option, WFE/WFI will not be used
 		in idle loop.
 
+config NRF53_SYSTIMER_RTC
+	bool "RTC"
+	select NRF53_RTC
+	select SCHED_TICKLESS
+	select SCHED_TICKLESS_ALARM
+	select NRF53_USE_LFCLK
+	---help---
+		Use RTC timer in tickless mode.
+
 endchoice
+
+if NRF53_SYSTIMER_RTC
+
+config NRF53_SYSTIMER_RTC_INSTANCE
+	int "RTC timer instance"
+	default 0 if !NRF53_SOFTDEVICE_CONTROLLER
+	default 1 if NRF53_SOFTDEVICE_CONTROLLER
+	range 0 1
+	---help---
+		Which RTC instance to use to drive the system timer
+
+endif
 
 endmenu # System Timer
 
