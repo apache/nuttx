@@ -111,6 +111,18 @@ int nrf53_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Configure ADC driver */
+
+  ret = nrf53_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC driver: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
   ret = nrf53_sdc_initialize();
 

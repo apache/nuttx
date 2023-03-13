@@ -106,5 +106,17 @@ int nrf53_timer_driver_setup(const char *devpath, int timer);
 int nrf53_pwm_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: nrf53_adc_setup
+ *
+ * Description:
+ *   Initialize ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int nrf53_adc_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF53_NRF5340_DK_H */

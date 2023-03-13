@@ -46,4 +46,8 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += nrf53_pwm.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += nrf53_adc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
