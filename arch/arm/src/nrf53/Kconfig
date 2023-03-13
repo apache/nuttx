@@ -26,6 +26,7 @@ config NRF53_APPCORE
 	select NRF52_HAVE_GPIOTE1
 	select NRF53_HAVE_SAADC
 	select NRF53_HAVE_UART1
+	select NRF53_HAVE_I2C123
 
 config NRF53_NETCORE
 	bool
@@ -88,7 +89,15 @@ config NRF53_HAVE_SAADC
 	bool
 	default n
 
+config NRF53_HAVE_I2C123
+	bool
+	default n
+
 # Peripheral Selection
+
+config NRF53_I2C_MASTER
+	bool
+	default n
 
 config NRF53_IPC
 	bool
@@ -115,6 +124,29 @@ menu "NRF53 Peripheral Selection"
 config NRF53_GPIOTE
 	bool "GPIOTE (GPIO interrupts)"
 	default n
+
+config NRF53_I2C0_MASTER
+	bool "I2C0 Master"
+	default n
+	select NRF53_I2C_MASTER
+
+config NRF53_I2C1_MASTER
+	bool "I2C1 Master"
+	default n
+	depends on NRF53_HAVE_I2C123
+	select NRF53_I2C_MASTER
+
+config NRF53_I2C2_MASTER
+	bool "I2C2 Master"
+	default n
+	depends on NRF53_HAVE_I2C123
+	select NRF53_I2C_MASTER
+
+config NRF53_I2C2_MASTER
+	bool "I2C3 Master"
+	default n
+	depends on NRF53_HAVE_I2C123
+	select NRF53_I2C_MASTER
 
 config NRF53_UART0
 	bool "UART0"
@@ -469,6 +501,33 @@ config NRF53_PER_PIN_INTERRUPTS
 		for the whole PORT event directly.
 
 endmenu # GPIO Interrupt Configuration
+
+menu "I2C Master Configuration"
+
+config NRF53_I2C_MASTER_DISABLE_NOSTART
+	bool "Disable the I2C Master NOSTART flag support"
+	default n
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf53
+		hardware requires these be joined into a single
+		transfer. This can be expensive and some devices
+		can get away with multi-part transfers as separate
+		transfers.  Enable this at your own risk!
+
+config NRF53_I2C_MASTER_COPY_BUF_SIZE
+	int "Static buffer size for NOSTART flag support"
+	depends on !NRF53_I2C_MASTER_DISABLE_NOSTART
+	default 4
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf53
+		hardware requires these be joined into a single
+		transfer. This static buffer will be used if the
+		transaction will fit otherwise it will fall back
+		on malloc.
+
+endmenu
 
 menuconfig NRF53_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
