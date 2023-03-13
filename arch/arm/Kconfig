@@ -280,6 +280,7 @@ config ARCH_CHIP_NRF52
 config ARCH_CHIP_NRF53
 	bool "Nordic NRF53"
 	select ARCH_CORTEXM33
+	select ARCH_HAVE_PWM_MULTICHAN
 	depends on EXPERIMENTAL
 	---help---
 		Nordic NRF53 architectures (ARM dual Cortex-M33).

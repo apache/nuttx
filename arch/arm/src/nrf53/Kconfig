@@ -21,6 +21,8 @@ config NRF53_APPCORE
 	bool
 	default n
 	select ARM_HAVE_DSP
+	select ARCH_HAVE_FPU
+	select NRF53_HAVE_PWM
 
 config NRF53_NETCORE
 	bool
@@ -66,6 +68,12 @@ config NRF53_ENABLE_APPROTECT
 	bool "NRF53 enable APPROTECT"
 	default n
 
+# Peripheral support
+
+config NRF53_HAVE_PWM
+	bool
+	default n
+
 # Peripheral Selection
 
 config NRF53_IPC
@@ -77,6 +85,10 @@ config NRF53_UART
 	default n
 
 config NRF53_TIMER
+	bool
+	default n
+
+config NRF53_PWM
 	bool
 	default n
 
@@ -108,6 +120,20 @@ config NRF53_TIMER1
 config NRF53_TIMER2
 	bool "TIMER2"
 	select NRF53_TIMER
+
+config NRF53_PWM0
+	bool "PWM0"
+	select NRF53_PWM
+	default n
+
+config NRF53_PWM1
+	bool "PWM1"
+	select NRF53_PWM
+	default n
+
+config NRF53_PWM2
+	bool "PWM2"
+	select NRF53_PWM
 	default n
 
 endmenu # NRF53 Peripheral Selection
@@ -187,6 +213,124 @@ config NRF53_SYSTIMER_SYSTICK
 endchoice
 
 endmenu # System Timer
+
+menu "PWM configuration"
+
+config NRF53_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+
+if NRF53_PWM_MULTICHAN
+
+if NRF53_PWM0
+
+config NRF53_PWM0_CH0
+	bool "PWM0 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF53_PWM0_CH1
+	bool "PWM0 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF53_PWM0_CH2
+	bool "PWM0 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF53_PWM0_CH3
+	bool "PWM0 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF53_PWM0
+
+if NRF53_PWM1
+
+config NRF53_PWM1_CH0
+	bool "PWM1 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF53_PWM1_CH1
+	bool "PWM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF53_PWM1_CH2
+	bool "PWM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF53_PWM1_CH3
+	bool "PWM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF53_PWM1
+
+if NRF53_PWM2
+
+config NRF53_PWM2_CH0
+	bool "PWM2 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF53_PWM2_CH1
+	bool "PWM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF53_PWM2_CH2
+	bool "PWM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF53_PWM2_CH3
+	bool "PWM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF53_PWM2
+
+endif # !NRF53_PWM_MULTICHAN
+
+if !NRF53_PWM_MULTICHAN
+
+config NRF53_PWM0_CHANNEL
+	int "PWM0 Output Channel"
+	depends on NRF53_PWM0
+	default 0
+	range 0 3
+
+config NRF53_PWM1_CHANNEL
+	int "PWM1 Output Channel"
+	depends on NRF53_PWM1
+	default 0
+	range 0 3
+
+config NRF53_PWM2_CHANNEL
+	int "PWM2 Output Channel"
+	depends on NRF53_PWM2
+	default 0
+	range 0 3
+
+endif # !NRF53_PWM_MULTICHAN
+
+endmenu # PWM configuration
 
 menuconfig NRF53_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
