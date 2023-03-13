@@ -200,6 +200,11 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
   int ret = 0;
 
   DEBUGASSERT(stream != NULL);
+  if (len <= 0)
+    {
+      return 0;
+    }
+
   stream->last_ch = ((FAR const char *)buff)[len -1];
 
 #ifdef CONFIG_SYSLOG_BUFFER
