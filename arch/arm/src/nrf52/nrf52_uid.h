@@ -31,6 +31,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-void nrf52_get_uniqueid(uint8_t uniqueid[]);
+void nrf52_get_uniqueid(uint8_t uniqueid[8]);
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_UID_H */
