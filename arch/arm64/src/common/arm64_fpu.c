@@ -24,14 +24,20 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/procfs.h>
 #include <arch/irq.h>
 
 #include "sched/sched.h"
@@ -46,6 +52,26 @@
  ***************************************************************************/
 
 #define FPU_CALLEE_REGS     (8)
+#define FPU_PROC_LINELEN    (64 * CONFIG_SMP_NCPUS)
+
+/***************************************************************************
+ * Private Types
+ ***************************************************************************/
+
+/* This structure describes one open "file" */
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+
+struct arm64_fpu_procfs_file_s
+{
+  struct procfs_file_s base; /* Base open file structure */
+  unsigned int linesize;     /* Number of valid characters in line[] */
+
+  /* Pre-allocated buffer for formatted lines */
+
+  char line[FPU_PROC_LINELEN];
+};
+#endif
 
 /***************************************************************************
  * Private Data
@@ -53,6 +79,44 @@
 
 static struct fpu_reg g_idle_thread_fpu[CONFIG_SMP_NCPUS];
 static struct arm64_cpu_fpu_context g_cpu_fpu_ctx[CONFIG_SMP_NCPUS];
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+
+/* procfs methods */
+
+static int arm64_fpu_procfs_open(struct file *filep, const char *relpath,
+                                 int oflags, mode_t mode);
+static int arm64_fpu_procfs_close(struct file *filep);
+static ssize_t arm64_fpu_procfs_read(struct file *filep, char *buffer,
+                                     size_t buflen);
+static int arm64_fpu_procfs_stat(const char *relpath, struct stat *buf);
+
+/* See include/nutts/fs/procfs.h
+ * We use the old-fashioned kind of initializers so that this will compile
+ * with any compiler.
+ */
+
+const struct procfs_operations arm64_fpu_procfs_operations =
+{
+  arm64_fpu_procfs_open,  /* open */
+  arm64_fpu_procfs_close, /* close */
+  arm64_fpu_procfs_read,  /* read */
+  NULL,                   /* write */
+  NULL,                   /* dup */
+  NULL,                   /* opendir */
+  NULL,                   /* closedir */
+  NULL,                   /* readdir */
+  NULL,                   /* rewinddir */
+  arm64_fpu_procfs_stat   /* stat */
+};
+
+static const struct procfs_entry_s g_procfs_arm64_fpu =
+{
+  "fpu",
+  &arm64_fpu_procfs_operations
+};
+
+#endif
 
 /***************************************************************************
  * Private Functions
@@ -83,6 +147,120 @@ static void arm64_fpu_access_trap_disable(void)
 
   ARM64_ISB();
 }
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+
+static int arm64_fpu_procfs_open(struct file *filep, const char *relpath,
+                                 int oflags, mode_t mode)
+{
+  struct arm64_fpu_procfs_file_s *priv;
+
+  uinfo("Open '%s'\n", relpath);
+
+  /* PROCFS is read-only.  Any attempt to open with any kind of write
+   * access is not permitted.
+   *
+   * REVISIT:  Write-able proc files could be quite useful.
+   */
+
+  if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0))
+    {
+      uerr("ERROR: Only O_RDONLY supported\n");
+      return -EACCES;
+    }
+
+  /* Allocate the open file structure */
+
+  priv = (struct arm64_fpu_procfs_file_s *)kmm_zalloc(
+    sizeof(struct arm64_fpu_procfs_file_s));
+  if (priv == NULL)
+    {
+      uerr("ERROR: Failed to allocate file attributes\n");
+      return -ENOMEM;
+    }
+
+  /* Save the open file structure as the open-specific state in
+   * filep->f_priv.
+   */
+
+  filep->f_priv = (void *)priv;
+  return OK;
+}
+
+static int arm64_fpu_procfs_close(struct file *filep)
+{
+  struct arm64_fpu_procfs_file_s *priv;
+
+  /* Recover our private data from the struct file instance */
+
+  priv = (struct arm64_fpu_procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(priv);
+
+  /* Release the file attributes structure */
+
+  kmm_free(priv);
+  filep->f_priv = NULL;
+  return OK;
+}
+
+static ssize_t arm64_fpu_procfs_read(struct file *filep, char *buffer,
+                                     size_t buflen)
+{
+  struct arm64_fpu_procfs_file_s *attr;
+  struct arm64_cpu_fpu_context *ctx;
+  off_t offset;
+  int linesize;
+  int ret;
+  int i;
+
+  uinfo("buffer=%p buflen=%zu\n", buffer, buflen);
+
+  /* Recover our private data from the struct file instance */
+
+  attr = (struct arm64_fpu_procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(attr);
+
+  /* Traverse all FPU context */
+
+  linesize = 0;
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      ctx = &g_cpu_fpu_ctx[i];
+      linesize += snprintf(attr->line + linesize,
+                           FPU_PROC_LINELEN,
+                           "CPU%d: save: %d restore: %d "
+                           "switch: %d exedepth: %d\n",
+                           i, ctx->save_count, ctx->restore_count,
+                           ctx->switch_count, ctx->exe_depth_count);
+    }
+
+  attr->linesize = linesize;
+
+  /* Transfer the system up time to user receive buffer */
+
+  offset = filep->f_pos;
+  ret    = procfs_memcpy(attr->line, attr->linesize,
+                         buffer, buflen, &offset);
+
+  /* Update the file offset */
+
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
+
+  return ret;
+}
+
+static int arm64_fpu_procfs_stat(const char *relpath, struct stat *buf)
+{
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
+  return OK;
+}
+#endif
 
 /***************************************************************************
  * Public Functions
@@ -258,3 +436,18 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
   return memcmp(&regs1[FPU_REG_Q4], &regs2[FPU_REG_Q4],
                 8 * FPU_CALLEE_REGS) == 0;
 }
+
+/***************************************************************************
+ * Name: arm64_fpu_procfs_register
+ *
+ * Description:
+ *   Register the arm64 fpu procfs file system entry
+ *
+ ***************************************************************************/
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+int arm64_fpu_procfs_register(void)
+{
+  return procfs_register(&g_procfs_arm64_fpu);
+}
+#endif

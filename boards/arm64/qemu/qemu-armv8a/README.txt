@@ -239,17 +239,7 @@ need to be considered:
     In many cases, the FPU trap is triggered by va_start() that copies
 the content of FP registers used for floating point argument passing
 into the va_list object in case there were actual float arguments from
-the caller. But In practice this is almost never the case.
-Seeing the save_count/restore_count at the g_cpu_fpu_ctx, which will
-be increase when saving/restoring FPU context. After running ostest,
-we can see the count with GDB:
-
-(gdb) p g_cpu_fpu_ctx
-  $1 = {{fpu_owner = 0x0, idle_thread = 0x402b3110 <g_idletcb>,
-      save_count = 1293, restore_count = 2226, switch_count = 4713,
-      exe_depth_count = 0}}
-(gdb)
-
+the caller.
     adding -mgeneral-regs-only option will make compiler not use the FPU
 register, we can use the following patch to syslog:
 
@@ -262,23 +252,32 @@ index c58fb45512..acac6febaa
  DEPPATH += --dep-path syslog
  VPATH += :syslog
 +syslog/lib_syslog.c_CFLAGS += -mgeneral-regs-only
-
-    With the option to make NuttX and booting. After running ostest, see
-the count with GDB again:
-
-(gdb) p g_cpu_fpu_ctx
-$1 = {{fpu_owner = 0x0, idle_thread = 0x402b3110 <g_idletcb>, save_count = 141,
-    restore_count = 170, switch_count = 4715, exe_depth_count = 0}}
-(gdb)
-
-    it's only 141/170 for saving/restoring FPU context, which is 1293/2226 before
-add this compile option. Almost all of FPU accessing switch is argument passing
-at the syslog.
-    I cannot commit the patch for NuttX mainline because it's very special case
+   I cannot commit the patch for NuttX mainline because it's very special case
 since ostest is using syslog for lots of information printing. but this is
 a clue for FPU performance analysis. va_list object is using for many C code to
 handle argument passing, but if it's not passing floating point argument indeed.
 Add the option to your code maybe increase FPU performance
+
+2. memset/memcpy issue
+    For improve performance, the memset/memcpy implement for libc will
+use the neon/fpu instruction/register. The FPU trap is also triggered
+in this case.
+
+we can trace this issue with Procfs:
+
+nsh> cat /proc/arm64fpu
+CPU0: save: 7 restore: 8 switch: 62 exedepth: 0
+nsh>
+
+after ostest
+nsh> cat /proc/arm64fpu
+CPU0: save: 1329 restore: 2262 switch: 4613 exedepth: 0
+nsh>
+
+Note:
+save:    the counts of save for task FPU context
+restore: the counts of restore for task FPU context
+switch:  the counts of task switch
 
 2. FPU trap at IRQ handler
     it's probably need to handle FPU trap at IRQ routine. Exception_depth is
@@ -294,6 +293,10 @@ register.
 save/restore FPU context directly maybe become a solution. Linux kernel introduce
 kernel_neon_begin/kernel_neon_end function for this case. Similar function will
 be add to NuttX if this issue need to be handle.
+
+3. More reading 
+for Linux kernel, please reference:
+- https://www.kernel.org/doc/html/latest/arm/kernel_mode_neon.html
 
 SMP Support
 ===========

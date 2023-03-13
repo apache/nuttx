@@ -5,7 +5,6 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
-# CONFIG_ARCH_FPU is not set
 CONFIG_ARCH="arm64"
 CONFIG_ARCH_ARM64=y
 CONFIG_ARCH_BOARD="qemu-armv8a"
@@ -32,6 +31,7 @@ CONFIG_DEV_ZERO=y
 CONFIG_EXAMPLES_HELLO=y
 CONFIG_EXPERIMENTAL=y
 CONFIG_FS_PROCFS=y
+CONFIG_FS_PROCFS_REGISTER=y
 CONFIG_FS_ROMFS=y
 CONFIG_IDLETHREAD_STACKSIZE=16384
 CONFIG_INIT_ENTRYPOINT="nsh_main"
