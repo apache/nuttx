@@ -42,4 +42,8 @@ CSRCS += nrf53_timer.c
 endif
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += nrf53_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

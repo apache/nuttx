@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf53/nrf5340-dk/src/nrf53_bringup.c
+ * boards/arm/nrf53/nrf5340-dk/src/nrf53_pwm.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,102 +24,67 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <debug.h>
+#include <errno.h>
+#include <stddef.h>
 
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
+#include <nuttx/timers/pwm.h>
+#include <arch/board/board.h>
 
-#ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
-#  include "nrf53_sdc.h"
-#endif
-
-#ifdef CONFIG_RPTUN
-#  include "nrf53_rptun.h"
-#endif
-
-#include "nrf5340-dk.h"
+#include "nrf53_pwm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NRF53_TIMER (0)
+#define NRF53_PWM (0)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf53_bringup
+ * Name: nrf53_pwm_setup
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ *   Initialize PWM and register the PWM device.
  *
  ****************************************************************************/
 
-int nrf53_bringup(void)
+int nrf53_pwm_setup(void)
 {
-  int ret;
+  static bool             initialized = false;
+  struct pwm_lowerhalf_s *pwm         = NULL;
+  int                     ret         = OK;
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
+  /* Have we already initialized? */
 
-  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
-  if (ret < 0)
+  if (!initialized)
     {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      /* Call nrf53_pwminitialize() to get an instance of the PWM interface */
+
+      pwm = nrf53_pwminitialize(NRF53_PWM);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the NRF53 PWM lower half\n");
+          ret = -ENODEV;
+          goto errout;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          goto errout;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
     }
-#endif
 
-#ifdef CONFIG_RPTUN
-#ifdef CONFIG_NRF53_APPCORE
-  nrf53_rptun_init("nrf53-shmem", "appcore");
-#else
-  nrf53_rptun_init("nrf53-shmem", "netcore");
-#endif
-#endif
-
-#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER)
-  /* Configure TIMER driver */
-
-  ret = nrf53_timer_driver_setup("/dev/timer0", NRF53_TIMER);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-    }
-#endif
-
-#ifdef CONFIG_PWM
-  /* Configure PWM driver */
-
-  ret = nrf53_pwm_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize PWM driver: %d\n",
-             ret);
-    }
-#endif
-
-#ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
-  ret = nrf53_sdc_initialize();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nrf53_sdc_initialize() failed: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
+errout:
+  return ret;
 }
