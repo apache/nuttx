@@ -175,6 +175,40 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
 int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev);
 
 /****************************************************************************
+ * Name: netdev_lower_carrier_on
+ *
+ * Description:
+ *   Notifies the networking layer about an available carrier.
+ *   (e.g. a cable was plugged in)
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int netdev_lower_carrier_on(FAR struct netdev_lowerhalf_s *dev);
+
+/****************************************************************************
+ * Name: netdev_lower_carrier_off
+ *
+ * Description:
+ *   Notifies the networking layer about an disappeared carrier.
+ *   (e.g. a cable was unplugged)
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int netdev_lower_carrier_off(FAR struct netdev_lowerhalf_s *dev);
+
+/****************************************************************************
  * Name: netdev_lower_rxready
  *
  * Description:
@@ -279,6 +313,44 @@ int netpkt_copyout(FAR struct netdev_lowerhalf_s *dev, FAR uint8_t *dest,
                    FAR const netpkt_t *pkt, unsigned int len, int offset);
 
 /****************************************************************************
+ * Name: netpkt_getdata/getbase
+ *
+ * Description:
+ *   Get the pointer of data/base in a netpkt, used when NETPKT_BUFLEN is
+ *   big enough to fit a full packet in.
+ *
+ * Input Parameters:
+ *   dev    - The lower half device driver structure
+ *   pkt    - The net packet
+ *
+ * Returned Value:
+ *   Pointer data/base, NULL on failure.
+ *
+ ****************************************************************************/
+
+FAR uint8_t *netpkt_getdata(FAR struct netdev_lowerhalf_s *dev,
+                            FAR netpkt_t *pkt);
+FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt);
+
+/****************************************************************************
+ * Name: netpkt_setdatalen
+ *
+ * Description:
+ *   Set the length of data in netpkt, used when data is written into
+ *   netpkt by data/base pointer, no need to set this length after
+ *   copyin.
+ *
+ * Input Parameters:
+ *   dev    - The lower half device driver structure
+ *   pkt    - The net packet
+ *   len    - The length of data in netpkt
+ *
+ ****************************************************************************/
+
+void netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
+                       FAR netpkt_t *pkt, unsigned int len);
+
+/****************************************************************************
  * Name: netpkt_getdatalen
  *
  * Description:
@@ -295,5 +367,35 @@ int netpkt_copyout(FAR struct netdev_lowerhalf_s *dev, FAR uint8_t *dest,
 
 unsigned int netpkt_getdatalen(FAR struct netdev_lowerhalf_s *dev,
                                FAR netpkt_t *pkt);
+
+/****************************************************************************
+ * Name: netpkt_reset_reserved
+ *
+ * Description:
+ *   Reset the reserved length (the starting point of data) of netpkt
+ *
+ * Input Parameters:
+ *   dev    - The lower half device driver structure
+ *   pkt    - The net packet
+ *   len    - The reserved length
+ *
+ ****************************************************************************/
+
+void netpkt_reset_reserved(FAR struct netdev_lowerhalf_s *dev,
+                           FAR netpkt_t *pkt, unsigned int len);
+
+/****************************************************************************
+ * Name: netpkt_is_fragmented
+ *
+ * Description:
+ *   Returns whether the netpkt is fragmented into different blocks.
+ *     In other words, NETPKT_BUFLEN < reserved + total data
+ *
+ * Input Parameters:
+ *   pkt - The net packet
+ *
+ ****************************************************************************/
+
+bool netpkt_is_fragmented(FAR netpkt_t *pkt);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_LOWERHALF_H */
