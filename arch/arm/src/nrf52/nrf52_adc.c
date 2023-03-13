@@ -809,7 +809,7 @@ static void nrf52_adc_shutdown(struct adc_dev_s *dev)
 
   /* Stop SAADC */
 
-  nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_STOP_OFFSET, 0);
+  nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_STOP_OFFSET, 1);
 
   /* Wait for SAADC stopped */
 
