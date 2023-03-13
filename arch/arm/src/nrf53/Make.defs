@@ -22,7 +22,12 @@ include armv8-m/Make.defs
 
 ifeq ($(CONFIG_NRF53_SYSTIMER_SYSTICK),y)
 CHIP_CSRCS += nrf53_systick.c
+else
+ifeq ($(CONFIG_NRF53_SYSTIMER_RTC),y)
+CHIP_CSRCS += nrf53_tickless_rtc.c
 endif
+endif
+
 CHIP_CSRCS += nrf53_start.c nrf53_clockconfig.c nrf53_irq.c nrf53_utils.c
 CHIP_CSRCS += nrf53_allocateheap.c nrf53_lowputc.c nrf53_gpio.c
 CHIP_CSRCS += nrf53_uid.c
