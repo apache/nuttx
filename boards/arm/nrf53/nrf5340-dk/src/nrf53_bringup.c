@@ -39,6 +39,14 @@
 #  include "nrf53_rptun.h"
 #endif
 
+#include "nrf5340-dk.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NRF53_TIMER (0)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -77,6 +85,18 @@ int nrf53_bringup(void)
 #else
   nrf53_rptun_init("nrf53-shmem", "netcore");
 #endif
+#endif
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER)
+  /* Configure TIMER driver */
+
+  ret = nrf53_timer_driver_setup("/dev/timer0", NRF53_TIMER);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
 #endif
 
 #ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER

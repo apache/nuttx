@@ -82,5 +82,17 @@
 
 int nrf53_bringup(void);
 
+/****************************************************************************
+ * Name: nrf53_timer_driver_setup
+ *
+ * Description:
+ *   Initialize TIMER driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int nrf53_timer_driver_setup(const char *devpath, int timer);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF53_NRF5340_DK_H */
