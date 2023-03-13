@@ -294,7 +294,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
                   tcb->xcp.saved_reg = tcb->xcp.regs;
 #ifdef CONFIG_ARCH_FPU
-                  tcb->xcp.sig_save_fpu_regs = tcb->xcp.fpu_regs;
+                  tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
 #endif
                   arm64_init_signal_process(tcb);
 
@@ -341,7 +341,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.sigdeliver      = sigdeliver;
 
 #ifdef CONFIG_ARCH_FPU
-          tcb->xcp.sig_save_fpu_regs = tcb->xcp.fpu_regs;
+          tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
 #endif
           tcb->xcp.saved_reg = tcb->xcp.regs;
 

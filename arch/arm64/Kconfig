@@ -129,37 +129,37 @@ config ARCH_CORTEX_A53
 	bool
 	default n
 	select ARCH_ARMV8A
-	select ARM_HAVE_NEON
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
+	select ARM_HAVE_NEON
 
 config ARCH_CORTEX_A57
 	bool
 	default n
 	select ARCH_ARMV8A
-	select ARM_HAVE_NEON
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
+	select ARM_HAVE_NEON
 
 config ARCH_CORTEX_A72
 	bool
 	default n
 	select ARCH_ARMV8A
-	select ARM_HAVE_NEON
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
+	select ARM_HAVE_NEON
 
 config ARCH_CORTEX_R82
 	bool
@@ -168,7 +168,9 @@ config ARCH_CORTEX_R82
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
+	select ARM_HAVE_NEON
 
 config ARCH_FAMILY
 	string

@@ -63,6 +63,10 @@ struct arm64_cpu_fpu_context
 void arm64_init_fpu(struct tcb_s *tcb);
 void arm64_destory_fpu(struct tcb_s *tcb);
 
+#ifdef CONFIG_FS_PROCFS_REGISTER
+int  arm64_fpu_procfs_register(void);
+#endif
+
 void arm64_fpu_disable(void);
 void arm64_fpu_enable(void);
 
