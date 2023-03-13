@@ -27,6 +27,7 @@ config NRF53_APPCORE
 	select NRF53_HAVE_SAADC
 	select NRF53_HAVE_UART1
 	select NRF53_HAVE_I2C123
+	select NRF53_HAVE_SPI1234
 
 config NRF53_NETCORE
 	bool
@@ -93,9 +94,17 @@ config NRF53_HAVE_I2C123
 	bool
 	default n
 
+config NRF53_HAVE_SPI1234
+	bool
+	default n
+
 # Peripheral Selection
 
 config NRF53_I2C_MASTER
+	bool
+	default n
+
+config NRF53_SPI_MASTER
 	bool
 	default n
 
@@ -147,6 +156,43 @@ config NRF53_I2C2_MASTER
 	default n
 	depends on NRF53_HAVE_I2C123
 	select NRF53_I2C_MASTER
+
+config NRF53_SPI0_MASTER
+	bool "SPI0 Master"
+	default n
+	select NRF53_SPI_MASTER
+
+if NRF53_HAVE_SPI1234
+
+config NRF53_SPI1_MASTER
+	bool "SPI1 Master"
+	default n
+	select NRF53_SPI_MASTER
+
+config NRF53_SPI2_MASTER
+	bool "SPI2 Master"
+	default n
+	select NRF53_SPI_MASTER
+
+config NRF53_SPI3_MASTER
+	bool "SPI3 Master"
+	default n
+	select NRF53_SPI_MASTER
+
+config NRF53_SPI4_MASTER
+	bool "SPI4 Master"
+	default n
+	select NRF53_SPI_MASTER
+
+endif # NRF53_HAVE_SPI1234
+
+if NRF53_SPI_MASTER
+
+config NRF53_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
+endif
 
 config NRF53_UART0
 	bool "UART0"
