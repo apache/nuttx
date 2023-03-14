@@ -206,7 +206,7 @@ void up_timer_set_lowerhalf(FAR struct timer_lowerhalf_s *lower)
   g_timer.lower = lower;
 
 #ifdef CONFIG_SCHED_TICKLESS
-  g_oneshot_maxticks = TIMER_TICK_MAXTIMEOUT(lower);
+  TIMER_TICK_MAXTIMEOUT(lower, &g_oneshot_maxticks);
   TIMER_TICK_SETTIMEOUT(g_timer.lower, g_oneshot_maxticks);
 #else
   TIMER_TICK_SETTIMEOUT(g_timer.lower, 1);
@@ -252,7 +252,9 @@ void up_timer_set_lowerhalf(FAR struct timer_lowerhalf_s *lower)
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 void weak_function up_timer_getmask(FAR clock_t *mask)
 {
-  uint32_t maxticks = TIMER_TICK_MAXTIMEOUT(g_timer.lower);
+  uint32_t maxticks;
+
+  TIMER_TICK_MAXTIMEOUT(g_timer.lower, &maxticks);
 
   *mask = 0;
   while (1)
