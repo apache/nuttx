@@ -82,8 +82,8 @@ static inline uint8_t get_num_regions(void)
 {
   uint64_t type;
 
-  type  = read_sysreg(mpuir_el1);
-  type  = type & MPU_IR_REGION_MSK;
+  type = read_sysreg(mpuir_el1);
+  type = type & MPU_IR_REGION_MSK;
 
   return (uint8_t)type;
 }
@@ -98,8 +98,12 @@ void arm64_core_mpu_enable(void)
 {
   uint64_t val;
 
-  val   = read_sysreg(sctlr_el1);
-  val   |= (SCTLR_M_BIT | SCTLR_C_BIT);
+  val = read_sysreg(sctlr_el1);
+  val |= (SCTLR_M_BIT
+#ifndef CONFIG_ARM64_DCACHE_DISABLE
+          | SCTLR_C_BIT
+#endif
+         );
   write_sysreg(val, sctlr_el1);
   ARM64_DSB();
   ARM64_ISB();
@@ -117,8 +121,8 @@ void arm64_core_mpu_disable(void)
 
   ARM64_DMB();
 
-  val   = read_sysreg(sctlr_el1);
-  val   &= ~(SCTLR_M_BIT | SCTLR_C_BIT);
+  val = read_sysreg(sctlr_el1);
+  val &= ~(SCTLR_M_BIT | SCTLR_C_BIT);
   write_sysreg(val, sctlr_el1);
   ARM64_DSB();
   ARM64_ISB();
@@ -161,8 +165,8 @@ static inline void mpu_set_region(uint32_t rnr, uint64_t rbar,
 static void region_init(const uint32_t index,
                         const struct arm64_mpu_region *region_conf)
 {
-  uint64_t  rbar    = region_conf->base & MPU_RBAR_BASE_MSK;
-  uint64_t  rlar    = (region_conf->limit - 1) & MPU_RLAR_LIMIT_MSK;
+  uint64_t rbar = region_conf->base & MPU_RBAR_BASE_MSK;
+  uint64_t rlar = (region_conf->limit - 1) & MPU_RLAR_LIMIT_MSK;
 
   rbar |= region_conf->attr.rbar &
           (MPU_RBAR_XN_MSK | MPU_RBAR_AP_MSK | MPU_RBAR_SH_MSK);

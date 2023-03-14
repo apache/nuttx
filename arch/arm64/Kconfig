@@ -219,6 +219,14 @@ config ARM_GIC_EOIMODE
 
 endif
 
+config ARM64_DCACHE_DISABLE
+	bool "Disable DCACHE at __start"
+	default n
+
+config ARM64_ICACHE_DISABLE
+	bool "Disable ICACHE at __start"
+	default n
+
 if ARCH_CHIP_A64
 source "arch/arm64/src/a64/Kconfig"
 endif
