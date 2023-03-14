@@ -449,7 +449,6 @@ int rpmsghci_bt_receive(FAR struct bt_driver_s *btdev, uint8_t type,
   FAR struct rpmsghci_server_s *priv  = NULL;
   FAR struct rpmsghci_data_s   *msg   = NULL;
   uint32_t                      space = 0;
-  int                           ret   = OK;
 
   wlinfo("rpmsghci_bt_receive %d\n", type);
 
