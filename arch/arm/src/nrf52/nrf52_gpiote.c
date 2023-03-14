@@ -433,6 +433,61 @@ void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
 }
 
 /****************************************************************************
+ * Name: nrf52_gpiote_set_event
+ *
+ * Description:
+ *   Configures a GPIOTE channel in EVENT mode, assigns it to a given pin
+ *   and sets a handler for the first availalbe GPIOTE channel
+ *
+ * Input Parameters:
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+int nrf52_gpiote_set_event(uint32_t pinset,
+                           bool risingedge, bool fallingedge,
+                           xcpt_t func, void *arg)
+{
+  irqstate_t flags;
+  int ret = -ENOMEM;
+  int i = 0;
+
+  flags = enter_critical_section();
+
+  /* Get free channel */
+
+  for (i = 0; i < GPIOTE_CHANNELS; i++)
+    {
+      if (g_gpiote_ch_callbacks[i].callback == NULL)
+        {
+          /* Configure channel */
+
+          nrf52_gpiote_set_ch_event(pinset, i,
+                                    risingedge, fallingedge,
+                                    func, arg);
+
+          /* Return the channel index */
+
+          ret = i;
+
+          break;
+        }
+    }
+
+  leave_critical_section(flags);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: nrf52_gpio_set_task
  *
  * Description:

@@ -69,6 +69,30 @@ void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
                                bool risingedge, bool fallingedge,
                                xcpt_t func, void *arg);
 
+/****************************************************************************
+ * Name: nrf52_gpiote_set_event
+ *
+ * Description:
+ *   Configures a GPIOTE channel in EVENT mode, assigns it to a given pin
+ *   and sets a handler for the first availalbe GPIOTE channel
+ *
+ * Input Parameters:
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+int nrf52_gpiote_set_event(uint32_t pinset,
+                           bool risingedge, bool fallingedge,
+                           xcpt_t func, void *arg);
+
 #ifdef CONFIG_NRF52_PER_PIN_INTERRUPTS
 /****************************************************************************
  * Name: nrf52_gpiote_set_pin_event
