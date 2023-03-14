@@ -24,14 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <debug.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "nrf52_gpio.h"
+#include "nrf52_gpiote.h"
 
 #include "nrf52832-dk.h"
 
@@ -89,27 +91,22 @@ uint32_t board_button_initialize(void)
 uint32_t board_buttons(void)
 {
   uint32_t ret = 0;
+  int i;
 
   /* Check that state of each key */
 
-  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN1]))
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
-      ret |= BUTTON_BTN1_BIT;
-    }
+      /* A LOW value means that the key is pressed. */
 
-  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN2]))
-    {
-      ret |= BUTTON_BTN2_BIT;
-    }
+      bool released = nrf52_gpio_read(g_buttons[i]);
 
-  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN3]))
-    {
-      ret |= BUTTON_BTN3_BIT;
-    }
+      /* Accumulate the set of depressed (not released) keys */
 
-  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN4]))
-    {
-      ret |= BUTTON_BTN4_BIT;
+      if (!released)
+        {
+          ret |= (1 << i);
+        }
     }
 
   return ret;
@@ -140,11 +137,16 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-  int ret = -ENOSYS;
+  int ret = OK;
 
-#warning Missing Implementation!
+  ret = nrf52_gpiote_set_event(g_buttons[id], true, true, irqhandler, arg);
+  if (ret < 0)
+    {
+      ierr("ERROR: nrf52_gpiote_set_event failed %d\n", ret);
+      return ret;
+    }
 
-  return ret;
+  return OK;
 }
 #endif
 
