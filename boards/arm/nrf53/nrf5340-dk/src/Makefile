@@ -36,6 +36,10 @@ else
 CSRCS += nrf53_userleds.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += nrf53_buttons.c
+endif
+
 ifeq ($(CONFIG_TIMER),y)
 ifeq ($(CONFIG_NRF53_TIMER),y)
 CSRCS += nrf53_timer.c

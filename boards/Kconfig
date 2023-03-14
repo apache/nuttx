@@ -1071,6 +1071,7 @@ config ARCH_BOARD_NRF5340_DK
 	depends on ARCH_CHIP_NRF53
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This option selects the nRF5340 Development Kit (PCA10095)
 
