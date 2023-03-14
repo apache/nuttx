@@ -1,0 +1,70 @@
+From 5aabcba27177c66a58f21c8d20bb133d005f36d2 Mon Sep 17 00:00:00 2001
+From: chao an <anchao@xiaomi.com>
+Date: Tue, 14 Mar 2023 23:38:30 +0800
+Subject: [PATCH] newlib/libm: fix NAN redefined if enable
+ --enable-newlib-hw-fp
+
+In file included from newlib/newlib/newlib/libm/mathfp/s_tan.c:52:
+newlib/newlib/newlib/libm/mathfp/zmath.h:7: warning: "NAN" redefined
+    7 | #define NAN 2
+      |
+In file included from newlib/newlib/newlib/libm/common/fdlibm.h:15,
+                 from newlib/newlib/newlib/libm/mathfp/s_tan.c:51:
+/home/archer/code/nuttx/n5/incubator-nuttx/libs/libm/newlib/include/math.h:58: note: this is the location of the previous definition
+   58 | #  define NAN (__builtin_nanf(""))
+      |
+
+Signed-off-by: chao an <anchao@xiaomi.com>
+---
+ newlib/libm/common/math_config.h | 16 ++++++++++++----
+ newlib/libm/mathfp/zmath.h       |  5 ++++-
+ 2 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/newlib/libm/common/math_config.h newlib/newlib/newlib/libm/common/math_config.h
+index 0f78b5c09..9116c754f 100644
+--- a/newlib/libm/common/math_config.h
++++ newlib/newlib/newlib/libm/common/math_config.h
+@@ -253,12 +253,20 @@ eval_as_double (double x)
+
+ #ifdef __GNUC__
+ # define NOINLINE __attribute__ ((noinline))
+-# define likely(x) __builtin_expect (!!(x), 1)
+-# define unlikely(x) __builtin_expect (x, 0)
++# ifndef likely
++#  define likely(x) __builtin_expect (!!(x), 1)
++# endif
++# ifndef unlikely
++#  define unlikely(x) __builtin_expect (x, 0)
++# endif
+ #else
+ # define NOINLINE
+-# define likely(x) (x)
+-# define unlikely(x) (x)
++# ifndef likely
++#  define likely(x) (x)
++# endif
++# ifndef unlikely
++#  define unlikely(x) (x)
++# endif
+ #endif
+
+ /* gcc emitting PE/COFF doesn't support visibility */
+diff --git a/newlib/libm/mathfp/zmath.h newlib/newlib/newlib/libm/mathfp/zmath.h
+index 67bdb24a7..681db83c4 100644
+--- a/newlib/libm/mathfp/zmath.h
++++ newlib/newlib/newlib/libm/mathfp/zmath.h
+@@ -4,7 +4,10 @@
+ #include <errno.h>
+
+ #define NUM 3
+-#define NAN 2
++#ifdef NAN
++#  undef NAN
++#  define NAN 2
++#endif
+ #define INF 1
+
+ #define __PI 3.14159265358979323846
+--
+2.25.1
+

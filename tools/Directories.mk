@@ -114,6 +114,8 @@ CONTEXTDIRS += libs$(DELIM)libc
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
 CONTEXTDIRS += libs$(DELIM)libm
+else ifeq ($(CONFIG_LIBM_NEWLIB),y)
+CONTEXTDIRS += libs$(DELIM)libm
 endif
 
 ifeq ($(CONFIG_HAVE_CXX),y)

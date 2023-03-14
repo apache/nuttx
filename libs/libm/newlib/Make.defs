@@ -1,0 +1,86 @@
+############################################################################
+# libs/libm/newlib/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+NEWLIB_VERSION=4.3.0.20230120
+
+newlib-$(NEWLIB_VERSION).tar.gz:
+	$(call DOWNLOAD,ftp://sourceware.org/pub/newlib,newlib-$(NEWLIB_VERSION).tar.gz)
+
+newlib/newlib: newlib-$(NEWLIB_VERSION).tar.gz
+	$(Q) tar -xf newlib-$(NEWLIB_VERSION).tar.gz
+	$(Q) mv newlib-$(NEWLIB_VERSION) newlib/newlib
+	$(Q) patch -p0 < newlib/0001-newlib-libm-fix-NAN-redefined-if-enable-enable-newli.patch
+	$(Q) touch $@
+
+ifeq ($(wildcard newlib/newlib/.git),)
+distclean::
+	$(call DELFILE, newlib-$(NEWLIB_VERSION).tar.gz)
+	$(call DELDIR, newlib/newlib)
+
+context:: newlib/newlib
+endif
+
+CSRCS += $(wildcard newlib/newlib/newlib/libm/common/*.c)
+CSRCS += $(wildcard newlib/newlib/newlib/libm/complex/*.c)
+CSRCS += $(wildcard newlib/newlib/newlib/libm/fenv/*.c)
+
+ifeq ($(CONFIG_ARCH_ARM),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/arm/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/arm
+endif
+ifeq ($(CONFIG_ARCH_ARM64),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/aarch64/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/aarch64
+endif
+ifeq ($(CONFIG_ARCH_RISCV),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/riscv/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/riscv
+endif
+ifeq ($(CONFIG_ARCH_X86),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/i386/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/i386
+endif
+ifeq ($(CONFIG_ARCH_X86_64),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/x86_64/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/x86_64
+endif
+ifeq ($(CONFIG_ARCH_SPARC),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/sparc/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/sparc
+endif
+ifeq ($(CONFIG_ARCH_MIPS),y)
+  CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/mips/*.c)
+  VPATH += :newlib/newlib/newlib/libm/machine/mips
+endif
+
+CSRCS += $(wildcard newlib/newlib/newlib/libm/math/*.c)
+
+VPATH += :newlib/newlib/newlib/libm/math
+VPATH += :newlib/newlib/newlib/libm/common
+VPATH += :newlib/newlib/newlib/libm/complex
+VPATH += :newlib/newlib/newlib/libm/fenv
+
+CFLAGS += -isystem newlib
+CFLAGS += -isystem newlib/newlib/newlib/libm/common
+
+CFLAGS += -Wno-undef
+CFLAGS += -Wno-unused-but-set-variable
+
+CSRCS := $(shell echo $(notdir $(CSRCS) | tr " " "\n" | sort | uniq))
