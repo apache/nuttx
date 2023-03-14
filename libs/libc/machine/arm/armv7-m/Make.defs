@@ -38,6 +38,10 @@ ifeq ($(CONFIG_ARMV7M_STRCMP),y)
 ASRCS += arch_strcmp.S
 endif
 
+ifeq ($(CONFIG_ARMV7M_STRCPY),y)
+ASRCS += arch_strcpy.S
+endif
+
 ifeq ($(CONFIG_ARMV7M_STRLEN),y)
 ASRCS += arch_strlen.S
 endif
