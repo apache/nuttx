@@ -45,6 +45,14 @@ config ARMV7M_STRCMP
 	---help---
 		Enable optimized ARMv7-M specific strcmp() library function
 
+config ARMV7M_STRCPY
+	bool "Enable optimized strcpy() for ARMv7-M"
+	default n
+	select LIBC_ARCH_STRCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-M specific strcpy() library function
+
 config ARMV7M_STRLEN
 	bool "Enable optimized strlen() for ARMv7-M"
 	default n
