@@ -1013,6 +1013,7 @@ config ARCH_BOARD_NRF52840_DK
 	depends on ARCH_CHIP_NRF52
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This option selects the Nordic nRF52840 Development Kit (PCA10056)
 
