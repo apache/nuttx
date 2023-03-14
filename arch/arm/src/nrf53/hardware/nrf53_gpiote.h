@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf53/hardware/nrf53_gpioe.h
+ * arch/arm/src/nrf53/hardware/nrf53_gpiote.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
