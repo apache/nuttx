@@ -41,6 +41,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Check configuration */
+
+#ifdef CONFIG_TIMER_ARCH
+#  error CONFIG_TIMER_ARCH must be not set
+#endif
+
 /* Check corresponding RTC support */
 
 #if (CONFIG_NRF52_SYSTIMER_RTC_INSTANCE == 0) && !defined(CONFIG_NRF52_RTC0)
