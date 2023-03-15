@@ -61,6 +61,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_ALLOW_BSD_COMPONENTS
+#  error "This file requires Kconfig ALLOW_BSD_COMPONENTS"
+#endif
+
 #define NRF52_FLASH_PAGE_SIZE  (4*1024)
 
 #define NRF52_FLASH_ERASEDVAL  (0xffu)

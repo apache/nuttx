@@ -385,6 +385,7 @@ config NRF52_FLASH_PREFETCH
 
 config NRF52_PROGMEM
 	bool "FLASH program memory"
+	depends on ALLOW_BSD_COMPONENTS
 	default n
 	select ARCH_HAVE_PROGMEM
 	---help---
