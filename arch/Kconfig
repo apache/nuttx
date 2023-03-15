@@ -468,6 +468,10 @@ config ARCH_HAVE_BOOTLOADER
 	bool
 	default n
 
+config ARCH_HAVE_CPUINFO
+	bool
+	default n
+
 config ARCH_FPU
 	bool "FPU support"
 	default y
