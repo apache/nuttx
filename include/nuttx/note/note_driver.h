@@ -50,11 +50,13 @@ struct note_driver_ops_s
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   CODE void (*suspend)(FAR struct note_driver_s *drv, FAR struct tcb_s *tcb);
   CODE void (*resume)(FAR struct note_driver_s *drv, FAR struct tcb_s *tcb);
-#  ifdef CONFIG_SMP
+#endif
+#ifdef CONFIG_SMP
   CODE void (*cpu_start)(FAR struct note_driver_s *drv,
                          FAR struct tcb_s *tcb, int cpu);
   CODE void (*cpu_started)(FAR struct note_driver_s *drv,
                            FAR struct tcb_s *tcb);
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   CODE void (*cpu_pause)(FAR struct note_driver_s *drv,
                          FAR struct tcb_s *tcb, int cpu);
   CODE void (*cpu_paused)(FAR struct note_driver_s *drv,

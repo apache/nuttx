@@ -41,11 +41,13 @@ static void notelog_suspend(FAR struct note_driver_s *drv,
                             FAR struct tcb_s *tcb);
 static void notelog_resume(FAR struct note_driver_s *drv,
                            FAR struct tcb_s *tcb);
-#  ifdef CONFIG_SMP
+#endif
+#ifdef CONFIG_SMP
 static void notelog_cpu_start(FAR struct note_driver_s *drv,
                               FAR struct tcb_s *tcb, int cpu);
 static void notelog_cpu_started(FAR struct note_driver_s *drv,
                                 FAR struct tcb_s *tcb);
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 static void notelog_cpu_pause(FAR struct note_driver_s *drv,
                               FAR struct tcb_s *tcb, int cpu);
 static void notelog_cpu_paused(FAR struct note_driver_s *drv,
@@ -87,14 +89,16 @@ static const struct note_driver_ops_s g_notelog_ops =
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   notelog_suspend,       /* suspend */
   notelog_resume,        /* resume */
+#endif
 #ifdef CONFIG_SMP
   notelog_cpu_start,     /* cpu_start */
   notelog_cpu_started,   /* cpu_started */
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   notelog_cpu_pause,     /* cpu_pause */
   notelog_cpu_paused,    /* cpu_paused */
   notelog_cpu_resume,    /* cpu_resume */
   notelog_cpu_resumed,   /* cpu_resumed */
-#endif
+#  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
   notelog_premption,     /* premption */

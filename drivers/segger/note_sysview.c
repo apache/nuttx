@@ -86,9 +86,11 @@ static const struct note_driver_ops_s g_note_sysview_ops =
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   note_sysview_suspend,       /* suspend */
   note_sysview_resume,        /* resume */
-#  ifdef CONFIG_SMP
+#endif
+#ifdef CONFIG_SMP
   NULL,                       /* cpu_start */
   NULL,                       /* cpu_started */
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   NULL,                       /* cpu_pause */
   NULL,                       /* cpu_paused */
   NULL,                       /* cpu_resume */
