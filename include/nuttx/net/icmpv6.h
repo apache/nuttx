@@ -102,11 +102,12 @@
 
 /* Option types */
 
-#define ICMPv6_OPT_SRCLLADDR  1 /* Source Link-Layer Address */
-#define ICMPv6_OPT_TGTLLADDR  2 /* Target Link-Layer Address */
-#define ICMPv6_OPT_PREFIX     3 /* Prefix Information */
-#define ICMPv6_OPT_REDIRECT   4 /* Redirected Header */
-#define ICMPv6_OPT_MTU        5 /* MTU */
+#define ICMPv6_OPT_SRCLLADDR  1  /* Source Link-Layer Address */
+#define ICMPv6_OPT_TGTLLADDR  2  /* Target Link-Layer Address */
+#define ICMPv6_OPT_PREFIX     3  /* Prefix Information */
+#define ICMPv6_OPT_REDIRECT   4  /* Redirected Header */
+#define ICMPv6_OPT_MTU        5  /* MTU */
+#define ICMPv6_OPT_RDNSS      25 /* DNS */
 
 /* ICMPv6 Neighbor Advertisement message flags */
 
@@ -349,6 +350,15 @@ struct icmpv6_mtu_s
   uint8_t  optlen;           /* "   " ": Option length: 1 octet */
   uint16_t reserved;         /* "   " ": Reserved */
   uint16_t mtu[2];           /* "   " ": MTU */
+};
+
+struct icmpv6_rdnss_s
+{
+  uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_RNDSS */
+  uint8_t  optlen;           /* "   " ": Option length: 1 octet */
+  uint16_t reserved;         /* "   " ": Reserved */
+  uint16_t lifetime[2];      /* "   " ": lifetime */
+  uint8_t  servers[1];       /* Octets 2-: Beginning of the DNS Servers */
 };
 
 /* The structure holding the ICMP statistics that are gathered if
