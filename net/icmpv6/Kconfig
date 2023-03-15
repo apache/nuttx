@@ -202,6 +202,13 @@ config NET_ICMPv6_PREFIX_8
 		Advertisement message.  This is the last of the 8-values.  The
 		default for all eight values is fc00::0.
 
+config NET_ICMPv6_ROUTER_RDNSS
+	bool "Fill the RDNSS into Router Advertisement"
+	default n
+	---help---
+		Fill the RDNSS from the netdb DNS Server into the Router
+		Advertisement.
+
 endif # NET_ICMPv6_ROUTER_MANUAL
 endif # NET_ICMPv6_ROUTER
 
