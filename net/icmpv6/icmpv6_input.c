@@ -33,6 +33,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/icmpv6.h>
+#include <nuttx/net/dns.h>
 
 #include "devif/devif.h"
 #include "neighbor/neighbor.h"
@@ -356,6 +357,53 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     dev->d_pktsize = NTOHS(mtuopt->mtu[1]) + dev->d_llhdrlen;
                   }
                   break;
+
+#ifdef CONFIG_ICMPv6_AUTOCONF_RDNSS
+                case ICMPv6_OPT_RDNSS:
+                  {
+                    FAR struct icmpv6_rdnss_s *rdnss =
+                                          (FAR struct icmpv6_rdnss_s *)opt;
+                    FAR struct in6_addr *servers;
+                    struct sockaddr_in6 addr;
+                    int nservers;
+                    int ret;
+                    int i;
+
+                    if (rdnss->optlen < 3)
+                      {
+                        nerr("rdnss error length %d\n", rdnss->optlen);
+                        break;
+                      }
+
+                    /* optlen is in units of 8 bytes. The header is 1 unit
+                     * (8 bytes) and each address is another 2 units
+                     * (16 bytes). So the number of addresses is equal to
+                     * (optlen - 1) / 2.
+                     */
+
+                    servers  = (FAR struct in6_addr *)rdnss->servers;
+                    nservers = (rdnss->optlen - 1) / 2;
+
+                    /* Set the IPv6 DNS server address */
+
+                    memset(&addr, 0, sizeof(addr));
+                    addr.sin6_family = AF_INET6;
+
+                    for (i = 0; i < CONFIG_NETDB_DNSSERVER_NAMESERVERS &&
+                         i < nservers; i++)
+                      {
+                        net_ipv6addr_copy(&addr.sin6_addr, servers + i);
+                        ret = dns_add_nameserver(
+                                          (FAR const struct sockaddr *)&addr,
+                                          sizeof(struct sockaddr_in6));
+                        if (ret < 0 && ret != -EEXIST)
+                          {
+                            nerr("dns add nameserver failed %d", ret);
+                          }
+                      }
+                  }
+                  break;
+#endif
 
                 default:
                   break;

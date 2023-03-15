@@ -88,6 +88,13 @@ config ICMPv6_AUTOCONF_DELAYMSEC
 		when an Router Solicitation is sent until the Router
 		Advertisement is received.
 
+config ICMPv6_AUTOCONF_RDNSS
+	bool "ICMPv6 handle RDNSS field in router advertise"
+	default n
+	---help---
+		Handle the RDNSS field in the Router Advertisement and add it to
+		netdb DNS Server.
+
 endif # NET_ICMPv6_AUTOCONF
 
 config NET_ICMPv6_ROUTER
