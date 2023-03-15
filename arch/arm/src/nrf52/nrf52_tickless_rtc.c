@@ -245,22 +245,19 @@ static int rtc_handler(int irq, void *context, void *arg)
 
 int up_alarm_cancel(struct timespec *ts)
 {
-  if (g_tickless_dev.alarm_set)
-    {
-      uint32_t counter;
-      irqstate_t flags;
+  uint32_t counter;
+  irqstate_t flags;
 
-      flags = enter_critical_section();
+  flags = enter_critical_section();
 
-      NRF52_RTC_DISABLEINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
-      NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
-      rtc_counter_to_ts(counter, ts);
+  NRF52_RTC_DISABLEINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
+  NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
+  rtc_counter_to_ts(counter, ts);
 
-      NRF52_RTC_ACKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
-      g_tickless_dev.alarm_set = false;
+  NRF52_RTC_ACKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
+  g_tickless_dev.alarm_set = false;
 
-      leave_critical_section(flags);
-    }
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -313,9 +310,9 @@ void up_timer_initialize(void)
 {
   struct timespec ts;
 
+  memset(&g_tickless_dev, 0, sizeof(struct nrf52_tickless_dev_s));
+
   g_tickless_dev.rtc = nrf52_rtc_init(CONFIG_NRF52_SYSTIMER_RTC_INSTANCE);
-  g_tickless_dev.periods = 0;
-  g_tickless_dev.alarm_set = false;
 
   /* Ensure we have support for the selected RTC instance */
 
