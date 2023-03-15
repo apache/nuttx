@@ -736,7 +736,7 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (!note_suspend(*driver, tcb))
+      if (note_suspend(*driver, tcb))
         {
           continue;
         }
