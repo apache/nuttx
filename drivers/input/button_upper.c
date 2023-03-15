@@ -66,6 +66,10 @@ struct btn_upperhalf_s
    */
 
   FAR struct btn_open_s *bu_open;
+
+#if CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY
+  struct wdog_s bu_wdog;
+#endif
 };
 
 /* This structure describes the state of one open button driver instance */
@@ -106,7 +110,7 @@ static void    btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
 
 /* Sampling */
 
-static void    btn_sample(FAR struct btn_upperhalf_s *priv);
+static void    btn_sample(wdparm_t arg);
 
 /* Character driver methods */
 
@@ -214,15 +218,21 @@ static void btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
 
   /* Process the next sample */
 
-  btn_sample(priv);
+#if CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY
+  wd_start(&priv->bu_wdog, MSEC2TICK(CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY),
+           btn_sample, (wdparm_t)priv);
+#else
+  btn_sample((wdparm_t)priv);
+#endif
 }
 
 /****************************************************************************
  * Name: btn_sample
  ****************************************************************************/
 
-static void btn_sample(FAR struct btn_upperhalf_s *priv)
+static void btn_sample(wdparm_t arg)
 {
+  FAR struct btn_upperhalf_s *priv;
   FAR const struct btn_lowerhalf_s *lower;
   FAR struct btn_open_s *opriv;
   btn_buttonset_t sample;
@@ -230,6 +240,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
   btn_buttonset_t press;
   btn_buttonset_t release;
 
+  priv = (FAR struct btn_upperhalf_s *)arg;
   DEBUGASSERT(priv && priv->bu_lower);
   lower = priv->bu_lower;
 
@@ -362,6 +373,10 @@ static int btn_close(FAR struct file *filep)
   /* Get exclusive access to the driver structure */
 
   flags = enter_critical_section();
+
+#if CONFIG_INPUT_BUTTONS_DEBOUNCE_DELAY
+  wd_cancel(&priv->bu_wdog);
+#endif
 
   /* Find the open structure in the list of open structures for the device */
 
