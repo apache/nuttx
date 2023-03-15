@@ -52,6 +52,7 @@
  * External Definitions
  ****************************************************************************/
 
+extern const struct procfs_operations g_cpuinfo_operations;
 extern const struct procfs_operations g_cpuload_operations;
 extern const struct procfs_operations g_critmon_operations;
 extern const struct procfs_operations g_iobinfo_operations;
@@ -93,6 +94,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
   { "[0-9]*/**",    &g_proc_operations,     PROCFS_UNKOWN_TYPE },
   { "[0-9]*",       &g_proc_operations,     PROCFS_DIR_TYPE    },
+#endif
+
+#if defined(CONFIG_ARCH_HAVE_CPUINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPUINFO)
+  { "cpuinfo",      &g_cpuinfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)

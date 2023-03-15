@@ -38,6 +38,11 @@ config FS_PROCFS_EXCLUDE_BLOCKS
 		system.  This procfs file provides the text output for the NSH 'df'
 		command.
 
+config FS_PROCFS_EXCLUDE_CPUINFO
+	bool "Exclude cpuinfo procfs"
+	depends on ARCH_HAVE_CPUINFO
+	default DEFAULT_SMALL
+
 config FS_PROCFS_EXCLUDE_CPULOAD
 	bool "Exclude CPU load"
 	depends on SCHED_CPULOAD
