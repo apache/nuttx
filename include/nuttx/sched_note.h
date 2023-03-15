@@ -143,9 +143,9 @@
           sched_note_printf_ip(tag, SCHED_NOTE_IP, "B|%d|%s", gettid(), str)
 #  define sched_note_endex(tag, str) \
           sched_note_printf_ip(tag, SCHED_NOTE_IP, "E|%d|%s", gettid(), str)
-#  define sched_note_begin(tag, ip) \
+#  define sched_note_begin(tag) \
           sched_note_string_ip(tag, SCHED_NOTE_IP, "B")
-#  define sched_note_end(tag, ip) \
+#  define sched_note_end(tag) \
           sched_note_string_ip(tag, SCHED_NOTE_IP, "E")
 #else
 #  define sched_note_string(tag, buf)
