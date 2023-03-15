@@ -29,8 +29,15 @@ endif
 endif
 
 CHIP_CSRCS += nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
-CHIP_CSRCS += nrf52_allocateheap.c nrf52_lowputc.c nrf52_gpio.c nrf52_nvmc.c
+CHIP_CSRCS += nrf52_allocateheap.c nrf52_lowputc.c nrf52_gpio.c
 CHIP_CSRCS += nrf52_uid.c
+
+ifeq ($(CONFIG_ALLOW_BSD_COMPONENTS),y)
+CHIP_CSRCS += nrf52_nvmc.c
+ifeq ($(CONFIG_NRF52_PROGMEM),y)
+CHIP_CSRCS += nrf52_flash.c
+endif
+endif
 
 ifeq ($(CONFIG_ARCH_CHIP_NRF52832),y)
 CHIP_CSRCS += nrf52832_errdata.c
@@ -50,10 +57,6 @@ endif
 
 ifeq ($(CONFIG_NRF52_UART),y)
 CHIP_CSRCS += nrf52_serial.c
-endif
-
-ifeq ($(CONFIG_NRF52_PROGMEM),y)
-CHIP_CSRCS  += nrf52_flash.c
 endif
 
 ifeq ($(CONFIG_NRF52_WDT),y)
