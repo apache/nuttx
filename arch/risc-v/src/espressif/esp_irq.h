@@ -45,7 +45,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* CPU interrupt types. */
+/* CPU interrupt trigger types */
 
 typedef enum irq_trigger_e
 {
@@ -53,7 +53,7 @@ typedef enum irq_trigger_e
   ESP_IRQ_TRIGGER_EDGE     = 1, /* Edge-triggered interrupts */
 } irq_trigger_t;
 
-/* CPU interrupt types. */
+/* CPU interrupt priority levels */
 
 typedef enum irq_priority_e
 {
