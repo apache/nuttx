@@ -544,6 +544,13 @@ config INPUT_BUTTONS
 	---help---
 		Enable standard button upper half driver.
 
+config INPUT_BUTTONS_DEBOUNCE_DELAY
+	int "Button Debounce Delay (millisecond)"
+	default 0
+	depends on INPUT_BUTTONS
+	---help---
+		Button Debounce Delay in ms
+
 if INPUT_BUTTONS
 
 config INPUT_BUTTONS_LOWER
