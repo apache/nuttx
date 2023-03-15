@@ -33,10 +33,9 @@
 #include <arch/irq.h>
 
 #include "arm_internal.h"
-#include "nvic.h"
-
-#include "nrf52_clockconfig.h"
+#include "hardware/nrf52_nvmc.h"
 #include "hardware/nrf52_utils.h"
+#include "nrf52_clockconfig.h"
 #include "nrf52_lowputc.h"
 #include "nrf52_start.h"
 #include "nrf52_gpio.h"
@@ -69,6 +68,61 @@
 /* we need to get r10 set before we can allow instrumentation calls */
 
 void __start(void) noinstrument_function;
+#endif
+
+#ifdef CONFIG_NRF52_FLASH_PREFETCH
+
+/****************************************************************************
+ * Name: nrf52_enable_icache
+ *
+ * Description:
+ *   Enable I-Cache for Flash
+ *
+ * Input Parameter:
+ *   enable - enable or disable I-Cache
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void nrf52_enable_icache(bool enable)
+{
+  if (enable)
+    {
+      modifyreg32(NRF52_NVMC_ICACHECNF, 0, NVMC_ICACHECNF_CACHEEN);
+    }
+  else
+    {
+      modifyreg32(NRF52_NVMC_ICACHECNF, NVMC_ICACHECNF_CACHEEN, 0);
+    }
+}
+
+/****************************************************************************
+ * Name: nrf52_enable_profile
+ *
+ * Description:
+ *   Enable profiling I-Cache for flash
+ *
+ * Input Parameter:
+ *   enable - enable or disable profiling for I-Cache
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void nrf52_enable_profile(bool enable)
+{
+  if (enable)
+    {
+      modifyreg32(NRF52_NVMC_ICACHECNF, 0, NVMC_ICACHECNF_CACHEPROFEN);
+    }
+  else
+    {
+      modifyreg32(NRF52_NVMC_ICACHECNF, NVMC_ICACHECNF_CACHEPROFEN, 0);
+    }
+}
 #endif
 
 /****************************************************************************
@@ -145,8 +199,8 @@ void __start(void)
   arm_fpuconfig();
 
 #ifdef CONFIG_NRF52_FLASH_PREFETCH
-  nrf_nvmc_enable_icache(true);
-  nrf_nvmc_enable_profile(true);
+  nrf52_enable_icache(true);
+  nrf52_enable_profile(true);
 #endif
 
   showprogress('D');

@@ -147,38 +147,6 @@ void nrf_nvmc_write_words(uint32_t address, const uint32_t *src,
                           uint32_t num_words);
 
 /****************************************************************************
- * Name: nrf_nvmc_enable_icache
- *
- * Description:
- *   Enable I-Cache for Flash
- *
- * Input Parameter:
- *   flag - Flag to enable or disable.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf_nvmc_enable_icache(bool flag);
-
-/****************************************************************************
- * Name: nrf_nvmc_enable_profile
- *
- * Description:
- *   Enable profiling I-Cache for flash
- *
- * Input Parameter:
- *   flag - Flag to enable or disable.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf_nvmc_enable_profile(bool flag);
-
-/****************************************************************************
  * Name: nrf_nvmc_get_profiling_ihit
  *
  * Description:
