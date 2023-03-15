@@ -43,12 +43,12 @@
 
 /* 2nd stage bootloader iram_loader_seg start address */
 
-#define SRAM_DRAM_END       0x403d0000 - I_D_SRAM_OFFSET
+#define SRAM_DRAM_END       (0x403ce710 - I_D_SRAM_OFFSET)
 
 #define SRAM_IRAM_ORG       (SRAM_IRAM_START + ICACHE_SIZE)
 #define SRAM_DRAM_ORG       (SRAM_DRAM_START + ICACHE_SIZE)
 
-#define I_D_SRAM_SIZE       SRAM_DRAM_END - SRAM_DRAM_ORG
+#define I_D_SRAM_SIZE       (SRAM_DRAM_END - SRAM_DRAM_ORG)
 
 #ifdef CONFIG_ESP32C3_FLASH_2M
 #  define FLASH_SIZE        0x200000

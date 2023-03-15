@@ -36,12 +36,12 @@
 
 /* 2nd stage bootloader iram_loader_seg start address */
 
-#define SRAM_DRAM_END       0x40880000 - I_D_SRAM_OFFSET
+#define SRAM_DRAM_END       (0x4086e610 - I_D_SRAM_OFFSET)
 
 #define SRAM_IRAM_ORG       (SRAM_IRAM_START)
 #define SRAM_DRAM_ORG       (SRAM_DRAM_START)
 
-#define I_D_SRAM_SIZE       SRAM_DRAM_END - SRAM_DRAM_ORG
+#define I_D_SRAM_SIZE       (SRAM_DRAM_END - SRAM_DRAM_ORG)
 
 /* IDRAM0_2_SEG_SIZE_DEFAULT is used when page size is 64KB */
 
