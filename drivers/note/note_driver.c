@@ -151,7 +151,7 @@ static struct note_filter_s g_note_filter =
   {
     CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
 #ifdef CONFIG_SMP
-    , CONFIG_SCHED_INSTRUMENTATION_CPUSET
+    , (cpu_set_t)CONFIG_SCHED_INSTRUMENTATION_CPUSET
 #endif
   }
 };
