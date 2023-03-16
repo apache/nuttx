@@ -8,7 +8,7 @@ context::$(MPFS_CRYPTO)
 distclean::
 	$(Q) rm -rf mpfs/crypto
 
-CHIP_CSRCS += mpfs_crypto.c
+CHIP_CSRCS += mpfs_crypto.c mpfs_systemservice.c
 
-DEPPATH += --dep-path crypto --dep-path mpfs/crypto
-VPATH += :crypto:mpfs/crypto
+DEPPATH += --dep-path mpfs/crypto
+VPATH += :mpfs/crypto
