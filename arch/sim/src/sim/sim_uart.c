@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "sim_internal.h"
 
@@ -363,18 +364,18 @@ static int tty_ioctl(struct file *filep, int cmd, unsigned long arg)
   struct tty_priv_s *priv = dev->priv;
   struct termios *termiosp = (struct termios *)(uintptr_t)arg;
 
-  if (!termiosp)
-    {
-      return -EINVAL;
-    }
-
   switch (cmd)
     {
       case TCGETS:
+        DEBUGASSERT(termiosp != NULL);
         return host_uart_getcflag(priv->fd, &termiosp->c_cflag);
 
       case TCSETS:
+        DEBUGASSERT(termiosp != NULL);
         return host_uart_setcflag(priv->fd, termiosp->c_cflag);
+
+      default:
+        break;
     }
 #endif
 
