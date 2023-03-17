@@ -24,6 +24,7 @@ config ARCH_ARM
 
 config ARCH_ARM64
 	bool "ARM64"
+	select ALARM_ARCH
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_VFORK
@@ -33,6 +34,7 @@ config ARCH_ARM64
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	select ARCH_HAVE_THREAD_LOCAL
+	select ONESHOT
 	---help---
 		The ARM64 architectures
 
