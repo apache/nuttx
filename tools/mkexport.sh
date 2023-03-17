@@ -423,6 +423,11 @@ for lib in ${EXTRA_LIBS}; do
     lib=`echo "${lib}" | sed -e "s/-l/lib/" -e "s/$/${LIBEXT}/"`
   fi
 
+  if [ -f "${lib}" ]; then
+    cp -a ${lib} ${EXPORTDIR}/libs
+    continue
+  fi
+
   for path in ${EXTRA_LIBPATHS}; do
 
     # Skip the library path options
