@@ -43,12 +43,8 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-extern uint64_t arm64_counter_read(void);
-extern void arm64_start_timer(void);
-
 #ifdef CONFIG_SMP
-void arm64_smp_timer_init(void);
+void arm64_arch_timer_secondary_init(void);
 #endif
 
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_ARCH_TIMER_H */
