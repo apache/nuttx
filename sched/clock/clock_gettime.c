@@ -58,7 +58,6 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #endif
   int ret = OK;
 
-  sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
   /* CLOCK_MONOTONIC is an optional under POSIX: "If the Monotonic Clock
@@ -141,14 +140,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
   if (ret < 0)
     {
-      serr("Returning ERROR\n");
-
       set_errno(-ret);
       ret = ERROR;
-    }
-  else
-    {
-      sinfo("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
 
   return ret;
