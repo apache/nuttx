@@ -210,6 +210,7 @@ config AUDIO_ES8388
 	bool "ES8388 codec chip"
 	default n
 	depends on AUDIO
+	select AUDIO_DRIVER_SPECIFIC_BUFFERS
 	---help---
 		Select to enable support for the ES8388 Audio codec by Everest
 		Semiconductor.
@@ -223,9 +224,61 @@ config ES8388_INPUT_INITVOLUME
 	int "ES8388 initial input volume setting"
 	default 1000
 
+config ES8388_OUTPUT_CHANNEL
+	int
+	default 0 if ES8388_OUTPUT_CHANNEL_LINE1
+	default 1 if ES8388_OUTPUT_CHANNEL_LINE2
+	default 2 if ES8388_OUTPUT_CHANNEL_ALL
+
+choice
+	prompt "ES8388 output channel"
+	default ES8388_OUTPUT_CHANNEL_ALL
+	---help---
+		Select the codec channel that will output audio.
+		The actual device that will reproduce the audio signal depends
+		on the board implementation.
+
+config ES8388_OUTPUT_CHANNEL_LINE1
+	bool "Line 1"
+
+config ES8388_OUTPUT_CHANNEL_LINE2
+	bool "Line 2"
+
+config ES8388_OUTPUT_CHANNEL_ALL
+	bool "Both"
+
+endchoice
+
 config ES8388_OUTPUT_INITVOLUME
 	int "ES8388 initial output volume setting"
 	default 400
+
+config ES8388_INPUT_CHANNEL
+	int
+	default 0 if ES8388_INPUT_CHANNEL_LINE1
+	default 1 if ES8388_INPUT_CHANNEL_LINE2
+	default 3 if ES8388_INPUT_CHANNEL_DIFFERENTIAL
+
+choice
+	prompt "ES8388 input channel"
+	default ES8388_INPUT_CHANNEL_LINE1
+	---help---
+		Select the codec channel that will input audio.
+		The actual device that will reproduce the audio signal depends
+		on the board implementation.
+		The "Differential" option will take the difference between the Line 1
+		left and right channels.
+
+config ES8388_INPUT_CHANNEL_LINE1
+	bool "Line 1"
+
+config ES8388_INPUT_CHANNEL_LINE2
+	bool "Line 2"
+
+config ES8388_INPUT_CHANNEL_DIFFERENTIAL
+	bool "Differential"
+
+endchoice
 
 config ES8388_INFLIGHT
 	int "ES8388 maximum in-flight audio buffers"

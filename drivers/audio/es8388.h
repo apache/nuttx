@@ -1072,10 +1072,10 @@ struct es8388_dev_s
   FAR const struct es8388_lower_s    *lower;            /* Pointer to the board lower functions */
   FAR struct i2c_master_s            *i2c;              /* I2C driver to use */
   FAR struct i2s_dev_s               *i2s;              /* I2S driver to use */
-  struct dq_queue_s                   pendq;            /* Queue of pending buffers to be sent */
+  struct dq_queue_s                   pendq;            /* Queue of pending buffers to be processed */
   struct dq_queue_s                   doneq;            /* Queue of sent buffers to be returned */
   struct file                         mq;               /* Message queue for receiving messages */
-  char                                mqname[16];       /* Our message queue name */
+  char                                mqname[NAME_MAX]; /* Our message queue name */
   pthread_t                           threadid;         /* ID of our thread */
   uint32_t                            bitrate;          /* Actual programmed bit rate */
   mutex_t                             pendlock;         /* Protect pendq */
@@ -1084,7 +1084,8 @@ struct es8388_dev_s
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   uint16_t                            balance;          /* Current balance level {0..1000} */
 #endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
-  uint16_t                            volume;           /* Current volume level {0..1000} */
+  uint16_t                            volume_out;       /* Current output volume level {0..1000} */
+  uint16_t                            volume_in;        /* Current input volume level {0..1000} */
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
   uint8_t                             nchannels;        /* Number of channels (1 or 2) */
   uint8_t                             bpsamp;           /* Bits per sample */
@@ -1100,6 +1101,7 @@ struct es8388_dev_s
   es8388_module_t                     audio_mode;       /* The current audio mode of the ES8388 chip */
   es8388_dac_output_t                 dac_output;       /* The current output of the ES8388 DAC */
   es8388_adc_input_t                  adc_input;        /* The current input of the ES8388 ADC */
+  es8388_mic_gain_t                   mic_gain;         /* The current microphone gain */
   uint32_t                            mclk;             /* The current MCLK frequency */
 };
 
