@@ -189,16 +189,16 @@ RUN mkdir sparc-gaisler-elf-gcc && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
 # Download the latest ESP32 GCC toolchain prebuilt by Espressif
 RUN mkdir -p xtensa-esp32-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
-  | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xz
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+  | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xJ
 
 RUN mkdir -p xtensa-esp32s2-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s2-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
-  | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xz
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+  | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xJ
 
 RUN mkdir -p xtensa-esp32s3-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
-  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xz
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
+  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xJ
 
 RUN echo "ESP Binaries: 2022/01/26"
 RUN mkdir -p /tools/blobs && cd /tools/blobs \
