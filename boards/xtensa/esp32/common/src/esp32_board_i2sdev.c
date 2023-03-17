@@ -69,7 +69,7 @@ int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx)
   struct audio_lowerhalf_s *audio_i2s;
   struct i2s_dev_s *i2s;
   char devname[8];
-  int ret;
+  int ret = OK;
 
   ainfo("Initializing I2S\n");
 

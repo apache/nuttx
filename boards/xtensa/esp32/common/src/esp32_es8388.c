@@ -49,6 +49,8 @@
  * Private Data
  ****************************************************************************/
 
+static struct es8388_lower_s g_es8388_lower[2];
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -78,7 +80,6 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
 {
   struct audio_lowerhalf_s *es8388;
   struct audio_lowerhalf_s *pcm;
-  struct es8388_lower_s *lower;
   struct i2s_dev_s *i2s;
   struct i2c_master_s *i2c;
   static bool initialized = false;
@@ -134,17 +135,14 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
         }
 #endif
 
-      /* Now we can use this I2S interface to initialize the ES8388 which
-       * will return an audio interface.
+      /* Now we can use this I2S interface to initialize the ES8388 output
+       * which will return an audio interface.
        */
 
-      lower = (struct es8388_lower_s *)
-        kmm_zalloc(sizeof(struct es8388_lower_s));
+      g_es8388_lower[0].address   = i2c_addr;
+      g_es8388_lower[0].frequency = i2c_freq;
 
-      lower->address   = i2c_addr,
-      lower->frequency = i2c_freq,
-
-      es8388 = es8388_initialize(i2c, i2s, lower);
+      es8388 = es8388_initialize(i2c, i2s, &g_es8388_lower[0]);
       if (es8388 == NULL)
         {
           auderr("ERROR: Failed to initialize the ES8388\n");
@@ -167,11 +165,40 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  i2s_port);
+      snprintf(devname, sizeof(devname), "pcm%d",  i2s_port);
 
       /* Finally, we can register the PCM/ES8388/I2S audio device. */
 
       ret = audio_register(devname, pcm);
+      if (ret < 0)
+        {
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
+          goto errout;
+        }
+
+      /* Now we can use this I2S interface to initialize the ES8388 input
+       * which will return an audio interface.
+       */
+
+      g_es8388_lower[1].address   = i2c_addr;
+      g_es8388_lower[1].frequency = i2c_freq;
+
+      es8388 = es8388_initialize(i2c, i2s, &g_es8388_lower[1]);
+      if (es8388 == NULL)
+        {
+          auderr("ERROR: Failed to initialize the ES8388\n");
+          ret = -ENODEV;
+          goto errout;
+        }
+
+      /* Create a device name */
+
+      snprintf(devname, sizeof(devname), "pcm_in%d",  i2s_port);
+
+      /* Finally, we can register the PCM/ES8388/I2S audio device. */
+
+      ret = audio_register(devname, es8388);
       if (ret < 0)
         {
           auderr("ERROR: Failed to register /dev/%s device: %d\n",
