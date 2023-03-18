@@ -181,7 +181,7 @@ int highpri_main(int argc, char *argv[])
          prescaler);
 
   STM32_TIM_SETPERIOD(dev, CONFIG_VIEWTOOL_TIM6_PERIOD);
-  printf("TIM6 period=%d cyles; interrupt rate=%d Hz\n",
+  printf("TIM6 period=%d cycles; interrupt rate=%d Hz\n",
          CONFIG_VIEWTOOL_TIM6_PERIOD,
          CONFIG_VIEWTOOL_TIM6_FREQUENCY / CONFIG_VIEWTOOL_TIM6_PERIOD);
 
