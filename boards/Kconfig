@@ -913,6 +913,13 @@ config ARCH_BOARD_MCU123_LPC214X
 		lpc214x development board. This OS is also built with the arm-nuttx-elf
 		toolchain*.  The port supports serial, timer0, spi, and usb.
 
+config ARCH_BOARD_MEGA1284P_XPLAINED
+	bool "Atmel MEGA-1284P-XPLAINED"
+	depends on ARCH_CHIP_ATMEGA1284P
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the configuration to support Atmel MEGA-1284P-XPLAINED board.
+
 config ARCH_BOARD_METRO_M4
 	bool "Adafruit M4 Metro"
 	depends on ARCH_CHIP_SAMD51J19
@@ -2850,6 +2857,7 @@ config ARCH_BOARD
 	default "mbed"                      if ARCH_BOARD_MBED
 	default "mcb1700"                   if ARCH_BOARD_MCB1700
 	default "mcu123-lpc214x"            if ARCH_BOARD_MCU123_LPC214X
+	default "mega1284p-xplained"        if ARCH_BOARD_MEGA1284P_XPLAINED
 	default "metro-m4"                  if ARCH_BOARD_METRO_M4
 	default "micropendous3"             if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                    if ARCH_BOARD_MIRTOO
@@ -3681,6 +3689,9 @@ source "boards/arm/xmc4/xmc4700-relax/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
 source "boards/avr/at32uc3/avr32dev1/Kconfig"
+endif
+if ARCH_BOARD_MEGA1284P_XPLAINED
+source "boards/avr/atmega/mega1284p-xplained/Kconfig"
 endif
 if ARCH_BOARD_MICROPENDOUS3
 source "boards/avr/at90usb/micropendous3/Kconfig"
