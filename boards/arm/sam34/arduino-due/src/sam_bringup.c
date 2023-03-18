@@ -29,12 +29,21 @@
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/leds/userled.h>
 
 #include "arduino-due.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#undef HAVE_LEDS
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
@@ -113,6 +122,19 @@ int sam_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_LEDS
+  board_userled_initialize();
+
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
     }
 #endif
 
