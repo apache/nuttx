@@ -28,11 +28,11 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-
 #include "chip.h"
 #include "sam_gpio.h"
 #include "arduino-due.h"
+
+#include <arch/board/board.h>
 
 #ifndef CONFIG_ARCH_LEDS
 

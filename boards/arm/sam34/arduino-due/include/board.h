@@ -147,6 +147,8 @@
  * GPIO output to low.
  */
 
+#define LED_DRIVER_PATH "/dev/userleds"
+
 /* LED index values for use with board_userled() */
 
 #define BOARD_LED_L       0
