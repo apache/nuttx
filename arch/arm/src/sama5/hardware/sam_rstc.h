@@ -51,6 +51,9 @@
 /* Reset Controller Control Register */
 
 #define RSTC_CR_PROCRST         (1 << 0)   /* Bit 0:  Processor Reset */
+#if defined(CONFIG_ARCH_CHIP_SAMA5D3)
+#  define RSTC_CR_PERRST        (1 << 2)   /* Bit 2:  Peripheral Reset */
+#endif
 #define RSTC_CR_EXTRST          (1 << 3)   /* Bit 3:  External Reset */
 #define RSTC_CR_KEY_SHIFT       (24)       /* Bits 24-31:  Password */
 #define RSTC_CR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
