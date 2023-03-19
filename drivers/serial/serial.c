@@ -315,7 +315,6 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
     {
       int ch = *buffer++;
 
-#ifdef CONFIG_SERIAL_TERMIOS
       /* Do output post-processing */
 
       if ((dev->tc_oflag & OPOST) != 0)
@@ -334,15 +333,6 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
               uart_putc(dev, '\r');
             }
         }
-
-#else /* !CONFIG_SERIAL_TERMIOS */
-      /* If this is the console, then we should replace LF with CR-LF */
-
-      if (dev->isconsole && ch == '\n')
-        {
-          uart_putc(dev, '\r');
-        }
-#endif
 
       /* Output the character, using the low-level direct UART interfaces */
 
@@ -847,7 +837,6 @@ static ssize_t uart_read(FAR struct file *filep,
 
           rxbuf->tail = tail;
 
-#ifdef CONFIG_SERIAL_TERMIOS
           /* Do input processing if any is enabled */
 
           if (dev->tc_iflag & (INLCR | IGNCR | ICRNL))
@@ -879,25 +868,13 @@ static ssize_t uart_read(FAR struct file *filep,
            * IUCLC - Not Posix
            * IXON/OXOFF - no xon/xoff flow control.
            */
-#else
-          if (dev->isconsole && ch == '\r')
-            {
-              ch = '\n';
-            }
-#endif
 
           /* Store the received character */
 
           *buffer++ = ch;
           recvd++;
 
-          if (
-#ifdef CONFIG_SERIAL_TERMIOS
-              dev->tc_lflag & ECHO
-#else
-              dev->isconsole
-#endif
-             )
+          if (dev->tc_lflag & ECHO)
             {
               /* Check for the beginning of a VT100 escape sequence, 3 byte */
 
@@ -1271,7 +1248,6 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
       ch  = *buffer++;
       ret = OK;
 
-#ifdef CONFIG_SERIAL_TERMIOS
       /* Do output post-processing */
 
       if ((dev->tc_oflag & OPOST) != 0)
@@ -1298,15 +1274,6 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
            * ONOCR  - low-speed interactive optimization
            */
         }
-
-#else /* !CONFIG_SERIAL_TERMIOS */
-      /* If this is the console, convert \n -> \r\n */
-
-      if (dev->isconsole && ch == '\n')
-        {
-          ret = uart_putxmitchar(dev, '\r', oktoblock);
-        }
-#endif
 
       /* Put the character into the transmit buffer */
 
@@ -1550,7 +1517,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
     }
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Append any higher level TTY flags */
 
   if (ret == OK || ret == -ENOTTY)
@@ -1599,7 +1565,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
         }
     }
-#endif
 
   return ret;
 }
@@ -1817,7 +1782,6 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   dev->pid = INVALID_PROCESS_ID;
 #endif
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* If this UART is a serial console */
 
   if (dev->isconsole)
@@ -1838,7 +1802,6 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
       dev->escape = 0;
     }
-#endif
 
   /* Initialize mutex & semaphores */
 
@@ -2031,11 +1994,7 @@ int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size)
 {
   size_t i;
 
-#ifdef CONFIG_SERIAL_TERMIOS
   if ((dev->tc_lflag & ISIG) == 0)
-#else
-  if (!dev->isconsole)
-#endif
     {
       return 0;
     }

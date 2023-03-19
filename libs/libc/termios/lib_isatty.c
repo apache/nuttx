@@ -46,8 +46,6 @@
  *   responds wo tcgetattr() without an error -- that it, the driver supports
  *   the NuttX TCGETS ioctl command.
  *
- *   Of course, that can only be true if CONFIG_SERIAL_TERMIOS=y.
- *
  ****************************************************************************/
 
 int isatty(int fd)

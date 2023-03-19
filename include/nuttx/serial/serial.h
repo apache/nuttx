@@ -284,13 +284,11 @@ struct uart_dev_s
   pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
 #endif
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Terminal control flags */
 
   tcflag_t             tc_iflag;     /* Input modes */
   tcflag_t             tc_oflag;     /* Output modes */
   tcflag_t             tc_lflag;     /* Local modes */
-#endif
 
   /* Semaphores & mutex */
 
