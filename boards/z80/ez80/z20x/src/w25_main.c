@@ -545,7 +545,6 @@ static int w25_boot_program(void)
       return ret;
     }
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Drain all pending Tx output in stdout. "Booting..." message will be
    * lost if the outgoing Tx bytes are not drained.
    */
@@ -557,7 +556,6 @@ static int w25_boot_program(void)
       fprintf(stderr, "ERROR: tcdrain() failed: %d\n", ret);
       return ret;
     }
-#endif
 
   /* Start the successfully loaded program */
 

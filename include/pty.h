@@ -31,7 +31,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-#if defined(CONFIG_SERIAL_TERMIOS) && defined(CONFIG_PSEUDOTERM)
+#ifdef CONFIG_PSEUDOTERM
 
 /****************************************************************************
  * Public Function Prototypes
@@ -59,5 +59,5 @@ int openpty(FAR int *master, FAR int *slave, FAR char *name,
 }
 #endif
 
-#endif /* CONFIG_SERIAL_TERMIOS && CONFIG_PSEUDOTERM */
+#endif /* CONFIG_PSEUDOTERM */
 #endif /* __INCLUDE_PTY_H */

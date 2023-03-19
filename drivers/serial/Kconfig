@@ -169,9 +169,10 @@ config SERIAL_TERMIOS
 	depends on ARCH_HAVE_SERIAL_TERMIOS
 	default n
 	---help---
-		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
-		If this is not defined, then the terminal settings (baud, parity, etc).
-		are not configurable at runtime; serial streams cannot be flushed, etc..
+		If this is not defined, then the terminal hardware setting
+		(baud, parity, flow control) is not configurable at runtime.
+		Note: other software setting (echo, \r\n<->\n, break, tcflush)
+		is always supported.
 
 config TTY_LAUNCH
 	bool "Enable feature TTY launch program"

@@ -73,9 +73,7 @@ struct pty_dev_s
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
-#ifdef CONFIG_SERIAL_TERMIOS
   tcflag_t pd_iflag;            /* Terminal input modes */
-#endif
   tcflag_t pd_oflag;            /* Terminal output modes */
   struct pty_poll_s pd_poll[CONFIG_DEV_PTY_NPOLLWAITERS];
 };
@@ -394,18 +392,15 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
   ssize_t ntotal;
-#ifdef CONFIG_SERIAL_TERMIOS
   ssize_t i;
   ssize_t j;
   char ch;
-#endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Do input processing if any is enabled
    *
    * Specifically not handled:
@@ -460,7 +455,6 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
         }
     }
   else
-#endif
     {
       /* NOTE: the source pipe will block if no data is available in
        * the pipe.   Otherwise, it will return data from the pipe.  If
@@ -681,7 +675,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-#ifdef CONFIG_SERIAL_TERMIOS
       case TCGETS:
         {
           FAR struct termios *termiosp = (FAR struct termios *)arg;
@@ -718,7 +711,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = OK;
         }
         break;
-#endif
 
       /* Get the number of bytes that are immediately available for reading
        * from the source pipe.

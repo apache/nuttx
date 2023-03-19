@@ -50,6 +50,8 @@ void cfmakeraw(FAR struct termios *termiosp)
                          | INLCR | IGNCR | ICRNL | IXON);
   termiosp->c_oflag &= ~OPOST;
   termiosp->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+#ifdef CONFIG_SERIAL_TERMIOS
   termiosp->c_cflag &= ~(CSIZE | PARENB);
   termiosp->c_cflag |= CS8;
+#endif
 }
