@@ -2339,9 +2339,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* And update with flags from this layer */
 
-        termiosp->c_iflag = serdev->tc_iflag;
-        termiosp->c_oflag = serdev->tc_oflag;
-        termiosp->c_lflag = serdev->tc_lflag;
         termiosp->c_cflag =
             ((priv->linecoding.parity != CDC_PARITY_NONE) ? PARENB : 0) |
             ((priv->linecoding.parity == CDC_PARITY_ODD) ? PARODD : 0) |
@@ -2358,10 +2355,10 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
 #endif
-      cfsetispeed(termiosp, (speed_t) priv->linecoding.baud[3] << 24 |
-                            (speed_t) priv->linecoding.baud[2] << 16 |
-                            (speed_t) priv->linecoding.baud[1] << 8  |
-                            (speed_t) priv->linecoding.baud[0]);
+        cfsetispeed(termiosp, (speed_t) priv->linecoding.baud[3] << 24 |
+                              (speed_t) priv->linecoding.baud[2] << 16 |
+                              (speed_t) priv->linecoding.baud[1] << 8  |
+                              (speed_t) priv->linecoding.baud[0]);
       }
       break;
 
@@ -2379,10 +2376,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
 
         /* Update the flags we keep at this layer */
-
-        serdev->tc_iflag = termiosp->c_iflag;
-        serdev->tc_oflag = termiosp->c_oflag;
-        serdev->tc_lflag = termiosp->c_lflag;
 
 #ifdef CONFIG_CDCACM_OFLOWCONTROL
         /* Handle changes to output flow control */
