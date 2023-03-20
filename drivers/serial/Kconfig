@@ -169,10 +169,10 @@ config SERIAL_TERMIOS
 	depends on ARCH_HAVE_SERIAL_TERMIOS
 	default n
 	---help---
-		If this is not defined, then the terminal hardware setting
-		(baud, parity, flow control) is not configurable at runtime.
-		Note: other software setting (echo, \r\n<->\n, break, tcflush)
-		is always supported.
+		If this is not defined, then the terminal hardware settings
+		(baud, parity, flow control) are not configurable at runtime.
+		Note: other software settings (echo, \r\n<->\n, break, tcflush)
+		are always supported.
 
 config TTY_LAUNCH
 	bool "Enable feature TTY launch program"
