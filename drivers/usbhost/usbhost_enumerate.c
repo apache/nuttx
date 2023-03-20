@@ -115,7 +115,7 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
   id->vid = usbhost_getle16(devdesc->vendor);
   id->pid = usbhost_getle16(devdesc->product);
 
-  uinfo("class:%d subclass:%04x protocol:%04x vid:%d pid:%d\n",
+  uinfo("class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
         id->base, id->subclass, id->proto, id->vid, id->pid);
   return OK;
 }

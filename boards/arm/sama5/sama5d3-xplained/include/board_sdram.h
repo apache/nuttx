@@ -92,11 +92,7 @@
 #  define BOARD_CKGR_UCKR_UPLLCOUNT  (15)  /* Maximum value */
 #  define BOARD_CKGR_UCKR_BIASCOUNT  (15)  /* Maximum value */
 
-/* REVISIT:  The divisor of 10 produces a rate that is too high. Division
- * by 5, however, seems to work just fine.  No idea why?
- */
-
-#  define BOARD_UPLL_OHCI_DIV        (5)   /* Divide by 5 */
+#  define BOARD_UPLL_OHCI_DIV        (10)   /* Divide by 10 */
 #endif
 
 /* ADC Configuration
