@@ -276,7 +276,7 @@ struct i2c_master_s *sim_i2cbus_initialize(int bus)
       return NULL;
     }
 
-  snprintf(filename, 19, "/dev/i2c-%d", bus);
+  snprintf(filename, sizeof(filename), "/dev/i2c-%d", bus);
   priv->file = open(filename, O_RDWR);
   if (priv->file < 0)
     {
