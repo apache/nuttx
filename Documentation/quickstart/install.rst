@@ -45,7 +45,7 @@ First, install the following set of system dependencies according to your Operat
     There may be complications interacting with
     programming tools over USB.  Recently support for USBIP was added to WSL 2
     which has been used with the STM32 platform, but it is not trivial to configure:
-    https://github.com/rpasek/usbip-wsl2-instructions
+    https://learn.microsoft.com/en-us/windows/wsl/connect-usb
 
   .. tab:: Windows/Cygwin
 
