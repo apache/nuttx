@@ -50,11 +50,11 @@
 #define PANIC()          __assert(__FILE__, __LINE__, "panic")
 
 #ifdef CONFIG_DEBUG_ASSERTIONS_EXPRESSION
-#define ASSERT(f)        do { if (unlikely(!(f))) __assert(__FILE__, __LINE__, #f); } while (0)
-#define VERIFY(f)        do { if (unlikely((f) < 0)) __assert(__FILE__, __LINE__, #f); } while (0)
+#define ASSERT(f)        do { if (predict_false(!(f))) __assert(__FILE__, __LINE__, #f); } while (0)
+#define VERIFY(f)        do { if (predict_false((f) < 0)) __assert(__FILE__, __LINE__, #f); } while (0)
 #else
-#define ASSERT(f)        do { if (unlikely(!(f))) __assert(__FILE__, __LINE__, NULL); } while (0)
-#define VERIFY(f)        do { if (unlikely((f) < 0)) __assert(__FILE__, __LINE__, NULL); } while (0)
+#define ASSERT(f)        do { if (predict_false(!(f))) __assert(__FILE__, __LINE__, NULL); } while (0)
+#define VERIFY(f)        do { if (predict_false((f) < 0)) __assert(__FILE__, __LINE__, NULL); } while (0)
 #endif
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
