@@ -377,6 +377,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
     {
       /* Select this FLASH part */
 
+      ee25xx_lock(priv->spi);
       SPI_SELECT(priv->spi, SPIDEV_EEPROM(0), true);
 
       /* Send "Read Status Register (RDSR)" command */
@@ -392,6 +393,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
       /* Deselect the FLASH */
 
       SPI_SELECT(priv->spi, SPIDEV_EEPROM(0), false);
+      ee25xx_unlock(priv->spi);
 
       /* Given that writing could take up to a few milliseconds,
        * the following short delay in the "busy" case will allow
@@ -400,9 +402,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 
       if ((status & EE25XX_SR_WIP) != 0)
         {
-          ee25xx_unlock(priv->spi);
           nxsig_usleep(1000);
-          ee25xx_lock(priv->spi);
         }
     }
   while ((status & EE25XX_SR_WIP) != 0);
