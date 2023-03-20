@@ -74,6 +74,7 @@ struct pty_dev_s
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
   tcflag_t pd_iflag;            /* Terminal input modes */
+  tcflag_t pd_lflag;            /* Terminal local modes */
   tcflag_t pd_oflag;            /* Terminal output modes */
   struct pty_poll_s pd_poll[CONFIG_DEV_PTY_NPOLLWAITERS];
 };
@@ -468,6 +469,11 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
        */
 
       ntotal = file_read(&dev->pd_src, buffer, len);
+    }
+
+  if (dev->pd_lflag & ECHO)
+    {
+      pty_write(filep, buffer, ntotal);
     }
 
   return ntotal;
@@ -949,7 +955,7 @@ int pty_register2(int minor, bool susv1)
 
   /* Map CR -> NL from terminal input (master)
    * For some usage like adb shell:
-   *   adb shell write \r -> nsh read \n
+   *   adb shell write \r -> nsh read \n and echo input
    *   nsh write \n -> adb shell read \r\n
    */
 
@@ -961,6 +967,7 @@ int pty_register2(int minor, bool susv1)
   devpair->pp_master.pd_oflag   = OPOST | OCRNL;
   devpair->pp_slave.pd_devpair  = devpair;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
+  devpair->pp_slave.pd_lflag    = ECHO;
 
   /* Register the master device
    *
