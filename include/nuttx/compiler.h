@@ -156,8 +156,8 @@
 
 /* Branch prediction */
 
-#  define likely(x) __builtin_expect((x), 1)
-#  define unlikely(x) __builtin_expect((x), 0)
+#  define predict_true(x) __builtin_expect(!!(x), 1)
+#  define predict_false(x) __builtin_expect((x), 0)
 
 /* Code locate */
 
@@ -476,8 +476,8 @@
  */
 
 #  define noreturn_function
-#  define likely(x) (x)
-#  define unlikely(x) (x)
+#  define predict_true(x) (x)
+#  define predict_false(x) (x)
 #  define locate_code(n)
 #  define aligned_data(n)
 #  define locate_data(n)
@@ -628,8 +628,8 @@
  */
 
 #  define noreturn_function
-#  define likely(x) (x)
-#  define unlikely(x) (x)
+#  define predict_true(x) (x)
+#  define predict_false(x) (x)
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)
@@ -737,8 +737,8 @@
 #  define weak_const_function
 #  define noreturn_function
 #  define farcall_function
-#  define likely(x) (x)
-#  define unlikely(x) (x)
+#  define predict_true(x) (x)
+#  define predict_false(x) (x)
 #  define locate_code(n)
 #  define aligned_data(n)
 #  define locate_data(n)
@@ -826,8 +826,8 @@
 #  define restrict
 #  define noreturn_function
 #  define farcall_function
-#  define likely(x) (x)
-#  define unlikely(x) (x)
+#  define predict_true(x) (x)
+#  define predict_false(x) (x)
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)
@@ -890,8 +890,8 @@
 #  define restrict
 #  define noreturn_function
 #  define farcall_function
-#  define likely(x) (x)
-#  define unlikely(x) (x)
+#  define predict_true(x) (x)
+#  define predict_false(x) (x)
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)
