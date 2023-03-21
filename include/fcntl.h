@@ -87,9 +87,9 @@
 #define F_GETFL         2  /* Read the file status flags */
 #define F_GETLEASE      3  /* Indicates what type of lease is held on fd (linux) */
 #define F_GETLK         4  /* Check if we could place a lock */
-#define F_GETOWN        5  /* Get the pid receiving  SIGIO and SIGURG signals for fd */
+#define F_GETOWN        5  /* Get the pid receiving SIGIO and SIGURG signals for fd */
 #define F_GETSIG        6  /* Get the signal sent */
-#define F_NOTIFY        7  /* Provide notification when directory referred to by fd changes (linux)*/
+#define F_NOTIFY        7  /* Provide notification when directory referred to by fd changes (linux) */
 #define F_SETFD         8  /* Set the file descriptor flags to value */
 #define F_SETFL         9  /* Set the file status flags to the value */
 #define F_SETLEASE      10 /* Set or remove file lease (linux) */
