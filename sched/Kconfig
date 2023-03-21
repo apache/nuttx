@@ -1649,14 +1649,6 @@ config SIG_POLL
 
 comment "Non-standard Signal Numbers"
 
-config SIG_SIGCONDTIMEDOUT
-	int "SIGCONDTIMEDOUT"
-	default 30
-	depends on !DISABLE_PTHREAD
-	---help---
-		This non-standard signal number is used the implementation of
-		pthread_cond_timedwait(). Default 30.
-
 config SIG_SIGWORK
 	int "SIGWORK"
 	default 31

@@ -160,11 +160,6 @@ FAR char *strsignal(int signum)
 
       /* Non-standard signals */
 
-#ifdef SIGCONDTIMEDOUT
-      case SIGCONDTIMEDOUT:
-        return (FAR char *)"SIGCONDTIMEDOUT";
-#endif
-
 #ifdef SIGWORK
       case SIGWORK:
         return (FAR char *)"SIGWORK";
