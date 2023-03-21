@@ -286,6 +286,11 @@ FAR void  *bsearch(FAR const void *key, FAR const void *base, size_t nel,
 
 FAR const char *getprogname(void);
 
+/* Registers a destructor function to be called by exit() */
+
+int __cxa_atexit(CODE void (*func)(FAR void *), FAR void *arg,
+                 FAR void *dso_handle);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
