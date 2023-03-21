@@ -212,7 +212,8 @@ int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz);
  *
  ****************************************************************************/
 
-int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz);
+int settimeofday(FAR const struct timeval *tv,
+                 FAR const struct timezone *tz);
 
 /****************************************************************************
  * Name: adjtime
