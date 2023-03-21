@@ -203,6 +203,17 @@ config ARM_GIC_VERSION
 		Version of Generic Interrupt Controller (GIC) supported by the
 		architecture
 
+if ARM_GIC_VERSION = 2
+
+config ARM_GIC_EOIMODE
+	bool
+	default n
+	---help---
+		Enable GICC_CTLR.EOImode, this will separates the priority drop and interrupt
+		deactivation operations.
+
+endif
+
 if ARCH_CHIP_A64
 source "arch/arm64/src/a64/Kconfig"
 endif

@@ -228,16 +228,17 @@ void arm_gic_initialize(void)
 
 #endif
 
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#ifdef CONFIG_ARMV7R_GIC_EOIMODE
+#  if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set EnableS=1 to enable CPU interface to signal secure interrupts.
    *
    * NOTE:  Only for processors that operate in secure state.
    */
 
   iccicr |= GIC_ICCICRS_EOIMODES;
-#endif
+#  endif
 
-#if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+#  if defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
   /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
    *
    * NOTE:  Only for processors that operate in non-secure state.
@@ -245,13 +246,14 @@ void arm_gic_initialize(void)
 
   iccicr |= GIC_ICCICRS_EOIMODENS;
 
-#elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
+#  elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
    *
    * NOTE:  Only for processors that operate in non-secure state.
    */
 
   iccicr |= GIC_ICCICRU_EOIMODENS;
+#  endif
 #endif
 
 #ifdef CONFIG_ARCH_TRUSTZONE_BOTH
@@ -343,6 +345,10 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   regval = getreg32(GIC_ICCIAR);
   irq = (regval & GIC_ICCIAR_INTID_MASK) >> GIC_ICCIAR_INTID_SHIFT;
 
+#ifdef CONFIG_ARMV7R_GIC_EOIMODE
+  putreg32(regval, GIC_ICCEOIR);
+#endif
+
   /* Ignore spurions IRQs.  ICCIAR will report 1023 if there is no pending
    * interrupt.
    */
@@ -357,7 +363,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
   /* Write to the end-of-interrupt register */
 
+#ifdef CONFIG_ARMV7R_GIC_EOIMODE
+  putreg32(regval, GIC_ICCDIR);
+#else
   putreg32(regval, GIC_ICCEOIR);
+#endif
   return regs;
 }
 

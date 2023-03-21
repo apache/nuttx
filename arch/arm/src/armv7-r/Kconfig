@@ -13,6 +13,17 @@ config ARMV7R_HAVE_GICv2
 		Selected by the configuration tool if the architecture supports the
 		Generic Interrupt Controller (GIC)
 
+if ARMV7R_HAVE_GICv2
+
+config ARMV7R_GIC_EOIMODE
+	bool
+	default n
+	---help---
+		Enable GICC_CTLR.EOImode, this will separates the priority drop and interrupt
+		deactivation operations.
+
+endif # ARMV7R_GIC_EOIMODE
+
 config ARMV7R_HAVE_PTM
 	bool
 	default n
