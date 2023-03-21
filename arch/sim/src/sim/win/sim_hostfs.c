@@ -120,6 +120,22 @@ int host_open(const char *pathname, int flags, nuttx_mode_t mode)
       mapflags |= O_TRUNC;
     }
 
+  /* Since the initial default setting in MSVC is text mode ( O_TEXT ):
+   *
+   * https://learn.microsoft.com/en-us/cpp/c-runtime-library/ \
+   * text-and-binary-mode-file-i-o?view=msvc-170
+   *
+   * In order to unify the translation behavior with unix,
+   * 1. set O_BINARY for hostfs as default
+   * 2. enable default text mode if the application specifies flag O_TEXT
+   *
+   */
+
+  if ((flags & NUTTX_O_TEXT) == 0)
+    {
+      mapflags |= O_BINARY;
+    }
+
   ret = _open(pathname, mapflags, mode);
   if (ret == -1)
     {
