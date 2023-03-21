@@ -32,6 +32,8 @@ LIBMETAL_ARCH = x86_64
 endif
 else ifeq ($(CONFIG_ARCH), risc-v)
 LIBMETAL_ARCH = riscv
+else ifeq ($(CONFIG_ARCH), arm64)
+LIBMETAL_ARCH = aarch64
 else
 LIBMETAL_ARCH = $(CONFIG_ARCH)
 endif
