@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/sensors/apds9922.h>
 #include <sys/ioctl.h>
@@ -67,34 +68,42 @@
 #  define APDS9922_PACK_TO_UINT16(a) \
    (((a)[0] >> 0) | ((a)[1]))
 #  define APDS9922_UNPACK_FROM_UINT32(w, b) \
-   do { \
-    (b)[0] = ((w) >> 24) & 0xff; \
-    (b)[1] = ((w) >> 16) & 0xff; \
-    (b)[2] = ((w) >> 8) & 0xff; \
-    (b)[3] = (w) & 0xff; \
-   } while (0)
+  do \
+    { \
+      (b)[0] = ((w) >> 24) & 0xff; \
+      (b)[1] = ((w) >> 16) & 0xff; \
+      (b)[2] = ((w) >> 8) & 0xff; \
+      (b)[3] = (w) & 0xff; \
+    } \
+  while (0)
 #  define APDS9922_UNPACK_FROM_UINT16(w, b) \
-   do { \
-    (b)[0] = ((w) >> 8) & 0xff; \
-    (b)[1] = (w) & 0xff; \
-   } while (0)
+  do \
+    { \
+      (b)[0] = ((w) >> 8) & 0xff; \
+      (b)[1] = (w) & 0xff; \
+    } \
+  while (0)
 #else
 #  define APDS9922_PACK_TO_UINT32(a) \
    (((a)[3] << 24) | ((a)[2] << 16) | ((a)[1] << 8) | ((a)[0]))
 #  define APDS9922_PACK_TO_UINT16(a) \
    (((a)[1] << 8) | ((a)[0]))
 #  define APDS9922_UNPACK_FROM_UINT32(w, b) \
-   do { \
-     (b)[3] = ((w) >> 24) & 0xff; \
-     (b)[2] = ((w) >> 16) & 0xff; \
-     (b)[1] = ((w) >> 8) & 0xff; \
-     (b)[0] = (w) & 0xff; \
-   } while (0)
+  do \
+    { \
+      (b)[3] = ((w) >> 24) & 0xff; \
+      (b)[2] = ((w) >> 16) & 0xff; \
+      (b)[1] = ((w) >> 8) & 0xff; \
+      (b)[0] = (w) & 0xff; \
+    } \
+  while (0)
 #  define APDS9922_UNPACK_FROM_UINT16(w, b) \
-   do { \
-     (b)[1] = ((w) >> 8) & 0xff; \
-     (b)[0] = (w) & 0xff; \
-   } while (0)
+  do \
+    { \
+      (b)[1] = ((w) >> 8) & 0xff; \
+      (b)[0] = (w) & 0xff; \
+    } \
+  while (0)
 #endif
 
 /* Register mappings */
@@ -219,19 +228,54 @@
  * Private Types
  ****************************************************************************/
 
+static const uint32_t apds9922_ps_res_table[] =
+{
+  256,
+  512,
+  1024,
+  2048,
+};
+
+static const uint32_t apds9922_als_gain_table[] =
+{
+  1,
+  3,
+  6,
+  9,
+  18,
+};
+
+static int apds9922_als_res_rate_table[] =
+{
+  400,
+  200,
+  100,
+  50,
+  25,
+};
+
+static const uint32_t apds9922_als_res_table[] =
+{
+  1048575,
+  524287,
+  262143,
+  131071,
+  65535,
+};
+
 struct apds9922_dev_s
 {
-  FAR struct pollfd               *fds_als[CONFIG_APDS9922_ALS_NPOLLWAITERS];
-  FAR struct pollfd               *fds_ps[CONFIG_APDS9922_PS_NPOLLWAITERS];
-  FAR struct work_s               work;       /* Handles  interrupt         */
-  mutex_t                         devlock;    /* Manages exclusive access   */
-  FAR struct apds9922_config_s    *config;    /* Platform specific config   */
-  FAR struct apds9922_als_setup_s als_setup;  /* Device ALS config          */
-  FAR struct apds9922_ps_setup_s  ps_setup;   /* Device PS config           */
-  int                             als;        /* ALS data                   */
-  FAR struct apds9922_ps_data     *ps_data;   /* PS data                    */
-  uint8_t                         devid;      /* Device ID read at startup  */
-  int                             crefs;      /* Number of opens, als or ps */
+  FAR struct pollfd            *fds_als[CONFIG_APDS9922_ALS_NPOLLWAITERS];
+  FAR struct pollfd            *fds_ps[CONFIG_APDS9922_PS_NPOLLWAITERS];
+  struct work_s                work;      /* Handles  interrupt         */
+  mutex_t                      devlock;   /* Manages exclusive access   */
+  FAR struct apds9922_config_s *config;   /* Platform specific config   */
+  struct apds9922_als_setup_s  als_setup; /* Device ALS config          */
+  struct apds9922_ps_setup_s   ps_setup;  /* Device PS config           */
+  int                          als;       /* ALS data                   */
+  FAR struct apds9922_ps_data  *ps_data;  /* PS data                    */
+  uint8_t                      devid;     /* Device ID read at startup  */
+  int                          crefs;     /* Number of opens, als or ps */
   };
 
 /****************************************************************************
@@ -269,41 +313,32 @@ static int apds9922_reset(FAR struct apds9922_dev_s *priv);
 static int apds9922_als_config(FAR struct apds9922_dev_s *priv,
                                FAR struct apds9922_als_setup_s *config);
 static int apds9922_lux_calc(FAR struct apds9922_dev_s *priv);
-static int apds9922_als_gain(FAR struct apds9922_dev_s *priv,
-                             enum apds9922_als_gain gain);
-static int apds9922_autogain(FAR struct apds9922_dev_s *priv,
-                             bool enable);
-static int apds9922_als_resolution(FAR struct apds9922_dev_s *priv,
-                                   enum apds9922_als_res res);
-static int apds9922_als_rate(FAR struct apds9922_dev_s *priv,
-                                     enum apds9922_als_rate rate);
+static int apds9922_als_gain(FAR struct apds9922_dev_s *priv, int gain);
+static int apds9922_autogain(FAR struct apds9922_dev_s *priv, bool enable);
+static int apds9922_als_resolution(FAR struct apds9922_dev_s *priv, int res);
+static int apds9922_als_rate(FAR struct apds9922_dev_s *priv, int rate);
 static int apds9922_als_persistance(FAR struct apds9922_dev_s *priv,
-                                        uint8_t persistance);
+                                    uint8_t persistance);
 static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
-                                     enum apds9922_als_thresh_var variance);
+                                 int variance);
 static int apds9922_als_thresh(FAR struct apds9922_dev_s *priv,
                                FAR struct adps9922_als_thresh thresholds);
-static int apds9922_als_int_mode(FAR struct apds9922_dev_s *priv,
-                                 enum apds9922_als_int_mode mode);
+static int apds9922_als_int_mode(FAR struct apds9922_dev_s *priv, int mode);
 static int apds9922_als_channel(FAR struct apds9922_dev_s *priv,
-                                enum apds9922_als_chan channel);
+                                int channel);
 static int apds9922_als_factor(FAR struct apds9922_dev_s *priv,
                                uint32_t factor);
 static int apds9922_als_limit(FAR struct apds9922_dev_s *priv,
-                               uint32_t limit);
+                              uint32_t limit);
 
 /* Proximity sensor functions */
 
 static int apds9922_ps_config(FAR struct apds9922_dev_s *priv,
-                             FAR struct apds9922_ps_setup_s *config);
-static int apds9922_ps_resolution(FAR struct apds9922_dev_s *priv,
-                                  enum apds9922_ps_res res);
-static int apds9922_ps_rate(FAR struct apds9922_dev_s *priv,
-                            enum apds9922_ps_rate rate);
-static int apds9922_ps_ledf(FAR struct apds9922_dev_s *priv,
-                            enum apds9922_ps_led_f freq);
-static int apds9922_ps_ledi(FAR struct apds9922_dev_s *priv,
-                            enum apds9922_ps_led_i current);
+                              FAR struct apds9922_ps_setup_s *config);
+static int apds9922_ps_resolution(FAR struct apds9922_dev_s *priv, int res);
+static int apds9922_ps_rate(FAR struct apds9922_dev_s *priv, int rate);
+static int apds9922_ps_ledf(FAR struct apds9922_dev_s *priv, int freq);
+static int apds9922_ps_ledi(FAR struct apds9922_dev_s *priv, int current);
 static int apds9922_ps_ledpk(FAR struct apds9922_dev_s *priv, bool enable);
 static int apds9922_ps_pulses(FAR struct apds9922_dev_s *priv,
                               uint8_t num_p);
@@ -311,25 +346,24 @@ static int apds9922_ps_thresh(FAR struct apds9922_dev_s *priv,
                               FAR struct adps9922_ps_thresh thresh);
 static int apds9922_ps_canc_lev(FAR struct apds9922_dev_s *priv,
                                 uint16_t lev);
-static int apds9922_ps_int_mode(FAR struct apds9922_dev_s *priv,
-                                enum apds9922_ps_int_mode mode);
+static int apds9922_ps_int_mode(FAR struct apds9922_dev_s *priv, int mode);
 static int apds9922_ps_persistance(FAR struct apds9922_dev_s *priv,
                                    uint8_t persistance);
 static int apds9922_ps_notify_mode(FAR struct apds9922_dev_s *priv,
-                                   enum apds9922_ps_notify);
+                                   int notify);
 
 /* Character driver methods */
 
 static int     apds9922_open(FAR struct file *filep);
 static int     apds9922_close(FAR struct file *filep);
-static ssize_t apds9922_als_read(FAR struct file *, FAR char *, size_t);
+static ssize_t apds9922_als_read(FAR struct file *filep, FAR char *, size_t);
 static ssize_t apds9922_als_write(FAR struct file *filep,
                                   FAR const char *buffer, size_t buflen);
 static int     apds9922_als_ioctl(FAR struct file *filep, int cmd,
                                   unsigned long arg);
 static int     apds9922_als_poll(FAR struct file *filep,
                                  FAR struct pollfd *fds, bool setup);
-static ssize_t apds9922_ps_read(FAR struct file *, FAR char *, size_t);
+static ssize_t apds9922_ps_read(FAR struct file *filep, FAR char *, size_t);
 static ssize_t apds9922_ps_write(FAR struct file *filep,
                                  FAR const char *buffer, size_t buflen);
 static int     apds9922_ps_ioctl(FAR struct file *filep, int cmd,
@@ -443,7 +477,7 @@ static void apds9922_worker(FAR void *arg)
         }
 
       sninfo("INFO: ps=0x%x\t close=%d\n",
-              priv->ps_data->ps, priv->ps_data->close);
+             priv->ps_data->ps, priv->ps_data->close);
 
       if (notify_ps)
         {
@@ -455,7 +489,7 @@ static void apds9922_worker(FAR void *arg)
    * Set proximity and lux to error value and notify.
    */
 
-  err_out:
+err_out:
 
   if (ret < 0)
     {
@@ -562,7 +596,7 @@ static int apds9922_reset(FAR struct apds9922_dev_s *priv)
 
   /* Wait for device to power up properly after reset */
 
-  usleep(50000);
+  nxsig_usleep(50000);
 
   return OK;
 }
@@ -712,8 +746,7 @@ static int apds9922_als_config(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_als_resolution(FAR struct apds9922_dev_s *priv,
-                               enum apds9922_als_res res)
+static int apds9922_als_resolution(FAR struct apds9922_dev_s *priv, int res)
 {
   uint8_t regval;
   int ret;
@@ -747,8 +780,7 @@ static int apds9922_als_resolution(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_als_channel(FAR struct apds9922_dev_s *priv,
-                                      enum apds9922_als_chan channel)
+static int apds9922_als_channel(FAR struct apds9922_dev_s *priv, int channel)
 {
   uint8_t regval;
   int ret;
@@ -822,7 +854,7 @@ static int apds9922_als_factor(FAR struct apds9922_dev_s *priv,
  ****************************************************************************/
 
 static int apds9922_als_limit(FAR struct apds9922_dev_s *priv,
-                               uint32_t limit)
+                              uint32_t limit)
 {
   if ((limit < 1) || (limit > 100))
     {
@@ -849,8 +881,7 @@ static int apds9922_als_limit(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_als_int_mode(FAR struct apds9922_dev_s *priv,
-                                       enum apds9922_als_int_mode mode)
+static int apds9922_als_int_mode(FAR struct apds9922_dev_s *priv, int mode)
 {
   uint8_t regval;
   int ret;
@@ -912,7 +943,7 @@ static int apds9922_als_thresh(FAR struct apds9922_dev_s *priv,
                                        FAR struct adps9922_als_thresh
                                                   thresholds)
 {
-  enum apds9922_als_res res_index = priv->als_setup.res;
+  int res_index = priv->als_setup.res;
   int ret;
   uint8_t data[8];
 
@@ -964,7 +995,7 @@ static int apds9922_als_thresh(FAR struct apds9922_dev_s *priv,
  ****************************************************************************/
 
 static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
-                                     enum apds9922_als_thresh_var variance)
+                                 int variance)
 {
   int ret;
 
@@ -1044,8 +1075,7 @@ static int apds9922_als_persistance(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_als_rate(FAR struct apds9922_dev_s *priv,
-                               enum apds9922_als_rate rate)
+static int apds9922_als_rate(FAR struct apds9922_dev_s *priv, int rate)
 {
   uint8_t regval;
   int ret;
@@ -1121,8 +1151,7 @@ static int apds9922_autogain(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_als_gain(FAR struct apds9922_dev_s *priv,
-                             enum apds9922_als_gain gain)
+static int apds9922_als_gain(FAR struct apds9922_dev_s *priv, int gain)
 {
   int ret;
 
@@ -1161,19 +1190,17 @@ static int apds9922_als_gain(FAR struct apds9922_dev_s *priv,
 static int apds9922_lux_calc(FAR struct apds9922_dev_s *priv)
 {
   uint32_t lux;
-  int thresh_h;
-  int thresh_l;
-  int ret;
-  uint32_t als = (uint32_t)priv->als;
-
-  enum apds9922_als_gain gain_idx = priv->als_setup.gain;
-  uint32_t               gain     = apds9922_als_gain_table[gain_idx];
-
-  enum apds9922_als_res  res_idx  = priv->als_setup.res;
-  uint32_t               limit    = priv->als_setup.range_lim;
-  uint32_t               factor   = priv->als_setup.als_factor;
-  uint32_t               res      = apds9922_als_res_rate_table[res_idx];
-  uint32_t               fs       = apds9922_als_res_table[res_idx];
+  int      thresh_h;
+  int      thresh_l;
+  int      ret;
+  uint32_t als      = (uint32_t)priv->als;
+  int      gain_idx = priv->als_setup.gain;
+  uint32_t gain     = apds9922_als_gain_table[gain_idx];
+  int      res_idx  = priv->als_setup.res;
+  uint32_t limit    = priv->als_setup.range_lim;
+  uint32_t factor   = priv->als_setup.als_factor;
+  uint32_t res      = apds9922_als_res_rate_table[res_idx];
+  uint32_t fs       = apds9922_als_res_table[res_idx];
 
   lux = (als * factor) / (res * gain);
 
@@ -1325,8 +1352,7 @@ static int apds9922_ps_config(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_ps_resolution(FAR struct apds9922_dev_s *priv,
-                                  enum apds9922_ps_res res)
+static int apds9922_ps_resolution(FAR struct apds9922_dev_s *priv, int res)
 {
   int ret;
   uint8_t regval;
@@ -1370,8 +1396,7 @@ static int apds9922_ps_resolution(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_ps_rate(FAR struct apds9922_dev_s *priv,
-                               enum apds9922_ps_rate rate)
+static int apds9922_ps_rate(FAR struct apds9922_dev_s *priv, int rate)
 {
   uint8_t regval;
   int ret;
@@ -1415,13 +1440,12 @@ static int apds9922_ps_rate(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_ps_ledf(FAR struct apds9922_dev_s *priv,
-                            enum apds9922_ps_led_f freq)
+static int apds9922_ps_ledf(FAR struct apds9922_dev_s *priv, int freq)
 {
   uint8_t regval;
   int ret;
 
-  if ((freq > PS_LED_FREQ100K) || (freq == PS_LED_FREQ_RESERVED))
+  if ((freq > PS_LED_FREQ100K) || (freq <= PS_LED_FREQ_RESERVED3))
     {
       return -EINVAL;
     }
@@ -1460,8 +1484,7 @@ static int apds9922_ps_ledf(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_ps_ledi(FAR struct apds9922_dev_s *priv,
-                            enum apds9922_ps_led_i current)
+static int apds9922_ps_ledi(FAR struct apds9922_dev_s *priv, int current)
 {
   uint8_t regval;
   int ret;
@@ -1585,7 +1608,7 @@ static int apds9922_ps_pulses(FAR struct apds9922_dev_s *priv, uint8_t num_p)
 static int apds9922_ps_thresh(FAR struct apds9922_dev_s *priv,
                               FAR struct adps9922_ps_thresh thresholds)
 {
-  enum apds9922_ps_res res_index = priv->ps_setup.res;
+  int res_index = priv->ps_setup.res;
   int ret;
   uint8_t data[4];
 
@@ -1676,8 +1699,7 @@ static int apds9922_ps_canc_lev(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_ps_int_mode(FAR struct apds9922_dev_s *priv,
-                                enum apds9922_ps_int_mode mode)
+static int apds9922_ps_int_mode(FAR struct apds9922_dev_s *priv, int mode)
 {
   int ret;
   uint8_t regval;
@@ -1781,7 +1803,7 @@ static int apds9922_ps_persistance(FAR struct apds9922_dev_s *priv,
  ****************************************************************************/
 
 static int apds9922_ps_notify_mode(FAR struct apds9922_dev_s *priv,
-                                   enum apds9922_ps_notify notify)
+                                   int notify)
 {
   if (notify > PS_FAR_OR_CLOSE_ONLY)
     {
@@ -2566,7 +2588,7 @@ int apds9922_register(FAR const char *devpath_als,
         {
           snerr("ERROR: Failed to register driver %s: %d\n",
                  devpath_als, ret);
-          kmm_free(priv);
+
           goto err_out;
         }
     }
@@ -2578,7 +2600,6 @@ int apds9922_register(FAR const char *devpath_als,
         {
           snerr("ERROR: Failed to register driver %s: %d\n",
                  devpath_ps, ret);
-          kmm_free(priv);
           goto err_out;
         }
     }
@@ -2588,8 +2609,10 @@ int apds9922_register(FAR const char *devpath_als,
   priv->als = 0;
   priv->crefs = 0;
 
-err_out:
+  return OK;
 
+err_out:
+  kmm_free(priv);
   return ret;
 }
 

@@ -52,9 +52,9 @@
  * Public Types
  ****************************************************************************/
 
-enum apds9922_als_rate
+enum
 {
-  ALS_RATE25MS = 0,
+  ALS_RATE25MS,
   ALS_RATE50MS,
   ALS_RATE100MS,
   ALS_RATE200MS,
@@ -64,54 +64,27 @@ enum apds9922_als_rate
   ALS_RATE4000MS,
 };
 
-static const uint32_t apds9922_als_res_table[] =
+enum
 {
-  1048575,
-  524287,
-  262143,
-  131071,
-  65535,
-};
-
-static int apds9922_als_res_rate_table[] =
-{
-  400,
-  200,
-  100,
-  50,
-  25,
-};
-
-enum apds9922_als_res
-{
-  ALS_RES400MS = 0,
+  ALS_RES400MS,
   ALS_RES200MS,
   ALS_RES100MS,
   ALS_RES50MS,
   ALS_RES25MS,
 };
 
-static const uint32_t apds9922_als_gain_table[] =
+enum
 {
-  1,
-  3,
-  6,
-  9,
-  18
-};
-
-enum apds9922_als_gain
-{
-  ALS_GAINX1 = 0,
+  ALS_GAINX1,
   ALS_GAINX3,
   ALS_GAINX6,
   ALS_GAINX9,
   ALS_GAINX18,
 };
 
-enum apds9922_als_thresh_var
+enum
 {
-  ALS_VAR8 = 0,
+  ALS_VAR8,
   ALS_VAR16,
   ALS_VAR32,
   ALS_VAR64,
@@ -121,15 +94,15 @@ enum apds9922_als_thresh_var
   ALS_VAR1024,
 };
 
-enum apds9922_als_chan
+enum
 {
-  ALS_IR = 0,
+  ALS_IR,
   ALS_VISIBLE,
 };
 
-enum apds9922_ps_rate
+enum
 {
-  PS_RATE_RESERVED = 0,
+  PS_RATE_RESERVED,
   PS_RATE6MS25,
   PS_RATE12MS5,
   PS_RATE25MS,
@@ -139,35 +112,29 @@ enum apds9922_ps_rate
   PS_RATE400MS,
 };
 
-static const uint32_t apds9922_ps_res_table[] =
+enum
 {
-  256,
-  512,
-  1024,
-  2048,
-};
-
-enum apds9922_ps_res
-{
-  PS_RES8 = 0,
+  PS_RES8,
   PS_RES9,
   PS_RES10,
   PS_RES11,
 };
 
-enum apds9922_ps_led_f
+enum
 {
-  PS_LED_FREQ_RESERVED = 0,
-  PS_LED_FREQ60K = 3,
+  PS_LED_FREQ_RESERVED1,
+  PS_LED_FREQ_RESERVED2,
+  PS_LED_FREQ_RESERVED3,
+  PS_LED_FREQ60K,
   PS_LED_FREQ70K,
   PS_LED_FREQ80K,
   PS_LED_FREQ90K,
   PS_LED_FREQ100K,
 };
 
-enum apds9922_ps_led_i
+enum
 {
-  PS_LED_CURRENT2MA5 = 0,
+  PS_LED_CURRENT2MA5,
   PS_LED_CURRENT5MA,
   PS_LED_CURRENT10MA,
   PS_LED_CURRENT25MA,
@@ -177,23 +144,23 @@ enum apds9922_ps_led_i
   PS_LED_CURRENT125MA,
 };
 
-enum apds9922_als_int_mode
+enum
 {
-  ALS_INT_MODE_DISABLED = 0,
+  ALS_INT_MODE_DISABLED,
   ALS_INT_MODE_THRESHOLD,
   ALS_INT_MODE_VARIANCE,
 };
 
-enum apds9922_ps_int_mode
+enum
 {
-  PS_INT_MODE_DISABLED = 0,
+  PS_INT_MODE_DISABLED,
   PS_INT_MODE_LOGIC,
   PS_INT_MODE_NORMAL,
 };
 
-enum apds9922_ps_notify
+enum
 {
-  PS_ALL_INFO = 0,
+  PS_ALL_INFO,
   PS_PROXIMITY_DATA_ONLY,
   PS_FAR_OR_CLOSE_ONLY,
 };
@@ -211,62 +178,60 @@ struct apds9922_config_s
 
 struct adps9922_als_thresh
 {
-  uint32_t               upper;       /* Upper threshold              */
-  uint32_t               lower;       /* Lower threshold              */
+  uint32_t upper;       /* Upper threshold                   */
+  uint32_t lower;       /* Lower threshold                   */
 };
 
 struct adps9922_ps_thresh
 {
-  uint16_t               upper;       /* Upper threshold              */
-  uint16_t               lower;       /* Lower threshold              */
+  uint16_t upper;       /* Upper threshold                   */
+  uint16_t lower;       /* Lower threshold                   */
 };
 
 /* ambient light data setup data */
 
 struct apds9922_als_setup_s
 {
-  enum apds9922_als_rate rate;        /* als measurement rate              */
-  enum apds9922_als_res  res;         /* als resolution                    */
-  enum apds9922_als_gain gain;        /* als gain                          */
+  int      rate;        /* als measurement rate              */
+  int      res;         /* als resolution                    */
+  int      gain;        /* als gain                          */
   struct adps9922_als_thresh
-                         thresh;      /* Upper and lower thresholds        */
-  enum apds9922_als_thresh_var
-                         thresh_var;  /* threshold variation               */
-  enum apds9922_als_int_mode
-                         int_mode;    /* Interrupt mode                    */
-  uint8_t                persistance; /* Num events before interrupt       */
-  uint32_t               als_factor;  /* Lux correction factor applied     */
-  uint32_t               range_lim;   /* % limit of ADC full range
-                                       * allowed in autogain mode.         */
-  bool                   autogain;    /* Auto gain mode on/off             */
-  enum apds9922_als_chan channel;     /* Visible or IR light channel       */
+           thresh;      /* Upper and lower thresholds        */
+  int      thresh_var;  /* threshold variation               */
+  int      int_mode;    /* Interrupt mode                    */
+  uint8_t  persistance; /* Num events before interrupt       */
+  uint32_t als_factor;  /* Lux correction factor applied     */
+  uint32_t range_lim;   /* % limit of ADC full range
+                         * allowed in autogain mode.
+                         */
+  bool     autogain;    /* Auto gain mode on/off             */
+  int      channel;     /* Visible or IR light channel       */
 };
 
 /* proximity sensor data setup data */
 
 struct apds9922_ps_setup_s
 {
-  enum apds9922_ps_rate   rate;        /* Measurement rate                  */
-  enum apds9922_ps_res    res;         /* Resolution, bits                  */
-  enum apds9922_ps_led_f  led_f;       /* LED modulation frequency          */
-  bool                    led_pk_on;   /* LED current peaking on/off        */
-  enum apds9922_ps_led_i  led_i;       /* LED pulsed current level          */
-  uint8_t                 pulses;      /* Number of LED pulses, 0-32        */
+  int      rate;        /* Measurement rate                  */
+  int      res;         /* Resolution, bits                  */
+  int      led_f;       /* LED modulation frequency          */
+  bool     led_pk_on;   /* LED current peaking on/off        */
+  int      led_i;       /* LED pulsed current level          */
+  uint8_t  pulses;      /* Number of LED pulses, 0-32        */
   struct adps9922_ps_thresh
-                          thresh;      /* Upper and lower thresholds        */
-  uint16_t                cancel_lev;  /* Intelligent cancellation lev.     */
-  enum apds9922_ps_int_mode
-                          int_mode;    /* Interrupt mode                    */
-  uint8_t                 persistance; /* Num events before interrupt       */
-  enum apds9922_ps_notify notify;      /* States that cause a notify        */
+           thresh;      /* Upper and lower thresholds        */
+  uint16_t cancel_lev;  /* Intelligent cancellation lev.     */
+  int      int_mode;    /* Interrupt mode                    */
+  uint8_t  persistance; /* Num events before interrupt       */
+  int      notify;      /* States that cause a notify        */
 };
 
 /* data that can be read from proximity sensor */
 
 struct apds9922_ps_data
 {
-  uint16_t            ps;             /* Current prximity measure        */
-  bool                close;          /* Object is far (false) or close  */
+  uint16_t ps;          /* Current prximity measure          */
+  bool     close;       /* Object is far (false) or close    */
 };
 
 /****************************************************************************
@@ -301,7 +266,6 @@ extern "C"
  *
  ****************************************************************************/
 
-struct i2c_master_s;
 int apds9922_register(FAR const char *devpath_als,
                       FAR const char *devpath_ps,
                       FAR struct apds9922_config_s *config);
