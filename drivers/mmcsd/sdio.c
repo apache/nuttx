@@ -39,14 +39,6 @@
 #define SDIO_CMD53_TIMEOUT_MS 100
 #define SDIO_IDLE_DELAY_MS    50
 
-#ifdef CONFIG_SDIO_MUXBUS
-#  define SDIO_TAKELOCK(dev)  SDIO_LOCK(dev, true)
-#  define SDIO_GIVELOCK(dev)  SDIO_LOCK(dev, false)
-#else
-#  define SDIO_TAKELOCK(dev)
-#  define SDIO_GIVELOCK(dev)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -100,6 +92,54 @@ union sdio_cmd5x
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int sdio_takelock(FAR struct sdio_dev_s *dev)
+{
+  int ret;
+
+  /* Take the lock, giving exclusive access to the driver (perhaps
+   * waiting)
+   */
+
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+      ret = nxmutex_lock(&dev->mutex);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Lock the bus if mutually exclusive access to the
+       * SDIO bus is required on this platform.
+       */
+
+#ifdef CONFIG_SDIO_MUXBUS
+      SDIO_LOCK(dev, true);
+#endif
+    }
+  else
+    {
+      ret = OK;
+    }
+
+  return ret;
+}
+
+static void sdio_givelock(FAR struct sdio_dev_s *dev)
+{
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+      /* Release the SDIO bus lock, then the MMC/SD driver mutex in the
+       * opposite order that they were taken to assure that no deadlock
+       * conditions will arise.
+       */
+
+#ifdef CONFIG_SDIO_MUXBUS
+      SDIO_LOCK(dev, false);
+#endif
+      nxmutex_unlock(&dev->mutex);
+    }
+}
 
 static int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev,
                             uint32_t cmd, uint32_t arg)
@@ -158,10 +198,10 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
   /* Send CMD52 command */
 
-  SDIO_TAKELOCK(dev);
+  sdio_takelock(dev);
   sdio_sendcmdpoll(dev, SD_ACMD52, arg.value);
   ret = SDIO_RECVR5(dev, SD_ACMD52, &data);
-  SDIO_GIVELOCK(dev);
+  sdio_givelock(dev);
 
   if (ret != OK)
     {
@@ -228,7 +268,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       arg.cmd53.byte_block_count = nblocks;
     }
 
-  SDIO_TAKELOCK(dev);
+  sdio_takelock(dev);
 
   /* Send CMD53 command */
 
@@ -276,7 +316,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
   /* There may not be a response to this, so don't look for one */
 
   SDIO_RECVR1(dev, SD_ACMD52ABRT, &data);
-  SDIO_GIVELOCK(dev);
+  sdio_givelock(dev);
 
   if (ret != OK)
     {
@@ -342,7 +382,9 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   int ret;
   uint32_t data = 0;
 
-  SDIO_TAKELOCK(dev);
+  nxmutex_init(&dev->mutex);
+
+  sdio_takelock(dev);
 
   /* Set device state from reset to idle */
 
@@ -407,11 +449,11 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
 
   /* Configure 4 bits bus width */
 
-  SDIO_GIVELOCK(dev);
+  sdio_givelock(dev);
   return sdio_set_wide_bus(dev);
 
 err:
-  SDIO_GIVELOCK(dev);
+  sdio_givelock(dev);
   return ret;
 }
 
