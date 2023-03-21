@@ -141,8 +141,8 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
       ret        = pthread_mutex_give(mutex);
       if (ret == 0)
         {
-          status = nxsem_clockwait_uninterruptible(
-                   &cond->sem, clockid, abstime);
+          status = nxsem_clockwait_uninterruptible(&cond->sem,
+                                                   clockid, abstime);
           if (status < 0)
             {
               ret = -status;

@@ -295,14 +295,6 @@
 
 /* The following are non-standard signal definitions */
 
-#ifndef CONFIG_DISABLE_PTHREAD
-#  ifndef CONFIG_SIG_SIGCONDTIMEDOUT
-#    define SIGCONDTIMEDOUT 30  /* Used in the implementation of pthread_cond_timedwait */
-#  else
-#    define SIGCONDTIMEDOUT CONFIG_SIG_SIGCONDTIMEDOUT
-#  endif
-#endif
-
 /* SIGWORK is used to wake up various internal NuttX worker threads */
 
 #if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_PAGING)
