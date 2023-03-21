@@ -2056,27 +2056,31 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
    */
 
   totallen = sizeof(g_rndis_cfgdesc);
-  memcpy(dest, &g_rndis_cfgdesc, totallen);
 
-  usbclass_copy_epdesc(RNDIS_EP_INTIN_IDX, &dest->epintindesc,
-                       devinfo, hispeed);
-  usbclass_copy_epdesc(RNDIS_EP_BULKIN_IDX, &dest->epbulkindesc,
-                       devinfo, hispeed);
-  usbclass_copy_epdesc(RNDIS_EP_BULKOUT_IDX, &dest->epbulkoutdesc,
-                       devinfo, hispeed);
+  if (dest != NULL)
+    {
+      memcpy(dest, &g_rndis_cfgdesc, totallen);
+
+      usbclass_copy_epdesc(RNDIS_EP_INTIN_IDX, &dest->epintindesc,
+                           devinfo, hispeed);
+      usbclass_copy_epdesc(RNDIS_EP_BULKIN_IDX, &dest->epbulkindesc,
+                           devinfo, hispeed);
+      usbclass_copy_epdesc(RNDIS_EP_BULKOUT_IDX, &dest->epbulkoutdesc,
+                           devinfo, hispeed);
 
 #ifndef CONFIG_RNDIS_COMPOSITE
-  /* For a stand-alone device, just fill in the total length */
+      /* For a stand-alone device, just fill in the total length */
 
-  dest->cfgdesc.totallen[0] = LSBYTE(totallen);
-  dest->cfgdesc.totallen[1] = MSBYTE(totallen);
+      dest->cfgdesc.totallen[0] = LSBYTE(totallen);
+      dest->cfgdesc.totallen[1] = MSBYTE(totallen);
 #else
-  /* For composite device, apply possible offset to the interface numbers */
+      /* For composite device, apply possible offset to the interface numbers */
 
-  dest->assoc_desc.firstif += devinfo->ifnobase;
-  dest->comm_ifdesc.ifno   += devinfo->ifnobase;
-  dest->data_ifdesc.ifno   += devinfo->ifnobase;
+      dest->assoc_desc.firstif += devinfo->ifnobase;
+      dest->comm_ifdesc.ifno   += devinfo->ifnobase;
+      dest->data_ifdesc.ifno   += devinfo->ifnobase;
 #endif
+    }
 
   return totallen;
 }
@@ -3016,21 +3020,49 @@ void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev)
 {
   memset(dev, 0, sizeof(struct composite_devdesc_s));
 
+  /* The callback functions for the RNDIS class.
+   *
+   * classobject() and uninitialize() must be provided by board-specific
+   * logic
+   */
+
   dev->mkconfdesc          = usbclass_mkcfgdesc;
   dev->mkstrdesc           = usbclass_mkstrdesc;
   dev->classobject         = usbclass_classobject;
   dev->uninitialize        = usbclass_uninitialize;
-  dev->nconfigs            = RNDIS_NCONFIGS;
-  dev->configid            = RNDIS_CONFIGID;
-  dev->cfgdescsize         = sizeof(g_rndis_cfgdesc);
+
+  dev->nconfigs            = RNDIS_NCONFIGS; /* Number of configurations supported  */
+  dev->configid            = RNDIS_CONFIGID; /* The only supported configuration ID */
+
+  /* Let the construction function calculate the size of config descriptor */
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+  dev->cfgdescsize  = usbclass_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
+#else
+  dev->cfgdescsize  = usbclass_mkcfgdesc(NULL, NULL);
+#endif
+
+  /* Board-specific logic must provide the device minor */
+
+  /* Interfaces.
+   *
+   * ifnobase must be provided by board-specific logic
+   */
+
   dev->devinfo.ninterfaces = RNDIS_NINTERFACES;
+
+  /* Strings.
+   *
+   * strbase must be provided by board-specific logic
+   */
+
   dev->devinfo.nstrings    = 0;
+
+  /* Endpoints.
+   *
+   * Endpoint numbers must be provided by board-specific logic.
+   */
+
   dev->devinfo.nendpoints  = RNDIS_NUM_EPS;
-
-  /* Default endpoint indexes, board-specific logic can override these */
-
-  dev->devinfo.epno[RNDIS_EP_INTIN_IDX] = USB_EPNO(RNDIS_EPINTIN_ADDR);
-  dev->devinfo.epno[RNDIS_EP_BULKIN_IDX] = USB_EPNO(RNDIS_EPBULKIN_ADDR);
-  dev->devinfo.epno[RNDIS_EP_BULKOUT_IDX] = USB_EPNO(RNDIS_EPBULKOUT_ADDR);
 }
 #endif
