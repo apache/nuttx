@@ -87,6 +87,7 @@ static_assert((CONFIG_NET_LL_GUARDSIZE % 4) == 2,
 #define RNDIS_CONFIGID          (1)
 #define RNDIS_CONFIGIDNONE      (0)
 #define RNDIS_NINTERFACES       (2)
+#define RNDIS_NSTRIDS           (0)
 
 #define RNDIS_EPINTIN_ADDR      USB_EPIN(CONFIG_RNDIS_EPINTIN)
 #define RNDIS_EPBULKIN_ADDR     USB_EPIN(CONFIG_RNDIS_EPBULKIN)
@@ -2847,13 +2848,9 @@ static int usbclass_classobject(int minor,
   drvr = &alloc->drvr;
   *classdev = &drvr->drvr;
 
-#ifdef CONFIG_RNDIS_COMPOSITE
-  priv->devinfo = *devinfo;
-#else
-  priv->devinfo.epno[RNDIS_EP_INTIN_IDX] = USB_EPNO(RNDIS_EPINTIN_ADDR);
-  priv->devinfo.epno[RNDIS_EP_BULKIN_IDX] = USB_EPNO(RNDIS_EPBULKIN_ADDR);
-  priv->devinfo.epno[RNDIS_EP_BULKOUT_IDX] = USB_EPNO(RNDIS_EPBULKOUT_ADDR);
-#endif
+  /* Get device info */
+
+  memcpy(&priv->devinfo, devinfo, sizeof(struct usbdev_devinfo_s));
 
   /* Initialize the USB ethernet driver structure */
 
@@ -2935,8 +2932,17 @@ int usbdev_rndis_initialize(FAR const uint8_t *mac_address)
   int ret;
   FAR struct usbdevclass_driver_s *classdev;
   FAR struct rndis_driver_s *drvr;
+  struct usbdev_devinfo_s devinfo;
 
-  ret = usbclass_classobject(0, NULL, &classdev);
+  memset(&devinfo, 0, sizeof(struct usbdev_devinfo_s));
+  devinfo.ninterfaces                = RNDIS_NINTERFACES;
+  devinfo.nstrings                   = RNDIS_NSTRIDS;
+  devinfo.nendpoints                 = RNDIS_NUM_EPS;
+  devinfo.epno[RNDIS_EP_INTIN_IDX]   = CONFIG_RNDIS_EPINTIN;
+  devinfo.epno[RNDIS_EP_BULKIN_IDX]  = CONFIG_RNDIS_EPBULKIN;
+  devinfo.epno[RNDIS_EP_BULKOUT_IDX] = CONFIG_RNDIS_EPBULKOUT;
+
+  ret = usbclass_classobject(0, &devinfo, &classdev);
   if (ret)
     {
       nerr("usbclass_classobject failed: %d\n", ret);
