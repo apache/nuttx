@@ -54,7 +54,7 @@
  *
  ****************************************************************************/
 
-int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz)
+int settimeofday(FAR const struct timeval *tv, FAR const struct timezone *tz)
 {
   struct timespec ts;
 
