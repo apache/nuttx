@@ -192,8 +192,9 @@ struct rndis_cfgdesc_s
 {
 #ifndef CONFIG_RNDIS_COMPOSITE
   struct usb_cfgdesc_s cfgdesc;        /* Configuration descriptor */
-#endif
+#elif defined(CONFIG_COMPOSITE_IAD)
   struct usb_iaddesc_s assoc_desc;     /* Interface association descriptor */
+#endif
   struct usb_ifdesc_s  comm_ifdesc;    /* Communication interface descriptor */
   struct usb_epdesc_s  epintindesc;    /* Interrupt endpoint descriptor */
   struct usb_ifdesc_s  data_ifdesc;    /* Data interface descriptor */
@@ -299,7 +300,7 @@ const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
     .attr         = USB_CONFIG_ATTR_ONE | USB_CONFIG_ATTR_SELFPOWER,
     .mxpower      = (CONFIG_USBDEV_MAXPOWER + 1) / 2
   },
-#endif
+#elif defined(CONFIG_COMPOSITE_IAD)
   {
     .len          = USB_SIZEOF_IADDESC,
     .type         = USB_DESC_TYPE_INTERFACEASSOCIATION,
@@ -310,6 +311,7 @@ const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
     .protocol     = 0x01,
     .ifunction    = 0
   },
+#endif
   {
     .len          = USB_SIZEOF_IFDESC,
     .type         = USB_DESC_TYPE_INTERFACE,
@@ -2075,9 +2077,13 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
       dest->cfgdesc.totallen[0] = LSBYTE(totallen);
       dest->cfgdesc.totallen[1] = MSBYTE(totallen);
 #else
-      /* For composite device, apply possible offset to the interface numbers */
+      /* For composite device, apply possible offset to the interface
+       * numbers
+       */
 
+#  ifdef CONFIG_COMPOSITE_IAD
       dest->assoc_desc.firstif += devinfo->ifnobase;
+#  endif
       dest->comm_ifdesc.ifno   += devinfo->ifnobase;
       dest->data_ifdesc.ifno   += devinfo->ifnobase;
 #endif
