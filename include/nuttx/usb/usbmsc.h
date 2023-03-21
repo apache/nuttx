@@ -169,6 +169,7 @@ int usbmsc_exportluns(FAR void *handle);
  ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
+struct usbdev_devinfo_s;
 struct usbdevclass_driver_s;
 int usbmsc_classobject(FAR void *handle,
                        FAR struct usbdev_devinfo_s *devinfo,
