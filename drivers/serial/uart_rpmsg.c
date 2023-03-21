@@ -412,14 +412,8 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
       return ret;
     }
 
-  /* Ignore the `isconsole` to passthrough all UART data,
-   * since the most common usage of rpmsg uart is to communicate with cu
-   * in other processor core, should not do CRLF convertion and ECHO.
-   * Note: you can also change this behavior by termios.
-   */
-
   dev->ops       = &g_uart_rpmsg_ops;
-  dev->isconsole = false;
+  dev->isconsole = isconsole;
   dev->recv.size = buf_size;
   dev->xmit.size = buf_size;
 
@@ -460,7 +454,7 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
   sprintf(dev_name, "%s%s", UART_RPMSG_DEV_PREFIX, devname);
   uart_register(dev_name, dev);
 
-  if (isconsole)
+  if (dev->isconsole)
     {
       uart_register(UART_RPMSG_DEV_CONSOLE, dev);
     }
