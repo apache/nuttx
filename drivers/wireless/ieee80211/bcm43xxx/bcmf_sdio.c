@@ -992,7 +992,9 @@ int bcmf_sdio_thread(int argc, char **argv)
               /* Turn off clock request. */
 
               timeout = UINT_MAX;
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
               bcmf_sdio_bus_lowpower(sbus, true);
+#endif
               continue;
             }
           else if (ret < 0)
