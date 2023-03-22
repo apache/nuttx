@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -95,10 +96,6 @@
 #  define SIM_USB_SPEED                   USB_SPEED_HIGH
 #else
 #  define SIM_USB_SPEED                   USB_SPEED_FULL
-#endif
-
-#ifndef MIN
-#  define MIN(a,b)                        ((a) > (b) ? (b) : (a))
 #endif
 
 /****************************************************************************
