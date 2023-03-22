@@ -25,7 +25,15 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdio.h>
 #include <netdb.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define STRERROR_UNKNOWN "Unknown error"
+#define STRERROR_BUFSIZE sizeof(STRERROR_UNKNOWN " 10")
 
 /****************************************************************************
  * Private Types
@@ -82,6 +90,9 @@ static const struct errno_strmap_s g_gaierrnomap[] =
 
 FAR const char *gai_strerror(int errnum)
 {
+#ifdef CONFIG_LIBC_GAISTRERROR_ERRNUM
+  static char s_err[STRERROR_BUFSIZE];
+#endif
 #ifdef CONFIG_LIBC_GAISTRERROR
   int ndxlow = 0;
   int ndxhi  = NERRNO_STRS - 1;
@@ -105,5 +116,15 @@ FAR const char *gai_strerror(int errnum)
     }
   while (ndxlow <= ndxhi);
 #endif
-  return "Unknown error";
+#ifdef CONFIG_LIBC_GAISTRERROR_ERRNUM
+  if (snprintf(s_err, sizeof(s_err), STRERROR_UNKNOWN " %d", errnum)
+      < sizeof(s_err))
+    {
+      return s_err;
+    }
+#elif !defined(CONFIG_LIBC_GAISTRERROR)
+  UNUSED(errnum);
+#endif
+
+  return STRERROR_UNKNOWN;
 }

@@ -19,6 +19,14 @@ config LIBC_GAISTRERROR
 		of memory. If this option is not selected, gai_strerror() will still exist in
 		the build but it will not decode error values.
 
+config LIBC_GAISTRERROR_ERRNUM
+	bool "Print unknown error code in gai_strerror()"
+	default !LIBC_GAISTRERROR
+	---help---
+		If this option is selected, then gai_strerror() will print error code
+		for unknown errors like "Unknown error 11". Default enabled when
+		LIBC_GAISTRERROR is not selected.
+
 config NETDB_BUFSIZE
 	int "gethostbyname/gethostbyaddr buffer size"
 	depends on LIBC_NETDB
