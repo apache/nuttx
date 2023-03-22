@@ -32,7 +32,7 @@ mode. While write-back gives better performance, the reason of the switch are th
 drivers that can arise because this mode is not correctly supported yet. This happens for example
 when selecting ``CONFIG_SAMV7_EMAC`` (Ethernet MAC driver).
 
-Data chace can also be switched to write-through mode manually by setting ARMV7M_DCACHE_WRITETHROUGH.
+Data cache can also be switched to write-through mode manually by setting ARMV7M_DCACHE_WRITETHROUGH.
 
 Tickless OS
 ===========
@@ -87,7 +87,7 @@ XDMAC       Yes
 Analog Comparator Controller (ACC)
 ----------------------------------
 
-Analog Comparator Controller generates an interrupt based on user settngs. It can also
+Analog Comparator Controller generates an interrupt based on user settings. It can also
 generate a compare event which can be used by the PWM driver.
 
 This peripheral is currently not supported.
@@ -117,7 +117,7 @@ The 12 bit resolution mode can be extended up to a 16 bit resolution by digital 
 The averaging can be set by ``CONFIG_SAMV7_AFECn_RES``.
 
 The controller supports data transfer with DMA support which can be enabled by ``CONFIG_SAMV7_AFEC_DMA``.
-Option ``CONFIG_SAMV7_AFEC_DMASAMPLES`` then sets the number of samples to be transfered.
+Option ``CONFIG_SAMV7_AFEC_DMASAMPLES`` then sets the number of samples to be transferred.
 
 Digital/Analog Converter Controller (DACC)
 ------------------------------------------
@@ -132,7 +132,7 @@ DMA data transfer is supported by the controller but currently not implemented i
 Ethernet MAC (GMAC)
 -------------------
 
-This module implements a 10/100 Mbps Ethernet MAC which is compitible with the IEEE 802.3 standard.
+This module implements a 10/100 Mbps Ethernet MAC which is compatible with the IEEE 802.3 standard.
 Number of RR and TX buffers can be configured by ``CONFIG_SAMV7_EMAC0_NRXBUFFERS`` and
 ``CONFIG_SAMV7_EMAC0_NTXBUFFERS`` respectively. Option ``CONFIG_SAMV7_EMAC0_PHYINIT`` may be selected
 when board specific initialization (GPIOs configuration, PHY reset etc.) is required prior to
@@ -141,7 +141,7 @@ module usage.
 High Speed Multimedia Card Interface (HSMCI)
 --------------------------------------------
 
-This module supports a hight speed connection to MultiMedia Cards (MMC). Support for
+This module supports a high speed connection to MultiMedia Cards (MMC). Support for
 the SD slots can be enabled with the following settings:
 
 - System Type -> SAMV7 Peripheral Selection
@@ -230,11 +230,11 @@ of comparison unit.
 The peripheral has integrated fault protection that drives the output to zero when activated. The
 protection activation can be trigger from various peripherals (ADC, PMC) or from GPIO inputs.
 
-Furthemore PWM can impelement a dead time delays before the activation of complementary outputs.
+Furthermore PWM can implement a dead time delays before the activation of complementary outputs.
 These delays are turn on by ``CONFIG_PWM_DEADTIME`` while dead time values are provided from application
 level the same way as duty cycle is set.
 
-The lower-half is initalized by function :c:func:`sam_pwminitialize`.
+The lower-half is initialized by function :c:func:`sam_pwminitialize`.
 
 Quad Serial Peripheral Interface (QSPI)
 ---------------------------------------
@@ -243,7 +243,7 @@ This peripheral provides communication with external devices in host mode throug
 data link. It is possible to use QSPI peripheral in SPI mode if this is supported by MCU (config option
 ``CONFIG_SAMV7_QSPI_SPI_MODE``).
 
-The lower-half is initalized by function :c:func:`sam_qspi_initialize` in case of QSPI mode and by
+The lower-half is initialized by function :c:func:`sam_qspi_initialize` in case of QSPI mode and by
 :c:func:`sam_qspi_spi_initialize` in case of SPI mode.
 
 Static Memory Controller (SMC)
@@ -252,7 +252,7 @@ Static Memory Controller (SMC)
 This peripheral is a part of External Bus Interface (EBI) which is designed to ensure the successful
 data transfer between several external devices and the microcontroller.
 
-This controller is currently not suported.
+This controller is currently not supported.
 
 Serial Peripheral Interface (SPI)
 ---------------------------------
@@ -260,7 +260,7 @@ Serial Peripheral Interface (SPI)
 This is a synchronous serial data link that provides communication with external devices in host
 or client mode.
 
-The pripheral is initialized by :c:func:`sam_spibus_initialize` function.
+The peripheral is initialized by :c:func:`sam_spibus_initialize` function.
 
 Synchronous Serial Controller (SSC)
 -----------------------------------
@@ -287,7 +287,7 @@ The MCU supports both UART and USART controllers. USART can be also used in RS-4
 by ``CONFIG_SAMV7_USARTx_RS485MODE`` option) or can be used with RX DMA support. For this purpose it
 is required to configure idle bus timeout value in ``CONFIG_SAMV7_SERIAL_DMA_TIMEOUT``. This option
 ensures data are read from the DMA buffer even if it is not full yet. TX DMA support is not implemented
-as well as entire DMA suport for UART peripheral.
+as well as entire DMA support for UART peripheral.
 
 Watchdog Timer (WDT)
 ---------------------
