@@ -80,7 +80,7 @@ $(MKSYMTAB):
 # not need symbol tables.
 
 CSVFILES  = $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)libc.csv
-CSVFILES += $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)math.csv
+CSVFILES += $(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)libm.csv
 
 # In the PROTECTED and KERNEL builds, the applications could link with
 # libproxy which will provide symbol-compatible access to OS functions
