@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/qemu-rv/qemu_rv_virtio.c
+ * drivers/virtio/virtio-blk.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,23 +18,44 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_VIRTIO_VIRTIO_BLK_H
+#define __DRIVERS_VIRTIO_VIRTIO_BLK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <syslog.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/virtio/virtio-mmio.h>
+#ifdef CONFIG_DRIVERS_VIRTIO_BLK
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-void riscv_netinitialize(void)
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  virtio_mmio_init();
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int virtio_register_blk_driver(void);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* CONFIG_DRIVERS_VIRTIO_BLK */
+
+#endif /* __DRIVERS_VIRTIO_VIRTIO_BLK_H */

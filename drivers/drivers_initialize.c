@@ -44,6 +44,7 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
+#include <nuttx/virtio/virtio.h>
 
 /****************************************************************************
  * Public Functions
@@ -202,5 +203,9 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_MTD_LOOP
   mtd_loop_register();
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO
+  virtio_register_drivers();
 #endif
 }
