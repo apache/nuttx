@@ -25,12 +25,16 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define STRERROR_UNKNOWN "Unknown error"
+#define STRERROR_BUFSIZE sizeof(STRERROR_UNKNOWN " 2000")
 
 /****************************************************************************
  * Private Types
@@ -367,6 +371,9 @@ static const struct errno_strmap_s g_errnomap[] =
 
 FAR char *strerror(int errnum)
 {
+#ifdef CONFIG_LIBC_STRERROR_ERRNUM
+  static char s_err[STRERROR_BUFSIZE];
+#endif
 #ifdef CONFIG_LIBC_STRERROR
   int ndxlow = 0;
   int ndxhi  = NERRNO_STRS - 1;
@@ -389,8 +396,16 @@ FAR char *strerror(int errnum)
         }
     }
   while (ndxlow <= ndxhi);
-#else
+#endif
+#ifdef CONFIG_LIBC_STRERROR_ERRNUM
+  if (snprintf(s_err, sizeof(s_err), STRERROR_UNKNOWN " %d", errnum)
+      < sizeof(s_err))
+    {
+      return s_err;
+    }
+#elif !defined(CONFIG_LIBC_STRERROR)
   UNUSED(errnum);
 #endif
-  return "Unknown error";
+
+  return STRERROR_UNKNOWN;
 }
