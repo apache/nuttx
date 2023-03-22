@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/param.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -131,10 +132,6 @@
 
 #define SET_CHAN_BITS(c, r, b)    setbits(b, LEDC_CHAN_REG(r, (c)->num));
 #define SET_CHAN_REG(c, r, v)     putreg32(v, LEDC_CHAN_REG(r, (c)->num));
-
-#ifndef MIN
-#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 /****************************************************************************
  * Private Types
