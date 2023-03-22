@@ -5,50 +5,59 @@
 
 menuconfig DRIVERS_VIRTIO
 	bool "Virtio Device Support"
-	depends on !OPENAMP
+	depends on OPENAMP
 	default n
 
 if DRIVERS_VIRTIO
-menuconfig DRIVERS_VIRTIO_MMIO_NUM
-	int "The number of virtio mmio devices"
-	default 1
+config DRIVERS_VIRTIO_MMIO
+	bool "Virtio MMIO Device Support"
+	default n
 
-if DRIVERS_VIRTIO_MMIO_NUM != 0
-menuconfig DRIVERS_VIRTIO_MMIO_BASE
-	hex "Virtio-mmio base address"
-
-menuconfig DRIVERS_VIRTIO_MMIO_REGSIZE
-	hex "Virtio-mmio register size"
+config DRIVERS_VIRTIO_MMIO_QUEUE_LEN
+	int "Virtio MMIO Virtio Queue Length"
 	default 0
+	range 0 1024
+	depends on DRIVERS_VIRTIO_MMIO
+	---help---
+		If this value equals to 0, use the max queue length get from
+		mmio register.
 
-menuconfig DRIVERS_VIRTIO_MMIO_IRQ
-	int "Virtio-mmio irq number"
-
-endif
-
-menuconfig DRIVERS_VIRTIO_NET
-	bool "Virtio network support"
-	default n
-	depends on DRIVERS_VIRTIO_MMIO_NUM > 0
-	select ARCH_HAVE_NETDEV_STATISTICS
-
-if DRIVERS_VIRTIO_NET
-config DRIVERS_VIRTIO_NET_QUEUE_LEN
-	int "Queue length"
-	default 16
-
-endif
-
-menuconfig DRIVERS_VIRTIO_BLK
+config DRIVERS_VIRTIO_BLK
 	bool "Virtio block support"
+	depends on !DISABLE_MOUNTPOINT
 	default n
-	depends on DRIVERS_VIRTIO_MMIO_NUM > 0
 
+config DRIVERS_VIRTIO_NET
+	bool "Virtio network support"
+	depends on NETDEVICES
+	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
+	select NETDEV_LATEINIT
+
+config DRIVERS_VIRTIO_NET_BUFNUM
+	int "Virtio network driver buffer number"
+	default 0
+	depends on DRIVERS_VIRTIO_NET
+	---help---
+		The buffer number in each virtqueue. (We have 2 virtqueues.)
+		If this value equals to 0, use CONFIG_IOB_NBUFFERS / 4 for each.
+		Normally we get just a little improvement for >8 buffers, and very little for >32.
+
+config DRIVERS_VIRTIO_RNG
+	bool "Virtio rng support"
+	default n
+	select ARCH_HAVE_RNG
+
+config DRIVERS_VIRTIO_SERIAL
+	bool "Virtio serial support"
+	depends on SERIAL
+	default n
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+
+if DRIVERS_VIRTIO_SERIAL
+config DRIVERS_VIRTIO_SERIAL_BUFSIZE
+	int "Virtio serial driver buffer size"
+	default 256
 endif
-
-if DRIVERS_VIRTIO_BLK
-config DRIVERS_VIRTIO_BLK_QUEUE_LEN
-	int "Queue length"
-	default 16
-
-endif
+endif # DRIVERS_VIRTIO

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/virtio/virtio-mmio-blk.h
+ * drivers/virtio/virtio-net.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_VIRTIO_VIRTIO_MMIO_BLK_H
-#define __DRIVERS_VIRTIO_VIRTIO_MMIO_BLK_H
+#ifndef __DRIVERS_VIRTIO_VIRTIO_NET_H
+#define __DRIVERS_VIRTIO_VIRTIO_NET_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_DRIVERS_VIRTIO_BLK
+#ifdef CONFIG_DRIVERS_VIRTIO_NET
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,20 +49,12 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: virtio_mmio_blk_init
- *
- * Description:
- *   Called from virtio-mmio.c to initialize virtblk
- *
- ****************************************************************************/
-
-int virtio_mmio_blk_init(FAR struct virtio_mmio_regs *regs, uint32_t intid);
+int virtio_register_net_driver(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_DRIVERS_VIRTIO_BLK */
-#endif /* __DRIVERS_VIRTIO_VIRTIO_MMIO_BLK_H */
+#endif /* CONFIG_DRIVERS_VIRTIO_NET */
+#endif /* __DRIVERS_VIRTIO_VIRTIO_NET_H */

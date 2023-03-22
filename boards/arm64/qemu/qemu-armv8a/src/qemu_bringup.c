@@ -28,8 +28,41 @@
 #include <syslog.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/virtio/virtio-mmio.h>
 
 #include "qemu-armv8a.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define QEMU_VIRTIO_MMIO_BASE    0x0a000000
+#define QEMU_VIRTIO_MMIO_REGSIZE 0x200
+#define QEMU_VIRTIO_MMIO_IRQ     48
+#define QEMU_VIRTIO_MMIO_NUM     4
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: qemu_virtio_register_mmio_devices
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+static void qemu_virtio_register_mmio_devices(void)
+{
+  uintptr_t virtio = (uintptr_t)QEMU_VIRTIO_MMIO_BASE;
+  size_t size = QEMU_VIRTIO_MMIO_REGSIZE;
+  int irq = QEMU_VIRTIO_MMIO_IRQ;
+  int i;
+
+  for (i = 0; i < QEMU_VIRTIO_MMIO_NUM; i++)
+    {
+      virtio_register_mmio_device((FAR void *)(virtio + size * i), irq + i);
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -55,6 +88,10 @@ int qemu_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+  qemu_virtio_register_mmio_devices();
 #endif
 
   UNUSED(ret);

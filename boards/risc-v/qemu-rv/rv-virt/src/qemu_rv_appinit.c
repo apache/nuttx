@@ -30,8 +30,45 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/virtio/virtio-mmio.h>
 
 #include <sys/mount.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define QEMU_VIRTIO_MMIO_BASE    0x10001000
+#define QEMU_VIRTIO_MMIO_REGSIZE 0x1000
+#ifdef CONFIG_ARCH_USE_S_MODE
+#  define QEMU_VIRTIO_MMIO_IRQ   26
+#else
+#  define QEMU_VIRTIO_MMIO_IRQ   28
+#endif
+#define QEMU_VIRTIO_MMIO_NUM     4
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: qemu_virtio_register_mmio_devices
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+static void qemu_virtio_register_mmio_devices(void)
+{
+  uintptr_t virtio = (uintptr_t)QEMU_VIRTIO_MMIO_BASE;
+  size_t size = QEMU_VIRTIO_MMIO_REGSIZE;
+  int irq = QEMU_VIRTIO_MMIO_IRQ;
+  int i;
+
+  for (i = 0; i < QEMU_VIRTIO_MMIO_NUM; i++)
+    {
+      virtio_register_mmio_device((FAR void *)(virtio + size * i), irq + i);
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -73,6 +110,10 @@ int board_app_initialize(uintptr_t arg)
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+  qemu_virtio_register_mmio_devices();
 #endif
 
   return OK;
