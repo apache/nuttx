@@ -36,7 +36,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SDIO_CMD53_TIMEOUT_MS 100
+#define SDIO_CMD53_TIMEOUT_MS 1000
 #define SDIO_IDLE_DELAY_MS    50
 
 /****************************************************************************
