@@ -372,7 +372,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
     {
       /* TODO handle this case */
 
-      wlerr("No credit to send frame\n");
+      wlwarn("No credit to send frame\n");
       return -EAGAIN;
     }
 
