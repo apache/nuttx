@@ -67,6 +67,7 @@ ifdef ARCHSCRIPT
 endif
 	@echo "LD=\"$(LD)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "LDENDGROUP=\"$(LDENDGROUP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDELFFLAGS=\"$(LDELFFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "LDFLAGS=\"$(LDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "LDLIBS=\"$(LDLIBS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "LDSCRIPT=\"$(LDSCRIPT)\"" >> $(EXPORTDIR)/makeinfo.sh
