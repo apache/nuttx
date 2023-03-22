@@ -1375,8 +1375,12 @@ static int imxrt_lock(struct sdio_dev_s *dev, bool lock)
 {
   /* The multiplex bus is part of board support package. */
 
-  imxrt_muxbus_sdio_lock((dev - g_sdhcdev) /
-                         sizeof(struct imxrt_dev_s), lock);
+  /* FIXME: Implement the below function to support bus share:
+   *
+   * imxrt_muxbus_sdio_lock((dev - g_sdhcdev) /
+   *                        sizeof(struct imxrt_dev_s), lock);
+   */
+
   return OK;
 }
 #endif

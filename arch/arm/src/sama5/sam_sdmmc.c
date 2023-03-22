@@ -1473,8 +1473,12 @@ static int sam_lock(struct sdio_dev_s *dev, bool lock)
 {
   /* The multiplex bus is part of board support package. */
 
-  sam_muxbus_sdio_lock((dev - g_sdmmcdev) /
-                         sizeof(struct sam_dev_s), lock);
+  /* FIXME: Implement the below function to support bus share:
+   *
+   * sam_muxbus_sdio_lock((dev - g_sdmmcdev) /
+   *                        sizeof(struct sam_dev_s), lock);
+   */
+
   return OK;
 }
 #endif

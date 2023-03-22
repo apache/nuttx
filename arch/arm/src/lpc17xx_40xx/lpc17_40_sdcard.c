@@ -1382,7 +1382,11 @@ static int lpc17_40_lock(struct sdio_dev_s *dev, bool lock)
    * bus is part of board support package.
    */
 
-  lpc17_40_muxbus_sdio_lock(lock);
+  /* FIXME: Implement the below function to support bus share:
+   *
+   * lpc17_40_muxbus_sdio_lock(lock);
+   */
+
   return OK;
 }
 #endif
