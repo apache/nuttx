@@ -24,6 +24,7 @@
 
 #include <signal.h>
 #include <errno.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Public Functions
@@ -63,7 +64,7 @@ int nxsig_delset(FAR sigset_t *set, int signo)
     {
       /* Remove the signal from the set */
 
-      *set &= ~SIGNO2SET(signo);
+      set->_elem[_SIGSET_NDX(signo)] &= ~_SIGNO2SET(signo);
       return OK;
     }
 }

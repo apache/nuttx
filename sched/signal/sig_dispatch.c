@@ -97,7 +97,7 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
           sigq->mask = sigact->act.sa_mask;
           if ((sigact->act.sa_flags & SA_NODEFER) == 0)
             {
-              sigq->mask |= SIGNO2SET(info->si_signo);
+              sigaddset(&sigq->mask, info->si_signo);
             }
 
           memcpy(&sigq->info, info, sizeof(siginfo_t));
@@ -321,9 +321,10 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
   int masked;
   int ret = OK;
 
-  sinfo("TCB=%p pid=%d signo=%d code=%d value=%d mask=%08" PRIx32 "\n",
+  sinfo("TCB=%p pid=%d signo=%d code=%d value=%d masked=%s\n",
         stcb, stcb->pid, info->si_signo, info->si_code,
-        info->si_value.sival_int, stcb->sigprocmask);
+        info->si_value.sival_int,
+        sigismember(&stcb->sigprocmask, info->si_signo) == 1 ? "YES" : "NO");
 
   DEBUGASSERT(stcb != NULL && info != NULL);
 
@@ -383,7 +384,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
            nxsig_ismember(&stcb->sigwaitmask, info->si_signo)))
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
-          stcb->sigwaitmask = NULL_SIGNAL_SET;
+          sigemptyset(&stcb->sigwaitmask);
 
           if (WDOG_ISACTIVE(&stcb->waitdog))
             {
@@ -446,7 +447,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       if (stcb->task_state == TSTATE_WAIT_SIG)
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
-          stcb->sigwaitmask = NULL_SIGNAL_SET;
+          sigemptyset(&stcb->sigwaitmask);
 
           if (WDOG_ISACTIVE(&stcb->waitdog))
             {

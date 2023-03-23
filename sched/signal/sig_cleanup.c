@@ -61,8 +61,8 @@ void nxsig_cleanup(FAR struct tcb_s *stcb)
 
   /* Misc. signal-related clean-up */
 
-  stcb->sigprocmask  = ALL_SIGNAL_SET;
-  stcb->sigwaitmask  = NULL_SIGNAL_SET;
+  sigfillset(&stcb->sigprocmask);
+  sigemptyset(&stcb->sigwaitmask);
 }
 
 /****************************************************************************

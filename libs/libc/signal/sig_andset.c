@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/signal/sig_pending.c
+ * libs/libc/signal/sig_andset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,84 +22,47 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <signal.h>
-#include <sched.h>
-#include <assert.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/signal.h>
-
-#include "sched/sched.h"
-#include "signal/signal.h"
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sigpending
+ * Name: sigandset
  *
  * Description:
- *   This function returns the set of signals that are blocked from delivery
- *   and that are pending for the calling process in the space pointed to by
- *   set.
+ *   This function returns the intersection of right and left in dest.
+ *
+ *   This is a non-standard function that may be provided by glibc if
+ *   _GNU_SOURCE is defined.
  *
  * Input Parameters:
- *   set - The location to return the pending signal set.
+ *   dest        - Location to store the intersection
+ *   left, right - The two sets to use in the intersection
  *
  * Returned Value:
- *   0 (OK) or -1 (ERROR)
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *     0 on success and -1 on failure
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sigpending(FAR sigset_t *set)
+int sigandset(FAR sigset_t *dest, FAR sigset_t *left, FAR sigset_t *right)
 {
-  if (set)
+  int ndx;
+
+  /* Add the signal to the dest set */
+
+  for (ndx = 0; ndx < _SIGSET_NELEM; ndx++)
     {
-      *set = nxsig_pendingset(NULL);
-      return OK;
+      dest->_elem[ndx] = left->_elem[ndx] & right->_elem[ndx];
     }
 
-  return ERROR;
-}
-
-/****************************************************************************
- * Name: nxsig_pendingset
- *
- * Description:
- *   Convert the list of pending signals into a signal set
- *
- ****************************************************************************/
-
-sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
-{
-  FAR struct task_group_s *group;
-  sigset_t sigpendset;
-  FAR sigpendq_t *sigpend;
-  irqstate_t flags;
-
-  if (stcb == NULL)
-    {
-      stcb = this_task();
-    }
-
-  group = stcb->group;
-  DEBUGASSERT(group);
-
-  sigemptyset(&sigpendset);
-
-  flags = enter_critical_section();
-  for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
-       (sigpend); sigpend = sigpend->flink)
-    {
-      nxsig_addset(&sigpendset, sigpend->info.si_signo);
-    }
-
-  leave_critical_section(flags);
-
-  return sigpendset;
+  return OK;
 }

@@ -260,8 +260,9 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
    * signals in the pending signal set argument.
    */
 
-  intersection = *set & nxsig_pendingset(rtcb);
-  if (intersection != NULL_SIGNAL_SET)
+  intersection = nxsig_pendingset(rtcb);
+  sigandset(&intersection, &intersection, (FAR sigset_t *)set);
+  if (!sigisemptyset(&intersection))
     {
       /* One or more of the signals in intersections is sufficient to cause
        * us to not wait.  Pick the lowest numbered signal and mark it not
@@ -414,7 +415,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
       /* We are running again, clear the sigwaitmask */
 
-      rtcb->sigwaitmask = NULL_SIGNAL_SET;
+      sigemptyset(&rtcb->sigwaitmask);
 
       /* When we awaken, the cause will be in the TCB.  Get the signal number
        * or timeout) that awakened us.

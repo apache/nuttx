@@ -146,7 +146,7 @@
 
 /* Required for sigqueue */
 
-#define _POSIX_RTSIG_MAX      2    /*  Number of reserved realtime signals */
+#define _POSIX_RTSIG_MAX      8   /*  Number of reserved realtime signals */
 #define _POSIX_SIGQUEUE_MAX   32
 
 /* Required for symbolic links */
@@ -220,7 +220,7 @@
 #define TZ_MAX_TIMES   CONFIG_LIBC_TZ_MAX_TIMES
 #define TZ_MAX_TYPES   CONFIG_LIBC_TZ_MAX_TYPES
 
-#define RTSIG_MAX      _POSIX_RTSIG_MAX
+#define RTSIG_MAX      32
 #define SIGQUEUE_MAX   _POSIX_SIGQUEUE_MAX
 
 #define SYMLOOP_MAX    _POSIX_SYMLOOP_MAX
