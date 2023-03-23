@@ -56,6 +56,10 @@
 
 #include "rndis_std.h"
 
+#ifdef CONFIG_USBMSC_COMPOSITE
+#  include <nuttx/usb/composite.h>
+#endif
+
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
@@ -2569,9 +2573,21 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
   if (ret >= 0)
     {
+      /* Configure the response */
+
       ctrlreq->len   = MIN(len, ret);
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
-      ret            = EP_SUBMIT(dev->ep0, ctrlreq);
+
+      /* Send the response -- either directly to the USB controller or
+       * indirectly in the case where this class is a member of a composite
+       * device.
+       */
+
+#ifndef CONFIG_RNDIS_COMPOSITE
+      ret = EP_SUBMIT(dev->ep0, ctrlreq);
+#else
+      ret = composite_ep0submit(driver, dev, ctrlreq);
+#endif
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPRESPQ), (uint16_t)-ret);
