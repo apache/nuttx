@@ -1728,14 +1728,19 @@ static void rndis_wrcomplete(FAR struct usbdev_ep_s *ep,
 static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                                    FAR struct usbdev_req_s *req)
 {
-  struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)ep->priv;
+  FAR struct rndis_dev_s *priv;
+
   if (req->result || req->xfrd != req->len)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_REQRESULT),
                (uint16_t)-req->result);
     }
-  else if (req->len > 0 && req->priv == priv->response_queue)
+  else if (req->len > 0 && req->priv)
     {
+      /* Get EP0 request private data  */
+
+      priv = (FAR struct rndis_dev_s *)req->priv;
+
       /* This transfer was from the response queue,
        * subtract remaining byte count.
        */
@@ -1761,7 +1766,7 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: usbclass_ep0incomplete
+ * Name: usbclass_epintin_complete
  *
  * Description:
  *   Handle completion of interrupt IN endpoint operations
@@ -2122,7 +2127,9 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
    * EP0).
    */
 
+#ifndef CONFIG_RNDIS_COMPOSITE
   dev->ep0->priv = priv;
+#endif
 
   /* Preallocate control request */
 
@@ -2581,7 +2588,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                     FAR struct rndis_response_header *hdr =
                       (struct rndis_response_header *)priv->response_queue;
                     memcpy(ctrlreq->buf, hdr, hdr->msglen);
-                    ctrlreq->priv = priv->response_queue;
+                    ctrlreq->priv = priv;
                     ret = hdr->msglen;
                   }
               }
