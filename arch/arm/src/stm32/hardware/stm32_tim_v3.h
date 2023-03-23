@@ -518,9 +518,9 @@
 #  define ATIM_SMCR_ITR1               (0x1 << ATIM_SMCR_TS_SHIFT)        /* 00 001: Internal trigger 1 (ITR1) */
 #  define ATIM_SMCR_ITR2               (0x2 << ATIM_SMCR_TS_SHIFT)        /* 00 010: Internal trigger 2 (ITR2) */
 #  define ATIM_SMCR_ITR3               (0x3 << ATIM_SMCR_TS_SHIFT)        /* 00 011: Internal trigger 3 (ITR3) */
-#  define ATIM_SMCR_T1FED              (0x4 << ATIM_SMCR_TS_SHIFT)        /* 00 100: TI1 Edge Detector (TI1F_ED) */
+#  define ATIM_SMCR_TI1FED             (0x4 << ATIM_SMCR_TS_SHIFT)        /* 00 100: TI1 Edge Detector (TI1F_ED) */
 #  define ATIM_SMCR_TI1FP1             (0x5 << ATIM_SMCR_TS_SHIFT)        /* 00 101: Filtered Timer Input 1 (TI1FP1) */
-#  define ATIM_SMCR_T12FP2             (0x6 << ATIM_SMCR_TS_SHIFT)        /* 00 110: Filtered Timer Input 2 (TI2FP2) */
+#  define ATIM_SMCR_TI2FP2             (0x6 << ATIM_SMCR_TS_SHIFT)        /* 00 110: Filtered Timer Input 2 (TI2FP2) */
 #  define ATIM_SMCR_ETRF               (0x7 << ATIM_SMCR_TS_SHIFT)        /* 00 111: External Trigger Input (ETRF) */
 #  define ATIM_SMCR_ITR4               (0x1000 << ATIM_SMCR_TS_SHIFT)     /* 01 000: Internal Trigger 0 ITR4 */
 #  define ATIM_SMCR_ITR5               (0x1001 << ATIM_SMCR_TS_SHIFT)     /* 01 001: Internal Trigger 1 ITR5 */
@@ -1019,9 +1019,9 @@
 #  define GTIM_SMCR_ITR1               (0x1 << GTIM_SMCR_TS_SHIFT)        /* 00 001: Internal trigger 1 (ITR1) */
 #  define GTIM_SMCR_ITR2               (0x2 << GTIM_SMCR_TS_SHIFT)        /* 00 010: Internal trigger 2 (ITR2) */
 #  define GTIM_SMCR_ITR3               (0x3 << GTIM_SMCR_TS_SHIFT)        /* 00 011: Internal trigger 3 (ITR3) */
-#  define GTIM_SMCR_T1FED              (0x4 << GTIM_SMCR_TS_SHIFT)        /* 00 100: TI1 Edge Detector (TI1F_ED) */
+#  define GTIM_SMCR_TI1FED             (0x4 << GTIM_SMCR_TS_SHIFT)        /* 00 100: TI1 Edge Detector (TI1F_ED) */
 #  define GTIM_SMCR_TI1FP1             (0x5 << GTIM_SMCR_TS_SHIFT)        /* 00 101: Filtered Timer Input 1 (TI1FP1) */
-#  define GTIM_SMCR_T12FP2             (0x6 << GTIM_SMCR_TS_SHIFT)        /* 00 110: Filtered Timer Input 2 (TI2FP2) */
+#  define GTIM_SMCR_TI2FP2             (0x6 << GTIM_SMCR_TS_SHIFT)        /* 00 110: Filtered Timer Input 2 (TI2FP2) */
 #  define GTIM_SMCR_ETRF               (0x7 << GTIM_SMCR_TS_SHIFT)        /* 00 111: External Trigger Input (ETRF) */
 #  define GTIM_SMCR_ITR4               (0x1000 << GTIM_SMCR_TS_SHIFT)     /* 01 000: Internal Trigger 0 ITR4 */
 #  define GTIM_SMCR_ITR5               (0x1001 << GTIM_SMCR_TS_SHIFT)     /* 01 001: Internal Trigger 1 ITR5 */
