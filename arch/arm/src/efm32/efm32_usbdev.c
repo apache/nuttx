@@ -1526,8 +1526,8 @@ static inline void efm32_ep0out_receive(struct efm32_ep_s *privep,
 
   /* Sanity Checking */
 
-  DEBUGASSERT(privep && privep->ep.priv);
-  priv = (struct efm32_usbdev_s *)privep->ep.priv;
+  DEBUGASSERT(privep && privep->dev);
+  priv = (struct efm32_usbdev_s *)privep->dev;
 
   uinfo("EP0: bcnt=%d\n", bcnt);
   usbtrace(TRACE_READ(EP0), bcnt);
@@ -5148,9 +5148,6 @@ static void efm32_swinitialize(struct efm32_usbdev_s *priv)
 
   priv->epavail[0] = EFM32_EP_AVAILABLE;
   priv->epavail[1] = EFM32_EP_AVAILABLE;
-
-  priv->epin[EP0].ep.priv  = priv;
-  priv->epout[EP0].ep.priv = priv;
 
   /* Initialize the endpoint lists */
 
