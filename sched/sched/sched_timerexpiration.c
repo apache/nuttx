@@ -533,6 +533,18 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 {
   unsigned int elapsed;
   unsigned int nexttime;
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+
+  /* If we are running on a single CPU architecture, then we know interrupts
+   * are disabled and there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() is required prevent multiple cpu to enter
+   * oneshot_tick_start.
+   */
+
+  flags = enter_critical_section();
+#endif
 
   /* Calculate elapsed */
 
@@ -552,6 +564,9 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   nexttime = nxsched_timer_process(elapsed, false);
   nxsched_timer_start(nexttime);
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }
 
 void nxsched_alarm_expiration(FAR const struct timespec *ts)
