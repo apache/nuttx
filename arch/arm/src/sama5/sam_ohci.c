@@ -2579,6 +2579,14 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIG, speed, funcaddr);
   DEBUGASSERT(rhport && maxpacketsize < 2048);
 
+  /* Expect the device to be unplugged during enumeration */
+
+  if (!ep0list || !ep0list->ed)
+    {
+      _err("Device was probably removed\n");
+      return -ENOMEM;
+    }
+
   edctrl = ep0list->ed;
 
   /* We must have exclusive access to EP0 and the control list */
@@ -3899,20 +3907,18 @@ static void sam_disconnect(struct usbhost_driver_s *drvr,
   DEBUGASSERT(rhport != NULL && hport != NULL && hport->ep0);
   ep0 = (struct sam_eplist_s *)hport->ep0;
 
-  /* Remove the disconnected port from the control list */
-
-  sam_ep0dequeue(ep0);
-
-  /* Did we just dequeue EP0 from a hoot hub port? */
+  /* Did we just dequeue EP0 from a root hub port? */
 
   if (ROOTHUB(hport))
     {
+      /* Remove the disconnected port from the control list */
+
+      sam_ep0dequeue(ep0);
       rhport->ep0init = false;
     }
 
   /* Unbind the class from the port */
 
-  hport->ep0      = NULL;
   hport->devclass = NULL;
 }
 
