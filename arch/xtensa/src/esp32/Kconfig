@@ -787,6 +787,7 @@ config ESP32_IMM_HEAP
 	bool "Reserve part of DRAM as a separate heap"
 	select XTENSA_IMEM_USE_SEPARATE_HEAP
 	default n
+	depends on ESP32_SPIRAM_COMMON_HEAP
 
 config ESP32_RTC_HEAP
 	bool "Use the RTC memory as a separate heap"
@@ -869,7 +870,7 @@ config ESP32_UART0_TXDMA
 	bool "Enable UART0 TX DMA"
 	select ARCH_DMA
 	select UART0_TXDMA
-	select ESP32_IMM_HEAP if ESP32_SPIRAM
+	select ESP32_IMM_HEAP if ESP32_SPIRAM_COMMON_HEAP
 	depends on EXPERIMENTAL
 	---help---
 		Due to a hardware bug on the DMA used by the UART
@@ -936,7 +937,7 @@ config ESP32_UART1_TXDMA
 	bool "Enable UART1 TX DMA"
 	select ARCH_DMA
 	select UART1_TXDMA
-	select ESP32_IMM_HEAP if ESP32_SPIRAM
+	select ESP32_IMM_HEAP if ESP32_SPIRAM_COMMON_HEAP
 	depends on EXPERIMENTAL
 	---help---
 		Due to a hardware bug on the DMA used by the UART
@@ -1003,7 +1004,7 @@ config ESP32_UART2_TXDMA
 	bool "Enable UART2 TX DMA"
 	select ARCH_DMA
 	select UART2_TXDMA
-	select ESP32_IMM_HEAP if ESP32_SPIRAM
+	select ESP32_IMM_HEAP if ESP32_SPIRAM_COMMON_HEAP
 	depends on EXPERIMENTAL
 	---help---
 		Due to a hardware bug on the DMA used by the UART
@@ -1156,14 +1157,14 @@ config ESP32_SPI2_DMA
 	bool "SPI2 use DMA"
 	default y
 	select ARCH_DMA
-	select ESP32_IMM_HEAP if ESP32_SPIRAM
+	select ESP32_IMM_HEAP if ESP32_SPIRAM_COMMON_HEAP
 	depends on ESP32_SPI2
 
 config ESP32_SPI3_DMA
 	bool "SPI3 use DMA"
 	default y
 	select ARCH_DMA
-	select ESP32_IMM_HEAP if ESP32_SPIRAM
+	select ESP32_IMM_HEAP if ESP32_SPIRAM_COMMON_HEAP
 	depends on ESP32_SPI3
 
 config SPI_DMADESC_NUM

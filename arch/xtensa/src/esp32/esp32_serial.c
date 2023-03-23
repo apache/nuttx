@@ -639,16 +639,24 @@ static void esp32_dmasend(struct uart_dev_s *dev)
     {
       struct esp32_dmadesc_s *dmadesc;
       uint8_t *tp;
-    #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+    #ifdef CONFIG_ESP32_SPIRAM
       uint8_t *alloctp = NULL;
     #endif
 
-      /* If the buffer comes from PSRAM, allocate a new one from DRAM */
+      /**
+       * If the buffer comes from PSRAM, allocate a new one from
+       * Internal SRAM.
+       */
 
-    #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+    #ifdef CONFIG_ESP32_SPIRAM
       if (esp32_ptr_extram(dev->dmatx.buffer))
         {
+    #  ifdef CONFIG_MM_KERNEL_HEAP
+          alloctp = kmm_malloc(dev->dmatx.length);
+    #  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
           alloctp = xtensa_imm_malloc(dev->dmatx.length);
+    #  endif
+
           DEBUGASSERT(alloctp != NULL);
           memcpy(alloctp, dev->dmatx.buffer, dev->dmatx.length);
           tp = alloctp;
@@ -680,10 +688,14 @@ static void esp32_dmasend(struct uart_dev_s *dev)
       modifyreg32(UHCI_DMA_OUT_LINK_REG(priv->config->dma_chan),
                   UHCI_OUTLINK_STOP_M, UHCI_OUTLINK_START_M);
 
-    #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+    #ifdef CONFIG_ESP32_SPIRAM
       if (alloctp != NULL)
         {
+    #  ifdef CONFIG_MM_KERNEL_HEAP
+          kmm_free(alloctp);
+    #  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
           xtensa_imm_free(alloctp);
+    #  endif
         }
     #endif
     }

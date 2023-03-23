@@ -829,9 +829,9 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
   uint32_t regval;
   struct esp32_dmadesc_s *dma_tx_desc;
   struct esp32_dmadesc_s *dma_rx_desc;
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_ESP32_SPIRAM
   uint8_t *alloctp = NULL;
-  uint8_t *allocrp;
+  uint8_t *allocrp = NULL;
 #endif
 
   /* Define these constants outside transfer loop to avoid wasting CPU time
@@ -853,10 +853,15 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
 
   /* If the buffer comes from PSRAM, allocate a new one from DRAM */
 
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_ESP32_SPIRAM
   if (esp32_ptr_extram(txbuffer))
     {
+#  ifdef CONFIG_MM_KERNEL_HEAP
+      alloctp = kmm_malloc(total);
+#  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
       alloctp = xtensa_imm_malloc(total);
+#  endif
+
       DEBUGASSERT(alloctp != NULL);
       memcpy(alloctp, txbuffer, total);
       tp = alloctp;
@@ -867,10 +872,15 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
       tp = (uint8_t *)txbuffer;
     }
 
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+#ifdef CONFIG_ESP32_SPIRAM
   if (esp32_ptr_extram(rxbuffer))
     {
+#  ifdef CONFIG_MM_KERNEL_HEAP
+      allocrp = kmm_malloc(total);
+#  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
       allocrp = xtensa_imm_malloc(total);
+#  endif
+
       DEBUGASSERT(allocrp != NULL);
       rp = allocrp;
     }
@@ -938,18 +948,26 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
 
   esp32_spi_reset_regbits(spi_slave_reg, SPI_INT_EN_M);
 
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  if (esp32_ptr_extram(rxbuffer))
+#ifdef CONFIG_ESP32_SPIRAM
+  if (allocrp)
     {
       memcpy(rxbuffer, allocrp, total);
+#  ifdef CONFIG_MM_KERNEL_HEAP
+      kmm_free(allocrp);
+#  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
       xtensa_imm_free(allocrp);
+#  endif
     }
 #endif
 
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  if (esp32_ptr_extram(txbuffer))
+#ifdef CONFIG_ESP32_SPIRAM
+  if (alloctp)
     {
+#  ifdef CONFIG_MM_KERNEL_HEAP
+      kmm_free(alloctp);
+#  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
       xtensa_imm_free(alloctp);
+#  endif
     }
 #endif
 }
