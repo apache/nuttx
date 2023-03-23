@@ -43,7 +43,7 @@
 #undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 
 #ifndef CONFIG_HAVE_FILENAME
-#  define __FILE__ NULL
+#  define __FILE__ 0
 #  define __LINE__ 0
 #endif
 
@@ -66,20 +66,20 @@
     }                                     \
   while (0)
 #else
-#  define ASSERT(f)                         \
-  do                                        \
-    {                                       \
-      if (predict_false(!(f)))              \
-        __assert(__FILE__, __LINE__, NULL); \
-    }                                       \
+#  define ASSERT(f)                       \
+  do                                      \
+    {                                     \
+      if (predict_false(!(f)))            \
+        __assert(__FILE__, __LINE__, 0);  \
+    }                                     \
   while (0)
 
-#  define VERIFY(f)                         \
-  do                                        \
-    {                                       \
-      if (predict_false((f) < 0))           \
-        __assert(__FILE__, __LINE__, NULL); \
-    }                                       \
+#  define VERIFY(f)                       \
+  do                                      \
+    {                                     \
+      if (predict_false((f) < 0))         \
+        __assert(__FILE__, __LINE__, 0);  \
+    }                                     \
   while (0)
 #endif
 
