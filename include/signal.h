@@ -37,19 +37,26 @@
 
 /* Signal set management definitions and macros. */
 
-#define NULL_SIGNAL_SET ((sigset_t)0x00000000)
-#define ALL_SIGNAL_SET  ((sigset_t)0xffffffff)
 #define MIN_SIGNO       1               /* Lowest valid signal number */
-#define MAX_SIGNO       31              /* Highest valid signal number */
+#define MAX_SIGNO       63              /* Highest valid signal number */
 #define GOOD_SIGNO(s)   ((((unsigned)(s)) <= MAX_SIGNO))
-#define SIGNO2SET(s)    ((sigset_t)1 << (s))
+
+/* Definitions for "standard" signals */
+
+#define SIGSTDMIN       1               /* First standard signal number */
+#define SIGSTDMAX       31              /* Last standard signal number */
 
 /* Definitions for "real time" signals */
 
-#define SIGSTDMAX       29              /* Last standard signal number */
 #define SIGRTMIN        (SIGSTDMAX + 1) /* First real time signal */
 #define SIGRTMAX        MAX_SIGNO       /* Last real time signal */
 #define _NSIG           (MAX_SIGNO + 1) /* Biggest signal number + 1 */
+
+/* sigset_t is represented as an array of 32-b unsigned integers.
+ * _SIGSET_NELEM is the allocated isze of the array
+ */
+
+#define _SIGSET_NELEM   ((_NSIG + 31) >> 5)
 
 /* NuttX does not support all standard signal actions.  NuttX supports what
  * are referred to as "real time" signals.  The default action of all NuttX
@@ -224,11 +231,7 @@
 #  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
 #endif
 
-#define tkill(tid, signo)            tgkill((pid_t)-1, tid, signo)
-
-#define sigisemptyset(set)           (!*(set))
-#define sigorset(dest, left, right)  (!(*(dest) = *(left) | *(right)))
-#define sigandset(dest, left, right) (!(*(dest) = *(left) & *(right)))
+#define tkill(tid, signo)  tgkill((pid_t)-1, tid, signo)
 
 /********************************************************************************
  * Public Types
@@ -239,10 +242,12 @@
  * special meaning in some circumstances (e.g., kill()).
  */
 
-#ifndef __SIGSET_T_DEFINED
-typedef uint32_t sigset_t;   /* Bit set of 32 signals */
-#define __SIGSET_T_DEFINED 1
-#endif
+struct sigset_s
+{
+  uint32_t _elem[_SIGSET_NELEM];
+};
+
+typedef struct sigset_s sigset_t; /* Bit set of _NSIG signals */
 
 /* Possibly volatile-qualified integer type of an object that can be accessed
  * as an atomic entity, even in the presence of asynchronous interrupts.
@@ -295,10 +300,7 @@ struct siginfo
   FAR void    *si_user;      /* The User info associated with sigaction */
 };
 
-#ifndef __SIGINFO_T_DEFINED
 typedef struct siginfo siginfo_t;
-#define __SIGINFO_T_DEFINED 1
-#endif
 
 /* Non-standard convenience definition of signal handling function types.
  * These should be used only internally within the NuttX signal logic.
@@ -351,13 +353,16 @@ int  raise(int signo);
 int  sigaction(int signo, FAR const struct sigaction *act,
                FAR struct sigaction *oact);
 int  sigaddset(FAR sigset_t *set, int signo);
+int  sigandset(FAR sigset_t *dest, FAR sigset_t *left, FAR sigset_t *right);
 int  sigdelset(FAR sigset_t *set, int signo);
 int  sigemptyset(FAR sigset_t *set);
 int  sigfillset(FAR sigset_t *set);
 int  sighold(int signo);
+int  sigisemptyset(FAR sigset_t *set);
 int  sigismember(FAR const sigset_t *set, int signo);
 int  sigignore(int signo);
 _sa_handler_t signal(int signo, _sa_handler_t func);
+int  sigorset(FAR sigset_t *dest, FAR sigset_t *left, FAR sigset_t *right);
 int  sigpause(int signo);
 int  sigpending(FAR sigset_t *set);
 int  sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
@@ -373,37 +378,6 @@ int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 #undef EXTERN
 #ifdef __cplusplus
 }
-#endif
-
-/********************************************************************************
- * Minimal Type Definitions
- ********************************************************************************/
-
-#else /* __INCLUDE_SIGNAL_H */
-
-/* Avoid circular dependencies by assuring that simple type definitions are
- * available in any inclusion ordering.
- */
-
-/********************************************************************************
- * Included Files
- ********************************************************************************/
-
-#include <stdint.h>
-
-/********************************************************************************
- * Public Types
- ********************************************************************************/
-
-#ifndef __SIGSET_T_DEFINED
-typedef uint32_t sigset_t;
-#  define __SIGSET_T_DEFINED 1
-#endif
-
-#ifndef __SIGINFO_T_DEFINED
-struct siginfo;
-typedef struct siginfo siginfo_t;
-#  define __SIGINFO_T_DEFINED 1
 #endif
 
 #endif /* __INCLUDE_SIGNAL_H */

@@ -66,7 +66,7 @@ int nxsig_ismember(FAR const sigset_t *set, int signo)
     {
       /* Check if the signal is in the set */
 
-      return ((*set & SIGNO2SET(signo)) != 0);
+      return ((set->_elem[_SIGSET_NDX(signo)] & _SIGNO2SET(signo)) != 0);
     }
 }
 

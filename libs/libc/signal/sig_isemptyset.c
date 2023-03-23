@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/signal/sig_pending.c
+ * libs/libc/signal/sig_isemptyset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,84 +22,51 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
+#include <stdbool.h>
 #include <signal.h>
-#include <sched.h>
-#include <assert.h>
-
-#include <nuttx/irq.h>
+#include <errno.h>
 #include <nuttx/signal.h>
-
-#include "sched/sched.h"
-#include "signal/signal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sigpending
+ * Name: sigisemptyset
  *
  * Description:
- *   This function returns the set of signals that are blocked from delivery
- *   and that are pending for the calling process in the space pointed to by
- *   set.
+ *   This function returns 1 if set contains no signals, and 0 otherwise.
+ *
+ *   This is a non-standard function that may be provided by glibc if
+ *   _GNU_SOURCE is defined.
  *
  * Input Parameters:
- *   set - The location to return the pending signal set.
+ *   set - Signal set to test
  *
  * Returned Value:
- *   0 (OK) or -1 (ERROR)
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    true - The set is empty.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sigpending(FAR sigset_t *set)
+int sigisemptyset(FAR sigset_t *set)
 {
-  if (set)
+  int ndx;
+
+  /* Add the signal to the set */
+
+  for (ndx = 0; ndx < _SIGSET_NELEM; ndx++)
     {
-      *set = nxsig_pendingset(NULL);
-      return OK;
+      if (set->_elem[ndx] != _NO_SIGNALS)
+        {
+          return 0;
+        }
     }
 
-  return ERROR;
-}
-
-/****************************************************************************
- * Name: nxsig_pendingset
- *
- * Description:
- *   Convert the list of pending signals into a signal set
- *
- ****************************************************************************/
-
-sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
-{
-  FAR struct task_group_s *group;
-  sigset_t sigpendset;
-  FAR sigpendq_t *sigpend;
-  irqstate_t flags;
-
-  if (stcb == NULL)
-    {
-      stcb = this_task();
-    }
-
-  group = stcb->group;
-  DEBUGASSERT(group);
-
-  sigemptyset(&sigpendset);
-
-  flags = enter_critical_section();
-  for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
-       (sigpend); sigpend = sigpend->flink)
-    {
-      nxsig_addset(&sigpendset, sigpend->info.si_signo);
-    }
-
-  leave_critical_section(flags);
-
-  return sigpendset;
+  return 1;
 }

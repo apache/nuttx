@@ -235,8 +235,8 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
           /* Return SIG_DFL if the default signal is attached */
 
           oact->sa_handler = SIG_DFL;
-          oact->sa_mask    = NULL_SIGNAL_SET;
           oact->sa_flags   = SA_SIGINFO;
+          sigemptyset(&oact->sa_mask);
         }
       else
 #endif
@@ -253,8 +253,8 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
           /* There isn't an old value */
 
           oact->sa_handler = NULL;
-          oact->sa_mask    = NULL_SIGNAL_SET;
           oact->sa_flags   = 0;
+          sigemptyset(&oact->sa_mask);
         }
     }
 

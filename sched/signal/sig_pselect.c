@@ -88,7 +88,7 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
       rtcb->sigprocmask = *sigmask;
     }
 
-  rtcb->sigwaitmask = NULL_SIGNAL_SET;
+  sigemptyset(&rtcb->sigwaitmask);
 
   /* Check if there is a pending signal corresponding to one of the
    * signals that will be unblocked by the new sigprocmask.

@@ -44,6 +44,19 @@
   #define sigwork_init(work) (void)(work)
 #endif
 
+/* Internal signal set definitions */
+
+#define _NO_SIGNALS     ((uint32_t)0x00000000)
+#define _ALL_SIGNALS    ((uint32_t)0xffffffff)
+#define _SIGSET_NDX(s)  ((s) >> 5)    /* Get array index from signal number */
+#define _SIGSET_BIT(s)  ((s) & 0x1f)  /* Get bit number from signal number */
+#define _SIGNO2SET(s)   ((uint32_t)1 << _SIGSET_BIT(s))
+
+/* Helper macros for printing signal sets. */
+
+#define SIGSET_FMT     "%08" PRIx32 "%08" PRIx32
+#define SIGSET_ELEM(s) (s)->_elem[1], (s)->_elem[0]
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -175,7 +188,7 @@ int nxsig_addset(FAR sigset_t *set, int signo);
  *   set specified by the 'set' argument.
  *
  * Input Parameters:
- *   set - Signal set to delete the signal from
+ *   set   - Signal set to delete the signal from
  *   signo - Signal to delete
  *
  * Returned Value:
@@ -190,6 +203,54 @@ int nxsig_addset(FAR sigset_t *set, int signo);
  ****************************************************************************/
 
 int nxsig_delset(FAR sigset_t *set, int signo);
+
+/****************************************************************************
+ * Name: nxsig_nandset
+ *
+ * Description:
+ *   This function returns the intersection of the left set and the
+ *   complement of the right set in dest.
+ *
+ * Input Parameters:
+ *   dest  - The location to store the result
+ *   left  - The uncomplemented set used in the intersection
+ *   right - The set that will be complemented and used in the intersection
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsig_nandset(FAR sigset_t *dest, FAR const sigset_t *left,
+                  FAR const sigset_t *right);
+
+/****************************************************************************
+ * Name: nxsig_xorset
+ *
+ * Description:
+ *   This function returns the xor of right and left in dest.
+ *
+ * Input Parameters:
+ *   dest        - Location to return the union
+ *   left, right - The two sets to use in the union
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *     0 on success or -1 on failure
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsig_xorset(FAR sigset_t *dest, FAR const sigset_t *left,
+                 FAR const sigset_t *right);
 
 /****************************************************************************
  * Name: nxsig_pendingset

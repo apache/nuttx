@@ -61,7 +61,7 @@
  *
  * Input Parameters:
  *   set  - The set of pending signals to wait for
- *   sig  - The location in which to return the pending signal number.
+ *   sig  - The location in which to store the pending signal number.
  *
  * Returned Value:
  *   Upon successful completion, sigwait() stores the signal number of the
