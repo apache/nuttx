@@ -19,7 +19,7 @@
 
 /risc-v/bl602/bl602evb/configs/wifi
 
-/risc-v/esp32c3/esp32c3-devkit/configs/wapi
+/risc-v/esp32c3/esp32c3-devkit/configs/wifi
 
 # ARM
 
@@ -27,7 +27,7 @@
 
 # XTENSA
 
-/xtensa/esp32/esp32-devkitc/configs/wapi
+/xtensa/esp32/esp32-devkitc/configs/wifi
 
 # x86_64-elf-gcc from homebrew doesn't seem to
 # provide __udivdi3 etc for -m32, so we do not build
