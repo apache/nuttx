@@ -244,7 +244,7 @@ errout:
   RELEASE_SEARCH(&newdesc);
   if (subdir != NULL)
     {
-      kmm_free(subdir);
+      lib_free(subdir);
     }
 
   return ret;
@@ -429,7 +429,7 @@ errout_with_newsearch:
   RELEASE_SEARCH(&newdesc);
   if (subdir != NULL)
     {
-      kmm_free(subdir);
+      lib_free(subdir);
     }
 
   return ret;

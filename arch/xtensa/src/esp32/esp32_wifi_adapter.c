@@ -3076,7 +3076,7 @@ static void esp_nvs_close(uint32_t handle)
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
   struct nvs_adpt *nvs_adpt = (struct nvs_adpt *)handle;
 
-  kmm_free(nvs_adpt->index_name);
+  lib_free(nvs_adpt->index_name);
   kmm_free(nvs_adpt);
 #else
   DEBUGPANIC();
@@ -3138,7 +3138,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
       if (ret != -ENOENT)
         {
           wlerr("Failed to unlink %s error=%d\n", dir, ret);
-          kmm_free(dir);
+          lib_free(dir);
           return -1;
         }
     }
@@ -3147,7 +3147,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
   if (ret < 0)
     {
       wlerr("Failed to set open %s\n", dir);
-      kmm_free(dir);
+      lib_free(dir);
       return -1;
     }
 
@@ -3155,12 +3155,12 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
   if (ret < 0)
     {
       wlerr("Failed to write to %s\n", dir);
-      kmm_free(dir);
+      lib_free(dir);
       file_close(&file);
       return -1;
     }
 
-  kmm_free(dir);
+  lib_free(dir);
   file_close(&file);
 
   return 0;
@@ -3213,11 +3213,11 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
       if (ret == -ENOENT)
         {
           wlinfo("No file %s\n", dir);
-          kmm_free(dir);
+          lib_free(dir);
           return ESP_ERR_NVS_NOT_FOUND;
         }
       wlerr("Failed to get open %s\n", dir);
-      kmm_free(dir);
+      lib_free(dir);
       return -1;
     }
 
@@ -3225,7 +3225,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
   if (ret <= 0)
     {
       wlerr("Failed to write to %s\n", dir);
-      kmm_free(dir);
+      lib_free(dir);
       file_close(&file);
       return -1;
     }
@@ -3234,7 +3234,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
       *length = ret;
     }
 
-  kmm_free(dir);
+  lib_free(dir);
   file_close(&file);
 
   return 0;
@@ -3279,11 +3279,11 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
   if (ret < 0)
     {
       wlerr("Failed to delete NVS file %s\n", dir);
-      kmm_free(dir);
+      lib_free(dir);
       return -1;
     }
 
-  kmm_free(dir);
+  lib_free(dir);
 
   return 0;
 #else
