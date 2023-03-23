@@ -2586,7 +2586,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_RNDIS_COMPOSITE
       ret = EP_SUBMIT(dev->ep0, ctrlreq);
 #else
-      ret = composite_ep0submit(driver, dev, ctrlreq);
+      ret = composite_ep0submit(driver, dev, ctrlreq, ctrl);
 #endif
       if (ret < 0)
         {

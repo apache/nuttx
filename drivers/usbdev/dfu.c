@@ -424,7 +424,7 @@ static int  usbclass_setup(FAR struct usbdevclass_driver_s *driver,
     {
       ctrlreq->len   = (len < ret) ? len : ret;
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
-      ret            = composite_ep0submit(driver, dev, ctrlreq);
+      ret            = composite_ep0submit(driver, dev, ctrlreq, ctrl);
       if (ret < 0)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPRESPQ), (uint16_t)-ret);
