@@ -39,14 +39,15 @@
 
 #define NULL_SIGNAL_SET ((sigset_t)0x00000000)
 #define ALL_SIGNAL_SET  ((sigset_t)0xffffffff)
-#define MIN_SIGNO       1
-#define MAX_SIGNO       31
+#define MIN_SIGNO       1               /* Lowest valid signal number */
+#define MAX_SIGNO       31              /* Highest valid signal number */
 #define GOOD_SIGNO(s)   ((((unsigned)(s)) <= MAX_SIGNO))
 #define SIGNO2SET(s)    ((sigset_t)1 << (s))
 
-/* All signals are "real time" signals */
+/* Definitions for "real time" signals */
 
-#define SIGRTMIN        MIN_SIGNO       /* First real time signal */
+#define SIGSTDMAX       29              /* Last standard signal number */
+#define SIGRTMIN        (SIGSTDMAX + 1) /* First real time signal */
 #define SIGRTMAX        MAX_SIGNO       /* Last real time signal */
 #define _NSIG           (MAX_SIGNO + 1) /* Biggest signal number + 1 */
 

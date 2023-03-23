@@ -82,7 +82,7 @@
  *
  * Required for sigqueue
  *
- *   _POSIX_RTSIG_MAX      Difference between SIGRTMIN and SIGRTMAX
+ *   _POSIX_RTSIG_MAX      Number of realtime signals reserved for application
  *   _POSIX_SIGQUEUE_MAX   Max number signals a task can queue
  *
  * Required for POSIX timers
@@ -146,7 +146,7 @@
 
 /* Required for sigqueue */
 
-#define _POSIX_RTSIG_MAX      31
+#define _POSIX_RTSIG_MAX      2    /*  Number of reserved realtime signals */
 #define _POSIX_SIGQUEUE_MAX   32
 
 /* Required for symbolic links */
