@@ -2474,20 +2474,28 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                   break;
 #endif
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+                /* If the serial device is used in as part of a composite
+                 * device, then the configuration descriptor is provided by
+                 * logic in the composite device implementation.
+                 */
+
+#ifndef CONFIG_CDCACM_COMPOSITE
+#  ifdef CONFIG_USBDEV_DUALSPEED
                 case USB_DESC_TYPE_OTHERSPEEDCONFIG:
-#endif /* CONFIG_USBDEV_DUALSPEED */
+#  endif /* CONFIG_USBDEV_DUALSPEED */
                 case USB_DESC_TYPE_CONFIG:
                   {
-#ifdef CONFIG_USBDEV_DUALSPEED
+#  ifdef CONFIG_USBDEV_DUALSPEED
                     ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
                                              dev->speed, ctrl->req);
-#else
+#  else
                     ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
-#endif
+#  endif
                   }
                   break;
+#endif
 
+#ifndef CONFIG_CDCACM_COMPOSITE
                 case USB_DESC_TYPE_STRING:
                   {
                     /* index == language code. */
@@ -2496,6 +2504,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                                   (FAR struct usb_strdesc_s *)ctrlreq->buf);
                   }
                   break;
+#endif
 
                 default:
                   {
@@ -2516,6 +2525,12 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
             }
             break;
 
+          /* If the serial device is used in as part of a composite device,
+           * then the overall composite class configuration is managed by
+           * logic in the composite device implementation.
+           */
+
+#ifndef CONFIG_CDCACM_COMPOSITE
           case USB_REQ_GETCONFIGURATION:
             {
               if (ctrl->type == USB_DIR_IN)
@@ -2525,6 +2540,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 }
             }
             break;
+#endif
 
           default:
             usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDSTDREQ),
@@ -2663,10 +2679,12 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
   leave_critical_section(flags);
 
   /* Perform the soft connect function so that we will we can be
-   * re-enumerated.
+   * re-enumerated (unless we are part of a composite device)
    */
 
+#ifndef CONFIG_CDCACM_COMPOSITE
   DEV_CONNECT(dev);
+#endif
 }
 
 /****************************************************************************
