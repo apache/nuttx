@@ -449,7 +449,7 @@ static int dir_close(FAR struct file *filep)
   /* Release our references on the contained 'root' inode */
 
   inode_release(inode);
-  kmm_free(relpath);
+  lib_free(relpath);
   return ret;
 }
 

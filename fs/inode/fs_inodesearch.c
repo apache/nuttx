@@ -357,7 +357,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                            "%s/%s", desc->relpath, name);
                                   if (buffer != NULL)
                                     {
-                                      kmm_free(desc->buffer);
+                                      lib_free(desc->buffer);
                                       desc->buffer = buffer;
                                       relpath = buffer;
                                     }

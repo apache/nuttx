@@ -1775,7 +1775,7 @@ static int unionfs_readdir(FAR struct inode *mountpt,
 
                       /* Free the allocated relpath */
 
-                      kmm_free(relpath);
+                      lib_free(relpath);
 
                       /* Check for a duplicate */
 
@@ -1862,7 +1862,7 @@ static int unionfs_readdir(FAR struct inode *mountpt,
 
                   /* Free the allocated relpath */
 
-                  kmm_free(relpath);
+                  lib_free(relpath);
                 }
             }
         }
