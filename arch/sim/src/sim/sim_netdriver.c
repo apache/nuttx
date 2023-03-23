@@ -77,7 +77,7 @@
  * when netpkt's buffer is long enough.
  */
 
-#if NETPKT_BUFLEN >= SIM_NETDEV_BUFSIZE
+#if NETPKT_BUFLEN - CONFIG_NET_LL_GUARDSIZE >= SIM_NETDEV_BUFSIZE - ETH_HDRLEN
 #  define SIM_NETDEV_RECV_OFFLOAD
 #endif
 
@@ -160,7 +160,7 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
        */
 
 #ifdef SIM_NETDEV_RECV_OFFLOAD
-      len = sim_netdev_read(DEVIDX(dev), netpkt_getbase(pkt),
+      len = sim_netdev_read(DEVIDX(dev), netpkt_getdata(dev, pkt),
                             SIM_NETDEV_BUFSIZE);
 #else
       len = sim_netdev_read(DEVIDX(dev), DEVBUF(dev), SIM_NETDEV_BUFSIZE);
@@ -172,7 +172,6 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
         }
 
 #ifdef SIM_NETDEV_RECV_OFFLOAD
-      netpkt_reset_reserved(dev, pkt, 0); /* No overhead before data. */
       netpkt_setdatalen(dev, pkt, len);
 #else
       netpkt_copyin(dev, pkt, DEVBUF(dev), len, 0);
