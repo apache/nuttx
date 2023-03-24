@@ -26,10 +26,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usbdev.h>
 
 #include <stdint.h>
 
-#include "stm32.h"
 #include "hardware/stm32_otghs.h"
 
 #if defined(CONFIG_STM32_OTGHS)
