@@ -107,13 +107,12 @@ endif
 
 ifeq ($(CONFIG_USBHOST),y)
 CHIP_CSRCS += stm32_otghost.c
-endif
-
 ifeq ($(CONFIG_USBHOST_TRACE),y)
 CHIP_CSRCS += stm32_usbhost.c
 else
 ifeq ($(CONFIG_DEBUG_USB),y)
 CHIP_CSRCS += stm32_usbhost.c
+endif
 endif
 endif
 
