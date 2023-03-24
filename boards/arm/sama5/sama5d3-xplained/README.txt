@@ -1025,7 +1025,6 @@ Networking
       CONFIG_NSH_NETINIT_THREAD             : Enable the network initialization thread
       CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
       CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
-      CONFIG_NSH_NETINIT_SIGNO=18
 
   Ethernet Over USB Configuration Script
   --------------------------------------
@@ -2872,7 +2871,6 @@ Shields
     CONFIG_NSH_ARCHINIT=y
     CONFIG_EXAMPLES_AJOYSTICK=y
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
-    CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13
 
   STATUS:
   2014-12-03:  As nearly I can tell, the Itead Joystick shield cannot be
