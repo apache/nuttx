@@ -48,7 +48,6 @@ Alternatively, you may follow the steps in
 Flashing
 ========
 
-
 Firmware for ESP32-S2 is flashed via the USB/UART or internal USB DEVICE JTAG interface using the
 ``esptool.py`` tool.
 It's a two-step process where the first converts the ELF file into a ESP32-S2 compatible binary
@@ -64,7 +63,7 @@ Bootloader and partitions
 
 ESP32-S2 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
 (or any time you which to modify either of these).
-An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`_.
+An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`__.
 In there you will find instructions to rebuild these if necessary.
 Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
 
@@ -97,29 +96,30 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-GPIO         Yes
-UART         Yes
-SPI          Yes
-I2C          Yes
+ADC          No
+AES          No
+CAN/TWAI     No
 DMA          Yes
-Wifi         No
+eFuse        No
 Ethernet     No
+GPIO         Yes
+I2C          Yes
+I2S          Yes
+LED_PWM      No
+Pulse_CNT    No
+RMT          No
+RNG          Yes
+RSA          No
+RTC          Yes
+SHA          No
+SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
 Timers       Yes
+Touch        Yes
+UART         Yes
 Watchdog     Yes
-RTC          Yes
-RNG          Yes
-AES          No
-eFuse        No
-ADC          No
-I2S          Yes
-LED_PWM      No
-RMT          No
-Pulse_CNT    No
-SHA          No
-RSA          No
-CAN/TWAI     No
+Wifi         No
 ========== ======= =====
 
 Memory Map
@@ -242,7 +242,7 @@ Linker Segments
 ESP32-S2 has 4 generic timers of 64 bits (2 from Group 0 and 2 from Group 1).
 They're accessible as character drivers, the configuration along with a
 guidance on how to run the example and the description of the application level
-interface can be found :doc:`here </components/drivers/character/timer>`.
+interface can be found in the :doc:`timer documentation </components/drivers/character/timer>`.
 
 Watchdog Timers
 ===============
@@ -250,8 +250,8 @@ Watchdog Timers
 ESP32-S2 has 3 WDTs. 2 MWDTs from the Timers Module and 1 RWDT from the RTC Module
 (Currently not supported yet). They're accessible as character drivers,
 The configuration along with a guidance on how to run the example and the description
-of the application level interface can be found
-:doc:`here </components/drivers/character/watchdog>`.
+of the application level interface can be found in the
+:doc:`watchdog documentation </components/drivers/character/watchdog>`.
 
 I2S
 ===
@@ -276,7 +276,7 @@ Secure Boot protects a device from running any unauthorized (i.e., unsigned) cod
 each piece of software that is being booted is signed. On an ESP32-S2, these pieces of software include
 the second stage bootloader and each application binary. Note that the first stage bootloader does not
 require signing as it is ROM code thus cannot be changed. This is achieved using specific hardware in
-conjunction with MCUboot (read more about MCUboot `here <https://docs.mcuboot.com/>`_).
+conjunction with MCUboot (read more about MCUboot `here <https://docs.mcuboot.com/>`__).
 
 The Secure Boot process on the ESP32-S2 involves the following steps performed:
 
@@ -290,7 +290,7 @@ The Secure Boot process on the ESP32-S2 involves the following steps performed:
 .. warning:: Once enabled, Secure Boot will not boot a modified bootloader. The bootloader will only boot an
    application firmware image if it has a verified digital signature. There are implications for reflashing
    updated images once Secure Boot is enabled. You can find more information about the ESP32-S2's Secure boot
-   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/security/secure-boot-v2.html>`_.
+   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/security/secure-boot-v2.html>`__.
 
 .. note:: As the bootloader image is built on top of the Hardware Abstraction Layer component
    of `ESP-IDF <https://github.com/espressif/esp-idf>`_, the
@@ -307,7 +307,7 @@ of flash will not be sufficient to recover most flash contents.
 .. warning::  After enabling Flash Encryption, an encryption key is generated internally by the device and
    cannot be accessed by the user for re-encrypting data and re-flashing the system, hence it will be permanently encrypted.
    Re-flashing an encrypted system is complicated and not always possible. You can find more information about the ESP32-S2's Flash Encryption
-   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/security/flash-encryption.html>`_.
+   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/security/flash-encryption.html>`__.
 
 Prerequisites
 -------------
@@ -360,7 +360,7 @@ the `MCUboot porting guide <https://github.com/mcu-tools/mcuboot/blob/main/docs/
 
 After you developed an application which implements all desired functions, you need to flash it into the primary image slot
 of the device (it will automatically be in the confirmed state, you can learn more about image
-confirmation `here <https://docs.mcuboot.com/design.html#image-swapping>`_).
+confirmation `here <https://docs.mcuboot.com/design.html#image-swapping>`__).
 To flash to the primary image slot, select ``Application image primary slot`` in
 :menuselection:`System Type --> Application Image Configuration --> Target slot for image flashing`
 and compile it using ``make -j ESPSEC_KEYDIR=~/signing_keys``.

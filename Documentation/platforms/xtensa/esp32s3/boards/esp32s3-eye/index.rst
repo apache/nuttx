@@ -26,16 +26,19 @@ Features
 Configurations
 ==============
 
+All of the configurations presented below can be tested by running the following commands::
+
+    $ ./tools/configure.sh esp32s3-eye:<config_name>
+    $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
+
+Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
+Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
+
 nsh
 ---
 
 Basic NuttShell configuration (console enabled in USB JTAG SERIAL Device, exposed via
 USB connection at 9600 bps).
-
-You can configure this board profile this way:
-
-  $ cd nuttxspace/nuttx
-  $ ./tools/configure.sh esp32s3-eye:nsh
 
 Flashing
 ========
@@ -63,8 +66,8 @@ You can use minicom with /dev/ttyACM0 port at 9600 8n1 or picocom this way:
 Buttons and LEDs
 ================
 
-Buttons
--------
+Board Buttons
+-------------
 
 There are two buttons labeled BOOT and RST.  The RST button is not available
 to software.  It pulls the chip enable line that doubles as a reset line.
@@ -74,8 +77,8 @@ pin to determine whether the chip boots normally or into the serial
 bootloader.  After reset, however, the BOOT button can be used for software
 input.
 
-LEDs
-----
+Board LEDs
+----------
 
 There are several on-board LEDs for that indicate the presence of power
 and USB activity.  None of these are available for use by software.

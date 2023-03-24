@@ -49,10 +49,10 @@ First make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32-C6 image and to flash the image into the board.
 It can be installed with: ``pip install esptool``.
 
-Configure the NUttX project: ``./tools/configure.sh esp32c6-devkit:nsh``
+Configure the NuttX project: ``./tools/configure.sh esp32c6-devkit:nsh``
 Run ``make`` to build the project.  Note that the conversion mentioned above is
-included in the build process.  
-The `esptool.py` command to flash all the binaries is::
+included in the build process.
+The ``esptool.py`` command to flash all the binaries is::
 
      esptool.py --chip esp32c6 --port /dev/ttyUSBXX --baud 921600 write_flash 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 nuttx.bin
 
@@ -60,9 +60,58 @@ However, this is also included in the build process and we can build and flash w
 
    make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=../esp-bins
 
-Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``../esp-bins`` is 
+Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``../esp-bins`` is
 the path to the folder containing the bootloader and the partition table
 for the ESP32-C6 as explained above.
 Note that this step is required only one time.  Once the bootloader and partition
 table are flashed, we don't need to flash them again.  So subsequent builds
 would just require: ``make flash ESPTOOL_PORT=/dev/ttyUSBXX``
+
+Peripheral Support
+==================
+
+The following list indicates the state of peripherals' support in NuttX:
+
+==============  =======
+Peripheral      Support
+==============  =======
+ADC              No
+AES              No
+Bluetooth        No
+CAN/TWAI         No
+DMA              No
+ECC              No
+eFuse            No
+GPIO             No
+HMAC             No
+I2C              No
+I2S              No
+Int. Temp.       No
+LED              No
+LED_PWM          No
+MCPWM            No
+Pulse Counter    No
+RMT              No
+RNG              No
+RSA              No
+RTC              No
+SD/MMC           No
+SDIO             No
+SHA              No
+SPI              No
+SPIFLASH         No
+Timers           No
+UART             Yes
+Watchdog         Yes
+Wifi             No
+XTS              No
+==============  =======
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

@@ -3040,6 +3040,17 @@ Espressif ESP32-C3 Devkit board.
 Please, refer to the :doc:`ESP32-C3 </platforms/risc-v/esp32c3/index>` on NuttX for
 further information.
 
+ESP32-C6
+--------
+
+Initial architectural support for ESP32-C6 (RISC-V) was added in NuttX-12.1.0
+
+**Espressif ESP32-C6 Devkit Board** The NuttX release includes support for
+Espressif ESP32-C6 Devkit board.
+
+Please, refer to the :doc:`ESP32-C6 </platforms/risc-v/esp32c6/index>` on NuttX for
+further information.
+
 ESP32 (Dual Xtensa LX6)
 =======================
 

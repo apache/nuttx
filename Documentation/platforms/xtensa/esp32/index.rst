@@ -90,33 +90,34 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-GPIO         Yes
-UART         Yes
-SPI          Yes
-I2C          Yes
+ADC          No
+AES          Yes
+Bluetooth    Yes
+CAN/TWAI     Yes
 DMA          Yes
-Wifi         Yes
+eFuse        Yes
 Ethernet     Yes
+GPIO         Yes
+I2C          Yes
+I2S          Yes
+LED_PWM      Yes
+MCPWM        No
+Pulse_CNT    No
+RMT          No
+RNG          Yes
+RSA          No
+RTC          Yes
+SD/MMC       No
+SDIO         No
+SHA          No
+SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
 Timers       Yes
+Touch        Yes
+UART         Yes
 Watchdog     Yes
-RTC          Yes
-RNG          Yes
-AES          Yes
-eFuse        Yes
-ADC          No
-Bluetooth    Yes
-SDIO         No
-SD/MMC       No
-I2S          Yes
-LED_PWM      Yes
-RMT          No
-MCPWM        No
-Pulse_CNT    No
-SHA          No
-RSA          No
-CAN/TWAI     Yes
+Wifi         Yes
 ========== ======= =====
 
 Memory Map
@@ -285,7 +286,7 @@ In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd``
 password. IP address is obtained via DHCP using ``renew`` command. You can check
 the result by running ``ifconfig`` afterwards.
 
-.. tip:: Boards usually expose a ``wapi`` defconfig which enables Wi-Fi
+.. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi
 
 Wi-Fi SoftAP
 ============
@@ -362,6 +363,9 @@ audio subsystem and develop specific usages of the I2S peripheral.
 .. note:: Note that the bit-width and sample rate can be modified "on-the-go" when using
    audio-related drivers. That is not the case for the I2S character device driver and
    such parameters are set on compile time through `make menuconfig`.
+
+.. warning:: Some upper driver implementations might not handle both transmission and
+   reception configured at the same time on the same peripheral.
 
 Please check for usage examples using the :doc:`ESP32 DevKitC </platforms/xtensa/esp32/boards/esp32-devkitc/index>`.
 

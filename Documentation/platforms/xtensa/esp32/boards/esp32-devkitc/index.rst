@@ -30,7 +30,7 @@ Features
 Serial Console
 ==============
 
-UART0 is, by default, the serial console.  It connects to the on-board
+UART0 is, by default, the serial console. It connects to the on-board
 CP2102 converter and is available on the USB connector USB CON8 (J1).
 
 It will show up as /dev/ttypUSB[n] where [n] will probably be 0 (is it 1
@@ -39,22 +39,22 @@ on my PC because I have a another device at ttyUSB0).
 Buttons and LEDs
 ================
 
-Buttons
--------
+Board Buttons
+-------------
 
-There are two buttons labeled Boot and EN.  The EN button is not available
-to software.  It pulls the chip enable line that doubles as a reset line.
+There are two buttons labeled Boot and EN. The EN button is not available
+to software. It pulls the chip enable line that doubles as a reset line.
 
-The BOOT button is connected to IO0.  On reset it is used as a strapping
+The BOOT button is connected to IO0. On reset it is used as a strapping
 pin to determine whether the chip boots normally or into the serial
-bootloader.  After reset, however, the BOOT button can be used for software
+bootloader. After reset, however, the BOOT button can be used for software
 input.
 
-LEDs
-----
+Board LEDs
+----------
 
 There are several on-board LEDs for that indicate the presence of power
-and USB activity.  None of these are available for use by software.
+and USB activity. None of these are available for use by software.
 
 Ethernet
 ========
@@ -155,6 +155,14 @@ Pin   Signal     Notes
 Configurations
 ==============
 
+All of the configurations presented below can be tested by running the following commands::
+
+    $ ./tools/configure.sh esp32-devkitc:<config_name>
+    $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
+
+Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
+Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
+
 audio
 -----
 
@@ -181,12 +189,11 @@ Prepare a PCM-encoded (`.wav`) audio file with 16 or 24 bits/sample (sampled at
 16~48kHz). This file must be placed into a folder in a computer that could
 be accessed on the same Wi-Fi network the ESP32 will be connecting to.
 
-Python provides a simple HTTP server. `cd` to the audio file folder on the
+Python provides a simple HTTP server. ``cd`` to the audio file folder on the
 PC and run::
 
-  $ python3 -m http.server
-
-  Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/)
+    $ python3 -m http.server
+    Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/)
 
 Look for your PC IP address and test playing the prepared audio on your
 browser:
@@ -196,20 +203,143 @@ browser:
 
 After successfully built and flashed, connect the board to the Wi-Fi network::
 
-  nsh> wapi psk wlan0 mypasswd 1
-  nsh> wapi essid wlan0 myssid 1
-  nsh> renew wlan0
+    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
 
 Once connected, open NuttX's player and play the file according to its file
 name and the IP address of the HTTP server::
 
-  nsh> nxplayer
-  nxplayer> play http://192.168.1.239:8000/tones.wav
+    nsh> nxplayer
+    nxplayer> play http://192.168.1.239:8000/tones.wav
+
+autopm
+------
+
+This configuration makes the device automatically enter the low power consumption mode
+when in the idle state, powering off the cpu and other peripherals.
+
+In minimum power save mode, the station wakes up every DTIM to receive a beacon. The broadcast
+data will not be lost because it is transmitted after DTIM. However, it can not save much more
+power if DTIM is short as the DTIM is determined by the access point.
+
+ble
+---
+
+This configuration is used to enable Bluetooth Low Energy support for this board. You can scan
+for Bluetooth devices using the following commands::
+
+
+    NuttShell (NSH) NuttX-10.2.0
+    nsh> ifconfig
+    bnep0   Link encap:UNSPEC at DOWN
+            inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+    wlan0   Link encap:Ethernet HWaddr ac:67:b2:53:8b:ec at UP
+            inet addr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+    nsh> bt bnep0 scan start
+    nsh> bt bnep0 scan stop
+    nsh> bt bnep0 scan get
+    Scan result:
+    1.     addr:           63:14:2f:b9:9f:83 type: 1
+          rssi:            -90
+          response type:   3
+          advertiser data: 1e ff 06 00 01 09 20 02 7c 33 a3 a7 cd c9 44 5b
+    2.     addr:           52:ca:05:b5:ad:77 type: 1
+          rssi:            -82
+          response type:   3
+          advertiser data: 1e ff 06 00 01 09 20 02 03 d1 21 57 bf 19 b3 7a
+    3.     addr:           46:8e:b2:cd:94:27 type: 1
+          rssi:            -92
+          response type:   2
+          advertiser data: 02 01 1a 09 ff c4 00 10 33 14 12 16 80 02 0a d4
+    4.     addr:           46:8e:b2:cd:94:27 type: 1
+          rssi:            -92
+          response type:   4
+          advertiser data: 18 09 5b 4c 47 5d 20 77 65 62 4f 53 20 54 56 20
+    5.     addr:           63:14:2f:b9:9f:83 type: 1
+          rssi:            -80
+          response type:   3
+        advertiser data: 1e ff 06 00 01 09 20 02 7c 33 a3 a7 cd c9 44 5b
+
+blewifi
+-------
+
+Combines the capabilities of the ``ble`` and ``wifi`` configurations. ESP32 has only one 2.4 GHz
+ISM band RF module, which is shared by Bluetooth (BT & BLE) and Wi-Fi, so Bluetooth can't receive
+or transmit data while Wi-Fi is receiving or transmitting data and vice versa. Under such circumstances,
+ESP32 uses the time-division multiplexing method to receive and transmit packets.
+
+bmp280
+------
+
+This configuration enables the use of the BMP280 temperature and pressure sensor over I2C.
+You can check that the sensor is working by using the ``sensortest`` application::
+
+    nsh> sensortest baro0
+    baro0: timestamp:66870000 value1:1008.37 value2:31.70
+    baro0: timestamp:66890000 value1:1008.31 value2:31.70
+
+buttons
+-------
+
+This configuration shows the use of the buttons subsystem. It can be used by executing
+the ``buttons`` application and pressing on any of the available board buttons::
+
+    nsh> buttons
+    buttons_main: Starting the button_daemon
+    buttons_main: button_daemon started
+    button_daemon: Running
+    button_daemon: Opening /dev/buttons
+    button_daemon: Supported BUTTONs 0x01
+    nsh> Sample = 1
+    Sample = 0
+
+coremark
+--------
+
+This configuration sets the CoreMark benchmark up for running on the maximum
+number of cores for this system. It also enables some optimization flags and
+disables the NuttShell to get the best possible score.
+
+.. note:: As the NSH is disabled, the application will start as soon as the
+  system is turned on.
+
+cxx
+---
+
+Development enviroment ready for C++ applications. You can check if the setup
+was successfull by running ``cxxtest``::
+
+    nsh> cxxtest
+    Test ofstream ================================
+    printf: Starting test_ostream
+    printf: Successfully opened /dev/console
+    cout: Successfully opened /dev/console
+    Writing this to /dev/console
+    Test iostream ================================
+    Hello, this is only a test
+    Print an int: 190
+    Print a char: d
+    Test std::vector =============================
+    v1=1 2 3
+    Hello World Good Luck
+    Test std::map ================================
+    Test C++17 features ==========================
+    File /proc/meminfo exists!
+    Invalid file! /invalid
+    File /proc/version exists!
 
 efuse
 -----
 
-A config with EFUSE enabled.
+A ``wifi`` configuration with the eFuse driver enabled. It can be accessed
+through the ``/dev/efuse`` device file.
+
+elf
+---
+
+This configuration uses apps/examples/elf in order to test the ELF loader.
+It can be tested by executing the ``elf`` application.
 
 i2schar
 -------
@@ -243,7 +373,7 @@ ESP32 Pin  Signal Pin Description
 
 After successfully built and flashed, run on the boards's terminal::
 
-  i2schar -p /dev/i2schar[0-1]
+    i2schar -p /dev/i2schar[0-1]
 
 The corresponding output should show related debug informations.
 
@@ -269,6 +399,50 @@ Flash and PSRAM).
     * The PID Controller **does not** prevent the application from accessing
       CPU System Registers.
 
+leds
+----
+
+This configuration uses the on-board LED (or an external LED connected to GPIO2)
+to demonstrate the use of the userleds subsystem::
+
+    nsh> leds
+    leds_main: Starting the led_daemon
+    leds_main: led_daemon started
+    led_daemon (pid# 3): Running
+    led_daemon: Opening /dev/userleds
+    led_daemon: Supported LEDs 0x01
+    led_daemon: LED set 0x01
+    led_daemon: LED set 0x00
+    led_daemon: LED set 0x01
+    led_daemon: LED set 0x00
+    led_daemon: LED set 0x01
+
+max6675
+-------
+
+This configuration enables the use of the MAX6675 temperature sensor over SPI.
+The following pin configuration is used to connect the sensor:
+
+===== =======
+Pin   Signal
+===== =======
+15    CS
+14    SCK
+12    MISO
+===== =======
+
+You can check that the sensor is working by using the ``max6675`` application::
+
+    nsh> max6675
+    Unable to open file /dev/temp1
+    Unable to open file /dev/temp2
+    Unable to open file /dev/temp3
+    Starting...
+    Channel SSP0/SPI1 Device 0: Temperature = 24!
+    Channel SSP0/SPI1 Device 1: Not enabled!
+    Channel SSP1/SPI2 Device 0: Not enabled!
+    Channel SSP1/SPI2 Device 1: Not enabled!
+
 mcp2515
 -------
 
@@ -287,24 +461,50 @@ Pin   Signal
 The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
 ESP32-Devkit.
 
-mmcsdspi
---------
+mcuboot_slot_confirm
+--------------------
 
-This config tests the SPI driver by connecting an SD Card reader over SPI.
-SPI2 is used and kept with the default IOMUX pins, i.e.:
+This configuration is used to represent an MCUboot update image that needs to be confirmed
+after flashing. The image can be confirmed by using the following command::
 
-===== =======
-Pin   Signal
-===== =======
-15    CS
-14    SCK
-13    MOSI
-12    MISO
-===== =======
+    nsh> mcuboot_confirm
+    Application Image successfully confirmed!
 
-Once booted the following command is used to mount a FAT file system::
+For more information, check `this demo <https://www.youtube.com/watch?v=Vzy0rl-ixbc>`_.
 
-    nsh> mount -t vfat /dev/mmcsd0 /mnt
+mcuboot_update_agent
+--------------------
+
+This configuration is used to represent an MCUboot image that contains an update agent
+to perform OTA updates. First, you will have to setup a HTTP server to provide the update
+image. To do that, we can run a simple Python server on the same folder that contains our
+binary file on the computer::
+
+    sudo python -m http.server 8080
+
+After this, we can use NSH to connect to our network and use the agent to perform the firmware
+update::
+
+    nsh> ifup wlan0
+    nsh> wapi mode wlan0 2
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+    nsh> mcuboot_agent http://<SERVER_IP>:8080/nuttx.bin
+
+For more information, check `this demo <https://www.youtube.com/watch?v=Vzy0rl-ixbc>`_.
+
+modbus
+------
+
+This configurations shows how to use this device as a ModBus RTU Slave. After
+configuring the desired pins on menuconfig and wiring the RS485 converter, you
+can enable the ModBus to respond to queries::
+
+    nsh> modbus -e
+
+Now you will be able to read the ModBus registers using an application like ``mbpoll``.
+For more information, check `this video <https://www.youtube.com/watch?v=bLUGLJIjt4E>`_.
 
 module
 ------
@@ -317,7 +517,7 @@ mqttc
 This configuration tests the MQTT-C publisher example.
 
 From the host, start the broker and subscribe to the :code:`test` topic.  Using
-`mosquitto` this should be::
+``mosquitto`` this should be::
 
     $ mosquitto&
     $ mosquitto_sub -t test
@@ -342,6 +542,16 @@ outputted::
          Disconnecting from 192.168.1.11
 
 From the host the message :code:`test` should be outputted.
+
+ms5611
+------
+
+This configuration enables the use of the MS5611 pressure sensor over I2C.
+You can check that the sensor is working by using the ``sensortest`` application::
+
+    nsh> sensortest baro0
+    baro0: timestamp:66870000 value1:1008.37 value2:31.70
+    baro0: timestamp:66890000 value1:1008.31 value2:31.70
 
 nsh
 ---
@@ -388,7 +598,7 @@ ESP32 Pin  Signal Pin Description
 
 **nxlooper**
 
-The `nxlooper` application captures data from the audio device with receiving
+The ``nxlooper`` application captures data from the audio device with receiving
 capabilities (the I2S1 on this example) and forwards the audio data frame to
 the audio device with transmitting capabilities (the I2S0 on this example).
 
@@ -397,23 +607,41 @@ After successfully built and flashed, run on the boards's terminal::
   nsh> nxlooper
   nxlooper> loopback
 
-.. note:: `loopback` command default arguments for the channel configuration,
+.. note:: ``loopback`` command default arguments for the channel configuration,
   the data width and the sample rate are, respectively, 2 channels,
   16 bits/sample and 48KHz. These arguments can be supplied to select
   different audio formats, for instance::
 
     nxlooper> loopback 2 8 44100
 
+oneshot
+-------
+
+This config demonstrate the use of oneshot timers present on the ESP32.
+To test it, just run the ``oneshot`` example::
+
+    nsh> oneshot
+    Opening /dev/oneshot
+    Maximum delay is 4294967295999999
+    Starting oneshot timer with delay 2000000 microseconds
+    Waiting...
+    Finished
+
 ostest
 ------
 
-This is the NuttX test at apps/testing/ostest that is run against all new
-architecture ports to assure a correct implementation of the OS.  The default
+This is the NuttX test at ``apps/testing/ostest`` that is run against all new
+architecture ports to assure a correct implementation of the OS. The default
 version is for a single CPU but can be modified for an SMP test by adding::
 
   CONFIG_SMP=y
   CONFIG_SMP_NCPUS=2
   CONFIG_SPINLOCK=y
+
+pm
+--
+
+This configuration enables the CPU power management through governors.
 
 psram
 -----
@@ -431,11 +659,56 @@ only 64KB on this example (64 * 1024), but you can change this number to
     RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc
     RAMTest: Address-in-address test: 3f800000 65536
 
+psram_usrheap
+-------------
+
+This configuration works just like ``psram`` but allocating the user
+heap on the PSRAM.
+
+pwm
+---
+
+This configuration demonstrates the use of PWM through a LED connected to GPIO12.
+To test it, just execute the ``pwm`` application::
+
+    nsh> pwm
+    pwm_main: starting output with frequency: 10000 duty: 00008000
+    pwm_main: stopping output
+
+random
+------
+
+This configuration shows the use of the ESP32's True Random Number Generator with
+entropy sourced from Wi-Fi and Bluetooth noise.
+To test it, just run ``rand`` to get 32 randomly generated bytes::
+
+    nsh> rand
+    Reading 8 random numbers
+    Random values (0x3ffe0b00):
+    0000  98 b9 66 a2 a2 c0 a2 ae 09 70 93 d1 b5 91 86 c8  ..f......p......
+    0010  8f 0e 0b 04 29 64 21 72 01 92 7c a2 27 60 6f 90  ....)d!r..|.'`o.
+
+rtc
+---
+
+This configuration demonstrates the use of the RTC driver through alarms.
+You can set an alarm, check its progress and receive a notification after it expires::
+
+    nsh> alarm 10
+    alarm_daemon started
+    alarm_daemon: Running
+    Opening /dev/rtc0
+    Alarm 0 set in 10 seconds
+    nsh> alarm -r
+    Opening /dev/rtc0
+    Alarm 0 is active with 10 seconds to expiration
+    nsh> alarm_daemon: alarm 0 received
+
 smp
 ---
 
 Another NSH configuration, similar to nsh, but also enables
-SMP operation.  It differs from the nsh configuration only in these
+SMP operation. It differs from the nsh configuration only in these
 additional settings:
 
 SMP is enabled::
@@ -454,13 +727,13 @@ The apps/testing/smp test is included::
 sotest
 ------
 
-This config is to run apps/examples/sotest.
+This config is to run ``apps/examples/sotest``.
 
 spiflash
 --------
 
-This config tests the external SPI that comes with an ESP32 module connected
-through SPI1.
+This config tests the external flash memory that comes with the ESP32 module
+connected through SPI1.
 
 By default a SmartFS file system is selected.
 Once booted you can use the following commands to mount the file system::
@@ -469,6 +742,27 @@ Once booted you can use the following commands to mount the file system::
     nsh> mount -t smartfs /dev/smart0 /mnt
 
 Note that mksmartfs is only needed the first time.
+
+sta_softap
+----------
+
+With this configuration you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+  nsh> ifup wlan1
+  nsh> dhcpd_start wlan1
+  nsh> wapi psk wlan1 mypasswd 3
+  nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
+
+tickless
+--------
+
+This configuration enables the support for tickless scheduler mode.
 
 timer
 -----
@@ -521,7 +815,7 @@ This example uses littlefs on ESP32's SPI flash to store wasm modules.
       nsh> mount -t littlefs /dev/esp32flash /mnt
       nsh> iwasm /mnt/....
 
-wapi
+wifi
 ----
 
 Enables Wi-Fi support. You can define your credentials this way::
@@ -535,9 +829,14 @@ Enables Wi-Fi support. You can define your credentials this way::
 Or if you don't want to keep it saved in the firmware you can do it
 at runtime::
 
-    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi psk wlan0 mypasswd 3
     nsh> wapi essid wlan0 myssid 1
     nsh> renew wlan0
+
+wifi_smp
+--------
+
+This configuration is similar to ``wifi``. It also enables multiple cores on the CPU.
 
 watchdog
 --------
@@ -552,10 +851,35 @@ To test it, just run the following::
 
 Where x is the watchdog instance.
 
+watcher
+-------
+
+This configuration is an example of monitoring watchdog interrupts. To test it, enable
+the watcher daemon with ``watcher`` and monitor the tasks using ``watched``::
+
+    nsh> watcher
+    Watcher Daemon has started!
+    nsh> watched
+    Starting watched tasks
+    Creating Watched Task 1 - It will not feed the dog
+    Creating Watched Task 2 - It will feed the dog
+    Creating Watched Task 3 - It will feed the dog
+    Creating Watched Task 4 - It will not feed the dog
+    nsh> *** Printing Tasks Status ***
+    Watched Task 1 starved the dog.
+    Watched Task 2 fed the dog.
+    Watched Task 3 fed the dog.
+    Watched Task 4 fed the dog.
+    *** Printing Tasks Status ***
+    Watched Task 1 starved the dog.
+    Watched Task 2 fed the dog.
+    Watched Task 3 fed the dog.
+    Watched Task 4 starved the dog.
+
 wifinsh
 -------
 
-The ``wifinsh`` is similar to the ``wapi`` board example, but it will connect
+The ``wifinsh`` is similar to the ``wifi`` board example, but it will connect
 automatically to your Access Point (Wi-Fi Router) and will run telnet daemon
 in the board. Then you can connect to your board from your computer using the
 telnet program.
