@@ -59,6 +59,10 @@
 #  include "stm32_wdg.h"
 #endif
 
+#ifdef CONFIG_RNDIS
+#  include <nuttx/usb/rndis.h>
+#endif
+
 #include "stm32_gpio.h"
 
 /****************************************************************************
@@ -307,7 +311,8 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_WL_NRF24L01 */
 
-#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE) && \
+    !defined(CONFIG_CDCACM_COMPOSITE)
   /* Initialize CDCACM */
 
   syslog(LOG_INFO, "Initialize CDCACM device\n");
@@ -318,6 +323,28 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: cdcacm_initialize failed: %d\n", ret);
     }
 #endif /* CONFIG_CDCACM & !CONFIG_CDCACM_CONSOLE */
+
+#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
+  uint8_t mac[6];
+  mac[0] = 0xa0; /* TODO */
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  /* Initialize the MMC/SD SPI driver (SPI3 is used) */
+
+  ret = stm32_mmcsd_initialize(CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDMINOR, ret);
+    }
+#endif
 
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
