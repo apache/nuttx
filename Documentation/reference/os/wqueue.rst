@@ -68,14 +68,6 @@ to match the highest priority client.
 -  ``CONFIG_SCHED_HPWORKSTACKSIZE``. The stack size allocated for
    the worker thread in bytes. Default: 2048.
 
-**Common Configuration Options**. These options apply to all work
-queues:
-
--  ``CONFIG_SIG_SIGWORK`` The signal number that will be used to
-   wake-up the worker thread. This same signal is used with various
-   internal worker threads.
-   Default: 17
-
 Low Priority Kernel Work Queue
 ------------------------------
 
