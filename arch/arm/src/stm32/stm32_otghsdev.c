@@ -227,10 +227,6 @@
 
 /* Endpoints ****************************************************************/
 
-/* Number of endpoints */
-
-#define STM32_NENDPOINTS             (4)          /* ep0-3 x 2 for IN and OUT */
-
 /* Odd physical endpoint numbers are IN; even are OUT */
 
 #define STM32_EPPHYIN2LOG(epphy)     ((uint8_t)(epphy)|USB_DIR_IN)

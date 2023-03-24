@@ -89,7 +89,6 @@
  * endpoint register sets there are.
  */
 
-#define STM32_NENDPOINTS      (8)
 #define EP0                   (0)
 #define EP1                   (1)
 #define EP2                   (2)

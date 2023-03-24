@@ -106,10 +106,6 @@
 #  define CONFIG_USBDEV_EP5_TXFIFO_SIZE 128
 #endif
 
-/* Number of endpoints */
-
-#define STM32L4_NENDPOINTS  (6)          /* ep0-5 x 2 for IN and OUT */
-
 /* Adjust actual number of endpoints based upon size;
  * 0 means 'not available', and we expect that the first 0-length endpoint
  * implies that all others after are unused as well (irrespective of what
