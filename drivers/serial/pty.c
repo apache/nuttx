@@ -757,7 +757,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           termiosp->c_iflag = dev->pd_iflag;
           termiosp->c_oflag = dev->pd_oflag;
-          termiosp->c_lflag = 0;
+          termiosp->c_lflag = dev->pd_lflag;
           ret = OK;
         }
         break;
