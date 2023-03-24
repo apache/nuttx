@@ -10,7 +10,7 @@ same files and functions for all of those series and therefore they can be merge
 named as SAM V7.
 
 Supported MCUs
-=============
+==============
 
 The following list includes MCUs from SAM x7 series and indicates whether they are supported in NuttX
 
@@ -305,8 +305,9 @@ Supported Boards
 
 For board documentation please refer to ``board/arm/samv7`` section to separate README files.
 
-.. toctree::
-   :glob:
-   :maxdepth: 1
+..
+   .. toctree::
+      :glob:
+      :maxdepth: 1
 
-   boards/*/*
+      boards/*/*

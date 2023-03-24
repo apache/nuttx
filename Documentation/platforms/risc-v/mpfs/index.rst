@@ -1,6 +1,6 @@
-===========================
+======================================
 Microchip PolarFire® SoC FPGA's (MPFS)
-===========================
+======================================
 
 RV64 64-bit RISC-V multiprocessor-based Microcontroller Subsystem
 (MPFS025T, MPFS095T, MPFS160T, MPFS250T, MPFS460T)
