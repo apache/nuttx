@@ -321,6 +321,12 @@ struct uart_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
+#ifdef CONFIG_SERIAL_TERMIOS
+  uint8_t minrecv;                   /* Minimum received bytes */
+  uint8_t minread;                   /* c_cc[VMIN] */
+  uint8_t timeout;                   /* c_cc[VTIME] */
+#endif
+
   struct pollfd *fds[CONFIG_SERIAL_NPOLLWAITERS];
 };
 
