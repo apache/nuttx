@@ -1503,7 +1503,7 @@ static inline int inet_pollsetup(FAR struct socket *psock,
   else
 #endif /* NET_TCP_HAVE_STACK */
 #ifdef NET_UDP_HAVE_STACK
-  if (psock->s_type != SOCK_STREAM)
+  if (psock->s_type == SOCK_DGRAM)
     {
       return udp_pollsetup(psock, fds);
     }
