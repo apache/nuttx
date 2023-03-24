@@ -62,14 +62,21 @@ void stm32_spidev_initialize(void)
    */
 
 #ifdef CONFIG_STM32H7_SPI3
+  spiinfo("Configure GPIO for SPI3/CS\n");
+
 #  ifdef CONFIG_WL_NRF24L01
   /* Configure the SPI-based NRF24L01 chip select GPIO */
-
-  spiinfo("Configure GPIO for SPI3/CS\n");
 
   stm32_configgpio(GPIO_NRF24L01_CS);
   stm32_gpiowrite(GPIO_NRF24L01_CS, true);
 #  endif
+#  ifdef CONFIG_MMCSD_SPI
+  /* Configure the SPI-based MMC/SD chip select and card detect GPIO */
+
+  stm32_configgpio(GPIO_MMCSD_CS);
+  stm32_gpiowrite(GPIO_MMCSD_CS, true);
+  stm32_configgpio(GPIO_MMCSD_NCD);
+#endif
 #endif
 }
 
@@ -143,6 +150,13 @@ void stm32_spi3select(struct spi_dev_s *dev,
         stm32_gpiowrite(GPIO_NRF24L01_CS, !selected);
         break;
 #endif
+
+#ifdef CONFIG_MMCSD_SPI
+      case SPIDEV_MMCSD(0):
+        stm32_gpiowrite(GPIO_MMCSD_CS, !selected);
+        break;
+#endif
+
       default:
         break;
     }
@@ -158,6 +172,16 @@ uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
         status |= SPI_STATUS_PRESENT;
         break;
 #endif
+
+#ifdef CONFIG_MMCSD_SPI
+      case SPIDEV_MMCSD(0):
+
+        /* Note: SD_DET is pulled high when there's no SD card present. */
+
+        status |= stm32_gpioread(GPIO_MMCSD_NCD);
+        break;
+#endif
+
       default:
         break;
     }

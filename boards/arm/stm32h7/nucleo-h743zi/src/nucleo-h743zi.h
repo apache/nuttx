@@ -196,6 +196,16 @@
                             GPIO_OUTPUT_CLEAR | GPIO_PORTF | GPIO_PIN12)
 #define GPIO_NRF24L01_IRQ  (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTD | GPIO_PIN15)
 
+/* MMC/SD
+ * CS  - PD15 (D9)
+ * NCD - PF12 (D8)
+ */
+
+#define GPIO_MMCSD_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN15)
+#define GPIO_MMCSD_NCD    (GPIO_INPUT | GPIO_PULLUP | GPIO_EXTI |  \
+                           GPIO_PORTF | GPIO_PIN12)
+
 /* LMS9DS1 configuration */
 
 #define LMS9DS1_I2CBUS 1
@@ -378,6 +388,18 @@ int stm32_pwm_setup(void);
 #ifdef HAVE_PROGMEM_CHARDEV
 int stm32_progmem_init(void);
 #endif  /* HAVE_PROGMEM_CHARDEV */
+#endif
+
+/****************************************************************************
+ * Name: stm32_mmcsd_initialize
+ *
+ * Description:
+ *   Initialize SPI-based SD card and card detect thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SPI
+int stm32_mmcsd_initialize(int minor);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */

@@ -100,4 +100,16 @@ ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
 CSRCS += stm32_boot_image.c
 endif
 
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += stm32_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += stm32_composite.c
+endif
+
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += stm32_mmcsd.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
