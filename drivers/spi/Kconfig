@@ -15,6 +15,14 @@ config ARCH_HAVE_SPI_BITORDER
 	bool
 	default n
 
+config ARCH_HAVE_QSPI_BITORDER
+	bool
+	default n
+
+config ARCH_HAVE_QSPI_WORD_REVERSE
+	bool
+	default n
+
 menuconfig SPI
 	bool "SPI Driver Support"
 	default n
@@ -161,6 +169,32 @@ config SPI_BITORDER
 	depends on ARCH_HAVE_SPI_BITORDER
 	---help---
 		Enables capability to select MSB- or LSB-first hardware feature for
+		data transfers.
+
+config QSPI_HWFEATURES
+	bool
+	default n
+	---help---
+		Selected only if a specific H/W feature is selected.  This is
+		basically the OR of any specific hardware feature and enables
+		the QSPI hwfeatures() interface method.
+
+config QSPI_BITORDER
+	bool "QSPI Bit Order Control"
+	default n
+	select QSPI_HWFEATURES
+	depends on ARCH_HAVE_QSPI_BITORDER
+	---help---
+		Enables capability to select MSB- or LSB-first hardware feature for
+		data transfers.
+
+config QSPI_WORD_REVERSE
+	bool "QSPI word reverse Control"
+	default n
+	select QSPI_HWFEATURES
+	depends on ARCH_HAVE_QSPI_WORD_REVERSE
+	---help---
+		Enables capability to word reverse hardware feature for
 		data transfers.
 
 config SPI_DELAY_CONTROL
