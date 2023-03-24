@@ -5,4 +5,52 @@
 
 if ARCH_BOARD_ESP32S2_KALUGA_1
 
+config ESP32S2_TOUCH
+	bool "Touch pads"
+	default n
+	---help---
+		Enable ESP32-S2 touch pad support.
+
+if ESP32S2_TOUCH
+
+config ESP32S2_TOUCH_THRESHOLD_POSEDGE
+	bool "Touch pad inverted threshold detection"
+	default y
+	---help---
+		Detect positive edge of touch pad threshold rather than negative edge.
+
+config ESP32S2_TOUCH_FILTER
+	bool "Touch pad filter"
+	default n
+	---help---
+		Enable internal filter for the touch pads.
+
+config ESP32S2_TOUCH_DENOISE
+	bool "Touch pad denoise"
+	default n
+	---help---
+		Enable internal denoise for the touch pads.
+
+config ESP32S2_TOUCH_IRQ
+	bool "Enable touch pad interrupts"
+	select ESP32S2_RTCIO_IRQ
+	select ESP32S2_RT_TIMER
+	depends on ARCH_IRQBUTTONS
+	default n
+	---help---
+		Enable interrupt support for the touch pads.
+
+config ESP32S2_TOUCH_IRQ_INTERVAL_MS
+	int "Minimum interrupt interval (ms)"
+	depends on ESP32S2_TOUCH_IRQ
+	default 100
+	---help---
+		Minimum interval between touch pad interrupts (in milliseconds).
+		As the RTC interrupts are triggered by level, this interrupt
+		will be constantly set off as long as the touch pad is pressed.
+		To avoid that, we disable the interrupt when it is triggered and
+		set a timer for it to be re-enabled.
+
+endif # ESP32S2_TOUCH
+
 endif # ARCH_BOARD_ESP32S2_KALUGA_1

@@ -43,6 +43,29 @@
 #  define BOARD_CLOCK_FREQUENCY 80000000
 #endif
 
+/* Button definitions *******************************************************/
+
+#define BUTTON_BTN1                 0 /* BUTTON_BOOT      */
+#define BUTTON_BTN1_BIT             (1 << BUTTON_BTN1)
+
+#ifdef CONFIG_ESP32S2_TOUCH
+#  define BUTTON_BTN2               1 /* TOUCHPAD_PHOTO   */
+#  define BUTTON_BTN2_BIT           (1 << BUTTON_BTN2)
+#  define BUTTON_BTN3               2 /* TOUCHPAD_PLAY    */
+#  define BUTTON_BTN3_BIT           (1 << BUTTON_BTN3)
+#  define BUTTON_BTN4               3 /* TOUCHPAD_RECORD  */
+#  define BUTTON_BTN4_BIT           (1 << BUTTON_BTN4)
+#  define BUTTON_BTN5               4 /* TOUCHPAD_NETWORK */
+#  define BUTTON_BTN5_BIT           (1 << BUTTON_BTN5)
+#  define BUTTON_BTN6               5 /* TOUCHPAD_VOLUP   */
+#  define BUTTON_BTN6_BIT           (1 << BUTTON_BTN6)
+#  define BUTTON_BTN7               6 /* TOUCHPAD_VOLDN   */
+#  define BUTTON_BTN7_BIT           (1 << BUTTON_BTN7)
+#  define NUM_BUTTONS               7
+#else
+#  define NUM_BUTTONS               1
+#endif
+
 /* LED definitions **********************************************************/
 
 /* Define how many LEDs this board has (needed by userleds) */

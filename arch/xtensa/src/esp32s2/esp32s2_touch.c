@@ -531,7 +531,11 @@ bool esp32s2_touchread(enum touch_pad_e tp)
 
   leave_critical_section(flags);
 
+#ifdef CONFIG_ESP32S2_TOUCH_THRESHOLD_POSEDGE
+  return (value < touch_pad_logic_threshold[tp]);
+#else
   return (value > touch_pad_logic_threshold[tp]);
+#endif
 }
 
 /****************************************************************************
