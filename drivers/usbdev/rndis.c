@@ -64,6 +64,15 @@
  * Pre-processor definitions
  ****************************************************************************/
 
+#define RNDIS_MKEPINTIN(desc)     (USB_DIR_IN | (desc)->epno[RNDIS_EP_INTIN_IDX])
+#define RNDIS_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
+
+#define RNDIS_MKEPBULKIN(desc)    (USB_DIR_IN | (desc)->epno[RNDIS_EP_BULKIN_IDX])
+#define RNDIS_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
+
+#define RNDIS_MKEPBULKOUT(desc)   ((desc)->epno[RNDIS_EP_BULKOUT_IDX])
+#define RNDIS_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
+
 #define CONFIG_RNDIS_EP0MAXPACKET 64
 
 #ifndef CONFIG_RNDIS_NWRREQS
