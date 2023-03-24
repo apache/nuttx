@@ -34,7 +34,7 @@
  * Private Data
  ****************************************************************************/
 
-static unsigned long g_cpu_freq;
+static unsigned long g_cpu_freq = ULONG_MAX;
 
 /****************************************************************************
  * Public Functions
