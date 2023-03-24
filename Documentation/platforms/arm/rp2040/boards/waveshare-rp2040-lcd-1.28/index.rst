@@ -19,8 +19,8 @@ Features
 * Onboard 1.28-inch 240 x 240 resolution, 65K RGB IPS LCD display for clear color pictures
 * Lithium battery recharge/discharge header, suitable for mobile devices
 * All GPIOs are adapted through 1.27 pitch female headers
-(There are 30 pins in total, but some pins have been connected to the internal circuit,
-you need to pay attention when multiplexing, please refer to the wiki for details)
+  (There are 30 pins in total, but some pins have been connected to the internal circuit,
+  you need to pay attention when multiplexing, please refer to the wiki for details)
 * USB 1.1 with device and host support
 * Low-power sleep and dormant modes
 * Drag-and-drop programming using mass storage over USB
