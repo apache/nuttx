@@ -89,9 +89,11 @@ static_assert((CONFIG_NET_LL_GUARDSIZE % 4) == 2,
 #define RNDIS_NINTERFACES       (2)
 #define RNDIS_NSTRIDS           (0)
 
-#define RNDIS_EPINTIN_ADDR      USB_EPIN(CONFIG_RNDIS_EPINTIN)
-#define RNDIS_EPBULKIN_ADDR     USB_EPIN(CONFIG_RNDIS_EPBULKIN)
-#define RNDIS_EPBULKOUT_ADDR    USB_EPOUT(CONFIG_RNDIS_EPBULKOUT)
+#ifndef CONFIG_RNDIS_COMPOSITE
+#  define RNDIS_EPINTIN_ADDR    USB_EPIN(CONFIG_RNDIS_EPINTIN)
+#  define RNDIS_EPBULKIN_ADDR   USB_EPIN(CONFIG_RNDIS_EPBULKIN)
+#  define RNDIS_EPBULKOUT_ADDR  USB_EPOUT(CONFIG_RNDIS_EPBULKOUT)
+#endif
 #define RNDIS_NUM_EPS           (3)
 
 #define RNDIS_MANUFACTURERSTRID (1)
@@ -326,7 +328,9 @@ const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
   {
     .len          = USB_SIZEOF_EPDESC,
     .type         = USB_DESC_TYPE_ENDPOINT,
+#ifndef CONFIG_RNDIS_COMPOSITE
     .addr         = RNDIS_EPINTIN_ADDR,
+#endif
     .attr         = USB_EP_ATTR_XFER_INT,
     .mxpacketsize =
     {
@@ -348,7 +352,9 @@ const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
   {
     .len          = USB_SIZEOF_EPDESC,
     .type         = USB_DESC_TYPE_ENDPOINT,
+#ifndef CONFIG_RNDIS_COMPOSITE
     .addr         = RNDIS_EPBULKIN_ADDR,
+#endif
     .attr         = USB_EP_ATTR_XFER_BULK,
 #ifdef CONFIG_USBDEV_DUALSPEED
     .mxpacketsize =
@@ -367,7 +373,9 @@ const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
   {
     .len          = USB_SIZEOF_EPDESC,
     .type         = USB_DESC_TYPE_ENDPOINT,
+#ifndef CONFIG_RNDIS_COMPOSITE
     .addr         = RNDIS_EPBULKOUT_ADDR,
+#endif
     .attr         = USB_EP_ATTR_XFER_BULK,
 #ifdef CONFIG_USBDEV_DUALSPEED
     .mxpacketsize =
