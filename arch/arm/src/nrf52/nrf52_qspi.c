@@ -123,6 +123,9 @@ static const struct qspi_ops_s g_qspi_ops =
   .setfrequency      = nrf52_qspi_setfrequency,
   .setmode           = nrf52_qspi_setmode,
   .setbits           = nrf52_qspi_setbits,
+#ifdef CONFIG_QSPI_HWFEATURES
+  .hwfeatures        = NULL,
+#endif
   .command           = nrf52_qspi_command,
   .memory            = nrf52_qspi_memory,
   .alloc             = nrf52_qspi_alloc,

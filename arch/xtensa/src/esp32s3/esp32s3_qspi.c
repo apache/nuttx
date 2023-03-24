@@ -289,6 +289,9 @@ static const struct qspi_ops_s esp32s3_spi2_ops =
   .setfrequency = esp32s3_qspi_setfrequency,
   .setmode      = esp32s3_qspi_setmode,
   .setbits      = esp32s3_qspi_setbits,
+#ifdef CONFIG_QSPI_HWFEATURES
+  .hwfeatures   = NULL,
+#endif
   .command      = esp32s3_qspi_command,
   .memory       = esp32s3_qspi_memory,
   .alloc        = esp32s3_qspi_alloc,
@@ -379,6 +382,9 @@ static const struct qspi_ops_s esp32s3_spi3_ops =
   .setfrequency = esp32s3_qspi_setfrequency,
   .setmode      = esp32s3_qspi_setmode,
   .setbits      = esp32s3_qspi_setbits,
+#ifdef CONFIG_QSPI_HWFEATURES
+  .hwfeatures   = NULL,
+#endif
   .command      = esp32s3_qspi_command,
   .memory       = esp32s3_qspi_memory,
   .alloc        = esp32s3_qspi_alloc,
