@@ -57,8 +57,6 @@
  *   priority worker thread.  Default: 224
  * CONFIG_SCHED_HPWORKSTACKSIZE - The stack size allocated for the worker
  *   thread.  Default: 2048.
- * CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
- *   the worker thread.  Default: 17
  *
  * CONFIG_SCHED_LPWORK. If CONFIG_SCHED_LPWORK is selected then a lower-
  *   priority work queue will be created.  This lower priority work queue

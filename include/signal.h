@@ -129,182 +129,42 @@
  * These are the semi-standard signal definitions:
  */
 
-#ifndef CONFIG_SIG_HUP
-#  define SIGHUP        1
-#else
-#  define SIGHUP        CONFIG_SIG_HUP
-#endif
-
-#ifndef CONFIG_SIG_INT
-#  define SIGINT        2
-#else
-#  define SIGINT        CONFIG_SIG_INT
-#endif
-
-#ifndef CONFIG_SIG_QUIT
-#  define SIGQUIT       3
-#else
-#  define SIGQUIT       CONFIG_SIG_QUIT
-#endif
-
-#ifndef CONFIG_SIG_ILL
-#  define SIGILL        4
-#else
-#  define SIGILL        CONFIG_SIG_ILL
-#endif
-
-#ifndef CONFIG_SIG_TRAP
-#  define SIGTRAP       5
-#else
-#  define SIGTRAP      CONFIG_SIG_TRAP
-#endif
-
-#ifndef CONFIG_SIG_ABRT
-#  define SIGABRT       6
-#else
-#  define SIGABRT      CONFIG_SIG_ABRT
-#endif
-
-#ifndef CONFIG_SIG_BUS
-#  define SIGBUS        7
-#else
-#  define SIGBUS        CONFIG_SIG_BUS
-#endif
-
-#ifndef CONFIG_SIG_FPE
-#  define SIGFPE        8
-#else
-#  define SIGFPE        CONFIG_SIG_FPE
-#endif
-
-#ifndef CONFIG_SIG_KILL
-#  define SIGKILL       9
-#else
-#  define SIGKILL       CONFIG_SIG_KILL
-#endif
-
-#ifndef CONFIG_SIG_USR1
-#  define SIGUSR1       10  /* User signal 1 */
-#else
-#  define SIGUSR1       CONFIG_SIG_USR1
-#endif
-
-#ifndef CONFIG_SIG_SEGV
-#  define SIGSEGV       11
-#else
-#  define SIGSEGV       CONFIG_SIG_SEGV
-#endif
-
-#ifndef CONFIG_SIG_USR2
-#  define SIGUSR2       12  /* User signal 2 */
-#else
-#  define SIGUSR2       CONFIG_SIG_USR2
-#endif
-
-#ifndef CONFIG_SIG_PIPE
-#  define SIGPIPE       13
-#else
-#  define SIGPIPE       CONFIG_SIG_PIPE
-#endif
-
-#ifndef CONFIG_SIG_ALRM
-#  define SIGALRM       14  /* Default signal used with POSIX timers (used only */
+#define SIGHUP          1
+#define SIGINT          2
+#define SIGQUIT         3
+#define SIGILL          4
+#define SIGTRAP         5
+#define SIGABRT         6
+#define SIGBUS          7
+#define SIGFPE          8
+#define SIGKILL         9
+#define SIGUSR1         10  /* User signal 1 */
+#define SIGSEGV         11
+#define SIGUSR2         12  /* User signal 2 */
+#define SIGPIPE         13
+#define SIGALRM         14  /* Default signal used with POSIX timers (used only */
                             /* no other signal is provided) */
-#else
-#  define SIGALRM       CONFIG_SIG_ALRM
-#endif
+#define SIGTERM         15
+#define SIGCHLD         17
+#define SIGCONT         18
+#define SIGSTOP         19
+#define SIGTSTP         20
+#define SIGTTIN         21
+#define SIGTTOU         22
+#define SIGURG          23
+#define SIGXCPU         24
+#define SIGXFSZ         25
+#define SIGVTALRM       26
+#define SIGPROF         27
+#define SIGPOLL         29
 
-#ifndef CONFIG_SIG_TERM
-#  define SIGTERM       15
-#else
-#  define SIGTERM       CONFIG_SIG_TERM
-#endif
-
-#ifndef CONFIG_SIG_CHLD
-#  define SIGCHLD       17
-#else
-#  define SIGCHLD       CONFIG_SIG_CHLD
-#endif
-
-#ifndef CONFIG_SIG_CONT
-#  define SIGCONT       18
-#else
-#  define SIGCONT       CONFIG_SIG_CONT
-#endif
-
-#ifndef CONFIG_SIG_STOP
-#  define SIGSTOP       19
-#else
-#  define SIGSTOP       CONFIG_SIG_STOP
-#endif
-
-#ifndef CONFIG_SIG_TSTP
-#  define SIGTSTP       20
-#else
-#  define SIGTSTP       CONFIG_SIG_TSTP
-#endif
-
-#ifndef CONFIG_SIG_TTIN
-#  define SIGTTIN       21
-#else
-#  define SIGTTIN       CONFIG_SIG_TTIN
-#endif
-
-#ifndef CONFIG_SIG_TTOU
-#  define SIGTTOU       22
-#else
-#  define SIGTTOU       CONFIG_SIG_TTOU
-#endif
-
-#ifndef CONFIG_SIG_URG
-#  define SIGURG        23
-#else
-#  define SIGURG        CONFIG_SIG_URG
-#endif
-
-#ifndef CONFIG_SIG_XCPU
-#  define SIGXCPU       24
-#else
-#  define SIGXCPU       CONFIG_SIG_XCPU
-#endif
-
-#ifndef CONFIG_SIG_XFSZ
-#  define SIGXFSZ       25
-#else
-#  define SIGXFSZ       CONFIG_SIG_XFSZ
-#endif
-
-#ifndef CONFIG_SIG_VTALRM
-#  define SIGVTALRM     26
-#else
-#  define SIGVTALRM     CONFIG_SIG_VTALRM
-#endif
-
-#ifndef CONFIG_SIG_PROF
-#  define SIGPROF       27
-#else
-#  define SIGPROF       CONFIG_SIG_PROF
-#endif
-
-#ifndef CONFIG_SIG_POLL
-#  define SIGPOLL       29
-#else
-#  define SIGPOLL       CONFIG_SIG_POLL
-#endif
-
-#define   SIGIO         SIGPOLL
+#define SIGIO           SIGPOLL
 
 /* The following are non-standard signal definitions */
 
 /* SIGWORK is used to wake up various internal NuttX worker threads */
 
-#if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_PAGING)
-#  ifndef CONFIG_SIG_SIGWORK
-#    define SIGWORK     31  /* Used to wake up the work queue */
-#  else
-#    define SIGWORK     CONFIG_SIG_SIGWORK
-#  endif
-#endif
+#define SIGWORK         31  /* Used to wake up the work queue */
 
 /* sigprocmask() "how" definitions. Only one of the following can be specified: */
 
