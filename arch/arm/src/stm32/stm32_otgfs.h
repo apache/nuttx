@@ -26,10 +26,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usbdev.h>
 
 #include <stdint.h>
-
-#include "stm32.h"
 
 #include "hardware/stm32fxxxxx_otgfs.h"
 

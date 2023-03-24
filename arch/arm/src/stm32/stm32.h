@@ -57,7 +57,9 @@
 #include "stm32_i2s.h"
 #include "stm32_tim.h"
 #include "stm32_uart.h"
-#include "stm32_usbdev.h"
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
+#  include "stm32_usbdev.h"
+#endif
 #include "stm32_wdg.h"
 #include "stm32_lowputc.h"
 #include "stm32_eth.h"

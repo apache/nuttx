@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include "stm32_otgfs.h"
+#include "stm32_gpio.h"
 #include "clicker2-stm32.h"
 
 #ifdef CONFIG_STM32_OTGFS
