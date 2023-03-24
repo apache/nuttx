@@ -624,7 +624,6 @@ Where <subdir> is one of the following:
        by default), then you would also need:
 
          CONFIG_EXAMPLES_NX_CLIENTPRIO=80
-         CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
          CONFIG_EXAMPLES_NX_SERVERPRIO=120
          CONFIG_EXAMPLES_NX_STACKSIZE=2048
 
@@ -704,7 +703,6 @@ Where <subdir> is one of the following:
             CONFIG_EXAMPLES_NXTEXT_STACKSIZE=2048
             CONFIG_EXAMPLES_NXTEXT_CLIENTPRIO=80
             CONFIG_EXAMPLES_NXTEXT_SERVERPRIO=120
-            CONFIG_EXAMPLES_NXTEXT_NOTIFYSIGNO=4
 
         c. Others could be similar configured:  apps/examples/nxhello,
             nximage, ...
@@ -729,7 +727,6 @@ Where <subdir> is one of the following:
 
            CONFIG_EXAMPLES_DJOYSTICK=y  # Enable the DJoystick example
            CONFIG_EXAMPLES_DJOYSTICK_DEVNAME="/dev/djoy0"
-           CONFIG_EXAMPLES_DJOYSTICK_SIGNO=13
 
        When running the configuration, you should see the built-in
        application 'djoy'.  Just type 'djoy' at the NSH command prompt.
