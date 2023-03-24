@@ -42,15 +42,6 @@
 
 /* Endpoint configuration ***************************************************/
 
-#define RNDIS_MKEPINTIN(desc)     (USB_DIR_IN | (desc)->epno[RNDIS_EP_INTIN_IDX])
-#define RNDIS_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
-
-#define RNDIS_MKEPBULKIN(desc)    (USB_DIR_IN | (desc)->epno[RNDIS_EP_BULKIN_IDX])
-#define RNDIS_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
-
-#define RNDIS_MKEPBULKOUT(desc)   ((desc)->epno[RNDIS_EP_BULKOUT_IDX])
-#define RNDIS_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
-
 #ifndef CONFIG_RNDIS_EPINTIN_FSSIZE
 #  define CONFIG_RNDIS_EPINTIN_FSSIZE 16
 #endif
