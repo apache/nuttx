@@ -20,7 +20,8 @@
 
 # Include header paths
 
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/driver/include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/nuttx/include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/nuttx/$(CHIP_SERIES)/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/efuse/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/efuse/private_include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/efuse/$(CHIP_SERIES)/include
@@ -47,7 +48,6 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/compo
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/riscv/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/soc/include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/soc/$(CHIP_SERIES)/include
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)/chip/$(ESP_HAL_3RDPARTY_UNPACK)/nuttx/$(CHIP_SERIES)/include
 
 # Linker scripts
 
@@ -71,8 +71,8 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/esp_clk.
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/periph_ctrl.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/regi2c_ctrl.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/clk_tree_common.c
-CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/cpu_region_protect.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/clk_tree.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/cpu_region_protect.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/pmu_init.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/pmu_param.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/rtc_clk.c
