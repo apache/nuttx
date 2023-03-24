@@ -70,6 +70,7 @@ from board-to-board. Follow the links for the details:
 
          - :ref:`introduction/detailed_support:LiteX on Arty A7` (1)
          - :ref:`introduction/detailed_support:ESP32-C3` (1)
+         - :ref:`introduction/detailed_support:ESP32-C6` (1)
 
        - Xtensa LX6:
 

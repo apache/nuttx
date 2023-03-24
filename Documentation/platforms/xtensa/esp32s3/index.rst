@@ -89,36 +89,37 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-GPIO         Yes
-UART         Yes
-SPI          Yes
-I2C          No
+ADC          No
+AES          No
+Bluetooth    No
+CAMERA       No
 CAN/TWAI     No
 DMA          Yes
-Wi-Fi        Yes   WPA3-SAE supported
+eFuse        No
+GPIO         Yes
+I2C          No
+I2S          No
+LCD          No
+LED_PWM      No
+MCPWM        No
+Pulse_CNT    No
+RMT          No
+RNG          No
+RSA          No
+RTC          No
+SD/MMC       No
+SDIO         No
+SHA          No
+SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
 Timers       Yes
-Watchdog     Yes
-RTC          No
-RNG          No
-AES          No
-eFuse        No
-ADC          No
-Bluetooth    No
-SDIO         No
-SD/MMC       No
-I2S          No
-LCD          No
-CAMERA       No
-LED_PWM      No
-RMT          No
-MCPWM        No
-Pulse_CNT    No
-SHA          No
-RSA          No
-USB SERIAL   Yes
+Touch        Yes
+UART         Yes
 USB OTG      No
+USB SERIAL   Yes
+Watchdog     Yes
+Wi-Fi        Yes   WPA3-SAE supported
 ========== ======= =====
 
 .. _esp32s3_peripheral_support:
@@ -126,7 +127,7 @@ USB OTG      No
 Wi-Fi
 -----
 
-.. tip:: Boards usually expose a ``wapi`` defconfig which enables Wi-Fi
+.. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi
 
 A standard network interface will be configured and can be initialized such as::
 

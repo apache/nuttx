@@ -45,8 +45,8 @@ It will show up as /dev/ttyUSB[n] where [n] will probably be 0.
 Buttons and LEDs
 ================
 
-Buttons
--------
+Board Buttons
+-------------
 
 Two key labeled *Rec* and *Mode*. They are routed to **ESP32-WROVER-E Module**
 and intended for developing and testing a UI for audio applications using
@@ -72,8 +72,8 @@ Entering of the ESP32 into upload mode may be done in two ways:
   by installing jumpers in three headers **JP23**, **JP24** and **JP25**.
   Remove all jumpers after upload is complete.
 
-LEDs
-----
+Board LEDs
+----------
 
 A general purpose green LED controlled by the **ESP32-WROVER-E Module** to
 indicate certain operation states of the audio application using dedicated
@@ -390,6 +390,14 @@ JTAG Header / JP7
 Configurations
 ==============
 
+All of the configurations presented below can be tested by running the following commands::
+
+    $ ./tools/configure.sh esp32-lyrat:<config_name>
+    $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
+
+Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
+Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
+
 audio
 -----
 
@@ -433,13 +441,78 @@ name and the IP address of the HTTP server (For example `tones.wav` and
     The codec implementation on the LyraT board was validated using 16-bit,
     44.1kHz WAV files. Other configurations might not work as expected.
 
+buttons
+-------
+
+This configuration shows the use of the buttons subsystem. It can be used by executing
+the ``buttons`` application and pressing on any of the available board buttons::
+
+    nsh> buttons
+    buttons_main: Starting the button_daemon
+    buttons_main: button_daemon started
+    button_daemon: Running
+    button_daemon: Opening /dev/buttons
+    button_daemon: Supported BUTTONs 0x01
+    nsh> Sample = 1
+    Sample = 0
+
+.. note::
+    The ``BOOT`` is connected to GPIO0 that is shared among some peripherals.
+    To avoid any conflicts, it's not registered in the buttons subsystem and, thus,
+    is unable to be used.
+
+mmcsdspi
+--------
+
+This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+For the ESP32-LyraT, make sure the DIP switches 1 and 2 are turned to the ON position.
+To access the card's files, execute the following commands::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+    nsh> ls /mnt/
+    /mnt:
+    song_16_88200_2ch.wav
+    song_16_96000_2ch.wav
+    song_24_44100_2ch.wav
+    song_32_44100_2ch.wav
+
 nsh
 ---
 
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of the CP2102N bridge, at 115200 bps).
 
-wapi
+nxrecorder
+----------
+
+This configuration is used to record raw audio from the the ES8388 audio codec
+through the I2S0 peripheral to a FAT32 SD Card. By default the audio is recorded from
+the on-board microphones.
+For the ESP32-LyraT, make sure the DIP switches 1 and 2 are turned to the ON position.
+To record audio, execute the following commands::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+    nsh> nxrecorder
+    nxrecorder> recordraw /mnt/record.raw
+    nxrecorder> stop
+
+To play the recorded audio, import the raw data into Audacity and set the encoding to signed
+16-bit PCM, the sample rate to 44.1kHz and the number of channels to 2.
+
+wifi
 ----
 
-Enables Wi-Fi support.
+Enables Wi-Fi support. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Or if you don't want to keep it saved in the firmware you can do it
+at runtime::
+
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0

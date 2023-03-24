@@ -49,10 +49,10 @@ First make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32 image and to flash the image into the board.
 It can be installed with: ``pip install esptool``.
 
-Configure the NUttX project: ``./tools/configure.sh esp32c3-devkit:nsh``
+Configure the NuttX project: ``./tools/configure.sh esp32c3-devkit:nsh``
 Run ``make`` to build the project.  Note that the conversion mentioned above is
-included in the build process.  
-The `esptool.py` command to flash all the binaries is::
+included in the build process.
+The ``esptool.py`` command to flash all the binaries is::
 
      esptool.py --chip esp32c3 --port /dev/ttyUSBXX --baud 921600 write_flash 0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 nuttx.bin
 
@@ -60,7 +60,7 @@ However, this is also included in the build process and we can build and flash w
 
    make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=../esp-bins
 
-Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``../esp-bins`` is 
+Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``../esp-bins`` is
 the path to the folder containing the bootloader and the partition table
 for the ESP32-C3 as explained above.
 Note that this step is required only one time.  Once the bootloader and partition
@@ -70,11 +70,11 @@ would just require: ``make flash ESPTOOL_PORT=/dev/ttyUSBXX``
 Debugging with OpenOCD
 ======================
 
-Download and build OpenOCD from Espressif, that can be found in 
-https://github.com/espressif/openocd-esp32  
+Download and build OpenOCD from Espressif, that can be found in
+https://github.com/espressif/openocd-esp32
 
 If you have an ESP32-C3 ECO3, no external JTAG is required to debug, the ESP32-C3
-integrates a USB-to-JTAG adapter.  
+integrates a USB-to-JTAG adapter.
 
 OpenOCD can then be used::
 
@@ -89,7 +89,7 @@ It can be connected as follows::
   TDO -> GPIO7
 
 Furthermore, an efuse needs to be burnt to be able to debug::
-  
+
   espefuse.py -p <port> burn_efuse DIS_USB_JTAG
 
 OpenOCD can then be used::
@@ -104,25 +104,26 @@ The following list indicates the state of peripherals' support in NuttX:
 =========== ======= =====
 Peripheral  Support NOTES
 =========== ======= =====
-GPIO         Yes       
-UART         Yes
-SPI          Yes       
-I2C          Yes       
-DMA          Yes       
-Wifi         Yes       
+ADC          Yes
+AES          Yes
+Bluetooth    Yes
+CDC Console  Yes    Rev.3
+DMA          Yes
+eFuse        Yes
+GPIO         Yes
+I2C          Yes
+LED_PWM      Yes
+RNG          Yes
+RSA          Yes
+RTC          Yes
+SHA          Yes
+SPI          Yes
 SPIFLASH     Yes
 Timers       Yes
+Touch        Yes
+UART         Yes
 Watchdog     Yes
-RTC          Yes
-RNG          Yes
-AES          Yes
-eFuse        Yes
-ADC          Yes
-Bluetooth    Yes
-LED_PWM      Yes
-SHA          Yes
-RSA          Yes
-CDC Console  Yes    Rev.3
+Wifi         Yes
 =========== ======= =====
 
 Secure Boot and Flash Encryption

@@ -39,8 +39,8 @@ It will show up as /dev/ttyUSB[n] where [n] will probably be 0.
 Buttons and LEDs
 ================
 
-Buttons
--------
+Board Buttons
+-------------
 
 There are two buttons labeled Boot and EN.  The EN button is not available
 to the software.  It pulls the chip enable line that doubles as a reset line.
@@ -50,8 +50,8 @@ pin to determine whether the chip boots normally or into the serial
 bootloader.  After resetting, however, the BOOT button can be used for
 software input.
 
-LEDs
-----
+Board LEDs
+----------
 
 There are two on-board LEDs. RED_LED (D5) indicates the presence of 3.3V
 power and is not controlled by software. RGB LED (U6) is a WS2812 addressable
@@ -90,6 +90,14 @@ The following configurations use the I2S peripheral::
 Configurations
 ==============
 
+All of the configurations presented below can be tested by running the following commands::
+
+    $ ./tools/configure.sh esp32s2-saola-1:<config_name>
+    $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
+
+Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
+Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
+
 audio
 -----
 
@@ -114,24 +122,92 @@ ESP32-S2 Pin CS4344 Pin Description
 
 **ROMFS example**
 
-Prepare and build the `audio` defconfig::
+Prepare and build the ``audio`` defconfig::
 
   $ make -j distclean && ./tools/configure.sh esp32s2-saola-1:audio && make
 
-This will create a temporary folder in `apps/examples/romfs/testdir`. Move
-a PCM-encoded (`.wav`) audio file with 16 or 24 bits/sample (sampled at 16~48kHz)
+This will create a temporary folder in ``apps/examples/romfs/testdir``. Move
+a PCM-encoded (``.wav``) audio file with 16 or 24 bits/sample (sampled at 16~48kHz)
 to this folder.
 
 .. note:: You can use :download:`this 440 Hz sinusoidal tone <tone.wav>`.
-   The audio file should be located at `apps/examples/romfs/testdir/tone.wav`
+   The audio file should be located at ``apps/examples/romfs/testdir/tone.wav``
 
 Build the project again and flash it (make sure not to clean it, just build)
 
 After successfully built and flashed, load the romfs and play it::
 
-  $ nsh> romfs
-  $ nsh> nxplayer
-  $ nxplayer> play /usr/share/local/tone.wav
+    nsh> romfs
+    nsh> nxplayer
+    nxplayer> play /usr/share/local/tone.wav
+
+buttons
+-------
+
+This configuration shows the use of the buttons subsystem. It can be used by executing
+the ``buttons`` application and pressing on any of the available board buttons::
+
+    nsh> buttons
+    buttons_main: Starting the button_daemon
+    buttons_main: button_daemon started
+    button_daemon: Running
+    button_daemon: Opening /dev/buttons
+    button_daemon: Supported BUTTONs 0x01
+    nsh> Sample = 1
+    Sample = 0
+
+coremark
+--------
+
+This configuration sets the CoreMark benchmark up for running on the maximum
+number of cores for this system. It also enables some optimization flags and
+disables the NuttShell to get the best possible score.
+
+.. note:: As the NSH is disabled, the application will start as soon as the
+  system is turned on.
+
+cxx
+---
+
+Development enviroment ready for C++ applications. You can check if the setup
+was successfull by running ``cxxtest``::
+
+    nsh> cxxtest
+    Test ofstream ================================
+    printf: Starting test_ostream
+    printf: Successfully opened /dev/console
+    cout: Successfully opened /dev/console
+    Writing this to /dev/console
+    Test iostream ================================
+    Hello, this is only a test
+    Print an int: 190
+    Print a char: d
+    Test std::vector =============================
+    v1=1 2 3
+    Hello World Good Luck
+    Test std::map ================================
+    Test C++17 features ==========================
+    File /proc/meminfo exists!
+    Invalid file! /invalid
+    File /proc/version exists!
+
+gpio
+----
+
+This is a test for the GPIO driver. It includes one arbitrary GPIO.
+For this example, GPIO1 was used (defined by the board implementation).
+At the nsh, we can turn the GPIO output on and off with the following::
+
+    nsh> gpio -o 1 /dev/gpio0
+    nsh> gpio -o 0 /dev/gpio0
+
+i2c
+---
+
+This configuration can be used to scan and manipulate I2C devices.
+You can scan for all I2C devices using the following command::
+
+    nsh> i2c dev 0x00 0x7f
 
 i2schar
 -------
@@ -154,9 +230,16 @@ ESP32-S2 Pin Signal Pin Description
 
 After successfully built and flashed, run on the boards's terminal::
 
-  nsh> i2schar
+    nsh> i2schar
 
 The corresponding output should show related debug information.
+
+mcuboot_nsh
+-----------
+
+Similar configuration as nsh, except that it enables booting from
+MCUboot and the experimental features configuration.
+You can find more information on the `example's documentation <https://github.com/apache/nuttx-apps/blob/master/examples/mcuboot/swap_test/README.md>`_.
 
 nsh
 ---
@@ -194,21 +277,63 @@ The DOUT pin will output the captured data frame.
 
 **nxlooper**
 
-The `nxlooper` application captures data from the audio device with receiving
+The ``nxlooper`` application captures data from the audio device with receiving
 capabilities and forwards the audio data frame to the audio device with
 transmitting capabilities.
 
 After successfully built and flashed, run on the boards's terminal::
 
-  nsh> nxlooper
-  nxlooper> loopback
+    nsh> nxlooper
+    nxlooper> loopback
 
-.. note:: `loopback` command default arguments for the channel configuration,
+.. note:: ``loopback`` command default arguments for the channel configuration,
   the data width and the sample rate are, respectively, 2 channels,
   16 bits/sample and 48KHz. These arguments can be supplied to select
   different audio formats, for instance::
 
     nxlooper> loopback 2 8 44100
+
+oneshot
+-------
+
+This config demonstrate the use of oneshot timers present on the ESP32-S2.
+To test it, just run the ``oneshot`` example::
+
+    nsh> oneshot
+    Opening /dev/oneshot
+    Maximum delay is 4294967295999999
+    Starting oneshot timer with delay 2000000 microseconds
+    Waiting...
+    Finished
+
+ostest
+------
+
+This is the NuttX test at apps/testing/ostest that is run against all new
+architecture ports to assure a correct implementation of the OS.
+
+pwm
+------
+
+This configuration demonstrates the use of PWM through a LED connected to GPIO2.
+To test it, just execute the ``pwm`` application::
+
+    nsh> pwm
+    pwm_main: starting output with frequency: 10000 duty: 00008000
+    pwm_main: stopping output
+
+random
+------
+
+This configuration shows the use of the ESP32-S2's True Random Number Generator with
+entropy sourced from Wi-Fi and Bluetooth noise.
+To test it, just run ``rand`` to get 32 randomly generated bytes::
+
+    nsh> rand
+    Reading 8 random numbers
+    Random values (0x3ffe0b00):
+    0000  98 b9 66 a2 a2 c0 a2 ae 09 70 93 d1 b5 91 86 c8  ..f......p......
+    0010  8f 0e 0b 04 29 64 21 72 01 92 7c a2 27 60 6f 90  ....)d!r..|.'`o.
 
 timer
 -----
@@ -219,7 +344,7 @@ example.
 
 To test it, just run the following::
 
-  nsh> timer -d /dev/timerx
+    nsh> timer -d /dev/timerx
 
 Where x in the timer instance.
 
@@ -232,6 +357,6 @@ example.
 
 To test it, just run the following::
 
-  nsh> wdog -i /dev/watchdogx
+    nsh> wdog -i /dev/watchdogx
 
 Where x is the watchdog instance.
