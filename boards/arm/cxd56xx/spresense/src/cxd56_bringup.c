@@ -458,7 +458,7 @@ int cxd56_bringup(void)
 
   up_pm_release_wakelock(&wlock);
 
-#if defined(CONFIG_RNDIS)
+#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
   uint8_t mac[6];
   mac[0] = 0xa0; /* TODO */
   mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
