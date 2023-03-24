@@ -160,12 +160,6 @@
 
 #define SIGIO           SIGPOLL
 
-/* The following are non-standard signal definitions */
-
-/* SIGWORK is used to wake up various internal NuttX worker threads */
-
-#define SIGWORK         31  /* Used to wake up the work queue */
-
 /* sigprocmask() "how" definitions. Only one of the following can be specified: */
 
 #define SIG_BLOCK       1  /* Block the given signals */

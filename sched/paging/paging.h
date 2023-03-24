@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <signal.h>
+
 #ifdef CONFIG_PAGING
 
 /****************************************************************************
@@ -50,6 +52,8 @@
 #ifndef CONFIG_PAGING_STACKSIZE
 #  define CONFIG_PAGING_STACKSIZE  CONFIG_IDLETHREAD_STACKSIZE
 #endif
+
+#define SIGPAGING SIGRTMIN
 
 /****************************************************************************
  * Public Data
