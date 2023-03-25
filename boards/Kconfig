@@ -211,6 +211,18 @@ config ARCH_BOARD_QUICKFEATHER
 		MC3635 accelerometer, DPS310 pressure sensor, IM69D130 PDM microphone,
 		internal programmable FPGA fabric.
 
+config ARCH_BOARD_ESP32_AUDIO_KIT
+	bool "Ai-Thinker ESP32 Audio Kit"
+	depends on ARCH_CHIP_ESP32_A1S
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		The Ai-Thinker ESP32-Audio-Kit is a board with the ESP32-A1S module
+		powered by ESP32-D0WD-V3 with 16MB of SPI Flash and 8MB PSRAM, and an
+		audio codec on it. There are two versions of ESP32-A1S module: ES8388
+		codec and other with AC101. Currently only ES8388 is supported.
+
 config ARCH_BOARD_ESP32_DEVKITC
 	bool "Espressif ESP32 DevkitC board V4"
 	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
@@ -2791,6 +2803,7 @@ config ARCH_BOARD
 	default "ekk-lm3s9b96"              if ARCH_BOARD_EKKLM3S9B96
 	default "emw3162"                   if ARCH_BOARD_EMW3162
 	default "quickfeather"              if ARCH_BOARD_QUICKFEATHER
+	default "esp32-audio-kit"           if ARCH_BOARD_ESP32_AUDIO_KIT
 	default "esp32-devkitc"             if ARCH_BOARD_ESP32_DEVKITC
 	default "ttgo_eink5_v2"             if ARCH_BOARD_TTGO_T5V2_ESP32
 	default "esp32-ethernet-kit"        if ARCH_BOARD_ESP32_ETHERNETKIT
@@ -3830,6 +3843,9 @@ source "boards/renesas/rx65n/rx65n-rsk2mb/Kconfig"
 endif
 if ARCH_BOARD_RX65N_GRROSE
 source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
+endif
+if ARCH_BOARD_ESP32_AUDIO_KIT
+source "boards/xtensa/esp32/esp32-audio-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_DEVKITC
 source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
