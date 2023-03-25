@@ -81,6 +81,15 @@ config ARCH_CHIP_ESP32SOLO1
 	---help---
 		Generic module with an embedded ESP32-S0WD chip, 4 MB of Flash memory
 
+config ARCH_CHIP_ESP32_A1S
+	bool "Ai-Thinker ESP32-A1S"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_16M
+	select ESP32_PSRAM_8M
+	---help---
+		Ai-Thinker ESP32-A1S module with an embedded ESP32-D0WD chip, 16 MB of
+		Flash memory, 8 MB of PSRAM
+
 endchoice # ESP32 Chip Selection
 
 config ESP32_SINGLE_CPU
