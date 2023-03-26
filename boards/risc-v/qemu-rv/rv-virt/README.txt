@@ -20,14 +20,17 @@
   $ ./tools/configure.sh rv-virt:nsh
   $ make V=1 -j7
 
-3.2 Configure and build NuttX for BUILD_KERNEL
+3.2 Configure and build NuttX for BUILD_KERNEL, 64-bit or 32-bit
 
   $ mkdir ./nuttx; cd ./nuttx
   $ git clone https://github.com/apache/nuttx.git nuttx
   $ git clone https://github.com/apache/nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
-  $ ./tools/configure.sh rv-virt:knsh64
+  $ # For 64-bit build.
+  $ ./tools/configure.sh rv-virt:knsh64 
+  $ # For 32-bit build.
+  $ ./tools/configure.sh rv-virt:knsh32
   $ make V=1 -j7
   $ make export V=1
   $ cd ../apps

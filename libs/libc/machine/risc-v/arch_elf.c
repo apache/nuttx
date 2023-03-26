@@ -85,6 +85,7 @@ static struct rname_code_s _rname_table[] =
   {"JAL", R_RISCV_JAL},
   {"RVC_JUMP", R_RISCV_RVC_JUMP},
   {"RVC_BRANCH", R_RISCV_RVC_BRANCH},
+  {"32_PCREL", R_RISCV_32_PCREL},
 };
 
 /****************************************************************************
@@ -538,6 +539,19 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
           binfo("offset for C.Bx=%ld (0x%lx) (val=0x%04x) already set!\n",
                 offset, offset, val);
+        }
+        break;
+      case R_RISCV_32_PCREL:
+        {
+          /* P.29 https://github.com/riscv-non-isa/riscv-elf-psabi-doc */
+
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
+                _get_rname(relotype),
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
+
+          addr = (long)sym->st_value + (long)rel->r_addend - (long)addr;
         }
         break;
       case R_RISCV_ADD32:
