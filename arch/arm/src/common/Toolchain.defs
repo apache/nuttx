@@ -74,42 +74,8 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
-ifeq ($(CONFIG_ARM_THUMB),y)
-  ARCHOPTIMIZATION += -mthumb
-
-  # GCC Manual:
-  # -mthumb
-  # ... If you want to force assembler files to be interpreted as Thumb
-  # code, either add a `.thumb' directive to the source or pass the
-  # -mthumb option directly to the assembler by prefixing it with -Wa.
-
-  ARCHOPTIMIZATION += -Wa,-mthumb
-
-  # Outputs an implicit IT block when there is a conditional instruction
-  # without an enclosing IT block.
-
-  ARCHOPTIMIZATION += -Wa,-mimplicit-it=always
-endif
-
 ifeq ($(CONFIG_UNWINDER_ARM),y)
   ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
-endif
-
-# Link Time Optimization
-
-ifeq ($(CONFIG_LTO_THIN),y)
-  ARCHOPTIMIZATION += -flto=thin
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
-    LDFLAGS += --lto
-  endif
-else ifeq ($(CONFIG_LTO_FULL),y)
-  ARCHOPTIMIZATION += -flto
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
-    ARCHOPTIMIZATION += -fuse-linker-plugin
-  endif
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
-    LDFLAGS += --lto
-  endif
 endif
 
 # NuttX buildroot under Linux or Cygwin
@@ -232,9 +198,9 @@ else
   # Wrong warning array subscript [0] is outside array bounds:
   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
-  GCCVER = $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+  GCCVER = $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
 
-  ifeq ($(GCCVER),12.2.1)
+  ifeq ($(GCCVER),12.2)
     ARCHOPTIMIZATION += --param=min-pagesize=0
   endif
 
@@ -246,6 +212,27 @@ ZIG := zig
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHOPTIMIZATION += -fshort-enums
+endif
+
+# Link Time Optimization
+
+ifeq ($(CONFIG_LTO_THIN),y)
+  ARCHOPTIMIZATION += -flto=thin
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+    LDFLAGS += --lto
+  endif
+else ifeq ($(CONFIG_LTO_FULL),y)
+  ifeq ($(GCCVER),12.2)
+    ARCHOPTIMIZATION += -flto=auto
+  else
+    ARCHOPTIMIZATION += -flto
+  endif
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
+    ARCHOPTIMIZATION += -fuse-linker-plugin
+  endif
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+    LDFLAGS += --lto
+  endif
 endif
 
 # Architecture flags
@@ -266,6 +253,29 @@ ifneq ($(CONFIG_CXX_RTTI),y)
 endif
 
 ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_ARM_THUMB),y)
+  ARCHOPTIMIZATION += -mthumb
+
+  # Add assembler options only if GCC LTO is not enabled. Otherwise we get
+  # lto-wrapper: warning: Extra option to '-Xassembler': -mthumb, dropping
+  # all '-Xassembler' and '-Wa' options.
+
+  ifneq ($(LD),$(CC))
+    # GCC Manual:
+    # -mthumb
+    # ... If you want to force assembler files to be interpreted as Thumb
+    # code, either add a `.thumb' directive to the source or pass the
+    # -mthumb option directly to the assembler by prefixing it with -Wa.
+
+    ARCHOPTIMIZATION += -Wa,-mthumb
+
+    # Outputs an implicit IT block when there is a conditional instruction
+    # without an enclosing IT block.
+
+    ARCHOPTIMIZATION += -Wa,-mimplicit-it=always
+  endif
+endif
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
