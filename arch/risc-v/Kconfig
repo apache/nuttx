@@ -166,6 +166,7 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39 if ARCH_CHIP_QEMU_RV64
+	select ARCH_MMU_TYPE_SV32 if ARCH_CHIP_QEMU_RV32
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
@@ -252,6 +253,10 @@ config ARCH_RISCV_INTXCPT_EXTREGS
 endif
 
 config ARCH_MMU_TYPE_SV39
+	bool
+	default n
+
+config ARCH_MMU_TYPE_SV32
 	bool
 	default n
 

@@ -44,6 +44,8 @@
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
 #  define ARCH_PGT_MAX_LEVELS (3)
+#elif CONFIG_ARCH_MMU_TYPE_SV32
+#  define ARCH_PGT_MAX_LEVELS (2)
 #endif
 
 /* Amount of static page tables allocated for an address environment */

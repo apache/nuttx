@@ -31,27 +31,6 @@
 
 #define RV_MMU_PAGE_ENTRIES     (RV_MMU_PAGE_SIZE / sizeof(uintptr_t))
 
-/* Supervisor Address Translation and Protection (satp) */
-
-#define SATP_PPN_SHIFT          (0)
-#define SATP_PPN_MASK           (((1ul << 44) - 1) << SATP_PPN_SHIFT)
-#define SATP_ASID_SHIFT         (44)
-#define SATP_ASID_MASK          (((1ul << 16) - 1) << SATP_ASID_SHIFT)
-#define SATP_MODE_SHIFT         (60)
-#define SATP_MODE_MASK          (((1ul << 4) - 1) << SATP_MODE_SHIFT)
-
-/* Modes, for RV32 only 1 is valid, for RV64 1-7 and 10-15 are reserved */
-
-#define SATP_MODE_BARE          (0ul)
-#define SATP_MODE_SV32          (1ul)
-#define SATP_MODE_SV39          (8ul)
-#define SATP_MODE_SV48          (9ul)
-
-/* satp address to PPN translation */
-
-#define SATP_ADDR_TO_PPN(_addr) ((_addr) >> RV_MMU_PAGE_SHIFT)
-#define SATP_PPN_TO_ADDR(_ppn)  ((_ppn)  << RV_MMU_PAGE_SHIFT)
-
 /* Common Page Table Entry (PTE) bits */
 
 #define PTE_VALID               (1 << 0) /* PTE is valid */
@@ -85,24 +64,32 @@
 #define MMU_KTEXT_FLAGS         (PTE_R | PTE_X | PTE_G)
 #define MMU_KDATA_FLAGS         (PTE_R | PTE_W | PTE_G)
 
-/* SvX definitions, only Sv39 is currently supported, but it should be
- * trivial to extend the driver to support other SvX implementations
- *
- * Sv39 has:
+/* Modes, for RV32 only 1 is valid, for RV64 1-7 and 10-15 are reserved */
+
+#define SATP_MODE_BARE          (0ul)
+#define SATP_MODE_SV32          (1ul)
+#define SATP_MODE_SV39          (8ul)
+#define SATP_MODE_SV48          (9ul)
+
+#if CONFIG_ARCH_HAVE_MMU
+#define RV_MMU_PTE_PADDR_SHIFT  (10)
+#define RV_MMU_PTE_PPN_SHIFT    (2)
+#define RV_MMU_VADDR_SHIFT(_n)  (RV_MMU_PAGE_SHIFT + RV_MMU_VPN_WIDTH * \
+                                 (RV_MMU_PT_LEVELS - (_n)))
+/* Sv39 has:
  * - 4K page size
  * - 3 page table levels
  * - 9-bit VPN width
  */
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
-#define RV_MMU_PTE_PADDR_SHIFT  (10)
-#define RV_MMU_PTE_PPN_MASK     (((1ul << 44) - 1) << RV_MMU_PTE_PADDR_SHIFT)
-#define RV_MMU_PTE_PPN_SHIFT    (2)
+#define RV_MMU_PPN_WIDTH        44
+#define RV_MMU_ASID_WIDTH       16
+#define RV_MMU_MODE_WIDTH       4
+#define RV_MMU_PTE_PPN_MASK     (((1ul << RV_MMU_PPN_WIDTH) - 1) << RV_MMU_PTE_PADDR_SHIFT)
 #define RV_MMU_VPN_WIDTH        (9)
 #define RV_MMU_VPN_MASK         ((1ul << RV_MMU_VPN_WIDTH) - 1)
 #define RV_MMU_PT_LEVELS        (3)
-#define RV_MMU_VADDR_SHIFT(_n)  (RV_MMU_PAGE_SHIFT + RV_MMU_VPN_WIDTH * \
-                                 (RV_MMU_PT_LEVELS - (_n)))
 #define RV_MMU_SATP_MODE        (SATP_MODE_SV39)
 #define RV_MMU_L1_PAGE_SIZE     (0x40000000) /* 1G */
 #define RV_MMU_L2_PAGE_SIZE     (0x200000)   /* 2M */
@@ -112,9 +99,46 @@
 
 #define RV_MMU_SECTION_ALIGN        (RV_MMU_L2_PAGE_SIZE)
 #define RV_MMU_SECTION_ALIGN_MASK   (RV_MMU_SECTION_ALIGN - 1)
+
+/* Sv32 has:
+ * - 4K page size
+ * - 2 page table levels
+ * - 10-bit VPN width
+ */
+
+#elif CONFIG_ARCH_MMU_TYPE_SV32
+#define RV_MMU_PPN_WIDTH        22
+#define RV_MMU_ASID_WIDTH       9
+#define RV_MMU_MODE_WIDTH       1
+#define RV_MMU_PTE_PPN_MASK     (((1ul << RV_MMU_PPN_WIDTH) - 1) << RV_MMU_PTE_PADDR_SHIFT)
+#define RV_MMU_VPN_WIDTH        (10)
+#define RV_MMU_VPN_MASK         ((1ul << RV_MMU_VPN_WIDTH) - 1)
+#define RV_MMU_PT_LEVELS        (2)
+#define RV_MMU_SATP_MODE        (SATP_MODE_SV32)
+#define RV_MMU_L1_PAGE_SIZE     (0x400000)   /* 4M */
+#define RV_MMU_L2_PAGE_SIZE     (0x1000)     /* 4K */
+
+#define RV_MMU_SECTION_ALIGN        (RV_MMU_L1_PAGE_SIZE)
+#define RV_MMU_SECTION_ALIGN_MASK   (RV_MMU_SECTION_ALIGN - 1)
+
 #else
 #error "Unsupported RISC-V MMU implementation selected"
-#endif /* CONFIG_ARCH_MMU_TYPE_SV39 */
+#endif
+#endif /* CONFIG_ARCH_HAVE_MMU */
+
+/* Supervisor Address Translation and Protection (satp) */
+
+#define SATP_PPN_SHIFT          (0)
+#define SATP_PPN_MASK           (((1ul << RV_MMU_PPN_WIDTH) - 1) << SATP_PPN_SHIFT)
+#define SATP_ASID_SHIFT         (RV_MMU_PPN_WIDTH)
+#define SATP_ASID_MASK          (((1ul << RV_MMU_ASID_WIDTH) - 1) << SATP_ASID_SHIFT)
+#define SATP_MODE_SHIFT         (RV_MMU_PPN_WIDTH + RV_MMU_ASID_WIDTH)
+#define SATP_MODE_MASK          (((1ul << RV_MMU_MODE_WIDTH) - 1) << SATP_MODE_SHIFT)
+
+/* satp address to PPN translation */
+
+#define SATP_ADDR_TO_PPN(_addr) ((_addr) >> RV_MMU_PAGE_SHIFT)
+#define SATP_PPN_TO_ADDR(_ppn)  ((_ppn)  << RV_MMU_PAGE_SHIFT)
 
 /****************************************************************************
  * Public Data
