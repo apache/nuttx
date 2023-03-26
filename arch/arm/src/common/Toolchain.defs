@@ -236,6 +236,9 @@ else
 
   ifeq ($(GCCVER),12.2.1)
     ARCHOPTIMIZATION += --param=min-pagesize=0
+    ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
+      LDFLAGS += --no-warn-rwx-segments
+    endif
   endif
 
 endif
