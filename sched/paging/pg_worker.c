@@ -523,7 +523,7 @@ static inline void pg_fillcomplete(void)
  *
  ****************************************************************************/
 
-int pg_worker(int argc, char *argv[])
+int pg_worker(int argc, FAR char *argv[])
 {
   FAR struct tcb_s *wtcb = this_task();
 
