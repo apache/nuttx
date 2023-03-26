@@ -729,6 +729,14 @@ if LCD_ST7789
 		---help---
 			Specifies the Y offset of the LCD.
 
+	config LCD_ST7789_MIRRORX
+		bool "ST7789 Mirror X"
+		default n
+
+	config LCD_ST7789_MIRRORY
+		bool "ST7789 Mirror Y"
+		default n
+
 	config LCD_ST7789_BPP
 		int "Bit Per Pixel (12 or 16)"
 		default 16
