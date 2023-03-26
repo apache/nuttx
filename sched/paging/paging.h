@@ -99,7 +99,7 @@ extern FAR struct tcb_s *g_pftcb;
  *
  ****************************************************************************/
 
-int pg_worker(int argc, char *argv[]);
+int pg_worker(int argc, FAR char *argv[]);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_PAGING */
