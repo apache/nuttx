@@ -332,7 +332,8 @@ static int modlib_relocate(FAR struct module_s *modp,
 }
 
 static int modlib_relocateadd(FAR struct module_s *modp,
-                           FAR struct mod_loadinfo_s *loadinfo, int relidx)
+                              FAR struct mod_loadinfo_s *loadinfo,
+                              int relidx)
 {
   FAR Elf_Shdr *relsec = &loadinfo->shdr[relidx];
   FAR Elf_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
