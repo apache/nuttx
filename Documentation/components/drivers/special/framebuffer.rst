@@ -48,6 +48,20 @@ This example will walk through the path from userspace to hardware-specific deta
 
     #. ``include/nuttx/lcd/lcd.h`` provides structures and APIs needed to work with LCD screens, whereas using the framebuffer adapter or the :doc:`lcd`;
 
+VSYNC
+======
+
+Vertical synchronization (VSync) synchronizes the frame rate of an application's graphics with the refresh rate of the display, helping to establish stability.
+If not synchronized, it may cause screen tearing, which is the effect of the image appearing to have horizontal jagged edges or ghosting across the entire screen.
+
+VSYNC Offset
+------------
+
+During the VSYNC event, the screen starts displaying frame N while the renderer begins compositing window for frame N+1.
+The application processes waiting input and generates frame N+2.
+When the renderer has a short rendering time, it can cause a delay of almost two frames from the end of rendering to the completion of screen display.
+To solve this problem, ``FBIOSET_VSYNCOFFSET`` can be used to set the VSYNC offset time (in microseconds) and reduce the delay from input device to screen using the VSYNC offset.
+
 
 Examples
 ========
