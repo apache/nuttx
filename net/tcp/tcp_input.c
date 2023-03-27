@@ -1545,7 +1545,15 @@ found:
 
         if (dev->d_len > 0)
           {
-            tcp_send(dev, conn, TCP_ACK, tcpiplen);
+            /* Due to RFC 2525, Section 2.17, we SHOULD send RST if we can no
+             * longer read any received data. Also set state into TCP_CLOSED
+             * because the peer will not send FIN after RST received.
+             *
+             * TODO: Modify shutdown behavior to allow read in FIN_WAIT.
+             */
+
+            conn->tcpstateflags = TCP_CLOSED;
+            tcp_reset(dev, conn);
             return;
           }
 
@@ -1572,7 +1580,13 @@ found:
 
         if (dev->d_len > 0)
           {
-            tcp_send(dev, conn, TCP_ACK, tcpiplen);
+            /* Due to RFC 2525, Section 2.17, we SHOULD send RST if we can no
+             * longer read any received data. Also set state into TCP_CLOSED
+             * because the peer will not send FIN after RST received.
+             */
+
+            conn->tcpstateflags = TCP_CLOSED;
+            tcp_reset(dev, conn);
             return;
           }
 
