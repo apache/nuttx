@@ -119,6 +119,7 @@ static const struct nxsig_defaction_s g_defactions[] =
   { SIGTERM,   0,                nxsig_abnormal_termination },
   { SIGXCPU,   0,                nxsig_abnormal_termination },
   { SIGXFSZ,   0,                nxsig_abnormal_termination },
+  { SIGSYS,    0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGUSR1_ACTION
   { SIGUSR1,   0,                nxsig_abnormal_termination },

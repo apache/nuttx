@@ -167,6 +167,8 @@
 
 #define SIGIO           SIGPOLL
 
+#define SIGSYS          31
+
 /* sigprocmask() "how" definitions. Only one of the following can be specified: */
 
 #define SIG_BLOCK       1  /* Block the given signals */
