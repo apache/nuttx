@@ -22,7 +22,11 @@ include common/Make.defs
 
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
+ifeq ($(CONFIG_LITEX_CORE_VEXRISCV_SMP),y)
+HEAD_ASRC = litex_shead.S
+else
 HEAD_ASRC = litex_head.S
+endif
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = litex_allocateheap.c litex_clockconfig.c
@@ -31,6 +35,9 @@ CHIP_CSRCS += litex_lowputc.c litex_serial.c
 CHIP_CSRCS += litex_start.c litex_timerisr.c
 CHIP_ASRCS += litex_cache.S
 
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CHIP_CSRCS += litex_mm_init.c litex_pgalloc.c
+endif
 
 ifeq ($(CONFIG_LITEX_GPIO),y)
 CHIP_CSRCS += litex_gpio.c

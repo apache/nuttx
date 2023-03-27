@@ -148,3 +148,32 @@ config LITEX_EMAC_PHYADDR
 		The 5-bit address of the PHY on the board.  Default: 1
 
 endmenu # PHY interface
+
+menu "LITEX MMU options"
+	depends on ARCH_USE_MMU
+
+config LITEX_MMU_IO_BASE
+	hex "IO base address."
+	default 0x80000000
+	---help---
+		The base address for the IO MMU mapping.
+
+config LITEX_MMU_IO_SIZE
+	hex "IO base address."
+	default 0x7F000000
+	---help---
+		The size for the IO MMU mapping.
+
+config LITEX_MMU_L1_SIZE
+	int "L1 page table size."
+	default 1024
+	---help---
+		The size of the L1 page table. Each entry in the page table represents a 4MB L1 page.
+
+config LITEX_MMU_L2_SIZE
+	int "L2 page table size."
+	default 4096
+	---help---
+		The size of the L2 page table. Each entry in the page table represents a 4kB L1 page.
+
+endmenu # LITEX MMU options

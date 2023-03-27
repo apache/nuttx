@@ -29,17 +29,19 @@
 #include CONFIG_LITEX_CUSTOM_IRQ_DEFINITIONS_PATH
 #else
 
+#include  <arch/mode.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-#define LITEX_IRQ_UART0    (RISCV_IRQ_MEXT + 1)
-#define LITEX_IRQ_TIMER0   (RISCV_IRQ_MEXT + 2)
-#define LITEX_IRQ_ETHMAC   (RISCV_IRQ_MEXT + 3)
-#define LITEX_IRQ_SDCARD   (RISCV_IRQ_MEXT + 4)
-#define LITEX_IRQ_GPIO     (RISCV_IRQ_MEXT + 5)
+#define LITEX_IRQ_UART0    (RISCV_IRQ_EXT + 1)
+#define LITEX_IRQ_TIMER0   (RISCV_IRQ_EXT + 2)
+#define LITEX_IRQ_ETHMAC   (RISCV_IRQ_EXT + 3)
+#define LITEX_IRQ_SDCARD   (RISCV_IRQ_EXT + 4)
+#define LITEX_IRQ_GPIO     (RISCV_IRQ_EXT + 5)
 
 /* The last hardware IRQ number */
 

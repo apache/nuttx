@@ -25,4 +25,12 @@ config LITEX_SDIO_MOUNT_FSTYPE
 	default "vfat"
 	depends on LITEX_SDIO
 
+config LITEX_APPLICATION_RAMDISK
+	bool "Use application ramdisk"
+	depends on BUILD_KERNEL
+	---help---
+		The application ramdisk is currently only intended only to hold 
+		application elfs in the romfs format. These applications must loaded
+		externally into ram through litex_term, or similar method.
+
 endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/chip.h
+ * arch/risc-v/src/litex/litex_shead.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,39 +18,77 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_LITEX_CHIP_H
-#define __ARCH_RISCV_SRC_LITEX_CHIP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+
+#include "chip.h"
 #include "litex_memorymap.h"
-
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
-#ifdef __ASSEMBLY__
 
 /****************************************************************************
- * Name: setintstack
+ * Public Symbols
+ ****************************************************************************/
+
+  /* Imported symbols */
+
+  .extern __trap_vec
+
+  .section .text
+  .global __start
+
+/****************************************************************************
+ * Name: __start
  *
  * Description:
- *   Set the current stack pointer to the  "top" the correct interrupt stack.
+ *   Supervisor mode start function.
+ *
+ * Input Parameters:
+ *    a0 - hartid
  *
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+__start:
+  /* Disable all interrupts in sie */
 
-#endif /* __ASSEMBLY__  */
 
-#endif /* __ARCH_RISCV_SRC_LITEX_CHIP_H */
+  csrw sie, zero
+  csrw sip, zero
+
+
+  /* Set the S-mode trap vector */
+
+  la   t0, __trap_vec
+  csrw stvec, t0
+
+  /* Clear sscratch */
+
+  csrw sscratch, zero
+  csrw scause, zero
+  csrw sepc, zero
+
+  /* initialize global pointer, global data */
+
+  
+.option push
+.option norelax
+  la  gp, __global_pointer$
+
+.option pop
+
+  lui  sp, %hi(LITEX_IDLESTACK_TOP)
+  addi sp, sp, %lo(LITEX_IDLESTACK_TOP)
+
+  /* Make sure the writes to CSR stick before continuing */
+
+  fence
+
+  /* Set stack pointer and jump to start */
+
+  /*la sp, LITEX_IDLESTACK_TOP*/
+  j __litex_start

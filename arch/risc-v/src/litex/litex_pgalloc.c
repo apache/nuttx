@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/litex_timerisr.c
+ * arch/risc-v/src/litex/litex_pgalloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,108 +22,46 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/arch.h>
 #include <nuttx/config.h>
-#include <nuttx/clock.h>
-#include <nuttx/timers/arch_alarm.h>
-#include <nuttx/init.h>
+#include <nuttx/pgalloc.h>
 
+#include <assert.h>
 #include <debug.h>
-#include "riscv_internal.h"
 
-#include "litex.h"
-#include "litex_clockconfig.h"
-#include "hardware/litex_timer.h"
-#include "riscv_mtimer.h"
+#include <arch/board/board_memorymap.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define TICK_COUNT (litex_get_hfclk() / TICK_PER_SEC)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Data
  ****************************************************************************/
-
-/****************************************************************************
- * Name:  litex_timerisr
- ****************************************************************************/
-
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
-static void litex_mtimer_initialise(void)
-{
-  struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
-    LITEX_CLINT_MTIME, LITEX_CLINT_MTIMECMP,
-    RISCV_IRQ_TIMER, litex_get_hfclk());
-
-  DEBUGASSERT(lower);
-
-  up_alarm_set_lowerhalf(lower);
-}
-
-#else
-
-static int litex_timerisr(int irq, void *context, void *arg)
-{
-  /* Clear timer interrupt */
-
-  putreg32(0xffffffff, LITEX_TIMER0_EV_PENDING);
-
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
-
-static void litex_timer0_initialize(void)
-{
-  /* Disable the timer and clear any pending interrupt */
-
-  putreg32(0, LITEX_TIMER0_EN);
-  putreg32(getreg32(LITEX_TIMER0_EV_PENDING), LITEX_TIMER0_EV_PENDING);
-
-  /* Set the timer period */
-
-  putreg32(TICK_COUNT, LITEX_TIMER0_RELOAD);
-  putreg32(getreg32(LITEX_TIMER0_RELOAD), LITEX_TIMER0_LOAD);
-
-  /* Attach timer interrupt handler */
-
-  irq_attach(LITEX_IRQ_TIMER0, litex_timerisr, NULL);
-
-  /* Enable the timer */
-
-  putreg32(1, LITEX_TIMER0_EN);
-
-  /* And enable the timer interrupt */
-
-  putreg32(1, LITEX_TIMER0_EV_ENABLE);
-  up_enable_irq(LITEX_IRQ_TIMER0);
-}
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_timer_initialize
+ * Name: up_allocate_pgheap
  *
  * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
+ *   If there is a page allocator in the configuration, then this function
+ *   must be provided by the platform-specific code.  The OS initialization
+ *   logic will call this function early in the initialization sequence to
+ *   get the page heap information needed to configure the page allocator.
  *
  ****************************************************************************/
 
-void up_timer_initialize(void)
+void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 {
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
-  litex_mtimer_initialise();
-#else
-  litex_timer0_initialize();
-#endif
+  DEBUGASSERT(heap_start && heap_size);
+
+  *heap_start = (void *)PGPOOL_START;
+  *heap_size  = (size_t)PGPOOL_SIZE;
 }

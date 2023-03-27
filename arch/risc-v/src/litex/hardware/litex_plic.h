@@ -22,13 +22,31 @@
 #define __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "litex_memorymap.h"
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#  define LITEX_PLIC_PRIORITY    (LITEX_PLIC_BASE + 0x000000)
+#  define LITEX_PLIC_PENDING1    (LITEX_PLIC_BASE + 0x001000)
+
+#  define LITEX_PLIC_ENABLE1     (LITEX_PLIC_BASE + 0x002080)
+#  define LITEX_PLIC_ENABLE2     (LITEX_PLIC_BASE + 0x002084)
+#  define LITEX_PLIC_THRESHOLD   (LITEX_PLIC_BASE + 0x201000)
+#  define LITEX_PLIC_CLAIM       (LITEX_PLIC_BASE + 0x201004)
+#else
 
 /* litex vexRiscv does not follow RISC-V privileged specification and
  * uses two additional CSRs: mask and pending.
  */
 #define LITEX_MMASK_CSR     0xBC0
 #define LITEX_MPENDING_CSR     0xFC0
+
+#endif
 
 #endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H */
