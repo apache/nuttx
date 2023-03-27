@@ -807,6 +807,15 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
   uint16_t portno;
   int ret;
 
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (conn->domain != addr->sa_family)
+    {
+      nerr("ERROR: Invalid address type: %d != %d\n", conn->domain,
+           addr->sa_family);
+      return -EINVAL;
+    }
+#endif
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   if (conn->domain == PF_INET)
