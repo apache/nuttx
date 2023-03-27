@@ -161,4 +161,22 @@ bool litex_cardinserted(int slotno);
 int litex_pwm_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: litex_mount_ramdisk
+ *
+ * Description:
+ *  Mount a ramdisk defined in the ld-kernel.script to /dev/ramX.
+ *  The ramdisk is intended to contain a romfs with applications which can
+ *  be spawned at runtime.
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   -ERRORNO is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LITEX_APPLICATION_RAMDISK
+int litex_mount_ramdisk(void);
+#endif
+
 #endif /* __BOARDS_RISCV_LITEX_ARTY_A7_SRC_ARTY_A7_H */

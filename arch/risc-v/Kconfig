@@ -354,6 +354,29 @@ config RISCV_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 
 endif
 
+if ARCH_CHIP_LITEX
+
+choice
+	prompt "LITEX Core Selection"
+	default LITEX_CORE_VEXRISCV
+
+config LITEX_CORE_VEXRISCV
+	bool "vexriscv core"
+
+config LITEX_CORE_VEXRISCV_SMP
+	bool "vexriscv_smp core"
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_RV_ISA_C
+	select ARCH_MMU_TYPE_SV32
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+
+endchoice
+
+endif
+
 source "arch/risc-v/src/opensbi/Kconfig"
 
 if ARCH_CHIP_FE310
