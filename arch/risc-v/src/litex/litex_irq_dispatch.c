@@ -49,8 +49,48 @@
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
+#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+  int irq = (vector & 0x3f);
+
+  if ((vector & RISCV_IRQ_BIT) != 0)
+    {
+       irq += RISCV_IRQ_ASYNC;
+    }
+
+  /* Firstly, check if the irq is machine external interrupt */
+
+  if (irq == RISCV_IRQ_EXT)
+    {
+      uint32_t ext = getreg32(LITEX_PLIC_CLAIM);
+
+      /* Add the value to nuttx irq which is offset to the ext */
+
+      irq = RISCV_IRQ_EXT + ext;
+    }
+
+  /* Acknowledge the interrupt */
+
+  riscv_ack_irq(irq);
+
+  /* EXT means no interrupt */
+
+  if (irq != RISCV_IRQ_EXT)
+    {
+      /* Deliver the IRQ */
+
+      regs = riscv_doirq(irq, regs);
+    }
+
+  if (irq > RISCV_IRQ_EXT)
+    {
+      /* Then write PLIC_CLAIM to clear pending in PLIC */
+
+      putreg32(irq - RISCV_IRQ_EXT, LITEX_PLIC_CLAIM);
+    }
+
+#else 
   int i;
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
 
   /* Firstly, check if the irq is machine external interrupt */
 
@@ -87,5 +127,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   regs = riscv_doirq(irq, regs);
 
+#endif /* CONFIG_LITEX_CORE_VEXRISCV_SMP */
   return regs;
 }

@@ -564,6 +564,11 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
           *(uint64_t *)addr += (uint64_t)(sym->st_value + rel->r_addend);
         }
         break;
+      case R_RISCV_SUB16:
+        {
+          *(uint16_t *)addr -= (uint16_t)(sym->st_value + rel->r_addend);
+        }
+        break;
       case R_RISCV_SUB32:
         {
           *(uint32_t *)addr -= (uint32_t)(sym->st_value + rel->r_addend);
@@ -572,6 +577,11 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
       case R_RISCV_SUB64:
         {
           *(uint64_t *)addr -= (uint64_t)(sym->st_value + rel->r_addend);
+        }
+        break;
+      case R_RISCV_SET16:
+        {
+          *(uint16_t *)addr = (uint16_t)(sym->st_value + rel->r_addend);
         }
         break;
       default:

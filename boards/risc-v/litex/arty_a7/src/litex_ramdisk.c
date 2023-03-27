@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/litex_allocateheap.c
+ * boards/risc-v/litex/arty_a7/src/litex_ramdisk.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,62 +24,75 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
+#include <nuttx/board.h>
+
+#include <arch/board/board_memorymap.h>
+#include <nuttx/drivers/ramdisk.h>
+#include <sys/boardctl.h>
+#include <sys/mount.h>
 
 #include "litex.h"
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-#include <arch/board/board_memorymap.h>
-#endif
-
-#include "riscv_internal.h"
+#include "arty_a7.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KERNEL_HEAP
-#define KRAM_END    KSRAM_END
-#else
-#define KRAM_END    CONFIG_RAM_END
+#ifndef CONFIG_BUILD_KERNEL
+#error "Ramdisk usage is intended to be used with kernel build only"
 #endif
+
+#define SECTORSIZE   512
+#define NSECTORS(b)  (((b) + SECTORSIZE - 1) / SECTORSIZE)
+#define RAMDISK_DEVICE_MINOR 0
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: litex_mount_ramdisk
  *
  * Description:
- *   This function will be called to dynamically set aside the heap region
- *   based on kernel or flat builds.
+ *  Mount a ramdisk defined in the ld-kernel.script to /dev/ramX.
+ *  The ramdisk is intended to contain a romfs with applications which can
+ *  be spawned at runtime.
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   -ERRORNO is returned on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-void up_allocate_kheap(void **heap_start, size_t *heap_size)
-#else
-void up_allocate_heap(void **heap_start, size_t *heap_size)
-#endif /* CONFIG_BUILD_KERNEL */
+int litex_mount_ramdisk(void)
 {
-  *heap_start = (void *)g_idle_topstack;
-  *heap_size = KRAM_END - g_idle_topstack;
+  int ret;
+  struct boardioc_romdisk_s desc;
+
+  desc.minor    = RAMDISK_DEVICE_MINOR;
+  desc.nsectors = NSECTORS((ssize_t)__ramdisk_size);
+  desc.sectsize = SECTORSIZE;
+  desc.image    = __ramdisk_start;
+
+  ret = boardctl(BOARDIOC_ROMDISK, (uintptr_t)&desc);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Ramdisk register failed: %s\n", strerror(errno));
+      syslog(LOG_ERR, "Ramdisk mountpoint /dev/ram%d\n",
+                                          RAMDISK_DEVICE_MINOR);
+      syslog(LOG_ERR, "Ramdisk length %u, origin %x\n",
+                                          (ssize_t)__ramdisk_size,
+                                          (uintptr_t)__ramdisk_start);
+    }
+
+  return ret;
 }
-
-/****************************************************************************
- * Name: riscv_addregion
- *
- * Description:
- *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
- *   that may be used for heap.
- *
- ****************************************************************************/
-
-#if CONFIG_MM_REGIONS > 1
-void riscv_addregion(void)
-{
-}
-#endif
-
