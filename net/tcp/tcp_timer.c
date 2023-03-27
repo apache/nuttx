@@ -553,7 +553,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
                   conn->crefs = 0;
                   tcp_free(conn);
-                  goto done;
+                  return;
                 }
 
               /* Otherwise, check for a timeout on an established connection.
