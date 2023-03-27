@@ -39,6 +39,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/video/fb.h>
+#include <nuttx/clock.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Private Types
@@ -59,6 +61,8 @@ struct fb_chardev_s
   uint8_t plane;                  /* Video plan number */
   uint8_t bpp;                    /* Bits per pixel */
   volatile bool pollready;        /* Poll ready flag */
+  clock_t vsyncoffset;            /* VSync offset ticks */
+  struct wdog_s wdog;             /* VSync offset timer */
 };
 
 /****************************************************************************
@@ -540,6 +544,13 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOSET_VSYNCOFFSET:
+        {
+          fb->vsyncoffset = USEC2TICK(arg);
+          ret = OK;
+        }
+        break;
+
       case FBIOGET_VSCREENINFO:
         {
           struct fb_videoinfo_s vinfo;
@@ -752,6 +763,21 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
+ * Name: fb_do_pollnotify
+ ****************************************************************************/
+
+static void fb_do_pollnotify(wdparm_t arg)
+{
+  FAR struct fb_chardev_s *fb = (FAR struct fb_chardev_s *)arg;
+
+  fb->pollready = true;
+
+  /* Notify framebuffer is writable. */
+
+  poll_notify(&fb->fds, 1, POLLOUT);
+}
+
+/****************************************************************************
  * Name: fb_pollnotify
  *
  * Description:
@@ -770,11 +796,14 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
 
   fb = vtable->priv;
 
-  fb->pollready = true;
-
-  /* Notify framebuffer is writable. */
-
-  poll_notify(&fb->fds, 1, POLLOUT);
+  if (fb->vsyncoffset > 0)
+    {
+      wd_start(&fb->wdog, fb->vsyncoffset, fb_do_pollnotify, (wdparm_t)fb);
+    }
+  else
+    {
+      fb_do_pollnotify((wdparm_t)fb);
+    }
 }
 
 /****************************************************************************
