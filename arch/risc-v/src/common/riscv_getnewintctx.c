@@ -70,3 +70,12 @@ uintptr_t riscv_get_newintctx(void)
 #endif
   );
 }
+
+void riscv_set_idleintctx(void)
+{
+  /* Set SUM for idle process if needed */
+
+#ifdef CONFIG_ARCH_USE_MMU
+  SET_CSR(CSR_STATUS, STATUS_SUM);
+#endif
+}
