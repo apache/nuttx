@@ -20,16 +20,17 @@
 
 ifeq ($(CONFIG_ARCH_CORTEXR4),y)
   ARCHCPUFLAGS += -mcpu=cortex-r4
-  ZARCHCPUFLAGS := -mcpu=cortex_r4
+  LLVM_CPUTYPE := cortex-r4
 else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
   ARCHCPUFLAGS += -mcpu=cortex-r5
-  ZARCHCPUFLAGS := -mcpu=cortex_r5
+  LLVM_CPUTYPE := cortex-r5
 else ifeq ($(CONFIG_ARCH_CORTEXR7),y)
   ARCHCPUFLAGS += -mcpu=cortex-r7
-  ZARCHCPUFLAGS := -mcpu=cortex_r7
+  LLVM_CPUTYPE := cortex-r7
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
+  LLVM_ABITYPE := eabihf
   ARCHCPUFLAGS += -mfpu=vfpv3-d16
   ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
     ARCHCPUFLAGS += -mfloat-abi=softfp
@@ -37,7 +38,14 @@ ifeq ($(CONFIG_ARCH_FPU),y)
     ARCHCPUFLAGS += -mfloat-abi=hard
   endif
 else
+  LLVM_ABITYPE := eabi
   ARCHCPUFLAGS += -mfloat-abi=soft
+endif
+
+ifeq ($(CONFIG_ARM_THUMB),y)
+  LLVM_ARCHTYPE := thumbv7r
+else
+  LLVM_ARCHTYPE := armv7r
 endif
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)

@@ -24,14 +24,15 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_ARM7EM   := y
   TOOLCHAIN_MTUNE    := -mtune=cortex-m4
   TOOLCHAIN_MARCH    := -march=armv7e-m
+  LLVM_CPUTYPE       := cortex-m4
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16
   endif
-  ZARCHCPUFLAGS := -mcpu=cortex_m4
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
   TOOLCHAIN_MTUNE    := -mtune=cortex-m7
   TOOLCHAIN_MARCH    := -march=armv7e-m
+  LLVM_CPUTYPE       := cortex-m7
   ifeq ($(CONFIG_ARCH_FPU),y)
     ifeq ($(CONFIG_ARCH_DPFPU),y)
       TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
@@ -39,23 +40,30 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
       TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
     endif
   endif
-  ZARCHCPUFLAGS := -mcpu=cortex_m7
 else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
   TOOLCHAIN_ARM7EM   := n
   TOOLCHAIN_MTUNE    := -mtune=cortex-m3
   TOOLCHAIN_MARCH    := -march=armv7-m
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
-  ZARCHCPUFLAGS      := -mcpu=cortex_m3
+  LLVM_CPUTYPE       := cortex-m3
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
+  LLVM_ABITYPE := eabihf
   ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
     TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
   else
     TOOLCHAIN_MFLOAT += -mfloat-abi=hard
   endif
 else
+  LLVM_ABITYPE 		 := eabi
   TOOLCHAIN_MFLOAT += -mfloat-abi=soft
+endif
+
+ifeq ($(CONFIG_ARCH_CORTEXM3),y)
+  LLVM_ARCHTYPE := thumbv7m
+else
+  LLVM_ARCHTYPE := thumbv7em
 endif
 
 # Clang Configuration files

@@ -243,10 +243,6 @@ else
 
 endif
 
-# Zig compiler
-
-ZIG := zig
-
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHOPTIMIZATION += -fshort-enums
 endif
@@ -341,3 +337,7 @@ endif
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
+
+# Zig toolchain
+
+include $(TOPDIR)/tools/Zig.defs

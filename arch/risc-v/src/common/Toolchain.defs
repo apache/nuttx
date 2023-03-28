@@ -160,11 +160,11 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   ifeq ($(CONFIG_ARCH_RV32),y)
     ARCHTYPE = rv32
     ARCHABITYPE = ilp32
-    ZARCHTYPE := riscv32
+    LLVM_ARCHTYPE := riscv32
   else ifeq ($(CONFIG_ARCH_RV64),y)
     ARCHTYPE = rv64
     ARCHABITYPE = lp64
-    ZARCHTYPE := riscv64
+    LLVM_ARCHTYPE := riscv64
   endif
 
   # Construct arch flags
@@ -175,10 +175,13 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)
     ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)d
+    LLVM_ABITYPE := $(ARCHABITYPE)d
   else ifeq ($(CONFIG_ARCH_FPU),y)
     ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)f
+    LLVM_ABITYPE := $(ARCHABITYPE)f
   else
     ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)
+    LLVM_ABITYPE := $(ARCHABITYPE)
   endif
 
 endif
@@ -195,8 +198,6 @@ ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
   ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
 endif
 
-ZIGFLAGS = -target $(ZARCHTYPE)-freestanding-none -mcpu generic_$(ARCHTYPE)$(ZARCHRVISAM)$(ZARCHRVISAA)$(ZARCHRVISAF)$(ZARCHRVISAF)$(ZARCHRVISAC) -mcmodel=medium
-
 # Default toolchain
 
 CC      = $(CROSSDEV)gcc
@@ -208,7 +209,6 @@ OBJDUMP = $(CROSSDEV)objdump
 LD      = $(CROSSDEV)ld
 AR      = $(CROSSDEV)ar rcs
 NM      = $(CROSSDEV)nm
-ZIG     = zig
 
 # Link Time Optimization
 
@@ -238,3 +238,7 @@ endif
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
+
+# Zig toolchain
+
+include $(TOPDIR)/tools/Zig.defs

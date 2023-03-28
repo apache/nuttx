@@ -59,44 +59,48 @@ ifeq ($(CONFIG_ARCH_CORTEXM23),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m23
   TOOLCHAIN_MARCH    := -march=armv8-m.main
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
-  ZARCHCPUFLAGS      := -mcpu=cortex_m23
+  LLVM_CPUTYPE       := cortex-m23
 else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m33
   TOOLCHAIN_MARCH    := -march=armv8-m.main$(EXTCPUFLAGS)
+  LLVM_CPUTYPE       := cortex-m33
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
-  ZARCHCPUFLAGS      := -mcpu=cortex_m33
 else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m35p
   TOOLCHAIN_MARCH    := -march=armv8-m.main$(EXTCPUFLAGS)
+  LLVM_CPUTYPE       := cortex-m35p
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
-  ZARCHCPUFLAGS := -mcpu=cortex_m35p
 else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m55
   TOOLCHAIN_MARCH    := -march=armv8.1-m.main$(EXTCPUFLAGS)
+  LLVM_CPUTYPE       := cortex-m55
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
   endif
-  ZARCHCPUFLAGS := -mcpu=cortex_m55
 else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m85
   TOOLCHAIN_MARCH    := -march=armv8.1-m.main$(EXTCPUFLAGS)
+  LLVM_CPUTYPE       := cortex-m85
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
   endif
-  ZARCHCPUFLAGS := -mcpu=cortex_m85
 endif
 
+LLVM_ARCHTYPE := thumbv8m.main$(EXTCPUFLAGS)
+
 ifeq ($(CONFIG_ARCH_FPU),y)
+  LLVM_ABITYPE := eabihf
   ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
     TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
   else
     TOOLCHAIN_MFLOAT += -mfloat-abi=hard
   endif
 else
+  LLVM_ABITYPE := eabi
   TOOLCHAIN_MFLOAT += -mfloat-abi=soft
 endif
 
