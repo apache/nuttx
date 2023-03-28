@@ -175,7 +175,7 @@ static int arm64_tick_max_delay(struct oneshot_lowerhalf_s *lower,
 {
   DEBUGASSERT(ticks != NULL);
 
-  *ticks = UINT64_MAX;
+  *ticks = (clock_t)UINT64_MAX;
 
   return OK;
 }
