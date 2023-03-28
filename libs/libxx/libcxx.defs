@@ -46,6 +46,7 @@ ifeq ($(wildcard libcxx/.git),)
 endif
 
 CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_BUILDING_LIBRARY
+CXXFLAGS += ${INCDIR_PREFIX}$(CURDIR)/libcxx/src 
 
 ifeq ($(CONFIG_LIBSUPCXX), y)
 CXXFLAGS += ${DEFINE_PREFIX}__GLIBCXX__
@@ -104,6 +105,11 @@ libcxx/src/condition_variable.cpp_CXXFLAGS += -Wno-sign-compare
 CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
+
+
+# Workaround the following warning, appearing on gcc 12.2.0
+# libcxx/src/include/to_chars_floating_point.h:988:17: warning: ‘always_inline’ function might not be inlinable [-Wattributes]
+libcxx/src/charconv.cpp_CXXFLAGS += -Wno-attributes
 
 DEPPATH += --dep-path libcxx/src
 DEPPATH += --dep-path libcxx/src/experimental
