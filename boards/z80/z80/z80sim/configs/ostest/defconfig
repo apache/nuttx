@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_DEV_CONSOLE is not set
-# CONFIG_FILE_STREAM is not set
 CONFIG_ARCH="z80"
 CONFIG_ARCH_BOARD="z80sim"
 CONFIG_ARCH_BOARD_Z80SIM=y
