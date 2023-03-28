@@ -78,6 +78,10 @@ void up_initial_state(struct tcb_s *tcb)
 
       riscv_stack_color(tcb->stack_alloc_ptr, 0);
 #endif /* CONFIG_STACK_COLORATION */
+
+      /* Set idle process' initial interrupt context */
+
+      riscv_set_idleintctx();
       return;
     }
 
