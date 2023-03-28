@@ -111,6 +111,10 @@ ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += nrf52_pminitialize.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += nrf52_usbd.c
+endif
+
 ifeq ($(CONFIG_NRF52_SOFTDEVICE_CONTROLLER),y)
 
 NRFXLIB_UNPACK  := sdk-nrfxlib
