@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -71,6 +72,13 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   FAR struct tcb_s *rtcb = this_task();
   FAR sem_t *sem = wtcb->waitobj;
 
+#ifdef CONFIG_ARCH_ADDRENV
+  if (wtcb->addrenv_own)
+    {
+      addrenv_select(wtcb->addrenv_own);
+    }
+#endif
+
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
    */
@@ -94,6 +102,13 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   /* Remove task from waiting list */
 
   dq_rem((FAR dq_entry_t *)wtcb, SEM_WAITLIST(sem));
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (wtcb->addrenv_own)
+    {
+      addrenv_restore();
+    }
+#endif
 
   /* Indicate that the wait is over. */
 
