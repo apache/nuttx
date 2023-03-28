@@ -42,6 +42,10 @@
 #  include "esp_timer.h"
 #endif
 
+#ifdef CONFIG_ONESHOT
+#  include "esp_oneshot.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_HR_TIMER
 #  include "esp_hr_timer.h"
 #endif
@@ -116,10 +120,20 @@ int esp_bringup(void)
       _err("Failed to initialize Timer 0: %d\n", ret);
     }
 
+#ifndef CONFIG_ONESHOT
   ret = esp_timer_initialize(1);
   if (ret < 0)
     {
       _err("Failed to initialize Timer 1: %d\n", ret);
+    }
+#endif
+#endif
+
+#ifdef CONFIG_ONESHOT
+  ret = esp_oneshot_initialize();
+  if (ret < 0)
+    {
+      _err("Failed to initialize Oneshot Timer: %d\n", ret);
     }
 #endif
 
