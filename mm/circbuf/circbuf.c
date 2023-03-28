@@ -541,3 +541,115 @@ ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
 
   return overwrite;
 }
+
+/****************************************************************************
+ * Name: circbuf_get_writeptr
+ *
+ * Description:
+ *   Get the write pointer of the circbuf.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ *   size  - Returns the maximum size that can be written consecutively
+ *
+ * Returned Value:
+ *   The write pointer of the circbuf.
+ *
+ ****************************************************************************/
+
+FAR void *circbuf_get_writeptr(FAR struct circbuf_s *circ, FAR size_t *size)
+{
+  size_t off;
+  size_t pos;
+
+  DEBUGASSERT(circ);
+
+  off = circ->head % circ->size;
+  pos = circ->tail % circ->size;
+  if (off >= pos)
+    {
+      *size = circ->size - off;
+    }
+  else
+    {
+      *size = pos - off;
+    }
+
+  return (FAR char *)circ->base + off;
+}
+
+/****************************************************************************
+ * Name: circbuf_get_readptr
+ *
+ * Description:
+ *   Get the read pointer of the circbuf.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ *   size  - Returns the maximum size that can be read consecutively.
+ *
+ * Returned Value:
+ *   The read pointer of the circbuf.
+ *
+ ****************************************************************************/
+
+FAR void *circbuf_get_readptr(FAR struct circbuf_s *circ, size_t *size)
+{
+  size_t off;
+  size_t pos;
+
+  DEBUGASSERT(circ);
+
+  off = circ->head % circ->size;
+  pos = circ->tail % circ->size;
+  if (pos > off)
+    {
+      *size = circ->size - pos;
+    }
+  else
+    {
+      *size = off - pos;
+    }
+
+  return (FAR char *)circ->base + pos;
+}
+
+/****************************************************************************
+ * Name: circbuf_writecommit
+ *
+ * Description:
+ *   After writing data using the buf returned by circbuf_writebuf,
+ *   you need to use this function to update the internal structure
+ *   of cricbuf.
+ *
+ * Input Parameters:
+ *   circ        - Address of the circular buffer to be used.
+ *   writtensize - The data that has been written to the buffer.
+ *
+ ****************************************************************************/
+
+void circbuf_writecommit(FAR struct circbuf_s *circ, size_t writtensize)
+{
+  DEBUGASSERT(circ);
+  circ->head += writtensize;
+}
+
+/****************************************************************************
+ * Name: circbuf_readcommit
+ *
+ * Description:
+ *   After reading data using the buf returned by circbuf_readbuf,
+ *   you need to use this function to update the internal structure
+ *   of cricbuf.
+ *
+ * Input Parameters:
+ *   circ     - Address of the circular buffer to be used.
+ *   readsize - The data that has been read to the buffer.
+ *
+ ****************************************************************************/
+
+void circbuf_readcommit(FAR struct circbuf_s *circ, size_t readsize)
+{
+  DEBUGASSERT(circ);
+  circ->tail += readsize;
+}
