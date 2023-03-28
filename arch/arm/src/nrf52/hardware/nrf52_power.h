@@ -51,6 +51,13 @@
 #define NRF52_POWER_RAMONB_OFFSET             0x000554  /* Deprecated register -  RAM on/off register (this register is retained) */
 #define NRF52_POWER_DCDCEN_OFFSET             0x000578  /* DC/DC enable register */
 
+#ifdef CONFIG_NRF52_HAVE_USBDEV
+#define NRF52_POWER_EVENTS_USBDETECTED_OFFSET 0x00011c  /* Voltage supply detected on VBUS */
+#define NRF52_POWER_EVENTS_USBREMOVED_OFFSET  0x000120  /* Voltage supply removed from VBUS */
+#define NRF52_POWER_EVENTS_USBPWRRDY_OFFSET   0x000124  /* USB 3.3 V supply ready */
+#define NRF52_POWER_USBREGSTATUS_OFFSET       0x000438  /* USB supply status */
+#endif
+
 /* Register definitions *****************************************************/
 
 #define NRF52_POWER_TASKS_CONSTLAT     (NRF52_POWER_BASE + NRF52_POWER_TASKS_CONSTLAT_OFFSET)
@@ -69,6 +76,13 @@
 #define NRF52_POWER_RAMON              (NRF52_POWER_BASE + NRF52_POWER_RAMON_OFFSET)
 #define NRF52_POWER_RAMONB             (NRF52_POWER_BASE + NRF52_POWER_RAMONB_OFFSET)
 #define NRF52_POWER_DCDCEN             (NRF52_POWER_BASE + NRF52_POWER_DCDCEN_OFFSET)
+
+#ifdef CONFIG_NRF52_HAVE_USBDEV
+#define NRF52_POWER_EVENTS_USBDETECTED (NRF52_POWER_BASE + NRF52_POWER_EVENTS_USBDETECTED_OFFSET)
+#define NRF52_POWER_EVENTS_USBREMOVED  (NRF52_POWER_BASE + NRF52_POWER_EVENTS_USBREMOVED_OFFSET)
+#define NRF52_POWER_EVENTS_USBPWRRDY   (NRF52_POWER_BASE + NRF52_POWER_EVENTS_USBPWRRDY_OFFSET)
+#define NRF52_POWER_USBREGSTATUS       (NRF52_POWER_BASE + NRF52_POWER_USBREGSTATUS_OFFSET)
+#endif
 
 /* Register bit definitions *************************************************/
 
@@ -124,5 +138,10 @@
 #define NRF52_POWER_RAMONB_OFFRAM3           (1 << 17)  /* On */
 
 #define NRF52_POWER_DCDCEN_ENABLE            (1 << 0)   /* Enable */
+
+#ifdef CONFIG_NRF52_HAVE_USBDEV
+#define NRF52_POWER_USBREGSTATUS_VBUSDETECT  (1 << 0)   /* Vbus Present */
+#define NRF52_POWER_USBREGSTATUS_OUTPUTRDY   (1 << 1)   /* Ready */
+#endif
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_POWER_H */

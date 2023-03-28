@@ -271,6 +271,8 @@ config NRF52_USBDEV
 	bool "USB Device"
 	default n
 	depends on NRF52_HAVE_USBDEV
+	depends on NRF52_HFCLK_XTAL
+	select USBDEV
 
 config NRF52_COMP
 	bool "COMP"
@@ -657,6 +659,10 @@ config NRF52_I2C_MASTER_COPY_BUF_SIZE
 		on malloc.
 
 endmenu
+
+menu "USBDEV Configuration"
+
+endmenu # USBDEV Configuration
 
 menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
