@@ -74,7 +74,7 @@ struct esp_wdt_lowerhalf_s
   uint32_t                     lastreset; /* The last reset time */
   bool                         started;   /* True: Timer has been started */
   xcpt_t                       handler;   /* User Handler */
-  void *                       upper;     /* Pointer to watchdog_upperhalf_s */
+  void                        *upper;     /* Pointer to watchdog_upperhalf_s */
 };
 
 /****************************************************************************
@@ -577,7 +577,7 @@ int esp_wdt_initialize(void)
 
   /* Attach the handler for the timer IRQ */
 
-  irq_attach(ESP_IRQ_TG0_WDT_LEVEL, (xcpt_t)wdt_handler, NULL);
+  irq_attach(ESP_IRQ_TG0_WDT_LEVEL, (xcpt_t)wdt_handler, lower);
 
   /* Enable the allocated CPU interrupt */
 
