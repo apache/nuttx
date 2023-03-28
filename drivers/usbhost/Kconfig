@@ -361,6 +361,12 @@ config HIDKBD_NODEBOUNCE
 		If set to y normal debouncing is disabled.  Default:
 		Debounce enabled (No repeat keys).
 
+config HIDKBD_NOGETREPORT
+	bool "Use Interrupt pipe to get keys"
+	default n
+	---help---
+		Use the INTERRUPT IN pipe to get keyboard input reports.
+
 endif
 
 config USBHOST_HIDMOUSE
