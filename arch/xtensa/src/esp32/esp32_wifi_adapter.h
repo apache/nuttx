@@ -495,7 +495,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set);
  ****************************************************************************/
 
 int esp_wifi_sta_rssi(struct iwreq *iwr, bool set);
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
 
