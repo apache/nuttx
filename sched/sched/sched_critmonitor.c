@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sched.h>
 #include <assert.h>
+#include <debug.h>
 
 #include "sched/sched.h"
 
