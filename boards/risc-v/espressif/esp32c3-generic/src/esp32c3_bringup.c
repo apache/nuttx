@@ -38,6 +38,10 @@
 #  include "esp_wdt.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "esp_hr_timer.h"
+#endif
+
 #include "esp32c3-generic.h"
 
 /****************************************************************************
@@ -98,6 +102,14 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      _err("Failed to initialize HR timer: %d\n", ret);
     }
 #endif
 

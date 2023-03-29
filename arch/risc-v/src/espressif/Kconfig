@@ -213,6 +213,15 @@ config ESPRESSIF_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESPRESSIF_HR_TIMER
+	bool "High-Resolution Timer"
+	default n
+	---help---
+		A high-resolution hardware timer for supporting the management of
+		kernel events.
+		The HR Timer is built on top of the System Timer (SYSTIMER) peripheral.
+		Timer callbacks are dispatched from a high-priority kernel task.
+
 config ESPRESSIF_BROWNOUT_DET
 	bool "Brownout Detector"
 	default y
@@ -351,6 +360,26 @@ config ESPRESSIF_FLASH_FREQ_20M
 endchoice # ESPRESSIF_FLASH_FREQ
 
 endmenu # SPI Flash Configuration
+
+menu "High Resolution Timer"
+	depends on ESPRESSIF_HR_TIMER
+
+config ESPRESSIF_HR_TIMER_TASK_NAME
+	string "High Resolution Timer task name"
+	default "hr_timer"
+
+config ESPRESSIF_HR_TIMER_TASK_PRIORITY
+	int "High Resolution Timer task priority"
+	default 223
+	---help---
+		Priority level of the High Resolution Timer task.
+		Must be lower than the SCHED_HPWORKPRIORITY.
+
+config ESPRESSIF_HR_TIMER_TASK_STACK_SIZE
+	int "High Resolution Timer task stack size"
+	default 2048
+
+endmenu # High Resolution Timer
 
 menu "Application Image Configuration"
 
