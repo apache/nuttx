@@ -423,6 +423,16 @@ config ARCH_BOARD_ESP32S3_EYE
 		featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display,
 		a microphone, an 8 MB Octal PSRAM and an 8 MB flash.
 
+config ARCH_BOARD_ESP32S3_MEADOW
+	bool "WildernessLabs ESP32S3-Meadow Board"
+	depends on ARCH_CHIP_ESP32S3WROOM1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The ESP32-S3-Meadow is a small-sized board produced by WildernessLabs
+		featuring the ESP32-S3 CPU with 32MiB Octal SPI PSRAM and 64 MiB flash.
+
 config ARCH_BOARD_ESP32C6_GENERIC
 	bool "Espressif ESP32-C6 Generic DevKit"
 	depends on ESPRESSIF_ESP32C6
@@ -2819,6 +2829,7 @@ config ARCH_BOARD
 	default "franzininho-wifi"          if ARCH_BOARD_FRANZININHO_WIFI
 	default "esp32s3-devkit"            if ARCH_BOARD_ESP32S3_DEVKIT
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
+	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32c6-devkit"            if ARCH_BOARD_ESP32C6_DEVKIT
 	default "esp32c6-generic"           if ARCH_BOARD_ESP32C6_GENERIC
 	default "esp32h2-generic"           if ARCH_BOARD_ESP32H2_GENERIC
@@ -3814,6 +3825,9 @@ source "boards/xtensa/esp32s3/esp32s3-devkit/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_EYE
 source "boards/xtensa/esp32s3/esp32s3-eye/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_MEADOW
+source "boards/xtensa/esp32s3/esp32s3-meadow/Kconfig"
 endif
 if ARCH_BOARD_ESP32C6_DEVKIT
 source "boards/risc-v/esp32c6/esp32c6-devkit/Kconfig"
