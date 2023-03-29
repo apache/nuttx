@@ -223,7 +223,7 @@ static const struct wlan_ops g_sta_ops =
   .event      = esp_wifi_notify_subscribe,
   .stop       = esp_wifi_sta_stop
 };
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
 static const struct wlan_ops g_softap_ops =
@@ -246,7 +246,7 @@ static const struct wlan_ops g_softap_ops =
   .event      = esp_wifi_notify_subscribe,
   .stop       = esp_wifi_softap_stop
 };
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
 
 /****************************************************************************
  * Private Function Prototypes
@@ -1712,7 +1712,7 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
 
   wlan_tx_done(priv);
 }
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 /****************************************************************************
  * Function: wlan_softap_rx_done
@@ -1763,7 +1763,7 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 
   wlan_tx_done(priv);
 }
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
 
 /****************************************************************************
  * Public Functions
@@ -1827,7 +1827,7 @@ int esp32_wlan_sta_initialize(void)
 
   return OK;
 }
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp32_wlan_softap_initialize
@@ -1888,6 +1888,6 @@ int esp32_wlan_softap_initialize(void)
 
   return OK;
 }
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
 
 #endif  /* CONFIG_ESP32_WIFI */

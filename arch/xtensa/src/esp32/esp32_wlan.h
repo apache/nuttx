@@ -62,7 +62,7 @@ extern "C"
 
 #ifdef ESP32_WLAN_HAS_STA
 int esp32_wlan_sta_initialize(void);
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp32_wlan_softap_initialize
@@ -80,7 +80,7 @@ int esp32_wlan_sta_initialize(void);
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
 int esp32_wlan_softap_initialize(void);
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
 
 #endif /* CONFIG_ESP32_WIFI */
 #ifdef __cplusplus

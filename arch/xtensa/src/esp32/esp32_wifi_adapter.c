@@ -2159,7 +2159,7 @@ static int esp_event_id_map(int event_id)
       case WIFI_EVENT_STA_STOP:
         id = WIFI_ADPT_EVT_STA_STOP;
         break;
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
       case WIFI_EVENT_AP_START:
@@ -2177,7 +2177,7 @@ static int esp_event_id_map(int event_id)
       case WIFI_EVENT_AP_STADISCONNECTED:
         id = WIFI_ADPT_EVT_AP_STADISCONNECTED;
         break;
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
       default:
         return -1;
     }
@@ -2264,7 +2264,7 @@ static void esp_evt_work_cb(void *arg)
             wlinfo("Wi-Fi sta stop\n");
             g_sta_connected = false;
             break;
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
           case WIFI_ADPT_EVT_AP_START:
@@ -4114,7 +4114,8 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
         }
     }
   else
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
+
 #ifdef ESP32_WLAN_HAS_SOFTAP
   if (ifidx == ESP_IF_WIFI_AP)
     {
@@ -4124,14 +4125,14 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
         }
     }
   else
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
     {
       wlerr("ifidx=%d is error\n", ifidx);
     }
 }
 
 /****************************************************************************
- * Name: esp_wifi_set_auth_param
+ * Name: esp_wifi_auth_trans
  *
  * Description:
  *   Converts a ESP32 authenticate mode values to WEXT authenticate mode.
@@ -4172,7 +4173,7 @@ static int esp_wifi_auth_trans(uint32_t wifi_auth)
 }
 
 /****************************************************************************
- * Name: esp_wifi_set_auth_param
+ * Name: esp_wifi_cipher_trans
  *
  * Description:
  *   Converts a ESP32 cipher type values to WEXT cipher type values.
@@ -4884,16 +4885,18 @@ int esp_wifi_sta_start(void)
     {
       mode = WIFI_MODE_APSTA;
     }
-#else
-  mode = WIFI_MODE_STA;
-#endif
+  else
+#endif /* ESP32_WLAN_HAS_SOFTAP */
+    {
+      mode = WIFI_MODE_STA;
+    }
 
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
       wlerr("Failed to set Wi-Fi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
-      goto errout_set_mode;
+      goto errout;
     }
 
   ret = esp_wifi_start();
@@ -4901,17 +4904,14 @@ int esp_wifi_sta_start(void)
     {
       wlerr("Failed to start Wi-Fi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
-      goto errout_set_mode;
+      goto errout;
     }
 
   g_sta_started = true;
 
   wlinfo("OK to start Wi-Fi station\n");
 
-  esp_wifi_lock(false);
-  return OK;
-
-errout_set_mode:
+errout:
   esp_wifi_lock(false);
   return ret;
 }
@@ -4953,7 +4953,7 @@ int esp_wifi_sta_stop(void)
         {
           wlerr("Failed to set Wi-Fi AP mode ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
-          goto errout_set_mode;
+          goto errout;
         }
 
       ret = esp_wifi_start();
@@ -4961,21 +4961,19 @@ int esp_wifi_sta_stop(void)
         {
           wlerr("Failed to start Wi-Fi AP ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
-          goto errout_set_mode;
+          goto errout;
         }
     }
-#endif
+#endif /* ESP32_WLAN_HAS_SOFTAP */
 
   wlinfo("OK to stop Wi-Fi station\n");
 
-  esp_wifi_lock(false);
-  return OK;
-
 #ifdef ESP32_WLAN_HAS_SOFTAP
-errout_set_mode:
-  esp_wifi_lock(true);
+errout:
+#endif /* ESP32_WLAN_HAS_SOFTAP */
+
+  esp_wifi_lock(false);
   return ret;
-#endif
 }
 
 /****************************************************************************
@@ -5423,7 +5421,7 @@ int esp_wifi_sta_connect(void)
     {
       wlerr("Failed to connect ret=%d\n", ret);
       ret = wifi_errno_trans(ret);
-      goto errout_wifi_connect;
+      goto errout;
     }
 
   esp_wifi_lock(false);
@@ -5449,7 +5447,7 @@ int esp_wifi_sta_connect(void)
 
   return OK;
 
-errout_wifi_connect:
+errout:
   g_sta_reconnect = false;
   esp_wifi_lock(false);
   return ret;
@@ -6082,7 +6080,7 @@ int esp_wifi_sta_rssi(struct iwreq *iwr, bool set)
 
   return OK;
 }
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
 /****************************************************************************
  * SoftAP functions
@@ -6123,16 +6121,18 @@ int esp_wifi_softap_start(void)
     {
       mode = WIFI_MODE_APSTA;
     }
-#else
-  mode = WIFI_MODE_AP;
-#endif
+  else
+#endif /* ESP32_WLAN_HAS_STA */
+    {
+      mode = WIFI_MODE_AP;
+    }
 
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
       wlerr("Failed to set Wi-Fi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
-      goto errout_set_mode;
+      goto errout;
     }
 
   ret = esp_wifi_start();
@@ -6140,17 +6140,14 @@ int esp_wifi_softap_start(void)
     {
       wlerr("Failed to start Wi-Fi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
-      goto errout_set_mode;
+      goto errout;
     }
 
   g_softap_started = true;
 
   wlinfo("OK to start Wi-Fi SoftAP\n");
 
-  esp_wifi_lock(false);
-  return OK;
-
-errout_set_mode:
+errout:
   esp_wifi_lock(false);
   return ret;
 }
@@ -6192,29 +6189,27 @@ int esp_wifi_softap_stop(void)
         {
           wlerr("Failed to set Wi-Fi AP mode ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
-          goto errout_set_mode;
+          goto errout;
         }
 
       ret = esp_wifi_start();
       if (ret)
         {
-          wlerr("Failed to start Wi-Fi AP ret=%d\n", ret);
+          wlerr("Failed to start Wi-Fi STA ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
-          goto errout_set_mode;
+          goto errout;
         }
     }
-#endif
+#endif /* ESP32_WLAN_HAS_STA */
 
   wlinfo("OK to stop Wi-Fi SoftAP\n");
 
-  esp_wifi_lock(false);
-  return OK;
-
 #ifdef ESP32_WLAN_HAS_STA
-errout_set_mode:
-  esp_wifi_lock(true);
+errout:
+#endif /* ESP32_WLAN_HAS_STA */
+
+  esp_wifi_lock(false);
   return ret;
-#endif
 }
 
 /****************************************************************************
