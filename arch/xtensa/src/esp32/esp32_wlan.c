@@ -1770,6 +1770,40 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32_wlan_sta_set_linkstatus
+ *
+ * Description:
+ *   Set Wi-Fi station link status
+ *
+ * Parameters:
+ *   linkstatus - true Notifies the networking layer about an available
+ *                carrier, false Notifies the networking layer about an
+ *                disappeared carrier.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ESP32_WLAN_HAS_STA
+int esp32_wlan_sta_set_linkstatus(bool linkstatus)
+{
+  int ret = -EINVAL;
+  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32_WLAN_STA_DEVNO];
+
+  if (linkstatus)
+    {
+      ret = netdev_carrier_on(&priv->dev);
+    }
+  else
+    {
+      ret = netdev_carrier_off(&priv->dev);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: esp32_wlan_sta_initialize
  *
  * Description:
@@ -1783,7 +1817,6 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  ****************************************************************************/
 
-#ifdef ESP32_WLAN_HAS_STA
 int esp32_wlan_sta_initialize(void)
 {
   int ret;

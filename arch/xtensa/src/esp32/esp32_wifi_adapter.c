@@ -63,6 +63,7 @@
 #include "esp32_wifi_adapter.h"
 #include "esp32_rt_timer.h"
 #include "esp32_wifi_utils.h"
+#include "esp32_wlan.h"
 
 #ifdef CONFIG_PM
 #  include "esp32_pm.h"
@@ -2245,11 +2246,23 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_CONNECT:
             wlinfo("Wi-Fi sta connect\n");
             g_sta_connected = true;
+            ret = esp32_wlan_sta_set_linkstatus(true);
+            if (ret < 0)
+              {
+                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
+              }
+
             break;
 
           case WIFI_ADPT_EVT_STA_DISCONNECT:
             wlinfo("Wi-Fi sta disconnect\n");
             g_sta_connected = false;
+            ret = esp32_wlan_sta_set_linkstatus(false);
+            if (ret < 0)
+              {
+                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
+              }
+
             if (g_sta_reconnect)
               {
                 ret = esp_wifi_connect();
