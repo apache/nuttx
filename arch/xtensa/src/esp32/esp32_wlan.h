@@ -61,6 +61,39 @@ extern "C"
  ****************************************************************************/
 
 #ifdef ESP32_WLAN_HAS_STA
+
+/****************************************************************************
+ * Name: esp32_wlan_sta_set_linkstatus
+ *
+ * Description:
+ *   Set Wi-Fi station link status
+ *
+ * Parameters:
+ *   linkstatus - true Notifies the networking layer about an available
+ *                carrier, false Notifies the networking layer about an
+ *                disappeared carrier.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int esp32_wlan_sta_set_linkstatus(bool linkstatus);
+
+/****************************************************************************
+ * Name: esp32_wlan_sta_initialize
+ *
+ * Description:
+ *   Initialize the ESP32 WLAN station netcard driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
 int esp32_wlan_sta_initialize(void);
 #endif /* ESP32_WLAN_HAS_STA */
 
