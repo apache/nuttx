@@ -42,6 +42,10 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += esp_wdt.c
 endif
 
+ifneq ($(CONFIG_DEV_RANDOM)$(CONFIG_DEV_URANDOM_ARCH),)
+CHIP_CSRCS += esp_random.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################

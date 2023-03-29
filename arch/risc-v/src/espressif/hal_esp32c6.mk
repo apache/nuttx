@@ -68,6 +68,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/efuse/$(CHIP_SERIES)/es
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/efuse/$(CHIP_SERIES)/esp_efuse_utility.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/cpu.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/esp_clk.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/hw_random.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/modem_clock.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/periph_ctrl.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/regi2c_ctrl.c
