@@ -84,6 +84,7 @@ endif
 
 ifeq (${CONFIG_MPFS_OPENSBI},y)
 CHIP_ASRCS += mpfs_opensbi_utils.S
+CHIP_ASRCS += mpfs_opensbi_trap.S
 CHIP_CSRCS += mpfs_opensbi.c
 endif
 

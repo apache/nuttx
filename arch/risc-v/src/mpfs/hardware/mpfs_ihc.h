@@ -27,8 +27,8 @@
 
 enum mpfs_irq_type_e
 {
-  MP_IRQ  = 0x0,
-  ACK_IRQ = 0x1,
+  MP_IRQ  = 0x1,
+  ACK_IRQ = 0x2,
 };
 
 #define IHC_MAX_MESSAGE_SIZE   2

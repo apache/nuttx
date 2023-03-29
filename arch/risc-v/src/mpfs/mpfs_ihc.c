@@ -39,6 +39,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/wqueue.h>
 
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
@@ -138,6 +139,12 @@ struct mpfs_queue_table_s
   void *data;
 };
 
+struct mpfs_ihc_work_arg_s
+{
+  uint32_t mhartid;
+  uint32_t rhartid;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -155,6 +162,7 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid);
 static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
                                         rptun_callback_t callback,
                                         void *arg);
+static void mpfs_rptun_worker(void *arg);
 
 /****************************************************************************
  * Private Data
@@ -179,8 +187,11 @@ static struct mpfs_rptun_shmem_s   g_shmem;
 static struct rpmsg_device        *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device *g_mpfs_virtio_device;
 
-static sem_t  g_mpfs_ack_sig       = SEM_INITIALIZER(0);
+#ifdef MPFS_RPTUN_USE_THREAD
 static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(0);
+#else
+static struct work_s g_rptun_work;
+#endif
 static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 static uint32_t g_connected_hart_ints;
@@ -188,6 +199,11 @@ static uint32_t g_connected_harts;
 static uint16_t g_vq_idx;
 static int      g_plic_irq;
 static bool     g_rptun_initialized;
+
+#ifdef IHC_AVOID_ACK_AND_MP
+static struct mpfs_ihc_work_arg_s g_work_arg;
+static struct work_s g_ihc_work;
+#endif
 
 const uint32_t ihcia_remote_harts[MPFS_NUM_HARTS] =
 {
@@ -237,6 +253,7 @@ static const struct rptun_ops_s g_mpfs_rptun_ops =
  *             mhartid base on the context, not necessarily the actual
  *             mhartid.
  *   is_ack  - Boolean that is set true if an ack has been found
+ *   is_msg  - Boolean that is set true if a message is present
  *
  * Returned Value:
  *   Remote hart id
@@ -244,7 +261,8 @@ static const struct rptun_ops_s g_mpfs_rptun_ops =
  ****************************************************************************/
 
 static uint32_t mpfs_ihc_parse_incoming_hartid(uint32_t mhartid,
-                                               bool *is_ack)
+                                               bool *is_ack,
+                                               bool *is_msg)
 {
   uint32_t hart_id        = 0;
   uint32_t return_hart_id = UNDEFINED_HART_ID;
@@ -262,6 +280,13 @@ static uint32_t mpfs_ihc_parse_incoming_hartid(uint32_t mhartid,
                 {
                   return_hart_id = hart_id;
                   *is_ack = true;
+
+                  test_int = (1 << (hart_id * 2));
+
+                  if ((g_connected_hart_ints & test_int) == test_int)
+                    {
+                      *is_msg = true;
+                    }
                   break;
                 }
             }
@@ -273,7 +298,7 @@ static uint32_t mpfs_ihc_parse_incoming_hartid(uint32_t mhartid,
               if (((g_connected_hart_ints & test_int) == test_int))
                 {
                   return_hart_id = hart_id;
-                  *is_ack = false;
+                  *is_msg = true;
                   break;
                 }
             }
@@ -415,38 +440,67 @@ static uint32_t mpfs_ihc_context_to_local_hart_id(ihc_channel_t channel)
  * Name: mpfs_ihc_rx_handler
  *
  * Description:
- *   This handles the received information and either lets the vq to proceed
- *   via posting g_mpfs_ack_sig, or lets the mpfs_rptun_thread() run as it
- *   waits for the g_mpfs_rx_sig.  virtqueue_notification() cannot be called
- *   from the interrupt context, thus the thread that will perform it.
+ *   This handles the received information and lets the vq to proceed.
+ *   virtqueue_notification() cannot be called from the interrupt context,
+ *   thus the thread or work queue that will perform it.
  *
  * Input Parameters:
  *   message   - Pointer to the incoming message
- *   is_ack    - Boolean indicating whether an ack is received
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
+static void mpfs_ihc_rx_handler(uint32_t *message)
 {
-  if (is_ack)
-    {
-      /* Received the ack */
+  g_vq_idx = message[0];
 
-      nxsem_post(&g_mpfs_ack_sig);
-    }
-  else
-    {
-      g_vq_idx = message[0];
+  DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
+              (g_vq_idx == VRING1_NOTIFYID));
 
-      DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
-                  (g_vq_idx == VRING1_NOTIFYID));
-
-      nxsem_post(&g_mpfs_rx_sig);
-    }
+#ifdef MPFS_RPTUN_USE_THREAD
+  nxsem_post(&g_mpfs_rx_sig);
+#else
+  work_queue(HPWORK, &g_rptun_work, mpfs_rptun_worker, NULL, 0);
+#endif
 }
+
+/****************************************************************************
+ * Name: mpfs_ihc_worker
+ *
+ * Description:
+ *   This function is used to wait for the remote message present condition,
+ *   after which the ACK is sent.  ACK wasn't sent before, as the remote end
+ *   has no way of knowing which one came first: the ACK or RMP.
+ *
+ * Input Parameters:
+ *   arg  - Pointer to the arguments struct
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef IHC_AVOID_ACK_AND_MP
+static void mpfs_ihc_worker(void *arg)
+{
+  uint32_t ctrl_reg;
+  uint32_t retries = 5000;
+
+  do
+    {
+      ctrl_reg = getreg32(MPFS_IHC_CTRL(g_work_arg.mhartid,
+                          g_work_arg.rhartid));
+    }
+  while ((ctrl_reg & RMP_MESSAGE_PRESENT) && --retries);
+
+  DEBUGASSERT(retries != 0);
+
+  modifyreg32(MPFS_IHC_CTRL(g_work_arg.mhartid,
+              g_work_arg.rhartid), 0, ACK_INT);
+}
+#endif
 
 /****************************************************************************
  * Name: mpfs_ihc_rx_message
@@ -459,7 +513,6 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
  *   channel  - Enum that describes the channel used.
  *   mhartid  - Context hart id, not necessarily the absolute mhartid but
  *              rather, the primary hartid of the set of harts.
- *   is_ack   - Boolean indicating an ack message
  *   msg      - For storing data, could be NULL
  *
  * Returned Value:
@@ -468,58 +521,54 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
  ****************************************************************************/
 
 static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
-                                bool is_ack, uint32_t *msg)
+                                uint32_t *msg)
 {
   uint32_t rhartid  = mpfs_ihc_context_to_remote_hart_id(channel);
   uint32_t ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
 
-  if (is_ack)
-    {
-      if (mhartid == CONTEXTB_HARTID)
-        {
-          uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
-          DEBUGASSERT(msg == NULL);
-          mpfs_ihc_rx_handler((uint32_t *)msg_in, is_ack);
-        }
-      else
-        {
-          /* This path is meant for the OpenSBI vendor extension only */
+  /* Check if we have a message */
 
-          DEBUGPANIC();
-        }
+  if (mhartid == CONTEXTB_HARTID)
+    {
+      uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
+      DEBUGASSERT(msg == NULL);
+      mpfs_ihc_rx_handler((uint32_t *)msg_in);
     }
-  else if (MP_MESSAGE_PRESENT == (ctrl_reg & MP_MASK))
+  else
     {
-      /* Check if we have a message */
+      /* This path is meant for the OpenSBI vendor extension only */
 
-      if (mhartid == CONTEXTB_HARTID)
-        {
-          uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
-          DEBUGASSERT(msg == NULL);
-          mpfs_ihc_rx_handler((uint32_t *)msg_in, is_ack);
-        }
-      else
-        {
-          /* This path is meant for the OpenSBI vendor extension only */
+      DEBUGPANIC();
+    }
 
-          DEBUGPANIC();
-        }
+  /* Set MP to 0. Note this generates an interrupt on the other hart
+   * if it has RMPIE bit set in the control register
+   */
 
-      /* Set MP to 0. Note this generates an interrupt on the other hart
-       * if it has RMPIE bit set in the control register
+  ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
+  if (ctrl_reg & RMP_MESSAGE_PRESENT)
+    {
+      /* If we send the ACK here, Linux will have the ACK and the
+       * MP flags sets.  IHC_AVOID_ACK_AND_MP assures only one
+       * is present at once.
        */
 
-      volatile uint32_t temp = getreg32(MPFS_IHC_CTRL(mhartid, rhartid)) &
-                                        ~MP_MASK;
+#ifdef IHC_AVOID_ACK_AND_MP
+      g_work_arg.mhartid = mhartid;
+      g_work_arg.rhartid = rhartid;
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
+      work_queue(HPWORK, &g_ihc_work, mpfs_ihc_worker, NULL, 0);
+#else
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, ACK_INT);
+#endif
+    }
+  else
+    {
+      /* We can send the ACK now and clear the MP */
 
-      /* Check if ACKIE_EN is set */
-
-      if (temp & ACKIE_EN)
-        {
-          temp |= ACK_INT;
-        }
-
-      putreg32(temp, MPFS_IHC_CTRL(mhartid, rhartid));
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, 0);
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, ACK_INT);
     }
 }
 
@@ -541,11 +590,13 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
 static void mpfs_ihc_message_present_isr(void)
 {
   uint64_t mhartid = riscv_mhartid();
-  bool is_ack;
+  bool is_ack = false;
+  bool is_msg = false;
 
   /* Check all our channels */
 
-  uint32_t origin_hart = mpfs_ihc_parse_incoming_hartid(mhartid, &is_ack);
+  uint32_t origin_hart = mpfs_ihc_parse_incoming_hartid(mhartid, &is_ack,
+                                                        &is_msg);
 
   if (origin_hart != UNDEFINED_HART_ID)
     {
@@ -564,7 +615,10 @@ static void mpfs_ihc_message_present_isr(void)
 
       /* Process incoming packet */
 
-      mpfs_ihc_rx_message(origin_hart, mhartid, is_ack, NULL);
+      if (is_msg)
+        {
+          mpfs_ihc_rx_message(origin_hart, mhartid, NULL);
+        }
 
       if (is_ack)
         {
@@ -698,15 +752,11 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
     {
       ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
     }
-  while ((ctrl_reg & (RMP_MESSAGE_PRESENT | ACK_INT)) && --retries);
+  while ((ctrl_reg & (RMP_MESSAGE_PRESENT)) && --retries);
 
   /* Return if RMP bit 1 indicating busy */
 
   if (RMP_MESSAGE_PRESENT == (ctrl_reg & RMP_MASK))
-    {
-      return -EBUSY;
-    }
-  else if (ACK_INT == (ctrl_reg & ACK_INT_MASK))
     {
       return -EBUSY;
     }
@@ -719,18 +769,18 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
           putreg32(message[i], MPFS_IHC_MSG_OUT(mhartid, rhartid) + i * 4);
         }
 
+      ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
+
+      /* If we're unlucky, we cannot send MP yet.. come back later */
+
+      if (ctrl_reg & MP_MESSAGE_PRESENT)
+        {
+          return -EBUSY;
+        }
+
       /* Set the MP bit. This will notify other of incoming hart message */
 
       modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, RMP_MESSAGE_PRESENT);
-
-      /* Wait for the ACK to arrive to maintain the logic */
-
-      if (mhartid == CONTEXTB_HARTID)
-        {
-          /* Only applicable for the CONTEXTB_HART */
-
-          nxsem_wait_uninterruptible(&g_mpfs_ack_sig);
-        }
     }
 
   return OK;
@@ -846,12 +896,10 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.notifyid      = VDEV_NOTIFYID;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
-                                      1 << VIRTIO_RPMSG_F_ACK |
-                                      VIRTIO_RING_F_EVENT_IDX;
+                                      1 << VIRTIO_RPMSG_F_ACK;
 
       rsc->rpmsg_vdev.gfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
-                                      1 << VIRTIO_RPMSG_F_ACK |
-                                      VIRTIO_RING_F_EVENT_IDX;
+                                      1 << VIRTIO_RPMSG_F_ACK;
 
       /* Set to VIRTIO_CONFIG_STATUS_DRIVER_OK when master is up */
 
@@ -980,6 +1028,8 @@ static int mpfs_rptun_stop(struct rptun_dev_s *dev)
 static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
 {
   uint32_t tx_msg[IHC_MAX_MESSAGE_SIZE];
+  uint32_t retries = 5;
+  int      ret = OK;
 
   /* We only care about the queue with notifyid VRING0 */
 
@@ -988,10 +1038,18 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
       tx_msg[0] = notifyid;
       tx_msg[1] = 0;
 
-      return mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
+      /* This failure should happen very rarely */
+
+      do
+        {
+           ret = mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
+        }
+      while ((ret != OK) && --retries);
+
+      DEBUGASSERT(ret == OK);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1154,6 +1212,33 @@ static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
 }
 
 /****************************************************************************
+ * Name: mpfs_rptun_worker
+ *
+ * Description:
+ *   This is used to notify the associated virtqueue via the scheduled work.
+ *   This doesn't use a separate thread, but a HPWORK instead, which is a
+ *   way to avoid deadlocks with net_lock() that also originate from HPWORK.
+ *
+ * Input Parameters:
+ *   arg    - Argument
+
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef MPFS_RPTUN_USE_THREAD
+static void mpfs_rptun_worker(void *arg)
+{
+  struct mpfs_queue_table_s *info;
+
+  DEBUGASSERT((g_vq_idx - VRING0_NOTIFYID) < VRINGS);
+  info = &g_mpfs_virtqueue_table[g_vq_idx - VRING0_NOTIFYID];
+  virtqueue_notification((struct virtqueue *)info->data);
+}
+#endif
+
+/****************************************************************************
  * Name: mpfs_rptun_thread
  *
  * Description:
@@ -1170,6 +1255,7 @@ static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
  *
  ****************************************************************************/
 
+#ifdef MPFS_RPTUN_USE_THREAD
 static int mpfs_rptun_thread(int argc, char *argv[])
 {
   struct mpfs_queue_table_s *info;
@@ -1185,6 +1271,7 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -1210,8 +1297,10 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 int mpfs_ihc_init(void)
 {
   uint32_t  mhartid = (uint32_t)riscv_mhartid();
+#ifdef MPFS_RPTUN_USE_THREAD
   char     *argv[3];
   char      arg1[19];
+#endif
   uint32_t  rhartid;
   int       ret;
 
@@ -1275,6 +1364,8 @@ int mpfs_ihc_init(void)
       goto init_error;
     }
 
+#ifdef MPFS_RPTUN_USE_THREAD
+
   /* Thread initialization */
 
   snprintf(arg1, sizeof(arg1), "%p",
@@ -1292,6 +1383,7 @@ int mpfs_ihc_init(void)
                                 NULL, NULL, NULL);
       goto init_error;
     }
+#endif
 
   return OK;
 
