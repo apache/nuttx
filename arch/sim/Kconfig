@@ -140,6 +140,13 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+config SIM_LOOPTASK_PRIORITY
+	int "looptask priority"
+	default SCHED_HPWORKPRIORITY if SCHED_HPWORK
+	default 255 if !SCHED_HPWORK
+	---help---
+		Looptask priority
+
 config SIM_LOOPTASK_INTERVAL
 	int "looptask interval in us"
 	default 10000

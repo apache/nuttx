@@ -310,7 +310,7 @@ void up_initialize(void)
   sim_usbhost_initialize();
 #endif
 
-  kthread_create("loop_task", SCHED_PRIORITY_MAX,
+  kthread_create("loop_task", CONFIG_SIM_LOOPTASK_PRIORITY,
                  CONFIG_DEFAULT_TASK_STACKSIZE,
                  sim_loop_task, NULL);
 }
