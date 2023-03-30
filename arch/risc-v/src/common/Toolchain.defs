@@ -132,27 +132,22 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
     ARCHRVISAM = m
-    ZARCHRVISAM := +m
   endif
 
   ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
     ARCHRVISAA = a
-    ZARCHRVISAA := +a
   endif
 
   ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
     ARCHRVISAC = c
-    ZARCHRVISAC := +c
   endif
 
   ifeq ($(CONFIG_ARCH_FPU),y)
     ARCHRVISAF = f
-    ZARCHRVISAF := +f
   endif
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)
     ARCHRVISAD = d
-    ZARCHRVISAD := +d
   endif
 
   # Detect abi type
@@ -169,7 +164,8 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
   # Construct arch flags
 
-  ARCHCPUFLAGS = -march=$(ARCHTYPE)i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)
+  ARCHCPUEXTFLAGS = i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)
+  ARCHCPUFLAGS = -march=$(ARCHTYPE)$(ARCHCPUEXTFLAGS)
 
   # Construct arch abi flags
 
@@ -184,6 +180,30 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LLVM_ABITYPE := $(ARCHABITYPE)
   endif
 
+endif
+
+# RISCV has a modular instruction set. It's hard to define cpu-model to support all toolchain.
+# For Zig, cpu model is this formal: generic_rv[32|64][i][m][a][f][d][c]
+# For Rust, cpu model is this formal: riscv[32|64][i][m][a][f][d][c]
+# So, it's better to map the NuttX config to LLVM builtin cpu model, these models supported by
+# all LLVM based toolchain.
+# Refer to : https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Target/RISCV/RISCV.td
+# These models can't cover all implementation of RISCV, but it's enough for most cases.
+
+ifeq ($(CONFIG_ARCH_RV32),y)
+  ifeq ($(ARCHCPUEXTFLAGS), imc)
+    LLVM_CPUTYPE := sifive-e20
+  else ifeq ($(ARCHCPUEXTFLAGS), imac)
+    LLVM_CPUTYPE := sifive-e31
+  else ifeq ($(ARCHCPUEXTFLAGS), imafc)
+    LLVM_CPUTYPE := sifive-e76
+  endif
+else
+  ifeq ($(ARCHCPUEXTFLAGS), imac)
+    LLVM_CPUTYPE := sifive-s51
+  else ifeq ($(ARCHCPUEXTFLAGS), imafdc)
+    LLVM_CPUTYPE := sifive-u54
+  endif
 endif
 
 ifeq ($(CONFIG_MM_KASAN_ALL),y)
