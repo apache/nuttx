@@ -257,11 +257,6 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
-tickless
---------
-
-This configuration enables the support for tickless scheduler mode.
-
 wifi
 ----
 
