@@ -20,36 +20,7 @@
 
 ZIG := zig
 
-ifeq ($(CONFIG_ARCH_RISCV),y)
-
-  ZIGFLAGS := -target $(LLVM_ARCHTYPE)-freestanding-none
-
-  # Detect cpu ISA support flags for risc-v
-
-  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
-    ZARCHRVISAM := +m
-  endif
-
-  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-    ZARCHRVISAA := +a
-  endif
-
-  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
-    ZARCHRVISAC := +c
-  endif
-
-  ifeq ($(CONFIG_ARCH_FPU),y)
-    ZARCHRVISAF := +f
-  endif
-
-  ifeq ($(CONFIG_ARCH_DPFPU),y)
-    ZARCHRVISAD := +d
-  endif
-
-  ZIGFLAGS += -mcpu generic$(ZARCHRVISAM)$(ZARCHRVISAA)$(ZARCHRVISAF)$(ZARCHRVISAD)$(ZARCHRVISAC)
-  ZIGFLAGS += -mcmodel=medium
-
-else ifeq ($(CONFIG_ARCH_ARM),y)
+ifeq ($(CONFIG_ARCH_ARM),y)
 
   ifeq ($(CONFIG_ARM_THUMB),y)
     ZIGFLAGS := -target thumb-freestanding-$(LLVM_ABITYPE)
@@ -57,13 +28,15 @@ else ifeq ($(CONFIG_ARCH_ARM),y)
     ZIGFLAGS := -target arm-freestanding-$(LLVM_ABITYPE)
   endif
 
-  # Convert cortex-xxx to cortex_xxx for zig
-  ZIGFLAGS += -mcpu $(subst -,_,$(LLVM_CPUTYPE))
+else ifeq ($(CONFIG_ARCH_RISCV),y)
 
-else ifeq ($(CONFIG_ARCH_SIM),y)
-  ifeq ($(CONFIG_SIM_M32),y)
-    ZIGFLAGS := -target x86-freestanding-gnu
-  else
-    ZIGFLAGS := -target x86_64-freestanding-gnu
-  endif
+  ZIGFLAGS := -target $(LLVM_ARCHTYPE)-freestanding-none
+  ZIGFLAGS += -mcmodel=medium
+
+else 
+  ZIGFLAGS := -target $(LLVM_ARCHTYPE)-freestanding-$(LLVM_ABITYPE)
 endif
+
+# Convert cortex-xxx/sifive-exx to cortex_xxx/sifive_exx
+
+ZIGFLAGS += -mcpu $(subst -,_,$(LLVM_CPUTYPE))
