@@ -20,7 +20,6 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/tools/Zig.defs
 
 # NuttX is sometimes built as a native target.
 # In that case, the __NuttX__ macro is predefined by the compiler.
@@ -125,7 +124,14 @@ endif
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
+  LLVM_ARCHTYPE := x86
+  LLVM_CPUTYPE := i686
+else
+  LLVM_ARCHTYPE := x86_64
+  LLVM_CPUTYPE  := native
 endif
+
+LLVM_ABITYPE := gnu
 
 ARCHPICFLAGS = -fpic
 
@@ -144,7 +150,10 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 RUSTC = rustc --edition 2021
-ZIG = zig
+
+# Zig toolchain
+
+include $(TOPDIR)/tools/Zig.defs
 
 CFLAGS := $(ARCHOPTIMIZATION) $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
