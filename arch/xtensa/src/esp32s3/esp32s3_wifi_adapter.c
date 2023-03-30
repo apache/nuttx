@@ -3981,13 +3981,24 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
     }
   else
 #endif /* ESP32S3_WLAN_HAS_STA */
+
+#ifdef ESP32S3_WLAN_HAS_SOFTAP
+  if (ifidx == ESP_IF_WIFI_AP)
+    {
+      if (g_softap_txdone_cb)
+        {
+          g_softap_txdone_cb(data, len, txstatus);
+        }
+    }
+  else
+#endif /* ESP32S3_WLAN_HAS_SOFTAP */
     {
       wlerr("ifidx=%d is error\n", ifidx);
     }
 }
 
 /****************************************************************************
- * Name: esp_wifi_set_auth_param
+ * Name: esp_wifi_auth_trans
  *
  * Description:
  *   Converts a ESP32-S3 authenticate mode values to WEXT authenticate mode.
@@ -4028,7 +4039,7 @@ static int esp_wifi_auth_trans(uint32_t wifi_auth)
 }
 
 /****************************************************************************
- * Name: esp_wifi_set_auth_param
+ * Name: esp_wifi_cipher_trans
  *
  * Description:
  *   Converts a ESP32-S3 cipher type values to WEXT cipher type values.
