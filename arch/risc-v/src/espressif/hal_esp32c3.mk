@@ -80,6 +80,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(C
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_hw_support/port/$(CHIP_SERIES)/systimer.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_system/port/brownout.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_system/port/soc/$(CHIP_SERIES)/clk.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_system/port/soc/$(CHIP_SERIES)/system_internal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/brownout_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/efuse_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/systimer_hal.c
