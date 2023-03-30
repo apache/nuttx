@@ -36,9 +36,9 @@
 #include "esp_lowputc.h"
 #include "esp_start.h"
 
-#include "brownout.h"
 #include "esp_clk_internal.h"
 #include "esp_cpu.h"
+#include "esp_private/brownout.h"
 #include "hal/wdt_hal.h"
 
 /****************************************************************************
