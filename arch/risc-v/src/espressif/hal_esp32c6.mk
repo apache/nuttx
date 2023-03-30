@@ -85,6 +85,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_rom/patches/esp_rom
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_rom/patches/esp_rom_wdt.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_system/port/brownout.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_system/port/soc/$(CHIP_SERIES)/clk.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/esp_system/port/soc/$(CHIP_SERIES)/system_internal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/brownout_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/efuse_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/uart_hal.c

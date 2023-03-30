@@ -24,6 +24,10 @@ CSRCS = esp32c6_boot.c esp32c6_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
   CSRCS += esp32c6_appinit.c
+
+  ifeq ($(CONFIG_BOARDCTL_RESET),y)
+    CSRCS += esp32c6_reset.c
+  endif
 endif
 
 DEPPATH += --dep-path board
