@@ -110,4 +110,20 @@ config TM4C1294_LAUNCHPAD_UART2_TX_D5
 
 endchoice # UART2 Tx pin selection
 
+choice
+	prompt "Sensors selection"
+	depends on TIVA_I2C
+	default BOOSTXL_SENSORS_NONE
+
+config BOOSTXL_SENSORS_NONE
+	bool "None"
+
+config BOOSTXL_SENSORS_1
+	bool "BOOSTXL-SENSORS on BOOSTERPACK1"
+	depends on TIVA_I2C0
+
+config BOOSTXL_SENSORS_2
+	bool "BOOSTXL-SENSORS on BOOSTERPACK2"
+	depends on TIVA_I2C2
+endchoice
 endif # ARCH_BOARD_TM4C1294_LAUNCHPAD

@@ -202,19 +202,40 @@
 #define GPIO_UART2_TX     GPIO_UART2_TX_1
 #endif
 
-/* Control pins for BOOST-CC2564MODA plugged into BoosterPack1
+/* Control pins for BOOST-CC2564MODA plugged into BoosterPack 1 or 2.
  *
- *   --- ------------
- *   Pin Pin Function
- *   --- ------------
- *   PM3 NSHUTD
- *   PG0 RTS
- *   PL4 CTS
- *   --- ------------
+ *   BoosterPack1            BoosterPack2
+ *
+ *   --- ------------        --- ------------
+ *   Pin Pin Function        Pin Pin Function
+ *   --- ------------        --- ------------
+ *   PM3 NSHUTD              PM7 NSHUTD
+ *   PG0 RTS                 PM0 RTS
+ *   PL4 CTS                 PM1 CTS
+ *   --- ------------        --- ------------
  */
 
 #define UART7_GPIO_NSHUTD (GPIO_FUNC_OUTPUT | GPIO_PORTM | GPIO_PIN_3)
 #define UART7_GPIO_RTS    (GPIO_FUNC_OUTPUT | GPIO_PORTG | GPIO_PIN_0)
 #define UART7_GPIO_CTS    (GPIO_FUNC_INPUT | GPIO_PORTL | GPIO_PIN_4)
+
+#define UART6_GPIO_NSHUTD (GPIO_FUNC_OUTPUT | GPIO_PORTM | GPIO_PIN_7)
+#define UART6_GPIO_RTS    (GPIO_FUNC_OUTPUT | GPIO_PORTM | GPIO_PIN_0)
+#define UART6_GPIO_CTS    (GPIO_FUNC_INPUT | GPIO_PORTM | GPIO_PIN_1)
+
+/* Pins for I2C.
+ *
+ *   BoosterPack1 I2C0       BoosterPack2 I2C2
+ *
+ *   --- ------------        --- ------------
+ *   Pin Pin Function        Pin Pin Function
+ *   --- ------------        --- ------------
+ *   PB2 SCL                 PN5 SCL
+ *   PB3 SDA                 PN4 SDA
+ *   --- ------------        --- ------------
+ */
+
+#define GPIO_I2C2_SCL  GPIO_I2C2_SCL_3
+#define GPIO_I2C2_SDA  GPIO_I2C2_SDA_2
 
 #endif /* __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H */
