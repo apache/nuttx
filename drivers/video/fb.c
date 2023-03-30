@@ -43,6 +43,12 @@
 #include <nuttx/wdog.h>
 
 /****************************************************************************
+ * Pre-processor definitions
+ ****************************************************************************/
+
+#define FB_NO_OVERLAY -1
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -55,14 +61,21 @@
 struct fb_chardev_s
 {
   FAR struct fb_vtable_s *vtable; /* Framebuffer interface */
-  FAR void *fbmem;                /* Start of frame buffer memory */
   FAR struct pollfd *fds;         /* Polling structure of waiting thread */
-  size_t fblen;                   /* Size of the framebuffer */
   uint8_t plane;                  /* Video plan number */
-  uint8_t bpp;                    /* Bits per pixel */
   volatile bool pollready;        /* Poll ready flag */
   clock_t vsyncoffset;            /* VSync offset ticks */
   struct wdog_s wdog;             /* VSync offset timer */
+#ifdef CONFIG_FB_OVERLAY
+  int overlay;                    /* Overlay number */
+#endif
+};
+
+struct fb_panelinfo_s
+{
+  FAR void *fbmem;                /* Start of frame buffer memory */
+  size_t fblen;                   /* Size of the framebuffer */
+  uint8_t bpp;                    /* Bits per pixel */
 };
 
 /****************************************************************************
@@ -79,6 +92,8 @@ static int     fb_mmap(FAR struct file *filep,
                        FAR struct mm_map_entry_s *map);
 static int     fb_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
+static int     fb_get_panelinfo(FAR struct fb_chardev_s *fb,
+                                FAR struct fb_panelinfo_s *panelinfo);
 
 /****************************************************************************
  * Private Data
@@ -109,9 +124,11 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   FAR struct inode *inode;
   FAR struct fb_chardev_s *fb;
+  struct fb_panelinfo_s panelinfo;
   size_t start;
   size_t end;
   size_t size;
+  int ret;
 
   ginfo("len: %u\n", (unsigned int)len);
 
@@ -121,25 +138,34 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
+  /* Get panel info */
+
+  ret = fb_get_panelinfo(fb, &panelinfo);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Get the start and size of the transfer */
 
   start = filep->f_pos;
-  if (start >= fb->fblen)
+  if (start >= panelinfo.fblen)
     {
       return 0;  /* Return end-of-file */
     }
 
   end = start + len;
-  if (end >= fb->fblen)
+  if (end >= panelinfo.fblen)
     {
-      end = fb->fblen;
+      end = panelinfo.fblen;
     }
 
   size = end - start;
 
   /* And transfer the data from the frame buffer */
 
-  memcpy(buffer, fb->fbmem + start, size);
+  memcpy(buffer, panelinfo.fbmem + start, size);
   filep->f_pos += size;
   return size;
 }
@@ -153,9 +179,11 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode *inode;
   FAR struct fb_chardev_s *fb;
+  struct fb_panelinfo_s panelinfo;
   size_t start;
   size_t end;
   size_t size;
+  int ret;
 
   ginfo("len: %u\n", (unsigned int)len);
 
@@ -165,27 +193,36 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
+  /* Get panel info */
+
+  ret = fb_get_panelinfo(fb, &panelinfo);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   fb->pollready = false;
 
   /* Get the start and size of the transfer */
 
   start = filep->f_pos;
-  if (start >= fb->fblen)
+  if (start >= panelinfo.fblen)
     {
       return -EFBIG;  /* Cannot extend the framebuffer */
     }
 
   end = start + len;
-  if (end >= fb->fblen)
+  if (end >= panelinfo.fblen)
     {
-      end = fb->fblen;
+      end = panelinfo.fblen;
     }
 
   size = end - start;
 
   /* And transfer the data into the frame buffer */
 
-  memcpy(fb->fbmem + start, buffer, size);
+  memcpy(panelinfo.fbmem + start, buffer, size);
   filep->f_pos += size;
   return size;
 }
@@ -204,6 +241,7 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode;
   FAR struct fb_chardev_s *fb;
+  struct fb_panelinfo_s panelinfo;
   off_t newpos;
   int ret;
 
@@ -228,7 +266,17 @@ static off_t fb_seek(FAR struct file *filep, off_t offset, int whence)
       break;
 
     case SEEK_END:
-      newpos = fb->fblen + offset;
+
+      /* Get panel info */
+
+      ret = fb_get_panelinfo(fb, &panelinfo);
+
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      newpos = panelinfo.fblen + offset;
       break;
 
     default:
@@ -388,9 +436,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = fb->vtable->getoverlayinfo(fb->vtable, arg, &oinfo);
           if (ret == OK)
             {
-              fb->fbmem = oinfo.fbmem;
-              fb->fblen = oinfo.fblen;
-              fb->bpp   = oinfo.bpp;
+              fb->overlay = arg;
             }
         }
         break;
@@ -704,7 +750,8 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct inode *inode;
   FAR struct fb_chardev_s *fb;
-  int ret = -EINVAL;
+  struct fb_panelinfo_s panelinfo;
+  int ret;
 
   /* Get the framebuffer instance */
 
@@ -712,16 +759,25 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   inode = filep->f_inode;
   fb    = (FAR struct fb_chardev_s *)inode->i_private;
 
-  /* Return the address corresponding to the start of frame buffer. */
+  /* Get panel info */
 
-  if (map->offset >= 0 && map->offset < fb->fblen &&
-      map->length && map->offset + map->length <= fb->fblen)
+  ret = fb_get_panelinfo(fb, &panelinfo);
+
+  if (ret < 0)
     {
-      map->vaddr = (FAR char *)fb->fbmem + map->offset;
-      ret = OK;
+      return ret;
     }
 
-  return ret;
+  /* Return the address corresponding to the start of frame buffer. */
+
+  if (map->offset >= 0 && map->offset < panelinfo.fblen &&
+      map->length && map->offset + map->length <= panelinfo.fblen)
+    {
+      map->vaddr = (FAR char *)panelinfo.fbmem + map->offset;
+      return OK;
+    }
+
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -770,6 +826,56 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
+ * Name: fb_get_panelinfo
+ ****************************************************************************/
+
+static int fb_get_panelinfo(FAR struct fb_chardev_s *fb,
+                            FAR struct fb_panelinfo_s *panelinfo)
+{
+  struct fb_planeinfo_s pinfo;
+  int ret;
+
+#ifdef CONFIG_FB_OVERLAY
+  if (fb->overlay != FB_NO_OVERLAY)
+    {
+      struct fb_overlayinfo_s oinfo;
+      DEBUGASSERT(fb->vtable->getoverlayinfo != NULL);
+      memset(&oinfo, 0, sizeof(oinfo));
+      ret = fb->vtable->getoverlayinfo(fb->vtable, fb->overlay, &oinfo);
+
+      if (ret < 0)
+        {
+          gerr("ERROR: getoverlayinfo() failed: %d\n", ret);
+          return ret;
+        }
+
+      panelinfo->fbmem  = oinfo.fbmem;
+      panelinfo->fblen  = oinfo.fblen;
+      panelinfo->bpp    = oinfo.bpp;
+      return OK;
+    }
+#endif
+
+  DEBUGASSERT(fb->vtable != NULL);
+  DEBUGASSERT(fb->vtable->getplaneinfo != NULL);
+  memset(&pinfo, 0, sizeof(pinfo));
+
+  ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
+      return ret;
+    }
+
+  panelinfo->fbmem  = pinfo.fbmem;
+  panelinfo->fblen  = pinfo.fblen;
+  panelinfo->bpp    = pinfo.bpp;
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: fb_do_pollnotify
  ****************************************************************************/
 
@@ -783,6 +889,10 @@ static void fb_do_pollnotify(wdparm_t arg)
 
   poll_notify(&fb->fds, 1, POLLOUT);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: fb_pollnotify
@@ -821,10 +931,6 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: fb_register
  *
  * Description:
@@ -850,8 +956,8 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
 int fb_register(int display, int plane)
 {
   FAR struct fb_chardev_s *fb;
+  struct fb_panelinfo_s panelinfo;
   struct fb_videoinfo_s vinfo;
-  struct fb_planeinfo_s pinfo;
 #ifdef CONFIG_FB_OVERLAY
   struct fb_overlayinfo_s oinfo;
 #endif
@@ -866,6 +972,13 @@ int fb_register(int display, int plane)
     {
       return -ENOMEM;
     }
+
+#ifdef CONFIG_FB_OVERLAY
+
+  /* Set the default overlay number */
+
+  fb->overlay = FB_NO_OVERLAY;
+#endif
 
   /* Initialize the frame buffer device. */
 
@@ -902,22 +1015,18 @@ int fb_register(int display, int plane)
   nplanes = vinfo.nplanes;
   DEBUGASSERT(vinfo.nplanes > 0 && (unsigned)plane < vinfo.nplanes);
 
-  DEBUGASSERT(fb->vtable->getplaneinfo != NULL);
-  memset(&pinfo, 0, sizeof(pinfo));
-  ret = fb->vtable->getplaneinfo(fb->vtable, plane, &pinfo);
+  /* Get panel info */
+
+  ret = fb_get_panelinfo(fb, &panelinfo);
+
   if (ret < 0)
     {
-      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
       goto errout_with_fb;
     }
 
-  fb->fbmem  = pinfo.fbmem;
-  fb->fblen  = pinfo.fblen;
-  fb->bpp    = pinfo.bpp;
-
   /* Clear the framebuffer memory */
 
-  memset(pinfo.fbmem, 0, pinfo.fblen);
+  memset(panelinfo.fbmem, 0, panelinfo.fblen);
 
 #ifdef CONFIG_FB_OVERLAY
   /* Initialize first overlay but do not select */
