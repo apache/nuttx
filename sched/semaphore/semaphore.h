@@ -91,6 +91,12 @@ void nxsem_release_all(FAR struct tcb_s *stcb);
 #  define nxsem_release_all(stcb)
 #endif
 
+#if defined(CONFIG_DEBUG_ASSERTIONS) && defined(CONFIG_PRIORITY_INHERITANCE)
+bool nxsem_checkholder(FAR sem_t *sem);
+#else
+#  define nxsem_checkholder(sem) true
+#endif /* CONFIG_DEBUG_ASSERTIONS */
+
 #undef EXTERN
 #ifdef __cplusplus
 }
