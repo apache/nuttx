@@ -262,3 +262,7 @@ endif
 # Zig toolchain
 
 include $(TOPDIR)/tools/Zig.defs
+
+# Rust toolchain
+
+include $(TOPDIR)/tools/Rust.defs

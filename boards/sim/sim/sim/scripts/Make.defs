@@ -42,7 +42,6 @@ ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += -g
-  ARCHOPTIMIZATIONRUST += -g
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
@@ -53,8 +52,6 @@ endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -fno-strict-aliasing
-else
-  ARCHOPTIMIZATIONRUST += -C opt-level=0
 endif
 
 ifeq ($(CONFIG_FRAME_POINTER),y)
@@ -124,14 +121,34 @@ endif
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
-  LLVM_ARCHTYPE := x86
-  LLVM_CPUTYPE := i686
-else
-  LLVM_ARCHTYPE := x86_64
-  LLVM_CPUTYPE  := native
 endif
 
-LLVM_ABITYPE := gnu
+# LLVM style architecture flags
+
+ifeq ($(CONFIG_HOST_X86_64),y)
+  ifeq ($(CONFIG_SIM_M32),y)
+    LLVM_ARCHTYPE := x86
+    LLVM_CPUTYPE := i686
+  else
+    LLVM_ARCHTYPE := x86_64
+    LLVM_CPUTYPE := skylake
+  endif
+else ifeq ($(CONFIG_HOST_X86_32),y)
+  LLVM_ARCHTYPE := x86
+  LLVM_CPUTYPE := i686
+else ifeq ($(CONFIG_HOST_ARM64),y)
+  LLVM_ARCHTYPE := aarch64
+  LLVM_CPUTYPE := cortex-a53
+else ifeq ($(CONFIG_HOST_ARM),y)
+  LLVM_ARCHTYPE := arm
+  LLVM_CPUTYPE := cortex-a9
+endif
+
+ifeq ($(CONFIG_HOST_LINUX),y)
+  LLVM_ABITYPE := gnu
+else ifeq ($(CONFIG_HOST_MACOS),y)
+  LLVM_ABITYPE := darwin
+endif
 
 ARCHPICFLAGS = -fpic
 
@@ -149,17 +166,19 @@ endif
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
-RUSTC = rustc --edition 2021
 
 # Zig toolchain
 
 include $(TOPDIR)/tools/Zig.defs
 
+# Rust toolchain
+
+include $(TOPDIR)/tools/Rust.defs
+
 CFLAGS := $(ARCHOPTIMIZATION) $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
-RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)
 
 ifeq ($(CONFIG_LIBCXX),y)
   ifeq ($(CONFIG_HOST_MACOS),y)
