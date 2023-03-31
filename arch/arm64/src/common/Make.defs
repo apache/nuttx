@@ -47,7 +47,7 @@ CMN_CSRCS += arm64_nputs.c arm64_idle.c arm64_copystate.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_vfork.c arm64_switchcontext.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
-CMN_CSRCS += arm64_backtrace.c arm64_getintstack.c arm64_registerdump.c
+CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
 CMN_CSRCS += arm64_perf.c
 
 # Common C source files ( hardware BSP )
@@ -114,4 +114,8 @@ endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += arm64_checkstack.c
+endif
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CMN_CSRCS += arm64_backtrace.c
 endif
