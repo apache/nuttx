@@ -416,16 +416,19 @@ static int usrsock_rpmsg_sendto_handler(FAR struct rpmsg_endpoint *ept,
             }
         }
 
-      if (i == CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC)
-        {
-          ret = -ENOMEM;
-          goto out;
-        }
-
       /* Partial packet ? continue to fetch */
 
       if (priv->remain > 0)
         {
+          /* We've used the last I/O vector, cannot continue. */
+
+          if (i == CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC - 1)
+            {
+              nerr("ERROR: Request %d too large!\n", req->usockid);
+              ret = -ENOMEM;
+              goto out;
+            }
+
           return 0;
         }
       else if (priv->remain < 0)
@@ -461,11 +464,15 @@ static int usrsock_rpmsg_sendto_handler(FAR struct rpmsg_endpoint *ept,
           priv->remain = sizeof(*req) + req->addrlen + req->buflen - len;
           if (priv->remain > 0)
             {
+#if CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC >= 2
               priv->iov[0].iov_base = data;
               priv->iov[0].iov_len = len;
 
               rpmsg_hold_rx_buffer(ept, data);
               return 0;
+#else
+              ret = -ENOMEM;
+#endif
             }
           else
             {
