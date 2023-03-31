@@ -1,0 +1,54 @@
+############################################################################
+# tools/Rust.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+RUSTC := rustc --edition 2021
+
+RUSTFLAGS :=
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  RUSTFLAGS += -g
+endif
+
+ifeq ($(CONFIG_DEBUG_NOOPT),y)
+  RUSTFLAGS += -C opt-level=0
+endif
+
+# Special handling for the SIM
+
+ifeq ($(CONFIG_ARCH_SIM),y)
+  ifeq ($(CONFIG_HOST_LINUX),y)
+    ifeq ($(LLVM_ARCHTYPE),x86)
+      # Only for x86 based host or x64 but m32 build
+      RUSTFLAGS += --target i686-unknown-linux-$(LLVM_ABITYPE)
+    else
+      # For other archs, such as aarch64, arm etc
+      RUSTFLAGS += --target $(LLVM_ARCHTYPE)-unknown-linux-$(LLVM_ABITYPE)
+    endif
+  else ifeq ($(CONFIG_HOST_MACOS),y)
+    RUSTFLAGS += --target $(LLVM_ARCHTYPE)-apple-$(LLVM_ABITYPE)
+  endif
+else ifeq ($(CONFIG_ARCH_RISCV),y)
+  # Traget triple is riscv[32|64][isa]-unknown-none-elf
+  RUSTFLAGS += --target $(LLVM_ARCHTYPE)i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)-unknown-none-elf
+else
+  # For arm, but there are some other archs not support yet,
+  # such as xtensa, x86 bare metal, etc.
+  RUSTFLAGS += --target $(LLVM_ARCHTYPE)-none-$(LLVM_ABITYPE)
+endif
