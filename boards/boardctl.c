@@ -31,6 +31,8 @@
 #include <assert.h>
 
 #include <nuttx/board.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 #include <nuttx/drivers/ramdisk.h>
@@ -362,8 +364,10 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_POWEROFF:
         {
+          irqstate_t flags = enter_critical_section();
           reboot_notifier_call_chain(SYS_POWER_OFF, (FAR void *)arg);
           ret = board_power_off((int)arg);
+          leave_critical_section(flags);
         }
         break;
 #endif
@@ -378,8 +382,10 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
       case BOARDIOC_RESET:
         {
+          irqstate_t flags = enter_critical_section();
           reboot_notifier_call_chain(SYS_RESTART, (FAR void *)arg);
           ret = board_reset((int)arg);
+          leave_critical_section(flags);
         }
         break;
 #endif
