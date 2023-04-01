@@ -34,10 +34,6 @@
 
 #ifdef CONFIG_BOARDCTL_RESET
 
-#if CONFIG_BOARD_ASSERT_RESET_VALUE == EXIT_SUCCESS
-#  error "CONFIG_BOARD_ASSERT_RESET_VALUE must not be equal to EXIT_SUCCESS"
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -70,9 +66,6 @@ int board_reset(int status)
     {
       case EXIT_SUCCESS:
         up_shutdown_handler();
-        break;
-
-      case CONFIG_BOARD_ASSERT_RESET_VALUE:
         break;
 
       default:

@@ -67,8 +67,6 @@ int board_reset(int status)
       case EXIT_SUCCESS:
         up_shutdown_handler();
         break;
-      case CONFIG_BOARD_ASSERT_RESET_VALUE:
-        break;
       default:
         break;
     }

@@ -513,7 +513,7 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
       reboot_notifier_call_chain(SYS_HALT, NULL);
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+      board_reset(BOARDIOC_SOFTRESETCAUSE_ASSERT);
 #else
       /* Disable interrupts on this CPU */
 
