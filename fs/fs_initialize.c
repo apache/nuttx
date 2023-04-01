@@ -40,7 +40,7 @@
 static int sync_reboot_handler(FAR struct notifier_block *nb,
                                unsigned long action, FAR void *data)
 {
-  if (action == SYS_DOWN || action == SYS_RESTART)
+  if (action == SYS_POWER_OFF || action == SYS_RESTART)
     {
       sync();
     }
