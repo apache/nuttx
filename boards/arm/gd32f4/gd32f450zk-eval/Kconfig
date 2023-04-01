@@ -112,6 +112,13 @@ config GD32F450ZK_EVAL_GD25_NXFFS
 		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
 		NXFFS is that it can be very slow.
 
+config GD32F450ZK_EVAL_GD25_LITTLEFS
+	bool "Create GD25 serial FLASH LFS file system"
+	depends on FS_LITTLEFS
+	---help---
+		Create the MTD driver for the GD25 and mount the GD25 device as
+		a wear-leveling, LittleFS FLASH file system (LFS).
+
 endchoice # GD25 serial FLASH configuration
 
 config GD32F450ZK_EVAL_AT24_TEST

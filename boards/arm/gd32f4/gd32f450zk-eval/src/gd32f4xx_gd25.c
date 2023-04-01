@@ -122,6 +122,33 @@ int gd32_gd25_automount(int minor)
 
       syslog(LOG_INFO, "INFO: NXFFS volume /mnt/gd25 mount \
             spi flash success: %d\n", ret);
+
+#elif defined(CONFIG_GD32F450ZK_EVAL_GD25_LITTLEFS)
+      /* Initialize to provide LittleFS on the MTD interface */
+
+      ret = register_mtddriver("/dev/spiflash", mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
+          return ret;
+        }
+
+      /* Mount the file system at /mnt/gd25 */
+
+      ret = nx_mount("/dev/spiflash", "/mnt/gd25", "littlefs", 0, NULL);
+      if (ret < 0)
+        {
+          ret = nx_mount("/dev/spiflash", "/mnt/gd25", "littlefs", 0,
+                         "forceformat");
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+              return ret;
+            }
+        }
+
+      syslog(LOG_INFO, "INFO: LittleFS volume /mnt/gd25 mount \
+            spi flash success: %d\n", ret);
 #endif
 
       /* Now we are initialized */
