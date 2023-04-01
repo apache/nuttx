@@ -69,14 +69,14 @@
 #    define FMC_PROGMEM_SECTOR_SIZES     {_K(16), _K(16), _K(16), _K(16)}
 #    define FMC_PROGMEM_SECTOR_NUM       (4)
 #    define FMC_PROGMEM_SECTOR_SADDR     (0x08100000)
-#    define FMC_PROGMEM_SECTOR_EADDR     (0x0813FFFF)
+#    define FMC_PROGMEM_SECTOR_EADDR     (0x0810FFFF)
 
 #  elif defined(CONFIG_GD32F4_FLASH_CONFIG_K)
 
 #    define FMC_PROGMEM_SECTOR_SIZES     {_K(16), _K(16), _K(16), _K(16)}
 #    define FMC_PROGMEM_SECTOR_NUM       (4)
 #    define FMC_PROGMEM_SECTOR_SADDR     (0x08100000)
-#    define FMC_PROGMEM_SECTOR_EADDR     (0x0813FFFF)
+#    define FMC_PROGMEM_SECTOR_EADDR     (0x0810FFFF)
 
 #  endif
 

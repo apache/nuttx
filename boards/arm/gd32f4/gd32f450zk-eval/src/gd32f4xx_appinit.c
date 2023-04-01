@@ -104,7 +104,7 @@ int board_app_initialize(uintptr_t arg)
         }
 #endif
 
-#ifdef CONFIG_FS_NXFFS
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 
 #  ifdef CONFIG_GD32F4_PROGMEM
 
@@ -118,6 +118,7 @@ int board_app_initialize(uintptr_t arg)
           syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
         }
 
+#    if defined(CONFIG_FS_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
       ret = nxffs_initialize(mtd);
@@ -135,7 +136,33 @@ int board_app_initialize(uintptr_t arg)
           syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n",
                   ret);
         }
+#      elif defined(CONFIG_FS_LITTLEFS)
+      /* Initialize to provide LittleFS on the MTD interface */
 
+      ret = register_mtddriver("/dev/fmc", mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
+          return ret;
+        }
+
+      /* Mount the file system at /mnt/fmc */
+
+      ret = nx_mount("/dev/fmc", "/mnt/fmc", "littlefs", 0, NULL);
+      if (ret < 0)
+        {
+          ret = nx_mount("/dev/fmc", "/mnt/fmc", "littlefs", 0,
+                         "forceformat");
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+              return ret;
+            }
+        }
+
+      syslog(LOG_INFO, "INFO: LittleFS volume /mnt/fmc mount " \
+            "on chip flash success: %d\n", ret);
+#    endif
 #  endif
 
 #  ifdef HAVE_GD25
