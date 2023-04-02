@@ -117,8 +117,8 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
- *   USB-related GPIO pins for the STM32F411 Discovery board.
+ *   Called from stm32_boardinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the WeAct Studio MiniF4 board.
  *
  ****************************************************************************/
 
@@ -126,17 +126,9 @@ void stm32_usbinitialize(void)
 {
   /* The OTG FS has an internal soft pull-up.  No GPIO configuration is
    * required
-   */
-
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent
+   * This board has no connections for VBUS, Power On, or Overcurrent
    * GPIOs
    */
-
-#ifdef CONFIG_STM32_OTGFS
-  stm32_configgpio(GPIO_OTGFS_VBUS);
-  stm32_configgpio(GPIO_OTGFS_PWRON);
-  stm32_configgpio(GPIO_OTGFS_OVER);
-#endif
 }
 
 /****************************************************************************
