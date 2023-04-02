@@ -121,6 +121,19 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller);
 struct usbdev_s;
 void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 
+#ifdef CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI
+/****************************************************************************
+ * Name:  stm32_usbulpireset
+ *
+ * Description:
+ *   Reset external ULPI.
+ *
+ ****************************************************************************/
+
+struct usbdev_s;
+void stm32_usbulpireset(struct usbdev_s *dev);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
