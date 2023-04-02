@@ -60,37 +60,6 @@
 #define GPIO_BTN_USER \
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
-/* SPI1 off */
-
-#define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTA | GPIO_PIN7)
-#define GPIO_SPI1_MISO_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTA | GPIO_PIN6)
-#define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTA | GPIO_PIN5)
-
-/* USB OTG FS
- *
- * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
- * PC0  OTG_FS_PowerSwitchOn
- * PD5  OTG_FS_Overcurrent
- */
-
-#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
-                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
-#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
-                           GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN0)
-
-#ifdef CONFIG_USBHOST
-#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|\
-                           GPIO_SPEED_100MHz|GPIO_PUSHPULL|\
-                           GPIO_PORTD|GPIO_PIN5)
-
-#else
-#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
-                           GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN5)
-#endif
-
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
