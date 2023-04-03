@@ -78,7 +78,6 @@ int stm32_mmcsd_initialize(int port, int minor)
   int rv;
 
   stm32_configgpio(GPIO_MMCSD_NCD);   /* Assign SD_DET */
-  stm32_configgpio(GPIO_SPI2_SCK_2);  /* Assign PB13 as SPI2_SCK */
   stm32_configgpio(GPIO_MMCSD_NSS);   /* Assign CS */
   stm32_gpiowrite(GPIO_MMCSD_NSS, 1); /* Ensure the CS is inactive */
 
