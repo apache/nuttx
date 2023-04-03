@@ -493,10 +493,6 @@ static int esp_attach(uart_dev_t *dev)
 
   priv->cpuint = esp_setup_irq(priv->source, priv->int_pri,
                                ESP_IRQ_TRIGGER_LEVEL);
-  if (priv->cpuint < 0)
-    {
-      return priv->cpuint;
-    }
 
   /* Attach and enable the IRQ */
 

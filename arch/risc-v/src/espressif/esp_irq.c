@@ -422,8 +422,7 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
  *   type          - Interrupt trigger type.
  *
  * Returned Value:
- *   The allocated CPU interrupt on success, a negated errno value on
- *   failure.
+ *   Allocated CPU interrupt.
  *
  ****************************************************************************/
 
@@ -449,11 +448,10 @@ int esp_setup_irq(int source, irq_priority_t priority, irq_trigger_t type)
   cpuint = esp_cpuint_alloc(irq);
   if (cpuint < 0)
     {
-      irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
+      _alert("Unable to allocate CPU interrupt for source=%d\n",
              priority, type);
-      leave_critical_section(irqstate);
 
-      return cpuint;
+      PANIC();
     }
 
   esp_route_intr(source, cpuint, priority, type);
