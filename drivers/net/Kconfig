@@ -73,14 +73,6 @@ config TELNET_MAXLCLIENTS
 		number.  This limitation is somewhat artificial since it only
 		determines the size of a fixed-size, preallocated, internal array.
 
-config TELNET_CHARACTER_MODE
-	bool "Character mode"
-	default n
-	---help---
-		The Telnet daemon works in character mode. In this case, the daemon
-		will echo a character which telnet client sent. By default, it works
-		in line mode.
-
 config TELNET_SUPPORT_NAWS
 	bool "Support NAWS (Negotiate About Window Size)"
 	default n
