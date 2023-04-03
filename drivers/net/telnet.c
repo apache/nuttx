@@ -311,18 +311,11 @@ static void telnet_getchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 {
   register int index;
 
-#ifndef CONFIG_TELNET_CHARACTER_MODE
-  /* Ignore carriage returns */
+  /* Add all characters to the destination buffer */
 
-  if (ch != TELNET_CR)
-#endif
-    {
-      /* Add all other characters to the destination buffer */
-
-      index = *nread;
-      dest[index++] = ch;
-      *nread = index;
-    }
+  index = *nread;
+  dest[index++] = ch;
+  *nread = index;
 }
 
 /****************************************************************************
@@ -420,25 +413,12 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
             break;
 
           case STATE_DO:
-#ifdef CONFIG_TELNET_CHARACTER_MODE
-            if (ch == TELNET_SGA || ch == TELNET_ECHO)
-              {
-                /* If it received 'ECHO' or 'Suppress Go Ahead', then do
-                 * nothing.
-                 */
-              }
-            else
-              {
-                /* Reply with a WONT */
 
-                telnet_sendopt(priv, TELNET_WONT, ch);
-                ninfo("WONT: 0x%02X\n", ch);
-              }
-#else
-            /* Reply with a WONT */
+            /* FIXME: Handle ECHO and SGA setting here
+             * Used to disable ECHO password in login nsh via telnet
+             */
 
             telnet_sendopt(priv, TELNET_WONT, ch);
-#endif
             priv->td_state = STATE_NORMAL;
             break;
 
@@ -999,11 +979,6 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   telnet_sendopt(priv, TELNET_DO, TELNET_NAWS);
-#endif
-
-#ifdef CONFIG_TELNET_CHARACTER_MODE
-  telnet_sendopt(priv, TELNET_WILL, TELNET_SGA);
-  telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
 #endif
 
   /* Save ourself in the list of Telnet client threads */
