@@ -88,6 +88,10 @@ as well as 5k pull-downs on USB-C CC1/CC2 pins (not affecting USB-A adapters).
 Because of this we are not considering USBOTG-FS Host configurations and
 do not map OTG_VBUS, OTG_ID pins to FS PHY, also no OVER/PWRON GPIOs.
 
+If using USB and USART1 simultaneously, make sure to check
+CONFIG_OTG_ID_GPIO_DISABLE, else stm32_otgfsdev driver code remaps PA10 pin from
+USART1_RX to OTG_ID, and you'll lose keyboard/console input!
+
 SPI NOR Flash
 =============
 
