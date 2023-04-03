@@ -52,6 +52,7 @@
 #include "riscv_internal.h"
 #include "mpfs_memorymap.h"
 #include "mpfs_ethernet.h"
+#include "mpfs_dsn.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_MPFS_ETHMAC)
 
@@ -1495,7 +1496,7 @@ static int mpfs_ifup(struct net_driver_s *dev)
       return ret;
     }
 
-  /* Set the MAC address (should have been configured while we were down) */
+  /* Set the MAC address */
 
   mpfs_macaddress(priv);
 
@@ -3565,6 +3566,16 @@ int mpfs_ethinitialize(int intf)
   priv->queue[1].dma_rxbuf_size = (uint32_t *)(base + DMA_RXBUF_SIZE_Q1);
   priv->queue[2].dma_rxbuf_size = (uint32_t *)(base + DMA_RXBUF_SIZE_Q2);
   priv->queue[3].dma_rxbuf_size = (uint32_t *)(base + DMA_RXBUF_SIZE_Q3);
+
+  /* Generate a locally administrated MAC address for this ethernet if */
+
+  /* Set first byte to 0x02 or 0x06 acc. to the intf */
+
+  priv->dev.d_mac.ether.ether_addr_octet[0] = 0x02 | ((intf & 1) << 2);
+
+  /* Read the next 5 bytes from the S/N */
+
+  mpfs_read_dsn(&priv->dev.d_mac.ether.ether_addr_octet[1], 5);
 
   /* MPU hack for ETH DMA if not enabled by bootloader */
 
