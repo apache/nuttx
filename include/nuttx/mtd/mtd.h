@@ -723,6 +723,40 @@ int rpmsgmtd_register(FAR const char *remotecpu, FAR const char *remotepath,
 int rpmsgmtd_server_init(void);
 #endif
 
+/****************************************************************************
+ * Name: dhara_initialize
+ *
+ * Description:
+ *   Initialize to provide a block driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   minor - The minor device number.  The MTD block device will be
+ *           registered as as /dev/mtdblockN where N is the minor number.
+ *   mtd   - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_DHARA
+int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd);
+#endif
+
+/****************************************************************************
+ * Name: dhara_initialize_by_path
+ *
+ * Description:
+ *   Initialize to provide a block driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   path - The block device path.
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_DHARA
+int dhara_initialize_by_path(FAR const char *path,
+                             FAR struct mtd_dev_s *mtd);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
