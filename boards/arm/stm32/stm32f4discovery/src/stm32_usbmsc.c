@@ -63,7 +63,7 @@ int board_usbmsc_initialize(int port)
    */
 
 #ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
+  return stm32_mmcsd_initialize(2, CONFIG_SYSTEM_USBMSC_DEVMINOR1);
 #else
   return OK;
 #endif
