@@ -30,6 +30,14 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
   CSRCS += stm32_autoleds.c
 endif
 
+ifeq ($(CONFIG_SPI),y)
+  CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_MTD_W25),y)
+  CSRCS += stm32_w25.c
+endif
+
 ifeq ($(CONFIG_STM32_OTGFS),y)
   CSRCS += stm32_usb.c
 endif
