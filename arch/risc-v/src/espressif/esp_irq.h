@@ -115,8 +115,7 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
  *   type          - Interrupt trigger type.
  *
  * Returned Value:
- *   The allocated CPU interrupt on success, a negated errno value on
- *   failure.
+ *   Allocated CPU interrupt.
  *
  ****************************************************************************/
 
