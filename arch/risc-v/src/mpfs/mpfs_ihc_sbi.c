@@ -79,6 +79,7 @@ static uint32_t g_connected_harts_c;
  *             mhartid base on the context, not necessarily the actual
  *             mhartid.
  *   is_ack  - Boolean that is set true if an ack has been found
+ *   is_mp   - Boolean that is set true if a msg is present also
  *
  * Returned Value:
  *   Remote hart id
@@ -86,7 +87,8 @@ static uint32_t g_connected_harts_c;
  ****************************************************************************/
 
 static uint32_t mpfs_ihc_sbi_parse_incoming_hartid(uint32_t mhartid,
-                                                   bool *is_ack)
+                                                   bool *is_ack,
+                                                   bool *is_mp)
 {
   uint32_t hart_id             = 0;
   uint32_t return_hart_id      = UNDEFINED_HART_ID;
@@ -112,6 +114,16 @@ static uint32_t mpfs_ihc_sbi_parse_incoming_hartid(uint32_t mhartid,
                 {
                   return_hart_id = hart_id;
                   *is_ack = true;
+
+                  /* We might also have a msg present */
+
+                  test_int = (1 << (hart_id * 2));
+
+                  if (msg_avail & test_int)
+                    {
+                      *is_mp = true;
+                    }
+
                   break;
                 }
             }
@@ -124,6 +136,7 @@ static uint32_t mpfs_ihc_sbi_parse_incoming_hartid(uint32_t mhartid,
                 {
                   return_hart_id = hart_id;
                   *is_ack = false;
+                  *is_mp = true;
                   break;
                 }
             }
@@ -231,7 +244,6 @@ static uint32_t mpfs_ihc_sbi_context_to_local_hart_id(ihc_channel_t channel)
     }
 
   DEBUGASSERT(hart < MPFS_NUM_HARTS);
-
   return hart;
 }
 
@@ -259,7 +271,8 @@ static uint32_t mpfs_ihc_sbi_context_to_local_hart_id(ihc_channel_t channel)
 static void mpfs_ihc_sbi_message_present_handler(uint32_t *message,
                                                  uint32_t mhartid,
                                                  uint32_t rhartid,
-                                                 bool is_ack)
+                                                 bool is_ack,
+                                                 bool is_mp)
 {
   struct ihc_sbi_rx_msg_s *msg;
   uintptr_t message_ihc     = (uintptr_t)MPFS_IHC_MSG_IN(mhartid, rhartid);
@@ -267,15 +280,20 @@ static void mpfs_ihc_sbi_message_present_handler(uint32_t *message,
 
   msg = (struct ihc_sbi_rx_msg_s *)message;
 
-  if (is_ack)
+  if (is_ack && !is_mp)
     {
       msg->irq_type = ACK_IRQ;
 
       /* msg->ihc_msg content doesn't matter here */
     }
-  else
+  else if (is_mp && !is_ack)
     {
       msg->irq_type = MP_IRQ;
+      msg->ihc_msg = *(struct mpfs_ihc_msg_s *)message_ihc;
+    }
+  else
+    {
+      msg->irq_type = ACK_IRQ | MP_IRQ;
       msg->ihc_msg = *(struct mpfs_ihc_msg_s *)message_ihc;
     }
 
@@ -302,11 +320,9 @@ static void mpfs_ihc_sbi_message_present_handler(uint32_t *message,
  ****************************************************************************/
 
 static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
-                                    bool is_ack, uint32_t *msg)
+                                    bool is_ack, bool is_mp, uint32_t *msg)
 {
-  uint32_t ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
-
-  if (is_ack)
+  if (is_ack && !is_mp)
     {
       if (mhartid == CONTEXTB_HARTID)
         {
@@ -318,10 +334,14 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
 
           DEBUGASSERT(msg != NULL);
           mpfs_ihc_sbi_message_present_handler(msg, mhartid, rhartid,
-                                               is_ack);
+                                               is_ack, is_mp);
+
+          /* Clear the ack */
+
+          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), ACK_CLR, 0);
         }
     }
-  else if (MP_MESSAGE_PRESENT == (ctrl_reg & MP_MASK))
+  else if (is_mp && !is_ack)
     {
       /* Check if we have a message */
 
@@ -335,24 +355,25 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
 
           DEBUGASSERT(msg != NULL);
           mpfs_ihc_sbi_message_present_handler(msg, mhartid, rhartid,
-                                               is_ack);
+                                               is_ack, is_mp);
         }
 
       /* Set MP to 0. Note this generates an interrupt on the other hart
        * if it has RMPIE bit set in the control register
        */
 
-      volatile uint32_t temp = getreg32(MPFS_IHC_CTRL(mhartid, rhartid)) &
-                                        ~MP_MASK;
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, ACK_INT);
+    }
+  else if (is_ack && is_mp)
+    {
+      DEBUGASSERT(msg != NULL);
+      mpfs_ihc_sbi_message_present_handler(msg, mhartid, rhartid,
+                                           is_ack, is_mp);
 
-      /* Check if ACKIE_EN is set */
+      /* Clear the ack and mp */
 
-      if (temp & ACKIE_EN)
-        {
-          temp |= ACK_INT;
-        }
-
-      putreg32(temp, MPFS_IHC_CTRL(mhartid, rhartid));
+      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), ACK_CLR | MP_MASK,
+                  ACK_INT);
     }
 }
 
@@ -377,22 +398,16 @@ void mpfs_ihc_sbi_message_present_indirect_isr(ihc_channel_t channel,
                                                uint32_t *msg)
 {
   bool is_ack;
+  bool is_mp = false;
   uint32_t mhartid     = mpfs_ihc_sbi_context_to_local_hart_id(channel);
   uint32_t origin_hart = mpfs_ihc_sbi_parse_incoming_hartid(mhartid,
-                                                            &is_ack);
-
+                                                            &is_ack,
+                                                            &is_mp);
   if (origin_hart != UNDEFINED_HART_ID)
     {
       /* Process incoming packet */
 
-      mpfs_ihc_sbi_rx_message(origin_hart, mhartid, is_ack, msg);
-
-      if (is_ack)
-        {
-          /* Clear the ack */
-
-          modifyreg32(MPFS_IHC_CTRL(mhartid, origin_hart), ACK_CLR, 0);
-        }
+      mpfs_ihc_sbi_rx_message(origin_hart, mhartid, is_ack, is_mp, msg);
     }
 }
 
@@ -624,12 +639,27 @@ int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
         break;
 
       case SBI_EXT_IHC_SEND:
+        /* Send and wait for the ACK: disable all incoming traffic
+         * meanwhile with the SW flow control.
+         */
+
+        modifyreg32(MPFS_IHC_INT_EN(0), 0, 1);  /* Flow contol on */
         result = mpfs_ihc_sbi_tx_message(remote_channel, message_ptr);
         break;
 
       case SBI_EXT_IHC_RECEIVE:
         mpfs_ihc_sbi_message_present_indirect_isr(remote_channel,
                                                   message_ptr);
+
+        /* ACK_IRQ indicates the end of the IHC_SEND transaction */
+
+        struct ihc_sbi_rx_msg_s *msg;
+        msg = (struct ihc_sbi_rx_msg_s *)message_ptr;
+
+        if (msg->irq_type & ACK_IRQ)
+          {
+            modifyreg32(MPFS_IHC_INT_EN(0), 1, 0);  /* Flow contol off */
+          }
         break;
 
       default:
