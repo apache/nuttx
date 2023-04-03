@@ -164,6 +164,31 @@ CSRCS += smart.c
 endif
 endif
 
+ifeq ($(CONFIG_MTD_DHARA),y)
+
+master.zip:
+	$(call DOWNLOAD,https://github.com/dlbeer/dhara/archive/refs/heads,master.zip)
+
+.dharaunpack: master.zip
+	$(Q) unzip master.zip -d mtd/
+	$(Q) mv mtd/dhara-master mtd/dhara
+	$(Q) touch mtd/dhara/.dharaunpack
+
+ifeq ($(wildcard mtd/dhara/.git),)
+context:: .dharaunpack
+
+distclean::
+	$(call DELFILE, master.zip)
+	$(call DELDIR, mtd/dhara)
+endif
+
+CSRCS += dhara.c
+CSRCS += mtd/dhara/dhara/map.c
+CSRCS += mtd/dhara/dhara/error.c
+CSRCS += mtd/dhara/dhara/journal.c
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)dhara
+endif
+
 # Include MTD driver support
 
 DEPPATH += --dep-path mtd
