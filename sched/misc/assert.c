@@ -423,20 +423,18 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 {
   FAR struct tcb_s *rtcb = running_task();
   struct utsname name;
-  bool fatal = false;
+  bool fatal = true;
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
   syslog_flush();
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
-  if (up_interrupt_context() ||
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if (!up_interrupt_context() &&
+      (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      fatal = true;
+      fatal = false;
     }
-#else
-  fatal = true;
 #endif
 
   panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK, rtcb);
