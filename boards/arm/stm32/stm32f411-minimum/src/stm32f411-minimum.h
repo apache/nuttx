@@ -60,6 +60,12 @@
 #define GPIO_BTN_USER \
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
+/* SPI chip selects */
+
+#define FLASH_SPI1_CS \
+  (GPIO_PORTA | GPIO_PIN4 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_FLOAT | \
+   GPIO_SPEED_50MHz)
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -94,11 +100,33 @@ extern struct spi_dev_s *g_spi2;
 void stm32_spidev_initialize(void);
 
 /****************************************************************************
+ * Name: stm32_mmcsd_initialize
+ *
+ * Description:
+ *   Initializes SPI-based SD card
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD
+int stm32_mmcsd_initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: stm32_w25initialize
+ *
+ * Description:
+ *   Called to initialize Winbond W25 memory
+ *
+ ****************************************************************************/
+
+int stm32_w25initialize(int minor);
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
  *   Called from stm32_boardinitialize very early in initialization to setup
- *   USB-related GPIO pins for the STM32F4Discovery board.
+ *   USB-related GPIO pins for the WeAct Studio MiniF4 board.
  *
  ****************************************************************************/
 

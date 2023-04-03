@@ -37,6 +37,32 @@
 #include "stm32f411-minimum.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Checking needed by W25 Flash */
+
+#define HAVE_W25      1
+
+/* Can't support the W25 device if it SPI1 or W25 support is not enabled */
+
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_W25)
+#  undef HAVE_W25
+#endif
+
+/* Can't support W25 features if mountpoints are disabled */
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  undef HAVE_W25
+#endif
+
+/* Default W25 minor number */
+
+#if defined(HAVE_W25) && !defined(CONFIG_NSH_W25MINOR)
+#  define CONFIG_NSH_W25MINOR 0
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -67,6 +93,18 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       uerr("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_W25
+  /* Initialize and register the W25 FLASH file system. */
+
+  ret = stm32_w25initialize(CONFIG_NSH_W25MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize W25 minor %d: %d\n",
+             CONFIG_NSH_W25MINOR, ret);
       return ret;
     }
 #endif
