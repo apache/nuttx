@@ -410,7 +410,7 @@ struct boardioc_boot_info_s
 };
 #endif
 
-#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+#if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_RESET_CAUSE)
 /* Describes the reason of last reset */
 
 enum boardioc_reset_cause_e
