@@ -860,7 +860,9 @@ static int litex_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 
   /* flush CPU d-cache */
 
+#ifndef CONFIG_LITEX_COHERENT_DMA
   up_invalidate_dcache_all();
+#endif
 
   putreg32(0, LITEX_SDBLOCK2MEM_DMA_ENABLE);
   putreg32((uintptr_t)buffer >> 32, LITEX_SDBLOCK2MEM_DMA_BASE);
@@ -903,7 +905,9 @@ static int litex_sendsetup(struct sdio_dev_s *dev,
 
   /* flush CPU d-cache */
 
+#ifndef CONFIG_LITEX_COHERENT_DMA
   up_invalidate_dcache_all();
+#endif
 
   putreg32(0, LITEX_SDMEM2BLOCK_DMA_ENABLE);
   putreg32((uintptr_t)buffer >> 32, LITEX_SDMEM2BLOCK_DMA_BASE);

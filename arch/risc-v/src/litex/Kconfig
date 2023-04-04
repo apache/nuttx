@@ -11,6 +11,13 @@ config LITEX_SYS_CORE_FREQ_HZ
 	---help---
 		This value should match default frequency of the FPGA fabric system clock.
 
+config LITEX_COHERENT_DMA
+	bool "Litex Coherent DMA"
+	default n
+	---help---
+		Select this option if the soft core was build with coherent DMA. When selected,
+		dcache is considered coherent and not invalidated before DMA transfers.
+
 menu "LITEX Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
