@@ -303,8 +303,8 @@
 
 /* The additional sensor open flags */
 
-#define SENSOR_REMOTE                               (1 << 31)
-#define SENSOR_PERSIST                              (1 << 30)
+#define SENSOR_REMOTE                               (1u << 31)
+#define SENSOR_PERSIST                              (1u << 30)
 
 /****************************************************************************
  * Inline Functions
