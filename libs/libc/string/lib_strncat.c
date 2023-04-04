@@ -30,7 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRNCAT
+#ifndef CONFIG_LIBC_ARCH_STRNCAT
 #undef strncat /* See mm/README.txt */
 FAR char *strncat(FAR char *dest, FAR const char *src, size_t n)
 {
