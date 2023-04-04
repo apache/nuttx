@@ -81,8 +81,10 @@ struct spi_slave_driver_s
 
   /* Transmit buffer */
 
-  uint8_t tx_buffer[CONFIG_SPI_SLAVE_DRIVER_BUFFER_SIZE];
-  uint32_t tx_length;         /* Location of next TX value */
+#ifdef CONFIG_SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
+  uint8_t tx_buffer[CONFIG_SPI_SLAVE_DRIVER_COLORIZE_NUM_BYTES];
+#endif
+
   mutex_t lock;               /* Mutual exclusion */
   int16_t crefs;              /* Number of open references */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -383,8 +385,8 @@ static ssize_t spi_slave_write(FAR struct file *filep,
 {
   FAR struct inode *inode;
   FAR struct spi_slave_driver_s *priv;
-  size_t num_words;
   size_t enqueued_bytes;
+  int ret;
 
   spiinfo("filep=%p buffer=%p buflen=%zu\n", filep, buffer, buflen);
 
@@ -393,16 +395,42 @@ static ssize_t spi_slave_write(FAR struct file *filep,
   inode = filep->f_inode;
   priv = (FAR struct spi_slave_driver_s *)inode->i_private;
 
-  memcpy(priv->tx_buffer, buffer, buflen);
-  priv->tx_length = buflen;
-  num_words = BYTES2WORDS(priv->tx_length);
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      spierr("Failed to get exclusive access: %d\n", ret);
+      return ret;
+    }
+
+  if (SPIS_CTRLR_QFULL(priv->ctrlr))
+    {
+      nxmutex_unlock(&priv->lock);
+      if (filep->f_oflags & O_NONBLOCK)
+        {
+          return -EAGAIN;
+        }
+
+      ret = nxsem_wait(&priv->wait);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = nxmutex_lock(&priv->lock);
+      if (ret < 0)
+        {
+          spierr("Failed to get exclusive access: %d\n", ret);
+          return ret;
+        }
+    }
 
   enqueued_bytes = WORDS2BYTES(SPIS_CTRLR_ENQUEUE(priv->ctrlr,
-                                                  priv->tx_buffer,
-                                                  num_words));
+                                                  buffer,
+                                                  BYTES2WORDS(buflen)));
 
   spiinfo("%zu bytes enqueued\n", enqueued_bytes);
 
+  nxmutex_unlock(&priv->lock);
   return (ssize_t)enqueued_bytes;
 }
 
@@ -446,12 +474,12 @@ static int spi_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
       SPIS_CTRLR_QPOLL(priv->ctrlr);
       if (priv->rx_length > 0)
         {
-          eventset |= POLLOUT;
+          eventset |= POLLIN;
         }
 
       if (!SPIS_CTRLR_QFULL(priv->ctrlr))
         {
-          eventset |= POLLIN;
+          eventset |= POLLOUT;
         }
 
       poll_notify(&priv->fds, 1, eventset);
@@ -610,9 +638,13 @@ static size_t spi_slave_getdata(FAR struct spi_slave_dev_s *dev,
 {
   FAR struct spi_slave_driver_s *priv = (FAR struct spi_slave_driver_s *)dev;
 
+#ifdef CONFIG_SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
   *data = priv->tx_buffer;
-
-  return BYTES2WORDS(priv->tx_length);
+  return BYTES2WORDS(CONFIG_SPI_SLAVE_DRIVER_COLORIZE_NUM_BYTES);
+#else
+  *data = NULL;
+  return 0;
+#endif
 }
 
 /****************************************************************************
@@ -673,25 +705,24 @@ static void spi_slave_notify(FAR struct spi_slave_dev_s *dev,
                              spi_slave_state_t state)
 {
   FAR struct spi_slave_driver_s *priv = (FAR struct spi_slave_driver_s *)dev;
+  int semcnt;
 
   if (state == SPISLAVE_TX_COMPLETE)
     {
-      poll_notify(&priv->fds, 1, POLLIN);
+      poll_notify(&priv->fds, 1, POLLOUT);
     }
   else if (state == SPISLAVE_RX_COMPLETE)
     {
-      int semcnt;
-
-      poll_notify(&priv->fds, 1, POLLOUT);
-      nxsem_get_value(&priv->wait, &semcnt);
-      if (semcnt < 1)
-        {
-          nxsem_post(&priv->wait);
-        }
+      poll_notify(&priv->fds, 1, POLLIN);
     }
   else
     {
-      spiinfo("sdev: %p transfer failed\n", dev);
+      poll_notify(&priv->fds, 1, POLLERR);
+    }
+
+  while (nxsem_get_value(&priv->wait, &semcnt) == 0 && semcnt <= 0)
+    {
+      nxsem_post(&priv->wait);
     }
 }
 
@@ -740,11 +771,12 @@ int spi_slave_register(FAR struct spi_slave_ctrlr_s *ctrlr, int bus)
   priv->dev.ops = &g_spisdev_ops;
   priv->ctrlr = ctrlr;
 
+  nxsem_init(&priv->wait, 0, 0);
+
 #ifdef CONFIG_SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
   memset(priv->tx_buffer,
          CONFIG_SPI_SLAVE_DRIVER_COLORIZE_PATTERN,
          CONFIG_SPI_SLAVE_DRIVER_COLORIZE_NUM_BYTES);
-  priv->tx_length = CONFIG_SPI_SLAVE_DRIVER_COLORIZE_NUM_BYTES;
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -761,6 +793,7 @@ int spi_slave_register(FAR struct spi_slave_ctrlr_s *ctrlr, int bus)
   if (ret < 0)
     {
       spierr("ERROR: Failed to register driver: %d\n", ret);
+      nxsem_destroy(&priv->wait);
       nxmutex_destroy(&priv->lock);
       kmm_free(priv);
     }
