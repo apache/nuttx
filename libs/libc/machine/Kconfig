@@ -112,6 +112,22 @@ config LIBC_ARCH_STRRCHR
 	bool
 	default n
 
+config LIBC_ARCH_STRCAT
+	bool
+	default n
+
+config LIBC_ARCH_STRNCAT
+	bool
+	default n
+
+config LIBC_ARCH_STRCASECMP
+	bool
+	default n
+
+config LIBC_ARCH_STRNCASECMP
+	bool
+	default n
+
 config LIBC_ARCH_ELF
 	bool
 	default n

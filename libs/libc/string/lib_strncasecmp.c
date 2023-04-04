@@ -32,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_STRNCASECMP
+#ifndef CONFIG_LIBC_ARCH_STRNCASECMP
 #undef strncasecmp /* See mm/README.txt */
 int strncasecmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
