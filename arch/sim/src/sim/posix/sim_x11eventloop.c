@@ -103,9 +103,9 @@ void sim_x11events(void)
 {
   XEvent event;
 
-  /* Check if there are any pending, queue X11 events. */
+  /* Dequeue any pending X11 events. */
 
-  if (g_display && XPending(g_display) > 0)
+  while (g_display && XPending(g_display) > 0)
     {
       /* Yes, get the event (this should not block since we know there are
        * pending events)
