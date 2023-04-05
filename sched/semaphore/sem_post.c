@@ -78,12 +78,6 @@ int nxsem_post(FAR sem_t *sem)
 
   DEBUGASSERT(sem != NULL);
 
-  /* If priority inheritance is enabled assure that the calling thread is
-   * the same as the holder thread.
-   */
-
-  DEBUGASSERT(nxsem_checkholder(sem));
-
   /* The following operations must be performed with interrupts
    * disabled because sem_post() may be called from an interrupt
    * handler.
