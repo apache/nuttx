@@ -95,6 +95,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/uart_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/uart_hal_iram.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/$(CHIP_SERIES)/clk_tree_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/$(CHIP_SERIES)/efuse_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/$(CHIP_SERIES)/lp_timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/hal/$(CHIP_SERIES)/modem_clock_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/log/log.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_UNPACK)/components/log/log_noos.c
