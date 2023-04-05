@@ -93,8 +93,8 @@
 #  endif
 #endif
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
+#if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
+#  error "Callback support requires CONFIG_SCHED_WORKQUEUE and CONFIG_SCHED_HPWORK"
 #endif
 
 #ifdef CONFIG_STM32L4_SDMMC1
