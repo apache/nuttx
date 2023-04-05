@@ -60,6 +60,10 @@ ifeq ($(CONFIG_ONESHOT),y)
 CHIP_CSRCS += esp_oneshot.c
 endif
 
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += esp_rtc.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
 CHIP_CSRCS += esp_hr_timer.c
 endif

@@ -217,8 +217,8 @@ config ESPRESSIF_UART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESPRESSIF_HR_TIMER
-	bool "High-Resolution Timer"
-	default n
+	bool
+	default y if RTC_DRIVER
 	---help---
 		A high-resolution hardware timer for supporting the management of
 		kernel events.

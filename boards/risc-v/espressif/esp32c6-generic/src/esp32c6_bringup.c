@@ -50,6 +50,10 @@
 #  include "esp_hr_timer.h"
 #endif
 
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp_rtc.h"
+#endif
+
 #include "esp32c6-generic.h"
 
 /****************************************************************************
@@ -142,6 +146,16 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize HR timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Initialize the RTC driver */
+
+  ret = esp_rtc_driverinit();
+  if (ret < 0)
+    {
+      _err("Failed to initialize the RTC driver: %d\n", ret);
     }
 #endif
 
