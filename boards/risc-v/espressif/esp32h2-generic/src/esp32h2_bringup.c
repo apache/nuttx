@@ -46,10 +46,6 @@
 #  include "esp_oneshot.h"
 #endif
 
-#ifdef CONFIG_ESPRESSIF_HR_TIMER
-#  include "esp_hr_timer.h"
-#endif
-
 #ifdef CONFIG_RTC_DRIVER
 #  include "esp_rtc.h"
 #endif
@@ -138,14 +134,6 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize Oneshot Timer: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_ESPRESSIF_HR_TIMER
-  ret = esp_hr_timer_init();
-  if (ret < 0)
-    {
-      _err("Failed to initialize HR timer: %d\n", ret);
     }
 #endif
 
