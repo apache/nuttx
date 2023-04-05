@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 #include "esp_irq.h"
 #include "esp_hr_timer.h"
@@ -74,6 +75,7 @@ struct esp_hr_timer_context_s
   sem_t toutsem;
   struct list_node runlist;
   struct list_node toutlist;
+  spinlock_t lock;
   systimer_hal_context_t hal;
 };
 
@@ -125,7 +127,7 @@ static int esp_hr_timer_thread(int argc, char *argv[])
 
       VERIFY(nxsem_wait_uninterruptible(&priv->toutsem));
 
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
       /* Process all the timers in list */
 
@@ -151,7 +153,7 @@ static int esp_hr_timer_thread(int argc, char *argv[])
 
           timer->state = HR_TIMER_IDLE;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&priv->lock, flags);
 
           if (raw_state == HR_TIMER_TIMEOUT)
             {
@@ -164,7 +166,7 @@ static int esp_hr_timer_thread(int argc, char *argv[])
 
           /* Enter critical section for next scanning list */
 
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave(&priv->lock);
 
           if (raw_state == HR_TIMER_TIMEOUT)
             {
@@ -177,7 +179,7 @@ static int esp_hr_timer_thread(int argc, char *argv[])
             }
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
   return 0;
@@ -211,7 +213,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
 
   systimer_ll_clear_alarm_int(priv->hal.dev, SYSTIMER_ALARM_ESPTIMER);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Check if there is a timer running */
 
@@ -281,7 +283,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -356,7 +358,7 @@ void esp_hr_timer_start(struct esp_hr_timer_s *timer,
   bool inserted = false;
   uint64_t counter;
   struct esp_hr_timer_s *p;
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   /* Only idle timer can be started */
 
@@ -416,7 +418,7 @@ void esp_hr_timer_start(struct esp_hr_timer_s *timer,
                                     timer->alarm);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -437,7 +439,7 @@ void esp_hr_timer_stop(struct esp_hr_timer_s *timer)
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   /* "start" function can set the timer's repeat flag, and "stop" function
    * should remove this flag.
@@ -489,7 +491,7 @@ void esp_hr_timer_stop(struct esp_hr_timer_s *timer)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -513,7 +515,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
 
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (timer->state == HR_TIMER_READY)
     {
@@ -540,7 +542,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
     }
 
 exit:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -584,7 +586,7 @@ uint64_t IRAM_ATTR esp_hr_timer_get_alarm(void)
   uint64_t counter;
   uint64_t alarm_value;
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   counter = systimer_hal_get_time(&priv->hal, SYSTIMER_COUNTER_ESPTIMER);
   alarm_value = systimer_hal_get_alarm_value(&priv->hal,
@@ -600,7 +602,7 @@ uint64_t IRAM_ATTR esp_hr_timer_get_alarm(void)
       alarm_value -= counter;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return alarm_value;
 }
@@ -623,10 +625,10 @@ void IRAM_ATTR esp_hr_timer_calibration(uint64_t time_us)
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
   systimer_hal_counter_value_advance(&priv->hal, SYSTIMER_COUNTER_ESPTIMER,
                                      time_us);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -666,7 +668,7 @@ int esp_hr_timer_init(void)
   priv->pid = (pid_t)pid;
 
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
       periph_module_enable(PERIPH_SYSTIMER_MODULE);
       systimer_hal_init(&priv->hal);
@@ -697,7 +699,7 @@ int esp_hr_timer_init(void)
       systimer_hal_connect_alarm_counter(&priv->hal, SYSTIMER_ALARM_ESPTIMER,
                                          SYSTIMER_COUNTER_ESPTIMER);
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
   esp_setup_irq(SYSTIMER_TARGET2_EDGE_INTR_SOURCE,
