@@ -5262,7 +5262,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTG_GAHBCFG_TXFELVL, STM32_OTG_GAHBCFG);
 
-#ifdef CONFIG_STM32H7_OTGHS_NO_ULPI
+#if defined(CONFIG_STM32H7_OTGHS_NO_ULPI) || defined(CONFIG_STM32H7_OTGFS)
   /* Full speed serial transceiver select */
 
   regval = stm32_getreg(STM32_OTG_GUSBCFG);
@@ -5313,7 +5313,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval = stm32_getreg(STM32_OTG_GCCFG);
 
-#ifdef CONFIG_STM32H7_OTGHS_NO_ULPI
+#if defined(CONFIG_STM32H7_OTGHS_NO_ULPI) || defined(CONFIG_STM32H7_OTGFS)
   /* Enable USB FS transceiver */
 
   regval |= OTG_GCCFG_PWRDWN;
