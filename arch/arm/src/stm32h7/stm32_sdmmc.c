@@ -138,8 +138,8 @@
 #  define SRAM4_END     (SRAM4_START + STM32H7_SRAM4_SIZE)
 #endif
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
+#if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
+#  error "Callback support requires CONFIG_SCHED_WORKQUEUE and CONFIG_SCHED_HPWORK"
 #endif
 
 #undef HAVE_SDMMC_SDIO_MODE
