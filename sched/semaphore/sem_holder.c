@@ -28,7 +28,6 @@
 #include <assert.h>
 #include <debug.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -1058,63 +1057,5 @@ void nxsem_release_all(FAR struct tcb_s *htcb)
       sem->semcount++;
     }
 }
-
-/****************************************************************************
- * Name: nxsem_isholder
- *
- * Assertion helper for sem_post().  If priority inheritance is enabled
- * assure that the calling thread is the same as the holder thread.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_ASSERTIONS
-bool nxsem_checkholder(FAR sem_t *sem)
-{
-  FAR struct tcb_s *htcb;
-  pid_t tid;
-
-  /* Is priorty inheritance selected? */
-
-  if ((sem->flags & SEM_PRIO_MASK) != SEM_PRIO_INHERIT)
-    {
-      return true;
-    }
-
-  /* Get the thread ID.  Skip thread ID 0; that is the IDLE thread which
-   * normally does not take semaphores but may do so initially as part of
-   * OS bringup.
-   */
-
-  tid = gettid();
-  if (tid == 0)
-    {
-      return true;
-    }
-
-  /* A semaphore with priority inheritance enabled cannot be called from an
-   * interrupt handler.  There is no valid holder information available in
-   * the interrupt context.
-   */
-
-  if (up_interrupt_context())
-    {
-      return false;
-    }
-
-  /* Get the TCB associated with this thread */
-
-  htcb = nxsched_get_tcb(tid);
-  if (htcb == NULL)
-    {
-      return false;
-    }
-
-  /* Return FALSE is the thread of this TCB is not a holder of this
-   * semaphore.
-   */
-
-  return nxsem_findholder(sem, htcb) != NULL;
-}
-#endif /* CONFIG_DEBUG_ASSERTIONS */
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */
