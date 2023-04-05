@@ -648,19 +648,30 @@ void IRAM_ATTR esp_hr_timer_calibration(uint64_t time_us)
 
 int esp_hr_timer_init(void)
 {
-  struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+  static bool g_hr_timer_initialized = false;
+  struct esp_hr_timer_context_s *priv;
+  int pid;
 
-  int pid = kthread_create(CONFIG_ESPRESSIF_HR_TIMER_TASK_NAME,
-                           CONFIG_ESPRESSIF_HR_TIMER_TASK_PRIORITY,
-                           CONFIG_ESPRESSIF_HR_TIMER_TASK_STACK_SIZE,
-                           esp_hr_timer_thread,
-                           NULL);
+  if (g_hr_timer_initialized)
+    {
+      tmrinfo("HR Timer already initialized, skipping...\n");
+
+      return OK;
+    }
+
+  pid  = kthread_create(CONFIG_ESPRESSIF_HR_TIMER_TASK_NAME,
+                        CONFIG_ESPRESSIF_HR_TIMER_TASK_PRIORITY,
+                        CONFIG_ESPRESSIF_HR_TIMER_TASK_STACK_SIZE,
+                        esp_hr_timer_thread,
+                        NULL);
   if (pid < 0)
     {
       tmrerr("Failed to create HR Timer task=%d\n", pid);
 
       return pid;
     }
+
+  priv = &g_hr_timer_context;
 
   list_initialize(&priv->runlist);
   list_initialize(&priv->toutlist);
@@ -714,5 +725,7 @@ int esp_hr_timer_init(void)
 
   up_enable_irq(ESP_IRQ_SYSTIMER_TARGET2_EDGE);
 
-  return 0;
+  g_hr_timer_initialized = true;
+
+  return OK;
 }
