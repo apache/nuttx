@@ -83,7 +83,6 @@ static int nxtask_assign_pid(FAR struct tcb_s *tcb)
   FAR struct tcb_s **pidhash;
   pid_t next_pid;
   int   hash_ndx;
-  void *temp;
   int   i;
 
   /* NOTE:
@@ -161,9 +160,8 @@ retry:
 
   /* Release resource for original g_pidhash, using new g_pidhash */
 
-  temp = g_pidhash;
+  kmm_free(g_pidhash);
   g_pidhash = pidhash;
-  kmm_free(temp);
 
   /* Let's try every allowable pid again */
 
