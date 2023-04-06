@@ -24,8 +24,8 @@ CMN_CSRCS += arm_allocateheap.c arm_createstack.c arm_exit.c
 CMN_CSRCS += arm_getintstack.c arm_initialize.c arm_lowputs.c
 CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
 CMN_CSRCS += arm_nputs.c arm_releasestack.c arm_registerdump.c
-CMN_CSRCS += arm_stackframe.c arm_saveusercontext.c
-CMN_CSRCS += arm_switchcontext.c arm_usestack.c arm_vfork.c
+CMN_CSRCS += arm_stackframe.c arm_switchcontext.c
+CMN_CSRCS += arm_usestack.c arm_vfork.c
 
 ifneq ($(CONFIG_ALARM_ARCH),y)
   ifneq ($(CONFIG_TIMER_ARCH),y)

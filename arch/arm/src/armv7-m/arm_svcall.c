@@ -159,26 +159,6 @@ int arm_svcall(int irq, void *context, void *arg)
 
   switch (cmd)
     {
-      /* R0=SYS_save_context:  This is a save context command:
-       *
-       *   int up_saveusercontext(void *saveregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_save_context
-       *   R1 = saveregs
-       *
-       * In this case, we simply need to copy the current registers to the
-       * save register space references in the saved R1 and return.
-       */
-
-      case SYS_save_context:
-        {
-          DEBUGASSERT(regs[REG_R1] != 0);
-          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-        }
-        break;
-
       /* R0=SYS_restore_context:  This a restore context command:
        *
        *   void arm_fullcontextrestore(uint32_t *restoreregs)

@@ -38,6 +38,7 @@ CMN_CSRCS += arm_perf.c cp15_cacheops.c
 # Common C source files
 
 CMN_ASRCS += arm_head.S arm_vectoraddrexcptn.S arm_vectors.S
+CMN_ASRCS += arm_saveusercontext.S
 
 ifeq ($(CONFIG_ARMV7R_HAVE_PTM), y)
   CMN_CSRCS += arm_timer.c

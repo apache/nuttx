@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/arm_saveusercontext.c
+ * arch/arm/src/armv7-r/arm_saveusercontext.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
-#include <arch/syscall.h>
+	.file	"arm_saveusercontext.S"
+
+	.text
+	.syntax	unified
+	.arm
 
 /****************************************************************************
  * Public Functions
@@ -34,17 +39,59 @@
  * Name: up_saveusercontext
  *
  * Description:
- *   Save the current thread context.  Full prototype is:
+ *   Save the current context.  Full prototype is:
  *
- *   int  up_saveusercontext(void *saveregs);
+ *   int up_saveusercontext(void *saveregs);
+ *
+ *   R0 = saveregs = pinter saved array
  *
  * Returned Value:
- *   0: Normal return
- *   1: Context switch return
+ *   None
  *
  ****************************************************************************/
 
-int up_saveusercontext(void *saveregs)
-{
-  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
-}
+	.globl	up_saveusercontext
+	.globl	up_saveusercontext
+	.type	up_saveusercontext, %function
+
+up_saveusercontext:
+
+	/* Save r0, r1 */
+
+	str		r0, [r0, #(4*REG_R0)]
+	str		r1, [r0, #(4*REG_R1)]
+
+#ifdef CONFIG_ARCH_FPU
+	/* Save fpu */
+
+#  ifdef CONFIG_ARM_DPFPU32
+	vstmia.64	r0!, {d0-d15}
+	vstmia.64	r0!, {d16-d31}
+#  else
+	vstmia		r0!, {s0-s31}
+#  endif
+	/* Save fpscr, r13 and r14 */
+
+	vmrs		r1, fpscr
+	stmia		r0!, {r1, r13, r14}
+#else
+	/* Save r13, r14 */
+
+	stmia		r0!, {r13, r14}
+#endif
+
+	/* Save r2~r12, and store the return address as PC */
+
+	add		r0, r0, #8
+	stmia		r0!, {r2-r12, r14}
+
+	/* Save cpsr */
+
+	mrs		r1, CPSR
+	str		r1, [r0]
+
+	mov		r0, #0
+	bx		lr
+
+	.size	up_saveusercontext, . - up_saveusercontext
+	.end

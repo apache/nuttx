@@ -22,7 +22,7 @@
 
 include common/Make.defs
 
-CMN_ASRCS += arm_exception.S
+CMN_ASRCS += arm_exception.S arm_saveusercontext.S
 
 CMN_CSRCS += arm_busfault.c arm_cache.c arm_doirq.c
 CMN_CSRCS += arm_hardfault.c arm_initialstate.c arm_itm.c

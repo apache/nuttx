@@ -36,9 +36,13 @@ CMN_ASRCS :=
 # Filter-out unnecessary .c files
 
 TC32_CSRCS_FILTER := arm_backtrace_fp.c arm_backtrace_thumb.c
-TC32_CSRCS_FILTER += arm_fullcontextrestore.c
-TC32_CSRCS_FILTER += arm_saveusercontext.c arm_udelay.c
+TC32_CSRCS_FILTER += arm_fullcontextrestore.c arm_udelay.c
 CMN_CSRCS := $(filter-out $(TC32_CSRCS_FILTER), $(CMN_CSRCS))
+
+# Filter-out unnecessary .S files
+
+TC32_ASRCS_FILTER := arm_saveusercontext.S
+CMN_ASRCS := $(filter-out $(TC32_ASRCS_FILTER), $(CMN_ASRCS))
 
 # Common files in arch/arm/src/armv6-m
 
