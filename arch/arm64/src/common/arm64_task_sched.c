@@ -45,44 +45,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_saveusercontext
- *
- * Description:
- *   Save the current thread context.  Full prototype is:
- *
- *   int  up_saveusercontext(void *saveregs);
- *
- * Returned Value:
- *   0: Normal return
- *   1: Context switch return
- *
- ****************************************************************************/
-#ifdef CONFIG_BUILD_FLAT
-
-int up_saveusercontext(void *saveregs)
-{
-  irqstate_t flags;
-
-  /* Take a snapshot of the thread context right now */
-
-  flags = enter_critical_section();
-
-  arm64_context_snapshot(saveregs);
-
-  leave_critical_section(flags);
-  return 0;
-}
-
-#else
-
-int up_saveusercontext(void *saveregs)
-{
-  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
-}
-
-#endif
-
-/****************************************************************************
  * Name: arm64_fullcontextrestore
  *
  * Description:
