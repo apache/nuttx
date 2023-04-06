@@ -426,22 +426,17 @@ static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp)
 {
   uint8_t depth;
 
-  /* Don't send any command if the depth hasn't changed. */
+  /* REVISIT: Works only for 12 and 16 bpp! */
 
-  if (dev->bpp != bpp)
-    {
-      /* REVISIT: Works only for 12 and 16 bpp! */
+  depth = bpp >> 2 | 1;
+  st7789_sendcmd(dev, ST7789_COLMOD);
+  st7789_select(dev->spi, 8);
+  SPI_SEND(dev->spi, depth);
+  st7789_deselect(dev->spi);
 
-      depth = bpp >> 2 | 1;
-      st7789_sendcmd(dev, ST7789_COLMOD);
-      st7789_select(dev->spi, 8);
-      SPI_SEND(dev->spi, depth);
-      st7789_deselect(dev->spi);
+  /* Cache the new BPP */
 
-      /* Cache the new BPP */
-
-      dev->bpp = bpp;
-    }
+  dev->bpp = bpp;
 }
 
 /****************************************************************************
