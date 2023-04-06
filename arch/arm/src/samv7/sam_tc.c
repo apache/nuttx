@@ -391,7 +391,7 @@ static const struct sam_tcconfig_s g_tc678config =
     },
     [2] =
     {
-      .base    = SAM_TC345_CHAN_BASE(8),
+      .base    = SAM_TC678_CHAN_BASE(8),
       .pid     = SAM_PID_TC8,
       .irq     = SAM_IRQ_TC8,
 
@@ -466,7 +466,7 @@ static const struct sam_tcconfig_s g_tc901config =
     },
     [2] =
     {
-      .base    = SAM_TC345_CHAN_BASE(11),
+      .base    = SAM_TC901_CHAN_BASE(11),
       .pid     = SAM_PID_TC11,
       .irq     = SAM_IRQ_TC11,
 
