@@ -135,6 +135,44 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd);
 
 int mtdconfig_unregister(void);
 
+/****************************************************************************
+ * Name: mtdconfig_register_by_path
+ *
+ * Description:
+ *   This function binds an instance of an MTD device to the path specified
+ *   device.
+ *
+ *   When this function is called, the MTD device pass in should already
+ *   be initialized appropriately to access the physical device or partition.
+ *
+ * Input Parameters:
+ *   mtd - Pointer to the MTD device to bind with the path device
+ *   path - Path name of the file backing the MTD device
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
+                               FAR const char *path);
+
+/****************************************************************************
+ * Name: mtdconfig_unregister_by_path
+ *
+ * Description:
+ *   This function unregisters path device.
+ *
+ * Input Parameters:
+ *   path - Path name of the file backing the MTD device
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mtdconfig_unregister_by_path(FAR const char *path);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
