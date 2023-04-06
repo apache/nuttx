@@ -64,13 +64,6 @@
 
 /* Cortex-M system calls ****************************************************/
 
-/* SYS call 0:
- *
- * int up_saveusercontext(void *saveregs);
- */
-
-#define SYS_save_context          (0)
-
 /* SYS call 1:
  *
  * void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;

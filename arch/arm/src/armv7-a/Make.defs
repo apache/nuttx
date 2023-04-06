@@ -37,6 +37,7 @@ endif
 # Common assembly language files
 
 CMN_ASRCS += arm_cpuhead.S arm_vectoraddrexcptn.S arm_vectors.S
+CMN_ASRCS += arm_saveusercontext.S
 
 # Common C source files
 

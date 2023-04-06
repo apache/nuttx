@@ -31,6 +31,7 @@ CMN_CSRCS += arm_undefinedinsn.c
 
 CMN_ASRCS += arm_cache.S arm_vectoraddrexcptn.S
 CMN_ASRCS += arm_vectors.S arm_vectortab.S
+CMN_ASRCS += arm_saveusercontext.S
 
 ifeq ($(CONFIG_PAGING),y)
   CMN_CSRCS += arm_pginitialize.c arm_checkmapping.c arm_allocpage.c arm_va2pte.c
