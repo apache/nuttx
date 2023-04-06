@@ -24,6 +24,7 @@ endif
 
 # Specify our general Assembly files
 CMN_ASRCS += riscv_vectors.S riscv_exception_common.S riscv_mhartid.S
+CMN_ASRCS += riscv_saveusercontext.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c riscv_mtimer.c
@@ -32,7 +33,7 @@ CMN_CSRCS += riscv_cpuidlestack.c riscv_doirq.c riscv_exit.c riscv_exception.c
 CMN_CSRCS += riscv_getnewintctx.c riscv_getintstack.c riscv_initialstate.c
 CMN_CSRCS += riscv_idle.c riscv_modifyreg32.c riscv_nputs.c riscv_releasestack.c
 CMN_CSRCS += riscv_registerdump.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS += riscv_sigdeliver.c riscv_switchcontext.c riscv_saveusercontext.c
+CMN_CSRCS += riscv_sigdeliver.c riscv_switchcontext.c
 CMN_CSRCS += riscv_usestack.c riscv_tcbinfo.c
 
 ifneq ($(CONFIG_ALARM_ARCH),y)

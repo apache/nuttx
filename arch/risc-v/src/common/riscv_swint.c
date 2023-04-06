@@ -132,26 +132,6 @@ int riscv_swint(int irq, void *context, void *arg)
 
   switch (regs[REG_A0])
     {
-      /* A0=SYS_save_context:  This is a save context command:
-       *
-       *   int up_saveusercontext(void *saveregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A0 = SYS_save_context
-       *   A1 = saveregs
-       *
-       * In this case, we simply need to copy the current registers to the
-       * save register space references in the saved A1 and return.
-       */
-
-      case SYS_save_context:
-        {
-          DEBUGASSERT(regs[REG_A1] != 0);
-          riscv_copystate((uintptr_t *)regs[REG_A1], regs);
-        }
-        break;
-
       /* A0=SYS_restore_context: This a restore context command:
        *
        * void
