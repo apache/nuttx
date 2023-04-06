@@ -1987,3 +1987,26 @@ int note_driver_register(FAR struct note_driver_s *driver)
 
   return -ENOMEM;
 }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FUNCTION
+
+/****************************************************************************
+ * Name: __cyg_profile_func_enter
+ ****************************************************************************/
+
+void noinstrument_function
+__cyg_profile_func_enter(void *this_fn, void *call_site)
+{
+  sched_note_string_ip(NOTE_TAG_ALWAYS, (uintptr_t)this_fn, "B");
+}
+
+/****************************************************************************
+ * Name: __cyg_profile_func_exit
+ ****************************************************************************/
+
+void noinstrument_function
+__cyg_profile_func_exit(void *this_fn, void *call_site)
+{
+  sched_note_string_ip(NOTE_TAG_ALWAYS, (uintptr_t)this_fn, "E");
+}
+#endif
