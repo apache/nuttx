@@ -60,15 +60,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arm64_context_snapshot
+ * Function: up_saveusercontext
  *
  * Description:
  *   Take a snapshot of the thread GP registers context
  *   x0 --- pointer to struct regs_context
  *
  ****************************************************************************/
-GTEXT(arm64_context_snapshot)
-SECTION_FUNC(text, arm64_context_snapshot)
+GTEXT(up_saveusercontext)
+SECTION_FUNC(text, up_saveusercontext)
     str    x0, [sp, #-16]!
 
     stp    x0,  x1,  [x0, #8 * REG_X0]
