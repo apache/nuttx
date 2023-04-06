@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_saveusercontext.c
+ * arch/risc-v/src/common/riscv_saveusercontext.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,27 +24,42 @@
 
 #include <nuttx/config.h>
 
-#include <arch/syscall.h>
+#include "riscv_macros.S"
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Symbols
  ****************************************************************************/
 
 /****************************************************************************
  * Name: up_saveusercontext
  *
  * Description:
- *   Save the current thread context.  Full prototype is:
- *
- *   int  up_saveusercontext(void *saveregs);
- *
- * Returned Value:
- *   0: Normal return
- *   1: Context switch return
+ *   Save the current thread context
  *
  ****************************************************************************/
 
-int up_saveusercontext(void *saveregs)
-{
-  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
-}
+  .section .text
+  .global up_saveusercontext
+  .align  8
+
+up_saveusercontext:
+
+  save_ctx   a0
+
+  csrr       a1, CSR_STATUS
+  REGSTORE   a1, REG_INT_CTX(a0)  /* status */
+
+  REGSTORE   sp, REG_X2(a0)       /* original SP */
+  REGSTORE   x1, REG_EPC(a0)
+
+  riscv_savefpu   a0
+
+  li         a0, 0
+  jr         ra
+
+  .size	up_saveusercontext, . - up_saveusercontext
+  .end

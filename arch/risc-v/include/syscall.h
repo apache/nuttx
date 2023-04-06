@@ -63,8 +63,6 @@
  * therefore, be reserved (0 is not used).
  */
 
-#define SYS_save_context          (0)
-
 /* SYS call 1:
  *
  * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
