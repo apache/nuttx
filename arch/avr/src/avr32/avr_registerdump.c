@@ -42,9 +42,10 @@
  * Name: up_getusrsp
  ****************************************************************************/
 
-uintptr_t up_getusrsp(void)
+uintptr_t up_getusrsp(void *regs)
 {
-  return g_current_regs[REG_R13];
+  uint8_t *ptr = regs;
+  return ptr[REG_R13];
 }
 
 /****************************************************************************
