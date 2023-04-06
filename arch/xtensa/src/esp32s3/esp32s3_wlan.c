@@ -1462,7 +1462,7 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 int esp32s3_wlan_sta_set_linkstatus(bool linkstatus)
 {
   int ret = -EINVAL;
-  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32S3_WLAN_STA_DEVNO];
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32S3_WLAN_STA_DEVNO];
 
   if (priv != NULL)
     {
