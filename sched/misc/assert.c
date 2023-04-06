@@ -148,82 +148,126 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
   _alert("  base: %p\n", (FAR void *)base);
   _alert("  size: %08zu\n", size);
 
-  if (sp >= base && sp < top)
+  if (!force)
     {
       stack_dump(sp, top);
     }
   else
     {
-      _alert("ERROR: %s Stack pointer is not within the stack\n", tag);
-
-      if (force)
-        {
 #ifdef CONFIG_STACK_COLORATION
-          size_t remain = size - used;
+      size_t remain = size - used;
 
-          base += remain;
-          size -= remain;
+      base += remain;
+      size -= remain;
 #endif
 
 #if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
-          if (size > CONFIG_ARCH_STACKDUMP_MAX_LENGTH)
-            {
-              size = CONFIG_ARCH_STACKDUMP_MAX_LENGTH;
-            }
+      if (size > CONFIG_ARCH_STACKDUMP_MAX_LENGTH)
+        {
+          size = CONFIG_ARCH_STACKDUMP_MAX_LENGTH;
+        }
 #endif
 
-          stack_dump(base, base + size);
-        }
+      stack_dump(base, base + size);
     }
 }
 
 /****************************************************************************
- * Name: showstacks
+ * Name: show_stacks
  ****************************************************************************/
 
-static void show_stacks(FAR struct tcb_s *rtcb)
+static void show_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 {
-  uintptr_t sp = up_getsp();
-
-  /* Get the limits on the interrupt stack memory */
+#if CONFIG_ARCH_INTERRUPTSTACK > 0
+  uintptr_t intstack_base = up_get_intstackbase();
+  size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
+  uintptr_t intstack_top = intstack_base + intstack_size;
+#endif
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  uintptr_t kernelstack_base = (uintptr_t)rtcb->xcp.kstack;
+  size_t kernelstack_size = CONFIG_ARCH_KERNEL_STACKSIZE;
+  uintptr_t kernelstack_top = kernelstack_base + kernelstack_size;
+#endif
+  uintptr_t tcbstack_base = (uintptr_t)rtcb->stack_base_ptr;
+  size_t tcbstack_size = (size_t)rtcb->adj_stack_size;
+  uintptr_t tcbstack_top = tcbstack_base + tcbstack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  dump_stack("IRQ", sp,
-             up_get_intstackbase(),
-             CONFIG_ARCH_INTERRUPTSTACK,
-#  ifdef CONFIG_STACK_COLORATION
-             up_check_intstack(),
-#  else
-             0,
-#  endif
-             up_interrupt_context());
-  if (up_interrupt_context())
+  if (sp >= intstack_base && sp < intstack_top)
     {
-      sp = up_getusrsp();
-    }
-#endif
-
-  dump_stack("User", sp,
-             (uintptr_t)rtcb->stack_base_ptr,
-             (size_t)rtcb->adj_stack_size,
+      dump_stack("IRQ", sp,
+                 intstack_base,
+                 intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-             up_check_tcbstack(rtcb),
+                 up_check_intstack(),
 #else
-             0,
+                 0,
+#endif
+                 false
+                );
+    }
+  else
 #endif
 #ifdef CONFIG_ARCH_KERNEL_STACK
-             false
-#else
-             true
+  if (sp >= kernelstack_base && sp < kernelstack_top)
+    {
+      dump_stack("Kernel", sp,
+                 kernelstack_base,
+                 kernelstack_size,
+                 0, false
+                );
+    }
+  else
 #endif
-            );
+  if (sp >= tcbstack_base && sp < tcbstack_top)
+    {
+      dump_stack("User", sp,
+                 tcbstack_base,
+                 tcbstack_size,
+#ifdef CONFIG_STACK_COLORATION
+                 up_check_tcbstack(rtcb),
+#else
+                 0,
+#endif
+                 false
+                );
+    }
+  else
+    {
+      _alert("ERROR: Stack pointer is not within the stack\n");
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 0
+      dump_stack("IRQ", sp,
+                 intstack_base,
+                 intstack_size,
+#ifdef CONFIG_STACK_COLORATION
+                 up_check_intstack(),
+#else
+                 0,
+#endif
+                 true
+                );
+#endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  dump_stack("Kernel", sp,
-             (uintptr_t)rtcb->xcp.kstack,
-             CONFIG_ARCH_KERNEL_STACKSIZE,
-             0, false);
+      dump_stack("Kernel", sp,
+                 kernelstack_base,
+                 kernelstack_size,
+                 0, true
+                );
 #endif
+
+      dump_stack("User", sp,
+                 tcbstack_base,
+                 tcbstack_size,
+#ifdef CONFIG_STACK_COLORATION
+                 up_check_tcbstack(rtcb),
+#else
+                 0,
+#endif
+                 true
+                );
+    }
 }
 
 #endif
@@ -487,7 +531,7 @@ void _assert(FAR const char *filename, int linenum,
   up_dump_register(regs);
 
 #ifdef CONFIG_ARCH_STACKDUMP
-  show_stacks(rtcb);
+  show_stacks(rtcb, up_getusrsp(regs));
 #endif
 
   /* Flush any buffered SYSLOG data */

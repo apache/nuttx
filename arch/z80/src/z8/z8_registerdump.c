@@ -59,10 +59,10 @@ static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
  * Name: up_getusrsp
  ****************************************************************************/
 
-uintptr_t up_getusrsp(void)
+uintptr_t up_getusrsp(FAR void *regs)
 {
-  FAR chipreg_t *regs = g_z8irqstate.regs;
-  return regs[XCPT_SP];
+  FAR chipreg_t *ptr = regs;
+  return ptr[XCPT_SP];
 }
 
 /****************************************************************************
