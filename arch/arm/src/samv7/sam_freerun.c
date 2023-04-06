@@ -155,7 +155,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
    *   TC_CMR_EEVTEDG_NONE - No external events (and, hence, no edges
    *   TC_CMR_EEVT_TIOB    - ???? REVISIT
    *   TC_CMR_ENET=0       - External event trigger disabled
-   *   TC_CMR_WAVSEL_UP    - TC_CV is incremented from 0 to 0xffffffff
+   *   TC_CMR_WAVSEL_UP    - TC_CV is incremented from 0 to 0xffff
    *   TC_CMR_WAVE         - Waveform mode
    *   TC_CMR_ACPA_NONE    - RA compare has no effect on TIOA
    *   TC_CMR_ACPC_NONE    - RC compare has no effect on TIOA
