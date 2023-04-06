@@ -201,7 +201,7 @@ int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   ret = nxmutex_lock(&volume->lock);
   if (ret != OK)
     {
-      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      ferr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 

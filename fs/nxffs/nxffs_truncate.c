@@ -75,7 +75,7 @@ int nxffs_truncate(FAR struct file *filep, off_t length)
   ret = nxmutex_lock(&volume->lock);
   if (ret < 0)
     {
-      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      ferr("ERROR: nxmutex_lock failed: %d\n", ret);
       goto errout;
     }
 

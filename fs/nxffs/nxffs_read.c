@@ -160,7 +160,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   ret = nxmutex_lock(&volume->lock);
   if (ret < 0)
     {
-      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      ferr("ERROR: nxmutex_lock failed: %d\n", ret);
       goto errout;
     }
 

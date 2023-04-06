@@ -690,7 +690,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   ret = nxmutex_lock(&volume->lock);
   if (ret != OK)
     {
-      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      ferr("ERROR: nxmutex_lock failed: %d\n", ret);
       goto errout;
     }
 
@@ -1134,7 +1134,7 @@ int nxffs_close(FAR struct file *filep)
   ret = nxmutex_lock(&volume->lock);
   if (ret != OK)
     {
-      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      ferr("ERROR: nxmutex_lock failed: %d\n", ret);
       goto errout;
     }
 
