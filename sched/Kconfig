@@ -1088,6 +1088,20 @@ config SCHED_INSTRUMENTATION_DUMP
 			void sched_note_printf(FAR const char *fmt, ...) printf_like(1, 2);
 			void sched_note_bprintf(uint32_t module, uint8_t event, FAR const char *fmt, ...);
 
+config SCHED_INSTRUMENTATION_FUNCTION
+	bool "Enable function auto-tracing"
+	default n
+	---help---
+		After enabling this option, you can automatically trace the function instrumentation without adding tracepoint manually.
+		This is similar to the Function Trace effect of the linux kernel
+		Add CFLAGS += -finstrument-functions to the makefile to track the required modules.
+		The following compilation option can exclude files that do not want to be tracked in this module
+		CFLAGS += -finstrument-functions-exclude-file-list=xxx
+		The following compilation option can exclude functions that do not want to be tracked in this module
+		CFLAGS += -finstrument-functions-exclude-function-list=xxx
+		For a more detailed description of compilation options,
+		refer to the "Program Instrumentation Options" chapter in the gcc documentation
+
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
