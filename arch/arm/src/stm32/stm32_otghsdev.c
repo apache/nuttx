@@ -1328,6 +1328,19 @@ static void stm32_epin_request(struct stm32_usbdev_s *priv,
           empmsk |= OTGHS_DIEPEMPMSK(privep->epphy);
           stm32_putreg(empmsk, STM32_OTGHS_DIEPEMPMSK);
 
+#ifdef CONFIG_DEBUG_FEATURES
+          /* Check if the configured TXFIFO size is sufficient for a given
+           * request. If not, raise an assertion here.
+           */
+
+          regval = stm32_putreg(regval, STM32_OTGHS_DIEPTXF(privep->epphy));
+          regval &= OTGHS_DIEPTXF_INEPTXFD_MASK;
+          regval >>= OTGHS_DIEPTXF_INEPTXFD_SHIFT;
+          uerr("EP%" PRId8 " TXLEN=%" PRId32 " nwords=%d\n",
+               privep->epphy, regval, nwords);
+          DEBUGASSERT(regval >= nwords);
+#endif
+
           /* Terminate the transfer.  We will try again when the TxFIFO empty
            * interrupt is received.
            */
