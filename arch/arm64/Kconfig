@@ -49,6 +49,13 @@ config ARCH_CHIP_FVP_ARMV8R
 	select ARCH_CORTEX_R82
 	---help---
 		ARM FVP virt platform (ARMv8r)
+
+config ARCH_CHIP_ARM64_CUSTOM
+	bool "Custom ARM64 chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/arm64/src/.
+
 endchoice
 
 config ARCH_ARMV8A
