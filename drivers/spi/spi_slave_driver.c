@@ -707,9 +707,14 @@ static void spi_slave_notify(FAR struct spi_slave_dev_s *dev,
   FAR struct spi_slave_driver_s *priv = (FAR struct spi_slave_driver_s *)dev;
   int semcnt;
 
+  /* POLLOUT is used to notify the upper layer that data can be written,
+   * POLLPRI is used to notify the upper layer that the data written
+   * has been read
+   */
+
   if (state == SPISLAVE_TX_COMPLETE)
     {
-      poll_notify(&priv->fds, 1, POLLOUT);
+      poll_notify(&priv->fds, 1, POLLOUT | POLLPRI);
     }
   else if (state == SPISLAVE_RX_COMPLETE)
     {
