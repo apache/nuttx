@@ -518,6 +518,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
+  new->rpaddr.rp_family = AF_RPMSG;
   strlcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev),
           sizeof(new->rpaddr.rp_cpu));
   strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
