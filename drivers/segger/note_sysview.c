@@ -348,7 +348,7 @@ unsigned int note_sysview_get_interrupt_id(void)
  *
  ****************************************************************************/
 
-unsigned int note_sysview_get_timestamp(void)
+unsigned long note_sysview_get_timestamp(void)
 {
   return up_perf_gettime();
 }
@@ -369,7 +369,7 @@ unsigned int note_sysview_get_timestamp(void)
 
 int note_sysview_initialize(void)
 {
-  uint32_t freq = up_perf_getfreq();
+  unsigned long freq = up_perf_getfreq();
 
   static const SEGGER_SYSVIEW_OS_API g_sysview_trace_api =
     {

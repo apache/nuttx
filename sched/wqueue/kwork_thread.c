@@ -54,14 +54,14 @@
 #  define CALL_WORKER(worker, arg) \
      do \
        { \
-         uint32_t start; \
-         uint32_t elapsed; \
+         unsigned long start; \
+         unsigned long elapsed; \
          start = up_perf_gettime(); \
          worker(arg); \
          elapsed = up_perf_gettime() - start; \
          if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) \
            { \
-             serr("WORKER %p execute too long %"PRIu32"\n", \
+             serr("WORKER %p execute too long %lu\n", \
                    worker, elapsed); \
            } \
        } \

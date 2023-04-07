@@ -2526,9 +2526,9 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 void up_perf_init(FAR void *arg);
-uint32_t up_perf_gettime(void);
-uint32_t up_perf_getfreq(void);
-void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);
+unsigned long up_perf_gettime(void);
+unsigned long up_perf_getfreq(void);
+void up_perf_convert(unsigned long elapsed, FAR struct timespec *ts);
 
 /****************************************************************************
  * Name: up_saveusercontext

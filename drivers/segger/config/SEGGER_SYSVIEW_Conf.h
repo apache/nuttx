@@ -73,7 +73,7 @@ extern "C"
  ****************************************************************************/
 
 unsigned int note_sysview_get_interrupt_id(void);
-unsigned int note_sysview_get_timestamp(void);
+unsigned long note_sysview_get_timestamp(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
