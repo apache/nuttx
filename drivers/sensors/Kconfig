@@ -791,6 +791,110 @@ config MPU60X0_ACCEL_AFS_SEL
 
 endif # SENSORS_MPU60X0
 
+config SENSORS_MPU9250
+	bool "Invensense MPU9250 Sensor support"
+	default n
+	---help---
+		Enable driver support for Invensense MPU9250 MotionTracker device.
+
+if SENSORS_MPU9250
+
+choice
+	prompt "MPU9250 Interface"
+	default MPU9250_SPI
+
+config MPU9250_SPI
+	bool "MPU9250 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface
+
+config MPU9250_I2C
+	bool "MPU9250 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+endchoice
+
+config MPU9250_I2C_FREQ
+	int "MPU9250 I2C Frequency"
+	depends on MPU9250_I2C
+	default 400000
+
+config MPU9250_MEASURE_FREQ
+	int "Default data output rate in Hz"
+	default 1000
+	---help---
+		Default data output rate in Hz
+
+config MPU9250_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread
+
+config MPU9250_EXT_SYNC_SET
+	int "MPU9250 frame sync bit position"
+	default 0
+	---help---
+		EXT_SYNC_SET[2..0]
+		EXT_SYNC_SET: frame sync bit position
+
+config MPU9250_DLPF_CFG
+	int "MPU9250 gyroscope and temperature low-pass filter setting"
+	default 1
+	---help---
+		DLPF_CFG[2..0]
+		DLPF_CFG: digital low-pass filter bandwidth
+
+config MPU9250_ACCEL_FCHOICE_B
+	int "Inverted version of accel_fchoice"
+	default 0
+	---help---
+		The data output rate of the DLPF filter block can be further
+		reduced by a factor of 1/(1+SMPLRT_DIV).
+		where SMPLRT_DIV is an 8-bit integer
+
+config MPU9250_A_DLPF_CFG
+	int "MPU9250 Accelerometer low pass filter setting"
+	default 1
+	---help---
+		A_DLPF_CFG[2..0]
+		A_DLPF_CFG: Accelerometer digital low-pass filter bandwidth
+
+config MPU9250_GYRO_FS_SEL
+	int "MPU9250 Gyro FS_SEL"
+	default 2
+	---help---
+		Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per
+		the datasheet, the meaning of @fs_sel is as follows:
+		GYRO_CONFIG(0x1b) :   XG_ST YG_ST ZG_ST FS_SEL1 FS_SEL0 x  x  x
+		XG_ST, YG_ST, ZG_ST  :  self-test (unsupported in this driver)
+				1 -> activate self-test on X, Y, and/or Z gyros
+		FS_SEL[10] : full-scale range select
+				0 -> ±  250 deg/sec
+				1 -> ±  500 deg/sec
+				2 -> ± 1000 deg/sec
+				3 -> ± 2000 deg/sec
+
+config MPU9250_ACCEL_AFS_SEL
+	int "MPU9250 Accelerometer AFS_SEL"
+	default 2
+	---help---
+		Sets the @afs_sel bit in ACCEL_CONFIG to the value provided. Per
+		the datasheet, the meaning of @afs_sel is as follows:
+		ACCEL_CONFIG(0x1c) :   XA_ST YA_ST ZA_ST AFS_SEL1 AFS_SEL0 x  x  x
+		XA_ST, YA_ST, ZA_ST  :  self-test (unsupported in this driver)
+				1 -> activate self-test on X, Y, and/or Z accelerometers
+		AFS_SEL[10] : full-scale range select
+				0 -> ±  2 g
+				1 -> ±  4 g
+				2 -> ±  8 g
+				3 -> ± 16 g
+
+endif # SENSORS_MPU9250
+
 config SENSORS_MAX44009
 	bool "Maxim MAX44009 ALS sensor"
 	default n
