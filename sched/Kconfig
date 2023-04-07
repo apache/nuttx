@@ -863,6 +863,20 @@ config SCHED_CRITMONITOR_MAXTIME_WDOG
 
 endif # SCHED_CRITMONITOR
 
+config SCHED_CRITMONITOR_MAXTIME_PANIC
+	bool "Monitor timeout panic"
+	depends on \
+		SCHED_CRITMONITOR_MAXTIME_THREAD > 0 || \
+		SCHED_CRITMONITOR_MAXTIME_WDOG > 0 || \
+		SCHED_CRITMONITOR_MAXTIME_WQUEUE > 0 || \
+		SCHED_CRITMONITOR_MAXTIME_PREEMPTION > 0 || \
+		SCHED_CRITMONITOR_MAXTIME_CSECTION > 0 || \
+		SCHED_CRITMONITOR_MAXTIME_IRQ > 0
+	default n
+	---help---
+		If this option is enabled, a panic will be triggered when
+		IRQ/WQUEUE/PREEMPTION execution time exceeds SCHED_CRITMONITOR_MAXTIME_xxx
+
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
 	default n

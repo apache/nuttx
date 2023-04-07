@@ -96,8 +96,8 @@
          if (CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ) \
            { \
-             serr("IRQ %d(%p), execute time too long %lu\n", \
-                  irq, vector, elapsed); \
+             CRITMONITOR_PANIC("IRQ %d(%p), execute time too long %lu\n", \
+                               irq, vector, elapsed); \
            } \
        } \
      while (0)
