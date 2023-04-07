@@ -71,6 +71,7 @@ struct rptun_priv_s
 #ifdef CONFIG_RPTUN_PM
   struct pm_wakelock_s         wakelock;
   uint16_t                     headrx;
+  struct wdog_s                wdog;
 #endif
 };
 
@@ -201,6 +202,31 @@ static void rptun_wakeup_tx(FAR struct rptun_priv_s *priv)
 }
 
 #ifdef CONFIG_RPTUN_PM
+
+#ifdef CONFIG_RPTUN_PM_AUTORELAX
+static void rptun_pm_callback(wdparm_t arg)
+{
+  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)arg;
+
+  if (priv->rproc.state != RPROC_RUNNING)
+    {
+      return;
+    }
+
+  if (rptun_buffer_nused(&priv->rvdev, false))
+    {
+      rptun_wakeup_tx(priv);
+
+      wd_start(&priv->wdog, MSEC2TICK(RPTUN_TIMEOUT_MS),
+               rptun_pm_callback, (wdparm_t)priv);
+    }
+  else
+    {
+      pm_wakelock_relax(&priv->wakelock);
+    }
+}
+#endif
+
 static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
                                    bool stay)
 {
@@ -210,16 +236,21 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
   flags = enter_critical_section();
 
   count = pm_wakelock_staycount(&priv->wakelock);
-
   if (stay && count == 0)
     {
       pm_wakelock_stay(&priv->wakelock);
+#ifdef CONFIG_RPTUN_PM_AUTORELAX
+      wd_start(&priv->wdog, MSEC2TICK(RPTUN_TIMEOUT_MS),
+               rptun_pm_callback, (wdparm_t)priv);
+#endif
     }
 
-  if (!stay && count > 0 && !rptun_buffer_nused(&priv->rvdev, false))
+#ifndef CONFIG_RPTUN_PM_AUTORELAX
+  if (!stay && count > 0 && rptun_buffer_nused(&priv->rvdev, false) == 0)
     {
       pm_wakelock_relax(&priv->wakelock);
     }
+#endif
 
   leave_critical_section(flags);
 }
@@ -407,10 +438,11 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct virtqueue *vq = rvdev->svq;
+  FAR struct virtio_device *vdev = rvdev->vdev;
+  FAR struct virtqueue *svq = rvdev->svq;
 
-  if (rvdev->vdev && vq &&
-      rvdev->vdev->vrings_info[vq->vq_queue_index].notifyid == id)
+  if (priv->rproc.state == RPROC_RUNNING &&
+      id == vdev->vrings_info[svq->vq_queue_index].notifyid)
     {
       rptun_pm_action(priv, true);
     }
