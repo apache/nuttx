@@ -52,14 +52,14 @@
 #  define CALL_FUNC(func, arg) \
      do \
        { \
-         uint32_t start; \
-         uint32_t elapsed; \
+         unsigned long start; \
+         unsigned long elapsed; \
          start = up_perf_gettime(); \
          func(arg); \
          elapsed = up_perf_gettime() - start; \
          if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG) \
            { \
-             serr("WDOG %p, %s IRQ, execute too long %"PRIu32"\n", \
+             serr("WDOG %p, %s IRQ, execute too long %lu\n", \
                    func, up_interrupt_context() ? "IN" : "NOT", elapsed); \
            } \
        } \

@@ -121,7 +121,7 @@ static int rptun_ping_once(FAR struct rpmsg_endpoint *ept,
   return ret;
 }
 
-static void rptun_ping_logout(FAR const char *s, uint32_t value)
+static void rptun_ping_logout(FAR const char *s, unsigned long value)
 {
   struct timespec ts;
 
@@ -141,8 +141,8 @@ static void rptun_ping_logout(FAR const char *s, uint32_t value)
 int rptun_ping(FAR struct rpmsg_endpoint *ept,
                FAR const struct rptun_ping_s *ping)
 {
-  uint32_t min = UINT32_MAX;
-  uint32_t max = 0;
+  unsigned long min = ULONG_MAX;
+  unsigned long max = 0;
   uint64_t total = 0;
   int i;
 
@@ -153,7 +153,7 @@ int rptun_ping(FAR struct rpmsg_endpoint *ept,
 
   for (i = 0; i < ping->times; i++)
     {
-      uint32_t tm = up_perf_gettime();
+      unsigned long tm = up_perf_gettime();
 
       int ret = rptun_ping_once(ept, ping->len, ping->ack);
       if (ret < 0)
@@ -169,7 +169,7 @@ int rptun_ping(FAR struct rpmsg_endpoint *ept,
       usleep(ping->sleep * USEC_PER_MSEC);
     }
 
-  syslog(LOG_INFO, "current CPU freq: %" PRIu32 ", ping times: %d\n",
+  syslog(LOG_INFO, "current CPU freq: %lu, ping times: %d\n",
                     up_perf_getfreq(), ping->times);
 
   rptun_ping_logout("avg", total / ping->times);

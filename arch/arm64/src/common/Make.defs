@@ -48,6 +48,7 @@ CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_vfork.c arm64_switchcontext.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_backtrace.c arm64_getintstack.c arm64_registerdump.c
+CMN_CSRCS += arm64_perf.c
 
 # Common C source files ( hardware BSP )
 CMN_CSRCS += arm64_arch_timer.c arm64_cache.c

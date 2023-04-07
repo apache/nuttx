@@ -193,5 +193,6 @@ void arm64_boot_primary_c_routine(void)
 {
   boot_early_memset(_START_BSS, 0, _END_BSS - _START_BSS);
   arm64_chip_boot();
+  up_perf_init(NULL);
   nx_start();
 }

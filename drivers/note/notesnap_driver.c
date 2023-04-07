@@ -42,7 +42,7 @@ struct notesnap_chunk_s
 #endif
   pid_t pid;
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PERFCOUNT
-  uint32_t count;
+  unsigned long count;
 #else
   struct timespec time;
 #endif
@@ -399,7 +399,7 @@ void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PERFCOUNT
       struct timespec time;
-      uint32_t elapsed = note->count < lastcount ?
+      unsigned long elapsed = note->count < lastcount ?
                          note->count + UINT32_MAX - lastcount :
                          note->count - lastcount;
       up_perf_convert(elapsed, &time);

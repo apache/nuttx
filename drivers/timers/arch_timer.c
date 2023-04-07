@@ -395,9 +395,9 @@ int weak_function up_timer_tick_start(clock_t ticks)
  *   units.
  ****************************************************************************/
 
-uint32_t weak_function up_perf_gettime(void)
+unsigned long weak_function up_perf_gettime(void)
 {
-  uint32_t ret = 0;
+  unsigned long ret = 0;
 
   if (g_timer.lower != NULL)
     {
@@ -407,12 +407,13 @@ uint32_t weak_function up_perf_gettime(void)
   return ret;
 }
 
-uint32_t weak_function up_perf_getfreq(void)
+unsigned long weak_function up_perf_getfreq(void)
 {
   return USEC_PER_SEC;
 }
 
-void weak_function up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
+void weak_function up_perf_convert(unsigned long elapsed,
+                                   FAR struct timespec *ts)
 {
   timespec_from_usec(ts, elapsed);
 }

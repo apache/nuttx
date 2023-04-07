@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_perf.c
+ * arch/arm64/src/common/arm64_perf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,19 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
-#include "arm_internal.h"
-#include "dwt.h"
-#include "itm.h"
-#include "nvic.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static unsigned long g_cpu_freq;
+#include "arm64_pmu.h"
 
 /****************************************************************************
  * Public Functions
@@ -42,35 +32,29 @@ static unsigned long g_cpu_freq;
 
 void up_perf_init(void *arg)
 {
-  g_cpu_freq = (unsigned long)(uintptr_t)arg;
-
-  /* Enable ITM and DWT resources, if not left enabled by debugger. */
-
-  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
-
-  /* Make sure the high speed cycle counter is running.  It will be started
-   * automatically only if a debugger is connected.
-   */
-
-  putreg32(0xc5acce55, ITM_LAR);
-  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
+  pmu_ccntr_ccfiltr_config(PMCCFILTR_EL0_NSH);
+  pmu_cntr_control_config(PMCR_EL0_C | PMCR_EL0_E);
+  pmu_cntr_trap_control(PMUSERENR_EL0_EN);
+  pmu_cntr_irq_disable(PMINTENCLR_EL1_C);
+  pmu_cntr_enable(PMCNTENSET_EL0_C);
 }
 
 unsigned long up_perf_getfreq(void)
 {
-  return g_cpu_freq;
+  return read_sysreg(cntfrq_el0);
 }
 
 unsigned long up_perf_gettime(void)
 {
-  return getreg32(DWT_CYCCNT);
+  return pmu_get_ccntr();
 }
 
 void up_perf_convert(unsigned long elapsed, struct timespec *ts)
 {
   unsigned long left;
+  unsigned long cpu_freq = read_sysreg(cntfrq_el0);
 
-  ts->tv_sec  = elapsed / g_cpu_freq;
-  left        = elapsed - ts->tv_sec * g_cpu_freq;
-  ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
+  ts->tv_sec  = elapsed / cpu_freq;
+  left        = elapsed - ts->tv_sec * cpu_freq;
+  ts->tv_nsec = NSEC_PER_SEC * left / cpu_freq;
 }

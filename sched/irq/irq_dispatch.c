@@ -81,8 +81,8 @@
      do \
        { \
          struct timespec delta; \
-         uint32_t start; \
-         uint32_t elapsed; \
+         unsigned long start; \
+         unsigned long elapsed; \
          start = up_perf_gettime(); \
          vector(irq, context, arg); \
          elapsed = up_perf_gettime() - start; \
@@ -98,7 +98,7 @@
          if (CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ) \
            { \
-             serr("IRQ %d(%p), execute time too long %"PRIu32"\n", \
+             serr("IRQ %d(%p), execute time too long %lu\n", \
                   irq, vector, elapsed); \
            } \
        } \
