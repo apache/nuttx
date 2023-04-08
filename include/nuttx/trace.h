@@ -32,8 +32,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_TRACE
-#  define trace_begin(tag) SCHED_NOTE_BEGIN(tag)
-#  define trace_end(tag) SCHED_NOTE_END(tag)
+#  define trace_begin(tag) sched_note_begin(tag)
+#  define trace_end(tag) sched_note_end(tag)
 #else
 #  define trace_begin(tag)
 #  define trace_end(tag)
