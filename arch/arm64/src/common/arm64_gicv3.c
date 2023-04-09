@@ -36,8 +36,6 @@
 #include "arm64_gic.h"
 #include "arm64_fatal.h"
 
-#if CONFIG_ARM_GIC_VERSION == 3 || CONFIG_ARM_GIC_VERSION == 4
-
 /***************************************************************************
  * Pre-processor Definitions
  ***************************************************************************/
@@ -493,6 +491,91 @@ void up_disable_irq(int irq)
 }
 
 /***************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set the priority of an IRQ.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ ***************************************************************************/
+
+int up_prioritize_irq(int irq, int priority)
+{
+  unsigned long base = GET_DIST_BASE(irq);
+
+  DEBUGASSERT(irq >= 0 && irq < NR_IRQS &&
+              priority >= 0 && priority <= 255);
+
+  /* Ignore invalid interrupt IDs */
+
+  if (irq >= 0 && irq < NR_IRQS)
+    {
+      /* PRIORITYR registers provide byte access */
+
+      putreg8(priority & GIC_PRI_MASK, IPRIORITYR(base, irq));
+      return OK;
+    }
+
+  return -EINVAL;
+}
+
+/***************************************************************************
+ * Name: up_affinity_irq
+ *
+ * Description:
+ *   Set an IRQ affinity by software.
+ *
+ ***************************************************************************/
+
+void up_affinity_irq(int irq, cpu_set_t cpuset)
+{
+  if (GIC_IS_SPI(irq))
+    {
+      arm64_gic_write_irouter(cpuset, irq);
+    }
+}
+
+/***************************************************************************
+ * Name: up_trigger_irq
+ *
+ * Description:
+ *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
+ *   selected, then the SGI is sent to all CPUs specified in the CPU set.
+ *   That set may include the current CPU.
+ *
+ *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
+ *   only to the current CPU.
+ *
+ * Input Parameters
+ *   irq    - The SGI interrupt ID (0-15)
+ *   cpuset - The set of CPUs to receive the SGI
+ *
+ ***************************************************************************/
+
+void up_trigger_irq(int irq, cpu_set_t cpuset)
+{
+  uint64_t  mpidr = GET_MPIDR();
+  uint32_t  mask  = BIT(irq & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t  idx   = irq / GIC_NUM_INTR_PER_REG;
+
+  if (GIC_IS_SGI(irq))
+    {
+      arm64_gic_raise_sgi(irq, mpidr, cpuset);
+    }
+  else if (irq >= 0 && irq < NR_IRQS)
+    {
+      /* Write '1' to the corresponding bit in the distributor Interrupt
+       * Set-Pending (ISPENDR)
+       * GICD_ISPENDRn: Interrupt Set-Pending Registers
+       */
+
+      putreg32(mask, ISPENDR(GET_DIST_BASE(irq), idx));
+    }
+}
+
+/***************************************************************************
  * Name: arm64_decodeirq
  *
  * Description:
@@ -659,5 +742,3 @@ void arm64_gic_secondary_init(void)
 }
 
 #endif
-
-#endif /* CONFIG_ARM_GIC_VERSION == 3 || CONFIG_ARM_GIC_VERSION == 4 */
