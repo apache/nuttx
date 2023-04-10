@@ -115,12 +115,20 @@
 /* STM32 F412 Family ********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F412)
-#  include "hardware/stm32f412xx_pinmap.h"
+#  if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#    include "hardware/stm32f412xx_pinmap_legacy.h"
+#  else
+#    include "hardware/stm32f412xx_pinmap.h"
+#  endif
 
 /* STM32 F4 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F4XXX)
-#  include "hardware/stm32f40xxx_pinmap.h"
+#  if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#    include "hardware/stm32f40xxx_pinmap_legacy.h"
+#  else
+#    include "hardware/stm32f40xxx_pinmap.h"
+#  endif
 
 /* STM32 G4 Family **********************************************************/
 

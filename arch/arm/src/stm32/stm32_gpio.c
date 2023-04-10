@@ -37,6 +37,10 @@
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"
 
+#if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#  pragma message "CONFIG_STM32_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
