@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
+#include <string.h>
+
 #include <arch/syscall.h>
 
 #include "ceva_internal.h"
@@ -50,6 +52,14 @@
 int up_saveusercontext(void *saveregs)
 {
   int ret;
+
+  if (up_interrupt_context())
+    {
+      /* TODO: save interrupt context */
+
+      memset(saveregs, 0x0, XCPTCONTEXT_SIZE);
+      return 0;
+    }
 
   /* Let sys_call1() do all of the work */
 
