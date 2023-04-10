@@ -1341,7 +1341,7 @@ static void efm32_epin_request(struct efm32_usbdev_s *priv,
            * request. If not, raise an assertion here.
            */
 
-          regval = emf32_putreg(regval, EMF32_USB_DIEPTXF(privep->epphy));
+          regval = efm32_getreg(EFM32_USB_DIEPTXF(privep->epphy));
           regval &= _USB_DIEPTXF1_INEPNTXFDEP_MASK;
           regval >>= _USB_DIEPTXF1_INEPNTXFDEP_SHIFT;
           uerr("EP%" PRId8 " TXLEN=%" PRId32 " nwords=%d\n",
