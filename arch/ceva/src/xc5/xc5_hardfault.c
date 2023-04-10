@@ -88,6 +88,6 @@ int ceva_hardfault(int irq, void *context, void *arg)
   hfdumpreg4(P_MAPAR, P_MAPSR, UOP_STS, UOP_PAR);
   hfdumpreg1(REG_DBG_GEN);
 
-  PANIC();
+  PANIC_WITH_REGS("panic", context);
   return OK;
 }

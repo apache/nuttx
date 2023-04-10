@@ -120,6 +120,6 @@ int arm_hardfault(int irq, void *context, void *arg)
 
   up_irq_save();
   hfalert("PANIC!!! Hard fault\n");
-  PANIC();
+  PANIC_WITH_REGS("panic", context);
   return OK; /* Won't get here */
 }

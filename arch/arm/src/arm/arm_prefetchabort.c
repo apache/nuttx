@@ -125,6 +125,6 @@ void arm_prefetchabort(uint32_t *regs)
 #endif
     {
       _alert("Prefetch abort. PC: %08" PRIx32 "\n", regs[REG_PC]);
-      PANIC();
+      PANIC_WITH_REGS("panic", regs);
     }
 }

@@ -48,6 +48,7 @@
 #endif
 
 #define PANIC() __assert(__FILE__, __LINE__, "panic")
+#define PANIC_WITH_REGS(msg, regs) _assert(__FILE__, __LINE__, msg, regs)
 
 #ifdef CONFIG_DEBUG_ASSERTIONS_EXPRESSION
 #  define ASSERT(f)                       \
@@ -152,7 +153,8 @@ extern "C"
  *
  ****************************************************************************/
 
-void _assert(FAR const char *filename, int linenum, FAR const char *msg);
+void _assert(FAR const char *filename, int linenum,
+             FAR const char *msg, FAR void *regs);
 
 /****************************************************************************
  * Name: __assert
