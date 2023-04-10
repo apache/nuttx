@@ -48,7 +48,7 @@ class dump_elf_file:
     and can be retrieved from the ELF file.
     """
 
-    def __init__(self, elffile):
+    def __init__(self, elffile: str):
         self.elffile = elffile
         self.fd = None
         self.elf = None
@@ -210,7 +210,7 @@ reg_table = {
 
 
 class dump_log_file:
-    def __init__(self, logfile):
+    def __init__(self, logfile: str):
         self.logfile = logfile
         self.fd = None
         self.arch = ""
@@ -311,7 +311,7 @@ GDB_SIGNAL_DEFAULT = 7
 
 
 class gdb_stub:
-    def __init__(self, logfile, elffile):
+    def __init__(self, logfile: dump_log_file, elffile: dump_elf_file):
         self.logfile = logfile
         self.elffile = elffile
         self.socket = None
@@ -470,7 +470,7 @@ class gdb_stub:
     def handle_general_query_packet(self, pkt):
         self.put_gdb_packet(b"")
 
-    def run(self, socket):
+    def run(self, socket: socket.socket):
         self.socket = socket
 
         while True:
