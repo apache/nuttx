@@ -46,8 +46,6 @@
 #include <nuttx/config.h>
 #include <nuttx/net/ioctl.h>
 
-#ifdef CONFIG_NET_TUN
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -58,6 +56,8 @@
 #define IFF_TAP          0x02
 #define IFF_MASK         0x7f
 #define IFF_NO_PI        0x80
+
+#ifdef CONFIG_NET_TUN
 
 /****************************************************************************
  * Public Type Definitions
