@@ -1443,7 +1443,7 @@ static void stm32_epin_request(struct stm32_usbdev_s *priv,
            * request. If not, raise an assertion here.
            */
 
-          regval = stm32_putreg(regval, STM32_OTG_DIEPTXF(privep->epphy));
+          regval = stm32_getreg(STM32_OTG_DIEPTXF(privep->epphy));
           regval &= OTG_DIEPTXF_INEPTXFD_MASK;
           regval >>= OTG_DIEPTXF_INEPTXFD_SHIFT;
           uerr("EP%" PRId8 " TXLEN=%" PRId32 " nwords=%d\n",
