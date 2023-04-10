@@ -100,6 +100,11 @@ static int sim_setcursor(struct fb_vtable_s *vtable,
 static int sim_openwindow(struct fb_vtable_s *vtable);
 static int sim_closewindow(struct fb_vtable_s *vtable);
 
+/* Get/set the panel power status (0: full off). */
+
+static int sim_getpower(struct fb_vtable_s *vtable);
+static int sim_setpower(struct fb_vtable_s *vtable, int power);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -109,6 +114,8 @@ static int sim_closewindow(struct fb_vtable_s *vtable);
 #ifndef CONFIG_SIM_X11FB
 static uint8_t g_fb[FB_SIZE];
 #endif
+
+static int g_fb_power = 100;
 
 /* This structure describes the simulated video controller */
 
@@ -168,6 +175,8 @@ static struct fb_vtable_s g_fbobject =
 
   .open          = sim_openwindow,
   .close         = sim_closewindow,
+  .getpower      = sim_getpower,
+  .setpower      = sim_setpower,
 };
 
 /****************************************************************************
@@ -371,6 +380,33 @@ static int sim_setcursor(struct fb_vtable_s *vtable,
   return -EINVAL;
 }
 #endif
+
+/****************************************************************************
+ * Name: sim_getpower
+ ****************************************************************************/
+
+static int sim_getpower(struct fb_vtable_s *vtable)
+{
+  ginfo("vtable=%p power=%d\n", vtable, g_fb_power);
+  return g_fb_power;
+}
+
+/****************************************************************************
+ * Name: sim_setpower
+ ****************************************************************************/
+
+static int sim_setpower(struct fb_vtable_s *vtable, int power)
+{
+  ginfo("vtable=%p power=%d\n", vtable, power);
+  if (power < 0)
+    {
+      gerr("ERROR: power=%d < 0\n", power);
+      return -EINVAL;
+    }
+
+  g_fb_power = power;
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
