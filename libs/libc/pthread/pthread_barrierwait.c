@@ -24,9 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -82,6 +82,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 {
   int semcount;
   int ret = OK;
+  irqstate_t flags;
 
   if (!barrier)
     {
@@ -90,14 +91,14 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
   /* Disable pre-emption throughout the following */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Find out how many threads are already waiting at the barrier */
 
   ret = sem_getvalue(&barrier->sem, &semcount);
   if (ret != OK)
     {
-      sched_unlock();
+      leave_critical_section(flags);
       return get_errno();
     }
 
@@ -115,7 +116,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
       /* Then return PTHREAD_BARRIER_SERIAL_THREAD to the final thread */
 
-      sched_unlock();
+      leave_critical_section(flags);
       return PTHREAD_BARRIER_SERIAL_THREAD;
     }
   else
@@ -133,7 +134,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
                * problem
                */
 
-              sched_unlock();
+              leave_critical_section(flags);
               return errornumber;
             }
         }
@@ -143,7 +144,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
        * zero.
        */
 
-      sched_unlock();
+      leave_critical_section(flags);
       return 0;
     }
 }
