@@ -53,7 +53,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 
   if (pc)
     {
-      if (*skip-- <= 0)
+      if ((*skip)-- <= 0)
         {
           buffer[i++] = pc;
         }
@@ -66,7 +66,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
           break;
         }
 
-      if (*skip-- <= 0)
+      if ((*skip)-- <= 0)
         {
           buffer[i++] = (void *)*(fp + 1);
         }
