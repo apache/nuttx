@@ -299,6 +299,12 @@ static void gicv3_rdist_enable(unsigned long rdist)
       return;
     }
 
+  /* Power up sequence of the Redistributors for GIC600/GIC700
+   * please check GICR_PWRR define at trm of GIC600/GIC700
+   */
+
+  putreg32(0x2, rdist + GICR_PWRR);
+
   sys_clear_bit(rdist + GICR_WAKER, GICR_WAKER_PS);
 
   while (getreg32(rdist + GICR_WAKER) & BIT(GICR_WAKER_CA))
