@@ -28,14 +28,25 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
-#  include "hardware/stm32f72xx73xx_pinmap.h"
-#elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
-#  include "hardware/stm32f74xx75xx_pinmap.h"
-#elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
-#  include "hardware/stm32f76xx77xx_pinmap.h"
+#if defined(CONFIG_STM32F7_USE_LEGACY_PINMAP)
+#  if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#    include "hardware/stm32f72xx73xx_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#    include "hardware/stm32f74xx75xx_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#    include "hardware/stm32f76xx77xx_pinmap_legacy.h"
+#  else
+#    error "Unsupported STM32 F7 Pin map"
+#  endif
 #else
-#  error "Unsupported STM32 F7 Pin map"
+#  if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#    include "hardware/stm32f72xx73xx_pinmap.h"
+#  elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#    include "hardware/stm32f74xx75xx_pinmap.h"
+#  elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#    include "hardware/stm32f76xx77xx_pinmap.h"
+#  else
+#    error "Unsupported STM32 F7 Pin map"
+#  endif
 #endif
-
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_PINMAP_H */

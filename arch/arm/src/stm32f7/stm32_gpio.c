@@ -45,6 +45,10 @@
   || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
   || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
+#if defined(CONFIG_STM32F7_USE_LEGACY_PINMAP)
+#  pragma message "CONFIG_STM32F7_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
