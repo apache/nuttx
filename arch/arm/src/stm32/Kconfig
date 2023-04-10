@@ -3452,6 +3452,26 @@ config STM32_NOEXT_VECTORS
 		Sometimes you may not need any Vector support beyond SysTick
 		and wish to save memory. This applies only to ARMv7-M architectures.
 
+config STM32_USE_LEGACY_PINMAP
+	bool "Use the legacy pinmap with GPIO_SPEED_xxx included."
+	default y
+	---help---
+		In the past, pinmap files included GPIO_SPEED_xxxMhz. These speed
+		settings should have come from the board.h as it describes the wiring
+		of the SoC to the board. The speed is really slew rate control and
+		therefore is related to the layout and can only be properly set
+		in board.h.
+
+		STM32_USE_LEGACY_PINMAP is provided, to allow lazy migration to
+		using pinmaps without speeds. The work required to do this can be aided
+		by running tools/stm32_pinmap_tool.py. The tools will take a board.h
+		file and a legacy pinmap and output the required changes that one needs
+		to make to a board.h file.
+
+		Eventually, STM32_USE_LEGACY_PINMAP will be deprecated and the legacy
+		pinmaps removed from NuttX. Any new boards added should set
+		STM32_USE_LEGACY_PINMAP=n and fully define the pins in board.h
+
 config STM32_SYSCFG_IOCOMPENSATION
 	bool "SYSCFG I/O Compensation"
 	default n
