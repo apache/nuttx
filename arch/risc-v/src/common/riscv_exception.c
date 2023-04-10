@@ -82,7 +82,7 @@ int riscv_exception(int mcause, void *regs, void *args)
   _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
   up_irq_save();
   CURRENT_REGS = regs;
-  PANIC();
+  PANIC_WITH_REGS("panic", regs);
 
   return 0;
 }

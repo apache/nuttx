@@ -163,6 +163,6 @@ uint32_t *pic32mz_exception(uint32_t *regs)
    */
 
   CURRENT_REGS = regs;
-  PANIC();
+  PANIC_WITH_REGS("panic", regs);
   return regs; /* Won't get here */
 }

@@ -33,6 +33,6 @@
 
 void __assert(FAR const char *filename, int linenum, FAR const char *msg)
 {
-  _assert(filename, linenum, msg);
+  _assert(filename, linenum, msg, NULL);
   abort();
 }

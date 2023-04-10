@@ -103,6 +103,6 @@ int arm_busfault(int irq, void *context, void *arg)
     }
 
   up_irq_save();
-  PANIC();
+  PANIC_WITH_REGS("panic", context);
   return OK;
 }

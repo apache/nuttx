@@ -419,11 +419,24 @@ static void show_tasks(void)
  * Public Functions
  ****************************************************************************/
 
-void _assert(FAR const char *filename, int linenum, FAR const char *msg)
+/****************************************************************************
+ * Name: _assert
+ ****************************************************************************/
+
+void _assert(FAR const char *filename, int linenum,
+             FAR const char *msg, FAR void *regs)
 {
   FAR struct tcb_s *rtcb = running_task();
   struct utsname name;
   bool fatal = true;
+
+  /* try to save current context if regs is null */
+
+  if (regs == NULL)
+    {
+      up_saveusercontext(g_last_regs);
+      regs = g_last_regs;
+    }
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
@@ -471,15 +484,7 @@ void _assert(FAR const char *filename, int linenum, FAR const char *msg)
 
   /* Register dump */
 
-  if (up_interrupt_context())
-    {
-      up_dump_register(NULL);
-    }
-  else
-    {
-      up_saveusercontext(g_last_regs);
-      up_dump_register(g_last_regs);
-    }
+  up_dump_register(regs);
 
 #ifdef CONFIG_ARCH_STACKDUMP
   show_stacks(rtcb);

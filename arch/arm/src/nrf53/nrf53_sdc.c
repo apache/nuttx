@@ -323,7 +323,7 @@ static int bt_hci_send(struct bt_driver_s *btdev,
 
 static void sdc_fault_handler(const char *file, const uint32_t line)
 {
-  _assert(file, line, "SoftDevice Controller Fault");
+  __assert(file, line, "SoftDevice Controller Fault");
 }
 
 /****************************************************************************
@@ -332,7 +332,7 @@ static void sdc_fault_handler(const char *file, const uint32_t line)
 
 static void mpsl_assert_handler(const char *const file, const uint32_t line)
 {
-  _assert(file, line, "MPSL assertion failed");
+  __assert(file, line, "MPSL assertion failed");
 }
 
 /****************************************************************************

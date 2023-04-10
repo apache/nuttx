@@ -372,5 +372,5 @@ void arm64_fatal_error(unsigned int reason, struct regs_context * reg)
         }
     }
 
-  PANIC();
+  PANIC_WITH_REGS("panic", reg);
 }

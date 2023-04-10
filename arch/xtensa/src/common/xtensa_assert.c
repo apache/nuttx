@@ -81,7 +81,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
   _alert("Unhandled Exception %d\n", xptcode);
 #endif
 
-  PANIC();  /* Should not return */
+  PANIC_WITH_REGS("panic", regs);  /* Should not return */
   for (; ; );
 }
 
@@ -184,6 +184,6 @@ void xtensa_user_panic(int exccause, uint32_t *regs)
   _alert("User Exception: EXCCAUSE=%04x\n", exccause);
 #endif
 
-  PANIC(); /* Should not return */
+  PANIC_WITH_REGS("user panic", regs); /* Should not return */
   for (; ; );
 }
