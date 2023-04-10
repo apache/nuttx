@@ -35,11 +35,12 @@
 #include <nuttx/sched.h>
 #include <nuttx/addrenv.h>
 
-#include "arch/irq.h"
-#include "signal/signal.h"
 #include "addrenv.h"
+#include "arch/irq.h"
 #include "arm64_internal.h"
 #include "arm64_fatal.h"
+#include "sched/sched.h"
+#include "signal/signal.h"
 
 /****************************************************************************
  * Private Functions
@@ -214,7 +215,13 @@ uint64_t *arm64_syscall_switch(uint64_t * regs)
       addrenv_switch(NULL);
 #endif
 
-    /* Restore the cpu lock */
+      /* Record the new "running" task.  g_running_tasks[] is only used by
+       * assertion logic for reporting crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+
+      /* Restore the cpu lock */
 
       restore_critical_section();
     }
