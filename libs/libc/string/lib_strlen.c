@@ -30,6 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef strlen /* See mm/README.txt */
 size_t strlen(const char *s)
 {
@@ -37,3 +38,4 @@ size_t strlen(const char *s)
   for (sc = s; *sc != '\0'; ++sc);
   return sc - s;
 }
+#endif

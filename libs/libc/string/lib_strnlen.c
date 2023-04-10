@@ -30,9 +30,11 @@
  * Public Functions
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 size_t strnlen(const char *s, size_t maxlen)
 {
   const char *sc;
   for (sc = s; maxlen != 0 && *sc != '\0'; maxlen--, ++sc);
   return sc - s;
 }
+#endif

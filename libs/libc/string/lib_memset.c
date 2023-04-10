@@ -46,6 +46,7 @@
  * Public Functions
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef memset /* See mm/README.txt */
 no_builtin("memset")
 FAR void *memset(FAR void *s, int c, size_t n)
@@ -169,3 +170,4 @@ FAR void *memset(FAR void *s, int c, size_t n)
 #endif
   return s;
 }
+#endif

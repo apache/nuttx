@@ -42,6 +42,7 @@
  *
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef strcpy /* See mm/README.txt */
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
@@ -49,3 +50,4 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
   while ((*dest++ = *src++) != '\0');
   return tmp;
 }
+#endif

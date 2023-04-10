@@ -44,6 +44,7 @@
  *
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef memchr /* See mm/README.txt */
 FAR void *memchr(FAR const void *s, int c, size_t n)
 {
@@ -61,3 +62,4 @@ FAR void *memchr(FAR const void *s, int c, size_t n)
 
   return NULL;
 }
+#endif

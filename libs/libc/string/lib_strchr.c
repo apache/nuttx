@@ -44,6 +44,7 @@
  *
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef strchr /* See mm/README.txt */
 FAR char *strchr(FAR const char *s, int c)
 {
@@ -62,3 +63,4 @@ FAR char *strchr(FAR const char *s, int c)
 
   return NULL;
 }
+#endif

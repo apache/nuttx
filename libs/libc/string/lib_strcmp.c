@@ -30,6 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef strcmp /* See mm/README.txt */
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
@@ -45,3 +46,4 @@ int strcmp(FAR const char *cs, FAR const char *ct)
 
   return result;
 }
+#endif

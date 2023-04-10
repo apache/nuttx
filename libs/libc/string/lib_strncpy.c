@@ -51,6 +51,7 @@
  *
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef strncpy /* See mm/README.txt */
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
@@ -76,3 +77,4 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 
   return ret;
 }
+#endif

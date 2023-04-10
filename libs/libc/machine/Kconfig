@@ -137,6 +137,18 @@ config LIBC_ARCH_ELF_64BIT
 	default n
 	depends on LIBC_ARCH_ELF
 
+config LIBC_ARCH_FORCE_KERNEL
+	bool
+	default n
+	---help---
+		Force usage of the architecture-specific implementations of C library
+		functions by the Kernel when protected build is selected. This option
+		is particularly useful for situations that require the software libc
+		functions being built (`LIBC_ARCH_X` not being selected) to be used
+		only on the userspace. Architecture-specific implementations, ROM
+		functions included, may not be accessed from the userspace but may be
+		required on the kernel.
+
 # One or more the of above may be selected by architecture specific logic
 
 if ARCH_ARM

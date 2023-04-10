@@ -43,6 +43,7 @@
  *
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 size_t strlcpy(FAR char *dst, FAR const char *src, size_t dsize)
 {
   FAR const char *osrc = src;
@@ -71,3 +72,4 @@ size_t strlcpy(FAR char *dst, FAR const char *src, size_t dsize)
 
   return (src - osrc - 1);
 }
+#endif

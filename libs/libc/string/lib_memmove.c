@@ -30,6 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
+#if !defined(__KERNEL__) || !defined(CONFIG_LIBC_ARCH_FORCE_KERNEL)
 #undef memmove /* See mm/README.txt */
 no_builtin("memmove")
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
@@ -60,3 +61,4 @@ FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 
   return dest;
 }
+#endif
