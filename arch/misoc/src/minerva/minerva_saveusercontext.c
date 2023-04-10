@@ -23,6 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
+
+#include <string.h>
 
 #include <arch/syscall.h>
 
@@ -46,5 +49,13 @@
 
 int up_saveusercontext(void *saveregs)
 {
+  if (up_interrupt_context())
+    {
+      /* TODO: save interrupt context */
+
+      memset(saveregs, 0x0, XCPTCONTEXT_SIZE);
+      return 0;
+    }
+
   return sys_call1(SYS_save_context, (uintptr_t)saveregs);
 }
