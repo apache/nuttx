@@ -28,23 +28,42 @@
 #include <nuttx/config.h>
 
 #include "stm32_gpio.h"
-
-#if defined(CONFIG_STM32_STM32G4XXK)
-#  include "stm32g4xxk_pinmap.h"
-#elif defined(CONFIG_STM32_STM32G4XXC)
-#  include "stm32g4xxc_pinmap.h"
-#elif defined(CONFIG_STM32_STM32G4XXR)
-#  include "stm32g4xxr_pinmap.h"
-#elif defined(CONFIG_STM32_STM32G4XXM)
-#  include "stm32g4xxm_pinmap.h"
-#elif defined(CONFIG_STM32_STM32G4XXV)
-#  include "stm32g4xxv_pinmap.h"
-#elif defined(CONFIG_STM32_STM32G4XXP)
-#  include "stm32g4xxp_pinmap.h"
-#elif defined(CONFIG_STM32_STM32G4XXQ)
-#  include "stm32g4xxq_pinmap.h"
+#if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#  if defined(CONFIG_STM32_STM32G4XXK)
+#    include "stm32g4xxk_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32_STM32G4XXC)
+#    include "stm32g4xxc_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32_STM32G4XXR)
+#    include "stm32g4xxr_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32_STM32G4XXM)
+#    include "stm32g4xxm_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32_STM32G4XXV)
+#    include "stm32g4xxv_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32_STM32G4XXP)
+#    include "stm32g4xxp_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32_STM32G4XXQ)
+#    include "stm32g4xxq_pinmap_legacy.h"
+#  else
+#    error "Unknown STM32G4xxxx chip!"
+#  endif
 #else
-#  error "Unknown STM32G4xxxx chip!"
+#  if defined(CONFIG_STM32_STM32G4XXK)
+#    include "stm32g4xxk_pinmap.h"
+#  elif defined(CONFIG_STM32_STM32G4XXC)
+#    include "stm32g4xxc_pinmap.h"
+#  elif defined(CONFIG_STM32_STM32G4XXR)
+#    include "stm32g4xxr_pinmap.h"
+#  elif defined(CONFIG_STM32_STM32G4XXM)
+#    include "stm32g4xxm_pinmap.h"
+#  elif defined(CONFIG_STM32_STM32G4XXV)
+#    include "stm32g4xxv_pinmap.h"
+#  elif defined(CONFIG_STM32_STM32G4XXP)
+#    include "stm32g4xxp_pinmap.h"
+#  elif defined(CONFIG_STM32_STM32G4XXQ)
+#    include "stm32g4xxq_pinmap.h"
+#  else
+#    error "Unknown STM32G4xxxx chip!"
+#  endif
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PINMAP_H */
