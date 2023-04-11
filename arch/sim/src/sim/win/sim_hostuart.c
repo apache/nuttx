@@ -26,6 +26,12 @@
 #include <windows.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NUM_INPUT 16
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -89,38 +95,6 @@ int host_uart_puts(int fd, const char *buf, size_t size)
 }
 
 /****************************************************************************
- * Name: host_uart_getc
- ****************************************************************************/
-
-int host_uart_gets(int fd, char *buf, size_t size)
-{
-  DWORD nread;
-  int ret;
-
-  ret = ReadConsole(g_stdin_handle, buf, size, &nread, 0);
-
-  return ret == 0 ? -EIO : nread;
-}
-
-/****************************************************************************
- * Name: host_uart_getcflag
- ****************************************************************************/
-
-int host_uart_getcflag(int fd, unsigned int *cflag)
-{
-  return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: host_uart_setcflag
- ****************************************************************************/
-
-int host_uart_setcflag(int fd, unsigned int cflag)
-{
-  return -ENOSYS;
-}
-
-/****************************************************************************
  * Name: host_uart_checkin
  ****************************************************************************/
 
@@ -143,4 +117,58 @@ bool host_uart_checkin(int fd)
 bool host_uart_checkout(int fd)
 {
   return true;
+}
+
+/****************************************************************************
+ * Name: host_uart_getc
+ ****************************************************************************/
+
+int host_uart_gets(int fd, char *buf, size_t size)
+{
+  INPUT_RECORD input[NUM_INPUT];
+  char *pos = buf;
+  DWORD ninput;
+  int i;
+
+  while (size > 0 && host_uart_checkin(fd))
+    {
+      ninput = size > NUM_INPUT ? NUM_INPUT : size;
+      if (ReadConsoleInput(g_stdin_handle,
+                           (void *)&input, ninput, &ninput) <= 0 ||
+          ninput == 0)
+        {
+          break;
+        }
+
+      for (i = 0; i < ninput; i++)
+        {
+          if (input[i].EventType == KEY_EVENT &&
+              input[i].Event.KeyEvent.bKeyDown &&
+              input[i].Event.KeyEvent.uChar.AsciiChar != 0)
+            {
+              *pos++ = input[i].Event.KeyEvent.uChar.AsciiChar;
+              size--;
+            }
+        }
+    }
+
+  return pos == buf ? -EIO : pos - buf;
+}
+
+/****************************************************************************
+ * Name: host_uart_getcflag
+ ****************************************************************************/
+
+int host_uart_getcflag(int fd, unsigned int *cflag)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: host_uart_setcflag
+ ****************************************************************************/
+
+int host_uart_setcflag(int fd, unsigned int cflag)
+{
+  return -ENOSYS;
 }
