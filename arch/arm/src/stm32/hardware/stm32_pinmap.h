@@ -109,11 +109,23 @@
 /* STM32 F3 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F30XX)
-#  include "hardware/stm32f30xxx_pinmap.h"
+#  if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#    include "hardware/stm32f30xxx_pinmap_legacy.h"
+#  else
+#    include "hardware/stm32f30xxx_pinmap.h"
+#  endif
 #elif defined(CONFIG_STM32_STM32F33XX)
-#  include "hardware/stm32f33xxx_pinmap.h"
+#  if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#    include "hardware/stm32f33xxx_pinmap_legacy.h"
+#  else
+#    include "hardware/stm32f33xxx_pinmap.h"
+#  endif
 #elif defined(CONFIG_STM32_STM32F37XX)
-#  include "hardware/stm32f37xxx_pinmap.h"
+#  if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#    include "hardware/stm32f37xxx_pinmap_legacy.h"
+#  else
+#    include "hardware/stm32f37xxx_pinmap.h"
+#  endif
 
 /* STM32 F412 Family ********************************************************/
 
