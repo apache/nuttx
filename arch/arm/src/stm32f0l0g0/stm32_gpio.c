@@ -43,6 +43,10 @@
 #  include "hardware/stm32_exti.h"
 #endif
 
+#if defined(CONFIG_STM32F0G0L0_USE_LEGACY_PINMAP)
+#  pragma message "CONFIG_STM32F0G0L0_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
