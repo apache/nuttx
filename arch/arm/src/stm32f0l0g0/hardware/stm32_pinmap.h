@@ -28,20 +28,37 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0L0G0_STM32F03X)
-#  include "hardware/stm32f03x_pinmap.h"
-#elif defined(CONFIG_STM32F0L0G0_STM32F05X)
-#  include "hardware/stm32f05x_pinmap.h"
-#elif defined(CONFIG_STM32F0L0G0_STM32F07X)
-#  include "hardware/stm32f07x_pinmap.h"
-#elif defined(CONFIG_STM32F0L0G0_STM32F09X)
-#  include "hardware/stm32f09x_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_pinmap.h"
+#if defined(CONFIG_STM32F0G0L0_USE_LEGACY_PINMAP)
+#  if defined(CONFIG_STM32F0L0G0_STM32F03X)
+#    include "hardware/stm32f03x_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32F0L0G0_STM32F05X)
+#    include "hardware/stm32f05x_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32F0L0G0_STM32F07X)
+#    include "hardware/stm32f07x_pinmap_legacy.h"
+#  elif defined(CONFIG_STM32F0L0G0_STM32F09X)
+#    include "hardware/stm32f09x_pinmap_legacy.h"
+#  elif defined(CONFIG_ARCH_CHIP_STM32L0)
+#    include "hardware/stm32l0_pinmap_legacy.h"
+#  elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#    include "hardware/stm32g0_pinmap_legacy.h"
+#  else
+#    error "Unsupported STM32 M0 pin map"
+#  endif
 #else
-#  error "Unsupported STM32 M0 pin map"
+#  if defined(CONFIG_STM32F0L0G0_STM32F03X)
+#    include "hardware/stm32f03x_pinmap.h"
+#  elif defined(CONFIG_STM32F0L0G0_STM32F05X)
+#    include "hardware/stm32f05x_pinmap.h"
+#  elif defined(CONFIG_STM32F0L0G0_STM32F07X)
+#    include "hardware/stm32f07x_pinmap.h"
+#  elif defined(CONFIG_STM32F0L0G0_STM32F09X)
+#    include "hardware/stm32f09x_pinmap.h"
+#  elif defined(CONFIG_ARCH_CHIP_STM32L0)
+#    include "hardware/stm32l0_pinmap.h"
+#  elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#    include "hardware/stm32g0_pinmap.h"
+#  else
+#    error "Unsupported STM32 M0 pin map"
+#  endif
 #endif
-
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_PINMAP_H */
