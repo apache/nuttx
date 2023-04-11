@@ -101,8 +101,11 @@
 /* STM32 F2 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F20XX)
-#  include "hardware/stm32f20xxx_pinmap.h"
-
+#  if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#    include "hardware/stm32f20xxx_pinmap_legacy.h"
+#  else
+#    include "hardware/stm32f20xxx_pinmap.h"
+#  endif
 /* STM32 F3 Family **********************************************************/
 
 #elif defined(CONFIG_STM32_STM32F30XX)
