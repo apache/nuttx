@@ -288,6 +288,7 @@ bool arm64_gic_irq_is_enabled(unsigned int intid);
 int  arm64_gic_initialize(void);
 void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags);
+int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 /****************************************************************************
  * Name: arm64_decodeirq

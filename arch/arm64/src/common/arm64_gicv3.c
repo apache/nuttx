@@ -153,8 +153,8 @@ static inline void arm64_gic_write_irouter(uint64_t val, unsigned int intid)
 void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags)
 {
-  uint32_t      mask    = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
-  uint32_t      idx     = intid / GIC_NUM_INTR_PER_REG;
+  uint32_t      mask  = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t      idx   = intid / GIC_NUM_INTR_PER_REG;
   uint32_t      shift;
   uint32_t      val;
   unsigned long base = GET_DIST_BASE(intid);
@@ -186,10 +186,55 @@ void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
     }
 }
 
+/***************************************************************************
+ * Name: arm64_gic_irq_trigger
+ *
+ * Description:
+ *   Set the trigger type for the specified IRQ source and the current CPU.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ * Input Parameters:
+ *   irq   - The interrupt request to modify.
+ *   flags - irq type, IRQ_TYPE_EDGE or IRQ_TYPE_LEVEL
+ *           Default is IRQ_TYPE_LEVEL
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ***************************************************************************/
+
+int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags)
+{
+  uint32_t      idx  = intid / GIC_NUM_INTR_PER_REG;
+  uint32_t      shift;
+  uint32_t      val;
+  unsigned long base = GET_DIST_BASE(intid);
+
+  if (!GIC_IS_SGI(intid))
+    {
+      idx   = intid / GIC_NUM_CFG_PER_REG;
+      shift = (intid & (GIC_NUM_CFG_PER_REG - 1)) * 2;
+
+      val = getreg32(ICFGR(base, idx));
+      val &= ~(GICD_ICFGR_MASK << shift);
+      if (flags & IRQ_TYPE_EDGE)
+        {
+          val |= (GICD_ICFGR_TYPE << shift);
+        }
+
+      putreg32(val, ICFGR(base, idx));
+      return OK;
+    }
+
+  return -EINVAL;
+}
+
 void arm64_gic_irq_enable(unsigned int intid)
 {
-  uint32_t  mask    = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
-  uint32_t  idx     = intid / GIC_NUM_INTR_PER_REG;
+  uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
 
   putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 
@@ -206,8 +251,8 @@ void arm64_gic_irq_enable(unsigned int intid)
 
 void arm64_gic_irq_disable(unsigned int intid)
 {
-  uint32_t  mask    = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
-  uint32_t  idx     = intid / GIC_NUM_INTR_PER_REG;
+  uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
 
   putreg32(mask, ICENABLER(GET_DIST_BASE(intid), idx));
 
@@ -218,9 +263,9 @@ void arm64_gic_irq_disable(unsigned int intid)
 
 bool arm64_gic_irq_is_enabled(unsigned int intid)
 {
-  uint32_t  mask    = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
-  uint32_t  idx     = intid / GIC_NUM_INTR_PER_REG;
-  uint32_t  val;
+  uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
+  uint32_t val;
 
   val = getreg32(ISENABLER(GET_DIST_BASE(intid), idx));
 
@@ -261,18 +306,18 @@ void arm64_gic_eoi(unsigned int intid)
 int arm64_gic_raise_sgi(unsigned int sgi_id, uint64_t target_aff,
                         uint16_t target_list)
 {
-  uint32_t  aff3;
-  uint32_t  aff2;
-  uint32_t  aff1;
-  uint64_t  sgi_val;
+  uint32_t aff3;
+  uint32_t aff2;
+  uint32_t aff1;
+  uint64_t sgi_val;
 
   assert(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
 
-  aff1  = MPIDR_AFFLVL(target_aff, 1);
-  aff2  = MPIDR_AFFLVL(target_aff, 2);
-  aff3  = MPIDR_AFFLVL(target_aff, 3);
+  aff1 = MPIDR_AFFLVL(target_aff, 1);
+  aff2 = MPIDR_AFFLVL(target_aff, 2);
+  aff3 = MPIDR_AFFLVL(target_aff, 3);
 
   sgi_val = GICV3_SGIR_VALUE(aff3, aff2, aff1, sgi_id, SGIR_IRM_TO_AFF,
                              target_list);
@@ -316,7 +361,6 @@ static void gicv3_cpuif_init(void)
 {
   uint32_t      icc_sre;
   uint32_t      intid;
-
   unsigned long base = gic_get_rdist() + GICR_SGI_BASE_OFF;
 
   /* Disable all sgi ppi */
@@ -479,9 +523,6 @@ static void gicv3_dist_init(void)
 
 void up_enable_irq(int irq)
 {
-  /* TODO: add common interface to set IRQ type for NuttX */
-
-  arm64_gic_irq_set_priority(irq, IRQ_DEFAULT_PRIORITY, IRQ_TYPE_LEVEL);
   arm64_gic_irq_enable(irq);
 }
 
@@ -618,11 +659,11 @@ uint64_t * arm64_decodeirq(uint64_t * regs)
 
 static int gic_validate_dist_version(void)
 {
-  uint32_t  typer;
-  bool      has_rss;
-  uint32_t  reg = getreg32(GICD_PIDR2) & GICD_PIDR2_ARCH_MASK;
-  int       spis;
-  int       espis;
+  uint32_t typer;
+  bool     has_rss;
+  uint32_t reg = getreg32(GICD_PIDR2) & GICD_PIDR2_ARCH_MASK;
+  int      spis;
+  int      espis;
 
   if (reg == GICD_PIDR2_ARCH_GICV3)
     {
@@ -678,10 +719,10 @@ static int gic_validate_redist_version(void)
       return -ENODEV;
     }
 
-  typer             = getreg64(redist_base + GICR_TYPER);
-  has_vlpis         &= !!(typer & GICR_TYPER_VLPIS);
-  has_direct_lpi    &= !!(typer & GICR_TYPER_DIRECTLPIS);
-  ppi_nr            = MIN(GICR_TYPER_NR_PPIS(typer), ppi_nr);
+  typer           = getreg64(redist_base + GICR_TYPER);
+  has_vlpis      &= !!(typer & GICR_TYPER_VLPIS);
+  has_direct_lpi &= !!(typer & GICR_TYPER_DIRECTLPIS);
+  ppi_nr          = MIN(GICR_TYPER_NR_PPIS(typer), ppi_nr);
 
   if (ppi_nr == (~0U))
     {
@@ -701,9 +742,9 @@ static void arm64_gic_init(void)
   uint8_t   cpu;
   int       err;
 
-  cpu               = this_cpu();
-  gic_rdists[cpu]   = CONFIG_GICR_BASE +
-                     up_cpu_index() * CONFIG_GICR_OFFSET;
+  cpu             = this_cpu();
+  gic_rdists[cpu] = CONFIG_GICR_BASE +
+                    up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
