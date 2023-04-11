@@ -1161,6 +1161,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
+  static bool onceinit;
 #ifndef CONFIG_RPTUN_WORKQUEUE
   FAR char *argv[3];
   char arg1[19];
@@ -1168,10 +1169,15 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   char name[32];
   int ret;
 
-  ret = metal_init(&params);
-  if (ret < 0)
+  if (!onceinit)
     {
-      return ret;
+      ret = metal_init(&params);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      onceinit = true;
     }
 
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
