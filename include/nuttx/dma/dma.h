@@ -137,12 +137,12 @@
     (chan)->ops->start_cyclic(chan, callback, arg, dst, src, len, period_len)
 
 /****************************************************************************
- * Name: DMA_START_CYCLIC
+ * Name: DMA_START_LINK
  *
  * Description:
- *   Start the cyclic DMA transfer.
+ *   Start the DMA link transfer.
  *
- * Note: callback get called for each period length data DMA transfer.
+ * Note: callback get called when the DMA link transfer finish.
  *
  ****************************************************************************/
 
@@ -233,6 +233,8 @@ typedef CODE void (*dma_callback_t)(FAR struct dma_chan_s *chan,
  *             where DMA data shall be read. If the source is memory this
  *             may be ignored. Legal values: 1, 2, 4, 8.
  * src_width - same as dst_width but for the source(RX) mutatis mutandis.
+ * dst_drq   - physical destination DMA request ID for this channel.
+ * src_drq   - physical source DMA request ID for this channel.
  *
  * Note: the special value zero means to keep the current value without
  *       change.
@@ -246,6 +248,8 @@ struct dma_config_s
   unsigned int timeout;
   unsigned int dst_width;
   unsigned int src_width;
+  unsigned int dst_drq;
+  unsigned int src_drq;
 };
 
 #ifdef CONFIG_DMA_LINK
