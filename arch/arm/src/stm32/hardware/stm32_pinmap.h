@@ -34,7 +34,11 @@
 /* STM32L15xx family */
 
 #  if defined(CONFIG_STM32_STM32L15XX)
-#    include "hardware/stm32l15xxx_pinmap.h"
+#    if defined(CONFIG_STM32_USE_LEGACY_PINMAP)
+#      include "hardware/stm32l15xxx_pinmap_legacy.h"
+#    else
+#      include "hardware/stm32l15xxx_pinmap.h"
+#    endif
 #  else
 #    error "Unsupported EnergyLite chip"
 #  endif
