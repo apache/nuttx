@@ -3506,6 +3506,12 @@ FAR void *gs2200m_register(FAR const char *devpath,
 
   nxmutex_init(&dev->dev_lock);
 
+  if (!dev->path)
+    {
+      wlerr("Failed to allocate driver path.\n");
+      goto errout;
+    }
+
   ret = gs2200m_initialize(dev, lower);
   if (ret < 0)
     {
@@ -3531,6 +3537,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
 
 errout:
   nxmutex_destroy(&dev->dev_lock);
+  lib_free(dev->path);
   kmm_free(dev);
   return NULL;
 }
