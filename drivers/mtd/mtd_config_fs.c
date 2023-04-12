@@ -991,14 +991,6 @@ static int nvs_startup(FAR struct nvs_fs *fs)
   fs->ate_wra = 0;
   fs->data_wra = 0;
 
-  /* Check the number of blocks, it should be at least 2. */
-
-  if (fs->geo.neraseblocks < 2)
-    {
-      ferr("Configuration error - block count\n");
-      return -EINVAL;
-    }
-
   /* Get the device geometry. (Casting to uintptr_t first eliminates
    * complaints on some architectures where the sizeof long is different
    * from the size of a pointer).
@@ -1018,6 +1010,14 @@ static int nvs_startup(FAR struct nvs_fs *fs)
     {
       ferr("ERROR: MTD ioctl(MTDIOC_ERASESTATE) failed: %d\n", rc);
       return rc;
+    }
+
+  /* Check the number of blocks, it should be at least 2. */
+
+  if (fs->geo.neraseblocks < 2)
+    {
+      ferr("Configuration error - block count\n");
+      return -EINVAL;
     }
 
   /* Step through the blocks to find a open block following
