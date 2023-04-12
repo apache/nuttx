@@ -164,11 +164,11 @@ config SENSORS_BMP180
 		Enable driver support for the Bosch BMP180 barometer sensor.
 
 config SENSORS_BMP280
-	bool "Bosch BMP280 Barometic Pressure Sensor"
+	bool "Bosch BMP280 Barometric Pressure Sensor"
 	default n
 	select I2C
 	---help---
-		Enable driver for the Bosch BMP280 barometic pressure sensor.
+		Enable driver for the Bosch BMP280 barometric pressure sensor.
 
 if SENSORS_BMP280
 
