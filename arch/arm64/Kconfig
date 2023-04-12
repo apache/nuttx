@@ -219,6 +219,25 @@ config ARM_GIC_EOIMODE
 
 endif
 
+config ARM64_SEMIHOSTING_HOSTFS
+	bool "Semihosting HostFS"
+	depends on FS_HOSTFS
+	---help---
+		Mount HostFS through semihosting.
+
+		This doesn't support some directory operations like readdir because
+		of the limitations of semihosting mechanism.
+
+if ARM64_SEMIHOSTING_HOSTFS
+
+config ARM64_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+	bool "Cache coherence in semihosting hostfs"
+	depends on ARCH_DCACHE
+	---help---
+		Flush & Invalidte cache before & after bkpt instruction.
+
+endif
+
 config ARM64_DCACHE_DISABLE
 	bool "Disable DCACHE at __start"
 	default n
