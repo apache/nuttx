@@ -43,6 +43,10 @@
  * Public Data
  ****************************************************************************/
 
+#if defined(CONFIG_STM32L5_USE_LEGACY_PINMAP)
+#  pragma message "CONFIG_STM32L5_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
+#endif
+
 /* Base addresses for each GPIO block */
 
 const uint32_t g_gpiobase[STM32L5_NPORTS] =
