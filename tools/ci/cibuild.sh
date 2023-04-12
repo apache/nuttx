@@ -286,7 +286,7 @@ function python-tools {
     CodeChecker \
     cvt2utf \
     cxxfilt \
-    esptool==3.3.1 \
+    esptool==4.5.1 \
     imgtool==1.9.0 \
     kconfiglib \
     pexpect==4.8.0 \
