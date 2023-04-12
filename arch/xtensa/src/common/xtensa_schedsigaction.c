@@ -287,6 +287,31 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   tcb->xcp.sigdeliver  = sigdeliver;
                   tcb->xcp.saved_regs  = tcb->xcp.regs;
 
+                  /* The Inter-Processor Interrupt that pauses the other CPU
+                   * generates a level-1 interrupt which sets the PS.EXCM.
+                   * This level-1 interrupt is treated as an Exception and
+                   * the bit PS.EXCM bit is automatically reset on return
+                   * from Exception. However, this is not the case here
+                   * because we are changing the execution to the signal
+                   * trampoline. Restoring the PS register with PS.EXCM bit
+                   * set would cause any other exception to deviate execution
+                   * to the DEC (double exception vector), avoiding it to be
+                   * treated correctly. According to xtensa ISA: "The process
+                   * of taking an interrupt does not clear the interrupt
+                   * request. The process does set PS.EXCM to 1, which
+                   * disables level-1 interrupts in the interrupt handler.
+                   * Typically, PS.EXCM is reset to 0 by the handler, after
+                   * it has set up the stack frame and masked the interrupt."
+                   * Clean the saved PS.EXCM to 1) avoid an exception from
+                   * being properly treated and 2) avoid interrupts to be
+                   * masked while delivering the signal.
+                   */
+
+                  if ((tcb->xcp.saved_regs[REG_PS] & PS_EXCM_MASK) != 0)
+                    {
+                      tcb->xcp.saved_regs[REG_PS] &= ~PS_EXCM_MASK;
+                    }
+
                   /* Duplicate the register context.  These will be
                    * restored by the signal trampoline after the signal has
                    * been delivered.
