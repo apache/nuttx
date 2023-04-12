@@ -1093,6 +1093,8 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
           pack->dest.entry.utc    = wrfile->ofile.entry.utc;
           pack->dest.entry.datlen = wrfile->ofile.entry.datlen;
 
+          DEBUGASSERT(pack->dest.entry.name != NULL);
+
           memset(&pack->src, 0, sizeof(struct nxffs_packstream_s));
           memcpy(&pack->src.entry, &wrfile->ofile.entry,
                  sizeof(struct nxffs_entry_s));
