@@ -82,4 +82,8 @@ ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += nrf52_composite.c
 endif
 
+ifeq ($(CONFIG_NRF52_QSPI),y)
+CSRCS += nrf52_mx25.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

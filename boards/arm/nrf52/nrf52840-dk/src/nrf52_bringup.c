@@ -261,9 +261,18 @@ int nrf52_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
+#ifdef CONFIG_NRF52_QSPI
+  /* Initialize the MX25 QSPU memory */
+
+  ret = nrf52_mx25_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_mx25_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
   ret = nrf52_sdc_initialize();
-
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
