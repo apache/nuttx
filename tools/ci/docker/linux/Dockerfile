@@ -294,7 +294,7 @@ RUN pip3 install CodeChecker
 RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
-RUN pip3 install esptool
+RUN pip3 install esptool==4.6.dev1
 RUN pip3 install imgtool
 RUN pip3 install kconfiglib
 RUN pip3 install pexpect==4.8.0
