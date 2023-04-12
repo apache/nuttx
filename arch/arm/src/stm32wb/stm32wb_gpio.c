@@ -36,6 +36,10 @@
 
 #include "hardware/stm32wb_syscfg.h"
 
+#if defined(CONFIG_STM32WB_USE_LEGACY_PINMAP)
+#  pragma message "CONFIG_STM32WB_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
