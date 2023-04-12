@@ -353,13 +353,15 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                 {
                                   char *buffer = NULL;
 
-                                  asprintf(&buffer,
-                                           "%s/%s", desc->relpath, name);
-                                  if (buffer != NULL)
+                                  ret = asprintf(&buffer,
+                                                 "%s/%s", desc->relpath,
+                                                 name);
+                                  if (ret > 0)
                                     {
                                       lib_free(desc->buffer);
                                       desc->buffer = buffer;
                                       relpath = buffer;
+                                      ret = OK;
                                     }
                                   else
                                     {
@@ -481,8 +483,8 @@ int inode_search(FAR struct inode_search_s *desc)
 
   if (*desc->path != '/')
     {
-      asprintf(&desc->buffer, "%s/%s", _inode_getcwd(), desc->path);
-      if (desc->buffer == NULL)
+      ret = asprintf(&desc->buffer, "%s/%s", _inode_getcwd(), desc->path);
+      if (ret < 0)
         {
           return -ENOMEM;
         }
