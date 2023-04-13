@@ -332,6 +332,7 @@
 #define AUDIO_MSG_WAKEUP            9
 #define AUDIO_MSG_COMMAND          10
 #define AUDIO_MSG_SLIENCE          11
+#define AUDIO_MSG_UNDERRUN         12
 #define AUDIO_MSG_USER             64
 
 /* Audio Pipeline Buffer flags */
