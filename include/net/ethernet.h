@@ -33,6 +33,10 @@
 
 #define ETHER_ADDR_LEN  6
 
+#define ETHERTYPE_ARP   0x0806 /* Address resolution protocol */
+#define ETHERTYPE_IP    0x0800 /* IP */
+#define ETHERTYPE_IPV6  0x86dd /* IP protocol version 6 */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
