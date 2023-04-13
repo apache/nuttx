@@ -80,6 +80,25 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo,
 #endif
 
 /****************************************************************************
+ * Name: nxflat_addrenv_restore
+ *
+ * Description:
+ *   Restore the address environment before nxflat_addrenv_select() was
+ *   called..
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+#  define nxflat_addrenv_restore(l) addrenv_restore()
+#endif
+
+/****************************************************************************
  * Name: nxflat_addrenv_free
  *
  * Description:
