@@ -163,4 +163,91 @@
  * be used by other board-specific logic.
  */
 
+/* ADC1 */
+
+#define GPIO_ADC123_IN0      GPIO_ADC123_IN0_0  /* PA0 */
+#define GPIO_ADC123_IN1      GPIO_ADC123_IN1_0  /* PA1 */
+#define GPIO_ADC123_IN2      GPIO_ADC123_IN2_0  /* PA2 */
+#define GPIO_ADC123_IN3      GPIO_ADC123_IN3_0  /* PA3 */
+#define GPIO_ADC123_IN10     GPIO_ADC123_IN10_0 /* PC0 */
+#define GPIO_ADC123_IN11     GPIO_ADC123_IN11_0 /* PC1 */
+#define GPIO_ADC123_IN12     GPIO_ADC123_IN12_0 /* PC2 */
+#define GPIO_ADC123_IN13     GPIO_ADC123_IN13_0 /* PC3 */
+
+/* ADC1 */
+
+#define GPIO_ADC12_IN4       GPIO_ADC12_IN4_0  /* PA4 */
+#define GPIO_ADC12_IN5       GPIO_ADC12_IN5_0  /* PA5 */
+#define GPIO_ADC12_IN6       GPIO_ADC12_IN6_0  /* PA6 */
+#define GPIO_ADC12_IN7       GPIO_ADC12_IN7_0  /* PA7 */
+#define GPIO_ADC12_IN8       GPIO_ADC12_IN8_0  /* PB0 */
+#define GPIO_ADC12_IN9       GPIO_ADC12_IN9_0  /* PB1 */
+#define GPIO_ADC12_IN14      GPIO_ADC12_IN14_0 /* PC4 */
+#define GPIO_ADC12_IN15      GPIO_ADC12_IN15_0 /* PC5 */
+
+/* TIM1 */
+
+#define GPIO_TIM1_ETR        GPIO_TIM1_ETR_0                                        /* PA12 */
+#define GPIO_TIM1_CH1IN      GPIO_TIM1_CH1IN_0                                      /* PA8 */
+#define GPIO_TIM1_CH1OUT     GPIO_ADJUST_MODE(GPIO_TIM1_CH1OUT_0, GPIO_MODE_50MHz)  /* PA8 */
+#define GPIO_TIM1_CH2IN      GPIO_TIM1_CH2IN_0                                      /* PA9 */
+#define GPIO_TIM1_CH2OUT     GPIO_ADJUST_MODE(GPIO_TIM1_CH2OUT_0, GPIO_MODE_50MHz)  /* PA9 */
+#define GPIO_TIM1_CH3IN      GPIO_TIM1_CH3IN_0                                      /* PA10 */
+#define GPIO_TIM1_CH3OUT     GPIO_ADJUST_MODE(GPIO_TIM1_CH3OUT_0, GPIO_MODE_50MHz)  /* PA10 */
+#define GPIO_TIM1_CH4IN      GPIO_TIM1_CH4IN_0                                      /* PA11 */
+#define GPIO_TIM1_CH4OUT     GPIO_ADJUST_MODE(GPIO_TIM1_CH4OUT_0, GPIO_MODE_50MHz)  /* PA11 */
+#define GPIO_TIM1_BKIN       GPIO_TIM1_BKIN_0                                       /* PA6 */
+#define GPIO_TIM1_CH1NOUT    GPIO_ADJUST_MODE(GPIO_TIM1_CH1NOUT_0, GPIO_MODE_50MHz) /* PA7 */
+#define GPIO_TIM1_CH2NOUT    GPIO_ADJUST_MODE(GPIO_TIM1_CH2NOUT_0, GPIO_MODE_50MHz) /* PB0 */
+#define GPIO_TIM1_CH3NOUT    GPIO_ADJUST_MODE(GPIO_TIM1_CH3NOUT_0, GPIO_MODE_50MHz) /* PB1 */
+
+/* TIM3 */
+
+#define GPIO_TIM3_CH1IN      GPIO_TIM3_CH1IN_0                                     /* PB4 */
+#define GPIO_TIM3_CH1OUT     GPIO_ADJUST_MODE(GPIO_TIM3_CH1OUT_0, GPIO_MODE_50MHz) /* PB4 */
+#define GPIO_TIM3_CH2IN      GPIO_TIM3_CH2IN_0                                     /* PB5 */
+#define GPIO_TIM3_CH2OUT     GPIO_ADJUST_MODE(GPIO_TIM3_CH2OUT_0, GPIO_MODE_50MHz) /* PB5 */
+#define GPIO_TIM3_CH3IN      GPIO_TIM3_CH3IN_0                                     /* PB0 */
+#define GPIO_TIM3_CH3OUT     GPIO_ADJUST_MODE(GPIO_TIM3_CH3OUT_0, GPIO_MODE_50MHz) /* PB0 */
+#define GPIO_TIM3_CH4IN      GPIO_TIM3_CH4IN_0                                     /* PB1 */
+#define GPIO_TIM3_CH4OUT     GPIO_ADJUST_MODE(GPIO_TIM3_CH4OUT_0, GPIO_MODE_50MHz) /* PB1 */
+
+/* USART1 */
+
+#define GPIO_USART1_TX       GPIO_ADJUST_MODE(GPIO_USART1_TX_0, GPIO_MODE_50MHz) /* PA9 */
+#define GPIO_USART1_RX       GPIO_USART1_RX_0                                    /* PA10 */
+
+/* USART2 */
+
+#define GPIO_USART2_CTS      GPIO_USART2_CTS_0                                    /* PA0 */
+#define GPIO_USART2_RTS      GPIO_ADJUST_MODE(GPIO_USART2_RTS_0, GPIO_MODE_50MHz) /* PA1 */
+#define GPIO_USART2_TX       GPIO_ADJUST_MODE(GPIO_USART2_TX_0, GPIO_MODE_50MHz)  /* PA2 */
+#define GPIO_USART2_RX       GPIO_USART2_RX_0                                     /* PA3 */
+#define GPIO_USART2_CK       GPIO_ADJUST_MODE(GPIO_USART2_CK_0, GPIO_MODE_50MHz)  /* PA4 */
+
+/* SPI1 */
+
+#define GPIO_SPI1_NSS        GPIO_ADJUST_MODE(GPIO_SPI1_NSS_0, GPIO_MODE_50MHz)  /* PA4 */
+#define GPIO_SPI1_SCK        GPIO_ADJUST_MODE(GPIO_SPI1_SCK_0, GPIO_MODE_50MHz)  /* PA5 */
+#define GPIO_SPI1_MISO       GPIO_ADJUST_MODE(GPIO_SPI1_MISO_0, GPIO_MODE_50MHz) /* PA6 */
+#define GPIO_SPI1_MOSI       GPIO_ADJUST_MODE(GPIO_SPI1_MOSI_0, GPIO_MODE_50MHz) /* PA7 */
+
+/* SPI2 */
+
+#define GPIO_SPI2_NSS        GPIO_ADJUST_MODE(GPIO_SPI2_NSS_0, GPIO_MODE_50MHz)  /* PB12 */
+#define GPIO_SPI2_SCK        GPIO_ADJUST_MODE(GPIO_SPI2_SCK_0, GPIO_MODE_50MHz)  /* PB13 */
+#define GPIO_SPI2_MISO       GPIO_ADJUST_MODE(GPIO_SPI2_MISO_0, GPIO_MODE_50MHz) /* PB14 */
+#define GPIO_SPI2_MOSI       GPIO_ADJUST_MODE(GPIO_SPI2_MOSI_0, GPIO_MODE_50MHz) /* PB15 */
+
+/* I2C2 */
+
+#define GPIO_I2C2_SCL        GPIO_ADJUST_MODE(GPIO_I2C2_SCL_0, GPIO_MODE_50MHz)  /* PB10 */
+#define GPIO_I2C2_SDA        GPIO_ADJUST_MODE(GPIO_I2C2_SDA_0, GPIO_MODE_50MHz)  /* PB11 */
+#define GPIO_I2C2_SMBA       GPIO_ADJUST_MODE(GPIO_I2C2_SMBA_0, GPIO_MODE_50MHz) /* PB12 */
+
+/* CAN1 */
+
+#define GPIO_CAN1_RX         GPIO_CAN1_RX_0                                    /* PB8 */
+#define GPIO_CAN1_TX         GPIO_ADJUST_MODE(GPIO_CAN1_TX_0, GPIO_MODE_50MHz) /* PB9 */
+
 #endif /* __BOARDS_ARM_STM32_OLIMEXINO_STM32_INCLUDE_BOARD_H */
