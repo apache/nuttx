@@ -41,6 +41,7 @@
 
 #include "netdev/netdev.h"
 #include "arp/arp.h"
+#include "net/if_arp.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
 #include "netlink/netlink.h"
@@ -246,6 +247,44 @@ static_assert(sizeof(g_ifa_ipv6_policy) / sizeof(g_ifa_ipv6_policy[0]) ==
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
+
+static uint16_t netlink_convert_device_type(uint8_t lltype)
+{
+  switch (lltype)
+    {
+      case NET_LL_ETHERNET:
+        return ARPHRD_ETHER;
+
+      case NET_LL_IEEE80211:
+        return ARPHRD_IEEE80211;
+
+      case NET_LL_LOOPBACK:
+        return ARPHRD_LOOPBACK;
+
+      case NET_LL_SLIP:
+        return ARPHRD_SLIP;
+
+      case NET_LL_TUN:
+      case NET_LL_BLUETOOTH:
+      case NET_LL_PKTRADIO:
+      case NET_LL_MBIM:
+        return ARPHRD_NONE;
+
+      case NET_LL_IEEE802154:
+        return ARPHRD_IEEE802154;
+
+      case NET_LL_CAN:
+        return ARPHRD_CAN;
+
+      case NET_LL_CELL:
+        return ARPHRD_PHONET_PIPE;
+
+      default:
+        nerr("ERROR: invalid lltype %d\n", lltype);
+        return ARPHRD_VOID;
+    }
+}
+
 static FAR struct netlink_response_s *
 netlink_get_device(FAR struct net_driver_s *dev,
                    FAR const struct nlroute_sendto_request_s *req)
@@ -275,7 +314,7 @@ netlink_get_device(FAR struct net_driver_s *dev,
   resp->hdr.nlmsg_pid    = req ? req->hdr.nlmsg_pid : 0;
 
   resp->iface.ifi_family = req ? req->gen.rtgen_family : AF_PACKET;
-  resp->iface.ifi_type   = dev->d_lltype;
+  resp->iface.ifi_type   = netlink_convert_device_type(dev->d_lltype);
 #ifdef CONFIG_NETDEV_IFINDEX
   resp->iface.ifi_index  = dev->d_ifindex;
 #endif
