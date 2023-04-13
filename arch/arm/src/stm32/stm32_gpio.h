@@ -132,6 +132,8 @@
 #  define GPIO_MODE_2MHz              (2 << GPIO_MODE_SHIFT)     /* Output mode, max speed 2 MHz */
 #  define GPIO_MODE_50MHz             (3 << GPIO_MODE_SHIFT)     /* Output mode, max speed 50 MHz */
 
+#define GPIO_ADJUST_MODE(p, m) (((p) & ~GPIO_MODE_MASK) | (m))
+
 /* External interrupt selection (GPIO inputs only):
  *
  * 1111 1100 0000 0000
