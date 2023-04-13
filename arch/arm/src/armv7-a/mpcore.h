@@ -44,17 +44,27 @@
 
 /* Peripheral Base Offsets **************************************************/
 
+#ifndef MPCORE_SCU_OFFSET
 #define MPCORE_SCU_OFFSET  0x0000 /* 0x0000-0x00fc SCU registers */
+#endif
+#ifndef MPCORE_ICC_OFFSET
 #ifdef CONFIG_ARCH_CORTEXA7
 #define MPCORE_ICC_OFFSET  0x2000 /* 0x0000-0x00FC Interrupt controller interface */
 #else
 #define MPCORE_ICC_OFFSET  0x0100 /* 0x0000-0x00FC Interrupt controller interface */
 #endif
+#endif
+#ifndef MPCORE_GTM_OFFSET
 #define MPCORE_GTM_OFFSET  0x0200 /* 0x0200-0x02ff Global timer */
+#endif
                                   /* 0x0300-0x05ff Reserved */
+#ifndef MPCORE_PTM_OFFSET
 #define MPCORE_PTM_OFFSET  0x0600 /* 0x0600-0x06ff Private timers and watchdogs */
+#endif
                                   /* 0x0700-0x07ff Reserved */
+#ifndef MPCORE_ICD_OFFSET
 #define MPCORE_ICD_OFFSET  0x1000 /* 0x1000-0x1fff Interrupt Distributor */
+#endif
 
 /* Peripheral Base Addresses ************************************************/
 
