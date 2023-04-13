@@ -265,6 +265,20 @@ config ARCH_BOARD_ESP32_LYRAT
 		Development Framework (ADF). It is designed for smart speakers and smart-home
 		applications. This port is for board version 4.3.
 
+config ARCH_BOARD_ESP32_PICO_KIT
+	bool "Espressif ESP32-PICO-KIT V4"
+	depends on ARCH_CHIP_ESP32PICOD4
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		ESP32-PICO-KIT is an ESP32-based mini development board produced by Espressif.
+		The core of this board is ESP32-PICO-D4, a System-in-Package module with complete
+		Wi-Fi and Bluetooth functionalities. Compared to other ESP32 modules, ESP32-PICO-D4
+		integrates the following peripheral components in one single package, which otherwise
+		would need to be installed separately: Crystal Oscillator, Flash Memory, Filter Capacitors
+		and RF matching links.
+
+
 config ARCH_BOARD_ESP32_SPARROWKIT
 	bool "Espressif ESP-SPARROW-KIT"
 	depends on ARCH_CHIP_ESP32WROVER
@@ -2819,6 +2833,7 @@ config ARCH_BOARD
 	default "ttgo_eink5_v2"             if ARCH_BOARD_TTGO_T5V2_ESP32
 	default "esp32-ethernet-kit"        if ARCH_BOARD_ESP32_ETHERNETKIT
 	default "esp32-lyrat"               if ARCH_BOARD_ESP32_LYRAT
+	default "esp32-pico-kit"            if ARCH_BOARD_ESP32_PICO_KIT
 	default "esp32-sparrow-kit"         if ARCH_BOARD_ESP32_SPARROWKIT
 	default "esp32-wrover-kit"          if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"            if ARCH_BOARD_ESP32C3_DEVKIT
@@ -3870,6 +3885,9 @@ source "boards/xtensa/esp32/ttgo_eink5_v2/Kconfig"
 endif
 if ARCH_BOARD_ESP32_ETHERNETKIT
 source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
+endif
+if ARCH_BOARD_ESP32_PICO_KIT
+source "boards/xtensa/esp32/esp32-pico-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_LYRAT
 source "boards/xtensa/esp32/esp32-lyrat/Kconfig"

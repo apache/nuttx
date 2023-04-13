@@ -90,6 +90,13 @@ config ARCH_CHIP_ESP32_A1S
 		Ai-Thinker ESP32-A1S module with an embedded ESP32-D0WD chip, 16 MB of
 		Flash memory, 8 MB of PSRAM
 
+config ARCH_CHIP_ESP32PICOD4
+	bool "ESP32-PICO-D4"
+	select ESP32_ESP32DXWDXX
+	select ESP32_FLASH_4M
+	---help---
+		ESP32 chip with a dual Xtensa LX6 core, 4 MB of in-package Flash memory
+
 endchoice # ESP32 Chip Selection
 
 config ESP32_SINGLE_CPU
