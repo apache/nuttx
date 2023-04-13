@@ -55,9 +55,9 @@
 
 /* Recognized values of the type bytes in the Ethernet header */
 
-#define ETHTYPE_ARP      0x0806 /* Address resolution protocol */
-#define ETHTYPE_IP       0x0800 /* IP protocol */
-#define ETHTYPE_IP6      0x86dd /* IP protocol version 6 */
+#define ETHTYPE_ARP      ETHERTYPE_ARP  /* Address resolution protocol */
+#define ETHTYPE_IP       ETHERTYPE_IP   /* IP protocol */
+#define ETHTYPE_IP6      ETHERTYPE_IPV6 /* IP protocol version 6 */
 
 /* Tag protocol identifier (TPID) of 0x8100 identifies the frame as an
  * IEEE 802.1Q-tagged frame.  This field is located at the same position as
@@ -65,7 +65,7 @@
  * distinguish the frame from untagged frames.
  */
 
-#define TPID_8021QVLAN   0x8100
+#define TPID_8021QVLAN   ETHERTYPE_VLAN
 
 /* These are some of the types associated with QVLAN tagged
  * Ethernet packets.
