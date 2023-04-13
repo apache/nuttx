@@ -1772,8 +1772,15 @@ static void mpfs_set_hs_8bit(struct sdio_dev_s *dev)
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   int ret;
   uint32_t r1;
+  uint32_t rr;
 
-  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b70000u | (6 << 8))) == OK)
+  /* mpfs to DDR mode */
+
+  modifyreg32(MPFS_EMMCSD_HRS06, 0x7, MPFS_EMMCSD_MODE_DDR);
+
+  /* eMMC to HS mode */
+
+  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b90100u)) == OK)
     {
       if ((ret == mpfs_waitresponse(dev, MMCSD_CMD6)) == OK)
         {
@@ -1787,9 +1794,21 @@ static void mpfs_set_hs_8bit(struct sdio_dev_s *dev)
       goto err;
     }
 
-  modifyreg32(MPFS_EMMCSD_HRS06, 0, priv->bus_mode);
+  /* While busy */
 
-  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b70000u | (2 << 8))) == OK)
+  do
+    {
+      rr = getreg32(MPFS_EMMCSD_SRS09);
+    }
+  while ((rr & (1 << 20)) == 0);
+
+  /* mpfs to 8-bit mode */
+
+  modifyreg32(MPFS_EMMCSD_SRS10, 0, MPFS_EMMCSD_SRS10_EDTW);
+
+  /* eMMC to 8-bit DDR mode */
+
+  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b70600u)) == OK)
     {
       if ((ret == mpfs_waitresponse(dev, MMCSD_CMD6)) == OK)
         {
@@ -1803,7 +1822,14 @@ static void mpfs_set_hs_8bit(struct sdio_dev_s *dev)
       goto err;
     }
 
-  modifyreg32(MPFS_EMMCSD_SRS10, 0, MPFS_EMMCSD_SRS10_EDTW);
+  /* While busy */
+
+  do
+    {
+      rr = getreg32(MPFS_EMMCSD_SRS09);
+    }
+  while ((rr & (1 << 20)) == 0);
+
   return;
 
 err:
@@ -1883,18 +1909,16 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
       break;
   }
 
-  /* Set the new clock frequency */
-
-  mpfs_setclkrate(priv, clckr);
-
-  /* REVISIT: This should really be a separate configuration procedure */
-
   if (rate == CLOCK_MMC_TRANSFER)
     {
       /* eMMC: Set 8-bit data bus and correct bus mode */
 
       mpfs_set_hs_8bit(dev);
     }
+
+  /* Set the new clock frequency */
+
+  mpfs_setclkrate(priv, clckr);
 }
 
 /****************************************************************************
@@ -2295,15 +2319,6 @@ static int mpfs_dmasendsetup(struct sdio_dev_s *dev,
     {
       mcerr("Unaligned buffer: %p\n", buffer);
       return -EFAULT;
-    }
-
-  /* DMA send doesn't work in 0x08xxxxxxx address range. Default to IRQ mode
-   * in this special case.
-   */
-
-  if (((uintptr_t)buffer & 0xff000000) == 0x08000000)
-    {
-      return mpfs_sendsetup(dev, buffer, buflen);
     }
 
   /* Save the source buffer information for use by the interrupt handler */
