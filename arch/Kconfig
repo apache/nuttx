@@ -555,6 +555,13 @@ config ARCH_SHM_VBASE
 	---help---
 		The virtual address of the beginning of the shared memory region.
 
+config ARCH_KMAP_VBASE
+	hex "Kernel dynamic virtual mappings base"
+	depends on ARCH_VMA_MAPPING
+	---help---
+		The virtual address of the beginning of the kernel dynamic mapping
+		region.
+
 config ARCH_TEXT_NPAGES
 	int "Max .text pages"
 	default 1
@@ -601,6 +608,18 @@ config ARCH_SHM_NPAGES
 	---help---
 		The maximum number of pages that can allocated per region for the shared memory
 		region. Default is 1.
+
+		The size of the virtual shared memory address space is then
+		determined by the product of the maximum number of regions, the
+		maximum number of pages per region, and the configured size of
+		each page.
+
+config ARCH_KMAP_NPAGES
+	int "Max kernel dynamic mapping pages"
+	default 1
+	---help---
+		The maximum amount of pages that a kernel can use for dynamically
+		mapping physical pages to itself.
 
 		The size of the virtual shared memory address space is then
 		determined by the product of the maximum number of regions, the
