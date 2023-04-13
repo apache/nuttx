@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_QEMU_ARM
+
+menu "Qemu Virt Chip Selection"
+
+choice
+	prompt "Qemu Core Configuration"
+	default ARCH_CHIP_QEMU_CORTEXA7
+
+config ARCH_CHIP_QEMU_CORTEXA7
+	bool "Qemu virtual Processor (cortex-a7)"
+        select ARCH_CORTEXA7
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_GTM
+	select ARMV7A_HAVE_PTM
+
+endchoice # Qemu Chip Selection
+
+endmenu # "Qemu Virt Chip Selection"
+
+endif # ARCH_CHIP_QEMU_ARM

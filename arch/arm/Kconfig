@@ -631,6 +631,11 @@ config ARCH_CHIP_TLSR82
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
 
+config ARCH_CHIP_QEMU_ARM
+	bool "QEMU virt platform (ARMv7a)"
+	---help---
+		QEMU virt platform (ARMv7a)
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -1033,6 +1038,7 @@ config ARCH_CHIP
 	default "cxd56xx"	if ARCH_CHIP_CXD56XX
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
+	default "qemu"		if ARCH_CHIP_QEMU_ARM
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1491,5 +1497,8 @@ source "arch/arm/src/cxd56xx/Kconfig"
 endif
 if ARCH_CHIP_TLSR82
 source "arch/arm/src/tlsr82/Kconfig"
+endif
+if ARCH_CHIP_QEMU_ARM
+source "arch/arm/src/qemu/Kconfig"
 endif
 endif # ARCH_ARM
