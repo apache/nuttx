@@ -1720,12 +1720,12 @@ static void cxd56_init_dma(FAR struct cxd56_dev_s *dev)
           dev->state,
           dev->dma_handle);
 
-  dq_clear(&dev->up_pendq);
-  dq_clear(&dev->up_runq);
+  dq_init(&dev->up_pendq);
+  dq_init(&dev->up_runq);
 #ifdef CONFIG_AUDIO_CXD56_SRC
-  dq_clear(&dev->down_pendq);
-  dq_clear(&dev->down_runq);
-  dq_clear(&dev->down_doneq);
+  dq_init(&dev->down_pendq);
+  dq_init(&dev->down_runq);
+  dq_init(&dev->down_doneq);
 #endif
 
   ints = CXD56_DMA_INT_DONE | CXD56_DMA_INT_ERR | CXD56_DMA_INT_CMB;
@@ -3170,6 +3170,16 @@ static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size)
     }
 }
 
+static void send_message_underrun(FAR struct cxd56_dev_s *dev)
+{
+  struct audio_msg_s msg;
+
+  msg.msg_id = AUDIO_MSG_UNDERRUN;
+  msg.u.ptr = NULL;
+  dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_MESSAGE,
+                 (FAR struct ap_buffer_s *)&msg, OK);
+}
+
 static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 {
   FAR struct ap_buffer_s *apb;
@@ -3202,6 +3212,8 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
           auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
           dev->running = false;
         }
+
+      send_message_underrun(dev);
 
       dev->state = CXD56_DEV_STATE_BUFFERING;
     }
@@ -3524,6 +3536,7 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
   unsigned int prio;
   int size;
   int ret;
+  irqstate_t flags;
 
   audinfo("Workerthread started.\n");
 
@@ -3626,6 +3639,13 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
 
   file_mq_close(&priv->mq);
   file_mq_unlink(priv->mqname);
+
+  /* Clean up queue */
+
+  flags = spin_lock_irqsave(&priv->lock);
+  dq_init(&priv->up_runq);
+  dq_init(&priv->up_pendq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Send AUDIO_MSG_COMPLETE to the client */
 
