@@ -201,6 +201,23 @@
 #  define ARCH_SCRATCH_VBASE   __ARCH_SHM_VBASE
 #endif
 
+#ifdef CONFIG_MM_KMAP
+#  ifndef CONFIG_ARCH_KMAP_VBASE
+#    error CONFIG_ARCH_KMAP_VBASE not defined
+#  endif
+
+#  if (CONFIG_ARCH_KMAP_VBASE & CONFIG_MM_MASK) != 0
+#    error CONFIG_ARCH_KMAP_VBASE not aligned to page boundary
+#  endif
+
+#  ifndef CONFIG_ARCH_KMAP_NPAGES
+#    error CONFIG_ARCH_KMAP_NPAGES not defined
+#  endif
+
+#  define ARCH_KMAP_SIZE       (CONFIG_ARCH_KMAP_NPAGES * CONFIG_MM_PGSIZE)
+#  define ARCH_KMAP_VEND       (CONFIG_ARCH_KMAP_VBASE + ARCH_KMAP_SIZE - 1)
+#endif
+
 /* There is no need to use the scratch memory region if the page pool memory
  * is statically mapped.
  */
