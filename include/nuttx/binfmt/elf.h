@@ -117,12 +117,12 @@ struct elf_loadinfo_s
 
   /* Address environment.
    *
-   * addrenv - This is the handle created by up_addrenv_create() that can be
+   * addrenv - This is the handle created by addrenv_allocate() that can be
    *   used to manage the tasks address space.
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  addrenv_t          addrenv;    /* Address environment */
+  FAR addrenv_t     *addrenv;    /* Address environment */
 #endif
 
   uint16_t           symtabidx;  /* Symbol table section index */

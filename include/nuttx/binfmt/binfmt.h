@@ -82,11 +82,11 @@ struct binary_s
 #ifdef CONFIG_ARCH_ADDRENV
   /* Address environment.
    *
-   * addrenv - This is the handle created by up_addrenv_create() that can be
+   * addrenv - This is the handle created by addrenv_allocate() that can be
    *   used to manage the tasks address space.
    */
 
-  addrenv_t addrenv;                   /* Address environment */
+  FAR addrenv_t *addrenv;              /* Address environment */
 #endif
 
   size_t mapsize;                      /* Size of the mapped address region (needed for munmap) */
