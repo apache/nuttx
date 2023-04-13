@@ -59,9 +59,6 @@
 size_t group_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
 {
   size_t n = 0;
-#ifdef CONFIG_ARCH_ADDRENV
-  bool saved = false;
-#endif
 
   /* Perform sanity checks */
 
@@ -77,7 +74,6 @@ size_t group_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
   if (tcb->addrenv_own != NULL)
     {
       addrenv_select(tcb->addrenv_own);
-      saved = true;
     }
 #endif
 
@@ -100,7 +96,7 @@ size_t group_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
     }
 
 #ifdef CONFIG_ARCH_ADDRENV
-  if (saved)
+  if (tcb->addrenv_own != NULL)
     {
       addrenv_restore();
     }

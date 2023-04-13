@@ -203,19 +203,16 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
   size_t size;
 
 #ifdef CONFIG_ARCH_ADDRENV
-  bool saved = false;
-
   if (tcb->addrenv_own != NULL)
     {
       addrenv_select(tcb->addrenv_own);
-      saved = true;
     }
 #endif
 
   size = arm_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
 
 #ifdef CONFIG_ARCH_ADDRENV
-  if (saved)
+  if (tcb->addrenv_own != NULL)
     {
       addrenv_restore();
     }
