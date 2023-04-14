@@ -72,6 +72,10 @@ ifeq ($(CONFIG_IMXRT_FLEXCAN),y)
 CHIP_CSRCS += imxrt_flexcan.c
 endif
 
+ifeq ($(CONFIG_IMXRT_FLEXIO),y)
+CHIP_CSRCS += imxrt_flexio.c
+endif
+
 ifeq ($(CONFIG_IMXRT_FLEXPWM),y)
 CHIP_CSRCS += imxrt_flexpwm.c
 endif
