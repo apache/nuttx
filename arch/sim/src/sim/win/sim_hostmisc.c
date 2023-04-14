@@ -22,7 +22,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <direct.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <io.h>
 #include <windows.h>
+#include <libloaderapi.h>
+
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -47,3 +55,32 @@ int host_backtrace(void** array, int size)
 {
   return CaptureStackBackTrace(0, size, array, NULL);
 }
+
+/****************************************************************************
+ * Name: host_init_cwd
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_IMAGEPATH_AS_CWD
+void host_init_cwd(void)
+{
+  char *name;
+  char path[MAX_PATH];
+
+  /* Get the absolute path of the executable file */
+
+  if (GetModuleFileNameA(GetModuleHandleA(NULL), path, MAX_PATH) == 0)
+    {
+      perror("GetModuleFileNameA failed");
+      return;
+    }
+
+  name = strrchr(path, '/');
+  if (name == NULL)
+    {
+      name = strrchr(path, '\\');
+    }
+
+  *++name = '\0';
+  _chdir(path);
+}
+#endif

@@ -254,6 +254,10 @@ static int sim_loop_task(int argc, char **argv)
 
 void up_initialize(void)
 {
+#ifdef CONFIG_SIM_IMAGEPATH_AS_CWD
+  host_init_cwd();
+#endif
+
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any

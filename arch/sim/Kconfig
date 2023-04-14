@@ -159,6 +159,17 @@ config SIM_HOSTFS
 	---help---
 		Access host filesystem through HostFS.
 
+config SIM_IMAGEPATH_AS_CWD
+	bool "Simulator switch working directory"
+	default n
+	---help---
+		If this option is enabled, the working path of nuttx will be modified
+		to the folder where the nuttx file is located.
+		It affects the file access of hostfs, which will start looking for
+		files based on the nuttx image folder.
+		Otherwise the default $CWD will be used as the starting path for the search.
+		Absolute paths are never affected.
+
 choice
 	prompt "Simulated Network Interface"
 	default SIM_NETDEV
