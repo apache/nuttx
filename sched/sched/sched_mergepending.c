@@ -82,72 +82,78 @@ bool nxsched_merge_pending(void)
 
   rtcb = this_task();
 
-  /* Process every TCB in the g_pendingtasks list */
+  /* Process every TCB in the g_pendingtasks list
+   *
+   * Do nothing if pre-emption is still disabled
+   */
 
-  for (ptcb = (FAR struct tcb_s *)g_pendingtasks.head;
-       ptcb;
-       ptcb = pnext)
+  if (rtcb->lockcount == 0)
     {
-      pnext = ptcb->flink;
-
-      /* REVISIT:  Why don't we just remove the ptcb from pending task list
-       * and call nxsched_add_readytorun?
-       */
-
-      /* Search the ready-to-run list to find the location to insert the
-       * new ptcb. Each is list is maintained in ascending sched_priority
-       * order.
-       */
-
-      for (;
-           (rtcb && ptcb->sched_priority <= rtcb->sched_priority);
-           rtcb = rtcb->flink)
+      for (ptcb = (FAR struct tcb_s *)g_pendingtasks.head;
+           ptcb;
+           ptcb = pnext)
         {
+          pnext = ptcb->flink;
+
+          /* REVISIT:  Why don't we just remove the ptcb from pending task
+           * list and call nxsched_add_readytorun?
+           */
+
+          /* Search the ready-to-run list to find the location to insert the
+           * new ptcb. Each is list is maintained in ascending sched_priority
+           * order.
+           */
+
+          for (;
+               (rtcb && ptcb->sched_priority <= rtcb->sched_priority);
+               rtcb = rtcb->flink)
+            {
+            }
+
+          /* Add the ptcb to the spot found in the list.  Check if the
+           * ptcb goes at the ends of the ready-to-run list. This would be
+           * error condition since the idle test must always be at the end of
+           * the ready-to-run list!
+           */
+
+          DEBUGASSERT(rtcb);
+
+          /* The ptcb goes just before rtcb */
+
+          rprev = rtcb->blink;
+          if (rprev == NULL)
+            {
+              /* Special case: Inserting ptcb at the head of the list */
+
+              ptcb->flink       = rtcb;
+              ptcb->blink       = NULL;
+              rtcb->blink       = ptcb;
+              g_readytorun.head = (FAR dq_entry_t *)ptcb;
+              rtcb->task_state  = TSTATE_TASK_READYTORUN;
+              ptcb->task_state  = TSTATE_TASK_RUNNING;
+              ret               = true;
+            }
+          else
+            {
+              /* Insert in the middle of the list */
+
+              ptcb->flink       = rtcb;
+              ptcb->blink       = rprev;
+              rprev->flink      = ptcb;
+              rtcb->blink       = ptcb;
+              ptcb->task_state  = TSTATE_TASK_READYTORUN;
+            }
+
+          /* Set up for the next time through */
+
+          rtcb = ptcb;
         }
 
-      /* Add the ptcb to the spot found in the list.  Check if the
-       * ptcb goes at the ends of the ready-to-run list. This would be
-       * error condition since the idle test must always be at the end of
-       * the ready-to-run list!
-       */
+      /* Mark the input list empty */
 
-      DEBUGASSERT(rtcb);
-
-      /* The ptcb goes just before rtcb */
-
-      rprev = rtcb->blink;
-      if (rprev == NULL)
-        {
-          /* Special case: Inserting ptcb at the head of the list */
-
-          ptcb->flink       = rtcb;
-          ptcb->blink       = NULL;
-          rtcb->blink       = ptcb;
-          g_readytorun.head = (FAR dq_entry_t *)ptcb;
-          rtcb->task_state  = TSTATE_TASK_READYTORUN;
-          ptcb->task_state  = TSTATE_TASK_RUNNING;
-          ret               = true;
-        }
-      else
-        {
-          /* Insert in the middle of the list */
-
-          ptcb->flink       = rtcb;
-          ptcb->blink       = rprev;
-          rprev->flink      = ptcb;
-          rtcb->blink       = ptcb;
-          ptcb->task_state  = TSTATE_TASK_READYTORUN;
-        }
-
-      /* Set up for the next time through */
-
-      rtcb = ptcb;
+      g_pendingtasks.head = NULL;
+      g_pendingtasks.tail = NULL;
     }
-
-  /* Mark the input list empty */
-
-  g_pendingtasks.head = NULL;
-  g_pendingtasks.tail = NULL;
 
   return ret;
 }
