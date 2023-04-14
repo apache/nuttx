@@ -782,12 +782,22 @@ static void mpfs_sendfifo(struct mpfs_dev_s *priv)
        * come back when we're good to write again.
        */
 
-      if (priv->remaining && (!(getreg32(MPFS_EMMCSD_SRS09) &
-          MPFS_EMMCSD_SRS09_BWE)))
+      if (priv->remaining)
         {
-          modifyreg32(MPFS_EMMCSD_SRS14, 0, MPFS_EMMCSD_SRS14_BWR_IE);
+          /* Enable BWR before checking BWE bit */
+
           putreg32(MPFS_EMMCSD_SRS12_BWR, MPFS_EMMCSD_SRS12);
-          return;
+          modifyreg32(MPFS_EMMCSD_SRS14, 0, MPFS_EMMCSD_SRS14_BWR_IE);
+          if (!(getreg32(MPFS_EMMCSD_SRS09) & MPFS_EMMCSD_SRS09_BWE))
+            {
+              return;
+            }
+
+          /* There is still room for writing to buffer,
+           * disable BWR and continue.
+           */
+
+          modifyreg32(MPFS_EMMCSD_SRS14, MPFS_EMMCSD_SRS14_BWR_IE, 0);
         }
     }
 
