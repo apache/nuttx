@@ -651,7 +651,7 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
  *   data gram socket with the IPPROTO_ICMP6 protocol.  icmpv6_recvmsg()
- *   receives ICMPv6 ECHO replies for the a socket.
+ *   receives ICMPv6 message for the a socket.
  *
  *   If msg_name is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in. The argument 'msg_namelen' is

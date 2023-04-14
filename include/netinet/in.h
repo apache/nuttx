@@ -132,6 +132,8 @@
                                                     * the incoming packet */
 #define IPV6_TCLASS           (__SO_PROTOCOL + 10) /* Access the Traffic Class
                                                     * field */
+#define IPV6_RECVHOPLIMIT     (__SO_PROTOCOL + 11) /* Access the hop limit field */
+#define IPV6_HOPLIMIT         (__SO_PROTOCOL + 12) /* Hop limit */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 
