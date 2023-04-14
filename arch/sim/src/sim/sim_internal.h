@@ -164,6 +164,10 @@ void *sim_doirq(int irq, void *regs);
 void host_abort(int status);
 int  host_backtrace(void** array, int size);
 
+#ifdef CONFIG_SIM_IMAGEPATH_AS_CWD
+void host_init_cwd(void);
+#endif
+
 /* sim_hostmemory.c *********************************************************/
 
 void *host_allocheap(size_t sz);

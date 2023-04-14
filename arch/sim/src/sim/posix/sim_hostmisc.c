@@ -22,9 +22,18 @@
  * Included Files
  ****************************************************************************/
 
+#include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "sim_internal.h"
+
+#ifdef CONFIG_HOST_MACOS
+#include <sys/syslimits.h>
+#include <mach-o/dyld.h>
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -88,3 +97,38 @@ int host_backtrace(void** array, int size)
   return backtrace(array, size);
 #endif
 }
+
+/****************************************************************************
+ * Name: host_init_cwd
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_IMAGEPATH_AS_CWD
+void host_init_cwd(void)
+{
+  char *name;
+  char path[PATH_MAX];
+  int len = PATH_MAX;
+
+  /* Get the absolute path of the executable file */
+
+#  ifdef CONFIG_HOST_LINUX
+  len = readlink("/proc/self/exe", path, len);
+  if (len < 0)
+    {
+      perror("readlink  failed");
+      return;
+    }
+#  else
+  if (_NSGetExecutablePath(path, &len) < 0)
+    {
+      perror("_NSGetExecutablePath failed");
+      return;
+    }
+#  endif
+
+  path[len] = '\0';
+  name = strrchr(path, '/');
+  *++name = '\0';
+  chdir(path);
+}
+#endif
