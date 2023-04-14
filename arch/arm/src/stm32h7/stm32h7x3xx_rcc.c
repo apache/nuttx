@@ -104,24 +104,30 @@
 #endif
 
 /* Over-drive is supported only for Voltage output scale 1 mode.
- * It is required when:
- *  - SYSCLK frequency is over 400 MHz,
- *  - external ULPI is selected
+ * It is required when SYSCLK frequency is over 400 MHz or it can be forced
+ * to a given state by adding define to the board.h configuration file:
+ *
+ *   #define STM32_VOS_OVERDRIVE 1 - force over-drive enabled,
+ *   #define STM32_VOS_OVERDRIVE 0 - force over-drive disabled,
+ *   #undef STM32_VOS_OVERDRIVE    - autoselect over-drive by logic below
+ *
+ * Boosting the core voltage can be a workaround solution to problems with
+ * poor board signal integration for high-speed digital interfaces like ULPI.
+ * Higher voltage means faster clock signal edges which may be sufficient to
+ * synchronise the high-speed clock and data.
  */
 
-#if (STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1)
-#  if (STM32_SYSCLK_FREQUENCY > 400000000)
-#   define STM32_VOS_OVERDRIVE 1
-#  elif defined(CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI)
+#ifndef STM32_VOS_OVERDRIVE
+#  if (STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1) && \
+      (STM32_SYSCLK_FREQUENCY > 400000000)
 #    define STM32_VOS_OVERDRIVE 1
 #  else
 #    define STM32_VOS_OVERDRIVE 0
 #  endif
-#endif
-
-#ifdef CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI
-#  if (STM32_PWR_VOS_SCALE != PWR_D3CR_VOS_SCALE_1)
-#    error external ULPI seems to work only with SCALE 0
+#else
+#  if (STM32_VOS_OVERDRIVE == 1) &&             \
+      (STM32_PWR_VOS_SCALE != PWR_D3CR_VOS_SCALE_1)
+#    error Over-drive can be selected only when VOS1 is configured
 #  endif
 #endif
 
