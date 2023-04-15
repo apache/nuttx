@@ -427,6 +427,8 @@ struct task_group_s
 #ifdef CONFIG_SCHED_USER_IDENTITY
   uid_t   tg_uid;                   /* User identity                            */
   gid_t   tg_gid;                   /* User group identity                      */
+  uid_t   tg_euid;                  /* Effective user identity                  */
+  gid_t   tg_egid;                  /* Effective user group identity            */
 #endif
 
   /* Group membership *******************************************************/

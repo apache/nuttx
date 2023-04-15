@@ -67,6 +67,10 @@ SYSCALL_LOOKUP(sethostname,                2)
   SYSCALL_LOOKUP(getuid,                   0)
   SYSCALL_LOOKUP(setgid,                   1)
   SYSCALL_LOOKUP(getgid,                   0)
+  SYSCALL_LOOKUP(seteuid,                  1)
+  SYSCALL_LOOKUP(geteuid,                  0)
+  SYSCALL_LOOKUP(setegid,                  1)
+  SYSCALL_LOOKUP(getegid,                  0)
 #endif
 
 /* Semaphores */

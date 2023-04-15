@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_geteuid.c
+ * sched/group/group_geteuid.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +25,10 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
+
+#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -36,7 +39,7 @@
  *
  * Description:
  *   The geteuid() function will return the effective user ID of the calling
- *   task group.
+ *   process.
  *
  * Input Parameters:
  *   None
@@ -48,7 +51,11 @@
 
 uid_t geteuid(void)
 {
-  /* Return the user identity 'root' with a uid value of 0. */
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
 
-  return 0;
+  /* Set the task group's group identity. */
+
+  DEBUGASSERT(rgroup != NULL);
+  return rgroup->tg_euid;
 }

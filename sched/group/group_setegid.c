@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_geteuid.c
+ * sched/group/group_setegid.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,30 +25,60 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
+
+#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: geteuid
+ * Name: setegid
  *
  * Description:
- *   The geteuid() function will return the effective user ID of the calling
- *   task group.
+ *   The setegid() function sets the effective group ID of the calling
+ *   process to gid, given appropriate privileges.
  *
  * Input Parameters:
- *   None
+ *   gid - Identity to set the various process's group ID attributes to.
  *
  * Returned Value:
- *   The effective user ID of the calling task group.
+ *   Zero if successful and -1 in case of failure, in which case errno is set
+ *   to one of he following values:
+ *
+ *   EINVAL - The value of the uid argument is invalid and not supported by
+ *            the implementation.
+ *   EPERM  - The process does not have appropriate privileges and uid does
+ *            not match the effective group ID or the saved set-group-ID.
  *
  ****************************************************************************/
 
-uid_t geteuid(void)
+int setegid(gid_t gid)
 {
-  /* Return the user identity 'root' with a uid value of 0. */
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
 
-  return 0;
+  /* Verify that the GID is in the valid range of 0 through INT16_MAX.
+   * OpenGroup.org does not specify a GID_MAX or GID_MIN.  Instead we use a
+   * priori knowledge that gid_t is type int16_t.
+   */
+
+  if ((uint16_t)gid > INT16_MAX)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* Get the currently executing thread's task group. */
+
+  rtcb   = this_task();
+  rgroup = rtcb->group;
+
+  /* Set the task group's group identity. */
+
+  DEBUGASSERT(rgroup != NULL);
+  rgroup->tg_egid = gid;
+  return OK;
 }
