@@ -50,13 +50,6 @@
 
 int setegid(gid_t gid)
 {
-#ifdef CONFIG_SCHED_USER_IDENTITY
-  /* If we have real UID/GID support, then treat the effective user ID as
-   * the real group ID.
-   */
-
-  return setgid(gid);
-#else
   /* NuttX only supports the group identity 'root' with a gid value of 0. */
 
   if (gid == 0)
@@ -70,5 +63,4 @@ int setegid(gid_t gid)
 
   set_errno(EINVAL);
   return -1;
-#endif
 }

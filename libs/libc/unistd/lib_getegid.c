@@ -48,15 +48,7 @@
 
 gid_t getegid(void)
 {
-#ifdef CONFIG_SCHED_USER_IDENTITY
-  /* If we have real UID/GID support, then treat the real group as the
-   * effective group ID.
-   */
-
-  return getgid();
-#else
   /* Return group identity 'root' with a gid value of 0. */
 
   return 0;
-#endif
 }
