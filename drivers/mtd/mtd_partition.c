@@ -149,7 +149,7 @@ static int     part_procfs_stat(FAR const char *relpath,
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
 static struct mtd_partition_s *g_pfirstpartition = NULL;
 
-const struct procfs_operations g_part_procfsoperations =
+const struct procfs_operations g_part_operations =
 {
   part_procfs_open,       /* open */
   part_procfs_close,      /* close */

@@ -99,7 +99,7 @@ static int     netprocfs_stat(FAR const char *relpath, FAR struct stat *buf);
  * Private Data
  ****************************************************************************/
 
-extern const struct procfs_operations g_net_procfs_routeoperations;
+extern const struct procfs_operations g_netroute_operations;
 
 /* Netprocfs component mappings */
 
@@ -141,7 +141,7 @@ static const struct netprocfs_entry_s g_net_entries[] =
   {
     DTYPE_DIRECTORY, "route",
     {
-      (FAR void *)&g_net_procfs_routeoperations
+      (FAR void *)&g_netroute_operations
     }
   },
 #endif
@@ -162,7 +162,7 @@ static const struct netprocfs_entry_s g_net_entries[] =
  * with any compiler.
  */
 
-const struct procfs_operations g_net_procfsoperations =
+const struct procfs_operations g_net_operations =
 {
   netprocfs_open,       /* open */
   netprocfs_close,      /* close */
@@ -202,7 +202,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
-      (g_net_procfsoperations.write == NULL))
+      (g_net_operations.write == NULL))
     {
       ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
