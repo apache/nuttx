@@ -117,7 +117,7 @@ static int     meminfo_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations meminfo_operations =
+const struct procfs_operations g_meminfo_operations =
 {
   meminfo_open,   /* open */
   meminfo_close,  /* close */
@@ -132,7 +132,7 @@ const struct procfs_operations meminfo_operations =
 };
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
-const struct procfs_operations memdump_operations =
+const struct procfs_operations g_memdump_operations =
 {
   meminfo_open,   /* open */
   meminfo_close,  /* close */

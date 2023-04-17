@@ -137,7 +137,7 @@ static int     mount_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations mount_procfsoperations =
+const struct procfs_operations g_mount_procfsoperations =
 {
   mount_open,          /* open */
   mount_close,         /* close */

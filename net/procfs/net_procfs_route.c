@@ -175,7 +175,7 @@ static int     route_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations net_procfs_routeoperations =
+const struct procfs_operations g_net_procfs_routeoperations =
 {
   route_open,          /* open */
   route_close,         /* close */

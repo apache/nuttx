@@ -100,7 +100,7 @@ static int     modprocfs_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations module_operations =
+const struct procfs_operations g_module_operations =
 {
   modprocfs_open,       /* open */
   modprocfs_close,      /* close */

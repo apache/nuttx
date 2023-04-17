@@ -93,7 +93,7 @@ static int     critmon_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations critmon_operations =
+const struct procfs_operations g_critmon_operations =
 {
   critmon_open,       /* open */
   critmon_close,      /* close */
