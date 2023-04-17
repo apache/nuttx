@@ -271,6 +271,18 @@ int tcp_start_monitor(FAR struct socket *psock)
 
       tcp_shutdown_monitor(conn, TCP_CLOSE);
 
+      /* If the peer close the connection before we call accept,
+       * in order to allow user to read the readahead data,
+       * return OK.
+       */
+
+      if (conn->tcpstateflags == TCP_CLOSED ||
+          conn->tcpstateflags == TCP_LAST_ACK)
+        {
+          net_unlock();
+          return OK;
+        }
+
       /* And return -ENOTCONN to indicate the monitor was not started
        * because the socket was already disconnected.
        */
