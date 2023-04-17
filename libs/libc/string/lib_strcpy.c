@@ -42,7 +42,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRCPY
 #undef strcpy /* See mm/README.txt */
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
@@ -50,4 +49,3 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
   while ((*dest++ = *src++) != '\0');
   return tmp;
 }
-#endif

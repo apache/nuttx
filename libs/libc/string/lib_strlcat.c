@@ -44,7 +44,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRLCAT
 size_t strlcat(FAR char *dst, FAR const char *src, size_t dsize)
 {
   FAR const char *odst = dst;
@@ -84,4 +83,3 @@ size_t strlcat(FAR char *dst, FAR const char *src, size_t dsize)
 
   return dlen + (src - osrc);
 }
-#endif

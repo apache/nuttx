@@ -30,7 +30,6 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_MEMCMP
 #undef memcmp /* See mm/README.txt */
 no_builtin("memcmp")
 int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
@@ -55,4 +54,3 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 
   return 0;
 }
-#endif

@@ -34,7 +34,6 @@
  * Name: memcpy
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_MEMCPY
 #undef memcpy /* See mm/README.txt */
 no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
@@ -44,4 +43,3 @@ FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
   while (n-- > 0) *pout++ = *pin++;
   return dest;
 }
-#endif
