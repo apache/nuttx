@@ -186,7 +186,7 @@ bool esp_spiram_test(void)
 
           if (errct < 4)
             {
-              merr("SPI SRAM error@%08x:%08x/%08x \n", &spiram[p], spiram[p],
+              merr("SPI SRAM error@%p:%08x/%08x \n", &spiram[p], spiram[p],
                    p ^ 0xaaaaaaaa);
             }
         }
@@ -378,6 +378,28 @@ bool esp_spiram_is_initialized(void)
 uint8_t esp_spiram_get_cs_io(void)
 {
   return psram_get_cs_io();
+}
+
+/**
+ * @brief Get allocable virtual start address
+ *
+ * @return Allocable virtual start address
+ */
+
+uint32_t esp_spiram_allocable_vaddr_start(void)
+{
+  return g_allocable_vaddr_start;
+}
+
+/**
+ * @brief Get allocable virtual end address
+ *
+ * @return Allocable virtual end address
+ */
+
+uint32_t esp_spiram_allocable_vaddr_end(void)
+{
+  return g_allocable_vaddr_end;
 }
 
 #endif

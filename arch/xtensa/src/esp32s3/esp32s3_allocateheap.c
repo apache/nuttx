@@ -38,6 +38,9 @@
 
 #include "xtensa.h"
 #include "hardware/esp32s3_rom_layout.h"
+#ifdef CONFIG_ESP32S3_SPIRAM
+#  include "esp32s3_spiram.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -154,5 +157,14 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void xtensa_add_region(void)
 {
+#ifdef CONFIG_ESP32S3_SPIRAM
+  void  *start;
+  size_t size;
+
+  start = (void *)esp_spiram_allocable_vaddr_start();
+  size  = (size_t)(esp_spiram_allocable_vaddr_end() -
+                   esp_spiram_allocable_vaddr_start());
+  umm_addregion(start, size);
+#endif
 }
 #endif

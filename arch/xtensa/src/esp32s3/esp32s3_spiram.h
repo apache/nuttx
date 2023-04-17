@@ -199,6 +199,22 @@ int rodata_flash2spiram_offset(void);
 
 #endif
 
+/**
+ * @brief Get allocable virtual start address
+ *
+ * @return Allocable virtual start address
+ */
+
+uint32_t esp_spiram_allocable_vaddr_start(void);
+
+/**
+ * @brief Get allocable virtual end address
+ *
+ * @return Allocable virtual end address
+ */
+
+uint32_t esp_spiram_allocable_vaddr_end(void);
+
 #ifdef __cplusplus
 }
 #endif

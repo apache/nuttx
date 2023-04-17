@@ -416,8 +416,10 @@ extern "C"
 
 /* Description: Set this bit to enable 8-bit-mode(8-bm) in ADDR phase. */
 
-#define SPI_MEM_FADDR_OCT    (BIT(6)) #define SPI_MEM_FADDR_OCT_M  (BIT(6))
-#define SPI_MEM_FADDR_OCT_V  0x1 #define SPI_MEM_FADDR_OCT_S  6
+#define SPI_MEM_FADDR_OCT    (BIT(6))
+#define SPI_MEM_FADDR_OCT_M  (BIT(6))
+#define SPI_MEM_FADDR_OCT_V  0x1
+#define SPI_MEM_FADDR_OCT_S  6
 
 /* SPI_MEM_FDIN_OCT : R/W ;bitpos:[5] ;default: 1'b0 ; */
 
