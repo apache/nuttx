@@ -8,6 +8,7 @@
 
 # clang doesn't -fsanitize=kernel-address
 -Darwin,sim:ostest
+-Darwin,sim:ostest_oneholder
 
 # macOS doesn't support --wrap flag
 # ld: unknown option: --wrap

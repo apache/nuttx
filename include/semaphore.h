@@ -113,7 +113,7 @@ struct sem_s
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 #  else
-  struct semholder_s holder[2];  /* Slot for old and new holder */
+  struct semholder_s holder;     /* Slot for old and new holder */
 #  endif
 #endif
 };
@@ -132,8 +132,7 @@ typedef struct sem_s sem_t;
 /* semcount, flags, waitlist, holder[2] */
 
 #    define SEM_INITIALIZER(c) \
-       {(c), 0, SEM_WAITLIST_INITIALIZER, \
-        {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
+       {(c), 0, SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
 #  endif
 #else
 /* semcount, flags, waitlist */
