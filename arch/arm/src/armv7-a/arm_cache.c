@@ -216,8 +216,8 @@ size_t up_get_dcache_linesize(void)
 
 void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 {
-  cp15_invalidate_dcache(start, end);
   l2cc_invalidate(start, end);
+  cp15_invalidate_dcache(start, end);
 }
 
 /****************************************************************************
@@ -241,8 +241,8 @@ void up_invalidate_dcache_all(void)
 {
 #ifdef CONFIG_ARCH_L2CACHE
   irqstate_t flags = enter_critical_section();
-  cp15_invalidate_dcache_all();
   l2cc_invalidate_all();
+  cp15_invalidate_dcache_all();
   leave_critical_section(flags);
 #else
   cp15_invalidate_dcache_all();
@@ -338,14 +338,15 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
   if ((end - start) < cp15_cache_size())
     {
-      cp15_flush_dcache(start, end);
+      cp15_clean_dcache(start, end);
     }
   else
     {
-      cp15_flush_dcache_all();
+      cp15_clean_dcache_all();
     }
 
   l2cc_flush(start, end);
+  cp15_invalidate_dcache(start, end);
 }
 
 /****************************************************************************
@@ -372,8 +373,9 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 
 void up_flush_dcache_all(void)
 {
-  cp15_flush_dcache_all();
+  cp15_clean_dcache_all();
   l2cc_flush_all();
+  cp15_invalidate_dcache_all();
 }
 
 /****************************************************************************
