@@ -191,7 +191,7 @@
 #define ENET_ECR_MAGICEN             (1 << 2)  /* Bit 2:  Magic packet detection enable */
 #define ENET_ECR_SLEEP               (1 << 3)  /* Bit 3:  Sleep mode enable */
 #define ENET_ECR_EN1588              (1 << 4)  /* Bit 4:  EN1588 enable */
-                                               /* Bit 5: Reserved */
+#define ENET_ECR_SPEED               (1 << 5)  /* Bit 5:  1000-Mbit/s mode */
 #define ENET_ECR_DBGEN               (1 << 6)  /* Bit 6:  Debug enable */
 #define ENET_ECR_STOPEN              (1 << 7)  /* Bit 7:  STOPEN Signal Control */
 #ifdef IMX_ENET_HAS_DBSWAP
@@ -248,7 +248,8 @@
 #define ENET_RCR_PROM                (1 << 3)  /* Bit 3:  Promiscuous mode */
 #define ENET_RCR_BC_REJ              (1 << 4)  /* Bit 4:  Broadcast frame reject */
 #define ENET_RCR_FCE                 (1 << 5)  /* Bit 5:  Flow control enable */
-                                               /* Bits 6-7: Reserved */
+#define ENET_RCR_RGMII_EN            (1 << 6)  /* Bit 6:  RGMII mode enable */
+                                               /* Bit 7:  Reserved */
 #define ENET_RCR_RMII_MODE           (1 << 8)  /* Bit 8: RMII mode enable */
 #define ENET_RCR_RMII_10T            (1 << 9)  /* Bit 9: Enables 10-Mbps mode of the RMII */
                                                /* Bits 10-11: Reserved */

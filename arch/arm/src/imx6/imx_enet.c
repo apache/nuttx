@@ -201,6 +201,16 @@
 #  define BOARD_PHY_10BASET(s)  (((s) & MII_DP83825I_PHYSTS_SPEED) != 0)
 #  define BOARD_PHY_100BASET(s) (((s) & MII_DP83825I_PHYSTS_SPEED) == 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_DP83825I_PHYSTS_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_AR8031)
+#  define BOARD_PHY_NAME        "AR8031"
+#  define BOARD_PHYID1          MII_PHYID1_AR8031
+#  define BOARD_PHYID2          MII_PHYID2_AR8031
+#  define BOARD_PHY_STATUS      MII_AR8031_PSSR
+#  define BOARD_PHY_ADDR        (1)
+#  define BOARD_PHY_10BASET(s)   (((s) & MII_AR8031_PSSR_10MBPS) == ((s) & MII_AR8031_PSSR_SPEEDMASK))
+#  define BOARD_PHY_100BASET(s)  (((s) & MII_AR8031_PSSR_100MBPS) == ((s) & MII_AR8031_PSSR_SPEEDMASK))
+#  define BOARD_PHY_1000BASET(s) (((s) & MII_AR8031_PSSR_1000MBPS) == ((s) & MII_AR8031_PSSR_SPEEDMASK))
+#  define BOARD_PHY_ISDUPLEX(s)  (((s) & MII_AR8031_PSSR_DUPLEX) != 0)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -216,7 +226,7 @@
  *             = 23
  */
 
-#define IMX_MII_SPEED  0x38 /* 100Mbs. Revisit and remove hardcoded value */
+#define IMX_MII_SPEED  0xd /* 1000Mbs. Revisit and remove hardcoded value */
 #if IMX_MII_SPEED > 63
 #  error "IMX_MII_SPEED is out-of-range"
 #endif
@@ -377,7 +387,7 @@ static int imx_phyintenable(struct imx_driver_s *priv);
 #endif
 static inline void imx_initmii(struct imx_driver_s *priv);
 
-#if 0 /* TODO */
+#ifndef CONFIG_IMX_ENET_WITH_QEMU
 static int imx_writemii(struct imx_driver_s *priv, uint8_t phyaddr,
              uint8_t regaddr, uint16_t data);
 static int imx_readmii(struct imx_driver_s *priv, uint8_t phyaddr,
@@ -1327,12 +1337,17 @@ static int imx_ifup_action(struct net_driver_s *dev, bool resetphy)
   /* And enable the MAC itself */
 
   regval  = imx_enet_getreg32(priv, IMX_ENET_ECR_OFFSET);
-  regval |= ENET_ECR_ETHEREN
+  regval |= ENET_ECR_ETHEREN | ENET_ECR_SPEED
 #ifdef IMX_USE_DBSWAP
          | ENET_ECR_DBSWP
 #endif
         ;
+
   imx_enet_putreg32(priv, regval, IMX_ENET_ECR_OFFSET);
+
+  /* Set TX FIFO write to avoid TX FIFO underrun */
+
+  imx_enet_putreg32(priv, 0x3f, IMX_ENET_TFWR_OFFSET);
 
   /* Indicate that there have been empty receive buffers produced */
 
@@ -1873,7 +1888,7 @@ static void imx_initmii(struct imx_driver_s *priv)
  *
  ****************************************************************************/
 
-#if 0 /* TODO */
+#ifndef CONFIG_IMX_ENET_WITH_QEMU
 static int imx_writemii(struct imx_driver_s *priv, uint8_t phyaddr,
                         uint8_t regaddr, uint16_t data)
 {
@@ -1935,7 +1950,7 @@ static int imx_writemii(struct imx_driver_s *priv, uint8_t phyaddr,
  *
  ****************************************************************************/
 
-#if 0 /* TODO */
+#ifndef CONFIG_IMX_ENET_WITH_QEMU
 static int imx_readmii(struct imx_driver_s *priv, uint8_t phyaddr,
                            uint8_t regaddr, uint16_t *data)
 {
@@ -2005,7 +2020,7 @@ static int imx_readmii(struct imx_driver_s *priv, uint8_t phyaddr,
 
 static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
 {
-#if 0 /* TODO */
+#ifndef CONFIG_IMX_ENET_WITH_QEMU
   uint32_t rcr;
   uint32_t tcr;
   uint32_t racc;
@@ -2160,6 +2175,23 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
                      MII_ADVERTISE_10BASETXHALF |
                      MII_ADVERTISE_CSMA);
 
+#elif defined (CONFIG_ETH0_PHY_AR8031)
+
+      /* Advertise Gigabit support */
+
+      imx_writemii(priv, phyaddr, MII_ADVERTISE,
+                   MII_ADVERTISE_1000XFULL |
+                   MII_ADVERTISE_1000XHALF |
+                   MII_ADVERTISE_100BASETXFULL |
+                   MII_ADVERTISE_100BASETXHALF |
+                   MII_ADVERTISE_10BASETXFULL |
+                   MII_ADVERTISE_10BASETXHALF |
+                   MII_ADVERTISE_CSMA);
+
+      /* Then reset PHY */
+
+      ninfo("AR8031: *** reset phy (phyaddr=0x%x) \n", phyaddr);
+      imx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
 #endif
 
       /* Start auto negotiation */
@@ -2253,16 +2285,13 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
    * configuration and the auto negotiation results.
    */
 
-#ifdef CONFIG_IMX_ENETUSEMII
   rcr = ENET_RCR_CRCFWD |
         (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
           << ENET_RCR_MAX_FL_SHIFT |
+#ifdef CONFIG_IMX_ENETUSEMII
         ENET_RCR_MII_MODE;
 #else
-  rcr = ENET_RCR_RMII_MODE | ENET_RCR_CRCFWD |
-        (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
-          << ENET_RCR_MAX_FL_SHIFT |
-        ENET_RCR_MII_MODE;
+        ENET_RCR_RGMII_EN;
 #endif
   tcr = 0;
 
@@ -2307,6 +2336,14 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
 
       ninfo("%s: 100 Base-T\n",  BOARD_PHY_NAME);
     }
+#ifdef CONFIG_ETH0_PHY_AR8031
+  else if (BOARD_PHY_1000BASET(phydata))
+    {
+      /* 1000 Mbps */
+
+      ninfo("%s: 1000 Base-T\n",  BOARD_PHY_NAME);
+    }
+#endif
   else
     {
       /* This might happen if Autonegotiation did not complete(?) */
@@ -2488,7 +2525,7 @@ int imx_netinitialize(int intf)
 #endif
   priv->dev.d_private = g_enet;         /* Used to recover private state from dev */
 
-#if 0 /* TODO */
+#if 0 /* NOTE: clock & iomux are set in u-boot */
   uint32_t regval;
 
   /* Configure ENET1_TX_CLK */
@@ -2519,7 +2556,7 @@ int imx_netinitialize(int intf)
   imx_config_gpio(GPIO_ENET_RX_ER);
 #endif
 
-#endif /* TODO */
+#endif /* if 0 */
 
   /* Attach the Ethernet MAC IEEE 1588 timer interrupt handler */
 
@@ -2556,15 +2593,15 @@ int imx_netinitialize(int intf)
 
   /* hardcoded offset: todo: need proper header file */
 
-#if 0 /* TODO */
-  uidl   = getreg32(IMX_OCOTP_BASE + 0x410);
-  uidml  = getreg32(IMX_OCOTP_BASE + 0x420);
+#ifndef CONFIG_IMX_ENET_WITH_QEMU
+  uidl   = getreg32(IMX_OCOTPCTRL_VBASE + 0x620);
+  uidml  = getreg32(IMX_OCOTPCTRL_VBASE + 0x630);
+#else
+  uidml |= 0x00000200;
+  uidml &= 0x0000feff;
 #endif
 
   mac    = priv->dev.d_mac.ether.ether_addr_octet;
-
-  uidml |= 0x00000200;
-  uidml &= 0x0000feff;
 
   mac[0] = (uidml & 0x0000ff00) >> 8;
   mac[1] = (uidml & 0x000000ff);
