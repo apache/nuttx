@@ -162,6 +162,38 @@ To test it, just run the ``oneshot`` example::
     Waiting...
     Finished
 
+psram_quad
+----------
+
+This config tests the PSRAM driver over SPIRAM interface in quad mode.
+You can use the mm command to test the PSRAM memory::
+
+    nsh> mm
+        mallinfo:
+          Total space allocated from system = 8803232
+          Number of non-inuse chunks        = 2
+          Largest non-inuse chunk           = 8388592
+          Total allocated space             = 9672
+          Total non-inuse space             = 8793560
+    (0)Allocating 5011 bytes
+
+    ......
+
+    (31)Releasing memory at 0x3fc8c088 (size=24 bytes)
+        mallinfo:
+          Total space allocated from system = 8803232
+          Number of non-inuse chunks        = 2
+          Largest non-inuse chunk           = 8388592
+          Total allocated space             = 9672
+          Total non-inuse space             = 8793560
+    TEST COMPLETE
+
+psram_octal
+-----------
+
+Similar to the ```psram_quad``` configuration but using the SPIRAM
+interface in octal mode.
+
 pwm
 ---
 
