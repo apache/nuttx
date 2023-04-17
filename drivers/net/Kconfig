@@ -414,6 +414,9 @@ config ETH0_PHY_NONE
 config ETH0_PHY_AM79C874
 	bool "AMD Am79C874 PHY"
 
+config ETH0_PHY_AR8031
+	bool "Atheros AR8031 PHY"
+
 config ETH0_PHY_KS8721
 	bool "Micrel KS8721 PHY"
 

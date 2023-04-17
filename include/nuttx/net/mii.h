@@ -59,6 +59,10 @@
  * abilities
  */
 
+/* AR8031: */
+
+#define MII_AR8031_PSSR              0x11      /* Phy-Specific Status Register */
+
 /* National Semiconductor DP83840: 0x07-0x11, 0x14, 0x1a, 0x1d-0x1f
  * reserved
  */
@@ -840,6 +844,17 @@
 #define MII_DP83848C_ANC_INT_EN       (1 << 2)  /* Enable Interrupt on Auto-negotiation complete event. */
 #define MII_DP83848C_FHF_INT_EN       (1 << 1)  /* Enable Interrupt on False Carrier Counter Register half-full event. */
 #define MII_DP83848C_RHF_INT_EN       (1 << 0)  /* Enable Interrupt on Receive Error Counter Register half-full event. */
+
+/* Atheros AR8031 MII ID1/2 register bits */
+
+#define MII_PHYID1_AR8031            0x004d     /* ID1 value for AR8031 */
+#define MII_PHYID2_AR8031            0xd074     /* ID2 value for AR8031 */
+
+#define MII_AR8031_PSSR_SPEEDMASK    (3 << 14)  /* Bit 14-15: Speed */
+#define MII_AR8031_PSSR_10MBPS       (0 << 14)
+#define MII_AR8031_PSSR_100MBPS      (1 << 14)
+#define MII_AR8031_PSSR_1000MBPS     (2 << 14)
+#define MII_AR8031_PSSR_DUPLEX       (1 << 13)  /* Bit 13:  Full duplex mode */
 
 /****************************************************************************
  * Type Definitions
