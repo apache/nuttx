@@ -168,7 +168,7 @@ static const uint8_t g_direntrycount = sizeof(g_direntry) /
  * with any compiler.
  */
 
-const struct procfs_operations g_smartfs_procfsoperations =
+const struct procfs_operations g_smartfs_operations =
 {
   smartfs_open,       /* open */
   smartfs_close,      /* close */
@@ -348,7 +348,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
-      (g_smartfs_procfsoperations.write == NULL))
+      (g_smartfs_operations.write == NULL))
     {
       ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;

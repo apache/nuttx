@@ -72,11 +72,11 @@ extern const struct procfs_operations g_tcbinfo_operations;
  * configuration.
  */
 
-extern const struct procfs_operations g_net_procfsoperations;
-extern const struct procfs_operations g_net_procfs_routeoperations;
-extern const struct procfs_operations g_part_procfsoperations;
-extern const struct procfs_operations g_mount_procfsoperations;
-extern const struct procfs_operations g_smartfs_procfsoperations;
+extern const struct procfs_operations g_net_operations;
+extern const struct procfs_operations g_netroute_operations;
+extern const struct procfs_operations g_part_operations;
+extern const struct procfs_operations g_mount_operations;
+extern const struct procfs_operations g_smartfs_operations;
 
 /****************************************************************************
  * Private Types
@@ -91,90 +91,90 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 {
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-  { "[0-9]*/**",     &g_proc_operations,            PROCFS_UNKOWN_TYPE },
-  { "[0-9]*",        &g_proc_operations,            PROCFS_DIR_TYPE    },
+  { "[0-9]*/**",    &g_proc_operations,     PROCFS_UNKOWN_TYPE },
+  { "[0-9]*",       &g_proc_operations,     PROCFS_DIR_TYPE    },
 #endif
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
-  { "cpuload",       &g_cpuload_operations,         PROCFS_FILE_TYPE   },
+  { "cpuload",      &g_cpuload_operations,  PROCFS_FILE_TYPE   },
 #endif
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  { "critmon",       &g_critmon_operations,         PROCFS_FILE_TYPE   },
+  { "critmon",      &g_critmon_operations,  PROCFS_FILE_TYPE   },
 #endif
 
 #ifdef CONFIG_SCHED_IRQMONITOR
-  { "irqs",          &g_irq_operations,             PROCFS_FILE_TYPE   },
+  { "irqs",         &g_irq_operations,      PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMINFO
-  { "meminfo",       &g_meminfo_operations,         PROCFS_FILE_TYPE   },
+  { "meminfo",      &g_meminfo_operations,  PROCFS_FILE_TYPE   },
 #  ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
-  { "memdump",       &g_memdump_operations,         PROCFS_FILE_TYPE   },
+  { "memdump",      &g_memdump_operations,  PROCFS_FILE_TYPE   },
 #  endif
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
-  { "mempool",       &g_mempool_operations,         PROCFS_FILE_TYPE   },
+  { "mempool",      &g_mempool_operations,  PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MM_IOB) && !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
-  { "iobinfo",       &g_iobinfo_operations,         PROCFS_FILE_TYPE   },
+  { "iobinfo",      &g_iobinfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  { "modules",       &g_module_operations,          PROCFS_FILE_TYPE   },
+  { "modules",      &g_module_operations,   PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
-  { "fs/blocks",     &g_mount_procfsoperations,     PROCFS_FILE_TYPE   },
+  { "fs/blocks",    &g_mount_operations,    PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
-  { "fs/mount",      &g_mount_procfsoperations,     PROCFS_FILE_TYPE   },
+  { "fs/mount",     &g_mount_operations,    PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
-  { "fs/usage",      &g_mount_procfsoperations,     PROCFS_FILE_TYPE   },
+  { "fs/usage",     &g_mount_operations,    PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-  { "fs/smartfs**",  &g_smartfs_procfsoperations,   PROCFS_UNKOWN_TYPE },
+  { "fs/smartfs**", &g_smartfs_operations,  PROCFS_UNKOWN_TYPE },
 #endif
 
 #if defined(CONFIG_NET) && !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
-  { "net",           &g_net_procfsoperations,       PROCFS_DIR_TYPE    },
+  { "net",          &g_net_operations,      PROCFS_DIR_TYPE    },
 #  if defined(CONFIG_NET_ROUTE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ROUTE)
-  { "net/route",     &g_net_procfs_routeoperations, PROCFS_DIR_TYPE    },
-  { "net/route/**",  &g_net_procfs_routeoperations, PROCFS_UNKOWN_TYPE },
+  { "net/route",    &g_netroute_operations, PROCFS_DIR_TYPE    },
+  { "net/route/**", &g_netroute_operations, PROCFS_UNKOWN_TYPE },
 #  endif
-  { "net/**",        &g_net_procfsoperations,       PROCFS_UNKOWN_TYPE },
+  { "net/**",       &g_net_operations,      PROCFS_UNKOWN_TYPE },
 #endif
 
 #if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITIONS)
-  { "partitions",    &g_part_procfsoperations,      PROCFS_FILE_TYPE   },
+  { "partitions",   &g_part_operations,     PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_PM) && defined(CONFIG_PM_PROCFS)
-  { "pm",            &g_pm_operations,              PROCFS_DIR_TYPE    },
-  { "pm/**",         &g_pm_operations,              PROCFS_UNKOWN_TYPE },
+  { "pm",           &g_pm_operations,       PROCFS_DIR_TYPE    },
+  { "pm/**",        &g_pm_operations,       PROCFS_UNKOWN_TYPE },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-  { "self",          &g_proc_operations,            PROCFS_DIR_TYPE    },
-  { "self/**",       &g_proc_operations,            PROCFS_UNKOWN_TYPE },
+  { "self",         &g_proc_operations,     PROCFS_DIR_TYPE    },
+  { "self/**",      &g_proc_operations,     PROCFS_UNKOWN_TYPE },
 #endif
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
-  { "uptime",        &g_uptime_operations,          PROCFS_FILE_TYPE   },
+  { "uptime",       &g_uptime_operations,   PROCFS_FILE_TYPE   },
 #endif
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_VERSION)
-  { "version",       &g_version_operations,         PROCFS_FILE_TYPE   },
+  { "version",      &g_version_operations,  PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_DEBUG_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
-  { "tcbinfo",       &g_tcbinfo_operations,         PROCFS_FILE_TYPE   },
+  { "tcbinfo",      &g_tcbinfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 };
 
