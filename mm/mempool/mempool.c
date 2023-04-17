@@ -398,7 +398,7 @@ int mempool_info_task(FAR struct mempool_s *pool,
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
 
   DEBUGASSERT(info);
-  if (info->pid == -2)
+  if (info->pid == MM_BACKTRACE_FREE_PID)
     {
       size_t count = mempool_queue_lenth(&pool->queue) +
                      mempool_queue_lenth(&pool->iqueue);
@@ -411,7 +411,7 @@ int mempool_info_task(FAR struct mempool_s *pool,
           info->uordblks -= pool->totalsize;
         }
     }
-  else if (info->pid == -1)
+  else if (info->pid == MM_BACKTRACE_ALLOC_PID)
     {
 #if CONFIG_MM_BACKTRACE >= 0
       size_t count = list_length(&pool->alist);
@@ -466,7 +466,7 @@ int mempool_info_task(FAR struct mempool_s *pool,
 
 void mempool_memdump(FAR struct mempool_s *pool, pid_t pid)
 {
-  if (pid == -2)
+  if (pid == MM_BACKTRACE_FREE_PID)
     {
       FAR sq_entry_t *entry;
 
@@ -492,7 +492,7 @@ void mempool_memdump(FAR struct mempool_s *pool, pid_t pid)
       list_for_every_entry(&pool->alist, buf, struct mempool_backtrace_s,
                            node)
         {
-          if (buf->pid == pid || pid == -1)
+          if (buf->pid == pid || pid == MM_BACKTRACE_ALLOC_PID)
             {
 #  if CONFIG_MM_BACKTRACE > 0
               int i;
