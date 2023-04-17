@@ -252,7 +252,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
- * Name: tcp_backlogremove
+ * Name: tcp_backlogpending
  *
  * Description:
  *  Called from poll().  Before waiting for a new connection, poll will
@@ -263,9 +263,26 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
+bool tcp_backlogpending(FAR struct tcp_conn_s *conn)
 {
   return (conn && conn->backlog && !sq_empty(&conn->backlog->bl_pending));
+}
+
+/****************************************************************************
+ * Name: tcp_backlogavailable
+ *
+ * Description:
+ *  Called from tcp_input().  Before alloc a new accept connection, tcp_input
+ *  will call this API to see if there are free node in the backlog.
+ *
+ * Assumptions:
+ *   Called from network socket logic with the network locked
+ *
+ ****************************************************************************/
+
+bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
+{
+  return (conn && conn->backlog && !sq_empty(&conn->backlog->bl_free));
 }
 
 /****************************************************************************

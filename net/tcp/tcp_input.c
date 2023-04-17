@@ -761,6 +761,12 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       if ((conn = tcp_findlistener(&uaddr, tmp16)) != NULL)
 #endif
         {
+          if (!tcp_backlogavailable(conn))
+            {
+              nerr("ERROR: no free containers for TCP BACKLOG!\n");
+              goto drop;
+            }
+
           /* We matched the incoming packet with a connection in LISTEN.
            * We now need to create a new connection and send a SYNACK in
            * response.
