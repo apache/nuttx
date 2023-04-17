@@ -48,8 +48,7 @@
 /* semcount, flags, waitlist, holder[2] */
 
 #    define NXSEM_INITIALIZER(c, f) \
-       {(c), (f), SEM_WAITLIST_INITIALIZER, \
-        {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
+       {(c), (f), SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
 #  endif
 #else /* CONFIG_PRIORITY_INHERITANCE */
 /* semcount, flags, waitlist */
