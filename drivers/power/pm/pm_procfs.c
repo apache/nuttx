@@ -123,7 +123,7 @@ static int     pm_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations pm_operations =
+const struct procfs_operations g_pm_operations =
 {
   pm_open,       /* open */
   pm_close,      /* close */

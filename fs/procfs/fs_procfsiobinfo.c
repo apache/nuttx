@@ -92,7 +92,7 @@ static int     iobinfo_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations iobinfo_operations =
+const struct procfs_operations g_iobinfo_operations =
 {
   iobinfo_open,   /* open */
   iobinfo_close,  /* close */

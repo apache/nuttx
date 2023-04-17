@@ -113,7 +113,7 @@ static int     irq_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations irq_operations =
+const struct procfs_operations g_irq_operations =
 {
   irq_open,       /* open */
   irq_close,      /* close */

@@ -95,7 +95,7 @@ static int     uptime_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations uptime_operations =
+const struct procfs_operations g_uptime_operations =
 {
   uptime_open,       /* open */
   uptime_close,      /* close */

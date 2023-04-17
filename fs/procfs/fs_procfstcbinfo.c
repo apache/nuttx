@@ -92,7 +92,7 @@ static int     tcbinfo_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations tcbinfo_operations =
+const struct procfs_operations g_tcbinfo_operations =
 {
   tcbinfo_open,       /* open */
   tcbinfo_close,      /* close */

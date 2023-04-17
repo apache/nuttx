@@ -244,7 +244,7 @@ static int     proc_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations proc_operations =
+const struct procfs_operations g_proc_operations =
 {
   proc_open,          /* open */
   proc_close,         /* close */
