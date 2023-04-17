@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
       - run: mkdir super-linter.report
       - name: Lint
-        uses: github/super-linter@v4
+        uses: github/super-linter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
