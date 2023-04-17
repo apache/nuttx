@@ -161,6 +161,7 @@ SECTIONS
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.gnu.linkonce.r.*)
     *(.rodata1)
+    *(.srodata.*)
     __XT_EXCEPTION_TABLE_ = ABSOLUTE(.);
     *(.xt_except_table)
     *(.gcc_except_table .gcc_except_table.*)
