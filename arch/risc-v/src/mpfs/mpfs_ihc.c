@@ -163,6 +163,7 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid);
 static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
                                         rptun_callback_t callback,
                                         void *arg);
+static void mpfs_rptun_worker(void *arg);
 
 /****************************************************************************
  * Private Data
@@ -188,7 +189,11 @@ static struct rpmsg_device        *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device *g_mpfs_virtio_device;
 
 static sem_t  g_mpfs_ack_sig       = SEM_INITIALIZER(0);
+#ifdef MPFS_RPTUN_USE_THREAD
 static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(0);
+#else
+static struct work_s g_rptun_work;
+#endif
 static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 static uint32_t g_connected_hart_ints;
@@ -468,7 +473,11 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack, bool is_msg)
       DEBUGASSERT((g_vq_idx == VRING0_NOTIFYID) ||
                   (g_vq_idx == VRING1_NOTIFYID));
 
+#ifdef MPFS_RPTUN_USE_THREAD
       nxsem_post(&g_mpfs_rx_sig);
+#else
+      work_queue(HPWORK, &g_rptun_work, mpfs_rptun_worker, NULL, 0);
+#endif
     }
 }
 
@@ -1288,6 +1297,33 @@ static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
 }
 
 /****************************************************************************
+ * Name: mpfs_rptun_worker
+ *
+ * Description:
+ *   This is used to notify the associated virtqueue via the scheduled work.
+ *   This doesn't use a separate thread, but a HPWORK instead, which is a
+ *   way to avoid deadlocks with net_lock() that also originate from HPWORK.
+ *
+ * Input Parameters:
+ *   arg    - Argument
+
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef MPFS_RPTUN_USE_THREAD
+static void mpfs_rptun_worker(void *arg)
+{
+  struct mpfs_queue_table_s *info;
+
+  DEBUGASSERT((g_vq_idx - VRING0_NOTIFYID) < VRINGS);
+  info = &g_mpfs_virtqueue_table[g_vq_idx - VRING0_NOTIFYID];
+  virtqueue_notification((struct virtqueue *)info->data);
+}
+#endif
+
+/****************************************************************************
  * Name: mpfs_rptun_thread
  *
  * Description:
@@ -1304,6 +1340,7 @@ static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
  *
  ****************************************************************************/
 
+#ifdef MPFS_RPTUN_USE_THREAD
 static int mpfs_rptun_thread(int argc, char *argv[])
 {
   struct mpfs_queue_table_s *info;
@@ -1319,6 +1356,7 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -1344,8 +1382,10 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 int mpfs_ihc_init(void)
 {
   uint32_t  mhartid = (uint32_t)riscv_mhartid();
+#ifdef MPFS_RPTUN_USE_THREAD
   char     *argv[3];
   char      arg1[19];
+#endif
   uint32_t  rhartid;
   int       ret;
 
@@ -1409,6 +1449,8 @@ int mpfs_ihc_init(void)
       goto init_error;
     }
 
+#ifdef MPFS_RPTUN_USE_THREAD
+
   /* Thread initialization */
 
   snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR,
@@ -1426,6 +1468,9 @@ int mpfs_ihc_init(void)
                                 NULL, NULL, NULL);
       goto init_error;
     }
+#else
+
+#endif
 
   return OK;
 
