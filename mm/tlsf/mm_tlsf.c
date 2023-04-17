@@ -263,16 +263,16 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (info->pid = -1)
+      if (info->pid = MM_BACKTRACE_ALLOC_PID)
 #else
-      if (info->pid == -1 || info->pid == dump->pid)
+      if (info->pid == MM_BACKTRACE_ALLOC_PID || info->pid == dump->pid)
 #endif
         {
           info->aordblks++;
           info->uordblks += size;
         }
     }
-  else if (info->pid == -2)
+  else if (info->pid == MM_BACKTRACE_FREE_PID)
     {
       info->aordblks++;
       info->uordblks += size;
@@ -377,9 +377,9 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (pid == -1)
+      if (pid == MM_BACKTRACE_ALLOC_PID)
 #else
-      if (pid == -1 || dump->pid == pid)
+      if (pid == MM_BACKTRACE_ALLOC_PID || dump->pid == pid)
 #endif
         {
 #if CONFIG_MM_BACKTRACE < 0
@@ -406,7 +406,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #endif
         }
     }
-  else if (pid <= -2)
+  else if (pid <= MM_BACKTRACE_FREE_PID)
     {
       syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
     }
@@ -904,7 +904,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 #endif
   struct memdump_info_s info;
 
-  if (pid >= -1)
+  if (pid >= MM_BACKTRACE_ALLOC_PID)
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
 #if CONFIG_MM_BACKTRACE < 0

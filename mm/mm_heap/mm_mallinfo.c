@@ -87,16 +87,16 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
     {
       DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
-      if (info->pid == -1)
+      if (info->pid == MM_BACKTRACE_ALLOC_PID)
 #else
-      if (info->pid == -1 || node->pid == info->pid)
+      if (info->pid == MM_BACKTRACE_ALLOC_PID || node->pid == info->pid)
 #endif
         {
           info->aordblks++;
           info->uordblks += nodesize;
         }
     }
-  else if (info->pid == -2)
+  else if (info->pid == MM_BACKTRACE_FREE_PID)
     {
       info->aordblks++;
       info->uordblks += nodesize;
