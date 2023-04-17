@@ -288,7 +288,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Check for read data or backlogged connection availability now */
 
-  if (conn->readahead != NULL || tcp_backlogavailable(conn))
+  if (conn->readahead != NULL || tcp_backlogpending(conn))
     {
       /* Normal data may be read without blocking. */
 
