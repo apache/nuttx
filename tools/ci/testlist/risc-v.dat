@@ -1,2 +1,3 @@
 /risc-v
 -,arty_a7:.+
+-/esp32c6:.+
