@@ -454,10 +454,11 @@ static void tcp_input_ofosegs(FAR struct net_driver_s *dev,
   /* Trim l3/l4 header to reserve appdata */
 
   dev->d_iob = iob_trimhead(dev->d_iob, len);
-  if (dev->d_iob == NULL)
+  if (dev->d_iob == NULL || dev->d_iob->io_pktlen == 0)
     {
       /* No available data, clear device buffer */
 
+      iob_free_chain(dev->d_iob);
       goto clear;
     }
 
