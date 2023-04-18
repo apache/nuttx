@@ -47,6 +47,19 @@
 
 struct lcd_dev_s;
 
+/* Some special LCD drivers require input data to be aligned.
+ * Such as starting row and column, width, height, data address, etc.
+ */
+
+struct lcddev_area_align_s
+{
+  uint16_t row_start_align; /* Start row index alignment */
+  uint16_t height_align;    /* Height alignment */
+  uint16_t col_start_align; /* Start column index alignment */
+  uint16_t width_align;     /* Width alignment */
+  uint16_t buf_align;       /* Buffer addr alignment */
+};
+
 /* This structure describes one color plane.  Some YUV formats may support
  * up to 4 planes (although they probably wouldn't be used on LCD hardware).
  * The framebuffer driver provides the video memory address in its
@@ -246,6 +259,11 @@ struct lcd_dev_s
   /* Get LCD panel frame rate (0: disable refresh) */
 
   int (*getframerate)(struct lcd_dev_s *dev);
+
+  /* Get LCD panel area alignment */
+
+  int (*getareaalign)(FAR struct lcd_dev_s *dev,
+                      FAR struct lcddev_area_align_s *align);
 };
 
 /****************************************************************************
