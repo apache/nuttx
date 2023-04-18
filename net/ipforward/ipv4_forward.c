@@ -343,7 +343,16 @@ int ipv4_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
   FAR struct ipv4_hdr_s *ipv4;
   int ret;
 
-  DEBUGASSERT(fwddev != NULL && dev != NULL && dev->d_buf != NULL);
+  DEBUGASSERT(fwddev != NULL);
+
+  /* Only IFF_UP device and non-loopback device need forward packet */
+
+  if (!IFF_IS_UP(fwddev->d_flags) || fwddev->d_lltype == NET_LL_LOOPBACK)
+    {
+      return OK;
+    }
+
+  DEBUGASSERT(dev != NULL && dev->d_buf != NULL);
 
   /* Check if we are forwarding on the same device that we received the
    * packet from.
