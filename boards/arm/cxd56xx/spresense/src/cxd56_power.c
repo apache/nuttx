@@ -64,7 +64,7 @@ static struct pm_cpu_freqlock_s g_hv_lock =
   PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('B', 'P', 0),
                       PM_CPUFREQLOCK_FLAG_HV);
 #endif
-static uint8_t g_reset_gpo_targets = 0xFF;
+static uint8_t g_reset_gpo_targets = 0xff;
 
 /****************************************************************************
  * Public Data
@@ -146,7 +146,8 @@ int board_power_setup(int status)
       case PM_BOOT_WDT_REBOOT:
       case PM_BOOT_WDT_RESET:
         /* Power off Hi-Z of GPO switches (except for GPO0)
-         * in first boot-up stage */
+         * in first boot-up stage
+         */
 
         for (pin = 1; pin <= BOARD_GPO_MAX_PIN_NUM; pin++)
           {
@@ -161,6 +162,7 @@ int board_power_setup(int status)
       case PM_BOOT_DEEP_WKUPS:
       case PM_BOOT_DEEP_RTC:
       case PM_BOOT_DEEP_OTHERS:
+
         /* Enable USB after wakeup from deep sleeping */
 
         ret = cxd56_pmic_read(PMIC_REG_CNT_USB2, &val, sizeof(val));
@@ -189,7 +191,7 @@ int board_power_setup(int status)
 
   /* Initialize reset GPO targets (reset all) */
 
-  g_reset_gpo_targets = 0xFF;
+  g_reset_gpo_targets = 0xff;
 
   return 0;
 }
