@@ -142,11 +142,41 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      /* A context switch will occur. */
-
-      if (nxsched_reprioritize_rtr(tcb, sched_priority))
+      if (rtcb->lockcount > 0)
         {
-          up_switch_context(this_task(), rtcb);
+          /* Move all tasks with the higher priority from the ready-to-run
+           * list to the pending list.
+           */
+
+          do
+            {
+              bool check = nxsched_remove_readytorun(nxttcb, false);
+              DEBUGASSERT(check == false);
+              UNUSED(check);
+
+              nxsched_add_prioritized(nxttcb, &g_pendingtasks);
+              nxttcb->task_state = TSTATE_TASK_PENDING;
+
+#ifdef CONFIG_SMP
+              nxttcb = nxsched_nexttcb(tcb);
+#else
+              nxttcb = tcb->flink;
+#endif
+            }
+          while (sched_priority < nxttcb->sched_priority);
+
+          /* Change the task priority */
+
+          tcb->sched_priority = (uint8_t)sched_priority;
+        }
+      else
+        {
+          /* A context switch will occur. */
+
+          if (nxsched_reprioritize_rtr(tcb, sched_priority))
+            {
+              up_switch_context(this_task(), rtcb);
+            }
         }
     }
 

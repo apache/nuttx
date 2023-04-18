@@ -236,16 +236,11 @@ int sched_lock(void)
 
   if (rtcb != NULL && !up_interrupt_context())
     {
-      FAR struct tcb_s *ptcb;
-      irqstate_t flags;
-
       /* Catch attempts to increment the lockcount beyond the range of the
        * integer type.
        */
 
       DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
-
-      flags = enter_critical_section();
 
       /* A counter is used to support locking.  This allows nested lock
        * operations on this thread (on any CPU)
@@ -269,22 +264,6 @@ int sched_lock(void)
 #endif
         }
 #endif
-
-      /* Move any tasks in the ready-to-run list to the pending task list
-       * where they will not be available to run until the scheduler is
-       * unlocked and nxsched_merge_pending() is called.  So ready-to-run
-       * will consist only from the currently runnig task and the idle task.
-       */
-
-      for (ptcb = rtcb->flink; ptcb && ptcb->flink; ptcb = rtcb->flink)
-        {
-          dq_rem((FAR dq_entry_t *)ptcb, &g_readytorun);
-
-          nxsched_add_prioritized(ptcb, &g_pendingtasks);
-          ptcb->task_state = TSTATE_TASK_PENDING;
-        }
-
-      leave_critical_section(flags);
     }
 
   return OK;
