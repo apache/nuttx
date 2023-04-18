@@ -257,7 +257,6 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
  *   arg             - The alloc & free memory fuctions used arg.
  *   expandsize      - The expend mempry for all pools in multiples pool.
  *   dict_expendsize - The expend size for multiple dictnoary.
- *   calibrate       - Whether to calibrate when counting memory usage.
  * Returned Value:
  *   Return an initialized multiple pool pointer on success,
  *   otherwise NULL is returned.
@@ -270,7 +269,7 @@ mempool_multiple_init(FAR const char *name,
                       mempool_multiple_alloc_t alloc,
                       mempool_multiple_free_t free,
                       FAR void *arg, size_t expandsize,
-                      size_t dict_expendsize, bool calibrate)
+                      size_t dict_expendsize)
 {
   FAR struct mempool_multiple_s *mpool;
   FAR struct mempool_s *pools;
@@ -329,7 +328,6 @@ mempool_multiple_init(FAR const char *name,
       pools[i].priv = mpool;
       pools[i].alloc = mempool_multiple_alloc_callback;
       pools[i].free = mempool_multiple_free_callback;
-      pools[i].calibrate = calibrate;
 #if CONFIG_MM_BACKTRACE >= 0
       pools[i].blockalign = mpool->minpoolsize;
 #endif

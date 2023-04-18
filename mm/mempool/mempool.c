@@ -405,11 +405,6 @@ int mempool_info_task(FAR struct mempool_s *pool,
 
       info->aordblks += count;
       info->uordblks += count * pool->blocksize;
-      if (pool->calibrate)
-        {
-          info->aordblks -= pool->nexpend;
-          info->uordblks -= pool->totalsize;
-        }
     }
   else if (info->pid == MM_BACKTRACE_ALLOC_PID)
     {
