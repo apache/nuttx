@@ -87,6 +87,7 @@ struct binary_s
    */
 
   FAR addrenv_t *addrenv;              /* Address environment */
+  FAR addrenv_t *oldenv;               /* Saved address environment */
 #endif
 
   size_t mapsize;                      /* Size of the mapped address region (needed for munmap) */

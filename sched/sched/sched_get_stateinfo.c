@@ -83,6 +83,15 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
 {
   irqstate_t flags;
 
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct addrenv_s *oldenv;
+
+  if (tcb->addrenv_own)
+    {
+      addrenv_select(tcb->addrenv_own, &oldenv);
+    }
+#endif
+
   /* if the state is waiting mutex */
 
   flags = enter_critical_section();
@@ -100,4 +109,11 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
       leave_critical_section(flags);
       strlcpy(state, g_statenames[tcb->task_state], length);
     }
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (tcb->addrenv_own)
+    {
+      addrenv_restore(oldenv);
+    }
+#endif
 }

@@ -188,7 +188,7 @@ int elf_addrenv_select(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Instantiate the new address environment */
 
-  ret = addrenv_select(loadinfo->addrenv);
+  ret = addrenv_select(loadinfo->addrenv, &loadinfo->oldenv);
   if (ret < 0)
     {
       berr("ERROR: addrenv_select failed: %d\n", ret);
@@ -240,7 +240,7 @@ int elf_addrenv_restore(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Restore the old address environment */
 
-  ret = addrenv_restore();
+  ret = addrenv_restore(loadinfo->oldenv);
   if (ret < 0)
     {
       berr("ERROR: addrenv_restore failed: %d\n", ret);

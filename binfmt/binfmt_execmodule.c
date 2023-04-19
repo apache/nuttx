@@ -165,7 +165,7 @@ int exec_module(FAR struct binary_s *binp,
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Instantiate the address environment containing the user heap */
 
-  ret = addrenv_select(binp->addrenv);
+  ret = addrenv_select(binp->addrenv, &binp->oldenv);
   if (ret < 0)
     {
       berr("ERROR: addrenv_select() failed: %d\n", ret);
@@ -273,7 +273,7 @@ int exec_module(FAR struct binary_s *binp,
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
 
-  ret = addrenv_restore();
+  ret = addrenv_restore(binp->oldenv);
   if (ret < 0)
     {
       berr("ERROR: addrenv_restore() failed: %d\n", ret);
@@ -292,7 +292,7 @@ errout_with_tcbinit:
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  addrenv_restore();
+  addrenv_restore(binp->oldenv);
 errout_with_envp:
 #endif
   binfmt_freeenv(envp);
