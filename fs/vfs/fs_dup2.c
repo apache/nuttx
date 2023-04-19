@@ -23,11 +23,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #include <unistd.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "inode/inode.h"
 
@@ -107,9 +110,24 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
           temp.f_priv = filep1->f_priv;
 
+          /* Add nonblock flags to avoid happening block when
+           * calling open()
+           */
+
+          temp.f_oflags |= O_NONBLOCK;
+
           if (inode->u.i_ops->open)
             {
               ret = inode->u.i_ops->open(&temp);
+            }
+
+          if (ret >= 0 && (filep1->f_oflags & O_NONBLOCK) == 0)
+            {
+              ret = file_ioctl(&temp, FIONBIO, 0);
+              if (ret < 0 && inode->u.i_ops->close)
+                {
+                  ret = inode->u.i_ops->close(&temp);
+                }
             }
         }
 
