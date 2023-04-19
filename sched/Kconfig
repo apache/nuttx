@@ -358,6 +358,13 @@ config SMP_NCPUS
 		SMP configuration.  However, running the SMP logic in a single CPU
 		configuration is useful during certain testing.
 
+config SMP_DEFAULT_CPUSET
+	hex "Default CPU bit set"
+	default 0xffffffff
+	---help---
+		Set the Default CPU bits. The way to use the unset CPU is to call the
+		sched_setaffinity function to bind a task to the CPU. bit0 means CPU0.
+
 endif # SMP
 
 choice
