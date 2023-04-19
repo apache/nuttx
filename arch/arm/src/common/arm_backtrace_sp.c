@@ -77,11 +77,6 @@ static bool in_code_region(unsigned long pc)
 {
   int i = 0;
 
-  if (pc >= (unsigned long)_START_TEXT && pc < (unsigned long)_END_TEXT)
-    {
-      return true;
-    }
-
   if (g_backtrace_code_regions)
     {
       while (g_backtrace_code_regions[i] &&
@@ -96,6 +91,13 @@ static bool in_code_region(unsigned long pc)
 
           i += 2;
         }
+    }
+
+  /* When g_backtrace_code_regions is null, try to use all the text section */
+
+  else if (pc >= (unsigned long)_START_TEXT && pc < (unsigned long)_END_TEXT)
+    {
+      return true;
     }
 
   return false;
