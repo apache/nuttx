@@ -338,7 +338,8 @@ int addrenv_leave(FAR struct tcb_s *tcb)
  *   running process.
  *
  * Input Parameters:
- *   addrenv - The address environment.
+ *   addrenv - The address environment to instantiate.
+ *   oldenv  - The old active address environment is placed here.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that
@@ -347,10 +348,12 @@ int addrenv_leave(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int addrenv_select(FAR struct addrenv_s *addrenv)
+int addrenv_select(FAR struct addrenv_s *addrenv,
+                   FAR struct addrenv_s **oldenv)
 {
   FAR struct tcb_s *tcb = this_task();
   addrenv_take(addrenv);
+  *oldenv = tcb->addrenv_curr;
   tcb->addrenv_curr = addrenv;
   return addrenv_switch(tcb);
 }
@@ -359,10 +362,10 @@ int addrenv_select(FAR struct addrenv_s *addrenv)
  * Name: addrenv_restore
  *
  * Description:
- *   Switch back to the procces's own address environment.
+ *   Switch back to the procces's previous address environment.
  *
  * Input Parameters:
- *   None
+ *   addrenv - The address environment to restore.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that
@@ -371,11 +374,11 @@ int addrenv_select(FAR struct addrenv_s *addrenv)
  *
  ****************************************************************************/
 
-int addrenv_restore(void)
+int addrenv_restore(FAR struct addrenv_s *addrenv)
 {
   FAR struct tcb_s *tcb = this_task();
   addrenv_give(tcb->addrenv_curr);
-  tcb->addrenv_curr = tcb->addrenv_own;
+  tcb->addrenv_curr = addrenv;
   return addrenv_switch(tcb);
 }
 

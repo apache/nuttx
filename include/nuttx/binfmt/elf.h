@@ -123,6 +123,7 @@ struct elf_loadinfo_s
 
 #ifdef CONFIG_ARCH_ADDRENV
   FAR addrenv_t     *addrenv;    /* Address environment */
+  FAR addrenv_t     *oldenv;     /* Saved address environment */
 #endif
 
   uint16_t           symtabidx;  /* Symbol table section index */
