@@ -302,7 +302,7 @@ static int shmfs_mmap(FAR struct file *filep,
         {
           entry->munmap = shmfs_munmap;
           entry->priv.p = (FAR void *)filep->f_inode;
-          mm_map_add(entry);
+          mm_map_add(get_current_mm(), entry);
         }
     }
 
