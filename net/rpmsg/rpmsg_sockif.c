@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
+#include <sys/socket.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -63,6 +64,9 @@ begin_packed_struct struct rpmsg_socket_sync_s
 {
   uint32_t                       cmd;
   uint32_t                       size;
+  uint32_t                       pid;
+  uint32_t                       uid;
+  uint32_t                       gid;
 } end_packed_struct;
 
 begin_packed_struct struct rpmsg_socket_data_s
@@ -111,6 +115,10 @@ struct rpmsg_socket_conn_s
 
   int                            backlog;
 
+  /* The remote connection's credentials */
+
+  struct ucred                   cred;
+
   /* Flow control, descript send side */
 
   uint32_t                       sendsize;
@@ -151,6 +159,11 @@ static ssize_t    rpmsg_socket_recvmsg(FAR struct socket *psock,
 static int        rpmsg_socket_close(FAR struct socket *psock);
 static int        rpmsg_socket_ioctl(FAR struct socket *psock,
                                      int cmd, unsigned long arg);
+#ifdef CONFIG_NET_SOCKOPTS
+static int        rpmsg_socket_getsockopt(FAR struct socket *psock,
+                    int level, int option, FAR void *value,
+                    FAR socklen_t *value_len);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -172,6 +185,12 @@ const struct sock_intf_s g_rpmsg_sockif =
   rpmsg_socket_recvmsg,     /* si_recvmsg */
   rpmsg_socket_close,       /* si_close */
   rpmsg_socket_ioctl,       /* si_ioctl */
+  NULL,                     /* si_socketpair */
+  NULL                      /* si_shutdown */
+#ifdef CONFIG_NET_SOCKOPTS
+  , rpmsg_socket_getsockopt /* si_getsockopt */
+  , NULL                    /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
@@ -284,6 +303,9 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       nxmutex_lock(&conn->recvlock);
       conn->sendsize = head->size;
+      conn->cred.pid = head->pid;
+      conn->cred.uid = head->uid;
+      conn->cred.gid = head->gid;
 
       conn->sconn.s_flags |= _SF_CONNECTED;
 
@@ -402,6 +424,9 @@ static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
 
   msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
   msg.size = circbuf_size(&conn->recvbuf);
+  msg.pid  = nxsched_getpid();
+  msg.uid  = getuid();
+  msg.gid  = getgid();
 
   rpmsg_send(&conn->ept, &msg, sizeof(msg));
 }
@@ -1345,3 +1370,24 @@ static int rpmsg_socket_ioctl(FAR struct socket *psock,
 
   return ret;
 }
+
+#ifdef CONFIG_NET_SOCKOPTS
+static int rpmsg_socket_getsockopt(FAR struct socket *psock, int level,
+                                   int option, FAR void *value,
+                                   FAR socklen_t *value_len)
+{
+  if (level == SOL_SOCKET && option == SO_PEERCRED)
+    {
+      FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
+      if (*value_len != sizeof(struct ucred))
+        {
+          return -EINVAL;
+        }
+
+      memcpy(value, &conn->cred, sizeof(struct ucred));
+      return OK;
+    }
+
+  return -ENOPROTOOPT;
+}
+#endif
