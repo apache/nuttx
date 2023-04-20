@@ -149,6 +149,15 @@ config NET_TCP_FAST_RETRANSMIT
 			missing segment, without waiting for a retransmission timer to
 			expire.
 
+config NET_TCP_CC_NEWRENO
+	bool "Enable the NewReno Congestion Control algorithm"
+	default n
+	select NET_TCP_FAST_RETRANSMIT
+	---help---
+		RFC5681:
+			The TCP Congestion Control defines four congestion control algorithms,
+			slow start, congestion avoidance, fast retransmit, and fast recovery.
+
 config NET_TCP_WINDOW_SCALE
 	bool "Enable TCP/IP Window Scale Option"
 	default n
