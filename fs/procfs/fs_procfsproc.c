@@ -762,6 +762,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                             size_t buflen, off_t offset)
 {
   struct timespec maxtime;
+  struct timespec runtime;
   size_t remaining;
   size_t linesize;
   size_t copysize;
@@ -851,12 +852,18 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
   /* Reset the maximum */
 
   tcb->run_max = 0;
+  up_perf_convert(tcb->run_time, &runtime);
 
-  /* Generate output for maximum time thread running */
+  /* Output the maximum time the thread has run and
+   * the total time the thread has run
+   */
 
-  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu\n",
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                             "%lu.%09lu,%lu.%09lu\n",
                              (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+                             (unsigned long)maxtime.tv_nsec,
+                             (unsigned long)runtime.tv_sec,
+                             (unsigned long)(runtime.tv_nsec));
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
