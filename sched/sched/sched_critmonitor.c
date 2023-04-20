@@ -297,6 +297,7 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
   unsigned long current = up_perf_gettime();
   unsigned long elapsed = current - tcb->run_start;
 
+  tcb->run_time += elapsed;
   if (elapsed > tcb->run_max)
     {
       tcb->run_max = elapsed;

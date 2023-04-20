@@ -639,6 +639,7 @@ struct tcb_s
   unsigned long crit_max;                /* Max time in critical section    */
   unsigned long run_start;               /* Time when thread begin run      */
   unsigned long run_max;                 /* Max time thread run             */
+  unsigned long run_time;                /* Total time thread run           */
 #endif
 
   /* State save areas *******************************************************/
