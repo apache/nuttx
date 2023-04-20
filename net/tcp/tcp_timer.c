@@ -567,6 +567,25 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
                     result = tcp_callback(dev, conn, TCP_REXMIT);
                     tcp_rexmit(dev, conn, result);
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+                    /* If conn is TCP_INFR, it should enter to slow start */
+
+                    if (conn->flags & TCP_INFR)
+                      {
+                        conn->flags &= ~TCP_INFR;
+                      }
+
+                    /* update the max_cwnd */
+
+                    conn->max_cwnd = (conn->max_cwnd + 7 * conn->cwnd) >> 3;
+
+                    /* reset cwnd and ssthresh, refers to RFC5861. */
+
+                    conn->ssthresh =
+                                    MAX(conn->tx_unacked / 2, 2 * conn->mss);
+                    conn->cwnd = conn->mss;
+#endif
                     goto done;
 
                   case TCP_FIN_WAIT_1:

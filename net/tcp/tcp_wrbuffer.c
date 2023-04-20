@@ -236,7 +236,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
       iob_free_chain(wrb->wb_iob);
     }
 
-#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
+#if defined(CONFIG_NET_TCP_FAST_RETRANSMIT) && !defined(CONFIG_NET_TCP_CC_NEWRENO)
   /* Reset the ack counter */
 
   TCP_WBNACK(wrb) = 0;
