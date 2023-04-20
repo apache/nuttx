@@ -51,15 +51,11 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
   unsigned int ncopy;
   unsigned int navail;
 
-  /* Handle special cases */
+  /* Handle special cases, preserve at least one iob. */
 
-  while (iob->io_len <= 0)
+  while (iob->io_len <= 0 && iob->io_flink != NULL)
     {
       iob = iob_free(iob);
-      if (iob == NULL)
-        {
-          return NULL;
-        }
     }
 
   /* Now remember the head of the chain (for the return value) */
