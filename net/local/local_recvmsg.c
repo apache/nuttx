@@ -40,6 +40,7 @@
 
 #include "socket/socket.h"
 #include "local/local.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Private Functions
@@ -117,21 +118,11 @@ static void local_recvctl(FAR struct local_conn_s *conn,
                           FAR struct msghdr *msg, int flags)
 {
   FAR struct local_conn_s *peer;
-  struct cmsghdr *cmsg;
   int count;
   int *fds;
   int i;
 
   net_lock();
-
-  cmsg  = CMSG_FIRSTHDR(msg);
-  count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
-  cmsg->cmsg_len = 0;
-
-  if (count == 0)
-    {
-      goto out;
-    }
 
   if (conn->lc_peer == NULL)
     {
@@ -151,10 +142,14 @@ static void local_recvctl(FAR struct local_conn_s *conn,
       goto out;
     }
 
-  fds = (int *)CMSG_DATA(cmsg);
+  fds = cmsg_append(msg, SOL_SOCKET, SCM_RIGHTS, NULL,
+                    sizeof(int) * peer->lc_cfpcount);
+  if (fds == NULL)
+    {
+      goto out;
+    }
 
-  count = count > peer->lc_cfpcount ?
-                  peer->lc_cfpcount : count;
+  count = peer->lc_cfpcount;
   for (i = 0; i < count; i++)
     {
       fds[i] = file_dup(peer->lc_cfps[i], 0, !!(flags & MSG_CMSG_CLOEXEC));
@@ -176,10 +171,6 @@ static void local_recvctl(FAR struct local_conn_s *conn,
           memmove(peer->lc_cfps[0], peer->lc_cfps[i],
                   sizeof(FAR void *) * peer->lc_cfpcount);
         }
-
-      cmsg->cmsg_len   = CMSG_LEN(sizeof(int) * i);
-      cmsg->cmsg_level = SOL_SOCKET;
-      cmsg->cmsg_type  = SCM_RIGHTS;
     }
 
 out:
