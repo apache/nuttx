@@ -703,6 +703,41 @@ attached interrupts.
    15 0000800d 00000000        817  100.000
    30 00000fd5 20000018         20    2.490
 
+.. _cmdcritmon:
+
+Show Critical Monitor Status (critmon)
+**************************************
+
+**Command Syntax**::
+
+  critmon
+
+**Synopsis**. Show the preemption time, critical section time,
+longest single run time, total run time, process ID (PID),
+and thread description of each thread in the system.
+
+**Example**::
+
+  nsh> critmon
+  PRE-EMPTION   CSECTION      RUN         TIME         PID   DESCRIPTION
+  0.010265000   0.000037000   ----------- ------------ ----  CPU 0
+  0.000000000   0.000000000   0.001237000 28.421047000 0     Idle Task
+  0.000011000   0.000037000   0.000046000 0.034211000  1     loop_task
+  0.000000000   0.000028000   0.000067000 0.236657000  2     hpwork
+
+In this example, the output shows the preemption time, critical section time,
+longest single run time, total run time, and thread description for each
+thread in the system.
+
+The output of the ``critmon`` command displays the following columns:
+
+- PRE-EMPTION: Preemption time
+- CSECTION: Critical section time
+- RUN: Longest single run time of the thread
+- TIME: Total run time of the thread
+- PID: Process ID of the thread
+- DESCRIPTION: Thread description (name)
+
 .. _cmdkill:
 
 Send a signal to a task (kill)
