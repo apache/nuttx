@@ -69,6 +69,10 @@
 ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                        int flags)
 {
+  unsigned long msg_controllen;
+  FAR void *msg_control;
+  int ret;
+
   /* Verify that non-NULL pointers were passed */
 
   if (msg == NULL || msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
@@ -100,7 +104,19 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   DEBUGASSERT(psock->s_sockif != NULL &&
               psock->s_sockif->si_recvmsg != NULL);
 
-  return psock->s_sockif->si_recvmsg(psock, msg, flags);
+  /* Save the original cmsg information */
+
+  msg_control         = msg->msg_control;
+  msg_controllen      = msg->msg_controllen;
+
+  ret = psock->s_sockif->si_recvmsg(psock, msg, flags);
+
+  /* Recover the pointer and calculate the cmsg's true data length */
+
+  msg->msg_control    = msg_control;
+  msg->msg_controllen = msg_controllen - msg->msg_controllen;
+
+  return ret;
 }
 
 /****************************************************************************

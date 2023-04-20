@@ -22,6 +22,7 @@
 
 NET_CSRCS += net_dsec2tick.c net_dsec2timeval.c net_timeval2dsec.c
 NET_CSRCS += net_chksum.c net_ipchksum.c net_incr32.c net_lock.c net_snoop.c
+NET_CSRCS += net_cmsg.c
 
 # IPv6 utilities
 

@@ -48,6 +48,7 @@
 
 #ifdef CONFIG_NET_TIMESTAMP
 #include <sys/time.h>
+#include <utils/utils.h>
 #endif
 
 /****************************************************************************
@@ -490,24 +491,14 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.pr_buffer = msg->msg_iov->iov_base;
 
 #ifdef CONFIG_NET_TIMESTAMP
-  if (conn->timestamp && msg->msg_controllen >=
-        (sizeof(struct cmsghdr) + sizeof(struct timeval)))
+  if (conn->timestamp)
     {
-      struct cmsghdr *cmsg = CMSG_FIRSTHDR(msg);
-      state.pr_msglen = sizeof(struct timeval);
-      state.pr_msgbuf = CMSG_DATA(cmsg);
-      cmsg->cmsg_level = SOL_SOCKET;
-      cmsg->cmsg_type = SO_TIMESTAMP;
-      cmsg->cmsg_len = state.pr_msglen;
-      msg->msg_controllen = sizeof(struct cmsghdr) + sizeof(struct timeval);
-    }
-  else
-    {
-      /* Expected behavior is that the msg_controllen becomes 0,
-       * otherwise CMSG_NXTHDR will go into a infinite loop
-       */
-
-      msg->msg_controllen = 0;
+      state.pr_msgbuf = cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMP,
+                                    NULL, sizeof(struct timeval));
+      if (state.pr_msgbuf != NULL)
+        {
+          state.pr_msglen = sizeof(struct timeval);
+        }
     }
 #endif
 
