@@ -271,7 +271,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
   entry.munmap = munmap_shm;
   entry.priv.i = shmid;
 
-  ret = mm_map_add(&entry);
+  ret = mm_map_add(get_current_mm(), &entry);
   if (ret < 0)
     {
       shmerr("ERROR: mm_map_add() failed\n");

@@ -47,6 +47,7 @@ static int file_munmap_(FAR void *start, size_t length, bool kernel)
   FAR struct tcb_s *tcb = nxsched_self();
   FAR struct task_group_s *group = tcb->group;
   FAR struct mm_map_entry_s *entry = NULL;
+  FAR struct mm_map_s *mm = get_current_mm();
   int ret = OK;
 
   /* Iterate through all the mappings and call the underlying
@@ -59,7 +60,7 @@ static int file_munmap_(FAR void *start, size_t length, bool kernel)
   ret = mm_map_lock();
   if (ret == OK)
     {
-      while (ret == OK && (entry = mm_map_find(start, length)))
+      while (ret == OK && (entry = mm_map_find(mm, start, length)))
         {
           DEBUGASSERT(entry->munmap);
           ret = entry->munmap(group, entry, start, length);

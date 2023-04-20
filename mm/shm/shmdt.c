@@ -85,7 +85,7 @@ int shmdt(FAR const void *shmaddr)
        * shmaddr. The mapping is matched with just shmaddr == map->vaddr.
        */
 
-      entry = mm_map_find(shmaddr, 1);
+      entry = mm_map_find(get_current_mm(), shmaddr, 1);
       if (entry && entry->vaddr == shmaddr)
         {
           DEBUGASSERT(entry->munmap);
