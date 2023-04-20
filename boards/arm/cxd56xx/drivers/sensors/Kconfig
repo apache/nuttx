@@ -128,11 +128,11 @@ config SENSORS_BMI160_SCU_DECI_ACCEL
 endif # SENSORS_BMI160_SCU
 
 config SENSORS_BMP280_SCU
-	bool "Bosch BMP280 Barometic Pressure Sensor"
+	bool "Bosch BMP280 Barometric Pressure Sensor"
 	default n
 	depends on !SENSORS_BMP280 && (CXD56_I2C0_SCUSEQ || CXD56_I2C1_SCUSEQ)
 	---help---
-		Enable driver for the Bosch BMP280 barometic pressure sensor.
+		Enable driver for the Bosch BMP280 barometric pressure sensor.
 
 if SENSORS_BMP280_SCU
 
