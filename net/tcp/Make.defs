@@ -61,6 +61,12 @@ ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 NET_CSRCS += tcp_wrbuffer.c
 endif
 
+# TCP congestion control
+
+ifeq ($(CONFIG_NET_TCP_CC_NEWRENO),y)
+NET_CSRCS += tcp_cc.c
+endif
+
 # TCP debug
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)

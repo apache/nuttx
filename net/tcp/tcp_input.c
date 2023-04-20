@@ -1160,6 +1160,11 @@ found:
   if ((tcp->flags & TCP_ACK) != 0 &&
       (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD)
     {
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+      /* If the packet is ack, update the cc var. */
+
+      tcp_cc_recv_ack(conn, tcp);
+#endif
       if (tcp_snd_wnd_update(conn, tcp))
         {
           /* Window updated, set the acknowledged flag. */
@@ -1230,6 +1235,9 @@ found:
             tcp_snd_wnd_init(conn, tcp);
             tcp_snd_wnd_update(conn, tcp);
 
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+            tcp_cc_update(conn, tcp);
+#endif
             flags               = TCP_CONNECTED;
             ninfo("TCP state: TCP_ESTABLISHED\n");
 
@@ -1279,6 +1287,9 @@ found:
             tcp_snd_wnd_init(conn, tcp);
             tcp_snd_wnd_update(conn, tcp);
 
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+            tcp_cc_update(conn, tcp);
+#endif
             net_incr32(conn->rcvseq, 1); /* ack SYN */
             conn->tx_unacked    = 0;
 

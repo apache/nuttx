@@ -1149,6 +1149,12 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->sndseq_max       = 0;
 #endif
 
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+      /* Initialize the variables of congestion control */
+
+      tcp_cc_init(conn);
+#endif
+
       /* rcvseq should be the seqno from the incoming packet + 1. */
 
       memcpy(conn->rcvseq, tcp->seqno, 4);
@@ -1447,6 +1453,12 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->isn        = 0;
   conn->sent       = 0;
   conn->sndseq_max = 0;
+#endif
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+  /* Initialize the variables of congestion control. */
+
+  tcp_cc_init(conn);
 #endif
 
   /* Initialize the list of TCP read-ahead buffers */
