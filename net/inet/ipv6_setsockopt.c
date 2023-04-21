@@ -34,9 +34,9 @@
 
 #include "mld/mld.h"
 #include "inet/inet.h"
-#include "udp/udp.h"
+#include "socket/socket.h"
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_SOCKOPTS)
 
 /****************************************************************************
  * Public Functions
@@ -127,15 +127,12 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         ret = -ENOSYS;
         break;
 
-#ifdef NET_UDP_HAVE_STACK
-      case IPV6_PKTINFO:
       case IPV6_RECVPKTINFO:
         {
-          FAR struct udp_conn_s *conn;
+          FAR struct socket_conn_s *conn;
           int enable;
 
-          if (psock->s_type != SOCK_DGRAM ||
-              value == NULL || value_len == 0)
+          if (value == NULL || value_len == 0)
             {
               ret = -EINVAL;
               break;
@@ -143,20 +140,19 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
           enable = (value_len >= sizeof(int)) ?
             *(FAR int *)value : (int)*(FAR unsigned char *)value;
-          conn = (FAR struct udp_conn_s *)psock->s_conn;
+          conn = psock->s_conn;
           if (enable)
             {
-              conn->flags |= _UDP_FLAG_PKTINFO;
+              _SO_SETOPT(conn->s_options, option);
             }
           else
             {
-              conn->flags &= ~_UDP_FLAG_PKTINFO;
+              _SO_CLROPT(conn->s_options, option);
             }
 
           ret = OK;
         }
         break;
-#endif
 
       case IPV6_TCLASS:
         {
