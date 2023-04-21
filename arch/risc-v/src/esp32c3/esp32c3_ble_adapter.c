@@ -44,6 +44,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 
@@ -780,7 +781,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
   bt_sem = kmm_malloc(tmp);
   DEBUGASSERT(bt_sem);
 
-  ret = sem_init(&bt_sem->sem, 0, init);
+  ret = nxsem_init(&bt_sem->sem, 0, init);
   DEBUGASSERT(ret == OK);
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
@@ -807,7 +808,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 static void semphr_delete_wrapper(void *semphr)
 {
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
-  sem_destroy(&bt_sem->sem);
+  nxsem_destroy(&bt_sem->sem);
   kmm_free(bt_sem);
 }
 
