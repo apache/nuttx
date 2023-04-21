@@ -62,19 +62,16 @@ struct udp_recvfrom_s
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_SOCKOPTS
 static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
                             FAR void *srcaddr, uint8_t ifindex)
 {
   FAR struct msghdr     *msg  = pstate->ir_msg;
   FAR struct udp_conn_s *conn = pstate->ir_conn;
 
-  if (!(conn->flags & _UDP_FLAG_PKTINFO))
-    {
-      return;
-    }
-
 #ifdef CONFIG_NET_IPv4
-  if (conn->domain == PF_INET)
+  if (conn->domain == PF_INET &&
+      _SO_GETOPT(conn->sconn.s_options, IP_PKTINFO))
     {
       FAR struct sockaddr_in *infrom = srcaddr;
       FAR struct in_pktinfo   pktinfo;
@@ -88,7 +85,8 @@ static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET6)
+  if (conn->domain == PF_INET6 &&
+      _SO_GETOPT(conn->sconn.s_options, IPV6_RECVPKTINFO))
     {
       FAR struct sockaddr_in6 *infrom = srcaddr;
       FAR struct in6_pktinfo   pktinfo;
@@ -101,6 +99,9 @@ static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
     }
 #endif
 }
+#else
+#define udp_recvpktinfo(p, s, i) {(void)(p); (void)(s); (void)(i);}
+#endif
 
 /****************************************************************************
  * Name: udp_recvfrom_newdata
@@ -175,7 +176,7 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 #ifdef CONFIG_NETDEV_IFINDEX
       ifindex = iob->io_data[offset++];
 #else
-      ifindex = 0;
+      ifindex = 1;
 #endif
       src_addr_size = iob->io_data[offset++];
       srcaddr = &iob->io_data[offset];
@@ -320,7 +321,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NETDEV_IFINDEX
   udp_recvpktinfo(pstate, srcaddr, dev->d_ifindex);
 #else
-  udp_recvpktinfo(pstate, srcaddr, 0);
+  udp_recvpktinfo(pstate, srcaddr, 1);
 #endif
 }
 
