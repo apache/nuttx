@@ -443,7 +443,7 @@ static struct sx127x_dev_s g_sx127x_devices[1];
 
 /* File ops */
 
-static const struct file_operations sx127x_fops =
+static const struct file_operations g_sx127x_fops =
 {
   sx127x_open,    /* open */
   sx127x_close,   /* close */
@@ -4607,7 +4607,7 @@ int sx127x_register(FAR struct spi_dev_s *spi,
 
   wlinfo("Registering " SX127X_DEV_NAME "\n");
 
-  ret = register_driver(SX127X_DEV_NAME, &sx127x_fops, 0666, dev);
+  ret = register_driver(SX127X_DEV_NAME, &g_sx127x_fops, 0666, dev);
   if (ret < 0)
     {
       wlerr("ERROR: register_driver() failed: %d\n", ret);

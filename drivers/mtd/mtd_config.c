@@ -112,7 +112,7 @@ static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations mtdconfig_fops =
+static const struct file_operations g_mtdconfig_fops =
 {
   mtdconfig_open,  /* open */
   mtdconfig_close, /* close */
@@ -1776,7 +1776,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
         }
 
       nxmutex_init(&dev->lock);
-      register_driver("/dev/config", &mtdconfig_fops, 0666, dev);
+      register_driver("/dev/config", &g_mtdconfig_fops, 0666, dev);
     }
 
 errout:

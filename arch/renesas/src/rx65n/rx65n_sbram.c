@@ -123,7 +123,7 @@ static int     rx65n_sbram_unlink(struct inode *inode);
 static uint8_t debug[RX65N_SBRAM_SIZE];
 #endif
 
-static const struct file_operations rx65n_sbram_fops =
+static const struct file_operations g_rx65n_sbram_fops =
 {
   .open   = rx65n_sbram_open,
   .close  = rx65n_sbram_close,
@@ -658,7 +658,7 @@ int rx65n_sbraminitialize(char *devpath, int *sizes)
   for (i = 0; i < fcnt && ret >= OK; i++)
     {
       snprintf(devname, sizeof(devname), "%s%d", devpath, i);
-      ret = register_driver(devname, &rx65n_sbram_fops, 0666, &g_sbram[i]);
+      ret = register_driver(devname, &g_rx65n_sbram_fops, 0666, &g_sbram[i]);
     }
 
   /* Disallow Access */

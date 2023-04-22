@@ -116,7 +116,7 @@ static int     rtc_unlink(FAR struct inode *inode);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations rtc_fops =
+static const struct file_operations g_rtc_fops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   rtc_open,      /* open */
@@ -852,7 +852,7 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower)
 
   /* And, finally, register the new RTC driver */
 
-  ret = register_driver(devpath, &rtc_fops, 0666, upper);
+  ret = register_driver(devpath, &g_rtc_fops, 0666, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->lock);

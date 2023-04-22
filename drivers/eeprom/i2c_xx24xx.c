@@ -232,7 +232,7 @@ static const struct ee24xx_geom_s g_ee24xx_devices[] =
 
 /* Driver operations */
 
-static const struct file_operations ee24xx_fops =
+static const struct file_operations g_ee24xx_fops =
 {
   ee24xx_open,  /* open */
   ee24xx_close, /* close */
@@ -243,7 +243,7 @@ static const struct file_operations ee24xx_fops =
 };
 
 #ifdef CONFIG_AT24CS_UUID
-static const struct file_operations at24cs_uuid_fops =
+static const struct file_operations g_at24cs_uuid_fops =
 {
   ee24xx_open,      /* piggyback on the ee24xx_open */
   ee24xx_close,     /* piggyback on the ee24xx_close */
@@ -891,7 +891,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
 
   strlcpy(uuidname, devname, size);
   strlcat(uuidname, ".uuid", size);
-  ret = register_driver(uuidname, &at24cs_uuid_fops, 0444, eedev);
+  ret = register_driver(uuidname, &g_at24cs_uuid_fops, 0444, eedev);
 
   kmm_free(uuidname);
 
@@ -902,5 +902,5 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
     }
 #endif
 
-  return register_driver(devname, &ee24xx_fops, 0666, eedev);
+  return register_driver(devname, &g_ee24xx_fops, 0666, eedev);
 }

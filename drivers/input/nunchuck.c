@@ -110,7 +110,7 @@ static int     nunchuck_sample(FAR struct nunchuck_dev_s *priv,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations nunchuck_fops =
+static const struct file_operations g_nunchuck_fops =
 {
   nunchuck_open,  /* open */
   nunchuck_close, /* close */
@@ -564,7 +564,7 @@ int nunchuck_register(FAR const char *devname, FAR struct i2c_master_s *i2c)
 
   /* And register the nunchuck driver */
 
-  ret = register_driver(devname, &nunchuck_fops, 0666, priv);
+  ret = register_driver(devname, &g_nunchuck_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

@@ -268,7 +268,7 @@ static const struct ee25xx_geom_s g_ee25xx_devices[] =
 
 /* Driver operations */
 
-static const struct file_operations ee25xx_fops =
+static const struct file_operations g_ee25xx_fops =
 {
   ee25xx_open,  /* open */
   ee25xx_close, /* close */
@@ -828,5 +828,5 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
         "%u per page, addrlen %u, readonly %d\n",
        devname, eedev->size, eedev->pgsize, eedev->addrlen, eedev->readonly);
 
-  return register_driver(devname, &ee25xx_fops, 0666, eedev);
+  return register_driver(devname, &g_ee25xx_fops, 0666, eedev);
 }

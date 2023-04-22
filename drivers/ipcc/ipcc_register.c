@@ -48,7 +48,7 @@
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations ipcc_fops =
+static const struct file_operations g_ipcc_fops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = ipcc_unlink,
@@ -165,7 +165,7 @@ int ipcc_register(FAR struct ipcc_lower_s *ipcc)
   /* Create the character device name */
 
   snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, ipcc->chan);
-  if ((ret = register_driver(devname, &ipcc_fops, 0666, priv)))
+  if ((ret = register_driver(devname, &g_ipcc_fops, 0666, priv)))
     {
       goto error;
     }

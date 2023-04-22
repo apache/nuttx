@@ -86,7 +86,7 @@ static int     spidrvr_unlink(FAR struct inode *inode);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations spidrvr_fops =
+static const struct file_operations g_spidrvr_fops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   spidrvr_open,    /* open */
@@ -374,7 +374,7 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
       /* Create the character device name */
 
       snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, bus);
-      ret = register_driver(devname, &spidrvr_fops, 0666, priv);
+      ret = register_driver(devname, &g_spidrvr_fops, 0666, priv);
       if (ret < 0)
         {
           /* Free the device structure if we failed to create the character

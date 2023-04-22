@@ -48,7 +48,7 @@ static ssize_t syslog_chardev_write(FAR struct file *filep,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations syslog_fops =
+static const struct file_operations g_syslog_fops =
 {
   NULL,                 /* open */
   NULL,                 /* close */
@@ -91,7 +91,7 @@ static ssize_t syslog_chardev_write(FAR struct file *filep,
 
 void syslog_register(void)
 {
-  register_driver("/dev/log", &syslog_fops, 0222, NULL);
+  register_driver("/dev/log", &g_syslog_fops, 0222, NULL);
 }
 
 #endif /* CONFIG_SYSLOG_CHARDEV */

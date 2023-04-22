@@ -233,7 +233,7 @@ static int himem_chardev_ioctl(struct file *filep,
   return 0;
 }
 
-static const struct file_operations fops =
+static const struct file_operations g_fops =
 {
   .open = himem_chardev_open,
   .close = himem_chardev_close,
@@ -323,7 +323,7 @@ int himem_chardev_register(char *name, size_t size)
       return ret;
     }
 
-  ret = register_driver(dev->name, &fops, 0666, dev);
+  ret = register_driver(dev->name, &g_fops, 0666, dev);
   if (ret != 0)
     {
       merr("Failed to register driver. dev=%s\n", dev->name);

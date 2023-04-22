@@ -66,7 +66,7 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations lcddev_fops =
+static const struct file_operations g_lcddev_fops =
 {
   NULL,         /* open */
   NULL,         /* close */
@@ -322,7 +322,7 @@ int lcddev_register(int devno)
     }
 
   snprintf(devname, sizeof(devname), "/dev/lcd%i", devno);
-  ret = register_driver(devname, &lcddev_fops, 0666, priv);
+  ret = register_driver(devname, &g_lcddev_fops, 0666, priv);
   if (ret < 0)
     {
       goto err;

@@ -114,7 +114,7 @@ static int  ads7843e_poll(FAR struct file *filep, struct pollfd *fds,
 
 /* This the vtable that supports the character driver interface */
 
-static const struct file_operations ads7843e_fops =
+static const struct file_operations g_ads7843e_fops =
 {
   ads7843e_open,    /* open */
   ads7843e_close,   /* close */
@@ -1177,7 +1177,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &ads7843e_fops, 0666, priv);
+  ret = register_driver(devname, &g_ads7843e_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

@@ -260,7 +260,7 @@ static int tc_poll(struct file *filep, struct pollfd *fds, bool setup);
 
 /* This the vtable that supports the character driver interface */
 
-static const struct file_operations tc_fops =
+static const struct file_operations g_tc_fops =
 {
   tc_open,    /* open */
   tc_close,   /* close */
@@ -1509,7 +1509,7 @@ int stm32_tsc_setup(int minor)
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &tc_fops, 0666, priv);
+  ret = register_driver(devname, &g_tc_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

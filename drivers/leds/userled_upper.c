@@ -97,7 +97,7 @@ static int     userled_ioctl(FAR struct file *filep, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations userled_fops =
+static const struct file_operations g_userled_fops =
 {
   userled_open,   /* open */
   userled_close,  /* close */
@@ -531,7 +531,7 @@ int userled_register(FAR const char *devname,
 
   /* And register the LED driver */
 
-  ret = register_driver(devname, &userled_fops, 0666, priv);
+  ret = register_driver(devname, &g_userled_fops, 0666, priv);
   if (ret < 0)
     {
       lederr("ERROR: register_driver failed: %d\n", ret);

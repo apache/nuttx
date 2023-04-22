@@ -339,7 +339,7 @@ static struct usbhost_registry_s g_cdcmbim =
 
 /* File operations for control channel */
 
-static const struct file_operations cdcwdm_fops =
+static const struct file_operations g_cdcwdm_fops =
 {
   NULL,          /* open */
   NULL,          /* close */
@@ -1574,7 +1574,7 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcmbim_s *priv)
 
       uinfo("Register character driver\n");
       usbhost_mkdevname(priv, devname);
-      ret = register_driver(devname, &cdcwdm_fops, 0666, priv);
+      ret = register_driver(devname, &g_cdcwdm_fops, 0666, priv);
     }
 
   if (priv->intin)

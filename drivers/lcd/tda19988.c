@@ -162,7 +162,7 @@ static void    tda19988_shutdown(FAR struct tda1988_dev_s *priv);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations tda19988_fops =
+static const struct file_operations g_tda19988_fops =
 {
   tda19988_open,     /* open */
   tda19988_close,    /* close */
@@ -1684,7 +1684,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
 
   /* Register the driver */
 
-  ret = register_driver(devpath, &tda19988_fops, 0666, NULL);
+  ret = register_driver(devpath, &g_tda19988_fops, 0666, NULL);
   if (ret < 0)
     {
       lcderr("ERROR: register_driver() failed: %d\n", ret);

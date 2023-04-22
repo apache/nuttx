@@ -62,7 +62,7 @@ static int shmfs_munmap(FAR struct task_group_s *group,
  * Public Data
  ****************************************************************************/
 
-const struct file_operations shmfs_operations =
+const struct file_operations g_shmfs_operations =
 {
   NULL,             /* open */
   shmfs_close,      /* close */

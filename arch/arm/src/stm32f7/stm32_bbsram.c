@@ -130,7 +130,7 @@ static int     stm32_bbsram_unlink(struct inode *inode);
 static uint8_t debug[STM32F7_BBSRAM_SIZE];
 #endif
 
-static const struct file_operations stm32_bbsram_fops =
+static const struct file_operations g_stm32_bbsram_fops =
 {
   .open   = stm32_bbsram_open,
   .close  = stm32_bbsram_close,
@@ -752,7 +752,8 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
   for (i = 0; i < fcnt && ret >= OK; i++)
     {
       snprintf(devname, sizeof(devname), "%s%d", devpath, i);
-      ret = register_driver(devname, &stm32_bbsram_fops, 0666, &g_bbsram[i]);
+      ret = register_driver(devname, &g_stm32_bbsram_fops,
+                            0666, &g_bbsram[i]);
     }
 
   /* Disallow Access */

@@ -106,7 +106,7 @@ static int     ubxmdm_poll (FAR struct file * filep,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations ubxmdm_fops =
+static const struct file_operations g_ubxmdm_fops =
 {
   NULL,         /* open */
   NULL,         /* close */
@@ -293,7 +293,7 @@ FAR void * ubxmdm_register(FAR const char * path,
       goto errout_with_upper;
     }
 
-  ret = register_driver(path, &ubxmdm_fops, 0666, upper);
+  ret = register_driver(path, &g_ubxmdm_fops, 0666, upper);
   if (ret < 0)
     {
       m_err("ERROR: register_driver failed: %d\n", ret);

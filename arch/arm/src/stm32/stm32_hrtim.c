@@ -787,7 +787,7 @@ static int stm32_hrtimconfig(struct stm32_hrtim_s *priv);
  ****************************************************************************/
 
 #ifndef CONFIG_STM32_HRTIM_DISABLE_CHARDRV
-static const struct file_operations hrtim_fops =
+static const struct file_operations g_hrtim_fops =
 {
   stm32_hrtim_open,   /* open */
   stm32_hrtim_close,  /* close */
@@ -6013,7 +6013,7 @@ int hrtim_register(const char *path, struct hrtim_dev_s *dev)
 
   /* Register the HRTIM character driver */
 
-  return register_driver(path, &hrtim_fops, 0444, dev);
+  return register_driver(path, &g_hrtim_fops, 0444, dev);
 }
 #endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 

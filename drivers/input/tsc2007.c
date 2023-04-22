@@ -201,7 +201,7 @@ static int tsc2007_poll(FAR struct file *filep, struct pollfd *fds,
 
 /* This the vtable that supports the character driver interface */
 
-static const struct file_operations tsc2007_fops =
+static const struct file_operations g_tsc2007_fops =
 {
   tsc2007_open,    /* open */
   tsc2007_close,   /* close */
@@ -1253,7 +1253,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &tsc2007_fops, 0666, priv);
+  ret = register_driver(devname, &g_tsc2007_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

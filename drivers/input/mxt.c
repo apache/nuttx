@@ -272,7 +272,7 @@ static int  mxt_hwinitialize(FAR struct mxt_dev_s *priv);
 
 /* This the vtable that supports the character driver interface */
 
-static const struct file_operations mxt_fops =
+static const struct file_operations g_mxt_fops =
 {
   mxt_open,    /* open */
   mxt_close,   /* close */
@@ -1891,7 +1891,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &mxt_fops, 0666, priv);
+  ret = register_driver(devname, &g_mxt_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);
