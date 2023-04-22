@@ -31,6 +31,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <nuttx/tls.h>
+#include <nuttx/pthread.h>
+
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 
 /****************************************************************************
@@ -86,6 +89,21 @@ FAR void *__dso_handle = &__dso_handle;
 
 void exit(int status)
 {
+  /* Mark the pthread as non-cancelable to avoid additional calls to
+   * pthread_exit() due to any cancellation point logic that might get
+   * kicked off by actions taken during pthread_exit processing.
+   */
+
+  task_setcancelstate(TASK_CANCEL_DISABLE, NULL);
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_popall(tls_get_info());
+#endif
+
+#if CONFIG_TLS_NELEM > 0
+  tls_destruct();
+#endif
+
   /* Run the registered exit functions */
 
   atexit_call_exitfuncs(status, false);
@@ -120,6 +138,21 @@ void exit(int status)
 
 void quick_exit(int status)
 {
+  /* Mark the pthread as non-cancelable to avoid additional calls to
+   * pthread_exit() due to any cancellation point logic that might get
+   * kicked off by actions taken during pthread_exit processing.
+   */
+
+  task_setcancelstate(TASK_CANCEL_DISABLE, NULL);
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_popall(tls_get_info());
+#endif
+
+#if CONFIG_TLS_NELEM > 0
+  tls_destruct();
+#endif
+
   /* Run the registered exit functions */
 
   atexit_call_exitfuncs(status, true);
