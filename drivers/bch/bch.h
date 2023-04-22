@@ -75,7 +75,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN const struct file_operations bch_fops;
+EXTERN const struct file_operations g_bch_fops;
 
 /****************************************************************************
  * Public Function Prototypes

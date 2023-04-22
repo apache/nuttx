@@ -206,7 +206,7 @@ static int     unionfs_dobind(FAR const char *fspath1,
  * with any compiler.
  */
 
-const struct mountpt_operations unionfs_operations =
+const struct mountpt_operations g_unionfs_operations =
 {
   unionfs_open,        /* open */
   unionfs_close,       /* close */
@@ -2733,7 +2733,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 
   INODE_SET_MOUNTPT(mpinode);
 
-  mpinode->u.i_mops = &unionfs_operations;
+  mpinode->u.i_mops = &g_unionfs_operations;
 
   /* Call unionfs_dobind to do the real work. */
 

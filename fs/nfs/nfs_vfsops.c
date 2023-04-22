@@ -190,7 +190,7 @@ struct nfsstats nfsstats;
 
 /* nfs vfs operations. */
 
-const struct mountpt_operations nfs_operations =
+const struct mountpt_operations g_nfs_operations =
 {
   nfs_open,                     /* open */
   nfs_close,                    /* close */

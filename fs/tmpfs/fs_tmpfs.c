@@ -170,7 +170,7 @@ static int  tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
  * Public Data
  ****************************************************************************/
 
-const struct mountpt_operations tmpfs_operations =
+const struct mountpt_operations g_tmpfs_operations =
 {
   tmpfs_open,       /* open */
   tmpfs_close,      /* close */

@@ -113,7 +113,7 @@ static int     romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
  * with any compiler.
  */
 
-const struct mountpt_operations romfs_operations =
+const struct mountpt_operations g_romfs_operations =
 {
   romfs_open,      /* open */
   romfs_close,     /* close */

@@ -133,7 +133,7 @@ static int  spiffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
  * Public Data
  ****************************************************************************/
 
-const struct mountpt_operations spiffs_operations =
+const struct mountpt_operations g_spiffs_operations =
 {
   spiffs_open,       /* open */
   spiffs_close,      /* close */

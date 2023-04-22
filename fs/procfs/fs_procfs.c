@@ -244,7 +244,7 @@ static int     procfs_initialize(void);
  * with any compiler.
  */
 
-const struct mountpt_operations procfs_operations =
+const struct mountpt_operations g_procfs_operations =
 {
   procfs_open,       /* open */
   procfs_close,      /* close */
