@@ -1,0 +1,84 @@
+From 47160b8facc968ed945decfa3ed5f1d4c608ac90 Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Sun, 26 Mar 2023 01:16:23 +0800
+Subject: [PATCH 1/2] newlib libm fix __RCSID build error
+
+VELAPLATFO-6159
+
+remove code __RCSID in newlib/libm
+
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+Change-Id: I7eec03396b911ead48183fc80936475a9136f3ee
+---
+ newlib/libm/complex/conjl.c      | 3 ---
+ newlib/libm/complex/cprojl.c     | 3 ---
+ newlib/libm/complex/csqrtl.c     | 8 --------
+ newlib/libm/machine/sparc/fenv.c | 5 -----
+ 4 files changed, 19 deletions(-)
+
+diff --git a/newlib/newlib/newlib/libm/complex/conjl.c newlib/newlib/newlib/libm/complex/conjl.c
+index 35094ce89..75c8544a1 100644
+--- a/newlib/newlib/newlib/libm/complex/conjl.c
++++ newlib/newlib/newlib/libm/complex/conjl.c
+@@ -25,9 +25,6 @@
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+-#include <sys/cdefs.h>
+-__RCSID("$NetBSD: conjl.c,v 1.4 2010/09/20 16:55:20 christos Exp $");
+-
+ #include <complex.h>
+ #include "../common/fdlibm.h"
+ 
+diff --git a/newlib/newlib/newlib/libm/complex/cprojl.c newlib/newlib/newlib/libm/complex/cprojl.c
+index e71c77353..93308b29f 100644
+--- a/newlib/newlib/newlib/libm/complex/cprojl.c
++++ newlib/newlib/newlib/libm/complex/cprojl.c
+@@ -25,9 +25,6 @@
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+-#include <sys/cdefs.h>
+-__RCSID("$NetBSD: cprojl.c,v 1.7 2014/10/10 00:48:18 christos Exp $");
+-
+ #include <complex.h>
+ #include <math.h>
+ 
+diff --git a/newlib/newlib/newlib/libm/complex/csqrtl.c newlib/newlib/newlib/libm/complex/csqrtl.c
+index c10a1264a..96c177c03 100644
+--- a/newlib/newlib/newlib/libm/complex/csqrtl.c
++++ newlib/newlib/newlib/libm/complex/csqrtl.c
+@@ -23,14 +23,6 @@
+  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  * SUCH DAMAGE.
+  */
+-
+-#include <sys/cdefs.h>
+-#if 0
+-__FBSDID("$FreeBSD: head/lib/msun/src/s_csqrtl.c 181402 2008-08-08 00:15:16Z das $");
+-#else
+-__RCSID("$NetBSD: csqrtl.c,v 1.2 2014/10/11 00:43:51 christos Exp $");
+-#endif
+-
+ #include <complex.h>
+ #include <float.h>
+ #include <math.h>
+diff --git a/newlib/newlib/newlib/libm/machine/sparc/fenv.c newlib/newlib/newlib/libm/machine/sparc/fenv.c
+index 127898021..b2bcdc1e4 100644
+--- a/newlib/newlib/newlib/libm/machine/sparc/fenv.c
++++ newlib/newlib/newlib/libm/machine/sparc/fenv.c
+@@ -23,11 +23,6 @@
+  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  */
+-#include <sys/cdefs.h>
+-__RCSID("$NetBSD: fenv.c,v 1.2 2017/03/22 23:11:09 chs Exp $");
+-
+-
+-
+ #include <assert.h>
+ #include <fenv.h>
+ 
+-- 
+2.39.1
+

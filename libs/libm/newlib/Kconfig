@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBM_NEWLIB_HW_FP
+	bool "Newlib hardware floating-point routines"
+	default n
+	---help---
+		The option is being disabled because the mathfp library is
+		not up to standard due to inaccuracies caused by some of the
+		floating-point algorithms used.
