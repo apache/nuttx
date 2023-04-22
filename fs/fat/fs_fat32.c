@@ -107,7 +107,7 @@ static int     fat_stat(struct inode *mountpt, const char *relpath,
  * with any compiler.
  */
 
-const struct mountpt_operations fat_operations =
+const struct mountpt_operations g_fat_operations =
 {
   fat_open,          /* open */
   fat_close,         /* close */

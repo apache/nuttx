@@ -46,7 +46,7 @@
  * with any compiler.
  */
 
-const struct mountpt_operations nxffs_operations =
+const struct mountpt_operations g_nxffs_operations =
 {
   nxffs_open,        /* open */
   nxffs_close,       /* close */

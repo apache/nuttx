@@ -134,7 +134,7 @@ static mutex_t g_lock = NXMUTEX_INITIALIZER;
  * with any compiler.
  */
 
-const struct mountpt_operations hostfs_operations =
+const struct mountpt_operations g_hostfs_operations =
 {
   hostfs_open,          /* open */
   hostfs_close,         /* close */

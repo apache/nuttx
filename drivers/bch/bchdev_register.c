@@ -67,7 +67,7 @@ int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
 
   /* Then setup the character device */
 
-  ret = register_driver(chardev, &bch_fops, 0666, handle);
+  ret = register_driver(chardev, &g_bch_fops, 0666, handle);
   if (ret < 0)
     {
       ferr("ERROR: register_driver failed: %d\n", -ret);

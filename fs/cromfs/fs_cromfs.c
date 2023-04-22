@@ -176,7 +176,7 @@ static int      cromfs_stat(FAR struct inode *mountpt,
  * with any compiler.
  */
 
-const struct mountpt_operations cromfs_operations =
+const struct mountpt_operations g_cromfs_operations =
 {
   cromfs_open,       /* open */
   cromfs_close,      /* close */

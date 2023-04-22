@@ -152,7 +152,7 @@ static int     userfs_chstat(FAR struct inode *mountpt,
  * with any compiler.
  */
 
-const struct mountpt_operations userfs_operations =
+const struct mountpt_operations g_userfs_operations =
 {
   userfs_open,       /* open */
   userfs_close,      /* close */

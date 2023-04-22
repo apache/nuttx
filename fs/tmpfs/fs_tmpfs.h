@@ -166,7 +166,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN const struct mountpt_operations tmpfs_operations;
+EXTERN const struct mountpt_operations g_tmpfs_operations;
 
 /****************************************************************************
  * Public Function Prototypes
