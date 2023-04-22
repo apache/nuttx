@@ -245,7 +245,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 #else
   /* Set the prefix and prefix length based on net driver IP and netmask */
 
-  prefix->preflen     = net_ipv6_mask2pref(dev->d_ipv6netmask);
+  prefix->preflen     = ipv6_mask2pref(dev->d_ipv6netmask);
   ipv6addr_mask(prefix->prefix, dev->d_ipv6addr, dev->d_ipv6netmask);
 #endif /* CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 

@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_ipv6_pref2mask
+ * Name: ipv6_pref2mask
  *
  * Description:
  *   Convert a IPv6 prefix length to a network mask.  The prefix length
@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
+void ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
 {
   unsigned int bit;
   unsigned int i;

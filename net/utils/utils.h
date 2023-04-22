@@ -145,7 +145,7 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
                               enum tv2ds_remainder_e remainder);
 
 /****************************************************************************
- * Name: net_ipv6_mask2pref
+ * Name: ipv6_mask2pref
  *
  * Description:
  *   Convert a 128-bit netmask to a prefix length.  The NuttX IPv6
@@ -169,11 +169,11 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask);
+uint8_t ipv6_mask2pref(FAR const uint16_t *mask);
 #endif
 
 /****************************************************************************
- * Name: net_ipv6_pref2mask
+ * Name: ipv6_pref2mask
  *
  * Description:
  *   Convert a IPv6 prefix length to a network mask.  The prefix length
@@ -189,7 +189,7 @@ uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
+void ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
 #endif
 
 /****************************************************************************

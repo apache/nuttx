@@ -117,7 +117,7 @@ static inline uint8_t net_msbits16(uint16_t hword)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_ipv6_mask2pref
+ * Name: ipv6_mask2pref
  *
  * Description:
  *   Convert a 128-bit netmask to a prefix length.  The NuttX IPv6
@@ -140,7 +140,7 @@ static inline uint8_t net_msbits16(uint16_t hword)
  *
  ****************************************************************************/
 
-uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask)
+uint8_t ipv6_mask2pref(FAR const uint16_t *mask)
 {
   uint8_t preflen;
   int i;

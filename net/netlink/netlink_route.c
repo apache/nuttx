@@ -373,7 +373,7 @@ netlink_get_ifaddr(FAR struct net_driver_s *dev, int domain, int type,
     {
       resp->attr.rta_len = RTA_LENGTH(sizeof(struct in6_addr));
       memcpy(&resp->local_addr, dev->d_ipv6addr, sizeof(struct in6_addr));
-      resp->ifaddr.ifa_prefixlen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+      resp->ifaddr.ifa_prefixlen = ipv6_mask2pref(dev->d_ipv6netmask);
     }
 #endif
 
@@ -932,7 +932,7 @@ static int netlink_new_ipv6addr(NETLINK_HANDLE handle,
     }
 
   memcpy(dev->d_ipv6addr, nla_data(tb[IFA_LOCAL]), 16);
-  net_ipv6_pref2mask(ifm->ifa_prefixlen, dev->d_ipv6netmask);
+  ipv6_pref2mask(ifm->ifa_prefixlen, dev->d_ipv6netmask);
 
   netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET6);
   net_unlock();

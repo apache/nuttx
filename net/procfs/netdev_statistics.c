@@ -316,7 +316,7 @@ static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile)
 
   /* Convert the 128 network mask to a human friendly prefix length */
 
-  preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+  preflen = ipv6_mask2pref(dev->d_ipv6netmask);
 
   /* Show the assigned IPv6 address */
 
@@ -347,7 +347,7 @@ static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile)
 
   /* Convert the 128 network mask to a human friendly prefix length */
 
-  preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+  preflen = ipv6_mask2pref(dev->d_ipv6netmask);
 
   /* Show the IPv6 default router address */
 
