@@ -61,7 +61,7 @@ static int     dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations dac_fops =
+static const struct file_operations g_dac_fops =
 {
   dac_open,       /* open */
   dac_close,      /* close */
@@ -501,5 +501,5 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
 
   dev->ad_ops->ao_reset(dev);
 
-  return register_driver(path, &dac_fops, 0222, dev);
+  return register_driver(path, &g_dac_fops, 0222, dev);
 }

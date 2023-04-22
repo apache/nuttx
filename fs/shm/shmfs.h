@@ -31,7 +31,7 @@
  * Public Data
  ****************************************************************************/
 
-extern const struct file_operations shmfs_operations;
+extern const struct file_operations g_shmfs_operations;
 
 /****************************************************************************
  * Public Types

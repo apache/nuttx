@@ -127,7 +127,7 @@ static int     djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations djoy_fops =
+static const struct file_operations g_djoy_fops =
 {
   djoy_open,  /* open */
   djoy_close, /* close */
@@ -714,7 +714,7 @@ int djoy_register(FAR const char *devname,
 
   /* And register the djoystick driver */
 
-  ret = register_driver(devname, &djoy_fops, 0666, priv);
+  ret = register_driver(devname, &g_djoy_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

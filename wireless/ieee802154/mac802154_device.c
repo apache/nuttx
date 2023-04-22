@@ -136,7 +136,7 @@ static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations mac802154dev_fops =
+static const struct file_operations g_mac802154dev_fops =
 {
   mac802154dev_open,  /* open */
   mac802154dev_close, /* close */
@@ -862,7 +862,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
 
   /* Register the mac character driver */
 
-  ret = register_driver(devname, &mac802154dev_fops, 0666, dev);
+  ret = register_driver(devname, &g_mac802154dev_fops, 0666, dev);
   if (ret < 0)
     {
       wlerr("ERROR: register_driver failed: %d\n", ret);

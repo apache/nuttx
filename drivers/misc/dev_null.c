@@ -49,7 +49,7 @@ static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations devnull_fops =
+static const struct file_operations g_devnull_fops =
 {
   NULL,          /* open */
   NULL,          /* close */
@@ -124,5 +124,5 @@ static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void devnull_register(void)
 {
-  register_driver("/dev/null", &devnull_fops, 0666, NULL);
+  register_driver("/dev/null", &g_devnull_fops, 0666, NULL);
 }

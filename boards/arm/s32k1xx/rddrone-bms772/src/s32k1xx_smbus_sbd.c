@@ -88,7 +88,7 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
  * slave character device:
  */
 
-static const struct file_operations smbus_sbd_fops =
+static const struct file_operations g_smbus_sbd_fops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   smbus_sbd_open,  /* open */
@@ -788,7 +788,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
        * the SMBus Smart Battery Data slave device structure.
        */
 
-      ret = register_driver(dev_name, &smbus_sbd_fops, 0, smbus_sbd_dev);
+      ret = register_driver(dev_name, &g_smbus_sbd_fops, 0, smbus_sbd_dev);
       if (ret < 0)
         {
           ferr("register_driver failed: %d\n", -ret);

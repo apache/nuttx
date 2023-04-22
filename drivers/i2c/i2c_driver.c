@@ -86,7 +86,7 @@ static int     i2cdrvr_unlink(FAR struct inode *inode);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations i2cdrvr_fops =
+static const struct file_operations g_i2cdrvr_fops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   i2cdrvr_open,    /* open */
@@ -389,7 +389,7 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
       /* Create the character device name */
 
       snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, bus);
-      ret = register_driver(devname, &i2cdrvr_fops, 0666, priv);
+      ret = register_driver(devname, &g_i2cdrvr_fops, 0666, priv);
       if (ret < 0)
         {
           /* Free the device structure if we failed to create the character

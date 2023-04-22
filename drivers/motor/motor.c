@@ -72,7 +72,7 @@ static int     motor_ioctl(FAR struct file *filep, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations motor_fops =
+static const struct file_operations g_motor_fops =
 {
   motor_open,                    /* open */
   motor_close,                   /* close */
@@ -585,7 +585,7 @@ int motor_register(FAR const char *path,
 
   /* Register the motor character driver */
 
-  ret = register_driver(path, &motor_fops, 0666, upper);
+  ret = register_driver(path, &g_motor_fops, 0666, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->closelock);

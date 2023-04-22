@@ -87,7 +87,7 @@ static int cxd56_sphirqhandler(int irq, void *context, void *arg);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations sph_fops =
+static const struct file_operations g_sph_fops =
 {
   .open  = sph_open,
   .ioctl = sph_ioctl
@@ -224,7 +224,7 @@ static inline int cxd56_sphdevinit(const char *devname, int num)
 
   snprintf(fullpath, sizeof(fullpath), "/dev/%s%d", devname, num);
 
-  ret = register_driver(fullpath, &sph_fops, 0666, (void *)priv);
+  ret = register_driver(fullpath, &g_sph_fops, 0666, (void *)priv);
   if (ret != 0)
     {
       return ERROR;

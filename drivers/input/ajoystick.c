@@ -127,7 +127,7 @@ static int     ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations ajoy_fops =
+static const struct file_operations g_ajoy_fops =
 {
   ajoy_open,  /* open */
   ajoy_close, /* close */
@@ -720,7 +720,7 @@ int ajoy_register(FAR const char *devname,
 
   /* And register the ajoystick driver */
 
-  ret = register_driver(devname, &ajoy_fops, 0666, priv);
+  ret = register_driver(devname, &g_ajoy_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

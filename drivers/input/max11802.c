@@ -107,7 +107,7 @@ static int max11802_poll(FAR struct file *filep, struct pollfd *fds,
 
 /* This the vtable that supports the character driver interface */
 
-static const struct file_operations max11802_fops =
+static const struct file_operations g_max11802_fops =
 {
   max11802_open,    /* open */
   max11802_close,   /* close */
@@ -1211,7 +1211,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &max11802_fops, 0666, priv);
+  ret = register_driver(devname, &g_max11802_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

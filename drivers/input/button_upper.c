@@ -125,7 +125,7 @@ static int     btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations btn_fops =
+static const struct file_operations g_btn_fops =
 {
   btn_open,  /* open */
   btn_close, /* close */
@@ -773,7 +773,7 @@ int btn_register(FAR const char *devname,
 
   /* And register the button driver */
 
-  ret = register_driver(devname, &btn_fops, 0666, priv);
+  ret = register_driver(devname, &g_btn_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

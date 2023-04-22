@@ -168,7 +168,7 @@ static int  ft5x06_poll(FAR struct file *filep, struct pollfd *fds,
 
 /* This the vtable that supports the character driver interface */
 
-static const struct file_operations ft5x06_fops =
+static const struct file_operations g_ft5x06_fops =
 {
   ft5x06_open,    /* open */
   ft5x06_close,   /* close */
@@ -1151,7 +1151,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &ft5x06_fops, 0666, priv);
+  ret = register_driver(devname, &g_ft5x06_fops, 0666, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

@@ -84,7 +84,7 @@ static int     fb_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations fb_fops =
+static const struct file_operations g_fb_fops =
 {
   NULL,          /* open */
   NULL,          /* close */
@@ -942,7 +942,7 @@ int fb_register(int display, int plane)
       snprintf(devname, 16, "/dev/fb%d.%d", display, plane);
     }
 
-  ret = register_driver(devname, &fb_fops, 0666, (FAR void *)fb);
+  ret = register_driver(devname, &g_fb_fops, 0666, (FAR void *)fb);
   if (ret < 0)
     {
       gerr("ERROR: register_driver() failed: %d\n", ret);
