@@ -1,0 +1,69 @@
+From 4bf252f304579f3d0c162a573b64547cd4fb4c05 Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Sun, 26 Mar 2023 09:31:15 +0800
+Subject: [PATCH 2/2] newlib libm remove include reent.h
+
+VELAPLATFO-6159
+
+remove include reent.h
+
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+Change-Id: I8265baa3bfc9df9035fb45f02676047ea8adacbd
+---
+ newlib/libm/math/w_gamma.c   | 1 -
+ newlib/libm/math/w_lgamma.c  | 1 -
+ newlib/libm/math/wf_gamma.c  | 1 -
+ newlib/libm/math/wf_lgamma.c | 1 -
+ 4 files changed, 4 deletions(-)
+
+diff --git a/newlib/newlib/newlib/libm/math/w_gamma.c newlib/newlib/newlib/libm/math/w_gamma.c
+index 16962c570..fdbe2c8b4 100644
+--- a/newlib/newlib/newlib/libm/math/w_gamma.c
++++ newlib/newlib/newlib/libm/math/w_gamma.c
+@@ -136,7 +136,6 @@ in terms of the base return values, although the <[signgam]> global for
+  */
+ 
+ #include "fdlibm.h"
+-#include <reent.h>
+ #include <errno.h>
+ 
+ #ifndef _DOUBLE_IS_32BITS
+diff --git a/newlib/newlib/newlib/libm/math/w_lgamma.c newlib/newlib/newlib/libm/math/w_lgamma.c
+index c075a4fc1..054291162 100644
+--- a/newlib/newlib/newlib/libm/math/w_lgamma.c
++++ newlib/newlib/newlib/libm/math/w_lgamma.c
+@@ -19,7 +19,6 @@
+  */
+ 
+ #include "fdlibm.h"
+-#include <reent.h>
+ #include <errno.h>
+ 
+ #ifdef _REENT_THREAD_LOCAL
+diff --git a/newlib/newlib/newlib/libm/math/wf_gamma.c newlib/newlib/newlib/libm/math/wf_gamma.c
+index 29f88a50b..0a4c31cd7 100644
+--- a/newlib/newlib/newlib/libm/math/wf_gamma.c
++++ newlib/newlib/newlib/libm/math/wf_gamma.c
+@@ -15,7 +15,6 @@
+  */
+ 
+ #include "fdlibm.h"
+-#include <reent.h>
+ #include <errno.h>
+ 
+ #ifdef __STDC__
+diff --git a/newlib/newlib/newlib/libm/math/wf_lgamma.c newlib/newlib/newlib/libm/math/wf_lgamma.c
+index b232ecfe4..f64aa6347 100644
+--- a/newlib/newlib/newlib/libm/math/wf_lgamma.c
++++ newlib/newlib/newlib/libm/math/wf_lgamma.c
+@@ -15,7 +15,6 @@
+  */
+ 
+ #include "fdlibm.h"
+-#include <reent.h>
+ #include <errno.h>
+ 
+ #ifdef __STDC__
+-- 
+2.39.1
+
