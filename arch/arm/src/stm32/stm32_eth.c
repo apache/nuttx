@@ -2043,6 +2043,12 @@ static void stm32_interrupt_work(void *arg)
 
       stm32_putreg(ETH_DMAINT_AIS, STM32_ETH_DMASR);
 
+      /* Lock the scheduler, to ensure that the network
+       * will be unlocked before the worker starts.
+       */
+
+      sched_lock();
+
       /* As per the datasheet's recommendation, the MAC
        * needs to be reset for all abnormal events. The
        * scheduled job will take the interface down and
@@ -2057,6 +2063,9 @@ static void stm32_interrupt_work(void *arg)
        */
 
       net_unlock();
+
+      sched_unlock();
+
       return;
     }
 
