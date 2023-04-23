@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/chip/chip.h>
 #include "arch/syscall.h"
 #include "arm64_macro.inc"
 #include "arch/irq.h"

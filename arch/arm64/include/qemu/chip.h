@@ -27,6 +27,10 @@
 
 #include <nuttx/config.h>
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* Number of bytes in @p x kibibytes/mebibytes/gibibytes */
 
 #define KB(x)           ((x) << 10)
@@ -62,5 +66,18 @@
 #define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
 
 #endif
+
+/****************************************************************************
+ * Assembly Macros
+ ****************************************************************************/
+
+#ifdef __ASSEMBLY__
+
+.macro  get_cpu_id xreg0
+  mrs    \xreg0, mpidr_el1
+  ubfx   \xreg0, \xreg0, #0, #8
+.endm
+
+#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM64_INCLUDE_QEMU_CHIP_H */
