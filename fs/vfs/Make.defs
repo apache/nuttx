@@ -25,7 +25,7 @@ CSRCS += fs_fchstat.c fs_fstat.c fs_fstatfs.c fs_ioctl.c fs_lseek.c
 CSRCS += fs_mkdir.c fs_open.c fs_poll.c fs_pread.c fs_pwrite.c fs_read.c
 CSRCS += fs_rename.c fs_rmdir.c fs_select.c fs_sendfile.c fs_stat.c
 CSRCS += fs_statfs.c fs_unlink.c fs_write.c fs_dir.c fs_fsync.c
-CSRCS += fs_truncate.c
+CSRCS += fs_truncate.c fs_pseudofile.c
 
 # Certain interfaces are not available if there is no mountpoint support
 
