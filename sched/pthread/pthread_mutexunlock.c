@@ -101,6 +101,7 @@ static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
   int ret = EPERM;
+  irqstate_t flags;
 
   sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
@@ -113,7 +114,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
    * This all needs to be one atomic action.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* The unlock operation is only performed if the mutex is actually locked.
    * EPERM *must* be returned if the mutex type is PTHREAD_MUTEX_ERRORCHECK
@@ -223,7 +224,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
         }
     }
 
-  sched_unlock();
+  leave_critical_section(flags);
   sinfo("Returning %d\n", ret);
   return ret;
 }
