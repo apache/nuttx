@@ -41,7 +41,14 @@
 #include "esp32_i2c.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
-#include "ttgo_lora_esp32.h"
+#define HAVE_SSD1306 1
+
+#if !defined(CONFIG_ESP32_I2C) || !defined(CONFIG_ESP32_I2C0) || \
+    !defined(CONFIG_LCD_SSD1306_I2C)
+#  undef HAVE_SSD1306
+#endif
+
+#define GPIO_SSD1306_RST 16
 
 #ifdef HAVE_SSD1306
 
