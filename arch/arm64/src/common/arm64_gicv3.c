@@ -303,8 +303,8 @@ void arm64_gic_eoi(unsigned int intid)
   write_sysreg(intid, ICC_EOIR1_EL1);
 }
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint64_t target_aff,
-                        uint16_t target_list)
+static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
+                              uint16_t target_list)
 {
   uint32_t aff3;
   uint32_t aff2;
@@ -325,6 +325,41 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint64_t target_aff,
   ARM64_DSB();
   write_sysreg(sgi_val, ICC_SGI1R);
   ARM64_ISB();
+
+  return 0;
+}
+
+int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
+{
+  uint64_t pre_cluster_id = UINT64_MAX;
+  uint64_t curr_cluster_id;
+  uint64_t curr_mpidr;
+  uint16_t tlist = 0;
+  uint16_t cpu = 0;
+  uint16_t i;
+
+  while ((i = ffs(target_list)))
+    {
+      cpu += (i - 1);
+
+      target_list >>= i;
+
+      curr_mpidr = arm64_get_mpid(cpu);
+      curr_cluster_id = MPID_TO_CLUSTER_ID(curr_mpidr);
+
+      if (pre_cluster_id != UINT64_MAX &&
+          pre_cluster_id != curr_cluster_id)
+        {
+          arm64_gic_send_sgi(sgi_id, pre_cluster_id, tlist);
+        }
+
+      tlist |= 1 << (curr_mpidr & MPIDR_AFFLVL_MASK);
+
+      cpu += i;
+      pre_cluster_id = curr_cluster_id;
+    }
+
+  arm64_gic_send_sgi(sgi_id, pre_cluster_id, tlist);
 
   return 0;
 }
@@ -597,13 +632,12 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  uint64_t  mpidr = GET_MPIDR();
   uint32_t  mask  = BIT(irq & (GIC_NUM_INTR_PER_REG - 1));
   uint32_t  idx   = irq / GIC_NUM_INTR_PER_REG;
 
   if (GIC_IS_SGI(irq))
     {
-      arm64_gic_raise_sgi(irq, mpidr, cpuset);
+      arm64_gic_raise_sgi(irq, cpuset);
     }
   else if (irq >= 0 && irq < NR_IRQS)
     {
