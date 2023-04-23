@@ -84,7 +84,10 @@ libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-shadow
 #  2676 |             const basic_string __temp (__first, __last, __alloc());
 #       |                                ^~~~~~
 
-GCCVER = $(shell $(CXX) --version | grep g++ | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
+ifeq ($(GCCVER),)
+  export GCCVER = $(shell $(CXX) --version | grep g++ | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
+endif
+
 ifeq ($(GCCVER),12.2)
   libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-maybe-uninitialized
 endif
