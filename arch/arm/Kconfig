@@ -718,6 +718,7 @@ config ARCH_CORTEXM0
 config ARCH_ARMV7M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM3
 	bool
