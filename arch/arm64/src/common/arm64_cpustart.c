@@ -58,7 +58,7 @@ typedef void (*arm64_cpustart_t)(void *data);
 
 struct arm64_boot_params
 {
-  uint64_t mpid;
+  uint64_t cpuid;
   char *boot_sp;
   arm64_cpustart_t func;
   void *arg;
@@ -69,7 +69,7 @@ struct arm64_boot_params
 volatile struct arm64_boot_params aligned_data(L1_CACHE_BYTES)
 cpu_boot_params =
 {
-  .mpid    = -1,
+  .cpuid   = -1,
   .boot_sp = (char *)g_cpu_idlestackalloc[0],
 };
 
@@ -142,9 +142,9 @@ static void arm64_smp_init_top(void *arg)
 static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
                             arm64_cpustart_t fn)
 {
-  uint64_t cpu_mpid;
-
-  cpu_mpid = arm64_get_mpid(cpu_num);
+#ifdef CONFIG_ARCH_HAVE_PSCI
+  uint64_t cpu_mpid = arm64_get_mpid(cpu_num);
+#endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
@@ -164,7 +164,7 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 
   /* store mpid last as this is our synchronization point */
 
-  cpu_boot_params.mpid = cpu_mpid;
+  cpu_boot_params.cpuid = cpu_num;
 
   flush_boot_params();
 

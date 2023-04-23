@@ -25,16 +25,6 @@
 #ifndef __ARCH_ARM64_SRC_COMMON_ARM64_MACRO_INC
 #define __ARCH_ARM64_SRC_COMMON_ARM64_MACRO_INC
 
-/*
- * Get CPU id
- */
-
-.macro  get_cpu_id xreg0
-    mrs    \xreg0, mpidr_el1
-    /* FIMXME: aff3 not taken into consideration */
-    ubfx   \xreg0, \xreg0, #0, #24
-.endm
-
 .macro  switch_el, xreg, el3_label, el2_label, el1_label
     mrs    \xreg, CurrentEL
     cmp    \xreg, 0xc
