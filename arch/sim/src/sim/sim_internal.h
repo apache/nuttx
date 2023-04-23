@@ -171,6 +171,7 @@ void host_init_cwd(void);
 /* sim_hostmemory.c *********************************************************/
 
 void *host_allocheap(size_t sz);
+void  host_freeheap(void *mem);
 void *host_allocshmem(const char *name, size_t size, int master);
 void  host_freeshmem(void *mem);
 
