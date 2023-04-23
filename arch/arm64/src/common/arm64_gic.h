@@ -307,8 +307,7 @@ int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 uint64_t * arm64_decodeirq(uint64_t *regs);
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint64_t target_aff,
-                        uint16_t target_list);
+int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
 #ifdef CONFIG_SMP
 

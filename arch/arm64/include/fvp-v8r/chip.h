@@ -69,6 +69,8 @@
 
 #define CONFIG_LOAD_BASE          0x00000000
 
+#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
+
 #endif
 
 #endif /* __ARCH_ARM64_INCLUDE_FVP_V8R_CHIP_H */
