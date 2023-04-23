@@ -289,9 +289,7 @@ begin_packed_struct struct bt_hci_evt_hdr_s
 
 begin_packed_struct struct bt_hci_acl_hdr_s
 {
-  uint16_t handle          : 12;
-  uint16_t packet_boundary : 2;
-  uint16_t broadcast       : 2;
+  uint16_t handle;
   uint16_t len;
 } end_packed_struct;
 
