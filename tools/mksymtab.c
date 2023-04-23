@@ -277,7 +277,7 @@ int main(int argc, char **argv, char **envp)
 
       /* Output any conditional compilation */
 
-      cond = (g_parm[COND_INDEX] && strlen(g_parm[COND_INDEX]) > 0);
+      cond = strlen(g_parm[COND_INDEX]) > 0;
       if (cond)
         {
           fprintf(outstream, "%s#if %s\n", nextterm, g_parm[COND_INDEX]);
