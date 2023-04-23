@@ -326,12 +326,11 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    */
 
   icmpv6 = (FAR struct icmpv6_echo_request_s *)buf;
-  if (icmpv6->type != ICMPv6_ECHO_REQUEST || icmpv6->id != conn->id ||
-      dev != conn->dev)
+  if (psock->s_type != SOCK_RAW && (icmpv6->type != ICMPv6_ECHO_REQUEST ||
+      icmpv6->id != conn->id || dev != conn->dev))
     {
-      conn->id    = 0;
-      conn->nreqs = 0;
-      conn->dev   = NULL;
+      conn->id  = 0;
+      conn->dev = NULL;
 
       iob_free_queue(&conn->readahead);
     }
@@ -372,13 +371,12 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       /* Setup to receive ICMPv6 ECHO replies */
 
-      if (icmpv6->type == ICMPv6_ECHO_REQUEST)
+      if (psock->s_type != SOCK_RAW && icmpv6->type == ICMPv6_ECHO_REQUEST)
         {
-          conn->id    = icmpv6->id;
-          conn->nreqs = 1;
+          conn->id = icmpv6->id;
         }
 
-      conn->dev       = dev;
+      conn->dev = dev;
 
       /* Notify the device driver of the availability of TX data */
 
@@ -439,9 +437,8 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   return len;
 
 errout:
-  conn->id    = 0;
-  conn->nreqs = 0;
-  conn->dev   = NULL;
+  conn->id  = 0;
+  conn->dev = NULL;
 
   iob_free_queue(&conn->readahead);
   return ret;

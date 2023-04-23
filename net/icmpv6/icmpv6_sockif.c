@@ -37,6 +37,7 @@
 #include <socket/socket.h>
 
 #include "icmpv6/icmpv6.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 
@@ -50,6 +51,12 @@ static void       icmpv6_addref(FAR struct socket *psock);
 static int        icmpv6_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static int        icmpv6_close(FAR struct socket *psock);
+#ifdef CONFIG_NET_SOCKOPTS
+static int        icmpv6_getsockopt(FAR struct socket *psock, int level,
+                    int option, FAR void *value, FAR socklen_t *value_len);
+static int        icmpv6_setsockopt(FAR struct socket *psock, int level,
+                    int option, FAR const void *value, socklen_t value_len);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -70,7 +77,13 @@ const struct sock_intf_s g_icmpv6_sockif =
   icmpv6_sendmsg,     /* si_sendmsg */
   icmpv6_recvmsg,     /* si_recvmsg */
   icmpv6_close,       /* si_close */
-  icmpv6_ioctl        /* si_ioctl */
+  icmpv6_ioctl,       /* si_ioctl */
+  NULL,               /* si_socketpair */
+  NULL                /* si_shutdown */
+#ifdef CONFIG_NET_SOCKOPTS
+  , icmpv6_getsockopt /* si_getsockopt */
+  , icmpv6_setsockopt /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
@@ -99,8 +112,8 @@ static int icmpv6_setup(FAR struct socket *psock)
 {
   /* SOCK_DGRAM or SOCK_CTRL and IPPROTO_ICMP6 are supported */
 
-  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL) &&
-      psock->s_proto == IPPROTO_ICMP6)
+  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL ||
+      psock->s_type == SOCK_RAW) && psock->s_proto == IPPROTO_ICMP6)
     {
       /* Allocate the IPPROTO_ICMP6 socket connection structure and save in
        * the new socket instance.
@@ -121,6 +134,10 @@ static int icmpv6_setup(FAR struct socket *psock)
 
       DEBUGASSERT(conn->crefs == 0);
       conn->crefs = 1;
+      if (psock->s_type != SOCK_RAW)
+        {
+          memset(&conn->filter, 0xff, sizeof(conn->filter));
+        }
 
       /* Save the pre-allocated connection in the socket structure */
 
@@ -265,6 +282,219 @@ static int icmpv6_close(FAR struct socket *psock)
 
   return OK;
 }
+
+#ifdef CONFIG_NET_SOCKOPTS
+
+/****************************************************************************
+ * Name: icmpv6_getsockopt_internal
+ *
+ * Description:
+ *   icmpv6_getsockopt_internal() sets the ICMPV6-protocol socket option
+ *   specified by the 'option' argument to the value pointed to by the
+ *   'value' argument for the socket specified by the 'psock' argument.
+ *
+ *   See <netinet/in.h> for the a complete list of values of ICMPV6 protocol
+ *   socket options.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
+                                      FAR void *value,
+                                      FAR socklen_t *value_len)
+{
+  int ret;
+
+  ninfo("option: %d\n", option);
+
+  if (psock->s_type != SOCK_RAW)
+    {
+      return ENOPROTOOPT;
+    }
+
+  net_lock();
+  switch (option)
+    {
+      case ICMP6_FILTER:
+        {
+          FAR struct icmpv6_conn_s *conn = psock->s_conn;
+
+          if (*value_len > sizeof(struct icmp6_filter))
+            {
+              *value_len = sizeof(struct icmp6_filter);
+            }
+
+          memcpy(value, &conn->filter, *value_len);
+          ret = OK;
+        }
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized ICMPV6 option: %d\n", option);
+        ret = -ENOPROTOOPT;
+        break;
+    }
+
+  net_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: icmpv6_getsockopt
+ *
+ * Description:
+ *   icmpv6_getsockopt() retrieve the value for the option specified by the
+ *   'option' argument at the protocol level specified by the 'level'
+ *   argument. If the size of the option value is greater than 'value_len',
+ *   the value stored in the object pointed to by the 'value' argument will
+ *   be silently truncated. Otherwise, the length pointed to by the
+ *   'value_len' argument will be modified to indicate the actual length
+ *   of the 'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ ****************************************************************************/
+
+static int icmpv6_getsockopt(FAR struct socket *psock, int level, int option,
+                             FAR void *value, FAR socklen_t *value_len)
+{
+  switch (level)
+  {
+    case IPPROTO_IPV6:
+      return ipv6_getsockopt(psock, option, value, value_len);
+
+    case IPPROTO_ICMPV6:
+      return icmpv6_getsockopt_internal(psock, option, value, value_len);
+
+    default:
+      nerr("ERROR: Unrecognized ICMPV6 option: %d\n", option);
+      return -ENOPROTOOPT;
+  }
+}
+
+/****************************************************************************
+ * Name: icmpv6_setsockopt_internal
+ *
+ * Description:
+ *   icmpv6_setsockopt_internal() sets the ICMPV6-protocol socket option
+ *   specified by the 'option' argument to the value pointed to by the
+ *   'value' argument for the socket specified by the 'psock' argument.
+ *
+ *   See <netinet/in.h> for the a complete list of values of ICMPV6 protocol
+ *   socket options.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_setcockopt() for
+ *   the list of possible error values.
+ *
+ ****************************************************************************/
+
+static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
+                                      FAR const void *value,
+                                      socklen_t value_len)
+{
+  int ret;
+
+  ninfo("option: %d\n", option);
+
+  if (psock->s_type != SOCK_RAW)
+    {
+      return ENOPROTOOPT;
+    }
+
+  net_lock();
+  switch (option)
+    {
+      case ICMP6_FILTER:
+        {
+          FAR struct icmpv6_conn_s *conn = psock->s_conn;
+
+          if (value_len > sizeof(struct icmp6_filter))
+            {
+              value_len = sizeof(struct icmp6_filter);
+            }
+
+          memcpy(&conn->filter, value, value_len);
+          ret = OK;
+        }
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized ICMP6 option: %d\n", option);
+        ret = -ENOPROTOOPT;
+        break;
+    }
+
+  net_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: icmpv6_setsockopt
+ *
+ * Description:
+ *   icmpv6_setsockopt() sets the option specified by the 'option' argument,
+ *   at the protocol level specified by the 'level' argument, to the value
+ *   pointed to by the 'value' argument for the connection.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To set
+ *   options at the socket level, specify the level argument as SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ ****************************************************************************/
+
+static int icmpv6_setsockopt(FAR struct socket *psock, int level, int option,
+                             FAR const void *value, socklen_t value_len)
+{
+  switch (level)
+  {
+    case IPPROTO_IPV6:
+      return ipv6_setsockopt(psock, option, value, value_len);
+
+    case IPPROTO_ICMPV6:
+      return icmpv6_setsockopt_internal(psock, option, value, value_len);
+
+    default:
+      nerr("ERROR: Unrecognized ICMPV6 option: %d\n", option);
+      return -ENOPROTOOPT;
+  }
+}
+#endif
 
 /****************************************************************************
  * Public Functions

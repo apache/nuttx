@@ -95,9 +95,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct icmpv6_recvfrom_s *pstate = pvpriv;
   FAR struct socket *psock;
-  FAR struct icmpv6_conn_s *conn;
   FAR struct ipv6_hdr_s *ipv6;
-  FAR struct icmpv6_echo_reply_s *icmpv6;
 
   ninfo("flags: %04x\n", flags);
 
@@ -112,35 +110,14 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
-      /* Is this a response on the same device that we sent the request out
-       * on?
-       */
-
       psock = pstate->recv_sock;
       DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-      conn  = psock->s_conn;
-      if (dev != conn->dev)
-        {
-          ninfo("Wrong device\n");
-          return flags;
-        }
 
       /* Check if we have just received a ICMPv6 ECHO reply. */
 
       if ((flags & ICMPv6_NEWDATA) != 0)    /* No incoming data */
         {
           unsigned int recvsize;
-
-          /* Check if it is for us.
-           * REVISIT:  What if there are IPv6 extension headers present?
-           */
-
-          icmpv6 = IPBUF(IPv6_HDRLEN);
-          if (conn->id != icmpv6->id)
-            {
-              ninfo("Wrong ID: %u vs %u\n", icmpv6->id, conn->id);
-              return flags;
-            }
 
           ninfo("Received ICMPv6 reply\n");
 
@@ -170,15 +147,6 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           ipv6 = IPBUF(0);
           net_ipv6addr_hdrcopy(&pstate->recv_from, ipv6->srcipaddr);
-
-          /* Decrement the count of outstanding requests.  I suppose this
-           * could have already been decremented of there were multiple
-           * threads calling sendto() or recvfrom().  If there finds, we
-           * may have to beef up the design.
-           */
-
-          DEBUGASSERT(conn->nreqs > 0);
-          conn->nreqs--;
 
           /* Indicate that the data has been consumed */
 
@@ -310,7 +278,7 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr_in6 *inaddr;
   FAR struct icmpv6_conn_s *conn;
-  FAR struct net_driver_s *dev;
+  FAR struct net_driver_s *dev = NULL;
   struct icmpv6_recvfrom_s state;
   ssize_t ret;
 
@@ -337,25 +305,18 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   net_lock();
 
-  /* We cannot receive a response from a device until a request has been
-   * sent to the devivce.
-   */
-
   conn = psock->s_conn;
-  if (conn->nreqs < 1)
+  if (psock->s_type != SOCK_RAW)
     {
-      ret = -EPROTO;
-      goto errout;
-    }
+      /* Get the device that was used to send the ICMPv6 request. */
 
-  /* Get the device that was used to send the ICMPv6 request. */
-
-  dev = conn->dev;
-  DEBUGASSERT(dev != NULL);
-  if (dev == NULL)
-    {
-      ret = -EPROTO;
-      goto errout;
+      dev = conn->dev;
+      DEBUGASSERT(dev != NULL);
+      if (dev == NULL)
+        {
+          ret = -EPROTO;
+          goto errout;
+        }
     }
 
   /* Check if there is buffered read-ahead data for this socket.  We may have
@@ -442,11 +403,10 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
        */
 
 errout:
-      if (conn->nreqs < 1)
+      if (ret < 0)
         {
-          conn->id    = 0;
-          conn->nreqs = 0;
-          conn->dev   = NULL;
+          conn->id  = 0;
+          conn->dev = NULL;
 
           iob_free_queue(&conn->readahead);
         }
