@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_barrierwait.c
+ * sched/pthread/pthread_barrierwait.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
