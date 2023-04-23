@@ -114,7 +114,16 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
 
   /* Align address to line size */
 
-  start_addr = LINE_ALIGN_DOWN(start_addr, line_size);
+  if ((start_addr & (line_size - 1)) != 0)
+    {
+      start_addr = LINE_ALIGN_DOWN(start_addr, line_size);
+
+      if (op == CACHE_OP_INVD)
+        {
+          dc_ops("civac", start_addr);
+          start_addr += line_size;
+        }
+    }
 
   while (start_addr < end_addr)
     {
@@ -128,7 +137,14 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
 
         case CACHE_OP_INVD:
           {
-            dc_ops("ivac", start_addr);
+            if (start_addr + line_size <= end_addr)
+              {
+                dc_ops("ivac", start_addr);
+              }
+            else
+              {
+                dc_ops("civac", start_addr);
+              }
             break;
           }
 
@@ -147,6 +163,7 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
     }
 
   ARM64_DSB();
+  ARM64_ISB();
 
   return 0;
 }
@@ -155,9 +172,9 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
 
 static inline int arm64_dcache_all(int op)
 {
-  uint32_t  clidr_el1;
-  uint32_t  csselr_el1;
-  uint32_t  ccsidr_el1;
+  uint64_t  clidr_el1;
+  uint64_t  csselr_el1;
+  uint64_t  ccsidr_el1;
   uint8_t   loc;
   uint8_t   ctype;
   uint8_t   cache_level;
@@ -258,7 +275,6 @@ static inline int arm64_dcache_all(int op)
   /* Restore csselr_el1 to level 0 */
 
   write_sysreg(0, csselr_el1);
-  __ic_iallu();
   ARM64_DSB();
   ARM64_ISB();
 
@@ -455,16 +471,7 @@ size_t up_get_dcache_linesize(void)
 
 void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
-  size_t cache_line = up_get_dcache_linesize();
-
-  if (cache_line < (end - start))
-    {
-      arm64_dcache_range(start, end, CACHE_OP_WB);
-    }
-  else
-    {
-      arm64_dcache_all(CACHE_OP_WB);
-    }
+  arm64_dcache_range(start, end, CACHE_OP_WB);
 }
 
 /****************************************************************************
@@ -560,16 +567,7 @@ void up_disable_dcache(void)
 
 void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
-  size_t cache_line = up_get_dcache_linesize();
-
-  if (cache_line < (end - start))
-    {
-      arm64_dcache_range(start, end, CACHE_OP_WB_INVD);
-    }
-  else
-    {
-      arm64_dcache_all(CACHE_OP_WB_INVD);
-    }
+  arm64_dcache_range(start, end, CACHE_OP_WB_INVD);
 }
 
 /****************************************************************************
