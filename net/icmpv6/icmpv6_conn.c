@@ -252,31 +252,36 @@ FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: icmpv6_findconn
+ * Name: icmpv6_foreach
  *
  * Description:
- *   Find an ICMPv6 connection structure that is expecting a ICMPv6 ECHO
- *  response with this ID from this device
+ *   Enumerate each ICMPv6 connection structure. This function will terminate
+ *   when either (1) all connection have been enumerated or (2) when a
+ *   callback returns any non-zero value.
  *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
  *
  ****************************************************************************/
 
-FAR struct icmpv6_conn_s *icmpv6_findconn(FAR struct net_driver_s *dev,
-                                          uint16_t id)
+int icmpv6_foreach(icmpv6_callback_t callback, FAR void *arg)
 {
   FAR struct icmpv6_conn_s *conn;
+  int ret = 0;
 
-  for (conn = icmpv6_nextconn(NULL); conn != NULL;
-       conn = icmpv6_nextconn(conn))
+  if (callback != NULL)
     {
-      if (conn->id == id && conn->dev == dev && conn->nreqs > 0)
+      for (conn = icmpv6_nextconn(NULL); conn != NULL;
+           conn = icmpv6_nextconn(conn))
         {
-          return conn;
+          ret = callback(conn, arg);
+          if (ret != 0)
+            {
+              break;
+            }
         }
     }
 
-  return conn;
+  return ret;
 }
 #endif /* CONFIG_NET_ICMP */
