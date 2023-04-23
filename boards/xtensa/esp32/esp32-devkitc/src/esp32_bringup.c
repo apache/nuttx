@@ -131,6 +131,11 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_LCD_DEV
+#  include <nuttx/board.h>
+#  include <nuttx/lcd/lcd_dev.h>
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
 #  include "esp32_rtc_lowerhalf.h"
 #endif
@@ -602,6 +607,20 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LCD_DEV
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_lcd_initialize() failed: %d\n", ret);
+    }
+
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
     }
 #endif
 
