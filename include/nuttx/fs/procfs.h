@@ -241,7 +241,7 @@ int procfs_snprintf(FAR char *buf, size_t size,
  ****************************************************************************/
 
 void procfs_sprintf(FAR char *buf, size_t size, FAR off_t *offset,
-                    FAR const IPTR char *format, ...);
+                    FAR const IPTR char *format, ...) printf_like(4, 5);
 
 /****************************************************************************
  * Name: procfs_register
