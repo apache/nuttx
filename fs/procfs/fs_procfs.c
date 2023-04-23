@@ -885,7 +885,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
                     pathpattern[level1->subdirlen + 1];
           level1->lastlen = strcspn(name, "/");
           level1->lastread = name;
-          strlcpy(entry->d_name, name, level1->lastlen);
+          strlcpy(entry->d_name, name, level1->lastlen + 1);
 
           /* Some of the search entries contain '**' wildcards.  When we
            * report the entry name, we must remove this wildcard search
