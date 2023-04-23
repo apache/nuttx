@@ -80,6 +80,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
 {
   pid_t mypid = nxsched_gettid();
   int ret = EINVAL;
+  irqstate_t flags;
 
   sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
@@ -90,7 +91,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
        * checks.  This all needs to be one atomic action.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* All mutex types except for NORMAL (and DEFAULT) will return
@@ -202,7 +203,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
             }
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   sinfo("Returning %d\n", ret);
