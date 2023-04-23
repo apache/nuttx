@@ -37,10 +37,24 @@ include map/Make.defs
 
 BINDIR ?= bin
 
+# Use double delim to fix windows native build and give an error:
+# makefile:132: *** target mode do not include“%”. stop.
+#
+# In Windows environment DELIM := $(strip \) but \ has two role:
+# first: \ as directory, and second \ as Escape character, Reference:
+#
+# https://github.com/apache/nuttx/pull/7572#discussion_r1028219229
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  DELIMS = $(DELIM)$(DELIM)
+else
+  DELIMS = $(DELIM)
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)mm
 
-AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT), $(ASRCS))
-COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT), $(CSRCS))
+AOBJS = $(patsubst %.S, $(BINDIR)$(DELIMS)%$(OBJEXT), $(ASRCS))
+COBJS = $(patsubst %.c, $(BINDIR)$(DELIMS)%$(OBJEXT), $(CSRCS))
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
@@ -51,12 +65,12 @@ BIN ?= libmm$(LIBEXT)
 all: $(BIN)
 .PHONY: context depend clean distclean
 
-$(AOBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.S
+$(AOBJS): $(BINDIR)$(DELIMS)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
 # REVISIT: Backslash causes problems in $(COBJS) target
 
-$(COBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.c
+$(COBJS): $(BINDIR)$(DELIMS)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 # Memory manager for the flat build and
