@@ -884,8 +884,9 @@ static void esp32_ints_on(uint32_t mask)
       bit = 1 << i;
       if (bit & mask)
       {
-        wlinfo("Enabled bit %d\n", i);
-        up_enable_irq(i);
+        int irq = i + XTENSA_IRQ_FIRSTPERIPH;
+        wlinfo("Enabled bit %d\n", irq);
+        up_enable_irq(irq);
       }
     }
 }
@@ -2879,4 +2880,3 @@ void coex_bb_reset_unlock_wrapper(uint32_t restore)
   coex_bb_reset_unlock(restore);
 #endif
 }
-
