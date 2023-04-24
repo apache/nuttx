@@ -559,5 +559,16 @@ FAR const char *inode_nextname(FAR const char *name)
       name++;
     }
 
+  /* Skip single '.' path segment, but not '..' */
+
+  if (*name == '.' && *(name + 1) == '/')
+    {
+      /* If there is a '/' after '.',
+       * continue searching from the next character
+       */
+
+      name = inode_nextname(name);
+    }
+
   return name;
 }
