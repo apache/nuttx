@@ -1,0 +1,38 @@
+From 147f2e6962c7624920909c3e4a4ef120e6814a66 Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Fri, 24 Mar 2023 11:55:02 +0800
+Subject: [PATCH 1/2] fix build float_t error: float_t has not been declared
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+VELAPLATFO-6159
+
+libcxx/cmath:335:9: error: ‘::float_t’ has not been declared
+
+(1)open menuconfig (2)close math.h:build setup->Customize Header Files->math.h (2) select openlibm:Library Rountines->Select math library->Math Library fram openlibm (3)build
+
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+Change-Id: Iec6dbcebbe4ef15a96bcebb038f0c64ab39c5af7
+---
+ include/openlibm_math.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/openlibm/openlibm/include/openlibm_math.h openlibm/openlibm/include/openlibm_math.h
+index 701ad70..988e80c 100644
+--- a/openlibm/openlibm/include/openlibm_math.h
++++ openlibm/openlibm/include/openlibm_math.h
+@@ -149,8 +149,8 @@ extern const union __nan_un {
+     : __signbitl(x))
+ 
+ //VBS
+-//typedef	__double_t	double_t;
+-//typedef	__float_t	float_t;
++typedef float  float_t;
++typedef double double_t;
+ #endif /* __ISO_C_VISIBLE >= 1999 */
+ 
+ /*
+-- 
+2.39.1
+

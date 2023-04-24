@@ -39,6 +39,12 @@ config LIBM_NEWLIB
 	---help---
 		Math library from Newlib
 
+config LIBM_OPENLIBM
+	bool "Math library from openlibm"
+	depends on !ARCH_MATH_H
+	---help---
+		Math library from openlibm
+
 config LIBM_TOOLCHAIN
 	bool "Math library from toolchain"
 

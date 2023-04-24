@@ -1,0 +1,116 @@
+
+############################################################################
+# libs/libm/openlibm/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+OPENLIBM_VERSION=0.8.1
+
+openlibm-$(OPENLIBM_VERSION).zip:
+	$(call DOWNLOAD,https://github.com/JuliaMath/openlibm/archive/refs/tags,v$(OPENLIBM_VERSION).zip,openlibm.zip)
+
+openlibm/openlibm: openlibm-$(OPENLIBM_VERSION).zip
+	$(Q) unzip -o openlibm.zip
+	$(Q) mv openlibm-$(OPENLIBM_VERSION) openlibm/openlibm
+	$(Q) patch -p0 < openlibm/0001-fix-build-float_t-error-float_t-has-not-been-declare.patch
+	$(Q) patch -p0 < openlibm/0002-add-math.h-and-complex.h-to-openlibm.patch
+
+ifeq ($(wildcard openlibm/openlibm/.git),)
+distclean::
+	$(call DELFILE, openlibm.zip)
+	$(call DELDIR, openlibm/openlibm)
+context:: openlibm/openlibm
+else
+distclean::
+context::
+endif
+
+# OS-specific stuff
+# Get ARCH, it is used to read source code file list form $(ARCH)/Make.files
+ifeq ($(CONFIG_ARCH),sim)
+  ifeq ($(CONFIG_SIM_M32),y)
+    ARCH = i387
+  else ifeq ($(CONFIG_HOST_ARM64),y)
+    ARCH = aarch64
+  else ifeq ($(CONFIG_HOST_ARM),y)
+    ARCH = arm
+  else ifeq ($(CONFIG_HOST_X86),y)
+    ARCH = i387
+  else
+    ARCH = amd64
+  endif
+else ifeq ($(CONFIG_ARCH),risc-v)
+  ARCH = riscv64
+else ifeq ($(CONFIG_ARCH),arm)
+  ARCH = arm
+else ifeq ($(CONFIG_ARCH),arm64)
+  ARCH = arm64
+else ifeq ($(CONFIG_ARCH),x86)
+  ARCH = i387
+else ifeq ($(CONFIG_ARCH),x86_64)
+  ARCH = amd64
+else
+  ARCH = $(CONFIG_ARCH)
+endif
+
+# Get source code lits from Make.files,and append to variable SRCS
+# (1) Override CUR_SRCS to xxx_SRCS(for example src_SRCS etc.), then in xxx/Make.files CUR_SRCS is changed to xxx_SRCS.
+# (2) Include Make.files
+# (3) Get variable xxx_SRCS from Make.files, and append it to variable SRCS
+define INC_template
+  ifneq ($(wildcard $(1)/Make.files),)
+  override CUR_SRCS = $(2)_SRCS
+  include $(1)/Make.files
+  SRCS += $$($(2)_SRCS)
+  endif
+endef
+
+# Determines whether `long double` is the same as `double` on this arch.
+# linux x86_64, for instance, `long double` is 80 bits wide, whereas on macOS aarch64,
+# `long double` is the same as `double`.
+ifneq ($(filter $(ARCH),i387 amd64),) # Add ld80 directory on x86 and x64
+$(eval $(call INC_template,openlibm/openlibm/ld80))
+VPATH += :openlibm/openlibm/ld80
+else ifneq ($(filter $(ARCH),aarch64),) # Add ld128 directory on aarch64
+$(eval $(call INC_template,openlibm/openlibm/ld128))
+VPATH += :openlibm/openlibm/ld128
+endif
+
+$(eval $(call INC_template,openlibm/openlibm/src,src))
+$(eval $(call INC_template,openlibm/openlibm/$(ARCH),$(ARCH)))
+$(eval $(call INC_template,openlibm/openlibm/bsdsrc,bsdsrc))
+
+VPATH += :openlibm/openlibm/src
+VPATH += :openlibm/openlibm/$(ARCH)
+VPATH += :openlibm/openlibm/bsdsrc
+
+CFLAGS += ${INCDIR_PREFIX}openlibm/openlibm
+CFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/$(ARCH)
+CFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/src
+CFLAGS += ${DEFINE_PREFIX}__BSD_VISIBLE
+
+AFLAGS += ${INCDIR_PREFIX}openlibm/openlibm
+AFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/$(ARCH)
+AFLAGS += ${INCDIR_PREFIX}openlibm/openlibm/src
+AFLAGS += ${DEFINE_PREFIX}__BSD_VISIBLE
+
+CSRCS := $(sort $(filter %.c,$(SRCS)))
+ASRCS := $(sort $(filter %.S,$(SRCS)))
+
+# CSRCS and ASRCS have the same name files, we use .S files,so remove them from CSRCS
+CSRCS := $(filter-out $(patsubst %.S,%.c,$(ASRCS)),$(CSRCS))
