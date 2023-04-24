@@ -58,7 +58,8 @@ up_saveusercontext:
 
 	/* Save r0~r14, store the return address as PC */
 
-	stmia		r0!, {r0-r14, r14}
+	stmia		r0!, {r0-r14}
+	str		r14, [r0], #4
 
 	/* Save cpsr */
 
