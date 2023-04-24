@@ -66,6 +66,11 @@ extern volatile clock_t g_system_ticks;
 extern struct timespec  g_basetime;
 #endif
 
+#ifdef CONFIG_CLOCK_ADJTIME
+extern long long g_clk_adj_usec;
+extern long long g_clk_adj_count;
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -77,6 +82,11 @@ void clock_initialize(void);
 void clock_timer(void);
 #else
 #  define clock_timer()
+#endif
+
+#ifdef CONFIG_CLOCK_ADJTIME
+void clock_set_adjust(long long adj_usec, long long adj_count,
+                      long long *adj_usec_old, long long *adj_count_old);
 #endif
 
 int  clock_abstime2ticks(clockid_t clockid,

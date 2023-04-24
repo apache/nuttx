@@ -27,6 +27,10 @@ ifeq ($(CONFIG_CLOCK_TIMEKEEPING),y)
 CSRCS += clock_timekeeping.c
 endif
 
+ifeq ($(CONFIG_CLOCK_ADJTIME),y)
+CSRCS += clock_adjtime.c
+endif
+
 # Include clock build support
 
 DEPPATH += --dep-path clock

@@ -1458,6 +1458,36 @@ void up_secure_irq_all(bool secure);
 #endif
 
 /****************************************************************************
+ * Function:  up_adj_timer_period
+ *
+ * Description:
+ *   Adjusts timer period. This call is used when adjusting timer period as
+ *   defined in adjtime() function.
+ *
+ * Input Parameters:
+ *   period_inc_usec  - period adjustment in usec (reset to default value
+ *                      if 0)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+void up_adj_timer_period(long long period_inc_usec);
+
+/****************************************************************************
+ * Function:  up_get_timer_period
+ *
+ * Description:
+ *   This function returns the timer period in usec.
+ *
+ * Input Parameters:
+ *   period_usec  - returned timer period in usec
+ *
+ ****************************************************************************/
+
+void up_get_timer_period(long long *period_usec);
+#endif
+
+/****************************************************************************
  * Function:  up_timer_initialize
  *
  * Description:
