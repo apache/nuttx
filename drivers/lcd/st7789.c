@@ -342,7 +342,11 @@ static void st7789_sleep(FAR struct st7789_dev_s *dev, bool sleep)
 static void st7789_display(FAR struct st7789_dev_s *dev, bool on)
 {
   st7789_sendcmd(dev, on ? ST7789_DISPON : ST7789_DISPOFF);
+#ifdef CONFIG_LCD_ST7789_INVCOLOR
   st7789_sendcmd(dev, ST7789_INVON);
+#else
+  st7789_sendcmd(dev, ST7789_INVOFF);
+#endif
 }
 
 /****************************************************************************

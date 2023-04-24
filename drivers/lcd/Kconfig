@@ -737,6 +737,13 @@ if LCD_ST7789
 		bool "ST7789 Mirror Y"
 		default n
 
+	config LCD_ST7789_INVCOLOR
+		bool "ST7789 Invert Color"
+		default y
+		---help---
+			Invert colors of the LCD display. This is useful for implementations
+			that assume that that colors are inverted by default.
+
 	config LCD_ST7789_BPP
 		int "Bit Per Pixel (12 or 16)"
 		default 16
