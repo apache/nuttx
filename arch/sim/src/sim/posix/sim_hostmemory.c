@@ -48,122 +48,12 @@
 static atomic_int g_aordblks;
 static atomic_int g_uordblks;
 
-/* Record memory allocated for text sections by sys/queue.h */
-
-struct textheap_s
-{
-  void *p;
-  size_t size;
-  TAILQ_ENTRY(textheap_s) entry;
-};
-
-static TAILQ_HEAD(, textheap_s) g_textheap_list =
-  TAILQ_HEAD_INITIALIZER(g_textheap_list);
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 extern uint64_t up_irq_save(void);
 extern void up_irq_restore(uint64_t flags);
-
-/****************************************************************************
- * Name: up_textheap_memalign
- *
- * Description:
- *   Allocate memory for text sections with the specified alignment.
- *
- ****************************************************************************/
-
-void *up_textheap_memalign(size_t align, size_t size)
-{
-  uint64_t flags;
-  void *p;
-
-  /* host_allocheap (mmap) returns memory aligned to the page size, which
-   * is always a multiple of the alignment (4/8) for text section. So, we
-   * don't need to do anything here.
-   */
-
-  p = host_allocheap(size);
-
-  flags = up_irq_save();
-
-  /* Record the allocated memory to a global list */
-
-  if (p)
-    {
-      struct textheap_s *node = malloc(sizeof(struct textheap_s));
-      if (node)
-        {
-          node->p = p;
-          node->size = size;
-          TAILQ_INSERT_TAIL(&g_textheap_list, node, entry);
-        }
-    }
-
-  up_irq_restore(flags);
-
-  return p;
-}
-
-/****************************************************************************
- * Name: up_textheap_free
- *
- * Description:
- *   Free memory allocated for text sections.
- *
- ****************************************************************************/
-
-void up_textheap_free(void *p)
-{
-  struct textheap_s *node;
-  uint64_t flags = up_irq_save();
-
-  /* Remove the memory from the global list */
-
-  TAILQ_FOREACH(node, &g_textheap_list, entry)
-    {
-      if (node->p == p)
-        {
-          TAILQ_REMOVE(&g_textheap_list, node, entry);
-          free(node);
-          break;
-        }
-    }
-
-  up_irq_restore(flags);
-  host_freeheap(p);
-}
-
-/****************************************************************************
- * Name: up_textheap_heapmember
- *
- * Description:
- *   Test if memory is from text heap.
- *
- ****************************************************************************/
-
-bool up_textheap_heapmember(void *p)
-{
-  struct textheap_s *node;
-  uint64_t flags = up_irq_save();
-
-  /* Traverse the global list to find the memory */
-
-  TAILQ_FOREACH(node, &g_textheap_list, entry)
-    {
-      if (node->p == p)
-        {
-          up_irq_restore(flags);
-          return true;
-        }
-    }
-
-  up_irq_restore(flags);
-
-  return false;
-}
 
 /****************************************************************************
  * Name: host_allocheap
