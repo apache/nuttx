@@ -48,32 +48,34 @@
  * replace with BIOC_XIPBASE, BIOC_FLUSH and BIOC_PARTINFO instead.
  */
 
-#define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
-                                           *      mtd_geometry_s in which to receive
-                                           *      receive geometry data (see mtd.h)
-                                           * OUT: Geometry structure is populated
-                                           *      with data for the MTD */
-#define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
-                                           * OUT: None */
-#define MTDIOC_PROTECT    _MTDIOC(0x0004) /* IN:  Pointer to read-able struct
-                                           *      mtd_protects_s that provides
-                                           *      the region to protect.
-                                           * OUT: None */
-#define MTDIOC_UNPROTECT  _MTDIOC(0x0005) /* IN:  Pointer to read-able struct
-                                           *      mtd_protects_s that provides
-                                           *      the region to un-protect.
-                                           * OUT: None */
-#define MTDIOC_SETSPEED   _MTDIOC(0x0006) /* IN:  New bus speed in Hz
-                                           * OUT: None */
-#define MTDIOC_EXTENDED   _MTDIOC(0x0007) /* IN:  unsigned long
-                                           *      0=Use normal memory region
-                                           *      1=Use alternate/extended memory
-                                           * OUT: None */
-#define MTDIOC_ECCSTATUS  _MTDIOC(0x0008) /* IN:  Pointer to uint8_t
-                                           * OUT: ECC status */
-#define MTDIOC_ERASESTATE _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
-                                           * OUT: Byte value that represents the
-                                           *      erased state of the MTD cell */
+#define MTDIOC_GEOMETRY     _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
+                                             *      mtd_geometry_s in which to receive
+                                             *      receive geometry data (see mtd.h)
+                                             * OUT: Geometry structure is populated
+                                             *      with data for the MTD */
+#define MTDIOC_BULKERASE    _MTDIOC(0x0003) /* IN:  None
+                                            * OUT: None */
+#define MTDIOC_PROTECT      _MTDIOC(0x0004) /* IN:  Pointer to read-able struct
+                                             *      mtd_protects_s that provides
+                                             *      the region to protect.
+                                             * OUT: None */
+#define MTDIOC_UNPROTECT    _MTDIOC(0x0005) /* IN:  Pointer to read-able struct
+                                             *      mtd_protects_s that provides
+                                             *      the region to un-protect.
+                                             * OUT: None */
+#define MTDIOC_SETSPEED     _MTDIOC(0x0006) /* IN:  New bus speed in Hz
+                                             * OUT: None */
+#define MTDIOC_EXTENDED     _MTDIOC(0x0007) /* IN:  unsigned long
+                                             *      0=Use normal memory region
+                                             *      1=Use alternate/extended memory
+                                             * OUT: None */
+#define MTDIOC_ECCSTATUS    _MTDIOC(0x0008) /* IN:  Pointer to uint8_t
+                                             * OUT: ECC status */
+#define MTDIOC_ERASESTATE   _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
+                                             * OUT: Byte value that represents the
+                                             *      erased state of the MTD cell */
+#define MTDIOC_ERASESECTORS _MTDIOC(0x000c) /* IN: Pointer to mtd_erase_s structure
+                                             * OUT: None */
 
 /* Macros to hide implementation */
 
@@ -137,6 +139,14 @@ struct mtd_byte_write_s
   uint32_t offset;        /* Offset within the device to write to */
   uint16_t count;         /* Number of bytes to write */
   const uint8_t *buffer;  /* Pointer to the data to write */
+};
+
+/* This structure describes a range of erase sectors to be erased. */
+
+struct mtd_erase_s
+{
+  uint32_t startblock;  /* First block to be erased */
+  uint32_t nblocks;     /* Number of blocks to be erased */
 };
 
 /* This structure defines the interface to a simple memory technology device.

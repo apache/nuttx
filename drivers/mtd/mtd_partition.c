@@ -469,6 +469,19 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case MTDIOC_ERASESECTORS:
+        {
+          /* Erase sectors as defined in mtd_erase_s structure */
+
+          FAR struct mtd_erase_s *erase = (FAR struct mtd_erase_s *)arg;
+
+          ret = priv->parent->erase(priv->parent,
+                                    priv->firstblock / priv->blkpererase +
+                                    erase->startblock,
+                                    erase->nblocks);
+        }
+        break;
+
       default:
         {
           /* Pass any unhandled ioctl() calls to the underlying driver */
