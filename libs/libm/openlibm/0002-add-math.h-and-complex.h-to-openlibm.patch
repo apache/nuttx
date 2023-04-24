@@ -1,0 +1,49 @@
+From 8af59fe95d7c878d96752cdc655d70ffbef28514 Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Sat, 25 Mar 2023 11:05:58 +0800
+Subject: [PATCH 2/2] add math.h and complex.h to openlibm
+
+VELAPLATFO-6159
+
+openlibm do not have math.h and complex.h, so we add them to openlibm
+
+(1)open menuconfig (2)close math.h:build setup->Customize Header Files->math.h (2) select openlibm:Library Rountines->Select math library->Math Library fram openlibm (3)build
+
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+Change-Id: I0bebef549c3ce7226a190d6a16a347f47014ad0b
+---
+ include/complex.h | 6 ++++++
+ include/math.h    | 6 ++++++
+ 2 files changed, 12 insertions(+)
+ create mode 100644 include/complex.h
+ create mode 100644 include/math.h
+
+diff --git a/openlibm/openlibm/include/complex.h openlibm/openlibm/include/complex.h
+new file mode 100644
+index 0000000..c97e82b
+--- /dev/null
++++ openlibm/openlibm/include/complex.h
+@@ -0,0 +1,6 @@
++#ifndef OPENLIBM_MATH_COMPLEX_H
++#define OPENLIBM_MATH_COMPLEX_H
++
++#include <openlibm_complex.h>
++
++#endif /* OPENLIBM_MATH_COMPLEX_H */
+\ No newline at end of file
+diff --git a/openlibm/openlibm/include/math.h openlibm/openlibm/include/math.h
+new file mode 100644
+index 0000000..0004b77
+--- /dev/null
++++ openlibm/openlibm/include/math.h
+@@ -0,0 +1,6 @@
++#ifndef OPENLIBM_MATH_MATH_H
++#define OPENLIBM_MATH_MATH_H
++
++#include <openlibm_math.h>
++
++#endif /* !OPENLIBM_MATH_MATH_H */
+\ No newline at end of file
+-- 
+2.39.1
+

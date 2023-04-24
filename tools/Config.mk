@@ -662,6 +662,11 @@ ifeq ($(CONFIG_LIBM_NEWLIB),y)
   ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)newlib$(DELIM)include
 endif
 
+ifeq ($(CONFIG_LIBM_OPENLIBM),y)
+  ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)openlibm$(DELIM)openlibm$(DELIM)include
+  ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)openlibm$(DELIM)openlibm$(DELIM)include
+endif
+
 ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include
 
 # Convert filepaths to their proper system format (i.e. Windows/Unix)
