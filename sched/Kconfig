@@ -184,6 +184,57 @@ config SYSTEM_TIME64
 		and/or if a very long "uptime" is required, then this option can be
 		selected to support a 64-bit wide timer.
 
+config ARCH_HAVE_ADJTIME
+	bool
+	default n
+
+config CLOCK_ADJTIME
+	bool "Support adjtime function"
+	default n
+	depends on ARCH_HAVE_ADJTIME
+	depends on !SCHED_TICKLESS
+	depends on !CLOCK_TIMEKEEPING
+	---help---
+		Enables usage of adjtime() interface used to correct the system time
+		clock. This requires specific architecture support capable of adjusting
+		system timer period.
+
+		Interfaces up_get_timer_period() and up_adj_timer_period() has to be
+		defined by architecture level support.
+
+		This is not a POSIX interface but derives from 4.3BSD, System V.
+		It is also supported for Linux compatibility.
+
+		Currently it is not possible to use adjtime() if SCHED_TICKLESS or
+		CLOCK_TIMEKEEPING is defined.
+
+if CLOCK_ADJTIME
+
+config CLOCK_ADJTIME_SLEWLIMIT
+	int "Adjtime slew limit"
+	default 2
+	range 0 100
+	---help---
+		In real time systems we do not want the time to adjust too quickly.
+		CLOCK_ADJTIME_SLEWLIMIT defines how many seconds can time change
+		during each clock.
+
+		Note that CLOCK_ADJTIME_SLEWLIMIT is divided by 100 in source code,
+		therefore CLOCK_ADJTIME_SLEWLIMIT=2 will result in possible 0.02 second
+		adjustment.
+
+config CLOCK_ADJTIME_PERIOD
+	int "Adjtime period"
+	default 97
+	range 0 100
+	---help---
+		Define system clock adjustment period. Should be between 0.95 and 0.99.
+
+		Note that CLOCK_ADJTIME_PERIOD is divided by 100 in source code,
+		therefore CLOCK_ADJTIME_PERIOD=97 will result in 0.97.
+
+endif
+
 config ARCH_HAVE_TIMEKEEPING
 	bool
 	default n
