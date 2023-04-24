@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 void bluetooth_poll(FAR struct net_driver_s *dev,
-                     FAR struct bluetooth_conn_s *conn)
+                    FAR struct bluetooth_conn_s *conn)
 {
   FAR struct radio_driver_s *radio;
 
