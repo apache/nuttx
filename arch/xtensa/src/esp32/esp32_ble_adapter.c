@@ -451,8 +451,8 @@ extern uint8_t _bss_start_btdm[];
 extern uint8_t _bss_end_btdm[];
 extern uint8_t _data_start_btdm[];
 extern uint8_t _data_end_btdm[];
-extern const uint8_t _data_start_btdm_rom[];
-extern const uint8_t _data_end_btdm_rom[];
+extern const uint32_t _data_start_btdm_rom;
+extern const uint32_t _data_end_btdm_rom;
 
 extern uint8_t _bt_bss_start[];
 extern uint8_t _bt_bss_end[];
@@ -2027,11 +2027,11 @@ static void btdm_controller_mem_init(void)
 
   /* initialise .data section */
 
-  memcpy(_data_start_btdm, _data_start_btdm_rom,
+  memcpy(_data_start_btdm, (void *)_data_start_btdm_rom,
          _data_end_btdm - _data_start_btdm);
 
   wlinfo(".data initialise [0x%08x] <== [0x%08x]\n",
-         (uint32_t)_data_start_btdm, (uint32_t)_data_start_btdm_rom);
+         (uint32_t)_data_start_btdm, _data_start_btdm_rom);
 
   /* initial em, .bss section */
 
