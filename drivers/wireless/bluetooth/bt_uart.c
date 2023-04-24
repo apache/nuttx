@@ -227,10 +227,20 @@ int btuart_send(FAR struct bt_driver_s *dev,
 
   if (type == BT_CMD)
     {
+      if (lower->txcmd)
+        {
+          return lower->txcmd(lower, data, len);
+        }
+
       *hdr = H4_CMD;
     }
   else if (type == BT_ACL_OUT)
     {
+      if (lower->txacl)
+        {
+          return lower->txacl(lower, data, len);
+        }
+
       *hdr = H4_ACL;
     }
   else if (type == BT_ISO_OUT)

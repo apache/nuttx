@@ -127,11 +127,19 @@ struct btuart_lowerhalf_s
    *   is insufficient buffer space to hold the Tx frame data.  In that
    *   case the lower half will block until there is sufficient to buffer
    *   the entire outgoing packet.
+   * txcmd() can be used, instead of write(), to send command packets if
+   *   hardware support is available.
+   * txacl() can be used, instead of write(), to send acl data packets if
+   *   hardware support is available.
    */
 
   CODE ssize_t (*read)(FAR const struct btuart_lowerhalf_s *lower,
                        FAR void *buffer, size_t buflen);
   CODE ssize_t (*write)(FAR const struct btuart_lowerhalf_s *lower,
+                        FAR const void *buffer, size_t buflen);
+  CODE ssize_t (*txcmd)(FAR const struct btuart_lowerhalf_s *lower,
+                        FAR const void *buffer, size_t buflen);
+  CODE ssize_t (*txacl)(FAR const struct btuart_lowerhalf_s *lower,
                         FAR const void *buffer, size_t buflen);
 
   /* Flush/drain all buffered RX data */
@@ -142,6 +150,10 @@ struct btuart_lowerhalf_s
 
   CODE int (*ioctl)(FAR const struct btuart_lowerhalf_s *lower,
                     int cmd, unsigned long arg);
+
+  /* Private instance data */
+
+  void *priv;
 };
 
 /****************************************************************************
