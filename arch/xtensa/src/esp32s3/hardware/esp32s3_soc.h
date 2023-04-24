@@ -152,6 +152,8 @@
 #define DR_REG_APB_SARADC_BASE                  0x60040000
 #define DR_REG_LCD_CAM_BASE                     0x60041000
 
+#define DR_REG_USB_BASE                         0x60080000
+
 #define DR_REG_SYSTEM_BASE                      0x600C0000
 #define DR_REG_SENSITIVE_BASE                   0x600C1000
 #define DR_REG_INTERRUPT_BASE                   0x600C2000

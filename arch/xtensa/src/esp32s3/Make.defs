@@ -135,6 +135,10 @@ ifeq ($(CONFIG_ESP32S3_TOUCH),y)
 CHIP_CSRCS += esp32s3_touch.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_OTG_DEVICE),y)
+CHIP_CSRCS += esp32s3_otg_device.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
 include chip/Wireless.mk
 endif

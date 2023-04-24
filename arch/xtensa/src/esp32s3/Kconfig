@@ -390,6 +390,10 @@ config ESP32S3_USBSERIAL
 	select OTHER_UART_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32S3_OTG
+	bool "USB OTG"
+	default n
+
 config ESP32S3_TIMER0
 	bool "54-bit Timer 0 (Group 0 Timer 0)"
 	default n
@@ -1215,6 +1219,35 @@ config ESP32S3_LEDC_CHANNEL7_PIN
 	default 9
 
 endmenu # LEDC configuration
+
+menu "USB OTG Configuration"
+	depends on ESP32S3_OTG
+
+choice
+	prompt "USB OTG Mode"
+	default ESP32S3_OTG_DEVICE
+
+config ESP32S3_OTG_DEVICE
+	bool "Device"
+	select USBDEV
+
+endchoice # USB OTG Mode
+
+if ESP32S3_OTG_DEVICE
+
+config ESP32S3_OTG_ENDPOINT_NUM
+	int "Additional Endpoint Number Except Endpoint 0"
+	range 0 6
+	default 3
+
+endif # ESP32S3_OTG_DEVICE
+
+config ESP32S3_OTG_DEBUG_REGISTER
+	bool "Debug Register Get/Set"
+	default n
+	depends on DEBUG_USB_INFO
+
+endmenu # USB OTG Configuration
 
 menu "Application Image Configuration"
 
