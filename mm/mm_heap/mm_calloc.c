@@ -42,20 +42,19 @@ FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 {
   FAR void *ret = NULL;
 
-  /* Verify input parameters */
+  /* Verify input parameters
+   *
+   * elem_size or n is zero treats as valid input.
+   *
+   * Assure that the following multiplication cannot overflow the size_t
+   * type, i.e., that:  SIZE_MAX >= n * elem_size
+   *
+   * Refer to SEI CERT C Coding Standard.
+   */
 
-  if (n > 0 && elem_size > 0)
+  if (elem_size == 0 || n <= (SIZE_MAX / elem_size))
     {
-      /* Assure that the following multiplication cannot overflow the size_t
-       * type, i.e., that:  SIZE_MAX >= n * elem_size
-       *
-       * Refer to SEI CERT C Coding Standard.
-       */
-
-      if (n <= (SIZE_MAX / elem_size))
-        {
-          ret = mm_zalloc(heap, n * elem_size);
-        }
+      ret = mm_zalloc(heap, n * elem_size);
     }
 
   return ret;
