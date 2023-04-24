@@ -360,24 +360,24 @@ extern void btdm_deep_sleep_mem_deinit(void);
 extern void btdm_ble_power_down_dma_copy(bool copy);
 extern uint8_t btdm_sleep_clock_sync(void);
 
-extern char _bss_start_btdm;
-extern char _bss_end_btdm;
-extern char _data_start_btdm;
-extern char _data_end_btdm;
-extern uint32_t _data_start_btdm_rom;
-extern uint32_t _data_end_btdm_rom;
+extern uint8_t _bss_start_btdm[];
+extern uint8_t _bss_end_btdm[];
+extern uint8_t _data_start_btdm[];
+extern uint8_t _data_end_btdm[];
+extern const uint32_t _data_start_btdm_rom;
+extern const uint32_t _data_end_btdm_rom;
 
-extern uint32_t _bt_bss_start;
-extern uint32_t _bt_bss_end;
-extern uint32_t _btdm_bss_start;
-extern uint32_t _btdm_bss_end;
-extern uint32_t _bt_data_start;
-extern uint32_t _bt_data_end;
-extern uint32_t _btdm_data_start;
-extern uint32_t _btdm_data_end;
+extern uint8_t _bt_bss_start[];
+extern uint8_t _bt_bss_end[];
+extern uint8_t _btdm_bss_start[];
+extern uint8_t _btdm_bss_end[];
+extern uint8_t _bt_data_start[];
+extern uint8_t _bt_data_end[];
+extern uint8_t _btdm_data_start[];
+extern uint8_t _btdm_data_end[];
 
-extern char _bt_tmp_bss_start;
-extern char _bt_tmp_bss_end;
+extern uint8_t _bt_tmp_bss_start[];
+extern uint8_t _bt_tmp_bss_end[];
 
 /****************************************************************************
  * Private Data
