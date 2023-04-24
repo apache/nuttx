@@ -54,4 +54,8 @@ CSRCS += tm4c_hciuart.c
 endif
 endif
 
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += tm4c_reset.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
