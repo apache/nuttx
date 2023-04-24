@@ -41,6 +41,19 @@ void *host_allocheap(size_t sz)
   return _aligned_malloc(sz, 8);
 }
 
+/****************************************************************************
+ * Name: host_freeheap
+ *
+ * Description:
+ *   Free a executable memory block.
+ *
+ ****************************************************************************/
+
+void host_freeheap(void *mem)
+{
+  _aligned_free(mem);
+}
+
 void *host_allocshmem(const char *name, size_t size, int master)
 {
   HANDLE handle;
