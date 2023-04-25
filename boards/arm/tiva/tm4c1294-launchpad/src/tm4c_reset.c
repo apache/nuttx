@@ -48,7 +48,7 @@
  *
  * Returned Value:
  *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
+ *   board due to some constraints.  The return value in this case is a
  *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
