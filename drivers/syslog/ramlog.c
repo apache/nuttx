@@ -275,7 +275,7 @@ static void ramlog_initbuf(void)
       prev = cur;
     }
 
-  if (i != priv->rl_bufsize || is_empty)
+  if (is_empty)
     {
       priv->rl_head = priv->rl_tail = 0;
     }
