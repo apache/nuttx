@@ -397,7 +397,8 @@ int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
 /* CPU load measurement support */
 
-#ifdef CONFIG_SCHED_CPULOAD_SYSCLK
+#if defined(CONFIG_SCHED_CPULOAD_SYSCLK) || \
+    defined (CONFIG_SCHED_CPULOAD_CRITMONITOR)
 void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, uint32_t ticks);
 void nxsched_process_cpuload_ticks(uint32_t ticks);
 #define nxsched_process_cpuload() nxsched_process_cpuload_ticks(1)

@@ -900,6 +900,7 @@ if SCHED_CPULOAD
 choice
 	prompt "Select CPU load clock source"
 	default SCHED_CPULOAD_EXTCLK if SCHED_TICKLESS
+	default SCHED_CPULOAD_CRITMONITOR if SCHED_CRITMONITOR
 
 config SCHED_CPULOAD_SYSCLK
 	bool "Use system clock"
@@ -940,6 +941,15 @@ config SCHED_CPULOAD_EXTCLK
 		logic; that platform-specific logic must call the system function
 		nxsched_process_cpuload_ticks() at each timer expiration with interrupts
 		disabled.
+
+config SCHED_CPULOAD_CRITMONITOR
+	bool "Use critical monitor"
+	depends on SCHED_CRITMONITOR
+	---help---
+		Use the perfcounter in the core of the chip as a counter, no need to
+		use an external timer. Need to depend on SCHED_CRITMONITOR.
+		When the task is suspended, call nxsched_critmon_cpuload_ticks to count
+		the recent running time of the task
 
 endchoice
 

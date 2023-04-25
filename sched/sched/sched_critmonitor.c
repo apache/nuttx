@@ -297,6 +297,11 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
   unsigned long current = up_perf_gettime();
   unsigned long elapsed = current - tcb->run_start;
 
+#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
+  unsigned long tick = elapsed * CLOCKS_PER_SEC / up_perf_getfreq();
+  nxsched_process_taskload_ticks(tcb, tick);
+#endif
+
   tcb->run_time += elapsed;
   if (elapsed > tcb->run_max)
     {
