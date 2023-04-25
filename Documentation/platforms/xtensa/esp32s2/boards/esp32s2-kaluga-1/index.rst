@@ -210,6 +210,30 @@ the ``buttons`` application and pressing on any of the available board buttons a
     Sample = 64
     Sample = 0
 
+lvgl_ili9341
+------------
+
+This is a demonstration of the LVGL graphics library running on the NuttX LCD
+driver with the ILI9341 display. You can find LVGL here::
+
+    https://www.lvgl.io/
+    https://github.com/lvgl/lvgl
+
+This configuration uses the LVGL demonstration at `apps/examples/lvgldemo` and
+can be executed by running the `lvgldemo` application.
+
+lvgl_st7789
+-----------
+
+This is a demonstration of the LVGL graphics library running on the NuttX LCD
+driver with the ST7799 display. You can find LVGL here::
+
+    https://www.lvgl.io/
+    https://github.com/lvgl/lvgl
+
+This configuration uses the LVGL demonstration at `apps/examples/lvgldemo` and
+can be executed by running the `lvgldemo` application.
+
 nsh
 ---
 

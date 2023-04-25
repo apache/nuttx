@@ -66,6 +66,15 @@
 #  define NUM_BUTTONS               1
 #endif
 
+/* GPIO definitions *********************************************************/
+
+/* ST7789 or ILI9341 */
+
+#define LCD_SPI_PORTNO       2
+#define GPIO_LCD_DC          13
+#define GPIO_LCD_RST         16
+#define GPIO_LCD_BCKL        6
+
 /* LED definitions **********************************************************/
 
 /* Define how many LEDs this board has (needed by userleds) */
