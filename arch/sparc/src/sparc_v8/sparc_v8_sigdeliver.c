@@ -84,14 +84,15 @@ void sparc_sigdeliver(void)
 
   sparc_copystate(regs, rtcb->xcp.regs);
 
+retry:
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented
    * 'irqcount' in order to force us into a critical section.  Save the
    * pre-incremented irqcount.
    */
 
-  saved_irqcount = rtcb->irqcount - 1;
-  DEBUGASSERT(saved_irqcount >= 0);
+  saved_irqcount = rtcb->irqcount;
+  DEBUGASSERT(saved_irqcount >= 1);
 
   /* Now we need call leave_critical_section() repeatedly to get the irqcount
    * to zero, freeing all global spinlocks that enforce the critical section.
@@ -144,6 +145,12 @@ void sparc_sigdeliver(void)
 
   set_errno(saved_errno);
 
+  if (!sq_empty(&rtcb->sigpendactionq) &&
+      (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
+    {
+      goto retry;
+    }
+
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is
    * not supported.  Therefore, these values will persist throughout the
@@ -195,5 +202,8 @@ void sparc_sigdeliver(void)
    */
 
   board_autoled_off(LED_SIGNAL);
+#ifdef CONFIG_SMP
+  rtcb->irqcount--;
+#endif
   sparc_fullcontextrestore(regs);
 }
