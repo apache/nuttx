@@ -1,0 +1,28 @@
+--- ./littlefs/littlefs/lfs_util.h	2022-11-11 03:32:30.000000000 +1100
++++ ./littlefs/littlefs/lfs_util.h	2023-04-21 12:25:27.987084276 +1000
+@@ -28,6 +28,7 @@
+
+ #ifndef LFS_NO_MALLOC
+ #include <stdlib.h>
++#include <nuttx/mm/mm.h>
+ #endif
+ #ifndef LFS_NO_ASSERT
+ #include <assert.h>
+@@ -218,7 +219,7 @@
+ // Note, memory must be 64-bit aligned
+ static inline void *lfs_malloc(size_t size) {
+ #ifndef LFS_NO_MALLOC
+-    return malloc(size);
++    return kmm_malloc(size);
+ #else
+     (void)size;
+     return NULL;
+@@ -228,7 +229,7 @@
+ // Deallocate memory, only used if buffers are not provided to littlefs
+ static inline void lfs_free(void *p) {
+ #ifndef LFS_NO_MALLOC
+-    free(p);
++    kmm_free(p);
+ #else
+     (void)p;
+ #endif
