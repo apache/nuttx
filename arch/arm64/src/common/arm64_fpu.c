@@ -268,8 +268,6 @@ static int arm64_fpu_procfs_stat(const char *relpath, struct stat *buf)
 
 void arm64_init_fpu(struct tcb_s *tcb)
 {
-  struct fpu_reg *fpu_reg;
-
   if (tcb->pid < CONFIG_SMP_NCPUS)
     {
       memset(&g_cpu_fpu_ctx[this_cpu()], 0,
@@ -280,13 +278,11 @@ void arm64_init_fpu(struct tcb_s *tcb)
     }
 
   memset(tcb->xcp.fpu_regs, 0, sizeof(struct fpu_reg));
-  fpu_reg = (struct fpu_reg *)tcb->xcp.fpu_regs;
-  fpu_reg->fpu_trap = 0;
 }
 
-void arm64_destory_fpu(struct tcb_s * tcb)
+void arm64_destory_fpu(struct tcb_s *tcb)
 {
-  struct tcb_s * owner;
+  struct tcb_s *owner;
 
   /* save current fpu owner's context */
 
@@ -314,10 +310,9 @@ void arm64_fpu_exit_exception(void)
 {
 }
 
-void arm64_fpu_trap(struct regs_context * regs)
+void arm64_fpu_trap(struct regs_context *regs)
 {
-  struct tcb_s * owner;
-  struct fpu_reg *fpu_reg;
+  struct tcb_s *owner;
 
   UNUSED(regs);
 
@@ -358,40 +353,44 @@ void arm64_fpu_trap(struct regs_context * regs)
 
   /* become new owner */
 
-  g_cpu_fpu_ctx[this_cpu()].fpu_owner   = owner;
-  fpu_reg = (struct fpu_reg *)owner->xcp.fpu_regs;
-  fpu_reg->fpu_trap = 0;
+  g_cpu_fpu_ctx[this_cpu()].fpu_owner = owner;
 }
 
 void arm64_fpu_context_restore(void)
 {
   struct tcb_s *new_tcb = (struct tcb_s *)arch_get_current_tcb();
-  struct fpu_reg *fpu_reg = (struct fpu_reg *)new_tcb->xcp.fpu_regs;
 
-  arm64_fpu_access_trap_enable();
+  arm64_fpu_access_trap_disable();
 
-  if (fpu_reg->fpu_trap == 0)
+  /* FPU trap has happened at this task */
+
+  if (new_tcb == g_cpu_fpu_ctx[this_cpu()].fpu_owner)
     {
-      /* FPU trap hasn't happened at this task */
-
-      arm64_fpu_access_trap_enable();
+      arm64_fpu_access_trap_disable();
     }
   else
     {
-      /* FPU trap has happened at this task */
-
-      if (new_tcb == g_cpu_fpu_ctx[this_cpu()].fpu_owner)
-        {
-          arm64_fpu_access_trap_disable();
-        }
-      else
-        {
-          arm64_fpu_access_trap_enable();
-        }
+      arm64_fpu_access_trap_enable();
     }
 
   g_cpu_fpu_ctx[this_cpu()].switch_count++;
 }
+
+#ifdef CONFIG_SMP
+void arm64_fpu_context_save(void)
+{
+  struct tcb_s *tcb = (struct tcb_s *)arch_get_current_tcb();
+
+  if (tcb == g_cpu_fpu_ctx[this_cpu()].fpu_owner)
+    {
+      arm64_fpu_access_trap_disable();
+      arm64_fpu_save((struct fpu_reg *)tcb->xcp.fpu_regs);
+      ARM64_DSB();
+      g_cpu_fpu_ctx[this_cpu()].save_count++;
+      g_cpu_fpu_ctx[this_cpu()].fpu_owner = NULL;
+    }
+}
+#endif
 
 void arm64_fpu_enable(void)
 {
@@ -426,8 +425,8 @@ void arm64_fpu_disable(void)
 
 bool up_fpucmp(const void *saveregs1, const void *saveregs2)
 {
-  const uint64_t *regs1  = saveregs1 + XCPTCONTEXT_GP_SIZE;
-  const uint64_t *regs2  = saveregs2 + XCPTCONTEXT_GP_SIZE;
+  const uint64_t *regs1 = saveregs1 + XCPTCONTEXT_GP_SIZE;
+  const uint64_t *regs2 = saveregs2 + XCPTCONTEXT_GP_SIZE;
 
   /* Only compare callee-saved registers, caller-saved registers do not
    * need to be preserved.
