@@ -117,15 +117,6 @@ config SYMTAB_DECORATED
 		underscore. This option will remove the underscore from symbol names
 		when relocating a loadable object.
 
-config POSIX_SPAWN_PROXY_STACKSIZE
-	int "Spawn Stack Size"
-	default 1024
-	---help---
-		If posix_spawn[p]() and task_spawn() use I/O redirection options,
-		they will require an intermediary/proxy task to muck with the file
-		descriptors.  This configuration item specifies the stack size
-		used for the proxy. Default: 1024 bytes.
-
 config POSIX_SPAWN_DEFAULT_STACKSIZE
 	int "Default task_spawn Stack Size"
 	default DEFAULT_TASK_STACKSIZE
