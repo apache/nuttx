@@ -1194,7 +1194,7 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
 
   /* Get the interface structure associated with this interface number. */
 
-  priv = (FAR struct btnet_driver_s *)
+  btdev->bt_net = priv = (FAR struct btnet_driver_s *)
     kmm_zalloc(sizeof(struct btnet_driver_s));
 
   if (priv == NULL)

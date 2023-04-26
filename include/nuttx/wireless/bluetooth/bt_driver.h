@@ -84,9 +84,17 @@ struct bt_driver_s
   CODE int (*ioctl)(FAR struct bt_driver_s *btdev, int cmd,
                     unsigned long arg);
 
-  /* Filled by register function, shouldn't be touched by bt_driver_s */
+  /* For private use by device drivers.
+   * Should NOT be touched by the bluetooth stack.
+   */
 
   FAR void *priv;
+
+  /* Reserved for the bluetooth stack.
+   * Should NOT be touched by drivers.
+   */
+
+  FAR void *bt_net;
 };
 
 /****************************************************************************
