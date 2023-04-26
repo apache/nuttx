@@ -803,6 +803,13 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
 
   fb = vtable->priv;
 
+  /* Prevent calling before getting the vtable. */
+
+  if (fb == NULL)
+    {
+      return;
+    }
+
   if (fb->vsyncoffset > 0)
     {
       wd_start(&fb->wdog, fb->vsyncoffset, fb_do_pollnotify, (wdparm_t)fb);
