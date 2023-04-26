@@ -39,4 +39,6 @@ ifeq ($(CONFIG_A64_TCON0),y)
 CHIP_CSRCS += a64_tcon0.c
 endif
 
+ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = a64_lowputc.S
+endif

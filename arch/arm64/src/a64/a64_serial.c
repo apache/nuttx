@@ -634,16 +634,20 @@ void arm64_earlyserialinit(void)
 
 int up_putc(int ch)
 {
+#ifdef CONSOLE_DEV
+  struct uart_dev_s *dev = &CONSOLE_DEV;
+
   /* Check for LF */
 
   if (ch == '\n')
     {
       /* Add CR */
 
-      arm64_lowputc('\r');
+      a64_uart_send(dev, '\r');
     }
 
-  arm64_lowputc((uint8_t)ch);
+  a64_uart_send(dev, ch);
+#endif
   return ch;
 }
 
@@ -661,6 +665,7 @@ int up_putc(int ch)
 
 void arm64_serialinit(void)
 {
+#ifdef CONSOLE_DEV
   int ret;
 
   ret = uart_register("/dev/console", &CONSOLE_DEV);
@@ -675,42 +680,7 @@ void arm64_serialinit(void)
     {
       sinfo("error at register dev/ttyS0, ret =%d\n", ret);
     }
-}
-
-#else /* USE_SERIALDRIVER */
-
-/***************************************************************************
- * Public Functions
- ***************************************************************************/
-
-/***************************************************************************
- * Name: up_putc
- *
- * Description:
- *   Provide priority, low-level access to support OS debug
- *   writes
- *
- * Input Parameters:
- *   ch - Character to be transmitted over UART
- *
- * Returned Value:
- *   Character that was transmitted
- *
- ***************************************************************************/
-
-int up_putc(int ch)
-{
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm64_lowputc('\r');
-    }
-
-  arm64_lowputc((uint8_t)ch);
-  return ch;
+#endif
 }
 
 #endif /* USE_SERIALDRIVER */

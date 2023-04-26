@@ -22,4 +22,7 @@ include common/Make.defs
 
 # fvp-specific C source files
 CHIP_CSRCS  = fvp_boot.c serial_pl011.c
-CHIP_ASRCS  = fvp_lowputc.S
+
+ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
+CHIP_ASRCS  += fvp_lowputc.S
+endif
