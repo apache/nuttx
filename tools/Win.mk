@@ -571,10 +571,10 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # location: https://bitbucket.org/nuttx/tools/downloads/.  See
 # misc\tools\README.txt for additional information.
 
-KCONFIG_ENV = set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR}) & \
-              set EXTERNALDIR=$(EXTERNALDIR) & \
-              set APPSBINDIR=$(patsubst "%",%,${CONFIG_APPS_DIR}) & \
-              set BINDIR=$(patsubst "%",%,${TOPDIR}) &
+KCONFIG_ENV = set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& \
+              set EXTERNALDIR=$(EXTERNALDIR)& \
+              set APPSBINDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& \
+              set BINDIR=$(patsubst "%",%,${TOPDIR})&
 
 config:
 	$(Q) $(MAKE) clean_context
