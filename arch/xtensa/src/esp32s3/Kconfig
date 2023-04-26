@@ -313,6 +313,10 @@ config ESP32S3_DMA
 	default n
 	select ARCH_DMA
 
+config ESP32S3_RTC
+	bool "Real Time Clock (RTC)"
+	default y
+
 config ESP32S3_UART0
 	bool "UART 0"
 	default n

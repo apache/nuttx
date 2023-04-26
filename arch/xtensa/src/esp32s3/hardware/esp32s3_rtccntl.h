@@ -71,8 +71,8 @@
 #define RTC_WDT_RESET_LENGTH_1600_NS   6
 #define RTC_WDT_RESET_LENGTH_3200_NS   7
 
-#define RTC_CNTL_TIME0_REG      RTC_CNTL_TIME_LOW0_REG
-#define RTC_CNTL_TIME1_REG      RTC_CNTL_TIME_HIGH0_REG
+#define RTC_CNTL_TIME0_REG      RTC_CNTL_RTC_TIME_LOW0_REG
+#define RTC_CNTL_TIME1_REG      RTC_CNTL_RTC_TIME_HIGH0_REG
 
 /* RTC_CNTL_RTC_OPTIONS0_REG register
  * RTC common configure register
@@ -474,6 +474,7 @@
 #define RTC_CNTL_PLL_BUF_WAIT_M  (RTC_CNTL_PLL_BUF_WAIT_V << RTC_CNTL_PLL_BUF_WAIT_S)
 #define RTC_CNTL_PLL_BUF_WAIT_V  0x000000ff
 #define RTC_CNTL_PLL_BUF_WAIT_S  24
+#define RTC_CNTL_PLL_BUF_WAIT_DEFAULT  20
 
 /* RTC_CNTL_XTL_BUF_WAIT : R/W; bitpos: [23:14]; default: 80;
  * XTAL wait cycles in slow_clk_rtc
@@ -483,15 +484,18 @@
 #define RTC_CNTL_XTL_BUF_WAIT_M  (RTC_CNTL_XTL_BUF_WAIT_V << RTC_CNTL_XTL_BUF_WAIT_S)
 #define RTC_CNTL_XTL_BUF_WAIT_V  0x000003ff
 #define RTC_CNTL_XTL_BUF_WAIT_S  14
+#define RTC_CNTL_XTL_BUF_WAIT_DEFAULT  100
 
 /* RTC_CNTL_CK8M_WAIT : R/W; bitpos: [13:6]; default: 16;
  * CK8M wait cycles in slow_clk_rtc
  */
 
-#define RTC_CNTL_CK8M_WAIT    0x000000ff
-#define RTC_CNTL_CK8M_WAIT_M  (RTC_CNTL_CK8M_WAIT_V << RTC_CNTL_CK8M_WAIT_S)
-#define RTC_CNTL_CK8M_WAIT_V  0x000000ff
-#define RTC_CNTL_CK8M_WAIT_S  6
+#define RTC_CNTL_CK8M_WAIT          0x000000ff
+#define RTC_CNTL_CK8M_WAIT_M        (RTC_CNTL_CK8M_WAIT_V << RTC_CNTL_CK8M_WAIT_S)
+#define RTC_CNTL_CK8M_WAIT_V        0x000000ff
+#define RTC_CNTL_CK8M_WAIT_S        6
+#define RTC_CNTL_CK8M_WAIT_DEFAULT  20
+#define RTC_CK8M_ENABLE_WAIT_DEFAULT 5
 
 /* RTC_CNTL_CPU_STALL_WAIT : R/W; bitpos: [5:1]; default: 1;
  * CPU stall wait cycles in fast_clk_rtc
@@ -630,10 +634,11 @@
  * minimal sleep cycles in slow_clk_rtc
  */
 
-#define RTC_CNTL_MIN_SLP_VAL    0x000000ff
-#define RTC_CNTL_MIN_SLP_VAL_M  (RTC_CNTL_MIN_SLP_VAL_V << RTC_CNTL_MIN_SLP_VAL_S)
-#define RTC_CNTL_MIN_SLP_VAL_V  0x000000ff
-#define RTC_CNTL_MIN_SLP_VAL_S  8
+#define RTC_CNTL_MIN_SLP_VAL     0x000000ff
+#define RTC_CNTL_MIN_SLP_VAL_M   (RTC_CNTL_MIN_SLP_VAL_V << RTC_CNTL_MIN_SLP_VAL_S)
+#define RTC_CNTL_MIN_SLP_VAL_V   0x000000ff
+#define RTC_CNTL_MIN_SLP_VAL_S   8
+#define RTC_CNTL_MIN_SLP_VAL_MIN 2
 
 /* RTC_CNTL_RTC_TIMER6_REG register
  * No public
@@ -5830,5 +5835,55 @@
 #define RTC_CNTL_DATE_M  (RTC_CNTL_DATE_V << RTC_CNTL_DATE_S)
 #define RTC_CNTL_DATE_V  0x0fffffff
 #define RTC_CNTL_DATE_S  0
+
+/* Deep sleep (power down digital domain) */
+
+#define RTC_SLEEP_PD_DIG                BIT(0)
+
+/* Power down RTC peripherals */
+
+#define RTC_SLEEP_PD_RTC_PERIPH         BIT(1)
+
+/* Power down RTC SLOW memory */
+
+#define RTC_SLEEP_PD_RTC_SLOW_MEM       BIT(2)
+
+/* Power down RTC FAST memory */
+
+#define RTC_SLEEP_PD_RTC_FAST_MEM       BIT(3)
+
+/* RTC FAST and SLOW memories are automatically
+ * powered up and down along with the CPU
+ */
+
+#define RTC_SLEEP_PD_RTC_MEM_FOLLOW_CPU BIT(4)
+
+/* Power down VDDSDIO regulator */
+
+#define RTC_SLEEP_PD_VDDSDIO            BIT(5)
+
+/* Power down WIFI */
+
+#define RTC_SLEEP_PD_WIFI               BIT(6)
+
+/* Power down BT */
+
+#define RTC_SLEEP_PD_BT                 BIT(7)
+
+/* Power down CPU when in lightsleep, but not restart */
+
+#define RTC_SLEEP_PD_CPU                BIT(8)
+
+/* Power down DIG peripherals */
+
+#define RTC_SLEEP_PD_DIG_PERIPH         BIT(9)
+
+/* Power down Internal 8M oscillator */
+
+#define RTC_SLEEP_PD_INT_8M             BIT(10)
+
+/* Power down main XTAL */
+
+#define RTC_SLEEP_PD_XTAL               BIT(11)
 
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_HARDWARE_ESP32S3_RTCCNTL_H */
