@@ -1182,6 +1182,8 @@ ssize_t rwb_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
 #ifdef CONFIG_DRVR_REMOVABLE
 int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
 {
+  int ret;
+
 #ifdef CONFIG_DRVR_WRITEBUFFER
   if (rwb->wrmaxblocks > 0)
     {
