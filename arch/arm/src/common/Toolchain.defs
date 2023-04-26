@@ -233,7 +233,7 @@ else
   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
   ifeq ($(GCCVER),)
-    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
+    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/")
   endif
 
   ifeq ($(GCCVER),12.2)
