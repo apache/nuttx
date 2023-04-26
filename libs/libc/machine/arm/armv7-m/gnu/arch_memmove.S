@@ -29,13 +29,17 @@
  *
  ****************************************************************************/
 
+#include "arm_asm.h"
+
 	.thumb
 	.syntax unified
 	.global memmove
 	.type	memmove, %function
 memmove:
+	.fnstart
+	.cfi_startproc
+	prologue 4
 	cmp	r0, r1
-	push	{r4}
 	bls	3f
 	adds	r3, r1, r2
 	cmp	r0, r3
@@ -49,9 +53,10 @@ memmove:
 	strb	r4, [r1, #-1]!
 	bne	1b
 2:
-	pop	{r4}
-	bx	lr
+	.cfi_remember_state
+	epilogue 4
 3:
+	.cfi_restore_state
 	cmp	r2, #0
 	beq	2b
 	add	r2, r2, r1
@@ -61,6 +66,8 @@ memmove:
 	cmp	r2, r1
 	strb	r4, [r3, #1]!
 	bne	4b
-	pop	{r4}
-	bx	lr
+	epilogue 4
+	.cfi_endproc
+	.cantunwind
+	.fnend
 	.size memmove, . - memmove

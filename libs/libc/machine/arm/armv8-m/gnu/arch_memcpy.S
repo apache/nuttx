@@ -50,6 +50,8 @@
      __OPT_BIG_BLOCK_SIZE: Size of big block in words.  Default to 64.
      __OPT_MID_BLOCK_SIZE: Size of big block in words.  Default to 16.
  */
+#include "arm_asm.h"
+
 #ifndef __OPT_BIG_BLOCK_SIZE
 #define __OPT_BIG_BLOCK_SIZE (4 * 16)
 #endif
@@ -90,11 +92,21 @@
 	.global	memcpy
 	.thumb
 	.thumb_func
+	.fnstart
+	.cfi_startproc
 	.type	memcpy, %function
 memcpy:
 	@ r0: dst
 	@ r1: src
 	@ r2: len
+#ifdef __ARM_FEATURE_UNALIGNED
+	/* In case of UNALIGNED access supported, ip is not used in
+	   function body.  */
+	prologue push_ip=HAVE_PAC_LEAF
+	mov	ip, r0
+#else
+	prologue 0 push_ip=HAVE_PAC_LEAF
+#endif /* __ARM_FEATURE_UNALIGNED */
 #ifdef __ARM_FEATURE_MVE
 	mov	r3, lr
 	wlstp.8	lr, r2, 2f
@@ -104,15 +116,14 @@ memcpy:
 	vstrb.8	q0, [r2], #16
 	letp	lr, 1b
 2:
+#ifdef __ARM_FEATURE_UNALIGNED
+	mov	r0, ip
+	epilogue push_ip=HAVE_PAC_LEAF
+#else
+	epilogue 0 push_ip=HAVE_PAC_LEAF
+#endif /* __ARM_FEATURE_UNALIGNED */
 	bx	r3
 #else
-#ifdef __ARM_FEATURE_UNALIGNED
-	/* In case of UNALIGNED access supported, ip is not used in
-	   function body.  */
-	mov	ip, r0
-#else
-	push	{r0}
-#endif
 	orr	r3, r1, r0
 	ands	r3, r3, #3
 	bne	.Lmisaligned_copy
@@ -194,15 +205,17 @@ memcpy:
 #endif /* __ARM_FEATURE_UNALIGNED */
 
 .Ldone:
+	.cfi_remember_state
 #ifdef __ARM_FEATURE_UNALIGNED
 	mov	r0, ip
+	epilogue push_ip=HAVE_PAC_LEAF
 #else
-	pop	{r0}
-#endif
-	bx	lr
+	epilogue 0 push_ip=HAVE_PAC_LEAF
+#endif /*  __ARM_FEATURE_UNALIGNED */
 
 	.align 2
 .Lmisaligned_copy:
+	.cfi_restore_state
 #ifdef __ARM_FEATURE_UNALIGNED
 	/* Define label DST_ALIGNED to BIG_BLOCK.  It will go to aligned copy
 	   once destination is adjusted to aligned.  */
@@ -263,6 +276,9 @@ memcpy:
 	/* dst is aligned, but src isn't.  Misaligned copy.  */
 
 	push	{r4, r5}
+	.cfi_adjust_cfa_offset 8
+	.cfi_rel_offset 4, 0
+	.cfi_rel_offset 5, 4
 	subs	r2, #4
 
 	/* Backward r1 by misaligned bytes, to make r1 aligned.
@@ -315,6 +331,9 @@ memcpy:
 	adds	r2, #4
 	subs	r1, ip
 	pop	{r4, r5}
+	.cfi_restore 4
+	.cfi_restore 5
+	.cfi_adjust_cfa_offset -8
 
 #endif /* __ARM_FEATURE_UNALIGNED */
 
@@ -337,9 +356,12 @@ memcpy:
 
 #ifdef __ARM_FEATURE_UNALIGNED
 	mov	r0, ip
+	epilogue push_ip=HAVE_PAC_LEAF
 #else
-	pop	{r0}
+	epilogue 0 push_ip=HAVE_PAC_LEAF
+#endif /* __ARM_FEATURE_UNALIGNED */
 #endif
-	bx	lr
-#endif
+	.cfi_endproc
+	.cantunwind
+	.fnend
 	.size	memcpy, .-memcpy
