@@ -29,11 +29,16 @@
  *
  ****************************************************************************/
 
+#include "arm_asm.h"
+
 	.thumb
 	.syntax unified
 	.global memset
 	.type	memset, %function
+	.fnstart
+	.cfi_startproc
 memset:
+	prologue 4 6
 #ifdef __ARM_FEATURE_MVE
 	vdup.8	q0, r1
 	mov	r3, lr
@@ -43,9 +48,11 @@ memset:
 	vstrb.8	q0, [r1], #16
 	letp	lr, 1b
 2:
+	.cfi_remember_state
+	epilogue 4 6
+	.cfi_restore_state
 	bx	r3
 #else
-	push	{r4, r5, r6}
 	lsls	r4, r0, #30
 	beq	10f
 	subs	r4, r2, #1
@@ -110,11 +117,15 @@ memset:
 	cmp	r3, r4
 	bne	8b
 9:
-	pop	{r4, r5, r6}
-	bx	lr
+	.cfi_remember_state
+	epilogue 4 6
 10:
+	.cfi_restore_state
 	mov	r4, r2
 	mov	r3, r0
 	b	3b
 #endif
+	.cfi_endproc
+	.cantunwind
+	.fnend
 	.size memset, . - memset
