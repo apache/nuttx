@@ -30,55 +30,6 @@
 #include <spawn.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_POSIX_SPAWN_PROXY_STACKSIZE
-#  define CONFIG_POSIX_SPAWN_PROXY_STACKSIZE 1024
-#endif
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-struct spawn_parms_s
-{
-  /* Common parameters */
-
-  int result;
-  FAR pid_t *pid;
-  FAR const posix_spawn_file_actions_t *file_actions;
-  FAR const posix_spawnattr_t *attr;
-  FAR char * const *argv;
-  FAR char * const *envp;
-
-  /* Parameters that differ for posix_spawn[p] and task_spawn */
-
-  union
-  {
-    struct
-    {
-      FAR const char *path;
-    } posix;
-    struct
-    {
-      FAR const char *name;
-      main_t entry;
-    } task;
-  } u;
-};
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern mutex_t g_spawn_parmlock;
-#ifndef CONFIG_SCHED_WAITPID
-extern sem_t g_spawn_execsem;
-#endif
-extern struct spawn_parms_s g_spawn_parms;
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -116,16 +67,10 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr);
  *
  * Input Parameters:
  *
- *   pid - The pid of the new task.
  *   attr - The attributes to use
- *   file_actions - The attributes to use
- *
- * Returned Value:
- *   0 (OK) on success; A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
-                     FAR const posix_spawn_file_actions_t *file_actions);
+void spawn_proxyattrs(FAR const posix_spawnattr_t *attr);
 
 #endif /* __SCHED_TASK_SPAWN_H */

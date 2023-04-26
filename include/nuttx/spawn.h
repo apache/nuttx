@@ -100,6 +100,9 @@ extern "C"
 void add_file_action(FAR posix_spawn_file_actions_t *file_action,
                      FAR struct spawn_general_file_action_s *entry);
 
+int spawn_file_actions(FAR struct tcb_s *tcb,
+                       FAR const posix_spawn_file_actions_t *actions);
+
 #ifdef __cplusplus
 }
 #endif

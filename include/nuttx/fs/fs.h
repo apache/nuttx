@@ -170,6 +170,7 @@ struct stat;
 struct statfs;
 struct pollfd;
 struct mtd_dev_s;
+struct tcb_s;
 
 /* The internal representation of type DIR is just a container for an inode
  * reference, and the path of directory.
@@ -786,6 +787,23 @@ void files_releaselist(FAR struct filelist *list);
 int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
 
 /****************************************************************************
+ * Name: file_allocate_from_tcb
+ *
+ * Description:
+ *   Allocate a struct files instance and associate it with an inode
+ *   instance.
+ *
+ * Returned Value:
+ *     Returns the file descriptor == index into the files array on success;
+ *     a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
+                           int oflags, off_t pos, FAR void *priv, int minfd,
+                           bool addref);
+
+/****************************************************************************
  * Name: file_allocate
  *
  * Description:
@@ -835,6 +853,27 @@ int file_dup(FAR struct file *filep, int minfd, bool cloexec);
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 
 /****************************************************************************
+ * Name: nx_dup2_from_tcb
+ *
+ * Description:
+ *   nx_dup2_from_tcb() is similar to the standard 'dup2' interface
+ *   except that is not a cancellation point and it does not modify the
+ *   errno variable.
+ *
+ *   nx_dup2_from_tcb() is an internal NuttX interface and should not be
+ *   called from applications.
+ *
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2);
+
+/****************************************************************************
  * Name: nx_dup2
  *
  * Description:
@@ -874,6 +913,32 @@ int nx_dup2(int fd1, int fd2);
  ****************************************************************************/
 
 int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...);
+
+/****************************************************************************
+ * Name: nx_open_from_tcb
+ *
+ * Description:
+ *   nx_open_from_tcb() is similar to the standard 'open' interface except
+ *   that it is not a cancellation point and it does not modify the errno
+ *   variable.
+ *
+ *   nx_open_from_tcb() is an internal NuttX interface and should not be
+ *   called from applications.
+ *
+ * Input Parameters:
+ *   tcb    - Address of the task's TCB
+ *   path   - The full path to the file to be opened.
+ *   oflags - open flags.
+ *   ...    - Variable number of arguments, may include 'mode_t mode'
+ *
+ * Returned Value:
+ *   The new file descriptor is returned on success; a negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_open_from_tcb(FAR struct tcb_s *tcb,
+                     FAR const char *path, int oflags, ...);
 
 /****************************************************************************
  * Name: nx_open
@@ -930,6 +995,31 @@ int fs_getfilep(int fd, FAR struct file **filep);
  ****************************************************************************/
 
 int file_close(FAR struct file *filep);
+
+/****************************************************************************
+ * Name: nx_close_from_tcb
+ *
+ * Description:
+ *   nx_close_from_tcb() is similar to the standard 'close' interface
+ *   except that is not a cancellation point and it does not modify the
+ *   errno variable.
+ *
+ *   nx_close_from_tcb() is an internal NuttX interface and should not
+ *   be called from applications.
+ *
+ *   Close an inode (if open)
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   on any failure.
+ *
+ * Assumptions:
+ *   Caller holds the list mutex because the file descriptor will be
+ *   freed.
+ *
+ ****************************************************************************/
+
+int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd);
 
 /****************************************************************************
  * Name: nx_close
@@ -1043,7 +1133,6 @@ int close_mtddriver(FAR struct inode *pinode);
  ****************************************************************************/
 
 #ifdef CONFIG_FILE_STREAM
-struct tcb_s; /* Forward reference */
 int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
               FAR struct file_struct **filep);
 #endif
