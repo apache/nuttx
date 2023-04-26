@@ -880,7 +880,6 @@ config SCHED_CRITMONITOR_MAXTIME_PANIC
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
 	default n
-	select SCHED_CPULOAD_EXTCLK if SCHED_TICKLESS
 	---help---
 		If this option is selected, the timer interrupt handler will monitor
 		if the system is IDLE or busy at the time of that the timer interrupt
@@ -898,14 +897,32 @@ config SCHED_CPULOAD
 
 if SCHED_CPULOAD
 
-config SCHED_CPULOAD_EXTCLK
-	bool "Use external clock"
-	default n
+choice
+	prompt "Select CPU load clock source"
+	default SCHED_CPULOAD_EXTCLK if SCHED_TICKLESS
+
+config SCHED_CPULOAD_SYSCLK
+	bool "Use system clock"
 	---help---
+		If this option is enabled, the system clock is used for cpu load
+		measurement by default.
+
+		There is a serious issue for the accuracy of measurements if the
+		system clock is used, however.  NuttX threads are often started at
+		the time of the system timer expiration.  Others may be stopped at
+		the time of the system timer expiration (if round-robin time-slicing
+		is enabled).  Such thread behavior occurs synchronously with the
+		system timer and, hence, is not randomly sampled.  As a consequence,
+		the CPU load attributed to these threads that run synchronously with
+		they system timer may be grossly in error.
 		The CPU load measurements are determined by sampling the active
 		tasks periodically at the occurrence to a timer expiration.  By
 		default, the system clock is used to do that sampling.
 
+config SCHED_CPULOAD_EXTCLK
+	bool "Use external clock"
+	depends on SCHED_TICKLESS
+	---help---
 		There is a serious issue for the accuracy of measurements if the
 		system clock is used, however.  NuttX threads are often started at
 		the time of the system timer expiration.  Others may be stopped at
@@ -923,6 +940,8 @@ config SCHED_CPULOAD_EXTCLK
 		logic; that platform-specific logic must call the system function
 		nxsched_process_cpuload_ticks() at each timer expiration with interrupts
 		disabled.
+
+endchoice
 
 if SCHED_CPULOAD_EXTCLK
 
