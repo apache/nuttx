@@ -1750,7 +1750,8 @@ static void uart_launch_worker(void *arg)
                  CONFIG_TTY_LAUNCH_ENTRYPOINT,
                  NULL, &attr, argv, NULL);
 #else
-      exec_spawn(CONFIG_TTY_LAUNCH_FILEPATH, argv, NULL, NULL, 0, &attr);
+      exec_spawn(CONFIG_TTY_LAUNCH_FILEPATH,
+                 argv, NULL, NULL, 0, NULL, &attr);
 #endif
       posix_spawnattr_destroy(&attr);
     }
