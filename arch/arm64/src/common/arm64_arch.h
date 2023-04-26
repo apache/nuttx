@@ -328,7 +328,6 @@ struct fpu_reg
   __int128 q[32];
   uint32_t fpsr;
   uint32_t fpcr;
-  uint64_t fpu_trap;
 };
 
 #endif
