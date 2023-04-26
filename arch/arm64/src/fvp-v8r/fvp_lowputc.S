@@ -50,6 +50,28 @@
  * Public Functions
  ****************************************************************************/
 
+/***************************************************************************
+ * Name: arm64_earlyprintinit
+ *
+ * PL011 UART initialization
+ * xb: register which contains the UART base address
+ * c: scratch register number
+ *
+ ***************************************************************************/
+
+GTEXT(arm64_earlyprintinit)
+SECTION_FUNC(text, arm64_earlyprintinit)
+    ldr   x15, =CONFIG_UART0_BASE
+    mov   x0, #(7372800 / EARLY_UART_PL011_BAUD_RATE % 16)
+    strh  w0, [x15, #0x28]      /* -> UARTFBRD (Baud divisor fraction) */
+    mov   x0, #(7372800 / EARLY_UART_PL011_BAUD_RATE / 16)
+    strh  w0, [x15, #0x24]      /* -> UARTIBRD (Baud divisor integer) */
+    mov   x0, #0x60             /* 8n1 */
+    str   w0, [x15, #0x2C]      /* -> UARTLCR_H (Line control) */
+    ldr   x0, =0x00000301       /* RXE | TXE | UARTEN */
+    str   w0, [x15, #0x30]      /* -> UARTCR (Control Register) */
+    ret
+
 /* PL011 UART wait UART to be ready to transmit
  * xb: register which contains the UART base address
  * c: scratch register number
