@@ -52,7 +52,15 @@
 void sim_sigdeliver(void)
 {
   struct tcb_s *rtcb = current_task(this_cpu());
+#ifdef CONFIG_SMP
+  /* In the SMP case, we must terminate the critical section while the signal
+   * handler executes, but we also need to restore the irqcount when the
+   * we resume the main thread of the task.
+   */
 
+  int16_t saved_irqcount;
+  irqstate_t flags;
+#endif
   if (NULL == (rtcb->xcp.sigdeliver))
     {
       return;
@@ -63,16 +71,7 @@ void sim_sigdeliver(void)
    */
 
 #ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
-
-#ifdef CONFIG_SMP
-  /* In the SMP case, we must terminate the critical section while the signal
-   * handler executes, but we also need to restore the irqcount when the
-   * we resume the main thread of the task.
-   */
-
-  int16_t saved_irqcount;
+  flags = enter_critical_section();
 #endif
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
@@ -81,6 +80,7 @@ void sim_sigdeliver(void)
 
   /* NOTE: we do not save the return state for sim */
 
+retry:
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented
    * 'irqcount' in order to force us into a critical section.  Save the
@@ -88,7 +88,7 @@ void sim_sigdeliver(void)
    */
 
   saved_irqcount = rtcb->irqcount;
-  DEBUGASSERT(saved_irqcount >= 0);
+  DEBUGASSERT(saved_irqcount >= 1);
 
   /* Now we need call leave_critical_section() repeatedly to get the irqcount
    * to zero, freeing all global spinlocks that enforce the critical section.
@@ -126,6 +126,12 @@ void sim_sigdeliver(void)
       enter_critical_section();
     }
 #endif
+
+  if (!sq_empty(&rtcb->sigpendactionq) &&
+      (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
+    {
+      goto retry;
+    }
 
   /* Allows next handler to be scheduled */
 
