@@ -441,6 +441,16 @@
 #define RTC_PLL_FREQ_320M           320
 #define RTC_PLL_FREQ_480M           480
 
+#define DPORT_CPUPERIOD_SEL_80      0
+#define DPORT_CPUPERIOD_SEL_160     1
+#define DPORT_CPUPERIOD_SEL_240     2
+
+#define DPORT_SOC_CLK_SEL_XTAL      0
+#define DPORT_SOC_CLK_SEL_PLL       1
+#define DPORT_SOC_CLK_SEL_8M        2
+
+#define RTC_FAST_CLK_FREQ_8M        8500000
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
