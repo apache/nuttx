@@ -187,7 +187,7 @@ static inline irqstate_t up_irq_save(void)
      "\tmsr    cpsr_c, %1"
      : "=r" (flags), "=r" (temp)
      :
-     : "memory");
+     : "cc", "memory");
   return flags;
 }
 
@@ -200,7 +200,7 @@ static inline void up_irq_restore(irqstate_t flags)
      "msr    cpsr_c, %0"
      :
      : "r" (flags)
-     : "memory");
+     : "cc", "memory");
 }
 
 /* Enable IRQs and return the previous IRQ state */
@@ -216,7 +216,7 @@ static inline irqstate_t up_irq_enable(void)
      "\tmsr    cpsr_c, %1"
      : "=r" (flags), "=r" (temp)
      :
-     : "memory");
+     : "cc", "memory");
   return flags;
 }
 #endif /* __ASSEMBLY__ */
