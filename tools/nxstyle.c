@@ -221,7 +221,7 @@ static const char *g_white_suffix[] =
   NULL
 };
 
-static const char *g_white_list[] =
+static const char *g_white_content_list[] =
 {
   /* Ref:  gnu_unwind_find_exidx.c */
 
@@ -548,6 +548,19 @@ static const char *g_white_list[] =
 static const char *g_white_headers[] =
 {
   "windows.h",
+  NULL
+};
+
+static const char *g_white_files[] =
+{
+  /* Skip assembler file headers
+   * Ref:
+   * libs/libc/machine/arm/arm-acle-compat.h
+   * libs/libc/machine/arm/arm_asm.h
+   */
+
+  "arm-acle-compat.h",
+  "arm_asm.h",
   NULL
 };
 
@@ -904,14 +917,40 @@ static bool check_section_header(const char *line, int lineno)
 }
 
 /********************************************************************************
- * Name:  white_prefix
+ * Name: white_file_list
+ *
+ * Description:
+ *   Return true if the filename string with a white-listed name
+ *
+ ********************************************************************************/
+
+static bool white_file_list(const char *filename)
+{
+  const char **pptr;
+  const char *str;
+
+  for (pptr = g_white_files;
+       (str = *pptr) != NULL;
+       pptr++)
+    {
+      if (strstr(filename, str) != NULL)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/********************************************************************************
+ * Name:  white_content_list
  *
  * Description:
  *   Return true if the identifier string begins with a white-listed prefix
  *
  ********************************************************************************/
 
-static bool white_list(const char *ident, int lineno)
+static bool white_content_list(const char *ident, int lineno)
 {
   const char **pptr;
   const char *str;
@@ -956,7 +995,7 @@ static bool white_list(const char *ident, int lineno)
         }
     }
 
-  for (pptr = g_white_list;
+  for (pptr = g_white_content_list;
        (str = *pptr) != NULL;
        pptr++)
     {
@@ -1098,6 +1137,11 @@ int main(int argc, char **argv, char **envp)
     }
 
   if (g_file_type == UNKNOWN)
+    {
+      return 0;
+    }
+
+  if (white_file_list(g_file_name))
     {
       return 0;
     }
@@ -1508,7 +1552,7 @@ int main(int argc, char **argv, char **envp)
                                "section",
                                lineno, ii);
                         }
-                      else if (white_list(&line[ii], lineno))
+                      else if (white_content_list(&line[ii], lineno))
                         {
                           g_skipmixedcase = true;
                         }
@@ -2049,7 +2093,7 @@ int main(int argc, char **argv, char **envp)
                   /* Ignore symbols that begin with white-listed prefixes */
 
                   if (g_skipmixedcase ||
-                      white_list(&line[ident_index], lineno))
+                      white_content_list(&line[ident_index], lineno))
                     {
                       /* No error */
                     }
