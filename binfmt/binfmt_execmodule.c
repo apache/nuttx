@@ -285,8 +285,14 @@ int exec_module(FAR struct binary_s *binp,
 
 #if defined(CONFIG_ARCH_ADDRENV) || defined(CONFIG_ARCH_VMA_MAPPING)
 errout_with_tcbinit:
-  tcb->cmn.stack_alloc_ptr = NULL;
-  nxsched_release_tcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
+#ifndef CONFIG_BUILD_KERNEL
+  if (binp->stackaddr != NULL)
+    {
+      tcb->cmn.stack_alloc_ptr = NULL;
+    }
+#endif
+
+  nxtask_uninit(tcb);
   return ret;
 #endif
 
