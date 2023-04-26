@@ -692,6 +692,7 @@ static int sim_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (privep->epstate == SIM_EPSTATE_STALLED)
     {
       sim_reqabort(privep, privreq, -EBUSY);
+      leave_critical_section(flags);
       return -EPERM;
     }
 
