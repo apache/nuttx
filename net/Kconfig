@@ -119,6 +119,7 @@ config NET_GUARDSIZE
 
 config NET_LL_GUARDSIZE
 	int "Data Link Layer(L2) Guard size of Network buffer(IOB)"
+	default 16 if NET_CAN && NET_TIMESTAMP
 	default 14 if NET_ETHERNET
 	default 0
 	---help---
