@@ -140,6 +140,9 @@ In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd``
 password. IP address is obtained via DHCP using ``renew`` command. You can check
 the result by running ``ifconfig`` afterwards.
 
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi Station Mode <esp32_wi-fi_sta>`
+  for more information.
+
 Wi-Fi SoftAP
 ------------
 
@@ -159,6 +162,10 @@ to connect your smartphone or laptop to your board::
 In this case, you are creating the access point ``nuttxapp`` in your board and to
 connect to it on your smartphone you will be required to type the password ``mypasswd``
 using WPA2.
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi SoftAP Mode <esp32_wi-fi_softap>`
+  for more information.
+
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Memory Map
