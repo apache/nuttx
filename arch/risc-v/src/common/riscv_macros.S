@@ -105,7 +105,7 @@
   li         t1, MSTATUS_FS
   and        t2, t0, t1
   li         t1, MSTATUS_FS_DIRTY
-  bne        t2, t1, skip_save_fpu
+  bne        t2, t1, 1f
   li         t1, ~MSTATUS_FS
   and        t0, t0, t1
   li         t1, MSTATUS_FS_CLEAN
@@ -150,7 +150,13 @@
   frcsr      t0
   REGSTORE   t0, REG_FCSR(\in)
 
-skip_save_fpu:
+1:
+
+  /* Restore what we have just destroyed (t0, t1, t2) */
+
+  REGLOAD      t0, REG_T0(\in)
+  REGLOAD      t1, REG_T1(\in)
+  REGLOAD      t2, REG_T2(\in)
 
 #endif
 
@@ -222,7 +228,7 @@ skip_save_fpu:
   li           t1, MSTATUS_FS
   and          t2, t0, t1
   li           t1, MSTATUS_FS_INIT
-  ble          t2, t1, skip_load_fpu
+  ble          t2, t1, 1f
 
   /* Load all floating point registers */
 
@@ -264,7 +270,13 @@ skip_save_fpu:
   REGLOAD      t0, REG_FCSR(\out)
   fscsr        t0
 
-skip_load_fpu:
+1:
+
+  /* Restore what we have just destroyed (t0, t1, t2) */
+
+  REGLOAD      t0, REG_T0(\out)
+  REGLOAD      t1, REG_T1(\out)
+  REGLOAD      t2, REG_T2(\out)
 
 #endif
 
