@@ -2049,6 +2049,27 @@ static void mpfs_can_add_hw_filter(struct mpfs_driver_s *priv,
 
   fc_reg = getreg32(priv->base + MPFS_CANFD_FILTER_CONTROL_OFFSET);
 
+  /* Clean up filter control reg */
+
+  fc_reg &= ~MPFS_CANFD_FILTER_CONTROL_FAFE;
+  fc_reg &= ~MPFS_CANFD_FILTER_CONTROL_FAFB;
+  fc_reg &= ~MPFS_CANFD_FILTER_CONTROL_FANE;
+  fc_reg &= ~MPFS_CANFD_FILTER_CONTROL_FANB;
+
+  /* Transform fid1, fid2 */
+
+  uint32_t fid1_trans = (can_id_type == CAN_EXT_ID) ?
+    (MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_EXT &
+            (fid1 << MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_EXT_SHIFT)) :
+    (MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_BASE &
+            (fid1 << MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_BASE_SHIFT));
+
+  uint32_t fid2_trans = (can_id_type == CAN_EXT_ID) ?
+    (MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_EXT &
+            (fid2 << MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_EXT_SHIFT)) :
+    (MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_BASE &
+            (fid2 << MPFS_CANFD_IDENTIFIER_W_IDENTIFIER_BASE_SHIFT));
+
   switch (filter_type)
     {
       case HW_FILTER_A:
@@ -2081,8 +2102,8 @@ static void mpfs_can_add_hw_filter(struct mpfs_driver_s *priv,
 
         /* Set bit filter value / mask */
 
-        putreg32(fid1, priv->base + MPFS_CANFD_FILTER_A_VAL_OFFSET);
-        putreg32(fid2, priv->base + MPFS_CANFD_FILTER_A_MASK_OFFSET);
+        putreg32(fid1_trans, priv->base + MPFS_CANFD_FILTER_A_VAL_OFFSET);
+        putreg32(fid2_trans, priv->base + MPFS_CANFD_FILTER_A_MASK_OFFSET);
         break;
 
       case HW_FILTER_B:
@@ -2115,8 +2136,8 @@ static void mpfs_can_add_hw_filter(struct mpfs_driver_s *priv,
 
         /* Set bit filter value / mask */
 
-        putreg32(fid1, priv->base + MPFS_CANFD_FILTER_B_VAL_OFFSET);
-        putreg32(fid2, priv->base + MPFS_CANFD_FILTER_B_MASK_OFFSET);
+        putreg32(fid1_trans, priv->base + MPFS_CANFD_FILTER_B_VAL_OFFSET);
+        putreg32(fid2_trans, priv->base + MPFS_CANFD_FILTER_B_MASK_OFFSET);
         break;
 
       case HW_FILTER_C:
@@ -2149,8 +2170,8 @@ static void mpfs_can_add_hw_filter(struct mpfs_driver_s *priv,
 
         /* Set bit filter value / mask */
 
-        putreg32(fid1, priv->base + MPFS_CANFD_FILTER_C_VAL_OFFSET);
-        putreg32(fid2, priv->base + MPFS_CANFD_FILTER_C_MASK_OFFSET);
+        putreg32(fid1_trans, priv->base + MPFS_CANFD_FILTER_C_VAL_OFFSET);
+        putreg32(fid2_trans, priv->base + MPFS_CANFD_FILTER_C_MASK_OFFSET);
         break;
 
       case HW_FILTER_RANGE:
@@ -2183,8 +2204,8 @@ static void mpfs_can_add_hw_filter(struct mpfs_driver_s *priv,
 
         /* Set range filter low / high */
 
-        putreg32(fid1, priv->base + MPFS_CANFD_FILTER_RAN_LOW_OFFSET);
-        putreg32(fid2, priv->base + MPFS_CANFD_FILTER_RAN_HIGH_OFFSET);
+        putreg32(fid1_trans, priv->base + MPFS_CANFD_FILTER_RAN_LOW_OFFSET);
+        putreg32(fid2_trans, priv->base + MPFS_CANFD_FILTER_RAN_HIGH_OFFSET);
         break;
 
       default:
