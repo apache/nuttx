@@ -192,6 +192,7 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
 {
   char devname[32];
   int ret;
+  bool blocking;
 
   /* Register a new pipe device */
 
@@ -201,12 +202,27 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
       return ret;
     }
 
+  /* Check for the O_NONBLOCK bit on flags */
+
+  blocking = (flags & O_NONBLOCK) == 0;
+
   /* Get a write file descriptor */
 
-  ret = file_open(filep[1], devname, O_WRONLY | flags);
+  ret = file_open(filep[1], devname, O_WRONLY | O_NONBLOCK | flags);
   if (ret < 0)
     {
       goto errout_with_driver;
+    }
+
+  /* Clear O_NONBLOCK if it was set previously */
+
+  if (blocking)
+    {
+      ret = file_fcntl(filep[1], F_SETFL, flags & (~O_NONBLOCK));
+      if (ret < 0)
+        {
+          goto errout_with_driver;
+        }
     }
 
   /* Get a read file descriptor */
