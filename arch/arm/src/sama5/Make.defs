@@ -221,6 +221,10 @@ CHIP_CSRCS += sam_tickless.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_SFC), y)
+CHIP_CSRCS += sam_sfc.c
+endif
+
 ifeq ($(CONFIG_SAMA5_EBICS0_NAND),y)
 CHIP_CSRCS += sam_nand.c sam_pmecc.c sam_gf512.c sam_gf1024.c
 else

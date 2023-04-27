@@ -814,6 +814,7 @@ config SAMA5_ARM
 config SAMA5_FUSE
 	bool "Fuse Controller (FUSE)"
 	default n
+	depends on SAMA5_HAVE_FUSE
 
 config SAMA5_MPDDRC
 	bool "MPDDR controller (MPDDRC)"
