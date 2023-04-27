@@ -115,7 +115,7 @@ browser:
 
 After successfully built and flashed, connect the board to the Wi-Fi network::
 
-  $ nsh> wapi psk wlan0 mypasswd 1
+  $ nsh> wapi psk wlan0 mypasswd 3
   $ nsh> wapi essid wlan0 myssid 1
   $ nsh> renew wlan0
 
@@ -153,3 +153,6 @@ at runtime::
     nsh> wapi psk wlan0 mypasswd 3
     nsh> wapi essid wlan0 myssid 1
     nsh> renew wlan0
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi Station Mode <esp32_wi-fi_sta>`
+  for more information.

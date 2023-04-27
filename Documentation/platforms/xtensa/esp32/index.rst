@@ -290,6 +290,15 @@ the result by running ``ifconfig`` afterwards.
 
 .. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi
 
+.. tip:: Please check :doc:`wapi </applications/wapi/index>` documentation for more
+   information about its commands and arguments.
+
+.. note:: The ``wapi psk`` command on Station mode sets a security threshold. That
+   is, it enables connecting only to an equally or more secure network than the set
+   threshold. ``wapi psk wlan0 mypasswd 3`` sets a WPA2-PSK-secured network and
+   enables the device to connect to networks that are equally or more secure than
+   that (WPA3-SAE, for instance, would be eligible for connecting to).
+
 .. _esp32_wi-fi_softap:
 
 Wi-Fi SoftAP
@@ -309,6 +318,10 @@ to connect your smartphone or laptop to your board::
 In this case, you are creating the access point ``nuttxapp`` in your board and to
 connect to it on your smartphone you will be required to type the password ``mypasswd``
 using WPA2.
+
+.. tip:: Please check :doc:`wapi </applications/wapi/index>` documentation for more
+   information about its commands and arguments.
+
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Bluetooth
