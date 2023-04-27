@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBM_LIBMCS_WANT_COMPLEX
+	bool "libmcs complex support"
+	default y
+	---help---
+		complex support, will use complex.h

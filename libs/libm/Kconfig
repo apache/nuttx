@@ -39,6 +39,13 @@ config LIBM_NEWLIB
 	---help---
 		Math library from Newlib
 
+config LIBM_LIBMCS
+	bool "Math library from LibmCS"
+	depends on !ARCH_MATH_H
+	depends on ALLOW_BSD_COMPONENTS
+	---help---
+		Math library from libmcs
+
 config LIBM_OPENLIBM
 	bool "Math library from openlibm"
 	depends on !ARCH_MATH_H
@@ -59,4 +66,8 @@ endif
 
 if LIBM_NEWLIB
 source "libs/libm/newlib/Kconfig"
+endif
+
+if LIBM_LIBMCS
+source "libs/libm/libmcs/Kconfig"
 endif

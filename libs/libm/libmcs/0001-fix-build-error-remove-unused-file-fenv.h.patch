@@ -1,0 +1,68 @@
+From 84a14af9f858606a42fbdcd1f04af102594293d3 Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Thu, 23 Mar 2023 09:43:19 +0800
+Subject: [PATCH 1/3] fix build error: remove unused file fenv.h
+
+VELAPLATFO-6159
+
+fenv.h is unused, remove it or will have conflict with quickjs.c`s fenv.h
+
+(1)open menuconfig  (2)close math.h:build setup->Customize Header Files->math.h (2) select libmcs:Library Rountines->Select math library->Math Library fram LibmCS (3)build
+
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+Change-Id: I70496ce82ff2f9de9016f5c829daf9982fa32d45
+---
+ libmcs/libmcs/libm/include/fenv.h | 41 -----------------------------------------
+ 1 file changed, 41 deletions(-)
+ delete mode 100644 libm/include/fenv.h
+
+diff --git a/libmcs/libmcs/libm/include/fenv.h libmcs/libmcs/libm/include/fenv.h
+deleted file mode 100644
+index 169c85627..000000000
+--- a/libmcs/libmcs/libm/include/fenv.h
++++ /dev/null
+@@ -1,41 +0,0 @@
+-/* SPDX-License-Identifier: GTDGmbH */
+-/* Copyright 2020-2021 by GTD GmbH. */
+-
+-#ifndef LIBMCS_FENV_H
+-#define LIBMCS_FENV_H
+-
+-#error fenv.h/fenv.c shall not be used as is. They have no functionality \
+-       other than returning an error value and providing prototypes.     \
+-       If you, the user, want to use fenv you will have to implement the \
+-       features yourself (or copy them from somewhere). We can not       \
+-       provide these functionalities for you as their implementation is  \
+-       highly platform dependant.
+-
+-#ifdef __cplusplus
+-extern "C"{
+-#endif
+-
+-/* Floating-point Exceptions */
+-extern int feclearexcept(int);
+-extern int feraiseexcept(int);
+-extern int fegetexceptflag(fexcept_t *, int);
+-extern int fesetexceptflag(const fexcept_t *, int);
+-
+-/* Rounding Direction */
+-extern int fegetround();
+-extern int fesetround(int);
+-
+-/* Entire Environment */
+-extern int fegetenv(fenv_t *);
+-extern int fesetenv(const fenv_t *);
+-extern int feholdexcept(fenv_t *);
+-extern int feupdateenv(const fenv_t *);
+-
+-/* Other */
+-extern int fetestexcept(int);
+-
+-#ifdef __cplusplus
+-}
+-#endif
+-
+-#endif /* !LIBMCS_FENV_H */
+-- 
+2.39.1
+

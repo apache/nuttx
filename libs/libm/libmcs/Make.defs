@@ -1,0 +1,238 @@
+
+############################################################################
+# libs/libm/libmcs/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+LIBMCS_VERSION=1.2.0
+
+libmcs-$(LIBMCS_VERSION).zip:
+	$(call DOWNLOAD,https://gitlab.com/gtd-gmbh/libmcs/-/archive/$(LIBMCS_VERSION),libmcs-$(LIBMCS_VERSION).zip,libmcs.zip)
+
+libmcs/libmcs: libmcs-$(LIBMCS_VERSION).zip
+	$(Q) unzip -o libmcs.zip
+	$(Q) mv libmcs-$(LIBMCS_VERSION) libmcs/libmcs
+	$(Q) patch -p1 < libmcs/0001-fix-build-error-remove-unused-file-fenv.h.patch
+	$(Q) patch -p1 < libmcs/0002-fix-build-error-do-not-include-config.h.patch
+	$(Q) patch -p1 < libmcs/0003-fix-build-error-INFINITY-error-in-quickjs.c.patch
+	$(Q) touch $@
+
+ifeq ($(wildcard libmcs/libmcs/.git),)
+distclean::
+	$(call DELFILE, libmcs.zip)
+	$(call DELDIR, libmcs/libmcs)
+
+context:: libmcs/libmcs
+else
+distclean::
+context::
+endif
+
+VPATH += :libmcs/libmcs/libm/common
+VPATH += :libmcs/libmcs/libm/complexd
+VPATH += :libmcs/libmcs/libm/complexd/internal
+VPATH += :libmcs/libmcs/libm/complexf
+VPATH += :libmcs/libmcs/libm/complexf/internal
+VPATH += :libmcs/libmcs/libm/mathd
+VPATH += :libmcs/libmcs/libm/mathd/internal
+VPATH += :libmcs/libmcs/libm/mathf
+VPATH += :libmcs/libmcs/libm/mathf/internal
+
+CFLAGS += ${INCDIR_PREFIX}libmcs/libmcs/libm/common
+CFLAGS += ${INCDIR_PREFIX}libmcs/libmcs/libm/mathd/internal
+CFLAGS += ${INCDIR_PREFIX}libmcs/libmcs/libm/mathf/internal
+
+CSRCS = signgam.c \
+        acosd.c \
+        acoshd.c \
+        asind.c \
+        asinhd.c \
+        atan2d.c \
+        atand.c \
+        atanhd.c \
+        cbrtd.c \
+        ceild.c \
+        copysignd.c \
+        cosd.c \
+        coshd.c \
+        erfcd.c \
+        erfd.c \
+        exp2d.c \
+        expd.c \
+        expm1d.c \
+        fabsd.c \
+        fdimd.c \
+        floord.c \
+        fmad.c \
+        fmaxd.c \
+        fmind.c \
+        fmodd.c \
+        frexpd.c \
+        hypotd.c \
+        ilogbd.c \
+        fpclassifyd.c \
+        gammad.c \
+        signbitd.c \
+        trigd.c \
+        j0d.c \
+        j1d.c \
+        jnd.c \
+        ldexpd.c \
+        lgammad.c \
+        llrintd.c \
+        llroundd.c \
+        log10d.c \
+        log1pd.c \
+        log2d.c \
+        logbd.c \
+        logd.c \
+        lrintd.c \
+        lroundd.c \
+        modfd.c \
+        nand.c \
+        nearbyintd.c \
+        nextafterd.c \
+        nexttowardd.c \
+        powd.c \
+        remainderd.c \
+        remquod.c \
+        rintd.c \
+        roundd.c \
+        scalblnd.c \
+        scalbnd.c \
+        sind.c \
+        sinhd.c \
+        sqrtd.c \
+        tand.c \
+        tanhd.c \
+        tgammad.c \
+        truncd.c \
+        y0d.c \
+        y1d.c \
+        ynd.c \
+        acosf.c \
+        acoshf.c \
+        asinf.c \
+        asinhf.c \
+        atan2f.c \
+        atanf.c \
+        atanhf.c \
+        cbrtf.c \
+        ceilf.c \
+        copysignf.c \
+        cosf.c \
+        coshf.c \
+        erfcf.c \
+        erff.c \
+        exp2f.c \
+        expf.c \
+        expm1f.c \
+        fabsf.c \
+        fdimf.c \
+        floorf.c \
+        fmaf.c \
+        fmaxf.c \
+        fminf.c \
+        fmodf.c \
+        frexpf.c \
+        hypotf.c \
+        ilogbf.c \
+        fpclassifyf.c \
+        gammaf.c \
+        signbitf.c \
+        trigf.c \
+        ldexpf.c \
+        lgammaf.c \
+        llrintf.c \
+        llroundf.c \
+        log10f.c \
+        log1pf.c \
+        log2f.c \
+        logbf.c \
+        logf.c \
+        lrintf.c \
+        lroundf.c \
+        modff.c \
+        nanf.c \
+        nearbyintf.c \
+        nextafterf.c \
+        nexttowardf.c \
+        powf.c \
+        remainderf.c \
+        remquof.c \
+        rintf.c \
+        roundf.c \
+        scalblnf.c \
+        scalbnf.c \
+        sinf.c \
+        sinhf.c \
+        sqrtf.c \
+        tanf.c \
+        tanhf.c \
+        tgammaf.c \
+        truncf.c
+
+ifeq ($(CONFIG_LIBM_LIBMCS_WANT_COMPLEX),y)
+CFLAGS += -DLIBMCS_WANT_COMPLEX
+CSRCS += cabsd.c \
+         cacosd.c \
+         cacoshd.c \
+         cargd.c \
+         casind.c \
+         casinhd.c \
+         catand.c \
+         catanhd.c \
+         ccosd.c \
+         ccoshd.c \
+         cexpd.c \
+         cimagd.c \
+         clogd.c \
+         conjd.c \
+         cpowd.c \
+         cprojd.c \
+         creald.c \
+         csind.c \
+         csinhd.c \
+         csqrtd.c \
+         ctand.c \
+         ctanhd.c \
+         ctrigd.c \
+         cabsf.c \
+         cacosf.c \
+         cacoshf.c \
+         cargf.c \
+         casinf.c \
+         casinhf.c \
+         catanf.c \
+         catanhf.c \
+         ccosf.c \
+         ccoshf.c \
+         cexpf.c \
+         cimagf.c \
+         clogf.c \
+         conjf.c \
+         cpowf.c \
+         cprojf.c \
+         crealf.c \
+         csinf.c \
+         csinhf.c \
+         csqrtf.c \
+         ctanf.c \
+         ctanhf.c \
+         ctrigf.c
+endif
