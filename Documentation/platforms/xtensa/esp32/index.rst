@@ -272,6 +272,8 @@ following in ``scripts/esp32.cfg``::
   # Only configure the APP CPU
   #set ESP32_ONLYCPU 2
 
+.. _esp32_wi-fi_sta:
+
 Wi-Fi
 =====
 
@@ -287,6 +289,8 @@ password. IP address is obtained via DHCP using ``renew`` command. You can check
 the result by running ``ifconfig`` afterwards.
 
 .. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi
+
+.. _esp32_wi-fi_softap:
 
 Wi-Fi SoftAP
 ============
