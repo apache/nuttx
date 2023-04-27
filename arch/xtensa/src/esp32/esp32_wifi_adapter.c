@@ -4177,6 +4177,11 @@ static int esp_wifi_auth_trans(uint32_t wifi_auth)
         auth_mode = IW_AUTH_WPA_VERSION_WPA2;
         break;
 
+      case WIFI_AUTH_WPA3_PSK:
+      case WIFI_AUTH_WPA2_WPA3_PSK:
+        auth_mode = IW_AUTH_WPA_VERSION_WPA3;
+        break;
+
       default:
         wlerr("Failed to transfer wireless authmode: %d", wifi_auth);
         break;
@@ -5576,6 +5581,10 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
                     wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
                     break;
 
+                  case IW_AUTH_WPA_VERSION_WPA3:
+                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA3_PSK;
+                    break;
+
                   default:
                     wlerr("Invalid wpa version %" PRId32 "\n",
                           iwr->u.param.value);
@@ -5599,12 +5608,8 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
                     break;
 
                   case IW_AUTH_CIPHER_TKIP:
-                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA_PSK;
-                    break;
-
                   case IW_AUTH_CIPHER_CCMP:
                   case IW_AUTH_CIPHER_AES_CMAC:
-                    wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
                     break;
 
                   default:
@@ -6362,40 +6367,12 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
       /* Clear the password field and copy the user password to it */
 
       memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
-      if (len)
+      if (ext->alg != IW_ENCODE_ALG_NONE)
         {
-          memcpy(wifi_cfg.ap.password, pdata, len);
-          switch (ext->alg)
-            {
-              case IW_ENCODE_ALG_NONE:
-                wifi_cfg.ap.authmode = WIFI_AUTH_OPEN;
-                break;
-
-              case IW_ENCODE_ALG_WEP:
-                wifi_cfg.ap.authmode = WIFI_AUTH_WEP;
-                break;
-
-              case IW_ENCODE_ALG_TKIP:
-                wifi_cfg.ap.authmode = WIFI_AUTH_WPA_PSK;
-                break;
-
-              case IW_ENCODE_ALG_CCMP:
-                wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
-                break;
-
-              case IW_ENCODE_ALG_PMK:
-              case IW_ENCODE_ALG_AES_CMAC:
-                wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
-                break;
-
-              default:
-                wlerr("Failed to transfer wireless authmode: %d",
-                      ext->alg);
-                return -EINVAL;
-            }
+          memcpy(wifi_cfg.sta.password, pdata, len);
         }
 
-        if (g_softap_started)
+      if (g_softap_started)
         {
           ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
           if (ret)
@@ -6674,12 +6651,8 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
                     break;
 
                   case IW_AUTH_CIPHER_TKIP:
-                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA_PSK;
-                    break;
-
                   case IW_AUTH_CIPHER_CCMP:
                   case IW_AUTH_CIPHER_AES_CMAC:
-                    wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
                     break;
 
                   default:
