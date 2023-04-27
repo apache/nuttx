@@ -853,6 +853,7 @@ config ARCH_CORTEXR7
 config ARCH_ARMV8M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM23
 	bool

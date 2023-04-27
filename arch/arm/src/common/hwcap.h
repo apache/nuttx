@@ -57,6 +57,7 @@
 #define HWCAP_FPSP      "fpsp"      /* Single-precision instructions support */
 #define HWCAP_FPDP      "fpdp"      /* Double-precision instructions support */
 #define HWCAP_FPV5      "fpv5"      /* Floating-point extension version */
+#define HWCAP_MVE       "mve"       /* M-profile vector extension */
 
 /* Hardware capabilities added form armv8 */
 
