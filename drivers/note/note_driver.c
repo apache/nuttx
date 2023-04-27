@@ -165,7 +165,7 @@ FAR static struct note_driver_s *
   g_note_drivers[CONFIG_DRIVERS_NOTE_MAX + 1] =
 {
 #ifdef CONFIG_DRIVERS_NOTERAM
-  &g_noteram_driver,
+  (FAR struct note_driver_s *)&g_noteram_driver,
 #endif
 #ifdef CONFIG_DRIVERS_NOTELOG
   &g_notelog_driver,
