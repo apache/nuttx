@@ -1,0 +1,87 @@
+From 6efff584737164533272e8888e945c60b671139c Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Thu, 23 Mar 2023 09:54:59 +0800
+Subject: [PATCH 3/3] fix build error: INFINITY error in quickjs.c
+
+VELAPLATFO-6159
+
+quickjs/quickjs.c:40035:45: error: initializer element is not constant 40035 | JS_PROP_DOUBLE_DEF("POSITIVE_INFINITY", INFINITY, 0 )
+
+(1)open menuconfig  (2)close math.h:build setup->Customize Header Files->math.h (2) select libmcs:Library Rountines->Select math library->Math Library fram LibmCS (3)build
+
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+Change-Id: I6d70b7152e047b893429f49abc3c6c0e191735a4
+---
+ libmcs/libmcs/Makefile.in                                          |  1 -
+ .../2000_misc_internal.rst                           |  1 -
+ libmcs/libmcs/libm/common/tools.c                                  |  7 -------
+ libmcs/libmcs/libm/include/math.h                                  | 12 ++++++------
+ 4 files changed, 6 insertions(+), 15 deletions(-)
+ delete mode 100644 libm/common/tools.c
+
+diff --git a/libmcs/libmcs/Makefile.in libmcs/libmcs/Makefile.in
+index 6e3bca4c1..a12073c6f 100644
+--- a/libmcs/libmcs/Makefile.in
++++ libmcs/libmcs/Makefile.in
+@@ -81,7 +81,6 @@ CSRC =  libm/complexd/cabsd.c \
+         libm/complexf/internal/ctrigf.c
+ 
+ SRC =   libm/common/signgam.c \
+-        libm/common/tools.c \
+         libm/mathd/acosd.c \
+         libm/mathd/acoshd.c \
+         libm/mathd/asind.c \
+diff --git a/libmcs/libmcs/doc/sdd/5_Software_Design/4_Software_Component_Design_Aspects_Of_Each_Component/2000_misc_internal.rst libmcs/libmcs/doc/sdd/5_Software_Design/4_Software_Component_Design_Aspects_Of_Each_Component/2000_misc_internal.rst
+index da1dd536b..f6bda14da 100644
+--- a/libmcs/libmcs/doc/sdd/5_Software_Design/4_Software_Component_Design_Aspects_Of_Each_Component/2000_misc_internal.rst
++++ libmcs/libmcs/doc/sdd/5_Software_Design/4_Software_Component_Design_Aspects_Of_Each_Component/2000_misc_internal.rst
+@@ -28,7 +28,6 @@ Source Code Files
+ ^^^^^^^^^^^^^^^^^
+ 
+ * libm/common/tools.h
+-* libm/common/tools.c
+ 
+ References
+ ^^^^^^^^^^
+diff --git a/libmcs/libmcs/libm/common/tools.c libmcs/libmcs/libm/common/tools.c
+deleted file mode 100644
+index 652dfe9f3..000000000
+--- a/libmcs/libmcs/libm/common/tools.c
++++ /dev/null
+@@ -1,7 +0,0 @@
+-/* SPDX-License-Identifier: GTDGmbH */
+-/* Copyright 2020-2021 by GTD GmbH. */
+-
+-#include "tools.h"
+-
+-const float __inff = 1.0f/0.0f;
+-const double __infd = 1.0/0.0;
+diff --git a/libmcs/libmcs/libm/include/math.h libmcs/libmcs/libm/include/math.h
+index b0f6427df..8cfb61f6b 100644
+--- a/libmcs/libmcs/libm/include/math.h
++++ libmcs/libmcs/libm/include/math.h
+@@ -35,15 +35,15 @@ typedef double double_t;
+ #define M_SQRT2             1.41421356237309504880
+ #define M_SQRT1_2           0.70710678118654752440
+ 
+-#define HUGE_VAL            (__infd)
+-#define HUGE_VALF           (__inff)
++#ifndef _HUGE_ENUF
++#define _HUGE_ENUF (1e+300)  /* _HUGE_ENUF*_HUGE_ENUF must overflow */
++#endif
++
++#define HUGE_VAL            ((double)(_HUGE_ENUF * _HUGE_ENUF))
++#define HUGE_VALF           ((float)(_HUGE_ENUF * _HUGE_ENUF))
+ #define HUGE_VALL           ((long double) HUGE_VAL)
+ #define INFINITY            HUGE_VALF
+ 
+-/* Global constants that contain infinities. */
+-extern const float __inff;
+-extern const double __infd;
+-
+ #define NAN                 (nanf(""))
+ 
+ #define FP_NAN              0
+-- 
+2.39.1
+
