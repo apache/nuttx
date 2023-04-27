@@ -34,6 +34,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/fs/fs.h>
@@ -648,4 +649,63 @@ int noteram_register(void)
 {
   return register_driver("/dev/note/ram", &g_noteram_fops, 0666,
                          &g_noteram_driver);
+}
+
+/****************************************************************************
+ * Name: noteram_initialize
+ *
+ * Description:
+ *   Register a serial driver at /dev/note/ram that can be used by an
+ *   application to read data from the circular note buffer.
+ *
+ * Input Parameters:
+ *  devpath: The path of the Noteram device
+ *  bufsize: The size of the circular buffer
+ *  overwrite: The overwrite mode
+ *
+ * Returned Value:
+ *   Zero on succress. A negated errno value is returned on a failure.
+ *
+ ****************************************************************************/
+
+FAR struct note_driver_s *
+noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
+{
+  FAR struct noteram_driver_s *drv;
+  int ret;
+
+  drv = (FAR struct noteram_driver_s *)kmm_malloc(sizeof(*drv) + bufsize);
+  if (drv == NULL)
+    {
+      return NULL;
+    }
+
+  drv->driver.ops = &g_noteram_ops;
+  drv->ni_bufsize = bufsize;
+  drv->ni_buffer = (FAR uint8_t *)(drv + 1);
+  drv->ni_overwrite = overwrite;
+  drv->ni_head = 0;
+  drv->ni_tail = 0;
+  drv->ni_read = 0;
+
+  ret = note_driver_register(&drv->driver);
+  if (ret < 0)
+    {
+      kmm_free(drv);
+      return NULL;
+    }
+
+  if (devpath == NULL)
+    {
+      return &drv->driver;
+    }
+
+  ret = register_driver(devpath, &g_noteram_fops, 0666, drv);
+  if (ret < 0)
+    {
+      kmm_free(drv);
+      return NULL;
+    }
+
+  return &drv->driver;
 }

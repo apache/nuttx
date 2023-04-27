@@ -117,6 +117,9 @@ extern struct noteram_driver_s g_noteram_driver;
 
 #ifdef CONFIG_DRIVERS_NOTERAM
 int noteram_register(void);
+
+FAR struct note_driver_s *
+noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite);
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
