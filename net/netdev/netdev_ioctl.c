@@ -920,13 +920,13 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGLIFMTU:  /* Get MTU size */
       case SIOCGIFMTU:   /* Get MTU size */
-        req->ifr_mtu = NETDEV_PKTSIZE(dev);
+        req->ifr_mtu = NETDEV_PKTSIZE(dev) - dev->d_llhdrlen;
         break;
       case SIOCSIFMTU:   /* Set MTU size */
         dev = netdev_ifr_dev(req);
         if (dev)
           {
-            NETDEV_PKTSIZE(dev) = req->ifr_mtu;
+            NETDEV_PKTSIZE(dev) = req->ifr_mtu + dev->d_llhdrlen;
           }
         break;
 
