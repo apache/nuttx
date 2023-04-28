@@ -26,11 +26,13 @@
 #include <sys/types.h>
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRLEN
+#if !defined(CONFIG_LIBC_ARCH_STRLEN) && defined(LIBC_BUILD_STRING)
 #undef strlen /* See mm/README.txt */
 size_t strlen(const char *s)
 {

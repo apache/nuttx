@@ -32,60 +32,14 @@ CSRCS += lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c lib_strsignal.c
 CSRCS += lib_index.c lib_rindex.c lib_timingsafe_bcmp.c lib_strverscmp.c
 CSRCS += lib_mempcpy.c lib_rawmemchr.c lib_bzero.c
 
-ifneq ($(CONFIG_LIBC_ARCH_MEMCHR),y)
-CSRCS += lib_memchr.c
-endif
+CSRCS += lib_memchr.c lib_memcmp.c lib_memmove.c lib_memset.c
+CSRCS += lib_strchr.c lib_strcmp.c lib_strcpy.c lib_strlcat.c
+CSRCS += lib_strlcpy.c lib_strlen.c lib_strncpy.c lib_strnlen.c
 
-ifneq ($(CONFIG_LIBC_ARCH_MEMCMP),y)
-CSRCS += lib_memcmp.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 ifeq ($(CONFIG_MEMCPY_VIK),y)
 CSRCS += lib_vikmemcpy.c
 else
 CSRCS += lib_memcpy.c
-endif
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_MEMMOVE),y)
-CSRCS += lib_memmove.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_MEMSET),y)
-CSRCS += lib_memset.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRCHR),y)
-CSRCS += lib_strchr.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRCMP),y)
-CSRCS += lib_strcmp.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRCPY),y)
-CSRCS += lib_strcpy.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRLCAT),y)
-CSRCS += lib_strlcat.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRLCPY),y)
-CSRCS += lib_strlcpy.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRLEN),y)
-CSRCS += lib_strlen.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRNCPY),y)
-CSRCS += lib_strncpy.c
-endif
-
-ifneq ($(CONFIG_LIBC_ARCH_STRNLEN),y)
-CSRCS += lib_strnlen.c
 endif
 
 ifeq ($(CONFIG_LIBC_LOCALE),y)

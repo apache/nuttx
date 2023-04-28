@@ -29,6 +29,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 	.arm
 	.syntax unified
 	.global memset
@@ -144,3 +148,5 @@ memset:
 	strbcs      r1, [r3], #1
 	bx          lr
 	.size memset, . - memset
+
+#endif
