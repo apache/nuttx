@@ -416,7 +416,16 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
 
           case STATE_DO:
 
-            if ((priv->td_lflag & ECHO) != 0 && ch == TELNET_ECHO)
+            if (ch == TELNET_SGA)
+              {
+                /* Reply with a WONT, that means we will not work in
+                 * character mode and stay in line mode,
+                 * it's OK for modern rich featured telnet clients.
+                 */
+
+                telnet_sendopt(priv, TELNET_WONT, ch);
+              }
+            else if ((priv->td_lflag & ECHO) != 0 && ch == TELNET_ECHO)
               {
                 telnet_sendopt(priv, TELNET_WONT, ch);
               }
