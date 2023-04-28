@@ -30,6 +30,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -46,7 +48,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_MEMSET
+#if !defined(CONFIG_LIBC_ARCH_MEMSET) && defined(LIBC_BUILD_STRING)
 #undef memset /* See mm/README.txt */
 no_builtin("memset")
 FAR void *memset(FAR void *s, int c, size_t n)

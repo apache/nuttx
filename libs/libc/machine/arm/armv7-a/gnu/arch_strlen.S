@@ -62,6 +62,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 #include "acle-compat.h"
 
 	.macro def_fn f p2align=0
@@ -182,3 +186,5 @@ def_fn	strlen p2align=6
 	mov	const_0, #0
 	b	.Lstart_realigned
 	.size	strlen, . - strlen
+
+#endif

@@ -59,6 +59,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 /* Assumptions:
  *
  * ARMv8-a, AArch64, unaligned accesses.
@@ -194,3 +198,5 @@ L(byte_loop):
 	ret
 
 	.size	memcmp, . - memcmp
+
+#endif

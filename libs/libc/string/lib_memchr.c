@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -44,6 +46,7 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_LIBC_ARCH_MEMCHR) && defined(LIBC_BUILD_STRING)
 #undef memchr /* See mm/README.txt */
 FAR void *memchr(FAR const void *s, int c, size_t n)
 {
@@ -61,3 +64,4 @@ FAR void *memchr(FAR const void *s, int c, size_t n)
 
   return NULL;
 }
+#endif
