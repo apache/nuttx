@@ -13,6 +13,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 .text
 .global memset
 .type	memset, @function
@@ -104,3 +108,5 @@ memset:
 	bleu a2, t1, .Ltiny
 	j .Laligned
 	.size	memset, .-memset
+
+#endif

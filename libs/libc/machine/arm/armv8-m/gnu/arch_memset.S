@@ -29,6 +29,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 #include "arm_asm.h"
 
 	.thumb
@@ -129,3 +133,5 @@ memset:
 	.cantunwind
 	.fnend
 	.size memset, . - memset
+
+#endif

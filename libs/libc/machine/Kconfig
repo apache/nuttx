@@ -137,6 +137,30 @@ config LIBC_ARCH_ELF_64BIT
 	default n
 	depends on LIBC_ARCH_ELF
 
+config LIBC_PREVENT_STRING_KERNEL
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc from being built and linked
+		in the kernel, including NuttX's software-defined version of the libc
+		or any other architecture-specific version of it. The ROM-defined
+		version should be linked instead. This option is particularly useful
+		when it's required that the ROM-defined libc to be used by the kernel
+		(for accessing some driver resource, for instance) but the userspace
+		is forbidden to use the same ROM-defined versions. In this case,
+		NuttX's software-defined version of the libc or arch-specific
+		assembly version is built instead.
+
+config LIBC_PREVENT_STRING_USER
+	bool
+	default n
+	---help---
+		Prevent any implementation of the libc from being built and linked
+		in the userspace, including NuttX's software-defined version of the
+		libc or any other architecture-specific version of it. A ROM-defined
+		version of the libc may be linked to the userspace by the linker.
+
+
 # One or more the of above may be selected by architecture specific logic
 
 if ARCH_ARM

@@ -29,6 +29,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 /* Assumptions:
  *
  * ARMv8-a, AArch64
@@ -177,3 +181,5 @@ def_fn strrchr
 	ret
 
 	.size	strrchr, . - strrchr
+
+#endif

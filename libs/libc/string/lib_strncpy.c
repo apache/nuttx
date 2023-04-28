@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -51,7 +53,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRNCPY
+#if !defined(CONFIG_LIBC_ARCH_STRNCPY) && defined(LIBC_BUILD_STRING)
 #undef strncpy /* See mm/README.txt */
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
