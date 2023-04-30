@@ -798,6 +798,13 @@ static int nand_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case MTDIOC_ERASESECTORS:
+        {
+          FAR struct mtd_erase_s *erase = (FAR struct mtd_erase_s *)arg;
+          ret = nand_erase(dev, erase->startblock, erase->nblocks);
+        }
+        break;
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;
