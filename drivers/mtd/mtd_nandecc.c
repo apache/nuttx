@@ -147,7 +147,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
         return -EUCLEAN;
 
       default:
-      ferr("ERROR: Block=%d page=%d Unrecoverable error: %d\n",
+      ferr("ERROR: Block=%" PRIdOFF " page=%d Unrecoverable error: %d\n",
            block, page, ret);
       return -EBADMSG;
     }
