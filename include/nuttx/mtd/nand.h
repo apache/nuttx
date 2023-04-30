@@ -88,6 +88,23 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nand_raw_initialize
+ *
+ * Description:
+ *   Initialize NAND without probing.
+ *
+ * Input Parameters:
+ *   raw      - Lower-half, raw NAND FLASH interface
+ *
+ * Returned Value:
+ *   A non-NULL MTD driver instance is returned on success.  NULL is
+ *   returned on any failaure.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *nand_raw_initialize(FAR struct nand_raw_s *raw);
+
+/****************************************************************************
  * Name: nand_initialize
  *
  * Description:

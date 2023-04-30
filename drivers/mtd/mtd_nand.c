@@ -818,6 +818,57 @@ static int nand_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nand_raw_initialize
+ *
+ * Description:
+ *   Initialize NAND without probing.
+ *
+ * Input Parameters:
+ *   raw      - Lower-half, raw NAND FLASH interface
+ *
+ * Returned Value:
+ *   A non-NULL MTD driver instance is returned on success.  NULL is
+ *   returned on any failaure.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *nand_raw_initialize(FAR struct nand_raw_s *raw)
+{
+  FAR struct nand_dev_s *nand;
+
+  /* Allocate an NAND MTD device structure */
+
+  nand = (FAR struct nand_dev_s *)kmm_zalloc(sizeof(struct nand_dev_s));
+  if (!nand)
+    {
+      ferr("ERROR: Failed to allocate the NAND MTD device structure\n");
+      return NULL;
+    }
+
+  /* Initialize the NAND MTD device structure */
+
+  nand->mtd.erase  = nand_erase;
+  nand->mtd.bread  = nand_bread;
+  nand->mtd.bwrite = nand_bwrite;
+  nand->mtd.ioctl  = nand_ioctl;
+  nand->raw        = raw;
+
+  nxmutex_init(&nand->lock);
+
+#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_INFO) && \
+    defined(CONFIG_DEBUG_FS)
+
+  /* Scan the device for bad blocks */
+
+  nand_devscan(nand);
+#endif
+
+  /* Return the implementation-specific state structure as the MTD device */
+
+  return &nand->mtd;
+}
+
+/****************************************************************************
  * Name: nand_initialize
  *
  * Description:
@@ -834,7 +885,6 @@ static int nand_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
 FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 {
-  FAR struct nand_dev_s *nand;
   struct onfi_pgparam_s onfi;
   int ret;
 
@@ -926,34 +976,5 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
                                                            true);
     }
 
-  /* Allocate an NAND MTD device structure */
-
-  nand = (FAR struct nand_dev_s *)kmm_zalloc(sizeof(struct nand_dev_s));
-  if (!nand)
-    {
-      ferr("ERROR: Failed to allocate the NAND MTD device structure\n");
-      return NULL;
-    }
-
-  /* Initialize the NAND MTD device structure */
-
-  nand->mtd.erase  = nand_erase;
-  nand->mtd.bread  = nand_bread;
-  nand->mtd.bwrite = nand_bwrite;
-  nand->mtd.ioctl  = nand_ioctl;
-  nand->raw        = raw;
-
-  nxmutex_init(&nand->lock);
-
-#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_INFO) && \
-    defined(CONFIG_DEBUG_FS)
-
-    /* Scan the device for bad blocks */
-
-  nand_devscan(nand);
-#endif
-
-  /* Return the implementation-specific state structure as the MTD device */
-
-  return &nand->mtd;
+  return nand_raw_initialize(raw);
 }
