@@ -37,9 +37,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mtd/nand_config.h>
 
-#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -372,7 +370,8 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
  *
  ****************************************************************************/
 
-void hamming_compute256x(FAR const uint8_t *data, size_t size, uint8_t *code)
+void hamming_compute256x(FAR const uint8_t *data, size_t size,
+                         FAR uint8_t *code)
 {
   ssize_t remaining = (ssize_t)size;
   DEBUGASSERT((size & 0xff) == 0);
