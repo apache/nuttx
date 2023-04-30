@@ -355,7 +355,7 @@ static int nand_eraseblock(FAR struct nand_dev_s *nand, off_t block,
   DEBUGASSERT(nand && nand->raw);
 
 #ifdef CONFIG_MTD_NAND_BLOCKCHECK
-  if (scrub)
+  if (!scrub)
     {
       /* Check block status */
 
