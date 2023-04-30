@@ -549,6 +549,7 @@ static ssize_t nand_bread(FAR struct mtd_dev_s *dev, off_t startpage,
   FAR struct nand_dev_s *nand = (FAR struct nand_dev_s *)dev;
   FAR struct nand_raw_s *raw;
   FAR struct nand_model_s *model;
+  bool fixedecc = false;
   unsigned int pagesperblock;
   unsigned int page;
   uint16_t pagesize;
@@ -600,7 +601,11 @@ static ssize_t nand_bread(FAR struct mtd_dev_s *dev, off_t startpage,
       /* Read the next page from NAND */
 
       ret = nand_readpage(nand, block, page, buffer);
-      if (ret < 0)
+      if (ret == -EUCLEAN)
+        {
+          fixedecc = true;
+        }
+      else if (ret < 0)
         {
           ferr("ERROR: nand_readpage failed block=%ld page=%d: %d\n",
                (long)block, page, ret);
@@ -624,7 +629,7 @@ static ssize_t nand_bread(FAR struct mtd_dev_s *dev, off_t startpage,
     }
 
   nxmutex_unlock(&nand->lock);
-  return npages;
+  return fixedecc ? -EUCLEAN : npages;
 
 errout_with_lock:
   nxmutex_unlock(&nand->lock);
