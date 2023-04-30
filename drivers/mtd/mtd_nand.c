@@ -790,6 +790,14 @@ static int nand_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = 0xff;
+          ret = OK;
+        }
+        break;
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;
