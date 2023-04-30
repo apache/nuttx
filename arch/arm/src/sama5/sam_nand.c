@@ -1945,8 +1945,8 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t coladdr;
   int ret;
 
-  finfo("block=%d page=%d data=%p spare=%p\n",
-        (int)block, page, data, spare);
+  finfo("block=%" PRIdOFF " page=%d data=%p spare=%p\n",
+        block, page, data, spare);
   DEBUGASSERT(priv && (data || spare));
 
   /* Get page and spare sizes */
@@ -2190,8 +2190,8 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t rowaddr;
   int ret = OK;
 
-  finfo("block=%d page=%d data=%p spare=%p\n",
-        (int)block, page, data, spare);
+  finfo("block=%" PRIdOFF " page=%d data=%p spare=%p\n",
+        block, page, data, spare);
 
   /* Get page and spare sizes */
 

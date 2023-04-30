@@ -37,7 +37,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mtd/nand_config.h>
 
 #include <nuttx/mtd/nand_scheme.h>
 #include <nuttx/mtd/nand_model.h>
@@ -49,8 +48,8 @@
 /* List of NandFlash models which can be recognized by the software */
 
 /****************************************************************************
- *  ID     OPTIONS             PAGE  SPARE  DEV  BLOCK | SCHEME
- *                             SIZE  SIZE   SIZE  SIZE  |
+ *  ID     OPTIONS             PAGE SPARE DEV  BLOCK | SCHEME
+ *                             SIZE SIZE  SIZE SIZE  |
  ****************************************************************************/
 
 const struct nand_model_s g_nandmodels[NAND_NMODELS] =

@@ -44,9 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/mtd/mtd.h>
-#include <nuttx/mtd/nand_raw.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -108,7 +105,7 @@ extern "C"
 
 void hamming_compute256x(FAR const uint8_t *data,
                          size_t size,
-                         uint8_t *code);
+                         FAR uint8_t *code);
 
 /****************************************************************************
  * Name: hamming_verify256x

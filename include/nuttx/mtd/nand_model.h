@@ -141,13 +141,13 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
  *   offset  Stores the byte offset inside the first accessed page.
  *
  * Returned Value:
- *   OK on success; -EPIPE on failure.
+ *   OK on success; -ESPIPE on failure.
  *
  ****************************************************************************/
 
 int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
-                        size_t size, FAR off_t *block, off_t *page,
-                        off_t *offset);
+                        size_t size, FAR off_t *block, FAR off_t *page,
+                        FAR off_t *offset);
 
 /****************************************************************************
  * Name: nandmodel_getscheme

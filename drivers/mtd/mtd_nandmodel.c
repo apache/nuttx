@@ -37,15 +37,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mtd/nand_config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/mtd/nand.h>
 #include <nuttx/mtd/nand_model.h>
 
 /****************************************************************************
@@ -155,6 +151,7 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
               finfo("  pagesize:  %d (B)\n",  model->pagesize);
               finfo("  options:   0x%02x\n",  model->options);
             }
+
           break;
         }
     }
@@ -181,13 +178,13 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
  *   offset  Stores the byte offset inside the first accessed page.
  *
  * Returned Value:
- *   OK on success; -EPIPE on failure.
+ *   OK on success; -ESPIPE on failure.
  *
  ****************************************************************************/
 
 int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
-                        size_t size, FAR off_t *block, off_t *page,
-                        off_t *offset)
+                        size_t size, FAR off_t *block, FAR off_t *page,
+                        FAR off_t *offset)
 {
   size_t blocksize;
   size_t pagesize;
