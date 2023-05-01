@@ -2084,12 +2084,12 @@ static int enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+  /* #warning "Multicast MAC support not implemented" */
 
   /* Un-lock the SPI bus */
 
   enc_unlock(priv);
-  return OK;
+  return -ENOSYS;
 }
 #endif
 
@@ -2122,12 +2122,12 @@ static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
-#warning "Multicast MAC support not implemented"
+  /* #warning "Multicast MAC support not implemented" */
 
   /* Un-lock the SPI bus */
 
   enc_unlock(priv);
-  return OK;
+  return -ENOSYS;
 }
 #endif
 
