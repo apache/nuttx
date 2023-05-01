@@ -85,7 +85,7 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
        *  Need to pass the meta data and the IOB through the callback.
        */
 
-#warning Missing logic
+      /* #warning Missing logic */
 
       /* Perform the application callback */
 

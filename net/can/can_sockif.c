@@ -494,7 +494,7 @@ static int can_close(FAR struct socket *psock)
     {
       /* Yes... inform user-space daemon of socket close. */
 
-#warning Missing logic
+      /* #warning Missing logic */
 
       /* Free the connection structure */
 

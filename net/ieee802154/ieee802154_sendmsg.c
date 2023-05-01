@@ -292,7 +292,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
 
   /* Make sure that this is the driver to which the socket is connected. */
 
-#warning Missing logic
+  /* #warning Missing logic */
 
   pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
