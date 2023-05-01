@@ -225,7 +225,7 @@ static uint16_t
 
   /* Make sure that this is the driver to which the socket is bound. */
 
-#warning Missing logic
+  /* #warning Missing logic */
 
   pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
