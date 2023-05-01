@@ -40,14 +40,10 @@
  ****************************************************************************/
 
 #if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
-
 float rintf(float x)
 {
   float result;
   asm volatile ("vrintx.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
-
-#else
-#  warning rintf() not built
 #endif

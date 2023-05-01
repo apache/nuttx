@@ -40,14 +40,10 @@
  ****************************************************************************/
 
 #if __ARM_ARCH >= 8 && (__ARM_FP & 0x8) && !defined (__SOFTFP__)
-
 double round(double x)
 {
   double result;
   asm volatile ("vrinta.f64\t%P0, %P1" : "=w" (result) : "w" (x));
   return result;
 }
-
-#else
-#  warning round() not built
 #endif

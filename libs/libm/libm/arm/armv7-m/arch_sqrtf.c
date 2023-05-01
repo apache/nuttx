@@ -30,14 +30,10 @@
  ****************************************************************************/
 
 #if (__ARM_ARCH >= 7) && (__ARM_FP >= 4)
-
 float sqrtf(float x)
 {
   float result;
   asm volatile ("vsqrt.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
-
-#else
-#  warning sqrtf() not built
 #endif

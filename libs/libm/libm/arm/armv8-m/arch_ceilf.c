@@ -40,14 +40,10 @@
  ****************************************************************************/
 
 #if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
-
 float ceilf(float x)
 {
   float result;
   asm volatile("vrintp.f32\t%0, %1" : "=t"(result) : "t"(x));
   return result;
 }
-
-#else
-#  warning ceilf() not built
 #endif
