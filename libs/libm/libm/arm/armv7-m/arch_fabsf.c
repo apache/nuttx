@@ -30,14 +30,10 @@
  ****************************************************************************/
 
 #if (__ARM_ARCH >= 7) && (__ARM_FP >= 4)
-
 float fabsf(float x)
 {
   float result;
   asm volatile ("vabs.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
-
-#else
-#  warning fabsf() not built
 #endif

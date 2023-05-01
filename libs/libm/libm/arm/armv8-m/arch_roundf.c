@@ -40,14 +40,10 @@
  ****************************************************************************/
 
 #if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
-
 float roundf(float x)
 {
   float result;
   asm volatile ("vrinta.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
-
-#else
-#  warning roundf() not built
 #endif
