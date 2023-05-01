@@ -223,10 +223,6 @@ void net_chksum_adjust(FAR uint16_t *chksum,
                        FAR const uint16_t *optr, ssize_t olen,
                        FAR const uint16_t *nptr, ssize_t nlen)
 {
-#ifdef CONFIG_ENDIAN_BIG
-#  warning "Not verified on big-endian yet."
-#endif
-
   int32_t x;
   int32_t oldval;
   int32_t newval;
