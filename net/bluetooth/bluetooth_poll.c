@@ -87,7 +87,7 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
        * REVISIT: Need to pass the meta data and the IOB through the callback
        */
 
-#warning Missing logic
+      /* #warning Missing logic */
 
       /* Perform the application callback */
 
