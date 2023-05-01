@@ -171,6 +171,7 @@ void   rewind(FAR FILE *stream);
 
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
+void   setbuffer(FAR FILE *stream, FAR char *buf, size_t size);
 
 int    ungetc(int c, FAR FILE *stream);
 
