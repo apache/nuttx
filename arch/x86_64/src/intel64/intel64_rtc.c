@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/x86_64/src/intel64/intel64_rtc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -36,11 +36,11 @@
 
 #include "x86_64_internal.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 /* This is a hacky implementation based on TSC, we only support Hi-RES mode */
 
@@ -54,33 +54,33 @@
 #define NS_PER_MSEC             1000000UL
 #define NS_PER_SEC              1000000000UL
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static unsigned long rtc_freq;
 static unsigned long rtc_overflow;
 static unsigned long rtc_last;
 static unsigned long rtc_overflows;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static unsigned long rtc_read(void)
 {
@@ -96,16 +96,16 @@ static unsigned long rtc_read(void)
   return tmr;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence.
  *
  * Input Parameters:
  *   None
@@ -113,7 +113,7 @@ static unsigned long rtc_read(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
@@ -123,13 +123,13 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
- *   Get the current time from the high resolution RTC clock/counter.  This interface
- *   is only supported by the high-resolution RTC/counter hardware implementation.
- *   It is used to replace the system timer.
+ *   Get the current time from the high resolution RTC clock/counter.
+ *   This interface is only supported by the high-resolution RTC/counter
+ *   hardware implementation.  It is used to replace the system timer.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -137,7 +137,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_gettime(struct timespec *tp)
 {
@@ -150,12 +150,12 @@ int up_rtc_gettime(struct timespec *tp)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -163,7 +163,7 @@ int up_rtc_gettime(struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(const struct timespec *tp)
 {
