@@ -48,26 +48,25 @@ FAR void *calloc(size_t n, size_t elem_size)
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Use zalloc() because it implements the sbrk() logic */
 
-  FAR void *ret = NULL;
+  FAR void *mem = NULL;
+  /* Verify input parameters
+   *
+   * elem_size or n is zero treats as valid input.
+   *
+   * Assure that the following multiplication cannot overflow the size_t
+   * type, i.e., that:  SIZE_MAX >= n * elem_size
+   *
+   * Refer to SEI CERT C Coding Standard.
+   */
 
-  /* Verify input parameters */
-
-  if (n > 0 && elem_size > 0)
+  if (elem_size == 0 || n <= (SIZE_MAX / elem_size))
     {
-      /* Assure that the following multiplication cannot overflow the size_t
-       * type, i.e., that:  SIZE_MAX >= n * elem_size
-       *
-       * Refer to SEI CERT C Coding Standard.
-       */
+      /* Use zalloc() because it implements the sbrk() logic */
 
-      if (n <= (SIZE_MAX / elem_size))
-        {
-          ret = zalloc(n * elem_size);
-        }
+      mem = zalloc(n * elem_size);
     }
 
-  return ret;
-
+  return mem;
 #else
   /* Use mm_calloc() because it implements the clear */
 

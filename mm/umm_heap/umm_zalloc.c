@@ -55,14 +55,13 @@ FAR void *zalloc(size_t size)
 #ifdef CONFIG_ARCH_ADDRENV
   /* Use malloc() because it implements the sbrk() logic */
 
-  FAR void *alloc = malloc(size);
-  if (alloc)
+  FAR void *mem = malloc(size);
+  if (mem)
     {
-       memset(alloc, 0, size);
+       memset(mem, 0, size);
     }
 
-  return alloc;
-
+  return mem;
 #else
   /* Use mm_zalloc() because it implements the clear */
 

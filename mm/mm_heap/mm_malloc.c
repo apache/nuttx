@@ -114,13 +114,6 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   free_delaylist(heap);
 
-  /* Ignore zero-length allocations */
-
-  if (size < 1)
-    {
-      return NULL;
-    }
-
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   ret = mempool_multiple_alloc(heap->mm_mpool, size);
   if (ret != NULL)

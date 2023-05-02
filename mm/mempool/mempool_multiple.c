@@ -406,11 +406,6 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
   FAR struct mempool_s *end;
   FAR struct mempool_s *pool;
 
-  if (size < 1)
-    {
-      return NULL;
-    }
-
   pool = mempool_multiple_find(mpool, size);
   if (pool == NULL)
     {
@@ -457,12 +452,6 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
   if (oldblk == NULL)
     {
       return mempool_multiple_alloc(mpool, size);
-    }
-
-  if (size < 1)
-    {
-      mempool_multiple_free(mpool, oldblk);
-      return NULL;
     }
 
   dict = mempool_multiple_get_dict(mpool, oldblk);
