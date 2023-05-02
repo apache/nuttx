@@ -282,10 +282,8 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
 {
 #if CONFIG_MM_BACKTRACE >= 0
   FAR struct memdump_backtrace_s *dump;
-#endif
   FAR struct mallinfo_task *info = user;
 
-#if CONFIG_MM_BACKTRACE >= 0
   size -= sizeof(struct memdump_backtrace_s);
   dump = ptr + size;
 
@@ -929,7 +927,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 #else
 # define region 0
 #endif
-  struct memdump_info_s info;
+  struct mallinfo_task info;
 
   if (pid >= MM_BACKTRACE_ALLOC_PID)
     {
@@ -965,7 +963,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
   info.pid = pid;
   mm_mallinfo_task(heap, &info);
   syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
-  syslog(LOG_INFO, "%12d%12d\n", info.blks, info.size);
+  syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
 }
 
 /****************************************************************************
