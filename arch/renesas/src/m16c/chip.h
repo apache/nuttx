@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/renesas/src/m16c/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_RENESAS_SRC_M16C_CHIP_H
 #define __ARCH_RENESAS_SRC_M16C_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* FLG register bits */
 
@@ -54,8 +54,8 @@
 
 #define M16C_SFR_BASE      0x00000   /* 00000-003ff: Special Function Registers */
 
-/* Internal, on-chip SRAM begins at address 0x00400 for all chips, regardless of the
- * size of the on-chip SRAM.
+/* Internal, on-chip SRAM begins at address 0x00400 for all chips,
+ * regardless of the size of the on-chip SRAM.
  */
 
 #define M16C_IRAM_BASE     0x00400   /* 00400-00xxx: Internal RAM */
@@ -72,13 +72,13 @@
 #define M16C_VEEPROM1_BASE 0x0f000   /* 0f000-0f7fff: Virtual EEPPROM block 1 */
 #define M16C_VEEPROM2_BASE 0x0f800   /* 0f800-0fffff: Virtual EEPPROM block 2 */
 
-/* If there were external, "far" RAM, it would be begin at 0x10000.  However, these
- * specific chips do not support external RAM.
+/* If there were external, "far" RAM, it would be begin at 0x10000.
+ * However, thesespecific chips do not support external RAM.
  */
 
-/* Each part has a different amount of on-chip FLASH.  The ending FLASH address is
- * 0xfffff for all chips, but the starting address varies depending on the amount
- * of on-chip FLASH.
+/* Each part has a different amount of on-chip FLASH.
+ * The ending FLASH address is0xfffff for all chips, but the starting address
+ * varies depending on the amount of on-chip FLASH.
  */
 
 #if defined(CONFIG_ARCH_CHIP_M30262F3)
@@ -233,9 +233,9 @@
 #define M16C_PUR2          0x003fe    /* Pull-up control 2 */
 #define M16C_PCR           0x003ff    /* Port control */
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
