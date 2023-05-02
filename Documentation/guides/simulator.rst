@@ -91,6 +91,8 @@ Compiling
        $
        $ # we're back at the Linux prompt.
 
+.. _simulator_accessing_the_network:
+
 Accessing the Network
 ---------------------
 
