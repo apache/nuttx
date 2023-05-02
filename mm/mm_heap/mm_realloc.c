@@ -81,14 +81,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       return mm_malloc(heap, size);
     }
 
-  /* If size is zero, then realloc is equivalent to free */
-
-  if (size < 1)
-    {
-      mm_free(heap, oldmem);
-      return NULL;
-    }
-
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
   if (newmem != NULL)

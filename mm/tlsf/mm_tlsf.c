@@ -542,25 +542,24 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
 
 FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 {
-  FAR void *ret = NULL;
+  FAR void *mem = NULL;
 
-  /* Verify input parameters */
+  /* Verify input parameters
+   *
+   * elem_size or n is zero treats as valid input.
+   *
+   * Assure that the following multiplication cannot overflow the size_t
+   * type, i.e., that:  SIZE_MAX >= n * elem_size
+   *
+   * Refer to SEI CERT C Coding Standard.
+   */
 
-  if (n > 0 && elem_size > 0)
+  if (elem_size == 0 || n <= (SIZE_MAX / elem_size))
     {
-      /* Assure that the following multiplication cannot overflow the size_t
-       * type, i.e., that:  SIZE_MAX >= n * elem_size
-       *
-       * Refer to SEI CERT C Coding Standard.
-       */
-
-      if (n <= (SIZE_MAX / elem_size))
-        {
-          ret = mm_zalloc(heap, n * elem_size);
-        }
+      mem = mm_zalloc(heap, n * elem_size);
     }
 
-  return ret;
+  return mem;
 }
 
 #ifdef CONFIG_DEBUG_MM
@@ -1005,6 +1004,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR void *ret;
 
+  /* In case of zero-length allocations allocate the minimum size object */
+
+  if (size < 1)
+    {
+      size = 1;
+    }
+
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   ret = mempool_multiple_alloc(heap->mm_mpool, size);
   if (ret != NULL)
@@ -1124,15 +1130,20 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 {
   FAR void *newmem;
 
+  /* If oldmem is NULL, then realloc is equivalent to malloc */
+
   if (oldmem == NULL)
     {
       return mm_malloc(heap, size);
     }
 
-  if (size == 0)
+  /* If size is zero, reallocate to the minim size object, so
+   * the memory pointed by oldmem is freed
+   */
+
+  if (size < 1)
     {
-      mm_free(heap, oldmem);
-      return NULL;
+      size = 1;
     }
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
@@ -1155,7 +1166,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #endif
 
 #ifdef CONFIG_MM_KASAN
-
   newmem = mm_malloc(heap, size);
   if (newmem)
     {

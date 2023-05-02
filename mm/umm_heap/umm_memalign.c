@@ -75,7 +75,7 @@ FAR void *memalign(size_t alignment, size_t size)
       mem = mm_memalign(USR_HEAP, alignment, size);
       if (!mem)
         {
-          brkaddr = sbrk(size);
+          brkaddr = sbrk(size < 1 ? 1 : size);
           if (brkaddr == (FAR void *)-1)
             {
               return NULL;
