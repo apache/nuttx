@@ -94,3 +94,8 @@ endif
 ifeq ($(CONFIG_MPFS_IHC_SBI),y)
 CHIP_CSRCS += mpfs_ihc_sbi.c
 endif
+
+ifeq ($(CONFIG_MPFS_CORESPI),y)
+CHIP_CSRCS += mpfs_corespi.c
+endif
+

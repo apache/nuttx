@@ -439,6 +439,36 @@ config MPFS_ETHMAC_1
 	---help---
 		Enable MPFS ethernet MAC-1.
 
+config MPFS_HAVE_CORESPI
+	bool "CoreSPI FPGA IP block configured"
+	default n
+
+if MPFS_HAVE_CORESPI
+
+config MPFS_CORESPI
+	bool "CoreSPI FPGA IP block configured"
+	default n
+	depends on MPFS_HAVE_CORESPI
+
+config MPFS_CORESPI_BASE
+	hex "Base address for the (first) CoreSPI instance"
+	default 0x4A000000
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_INSTANCES
+	int "Amount of CoreSPI instances"
+	default 1
+	range 1 8
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_IRQNUM
+	int "Number of (first) F2H interrupt"
+	default 4
+	range 0 63
+	depends on MPFS_CORESPI
+
+endif # MPFS_HAVE_CORESPI
+
 comment "CorePWM Options"
 
 config MPFS_HAVE_COREPWM
