@@ -285,6 +285,13 @@ config MPFS_I2C1
 	select ARCH_HAVE_I2CRESET
 	default n
 
+config MPFS_COREI2C0
+        bool "Core I2C 0"
+        select ARCH_HAVE_I2CRESET
+        default n
+	---help---
+		Selects the FPGA i2c0 driver.
+
 config MPFS_EMMCSD
 	bool "EMMCSD"
 	select ARCH_HAVE_SDIO
