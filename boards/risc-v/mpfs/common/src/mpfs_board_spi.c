@@ -32,6 +32,7 @@
 #include <nuttx/spi/spi_transfer.h>
 
 #include "mpfs_spi.h"
+#include "mpfs_corespi.h"
 
 /****************************************************************************
  * Public Functions
@@ -48,7 +49,8 @@
 int mpfs_board_spi_init(void)
 {
   int ret = OK;
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
+#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1) || \
+    defined(CONFIG_MPFS_CORESPI)
   struct spi_dev_s *spi;
 #ifdef CONFIG_SPI_DRIVER
   int port = 0;
@@ -95,5 +97,28 @@ int mpfs_board_spi_init(void)
 
 #endif /* CONFIG_SPI_DRIVER */
 #endif /* CONFIG_MPFS_SPI1 */
+
+#ifdef CONFIG_MPFS_CORESPI
+  /* REVISIT: Initialize all of them ? */
+
+  spi = mpfs_corespibus_initialize(0);
+  if (spi == NULL)
+    {
+      spierr("Failed to initialize SPI%d\n", 2);
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_SPI_DRIVER
+  ret = spi_register(spi, 2);
+  if (ret < 0)
+    {
+      spierr("Failed to register /dev/spi%d: %d\n", 2, ret);
+
+      mpfs_spibus_uninitialize(spi);
+    }
+
+#endif /* CONFIG_SPI_DRIVER */
+#endif
+
   return ret;
 }
