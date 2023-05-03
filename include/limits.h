@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * include/limits.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_LIMITS_H
 #define __INCLUDE_LIMITS_H
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,11 +31,11 @@
 
 #include <arch/limits.h>
 
-/********************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
-/* Default values for user configurable limits **********************************/
+/* Default values for user configurable limits ******************************/
 
 /* Maximum number of bytes in a filename (not including terminating null). */
 
@@ -62,7 +62,7 @@
 
 #define MB_LEN_MAX            4
 
-/* Configurable limits required by POSIX ****************************************
+/* Configurable limits required by POSIX ************************************
  *
  * Required for all implementations:
  *
@@ -74,15 +74,18 @@
  *   _POSIX_NAME_MAX       Number of bytes in a file or pathname component
  *   _POSIX_NGROUPS_MAX    Number supplementary group IDs
  *   _POSIX_OPEN_MAX       Number of files a task can have open at once
- *   _POSIX_PATH_MAX       Number of bytes in a full pathname (including NULL)
+ *   _POSIX_PATH_MAX       Number of bytes in a full pathname
+ *                         (including NULL)
  *   _POSIX_PIPE_BUF       Number of bytes for atomic write into pipe
- *   _POSIX_SSIZE_MAX      Largest filesystem write; also max value of ssize_t
+ *   _POSIX_SSIZE_MAX      Largest filesystem write; also max value
+ *                         of ssize_t
  *   _POSIX_STREAM_MAX     Number of std I/O streams open at once
  *   _POSIX_TZNAME_MAX     Max number of bytes of a timezone name
  *
  * Required for sigqueue
  *
- *   _POSIX_RTSIG_MAX      Number of realtime signals reserved for application
+ *   _POSIX_RTSIG_MAX      Number of realtime signals reserved
+ *                         for application
  *   _POSIX_SIGQUEUE_MAX   Max number signals a task can queue
  *
  * Required for POSIX timers
@@ -107,9 +110,9 @@
  *   _POSIX_SEM_VALUE_MAX  Max value a semaphore may have
  *
  * Required for symbolic links
- *   _POSIX_SYMLOOP_MAX   Maximum number of symbolic links that can be
- *                        reliably traversed in the resolution of a pathname
- *                        in the absence of a loop.
+ *   _POSIX_SYMLOOP_MAX    Maximum number of symbolic links that can be
+ *                         reliably traversed in the resolution of a pathname
+ *                         in the absence of a loop.
  *
  */
 
