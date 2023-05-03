@@ -416,4 +416,6 @@ int bt_conn_le_conn_update(FAR struct bt_conn_s *conn, uint16_t min,
                            uint16_t max, uint16_t latency,
                            uint16_t timeout);
 
+void bt_conn_initialize(void);
+
 #endif /* __WIRELESS_BLUETOOTH_BT_CONN_H */

@@ -1584,6 +1584,8 @@ int bt_smp_initialize(void)
     .encrypt_change = bt_smp_encrypt_change,
   };
 
+  memset(g_smp_pool, 0, sizeof(g_smp_pool));
+
   bt_l2cap_chan_register(&chan);
 
   return smp_self_test();
