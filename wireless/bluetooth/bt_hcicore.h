@@ -100,6 +100,10 @@ struct bt_dev_s
   sem_t le_pkts_sem;
 #endif
 
+  /* TX thread status */
+
+  int tx_status;
+
   /* Number of commands controller can accept */
 
   uint8_t ncmd;
@@ -254,6 +258,19 @@ struct bt_eir_s; /* Forward reference */
  ****************************************************************************/
 
 int bt_initialize(void);
+
+/****************************************************************************
+ * Name: bt_deinitialize
+ *
+ * Description:
+ *   Deinitialize Bluetooth.
+ *
+ * Returned Value:
+ *    Zero on success or (negative) error code otherwise.
+ *
+ ****************************************************************************/
+
+int bt_deinitialize(void);
 
 /****************************************************************************
  * Name: bt_driver_register

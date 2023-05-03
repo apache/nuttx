@@ -985,7 +985,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
   wlinfo("started\n");
 
-  for (; ; )
+  for (; g_btdev.tx_status == OK; )
     {
       FAR struct bt_buf_s *buf;
 
@@ -1016,16 +1016,25 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
           g_btdev.sent_cmd = NULL;
         }
 
-      g_btdev.sent_cmd = bt_buf_addref(buf);
+      /* Allow transmission if module is connected. */
 
-      wlinfo("Sending command %04x buf %p to driver\n",
-             buf->u.hci.opcode, buf);
+      if (g_btdev.tx_status == OK)
+        {
+          g_btdev.sent_cmd = bt_buf_addref(buf);
 
-      bt_send(btdev, buf);
+          wlinfo("Sending command %04x buf %p to driver\n",
+                 buf->u.hci.opcode, buf);
+
+          bt_send(btdev, buf);
+        }
+
       bt_buf_release(buf);
     }
 
-  return EXIT_SUCCESS;  /* Can't get here */
+  /* Acknowledge the termination request. */
+
+  g_btdev.tx_status = ESHUTDOWN;
+  return EXIT_SUCCESS;
 }
 
 /****************************************************************************
@@ -1425,6 +1434,64 @@ static int hci_initialize(void)
   nxsem_init(&g_btdev.le_pkts_sem, 0, g_btdev.le_pkts);
   return 0;
 }
+
+/****************************************************************************
+ * Name: cmd_queue_deinit
+ *
+ * Description:
+ *   Threads, fifos and semaphores deinitialization
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void cmd_queue_deinit(void)
+{
+  int ret;
+  FAR struct bt_buf_s *buf;
+
+  /* Tell the tx thread that the module is disconnected.
+   */
+
+  g_btdev.tx_status = ENOTCONN;
+
+  /* Make sure the thread is not blocked by the semaphore.
+   */
+
+  nxsem_post(&g_btdev.ncmd_sem);
+
+  /* We create and push a packet into the tx queue to unblock the thread.
+   * Any packet will do.
+   */
+
+  buf = bt_hci_cmd_create(BT_HCI_OP_RESET, 0);
+  if (buf)
+    {
+      ret = bt_queue_send(&g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
+      if (ret < 0)
+        {
+          wlerr("ERROR: bt_queue_send() failed: %d\n", ret);
+        }
+    }
+
+  /* Wait for the tx thread to exit gracefully. */
+
+  while (g_btdev.tx_status == ENOTCONN)
+    {
+      nxsig_usleep(1000);
+    }
+
+  /* Deinitialization */
+
+  nxsem_destroy(&g_btdev.ncmd_sem);
+  file_mq_close(&g_btdev.tx_queue);
+  work_cancel(HPWORK, &g_hp_work);
+  work_cancel(LPWORK, &g_lp_work);
+}
 #endif
 
 /* threads, fifos and semaphores initialization */
@@ -1444,6 +1511,7 @@ static void cmd_queue_init(void)
   nxsem_init(&g_btdev.ncmd_sem, 0, 1);
 
   g_btdev.ncmd = 1;
+  g_btdev.tx_status = OK;
   ret = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
                        CONFIG_BLUETOOTH_TXCMD_STACKSIZE,
                        hci_tx_kthread, NULL);
@@ -1497,6 +1565,14 @@ int bt_initialize(void)
 
   wlinfo("btdev %p\n", btdev);
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
+  g_callback_list = NULL;
+  g_scan_dev_found_cb = NULL;
+#endif
+
+  memset(&g_lp_rxlist, 0, sizeof(g_lp_rxlist));
+  memset(&g_hp_rxlist, 0, sizeof(g_hp_rxlist));
+
   DEBUGASSERT(btdev != NULL);
   bt_buf_initialize();
 
@@ -1505,6 +1581,9 @@ int bt_initialize(void)
   ret = btdev->open(btdev);
   if (ret < 0)
     {
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
+      cmd_queue_deinit();
+#endif
       wlerr("ERROR: HCI driver open failed (%d)\n", ret);
       return ret;
     }
@@ -1513,6 +1592,7 @@ int bt_initialize(void)
   ret = hci_initialize();
   if (ret < 0)
     {
+      cmd_queue_deinit();
       wlerr("ERROR:  hci_initialize failed: %d\n", ret);
       return ret;
     }
@@ -1521,6 +1601,38 @@ int bt_initialize(void)
 #endif
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: bt_deinitialize
+ *
+ * Description:
+ *   Deinitialize Bluetooth.
+ *
+ * Returned Value:
+ *    Zero on success or (negative) error code otherwise.
+ *
+ ****************************************************************************/
+
+int bt_deinitialize(void)
+{
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
+  FAR struct bt_driver_s *btdev = g_btdev.btdev;
+
+  cmd_queue_deinit();
+
+  /* Call the bluetooth HCI driver's close function if available. */
+
+  if (btdev)
+    {
+      if (btdev->close)
+        {
+          btdev->close(btdev);
+        }
+    }
+#endif
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1551,6 +1663,8 @@ int bt_driver_register(FAR struct bt_driver_s *btdev)
       wlwarn("WARNING:  Already registered\n");
       return -EALREADY;
     }
+
+  memset(&g_btdev, 0, sizeof(g_btdev));
 
   g_btdev.btdev = btdev;
   return 0;

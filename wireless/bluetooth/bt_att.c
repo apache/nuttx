@@ -1846,6 +1846,8 @@ void bt_att_initialize(void)
     .disconnected = bt_att_disconnected,
   };
 
+  memset(g_bt_att_pool, 0, sizeof(g_bt_att_pool));
+
   bt_l2cap_chan_register(&chan);
 }
 
