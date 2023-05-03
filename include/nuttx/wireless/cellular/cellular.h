@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/wireless/cellular/cellular.h
  * Cellular network device commands
  *
@@ -17,14 +17,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_CELLULAR_CELLULAR_H
 #define __INCLUDE_NUTTX_WIRELESS_CELLULAR_CELLULAR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -34,18 +34,18 @@
 #include <net/if.h>
 #include <nuttx/fs/ioctl.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Sizing parameters */
 
-#define IFCELLDEVPARAMSIZ   136 /* Big enough to store cellelur net paramters */
+#define IFCELLDEVPARAMSIZ   136 /* Big enough to store cellular net paramters */
 
-/* Network Driver IOCTL Commands ****************************************************/
+/* Network Driver IOCTL Commands ********************************************/
 
-/* Use of these IOCTL commands requires a socket descriptor created by the socket()
- * interface.
+/* Use of these IOCTL commands requires a socket descriptor created
+ * by the socket() interface.
  */
 
 #define SIOCSCELLNETDEV     _CELLIOC(0x0000)  /* Set info in dev */
@@ -56,9 +56,9 @@
 #define ifr_cellinfo        icellr_ifru.icellru_info;
 #define ifr_celldata        icellr_ifru.ioctl_param;
 
-/************************************************************************************
+/****************************************************************************
  * Public Type Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 struct cellnetinfo_s
 {

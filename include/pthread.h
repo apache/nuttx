@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * include/pthread.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_PTHREAD_H
 #define __INCLUDE_PTHREAD_H
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>    /* Default settings */
 #include <nuttx/compiler.h>  /* Compiler settings, noreturn_function */
@@ -50,9 +50,9 @@
 #  include <arch/spinlock.h>
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
 /* Standard POSIX switches */
 
@@ -71,25 +71,26 @@
 
 /* Values for the mutext type attribute:
  *
- * PTHREAD_MUTEX_NORMAL: This type of mutex does not detect deadlock. A thread
- *   attempting to relock this mutex without first unlocking it will deadlock.
- *   Attempting to unlock a mutex locked by a different thread results in
- *   undefined behavior. Attempting to unlock an unlocked mutex results in
- *   undefined behavior.
+ * PTHREAD_MUTEX_NORMAL: This type of mutex does not detect deadlock.
+ *   A thread attempting to relock this mutex without first unlocking
+ *   it will deadlock.  Attempting to unlock a mutex locked by a different
+ *   thread results in undefined behavior.  Attempting to unlock an unlocked
+ *   mutex results in undefined behavior.
  * PTHREAD_MUTEX_ERRORCHECK
- *   This type of mutex provides error checking. A thread attempting to relock
- *   this mutex without first unlocking it will return with an error. A thread
- *   attempting to unlock a mutex which another thread has locked will return
- *   with an error.   A thread attempting to unlock an unlocked mutex will return
- *   with an error.
+ *   This type of mutex provides error checking. A thread attempting
+ *   to relock this mutex without first unlocking it will return with
+ *   an error.  A thread attempting to unlock a mutex which another thread
+ *   has locked will return with an error.  A thread attempting to unlock
+ *   an unlocked mutex will return with an error.
  * PTHREAD_MUTEX_RECURSIVE
  *   A thread attempting to relock this mutex without first unlocking it will
- *   succeed in locking the mutex. The relocking deadlock which can occur with
- *   mutexes of type PTHREAD_MUTEX_NORMAL cannot occur with this type of mutex.
- *   Multiple locks of this mutex require the same number of unlocks to release
- *   the mutex before another thread can acquire the mutex. A thread attempting
- *   to unlock a mutex which another thread has locked will return with an error.
- *   A thread attempting to unlock an unlocked mutex will return with an error.
+ *   succeed in locking the mutex. The relocking deadlock which can occur
+ *   with mutexes of type PTHREAD_MUTEX_NORMAL cannot occur with this type
+ *   of mutex.  Multiple locks of this mutex require the same number
+ *   of unlocks to release the mutex before another thread can acquire
+ *   the mutex.  A thread attempting to unlock a mutex which another thread
+ *   has locked will return with an error.  A thread attempting to unlock
+ *   an unlocked mutex will return with an error.
  * PTHREAD_MUTEX_DEFAULT
  *  An implementation is allowed to map this mutex to one of the other mutex
  *  types.
@@ -186,9 +187,9 @@
 #define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 1) /* Mutex is in an inconsistent state */
 #define _PTHREAD_MFLAGS_NRECOVERABLE  (1 << 2) /* Inconsistent mutex has been unlocked */
 
-/********************************************************************************
+/****************************************************************************
  * Public Type Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 extern "C"
@@ -426,12 +427,12 @@ typedef CODE void (*pthread_cleanup_t)(FAR void *arg);
 
 struct sched_param; /* Defined in sched.h */
 
-/********************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************/
+ ****************************************************************************/
 
-/* Initializes a thread attributes object (attr) with default values for all of
- * the individual attributes used by a given implementation.
+/* Initializes a thread attributes object (attr) with default values
+ * for all of the individual attributes used by a given implementation.
  */
 
 int pthread_attr_init(FAR pthread_attr_t *attr);
@@ -443,7 +444,8 @@ int pthread_attr_destroy(FAR pthread_attr_t *attr);
 /* Set or obtain the default scheduling algorithm */
 
 int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy);
-int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, FAR int *policy);
+int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr,
+                                FAR int *policy);
 int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
                                FAR const struct sched_param *param);
 int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
@@ -537,7 +539,9 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg);
 
 int pthread_join(pthread_t thread, FAR pthread_addr_t *value);
 
-/* A thread may tell the scheduler that its processor can be made available. */
+/* A thread may tell the scheduler that its processor
+ * can be made available.
+ */
 
 void pthread_yield(void);
 
@@ -725,22 +729,22 @@ int pthread_atfork(CODE void (*prepare)(void),
 }
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Minimal Type Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
 #else /* __INCLUDE_PTHREAD_H */
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <stdbool.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Type Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
 /* Avoid circular dependencies by assuring that simple type definitions are
  * available in any inclusion ordering.

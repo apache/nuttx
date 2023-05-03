@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/input/mouse.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The mouse driver exports a standard character driver interface. By
  * convention, the mouse driver is registered as an input device at
@@ -30,15 +30,15 @@
 #ifndef __INCLUDE_NUTTX_INPUT_MOUSE_H
 #define __INCLUDE_NUTTX_INPUT_MOUSE_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* These definitions provide the meaning of all of the bits that may be
  * reported in the struct mouse_report_s buttons.
@@ -48,13 +48,13 @@
 #define MOUSE_BUTTON_2       (1 << 1) /* True: Right mouse button pressed */
 #define MOUSE_BUTTON_3       (1 << 2) /* True: Middle mouse button pressed */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This structure contains information about the current mouse button states and
- * mouse position.  Positional units are device specific and determined by mouse
- * configuration settings.
+/* This structure contains information about the current mouse button states
+ * and mouse position.  Positional units are device specific and determined
+ * by mouse configuration settings.
  */
 
 struct mouse_report_s
@@ -68,9 +68,9 @@ struct mouse_report_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -80,9 +80,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

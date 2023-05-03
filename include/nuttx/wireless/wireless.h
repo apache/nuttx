@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/wireless/wireless.h
  * Wireless network IOCTL commands
  *
@@ -17,18 +17,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file includes common definitions to be used in all wireless network drivers
- * (when applicable).
+/* This file includes common definitions to be used in all
+ * wireless network drivers (when applicable).
  */
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_WIRELESS_H
 #define __INCLUDE_NUTTX_WIRELESS_WIRELESS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -38,14 +38,14 @@
 #include <net/if.h>
 #include <nuttx/fs/ioctl.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Network Driver IOCTL Commands ****************************************************/
+/* Network Driver IOCTL Commands ********************************************/
 
-/* Use of these IOCTL commands requires a socket descriptor created by the socket()
- * interface.
+/* Use of these IOCTL commands requires a socket descriptor created
+ * by the socket() interface.
  */
 
 /* Wireless identification */
@@ -185,7 +185,7 @@
                                    (cmd) == SIOCGIWESSID || \
                                    (cmd) == SIOCSIWESSID)
 
-/* ------------------------------ WIRELESS EVENTS --------------------------------- */
+/* --------------------------- WIRELESS EVENTS --------------------------- */
 
 /* Those are *NOT* ioctls, do not issue request on them !!! */
 
@@ -228,7 +228,7 @@
 #define IWEVFIRST       0x8c00
 #define IW_EVENT_IDX(cmd) ((cmd) - IWEVFIRST)
 
-/* Other Common Wireless Definitions ************************************************/
+/* Other Common Wireless Definitions ****************************************/
 
 /* Maximum size of the ESSID and NICKN strings */
 
@@ -404,21 +404,22 @@
 #define IW_PTA_PRIORITY_WLAN_HIGH      3
 #define IW_PTA_PRIORITY_WLAN_MAXIMIZED 4
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* TODO:
  *
- * - Add struct iw_range for use with IOCTL commands that need exchange mode data
- *   that could not fit in iwreq.
+ * - Add struct iw_range for use with IOCTL commands that need exchange
+ *   mode data that could not fit in iwreq.
  * - Private IOCTL data support (struct iw_priv_arg)
  * - Quality
  * - WPA support.
  * - Wireless events.
  * - Various flag definitions.
  *
- * These future additions will all need to be compatible with BSD/Linux definitions.
+ * These future additions will all need to be compatible
+ * with BSD/Linux definitions.
  */
 
 /* Generic format for most parameters that fit in a int32_t */
@@ -431,8 +432,8 @@ struct iw_param
   uint16_t  flags;          /* Optional flags */
 };
 
-/* Large data reference.  For all data larger than 16 octets, we need to use a
- * pointer to memory allocated in user space.
+/* Large data reference.  For all data larger than 16 octets,
+ * we need to use a pointer to memory allocated in user space.
  */
 
 struct iw_point
@@ -492,8 +493,8 @@ struct iw_missed
   uint32_t beacon;    /* Missed beacons/superframe */
 };
 
-/* This union defines the data payload of an ioctl, and is used in struct iwreq
- * below.
+/* This union defines the data payload of an ioctl
+ * and is used in struct iwreq below.
  */
 
 union iwreq_data
@@ -523,8 +524,9 @@ union iwreq_data
   struct iw_point data;     /* Other large parameters */
 };
 
-/* This is the structure used to exchange data in wireless IOCTLs.  This structure
- * is the same as 'struct ifreq', but defined for use with wireless IOCTLs.
+/* This is the structure used to exchange data in wireless IOCTLs.
+ * This structure is the same as 'struct ifreq', but defined for
+ * use with wireless IOCTLs.
  */
 
 struct iwreq

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/can/can.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_CAN_CAN_H
 #define __INCLUDE_NUTTX_CAN_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -44,39 +44,41 @@
 
 #ifdef CONFIG_CAN
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* CONFIG_CAN - Enables CAN support (MCU-specific selections are also required.  For
- *   STM32, as an example, one or both of CONFIG_STM32_CAN1 or CONFIG_STM32_CAN2
- *   must also be defined)
+/* CONFIG_CAN - Enables CAN support
+ *   (MCU-specific selections are also required.  For STM32, as an example,
+ *   one or both of CONFIG_STM32_CAN1 or CONFIG_STM32_CAN2
+ *   must also be defined).
  * CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
  *   Standard 11-bit IDs.
- * CONFIG_CAN_FD - Enable support for CAN FD mode.  For the upper half driver, this
- *   just means handling encoded DLC values (for values of DLC > 9).
+ * CONFIG_CAN_FD - Enable support for CAN FD mode.
+ *   For the upper half driver, this just means handling encoded DLC values
+ *   (for values of DLC > 9).
  * CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
  *   Default: 8
  * CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
  *   Default: 4
  * CONFIG_CAN_LOOPBACK - A CAN driver may or may not support a loopback
  *   mode for testing. If the driver does support loopback mode, the setting
- *   will enable it. (If the driver does not, this setting will have no effect).
- *   The loopback mode may be changed later by ioctl() if the driver supports the
- *   CANIOC_SET_CONNMODES ioctl command.
- * CONFIG_CAN_TXREADY - Add support for the can_txready() callback.  This is needed
- *   only for CAN hardware the supports an separate H/W TX message FIFO.  The call
- *   back is needed to keep the S/W FIFO and the H/W FIFO in sync.  Work queue
- *   support is needed for this feature.
- * CONFIG_CAN_TXREADY_HIPRI or CONFIG_CAN_TXREADY_LOPRI - Selects which work queue
- *   will be used for the can_txready() processing.
+ *   will enable it. (If the driver does not, this setting will have
+ *   no effect).  The loopback mode may be changed later by ioctl()
+ *   if the driver supports the CANIOC_SET_CONNMODES ioctl command.
+ * CONFIG_CAN_TXREADY - Add support for the can_txready() callback.
+ *   This is needed only for CAN hardware the supports an separate
+ *   H/W TX message FIFO.  The call back is needed to keep the S/W FIFO and
+ *   the H/W FIFO in sync.  Work queue support is needed for this feature.
+ * CONFIG_CAN_TXREADY_HIPRI or CONFIG_CAN_TXREADY_LOPRI - Selects which
+ *    work queue will be used for the can_txready() processing.
  */
 
-/* Default configuration settings that may be overridden in the NuttX configuration
- * file or in the board configuration file.  The configured size is limited to 255
- * to fit into a uint8_t.
+/* Default configuration settings that may be overridden in the NuttX
+ * configuration file or in the board configuration file.
+ * The configured size is limited to 255 to fit into a uint8_t.
  */
 
 #if !defined(CONFIG_CAN_FIFOSIZE)
@@ -93,18 +95,19 @@
 #  define CONFIG_CAN_NPENDINGRTR 255
 #endif
 
-/* Ioctl Commands *******************************************************************/
+/* Ioctl Commands ***********************************************************/
 
 /* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
- *   Description:    Send the given message as a remote request. On successful
- *                   return, the passed message structure is updated with
- *                   the contents of the received message; i.e. the message
- *                   ID and the standard/extended ID indication bit stay the
- *                   same, but the DLC and data bits are updated with the
- *                   contents of the received message. If no response is
- *                   received after the specified timeout, ioctl will return.
+ *   Description:    Send the given message as a remote request.
+ *                   On successful return, the passed message structure
+ *                   is updated with the contents of the received message;
+ *                   i.e. the message ID and the standard/extended
+ *                   ID indication bit stay the same, but the DLC and data
+ *                   bits are updated with the contents of the
+ *                   received message.  If no response is received after
+ *                   the specified timeout, ioctl will return.
  *
  *                   Note: Lower-half drivers that do not implement
  *                         CONFIG_CAN_USE_RTR and implement co_remoterequest
@@ -116,7 +119,8 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error (for example, ETIMEDOUT)
  *
- * Ioctl commands that may or may not be supported by the lower half CAN driver.
+ * Ioctl commands that may or may not be supported
+ * by the lower half CAN driver.
  *
  * CANIOC_ADD_STDFILTER:
  *   Description:    Add an address filter for a standard 11 bit address.
@@ -175,7 +179,8 @@
  * CANIOC_GET_CONNMODES:
  *   Description:    Get the current bus connection modes
  *   Argument:       A pointer to a write-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes will be returned.
+ *                   canioc_connmodes_s in which the new bus modes
+ *                   will be returned.
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
@@ -184,7 +189,8 @@
  * CANIOC_SET_CONNMODES:
  *   Description:    Set new bus connection modes values
  *   Argument:       A pointer to a read-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes are provided.
+ *                   canioc_connmodes_s in which the new bus modes
+ *                   are provided.
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
@@ -234,32 +240,33 @@
 #define CAN_NCMDS                 12             /* Ten common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
- * method of the CAN lower-half interface.  However, the lower-half driver
- * must reserve a block of commands as follows in order prevent IOCTL
- * command numbers from overlapping.
+ * by the upper-half CAN driver to the lower-half CAN driver via the
+ * co_ioctl() method of the CAN lower-half interface.
+ * However, the lower-half driver must reserve a block of commands
+ * as follows in order prevent IOCTL command numbers from overlapping.
  *
- * This is generally done as follows.  The first reservation for CAN driver A would
- * look like:
+ * This is generally done as follows.  The first reservation for CAN driver A
+ * would look like:
  *
- *   CAN_A_FIRST                 (CAN_FIRST + CAN_NCMDS)     <- First command
- *   CAN_A_NCMDS                 42                          <- Number of commands
+ *   CAN_A_FIRST            (CAN_FIRST + CAN_NCMDS)     <- First command
+ *   CAN_A_NCMDS            42                          <- Number of commands
  *
- * IOCTL commands for CAN driver A would then be defined in a CAN A header file like:
+ * IOCTL commands for CAN driver A would then be defined in a
+ * CAN A header file like:
  *
- *   CANIOC_A_CMD1               _CANIOC(CAN_A_FIRST+0)
- *   CANIOC_A_CMD2               _CANIOC(CAN_A_FIRST+1)
- *   CANIOC_A_CMD3               _CANIOC(CAN_A_FIRST+2)
+ *   CANIOC_A_CMD1          _CANIOC(CAN_A_FIRST+0)
+ *   CANIOC_A_CMD2          _CANIOC(CAN_A_FIRST+1)
+ *   CANIOC_A_CMD3          _CANIOC(CAN_A_FIRST+2)
  *   ...
- *   CANIOC_A_CMD42              _CANIOC(CAN_A_FIRST+41)
+ *   CANIOC_A_CMD42            _CANIOC(CAN_A_FIRST+41)
  *
  * The next reservation would look like:
  *
- *   CAN_B_FIRST                 (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
- *   CAN_B_NCMDS                 77                          <- Number of commands
+ *   CAN_B_FIRST            (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
+ *   CAN_B_NCMDS            77                          <- Number of commands
  */
 
-/* Convenience macros ***************************************************************/
+/* Convenience macros *******************************************************/
 
 #define dev_reset(dev)            dev->cd_ops->co_reset(dev)
 #define dev_setup(dev)            dev->cd_ops->co_setup(dev)
@@ -272,7 +279,7 @@
 #define dev_txready(dev)          dev->cd_ops->co_txready(dev)
 #define dev_txempty(dev)          dev->cd_ops->co_txempty(dev)
 
-/* CAN message support **************************************************************/
+/* CAN message support ******************************************************/
 
 #ifdef CONFIG_CAN_FD
 #  define CAN_MAXDATALEN          64
@@ -285,10 +292,12 @@
 
 #define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
 
-/* CAN Error Indications ************************************************************/
+/* CAN Error Indications ****************************************************/
 
 #ifdef CONFIG_CAN_ERRORS
-/* Bit settings in the ch_id field of the CAN error message (when ch_error is set) */
+/* Bit settings in the ch_id field of the CAN error message
+ * (when ch_error is set)
+ */
 
 #  define CAN_ERROR_TXTIMEOUT     (1 << 0) /* Bit 0: TX timeout */
 #  define CAN_ERROR_LOSTARB       (1 << 1) /* Bit 1: Lost arbitration (See CAN_ERROR0_* definitions) */
@@ -302,8 +311,8 @@
 #  define CAN_ERROR_INTERNAL      (1 << 9) /* Bit 9: Stack internal error (See CAN_ERROR5_* definitions) */
                                            /* Bit 10: Available */
 
-/* The remaining definitions described the error report payload that follows the
- * CAN header.
+/* The remaining definitions described the error report payload that follows
+ * the CAN header.
  */
 
 #  define CAN_ERROR_DLC           (8)      /* DLC of error report */
@@ -336,7 +345,9 @@
 #  define CAN_ERROR2_ACTIVE       (1 << 6) /* Bit 6: Active error announcement */
 #  define CAN_ERROR2_TX           (1 << 7) /* Bit 7: Error occurred on transmission */
 
-/* Data[3]:  Error in CAN protocol.  This provides the loation of the error. */
+/* Data[3]:  Error in CAN protocol.
+ * This provides the loation of the error.
+ */
 
 #  define CAN_ERROR3_UNSPEC       0x00 /* Unspecified error */
 #  define CAN_ERROR3_SOF          0x01 /* start of frame */
@@ -383,11 +394,11 @@
 
 #endif /* CONFIG_CAN_ERRORS */
 
-/* CAN filter support ***************************************************************/
+/* CAN filter support *******************************************************/
 
-/* Some CAN hardware supports a notion of prioritizing messages that match filters.
- * Only two priority levels are currently supported and are encoded as defined
- * below:
+/* Some CAN hardware supports a notion of prioritizing messages
+ * that match filters.  Only two priority levels are currently supported
+ * and are encoded as defined below:
  */
 
 #define CAN_MSGPRIO_LOW           0
@@ -399,50 +410,56 @@
 #define CAN_FILTER_DUAL           1  /* Dual address match */
 #define CAN_FILTER_RANGE          2  /* Match a range of addresses */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* CAN-message Format (without Extended ID support)
  *
- *   One based CAN-message is represented with a maximum of 10 bytes.  A message is
- *   composed of at least the first 2 bytes (when there are no data bytes present).
+ *   One based CAN-message is represented with a maximum of 10 bytes.
+ *   A message is composed of at least the first 2 bytes
+ *   (when there are no data bytes present).
  *
  *   Bytes 0-1:  Bits 0-3:   Data Length Code (DLC)
  *               Bit  4:     Remote Transmission Request (RTR)
- *               Bit  5:     1=Message ID is a bit-encoded error report (See NOTE)
+ *               Bit  5:     1=Message ID is a bit-encoded error report
+ *                           (See NOTE)
  *               Bits 6-7:   Unused
- *   Bytes 1-2:  Bits 0-10:  The 11-bit CAN identifier  This message ID is a bit
- *                           encoded error set if ch_error is set (See NOTE).
+ *   Bytes 1-2:  Bits 0-10:  The 11-bit CAN identifier  This message ID
+ *                           is a bit encoded error set if ch_error is set
+ *                           (See NOTE).
  *               Bits 11-15: Unused
  *   Bytes 3-10: CAN data
  *
  * CAN-message Format (with Extended ID support)
  *
- *   One CAN-message consists of a maximum of 13 bytes.  A message is composed of at
- *   least the first 5 bytes (when there are no data bytes).
+ *   One CAN-message consists of a maximum of 13 bytes.  A message is
+ *   composed of at least the first 5 bytes (when there are no data bytes).
  *
- *   Bytes 0-3:  Bits 0-28:  Hold 11- or 29-bit CAN ID in host byte order.  This
- *                           message ID is a bit encoded error set if ch_error
- *                           is set (See NOTE).
+ *   Bytes 0-3:  Bits 0-28:  Hold 11- or 29-bit CAN ID in host byte order.
+ *                           This message ID is a bit encoded error
+ *                           set if ch_error is set (See NOTE).
  *               Bits 29-31: Unused
  *   Byte 4:     Bits 0-3:   Data Length Code (DLC)
  *               Bit 4:      Remote Transmission Request (RTR)
- *               Bit 5:      1=Message ID is a bit-encoded error report (See NOTE)
+ *               Bit 5:      1=Message ID is a bit-encoded error report
+ *                           (See NOTE)
  *               Bit 6:      Extended ID indication
  *               Bit 7:      Unused
  *   Bytes 5-12: CAN data    Size determined by DLC
  *
- * NOTE: The error indication if valid only on message reports received from the
- * CAN driver; it is ignored on transmission.  When the error bit is set, the
- * message ID is an encoded set of error indications (see CAN_ERROR_* definitions).
+ * NOTE: The error indication if valid only on message reports received from
+ * the CAN driver; it is ignored on transmission.  When the error bit is set,
+ * the message ID is an encoded set of error indications
+ * (see CAN_ERROR_* definitions).
  * A more detailed report of certain errors then follows in message payload.
  * CONFIG_CAN_ERRORS=y is required in order to receive error reports.
  *
- * The struct can_msg_s holds this information in a user-friendly, unpacked form.
- * This is the form that is used at the read() and write() driver interfaces.  The
- * message structure is actually variable length -- the true length is given by
- * the CAN_MSGLEN macro.
+ * The struct can_msg_s holds this information in a user-friendly,
+ * unpacked form.
+ * This is the form that is used at the read() and write() driver interfaces.
+ * The message structure is actually variable length the true length
+ * is given by the CAN_MSGLEN macro.
  */
 
 #ifdef CONFIG_CAN_EXTID
@@ -517,7 +534,9 @@ struct can_txfifo_s
   struct can_msg_s tx_buffer[CONFIG_CAN_FIFOSIZE];
 };
 
-/* The following structure define the logic to handle one RTR message transaction */
+/* The following structure define the logic to handle
+ * one RTR message transaction
+ */
 
 struct can_rtrwait_s
 {
@@ -525,9 +544,9 @@ struct can_rtrwait_s
   FAR struct can_msg_s *cr_msg;          /* This is where the RTR response goes */
 };
 
-/* This structure defines all of the operations provided by the architecture specific
- * logic.  All fields must be provided with non-NULL function pointers by the
- * caller of can_register().
+/* This structure defines all of the operations provided by the architecture
+ * specific logic.  All fields must be provided with non-NULL
+ * function pointers by the caller of can_register().
  */
 
 struct can_dev_s;
@@ -563,7 +582,8 @@ struct can_ops_s
 
   /* All ioctl calls will be routed through this method */
 
-  CODE int (*co_ioctl)(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*co_ioctl)(FAR struct can_dev_s *dev,
+                       int cmd, unsigned long arg);
 
   /* Send a remote request. Lower-half drivers should NOT implement this if
    * they support sending RTR messages with the regular send function
@@ -586,7 +606,8 @@ struct can_ops_s
   /* Return true if all message have been sent.  If for example, the CAN
    * hardware implements FIFOs, then this would mean the transmit FIFO is
    * empty.  This method is called when the driver needs to make sure that
-   * all characters are "drained" from the TX hardware before calling co_shutdown().
+   * all characters are "drained" from the TX hardware before
+   * calling co_shutdown().
    */
 
   CODE bool (*co_txempty)(FAR struct can_dev_s *dev);
@@ -710,9 +731,9 @@ struct canioc_stdfilter_s
   uint8_t               sf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -723,17 +744,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: can_register
  *
  * Description:
  *   Register a CAN driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int can_register(FAR const char *path, FAR struct can_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: can_receive
  *
  * Description:
@@ -747,12 +768,12 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev);
  * Returned Value:
  *   OK on success; a negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
                 FAR uint8_t *data);
 
-/************************************************************************************
+/****************************************************************************
  * Name: can_txdone
  *
  * Description:
@@ -822,11 +843,11 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *   through can_write().  Interrupts are expected be disabled when called
  *   from the CAN interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int can_txdone(FAR struct can_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: can_txready
  *
  * Description:
@@ -855,8 +876,9 @@ int can_txdone(FAR struct can_dev_s *dev);
  *
  *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
  *   when the transfer is complete, but rather when the transfer is queued in
- *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
- *   report false and the number of queued messages in the S/W FIFO will grow.
+ *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready()
+ *   will report false and the number of queued messages in the
+ *   S/W FIFO will grow.
  *
  *   There is no mechanism in this case to inform the upper half driver when
  *   the hardware is again available, when there is again space in the H/W
@@ -880,7 +902,7 @@ int can_txdone(FAR struct can_dev_s *dev);
  *   Interrupts are disabled.  This function may execute in the context of
  *   and interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CAN_TXREADY
 int can_txready(FAR struct can_dev_s *dev);
