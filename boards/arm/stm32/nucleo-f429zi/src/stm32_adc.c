@@ -47,19 +47,19 @@
 /* Up to 3 ADC interfaces are supported */
 
 #if STM32F4_NADC < 3
-#  undef CONFIG_STM32F4_ADC3
+#  undef CONFIG_STM32_ADC3
 #endif
 
 #if STM32F4_NADC < 2
-#  undef CONFIG_STM32F4_ADC2
+#  undef CONFIG_STM32_ADC2
 #endif
 
 #if STM32F4_NADC < 1
-#  undef CONFIG_STM32F4_ADC1
+#  undef CONFIG_STM32_ADC1
 #endif
 
-#if defined(CONFIG_STM32F4_ADC1) || defined(CONFIG_STM32F4_ADC2) || defined(CONFIG_STM32F4_ADC3)
-#ifndef CONFIG_STM32F4_ADC1
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+#ifndef CONFIG_STM32_ADC1
 #  warning "Channel information only available for ADC1"
 #endif
 
@@ -76,7 +76,7 @@
  * {1,  2,  3, 4,  5,  6, 7,  8,  9, 10, 11, 12, 13, 15};
  */
 
-#ifdef CONFIG_STM32F4_ADC1
+#ifdef CONFIG_STM32_ADC1
 static const uint8_t  g_chanlist[ADC1_NCHANNELS] =
     {
         3
@@ -114,7 +114,7 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS] =
 
 int stm32_adc_setup(void)
 {
-#ifdef CONFIG_STM32F4_ADC1
+#ifdef CONFIG_STM32_ADC1
   static bool initialized = false;
   struct adc_dev_s *adc;
   int ret;
@@ -163,5 +163,5 @@ int stm32_adc_setup(void)
 #endif
 }
 
-#endif /* CONFIG_STM32F4_ADC1 || CONFIG_STM32F4_ADC2 || CONFIG_STM32F4_ADC3 */
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* CONFIG_ADC */

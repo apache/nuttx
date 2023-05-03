@@ -98,7 +98,7 @@
 #define GPIO_SPI3_CS2  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN6)
 #define GPIO_SPI3_CS3  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN7)
 
-#if defined(CONFIG_STM32F4_SDMMC1) || defined(CONFIG_STM32F4_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)
 # define HAVE_SDIO
 #endif
 
@@ -109,7 +109,7 @@
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
-#  if defined(CONFIG_STM32F4_SDMMC1)
+#  if defined(CONFIG_STM32_SDMMC1)
 #    define GPIO_SDMMC1_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
 #  endif
 
@@ -229,7 +229,7 @@ int stm32_sdio_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 void stm32_usbinitialize(void);
 #endif
 
@@ -261,7 +261,7 @@ int stm32_adc_setup(void);
  * Name: stm32_bbsram_int
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F4_BBSRAM
+#ifdef CONFIG_STM32_BBSRAM
 int stm32_bbsram_int(void);
 #endif
 

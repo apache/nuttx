@@ -121,7 +121,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_STM32F4_BBSRAM
+#ifdef CONFIG_STM32_BBSRAM
   /* Initialize battery-backed RAM */
 
   stm32_bbsram_int();

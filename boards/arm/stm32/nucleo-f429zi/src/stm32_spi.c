@@ -93,7 +93,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F4_SPI1)
+#if defined(CONFIG_STM32_SPI1)
 static const uint32_t g_spi1gpio[] =
 {
 #if defined(GPIO_SPI1_CS0)
@@ -119,7 +119,7 @@ static const uint32_t g_spi1gpio[] =
 };
 #endif
 
-#if defined(CONFIG_STM32F4_SPI2)
+#if defined(CONFIG_STM32_SPI2)
 static const uint32_t g_spi2gpio[] =
 {
 #if defined(GPIO_SPI2_CS0)
@@ -145,7 +145,7 @@ static const uint32_t g_spi2gpio[] =
 };
 #endif
 
-#if defined(CONFIG_STM32F4_SPI3)
+#if defined(CONFIG_STM32_SPI3)
 static const uint32_t g_spi3gpio[] =
 {
 #if defined(GPIO_SPI3_CS0)
@@ -172,13 +172,13 @@ static const uint32_t g_spi3gpio[] =
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI_TEST)
-#  if defined(CONFIG_STM32F4_SPI1)
+#  if defined(CONFIG_STM32_SPI1)
 struct spi_dev_s *spi1;
 #  endif
-#  if defined(CONFIG_STM32F4_SPI2)
+#  if defined(CONFIG_STM32_SPI2)
 struct spi_dev_s *spi2;
 #  endif
-#  if defined(CONFIG_STM32F4_SPI3)
+#  if defined(CONFIG_STM32_SPI3)
 struct spi_dev_s *spi3;
 #  endif
 #endif
@@ -199,7 +199,7 @@ void weak_function stm32_spidev_initialize(void)
 {
   /* Configure SPI CS GPIO for output */
 
-#if defined(CONFIG_STM32F4_SPI1)
+#if defined(CONFIG_STM32_SPI1)
   for (int i = 0; i < nitems(g_spi1gpio); i++)
     {
       if (g_spi1gpio[i] != 0)
@@ -209,7 +209,7 @@ void weak_function stm32_spidev_initialize(void)
     }
 #endif
 
-#if defined(CONFIG_STM32F4_SPI2)
+#if defined(CONFIG_STM32_SPI2)
   for (int i = 0; i < nitems(g_spi2gpio); i++)
     {
       if (g_spi2gpio[i] != 0)
@@ -219,7 +219,7 @@ void weak_function stm32_spidev_initialize(void)
     }
 #endif
 
-#if defined(CONFIG_STM32F4_SPI3)
+#if defined(CONFIG_STM32_SPI3)
   for (int i = 0; i < nitems(g_spi3gpio); i++)
     {
       if (g_spi3gpio[i] != 0)
@@ -257,7 +257,7 @@ void weak_function stm32_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F4_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -278,7 +278,7 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI2
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -299,7 +299,7 @@ uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI3
+#ifdef CONFIG_STM32_SPI3
 void stm32_spi3select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -320,7 +320,7 @@ uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI4
+#ifdef CONFIG_STM32_SPI4
 void stm32_spi4select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -334,7 +334,7 @@ uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI5
+#ifdef CONFIG_STM32_SPI5
 void stm32_spi5select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -348,7 +348,7 @@ uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI6
+#ifdef CONFIG_STM32_SPI6
 void stm32_spi6select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -386,42 +386,42 @@ uint8_t stm32_spi6status(struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32F4_SPI1
+#ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI2
+#ifdef CONFIG_STM32_SPI2
 int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI3
+#ifdef CONFIG_STM32_SPI3
 int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI4
+#ifdef CONFIG_STM32_SPI4
 int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI5
+#ifdef CONFIG_STM32_SPI5
 int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32F4_SPI6
+#ifdef CONFIG_STM32_SPI6
 int stm32_spi6cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;

@@ -56,11 +56,11 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_sdio.c
 endif
 
-ifeq ($(CONFIG_STM32F4_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_STM32F4_BBSRAM),y)
+ifeq ($(CONFIG_STM32_BBSRAM),y)
 CSRCS += stm32_bbsram.c
 endif
 
