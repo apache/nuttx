@@ -45,7 +45,7 @@
 
 #include "nucleo-144.h"
 
-#ifdef CONFIG_STM32F4_BBSRAM
+#ifdef CONFIG_STM32_BBSRAM
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -306,7 +306,7 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
  * Name: copy_reverse
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F4_SAVE_CRASHDUMP)
+#if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
 {
   while (size--)
@@ -314,7 +314,7 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
       *dest++ = *src--;
     }
 }
-#endif /* CONFIG_STM32F4_SAVE_CRASHDUMP */
+#endif /* CONFIG_STM32_SAVE_CRASHDUMP */
 
 /****************************************************************************
  * Public Functions
@@ -326,7 +326,7 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
 
 int stm32_bbsram_int(void)
 {
-  int filesizes[CONFIG_STM32F4_BBSRAM_FILES + 1] = BSRAM_FILE_SIZES;
+  int filesizes[CONFIG_STM32_BBSRAM_FILES + 1] = BSRAM_FILE_SIZES;
   char buf[HEADER_TIME_FMT_LEN + 1];
   struct bbsramd_s desc;
   int rv;
@@ -338,7 +338,7 @@ int stm32_bbsram_int(void)
 
   stm32_bbsraminitialize(BBSRAM_PATH, filesizes);
 
-#if defined(CONFIG_STM32F4_SAVE_CRASHDUMP)
+#if defined(CONFIG_STM32_SAVE_CRASHDUMP)
   /* Panic Logging in Battery Backed Up Files
    * Do we have an hard fault in BBSRAM?
    */
@@ -369,7 +369,7 @@ int stm32_bbsram_int(void)
                  "[%s] (%d)\n", HARDFAULT_PATH, rv);
         }
     }
-#endif /* CONFIG_STM32F4_SAVE_CRASHDUMP */
+#endif /* CONFIG_STM32_SAVE_CRASHDUMP */
 
   return rv;
 }
@@ -378,7 +378,7 @@ int stm32_bbsram_int(void)
  * Name: board_crashdump
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F4_SAVE_CRASHDUMP)
+#if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                      const char *filename, int lineno,
                      const char *msg)
@@ -521,6 +521,6 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
       arm_lowputc('!');
     }
 }
-#endif /* CONFIG_STM32F4_SAVE_CRASHDUMP */
+#endif /* CONFIG_STM32_SAVE_CRASHDUMP */
 
 #endif /* CONFIG_STM32_BBSRAM */
