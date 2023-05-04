@@ -339,7 +339,9 @@ static void           i2s_rx_schedule(struct esp32_i2s_s *priv,
 
 static uint32_t i2s_set_datawidth(struct esp32_i2s_s *priv);
 static uint32_t i2s_set_clock(struct esp32_i2s_s *priv);
-static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev, uint32_t frequency);
+static uint32_t i2s_getmclkfrequency(struct i2s_dev_s *dev);
+static uint32_t i2s_setmclkfrequency(struct i2s_dev_s *dev,
+                                     uint32_t frequency);
 static int      i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg);
 
 #ifdef I2S_HAVE_TX
@@ -385,7 +387,8 @@ static const struct i2s_ops_s g_i2sops =
 #endif /* I2S_HAVE_RX */
 
   .i2s_ioctl          = i2s_ioctl,
-  .i2s_mclkfrequency  = i2s_mclkfrequency,
+  .i2s_getmclkfrequency  = i2s_getmclkfrequency,
+  .i2s_setmclkfrequency  = i2s_setmclkfrequency,
 };
 
 #ifdef CONFIG_ESP32_I2S0
@@ -1654,7 +1657,7 @@ static void i2s_configure(struct esp32_i2s_s *priv)
        * by the number of bytes from a sample, i.e, for 24 bits, the
        * multiplier should be divisible by 3. NOTE: the MCLK frequency can
        * be adjusted on runtime, so this value remains valid only if the
-       * upper half does not implement the `i2s_mclkfrequency` method.
+       * upper half does not implement the `i2s_setmclkfrequency` method.
        */
 
       if (priv->config->data_width == I2S_DATA_BIT_WIDTH_24BIT)
@@ -1666,8 +1669,8 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
         }
 
-      i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
-                        priv->mclk_multiple));
+      i2s_setmclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
+                           priv->mclk_multiple));
 
       priv->rate = priv->config->rate;
       i2s_set_clock(priv);
@@ -1774,7 +1777,7 @@ static void i2s_configure(struct esp32_i2s_s *priv)
        * by the number of bytes from a sample, i.e, for 24 bits, the
        * multiplier should be divisible by 3. NOTE: the MCLK frequency can
        * be adjusted on runtime, so this value remains valid only if the
-       * upper half does not implement the `i2s_mclkfrequency` method.
+       * upper half does not implement the `i2s_setmclkfrequency` method.
        */
 
       if (priv->config->data_width == I2S_DATA_BIT_WIDTH_24BIT)
@@ -1786,8 +1789,8 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
         }
 
-      i2s_mclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
-                        priv->mclk_multiple));
+      i2s_setmclkfrequency((struct i2s_dev_s *)priv, (priv->config->rate *
+                           priv->mclk_multiple));
 
       priv->rate = priv->config->rate;
       i2s_set_clock(priv);
@@ -2305,7 +2308,28 @@ static int i2s_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: i2s_mclkfrequency
+ * Name: i2s_getmclkfrequency
+ *
+ * Description:
+ *   Get the current master clock frequency.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns the current master clock.
+ *
+ ****************************************************************************/
+
+static uint32_t i2s_getmclkfrequency(struct i2s_dev_s *dev)
+{
+  struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
+
+  return priv->mclk_freq;
+}
+
+/****************************************************************************
+ * Name: i2s_setmclkfrequency
  *
  * Description:
  *   Set the master clock frequency. Usually, the MCLK is a multiple of the
@@ -2321,7 +2345,8 @@ static int i2s_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static uint32_t i2s_mclkfrequency(struct i2s_dev_s *dev, uint32_t frequency)
+static uint32_t i2s_setmclkfrequency(struct i2s_dev_s *dev,
+                                     uint32_t frequency)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 

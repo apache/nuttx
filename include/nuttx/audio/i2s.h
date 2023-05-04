@@ -226,7 +226,27 @@
   ((d)->ops->i2s_send ? (d)->ops->i2s_send(d,b,c,a,t) : -ENOTTY)
 
 /****************************************************************************
- * Name: I2S_MCLKFREQUENCY
+ * Name: I2S_GETMCLKFREQUENCY
+ *
+ * Description:
+ *   Get the current master clock frequency. NOTE: this parameter may not
+ *   be implemented on I2S driver. If not implemented, the I2S may set
+ *   internally any value to the master clock (or even does not support it).
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns the current master clock.
+ *
+ ****************************************************************************/
+
+#define I2S_GETMCLKFREQUENCY(d) \
+  ((d)->ops->i2s_getmclkfrequency ? \
+   (d)->ops->i2s_getmclkfrequency(d) : -ENOTTY)
+
+/****************************************************************************
+ * Name: I2S_SETMCLKFREQUENCY
  *
  * Description:
  *   Set the master clock frequency. Usually, the MCLK is a multiple of the
@@ -244,9 +264,9 @@
  *
  ****************************************************************************/
 
-#define I2S_MCLKFREQUENCY(d,f) \
-  ((d)->ops->i2s_mclkfrequency ? \
-   (d)->ops->i2s_mclkfrequency(d,f) : -ENOTTY)
+#define I2S_SETMCLKFREQUENCY(d,f) \
+  ((d)->ops->i2s_setmclkfrequency ? \
+   (d)->ops->i2s_setmclkfrequency(d,f) : -ENOTTY)
 
 /****************************************************************************
  * Name: I2S_IOCTL
@@ -311,8 +331,9 @@ struct i2s_ops_s
 
   /* Master Clock methods */
 
-  CODE uint32_t (*i2s_mclkfrequency)(FAR struct i2s_dev_s *dev,
-                                     uint32_t frequency);
+  CODE uint32_t (*i2s_getmclkfrequency)(FAR struct i2s_dev_s *dev);
+  CODE uint32_t (*i2s_setmclkfrequency)(FAR struct i2s_dev_s *dev,
+                                        uint32_t frequency);
 
   /* Ioctl */
 
