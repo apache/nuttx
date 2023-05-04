@@ -76,8 +76,23 @@ int pthread_detach(pthread_t thread)
   pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {
+      FAR struct tcb_s *tcb = nxsched_get_tcb((pid_t)thread);
+
       serr("ERROR: Could not find thread entry\n");
-      ret = EINVAL;
+
+      if (tcb == NULL)
+        {
+          ret = ESRCH;
+        }
+
+      /* The thread is still active but has no join info.  In that
+       * case, it must be a task and not a pthread.
+       */
+
+      else
+        {
+          ret = EINVAL;
+        }
     }
   else
     {
