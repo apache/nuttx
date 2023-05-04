@@ -217,12 +217,7 @@ void *host_realloc(void *oldmem, size_t size)
   size_t oldsize;
   void *mem;
 
-  if (size == 0)
-    {
-      host_free(oldmem);
-      return NULL;
-    }
-  else if (oldmem == NULL)
+  if (oldmem == NULL)
     {
       return host_memalign(sizeof(void *), size);
     }
