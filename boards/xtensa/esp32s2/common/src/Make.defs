@@ -44,6 +44,10 @@ ifeq ($(CONFIG_LCD_ST7789),y)
   CSRCS += esp32s2_st7789.c
 endif
 
+ifeq ($(CONFIG_AUDIO_ES8311),y)
+  CSRCS += esp32s2_es8311.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

@@ -180,10 +180,40 @@ Configurations
 All of the configurations presented below can be tested by running the following commands::
 
     $ ./tools/configure.sh esp32s2-kaluga-1:<config_name>
-    $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
+    $ make flash ESPTOOL_PORT=/dev/ttyUSB1 -j
 
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
+
+audio
+-----
+
+This configuration uses the I2S peripheral and the ES8311 audio
+codec to play an audio file. The easiest way of playing an uncompressed file
+is embedding into the firmware. This configuration selects
+`romfs example <https://github.com/apache/nuttx-apps/tree/master/examples/romfs>`__
+to allow that.
+
+**ROMFS example**
+
+Prepare and build the ``audio`` defconfig::
+
+  $ make -j distclean && ./tools/configure.sh esp32s2-kaluga-1:audio && make
+
+This will create a temporary folder in ``apps/examples/romfs/testdir``. Move
+a PCM-encoded (``.wav``) audio file with 16 or 24 bits/sample (sampled at 16~48kHz)
+to this folder.
+
+.. note:: You can use :download:`this 440 Hz sinusoidal tone <tone.wav>`.
+   The audio file should be located at ``apps/examples/romfs/testdir/tone.wav``
+
+Build the project again and flash it (make sure not to clean it, just build)
+
+After successfully built and flashed, load the romfs and play it::
+
+    nsh> romfs
+    nsh> nxplayer
+    nxplayer> play /usr/share/local/tone.wav
 
 buttons
 -------
@@ -210,6 +240,14 @@ the ``buttons`` application and pressing on any of the available board buttons a
     Sample = 64
     Sample = 0
 
+i2c
+---
+
+This configuration can be used to scan and manipulate I2C devices.
+You can scan for all I2C devices using the following command::
+
+    nsh> i2c dev 0x00 0x7f
+
 lvgl_ili9341
 ------------
 
@@ -219,8 +257,8 @@ driver with the ILI9341 display. You can find LVGL here::
     https://www.lvgl.io/
     https://github.com/lvgl/lvgl
 
-This configuration uses the LVGL demonstration at `apps/examples/lvgldemo` and
-can be executed by running the `lvgldemo` application.
+This configuration uses the LVGL demonstration at ``apps/examples/lvgldemo`` and
+can be executed by running the ``lvgldemo`` application.
 
 lvgl_st7789
 -----------
@@ -231,11 +269,30 @@ driver with the ST7799 display. You can find LVGL here::
     https://www.lvgl.io/
     https://github.com/lvgl/lvgl
 
-This configuration uses the LVGL demonstration at `apps/examples/lvgldemo` and
-can be executed by running the `lvgldemo` application.
+This configuration uses the LVGL demonstration at ``apps/examples/lvgldemo`` and
+can be executed by running the ``lvgldemo`` application.
 
 nsh
 ---
 
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
+
+nxlooper
+--------
+
+The ``nxlooper`` application captures data from the audio device with receiving
+capabilities and forwards the audio data frame to the audio device with transmitting
+capabilities.
+
+After successfully built and flashed, run on the boards' terminal::
+
+    nsh> nxlooper
+    nxlooper> loopback
+
+.. note:: ``loopback`` command default arguments for the channel configuration,
+  the data width and the sample rate are, respectively, 2 channels,
+  16 bits/sample and 48KHz. These arguments can be supplied to select
+  different audio formats, for instance::
+
+    nxlooper> loopback 2 8 44100

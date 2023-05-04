@@ -75,6 +75,17 @@
 #define GPIO_LCD_RST         16
 #define GPIO_LCD_BCKL        6
 
+/* ES8311 Codec */
+
+#define ES8311_I2C_CCLK      7      /* SCL */
+#define ES8311_I2C_CDATA     8      /* SDA */
+#define ES8311_I2S_MCLK      35     /* Master clock */
+#define ES8311_I2S_SCLK      18     /* Audio data bit clock */
+#define ES8311_I2S_LRCK      17     /* Audio data left and right clock */
+#define ES8311_I2S_DSDIN     34     /* DAC audio data (to speakers) */
+#define ES8311_I2S_ASDOUT    12     /* ADC audio data (from microphone) */
+#define ES8311_GPIO_PA_EN    10     /* Power amplifier */
+
 /* LED definitions **********************************************************/
 
 /* Define how many LEDs this board has (needed by userleds) */
@@ -86,5 +97,12 @@
 #define BOARD_NGPIOOUT    2 /* Amount of GPIO Output pins */
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+/* Peripherals definitions **************************************************/
+
+/* ES8311 CODEC */
+
+#define ES8311_I2C_FREQ       100000
+#define ES8311_I2C_ADDR       0x18
 
 #endif /* __BOARDS_XTENSA_ESP32S2_ESP32S2_KALUGA_1_INCLUDE_BOARD_H */
