@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NETINET_ICMP6_H
-#define _INCLUDE_NETINET_ICMP6_H
+#ifndef __INCLUDE_NETINET_ICMP6_H
+#define __INCLUDE_NETINET_ICMP6_H
 
 /****************************************************************************
  * Included Files
@@ -361,4 +361,4 @@ struct nd_opt_home_agent_info
   uint16_t  nd_opt_home_agent_info_lifetime;
 };
 
-#endif /* netinet/icmpv6.h */
+#endif /* __INCLUDE_NETINET_ICMP6_H */

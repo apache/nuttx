@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NETINET_IF_ETHER_H
-#define _INCLUDE_NETINET_IF_ETHER_H
+#ifndef __INCLUDE_NETINET_IF_ETHER_H
+#define __INCLUDE_NETINET_IF_ETHER_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,7 @@
  * RFC 826.
  */
 
-struct  ether_arp
+struct ether_arp
 {
   struct  arphdr ea_hdr;          /* fixed-size header */
   uint8_t arp_sha[ETH_ALEN];      /* sender hardware address */
@@ -61,4 +61,4 @@ struct  ether_arp
 #define arp_pln ea_hdr.ar_pln
 #define arp_op  ea_hdr.ar_op
 
-#endif /* _INCLUDE_NETINET_IF_ETHER_H */
+#endif /* __INCLUDE_NETINET_IF_ETHER_H */
