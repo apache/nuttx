@@ -206,6 +206,63 @@ config CS4344_WORKER_STACKSIZE
 
 endif # AUDIO_CS4344
 
+config AUDIO_ES8311
+	bool "ES8311 codec chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the ES8311 Audio codec by Everest
+		Semiconductor.
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
+
+if AUDIO_ES8311
+
+config ES8311_INPUT_INITVOLUME
+	int "ES8311 initial input volume setting"
+	default 1000
+
+config ES8311_OUTPUT_INITVOLUME
+	int "ES8311 initial output volume setting"
+	default 400
+
+choice
+	prompt "MCLK source"
+	default ES8311_SRC_MCLK
+	---help---
+		Select the source of the MCLK signal.
+
+config ES8311_SRC_MCLK
+	bool "From MCLK Pin"
+
+config ES8311_SRC_BCLK
+	bool "From BCLK Pin"
+
+endchoice
+
+config ES8311_INFLIGHT
+	int "ES8311 maximum in-flight audio buffers"
+	default 2
+
+config ES8311_MSG_PRIO
+	int "ES8311 message priority"
+	default 1
+
+config ES8311_BUFFER_SIZE
+	int "ES8311 preferred buffer size"
+	default 8192
+
+config ES8311_NUM_BUFFERS
+	int "ES8311 preferred number of buffers"
+	default 4
+
+config ES8311_WORKER_STACKSIZE
+	int "ES8311 worker thread stack size"
+	default 2048
+
+endif # AUDIO_ES8388
+
 config AUDIO_ES8388
 	bool "ES8388 codec chip"
 	default n

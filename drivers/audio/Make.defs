@@ -48,6 +48,13 @@ ifeq ($(CONFIG_AUDIO_CS4344),y)
 CSRCS += cs4344.c
 endif
 
+ifeq ($(CONFIG_AUDIO_ES8311),y)
+CSRCS += es8311.c
+ifeq ($(CONFIG_ES8311_REGDUMP),y)
+CSRCS += es8311_debug.c
+endif
+endif
+
 ifeq ($(CONFIG_AUDIO_ES8388),y)
 CSRCS += es8388.c
 ifeq ($(CONFIG_ES8388_REGDUMP),y)
