@@ -98,6 +98,36 @@ static void allsyms_relocate(void)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: __lsan_default_options
+ *
+ * Description:
+ *   This function may be optionally provided by user and should return
+ *   a string containing leak sanitizer runtime options.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_ASAN
+const char *__lsan_default_options(void)
+{
+  /* The fast-unwind implementation of leak-sanitizer will obtain the
+   * current stack top/bottom and frame address(Stack Pointer) for
+   * backtrace calculation:
+   *
+   * https://github.com/gcc-mirror/gcc/blob/releases/gcc-13/libsanitizer/
+   *   lsan/lsan.cpp#L39-L42
+   *
+   * Since the scheduling mechanism of NuttX sim is coroutine
+   * (setjmp/longjmp), if the Stack Pointer is switched, the fast-unwind
+   * will unable to get the available address, so the memory leaks on the
+   * system/application side that cannot be caught normally. This PR will
+   * disable fast-unwind by default to avoid unwind failure.
+   */
+
+  return "fast_unwind_on_malloc=0";
+}
+#endif
+
+/****************************************************************************
  * Name: main
  *
  * Description:
