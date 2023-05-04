@@ -278,7 +278,7 @@ static int cs4344_setmclkfrequency(FAR struct cs4344_dev_s *priv)
 
   if (priv->mclk_freq != 0)
     {
-      ret = I2S_MCLKFREQUENCY(priv->i2s, priv->mclk_freq);
+      ret = I2S_SETMCLKFREQUENCY(priv->i2s, priv->mclk_freq);
     }
   else
     {

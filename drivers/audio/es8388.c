@@ -527,7 +527,7 @@ static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv)
     {
       audinfo("MCLK Freq: %u\n", priv->mclk);
 
-      int ret = I2S_MCLKFREQUENCY(priv->i2s, priv->mclk);
+      int ret = I2S_SETMCLKFREQUENCY(priv->i2s, priv->mclk);
 
       if (ret < 0)
         {
