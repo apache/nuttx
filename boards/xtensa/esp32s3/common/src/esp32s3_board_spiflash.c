@@ -50,12 +50,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_WIFI_MTD_ENCRYPT
-#  define WIFI_ENCRYPT true
-#else
-#  define WIFI_ENCRYPT false
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -256,72 +250,6 @@ static int setup_nxffs(struct mtd_dev_s *mtd, const char *mnt_pt)
 #endif
 
 /****************************************************************************
- * Name: init_wifi_partition
- *
- * Description:
- *   Initialize partition that is dedicated to Wi-Fi.
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_WIFI_SAVE_PARAM
-static int init_wifi_partition(void)
-{
-  int ret = OK;
-  struct mtd_dev_s *mtd;
-
-  mtd = esp32s3_spiflash_alloc_mtdpart(CONFIG_ESP32S3_WIFI_MTD_OFFSET,
-                                       CONFIG_ESP32S3_WIFI_MTD_SIZE,
-                                       WIFI_ENCRYPT);
-  if (!mtd)
-    {
-      ferr("Failed to alloc MTD partition of SPI Flash\n");
-      return -ENOMEM;
-    }
-
-#if defined (CONFIG_ESP32S3_SPIFLASH_SMARTFS)
-
-  ret = setup_smartfs(1, mtd, CONFIG_ESP32S3_WIFI_FS_MOUNTPT);
-  if (ret < 0)
-    {
-      ferr("Failed to setup smartfs\n");
-      return ret;
-    }
-
-#elif defined(CONFIG_ESP32S3_SPIFLASH_LITTLEFS)
-
-  const char *path = "/dev/mtdblock1";
-  ret = setup_littlefs(path, mtd, CONFIG_ESP32S3_WIFI_FS_MOUNTPT, 0777);
-  if (ret < 0)
-    {
-      ferr("Failed to setup littlefs\n");
-      return ret;
-    }
-
-#elif defined(CONFIG_ESP32S3_SPIFLASH_SPIFFS)
-
-  const char *path = "/dev/mtdblock1";
-  ret = setup_spiffs(path, mtd, CONFIG_ESP32S3_WIFI_FS_MOUNTPT, 0777);
-  if (ret < 0)
-    {
-      ferr("Failed to setup spiffs\n");
-      return ret;
-    }
-
-#else
-
-    ferr("No supported FS selected. Wi-Fi partition "
-         "should be mounted before Wi-Fi initialization\n");
-
-#endif
-
-  return ret;
-}
-#endif
-
-/****************************************************************************
  * Name: init_storage_partition
  *
  * Description:
@@ -348,7 +276,7 @@ static int init_storage_partition(void)
 
 #if defined (CONFIG_ESP32S3_SPIFLASH_SMARTFS)
 
-  ret = setup_smartfs(0, mtd, NULL);
+  ret = setup_smartfs(0, mtd, "/data");
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup smartfs\n");
@@ -357,7 +285,7 @@ static int init_storage_partition(void)
 
 #elif defined (CONFIG_ESP32S3_SPIFLASH_NXFFS)
 
-  ret = setup_nxffs(mtd, "/mnt");
+  ret = setup_nxffs(mtd, "/data");
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup nxffs\n");
@@ -367,7 +295,7 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESP32S3_SPIFLASH_LITTLEFS)
 
   const char *path = "/dev/esp32s3flash";
-  ret = setup_littlefs(path, mtd, NULL, 0755);
+  ret = setup_littlefs(path, mtd, "/data", 0755);
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup littlefs\n");
@@ -377,7 +305,7 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESP32S3_SPIFLASH_SPIFFS)
 
   const char *path = "/dev/esp32s3flash";
-  ret = setup_spiffs(path, mtd, NULL, 0755);
+  ret = setup_spiffs(path, mtd, "/data", 0755);
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup spiffs\n");
@@ -419,14 +347,6 @@ int board_spiflash_init(void)
     {
       return ret;
     }
-
-#ifdef CONFIG_ESP32S3_WIFI_SAVE_PARAM
-  ret = init_wifi_partition();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
 
   ret = init_storage_partition();
   if (ret < 0)
