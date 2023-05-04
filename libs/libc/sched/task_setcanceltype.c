@@ -55,5 +55,5 @@ int task_setcanceltype(int type, FAR int *oldtype)
 
   /* Check the requested cancellation type */
 
-  return (type == TASK_CANCEL_ASYNCHRONOUS) ? OK : ENOSYS;
+  return (type == TASK_CANCEL_ASYNCHRONOUS) ? OK : EINVAL;
 }
