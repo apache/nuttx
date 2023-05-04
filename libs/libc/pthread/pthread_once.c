@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <sched.h>
@@ -65,8 +66,10 @@ int pthread_once(FAR pthread_once_t *once_control,
 {
   /* Sanity checks */
 
-  DEBUGASSERT(once_control != NULL);
-  DEBUGASSERT(init_routine != NULL);
+  if (once_control == NULL || init_routine == NULL)
+    {
+      return EINVAL;
+    }
 
   /* Prohibit pre-emption while we test and set the once_control. */
 
