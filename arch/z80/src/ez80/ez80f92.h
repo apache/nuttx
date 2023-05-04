@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/z80/src/ez80/ez80f92.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_Z80_SRC_EZ80_EZ80F92_H
 #define __ARCH_Z80_SRC_EZ80_EZ80F92_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include "nuttx/config.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Memory map ***********************************************************************/
+/* Memory map ***************************************************************/
 
 #define EZ80_ONCHIPFLASH       0x000000 /* CS0: 64-128Kb of on-chip flash */
 #define EZ80_OFFCHIPCS0        0x400000 /* CS0: Off chip use (usually flash) */
@@ -47,13 +47,13 @@
 #  define EZ80_SRAM_SIZE       0x001000 /* 4Kb on-chip sram */
 #endif
 
-/* Product ID Registers  ************************************************************/
+/* Product ID Registers  ****************************************************/
 
 #define EZ80_ZDI_ID_L          0x00
 #define EZ80_ZDI_ID_H          0x01
 #define EZ80_ZDI_ID_REV        0x02
 
-/* Timer Registers  *****************************************************************/
+/* Timer Registers  *********************************************************/
 
 #define EZ80_TMR0_CTL          0x80        /* RW: Timer 0 control register */
 #define EZ80_TMR0_DRL          0x81        /* R : Timer 0 data register (low) */
@@ -93,7 +93,7 @@
 
 #define EZ80_TMR_ISS           0x92        /* Timer input source selection register */
 
-/* TMR0/1/2/3 CTL Register Bit Definitions ******************************************/
+/* TMR0/1/2/3 CTL Register Bit Definitions **********************************/
 
 #define EZ80_TMRCTL_IRQ        0x80        /* Bit 7: Generate interrupt request */
 #define EZ80_TMRCTL_EN         0x40        /* Bit 6: Enable timer interrupt requests */
@@ -107,12 +107,12 @@
 #define EZ80_TMRCTL_RSTEN      0x02        /* Bit 1: Reload and start function enabled */
 #define EZ80_TMRCTL_TIMEN      0x01        /* Bit 0: Programmable reload timer enabled */
 
-/* WDT Registers ********************************************************************/
+/* WDT Registers ************************************************************/
 
 #define EZ80_WDT_CTL           0x93
 #define EZ80_WDT_RR            0x94
 
-/* GPIO Registers *******************************************************************/
+/* GPIO Registers ***********************************************************/
 
 #define EZ80_PB_DR             0x9a
 #define EZ80_PB_DDR            0x9b
@@ -127,7 +127,7 @@
 #define EZ80_PD_ALT1           0xa4
 #define EZ80_PD_ALT2           0xa5
 
-/* CS Registers *********************************************************************/
+/* CS Registers *************************************************************/
 
 #define EZ80_CS0_LBR           0xa8
 #define EZ80_CS0_UBR           0xa9
@@ -142,17 +142,17 @@
 #define EZ80_CS3_UBR           0xb2
 #define EZ80_CS3_CTL           0xb3
 
-/* RAMCTL registers *****************************************************************/
+/* RAMCTL registers *********************************************************/
 
 #define EZ80_RAM_CTL           0xb4
 #define EZ80_RAM_ADDR_U        0xb5
 
-/* RAMCTL bit definitions ***********************************************************/
+/* RAMCTL bit definitions ***************************************************/
 
 #define RAMCTL_ERAMEN          (1 << 6)    /* Bit 7: 1=On chip EMAC SRAM is enabled */
 #define RAMCTL_GPRAMEN         (1 << 7)    /* Bit 7: 1=On chip GP SRAM is enabled */
 
-/* SPI Registers ********************************************************************/
+/* SPI Registers ************************************************************/
 
 #define EZ80_SPI_BRG_L         0xb8
 #define EZ80_SPI_BRG_H         0xb9
@@ -161,11 +161,11 @@
 #define EZ80_SPI_RBR           0xbc
 #define EZ80_SPI_TSR           0xbc
 
-/* Infrared Encoder/Decoder Block ***************************************************/
+/* Infrared Encoder/Decoder Block *******************************************/
 
 #define EZ80_IR_CTL            0xbf        /* Infrared Encoder/Decoder Control */
 
-/* UART Register Offsets ************************************************************/
+/* UART Register Offsets ****************************************************/
 
                                            /* DLAB=0: */
 #define EZ80_UART_THR          0x00        /*    W: UART Transmit holding register */
@@ -184,12 +184,12 @@
 #define EZ80_UART_MSR          0x06        /*   R : UART Modem status register */
 #define EZ80_UART_SPR          0x07        /*   RW: UART Scratchpad register */
 
-/* UART0/1 Base Register Addresses **************************************************/
+/* UART0/1 Base Register Addresses ******************************************/
 
 #define EZ80_UART0_BASE        0xc0
 #define EZ80_UART1_BASE        0xd0
 
-/* UART0/1 IER register bits ********************************************************/
+/* UART0/1 IER register bits ************************************************/
 
 #define EZ80_UARTEIR_INTMASK   0x1f         /* Bits 5-7: Reserved */
 #define EZ80_UARTEIR_TCIE      0x10         /* Bit 4: Transmission complete interrupt */
@@ -198,7 +198,7 @@
 #define EZ80_UARTEIR_TIE       0x02         /* Bit 1: Transmit interrupt */
 #define EZ80_UARTEIR_RIE       0x01         /* Bit 0: Receive interrupt */
 
-/* UART0/1 IIR register bits ********************************************************/
+/* UART0/1 IIR register bits ************************************************/
 
 #define EZ80_UARTIIR_FSTS      0xc0         /* Bits 6-7: FIFO enable */
 #define EZ80_UARTIIR_FDIS      0x00         /*   00: FIFO disabled */
@@ -215,7 +215,7 @@
 #define EZ80_UARTIIR_INTBIT    0x01         /* Bit 0: (NOT) Active interrupt source */
 #define EZ80_UARTIIR_CAUSEMASK 0x0f
 
-/* UART0/1 FCTL register bits *******************************************************/
+/* UART0/1 FCTL register bits ***********************************************/
 
 #define EZ80_UARTFCTL_TRIG     0xc0         /* Bits 6-7: UART receive FIFO trigger level */
 #  define EZ80_UARTTRIG_1      0x00         /*   00: Receive FIFO trigger level=1 */
@@ -227,7 +227,7 @@
 #define EZ80_UARTFCTL_CLRRXF   0x02         /* Bit 1: Receive enable */
 #define EZ80_UARTFCTL_FIFOEN   0x01         /* Bit 0: Enable receive/transmit FIFOs */
 
-/* UART0/1 LCTL register bits *******************************************************/
+/* UART0/1 LCTL register bits ***********************************************/
 
 #define EZ80_UARTLCTL_DLAB     0x80         /* Bit 7: Enable access to baud rate generator */
 #define EZ80_UARTLCTL_SB       0x40         /* Bit 6: Send break */
@@ -243,7 +243,7 @@
 
 #define EZ80_UARTLCTL_MASK     0x3f
 
-/* UART0/1 MCTL register bits *******************************************************/
+/* UART0/1 MCTL register bits ***********************************************/
 
                                             /* Bits 6-7: Reserved */
 #define EZ80_UARTMCTL_MDM      0x20         /* Bit 5: Multi-drop mode enable */
@@ -253,7 +253,7 @@
 #define EZ80_UARTMCTL_RTS      0x02         /* Bit 1: Request to send */
 #define EZ80_UARTMCTL_DTR      0x01         /* Bit 0: Data termnal read */
 
-/* UART0/1 LSR register bits ********************************************************/
+/* UART0/1 LSR register bits ************************************************/
 
 #define EZ80_UARTLSR_ERR       0x80         /* Bit 7: Error detected in FIFO */
 #define EZ80_UARTLSR_TEMT      0x40         /* Bit 6: Transmit FIFO empty and idle */
@@ -264,7 +264,7 @@
 #define EZ80_UARTLSR_OE        0x02         /* Bit 1: Overrun error */
 #define EZ80_UARTLSR_DR        0x01         /* Bit 0: Data ready */
 
-/* UART0/1 MSR register bits ********************************************************/
+/* UART0/1 MSR register bits ************************************************/
 
 #define EZ80_UARTMSR_DCD       0x80         /* Bit 7: Data carrier detect */
 #define EZ80_UARTMSR_RI        0x40         /* Bit 6: Ring indicator */
@@ -275,7 +275,7 @@
 #define EZ80_UARTMSR_DDSR      0x02         /* Bit 1: Delta on DSR input */
 #define EZ80_UARTMSR_DCTS      0x01         /* Bit 0: Delta on CTS input */
 
-/* I2C Registers  *******************************************************************/
+/* I2C Registers  ***********************************************************/
 
 #define EZ80_I2C_SAR           0xc8
 #define EZ80_I2C_XSAR          0xc9
@@ -285,12 +285,12 @@
 #define EZ80_I2C_CCR           0xcc
 #define EZ80_I2C_SRR           0xcd
 
-/* CLK Registers  *******************************************************************/
+/* CLK Registers  ***********************************************************/
 
 #define EZ80_CLK_PPD1          0xdb
 #define EZ80_CLK_PPD2          0xdc
 
-/* RTC Registers  *******************************************************************/
+/* RTC Registers  ***********************************************************/
 
 #define EZ80_RTC_SEC           0xe0
 #define EZ80_RTC_MIN           0xe1
@@ -307,14 +307,14 @@
 #define EZ80_RTC_ACTRL         0xec
 #define EZ80_RTC_CTRL          0xed
 
-/* CSBMC Registers  *****************************************************************/
+/* CSBMC Registers  *********************************************************/
 
 #define EZ80_CS0_BMC           0xf0
 #define EZ80_CS1_BMC           0xf1
 #define EZ80_CS2_BMC           0xf2
 #define EZ80_CS3_BMC           0xf3
 
-/* FLASH Registers  *****************************************************************/
+/* FLASH Registers  *********************************************************/
 
 #define EZ80_FLASH_KEY         0xf5
 #define EZ80_FLASH_DATA        0xf6
@@ -328,9 +328,9 @@
 #define EZ80_FLASH_COL         0xfe
 #define EZ80_FLASH_PGCTL       0xff
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

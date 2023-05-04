@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/z80/src/ez80/ez80f91_emac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_Z80_SRC_EZ80_EZ80F91_EMAC_H
 #define __ARCH_Z80_SRC_EZ80_EZ80F91_EMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* EMACC Registers  *****************************************************************/
+/* EMACC Registers  *********************************************************/
 
 /* Provided in ez80f91.h */
 
-/* EMAC configuration 1/2/3 register bit settings ***********************************/
+/* EMAC configuration 1/2/3 register bit settings ***************************/
 
 #define EMAC_CFG1_DCRCC        0x01  /* Bit 0: 1=4 bytes of proprietary header */
 #define EMAC_CFG1_HUGEN        0x02  /* Bit 1: 1=Allow unlimited size frames to be received */
@@ -67,7 +67,7 @@
 #define EMAC_CFG4_TPCF         0x40  /* Bit 6: 1=Transmit pause control frame. */
                                      /* Bit 7: reserved */
 
-/* EMAC AFR register bit settings ***************************************************/
+/* EMAC AFR register bit settings *******************************************/
 
 #define EMAC_AFR_BC            0x01  /* Bit 0: 1=Accept broadcast messages */
 #define EMAC_AFR_QMC           0x02  /* Bit 1: 1=Accept only qualified multicast messages */
@@ -75,7 +75,7 @@
 #define EMAC_AFR_PROM          0x08  /* Bit 3: 1=Enable promiscuous mode */
                                      /* Bits 4-7: Reserved */
 
-/* EMAC MII management register bit settings ****************************************/
+/* EMAC MII management register bit settings ********************************/
 
 #define EMAC_MIIMGMT_CLKMASK   0x07  /* Bits 0-2: Divisor that produces MDC from SCLK */
 #  define EMAC_MDC_DIV4        0x01  /*        MDC = SCLK / 4 */
@@ -91,15 +91,15 @@
 #define EMAC_MIIMGMT_RSTAT     0x40  /* Bit 6: 1=Read status from PHY (via PRSD) */
 #define EMAC_MIIMGMT_LCTLD     0x80  /* Bit 7: 1=Send CTLD control data to PHY */
 
-/* EMAC PHY unit select address register bit settings *******************************/
+/* EMAC PHY unit select address register bit settings ***********************/
 
 #define EMAC_RGAD_MASK         0x1f  /* 5-bit value selects address within PHY */
 
-/* EMAC PHY address register bit settings *******************************************/
+/* EMAC PHY address register bit settings ***********************************/
 
 #define EMAC_FIAD_MASK         0x1f  /* 5-bit value selects the external PHY */
 
-/* EMAC reset control register bit settings *****************************************/
+/* EMAC reset control register bit settings *********************************/
 
 #define EMAC_RST_HRMGT         0x01  /* Bit 0: 1=Reset EMAC management function */
 #define EMAC_RST_HRRMC         0x02  /* Bit 1: 1=Reset EMAC receive control function */
@@ -109,7 +109,7 @@
 #define EMAC_RST_SRST          0x20  /* Bit 5: 1=Software reset active */
                                      /* Bits 6-7: Reserved */
 
-/* EMAC bufsize register bit settings ***********************************************/
+/* EMAC bufsize register bit settings ***************************************/
 
 #define EMAC_BUFSZ_BUFSZMASK   0xc0  /* Bits 6-6: Rx/Tx buffer size */
 #  define EMAC_BUFSZ_256b      0x00  /*   EMAC Rx/Tx buffer size = 256 bytes */
@@ -118,7 +118,7 @@
 #  define EMAC_BUFSZ_32b       0xc0  /*   EMAC Rx/Tx buffer size = 32 bytes */
 #define EMAC_BUFSZ_TPCFLMASK   0x3f  /* Bits 0-5: Tranmsit pause frame level */
 
-/* EMAC interrupt enable register bit settings **************************************/
+/* EMAC interrupt enable register bit settings ******************************/
 
 #define EMAC_EIN_TXDONE       0x01  /* Bit 0: 1=Enable transmit done interrupt */
 #define EMAC_EIN_TXCF         0x02  /* Bit 1: 1=Enable transmit control frame interrupt */
@@ -129,7 +129,7 @@
 #define EMAC_EIN_MGTDONE      0x40  /* Bit 6: 1=Enable MII Mgmt done interrupt */
 #define EMAC_EIN_TXFSMERR     0x80  /* Bit 7: 1=Enable transmit state machine error interrupt */
 
-/* EMAC interrupt status register bit settings **************************************/
+/* EMAC interrupt status register bit settings ******************************/
 
 #define EMAC_ISTAT_TXDONE     0x01  /* Bit 0: 1=Transmit done interrupt */
 #define EMAC_ISTAT_TXCF       0x02  /* Bit 1: 1=Transmit control frame interrupt */
@@ -140,14 +140,14 @@
 #define EMAC_ISTAT_MGTDONE    0x40  /* Bit 6: 1=MII Mgmt done interrupt */
 #define EMAC_ISTAT_TXFSMERR   0x80  /* Bit 7: 1=Transmit state machine error interrupt */
 
-/* EMAC MII status register bit settings ********************************************/
+/* EMAC MII status register bit settings ************************************/
 
 #define EMAC_MIISTAT_RDADRMK  0x1f  /* Bits 0-4: PHY addressed in current scan cycle */
 #define EMAC_MIISTAT_NVALID   0x20  /* Bit 5: 1=PRSD is valid */
 #define EMAC_MIISTAT_MIILF    0x40  /* Bit 6: 1=PHY link OK */
 #define EMAC_MIISTAT_BUSY     0x80  /* Bit 7: 1=MII management in progress */
 
-/* EMAC FIFO flags register bit settings ********************************************/
+/* EMAC FIFO flags register bit settings ************************************/
 
 #define EMAC_FFLAGS_RFE       0x01 /* Bit 0: 1=Receive FIFO empty */
 #define EMAC_FFLAGS_RFAE      0x02 /* Bit 0: 1=Receive FIFO almost empty */
@@ -157,7 +157,7 @@
 #define EMAC_FFLAGS_TFAE      0x20 /* Bit 0: 1=Transmit FIFO almost empty */
 #define EMAC_FFLAGS_TFF       0x80 /* Bit 0: 1=Trasnmit FIFO full */
 
-/* EMAC Transmit Descriptor Status **************************************************/
+/* EMAC Transmit Descriptor Status ******************************************/
 
 #define EMAC_TXDESC_NCOLL     0x0001 /* Bits 0-3: Number of collisions that occurred
                                       * while transmitting the packet. */
@@ -187,7 +187,7 @@
 #define EMAC_TXDESC_ABORT     0x4000 /* Bit 14: 1=Packet aborted (not transmitted). */
 #define EMAC_TXDESC_OWNER     0x8000 /* Bit 15: 0=Host (eZ80 CPU) owns, 1=EMAC owns. */
 
-/* Receive Descriptor Status ********************************************************/
+/* Receive Descriptor Status ************************************************/
 
 #define EMAC_RXDESC_OVR       0x0001 /* Bit 0: 1=A Receive Overrun occurs in this
                                       * packet.  An overrun occurs when all of the
@@ -234,9 +234,9 @@
 #define EMAC_RXDESC_ALGNERR   0x4000 /* Bit 14: 1=An odd number of nibbles is received. */
 #define EMAC_RXDESC_OK        0x8000 /* Bit 15: 1=Packet received intact. */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* EMAC descriptor structure (7 bytes) */
 
@@ -253,9 +253,9 @@ struct ez80emac_desc_s
 
 #define SIZEOF_EMACSDESC 7
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -266,9 +266,9 @@ extern "C"
 #define EXTERN extern
 #endif /* __cplusplus */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/renesas/include/sh1/irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directly but, rather,
  * only indirectly through nuttx/irq.h
@@ -25,16 +25,16 @@
 #ifndef __ARCH_RENESAS_INCLUDE_SH1_IRQ_H
 #define __ARCH_RENESAS_INCLUDE_SH1_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* IRQ channels */
 
@@ -241,16 +241,17 @@
 #define SH1_SYSTIMER_IRQ   SH1_IMIA0_IRQ
 #endif
 
-/* Vector table offsets *************************************************************/
+/* Vector table offsets *****************************************************/
 
-/* The following provides the vector numbers for each IRQ.  The IRQ numbers (above)
- * form the densely packet number space used by the system to identify IRQs.  The
- * following are the (relatively) loosely spaced offsets that identify the location
- * of the corresponding vector in the vector table.
+/* The following provides the vector numbers for each IRQ.
+ * The IRQ numbers (above) form the densely packet number space used by the
+ * system to identify IRQs.  The following are the (relatively) loosely
+ * spaced offsets that identify the location of the corresponding vector
+ * in the vector table.
  *
- * These offsets are specified as a vector number (suitably for indexing an array
- * of uint32_t) but would have to by multiplied by 4 to get an addressable, byte
- * offset.
+ * These offsets are specified as a vector number (suitably for indexing
+ * an array of uint32_t) but would have to by multiplied by 4 to get
+ * an addressable, byte offset.
  */
 
 /* Resets */
@@ -439,9 +440,9 @@
 #define XCPTCONTEXT_REGS    (22)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This struct defines the way the registers are stored.  We need to save: */
 
@@ -471,9 +472,9 @@ struct xcptcontext
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -484,9 +485,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -563,9 +564,9 @@ static inline void up_irq_restore(irqstate_t flags)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
