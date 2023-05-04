@@ -68,13 +68,13 @@ static void es8388_writereg(FAR struct es8388_dev_s *priv,
                             uint16_t regval);
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static void es8388_setvolume(FAR struct es8388_dev_s *priv,
-                             es8388_module_t module,
+                             es_module_e module,
                              uint16_t volume);
 #endif
 static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv);
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
 static void es8388_setmute(FAR struct es8388_dev_s *priv,
-                           es8388_module_t module,
+                           es_module_e module,
                            bool enable);
 #endif
 static void es8388_setmicgain(FAR struct es8388_dev_s *priv, uint32_t gain);
@@ -359,17 +359,17 @@ static void es8388_writereg(FAR struct es8388_dev_s *priv,
 
 static void es8388_setmicgain(FAR struct es8388_dev_s *priv, uint32_t gain)
 {
-  static const es8388_mic_gain_t gain_map[] =
+  static const es_mic_gain_e gain_map[] =
   {
-    ES8388_MIC_GAIN_0DB,
-    ES8388_MIC_GAIN_3DB,
-    ES8388_MIC_GAIN_6DB,
-    ES8388_MIC_GAIN_9DB,
-    ES8388_MIC_GAIN_12DB,
-    ES8388_MIC_GAIN_15DB,
-    ES8388_MIC_GAIN_18DB,
-    ES8388_MIC_GAIN_21DB,
-    ES8388_MIC_GAIN_24DB,
+    ES_MIC_GAIN_0DB,
+    ES_MIC_GAIN_3DB,
+    ES_MIC_GAIN_6DB,
+    ES_MIC_GAIN_9DB,
+    ES_MIC_GAIN_12DB,
+    ES_MIC_GAIN_15DB,
+    ES_MIC_GAIN_18DB,
+    ES_MIC_GAIN_21DB,
+    ES_MIC_GAIN_24DB,
   };
 
   priv->mic_gain = gain_map[MIN(gain, 24) / 3];
@@ -387,7 +387,8 @@ static void es8388_setmicgain(FAR struct es8388_dev_s *priv, uint32_t gain)
  *   desired volume and balance settings.
  *
  * Input Parameters:
- *   priv - A reference to the driver state structure.
+ *   priv - A reference to the driver state structure;
+ *   module - The module to change the volume for;
  *   volume - The volume to be set in the codec (0..1000).
  *
  * Returned Value:
@@ -397,7 +398,7 @@ static void es8388_setmicgain(FAR struct es8388_dev_s *priv, uint32_t gain)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static void es8388_setvolume(FAR struct es8388_dev_s *priv,
-                             es8388_module_t module,
+                             es_module_e module,
                              uint16_t volume)
 {
   uint16_t leftlvl;
@@ -468,14 +469,14 @@ static void es8388_setvolume(FAR struct es8388_dev_s *priv,
 
   /* Set the volume */
 
-  if (module == ES8388_MODULE_DAC || module == ES8388_MODULE_ADC_DAC)
+  if (module == ES_MODULE_DAC || module == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_DACCONTROL4, ES8388_LDACVOL(dbleftlvl));
       es8388_writereg(priv, ES8388_DACCONTROL5, ES8388_RDACVOL(dbrightlvl));
       priv->volume_out = volume;
     }
 
-  if (module == ES8388_MODULE_ADC || module == ES8388_MODULE_ADC_DAC)
+  if (module == ES_MODULE_ADC || module == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_ADCCONTROL8, ES8388_LADCVOL(dbleftlvl));
       es8388_writereg(priv, ES8388_ADCCONTROL9, ES8388_RADCVOL(dbrightlvl));
@@ -566,7 +567,7 @@ static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
 static void es8388_setmute(FAR struct es8388_dev_s *priv,
-                           es8388_module_t module,
+                           es_module_e module,
                            bool enable)
 {
   uint8_t reg = 0;
@@ -575,7 +576,7 @@ static void es8388_setmute(FAR struct es8388_dev_s *priv,
 
   priv->mute = enable;
 
-  if (module == ES8388_MODULE_DAC || module == ES8388_MODULE_ADC_DAC)
+  if (module == ES_MODULE_DAC || module == ES_MODULE_ADC_DAC)
     {
       reg = es8388_readreg(priv, ES8388_DACCONTROL3) &
         (~ES8388_DACMUTE_BITMASK);
@@ -583,7 +584,7 @@ static void es8388_setmute(FAR struct es8388_dev_s *priv,
                       reg | ES8388_DACMUTE(enable));
     }
 
-  if (module == ES8388_MODULE_ADC || module == ES8388_MODULE_ADC_DAC)
+  if (module == ES_MODULE_ADC || module == ES_MODULE_ADC_DAC)
     {
       reg = es8388_readreg(priv, ES8388_ADCCONTROL7) &
         (~ES8388_ADCMUTE_BITMASK);
@@ -617,23 +618,23 @@ static void es8388_setbitspersample(FAR struct es8388_dev_s *priv)
   switch (priv->bpsamp)
     {
       case 16:
-        bit_config = ES8388_WORD_LENGTH_16BITS;
+        bit_config = ES_WORD_LENGTH_16BITS;
         break;
 
       case 18:
-        bit_config = ES8388_WORD_LENGTH_18BITS;
+        bit_config = ES_WORD_LENGTH_18BITS;
         break;
 
       case 20:
-        bit_config = ES8388_WORD_LENGTH_20BITS;
+        bit_config = ES_WORD_LENGTH_20BITS;
         break;
 
       case 24:
-        bit_config = ES8388_WORD_LENGTH_24BITS;
+        bit_config = ES_WORD_LENGTH_24BITS;
         break;
 
       case 32:
-        bit_config = ES8388_WORD_LENGTH_32BITS;
+        bit_config = ES_WORD_LENGTH_32BITS;
         break;
 
       default:
@@ -644,8 +645,8 @@ static void es8388_setbitspersample(FAR struct es8388_dev_s *priv)
   I2S_TXDATAWIDTH(priv->i2s, priv->bpsamp);
   I2S_RXDATAWIDTH(priv->i2s, priv->bpsamp);
 
-  if (priv->audio_mode == ES8388_MODULE_ADC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_ADC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       reg = es8388_readreg(priv, ES8388_ADCCONTROL4) &
         (~ES8388_ADCWL_BITMASK);
@@ -653,8 +654,8 @@ static void es8388_setbitspersample(FAR struct es8388_dev_s *priv)
                       reg | ES8388_ADCWL(bit_config));
     }
 
-  if (priv->audio_mode == ES8388_MODULE_DAC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_DAC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       reg = es8388_readreg(priv, ES8388_DACCONTROL1) &
         (~ES8388_DACWL_BITMASK);
@@ -688,35 +689,35 @@ static void es8388_setsamplerate(FAR struct es8388_dev_s *priv)
   switch (priv->samprate)
     {
       case 8000:
-        regval = ES8388_LCLK_DIV_1536;
+        regval = ES_LCLK_DIV_1536;
         break;
 
       case 11025:
       case 12000:
-        regval = ES8388_LCLK_DIV_1024;
+        regval = ES_LCLK_DIV_1024;
         break;
 
       case 16000:
-        regval = ES8388_LCLK_DIV_768;
+        regval = ES_LCLK_DIV_768;
         break;
 
       case 22050:
       case 24000:
-        regval = ES8388_LCLK_DIV_512;
+        regval = ES_LCLK_DIV_512;
         break;
 
       case 32000:
-        regval = ES8388_LCLK_DIV_384;
+        regval = ES_LCLK_DIV_384;
         break;
 
       case 44100:
       case 48000:
-        regval = ES8388_LCLK_DIV_256;
+        regval = ES_LCLK_DIV_256;
         break;
 
       case 88200:
       case 96000:
-        regval = ES8388_LCLK_DIV_128;
+        regval = ES_LCLK_DIV_128;
         break;
 
       default:
@@ -731,14 +732,14 @@ static void es8388_setsamplerate(FAR struct es8388_dev_s *priv)
   I2S_TXSAMPLERATE(priv->i2s, priv->samprate);
   I2S_RXSAMPLERATE(priv->i2s, priv->samprate);
 
-  if (priv->audio_mode == ES8388_MODULE_ADC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_ADC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_ADCCONTROL5, ES8388_ADCFSRATIO(regval));
     }
 
-  if (priv->audio_mode == ES8388_MODULE_DAC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_DAC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_DACCONTROL2, ES8388_DACFSRATIO(regval));
     }
@@ -970,7 +971,7 @@ static int es8388_configure(FAR struct audio_lowerhalf_s *dev,
             bool mute = (bool)caps->ac_controls.hw[0];
             audinfo("    Mute: %d\n", mute);
 
-            es8388_setmute(priv, ES8388_MODULE_DAC, mute);
+            es8388_setmute(priv, ES_MODULE_DAC, mute);
           }
           break;
 #endif /* CONFIG_AUDIO_EXCLUDE_MUTE */
@@ -993,7 +994,7 @@ static int es8388_configure(FAR struct audio_lowerhalf_s *dev,
               }
           }
           break;
-#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
 
         case AUDIO_FU_INP_GAIN:
           {
@@ -1368,7 +1369,7 @@ static int es8388_processbegin(FAR struct es8388_dev_s *priv)
       timeout = MSEC2TICK(((uint32_t)(apb->nbytes - apb->curbyte) << shift) /
                           (uint32_t)priv->samprate / (uint32_t)priv->bpsamp);
 
-      if (priv->audio_mode == ES8388_MODULE_DAC)
+      if (priv->audio_mode == ES_MODULE_DAC)
         {
           ret = I2S_SEND(priv->i2s, apb, es8388_processdone,
                          priv, timeout);
@@ -1424,7 +1425,7 @@ static int es8388_start(FAR struct audio_lowerhalf_s *dev)
 
   prev_regval = es8388_readreg(priv, ES8388_DACCONTROL21);
 
-  if (priv->audio_mode == ES8388_MODULE_LINE)
+  if (priv->audio_mode == ES_MODULE_LINE)
     {
       es8388_writereg(priv, ES8388_DACCONTROL16,
                       ES8388_RMIXSEL_RIN2 |
@@ -1484,9 +1485,9 @@ static int es8388_start(FAR struct audio_lowerhalf_s *dev)
                       ES8388_ADC_DIGPDN_NORMAL);
     }
 
-  if (priv->audio_mode == ES8388_MODULE_LINE    ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC ||
-      priv->audio_mode == ES8388_MODULE_ADC)
+  if (priv->audio_mode == ES_MODULE_LINE    ||
+      priv->audio_mode == ES_MODULE_ADC_DAC ||
+      priv->audio_mode == ES_MODULE_ADC)
     {
       es8388_writereg(priv, ES8388_ADCPOWER,
                       ES8388_INT1LP_NORMAL        |
@@ -1499,9 +1500,9 @@ static int es8388_start(FAR struct audio_lowerhalf_s *dev)
                       ES8388_PDNAINL_NORMAL);
     }
 
-  if (priv->audio_mode == ES8388_MODULE_LINE    ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC ||
-      priv->audio_mode == ES8388_MODULE_DAC)
+  if (priv->audio_mode == ES_MODULE_LINE    ||
+      priv->audio_mode == ES_MODULE_ADC_DAC ||
+      priv->audio_mode == ES_MODULE_DAC)
     {
       es8388_writereg(priv, ES8388_DACPOWER,
                       ES8388_ROUT2_ENABLE  |
@@ -1595,7 +1596,7 @@ static int es8388_stop(FAR struct audio_lowerhalf_s *dev)
 
   audinfo("ES8388 Stop\n");
 
-  if (priv->audio_mode == ES8388_MODULE_LINE)
+  if (priv->audio_mode == ES_MODULE_LINE)
     {
       es8388_writereg(priv, ES8388_DACCONTROL21,
                       ES8388_DAC_DLL_PWD_NORMAL |
@@ -1622,8 +1623,8 @@ static int es8388_stop(FAR struct audio_lowerhalf_s *dev)
       goto stop_msg;
     }
 
-  if (priv->audio_mode == ES8388_MODULE_DAC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_DAC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_DACPOWER,
                       ES8388_ROUT2_DISABLE |
@@ -1634,8 +1635,8 @@ static int es8388_stop(FAR struct audio_lowerhalf_s *dev)
                       ES8388_PDNDACL_PWRUP);
     }
 
-  if (priv->audio_mode == ES8388_MODULE_ADC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_ADC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_ADCPOWER,
                       ES8388_INT1LP_LP        |
@@ -1648,7 +1649,7 @@ static int es8388_stop(FAR struct audio_lowerhalf_s *dev)
                       ES8388_PDNAINL_PWRDN);
     }
 
-  if (priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_DACCONTROL21,
                       ES8388_DAC_DLL_PWD_PWRDN  |
@@ -2016,7 +2017,7 @@ static void es8388_audio_output(FAR struct es8388_dev_s *priv)
 {
   audinfo("ES8388 set to output mode\n");
 
-  priv->audio_mode = ES8388_MODULE_DAC;
+  priv->audio_mode = ES_MODULE_DAC;
 }
 
 /****************************************************************************
@@ -2038,7 +2039,7 @@ static void es8388_audio_input(FAR struct es8388_dev_s *priv)
 {
   audinfo("ES8388 set to input mode\n");
 
-  priv->audio_mode = ES8388_MODULE_ADC;
+  priv->audio_mode = ES_MODULE_ADC;
 }
 
 /****************************************************************************
@@ -2265,9 +2266,9 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
   es8388_writereg(priv, 0x39, 0xd0);
 
   es8388_writereg(priv, ES8388_MASTERMODE,
-                  ES8388_BCLKDIV(ES8388_MCLK_DIV_AUTO) |
-                  ES8388_BCLK_INV_NORMAL               |
-                  ES8388_MCLKDIV2_NODIV                |
+                  ES8388_BCLKDIV(ES_MCLK_DIV_AUTO) |
+                  ES8388_BCLK_INV_NORMAL           |
+                  ES8388_MCLKDIV2_NODIV            |
                   ES8388_MSC_SLAVE);
 
   es8388_writereg(priv, ES8388_DACPOWER,
@@ -2288,13 +2289,13 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
                   ES8388_SCPRESET_NORMAL);
 
   es8388_writereg(priv, ES8388_DACCONTROL1,
-                  ES8388_DACFORMAT(ES8388_I2S_NORMAL)     |
-                  ES8388_DACWL(ES8388_WORD_LENGTH_16BITS) |
-                  ES8388_DACLRP_NORM_2ND                  |
+                  ES8388_DACFORMAT(ES_I2S_NORMAL)     |
+                  ES8388_DACWL(ES_WORD_LENGTH_16BITS) |
+                  ES8388_DACLRP_NORM_2ND              |
                   ES8388_DACLRSWAP_NORMAL);
 
   es8388_writereg(priv, ES8388_DACCONTROL2,
-                  ES8388_DACFSRATIO(ES8388_LCLK_DIV_256) |
+                  ES8388_DACFSRATIO(ES_LCLK_DIV_256) |
                   ES8388_DACFSMODE_SINGLE);
 
   es8388_writereg(priv, ES8388_DACCONTROL16,
@@ -2333,25 +2334,25 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
                   ES8388_ROUT2VOL(ES8388_DAC_CHVOL_DB(0)));
 
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
-  es8388_setmute(priv, ES8388_MODULE_DAC, true);
+  es8388_setmute(priv, ES_MODULE_DAC, true);
 #endif
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-  es8388_setvolume(priv, ES8388_MODULE_DAC, CONFIG_ES8388_OUTPUT_INITVOLUME);
+  es8388_setvolume(priv, ES_MODULE_DAC, CONFIG_ES8388_OUTPUT_INITVOLUME);
 #endif
 
   if (priv->dac_output == ES8388_DAC_OUTPUT_LINE2)
     {
-      regconfig = ES8388_DAC_CHANNEL_LOUT1 | ES8388_DAC_CHANNEL_ROUT1;
+      regconfig = ES_DAC_CHANNEL_LOUT1 | ES_DAC_CHANNEL_ROUT1;
     }
   else if (priv->dac_output == ES8388_DAC_OUTPUT_LINE1)
     {
-      regconfig = ES8388_DAC_CHANNEL_LOUT2 | ES8388_DAC_CHANNEL_ROUT2;
+      regconfig = ES_DAC_CHANNEL_LOUT2 | ES_DAC_CHANNEL_ROUT2;
     }
   else
     {
-      regconfig = ES8388_DAC_CHANNEL_LOUT1 | ES8388_DAC_CHANNEL_ROUT1 |
-            ES8388_DAC_CHANNEL_LOUT2 | ES8388_DAC_CHANNEL_ROUT2;
+      regconfig = ES_DAC_CHANNEL_LOUT1 | ES_DAC_CHANNEL_ROUT1 |
+                  ES_DAC_CHANNEL_LOUT2 | ES_DAC_CHANNEL_ROUT2;
     }
 
   es8388_writereg(priv, ES8388_DACPOWER, regconfig);
@@ -2370,15 +2371,15 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
 
   if (priv->adc_input == ES8388_ADC_INPUT_LINE1)
     {
-      regconfig = ES8388_ADC_CHANNEL_LINPUT1_RINPUT1;
+      regconfig = ES_ADC_CHANNEL_LINPUT1_RINPUT1;
     }
   else if (priv->adc_input == ES8388_ADC_INPUT_LINE2)
     {
-      regconfig = ES8388_ADC_CHANNEL_LINPUT2_RINPUT2;
+      regconfig = ES_ADC_CHANNEL_LINPUT2_RINPUT2;
     }
   else
     {
-      regconfig = ES8388_ADC_CHANNEL_DIFFERENCE;
+      regconfig = ES_ADC_CHANNEL_DIFFERENCE;
     }
 
   es8388_writereg(priv, ES8388_ADCCONTROL2, regconfig);
@@ -2390,21 +2391,21 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
                   ES8388_DS_LINPUT1_RINPUT1);
 
   es8388_writereg(priv, ES8388_ADCCONTROL4,
-                  ES8388_ADCFORMAT(ES8388_I2S_NORMAL)     |
-                  ES8388_ADCWL(ES8388_WORD_LENGTH_16BITS) |
-                  ES8388_ADCLRP_NORM_2ND                  |
+                  ES8388_ADCFORMAT(ES_I2S_NORMAL)     |
+                  ES8388_ADCWL(ES_WORD_LENGTH_16BITS) |
+                  ES8388_ADCLRP_NORM_2ND              |
                   ES8388_DATSEL_LL);
 
   es8388_writereg(priv, ES8388_ADCCONTROL5,
-                  ES8388_ADCFSRATIO(ES8388_LCLK_DIV_256) |
+                  ES8388_ADCFSRATIO(ES_LCLK_DIV_256) |
                   ES8388_ADCFSMODE_SINGLE);
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-  es8388_setvolume(priv, ES8388_MODULE_ADC, CONFIG_ES8388_INPUT_INITVOLUME);
+  es8388_setvolume(priv, ES_MODULE_ADC, CONFIG_ES8388_INPUT_INITVOLUME);
 #endif
 
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
-  es8388_setmute(priv, ES8388_MODULE_ADC, true);
+  es8388_setmute(priv, ES_MODULE_ADC, true);
 #endif
 
   es8388_writereg(priv, ES8388_ADCPOWER,
@@ -2419,7 +2420,7 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
 
   /* Stop sequence to avoid noise at boot */
 
-  if (priv->audio_mode == ES8388_MODULE_LINE)
+  if (priv->audio_mode == ES_MODULE_LINE)
     {
       es8388_writereg(priv, ES8388_DACCONTROL21,
                       ES8388_DAC_DLL_PWD_NORMAL |
@@ -2445,8 +2446,8 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
       goto reset_finish;
     }
 
-  if (priv->audio_mode == ES8388_MODULE_DAC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_DAC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_DACPOWER,
                       ES8388_ROUT2_DISABLE |
@@ -2457,8 +2458,8 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
                       ES8388_PDNDACL_PWRUP);
     }
 
-  if (priv->audio_mode == ES8388_MODULE_ADC ||
-      priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_ADC ||
+      priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_ADCPOWER,
                       ES8388_INT1LP_LP        |
@@ -2471,7 +2472,7 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
                       ES8388_PDNAINL_PWRDN);
     }
 
-  if (priv->audio_mode == ES8388_MODULE_ADC_DAC)
+  if (priv->audio_mode == ES_MODULE_ADC_DAC)
     {
       es8388_writereg(priv, ES8388_DACCONTROL21,
                       ES8388_DAC_DLL_PWD_PWRDN  |
@@ -2485,11 +2486,11 @@ static void es8388_reset(FAR struct es8388_dev_s *priv)
 reset_finish:
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-  es8388_setvolume(priv, ES8388_MODULE_DAC, CONFIG_ES8388_OUTPUT_INITVOLUME);
+  es8388_setvolume(priv, ES_MODULE_DAC, CONFIG_ES8388_OUTPUT_INITVOLUME);
 #endif
 
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
-  es8388_setmute(priv, ES8388_MODULE_DAC, true);
+  es8388_setmute(priv, ES_MODULE_DAC, true);
 #endif
 
   es8388_dump_registers(&priv->dev, "After reset");
