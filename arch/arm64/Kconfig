@@ -32,6 +32,7 @@ config ARCH_CHIP_A64
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_PSCI
+	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		Allwinner A64 SoC
@@ -49,6 +50,7 @@ config ARCH_CHIP_RK3399
 config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_POWEROFF
@@ -74,6 +76,7 @@ config ARCH_CHIP_GOLDFISH
 config ARCH_CHIP_FVP_ARMV8R
 	bool "ARM FVP virt platform (ARMv8r)"
 	select ARCH_CORTEX_R82
+	select ARCH_HAVE_IRQTRIGGER
 	---help---
 		ARM FVP virt platform (ARMv8r)
 
