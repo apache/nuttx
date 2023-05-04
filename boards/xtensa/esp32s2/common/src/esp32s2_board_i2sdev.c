@@ -37,7 +37,8 @@
 
 #include "esp32s2_i2s.h"
 
-#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344)
+#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344) && \
+    !defined(CONFIG_AUDIO_ES8311)
 
 /****************************************************************************
  * Public Functions
@@ -152,4 +153,5 @@ int board_i2sdev_initialize(bool enable_tx, bool enable_rx)
   return ret;
 }
 
-#endif /* (CONFIG_ESP32S2_I2S) && !defined (CONFIG_AUDIO_CS4344) */
+#endif /* (CONFIG_ESP32S2_I2S) && !(CONFIG_AUDIO_CS4344)  *
+        * !(CONFIG_AUDIO_ES8311)                          */

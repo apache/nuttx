@@ -34,9 +34,12 @@
 #include <syslog.h>
 #include <debug.h>
 #include <stdio.h>
-
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
+#include <arch/board/board.h>
+
+#include "esp32s2_gpio.h"
 
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
@@ -52,6 +55,10 @@
 
 #ifdef CONFIG_ESP32S2_I2C
 #  include "esp32s2_i2c.h"
+#endif
+
+#ifdef CONFIG_ESP32_I2S
+#  include "esp32s2_i2s.h"
 #endif
 
 #ifdef CONFIG_ESP32S2_RT_TIMER
@@ -234,6 +241,28 @@ int esp32s2_bringup(void)
       syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_ESP32S2_I2S
+
+  /* Configure I2S0 */
+
+#ifdef CONFIG_AUDIO_ES8311
+
+  /* Configure ES8311 audio on I2C0 and I2S0 */
+
+  esp32s2_configgpio(SPEAKER_ENABLE_GPIO, OUTPUT);
+  esp32s2_gpiowrite(SPEAKER_ENABLE_GPIO, true);
+
+  ret = esp32s2_es8311_initialize(ESP32S2_I2C0, ES8311_I2C_ADDR,
+                                  ES8311_I2C_FREQ);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize ES8311 audio: %d\n", ret);
+    }
+
+#endif /* CONFIG_AUDIO_ES8311 */
+
+#endif /* CONFIG_ESP32S2_I2S */
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

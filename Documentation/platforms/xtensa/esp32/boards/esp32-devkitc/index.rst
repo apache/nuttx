@@ -602,7 +602,7 @@ The ``nxlooper`` application captures data from the audio device with receiving
 capabilities (the I2S1 on this example) and forwards the audio data frame to
 the audio device with transmitting capabilities (the I2S0 on this example).
 
-After successfully built and flashed, run on the boards's terminal::
+After successfully built and flashed, run on the boards' terminal::
 
   nsh> nxlooper
   nxlooper> loopback
