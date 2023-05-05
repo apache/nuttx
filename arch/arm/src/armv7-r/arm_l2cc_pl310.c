@@ -416,6 +416,25 @@ uint32_t l2cc_linesize(void)
 }
 
 /****************************************************************************
+ * Name: l2cc_size
+ *
+ * Description:
+ *    Get L2CC-P310 L2 cache size
+ *
+ * Input Parameters:
+ *    None
+ *
+ * Returned Value:
+ *    L2 cache size
+ *
+ ****************************************************************************/
+
+uint32_t l2cc_size(void)
+{
+  return PL310_CACHE_SIZE;
+}
+
+/****************************************************************************
  * Name: l2cc_enable
  *
  * Description:
