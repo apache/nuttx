@@ -142,6 +142,49 @@ static size_t up_get_cache_linesize(bool icache)
 
   return 1 << sshift;
 }
+
+/****************************************************************************
+ * Name: up_get_cache_size
+ *
+ * Description:
+ *   Get cache size
+ *
+ * Input Parameters:
+ *   level - Difference between icache and dcache.
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+static size_t up_get_cache_size(bool icache)
+{
+  uint32_t ccsidr;
+  uint32_t csselr;
+  uint32_t sshift;
+  uint32_t sets;
+  uint32_t ways;
+  uint32_t line;
+
+  csselr = getreg32(NVIC_CSSELR);
+
+  if (icache)
+    {
+      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_ICACHE;
+    }
+  else
+    {
+      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_DCACHE;
+    }
+
+  ccsidr = getreg32(NVIC_CCSIDR);
+  sets   = CCSIDR_SETS(ccsidr) + 1;
+  ways   = CCSIDR_WAYS(ccsidr) + 1;
+  sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+  line   = 1 << sshift;
+
+  return sets * ways * line;
+}
 #endif
 
 /****************************************************************************
@@ -173,6 +216,32 @@ size_t up_get_icache_linesize(void)
     }
 
   return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_icache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = up_get_cache_size(true);
+    }
+
+  return csize;
 }
 #endif
 
@@ -366,6 +435,32 @@ size_t up_get_dcache_linesize(void)
     }
 
   return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_dcache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_dcache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = up_get_cache_size(false);
+    }
+
+  return csize;
 }
 #endif
 

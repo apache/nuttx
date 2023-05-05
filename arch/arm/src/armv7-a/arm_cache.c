@@ -64,6 +64,32 @@ size_t up_get_icache_linesize(void)
 }
 
 /****************************************************************************
+ * Name: up_get_icache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = MAX(cp15_icache_size(), l2cc_size());
+    }
+
+  return csize;
+}
+
+/****************************************************************************
  * Name: up_invalidate_icache_all
  *
  * Description:
@@ -170,6 +196,32 @@ size_t up_get_dcache_linesize(void)
     }
 
   return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_dcache_size
+ *
+ * Description:
+ *   Get dcache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_dcache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = MAX(cp15_dcache_size(), l2cc_size());
+    }
+
+  return csize;
 }
 
 /****************************************************************************
