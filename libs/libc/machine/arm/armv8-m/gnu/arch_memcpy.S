@@ -29,7 +29,6 @@
  *
  ****************************************************************************/
 
-#ifndef __ARM_FEATURE_MVE
 /* This memcpy routine is optimised for Cortex-M3/M4 cores with/without
    unaligned access.
 
@@ -50,7 +49,10 @@
      __OPT_BIG_BLOCK_SIZE: Size of big block in words.  Default to 64.
      __OPT_MID_BLOCK_SIZE: Size of big block in words.  Default to 16.
  */
+
 #include "arm_asm.h"
+
+#ifndef __ARM_FEATURE_MVE
 
 #ifndef __OPT_BIG_BLOCK_SIZE
 #define __OPT_BIG_BLOCK_SIZE (4 * 16)
