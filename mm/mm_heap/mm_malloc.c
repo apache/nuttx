@@ -79,9 +79,12 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   struct mallinfo_task info;
+  struct mm_memdump_s dump;
 
-  info.pid = tcb->pid;
-  mm_mallinfo_task(arg, &info);
+  dump.pid = tcb->pid;
+  dump.seqmin = 0;
+  dump.seqmax = ULONG_MAX;
+  info = mm_mallinfo_task(arg, &dump);
   mwarn("pid:%5d, used:%10d, nused:%10d\n",
         tcb->pid, info.uordblks, info.aordblks);
 }

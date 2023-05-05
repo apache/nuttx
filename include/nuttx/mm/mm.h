@@ -107,6 +107,7 @@
  ****************************************************************************/
 
 struct mm_heap_s; /* Forward reference */
+struct mm_memdump_s;
 
 /****************************************************************************
  * Public Data
@@ -253,7 +254,7 @@ FAR void *kmm_zalloc(size_t size) malloc_like1(1);
 /* Functions contained in kmm_memdump.c *************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-void kmm_memdump(pid_t pid);
+void kmm_memdump(FAR const struct mm_memdump_s *dump);
 #endif
 
 /* Functions contained in mm_memalign.c *************************************/
@@ -315,21 +316,22 @@ void kmm_extend(FAR void *mem, size_t size, int region);
 struct mallinfo; /* Forward reference */
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
 struct mallinfo_task; /* Forward reference */
-int mm_mallinfo_task(FAR struct mm_heap_s *heap,
-                     FAR struct mallinfo_task *info);
+struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
+                                      FAR const struct mm_memdump_s *dump);
 
 /* Functions contained in kmm_mallinfo.c ************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 struct mallinfo kmm_mallinfo(void);
 #  if CONFIG_MM_BACKTRACE >= 0
-struct mallinfo_task kmm_mallinfo_task(pid_t pid);
+struct mallinfo_task kmm_mallinfo_task(FAR const struct mm_memdump_s *dump);
 #  endif
 #endif
 
 /* Functions contained in mm_memdump.c **************************************/
 
-void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid);
+void mm_memdump(FAR struct mm_heap_s *heap,
+                FAR const struct mm_memdump_s *dump);
 
 #ifdef CONFIG_DEBUG_MM
 /* Functions contained in mm_checkcorruption.c ******************************/
@@ -342,7 +344,7 @@ FAR void umm_checkcorruption(void);
 
 /* Functions contained in umm_memdump.c *************************************/
 
-void umm_memdump(pid_t pid);
+void umm_memdump(FAR const struct mm_memdump_s *dump);
 
 /* Functions contained in kmm_checkcorruption.c *****************************/
 
