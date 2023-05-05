@@ -626,8 +626,8 @@ static void litex_receive(struct litex_emac_s *priv)
           litex_transmit(priv);
         }
     }
-#endif
   else
+#endif
     {
       NETDEV_RXDROPPED(&priv->dev);
     }
@@ -788,11 +788,13 @@ static int litex_ifup(struct net_driver_s *dev)
   struct litex_emac_s *priv = (struct litex_emac_s *)dev->d_private;
   int ret;
 
+  #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
         (int)(dev->d_ipaddr & 0xff),
         (int)((dev->d_ipaddr >> 8) & 0xff),
         (int)((dev->d_ipaddr >> 16) & 0xff),
         (int)(dev->d_ipaddr >> 24));
+  #endif
 
   /* Configure the EMAC interface for normal operation. */
 
