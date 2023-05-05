@@ -911,7 +911,7 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
     {
       size_t remaining;
 
-      ret = nxmutex_lock(&rwb->rhlock);
+      ret = rwb_lock(&rwb->rhlock);
       if (ret < 0)
         {
           return ret;
@@ -1005,7 +1005,7 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
 
   if (rwb->wrmaxblocks > 0)
     {
-      ret = nxmutex_lock(&rwb->wrlock);
+      ret = rwb_lock(&rwb->wrlock);
       if (ret < 0)
         {
           return ret;
@@ -1082,7 +1082,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
        * streaming applications.
        */
 
-      ret = nxmutex_lock(&rwb->rhlock);
+      ret = rwb_lock(&rwb->rhlock);
       if (ret < 0)
         {
           return ret;
@@ -1115,7 +1115,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
     {
       finfo("startblock=%" PRIdOFF " wrbuffer=%p\n", startblock, wrbuffer);
 
-      ret = nxmutex_lock(&rwb->wrlock);
+      ret = rwb_lock(&rwb->wrlock);
       if (ret < 0)
         {
           return ret;
