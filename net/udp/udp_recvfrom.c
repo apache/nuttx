@@ -170,8 +170,6 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
       FAR void *srcaddr;
       uint8_t ifindex;
 
-      DEBUGASSERT(iob->io_pktlen > 0);
-
       /* Unflatten saved connection information */
 
 #ifdef CONFIG_NETDEV_IFINDEX
