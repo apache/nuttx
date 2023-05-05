@@ -39,9 +39,9 @@
  *
  ****************************************************************************/
 
-void kmm_memdump(pid_t pid)
+void kmm_memdump(FAR const struct mm_memdump_s *dump)
 {
-  mm_memdump(g_kmmheap, pid);
+  mm_memdump(g_kmmheap, dump);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

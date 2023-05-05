@@ -419,7 +419,8 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 
 #if CONFIG_MM_BACKTRACE >= 0
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                              "usage: <pid/used/free/on/off>\n"
+                              "usage: <pid/used/free/on/off>"
+                              "<seqmin> <seqmax> \n"
                               "on/off backtrace\n"
                               "pid: dump pid allocated node\n");
 #else
@@ -436,8 +437,20 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
                               "used: dump all allocated node\n"
                               "free: dump all free node\n");
 
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
+                           &offset);
+  totalsize += copysize;
+
+#if CONFIG_MM_BACKTRACE >= 0
+  buffer    += copysize;
+  buflen    -= copysize;
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+              "The current sequence number %lu\n", g_mm_seqno);
+
   totalsize += procfs_memcpy(procfile->line, linesize, buffer, buflen,
                              &offset);
+#endif
+
   filep->f_pos += totalsize;
   return totalsize;
 }
@@ -453,10 +466,20 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct procfs_meminfo_entry_s *entry;
   FAR struct meminfo_file_s *procfile;
-  pid_t pid = INVALID_PROCESS_ID;
+  struct mm_memdump_s dump =
+    {
+      MM_BACKTRACE_ALLOC_PID,
+#if CONFIG_MM_BACKTRACE >= 0
+      0,
+      ULONG_MAX
+#endif
+    };
+
+#if CONFIG_MM_BACKTRACE >= 0
+  FAR char *p;
+#endif
 #if CONFIG_MM_BACKTRACE > 0
   FAR struct tcb_s *tcb;
-  FAR char *p;
 #endif
 
   DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
@@ -488,8 +511,8 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   else if ((p = strstr(buffer, "on")) != NULL)
     {
       *p = '\0';
-      pid = atoi(buffer);
-      tcb = nxsched_get_tcb(pid);
+      dump.pid = atoi(buffer);
+      tcb = nxsched_get_tcb(dump.pid);
       if (tcb == NULL)
         {
           return -EINVAL;
@@ -501,8 +524,8 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   else if ((p = strstr(buffer, "off")) != NULL)
     {
       *p = '\0';
-      pid = atoi(buffer);
-      tcb = nxsched_get_tcb(pid);
+      dump.pid = atoi(buffer);
+      tcb = nxsched_get_tcb(dump.pid);
       if (tcb == NULL)
         {
           return -EINVAL;
@@ -516,11 +539,21 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   switch (buffer[0])
     {
       case 'u':
-        pid = MM_BACKTRACE_ALLOC_PID;
+        dump.pid = MM_BACKTRACE_ALLOC_PID;
+
+#if CONFIG_MM_BACKTRACE >= 0
+        p = (FAR char *)buffer + 4;
+        goto dump;
+#endif
         break;
 
       case 'f':
-        pid = MM_BACKTRACE_FREE_PID;
+        dump.pid = MM_BACKTRACE_FREE_PID;
+
+#if CONFIG_MM_BACKTRACE >= 0
+        p = (FAR char *)buffer + 4;
+        goto dump;
+#endif
         break;
 #if CONFIG_MM_BACKTRACE >= 0
       default:
@@ -529,13 +562,26 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
             return buflen;
           }
 
-        pid = atoi(buffer);
+        dump.pid = strtol(buffer, &p, 0);
+        if (!isdigit(*(p + 1)))
+          {
+            break;
+          }
+
+dump:
+        dump.seqmin = strtoul(p + 1, &p, 0);
+        if (!isdigit(*(p + 1)))
+          {
+            break;
+          }
+
+        dump.seqmax = strtoul(p + 1, &p, 0);
 #endif
     }
 
   for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
     {
-      mm_memdump(entry->heap, pid);
+      mm_memdump(entry->heap, &dump);
     }
 
   return buflen;

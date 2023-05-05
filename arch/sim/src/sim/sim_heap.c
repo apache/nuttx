@@ -396,11 +396,15 @@ int mm_mallinfo(struct mm_heap_s *heap, struct mallinfo *info)
  *
  ****************************************************************************/
 
-int mm_mallinfo_task(struct mm_heap_s *heap, struct mallinfo_task *info)
+struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
+                                      FAR const struct mm_memdump_s *dump)
 {
-  info->aordblks = 0;
-  info->uordblks = 0;
-  return 0;
+  struct mallinfo_task info =
+    {
+      0, 0
+    };
+
+  return info;
 }
 
 /****************************************************************************
@@ -411,7 +415,7 @@ int mm_mallinfo_task(struct mm_heap_s *heap, struct mallinfo_task *info)
  *
  ****************************************************************************/
 
-void mm_memdump(struct mm_heap_s *heap, pid_t pid)
+void mm_memdump(struct mm_heap_s *heap, const struct mm_memdump_s *dump)
 {
 }
 
