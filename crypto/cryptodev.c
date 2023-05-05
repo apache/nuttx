@@ -495,8 +495,8 @@ int cryptodev_op(FAR struct csession *cse,
 
       if (!(crde->crd_flags & CRD_F_IV_EXPLICIT))
         {
-          memcpy(cse->tmp_iv, cop->iv, cse->txform->blocksize);
-          bcopy(cse->tmp_iv, crde->crd_iv, cse->txform->blocksize);
+          memcpy(cse->tmp_iv, cop->iv, cse->txform->ivsize);
+          bcopy(cse->tmp_iv, crde->crd_iv, cse->txform->ivsize);
           crde->crd_flags |= CRD_F_IV_EXPLICIT | CRD_F_IV_PRESENT;
           crde->crd_skip = 0;
         }
@@ -564,7 +564,7 @@ dispatch:
   crypto_invoke(crp);
 processed:
 
-  if ((cop->flags & COP_FLAG_UPDATE) == 0)
+  if (crde && (cop->flags & COP_FLAG_UPDATE) == 0)
     {
       crde->crd_flags &= ~CRD_F_IV_EXPLICIT;
     }
