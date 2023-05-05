@@ -144,7 +144,7 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
   FAR struct tcb_s *tcb;
 #  endif
 
-  dump->pid = _SCHED_GETPID();
+  dump->pid = _SCHED_GETTID();
 #  if CONFIG_MM_BACKTRACE > 0
   tcb = nxsched_get_tcb(dump->pid);
   if (heap->mm_procfs.backtrace ||
@@ -827,7 +827,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
     }
 
   heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
-                                  (mempool_multiple_alloc_t)mempool_algin,
+                                  (mempool_multiple_alloc_t)mempool_memalign,
                                   (mempool_multiple_free_t)mm_free, heap,
                                   CONFIG_MM_HEAP_MEMPOOL_EXPAND,
                                   CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND);
