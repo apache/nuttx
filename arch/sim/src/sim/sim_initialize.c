@@ -299,6 +299,11 @@ void up_initialize(void)
 
   audio_register("pcm1p", sim_audio_initialize(true, true));
   audio_register("pcm1c", sim_audio_initialize(false, true));
+
+  /* register independent mixer device, simulate amixer ioctl */
+
+  audio_register("mixer", sim_audio_initialize(false, false));
+
 #endif
 
 #ifdef CONFIG_SIM_USB_DEV
