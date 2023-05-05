@@ -98,15 +98,27 @@ static void allsyms_relocate(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: __lsan_default_options
+ * Name: __xsan_default_options
  *
  * Description:
  *   This function may be optionally provided by user and should return
- *   a string containing leak sanitizer runtime options.
+ *   a string containing sanitizer runtime options.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SIM_ASAN
+const char *__asan_default_options(void)
+{
+  return "abort_on_error=1"
+         " alloc_dealloc_mismatch=0"
+         " allocator_frees_and_returns_null_on_realloc_zero=0"
+         " check_initialization_order=1"
+         " detect_invalid_pointer_pairs=2"
+         " detect_stack_use_after_return=1"
+         " fast_unwind_on_malloc=0"
+         " strict_init_order=1";
+}
+
 const char *__lsan_default_options(void)
 {
   /* The fast-unwind implementation of leak-sanitizer will obtain the
@@ -123,7 +135,16 @@ const char *__lsan_default_options(void)
    * disable fast-unwind by default to avoid unwind failure.
    */
 
-  return "fast_unwind_on_malloc=0";
+  return "detect_leaks=1"
+         " fast_unwind_on_malloc=0";
+}
+#endif
+
+#ifdef CONFIG_SIM_UBSAN
+const char *__ubsan_default_options(void)
+{
+  return "print_stacktrace=1"
+         " fast_unwind_on_malloc=0";
 }
 #endif
 
