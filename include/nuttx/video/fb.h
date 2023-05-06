@@ -673,6 +673,11 @@ struct fb_vtable_s
   int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno,
                       FAR struct fb_planeinfo_s *pinfo);
 
+  /* open/close window. */
+
+  int (*open)(FAR struct fb_vtable_s *vtable);
+  int (*close)(FAR struct fb_vtable_s *vtable);
+
 #ifdef CONFIG_FB_CMAP
   /* The following are provided only if the video hardware supports RGB
    * color mapping
