@@ -29,7 +29,7 @@ HEAD_ASRC += arm_vectortab.S
 
 # Common assembly language files
 
-CMN_CSRCS += arm_cache.c arm_dataabort.c arm_doirq.c arm_gicv2.c
+CMN_CSRCS += arm_cache.c arm_cpuinfo.c arm_dataabort.c arm_doirq.c arm_gicv2.c
 CMN_CSRCS += arm_initialstate.c arm_prefetchabort.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
