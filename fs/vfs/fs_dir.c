@@ -607,8 +607,8 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       return ret;
     }
 
-  filep->f_inode  = &g_dir_inode;
-  filep->f_priv   = dir;
+  filep->f_inode = &g_dir_inode;
+  filep->f_priv  = dir;
   inode_addref(&g_dir_inode);
   return ret;
 }

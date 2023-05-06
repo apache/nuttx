@@ -156,10 +156,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   /* Associate the inode with a file structure */
 
+  memset(filep, 0, sizeof(*filep));
   filep->f_oflags = oflags;
-  filep->f_pos    = 0;
   filep->f_inode  = inode;
-  filep->f_priv   = NULL;
 
   /* Perform the driver open operation.  NOTE that the open method may be
    * called many times.  The driver/mountpoint logic should handle this

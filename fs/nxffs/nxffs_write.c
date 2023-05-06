@@ -607,8 +607,8 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Success.. return the number of bytes written */
 
-  ret           = total;
-  filep->f_pos  = wrfile->datlen;
+  ret          = total;
+  filep->f_pos = wrfile->datlen;
 
 errout_with_lock:
   nxmutex_unlock(&volume->lock);
