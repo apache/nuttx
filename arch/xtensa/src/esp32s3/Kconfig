@@ -594,9 +594,22 @@ config ESP32S3_RTCIO_IRQ
 menu "SPI configuration"
 	depends on ESP32S3_SPI
 
+choice
+	prompt "SPI I/O Mode"
+	default ESP32S3_SPI_IO_SPI
+
+config ESP32S3_SPI_IO_SPI
+	bool "SPI (4-line)"
+
+config ESP32S3_SPI_IO_QIO
+	bool "QIO (6-line)"
+
+endchoice # SPI I/O Mode
+
 config ESP32S3_SPI_SWCS
 	bool "SPI software CS"
 	default n
+	depends on ESP32S3_SPI_IO_SPI
 	---help---
 		Use SPI software CS.
 
@@ -607,35 +620,33 @@ config ESP32S3_SPI_UDCS
 	---help---
 		Use user-defined CS.
 
-config ESP32S3_SPI_SLAVE_BUFSIZE
-	int "SPI slave buffer size"
-	default 2048
-	depends on SPI_SLAVE
-
-if ESP32S3_SPI2
-
-config ESP32S3_SPI2_DMA
-	bool "SPI2 use GDMA"
+config ESP32S3_SPI_DMA
+	bool "SPI use GDMA"
 	default n
-	depends on ESP32S3_DMA
+	select ESP32S3_DMA
 	---help---
 		Enable support for transfers using the GDMA engine.
 
-config ESP32S3_SPI2_DMADESC_NUM
-	int "SPI2 Master GDMA maximum number of descriptors"
-	default 2
-	depends on ESP32S3_SPI2_DMA
+config ESP32S3_SPI_DMA_BUFSIZE
+	int "SPI Master GDMA buffer size"
+	default 2048
+	depends on ESP32S3_SPI_DMA
 	---help---
-		Configure the maximum number of out-link/in-link descriptors to
-		be chained for a GDMA transfer.
+		This is used to calculate and allocate DMA description buffer,
+		not really allocate TX/RX buffer.
 
-config ESP32S3_SPI2_DMATHRESHOLD
-	int "SPI2 Master GDMA threshold"
+config ESP32S3_SPI_DMATHRESHOLD
+	int "SPI Master GDMA threshold"
 	default 64
-	depends on ESP32S3_SPI2_DMA
+	depends on ESP32S3_SPI_DMA && ESP32S3_SPI_IO_SPI
 	---help---
 		When SPI GDMA is enabled, GDMA transfers whose size are below the
 		defined threshold will be performed by polling logic.
+
+config ESP32S3_SPI_SLAVE_BUFSIZE
+	int "SPI Slave buffer size"
+	default 2048
+	depends on SPI_SLAVE
 
 config ESP32S3_SPI2_CSPIN
 	int "SPI2 CS Pin"
@@ -657,16 +668,17 @@ config ESP32S3_SPI2_MISOPIN
 	default 13
 	range 0 48
 
-endif # ESP32S3_SPI2
+config ESP32S3_SPI2_IO2PIN
+	int "SPI2 IO2 Pin"
+	default 14
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
 
-if ESP32S3_SPI3
-
-config ESP32S3_SPI3_DMA
-	bool "SPI3 use GDMA"
-	default n
-	depends on ESP32S3_DMA
-	---help---
-		Enable support for transfers using the GDMA engine.
+config ESP32S3_SPI2_IO3PIN
+	int "SPI2 IO3 Pin"
+	default 9
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
 
 config ESP32S3_SPI3_CSPIN
 	int "SPI3 CS Pin"
@@ -688,7 +700,17 @@ config ESP32S3_SPI3_MISOPIN
 	default 2
 	range 0 48
 
-endif # ESP32S3_SPI3
+config ESP32S3_SPI3_IO2PIN
+	int "SPI3 IO2 Pin"
+	default 3
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
+
+config ESP32S3_SPI3_IO3PIN
+	int "SPI3 IO3 Pin"
+	default 4
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
 
 endmenu # SPI configuration
 
