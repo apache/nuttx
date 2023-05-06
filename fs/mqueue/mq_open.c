@@ -253,10 +253,9 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Associate the inode with a file structure */
 
-      mq->f_oflags  = oflags;
-      mq->f_pos     = 0;
-      mq->f_inode   = inode;
-      mq->f_priv    = NULL;
+      memset(mq, 0, sizeof(*mq));
+      mq->f_oflags = oflags;
+      mq->f_inode  = inode;
 
       if (created)
         {
@@ -303,10 +302,9 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Associate the inode with a file structure */
 
-      mq->f_oflags  = oflags;
-      mq->f_pos     = 0;
-      mq->f_inode   = inode;
-      mq->f_priv    = NULL;
+      memset(mq, 0, sizeof(*mq));
+      mq->f_oflags = oflags;
+      mq->f_inode  = inode;
 
       INODE_SET_MQUEUE(inode);
       inode->u.i_ops    = &g_nxmq_fileops;

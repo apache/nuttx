@@ -79,10 +79,10 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
   /* Then clone the file structure */
 
+  memset(&temp, 0, sizeof(temp));
   temp.f_oflags = filep1->f_oflags;
   temp.f_pos    = filep1->f_pos;
   temp.f_inode  = inode;
-  temp.f_priv   = NULL;
 
   /* Call the open method on the file, driver, mountpoint so that it
    * can maintain the correct open counts.
