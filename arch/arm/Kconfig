@@ -772,6 +772,7 @@ config ARCH_CORTEXM7
 config ARCH_ARMV7A
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 	select ARM_HAVE_WFE_SEV
 
 config ARCH_CORTEXA5

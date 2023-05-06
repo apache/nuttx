@@ -41,7 +41,7 @@ CMN_ASRCS += arm_saveusercontext.S
 
 # Common C source files
 
-CMN_CSRCS += arm_cache.c arm_dataabort.c
+CMN_CSRCS += arm_cache.c arm_cpuinfo.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_gicv2_dump.c
 CMN_CSRCS += arm_initialstate.c arm_mmu.c arm_prefetchabort.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
