@@ -48,7 +48,7 @@
 #include "esp32s3_irq.h"
 #include "esp32s3_gpio.h"
 
-#if defined(CONFIG_ESP32S3_SPI2_DMA) || defined(CONFIG_ESP32S3_SPI3_DMA)
+#ifdef CONFIG_ESP32S3_SPI_DMA
 #include "esp32s3_dma.h"
 #endif
 
@@ -65,20 +65,27 @@
 
 #define SPI_SLAVE_BUFSIZE (CONFIG_ESP32S3_SPI_SLAVE_BUFSIZE)
 
-#if defined(CONFIG_ESP32S3_SPI2_DMA) || defined(CONFIG_ESP32S3_SPI3_DMA)
-#  define ESP32S3_SPI_DMA
-#endif
-
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 /* SPI DMA RX/TX number of descriptors */
 
-#if (SPI_SLAVE_BUFSIZE % ESP32S3_DMA_BUFLEN_MAX) > 0
-#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESP32S3_DMA_BUFLEN_MAX + 1)
-#else
-#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESP32S3_DMA_BUFLEN_MAX)
-#endif
+#  if (SPI_SLAVE_BUFSIZE % ESP32S3_DMA_BUFLEN_MAX) > 0
+#    define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESP32S3_DMA_BUFLEN_MAX + 1)
+#  else
+#    define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESP32S3_DMA_BUFLEN_MAX)
+#  endif
 
-#endif /* ESP32S3_SPI_DMA */
+#  define SPI_SLV_INT_EN      (SPI_SLV_WR_DMA_DONE_INT_ENA_M | SPI_SLV_RD_DMA_DONE_INT_ENA_M)
+#  define SPI_SLV_INT_RX      SPI_SLV_WR_DMA_DONE_INT_ST_M
+#  define SPI_SLV_INT_CLR_RX  SPI_SLV_WR_DMA_DONE_INT_CLR_M
+#  define SPI_SLV_INT_TX      SPI_SLV_RD_DMA_DONE_INT_ST_M
+#  define SPI_SLV_INT_CLR_TX  SPI_SLV_RD_DMA_DONE_INT_CLR_M
+#else
+#  define SPI_SLV_INT_EN      (SPI_SLV_WR_BUF_DONE_INT_ENA_M | SPI_SLV_RD_BUF_DONE_INT_ENA_M)
+#  define SPI_SLV_INT_RX      SPI_SLV_WR_BUF_DONE_INT_ST_M
+#  define SPI_SLV_INT_CLR_RX  SPI_SLV_WR_BUF_DONE_INT_CLR_M
+#  define SPI_SLV_INT_TX      SPI_SLV_RD_BUF_DONE_INT_ST_M
+#  define SPI_SLV_INT_CLR_TX  SPI_SLV_RD_BUF_DONE_INT_CLR_M
+#endif /* CONFIG_ESP32S3_SPI_DMA */
 
 /* Verify whether SPI has been assigned IOMUX pins.
  * Otherwise, SPI signals will be routed via GPIO Matrix.
@@ -90,10 +97,29 @@
 #  define SPI_IS_MOSI_IOMUX (CONFIG_ESP32S3_SPI2_MOSIPIN == SPI2_IOMUX_MOSIPIN)
 #  define SPI_IS_MISO_IOMUX (CONFIG_ESP32S3_SPI2_MISOPIN == SPI2_IOMUX_MISOPIN)
 
-#  define SPI_VIA_IOMUX     ((SPI_IS_CS_IOMUX) && \
-                             (SPI_IS_CLK_IOMUX) && \
-                             (SPI_IS_MOSI_IOMUX) && \
-                             (SPI_IS_MISO_IOMUX))
+/* In quad SPI mode, flash's IO map is:
+ *    MOSI -> IO0
+ *    MISO -> IO1
+ *    WP   -> IO2
+ *    Hold -> IO3
+ */
+
+#  ifdef CONFIG_ESP32S3_SPI_IO_QIO
+#    define SPI_IS_IO2_IOMUX  (CONFIG_ESP32S3_SPI2_IO2PIN == SPI2_IOMUX_WPPIN)
+#    define SPI_IS_IO3_IOMUX  (CONFIG_ESP32S3_SPI2_IO3PIN == SPI2_IOMUX_HDPIN)
+
+#    define SPI_VIA_IOMUX     ((SPI_IS_CS_IOMUX) && \
+                               (SPI_IS_CLK_IOMUX) && \
+                               (SPI_IS_MOSI_IOMUX) && \
+                               (SPI_IS_MISO_IOMUX) && \
+                               (SPI_IS_IO2_IOMUX) && \
+                               (SPI_IS_IO3_IOMUX))
+#  else
+#    define SPI_VIA_IOMUX     ((SPI_IS_CS_IOMUX) && \
+                               (SPI_IS_CLK_IOMUX) && \
+                               (SPI_IS_MOSI_IOMUX) && \
+                               (SPI_IS_MISO_IOMUX))
+#  endif
 #else
 #  define SPI_VIA_IOMUX     0
 #endif
@@ -136,12 +162,15 @@ struct spislave_config_s
   uint8_t mosi_pin;           /* GPIO configuration for MOSI */
   uint8_t miso_pin;           /* GPIO configuration for MISO */
   uint8_t clk_pin;            /* GPIO configuration for CLK */
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  uint8_t io2_pin;            /* GPIO configuration for IO2 */
+  uint8_t io3_pin;            /* GPIO configuration for IO3 */
+#endif
   uint8_t periph;             /* Peripheral ID */
   uint8_t irq;                /* Interrupt ID */
   uint32_t clk_bit;           /* Clock enable bit */
   uint32_t rst_bit;           /* SPI reset bit */
-#ifdef ESP32S3_SPI_DMA
-  bool dma_used;              /* Enable DMA channel */
+#ifdef CONFIG_ESP32S3_SPI_DMA
   uint32_t dma_clk_bit;       /* DMA clock enable bit */
   uint32_t dma_rst_bit;       /* DMA reset bit */
   uint8_t dma_periph;         /* DMA peripheral */
@@ -154,6 +183,12 @@ struct spislave_config_s
   uint32_t miso_outsig;       /* SPI MISO output signal index */
   uint32_t clk_insig;         /* SPI CLK input signal index */
   uint32_t clk_outsig;        /* SPI CLK output signal index */
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  uint32_t io2_insig;
+  uint32_t io2_outsig;
+  uint32_t io3_insig;
+  uint32_t io3_outsig;
+#endif
 };
 
 struct spislave_priv_s
@@ -172,7 +207,7 @@ struct spislave_priv_s
   int refs;                   /* Reference count */
   int cpu;                    /* CPU ID */
   int cpuint;                 /* SPI interrupt ID */
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
   int32_t dma_channel;        /* Channel assigned by the GDMA driver */
 
   /* DMA RX/TX description */
@@ -224,7 +259,7 @@ static void spislave_store_result(struct spislave_priv_s *priv,
                                   uint32_t recv_bytes);
 static void spislave_evict_sent_data(struct spislave_priv_s *priv,
                                      uint32_t sent_bytes);
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 static void spislave_setup_rx_dma(struct spislave_priv_s *priv);
 static void spislave_setup_tx_dma(struct spislave_priv_s *priv);
 static void spislave_prepare_next_rx(struct spislave_priv_s *priv);
@@ -265,12 +300,15 @@ static const struct spislave_config_s esp32s3_spi2slave_config =
   .mosi_pin     = CONFIG_ESP32S3_SPI2_MOSIPIN,
   .miso_pin     = CONFIG_ESP32S3_SPI2_MISOPIN,
   .clk_pin      = CONFIG_ESP32S3_SPI2_CLKPIN,
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  .io2_pin      = CONFIG_ESP32S3_SPI2_IO2PIN,
+  .io3_pin      = CONFIG_ESP32S3_SPI2_IO3PIN,
+#endif
   .periph       = ESP32S3_PERIPH_SPI2,
   .irq          = ESP32S3_IRQ_SPI2,
   .clk_bit      = SYSTEM_SPI2_CLK_EN,
   .rst_bit      = SYSTEM_SPI2_RST,
-#ifdef CONFIG_ESP32S3_SPI2_DMA
-  .dma_used     = true,
+#ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_clk_bit  = SYSTEM_SPI2_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI2_DMA_RST,
   .dma_periph   = ESP32S3_DMA_PERIPH_SPI2,
@@ -282,7 +320,13 @@ static const struct spislave_config_s esp32s3_spi2slave_config =
   .miso_insig   = FSPIQ_IN_IDX,
   .miso_outsig  = FSPIQ_OUT_IDX,
   .clk_insig    = FSPICLK_IN_IDX,
-  .clk_outsig   = FSPICLK_OUT_IDX
+  .clk_outsig   = FSPICLK_OUT_IDX,
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  .io2_insig    = FSPIWP_IN_IDX,
+  .io2_outsig   = FSPIWP_OUT_IDX,
+  .io3_insig    = FSPIHD_IN_IDX,
+  .io3_outsig   = FSPIHD_OUT_IDX,
+#endif
 };
 
 static const struct spi_slave_ctrlrops_s esp32s3_spi2slave_ops =
@@ -295,7 +339,7 @@ static const struct spi_slave_ctrlrops_s esp32s3_spi2slave_ops =
   .qpoll    = spislave_qpoll
 };
 
-#ifdef CONFIG_ESP32S3_SPI2_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 
 /* SPI DMA RX/TX description buffer */
 
@@ -314,7 +358,7 @@ static struct spislave_priv_s esp32s3_spi2slave_priv =
   .refs          = 0,
   .cpu           = -1,
   .cpuint        = -ENOMEM,
-#ifdef CONFIG_ESP32S3_SPI2_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_channel   = -ENOMEM,
   .dma_rxdesc    = esp32s3_spi2_dma_rxdesc,
   .dma_txdesc    = esp32s3_spi2_dma_txdesc,
@@ -347,12 +391,15 @@ static const struct spislave_config_s esp32s3_spi3slave_config =
   .mosi_pin     = CONFIG_ESP32S3_SPI3_MOSIPIN,
   .miso_pin     = CONFIG_ESP32S3_SPI3_MISOPIN,
   .clk_pin      = CONFIG_ESP32S3_SPI3_CLKPIN,
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  .io2_pin      = CONFIG_ESP32S3_SPI3_IO2PIN,
+  .io3_pin      = CONFIG_ESP32S3_SPI3_IO3PIN,
+#endif
   .periph       = ESP32S3_PERIPH_SPI3,
   .irq          = ESP32S3_IRQ_SPI3,
   .clk_bit      = SYSTEM_SPI3_CLK_EN,
   .rst_bit      = SYSTEM_SPI3_RST,
-#ifdef CONFIG_ESP32S3_SPI3_DMA
-  .dma_used     = true,
+#ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_clk_bit  = SYSTEM_SPI3_DMA_CLK_EN,
   .dma_rst_bit  = SYSTEM_SPI3_DMA_RST,
   .dma_periph   = ESP32S3_DMA_PERIPH_SPI3,
@@ -364,7 +411,13 @@ static const struct spislave_config_s esp32s3_spi3slave_config =
   .miso_insig   = SPI3_Q_IN_IDX,
   .miso_outsig  = SPI3_Q_OUT_IDX,
   .clk_insig    = SPI3_CLK_IN_IDX,
-  .clk_outsig   = SPI3_CLK_OUT_IDX
+  .clk_outsig   = SPI3_CLK_OUT_IDX,
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  .io2_insig    = SPI3_WP_IN_IDX,
+  .io2_outsig   = SPI3_WP_OUT_IDX,
+  .io3_insig    = SPI3_HD_IN_IDX,
+  .io3_outsig   = SPI3_HD_OUT_IDX,
+#endif
 };
 
 static const struct spi_slave_ctrlrops_s esp32s3_spi3slave_ops =
@@ -377,7 +430,7 @@ static const struct spi_slave_ctrlrops_s esp32s3_spi3slave_ops =
   .qpoll    = spislave_qpoll
 };
 
-#ifdef CONFIG_ESP32S3_SPI3_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 
 /* SPI DMA RX/TX description buffer */
 
@@ -396,7 +449,7 @@ static struct spislave_priv_s esp32s3_spi3slave_priv =
   .refs          = 0,
   .cpu           = -1,
   .cpuint        = -ENOMEM,
-#ifdef CONFIG_ESP32S3_SPI3_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
   .dma_channel   = -ENOMEM,
   .dma_rxdesc    = esp32s3_spi3_dma_rxdesc,
   .dma_txdesc    = esp32s3_spi3_dma_txdesc,
@@ -479,7 +532,7 @@ static inline void spislave_cpu_tx_fifo_reset(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 static inline void spislave_dma_tx_fifo_reset(struct spislave_priv_s *priv)
 {
   setbits(SPI_DMA_AFIFO_RST_M, SPI_DMA_CONF_REG(priv->config->id));
@@ -502,7 +555,7 @@ static inline void spislave_dma_tx_fifo_reset(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 static inline void spislave_dma_rx_fifo_reset(struct spislave_priv_s *priv)
 {
   setbits(SPI_RX_AFIFO_RST_M, SPI_DMA_CONF_REG(priv->config->id));
@@ -678,7 +731,7 @@ static void spislave_store_result(struct spislave_priv_s *priv,
       bytes_to_copy = remaining_space;
     }
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
   if (bytes_to_copy)
     {
       if ((priv->rx_dma_offset != priv->rx_length))
@@ -739,7 +792,7 @@ static void spislave_store_result(struct spislave_priv_s *priv,
  *
  ****************************************************************************/
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 static void spislave_prepare_next_rx(struct spislave_priv_s *priv)
 {
   if (priv->rx_length < SPI_SLAVE_BUFSIZE)
@@ -797,7 +850,7 @@ static void spislave_evict_sent_data(struct spislave_priv_s *priv,
  *
  ****************************************************************************/
 
-#ifndef ESP32S3_SPI_DMA
+#ifndef CONFIG_ESP32S3_SPI_DMA
 static void spislave_write_tx_buffer(struct spislave_priv_s *priv)
 {
   /* Initialize data_buf_reg with the address of the first data buffer
@@ -842,7 +895,7 @@ static void spislave_write_tx_buffer(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
 {
   uint32_t length = SPI_SLAVE_BUFSIZE - priv->rx_length;
@@ -888,7 +941,7 @@ static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 {
   esp32s3_dma_setup(priv->dma_channel,
@@ -934,11 +987,8 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 {
   if (priv->tx_length != 0)
     {
-#ifdef ESP32S3_SPI_DMA
-      if (priv->config->dma_used)
-        {
-          spislave_setup_tx_dma(priv);
-        }
+#ifdef CONFIG_ESP32S3_SPI_DMA
+      spislave_setup_tx_dma(priv);
 #else
       spislave_peripheral_reset(priv);
 
@@ -953,14 +1003,7 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
     {
       spiwarn("TX buffer empty! Disabling TX for next transaction\n");
 
-#ifdef ESP32S3_SPI_DMA
-      if (!priv->config->dma_used)
-        {
-          spislave_cpu_tx_fifo_reset(priv);
-        }
-#else
       spislave_cpu_tx_fifo_reset(priv);
-#endif
 
       priv->is_tx_enabled = false;
     }
@@ -986,9 +1029,15 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 static int spislave_periph_interrupt(int irq, void *context, void *arg)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
-
   uint32_t regval = getreg32(SPI_SLAVE1_REG(priv->config->id));
   uint32_t transfer_size = REG_MASK(regval, SPI_SLV_DATA_BITLEN) / 8;
+
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  uint32_t int_clear = 0;
+  uint32_t int_status = getreg32(SPI_DMA_INT_ST_REG(priv->config->id));
+#else
+  uint32_t int_clear = SPI_TRANS_DONE_INT_CLR_M;
+#endif
 
   if (!priv->is_processing)
     {
@@ -998,26 +1047,41 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   /* RX process */
 
-  if (transfer_size > 0)
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  if (int_status & SPI_SLV_INT_RX)
     {
-      spislave_store_result(priv, transfer_size);
-    }
+#endif
+      if (transfer_size > 0)
+        {
+          spislave_store_result(priv, transfer_size);
+        }
 
-#ifdef ESP32S3_SPI_DMA
-  if (priv->config->dma_used)
-    {
+#ifdef CONFIG_ESP32S3_SPI_DMA
       spislave_prepare_next_rx(priv);
+#endif
+
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+      int_clear |= SPI_SLV_INT_CLR_RX;
     }
 #endif
 
   /* TX process */
 
-  if (priv->is_tx_enabled && transfer_size > 0)
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  if (int_status & SPI_SLV_INT_TX)
     {
-      spislave_evict_sent_data(priv, transfer_size);
-    }
+#endif
+      if (priv->is_tx_enabled && transfer_size > 0)
+        {
+          spislave_evict_sent_data(priv, transfer_size);
+        }
 
-  spislave_prepare_next_tx(priv);
+      spislave_prepare_next_tx(priv);
+
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+      int_clear |= SPI_SLV_INT_CLR_TX;
+    }
+#endif
 
   if (priv->is_processing && esp32s3_gpioread(priv->config->cs_pin))
     {
@@ -1027,11 +1091,13 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   /* Clear the trans_done interrupt flag */
 
-  setbits(SPI_TRANS_DONE_INT_CLR_M, SPI_DMA_INT_CLR_REG(priv->config->id));
+  setbits(int_clear, SPI_DMA_INT_CLR_REG(priv->config->id));
 
   /* Trigger the start of user-defined transaction */
 
+#ifndef CONFIG_ESP32S3_SPI_IO_QIO
   setbits(SPI_USR_M, SPI_CMD_REG(priv->config->id));
+#endif
 
   return 0;
 }
@@ -1050,7 +1116,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
 void spislave_dma_init(struct spislave_priv_s *priv)
 {
   /* Enable GDMA clock for the SPI peripheral */
@@ -1087,6 +1153,105 @@ void spislave_dma_init(struct spislave_priv_s *priv)
 #endif
 
 /****************************************************************************
+ * Name: spislave_initializ_iomux
+ *
+ * Description:
+ *   Initialize ESP32-S3 SPI Slave GPIO by IO MUX.
+ *
+ * Input Parameters:
+ *   priv - Private SPI Slave controller structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if SPI_VIA_IOMUX != 0
+static void spislave_initializ_iomux(struct spislave_priv_s *priv)
+{
+  uint32_t attr = INPUT_FUNCTION_5 | DRIVE_0;
+  const struct spislave_config_s *config = priv->config;
+
+  esp32s3_configgpio(config->cs_pin,  attr);
+  esp32s3_configgpio(config->clk_pin, attr);
+
+  esp32s3_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
+  esp32s3_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  attr |= OUTPUT;
+
+  esp32s3_configgpio(config->mosi_pin, attr);
+  esp32s3_configgpio(config->miso_pin, attr);
+  esp32s3_configgpio(config->io2_pin,  attr);
+  esp32s3_configgpio(config->io3_pin,  attr);
+
+  esp32s3_gpio_matrix_out(config->io2_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32s3_gpio_matrix_out(config->io3_pin, SIG_GPIO_OUT_IDX, 0, 0);
+#else
+  esp32s3_configgpio(config->mosi_pin, attr);
+  esp32s3_configgpio(config->miso_pin, OUTPUT_FUNCTION_5);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: spislave_initializ_iomatrix
+ *
+ * Description:
+ *   Initialize ESP32-S3 SPI Slave GPIO by IO matrix.
+ *
+ * Input Parameters:
+ *   priv - Private SPI Slave controller structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if SPI_VIA_IOMUX == 0 || defined(CONFIG_ESP32S3_SPI3)
+static void spislave_initializ_iomatrix(struct spislave_priv_s *priv)
+{
+  uint32_t attr = INPUT | DRIVE_0;
+  const struct spislave_config_s *config = priv->config;
+
+  esp32s3_configgpio(config->cs_pin, attr);
+  esp32s3_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
+
+  esp32s3_configgpio(config->clk_pin, attr);
+  esp32s3_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+
+#  ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  attr |= OUTPUT;
+
+  esp32s3_configgpio(config->mosi_pin, attr);
+  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+  esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+
+  esp32s3_configgpio(config->miso_pin, attr);
+  esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+
+  esp32s3_configgpio(config->io2_pin, attr);
+  esp32s3_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
+  esp32s3_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
+
+  esp32s3_configgpio(config->io3_pin, attr);
+  esp32s3_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
+  esp32s3_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
+#  else
+  esp32s3_configgpio(config->mosi_pin, attr);
+  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+
+  esp32s3_configgpio(config->miso_pin, OUTPUT);
+  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+#  endif
+}
+#endif
+
+/****************************************************************************
  * Name: spislave_gpio_initialize
  *
  * Description:
@@ -1102,54 +1267,19 @@ void spislave_dma_init(struct spislave_priv_s *priv)
 
 static void spislave_gpio_initialize(struct spislave_priv_s *priv)
 {
-  const struct spislave_config_s *config = priv->config;
-
-  esp32s3_gpiowrite(config->cs_pin, 1);
-  esp32s3_gpiowrite(config->mosi_pin, 1);
-  esp32s3_gpiowrite(config->miso_pin, 1);
-  esp32s3_gpiowrite(config->clk_pin, 1);
-
 #if SPI_VIA_IOMUX != 0
-  if (priv->config->id == 0)
+  if (priv->config->id == 2)
     {
-      esp32s3_configgpio(config->cs_pin, INPUT_FUNCTION_5 | PULLUP);
-      esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
-
-      esp32s3_configgpio(config->mosi_pin, INPUT_FUNCTION_5 | PULLUP);
-      esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
-
-      esp32s3_configgpio(config->miso_pin, OUTPUT_FUNCTION_5 | PULLUP);
-      esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
-
-      esp32s3_configgpio(config->clk_pin, INPUT_FUNCTION_5 | PULLUP);
-      esp32s3_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      spislave_initializ_iomux(priv);
     }
+#  ifdef CONFIG_ESP32S3_SPI3
   else
     {
-      esp32s3_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
-      esp32s3_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
-
-      esp32s3_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
-      esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
-
-      esp32s3_configgpio(config->miso_pin, OUTPUT_FUNCTION_2 | PULLUP);
-      esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
-
-      esp32s3_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
-      esp32s3_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+      spislave_initializ_iomatrix(priv);
     }
+#  endif
 #else
-  esp32s3_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
-  esp32s3_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
-
-  esp32s3_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
-  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
-
-  esp32s3_configgpio(config->miso_pin, OUTPUT_FUNCTION_2 | PULLUP);
-  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
-
-  esp32s3_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
-  esp32s3_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+  spislave_initializ_iomatrix(priv);
 #endif
 }
 
@@ -1169,6 +1299,7 @@ static void spislave_gpio_initialize(struct spislave_priv_s *priv)
 
 static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
 {
+  uint32_t regval;
   struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   const struct spislave_config_s *config = priv->config;
 
@@ -1183,11 +1314,23 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
 
   putreg32(0, SPI_CLOCK_REG(priv->config->id));
 
-  putreg32(SPI_DOUTDIN_M, SPI_USER_REG(priv->config->id));
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  regval = 0;
+#else
+  regval = SPI_DOUTDIN_M;
+#endif
+  putreg32(regval, SPI_USER_REG(priv->config->id));
 
   putreg32(0, SPI_CTRL_REG(priv->config->id));
 
-  putreg32(SPI_SLAVE_MODE_M, SPI_SLAVE_REG(priv->config->id));
+  regval = SPI_SLAVE_MODE_M;
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  regval |= SPI_SLV_WRDMA_BITLEN_EN_M | SPI_SLV_RDDMA_BITLEN_EN_M;
+#else
+  regval |= SPI_SLV_WRBUF_BITLEN_EN_M | SPI_SLV_RDBUF_BITLEN_EN_M;
+#endif
+
+  putreg32(regval, SPI_SLAVE_REG(priv->config->id));
 
   spislave_peripheral_reset(priv);
 
@@ -1200,11 +1343,8 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
 
   resetbits(SPI_INT_MASK, SPI_DMA_INT_ENA_REG(priv->config->id));
 
-#ifdef ESP32S3_SPI_DMA
-  if (priv->config->dma_used)
-    {
-      spislave_dma_init(priv);
-    }
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  spislave_dma_init(priv);
 #endif
 
   esp32s3_gpioirqenable(ESP32S3_PIN2IRQ(config->cs_pin), GPIO_INTR_POSEDGE);
@@ -1216,8 +1356,13 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
    * queued.
    */
 
-  setbits(SPI_TRANS_DONE_INT_RAW_M, SPI_DMA_INT_RAW_REG(priv->config->id));
-  setbits(SPI_TRANS_DONE_INT_ENA_M, SPI_DMA_INT_ENA_REG(priv->config->id));
+#ifdef CONFIG_ESP32S3_SPI_IO_QIO
+  regval = SPI_SLV_INT_EN;
+#else
+  regval = SPI_TRANS_DONE_INT_ENA_M;
+#endif
+  setbits(regval, SPI_DMA_INT_RAW_REG(priv->config->id));
+  setbits(regval, SPI_DMA_INT_ENA_REG(priv->config->id));
 }
 
 /****************************************************************************
@@ -1244,12 +1389,8 @@ static void spislave_deinitialize(struct spi_slave_ctrlr_s *ctrlr)
 
   resetbits(SPI_TRANS_DONE_INT_ENA_M, SPI_DMA_INT_ENA_REG(priv->config->id));
 
-#ifdef ESP32S3_SPI_DMA
-  if (priv->config->dma_used)
-    {
-      resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
-    }
-
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
   priv->rx_dma_offset = 0;
 #endif
 
@@ -1315,7 +1456,7 @@ static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
 
   SPIS_DEV_CMDDATA(dev, false);
 
-#ifdef ESP32S3_SPI_DMA
+#ifdef CONFIG_ESP32S3_SPI_DMA
   priv->rx_dma_offset = 0;
 #endif
 
@@ -1336,6 +1477,10 @@ static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
       memcpy(priv->tx_buffer, data, num_bytes);
       priv->tx_length += num_bytes;
     }
+
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  spislave_prepare_next_rx(priv);
+#endif
 
   /* Enable the CPU interrupt that is linked to the SPI Slave controller */
 
@@ -1380,11 +1525,8 @@ static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   resetbits(SPI_TRANS_DONE_INT_ENA_M, SPI_DMA_INT_ENA_REG(priv->config->id));
 
-#ifdef ESP32S3_SPI_DMA
-  if (priv->config->dma_used)
-    {
-      resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
-    }
+#ifdef CONFIG_ESP32S3_SPI_DMA
+  resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
 #endif
 
   resetbits(priv->config->clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
