@@ -311,8 +311,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
 #ifdef CONFIG_SMP
 
-#define SGI_CPU_PAUSE             GIC_IRQ_SGI0
-
 /****************************************************************************
  * Name: arm64_pause_handler
  *
@@ -336,8 +334,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 int arm64_pause_handler(int irq, void *context, void *arg);
 
 void arm64_gic_secondary_init(void);
-
-int arm64_smp_sgi_init(void);
 
 #endif
 

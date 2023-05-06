@@ -554,6 +554,12 @@ static void gicv3_dist_init(void)
   putreg32(BIT(GICD_CTRL_ARE_NS) | BIT(GICD_CTLR_ENABLE_G1NS),
            GICD_CTLR);
 #endif
+
+#ifdef CONFIG_SMP
+  /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
+
+  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm64_pause_handler, NULL));
+#endif
 }
 
 void up_enable_irq(int irq)
@@ -790,6 +796,10 @@ static void arm64_gic_init(void)
   gicv3_rdist_enable(gic_get_rdist());
 
   gicv3_cpuif_init();
+
+#ifdef CONFIG_SMP
+  up_enable_irq(GIC_IRQ_SGI2);
+#endif
 }
 
 int arm64_gic_initialize(void)
