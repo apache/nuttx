@@ -80,9 +80,6 @@ define _examine_target
 
     set $_target_max_tasks = g_npidhash
 
-    python if (type(gdb.lookup_global_symbol("up_check_tcbstack")) is gdb.Symbol) : \
-    gdb.execute("set $_target_has_stack_coloration = 1")
-
     printf "target examined\n"
     python print("_target_arch.name=" + _target_arch.name())
 
@@ -104,15 +101,9 @@ define _print_thread
     printf "  "
   end
 
-  if ($_target_has_stack_coloration)
-    set $stack_used = up_check_tcbstack($tcb)
-  else
-    set $stack_used = 0
-  end
-
-  printf "%d Thread 0x%x  (Name: %s, State: %s, Priority: %d, Stack: %d/%d) PC: 0x%x in ", \
+  printf "%d Thread 0x%x  (Name: %s, State: %s, Priority: %d, Stack: %d) PC: 0x%x in ", \
   $tcb->pid, $tcb, $tcb->name, g_statenames[$tcb->task_state], $tcb->sched_priority, \
-  $stack_used, $tcb->adj_stack_size, $tcb->xcp.regs[$_pc_reg_idx]
+  $tcb->adj_stack_size, $tcb->xcp.regs[$_pc_reg_idx]
   python _symbol = gdb.execute("info symbol $tcb->xcp.regs[$_pc_reg_idx]", to_string=True); \
   print(_symbol.split()[0] + "()")
 end
