@@ -111,7 +111,7 @@ static inline uint32_t arm_clz(unsigned int value)
  *   Get cache linesize
  *
  * Input Parameters:
- *   None
+ *   icache - Difference between icache and dcache.
  *
  * Returned Value:
  *   Cache line size
@@ -119,21 +119,28 @@ static inline uint32_t arm_clz(unsigned int value)
  ****************************************************************************/
 
 #if defined(CONFIG_ARMV8M_ICACHE) || defined(CONFIG_ARMV8M_DCACHE)
-static size_t up_get_cache_linesize(void)
+static size_t up_get_cache_linesize(bool icache)
 {
-  static uint32_t clsize;
+  uint32_t ccsidr;
+  uint32_t csselr;
+  uint32_t sshift;
 
-  if (clsize == 0)
+  csselr = getreg32(NVIC_CSSELR);
+
+  if (icache)
     {
-      uint32_t ccsidr;
-      uint32_t sshift;
-
-      ccsidr = getreg32(NVIC_CCSIDR);
-      sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
-      clsize = 1 << sshift;
+      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_ICACHE;
+    }
+  else
+    {
+      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_DCACHE;
     }
 
-  return clsize;
+  putreg32(csselr, NVIC_CSSELR);
+  ccsidr = getreg32(NVIC_CCSIDR);
+  sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+
+  return 1 << sshift;
 }
 #endif
 
@@ -158,7 +165,14 @@ static size_t up_get_cache_linesize(void)
 #ifdef CONFIG_ARMV8M_ICACHE
 size_t up_get_icache_linesize(void)
 {
-  return up_get_cache_linesize();
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = up_get_cache_linesize(true);
+    }
+
+  return clsize;
 }
 #endif
 
@@ -344,7 +358,14 @@ void up_invalidate_icache_all(void)
 #ifdef CONFIG_ARMV8M_DCACHE
 size_t up_get_dcache_linesize(void)
 {
-  return up_get_cache_linesize();
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = up_get_cache_linesize(false);
+    }
+
+  return clsize;
 }
 #endif
 

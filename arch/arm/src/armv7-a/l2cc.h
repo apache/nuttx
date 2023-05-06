@@ -71,7 +71,7 @@ void arm_l2ccinitialize(void);
 #endif
 
 /****************************************************************************
- * Name: l2cc_get_linesize
+ * Name: l2cc_linesize
  *
  * Description:
  *    Get L2 cache linesize
@@ -84,7 +84,7 @@ void arm_l2ccinitialize(void);
  *
  ****************************************************************************/
 
-uint32_t l2cc_get_linesize(void);
+uint32_t l2cc_linesize(void);
 
 /****************************************************************************
  * Name: l2cc_enable
@@ -245,7 +245,7 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
    * compilation in one place.
    */
 
-#  define l2cc_get_linesize() 0
+#  define l2cc_linesize() 0
 #  define l2cc_enable()
 #  define l2cc_disable()
 #  define l2cc_sync()
