@@ -258,8 +258,6 @@ void arm64_boot_secondary_c_routine(void)
 
   up_perf_init(NULL);
 
-  up_enable_irq(SGI_CPU_PAUSE);
-
   func  = cpu_boot_params.func;
   arg   = cpu_boot_params.arg;
   ARM64_DSB();
@@ -277,10 +275,3 @@ void arm64_boot_secondary_c_routine(void)
   func(arg);
 }
 
-int arm64_smp_sgi_init(void)
-{
-  irq_attach(SGI_CPU_PAUSE, arm64_pause_handler, 0);
-  up_enable_irq(SGI_CPU_PAUSE);
-
-  return 0;
-}
