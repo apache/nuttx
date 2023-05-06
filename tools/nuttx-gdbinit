@@ -59,8 +59,7 @@ define _examine_target
   if ($_target_examined == 0x0)
     _examine_arch
 
-    set $_tcb0 = g_pidhash[0]
-    set $_xcp_nregs = sizeof($_tcb0->xcp.regs) / sizeof($_tcb0->xcp.regs[0])
+    set $_xcp_nregs = sizeof(g_last_regs) / sizeof(void *)
     set $_target_has_fpu = 0
 
     if ($_streq($_target_arch, "armv7e-m") == 1)
