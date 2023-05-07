@@ -62,6 +62,12 @@ config LIBC_ENVPATH
 		Use the contents of the common environment variable to locate executable
 		or library files.  Default: n
 
+config FDSAN
+	bool "Enable Fdsan"
+	default n
+		---help---
+		Enable the fdsan support
+
 config LIBC_FTOK_VFS_PATH
 	string "Relative path to ftok storage"
 	default "/var/ftok"

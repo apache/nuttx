@@ -30,6 +30,10 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef CONFIG_FDSAN
+#  include <android/fdsan.h>
+#endif
+
 #include "libc.h"
 
 /****************************************************************************
@@ -119,7 +123,14 @@ int fclose(FAR FILE *stream)
         {
           /* Close the file descriptor and save the return status */
 
+#ifdef CONFIG_FDSAN
+          uint64_t tag;
+          tag = android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
+                                               (uintptr_t)stream);
+          status = android_fdsan_close_with_tag(stream->fs_fd, tag);
+#else
           status = close(stream->fs_fd);
+#endif
 
           /* If close() returns an error but flush() did not then make sure
            * that we return the close() error condition.

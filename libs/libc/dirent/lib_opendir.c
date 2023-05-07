@@ -25,6 +25,11 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#ifdef CONFIG_FDSAN
+#  include <android/fdsan.h>
+#endif
+
 #include <string.h>
 
 #include "libc.h"
@@ -83,5 +88,12 @@ FAR DIR *opendir(FAR const char *path)
     }
 
   dir->fd = fd;
+
+#ifdef CONFIG_FDSAN
+  android_fdsan_exchange_owner_tag(fd, 0,
+    android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_DIR,
+                                       (uintptr_t)dir));
+#endif
+
   return dir;
 }
