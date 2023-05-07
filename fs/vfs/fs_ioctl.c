@@ -43,6 +43,9 @@
 int file_vioctl(FAR struct file *filep, int req, va_list ap)
 {
   FAR struct inode *inode;
+#ifdef CONFIG_FDSAN
+  FAR uint64_t *tag;
+#endif
   unsigned long arg;
   int ret = -ENOTTY;
 
@@ -108,6 +111,20 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
             ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg, PATH_MAX);
           }
         break;
+
+#ifdef CONFIG_FDSAN
+      case FIOC_SETTAG:
+        tag = (FAR uint64_t *)arg;
+        filep->f_tag = *tag;
+        ret = OK;
+        break;
+
+      case FIOC_GETTAG:
+        tag = (FAR uint64_t *)arg;
+        *tag = filep->f_tag;
+        ret = OK;
+        break;
+#endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       case BIOC_BLKSSZGET:

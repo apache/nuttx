@@ -184,6 +184,18 @@
                                            * OUT: None
                                            */
 
+#ifdef CONFIG_FDSAN
+#define FIOC_SETTAG     _FIOC(0x000e)     /* IN:  FAR uint64_t *
+                                           * Pointer to file tag
+                                           * OUT: None
+                                           */
+
+#define FIOC_GETTAG     _FIOC(0x000f)     /* IN:  FAR uint64_t *
+                                           * Pointer to file tag
+                                           * OUT: None
+                                           */
+#endif
+
 /* NuttX file system ioctl definitions **************************************/
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
