@@ -430,6 +430,9 @@ struct file
   off_t             f_pos;      /* File position */
   FAR struct inode *f_inode;    /* Driver or file system interface */
   FAR void         *f_priv;     /* Per file driver private data */
+#ifdef CONFIG_FDSAN
+  uint64_t          f_tag;      /* file owner tag, init to 0 */
+#endif
 };
 
 /* This defines a two layer array of files indexed by the file descriptor.
