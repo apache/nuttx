@@ -1284,6 +1284,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
                            * change
                            */
 
+                          priv->mptr = priv->msgv->buffer;
                           tiva_i2c_nextxfr(priv, 0);
                         }
                       else
