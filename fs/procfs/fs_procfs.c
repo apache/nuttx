@@ -55,6 +55,7 @@
 extern const struct procfs_operations g_cpuinfo_operations;
 extern const struct procfs_operations g_cpuload_operations;
 extern const struct procfs_operations g_critmon_operations;
+extern const struct procfs_operations g_fdt_operations;
 extern const struct procfs_operations g_iobinfo_operations;
 extern const struct procfs_operations g_irq_operations;
 extern const struct procfs_operations g_meminfo_operations;
@@ -106,6 +107,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #ifdef CONFIG_SCHED_CRITMONITOR
   { "critmon",      &g_critmon_operations,  PROCFS_FILE_TYPE   },
+#endif
+
+#if defined(CONFIG_DEVICE_TREE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_FDT)
+  { "fdt",          &g_fdt_operations,      PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS

@@ -1,5 +1,5 @@
 ############################################################################
-# fs/procfs/Make.defs
+# drivers/devicetree/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,17 +18,11 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_FS_PROCFS),y)
-# Files required for procfs file system support
+ifeq ($(CONFIG_DEVICE_TREE),y)
 
-CSRCS += fs_procfs.c fs_procfscpuinfo.c fs_procfscpuload.c
-CSRCS += fs_procfscritmon.c fs_procfsfdt.c fs_procfsiobinfo.c
-CSRCS += fs_procfsmeminfo.c fs_procfsproc.c fs_procfstcbinfo.c
-CSRCS += fs_procfsuptime.c fs_procfsutil.c fs_procfsversion.c
+CSRCS += fdt.c
 
-# Include procfs build support
-
-DEPPATH += --dep-path procfs
-VPATH += :procfs
+DEPPATH += --dep-path devicetree
+VPATH += :devicetree
 
 endif
