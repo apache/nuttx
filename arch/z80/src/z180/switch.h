@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/z80/src/z180/switch.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_Z80_SRC_Z180_SWITCH_H
 #define __ARCH_Z80_SRC_Z180_SWITCH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/sched.h>
 
@@ -33,14 +33,14 @@
 #include "z180_iomap.h"
 #include "z80_internal.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Macros for portability ***********************************************************
+/* Macros for portability ***************************************************
  *
- * Common logic in arch/z80/src/common is customized for the z180 context switching
- * logic via the following macros.
+ * Common logic in arch/z80/src/common is customized for
+ * the z180 context switching logic via the following macros.
  */
 
 /* Initialize the IRQ state */
@@ -48,34 +48,36 @@
 #define INIT_IRQCONTEXT() \
   g_current_regs = NULL
 
-/* IN_INTERRUPT returns true if the system is currently operating in the interrupt
- * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
+/* IN_INTERRUPT returns true if the system is currently operating
+ * in the interrupt context.  IN_INTERRUPT is the inline equivalent
+ * of up_interrupt_context().
  */
 
 #define IN_INTERRUPT() \
   (g_current_regs != NULL)
 
-/* The following macro declares the variables need by IRQ_ENTER and IRQ_LEAVE.
- * These variables are used to support nested interrupts.
+/* The following macro declares the variables need by IRQ_ENTER
+ * and IRQ_LEAVE.  These variables are used to support nested interrupts.
  *
  * - savestate holds the previous value of current_state.
  * - savecpr holds the previous value of current_cpr.
  *
- * NOTE: Nested interrupts are not supported in this implementation.  If you want
- * to implement nested interrupts, you would have to change the way that
- * g_current_regs/cbr is handled.  The savestate/savecbr variables would not work
- * for that purpose as implemented here because only the outermost nested
- * interrupt can result in a context switch (they can probably be deleted).
+ * NOTE: Nested interrupts are not supported in this implementation.
+ * If you want to implement nested interrupts, you would have to change
+ * the way that g_current_regs/cbr is handled.  The savestate/savecbr
+ * variables would not work for that purpose as implemented here because
+ * only the outermost nested interrupt can result in a context switch
+ * (they can probably be deleted).
  */
 
 #define DECL_SAVESTATE() \
   FAR chipreg_t *savestate; \
   uint8_t savecbr;
 
-/* The following macro is used when the system enters interrupt handling logic.
- * The entry values of g_current_regs and current_cbr and stored in local variables.
- * Then g_current_regs and current_cbr are set to the values of the interrupted
- * task.
+/* The following macro is used when the system enters interrupt
+ * handling logic.  The entry values of g_current_regs and current_cbr
+ * and stored in local variables.  Then g_current_regs and current_cbr
+ * are set to the values of the interrupted task.
  */
 
 #define IRQ_ENTER(irq, regs) \
@@ -88,9 +90,10 @@
     } \
   while (0)
 
-/* The following macro is used when the system exits interrupt handling logic.
- * The value of g_current_regs is restored.  If we are not processing a nested
- * interrupt (meaning that we going to return to the user task), then also
+/* The following macro is used when the system exits interrupt
+ * handling logic.  The value of g_current_regs is restored.
+ * If we are not processing a nested interrupt (meaning
+ * that we going to return to the user task), then also
  * set the MMU's CBR register.
  */
 
@@ -109,7 +112,9 @@
     } \
   while (0)
 
-/* The following macro is used to sample the interrupt state (as a opaque handle) */
+/* The following macro is used to sample the interrupt state
+ * (as a opaque handle)
+ */
 
 #define IRQ_STATE() \
   (g_current_regs)
@@ -132,8 +137,9 @@
     } \
   while (0)
 
-/* Save the user context in the specified TCB.  User context saves can be simpler
- * because only those registers normally saved in a C called need be stored.
+/* Save the user context in the specified TCB.  User context saves can be
+ * simpler because only those registers normally saved in a C called
+ * need be stored.
  */
 
 #define SAVE_USERCONTEXT(tcb)  \
@@ -154,33 +160,33 @@
     } \
   while (0)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level register storage structure.
- * If is non-NULL only during interrupt processing.
+/* This holds a references to the current interrupt level register
+ * storage structure.  If is non-NULL only during interrupt processing.
  */
 
 extern volatile chipreg_t *g_current_regs;
 
 /* This holds the value of the MMU's CBR register.  This value is set to the
- * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR if
- * an interrupt level context switch occurs, and restored on interrupt exit.  In
- * this way, the CBR is always correct on interrupt exit.
+ * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR
+ * if an interrupt level context switch occurs, and restored on interrupt
+ * exit.  In this way, the CBR is always correct on interrupt exit.
  */
 
 extern uint8_t current_cbr;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
