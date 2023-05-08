@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/z80/src/z180/z180_iomap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_Z80_SRC_Z180_Z180_IOMAP_H
 #define __ARCH_Z80_SRC_Z180_Z180_IOMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <arch/z180/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 /* These registers may be relocated to multiples of 0x40 by setting the IO
  * Control Register (ICR).  Relocatable to 0x40-0x7f, or 0x80-0xbf. The
@@ -45,7 +45,7 @@
 #  define SFR_OFFSET 0
 #endif
 
-/* Z180 Register Bit addresses ******************************************************/
+/* Z180 Register Bit addresses **********************************************/
 
 /* ASCI Registers */
 
@@ -291,9 +291,9 @@
 #define Z18X_SCC_WR14        0x0e /* Miscellaneous control bits */
 #define Z18X_SCC_WR15        0x0f /* External status interrupt enable control */
 
-/* Z180 Register Bit definitions ****************************************************/
+/* Z180 Register Bit definitions ********************************************/
 
-/* ASCI Registers *******************************************************************/
+/* ASCI Registers ***********************************************************/
 
 /* ASCI Control Register A 0 (CNTLA0: 0x00) */
 
@@ -389,7 +389,7 @@
  * (Z8S180/L180-Class Processors Only) -- 8-bit data
  */
 
-/* CSI/O Registers ******************************************************************/
+/* CSI/O Registers **********************************************************/
 
 /* CSI/O Control/Status Register (CNTR: 0x0a) */
 
@@ -411,7 +411,7 @@
 
 /* CSI/O Transmit/Receive Register (TRDR: 0x0b) -- 8-bit data */
 
-/* Timer Registers ******************************************************************/
+/* Timer Registers **********************************************************/
 
 /* Timer Data Register 0L (TMDR0L: 0x0c) -- 8-bit data */
 
@@ -442,7 +442,7 @@
 
 /* Free Running counter (FRC: 0x18) -- 8-bit data */
 
-/* DMA Registers ********************************************************************/
+/* DMA Registers ************************************************************/
 
 /* DMA Destination Address Register Channel 0
  * (DAR0 I/O Address 0x23 to 0x25) -- 8-bit data
@@ -527,7 +527,7 @@
 #  define DCNTL_DIM_IO2MI    (2 << DCNTL_DIM_SHIFT) /* I/O to memory, increment MARI */
 #  define DCNTL_DIM_IO2MD    (3 << DCNTL_DIM_SHIFT) /* I/O to memory, decrement MARI */
 
-/* System Control Registers *********************************************************/
+/* System Control Registers *************************************************/
 
 /* Clock Multiplier Register (CMR: 0x1e)
  * (Z8S180/L180-Class Processors Only)
@@ -577,7 +577,9 @@
 #  define RCR_CYC0           (1 << RCR_CYC_SHIFT)
 #  define RCR_CYC1           (2 << RCR_CYC_SHIFT)
 
-/* MMU Common Base Register (CBR: 0x38) - 8-bit base address of Common Area 1 */
+/* MMU Common Base Register (CBR: 0x38)
+ * - 8-bit base address of Common Area 1
+ */
 
 /* MMU Bank Base Register (BBR: 0x39) - 8-bit address of Bank area */
 
@@ -602,7 +604,7 @@
 #  define ICR_IOA7           (2 << ICR_IOA_SHIFT)
 #define ICR_IOSTP            (0x20) /* Bit 5: Enable I/O stop mode */
 
-/* Registers unique to Z8x181 class CPUs ********************************************/
+/* Registers unique to Z8x181 class CPUs ************************************/
 
 #ifdef HAVE_Z8X181
 /* PIA Registers */
@@ -653,7 +655,7 @@
 
 #endif
 
-/* Registers unique to Z8x182 class CPUs ********************************************/
+/* Registers unique to Z8x182 class CPUs ************************************/
 
 #ifdef HAVE_Z8X182
 /* PIA Registers */
@@ -681,7 +683,7 @@
 
 #endif
 
-/* [E]SCC Internal Register Definitions *********************************************/
+/* [E]SCC Internal Register Definitions *************************************/
 
 /* Read Registers */
 
@@ -707,7 +709,9 @@
 #define RR0_RES2             (0x02) /* Bit 1: Residue Code 2 */
 #define RR0_ALL              (0x01) /* Bit 0: All Sent */
 
-/* RR2: Interrupt vector (modified if VIS Bit in WR9 is set) -- 8-bit vector value */
+/* RR2: Interrupt vector (modified if VIS Bit in WR9 is set)
+ * -- 8-bit vector value
+ */
 
 /* RR3: Interrupt pending bits */
 
