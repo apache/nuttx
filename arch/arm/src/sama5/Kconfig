@@ -4677,10 +4677,10 @@ config SAMA5_ADC_TIOATRIG
 		Timer/Counter 0 channels.
 
 config SAMA5_ADC_PWMTRIG
-  bool "PWM Event trigger"
-  depends on SAMA5_PWM
-  ---help---
-	A-to-D Conversion is initiated from the PWM event lines
+	bool "PWM Event trigger"
+	depends on SAMA5_PWM
+	---help---
+		A-to-D Conversion is initiated from the PWM event lines
 
 config SAMA5_ADC_RTCOUT
 	bool "RTC Out trigger"
