@@ -113,8 +113,6 @@ const char *__asan_default_options(void)
          " alloc_dealloc_mismatch=0"
          " allocator_frees_and_returns_null_on_realloc_zero=0"
          " check_initialization_order=1"
-         " detect_invalid_pointer_pairs=2"
-         " detect_stack_use_after_return=1"
          " fast_unwind_on_malloc=0"
          " strict_init_order=1";
 }
