@@ -67,8 +67,8 @@
   }
 
 #define SWAPINIT(a, width) \
-  swaptype = ((FAR char *)a - (FAR char *)0) % sizeof(long) || \
-  width % sizeof(long) ? 2 : width == sizeof(long)? 0 : 1;
+  swaptype = (uintptr_t)a % sizeof(long) || \
+  width % sizeof(long) ? 2 : width == sizeof(long) ? 0 : 1;
 
 #define swap(a, b) \
   if (swaptype == 0) \
