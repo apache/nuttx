@@ -1135,12 +1135,12 @@ config ESP32_TWAI0_SAM
 endif # ESP32_TWAI0
 
 config ESP32_TWAI_REGDEBUG
-    bool "TWAI register level debug"
-    depends on DEBUG_CAN_INFO
-    default n
-    ---help---
-        Output detailed register-level TWAI debug information. Requires also
-        CONFIG_DEBUG_CAN_INFO.
+	bool "TWAI register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level TWAI debug information. Requires also
+		CONFIG_DEBUG_CAN_INFO.
 
 endmenu #ESP32_TWAI
 
