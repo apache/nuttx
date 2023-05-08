@@ -302,11 +302,11 @@ config MPFS_IHC_CLIENT
 		Selects and enables the Inter-Hart-Communication (IHC) slave driver.
 
 config MPFS_IHC_SBI
-        bool "IHC OpenSBI handler"
-        depends on MPFS_BOOTLOADER
-        default n
-        ---help---
-                Selects and enables the Inter-Hart-Communication (IHC) driver on hart0.
+	bool "IHC OpenSBI handler"
+	depends on MPFS_BOOTLOADER
+	default n
+	---help---
+		Selects and enables the Inter-Hart-Communication (IHC) driver on hart0.
 
 config MPFS_IHC_LINUX_ON_HART1
 	int "Linux on hart1"
