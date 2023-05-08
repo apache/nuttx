@@ -72,6 +72,7 @@
 #ifdef HAVE_GROUP_MEMBERS
 static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 {
+  FAR pid_t *oldmembers = NULL;
   irqstate_t flags;
 
   DEBUGASSERT(group && group->tg_nmembers < UINT8_MAX);
@@ -91,8 +92,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
           newmax = UINT8_MAX;
         }
 
-      newmembers = (FAR pid_t *)
-        kmm_realloc(group->tg_members, sizeof(pid_t) * newmax);
+      newmembers = (FAR pid_t *)kmm_malloc(sizeof(pid_t) * newmax);
 
       if (!newmembers)
         {
@@ -105,10 +105,16 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
        * may be traversed from an interrupt handler (read-only).
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(NULL);
+      memcpy(newmembers, group->tg_members,
+             sizeof(pid_t) * group->tg_mxmembers);
+      oldmembers = group->tg_members;
       group->tg_members   = newmembers;
       group->tg_mxmembers = newmax;
-      leave_critical_section(flags);
+    }
+  else
+    {
+      flags = spin_lock_irqsave(NULL);
     }
 
   /* Assign this new pid to the group; group->tg_nmembers will be incremented
@@ -116,6 +122,14 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
    */
 
   group->tg_members[group->tg_nmembers] = pid;
+  group->tg_nmembers++;
+  spin_unlock_irqrestore(NULL, flags);
+
+  if (oldmembers != NULL)
+    {
+      kmm_free(oldmembers);
+    }
+
   return OK;
 }
 #endif /* HAVE_GROUP_MEMBERS */
@@ -191,6 +205,8 @@ int group_join(FAR struct pthread_tcb_s *tcb)
   FAR struct task_group_s *group;
 #ifdef HAVE_GROUP_MEMBERS
   int ret;
+#else
+  irqstate_t flags;
 #endif
 
   DEBUGASSERT(tcb && tcb->cmn.group &&
@@ -208,9 +224,12 @@ int group_join(FAR struct pthread_tcb_s *tcb)
     {
       return ret;
     }
+#else
+  flags = spin_lock_irqsave(NULL);
+  group->tg_nmembers++;
+  spin_unlock_irqrestore(NULL, flags);
 #endif
 
-  group->tg_nmembers++;
   return OK;
 }
 
