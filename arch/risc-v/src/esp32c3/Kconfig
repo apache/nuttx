@@ -774,50 +774,6 @@ config ESP32C3_WIFI_SCAN_RESULT_SIZE
 	---help---
 		Maximum scan result buffer size.
 
-config ESP32C3_WIFI_SAVE_PARAM
-	bool "Save Wi-Fi Parameters"
-	default n
-	depends on !DISABLE_MOUNTPOINT
-	---help---
-		If you enable this option, Wi-Fi adapter parameters will be saved
-		into the file system instead of computing them each time.
-
-		These parameters mainly contains:
-			- SSID
-			- Password
-			- BSSID
-			- PMK(compute when connecting)
-			- Author mode
-			- MAC address
-			- Wi-Fi hardware configuration parameters
-
-config ESP32C3_WIFI_FS_MOUNTPT
-	string "Wi-Fi parameters mount point"
-	default "/mnt/esp/wifi"
-	depends on ESP32C3_WIFI_SAVE_PARAM
-	---help---
-		Mount point of Wi-Fi storage file system.
-
-config ESP32C3_WIFI_MTD_ENCRYPT
-	bool "Encrypt Wi-Fi MTD partition"
-	default y
-	depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
-
-config ESP32C3_WIFI_MTD_OFFSET
-	hex "Wi-Fi MTD partition offset"
-	default 0x280000 if !ESP32C3_HAVE_OTA_PARTITION
-	default 0x350000 if ESP32C3_HAVE_OTA_PARTITION
-	depends on ESP32C3_WIFI_SAVE_PARAM
-	---help---
-		This is the base address of the Wi-Fi MTD partition.
-
-config ESP32C3_WIFI_MTD_SIZE
-	hex "Wi-Fi MTD partition size"
-	default 0xb0000
-	depends on ESP32C3_WIFI_SAVE_PARAM
-	---help---
-		This is the size of the Wi-Fi MTD partition.
-
 config ESP32C3_WIFI_STA_DISCONNECT_PM
 	bool "Power Management for station when disconnected"
 	default n
