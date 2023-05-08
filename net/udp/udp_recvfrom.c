@@ -546,7 +546,7 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
 ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
                            int flags)
 {
-  FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
+  FAR struct udp_conn_s *conn = psock->s_conn;
   FAR struct net_driver_s *dev;
   struct udp_recvfrom_s state;
   int ret;

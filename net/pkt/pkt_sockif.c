@@ -236,7 +236,7 @@ static int pkt_bind(FAR struct socket *psock,
 
   if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
     {
-      FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
+      FAR struct pkt_conn_s *conn = psock->s_conn;
       FAR struct net_driver_s *dev;
 
       /* Look at the addr and identify the network interface */

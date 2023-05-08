@@ -253,7 +253,7 @@ static int netlink_bind(FAR struct socket *psock,
   /* Save the address information in the connection structure */
 
   nladdr = (FAR struct sockaddr_nl *)addr;
-  conn   = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn   = psock->s_conn;
 
   conn->pid    = nladdr->nl_pid ? nladdr->nl_pid : nxsched_gettid();
   conn->groups = nladdr->nl_groups;
@@ -293,7 +293,7 @@ static int netlink_getsockname(FAR struct socket *psock,
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
               addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
 
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Return the address information in the address structure */
 
@@ -346,7 +346,7 @@ static int netlink_getpeername(FAR struct socket *psock,
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
               addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
 
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Return the address information in the address structure */
 
@@ -392,7 +392,7 @@ static int netlink_connect(FAR struct socket *psock,
   /* Save the address information in the connection structure */
 
   nladdr = (FAR struct sockaddr_nl *)addr;
-  conn   = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn   = psock->s_conn;
 
   conn->dst_pid    = nladdr->nl_pid;
   conn->dst_groups = nladdr->nl_groups;
@@ -476,7 +476,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
   int ret = OK;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Check if we are setting up or tearing down the poll */
 
@@ -595,7 +595,7 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
 
   /* Get the underlying connection structure */
 
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   if (to == NULL)
     {
       /* netlink_send() */

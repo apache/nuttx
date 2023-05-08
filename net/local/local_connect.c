@@ -246,7 +246,7 @@ int psock_local_connect(FAR struct socket *psock,
   int ret;
 
   DEBUGASSERT(psock && psock->s_conn);
-  client = (FAR struct local_conn_s *)psock->s_conn;
+  client = psock->s_conn;
 
   if (client->lc_state == LOCAL_STATE_ACCEPT ||
       client->lc_state == LOCAL_STATE_CONNECTED)

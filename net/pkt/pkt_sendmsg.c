@@ -201,7 +201,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Get the device driver that will service this transfer */
 
-  dev = pkt_find_device((FAR struct pkt_conn_s *)psock->s_conn);
+  dev = pkt_find_device(psock->s_conn);
   if (dev == NULL)
     {
       return -ENODEV;
@@ -223,7 +223,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   if (len > 0)
     {
-      FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
+      FAR struct pkt_conn_s *conn = psock->s_conn;
 
       /* Allocate resource to receive a callback */
 

@@ -61,7 +61,7 @@ int psock_local_bind(FAR struct socket *psock,
       return -EINVAL;
     }
 
-  conn = (FAR struct local_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Save the address family */
 

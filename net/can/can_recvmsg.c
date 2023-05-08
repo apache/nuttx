@@ -472,7 +472,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
-  conn = (FAR struct can_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   if (psock->s_type != SOCK_RAW)
     {

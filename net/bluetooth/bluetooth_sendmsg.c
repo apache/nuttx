@@ -254,7 +254,7 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
       return -EBADF;
     }
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Verify that the address is large enough to be a valid PF_BLUETOOTH
    * address.
@@ -416,7 +416,7 @@ static ssize_t bluetooth_l2cap_send(FAR struct socket *psock,
   FAR struct bluetooth_conn_s *conn;
   ssize_t ret;
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   if (!_SS_ISCONNECTED(conn->bc_conn.s_flags))

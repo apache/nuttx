@@ -606,7 +606,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
   net_lock();
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Initialize the state structure.  This is done with the network locked
    * because we don't want anything to happen until we are ready.

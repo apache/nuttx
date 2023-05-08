@@ -157,8 +157,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
       case IPV6_TCLASS:
         {
-          FAR struct socket_conn_s *conn =
-                           (FAR struct socket_conn_s *)psock->s_conn;
+          FAR struct socket_conn_s *conn = psock->s_conn;
           int tclass;
 
           tclass = (value_len >= sizeof(int)) ?

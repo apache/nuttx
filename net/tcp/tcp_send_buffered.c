@@ -1231,7 +1231,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {

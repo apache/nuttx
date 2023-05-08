@@ -95,7 +95,7 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   DEBUGASSERT(psock->s_type == SOCK_STREAM);
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Initialize the wait semaphore */
 

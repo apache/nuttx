@@ -76,7 +76,7 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
   int ret = OK;
 
   DEBUGASSERT(psock != NULL && value != NULL && psock->s_conn != NULL);
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* All of the TCP protocol options apply only TCP sockets.  The sockets
    * do not have to be connected.. that might occur later with the KeepAlive
