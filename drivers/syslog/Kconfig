@@ -277,7 +277,7 @@ config SYSLOG_RPMSG_WORK_DELAY
 
 config SYSLOG_RPMSG_CHARDEV
 	bool "SYSLOG rpmsg character device"
-	default !SYSLOG_RPMSG_WORK_DELAY
+	default SYSLOG_RPMSG_WORK_DELAY != 0
 
 endif # SYSLOG_RPMSG
 
