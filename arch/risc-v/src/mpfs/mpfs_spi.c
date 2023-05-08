@@ -316,7 +316,7 @@ static void mpfs_spi_rxoverflow_recover(struct mpfs_spi_priv_s *priv)
 
   control_reg  = getreg32(MPFS_SPI_CONTROL);
   clk_gen      = getreg32(MPFS_SPI_CLK_GEN);
-  frame_size   = getreg32(MPFS_SPI_FRAMESIZE);
+  frame_size   = getreg32(MPFS_SPI_FSIZE);
   control2     = getreg32(MPFS_SPI_CONTROL2);
   packet_size  = getreg32(MPFS_SPI_PKTSIZE);
   cmd_size     = getreg32(MPFS_SPI_CMD_SIZE);
@@ -333,7 +333,7 @@ static void mpfs_spi_rxoverflow_recover(struct mpfs_spi_priv_s *priv)
 
   putreg32(control_reg, MPFS_SPI_CONTROL);
   putreg32(clk_gen, MPFS_SPI_CLK_GEN);
-  putreg32(frame_size, MPFS_SPI_FRAMESIZE);
+  putreg32(frame_size, MPFS_SPI_FSIZE);
 
   mpfs_spi_enable(priv, 1);
 
@@ -862,6 +862,13 @@ static void mpfs_spi_irq_exchange(struct mpfs_spi_priv_s *priv,
 
   putreg32(0, MPFS_SPI_FRAMESUP);
 
+  /* Clear the interrupts before writing FIFO */
+
+  putreg32(MPFS_SPI_TXCHUNDRUN |
+           MPFS_SPI_RXCHOVRFLW |
+           MPFS_SPI_RXRDONECLR |
+           MPFS_SPI_TXDONECLR, MPFS_SPI_INT_CLEAR);
+
   if (nwords > priv->fifosize)
     {
       modifyreg32(MPFS_SPI_CONTROL, MPFS_SPI_FRAMECNT,
@@ -876,11 +883,6 @@ static void mpfs_spi_irq_exchange(struct mpfs_spi_priv_s *priv,
     }
 
   /* Enable TX, RX, underrun and overflow interrupts */
-
-  putreg32(MPFS_SPI_INT_CLEAR, MPFS_SPI_TXCHUNDRUN |
-                               MPFS_SPI_RXCHOVRFLW |
-                               MPFS_SPI_RXRDONECLR |
-                               MPFS_SPI_TXDONECLR);
 
   modifyreg32(MPFS_SPI_CONTROL, 0, MPFS_SPI_INTTXTURUN |
                                    MPFS_SPI_INTRXOVRFLOW |
@@ -899,10 +901,10 @@ static void mpfs_spi_irq_exchange(struct mpfs_spi_priv_s *priv,
                                 MPFS_SPI_INTTXDATA,
                                 0);
 
-  putreg32(MPFS_SPI_INT_CLEAR, MPFS_SPI_TXCHUNDRUN |
-                               MPFS_SPI_RXCHOVRFLW |
-                               MPFS_SPI_RXRDONECLR |
-                               MPFS_SPI_TXDONECLR);
+  putreg32(MPFS_SPI_TXCHUNDRUN |
+           MPFS_SPI_RXCHOVRFLW |
+           MPFS_SPI_RXRDONECLR |
+           MPFS_SPI_TXDONECLR, MPFS_SPI_INT_CLEAR);
 }
 
 /****************************************************************************
