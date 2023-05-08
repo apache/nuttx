@@ -176,7 +176,7 @@ static ssize_t local_send(FAR struct socket *psock,
           /* Local TCP packet send */
 
           DEBUGASSERT(psock && psock->s_conn && buf);
-          peer = (FAR struct local_conn_s *)psock->s_conn;
+          peer = psock->s_conn;
 
           /* Verify that this is a connected peer socket and that it has
            * opened the outgoing FIFO for write-only access.
@@ -268,7 +268,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
                             socklen_t tolen)
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
-  FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
+  FAR struct local_conn_s *conn = psock->s_conn;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
   ssize_t ret;
 

@@ -81,7 +81,7 @@ int local_listen(FAR struct socket *psock, int backlog)
 
   net_lock();
 
-  server = (FAR struct local_conn_s *)psock->s_conn;
+  server = psock->s_conn;
 
   /* Some sanity checks */
 

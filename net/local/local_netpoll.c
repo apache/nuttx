@@ -160,7 +160,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct local_conn_s *conn;
   int ret = -ENOSYS;
 
-  conn = (FAR struct local_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   if (conn->lc_proto == SOCK_DGRAM)
     {
@@ -314,7 +314,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct local_conn_s *conn;
   int ret = OK;
 
-  conn = (FAR struct local_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   if (conn->lc_proto == SOCK_DGRAM)
     {

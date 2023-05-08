@@ -67,7 +67,7 @@ int udp_close(FAR struct socket *psock)
 
   net_lock();
 
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
 #ifdef CONFIG_NET_SOLINGER

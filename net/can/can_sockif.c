@@ -318,7 +318,7 @@ static int can_bind(FAR struct socket *psock,
   /* Save the address information in the connection structure */
 
   canaddr = (FAR struct sockaddr_can *)addr;
-  conn    = (FAR struct can_conn_s *)psock->s_conn;
+  conn    = psock->s_conn;
 
   /* Bind CAN device to socket */
 
@@ -366,7 +366,7 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
   int ret = OK;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-  conn = (FAR struct can_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   info = conn->pollinfo;
 
   /* FIXME add NETDEV_DOWN support */

@@ -147,8 +147,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
       else if ((flags & TCP_CONNECTED) != 0)
         {
 #if 0 /* REVISIT: Assertion fires.  Why? */
-          FAR struct tcp_conn_s *conn =
-            (FAR struct tcp_conn_s *)psock->s_conn;
+          FAR struct tcp_conn_s *conn = psock->s_conn;
 
           /* Make sure that this is the device bound to the connection */
 
@@ -250,7 +249,7 @@ int tcp_start_monitor(FAR struct socket *psock)
   bool nonblock_conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   net_lock();
 

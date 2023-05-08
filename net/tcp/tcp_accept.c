@@ -223,7 +223,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
    * this listener.
    */
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
 #ifdef CONFIG_NET_TCPBACKLOG
   state.acpt_newconn = tcp_backlogremove(conn);

@@ -217,7 +217,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
   net_lock();
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* Discard our reference to the connection */

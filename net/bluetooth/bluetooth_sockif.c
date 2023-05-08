@@ -211,7 +211,7 @@ static void bluetooth_addref(FAR struct socket *psock)
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
               (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL));
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn->bc_crefs > 0 && conn->bc_crefs < 255);
   conn->bc_crefs++;
 }
@@ -251,7 +251,7 @@ static int bluetooth_connect(FAR struct socket *psock,
   int ret = OK;
 
   DEBUGASSERT(psock != NULL || addr != NULL);
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* Verify the address family */
@@ -395,7 +395,7 @@ static int bluetooth_l2cap_bind(FAR struct socket *psock,
       return -EBADF;
     }
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Verify that the socket is not already bound. */
 
@@ -468,7 +468,7 @@ static int bluetooth_hci_bind(FAR struct socket *psock,
       return -EBADF;
     }
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Verify that the socket is not already bound. */
 
@@ -523,7 +523,7 @@ static int bluetooth_getsockname(FAR struct socket *psock,
 
   DEBUGASSERT(psock != NULL && addr != NULL && addrlen != NULL);
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* Create a copy of the full address on the stack */
@@ -590,7 +590,7 @@ static int bluetooth_getpeername(FAR struct socket *psock,
       return -EPFNOSUPPORT;
     }
 
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* Create a copy of the full address on the stack */

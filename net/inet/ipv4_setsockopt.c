@@ -199,7 +199,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             }
           else
             {
-              conn = (FAR struct udp_conn_s *)psock->s_conn;
+              conn = psock->s_conn;
               conn->ttl = ttl;
               ret = OK;
             }
@@ -247,7 +247,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
           enable = (value_len >= sizeof(int)) ?
             *(FAR int *)value : (int)*(FAR unsigned char *)value;
 
-          conn = (FAR struct socket_conn_s *)psock->s_conn;
+          conn = psock->s_conn;
           if (enable)
             {
               _SO_SETOPT(conn->s_options, option);
@@ -263,8 +263,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 
       case IP_TOS:
         {
-          FAR struct socket_conn_s *conn =
-                           (FAR struct socket_conn_s *)psock->s_conn;
+          FAR struct socket_conn_s *conn = psock->s_conn;
           int tos;
 
           tos = (value_len >= sizeof(int)) ?

@@ -485,7 +485,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Check early if this is an un-connected socket, if so, then
    * return -ENOTCONN. Note, we will have to check this again, as we can't

@@ -178,7 +178,7 @@ static void ieee802154_meta_data(FAR struct radio_driver_s *radio,
   psock    = pstate->is_sock;
   DEBUGASSERT(psock->s_conn != NULL);
 
-  conn     = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  conn     = psock->s_conn;
   srcaddr  = &conn->laddr;
   destaddr = &pstate->is_destaddr;
 
@@ -443,7 +443,7 @@ static ssize_t ieee802154_sendto(FAR struct socket *psock,
       return -EDESTADDRREQ;
     }
 
-  conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Verify that the address is large enough to be a valid PF_IEEE802154
    * address.
@@ -566,7 +566,7 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
   ssize_t ret;
 
   DEBUGASSERT(psock != NULL || buf != NULL);
-  conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* Only SOCK_DGRAM is supported (because the MAC header is stripped) */

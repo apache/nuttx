@@ -108,8 +108,7 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf)
 #if defined(NET_TCP_HAVE_STACK)
        case SOCK_STREAM:
          {
-           FAR struct tcp_conn_s *tcp_conn =
-                       (FAR struct tcp_conn_s *)psock->s_conn;
+           FAR struct tcp_conn_s *tcp_conn = psock->s_conn;
 
            /* For TCP, the MSS is a dynamic value that maintained in the
             * connection structure.
@@ -123,8 +122,7 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf)
 #if defined(NET_UDP_HAVE_STACK)
        case SOCK_DGRAM:
          {
-           FAR struct udp_conn_s *udp_conn =
-                                   (FAR struct udp_conn_s *)psock->s_conn;
+           FAR struct udp_conn_s *udp_conn = psock->s_conn;
            FAR struct net_driver_s *dev;
            uint16_t iplen;
 

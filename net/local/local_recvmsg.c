@@ -58,7 +58,7 @@
 static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
                            FAR size_t *readlen, bool once)
 {
-  FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
+  FAR struct local_conn_s *conn = psock->s_conn;
   int ret;
 
   ret = local_fifo_read(&conn->lc_infile, buf, readlen, once);
@@ -206,7 +206,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                       int flags, FAR struct sockaddr *from,
                       FAR socklen_t *fromlen)
 {
-  FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
+  FAR struct local_conn_s *conn = psock->s_conn;
   size_t readlen = len;
   int ret;
 
@@ -274,7 +274,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                      int flags, FAR struct sockaddr *from,
                      FAR socklen_t *fromlen)
 {
-  FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
+  FAR struct local_conn_s *conn = psock->s_conn;
   uint16_t pktlen;
   size_t readlen;
   int ret;

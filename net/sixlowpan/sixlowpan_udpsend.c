@@ -186,7 +186,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   /* Get the underlying UDP "connection" structure */
 
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* Route outgoing message to the correct device */
@@ -351,7 +351,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Get the underlying UDP "connection" structure */
 
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Was the UDP socket connected via connect()? */
 

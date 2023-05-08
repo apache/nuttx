@@ -77,8 +77,7 @@ int ipv6_getsockopt(FAR struct socket *psock, int option,
     {
       case IPV6_TCLASS:
         {
-          FAR struct socket_conn_s *conn =
-                           (FAR struct socket_conn_s *)psock->s_conn;
+          FAR struct socket_conn_s *conn = psock->s_conn;
 
           *(FAR uint8_t *)value = conn->s_tclass;
           *value_len = 1;

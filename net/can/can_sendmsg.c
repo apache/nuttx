@@ -185,7 +185,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EDESTADDRREQ;
     }
 
-  conn = (FAR struct can_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Get the device driver that will service this transfer */
 

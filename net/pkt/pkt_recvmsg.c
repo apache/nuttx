@@ -394,7 +394,7 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   size_t len = msg->msg_iov->iov_len;
   FAR struct sockaddr *from = msg->msg_name;
   FAR socklen_t *fromlen = &msg->msg_namelen;
-  FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
+  FAR struct pkt_conn_s *conn = psock->s_conn;
   FAR struct net_driver_s *dev;
   struct pkt_recvfrom_s state;
   ssize_t ret;

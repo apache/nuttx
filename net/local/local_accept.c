@@ -122,7 +122,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
    * address
    */
 
-  server = (FAR struct local_conn_s *)psock->s_conn;
+  server = psock->s_conn;
 
   if (server->lc_proto != SOCK_STREAM ||
       server->lc_state != LOCAL_STATE_LISTENING ||

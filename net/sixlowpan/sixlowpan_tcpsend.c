@@ -731,7 +731,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Get the underlying TCP connection structure */
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
 
   /* Make sure that this is a connected TCP socket */
 

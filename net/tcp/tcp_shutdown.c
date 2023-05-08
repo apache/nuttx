@@ -105,7 +105,7 @@ static inline int tcp_send_fin(FAR struct socket *psock)
 
   net_lock();
 
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   if ((conn->tcpstateflags == TCP_ESTABLISHED ||
