@@ -1330,6 +1330,8 @@ static inline int sam_reminted(struct sam_ed_s *ed)
            */
 
           prev->hw.nexted = ed->hw.nexted;
+          up_clean_dcache((uintptr_t)prev,
+                          (uintptr_t)prev + sizeof(struct ohci_ed_s));
         }
 
 #ifdef CONFIG_USBHOST_TRACE
