@@ -2922,17 +2922,17 @@ if IMXRT_HAVE_OTA_PARTITION
 comment "Application Image OTA Update support"
 
 config IMXRT_PROGMEM_OTA_PARTITION
- 	bool "MTD driver"
- 	default n
+	bool "MTD driver"
+	default n
 	select BCH
- 	select MTD
- 	select MTD_BYTE_WRITE
- 	select MTD_PARTITION
- 	select MTD_PROGMEM
- 	select IMXRT_PROGMEM
- 	---help---
- 		Initialize an MTD driver for the Flash, which will
- 		add an entry at /dev for application access from userspace.
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	select MTD_PROGMEM
+	select IMXRT_PROGMEM
+	---help---
+		Initialize an MTD driver for the Flash, which will
+		add an entry at /dev for application access from userspace.
 
 if IMXRT_PROGMEM_OTA_PARTITION
 config IMXRT_MCUBOOT_HEADER_SIZE
