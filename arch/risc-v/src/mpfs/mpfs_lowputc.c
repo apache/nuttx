@@ -40,6 +40,8 @@
  ****************************************************************************/
 
 /* Select UART parameters for the selected console */
+
+#ifndef CONFIG_MPFS_FPGA_UART
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define MPFS_CONSOLE_BASE        MPFS_UART0_BASE
 #  define MPFS_CONSOLE_BAUD        CONFIG_UART0_BAUD
@@ -89,6 +91,93 @@
 #    error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #  endif
 
+#else /* CONFIG_MPFS_FPGA_UART */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART0_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART0_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART0_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART0_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART0_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART1_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART1_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART1_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART1_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART1_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART2_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART2_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART2_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART2_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART2_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#  elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART3_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART3_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART3_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART3_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART3_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART4_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART4_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART4_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART4_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART4_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART5_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART5_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART5_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART5_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART5_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(CONFIG_UART6_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART6_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART6_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART6_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART6_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART6_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(CONFIG_UART7_SERIAL_CONSOLE)
+#  define MPFS_CONSOLE_BASE        MPFS_FPGA_UART7_BASE
+#  define MPFS_CONSOLE_BAUD        CONFIG_UART7_BAUD
+#  define MPFS_CONSOLE_BITS        CONFIG_UART7_BITS
+#  define MPFS_CONSOLE_PARITY      CONFIG_UART7_PARITY
+#  define MPFS_CONSOLE_2STOP       CONFIG_UART7_2STOP
+#  define MPFS_CONSOLE_CLOCKBIT    SYSREG_SUBBLK_CLOCK_CR_FIC3
+#  define MPFS_CONSOLE_RESETBIT    SYSREG_SOFT_RESET_CR_FIC3 | \
+                                   SYSREG_SOFT_RESET_CR_FPGA
+#  define HAVE_UART
+#elif defined(HAVE_UART)
+#    error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#endif
+#endif /* CONFIG_MPFS_FPGA_UART */
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -111,7 +200,16 @@ static void config_baud_divisors(void)
   uint32_t fractional_baud_value;
   uint64_t pclk_freq;
 
-  pclk_freq = MPFS_MSS_APB_AHB_CLK;
+  if (MPFS_CONSOLE_CLOCKBIT == SYSREG_SUBBLK_CLOCK_CR_FIC3)
+    {
+      /* This is an FPGA UART */
+
+      pclk_freq = MPFS_FPGA_PERIPHERAL_CLK;
+    }
+  else
+    {
+      pclk_freq = MPFS_MSS_APB_AHB_CLK;
+    }
 
   /* Compute baud value based on requested baud rate and PCLK frequency.
    * The baud value is computed using the following equation:
@@ -189,20 +287,23 @@ void mpfs_lowsetup(void)
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t lcr = 0;
 
-  /* reset on */
+  /* reset on - only for non-FPGA uarts */
 
-  modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
-            0, MPFS_CONSOLE_RESETBIT);
+  if (SYSREG_SUBBLK_CLOCK_CR_FIC3 != MPFS_CONSOLE_CLOCKBIT)
+    {
+      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET, 0,
+                  MPFS_CONSOLE_RESETBIT);
+    }
 
   /* reset off */
 
-  modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET,
-              0, MPFS_CONSOLE_CLOCKBIT);
+  modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
+              MPFS_CONSOLE_RESETBIT, 0);
 
   /* clock on */
 
-  modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
-              MPFS_CONSOLE_RESETBIT, 0);
+  modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET,
+              0, MPFS_CONSOLE_CLOCKBIT);
 
   switch (MPFS_CONSOLE_BITS)
     {

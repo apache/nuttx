@@ -80,6 +80,15 @@
 #  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart4port     /* UART4 is console */
 #    define SERIAL_CONSOLE  5
+#  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart5port     /* UART5 is console */
+#    define SERIAL_CONSOLE  6
+#  elif defined(CONFIG_UART6_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart6port     /* UART6 is console */
+#    define SERIAL_CONSOLE  7
+#  elif defined(CONFIG_UART7_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart7port     /* UART7 is console */
+#    define SERIAL_CONSOLE  8
 #  else
 #    error "I'm confused... Do we have a serial console or not?"
 #  endif
@@ -100,6 +109,12 @@
 #    define SERIAL_CONSOLE  4
 #  elif defined(CONFIG_MPFS_UART4)
 #    define SERIAL_CONSOLE  5
+#  elif defined(CONFIG_MPFS_UART5)
+#    define SERIAL_CONSOLE  6
+#  elif defined(CONFIG_MPFS_UART6)
+#    define SERIAL_CONSOLE  7
+#  elif defined(CONFIG_MPFS_UART7)
+#    define SERIAL_CONSOLE  8
 #  else
 #    undef  TTYS0_DEV
 #    undef  TTYS1_DEV
@@ -127,6 +142,7 @@ struct up_dev_s
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (7 or 8) */
   bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  bool      fpga;      /* true: this is an FPGA based driver */
 };
 
 /****************************************************************************
@@ -197,6 +213,22 @@ static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
 
+#ifdef CONFIG_MPFS_UART5
+static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
+static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_MPFS_UART6
+static char g_uart6rxbuffer[CONFIG_UART6_RXBUFSIZE];
+static char g_uart6txbuffer[CONFIG_UART6_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_MPFS_UART7
+static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
+static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
+#endif
+
+#ifndef CONFIG_MPFS_FPGA_UART
 #ifdef CONFIG_MPFS_UART0
 static struct up_dev_s g_uart0priv =
 {
@@ -206,6 +238,7 @@ static struct up_dev_s g_uart0priv =
   .parity    = CONFIG_UART0_PARITY,
   .bits      = CONFIG_UART0_BITS,
   .stopbits2 = CONFIG_UART0_2STOP,
+  .fpga      = false,
 };
 
 static uart_dev_t g_uart0port =
@@ -237,6 +270,7 @@ static struct up_dev_s g_uart1priv =
   .parity    = CONFIG_UART1_PARITY,
   .bits      = CONFIG_UART1_BITS,
   .stopbits2 = CONFIG_UART1_2STOP,
+  .fpga      = false,
 };
 
 static uart_dev_t g_uart1port =
@@ -268,6 +302,7 @@ static struct up_dev_s g_uart2priv =
   .parity    = CONFIG_UART2_PARITY,
   .bits      = CONFIG_UART2_BITS,
   .stopbits2 = CONFIG_UART2_2STOP,
+  .fpga      = false,
 };
 
 static uart_dev_t g_uart2port =
@@ -299,6 +334,7 @@ static struct up_dev_s g_uart3priv =
   .parity    = CONFIG_UART3_PARITY,
   .bits      = CONFIG_UART3_BITS,
   .stopbits2 = CONFIG_UART3_2STOP,
+  .fpga      = false,
 };
 
 static uart_dev_t g_uart3port =
@@ -330,6 +366,7 @@ static struct up_dev_s g_uart4priv =
   .parity    = CONFIG_UART4_PARITY,
   .bits      = CONFIG_UART4_BITS,
   .stopbits2 = CONFIG_UART4_2STOP,
+  .fpga      = false,
 };
 
 static uart_dev_t g_uart4port =
@@ -351,6 +388,266 @@ static uart_dev_t g_uart4port =
   .priv      = &g_uart4priv,
 };
 #endif
+
+#else /* CONFIG_MPFS_FPGA_UART */
+
+#ifdef CONFIG_MPFS_UART0
+static struct up_dev_s g_uart0priv =
+{
+  .uartbase  = MPFS_FPGA_UART0_BASE,
+  .baud      = CONFIG_UART0_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_12,
+  .parity    = CONFIG_UART0_PARITY,
+  .bits      = CONFIG_UART0_BITS,
+  .stopbits2 = CONFIG_UART0_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart0port =
+{
+#if SERIAL_CONSOLE == 1
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART0_RXBUFSIZE,
+    .buffer  = g_uart0rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART0_TXBUFSIZE,
+    .buffer  = g_uart0txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart0priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART1
+static struct up_dev_s g_uart1priv =
+{
+  .uartbase  = MPFS_FPGA_UART1_BASE,
+  .baud      = CONFIG_UART1_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_13,
+  .parity    = CONFIG_UART1_PARITY,
+  .bits      = CONFIG_UART1_BITS,
+  .stopbits2 = CONFIG_UART1_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart1port =
+{
+#if SERIAL_CONSOLE == 2
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART1_RXBUFSIZE,
+    .buffer  = g_uart1rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART1_TXBUFSIZE,
+    .buffer  = g_uart1txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart1priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART2
+static struct up_dev_s g_uart2priv =
+{
+  .uartbase  = MPFS_FPGA_UART2_BASE,
+  .baud      = CONFIG_UART2_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_14,
+  .parity    = CONFIG_UART2_PARITY,
+  .bits      = CONFIG_UART2_BITS,
+  .stopbits2 = CONFIG_UART2_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart2port =
+{
+#if SERIAL_CONSOLE == 3
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART2_RXBUFSIZE,
+    .buffer  = g_uart2rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART2_TXBUFSIZE,
+    .buffer  = g_uart2txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart2priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART3
+static struct up_dev_s g_uart3priv =
+{
+  .uartbase  = MPFS_FPGA_UART3_BASE,
+  .baud      = CONFIG_UART3_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_15,
+  .parity    = CONFIG_UART3_PARITY,
+  .bits      = CONFIG_UART3_BITS,
+  .stopbits2 = CONFIG_UART3_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart3port =
+{
+#if SERIAL_CONSOLE == 4
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART3_RXBUFSIZE,
+    .buffer  = g_uart3rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART3_TXBUFSIZE,
+    .buffer  = g_uart3txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart3priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART4
+static struct up_dev_s g_uart4priv =
+{
+  .uartbase  = MPFS_FPGA_UART4_BASE,
+  .baud      = CONFIG_UART4_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_16,
+  .parity    = CONFIG_UART4_PARITY,
+  .bits      = CONFIG_UART4_BITS,
+  .stopbits2 = CONFIG_UART4_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart4port =
+{
+#if SERIAL_CONSOLE == 5
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART4_RXBUFSIZE,
+    .buffer  = g_uart4rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART4_TXBUFSIZE,
+    .buffer  = g_uart4txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart4priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART5
+static struct up_dev_s g_uart5priv =
+{
+  .uartbase  = MPFS_FPGA_UART5_BASE,
+  .baud      = CONFIG_UART5_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_17,
+  .parity    = CONFIG_UART5_PARITY,
+  .bits      = CONFIG_UART5_BITS,
+  .stopbits2 = CONFIG_UART5_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart5port =
+{
+#if SERIAL_CONSOLE == 6
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART5_RXBUFSIZE,
+    .buffer  = g_uart5rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART5_TXBUFSIZE,
+    .buffer  = g_uart5txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart5priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART6
+static struct up_dev_s g_uart6priv =
+{
+  .uartbase  = MPFS_FPGA_UART6_BASE,
+  .baud      = CONFIG_UART6_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_18,
+  .parity    = CONFIG_UART6_PARITY,
+  .bits      = CONFIG_UART6_BITS,
+  .stopbits2 = CONFIG_UART6_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart6port =
+{
+#if SERIAL_CONSOLE == 7
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART6_RXBUFSIZE,
+    .buffer  = g_uart6rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART6_TXBUFSIZE,
+    .buffer  = g_uart6txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart6priv,
+};
+#endif
+
+#ifdef CONFIG_MPFS_UART7
+static struct up_dev_s g_uart7priv =
+{
+  .uartbase  = MPFS_FPGA_UART7_BASE,
+  .baud      = CONFIG_UART7_BAUD,
+  .irq       = MPFS_IRQ_FABRIC_F2H_19,
+  .parity    = CONFIG_UART7_PARITY,
+  .bits      = CONFIG_UART7_BITS,
+  .stopbits2 = CONFIG_UART7_2STOP,
+  .fpga      = true,
+};
+
+static uart_dev_t g_uart7port =
+{
+#if SERIAL_CONSOLE == 7
+  .isconsole = 1,
+#endif
+  .recv      =
+  {
+    .size    = CONFIG_UART7_RXBUFSIZE,
+    .buffer  = g_uart7rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = CONFIG_UART7_TXBUFSIZE,
+    .buffer  = g_uart7txbuffer,
+  },
+  .ops       = &g_uart_ops,
+  .priv      = &g_uart7priv,
+};
+#endif
+
+#endif /* CONFIG_MPFS_FPGA_UART */
 
 /****************************************************************************
  * Private Functions
@@ -447,27 +744,41 @@ static void up_enable_uart(struct up_dev_s *priv, bool enable)
       clock_bit = SYSREG_SUBBLK_CLOCK_CR_MMUART4;
       reset_bit = SYSREG_SOFT_RESET_CR_MMUART4;
       break;
+    case MPFS_FPGA_UART0_BASE:
+    case MPFS_FPGA_UART1_BASE:
+    case MPFS_FPGA_UART2_BASE:
+    case MPFS_FPGA_UART3_BASE:
+    case MPFS_FPGA_UART4_BASE:
+    case MPFS_FPGA_UART5_BASE:
+    case MPFS_FPGA_UART6_BASE:
+    case MPFS_FPGA_UART7_BASE:
+      clock_bit = SYSREG_SUBBLK_CLOCK_CR_FIC3;
+      reset_bit = SYSREG_SOFT_RESET_CR_FIC3 | SYSREG_SOFT_RESET_CR_FPGA;
+      break;
 
     default:
       return;
     }
 
-  /* reset on */
+  /* reset on for non-fpga */
 
-  modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
-              0, reset_bit);
+  if (!priv->fpga)
+    {
+      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
+                  0, reset_bit);
+    }
 
   if (enable)
     {
       /* reset off */
 
-      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET,
-                 0, reset_bit);
+      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
+                  reset_bit, 0);
 
       /* clock on */
 
-      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SOFT_RESET_CR_OFFSET,
-                 clock_bit, 0);
+      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET,
+                  0, clock_bit);
     }
   else
     {
@@ -494,7 +805,14 @@ static void up_config_baud_divisors(struct up_dev_s *priv, uint32_t baudrate)
   uint32_t fractional_baud_value;
   uint64_t pclk_freq;
 
-  pclk_freq = MPFS_MSS_APB_AHB_CLK;
+  if (!priv->fpga)
+    {
+      pclk_freq = MPFS_MSS_APB_AHB_CLK;
+    }
+  else
+    {
+      pclk_freq = MPFS_FPGA_PERIPHERAL_CLK;
+    }
 
   /* Compute baud value based on requested baud rate and PCLK frequency.
    * The baud value is computed using the following equation:
@@ -1140,6 +1458,18 @@ void riscv_earlyserialinit(void)
   up_disableuartint(g_uart4port.priv, NULL);
 #endif
 
+#ifdef CONFIG_MPFS_UART5
+  up_disableuartint(g_uart5port.priv, NULL);
+#endif
+
+#ifdef CONFIG_MPFS_UART6
+  up_disableuartint(g_uart6port.priv, NULL);
+#endif
+
+#ifdef CONFIG_MPFS_UART7
+  up_disableuartint(g_uart7port.priv, NULL);
+#endif
+
   /* Configuration whichever one is the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
@@ -1182,6 +1512,15 @@ void riscv_serialinit(void)
 #endif
 #ifdef CONFIG_MPFS_UART4
   uart_register("/dev/ttyS4", &g_uart4port);
+#endif
+#ifdef CONFIG_MPFS_UART5
+  uart_register("/dev/ttyS5", &g_uart5port);
+#endif
+#ifdef CONFIG_MPFS_UART6
+  uart_register("/dev/ttyS6", &g_uart6port);
+#endif
+#ifdef CONFIG_MPFS_UART7
+  uart_register("/dev/ttyS7", &g_uart7port);
 #endif
 }
 
