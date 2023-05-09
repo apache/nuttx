@@ -34,9 +34,11 @@
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/icmp.h>
 #include <socket/socket.h>
 
 #include "icmp/icmp.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET_ICMP_SOCKET
 
@@ -50,6 +52,12 @@ static void       icmp_addref(FAR struct socket *psock);
 static int        icmp_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static int        icmp_close(FAR struct socket *psock);
+#ifdef CONFIG_NET_SOCKOPTS
+static int        icmp_getsockopt(FAR struct socket *psock, int level,
+                    int option, FAR void *value, FAR socklen_t *value_len);
+static int        icmp_setsockopt(FAR struct socket *psock, int level,
+                    int option, FAR const void *value, socklen_t value_len);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -70,7 +78,13 @@ const struct sock_intf_s g_icmp_sockif =
   icmp_sendmsg,     /* si_sendmsg */
   icmp_recvmsg,     /* si_recvmsg */
   icmp_close,       /* si_close */
-  icmp_ioctl        /* si_ioctl */
+  icmp_ioctl,       /* si_ioctl */
+  NULL,             /* si_socketpair */
+  NULL              /* si_shutdown */
+#ifdef CONFIG_NET_SOCKOPTS
+  , icmp_getsockopt /* si_getsockopt */
+  , icmp_setsockopt /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
@@ -99,8 +113,8 @@ static int icmp_setup(FAR struct socket *psock)
 {
   /* SOCK_DGRAM or SOCK_CTRL and IPPROTO_ICMP are supported */
 
-  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL) &&
-       psock->s_proto == IPPROTO_ICMP)
+  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL ||
+      psock->s_type == SOCK_RAW) && psock->s_proto == IPPROTO_ICMP)
     {
       /* Allocate the IPPROTO_ICMP socket connection structure and save in
        * the new socket instance.
@@ -121,6 +135,10 @@ static int icmp_setup(FAR struct socket *psock)
 
       DEBUGASSERT(conn->crefs == 0);
       conn->crefs = 1;
+      if (psock->s_type != SOCK_RAW)
+        {
+          conn->filter = UINT32_MAX;
+        }
 
       /* Save the pre-allocated connection in the socket structure */
 
@@ -265,6 +283,218 @@ static int icmp_close(FAR struct socket *psock)
 
   return OK;
 }
+
+#ifdef CONFIG_NET_SOCKOPTS
+/****************************************************************************
+ * Name: icmp_getsockopt_internal
+ *
+ * Description:
+ *   icmp_getsockopt_internal() sets the ICMP-protocol socket option
+ *   specified by the 'option' argument to the value pointed to by the
+ *   'value' argument for the socket specified by the 'psock' argument.
+ *
+ *   See <netinet/in.h> for the a complete list of values of ICMP protocol
+ *   socket options.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
+                                    FAR void *value,
+                                    FAR socklen_t *value_len)
+{
+  int ret;
+
+  ninfo("option: %d\n", option);
+
+  if (psock->s_type != SOCK_RAW)
+    {
+      return ENOPROTOOPT;
+    }
+
+  net_lock();
+  switch (option)
+    {
+      case ICMP_FILTER:
+        {
+          FAR struct icmp_conn_s *conn = psock->s_conn;
+
+          if (*value_len > sizeof(uint32_t))
+            {
+              *value_len = sizeof(uint32_t);
+            }
+
+          memcpy(value, &conn->filter, *value_len);
+          ret = OK;
+        }
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized ICMP option: %d\n", option);
+        ret = -ENOPROTOOPT;
+        break;
+    }
+
+  net_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: icmp_getsockopt
+ *
+ * Description:
+ *   icmp_getsockopt() retrieve the value for the option specified by the
+ *   'option' argument at the protocol level specified by the 'level'
+ *   argument. If the size of the option value is greater than 'value_len',
+ *   the value stored in the object pointed to by the 'value' argument will
+ *   be silently truncated. Otherwise, the length pointed to by the
+ *   'value_len' argument will be modified to indicate the actual length
+ *   of the 'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ ****************************************************************************/
+
+static int icmp_getsockopt(FAR struct socket *psock, int level, int option,
+                           FAR void *value, FAR socklen_t *value_len)
+{
+  switch (level)
+  {
+    case IPPROTO_IP:
+      return ipv4_getsockopt(psock, option, value, value_len);
+
+    case IPPROTO_ICMP:
+      return icmp_getsockopt_internal(psock, option, value, value_len);
+
+    default:
+      nerr("ERROR: Unrecognized ICMP option: %d\n", option);
+      return -ENOPROTOOPT;
+  }
+}
+
+/****************************************************************************
+ * Name: icmp_setsockopt_internal
+ *
+ * Description:
+ *   icmp_setsockopt_internal() sets the ICMP-protocol socket option
+ *   specified by the 'option' argument to the value pointed to by the
+ *   'value' argument for the socket specified by the 'psock' argument.
+ *
+ *   See <netinet/in.h> for the a complete list of values of ICMP protocol
+ *   socket options.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_setcockopt() for
+ *   the list of possible error values.
+ *
+ ****************************************************************************/
+
+static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
+                                    FAR const void *value,
+                                    socklen_t value_len)
+{
+  int ret;
+
+  ninfo("option: %d\n", option);
+
+  if (psock->s_type != SOCK_RAW)
+    {
+      return ENOPROTOOPT;
+    }
+
+  net_lock();
+  switch (option)
+    {
+      case ICMP_FILTER:
+        {
+          FAR struct icmp_conn_s *conn = psock->s_conn;
+
+          if (value_len > sizeof(uint32_t))
+            {
+              value_len = sizeof(uint32_t);
+            }
+
+          memcpy(&conn->filter, value, value_len);
+          ret = OK;
+        }
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized ICMP6 option: %d\n", option);
+        ret = -ENOPROTOOPT;
+        break;
+    }
+
+  net_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: icmp_setsockopt
+ *
+ * Description:
+ *   icmp_setsockopt() sets the option specified by the 'option' argument,
+ *   at the protocol level specified by the 'level' argument, to the value
+ *   pointed to by the 'value' argument for the connection.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To set
+ *   options at the socket level, specify the level argument as SOL_SOCKET.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ ****************************************************************************/
+
+static int icmp_setsockopt(FAR struct socket *psock, int level, int option,
+                           FAR const void *value, socklen_t value_len)
+{
+  switch (level)
+  {
+    case IPPROTO_IP:
+      return ipv4_setsockopt(psock, option, value, value_len);
+
+    case IPPROTO_ICMP:
+      return icmp_setsockopt_internal(psock, option, value, value_len);
+
+    default:
+      nerr("ERROR: Unrecognized ICMP option: %d\n", option);
+      return -ENOPROTOOPT;
+  }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
