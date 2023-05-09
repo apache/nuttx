@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/z80/src/z8/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_Z80_SRC_Z8_CHIP_H
 #define __ARCH_Z80_SRC_Z8_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Hexadecimal Representation *******************************************************/
+/* Hexadecimal Representation ***********************************************/
 
 #ifdef __ASSEMBLY__
 # define _HX(h)   %##h
@@ -56,13 +56,14 @@
  *    f00 -   fff   : 256 byte control register area
  */
 
-/* Special Function Registers *******************************************************
+/* Special Function Registers ***********************************************
  *
  * Because of the many different ez80 configurations, we will rely on the
- * ZDS-II header file, ez8.h, to provide the correct addresses for each register.
+ * ZDS-II header file, ez8.h, to provide the correct addresses for
+ * each register.
  */
 
-/* Timer Register Bit Definitions ***************************************************/
+/* Timer Register Bit Definitions *******************************************/
 
 /* Timer control register */
 
@@ -85,7 +86,7 @@
 #define Z8_TIMERCTL_GATED    _HX(06)
 #define Z8_TIMERCTL_CAPCMP   _HX(07)
 
-/* UART Register Offsets ************************************************************/
+/* UART Register Offsets ****************************************************/
 
 #define Z8_UART_TXD          _HX(00)        /*  8-bits: UART Transmit Data */
 #define Z8_UART_RXD          _HX(00)        /*  8-bits: UART Receive Data */
@@ -103,7 +104,7 @@
 #define Z8_UART_BRH          _HX(06)        /*  8-bits: UART Baud Rate High Byte */
 #define Z8_UART_BRL          _HX(07)        /*  8-bits: UART Baud Rate Low Byte */
 
-/* UART0/1 Base Register Addresses **************************************************/
+/* UART0/1 Base Register Addresses ******************************************/
 
 #ifdef EZ8_UART0
 #  define Z8_UART0_BASE       ((uint8_t volatile far*)0xf40)
@@ -113,7 +114,7 @@
 #  define Z8_UART1_BASE       ((uint8_t volatile far*)0xf48)
 #endif
 
-/* UART0/1 Status 0 Register Bit Definitions ****************************************/
+/* UART0/1 Status 0 Register Bit Definitions ********************************/
 
 #define Z8_UARTSTAT0_RDA     _HX(80)        /* Bit 7: Receive Data Available */
 #define Z8_UARTSTAT0_PE      _HX(40)        /* Bit 6: Parity Error */
@@ -124,7 +125,7 @@
 #define Z8_UARTSTAT0_TXE     _HX(02)        /* Bit 1: Transmitter Empty */
 #define Z8_UARTSTAT0_CTS     _HX(01)        /* Bit 0: Clear To Send */
 
-/* UART0/1 Control 0/1 Register Bit Definitions *************************************/
+/* UART0/1 Control 0/1 Register Bit Definitions *****************************/
 
 #define Z8_UARTCTL0_TEN      _HX(80)        /* Bit 7: Transmit Enable */
 #define Z8_UARTCTL0_REN      _HX(40)        /* Bit 6: Receive Enable */
@@ -144,7 +145,7 @@
 #define Z8_UARTCTL1_RDAIRQ   _HX(02)        /* Bit 1: Receive Data Interrupt Enable */
 #define Z8_UARTCTL1_IREN     _HX(01)        /* Bit 0: Infrared Encoder/Decoder Enable */
 
-/* UART0/1 Mode Status/Select Register Bit Definitions ******************************/
+/* UART0/1 Mode Status/Select Register Bit Definitions **********************/
 
 #define Z8_UARTMDSEL_NORMAL  _HX(00)        /* Bits 5-7=0: Multiprocessor and Normal Mode */
 #define Z8_UARTMDSEL_FILTER   HX(20)        /* Bits 5-7=1: Noise Filter Control/Status */
@@ -152,7 +153,7 @@
 #define Z8_UARTMDSEL_HWREV    HX(e0)        /* Bits 5-7=7: LIN-UART Hardware Revision */
                                             /* Bits 0-4:   Mode dependent status */
 
-/* I2C Status Register Bit Definitions **********************************************/
+/* I2C Status Register Bit Definitions **************************************/
 
 #if defined(_Z8FMC16) || defined(_Z8F1680)
 #  define I2C_ISTAT_NCKI   (1 << 0) /* Bit 0: 1=NAK Interrupt */
@@ -174,7 +175,7 @@
 #  define I2C_STAT_TDRE    (1 << 7) /* Bit 7: 1=Transmit Data Register Empty */
 #endif
 
-/* I2C Control Register Bit Definitions *********************************************/
+/* I2C Control Register Bit Definitions *************************************/
 
 #define I2C_CTL_FILTEN     (1 << 0) /* Bit 0: 1=I2C Signal Filter Enable */
 #define I2C_CTL_FLUSH      (1 << 1) /* Bit 1: 1=Flush Data */
@@ -185,9 +186,9 @@
 #define I2C_CTL_START      (1 << 6) /* Bit 6: 1=Send Start Condition */
 #define I2C_CTL_IEN        (1 << 7) /* Bit 7: 1=I2C Enable */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
