@@ -151,7 +151,11 @@
 /* GPIO pins used by the GPIO Subsystem */
 
 #define BOARD_NGPIOIN     4   /* Amount of GPIO Input pins */
+#ifdef CONFIG_STM32F7_TIM1_CH1NOUT
 #define BOARD_NGPIOOUT    8   /* Amount of GPIO Output pins */
+#else
+#define BOARD_NGPIOOUT    10   /* Amount of GPIO Output pins */
+#endif
 #define BOARD_NGPIOINT    1   /* Amount of GPIO Input w/ Interruption pins */
 
 #define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
@@ -171,6 +175,12 @@
                                 GPIO_OUTPUT_SET | GPIO_PORTA |GPIO_PIN5)
 #define GPIO_OUT5         (GPIO_OUTPUT | GPIO_SPEED_50MHz | \
                                 GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN12)
+#ifndef CONFIG_STM32F7_TIM1_CH1NOUT
+#define GPIO_OUT6         (GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN8)
+#define GPIO_OUT7         (GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN10)
+#endif
 
 /****************************************************************************
  * Public Data
