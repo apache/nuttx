@@ -123,6 +123,10 @@ static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
   GPIO_OUT3,
   GPIO_OUT4,
   GPIO_OUT5,
+#ifndef CONFIG_STM32F7_TIM1_CH1NOUT
+  GPIO_OUT6,
+  GPIO_OUT7,
+#endif
 };
 
 static struct stm32gpio_dev_s g_gpout[BOARD_NGPIOOUT];
