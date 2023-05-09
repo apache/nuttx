@@ -58,6 +58,32 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* OTG device selection *****************************************************/
+
+#if defined(CONFIG_STM32H7_OTGFS_USBDEV)
+#  define STM32_IRQ_OTG         STM32_IRQ_OTGFS
+#  define STM32_OTG_BASE        STM32_OTGFS_BASE
+#  define GPIO_OTG_DM           GPIO_OTGFS_DM
+#  define GPIO_OTG_DP           GPIO_OTGFS_DP
+#  define GPIO_OTG_ID           GPIO_OTGFS_ID
+#  define GPIO_OTG_SOF          GPIO_OTGFS_SOF
+#  define STM32_OTG_FIFO_SIZE   4096
+#elif defined(CONFIG_STM32H7_OTGHS_USBDEV)
+#  define STM32_IRQ_OTG         STM32_IRQ_OTGHS
+#  define STM32_OTG_BASE        STM32_OTGHS_BASE
+#  define GPIO_OTG_DM           GPIO_OTGHS_DM
+#  define GPIO_OTG_DP           GPIO_OTGHS_DP
+#  define GPIO_OTG_ID           GPIO_OTGHS_ID
+#  define GPIO_OTG_SOF          GPIO_OTGHS_SOF
+#  define STM32_OTG_FIFO_SIZE   4096
+#else
+#  error Not selected USBDEV peripheral
+#endif
+
+#if defined(CONFIG_STM32H7_OTGFS_USBDEV) && defined(CONFIG_STM32H7_OTGHS_USBDEV)
+#  error Only one USBDEV role supported
+#endif
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
@@ -2110,7 +2136,8 @@ static void stm32_usbreset(struct stm32_usbdev_s *priv)
 
   stm32_setaddress(priv, 0);
   priv->devstate = DEVSTATE_DEFAULT;
-#ifdef CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI
+#if defined(CONFIG_STM32H7_OTGHS_USBDEV) &&     \
+    defined(CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI)
   priv->usbdev.speed = USB_SPEED_HIGH;
 #else
   priv->usbdev.speed = USB_SPEED_FULL;
@@ -5259,7 +5286,9 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTG_GAHBCFG_TXFELVL, STM32_OTG_GAHBCFG);
 
-#if defined(CONFIG_STM32H7_OTGHS_NO_ULPI) || defined(CONFIG_STM32H7_OTGFS)
+#if (defined(CONFIG_STM32H7_OTGHS_USBDEV) &&                            \
+     defined(CONFIG_STM32H7_OTGHS_NO_ULPI)) ||                          \
+  defined(CONFIG_STM32H7_OTGFS_USBDEV)
   /* Full speed serial transceiver select */
 
   regval = stm32_getreg(STM32_OTG_GUSBCFG);
@@ -5267,7 +5296,8 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
   stm32_putreg(regval, STM32_OTG_GUSBCFG);
 #endif
 
-#if defined(CONFIG_STM32H7_OTGHS_FS) &&         \
+#if defined(CONFIG_STM32H7_OTGHS_USBDEV) &&       \
+    defined(CONFIG_STM32H7_OTGHS_FS) &&           \
     defined(CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI)
   /* ULPI Full speed mode */
 
@@ -5310,7 +5340,9 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval = stm32_getreg(STM32_OTG_GCCFG);
 
-#if defined(CONFIG_STM32H7_OTGHS_NO_ULPI) || defined(CONFIG_STM32H7_OTGFS)
+#if (defined(CONFIG_STM32H7_OTGHS_USBDEV) &&   \
+     defined(CONFIG_STM32H7_OTGHS_NO_ULPI)) || \
+    defined(CONFIG_STM32H7_OTGFS_USBDEV)
   /* Enable USB FS transceiver */
 
   regval |= OTG_GCCFG_PWRDWN;
@@ -5325,7 +5357,8 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
   stm32_putreg(regval, STM32_OTG_GCCFG);
   up_mdelay(20);
 
-#ifdef CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI
+#if defined(CONFIG_STM32H7_OTGHS_USBDEV) &&     \
+    defined(CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI)
   /* Enable delay to default timing, necessary for some ULPI PHYs such
    * as such as USB334x
    */
@@ -5368,9 +5401,10 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval = stm32_getreg(STM32_OTG_DCFG);
   regval &= ~OTG_DCFG_DSPD_MASK;
-#if defined(CONFIG_STM32H7_OTGHS_FS)
+#if defined(CONFIG_STM32H7_OTGHS_USBDEV) &&     \
+    defined(CONFIG_STM32H7_OTGHS_FS)
   regval |= OTG_DCFG_DSPD_FSHS;
-#elif defined(CONFIG_STM32H7_OTGHS)
+#elif defined(CONFIG_STM32H7_OTGHS_USBDEV)
   regval |= OTG_DCFG_DSPD_HS;
 #else
   regval |= OTG_DCFG_DSPD_FS;
@@ -5513,7 +5547,8 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
   regval &=  OTG_GINT_RESERVED;
   stm32_putreg(regval | OTG_GINT_RC_W1, STM32_OTG_GINTSTS);
 
-#if defined(CONFIG_STM32H7_OTGHS) && defined(CONFIG_STM32H7_OTGHS_NO_ULPI)
+#if defined(CONFIG_STM32H7_OTGHS_USBDEV) &&     \
+    defined(CONFIG_STM32H7_OTGHS_NO_ULPI)
   /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must
    * be done because if both the ULPI and the FS PHY clock enable bits
    * are set at the same time, the ARM never awakens from WFI due to
@@ -5622,7 +5657,8 @@ void arm_usbinitialize(void)
    *    current detection.
    */
 
-#ifndef CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI
+#if !(defined(CONFIG_STM32H7_OTGHS_USBDEV) &&       \
+      defined(CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI))
   /* Configure OTG alternate function pins */
 
   stm32_configgpio(GPIO_OTG_DM);
