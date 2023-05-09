@@ -98,6 +98,7 @@
 #  endif
 #endif
 
+#define MM_BACKTRACE_INVALID_PID ((pid_t)-4)
 #define MM_BACKTRACE_MEMPOOL_PID ((pid_t)-3)
 #define MM_BACKTRACE_FREE_PID    ((pid_t)-2)
 #define MM_BACKTRACE_ALLOC_PID   ((pid_t)-1)
