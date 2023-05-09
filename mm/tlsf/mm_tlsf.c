@@ -294,16 +294,24 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
     {
 #if CONFIG_MM_BACKTRACE < 0
       if (handler->dump->pid = MM_BACKTRACE_ALLOC_PID)
-#else
-      if ((handler->dump->pid == MM_BACKTRACE_ALLOC_PID ||
-           handler->dump->pid == dump->pid) &&
-          dump->seqno >= handler->dump->seqmin &&
-          dump->seqno <= handler->dump->seqmax)
-#endif
         {
           handler->info->aordblks++;
           handler->info->uordblks += size;
         }
+#else
+      if (handler->dump->pid == MM_BACKTRACE_ALLOC_PID ||
+          handler->dump->pid == dump->pid ||
+          (handler->dump->pid == MM_BACKTRACE_INVALID_PID &&
+           nxsched_get_tcb(dump->pid) == NULL))
+        {
+          if (dump->seqno >= handler->dump->seqmin &&
+              dump->seqno <= handler->dump->seqmax)
+            {
+              handler->info->aordblks++;
+              handler->info->uordblks += size;
+            }
+        }
+#endif
     }
   else if (handler->dump->pid == MM_BACKTRACE_FREE_PID)
     {

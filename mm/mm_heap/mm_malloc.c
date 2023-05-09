@@ -81,12 +81,12 @@ void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
   struct mallinfo_task info;
   struct mm_memdump_s dump;
 
-  dump.pid = tcb->pid;
+  dump.pid = tcb ? tcb->pid : MM_BACKTRACE_INVALID_PID;
   dump.seqmin = 0;
   dump.seqmax = ULONG_MAX;
   info = mm_mallinfo_task(arg, &dump);
   mwarn("pid:%5d, used:%10d, nused:%10d\n",
-        tcb->pid, info.uordblks, info.aordblks);
+        dump.pid, info.uordblks, info.aordblks);
 }
 #endif
 
@@ -283,6 +283,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
 #  if CONFIG_MM_BACKTRACE >= 0
       nxsched_foreach(mm_dump_handler, heap);
+      mm_dump_handler(NULL, heap);
 #  endif
 #  if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
       mwarn("%11s%9s%9s%9s%9s%9s%9s\n", "bsize", "total", "nused",

@@ -30,6 +30,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mempool.h>
+#include <nuttx/sched.h>
 
 #include "kasan/kasan.h"
 
@@ -436,12 +437,15 @@ mempool_info_task(FAR struct mempool_s *pool,
       list_for_every_entry(&pool->alist, buf, struct mempool_backtrace_s,
                            node)
         {
-          if (buf->pid == dump->pid &&
-              buf->seqno >= dump->seqmin &&
-              buf->seqno <= dump->seqmax)
+          if (buf->pid == dump->pid ||
+              (dump->pid == MM_BACKTRACE_INVALID_PID &&
+               nxsched_get_tcb(buf->pid) == NULL))
             {
-              info.aordblks++;
-              info.uordblks += pool->blocksize;
+              if (buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
+                {
+                  info.aordblks++;
+                  info.uordblks += pool->blocksize;
+                }
             }
         }
     }
