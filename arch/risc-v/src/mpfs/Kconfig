@@ -253,6 +253,27 @@ config MPFS_HAVE_UART4
 	select UART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config MPFS_HAVE_UART5
+	bool
+	depends on MPFS_FPGA_UART
+	default n
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MPFS_HAVE_UART6
+	bool
+	depends on MPFS_FPGA_UART
+	default n
+	select UART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MPFS_HAVE_UART7
+	bool
+	depends on MPFS_FPGA_UART
+	default n
+	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
 # These are the peripheral selections proper
 
 config MPFS_SPI0
@@ -262,6 +283,12 @@ config MPFS_SPI0
 config MPFS_SPI1
 	bool "SPI 1"
 	default n
+
+config MPFS_FPGA_UART
+	bool "FPGA uarts"
+	default n
+	---help---
+		Use FPGA UARTs instead of MSS UARTS.
 
 config MPFS_UART0
 	bool "UART 0"
@@ -297,6 +324,30 @@ config MPFS_UART4
 	select ARCH_HAVE_UART4
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select MPFS_HAVE_UART4
+
+config MPFS_UART5
+	bool "UART 5"
+	depends on MPFS_FPGA_UART
+	default n
+	select ARCH_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART5
+
+config MPFS_UART6
+	bool "UART 6"
+	depends on MPFS_FPGA_UART
+	default n
+	select ARCH_HAVE_UART6
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART6
+
+config MPFS_UART7
+	bool "UART 7"
+	depends on MPFS_FPGA_UART
+	default n
+	select ARCH_HAVE_UART7
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART7
 
 config MPFS_I2C0
 	bool "I2C 0"
