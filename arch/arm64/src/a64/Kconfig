@@ -34,13 +34,6 @@ config A64_TCON0
 	---help---
 		Select to enable support for Timing Controller TCON0.
 
-config A64_UART
-	bool "UART"
-	default n
-	select UART1_SERIALDRIVER
-	---help---
-		Select to enable support for UART.
-
 config A64_RTWI
 	bool "Two-wire Master Controller R"
 	default n
@@ -64,6 +57,46 @@ config A64_TWI2
 	default n
 	---help---
 		Select to enable support for TWI2.
+
+config A64_UART
+	bool "UART 0"
+	default n
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART0.
+
+config A64_UART1
+	bool "UART 1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART1.
+
+config A64_UART2
+	bool "UART 2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART2.
+
+config A64_UART3
+	bool "UART 3"
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART3.
+
+config A64_UART4
+	bool "UART 4"
+	default n
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART4.
 
 endmenu # Allwinner A64 Peripheral Selection
 

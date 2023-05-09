@@ -49,9 +49,16 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_CHIP_A64
-#define CONFIG_A64_UART_BASE      0x1C28000  /* A64 UART0 Base Address */
-#define CONFIG_A64_UART_IRQ       32         /* A64 UART0 IRQ */
-#endif
+
+/* IRQ for A64 UART */
+
+#define A64_UART0_IRQ       32         /* A64 UART0 IRQ */
+#define A64_UART1_IRQ       33         /* A64 UART1 IRQ */
+#define A64_UART2_IRQ       34         /* A64 UART2 IRQ */
+#define A64_UART3_IRQ       35         /* A64 UART3 IRQ */
+#define A64_UART4_IRQ       36         /* A64 UART4 IRQ */
+
+#endif /* CONFIG_ARCH_CHIP_A64 */
 
 /****************************************************************************
  * Public Function Prototypes

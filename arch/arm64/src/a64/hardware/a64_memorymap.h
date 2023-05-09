@@ -39,6 +39,11 @@
 #define A64_CCU_ADDR        0x01c20000 /* CCU             0x01c2:0000-0x01c2:03ff 1K */
 #define A64_PIO_ADDR        0x01c20800 /* PIO             0x01c2:0800-0x01c2:0bff 1K */
 #define A64_PWM_ADDR        0x01c21400 /* PWM             0x01c2:1400-0x01c2:17ff 1K */
+#define A64_UART0_ADDR      0x01c28000 /* UART 0          0x01c2:8000-0x01c2:83ff 1K */
+#define A64_UART1_ADDR      0x01c28400 /* UART 1          0x01c2:8400-0x01c2:87ff 1K */
+#define A64_UART2_ADDR      0x01c28800 /* UART 2          0x01c2:8800-0x01c2:8bff 1K */
+#define A64_UART3_ADDR      0x01c28c00 /* UART 3          0x01c2:8c00-0x01c2:8fff 1K */
+#define A64_UART4_ADDR      0x01c29000 /* UART 4          0x01c2:9000-0x01c2:93ff 1K */
 #define A64_TWI0_ADDR       0x01c2ac00 /* TWI 0           0x01c2:ac00-0x01c2:afff 1K */
 #define A64_TWI1_ADDR       0x01c2b000 /* TWI 1           0x01c2:b000-0x01c2:B3ff 1K */
 #define A64_TWI2_ADDR       0x01c2b400 /* TWI 2           0x01c2:b400-0x01c2:b7ff 1K */
