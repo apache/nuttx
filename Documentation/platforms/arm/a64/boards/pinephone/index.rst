@@ -193,5 +193,5 @@ RSB                      Yes
 TCON0                    Yes
 TWI / I2C                Yes
 Touch Panel (GT917S)     Yes
-UART                     Yes     Only UART0 is supported
+UART                     Yes
 ======================== ======= =====
