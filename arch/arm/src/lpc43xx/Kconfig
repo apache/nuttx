@@ -239,7 +239,7 @@ config LPC43_RIT
 	default n
 
 config LPC43_RIT_RES
-	int  "Interrupt schedule resolution (nS)"
+	int "Interrupt schedule resolution (nS)"
 	default 250
 	depends on LPC43_RIT
 
