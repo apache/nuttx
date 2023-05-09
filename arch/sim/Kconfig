@@ -551,8 +551,8 @@ config SIM_UART_NUMBER
 		by running:
 
 			socat PTY,link=/dev/ttySIM0 PTY,link=/dev/ttyNX0
-		 	stty -F /dev/ttySIM0 raw
-		 	stty -F /dev/ttyNX0 raw
+			stty -F /dev/ttySIM0 raw
+			stty -F /dev/ttyNX0 raw
 
 		This will create two new ports on your system.
 		NuttX will use the ttySIM0 port, and another software
@@ -629,20 +629,20 @@ config SIM_USB_RAW_GADGET
 	default n
 	depends on HOST_LINUX
 	---help---
-		 Use USB Raw Gadget and Dummy HCD/UDC to set up virtual
-		 USB Device and Host controller that connected to each
-		 other inside the kernel.
+		Use USB Raw Gadget and Dummy HCD/UDC to set up virtual
+		USB Device and Host controller that connected to each
+		other inside the kernel.
 
-		 Get Raw Gadget:
-		 Get Raw Gadget code at https://github.com/xairy/raw-gadget.
+		Get Raw Gadget:
+		Get Raw Gadget code at https://github.com/xairy/raw-gadget.
 
-		 Make Raw Gadget:
-		 Run make in the raw_gadget and dummy_hcd directory. If raw_gadget
-		 build fail, you need to check which register interface meets your
-		 kenel version, usb_gadget_probe_driver or usb_gadget_register_driver.
+		Make Raw Gadget:
+		Run make in the raw_gadget and dummy_hcd directory. If raw_gadget
+		build fail, you need to check which register interface meets your
+		kenel version, usb_gadget_probe_driver or usb_gadget_register_driver.
 
-		 Install Raw Gadget:
-		 Run ./insmod.sh in the raw_gadget and dummy_hcd directory.
+		Install Raw Gadget:
+		Run ./insmod.sh in the raw_gadget and dummy_hcd directory.
 
 endif
 
@@ -661,7 +661,7 @@ config SIM_LIBUSB
 	default n
 	depends on HOST_LINUX
 	---help---
-		 Use libusb to set up virtual USB Host controller.
+		Use libusb to set up virtual USB Host controller.
 
 config SIM_USB_VID
 	hex "Simulated USB Dev VID"
