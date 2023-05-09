@@ -39,7 +39,7 @@ define _examine_arch
   gdb.execute("set $_target_arch = \"armv7e-m\"")
 
   # TODO: need more smart way to detect armv7-a
-  python if (type(gdb.lookup_global_symbol("arm_gic_initialize")) is gdb.Symbol) : \
+  python if (type(gdb.lookup_global_symbol("arm_decodeirq")) is gdb.Symbol) : \
   gdb.execute("set $_target_arch = \"armv7-a\"")
 
   python if (_target_arch.name() == 'i386:x86-64') : \
@@ -61,6 +61,7 @@ define _examine_target
 
     set $_xcp_nregs = sizeof(g_last_regs) / sizeof(void *)
     set $_target_has_fpu = 0
+    set $_target_regs_offset = 0
 
     if ($_streq($_target_arch, "armv7e-m") == 1)
       if ($_xcp_nregs != 19)
@@ -71,6 +72,7 @@ define _examine_target
     if ($_streq($_target_arch, "armv7-a") == 1)
       if ($_xcp_nregs != 17)
         set $_target_has_fpu = 1
+        set $_target_regs_offset = $_xcp_nregs - 17
       end
     end
 
@@ -177,46 +179,46 @@ end
 # see nuttx/arch/arm/include/armv7-a/irq.h
 define _save_tcb_armv7-a
   set $tcb = (struct tcb_s *)$arg0
-  set $tcb.xcp.regs[0] = $r13
-  set $tcb.xcp.regs[1] = $r14
-  set $tcb.xcp.regs[2] = $r0
-  set $tcb.xcp.regs[3] = $r1
-  set $tcb.xcp.regs[4] = $r2
-  set $tcb.xcp.regs[5] = $r3
-  set $tcb.xcp.regs[6] = $r4
-  set $tcb.xcp.regs[7] = $r5
-  set $tcb.xcp.regs[8] = $r6
-  set $tcb.xcp.regs[9] = $r7
-  set $tcb.xcp.regs[10] = $r8
-  set $tcb.xcp.regs[11] = $r9
-  set $tcb.xcp.regs[12] = $r10
-  set $tcb.xcp.regs[13] = $r11
-  set $tcb.xcp.regs[14] = $r12
-  set $tcb.xcp.regs[15] = $r15
-  set $tcb.xcp.regs[16] = $cpsr
+  set $tcb.xcp.regs[0 + $_target_regs_offset] = $r13
+  set $tcb.xcp.regs[1 + $_target_regs_offset] = $r14
+  set $tcb.xcp.regs[2 + $_target_regs_offset] = $r0
+  set $tcb.xcp.regs[3 + $_target_regs_offset] = $r1
+  set $tcb.xcp.regs[4 + $_target_regs_offset] = $r2
+  set $tcb.xcp.regs[5 + $_target_regs_offset] = $r3
+  set $tcb.xcp.regs[6 + $_target_regs_offset] = $r4
+  set $tcb.xcp.regs[7 + $_target_regs_offset] = $r5
+  set $tcb.xcp.regs[8 + $_target_regs_offset] = $r6
+  set $tcb.xcp.regs[9 + $_target_regs_offset] = $r7
+  set $tcb.xcp.regs[10 + $_target_regs_offset] = $r8
+  set $tcb.xcp.regs[11 + $_target_regs_offset] = $r9
+  set $tcb.xcp.regs[12 + $_target_regs_offset] = $r10
+  set $tcb.xcp.regs[13 + $_target_regs_offset] = $r11
+  set $tcb.xcp.regs[14 + $_target_regs_offset] = $r12
+  set $tcb.xcp.regs[15 + $_target_regs_offset] = $r15
+  set $tcb.xcp.regs[16 + $_target_regs_offset] = $cpsr
 
-  set $_pc_reg_idx = 15
+  set $_pc_reg_idx = $_target_regs_offset + 15
 end
 
 define _switch_tcb_armv7-a
   set $tcb = (struct tcb_s *)$arg0
-  set $r13 = $tcb.xcp.regs[0]
-  set $r14 = $tcb.xcp.regs[1]
-  set $r0 = $tcb.xcp.regs[2]
-  set $r1 = $tcb.xcp.regs[3]
-  set $r2 = $tcb.xcp.regs[4]
-  set $r3 = $tcb.xcp.regs[5]
-  set $r4 = $tcb.xcp.regs[6]
-  set $r5 = $tcb.xcp.regs[7]
-  set $r6 = $tcb.xcp.regs[8]
-  set $r7 = $tcb.xcp.regs[9]
-  set $r8 = $tcb.xcp.regs[10]
-  set $r9 = $tcb.xcp.regs[11]
-  set $r10 = $tcb.xcp.regs[12]
-  set $r11 = $tcb.xcp.regs[13]
-  set $r12 = $tcb.xcp.regs[14]
-  set $r15 = $tcb.xcp.regs[15]
-  set $cpsr = $tcb.xcp.regs[16]
+  set $r13 = $tcb.xcp.regs[0 + $_target_regs_offset]
+  set $r14 = $tcb.xcp.regs[1 + $_target_regs_offset]
+  set $r0 = $tcb.xcp.regs[2 + $_target_regs_offset]
+  set $r1 = $tcb.xcp.regs[3 + $_target_regs_offset]
+  set $r2 = $tcb.xcp.regs[4 + $_target_regs_offset]
+  set $r3 = $tcb.xcp.regs[5 + $_target_regs_offset]
+  set $r4 = $tcb.xcp.regs[6 + $_target_regs_offset]
+  set $r5 = $tcb.xcp.regs[7 + $_target_regs_offset]
+  set $r6 = $tcb.xcp.regs[8 + $_target_regs_offset]
+  set $r7 = $tcb.xcp.regs[9 + $_target_regs_offset]
+  set $r8 = $tcb.xcp.regs[10 + $_target_regs_offset]
+  set $r9 = $tcb.xcp.regs[11 + $_target_regs_offset]
+  set $r10 = $tcb.xcp.regs[12 + $_target_regs_offset]
+  set $r11 = $tcb.xcp.regs[13 + $_target_regs_offset]
+  set $r12 = $tcb.xcp.regs[14 + $_target_regs_offset]
+  set $r15 = $tcb.xcp.regs[15 + $_target_regs_offset]
+  set $cpsr = $tcb.xcp.regs[16 + $_target_regs_offset]
 end
 
 # see nuttx/arch/arm/include/armv7-m/irq_cmnvector.h
