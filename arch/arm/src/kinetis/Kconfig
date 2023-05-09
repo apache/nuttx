@@ -1305,7 +1305,7 @@ config KINETIS_UART_BREAKS
 		break.
 
 config KINETIS_UART_EXTEDED_BREAK
-	bool  "Selects a longer transmitted break character length"
+	bool "Selects a longer transmitted break character length"
 	depends on KINETIS_UART_BREAKS
 	default n
 	---help---
