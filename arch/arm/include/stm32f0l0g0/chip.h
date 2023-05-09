@@ -50,7 +50,7 @@
 #  define STM32_NDAC            0  /* One DAC channel */
 #  define STM32_NCOMP           0  /* Two Analog Comparators */
 #  define STM32_NCAP            0  /* Capacitive sensing channels (14 on UFQFPN32)) */
-#  define STM32_NPORTS          5  /* Six GPIO ports, GPIOA-F */
+#  define STM32_NPORTS          5  /* Five GPIO ports, GPIOA-D, F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F051R8)
 
@@ -244,7 +244,7 @@
 #  define STM32_NCRC            1  /* No CRC module */
 #  define STM32_NRNG            0  /* No Random number generator (RNG) */
 #  define STM32_NCAP            0  /* No Capacitive sensing channels */
-#  define STM32_NPORTS          5  /* Five GPIO ports, GPIOA-D, F */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32G071EB)   || defined(CONFIG_ARCH_CHIP_STM32G071G8)   || \
       defined(CONFIG_ARCH_CHIP_STM32G071GB)   || defined(CONFIG_ARCH_CHIP_STM32G071G8XN) || \
@@ -277,7 +277,7 @@
 #  define STM32_NCRC            0  /* No CRC module */
 #  define STM32_NRNG            0  /* No Random number generator (RNG) */
 #  define STM32_NCAP            0  /* No Capacitive sensing channels */
-#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
 /* STM32L EnergyLite Line ***************************************************/
 
