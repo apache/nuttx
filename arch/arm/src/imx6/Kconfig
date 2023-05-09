@@ -166,8 +166,8 @@ config IMX_ENET_PHYINIT
 		function one time before it first uses the PHY.
 
 config IMX_ENET_WITH_QEMU
-       bool "With QEMU"
-       default y
+	bool "With QEMU"
+	default y
 
 endmenu # IMX_ENET
 
