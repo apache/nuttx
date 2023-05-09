@@ -365,9 +365,9 @@ config MPFS_IHC_NUTTX_ON_HART3
 		Set this to 1 if NuttX is running on hart3
 
 config MPFS_IHC_NUTTX_ON_HART4
-        int "NuttX on hart4"
-        depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
-        default 0
+	int "NuttX on hart4"
+	depends on MPFS_IHC_CLIENT || MPFS_IHC_SBI
+	default 0
 	range 0 1
 	---help---
 		Set this to 1 if NuttX is running on hart4
