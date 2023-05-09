@@ -30,6 +30,7 @@
 
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bmi160.h>
+#include <nuttx/sensors/bmp280.h>
 #include <nuttx/sensors/mpu60x0.h>
 #include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
@@ -246,6 +247,44 @@ static int tm4c_mpu60x0_setup(int bus)
 #endif
 
 /****************************************************************************
+ * Name: tm4c_bmp280_setup
+ *
+ * Description:
+ *   Initialize and register the bmp280 sensor.
+ *
+ * Input Parameters:
+ *   bus - A number identifying the I2C bus.
+ *
+ * Returned Value:
+ *   On success, zero (OK) is returned.  On failure, a negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_BMP280
+int tm4c_bmp280_setup(int bus)
+{
+  int ret;
+  struct i2c_master_s *i2c;
+
+  i2c = tiva_i2cbus_initialize(bus);
+  if (!i2c)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize i2c%d.\n", bus);
+      return -ENODEV;
+    }
+
+  ret = bmp280_register(0, i2c);
+  if (ret < 0)
+    {
+      snerr("ERROR: Error registering BMP280\n");
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: tm4c_pwm_register
  *
  * Description:
@@ -424,6 +463,14 @@ int tm4c_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: MPU60X0 on I2C0 failed %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP280
+  ret = tm4c_bmp280_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: BMP280 on I2C0 failed %d\n", ret);
     }
 #endif
 
