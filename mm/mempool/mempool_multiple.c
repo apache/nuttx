@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <strings.h>
+#include <syslog.h>
 #include <sys/param.h>
 
 #include <nuttx/mutex.h>
@@ -589,6 +590,27 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
   while (++pool < end);
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: mempool_multiple_info
+ ****************************************************************************/
+
+void mempool_multiple_info(FAR struct mempool_multiple_s *mpool)
+{
+  struct mempoolinfo_s minfo;
+  size_t i;
+
+  syslog(LOG_INFO, "%11s%9s%9s%9s%9s%9s%9s\n", "bsize", "total", "nused",
+                  "nfree", "nifree", "nwaiter", "nexpend");
+  for (i = 0; i < mpool->npools; i++)
+    {
+      mempool_info(mpool->pools + i, &minfo);
+      syslog(LOG_INFO, "%9lu%11lu%9lu%9lu%9lu%9lu%9zu\n",
+                       minfo.sizeblks, minfo.arena, minfo.aordblks,
+                       minfo.ordblks, minfo.iordblks,
+                       minfo.nwaiter, mpool->pools->nexpend);
+    }
 }
 
 /****************************************************************************

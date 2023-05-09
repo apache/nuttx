@@ -268,6 +268,10 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #  if CONFIG_MM_BACKTRACE >= 0
       nxsched_foreach(mm_dump_handler, heap);
 #  endif
+#  if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+      mempool_multiple_info(heap->mm_mpool);
+#  endif
+
 #endif
 #ifdef CONFIG_MM_PANIC_ON_FAILURE
       PANIC();
