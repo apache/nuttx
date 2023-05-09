@@ -42,23 +42,23 @@ config SAMV7_HSMCI0_AUTOMOUNT_UDELAY
 endif # SAMV7_HSMCI0_AUTOMOUNT
 
 config SAMV7_HSMCI0_MOUNT
-       bool "HSMCI0 boot mount"
-       default n
-       depends on !DISABLE_MOUNTPOINT && SAMV7_HSMCI0 && !SAMV7_HSMCI0_AUTOMOUNT
+	bool "HSMCI0 boot mount"
+	default n
+	depends on !DISABLE_MOUNTPOINT && SAMV7_HSMCI0 && !SAMV7_HSMCI0_AUTOMOUNT
 
 if SAMV7_HSMCI0_MOUNT
 
 config SAMV7_HSMCI0_MOUNT_FSTYPE
-       string "HSMCI0 file system type"
-       default "vfat"
+	string "HSMCI0 file system type"
+	default "vfat"
 
 config SAMV7_HSMCI0_MOUNT_BLKDEV
-       string "HSMCI0 block device"
-       default "/dev/mmcsd0"
+	string "HSMCI0 block device"
+	default "/dev/mmcsd0"
 
 config SAMV7_HSMCI0_MOUNT_MOUNTPOINT
-       string "HSMCI0 mount point"
-       default "/bin"
+	string "HSMCI0 mount point"
+	default "/bin"
 
 endif # SAMV7_HSMCI0_MOUNT
 
@@ -83,7 +83,7 @@ menuconfig SAMV7_FORMAT_MCUBOOT
 	default n
 	select SAMV7_PROGMEM_OTA_PARTITION
 	---help---
-		 The MCUboot support of loading the firmware images.
+		The MCUboot support of loading the firmware images.
 
 if SAMV7_FORMAT_MCUBOOT
 
