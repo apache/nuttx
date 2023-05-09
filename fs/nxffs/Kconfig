@@ -49,7 +49,7 @@ config NXFFS_NAND
 
 		Secondly, NXFFS will write a block many times.  It tries to keep
 		bits in the erased state and assumes that it can overwrite those
- 		bits to change them from the erased to the non-erased state.  This
+		bits to change them from the erased to the non-erased state.  This
 		works will with NOR-like FLASH.  NAND behaves this way too.  But the
 		problem with NAND is that the ECC bits cannot be re-written in this
 		way.  So once a block has been written, it cannot be modified.  This
