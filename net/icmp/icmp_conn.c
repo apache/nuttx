@@ -281,12 +281,46 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
 
   for (conn = icmp_nextconn(NULL); conn != NULL; conn = icmp_nextconn(conn))
     {
-      if (conn->id == id && conn->dev == dev && conn->nreqs > 0)
+      if (conn->id == id && conn->dev == dev)
         {
           return conn;
         }
     }
 
   return conn;
+}
+
+/****************************************************************************
+ * Name: icmp_foreach
+ *
+ * Description:
+ *   Enumerate each ICMP connection structure. This function will terminate
+ *   when either (1) all connection have been enumerated or (2) when a
+ *   callback returns any non-zero value.
+ *
+ * Assumptions:
+ *   This function is called from network logic at with the network locked.
+ *
+ ****************************************************************************/
+
+int icmp_foreach(icmp_callback_t callback, FAR void *arg)
+{
+  FAR struct icmp_conn_s *conn;
+  int ret = 0;
+
+  if (callback != NULL)
+    {
+      for (conn = icmp_nextconn(NULL); conn != NULL;
+           conn = icmp_nextconn(conn))
+        {
+          ret = callback(conn, arg);
+          if (ret != 0)
+            {
+              break;
+            }
+        }
+    }
+
+  return ret;
 }
 #endif /* CONFIG_NET_ICMP */

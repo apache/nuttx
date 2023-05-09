@@ -339,12 +339,11 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    */
 
   icmp = (FAR struct icmp_hdr_s *)buf;
-  if (icmp->type != ICMP_ECHO_REQUEST || icmp->id != conn->id ||
-      dev != conn->dev)
+  if (psock->s_type != SOCK_RAW && (icmp->type != ICMP_ECHO_REQUEST ||
+      icmp->id != conn->id || dev != conn->dev))
     {
-      conn->id    = 0;
-      conn->nreqs = 0;
-      conn->dev   = NULL;
+      conn->id  = 0;
+      conn->dev = NULL;
 
       iob_free_queue(&conn->readahead);
     }
@@ -379,19 +378,18 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.snd_cb = icmp_callback_alloc(dev, conn);
   if (state.snd_cb != NULL)
     {
-      state.snd_cb->flags   = (ICMP_POLL | NETDEV_DOWN);
-      state.snd_cb->priv    = (FAR void *)&state;
-      state.snd_cb->event   = sendto_eventhandler;
+      state.snd_cb->flags = (ICMP_POLL | NETDEV_DOWN);
+      state.snd_cb->priv  = (FAR void *)&state;
+      state.snd_cb->event = sendto_eventhandler;
 
       /* Setup to receive ICMP ECHO replies */
 
-      if (icmp->type == ICMP_ECHO_REQUEST)
+      if (psock->s_type != SOCK_RAW && icmp->type == ICMP_ECHO_REQUEST)
         {
-          conn->id    = icmp->id;
-          conn->nreqs = 1;
+          conn->id = icmp->id;
         }
 
-        conn->dev     = dev;
+        conn->dev = dev;
 
       /* Notify the device driver of the availability of TX data */
 
@@ -452,9 +450,8 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   return len;
 
 errout:
-  conn->id    = 0;
-  conn->nreqs = 0;
-  conn->dev   = NULL;
+  conn->id  = 0;
+  conn->dev = NULL;
 
   iob_free_queue(&conn->readahead);
   return ret;

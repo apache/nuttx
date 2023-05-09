@@ -32,6 +32,7 @@
 #include <assert.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/icmp.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -82,9 +83,8 @@ struct icmp_conn_s
 
   /* ICMP-specific content follows */
 
-  uint16_t   id;                 /* ICMP ECHO request ID */
-  uint8_t    nreqs;              /* Number of requests with no response received */
-  uint8_t    crefs;              /* Reference counts on this instance */
+  uint16_t id;                 /* ICMP ECHO request ID */
+  uint8_t  crefs;              /* Reference counts on this instance */
 
   /* The device that the ICMP request was sent on */
 
@@ -96,6 +96,7 @@ struct icmp_conn_s
    */
 
   struct iob_queue_s readahead;  /* Read-ahead buffering */
+  uint32_t filter;               /* ICMP type filter */
 
   /* The following is a list of poll structures of threads waiting for
    * socket events.
@@ -103,6 +104,8 @@ struct icmp_conn_s
 
   struct icmp_poll_s pollinfo[CONFIG_NET_ICMP_NPOLLWAITERS];
 };
+
+typedef int (*icmp_callback_t)(FAR struct icmp_conn_s *conn, FAR void *arg);
 #endif
 
 #ifdef CONFIG_NET_IPv4
@@ -243,6 +246,23 @@ FAR struct icmp_conn_s *icmp_nextconn(FAR struct icmp_conn_s *conn);
 #ifdef CONFIG_NET_ICMP_SOCKET
 FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
                                       uint16_t id);
+#endif
+
+/****************************************************************************
+ * Name: icmp_foreach
+ *
+ * Description:
+ *   Enumerate each ICMP connection structure. This function will terminate
+ *   when either (1) all connection have been enumerated or (2) when a
+ *   callback returns any non-zero value.
+ *
+ * Assumptions:
+ *   This function is called from network logic at with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMP_SOCKET
+int icmp_foreach(icmp_callback_t callback, FAR void *arg);
 #endif
 
 /****************************************************************************

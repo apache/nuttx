@@ -2441,8 +2441,8 @@ inet_sockif(sa_family_t family, int type, int protocol)
 #if defined(HAVE_PFINET_SOCKETS) && defined(CONFIG_NET_ICMP_SOCKET)
   /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
 
-  if (family == PF_INET && (type == SOCK_DGRAM || type == SOCK_CTRL) &&
-      protocol == IPPROTO_ICMP)
+  if (family == PF_INET && (type == SOCK_DGRAM || type == SOCK_CTRL ||
+      type == SOCK_RAW) && protocol == IPPROTO_ICMP)
     {
       return &g_icmp_sockif;
     }
