@@ -459,7 +459,26 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
           {
             /* Send stop condition */
 
-            modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+            if (priv->fpga && (priv->rx_idx == 0 && priv->rx_size > 0))
+              {
+                /* This is a known bug: FPGA IP sends data twice after
+                 * sending the address occasionally. Instead of sending
+                 * STOP, send repeated start instead.
+                 */
+
+                modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                clear_irq = 0u;
+                modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
+
+               /* Jump to the next message */
+
+                priv->msgid++;
+              }
+            else
+              {
+                modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+              }
+
             priv->status = MPFS_I2C_SUCCESS;
           }
         break;
