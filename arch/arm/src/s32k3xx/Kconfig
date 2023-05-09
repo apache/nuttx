@@ -196,8 +196,8 @@ config S32K3XX_HAVE_ENET
 # Select MPU when D-cache is enabled for ARM errata 1624041
 
 config S32K3XX_NEEDS_MPU
-    bool
-    default y
+	bool
+	default y
 	depends on ARMV7M_DCACHE
 	select ARM_MPU
 
