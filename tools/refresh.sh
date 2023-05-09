@@ -68,10 +68,16 @@ while [ ! -z "$1" ]; do
     echo "  --help"
     echo "     Show this help message and exit"
     echo "  <board>"
-    echo "     The board directory under nuttx/boards"
+    echo "     The board directory under nuttx/boards/arch/chip/"
     echo "  <config>"
-    echo "     The board configuration directory under nuttx/boards/<board>/configs"
-    echo "  Note: all configuration is refreshed if <board>:<config> equals all."
+    echo "     The board configuration directory under nuttx/boards/arch/chip/<board>/configs"
+    echo "  <archname>"
+    echo "     The architecture directory under nuttx/boards/"
+    echo "  <chipname>"
+    echo "     The chip family directory under nuttx/boards/<arch>/"
+    echo "  Note1: all configuration is refreshed if <board>:<config> equals all."
+    echo "  Note2: all configuration of arch XYZ is refreshed if \"arch:<namearch>\" is passed"
+    echo "  Note3: all configuration of chip XYZ is refreshed if \"chip:<chipname>\" is passed"
     exit 0
     ;;
   * )
@@ -106,7 +112,22 @@ if [ -z "${CONFIGS}" ]; then
 fi
 
 if [ "X${CONFIGS}" == "Xall" ]; then
+  echo "Normalizing all boards!"
   CONFIGS=`find boards -name defconfig | cut -d'/' -f4,6`
+else
+  if [[ "X${CONFIGS}" == "Xarch:"* ]]; then
+    IFS=: read -r atype archname <<< "${CONFIGS}"
+    ARCH=$archname
+    echo "Normalizing all boards in arch: ${ARCH} !"
+    CONFIGS=`find boards/${ARCH} -name defconfig | cut -d'/' -f4,6`
+  else
+    if [[ "X${CONFIGS}" == "Xchip:"* ]]; then
+      IFS=: read -r atype chipname <<< "${CONFIGS}"
+      CHIP=$chipname
+      echo "Normalizing all boards in chip: ${CHIP} !"
+      CONFIGS=`find boards/*/${CHIP} -name defconfig | cut -d'/' -f4,6`
+    fi
+  fi
 fi
 
 for CONFIG in ${CONFIGS}; do
