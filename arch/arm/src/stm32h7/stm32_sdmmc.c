@@ -2797,7 +2797,7 @@ static void stm32_waitenable(struct sdio_dev_s *dev,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   if ((eventset & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      /* Read pin to see if ready (true) skip timeout */
+      /* Read pin to see if ready (true) skip timeout and the pin IRQ */
 
       if (stm32_gpioread(priv->d0_gpio))
         {
@@ -2894,13 +2894,15 @@ static sdio_eventset_t stm32_eventwait(struct sdio_dev_s *dev)
   flags = enter_critical_section();
 
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
-  /* A card ejected while in SDIOWAIT_WRCOMPLETE can lead to a
+  /* A call to stm32_waitenable that finds the card ready or
+   * a card ejected while in SDIOWAIT_WRCOMPLETE can lead to a
    * condition where there is no waitevents set and no wkupevent
+   * This simply means we should not wait.
    */
 
   if (priv->waitevents == 0 && priv->wkupevent == 0)
     {
-      wkupevent = SDIOWAIT_ERROR;
+      wkupevent = 0;
       goto errout_with_waitints;
     }
 
