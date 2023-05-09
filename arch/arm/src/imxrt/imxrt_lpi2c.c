@@ -51,13 +51,15 @@
 
 #include "hardware/imxrt_dmamux.h"
 #include "hardware/imxrt_pinmux.h"
+#include "imxrt_clockconfig.h"
 #include "hardware/imxrt_ccm.h"
 #include "imxrt_periphclks.h"
 
 /* At least one I2C peripheral must be enabled */
 
 #if defined(CONFIG_IMXRT_LPI2C1) || defined(CONFIG_IMXRT_LPI2C2) || \
-    defined(CONFIG_IMXRT_LPI2C3) || defined(CONFIG_IMXRT_LPI2C4)
+    defined(CONFIG_IMXRT_LPI2C3) || defined(CONFIG_IMXRT_LPI2C4) || \
+    defined(CONFIG_IMXRT_LPI2C5) || defined(CONFIG_IMXRT_LPI2C6)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -500,6 +502,96 @@ static struct imxrt_lpi2c_priv_s imxrt_lpi2c4_priv =
 };
 #endif
 
+#ifdef CONFIG_IMXRT_LPI2C5
+static const struct imxrt_lpi2c_config_s imxrt_lpi2c5_config =
+{
+  .base          = IMXRT_LPI2C5_BASE,
+  .busy_idle     = CONFIG_LPI2C5_BUSYIDLE,
+  .filtscl       = CONFIG_LPI2C5_FILTSCL,
+  .filtsda       = CONFIG_LPI2C5_FILTSDA,
+  .scl_pin       = GPIO_LPI2C5_SCL,
+  .sda_pin       = GPIO_LPI2C5_SDA,
+#if defined(CONFIG_I2C_RESET)
+  .reset_scl_pin = GPIO_LPI2C5_SCL_RESET,
+  .reset_sda_pin = GPIO_LPI2C5_SDA_RESET,
+#endif
+#ifndef CONFIG_I2C_SLAVE
+  .mode          = LPI2C_MASTER,
+#else
+  .mode          = LPI2C_SLAVE,
+#endif
+#ifndef CONFIG_I2C_POLLED
+  .irq           = IMXRT_IRQ_LPI2C5,
+#endif
+#ifdef CONFIG_LPI2C5_DMA
+  .dma_reqsrc    = IMXRT_DMACHAN_LPI2C5,
+#endif
+};
+
+static struct imxrt_lpi2c_priv_s imxrt_lpi2c5_priv =
+{
+  .ops           = &imxrt_lpi2c_ops,
+  .config        = &imxrt_lpi2c5_config,
+  .refs          = 0,
+  .lock          = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr       = SEM_INITIALIZER(0),
+#endif
+  .intstate      = INTSTATE_IDLE,
+  .msgc          = 0,
+  .msgv          = NULL,
+  .ptr           = NULL,
+  .dcnt          = 0,
+  .flags         = 0,
+  .status        = 0
+};
+#endif
+
+#ifdef CONFIG_IMXRT_LPI2C6
+static const struct imxrt_lpi2c_config_s imxrt_lpi2c6_config =
+{
+  .base          = IMXRT_LPI2C6_BASE,
+  .busy_idle     = CONFIG_LPI2C6_BUSYIDLE,
+  .filtscl       = CONFIG_LPI2C6_FILTSCL,
+  .filtsda       = CONFIG_LPI2C6_FILTSDA,
+  .scl_pin       = GPIO_LPI2C6_SCL,
+  .sda_pin       = GPIO_LPI2C6_SDA,
+#if defined(CONFIG_I2C_RESET)
+  .reset_scl_pin = GPIO_LPI2C6_SCL_RESET,
+  .reset_sda_pin = GPIO_LPI2C6_SDA_RESET,
+#endif
+#ifndef CONFIG_I2C_SLAVE
+  .mode          = LPI2C_MASTER,
+#else
+  .mode          = LPI2C_SLAVE,
+#endif
+#ifndef CONFIG_I2C_POLLED
+  .irq           = IMXRT_IRQ_LPI2C6,
+#endif
+#ifdef CONFIG_LPI2C6_DMA
+  .dma_reqsrc    = IMXRT_DMACHAN_LPI2C6,
+#endif
+};
+
+static struct imxrt_lpi2c_priv_s imxrt_lpi2c6_priv =
+{
+  .ops           = &imxrt_lpi2c_ops,
+  .config        = &imxrt_lpi2c6_config,
+  .refs          = 0,
+  .lock          = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr       = SEM_INITIALIZER(0),
+#endif
+  .intstate      = INTSTATE_IDLE,
+  .msgc          = 0,
+  .msgv          = NULL,
+  .ptr           = NULL,
+  .dcnt          = 0,
+  .flags         = 0,
+  .status        = 0
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -924,8 +1016,10 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
                                  uint32_t frequency)
 {
   uint32_t src_freq = 0;
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
   uint32_t pll3_div = 0;
   uint32_t lpi2c_clk_div;
+#endif
   uint32_t regval;
   uint32_t men;
   uint32_t prescale = 0;
@@ -957,6 +1051,33 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
 
           /* Get the LPI2C clock source frequency */
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+          if (priv->config->base == IMXRT_LPI2C1_BASE)
+            {
+              imxrt_get_rootclock(CCM_CR_LPI2C1, &src_freq);
+            }
+          else if (priv->config->base == IMXRT_LPI2C2_BASE)
+            {
+              imxrt_get_rootclock(CCM_CR_LPI2C2, &src_freq);
+            }
+          else if (priv->config->base == IMXRT_LPI2C3_BASE)
+            {
+              imxrt_get_rootclock(CCM_CR_LPI2C3, &src_freq);
+            }
+          else if (priv->config->base == IMXRT_LPI2C4_BASE)
+            {
+              imxrt_get_rootclock(CCM_CR_LPI2C4, &src_freq);
+            }
+          else if (priv->config->base == IMXRT_LPI2C5_BASE)
+            {
+              imxrt_get_rootclock(CCM_CR_LPI2C5, &src_freq);
+            }
+          else if (priv->config->base == IMXRT_LPI2C6_BASE)
+            {
+              imxrt_get_rootclock(CCM_CR_LPI2C6, &src_freq);
+            }
+#else
+
           if ((getreg32(IMXRT_CCM_CSCDR2) & CCM_CSCDR2_LPI2C_CLK_SEL) ==
               CCM_CSCDR2_LPI2C_CLK_SEL_OSC_CLK)
             {
@@ -981,6 +1102,8 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
               src_freq      = (BOARD_XTAL_FREQUENCY * pll3_div) /
                               (8 * lpi2c_clk_div);
             }
+
+#endif
 
           /* LPI2C output frequency = (Source Clock (Hz)/ 2^prescale) /
            *   (CLKLO + 1 + CLKHI + 1 + ROUNDDOWN((2 + FILTSCL) / 2^prescale)
@@ -1500,7 +1623,19 @@ void imxrt_lpi2c_clock_enable (uint32_t base)
     }
   else if (base == IMXRT_LPI2C4_BASE)
     {
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
       imxrt_clockall_lpi2c4_serial();
+#else
+      imxrt_clockall_lpi2c4();
+    }
+  else if (base == IMXRT_LPI2C5_BASE)
+    {
+      imxrt_clockall_lpi2c5();
+    }
+  else if (base == IMXRT_LPI2C6_BASE)
+    {
+      imxrt_clockall_lpi2c6();
+#endif
     }
 }
 
@@ -1528,7 +1663,19 @@ void imxrt_lpi2c_clock_disable (uint32_t base)
     }
   else if (base == IMXRT_LPI2C4_BASE)
     {
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
       imxrt_clockoff_lpi2c4_serial();
+#else
+      imxrt_clockoff_lpi2c4();
+    }
+  else if (base == IMXRT_LPI2C5_BASE)
+    {
+      imxrt_clockoff_lpi2c5();
+    }
+  else if (base == IMXRT_LPI2C6_BASE)
+    {
+      imxrt_clockoff_lpi2c6();
+#endif
     }
 }
 

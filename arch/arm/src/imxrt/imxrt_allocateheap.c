@@ -120,7 +120,9 @@
  * The pieces of the OCRAM used for DTCM and ITCM DTCM and ITCM memory spaces
  */
 
-#if defined(IMXRT_OCRAM2_BASE)
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+# define _IMXRT_OCRAM_BASE IMXRT_OCRAM_BASE
+#elif defined(IMXRT_OCRAM2_BASE)
 # define _IMXRT_OCRAM_BASE IMXRT_OCRAM2_BASE
 #else
 # define _IMXRT_OCRAM_BASE IMXRT_OCRAM_BASE
@@ -146,6 +148,13 @@
 #  define CONFIG_DTCM_USED (CONFIG_IMXRT_DTCM * 1024)
 #else
 #  define IMXRT_DTCM 0
+#endif
+
+#ifndef IMXRT_OCRAM_SIZE
+
+extern  const uint32_t  _ram_size[];  /* See linker script */
+
+#  define IMXRT_OCRAM_SIZE             ((uint32_t)_ram_size)
 #endif
 
 #define FLEXRAM_REMAINING_K ((IMXRT_OCRAM_SIZE / 1024) - (CONFIG_IMXRT_DTCM + CONFIG_IMXRT_DTCM))

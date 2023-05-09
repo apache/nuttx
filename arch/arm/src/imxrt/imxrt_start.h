@@ -53,6 +53,15 @@
  * Public Data
  ****************************************************************************/
 
+#if defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+
+/* Each IMXRT11XX board must provide the following initialized structure.
+ *  This is needed to establish the initial board clocking.
+ */
+
+extern const struct clock_configuration_s g_initial_clkconfig;
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"

@@ -43,7 +43,7 @@ static const uintptr_t g_xbars_addresses[] =
 {
   IMXRT_XBAR1_BASE,
   IMXRT_XBAR2_BASE,
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x))
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x) || defined (CONFIG_ARCH_FAMILY_IMXRT117x))
   IMXRT_XBAR3_BASE
 #endif
 };
@@ -91,7 +91,7 @@ int imxrt_xbar_connect(uint16_t mux_index_out, uint16_t mux_index_input)
         imxrt_clockall_xbar2();
         break;
       case 2:
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x) || defined (CONFIG_ARCH_FAMILY_IMXRT117x))
         imxrt_clockall_xbar3();
         break;
 #endif

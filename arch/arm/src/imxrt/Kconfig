@@ -74,6 +74,11 @@ config ARCH_CHIP_MIMXRT1064CVL5A
 	select ARCH_FAMILY_MIMXRT106xCVL5A
 	select IMXRT_HAVE_LCD
 
+config ARCH_CHIP_MIMXRT1176DVMAA
+	bool "MIMXRT1176DVMAA"
+	select ARCH_FAMILY_IMXRT117x
+	select IMXRT_HAVE_LCD
+
 endchoice # i.MX RT Chip Selection
 
 # i.MX RT Families
@@ -150,6 +155,21 @@ config ARCH_FAMILY_IMXRT106x
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
 	select IMXRT_HIGHSPEED_GPIO
+
+config ARCH_FAMILY_IMXRT117x
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select IMXRT_HIGHSPEED_GPIO
+	select IMXRT_HAVE_FLEXSPI2
+	select IMXRT_ADC_VER2
+	select IMXRT_CLOCKCONFIG_VER2
+	select IMXRT_IOMUX_VER2
 
 config IMXRT_HAVE_OTA_PARTITION
 	bool
@@ -248,6 +268,18 @@ config IMXRT_SEMC_INIT_DONE
 	bool
 	default n
 
+config IMXRT_ADC_VER2
+	bool
+	default n
+
+config IMXRT_CLOCKCONFIG_VER2
+	bool
+	default n
+
+config IMXRT_IOMUX_VER2
+	bool
+	default n
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA
@@ -303,12 +335,12 @@ config FLEXIO1_CLK_PLL4
 config FLEXIO1_CLK_PLL3_PFD2
 	bool "PLL3_PFD2"
 
-if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 config FLEXIO1_CLK_PLL5
 	bool "PLL5"
 
-endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 config FLEXIO1_CLK_PLL3_SW
 	bool "PLL3_SW_CLK"
@@ -338,7 +370,7 @@ config FLEXIO1_PODF_DIVIDER
 
 endif # IMXRT_FLEXIO1
 
-if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 config IMXRT_FLEXIO2
 	bool "FLEXIO2"
@@ -393,7 +425,7 @@ config FLEXIO2_PODF_DIVIDER
 
 endif # IMXRT_FLEXIO2 || IMXRT_FLEXIO3
 
-if ARCH_FAMILY_IMXRT106x
+if ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 config IMXRT_FLEXIO3
 	bool "FLEXIO3"
@@ -604,7 +636,7 @@ config IMXRT_FLEXPWM2
 	default n
 	select IMXRT_FLEXPWM
 
-if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 config IMXRT_FLEXPWM3
 	bool "FLEXPWM3"
@@ -616,7 +648,7 @@ config IMXRT_FLEXPWM4
 	default n
 	select IMXRT_FLEXPWM
 
-endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 endmenu # FLEXPWM Peripherals
 
@@ -1627,6 +1659,49 @@ config LPI2C4_FILTSDA
 endif # IMXRT_LPI2C4
 endmenu # LPI2C Peripherals
 
+menuconfig IMXRT_LPI2C5
+	bool "LPI2C5"
+	default n
+	select IMXRT_LPI2C
+	depends on ARCH_FAMILY_IMXRT117x
+
+if IMXRT_LPI2C5
+
+config LPI2C5_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config LPI2C5_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config LPI2C5_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMXRT_LPI2C5
+
+menuconfig IMXRT_LPI2C6
+	bool "LPI2C6"
+	default n
+	select IMXRT_LPI2C
+	depends on ARCH_FAMILY_IMXRT117x
+
+if IMXRT_LPI2C6
+
+config LPI2C6_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config LPI2C6_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config LPI2C6_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMXRT_LPI2C6
 menu "LPSPI Peripherals"
 
 menuconfig IMXRT_LPSPI1
@@ -1649,6 +1724,19 @@ menuconfig IMXRT_LPSPI4
 	default n
 	select IMXRT_LPSPI
 
+if ARCH_FAMILY_IMXRT117x
+
+menuconfig IMXRT_LPSPI5
+	bool "LPSPI5"
+	default n
+	select IMXRT_LPSPI
+
+menuconfig IMXRT_LPSPI6
+	bool "LPSPI6"
+	default n
+	select IMXRT_LPSPI
+
+endif
 endmenu # LPSPI Peripherals
 
 menu "FLEXSPI Peripherals"
@@ -1897,7 +1985,7 @@ endif # DEBUG_SENSORS
 
 endif # IMXRT_ENC2
 
-if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 menuconfig IMXRT_ENC3
 	bool "ENC3"
@@ -2057,7 +2145,7 @@ endif # DEBUG_SENSORS
 
 endif # IMXRT_ENC4
 
-endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x || ARCH_FAMILY_IMXRT117x
 
 endmenu # ENC Peripherals
 
@@ -2148,6 +2236,11 @@ config IMXRT_GPIO9_16_31_IRQ
 	bool "GPIO9 Pins 16-31 interrupts"
 	default n
 	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO13_IRQ
+	bool "GPIO13 Pins 0-31 interrupts"
+	default n
+	depends on ARCH_FAMILY_IMXRT117x
 
 endif # IMXRT_GPIO_IRQ
 
@@ -2386,6 +2479,11 @@ config IMXRT_SRAM_HEAPOFFSET
 		a framebuffer.
 
 endmenu  # i.MX RT Heap Configuration
+
+config IMXRT_FLEXRAM_PARTITION
+	bool "Set FlexRAM Paritioning"
+	depends on ARCH_FAMILY_IMXRT117x
+
 endmenu # Memory Configuration
 
 menu "LPI2C Configuration"

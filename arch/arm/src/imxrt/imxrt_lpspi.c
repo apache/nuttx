@@ -71,6 +71,7 @@
 #include "imxrt_gpio.h"
 #include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_lpspi.h"
+#include "imxrt_clockconfig.h"
 #include "hardware/imxrt_ccm.h"
 #include "imxrt_periphclks.h"
 
@@ -78,7 +79,8 @@
 #include "imxrt_edma.h"
 
 #if defined(CONFIG_IMXRT_LPSPI1) || defined(CONFIG_IMXRT_LPSPI2) || \
-    defined(CONFIG_IMXRT_LPSPI3) || defined(CONFIG_IMXRT_LPSPI4)
+    defined(CONFIG_IMXRT_LPSPI3) || defined(CONFIG_IMXRT_LPSPI4 || \
+    defined(CONFIG_IMXRT_LPSPI5) || defined(CONFIG_IMXRT_LPSPI6)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -405,6 +407,104 @@ static struct imxrt_lpspidev_s g_lpspi4dev =
 };
 #endif
 
+#ifdef CONFIG_IMXRT_LPSPI5
+static const struct spi_ops_s g_spi5ops =
+{
+  .lock         = imxrt_lpspi_lock,
+  .select       = imxrt_lpspi5select,
+  .setfrequency = imxrt_lpspi_setfrequency,
+  .setmode      = imxrt_lpspi_setmode,
+  .setbits      = imxrt_lpspi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures   = imxrt_lpspi_hwfeatures,
+#endif
+  .status       = imxrt_lpspi5status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata      = imxrt_lpspi5cmddata,
+#endif
+  .send         = imxrt_lpspi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange     = imxrt_lpspi_exchange,
+#else
+  .sndblock     = imxrt_lpspi_sndblock,
+  .recvblock    = imxrt_lpspi_recvblock,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback = imxrt_lpspi5register,  /* Provided externally */
+#else
+  .registercallback = 0,                     /* Not implemented */
+#endif
+};
+
+static struct imxrt_lpspidev_s g_lpspi5dev =
+{
+  .spidev       =
+  {
+    &g_spi5ops
+  },
+  .spibase      = IMXRT_LPSPI5_BASE,
+#ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
+  .spiirq       = IMXRT_IRQ_LPSPI5,
+#endif
+  .lock         = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_IMXRT_LPSPI5_DMA
+  .rxch         = IMXRT_DMACHAN_LPSPI5_RX,
+  .txch         = IMXRT_DMACHAN_LPSPI5_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
+#endif
+};
+#endif
+
+#ifdef CONFIG_IMXRT_LPSPI6
+static const struct spi_ops_s g_spi6ops =
+{
+  .lock         = imxrt_lpspi_lock,
+  .select       = imxrt_lpspi6select,
+  .setfrequency = imxrt_lpspi_setfrequency,
+  .setmode      = imxrt_lpspi_setmode,
+  .setbits      = imxrt_lpspi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures   = imxrt_lpspi_hwfeatures,
+#endif
+  .status       = imxrt_lpspi6status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata      = imxrt_lpspi6cmddata,
+#endif
+  .send         = imxrt_lpspi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange     = imxrt_lpspi_exchange,
+#else
+  .sndblock     = imxrt_lpspi_sndblock,
+  .recvblock    = imxrt_lpspi_recvblock,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback = imxrt_lpspi6register,  /* Provided externally */
+#else
+  .registercallback = 0,                     /* Not implemented */
+#endif
+};
+
+static struct imxrt_lpspidev_s g_lpspi6dev =
+{
+  .spidev       =
+  {
+    &g_spi6ops
+  },
+  .spibase      = IMXRT_LPSPI6_BASE,
+#ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
+  .spiirq       = IMXRT_IRQ_LPSPI6,
+#endif
+  .lock         = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_IMXRT_LPSPI6_DMA
+  .rxch         = IMXRT_DMACHAN_LPSPI6_RX,
+  .txch         = IMXRT_DMACHAN_LPSPI6_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
+#endif
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -631,8 +731,10 @@ static inline void imxrt_lpspi_master_set_delays(
                              uint32_t delay_ns,
                              enum imxrt_delay_e type)
 {
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
   uint32_t pll3_div;
   uint32_t pll_freq;
+#endif
   uint32_t src_freq;
   uint64_t real_delay;
   uint32_t scaler;
@@ -643,6 +745,32 @@ static inline void imxrt_lpspi_master_set_delays(
   uint32_t clock_div_prescaler;
   uint32_t additional_scaler;
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+  if (priv->spibase == IMXRT_LPSPI1_BASE)
+    {
+      imxrt_get_rootclock(CCM_CR_LPSPI1, &src_freq);
+    }
+  else if (priv->spibase == IMXRT_LPSPI2_BASE)
+    {
+      imxrt_get_rootclock(CCM_CR_LPSPI2, &src_freq);
+    }
+  else if (priv->spibase == IMXRT_LPSPI3_BASE)
+    {
+      imxrt_get_rootclock(CCM_CR_LPSPI3, &src_freq);
+    }
+  else if (priv->spibase == IMXRT_LPSPI4_BASE)
+    {
+      imxrt_get_rootclock(CCM_CR_LPSPI4, &src_freq);
+    }
+  else if (priv->spibase == IMXRT_LPSPI5_BASE)
+    {
+      imxrt_get_rootclock(CCM_CR_LPSPI5, &src_freq);
+    }
+  else if (priv->spibase == IMXRT_LPSPI6_BASE)
+    {
+      imxrt_get_rootclock(CCM_CR_LPSPI6, &src_freq);
+    }
+#else
   if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
        CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
     {
@@ -667,6 +795,8 @@ static inline void imxrt_lpspi_master_set_delays(
   src_freq *= 18;
   src_freq /= ((getreg32(IMXRT_CCM_CBCMR) & CCM_CBCMR_LPSPI_PODF_MASK) >>
                CCM_CBCMR_LPSPI_PODF_SHIFT) + 1;
+
+#endif
 
   clock_div_prescaler = src_freq /
               (1 << ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_TCR_OFFSET) &
@@ -812,8 +942,10 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
   struct imxrt_lpspidev_s *priv = (struct imxrt_lpspidev_s *)dev;
 
   uint32_t men;
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
   uint32_t pll_freq;
   uint32_t pll3_div;
+#endif
   uint32_t src_freq = 0;
   uint32_t prescaler;
   uint32_t best_prescaler;
@@ -837,6 +969,32 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
                                         LPSPI_CR_MEN, 0);
         }
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+      if (priv->spibase == IMXRT_LPSPI1_BASE)
+        {
+          imxrt_get_rootclock(CCM_CR_LPSPI1, &src_freq);
+        }
+      else if (priv->spibase == IMXRT_LPSPI2_BASE)
+        {
+          imxrt_get_rootclock(CCM_CR_LPSPI2, &src_freq);
+        }
+      else if (priv->spibase == IMXRT_LPSPI3_BASE)
+        {
+          imxrt_get_rootclock(CCM_CR_LPSPI3, &src_freq);
+        }
+      else if (priv->spibase == IMXRT_LPSPI4_BASE)
+        {
+          imxrt_get_rootclock(CCM_CR_LPSPI4, &src_freq);
+        }
+      else if (priv->spibase == IMXRT_LPSPI5_BASE)
+        {
+          imxrt_get_rootclock(CCM_CR_LPSPI5, &src_freq);
+        }
+      else if (priv->spibase == IMXRT_LPSPI6_BASE)
+        {
+          imxrt_get_rootclock(CCM_CR_LPSPI6, &src_freq);
+        }
+#else
       if ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
            CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
         {
@@ -861,6 +1019,7 @@ static uint32_t imxrt_lpspi_setfrequency(struct spi_dev_s *dev,
       src_freq *= 18;
       src_freq /= ((getreg32(IMXRT_CCM_CBCMR) & CCM_CBCMR_LPSPI_PODF_MASK) >>
                    CCM_CBCMR_LPSPI_PODF_SHIFT) + 1;
+#endif
 
       min_diff  = 0xffffffff;
 

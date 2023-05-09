@@ -34,6 +34,7 @@
 #include "hardware/imxrt_lpuart.h"
 #include "imxrt_config.h"
 #include "imxrt_periphclks.h"
+#include "imxrt_clockconfig.h"
 #include "imxrt_iomuxc.h"
 #include "imxrt_gpio.h"
 #include "imxrt_lowputc.h"
@@ -363,9 +364,11 @@ void imxrt_lowsetup(void)
 int imxrt_lpuart_configure(uint32_t base,
                            const struct uart_config_s *config)
 {
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
   uint32_t src_freq = 0;
   uint32_t pll3_div = 0;
   uint32_t uart_div = 0;
+#endif
   uint32_t lpuart_freq = 0;
   uint16_t sbr;
   uint16_t temp_sbr;
@@ -377,6 +380,65 @@ int imxrt_lpuart_configure(uint32_t base,
   uint32_t regval;
   uint32_t regval2;
 
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+  if (base == IMXRT_LPUART1_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART1, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART2_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART2, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART3_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART3, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART4_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART4, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART5_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART5, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        };
+    }
+  else if (base == IMXRT_LPUART6_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART6, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART7_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART7, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+  else if (base == IMXRT_LPUART8_BASE)
+    {
+      if (imxrt_get_rootclock(CCM_CR_LPUART8, &lpuart_freq) != OK)
+        {
+          return ERROR;
+        }
+    }
+
+#else
   if ((getreg32(IMXRT_CCM_CSCDR1) & CCM_CSCDR1_UART_CLK_SEL) != 0)
     {
       src_freq = BOARD_XTAL_FREQUENCY;
@@ -399,6 +461,8 @@ int imxrt_lpuart_configure(uint32_t base,
   uart_div    = (getreg32(IMXRT_CCM_CSCDR1) &
                  CCM_CSCDR1_UART_CLK_PODF_MASK) + 1;
   lpuart_freq = src_freq / uart_div;
+
+#endif
 
   /* This LPUART instantiation uses a slightly different baud rate
    * calculation.  The idea is to use the best OSR (over-sampling rate)

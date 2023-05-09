@@ -72,17 +72,33 @@
 #define imxrt_clockoff_flexio1()          imxrt_periphclk_configure(CCM_CCGR_FLEXIO1, CCM_CG_OFF)
 #define imxrt_clockoff_flexio2()          imxrt_periphclk_configure(CCM_CCGR_FLEXIO2, CCM_CG_OFF)
 #define imxrt_clockoff_flexram()          imxrt_periphclk_configure(CCM_CCGR_FLEXRAM, CCM_CG_OFF)
-#define imxrt_clockoff_flexspi()          imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_OFF)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_OFF)
+#else
+#  define imxrt_clockoff_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI1, CCM_CG_OFF)
+#  define imxrt_clockoff_flexspi2()       imxrt_periphclk_configure(CCM_CCGR_FLEXSPI2, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_gpio1()            imxrt_periphclk_configure(CCM_CCGR_GPIO1, CCM_CG_OFF)
 #define imxrt_clockoff_gpio2()            imxrt_periphclk_configure(CCM_CCGR_GPIO2, CCM_CG_OFF)
 #define imxrt_clockoff_gpio3()            imxrt_periphclk_configure(CCM_CCGR_GPIO3, CCM_CG_OFF)
 #define imxrt_clockoff_gpio4()            imxrt_periphclk_configure(CCM_CCGR_GPIO4, CCM_CG_OFF)
-#define imxrt_clockoff_gpt_bus()          imxrt_periphclk_configure(CCM_CCGR_GPT_BUS, CCM_CG_OFF)
-#define imxrt_clockoff_gpt_serial()       imxrt_periphclk_configure(CCM_CCGR_GPT_SERIAL, CCM_CG_OFF)
-#define imxrt_clockoff_gpt2_bus()         imxrt_periphclk_configure(CCM_CCGR_GPT2_BUS, CCM_CG_OFF)
-#define imxrt_clockoff_gpt2_serial()      imxrt_periphclk_configure(CCM_CCGR_GPT2_SERIAL, CCM_CG_OFF)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_gpt_bus()        imxrt_periphclk_configure(CCM_CCGR_GPT_BUS, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt_serial()     imxrt_periphclk_configure(CCM_CCGR_GPT_SERIAL, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt2_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT2_BUS, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt2_serial()    imxrt_periphclk_configure(CCM_CCGR_GPT2_SERIAL, CCM_CG_OFF)
+#else
+#  define imxrt_clockoff_gpt_bus()        imxrt_periphclk_configure(CCM_CCGR_GPT1, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt2_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT2, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt3_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT3, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt4_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT4, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt5_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT5, CCM_CG_OFF)
+#  define imxrt_clockoff_gpt6_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT6, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_iomuxc()           imxrt_periphclk_configure(CCM_CCGR_IOMUXC, CCM_CG_OFF)
-#define imxrt_clockoff_iomuxc_gpr()       imxrt_periphclk_configure(CCM_CCGR_IOMUXC_GPR, CCM_CG_OFF)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_iomuxc_gpr()     imxrt_periphclk_configure(CCM_CCGR_IOMUXC_GPR, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_iomuxc_snvs()      imxrt_periphclk_configure(CCM_CCGR_IOMUXC_SNVS, CCM_CG_OFF)
 #define imxrt_clockoff_iomuxc_snvs_gpr()  imxrt_periphclk_configure(CCM_CCGR_IOMUXC_SNVS_GPR, CCM_CG_OFF)
 #define imxrt_clockoff_ipmux1()           imxrt_periphclk_configure(CCM_CCGR_IPMUX1, CCM_CG_OFF)
@@ -95,11 +111,21 @@
 #define imxrt_clockoff_lpi2c1()           imxrt_periphclk_configure(CCM_CCGR_LPI2C1, CCM_CG_OFF)
 #define imxrt_clockoff_lpi2c2()           imxrt_periphclk_configure(CCM_CCGR_LPI2C2, CCM_CG_OFF)
 #define imxrt_clockoff_lpi2c3()           imxrt_periphclk_configure(CCM_CCGR_LPI2C3, CCM_CG_OFF)
-#define imxrt_clockoff_lpi2c4_serial()    imxrt_periphclk_configure(CCM_CCGR_LPI2C4_SERIAL, CCM_CG_OFF)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_lpi2c4_serial()  imxrt_periphclk_configure(CCM_CCGR_LPI2C4_SERIAL, CCM_CG_OFF)
+#else
+#  define imxrt_clockoff_lpi2c4()         imxrt_periphclk_configure(CCM_CCGR_LPI2C4, CCM_CG_OFF)
+#  define imxrt_clockoff_lpi2c5()         imxrt_periphclk_configure(CCM_CCGR_LPI2C5, CCM_CG_OFF)
+#  define imxrt_clockoff_lpi2c6()         imxrt_periphclk_configure(CCM_CCGR_LPI2C6, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_lpspi1()           imxrt_periphclk_configure(CCM_CCGR_LPSPI1, CCM_CG_OFF)
 #define imxrt_clockoff_lpspi2()           imxrt_periphclk_configure(CCM_CCGR_LPSPI2, CCM_CG_OFF)
 #define imxrt_clockoff_lpspi3()           imxrt_periphclk_configure(CCM_CCGR_LPSPI3, CCM_CG_OFF)
 #define imxrt_clockoff_lpspi4()           imxrt_periphclk_configure(CCM_CCGR_LPSPI4, CCM_CG_OFF)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_lpspi5()         imxrt_periphclk_configure(CCM_CCGR_LPSPI5, CCM_CG_OFF)
+#  define imxrt_clockoff_lpspi6()         imxrt_periphclk_configure(CCM_CCGR_LPSPI6, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_lpuart1()          imxrt_periphclk_configure(CCM_CCGR_LPUART1, CCM_CG_OFF)
 #define imxrt_clockoff_lpuart2()          imxrt_periphclk_configure(CCM_CCGR_LPUART2, CCM_CG_OFF)
 #define imxrt_clockoff_lpuart3()          imxrt_periphclk_configure(CCM_CCGR_LPUART3, CCM_CG_OFF)
@@ -137,7 +163,11 @@
 #define imxrt_clockoff_trace()            imxrt_periphclk_configure(CCM_CCGR_TRACE, CCM_CG_OFF)
 #define imxrt_clockoff_trng()             imxrt_periphclk_configure(CCM_CCGR_TRNG, CCM_CG_OFF)
 #define imxrt_clockoff_tsc_dig()          imxrt_periphclk_configure(CCM_CCGR_TSC_DIG, CCM_CG_OFF)
-#define imxrt_clockoff_usboh3()           imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_OFF)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockoff_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USB, CCM_CG_OFF)
+#else
+#  define imxrt_clockoff_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_OFF)
+#endif
 #define imxrt_clockoff_usdhc1()           imxrt_periphclk_configure(CCM_CCGR_USDHC1, CCM_CG_OFF)
 #define imxrt_clockoff_usdhc2()           imxrt_periphclk_configure(CCM_CCGR_USDHC2, CCM_CG_OFF)
 #define imxrt_clockoff_wdog1()            imxrt_periphclk_configure(CCM_CCGR_WDOG1, CCM_CG_OFF)
@@ -145,7 +175,7 @@
 #define imxrt_clockoff_wdog3()            imxrt_periphclk_configure(CCM_CCGR_WDOG3, CCM_CG_OFF)
 #define imxrt_clockoff_xbar1()            imxrt_periphclk_configure(CCM_CCGR_XBAR1, CCM_CG_OFF)
 #define imxrt_clockoff_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_OFF)
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x) || defined(CONFIG_ARCH_FAMILY_IMXRT117x))
 #define imxrt_clockoff_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_OFF)
 #endif
 
@@ -186,17 +216,33 @@
 #define imxrt_clockrun_flexio1()          imxrt_periphclk_configure(CCM_CCGR_FLEXIO1, CCM_CG_RUN)
 #define imxrt_clockrun_flexio2()          imxrt_periphclk_configure(CCM_CCGR_FLEXIO2, CCM_CG_RUN)
 #define imxrt_clockrun_flexram()          imxrt_periphclk_configure(CCM_CCGR_FLEXRAM, CCM_CG_RUN)
-#define imxrt_clockrun_flexspi()          imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_RUN)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_RUN)
+#else
+#  define imxrt_clockrun_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI1, CCM_CG_RUN)
+#  define imxrt_clockrun_flexspi2()       imxrt_periphclk_configure(CCM_CCGR_FLEXSPI2, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_gpio1()            imxrt_periphclk_configure(CCM_CCGR_GPIO1, CCM_CG_RUN)
 #define imxrt_clockrun_gpio2()            imxrt_periphclk_configure(CCM_CCGR_GPIO2, CCM_CG_RUN)
 #define imxrt_clockrun_gpio3()            imxrt_periphclk_configure(CCM_CCGR_GPIO3, CCM_CG_RUN)
 #define imxrt_clockrun_gpio4()            imxrt_periphclk_configure(CCM_CCGR_GPIO4, CCM_CG_RUN)
-#define imxrt_clockrun_gpt_bus()          imxrt_periphclk_configure(CCM_CCGR_GPT_BUS, CCM_CG_RUN)
-#define imxrt_clockrun_gpt_serial()       imxrt_periphclk_configure(CCM_CCGR_GPT_SERIAL, CCM_CG_RUN)
-#define imxrt_clockrun_gpt2_bus()         imxrt_periphclk_configure(CCM_CCGR_GPT2_BUS, CCM_CG_RUN)
-#define imxrt_clockrun_gpt2_serial()      imxrt_periphclk_configure(CCM_CCGR_GPT2_SERIAL, CCM_CG_RUN)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_gpt_bus()        imxrt_periphclk_configure(CCM_CCGR_GPT_BUS, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt_serial()     imxrt_periphclk_configure(CCM_CCGR_GPT_SERIAL, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt2_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT2_BUS, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt2_serial()    imxrt_periphclk_configure(CCM_CCGR_GPT2_SERIAL, CCM_CG_RUN)
+#else
+#  define imxrt_clockrun_gpt_bus()        imxrt_periphclk_configure(CCM_CCGR_GPT1, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt2_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT2, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt3_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT3, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt4_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT4, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt5_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT5, CCM_CG_RUN)
+#  define imxrt_clockrun_gpt6_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT6, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_iomuxc()           imxrt_periphclk_configure(CCM_CCGR_IOMUXC, CCM_CG_RUN)
-#define imxrt_clockrun_iomuxc_gpr()       imxrt_periphclk_configure(CCM_CCGR_IOMUXC_GPR, CCM_CG_RUN)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_iomuxc_gpr()     imxrt_periphclk_configure(CCM_CCGR_IOMUXC_GPR, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_iomuxc_snvs()      imxrt_periphclk_configure(CCM_CCGR_IOMUXC_SNVS, CCM_CG_RUN)
 #define imxrt_clockrun_iomuxc_snvs_gpr()  imxrt_periphclk_configure(CCM_CCGR_IOMUXC_SNVS_GPR, CCM_CG_RUN)
 #define imxrt_clockrun_ipmux1()           imxrt_periphclk_configure(CCM_CCGR_IPMUX1, CCM_CG_RUN)
@@ -209,11 +255,21 @@
 #define imxrt_clockrun_lpi2c1()           imxrt_periphclk_configure(CCM_CCGR_LPI2C1, CCM_CG_RUN)
 #define imxrt_clockrun_lpi2c2()           imxrt_periphclk_configure(CCM_CCGR_LPI2C2, CCM_CG_RUN)
 #define imxrt_clockrun_lpi2c3()           imxrt_periphclk_configure(CCM_CCGR_LPI2C3, CCM_CG_RUN)
-#define imxrt_clockrun_lpi2c4_serial()    imxrt_periphclk_configure(CCM_CCGR_LPI2C4_SERIAL, CCM_CG_RUN)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_lpi2c4_serial()  imxrt_periphclk_configure(CCM_CCGR_LPI2C4_SERIAL, CCM_CG_RUN)
+#else
+#  define imxrt_clockrun_lpi2c4()         imxrt_periphclk_configure(CCM_CCGR_LPI2C4, CCM_CG_RUN)
+#  define imxrt_clockrun_lpi2c5()         imxrt_periphclk_configure(CCM_CCGR_LPI2C5, CCM_CG_RUN)
+#  define imxrt_clockrun_lpi2c6()         imxrt_periphclk_configure(CCM_CCGR_LPI2C6, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_lpspi1()           imxrt_periphclk_configure(CCM_CCGR_LPSPI1, CCM_CG_RUN)
 #define imxrt_clockrun_lpspi2()           imxrt_periphclk_configure(CCM_CCGR_LPSPI2, CCM_CG_RUN)
 #define imxrt_clockrun_lpspi3()           imxrt_periphclk_configure(CCM_CCGR_LPSPI3, CCM_CG_RUN)
 #define imxrt_clockrun_lpspi4()           imxrt_periphclk_configure(CCM_CCGR_LPSPI4, CCM_CG_RUN)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_lpspi5()         imxrt_periphclk_configure(CCM_CCGR_LPSPI5, CCM_CG_RUN)
+#  define imxrt_clockrun_lpspi6()         imxrt_periphclk_configure(CCM_CCGR_LPSPI6, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_lpuart1()          imxrt_periphclk_configure(CCM_CCGR_LPUART1, CCM_CG_RUN)
 #define imxrt_clockrun_lpuart2()          imxrt_periphclk_configure(CCM_CCGR_LPUART2, CCM_CG_RUN)
 #define imxrt_clockrun_lpuart3()          imxrt_periphclk_configure(CCM_CCGR_LPUART3, CCM_CG_RUN)
@@ -251,7 +307,11 @@
 #define imxrt_clockrun_trace()            imxrt_periphclk_configure(CCM_CCGR_TRACE, CCM_CG_RUN)
 #define imxrt_clockrun_trng()             imxrt_periphclk_configure(CCM_CCGR_TRNG, CCM_CG_RUN)
 #define imxrt_clockrun_tsc_dig()          imxrt_periphclk_configure(CCM_CCGR_TSC_DIG, CCM_CG_RUN)
-#define imxrt_clockrun_usboh3()           imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_RUN)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockrun_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USB, CCM_CG_RUN)
+#else
+#  define imxrt_clockrun_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_RUN)
+#endif
 #define imxrt_clockrun_usdhc1()           imxrt_periphclk_configure(CCM_CCGR_USDHC1, CCM_CG_RUN)
 #define imxrt_clockrun_usdhc2()           imxrt_periphclk_configure(CCM_CCGR_USDHC2, CCM_CG_RUN)
 #define imxrt_clockrun_wdog1()            imxrt_periphclk_configure(CCM_CCGR_WDOG1, CCM_CG_RUN)
@@ -259,7 +319,7 @@
 #define imxrt_clockrun_wdog3()            imxrt_periphclk_configure(CCM_CCGR_WDOG3, CCM_CG_RUN)
 #define imxrt_clockrun_xbar1()            imxrt_periphclk_configure(CCM_CCGR_XBAR1, CCM_CG_RUN)
 #define imxrt_clockrun_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_RUN)
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x) || defined(CONFIG_ARCH_FAMILY_IMXRT117x))
 #define imxrt_clockrun_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_RUN)
 #endif
 
@@ -300,17 +360,33 @@
 #define imxrt_clockall_flexio1()          imxrt_periphclk_configure(CCM_CCGR_FLEXIO1, CCM_CG_ALL)
 #define imxrt_clockall_flexio2()          imxrt_periphclk_configure(CCM_CCGR_FLEXIO2, CCM_CG_ALL)
 #define imxrt_clockall_flexram()          imxrt_periphclk_configure(CCM_CCGR_FLEXRAM, CCM_CG_ALL)
-#define imxrt_clockall_flexspi()          imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_ALL)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_ALL)
+#else
+#  define imxrt_clockall_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI1, CCM_CG_ALL)
+#  define imxrt_clockall_flexspi2()       imxrt_periphclk_configure(CCM_CCGR_FLEXSPI2, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_gpio1()            imxrt_periphclk_configure(CCM_CCGR_GPIO1, CCM_CG_ALL)
 #define imxrt_clockall_gpio2()            imxrt_periphclk_configure(CCM_CCGR_GPIO2, CCM_CG_ALL)
 #define imxrt_clockall_gpio3()            imxrt_periphclk_configure(CCM_CCGR_GPIO3, CCM_CG_ALL)
 #define imxrt_clockall_gpio4()            imxrt_periphclk_configure(CCM_CCGR_GPIO4, CCM_CG_ALL)
-#define imxrt_clockall_gpt_bus()          imxrt_periphclk_configure(CCM_CCGR_GPT_BUS, CCM_CG_ALL)
-#define imxrt_clockall_gpt_serial()       imxrt_periphclk_configure(CCM_CCGR_GPT_SERIAL, CCM_CG_ALL)
-#define imxrt_clockall_gpt2_bus()         imxrt_periphclk_configure(CCM_CCGR_GPT2_BUS, CCM_CG_ALL)
-#define imxrt_clockall_gpt2_serial()      imxrt_periphclk_configure(CCM_CCGR_GPT2_SERIAL, CCM_CG_ALL)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_gpt_bus()        imxrt_periphclk_configure(CCM_CCGR_GPT_BUS, CCM_CG_ALL)
+#  define imxrt_clockall_gpt_serial()     imxrt_periphclk_configure(CCM_CCGR_GPT_SERIAL, CCM_CG_ALL)
+#  define imxrt_clockall_gpt2_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT2_BUS, CCM_CG_ALL)
+#  define imxrt_clockall_gpt2_serial()    imxrt_periphclk_configure(CCM_CCGR_GPT2_SERIAL, CCM_CG_ALL)
+#else
+#  define imxrt_clockall_gpt_bus()        imxrt_periphclk_configure(CCM_CCGR_GPT1, CCM_CG_ALL)
+#  define imxrt_clockall_gpt2_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT2, CCM_CG_ALL)
+#  define imxrt_clockall_gpt3_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT3, CCM_CG_ALL)
+#  define imxrt_clockall_gpt4_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT4, CCM_CG_ALL)
+#  define imxrt_clockall_gpt5_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT5, CCM_CG_ALL)
+#  define imxrt_clockall_gpt6_bus()       imxrt_periphclk_configure(CCM_CCGR_GPT6, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_iomuxc()           imxrt_periphclk_configure(CCM_CCGR_IOMUXC, CCM_CG_ALL)
-#define imxrt_clockall_iomuxc_gpr()       imxrt_periphclk_configure(CCM_CCGR_IOMUXC_GPR, CCM_CG_ALL)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_iomuxc_gpr()     imxrt_periphclk_configure(CCM_CCGR_IOMUXC_GPR, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_iomuxc_snvs()      imxrt_periphclk_configure(CCM_CCGR_IOMUXC_SNVS, CCM_CG_ALL)
 #define imxrt_clockall_iomuxc_snvs_gpr()  imxrt_periphclk_configure(CCM_CCGR_IOMUXC_SNVS_GPR, CCM_CG_ALL)
 #define imxrt_clockall_ipmux1()           imxrt_periphclk_configure(CCM_CCGR_IPMUX1, CCM_CG_ALL)
@@ -323,11 +399,21 @@
 #define imxrt_clockall_lpi2c1()           imxrt_periphclk_configure(CCM_CCGR_LPI2C1, CCM_CG_ALL)
 #define imxrt_clockall_lpi2c2()           imxrt_periphclk_configure(CCM_CCGR_LPI2C2, CCM_CG_ALL)
 #define imxrt_clockall_lpi2c3()           imxrt_periphclk_configure(CCM_CCGR_LPI2C3, CCM_CG_ALL)
-#define imxrt_clockall_lpi2c4_serial()    imxrt_periphclk_configure(CCM_CCGR_LPI2C4_SERIAL, CCM_CG_ALL)
+#ifndef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_lpi2c4_serial()  imxrt_periphclk_configure(CCM_CCGR_LPI2C4_SERIAL, CCM_CG_ALL)
+#else
+#  define imxrt_clockall_lpi2c4()         imxrt_periphclk_configure(CCM_CCGR_LPI2C4, CCM_CG_ALL)
+#  define imxrt_clockall_lpi2c5()         imxrt_periphclk_configure(CCM_CCGR_LPI2C5, CCM_CG_ALL)
+#  define imxrt_clockall_lpi2c6()         imxrt_periphclk_configure(CCM_CCGR_LPI2C6, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_lpspi1()           imxrt_periphclk_configure(CCM_CCGR_LPSPI1, CCM_CG_ALL)
 #define imxrt_clockall_lpspi2()           imxrt_periphclk_configure(CCM_CCGR_LPSPI2, CCM_CG_ALL)
 #define imxrt_clockall_lpspi3()           imxrt_periphclk_configure(CCM_CCGR_LPSPI3, CCM_CG_ALL)
 #define imxrt_clockall_lpspi4()           imxrt_periphclk_configure(CCM_CCGR_LPSPI4, CCM_CG_ALL)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#define imxrt_clockall_lpspi5()           imxrt_periphclk_configure(CCM_CCGR_LPSPI5, CCM_CG_ALL)
+#define imxrt_clockall_lpspi6()           imxrt_periphclk_configure(CCM_CCGR_LPSPI6, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_lpuart1()          imxrt_periphclk_configure(CCM_CCGR_LPUART1, CCM_CG_ALL)
 #define imxrt_clockall_lpuart2()          imxrt_periphclk_configure(CCM_CCGR_LPUART2, CCM_CG_ALL)
 #define imxrt_clockall_lpuart3()          imxrt_periphclk_configure(CCM_CCGR_LPUART3, CCM_CG_ALL)
@@ -365,7 +451,11 @@
 #define imxrt_clockall_trace()            imxrt_periphclk_configure(CCM_CCGR_TRACE, CCM_CG_ALL)
 #define imxrt_clockall_trng()             imxrt_periphclk_configure(CCM_CCGR_TRNG, CCM_CG_ALL)
 #define imxrt_clockall_tsc_dig()          imxrt_periphclk_configure(CCM_CCGR_TSC_DIG, CCM_CG_ALL)
-#define imxrt_clockall_usboh3()           imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_ALL)
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+#  define imxrt_clockall_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USB, CCM_CG_ALL)
+#else
+#  define imxrt_clockall_usboh3()         imxrt_periphclk_configure(CCM_CCGR_USBOH3, CCM_CG_ALL)
+#endif
 #define imxrt_clockall_usdhc1()           imxrt_periphclk_configure(CCM_CCGR_USDHC1, CCM_CG_ALL)
 #define imxrt_clockall_usdhc2()           imxrt_periphclk_configure(CCM_CCGR_USDHC2, CCM_CG_ALL)
 #define imxrt_clockall_wdog1()            imxrt_periphclk_configure(CCM_CCGR_WDOG1, CCM_CG_ALL)
@@ -373,7 +463,7 @@
 #define imxrt_clockall_wdog3()            imxrt_periphclk_configure(CCM_CCGR_WDOG3, CCM_CG_ALL)
 #define imxrt_clockall_xbar1()            imxrt_periphclk_configure(CCM_CCGR_XBAR1, CCM_CG_ALL)
 #define imxrt_clockall_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_ALL)
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x) || defined(CONFIG_ARCH_FAMILY_IMXRT117x))
 #define imxrt_clockall_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_ALL)
 #endif
 
@@ -385,6 +475,28 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+#ifdef CONFIG_ARCH_FAMILY_IMXRT117x
+
+/****************************************************************************
+ * Name: imxrt_periphclk_configure
+ *
+ * Description:
+ *   Configure a peripheral clock by modifying the appropriate field in the
+ *   appropriate LPCG register.
+ *
+ * Input Parameters:
+ *   index   - The index of the field to be modified
+ *   value   - The new value of the field
+ *
+ * Returned Value:
+ *  None
+ *
+ ****************************************************************************/
+
+void imxrt_periphclk_configure(unsigned int index, unsigned int value);
+
+#else
 
 /****************************************************************************
  * Name: imxrt_periphclk_configure
@@ -405,6 +517,8 @@ extern "C"
 
 void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
                                unsigned int value);
+
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -33,6 +33,8 @@
 #  include "hardware/rt105x/imxrt105x_pinmux.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
 #  include "hardware/rt106x/imxrt106x_pinmux.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT117x)
+#  include "hardware/rt117x/imxrt117x_pinmux.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
