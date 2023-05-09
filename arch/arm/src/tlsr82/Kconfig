@@ -340,20 +340,20 @@ config TLSR82_ADC_CALI_PARA_ADDR
 		equal to the address defined in production tools.
 
 config TLSR82_ADC_CHAN0
-  bool "TLSR82 Adc channel 0 enable"
-  default n
+	bool "TLSR82 Adc channel 0 enable"
+	default n
 
 config TLSR82_ADC_CHAN1
-  bool "TLSR82 Adc channel 1 enable"
-  default n
+	bool "TLSR82 Adc channel 1 enable"
+	default n
 
 config TLSR82_ADC_CHAN2
-  bool "TLSR82 Adc channel 2 enable"
-  default n
+	bool "TLSR82 Adc channel 2 enable"
+	default n
 
 config TLSR82_ADC_VBAT
-  bool "TLSR82 Adc channel Vbat enable"
-  default n
+	bool "TLSR82 Adc channel Vbat enable"
+	default n
 
 config TLSR82_ADC_FILT_NUM
 	int "TLSR82 Adc filter average number"
