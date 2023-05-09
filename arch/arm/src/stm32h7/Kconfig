@@ -1040,7 +1040,7 @@ config STM32H7_I2CTIMEOTICKS
 endmenu # "I2C Configuration"
 
 menu "OTG Configuration"
-	depends on STM32H7_OTGFS
+	depends on STM32H7_OTGFS || STM32H7_OTGHS
 
 config OTG_ID_GPIO_DISABLE
 	bool "Disable the use of GPIO_OTG_ID pin."
@@ -1049,6 +1049,33 @@ config OTG_ID_GPIO_DISABLE
 		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
 		cases to reuse this GPIO pin and ensure it is not set incorrectlty
 		during OS boot.
+
+choice
+	prompt "STM32H7 OTGFS role"
+	depends on STM32H7_OTGFS
+	default STM32H7_OTGFS_USBDEV if USBDEV
+	default STM32H7_OTGFS_USBHOST if !USBDEV && USBHOST
+
+config STM32H7_OTGFS_USBDEV
+	bool "OTGFS as USBDEV"
+	depends on USBDEV
+
+config STM32H7_OTGFS_HOST
+	bool "OTGFS as HOST"
+	depends on USBHOST
+
+endchoice # "STM32H7 OTGFS role"
+
+choice
+	prompt "STM32H7 OTGHS role (only USBDEV supported for now)"
+	depends on STM32H7_OTGHS
+	default STM32H7_OTGHS_USBDEV if USBDEV
+
+config STM32H7_OTGHS_USBDEV
+	bool "OTGHS as USBDEV"
+	depends on USBDEV
+
+endchoice # "STM32H7 OTGHS role"
 
 endmenu
 
