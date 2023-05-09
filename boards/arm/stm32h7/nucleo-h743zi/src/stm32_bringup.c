@@ -33,11 +33,11 @@
 #include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_USBMONITOR
-#include <nuttx/usb/usbmonitor.h>
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #ifdef CONFIG_STM32H7_OTGFS
-#include "stm32_usbhost.h"
+#  include "stm32_usbhost.h"
 #endif
 
 #include "nucleo-h743zi.h"
