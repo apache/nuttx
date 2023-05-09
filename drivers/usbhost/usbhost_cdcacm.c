@@ -2141,7 +2141,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 
   if (priv->intin)
     {
-      int ret = DRVR_CANCEL(hport->drvr, priv->intin);
+      ret = DRVR_CANCEL(hport->drvr, priv->intin);
       if (ret < 0)
         {
          uerr("ERROR: Interrupt IN DRVR_CANCEL failed: %d\n", ret);
