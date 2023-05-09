@@ -1091,7 +1091,7 @@ choice
 		TRAILING EDGE: The signal is single-ended.
 			If bit NON_OVERLAP is cleared, the signal is sent to 
 			CLASSD_L0 and CLASSD_R0.
-
+			
 			If bit NON_OVERLAP is set, the signal is sent to
 			CLASSD_L0/L1 and CLASSD_R0/R1.
 		UNIFORM: The signal is differential.
@@ -1117,7 +1117,7 @@ choice
 	depends on SAMA5D2_CLASSD_NON_OVERLAP_MODE
 	prompt "Non-overlapping Value (NOVRVAL)"
 	default SAMA5D2_CLASSD_NON_OVERLAP_5NS
-	---help---	
+	---help---
 		Non-overlapping time
 
 config SAMA5D2_CLASSD_NON_OVERLAP_5NS
@@ -1137,7 +1137,7 @@ endchoice # Non-overlapping Value (NOVRVAL)
 config SAMA5D2_CLASSD_DEEMP
 	bool "Enable De-emphasis Filter (DEEMP)"
 	default n
-	
+
 config SAMA5D2_CLASSD_SWAP
 	bool "Swap Left and Right Channels (SWAP)"
 	default n
@@ -1145,7 +1145,7 @@ config SAMA5D2_CLASSD_SWAP
 choice
 	prompt "Default Data Sampling Frequency (FRAME)"
 	default SAMA5D2_CLASSD_FRAME_8K
-	---help---	
+	---help---
 		Incoming Data Sampling Frequency default
 
 config SAMA5D2_CLASSD_FRAME_8K
@@ -1177,7 +1177,7 @@ endchoice # Incoming Data Sampling Frequency (FRAME)
 choice
 	prompt "Equalisation Selection (EQCFG)"
 	default SAMA5D2_CLASSD_EQ_FLAT
-	---help---	
+	---help---
 		Equalisation selection
 
 config SAMA5D2_CLASSD_EQ_FLAT
@@ -1233,17 +1233,17 @@ choice
 	prompt "Mono Mode Selection (MONOMODE)"
 	default SAMA5D2_CLASSD_MONOMODE_MIX
 	depends on SAMA5D2_CLASSD_MONO
-	---help---	
+	---help---
 		Selects which signals are used in mono mode
 
 config SAMA5D2_CLASSD_MONOMODE_MIX
-bool "(L+R)/2 -> channels"
+	bool "(L+R)/2 -> channels"
 
 config SAMA5D2_CLASSD_MONOMODE_SAT
-bool "(L+R)   -> both channels, saturated on overrange"
+	bool "(L+R)   -> both channels, saturated on overrange"
 
 config SAMA5D2_CLASSD_MONOMODE_LEFT
-bool "L       -> both channels"
+	bool "L       -> both channels"
 
 	config SAMA5D2_CLASSD_MONOMODE_RIGHT
 	bool "R       -> both channels"
