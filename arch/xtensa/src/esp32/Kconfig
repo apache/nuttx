@@ -1093,7 +1093,7 @@ config ESP32_I2CTIMEOMS
 endmenu # I2C configuration
 
 menu "TWAI driver options"
-        depends on ESP32_TWAI
+	depends on ESP32_TWAI
 
 if ESP32_TWAI0
 
