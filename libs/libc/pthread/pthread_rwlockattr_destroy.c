@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * libs/libc/pthread/pthread_rwlockattr_destroy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -28,18 +28,18 @@
 #include <errno.h>
 #include <debug.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: pthread_rwlockattr_destroy
  *
  * Description:
- *   The pthread_rwlockattr_destroy() function will destroy a rwlock attributes
- *   object.  A destroyed attr attributes object can be reinitialized using
- *   pthread_rwlockattr_init(); the results of otherwise referencing the object
- *   after it has been destroyed are undefined.
+ *   The pthread_rwlockattr_destroy() function will destroy a rwlock
+ *   attributes object.  A destroyed attr attributes object can be
+ *   reinitialized using pthread_rwlockattr_init(); the results of otherwise
+ *   referencing the object after it has been destroyed are undefined.
  *
  * Input Parameters:
  *   attr - rwlock attributes to be destroyed.
@@ -49,7 +49,7 @@
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int pthread_rwlockattr_destroy(FAR pthread_rwlockattr_t *attr)
 {

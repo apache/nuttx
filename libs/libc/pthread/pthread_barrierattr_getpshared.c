@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * libs/libc/pthread/pthread_barrierattr_getpshared.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -28,27 +28,29 @@
 #include <errno.h>
 #include <debug.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: pthread_barrierattr_getpshared
  *
  * Description:
- *   The pthread_barrierattr_getpshared() function will obtain the value of the
- *   process-shared attribute from the attributes object referenced by attr.
+ *   The pthread_barrierattr_getpshared() function will obtain the value
+ *   of the process-shared attribute from the attributes object referenced
+ *   by attr.
  *
  * Input Parameters:
  *   attr - barrier attributes to be queried.
- *   pshared - the location to stored the current value of the pshared attribute.
+ *   pshared - the location to stored the current value of the
+ *   pshared attribute.
  *
  * Returned Value:
  *   0 (OK) on success or EINVAL if either attr or pshared is invalid.
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr,
                                    FAR int *pshared)
