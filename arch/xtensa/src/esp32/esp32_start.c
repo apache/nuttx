@@ -44,6 +44,7 @@
 #endif
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_rtccntl.h"
+#include "rom/esp32_libc_stubs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -242,6 +243,10 @@ static noreturn_function void __esp32_start(void)
 #  endif
 
 #endif
+
+  /* Setup the syscall table needed by the ROM code */
+
+  esp_setup_syscall_table();
 
   /* Initialize onboard resources */
 

@@ -34,7 +34,7 @@ endif
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_gpio.c
 CHIP_CSRCS += esp32_systemreset.c esp32_resetcause.c
 CHIP_CSRCS += esp32_irq.c esp32_region.c esp32_rtc_gpio.c
-CHIP_CSRCS += esp32_user.c
+CHIP_CSRCS += esp32_user.c esp32_libc_stubs.c
 CHIP_CSRCS += esp32_dma.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
