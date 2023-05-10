@@ -16,22 +16,22 @@ config STM32F411MINIMUM_USBHOST_PRIO
 	depends on USBHOST
 
 config STM32F411MINIMUM_FLASH
-        bool "MTD driver for external 8Mbyte W25Q64FV FLASH on SPI1"
-        default n
-        select MTD
-        select MTD_W25
-        select MTD_SMART
-        select FS_SMARTFS
-        select STM32_SPI1
-        select MTD_BYTE_WRITE
-        ---help---
-                Configures an MTD device for use with the onboard flash
+	bool "MTD driver for external 8Mbyte W25Q64FV FLASH on SPI1"
+	default n
+	select MTD
+	select MTD_W25
+	select MTD_SMART
+	select FS_SMARTFS
+	select STM32_SPI1
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
 
 config STM32F411MINIMUM_FLASH_MINOR
-        int "Minor number for the FLASH /dev/smart entry"
-        default 0
-        depends on STM32F411MINIMUM_FLASH
-        ---help---
-                Sets the minor number for the FLASH MTD /dev entry
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on STM32F411MINIMUM_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
 
 endif
