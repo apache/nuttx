@@ -79,7 +79,7 @@ FAR void *cmsg_append(FAR struct msghdr *msg, int level, int type,
       memcpy(cmsgdata, value, value_len);
     }
 
-  msg->msg_control    += cmsgspace;
+  msg->msg_control     = (char *)msg->msg_control + cmsgspace;
   msg->msg_controllen -= cmsgspace;
 
   return cmsgdata;
