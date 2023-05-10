@@ -35,7 +35,7 @@
 
 /* Check if CAN-FD support is enabled. */
 
-#ifdef CONFIG_MPFS_CANFD
+#ifdef CONFIG_MPFS_HAVE_CANFD
 
 /****************************************************************************
  * Included Files
@@ -90,5 +90,5 @@ int mpfs_fpga_canfd_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_MPFS_CANFD */
+#endif /* CONFIG_MPFS_HAVE_CANFD */
 #endif /* __ARCH_RISCV_SRC_MPFS_MPFS_FPGA_CANFD_H */

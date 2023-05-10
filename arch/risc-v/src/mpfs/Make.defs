@@ -82,7 +82,7 @@ ifeq (${CONFIG_MPFS_HAVE_COREPWM},y)
 CHIP_CSRCS += mpfs_corepwm.c
 endif
 
-ifeq (${CONFIG_MPFS_CANFD}, y)
+ifeq (${CONFIG_MPFS_HAVE_CANFD}, y)
 CHIP_CSRCS += mpfs_fpga_canfd.c
 endif
 

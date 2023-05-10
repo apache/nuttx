@@ -672,7 +672,7 @@ config MPFS_COREPWM1_NCHANNELS
 
 comment "CAN-FD Options"
 
-config MPFS_CANFD
+config MPFS_HAVE_CANFD
 	bool "CAN FD"
 	select ARCH_HAVE_CAN_ERRORS
 	select NET_CAN_HAVE_CANFD
@@ -680,26 +680,57 @@ config MPFS_CANFD
 	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 
-config MPFS_CANFD_BASE
-	hex "Base address for the instance"
-	default 0x46000000
-	depends on MPFS_CANFD
+config MPFS_CANFD0
+	bool "MPFS FPGA CANFD0 IP block configured"
+	default n
+	depends on MPFS_HAVE_CANFD
 
-config MPFS_CANFD_CLK
-	int "Clock frequency of the CANFD block (Hz)"
+config MPFS_CANFD_BASE0
+	hex "Base address for the CANFD0 instance"
+	default 0x46000000
+	depends on MPFS_CANFD0
+
+config MPFS_CANFD_CLK0
+	int "Clock frequency of the CANFD0 block (Hz)"
 	default 62500000
 	range 1000000 100000000
-	depends on MPFS_CANFD
+	depends on MPFS_CANFD0
 
-config MPFS_CANFD_ARBI_BITRATE
-	int "CAN FD Arbitration phase bitrate"
+config MPFS_CANFD_ARBI_BITRATE0
+	int "CANFD0 Arbitration phase bitrate"
 	default 1000000
-	depends on MPFS_CANFD
+	depends on MPFS_CANFD0
 
-config MPFS_CANFD_DATA_BITRATE
-	int "CAN  Arbitration phase bitrate"
+config MPFS_CANFD_DATA_BITRATE0
+	int "CANFD0 Data phase bitrate"
 	default 4000000
-	depends on MPFS_CANFD
+	depends on MPFS_CANFD0
+
+config MPFS_CANFD1
+	bool "MPFS FPGA CANFD1 IP block configured"
+	default n
+	depends on MPFS_HAVE_CANFD
+
+config MPFS_CANFD_BASE1
+	hex "Base address for the CANFD1 instance"
+	default 0x47000000
+	depends on MPFS_CANFD1
+
+config MPFS_CANFD_CLK1
+	int "Clock frequency of the CANFD1 block (Hz)"
+	default 62500000
+	range 1000000 100000000
+	depends on MPFS_CANFD1
+
+config MPFS_CANFD_ARBI_BITRATE1
+	int "CANFD1 Arbitration phase bitrate"
+	default 1000000
+	depends on MPFS_CANFD1
+
+config MPFS_CANFD_DATA_BITRATE1
+	int "CANFD1 Data phase bitrate"
+	default 4000000
+	depends on MPFS_CANFD1
 
 endmenu
 
