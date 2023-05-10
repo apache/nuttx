@@ -64,86 +64,86 @@
 
 struct opi_psram_reg
 {
-    union mr0_u
-      {
-        struct
-          {
-            uint8_t drive_str: 2;
-            uint8_t read_latency: 3;
-            uint8_t lt: 1;
-            uint8_t rsvd0_1: 2;
-          };
+  union mr0_u
+    {
+      struct
+        {
+          uint8_t drive_str: 2;
+          uint8_t read_latency: 3;
+          uint8_t lt: 1;
+          uint8_t rsvd0_1: 2;
+        };
 
-        uint8_t val;
-      }
-    mr0;
+      uint8_t val;
+    }
+  mr0;
 
-    union mr1_u
-      {
-        struct
-          {
-            uint8_t vendor_id: 5;
-            uint8_t rsvd0_2: 3;
-          };
+  union mr1_u
+    {
+      struct
+        {
+          uint8_t vendor_id: 5;
+          uint8_t rsvd0_2: 3;
+        };
 
-        uint8_t val;
-      }
-    mr1;
+      uint8_t val;
+    }
+  mr1;
 
-    union mr2_u
-      {
-        struct
-          {
-            uint8_t density: 3;
-            uint8_t dev_id: 2;
-            uint8_t rsvd1_2: 2;
-            uint8_t gb: 1;
-          };
+  union mr2_u
+    {
+      struct
+        {
+          uint8_t density: 3;
+          uint8_t dev_id: 2;
+          uint8_t rsvd1_2: 2;
+          uint8_t gb: 1;
+        };
 
-        uint8_t val;
-      }
-    mr2;
+      uint8_t val;
+    }
+  mr2;
 
-    union mr3_u
-      {
-        struct
-          {
-            uint8_t rsvd3_7: 5;
-            uint8_t srf: 1;
-            uint8_t vcc: 1;
-            uint8_t rsvd0: 1;
-          };
+  union mr3_u
+    {
+      struct
+        {
+          uint8_t rsvd3_7: 5;
+          uint8_t srf: 1;
+          uint8_t vcc: 1;
+          uint8_t rsvd0: 1;
+        };
 
-        uint8_t val;
-      }
-    mr3;
+      uint8_t val;
+    }
+  mr3;
 
-    union mr4_u
-      {
-        struct
-          {
-            uint8_t pasr: 3;
-            uint8_t rf: 1;
-            uint8_t rsvd3: 1;
-            uint8_t wr_latency: 3;
-          };
+  union mr4_u
+    {
+      struct
+        {
+          uint8_t pasr: 3;
+          uint8_t rf: 1;
+          uint8_t rsvd3: 1;
+          uint8_t wr_latency: 3;
+        };
 
-        uint8_t val;
-      }
-    mr4;
+      uint8_t val;
+    }
+  mr4;
 
-    union mr8_u
-      {
-        struct
-          {
-            uint8_t bl: 2;
-            uint8_t bt: 1;
-            uint8_t rsvd0_4: 5;
-          };
+  union mr8_u
+    {
+      struct
+        {
+          uint8_t bl: 2;
+          uint8_t bt: 1;
+          uint8_t rsvd0_4: 5;
+        };
 
-        uint8_t val;
-      }
-    mr8;
+      uint8_t val;
+    }
+  mr8;
 };
 
 /****************************************************************************
