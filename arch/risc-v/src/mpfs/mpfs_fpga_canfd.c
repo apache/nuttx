@@ -58,18 +58,18 @@
 #  define OK 0
 #endif
 
-/* This module only compiles if the CAN-FD IP core instance
+/* This module only compiles if the CANFD IP core instance
  * is configured to the FPGA
  */
 
-#ifndef CONFIG_MPFS_CANFD
-#  error This should not be compiled as CAN-FD FPGA block is not defined
+#ifndef CONFIG_MPFS_HAVE_CANFD
+#  error This should not be compiled as CANFD FPGA block is not defined
 #endif
 
 /* This module only compiles if Nuttx socketCAN interface supports CANFD */
 
 #ifndef CONFIG_NET_CAN_CANFD
-#  error This should not be compiled as CAN-FD driver relies on socket CAN
+#  error This should not be compiled as CANFD driver relies on socket CAN
 #endif
 
 /* Clock reset and enabling */
@@ -83,7 +83,7 @@
 
 #define MPFS_CANFD_ID           0xCAFD
 
-/* For allocating the tx and rx CAN-FD frame buffer */
+/* For allocating the tx and rx CANFD frame buffer */
 
 #define POOL_SIZE               1
 #define TIMESTAMP_SIZE          sizeof(struct timeval)  /* To support
@@ -332,13 +332,21 @@ enum mpfs_canfd_can_frame_format
 
 struct mpfs_config_s
 {
-  uint32_t canfd_fpga_irq;           /* the only CAN-FD FPGA IRQ */
+  uint32_t canfd_fpga_irq;           /* the only CANFD FPGA IRQ */
 };
 
-static const struct mpfs_config_s mpfs_fpga_canfd_config =
+#ifdef CONFIG_MPFS_CANFD0
+static const struct mpfs_config_s mpfs_fpga_canfd_config0 =
 {
   .canfd_fpga_irq = MPFS_IRQ_FABRIC_F2H_0,
 };
+#endif
+#ifdef CONFIG_MPFS_CANFD1
+static const struct mpfs_config_s mpfs_fpga_canfd_config1 =
+{
+  .canfd_fpga_irq = MPFS_IRQ_FABRIC_F2H_9,
+};
+#endif
 
 /****************************************************************************
  * The mpfs_driver_s encapsulates all state information for a single
@@ -390,12 +398,23 @@ struct mpfs_driver_s
  * Private Data
  ****************************************************************************/
 
-static struct mpfs_driver_s g_canfd;
+#ifdef CONFIG_MPFS_CANFD0
+static struct mpfs_driver_s g_canfd0;
 
-static uint8_t g_tx_pool[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
+static uint8_t g_tx_pool0[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
                          POOL_SIZE];
-static uint8_t g_rx_pool[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
+static uint8_t g_rx_pool0[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
                          POOL_SIZE];
+#endif
+
+#ifdef CONFIG_MPFS_CANFD1
+static struct mpfs_driver_s g_canfd1;
+
+static uint8_t g_tx_pool1[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
+                         POOL_SIZE];
+static uint8_t g_rx_pool1[(sizeof(struct canfd_frame) + TIMESTAMP_SIZE) *
+                         POOL_SIZE];
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -971,7 +990,7 @@ static enum mpfs_can_state_e
      return CAN_STATE_BUS_OFF;
     }
 
-  canwarn("Invalid FPGA CAN-FD error state\n");
+  canwarn("Invalid FPGA CANFD error state\n");
   return CAN_STATE_ERROR_PASSIVE;
 }
 
@@ -1059,6 +1078,7 @@ static void mpfs_err_interrupt(struct mpfs_driver_s *priv, uint32_t isr)
       switch (state)
         {
         case CAN_STATE_BUS_OFF:
+          priv->can.can_stats.bus_off++;
           canwarn("Change to BUS_OFF error state\n");
           break;
         case CAN_STATE_ERROR_PASSIVE:
@@ -1196,6 +1216,8 @@ static int mpfs_interrupt(int irq, void *context, void *arg)
 
   if (isr & MPFS_CANFD_INT_STAT_TXBHCI)
     {
+      canerr("TXBHCI interrupt\n");
+
 #ifdef CONFIG_DEBUG_CAN_INFO
       caninfo("txb_sent=0x%08x txb_processed=0x%08x\n", priv->txb_sent,
               priv->txb_processed);
@@ -1219,6 +1241,8 @@ static int mpfs_interrupt(int irq, void *context, void *arg)
 
   if (isr & MPFS_CANFD_INT_STAT_DOI)
     {
+      canerr("DOI interrupt\n");
+
       /* Notify to socket interface */
 
       NETDEV_RXERRORS(&priv->dev);
@@ -2468,6 +2492,8 @@ static int mpfs_reset(struct mpfs_driver_s *priv)
       nxsig_usleep(200);
     }
   while (1);
+
+  priv->can.can_stats.restarts++;
 }
 
 /****************************************************************************
@@ -2498,9 +2524,6 @@ static int mpfs_ifup(struct net_driver_s *dev)
     }
 
   priv->bifup = true;
-
-  priv->txdesc = (struct canfd_frame *)&g_tx_pool;
-  priv->rxdesc = (struct canfd_frame *)&g_rx_pool;
 
   priv->dev.d_buf = (uint8_t *)priv->txdesc;
 
@@ -2833,7 +2856,7 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
  *  Initialize the CAN controller and driver
  *
  * Returned Value:
- *  On success, a pointer to the MPFS CAN-FD driver is
+ *  On success, a pointer to the MPFS CANFD driver is
  *  returned. NULL is returned on any failure.
  *
  * Assumptions:
@@ -2843,91 +2866,205 @@ defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
 
 int mpfs_fpga_canfd_init(void)
 {
-  caninfo("Initialize CAN-FD driver...\n");
-  struct mpfs_driver_s *priv;
-  priv         = &g_canfd;
-  memset(priv, 0, sizeof(struct mpfs_driver_s));
+#ifdef CONFIG_MPFS_CANFD0
+  caninfo("Initialize CANFD0 driver...\n");
+  struct mpfs_driver_s *priv0;
+  priv0 = &g_canfd0;
+  memset(priv0, 0, sizeof(struct mpfs_driver_s));
 
-  priv->base   = CONFIG_MPFS_CANFD_BASE;
-  priv->config = &mpfs_fpga_canfd_config;
+  priv0->base   = CONFIG_MPFS_CANFD_BASE0;
+  priv0->config = &mpfs_fpga_canfd_config0;
 
   /* Initialize the CAN common private data structure */
 
-  priv->can.state = CAN_STATE_ERROR_ACTIVE;
-  priv->ntxbufs = 2;
-  priv->can.bittiming_const = &mpfs_can_bit_timing_range;
-  priv->can.data_bittiming_const = &mpfs_can_bit_timing_data_range;
+  priv0->can.state = CAN_STATE_ERROR_ACTIVE;
+  priv0->ntxbufs = 2;
+  priv0->can.bittiming_const = &mpfs_can_bit_timing_range;
+  priv0->can.data_bittiming_const = &mpfs_can_bit_timing_data_range;
+
+  priv0->can.can_stats.arbitration_lost = 0;
+  priv0->can.can_stats.bus_error = 0;
+  priv0->can.can_stats.bus_off = 0;
+  priv0->can.can_stats.error_warning = 0;
+  priv0->can.can_stats.error_passive = 0;
+  priv0->can.can_stats.restarts = 0;
 
   /* Get the can_clk info */
 
-  priv->can.clock.freq = CONFIG_MPFS_CANFD_CLK;
+  priv0->can.clock.freq = CONFIG_MPFS_CANFD_CLK0;
 
   /* Needed for timing adjustment to be performed as soon as possible */
 
-  priv->can.bittiming.bitrate = CONFIG_MPFS_CANFD_ARBI_BITRATE;
-  priv->can.data_bittiming.bitrate = CONFIG_MPFS_CANFD_DATA_BITRATE;
-  priv->can.bittiming.sjw = 5;
-  priv->can.data_bittiming.sjw = 5;
+  priv0->can.bittiming.bitrate = CONFIG_MPFS_CANFD_ARBI_BITRATE0;
+  priv0->can.data_bittiming.bitrate = CONFIG_MPFS_CANFD_DATA_BITRATE0;
+  priv0->can.bittiming.sjw = 5;
+  priv0->can.data_bittiming.sjw = 5;
 
   /* Calculate nominal and data bit timing */
 
-  mpfs_can_btr_compute(priv,
-                          &priv->can.bittiming,
-                          priv->can.bittiming_const);
-  mpfs_can_btr_compute(priv,
-                          &priv->can.data_bittiming,
-                          priv->can.data_bittiming_const);
+  mpfs_can_btr_compute(priv0,
+                          &priv0->can.bittiming,
+                          priv0->can.bittiming_const);
+  mpfs_can_btr_compute(priv0,
+                          &priv0->can.data_bittiming,
+                          priv0->can.data_bittiming_const);
 
 #ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
   /* Init hw filter runtime var */
 
-  priv->used_bit_filter_number = 0;
-  priv->used_range_filter = false;
+  priv0->used_bit_filter_number = 0;
+  priv0->used_range_filter = false;
 #endif /* CONFIG_NETDEV_CAN_FILTER_IOCTL */
 
   /* Set CAN control modes */
 
-  priv->can.ctrlmode = CAN_CTRLMODE_FD
+  priv0->can.ctrlmode = CAN_CTRLMODE_FD
                       | CAN_CTRLMODE_BERR_REPORTING;
 
   /* Attach the interrupt handler */
 
-  if (irq_attach(priv->config->canfd_fpga_irq, mpfs_interrupt, priv))
+  if (irq_attach(priv0->config->canfd_fpga_irq, mpfs_interrupt, priv0))
     {
       /* We could not attach the ISR to the interrupt */
 
-      canerr("ERROR: Failed to attach to CAN IRQ\n");
+      canerr("ERROR: Failed to attach to CAN0 IRQ\n");
       return -EAGAIN;
     }
 
-  /* Initialize the driver structure */
+  /* Initialize TX/RX descriptor structure */
 
-  priv->dev.d_ifup    = mpfs_ifup;    /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown  = mpfs_ifdown;  /* I/F down callback */
-  priv->dev.d_txavail = mpfs_txavail; /* New TX data callback */
+  priv0->txdesc = (struct canfd_frame *)&g_tx_pool0;
+  priv0->rxdesc = (struct canfd_frame *)&g_rx_pool0;
+
+  /* Initialize the driver network device structure */
+
+  priv0->dev.d_ifup    = mpfs_ifup;    /* I/F up (new IP address) callback */
+  priv0->dev.d_ifdown  = mpfs_ifdown;  /* I/F down callback */
+  priv0->dev.d_txavail = mpfs_txavail; /* New TX data callback */
 #ifdef CONFIG_NETDEV_IOCTL
-  priv->dev.d_ioctl   = mpfs_ioctl;   /* Support CAN ioctl() calls */
+  priv0->dev.d_ioctl   = mpfs_ioctl;   /* Support CAN ioctl() calls */
 #endif
-  priv->dev.d_private = priv;         /* Used to recover private state from dev */
+  priv0->dev.d_private = priv0;         /* Used to recover private state from dev */
 
   /* Reset controller */
 
-  if (mpfs_reset(priv) < 0)
+  if (mpfs_reset(priv0) < 0)
     {
       return -1;
     }
 
-  caninfo("CAN-FD driver init done\n");
+  caninfo("CANFD0 driver init done\n");
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling mpfs_ifdown().
    */
 
-  mpfs_ifdown(&priv->dev);
+  mpfs_ifdown(&priv0->dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  netdev_register(&priv->dev, NET_LL_CAN);
+  netdev_register(&priv0->dev, NET_LL_CAN);
+#endif /* CONFIG_MPFS_CANFD0 */
+
+#ifdef CONFIG_MPFS_CANFD1
+  caninfo("Initialize CANFD1 driver...\n");
+  struct mpfs_driver_s *priv1;
+  priv1 = &g_canfd1;
+  memset(priv1, 0, sizeof(struct mpfs_driver_s));
+
+  priv1->base   = CONFIG_MPFS_CANFD_BASE1;
+  priv1->config = &mpfs_fpga_canfd_config1;
+
+  /* Initialize the CAN common private data structure */
+
+  priv1->can.state = CAN_STATE_ERROR_ACTIVE;
+  priv1->ntxbufs = 2;
+  priv1->can.bittiming_const = &mpfs_can_bit_timing_range;
+  priv1->can.data_bittiming_const = &mpfs_can_bit_timing_data_range;
+
+  priv1->can.can_stats.arbitration_lost = 0;
+  priv1->can.can_stats.bus_error = 0;
+  priv1->can.can_stats.bus_off = 0;
+  priv1->can.can_stats.error_warning = 0;
+  priv1->can.can_stats.error_passive = 0;
+  priv1->can.can_stats.restarts = 0;
+
+  /* Get the can_clk info */
+
+  priv1->can.clock.freq = CONFIG_MPFS_CANFD_CLK1;
+
+  /* Needed for timing adjustment to be performed as soon as possible */
+
+  priv1->can.bittiming.bitrate = CONFIG_MPFS_CANFD_ARBI_BITRATE1;
+  priv1->can.data_bittiming.bitrate = CONFIG_MPFS_CANFD_DATA_BITRATE1;
+  priv1->can.bittiming.sjw = 5;
+  priv1->can.data_bittiming.sjw = 5;
+
+  /* Calculate nominal and data bit timing */
+
+  mpfs_can_btr_compute(priv1,
+                          &priv1->can.bittiming,
+                          priv1->can.bittiming_const);
+  mpfs_can_btr_compute(priv1,
+                          &priv1->can.data_bittiming,
+                          priv1->can.data_bittiming_const);
+
+#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
+  /* Init hw filter runtime var */
+
+  priv1->used_bit_filter_number = 0;
+  priv1->used_range_filter = false;
+#endif /* CONFIG_NETDEV_CAN_FILTER_IOCTL */
+
+  /* Set CAN control modes */
+
+  priv1->can.ctrlmode = CAN_CTRLMODE_FD
+                      | CAN_CTRLMODE_BERR_REPORTING;
+
+  /* Attach the interrupt handler */
+
+  if (irq_attach(priv1->config->canfd_fpga_irq, mpfs_interrupt, priv1))
+    {
+      /* We could not attach the ISR to the interrupt */
+
+      canerr("ERROR: Failed to attach to CAN1 IRQ\n");
+      return -EAGAIN;
+    }
+
+  /* Initialize TX/RX descriptor structure */
+
+  priv1->txdesc = (struct canfd_frame *)&g_tx_pool1;
+  priv1->rxdesc = (struct canfd_frame *)&g_rx_pool1;
+
+  /* Initialize the driver network device structure */
+
+  priv1->dev.d_ifup    = mpfs_ifup;    /* I/F up (new IP address) callback */
+  priv1->dev.d_ifdown  = mpfs_ifdown;  /* I/F down callback */
+  priv1->dev.d_txavail = mpfs_txavail; /* New TX data callback */
+#ifdef CONFIG_NETDEV_IOCTL
+  priv1->dev.d_ioctl   = mpfs_ioctl;   /* Support CAN ioctl() calls */
+#endif
+  priv1->dev.d_private = priv1;         /* Used to recover private state from dev */
+
+  /* Reset controller */
+
+  if (mpfs_reset(priv1) < 0)
+    {
+      return -1;
+    }
+
+  caninfo("CANFD1 driver init done\n");
+
+  /* Put the interface in the down state.  This usually amounts to resetting
+   * the device and/or calling mpfs_ifdown().
+   */
+
+  mpfs_ifdown(&priv1->dev);
+
+  /* Register the device with the OS so that socket IOCTLs can be performed */
+
+  netdev_register(&priv1->dev, NET_LL_CAN);
+#endif /* CONFIG_MPFS_CANFD1 */
 
   return OK;
 }
