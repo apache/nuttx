@@ -8,21 +8,21 @@ if ARCH_BOARD_TLSR8278ADK80D
 menu "Telink TLSR8278ADK80D board"
 
 choice
-  prompt "Default pin interrupt type"
-  default PIN_INTERRUPT_DEFAULT_RISING
-  depends on DEV_GPIO
+	prompt "Default pin interrupt type"
+	default PIN_INTERRUPT_DEFAULT_RISING
+	depends on DEV_GPIO
 
 config PIN_INTERRUPT_DEFAULT_RISING
-  bool "Rising"
+	bool "Rising"
 
 config PIN_INTERRUPT_DEFAULT_FALLING
-  bool "Falling"
+	bool "Falling"
 
 config PIN_INTERRUPT_DEFAULT_HIGH
-  bool "High level"
+	bool "High level"
 
 config PIN_INTERRUPT_DEFAULT_LOW
-  bool "Low level"
+	bool "Low level"
 
 endchoice
 
