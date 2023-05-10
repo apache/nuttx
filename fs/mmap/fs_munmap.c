@@ -69,6 +69,13 @@ static int file_munmap_(FAR void *start, size_t length, bool kernel)
       mm_map_unlock();
     }
 
+  /* If entry don't find, the start and length is invalid. */
+
+  if (entry == NULL)
+    {
+      return -EINVAL;
+    }
+
   return ret;
 }
 
