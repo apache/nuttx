@@ -12,7 +12,7 @@ config RELAY
 config RELAY_GPIO
 	bool "Relay gpio driver support"
 	default n
-  depends on RELAY
-  depends on IOEXPANDER
+	depends on RELAY
+	depends on IOEXPANDER
 
 endmenu
