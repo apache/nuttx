@@ -206,44 +206,6 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* Alternate function pin selections ****************************************/
-
-/* USART6:
- *
- * These configurations assume that you are using a standard Arduio RS-232
- * shield with the serial interface with RX on pin D0 and TX on pin D1:
- *
- *   -------- ---------------
- *               STM32F7
- *   ARDUIONO FUNCTION  GPIO
- *   -- ----- --------- -----
- *   DO RX    USART6_RX PC7
- *   D1 TX    USART6_TX PC6
- *   -- ----- --------- -----
- */
-
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
-
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-
-#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_1
-#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_1
-
-/* SDMMC */
-
-/* Stream selections are arbitrary for now but might become important in the
- * future if we set aside more DMA channels/streams.
- *
- * SDIO DMA
- *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
- *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
- */
-
-#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
-
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
  * to service FIFOs in interrupt driven mode.  These values have not been
@@ -273,5 +235,83 @@
 #else
 #  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #endif
+
+/* DMA channels *************************************************************/
+
+/* SDMMC */
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
+ *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ */
+
+#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+
+/* Alternate function pin selections ****************************************/
+
+/* ADC1 */
+
+#define GPIO_ADC1_IN0   GPIO_ADC1_IN0_0   /* PA0 */
+#define GPIO_ADC1_IN1   GPIO_ADC1_IN1_0   /* PA1 */
+#define GPIO_ADC1_IN2   GPIO_ADC1_IN2_0   /* PA2 */
+#define GPIO_ADC1_IN3   GPIO_ADC1_IN3_0   /* PA3 */
+#define GPIO_ADC1_IN4   GPIO_ADC1_IN4_0   /* PA4 */
+#define GPIO_ADC1_IN5   GPIO_ADC1_IN5_0   /* PA5 */
+#define GPIO_ADC1_IN6   GPIO_ADC1_IN6_0   /* PA6 */
+#define GPIO_ADC1_IN7   GPIO_ADC1_IN7_0   /* PA7 */
+#define GPIO_ADC1_IN8   GPIO_ADC1_IN8_0   /* PB0 */
+#define GPIO_ADC1_IN9   GPIO_ADC1_IN9_0   /* PB1 */
+#define GPIO_ADC1_IN10  GPIO_ADC1_IN10_0  /* PC0 */
+#define GPIO_ADC1_IN11  GPIO_ADC1_IN11_0  /* PC1 */
+#define GPIO_ADC1_IN12  GPIO_ADC1_IN12_0  /* PC2 */
+#define GPIO_ADC1_IN13  GPIO_ADC1_IN13_0  /* PC3 */
+#define GPIO_ADC1_IN14  GPIO_ADC1_IN14_0  /* PC4 */
+#define GPIO_ADC1_IN15  GPIO_ADC1_IN15_0  /* PC5 */
+
+/* USART6:
+ *
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
+ *
+ *   -------- ---------------
+ *               STM32F7
+ *   ARDUIONO FUNCTION  GPIO
+ *   -- ----- --------- -----
+ *   DO RX    USART6_RX PC7
+ *   D1 TX    USART6_TX PC6
+ *   -- ----- --------- -----
+ */
+
+#define GPIO_USART6_RX (GPIO_USART6_RX_1|GPIO_SPEED_100MHz)
+#define GPIO_USART6_TX (GPIO_USART6_TX_1|GPIO_SPEED_100MHz)
+
+#define GPIO_SPI1_SCK  (GPIO_SPI1_SCK_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI1_MISO (GPIO_SPI1_MISO_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI1_MOSI (GPIO_SPI1_MOSI_1|GPIO_SPEED_50MHz)
+
+#define GPIO_I2C1_SCL  (GPIO_I2C1_SCL_1|GPIO_SPEED_50MHz)
+#define GPIO_I2C1_SDA  (GPIO_I2C1_SDA_1|GPIO_SPEED_50MHz)
+
+/* SDMMC1 */
+
+#define GPIO_SDMMC1_CK  (GPIO_SDMMC1_CK_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_CMD (GPIO_SDMMC1_CMD_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D0  (GPIO_SDMMC1_D0_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D1  (GPIO_SDMMC1_D1_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D2  (GPIO_SDMMC1_D2_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D3  (GPIO_SDMMC1_D3_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D4  (GPIO_SDMMC1_D4_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D5  (GPIO_SDMMC1_D5_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D6  (GPIO_SDMMC1_D6_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC1_D7  (GPIO_SDMMC1_D7_0|GPIO_SPEED_50MHz)
+
+/* OTGFS */
+
+#define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0|GPIO_SPEED_100MHz)
+#define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0|GPIO_SPEED_100MHz)
+#define GPIO_OTGFS_ID  (GPIO_OTGFS_ID_0|GPIO_SPEED_100MHz)
 
 #endif /* __BOARDS_ARM_STM32F7_STM32F746_WS_INCLUDE_BOARD_H */

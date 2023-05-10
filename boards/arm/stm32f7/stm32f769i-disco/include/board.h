@@ -245,6 +245,36 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
 /* LED definitions **********************************************************/
 
 /* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located
@@ -311,6 +341,44 @@
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
+/* LCD definitions **********************************************************/
+
+/* LCD DISPLAY
+ * (work in progress as of 2017 07 19)
+ */
+
+#define	BOARD_LTDC_WIDTH        800
+#define	BOARD_LTDC_HEIGHT       472
+
+#define	BOARD_LTDC_HSYNC        10
+#define	BOARD_LTDC_HFP          10
+#define	BOARD_LTDC_HBP          20
+#define	BOARD_LTDC_VSYNC        2
+#define	BOARD_LTDC_VFP          4
+#define	BOARD_LTDC_VBP          2
+
+#define	BOARD_LTDC_GCR_PCPOL    0
+#define	BOARD_LTDC_GCR_DEPOL    0
+#define	BOARD_LTDC_GCR_VSPOL    0
+#define	BOARD_LTDC_GCR_HSPOL    0
+
+/* DMA Channel/Stream Selections ********************************************/
+
+/* SDMMC */
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
+ *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ *
+ *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
+ *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
+ */
+
+#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+
 /* Alternate function pin selections ****************************************/
 
 /* USART6:
@@ -327,8 +395,8 @@
  *   -- ----- --------- -----
  */
 
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
+#define GPIO_USART6_RX (GPIO_USART6_RX_1|GPIO_SPEED_100MHz)
+#define GPIO_USART6_TX (GPIO_USART6_TX_1|GPIO_SPEED_100MHz)
 
 /* USART1:
  * USART1 is connected to the "Virtual Com Port" lines
@@ -343,8 +411,8 @@
  *   -- ----- --------- -----
  */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_1
-#define GPIO_USART1_TX GPIO_USART1_TX_1
+#define GPIO_USART1_RX (GPIO_USART1_RX_1|GPIO_SPEED_100MHz)
+#define GPIO_USART1_TX (GPIO_USART1_TX_1|GPIO_SPEED_100MHz)
 
 /* PWM
  *
@@ -352,7 +420,7 @@
  * be configured to output a pulse train using TIM1 CH4 on PA11.
  */
 
-#define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_1
+#define GPIO_TIM1_CH4OUT  (GPIO_TIM1_CH4OUT_1|GPIO_SPEED_50MHz)
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
@@ -377,9 +445,15 @@
  * receive errors can be detected using GPIO pin PD5
  */
 
-#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
-#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
-#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_2|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_2|GPIO_SPEED_100MHz)
 
 /* I2C Mapping
  * I2C #4 is connected to the LCD daughter board
@@ -388,54 +462,9 @@
  * I2C4_SCL - PD12
  * I2C4_SDA - PB7
  */
-#define GPIO_I2C4_SCL        GPIO_I2C4_SCL_1
-#define GPIO_I2C4_SDA        GPIO_I2C4_SDA_5
 
-/* SDMMC */
-
-/* Stream selections are arbitrary for now but might become important in the
- * future if we set aside more DMA channels/streams.
- *
- * SDIO DMA
- *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
- *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
- *
- *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
- *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
- */
-
-/* #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1 */
-#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
-
-/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
- * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
- *
- * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
- */
-
-#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
-
-#ifdef CONFIG_SDIO_DMA
-#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#else
-#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#endif
-
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
-
-#ifdef CONFIG_SDIO_DMA
-#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#else
-#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#endif
+#define GPIO_I2C4_SCL        (GPIO_I2C4_SCL_1|GPIO_SPEED_50MHz)
+#define GPIO_I2C4_SDA        (GPIO_I2C4_SDA_5|GPIO_SPEED_50MHz)
 
 /* SDMMC2 Pin mapping
  *
@@ -444,27 +473,12 @@
  * D2 - PB3
  * D3 - PB4
  */
-#define GPIO_SDMMC2_D0  GPIO_SDMMC2_D0_2
-#define GPIO_SDMMC2_D1  GPIO_SDMMC2_D1_2
-#define GPIO_SDMMC2_D2  GPIO_SDMMC2_D2_1
-#define GPIO_SDMMC2_D3  GPIO_SDMMC2_D3_1
 
-/* LCD DISPLAY
- * (work in progress as of 2017 07 19)
- */
-#define	BOARD_LTDC_WIDTH        800
-#define	BOARD_LTDC_HEIGHT       472
-
-#define	BOARD_LTDC_HSYNC        10
-#define	BOARD_LTDC_HFP          10
-#define	BOARD_LTDC_HBP          20
-#define	BOARD_LTDC_VSYNC        2
-#define	BOARD_LTDC_VFP          4
-#define	BOARD_LTDC_VBP          2
-
-#define	BOARD_LTDC_GCR_PCPOL    0
-#define	BOARD_LTDC_GCR_DEPOL    0
-#define	BOARD_LTDC_GCR_VSPOL    0
-#define	BOARD_LTDC_GCR_HSPOL    0
+#define GPIO_SDMMC2_CK  (GPIO_SDMMC2_CK_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC2_CMD (GPIO_SDMMC2_CMD_0|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC2_D0  (GPIO_SDMMC2_D0_2|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC2_D1  (GPIO_SDMMC2_D1_2|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC2_D2  (GPIO_SDMMC2_D2_1|GPIO_SPEED_50MHz)
+#define GPIO_SDMMC2_D3  (GPIO_SDMMC2_D3_1|GPIO_SPEED_50MHz)
 
 #endif /* __BOARDS_ARM_STM32F7_STM32F769I_DISCO_INCLUDE_BOARD_H */

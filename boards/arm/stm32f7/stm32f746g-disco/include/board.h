@@ -247,7 +247,39 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* LED definitions */
+/* SDMMC */
+
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+
+#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* LED definitions **********************************************************/
 
 /* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located
  * near the reset button, that can be controlled by software (LD2 is a power
@@ -303,7 +335,7 @@
 #define LED_ASSERTION                2 /* LD1=no change */
 #define LED_PANIC                    3 /* LD1=flashing */
 
-/* Button definitions */
+/* Button definitions *******************************************************/
 
 /* The STM32F7 Discovery supports one button:
  * Pushbutton B1, labelled "User", is connected to GPIO PI11.
@@ -314,7 +346,55 @@
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections */
+/* LCD definitions **********************************************************/
+
+#define BOARD_LTDC_WIDTH                480
+#define BOARD_LTDC_HEIGHT               272
+
+#define BOARD_LTDC_OUTPUT_BPP           24
+#define BOARD_LTDC_HFP                  32
+#define BOARD_LTDC_HBP                  13
+#define BOARD_LTDC_VFP                  2
+#define BOARD_LTDC_VBP                  2
+#define BOARD_LTDC_HSYNC                41
+#define BOARD_LTDC_VSYNC                10
+
+#define BOARD_LTDC_PLLSAIN              192
+#define BOARD_LTDC_PLLSAIR              5
+
+/* Pixel Clock Polarity */
+
+#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
+
+/* Data Enable Polarity */
+
+#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
+
+/* Vertical Sync Polarity */
+
+#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
+
+/* Horizontal Sync Polarity */
+
+#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
+
+/* DMA channels *************************************************************/
+
+#define DMACHAN_SAI2_A                  DMAMAP_SAI2_A
+#define DMACHAN_SAI2_B                  DMAMAP_SAI2_B
+#define DMACHAN_SAI1_B                  DMAMAP_SAI1_B
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
+ *
+ * SDIO DMA
+ *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
+ *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ */
+
+#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+
+/* Alternate function pin selections ****************************************/
 
 /* USART6:
  *
@@ -330,8 +410,8 @@
  *   -- ----- --------- -----
  */
 
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
+#define GPIO_USART6_RX (GPIO_USART6_RX_1|GPIO_SPEED_100MHz)
+#define GPIO_USART6_TX (GPIO_USART6_TX_1|GPIO_SPEED_100MHz)
 
 /* USART1:
  *
@@ -347,15 +427,15 @@
  *   -- ----- --------- -----
  */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_2
-#define GPIO_USART1_TX GPIO_USART1_TX_1
+#define GPIO_USART1_RX (GPIO_USART1_RX_2|GPIO_SPEED_100MHz)
+#define GPIO_USART1_TX (GPIO_USART1_TX_1|GPIO_SPEED_100MHz)
 
 /* I2C1 - the I2C1 bus is shared by audio (Cirrus WM8994),
  * camera (DCMI SDA/SCL) and external connectors CN2 & Arduino D14/D15.
  */
 
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2
+#define GPIO_I2C1_SDA (GPIO_I2C1_SDA_2|GPIO_SPEED_50MHz)
+#define GPIO_I2C1_SCL (GPIO_I2C1_SCL_2|GPIO_SPEED_50MHz)
 
 /* I2C - There is a FT5336 TouchPanel on I2C3 using these pins: */
 
@@ -389,144 +469,109 @@
  * PG2 is not controlled but appears to result in a PHY address of 0.
  */
 
-#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
-#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
-#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_2|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_2|GPIO_SPEED_100MHz)
 
-/* LCD definitions */
+/* LCD pinset */
 
-#define BOARD_LTDC_WIDTH                480
-#define BOARD_LTDC_HEIGHT               272
+#define GPIO_LTDC_PINS        24 /* 24-bit display */
 
-#define BOARD_LTDC_OUTPUT_BPP           24
-#define BOARD_LTDC_HFP                  32
-#define BOARD_LTDC_HBP                  13
-#define BOARD_LTDC_VFP                  2
-#define BOARD_LTDC_VBP                  2
-#define BOARD_LTDC_HSYNC                41
-#define BOARD_LTDC_VSYNC                10
+#define GPIO_LTDC_R0          (GPIO_LTDC_R0_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R1          (GPIO_LTDC_R1_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R2          (GPIO_LTDC_R2_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R3          (GPIO_LTDC_R3_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R4          (GPIO_LTDC_R4_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R5          (GPIO_LTDC_R5_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R6          (GPIO_LTDC_R6_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R7          (GPIO_LTDC_R7_3|GPIO_SPEED_100MHz)
 
-#define BOARD_LTDC_PLLSAIN              192
-#define BOARD_LTDC_PLLSAIR              5
+#define GPIO_LTDC_G0          (GPIO_LTDC_G0_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G1          (GPIO_LTDC_G1_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G2          (GPIO_LTDC_G2_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G3          (GPIO_LTDC_G3_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G4          (GPIO_LTDC_G4_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G5          (GPIO_LTDC_G5_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G6          (GPIO_LTDC_G6_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G7          (GPIO_LTDC_G7_3|GPIO_SPEED_100MHz)
 
-/* Pixel Clock Polarity */
+#define GPIO_LTDC_B0          (GPIO_LTDC_B0_1|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B1          (GPIO_LTDC_B1_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B2          (GPIO_LTDC_B2_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B3          (GPIO_LTDC_B3_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B4          (GPIO_LTDC_B4_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B5          (GPIO_LTDC_B5_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B6          (GPIO_LTDC_B6_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B7          (GPIO_LTDC_B7_3|GPIO_SPEED_100MHz)
 
-#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
-
-/* Data Enable Polarity */
-
-#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
-
-/* Vertical Sync Polarity */
-
-#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
-
-/* Horizontal Sync Polarity */
-
-#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
-
-/* GPIO pinset */
-
-#define GPIO_LTDC_PINS                  24 /* 24-bit display */
-
-#define GPIO_LTDC_R0                    GPIO_LTDC_R0_3
-#define GPIO_LTDC_R1                    GPIO_LTDC_R1_3
-#define GPIO_LTDC_R2                    GPIO_LTDC_R2_4
-#define GPIO_LTDC_R3                    GPIO_LTDC_R3_3
-#define GPIO_LTDC_R4                    GPIO_LTDC_R4_4
-#define GPIO_LTDC_R5                    GPIO_LTDC_R5_4
-#define GPIO_LTDC_R6                    GPIO_LTDC_R6_4
-#define GPIO_LTDC_R7                    GPIO_LTDC_R7_3
-
-#define GPIO_LTDC_G0                    GPIO_LTDC_G0_2
-#define GPIO_LTDC_G1                    GPIO_LTDC_G1_2
-#define GPIO_LTDC_G2                    GPIO_LTDC_G2_3
-#define GPIO_LTDC_G3                    GPIO_LTDC_G3_4
-#define GPIO_LTDC_G4                    GPIO_LTDC_G4_3
-#define GPIO_LTDC_G5                    GPIO_LTDC_G5_3
-#define GPIO_LTDC_G6                    GPIO_LTDC_G6_3
-#define GPIO_LTDC_G7                    GPIO_LTDC_G7_3
-
-#define GPIO_LTDC_B0                    GPIO_LTDC_B0_1
-#define GPIO_LTDC_B1                    GPIO_LTDC_B1_2
-#define GPIO_LTDC_B2                    GPIO_LTDC_B2_3
-#define GPIO_LTDC_B3                    GPIO_LTDC_B3_3
-#define GPIO_LTDC_B4                    GPIO_LTDC_B4_4
-#define GPIO_LTDC_B5                    GPIO_LTDC_B5_3
-#define GPIO_LTDC_B6                    GPIO_LTDC_B6_3
-#define GPIO_LTDC_B7                    GPIO_LTDC_B7_3
-
-#define GPIO_LTDC_VSYNC                 GPIO_LTDC_VSYNC_2
-#define GPIO_LTDC_HSYNC                 GPIO_LTDC_HSYNC_2
-#define GPIO_LTDC_DE                    GPIO_LTDC_DE_3
-#define GPIO_LTDC_CLK                   GPIO_LTDC_CLK_3
+#define GPIO_LTDC_VSYNC       (GPIO_LTDC_VSYNC_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_HSYNC       (GPIO_LTDC_HSYNC_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_DE          (GPIO_LTDC_DE_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_CLK         (GPIO_LTDC_CLK_3|GPIO_SPEED_100MHz)
 
 /* QSPI pinset */
 
-#define GPIO_QSPI_CS                    GPIO_QUADSPI_BK1_NCS
-#define GPIO_QSPI_IO0                   GPIO_QUADSPI_BK1_IO0_3
-#define GPIO_QSPI_IO1                   GPIO_QUADSPI_BK1_IO1_3
-#define GPIO_QSPI_IO2                   GPIO_QUADSPI_BK1_IO2_1
-#define GPIO_QSPI_IO3                   GPIO_QUADSPI_BK1_IO3_2
-#define GPIO_QSPI_SCK                   GPIO_QUADSPI_CLK
-
-/* SDMMC */
-
-/* Stream selections are arbitrary for now but might become important in the
- * future if we set aside more DMA channels/streams.
- *
- * SDIO DMA
- *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
- *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
- */
-
-#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
-
-/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
- * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
- *
- * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
- */
-
-#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
-
-#ifdef CONFIG_SDIO_DMA
-#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#else
-#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#endif
-
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
-
-#ifdef CONFIG_SDIO_DMA
-#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#else
-#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#endif
+#define GPIO_QSPI_CS          (GPIO_QUADSPI_BK1_NCS|GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO0         (GPIO_QUADSPI_BK1_IO0_3|GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO1         (GPIO_QUADSPI_BK1_IO1_3|GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO2         (GPIO_QUADSPI_BK1_IO2_1|GPIO_SPEED_100MHz)
+#define GPIO_QSPI_IO3         (GPIO_QUADSPI_BK1_IO3_2|GPIO_SPEED_100MHz)
+#define GPIO_QSPI_SCK         (GPIO_QUADSPI_CLK|GPIO_SPEED_100MHz)
 
 /* SAI2 pinset */
+
 #if defined(CONFIG_STM32F7_SAI2) && defined(CONFIG_STM32F7_SAI2_A)
-#define GPIO_SAI2_SD_A                  GPIO_SAI2_SD_A_2
-#define GPIO_SAI2_FS_A                  GPIO_SAI2_FS_A_2
-#define GPIO_SAI2_SCK_A                 GPIO_SAI2_SCK_A_2
-#define GPIO_SAI2_MCLK_A                GPIO_SAI2_MCLK_A_2
-#define GPIO_SAI2_SD_B                  GPIO_SAI2_SD_B_4
-
-#define DMACHAN_SAI2_A                  DMAMAP_SAI2_A
-#define DMACHAN_SAI2_B                  DMAMAP_SAI2_B
-
+#  define GPIO_SAI2_SD_A      (GPIO_SAI2_SD_A_2|GPIO_SPEED_100MHz)
+#  define GPIO_SAI2_FS_A      (GPIO_SAI2_FS_A_2|GPIO_SPEED_100MHz)
+#  define GPIO_SAI2_SCK_A     (GPIO_SAI2_SCK_A_2|GPIO_SPEED_100MHz)
+#  define GPIO_SAI2_MCLK_A    (GPIO_SAI2_MCLK_A_2|GPIO_SPEED_100MHz)
+#  define GPIO_SAI2_SD_B      (GPIO_SAI2_SD_B_4|GPIO_SPEED_100MHz)
 #else
-
-#define GPIO_SAI1_SD_B                  GPIO_SAI1_SD_B_1
-#define DMACHAN_SAI1_B                  DMAMAP_SAI1_B
-
+#  define GPIO_SAI1_SD_B      (GPIO_SAI1_SD_B_1|GPIO_SPEED_100MHz)
 #endif
-#endif
+
+/* FMC */
+
+#define GPIO_FMC_A0           (GPIO_FMC_A0_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A1           (GPIO_FMC_A1_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A2           (GPIO_FMC_A2_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A3           (GPIO_FMC_A3_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A4           (GPIO_FMC_A4_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A5           (GPIO_FMC_A5_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A6           (GPIO_FMC_A6_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A7           (GPIO_FMC_A7_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A8           (GPIO_FMC_A8_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A9           (GPIO_FMC_A9_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A10          (GPIO_FMC_A10_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_A11          (GPIO_FMC_A11_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_NBL0         (GPIO_FMC_NBL0_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_NBL1         (GPIO_FMC_NBL1_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_SDNRAS       (GPIO_FMC_SDNRAS_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_BA0          (GPIO_FMC_BA0_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_BA1          (GPIO_FMC_BA1_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_SDCLK        (GPIO_FMC_SDCLK_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_SDNCAS       (GPIO_FMC_SDNCAS_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D0           (GPIO_FMC_D0_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D1           (GPIO_FMC_D1_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D2           (GPIO_FMC_D2_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D3           (GPIO_FMC_D3_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D4           (GPIO_FMC_D4_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D5           (GPIO_FMC_D5_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D6           (GPIO_FMC_D6_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D7           (GPIO_FMC_D7_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D8           (GPIO_FMC_D8_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D9           (GPIO_FMC_D9_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D10          (GPIO_FMC_D10_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D11          (GPIO_FMC_D11_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D12          (GPIO_FMC_D12_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D13          (GPIO_FMC_D13_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D14          (GPIO_FMC_D14_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_D15          (GPIO_FMC_D15_0|GPIO_SPEED_100MHz)
+
+#endif  /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H */

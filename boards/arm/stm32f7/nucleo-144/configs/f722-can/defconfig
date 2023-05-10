@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_ARCH_FPU is not set
+# CONFIG_STM32F7_USE_LEGACY_PINMAP is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="nucleo-144"
 CONFIG_ARCH_BOARD_NUCLEO_144=y
