@@ -35,6 +35,7 @@
 
 #include "hardware/esp32s2_cache_memory.h"
 #include "hardware/esp32s2_extmem.h"
+#include "rom/esp32s2_libc_stubs.h"
 #include "esp32s2_clockconfig.h"
 #include "esp32s2_region.h"
 #include "esp32s2_spiram.h"
@@ -370,6 +371,10 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
       esp_spiram_test();
     }
 #endif
+
+  /* Setup the syscall table needed by the ROM code */
+
+  esp_setup_syscall_table();
 
   /* Initialize onboard resources */
 
