@@ -228,6 +228,13 @@ config MM_HEAP_MEMPOOL_CHUNK_SIZE
 	---help---
 		This size describes the multiple mempool chunk size.
 
+config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
+	int "The skip depth of backtrace for mempool"
+	default 6
+	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0 && MM_BACKTRACE > 0
+	---help---
+		This number is the skipped backtrace depth for mempool.
+
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
 	default DEFAULT_SMALL
@@ -303,6 +310,11 @@ config MM_BACKTRACE
 		Config the depth of backtrace in memory block by specified this
 		config: disable backtrace by -1, only record pid info by zero and
 		enable record backtrace info by 8(fixed depth).
+
+config MM_BACKTRACE_SKIP
+	int "The skip depth of backtrace"
+	depends on MM_BACKTRACE > 0
+	default 3
 
 config MM_BACKTRACE_DEFAULT
 	bool "Enable the backtrace record by default"

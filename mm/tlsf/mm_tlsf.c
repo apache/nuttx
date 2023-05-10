@@ -28,7 +28,6 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <execinfo.h>
 #include <sched.h>
 #include <stdio.h>
 #include <string.h>
@@ -150,7 +149,9 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
   if (heap->mm_procfs.backtrace ||
       (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP))
     {
-      int ret = backtrace(buf->backtrace, CONFIG_MM_BACKTRACE);
+      int ret = sched_backtrace(buf->pid, buf->backtrace,
+                                CONFIG_MM_BACKTRACE,
+                                CONFIG_MM_BACKTRACE_SKIP);
       if (ret < CONFIG_MM_BACKTRACE)
         {
           buf->backtrace[ret] = NULL;
