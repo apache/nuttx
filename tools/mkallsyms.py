@@ -103,10 +103,10 @@ class SymbolTables(object):
         symtable = self.get_symtable()
         for nsym, symbol in enumerate(symtable.iter_symbols()):
             if self.symbol_filter(symbol) is not None:
-                try:
+                try :
                     symbol_name = cxxfilt.demangle(symbol.name)
                     func_name = re.sub(r"\(.*$", "", symbol_name)
-                except cxxfilt.InvalidName:
+                except:
                     symbol_name = symbol.name
                 self.symbol_list.append((symbol["st_value"] & ~0x01, func_name))
         self.symbol_list = sorted(self.symbol_list, key=lambda item: item[0])
