@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * libs/libc/pthread/pthread_rwlockattr_init.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -28,17 +28,17 @@
 #include <errno.h>
 #include <debug.h>
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: pthread_rwlockattr_init
  *
  * Description:
- *   The pthread_rwlockattr_init() function will initialize a rwlock attribute
- *   object attr with the default value for all of the attributes defined by the
- *   implementation.
+ *   The pthread_rwlockattr_init() function will initialize a rwlock
+ *   attribute object attr with the default value for all of the attributes
+ *   defined by the implementation.
  *
  * Input Parameters:
  *   attr - rwlock attributes to be initialized.
@@ -48,7 +48,7 @@
  *
  * Assumptions:
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 int pthread_rwlockattr_init(FAR pthread_rwlockattr_t *attr)
 {
