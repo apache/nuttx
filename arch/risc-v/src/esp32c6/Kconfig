@@ -76,7 +76,7 @@ config ESP32C6_ESP32C6XXX
 choice ESP32C6_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32C6_CPU_FREQ_160
-	help
+	---help---
 		CPU frequency to be set on application startup.
 
 config ESP32C6_CPU_FREQ_80
