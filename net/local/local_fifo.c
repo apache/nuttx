@@ -275,10 +275,9 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
 static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
                          bool nonblock)
 {
-  int oflags = nonblock ? O_WRONLY | O_NONBLOCK : O_WRONLY;
   int ret;
 
-  ret = file_open(&conn->lc_outfile, path, oflags);
+  ret = file_open(&conn->lc_outfile, path, O_WRONLY | O_NONBLOCK);
   if (ret < 0)
     {
       nerr("ERROR: Failed on open %s for writing: %d\n",
@@ -293,6 +292,17 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
        */
 
       return ret == -ENOENT ? -EFAULT : ret;
+    }
+
+  /* Clear O_NONBLOCK if it's meant to be blocking */
+
+  if (nonblock == false)
+    {
+      ret = file_fcntl(&conn->lc_outfile, F_SETFL, O_WRONLY);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   return OK;
