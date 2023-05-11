@@ -715,7 +715,7 @@ config PSEUDOTERM_TXBUFSIZE
 endif # PSEUDOTERM
 
 menuconfig UART_BTH4
-	bool "BT H4 uart pseudo device"
+	bool "BT H4 UART Pseudo Device"
 	default n
 	depends on DRIVERS_BLUETOOTH
 	---help---
@@ -727,24 +727,63 @@ menuconfig UART_BTH4
 if UART_BTH4
 
 config UART_BTH4_TXBUFSIZE
-	int "BT H4 uart TX buffer size"
+	int "BT H4 UART TX Buffer Size"
 	default 2048
 	---help---
-		H4 UART TX buffer size.  Default: 2048
+		H4 UART TX Buffer Size.  Default: 2048
 
 config UART_BTH4_RXBUFSIZE
-	int "BT H4 uart RX buffer size"
+	int "BT H4 UART RX Buffer Size"
 	default 8096
 	---help---
-		H4 UART RX buffer size.  Default: 8096
+		H4 UART RX Buffer Size.  Default: 8096
 
 config UART_BTH4_NPOLLWAITERS
-	int "Number of poll threads"
+	int "Number Of Poll Threads"
 	default 2
 	---help---
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 2
 
 endif # UART_BTH4
+
+menuconfig UART_BTH5
+	bool "BT H5 UART Pseudo Device"
+	default n
+	depends on DRIVERS_BLUETOOTH
+	---help---
+		Enable support for Bluetooth H5 UART Pseudo Device(eg. /dev/ttyHCI).
+		This instantiates a serial-like interface over an existing bluetooth
+		controller via HCI interface. Useful for external Bluetooth
+		stacks working this way instead of the socket based interface.
+
+if UART_BTH5
+
+config UART_BTH5_TXBUFSIZE
+	int "BT H5 UART TX Buffer Size"
+	default 2048
+	---help---
+		H5 UART TX Buffer Size.  Default: 2048
+
+config UART_BTH5_TXWIN
+	int "BT H5 Uart TX Window Size"
+	default 4
+	---help---
+		H5 UART TX Window Size.  Default: 4
+
+config UART_BTH5_RXBUFSIZE
+	int "BT H5 Uart RX Buffer Size"
+	default 8096
+	---help---
+		H5 UART RX Buffer Size.  Default: 8096
+
+config UART_BTH5_NPOLLWAITERS
+	int "Number Of Poll Threads"
+	default 2
+	---help---
+		Maximum number of threads than can be waiting for POLL events.
+		Default: 2
+
+endif # UART_BTH5
 
 endif # SERIAL
