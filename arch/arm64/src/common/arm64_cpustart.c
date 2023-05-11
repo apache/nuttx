@@ -222,15 +222,6 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-#ifdef CONFIG_STACK_COLORATION
-  /* If stack debug is enabled, then fill the stack with a
-   * recognizable value that we can use later to test for high
-   * water marks.
-   */
-
-  arm64_stack_color(g_cpu_idlestackalloc[cpu], SMP_STACK_SIZE);
-#endif
-
   cpu_boot_params.cpu_ready_flag = 0;
   arm64_start_cpu(cpu, (char *)g_cpu_idlestackalloc[cpu], SMP_STACK_SIZE,
                   arm64_smp_init_top);
