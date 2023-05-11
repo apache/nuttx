@@ -49,6 +49,10 @@ ifeq ($(CONFIG_NET_ICMPv6_ROUTER),y)
 NET_CSRCS += icmpv6_radvertise.c
 endif
 
+ifneq ($(CONFIG_NET_ICMPv6_PMTU_ENTRIES), 0)
+NET_CSRCS += icmpv6_pmtu.c
+endif
+
 # Include ICMPv6 build support
 
 DEPPATH += --dep-path icmpv6

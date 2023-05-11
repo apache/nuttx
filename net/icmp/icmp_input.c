@@ -49,6 +49,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
+#include <sys/time.h>
 
 #include <net/if.h>
 #include <arpa/inet.h>
@@ -298,6 +299,39 @@ void icmp_input(FAR struct net_driver_s *dev)
     }
 #endif
 
+#if CONFIG_NET_ICMP_PMTU_ENTRIES > 0
+  else if (icmp->type == ICMP_DEST_UNREACHABLE)
+    {
+      if (icmp->icode == ICMP_FRAG_NEEDED)
+        {
+          FAR struct icmp_pmtu_entry *entry;
+          FAR struct ipv4_hdr_s *inner;
+          int mtu;
+
+          mtu = ntohs(icmp->data[0]) << 16 | ntohs(icmp->data[1]);
+          if (mtu <= 0)
+            {
+              goto typeerr;
+            }
+
+          inner = (FAR struct ipv4_hdr_s *)(icmp + 1);
+          entry = icmpv4_find_pmtu_entry(
+                        net_ip4addr_conv32(inner->destipaddr));
+          if (entry == NULL)
+            {
+              icmpv4_add_pmtu_entry(
+                net_ip4addr_conv32(inner->destipaddr), mtu);
+            }
+          else
+            {
+              entry->pmtu = mtu;
+            }
+
+          goto icmp_send_nothing;
+        }
+    }
+#endif
+
   /* Otherwise the ICMP input was not processed */
 
   else
@@ -319,6 +353,11 @@ drop:
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.drop++;
 #endif
+
+#if CONFIG_NET_ICMP_PMTU_ENTRIES > 0
+icmp_send_nothing:
+#endif
+
   dev->d_len = 0;
 }
 

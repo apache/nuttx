@@ -21,6 +21,19 @@ config NET_ICMP_NO_STACK
 
 if NET_ICMP && !NET_ICMP_NO_STACK
 
+config NET_ICMP_PMTU_ENTRIES
+	int "Path MTU Discovery (PMTUD) ICMP pmtu entry number"
+	default 0
+	---help---
+		The number of the ICMP pmtu entry
+
+config NET_ICMP_PMTU_TIMEOUT
+	int "Path MTU Discovery (PMTUD) ICMP pmtu entry timeout (Time Unit:minute)"
+	default 10
+	depends on NET_ICMP_PMTU_ENTRIES != 0
+	---help---
+		The timout of the ICMP pmtu entry
+
 config NET_ICMP_SOCKET
 	bool "IPPROTO_ICMP socket support"
 	default n

@@ -25,6 +25,10 @@ ifneq ($(CONFIG_NET_ICMP_NO_STACK),y)
 
 NET_CSRCS += icmp_input.c icmp_reply.c
 
+ifneq ($(CONFIG_NET_ICMP_PMTU_ENTRIES), 0)
+NET_CSRCS += icmp_pmtu.c
+endif
+
 ifeq ($(CONFIG_NET_ICMP_SOCKET),y)
 SOCK_CSRCS += icmp_sockif.c icmp_poll.c icmp_conn.c icmp_sendmsg.c
 SOCK_CSRCS += icmp_recvmsg.c icmp_netpoll.c icmp_ioctl.c

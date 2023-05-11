@@ -1236,7 +1236,7 @@ void ip_frag_remallfrags(void)
 
 int32_t ip_fragout(FAR struct net_driver_s *dev)
 {
-  uint16_t mtu = dev->d_pktsize - dev->d_llhdrlen;
+  uint16_t mtu = devif_get_mtu(dev);
 
   if (dev->d_iob == NULL || dev->d_len == 0)
     {

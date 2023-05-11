@@ -596,6 +596,22 @@ int devif_loopback(FAR struct net_driver_s *dev);
 int netdev_input(FAR struct net_driver_s *dev,
                  devif_poll_callback_t callback, bool reply);
 
+/****************************************************************************
+ * Name: devif_get_mtu
+ *
+ * Description:
+ *   Get mtu
+ *
+ * Parameters:
+ *   dev   Ethernet driver device structure
+ *
+ * Return:
+ *   return (Maximum packet size - Link layer header size),
+ *   if PMTUD enable return pmtu
+ ****************************************************************************/
+
+uint16_t devif_get_mtu(FAR struct net_driver_s *dev);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

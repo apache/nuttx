@@ -136,6 +136,13 @@ struct icmpv6_rnotify_s
 };
 #endif
 
+struct icmpv6_pmtu_entry
+{
+  net_ipv6addr_t daddr;
+  uint16_t pmtu;
+  clock_t time;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -782,6 +789,39 @@ void icmpv6_reply(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 int icmpv6_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 #endif
+
+/****************************************************************************
+ * Name: icmpv6_find_pmtu_entry
+ *
+ * Description:
+ *   Search for a ipv6 pmtu entry
+ *
+ * Parameters:
+ *   destipaddr   the IPv6 address of the destination
+ *
+ * Return:
+ *   void
+ ****************************************************************************/
+
+FAR struct icmpv6_pmtu_entry *
+icmpv6_find_pmtu_entry(net_ipv6addr_t destipaddr);
+
+/****************************************************************************
+ * Name: icmpv6_add_pmtu_entry
+ *
+ * Description:
+ *   Create a new ipv6 destination cache entry. If no unused entry is found,
+ *   will recycle oldest entry
+ *
+ * Parameters:
+ *   destipaddr   the IPv6 address of the destination
+ *   mtu          MTU
+ *
+ * Return:
+ *   void
+ ****************************************************************************/
+
+void icmpv6_add_pmtu_entry(net_ipv6addr_t destipaddr, int mtu);
 
 #undef EXTERN
 #ifdef __cplusplus
