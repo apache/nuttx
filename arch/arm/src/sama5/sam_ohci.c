@@ -266,6 +266,8 @@ struct sam_ohci_s
   volatile struct usbhost_hubport_s *hport;
 #endif
 
+  struct usbhost_devaddr_s devgen;  /* Address generation data */
+
   /* Root hub ports */
 
   struct sam_rhport_s rhport[SAM_OHCI_NRHPORT];
@@ -4068,6 +4070,10 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
       buffer += CONFIG_SAMA5_OHCI_TDBUFSIZE;
     }
 
+  /* Initialize function address generation logic */
+
+  usbhost_devaddr_initialize(&g_ohci.devgen);
+
   /* Initialize the root hub port structures */
 
   for (i = 0; i < SAM_OHCI_NRHPORT; i++)
@@ -4094,6 +4100,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
       rhport->drvr.connect        = sam_connect;
 #endif
       rhport->drvr.disconnect     = sam_disconnect;
+      rhport->hport.pdevgen       = &g_ohci.devgen;
 
       /* Initialize the public port representation */
 
@@ -4106,10 +4113,6 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
       hport->port                 = i;
       hport->speed                = USB_SPEED_FULL;
       hport->funcaddr             = 0;
-
-      /* Initialize function address generation logic */
-
-      usbhost_devaddr_initialize(&rhport->hport);
     }
 
   /* Wait 50MS then perform hardware reset */

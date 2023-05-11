@@ -300,6 +300,8 @@ struct kinetis_ehci_s
   volatile struct usbhost_hubport_s *hport;
 #endif
 
+  struct usbhost_devaddr_s devgen;  /* Address generation data */
+
   /* Root hub ports */
 
   struct kinetis_rhport_s rhport[KINETIS_EHCI_NRHPORT];
@@ -5072,6 +5074,10 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 
   usbhost_vtrace1(EHCI_VTRACE1_INITIALIZING, 0);
 
+  /* Initialize function address generation logic */
+
+  usbhost_devaddr_initialize(&g_ehci.devgen);
+
   /* Initialize the root hub port structures */
 
   for (i = 0; i < KINETIS_EHCI_NRHPORT; i++)
@@ -5098,6 +5104,7 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
       rhport->drvr.connect = kinetis_connect;
 #  endif
       rhport->drvr.disconnect = kinetis_disconnect;
+      rhport->hport.pdevgen   = &g_ehci.devgen;
 
       /* Initialize EP0 */
 
@@ -5116,10 +5123,6 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
       hport->ep0 = &rhport->ep0;
       hport->port = i;
       hport->speed = USB_SPEED_FULL;
-
-      /* Initialize function address generation logic */
-
-      usbhost_devaddr_initialize(&rhport->hport);
     }
 
 #  ifndef CONFIG_KINETIS_EHCI_PREALLOCATE

@@ -734,7 +734,7 @@ struct usbhost_roothubport_s
    */
 
   struct usbhost_hubport_s hport;       /* Common hub port definitions */
-  struct usbhost_devaddr_s devgen;      /* Address generation data */
+  struct usbhost_devaddr_s *pdevgen;    /* Address generation data pointer */
 };
 
 /* struct usbhost_class_s provides access from the USB host driver to the

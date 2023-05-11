@@ -256,6 +256,8 @@ struct sam_ehci_s
   volatile struct usbhost_hubport_s *hport;
 #endif
 
+  struct usbhost_devaddr_s devgen;  /* Address generation data */
+
   /* Root hub ports */
 
   struct sam_rhport_s rhport[SAM_EHCI_NRHPORT];
@@ -4827,6 +4829,10 @@ struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   usbhost_vtrace1(EHCI_VTRACE1_INITIALIZING, 0);
 
+  /* Initialize function address generation logic */
+
+  usbhost_devaddr_initialize(&g_ehci.devgen);
+
   /* Initialize the root hub port structures */
 
   for (i = 0; i < SAM_EHCI_NRHPORT; i++)
@@ -4853,6 +4859,7 @@ struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->drvr.connect        = sam_connect;
 #endif
       rhport->drvr.disconnect     = sam_disconnect;
+      rhport->hport.pdevgen       = &g_ehci.devgen;
 
       /* Initialize EP0 */
 
@@ -4871,10 +4878,6 @@ struct usbhost_connection_s *sam_ehci_initialize(int controller)
       hport->ep0                  = &rhport->ep0;
       hport->port                 = i;
       hport->speed                = USB_SPEED_FULL;
-
-      /* Initialize function address generation logic */
-
-      usbhost_devaddr_initialize(&rhport->hport);
     }
 
 #ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
