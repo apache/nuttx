@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * sched/mqueue/mqueue.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef __SCHED_MQUEUE_MQUEUE_H
 #define __SCHED_MQUEUE_MQUEUE_H
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -39,17 +39,17 @@
 
 #if defined(CONFIG_MQ_MAXMSGSIZE) && CONFIG_MQ_MAXMSGSIZE > 0
 
-/********************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
 #define MQ_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
 #define MQ_MAX_MSGS    16
 #define MQ_PRIO_MAX    _POSIX_MQ_PRIO_MAX
 
-/********************************************************************************
+/****************************************************************************
  * Public Type Definitions
- ********************************************************************************/
+ ****************************************************************************/
 
 enum mqalloc_e
 {
@@ -73,9 +73,9 @@ struct mqueue_msg_s
   char mail[MQ_MAX_BYTES]; /* Message data */
 };
 
-/********************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -97,23 +97,23 @@ EXTERN struct list_node g_msgfree;
 
 EXTERN struct list_node g_msgfreeirq;
 
-/********************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************/
+ ****************************************************************************/
 
 struct tcb_s;        /* Forward reference */
 struct task_group_s; /* Forward reference */
 
-/* Functions defined in mq_initialize.c *****************************************/
+/* Functions defined in mq_initialize.c *************************************/
 
 void nxmq_initialize(void);
 void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg);
 
-/* mq_waitirq.c *****************************************************************/
+/* mq_waitirq.c *************************************************************/
 
 void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
-/* mq_rcvinternal.c *************************************************************/
+/* mq_rcvinternal.c *********************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
 int nxmq_verify_receive(FAR struct file *mq, FAR char *msg, size_t msglen);
@@ -126,7 +126,7 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
                         FAR struct mqueue_msg_s *mqmsg,
                         FAR char *ubuffer, FAR unsigned int *prio);
 
-/* mq_sndinternal.c *************************************************************/
+/* mq_sndinternal.c *********************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
 int nxmq_verify_send(FAR struct file *mq, FAR const char *msg,
@@ -140,7 +140,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
                  FAR struct mqueue_msg_s *mqmsg,
                  FAR const char *msg, size_t msglen, unsigned int prio);
 
-/* mq_recover.c *****************************************************************/
+/* mq_recover.c *************************************************************/
 
 void nxmq_recover(FAR struct tcb_s *tcb);
 
