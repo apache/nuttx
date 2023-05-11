@@ -48,6 +48,7 @@
 #include "ipforward/ipforward.h"
 #include "sixlowpan/sixlowpan.h"
 #include "ipfrag/ipfrag.h"
+#include "inet/inet.h"
 
 /****************************************************************************
  * Private Types
@@ -1150,6 +1151,72 @@ int devif_poll_out(FAR struct net_driver_s *dev,
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: devif_get_mtu
+ *
+ * Description:
+ *   Get mtu
+ *
+ * Parameters:
+ *   dev   Ethernet driver device structure
+ *
+ * Return:
+ *   return (Maximum packet size - Link layer header size),
+ *   if PMTUD enable return pmtu
+ ****************************************************************************/
+
+uint16_t devif_get_mtu(FAR struct net_driver_s *dev)
+{
+  if (dev->d_iob == NULL || dev->d_len == 0)
+    {
+      return dev->d_pktsize - dev->d_llhdrlen;
+    }
+
+#if (defined(CONFIG_NET_IPv6) && \
+    defined(CONFIG_NET_ICMPv6) && \
+    !defined(CONFIG_NET_ICMPv6_NO_STACK) && \
+    CONFIG_NET_ICMPv6_PMTU_ENTRIES > 0)
+  if (IFF_IS_IPv6(dev->d_flags))
+    {
+      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
+      if (!net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_unspecaddr))
+        {
+          FAR struct icmpv6_pmtu_entry *entry =
+            icmpv6_find_pmtu_entry(ipv6->destipaddr);
+
+          if (entry != NULL)
+            {
+              return entry->pmtu;
+            }
+        }
+    }
+#  endif
+
+#if (defined(CONFIG_NET_IPv4) && \
+    defined(CONFIG_NET_ICMP) && \
+    !defined(CONFIG_NET_ICMP_NO_STACK) && \
+    CONFIG_NET_ICMP_PMTU_ENTRIES > 0)
+  if (IFF_IS_IPv4(dev->d_flags))
+    {
+      FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
+      if (!net_ipv4addr_cmp(ipv4->destipaddr, INADDR_ANY))
+        {
+          FAR struct icmp_pmtu_entry *entry =
+            icmpv4_find_pmtu_entry(net_ip4addr_conv32(ipv4->destipaddr));
+
+          if (entry != NULL)
+            {
+              return entry->pmtu;
+            }
+        }
+    }
+#  endif
+
+  return dev->d_pktsize - dev->d_llhdrlen;
 }
 
 #endif /* CONFIG_NET */

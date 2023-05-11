@@ -551,6 +551,34 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
       }
       break;
 
+#if (CONFIG_NET_ICMPv6_PMTU_ENTRIES > 0)
+    case ICMPv6_PACKET_TOO_BIG:
+      {
+        FAR struct icmpv6_pmtu_entry *entry;
+        FAR struct ipv6_hdr_s *inner;
+        int mtu;
+
+        mtu = (ntohs(icmpv6->data[0]) << 16) | (ntohs(icmpv6->data[1]));
+        if (mtu <= 0)
+          {
+            goto icmpv6_type_error;
+          }
+
+        inner = (FAR struct ipv6_hdr_s *)(icmpv6 + 1);
+        entry = icmpv6_find_pmtu_entry(inner->destipaddr);
+        if (entry == NULL)
+          {
+            icmpv6_add_pmtu_entry(inner->destipaddr, mtu);
+          }
+        else
+          {
+            entry->pmtu = mtu;
+          }
+
+        goto icmpv6_send_nothing;
+      }
+#endif
+
 #ifdef CONFIG_NET_MLD
     /* Dispatch received Multicast Listener Discovery (MLD) packets. */
 

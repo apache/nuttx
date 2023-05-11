@@ -104,6 +104,16 @@ struct icmp_conn_s
 };
 #endif
 
+#ifdef CONFIG_NET_IPv4
+struct icmp_pmtu_entry
+{
+  in_addr_t daddr;
+  uint16_t pmtu;
+  clock_t time;
+};
+
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -395,6 +405,38 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code);
 #ifdef CONFIG_NET_ICMP_SOCKET
 int icmp_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 #endif
+
+/****************************************************************************
+ * Name: icmpv4_find_pmtu_entry
+ *
+ * Description:
+ *   Search for a ipv4 destination cache entry
+ *
+ * Parameters:
+ *   destipaddr   the IPv4 address of the destination
+ *
+ * Return:
+ *   not null is success; null is failure
+ ****************************************************************************/
+
+FAR struct icmp_pmtu_entry *icmpv4_find_pmtu_entry(in_addr_t destipaddr);
+
+/****************************************************************************
+ * Name: icmpv4_add_pmtu_entry
+ *
+ * Description:
+ *   Create a new ipv4 destination cache entry. If no unused entry is found,
+ *   will recycle oldest entry
+ *
+ * Parameters:
+ *   destipaddr   the IPv4 address of the destination
+ *   mtu          MTU
+ *
+ * Return:
+ *   void
+ ****************************************************************************/
+
+void icmpv4_add_pmtu_entry(in_addr_t destipaddr, int mtu);
 
 #undef EXTERN
 #ifdef __cplusplus
