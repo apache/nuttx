@@ -67,5 +67,50 @@
 
 uintptr_t riscv_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr);
 
+/****************************************************************************
+ * Name: riscv_map_pages
+ *
+ * Description:
+ *   Map physical pages into a continuous virtual memory block.
+ *
+ * Input Parameters:
+ *   addrenv - Pointer to a structure describing the address environment.
+ *   pages - A pointer to the first element in a array of physical address,
+ *     each corresponding to one page of memory.
+ *   npages - The number of pages in the list of physical pages to be mapped.
+ *   vaddr - The virtual address corresponding to the beginning of the
+ *     (continuous) virtual address region.
+ *   prot - MMU flags to use.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int riscv_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
+                    unsigned int npages, uintptr_t vaddr, int prot);
+
+/****************************************************************************
+ * Name: riscv_unmap_pages
+ *
+ * Description:
+ *   Unmap a previously mapped virtual memory region.
+ *
+ * Input Parameters:
+ *   addrenv - Pointer to a structure describing the address environment.
+ *   vaddr - The virtual address corresponding to the beginning of the
+ *     (continuous) virtual address region.
+ *   npages - The number of pages to be unmapped
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int riscv_unmap_pages(arch_addrenv_t *addrenv, uintptr_t vaddr,
+                      unsigned int npages);
+
 #endif /* CONFIG_ARCH_ADDRENV */
 #endif /* __ARCH_RISC_V_SRC_COMMON_ADDRENV_H */
