@@ -1,4 +1,4 @@
-/*******************************************************************************
+/****************************************************************************
  * sched/task/task_terminate.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,11 +16,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,11 +37,11 @@
 #include "signal/signal.h"
 #include "task/task.h"
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- *******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: nxtask_terminate
  *
  * Description:
@@ -73,7 +73,7 @@
  *   This function can fail if the provided pid does not correspond to a
  *   task (errno is not set)
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int nxtask_terminate(pid_t pid)
 {
@@ -110,8 +110,8 @@ int nxtask_terminate(pid_t pid)
   nxtask_exithook(dtcb, EXIT_SUCCESS);
 
   /* Since all tasks pass through this function as the final step in their
-   * exit sequence, this is an appropriate place to inform any instrumentation
-   * layer that the task no longer exists.
+   * exit sequence, this is an appropriate place to inform any
+   * instrumentation layer that the task no longer exists.
    */
 
   sched_note_stop(dtcb);
