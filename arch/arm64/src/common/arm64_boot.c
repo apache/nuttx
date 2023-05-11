@@ -174,24 +174,8 @@ void arm64_boot_el1_init(void)
   ARM64_ISB();
 }
 
-/* These simple memset alternatives are necessary
- * as the function at libc is depend on the MMU
- * to be active.
- */
-
-static void boot_early_memset(void *dst, int c, size_t n)
-{
-  uint8_t *d = dst;
-
-  while (n--)
-    {
-      *d++ = c;
-    }
-}
-
 void arm64_boot_primary_c_routine(void)
 {
-  boot_early_memset(_START_BSS, 0, _END_BSS - _START_BSS);
   arm64_chip_boot();
   up_perf_init(NULL);
   nx_start();
