@@ -58,6 +58,7 @@
 
 static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
 static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_resumed[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -136,6 +137,10 @@ int up_cpu_paused(int cpu)
 
   spin_unlock(&g_cpu_paused[cpu]);
 
+  /* Ensure the CPU has been resumed to avoid causing a deadlock */
+
+  spin_lock(&g_cpu_resumed[cpu]);
+
   /* Wait for the spinlock to be released.  The requesting CPU will release
    * the spinlock when the CPU is resumed.
    */
@@ -164,6 +169,7 @@ int up_cpu_paused(int cpu)
 
   arm_restorestate(tcb->xcp.regs);
   spin_unlock(&g_cpu_wait[cpu]);
+  spin_unlock(&g_cpu_resumed[cpu]);
 
   return OK;
 }
@@ -320,6 +326,13 @@ int up_cpu_resume(int cpu)
               !spin_islocked(&g_cpu_paused[cpu]));
 
   spin_unlock(&g_cpu_wait[cpu]);
+
+  /* Ensure the CPU has been resumed to avoid causing a deadlock */
+
+  spin_lock(&g_cpu_resumed[cpu]);
+
+  spin_unlock(&g_cpu_resumed[cpu]);
+
   return OK;
 }
 
