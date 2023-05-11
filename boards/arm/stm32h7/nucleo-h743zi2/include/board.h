@@ -283,12 +283,6 @@
 
 #define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
 
-/* Ethernet definitions *****************************************************/
-
-#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2    /* PG13 */
-#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1    /* PB 13 */
-#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
-
 /* LED definitions **********************************************************/
 
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
@@ -355,66 +349,92 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* ADC */
+
+#define GPIO_ADC12_INP5   GPIO_ADC12_INP5_0                      /* PB1 */
+#define GPIO_ADC123_INP10 GPIO_ADC123_INP10_0                    /* PC0 */
+#define GPIO_ADC123_INP12 GPIO_ADC123_INP12_0                    /* PC2 */
+#define GPIO_ADC12_INP13  GPIO_ADC12_INP13_0                     /* PC3 */
+#define GPIO_ADC12_INP15  GPIO_ADC12_INP15_0                     /* PA3 */
+
 /* USART3 (Nucleo Virtual Console) */
 
-#define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
-#define GPIO_USART3_TX     GPIO_USART3_TX_3  /* PD8 */
+#define GPIO_USART3_RX    (GPIO_USART3_RX_3|GPIO_SPEED_100MHz)   /* PD9 */
+#define GPIO_USART3_TX    (GPIO_USART3_TX_3|GPIO_SPEED_100MHz)   /* PD8 */
 
 /* USART6 (Arduino Serial Shield) */
 
-#define GPIO_USART6_RX     GPIO_USART6_RX_2  /* PG9 */
-#define GPIO_USART6_TX     GPIO_USART6_TX_2  /* PG14 */
+#define GPIO_USART6_RX    (GPIO_USART6_RX_2|GPIO_SPEED_100MHz)   /* PG9 */
+#define GPIO_USART6_TX    (GPIO_USART6_TX_2|GPIO_SPEED_100MHz)   /* PG14 */
 
 /* I2C1 Use Nucleo I2C1 pins */
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB8 - D15 */
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB9 - D14 */
+#define GPIO_I2C1_SCL     (GPIO_I2C1_SCL_2|GPIO_SPEED_50MHz)     /* PB8 - D15 */
+#define GPIO_I2C1_SDA     (GPIO_I2C1_SDA_2|GPIO_SPEED_50MHz)     /* PB9 - D14 */
 
 /* I2C2 Use Nucleo I2C2 pins */
 
-#define GPIO_I2C2_SCL  GPIO_I2C2_SCL_2  /* PF1 - D69 */
-#define GPIO_I2C2_SDA  GPIO_I2C2_SDA_2  /* PF0 - D68 */
-#define GPIO_I2C2_SMBA GPIO_I2C2_SMBA_2 /* PF2 - D70 */
+#define GPIO_I2C2_SCL     (GPIO_I2C2_SCL_2|GPIO_SPEED_50MHz)     /* PF1 - D69 */
+#define GPIO_I2C2_SDA     (GPIO_I2C2_SDA_2|GPIO_SPEED_50MHz)     /* PF0 - D68 */
+#define GPIO_I2C2_SMBA    (GPIO_I2C2_SMBA_2|GPIO_SPEED_50MHz)    /* PF2 - D70 */
 
 /* SPI3 */
 
-#define GPIO_SPI3_MISO GPIO_SPI3_MISO_1 /* PB4 */
-#define GPIO_SPI3_MOSI GPIO_SPI3_MOSI_4 /* PB5 */
-#define GPIO_SPI3_SCK  GPIO_SPI3_SCK_1  /* PB3 */
-#define GPIO_SPI3_NSS  GPIO_SPI3_NSS_2  /* PA4 */
+#define GPIO_SPI3_MISO    (GPIO_SPI3_MISO_1|GPIO_SPEED_50MHz)    /* PB4 */
+#define GPIO_SPI3_MOSI    (GPIO_SPI3_MOSI_4|GPIO_SPEED_50MHz)    /* PB5 */
+#define GPIO_SPI3_SCK     (GPIO_SPI3_SCK_1|GPIO_SPEED_50MHz)     /* PB3 */
+#define GPIO_SPI3_NSS     (GPIO_SPI3_NSS_2|GPIO_SPEED_50MHz)     /* PA4 */
 
 /* TIM1 */
 
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2  /* PE9  - D6 */
-#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1NOUT_3 /* PE8  - D42 */
-#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2  /* PE11 - D5 */
-#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2NOUT_3 /* PE10 - D40 */
+#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_2|GPIO_SPEED_50MHz)  /* PE9  - D6 */
+#define GPIO_TIM1_CH1NOUT (GPIO_TIM1_CH1NOUT_3|GPIO_SPEED_50MHz) /* PE8  - D42 */
+#define GPIO_TIM1_CH2OUT  (GPIO_TIM1_CH2OUT_2|GPIO_SPEED_50MHz)  /* PE11 - D5 */
+#define GPIO_TIM1_CH2NOUT (GPIO_TIM1_CH2NOUT_3|GPIO_SPEED_50MHz) /* PE10 - D40 */
 
-#define GPIO_TIM1_CH1IN GPIO_TIM1_CH1IN_2      /* PE9 */
-#define GPIO_TIM1_CH2IN GPIO_TIM1_CH2IN_2      /* PE11 */
+#define GPIO_TIM1_CH1IN   (GPIO_TIM1_CH1IN_2|GPIO_SPEED_50MHz)   /* PE9 */
+#define GPIO_TIM1_CH2IN   (GPIO_TIM1_CH2IN_2|GPIO_SPEED_50MHz)   /* PE11 */
 
 /* TIM3 */
 
-#define GPIO_TIM3_CH1OUT  GPIO_TIM3_CH1OUT_2   /* PB4  */
-#define GPIO_TIM3_CH2OUT  GPIO_TIM3_CH2OUT_2   /* PB5  */
+#define GPIO_TIM3_CH1OUT  (GPIO_TIM3_CH1OUT_2|GPIO_SPEED_50MHz)  /* PB4  */
+#define GPIO_TIM3_CH2OUT  (GPIO_TIM3_CH2OUT_2|GPIO_SPEED_50MHz)  /* PB5  */
 
-#define GPIO_TIM3_CH1IN GPIO_TIM3_CH1IN_2      /* PA4 */
-#define GPIO_TIM3_CH2IN GPIO_TIM3_CH2IN_2      /* PB5 */
+#define GPIO_TIM3_CH1IN   (GPIO_TIM3_CH1IN_2|GPIO_SPEED_50MHz)   /* PA4 */
+#define GPIO_TIM3_CH2IN   (GPIO_TIM3_CH2IN_2|GPIO_SPEED_50MHz)   /* PB5 */
 
 /* TIM4 */
 
-#define GPIO_TIM4_CH1IN GPIO_TIM4_CH1IN_2      /* PD12 */
-#define GPIO_TIM4_CH2IN GPIO_TIM4_CH2IN_2      /* PD13 */
+#define GPIO_TIM4_CH1IN   (GPIO_TIM4_CH1IN_2|GPIO_SPEED_50MHz)   /* PD12 */
+#define GPIO_TIM4_CH2IN   (GPIO_TIM4_CH2IN_2|GPIO_SPEED_50MHz)   /* PD13 */
 
 /* FDCAN1 */
 
-#define GPIO_CAN1_RX GPIO_CAN1_RX_3 /* PD0 */
-#define GPIO_CAN1_TX GPIO_CAN1_TX_3 /* PD1 */
+#define GPIO_CAN1_RX      (GPIO_CAN1_RX_3|GPIO_SPEED_50MHz)      /* PD0 */
+#define GPIO_CAN1_TX      (GPIO_CAN1_TX_3|GPIO_SPEED_50MHz)      /* PD1 */
 
 /* FDCAN2 */
 
-#define GPIO_CAN2_RX GPIO_CAN2_RX_2 /* PB5 - D11 */
-#define GPIO_CAN2_TX GPIO_CAN2_TX_2 /* PB6 - D1 */
+#define GPIO_CAN2_RX      (GPIO_CAN2_RX_2|GPIO_SPEED_50MHz)      /* PB5 - D11 */
+#define GPIO_CAN2_TX      (GPIO_CAN2_TX_2|GPIO_SPEED_50MHz)      /* PB6 - D1 */
+
+/* OTG */
+
+#define GPIO_OTGFS_DM     (GPIO_OTGFS_DM_0|GPIO_SPEED_100MHz)    /* PA11 */
+#define GPIO_OTGFS_DP     (GPIO_OTGFS_DP_0|GPIO_SPEED_100MHz)    /* PA12 */
+#define GPIO_OTGFS_ID     (GPIO_OTGFS_ID_0|GPIO_SPEED_100MHz)    /* PA10 */
+
+/* Ethernet */
+
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_2|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2|GPIO_SPEED_100MHz)
 
 /* DMA **********************************************************************/
 

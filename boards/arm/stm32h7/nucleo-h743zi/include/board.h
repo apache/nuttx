@@ -371,9 +371,6 @@
 #define GPIO_USART6_RX    (GPIO_USART6_RX_2 | GPIO_SPEED_100MHz) /* PG9 */
 #define GPIO_USART6_TX    (GPIO_USART6_TX_2 | GPIO_SPEED_100MHz) /* PG14 */
 
-#define DMAMAP_USART6_RX DMAMAP_DMA12_USART6RX_1
-#define DMAMAP_USART6_TX DMAMAP_DMA12_USART6TX_0
-
 /* I2C1 Use Nucleo I2C1 pins */
 
 #define GPIO_I2C1_SCL     (GPIO_I2C1_SCL_2 | GPIO_SPEED_50MHz) /* PB8 - D15 */
@@ -412,6 +409,9 @@
 
 #define DMAMAP_SPI3_RX DMAMAP_DMA12_SPI3RX_0 /* DMA1 */
 #define DMAMAP_SPI3_TX DMAMAP_DMA12_SPI3TX_0 /* DMA1 */
+
+#define DMAMAP_USART6_RX DMAMAP_DMA12_USART6RX_1
+#define DMAMAP_USART6_TX DMAMAP_DMA12_USART6TX_0
 
 /****************************************************************************
  * Public Data

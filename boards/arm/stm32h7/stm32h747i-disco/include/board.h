@@ -307,25 +307,6 @@
        FMC_SDCMR_MRD_CAS_LATENCY_2 |\
        FMC_SDCMR_MRD_WRITEBURST_MODE_SINGLE)
 
-#define BOARD_FMC_GPIO_CONFIGS \
-       GPIO_FMC_A0, GPIO_FMC_A1, GPIO_FMC_A2, GPIO_FMC_A3, \
-       GPIO_FMC_A4, GPIO_FMC_A5, GPIO_FMC_A6, GPIO_FMC_A7, \
-       GPIO_FMC_A8, GPIO_FMC_A9, GPIO_FMC_A10, GPIO_FMC_A11, \
-       GPIO_FMC_A12, \
-       GPIO_FMC_D0, GPIO_FMC_D1, GPIO_FMC_D2, GPIO_FMC_D3, \
-       GPIO_FMC_D4, GPIO_FMC_D5, GPIO_FMC_D6, GPIO_FMC_D7, \
-       GPIO_FMC_D8, GPIO_FMC_D9, GPIO_FMC_D10, GPIO_FMC_D11, \
-       GPIO_FMC_D12, GPIO_FMC_D13, GPIO_FMC_D14, GPIO_FMC_D15, \
-       GPIO_FMC_D16, GPIO_FMC_D17, GPIO_FMC_D18, GPIO_FMC_D19, \
-       GPIO_FMC_D20, GPIO_FMC_D21, GPIO_FMC_D22, GPIO_FMC_D23, \
-       GPIO_FMC_D24, GPIO_FMC_D25, GPIO_FMC_D26, GPIO_FMC_D27, \
-       GPIO_FMC_D28, GPIO_FMC_D29, GPIO_FMC_D30, GPIO_FMC_D31, \
-       GPIO_FMC_NBL0, GPIO_FMC_NBL1, GPIO_FMC_NBL2, GPIO_FMC_NBL3, \
-       GPIO_FMC_BA0, GPIO_FMC_BA1, \
-       GPIO_FMC_SDNCAS, GPIO_FMC_SDNRAS, \
-       GPIO_FMC_SDNWE_3, GPIO_FMC_SDNE1_2, GPIO_FMC_SDCKE1_2, \
-       GPIO_FMC_SDCLK
-
 /* LED definitions **********************************************************/
 
 /* The board has 4 user LEDs.
@@ -390,17 +371,78 @@
 
 /* USART1 ( Console) */
 
-#define GPIO_USART1_RX     GPIO_USART1_RX_2  /* PA10 */
-#define GPIO_USART1_TX     GPIO_USART1_TX_2  /* PA9 */
+#define GPIO_USART1_RX     (GPIO_USART1_RX_2|GPIO_SPEED_100MHz)  /* PA10 */
+#define GPIO_USART1_TX     (GPIO_USART1_TX_2|GPIO_SPEED_100MHz)  /* PA9 */
 
 /* UART4 ( PMOD/STMOD ) */
 
-#define GPIO_UART4_CTS     GPIO_UART4_CTS_2  /* PB15 */
-#define GPIO_UART4_RTS     GPIO_UART4_RTS_2  /* PB14 */
-#define GPIO_UART4_RX      GPIO_UART4_RX_1   /* PA11 */
-#define GPIO_UART4_TX      GPIO_UART4_TX_1   /* PA12 */
-#define GPIO_UART4_SHUTD   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                           GPIO_PORTJ | GPIO_PIN13)
+#define GPIO_UART4_CTS     GPIO_UART4_CTS_2                      /* PB15 */
+#define GPIO_UART4_RTS     GPIO_UART4_RTS_2                      /* PB14 */
+#define GPIO_UART4_RX      (GPIO_UART4_RX_1|GPIO_SPEED_100MHz)   /* PA11 */
+#define GPIO_UART4_TX      (GPIO_UART4_TX_1|GPIO_SPEED_100MHz)   /* PA12 */
+#define GPIO_UART4_SHUTD   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                            GPIO_OUTPUT_CLEAR | GPIO_PORTJ | GPIO_PIN13)
+
+/* FMC pins */
+
+#define BOARD_FMC_GPIO_CONFIGS                  \
+    (GPIO_FMC_A0|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A1|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A2|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A3|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A4|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A5|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A6|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A7|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A8|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A9|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_A10|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_A11|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_A12|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D0|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D1|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D2|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D3|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D4|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D5|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D6|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D7|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D8|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D9|GPIO_SPEED_100MHz),            \
+    (GPIO_FMC_D10|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D11|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D12|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D13|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D14|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D15|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D16|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D17|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D18|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D19|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D20|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D21|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D22|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D23|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D24|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D25|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D26|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D27|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D28|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D29|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D30|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_D31|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_NBL0|GPIO_SPEED_100MHz),          \
+    (GPIO_FMC_NBL1|GPIO_SPEED_100MHz),          \
+    (GPIO_FMC_NBL2|GPIO_SPEED_100MHz),          \
+    (GPIO_FMC_NBL3|GPIO_SPEED_100MHz),          \
+    (GPIO_FMC_BA0|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_BA1|GPIO_SPEED_100MHz),           \
+    (GPIO_FMC_SDNCAS|GPIO_SPEED_100MHz),        \
+    (GPIO_FMC_SDNRAS|GPIO_SPEED_100MHz),        \
+    (GPIO_FMC_SDNWE_3|GPIO_SPEED_100MHz),       \
+    (GPIO_FMC_SDNE1_2|GPIO_SPEED_100MHz),       \
+    (GPIO_FMC_SDCKE1_2|GPIO_SPEED_100MHz),      \
+    (GPIO_FMC_SDCLK|GPIO_SPEED_100MHz)
 
 /****************************************************************************
  * Public Data
