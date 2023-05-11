@@ -293,6 +293,8 @@ struct lpc43_ehci_s
   volatile struct usbhost_hubport_s *hport;
 #endif
 
+  struct usbhost_devaddr_s devgen;  /* Address generation data */
+
   /* Root hub ports */
 
   struct lpc43_rhport_s rhport[LPC43_EHCI_NRHPORT];
@@ -4849,6 +4851,10 @@ struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
 
   usbhost_vtrace1(EHCI_VTRACE1_INITIALIZING, 0);
 
+  /* Initialize function address generation logic */
+
+  usbhost_devaddr_initialize(&g_ehci.devgen);
+
   /* Initialize the root hub port structures */
 
   for (i = 0; i < LPC43_EHCI_NRHPORT; i++)
@@ -4875,6 +4881,7 @@ struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
       rhport->drvr.connect        = lpc43_connect;
 #endif
       rhport->drvr.disconnect     = lpc43_disconnect;
+      rhport->hport.pdevgen       = &g_ehci.devgen;
 
       /* Initialize EP0 */
 
@@ -4893,10 +4900,6 @@ struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
       hport->ep0                  = &rhport->ep0;
       hport->port                 = i;
       hport->speed                = USB_SPEED_FULL;
-
-      /* Initialize function address generation logic */
-
-      usbhost_devaddr_initialize(&rhport->hport);
     }
 
 #ifndef CONFIG_LPC43_EHCI_PREALLOCATE

@@ -81,14 +81,15 @@ struct usbhost_roothubport_s; /* Forward reference */
  *   hub port.
  *
  * Input Parameters:
- *   rhport - A reference to a roothubport structure.
+ *   devgen - A reference to a usbhost_devaddr_s structure.
  *
  * Returned Value:
- *   None
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  ****************************************************************************/
 
-void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport);
+int usbhost_devaddr_initialize(FAR struct usbhost_devaddr_s *devgen);
 
 /****************************************************************************
  * Name: usbhost_devaddr_create

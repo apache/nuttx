@@ -106,6 +106,8 @@ struct sim_usbhost_s
 
   mutex_t                       lock;               /* Support mutually exclusive access */
   sem_t                         pscsem;             /* Semaphore to wait for port status change events */
+
+  struct usbhost_devaddr_s      devgen;              /* Address generation data */
 };
 
 /****************************************************************************
@@ -700,7 +702,8 @@ int sim_usbhost_initialize(void)
 
   /* Initialize function address generation logic */
 
-  usbhost_devaddr_initialize(&priv->hport);
+  usbhost_devaddr_initialize(&priv->devgen);
+  priv->hport.pdevgen = &priv->devgen;
 
   /* Initialize host usb controller */
 
