@@ -687,7 +687,7 @@ static int lpc43_erase(struct mtd_dev_s *dev,
                        off_t startblock, size_t nblocks)
 {
 #ifdef CONFIG_SPIFI_READONLY
-  return -EACESS
+  return -EACCES;
 #else
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
   size_t blocksleft = nblocks;

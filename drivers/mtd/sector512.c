@@ -247,7 +247,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev,
                       size_t nsectors)
 {
 #ifdef CONFIG_MTD_SECT512_READONLY
-  return -EACESS
+  return -EACCES;
 #else
   FAR struct s512_dev_s *priv = (FAR struct s512_dev_s *)dev;
   FAR uint8_t *dest;
@@ -370,7 +370,7 @@ static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512,
                            FAR const uint8_t *buffer)
 {
 #ifdef CONFIG_MTD_SECT512_READONLY
-  return -EACCESS;
+  return -EACCES;
 #else
   FAR struct s512_dev_s *priv = (FAR struct s512_dev_s *)dev;
   ssize_t remaining;
