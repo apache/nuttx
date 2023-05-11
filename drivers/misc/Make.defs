@@ -76,6 +76,10 @@ ifneq ($(CONFIG_DEV_OPTEE_NONE),y)
   CSRCS += optee.c
 endif
 
+ifeq ($(CONFIG_GOLDFISH_PIPE),y)
+  CSRCS += goldfish_pipe.c
+endif
+
 # Include build support
 
 DEPPATH += --dep-path misc
