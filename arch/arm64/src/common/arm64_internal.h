@@ -91,6 +91,25 @@
 #define STACK_COLOR    0xdeaddead
 #define HEAP_COLOR     'h'
 
+/* AArch64 the stack-pointer must be 128-bit aligned */
+
+#define STACK_ALIGNMENT     16
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+#ifdef CONFIG_SMP
+/* The size of interrupt and idle stack.  This is the configured
+ * value aligned the 8-bytes as required by the ARM EABI.
+ */
+
+#  define SMP_STACK_SIZE    STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE)
+#  define SMP_STACK_WORDS   (SMP_STACK_SIZE >> 2)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -112,16 +131,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* AArch64 the stack-pointer must be 128-bit aligned */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 #define INIT_STACK_DEFINE(sym, size) \
     char locate_data(".initstack") \
      aligned_data(STACK_ALIGNMENT) sym[size]
@@ -142,12 +151,6 @@ extern "C"
 #define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
 #ifdef CONFIG_SMP
-
-/* The size of interrupt and idle stack.  This is the configured
- * value aligned the 8-bytes as required by the ARM EABI.
- */
-
-#define SMP_STACK_SIZE       STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE)
 
 INIT_STACK_ARRAY_DEFINE_EXTERN(g_cpu_idlestackalloc, CONFIG_SMP_NCPUS,
                           SMP_STACK_SIZE);
