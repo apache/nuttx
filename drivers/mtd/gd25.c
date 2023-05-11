@@ -753,7 +753,7 @@ static int gd25_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks)
 {
 #ifdef CONFIG_GD25_READONLY
-  return -EACESS
+  return -EACCES;
 #else
   FAR struct gd25_dev_s *priv = (FAR struct gd25_dev_s *)dev;
   size_t blocksleft = nblocks;
