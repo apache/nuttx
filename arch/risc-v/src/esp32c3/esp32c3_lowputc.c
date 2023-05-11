@@ -766,6 +766,12 @@ void esp32c3_lowputc_config_pins(const struct esp32c3_uart_s *priv)
 {
   /* Configure the pins */
 
+  /* Keep TX pin in high level to avoid "?" trash character
+   * This "?" is the Unicode replacement character (U+FFFD)
+   */
+
+  esp32c3_gpiowrite(priv->txpin, true);
+
   esp32c3_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
   esp32c3_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
 

@@ -1885,6 +1885,11 @@ static void esp32_config_pins(struct esp32_dev_s *priv)
    * But only one GPIO pad can connect with input signal
    */
 
+  /* Keep TX pin in high level to avoid "?" trash character
+   * This "?" is the Unicode replacement character (U+FFFD)
+   */
+
+  esp32_gpiowrite(priv->config->txpin, true);
   esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
   esp32_gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
 

@@ -683,6 +683,12 @@ void esp32s2_lowputc_config_pins(const struct esp32s2_uart_s *priv)
 {
   /* Configure the pins */
 
+  /* Keep TX pin in high level to avoid "?" trash character
+   * This "?" is the Unicode replacement character (U+FFFD)
+   */
+
+  esp32s2_gpiowrite(priv->txpin, true);
+
   /* Route UART TX signal to the selected TX pin */
 
   esp32s2_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
