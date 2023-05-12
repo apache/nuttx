@@ -1340,9 +1340,13 @@ void u16550_serialinit(void)
 int up_putc(int ch)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)CONSOLE_DEV.priv;
-  uart_datawidth_t ier;
+  irqstate_t flags;
 
-  u16550_disableuartint(priv, &ier);
+  /* All interrupts must be disabled to prevent re-entrancy and to prevent
+   * interrupts from firing in the serial driver code.
+   */
+
+  flags = enter_critical_section();
 
   /* Check for LF */
 
@@ -1354,7 +1358,8 @@ int up_putc(int ch)
     }
 
   u16550_putc(priv, ch);
-  u16550_restoreuartint(priv, ier);
+  leave_critical_section(flags);
+
   return ch;
 }
 #endif
