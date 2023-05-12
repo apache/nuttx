@@ -3,6 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config RISCV_STRING_FUNCTION
+	bool "Enable optimized RISC-V specific string function"
+	default n
+	depends on ARCH_TOOLCHAIN_GNU
+	select RISCV_MEMCPY
+	select RISCV_MEMSET
+	select RISCV_STRCMP
+
 config RISCV_MEMCPY
 	bool "Enable optimized memcpy() for RISC-V"
 	select LIBC_ARCH_MEMCPY
