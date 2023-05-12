@@ -162,6 +162,18 @@ ifeq ($(CONFIG_LTO_FULL),y)
   endif
 endif
 
+# Workaround for GCC-12.2 linker warning
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+  ifeq ($(GCCVER),)
+    export GCCVER := $(shell $(CC) --version | grep gcc | sed -r "s/.* ([0-9]+\.[0-9]+).*/\1/")
+  endif
+
+  ifeq ($(GCCVER),12.2)
+    LDFLAGS += --no-warn-rwx-segments
+  endif
+endif
+
 # Add the builtin library
 
 EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))
