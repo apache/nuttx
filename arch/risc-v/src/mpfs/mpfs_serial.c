@@ -99,6 +99,9 @@
 #  undef  CONFIG_UART2_SERIAL_CONSOLE
 #  undef  CONFIG_UART3_SERIAL_CONSOLE
 #  undef  CONFIG_UART4_SERIAL_CONSOLE
+#  undef  CONFIG_UART5_SERIAL_CONSOLE
+#  undef  CONFIG_UART6_SERIAL_CONSOLE
+#  undef  CONFIG_UART7_SERIAL_CONSOLE
 #  if defined(CONFIG_MPFS_UART0)
 #    define SERIAL_CONSOLE  1
 #  elif defined(CONFIG_MPFS_UART1)
@@ -782,10 +785,17 @@ static void up_enable_uart(struct up_dev_s *priv, bool enable)
     }
   else
     {
-      /* clock off */
+      /* clock off for non-fpga */
 
-      modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET,
-                 clock_bit, 0);
+      if (!priv->fpga)
+        {
+          /* Turning off FPGA clk would disable it for all other FPGA
+           * peripherals as well. Don't touch it without refcnt mechanism.
+           */
+
+          modifyreg32(MPFS_SYSREG_BASE + MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET,
+                      clock_bit, 0);
+        }
     }
 }
 
