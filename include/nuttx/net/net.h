@@ -228,6 +228,9 @@ struct socket_conn_s
 
   uint8_t       s_tos;       /* IPv4 Type of Service */
 #define s_tclass s_tos       /* IPv6 traffic class defination */
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+  uint8_t       ttl;         /* Default time-to-live */
+#endif
 
   /* Connection-specific content may follow */
 };

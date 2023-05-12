@@ -227,7 +227,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   ipv6udp.ipv6.tcf    = 0x00;
   ipv6udp.ipv6.flow   = 0x00;
   ipv6udp.ipv6.proto  = IP_PROTO_UDP;
-  ipv6udp.ipv6.ttl    = conn->ttl;
+  ipv6udp.ipv6.ttl    = conn->sconn.ttl;
 
   /* The IPv6 header length field does not include the size of IPv6 IP
    * header.
