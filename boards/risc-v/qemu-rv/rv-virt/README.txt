@@ -57,10 +57,13 @@
   ...
   nsh>
 
-4. Run the nuttx network with qemu
+4. Run the virtio network and block driver with qemu
+
+  $ dd if=/dev/zero of=./mydisk-1gb.img bs=1M count=1024
 
   $ qemu-system-riscv32 -semihosting -M virt,aclint=on -cpu rv32 -smp 8 \
   -global virtio-mmio.force-legacy=false \
+  -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd -device virtio-blk-device,drive=hd \
   -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
   -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
   -bios none -kernel nuttx -nographic
@@ -69,6 +72,7 @@
 
   $ qemu-system-riscv64 -semihosting -M virt,aclint=on -cpu rv64 -smp 8 \
   -global virtio-mmio.force-legacy=false \
+  -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd -device virtio-blk-device,drive=hd \
   -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
   -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
   -bios none -kernel nuttx -nographic
