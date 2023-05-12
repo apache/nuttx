@@ -883,15 +883,15 @@ static inline void sam_config_gclks(void)
  *   Setup PM main clock dividers to generate CPU, AHB, and APB clocks.
  *   Depends on:
  *
- *  BOARD_CPU_DIVIDER   - See PM_CPUSEL_CPUDIV_* definitions
- *  BOARD_CPU_FRQUENCY  - In Hz
- *  BOARD_CPU_FAILDECT  - Boolean (defined / not defined)
- *  BOARD_APBA_DIVIDER  - See M_APBASEL_APBADIV_* definitions
- *  BOARD_APBA_FRQUENCY - In Hz
- *  BOARD_APBB_DIVIDER  - See M_APBBSEL_APBBDIV_* definitions
- *  BOARD_APBB_FRQUENCY - In Hz
- *  BOARD_APBC_DIVIDER  - See M_APBCSEL_APBCDIV_* definitions
- *  BOARD_APBC_FRQUENCY - In Hz
+ *  BOARD_CPU_DIVIDER    - See PM_CPUSEL_CPUDIV_* definitions
+ *  BOARD_CPU_FREQUENCY  - In Hz
+ *  BOARD_CPU_FAILDECT   - Boolean (defined / not defined)
+ *  BOARD_APBA_DIVIDER   - See M_APBASEL_APBADIV_* definitions
+ *  BOARD_APBA_FREQUENCY - In Hz
+ *  BOARD_APBB_DIVIDER   - See M_APBBSEL_APBBDIV_* definitions
+ *  BOARD_APBB_FREQUENCY - In Hz
+ *  BOARD_APBC_DIVIDER   - See M_APBCSEL_APBCDIV_* definitions
+ *  BOARD_APBC_FREQUENCY - In Hz
  *
  * Input Parameters:
  *   None

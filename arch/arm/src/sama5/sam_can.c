@@ -1639,7 +1639,7 @@ static int can_bittiming(struct sam_can_s *priv)
    * selected Tq value, the desired BAUD and the CAN peripheral clock
    * frequency.
    *
-   *   Tq   = (BRP + 1) / CAN_FRQUENCY
+   *   Tq   = (BRP + 1) / CAN_FREQUENCY
    *   Tbit = Nquanta * (BRP + 1) / Fcan
    *   baud = Fcan / (Nquanta * (brp + 1))
    *   brp  = Fcan / (baud * nquanta) - 1

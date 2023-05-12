@@ -62,7 +62,7 @@
 /* On-board crystals */
 
 #define BOARD_XTAL_FREQUENCY        12000000 /* 12MHz XTAL */
-#define BOARD_RTC_XTAL_FRQUENCY     32769    /* 32.768KHz RTC XTAL */
+#define BOARD_RTC_XTAL_FREQUENCY    32769    /* 32.768KHz RTC XTAL */
 
 /* TODO: enable the RTC osc, use RTC for time/date
  */
