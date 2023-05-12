@@ -66,4 +66,5 @@ Character device drivers have these properties:
   note.rst
   foc.rst
   ws2812.rst
+  se05x.rst
 

@@ -74,3 +74,60 @@ config DEV_URANDOM_ARCH
 
 endchoice # /dev/urandom algorithm
 endif # DEV_URANDOM
+
+menuconfig DEV_SE05X
+	bool "Enable secure element (SE05X)"
+	depends on I2C
+	depends on CRYPTO
+	default n
+	---help---
+		Enable support for /dev/se05x secure element provided by NXP SE050
+		or SE051
+
+if DEV_SE05X
+
+choice
+	prompt "Channel communication interface"
+	default DEV_SE05X_PLAIN
+	---help---
+		Select authentication method
+
+config DEV_SE05X_SCP03
+	bool "SCP03 secure channel (TBI)"
+	select CRYPTO_RANDOM_POOL
+	select CRYPTO_AES
+
+config DEV_SE05X_PLAIN
+	bool "plain communication"
+
+endchoice
+
+config DEV_SE05X_SCP03_KEY_FILE
+	string "SCP03 keys"
+	depends on DEV_SE05X_SCP03
+	default "/host/path/to/key_file"
+	---help---
+		Specify file containing the keys needed with SCP03 channel authentication.
+		Location may be relative to the NuttX root folder. File should contain
+		the definitions for SCP03_ENC_KEY, SCP03_MAC_KEY and SCP03_DEK_KEY as
+		byte array initializers.
+
+choice SE05X_LOG_LEVEL
+	prompt "SE05x debug log level"
+	default SE05X_LOG_NONE
+	---help---
+		The SE05x log is divided into the following levels: ERROR,WARNING,INFO,DEBUG.
+
+	config SE05X_LOG_NONE
+		bool "No output"
+	config SE05X_LOG_ERROR
+		bool "Error"
+	config SE05X_LOG_WARNING
+		bool "Warning"
+	config SE05X_LOG_INFO
+		bool "Info"
+	config SE05X_LOG_DEBUG
+		bool "Debug"
+endchoice
+
+endif #DEV_SE05X

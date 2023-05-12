@@ -1,0 +1,77 @@
+############################################################################
+# drivers/crypto/pnt/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+PNT_GIT_COMMIT_HASH = d7323c25d967edb0ff1957459586850f447eb8c5
+PNT_DOWNLOAD_URL = https://github.com/NXPPlugNTrust/nano-package/archive/$(PNT_GIT_COMMIT_HASH).zip
+PNT_WRAPPER_DIR = crypto/pnt
+PNT_NANO_ZIP = $(PNT_WRAPPER_DIR)/pnt_$(PNT_GIT_COMMIT_HASH).zip
+PNT_NANO_DIR = $(PNT_WRAPPER_DIR)/nano-package
+
+PNT_INCDIRS = \
+	-I. \
+	-I$(PNT_WRAPPER_DIR) \
+	-I$(PNT_NANO_DIR)/lib/apdu \
+	-I$(PNT_NANO_DIR)/lib/t1oi2c \
+
+CSRCS += \
+	$(PNT_WRAPPER_DIR)/pnt_se05x_api.c \
+	$(PNT_WRAPPER_DIR)/pnt_util.c \
+	$(PNT_WRAPPER_DIR)/sm_i2c.c \
+	$(PNT_WRAPPER_DIR)/sm_timer.c \
+	$(PNT_NANO_DIR)/lib/apdu/smCom.c \
+	$(PNT_NANO_DIR)/lib/apdu/se05x_tlv.c \
+	$(PNT_NANO_DIR)/lib/apdu/se05x_APDU_impl.c \
+	$(PNT_NANO_DIR)/lib/t1oi2c/phNxpEse_Api.c \
+	$(PNT_NANO_DIR)/lib/t1oi2c/phNxpEseProto7816_3.c \
+	$(PNT_NANO_DIR)/lib/t1oi2c/phNxpEsePal_i2c.c \
+
+ifeq ($(CONFIG_DEV_SE05X_SCP03),y)
+	PNT_INCDIRS += -I$(PNT_NANO_DIR)/lib/apdu/scp03
+	CFLAGS += DWITH_PLATFORM_SCP03
+	CSRCS += hcrypto.c $(PNT_NANO_DIR)/lib/apdu/scp03/se05x_scp03.c
+endif
+
+CFLAGS += $(PNT_INCDIRS) -DT1oI2C -DT1oI2C_UM11225 -DAX_EMBEDDED=0
+
+UNPACK ?= unzip -q -o
+
+PATCH ?= patch -p1
+
+$(PNT_NANO_ZIP):
+	@echo "Downloading: $(PNT_DOWNLOAD_URL)"
+	$(Q) curl -o $(PNT_NANO_ZIP) -L $(PNT_DOWNLOAD_URL)
+
+$(PNT_NANO_DIR): $(PNT_NANO_ZIP)
+	@echo "Unpacking: $(PNT_NANO_ZIP) -> $(PNT_NANO_DIR)"
+	$(Q) $(UNPACK) $(PNT_NANO_ZIP) -d $(PNT_WRAPPER_DIR)
+	$(call DELDIR, $(PNT_NANO_DIR))
+	$(Q) mv -T $(PNT_NANO_DIR)-$(PNT_GIT_COMMIT_HASH) $(PNT_NANO_DIR)
+	$(Q) $(foreach PATCH_FILE, $(sort $(wildcard $(PNT_WRAPPER_DIR)/*.patch)), $(PATCH) -d $(PNT_NANO_DIR) < $(PATCH_FILE);)
+
+context:: $(PNT_NANO_DIR)
+
+distclean::
+	$(call DELFILE, $(PNT_NANO_ZIP))
+	$(call DELDIR, $(PNT_NANO_DIR))
+
+# Include crypto device driver build support
+
+DEPPATH += --dep-path crypto
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)crypto$(DELIM)pnt}
