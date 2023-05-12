@@ -86,28 +86,17 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       /* Handle MLD-related socket options */
 
       case IPV6_JOIN_GROUP:       /* Join a multicast group */
-        {
-          FAR const struct ipv6_mreq *mrec ;
-
-          mrec = (FAR const struct ipv6_mreq *)value;
-          ret = mld_joingroup(mrec);
-        }
+        ret = mld_joingroup(value);
         break;
 
       case IPV6_LEAVE_GROUP:      /* Quit a multicast group */
-        {
-          FAR const struct ipv6_mreq *mrec ;
-
-          mrec = (FAR const struct ipv6_mreq *)value;
-          ret = mld_leavegroup(mrec);
-        }
+        ret = mld_leavegroup(value);
         break;
 
       case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
         {
-          FAR struct socket_conn_s *conn;
+          FAR struct socket_conn_s *conn = psock->s_conn;
 
-          conn = psock->s_conn;
           conn->ttl = (value_len >= sizeof(int)) ?
                       *(FAR int *)value : (int)*(FAR unsigned char *)value;
           ret = OK;
@@ -129,9 +118,8 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
       case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
         {
-          FAR struct socket_conn_s *conn;
+          FAR struct socket_conn_s *conn = psock->s_conn;
 
-          conn = psock->s_conn;
           conn->ttl = (value_len >= sizeof(int)) ?
                       *(FAR int *)value : (int)*(FAR unsigned char *)value;
           ret = OK;
