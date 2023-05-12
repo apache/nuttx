@@ -217,9 +217,9 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
 static struct mpfs_i2c_priv_s g_mpfs_corei2c0_priv =
 {
   .ops            = &mpfs_i2c_ops,
-  .id             = 2,
+  .id             = 0,
   .hw_base        = 0x4b000000,
-  .plic_irq       = MPFS_IRQ_FABRIC_F2H_3,
+  .plic_irq       = MPFS_IRQ_FABRIC_F2H_6,
   .msgv           = NULL,
   .frequency      = 0,
   .ser_address    = 0,
@@ -236,6 +236,54 @@ static struct mpfs_i2c_priv_s g_mpfs_corei2c0_priv =
   .fpga           = true
 };
 #endif /* CONFIG_MPFS_COREI2C0 */
+
+#ifdef CONFIG_MPFS_COREI2C1
+static struct mpfs_i2c_priv_s g_mpfs_corei2c1_priv =
+{
+  .ops            = &mpfs_i2c_ops,
+  .id             = 1,
+  .hw_base        = 0x4b001000,
+  .plic_irq       = MPFS_IRQ_FABRIC_F2H_7,
+  .msgv           = NULL,
+  .frequency      = 0,
+  .ser_address    = 0,
+  .target_addr    = 0,
+  .lock           = NXMUTEX_INITIALIZER,
+  .sem_isr        = SEM_INITIALIZER(0),
+  .refs           = 0,
+  .tx_size        = 0,
+  .tx_idx         = 0,
+  .rx_size        = 0,
+  .rx_idx         = 0,
+  .status         = MPFS_I2C_SUCCESS,
+  .initialized    = false,
+  .fpga           = true
+};
+#endif /* CONFIG_MPFS_COREI2C1 */
+
+#ifdef CONFIG_MPFS_COREI2C2
+static struct mpfs_i2c_priv_s g_mpfs_corei2c2_priv =
+{
+  .ops            = &mpfs_i2c_ops,
+  .id             = 2,
+  .hw_base        = 0x4b002000,
+  .plic_irq       = MPFS_IRQ_FABRIC_F2H_8,
+  .msgv           = NULL,
+  .frequency      = 0,
+  .ser_address    = 0,
+  .target_addr    = 0,
+  .lock           = NXMUTEX_INITIALIZER,
+  .sem_isr        = SEM_INITIALIZER(0),
+  .refs           = 0,
+  .tx_size        = 0,
+  .tx_idx         = 0,
+  .rx_size        = 0,
+  .rx_idx         = 0,
+  .status         = MPFS_I2C_SUCCESS,
+  .initialized    = false,
+  .fpga           = true
+};
+#endif /* CONFIG_MPFS_COREI2C2 */
 
 static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
                                   uint32_t frequency);
@@ -263,7 +311,21 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
   if (!priv->initialized)
     {
-      if (priv->id == 0)
+      if (priv->fpga)
+        {
+          /* FIC3 is used by many, don't reset it here, or many
+           * FPGA based modules will stop working right here. Just
+           * bring out of reset instead.
+           */
+
+          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+                      SYSREG_SOFT_RESET_CR_FIC3 | SYSREG_SOFT_RESET_CR_FPGA,
+                      0);
+
+          modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
+                      SYSREG_SUBBLK_CLOCK_CR_FIC3);
+        }
+      else if (priv->id == 0)
         {
           modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
                       0, SYSREG_SOFT_RESET_CR_I2C0);
@@ -284,20 +346,6 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 
           modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
                       0, SYSREG_SUBBLK_CLOCK_CR_I2C1);
-        }
-      else if (priv->id == 2)
-        {
-          /* FIC3 is used by many, don't reset it here, or many
-           * FPGA based modules will stop working right here. Just
-           * bring out of reset instead.
-           */
-
-          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-                      SYSREG_SOFT_RESET_CR_FIC3 | SYSREG_SOFT_RESET_CR_FPGA,
-                      0);
-
-          modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                      SYSREG_SUBBLK_CLOCK_CR_FIC3);
         }
       else
         {
@@ -872,8 +920,18 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
         break;
 #endif /* CONFIG_MPFS_I2C1 */
 #ifdef CONFIG_MPFS_COREI2C0
-      case 2:
+      case 0:
         priv = &g_mpfs_corei2c0_priv;
+        break;
+#endif
+#ifdef CONFIG_MPFS_COREI2C1
+      case 1:
+        priv = &g_mpfs_corei2c1_priv;
+        break;
+#endif
+#ifdef CONFIG_MPFS_COREI2C2
+      case 2:
+        priv = &g_mpfs_corei2c2_priv;
         break;
 #endif
       default:

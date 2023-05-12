@@ -286,11 +286,27 @@ config MPFS_I2C1
 	default n
 
 config MPFS_COREI2C0
-        bool "Core I2C 0"
-        select ARCH_HAVE_I2CRESET
-        default n
+	bool "Core I2C 0"
+	depends on !MPFS_I2C0
+	select ARCH_HAVE_I2CRESET
+	default n
 	---help---
 		Selects the FPGA i2c0 driver.
+
+config MPFS_COREI2C1
+	bool "Core I2C 1"
+	depends on !MPFS_I2C1
+	select ARCH_HAVE_I2CRESET
+	default n
+	---help---
+		Selects the FPGA i2c1 driver.
+
+config MPFS_COREI2C2
+	bool "Core I2C 2"
+	select ARCH_HAVE_I2CRESET
+	default n
+	---help---
+		Selects the FPGA i2c2 driver.
 
 config MPFS_EMMCSD
 	bool "EMMCSD"
