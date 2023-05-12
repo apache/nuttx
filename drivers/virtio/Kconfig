@@ -38,5 +38,17 @@ config DRIVERS_VIRTIO_NET_QUEUE_LEN
 	default 16
 
 endif
+
+menuconfig DRIVERS_VIRTIO_BLK
+	bool "Virtio block support"
+	default n
+	depends on DRIVERS_VIRTIO_MMIO_NUM > 0
+
 endif
 
+if DRIVERS_VIRTIO_BLK
+config DRIVERS_VIRTIO_BLK_QUEUE_LEN
+	int "Queue length"
+	default 16
+
+endif

@@ -36,6 +36,10 @@
 #  include "virtio-mmio-net.h"
 #endif
 
+#ifdef CONFIG_DRIVERS_VIRTIO_BLK
+#  include "virtio-mmio-blk.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -144,6 +148,11 @@ static int virtio_dev_init(uintptr_t virt, uint32_t irq)
 #ifdef CONFIG_DRIVERS_VIRTIO_NET
     case VIRTIO_DEV_NET:
       ret = virtio_mmio_net_init(regs, irq);
+      break;
+#endif
+#ifdef CONFIG_DRIVERS_VIRTIO_BLK
+    case VIRTIO_DEV_BLK:
+      ret = virtio_mmio_blk_init(regs, irq);
       break;
 #endif
     default:
