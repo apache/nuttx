@@ -39,6 +39,7 @@
 #define VIRTIO_VERSION  0x2    /* NOTE: Legacy devices used 0x1 */
 
 #define VIRTIO_DEV_NET  0x1
+#define VIRTIO_DEV_BLK  0x2
 
 #define VIRTIO_STATUS_ACKNOWLEDGE   (1)
 #define VIRTIO_STATUS_DRIVER        (2)
