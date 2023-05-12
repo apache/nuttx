@@ -1162,13 +1162,13 @@ static inline void sam_fdpll96m_refclk(void)
  *   Setup PM main clock dividers to generate CPU and AHB.
  *   Depends on:
  *
- *     BOARD_CPU_DIVIDER        - See MCLK_CPUDIV_DIV* definitions
- *     BOARD_CPU_FRQUENCY       - In Hz
- *     BOARD_CPU_FAILDECT       - Boolean (defined / not defined)
- *     BOARD_LOWPOWER_DIVIDER   - See MCLK_LPDIV_DIV_* definitions
- *     BOARD_LOWPOWER_FREQUENCY - In Hz
- *     BOARD_BACKUP_DIVIDER     - See MCLK_BUPDIV_DIV_* definitions
- *     BOARD_BACKUP_FREQUENCY   - In Hz
+ *     BOARD_CPU_DIVIDER         - See MCLK_CPUDIV_DIV* definitions
+ *     BOARD_CPU_FREQUENCY       - In Hz
+ *     BOARD_CPU_FAILDECT        - Boolean (defined / not defined)
+ *     BOARD_LOWPOWER_DIVIDER    - See MCLK_LPDIV_DIV_* definitions
+ *     BOARD_LOWPOWER_FREQUENCY  - In Hz
+ *     BOARD_BACKUP_DIVIDER      - See MCLK_BUPDIV_DIV_* definitions
+ *     BOARD_BACKUP_FREQUENCY    - In Hz
  *
  * Input Parameters:
  *   None

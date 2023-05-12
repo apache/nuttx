@@ -66,7 +66,7 @@
  */
 
 #define BOARD_XTAL_FREQUENCY        12000000 /* 12MHz XTAL */
-#undef  BOARD_RTC_XTAL_FRQUENCY              /* 32.768KHz RTC XTAL not available on the Relax Lite */
+#undef  BOARD_RTC_XTAL_FREQUENCY             /* 32.768KHz RTC XTAL not available on the Relax Lite */
 
 /* TODO: enable the RTC osc, use RTC for time/date
  */
