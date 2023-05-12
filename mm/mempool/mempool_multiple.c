@@ -594,23 +594,17 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
 }
 
 /****************************************************************************
- * Name: mempool_multiple_info
+ * Name: mempool_multiple_foreach
  ****************************************************************************/
 
-void mempool_multiple_info(FAR struct mempool_multiple_s *mpool)
+void mempool_multiple_foreach(FAR struct mempool_multiple_s *mpool,
+                              mempool_multiple_foreach_t handle,
+                              FAR void *arg)
 {
-  struct mempoolinfo_s minfo;
   size_t i;
-
-  syslog(LOG_INFO, "%11s%9s%9s%9s%9s%9s%9s\n", "bsize", "total", "nused",
-                  "nfree", "nifree", "nwaiter", "nexpend");
   for (i = 0; i < mpool->npools; i++)
     {
-      mempool_info(mpool->pools + i, &minfo);
-      syslog(LOG_INFO, "%9lu%11lu%9lu%9lu%9lu%9lu%9zu\n",
-                       minfo.sizeblks, minfo.arena, minfo.aordblks,
-                       minfo.ordblks, minfo.iordblks,
-                       minfo.nwaiter, mpool->pools->nexpend);
+      handle(mpool->pools + i, arg);
     }
 }
 
