@@ -51,15 +51,17 @@ Getting Started
      -net none -chardev stdio,id=con,mux=on -serial chardev:con \
      -mon chardev=con,mode=readline -kernel ./nuttx
 
-  3.1.1 Single Core with network (GICv3)
+  3.1.1 Single Core with virtio network and block driver (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:netnsh
    $ make
+   $ dd if=/dev/zero of=./mydisk-1gb.img bs=1M count=1024
    Running with qemu
    $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
      -machine virt,virtualization=on,gic-version=3 \
      -chardev stdio,id=con,mux=on -serial chardev:con \
      -global virtio-mmio.force-legacy=false \
+     -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd -device virtio-blk-device,drive=hd \
      -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
      -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
      -mon chardev=con,mode=readline -kernel ./nuttx
