@@ -24,6 +24,11 @@ ifneq ($(CONFIG_DEV_URANDOM_ARCH),y)
 endif
 endif
 
+ifeq ($(CONFIG_DEV_SE05X),y)
+  CSRCS += se05x.c
+  include crypto/pnt/Make.defs
+endif
+
 # Include crypto device driver build support
 
 DEPPATH += --dep-path crypto

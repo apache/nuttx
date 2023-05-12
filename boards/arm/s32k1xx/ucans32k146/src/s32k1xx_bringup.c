@@ -139,6 +139,17 @@ int s32k1xx_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_SE05X
+  /* Initialize SE05x driver */
+
+  ret = s32k1xx_se05x_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_se05x_initialize() failed: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_S32K1XX_LPSPI
   /* Initialize SPI driver */
 

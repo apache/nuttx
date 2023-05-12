@@ -1,0 +1,36 @@
+From 592b71399937c8a4b30e15c1a3ec15c8b6bb883a Mon Sep 17 00:00:00 2001
+From: Andre Heinemans <andre.heinemans@nxp.com>
+Date: Wed, 22 Feb 2023 09:34:38 +0100
+Subject: [PATCH 4/4] Restored delay at i2c read and write retries
+
+---
+ lib/t1oi2c/phNxpEsePal_i2c.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/lib/t1oi2c/phNxpEsePal_i2c.c b/lib/t1oi2c/phNxpEsePal_i2c.c
+index 8e4c6bc..4bb4301 100644
+--- a/lib/t1oi2c/phNxpEsePal_i2c.c
++++ b/lib/t1oi2c/phNxpEsePal_i2c.c
+@@ -124,8 +124,7 @@ int phPalEse_i2c_read(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToRead)
+             if ((ret == I2C_NACK_ON_ADDRESS) && (retryCount < MAX_RETRY_COUNT)) {
+                 retryCount++;
+                 /* 1ms delay to give ESE polling delay */
+-                /*i2c driver back off delay is providing 1ms wait time so ignoring waiting time at this level*/
+-                //sm_sleep(ESE_POLL_DELAY_MS);
++                sm_sleep(ESE_POLL_DELAY_MS);
+                 T_SMLOG_D("_i2c_read() failed. Going to retry, counter:%d  !", retryCount);
+                 continue;
+             }
+@@ -167,8 +166,7 @@ int phPalEse_i2c_write(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToWrite)
+             if ((ret == I2C_NACK_ON_ADDRESS) && (retryCount < MAX_RETRY_COUNT)) {
+                 retryCount++;
+                 /* 1ms delay to give ESE polling delay */
+-                /*i2c driver back off delay is providing 1ms wait time so ignoring waiting time at this level*/
+-                //sm_sleep(ESE_POLL_DELAY_MS);
++                sm_sleep(ESE_POLL_DELAY_MS);
+                 T_SMLOG_D("_i2c_write() failed. Going to retry, counter:%d  !", retryCount);
+                 continue;
+             }
+-- 
+2.25.1
+

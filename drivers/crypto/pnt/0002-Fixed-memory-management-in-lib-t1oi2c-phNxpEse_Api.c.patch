@@ -1,0 +1,335 @@
+From 48fefd7d0b92b852de6250a37b615eb654dffaf7 Mon Sep 17 00:00:00 2001
+From: Andre Heinemans <andre.heinemans@nxp.com>
+Date: Wed, 22 Feb 2023 09:52:15 +0100
+Subject: [PATCH 2/4] Fixed memory management in lib/t1oi2c/phNxpEse_Api.c by
+ not using global memory anymore but take the buffer being allocated as a
+ precondition
+
+---
+ lib/apdu/smCom.c               | 12 ++++-
+ lib/t1oi2c/phNxpEse_Api.c      | 96 +++++++++++-----------------------
+ lib/t1oi2c/phNxpEse_Api.h      |  2 +-
+ lib/t1oi2c/phNxpEse_Internal.h |  1 +
+ 4 files changed, 43 insertions(+), 68 deletions(-)
+
+diff --git a/lib/apdu/smCom.c b/lib/apdu/smCom.c
+index 16eca5e..0fea95a 100644
+--- a/lib/apdu/smCom.c
++++ b/lib/apdu/smCom.c
+@@ -36,6 +36,10 @@ smStatus_t smComT1oI2C_Close(void *conn_ctx, uint8_t mode)
+     status = phNxpEse_close(conn_ctx);
+     ENSURE_OR_RETURN_ON_ERROR((status == ESESTATUS_SUCCESS), SM_NOT_OK);
+ 
++    if (conn_ctx != NULL) {
++        sm_free(conn_ctx);
++    }
++
+     SM_MUTEX_DEINIT(g_sm_mutex);
+ 
+     return SM_OK;
+@@ -47,7 +51,13 @@ smStatus_t smComT1oI2C_Init(void **conn_ctx, const char *pConnString)
+     phNxpEse_initParams initParams;
+     initParams.initMode = ESE_MODE_NORMAL;
+ 
+-    status = phNxpEse_open(conn_ctx, initParams, pConnString);
++    if (*conn_ctx != NULL) {
++        // conn_ctx not being NULL could indicate this function is
++        // called 2 times. Return error to prevent leaks
++        return SM_NOT_OK;
++    }
++    *conn_ctx = sm_malloc(sizeof(phNxpEse_Context_t));
++    status = phNxpEse_open(*conn_ctx, initParams, pConnString);
+     ENSURE_OR_RETURN_ON_ERROR((status == ESESTATUS_SUCCESS), SM_NOT_OK);
+ 
+     SM_MUTEX_INIT(g_sm_mutex);
+diff --git a/lib/t1oi2c/phNxpEse_Api.c b/lib/t1oi2c/phNxpEse_Api.c
+index a4565f3..01a757e 100644
+--- a/lib/t1oi2c/phNxpEse_Api.c
++++ b/lib/t1oi2c/phNxpEse_Api.c
+@@ -29,15 +29,6 @@ static int poll_sof_chained_delay = 0;
+ 
+ /*********************** Global Variables *************************************/
+ 
+-/* ESE Context structure */
+-phNxpEse_Context_t gnxpese_ctxt;
+-static uint8_t t10i2c_tempBuf[48] = {
+-    0,
+-};
+-phNxpEse_data gRsp = {
+-    0,
+-};
+-
+ /******************************************************************************
+  * Function         phNxpEse_init
+  *
+@@ -55,15 +46,15 @@ phNxpEse_data gRsp = {
+ ESESTATUS phNxpEse_init(void *conn_ctx, phNxpEse_initParams initParams, phNxpEse_data *AtrRsp)
+ {
+     ESESTATUS wConfigStatus         = ESESTATUS_SUCCESS;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+     bool_t status                   = FALSE;
+     phNxpEseProto7816InitParam_t protoInitParam;
+     phNxpEse_memset(&protoInitParam, 0x00, sizeof(phNxpEseProto7816InitParam_t));
+     protoInitParam.rnack_retry_limit = MAX_RNACK_RETRY_LIMIT;
+     protoInitParam.wtx_counter_limit = PH_PROTO_WTX_DEFAULT_COUNT;
+ 
+-    gRsp.p_data = AtrRsp->p_data;
+-    gRsp.len    = AtrRsp->len;
++    nxpese_ctxt->p_read_buff = AtrRsp->p_data;
++    nxpese_ctxt->read_buff_len = AtrRsp->len;
+ 
+     if (ESE_MODE_NORMAL == initParams.initMode) /* TZ/Normal wired mode should come here*/
+     {
+@@ -101,25 +92,21 @@ ESESTATUS phNxpEse_init(void *conn_ctx, phNxpEse_initParams initParams, phNxpEse
+  *                  In case of failure returns other failure value.
+  *
+  ******************************************************************************/
+-ESESTATUS phNxpEse_open(void **conn_ctx, phNxpEse_initParams initParams, const char *pConnString)
++ESESTATUS phNxpEse_open(void *conn_ctx, phNxpEse_initParams initParams, const char *pConnString)
+ {
+     phPalEse_Config_t tPalConfig;
+-    phNxpEse_Context_t *pnxpese_ctxt = NULL;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+     ESESTATUS wConfigStatus          = ESESTATUS_SUCCESS;
+ 
+-    pnxpese_ctxt = &gnxpese_ctxt;
+-    phNxpEse_memset(pnxpese_ctxt, 0, sizeof(phNxpEse_Context_t));
+-    if (conn_ctx != NULL) {
+-        *conn_ctx = pnxpese_ctxt;
+-    }
++    phNxpEse_memset(nxpese_ctxt, 0, sizeof(phNxpEse_Context_t));
+ 
+     /*When I2C channel is already opened return status as FAILED*/
+-    if (pnxpese_ctxt->EseLibStatus != ESE_STATUS_CLOSE) {
++    if (nxpese_ctxt->EseLibStatus != ESE_STATUS_CLOSE) {
+         T_SMLOG_E(" Session already opened");
+         return ESESTATUS_BUSY;
+     }
+ 
+-    phNxpEse_memset(pnxpese_ctxt, 0x00, sizeof(phNxpEse_Context_t));
++    phNxpEse_memset(nxpese_ctxt, 0x00, sizeof(phNxpEse_Context_t));
+     phNxpEse_memset(&tPalConfig, 0x00, sizeof(tPalConfig));
+ 
+     tPalConfig.pDevName = (int8_t *)pConnString; //"/dev/p73"; /*RFU*/
+@@ -130,18 +117,18 @@ ESESTATUS phNxpEse_open(void **conn_ctx, phNxpEse_initParams initParams, const c
+         goto clean_and_return;
+     }
+     /* Copying device handle to ESE Lib context*/
+-    pnxpese_ctxt->pDevHandle = tPalConfig.pDevHandle;
++    nxpese_ctxt->pDevHandle = tPalConfig.pDevHandle;
+     /* STATUS_OPEN */
+-    pnxpese_ctxt->EseLibStatus = ESE_STATUS_OPEN;
+-    phNxpEse_memcpy(&pnxpese_ctxt->initParams, &initParams, sizeof(phNxpEse_initParams));
++    nxpese_ctxt->EseLibStatus = ESE_STATUS_OPEN;
++    phNxpEse_memcpy(&nxpese_ctxt->initParams, &initParams, sizeof(phNxpEse_initParams));
+     return wConfigStatus;
+ 
+ clean_and_return:
+-    if (NULL != pnxpese_ctxt->pDevHandle) {
+-        phPalEse_i2c_close(pnxpese_ctxt->pDevHandle);
+-        phNxpEse_memset(pnxpese_ctxt, 0x00, sizeof(phNxpEse_Context_t));
++    if (NULL != nxpese_ctxt->pDevHandle) {
++        phPalEse_i2c_close(nxpese_ctxt->pDevHandle);
++        phNxpEse_memset(nxpese_ctxt, 0x00, sizeof(phNxpEse_Context_t));
+     }
+-    pnxpese_ctxt->EseLibStatus = ESE_STATUS_CLOSE;
++    nxpese_ctxt->EseLibStatus = ESE_STATUS_CLOSE;
+     return ESESTATUS_FAILED;
+ }
+ 
+@@ -162,15 +149,12 @@ ESESTATUS phNxpEse_Transceive(void *conn_ctx, phNxpEse_data *pCmd, phNxpEse_data
+ {
+     ESESTATUS status                = ESESTATUS_FAILED;
+     bool_t bStatus                  = FALSE;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+ 
+     if ((NULL == pCmd) || (NULL == pRsp)) {
+         return ESESTATUS_INVALID_PARAMETER;
+     }
+ 
+-    gRsp.p_data = pRsp->p_data;
+-    gRsp.len    = pRsp->len;
+-
+     if ((pCmd->len == 0) || pCmd->p_data == NULL) {
+         T_SMLOG_E(" phNxpEse_Transceive - Invalid Parameter no data");
+         return ESESTATUS_INVALID_PARAMETER;
+@@ -218,7 +202,7 @@ ESESTATUS phNxpEse_Transceive(void *conn_ctx, phNxpEse_data *pCmd, phNxpEse_data
+ ESESTATUS phNxpEse_reset(void *conn_ctx)
+ {
+     ESESTATUS status                = ESESTATUS_FAILED;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+     //bool_t bStatus = phNxpEseProto7816_IntfReset(&AtrRsp);
+     status = phNxpEse_chipReset((void *)nxpese_ctxt);
+     if (status != ESESTATUS_SUCCESS) {
+@@ -241,7 +225,7 @@ ESESTATUS phNxpEse_reset(void *conn_ctx)
+ ESESTATUS phNxpEse_EndOfApdu(void *conn_ctx)
+ {
+     ESESTATUS status                = ESESTATUS_SUCCESS;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+     bool_t bStatus                  = phNxpEseProto7816_Close((void *)nxpese_ctxt);
+     if (!bStatus) {
+         status = ESESTATUS_FAILED;
+@@ -263,7 +247,7 @@ ESESTATUS phNxpEse_chipReset(void *conn_ctx)
+ {
+     ESESTATUS status                = ESESTATUS_SUCCESS;
+     bool_t bStatus                  = FALSE;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+     bStatus                         = phNxpEseProto7816_Reset();
+     if (!bStatus) {
+         status = ESESTATUS_FAILED;
+@@ -294,15 +278,11 @@ ESESTATUS phNxpEse_deInit(void *conn_ctx)
+ {
+     ESESTATUS status = ESESTATUS_SUCCESS;
+     //bool_t bStatus = FALSE;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
+-    /*bStatus = phNxpEseProto7816_ResetProtoParams();
+-    if(!bStatus)
+-    {
+-        status = ESESTATUS_FAILED;
+-    }*/
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
++
+     phPalEse_i2c_close(nxpese_ctxt->pDevHandle);
+     phNxpEse_memset(nxpese_ctxt, 0x00, sizeof(*nxpese_ctxt));
+-    //status= phNxpEse_close();
++
+     return status;
+ }
+ 
+@@ -320,7 +300,7 @@ ESESTATUS phNxpEse_deInit(void *conn_ctx)
+ ESESTATUS phNxpEse_close(void *conn_ctx)
+ {
+     ESESTATUS status                = ESESTATUS_SUCCESS;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+ 
+     if ((ESE_STATUS_CLOSE == nxpese_ctxt->EseLibStatus)) {
+         T_SMLOG_E(" %s ESE Not Initialized previously ", __FUNCTION__);
+@@ -328,7 +308,6 @@ ESESTATUS phNxpEse_close(void *conn_ctx)
+     }
+ 
+     phPalEse_i2c_close(nxpese_ctxt->pDevHandle);
+-    phNxpEse_memset(nxpese_ctxt, 0x00, sizeof(*nxpese_ctxt));
+     T_SMLOG_D("phNxpEse_close - ESE Context deinit completed");
+     /* Return success always */
+     return status;
+@@ -350,12 +329,11 @@ ESESTATUS phNxpEse_close(void *conn_ctx)
+ void phNxpEse_clearReadBuffer(void *conn_ctx)
+ {
+     int ret                         = -1;
+-    uint8_t *readBuf                = &t10i2c_tempBuf[0]; //[MAX_APDU_BUFFER];
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+ 
+     T_SMLOG_D("%s Enter ..", __FUNCTION__);
+ 
+-    ret = phPalEse_i2c_read(nxpese_ctxt->pDevHandle, readBuf, sizeof(t10i2c_tempBuf));
++    ret = phPalEse_i2c_read(nxpese_ctxt->pDevHandle, nxpese_ctxt->p_read_buff, nxpese_ctxt->read_buff_len);
+     if (ret < 0) {
+         /* Do nothing as nothing to read*/
+     }
+@@ -385,21 +363,15 @@ ESESTATUS phNxpEse_read(void *conn_ctx, uint32_t *data_len, uint8_t **pp_data)
+     ESESTATUS status                = ESESTATUS_FAILED;
+     int ret                         = -1;
+     uint8_t rspBufLen               = 0;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+ 
+     T_SMLOG_D("%s Enter ..", __FUNCTION__);
+ 
+     ENSURE_OR_GO_EXIT(data_len != NULL);
+     ENSURE_OR_GO_EXIT(pp_data != NULL);
+ 
+-    if (gRsp.p_data == NULL || gRsp.len == 0) {
+-        *pp_data  = &t10i2c_tempBuf[0];
+-        rspBufLen = sizeof(t10i2c_tempBuf);
+-    }
+-    else {
+-        *pp_data  = gRsp.p_data;
+-        rspBufLen = gRsp.len;
+-    }
++	*pp_data  = nxpese_ctxt->p_read_buff;
++	rspBufLen = nxpese_ctxt->read_buff_len;
+ 
+     ret = phNxpEse_readPacket((void *)nxpese_ctxt, nxpese_ctxt->pDevHandle, *pp_data, rspBufLen);
+     if (ret < 0) {
+@@ -417,8 +389,6 @@ ESESTATUS phNxpEse_read(void *conn_ctx, uint32_t *data_len, uint8_t **pp_data)
+         status = ESESTATUS_SUCCESS;
+     }
+ exit:
+-    gRsp.p_data = NULL;
+-    gRsp.len    = 0;
+     return status;
+ }
+ 
+@@ -442,7 +412,7 @@ static int phNxpEse_readPacket(void *conn_ctx, void *pDevHandle, uint8_t *pBuffe
+     int ret         = -1;
+     int sof_counter = 0; /* one read may take 1 ms*/
+     int total_count = 0, numBytesToRead = 0, headerIndex = 0;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+ 
+     ENSURE_OR_GO_EXIT(pBuffer != NULL);
+     memset(pBuffer, 0, nNbBytesToRead);
+@@ -578,7 +548,7 @@ ESESTATUS phNxpEse_WriteFrame(void *conn_ctx, uint32_t data_len, const uint8_t *
+ {
+     ESESTATUS status                = ESESTATUS_INVALID_PARAMETER;
+     int32_t dwNoBytesWrRd           = 0;
+-    phNxpEse_Context_t *nxpese_ctxt = (conn_ctx == NULL) ? &gnxpese_ctxt : (phNxpEse_Context_t *)conn_ctx;
++    phNxpEse_Context_t *nxpese_ctxt = (phNxpEse_Context_t *)conn_ctx;
+ 
+     /* Create local copy of cmd_data */
+     T_SMLOG_D("%s Enter ..", __FUNCTION__);
+@@ -709,9 +679,6 @@ ESESTATUS phNxpEse_getAtr(void *conn_ctx, phNxpEse_data *pRsp)
+ {
+     bool_t status = FALSE;
+ 
+-    gRsp.p_data = pRsp->p_data;
+-    gRsp.len    = pRsp->len;
+-
+     status = phNxpEseProto7816_GetAtr(conn_ctx, pRsp);
+     if (status == FALSE) {
+         T_SMLOG_E("%s Get ATR Failed ", __FUNCTION__);
+@@ -736,9 +703,6 @@ ESESTATUS phNxpEse_getCip(void *conn_ctx, phNxpEse_data *pRsp)
+ {
+     bool_t status = FALSE;
+ 
+-    gRsp.p_data = pRsp->p_data;
+-    gRsp.len    = pRsp->len;
+-
+     status = phNxpEseProto7816_GetCip(conn_ctx, pRsp);
+     if (status == FALSE) {
+         T_SMLOG_E("%s Get CIP Failed ", __FUNCTION__);
+diff --git a/lib/t1oi2c/phNxpEse_Api.h b/lib/t1oi2c/phNxpEse_Api.h
+index 3d5224d..688c84b 100644
+--- a/lib/t1oi2c/phNxpEse_Api.h
++++ b/lib/t1oi2c/phNxpEse_Api.h
+@@ -52,7 +52,7 @@ typedef struct phNxpEse_initParams
+ } phNxpEse_initParams;
+ 
+ ESESTATUS phNxpEse_init(void *conn_ctx, phNxpEse_initParams initParams, phNxpEse_data *AtrRsp);
+-ESESTATUS phNxpEse_open(void **conn_ctx, phNxpEse_initParams initParams, const char *pConnString);
++ESESTATUS phNxpEse_open(void *conn_ctx, phNxpEse_initParams initParams, const char *pConnString);
+ ESESTATUS phNxpEse_Transceive(void *conn_ctx, phNxpEse_data *pCmd, phNxpEse_data *pRsp);
+ ESESTATUS phNxpEse_deInit(void *conn_ctx);
+ ESESTATUS phNxpEse_close(void *conn_ctx);
+diff --git a/lib/t1oi2c/phNxpEse_Internal.h b/lib/t1oi2c/phNxpEse_Internal.h
+index f20d86a..a5e8a36 100644
+--- a/lib/t1oi2c/phNxpEse_Internal.h
++++ b/lib/t1oi2c/phNxpEse_Internal.h
+@@ -38,6 +38,7 @@ typedef enum
+ typedef struct phNxpEse_Context
+ {
+     uint8_t *p_read_buff;
++    uint8_t read_buff_len;
+     uint8_t cmd_len;
+     uint8_t *p_cmd_data;
+     phNxpEse_LibStatus EseLibStatus; /* Indicate if Ese Lib is open or closed */
+-- 
+2.25.1
+

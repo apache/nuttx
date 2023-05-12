@@ -1,0 +1,196 @@
+From b88625c69a26cfc178cad2e1430d53c8f01be6b0 Mon Sep 17 00:00:00 2001
+From: Andre Heinemans <andre.heinemans@nxp.com>
+Date: Fri, 11 Nov 2022 13:20:53 +0100
+Subject: [PATCH 3/4] Added Se05x_API_ReadSize to API
+
+---
+ lib/apdu/se05x_APDU_apis.h | 71 ++++++++++++++++++++++++++++++++++++++
+ lib/apdu/se05x_APDU_impl.c | 39 +++++++++++++++++++++
+ lib/apdu/se05x_tlv.c       | 26 ++++++++++++++
+ lib/apdu/se05x_tlv.h       |  1 +
+ 4 files changed, 137 insertions(+)
+
+diff --git a/lib/apdu/se05x_APDU_apis.h b/lib/apdu/se05x_APDU_apis.h
+index 38cf017..7865c93 100644
+--- a/lib/apdu/se05x_APDU_apis.h
++++ b/lib/apdu/se05x_APDU_apis.h
+@@ -113,6 +113,77 @@ smStatus_t Se05x_API_WriteECKey(pSe05xSession_t session_ctx,
+     const SE05x_INS_t ins_type,
+     const SE05x_KeyPart_t key_part);
+ 
++/** Se05x_API_ReadSize
++ *
++ * ReadSize
++ *
++ * Get the size of a Secure Object (in bytes):
++ *
++ *   * For EC keys: the size of the curve is returned.
++ *
++ *   * For RSA keys: the key size is returned.
++ *
++ *   * For AES/DES/HMAC keys, the key size is returned.
++ *
++ *   * For binary files: the file size is returned
++ *
++ *   * For userIDs: nothing is returned (SW_CONDITIONS_NOT_SATISFIED).
++ *
++ *   * For counters: the counter length is returned.
++ *
++ *   * For PCR: the PCR length is returned.
++ *
++ * # Command to Applet
++ *
++ * @rst
++ * +-------+------------+-----------------------------+
++ * | Field | Value      | Description                 |
++ * +=======+============+=============================+
++ * | CLA   | 0x80       |                             |
++ * +-------+------------+-----------------------------+
++ * | INS   | INS_READ   | See :cpp:type:`SE05x_INS_t` |
++ * +-------+------------+-----------------------------+
++ * | P1    | P1_DEFAULT | See :cpp:type:`SE05x_P1_t`  |
++ * +-------+------------+-----------------------------+
++ * | P2    | P2_SIZE    | See :cpp:type:`SE05x_P2_t`  |
++ * +-------+------------+-----------------------------+
++ * | Lc    | #(Payload) |                             |
++ * +-------+------------+-----------------------------+
++ * |       | TLV[TAG_1] | 4-byte object identifier.   |
++ * +-------+------------+-----------------------------+
++ * | Le    | 0x00       |                             |
++ * +-------+------------+-----------------------------+
++ * @endrst
++ *
++ * # R-APDU Body
++ *
++ * @rst
++ * +------------+-----------------------------+
++ * | Value      | Description                 |
++ * +============+=============================+
++ * | TLV[TAG_1] | Byte array containing size. |
++ * +------------+-----------------------------+
++ * @endrst
++ *
++ * # R-APDU Trailer
++ *
++ * @rst
++ * +-------------+--------------------------------+
++ * | SW          | Description                    |
++ * +=============+================================+
++ * | SW_NO_ERROR | Data is returned successfully. |
++ * +-------------+--------------------------------+
++ * @endrst
++ *
++ *
++ * @param[in]  session_ctx  The session context
++ * @param[in]  objectID     The object id
++ * @param      psize        The psize
++ *
++ * @return     The sm status.
++ */
++smStatus_t Se05x_API_ReadSize(pSe05xSession_t session_ctx, uint32_t objectID, uint16_t *psize);
++
+ /** Se05x_API_ReadObject
+  *
+  * Reads the content of a Secure Object.
+diff --git a/lib/apdu/se05x_APDU_impl.c b/lib/apdu/se05x_APDU_impl.c
+index 4acfad7..86b0d8f 100644
+--- a/lib/apdu/se05x_APDU_impl.c
++++ b/lib/apdu/se05x_APDU_impl.c
+@@ -186,6 +186,45 @@ cleanup:
+     return retStatus;
+ }
+ 
++smStatus_t Se05x_API_ReadSize(pSe05xSession_t session_ctx, uint32_t objectID, uint16_t *psize)
++{
++    smStatus_t retStatus = SM_NOT_OK;
++    tlvHeader_t hdr      = {{kSE05x_CLA, kSE05x_INS_READ, kSE05x_P1_DEFAULT, kSE05x_P2_SIZE}};
++    size_t cmdbufLen     = 0;
++    uint8_t *pCmdbuf     = NULL;
++    int tlvRet           = 0;
++    uint8_t *pRspbuf     = NULL;
++    size_t rspbufLen     = 0;
++
++    ENSURE_OR_GO_CLEANUP(session_ctx != NULL);
++
++    pCmdbuf   = &session_ctx->apdu_buffer[0];
++    pRspbuf   = &session_ctx->apdu_buffer[0];
++    rspbufLen = sizeof(session_ctx->apdu_buffer);
++
++    SMLOG_D("APDU - ReadSize [] \n");
++
++    tlvRet = TLVSET_U32("object id", &pCmdbuf, &cmdbufLen, kSE05x_TAG_1, objectID);
++    if (0 != tlvRet) {
++        goto cleanup;
++    }
++    retStatus = DoAPDUTxRx(session_ctx, &hdr, session_ctx->apdu_buffer, cmdbufLen, pRspbuf, &rspbufLen, 1);
++    if (retStatus == SM_OK) {
++        retStatus       = SM_NOT_OK;
++        size_t rspIndex = 0;
++        tlvRet          = tlvGet_U16(pRspbuf, &rspIndex, rspbufLen, kSE05x_TAG_1, psize); /* - */
++        if (0 != tlvRet) {
++            goto cleanup;
++        }
++        if ((rspIndex + 2) == rspbufLen) {
++            retStatus = (smStatus_t)((pRspbuf[rspIndex] << 8) | (pRspbuf[rspIndex + 1]));
++        }
++    }
++
++cleanup:
++    return retStatus;
++}
++
+ smStatus_t Se05x_API_ReadObject(
+     pSe05xSession_t session_ctx, uint32_t objectID, uint16_t offset, uint16_t length, uint8_t *data, size_t *pdataLen)
+ {
+diff --git a/lib/apdu/se05x_tlv.c b/lib/apdu/se05x_tlv.c
+index 4ed996e..71d253a 100644
+--- a/lib/apdu/se05x_tlv.c
++++ b/lib/apdu/se05x_tlv.c
+@@ -252,6 +252,32 @@ cleanup:
+     return retVal;
+ }
+ 
++int tlvGet_U16(uint8_t *buf, size_t *pBufIndex, const size_t bufLen, SE05x_TAG_t tag, uint16_t *pRsp)
++{
++    int retVal      = 1;
++    uint8_t *pBuf   = buf + (*pBufIndex);
++    uint8_t got_tag = *pBuf++;
++    size_t rspLen;
++
++    if ((*pBufIndex) > bufLen) {
++        goto cleanup;
++    }
++
++    if (got_tag != tag) {
++        goto cleanup;
++    }
++    rspLen = *pBuf++;
++    if (rspLen > 2) {
++        goto cleanup;
++    }
++    *pRsp = (*pBuf++) << 8;
++    *pRsp |= *pBuf++;
++    *pBufIndex += (1 + 1 + (rspLen));
++    retVal = 0;
++cleanup:
++    return retVal;
++}
++
+ int tlvGet_u8buf(uint8_t *buf, size_t *pBufIndex, const size_t bufLen, SE05x_TAG_t tag, uint8_t *rsp, size_t *pRspLen)
+ {
+     int retVal      = 1;
+diff --git a/lib/apdu/se05x_tlv.h b/lib/apdu/se05x_tlv.h
+index 2fda3e7..ea7bfdf 100644
+--- a/lib/apdu/se05x_tlv.h
++++ b/lib/apdu/se05x_tlv.h
+@@ -34,6 +34,7 @@ int tlvSet_ECCurve(uint8_t **buf, size_t *bufLen, SE05x_TAG_t tag, SE05x_ECCurve
+ int tlvSet_KeyID(uint8_t **buf, size_t *bufLen, SE05x_TAG_t tag, uint32_t keyID);
+ int tlvSet_header(uint8_t **buf, size_t *bufLen, tlvHeader_t *hdr);
+ int tlvGet_U8(uint8_t *buf, size_t *pBufIndex, const size_t bufLen, SE05x_TAG_t tag, uint8_t *pRsp);
++int tlvGet_U16(uint8_t *buf, size_t *pBufIndex, const size_t bufLen, SE05x_TAG_t tag, uint16_t *pRsp);
+ int tlvGet_u8buf(uint8_t *buf, size_t *pBufIndex, const size_t bufLen, SE05x_TAG_t tag, uint8_t *rsp, size_t *pRspLen);
+ int tlvGet_Result(uint8_t *buf, size_t *pBufIndex, size_t bufLen, SE05x_TAG_t tag, SE05x_Result_t *presult);
+ smStatus_t DoAPDUTx(
+-- 
+2.25.1
+
