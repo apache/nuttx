@@ -276,13 +276,19 @@ config MPFS_HAVE_UART7
 
 # These are the peripheral selections proper
 
+config MPFS_SPI
+	bool
+	default n
+
 config MPFS_SPI0
 	bool "SPI 0"
 	default n
+	select MPFS_SPI
 
 config MPFS_SPI1
 	bool "SPI 1"
 	default n
+	select MPFS_SPI
 
 config MPFS_FPGA_UART
 	bool "FPGA uarts"

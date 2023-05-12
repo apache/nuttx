@@ -50,7 +50,7 @@ ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += mpfs_pgalloc.c
 endif
 
-ifeq ($(CONFIG_SPI),y)
+ifeq ($(CONFIG_MPFS_SPI),y)
 CHIP_CSRCS += mpfs_spi.c
 endif
 
