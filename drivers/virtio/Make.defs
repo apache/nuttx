@@ -28,6 +28,10 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_NET),y)
   CSRCS += virtio-mmio-net.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_BLK),y)
+  CSRCS += virtio-mmio-blk.c
+endif
+
 # Include build support
 
 DEPPATH += --dep-path virtio
