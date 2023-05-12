@@ -9553,10 +9553,6 @@ config STM32_USART
 	bool
 	default n
 
-config STM32_USART_RXDMA
-	bool
-	default n
-
 config STM32_SERIALDRIVER
 	bool
 	default n
@@ -9623,7 +9619,6 @@ config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
 	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9631,7 +9626,6 @@ config USART1_TXDMA
 	bool "USART1 Tx DMA"
 	default n
 	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9718,7 +9712,6 @@ config USART2_RXDMA
 	bool "USART2 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9726,7 +9719,6 @@ config USART2_TXDMA
 	bool "USART2 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9813,7 +9805,6 @@ config USART3_RXDMA
 	bool "USART3 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9821,7 +9812,6 @@ config USART3_TXDMA
 	bool "USART3 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9903,7 +9893,6 @@ config UART4_RXDMA
 	bool "UART4 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9911,7 +9900,6 @@ config UART4_TXDMA
 	bool "UART4 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -9957,7 +9945,6 @@ config UART5_RXDMA
 	bool "UART5 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -9965,7 +9952,6 @@ config UART5_TXDMA
 	bool "UART5 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10016,7 +10002,6 @@ config USART6_RXDMA
 	bool "USART6 Rx DMA"
 	default n
 	depends on STM32_DMA2
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -10024,7 +10009,6 @@ config USART6_TXDMA
 	bool "USART6 Tx DMA"
 	default n
 	depends on STM32_DMA2
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10111,7 +10095,6 @@ config UART7_RXDMA
 	bool "UART7 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -10119,7 +10102,6 @@ config UART7_TXDMA
 	bool "UART7 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10206,7 +10188,6 @@ config UART8_RXDMA
 	bool "UART8 Rx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -10214,7 +10195,6 @@ config UART8_TXDMA
 	bool "UART8 Tx DMA"
 	default n
 	depends on STM32_DMA1
-	select STM32_USART_TXDMA
 	---help---
 		In high data rate usage, Tx DMA may reduce CPU load
 
@@ -10263,7 +10243,6 @@ config STM32_SERIAL_RXDMA_BUFFER_SIZE
 	int "Rx DMA buffer size"
 	default 32
 	range 32 4096
-	depends on STM32_USART_RXDMA
 	---help---
 		The DMA buffer size when using RX DMA to emulate a FIFO.
 
