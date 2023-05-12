@@ -112,19 +112,55 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 
+      case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
+        {
+          FAR struct socket_conn_s *conn;
+          uint8_t ttl;
+
+          if (value == NULL || value_len == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ttl = (value_len >= sizeof(int)) ?
+            *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          conn = psock->s_conn;
+          conn->ttl = ttl;
+          ret = OK;
+        }
+        break;
+
       /* The following IPv6 socket options are defined, but not implemented */
 
-      case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
       case IPV6_MULTICAST_IF:     /* Interface to use for outgoing multicast
                                    * packets */
       case IPV6_MULTICAST_LOOP:   /* Multicast packets are delivered back to
                                    * the local application */
 #endif
-      case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
       case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
                                    * communications only */
         nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
         ret = -ENOSYS;
+        break;
+
+      case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
+        {
+          FAR struct socket_conn_s *conn;
+          uint8_t ttl;
+
+          if (value == NULL || value_len == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ttl = (value_len >= sizeof(int)) ?
+            *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          conn = psock->s_conn;
+          conn->ttl = ttl;
+          ret = OK;
+        }
         break;
 
       case IPV6_RECVPKTINFO:
