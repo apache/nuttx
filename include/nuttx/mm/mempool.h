@@ -61,6 +61,9 @@ typedef CODE FAR void *(*mempool_multiple_alloc_t)(FAR void *arg,
                                                    size_t size);
 typedef CODE void (*mempool_multiple_free_t)(FAR void *arg, FAR void *addr);
 
+typedef CODE void (mempool_multiple_foreach_t)(FAR struct mempool_s *pool,
+                                               FAR void *arg);
+
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 struct mempool_procfs_entry_s
 {
@@ -481,12 +484,14 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
 void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
 
 /****************************************************************************
-  * Name: mempool_multiple_info
+ * Name: mempool_multiple_foreach
  * Description:
- *   Dump multiple memory pool's info.
+ *   Traverse mempool under multiple pool to execute handle.
  ****************************************************************************/
 
-void mempool_multiple_info(FAR struct mempool_multiple_s *mpool);
+void mempool_multiple_foreach(FAR struct mempool_multiple_s *mpool,
+                              mempool_multiple_foreach_t handle,
+                              FAR void *arg);
 
 /****************************************************************************
  * Name: mempool_multiple_info_task
