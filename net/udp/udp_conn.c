@@ -636,17 +636,17 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
     {
       /* Make sure that the connection is marked as uninitialized */
 
-      conn->flags   = 0;
+      conn->sconn.ttl = IP_TTL_DEFAULT;
+      conn->flags     = 0;
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      conn->domain  = domain;
+      conn->domain    = domain;
 #endif
-      conn->lport   = 0;
-      conn->ttl     = IP_TTL_DEFAULT;
+      conn->lport     = 0;
 #if CONFIG_NET_RECV_BUFSIZE > 0
-      conn->rcvbufs = CONFIG_NET_RECV_BUFSIZE;
+      conn->rcvbufs   = CONFIG_NET_RECV_BUFSIZE;
 #endif
 #if CONFIG_NET_SEND_BUFSIZE > 0
-      conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+      conn->sndbufs   = CONFIG_NET_SEND_BUFSIZE;
 
       nxsem_init(&conn->sndsem, 0, 0);
 #endif
