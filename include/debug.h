@@ -29,10 +29,10 @@
 #include <nuttx/compiler.h>
 
 #ifdef CONFIG_ARCH_DEBUG_H
-# include <arch/debug.h>
+#  include <arch/debug.h>
 #endif
 #ifdef CONFIG_ARCH_CHIP_DEBUG_H
-# include <arch/chip/debug.h>
+#  include <arch/chip/debug.h>
 #endif
 
 #include <syslog.h>

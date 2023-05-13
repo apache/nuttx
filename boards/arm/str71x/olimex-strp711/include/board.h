@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
 #include "chip.h"
 

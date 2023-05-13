@@ -28,10 +28,10 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
-# include <stdbool.h>
+#  include <stdint.h>
+#  include <stdbool.h>
 
-# include <arch/chip/kinetis_mcg.h>
+#  include <arch/chip/kinetis_mcg.h>
 #endif
 
 /****************************************************************************

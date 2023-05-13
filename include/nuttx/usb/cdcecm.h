@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 
 #ifdef CONFIG_CDCECM_COMPOSITE
-# include <nuttx/usb/composite.h>
+#  include <nuttx/usb/composite.h>
 #endif
 
 /****************************************************************************

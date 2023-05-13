@@ -27,18 +27,16 @@
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
 
-/* Do not include STM32 L4 header files here */
+#include <arch/board/stm32l476vg-disco-clocking.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Clocking *****************************************************************/
-
-#include <arch/board/stm32l476vg-disco-clocking.h>
 
 /* DMA Channel/Stream Selections ********************************************/
 

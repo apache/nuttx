@@ -41,7 +41,7 @@
 #include <nuttx/binfmt/binfmt.h>
 
 #ifdef CONFIG_PAGING
-# include "paging/paging.h"
+#  include "paging/paging.h"
 #endif
 
 #include "sched/sched.h"

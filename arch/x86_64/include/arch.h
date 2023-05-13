@@ -33,12 +33,12 @@
 
 /* Include chip-specific definitions */
 
-# include <arch/chip/arch.h>
+#  include <arch/chip/arch.h>
 
 /* Include architecture-specific definitions */
 
 #ifdef CONFIG_ARCH_INTEL64
-# include <arch/intel64/arch.h>
+#  include <arch/intel64/arch.h>
 #endif
 
 /****************************************************************************

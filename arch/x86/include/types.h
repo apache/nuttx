@@ -32,7 +32,7 @@
 /* Include architecture-specific limits */
 
 #ifdef CONFIG_ARCH_I486
-# include <arch/i486/types.h>
+#  include <arch/i486/types.h>
 #endif
 
 /****************************************************************************

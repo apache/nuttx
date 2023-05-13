@@ -38,10 +38,10 @@
 #include <arch/chip/irq.h>
 
 #ifdef CONFIG_ARCH_CHIP_LM32
-# include <arch/lm32/irq.h>
+#  include <arch/lm32/irq.h>
 #endif
 #ifdef CONFIG_ARCH_CHIP_MINERVA
-# include <arch/minerva/irq.h>
+#  include <arch/minerva/irq.h>
 #endif
 
 /****************************************************************************

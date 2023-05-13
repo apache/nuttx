@@ -23,21 +23,21 @@
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE
-# include <stdio.h>
-# include <stdlib.h>
-# include <syslog.h>
-# include <zlib.h>
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <syslog.h>
+#  include <zlib.h>
 #else
-# include <nuttx/config.h>
+#  include <nuttx/config.h>
 
-# include <syslog.h>
-# include <stdlib.h>
-# include <debug.h>
-# include <zlib.h>
+#  include <syslog.h>
+#  include <stdlib.h>
+#  include <debug.h>
+#  include <zlib.h>
 
-# include <nuttx/kmalloc.h>
+#  include <nuttx/kmalloc.h>
 
-# include "sim_internal.h"
+#  include "sim_internal.h"
 #endif
 
 /****************************************************************************

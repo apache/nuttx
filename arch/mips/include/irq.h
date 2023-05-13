@@ -47,7 +47,7 @@
  */
 
 #ifdef CONFIG_ARCH_MIPS32
-# include <arch/mips32/irq.h>
+#  include <arch/mips32/irq.h>
 #endif
 
 /****************************************************************************

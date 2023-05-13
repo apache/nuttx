@@ -32,9 +32,9 @@
 #include <nuttx/config.h>
 
 #ifdef CONFIG_ARCH_FAMILY_AVR32
-# include <arch/avr32/arch.h>
+#  include <arch/avr32/arch.h>
 #else
-# include <arch/avr/arch.h>
+#  include <arch/avr/arch.h>
 #endif
 
 /****************************************************************************

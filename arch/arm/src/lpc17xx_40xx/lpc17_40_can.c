@@ -72,15 +72,15 @@
 #include <nuttx/arch.h>
 
 #if defined(CHRDEV_CAN)
-# include <nuttx/can/can.h>
+#  include <nuttx/can/can.h>
 #endif
 
 #if defined(SOCKET_CAN)
-# include <nuttx/can.h>
-# include <nuttx/net/netdev.h>
-# include <nuttx/net/can.h>
-# include <nuttx/wqueue.h>
-# include <string.h>
+#  include <nuttx/can.h>
+#  include <nuttx/net/netdev.h>
+#  include <nuttx/net/can.h>
+#  include <nuttx/wqueue.h>
+#  include <string.h>
 #endif
 
 #include "arm_internal.h"
