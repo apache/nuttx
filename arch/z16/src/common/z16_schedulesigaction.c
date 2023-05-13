@@ -82,6 +82,8 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -99,6 +101,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the interrupted
@@ -117,7 +120,6 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * been delivered.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
               tcb->xcp.saved_pc         = *current_pc;
               tcb->xcp.saved_i          = g_current_regs[REG_FLAGS];
 
@@ -150,7 +152,6 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver      = sigdeliver;
           tcb->xcp.saved_pc        = *saved_pc;
           tcb->xcp.saved_i         = tcb->xcp.regs[REG_FLAGS];
 

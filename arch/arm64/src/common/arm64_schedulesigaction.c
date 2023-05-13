@@ -126,6 +126,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is being delivered
        * to task that is currently executing on this CPU.
        */
@@ -143,6 +145,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the interrupted
@@ -163,8 +166,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * These will be restored by the signal trampoline after
                * the signals have been delivered.
                */
-
-              tcb->xcp.sigdeliver     = sigdeliver;
 
               /* create signal process context */
 
@@ -193,7 +194,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * have been delivered.
            */
 
-          tcb->xcp.sigdeliver      = sigdeliver;
 #ifdef CONFIG_ARCH_FPU
           tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
 #endif
@@ -218,6 +218,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is being delivered
        * to task that is currently executing on any CPU.
        */
@@ -240,6 +242,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  The task that needs to receive the signal is running.
@@ -275,8 +278,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver      = sigdeliver;
-
 #ifdef CONFIG_ARCH_FPU
                   tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
 #endif
@@ -294,8 +295,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * be restored by the signal trampoline after the signal
                    * has been delivered.
                    */
-
-                  tcb->xcp.sigdeliver      = (void *)sigdeliver;
 
                   /* create signal process context */
 
@@ -345,8 +344,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * will be restored by the signal trampoline after the signals
            * have been delivered.
            */
-
-          tcb->xcp.sigdeliver      = sigdeliver;
 
 #ifdef CONFIG_ARCH_FPU
           tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;

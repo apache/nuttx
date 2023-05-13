@@ -87,6 +87,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -105,6 +107,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the
@@ -134,7 +137,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               CURRENT_REGS = (uintptr_t *)((uintptr_t)CURRENT_REGS -
-                                            XCPTCONTEXT_SIZE);
+                                                      XCPTCONTEXT_SIZE);
 
               memcpy((uintptr_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                      XCPTCONTEXT_SIZE);
@@ -144,7 +147,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * privileged thread mode.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
               CURRENT_REGS[REG_EPC]     = (uintptr_t)riscv_sigdeliver;
 
               int_ctx                   = CURRENT_REGS[REG_INT_CTX];
@@ -155,8 +157,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               CURRENT_REGS[REG_INT_CTX] = int_ctx;
 
-              CURRENT_REGS[REG_SP] = (uintptr_t)CURRENT_REGS +
-                                       XCPTCONTEXT_SIZE;
+              CURRENT_REGS[REG_SP]      = (uintptr_t)CURRENT_REGS +
+                                                     XCPTCONTEXT_SIZE;
 
               sinfo("PC/STATUS Saved: %" PRIxREG "/%" PRIxREG
                     " New: %" PRIxREG "/%" PRIxREG "\n",
@@ -179,8 +181,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * been delivered.
            */
 
-          tcb->xcp.sigdeliver = sigdeliver;
-
           /* Save the current register context location */
 
           tcb->xcp.saved_regs = tcb->xcp.regs;
@@ -191,12 +191,12 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.regs = (uintptr_t *)((uintptr_t)tcb->xcp.regs -
-                                         XCPTCONTEXT_SIZE);
+                                                   XCPTCONTEXT_SIZE);
 
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
 
           tcb->xcp.regs[REG_SP]       = (uintptr_t)tcb->xcp.regs +
-                                          XCPTCONTEXT_SIZE;
+                                                   XCPTCONTEXT_SIZE;
 
           tcb->xcp.regs[REG_EPC]      = (uintptr_t)riscv_sigdeliver;
           int_ctx                     = tcb->xcp.regs[REG_INT_CTX];
@@ -227,6 +227,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is being delivered
        * to task that is currently executing on any CPU.
        */
@@ -249,6 +251,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  The task that needs to receive the signal is running.
@@ -284,8 +287,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver = sigdeliver;
-
                   /* Then set up vector to the trampoline with interrupts
                    * disabled.  We must already be in privileged thread mode
                    * to be here.
@@ -301,13 +302,13 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    */
 
                   tcb->xcp.regs = (uintptr_t *)((uintptr_t)tcb->xcp.regs -
-                                                 XCPTCONTEXT_SIZE);
+                                                           XCPTCONTEXT_SIZE);
 
                   memcpy(tcb->xcp.regs, tcb->xcp.saved_regs,
                          XCPTCONTEXT_SIZE);
 
                   tcb->xcp.regs[REG_SP]      = (uintptr_t)tcb->xcp.regs +
-                                                 XCPTCONTEXT_SIZE;
+                                                          XCPTCONTEXT_SIZE;
 
                   tcb->xcp.regs[REG_EPC]     = (uintptr_t)riscv_sigdeliver;
                   int_ctx                    = tcb->xcp.regs[REG_INT_CTX];
@@ -326,8 +327,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver = (void *)sigdeliver;
-
                   tcb->xcp.saved_regs = (uintptr_t *)CURRENT_REGS;
 
                   /* Duplicate the register context.  These will be
@@ -336,13 +335,13 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    */
 
                   CURRENT_REGS = (uintptr_t *)((uintptr_t)CURRENT_REGS -
-                                                XCPTCONTEXT_SIZE);
+                                                          XCPTCONTEXT_SIZE);
 
                   memcpy((uintptr_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                          XCPTCONTEXT_SIZE);
 
-                  CURRENT_REGS[REG_SP] = (uintptr_t)CURRENT_REGS +
-                                           XCPTCONTEXT_SIZE;
+                  CURRENT_REGS[REG_SP]      = (uintptr_t)CURRENT_REGS +
+                                                         XCPTCONTEXT_SIZE;
 
                   /* Then set up vector to the trampoline with interrupts
                    * disabled.  The kernel-space trampoline must run in
@@ -394,8 +393,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * by the signal trampoline after the signal has been delivered.
            */
 
-          tcb->xcp.sigdeliver        = (void *)sigdeliver;
-
           /* Save the current register context location */
 
           tcb->xcp.saved_regs        = tcb->xcp.regs;
@@ -405,13 +402,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs = (uintptr_t *)((uintptr_t)tcb->xcp.regs -
-                                         XCPTCONTEXT_SIZE);
+          tcb->xcp.regs              = (uintptr_t *)
+                                       ((uintptr_t)tcb->xcp.regs -
+                                                   XCPTCONTEXT_SIZE);
 
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
 
           tcb->xcp.regs[REG_SP]      = (uintptr_t)tcb->xcp.regs +
-                                         XCPTCONTEXT_SIZE;
+                                                  XCPTCONTEXT_SIZE;
 
           /* Increment the IRQ lock count so that when the task is restarted,
            * it will hold the IRQ spinlock.

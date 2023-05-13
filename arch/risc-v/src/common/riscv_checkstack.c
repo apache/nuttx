@@ -168,7 +168,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 #endif
 
   size = riscv_stack_check((uintptr_t)tcb->stack_base_ptr,
-                           tcb->adj_stack_size);
+                                      tcb->adj_stack_size);
 
 #ifdef CONFIG_ARCH_ADDRENV
   if (tcb->addrenv_own != NULL)

@@ -166,7 +166,7 @@ int up_cpu_start(int cpu)
   backup[0] = getreg32(CPU1_VECTOR_ISTACK);
   backup[1] = getreg32(CPU1_VECTOR_RESETV);
   putreg32((uint32_t)tcb->stack_base_ptr +
-           tcb->adj_stack_size, CPU1_VECTOR_ISTACK);
+                     tcb->adj_stack_size, CPU1_VECTOR_ISTACK);
   putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_RESETV);
 
   spin_lock(&g_cpu_wait[0]);
