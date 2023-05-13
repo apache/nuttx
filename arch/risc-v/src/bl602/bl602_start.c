@@ -33,7 +33,7 @@
 #include <syslog.h>
 
 #ifdef CONFIG_STACK_OVERFLOW_CHECK
-# include "sched/sched.h"
+#  include "sched/sched.h"
 #endif
 
 #include "riscv_internal.h"

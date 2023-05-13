@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #ifdef CONFIG_SENSORS_HYT271
-# include <nuttx/sensors/hyt271.h>
+#  include <nuttx/sensors/hyt271.h>
 #endif
 
 #include "chip.h"

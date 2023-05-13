@@ -28,9 +28,9 @@
 /* Include architecture-specific limits definitions */
 
 #if defined(CONFIG_ARCH_HC12)
-# include <arch/hc12/limits.h>
+#  include <arch/hc12/limits.h>
 #elif defined(CONFIG_ARCH_HCS12)
-# include <arch/hcs12/limits.h>
+#  include <arch/hcs12/limits.h>
 #endif
 
 /****************************************************************************

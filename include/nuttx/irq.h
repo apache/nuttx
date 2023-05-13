@@ -28,8 +28,8 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
-# include <stdbool.h>
+#  include <stdint.h>
+#  include <stdbool.h>
 #endif
 
 /* Now include architecture-specific types */

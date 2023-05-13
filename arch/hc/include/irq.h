@@ -47,9 +47,9 @@
  */
 
 #if defined(CONFIG_ARCH_HC12)
-# include <arch/hc12/irq.h>
+#  include <arch/hc12/irq.h>
 #elif defined(CONFIG_ARCH_HCS12)
-# include <arch/hcs12/irq.h>
+#  include <arch/hcs12/irq.h>
 #endif
 
 /****************************************************************************

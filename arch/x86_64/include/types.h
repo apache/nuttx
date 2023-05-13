@@ -32,7 +32,7 @@
 /* Include architecture-specific limits */
 
 #ifdef CONFIG_ARCH_INTEL64
-# include <arch/intel64/types.h>
+#  include <arch/intel64/types.h>
 #endif
 
 /****************************************************************************

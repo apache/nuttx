@@ -28,7 +28,7 @@
 /* Include architecture-specific limits */
 
 #ifdef CONFIG_ARCH_I486
-# include <arch/i486/limits.h>
+#  include <arch/i486/limits.h>
 #endif
 
 /****************************************************************************

@@ -47,7 +47,7 @@
  */
 
 #ifdef CONFIG_ARCH_SPARC_V8
-# include <arch/sparc_v8/irq.h>
+#  include <arch/sparc_v8/irq.h>
 #endif
 
 /****************************************************************************

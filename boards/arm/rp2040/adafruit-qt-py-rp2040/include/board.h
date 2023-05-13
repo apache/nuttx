@@ -34,7 +34,7 @@
 #include "rp2040_spisd.h"
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
 
 /****************************************************************************

@@ -28,7 +28,7 @@
 /* Include architecture-specific limits */
 
 #ifdef CONFIG_ARCH_INTEL64
-# include <arch/intel64/limits.h>
+#  include <arch/intel64/limits.h>
 #endif
 
 /****************************************************************************
