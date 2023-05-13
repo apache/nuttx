@@ -99,12 +99,12 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set the initial stack pointer to the top of the allocated stack */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
+  xcp->regs[REG_SP] = (uint32_t)tcb->stack_base_ptr +
+                                tcb->adj_stack_size;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
+  xcp->regs[REG_PC] = (uint32_t)tcb->start;
 
   /* Set supervisor- or user-mode, depending on how NuttX is configured and
    * what kind of thread is being started.  Disable FIQs in any event
@@ -120,8 +120,8 @@ void up_initial_state(struct tcb_s *tcb)
   /* Enable or disable interrupts, based on user configuration */
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_SR]    = avr32_sr() | AVR32_SR_GM_MASK;
+  xcp->regs[REG_SR] = avr32_sr() | AVR32_SR_GM_MASK;
 #else
-  xcp->regs[REG_SR]    = avr32_sr() & ~AVR32_SR_GM_MASK;
+  xcp->regs[REG_SR] = avr32_sr() & ~AVR32_SR_GM_MASK;
 #endif
 }

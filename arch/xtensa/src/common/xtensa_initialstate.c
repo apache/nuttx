@@ -93,19 +93,19 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set initial values of registers */
 
-  xcp->regs[REG_PC]   = (uint32_t)tcb->start;           /* Task entrypoint                */
-  xcp->regs[REG_A0]   = 0;                              /* To terminate GDB backtrace     */
-  xcp->regs[REG_A1]   = (uint32_t)tcb->stack_base_ptr + /* Physical top of stack frame    */
-                                  tcb->adj_stack_size;
+  xcp->regs[REG_PC] = (uint32_t)tcb->start;           /* Task entrypoint                */
+  xcp->regs[REG_A0] = 0;                              /* To terminate GDB backtrace     */
+  xcp->regs[REG_A1] = (uint32_t)tcb->stack_base_ptr + /* Physical top of stack frame    */
+                                tcb->adj_stack_size;
 
   /* Set initial PS to int level 0, user mode. */
 
 #ifdef __XTENSA_CALL0_ABI__
-  xcp->regs[REG_PS]   = PS_UM;
+  xcp->regs[REG_PS] = PS_UM;
 
 #else
   /* For windowed ABI set WOE and CALLINC (pretend task was 'call4'd). */
 
-  xcp->regs[REG_PS]   = PS_UM | PS_WOE | PS_CALLINC(1);
+  xcp->regs[REG_PS] = PS_UM | PS_WOE | PS_CALLINC(1);
 #endif
 }

@@ -151,7 +151,7 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
 #ifdef CONFIG_ARCH_FPU
-  xcp->regs[REG_FPSCR] |= ARMV8M_FPSCR_LTPSIZE_NONE;
+  xcp->regs[REG_FPSCR]  |= ARMV8M_FPSCR_LTPSIZE_NONE;
 #endif /* CONFIG_ARCH_FPU */
 
   /* Enable or disable interrupts, based on user configuration */
