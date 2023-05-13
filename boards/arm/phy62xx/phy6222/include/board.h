@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#  include <stdint.h>
 #endif
 
 #define HCLK_FREQUENCY    32000000ul       /* HSI48 for USB, only some STM32F0xx */

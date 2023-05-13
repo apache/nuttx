@@ -30,7 +30,7 @@
  */
 
 #ifdef CONFIG_ARCH_INTEL64
-# include <arch/intel64/io.h>
+#  include <arch/intel64/io.h>
 #endif
 
 /****************************************************************************

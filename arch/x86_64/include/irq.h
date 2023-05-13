@@ -42,7 +42,7 @@
  */
 
 #ifdef CONFIG_ARCH_INTEL64
-# include <arch/intel64/irq.h>
+#  include <arch/intel64/irq.h>
 #endif
 
 /****************************************************************************

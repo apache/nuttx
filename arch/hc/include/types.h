@@ -32,9 +32,9 @@
 /* Include architecture-specific limits definitions */
 
 #if defined(CONFIG_ARCH_HC12)
-# include <arch/hc12/types.h>
+#  include <arch/hc12/types.h>
 #elif defined(CONFIG_ARCH_HCS12)
-# include <arch/hcs12/types.h>
+#  include <arch/hcs12/types.h>
 #endif
 
 /****************************************************************************
