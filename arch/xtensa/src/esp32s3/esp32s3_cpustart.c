@@ -116,7 +116,7 @@ void xtensa_appcpu_start(void)
    */
 
   sp = (uint32_t)tcb->stack_base_ptr + tcb->adj_stack_size -
-       XCPTCONTEXT_SIZE;
+                 XCPTCONTEXT_SIZE;
   __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
   sinfo("CPU%d Started\n", up_cpu_index());

@@ -89,27 +89,27 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set the initial stack pointer to the top of the allocated stack */
 
-  sp                   = (uintptr_t)tcb->stack_base_ptr +
-                                    tcb->adj_stack_size;
-  xcp->regs[REG_SPH]   = (uint8_t)(sp >> 8);
-  xcp->regs[REG_SPL]   = (uint8_t)(sp & 0xff);
+  sp                  = (uintptr_t)tcb->stack_base_ptr +
+                                   tcb->adj_stack_size;
+  xcp->regs[REG_SPH]  = (uint8_t)(sp >> 8);
+  xcp->regs[REG_SPL]  = (uint8_t)(sp & 0xff);
 
   /* Save the task entry point */
 
 #if !defined(REG_PC2)
-  xcp->regs[REG_PC0]   = (uint8_t)((uintptr_t)tcb->start >> 8);
-  xcp->regs[REG_PC1]   = (uint8_t)((uintptr_t)tcb->start & 0xff);
+  xcp->regs[REG_PC0]  = (uint8_t)((uintptr_t)tcb->start >> 8);
+  xcp->regs[REG_PC1]  = (uint8_t)((uintptr_t)tcb->start & 0xff);
 #else
-  xcp->regs[REG_PC0]   = (uint8_t)((uint32_t)(uintptr_t)tcb->start >> 16);
-  xcp->regs[REG_PC1]   = (uint8_t)((uintptr_t)tcb->start >> 8);
-  xcp->regs[REG_PC2]   = (uint8_t)((uintptr_t)tcb->start & 0xff);
+  xcp->regs[REG_PC0]  = (uint8_t)((uint32_t)(uintptr_t)tcb->start >> 16);
+  xcp->regs[REG_PC1]  = (uint8_t)((uintptr_t)tcb->start >> 8);
+  xcp->regs[REG_PC2]  = (uint8_t)((uintptr_t)tcb->start & 0xff);
 #endif
 
   /* Enable or disable interrupts, based on user configuration */
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_SREG]  = getsreg() & ~(1 << SREG_I);
+  xcp->regs[REG_SREG] = getsreg() & ~(1 << SREG_I);
 #else
-  xcp->regs[REG_SREG]  = getsreg() | (1 << SREG_I);
+  xcp->regs[REG_SREG] = getsreg() | (1 << SREG_I);
 #endif
 }

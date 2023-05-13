@@ -85,40 +85,40 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* set the FCW to 1f80 */
 
-  xcp->regs[1]      = (uint64_t)0x0000037f00000000;
+  xcp->regs[1]          = (uint64_t)0x0000037f00000000;
 
   /* set the MXCSR to 1f80 */
 
-  xcp->regs[3]      = (uint64_t)0x0000000000001f80;
+  xcp->regs[3]          = (uint64_t)0x0000000000001f80;
 
   /* Save the initial stack pointer... the value of the stackpointer before
    * the "interrupt occurs."
    */
 
-  xcp->regs[REG_RSP]      = (uint64_t)tcb->stack_base_ptr +
-                                      tcb->adj_stack_size;
-  xcp->regs[REG_RBP]      = (uint64_t)tcb->stack_base_ptr +
-                                      tcb->adj_stack_size;
+  xcp->regs[REG_RSP]    = (uint64_t)tcb->stack_base_ptr +
+                                    tcb->adj_stack_size;
+  xcp->regs[REG_RBP]    = (uint64_t)tcb->stack_base_ptr +
+                                    tcb->adj_stack_size;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_RIP]     = (uint64_t)tcb->start;
+  xcp->regs[REG_RIP]    = (uint64_t)tcb->start;
 
   /* Set up the segment registers... assume the same segment as the caller.
    * That is not a good assumption in the long run.
    */
 
-  xcp->regs[REG_DS]      = up_getds();
-  xcp->regs[REG_CS]      = up_getcs();
-  xcp->regs[REG_SS]      = up_getss();
-  xcp->regs[REG_ES]      = up_getes();
+  xcp->regs[REG_DS]     = up_getds();
+  xcp->regs[REG_CS]     = up_getcs();
+  xcp->regs[REG_SS]     = up_getss();
+  xcp->regs[REG_ES]     = up_getes();
 
   /* Aux GS and FS are set to be 0 */
 
   /* used by some libc for TLS and segment reference */
 
-  xcp->regs[REG_GS]      = 0;
-  xcp->regs[REG_FS]      = 0;
+  xcp->regs[REG_GS]     = 0;
+  xcp->regs[REG_FS]     = 0;
 
   /* Set supervisor- or user-mode, depending on how NuttX is configured and
    * what kind of thread is being started.  Disable FIQs in any event
@@ -136,7 +136,7 @@ void up_initial_state(struct tcb_s *tcb)
    */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_RFLAGS]  = X86_64_RFLAGS_IF;
+  xcp->regs[REG_RFLAGS] = X86_64_RFLAGS_IF;
 #endif
 }
 

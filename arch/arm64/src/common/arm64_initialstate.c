@@ -56,12 +56,12 @@
 
 void arm64_new_task(struct tcb_s * tcb)
 {
-  char  *stack_ptr = tcb->stack_base_ptr + tcb->adj_stack_size;
-  struct regs_context  * pinitctx;
+  char *stack_ptr = tcb->stack_base_ptr + tcb->adj_stack_size;
+  struct regs_context *pinitctx;
 
 #ifdef CONFIG_ARCH_FPU
-  struct fpu_reg      * pfpuctx;
-  pfpuctx      = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
+  struct fpu_reg *pfpuctx;
+  pfpuctx = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
   tcb->xcp.fpu_regs   = (uint64_t *)pfpuctx;
 
   /* set fpu context */
@@ -70,25 +70,25 @@ void arm64_new_task(struct tcb_s * tcb)
   stack_ptr  = (char *)pfpuctx;
 #endif
 
-  pinitctx      = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
+  pinitctx = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
   memset(pinitctx, 0, sizeof(struct regs_context));
-  pinitctx->elr          = (uint64_t)tcb->start;
+  pinitctx->elr       = (uint64_t)tcb->start;
 
   /* Keep using SP_EL1 */
 
-  pinitctx->spsr         = SPSR_MODE_EL1H;
+  pinitctx->spsr      = SPSR_MODE_EL1H;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   pinitctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
-  pinitctx->sp_elx       = (uint64_t)pinitctx;
-  pinitctx->sp_el0       = (uint64_t)pinitctx;
-  pinitctx->exe_depth    = 0;
-  pinitctx->tpidr_el0    = (uint64_t)tcb;
-  pinitctx->tpidr_el1    = (uint64_t)tcb;
+  pinitctx->sp_elx    = (uint64_t)pinitctx;
+  pinitctx->sp_el0    = (uint64_t)pinitctx;
+  pinitctx->exe_depth = 0;
+  pinitctx->tpidr_el0 = (uint64_t)tcb;
+  pinitctx->tpidr_el1 = (uint64_t)tcb;
 
-  tcb->xcp.regs          = (uint64_t *)pinitctx;
+  tcb->xcp.regs       = (uint64_t *)pinitctx;
 }
 
 /****************************************************************************
@@ -115,12 +115,12 @@ void up_initial_state(struct tcb_s *tcb)
     {
       /* Initialize the idle thread stack */
 #ifdef CONFIG_SMP
-      tcb->stack_alloc_ptr  = (void *)(g_cpu_idlestackalloc[0]);
+      tcb->stack_alloc_ptr = (void *)(g_cpu_idlestackalloc[0]);
 #else
-      tcb->stack_alloc_ptr  = (void *)(g_idle_stack);
+      tcb->stack_alloc_ptr = (void *)(g_idle_stack);
 #endif
-      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size   = CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
 #ifdef CONFIG_ARCH_FPU
       /* set fpu context */

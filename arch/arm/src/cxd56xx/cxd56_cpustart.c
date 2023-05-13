@@ -178,7 +178,7 @@ int up_cpu_start(int cpu)
   /* Copy initial stack and reset vector for APP_DSP */
 
   putreg32((uint32_t)tcb->stack_base_ptr +
-           tcb->adj_stack_size, VECTOR_ISTACK);
+                     tcb->adj_stack_size, VECTOR_ISTACK);
   putreg32((uint32_t)appdsp_boot, VECTOR_RESETV);
 
   spin_lock(&g_appdsp_boot);
