@@ -616,7 +616,7 @@ static void w25qxxxjv_quad_enable(FAR struct w25qxxxjv_dev_s *priv)
       w25qxxxjv_write_enable(priv);
 
       priv->cmdbuf[0] &= ~STATUS2_QE_MASK;
-      priv->cmdbuf[1] |= STATUS2_QE_ENABLED;
+      priv->cmdbuf[0] |= STATUS2_QE_ENABLED;
 
       w25qxxxjv_command_write(priv->qspi, W25QXXXJV_WRITE_STATUS_2,
                               (FAR const void *)priv->cmdbuf, 1);
