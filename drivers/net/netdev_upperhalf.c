@@ -37,6 +37,7 @@
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,6 +79,51 @@ struct netdev_upperhalf_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: quota_fetch_inc/dec
+ *
+ * Description:
+ *   Fetch the quota and add/sub one to it.  It works like atomic_fetch_xxx,
+ *   just because currently we don't have atomic on some platform.  We may
+ *   switch to atomic later.
+ *
+ ****************************************************************************/
+
+static int quota_fetch_inc(FAR struct netdev_lowerhalf_s *lower,
+                           enum netpkt_type_e type)
+{
+  irqstate_t flags = spin_lock_irqsave(NULL);
+  int ret = lower->quota[type]++;
+  spin_unlock_irqrestore(NULL, flags);
+  return ret;
+}
+
+static int quota_fetch_dec(FAR struct netdev_lowerhalf_s *lower,
+                           enum netpkt_type_e type)
+{
+  irqstate_t flags = spin_lock_irqsave(NULL);
+  int ret = lower->quota[type]--;
+  spin_unlock_irqrestore(NULL, flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: quota_load
+ *
+ * Description:
+ *   Fetch the quota, works like atomic_load.
+ *
+ ****************************************************************************/
+
+static int quota_load(FAR struct netdev_lowerhalf_s *lower,
+                      enum netpkt_type_e type)
+{
+  irqstate_t flags = spin_lock_irqsave(NULL);
+  int ret = lower->quota[type];
+  spin_unlock_irqrestore(NULL, flags);
+  return ret;
+}
+
+/****************************************************************************
  * Name: netpkt_get
  *
  * Description:
@@ -105,7 +151,7 @@ static FAR netpkt_t *netpkt_get(FAR struct net_driver_s *dev,
    * cases will be limited by netdev_upper_can_tx and seldom reaches here.
    */
 
-  if (upper->lower->quota[type]-- <= 0)
+  if (quota_fetch_dec(upper->lower, type) <= 0)
     {
       nwarn("WARNING: Allowing temperarily exceeding quota of %s.\n",
             dev->d_ifname);
@@ -137,7 +183,7 @@ static void netpkt_put(FAR struct net_driver_s *dev, FAR netpkt_t *pkt,
    *       but we don't want these changes.
    */
 
-  upper->lower->quota[type]++;
+  quota_fetch_inc(upper->lower, type);
   netdev_iob_release(dev);
   dev->d_iob = pkt;
   dev->d_len = netpkt_getdatalen(upper->lower, pkt);
@@ -186,7 +232,7 @@ netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev)
 
 static inline bool netdev_upper_can_tx(FAR struct netdev_upperhalf_s *upper)
 {
-  return upper->lower->quota[NETPKT_TX] > 0;
+  return quota_load(upper->lower, NETPKT_TX) > 0;
 }
 
 /****************************************************************************
@@ -814,20 +860,18 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 {
   FAR netpkt_t *pkt;
 
-  if (dev->quota[type] <= 0)
+  if (quota_fetch_dec(dev, type) <= 0)
     {
+      quota_fetch_inc(dev, type);
       return NULL;
     }
 
   pkt = iob_tryalloc(false);
   if (pkt == NULL)
     {
+      quota_fetch_inc(dev, type);
       return NULL;
     }
-
-  net_lock(); /* REVISIT: Do we have better solution? */
-  dev->quota[type]--;
-  net_unlock();
 
   iob_reserve(pkt, CONFIG_NET_LL_GUARDSIZE);
   return pkt;
@@ -849,10 +893,7 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
                  enum netpkt_type_e type)
 {
-  net_lock(); /* REVISIT: Do we have better solution? */
-  dev->quota[type]++;
-  net_unlock();
-
+  quota_fetch_inc(dev, type);
   iob_free_chain(pkt);
 }
 
