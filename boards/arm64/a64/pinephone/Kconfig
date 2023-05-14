@@ -17,4 +17,10 @@ config PINEPHONE_LCD
 	---help---
 		Select to enable support for LCD Display.
 
+config PINEPHONE_MODEM
+	bool "LTE Modem"
+	default n
+	---help---
+		Select to enable support for Quectel EG25-G LTE Modem.
+
 endif # ARCH_BOARD_PINEPHONE

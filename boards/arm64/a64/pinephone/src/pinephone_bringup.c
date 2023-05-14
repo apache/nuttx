@@ -55,6 +55,10 @@
 #  include <nuttx/sensors/mpu60x0.h>
 #endif
 
+#ifdef CONFIG_PINEPHONE_MODEM
+#  include "pinephone_modem.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -201,6 +205,16 @@ int pinephone_bringup(void)
           mpu_config->addr = 0x68;
           mpu60x0_register("/dev/imu0", mpu_config);
         }
+    }
+#endif
+
+#ifdef CONFIG_PINEPHONE_MODEM
+  /* Initialize Quectel EG25-G LTE Modem */
+
+  ret = pinephone_modem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Init LTE Modem failed: %d\n", ret);
     }
 #endif
 

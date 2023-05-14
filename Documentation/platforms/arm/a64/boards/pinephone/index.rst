@@ -155,6 +155,13 @@ Supports all the features in ``lcd``,
 plus LVGL Graphics Library and Touch Panel (GT917S).
 Serial Console is enabled on UART0 at 115.2 kbps.
 
+modem
+-----
+
+Supports LTE Modem (EG25-G). Accepts AT Commands on UART3
+at ``/dev/ttyS1``.
+Serial Console is enabled on UART0 at 115.2 kbps.
+
 nsh
 ---
 
@@ -185,6 +192,7 @@ Display Engine           Yes
 Frame Buffer             Yes
 LCD Controller (ST7703)  Yes
 LCD Panel (XBD599)       Yes
+LTE Modem (EG25-G)       Yes
 MIPI D-PHY               Yes
 MIPI DSI                 Yes
 PIO                      Yes

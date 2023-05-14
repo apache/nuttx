@@ -45,4 +45,8 @@ ifeq ($(CONFIG_INPUT_GT9XX),y)
 CSRCS += pinephone_touch.c
 endif
 
+ifeq ($(CONFIG_PINEPHONE_MODEM),y)
+CSRCS += pinephone_modem.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
