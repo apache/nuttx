@@ -195,8 +195,6 @@ void riscv_addregion(void);
 
 void riscv_ack_irq(int irq);
 
-void riscv_copystate(uintptr_t *dest, uintptr_t *src);
-
 void riscv_sigdeliver(void);
 int riscv_swint(int irq, void *context, void *arg);
 uintptr_t riscv_get_newintctx(void);
