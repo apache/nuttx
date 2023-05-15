@@ -12208,6 +12208,7 @@ config STM32_FOC_USE_ADC4
 config STM32_FOC_G4_ADCCHAN0_WORKAROUND
 	bool "FOC G4 ADC channel 0 unwanted conversion workaround"
 	default n
+	depends on STM32_STM32G4XXX
 	---help---
 		Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
 		conversion when a regular conversion is interrupted by an injected conversion.
