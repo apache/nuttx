@@ -97,6 +97,8 @@ begin_packed_struct struct tcbinfo_s
   uint16_t state_off;
   uint16_t pri_off;
   uint16_t name_off;
+  uint16_t stack_off;
+  uint16_t stack_size_off;
   uint16_t regs_off;
   uint16_t basic_num;
   uint16_t total_num;
