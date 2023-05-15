@@ -452,7 +452,12 @@ config MPFS_CORESPI
 
 config MPFS_CORESPI_BASE
 	hex "Base address for the (first) CoreSPI instance"
-	default 0x4A000000
+	default 0x4B008000
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_INST_OFFSET
+	hex "Offset of instances in memory, base + n * offset finds instance n"
+	default 0x1000
 	depends on MPFS_CORESPI
 
 config MPFS_CORESPI_INSTANCES
@@ -463,8 +468,13 @@ config MPFS_CORESPI_INSTANCES
 
 config MPFS_CORESPI_IRQNUM
 	int "Number of (first) F2H interrupt"
-	default 4
+	default 20
 	range 0 63
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_IRQNUM_OFFSET
+	int "Offset of interrupt source for instance n"
+	default 1
 	depends on MPFS_CORESPI
 
 endif # MPFS_HAVE_CORESPI
