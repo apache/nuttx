@@ -90,8 +90,8 @@
 #define MPFS_CORESPI_BASE           CONFIG_MPFS_CORESPI_BASE
 #define MPFS_CORESPI_IRQNUM         (MPFS_IRQ_FABRIC_F2H_0 + \
                                      CONFIG_MPFS_CORESPI_IRQNUM)
-#define MPFS_CORESPI_INST_OFFSET(n) ((n) * 0x1000000)
-#define MPFS_CORESPI_IRQ_OFFSET(n)  ((n) * 1)
+#define MPFS_CORESPI_INST_OFFSET(n) ((n) * CONFIG_MPFS_CORESPI_INST_OFFSET)
+#define MPFS_CORESPI_IRQ_OFFSET(n)  ((n) * CONFIG_MPFS_CORESPI_IRQNUM_OFFSET)
 
 /* Gives TTOA in microseconds, ~4.8% bias, +1 rounds up */
 
