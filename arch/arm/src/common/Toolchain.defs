@@ -251,8 +251,8 @@ endif
 
 # Architecture flags
 
-ARCHCFLAGS += -Wstrict-prototypes
-ARCHCXXFLAGS += -nostdinc++
+ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
+ARCHCXXFLAGS += -nostdinc++ -Wno-attributes -Wno-unknown-pragmas
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
