@@ -228,18 +228,18 @@ pid_t riscv_fork(const struct fork_s *context)
   child->cmn.xcp.regs[REG_GP]   = newsp;        /* Global pointer */
 #endif
 #ifdef CONFIG_ARCH_FPU
-  child->cmn.xcp.regs[REG_FS0]  = context->fs0;  /* Saved register fs1 */
-  child->cmn.xcp.regs[REG_FS1]  = context->fs1;  /* Saved register fs1 */
-  child->cmn.xcp.regs[REG_FS2]  = context->fs2;  /* Saved register fs2 */
-  child->cmn.xcp.regs[REG_FS3]  = context->fs3;  /* Saved register fs3 */
-  child->cmn.xcp.regs[REG_FS4]  = context->fs4;  /* Saved register fs4 */
-  child->cmn.xcp.regs[REG_FS5]  = context->fs5;  /* Saved register fs5 */
-  child->cmn.xcp.regs[REG_FS6]  = context->fs6;  /* Saved register fs6 */
-  child->cmn.xcp.regs[REG_FS7]  = context->fs7;  /* Saved register fs7 */
-  child->cmn.xcp.regs[REG_FS8]  = context->fs8;  /* Saved register fs8 */
-  child->cmn.xcp.regs[REG_FS9]  = context->fs9;  /* Saved register fs9 */
-  child->cmn.xcp.regs[REG_FS10] = context->fs10; /* Saved register fs10 */
-  child->cmn.xcp.regs[REG_FS11] = context->fs11; /* Saved register fs11 */
+  child->cmn.xcp.fregs[REG_FS0]  = context->fs0;  /* Saved register fs1 */
+  child->cmn.xcp.fregs[REG_FS1]  = context->fs1;  /* Saved register fs1 */
+  child->cmn.xcp.fregs[REG_FS2]  = context->fs2;  /* Saved register fs2 */
+  child->cmn.xcp.fregs[REG_FS3]  = context->fs3;  /* Saved register fs3 */
+  child->cmn.xcp.fregs[REG_FS4]  = context->fs4;  /* Saved register fs4 */
+  child->cmn.xcp.fregs[REG_FS5]  = context->fs5;  /* Saved register fs5 */
+  child->cmn.xcp.fregs[REG_FS6]  = context->fs6;  /* Saved register fs6 */
+  child->cmn.xcp.fregs[REG_FS7]  = context->fs7;  /* Saved register fs7 */
+  child->cmn.xcp.fregs[REG_FS8]  = context->fs8;  /* Saved register fs8 */
+  child->cmn.xcp.fregs[REG_FS9]  = context->fs9;  /* Saved register fs9 */
+  child->cmn.xcp.fregs[REG_FS10] = context->fs10; /* Saved register fs10 */
+  child->cmn.xcp.fregs[REG_FS11] = context->fs11; /* Saved register fs11 */
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL

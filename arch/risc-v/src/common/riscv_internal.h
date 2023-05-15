@@ -204,8 +204,12 @@ void riscv_exception_attach(void);
 
 #ifdef CONFIG_ARCH_FPU
 void riscv_fpuconfig(void);
+void riscv_savefpu(uintptr_t *regs, uintptr_t *fregs);
+void riscv_restorefpu(uintptr_t *regs, uintptr_t *fregs);
 #else
 #  define riscv_fpuconfig()
+#  define riscv_savefpu(regs, fregs)
+#  define riscv_restorefpu(regs, fregs)
 #endif
 
 /* Save / restore context of task */
@@ -213,11 +217,23 @@ void riscv_fpuconfig(void);
 static inline void riscv_savecontext(struct tcb_s *tcb)
 {
   tcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
+
+#ifdef CONFIG_ARCH_FPU
+  /* Save current process FPU state to TCB */
+
+  riscv_savefpu(tcb->xcp.regs, tcb->xcp.fregs);
+#endif
 }
 
 static inline void riscv_restorecontext(struct tcb_s *tcb)
 {
   CURRENT_REGS = (uintptr_t *)tcb->xcp.regs;
+
+#ifdef CONFIG_ARCH_FPU
+  /* Restore FPU state for next process */
+
+  riscv_restorefpu(tcb->xcp.regs, tcb->xcp.fregs);
+#endif
 }
 
 /* RISC-V PMP Config ********************************************************/
