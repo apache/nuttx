@@ -574,3 +574,59 @@ are two conditions where ``mmap()`` can be supported:
     -  ``ENODEV`` - The underlying file-system of the specified file does
        not support memory mapping.
 
+Fdsan
+---------------
+FD (file descriptor) is widely used in system software development,
+and almost all implementations of posix os (including nuttx) use FD as an index.
+the value of fd needs to be allocated starting from the minimum available value of 3, and each process has a copy,
+so the same fd value is very easy to reuse in the program.
+
+In multi threaded or multi process environments without address isolation,
+If the ownership, global variables, and competition relationships of fd are not properly handled,
+there may be issues with fd duplication or accidental closure.
+Further leading to the following issues, which are difficult to troubleshoot.
+
+1. Security vulnerability: the fd we wrote is not the expected fd and will be accessed by hackers to obtain data
+2. Program exceptions or crashes: write or read fd failures, and program logic errors
+3. The structured file XML or database is damaged: the data format written to the database is not the expected format.
+
+The implementation principle of fdsan is based on the implementation of Android
+https://android.googlesource.com/platform/bionic/+/master/docs/fdsan.md
+
+
+.. c:function:: uint64_t android_fdsan_create_owner_tag(enum android_fdsan_owner_type type, uint64_t tag);
+
+  Create an owner tag with the specified type and least significant 56 bits of tag.
+
+  :param type: See the ANDROID_* definitions in include/android/fdsan.h.
+
+     -  ``ANDROID_FDSAN_OWNER_TYPE_FILE`` - FILE
+     -  ``ANDROID_FDSAN_OWNER_TYPE_DIR`` - DIR
+     -  ``ANDROID_FDSAN_OWNER_TYPE_UNIQUE_FD`` - android::base::unique_fd
+     -  ``ANDROID_FDSAN_OWNER_TYPE_SQLITE`` - sqlite-owned file descriptors
+     -  ``ANDROID_FDSAN_OWNER_TYPE_FILEINPUTSTREAM`` - java.io.FileInputStream
+     -  ``ANDROID_FDSAN_OWNER_TYPE_FILEOUTPUTSTREAM`` - java.io.FileOutputStream
+     -  ``ANDROID_FDSAN_OWNER_TYPE_RANDOMACCESSFILE`` - java.io.RandomAccessFile
+     -  ``ANDROID_FDSAN_OWNER_TYPE_PARCELFILEDESCRIPTOR`` - android.os.ParcelFileDescriptor
+     -  ``ANDROID_FDSAN_OWNER_TYPE_ART_FDFILE`` - ART FdFile
+     -  ``ANDROID_FDSAN_OWNER_TYPE_DATAGRAMSOCKETIMPL`` - java.net.DatagramSocketImpl
+     -  ``ANDROID_FDSAN_OWNER_TYPE_SOCKETIMPL`` - java.net.SocketImpl
+     -  ``ANDROID_FDSAN_OWNER_TYPE_ZIPARCHIVE`` - libziparchive's ZipArchive
+
+  :param tag: least significant 56 bits of tag. Typically, it is a pointer to the object/structure where fd is located
+
+.. c:function:: void android_fdsan_exchange_owner_tag(int fd, uint64_t expected_tag,  uint64_t new_tag);
+
+  Exchange a file descriptor's tag. Logs and aborts if the fd's tag does not match expected_tag.
+
+  :param fd: The fd we want to protect
+  :param expected_tag: The tag corresponding to the current fd
+  :param new_tag: A new tag for fd binding
+
+.. c:function:: int android_fdsan_close_with_tag(int fd, uint64_t tag);
+
+  Close a file descriptor with a tag, and resets the tag to 0. Logs and aborts if the tag is incorrect.
+
+  :param fd: The fd we want to protect.
+  :param tag: The tag corresponding to the current fd.
+  :return: Consistent with the return value of close.
