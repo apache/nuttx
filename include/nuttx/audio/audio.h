@@ -484,7 +484,7 @@ struct audio_buf_desc_s
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   FAR void            *session;           /* Associated channel */
 #endif
-  uint16_t            numbytes;           /* Number of bytes to allocate */
+  apb_samp_t          numbytes;           /* Number of bytes to allocate */
   union
   {
     FAR struct ap_buffer_s  *buffer;     /* Buffer to free / enqueue */
