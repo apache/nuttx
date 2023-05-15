@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF53_NRF5340_DK_H
-#define __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF53_NRF5340_DK_H
+#ifndef __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF5340_DK_H
+#define __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF5340_DK_H
 
 /****************************************************************************
  * Included Files
@@ -131,4 +131,4 @@ int nrf53_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF53_NRF5340_DK_H */
+#endif /* __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF5340_DK_H */
