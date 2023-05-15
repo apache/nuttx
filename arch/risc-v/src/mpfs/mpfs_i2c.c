@@ -577,13 +577,16 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         /* Data byte received, NACK returned */
 
         DEBUGASSERT(priv->rx_buffer != NULL);
+        DEBUGASSERT(priv->rx_idx < priv->rx_size);
         priv->rx_buffer[priv->rx_idx] = (uint8_t)getreg32(MPFS_I2C_DATA);
+        priv->rx_idx++;
 
         priv->status = MPFS_I2C_SUCCESS;
         modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
         break;
 
       case MPFS_I2C_ST_IDLE:
+      case MPFS_I2C_ST_STOP_SENT:
 
         /* No activity, bus idle */
 
@@ -609,7 +612,17 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
       if (status == MPFS_I2C_ST_STOP_SENT)
         {
-          nxsem_post(&priv->sem_isr);
+          /* Don't post on a new request, STOPs possible initially */
+
+          if (!((priv->rx_idx == 0 && priv->rx_size > 0) ||
+             (priv->tx_idx == 0 && priv->tx_size > 0)))
+            {
+              nxsem_post(&priv->sem_isr);
+            }
+          else if (priv->status == MPFS_I2C_FAILED)
+            {
+              nxsem_post(&priv->sem_isr);
+            }
         }
     }
   else if (priv->status != MPFS_I2C_IN_PROGRESS)
@@ -687,12 +700,22 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
           priv->rx_buffer = msgs[i].buffer;
           priv->rx_size = msgs[i].length;
           priv->rx_idx = 0;
+
+          /* Clear tx_idx as well for combined transactions */
+
+          priv->tx_idx = 0;
+          priv->tx_size = 0;
         }
       else
         {
           priv->tx_buffer = msgs[i].buffer;
           priv->tx_size = msgs[i].length;
           priv->tx_idx = 0;
+
+          /* Clear rx_idx as well for combined transactions */
+
+          priv->rx_idx = 0;
+          priv->rx_size = 0;
 
           if (msgs[i].flags & I2C_M_NOSTOP)
             {
