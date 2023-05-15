@@ -107,6 +107,9 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_SPI),y)
 CHIP_CSRCS += esp32s3_spi.c
+ifeq ($(CONFIG_SPI_SLAVE),y)
+CHIP_CSRCS += esp32s3_spi_slave.c
+endif
 endif
 
 ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)

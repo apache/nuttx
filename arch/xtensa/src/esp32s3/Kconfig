@@ -301,12 +301,14 @@ config ESP32S3_SPI2
 	default n
 	select ESP32S3_SPI
 	select SPI
+	select ESP32S3_GPIO_IRQ if SPI_SLAVE
 
 config ESP32S3_SPI3
 	bool "SPI 3"
 	default n
 	select ESP32S3_SPI
 	select SPI
+	select ESP32S3_GPIO_IRQ if SPI_SLAVE
 
 config ESP32S3_DMA
 	bool "General DMA (GDMA)"
@@ -596,6 +598,11 @@ config ESP32S3_SPI_UDCS
 	---help---
 		Use user-defined CS.
 
+config ESP32S3_SPI_SLAVE_BUFSIZE
+	int "SPI slave buffer size"
+	default 2048
+	depends on SPI_SLAVE
+
 if ESP32S3_SPI2
 
 config ESP32S3_SPI2_DMA
@@ -644,6 +651,13 @@ config ESP32S3_SPI2_MISOPIN
 endif # ESP32S3_SPI2
 
 if ESP32S3_SPI3
+
+config ESP32S3_SPI3_DMA
+	bool "SPI3 use GDMA"
+	default n
+	depends on ESP32S3_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
 
 config ESP32S3_SPI3_CSPIN
 	int "SPI3 CS Pin"
