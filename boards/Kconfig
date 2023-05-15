@@ -1115,6 +1115,13 @@ config ARCH_BOARD_NRF5340_AUDIO_DK
 	---help---
 		This option selects the nRF5340 Audio Development Kit (PCA10121)
 
+config ARCH_BOARD_THINGY53
+	bool "Nordic Thingy:53 IoT prototyping platform"
+	depends on ARCH_CHIP_NRF53
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This option selects the Thingy:53 multi-protocol IoT prototyping platform
+
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
 	depends on ARCH_CHIP_NUC120LE3AN
@@ -2921,6 +2928,7 @@ config ARCH_BOARD
 	default "thingy52"                  if ARCH_BOARD_THINGY52
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
+	default "thingy53"                  if ARCH_BOARD_THINGY53
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
