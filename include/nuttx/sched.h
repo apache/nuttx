@@ -717,6 +717,8 @@ begin_packed_struct struct tcbinfo_s
   uint16_t state_off;                    /* Offset of tcb.task_state        */
   uint16_t pri_off;                      /* Offset of tcb.sched_priority    */
   uint16_t name_off;                     /* Offset of tcb.name              */
+  uint16_t stack_off;                    /* Offset of tcb.stack_alloc_ptr   */
+  uint16_t stack_size_off;               /* Offset of tcb.adj_stack_size    */
   uint16_t regs_off;                     /* Offset of tcb.regs              */
   uint16_t basic_num;                    /* Num of genernal regs            */
   uint16_t total_num;                    /* Num of regs in tcbinfo.reg_offs */
