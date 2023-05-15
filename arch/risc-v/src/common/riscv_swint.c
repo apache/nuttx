@@ -153,7 +153,7 @@ int riscv_swint(int irq, void *context, void *arg)
           struct tcb_s *next = (struct tcb_s *)regs[REG_A1];
 
           DEBUGASSERT(regs[REG_A1] != 0);
-          CURRENT_REGS = (uintptr_t *)next->xcp.regs;
+          riscv_restorecontext(next);
         }
         break;
 
@@ -180,8 +180,8 @@ int riscv_swint(int irq, void *context, void *arg)
           struct tcb_s *next = (struct tcb_s *)regs[REG_A2];
 
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          prev->xcp.regs = (uintptr_t *)CURRENT_REGS;
-          CURRENT_REGS = (uintptr_t *)next->xcp.regs;
+          riscv_savecontext(prev);
+          riscv_restorecontext(next);
         }
         break;
 
