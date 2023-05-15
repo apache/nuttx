@@ -5,4 +5,44 @@
 
 if ARCH_BOARD_NUCLEO_H743ZI2
 
+config H743ZI2_WDG
+	bool
+
+config H743ZI2_IWDG
+	bool "IWDG kicker support"
+	depends on STM32H7_IWDG
+	depends on WATCHDOG
+	select H743ZI2_WDG
+
+config H743ZI2_IWDG_TIMEOUT
+	int "IWDG Timeout (ms)"
+	default 32000
+	depends on H743ZI2_IWDG
+	---help---
+		Watchdog timeout value in milliseconds.
+
+if H743ZI2_WDG
+config H743ZI2_WDG_THREAD
+	bool "Watchdog Daemon Thread"
+
+if H743ZI2_WDG_THREAD
+config H743ZI2_WDG_THREAD_NAME
+	string "Watchdog Thread Name"
+	default "wdog"
+
+config H743ZI2_WDG_THREAD_INTERVAL
+	int "Watchdog Thread Interval (ms)"
+	default 2500
+
+config H743ZI2_WDG_THREAD_PRIORITY
+	int "Watchdog Thread Priority"
+	default 200
+
+config H743ZI2_WDG_THREAD_STACKSIZE
+	int "Watchdog Thread Stacksize"
+	default 1024
+
+endif # H743ZI2_WDG_THREAD
+endif # H743ZI2_WDG
+
 endif # ARCH_BOARD_NUCLEO_H743ZI2

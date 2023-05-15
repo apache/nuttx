@@ -155,6 +155,24 @@
 int stm32_bringup(void);
 
 /****************************************************************************
+ * Name: stm32_watchdog_initialize()
+ *
+ * Description:
+ *   Perform architecture-specific initialization of the Watchdog hardware.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_H743ZI2_WDG
+int stm32_watchdog_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:

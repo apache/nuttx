@@ -96,6 +96,21 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32_IWDG
+  /* Initialize the watchdog timer */
+
+  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+
+  /* Start WDG kicker thread */
+
+  ret = stm32_watchdog_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_RAMMTD
   /* Create a RAM MTD device if configured */
 
