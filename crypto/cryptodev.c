@@ -632,7 +632,7 @@ int cryptodev_key(FAR struct crypt_kop *kop)
         return -EINVAL;
     }
 
-  krp = kmm_malloc(sizeof *krp);
+  krp = kmm_zalloc(sizeof *krp);
   krp->krp_op = kop->crk_op;
   krp->krp_status = kop->crk_status;
   krp->krp_iparams = kop->crk_iparams;
@@ -665,10 +665,6 @@ int cryptodev_key(FAR struct crypt_kop *kop)
         }
 
       memcpy(krp->krp_param[i].crp_p, kop->crk_param[i].crp_p, size);
-      if (error)
-        {
-          goto fail;
-        }
     }
 
   error = crypto_kinvoke(krp);
