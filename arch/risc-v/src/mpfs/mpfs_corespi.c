@@ -229,7 +229,7 @@ static const struct spi_ops_s mpfs_spi_ops =
 
 static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
 {
-#if MPFS_CORESPI_INSTANCES < 2
+#if MPFS_CORESPI_INSTANCES > 0
   [0] =
   {
     .spi_dev =
@@ -243,8 +243,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 2
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 1
   [1] =
   {
     .spi_dev =
@@ -258,8 +259,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 3
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 2
   [2] =
   {
     .spi_dev =
@@ -273,8 +275,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 4
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 3
   [3] =
   {
     .spi_dev =
@@ -288,8 +291,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 5
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 4
   [4] =
   {
     .spi_dev =
@@ -303,8 +307,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 6
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 5
   [5] =
   {
     .spi_dev =
@@ -318,8 +323,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 7
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 6
   [6] =
   {
     .spi_dev =
@@ -333,8 +339,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#elif MPFS_CORESPI_INSTANCES == 8
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 7
   [7] =
   {
     .spi_dev =
@@ -348,8 +355,9 @@ static struct mpfs_spi_priv_s g_mpfs_spi_priv[MPFS_CORESPI_INSTANCES] =
     .devid             = 0,
     .lock              = NXMUTEX_INITIALIZER,
     .sem_isr           = SEM_INITIALIZER(0),
-  }
-#else
+  },
+#endif
+#if MPFS_CORESPI_INSTANCES > 8
 #  error "Too many CoreSPI instances, maximum is 8"
 #endif
 };
