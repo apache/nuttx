@@ -536,6 +536,12 @@ static const char *g_white_content_list[] =
   "idProduct",
 
   /* Ref:
+   * sim/posix/sim_hostmisc.c
+   */
+
+  "_NSGetExecutablePath",
+
+  /* Ref:
    * arch/arm/src/nrf52/sdc/nrf.h
    * arch/arm/src/nrf53/sdc/nrf.h
    */
