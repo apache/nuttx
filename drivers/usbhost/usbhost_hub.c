@@ -1095,10 +1095,6 @@ static void usbhost_disconnect_event(FAR void *arg)
 
   work_cancel(LPWORK, &priv->work);
 
-  /* Disable power to all downstream ports */
-
-  usbhost_hubpwr(priv, hport, false);
-
   /* Free the allocated control request */
 
   DRVR_FREE(hport->drvr, (FAR uint8_t *)priv->ctrlreq);
