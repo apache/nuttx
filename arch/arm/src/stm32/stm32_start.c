@@ -200,5 +200,7 @@ void __start(void)
 
   /* Shouldn't get here */
 
+#ifndef CONFIG_DISABLE_IDLE_LOOP
   for (; ; );
+#endif
 }
