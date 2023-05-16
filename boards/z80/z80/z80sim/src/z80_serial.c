@@ -90,8 +90,6 @@ static char g_uarttxbuffer[CONFIG_UART_TXBUFSIZE];
 static uart_dev_t g_uartport =
 {
   0,                        /* open_count */
-  false,                    /* xmitwaiting */
-  false,                    /* recvwaiting */
   true,                     /* isconsole */
   { 1 },                    /* closesem */
   { 0 },                    /* xmitsem */
