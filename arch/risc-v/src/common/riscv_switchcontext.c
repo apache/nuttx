@@ -69,7 +69,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        * Just copy the CURRENT_REGS into the OLD rtcb.
        */
 
-      riscv_savestate(rtcb->xcp.regs);
+      riscv_savecontext(rtcb);
 
       /* Update scheduler parameters */
 
@@ -79,7 +79,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        * changes will be made when the interrupt returns.
        */
 
-      riscv_restorestate(tcb->xcp.regs);
+      riscv_restorecontext(tcb);
     }
 
   /* No, then we will need to perform the user context switch */
@@ -92,7 +92,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      riscv_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
+      riscv_switchcontext(rtcb, tcb);
 
       /* riscv_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the
