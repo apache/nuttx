@@ -84,8 +84,8 @@ jobs:
             esac
           fi
 
-          echo ::set-output name=os_ref::$OS_REF
-          echo ::set-output name=apps_ref::$APPS_REF
+          echo "name=$OS_REF" >> $GITHUB_OUTPUT
+          echo "app_ref=$APPS_REF" >> $GITHUB_OUTPUT
 
       - name: Checkout nuttx repo
         uses: actions/checkout@v3
