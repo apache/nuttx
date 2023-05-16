@@ -46,6 +46,13 @@ config DISABLE_ENVIRON
 
 endif # DISABLE_OS_API
 
+config DISABLE_IDLE_LOOP
+	bool
+	default n
+	---help---
+		This option allows nx_start to return instead of
+		entering the idle loop.
+
 menu "Clocks and Timers"
 
 config ARCH_HAVE_TICKLESS

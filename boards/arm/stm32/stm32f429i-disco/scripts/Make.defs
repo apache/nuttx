@@ -22,7 +22,12 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
+ifeq ($(CONFIG_SYSTEM_OFLOADER),y)
+LDSCRIPT = ofloader.ld
+else
 LDSCRIPT = ld.script
+endif
+
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10

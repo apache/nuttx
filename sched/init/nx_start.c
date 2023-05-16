@@ -698,10 +698,12 @@ void nx_start(void)
   /* When control is return to this point, the system is idle. */
 
   sinfo("CPU0: Beginning Idle Loop\n");
+#ifndef CONFIG_DISABLE_IDLE_LOOP
   for (; ; )
     {
       /* Perform any processor-specific idle state operations */
 
       up_idle();
     }
+#endif
 }

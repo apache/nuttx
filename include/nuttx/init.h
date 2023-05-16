@@ -98,7 +98,7 @@ EXTERN uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
 /* OS entry point called by boot logic */
 
-void nx_start(void) noreturn_function;
+void nx_start(void);
 
 #undef EXTERN
 #ifdef __cplusplus
