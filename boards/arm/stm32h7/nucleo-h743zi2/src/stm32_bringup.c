@@ -32,6 +32,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usbmonitor.h>
+#include <arch/board/board.h>
 
 #ifdef CONFIG_STM32H7_OTGFS
 #include "stm32_usbhost.h"
@@ -39,6 +40,10 @@
 
 #ifdef CONFIG_STM32H7_FDCAN
 #include "stm32_fdcan_sock.h"
+#endif
+
+#ifdef CONFIG_STM32H7_IWDG
+#include "stm32_wdg.h"
 #endif
 
 #include "nucleo-h743zi2.h"
@@ -96,7 +101,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32_IWDG
+#ifdef CONFIG_STM32H7_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);

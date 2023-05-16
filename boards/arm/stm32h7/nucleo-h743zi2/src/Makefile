@@ -56,4 +56,8 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += stm32_reset.c
 endif
 
+ifeq ($(CONFIG_WATCHDOG),y)
+CSRCS += stm32_wdt.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

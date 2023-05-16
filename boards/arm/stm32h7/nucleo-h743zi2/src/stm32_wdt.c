@@ -110,10 +110,10 @@ int stm32_watchdog_initialize(void)
 
   /* Open the watchdog device */
 
-  ret = file_open(&filestruct, CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  ret = file_open(&filestruct, CONFIG_H743ZI2_WDG_DEVPATH, O_RDONLY);
   if (ret < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, ret);
+      wderr("ERROR: open %s failed: %d\n", CONFIG_H743ZI2_WDG_DEVPATH, ret);
       return ret;
     }
 

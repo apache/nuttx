@@ -30,6 +30,10 @@ config H743ZI2_WDG_THREAD_NAME
 	string "Watchdog Thread Name"
 	default "wdog"
 
+config H743ZI2_WDG_DEVPATH
+	string "Watchdog Thread Name"
+	default "/dev/watchdog0"
+
 config H743ZI2_WDG_THREAD_INTERVAL
 	int "Watchdog Thread Interval (ms)"
 	default 2500
