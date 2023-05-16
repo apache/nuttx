@@ -136,8 +136,6 @@ static const struct z180_dev_s g_scc_priv =
 static uart_dev_t g_scc_port =
 {
   0,                           /* open_count */
-  false,                       /* xmitwaiting */
-  false,                       /* recvwaiting */
 #ifdef CONFIG_Z180_SCC_SERIAL_CONSOLE
   true,                        /* isconsole */
 #else
@@ -182,8 +180,6 @@ static const struct z180_dev_s g_escca_priv =
 static uart_dev_t g_escca_port =
 {
   0,                             /* open_count */
-  false,                         /* xmitwaiting */
-  false,                         /* recvwaiting */
 #ifdef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
   true,                          /* isconsole */
 #else
@@ -228,8 +224,6 @@ static const struct z180_dev_s g_esccb_priv =
 static uart_dev_t g_escca_port =
 {
   0,                           /* open_count */
-  false,                       /* xmitwaiting */
-  false,                       /* recvwaiting */
 #ifdef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
   true,                        /* isconsole */
 #else
