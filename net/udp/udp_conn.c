@@ -807,6 +807,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
   uint16_t portno;
   int ret;
 
+  conn->domain = addr->sa_family == AF_INET ? PF_INET : PF_INET6;
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   if (conn->domain == PF_INET)
