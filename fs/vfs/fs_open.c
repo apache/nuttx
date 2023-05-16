@@ -297,18 +297,20 @@ static int nx_vopen(FAR struct tcb_s *tcb,
 
 int inode_checkflags(FAR struct inode *inode, int oflags)
 {
+  FAR const struct file_operations *ops = inode->u.i_ops;
+
   if (INODE_IS_PSEUDODIR(inode))
     {
       return OK;
     }
 
-  if (inode->u.i_ops == NULL)
+  if (ops == NULL)
     {
       return -ENXIO;
     }
 
-  if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
-      ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
+  if (((oflags & O_RDOK) != 0 && !ops->read && !ops->ioctl) ||
+      ((oflags & O_WROK) != 0 && !ops->write && !ops->ioctl))
     {
       return -EACCES;
     }
