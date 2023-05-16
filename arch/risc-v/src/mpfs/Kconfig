@@ -690,12 +690,6 @@ config MPFS_CANFD_BASE0
 	default 0x46000000
 	depends on MPFS_CANFD0
 
-config MPFS_CANFD_CLK0
-	int "Clock frequency of the CANFD0 block (Hz)"
-	default 62500000
-	range 1000000 100000000
-	depends on MPFS_CANFD0
-
 config MPFS_CANFD_ARBI_BITRATE0
 	int "CANFD0 Arbitration phase bitrate"
 	default 1000000
@@ -714,12 +708,6 @@ config MPFS_CANFD1
 config MPFS_CANFD_BASE1
 	hex "Base address for the CANFD1 instance"
 	default 0x47000000
-	depends on MPFS_CANFD1
-
-config MPFS_CANFD_CLK1
-	int "Clock frequency of the CANFD1 block (Hz)"
-	default 62500000
-	range 1000000 100000000
 	depends on MPFS_CANFD1
 
 config MPFS_CANFD_ARBI_BITRATE1
