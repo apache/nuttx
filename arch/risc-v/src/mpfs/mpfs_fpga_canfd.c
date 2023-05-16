@@ -2891,7 +2891,7 @@ int mpfs_fpga_canfd_init(void)
 
   /* Get the can_clk info */
 
-  priv0->can.clock.freq = CONFIG_MPFS_CANFD_CLK0;
+  priv0->can.clock.freq = MPFS_FPGA_PERIPHERAL_CLK;
 
   /* Needed for timing adjustment to be performed as soon as possible */
 
@@ -2991,7 +2991,7 @@ int mpfs_fpga_canfd_init(void)
 
   /* Get the can_clk info */
 
-  priv1->can.clock.freq = CONFIG_MPFS_CANFD_CLK1;
+  priv1->can.clock.freq = MPFS_FPGA_PERIPHERAL_CLK;
 
   /* Needed for timing adjustment to be performed as soon as possible */
 
