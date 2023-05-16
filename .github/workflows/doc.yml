@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+---
 name: "Build Documentation"
 on:
   pull_request:
@@ -30,13 +31,22 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
+      - name: Install LaTeX packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            texlive-latex-recommended texlive-fonts-recommended \
+            texlive-latex-base texlive-latex-extra latexmk texlive-luatex \
+            fonts-freefont-otf xindy
       - name: Generate Documentation
         run: |
           cd Documentation/
           pip3 install pipenv
           pipenv install
-          pipenv run make html
+          pipenv run make html latexpdf
       - uses: actions/upload-artifact@v3
         with:
           name: sphinx-docs
-          path: Documentation/_build/html/
+          path: |
+            Documentation/_build/html/
+            Documentation/_build/latex/*.pdf

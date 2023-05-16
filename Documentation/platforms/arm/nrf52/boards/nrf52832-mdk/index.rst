@@ -7,7 +7,7 @@ the nRF52832 SoC from Nordic. It features 24 I/Os an on-board RGB led and a chip
 It also includes an embedded DAPlink debugger which allows to flash/debug and monitor UART
 from the USB port.
 
-.. figure:: pinout.webp
+.. figure:: pinout.png
    :align: center
 
    Pinout diagram

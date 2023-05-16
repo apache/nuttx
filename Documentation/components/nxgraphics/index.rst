@@ -83,7 +83,7 @@ That NuttX directory organization is discussed in `Appendix
 B <#grapicsdirs>`__ of this document. The logic modules are discussed in
 the following sub-paragraphs.
 
-.. figure:: NXOrganization.gif
+.. figure:: NXOrganization.png
   :align: center
 
 NX Graphics Library (``NXGL``)
