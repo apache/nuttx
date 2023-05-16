@@ -138,8 +138,6 @@ static struct z8_uart_s g_uart0priv =
 static uart_dev_t g_uart0port =
 {
   0,                        /* open_count */
-  false,                    /* xmitwaiting */
-  false,                    /* recvwaiting */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
   true,                     /* isconsole */
 #else
@@ -185,8 +183,6 @@ static struct z8_uart_s g_uart1priv =
 static uart_dev_t g_uart1port =
 {
   0,                        /* open_count */
-  false,                    /* xmitwaiting */
-  false,                    /* recvwaiting */
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
   true,                     /* isconsole */
 #else

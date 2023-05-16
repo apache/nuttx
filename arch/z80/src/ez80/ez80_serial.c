@@ -128,8 +128,6 @@ static struct ez80_dev_s g_uart0priv =
 static uart_dev_t g_uart0port =
 {
   0,                        /* open_count */
-  false,                    /* xmitwaiting */
-  false,                    /* recvwaiting */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
   true,                     /* isconsole */
 #else
