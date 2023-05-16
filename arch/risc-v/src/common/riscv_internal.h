@@ -29,6 +29,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
+#  include <nuttx/sched.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
@@ -207,6 +208,18 @@ void riscv_fpuconfig(void);
 #  define riscv_fpuconfig()
 #endif
 
+/* Save / restore context of task */
+
+static inline void riscv_savecontext(struct tcb_s *tcb)
+{
+  tcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
+}
+
+static inline void riscv_restorecontext(struct tcb_s *tcb)
+{
+  CURRENT_REGS = (uintptr_t *)tcb->xcp.regs;
+}
+
 /* RISC-V PMP Config ********************************************************/
 
 int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
@@ -304,19 +317,19 @@ void *riscv_perform_syscall(uintptr_t *regs);
 
 /* SYS call 1:
  *
- * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
+ * void riscv_fullcontextrestore(struct tcb_s *next) noreturn_function;
  */
 
-#define riscv_fullcontextrestore(restoreregs) \
-  sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
+#define riscv_fullcontextrestore(next) \
+  sys_call1(SYS_restore_context, (uintptr_t)next)
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+ * riscv_switchcontext(struct tcb_s *prev, struct tcb_s *next);
  */
 
-#define riscv_switchcontext(saveregs, restoreregs) \
-  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+#define riscv_switchcontext(prev, next) \
+  sys_call2(SYS_switch_context, (uintptr_t)prev, (uintptr_t)next)
 
 #ifdef CONFIG_BUILD_KERNEL
 /* SYS call 3:
