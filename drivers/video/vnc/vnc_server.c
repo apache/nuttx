@@ -125,6 +125,10 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   session->nwhupd  = 0;
   session->change  = true;
 
+#ifdef CONFIG_VNCSERVER_TOUCH
+  session->touch.maxpoint = 1;
+#endif
+
   /* Careful not to disturb the keyboard/mouse callouts set by
    * vnc_fbinitialize().  Client related data left in garbage state.
    */
