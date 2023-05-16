@@ -155,5 +155,7 @@ retry:
 #ifdef CONFIG_SMP
   rtcb->irqcount--;
 #endif
-  riscv_fullcontextrestore(regs);
+
+  rtcb->xcp.regs = regs;
+  riscv_fullcontextrestore(rtcb);
 }
