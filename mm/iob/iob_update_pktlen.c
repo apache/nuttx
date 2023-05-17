@@ -36,14 +36,16 @@
  *
  * Description:
  *   This function will update packet length of the iob, it will be
- *   trimmed if the length of the iob chain is greater than the current
- *   length.
- *   This function will not grow the iob link, any grow operation should
- *   be implemented through iob_copyin()/iob_trycopyin().
+ *   trimmed if the current length of the iob chain is greater than the
+ *   new length, and will be grown if less than new length.
+ *
+ * Returned Value:
+ *   The new effective iob packet length, or a negated errno value on error.
  *
  ****************************************************************************/
 
-void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen)
+int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
+                      bool throttled)
 {
   FAR struct iob_s *penultimate;
   FAR struct iob_s *next;
@@ -56,7 +58,7 @@ void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen)
 
   if (iob == NULL)
     {
-      return;
+      return -EINVAL;
     }
 
   /* Calculate the total entries of the data in the I/O buffer chain */
@@ -66,7 +68,8 @@ void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen)
     {
       ninqueue++;
       offset += next->io_offset;
-      next    = next->io_flink;
+      penultimate = next;
+      next = next->io_flink;
     }
 
   /* Trim inqueue entries if needed */
@@ -104,6 +107,21 @@ void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen)
             }
         }
     }
+  else if (nrequire > ninqueue)
+    {
+      /* Start from the last IOB */
+
+      next = penultimate;
+
+      /* Loop to extend the link */
+
+      while (next != NULL && nrequire > ninqueue)
+        {
+          next->io_flink = iob_tryalloc(throttled);
+          next = next->io_flink;
+          ninqueue++;
+        }
+    }
 
   iob->io_pktlen = pktlen;
 
@@ -125,4 +143,10 @@ void iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen)
       pktlen      -= len;
       next         = next->io_flink;
     }
+
+  /* Adjust final pktlen if it's not fully increased (e.g. alloc fail) */
+
+  iob->io_pktlen -= pktlen;
+
+  return iob->io_pktlen;
 }

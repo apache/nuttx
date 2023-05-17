@@ -704,7 +704,7 @@ static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
 
   if (!bstop && reused)
     {
-      iob_update_pktlen(dev->d_iob, 0);
+      iob_update_pktlen(dev->d_iob, 0, false);
       netdev_iob_prepare(dev, true, 0);
     }
 

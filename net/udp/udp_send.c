@@ -174,7 +174,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
       /* Update the device buffer length */
 
-      iob_update_pktlen(dev->d_iob, dev->d_len);
+      iob_update_pktlen(dev->d_iob, dev->d_len, false);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */

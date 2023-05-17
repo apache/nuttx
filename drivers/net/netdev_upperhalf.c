@@ -1290,12 +1290,17 @@ FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt)
  *   pkt    - The net packet
  *   len    - The length of data in netpkt
  *
+ * Returned Value:
+ *   The new effective data length, or a negated errno value on error.
+ *
  ****************************************************************************/
 
-void netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
-                       FAR netpkt_t *pkt, unsigned int len)
+int netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
+                      FAR netpkt_t *pkt, unsigned int len)
 {
-  iob_update_pktlen(pkt, len - NET_LL_HDRLEN(&dev->netdev));
+  uint8_t llhdrlen = NET_LL_HDRLEN(&dev->netdev);
+  int ret = iob_update_pktlen(pkt, len - llhdrlen, false);
+  return ret >= 0 ? ret + llhdrlen : ret;
 }
 
 /****************************************************************************

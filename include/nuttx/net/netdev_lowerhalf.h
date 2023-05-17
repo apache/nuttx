@@ -422,10 +422,13 @@ FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt);
  *   pkt    - The net packet
  *   len    - The length of data in netpkt
  *
+ * Returned Value:
+ *   The new effective data length, or a negated errno value on error.
+ *
  ****************************************************************************/
 
-void netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
-                       FAR netpkt_t *pkt, unsigned int len);
+int netpkt_setdatalen(FAR struct netdev_lowerhalf_s *dev,
+                      FAR netpkt_t *pkt, unsigned int len);
 
 /****************************************************************************
  * Name: netpkt_getdatalen
