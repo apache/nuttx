@@ -39,5 +39,5 @@ int timingsafe_bcmp(FAR const void *b1, FAR const void *b2, size_t n)
       ret |= *p1++ ^ *p2++;
     }
 
-  return (ret != 0);
+  return ret != 0;
 }
