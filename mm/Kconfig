@@ -298,6 +298,11 @@ config MM_DUMP_ON_FAILURE
 	default n
 	depends on DEBUG_MM
 
+config MM_DUMP_DETAILS_ON_FAILURE
+	bool "Dump all used memory blocks on allocation failure"
+	default n
+	depends on MM_DUMP_ON_FAILURE
+
 config MM_PANIC_ON_FAILURE
 	bool "Panic on allocation failure"
 	default n
