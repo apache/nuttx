@@ -139,10 +139,11 @@ static void lcddrv_spiif_deselect(FAR struct lcddrv_lcd_s *lcd)
 static int lcddrv_spiif_sendmulti(FAR struct lcddrv_lcd_s *lcd,
                                   FAR const uint16_t *wd, uint32_t nwords)
 {
+  uint32_t t;
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
   SPI_SETBITS(priv->spi, 16);
-  for (uint32_t t = 0; t < nwords; t++)
+  for (t = 0; t < nwords; t++)
     {
       SPI_SEND(priv->spi, *wd++);
     }

@@ -335,10 +335,11 @@ static int fakesensor_thread(int argc, char** argv)
           if (sensor->batch)
             {
               uint32_t batch_num = sensor->batch / sensor->interval;
-
               uint64_t event_timestamp =
                   sensor_get_timestamp() - sensor->interval * batch_num;
-              for (int i = 0; i < batch_num; i++)
+              int i;
+
+              for (i = 0; i < batch_num; i++)
                 {
                   fakesensor_push_event(&sensor->lower, event_timestamp);
                   event_timestamp += sensor->interval;

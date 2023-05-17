@@ -501,9 +501,11 @@ static void es8388_setvolume(FAR struct es8388_dev_s *priv,
 
 static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv)
 {
+  int i;
+
   priv->mclk = 0;
 
-  for (int i = 0; i < nitems(es8388_mclk_rate); i++)
+  for (i = 0; i < nitems(es8388_mclk_rate); i++)
     {
       if (es8388_mclk_rate[i].sample_rate == priv->samprate)
         {
