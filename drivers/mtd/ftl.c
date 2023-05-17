@@ -383,7 +383,7 @@ static ssize_t ftl_mtd_erase(FAR struct ftl_struct_s *dev, off_t startblock)
   if (dev->lptable == NULL)
     {
       ret = MTD_ERASE(dev->mtd, startblock, 1);
-      if (ret != 1)
+      if (ret < 0)
         {
           ferr("ERROR: Erase block %" PRIdOFF " failed: %zd\n",
                startblock, ret);
