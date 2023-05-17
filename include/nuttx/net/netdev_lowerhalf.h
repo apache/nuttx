@@ -47,12 +47,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* | <-------------- NETPKT_BUFLEN ---------------> |
+/* Layout for net packet:
+ *
+ * | <-------------- NETPKT_BUFLEN ---------------> |
  * +---------------------+-------------------+------+      +-------------+
  * | reserved for driver |       data        | free | ---> | next netpkt |
  * +---------------------+-------------------+------+      +-------------+
  * |                     | <--- datalen ---> |
  * ^base                 ^data
+ */
+
+/* Layout for linked net packet, you can get list of (data, len) by
+ * netpkt_to_iov() interface:
+ *
+ *            | <----------- datalen = sum(len) ------------> |
+ * +----------+-----------+     +-----------+     +-----------+------+
+ * | reserved |   data    | --> |   data    | --> |   data    | free |
+ * +----------+-----------+     +-----------+     +-----------+------+
+ * |          | <- len -> |     | <- len -> |     | <- len -> |
+ * ^base      ^data             ^data             ^data
  */
 
 #define NETPKT_BUFLEN   CONFIG_IOB_BUFSIZE
@@ -477,5 +490,25 @@ void netpkt_reset_reserved(FAR struct netdev_lowerhalf_s *dev,
  ****************************************************************************/
 
 bool netpkt_is_fragmented(FAR netpkt_t *pkt);
+
+/****************************************************************************
+ * Name: netpkt_to_iov
+ *
+ * Description:
+ *   Write each piece of data/len into iov array.
+ *
+ * Input Parameters:
+ *   dev    - The lower half device driver structure
+ *   pkt    - The net packet
+ *   iov    - The iov array to write
+ *   iovcnt - The number of elements in the iov array
+ *
+ * Returned Value:
+ *   The actual written count of iov entries.
+ *
+ ****************************************************************************/
+
+int netpkt_to_iov(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
+                  FAR struct iovec *iov, int iovcnt);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_LOWERHALF_H */
