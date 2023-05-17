@@ -70,24 +70,24 @@
 
 /* Interrupt wait timeout in seconds and milliseconds */
 
-#if !defined(CONFIG_S32K1XX_I2CTIMEOSEC) && !defined(CONFIG_S32K1XX_I2CTIMEOMS)
-#  define CONFIG_S32K1XX_I2CTIMEOSEC 0
-#  define CONFIG_S32K1XX_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#elif !defined(CONFIG_S32K1XX_I2CTIMEOSEC)
-#  define CONFIG_S32K1XX_I2CTIMEOSEC 0     /* User provided milliseconds */
-#elif !defined(CONFIG_S32K1XX_I2CTIMEOMS)
-#  define CONFIG_S32K1XX_I2CTIMEOMS  0     /* User provided seconds */
+#if !defined(CONFIG_S32K1XX_LPI2CTIMEOSEC) && !defined(CONFIG_S32K1XX_LPI2CTIMEOMS)
+#  define CONFIG_S32K1XX_LPI2CTIMEOSEC 0
+#  define CONFIG_S32K1XX_LPI2CTIMEOMS  500   /* Default is 500 milliseconds */
+#elif !defined(CONFIG_S32K1XX_LPI2CTIMEOSEC)
+#  define CONFIG_S32K1XX_LPI2CTIMEOSEC 0     /* User provided milliseconds */
+#elif !defined(CONFIG_S32K1XX_LPI2CTIMEOMS)
+#  define CONFIG_S32K1XX_LPI2CTIMEOMS  0     /* User provided seconds */
 #endif
 
 /* Interrupt wait time timeout in system timer ticks */
 
-#ifndef CONFIG_S32K1XX_I2CTIMEOTICKS
-#  define CONFIG_S32K1XX_I2CTIMEOTICKS \
-    (SEC2TICK(CONFIG_S32K1XX_I2CTIMEOSEC) + MSEC2TICK(CONFIG_S32K1XX_I2CTIMEOMS))
+#ifndef CONFIG_S32K1XX_LPI2CTIMEOTICKS
+#  define CONFIG_S32K1XX_LPI2CTIMEOTICKS \
+    (SEC2TICK(CONFIG_S32K1XX_LPI2CTIMEOSEC) + MSEC2TICK(CONFIG_S32K1XX_LPI2CTIMEOMS))
 #endif
 
-#ifndef CONFIG_S32K1XX_I2C_DYNTIMEO_STARTSTOP
-#  define CONFIG_S32K1XX_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_S32K1XX_I2CTIMEOTICKS)
+#ifndef CONFIG_S32K1XX_LPI2C_DYNTIMEO_STARTSTOP
+#  define CONFIG_S32K1XX_LPI2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_S32K1XX_LPI2CTIMEOTICKS)
 #endif
 
 /* Debug ********************************************************************/
@@ -113,6 +113,8 @@
 
 #define MKI2C_OUTPUT(p) (((p) & (~_PIN_MODE_MASK)) | GPIO_OUTPUT | GPIO_OUTPUT_ONE)
 #define MKI2C_INPUT(p)  (((p) & (~_PIN_MODE_MASK)) | GPIO_INPUT)
+
+#define LPI2C_MSR_LIMITED_ERROR_MASK (LPI2C_MSR_ERROR_MASK & ~(LPI2C_MSR_FEF))
 
 /****************************************************************************
  * Private Types
@@ -232,10 +234,10 @@ s32k1xx_lpi2c_modifyreg(struct s32k1xx_lpi2c_priv_s *priv,
                         uint16_t offset, uint32_t clearbits,
                         uint32_t setbits);
 
-#ifdef CONFIG_S32K1XX_I2C_DYNTIMEO
+#ifdef CONFIG_S32K1XX_LPI2C_DYNTIMEO
 static uint32_t
 s32k1xx_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs);
-#endif /* CONFIG_S32K1XX_I2C_DYNTIMEO */
+#endif /* CONFIG_S32K1XX_LPI2C_DYNTIMEO */
 
 static inline int
 s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv);
@@ -449,7 +451,7 @@ s32k1xx_lpi2c_modifyreg(struct s32k1xx_lpi2c_priv_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_S32K1XX_I2C_DYNTIMEO
+#ifdef CONFIG_S32K1XX_LPI2C_DYNTIMEO
 static uint32_t s32k1xx_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
@@ -466,7 +468,7 @@ static uint32_t s32k1xx_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return USEC2TICK(CONFIG_S32K1XX_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_S32K1XX_LPI2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -492,50 +494,49 @@ s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv)
   if (priv->rxdma == NULL && priv->txdma == NULL)
     {
 #endif
+      /* Clear the TX and RX FIFOs */
+
+      s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0,
+                              LPI2C_MCR_RTF | LPI2C_MCR_RRF);
+
   /* Enable Interrupts when master mode */
 
-  if (priv->config->mode == LPI2C_MASTER)
-    {
-      if ((priv->flags & I2C_M_READ) != 0)
+      if (priv->config->mode == LPI2C_MASTER)
         {
-          regval = LPI2C_MIER_TDIE | LPI2C_MIER_RDIE | LPI2C_MIER_NDIE |
-                   LPI2C_MIER_ALIE | LPI2C_MIER_SDIE;
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, regval);
+          if ((priv->flags & I2C_M_READ) != 0)
+            {
+              regval = LPI2C_MIER_TDIE | LPI2C_MIER_RDIE | LPI2C_MIER_NDIE |
+                       LPI2C_MIER_ALIE | LPI2C_MIER_SDIE;
+              s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, regval);
+            }
+          else
+            {
+              regval = LPI2C_MIER_TDIE | LPI2C_MIER_NDIE | \
+                       LPI2C_MIER_ALIE | LPI2C_MIER_SDIE;
+              s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, regval);
+            }
         }
+
+      /* Enable Interrupts when slave mode */
+
       else
         {
-          regval = LPI2C_MIER_TDIE | LPI2C_MIER_NDIE | \
-                   LPI2C_MIER_ALIE | LPI2C_MIER_SDIE;
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, regval);
-        }
-    }
-
-  /* Enable Interrupts when slave mode */
-
-  else
-    {
 #warning Missing logic for I2C Slave mode
-    }
-
-  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
-   * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_tickwait_uninterruptible() sleeps.
-   */
+        }
 #ifdef CONFIG_S32K1XX_LPI2C_DMA
     }
-
 #endif
-  priv->intstate = INTSTATE_WAITING;
+
   do
     {
       /* Wait until either the transfer is complete or the timeout expires */
 
-#ifdef CONFIG_S32K1XX_I2C_DYNTIMEO
+#ifdef CONFIG_S32K1XX_LPI2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                      s32k1xx_lpi2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                                           CONFIG_S32K1XX_I2CTIMEOTICKS);
+                                           CONFIG_S32K1XX_LPI2CTIMEOTICKS);
 #endif
       if (ret < 0)
         {
@@ -558,16 +559,12 @@ s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv)
 
   /* Disable I2C interrupts */
 
-  /* Enable Interrupts when master mode */
-
   if (priv->config->mode == LPI2C_MASTER)
     {
       s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, 0);
     }
 
 #if 0
-  /* Enable Interrupts when slave mode */
-
   else
     {
       s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_SIER_OFFSET, 0);
@@ -588,18 +585,11 @@ s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv)
 
   /* Get the timeout value */
 
-#ifdef CONFIG_S32K1XX_I2C_DYNTIMEO
+#ifdef CONFIG_S32K1XX_LPI2C_DYNTIMEO
   timeout = s32k1xx_lpi2c_toticks(priv->msgc, priv->msgv);
 #else
-  timeout = CONFIG_S32K1XX_I2CTIMEOTICKS;
+  timeout = CONFIG_S32K1XX_LPI2CTIMEOTICKS;
 #endif
-
-  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
-   * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_tickwait_uninterruptible() sleeps.
-   */
-
-  priv->intstate = INTSTATE_WAITING;
   start = clock_systime_ticks();
 
   do
@@ -631,6 +621,95 @@ s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv)
 #endif
 
 /****************************************************************************
+ * Name: s32k1xx_lpi2c_sem_waitstop
+ *
+ * Description:
+ *   Wait for a STOP to complete
+ *
+ ****************************************************************************/
+
+static inline void
+s32k1xx_lpi2c_sem_waitstop(struct s32k1xx_lpi2c_priv_s *priv)
+{
+  clock_t start;
+  clock_t elapsed;
+  clock_t timeout;
+  uint32_t regval;
+
+  /* Select a timeout */
+
+#ifdef CONFIG_S32K1XX_LPI2C_DYNTIMEO
+  timeout = USEC2TICK(CONFIG_S32K1XX_LPI2C_DYNTIMEO_STARTSTOP);
+#else
+  timeout = CONFIG_S32K1XX_LPI2CTIMEOTICKS;
+#endif
+
+  /* Wait as stop might still be in progress; but stop might also
+   * be set because of a timeout error: "The [STOP] bit is set and
+   * cleared by software, cleared by hardware when a Stop condition is
+   * detected, set by hardware when a timeout error is detected."
+   */
+
+  start = clock_systime_ticks();
+  do
+    {
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systime_ticks() - start;
+
+      /* Check for STOP condition */
+
+      if (priv->config->mode == LPI2C_MASTER)
+        {
+          regval = s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MSR_OFFSET);
+          if ((regval & LPI2C_MSR_SDF) == LPI2C_MSR_SDF)
+            {
+              return;
+            }
+        }
+
+      /* Enable Interrupts when slave mode */
+
+      else
+        {
+          regval = s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_SSR_OFFSET);
+          if ((regval & LPI2C_SSR_SDF) == LPI2C_SSR_SDF)
+            {
+              return;
+            }
+        }
+
+      /* Check for NACK error */
+
+      if (priv->config->mode == LPI2C_MASTER)
+        {
+          regval = s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MSR_OFFSET);
+          if ((regval & LPI2C_MSR_NDF) == LPI2C_MSR_NDF)
+            {
+              return;
+            }
+        }
+
+      /* Enable Interrupts when slave mode */
+
+      else
+        {
+#warning Missing logic for I2C Slave
+        }
+    }
+
+  /* Loop until the stop is complete or a timeout occurs. */
+
+  while (elapsed < timeout);
+
+  /* If we get here then a timeout occurred with the STOP condition
+   * still pending.
+   */
+
+  i2cinfo("Timeout with Status Register: %" PRIx32 "\n", regval);
+}
+
+/****************************************************************************
  * Name: s32k1xx_rxdma_callback
  *
  * Description:
@@ -646,38 +725,23 @@ static void s32k1xx_rxdma_callback(DMACH_HANDLE handle, void *arg, bool done,
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET, 0,
                               LPI2C_MIER_SDIE);
 
-  if (result != OK)
+  if (result == OK)
     {
-      priv->status = s32k1xx_lpi2c_getstatus(priv);
-
-      if ((priv->status & LPI2C_MSR_ERROR_MASK) != 0)
+      if ((priv->flags & I2C_M_NOSTOP) == 0)
         {
-          i2cerr("ERROR: MSR: status: 0x0%" PRIx32 "\n", priv->status);
+          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+          s32k1xx_lpi2c_sendstop(priv);
+        }
+    }
+  else
+    {
+      uint32_t status = s32k1xx_lpi2c_getstatus(priv);
+
+      if ((status & LPI2C_MSR_ERROR_MASK) != 0)
+        {
+          i2cerr("ERROR: MSR: status: 0x0%" PRIx32 "\n", status);
 
           s32k1xx_lpi2c_traceevent(priv, I2CEVENT_ERROR, 0);
-
-          /* Clear the TX and RX FIFOs */
-
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0,
-                                LPI2C_MCR_RTF | LPI2C_MCR_RRF);
-
-          /* Clear the error */
-
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET,
-                             (priv->status & (LPI2C_MSR_NDF |
-                                              LPI2C_MSR_ALF |
-                                              LPI2C_MSR_FEF |
-                                              LPI2C_MSR_PLTF)));
-
-          if (priv->intstate == INTSTATE_WAITING)
-            {
-              /* inform the thread that transfer is complete
-               * and wake it up
-               */
-
-              priv->intstate = INTSTATE_DONE;
-              nxsem_post(&priv->sem_isr);
-            }
         }
     }
 }
@@ -699,38 +763,22 @@ static void s32k1xx_txdma_callback(DMACH_HANDLE handle, void *arg, bool done,
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET, 0,
                               LPI2C_MIER_SDIE);
 
-  if (result != OK)
+  if (result == OK)
     {
-      priv->status = s32k1xx_lpi2c_getstatus(priv);
-
-      if ((priv->status & LPI2C_MSR_ERROR_MASK) != 0)
+      if ((priv->flags & I2C_M_NOSTOP) == 0)
         {
-          i2cerr("ERROR: MSR: status: 0x0%" PRIx32 "\n", priv->status);
+          s32k1xx_lpi2c_sendstop(priv);
+        }
+    }
+  else
+    {
+      uint32_t status = s32k1xx_lpi2c_getstatus(priv);
+
+      if ((status & LPI2C_MSR_ERROR_MASK) != 0)
+        {
+          i2cerr("ERROR: MSR: status: 0x0%" PRIx32 "\n", status);
 
           s32k1xx_lpi2c_traceevent(priv, I2CEVENT_ERROR, 0);
-
-          /* Clear the TX and RX FIFOs */
-
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0,
-                                LPI2C_MCR_RTF | LPI2C_MCR_RRF);
-
-          /* Clear the error */
-
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET,
-                             (priv->status & (LPI2C_MSR_NDF |
-                                              LPI2C_MSR_ALF |
-                                              LPI2C_MSR_FEF |
-                                              LPI2C_MSR_PLTF)));
-
-          if (priv->intstate == INTSTATE_WAITING)
-            {
-              /* inform the thread that transfer is complete
-               * and wake it up
-               */
-
-              priv->intstate = INTSTATE_DONE;
-              nxsem_post(&priv->sem_isr);
-            }
         }
     }
 }
@@ -1061,10 +1109,10 @@ s32k1xx_lpi2c_sendstart(struct s32k1xx_lpi2c_priv_s *priv,
 
   /* Generate START condition and send the address */
 
-  /* Turn off auto_stop option */
+  /* Disable AUTOSTOP and NAK Ignore */
 
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCFGR1_OFFSET,
-                          LPI2C_MCFGR1_IGNACK, 0);
+                          LPI2C_MCFGR1_IGNACK | LPI2C_MCFGR1_AUTOSTOP, 0);
 
   do
     {
@@ -1131,13 +1179,11 @@ s32k1xx_lpi2c_getstatus(struct s32k1xx_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_S32K1XX_LPI2C_DMA
 static inline uint32_t
 s32k1xx_lpi2c_getenabledints(struct s32k1xx_lpi2c_priv_s *priv)
 {
   return s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MIER_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: s32k1xx_lpi2c_isr_process
@@ -1160,6 +1206,17 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
 
   if (priv->rxdma != NULL || priv->txdma != NULL)
     {
+      /* Is there an Error condition */
+
+      if (current_status & LPI2C_MSR_LIMITED_ERROR_MASK)
+        {
+          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_ERROR, 0);
+
+          /* Return the full error status */
+
+          priv->status = current_status;
+        }
+
       /* End of packet or Stop */
 
       if ((status & (LPI2C_MSR_SDF | LPI2C_MSR_EPF)) != 0)
@@ -1171,30 +1228,26 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
           s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, status &
                                                            (LPI2C_MSR_SDF |
                                                            LPI2C_MSR_EPF));
-        }
 
-      /* Is there an Error condition */
+          /* Mark that this transaction stopped */
 
-      if (current_status & LPI2C_MSR_ERROR_MASK)
-        {
-          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_ERROR, 0);
+          priv->msgv = NULL;
+          priv->msgc = 0;
+          priv->dcnt = -1;
 
-          /* Shutdown DMA */
-
-          if (priv->rxdma != NULL)
+          if (priv->intstate == INTSTATE_WAITING)
             {
+              /* inform the thread that transfer is complete
+               * and wake it up
+               */
+
+              s32k1xx_dmach_stop(priv->txdma);
               s32k1xx_dmach_stop(priv->rxdma);
+
+              priv->intstate = INTSTATE_DONE;
+              nxsem_post(&priv->sem_isr);
             }
-
-          if (priv->txdma != NULL)
-            {
-               s32k1xx_dmach_stop(priv->txdma);
-            }
-
-          /* Clear the TX and RX FIFOs */
-
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0,
-                                LPI2C_MCR_RTF | LPI2C_MCR_RRF);
+        }
 
           /* Clear the error */
 
@@ -1203,236 +1256,219 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
                                                LPI2C_MSR_ALF |
                                                LPI2C_MSR_FEF)));
 
-          /* Return the full error status */
-
-          status = current_status;
-        }
-
-      /* Mark that this transaction stopped */
-
-      priv->msgv = NULL;
-      priv->msgc = 0;
-      priv->dcnt = -1;
-
-      if (priv->intstate == INTSTATE_WAITING)
-        {
-          /* Update Status once at the end */
-
-          priv->status = status;
-
-          /* inform the thread that transfer is complete
-           * and wake it up
-           */
-
-          priv->intstate = INTSTATE_DONE;
-          nxsem_post(&priv->sem_isr);
-        }
-
       return OK;
     }
+#endif
 
-#endif  /* Check for new trace setup */
+  /* Check for new trace setup */
 
   s32k1xx_lpi2c_tracenew(priv, status);
 
-  /* After an error we can get a STOP Detect Flag  */
-
-  if (priv->intstate == INTSTATE_DONE && (status & LPI2C_MSR_SDF) != 0)
+  if ((status & LPI2C_MSR_LIMITED_ERROR_MASK) == 0)
     {
-      s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-      s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, LPI2C_MSR_SDF);
-    }
+      /* Check if there is more bytes to send */
 
-  /* Check if there is more bytes to send */
-
-  else if (((priv->flags & I2C_M_READ) == 0) &&
-           (status & LPI2C_MSR_TDF) != 0)
-    {
-      if (priv->dcnt > 0)
+      if (((priv->flags & I2C_M_READ) == 0) &&
+               (status & LPI2C_MSR_TDF) != 0)
         {
-          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MTDR_OFFSET,
-                             LPI2C_MTDR_CMD_TXD |
-                             LPI2C_MTDR_DATA(*priv->ptr++));
-          priv->dcnt--;
-
-          if ((priv->msgc <= 0) && (priv->dcnt == 0))
+          if (priv->dcnt > 0)
             {
-              s32k1xx_lpi2c_sendstop(priv);
-            }
-        }
-    }
-
-  /* Check if there is more bytes to read */
-
-  else if (((priv->flags & I2C_M_READ) != 0) &&
-           (status & LPI2C_MSR_RDF) != 0)
-    {
-      /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
-
-      if (priv->dcnt > 0)
-        {
-          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
-
-          /* No interrupts or contex switches should occur in the following
-           * sequence. Otherwise, additional bytes may be sent by the device.
-           */
-
-#ifdef CONFIG_I2C_POLLED
-          irqstate_t flags = enter_critical_section();
-#endif
-
-          /* Receive a byte */
-
-          *priv->ptr++ =
-            s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MRDR_OFFSET) &
-            LPI2C_MRDR_DATA_MASK;
-
-          priv->dcnt--;
-
-#ifdef CONFIG_I2C_POLLED
-          leave_critical_section(flags);
-#endif
-          if ((priv->msgc <= 0) && (priv->dcnt == 0))
-            {
-              s32k1xx_lpi2c_sendstop(priv);
-            }
-        }
-      else
-        {
-          s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MRDR_OFFSET);
-        }
-    }
-
-  if (priv->dcnt <= 0)
-    {
-      if (priv->msgc > 0 && priv->msgv != NULL)
-        {
-          priv->ptr   = priv->msgv->buffer;
-          priv->dcnt  = priv->msgv->length;
-          priv->flags = priv->msgv->flags;
-
-          if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
-            {
-              s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
-                                     priv->msgc);
-              s32k1xx_lpi2c_sendstart(priv, priv->msgv->addr);
-            }
-          else
-            {
-              s32k1xx_lpi2c_traceevent(priv, I2CEVENT_NOSTART, priv->msgc);
-            }
-
-          priv->msgv++;
-          priv->msgc--;
-
-          if ((priv->flags & I2C_M_READ) != 0)
-            {
-#ifndef CONFIG_I2C_POLLED
-              /* Stop TX interrupt */
-
-              s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
-                                    LPI2C_MIER_TDIE, LPI2C_MIER_RDIE);
-#endif
-              /* Set LPI2C in read mode */
-
-              s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MTDR_OFFSET,
-                                 LPI2C_MTDR_CMD_RXD |
-                                 LPI2C_MTDR_DATA((priv->dcnt - 1)));
-            }
-          else
-            {
-              /* Send the first byte from tx buffer */
-
               s32k1xx_lpi2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
               s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MTDR_OFFSET,
                                  LPI2C_MTDR_CMD_TXD |
                                  LPI2C_MTDR_DATA(*priv->ptr++));
               priv->dcnt--;
+
+              /* Last byte of last message? */
+
               if ((priv->msgc <= 0) && (priv->dcnt == 0))
                 {
-                  s32k1xx_lpi2c_sendstop(priv);
+                  if ((priv->flags & I2C_M_NOSTOP) == 0)
+                    {
+                      s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+
+                      /* Do this once */
+
+                      priv->flags |= I2C_M_NOSTOP;
+                      s32k1xx_lpi2c_sendstop(priv);
+                    }
                 }
             }
         }
-      else if (priv->msgv && ((status & LPI2C_MSR_SDF) != 0))
+
+      /* Check if there is more bytes to read */
+
+      else if (((priv->flags & I2C_M_READ) != 0) &&
+               (status & LPI2C_MSR_RDF) != 0)
         {
-          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET,
-                             LPI2C_MSR_SDF);
+          /* Read a byte, if dcnt goes < 0, read dummy bytes to ack ISRs */
 
-          /* Check is there thread waiting for this event (there should be) */
-
-#ifndef CONFIG_I2C_POLLED
-          if (priv->intstate == INTSTATE_WAITING)
+          if (priv->dcnt > 0)
             {
-              /* Update Status once at the end */
+              s32k1xx_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
-              priv->status = status;
-
-              /* inform the thread that transfer is complete
-               * and wake it up
+              /* No interrupts or context switches should occur in the
+               * following sequence. Otherwise, additional bytes may be
+               * sent by the device.
                */
 
-              priv->intstate = INTSTATE_DONE;
-              nxsem_post(&priv->sem_isr);
+    #ifdef CONFIG_I2C_POLLED
+              irqstate_t flags = enter_critical_section();
+    #endif
+
+              /* Receive a byte */
+
+              *priv->ptr++ = s32k1xx_lpi2c_getreg(priv,
+                                                S32K1XX_LPI2C_MRDR_OFFSET) &
+                                                LPI2C_MRDR_DATA_MASK;
+              priv->dcnt--;
+
+    #ifdef CONFIG_I2C_POLLED
+              leave_critical_section(flags);
+    #endif
+              /* Last byte of last message? */
+
+              if ((priv->msgc <= 0) && (priv->dcnt == 0))
+                {
+                  if ((priv->flags & I2C_M_NOSTOP) == 0)
+                    {
+                      s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+
+                      /* Do this once */
+
+                      priv->flags |= I2C_M_NOSTOP;
+                      s32k1xx_lpi2c_sendstop(priv);
+                    }
+                }
             }
-#else
-          priv->status = status;
-          priv->intstate = INTSTATE_DONE;
-#endif
-          /* Mark that this transaction stopped */
+          else
+            {
+              /* Read and discard data */
 
-          priv->msgv = NULL;
+              s32k1xx_lpi2c_getreg(priv, S32K1XX_LPI2C_MRDR_OFFSET);
+            }
         }
-#ifndef CONFIG_I2C_POLLED
-      else
+
+      /* Start the first or next message */
+
+      if (priv->dcnt <= 0 && (status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) == 0)
         {
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
-                                LPI2C_MIER_TDIE | LPI2C_MIER_RDIE, 0);
-        }
+          if (priv->msgc > 0 && priv->msgv != NULL)
+            {
+              priv->ptr   = priv->msgv->buffer;
+              priv->dcnt  = priv->msgv->length;
+              priv->flags = priv->msgv->flags;
+
+              if ((priv->flags & I2C_M_NOSTART) == 0)
+                {
+                  s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
+                                         priv->msgc);
+
+                  /* Do this once */
+
+                  priv->flags |= I2C_M_NOSTART;
+
+                  s32k1xx_lpi2c_sendstart(priv, priv->msgv->addr);
+                }
+              else
+                {
+                  s32k1xx_lpi2c_traceevent(priv, I2CEVENT_NOSTART,
+                                           priv->msgc);
+                }
+
+              priv->msgv++;
+              priv->msgc--;
+
+              if ((priv->flags & I2C_M_READ) != 0)
+                {
+#ifndef CONFIG_I2C_POLLED
+                  /* Stop TX interrupt */
+
+                  s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
+                                        LPI2C_MIER_TDIE, LPI2C_MIER_RDIE);
 #endif
+                  /* Set LPI2C in read mode */
+
+                  s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MTDR_OFFSET,
+                                     LPI2C_MTDR_CMD_RXD |
+                                     LPI2C_MTDR_DATA((priv->dcnt - 1)));
+                }
+              else
+                {
+                  /* Send the first byte from tx buffer */
+
+                  s32k1xx_lpi2c_traceevent(priv, I2CEVENT_SENDBYTE,
+                                         priv->dcnt);
+                  s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MTDR_OFFSET,
+                                     LPI2C_MTDR_CMD_TXD |
+                                     LPI2C_MTDR_DATA(*priv->ptr++));
+                  priv->dcnt--;
+
+                  /* Last byte of last message? */
+
+                  if ((priv->msgc <= 0) && (priv->dcnt == 0))
+                    {
+                      if ((priv->flags & I2C_M_NOSTOP) == 0)
+                        {
+                          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+
+                          /* Do this once */
+
+                          priv->flags |= I2C_M_NOSTOP;
+                          s32k1xx_lpi2c_sendstop(priv);
+                        }
+                    }
+                }
+            }
+        }
     }
-
-  /* Check for errors */
-
-  if ((status & LPI2C_MSR_EPF) != 0)
-    {
-      s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, LPI2C_MSR_EPF);
-    }
-
-  if ((status & LPI2C_MSR_ERROR_MASK) != 0)
+  else
     {
       s32k1xx_lpi2c_traceevent(priv, I2CEVENT_ERROR, 0);
 
-      /* Clear the TX and RX FIFOs */
+      priv->status = status;
 
-      s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0,
-                            LPI2C_MCR_RTF | LPI2C_MCR_RRF);
+      if ((priv->flags & I2C_M_NOSTOP) == 0)
+        {
+          s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+
+          /* Do this once */
+
+          priv->flags |= I2C_M_NOSTOP;
+          s32k1xx_lpi2c_sendstop(priv);
+        }
 
       /* Clear the error */
 
       s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET,
-                         (status & (LPI2C_MSR_NDF | LPI2C_MSR_ALF |
-                                    LPI2C_MSR_FEF)));
+                           (status & (LPI2C_MSR_NDF | LPI2C_MSR_ALF |
+                                      LPI2C_MSR_FEF | LPI2C_MSR_EPF)));
+    }
+
+  /* Check for endof packet */
+
+  if ((status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) != 0)
+    {
+      s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, status &
+                           (LPI2C_MSR_EPF | LPI2C_MSR_SDF));
 
 #ifndef CONFIG_I2C_POLLED
-          if (priv->intstate == INTSTATE_WAITING)
-            {
-              /* Update Status once at the end */
+      if (priv->intstate == INTSTATE_WAITING)
+        {
+          /* inform the thread that transfer is complete
+           * and wake it up
+           */
 
-              priv->status = status;
-
-              /* inform the thread that transfer is complete
-               * and wake it up
-               */
-
-              priv->intstate = INTSTATE_DONE;
-              nxsem_post(&priv->sem_isr);
-            }
-#else
-          priv->status = status;
           priv->intstate = INTSTATE_DONE;
+
+          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
+                               LPI2C_MIER_TDIE | LPI2C_MIER_RDIE |
+                               LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
+                               LPI2C_MIER_SDIE | LPI2C_MIER_EPIE, 0);
+          nxsem_post(&priv->sem_isr);
+        }
+#else
+      priv->intstate = INTSTATE_DONE;
 #endif
     }
 
@@ -1651,10 +1687,10 @@ static int s32k1xx_lpi2c_dma_data_configure(struct s32k1xx_lpi2c_priv_s
 #endif
 
 /****************************************************************************
- * Name: s32k1xx_lpi2c_configure_dma_transfer
+ * Name: s32k1xx_lpi2c_lpi2c_form_command_list
  *
  * Description:
- *   DMA based I2C transfer function
+ *   Form the DMA command list
  *
  ****************************************************************************/
 
@@ -1729,15 +1765,14 @@ static int s32k1xx_lpi2c_dma_transfer(struct s32k1xx_lpi2c_priv_s *priv)
 
   /* Disable Interrupts */
 
-  s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
-                            LPI2C_MIER_RDIE | LPI2C_MIER_TDIE, 0);
+  s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, 0);
 
   /* Disable DMA */
 
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MDER_OFFSET, LPI2C_MDER_TDDE |
                                                        LPI2C_MDER_RDDE, 0);
 
-  /* Turn off auto_stop option */
+  /* Enable AUTOSTOP and NAK Ignore */
 
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCFGR1_OFFSET, 0,
                           LPI2C_MCFGR1_IGNACK | LPI2C_MCFGR1_AUTOSTOP);
@@ -1772,12 +1807,29 @@ static int s32k1xx_lpi2c_dma_transfer(struct s32k1xx_lpi2c_priv_s *priv)
         }
     }
 
+  /* Clear the TX and RX FIFOs */
+
+  s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0,
+                          LPI2C_MCR_RTF | LPI2C_MCR_RRF);
+
+  /* Reset the Error bits */
+
+  s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, LPI2C_MSR_NDF |
+                                                       LPI2C_MSR_ALF |
+                                                       LPI2C_MSR_FEF);
+
+  /* Enable the Iterrupts */
+
   s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
                      LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
-                     LPI2C_MIER_PLTIE | LPI2C_MIER_FEIE);
+                     LPI2C_MIER_PLTIE);
 
-  s32k1xx_dmach_start(priv->rxdma, s32k1xx_rxdma_callback, priv);
-  s32k1xx_dmach_start(priv->txdma, s32k1xx_txdma_callback, priv);
+  /* Start The DMA */
+
+  s32k1xx_dmach_start(priv->rxdma, s32k1xx_rxdma_callback, (void *)priv);
+  s32k1xx_dmach_start(priv->txdma, s32k1xx_txdma_callback, (void *)priv);
+
+  /* Enable the DMA Request */
 
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MDER_OFFSET, 0,
                           LPI2C_MDER_TDDE | LPI2C_MDER_RDDE);
@@ -1798,6 +1850,9 @@ static int s32k1xx_lpi2c_transfer(struct i2c_master_s *dev,
 {
   struct s32k1xx_lpi2c_priv_s *priv = (struct s32k1xx_lpi2c_priv_s *)dev;
   int ret;
+#ifdef CONFIG_S32K1XX_LPI2C_DMA
+  int m;
+#endif
 
   DEBUGASSERT(count > 0);
 
@@ -1838,7 +1893,14 @@ static int s32k1xx_lpi2c_transfer(struct i2c_master_s *dev,
 
   priv->status = 0;
 
-  /* Wait for ISR. If there was a timeout, fetch latest status to get
+  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
+   * are currently disabled but will be temporarily re-enabled below when
+   * nxsem_tickwait_uninterruptible() sleeps.
+   */
+
+  priv->intstate = INTSTATE_WAITING;
+
+  /* Wait for an ISR, if there was a timeout, fetch latest status to get
    * the BUSY flag.
    */
 
@@ -1864,7 +1926,6 @@ static int s32k1xx_lpi2c_transfer(struct i2c_master_s *dev,
 
 #endif
       ret = -ETIMEDOUT;
-
       i2cerr("ERROR: Timed out: MCR: status: 0x%" PRIx32 "\n", priv->status);
     }
 
@@ -1907,6 +1968,20 @@ static int s32k1xx_lpi2c_transfer(struct i2c_master_s *dev,
 
   priv->dcnt = 0;
   priv->ptr = NULL;
+
+#ifdef CONFIG_S32K1XX_LPI2C_DMA
+  if (priv->rxdma)
+    {
+      for (m = 0; m < count; m++)
+        {
+          if (msgs[m].flags & I2C_M_READ)
+            {
+            up_invalidate_dcache((uintptr_t)msgs[m].buffer,
+                                (uintptr_t)msgs[m].buffer + msgs[m].length);
+            }
+        }
+    }
+#endif
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -2067,7 +2142,8 @@ out:
 
 struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
 {
-  struct s32k1xx_lpi2c_priv_s *priv = NULL;
+  struct s32k1xx_lpi2c_priv_s * priv = NULL;
+  irqstate_t flags;
 
   /* Get I2C private structure */
 
@@ -2093,8 +2169,9 @@ struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
    * power-up hardware and configure pins.
    */
 
-  nxmutex_lock(&priv->lock);
-  if (priv->refs++ == 0)
+  flags = enter_critical_section();
+
+  if ((volatile int)priv->refs++ == 0)
     {
       s32k1xx_lpi2c_init(priv);
 
@@ -2115,7 +2192,8 @@ struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
 #endif
     }
 
-  nxmutex_unlock(&priv->lock);
+  leave_critical_section(flags);
+
   return (struct i2c_master_s *)priv;
 }
 
@@ -2130,6 +2208,7 @@ struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
 int s32k1xx_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct s32k1xx_lpi2c_priv_s *priv = (struct s32k1xx_lpi2c_priv_s *)dev;
+  irqstate_t flags;
 
   DEBUGASSERT(dev);
 
@@ -2140,12 +2219,15 @@ int s32k1xx_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  nxmutex_lock(&priv->lock);
+  flags = enter_critical_section();
+
   if (--priv->refs > 0)
     {
-      nxmutex_unlock(&priv->lock);
+      leave_critical_section(flags);
       return OK;
     }
+
+  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 
@@ -2166,7 +2248,6 @@ int s32k1xx_i2cbus_uninitialize(struct i2c_master_s *dev)
 #endif
 
   s32k1xx_lpi2c_deinit(priv);
-  nxmutex_unlock(&priv->lock);
 
   return OK;
 }
