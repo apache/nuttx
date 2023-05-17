@@ -256,7 +256,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 
   if (paylen < dev->d_len)
     {
-      iob_update_pktlen(dev->d_iob, paylen);
+      iob_update_pktlen(dev->d_iob, paylen, false);
       dev->d_len = paylen;
     }
   else if (paylen > dev->d_len)

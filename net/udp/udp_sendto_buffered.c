@@ -790,7 +790,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       udpiplen = udpip_hdrsize(conn);
 
       iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
-      iob_update_pktlen(wrb->wb_iob, udpiplen);
+      iob_update_pktlen(wrb->wb_iob, udpiplen, false);
 
       /* Copy the user data into the write buffer.  We cannot wait for
        * buffer space if the socket was opened non-blocking.
