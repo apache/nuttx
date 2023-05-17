@@ -420,8 +420,8 @@ begin_packed_struct struct bt_att_signed_write_cmd_s
 } end_packed_struct;
 
 typedef void (*bt_att_func_t)(FAR struct bt_conn_s *conn, uint8_t err,
-                               FAR const void *pdu, uint16_t length,
-                               FAR void *user_data);
+                              FAR const void *pdu, uint16_t length,
+                              FAR void *user_data);
 typedef void (*bt_att_destroy_t)(FAR void *user_data);
 
 /****************************************************************************
@@ -430,7 +430,7 @@ typedef void (*bt_att_destroy_t)(FAR void *user_data);
 
 void bt_att_initialize(void);
 struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn, uint8_t op,
-                                 size_t len);
+                                   size_t len);
 
 /* Send ATT PDU over a connection */
 
