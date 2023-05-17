@@ -127,7 +127,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       /* Some compilers (e.g., SDCC), do not permit assignment of aggregates.
        * Use of memcpy() is overkill;  We could just copy the larger of the
-       * nt and FAR void * members in the union.  memcpy(), however, does
+       * int and FAR void * members in the union.  memcpy(), however, does
        * not require that we know which is larger.
        */
 
