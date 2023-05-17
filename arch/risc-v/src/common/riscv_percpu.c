@@ -192,3 +192,35 @@ uintptr_t riscv_percpu_get_irqstack(void)
 
   return ((riscv_percpu_t *)scratch)->irq_stack;
 }
+
+/****************************************************************************
+ * Name: riscv_percpu_set_kstack
+ *
+ * Description:
+ *   Set current kernel stack, so it can be taken quickly into use when a
+ *   trap is taken. Do this whenever a new process moves to running state.
+ *
+ * Input Parameters:
+ *   ksp - Pointer to the kernel stack
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_percpu_set_kstack(uintptr_t ksp)
+{
+  irqstate_t flags;
+  uintptr_t scratch;
+
+  /* This must be done with interrupts disabled */
+
+  flags   = enter_critical_section();
+  scratch = READ_CSR(CSR_SCRATCH);
+
+  DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
+              scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
+
+  ((riscv_percpu_t *)scratch)->ksp = ksp;
+  leave_critical_section(flags);
+}

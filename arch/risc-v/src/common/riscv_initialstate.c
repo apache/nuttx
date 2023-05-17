@@ -32,6 +32,7 @@
 #include <nuttx/tls.h>
 #include <arch/irq.h>
 
+#include "addrenv.h"
 #include "riscv_internal.h"
 
 /****************************************************************************
@@ -56,6 +57,7 @@ void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
   uintptr_t regval;
+  uintptr_t topstack;
 #ifdef CONFIG_ARCH_KERNEL_STACK
   uintptr_t *kstack = xcp->kstack;
 #endif
@@ -88,13 +90,22 @@ void up_initial_state(struct tcb_s *tcb)
       return;
     }
 
+  topstack = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
+
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  xcp->kstack = kstack;
+  /* Use the process kernel stack to store context for user processes */
+
+  if (kstack)
+    {
+      xcp->kstack  = kstack;
+      xcp->ustkptr = (uintptr_t *)topstack;
+      topstack     = (uintptr_t)kstack + ARCH_KERNEL_STACKSIZE;
+      xcp->ktopstk = (uintptr_t *)topstack;
+      xcp->kstkptr = xcp->ktopstk;
+    }
 #endif
 
-  xcp->regs = (uintptr_t *)(
-    (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size - XCPTCONTEXT_SIZE);
-
+  xcp->regs = (uintptr_t *)(topstack - XCPTCONTEXT_SIZE);
   memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
   /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
@@ -103,8 +114,7 @@ void up_initial_state(struct tcb_s *tcb)
    * only the start function would do that and we have control over that one
    */
 
-  xcp->regs[REG_SP]      = (uintptr_t)tcb->stack_base_ptr +
-                                      tcb->adj_stack_size;
+  xcp->regs[REG_SP]      = topstack;
 
   /* Save the task entry point */
 

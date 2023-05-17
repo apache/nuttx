@@ -97,7 +97,7 @@ CMN_CSRCS += riscv_mmu.c
 endif
 
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
-CMN_CSRCS += riscv_addrenv_kstack.c
+CMN_CSRCS += riscv_addrenv_kstack.c riscv_ksp.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
