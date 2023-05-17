@@ -108,8 +108,8 @@ struct icmpv6_conn_s
 
 /* Callback from icmpv6_foreach() */
 
-typedef int (*icmpv6_callback_t)(FAR struct icmpv6_conn_s *conn,
-                                 FAR void *arg);
+typedef CODE int (*icmpv6_callback_t)(FAR struct icmpv6_conn_s *conn,
+                                      FAR void *arg);
 #endif
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
