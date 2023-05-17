@@ -50,6 +50,8 @@
 #define RISCV_PERCPU_LIST       (0 * INT_REG_SIZE)
 #define RISCV_PERCPU_HARTID     (1 * INT_REG_SIZE)
 #define RISCV_PERCPU_IRQSTACK   (2 * INT_REG_SIZE)
+#define RISCV_PERCPU_USP        (3 * INT_REG_SIZE)
+#define RISCV_PERCPU_KSP        (4 * INT_REG_SIZE)
 
 #ifndef __ASSEMBLY__
 
@@ -68,6 +70,8 @@ struct riscv_percpu_s
   struct riscv_percpu_s *next;      /* For sl list linkage */
   uintptr_t              hartid;    /* Hart ID */
   uintptr_t              irq_stack; /* Interrupt stack */
+  uintptr_t              usp;       /* Area to store user sp */
+  uintptr_t              ksp;       /* Area to load kernel sp */
 };
 
 typedef struct riscv_percpu_s riscv_percpu_t;
@@ -115,6 +119,23 @@ uintptr_t riscv_percpu_get_hartid(void);
  ****************************************************************************/
 
 uintptr_t riscv_percpu_get_irqstack(void);
+
+/****************************************************************************
+ * Name: riscv_percpu_set_kstack
+ *
+ * Description:
+ *   Set current kernel stack, so it can be taken quickly into use when a
+ *   trap is taken.
+ *
+ * Input Parameters:
+ *   ksp - Pointer to the kernel stack
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_percpu_set_kstack(uintptr_t ksp);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISC_V_SRC_COMMON_RISCV_PERCPU_H */

@@ -32,24 +32,22 @@
 
 #include "chip.h"
 
+#include "riscv_percpu.h"
+
 #include "riscv_macros.S"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Using address environments currently require that a common interrupt stack
- * is in place. This is needed because during context switch the procedure
- * that swaps the active address environment is dependent on a stack, which
- * must be a 'neutral' stack.
- *
- * Another option would be to use a per-process kernel stack, but full
- * support for this is not yet in place, so use the common IRQ stack instead.
+/* Using address environments requires that the per-process kernel stack is
+ * enabled. Using user stack to run exception and/or kernel code is a very
+ * very bad idea, thus enforce the kernel stack
  */
 
 #ifdef CONFIG_ARCH_ADDRENV
-#  if CONFIG_ARCH_INTERRUPTSTACK == 0 && !defined(CONFIG_ARCH_KERNEL_STACK)
-#    error "IRQ or kernel stack is needed for swapping address environments"
+#  ifndef CONFIG_ARCH_KERNEL_STACK
+#    error "Kernel stack is needed for handling exceptions"
 #  endif
 #endif
 
@@ -78,13 +76,38 @@
 
 exception_common:
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Take the kernel stack into use */
+
+  csrrw      a0, CSR_SCRATCH, a0
+  REGSTORE   sp, RISCV_PERCPU_USP(a0)
+  REGLOAD    sp, RISCV_PERCPU_KSP(a0)
+  REGSTORE   x0, RISCV_PERCPU_KSP(a0)
+  bnez       sp, 1f
+
+  /* No kernel stack, exception comes from kernel */
+
+  REGLOAD    sp, RISCV_PERCPU_USP(a0)
+
+1:
+  /* Restore the per-cpu structure */
+
+  csrrw      a0, CSR_SCRATCH, a0
+#endif
+
   addi       sp, sp, -XCPTCONTEXT_SIZE
   save_ctx   sp
 
   csrr       s0, CSR_STATUS
   REGSTORE   s0, REG_INT_CTX(sp)  /* status */
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  csrr       s0, CSR_SCRATCH
+  REGLOAD    s0, RISCV_PERCPU_USP(s0)
+#else
   addi       s0, sp, XCPTCONTEXT_SIZE
+#endif
+
   REGSTORE   s0, REG_X2(sp)       /* original SP */
 
   csrr       s0, CSR_EPC
@@ -132,6 +155,22 @@ exception_common:
 
   REGLOAD    s0, REG_INT_CTX(sp)  /* restore sstatus */
   csrw       CSR_STATUS, s0
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Returning to userspace ? */
+
+  li         s1, STATUS_PPP
+  and        s0, s0, s1
+  bnez       s0, 1f
+
+  /* Set the next task's kernel stack to the scratch area */
+
+  jal        x1, riscv_current_ksp
+  csrr       s0, CSR_SCRATCH
+  REGSTORE   a0, RISCV_PERCPU_KSP(s0)
+
+1:
+#endif
 
   load_ctx   sp
 
