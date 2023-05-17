@@ -109,8 +109,6 @@
  * Public Types
  ****************************************************************************/
 
-struct es8311_lower_s;
-
 struct es8311_lower_s
 {
   /* I2C characterization */
