@@ -1056,7 +1056,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
     (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_data_ind_s *ind;
   FAR struct iob_s *iob;
-  uint16_t *frame_ctrl;
+  FAR uint16_t *frame_ctrl;
   bool panid_comp;
   uint8_t ftype;
 
@@ -1094,7 +1094,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
        * the frame control field
        */
 
-      frame_ctrl = (uint16_t *)&iob->io_data[iob->io_offset];
+      frame_ctrl = (FAR uint16_t *)&iob->io_data[iob->io_offset];
       iob->io_offset += 2;
 
       /* We use the data_ind_s as a container for the frame information even
@@ -1438,11 +1438,11 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
  ****************************************************************************/
 
 static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
-                                 FAR struct ieee802154_data_ind_s *ind)
+                                FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct ieee802154_txdesc_s *txdesc;
   FAR struct iob_s *iob;
-  uint16_t *frame_ctrl;
+  FAR uint16_t *frame_ctrl;
 
   /* Get exclusive access to the MAC */
 
