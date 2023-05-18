@@ -87,9 +87,10 @@ SECTIONS
   _edata = .; /* End+1 of .data */
 
   .bss : {                     /* BSS */
+       . = ALIGN(8);
        _sbss = .;
        *(.bss)
-       . = ALIGN(1 << 3);
+       . = ALIGN(8);
   } :text
   . = ALIGN(4096);
   _ebss = .;
