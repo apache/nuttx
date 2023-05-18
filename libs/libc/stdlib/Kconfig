@@ -23,7 +23,7 @@ config LIBC_HOMEDIR
 config LIBC_TMPDIR
 	string "Temporary file directory"
 	default "/tmp"
-		---help---
+	---help---
 		If a write-able file system is selected, this string will be
 		provided to specify the full path to a directory where temporary
 		files can be created.  This would be a good application of RAM disk:
@@ -32,7 +32,7 @@ config LIBC_TMPDIR
 config LIBC_MAX_TMPFILE
 	int "Maximum size of a temporary file path"
 	default 32
-		---help---
+	---help---
 		If a write-able file system is selected, then temporary file may be
 		supported at the path provided by LIBC_TMPDIR.  The tmpnam() interface
 		keeps a static copy of this last filename produced; this value is the
@@ -42,7 +42,7 @@ config LIBC_MAX_TMPFILE
 config LIBC_MAX_EXITFUNS
 	int "Maximum amount of exit functions"
 	default 0
-		---help---
+	---help---
 		Configure the amount of exit functions for atexit/on_exit. The ANSI
 		default is 32, but most likely we don't need as many.
 
