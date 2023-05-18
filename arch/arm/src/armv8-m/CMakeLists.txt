@@ -66,4 +66,8 @@ if(CONFIG_ARM_MPU OR CONFIG_ARM_MPU_EARLY_RESET)
   list(APPEND SRCS arm_mpu.c)
 endif()
 
+if(CONFIG_ARCH_TRUSTZONE_SECURE)
+  list(APPEND SRCS arm_gen_nonsecfault.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
