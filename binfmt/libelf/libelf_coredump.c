@@ -246,8 +246,20 @@ static void elf_emit_note_info(FAR struct elf_dumpinfo_s *cinfo)
 
       for (j = 0; j < nitems(status.pr_regs); j++)
         {
-          status.pr_regs[j] = *(uintptr_t *)((uint8_t *)tcb +
-                                             g_tcbinfo.reg_off.p[j]);
+          if (tcb->xcp.regs == NULL)
+            {
+              continue;
+            }
+
+          if (g_tcbinfo.reg_off.p[j] == UINT16_MAX)
+            {
+              status.pr_regs[j] = 0;
+            }
+          else
+            {
+              status.pr_regs[j] = *(uintptr_t *)((uint8_t *)tcb->xcp.regs +
+                                                 g_tcbinfo.reg_off.p[j]);
+            }
         }
 
       elf_emit(cinfo, &status, sizeof(status));
