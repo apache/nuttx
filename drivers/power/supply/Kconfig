@@ -94,7 +94,7 @@ menu "ACT8945A Regulator System Functions"
 choice
 	prompt "ACT8945A SYSLEV threshold"
 	default ACT8945A_SYSLEV_3000
-		---help---
+	---help---
 		The SYSLEV voltage below which the configured SYSLEV mode will be triggered.
 
 config ACT8945A_SYSLEV_2300
