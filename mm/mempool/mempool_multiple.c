@@ -319,6 +319,7 @@ mempool_multiple_init(FAR const char *name,
   mpool->alloc = alloc;
   mpool->free = free;
   mpool->arg = arg;
+  mpool->delta = 0;
 
   for (i = 0; i < npools; i++)
     {
@@ -340,7 +341,7 @@ mempool_multiple_init(FAR const char *name,
 
       if (i + 1 != npools)
         {
-          size_t delta = pools[i + 1].blocksize - pools[i].blocksize;
+          size_t delta = poolsize[i + 1] - poolsize[i];
 
           if (i == 0)
             {
