@@ -65,7 +65,7 @@ config LIBC_ENVPATH
 config FDSAN
 	bool "Enable Fdsan"
 	default n
-		---help---
+	---help---
 		Enable the fdsan support
 
 config LIBC_FTOK_VFS_PATH
