@@ -136,6 +136,7 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
                           state->blocksize);
       pentry.nblocks    = MBR_LBA_TO_BLOCK(table[i].partition_size,
                           state->blocksize);
+      pentry.blocksize  = state->blocksize;
 
       if (pentry.nblocks != 0)
         {

@@ -40,7 +40,7 @@
 #define GPT_BLOCK_SIZE                  512
 #define GPT_HEADER_SIGNATURE            0x5452415020494645ull
 #define GPT_PARTNAME_MAX_SIZE           (72 / sizeof(uint16_t))
-#define GPT_LBA_TO_BLOCK(lba, blk)      ((le64toh(lba) * 512 + (blk) -1) / (blk))
+#define GPT_LBA_TO_BLOCK(lba, blk)      ((le64toh(lba) * 512 + (blk) - 1) / (blk))
 
 /****************************************************************************
  * Private Types
@@ -204,7 +204,7 @@ gpt_alloc_verify_entries(FAR struct partition_state_s *state,
       return NULL;
     }
 
-  blk = (size + (state->blocksize -1)) / state->blocksize;
+  blk = (size + (state->blocksize - 1)) / state->blocksize;
   pte = kmm_zalloc(blk * state->blocksize);
   if (!pte)
     {
