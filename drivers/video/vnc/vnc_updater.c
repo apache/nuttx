@@ -386,7 +386,10 @@ static FAR void *vnc_updater(FAR void *arg)
           break;
         }
 
-      DEBUGASSERT(srcrect != NULL);
+      if (srcrect == NULL)
+        {
+          continue;
+        }
 
       updinfo("Dequeued {(%d, %d),(%d, %d)}\n",
               srcrect->rect.x, srcrect->rect.y,
