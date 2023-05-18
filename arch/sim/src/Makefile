@@ -93,6 +93,10 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
+ifeq ($(CONFIG_FS_LARGEFILE),y)
+  HOSTCFLAGS += -D_FILE_OFFSET_BITS=64
+endif
+
 HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
