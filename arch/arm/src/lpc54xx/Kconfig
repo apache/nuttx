@@ -972,11 +972,11 @@ config LPC54_SDMMC_DMA
 		Support DMA data transfers.
 
 config LPC54_SDMMC_REGDEBUG
-		bool "Register level debug"
-		default n
-		depends on DEBUG_MEMCARD_INFO
-		---help---
-				Output detailed register-level SD/MMC debug information.
+	bool "Register level debug"
+	default n
+	depends on DEBUG_MEMCARD_INFO
+	---help---
+		Output detailed register-level SD/MMC debug information.
 
 endmenu # SD/MMC Configuration
 
