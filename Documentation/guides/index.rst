@@ -16,3 +16,4 @@ Guides
   pysimcoder.rst
   customboards.rst
   customapps.rst
+  zerolatencyinterrupts.rst
