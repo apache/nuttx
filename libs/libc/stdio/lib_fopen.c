@@ -81,6 +81,12 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
         }
     }
 
+#ifdef CONFIG_FDSAN
+  android_fdsan_exchange_owner_tag(fd, 0,
+      android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
+                                     (uintptr_t)filep));
+#endif
+
   return filep;
 }
 
