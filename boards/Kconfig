@@ -1090,6 +1090,14 @@ config ARCH_BOARD_NRF52840_DONGLE
 	---help---
 		This option selects the Nordic nRF52840 Dongle (PCA10059)
 
+config ARCH_BOARD_THINGY52
+	bool "Nordic Thingy:52 Prototyping platform"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This option selects the Nordic Thingy:52 prototyping platform
+
 config ARCH_BOARD_NRF5340_DK
 	bool "Nordic nRF5340 Development Kit (PCA10095)"
 	depends on ARCH_CHIP_NRF53
@@ -2910,6 +2918,7 @@ config ARCH_BOARD
 	default "nrf52832-dk"               if ARCH_BOARD_NRF52832_DK
 	default "nrf52840-dk"               if ARCH_BOARD_NRF52840_DK
 	default "nrf52840-dongle"           if ARCH_BOARD_NRF52840_DONGLE
+	default "thingy52"                  if ARCH_BOARD_THINGY52
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
