@@ -45,6 +45,13 @@ config NETDEV_WORK_THREAD_PRIORITY
 	---help---
 		The priority of work poll thread in netdev.
 
+config NETDEV_WIRELESS_HANDLER
+	bool "Support wireless handler in upper-half driver"
+	default y
+	depends on NETDEV_IOCTL
+	---help---
+		Enable the wireless handler support in upper-half driver.
+
 comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV
