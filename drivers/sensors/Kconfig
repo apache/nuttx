@@ -24,6 +24,13 @@ config SENSORS_RPMSG
 	---help---
 		Allow application to read or control remote sensor device by rpmsg.
 
+config SENSORS_GPS
+	bool "GPS Support"
+	default n
+	depends on GPSUTILS_MINMEA_LIB
+	---help---
+		Allow application to use gps by /dev/uorb/gps or /dev/ttyGPS
+
 config SENSORS_WTGAHRS2
 	bool "Wtgahrs2 Sensor Support"
 	default n
