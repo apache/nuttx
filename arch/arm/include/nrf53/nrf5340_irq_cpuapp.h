@@ -33,11 +33,11 @@
 #define NRF53_IRQ_CACHE         (NRF53_IRQ_EXTINT+1)   /* CACHE interrupt */
 #define NRF53_IRQ_SPU           (NRF53_IRQ_EXTINT+3)   /* SPU interrupt */
 #define NRF53_IRQ_POWER_CLOCK   (NRF53_IRQ_EXTINT+5)   /* Power, Clock, Bprot */
-#define NRF53_IRQ_UART0         (NRF53_IRQ_EXTINT+8)   /* UART/UARTE 0 */
-#define NRF53_IRQ_UART1         (NRF53_IRQ_EXTINT+9)   /* UART/UARTE 1 */
+#define NRF53_IRQ_SERIAL0       (NRF53_IRQ_EXTINT+8)   /* UART/SPI/TWI 0 */
+#define NRF53_IRQ_SERIAL1       (NRF53_IRQ_EXTINT+9)   /* UART/SPI/TWI 1 */
 #define NRF53_IRQ_SPIM4         (NRF53_IRQ_EXTINT+10)  /* SPIM4 */
-#define NRF53_IRQ_UART2         (NRF53_IRQ_EXTINT+11)  /* UART/UARTE 2 */
-#define NRF53_IRQ_UART3         (NRF53_IRQ_EXTINT+12)  /* UART/UARTE 3 */
+#define NRF53_IRQ_SERIAL2       (NRF53_IRQ_EXTINT+11)  /* UART/SPI/TWI 2 */
+#define NRF53_IRQ_SERIAL3       (NRF53_IRQ_EXTINT+12)  /* UART/SPI/TWI 3 */
 #define NRF53_IRQ_GPIOTE0       (NRF53_IRQ_EXTINT+13)  /* GPIO Task & Event 0 */
 #define NRF53_IRQ_SAADC         (NRF53_IRQ_EXTINT+14)  /* Analog to Digital Converter */
 #define NRF53_IRQ_TIMER0        (NRF53_IRQ_EXTINT+15)  /* Timer 0 */
