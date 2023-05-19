@@ -2655,7 +2655,7 @@ menu "RTC Configuration"
 config IMXRT_RTC_MAGIC_REG
 	int "RTC SNVS GPR"
 	default 0
-	range  0 3
+	range 0 3
 	---help---
 		The BKP register used to store/check the Magic value to determine if
 		RTC is already setup
