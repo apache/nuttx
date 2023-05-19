@@ -51,7 +51,9 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val);
 static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
               FAR struct usbhost_id_s *id);
 static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
-              FAR struct usbhost_id_s *id);
+                                     uint8_t start_ifnum,
+                                     uint8_t *ret_ifnum,
+                                     struct usbhost_id_s *id);
 static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
               FAR const uint8_t *configdesc, int desclen,
               FAR struct usbhost_id_s *id,
@@ -130,6 +132,8 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
  ****************************************************************************/
 
 static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
+                                     uint8_t start_ifnum,
+                                     uint8_t *ret_ifnum,
                                      struct usbhost_id_s *id)
 {
   FAR struct usb_cfgdesc_s *cfgdesc;
@@ -161,7 +165,8 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
       /* What is the next descriptor? Is it an interface descriptor? */
 
       ifdesc = (struct usb_ifdesc_s *)configdesc;
-      if (ifdesc->type == USB_DESC_TYPE_INTERFACE)
+      if (ifdesc->type == USB_DESC_TYPE_INTERFACE &&
+          ifdesc->ifno >= start_ifnum)
         {
           /* Yes, extract the class information from the interface
            * descriptor.
@@ -175,6 +180,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
           id->proto    = ifdesc->protocol;
           uinfo("class:%d subclass:%d protocol:%d\n",
                 id->base, id->subclass, id->proto);
+          *ret_ifnum = ifdesc->ifno;
           return OK;
         }
 
@@ -499,6 +505,10 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
       goto errout;
     }
 
+  /* Some devices may require some delay before initialization */
+
+  nxsig_usleep(100 * 1000);
+
   /* Was the class identification information provided in the device
    * descriptor? Or do we need to find it in the interface descriptor(s)?
    */
@@ -510,49 +520,63 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
        * case of multiple interface descriptors.
        */
 
-      ret = usbhost_configdesc(buffer, cfglen, &id);
-      if (ret < 0)
+      uint8_t ninterfaces = ((struct usb_cfgdesc_s *)buffer)->ninterfaces;
+      uint8_t ifnum = 0;
+
+      for (ifnum = 0; ifnum < ninterfaces; ifnum++)
         {
-          uerr("ERROR: usbhost_configdesc failed: %d\n", ret);
-          goto errout;
+          uinfo("Parsing interface: %d\n", ifnum);
+          ret = usbhost_configdesc(buffer, cfglen, ifnum, &ifnum, &id);
+          if (ret < 0)
+            {
+              uerr("ERROR: usbhost_configdesc failed: %d\n", ret);
+              goto errout;
+            }
+
+          ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
+          if (ret < 0)
+            {
+              uerr("ERROR: usbhost_classbind failed %d\n", ret);
+            }
+
+          ret = OK;
         }
     }
-
-  /* Some devices may require some delay before initialization */
-
-  nxsig_usleep(100 * 1000);
-
-#ifdef CONFIG_USBHOST_COMPOSITE
-  /* Check if the device attached to the downstream port if a USB composite
-   * device and, if so, create the composite device wrapper and bind it to
-   * the HCD.
-   *
-   * usbhost_composite() will return a negated errno value is on any
-   * failure.  The value -ENOENT, in particular means that the attached
-   * device is not a composite device.  Other values would indicate other
-   * various, unexpected failures.  We make no real distinction here.
-   */
-
-  ret = usbhost_composite(hport, buffer, cfglen, &id, devclass);
-  if (ret >= 0)
-    {
-      uinfo("usbhost_composite has bound the composite device\n");
-    }
-
-  /* Apparently this is not a composite device */
-
   else
-#endif
     {
-      /* Parse the configuration descriptor and bind to the class instance
-       * for the device.  This needs to be the last thing done because the
-       * class driver will begin configuring the device.
+#ifdef CONFIG_USBHOST_COMPOSITE
+      /* Check if the device attached to the downstream port if a USB
+       * composite device and, if so, create the composite device wrapper
+       * and bind it to the HCD.
+       *
+       * usbhost_composite() will return a negated errno value is on any
+       * failure.  The value -ENOENT, in particular means that the attached
+       * device is not a composite device.  Other values would indicate other
+       * various, unexpected failures.  We make no real distinction here.
        */
 
-      ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
-      if (ret < 0)
+      ret = usbhost_composite(hport, buffer, cfglen, &id, devclass);
+      if (ret >= 0)
         {
-          uerr("ERROR: usbhost_classbind failed %d\n", ret);
+          uinfo("usbhost_composite has bound the composite device\n");
+        }
+
+      /* Apparently this is not a composite device */
+
+      else
+#endif
+        {
+          /* Parse the configuration descriptor and bind to the class
+           * instance for the device.  This needs to be the last thing
+           * done because the class driver will begin configuring the
+           * device.
+           */
+
+          ret = usbhost_classbind(hport, buffer, cfglen, &id, devclass);
+          if (ret < 0)
+            {
+              uerr("ERROR: usbhost_classbind failed %d\n", ret);
+            }
         }
     }
 
