@@ -32,6 +32,10 @@ ifeq ($(CONFIG_SENSORS_RPMSG),y)
 CSRCS += sensor_rpmsg.c
 endif
 
+ifeq ($(CONFIG_SENSORS_GPS),y)
+  CSRCS += gps.c
+endif
+
 ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
   CSRCS += wtgahrs2.c
 endif
