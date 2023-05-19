@@ -552,9 +552,9 @@ static uint32_t lpc43_getreg(uint32_t addr);
 static void lpc43_putreg(uint32_t val, uint32_t addr);
 static void lpc43_checksetup(void);
 #else
-# define lpc43_getreg(addr)      getreg32(addr)
-# define lpc43_putreg(val,addr)  putreg32(val,addr)
-# define lpc43_checksetup()
+#  define lpc43_getreg(addr)     getreg32(addr)
+#  define lpc43_putreg(val,addr) putreg32(val,addr)
+#  define lpc43_checksetup()
 #endif
 
 /* Free buffer management */

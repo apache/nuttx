@@ -106,8 +106,8 @@ struct stm32l4_lowerhalf_s
 static uint16_t stm32l4_getreg(uint32_t addr);
 static void     stm32l4_putreg(uint16_t val, uint32_t addr);
 #else
-# define        stm32l4_getreg(addr)     getreg16(addr)
-# define        stm32l4_putreg(val,addr) putreg16(val,addr)
+#  define       stm32l4_getreg(addr)     getreg16(addr)
+#  define       stm32l4_putreg(val,addr) putreg16(val,addr)
 #endif
 
 static inline void

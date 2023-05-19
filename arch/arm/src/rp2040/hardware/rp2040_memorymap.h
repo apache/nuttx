@@ -113,10 +113,10 @@
 
 #ifndef __ASSEMBLY__
 
-# define xorbits_reg32(v,a)   putreg32(v, (a) | RP2040_ATOMIC_XOR_REG_OFFSET)
-# define setbits_reg32(v,a)   putreg32(v, (a) | RP2040_ATOMIC_SET_REG_OFFSET)
-# define clrbits_reg32(v,a)   putreg32(v, (a) | RP2040_ATOMIC_CLR_REG_OFFSET)
-# define modbits_reg32(v,m,a) xorbits_reg32((getreg32(a) ^ (v)) & (m), a)
+#  define xorbits_reg32(v,a)   putreg32(v, (a) | RP2040_ATOMIC_XOR_REG_OFFSET)
+#  define setbits_reg32(v,a)   putreg32(v, (a) | RP2040_ATOMIC_SET_REG_OFFSET)
+#  define clrbits_reg32(v,a)   putreg32(v, (a) | RP2040_ATOMIC_CLR_REG_OFFSET)
+#  define modbits_reg32(v,m,a) xorbits_reg32((getreg32(a) ^ (v)) & (m), a)
 
 /****************************************************************************
  * Public Function Prototypes

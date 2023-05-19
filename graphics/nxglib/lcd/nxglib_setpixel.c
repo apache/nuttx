@@ -73,39 +73,39 @@ void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
 
 # ifdef CONFIG_NX_PACKEDMSFIRST
 
-#if NXGLIB_BITSPERPIXEL == 1
+#  if NXGLIB_BITSPERPIXEL == 1
   shift   = (7 - (pos->x & 7));              /* Shift is 0, 1, ... 7 */
   mask    = (1 << shift);                    /* Mask is 0x01, 0x02, .. 0x80 */
   color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 2
+#  elif NXGLIB_BITSPERPIXEL == 2
   shift   = (6 - ((pos->x & 3) << 1));       /* Shift is 0, 2, 4, or 6 */
   mask    = (3 << shift);                    /* Mask is 0x03, 0x0c, 0x30, or 0xc0 */
   color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 4
+#  elif NXGLIB_BITSPERPIXEL == 4
   shift   = (4 - ((pos->x & 1) << 2));       /* Shift is 0 or 4 */
   mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
   color <<= shift;                           /* Color is positioned under the mask */
-#else
-#  error "Unsupported pixel depth"
-#endif
+#  else
+#    error "Unsupported pixel depth"
+#  endif
 
-# else /* CONFIG_NX_PACKEDMSFIRST */
+#else /* CONFIG_NX_PACKEDMSFIRST */
 
-#if NXGLIB_BITSPERPIXEL == 1
+#  if NXGLIB_BITSPERPIXEL == 1
   shift   = (pos->x & 7);                    /* Shift is 0, 1, ... 7 */
   mask    = (1 << shift);                    /* Mask is 0x01, 0x02, .. 0x80 */
   color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 2
+#  elif NXGLIB_BITSPERPIXEL == 2
   shift   = (pos->x & 3) << 1;               /* Shift is 0, 2, 4, or 6 */
   mask    = (3 << shift);                    /* Mask is 0x03, 0x0c, 0x30, or 0xc0 */
   color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 4
+#  elif NXGLIB_BITSPERPIXEL == 4
   shift   = (pos->x & 1) << 2;               /* Shift is 0 or 4 */
   mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
   color <<= shift;                           /* Color is positioned under the mask */
-#else
-#  error "Unsupported pixel depth"
-#endif
+#  else
+#    error "Unsupported pixel depth"
+#  endif
 #endif /* CONFIG_NX_PACKEDMSFIRST */
 
   /* Handle masking of the fractional byte */

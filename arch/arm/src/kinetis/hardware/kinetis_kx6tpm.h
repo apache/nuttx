@@ -81,20 +81,20 @@
 
 #define TPM_SC_PS_SHIFT             0 /* Bits 0-2: Prescale Factor Selection */
 #define TPM_SC_PS_MASK              (7 << TPM_SC_PS_SHIFT)
-# define TPM_SC_PS_DIV1             (0 << TPM_SC_PS_SHIFT) /* Divide Clock by 1 */
-# define TPM_SC_PS_DIV2             (1 << TPM_SC_PS_SHIFT) /* Divide Clock by 2 */
-# define TPM_SC_PS_DIV4             (2 << TPM_SC_PS_SHIFT) /* Divide Clock by 4 */
-# define TPM_SC_PS_DIV8             (3 << TPM_SC_PS_SHIFT) /* Divide Clock by 8 */
-# define TPM_SC_PS_DIV16            (4 << TPM_SC_PS_SHIFT) /* Divide Clock by 16 */
-# define TPM_SC_PS_DIV32            (5 << TPM_SC_PS_SHIFT) /* Divide Clock by 32 */
-# define TPM_SC_PS_DIV64            (6 << TPM_SC_PS_SHIFT) /* Divide Clock by 64 */
-# define TPM_SC_PS_DIV128           (7 << TPM_SC_PS_SHIFT) /* Divide Clock by 128 */
+#  define TPM_SC_PS_DIV1            (0 << TPM_SC_PS_SHIFT) /* Divide Clock by 1 */
+#  define TPM_SC_PS_DIV2            (1 << TPM_SC_PS_SHIFT) /* Divide Clock by 2 */
+#  define TPM_SC_PS_DIV4            (2 << TPM_SC_PS_SHIFT) /* Divide Clock by 4 */
+#  define TPM_SC_PS_DIV8            (3 << TPM_SC_PS_SHIFT) /* Divide Clock by 8 */
+#  define TPM_SC_PS_DIV16           (4 << TPM_SC_PS_SHIFT) /* Divide Clock by 16 */
+#  define TPM_SC_PS_DIV32           (5 << TPM_SC_PS_SHIFT) /* Divide Clock by 32 */
+#  define TPM_SC_PS_DIV64           (6 << TPM_SC_PS_SHIFT) /* Divide Clock by 64 */
+#  define TPM_SC_PS_DIV128          (7 << TPM_SC_PS_SHIFT) /* Divide Clock by 128 */
 
 #define TPM_SC_CMOD_SHIFT           3 /* Bits 3-4: Clock Mode Selection */
 #define TPM_SC_CMOD_MASK            (3 << TPM_SC_CMOD_SHIFT)
-# define TPM_SC_CMOD_DIS            (0 << TPM_SC_CMOD_SHIFT) /* TPM counter is disabled */
-# define TPM_SC_CMOD_LPTPM_CLK      (1 << TPM_SC_CMOD_SHIFT) /* TPM increments on every counter clock */
-# define TPM_SC_CMOD_LPTPM_EXTCLK   (2 << TPM_SC_CMOD_SHIFT) /* TPM increments on rising edge of EXTCLK */
+#  define TPM_SC_CMOD_DIS           (0 << TPM_SC_CMOD_SHIFT) /* TPM counter is disabled */
+#  define TPM_SC_CMOD_LPTPM_CLK     (1 << TPM_SC_CMOD_SHIFT) /* TPM increments on every counter clock */
+#  define TPM_SC_CMOD_LPTPM_EXTCLK  (2 << TPM_SC_CMOD_SHIFT) /* TPM increments on rising edge of EXTCLK */
 
 #define TPM_SC_CPWMS                (1 << 5) /* Bit 5: Center-aligned PWM Select */
 #define TPM_SC_TOIE                 (1 << 6) /* Bit 6: Timer Overflow Interrupt Enable */
@@ -162,8 +162,8 @@
 
 #define TPM_CONF_DBGMODE_SHIFT      6 /* Bits 6-7: Debug Mode */
 #define TPM_CONF_DBGMODE_MASK       (3 << TPM_CONF_DBGMODE_SHIFT)
-# define TPM_CONF_DBGMODE_PAUSE     (0 << TPM_CONF_DBGMODE_SHIFT) /* TPM counter will pause during DEBUG mode */
-# define TPM_CONF_DBGMODE_CONT      (3 << TPM_CONF_DBGMODE_SHIFT) /* TPM counter continue working in DEBUG mode */
+#  define TPM_CONF_DBGMODE_PAUSE    (0 << TPM_CONF_DBGMODE_SHIFT) /* TPM counter will pause during DEBUG mode */
+#  define TPM_CONF_DBGMODE_CONT     (3 << TPM_CONF_DBGMODE_SHIFT) /* TPM counter continue working in DEBUG mode */
 
 #define TPM_CONF_GTBSYNC            (1 << 8)  /* Bit 8: Global Time Base Synchronization */
 #define TPM_CONF_GTBEEN             (1 << 9)  /* Bit 9: Global Time Base Enable */
@@ -179,25 +179,25 @@
 #define TPM_CONF_TRGSEL_SHIFT       24 /* Bits 24-27: Trigger Select */
 #define TPM_CONF_TRGSEL_MASK        (0xf << TPM_CONF_TRGSEL_SHIFT)
                                                                   /* Internal TPM_CONF_TRGSRC set */
-# define TPM_CONF_TRGSEL_INTC0      (0 << TPM_CONF_TRGSEL_SHIFT)  /* Internal Channel 0 pin input capture */
-# define TPM_CONF_TRGSEL_INTC1      (2 << TPM_CONF_TRGSEL_SHIFT)  /* Internal Channel 1 pin input capture */
-# define TPM_CONF_TRGSEL_INTC01     (3 << TPM_CONF_TRGSEL_SHIFT)  /* Internal Channel 0 or 1 pin input capture */
+#  define TPM_CONF_TRGSEL_INTC0     (0 << TPM_CONF_TRGSEL_SHIFT)  /* Internal Channel 0 pin input capture */
+#  define TPM_CONF_TRGSEL_INTC1     (2 << TPM_CONF_TRGSEL_SHIFT)  /* Internal Channel 1 pin input capture */
+#  define TPM_CONF_TRGSEL_INTC01    (3 << TPM_CONF_TRGSEL_SHIFT)  /* Internal Channel 0 or 1 pin input capture */
 
-# define TPM_CONF_TRGSEL_EXTRG_IN   (0 << TPM_CONF_TRGSEL_SHIFT)  /* External trigger pin input */
-# define TPM_CONF_TRGSEL_CMP0       (1 << TPM_CONF_TRGSEL_SHIFT)  /* CPM0 output */
-# define TPM_CONF_TRGSEL_CMP1       (2 << TPM_CONF_TRGSEL_SHIFT)  /* CPM1 output */
-# define TPM_CONF_TRGSEL_CMP2       (3 << TPM_CONF_TRGSEL_SHIFT)  /* CPM2 output */
-# define TPM_CONF_TRGSEL_PIT0       (4 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 0 */
-# define TPM_CONF_TRGSEL_PIT1       (5 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 1 */
-# define TPM_CONF_TRGSEL_PIT2       (6 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 2 */
-# define TPM_CONF_TRGSEL_PIT3       (7 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 3 */
-# define TPM_CONF_TRGSEL_FTM0       (8 << TPM_CONF_TRGSEL_SHIFT)  /* FTM0 initialization trigger and channel triggers */
-# define TPM_CONF_TRGSEL_FTM1       (9 << TPM_CONF_TRGSEL_SHIFT)  /* FTM1 initialization trigger and channel triggers */
-# define TPM_CONF_TRGSEL_FTM2       (10 << TPM_CONF_TRGSEL_SHIFT) /* FTM2 initialization trigger and channel triggers */
-# define TPM_CONF_TRGSEL_FTM3       (11 << TPM_CONF_TRGSEL_SHIFT) /* FTM3 initialization trigger and channel triggers */
-# define TPM_CONF_TRGSEL_RTC_ALRM   (12 << TPM_CONF_TRGSEL_SHIFT) /* RTC Alarm */
-# define TPM_CONF_TRGSEL_RTC_SECS   (13 << TPM_CONF_TRGSEL_SHIFT) /* RTC Seconds */
-# define TPM_CONF_TRGSEL_LPTMR      (14 << TPM_CONF_TRGSEL_SHIFT) /* LPTMR trigger */
-# define TPM_CONF_TRGSEL_SW         (15 << TPM_CONF_TRGSEL_SHIFT) /* Software Trigger */
+#  define TPM_CONF_TRGSEL_EXTRG_IN  (0 << TPM_CONF_TRGSEL_SHIFT)  /* External trigger pin input */
+#  define TPM_CONF_TRGSEL_CMP0      (1 << TPM_CONF_TRGSEL_SHIFT)  /* CPM0 output */
+#  define TPM_CONF_TRGSEL_CMP1      (2 << TPM_CONF_TRGSEL_SHIFT)  /* CPM1 output */
+#  define TPM_CONF_TRGSEL_CMP2      (3 << TPM_CONF_TRGSEL_SHIFT)  /* CPM2 output */
+#  define TPM_CONF_TRGSEL_PIT0      (4 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 0 */
+#  define TPM_CONF_TRGSEL_PIT1      (5 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 1 */
+#  define TPM_CONF_TRGSEL_PIT2      (6 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 2 */
+#  define TPM_CONF_TRGSEL_PIT3      (7 << TPM_CONF_TRGSEL_SHIFT)  /* PIT trigger 3 */
+#  define TPM_CONF_TRGSEL_FTM0      (8 << TPM_CONF_TRGSEL_SHIFT)  /* FTM0 initialization trigger and channel triggers */
+#  define TPM_CONF_TRGSEL_FTM1      (9 << TPM_CONF_TRGSEL_SHIFT)  /* FTM1 initialization trigger and channel triggers */
+#  define TPM_CONF_TRGSEL_FTM2      (10 << TPM_CONF_TRGSEL_SHIFT) /* FTM2 initialization trigger and channel triggers */
+#  define TPM_CONF_TRGSEL_FTM3      (11 << TPM_CONF_TRGSEL_SHIFT) /* FTM3 initialization trigger and channel triggers */
+#  define TPM_CONF_TRGSEL_RTC_ALRM  (12 << TPM_CONF_TRGSEL_SHIFT) /* RTC Alarm */
+#  define TPM_CONF_TRGSEL_RTC_SECS  (13 << TPM_CONF_TRGSEL_SHIFT) /* RTC Seconds */
+#  define TPM_CONF_TRGSEL_LPTMR     (14 << TPM_CONF_TRGSEL_SHIFT) /* LPTMR trigger */
+#  define TPM_CONF_TRGSEL_SW        (15 << TPM_CONF_TRGSEL_SHIFT) /* Software Trigger */
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_KX6TPM_H */

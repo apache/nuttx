@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-# define AJOY_SUPPORTED (AJOY_BUTTON_1_BIT | AJOY_BUTTON_2_BIT | \
+#  define AJOY_SUPPORTED (AJOY_BUTTON_1_BIT | AJOY_BUTTON_2_BIT | \
                          AJOY_BUTTON_3_BIT)
 
 /****************************************************************************

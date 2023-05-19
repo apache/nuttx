@@ -230,17 +230,17 @@ extern int isnan (double);
 #define FP_NORMAL      4
 
 #ifndef FP_ILOGB0
-# define FP_ILOGB0 (-__INT_MAX__)
+#  define FP_ILOGB0 (-__INT_MAX__)
 #endif
 #ifndef FP_ILOGBNAN
-# define FP_ILOGBNAN __INT_MAX__
+#  define FP_ILOGBNAN __INT_MAX__
 #endif
 
 #ifndef MATH_ERRNO
-# define MATH_ERRNO 1
+#  define MATH_ERRNO 1
 #endif
 #ifndef MATH_ERREXCEPT
-# define MATH_ERREXCEPT 2
+#  define MATH_ERREXCEPT 2
 #endif
 #ifndef math_errhandling
 # ifdef _IEEE_LIBM
@@ -253,7 +253,7 @@ extern int isnan (double);
 # else
 #  define _MATH_ERRHANDLING_ERREXCEPT 0
 # endif
-# define math_errhandling (_MATH_ERRHANDLING_ERRNO | _MATH_ERRHANDLING_ERREXCEPT)
+#  define math_errhandling (_MATH_ERRHANDLING_ERRNO | _MATH_ERRHANDLING_ERREXCEPT)
 #endif
 
 extern int __isinff (float);

@@ -39,9 +39,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_BUSFAULT
-# define bfalert(format, ...)  _alert(format, ##__VA_ARGS__)
+#  define bfalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
-# define bfalert(x...)
+#  define bfalert(x...)
 #endif
 
 /****************************************************************************

@@ -1099,38 +1099,38 @@
 /* Empty placeholder macros for undefined coprocessors: */
 
 #if (XCHAL_CP_MASK & ~XCHAL_CP_PORT_MASK) == 0
-# if XCHAL_CP0_SA_SIZE == 0
+#  if XCHAL_CP0_SA_SIZE == 0
     .macro xchal_cp0_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp0_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP1_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP1_SA_SIZE == 0
     .macro xchal_cp1_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp1_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP2_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP2_SA_SIZE == 0
     .macro xchal_cp2_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp2_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP3_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP3_SA_SIZE == 0
     .macro xchal_cp3_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp3_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP4_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP4_SA_SIZE == 0
     .macro xchal_cp4_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp4_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP5_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP5_SA_SIZE == 0
     .macro xchal_cp5_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp5_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP6_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP6_SA_SIZE == 0
     .macro xchal_cp6_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp6_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
-# if XCHAL_CP7_SA_SIZE == 0
+#  endif
+#  if XCHAL_CP7_SA_SIZE == 0
     .macro xchal_cp7_store  p a b c d continue=0 ofs=-1 select=-1 ; .endm
     .macro xchal_cp7_load   p a b c d continue=0 ofs=-1 select=-1 ; .endm
-# endif
+#  endif
 #endif
 
 /* Macros to create functions that save and restore the state of *any* TIE
@@ -1147,54 +1147,54 @@
 
   .macro xchal_cpi_store_funcbody
 #if (XCHAL_CP_MASK & ~XCHAL_CP_PORT_MASK)
-# if XCHAL_CP0_SA_SIZE
+#  if XCHAL_CP0_SA_SIZE
   bnez a3, 99f
   xchal_cp0_store_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP1_SA_SIZE
+#  endif
+#  if XCHAL_CP1_SA_SIZE
   bnei    a3, 1, 99f
   xchal_cp1_store_a2
   j 290f
 99:
-# endif
-# if XCHAL_CP2_SA_SIZE
+#  endif
+#  if XCHAL_CP2_SA_SIZE
   bnei    a3, 2, 99f
   xchal_cp2_store_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP3_SA_SIZE
+#  endif
+#  if XCHAL_CP3_SA_SIZE
   bnei a3, 3, 99f
   xchal_cp3_store_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP4_SA_SIZE
+#  endif
+#  if XCHAL_CP4_SA_SIZE
   bnei a3, 4, 99f
   xchal_cp4_store_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP5_SA_SIZE
+#  endif
+#  if XCHAL_CP5_SA_SIZE
   bnei a3, 5, 99f
   xchal_cp5_store_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP6_SA_SIZE
+#  endif
+#  if XCHAL_CP6_SA_SIZE
   bnei a3, 6, 99f
   xchal_cp6_store_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP7_SA_SIZE
+#  endif
+#  if XCHAL_CP7_SA_SIZE
   bnei a3, 7, 99f
   xchal_cp7_store_a2
   j 90f
 99:
-# endif
+#  endif
 90:
 #endif
   .endm
@@ -1209,54 +1209,54 @@
 
   .macro  xchal_cpi_load_funcbody
 #if (XCHAL_CP_MASK & ~XCHAL_CP_PORT_MASK)
-# if XCHAL_CP0_SA_SIZE
+#  if XCHAL_CP0_SA_SIZE
   bnez a3, 99f
   xchal_cp0_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP1_SA_SIZE
+#  endif
+#  if XCHAL_CP1_SA_SIZE
   bnei a3, 1, 99f
   xchal_cp1_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP2_SA_SIZE
+#  endif
+#  if XCHAL_CP2_SA_SIZE
   bnei a3, 2, 99f
   xchal_cp2_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP3_SA_SIZE
+#  endif
+#  if XCHAL_CP3_SA_SIZE
   bnei a3, 3, 99f
   xchal_cp3_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP4_SA_SIZE
+#  endif
+#  if XCHAL_CP4_SA_SIZE
   bnei a3, 4, 99f
   xchal_cp4_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP5_SA_SIZE
+#  endif
+#  if XCHAL_CP5_SA_SIZE
   bnei a3, 5, 99f
   xchal_cp5_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP6_SA_SIZE
+#  endif
+#  if XCHAL_CP6_SA_SIZE
   bnei a3, 6, 99f
   xchal_cp6_load_a2
   j 90f
 99:
-# endif
-# if XCHAL_CP7_SA_SIZE
+#  endif
+#  if XCHAL_CP7_SA_SIZE
   bnei a3, 7, 99f
   xchal_cp7_load_a2
   j 90f
 99:
-# endif
+#  endif
 90:
 #endif
   .endm
@@ -1419,20 +1419,20 @@
  */
 
 #if XCHAL_HW_CONFIGID_RELIABLE
-# define XCHAL_HW_RELEASE_AT_OR_BELOW(major,minor)      (XTHAL_REL_LE( XCHAL_HW_VERSION_MAJOR,XCHAL_HW_VERSION_MINOR, major,minor ) ? 1 : 0)
-# define XCHAL_HW_RELEASE_AT_OR_ABOVE(major,minor)      (XTHAL_REL_GE( XCHAL_HW_VERSION_MAJOR,XCHAL_HW_VERSION_MINOR, major,minor ) ? 1 : 0)
-# define XCHAL_HW_RELEASE_AT(major,minor)               (XTHAL_REL_EQ( XCHAL_HW_VERSION_MAJOR,XCHAL_HW_VERSION_MINOR, major,minor ) ? 1 : 0)
-# define XCHAL_HW_RELEASE_MAJOR_AT(major)               ((XCHAL_HW_VERSION_MAJOR == (major)) ? 1 : 0)
+#  define XCHAL_HW_RELEASE_AT_OR_BELOW(major,minor)     (XTHAL_REL_LE( XCHAL_HW_VERSION_MAJOR,XCHAL_HW_VERSION_MINOR, major,minor ) ? 1 : 0)
+#  define XCHAL_HW_RELEASE_AT_OR_ABOVE(major,minor)     (XTHAL_REL_GE( XCHAL_HW_VERSION_MAJOR,XCHAL_HW_VERSION_MINOR, major,minor ) ? 1 : 0)
+#  define XCHAL_HW_RELEASE_AT(major,minor)              (XTHAL_REL_EQ( XCHAL_HW_VERSION_MAJOR,XCHAL_HW_VERSION_MINOR, major,minor ) ? 1 : 0)
+#  define XCHAL_HW_RELEASE_MAJOR_AT(major)              ((XCHAL_HW_VERSION_MAJOR == (major)) ? 1 : 0)
 #else
-# define XCHAL_HW_RELEASE_AT_OR_BELOW(major,minor)      ( ((major) < 1040 && XCHAL_HAVE_XEA2) ? 0 \
+#  define XCHAL_HW_RELEASE_AT_OR_BELOW(major,minor)     ( ((major) < 1040 && XCHAL_HAVE_XEA2) ? 0 \
                                                         : ((major) > 1050 && XCHAL_HAVE_XEA1) ? 1 \
                                                         : XTHAL_MAYBE )
-# define XCHAL_HW_RELEASE_AT_OR_ABOVE(major,minor)      ( ((major) >= 2000 && XCHAL_HAVE_XEA1) ? 0 \
+#  define XCHAL_HW_RELEASE_AT_OR_ABOVE(major,minor)     ( ((major) >= 2000 && XCHAL_HAVE_XEA1) ? 0 \
                                                         : (XTHAL_REL_LE(major,minor, 1040,0) && XCHAL_HAVE_XEA2) ? 1 \
                                                         : XTHAL_MAYBE )
-# define XCHAL_HW_RELEASE_AT(major,minor)               ( (((major) < 1040 && XCHAL_HAVE_XEA2) || \
+#  define XCHAL_HW_RELEASE_AT(major,minor)              ( (((major) < 1040 && XCHAL_HAVE_XEA2) || \
                                                            ((major) >= 2000 && XCHAL_HAVE_XEA1)) ? 0 : XTHAL_MAYBE)
-# define XCHAL_HW_RELEASE_MAJOR_AT(major)               XCHAL_HW_RELEASE_AT(major,0)
+#  define XCHAL_HW_RELEASE_MAJOR_AT(major)              XCHAL_HW_RELEASE_AT(major,0)
 #endif
 
 /*  Specific errata: */

@@ -321,28 +321,28 @@
                                                   /* Bits 11-15: Reserved */
 #define CAN_ICR_ERRBIT_SHIFT            (16)      /* Bits 16-20: Error Code Capture */
 #define CAN_ICR_ERRBIT_MASK             (0x1f << CAN_ICR_ERRBIT_SHIFT)
-# define CAN_ICR_ERRBIT_SOF             (3  << CAN_ICR_ERRBIT_SHIFT) /* Start of Frame */
-# define CAN_ICR_ERRBIT_ID28            (2  << CAN_ICR_ERRBIT_SHIFT) /* ID28 ... ID21 */
-# define CAN_ICR_ERRBIT_SRTR            (4  << CAN_ICR_ERRBIT_SHIFT) /* SRTR Bit */
-# define CAN_ICR_ERRBIT_IDE             (5  << CAN_ICR_ERRBIT_SHIFT) /* DE bit */
-# define CAN_ICR_ERRBIT_ID20            (6  << CAN_ICR_ERRBIT_SHIFT) /* ID20 ... ID18 */
-# define CAN_ICR_ERRBIT_ID17            (7  << CAN_ICR_ERRBIT_SHIFT) /* ID17 ... 13 */
-# define CAN_ICR_ERRBIT_CRC             (8  << CAN_ICR_ERRBIT_SHIFT) /* CRC Sequence */
-# define CAN_ICR_ERRBIT_DATA            (10 << CAN_ICR_ERRBIT_SHIFT) /* Data Field */
-# define CAN_ICR_ERRBIT_LEN             (11 << CAN_ICR_ERRBIT_SHIFT) /* Data Length Code */
-# define CAN_ICR_ERRBIT_ RTR            (12 << CAN_ICR_ERRBIT_SHIFT) /* RTR Bit */
-# define CAN_ICR_ERRBIT_ID4             (14 << CAN_ICR_ERRBIT_SHIFT) /* ID4 ... ID0 */
-# define CAN_ICR_ERRBIT_ID12            (15 << CAN_ICR_ERRBIT_SHIFT) /* ID12 ... ID5 */
-# define CAN_ICR_ERRBIT_AERR            (17 << CAN_ICR_ERRBIT_SHIFT) /* Active Error Flag */
-# define CAN_ICR_ERRBIT_INTERMSN        (18 << CAN_ICR_ERRBIT_SHIFT) /* Intermission */
-# define CAN_ICR_ERRBIT_DOM             (19 << CAN_ICR_ERRBIT_SHIFT) /* Tolerate Dominant Bits */
-# define CAN_ICR_ERRBIT_PERR            (22 << CAN_ICR_ERRBIT_SHIFT) /* Passive Error Flag */
-# define CAN_ICR_ERRBIT_ERRDLM          (23 << CAN_ICR_ERRBIT_SHIFT) /* Error Delimiter */
-# define CAN_ICR_ERRBIT_CRCDLM          (24 << CAN_ICR_ERRBIT_SHIFT) /* CRC Delimiter */
-# define CAN_ICR_ERRBIT_ACKSLT          (25 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Slot */
-# define CAN_ICR_ERRBIT_EOF             (26 << CAN_ICR_ERRBIT_SHIFT) /* End of Frame */
-# define CAN_ICR_ERRBIT_ACKDLM          (27 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Delimiter */
-# define CAN_ICR_ERRBIT_OVLD            (28 << CAN_ICR_ERRBIT_SHIFT) /* Overload flag */
+#  define CAN_ICR_ERRBIT_SOF            (3  << CAN_ICR_ERRBIT_SHIFT) /* Start of Frame */
+#  define CAN_ICR_ERRBIT_ID28           (2  << CAN_ICR_ERRBIT_SHIFT) /* ID28 ... ID21 */
+#  define CAN_ICR_ERRBIT_SRTR           (4  << CAN_ICR_ERRBIT_SHIFT) /* SRTR Bit */
+#  define CAN_ICR_ERRBIT_IDE            (5  << CAN_ICR_ERRBIT_SHIFT) /* DE bit */
+#  define CAN_ICR_ERRBIT_ID20           (6  << CAN_ICR_ERRBIT_SHIFT) /* ID20 ... ID18 */
+#  define CAN_ICR_ERRBIT_ID17           (7  << CAN_ICR_ERRBIT_SHIFT) /* ID17 ... 13 */
+#  define CAN_ICR_ERRBIT_CRC            (8  << CAN_ICR_ERRBIT_SHIFT) /* CRC Sequence */
+#  define CAN_ICR_ERRBIT_DATA           (10 << CAN_ICR_ERRBIT_SHIFT) /* Data Field */
+#  define CAN_ICR_ERRBIT_LEN            (11 << CAN_ICR_ERRBIT_SHIFT) /* Data Length Code */
+#  define CAN_ICR_ERRBIT_ RTR           (12 << CAN_ICR_ERRBIT_SHIFT) /* RTR Bit */
+#  define CAN_ICR_ERRBIT_ID4            (14 << CAN_ICR_ERRBIT_SHIFT) /* ID4 ... ID0 */
+#  define CAN_ICR_ERRBIT_ID12           (15 << CAN_ICR_ERRBIT_SHIFT) /* ID12 ... ID5 */
+#  define CAN_ICR_ERRBIT_AERR           (17 << CAN_ICR_ERRBIT_SHIFT) /* Active Error Flag */
+#  define CAN_ICR_ERRBIT_INTERMSN       (18 << CAN_ICR_ERRBIT_SHIFT) /* Intermission */
+#  define CAN_ICR_ERRBIT_DOM            (19 << CAN_ICR_ERRBIT_SHIFT) /* Tolerate Dominant Bits */
+#  define CAN_ICR_ERRBIT_PERR           (22 << CAN_ICR_ERRBIT_SHIFT) /* Passive Error Flag */
+#  define CAN_ICR_ERRBIT_ERRDLM         (23 << CAN_ICR_ERRBIT_SHIFT) /* Error Delimiter */
+#  define CAN_ICR_ERRBIT_CRCDLM         (24 << CAN_ICR_ERRBIT_SHIFT) /* CRC Delimiter */
+#  define CAN_ICR_ERRBIT_ACKSLT         (25 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Slot */
+#  define CAN_ICR_ERRBIT_EOF            (26 << CAN_ICR_ERRBIT_SHIFT) /* End of Frame */
+#  define CAN_ICR_ERRBIT_ACKDLM         (27 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Delimiter */
+#  define CAN_ICR_ERRBIT_OVLD           (28 << CAN_ICR_ERRBIT_SHIFT) /* Overload flag */
 
 #define CAN_ICR_ERRDIR                  (1 << 21) /* Bit 21: Direction bit at time of error */
 #define CAN_ICR_ERRC_SHIFT              (22)      /* Bits 22-23: Type of error */

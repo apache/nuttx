@@ -3295,7 +3295,7 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
    *  CK_PLLP clock (through a configurable prescaler) on PC9 pin."
    */
 
-# if defined(CONFIG_GD32F4_MII_CKOUT0)
+#  if defined(CONFIG_GD32F4_MII_CKOUT0)
   /* Configure CKOUT0 to drive the PHY.  Board logic must provide
    * CKOUT0 clocking info.
    */
@@ -3303,14 +3303,14 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
   gd32_gpio_config(GPIO_CKOUT0);
   gd32_rcu_ckout0_config(BOARD_CFG_CKOUT0_SOURCE, BOARD_CFG_CKOUT0_DIVIDER);
 
-# elif defined(CONFIG_GD32F4_MII_CKOUT1)
+#  elif defined(CONFIG_GD32F4_MII_CKOUT1)
   /* Configure CKOUT1 to drive the PHY.  Board logic must provide
    * CKOUT1 clocking info.
    */
 
   gd32_gpio_config(GPIO_CKOUT1);
   gd32_rcu_ckout1_config(BOARD_CFG_CKOUT1_SOURCE, BOARD_CFG_CKOUT1_DIVIDER);
-# endif
+#  endif
 
   /* MII interface pins (17):
    *
@@ -3351,7 +3351,7 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
    *  CK_PLLP clock (through a configurable prescaler) on PC9 pin."
    */
 
-# if defined(CONFIG_GD32F4_RMII_CKOUT0)
+#  if defined(CONFIG_GD32F4_RMII_CKOUT0)
   /* Configure CKOUT0 to drive the PHY.  Board logic must provide
    * CKOUT0 clocking info.
    */
@@ -3359,7 +3359,7 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
   gd32_gpio_config(GPIO_CKOUT0);
   gd32_rcu_ckout0_config(BOARD_CFG_CKOUT0_SOURCE, BOARD_CFG_CKOUT0_DIV);
 
-# elif defined(CONFIG_GD32F4_RMII_CKOUT1)
+#  elif defined(CONFIG_GD32F4_RMII_CKOUT1)
   /* Configure CKOUT1 to drive the PHY.  Board logic must provide
    * CKOUT1 clocking info.
    */
@@ -3367,7 +3367,7 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
   gd32_gpio_config(GPIO_CKOUT1);
   gd32_rcu_ckout1_config(BOARD_CFG_CKOUT1_SOURCE, BOARD_CFG_CKOUT1_DIVIDER);
 
-# endif
+#  endif
 
   /* RMII interface pins (7):
    *
@@ -3383,7 +3383,7 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
   gd32_gpio_config(GPIO_ENET_RMII_TXD0);
   gd32_gpio_config(GPIO_ENET_RMII_TXD1);
 
-#endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_ENET_PTP

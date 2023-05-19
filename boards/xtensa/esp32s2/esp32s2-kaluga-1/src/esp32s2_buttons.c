@@ -93,17 +93,17 @@ static const struct touch_config_s tp_config =
   .slope = TOUCHPAD_SLOPE,
   .tie_opt = TOUCHPAD_TIE_OPT,
   .fsm_mode = TOUCHPAD_FSM_MODE,
-# ifdef CONFIG_ESP32S2_TOUCH_FILTER
+#  ifdef CONFIG_ESP32S2_TOUCH_FILTER
   .filter_mode = TOUCHPAD_FILTER_MODE,
   .filter_debounce_cnt = TOUCHPAD_FILTER_DEBOUNCE,
   .filter_noise_thr = TOUCHPAD_FILTER_NOISE,
   .filter_jitter_step = TOUCHPAD_FILTER_JITTER,
   .filter_smh_lvl = TOUCHPAD_FILTER_SMH,
-# endif
-# ifdef CONFIG_ESP32S2_TOUCH_DENOISE
+#  endif
+#  ifdef CONFIG_ESP32S2_TOUCH_DENOISE
   .denoise_grade = TOUCHPAD_DENOISE_GRADE,
   .denoise_cap_level = TOUCHPAD_DENOISE_CAP
-# endif
+#  endif
 };
 #endif
 

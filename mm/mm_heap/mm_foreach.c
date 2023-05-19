@@ -52,7 +52,7 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
-# define region 0
+#  define region 0
 #endif
 
   DEBUGASSERT(handler);

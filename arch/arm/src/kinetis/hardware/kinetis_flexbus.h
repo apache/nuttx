@@ -68,8 +68,6 @@
 
 /* Register Addresses *******************************************************/
 
-# define    0x4000c000 /* FlexBus */
-
 #define KINETIS_FB_CS_BASE(n)      (KINETIS_FLEXBUSC_BASE+KINETIS_FB_CS_OFFSET(n))
 #define KINETIS_FB_CSAR(n)         (KINETIS_FB_CS_BASE(n)+KINETIS_FB_CSAR_OFFSET)
 #define KINETIS_FB_CSMR(n)         (KINETIS_FB_CS_BASE(n)+KINETIS_FB_CSMR_OFFSET)

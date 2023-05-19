@@ -674,9 +674,9 @@ static uint32_t tiva_getreg(uint32_t addr);
 static void tiva_putreg(uint32_t val, uint32_t addr);
 static void tiva_checksetup(void);
 #else
-# define tiva_getreg(addr)      getreg32(addr)
-# define tiva_putreg(val,addr)  putreg32(val,addr)
-# define tiva_checksetup()
+#  define tiva_getreg(addr)     getreg32(addr)
+#  define tiva_putreg(val,addr) putreg32(val,addr)
+#  define tiva_checksetup()
 #endif
 
 /* Free buffer management */

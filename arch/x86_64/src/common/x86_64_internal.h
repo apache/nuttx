@@ -87,7 +87,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /* The initial stack point is aligned at 16 bytes boundaries. If
@@ -205,7 +205,7 @@ void x86_64_syscall(uint64_t *regs);
 #if CONFIG_MM_REGIONS > 1
 void x86_64_addregion(void);
 #else
-# define x86_64_addregion()
+#  define x86_64_addregion()
 #endif
 
 /* Defined in xyz_serial.c */
@@ -223,15 +223,15 @@ void x86_64_timer_initialize(void);
 #ifdef CONFIG_NET
 void x86_64_netinitialize(void);
 #else
-# define x86_64_netinitialize()
+#  define x86_64_netinitialize()
 #endif
 
 #ifdef CONFIG_USBDEV
 void x86_64_usbinitialize(void);
 void x86_64_usbuninitialize(void);
 #else
-# define x86_64_usbinitialize()
-# define x86_64_usbuninitialize()
+#  define x86_64_usbinitialize()
+#  define x86_64_usbuninitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */

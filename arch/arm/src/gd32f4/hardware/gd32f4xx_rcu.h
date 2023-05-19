@@ -236,7 +236,7 @@
 
 #define RCU_CFG0_CKOUT0DIV_SHIFT         (24)                  /* Bits 24-26: The CK_OUT0 divider */
 #define RCU_CFG0_CKOUT0DIV_MASK          (7 << RCU_CFG0_CKOUT0DIV_SHIFT)
-# define RCU_CFG0_CKOUT0DIV(n)           ((n) << RCU_CFG0_CKOUT0DIV_SHIFT)
+#  define RCU_CFG0_CKOUT0DIV(n)          ((n) << RCU_CFG0_CKOUT0DIV_SHIFT)
 #  define RCU_CFG0_CKOUT0_DIV1           RCU_CFG0_CKOUT0DIV(0) /* CK_OUT0 is divided by 1, n=0..3 */
 #  define RCU_CFG0_CKOUT0_DIV2           RCU_CFG0_CKOUT0DIV(4) /* CK_OUT0 is divided by 2 */
 #  define RCU_CFG0_CKOUT0_DIV3           RCU_CFG0_CKOUT0DIV(5) /* CK_OUT0 is divided by 3 */
@@ -245,7 +245,7 @@
 
 #define RCU_CFG0_CKOUT1DIV_SHIFT         (27)                  /* Bits 27-29: The CK_OUT1 divider */
 #define RCU_CFG0_CKOUT1DIV_MASK          (7 << RCU_CFG0_CKOUT1DIV_SHIFT)
-# define RCU_CFG0_CKOUT1DIV(n)           ((n) << RCU_CFG0_CKOUT1DIV_SHIFT)
+#  define RCU_CFG0_CKOUT1DIV(n)          ((n) << RCU_CFG0_CKOUT1DIV_SHIFT)
 #  define RCU_CFG0_CKOUT1_DIV1           RCU_CFG0_CKOUT1DIV(0) /* CK_OUT1 is divided by 1, n=0..3 */
 #  define RCU_CFG0_CKOUT1_DIV2           RCU_CFG0_CKOUT1DIV(4) /* CK_OUT1 is divided by 2 */
 #  define RCU_CFG0_CKOUT1_DIV3           RCU_CFG0_CKOUT1DIV(5) /* CK_OUT1 is divided by 3 */

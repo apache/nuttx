@@ -173,7 +173,7 @@
 #  ifndef CONFIG_USBMSC_VENDORSTR
 #    warning "No Vendor string specified"
 #    define CONFIG_USBMSC_VENDORSTR  "NuttX"
-# endif
+#  endif
 
 #  ifndef CONFIG_USBMSC_PRODUCTSTR
 #    warning "No Product string specified"

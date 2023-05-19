@@ -45,35 +45,35 @@
 /* Hexadecimal Representation ***********************************************/
 
 #ifdef __ASSEMBLY__
-# define _HX32(w)                 %##w
-# define _HX8(b)                  %##b
+#  define _HX32(w)                %##w
+#  define _HX8(b)                 %##b
 #else
-# define _HX32(w)                 0x##w
-# define _HX8(b)                  0x##b
+#  define _HX32(w)                0x##w
+#  define _HX8(b)                 0x##b
 #endif
 
 /* Z16F Chip Variants *******************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_Z16F2810)
-# define Z16F_INVMEM_SIZE         (128*1024)
-# define Z16F_IRAM_SIZE           (4*1024)
+#  define Z16F_INVMEM_SIZE        (128*1024)
+#  define Z16F_IRAM_SIZE          (4*1024)
 # undef  Z16F_HAVE_EXTMEM
 # undef  Z16F_HAVE_GPIO_PORTJ
 # undef  Z16F_HAVE_GPIO_PORTK
 #elif defined(CONFIG_ARCH_CHIP_Z16F2811)
-# define Z16F_INVMEM_SIZE         (128*1024)
-# define Z16F_IRAM_SIZE           (4*1024)
-# define Z16F_HAVE_EXTMEM         1
-# define Z16F_HAVE_GPIO_PORTJ     1
-# define Z16F_HAVE_GPIO_PORTK     1
+#  define Z16F_INVMEM_SIZE        (128*1024)
+#  define Z16F_IRAM_SIZE          (4*1024)
+#  define Z16F_HAVE_EXTMEM        1
+#  define Z16F_HAVE_GPIO_PORTJ    1
+#  define Z16F_HAVE_GPIO_PORTK    1
 #elif defined(CONFIG_ARCH_CHIP_Z16F3211)
-# define Z16F_INVMEM_SIZE         (32*1024)
-# define Z16F_IRAM_SIZE           (2*1024)
-# define Z16F_HAVE_EXTMEM         1
+#  define Z16F_INVMEM_SIZE        (32*1024)
+#  define Z16F_IRAM_SIZE          (2*1024)
+#  define Z16F_HAVE_EXTMEM        1
 #elif defined(CONFIG_ARCH_CHIP_Z16F6411)
-# define Z16F_INVMEM_SIZE         (64*1024)
-# define Z16F_IRAM_SIZE           (4*1024)
-# define Z16F_HAVE_EXTMEM         1
+#  define Z16F_INVMEM_SIZE        (64*1024)
+#  define Z16F_IRAM_SIZE          (4*1024)
+#  define Z16F_HAVE_EXTMEM        1
 #else
 # error "Z16F chip variant not specified"
 #endif
@@ -349,24 +349,24 @@
 #define Z16F_GPIOH_SMRE           _HX32(ffffe178) /*  8-bits: Port H Stop Mode Recovery En */
 
 #ifdef Z16F_HAVE_GPIO_PORTJ
-# define Z16F_GPIOJ_IN            _HX32(ffffe180) /*  8-bits: Port J Input Data */
-# define Z16F_GPIOJ_OUT           _HX32(ffffe181) /*  8-bits: Port J Output Data */
-# define Z16F_GPIOJ_DD            _HX32(ffffe182) /*  8-bits: Port J Data Direction */
-# define Z16F_GPIOJ_HDE           _HX32(ffffe183) /*  8-bits: Port J High Drive Enable */
-# define Z16F_GPIOJ_OC            _HX32(ffffe186) /*  8-bits: Port J Output Control */
-# define Z16F_GPIOJ_PUE           _HX32(ffffe187) /*  8-bits: Port J Pull-Up Enable */
-# define Z16F_GPIOJ_SMRE          _HX32(ffffe188) /*  8-bits: Port J Stop Mode Recovery En */
+#  define Z16F_GPIOJ_IN           _HX32(ffffe180) /*  8-bits: Port J Input Data */
+#  define Z16F_GPIOJ_OUT          _HX32(ffffe181) /*  8-bits: Port J Output Data */
+#  define Z16F_GPIOJ_DD           _HX32(ffffe182) /*  8-bits: Port J Data Direction */
+#  define Z16F_GPIOJ_HDE          _HX32(ffffe183) /*  8-bits: Port J High Drive Enable */
+#  define Z16F_GPIOJ_OC           _HX32(ffffe186) /*  8-bits: Port J Output Control */
+#  define Z16F_GPIOJ_PUE          _HX32(ffffe187) /*  8-bits: Port J Pull-Up Enable */
+#  define Z16F_GPIOJ_SMRE         _HX32(ffffe188) /*  8-bits: Port J Stop Mode Recovery En */
 #endif
 
 #ifdef Z16F_HAVE_GPIO_PORTK
-# define Z16F_GPIOK_IN            _HX32(ffffe190) /*  8-bits: Port K Input Data */
-# define Z16F_GPIOK_OUT           _HX32(ffffe191) /*  8-bits: Port K Output Data */
-# define Z16F_GPIOK_DD            _HX32(ffffe192) /*  8-bits: Port K Data Direction */
-# define Z16F_GPIOK_HDE           _HX32(ffffe193) /*  8-bits: Port K High Drive Enable */
-# define Z16F_GPIOK_AFL           _HX32(ffffe195) /*  8-bits: Port K Alternate Function Low */
-# define Z16F_GPIOK_OC            _HX32(ffffe196) /*  8-bits: Port K Output Control */
-# define Z16F_GPIOK_PUE           _HX32(ffffe197) /*  8-bits: Port K Pull-Up Enable */
-# define Z16F_GPIOK_SMRE          _HX32(ffffe198) /*  8-bits: Port K Stop Mode Recovery En */
+#  define Z16F_GPIOK_IN           _HX32(ffffe190) /*  8-bits: Port K Input Data */
+#  define Z16F_GPIOK_OUT          _HX32(ffffe191) /*  8-bits: Port K Output Data */
+#  define Z16F_GPIOK_DD           _HX32(ffffe192) /*  8-bits: Port K Data Direction */
+#  define Z16F_GPIOK_HDE          _HX32(ffffe193) /*  8-bits: Port K High Drive Enable */
+#  define Z16F_GPIOK_AFL          _HX32(ffffe195) /*  8-bits: Port K Alternate Function Low */
+#  define Z16F_GPIOK_OC           _HX32(ffffe196) /*  8-bits: Port K Output Control */
+#  define Z16F_GPIOK_PUE          _HX32(ffffe197) /*  8-bits: Port K Pull-Up Enable */
+#  define Z16F_GPIOK_SMRE         _HX32(ffffe198) /*  8-bits: Port K Stop Mode Recovery En */
 #endif
 
 /* UART Register Offsets ****************************************************/
@@ -539,7 +539,7 @@
 #  define Z16F_TIMER0_L           _HX32(ffffe301) /*  8-bit: Timer 0 Low Byte */
 #define Z16F_TIMER0_R             _HX32(ffffe302) /* 16-bit: Timer 0 Reload */
 #  define Z16F_TIMER0_RH          _HX32(ffffe302) /*  8-bit: Timer 0 Reload High Byte */
-# define Z16F_TIMER0_RL           _HX32(ffffe303) /*  8-bit: Timer 0 Reload Low Byte */
+#  define Z16F_TIMER0_RL          _HX32(ffffe303) /*  8-bit: Timer 0 Reload Low Byte */
 #define Z16F_TIMER0_PWM           _HX32(ffffe304) /* 16-bit: Timer 0 PWM */
 #  define Z16F_TIMER0_PWMH        _HX32(ffffe304) /*  8-bit: Timer 0 PWM High Byte */
 #  define Z16F_TIMER0_PWML        _HX32(ffffe305) /*  8-bit: Timer 0 PWM Low Byte */

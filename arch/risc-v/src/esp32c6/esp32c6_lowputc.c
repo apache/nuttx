@@ -104,7 +104,7 @@ static struct esp32c6_uart_s g_console_config =
   .int_pri = 1
 };
 
-# elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 
 static struct esp32c6_uart_s g_uart1_config =
 {
@@ -117,7 +117,7 @@ static struct esp32c6_uart_s g_uart1_config =
   .stop_b2 =  CONFIG_UART1_2STOP,
   .int_pri = 1
 };
-#endif /* CONFIG_UART0_SERIAL_CONSOLE */
+#  endif /* CONFIG_UART0_SERIAL_CONSOLE */
 #endif /* HAVE_SERIAL_CONSOLE */
 #endif
 

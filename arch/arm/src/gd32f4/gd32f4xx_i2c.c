@@ -130,14 +130,14 @@
 
 #  error "Now I2C DMA has not ready"
 
-# if defined(CONFIG_I2C_DMAPRIO)
-#   if (CONFIG_I2C_DMAPRIO & ~DMA_CHXCTL_PRIO_MASK) != 0
-#     error "Illegal value for CONFIG_I2C_DMAPRIO"
-#   endif
-#   define I2C_DMA_PRIO     CONFIG_I2C_DMAPRIO
-# else
-#   define I2C_DMA_PRIO     DMA_PRIO_HIGH_SELECT
-# endif
+#  if defined(CONFIG_I2C_DMAPRIO)
+#    if (CONFIG_I2C_DMAPRIO & ~DMA_CHXCTL_PRIO_MASK) != 0
+#      error "Illegal value for CONFIG_I2C_DMAPRIO"
+#    endif
+#    define I2C_DMA_PRIO     CONFIG_I2C_DMAPRIO
+#  else
+#    define I2C_DMA_PRIO     DMA_PRIO_HIGH_SELECT
+#  endif
 #endif
 
 /* Debug ********************************************************************/

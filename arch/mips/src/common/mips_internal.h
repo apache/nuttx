@@ -211,7 +211,7 @@ void weak_function mips_dma_initialize(void);
 #if CONFIG_MM_REGIONS > 1
 void mips_addregion(void);
 #else
-# define mips_addregion()
+#  define mips_addregion()
 #endif
 
 /* Serial output */
@@ -231,7 +231,7 @@ void mips_serialinit(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void mips_netinitialize(void);
 #else
-# define mips_netinitialize()
+#  define mips_netinitialize()
 #endif
 
 /* USB */
@@ -240,8 +240,8 @@ void mips_netinitialize(void);
 void mips_usbinitialize(void);
 void mips_usbuninitialize(void);
 #else
-# define mips_usbinitialize()
-# define mips_usbuninitialize()
+#  define mips_usbinitialize()
+#  define mips_usbuninitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */

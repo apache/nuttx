@@ -72,7 +72,7 @@
  */
 
 #ifndef CONFIG_MISOC_NET_NINTERFACES
-# define CONFIG_MISOC_NET_NINTERFACES 1
+#  define CONFIG_MISOC_NET_NINTERFACES 1
 #endif
 
 /* TX timeout = 1 minute */

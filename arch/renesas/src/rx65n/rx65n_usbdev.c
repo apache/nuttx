@@ -291,12 +291,12 @@ uint8_t g_buffer[64] ;
 
 /* Register operations */
 
-# define rx65n_getreg8(addr)      getreg8(addr)
-# define rx65n_getreg16(addr)     getreg16(addr)
-# define rx65n_getreg32(addr)     getreg32(addr)
-# define rx65n_putreg8(val,addr)  putreg8(val,addr)
-# define rx65n_putreg16(val,addr) putreg16(val,addr)
-# define rx65n_putreg32(val,addr) putreg32(val,addr)
+#  define rx65n_getreg8(addr)      getreg8(addr)
+#  define rx65n_getreg16(addr)     getreg16(addr)
+#  define rx65n_getreg32(addr)     getreg32(addr)
+#  define rx65n_putreg8(val,addr)  putreg8(val,addr)
+#  define rx65n_putreg16(val,addr) putreg16(val,addr)
+#  define rx65n_putreg32(val,addr) putreg32(val,addr)
 
 /* Request queue operations *************************************************/
 

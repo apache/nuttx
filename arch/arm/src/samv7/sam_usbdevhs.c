@@ -455,7 +455,7 @@ static void   sam_dumpep(struct sam_usbdev_s *priv, int epno);
 #else
 static inline uint32_t sam_getreg(uintptr_t regaddr);
 static inline void sam_putreg(uint32_t regval, uintptr_t regaddr);
-# define sam_dumpep(priv,epno)
+#  define sam_dumpep(priv,epno)
 #endif
 
 /* Suspend/Resume Helpers ***************************************************/

@@ -47,7 +47,7 @@
 /* Only NCS0 can support NAND.  The rest is a fantasy */
 
 #if defined(CONFIG_SAM34_EXTNAND)
-  # define CONFIG_SAM34_NCS0_NAND 1
+  #  define CONFIG_SAM34_NCS0_NAND 1
 #else
   # undef CONFIG_SAM34_NCS0_NAND
 #endif

@@ -163,10 +163,10 @@
                                               /* Fast Charge Timer Settings */
 #define BQ2429XR5_CHG_TIMER_SHIFT     1
 #define BQ2429XR5_CHG_TIMER_MASK     (3 << BQ2429XR5_CHG_TIMER_SHIFT)
-# define BQ2429XR5_CHG_TIMER_05hrs   (0 << BQ2429XR5_CHG_TIMER_SHIFT)
-# define BQ2429XR5_CHG_TIMER_08hrs   (1 << BQ2429XR5_CHG_TIMER_SHIFT)
-# define BQ2429XR5_CHG_TIMER_12hrs   (2 << BQ2429XR5_CHG_TIMER_SHIFT)
-# define BQ2429XR5_CHG_TIMER_20hrs   (3 << BQ2429XR5_CHG_TIMER_SHIFT)
+#  define BQ2429XR5_CHG_TIMER_05hrs  (0 << BQ2429XR5_CHG_TIMER_SHIFT)
+#  define BQ2429XR5_CHG_TIMER_08hrs  (1 << BQ2429XR5_CHG_TIMER_SHIFT)
+#  define BQ2429XR5_CHG_TIMER_12hrs  (2 << BQ2429XR5_CHG_TIMER_SHIFT)
+#  define BQ2429XR5_CHG_TIMER_20hrs  (3 << BQ2429XR5_CHG_TIMER_SHIFT)
 #define BQ2429XR5_RESERVED0          (1 << 0)
 
 /* REG06 Boost Voltage/Thermal Regulation Control register */

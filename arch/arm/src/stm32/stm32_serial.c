@@ -216,7 +216,7 @@
                  DMA_CCR_PSIZE_8BITS   | \
                  DMA_CCR_MSIZE_8BITS   | \
                  CONFIG_USART_RXDMAPRIO)
-# endif
+#  endif
 
 #endif  /* SERIAL_HAVE_RXDMA */
 
@@ -634,65 +634,65 @@ static const struct uart_ops_s g_uart_txdma_ops =
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
-# ifdef CONFIG_USART1_RXDMA
+#  ifdef CONFIG_USART1_RXDMA
 static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
-# ifdef CONFIG_USART2_RXDMA
+#  ifdef CONFIG_USART2_RXDMA
 static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_USART3_SERIALDRIVER
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
-# ifdef CONFIG_USART3_RXDMA
+#  ifdef CONFIG_USART3_RXDMA
 static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_UART4_SERIALDRIVER
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
-# ifdef CONFIG_UART4_RXDMA
+#  ifdef CONFIG_UART4_RXDMA
 static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_UART5_SERIALDRIVER
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
-# ifdef CONFIG_UART5_RXDMA
+#  ifdef CONFIG_UART5_RXDMA
 static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_USART6_SERIALDRIVER
 static char g_usart6rxbuffer[CONFIG_USART6_RXBUFSIZE];
 static char g_usart6txbuffer[CONFIG_USART6_TXBUFSIZE];
-# ifdef CONFIG_USART6_RXDMA
+#  ifdef CONFIG_USART6_RXDMA
 static char g_usart6rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_UART7_SERIALDRIVER
 static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
 static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
-# ifdef CONFIG_UART7_RXDMA
+#  ifdef CONFIG_UART7_RXDMA
 static char g_uart7rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32_UART8_SERIALDRIVER
 static char g_uart8rxbuffer[CONFIG_UART8_RXBUFSIZE];
 static char g_uart8txbuffer[CONFIG_UART8_TXBUFSIZE];
-# ifdef CONFIG_UART8_RXDMA
+#  ifdef CONFIG_UART8_RXDMA
 static char g_uart8rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 /* This describes the state of the STM32 USART1 ports. */
@@ -702,9 +702,9 @@ static struct up_dev_s g_usart1priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 1
+#  if CONSOLE_UART == 1
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_USART1_RXBUFSIZE,
@@ -715,15 +715,15 @@ static struct up_dev_s g_usart1priv =
         .size    = CONFIG_USART1_TXBUFSIZE,
         .buffer  = g_usart1txbuffer,
       },
-#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+#  if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART1_RXDMA) && !defined(CONFIG_USART1_TXDMA)
+#  elif defined(CONFIG_USART1_RXDMA) && !defined(CONFIG_USART1_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+#  elif !defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_usart1priv,
     },
 
@@ -732,38 +732,38 @@ static struct up_dev_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-#if defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F302)
+#  if defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F302)
   .apbclock      = STM32_PCLK1_FREQUENCY, /* Errata 2.5.1 */
-#else
+#  else
   .apbclock      = STM32_PCLK2_FREQUENCY,
-#endif
+#  endif
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART1_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART1_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART1_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_USART1_RTS,
-#endif
-#ifdef CONFIG_USART1_TXDMA
+#  endif
+#  ifdef CONFIG_USART1_TXDMA
   .txdma_channel = DMAMAP_USART1_TX,
-#endif
-#ifdef CONFIG_USART1_RXDMA
+#  endif
+#  ifdef CONFIG_USART1_RXDMA
   .rxdma_channel = DMAMAP_USART1_RX,
   .rxfifo        = g_usart1rxfifo,
-#endif
-
-#ifdef CONFIG_USART1_RS485
-  .rs485_dir_gpio = GPIO_USART1_RS485_DIR,
-#  if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_USART1_RS485
+  .rs485_dir_gpio = GPIO_USART1_RS485_DIR,
+#    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -774,9 +774,9 @@ static struct up_dev_s g_usart2priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 2
+#  if CONSOLE_UART == 2
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_USART2_RXBUFSIZE,
@@ -787,15 +787,15 @@ static struct up_dev_s g_usart2priv =
         .size    = CONFIG_USART2_TXBUFSIZE,
         .buffer  = g_usart2txbuffer,
       },
-#if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+#  if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART2_RXDMA) && !defined(CONFIG_USART2_TXDMA)
+#  elif defined(CONFIG_USART2_RXDMA) && !defined(CONFIG_USART2_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+#  elif !defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_usart2priv,
     },
 
@@ -808,30 +808,30 @@ static struct up_dev_s g_usart2priv =
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART2_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART2_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART2_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_USART2_RTS,
-#endif
-#ifdef CONFIG_USART2_TXDMA
+#  endif
+#  ifdef CONFIG_USART2_TXDMA
   .txdma_channel = DMAMAP_USART2_TX,
-#endif
-#ifdef CONFIG_USART2_RXDMA
+#  endif
+#  ifdef CONFIG_USART2_RXDMA
   .rxdma_channel = DMAMAP_USART2_RX,
   .rxfifo        = g_usart2rxfifo,
-#endif
-
-#ifdef CONFIG_USART2_RS485
-  .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
-#  if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_USART2_RS485
+  .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
+#    if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -842,9 +842,9 @@ static struct up_dev_s g_usart3priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 3
+#  if CONSOLE_UART == 3
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_USART3_RXBUFSIZE,
@@ -855,15 +855,15 @@ static struct up_dev_s g_usart3priv =
         .size    = CONFIG_USART3_TXBUFSIZE,
         .buffer  = g_usart3txbuffer,
       },
-#if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
+#  if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART3_RXDMA) && !defined(CONFIG_USART3_TXDMA)
+#  elif defined(CONFIG_USART3_RXDMA) && !defined(CONFIG_USART3_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
+#  elif !defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_usart3priv,
     },
 
@@ -876,30 +876,30 @@ static struct up_dev_s g_usart3priv =
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART3_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART3_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART3_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART3_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART3_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_USART3_RTS,
-#endif
-#ifdef CONFIG_USART3_TXDMA
+#  endif
+#  ifdef CONFIG_USART3_TXDMA
   .txdma_channel = DMAMAP_USART3_TX,
-#endif
-#ifdef CONFIG_USART3_RXDMA
+#  endif
+#  ifdef CONFIG_USART3_RXDMA
   .rxdma_channel = DMAMAP_USART3_RX,
   .rxfifo        = g_usart3rxfifo,
-#endif
-
-#ifdef CONFIG_USART3_RS485
-  .rs485_dir_gpio = GPIO_USART3_RS485_DIR,
-#  if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_USART3_RS485
+  .rs485_dir_gpio = GPIO_USART3_RS485_DIR,
+#    if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -910,9 +910,9 @@ static struct up_dev_s g_uart4priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 4
+#  if CONSOLE_UART == 4
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_UART4_RXBUFSIZE,
@@ -923,15 +923,15 @@ static struct up_dev_s g_uart4priv =
         .size    = CONFIG_UART4_TXBUFSIZE,
         .buffer  = g_uart4txbuffer,
       },
-#if defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+#  if defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
+#  elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+#  elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_uart4priv,
     },
 
@@ -939,35 +939,35 @@ static struct up_dev_s g_uart4priv =
   .parity        = CONFIG_UART4_PARITY,
   .bits          = CONFIG_UART4_BITS,
   .stopbits2     = CONFIG_UART4_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART4_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART4_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_UART4_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_UART4_RTS,
-#endif
+#  endif
   .baud          = CONFIG_UART4_BAUD,
   .apbclock      = STM32_PCLK1_FREQUENCY,
   .usartbase     = STM32_UART4_BASE,
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
-#ifdef CONFIG_UART4_TXDMA
+#  ifdef CONFIG_UART4_TXDMA
   .txdma_channel = DMAMAP_UART4_TX,
-#endif
-#ifdef CONFIG_UART4_RXDMA
+#  endif
+#  ifdef CONFIG_UART4_RXDMA
   .rxdma_channel = DMAMAP_UART4_RX,
   .rxfifo        = g_uart4rxfifo,
-#endif
-
-#ifdef CONFIG_UART4_RS485
-  .rs485_dir_gpio = GPIO_UART4_RS485_DIR,
-#  if (CONFIG_UART4_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_UART4_RS485
+  .rs485_dir_gpio = GPIO_UART4_RS485_DIR,
+#    if (CONFIG_UART4_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -978,9 +978,9 @@ static struct up_dev_s g_uart5priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 5
+#  if CONSOLE_UART == 5
       .isconsole = true,
-#endif
+#  endif
       .recv     =
       {
         .size   = CONFIG_UART5_RXBUFSIZE,
@@ -991,15 +991,15 @@ static struct up_dev_s g_uart5priv =
         .size   = CONFIG_UART5_TXBUFSIZE,
         .buffer = g_uart5txbuffer,
       },
-#if defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
+#  if defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART5_RXDMA) && !defined(CONFIG_UART5_TXDMA)
+#  elif defined(CONFIG_UART5_RXDMA) && !defined(CONFIG_UART5_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
+#  elif !defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv     = &g_uart5priv,
     },
 
@@ -1007,35 +1007,35 @@ static struct up_dev_s g_uart5priv =
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
   .stopbits2      = CONFIG_UART5_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART5_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART5_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_UART5_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_UART5_RTS,
-#endif
+#  endif
   .baud           = CONFIG_UART5_BAUD,
   .apbclock       = STM32_PCLK1_FREQUENCY,
   .usartbase      = STM32_UART5_BASE,
   .tx_gpio        = GPIO_UART5_TX,
   .rx_gpio        = GPIO_UART5_RX,
-#ifdef CONFIG_UART5_TXDMA
+#  ifdef CONFIG_UART5_TXDMA
   .txdma_channel = DMAMAP_UART5_TX,
-#endif
-#ifdef CONFIG_UART5_RXDMA
+#  endif
+#  ifdef CONFIG_UART5_RXDMA
   .rxdma_channel = DMAMAP_UART5_RX,
   .rxfifo        = g_uart5rxfifo,
-#endif
-
-#ifdef CONFIG_UART5_RS485
-  .rs485_dir_gpio = GPIO_UART5_RS485_DIR,
-#  if (CONFIG_UART5_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_UART5_RS485
+  .rs485_dir_gpio = GPIO_UART5_RS485_DIR,
+#    if (CONFIG_UART5_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -1046,9 +1046,9 @@ static struct up_dev_s g_usart6priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 6
+#  if CONSOLE_UART == 6
       .isconsole = true,
-#endif
+#  endif
       .recv     =
       {
         .size   = CONFIG_USART6_RXBUFSIZE,
@@ -1059,15 +1059,15 @@ static struct up_dev_s g_usart6priv =
         .size   = CONFIG_USART6_TXBUFSIZE,
         .buffer = g_usart6txbuffer,
       },
-#if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
+#  if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART6_RXDMA) && !defined(CONFIG_USART6_TXDMA)
+#  elif defined(CONFIG_USART6_RXDMA) && !defined(CONFIG_USART6_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
+#  elif !defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv     = &g_usart6priv,
     },
 
@@ -1080,30 +1080,30 @@ static struct up_dev_s g_usart6priv =
   .usartbase      = STM32_USART6_BASE,
   .tx_gpio        = GPIO_USART6_TX,
   .rx_gpio        = GPIO_USART6_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART6_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART6_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_USART6_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART6_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART6_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_USART6_RTS,
-#endif
-#ifdef CONFIG_USART6_TXDMA
+#  endif
+#  ifdef CONFIG_USART6_TXDMA
   .txdma_channel = DMAMAP_USART6_TX,
-#endif
-#ifdef CONFIG_USART6_RXDMA
+#  endif
+#  ifdef CONFIG_USART6_RXDMA
   .rxdma_channel = DMAMAP_USART6_RX,
   .rxfifo        = g_usart6rxfifo,
-#endif
-
-#ifdef CONFIG_USART6_RS485
-  .rs485_dir_gpio = GPIO_USART6_RS485_DIR,
-#  if (CONFIG_USART6_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_USART6_RS485
+  .rs485_dir_gpio = GPIO_USART6_RS485_DIR,
+#    if (CONFIG_USART6_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -1114,9 +1114,9 @@ static struct up_dev_s g_uart7priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 7
+#  if CONSOLE_UART == 7
       .isconsole = true,
-#endif
+#  endif
       .recv     =
       {
         .size   = CONFIG_UART7_RXBUFSIZE,
@@ -1127,15 +1127,15 @@ static struct up_dev_s g_uart7priv =
         .size   = CONFIG_UART7_TXBUFSIZE,
         .buffer = g_uart7txbuffer,
       },
-#if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
+#  if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART7_RXDMA) && !defined(CONFIG_UART7_TXDMA)
+#  elif defined(CONFIG_UART7_RXDMA) && !defined(CONFIG_UART7_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
+#  elif !defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv     = &g_uart7priv,
     },
 
@@ -1148,30 +1148,30 @@ static struct up_dev_s g_uart7priv =
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART7_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART7_RTS,
-#endif
-#ifdef CONFIG_UART7_TXDMA
+#  endif
+#  ifdef CONFIG_UART7_TXDMA
   .txdma_channel = DMAMAP_UART7_TX,
-#endif
-#ifdef CONFIG_UART7_RXDMA
+#  endif
+#  ifdef CONFIG_UART7_RXDMA
   .rxdma_channel = DMAMAP_UART7_RX,
   .rxfifo        = g_uart7rxfifo,
-#endif
-
-#ifdef CONFIG_UART7_RS485
-  .rs485_dir_gpio = GPIO_UART7_RS485_DIR,
-#  if (CONFIG_UART7_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_UART7_RS485
+  .rs485_dir_gpio = GPIO_UART7_RS485_DIR,
+#    if (CONFIG_UART7_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -1182,9 +1182,9 @@ static struct up_dev_s g_uart8priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 8
+#  if CONSOLE_UART == 8
       .isconsole = true,
-#endif
+#  endif
       .recv     =
       {
         .size   = CONFIG_UART8_RXBUFSIZE,
@@ -1195,15 +1195,15 @@ static struct up_dev_s g_uart8priv =
         .size   = CONFIG_UART8_TXBUFSIZE,
         .buffer = g_uart8txbuffer,
       },
-#if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
+#  if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
       .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART8_RXDMA) && !defined(CONFIG_UART8_TXDMA)
+#  elif defined(CONFIG_UART8_RXDMA) && !defined(CONFIG_UART8_TXDMA)
       .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
+#  elif !defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
       .ops       = &g_uart_txdma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv     = &g_uart8priv,
     },
 
@@ -1216,30 +1216,30 @@ static struct up_dev_s g_uart8priv =
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = GPIO_UART8_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = GPIO_UART8_RTS,
-#endif
-#ifdef CONFIG_UART8_TXDMA
+#  endif
+#  ifdef CONFIG_UART8_TXDMA
   .txdma_channel = DMAMAP_UART8_TX,
-#endif
-#ifdef CONFIG_UART8_RXDMA
+#  endif
+#  ifdef CONFIG_UART8_RXDMA
   .rxdma_channel = DMAMAP_UART8_RX,
   .rxfifo        = g_uart8rxfifo,
-#endif
-
-#ifdef CONFIG_UART8_RS485
-  .rs485_dir_gpio = GPIO_UART8_RS485_DIR,
-#  if (CONFIG_UART8_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_UART8_RS485
+  .rs485_dir_gpio = GPIO_UART8_RS485_DIR,
+#    if (CONFIG_UART8_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 

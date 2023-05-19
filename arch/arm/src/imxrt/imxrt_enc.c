@@ -77,7 +77,7 @@
 #endif
 
 #ifndef CONFIG_ENC1_HNE
-# define CONFIG_ENC1_HNE 0
+#  define CONFIG_ENC1_HNE 0
 #endif
 
 #ifndef CONFIG_ENC1_XIE
@@ -89,7 +89,7 @@
 #endif
 
 #ifndef CONFIG_ENC1_XNE
-# define CONFIG_ENC1_XNE 0
+#  define CONFIG_ENC1_XNE 0
 #endif
 
 #ifndef CONFIG_ENC1_MOD
@@ -97,7 +97,7 @@
 #endif
 
 #ifndef CONFIG_ENC1_MODULUS
-# define CONFIG_ENC1_MODULUS 0
+#  define CONFIG_ENC1_MODULUS 0
 #endif
 
 #if defined(CONFIG_DEBUG_SENSORS)
@@ -122,7 +122,7 @@
 #endif
 
 #ifndef CONFIG_ENC2_HNE
-# define CONFIG_ENC2_HNE 0
+#  define CONFIG_ENC2_HNE 0
 #endif
 
 #ifndef CONFIG_ENC2_XIE
@@ -134,7 +134,7 @@
 #endif
 
 #ifndef CONFIG_ENC2_XNE
-# define CONFIG_ENC2_XNE 0
+#  define CONFIG_ENC2_XNE 0
 #endif
 
 #ifndef CONFIG_ENC2_MOD
@@ -142,7 +142,7 @@
 #endif
 
 #ifndef CONFIG_ENC2_MODULUS
-# define CONFIG_ENC2_MODULUS 0
+#  define CONFIG_ENC2_MODULUS 0
 #endif
 
 #if defined(CONFIG_DEBUG_SENSORS)
@@ -167,7 +167,7 @@
 #endif
 
 #ifndef CONFIG_ENC3_HNE
-# define CONFIG_ENC3_HNE 0
+#  define CONFIG_ENC3_HNE 0
 #endif
 
 #ifndef CONFIG_ENC3_XIE
@@ -179,7 +179,7 @@
 #endif
 
 #ifndef CONFIG_ENC3_XNE
-# define CONFIG_ENC3_XNE 0
+#  define CONFIG_ENC3_XNE 0
 #endif
 
 #ifndef CONFIG_ENC3_MOD
@@ -187,7 +187,7 @@
 #endif
 
 #ifndef CONFIG_ENC3_MODULUS
-# define CONFIG_ENC3_MODULUS 0
+#  define CONFIG_ENC3_MODULUS 0
 #endif
 
 #if defined(CONFIG_DEBUG_SENSORS)
@@ -212,7 +212,7 @@
 #endif
 
 #ifndef CONFIG_ENC4_HNE
-# define CONFIG_ENC4_HNE 0
+#  define CONFIG_ENC4_HNE 0
 #endif
 
 #ifndef CONFIG_ENC4_XIE
@@ -224,7 +224,7 @@
 #endif
 
 #ifndef CONFIG_ENC4_XNE
-# define CONFIG_ENC4_XNE 0
+#  define CONFIG_ENC4_XNE 0
 #endif
 
 #ifndef CONFIG_ENC4_MOD
@@ -232,7 +232,7 @@
 #endif
 
 #ifndef CONFIG_ENC4_MODULUS
-# define CONFIG_ENC4_MODULUS 0
+#  define CONFIG_ENC4_MODULUS 0
 #endif
 
 #if defined(CONFIG_DEBUG_SENSORS)

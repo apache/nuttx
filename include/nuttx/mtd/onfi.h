@@ -152,7 +152,7 @@ bool onfi_embeddedecc(FAR const struct onfi_pgparam_s *onfi,
                       uintptr_t cmdaddr, uintptr_t addraddr,
                       uintptr_t dataaddr, bool enable);
 #else
-# define onfi_embeddedecc(o,c,a,d,e) (false)
+#  define onfi_embeddedecc(o,c,a,d,e) (false)
 #endif
 
 /****************************************************************************

@@ -72,7 +72,7 @@
  */
 
 #ifndef CONFIG_NET_SKELETON_NINTERFACES
-# define CONFIG_NET_SKELETON_NINTERFACES 1
+#  define CONFIG_NET_SKELETON_NINTERFACES 1
 #endif
 
 /* TX timeout = 1 minute */

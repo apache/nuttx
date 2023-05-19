@@ -58,7 +58,7 @@
 #  define TRNG_CR_DISABLE         (0)       /* Bit 0:  0=Disables the TRNG */
 #define TRNG_CR_KEY_SHIFT         (8)       /* Bits 8-31: Security key */
 #define TRNG_CR_KEY_MASK          (0xffffff << TRNG_CR_KEY_SHIFT)
-# define TRNG_CR_KEY              (0x524e47 << TRNG_CR_KEY_SHIFT) /* RNG in ASCII */
+#  define TRNG_CR_KEY             (0x524e47 << TRNG_CR_KEY_SHIFT) /* RNG in ASCII */
 
 /* Interrupt Enable Register,
  * Interrupt Disable Register, Interrupt Mask Register,

@@ -55,11 +55,11 @@
 #define EXCCAUSE_ILLEGAL           0  /* Illegal Instruction */
 #define EXCCAUSE_SYSCALL           1  /* System Call (SYSCALL instruction) */
 #define EXCCAUSE_INSTR_ERROR       2  /* Instruction Fetch Error */
-# define EXCCAUSE_IFETCHERROR      2  /* (backward compatibility macro, deprecated, avoid) */
+#  define EXCCAUSE_IFETCHERROR     2  /* (backward compatibility macro, deprecated, avoid) */
 #define EXCCAUSE_LOAD_STORE_ERROR  3  /* Load Store Error */
-# define EXCCAUSE_LOADSTOREERROR   3  /* (backward compatibility macro, deprecated, avoid) */
+#  define EXCCAUSE_LOADSTOREERROR  3  /* (backward compatibility macro, deprecated, avoid) */
 #define EXCCAUSE_LEVEL1_INTERRUPT  4  /* Level 1 Interrupt */
-# define EXCCAUSE_LEVEL1INTERRUPT  4  /* (backward compatibility macro, deprecated, avoid) */
+#  define EXCCAUSE_LEVEL1INTERRUPT 4  /* (backward compatibility macro, deprecated, avoid) */
 #define EXCCAUSE_ALLOCA            5  /* Stack Extension Assist (MOVSP instruction) for alloca */
 #define EXCCAUSE_DIVIDE_BY_ZERO    6  /* Integer Divide by Zero */
 #define EXCCAUSE_SPECULATION       7  /* Use of Failed Speculative Access (not implemented) */

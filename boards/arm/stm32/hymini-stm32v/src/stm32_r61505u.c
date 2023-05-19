@@ -398,10 +398,10 @@ static inline void lcd_gramselect(void)
 static void lcd_setcursor(unsigned int x, unsigned int y)
 {
 #if defined(CONFIG_LCD_PORTRAIT) || defined (CONFIG_LCD_RPORTRAIT)
-# if defined (CONFIG_LCD_RPORTRAIT)
+#  if defined (CONFIG_LCD_RPORTRAIT)
   x = (LCD_XRES - 1) - x;
   y = (LCD_YRES - 1) - y;
-# endif
+#  endif
   write_reg(0x20, x); /* Row */
   write_reg(0x21, y); /* Line */
 #endif

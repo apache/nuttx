@@ -56,9 +56,9 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
+#  define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
-# define elf_dumpbuffer(m,b,n)
+#  define elf_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -161,7 +161,7 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
     }
 }
 #else
-# define elf_dumploadinfo(i)
+#  define elf_dumploadinfo(i)
 #endif
 
 /****************************************************************************
@@ -202,7 +202,7 @@ static void elf_dumpentrypt(FAR struct binary_s *binp,
 #endif
 }
 #else
-# define elf_dumpentrypt(b,l)
+#  define elf_dumpentrypt(b,l)
 #endif
 
 /****************************************************************************

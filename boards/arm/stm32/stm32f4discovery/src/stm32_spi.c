@@ -89,12 +89,12 @@ void weak_function stm32_spidev_initialize(void)
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
     defined(CONFIG_LCD_SSD1351)
   stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
-# if defined(CONFIG_LCD_UG2864AMBAG01)
+#  if defined(CONFIG_LCD_UG2864AMBAG01)
   stm32_configgpio(GPIO_OLED_A0);    /* OLED Command/Data */
-# endif
-# if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
+#  endif
+#  if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
   stm32_configgpio(GPIO_OLED_DC);    /* OLED Command/Data */
-# endif
+#  endif
 #endif
 }
 
@@ -316,12 +316,12 @@ int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *       registers."
        */
 
-# if defined(CONFIG_LCD_UG2864AMBAG01)
+#  if defined(CONFIG_LCD_UG2864AMBAG01)
       stm32_gpiowrite(GPIO_OLED_A0, !cmd);
-# endif
-# if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
+#  endif
+#  if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
       stm32_gpiowrite(GPIO_OLED_DC, !cmd);
-# endif
+#  endif
       return OK;
     }
 #endif

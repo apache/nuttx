@@ -151,7 +151,7 @@ static void qspi_resetregisters(void);
 #if defined(CONFIG_DEBUG_SPI_INFO) && defined(CONFIG_DEBUG_GPIO)
 static void     qspi_dumpgpioconfig(const char *msg);
 #else
-# define        qspi_dumpgpioconfig(msg)
+#  define       qspi_dumpgpioconfig(msg)
 #endif
 
 static inline uint32_t qspi_isbusy(void);

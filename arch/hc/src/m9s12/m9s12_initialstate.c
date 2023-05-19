@@ -113,13 +113,13 @@ void up_initial_state(struct tcb_s *tcb)
    *   Bit 7: S STOP instruction control bit
    */
 
-# ifdef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
   /* Disable STOP, Mask I- and Z- interrupts */
 
   xcp->regs[REG_CCR]   = HCS12_CCR_S | HCS12_CCR_X | HCS12_CCR_I;
-# else
+#else
   /* Disable STOP, Enable I- and Z-interrupts */
 
   xcp->regs[REG_CCR]   = HCS12_CCR_S;
-# endif
+#endif
 }

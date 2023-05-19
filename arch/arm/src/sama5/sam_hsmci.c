@@ -458,7 +458,7 @@ struct sam_dev_s
 static bool sam_checkreg(struct sam_dev_s *priv, bool wr,
               uint32_t value, uint32_t address);
 #else
-# define    sam_checkreg(priv,wr,value,address) (false)
+#  define   sam_checkreg(priv,wr,value,address) (false)
 #endif
 
 static inline uint32_t sam_getreg(struct sam_dev_s *priv,

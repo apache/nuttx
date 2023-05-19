@@ -285,7 +285,7 @@ uint64_t *arm64_doirq(int irq, uint64_t *regs);
 #ifdef CONFIG_PAGING
 void arm64_pginitialize(void);
 #else /* CONFIG_PAGING */
-# define arm64_pginitialize()
+#  define arm64_pginitialize()
 #endif /* CONFIG_PAGING */
 
 uint64_t * arm64_syscall_switch(uint64_t *regs);
@@ -335,7 +335,7 @@ void weak_function arm64_dma_initialize(void);
 #if CONFIG_MM_REGIONS > 1
 void arm64_addregion(void);
 #else
-# define arm64_addregion()
+#  define arm64_addregion()
 #endif
 
 /* Networking */
@@ -354,7 +354,7 @@ void arm64_addregion(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void arm64_netinitialize(void);
 #else
-# define arm64_netinitialize()
+#  define arm64_netinitialize()
 #endif
 
 /* USB */
@@ -363,8 +363,8 @@ void arm64_netinitialize(void);
 void arm64_usbinitialize(void);
 void arm64_usbuninitialize(void);
 #else
-# define arm64_usbinitialize()
-# define arm64_usbuninitialize()
+#  define arm64_usbinitialize()
+#  define arm64_usbuninitialize()
 #endif
 
 /* Debug */

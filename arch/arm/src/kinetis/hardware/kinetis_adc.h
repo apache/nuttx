@@ -183,10 +183,10 @@
 
 #define ADC_CFG1_MODE_SHIFT       (2)       /* Bits 2-3: Conversion mode selection */
 #define ADC_CFG1_MODE_MASK        (3 << ADC_CFG1_MODE_SHIFT)
-# define ADC_CFG1_MODE_89BIT      (0 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 8-bit; DIFF=1 9-bit */
-# define ADC_CFG1_MODE_1213BIT    (1 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 12-bit; DIFF=1 13-bit */
-# define ADC_CFG1_MODE_1011BIT    (2 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 10-bit; DIFF=1 11-bit */
-# define ADC_CFG1_MODE_1616BIT    (3 << ADC_CFG1_MODE_SHIFT) /*  DIFF=0 16-bit; DIFF=1 16-bit */
+#  define ADC_CFG1_MODE_89BIT     (0 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 8-bit; DIFF=1 9-bit */
+#  define ADC_CFG1_MODE_1213BIT   (1 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 12-bit; DIFF=1 13-bit */
+#  define ADC_CFG1_MODE_1011BIT   (2 << ADC_CFG1_MODE_SHIFT) /* DIFF=0 10-bit; DIFF=1 11-bit */
+#  define ADC_CFG1_MODE_1616BIT   (3 << ADC_CFG1_MODE_SHIFT) /*  DIFF=0 16-bit; DIFF=1 16-bit */
 
 #define ADC_CFG1_ADLSMP           (1 << 4)  /* Bit 4:  Sample time configuration */
 #define ADC_CFG1_ADIV_SHIFT       (5)       /* Bits 5-6: Clock divide select */

@@ -48,7 +48,7 @@
 #define BASE_BAUD     115200
 
 #if defined(CONFIG_UART_IRDA_HWFLOWCONTROL) || defined(CONFIG_UART_MODEM_HWFLOWCONTROL)
-# define CONFIG_UART_HWFLOWCONTROL
+#  define CONFIG_UART_HWFLOWCONTROL
 #endif
 
 /****************************************************************************
@@ -203,13 +203,13 @@ static uart_dev_t g_modemport =
 /* Now, which one with be tty0/console and which tty1? */
 
 #ifdef CONFIG_SERIAL_IRDA_CONSOLE
-# define CONSOLE_DEV     g_irdaport
-# define TTYS0_DEV       g_irdaport
-# define TTYS1_DEV       g_modemport
+#  define CONSOLE_DEV    g_irdaport
+#  define TTYS0_DEV      g_irdaport
+#  define TTYS1_DEV      g_modemport
 #else
-# define CONSOLE_DEV     g_modemport
-# define TTYS0_DEV       g_modemport
-# define TTYS1_DEV       g_irdaport
+#  define CONSOLE_DEV    g_modemport
+#  define TTYS0_DEV      g_modemport
+#  define TTYS1_DEV      g_irdaport
 #endif
 
 /****************************************************************************

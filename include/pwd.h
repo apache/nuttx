@@ -35,9 +35,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_PASSWD_LINESIZE
-# define NSS_BUFLEN_PASSWD CONFIG_LIBC_PASSWD_LINESIZE
+#  define NSS_BUFLEN_PASSWD CONFIG_LIBC_PASSWD_LINESIZE
 #else
-# define NSS_BUFLEN_PASSWD 256
+#  define NSS_BUFLEN_PASSWD 256
 #endif
 
 /****************************************************************************
