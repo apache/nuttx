@@ -1090,18 +1090,18 @@ void arm_serialinit(void)
 
 #ifdef TTYS0_DEV
   uart_register("/dev/ttyS0", &TTYS0_DEV);
-# ifdef TTYS1_DEV
+#  ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
-#  ifdef TTYS2_DEV
+#    ifdef TTYS2_DEV
   uart_register("/dev/ttyS2", &TTYS2_DEV);
-#    ifdef TTYS3_DEV
+#      ifdef TTYS3_DEV
   uart_register("/dev/ttyS3", &TTYS2_DEV);
-#      ifdef TTYS4_DEV
+#        ifdef TTYS4_DEV
   uart_register("/dev/ttyS4", &TTYS2_DEV);
+#        endif
 #      endif
 #    endif
 #  endif
-# endif
 #endif
 }
 

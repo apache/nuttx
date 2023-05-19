@@ -274,50 +274,50 @@
 
 /* Sizes and limits */
 
-# if CONFIG_FAT_MAXFNAME > CONFIG_NAME_MAX && CONFIG_NAME_MAX >= 12
-#   warning CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
-#   undef  CONFIG_FAT_MAXFNAME
-#   define CONFIG_FAT_MAXFNAME CONFIG_NAME_MAX
-# endif
+#  if CONFIG_FAT_MAXFNAME > CONFIG_NAME_MAX && CONFIG_NAME_MAX >= 12
+#    warning CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
+#    undef  CONFIG_FAT_MAXFNAME
+#    define CONFIG_FAT_MAXFNAME CONFIG_NAME_MAX
+#  endif
 
-# if CONFIG_FAT_MAXFNAME < 12
-#   undef  CONFIG_FAT_MAXFNAME
-#   define CONFIG_FAT_MAXFNAME 12
-# endif
+#  if CONFIG_FAT_MAXFNAME < 12
+#    undef  CONFIG_FAT_MAXFNAME
+#    define CONFIG_FAT_MAXFNAME 12
+#  endif
 
-# ifndef CONFIG_FAT_MAXFNAME   /* The maximum support filename can be limited */
-#   define LDIR_MAXFNAME   255 /* Max unicode characters in file name */
-# elif CONFIG_FAT_MAXFNAME <= 255
-#   define LDIR_MAXFNAME  CONFIG_FAT_MAXFNAME
-# else
-#   error "Illegal value for CONFIG_FAT_MAXFNAME"
-# endif
+#  ifndef CONFIG_FAT_MAXFNAME   /* The maximum support filename can be limited */
+#    define LDIR_MAXFNAME   255 /* Max unicode characters in file name */
+#  elif CONFIG_FAT_MAXFNAME <= 255
+#    define LDIR_MAXFNAME  CONFIG_FAT_MAXFNAME
+#  else
+#    error "Illegal value for CONFIG_FAT_MAXFNAME"
+#  endif
 
-# define LDIR_MAXLFNCHARS   13  /* Max unicode characters in one LFN entry */
-# define LDIR_MAXLFNS       20  /* Max number of LFN entries */
+#  define LDIR_MAXLFNCHARS  13  /* Max unicode characters in one LFN entry */
+#  define LDIR_MAXLFNS      20  /* Max number of LFN entries */
 
 /* LFN directory entry offsets */
 
-# define LDIR_SEQ            0  /*  1@ 0: Sequence number */
-# define LDIR_WCHAR1_5       1  /* 10@ 1: File name characters 1-5 (5 Unicode characters) */
-# define LDIR_ATTRIBUTES    11  /*  1@11: File attributes (always 0x0f) */
-# define LDIR_NTRES         12  /*  1@12: Reserved for use by NT  (always 0x00) */
-# define LDIR_CHECKSUM      13  /*  1@13: Checksum of the DOS filename */
-# define LDIR_WCHAR6_11     14  /* 12@14: File name characters 6-11 (6 Unicode characters) */
-# define LDIR_FSTCLUSTLO    26  /*  2@26: First cluster (always 0x0000) */
-# define LDIR_WCHAR12_13    28  /*  4@28: File name characters 12-13 (2 Unicode characters) */
+#  define LDIR_SEQ           0  /*  1@ 0: Sequence number */
+#  define LDIR_WCHAR1_5      1  /* 10@ 1: File name characters 1-5 (5 Unicode characters) */
+#  define LDIR_ATTRIBUTES   11  /*  1@11: File attributes (always 0x0f) */
+#  define LDIR_NTRES        12  /*  1@12: Reserved for use by NT  (always 0x00) */
+#  define LDIR_CHECKSUM     13  /*  1@13: Checksum of the DOS filename */
+#  define LDIR_WCHAR6_11    14  /* 12@14: File name characters 6-11 (6 Unicode characters) */
+#  define LDIR_FSTCLUSTLO   26  /*  2@26: First cluster (always 0x0000) */
+#  define LDIR_WCHAR12_13   28  /*  4@28: File name characters 12-13 (2 Unicode characters) */
 
 /* LFN sequence number and allocation status */
 
-# define LDIR0_EMPTY       DIR0_EMPTY    /* The directory entry is empty */
-# define LDIR0_ALLEMPTY    DIR0_ALLEMPTY /* This entry and all following are empty */
-# define LDIR0_E5          DIR0_E5       /* The actual value is 0xe5 */
-# define LDIR0_LAST        0x40          /* Last LFN in file name (appears first) */
-# define LDIR0_SEQ_MASK    0x1f          /* Mask for sequence number (1-20) */
+#  define LDIR0_EMPTY      DIR0_EMPTY    /* The directory entry is empty */
+#  define LDIR0_ALLEMPTY   DIR0_ALLEMPTY /* This entry and all following are empty */
+#  define LDIR0_E5         DIR0_E5       /* The actual value is 0xe5 */
+#  define LDIR0_LAST       0x40          /* Last LFN in file name (appears first) */
+#  define LDIR0_SEQ_MASK   0x1f          /* Mask for sequence number (1-20) */
 
 /* The LFN entry attribute */
 
-# define LDDIR_LFNATTR     0x0f
+#  define LDDIR_LFNATTR    0x0f
 #endif
 
 /* File system types */
@@ -385,17 +385,17 @@
 
 /* Access to data in raw sector data */
 
-#define UBYTE_VAL(p,o)            (((uint8_t*)(p))[o])
-#define UBYTE_PTR(p,o)            &UBYTE_VAL(p,o)
-#define UBYTE_PUT(p,o,v)          (UBYTE_VAL(p,o)=(uint8_t)(v))
+#define UBYTE_VAL(p,o)              (((uint8_t*)(p))[o])
+#define UBYTE_PTR(p,o)              &UBYTE_VAL(p,o)
+#define UBYTE_PUT(p,o,v)            (UBYTE_VAL(p,o)=(uint8_t)(v))
 
-#define UINT16_PTR(p,o)           ((uint16_t*)UBYTE_PTR(p,o))
-#define UINT16_VAL(p,o)           (*UINT16_PTR(p,o))
-#define UINT16_PUT(p,o,v)         (UINT16_VAL(p,o)=(uint16_t)(v))
+#define UINT16_PTR(p,o)             ((uint16_t*)UBYTE_PTR(p,o))
+#define UINT16_VAL(p,o)             (*UINT16_PTR(p,o))
+#define UINT16_PUT(p,o,v)           (UINT16_VAL(p,o)=(uint16_t)(v))
 
-#define UINT32_PTR(p,o)           ((uint32_t*)UBYTE_PTR(p,o))
-#define UINT32_VAL(p,o)           (*UINT32_PTR(p,o))
-#define UINT32_PUT(p,o,v)         (UINT32_VAL(p,o)=(uint32_t)(v))
+#define UINT32_PTR(p,o)             ((uint32_t*)UBYTE_PTR(p,o))
+#define UINT32_VAL(p,o)             (*UINT32_PTR(p,o))
+#define UINT32_PUT(p,o,v)           (UINT32_VAL(p,o)=(uint32_t)(v))
 
 /* Regardless of the endian-ness of the target or alignment of the data, no
  * special operations are required for byte, string or byte array accesses.
@@ -403,70 +403,70 @@
  * accessed byte-by-byte for big-endian targets.
  */
 
-#define MBR_GETSECPERCLUS(p)      UBYTE_VAL(p,MBR_SECPERCLUS)
-#define MBR_GETNUMFATS(p)         UBYTE_VAL(p,MBR_NUMFATS)
-#define MBR_GETMEDIA(p)           UBYTE_VAL(p,MBR_MEDIA)
-#define MBR_GETDRVNUM16(p)        UBYTE_VAL(p,MBR16_DRVNUM)
-#define MBR_GETDRVNUM32(p)        UBYTE_VAL(p,MBR32_DRVNUM)
-#define MBR_GETBOOTSIG16(p)       UBYTE_VAL(p,MBR16_BOOTSIG)
-#define MBR_GETBOOTSIG32(p)       UBYTE_VAL(p,MBR32_BOOTSIG)
+#define MBR_GETSECPERCLUS(p)        UBYTE_VAL(p,MBR_SECPERCLUS)
+#define MBR_GETNUMFATS(p)           UBYTE_VAL(p,MBR_NUMFATS)
+#define MBR_GETMEDIA(p)             UBYTE_VAL(p,MBR_MEDIA)
+#define MBR_GETDRVNUM16(p)          UBYTE_VAL(p,MBR16_DRVNUM)
+#define MBR_GETDRVNUM32(p)          UBYTE_VAL(p,MBR32_DRVNUM)
+#define MBR_GETBOOTSIG16(p)         UBYTE_VAL(p,MBR16_BOOTSIG)
+#define MBR_GETBOOTSIG32(p)         UBYTE_VAL(p,MBR32_BOOTSIG)
 
-#define FBR_GETSECPERCLUS(p)      UBYTE_VAL(p,FBR_SECPERCLUS)
-#define FBR_GETNUMFATS(p)         UBYTE_VAL(p,FBR_NUMFATS)
-#define FBR_GETMEDIA(p)           UBYTE_VAL(p,FBR_MEDIA)
-#define FBR_GETDRVNUM16(p)        UBYTE_VAL(p,FBR16_DRVNUM)
-#define FBR_GETDRVNUM32(p)        UBYTE_VAL(p,FBR32_DRVNUM)
-#define FBR_GETBOOTSIG16(p)       UBYTE_VAL(p,FBR16_BOOTSIG)
-#define FBR_GETBOOTSIG32(p)       UBYTE_VAL(p,FBR32_BOOTSIG)
+#define FBR_GETSECPERCLUS(p)        UBYTE_VAL(p,FBR_SECPERCLUS)
+#define FBR_GETNUMFATS(p)           UBYTE_VAL(p,FBR_NUMFATS)
+#define FBR_GETMEDIA(p)             UBYTE_VAL(p,FBR_MEDIA)
+#define FBR_GETDRVNUM16(p)          UBYTE_VAL(p,FBR16_DRVNUM)
+#define FBR_GETDRVNUM32(p)          UBYTE_VAL(p,FBR32_DRVNUM)
+#define FBR_GETBOOTSIG16(p)         UBYTE_VAL(p,FBR16_BOOTSIG)
+#define FBR_GETBOOTSIG32(p)         UBYTE_VAL(p,FBR32_BOOTSIG)
 
-#define PART_GETTYPE(n,p)         UBYTE_VAL(p,PART_ENTRY(n)+PART_TYPE)
-#define PART1_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY1+PART_TYPE)
-#define PART2_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY2+PART_TYPE)
-#define PART3_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY3+PART_TYPE)
-#define PART4_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY4+PART_TYPE)
+#define PART_GETTYPE(n,p)           UBYTE_VAL(p,PART_ENTRY(n)+PART_TYPE)
+#define PART1_GETTYPE(p)            UBYTE_VAL(p,PART_ENTRY1+PART_TYPE)
+#define PART2_GETTYPE(p)            UBYTE_VAL(p,PART_ENTRY2+PART_TYPE)
+#define PART3_GETTYPE(p)            UBYTE_VAL(p,PART_ENTRY3+PART_TYPE)
+#define PART4_GETTYPE(p)            UBYTE_VAL(p,PART_ENTRY4+PART_TYPE)
 
-#define DIR_GETATTRIBUTES(p)      UBYTE_VAL(p,DIR_ATTRIBUTES)
-#define DIR_GETNTRES(p)           UBYTE_VAL(p,DIR_NTRES)
-#define DIR_GETCRTTIMETENTH(p)    UBYTE_VAL(p,DIR_CRTTIMETENTH)
+#define DIR_GETATTRIBUTES(p)        UBYTE_VAL(p,DIR_ATTRIBUTES)
+#define DIR_GETNTRES(p)             UBYTE_VAL(p,DIR_NTRES)
+#define DIR_GETCRTTIMETENTH(p)      UBYTE_VAL(p,DIR_CRTTIMETENTH)
 
 #ifdef CONFIG_FAT_LFN
-# define LDIR_GETSEQ(p)           UBYTE_VAL(p,LDIR_SEQ)
-# define LDIR_GETATTRIBUTES(p)    UBYTE_VAL(p,LDIR_ATTRIBUTES)
-# define LDIR_GETNTRES(p)         UBYTE_VAL(p,LDIR_NTRES)
-# define LDIR_GETCHECKSUM(p)      UBYTE_VAL(p,LDIR_CHECKSUM)
+#  define LDIR_GETSEQ(p)            UBYTE_VAL(p,LDIR_SEQ)
+#  define LDIR_GETATTRIBUTES(p)     UBYTE_VAL(p,LDIR_ATTRIBUTES)
+#  define LDIR_GETNTRES(p)          UBYTE_VAL(p,LDIR_NTRES)
+#  define LDIR_GETCHECKSUM(p)       UBYTE_VAL(p,LDIR_CHECKSUM)
 #endif
 
-#define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,MBR_SECPERCLUS,v)
-#define MBR_PUTNUMFATS(p,v)       UBYTE_PUT(p,MBR_NUMFATS,v)
-#define MBR_PUTMEDIA(p,v)         UBYTE_PUT(p,MBR_MEDIA,v)
-#define MBR_PUTDRVNUM16(p,v)      UBYTE_PUT(p,MBR16_DRVNUM,v)
-#define MBR_PUTDRVNUM32(p,v)      UBYTE_PUT(p,MBR32_DRVNUM,v)
-#define MBR_PUTBOOTSIG16(p,v)     UBYTE_PUT(p,MBR16_BOOTSIG,v)
-#define MBR_PUTBOOTSIG32(p,v)     UBYTE_PUT(p,MBR32_BOOTSIG,v)
+#define MBR_PUTSECPERCLUS(p,v)      UBYTE_PUT(p,MBR_SECPERCLUS,v)
+#define MBR_PUTNUMFATS(p,v)         UBYTE_PUT(p,MBR_NUMFATS,v)
+#define MBR_PUTMEDIA(p,v)           UBYTE_PUT(p,MBR_MEDIA,v)
+#define MBR_PUTDRVNUM16(p,v)        UBYTE_PUT(p,MBR16_DRVNUM,v)
+#define MBR_PUTDRVNUM32(p,v)        UBYTE_PUT(p,MBR32_DRVNUM,v)
+#define MBR_PUTBOOTSIG16(p,v)       UBYTE_PUT(p,MBR16_BOOTSIG,v)
+#define MBR_PUTBOOTSIG32(p,v)       UBYTE_PUT(p,MBR32_BOOTSIG,v)
 
-#define FBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,FBR_SECPERCLUS,v)
-#define FBR_PUTNUMFATS(p,v)       UBYTE_PUT(p,FBR_NUMFATS,v)
-#define FBR_PUTMEDIA(p,v)         UBYTE_PUT(p,FBR_MEDIA,v)
-#define FBR_PUTDRVNUM16(p,v)      UBYTE_PUT(p,FBR16_DRVNUM,v)
-#define FBR_PUTDRVNUM32(p,v)      UBYTE_PUT(p,FBR32_DRVNUM,v)
-#define FBR_PUTBOOTSIG16(p,v)     UBYTE_PUT(p,FBR16_BOOTSIG,v)
-#define FBR_PUTBOOTSIG32(p,v)     UBYTE_PUT(p,FBR32_BOOTSIG,v)
+#define FBR_PUTSECPERCLUS(p,v)      UBYTE_PUT(p,FBR_SECPERCLUS,v)
+#define FBR_PUTNUMFATS(p,v)         UBYTE_PUT(p,FBR_NUMFATS,v)
+#define FBR_PUTMEDIA(p,v)           UBYTE_PUT(p,FBR_MEDIA,v)
+#define FBR_PUTDRVNUM16(p,v)        UBYTE_PUT(p,FBR16_DRVNUM,v)
+#define FBR_PUTDRVNUM32(p,v)        UBYTE_PUT(p,FBR32_DRVNUM,v)
+#define FBR_PUTBOOTSIG16(p,v)       UBYTE_PUT(p,FBR16_BOOTSIG,v)
+#define FBR_PUTBOOTSIG32(p,v)       UBYTE_PUT(p,FBR32_BOOTSIG,v)
 
-#define PART_PUTTYPE(n,p,v)       UBYTE_PUT(p,PART_ENTRY(n)+PART_TYPE,v)
-#define PART1_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY1+PART_TYPE,v)
-#define PART2_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY2+PART_TYPE,v)
-#define PART3_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY3+PART_TYPE,v)
-#define PART4_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY4+PART_TYPE,v)
+#define PART_PUTTYPE(n,p,v)         UBYTE_PUT(p,PART_ENTRY(n)+PART_TYPE,v)
+#define PART1_PUTTYPE(p,v)          UBYTE_PUT(p,PART_ENTRY1+PART_TYPE,v)
+#define PART2_PUTTYPE(p,v)          UBYTE_PUT(p,PART_ENTRY2+PART_TYPE,v)
+#define PART3_PUTTYPE(p,v)          UBYTE_PUT(p,PART_ENTRY3+PART_TYPE,v)
+#define PART4_PUTTYPE(p,v)          UBYTE_PUT(p,PART_ENTRY4+PART_TYPE,v)
 
-#define DIR_PUTATTRIBUTES(p,v)    UBYTE_PUT(p,DIR_ATTRIBUTES,v)
-#define DIR_PUTNTRES(p,v)         UBYTE_PUT(p,DIR_NTRES,v)
-#define DIR_PUTCRTTIMETENTH(p,v)  UBYTE_PUT(p,DIR_CRTTIMETENTH,v)
+#define DIR_PUTATTRIBUTES(p,v)      UBYTE_PUT(p,DIR_ATTRIBUTES,v)
+#define DIR_PUTNTRES(p,v)           UBYTE_PUT(p,DIR_NTRES,v)
+#define DIR_PUTCRTTIMETENTH(p,v)    UBYTE_PUT(p,DIR_CRTTIMETENTH,v)
 
 #ifdef CONFIG_FAT_LFN
-# define LDIR_PUTSEQ(p,v)         UBYTE_PUT(p,LDIR_SEQ,v)
-# define LDIR_PUTATTRIBUTES(p,v)  UBYTE_PUT(p,LDIR_ATTRIBUTES,v)
-# define LDIR_PUTNTRES(p,v)       UBYTE_PUT(p,LDIR_NTRES,v)
-# define LDIR_PUTCHECKSUM(p,v)    UBYTE_PUT(p,LDIR_CHECKSUM,v)
+#  define LDIR_PUTSEQ(p,v)          UBYTE_PUT(p,LDIR_SEQ,v)
+#  define LDIR_PUTATTRIBUTES(p,v)   UBYTE_PUT(p,LDIR_ATTRIBUTES,v)
+#  define LDIR_PUTNTRES(p,v)        UBYTE_PUT(p,LDIR_NTRES,v)
+#  define LDIR_PUTCHECKSUM(p,v)     UBYTE_PUT(p,LDIR_CHECKSUM,v)
 #endif
 
 /* For the all targets, unaligned values need to be accessed byte-by-byte.
@@ -476,56 +476,56 @@
 
 /* Unaligned multi-byte access macros */
 
-#define MBR_GETBYTESPERSEC(p)      fat_getuint16(UBYTE_PTR(p,MBR_BYTESPERSEC))
-#define MBR_GETROOTENTCNT(p)       fat_getuint16(UBYTE_PTR(p,MBR_ROOTENTCNT))
-#define MBR_GETTOTSEC16(p)         fat_getuint16(UBYTE_PTR(p,MBR_TOTSEC16))
-#define MBR_GETVOLID16(p)          fat_getuint32(UBYTE_PTR(p,MBR16_VOLID))
-#define MBR_GETVOLID32(p)          fat_getuint32(UBYTE_PTR(p,MBR32_VOLID))
+#define MBR_GETBYTESPERSEC(p)       fat_getuint16(UBYTE_PTR(p,MBR_BYTESPERSEC))
+#define MBR_GETROOTENTCNT(p)        fat_getuint16(UBYTE_PTR(p,MBR_ROOTENTCNT))
+#define MBR_GETTOTSEC16(p)          fat_getuint16(UBYTE_PTR(p,MBR_TOTSEC16))
+#define MBR_GETVOLID16(p)           fat_getuint32(UBYTE_PTR(p,MBR16_VOLID))
+#define MBR_GETVOLID32(p)           fat_getuint32(UBYTE_PTR(p,MBR32_VOLID))
 
-#define FBR_GETBYTESPERSEC(p)      fat_getuint16(UBYTE_PTR(p,FBR_BYTESPERSEC))
-#define FBR_GETROOTENTCNT(p)       fat_getuint16(UBYTE_PTR(p,FBR_ROOTENTCNT))
-#define FBR_GETTOTSEC16(p)         fat_getuint16(UBYTE_PTR(p,FBR_TOTSEC16))
-#define FBR_GETVOLID16(p)          fat_getuint32(UBYTE_PTR(p,FBR16_VOLID))
-#define FBR_GETVOLID32(p)          fat_getuint32(UBYTE_PTR(p,FBR32_VOLID))
+#define FBR_GETBYTESPERSEC(p)       fat_getuint16(UBYTE_PTR(p,FBR_BYTESPERSEC))
+#define FBR_GETROOTENTCNT(p)        fat_getuint16(UBYTE_PTR(p,FBR_ROOTENTCNT))
+#define FBR_GETTOTSEC16(p)          fat_getuint16(UBYTE_PTR(p,FBR_TOTSEC16))
+#define FBR_GETVOLID16(p)           fat_getuint32(UBYTE_PTR(p,FBR16_VOLID))
+#define FBR_GETVOLID32(p)           fat_getuint32(UBYTE_PTR(p,FBR32_VOLID))
 
-#define PART_GETSTARTSECTOR(n,p)   fat_getuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_STARTSECTOR))
-#define PART_GETSIZE(n,p)          fat_getuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_SIZE))
-#define PART1_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR))
-#define PART1_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE))
-#define PART2_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR))
-#define PART2_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE))
-#define PART3_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY3+PART_STARTSECTOR))
-#define PART3_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY3+PART_SIZE))
-#define PART4_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY4+PART_STARTSECTOR))
-#define PART4_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY4+PART_SIZE))
+#define PART_GETSTARTSECTOR(n,p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_STARTSECTOR))
+#define PART_GETSIZE(n,p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_SIZE))
+#define PART1_GETSTARTSECTOR(p)     fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR))
+#define PART1_GETSIZE(p)            fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE))
+#define PART2_GETSTARTSECTOR(p)     fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR))
+#define PART2_GETSIZE(p)            fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE))
+#define PART3_GETSTARTSECTOR(p)     fat_getuint32(UBYTE_PTR(p,PART_ENTRY3+PART_STARTSECTOR))
+#define PART3_GETSIZE(p)            fat_getuint32(UBYTE_PTR(p,PART_ENTRY3+PART_SIZE))
+#define PART4_GETSTARTSECTOR(p)     fat_getuint32(UBYTE_PTR(p,PART_ENTRY4+PART_STARTSECTOR))
+#define PART4_GETSIZE(p)            fat_getuint32(UBYTE_PTR(p,PART_ENTRY4+PART_SIZE))
 
-#define MBR_PUTBYTESPERSEC(p,v)    fat_putuint16(UBYTE_PTR(p,MBR_BYTESPERSEC),v)
-#define MBR_PUTROOTENTCNT(p,v)     fat_putuint16(UBYTE_PTR(p,MBR_ROOTENTCNT),v)
-#define MBR_PUTTOTSEC16(p,v)       fat_putuint16(UBYTE_PTR(p,MBR_TOTSEC16),v)
-#define MBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,MBR16_VOLID),v)
-#define MBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,MBR32_VOLID),v)
+#define MBR_PUTBYTESPERSEC(p,v)     fat_putuint16(UBYTE_PTR(p,MBR_BYTESPERSEC),v)
+#define MBR_PUTROOTENTCNT(p,v)      fat_putuint16(UBYTE_PTR(p,MBR_ROOTENTCNT),v)
+#define MBR_PUTTOTSEC16(p,v)        fat_putuint16(UBYTE_PTR(p,MBR_TOTSEC16),v)
+#define MBR_PUTVOLID16(p,v)         fat_putuint32(UBYTE_PTR(p,MBR16_VOLID),v)
+#define MBR_PUTVOLID32(p,v)         fat_putuint32(UBYTE_PTR(p,MBR32_VOLID),v)
 
-#define FBR_PUTBYTESPERSEC(p,v)    fat_putuint16(UBYTE_PTR(p,FBR_BYTESPERSEC),v)
-#define FBR_PUTROOTENTCNT(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_ROOTENTCNT),v)
-#define FBR_PUTTOTSEC16(p,v)       fat_putuint16(UBYTE_PTR(p,FBR_TOTSEC16),v)
-#define FBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,FBR16_VOLID),v)
-#define FBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,FBR32_VOLID),v)
+#define FBR_PUTBYTESPERSEC(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_BYTESPERSEC),v)
+#define FBR_PUTROOTENTCNT(p,v)      fat_putuint16(UBYTE_PTR(p,FBR_ROOTENTCNT),v)
+#define FBR_PUTTOTSEC16(p,v)        fat_putuint16(UBYTE_PTR(p,FBR_TOTSEC16),v)
+#define FBR_PUTVOLID16(p,v)         fat_putuint32(UBYTE_PTR(p,FBR16_VOLID),v)
+#define FBR_PUTVOLID32(p,v)         fat_putuint32(UBYTE_PTR(p,FBR32_VOLID),v)
 
-#define PART_PUTSTARTSECTOR(n,p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_STARTSECTOR),v)
-#define PART_PUTSIZE(n,p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_SIZE),v)
-#define PART1_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR),v)
-#define PART1_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE),v)
-#define PART2_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR),v)
-#define PART2_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE),v)
-#define PART3_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY3+PART_STARTSECTOR),v)
-#define PART3_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY3+PART_SIZE),v)
-#define PART4_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY4+PART_STARTSECTOR),v)
-#define PART4_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY4+PART_SIZE),v)
+#define PART_PUTSTARTSECTOR(n,p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_STARTSECTOR),v)
+#define PART_PUTSIZE(n,p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_SIZE),v)
+#define PART1_PUTSTARTSECTOR(p,v)   fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR),v)
+#define PART1_PUTSIZE(p,v)          fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE),v)
+#define PART2_PUTSTARTSECTOR(p,v)   fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR),v)
+#define PART2_PUTSIZE(p,v)          fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE),v)
+#define PART3_PUTSTARTSECTOR(p,v)   fat_putuint32(UBYTE_PTR(p,PART_ENTRY3+PART_STARTSECTOR),v)
+#define PART3_PUTSIZE(p,v)          fat_putuint32(UBYTE_PTR(p,PART_ENTRY3+PART_SIZE),v)
+#define PART4_PUTSTARTSECTOR(p,v)   fat_putuint32(UBYTE_PTR(p,PART_ENTRY4+PART_STARTSECTOR),v)
+#define PART4_PUTSIZE(p,v)          fat_putuint32(UBYTE_PTR(p,PART_ENTRY4+PART_SIZE),v)
 
 #ifdef CONFIG_FAT_LFN
-# define LDIR_PTRWCHAR1_5(p)       UBYTE_PTR(p,LDIR_WCHAR1_5)
-# define LDIR_PTRWCHAR6_11(p)      UBYTE_PTR(p,LDIR_WCHAR6_11)
-# define LDIR_PTRWCHAR12_13(p)     UBYTE_PTR(p,LDIR_WCHAR12_13)
+#  define LDIR_PTRWCHAR1_5(p)       UBYTE_PTR(p,LDIR_WCHAR1_5)
+#  define LDIR_PTRWCHAR6_11(p)      UBYTE_PTR(p,LDIR_WCHAR6_11)
+#  define LDIR_PTRWCHAR12_13(p)     UBYTE_PTR(p,LDIR_WCHAR12_13)
 #endif
 
 /* But for multi-byte values, the endian-ness of the target vs. the little
@@ -539,143 +539,143 @@
  * accessed byte-by-byte.
  */
 
-# define MBR_GETRESVDSECCOUNT(p)   fat_getuint16(UBYTE_PTR(p,MBR_RESVDSECCOUNT))
-# define MBR_GETFATSZ16(p)         fat_getuint16(UBYTE_PTR(p,MBR_FATSZ16))
-# define MBR_GETSECPERTRK(p)       fat_getuint16(UBYTE_PTR(p,MBR_SECPERTRK))
-# define MBR_GETNUMHEADS(p)        fat_getuint16(UBYTE_PTR(p,MBR_NUMHEADS))
-# define MBR_GETHIDSEC(p)          fat_getuint32(UBYTE_PTR(p,MBR_HIDSEC))
-# define MBR_GETTOTSEC32(p)        fat_getuint32(UBYTE_PTR(p,MBR_TOTSEC32))
-# define MBR_GETFATSZ32(p)         fat_getuint32(UBYTE_PTR(p,MBR32_FATSZ32))
-# define MBR_GETEXTFLAGS(p)        fat_getuint16(UBYTE_PTR(p,MBR32_EXTFLAGS))
-# define MBR_GETFSVER(p)           fat_getuint16(UBYTE_PTR(p,MBR32_FSVER))
-# define MBR_GETROOTCLUS(p)        fat_getuint32(UBYTE_PTR(p,MBR32_ROOTCLUS))
-# define MBR_GETFSINFO(p)          fat_getuint16(UBYTE_PTR(p,MBR32_FSINFO))
-# define MBR_GETBKBOOTSEC(p)       fat_getuint16(UBYTE_PTR(p,MBR32_BKBOOTSEC))
-# define MBR_GETSIGNATURE(p)       fat_getuint16(UBYTE_PTR(p,MBR_SIGNATURE))
+#  define MBR_GETRESVDSECCOUNT(p)   fat_getuint16(UBYTE_PTR(p,MBR_RESVDSECCOUNT))
+#  define MBR_GETFATSZ16(p)         fat_getuint16(UBYTE_PTR(p,MBR_FATSZ16))
+#  define MBR_GETSECPERTRK(p)       fat_getuint16(UBYTE_PTR(p,MBR_SECPERTRK))
+#  define MBR_GETNUMHEADS(p)        fat_getuint16(UBYTE_PTR(p,MBR_NUMHEADS))
+#  define MBR_GETHIDSEC(p)          fat_getuint32(UBYTE_PTR(p,MBR_HIDSEC))
+#  define MBR_GETTOTSEC32(p)        fat_getuint32(UBYTE_PTR(p,MBR_TOTSEC32))
+#  define MBR_GETFATSZ32(p)         fat_getuint32(UBYTE_PTR(p,MBR32_FATSZ32))
+#  define MBR_GETEXTFLAGS(p)        fat_getuint16(UBYTE_PTR(p,MBR32_EXTFLAGS))
+#  define MBR_GETFSVER(p)           fat_getuint16(UBYTE_PTR(p,MBR32_FSVER))
+#  define MBR_GETROOTCLUS(p)        fat_getuint32(UBYTE_PTR(p,MBR32_ROOTCLUS))
+#  define MBR_GETFSINFO(p)          fat_getuint16(UBYTE_PTR(p,MBR32_FSINFO))
+#  define MBR_GETBKBOOTSEC(p)       fat_getuint16(UBYTE_PTR(p,MBR32_BKBOOTSEC))
+#  define MBR_GETSIGNATURE(p)       fat_getuint16(UBYTE_PTR(p,MBR_SIGNATURE))
 
-# define FBR_GETRESVDSECCOUNT(p)   fat_getuint16(UBYTE_PTR(p,FBR_RESVDSECCOUNT))
-# define FBR_GETFATSZ16(p)         fat_getuint16(UBYTE_PTR(p,FBR_FATSZ16))
-# define FBR_GETSECPERTRK(p)       fat_getuint16(UBYTE_PTR(p,FBR_SECPERTRK))
-# define FBR_GETNUMHEADS(p)        fat_getuint16(UBYTE_PTR(p,FBR_NUMHEADS))
-# define FBR_GETHIDSEC(p)          fat_getuint32(UBYTE_PTR(p,FBR_HIDSEC))
-# define FBR_GETTOTSEC32(p)        fat_getuint32(UBYTE_PTR(p,FBR_TOTSEC32))
-# define FBR_GETFATSZ32(p)         fat_getuint32(UBYTE_PTR(p,FBR_FATSZ32))
-# define FBR_GETEXTFLAGS(p)        fat_getuint16(UBYTE_PTR(p,FBR_EXTFLAGS))
-# define FBR_GETFSVER(p)           fat_getuint16(UBYTE_PTR(p,FBR_FSVER))
-# define FBR_GETROOTCLUS(p)        fat_getuint32(UBYTE_PTR(p,FBR_ROOTCLUS))
-# define FBR_GETFSINFO(p)          fat_getuint16(UBYTE_PTR(p,FBR_FSINFO))
-# define FBR_GETBKBOOTSEC(p)       fat_getuint16(UBYTE_PTR(p,FBR_BKBOOTSEC))
-# define FBR_GETSIGNATURE(p)       fat_getuint16(UBYTE_PTR(p,FBR_SIGNATURE))
+#  define FBR_GETRESVDSECCOUNT(p)   fat_getuint16(UBYTE_PTR(p,FBR_RESVDSECCOUNT))
+#  define FBR_GETFATSZ16(p)         fat_getuint16(UBYTE_PTR(p,FBR_FATSZ16))
+#  define FBR_GETSECPERTRK(p)       fat_getuint16(UBYTE_PTR(p,FBR_SECPERTRK))
+#  define FBR_GETNUMHEADS(p)        fat_getuint16(UBYTE_PTR(p,FBR_NUMHEADS))
+#  define FBR_GETHIDSEC(p)          fat_getuint32(UBYTE_PTR(p,FBR_HIDSEC))
+#  define FBR_GETTOTSEC32(p)        fat_getuint32(UBYTE_PTR(p,FBR_TOTSEC32))
+#  define FBR_GETFATSZ32(p)         fat_getuint32(UBYTE_PTR(p,FBR_FATSZ32))
+#  define FBR_GETEXTFLAGS(p)        fat_getuint16(UBYTE_PTR(p,FBR_EXTFLAGS))
+#  define FBR_GETFSVER(p)           fat_getuint16(UBYTE_PTR(p,FBR_FSVER))
+#  define FBR_GETROOTCLUS(p)        fat_getuint32(UBYTE_PTR(p,FBR_ROOTCLUS))
+#  define FBR_GETFSINFO(p)          fat_getuint16(UBYTE_PTR(p,FBR_FSINFO))
+#  define FBR_GETBKBOOTSEC(p)       fat_getuint16(UBYTE_PTR(p,FBR_BKBOOTSEC))
+#  define FBR_GETSIGNATURE(p)       fat_getuint16(UBYTE_PTR(p,FBR_SIGNATURE))
 
-# define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
-# define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
-# define FSI_GETFREECOUNT(p)       fat_getuint32(UBYTE_PTR(p,FSI_FREECOUNT))
-# define FSI_GETNXTFREE(p)         fat_getuint32(UBYTE_PTR(p,FSI_NXTFREE))
-# define FSI_GETTRAILSIG(p)        fat_getuint32(UBYTE_PTR(p,FSI_TRAILSIG))
+#  define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
+#  define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
+#  define FSI_GETFREECOUNT(p)       fat_getuint32(UBYTE_PTR(p,FSI_FREECOUNT))
+#  define FSI_GETNXTFREE(p)         fat_getuint32(UBYTE_PTR(p,FSI_NXTFREE))
+#  define FSI_GETTRAILSIG(p)        fat_getuint32(UBYTE_PTR(p,FSI_TRAILSIG))
 
-# define DIR_GETCRTIME(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRTIME))
-# define DIR_GETCRDATE(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRDATE))
-# define DIR_GETLASTACCDATE(p)     fat_getuint16(UBYTE_PTR(p,DIR_LASTACCDATE))
-# define DIR_GETFSTCLUSTHI(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI))
-# define DIR_GETWRTTIME(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTTIME))
-# define DIR_GETWRTDATE(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTDATE))
-# define DIR_GETFSTCLUSTLO(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO))
-# define DIR_GETFILESIZE(p)        fat_getuint32(UBYTE_PTR(p,DIR_FILESIZE))
-
-# ifdef CONFIG_FAT_LFN
-#  define LDIR_GETWCHAR1(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5))
-#  define LDIR_GETWCHAR2(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+2))
-#  define LDIR_GETWCHAR3(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+4))
-#  define LDIR_GETWCHAR4(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+6))
-#  define LDIR_GETWCHAR5(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+8))
-#  define LDIR_GETWCHAR6(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11))
-#  define LDIR_GETWCHAR7(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+2))
-#  define LDIR_GETWCHAR8(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+4))
-#  define LDIR_GETWCHAR9(p)        fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+6))
-#  define LDIR_GETWCHAR10(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+8))
-#  define LDIR_GETWCHAR11(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+10))
-#  define LDIR_GETWCHAR12(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR12_13))
-#  define LDIR_GETWCHAR13(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR12_13+2))
-#  define LDIR_GETFSTCLUSTLO(p)    fat_getuint16(UBYTE_PTR(p,LDIR_FSTCLUSTLO))
-# endif
-
-# define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
-# define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
-# define FSI_GETFREECOUNT(p)       fat_getuint32(UBYTE_PTR(p,FSI_FREECOUNT))
-# define FSI_GETNXTFREE(p)         fat_getuint32(UBYTE_PTR(p,FSI_NXTFREE))
-# define FSI_GETTRAILSIG(p)        fat_getuint32(UBYTE_PTR(p,FSI_TRAILSIG))
-
-# define FAT_GETFAT16(p,i)         fat_getuint16(UBYTE_PTR(p,i))
-# define FAT_GETFAT32(p,i)         fat_getuint32(UBYTE_PTR(p,i))
-
-# define MBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,MBR_RESVDSECCOUNT),v)
-# define MBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,MBR_FATSZ16),v)
-# define MBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,MBR_SECPERTRK),v)
-# define MBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,MBR_NUMHEADS),v)
-# define MBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,MBR_HIDSEC),v)
-# define MBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,MBR_TOTSEC32),v)
-# define MBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,MBR32_FATSZ32),v)
-# define MBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,MBR32_EXTFLAGS),v)
-# define MBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,MBR32_FSVER),v)
-# define MBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,MBR32_ROOTCLUS),v)
-# define MBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,MBR32_FSINFO),v)
-# define MBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,MBR32_BKBOOTSEC),v)
-# define MBR_PUTSIGNATURE(p,v)     fat_putuint16(UBYTE_PTR(p,MBR_SIGNATURE),v)
-
-# define FBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,FBR_RESVDSECCOUNT),v)
-# define FBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,FBR_FATSZ16),v)
-# define FBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_SECPERTRK),v)
-# define FBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,FBR_NUMHEADS),v)
-# define FBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,FBR_HIDSEC),v)
-# define FBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,FBR_TOTSEC32),v)
-# define FBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,FBR_FATSZ32),v)
-# define FBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,FBR_EXTFLAGS),v)
-# define FBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,FBR_FSVER),v)
-# define FBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,FBR_ROOTCLUS),v)
-# define FBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,FBR_FSINFO),v)
-# define FBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_BKBOOTSEC),v)
-# define FBR_PUTSIGNATURE(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_SIGNATURE),v)
-
-# define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
-# define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)
-# define FSI_PUTFREECOUNT(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_FREECOUNT),v)
-# define FSI_PUTNXTFREE(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_NXTFREE),v)
-# define FSI_PUTTRAILSIG(p,v)      fat_putuint32(UBYTE_PTR(p,FSI_TRAILSIG),v)
-
-# define DIR_PUTCRTIME(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRTIME),v)
-# define DIR_PUTCRDATE(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRDATE),v)
-# define DIR_PUTLASTACCDATE(p,v)   fat_putuint16(UBYTE_PTR(p,DIR_LASTACCDATE),v)
-# define DIR_PUTFSTCLUSTHI(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI),v)
-# define DIR_PUTWRTTIME(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTTIME),v)
-# define DIR_PUTWRTDATE(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTDATE),v)
-# define DIR_PUTFSTCLUSTLO(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO),v)
-# define DIR_PUTFILESIZE(p,v)      fat_putuint32(UBYTE_PTR(p,DIR_FILESIZE),v)
+#  define DIR_GETCRTIME(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRTIME))
+#  define DIR_GETCRDATE(p)          fat_getuint16(UBYTE_PTR(p,DIR_CRDATE))
+#  define DIR_GETLASTACCDATE(p)     fat_getuint16(UBYTE_PTR(p,DIR_LASTACCDATE))
+#  define DIR_GETFSTCLUSTHI(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI))
+#  define DIR_GETWRTTIME(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTTIME))
+#  define DIR_GETWRTDATE(p)         fat_getuint16(UBYTE_PTR(p,DIR_WRTDATE))
+#  define DIR_GETFSTCLUSTLO(p)      fat_getuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO))
+#  define DIR_GETFILESIZE(p)        fat_getuint32(UBYTE_PTR(p,DIR_FILESIZE))
 
 # ifdef CONFIG_FAT_LFN
-#  define LDIR_PUTWCHAR1(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5),v)
-#  define LDIR_PUTWCHAR2(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+2),v)
-#  define LDIR_PUTWCHAR3(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+4),v)
-#  define LDIR_PUTWCHAR4(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+6),v)
-#  define LDIR_PUTWCHAR5(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+8),v)
-#  define LDIR_PUTWCHAR6(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11),v)
-#  define LDIR_PUTWCHAR7(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+2),v)
-#  define LDIR_PUTWCHAR8(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+4),v)
-#  define LDIR_PUTWCHAR9(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+6),v)
-#  define LDIR_PUTWCHAR10(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+8),v)
-#  define LDIR_PUTWCHAR11(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+10),v)
-#  define LDIR_PUTWCHAR12(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13),v)
-#  define LDIR_PUTWCHAR13(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13+2),v)
-#  define LDIR_PUTFSTCLUSTLO(p,v)  fat_putuint16(UBYTE_PTR(p,LDIR_FSTCLUSTLO),v)
-# endif
+#    define LDIR_GETWCHAR1(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5))
+#    define LDIR_GETWCHAR2(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+2))
+#    define LDIR_GETWCHAR3(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+4))
+#    define LDIR_GETWCHAR4(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+6))
+#    define LDIR_GETWCHAR5(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+8))
+#    define LDIR_GETWCHAR6(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11))
+#    define LDIR_GETWCHAR7(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+2))
+#    define LDIR_GETWCHAR8(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+4))
+#    define LDIR_GETWCHAR9(p)       fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+6))
+#    define LDIR_GETWCHAR10(p)      fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+8))
+#    define LDIR_GETWCHAR11(p)      fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+10))
+#    define LDIR_GETWCHAR12(p)      fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR12_13))
+#    define LDIR_GETWCHAR13(p)      fat_getuint16(UBYTE_PTR(p,LDIR_WCHAR12_13+2))
+#    define LDIR_GETFSTCLUSTLO(p)   fat_getuint16(UBYTE_PTR(p,LDIR_FSTCLUSTLO))
+#  endif
 
-# define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
-# define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)
-# define FSI_PUTFREECOUNT(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_FREECOUNT),v)
-# define FSI_PUTNXTFREE(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_NXTFREE),v)
-# define FSI_PUTTRAILSIG(p,v)      fat_putuint32(UBYTE_PTR(p,FSI_TRAILSIG),v)
+#  define FSI_GETLEADSIG(p)         fat_getuint32(UBYTE_PTR(p,FSI_LEADSIG))
+#  define FSI_GETSTRUCTSIG(p)       fat_getuint32(UBYTE_PTR(p,FSI_STRUCTSIG))
+#  define FSI_GETFREECOUNT(p)       fat_getuint32(UBYTE_PTR(p,FSI_FREECOUNT))
+#  define FSI_GETNXTFREE(p)         fat_getuint32(UBYTE_PTR(p,FSI_NXTFREE))
+#  define FSI_GETTRAILSIG(p)        fat_getuint32(UBYTE_PTR(p,FSI_TRAILSIG))
 
-# define FAT_PUTFAT16(p,i,v)       fat_putuint16(UBYTE_PTR(p,i),v)
-# define FAT_PUTFAT32(p,i,v)       fat_putuint32(UBYTE_PTR(p,i),v)
+#  define FAT_GETFAT16(p,i)         fat_getuint16(UBYTE_PTR(p,i))
+#  define FAT_GETFAT32(p,i)         fat_getuint32(UBYTE_PTR(p,i))
+
+#  define MBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,MBR_RESVDSECCOUNT),v)
+#  define MBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,MBR_FATSZ16),v)
+#  define MBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,MBR_SECPERTRK),v)
+#  define MBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,MBR_NUMHEADS),v)
+#  define MBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,MBR_HIDSEC),v)
+#  define MBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,MBR_TOTSEC32),v)
+#  define MBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,MBR32_FATSZ32),v)
+#  define MBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,MBR32_EXTFLAGS),v)
+#  define MBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,MBR32_FSVER),v)
+#  define MBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,MBR32_ROOTCLUS),v)
+#  define MBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,MBR32_FSINFO),v)
+#  define MBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,MBR32_BKBOOTSEC),v)
+#  define MBR_PUTSIGNATURE(p,v)     fat_putuint16(UBYTE_PTR(p,MBR_SIGNATURE),v)
+
+#  define FBR_PUTRESVDSECCOUNT(p,v) fat_putuint16(UBYTE_PTR(p,FBR_RESVDSECCOUNT),v)
+#  define FBR_PUTFATSZ16(p,v)       fat_putuint16(UBYTE_PTR(p,FBR_FATSZ16),v)
+#  define FBR_PUTSECPERTRK(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_SECPERTRK),v)
+#  define FBR_PUTNUMHEADS(p,v)      fat_putuint16(UBYTE_PTR(p,FBR_NUMHEADS),v)
+#  define FBR_PUTHIDSEC(p,v)        fat_putuint32(UBYTE_PTR(p,FBR_HIDSEC),v)
+#  define FBR_PUTTOTSEC32(p,v)      fat_putuint32(UBYTE_PTR(p,FBR_TOTSEC32),v)
+#  define FBR_PUTFATSZ32(p,v)       fat_putuint32(UBYTE_PTR(p,FBR_FATSZ32),v)
+#  define FBR_PUTEXTFLAGS(p,v)      fat_putuint16(UBYTE_PTR(p,FBR_EXTFLAGS),v)
+#  define FBR_PUTFSVER(p,v)         fat_putuint16(UBYTE_PTR(p,FBR_FSVER),v)
+#  define FBR_PUTROOTCLUS(p,v)      fat_putuint32(UBYTE_PTR(p,FBR_ROOTCLUS),v)
+#  define FBR_PUTFSINFO(p,v)        fat_putuint16(UBYTE_PTR(p,FBR_FSINFO),v)
+#  define FBR_PUTBKBOOTSEC(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_BKBOOTSEC),v)
+#  define FBR_PUTSIGNATURE(p,v)     fat_putuint16(UBYTE_PTR(p,FBR_SIGNATURE),v)
+
+#  define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
+#  define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)
+#  define FSI_PUTFREECOUNT(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_FREECOUNT),v)
+#  define FSI_PUTNXTFREE(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_NXTFREE),v)
+#  define FSI_PUTTRAILSIG(p,v)      fat_putuint32(UBYTE_PTR(p,FSI_TRAILSIG),v)
+
+#  define DIR_PUTCRTIME(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRTIME),v)
+#  define DIR_PUTCRDATE(p,v)        fat_putuint16(UBYTE_PTR(p,DIR_CRDATE),v)
+#  define DIR_PUTLASTACCDATE(p,v)   fat_putuint16(UBYTE_PTR(p,DIR_LASTACCDATE),v)
+#  define DIR_PUTFSTCLUSTHI(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTHI),v)
+#  define DIR_PUTWRTTIME(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTTIME),v)
+#  define DIR_PUTWRTDATE(p,v)       fat_putuint16(UBYTE_PTR(p,DIR_WRTDATE),v)
+#  define DIR_PUTFSTCLUSTLO(p,v)    fat_putuint16(UBYTE_PTR(p,DIR_FSTCLUSTLO),v)
+#  define DIR_PUTFILESIZE(p,v)      fat_putuint32(UBYTE_PTR(p,DIR_FILESIZE),v)
+
+# ifdef CONFIG_FAT_LFN
+#    define LDIR_PUTWCHAR1(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5),v)
+#    define LDIR_PUTWCHAR2(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+2),v)
+#    define LDIR_PUTWCHAR3(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+4),v)
+#    define LDIR_PUTWCHAR4(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+6),v)
+#    define LDIR_PUTWCHAR5(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+8),v)
+#    define LDIR_PUTWCHAR6(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11),v)
+#    define LDIR_PUTWCHAR7(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+2),v)
+#    define LDIR_PUTWCHAR8(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+4),v)
+#    define LDIR_PUTWCHAR9(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+6),v)
+#    define LDIR_PUTWCHAR10(p,v)    fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+8),v)
+#    define LDIR_PUTWCHAR11(p,v)    fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+10),v)
+#    define LDIR_PUTWCHAR12(p,v)    fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13),v)
+#    define LDIR_PUTWCHAR13(p,v)    fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13+2),v)
+#    define LDIR_PUTFSTCLUSTLO(p,v) fat_putuint16(UBYTE_PTR(p,LDIR_FSTCLUSTLO),v)
+#  endif
+
+#  define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
+#  define FSI_PUTSTRUCTSIG(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_STRUCTSIG),v)
+#  define FSI_PUTFREECOUNT(p,v)     fat_putuint32(UBYTE_PTR(p,FSI_FREECOUNT),v)
+#  define FSI_PUTNXTFREE(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_NXTFREE),v)
+#  define FSI_PUTTRAILSIG(p,v)      fat_putuint32(UBYTE_PTR(p,FSI_TRAILSIG),v)
+
+#  define FAT_PUTFAT16(p,i,v)       fat_putuint16(UBYTE_PTR(p,i),v)
+#  define FAT_PUTFAT32(p,i,v)       fat_putuint32(UBYTE_PTR(p,i),v)
 
 #else
 
@@ -683,142 +683,142 @@
  * to aligned multibyte values.
  */
 
-# define MBR_GETRESVDSECCOUNT(p)   UINT16_VAL(p,MBR_RESVDSECCOUNT)
-# define MBR_GETFATSZ16(p)         UINT16_VAL(p,MBR_FATSZ16)
-# define MBR_GETSECPERTRK(p)       UINT16_VAL(p,MBR_SECPERTRK)
-# define MBR_GETNUMHEADS(p)        UINT16_VAL(p,MBR_NUMHEADS)
-# define MBR_GETHIDSEC(p)          UINT32_VAL(p,MBR_HIDSEC)
-# define MBR_GETTOTSEC32(p)        UINT32_VAL(p,MBR_TOTSEC32)
-# define MBR_GETFATSZ32(p)         UINT32_VAL(p,MBR32_FATSZ32)
-# define MBR_GETEXTFLAGS(p)        UINT16_VAL(p,MBR32_EXTFLAGS)
-# define MBR_GETFSVER(p)           UINT16_VAL(p,MBR32_FSVER)
-# define MBR_GETROOTCLUS(p)        UINT32_VAL(p,MBR32_ROOTCLUS)
-# define MBR_GETFSINFO(p)          UINT16_VAL(p,MBR32_FSINFO)
-# define MBR_GETBKBOOTSEC(p)       UINT16_VAL(p,MBR32_BKBOOTSEC)
-# define MBR_GETSIGNATURE(p)       UINT16_VAL(p,MBR_SIGNATURE)
+#  define MBR_GETRESVDSECCOUNT(p)   UINT16_VAL(p,MBR_RESVDSECCOUNT)
+#  define MBR_GETFATSZ16(p)         UINT16_VAL(p,MBR_FATSZ16)
+#  define MBR_GETSECPERTRK(p)       UINT16_VAL(p,MBR_SECPERTRK)
+#  define MBR_GETNUMHEADS(p)        UINT16_VAL(p,MBR_NUMHEADS)
+#  define MBR_GETHIDSEC(p)          UINT32_VAL(p,MBR_HIDSEC)
+#  define MBR_GETTOTSEC32(p)        UINT32_VAL(p,MBR_TOTSEC32)
+#  define MBR_GETFATSZ32(p)         UINT32_VAL(p,MBR32_FATSZ32)
+#  define MBR_GETEXTFLAGS(p)        UINT16_VAL(p,MBR32_EXTFLAGS)
+#  define MBR_GETFSVER(p)           UINT16_VAL(p,MBR32_FSVER)
+#  define MBR_GETROOTCLUS(p)        UINT32_VAL(p,MBR32_ROOTCLUS)
+#  define MBR_GETFSINFO(p)          UINT16_VAL(p,MBR32_FSINFO)
+#  define MBR_GETBKBOOTSEC(p)       UINT16_VAL(p,MBR32_BKBOOTSEC)
+#  define MBR_GETSIGNATURE(p)       UINT16_VAL(p,MBR_SIGNATURE)
 
-# define FBR_GETRESVDSECCOUNT(p)   UINT16_VAL(p,FBR_RESVDSECCOUNT)
-# define FBR_GETFATSZ16(p)         UINT16_VAL(p,FBR_FATSZ16)
-# define FBR_GETSECPERTRK(p)       UINT16_VAL(p,FBR_SECPERTRK)
-# define FBR_GETNUMHEADS(p)        UINT16_VAL(p,FBR_NUMHEADS)
-# define FBR_GETHIDSEC(p)          UINT32_VAL(p,FBR_HIDSEC)
-# define FBR_GETTOTSEC32(p)        UINT32_VAL(p,FBR_TOTSEC32)
-# define FBR_GETFATSZ32(p)         UINT32_VAL(p,FBR_FATSZ32)
-# define FBR_GETEXTFLAGS(p)        UINT16_VAL(p,FBR_EXTFLAGS)
-# define FBR_GETFSVER(p)           UINT16_VAL(p,FBR_FSVER)
-# define FBR_GETROOTCLUS(p)        UINT32_VAL(p,FBR_ROOTCLUS)
-# define FBR_GETFSINFO(p)          UINT16_VAL(p,FBR_FSINFO)
-# define FBR_GETBKBOOTSEC(p)       UINT16_VAL(p,FBR_BKBOOTSEC)
-# define FBR_GETSIGNATURE(p)       UINT16_VAL(p,FBR_SIGNATURE)
+#  define FBR_GETRESVDSECCOUNT(p)   UINT16_VAL(p,FBR_RESVDSECCOUNT)
+#  define FBR_GETFATSZ16(p)         UINT16_VAL(p,FBR_FATSZ16)
+#  define FBR_GETSECPERTRK(p)       UINT16_VAL(p,FBR_SECPERTRK)
+#  define FBR_GETNUMHEADS(p)        UINT16_VAL(p,FBR_NUMHEADS)
+#  define FBR_GETHIDSEC(p)          UINT32_VAL(p,FBR_HIDSEC)
+#  define FBR_GETTOTSEC32(p)        UINT32_VAL(p,FBR_TOTSEC32)
+#  define FBR_GETFATSZ32(p)         UINT32_VAL(p,FBR_FATSZ32)
+#  define FBR_GETEXTFLAGS(p)        UINT16_VAL(p,FBR_EXTFLAGS)
+#  define FBR_GETFSVER(p)           UINT16_VAL(p,FBR_FSVER)
+#  define FBR_GETROOTCLUS(p)        UINT32_VAL(p,FBR_ROOTCLUS)
+#  define FBR_GETFSINFO(p)          UINT16_VAL(p,FBR_FSINFO)
+#  define FBR_GETBKBOOTSEC(p)       UINT16_VAL(p,FBR_BKBOOTSEC)
+#  define FBR_GETSIGNATURE(p)       UINT16_VAL(p,FBR_SIGNATURE)
 
-# define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
-# define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
-# define FSI_GETFREECOUNT(p)       UINT32_VAL(p,FSI_FREECOUNT)
-# define FSI_GETNXTFREE(p)         UINT32_VAL(p,FSI_NXTFREE)
-# define FSI_GETTRAILSIG(p)        UINT32_VAL(p,FSI_TRAILSIG)
+#  define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
+#  define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
+#  define FSI_GETFREECOUNT(p)       UINT32_VAL(p,FSI_FREECOUNT)
+#  define FSI_GETNXTFREE(p)         UINT32_VAL(p,FSI_NXTFREE)
+#  define FSI_GETTRAILSIG(p)        UINT32_VAL(p,FSI_TRAILSIG)
 
-# define DIR_GETCRTIME(p)          UINT16_VAL(p,DIR_CRTIME)
-# define DIR_GETCRDATE(p)          UINT16_VAL(p,DIR_CRDATE)
-# define DIR_GETLASTACCDATE(p)     UINT16_VAL(p,DIR_LASTACCDATE)
-# define DIR_GETFSTCLUSTHI(p)      UINT16_VAL(p,DIR_FSTCLUSTHI)
-# define DIR_GETWRTTIME(p)         UINT16_VAL(p,DIR_WRTTIME)
-# define DIR_GETWRTDATE(p)         UINT16_VAL(p,DIR_WRTDATE)
-# define DIR_GETFSTCLUSTLO(p)      UINT16_VAL(p,DIR_FSTCLUSTLO)
-# define DIR_GETFILESIZE(p)        UINT32_VAL(p,DIR_FILESIZE)
-
-# ifdef CONFIG_FAT_LFN
-#  define LDIR_GETWCHAR1(p)        UINT16_VAL(p,LDIR_WCHAR1_5)
-#  define LDIR_GETWCHAR2(p)        UINT16_VAL(p,LDIR_WCHAR1_5+2)
-#  define LDIR_GETWCHAR3(p)        UINT16_VAL(p,LDIR_WCHAR1_5+4)
-#  define LDIR_GETWCHAR4(p)        UINT16_VAL(p,LDIR_WCHAR1_5+6)
-#  define LDIR_GETWCHAR5(p)        UINT16_VAL(p,LDIR_WCHAR1_5+8)
-#  define LDIR_GETWCHAR6(p)        UINT16_VAL(p,LDIR_WCHAR6_11)
-#  define LDIR_GETWCHAR7(p)        UINT16_VAL(p,LDIR_WCHAR6_11+2)
-#  define LDIR_GETWCHAR8(p)        UINT16_VAL(p,LDIR_WCHAR6_11+4)
-#  define LDIR_GETWCHAR9(p)        UINT16_VAL(p,LDIR_WCHAR6_11+6)
-#  define LDIR_GETWCHAR10(p)       UINT16_VAL(p,LDIR_WCHAR6_11+8)
-#  define LDIR_GETWCHAR11(p)       UINT16_VAL(p,LDIR_WCHAR6_11+10)
-#  define LDIR_GETWCHAR12(p)       UINT16_VAL(p,LDIR_WCHAR12_13)
-#  define LDIR_GETWCHAR13(p)       UINT16_VAL(p,LDIR_WCHAR12_13+2)
-# endif
-
-# define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
-# define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
-# define FSI_GETFREECOUNT(p)       UINT32_VAL(p,FSI_FREECOUNT)
-# define FSI_GETNXTFREE(p)         UINT32_VAL(p,FSI_NXTFREE)
-# define FSI_GETTRAILSIG(p)        UINT32_VAL(p,FSI_TRAILSIG)
-
-# define FAT_GETFAT16(p,i)         UINT16_VAL(p,i)
-# define FAT_GETFAT32(p,i)         UINT32_VAL(p,i)
-
-# define MBR_PUTRESVDSECCOUNT(p,v) UINT16_PUT(p,MBR_RESVDSECCOUNT,v)
-# define MBR_PUTFATSZ16(p,v)       UINT16_PUT(p,MBR_FATSZ16,v)
-# define MBR_PUTSECPERTRK(p,v)     UINT16_PUT(p,MBR_SECPERTRK,v)
-# define MBR_PUTNUMHEADS(p,v)      UINT16_PUT(p,MBR_NUMHEADS,v)
-# define MBR_PUTHIDSEC(p,v)        UINT32_PUT(p,MBR_HIDSEC,v)
-# define MBR_PUTTOTSEC32(p,v)      UINT32_PUT(p,MBR_TOTSEC32,v)
-# define MBR_PUTFATSZ32(p,v)       UINT32_PUT(p,MBR32_FATSZ32,v)
-# define MBR_PUTEXTFLAGS(p,v)      UINT16_PUT(p,MBR32_EXTFLAGS,v)
-# define MBR_PUTFSVER(p,v)         UINT16_PUT(p,MBR32_FSVER,v)
-# define MBR_PUTROOTCLUS(p,v)      UINT32_PUT(p,MBR32_ROOTCLUS,v)
-# define MBR_PUTFSINFO(p,v)        UINT16_PUT(p,MBR32_FSINFO,v)
-# define MBR_PUTBKBOOTSEC(p,v)     UINT16_PUT(p,MBR32_BKBOOTSEC,v)
-# define MBR_PUTSIGNATURE(p,v)     UINT16_PUT(p,MBR_SIGNATURE,v)
-
-# define FBR_PUTRESVDSECCOUNT(p,v) UINT16_PUT(p,FBR_RESVDSECCOUNT,v)
-# define FBR_PUTFATSZ16(p,v)       UINT16_PUT(p,FBR_FATSZ16,v)
-# define FBR_PUTSECPERTRK(p,v)     UINT16_PUT(p,FBR_SECPERTRK,v)
-# define FBR_PUTNUMHEADS(p,v)      UINT16_PUT(p,FBR_NUMHEADS,v)
-# define FBR_PUTHIDSEC(p,v)        UINT32_PUT(p,FBR_HIDSEC,v)
-# define FBR_PUTTOTSEC32(p,v)      UINT32_PUT(p,FBR_TOTSEC32,v)
-# define FBR_PUTFATSZ32(p,v)       UINT32_PUT(p,FBR_FATSZ32,v)
-# define FBR_PUTEXTFLAGS(p,v)      UINT16_PUT(p,FBR_EXTFLAGS,v)
-# define FBR_PUTFSVER(p,v)         UINT16_PUT(p,FBR_FSVER,v)
-# define FBR_PUTROOTCLUS(p,v)      UINT32_PUT(p,FBR_ROOTCLUS,v)
-# define FBR_PUTFSINFO(p,v)        UINT16_PUT(p,FBR_FSINFO,v)
-# define FBR_PUTBKBOOTSEC(p,v)     UINT16_PUT(p,FBR_BKBOOTSEC,v)
-# define FBR_PUTSIGNATURE(p,v)     UINT16_PUT(p,FBR_SIGNATURE,v)
-
-# define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
-# define FSI_PUTSTRUCTSIG(p,v)     UINT32_PUT(p,FSI_STRUCTSIG,v)
-# define FSI_PUTFREECOUNT(p,v)     UINT32_PUT(p,FSI_FREECOUNT,v)
-# define FSI_PUTNXTFREE(p,v)       UINT32_PUT(p,FSI_NXTFREE,v)
-# define FSI_PUTTRAILSIG(p,v)      UINT32_PUT(p,FSI_TRAILSIG,v)
-
-# define DIR_PUTCRTIME(p,v)        UINT16_PUT(p,DIR_CRTIME,v)
-# define DIR_PUTCRDATE(p,v)        UINT16_PUT(p,DIR_CRDATE,v)
-# define DIR_PUTLASTACCDATE(p,v)   UINT16_PUT(p,DIR_LASTACCDATE,v)
-# define DIR_PUTFSTCLUSTHI(p,v)    UINT16_PUT(p,DIR_FSTCLUSTHI,v)
-# define DIR_PUTWRTTIME(p,v)       UINT16_PUT(p,DIR_WRTTIME,v)
-# define DIR_PUTWRTDATE(p,v)       UINT16_PUT(p,DIR_WRTDATE,v)
-# define DIR_PUTFSTCLUSTLO(p,v)    UINT16_PUT(p,DIR_FSTCLUSTLO,v)
-# define DIR_PUTFILESIZE(p,v)      UINT32_PUT(p,DIR_FILESIZE,v)
+#  define DIR_GETCRTIME(p)          UINT16_VAL(p,DIR_CRTIME)
+#  define DIR_GETCRDATE(p)          UINT16_VAL(p,DIR_CRDATE)
+#  define DIR_GETLASTACCDATE(p)     UINT16_VAL(p,DIR_LASTACCDATE)
+#  define DIR_GETFSTCLUSTHI(p)      UINT16_VAL(p,DIR_FSTCLUSTHI)
+#  define DIR_GETWRTTIME(p)         UINT16_VAL(p,DIR_WRTTIME)
+#  define DIR_GETWRTDATE(p)         UINT16_VAL(p,DIR_WRTDATE)
+#  define DIR_GETFSTCLUSTLO(p)      UINT16_VAL(p,DIR_FSTCLUSTLO)
+#  define DIR_GETFILESIZE(p)        UINT32_VAL(p,DIR_FILESIZE)
 
 # ifdef CONFIG_FAT_LFN
-#  define LDIR_PUTWCHAR1(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5,v)
-#  define LDIR_PUTWCHAR2(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+2,v)
-#  define LDIR_PUTWCHAR3(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+4,v)
-#  define LDIR_PUTWCHAR4(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+6,v)
-#  define LDIR_PUTWCHAR5(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+8,v)
-#  define LDIR_PUTWCHAR6(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11,v)
-#  define LDIR_PUTWCHAR7(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11+2,v)
-#  define LDIR_PUTWCHAR8(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11+4,v)
-#  define LDIR_PUTWCHAR9(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11+6,v)
-#  define LDIR_PUTWCHAR10(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+8,v)
-#  define LDIR_PUTWCHAR11(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+10,v)
-#  define LDIR_PUTWCHAR12(p,v)     UINT16_PUT(p,LDIR_WCHAR12_13,v)
-#  define LDIR_PUTWCHAR13(p,v)     UINT16_PUT(p,LDIR_WCHAR12_13+2,v)
-#  define LDIR_PUTFSTCLUSTLO(p,v)  UINT16_PUT(p,LDIR_FSTCLUSTLO,v)
-# endif
+#    define LDIR_GETWCHAR1(p)       UINT16_VAL(p,LDIR_WCHAR1_5)
+#    define LDIR_GETWCHAR2(p)       UINT16_VAL(p,LDIR_WCHAR1_5+2)
+#    define LDIR_GETWCHAR3(p)       UINT16_VAL(p,LDIR_WCHAR1_5+4)
+#    define LDIR_GETWCHAR4(p)       UINT16_VAL(p,LDIR_WCHAR1_5+6)
+#    define LDIR_GETWCHAR5(p)       UINT16_VAL(p,LDIR_WCHAR1_5+8)
+#    define LDIR_GETWCHAR6(p)       UINT16_VAL(p,LDIR_WCHAR6_11)
+#    define LDIR_GETWCHAR7(p)       UINT16_VAL(p,LDIR_WCHAR6_11+2)
+#    define LDIR_GETWCHAR8(p)       UINT16_VAL(p,LDIR_WCHAR6_11+4)
+#    define LDIR_GETWCHAR9(p)       UINT16_VAL(p,LDIR_WCHAR6_11+6)
+#    define LDIR_GETWCHAR10(p)      UINT16_VAL(p,LDIR_WCHAR6_11+8)
+#    define LDIR_GETWCHAR11(p)      UINT16_VAL(p,LDIR_WCHAR6_11+10)
+#    define LDIR_GETWCHAR12(p)      UINT16_VAL(p,LDIR_WCHAR12_13)
+#    define LDIR_GETWCHAR13(p)      UINT16_VAL(p,LDIR_WCHAR12_13+2)
+#  endif
 
-# define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
-# define FSI_PUTSTRUCTSIG(p,v)     UINT32_PUT(p,FSI_STRUCTSIG,v)
-# define FSI_PUTFREECOUNT(p,v)     UINT32_PUT(p,FSI_FREECOUNT,v)
-# define FSI_PUTNXTFREE(p,v)       UINT32_PUT(p,FSI_NXTFREE,v)
-# define FSI_PUTTRAILSIG(p,v)      UINT32_PUT(p,FSI_TRAILSIG,v)
+#  define FSI_GETLEADSIG(p)         UINT32_VAL(p,FSI_LEADSIG)
+#  define FSI_GETSTRUCTSIG(p)       UINT32_VAL(p,FSI_STRUCTSIG)
+#  define FSI_GETFREECOUNT(p)       UINT32_VAL(p,FSI_FREECOUNT)
+#  define FSI_GETNXTFREE(p)         UINT32_VAL(p,FSI_NXTFREE)
+#  define FSI_GETTRAILSIG(p)        UINT32_VAL(p,FSI_TRAILSIG)
 
-# define FAT_PUTFAT16(p,i,v)       UINT16_PUT(p,i,v)
-# define FAT_PUTFAT32(p,i,v)       UINT32_PUT(p,i,v)
+#  define FAT_GETFAT16(p,i)         UINT16_VAL(p,i)
+#  define FAT_GETFAT32(p,i)         UINT32_VAL(p,i)
+
+#  define MBR_PUTRESVDSECCOUNT(p,v) UINT16_PUT(p,MBR_RESVDSECCOUNT,v)
+#  define MBR_PUTFATSZ16(p,v)       UINT16_PUT(p,MBR_FATSZ16,v)
+#  define MBR_PUTSECPERTRK(p,v)     UINT16_PUT(p,MBR_SECPERTRK,v)
+#  define MBR_PUTNUMHEADS(p,v)      UINT16_PUT(p,MBR_NUMHEADS,v)
+#  define MBR_PUTHIDSEC(p,v)        UINT32_PUT(p,MBR_HIDSEC,v)
+#  define MBR_PUTTOTSEC32(p,v)      UINT32_PUT(p,MBR_TOTSEC32,v)
+#  define MBR_PUTFATSZ32(p,v)       UINT32_PUT(p,MBR32_FATSZ32,v)
+#  define MBR_PUTEXTFLAGS(p,v)      UINT16_PUT(p,MBR32_EXTFLAGS,v)
+#  define MBR_PUTFSVER(p,v)         UINT16_PUT(p,MBR32_FSVER,v)
+#  define MBR_PUTROOTCLUS(p,v)      UINT32_PUT(p,MBR32_ROOTCLUS,v)
+#  define MBR_PUTFSINFO(p,v)        UINT16_PUT(p,MBR32_FSINFO,v)
+#  define MBR_PUTBKBOOTSEC(p,v)     UINT16_PUT(p,MBR32_BKBOOTSEC,v)
+#  define MBR_PUTSIGNATURE(p,v)     UINT16_PUT(p,MBR_SIGNATURE,v)
+
+#  define FBR_PUTRESVDSECCOUNT(p,v) UINT16_PUT(p,FBR_RESVDSECCOUNT,v)
+#  define FBR_PUTFATSZ16(p,v)       UINT16_PUT(p,FBR_FATSZ16,v)
+#  define FBR_PUTSECPERTRK(p,v)     UINT16_PUT(p,FBR_SECPERTRK,v)
+#  define FBR_PUTNUMHEADS(p,v)      UINT16_PUT(p,FBR_NUMHEADS,v)
+#  define FBR_PUTHIDSEC(p,v)        UINT32_PUT(p,FBR_HIDSEC,v)
+#  define FBR_PUTTOTSEC32(p,v)      UINT32_PUT(p,FBR_TOTSEC32,v)
+#  define FBR_PUTFATSZ32(p,v)       UINT32_PUT(p,FBR_FATSZ32,v)
+#  define FBR_PUTEXTFLAGS(p,v)      UINT16_PUT(p,FBR_EXTFLAGS,v)
+#  define FBR_PUTFSVER(p,v)         UINT16_PUT(p,FBR_FSVER,v)
+#  define FBR_PUTROOTCLUS(p,v)      UINT32_PUT(p,FBR_ROOTCLUS,v)
+#  define FBR_PUTFSINFO(p,v)        UINT16_PUT(p,FBR_FSINFO,v)
+#  define FBR_PUTBKBOOTSEC(p,v)     UINT16_PUT(p,FBR_BKBOOTSEC,v)
+#  define FBR_PUTSIGNATURE(p,v)     UINT16_PUT(p,FBR_SIGNATURE,v)
+
+#  define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
+#  define FSI_PUTSTRUCTSIG(p,v)     UINT32_PUT(p,FSI_STRUCTSIG,v)
+#  define FSI_PUTFREECOUNT(p,v)     UINT32_PUT(p,FSI_FREECOUNT,v)
+#  define FSI_PUTNXTFREE(p,v)       UINT32_PUT(p,FSI_NXTFREE,v)
+#  define FSI_PUTTRAILSIG(p,v)      UINT32_PUT(p,FSI_TRAILSIG,v)
+
+#  define DIR_PUTCRTIME(p,v)        UINT16_PUT(p,DIR_CRTIME,v)
+#  define DIR_PUTCRDATE(p,v)        UINT16_PUT(p,DIR_CRDATE,v)
+#  define DIR_PUTLASTACCDATE(p,v)   UINT16_PUT(p,DIR_LASTACCDATE,v)
+#  define DIR_PUTFSTCLUSTHI(p,v)    UINT16_PUT(p,DIR_FSTCLUSTHI,v)
+#  define DIR_PUTWRTTIME(p,v)       UINT16_PUT(p,DIR_WRTTIME,v)
+#  define DIR_PUTWRTDATE(p,v)       UINT16_PUT(p,DIR_WRTDATE,v)
+#  define DIR_PUTFSTCLUSTLO(p,v)    UINT16_PUT(p,DIR_FSTCLUSTLO,v)
+#  define DIR_PUTFILESIZE(p,v)      UINT32_PUT(p,DIR_FILESIZE,v)
+
+# ifdef CONFIG_FAT_LFN
+#    define LDIR_PUTWCHAR1(p,v)     UINT16_PUT(p,LDIR_WCHAR1_5,v)
+#    define LDIR_PUTWCHAR2(p,v)     UINT16_PUT(p,LDIR_WCHAR1_5+2,v)
+#    define LDIR_PUTWCHAR3(p,v)     UINT16_PUT(p,LDIR_WCHAR1_5+4,v)
+#    define LDIR_PUTWCHAR4(p,v)     UINT16_PUT(p,LDIR_WCHAR1_5+6,v)
+#    define LDIR_PUTWCHAR5(p,v)     UINT16_PUT(p,LDIR_WCHAR1_5+8,v)
+#    define LDIR_PUTWCHAR6(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11,v)
+#    define LDIR_PUTWCHAR7(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+2,v)
+#    define LDIR_PUTWCHAR8(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+4,v)
+#    define LDIR_PUTWCHAR9(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+6,v)
+#    define LDIR_PUTWCHAR10(p,v)    UINT16_PUT(p,LDIR_WCHAR6_11+8,v)
+#    define LDIR_PUTWCHAR11(p,v)    UINT16_PUT(p,LDIR_WCHAR6_11+10,v)
+#    define LDIR_PUTWCHAR12(p,v)    UINT16_PUT(p,LDIR_WCHAR12_13,v)
+#    define LDIR_PUTWCHAR13(p,v)    UINT16_PUT(p,LDIR_WCHAR12_13+2,v)
+#    define LDIR_PUTFSTCLUSTLO(p,v) UINT16_PUT(p,LDIR_FSTCLUSTLO,v)
+#  endif
+
+#  define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
+#  define FSI_PUTSTRUCTSIG(p,v)     UINT32_PUT(p,FSI_STRUCTSIG,v)
+#  define FSI_PUTFREECOUNT(p,v)     UINT32_PUT(p,FSI_FREECOUNT,v)
+#  define FSI_PUTNXTFREE(p,v)       UINT32_PUT(p,FSI_NXTFREE,v)
+#  define FSI_PUTTRAILSIG(p,v)      UINT32_PUT(p,FSI_TRAILSIG,v)
+
+#  define FAT_PUTFAT16(p,i,v)       UINT16_PUT(p,i,v)
+#  define FAT_PUTFAT32(p,i,v)       UINT32_PUT(p,i,v)
 
 #endif
 

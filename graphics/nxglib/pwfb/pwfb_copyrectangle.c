@@ -81,21 +81,21 @@ void NXGL_FUNCNAME(pwfb_copyrectangle, NXGLIB_SUFFIX)
 #if NXGLIB_BITSPERPIXEL < 8
   /* REVISIT: Doesn't the following assume 8 pixels in a byte */
 
-# ifdef CONFIG_NX_PACKEDMSFIRST
+#  ifdef CONFIG_NX_PACKEDMSFIRST
   /* Get the mask for pixels that are ordered so that they pack from the
    * MS byte down.
    */
 
   leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
   tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x - 1)));
-# else
+#  else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
   leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
   tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x - 1)));
-# endif
+#  endif
 #endif
 
   /* Then copy the image */

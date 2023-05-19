@@ -94,7 +94,7 @@
  */
 
 #ifndef CONFIG_NET_SLIP_NINTERFACES
-# define CONFIG_NET_SLIP_NINTERFACES 1
+#  define CONFIG_NET_SLIP_NINTERFACES 1
 #endif
 
 /*  SLIP special character codes ********************************************/

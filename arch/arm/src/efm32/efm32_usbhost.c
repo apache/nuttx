@@ -284,8 +284,8 @@ static void efm32_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t efm32_getreg(uint32_t addr);
 static void efm32_putreg(uint32_t addr, uint32_t value);
 #else
-# define efm32_getreg(addr)     getreg32(addr)
-# define efm32_putreg(addr,val) putreg32(val,addr)
+#  define efm32_getreg(addr)     getreg32(addr)
+#  define efm32_putreg(addr,val) putreg32(val,addr)
 #endif
 
 static inline void efm32_modifyreg(uint32_t addr, uint32_t clrbits,

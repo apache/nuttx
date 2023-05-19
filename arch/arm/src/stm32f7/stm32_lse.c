@@ -35,17 +35,17 @@
 #define LSERDY_TIMEOUT (500 * CONFIG_BOARD_LOOPSPERMSEC)
 
 #ifdef CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY
-# if CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-     CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
-#  error "Invalid LSE drive capability setting"
-#endif
+#  if CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#    error "Invalid LSE drive capability setting"
+#  endif
 #endif
 
 #ifdef CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-# if CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
-     CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
-#  error "Invalid LSE drive capability setting"
-#endif
+#  if CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
+#    error "Invalid LSE drive capability setting"
+#  endif
 #endif
 
 /****************************************************************************

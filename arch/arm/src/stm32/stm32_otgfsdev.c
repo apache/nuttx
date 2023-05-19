@@ -505,8 +505,8 @@ struct stm32_usbdev_s
 static uint32_t    stm32_getreg(uint32_t addr);
 static void        stm32_putreg(uint32_t val, uint32_t addr);
 #else
-# define stm32_getreg(addr)     getreg32(addr)
-# define stm32_putreg(val,addr) putreg32(val,addr)
+#  define stm32_getreg(addr)     getreg32(addr)
+#  define stm32_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Request queue operations *************************************************/
@@ -5366,9 +5366,9 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval  = OTGFS_GCCFG_PWRDWN;
 
-# ifdef CONFIG_USBDEV_VBUSSENSING
+#  ifdef CONFIG_USBDEV_VBUSSENSING
   regval |= OTGFS_GCCFG_VBDEN;
-# endif
+#  endif
 
 #else
   /* In the case of the all others the meaning of the bit is No VBUS
@@ -5377,12 +5377,12 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval  = (OTGFS_GCCFG_PWRDWN | OTGFS_GCCFG_VBUSASEN |
              OTGFS_GCCFG_VBUSBSEN);
-# ifndef CONFIG_USBDEV_VBUSSENSING
+#  ifndef CONFIG_USBDEV_VBUSSENSING
   regval |= OTGFS_GCCFG_NOVBUSSENS;
-# endif
-# ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
+#  endif
+#  ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
   regval |= OTGFS_GCCFG_SOFOUTEN;
-# endif
+#  endif
 #endif
   stm32_putreg(regval, STM32_OTGFS_GCCFG);
   up_mdelay(20);
@@ -5392,11 +5392,11 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
    */
 
 #if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
-# ifndef CONFIG_USBDEV_VBUSSENSING
+#  ifndef CONFIG_USBDEV_VBUSSENSING
   regval  =  stm32_getreg(STM32_OTGFS_GOTGCTL);
   regval |= (OTGFS_GOTGCTL_BVALOEN | OTGFS_GOTGCTL_BVALOVAL);
   stm32_putreg(regval, STM32_OTGFS_GOTGCTL);
-# endif
+#  endif
 #endif
 
   /* Force Device Mode */

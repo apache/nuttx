@@ -43,8 +43,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-# define rx65n_getreg(addr)      getreg8(addr)
-# define rx65n_putreg(val,addr)  putreg8(val,addr)
+#  define rx65n_getreg(addr)     getreg8(addr)
+#  define rx65n_putreg(val,addr) putreg8(val,addr)
 
 /* Configuration ************************************************************/
 

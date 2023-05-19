@@ -36,9 +36,9 @@
 /* Hexadecimal Representation ***********************************************/
 
 #ifdef __ASSEMBLY__
-# define _HX(h)   %##h
+#  define _HX(h)  %##h
 #else
-# define _HX(h)   0x##h
+#  define _HX(h)  0x##h
 #endif
 
 /* Memory Map

@@ -426,9 +426,9 @@ static uint32_t rx65n_getreg(uint32_t addr);
 static void rx65n_putreg(uint32_t val, uint32_t addr);
 static void rx65n_checksetup(void);
 #else
-# define rx65n_getreg(addr)      getreg32(addr)
-# define rx65n_putreg(val,addr)  putreg32(val,addr)
-# define rx65n_checksetup()
+#  define rx65n_getreg(addr)     getreg32(addr)
+#  define rx65n_putreg(val,addr) putreg32(val,addr)
+#  define rx65n_checksetup()
 #endif
 
 /* Debug */

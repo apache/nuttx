@@ -129,33 +129,33 @@
 
 #if defined(CONFIG_STM32_DAC1CH1_DMA) || defined(CONFIG_STM32_DAC1CH2_DMA) || \
     defined(CONFIG_STM32_DAC2CH1_DMA)
-# if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#   ifndef CONFIG_STM32_DMA2
-#     warning "STM32 F1/F3 DAC DMA support requires CONFIG_STM32_DMA2"
-#     undef CONFIG_STM32_DAC1CH1_DMA
-#     undef CONFIG_STM32_DAC1CH2_DMA
-#     undef CONFIG_STM32_DAC2CH1_DMA
-#   endif
-# elif defined(CONFIG_STM32_STM32F33XX)
-#   ifndef CONFIG_STM32_DMA1
-#     warning "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
-#     undef CONFIG_STM32_DAC1CH1_DMA
-#     undef CONFIG_STM32_DAC1CH2_DMA
-#     undef CONFIG_STM32_DAC2CH1_DMA
-#   endif
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#   ifndef CONFIG_STM32_DMA1
-#     warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
-#     undef CONFIG_STM32_DAC1CH1_DMA
-#     undef CONFIG_STM32_DAC1CH2_DMA
-#     undef CONFIG_STM32_DAC2CH1_DMA
-#   endif
-# else
-#   warning "No DAC DMA information for this STM32 family"
-#   undef CONFIG_STM32_DAC1CH1_DMA
-#   undef CONFIG_STM32_DAC1CH2_DMA
-#   undef CONFIG_STM32_DAC2CH1_DMA
-# endif
+#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#    ifndef CONFIG_STM32_DMA2
+#      warning "STM32 F1/F3 DAC DMA support requires CONFIG_STM32_DMA2"
+#      undef CONFIG_STM32_DAC1CH1_DMA
+#      undef CONFIG_STM32_DAC1CH2_DMA
+#      undef CONFIG_STM32_DAC2CH1_DMA
+#    endif
+#  elif defined(CONFIG_STM32_STM32F33XX)
+#    ifndef CONFIG_STM32_DMA1
+#      warning "STM32 F334 DAC DMA support requires CONFIG_STM32_DMA1"
+#      undef CONFIG_STM32_DAC1CH1_DMA
+#      undef CONFIG_STM32_DAC1CH2_DMA
+#      undef CONFIG_STM32_DAC2CH1_DMA
+#    endif
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#    ifndef CONFIG_STM32_DMA1
+#      warning "STM32 F4 DAC DMA support requires CONFIG_STM32_DMA1"
+#      undef CONFIG_STM32_DAC1CH1_DMA
+#      undef CONFIG_STM32_DAC1CH2_DMA
+#      undef CONFIG_STM32_DAC2CH1_DMA
+#    endif
+#  else
+#    warning "No DAC DMA information for this STM32 family"
+#    undef CONFIG_STM32_DAC1CH1_DMA
+#    undef CONFIG_STM32_DAC1CH2_DMA
+#    undef CONFIG_STM32_DAC2CH1_DMA
+#  endif
 #endif
 
 #if defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG1) || defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG2)
@@ -220,10 +220,10 @@
 #undef HAVE_DMA
 #if defined(CONFIG_STM32_DAC1CH1_DMA) || defined(CONFIG_STM32_DAC1CH2_DMA) || \
     defined(CONFIG_STM32_DAC2CH1_DMA)
-# if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-     defined(CONFIG_STM32_STM32F33XX)
-#  define HAVE_DMA        1
-#  define DAC_DMA         2
+#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+      defined(CONFIG_STM32_STM32F33XX)
+#    define HAVE_DMA        1
+#    define DAC_DMA         2
 #  if defined(CONFIG_STM32_DAC1CH1) && !defined(CONFIG_STM32_DAC1CH1_DMA_EXTERNAL)
 #    define DAC1CH1_DMA_CHAN   DMACHAN_DAC1_CH1
 #  endif
@@ -233,19 +233,19 @@
 #  if defined(CONFIG_STM32_DAC2CH1) && !defined(CONFIG_STM32_DAC2CH1_DMA_EXTERNAL)
 #    define DAC2CH1_DMA_CHAN   DMACHAN_DAC2_CH1
 #  endif
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  define HAVE_DMA        1
-#  define DAC_DMA         1
-#  if defined(CONFIG_STM32_DAC1CH1) && !defined(CONFIG_STM32_DAC1CH1_DMA_EXTERNAL)
-#    define DAC1CH1_DMA_CHAN   DMAMAP_DAC1
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#    define HAVE_DMA        1
+#    define DAC_DMA         1
+#    if defined(CONFIG_STM32_DAC1CH1) && !defined(CONFIG_STM32_DAC1CH1_DMA_EXTERNAL)
+#      define DAC1CH1_DMA_CHAN   DMAMAP_DAC1
+#    endif
+#    if defined(CONFIG_STM32_DAC1CH2) && !defined(CONFIG_STM32_DAC1CH2_DMA_EXTERNAL)
+#      define DAC1CH2_DMA_CHAN   DMAMAP_DAC1
+#    endif
+#    if defined(CONFIG_STM32_DAC2CH1) && !defined(CONFIG_STM32_DAC2CH1_DMA_EXTERNAL)
+#      define DAC2CH1_DMA_CHAN   DMAMAP_DAC2
+#    endif
 #  endif
-#  if defined(CONFIG_STM32_DAC1CH2) && !defined(CONFIG_STM32_DAC1CH2_DMA_EXTERNAL)
-#    define DAC1CH2_DMA_CHAN   DMAMAP_DAC1
-#  endif
-#  if defined(CONFIG_STM32_DAC2CH1) && !defined(CONFIG_STM32_DAC2CH1_DMA_EXTERNAL)
-#    define DAC2CH1_DMA_CHAN   DMAMAP_DAC2
-#  endif
-# endif
 #endif
 
 /* Timer configuration.  The STM32 supports 8 different trigger for DAC

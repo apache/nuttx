@@ -60,7 +60,7 @@
  */
 
 #ifndef VIRTIO_BLK_NINTERFACES
-# define VIRTIO_BLK_NINTERFACES 1
+#  define VIRTIO_BLK_NINTERFACES 1
 #endif
 
 /****************************************************************************

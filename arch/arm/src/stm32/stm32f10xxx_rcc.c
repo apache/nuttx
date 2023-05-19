@@ -671,18 +671,18 @@ static void stm32_stdclockconfig(void)
 
   /* If this is a value-line part and we are using the HSE as the PLL */
 
-# if defined(CONFIG_STM32_VALUELINE) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC)
+#  if defined(CONFIG_STM32_VALUELINE) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC)
 
-# if (STM32_CFGR_PLLXTPRE >> 17) != (STM32_CFGR2_PREDIV1 & 1)
-#  error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
-# endif
+#    if (STM32_CFGR_PLLXTPRE >> 17) != (STM32_CFGR2_PREDIV1 & 1)
+#      error STM32_CFGR_PLLXTPRE must match the LSB of STM32_CFGR2_PREDIV1
+#    endif
 
   /* Set the HSE prescaler */
 
   regval = STM32_CFGR2_PREDIV1;
   putreg32(regval, STM32_RCC_CFGR2);
 
-# endif
+#  endif
 #endif
 
   /* Value-line devices don't implement flash prefetch/waitstates */

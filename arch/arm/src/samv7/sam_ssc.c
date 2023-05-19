@@ -470,7 +470,7 @@ struct sam_ssc_s
 static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr,
                   uint32_t regval, uint32_t regaddr);
 #else
-# define        ssc_checkreg(priv,wr,regval,regaddr) (false)
+#  define       ssc_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
 static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,

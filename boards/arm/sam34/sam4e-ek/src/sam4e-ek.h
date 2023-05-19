@@ -399,7 +399,7 @@ void weak_function sam_spidev_initialize(void);
 #ifdef HAVE_HSMCI
 int sam_hsmci_initialize(int minor);
 #else
-# define sam_hsmci_initialize(minor) (-ENOSYS)
+#  define sam_hsmci_initialize(minor) (-ENOSYS)
 #endif
 
 /****************************************************************************

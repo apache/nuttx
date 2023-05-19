@@ -50,9 +50,9 @@
 #endif
 
 #ifdef CONFIG_MODLIB_DUMPBUFFER
-# define modlib_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
+#  define modlib_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
-# define modlib_dumpbuffer(m,b,n)
+#  define modlib_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

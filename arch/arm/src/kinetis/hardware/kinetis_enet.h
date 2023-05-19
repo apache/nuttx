@@ -489,13 +489,13 @@
  */
 
 #ifdef KINETIS_ENET_HAS_DBSWAP
-# ifndef CONFIG_ENDIAN_BIG
-#  define KINETIS_USE_DBSWAP
-# endif
+#  ifndef CONFIG_ENDIAN_BIG
+#    define KINETIS_USE_DBSWAP
+#  endif
 #else
-# ifndef CONFIG_ENDIAN_BIG
-#  define KINETIS_BUFFERS_SWAP
-# endif
+#  ifndef CONFIG_ENDIAN_BIG
+#    define KINETIS_BUFFERS_SWAP
+#  endif
 #endif
 
 #ifndef KINETIS_BUFFERS_SWAP

@@ -74,10 +74,10 @@
 #define X86_GDT_ENTRY_SIZE      0x8
 
 #define X86_GDT_CODE_SEL_NUM    1
-# define X86_GDT_CODE_SEL       (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#  define X86_GDT_CODE_SEL      (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
 #define X86_GDT_DATA_SEL_NUM    2
-# define X86_GDT_DATA_SEL       (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#  define X86_GDT_DATA_SEL      (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
 #define X86_GDT_ISTL_SEL_NUM    6
 #define X86_GDT_ISTH_SEL_NUM    (X86_GDT_ISTL_SEL_NUM + 1)
@@ -128,38 +128,38 @@
 #define X86_NUM_PAGE_ENTRY (PAGE_SIZE / X86_PAGE_ENTRY_SIZE)
 
 #define PAGE_SIZE        (0x1000)
-# define PAGE_MASK        (~(PAGE_SIZE - 1))
+#  define PAGE_MASK      (~(PAGE_SIZE - 1))
 
 #define HUGE_PAGE_SIZE   (0x200000)
-# define HUGE_PAGE_MASK   (~(HUGE_PAGE_SIZE - 1))
+#  define HUGE_PAGE_MASK (~(HUGE_PAGE_SIZE - 1))
 
 /* CPUID Leaf Definitions */
 
-#define X86_64_CPUID_CAP        0x01
-# define X86_64_CPUID_01_SSE3   (1 << 0)
-# define X86_64_CPUID_01_PCID   (1 << 17)
-# define X86_64_CPUID_01_X2APIC (1 << 21)
-# define X86_64_CPUID_01_TSCDEA (1 << 24)
-# define X86_64_CPUID_01_XSAVE  (1 << 26)
-# define X86_64_CPUID_01_RDRAND (1 << 30)
-#define X86_64_CPUID_TSC        0x15
+#define X86_64_CPUID_CAP         0x01
+#  define X86_64_CPUID_01_SSE3   (1 << 0)
+#  define X86_64_CPUID_01_PCID   (1 << 17)
+#  define X86_64_CPUID_01_X2APIC (1 << 21)
+#  define X86_64_CPUID_01_TSCDEA (1 << 24)
+#  define X86_64_CPUID_01_XSAVE  (1 << 26)
+#  define X86_64_CPUID_01_RDRAND (1 << 30)
+#define X86_64_CPUID_TSC         0x15
 
 /* MSR Definitions */
 
 #define MSR_FS_BASE             0xc0000100 /* 64bit FS base */
 
 #define MSR_EFER                0xc0000080
-# define EFER_LME               0x00000100
+#  define EFER_LME              0x00000100
 
 #define MSR_MTRR_DEF_TYPE       0x000002ff
-# define MTRR_ENABLE            0x00000800
+#  define MTRR_ENABLE           0x00000800
 
 #define MSR_IA32_TSC_DEADLINE   0x6e0
 
 #define MSR_IA32_APIC_BASE      0x01b
-# define MSR_IA32_APIC_EN       0x800
-# define MSR_IA32_APIC_X2APIC   0x400
-# define MSR_IA32_APIC_BSP      0x100
+#  define MSR_IA32_APIC_EN      0x800
+#  define MSR_IA32_APIC_X2APIC  0x400
+#  define MSR_IA32_APIC_BSP     0x100
 
 #define MSR_X2APIC_ID           0x802
 #define MSR_X2APIC_VER          0x803
@@ -169,7 +169,7 @@
 #define MSR_X2APIC_LDR          0x80d
 
 #define MSR_X2APIC_SPIV         0x80f
-# define MSR_X2APIC_SPIV_EN     0x100
+#  define MSR_X2APIC_SPIV_EN    0x100
 
 #define MSR_X2APIC_ISR0         0x810
 #define MSR_X2APIC_ISR1         0x811
@@ -200,25 +200,25 @@
 
 #define MSR_X2APIC_ESR          0x828
 #define MSR_X2APIC_ICR          0x830
-# define MSR_X2APIC_ICR_INIT           0x00000500  /* INIT/RESET */
-# define MSR_X2APIC_ICR_STARTUP        0x00000600  /* Startup IPI */
-# define MSR_X2APIC_ICR_DELIVS         0x00001000  /* Delivery status */
-# define MSR_X2APIC_ICR_ASSERT         0x00004000  /* Assert interrupt (vs deassert) */
-# define MSR_X2APIC_ICR_DEASSERT       0x00000000
-# define MSR_X2APIC_ICR_LEVEL          0x00008000  /* Level triggered */
-# define MSR_X2APIC_ICR_BCAST          0x00080000  /* Send to all APICs, including self. */
-# define MSR_X2APIC_ICR_BUSY           0x00001000
-# define MSR_X2APIC_ICR_FIXED          0x00000000
+#  define MSR_X2APIC_ICR_INIT          0x00000500  /* INIT/RESET */
+#  define MSR_X2APIC_ICR_STARTUP       0x00000600  /* Startup IPI */
+#  define MSR_X2APIC_ICR_DELIVS        0x00001000  /* Delivery status */
+#  define MSR_X2APIC_ICR_ASSERT        0x00004000  /* Assert interrupt (vs deassert) */
+#  define MSR_X2APIC_ICR_DEASSERT      0x00000000
+#  define MSR_X2APIC_ICR_LEVEL         0x00008000  /* Level triggered */
+#  define MSR_X2APIC_ICR_BCAST         0x00080000  /* Send to all APICs, including self. */
+#  define MSR_X2APIC_ICR_BUSY          0x00001000
+#  define MSR_X2APIC_ICR_FIXED         0x00000000
 #define MSR_X2APIC_LVTT         0x832
-# define MSR_X2APIC_LVTT_X1            0x0000000B  /* divide counts by 1 */
-# define MSR_X2APIC_LVTT_PERIODIC      0x00020000  /* Periodic */
-# define MSR_X2APIC_LVTT_TSC_DEADLINE  0x00040000  /* Enable TSC DEADLINE One-shot timer */
+#  define MSR_X2APIC_LVTT_X1           0x0000000B  /* divide counts by 1 */
+#  define MSR_X2APIC_LVTT_PERIODIC     0x00020000  /* Periodic */
+#  define MSR_X2APIC_LVTT_TSC_DEADLINE 0x00040000  /* Enable TSC DEADLINE One-shot timer */
 #define MSR_X2APIC_LVTTHER      0x833
 #define MSR_X2APIC_LVTPMR       0x834
 #define MSR_X2APIC_LINT0        0x835
 #define MSR_X2APIC_LINT1        0x836
 #define MSR_X2APIC_LERR         0x837
-# define MSR_X2APIC_MASKED             0x00010000  /* Interrupt masked */
+#  define MSR_X2APIC_MASKED            0x00010000  /* Interrupt masked */
 #define MSR_X2APIC_TMICT        0x838
 #define MSR_X2APIC_TMCCT        0x839
 #define MSR_X2APIC_TDCR         0x83e
@@ -228,10 +228,10 @@
 #define IOAPIC_BASE             0xfec00000
 #define IOAPIC_REG_INDEX        0x00
 #define IOAPIC_REG_DATA         0x10
-# define IOAPIC_REG_ID          0x00       /* Register index: ID */
-# define IOAPIC_REG_VER         0x01       /* Register index: version */
-# define IOAPIC_REG_TABLE       0x10       /* Redirection table base */
-# define IOAPIC_PIN_DISABLE     (1 << 16)  /* Disable */
+#  define IOAPIC_REG_ID         0x00       /* Register index: ID */
+#  define IOAPIC_REG_VER        0x01       /* Register index: version */
+#  define IOAPIC_REG_TABLE      0x10       /* Redirection table base */
+#  define IOAPIC_PIN_DISABLE    (1 << 16)  /* Disable */
 
 /* PIC related Definitions */
 

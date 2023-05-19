@@ -318,13 +318,13 @@
 
 #define GPDMA_CONTROL_S_SHIFT            (24) /* Bit 24: Source AHB master select */
 
-# define GPDMA_CONTROL_S0                (0 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 0 selected for source transfer. */
-# define GPDMA_CONTROL_S1                (1 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 1 selected for source transfer. */
+#  define GPDMA_CONTROL_S0               (0 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 0 selected for source transfer. */
+#  define GPDMA_CONTROL_S1               (1 << GPDMA_CONTROL_S_SHIFT) /* AHB Master 1 selected for source transfer. */
 
 #define GPDMA_CONTROL_D_SHIFT            (25) /* Bit 25: Destination AHB master select */
 
-# define GPDMA_CONTROL_D0                (0 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 0 selected for destination transfer. */
-# define GPDMA_CONTROL_D1                (1 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 1 selected for destination transfer. */
+#  define GPDMA_CONTROL_D0               (0 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 0 selected for destination transfer. */
+#  define GPDMA_CONTROL_D1               (1 << GPDMA_CONTROL_D_SHIFT) /* AHB Master 1 selected for destination transfer. */
 
 #define GPDMA_CONTROL_SI                 (1 << 26) /* Bit 26: Source increment */
 #define GPDMA_CONTROL_DI                 (1 << 27) /* Bit 27: Destination increment */

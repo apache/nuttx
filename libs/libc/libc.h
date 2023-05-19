@@ -50,7 +50,7 @@
  */
 
 #ifndef CONFIG_LIBC_HOMEDIR
-# define CONFIG_LIBC_HOMEDIR "/"
+#  define CONFIG_LIBC_HOMEDIR "/"
 #endif
 
 #define LIB_BUFLEN_UNKNOWN INT_MAX

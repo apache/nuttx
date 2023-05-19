@@ -39,9 +39,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_USAGEFAULT
-# define ufalert(format, ...)  _alert(format, ##__VA_ARGS__)
+#  define ufalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
-# define ufalert(x...)
+#  define ufalert(x...)
 #endif
 
 /****************************************************************************

@@ -101,14 +101,14 @@ struct can_conn_s
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
   int32_t loopback;
   int32_t recv_own_msgs;
-#ifdef CONFIG_NET_CAN_CANFD
+#  ifdef CONFIG_NET_CAN_CANFD
   int32_t fd_frames;
-#endif
+#  endif
   struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
   int32_t filter_count;
-# ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+#  ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   int32_t tx_deadline;
-# endif
+#  endif
 #endif
 #ifdef CONFIG_NET_TIMESTAMP
   int32_t timestamp; /* Socket timestamp enabled/disabled */

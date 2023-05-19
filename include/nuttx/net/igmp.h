@@ -148,9 +148,9 @@ struct igmp_stats_s
   net_stats_t report_received;
 };
 
-# define IGMP_STATINCR(p) ((p)++)
+#  define IGMP_STATINCR(p) ((p)++)
 #else
-# define IGMP_STATINCR(p)
+#  define IGMP_STATINCR(p)
 #endif
 
 /****************************************************************************

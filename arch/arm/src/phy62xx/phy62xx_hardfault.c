@@ -42,15 +42,15 @@ extern uint8_t _stextram[];
 extern uint8_t _etextram[];
 
 #ifdef CONFIG_DEBUG_HARDFAULT_ALERT
-# define hfalert(format, ...)  _alert(format, ##__VA_ARGS__)
+#  define hfalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
-# define hfalert(x...)
+#  define hfalert(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_HARDFAULT_INFO
-# define hfinfo(format, ...)   _info(format, ##__VA_ARGS__)
+#  define hfinfo(format, ...)  _info(format, ##__VA_ARGS__)
 #else
-# define hfinfo(x...)
+#  define hfinfo(x...)
 #endif
 
 #define INSN_SVC0        0xdf00 /* insn: svc 0 */

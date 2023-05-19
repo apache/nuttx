@@ -142,7 +142,7 @@ struct telnet_dev_s
 static inline void telnet_dumpbuffer(FAR const char *msg,
                  FAR const char *buffer, unsigned int nbytes);
 #else
-# define telnet_dumpbuffer(msg,buffer,nbytes)
+#  define telnet_dumpbuffer(msg,buffer,nbytes)
 #endif
 static void    telnet_getchar(FAR struct telnet_dev_s *priv, uint8_t ch,
                  FAR char *dest, int *nread);

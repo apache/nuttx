@@ -1012,7 +1012,7 @@
 #define GPR_GPR2_L2_MEM_FORCE_DEEPSLEEP                         (1 << 14)
 #define GPR_GPR2_MQS_CLK_DIV_SHIFT                              (16)
 #define GPR_GPR2_MQS_CLK_DIV_MASK                               (255 << GPR_GPR2_MQS_CLK_DIV_SHIFT)
-# define GPR_GPR2_MQS_CLK_DIV(n)                                ((n - 1) << GPR_GPR2_MQS_CLK_DIV_SHIFT)
+#  define GPR_GPR2_MQS_CLK_DIV(n)                               ((n - 1) << GPR_GPR2_MQS_CLK_DIV_SHIFT)
 #define GPR_GPR2_MQS_SW_RST_EN                                  (1 << 24)
 #define GPR_GPR2_MQS_EN                                         (1 << 25)
 #define GPR_GPR2_MQS_OVERSAMPLE32                               (0 << 26)

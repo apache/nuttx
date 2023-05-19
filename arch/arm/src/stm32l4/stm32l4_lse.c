@@ -34,17 +34,17 @@
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY
-# if CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-     CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
-#  error "Invalid LSE drive capability setting"
-#endif
+#  if CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#    error "Invalid LSE drive capability setting"
+#  endif
 #endif
 
 #ifdef CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-# if CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
-     CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
-#  error "Invalid LSE drive capability setting"
-#endif
+#  if CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
+#    error "Invalid LSE drive capability setting"
+#  endif
 #endif
 
 /****************************************************************************

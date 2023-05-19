@@ -209,11 +209,11 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_MX25L_DEBUG
-# define mxlerr(format, ...)    _err(format, ##__VA_ARGS__)
-# define mxlinfo(format, ...)   _info(format, ##__VA_ARGS__)
+#  define mxlerr(format, ...)    _err(format, ##__VA_ARGS__)
+#  define mxlinfo(format, ...)   _info(format, ##__VA_ARGS__)
 #else
-# define mxlerr(x...)
-# define mxlinfo(x...)
+#  define mxlerr(x...)
+#  define mxlinfo(x...)
 #endif
 
 /****************************************************************************

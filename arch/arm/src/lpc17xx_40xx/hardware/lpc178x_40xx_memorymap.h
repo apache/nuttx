@@ -50,15 +50,15 @@
 /* Off chip Memory via External Memory Interface */
 
 #define LPC17_40_EXTRAM_BASE    0x80000000 /*  */
-# define LPC17_40_EXTSRAM_CS0   0x80000000 /* Chip select 0 /up to 64MB/  */
-# define LPC17_40_EXTSRAM_CS1   0x90000000 /* Chip select 1 /up to 64MB/  */
-# define LPC17_40_EXTSRAM_CS2   0x98000000 /* Chip select 2 /up to 64MB/  */
-# define LPC17_40_EXTSRAM_CS3   0x9c000000 /* Chip select 3 /up to 64MB/  */
+#  define LPC17_40_EXTSRAM_CS0  0x80000000 /* Chip select 0 /up to 64MB/  */
+#  define LPC17_40_EXTSRAM_CS1  0x90000000 /* Chip select 1 /up to 64MB/  */
+#  define LPC17_40_EXTSRAM_CS2  0x98000000 /* Chip select 2 /up to 64MB/  */
+#  define LPC17_40_EXTSRAM_CS3  0x9c000000 /* Chip select 3 /up to 64MB/  */
 
-# define LPC17_40_EXTDRAM_CS0   0xa0000000 /* Chip select 0 /up to 256MB/  */
-# define LPC17_40_EXTDRAM_CS1   0xb0000000 /* Chip select 1 /up to 256MB/  */
-# define LPC17_40_EXTDRAM_CS2   0xc0000000 /* Chip select 2 /up to 256MB/  */
-# define LPC17_40_EXTDRAM_CS3   0xd0000000 /* Chip select 3 /up to 256MB/  */
+#  define LPC17_40_EXTDRAM_CS0  0xa0000000 /* Chip select 0 /up to 256MB/  */
+#  define LPC17_40_EXTDRAM_CS1  0xb0000000 /* Chip select 1 /up to 256MB/  */
+#  define LPC17_40_EXTDRAM_CS2  0xc0000000 /* Chip select 2 /up to 256MB/  */
+#  define LPC17_40_EXTDRAM_CS3  0xd0000000 /* Chip select 3 /up to 256MB/  */
 
 #define LPC17_40_CORTEXM3_BASE  0xe0000000 /* -0xe00fffff: (see armv7-m/nvic.h) */
 #define LPC17_40_SCS_BASE       0xe000e000

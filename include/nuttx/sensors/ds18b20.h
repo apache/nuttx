@@ -51,9 +51,9 @@ struct ds18b20_alarm_s
 {
   int8_t thigh;           /* Upper alarm temperature */
   int8_t tlow;            /* Lower alarm temperature */
-# ifdef CONFIG_SENSORS_DS18B20_POLL
+#  ifdef CONFIG_SENSORS_DS18B20_POLL
   bool   wakeup;          /* Wakeup poll requests only when alarm detected */
-# endif
+#  endif
 };
 
 /****************************************************************************

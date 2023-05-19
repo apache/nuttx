@@ -323,7 +323,7 @@ struct stm32_i2s_s
 static bool     i2s_checkreg(struct stm32_i2s_s *priv, bool wr,
                              uint16_t regval, uint32_t regaddr);
 #else
-# define        i2s_checkreg(priv,wr,regval,regaddr) (false)
+#  define       i2s_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
 static inline uint16_t i2s_getreg(struct stm32_i2s_s *priv, uint8_t offset);

@@ -391,9 +391,9 @@ struct mld_stats_s
   net_stats_t done_received;         /* DONE packets received */
 };
 
-# define MLD_STATINCR(p) ((p)++)
+#  define MLD_STATINCR(p) ((p)++)
 #else
-# define MLD_STATINCR(p)
+#  define MLD_STATINCR(p)
 #endif
 
 /****************************************************************************

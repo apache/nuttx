@@ -302,7 +302,7 @@ static bool pwm_checkreg(struct sam_pwm_s *chan,
                          bool wr, uint32_t regval,
                          uintptr_t regaddr);
 #else
-# define pwm_checkreg(chan,wr,regval,regaddr) (false)
+#  define pwm_checkreg(chan,wr,regval,regaddr) (false)
 #endif
 
 static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset);

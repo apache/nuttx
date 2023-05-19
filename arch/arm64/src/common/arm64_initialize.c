@@ -133,7 +133,7 @@ static void up_color_intstack(void)
   arm64_stack_color(ptr, INTSTACK_SIZE);
 }
 #else
-# define up_color_intstack()
+#  define up_color_intstack()
 #endif
 
 /****************************************************************************

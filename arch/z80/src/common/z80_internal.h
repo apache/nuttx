@@ -131,16 +131,16 @@ void z80_timerhook(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 int  z80_netinitialize(void);
 void z80_netuninitialize(void);
-# ifdef CONFIG_ARCH_MCFILTER
+#  ifdef CONFIG_ARCH_MCFILTER
 int z80_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac,
                        bool enable);
-# else
-#   define z80_multicastfilter(dev, mac, enable)
-# endif
+#  else
+#    define z80_multicastfilter(dev, mac, enable)
+#  endif
 #else
-# define z80_netinitialize()
-# define z80_netuninitialize()
-# define z80_multicastfilter(dev, mac, enable)
+#  define z80_netinitialize()
+#  define z80_netuninitialize()
+#  define z80_multicastfilter(dev, mac, enable)
 #endif
 
 #ifdef __cplusplus
