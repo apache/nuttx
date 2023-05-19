@@ -3356,10 +3356,43 @@ config SAMA5_SPI_DMA
 	---help---
 		Use DMA to improve SPI transfer performance.
 
+config SAMA5_SPI_XDMA
+	bool "SPI XDMA"
+	default n
+	depends on SAMA5_XDMAC0 || SAMA5_XDMAC1    
+	---help---
+		Use XDMA to improve SPI transfer performance.
+
+choice
+	prompt "SPI0 XDMAC channel selection"
+	default SAMA5_SPI0_XDMAC0
+	depends on SAMA5_SPI_XDMA && SAMA5_SPI0
+
+config SAMA5_SPI0_XDMAC0
+	bool "XDMAC0"
+
+config SAMA5_SPI0_XDMAC1
+	bool "XDMAC1"
+
+endchoice
+
+choice
+	prompt "SPI1 XDMAC channel selection"
+	default SAMA5_SPI1_XDMAC0
+	depends on SAMA5_SPI_XDMA && SAMA5_SPI1
+
+config SAMA5_SPI1_XDMAC0
+	bool "XDMAC0"
+
+config SAMA5_SPI1_XDMAC1
+	bool "XDMAC1"
+
+endchoice
+
 config SAMA5_SPI_DMATHRESHOLD
 	int "SPI DMA threshold"
 	default 4
-	depends on SAMA5_SPI_DMA
+	depends on SAMA5_SPI_DMA || SAMA5_SPI_XDMA
 	---help---
 		When SPI DMA is enabled, small DMA transfers will still be performed
 		by polling logic.  But we need a threshold value to determine what
@@ -3367,7 +3400,7 @@ config SAMA5_SPI_DMATHRESHOLD
 
 config SAMA5_SPI_DMADEBUG
 	bool "SPI DMA transfer debug"
-	depends on SAMA5_SPI_DMA && DEBUG_FEATURES && DEBUG_DMA
+	depends on (SAMA5_SPI_DMA || SAMA5_SPI_XDMA) && DEBUG_FEATURES && DEBUG_DMA
 	default n
 	---help---
 		Enable special debug instrumentation analyze SPI DMA data transfers.
@@ -3403,7 +3436,7 @@ config SAMA5_FLEXCOM_SPI_DMAC_NUMBER
 	range 0 1
 	depends on SAMA5_FLEXCOM_SPI_DMA
 	---help---
-		Select witch xdma controller to use for Flexcom SPI DMA.
+		Select which xdma controller to use for Flexcom SPI DMA.
 
 config SAMA5_FLEXCOM_SPI_DMATHRESHOLD
 	int "FLEXCOM SPI DMA threshold"
