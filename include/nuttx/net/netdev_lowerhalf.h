@@ -41,6 +41,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/wireless/wireless.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,9 +88,16 @@ enum netpkt_type_e
  */
 
 struct netdev_ops_s;
+struct wireless_ops_s;
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
+
+  /* Extended operations. */
+
+#ifdef CONFIG_NETDEV_WIRELESS_HANDLER
+  FAR const struct wireless_ops_s *iw_ops;
+#endif
 
   /* Max # of buffer held by driver */
 
@@ -147,6 +155,46 @@ struct netdev_ops_s
                unsigned long arg);
 #endif
 };
+
+/* This structure is a set of wireless handlers, leave unsupported operations
+ * as NULL is OK.
+ */
+
+#ifdef CONFIG_NETDEV_WIRELESS_HANDLER
+typedef int (*iw_handler_rw)(FAR struct netdev_lowerhalf_s *dev,
+                             FAR struct iwreq *iwr, bool set);
+typedef int (*iw_handler_ro)(FAR struct netdev_lowerhalf_s *dev,
+                             FAR struct iwreq *iwr);
+
+struct wireless_ops_s
+{
+  /* Connect / disconnect operation, should exist if essid or bssid exists */
+
+  int (*connect)(FAR struct netdev_lowerhalf_s *dev);
+  int (*disconnect)(FAR struct netdev_lowerhalf_s *dev);
+
+  /* The following attributes need both set and get. */
+
+  iw_handler_rw essid;
+  iw_handler_rw bssid;
+  iw_handler_rw passwd;
+  iw_handler_rw mode;
+  iw_handler_rw auth;
+  iw_handler_rw freq;
+  iw_handler_rw bitrate;
+  iw_handler_rw txpower;
+  iw_handler_rw country;
+  iw_handler_rw sensitivity;
+
+  /* Scan operation: start scan (set=1) / get scan result (set=0). */
+
+  iw_handler_rw scan;
+
+  /* Get-only attributes. */
+
+  iw_handler_ro range;
+};
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

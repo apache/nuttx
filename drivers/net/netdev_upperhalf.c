@@ -538,6 +538,250 @@ static int netdev_upper_txavail(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: netdev_upper_wireless_ioctl
+ *
+ * Description:
+ *   Support for wireless handlers in ioctl.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_WIRELESS_HANDLER
+int netdev_upper_wireless_ioctl(FAR struct netdev_lowerhalf_s *lower,
+                                int cmd, unsigned long arg)
+{
+  int ret = -ENOTTY; /* Default to ENOTTY to indicate not serving. */
+  FAR struct iwreq *iwr = (FAR struct iwreq *)arg;
+  FAR const struct wireless_ops_s *ops = lower->iw_ops;
+  const struct ether_addr zero =
+    {
+    };
+
+  /* Decode and dispatch the driver-specific IOCTL command */
+
+  switch (cmd)
+    {
+      case SIOCSIWENCODEEXT: /* Set encoding token & mode */
+        if (ops->passwd)
+          {
+            ret = ops->passwd(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWENCODEEXT: /* Get encoding token & mode */
+        if (ops->passwd)
+          {
+            ret = ops->passwd(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWESSID: /* Set ESSID */
+        if (ops->essid)
+          {
+            if ((iwr->u.essid.flags == IW_ESSID_ON) ||
+                (iwr->u.essid.flags == IW_ESSID_DELAY_ON))
+              {
+                ret = ops->essid(lower, iwr, true);
+                if (ret < 0)
+                  {
+                    break;
+                  }
+
+                if (iwr->u.essid.flags == IW_ESSID_ON)
+                  {
+                    ret = ops->connect(lower);
+                    if (ret < 0)
+                      {
+                        nerr("ERROR: Failed to connect\n");
+                        break;
+                      }
+                  }
+              }
+            else
+              {
+                ret = ops->disconnect(lower);
+                if (ret < 0)
+                  {
+                    nerr("ERROR: Failed to disconnect\n");
+                    break;
+                  }
+              }
+          }
+        break;
+
+      case SIOCGIWESSID: /* Get ESSID */
+        if (ops->essid)
+          {
+            ret = ops->essid(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWAP: /* Set access point MAC addresses */
+        if (ops->bssid)
+          {
+            if (memcmp(iwr->u.ap_addr.sa_data, &zero, sizeof(zero)) != 0)
+              {
+                ret = ops->bssid(lower, iwr, true);
+                if (ret < 0)
+                  {
+                    nerr("ERROR: Failed to set BSSID\n");
+                    break;
+                  }
+
+                ret = ops->connect(lower);
+                if (ret < 0)
+                  {
+                    nerr("ERROR: Failed to connect\n");
+                    break;
+                  }
+              }
+            else
+              {
+                ret = ops->disconnect(lower);
+                if (ret < 0)
+                  {
+                    nerr("ERROR: Failed to disconnect\n");
+                    break;
+                  }
+              }
+          }
+        break;
+
+      case SIOCGIWAP: /* Get access point MAC addresses */
+        if (ops->bssid)
+          {
+            ret = ops->bssid(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWSCAN: /* Trigger scanning */
+        if (ops->scan)
+          {
+            ret = ops->scan(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWSCAN: /* Get scanning results */
+        if (ops->scan)
+          {
+            ret = ops->scan(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWCOUNTRY: /* Set country code */
+        if (ops->country)
+          {
+            ret = ops->country(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWCOUNTRY: /* Get country code */
+        if (ops->country)
+          {
+            ret = ops->country(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWSENS: /* Set sensitivity (dBm) */
+        if (ops->sensitivity)
+          {
+            ret = ops->sensitivity(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWSENS: /* Get sensitivity (dBm) */
+        if (ops->sensitivity)
+          {
+            ret = ops->sensitivity(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWMODE: /* Set operation mode */
+        if (ops->mode)
+          {
+            ret = ops->mode(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWMODE: /* Get operation mode */
+        if (ops->mode)
+          {
+            ret = ops->mode(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWAUTH: /* Set authentication mode params */
+        if (ops->auth)
+          {
+            ret = ops->auth(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWAUTH: /* Get authentication mode params */
+        if (ops->auth)
+          {
+            ret = ops->auth(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWFREQ: /* Set channel/frequency (MHz) */
+        if (ops->freq)
+          {
+            ret = ops->freq(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWFREQ: /* Get channel/frequency (MHz) */
+        if (ops->freq)
+          {
+            ret = ops->freq(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWRATE: /* Set default bit rate (Mbps) */
+        if (ops->bitrate)
+          {
+            ret = ops->bitrate(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWRATE: /* Get default bit rate (Mbps) */
+        if (ops->bitrate)
+          {
+            ret = ops->bitrate(lower, iwr, false);
+          }
+        break;
+
+      case SIOCSIWTXPOW: /* Set transmit power (dBm) */
+        if (ops->txpower)
+          {
+            ret = ops->txpower(lower, iwr, true);
+          }
+        break;
+
+      case SIOCGIWTXPOW: /* Get transmit power (dBm) */
+        if (ops->txpower)
+          {
+            ret = ops->txpower(lower, iwr, false);
+          }
+        break;
+
+      case SIOCGIWRANGE: /* Get range of parameters */
+        if (ops->range)
+          {
+            ret = ops->range(lower, iwr);
+          }
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
+        break;
+    }
+
+  return ret;
+}
+#endif  /* CONFIG_NETDEV_WIRELESS_HANDLER */
+
+/****************************************************************************
  * Name: netdev_upper_ifup/ifdown/addmac/rmmac/ioctl
  *
  * Description:
@@ -632,10 +876,22 @@ static int netdev_upper_ioctl(FAR struct net_driver_s *dev, int cmd,
                               unsigned long arg)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  FAR struct netdev_lowerhalf_s *lower = upper->lower;
 
-  if (upper->lower->ops->ioctl)
+#ifdef CONFIG_NETDEV_WIRELESS_HANDLER
+  if (lower->iw_ops)
     {
-      return upper->lower->ops->ioctl(upper->lower, cmd, arg);
+      int ret = netdev_upper_wireless_ioctl(lower, cmd, arg);
+      if (ret != -ENOTTY)
+        {
+          return ret;
+        }
+    }
+#endif
+
+  if (lower->ops->ioctl)
+    {
+      return lower->ops->ioctl(lower, cmd, arg);
     }
 
   return -ENOTTY;
