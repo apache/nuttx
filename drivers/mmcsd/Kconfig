@@ -163,6 +163,13 @@ config SDIO_BLOCKSETUP
 		number of blocks.  Others just work on the byte stream.  This option
 		enables the block setup method in the SDIO vtable.
 
+config MMCSD_BLOCK_WDATADELAY
+	int "The wait timeout to write one data block"
+	default 260
+	---help---
+		Some hardware needs to configure this delay to write one data block, because
+		the hardware needs more time for wear leveling and bad block management.
+
 endif
 
 endif # MMCSD
