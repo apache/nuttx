@@ -83,7 +83,10 @@
 
 #define MMCSD_SCR_DATADELAY     (100)      /* Wait up to 100MS to get SCR */
 #define MMCSD_BLOCK_RDATADELAY  (100)      /* Wait up to 100MS to get one data block */
-#define MMCSD_BLOCK_WDATADELAY  (260)      /* Wait up to 260MS to write one data block */
+
+/* Wait timeout to write one data block */
+
+#define MMCSD_BLOCK_WDATADELAY  CONFIG_MMCSD_BLOCK_WDATADELAY
 
 #define IS_EMPTY(priv) (priv->type == MMCSD_CARDTYPE_UNKNOWN)
 
