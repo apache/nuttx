@@ -76,6 +76,17 @@ SECTIONS
 
     *(.iram1 .iram1.*)
 
+    *libarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
+    *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
+
+    *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
+    *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
+    *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
+
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
     *(.wifiorslpiram .wifiorslpiram.*)
