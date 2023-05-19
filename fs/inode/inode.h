@@ -427,8 +427,10 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_PSEUDOFS_FILE
 int pseudofile_create(FAR struct inode **node, FAR const char *path,
                       mode_t mode);
+#endif
 
 /****************************************************************************
  * Name: inode_is_pseudofile
@@ -438,7 +440,9 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_PSEUDOFS_FILE
 bool inode_is_pseudofile(FAR struct inode *inode);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
