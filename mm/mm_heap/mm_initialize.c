@@ -117,7 +117,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
     }
 
 #else
-# define IDX 0
+#  define IDX 0
 #endif
 
 #if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)

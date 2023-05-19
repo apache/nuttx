@@ -205,7 +205,7 @@
                                                            /* Bits 13-15: Reserved */
 #define CCM_CBCDR_SEMC_PODF_SHIFT                (16)      /* Bits 16-18: Post divider for SEMC clock */
 #define CCM_CBCDR_SEMC_PODF_MASK                 (0x3 << CCM_CBCDR_SEMC_PODF_SHIFT)
-# define CCM_CBCDR_SEMC_PODF(n)                  ((uint32_t)(n) << CCM_CBCDR_SEMC_PODF_SHIFT)
+#  define CCM_CBCDR_SEMC_PODF(n)                 ((uint32_t)(n) << CCM_CBCDR_SEMC_PODF_SHIFT)
                                                            /* Bits 19-24: Reserved */
 #define CCM_CBCDR_PERIPH_CLK_SEL_SHIFT           (25)      /* Bit 25:     Selector for peripheral main clock */
 #define CCM_CBCDR_PERIPH_CLK_SEL_MASK            (1 << CCM_CBCDR_PERIPH_CLK_SEL_SHIFT)
@@ -268,7 +268,7 @@
                                                            /* Bits 20-22: Reserved */
 #define CCM_CBCMR_LCDIF_PODF_SHIFT               (23)      /* Bits 23-25: Post-divider for LCDIF clock */
 #define CCM_CBCMR_LCDIF_PODF_MASK                (0x7 << CCM_CBCMR_LCDIF_PODF_SHIFT)
-# define CCM_CBCMR_LCDIF_PODF(n)                 ((uint32_t)(n) << CCM_CBCMR_LCDIF_PODF_SHIFT)
+#  define CCM_CBCMR_LCDIF_PODF(n)                ((uint32_t)(n) << CCM_CBCMR_LCDIF_PODF_SHIFT)
 #define CCM_CBCMR_LPSPI_PODF_SHIFT               (26)      /* Bits 26-28: Divider for LPSPI */
 #define CCM_CBCMR_LPSPI_PODF_MASK                (0x7 << CCM_CBCMR_LPSPI_PODF_SHIFT)
 #  define CCM_CBCMR_LPSPI_PODF(n)                ((uint32_t)(n) << CCM_CBCMR_LPSPI_PODF_SHIFT)

@@ -69,7 +69,7 @@
 #  ifndef CONFIG_COMPOSITE_VENDORSTR
 #    warning "No Vendor string specified"
 #    define CONFIG_COMPOSITE_VENDORSTR  "NuttX"
-# endif
+#  endif
 
 #  ifndef CONFIG_COMPOSITE_PRODUCTSTR
 #    warning "No Product string specified"

@@ -208,7 +208,7 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
 #ifdef CONFIG_NET_ARP_IPIN
 void arp_ipin(FAR struct net_driver_s *dev);
 #else
-# define arp_ipin(dev)
+#  define arp_ipin(dev)
 #endif
 
 /****************************************************************************

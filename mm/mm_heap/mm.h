@@ -127,9 +127,9 @@
 #define MM_PREVFREE_BIT  0x2
 #define MM_MASK_BIT      (MM_ALLOC_BIT | MM_PREVFREE_BIT)
 #ifdef CONFIG_MM_SMALL
-# define MMSIZE_MAX      UINT16_MAX
+#  define MMSIZE_MAX     UINT16_MAX
 #else
-# define MMSIZE_MAX      UINT32_MAX
+#  define MMSIZE_MAX     UINT32_MAX
 #endif
 
 /* What is the size of the allocnode? */

@@ -89,7 +89,7 @@
 #endif
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
-# define SAMV7_QSPI0_DMA true
+#  define SAMV7_QSPI0_DMA true
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI_DMA
@@ -206,7 +206,7 @@ struct sam_qspidev_s
 static bool     qspi_checkreg(struct sam_qspidev_s *priv, bool wr,
                   uint32_t value, uint32_t address);
 #else
-# define        qspi_checkreg(priv,wr,value,address) (false)
+#  define       qspi_checkreg(priv,wr,value,address) (false)
 #endif
 
 static inline uint32_t qspi_getreg(struct sam_qspidev_s *priv,
@@ -217,7 +217,7 @@ static inline void qspi_putreg(struct sam_qspidev_s *priv, uint32_t value,
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void     qspi_dumpregs(struct sam_qspidev_s *priv, const char *msg);
 #else
-# define        qspi_dumpregs(priv,msg)
+#  define       qspi_dumpregs(priv,msg)
 #endif
 
 /* DMA support */

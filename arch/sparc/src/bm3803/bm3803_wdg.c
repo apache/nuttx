@@ -77,8 +77,8 @@ struct bm3803_lowerhalf_s
 
 /* Register operations ******************************************************/
 
-# define        bm3803_getreg(addr)     getreg32(addr)
-# define        bm3803_putreg(val,addr) putreg32(val,addr)
+#  define        bm3803_getreg(addr)     getreg32(addr)
+#  define        bm3803_putreg(val,addr) putreg32(val,addr)
 
 static inline void bm3803_setreload(struct bm3803_lowerhalf_s *priv);
 

@@ -711,9 +711,9 @@ static inline uint32_t sam_getreg16(uintptr_t regaddr);
 static inline void sam_putreg16(uint16_t regval, uintptr_t regaddr);
 static inline uint32_t sam_getreg8(uintptr_t regaddr);
 static inline void sam_putreg8(uint8_t regval, uintptr_t regaddr);
-# define sam_dumpep(priv, epno)
+#  define sam_dumpep(priv, epno)
 #ifdef CONFIG_USBHOST
-# define sam_dumppipe(priv, epno)
+#  define sam_dumppipe(priv, epno)
 #endif
 #endif
 static inline void sam_modifyreg8(uint32_t clrbits,

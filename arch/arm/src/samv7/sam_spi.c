@@ -204,7 +204,7 @@ struct sam_spidev_s
 static bool     spi_checkreg(struct sam_spidev_s *spi, bool wr,
                   uint32_t value, uint32_t address);
 #else
-# define        spi_checkreg(spi,wr,value,address) (false)
+#  define       spi_checkreg(spi,wr,value,address) (false)
 #endif
 
 static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
@@ -216,7 +216,7 @@ static inline struct sam_spidev_s *spi_device(struct sam_spics_s *spics);
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
 #else
-# define        spi_dumpregs(spi,msg)
+#  define       spi_dumpregs(spi,msg)
 #endif
 
 static inline void spi_flush(struct sam_spidev_s *spi);

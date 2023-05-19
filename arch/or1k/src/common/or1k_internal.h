@@ -286,7 +286,7 @@ void or1k_l2ccinitialize(void);
 #if CONFIG_MM_REGIONS > 1
 void or1k_addregion(void);
 #else
-# define or1k_addregion()
+#  define or1k_addregion()
 #endif
 
 /* Networking ***************************************************************/
@@ -304,7 +304,7 @@ void or1k_addregion(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void or1k_etinitialize(void);
 #else
-# define or1k_etinitialize()
+#  define or1k_etinitialize()
 #endif
 
 /* USB **********************************************************************/
@@ -313,8 +313,8 @@ void or1k_etinitialize(void);
 void or1k_usbinitialize(void);
 void or1k_usbuninitialize(void);
 #else
-# define or1k_usbinitialize()
-# define or1k_usbuninitialize()
+#  define or1k_usbinitialize()
+#  define or1k_usbuninitialize()
 #endif
 
 /* Debug ********************************************************************/

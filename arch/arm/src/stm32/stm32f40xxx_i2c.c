@@ -150,14 +150,14 @@
 
 #ifdef CONFIG_STM32_I2C_DMA
 
-# if defined(CONFIG_I2C_DMAPRIO)
-#   if (CONFIG_I2C_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#     error "Illegal value for CONFIG_I2C_DMAPRIO"
-#   endif
-#   define I2C_DMA_PRIO     CONFIG_I2C_DMAPRIO
-# else
-#   define I2C_DMA_PRIO     DMA_SCR_PRIMED
-# endif
+#  if defined(CONFIG_I2C_DMAPRIO)
+#    if (CONFIG_I2C_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_I2C_DMAPRIO"
+#    endif
+#    define I2C_DMA_PRIO     CONFIG_I2C_DMAPRIO
+#  else
+#    define I2C_DMA_PRIO     DMA_SCR_PRIMED
+#  endif
 
 #endif
 
@@ -431,10 +431,10 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
   .reset_bit  = RCC_APB1RSTR_I2C2RST,
   .scl_pin    = GPIO_I2C2_SCL,
   .sda_pin    = GPIO_I2C2_SDA,
-#ifndef CONFIG_I2C_POLLED
+#  ifndef CONFIG_I2C_POLLED
   .ev_irq     = STM32_IRQ_I2C2EV,
   .er_irq     = STM32_IRQ_I2C2ER
-#endif
+#  endif
 };
 
 static struct stm32_i2c_priv_s stm32_i2c2_priv =
@@ -443,9 +443,9 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
   .config     = &stm32_i2c2_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-#ifndef CONFIG_I2C_POLLED
+#  ifndef CONFIG_I2C_POLLED
   .sem_isr    = SEM_INITIALIZER(0),
-#endif
+#  endif
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
@@ -453,13 +453,13 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0,
-#ifdef CONFIG_STM32_I2C_DMA
-# ifndef CONFIG_STM32_DMA1
-#   error "I2C2 enabled with DMA but corresponding DMA controller 1 is not enabled!"
-# endif
+#  ifdef CONFIG_STM32_I2C_DMA
+#    ifndef CONFIG_STM32_DMA1
+#      error "I2C2 enabled with DMA but corresponding DMA controller 1 is not enabled!"
+#    endif
   .rxch       = DMAMAP_I2C2_RX,
   .txch       = DMAMAP_I2C2_TX,
-#endif
+#  endif
 };
 #endif
 
@@ -471,10 +471,10 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
   .reset_bit  = RCC_APB1RSTR_I2C3RST,
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
-#ifndef CONFIG_I2C_POLLED
+#  ifndef CONFIG_I2C_POLLED
   .ev_irq     = STM32_IRQ_I2C3EV,
   .er_irq     = STM32_IRQ_I2C3ER
-#endif
+#  endif
 };
 
 static struct stm32_i2c_priv_s stm32_i2c3_priv =
@@ -483,9 +483,9 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
   .config     = &stm32_i2c3_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-#ifndef CONFIG_I2C_POLLED
+#  ifndef CONFIG_I2C_POLLED
   .sem_isr    = SEM_INITIALIZER(0),
-#endif
+#  endif
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
@@ -493,13 +493,13 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0,
-#ifdef CONFIG_STM32_I2C_DMA
-# ifndef CONFIG_STM32_DMA1
-#   error "I2C3 enabled with DMA but corresponding DMA controller 1 is not enabled!"
-# endif
+#  ifdef CONFIG_STM32_I2C_DMA
+#    ifndef CONFIG_STM32_DMA1
+#      error "I2C3 enabled with DMA but corresponding DMA controller 1 is not enabled!"
+#    endif
   .rxch       = DMAMAP_I2C3_RX,
   .txch       = DMAMAP_I2C3_TX,
-#endif
+#  endif
 };
 #endif
 

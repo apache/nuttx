@@ -207,24 +207,24 @@ static uart_dev_t g_uart1port =
 /* Now, which one with be tty0/console and which tty1? */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_EZ80_UART0)
-# define CONSOLE_DEV     g_uart0port
-# define TTYS0_DEV       g_uart0port
-# if defined(CONFIG_EZ80_UART1)
-#   define TTYS1_DEV     g_uart1port
-# endif
+#  define CONSOLE_DEV    g_uart0port
+#  define TTYS0_DEV      g_uart0port
+#  if defined(CONFIG_EZ80_UART1)
+#    define TTYS1_DEV    g_uart1port
+#  endif
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_EZ80_UART1)
-# define CONSOLE_DEV     g_uart1port
-# define TTYS0_DEV       g_uart1port
-# if defined(CONFIG_EZ80_UART0)
-#   define TTYS1_DEV     g_uart0port
-# endif
+#  define CONSOLE_DEV    g_uart1port
+#  define TTYS0_DEV      g_uart1port
+#  if defined(CONFIG_EZ80_UART0)
+#    define TTYS1_DEV    g_uart0port
+#  endif
 #elif defined(CONFIG_EZ80_UART0)
-# define TTYS0_DEV       g_uart0port
-# if defined(CONFIG_EZ80_UART1)
-#   define TTYS1_DEV     g_uart1port
-# endif
+#  define TTYS0_DEV      g_uart0port
+#  if defined(CONFIG_EZ80_UART1)
+#    define TTYS1_DEV    g_uart1port
+#  endif
 #elif defined(CONFIG_EZ80_UART0)
-# define TTYS0_DEV       g_uart1port
+#  define TTYS0_DEV      g_uart1port
 #endif
 
 /****************************************************************************
@@ -771,11 +771,11 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define ez80_inp(offs)      inp((EZ80_UART1_BASE+(offs)))
-# define ez80_outp(offs,val) outp((EZ80_UART1_BASE+(offs)), (val))
+#  define ez80_inp(offs)      inp((EZ80_UART1_BASE+(offs)))
+#  define ez80_outp(offs,val) outp((EZ80_UART1_BASE+(offs)), (val))
 #else
-# define ez80_inp(offs)      inp((EZ80_UART0_BASE+(offs)))
-# define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
+#  define ez80_inp(offs)      inp((EZ80_UART0_BASE+(offs)))
+#  define ez80_outp(offs,val) outp((EZ80_UART0_BASE+(offs)), (val))
 #endif
 
 #define ez80_txready()       ((ez80_inp(EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0)

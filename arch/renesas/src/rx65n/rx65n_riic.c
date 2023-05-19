@@ -40,8 +40,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-# define rx65n_getreg(addr)      getreg8(addr)
-# define rx65n_putreg(val,addr)  putreg8(val,addr)
+#  define rx65n_getreg(addr)     getreg8(addr)
+#  define rx65n_putreg(val,addr) putreg8(val,addr)
 
 #if defined(CONFIG_RX65N_RIIC0) || defined(CONFIG_RX65N_RIIC1) || \
     defined(CONFIG_RX65N_RIIC2)

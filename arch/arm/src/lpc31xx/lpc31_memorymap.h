@@ -199,7 +199,7 @@
  */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-# define LPC31_FIRST_VSECTION        0x00000000 /* Beginning of the virtual address space */
+#  define LPC31_FIRST_VSECTION       0x00000000 /* Beginning of the virtual address space */
 #  define LPC31_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC31_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */
 #    define LPC31_INTSRAM0_VADDR     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */

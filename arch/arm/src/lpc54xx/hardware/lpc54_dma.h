@@ -134,17 +134,17 @@
 #define DMA_CFG_TRIGBURST           (1 << 6)  /* Bit 6:  Trigger Burst */
 #define DMA_CFG_BURSTPOWER_SHIFT    (8)       /* Bits 8-11: Burst Power */
 #define DMA_CFG_BURSTPOWER_MASK     (15 << DMA_CFG_BURSTPOWER_SHIFT)
-# define DMA_CFG_BURSTPOWER_1       (0 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 1 (2^0) */
-# define DMA_CFG_BURSTPOWER_2       (1 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 2 (2^1) */
-# define DMA_CFG_BURSTPOWER_3       (2 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 4 (2^2) */
-# define DMA_CFG_BURSTPOWER_8       (3 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 8 (2^2) */
-# define DMA_CFG_BURSTPOWER_16      (4 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 16 (2^2) */
-# define DMA_CFG_BURSTPOWER_32      (5 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 32 (2^2) */
-# define DMA_CFG_BURSTPOWER_64      (6 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 64 (2^2) */
-# define DMA_CFG_BURSTPOWER_128     (7 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 128 (2^2) */
-# define DMA_CFG_BURSTPOWER_256     (8 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 256 (2^2) */
-# define DMA_CFG_BURSTPOWER_512     (9 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 256 (2^2) */
-# define DMA_CFG_BURSTPOWER_1024    (10 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 1024 (2^10) */
+#  define DMA_CFG_BURSTPOWER_1      (0 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 1 (2^0) */
+#  define DMA_CFG_BURSTPOWER_2      (1 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 2 (2^1) */
+#  define DMA_CFG_BURSTPOWER_3      (2 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 4 (2^2) */
+#  define DMA_CFG_BURSTPOWER_8      (3 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 8 (2^2) */
+#  define DMA_CFG_BURSTPOWER_16     (4 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 16 (2^2) */
+#  define DMA_CFG_BURSTPOWER_32     (5 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 32 (2^2) */
+#  define DMA_CFG_BURSTPOWER_64     (6 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 64 (2^2) */
+#  define DMA_CFG_BURSTPOWER_128    (7 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 128 (2^2) */
+#  define DMA_CFG_BURSTPOWER_256    (8 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 256 (2^2) */
+#  define DMA_CFG_BURSTPOWER_512    (9 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 256 (2^2) */
+#  define DMA_CFG_BURSTPOWER_1024   (10 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 1024 (2^10) */
 
 #define DMA_CFG_SRCBURSTWRAP        (1 << 14) /* Bit 14: Source Burst Wrap */
 #define DMA_CFG_DSTBURSTWRAP        (1 << 15) /* Bit 15: Destination Burst Wrap */

@@ -72,7 +72,7 @@
 #    define PWR_CR_2p7V        (5 << PWR_CR_PLS_SHIFT) /* 101: 2.7V */
 #    define PWR_CR_2p8V        (6 << PWR_CR_PLS_SHIFT) /* 110: 2.8V */
 #    define PWR_CR_2p9V        (7 << PWR_CR_PLS_SHIFT) /* 111: 2.9V */
-# endif
+#  endif
 #define PWR_CR_DBP             (1 << 8)  /* Bit 8: Disable Backup Domain write protection */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)

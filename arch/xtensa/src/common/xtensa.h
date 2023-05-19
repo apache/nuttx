@@ -279,7 +279,7 @@ void weak_function xtensa_dma_initialize(void);
 #if CONFIG_MM_REGIONS > 1
 void xtensa_add_region(void);
 #else
-# define xtensa_add_region()
+#  define xtensa_add_region()
 #endif
 
 /* Watchdog timer ***********************************************************/
@@ -298,7 +298,7 @@ void xtensa_serialinit(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void xtensa_netinitialize(void);
 #else
-# define xtensa_netinitialize()
+#  define xtensa_netinitialize()
 #endif
 
 /* USB */
@@ -307,8 +307,8 @@ void xtensa_netinitialize(void);
 void xtensa_usbinitialize(void);
 void xtensa_usbuninitialize(void);
 #else
-# define xtensa_usbinitialize()
-# define xtensa_usbuninitialize()
+#  define xtensa_usbinitialize()
+#  define xtensa_usbuninitialize()
 #endif
 
 /* Power management *********************************************************/

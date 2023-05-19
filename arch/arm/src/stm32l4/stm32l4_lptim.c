@@ -310,21 +310,21 @@ static int stm32l4_lptim_get_gpioconfig(struct stm32l4_lptim_dev_s *dev,
       case STM32L4_LPTIM1_BASE:
         switch (channel)
           {
-# if defined(GPIO_LPTIM1_OUT_1)
+#  if defined(GPIO_LPTIM1_OUT_1)
             case 1:
               *cfg = GPIO_LPTIM1_OUT_1;
               break;
-# endif
-# if defined(GPIO_LPTIM1_OUT_2)
+#  endif
+#  if defined(GPIO_LPTIM1_OUT_2)
             case 2:
               *cfg = GPIO_LPTIM1_OUT_2;
               break;
-# endif
-# if defined(GPIO_LPTIM1_OUT_3)
+#  endif
+#  if defined(GPIO_LPTIM1_OUT_3)
             case 3:
               *cfg = GPIO_LPTIM1_OUT_3;
               break;
-# endif
+#  endif
             default:
               return ERROR;
           }
@@ -335,21 +335,21 @@ static int stm32l4_lptim_get_gpioconfig(struct stm32l4_lptim_dev_s *dev,
       case STM32L4_LPTIM2_BASE:
         switch (channel)
           {
-# if defined(GPIO_LPTIM2_OUT_1)
+#  if defined(GPIO_LPTIM2_OUT_1)
             case 1:
               *cfg = GPIO_LPTIM2_OUT_1;
               break;
-# endif
-# if defined(GPIO_LPTIM2_OUT_2)
+#  endif
+#  if defined(GPIO_LPTIM2_OUT_2)
             case 2:
               *cfg = GPIO_LPTIM2_OUT_2;
               break;
-# endif
-# if defined(GPIO_LPTIM2_OUT_3)
+#  endif
+#  if defined(GPIO_LPTIM2_OUT_3)
             case 3:
               *cfg = GPIO_LPTIM2_OUT_3;
               break;
-# endif
+#  endif
             default:
               return ERROR;
           }

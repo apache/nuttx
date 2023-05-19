@@ -79,7 +79,7 @@
 #define REG_PC0          35 /* PC */
 #define REG_PC1          36
 #if AVR_PC_SIZE > 16
-# define REG_PC2         37
+#  define REG_PC2        37
 #endif
 
 #define XCPTCONTEXT_SIZE XCPTCONTEXT_REGS

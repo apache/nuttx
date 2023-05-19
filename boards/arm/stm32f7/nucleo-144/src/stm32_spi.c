@@ -58,7 +58,7 @@
 #    define CONFIG_NUCLEO_SPI1_TEST_MODE SPIDEV_MODE3
 #  else
 #    error "No CONFIG_NUCLEO_SPI1_TEST_MODEx defined"
-# endif
+#  endif
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI2_TEST)
@@ -72,7 +72,7 @@
 #    define CONFIG_NUCLEO_SPI2_TEST_MODE SPIDEV_MODE3
 #  else
 #    error "No CONFIG_NUCLEO_SPI2_TEST_MODEx defined"
-# endif
+#  endif
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI3_TEST)
@@ -86,7 +86,7 @@
 #    define CONFIG_NUCLEO_SPI3_TEST_MODE SPIDEV_MODE3
 #  else
 #    error "No CONFIG_NUCLEO_SPI3_TEST_MODEx defined"
-# endif
+#  endif
 #endif
 
 /****************************************************************************
@@ -96,78 +96,78 @@
 #if defined(CONFIG_STM32F7_SPI1)
 static const uint32_t g_spi1gpio[] =
 {
-#if defined(GPIO_SPI1_CS0)
+#  if defined(GPIO_SPI1_CS0)
   GPIO_SPI1_CS0,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI1_CS1)
+#  endif
+#  if defined(GPIO_SPI1_CS1)
   GPIO_SPI1_CS1,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI1_CS2)
+#  endif
+#  if defined(GPIO_SPI1_CS2)
   GPIO_SPI1_CS2,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI1_CS3)
+#  endif
+#  if defined(GPIO_SPI1_CS3)
   GPIO_SPI1_CS3
-#else
+#  else
   0
-#endif
+#  endif
 };
 #endif
 
 #if defined(CONFIG_STM32F7_SPI2)
 static const uint32_t g_spi2gpio[] =
 {
-#if defined(GPIO_SPI2_CS0)
+#  if defined(GPIO_SPI2_CS0)
   GPIO_SPI2_CS0,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI2_CS1)
+#  endif
+#  if defined(GPIO_SPI2_CS1)
   GPIO_SPI2_CS1,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI2_CS2)
+#  endif
+#  if defined(GPIO_SPI2_CS2)
   GPIO_SPI2_CS2,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI2_CS3)
+#  endif
+#  if defined(GPIO_SPI2_CS3)
   GPIO_SPI2_CS3
-#else
+#  else
   0
-#endif
+#  endif
 };
 #endif
 
 #if defined(CONFIG_STM32F7_SPI3)
 static const uint32_t g_spi3gpio[] =
 {
-#if defined(GPIO_SPI3_CS0)
+#  if defined(GPIO_SPI3_CS0)
   GPIO_SPI3_CS0,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI3_CS1)
+#  endif
+#  if defined(GPIO_SPI3_CS1)
   GPIO_SPI3_CS1,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI3_CS2)
+#  endif
+#  if defined(GPIO_SPI3_CS2)
   GPIO_SPI3_CS2,
-#else
+#  else
   0,
-#endif
-#if defined(GPIO_SPI3_CS3)
+#  endif
+#  if defined(GPIO_SPI3_CS3)
   GPIO_SPI3_CS3
-#else
+#  else
   0
-#endif
+#  endif
 };
 #endif
 

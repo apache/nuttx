@@ -1583,11 +1583,11 @@ struct adc_hires_timestamp_s
 
 #undef EXTERN
 #if defined(__cplusplus)
-# define EXTERN extern "C"
+#  define EXTERN extern "C"
 extern "C"
 {
 #else
-# define EXTERN extern
+#  define EXTERN extern
 #endif
 
 #undef EXTERN

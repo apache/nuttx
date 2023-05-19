@@ -278,18 +278,18 @@ struct net_driver_s
     defined(CONFIG_NET_TUN)
   union
   {
-# if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_TUN)
+#  if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_TUN)
     /* Ethernet device identity */
 
     struct ether_addr ether;    /* Device Ethernet MAC address */
-# endif
+#  endif
 
-# if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_BLUETOOTH) || \
-    defined(CONFIG_NET_IEEE802154)
+#  if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_BLUETOOTH) || \
+      defined(CONFIG_NET_IEEE802154)
   /* The address assigned to an IEEE 802.15.4 or generic packet radio. */
 
     struct netdev_varaddr_s radio;
-# endif
+#  endif
   } d_mac;
 #endif
 

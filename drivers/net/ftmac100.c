@@ -77,7 +77,7 @@
  */
 
 #ifndef CONFIG_FTMAC100_NINTERFACES
-# define CONFIG_FTMAC100_NINTERFACES 1
+#  define CONFIG_FTMAC100_NINTERFACES 1
 #endif
 
 /* TX timeout = 1 minute */
@@ -102,24 +102,24 @@
 #define ETH_ZLEN 60
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-# define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
-                           FTMAC100_MACCR_RCV_EN  | \
-                           FTMAC100_MACCR_XDMA_EN | \
-                           FTMAC100_MACCR_RDMA_EN | \
-                           FTMAC100_MACCR_CRC_APD | \
-                           FTMAC100_MACCR_FULLDUP | \
-                           FTMAC100_MACCR_RX_RUNT | \
-                           FTMAC100_MACCR_HT_MULTI_EN | \
-                           FTMAC100_MACCR_RX_BROADPKT)
+#  define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
+                            FTMAC100_MACCR_RCV_EN  | \
+                            FTMAC100_MACCR_XDMA_EN | \
+                            FTMAC100_MACCR_RDMA_EN | \
+                            FTMAC100_MACCR_CRC_APD | \
+                            FTMAC100_MACCR_FULLDUP | \
+                            FTMAC100_MACCR_RX_RUNT | \
+                            FTMAC100_MACCR_HT_MULTI_EN | \
+                            FTMAC100_MACCR_RX_BROADPKT)
 #else
-# define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
-                           FTMAC100_MACCR_RCV_EN  | \
-                           FTMAC100_MACCR_XDMA_EN | \
-                           FTMAC100_MACCR_RDMA_EN | \
-                           FTMAC100_MACCR_CRC_APD | \
-                           FTMAC100_MACCR_FULLDUP | \
-                           FTMAC100_MACCR_RX_RUNT | \
-                           FTMAC100_MACCR_RX_BROADPKT)
+#  define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
+                            FTMAC100_MACCR_RCV_EN  | \
+                            FTMAC100_MACCR_XDMA_EN | \
+                            FTMAC100_MACCR_RDMA_EN | \
+                            FTMAC100_MACCR_CRC_APD | \
+                            FTMAC100_MACCR_FULLDUP | \
+                            FTMAC100_MACCR_RX_RUNT | \
+                            FTMAC100_MACCR_RX_BROADPKT)
 #endif
 
 #define MACCR_DISABLE_ALL 0

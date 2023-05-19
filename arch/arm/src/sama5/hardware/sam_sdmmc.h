@@ -591,9 +591,9 @@ enum bus_mode
  */
 
 #ifdef CONFIG_SAMA5_SDMMC_50MHZ
-# define SAMA5_SDMMC_BUS_SPEED 50000000
+#  define SAMA5_SDMMC_BUS_SPEED 50000000
 #else
-# define SAMA5_SDMMC_BUS_SPEED 25000000
+#  define SAMA5_SDMMC_BUS_SPEED 25000000
 #endif
 
 /* SDMA default buffer size - needed to reset the start address after an SDMA

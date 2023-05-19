@@ -356,65 +356,65 @@ static const struct uart_ops_s g_uart_ops_no_dma =
 #ifdef CONFIG_GD32F4_USART0_SERIALDRIVER
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_USART0_RXDMA
+#  ifdef CONFIG_GD32F4_USART0_RXDMA
 static char g_usart0rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_USART1_RXDMA
+#  ifdef CONFIG_GD32F4_USART1_RXDMA
 static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_USART2_RXDMA
+#  ifdef CONFIG_GD32F4_USART2_RXDMA
 static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_UART3_SERIALDRIVER
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_UART3_RXDMA
+#  ifdef CONFIG_GD32F4_UART3_RXDMA
 static char g_uart3rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_UART4_SERIALDRIVER
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_UART4_RXDMA
+#  ifdef CONFIG_GD32F4_UART4_RXDMA
 static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_USART5_SERIALDRIVER
 static char g_usart5rxbuffer[CONFIG_USART5_RXBUFSIZE];
 static char g_usart5txbuffer[CONFIG_USART5_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_USART5_RXDMA
+#  ifdef CONFIG_GD32F4_USART5_RXDMA
 static char g_usart5rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_UART6_SERIALDRIVER
 static char g_uart6rxbuffer[CONFIG_UART6_RXBUFSIZE];
 static char g_uart6txbuffer[CONFIG_UART6_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_UART6_RXDMA
+#  ifdef CONFIG_GD32F4_UART6_RXDMA
 static char g_uart6rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_GD32F4_UART7_SERIALDRIVER
 static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
 static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
-# ifdef CONFIG_GD32F4_UART7_RXDMA
+#  ifdef CONFIG_GD32F4_UART7_RXDMA
 static char g_uart7rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 /* This describes the state of the GD32 USART0 ports. */

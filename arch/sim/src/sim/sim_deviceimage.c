@@ -45,9 +45,9 @@
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE
-# define serr(format, ...) syslog(LOG_ERR, format, ##__VA_ARGS__)
-# define kmm_malloc(size)   malloc(size)
-# define kmm_free(mem)     free(mem)
+#  define serr(format, ...) syslog(LOG_ERR, format, ##__VA_ARGS__)
+#  define kmm_malloc(size)  malloc(size)
+#  define kmm_free(mem)     free(mem)
 #endif
 
 /****************************************************************************

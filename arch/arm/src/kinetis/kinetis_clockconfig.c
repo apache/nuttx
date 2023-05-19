@@ -68,15 +68,15 @@
 
 /* A board may provide BOARD_EXTAL_LP to not choose MCG_C2_HGO */
 
-# if defined(BOARD_EXTAL_LP)
-#   define BOARD_MGC_C2_HGO        0  /* Do not use MCG_C2_HGO */
-# else
-#   if !defined(KINETIS_MCG_HAS_C2_HGO)
-#     error BOARD_EXTAL_LP is not defined and MCG_C2_HGO is not supported on this SoC!
-#   else
-#     define BOARD_MGC_C2_HGO      MCG_C2_HGO
-#   endif
-# endif
+#  if defined(BOARD_EXTAL_LP)
+#    define BOARD_MGC_C2_HGO        0  /* Do not use MCG_C2_HGO */
+#  else
+#    if !defined(KINETIS_MCG_HAS_C2_HGO)
+#      error BOARD_EXTAL_LP is not defined and MCG_C2_HGO is not supported on this SoC!
+#    else
+#      define BOARD_MGC_C2_HGO      MCG_C2_HGO
+#    endif
+#  endif
 
 /* A board must provide BOARD_MCG_C2_FCFTRIM when SoC has the setting */
 
@@ -97,11 +97,11 @@
 /* A board must provide BOARD_MCG_C2_LOCRE0 when SoC has the setting */
 
 #  if defined(KINETIS_MCG_HAS_C2_LOCRE0) && !defined(BOARD_MCG_C2_LOCRE0)
-#      error MCG_C2_LOCRE0 is supported on this SoC and BOARD_MCG_C2_LOCRE0 is not defined!
+#    error MCG_C2_LOCRE0 is supported on this SoC and BOARD_MCG_C2_LOCRE0 is not defined!
 #  endif
 
 #  if !defined(KINETIS_MCG_HAS_C2_LOCRE0) && defined(BOARD_MCG_C2_LOCRE0)
-#      error BOARD_MCG_C2_LOCRE0 is defined but MCG_C2_LOCRE0 is not supported on this SoC!
+#    error BOARD_MCG_C2_LOCRE0 is defined but MCG_C2_LOCRE0 is not supported on this SoC!
 #  endif
 
 /* Provide the 0 default */

@@ -316,11 +316,11 @@ struct rr_pco_use      /* use prefix part */
 #define ICMP6_RR_PCOUSE_RAFLAGS_AUTO    0x10
 
 #if __BYTE_ORDER == __BIG_ENDIAN
-# define ICMP6_RR_PCOUSE_FLAGS_DECRVLTIME 0x80000000
-# define ICMP6_RR_PCOUSE_FLAGS_DECRPLTIME 0x40000000
+#  define ICMP6_RR_PCOUSE_FLAGS_DECRVLTIME 0x80000000
+#  define ICMP6_RR_PCOUSE_FLAGS_DECRPLTIME 0x40000000
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
-# define ICMP6_RR_PCOUSE_FLAGS_DECRVLTIME 0x80
-# define ICMP6_RR_PCOUSE_FLAGS_DECRPLTIME 0x40
+#  define ICMP6_RR_PCOUSE_FLAGS_DECRVLTIME 0x80
+#  define ICMP6_RR_PCOUSE_FLAGS_DECRPLTIME 0x40
 #endif
 
 struct rr_result       /* router renumbering result message */
@@ -333,11 +333,11 @@ struct rr_result       /* router renumbering result message */
 };
 
 #if __BYTE_ORDER == __BIG_ENDIAN
-# define ICMP6_RR_RESULT_FLAGS_OOB       0x0002
-# define ICMP6_RR_RESULT_FLAGS_FORBIDDEN 0x0001
+#  define ICMP6_RR_RESULT_FLAGS_OOB       0x0002
+#  define ICMP6_RR_RESULT_FLAGS_FORBIDDEN 0x0001
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
-# define ICMP6_RR_RESULT_FLAGS_OOB       0x0200
-# define ICMP6_RR_RESULT_FLAGS_FORBIDDEN 0x0100
+#  define ICMP6_RR_RESULT_FLAGS_OOB       0x0200
+#  define ICMP6_RR_RESULT_FLAGS_FORBIDDEN 0x0100
 #endif
 
 /* Mobile IPv6 extension: Advertisement Interval.  */

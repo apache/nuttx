@@ -135,9 +135,9 @@
  */
 
 #ifdef CONFIG_USEC_PER_TICK
-# define USEC_PER_TICK        (CONFIG_USEC_PER_TICK)
+#  define USEC_PER_TICK       (CONFIG_USEC_PER_TICK)
 #else
-# define USEC_PER_TICK        (10000)
+#  define USEC_PER_TICK       (10000)
 #endif
 
 /* MSEC_PER_TICK can be very inaccurate if CONFIG_USEC_PER_TICK is not an

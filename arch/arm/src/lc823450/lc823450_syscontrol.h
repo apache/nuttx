@@ -277,8 +277,8 @@ void lc823450_clock_dump(void);
 void mod_stby_regs(uint32_t clearbits, uint32_t setbits);
 void lc823450_mod_stby_regs(uint32_t clearbits, uint32_t setbits);
 #else
-# define mod_stby_regs(...)
-# define lc823450_mod_stby_regs(...)
+#  define mod_stby_regs(...)
+#  define lc823450_mod_stby_regs(...)
 #endif
 
 #if defined(__cplusplus)

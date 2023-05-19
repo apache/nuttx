@@ -49,9 +49,9 @@
 #endif
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
-# define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
+#  define nxflat_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
-# define nxflat_dumpbuffer(m,b,n)
+#  define nxflat_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

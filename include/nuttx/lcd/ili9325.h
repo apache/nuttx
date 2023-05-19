@@ -334,7 +334,7 @@
 #  define ILI9325_GAMMA_CTRL7_KN2(n)           ((uint16_t)(n) << ILI9325_GAMMA_CTRL7_KN2_SHIFT)
 #define ILI9325_GAMMA_CTRL7_KN3_SHIFT          8
 #define ILI9325_GAMMA_CTRL7_KN3_MASK           (7 << ILI9325_GAMMA_CTRL7_KN3_SHIFT)
-# define ILI9325_GAMMA_CTRL7_KN3(n)            ((uint16_t)(n) << ILI9325_GAMMA_CTRL7_KN3_SHIFT)
+#  define ILI9325_GAMMA_CTRL7_KN3(n)           ((uint16_t)(n) << ILI9325_GAMMA_CTRL7_KN3_SHIFT)
 
 /* ILI9325_GAMMA_CTRL8, Gamma Control 8, Offset: 0x39 */
 

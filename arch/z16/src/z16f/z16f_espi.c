@@ -81,15 +81,15 @@ static void     spi_putreg8(FAR struct z16f_spi_s *priv, uint8_t regval,
 static void     spi_putreg16(FAR struct z16f_spi_s *priv, uint16_t regval,
                   uintptr_t regaddr);
 #else
-# define        spi_getreg8(priv,regaddr)         getreg8(regaddr)
-# define        spi_putreg8(priv,regval,regaddr)  putreg8(regval, regaddr)
-# define        spi_putreg16(priv,regval,regaddr) putreg16(regval, regaddr)
+#  define       spi_getreg8(priv,regaddr)         getreg8(regaddr)
+#  define       spi_putreg8(priv,regval,regaddr)  putreg8(regval, regaddr)
+#  define       spi_putreg16(priv,regval,regaddr) putreg16(regval, regaddr)
 #endif
 
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(FAR struct z16f_spi_s *priv, const char *msg);
 #else
-# define        spi_dumpregs(priv,msg)
+#  define       spi_dumpregs(priv,msg)
 #endif
 
 static void     spi_flush(FAR struct z16f_spi_s *priv);

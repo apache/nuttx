@@ -80,7 +80,7 @@
  */
 
 #ifndef CONFIG_C5471_NET_NINTERFACES
-# define CONFIG_C5471_NET_NINTERFACES 1
+#  define CONFIG_C5471_NET_NINTERFACES 1
 #endif
 
 /* CONFIG_C5471_NET_STATS will enabled collection of driver statistics.
@@ -99,7 +99,7 @@
 # undef CONFIG_C5471_AUTONEGOTIATION
 # undef CONFIG_C5471_BASET100
 #else
-# define CONFIG_C5471_AUTONEGOTIATION 1
+#  define CONFIG_C5471_AUTONEGOTIATION 1
 # undef CONFIG_C5471_BASET100
 # undef CONFIG_C5471_BASET10
 #endif
@@ -435,7 +435,7 @@ static inline void c5471_dumpbuffer(const char *msg, const uint8_t *buffer,
   ninfodumpbuffer(msg, buffer, nbytes);
 }
 #else
-# define c5471_dumpbuffer(msg, buffer,nbytes)
+#  define c5471_dumpbuffer(msg, buffer,nbytes)
 #endif
 
 /****************************************************************************

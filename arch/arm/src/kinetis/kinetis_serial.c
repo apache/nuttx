@@ -405,55 +405,55 @@ static const struct uart_ops_s g_uart_dma_ops =
 #ifdef CONFIG_KINETIS_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
-# ifdef CONFIG_KINETIS_UART0_RXDMA
+#  ifdef CONFIG_KINETIS_UART0_RXDMA
 static char g_uart0rxfifo[RXDMA_BUFFER_SIZE]
   aligned_data(ARMV7M_DCACHE_LINESIZE);
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_KINETIS_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
-# ifdef CONFIG_KINETIS_UART1_RXDMA
+#  ifdef CONFIG_KINETIS_UART1_RXDMA
 static char g_uart1rxfifo[RXDMA_BUFFER_SIZE]
   aligned_data(ARMV7M_DCACHE_LINESIZE);
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_KINETIS_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
-# ifdef CONFIG_KINETIS_UART2_RXDMA
+#  ifdef CONFIG_KINETIS_UART2_RXDMA
 static char g_uart2rxfifo[RXDMA_BUFFER_SIZE]
   aligned_data(ARMV7M_DCACHE_LINESIZE);
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_KINETIS_UART3
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
-# ifdef CONFIG_KINETIS_UART3_RXDMA
+#  ifdef CONFIG_KINETIS_UART3_RXDMA
 static char g_uart3rxfifo[RXDMA_BUFFER_SIZE]
   aligned_data(ARMV7M_DCACHE_LINESIZE);
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_KINETIS_UART4
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
-# ifdef CONFIG_KINETIS_UART4_RXDMA
+#  ifdef CONFIG_KINETIS_UART4_RXDMA
 static char g_uart4rxfifo[RXDMA_BUFFER_SIZE]
   aligned_data(ARMV7M_DCACHE_LINESIZE);
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_KINETIS_UART5
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
-# ifdef CONFIG_KINETIS_UART5_RXDMA
+#  ifdef CONFIG_KINETIS_UART5_RXDMA
 static char g_uart5rxfifo[RXDMA_BUFFER_SIZE]
   aligned_data(ARMV7M_DCACHE_LINESIZE);
-# endif
+#  endif
 #endif
 
 /* This describes the state of the Kinetis UART0 port. */
@@ -464,25 +464,25 @@ static struct up_dev_s g_uart0priv =
   .uartbase       = KINETIS_UART0_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART0_BAUD,
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART0E,
-#endif
+#  endif
   .irqs           = KINETIS_IRQ_UART0S,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stop2          = CONFIG_UART0_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART0_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART0_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = PIN_UART0_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART0_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART0_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART0_RTS,
-#endif
-#ifdef CONFIG_KINETIS_UART0_RXDMA
+#  endif
+#  ifdef CONFIG_KINETIS_UART0_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART0_RX,
   .rxfifo         = g_uart0rxfifo,
-#endif
+#  endif
 };
 
 static uart_dev_t g_uart0port =
@@ -497,11 +497,11 @@ static uart_dev_t g_uart0port =
       .size   = CONFIG_UART0_TXBUFSIZE,
       .buffer = g_uart0txbuffer,
     },
-#ifdef CONFIG_KINETIS_UART0_RXDMA
+#  ifdef CONFIG_KINETIS_UART0_RXDMA
   .ops        = &g_uart_dma_ops,
-#else
+#  else
   .ops        = &g_uart_ops,
-#endif
+#  endif
   .priv       = &g_uart0priv,
 };
 #endif
@@ -514,25 +514,25 @@ static struct up_dev_s g_uart1priv =
   .uartbase       = KINETIS_UART1_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART1_BAUD,
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART1E,
-#endif
+#  endif
   .irqs           = KINETIS_IRQ_UART1S,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stop2          = CONFIG_UART1_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = PIN_UART1_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART1_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART1_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART1_RTS,
-#endif
-#ifdef CONFIG_KINETIS_UART1_RXDMA
+#  endif
+#  ifdef CONFIG_KINETIS_UART1_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART1_RX,
   .rxfifo         = g_uart1rxfifo,
-#endif
+#  endif
 };
 
 static uart_dev_t g_uart1port =
@@ -547,11 +547,11 @@ static uart_dev_t g_uart1port =
       .size   = CONFIG_UART1_TXBUFSIZE,
       .buffer = g_uart1txbuffer,
     },
-#ifdef CONFIG_KINETIS_UART1_RXDMA
+#  ifdef CONFIG_KINETIS_UART1_RXDMA
   .ops        = &g_uart_dma_ops,
-#else
+#  else
   .ops        = &g_uart_ops,
-#endif
+#  endif
   .priv       = &g_uart1priv,
 };
 #endif
@@ -564,25 +564,25 @@ static struct up_dev_s g_uart2priv =
   .uartbase       = KINETIS_UART2_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART2_BAUD,
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART2E,
-#endif
+#  endif
   .irqs           = KINETIS_IRQ_UART2S,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stop2          = CONFIG_UART2_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART2_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART2_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = PIN_UART2_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART2_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART2_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART2_RTS,
-#endif
-#ifdef CONFIG_KINETIS_UART2_RXDMA
+#  endif
+#  ifdef CONFIG_KINETIS_UART2_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART2_RX,
   .rxfifo         = g_uart2rxfifo,
-#endif
+#  endif
 };
 
 static uart_dev_t g_uart2port =
@@ -597,11 +597,11 @@ static uart_dev_t g_uart2port =
       .size   = CONFIG_UART2_TXBUFSIZE,
       .buffer = g_uart2txbuffer,
     },
-#ifdef CONFIG_KINETIS_UART2_RXDMA
+#  ifdef CONFIG_KINETIS_UART2_RXDMA
   .ops        = &g_uart_dma_ops,
-#else
+#  else
   .ops        = &g_uart_ops,
-#endif
+#  endif
   .priv       = &g_uart2priv,
 };
 #endif
@@ -614,25 +614,25 @@ static struct up_dev_s g_uart3priv =
   .uartbase       = KINETIS_UART3_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART3_BAUD,
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART3E,
-#endif
+#  endif
   .irqs           = KINETIS_IRQ_UART3S,
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stop2          = CONFIG_UART3_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART3_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART3_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = PIN_UART3_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART3_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART3_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART3_RTS,
-#endif
-#ifdef CONFIG_KINETIS_UART3_RXDMA
+#  endif
+#  ifdef CONFIG_KINETIS_UART3_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART3_RX,
   .rxfifo         = g_uart3rxfifo,
-#endif
+#  endif
 };
 
 static uart_dev_t g_uart3port =
@@ -647,11 +647,11 @@ static uart_dev_t g_uart3port =
       .size   = CONFIG_UART3_TXBUFSIZE,
       .buffer = g_uart3txbuffer,
     },
-#ifdef CONFIG_KINETIS_UART3_RXDMA
+#  ifdef CONFIG_KINETIS_UART3_RXDMA
   .ops        = &g_uart_dma_ops,
-#else
+#  else
   .ops        = &g_uart_ops,
-#endif
+#  endif
   .priv       = &g_uart3priv,
 };
 #endif
@@ -664,25 +664,25 @@ static struct up_dev_s g_uart4priv =
   .uartbase       = KINETIS_UART4_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART4_BAUD,
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART4E,
-#endif
+#  endif
   .irqs           = KINETIS_IRQ_UART4S,
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
   .stop2          = CONFIG_UART4_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART4_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART4_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = PIN_UART4_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART4_RTS,
-#endif
-#ifdef CONFIG_KINETIS_UART4_RXDMA
+#  endif
+#  ifdef CONFIG_KINETIS_UART4_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART4_RXTX,
   .rxfifo         = g_uart4rxfifo,
-#endif
+#  endif
 };
 
 static uart_dev_t g_uart4port =
@@ -697,11 +697,11 @@ static uart_dev_t g_uart4port =
       .size   = CONFIG_UART4_TXBUFSIZE,
       .buffer = g_uart4txbuffer,
     },
-#ifdef CONFIG_KINETIS_UART4_RXDMA
+#  ifdef CONFIG_KINETIS_UART4_RXDMA
   .ops        = &g_uart_dma_ops,
-#else
+#  else
   .ops        = &g_uart_ops,
-#endif
+#  endif
   .priv       = &g_uart4priv,
 };
 #endif
@@ -714,25 +714,25 @@ static struct up_dev_s g_uart5priv =
   .uartbase       = KINETIS_UART5_BASE,
   .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART5_BAUD,
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   .irqe           = KINETIS_IRQ_UART5E,
-#endif
+#  endif
   .irqs           = KINETIS_IRQ_UART5S,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
   .stop2          = CONFIG_UART5_2STOP,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART5_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART5_OFLOWCONTROL)
   .oflow          = true,
   .cts_gpio       = PIN_UART5_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART5_RTS,
-#endif
-#ifdef CONFIG_KINETIS_UART5_RXDMA
+#  endif
+#  ifdef CONFIG_KINETIS_UART5_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART5_RX,
   .rxfifo         = g_uart5rxfifo,
-#endif
+#  endif
 };
 
 static uart_dev_t g_uart5port =
@@ -747,11 +747,11 @@ static uart_dev_t g_uart5port =
       .size   = CONFIG_UART5_TXBUFSIZE,
       .buffer = g_uart5txbuffer,
     },
-#ifdef CONFIG_KINETIS_UART5_RXDMA
+#  ifdef CONFIG_KINETIS_UART5_RXDMA
   .ops        = &g_uart_dma_ops,
-#else
+#  else
   .ops        = &g_uart_ops,
-#endif
+#  endif
   .priv       = &g_uart5priv,
 };
 #endif
