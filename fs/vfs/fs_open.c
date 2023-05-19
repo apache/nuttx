@@ -104,7 +104,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
   ret = inode_find(&desc);
   if (ret < 0)
     {
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+#ifdef CONFIG_PSEUDOFS_FILE
       if ((oflags & O_CREAT) != 0)
         {
           ret = pseudofile_create(&desc.node, path, mode);
