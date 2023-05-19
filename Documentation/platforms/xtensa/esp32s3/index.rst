@@ -127,7 +127,8 @@ Wi-Fi        Yes   WPA3-SAE supported
 Wi-Fi
 -----
 
-.. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi
+.. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi. On ESP32-S3,
+   SMP is enabled to enhance Wi-Fi performance.
 
 A standard network interface will be configured and can be initialized such as::
 
@@ -146,10 +147,10 @@ the result by running ``ifconfig`` afterwards.
 Wi-Fi SoftAP
 ------------
 
-It is possible to use ESP32 as an Access Point (SoftAP).
+It is possible to use ESP32-S3 as an Access Point (SoftAP).
 
 .. tip:: Boards usually expose a ``sta_softap`` defconfig which enables Wi-Fi
-   (STA + SoftAP)
+   (STA + SoftAP). On ESP32-S3, SMP is enabled to enhance Wi-Fi performance.
 
 If you are using this board config profile you can run these commands to be able
 to connect your smartphone or laptop to your board::
