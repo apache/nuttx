@@ -40,7 +40,7 @@
 #define NRF53_IRQ_TEMP          (NRF53_IRQ_EXTINT+16)  /* Temperature Sensor */
 #define NRF53_IRQ_RTC0          (NRF53_IRQ_EXTINT+17)  /* Real-time counter 0 */
 #define NRF53_IRQ_IPC           (NRF53_IRQ_EXTINT+18)  /* IPC */
-#define NRF53_IRQ_UART0         (NRF53_IRQ_EXTINT+19)  /* UART/UARTE 0 */
+#define NRF53_IRQ_SERIAL0       (NRF53_IRQ_EXTINT+19)  /* UART/SPI/TWI 0 */
 #define NRF53_IRQ_EGU0          (NRF53_IRQ_EXTINT+20)  /* Event Gen. Unit 0 */
 #define NRF53_IRQ_RTC1          (NRF53_IRQ_EXTINT+22)  /* Real-time counter 1 */
 #define NRF53_IRQ_TIMER1        (NRF53_IRQ_EXTINT+24)  /* Timer 1 */
