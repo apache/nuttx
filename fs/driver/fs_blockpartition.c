@@ -294,14 +294,14 @@ static int part_unlink(FAR struct inode *inode)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: register_blockpartition
+ * Name: register_blockpartition/register_partition_with_inode
  *
  * Description:
  *   Register a block partition driver inode the pseudo file system.
  *
  * Input Parameters:
  *   partition   - The path to the partition inode
- *   parent      - The path to the parent inode
+ *   parent      - The parent path or inode
  *   firstsector - The offset in sectors to the partition
  *   nsectors    - The number of sectors in the partition
  *
@@ -316,44 +316,35 @@ static int part_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int register_blockpartition(FAR const char *partition,
-                            mode_t mode, FAR const char *parent,
-                            off_t firstsector, off_t nsectors)
+int register_partition_with_inode(FAR const char *partition,
+                                  mode_t mode, FAR struct inode *parent,
+                                  off_t firstsector, off_t nsectors)
 {
   FAR struct part_struct_s *dev;
   struct geometry geo;
   int ret;
 
+  if (parent == NULL)
+    {
+      return -EINVAL;
+    }
+
   /* Allocate a partition device structure */
 
   dev = kmm_zalloc(sizeof(*dev));
-  if (!dev)
+  if (dev == NULL)
     {
       return -ENOMEM;
     }
 
+  inode_addref(parent);
+  dev->parent      = parent;
   dev->firstsector = firstsector;
   dev->nsectors    = nsectors;
 
-  /* Find the block driver */
-
-  if (mode & (S_IWOTH | S_IWGRP | S_IWUSR))
-    {
-      ret = find_blockdriver(parent, 0, &dev->parent);
-    }
-  else
-    {
-      ret = find_blockdriver(parent, MS_RDONLY, &dev->parent);
-    }
-
-  if (ret < 0)
-    {
-      goto errout_free;
-    }
-
   /* Get sector size */
 
-  ret = dev->parent->u.i_bops->geometry(dev->parent, &geo);
+  ret = parent->u.i_bops->geometry(parent, &geo);
   if (ret < 0)
     {
       goto errout_free;
@@ -366,14 +357,43 @@ int register_blockpartition(FAR const char *partition,
   ret = register_blockdriver(partition, &g_part_bops, mode, dev);
   if (ret < 0)
     {
-      goto errout_release;
+      goto errout_free;
     }
 
   return OK;
 
-errout_release:
-  inode_release(dev->parent);
 errout_free:
+  inode_release(parent);
   kmm_free(dev);
+  return ret;
+}
+
+int register_blockpartition(FAR const char *partition,
+                            mode_t mode, FAR const char *parent,
+                            off_t firstsector, off_t nsectors)
+{
+  FAR struct inode *inode;
+  int ret;
+
+  /* Find the block driver */
+
+  if (mode & (S_IWOTH | S_IWGRP | S_IWUSR))
+    {
+      ret = find_blockdriver(parent, 0, &inode);
+    }
+  else
+    {
+      ret = find_blockdriver(parent, MS_RDONLY, &inode);
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = register_partition_with_inode(partition, mode,
+                                      inode, firstsector, nsectors);
+  inode_release(inode);
+
   return ret;
 }
