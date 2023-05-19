@@ -115,11 +115,10 @@ Nested Interrupt Handling
 =========================
 
 Some general notes about nested interrupt handling are provided in
-another `Wiki page <https://cwiki.apache.org/confluence/display/NUTTX/Nested+Interrupts>`_.
-In this case, handling the nested custom interrupt is simpler because
-the generic interrupt handler is not re-entered. Rather, the generic
-interrupt handler must simply be made to co-exist with the custom
-interrupt interrupt handler.
+:doc:`<nestedinterrupts.rst>`. In this case, handling the nested custom
+interrupt is simpler because the generic interrupt handler is not
+re-entered. Rather, the generic interrupt handler must simply be made to
+co-exist with the custom interrupt interrupt handler.
 
 Modifications may be required to the generic interrupt handling logic
 to accomplish. A few points need to be made here:
