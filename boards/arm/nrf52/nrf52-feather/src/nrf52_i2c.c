@@ -88,7 +88,7 @@ int nrf52_i2ctool(void)
 #endif
 
 #ifdef CONFIG_NRF52_I2C1_MASTER
-  ret = nrf52_i2c_register(0);
+  ret = nrf52_i2c_register(1);
 #endif
   return ret;
 }
