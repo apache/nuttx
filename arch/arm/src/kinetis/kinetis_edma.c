@@ -364,7 +364,9 @@ static inline void kinetis_tcd_configure(struct kinetis_edmatcd_s *tcd,
   tcd->attr     = EDMA_TCD_ATTR_SSIZE(config->ssize) |  /* Transfer Attributes */
                   EDMA_TCD_ATTR_DSIZE(config->dsize);
   tcd->nbytes   = config->nbytes;
-  tcd->slast    = config->flags & EDMA_CONFIG_LOOPSRC ? -config->iter : 0;
+  tcd->slast    = config->flags & EDMA_CONFIG_LOOPSRC ?
+                                  -(config->iter * config->nbytes) : 0;
+
   tcd->daddr    = config->daddr;
   tcd->doff     = config->doff;
   tcd->citer    = config->iter & EDMA_TCD_CITER_CITER_MASK;
@@ -373,7 +375,8 @@ static inline void kinetis_tcd_configure(struct kinetis_edmatcd_s *tcd,
                                   0 : EDMA_TCD_CSR_DREQ;
   tcd->csr     |= config->flags & EDMA_CONFIG_INTHALF ?
                                   EDMA_TCD_CSR_INTHALF : 0;
-  tcd->dlastsga = config->flags & EDMA_CONFIG_LOOPDEST ? -config->iter : 0;
+  tcd->dlastsga = config->flags & EDMA_CONFIG_LOOPDEST ?
+                                  -(config->iter * config->nbytes) : 0;
 
   /* And special case flags */
 
