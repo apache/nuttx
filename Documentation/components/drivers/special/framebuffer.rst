@@ -68,7 +68,7 @@ Examples
 
 Examples apply to specific cases of the :ref:`genericlcdfb`:
 
-.. _ttgotdisplayesp32:
+.. _ttgotdisplayesp32_fb:
 
 TTGO T-Display ESP32 board
 ---------------------------
@@ -109,7 +109,7 @@ NuttX Simulator
 
 By selecting the ``sim:lvgl_fb`` config, the ``lvgldemo`` example will be built with the framebuffer driver.
 
-* ``boards/sim/sim/sim/src/sim_bringup.c`` registers the framebuffer driver the same way :ref:`ttgotdisplayesp32`;
+* ``boards/sim/sim/sim/src/sim_bringup.c`` registers the framebuffer driver the same way :ref:`ttgotdisplayesp32_fb`;
 * ``arch/sim/src/sim/up_framebuffer.c`` and ``arch/sim/src/sim/up_x11framebuffer.c`` will be built as ``CONFIG_SIM_FRAMEBUFFER = y`` and ``CONFIG_SIM_X11FB = y`` are set, respectively;
 
    * ``up_framebuffer.c`` provides ``up_fbinitialize`` and,

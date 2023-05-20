@@ -18,6 +18,7 @@ in other header files.
   led.rst
   mutex.rst
   nat.rst
+  newreno.rst
   notifier.rst
   nuttx.rst
   paging.rst
