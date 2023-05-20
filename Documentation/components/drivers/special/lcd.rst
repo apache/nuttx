@@ -46,7 +46,7 @@ Examples
 
 Examples apply to specific cases of the :ref:`genericlcdlcd`:
 
-.. _ttgotdisplayesp32:
+.. _ttgotdisplayesp32_lcd:
 
 TTGO T-Display ESP32 board
 ---------------------------
@@ -94,7 +94,7 @@ NuttX Simulator
 
 By selecting the ``sim:lvgl_lcd`` config, the ``lvgldemo`` example will be built with the LCD character interface.
 
-* ``boards/sim/sim/sim/src/sim_bringup.c`` registers the framebuffer driver the same way :ref:`ttgotdisplayesp32`;
+* ``boards/sim/sim/sim/src/sim_bringup.c`` registers the lcd driver the same way :ref:`ttgotdisplayesp32_lcd`;
 * ``arch/sim/src/sim/up_lcd.c`` and ``arch/sim/src/sim/up_x11framebuffer.c`` will be built as ``CONFIG_SIM_LCDDRIVER = y`` and ``CONFIG_SIM_X11FB = y`` are set, respectively;
 
    * ``up_lcd.c`` provides ``board_lcd_initialize`` and ``board_lcd_getdev``:
