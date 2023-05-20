@@ -204,7 +204,7 @@ This will create a temporary folder in ``apps/examples/romfs/testdir``. Move
 a PCM-encoded (``.wav``) audio file with 16 or 24 bits/sample (sampled at 16~48kHz)
 to this folder.
 
-.. note:: You can use :download:`this 440 Hz sinusoidal tone <tone.wav>`.
+.. note:: You can use :download:`this 440 Hz sinusoidal tone <../esp32s2-saola-1/tone.wav>`.
    The audio file should be located at ``apps/examples/romfs/testdir/tone.wav``
 
 Build the project again and flash it (make sure not to clean it, just build)

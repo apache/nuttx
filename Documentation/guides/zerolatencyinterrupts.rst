@@ -115,7 +115,7 @@ Nested Interrupt Handling
 =========================
 
 Some general notes about nested interrupt handling are provided in
-:doc:`<nestedinterrupts.rst>`. In this case, handling the nested custom
+:doc:`nestedinterrupts`. In this case, handling the nested custom
 interrupt is simpler because the generic interrupt handler is not
 re-entered. Rather, the generic interrupt handler must simply be made to
 co-exist with the custom interrupt interrupt handler.
