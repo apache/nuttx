@@ -67,7 +67,7 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
 
       .. code-tab:: console Ubuntu 20.04 LTS and later
 
-         $ apt install kconfig-frontends
+         $ sudo apt install kconfig-frontends
 
       .. code-tab:: console MacOS, Ubuntu 18.04 LTS and earlier
 
@@ -115,7 +115,7 @@ ARM architecture:
 
   .. code-tab:: console Ubuntu (deb)
 
-    $ apt install gcc-arm-none-eabi binutils-arm-none-eabi
+    $ sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi
 
   .. tab:: From arm.com
 
