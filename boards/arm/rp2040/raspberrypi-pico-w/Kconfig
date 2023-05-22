@@ -8,7 +8,7 @@ if ARCH_BOARD_RASPBERRYPI_PICO_W
 menuconfig RP2040_INFINEON_CYW43439
 	bool "Has Infineon cyw43439 WiFi chip"
 	depends on IEEE80211_INFINEON_CYW43439
-  default y
+	default y
 endif
 
 if RP2040_INFINEON_CYW43439
@@ -18,7 +18,7 @@ if RP2040_INFINEON_CYW43439
 		default "${PICO_SDK_PATH}/lib/cyw43-driver/firmware/43439A0-7.95.49.00.combined"
 		---help---
 			This should be a path to a file containing both the cyw43439 firmware and
-			the CLB blob.   The firmware should be padded to a 256 byte boundary and
+			the CLB blob.  The firmware should be padded to a 256 byte boundary and
 			then the CLM blob should be appended.
 
 			If this file is updated, check the CYW43439_FIRMWARE_LEN below to make sure

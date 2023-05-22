@@ -654,7 +654,7 @@ if LCD_ST7735
 
 	endchoice
 
-if  !LCD_ST7735_GM00 && !LCD_ST7735_GM01 && !LCD_ST7735_GM11
+if !LCD_ST7735_GM00 && !LCD_ST7735_GM01 && !LCD_ST7735_GM11
 
 	config LCD_ST7735_XRES
 	int "ST7735 X Resolution"
@@ -1412,7 +1412,7 @@ config LCD_LCDDRV_SPIIF
 		a normal SPI port.
 
 config LCD_LCDDRV_SPEED
-        int "Generic SPI Interface speed"
+	int "Generic SPI Interface speed"
 	default 10000000
 	depends on LCD_LCDDRV_SPIIF
 	---help---

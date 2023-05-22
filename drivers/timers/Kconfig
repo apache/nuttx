@@ -480,4 +480,4 @@ config CS2100CP_REGDEBUG
 	depends on DEBUG_FEATURES
 
 endif # TIMERS_CS2100CP
-endmenu  # Timer Driver Support
+endmenu # Timer Driver Support

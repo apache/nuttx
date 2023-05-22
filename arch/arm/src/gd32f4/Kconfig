@@ -559,7 +559,7 @@ config GD32F4_WWDGT
 	select GD32F4_WDGT
 	select WATCHDOG
 
-endmenu  #"GD32 Peripheral Support"
+endmenu # "GD32 Peripheral Support"
 
 
 config GD32F4_ADC
@@ -663,7 +663,7 @@ config ARCH_BOARD_GD32F4_CUSTOM_CLOCKCONFIG
 
 config GD32F4_TCMEXCLUDE
 	bool "Exclude TCM SRAM from the heap"
-	default y if  ARCH_DMA || LIBC_ARCH_ELF
+	default y if ARCH_DMA || LIBC_ARCH_ELF
 	depends on GD32F4_HAVE_TCM
 	---help---
 		Exclude TCM SRAM from the HEAP because it cannot be used for DMA

@@ -850,7 +850,7 @@ config S32K1XX_ENET_ENHANCEDBD
 	default n
 
 config S32K1XX_ENET_NETHIFS
-	int  # Not optional
+	int # Not optional
 	default 1
 
 config S32K1XX_ENET_PHYINIT
