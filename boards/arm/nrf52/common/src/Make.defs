@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/nrf52/thingy52/src/Makefile
+#############################################################################
+# boards/arm/nrf52/common/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,18 +16,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
-include $(TOPDIR)/Make.defs
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
-CSRCS = nrf52_boot.c nrf52_bringup.c
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += nrf52_appinit.c
+ifeq ($(CONFIG_NRF52_TIMER),y)
+  CSRCS += nrf52_timer.c
 endif
 
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += nrf52_buttons.c
-endif
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
 
-include $(TOPDIR)/boards/Board.mk
+endif

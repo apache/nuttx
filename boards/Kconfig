@@ -4009,6 +4009,9 @@ endif
 if ARCH_CHIP_RP2040
 source "boards/arm/rp2040/common/Kconfig"
 endif
+if ARCH_CHIP_NRF52
+source "boards/arm/nrf52/common/Kconfig"
+endif
 endif
 
 config BOARD_CRASHDUMP
