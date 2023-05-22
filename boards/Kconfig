@@ -4012,6 +4012,9 @@ endif
 if ARCH_CHIP_NRF52
 source "boards/arm/nrf52/common/Kconfig"
 endif
+if ARCH_CHIP_NRF53
+source "boards/arm/nrf53/common/Kconfig"
+endif
 endif
 
 config BOARD_CRASHDUMP
