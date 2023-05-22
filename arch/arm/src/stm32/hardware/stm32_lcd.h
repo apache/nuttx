@@ -100,11 +100,11 @@
 #define LCD_CR_VSEL               (1 << 1)  /* Bit 1:  Voltage source selection */
 #define LCD_CR_DUTY_SHIFT         (2)       /* Bits 2-4: Duty selection */
 #define LCD_CR_DUTY_MASK          (7 << LCD_CR_DUTY_SHIFT)
-# define LCD_CR_DUTY_STATIC       (0 << LCD_CR_DUTY_SHIFT) /* 000: Static duty */
-# define LCD_CR_DUTY_1TO2         (1 << LCD_CR_DUTY_SHIFT) /* 001: 1/2 duty */
-# define LCD_CR_DUTY_1TO3         (2 << LCD_CR_DUTY_SHIFT) /* 010: 1/3 duty */
-# define LCD_CR_DUTY_1TO4         (3 << LCD_CR_DUTY_SHIFT) /* 011: 1/4 duty */
-# define LCD_CR_DUTY_1TO8         (4 << LCD_CR_DUTY_SHIFT) /* 100: 1/8 duty */
+#  define LCD_CR_DUTY_STATIC      (0 << LCD_CR_DUTY_SHIFT) /* 000: Static duty */
+#  define LCD_CR_DUTY_1TO2        (1 << LCD_CR_DUTY_SHIFT) /* 001: 1/2 duty */
+#  define LCD_CR_DUTY_1TO3        (2 << LCD_CR_DUTY_SHIFT) /* 010: 1/3 duty */
+#  define LCD_CR_DUTY_1TO4        (3 << LCD_CR_DUTY_SHIFT) /* 011: 1/4 duty */
+#  define LCD_CR_DUTY_1TO8        (4 << LCD_CR_DUTY_SHIFT) /* 100: 1/8 duty */
 
 #define LCD_CR_BIAS_SHIFT         (5)       /* Bits 5-6: Bias selector */
 #define LCD_CR_BIAS_MASK          (3 << LCD_CR_BIAS_SHIFT)

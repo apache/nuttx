@@ -183,11 +183,11 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_SST26_DEBUG
-# define ssterr(format, ...)    _err(format, ##__VA_ARGS__)
-# define sstinfo(format, ...)   _info(format, ##__VA_ARGS__)
+#  define ssterr(format, ...)    _err(format, ##__VA_ARGS__)
+#  define sstinfo(format, ...)   _info(format, ##__VA_ARGS__)
 #else
-# define ssterr(x...)
-# define sstinfo(x...)
+#  define ssterr(x...)
+#  define sstinfo(x...)
 #endif
 
 /****************************************************************************

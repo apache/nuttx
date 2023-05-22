@@ -116,7 +116,7 @@ struct sam_spidev_s
 static bool     spi_checkreg(struct sam_spidev_s *priv, bool wr,
                              uint32_t value, uint32_t address);
 #else
-# define        spi_checkreg(priv,wr,value,address) (false)
+#  define       spi_checkreg(priv,wr,value,address) (false)
 #endif
 
 static uint32_t spi_getreg(struct sam_spidev_s *priv,
@@ -127,7 +127,7 @@ static void     spi_putreg(struct sam_spidev_s *priv, uint32_t value,
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #else
-# define        spi_dumpregs(priv,msg)
+#  define       spi_dumpregs(priv,msg)
 #endif
 
 /* Interrupt Handling */

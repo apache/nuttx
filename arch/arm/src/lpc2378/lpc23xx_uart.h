@@ -91,26 +91,26 @@
 
 /* PCKLSEL0 bits 7:6, 00=CCLK/4, 01=CCLK/1 , 10=CCLK/2  */
 #ifdef U0_PCLKDIV
-# if U0_PCLKDIV == 1
-#  define U0_PCLKSEL     (0x00000040)
-# elif U0_PCLKDIV == 2
-#   define U0_PCLKSEL    (0x00000080)
-# elif U0_PCLKDIV == 4
-#   define U0_PCLKSEL    (0x00000000)
-# endif
+#  if U0_PCLKDIV == 1
+#    define U0_PCLKSEL  (0x00000040)
+#  elif U0_PCLKDIV == 2
+#    define U0_PCLKSEL  (0x00000080)
+#  elif U0_PCLKDIV == 4
+#    define U0_PCLKSEL  (0x00000000)
+#  endif
 #else
 #  error "UART0 PCLK divider not set"
 #endif
 
 /* PCKLSEL1 bits 17:16, 00=CCLK/4, 01=CCLK/1 , 10=CCLK/2  */
 #ifdef U2_PCLKDIV
-# if U2_PCLKDIV == 1
-#  define U2_PCLKSEL    (0x00010000)
-# elif U2_PCLKDIV == 2
-#   define U2_PCLKSEL   (0x00020000)
-# elif U2_PCLKDIV == 4
-#   define U2_PCLKSEL   (0x00000000)
-# endif
+#  if U2_PCLKDIV == 1
+#    define U2_PCLKSEL  (0x00010000)
+#  elif U2_PCLKDIV == 2
+#    define U2_PCLKSEL  (0x00020000)
+#  elif U2_PCLKDIV == 4
+#    define U2_PCLKSEL  (0x00000000)
+#  endif
 #else
 #  error "UART2 PCLK divider not set"
 #endif

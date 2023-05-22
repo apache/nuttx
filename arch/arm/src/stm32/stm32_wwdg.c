@@ -103,8 +103,8 @@ struct stm32_lowerhalf_s
 static uint16_t stm32_getreg(uint32_t addr);
 static void     stm32_putreg(uint16_t val, uint32_t addr);
 #else
-# define        stm32_getreg(addr)     getreg32(addr)
-# define        stm32_putreg(val,addr) putreg32(val,addr)
+#  define       stm32_getreg(addr)     getreg32(addr)
+#  define       stm32_putreg(val,addr) putreg32(val,addr)
 #endif
 static void     stm32_setwindow(struct stm32_lowerhalf_s *priv,
                   uint8_t window);

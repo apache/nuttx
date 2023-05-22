@@ -51,9 +51,9 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
+#  define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
-# define elf_dumpbuffer(m,b,n)
+#  define elf_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

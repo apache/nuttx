@@ -334,17 +334,17 @@ static const struct uart_ops_s g_uart_dma_ops =
 #ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
-# ifdef CONFIG_LPUART1_RXDMA
+#  ifdef CONFIG_LPUART1_RXDMA
 static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32WB_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
-# ifdef CONFIG_USART1_RXDMA
+#  ifdef CONFIG_USART1_RXDMA
 static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 /* This describes the state of the STM32WB LPUART1 port. */

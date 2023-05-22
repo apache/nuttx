@@ -51,7 +51,7 @@
 #undef  HAVE_USBMONITOR
 
 #if defined(CONFIG_MMCSD_SPI)
-# define HAVE_MMCSD_SPI 1
+#  define HAVE_MMCSD_SPI 1
 #endif
 
 /* HSMCI */
@@ -189,8 +189,8 @@
 /* NAND */
 
 #ifdef HAVE_NAND
-# define NAND_MINOR 0
-# define SAM_SMC_CS0 0 /* GPIO_SMC_NCS0  connect SAM_SMC_CS0_BASE */
+#  define NAND_MINOR 0
+#  define SAM_SMC_CS0 0 /* GPIO_SMC_NCS0  connect SAM_SMC_CS0_BASE */
 int sam_nand_automount(int minor);
 #endif /* HAVE_NAND */
 
@@ -205,7 +205,7 @@ int sam_nand_automount(int minor);
 #ifdef HAVE_HSMCI
 int sam_hsmci_initialize(void);
 #else
-# define sam_hsmci_initialize()
+#  define sam_hsmci_initialize()
 #endif
 
 int sam_sdinitialize(int port, int minor);

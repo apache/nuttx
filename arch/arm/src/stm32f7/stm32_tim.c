@@ -1000,7 +1000,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
             case 2:
               stm32_tim_gpioconfig(GPIO_TIM9_CH3OUT, mode);
               break;
-# endif
+#  endif
 #  if defined(GPIO_TIM9_CH4OUT)
             case 3:
               stm32_tim_gpioconfig(GPIO_TIM9_CH4OUT, mode);

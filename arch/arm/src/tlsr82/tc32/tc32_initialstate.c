@@ -144,9 +144,9 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Enable or disable interrupts, based on user configuration */
 
-# ifdef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
   cpsr                  |= PSR_I_BIT;
-# endif
+#endif
 
   xcp->regs[REG_CPSR]    = cpsr;
 }

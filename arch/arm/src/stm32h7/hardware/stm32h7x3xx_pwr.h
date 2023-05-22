@@ -222,11 +222,11 @@
 #define STM32_PWR_WKUPPUPD5_SHIFT   (24)      /* Bits 24-25: Wakeup pin pull config for WKUP5 */
 #define STM32_PWR_WKUPPUPD6_SHIFT   (26)      /* Bits 26-27: Wakeup pin pull config for WKUP6 */
 
-# define STM32_PWR_WKUPPUPD_NONE    (0)      /* No pull-up */
-# define STM32_PWR_WKUPPUPD_PULLUP  (1)      /* Pull-up enabled */
-# define STM32_PWR_WKUPPUPD_PULLDN  (2)      /* Pull-down enabled */
-                                             /* 3 is reserved */
-# define STM32_PWR_WKUPPUPD_MASK    (3)
-                                             /* Bits 28-31: Reserved */
+#  define STM32_PWR_WKUPPUPD_NONE   (0)       /* No pull-up */
+#  define STM32_PWR_WKUPPUPD_PULLUP (1)       /* Pull-up enabled */
+#  define STM32_PWR_WKUPPUPD_PULLDN (2)       /* Pull-down enabled */
+                                              /* 3 is reserved */
+#  define STM32_PWR_WKUPPUPD_MASK   (3)
+                                              /* Bits 28-31: Reserved */
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H */

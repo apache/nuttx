@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -34,7 +36,7 @@
  * occurrence of the character c in the string s.
  */
 
-#ifndef CONFIG_LIBC_ARCH_STRRCHR
+#if !defined(CONFIG_LIBC_ARCH_STRRCHR) && defined(LIBC_BUILD_STRING)
 #undef strrchr /* See mm/README.txt */
 FAR char *strrchr(FAR const char *s, int c)
 {

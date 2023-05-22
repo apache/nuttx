@@ -373,7 +373,7 @@
 
 #define SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT   (0)     /* Bits 0-4: divide value for SPIFI clock  */
 #define SYSCON_SPIFICLKSEL_SPIFIDIV_MASK    (0x1f << SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT)
-# define SYSCON_SPIFICLKSEL_SPIFIDIV(n)     ((n-1) << SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT) /* n = 2 - 31 */
+#  define SYSCON_SPIFICLKSEL_SPIFIDIV(n)    ((n-1) << SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT) /* n = 2 - 31 */
 
                                                     /* Bits 5-7: Reserved */
 #define SYSCON_SPIFICLKSEL_SPIFISEL_SHIFT   (8)     /* Bits 8-9: Selects input clock for SPIFI clock divider */
@@ -509,10 +509,10 @@
 
 /* System control registers -- Matrix Arbitration Priorities */
 
-# define SYSCON_MATRIXARB_PRI_LOWEST        (0)
-# define SYSCON_MATRIXARB_PRI_LOW           (1)
-# define SYSCON_MATRIXARB_PRI_HIGH          (2)
-# define SYSCON_MATRIXARB_PRI_HIGHEST       (3)
+#  define SYSCON_MATRIXARB_PRI_LOWEST       (0)
+#  define SYSCON_MATRIXARB_PRI_LOW          (1)
+#  define SYSCON_MATRIXARB_PRI_HIGH         (2)
+#  define SYSCON_MATRIXARB_PRI_HIGHEST      (3)
 
 #define SYSCON_MATRIXARB_PRI_ICODE_SHIFT    (0)       /* Bits 0-1:  I-Code bus priority (should be lower than D-Code) */
 #define SYSCON_MATRIXARB_PRI_ICODE_MASK     (3 << SYSCON_MATRIXARB_PRI_ICODE_SHIFT)
@@ -642,7 +642,7 @@
                             /* Delay values multiplied by 250 picoseconds */
 #define SYSCON_EMCDLYCTL_CMDDLY_SHIFT       (0)     /* Bits 0-4: Delay value for EMC outputs in command delayed mode */
 #define SYSCON_EMCDLYCTL_CMDDLY_MASK        (0x1f << SYSCON_EMCDLYCTL_CMDDLY_SHIFT)
-# define SYSCON_EMCDLYCTL_CMDDLY(n)         ((n-1) << SYSCON_EMCDLYCTL_CMDDLY_SHIFT) /* n = 3 - 32 */
+#  define SYSCON_EMCDLYCTL_CMDDLY(n)        ((n-1) << SYSCON_EMCDLYCTL_CMDDLY_SHIFT) /* n = 3 - 32 */
 
                                                     /* Bits 5-7: Reserved */
 #define SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT     (8)     /* Bits 8-12: Delay value for the feedback clock that controls input data sampling */
@@ -652,12 +652,12 @@
                                                     /* Bits 13-15: Reserved */
 #define SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT   (16)    /* Bits 16-20: Delay value for the CLKOUT0 output */
 #define SYSCON_EMCDLYCTL_CLKOUT0DLY_MASK    (0x1f << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT)
-# define SYSCON_EMCDLYCTL_CLKOUT0DLY(n)     ((n-1) << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT) /* n = 3 - 32 */
+#  define SYSCON_EMCDLYCTL_CLKOUT0DLY(n)    ((n-1) << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT) /* n = 3 - 32 */
 
                                                     /* Bits 21-23: Reserved */
 #define SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT   (24)    /* Bits 24-28: Delay value for the CLKOUT1 output */
 #define SYSCON_EMCDLYCTL_CLKOUT1DLY_MASK    (0x1f << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT)
-# define SYSCON_EMCDLYCTL_CLKOUT1DLY(n)     ((n-1) << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT) /* n = 3 - 32 */
+#  define SYSCON_EMCDLYCTL_CLKOUT1DLY(n)    ((n-1) << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT) /* n = 3 - 32 */
 
                                                     /* Bits 29-31: Reserved */
 

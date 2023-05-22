@@ -45,7 +45,7 @@
 #define STM32_RTC_PRESCALER_MIN             1      /* Maximum speed of 16384 Hz */
 
 #if !defined(CONFIG_STM32H7_RTC_MAGIC)
-# define CONFIG_STM32H7_RTC_MAGIC           (0xfacefeed)
+#  define CONFIG_STM32H7_RTC_MAGIC          (0xfacefeed)
 #endif
 
 #if !defined(CONFIG_STM32H7_RTC_MAGIC_TIME_SET)
@@ -53,7 +53,7 @@
 #endif
 
 #if !defined(CONFIG_STM32H7_RTC_MAGIC_REG)
-# define CONFIG_STM32H7_RTC_MAGIC_REG       (0)
+#  define CONFIG_STM32H7_RTC_MAGIC_REG      (0)
 #endif
 
 #define RTC_MAGIC                            CONFIG_STM32H7_RTC_MAGIC

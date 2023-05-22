@@ -356,7 +356,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs);
 void arm_pginitialize(void);
 uint32_t *arm_va2pte(uintptr_t vaddr);
 #else /* CONFIG_PAGING */
-# define arm_pginitialize()
+#  define arm_pginitialize()
 #endif /* CONFIG_PAGING */
 
 /* Exception Handlers */
@@ -382,7 +382,7 @@ void arm_pginitialize(void);
 uint32_t *arm_va2pte(uintptr_t vaddr);
 void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
 #else /* CONFIG_PAGING */
-# define arm_pginitialize()
+#  define arm_pginitialize()
 void arm_dataabort(uint32_t *regs);
 #endif /* CONFIG_PAGING */
 
@@ -442,7 +442,7 @@ void arm_l2ccinitialize(void);
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void);
 #else
-# define arm_addregion()
+#  define arm_addregion()
 #endif
 
 /* Networking ***************************************************************/
@@ -461,7 +461,7 @@ void arm_addregion(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void);
 #else
-# define arm_netinitialize()
+#  define arm_netinitialize()
 #endif
 
 /* USB **********************************************************************/
@@ -470,8 +470,8 @@ void arm_netinitialize(void);
 void arm_usbinitialize(void);
 void arm_usbuninitialize(void);
 #else
-# define arm_usbinitialize()
-# define arm_usbuninitialize()
+#  define arm_usbinitialize()
+#  define arm_usbuninitialize()
 #endif
 
 /* Debug ********************************************************************/

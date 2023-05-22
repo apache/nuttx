@@ -202,7 +202,7 @@ static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size)
 
 static uintptr_t pmp_read_region_cfg(uintptr_t region)
 {
-# if (PMP_XLEN == 32)
+#if (PMP_XLEN == 32)
   switch (region)
     {
       case 0 ... 3:
@@ -220,7 +220,7 @@ static uintptr_t pmp_read_region_cfg(uintptr_t region)
       default:
         break;
     }
-# elif (PMP_XLEN == 64)
+#elif (PMP_XLEN == 64)
   switch (region)
     {
       case 0 ... 7:
@@ -542,7 +542,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
 
   /* Set the configuration register value */
 
-# if (PMP_XLEN == 32)
+#if (PMP_XLEN == 32)
   switch (region)
     {
       case 0 ... 3:
@@ -572,7 +572,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
       default:
         break;
     }
-# elif (PMP_XLEN == 64)
+#elif (PMP_XLEN == 64)
   switch (region)
     {
       case 0 ... 7:
@@ -590,9 +590,9 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
       default:
         break;
     }
-# else
-#   error "XLEN of risc-v not supported"
-# endif
+#else
+#  error "XLEN of risc-v not supported"
+#endif
 
 #ifdef CONFIG_ARCH_USE_S_MODE
   /* Fence is needed when page-based virtual memory is implemented.

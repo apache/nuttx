@@ -69,11 +69,11 @@ struct nxtk_framedwindow_s
 
 #undef EXTERN
 #if defined(__cplusplus)
-# define EXTERN extern "C"
+#  define EXTERN extern "C"
 extern "C"
 {
 #else
-# define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /* That is the callback for the framed window */

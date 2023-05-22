@@ -51,9 +51,9 @@
  */
 
 #ifdef ADC_HAVE_DMA
-# define ADC3_NCHANNELS 6
+#  define ADC3_NCHANNELS 6
 #else
-# define ADC3_NCHANNELS 1
+#  define ADC3_NCHANNELS 1
 #endif
 
 /* The number of ADC channels in the conversion list */

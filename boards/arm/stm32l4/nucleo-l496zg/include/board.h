@@ -570,8 +570,8 @@
  *   -- ----- --------- -----
  */
 
- # define GPIO_USART6_RX GPIO_USART6_RX_2
- # define GPIO_USART6_TX GPIO_USART6_TX_2
+ #  define GPIO_USART6_RX GPIO_USART6_RX_2
+ #  define GPIO_USART6_TX GPIO_USART6_TX_2
 #endif
 
 /* USART3:

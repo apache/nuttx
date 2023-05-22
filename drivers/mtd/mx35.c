@@ -64,11 +64,11 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_MX35_DEBUG
-# define mx35err(format, ...)    _err(format, ##__VA_ARGS__)
-# define mx35info(format, ...)   _info(format, ##__VA_ARGS__)
+#  define mx35err(format, ...)    _err(format, ##__VA_ARGS__)
+#  define mx35info(format, ...)   _info(format, ##__VA_ARGS__)
 #else
-# define mx35err(x...)
-# define mx35info(x...)
+#  define mx35err(x...)
+#  define mx35info(x...)
 #endif
 
 /* Identification register values *******************************************/

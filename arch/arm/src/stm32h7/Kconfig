@@ -1744,7 +1744,7 @@ menu "RTC Configuration"
 config STM32H7_RTC_MAGIC_REG
 	int "BKP register"
 	default 0
-	range  0 31
+	range 0 31
 	---help---
 		The BKP register used to store/check the Magic value to determine if
 		RTC is already setup

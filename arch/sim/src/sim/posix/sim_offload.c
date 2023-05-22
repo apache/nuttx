@@ -454,9 +454,6 @@ void *sim_audio_lame_init(struct audio_info_s *info)
     {
       lame_set_num_channels(codec->gfp, info->channels);
       lame_set_mode(codec->gfp, info->channels > 1 ? STEREO : MONO);
-
-      lame_set_in_samplerate (codec->gfp, info->samplerate);
-      lame_set_out_samplerate(codec->gfp, info->samplerate);
     }
 
   ret = lame_init_params(codec->gfp);

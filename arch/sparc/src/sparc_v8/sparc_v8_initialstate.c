@@ -91,13 +91,13 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set the initial stack pointer to the "base" of the allocated stack */
 
-  xcp->regs[REG_I6]      = (uint32_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
+  xcp->regs[REG_I6]  = (uint32_t)tcb->stack_base_ptr +
+                                 tcb->adj_stack_size;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PC]      = (uint32_t)(tcb->start);
-  xcp->regs[REG_NPC]     = (uint32_t)(tcb->start + 4);
+  xcp->regs[REG_PC]  = (uint32_t)(tcb->start);
+  xcp->regs[REG_NPC] = (uint32_t)(tcb->start + 4);
 
   /* Set supervisor- or user-mode, depending on how NuttX is configured and
    * what kind of thread is being started.  Disable FIQs in any event

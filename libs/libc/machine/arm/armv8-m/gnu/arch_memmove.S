@@ -29,6 +29,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 #include "arm_asm.h"
 
 	.thumb
@@ -71,3 +75,5 @@ memmove:
 	.cantunwind
 	.fnend
 	.size memmove, . - memmove
+
+#endif

@@ -172,7 +172,7 @@ void hc_lowputs(const char *str);
 #if CONFIG_MM_REGIONS > 1
 void hc_addregion(void);
 #else
-# define hc_addregion()
+#  define hc_addregion()
 #endif
 
 /* Sub-system/driver initialization */
@@ -184,15 +184,15 @@ void weak_function hc_dma_initialize(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void hc_netinitialize(void);
 #else
-# define hc_netinitialize()
+#  define hc_netinitialize()
 #endif
 
 #ifdef CONFIG_USBDEV
 void hc_usbinitialize(void);
 void hc_usbuninitialize(void);
 #else
-# define hc_usbinitialize()
-# define hc_usbuninitialize()
+#  define hc_usbinitialize()
+#  define hc_usbuninitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */

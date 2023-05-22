@@ -1,0 +1,93 @@
+From 61a7811f09b529341351c19ce1644b7e790daa5f Mon Sep 17 00:00:00 2001
+From: wangbowen6 <wangbowen6@xiaomi.com>
+Date: Tue, 9 May 2023 11:30:09 +0800
+Subject: [PATCH 1/2] virtio: follow virtio 1.2 spec, add more virtio status
+ and device
+
+Signed-off-by: wangbowen6 <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 37 ++++++++++++++++++++++++++----------
+ lib/virtio/virtio.c          | 14 ++++++++++++++
+ 2 files changed, 41 insertions(+), 10 deletions(-)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index 0303a5b..3001a06 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -15,21 +15,38 @@ extern "C" {
+ #endif
+ 
+ /* VirtIO device IDs. */
+-#define VIRTIO_ID_NETWORK    0x01UL
+-#define VIRTIO_ID_BLOCK      0x02UL
+-#define VIRTIO_ID_CONSOLE    0x03UL
+-#define VIRTIO_ID_ENTROPY    0x04UL
+-#define VIRTIO_ID_BALLOON    0x05UL
+-#define VIRTIO_ID_IOMEMORY   0x06UL
+-#define VIRTIO_ID_RPMSG      0x07UL /* remote processor messaging */
+-#define VIRTIO_ID_SCSI       0x08UL
+-#define VIRTIO_ID_9P         0x09UL
+-#define VIRTIO_DEV_ANY_ID    (-1)UL
++#define VIRTIO_ID_NETWORK      1UL
++#define VIRTIO_ID_BLOCK        2UL
++#define VIRTIO_ID_CONSOLE      3UL
++#define VIRTIO_ID_ENTROPY      4UL
++#define VIRTIO_ID_BALLOON      5UL
++#define VIRTIO_ID_IOMEMORY     6UL
++#define VIRTIO_ID_RPMSG        7UL /* remote processor messaging */
++#define VIRTIO_ID_SCSI         8UL
++#define VIRTIO_ID_9P           9UL
++#define VIRTIO_ID_RPROC_SERIAL 11UL
++#define VIRTIO_ID_GPU          16UL
++#define VIRTIO_ID_INPUT        18UL
++#define VIRTIO_ID_VSOCK        19UL
++#define VIRTIO_ID_CRYPTO       20UL
++#define VIRTIO_ID_IOMMU        23UL
++#define VIRTIO_ID_MEM          24UL
++#define VIRTIO_ID_SOUND        25UL
++#define VIRTIO_ID_FS           26UL
++#define VIRTIO_ID_PMEM         27UL
++#define VIRTIO_ID_RPMB         28UL
++#define VIRTIO_ID_SCMI         32UL
++#define VIRTIO_ID_I2C_ADAPTER  34UL
++#define VIRTIO_ID_BT           40UL
++#define VIRTIO_ID_GPIO         41UL
++#define VIRTIO_DEV_ANY_ID      -1UL
+ 
+ /* Status byte for guest to report progress. */
++#define VIRTIO_CONFIG_STATUS_RESET     0x00
+ #define VIRTIO_CONFIG_STATUS_ACK       0x01
+ #define VIRTIO_CONFIG_STATUS_DRIVER    0x02
+ #define VIRTIO_CONFIG_STATUS_DRIVER_OK 0x04
++#define VIRTIO_CONFIG_FEATURES_OK      0x08
+ #define VIRTIO_CONFIG_STATUS_NEEDS_RESET 0x40
+ #define VIRTIO_CONFIG_STATUS_FAILED    0x80
+ 
+diff --git a/lib/virtio/virtio.c open-amp/lib/virtio/virtio.c
+index d205784..d25aec3 100644
+--- a/lib/virtio/virtio.c
++++ open-amp/lib/virtio/virtio.c
+@@ -26,6 +26,20 @@ static const struct virtio_ident {
+ 	VIRTIO_ID_IOMEMORY, "IOMemory"}, {
+ 	VIRTIO_ID_SCSI, "SCSI"}, {
+ 	VIRTIO_ID_9P, "9P Transport"}, {
++	VIRTIO_ID_GPU, "GPU"}, {
++	VIRTIO_ID_INPUT, "Input"}, {
++	VIRTIO_ID_VSOCK, "Vsock Transport"}, {
++	VIRTIO_ID_CRYPTO, "Crypto"}, {
++	VIRTIO_ID_IOMMU, "IOMMU"}, {
++	VIRTIO_ID_MEM, "Memory"}, {
++	VIRTIO_ID_SOUND, "Sound"}, {
++	VIRTIO_ID_FS, "File System"}, {
++	VIRTIO_ID_PMEM, "Pmem"}, {
++	VIRTIO_ID_RPMB, "RPMB"}, {
++	VIRTIO_ID_SCMI, "SCMI"}, {
++	VIRTIO_ID_I2C_ADAPTER, "I2C Adapter"}, {
++	VIRTIO_ID_BT, "Bluetooth"}, {
++	VIRTIO_ID_GPIO, "GPIO" }, {
+ 	0, NULL}
+ };
+ 
+-- 
+2.25.1
+

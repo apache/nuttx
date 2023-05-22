@@ -87,20 +87,20 @@ void up_initial_state(struct tcb_s *tcb)
    * that depends on if a priority change is required or not.
    */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
+  xcp->regs[REG_SP]     = (uint32_t)tcb->stack_base_ptr +
+                                    tcb->adj_stack_size;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_EIP]     = (uint32_t)tcb->start;
+  xcp->regs[REG_EIP]    = (uint32_t)tcb->start;
 
   /* Set up the segment registers... assume the same segment as the caller.
    * That is not a good assumption in the long run.
    */
 
-  xcp->regs[REG_DS]      = up_getds();
-  xcp->regs[REG_CS]      = up_getcs();
-  xcp->regs[REG_SS]      = up_getss();
+  xcp->regs[REG_DS]     = up_getds();
+  xcp->regs[REG_CS]     = up_getcs();
+  xcp->regs[REG_SS]     = up_getss();
 
   /* Set supervisor- or user-mode, depending on how NuttX is configured and
    * what kind of thread is being started.  Disable FIQs in any event
@@ -118,6 +118,6 @@ void up_initial_state(struct tcb_s *tcb)
    */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_EFLAGS]  = X86_FLAGS_IF;
+  xcp->regs[REG_EFLAGS] = X86_FLAGS_IF;
 #endif
 }

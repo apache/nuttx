@@ -608,7 +608,7 @@ static struct s32k1xx_uart_s g_lpuart2priv =
 #  ifdef CONFIG_LPUART2_RXDMA
   .dma_rxreqsrc = S32K1XX_DMACHAN_LPUART2_RX,
   .rxfifo        = g_lpuart2rxfifo,
-# endif
+#  endif
 };
 #endif
 

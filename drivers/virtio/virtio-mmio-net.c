@@ -78,7 +78,7 @@
  */
 
 #ifndef VIRTIO_NET_NINTERFACES
-# define VIRTIO_NET_NINTERFACES 1
+#  define VIRTIO_NET_NINTERFACES 1
 #endif
 
 /* TX timeout = 1 minute */

@@ -247,7 +247,6 @@ int arm64_pause_handler(int irq, void *context, void *arg)
 int up_cpu_pause(int cpu)
 {
   int ret;
-  uint64_t mpidr = GET_MPIDR();
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
@@ -273,7 +272,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute SGI2 */
 
-  ret = arm64_gic_raise_sgi(SGI_CPU_PAUSE, mpidr, (1 << cpu));
+  ret = arm64_gic_raise_sgi(GIC_IRQ_SGI2, (1 << cpu));
   if (ret < 0)
     {
       /* What happened?  Unlock the g_cpu_wait spinlock */

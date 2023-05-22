@@ -120,7 +120,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 #if CONFIG_MM_REGIONS > 1
   int region = heap->mm_nregions;
 #else
-# define region 1
+#  define region 1
 #endif
 
   DEBUGASSERT(info);

@@ -77,7 +77,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 #define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
@@ -222,7 +222,7 @@ void weak_function sparc_dma_initialize(void);
 #if CONFIG_MM_REGIONS > 1
 void sparc_addregion(void);
 #else
-# define sparc_addregion()
+#  define sparc_addregion()
 #endif
 
 /* Serial output */
@@ -236,7 +236,7 @@ void sparc_serialinit(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void sparc_netinitialize(void);
 #else
-# define sparc_netinitialize()
+#  define sparc_netinitialize()
 #endif
 
 /* USB */
@@ -245,8 +245,8 @@ void sparc_netinitialize(void);
 void sparc_usbinitialize(void);
 void sparc_usbuninitialize(void);
 #else
-# define sparc_usbinitialize()
-# define sparc_usbuninitialize()
+#  define sparc_usbinitialize()
+#  define sparc_usbuninitialize()
 #endif
 
 /* Debug ********************************************************************/

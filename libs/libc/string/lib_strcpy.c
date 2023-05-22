@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -42,7 +44,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRCPY
+#if !defined(CONFIG_LIBC_ARCH_STRCPY) && defined(LIBC_BUILD_STRING)
 #undef strcpy /* See mm/README.txt */
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {

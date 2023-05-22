@@ -124,7 +124,7 @@ void z16_sigdeliver(void);
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 void z16_lowputc(char ch);
 #else
-# define z16_lowputc(ch)
+#  define z16_lowputc(ch)
 #endif
 
 /* Defined in xyz_allocateheap.c */
@@ -152,7 +152,7 @@ void z16_ack_irq(int irq);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void z16_netinitialize(void);
 #else
-# define z16_netinitialize()
+#  define z16_netinitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -110,11 +110,11 @@ struct sem_s
   dq_queue_t waitlist;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-# if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
-# else
+#  else
   struct semholder_s holder[2];  /* Slot for old and new holder */
-# endif
+#  endif
 #endif
 };
 
@@ -123,25 +123,26 @@ typedef struct sem_s sem_t;
 /* Initializers */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-# if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
 /* semcount, flags, waitlist, hhead */
 
-#  define SEM_INITIALIZER(c) \
-    {(c), 0, SEM_WAITLIST_INITIALIZER, NULL}
-# else
+#    define SEM_INITIALIZER(c) \
+       {(c), 0, SEM_WAITLIST_INITIALIZER, NULL}
+#  else
 /* semcount, flags, waitlist, holder[2] */
 
-#  define SEM_INITIALIZER(c) \
-    {(c), 0, SEM_WAITLIST_INITIALIZER, {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
-# endif
+#    define SEM_INITIALIZER(c) \
+       {(c), 0, SEM_WAITLIST_INITIALIZER, \
+        {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}
+#  endif
 #else
 /* semcount, flags, waitlist */
 
 #  define SEM_INITIALIZER(c) \
-    {(c), 0, SEM_WAITLIST_INITIALIZER}
+     {(c), 0, SEM_WAITLIST_INITIALIZER}
 #endif
 
-# define SEM_WAITLIST(sem)        (&((sem)->waitlist))
+#define SEM_WAITLIST(sem)       (&((sem)->waitlist))
 
 /****************************************************************************
  * Public Data

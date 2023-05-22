@@ -785,15 +785,15 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define z16f_contrde() \
-  ((getreg8(Z16F_UART1_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
-# define z16f_contxd(ch) \
-  putreg8((uint8_t)(ch), Z16F_UART1_TXD)
+#  define z16f_contrde() \
+   ((getreg8(Z16F_UART1_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
+#  define z16f_contxd(ch) \
+   putreg8((uint8_t)(ch), Z16F_UART1_TXD)
 #else
-# define z16f_contrde() \
-  ((getreg8(Z16F_UART0_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
-# define z16f_contxd(ch) \
-  putreg8((uint8_t)(ch), Z16F_UART0_TXD)
+#  define z16f_contrde() \
+   ((getreg8(Z16F_UART0_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
+#  define z16f_contxd(ch) \
+   putreg8((uint8_t)(ch), Z16F_UART0_TXD)
 #endif
 
 /****************************************************************************

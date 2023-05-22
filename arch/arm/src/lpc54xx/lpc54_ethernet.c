@@ -370,8 +370,8 @@ static uint32_t *g_txbuffers1[CONFIG_LPC54_ETH_NTXDESC1];
 static uint32_t lpc54_getreg(uintptr_t addr);
 static void lpc54_putreg(uint32_t val, uintptr_t addr);
 #else
-# define lpc54_getreg(addr)      getreg32(addr)
-# define lpc54_putreg(val,addr)  putreg32(val,addr)
+#  define lpc54_getreg(addr)     getreg32(addr)
+#  define lpc54_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Common TX logic */

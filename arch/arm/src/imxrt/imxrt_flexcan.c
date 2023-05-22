@@ -821,10 +821,10 @@ static void imxrt_receive(struct imxrt_driver_s *priv,
   uint32_t mbi;
   uint32_t mbj;
   struct mb_s *rf;
-# ifdef CONFIG_NET_CAN_CANFD
+#ifdef CONFIG_NET_CAN_CANFD
   uint32_t *frame_data_word;
   uint32_t i;
-# endif
+#endif
   uint32_t f;
 
   while ((f = flags) != 0)

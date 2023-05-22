@@ -29,6 +29,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 /* Very similar to the generic code, but uses Thumb2 as implemented
    in ARMv7-M.  */
 
@@ -419,3 +423,5 @@ def_fn strcmp
 	.cantunwind
 	.fnend
 	.size strcmp, . - strcmp
+
+#endif

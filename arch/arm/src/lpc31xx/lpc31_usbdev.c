@@ -340,8 +340,8 @@ struct lpc31_usbdev_s
 static uint32_t lpc31_getreg(uint32_t addr);
 static void lpc31_putreg(uint32_t val, uint32_t addr);
 #else
-# define lpc31_getreg(addr)     getreg32(addr)
-# define lpc31_putreg(val,addr) putreg32(val,addr)
+#  define lpc31_getreg(addr)     getreg32(addr)
+#  define lpc31_putreg(val,addr) putreg32(val,addr)
 #endif
 
 static inline void lpc31_clrbits(uint32_t mask, uint32_t addr);

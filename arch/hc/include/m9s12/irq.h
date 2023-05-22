@@ -98,48 +98,48 @@
 
 /* To conserve space, interrupts must also be configured, port by port */
 
-# define HCC12_IRQ_PGFIRST     HCS12_IRQ_NVECTORS
-# ifdef CONFIG_HCS12_PORTG_INTS
-#  define HCS12_IRQ_PGSET     0xff
-#  define HCS12_IRQ_PG0       (HCC12_IRQ_PGFIRST+0)
-#  define HCS12_IRQ_PG1       (HCC12_IRQ_PGFIRST+1)
-#  define HCS12_IRQ_PG2       (HCC12_IRQ_PGFIRST+2)
-#  define HCS12_IRQ_PG3       (HCC12_IRQ_PGFIRST+3)
-#  define HCS12_IRQ_PG4       (HCC12_IRQ_PGFIRST+4)
-#  define HCS12_IRQ_PG5       (HCC12_IRQ_PGFIRST+5)
-#  define HCS12_IRQ_PG6       (HCC12_IRQ_PGFIRST+6)
-#  define HCS12_IRQ_PG7       (HCC12_IRQ_PGFIRST+7)
-#  define HCC12_IRQ_PHFIRST   (HCC12_IRQ_PGFIRST+8)
-# else
-#  define HCC12_IRQ_PHFIRST   HCC12_IRQ_PGFIRST
-# endif
+#  define HCC12_IRQ_PGFIRST   HCS12_IRQ_NVECTORS
+#  ifdef CONFIG_HCS12_PORTG_INTS
+#    define HCS12_IRQ_PGSET   0xff
+#    define HCS12_IRQ_PG0     (HCC12_IRQ_PGFIRST+0)
+#    define HCS12_IRQ_PG1     (HCC12_IRQ_PGFIRST+1)
+#    define HCS12_IRQ_PG2     (HCC12_IRQ_PGFIRST+2)
+#    define HCS12_IRQ_PG3     (HCC12_IRQ_PGFIRST+3)
+#    define HCS12_IRQ_PG4     (HCC12_IRQ_PGFIRST+4)
+#    define HCS12_IRQ_PG5     (HCC12_IRQ_PGFIRST+5)
+#    define HCS12_IRQ_PG6     (HCC12_IRQ_PGFIRST+6)
+#    define HCS12_IRQ_PG7     (HCC12_IRQ_PGFIRST+7)
+#    define HCC12_IRQ_PHFIRST (HCC12_IRQ_PGFIRST+8)
+#  else
+#    define HCC12_IRQ_PHFIRST HCC12_IRQ_PGFIRST
+#  endif
 
-# ifdef CONFIG_HCS12_PORTH_INTS
-#  define HCS12_IRQ_PHSET     0x7f
-#  define HCS12_IRQ_PH0       (HCC12_IRQ_PHFIRST+0)
-#  define HCS12_IRQ_PH1       (HCC12_IRQ_PHFIRST+1)
-#  define HCS12_IRQ_PH2       (HCC12_IRQ_PHFIRST+2)
-#  define HCS12_IRQ_PH3       (HCC12_IRQ_PHFIRST+3)
-#  define HCS12_IRQ_PH4       (HCC12_IRQ_PHFIRST+4)
-#  define HCS12_IRQ_PH5       (HCC12_IRQ_PHFIRST+5)
-#  define HCS12_IRQ_PH6       (HCC12_IRQ_PHFIRST+6)
-#  define HCC12_IRQ_PJFIRST   (HCC12_IRQ_PHFIRST+7)
-# else
-#  define HCC12_IRQ_PJFIRST   HCC12_IRQ_PHFIRST
-# endif
+#  ifdef CONFIG_HCS12_PORTH_INTS
+#    define HCS12_IRQ_PHSET   0x7f
+#    define HCS12_IRQ_PH0     (HCC12_IRQ_PHFIRST+0)
+#    define HCS12_IRQ_PH1     (HCC12_IRQ_PHFIRST+1)
+#    define HCS12_IRQ_PH2     (HCC12_IRQ_PHFIRST+2)
+#    define HCS12_IRQ_PH3     (HCC12_IRQ_PHFIRST+3)
+#    define HCS12_IRQ_PH4     (HCC12_IRQ_PHFIRST+4)
+#    define HCS12_IRQ_PH5     (HCC12_IRQ_PHFIRST+5)
+#    define HCS12_IRQ_PH6     (HCC12_IRQ_PHFIRST+6)
+#    define HCC12_IRQ_PJFIRST (HCC12_IRQ_PHFIRST+7)
+#  else
+#    define HCC12_IRQ_PJFIRST HCC12_IRQ_PHFIRST
+#  endif
 
-# ifdef CONFIG_HCS12_PORTJ_INTS
-#  define HCS12_IRQ_PJSET     0xcf
-#  define HCS12_IRQ_PJ0       (HCC12_IRQ_PJFIRST+0)
-#  define HCS12_IRQ_PJ1       (HCC12_IRQ_PJFIRST+1)
-#  define HCS12_IRQ_PJ2       (HCC12_IRQ_PJFIRST+2)
-#  define HCS12_IRQ_PJ3       (HCC12_IRQ_PJFIRST+3)
-#  define HCS12_IRQ_PJ6       (HCC12_IRQ_PJFIRST+4)
-#  define HCS12_IRQ_PJ7       (HCC12_IRQ_PJFIRST+5)
-#  define HCS12_IRQ_NIRQS     (HCC12_IRQ_PJFIRST+6)
-# else
-#  define HCS12_IRQ_NIRQS     HCC12_IRQ_PJFIRST
-# endif
+#  ifdef CONFIG_HCS12_PORTJ_INTS
+#    define HCS12_IRQ_PJSET   0xcf
+#    define HCS12_IRQ_PJ0     (HCC12_IRQ_PJFIRST+0)
+#    define HCS12_IRQ_PJ1     (HCC12_IRQ_PJFIRST+1)
+#    define HCS12_IRQ_PJ2     (HCC12_IRQ_PJFIRST+2)
+#    define HCS12_IRQ_PJ3     (HCC12_IRQ_PJFIRST+3)
+#    define HCS12_IRQ_PJ6     (HCC12_IRQ_PJFIRST+4)
+#    define HCS12_IRQ_PJ7     (HCC12_IRQ_PJFIRST+5)
+#    define HCS12_IRQ_NIRQS   (HCC12_IRQ_PJFIRST+6)
+#  else
+#    define HCS12_IRQ_NIRQS   HCC12_IRQ_PJFIRST
+#   endif
 #else
 #  define HCS12_IRQ_NIRQS     HCS12_IRQ_NVECTORS
 #endif /* CONFIG_HCS12_GPIOIRQ */

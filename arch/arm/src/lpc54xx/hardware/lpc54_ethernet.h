@@ -571,13 +571,13 @@
 #define ETH_DMA_MODE_TXPR                                (1 << 11)                     /* Bit 11: Transmit priority */
 #define ETH_DMA_MODE_PR_SHIFT                            (12)                          /* Bits 12-14: Priority ratio */
 #define ETH_DMA_MODE_PR_MASK                             (7 << ETH_DMA_MODE_PR_SHIFT)
-# define ETH_DMA_MODE_PR_1TO1                            (0 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 1:1 */
-# define ETH_DMA_MODE_PR_3TO1                            (2 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 3:1 */
-# define ETH_DMA_MODE_PR_4TO1                            (3 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 4:1 */
-# define ETH_DMA_MODE_PR_5TO1                            (4 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 5:1 */
-# define ETH_DMA_MODE_PR_6TO1                            (5 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 6:1 */
-# define ETH_DMA_MODE_PR_7TO1                            (6 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 7:1 */
-# define ETH_DMA_MODE_PR_8TO1                            (7 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 8:1 */
+#  define ETH_DMA_MODE_PR_1TO1                           (0 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 1:1 */
+#  define ETH_DMA_MODE_PR_3TO1                           (2 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 3:1 */
+#  define ETH_DMA_MODE_PR_4TO1                           (3 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 4:1 */
+#  define ETH_DMA_MODE_PR_5TO1                           (4 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 5:1 */
+#  define ETH_DMA_MODE_PR_6TO1                           (5 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 6:1 */
+#  define ETH_DMA_MODE_PR_7TO1                           (6 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 7:1 */
+#  define ETH_DMA_MODE_PR_8TO1                           (7 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 8:1 */
 
 /* DMA system bus mode */
 

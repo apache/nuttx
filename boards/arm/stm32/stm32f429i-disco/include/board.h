@@ -300,11 +300,11 @@
 
 #if defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_LANDSCAPE) || \
     defined(CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE_RLANDSCAPE)
-# define BOARD_LTDC_WIDTH               320
-# define BOARD_LTDC_HEIGHT              240
+#  define BOARD_LTDC_WIDTH              320
+#  define BOARD_LTDC_HEIGHT             240
 #else
-# define BOARD_LTDC_WIDTH               240
-# define BOARD_LTDC_HEIGHT              320
+#  define BOARD_LTDC_WIDTH              240
+#  define BOARD_LTDC_HEIGHT             320
 #endif
 
 #define BOARD_LTDC_OUTPUT_BPP           16
@@ -372,8 +372,8 @@
 #else
 /* Custom LCD display configuration */
 
-# define BOARD_LTDC_WIDTH               ???
-# define BOARD_LTDC_HEIGHT              ???
+#  define BOARD_LTDC_WIDTH              ???
+#  define BOARD_LTDC_HEIGHT             ???
 
 #define BOARD_LTDC_HFP                  ???
 #define BOARD_LTDC_HBP                  ???

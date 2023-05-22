@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -44,7 +46,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRCHRNUL
+#if !defined(CONFIG_LIBC_ARCH_STRCHRNUL) && defined(LIBC_BUILD_STRING)
 FAR char *strchrnul(FAR const char *s, int c)
 {
   if (s)

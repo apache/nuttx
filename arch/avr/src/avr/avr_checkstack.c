@@ -145,7 +145,7 @@ size_t avr_stack_check(uintptr_t alloc, size_t size)
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
   return avr_stack_check((uintptr_t)tcb->stack_base_ptr,
-                         tcb->adj_stack_size);
+                                    tcb->adj_stack_size);
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

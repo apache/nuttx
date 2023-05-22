@@ -85,6 +85,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -103,6 +105,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the
@@ -124,13 +127,12 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * trampoline after the signal(s) have been delivered.
                */
 
-              tcb->xcp.sigdeliver   = sigdeliver;
-              tcb->xcp.saved_pc0    = g_current_regs[REG_PC0];
-              tcb->xcp.saved_pc1    = g_current_regs[REG_PC1];
+              tcb->xcp.saved_pc0      = g_current_regs[REG_PC0];
+              tcb->xcp.saved_pc1      = g_current_regs[REG_PC1];
 #if defined(REG_PC2)
-              tcb->xcp.saved_pc2    = g_current_regs[REG_PC2];
+              tcb->xcp.saved_pc2      = g_current_regs[REG_PC2];
 #endif
-              tcb->xcp.saved_sreg   = g_current_regs[REG_SREG];
+              tcb->xcp.saved_sreg     = g_current_regs[REG_SREG];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
@@ -167,28 +169,27 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_pc0        = tcb->xcp.regs[REG_PC0];
-          tcb->xcp.saved_pc1        = tcb->xcp.regs[REG_PC1];
+          tcb->xcp.saved_pc0     = tcb->xcp.regs[REG_PC0];
+          tcb->xcp.saved_pc1     = tcb->xcp.regs[REG_PC1];
 #if defined(REG_PC2)
-          tcb->xcp.saved_pc2        = tcb->xcp.regs[REG_PC2];
+          tcb->xcp.saved_pc2     = tcb->xcp.regs[REG_PC2];
 #endif
-          tcb->xcp.saved_sreg       = tcb->xcp.regs[REG_SREG];
+          tcb->xcp.saved_sreg    = tcb->xcp.regs[REG_SREG];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
 #if !defined(REG_PC2)
-          tcb->xcp.regs[REG_PC0]    = (uint16_t)reg_ptr >> 8;
-          tcb->xcp.regs[REG_PC1]    = (uint16_t)reg_ptr & 0xff;
+          tcb->xcp.regs[REG_PC0] = (uint16_t)reg_ptr >> 8;
+          tcb->xcp.regs[REG_PC1] = (uint16_t)reg_ptr & 0xff;
 #else
-          tcb->xcp.regs[REG_PC0]    = (uint32_t)reg_ptr >> 16;
-          tcb->xcp.regs[REG_PC1]    = (uint32_t)reg_ptr >> 8;
-          tcb->xcp.regs[REG_PC2]    = (uint32_t)reg_ptr & 0xff;
+          tcb->xcp.regs[REG_PC0] = (uint32_t)reg_ptr >> 16;
+          tcb->xcp.regs[REG_PC1] = (uint32_t)reg_ptr >> 8;
+          tcb->xcp.regs[REG_PC2] = (uint32_t)reg_ptr & 0xff;
 
 #endif
-          tcb->xcp.regs[REG_SREG]  &= ~(1 << SREG_I);
+          tcb->xcp.regs[REG_SREG] &= ~(1 << SREG_I);
         }
     }
 }

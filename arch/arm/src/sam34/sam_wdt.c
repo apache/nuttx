@@ -103,8 +103,8 @@ struct sam34_lowerhalf_s
 static uint32_t sam34_getreg(uint32_t addr);
 static void     sam34_putreg(uint32_t val, uint32_t addr);
 #else
-# define        sam34_getreg(addr)     getreg32(addr)
-# define        sam34_putreg(val,addr) putreg32(val,addr)
+#  define       sam34_getreg(addr)     getreg32(addr)
+#  define       sam34_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Interrupt handling *******************************************************/

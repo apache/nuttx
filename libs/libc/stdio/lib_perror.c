@@ -59,16 +59,16 @@ void perror(FAR const char *s)
   /* If strerror() is not enabled, then just print the error number */
 
 #ifdef CONFIG_LIBC_STRERROR
-# ifdef CONFIG_FILE_STREAM
+#  ifdef CONFIG_FILE_STREAM
   fprintf(PERROR_STREAM, "%s: %s\n", s, strerror(get_errno()));
-# else
+#  else
   dprintf(PERROR_FILENO, "%s: %s\n", s, strerror(get_errno()));
-# endif
+#  endif
 #else
-# ifdef CONFIG_FILE_STREAM
+#  ifdef CONFIG_FILE_STREAM
   fprintf(PERROR_STREAM, "%s: Error %d\n", s, get_errno());
-# else
+#  else
   dprintf(PERROR_FILENO, "%s: Error %d\n", s, get_errno());
-# endif
+#  endif
 #endif
 }

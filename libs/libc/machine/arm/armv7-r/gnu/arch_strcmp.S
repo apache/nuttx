@@ -30,6 +30,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 #ifdef __ARMEB__
 #define SHFT2LSB lsl
 #define SHFT2LSBEQ lsleq
@@ -301,3 +305,5 @@ strcmp:
 	ldr	r5, [sp], #4
 	bx	lr
 	.size strcmp, . - strcmp
+
+#endif

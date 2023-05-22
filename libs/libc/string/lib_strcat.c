@@ -26,11 +26,13 @@
 
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRCAT
+#if !defined(CONFIG_LIBC_ARCH_STRCAT) && defined(LIBC_BUILD_STRING)
 #undef strcat /* See mm/README.txt */
 FAR char *strcat(FAR char *dest, FAR const char *src)
 {

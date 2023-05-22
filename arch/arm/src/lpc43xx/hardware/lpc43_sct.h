@@ -1081,22 +1081,22 @@
 
 #define SCT_CONFIG_CLKSEL_SHIFT     (3)       /* Bits 3-6: SCT clock select */
 #define SCT_CONFIG_CLKSEL_MASK      (15 << SCT_CONFIG_CLKSEL_SHIFT)
-# define SCT_CONFIG_CLKSEL_REDGE0   (0 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 0 */
-# define SCT_CONFIG_CLKSEL_FEDGE0   (1 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 0 */
-# define SCT_CONFIG_CLKSEL_REDGE1   (2 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 1 */
-# define SCT_CONFIG_CLKSEL_FEDGE1   (3 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 1 */
-# define SCT_CONFIG_CLKSEL_REDGE2   (4 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 2 */
-# define SCT_CONFIG_CLKSEL_FEDGE2   (5 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 2 */
-# define SCT_CONFIG_CLKSEL_REDGE3   (6 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 3 */
-# define SCT_CONFIG_CLKSEL_FEDGE3   (7 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 3 */
-# define SCT_CONFIG_CLKSEL_REDGE4   (8 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 4 */
-# define SCT_CONFIG_CLKSEL_FEDGE4   (9 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 4 */
-# define SCT_CONFIG_CLKSEL_REDGE5   (10 << SCT_CONFIG_CLKSEL_SHIFT) /* Rising edges on input 5 */
-# define SCT_CONFIG_CLKSEL_FEDGE5   (11 << SCT_CONFIG_CLKSEL_SHIFT) /* Falling edges on input 5 */
-# define SCT_CONFIG_CLKSEL_REDGE6   (12 << SCT_CONFIG_CLKSEL_SHIFT) /* Rising edges on input 6 */
-# define SCT_CONFIG_CLKSEL_FEDGE6   (13 << SCT_CONFIG_CLKSEL_SHIFT) /* Falling edges on input 6 */
-# define SCT_CONFIG_CLKSEL_REDGE7   (14 << SCT_CONFIG_CLKSEL_SHIFT) /* Rising edges on input 7 */
-# define SCT_CONFIG_CLKSEL_FEDGE7   (15 << SCT_CONFIG_CLKSEL_SHIFT) /* Falling edges on input 7 */
+#  define SCT_CONFIG_CLKSEL_REDGE0  (0 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 0 */
+#  define SCT_CONFIG_CLKSEL_FEDGE0  (1 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 0 */
+#  define SCT_CONFIG_CLKSEL_REDGE1  (2 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 1 */
+#  define SCT_CONFIG_CLKSEL_FEDGE1  (3 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 1 */
+#  define SCT_CONFIG_CLKSEL_REDGE2  (4 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 2 */
+#  define SCT_CONFIG_CLKSEL_FEDGE2  (5 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 2 */
+#  define SCT_CONFIG_CLKSEL_REDGE3  (6 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 3 */
+#  define SCT_CONFIG_CLKSEL_FEDGE3  (7 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 3 */
+#  define SCT_CONFIG_CLKSEL_REDGE4  (8 << SCT_CONFIG_CLKSEL_SHIFT)  /* Rising edges on input 4 */
+#  define SCT_CONFIG_CLKSEL_FEDGE4  (9 << SCT_CONFIG_CLKSEL_SHIFT)  /* Falling edges on input 4 */
+#  define SCT_CONFIG_CLKSEL_REDGE5  (10 << SCT_CONFIG_CLKSEL_SHIFT) /* Rising edges on input 5 */
+#  define SCT_CONFIG_CLKSEL_FEDGE5  (11 << SCT_CONFIG_CLKSEL_SHIFT) /* Falling edges on input 5 */
+#  define SCT_CONFIG_CLKSEL_REDGE6  (12 << SCT_CONFIG_CLKSEL_SHIFT) /* Rising edges on input 6 */
+#  define SCT_CONFIG_CLKSEL_FEDGE6  (13 << SCT_CONFIG_CLKSEL_SHIFT) /* Falling edges on input 6 */
+#  define SCT_CONFIG_CLKSEL_REDGE7  (14 << SCT_CONFIG_CLKSEL_SHIFT) /* Rising edges on input 7 */
+#  define SCT_CONFIG_CLKSEL_FEDGE7  (15 << SCT_CONFIG_CLKSEL_SHIFT) /* Falling edges on input 7 */
 
 #define SCT_CONFIG_NORELOADU        (1 << 7)  /* Bit 7:  Disable unified match register reload */
 #define SCT_CONFIG_NORELOADL        (1 << 7)  /* Bit 7:  Disable lower match registers reload */

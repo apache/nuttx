@@ -103,13 +103,13 @@
 #  define __OBSOLETE_MATH_DEFAULT 0
 # endif
 #else
-# define __IEEE_BIG_ENDIAN
+#  define __IEEE_BIG_ENDIAN
 # ifdef __ARMEL__
 #  define __IEEE_BYTES_LITTLE_ENDIAN
 # endif
 #endif
 #ifndef __SOFTFP__
-# define _SUPPORTS_ERREXCEPT
+#  define _SUPPORTS_ERREXCEPT
 #endif
 /* As per ISO/IEC TS 18661 '__FLT_EVAL_METHOD__' will be defined to 16
  * (if compiling with +fp16 support) so it can't be used by math.h to
@@ -129,7 +129,7 @@
 #endif
 #define __OBSOLETE_MATH_DEFAULT 0
 #ifdef __ARM_FP
-# define _SUPPORTS_ERREXCEPT
+#  define _SUPPORTS_ERREXCEPT
 #endif
 /* As per ISO/IEC TS 18661 '__FLT_EVAL_METHOD__' will be defined to 16
  * (if compiling with +fp16 support) so it can't be used by math.h to
@@ -193,7 +193,7 @@
 #if defined(__mc68hc11__) || defined(__mc68hc12__) || defined(__mc68hc1x__)
 #define __IEEE_BIG_ENDIAN
 #ifdef __HAVE_SHORT_DOUBLE__
-# define _DOUBLE_IS_32BITS
+#  define _DOUBLE_IS_32BITS
 #endif
 #endif
 
@@ -230,7 +230,7 @@
 
 #ifdef __i386__
 #define __IEEE_LITTLE_ENDIAN
-# define _SUPPORTS_ERREXCEPT
+#  define _SUPPORTS_ERREXCEPT
 #endif
 
 #ifdef __riscv
@@ -240,12 +240,12 @@
 #define __IEEE_LITTLE_ENDIAN
 #endif
 #ifdef __riscv_flen
-# define _SUPPORTS_ERREXCEPT
+#  define _SUPPORTS_ERREXCEPT
 #endif
 #if __riscv_flen == 64
-# define __OBSOLETE_MATH_DEFAULT 0
+#  define __OBSOLETE_MATH_DEFAULT 0
 #else
-# define __OBSOLETE_MATH_DEFAULT 1
+#  define __OBSOLETE_MATH_DEFAULT 1
 #endif
 #endif
 
@@ -448,7 +448,7 @@
 
 #ifdef __x86_64__
 #define __IEEE_LITTLE_ENDIAN
-# define _SUPPORTS_ERREXCEPT
+#  define _SUPPORTS_ERREXCEPT
 #endif
 
 #ifdef __mep__

@@ -355,10 +355,10 @@ static void stm32l4_putreg(uint16_t val, uint32_t addr);
 static void stm32l4_checksetup(void);
 static void stm32l4_dumpep(int epno);
 #else
-# define stm32l4_getreg(addr)      getreg16(addr)
-# define stm32l4_putreg(val,addr)  putreg16(val,addr)
-# define stm32l4_checksetup()
-# define stm32l4_dumpep(epno)
+#  define stm32l4_getreg(addr)     getreg16(addr)
+#  define stm32l4_putreg(val,addr) putreg16(val,addr)
+#  define stm32l4_checksetup()
+#  define stm32l4_dumpep(epno)
 #endif
 
 /* Low-Level Helpers ********************************************************/

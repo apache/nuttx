@@ -60,9 +60,9 @@
 #define  DM320_TMR_MODE_TEST_MASK 0x00fc /* Bits 7:2=Test */
 #define  DM320_TMR_MODE_MODE_MASK 0x0003 /* Bits 1:0=timer mode */
 
-# define DM320_TMR_MODE_STOP      0x0000 /* Stop Timer */
-# define DM320_TMR_MODE_ONESHOT   0x0001 /* Start one-shot timer */
-# define DM320_TMR_MODE_FREERUN   0x0002 /* Start free-running timer */
+#  define DM320_TMR_MODE_STOP     0x0000 /* Stop Timer */
+#  define DM320_TMR_MODE_ONESHOT  0x0001 /* Start one-shot timer */
+#  define DM320_TMR_MODE_FREERUN  0x0002 /* Start free-running timer */
 
 /* Timer 0,1,2,3 Clock Select Register Bits: */
 
@@ -76,7 +76,7 @@
 
 #define  DM320_TMR_TMTRG_MASK     0x0001 /* Bit 0=One short trigger */
 
-# define DM320_TMR_TMTRG_START    0x0001 /* 1 starts one shot timer */
+#  define DM320_TMR_TMTRG_START   0x0001 /* 1 starts one shot timer */
 
 /* Timer 0,1,2,3 Timer Counter Register Bits: */
 

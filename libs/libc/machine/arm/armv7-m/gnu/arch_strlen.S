@@ -62,6 +62,10 @@
  *
  ****************************************************************************/
 
+#include "libc.h"
+
+#ifdef LIBC_BUILD_STRING
+
 #include "arm-acle-compat.h"
 #include "arm_asm.h"
 
@@ -193,3 +197,5 @@ def_fn	strlen p2align=6
 	.cantunwind
 	.fnend
 	.size	strlen, . - strlen
+
+#endif

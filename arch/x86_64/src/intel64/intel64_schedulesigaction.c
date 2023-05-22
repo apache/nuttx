@@ -79,6 +79,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is being delivered
        * to the currently executing task.
        */
@@ -96,6 +98,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the interrupted task
@@ -117,17 +120,16 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * have been delivered.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_rip        = g_current_regs[REG_RIP];
-              tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
-              tcb->xcp.saved_rflags     = g_current_regs[REG_RFLAGS];
+              tcb->xcp.saved_rip         = g_current_regs[REG_RIP];
+              tcb->xcp.saved_rsp         = tcb->xcp.regs[REG_RSP];
+              tcb->xcp.saved_rflags      = g_current_regs[REG_RFLAGS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              g_current_regs[REG_RIP]     = (uint64_t)x86_64_sigdeliver;
-              g_current_regs[REG_RFLAGS]  = 0;
+              g_current_regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
+              g_current_regs[REG_RFLAGS] = 0;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -150,7 +152,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_rip        = tcb->xcp.regs[REG_RIP];
           tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
           tcb->xcp.saved_rflags     = tcb->xcp.regs[REG_RFLAGS];
@@ -160,7 +161,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-          tcb->xcp.regs[REG_RFLAGS]  = 0;
+          tcb->xcp.regs[REG_RFLAGS] = 0;
         }
     }
 }

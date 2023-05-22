@@ -1917,7 +1917,7 @@ static void s32k1xx_lpspi_bus_initialize(struct s32k1xx_lpspidev_s *priv)
 static void up_pm_notify(struct pm_callback_s *cb, int domain,
                          enum pm_state_e pmstate)
 {
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
   struct s32k1xx_lpspidev_s *priv0 = NULL;
 
@@ -1925,8 +1925,8 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
   priv0 = &g_lpspi0dev;
 
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
 
   struct s32k1xx_lpspidev_s *priv1 = NULL;
 
@@ -1934,7 +1934,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
   priv1 = &g_lpspi1dev;
 
-# endif
+#  endif
 
   unsigned int count = 0;   /* the amount of peripheral clocks to change */
 
@@ -1967,19 +1967,19 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
       clock_source = CLK_SRC_SPLL_DIV2;
 
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
       /* add 1 to count to do it for SPI0 */
 
       count++;
-# endif
+#  endif
 
-# ifdef CONFIG_PM_SPI1
+#  ifdef CONFIG_PM_SPI1
 
       /* add 1 to count to do it for SPI1 */
 
       count++;
-# endif
+#  endif
     }
     break;
 
@@ -1998,7 +1998,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
     const struct peripheral_clock_config_s clock_config[] =
     {
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
       {
         .clkname  =   LPSPI0_CLK,
@@ -2007,8 +2007,8 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
         .frac     =   MULTIPLY_BY_ONE,
         .divider  =   1,
       },
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
 
       {
         .clkname  =   LPSPI1_CLK,
@@ -2017,45 +2017,45 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
         .frac     =   MULTIPLY_BY_ONE,
         .divider  =   1,
       }
-# endif
+#  endif
     };
 
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
     /* disable LPSP0 */
 
     s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
                               !LPSPI_CR_MEN);
 
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
 
     /* disable LPSPI */
 
     s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
                               !LPSPI_CR_MEN);
 
-# endif
+#  endif
 
     /* change the clock config for the new mode */
 
     s32k1xx_periphclocks(count, clock_config);
 
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
     /* Enable LPSP0 */
 
     s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
                               LPSPI_CR_MEN);
 
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
 
     /* Enable LPSPI */
 
     s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
                               LPSPI_CR_MEN);
-# endif
+#  endif
 
     /* get the clock freq */
   }
@@ -2276,14 +2276,14 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
   /* make the private struct for lpspi bus 0 */
 
   priv0 = &g_lpspi0dev;
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
   struct s32k1xx_lpspidev_s *priv1 = NULL;
 
   /* make the private struct for lpspi bus 1  */
 
   priv1 = &g_lpspi1dev;
-# endif
+#  endif
 
   unsigned int count = 0;   /* the amount of peripheral clocks to change */
 
@@ -2312,20 +2312,20 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 
       clock_source = CLK_SRC_SIRC_DIV2;
 
-# ifdef CONFIG_PM_SPI0_STANDBY
+#  ifdef CONFIG_PM_SPI0_STANDBY
 
       /* increase count to change the SPI0  */
 
       count++;
 
-# endif
-# ifdef CONFIG_PM_SPI1_STANDBY
+#  endif
+#  ifdef CONFIG_PM_SPI1_STANDBY
 
       /* increase count to change the SPI1 */
 
       count++;
 
-# endif
+#  endif
     }
     break;
 
@@ -2339,20 +2339,20 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 
       clock_source = CLK_SRC_SIRC_DIV2;
 
-# ifdef CONFIG_PM_SPI0_SLEEP
+#  ifdef CONFIG_PM_SPI0_SLEEP
 
       /* increase count to change the SPI0  */
 
       count++;
 
-# endif
-# ifdef CONFIG_PM_SPI1_SLEEP
+#  endif
+#  ifdef CONFIG_PM_SPI1_SLEEP
 
       /* increase count to change the SPI1 */
 
       count++;
 
-# endif
+#  endif
     }
     break;
 
@@ -2371,7 +2371,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 
     const struct peripheral_clock_config_s clock_config[] =
     {
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
       {
         .clkname  =   LPSPI0_CLK,
         .clkgate  =   true,
@@ -2379,8 +2379,8 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
         .frac     =   MULTIPLY_BY_ONE,
         .divider  =   1,
       },
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
       {
         .clkname  =   LPSPI1_CLK,
         .clkgate  =   true,
@@ -2388,46 +2388,46 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
         .frac     =   MULTIPLY_BY_ONE,
         .divider  =   1,
       }
-# endif
+#  endif
     };
 
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
     /* disable LPSPI0 */
 
     s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
                                      !LPSPI_CR_MEN);
 
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
 
     /* disable LPSPI1 */
 
     s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
                               !LPSPI_CR_MEN);
 
-# endif
+#  endif
 
     /* change the clock config for the new mode */
 
     s32k1xx_periphclocks(count, clock_config);
 
-# ifdef CONFIG_PM_SPI0
+#  ifdef CONFIG_PM_SPI0
 
     /* Enable LPSPI */
 
     s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
                               LPSPI_CR_MEN);
 
-# endif
-# ifdef CONFIG_PM_SPI1
+#  endif
+#  ifdef CONFIG_PM_SPI1
 
     /* Enable LPSPI */
 
     s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
                               LPSPI_CR_MEN);
 
-# endif
+#  endif
   }
 
   /* get the clock freq */

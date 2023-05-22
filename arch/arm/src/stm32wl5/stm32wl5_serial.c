@@ -366,25 +366,25 @@ static const struct uart_ops_s g_uart_dma_ops =
 #ifdef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
-# ifdef CONFIG_LPUART1_RXDMA
+#  ifdef CONFIG_LPUART1_RXDMA
 static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32WL5_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
-# ifdef CONFIG_USART1_RXDMA
+#  ifdef CONFIG_USART1_RXDMA
 static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32WL5_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
-# ifdef CONFIG_USART2_RXDMA
+#  ifdef CONFIG_USART2_RXDMA
 static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
-# endif
+#  endif
 #endif
 
 /* This describes the state of the STM32 USART1 ports. */
@@ -394,9 +394,9 @@ static struct stm32wl5_serial_s g_lpuart1priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 1
+#  if CONSOLE_UART == 1
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_LPUART1_RXBUFSIZE,
@@ -407,11 +407,11 @@ static struct stm32wl5_serial_s g_lpuart1priv =
         .size    = CONFIG_LPUART1_TXBUFSIZE,
         .buffer  = g_lpuart1txbuffer,
       },
-#ifdef CONFIG_LPUART1_RXDMA
+#  ifdef CONFIG_LPUART1_RXDMA
       .ops       = &g_uart_dma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_lpuart1priv,
     },
 
@@ -424,27 +424,27 @@ static struct stm32wl5_serial_s g_lpuart1priv =
   .usartbase     = STM32WL5_LPUART1_BASE,
   .tx_gpio       = GPIO_LPUART1_TX,
   .rx_gpio       = GPIO_LPUART1_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_LPUART1_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_LPUART1_RTS,
-#endif
-#ifdef CONFIG_LPUART1_RXDMA
+#  endif
+#  ifdef CONFIG_LPUART1_RXDMA
   .rxdma_channel = DMAMAP_LPUSART_RX,
   .rxfifo        = g_lpuart1rxfifo,
-#endif
-
-#ifdef CONFIG_USART1_RS485
-  .rs485_dir_gpio = GPIO_LPUART1_RS485_DIR,
-#  if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_USART1_RS485
+  .rs485_dir_gpio = GPIO_LPUART1_RS485_DIR,
+#    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 
@@ -453,9 +453,9 @@ static struct stm32wl5_serial_s g_usart1priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 2
+#  if CONSOLE_UART == 2
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_USART1_RXBUFSIZE,
@@ -466,11 +466,11 @@ static struct stm32wl5_serial_s g_usart1priv =
         .size    = CONFIG_USART1_TXBUFSIZE,
         .buffer  = g_usart1txbuffer,
       },
-#ifdef CONFIG_USART1_RXDMA
+#  ifdef CONFIG_USART1_RXDMA
       .ops       = &g_uart_dma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_usart1priv,
     },
 
@@ -483,18 +483,18 @@ static struct stm32wl5_serial_s g_usart1priv =
   .usartbase     = STM32WL5_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART1_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART1_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART1_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_USART1_RTS,
-#endif
-#ifdef CONFIG_USART1_RXDMA
+#  endif
+#  ifdef CONFIG_USART1_RXDMA
   .rxdma_channel = DMAMAP_USART1_RX,
   .rxfifo        = g_usart1rxfifo,
-#endif
+#  endif
 
 #ifdef CONFIG_USART1_RS485
   .rs485_dir_gpio = GPIO_USART1_RS485_DIR,
@@ -514,9 +514,9 @@ static struct stm32wl5_serial_s g_usart2priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 3
+#  if CONSOLE_UART == 3
       .isconsole = true,
-#endif
+#  endif
       .recv      =
       {
         .size    = CONFIG_USART2_RXBUFSIZE,
@@ -527,11 +527,11 @@ static struct stm32wl5_serial_s g_usart2priv =
         .size    = CONFIG_USART2_TXBUFSIZE,
         .buffer  = g_usart2txbuffer,
       },
-#ifdef CONFIG_USART2_RXDMA
+#  ifdef CONFIG_USART2_RXDMA
       .ops       = &g_uart_dma_ops,
-#else
+#  else
       .ops       = &g_uart_ops,
-#endif
+#  endif
       .priv      = &g_usart2priv,
     },
 
@@ -544,27 +544,27 @@ static struct stm32wl5_serial_s g_usart2priv =
   .usartbase     = STM32WL5_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART2_CTS,
-#endif
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART2_IFLOWCONTROL)
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART2_IFLOWCONTROL)
   .iflow         = true,
   .rts_gpio      = GPIO_USART2_RTS,
-#endif
-#ifdef CONFIG_USART2_RXDMA
+#  endif
+#  ifdef CONFIG_USART2_RXDMA
   .rxdma_channel = DMAMAP_USART2_RX,
   .rxfifo        = g_usart2rxfifo,
-#endif
-
-#ifdef CONFIG_USART2_RS485
-  .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
-#  if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
-#  else
-  .rs485_dir_polarity = true,
 #  endif
-#endif
+
+#  ifdef CONFIG_USART2_RS485
+  .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
+#    if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
 };
 #endif
 

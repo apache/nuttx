@@ -102,7 +102,7 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
     }
 }
 #else
-# define mod_dumploadinfo(i)
+#  define mod_dumploadinfo(i)
 #endif
 
 /****************************************************************************
@@ -117,7 +117,7 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
                     MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
 }
 #else
-# define mod_dumpinitializer(b,l)
+#  define mod_dumpinitializer(b,l)
 #endif
 
 /****************************************************************************

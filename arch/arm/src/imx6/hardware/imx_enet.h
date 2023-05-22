@@ -515,13 +515,13 @@
  */
 
 #ifdef IMX_ENET_HAS_DBSWAP
-# ifndef CONFIG_ENDIAN_BIG
-#  define IMX_USE_DBSWAP
-# endif
+#  ifndef CONFIG_ENDIAN_BIG
+#    define IMX_USE_DBSWAP
+#  endif
 #else
-# ifndef CONFIG_ENDIAN_BIG
-#  define IMX_BUFFERS_SWAP
-# endif
+#  ifndef CONFIG_ENDIAN_BIG
+#    define IMX_BUFFERS_SWAP
+#  endif
 #endif
 
 #ifndef IMX_BUFFERS_SWAP

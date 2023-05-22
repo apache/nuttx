@@ -338,8 +338,8 @@ static void sam_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t sam_getreg(uint32_t addr);
 static void sam_putreg(uint32_t val, uint32_t addr);
 #else
-# define sam_getreg(addr)     getreg32(addr)
-# define sam_putreg(val,addr) putreg32(val,addr)
+#  define sam_getreg(addr)     getreg32(addr)
+#  define sam_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Byte stream access helper functions **************************************/

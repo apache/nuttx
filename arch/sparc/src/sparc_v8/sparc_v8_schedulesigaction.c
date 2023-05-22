@@ -86,6 +86,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -103,6 +105,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the
@@ -124,7 +127,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * trampoline after the signal(s) have been delivered.
                */
 
-              tcb->xcp.sigdeliver   = sigdeliver;
               tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
               tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
               tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
@@ -158,7 +160,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
           tcb->xcp.saved_npc        = tcb->xcp.regs[REG_NPC];
           tcb->xcp.saved_status     = tcb->xcp.regs[REG_PSR];
@@ -194,6 +195,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is being delivered
        * to task that is currently executing on any CPU.
        */
@@ -216,6 +219,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  The task that needs to receive the signal is running.
@@ -251,19 +255,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver       = (void *)sigdeliver;
-                  tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-                  tcb->xcp.saved_npc        = tcb->xcp.regs[REG_NPC];
-                  tcb->xcp.saved_status     = tcb->xcp.regs[REG_PSR];
+                  tcb->xcp.saved_pc     = tcb->xcp.regs[REG_PC];
+                  tcb->xcp.saved_npc    = tcb->xcp.regs[REG_NPC];
+                  tcb->xcp.saved_status = tcb->xcp.regs[REG_PSR];
 
                   /* Then set up vector to the trampoline with interrupts
                    * disabled.  We must already be in privileged thread mode
                    * to be here.
                    */
 
-                  tcb->xcp.regs[REG_PC]     = (uint32_t)sparc_sigdeliver;
-                  tcb->xcp.regs[REG_NPC]    = (uint32_t)sparc_sigdeliver + 4;
-                  tcb->xcp.regs[REG_PSR]    |= SPARC_PSR_ET_MASK;
+                  tcb->xcp.regs[REG_PC]  = (uint32_t)sparc_sigdeliver;
+                  tcb->xcp.regs[REG_NPC] = (uint32_t)sparc_sigdeliver + 4;
+                  tcb->xcp.regs[REG_PSR] |= SPARC_PSR_ET_MASK;
                 }
               else
                 {
@@ -274,7 +277,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * trampoline after the signal(s) have been delivered.
                    */
 
-                  tcb->xcp.sigdeliver   = (void *)sigdeliver;
                   tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
                   tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
                   tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
@@ -330,7 +332,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * trampoline after the signal(s) have been delivered.
            */
 
-          tcb->xcp.sigdeliver       = (void *)sigdeliver;
           tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
           tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
           tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
@@ -347,9 +348,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * here.
            */
 
-          tcb->xcp.regs[REG_PC]     = (uint32_t)sparc_sigdeliver;
-          tcb->xcp.regs[REG_NPC]    = (uint32_t)sparc_sigdeliver + 4;
-          tcb->xcp.regs[REG_PSR]    |= SPARC_PSR_ET_MASK;
+          tcb->xcp.regs[REG_PC]  = (uint32_t)sparc_sigdeliver;
+          tcb->xcp.regs[REG_NPC] = (uint32_t)sparc_sigdeliver + 4;
+          tcb->xcp.regs[REG_PSR] |= SPARC_PSR_ET_MASK;
         }
     }
 

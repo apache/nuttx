@@ -285,8 +285,8 @@ static uint32_t sam_getreg(struct sam_gmac_s *priv, uintptr_t addr);
 static void sam_putreg(struct sam_gmac_s *priv, uintptr_t addr,
                        uint32_t val);
 #else
-# define sam_getreg(priv,addr)      getreg32(addr)
-# define sam_putreg(priv,addr,val)  putreg32(val,addr)
+#  define sam_getreg(priv,addr)     getreg32(addr)
+#  define sam_putreg(priv,addr,val) putreg32(val,addr)
 #endif
 
 /* Buffer management */

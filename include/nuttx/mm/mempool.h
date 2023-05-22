@@ -475,6 +475,14 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
 void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
 
 /****************************************************************************
+  * Name: mempool_multiple_info
+ * Description:
+ *   Dump multiple memory pool's info.
+ ****************************************************************************/
+
+void mempool_multiple_info(FAR struct mempool_multiple_s *mpool);
+
+/****************************************************************************
  * Name: mempool_multiple_info_task
  * Description:
  *   Get multiple memory pool's memory used info.

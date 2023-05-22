@@ -52,6 +52,8 @@ ARCH_INC = $(ARCH_DIR)\include
 
 ifeq ($(CONFIG_APPS_DIR),)
 CONFIG_APPS_DIR = ..\apps
+else
+CONFIG_APPS_DIR := $(patsubst "%",%,$(CONFIG_APPS_DIR))
 endif
 APPDIR := $(realpath ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFIG_APPS_DIR)})
 

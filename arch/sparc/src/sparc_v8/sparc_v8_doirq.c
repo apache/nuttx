@@ -110,7 +110,7 @@ uint32_t *sparc_doirq(int irq, uint32_t *regs)
    */
 
   regs = (uint32_t *)((uint32_t)CURRENT_REGS -
-                       CPU_MINIMUM_STACK_FRAME_SIZE);
+                                CPU_MINIMUM_STACK_FRAME_SIZE);
 
   /* Restore the cpu lock */
 

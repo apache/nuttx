@@ -64,9 +64,9 @@
 #endif
 
 #ifdef CONFIG_MODLIB_DUMPBUFFER
-# define modlib_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
+#  define modlib_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
-# define modlib_dumpbuffer(m,b,n)
+#  define modlib_dumpbuffer(m,b,n)
 #endif
 
 /* Module names.  These are only used by the kernel module and will be

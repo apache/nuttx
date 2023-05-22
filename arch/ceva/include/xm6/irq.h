@@ -142,14 +142,14 @@ struct xcptcontext
 
   uint32_t *saved_regs;
 
-# ifdef CONFIG_BUILD_PROTECTED
+#  ifdef CONFIG_BUILD_PROTECTED
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
 
   uint32_t sigreturn;
 
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL
