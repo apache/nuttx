@@ -154,7 +154,7 @@ static int nrf53_gpiote_isr(int irq, void *context, void *arg)
   /* Get GPIOTE instnace */
 
 #ifdef CONFIG_NRF53_HAVE_GPIOTE1
-  ints = (irq == NRF53_IRQ_GPIOTE0) ? 0 : 1;
+  inst = (irq == NRF53_IRQ_GPIOTE0) ? 0 : 1;
 #else
   inst = 0;
 #endif
