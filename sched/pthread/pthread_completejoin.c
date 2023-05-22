@@ -191,6 +191,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
   FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
   FAR struct task_group_s *group = tcb ? tcb->group : NULL;
   FAR struct join_s *pjoin;
+  int ret;
 
   sinfo("pid=%d exit_value=%p group=%p\n", pid, exit_value, group);
   DEBUGASSERT(group && tcb);
@@ -198,20 +199,22 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
   /* First, find thread's structure in the private data set. */
 
   nxmutex_lock(&group->tg_joinlock);
-  pjoin = pthread_findjoininfo(group, pid);
-  if (!pjoin)
+  ret = pthread_findjoininfo(group, pid, &pjoin);
+  if (ret != OK)
     {
       nxmutex_unlock(&group->tg_joinlock);
       return tcb->flags & TCB_FLAG_DETACHED ? OK : ERROR;
     }
   else
     {
+      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
       bool waiters;
 
       /* Save the return exit value in the thread structure. */
 
       pjoin->terminated = true;
       pjoin->exit_value = exit_value;
+      ptcb->join_complete = true;
 
       /* Notify waiters of the availability of the exit value */
 
