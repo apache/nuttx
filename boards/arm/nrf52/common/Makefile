@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/nrf52/nrf52832-dk/src/Makefile
+#############################################################################
+# boards/arm/nrf52/common/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,24 +16,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = nrf52_boot.c nrf52_bringup.c
+include board/Make.defs
+include src/Make.defs
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += nrf52_appinit.c
-endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += nrf52_autoleds.c
-else
-CSRCS += nrf52_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += nrf52_buttons.c
-endif
+DEPPATH += --dep-path board
+DEPPATH += --dep-path src
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(BOARDDIR)$(DELIM)include)
