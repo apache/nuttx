@@ -48,6 +48,14 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += nrf53_adc.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += nrf53_usb.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += nrf53_composite.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
