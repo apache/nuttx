@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 #include <sys/stat.h>
 #include <sys/param.h>
@@ -43,9 +44,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ELF_PAGESIZE    4096
+#ifdef PAGESIZE
+#  define ELF_PAGESIZE PAGESIZE
+#else
+#  define ELF_PAGESIZE 1024
+#endif
 
 #define ROUNDUP(x, y)   ((x + (y - 1)) / (y)) * (y)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint8_t g_running_regs[XCPTCONTEXT_SIZE] aligned_data(16);
 
 /****************************************************************************
  * Private Functions
@@ -128,15 +139,15 @@ static int elf_emit_align(FAR struct elf_dumpinfo_s *cinfo)
 }
 
 /****************************************************************************
- * Name: elf_emit_header
+ * Name: elf_emit_hdr
  *
  * Description:
  *   Fill the elf header
  *
  ****************************************************************************/
 
-static int elf_emit_header(FAR struct elf_dumpinfo_s *cinfo,
-                           int segs)
+static int elf_emit_hdr(FAR struct elf_dumpinfo_s *cinfo,
+                        int segs)
 {
   Elf_Ehdr ehdr;
 
@@ -161,6 +172,30 @@ static int elf_emit_header(FAR struct elf_dumpinfo_s *cinfo,
 }
 
 /****************************************************************************
+ * Name: elf_get_ntcb
+ *
+ * Description:
+ *   Calculate the note segment size
+ *
+ ****************************************************************************/
+
+static int elf_get_ntcb(void)
+{
+  int count = 0;
+  int i;
+
+  for (i = 0; i < g_npidhash; i++)
+    {
+      if (g_pidhash[i] != NULL)
+        {
+          count++;
+        }
+    }
+
+  return count;
+}
+
+/****************************************************************************
  * Name: elf_get_note_size
  *
  * Description:
@@ -168,116 +203,262 @@ static int elf_emit_header(FAR struct elf_dumpinfo_s *cinfo,
  *
  ****************************************************************************/
 
-static int elf_get_note_size(void)
+static int elf_get_note_size(int stksegs)
 {
-  int count = 0;
   int total;
-  int i;
 
-  for (i = 0; i < g_npidhash; i++)
-    {
-      if (g_pidhash[i])
-        {
-          count++;
-        }
-    }
-
-  total  = count * (sizeof(Elf_Nhdr) + ROUNDUP(CONFIG_TASK_NAME_SIZE, 8) +
-                    sizeof(elf_prstatus_t));
-  total += count * (sizeof(Elf_Nhdr) + ROUNDUP(CONFIG_TASK_NAME_SIZE, 8) +
-                    sizeof(elf_prpsinfo_t));
+  total  = stksegs * (sizeof(Elf_Nhdr) + ROUNDUP(CONFIG_TASK_NAME_SIZE, 8) +
+                     sizeof(elf_prstatus_t));
+  total += stksegs * (sizeof(Elf_Nhdr) + ROUNDUP(CONFIG_TASK_NAME_SIZE, 8) +
+                     sizeof(elf_prpsinfo_t));
   return total;
 }
 
 /****************************************************************************
- * Name: elf_emit_note_info
+ * Name: elf_emit_tcb_note
+ *
+ * Description:
+ *   Fill the note segment information from tcb
+ *
+ ****************************************************************************/
+
+static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
+                              FAR struct tcb_s *tcb)
+{
+  char name[ROUNDUP(CONFIG_TASK_NAME_SIZE, 8)];
+  elf_prstatus_t status;
+  elf_prpsinfo_t info;
+  FAR uint32_t *regs;
+  Elf_Nhdr nhdr;
+  int i;
+
+  memset(&info,   0x0, sizeof(info));
+  memset(&status, 0x0, sizeof(status));
+
+  /* Fill Process info */
+
+  nhdr.n_namesz = sizeof(name);
+  nhdr.n_descsz = sizeof(info);
+  nhdr.n_type   = NT_PRPSINFO;
+
+  elf_emit(cinfo, &nhdr, sizeof(nhdr));
+
+  strlcpy(name, tcb->name, sizeof(name));
+  elf_emit(cinfo, name, sizeof(name));
+
+  info.pr_pid   = tcb->pid;
+  strlcpy(info.pr_fname, tcb->name, sizeof(info.pr_fname));
+  elf_emit(cinfo, &info, sizeof(info));
+
+  /* Fill Process status */
+
+  nhdr.n_descsz = sizeof(status);
+  nhdr.n_type   = NT_PRSTATUS;
+
+  elf_emit(cinfo, &nhdr, sizeof(nhdr));
+  elf_emit(cinfo, name, sizeof(name));
+
+  status.pr_pid = tcb->pid;
+
+  if (running_task() == tcb)
+    {
+      if (up_interrupt_context())
+        {
+          regs = (FAR uint32_t *)CURRENT_REGS;
+        }
+      else
+        {
+          up_saveusercontext(g_running_regs);
+          regs = (FAR uint32_t *)g_running_regs;
+        }
+    }
+  else
+    {
+      regs = tcb->xcp.regs;
+    }
+
+  if (regs != NULL)
+    {
+      for (i = 0; i < nitems(status.pr_regs); i++)
+        {
+          if (g_tcbinfo.reg_off.p[i] == UINT16_MAX)
+            {
+              continue;
+            }
+          else
+            {
+              status.pr_regs[i] =
+                *(uintptr_t *)((uint8_t *)regs + g_tcbinfo.reg_off.p[i]);
+            }
+        }
+    }
+
+  elf_emit(cinfo, &status, sizeof(status));
+}
+
+/****************************************************************************
+ * Name: elf_emit_note
  *
  * Description:
  *   Fill the note segment information
  *
  ****************************************************************************/
 
-static void elf_emit_note_info(FAR struct elf_dumpinfo_s *cinfo)
+static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
 {
-  char name[ROUNDUP(CONFIG_TASK_NAME_SIZE, 8)];
-  FAR struct tcb_s *tcb;
-  elf_prstatus_t status;
-  elf_prpsinfo_t info;
-  Elf_Nhdr nhdr;
   int i;
-  int j;
 
-  memset(&info,   0x0, sizeof(info));
-  memset(&status, 0x0, sizeof(status));
-
-  for (i = 0; i < g_npidhash; i++)
+  if (cinfo->pid == INVALID_PROCESS_ID)
     {
-      if (g_pidhash[i] == NULL)
+      for (i = 0; i < g_npidhash; i++)
         {
-          continue;
-        }
-
-      tcb = g_pidhash[i];
-
-      /* Fill Process info */
-
-      nhdr.n_namesz = sizeof(name);
-      nhdr.n_descsz = sizeof(info);
-      nhdr.n_type   = NT_PRPSINFO;
-
-      elf_emit(cinfo, &nhdr, sizeof(nhdr));
-
-      strlcpy(name, tcb->name, sizeof(name));
-      elf_emit(cinfo, name, sizeof(name));
-
-      info.pr_pid   = tcb->pid;
-      strlcpy(info.pr_fname, tcb->name, sizeof(info.pr_fname));
-      elf_emit(cinfo, &info, sizeof(info));
-
-      /* Fill Process status */
-
-      nhdr.n_descsz = sizeof(status);
-      nhdr.n_type   = NT_PRSTATUS;
-
-      elf_emit(cinfo, &nhdr, sizeof(nhdr));
-      elf_emit(cinfo, name, sizeof(name));
-
-      status.pr_pid = tcb->pid;
-
-      for (j = 0; j < nitems(status.pr_regs); j++)
-        {
-          if (tcb->xcp.regs == NULL)
+          if (g_pidhash[i] != NULL)
             {
-              continue;
-            }
-
-          if (g_tcbinfo.reg_off.p[j] == UINT16_MAX)
-            {
-              status.pr_regs[j] = 0;
-            }
-          else
-            {
-              status.pr_regs[j] = *(uintptr_t *)((uint8_t *)tcb->xcp.regs +
-                                                 g_tcbinfo.reg_off.p[j]);
+              elf_emit_tcb_note(cinfo, g_pidhash[i]);
             }
         }
-
-      elf_emit(cinfo, &status, sizeof(status));
+    }
+  else
+    {
+      elf_emit_tcb_note(cinfo, nxsched_get_tcb(cinfo->pid));
     }
 }
 
 /****************************************************************************
- * Name: elf_emit_program_header
+ * Name: elf_emit_tcb_stack
+ *
+ * Description:
+ *   Fill the task stack information from tcb
+ *
+ ****************************************************************************/
+
+static void elf_emit_tcb_stack(FAR struct elf_dumpinfo_s *cinfo,
+                               FAR struct tcb_s *tcb)
+{
+  FAR void *buf;
+  size_t len;
+
+  if (running_task() != tcb)
+    {
+      len = ((uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size) -
+            up_getusrsp(tcb->xcp.regs);
+      buf = (FAR void *)up_getusrsp(tcb->xcp.regs);
+    }
+  else
+    {
+      buf = (FAR void *)tcb->stack_alloc_ptr;
+      len = tcb->adj_stack_size +
+            (tcb->stack_base_ptr - tcb->stack_alloc_ptr);
+    }
+
+  elf_emit(cinfo, buf, len);
+
+  /* Align to page */
+
+  elf_emit_align(cinfo);
+}
+
+/****************************************************************************
+ * Name: elf_emit_stack
+ *
+ * Description:
+ *   Fill the task stack information
+ *
+ ****************************************************************************/
+
+static void elf_emit_stack(FAR struct elf_dumpinfo_s *cinfo)
+{
+  int i;
+
+  if (cinfo->pid == INVALID_PROCESS_ID)
+    {
+      for (i = 0; i < g_npidhash; i++)
+        {
+          if (g_pidhash[i] != NULL)
+            {
+              elf_emit_tcb_stack(cinfo, g_pidhash[i]);
+            }
+        }
+    }
+  else
+    {
+      elf_emit_tcb_stack(cinfo, nxsched_get_tcb(cinfo->pid));
+    }
+}
+
+/****************************************************************************
+ * Name: elf_emit_memory
+ *
+ * Description:
+ *   Fill the note segment information
+ *
+ ****************************************************************************/
+
+static void elf_emit_memory(FAR struct elf_dumpinfo_s *cinfo, int memsegs)
+{
+  int i;
+
+  for (i = 0; i < memsegs; i++)
+    {
+      elf_emit(cinfo, (FAR void *)cinfo->regions[i].start,
+               cinfo->regions[i].end -
+               cinfo->regions[i].start);
+
+      /* Align to page */
+
+      elf_emit_align(cinfo);
+    }
+}
+
+/****************************************************************************
+ * Name: elf_emit_tcb_phdr
+ *
+ * Description:
+ *   Fill the program segment header from tcb
+ *
+ ****************************************************************************/
+
+static void elf_emit_tcb_phdr(FAR struct elf_dumpinfo_s *cinfo,
+                              FAR struct tcb_s *tcb,
+                              FAR Elf_Phdr *phdr, off_t *offset)
+{
+  if (running_task() != tcb)
+    {
+      phdr->p_filesz = (uintptr_t)(tcb->stack_base_ptr +
+                       tcb->adj_stack_size) - up_getusrsp(tcb->xcp.regs);
+      phdr->p_vaddr  = up_getusrsp(tcb->xcp.regs);
+    }
+  else
+    {
+      phdr->p_vaddr  = (uintptr_t)tcb->stack_alloc_ptr;
+      phdr->p_filesz = tcb->adj_stack_size +
+                      (tcb->stack_base_ptr - tcb->stack_alloc_ptr);
+    }
+
+  phdr->p_type   = PT_LOAD;
+  phdr->p_offset = ROUNDUP(*offset, ELF_PAGESIZE);
+  phdr->p_paddr  = phdr->p_vaddr;
+  phdr->p_memsz  = phdr->p_filesz;
+  phdr->p_flags  = PF_X | PF_W | PF_R;
+  phdr->p_align  = ELF_PAGESIZE;
+  *offset       += ROUNDUP(phdr->p_memsz, ELF_PAGESIZE);
+
+  elf_emit(cinfo, phdr, sizeof(*phdr));
+}
+
+/****************************************************************************
+ * Name: elf_emit_phdr
  *
  * Description:
  *   Fill the program segment header
  *
  ****************************************************************************/
 
-static void elf_emit_program_header(FAR struct elf_dumpinfo_s *cinfo,
-                                    int segs)
+static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
+                          int stksegs, int memsegs)
 {
-  off_t offset = cinfo->stream->nput + (segs + 1) * sizeof(Elf_Phdr);
+  off_t offset = cinfo->stream->nput +
+                 (stksegs + memsegs + 1) * sizeof(Elf_Phdr);
   Elf_Phdr phdr;
   int i;
 
@@ -285,19 +466,35 @@ static void elf_emit_program_header(FAR struct elf_dumpinfo_s *cinfo,
 
   phdr.p_type   = PT_NOTE;
   phdr.p_offset = offset;
-  phdr.p_filesz = elf_get_note_size();
+  phdr.p_filesz = elf_get_note_size(stksegs);
   offset       += phdr.p_filesz;
 
   elf_emit(cinfo, &phdr, sizeof(phdr));
 
+  if (cinfo->pid == INVALID_PROCESS_ID)
+    {
+      for (i = 0; i < g_npidhash; i++)
+        {
+          if (g_pidhash[i] != NULL)
+            {
+              elf_emit_tcb_phdr(cinfo, g_pidhash[i], &phdr, &offset);
+            }
+        }
+    }
+  else
+    {
+      elf_emit_tcb_phdr(cinfo, nxsched_get_tcb(cinfo->pid),
+                        &phdr, &offset);
+    }
+
   /* Write program headers for segments dump */
 
-  for (i = 0; i < segs; i++)
+  for (i = 0; i < memsegs; i++)
     {
       phdr.p_type   = PT_LOAD;
       phdr.p_offset = ROUNDUP(offset, ELF_PAGESIZE);
       phdr.p_vaddr  = cinfo->regions[i].start;
-      phdr.p_paddr  = cinfo->regions[i].start;
+      phdr.p_paddr  = phdr.p_vaddr;
       phdr.p_filesz = cinfo->regions[i].end - cinfo->regions[i].start;
       phdr.p_memsz  = phdr.p_filesz;
       phdr.p_flags  = cinfo->regions[i].flags;
@@ -327,54 +524,69 @@ static void elf_emit_program_header(FAR struct elf_dumpinfo_s *cinfo,
 
 int elf_coredump(FAR struct elf_dumpinfo_s *cinfo)
 {
-  int segs = 0;
-  int i;
+  irqstate_t flags;
+  int memsegs = 0;
+  int stksegs;
+
+  flags = enter_critical_section();
+
+  if (cinfo->pid != INVALID_PROCESS_ID)
+    {
+      if (nxsched_get_tcb(cinfo->pid) == NULL)
+        {
+          leave_critical_section(flags);
+          return -EINVAL;
+        }
+
+      stksegs = 1;
+    }
+  else
+    {
+      stksegs = elf_get_ntcb();
+    }
 
   /* Check the memory region */
 
-  if (cinfo->regions)
+  if (cinfo->regions != NULL)
     {
-      for (; cinfo->regions[segs].start <
-             cinfo->regions[segs].end; segs++);
-    }
-
-  if (segs == 0)
-    {
-      return -EINVAL;
+      for (; cinfo->regions[memsegs].start <
+             cinfo->regions[memsegs].end; memsegs++);
     }
 
   /* Fill notes section */
 
-  elf_emit_header(cinfo, segs + 1);
+  elf_emit_hdr(cinfo, stksegs + memsegs + 1);
 
   /* Fill all the program information about the process for the
    * notes.  This also sets up the file header.
    */
 
-  elf_emit_program_header(cinfo, segs);
+  elf_emit_phdr(cinfo, stksegs, memsegs);
 
   /* Fill note information */
 
-  elf_emit_note_info(cinfo);
+  elf_emit_note(cinfo);
 
   /* Align to page */
 
   elf_emit_align(cinfo);
 
-  /* Start dump the memory */
+  /* Dump stack */
 
-  for (i = 0; i < segs; i++)
+  elf_emit_stack(cinfo);
+
+  /* Dump memory segments */
+
+  if (memsegs > 0)
     {
-      elf_emit(cinfo, (FAR void *)cinfo->regions[i].start,
-               cinfo->regions[i].end -
-               cinfo->regions[i].start);
-
-      /* Align to page */
-
-      elf_emit_align(cinfo);
+      elf_emit_memory(cinfo, memsegs);
     }
 
   /* Flush the dump */
 
-  return elf_flush(cinfo);
+  elf_flush(cinfo);
+
+  leave_critical_section(flags);
+
+  return OK;
 }
