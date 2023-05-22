@@ -781,8 +781,7 @@ static void mpfs_spi_unload_rx_fifo(struct mpfs_spi_priv_s *priv,
 
   for (i = 0; i < nwords; i++)
     {
-      rx_fifo_empty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY;
-      if (rx_fifo_empty)
+      while ((rx_fifo_empty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY))
         {
           /* Last RX character not ready yet, try again (once) */
 
