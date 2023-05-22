@@ -218,6 +218,133 @@ FAR wchar_t      *wmemset(FAR wchar_t *, wchar_t, size_t);
 int               wprintf(FAR const wchar_t *, ...);
 int               wscanf(FAR const wchar_t *, ...);
 
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(fgetws) FAR wchar_t *fgetws(FAR wchar_t *s, int n,
+                                             FAR FILE *stream)
+{
+  fortify_assert((size_t)n <= fortify_size(s, 0) / sizeof(wchar_t));
+  return __real_fgetws(s, n, stream);
+}
+
+fortify_function(mbsnrtowcs) size_t mbsnrtowcs(FAR wchar_t *dst,
+                                               FAR const char **src,
+                                               size_t nms,
+                                               size_t len,
+                                               FAR mbstate_t *ps)
+{
+  fortify_assert(len <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_mbsnrtowcs(dst, src, nms, len, ps);
+}
+
+fortify_function(mbsrtowcs) size_t mbsrtowcs(FAR wchar_t *dst,
+                                             FAR const char **src,
+                                             size_t len,
+                                             FAR mbstate_t *ps)
+{
+  fortify_assert(len <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_mbsrtowcs(dst, src, len, ps);
+}
+
+fortify_function(wcrtomb) size_t wcrtomb(FAR char *s, wchar_t wc,
+                                         FAR mbstate_t *ps)
+{
+  size_t ret = __real_wcrtomb(s, wc, ps);
+
+  fortify_assert(s == NULL || ret <= fortify_size(s, 0));
+  return ret;
+}
+
+fortify_function(wcscpy) FAR wchar_t *wcscpy(FAR wchar_t *dst,
+                                             FAR const wchar_t *src)
+{
+  fortify_assert(wcslen(src) + 1 <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcscpy(dst, src);
+}
+
+fortify_function(wcslcpy) size_t wcslcpy(FAR wchar_t *dst,
+                                         FAR const wchar_t *src,
+                                         size_t siz)
+{
+  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcslcpy(dst, src, siz);
+}
+
+fortify_function(wcscat) FAR wchar_t *wcscat(FAR wchar_t *dst,
+                                             FAR const wchar_t *src)
+{
+  fortify_assert(wcslen(dst) + wcslen(src) + 1 <=
+                 fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcscat(dst, src);
+}
+
+fortify_function(wcsncat) FAR wchar_t *wcsncat(FAR wchar_t *dst,
+                                               FAR const wchar_t *src,
+                                               size_t siz)
+{
+  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcsncat(dst, src, siz);
+}
+
+fortify_function(wcslcat) size_t wcslcat(FAR wchar_t *dst,
+                                         FAR const wchar_t *src,
+                                         size_t siz)
+{
+  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcslcat(dst, src, siz);
+}
+
+fortify_function(wcsncpy) FAR wchar_t *wcsncpy(FAR wchar_t *dst,
+                                               FAR const wchar_t *src,
+                                               size_t siz)
+{
+  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcsncpy(dst, src, siz);
+}
+
+fortify_function(wcsnrtombs) size_t wcsnrtombs(FAR char *dst,
+                                               FAR const wchar_t **src,
+                                               size_t nwc, size_t len,
+                                               FAR mbstate_t *ps)
+{
+  fortify_assert(len <= fortify_size(dst, 0));
+  return __real_wcsnrtombs(dst, src, nwc, len, ps);
+}
+
+fortify_function(wcsrtombs) size_t wcsrtombs(FAR char *dst,
+                                             FAR const wchar_t **src,
+                                             size_t len,
+                                             FAR mbstate_t *ps)
+{
+  fortify_assert(len <= fortify_size(dst, 0));
+  return __real_wcsrtombs(dst, src, len, ps);
+}
+
+fortify_function(wmemcpy) FAR wchar_t *wmemcpy(FAR wchar_t *d,
+                                               FAR const wchar_t *s,
+                                               size_t n)
+{
+  fortify_assert(n <= fortify_size(d, 0) / sizeof(wchar_t));
+  return __real_wmemcpy(d, s, n);
+}
+
+fortify_function(wmemmove) FAR wchar_t *wmemmove(FAR wchar_t *d,
+                                                 FAR const wchar_t *s,
+                                                 size_t n)
+{
+  fortify_assert(n <= fortify_size(d, 0) / sizeof(wchar_t));
+  return __real_wmemmove(d, s, n);
+}
+
+fortify_function(wmemset) FAR wchar_t *wmemset(FAR wchar_t *s,
+                                               wchar_t c,
+                                               size_t n)
+{
+  fortify_assert(n <= fortify_size(s, 0) / sizeof(wchar_t));
+  return __real_wmemset(s, c, n);
+}
+
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

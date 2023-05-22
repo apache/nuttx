@@ -244,6 +244,67 @@ int pclose(FILE *stream);
 FILE *popen(FAR const char *command, FAR const char *mode) popen_like;
 #endif
 
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(fgets) FAR char *fgets(FAR char *s, int n, FAR FILE *stream)
+{
+  fortify_assert((size_t)n <= fortify_size(s, 0));
+  return __real_fgets(s, n, stream);
+}
+
+fortify_function(fread) size_t fread(FAR void *ptr, size_t size,
+                                     size_t n_items, FAR FILE *stream)
+{
+  fortify_assert(n_items == 0 || (n_items * size) / n_items == size);
+  fortify_assert(n_items * size <= fortify_size(ptr, 0));
+  return __real_fread(ptr, size, n_items, stream);
+}
+
+fortify_function(fwrite) size_t fwrite(FAR const void *ptr, size_t size,
+                                       size_t n_items, FAR FILE *stream)
+{
+  fortify_assert(n_items == 0 || (n_items * size) / n_items == size);
+  fortify_assert(n_items * size <= fortify_size(ptr, 0));
+  return __real_fwrite(ptr, size, n_items, stream);
+}
+
+fortify_function(vsnprintf) int vsnprintf(FAR char *buf, size_t size,
+                                          FAR const IPTR char *format,
+                                          va_list ap)
+{
+  fortify_assert(size <= fortify_size(buf, 0));
+  return __real_vsnprintf(buf, size, format, ap);
+}
+
+fortify_function(vsprintf) int vsprintf(FAR char *dest,
+                                        FAR const IPTR char *src,
+                                        va_list ap)
+{
+  int ret;
+
+  ret = __real_vsprintf(dest, src, ap);
+  fortify_assert(ret == -1 || (size_t)ret <= fortify_size(dest, 0));
+  return ret;
+}
+
+fortify_function(snprintf) int snprintf(FAR char *buf, size_t size,
+                                        FAR const IPTR char *format, ...)
+{
+  fortify_assert(size <= fortify_size(buf, 0));
+  return __real_snprintf(buf, size, format, fortify_va_arg_pack());
+}
+
+fortify_function(sprintf) int sprintf(FAR char *buf,
+                                      FAR const IPTR char *fmt,
+                                      ...)
+{
+  int ret;
+
+  ret = __real_sprintf(buf, fmt, fortify_va_arg_pack());
+  fortify_assert(ret == -1 || (size_t)ret <= fortify_size(buf, 0));
+  return ret;
+}
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
