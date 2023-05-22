@@ -1278,7 +1278,7 @@ endif # SENSORS_HDC1008
 config SENSORS_LTR308
 	bool "LTR308 Lite-On ambient light sensor"
 	default n
-  select I2C
+	select I2C
 	---help---
 		Enable driver support for the LTR308 Lite-on ambient light sensor.
 

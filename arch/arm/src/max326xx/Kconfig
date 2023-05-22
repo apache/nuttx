@@ -15,22 +15,22 @@ choice
 config ARCH_CHIP_MAX32620
 	bool "MAX32620"
 	select ARCH_FAMILY_MAX32620
-	depends on EXPERIMENTAL  # Not fully implemented
+	depends on EXPERIMENTAL # Not fully implemented
 
 config ARCH_CHIP_MAX32621
 	bool "MAX32621"
 	select ARCH_FAMILY_MAX32620
-	depends on EXPERIMENTAL  # Not fully implemented
+	depends on EXPERIMENTAL # Not fully implemented
 
 config ARCH_CHIP_MAX32630
 	bool "MAX32630"
 	select ARCH_FAMILY_MAX32630
-	depends on EXPERIMENTAL  # Not fully implemented
+	depends on EXPERIMENTAL # Not fully implemented
 
 config ARCH_CHIP_MAX32632
 	bool "MAX32632"
 	select ARCH_FAMILY_MAX32630
-	depends on EXPERIMENTAL  # Not fully implemented
+	depends on EXPERIMENTAL # Not fully implemented
 
 config ARCH_CHIP_MAX32660
 	bool "MAX32660"

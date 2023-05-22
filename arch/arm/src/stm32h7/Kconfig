@@ -5686,8 +5686,8 @@ config STM32_OTA_SCRATCH_SIZE
 	hex "MCUboot scratch partition size (in bytes)"
 	default "0x40000"
 
-endif   #STM32_PROGMEM_OTA_PARTITION
-endif   #STM32_HAVE_OTA_PARTITION
+endif # STM32_PROGMEM_OTA_PARTITION
+endif # STM32_HAVE_OTA_PARTITION
 
 endmenu # Progmem configuration
 

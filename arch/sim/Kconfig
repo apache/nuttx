@@ -93,7 +93,7 @@ config SIM_X8664_SYSTEMV
 		systems. The first six integer or pointer arguments are passed in registers
 		RDI, RSI, RDX, RCX, R8, and R9, while XMM0, XMM1, XMM2, XMM3, XMM4, XMM5,
 		XMM6 and XMM7 are used for floating point arguments. For system calls, R10
-		is used instead of RCX.   As in the Microsoft x64 calling convention,
+		is used instead of RCX.  As in the Microsoft x64 calling convention,
 		additional arguments are passed on the stack and the return value is stored
 		in RAX.
 

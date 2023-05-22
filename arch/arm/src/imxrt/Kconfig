@@ -2195,7 +2195,7 @@ config IMXRT_ENET_ENHANCEDBD
 	default y if !ARMV7M_DCACHE_WRITETHROUGH
 
 config IMXRT_ENET_NETHIFS
-	int  # Not optional
+	int # Not optional
 	default 1
 
 config IMXRT_ENET_PHYINIT
@@ -2385,7 +2385,7 @@ config IMXRT_SRAM_HEAPOFFSET
 		Used to reserve memory at the beginning of SRAM for, as an example,
 		a framebuffer.
 
-endmenu  # i.MX RT Heap Configuration
+endmenu # i.MX RT Heap Configuration
 endmenu # Memory Configuration
 
 menu "LPI2C Configuration"
@@ -2915,7 +2915,7 @@ config IMXRT_PROGMEM_FLEXSPI_INSTANCE
 		FlexSPI instance number. Base address 0x60000000 is used for instance 0
 		and 0x70000000 for instance 1. Other values are not supported.
 
-endif   #IMXRT_PROGMEM
+endif # IMXRT_PROGMEM
 
 if IMXRT_HAVE_OTA_PARTITION
 
@@ -2972,8 +2972,8 @@ config IMXRT_OTA_SCRATCH_SIZE
 	hex "MCUboot scratch partition size (in bytes)"
 	default "0x40000"
 
-endif   #IMXRT_PROGMEM_OTA_PARTITION
-endif   #IMXRT_HAVE_OTA_PARTITION
+endif # IMXRT_PROGMEM_OTA_PARTITION
+endif # IMXRT_HAVE_OTA_PARTITION
 
 endmenu # Progmem configuration
 

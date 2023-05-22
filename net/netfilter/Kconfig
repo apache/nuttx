@@ -8,6 +8,6 @@ config NET_IPTABLES
 	default y
 	depends on NET_IPv4
 	depends on NET_SOCKOPTS
-	depends on NET_NAT  # May change dependency if we have firewall later.
+	depends on NET_NAT # May change dependency if we have firewall later.
 	---help---
 		Enable or disable iptables compatible interface (for NAT).

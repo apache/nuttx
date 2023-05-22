@@ -151,7 +151,7 @@ config IMX_ENET_ENHANCEDBD
 	default y if !ARMV7A_DCACHE_DISABLE
 
 config IMX_ENET_NETHIFS
-	int  # Not optional
+	int # Not optional
 	default 1
 
 config IMX_ENET_PHYINIT
