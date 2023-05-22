@@ -56,6 +56,10 @@
 #  include "nrf53_rptun.h"
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "nrf53_timer.h"
+#endif
+
 #include "nrf5340-dk.h"
 
 /****************************************************************************
