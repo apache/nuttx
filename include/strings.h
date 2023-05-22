@@ -93,6 +93,14 @@ int strncasecmp(FAR const char *, FAR const char *, size_t);
 
 void bzero(FAR void *s, size_t n);
 
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(bzero) void bzero(FAR void *s, size_t n)
+{
+  fortify_assert(n <= fortify_size(s, 0));
+  return bzero(s, n);
+}
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

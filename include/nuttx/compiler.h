@@ -87,6 +87,38 @@
 #    define CONFIG_HAVE_BUILTIN_FFSLL 1
 #  endif
 
+#  if CONFIG_FORTIFY_SOURCE > 0
+#    if !defined(__OPTIMIZE__) || (__OPTIMIZE__) <= 0
+#      warning requires compiling with optimization (-O2 or higher)
+#    endif
+#    if CONFIG_FORTIFY_SOURCE == 3
+#      if __GNUC__ < 12 || (defined(__clang__) && __clang_major__ < 12)
+#        error compiler version less than 12 does not support dynamic object size
+#      endif
+
+#      define fortify_size(__o, type) __builtin_dynamic_object_size(__o, type)
+#    else
+#      define fortify_size(__o, type) __builtin_object_size(__o, type)
+#    endif
+
+#    define fortify_assert(condition) do \
+                                        { \
+                                          if (!(condition)) \
+                                            { \
+                                              __builtin_trap(); \
+                                            } \
+                                        } \
+                                      while (0)
+
+#    define fortify_va_arg_pack __builtin_va_arg_pack
+#    define fortify_str(s) #s
+#    define fortify_real(p,fn) __typeof__(fn) __real_##fn __asm__(fortify_str(p) #fn)
+#    define fortify_function(fn) fortify_real(__USER_LABEL_PREFIX__, fn); \
+                                 extern __inline__ \
+                                 __attribute__((__always_inline__, \
+                                                __gnu_inline__, __artificial__))
+#  endif
+
 /* Pre-processor */
 
 #  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */

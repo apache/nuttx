@@ -435,6 +435,40 @@ int getpeername(int sockfd, FAR struct sockaddr *addr,
 ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags);
 ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags);
 
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(send) ssize_t send(int sockfd, FAR const void *buf,
+                                    size_t len, int flags)
+{
+  fortify_assert(len <= fortify_size(buf, 0));
+  return __real_send(sockfd, buf, len, flags);
+}
+
+fortify_function(sendto) ssize_t sendto(int sockfd, FAR const void *buf,
+                                        size_t len, int flags,
+                                        FAR const struct sockaddr *to,
+                                        socklen_t tolen)
+{
+  fortify_assert(len <= fortify_size(buf, 0));
+  return __real_sendto(sockfd, buf, len, flags, to, tolen);
+}
+
+fortify_function(recv) ssize_t recv(int sockfd, FAR void *buf,
+                                    size_t len, int flags)
+{
+  fortify_assert(len <= fortify_size(buf, 0));
+  return __real_recv(sockfd, buf, len, flags);
+}
+
+fortify_function(recvfrom) ssize_t recvfrom(int sockfd, FAR void *buf,
+                                            size_t len, int flags,
+                                            FAR struct sockaddr *from,
+                                            FAR socklen_t *fromlen)
+{
+  fortify_assert(len <= fortify_size(buf, 0));
+  return __real_recvfrom(sockfd, buf, len, flags, from, fromlen);
+}
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
