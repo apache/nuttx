@@ -163,7 +163,7 @@ config USBHOST_CDCACM_REDUCED
 		protocol is supported for devices that provide not interrupt IN
 		endpoint.  This option is then most useful for testing purposes or
 		if there are insufficient resources to support the compliant
-		protocol.   The interrupt IN control interface will not be used even
+		protocol.  The interrupt IN control interface will not be used even
 		if it is available in this case.
 
 config USBHOST_CDCACM_BULKONLY
@@ -295,7 +295,7 @@ config USBHOST_HIDKBD
 	---help---
 		Enable support for the keyboard class driver.
 
-if  USBHOST_HIDKBD
+if USBHOST_HIDKBD
 
 config HIDKBD_POLLUSEC
 	int "Keyboard Poll Rate (MSEC)"

@@ -25,4 +25,4 @@ endchoice
 
 endif
 
-endmenu  # MATH Acceleration Information
+endmenu # MATH Acceleration Information

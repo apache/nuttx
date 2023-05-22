@@ -2006,7 +2006,7 @@ config FRAME_POINTER
 
 endmenu # Debug Options
 
-menuconfig  TRACE
+menuconfig TRACE
 	bool "Enable tracepoints"
 	default n
 	depends on SCHED_INSTRUMENTATION_DUMP

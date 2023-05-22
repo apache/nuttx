@@ -306,7 +306,7 @@ config S32K3XX_DTCM_HEAP
 	---help---
 		Select to add the entire DTCM to the heap
 
-endmenu  # S32K3XX Heap Configuration
+endmenu # S32K3XX Heap Configuration
 
 # Peripheral Group Selections
 
@@ -1358,7 +1358,7 @@ config S32K3XX_ENET_ENHANCEDBD
 	default n
 
 config S32K3XX_ENET_NETHIFS
-	int  # Not optional
+	int # Not optional
 	default 1
 
 config S32K3XX_ENET_PHYINIT
