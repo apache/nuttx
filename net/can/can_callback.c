@@ -62,6 +62,9 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
                uint16_t flags)
 {
   int buflen = dev->d_len;
+#ifdef CONFIG_NET_TIMESTAMP
+  buflen -= sizeof(struct timeval);
+#endif
   uint16_t recvlen;
   uint16_t ret;
 
@@ -133,6 +136,19 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
 
       if ((flags & CAN_NEWDATA) != 0)
         {
+          if (dev->d_iob->io_flink != NULL ||
+              dev->d_iob->io_pktlen == 0 ||
+              dev->d_iob->io_offset <= 0)
+            {
+              if (dev->d_iob->io_flink == NULL)
+                {
+                  iob_free(dev->d_iob);
+                }
+
+              netdev_iob_clear(dev);
+              return flags;
+            }
+
 #ifdef CONFIG_NET_TIMESTAMP
           /* TIMESTAMP sockopt is activated,
            * create timestamp and copy to iob
