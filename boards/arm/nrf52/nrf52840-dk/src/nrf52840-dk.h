@@ -166,18 +166,6 @@ int nrf52_lpwaninitialize(void);
 #endif
 
 /****************************************************************************
- * Name: nrf52_timer_driver_setup
- *
- * Description:
- *   Initialize TIMER driver.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIMER
-int nrf52_timer_driver_setup(const char *devpath, int timer);
-#endif
-
-/****************************************************************************
  * Name: nrf52_pwm_setup
  *
  * Description:

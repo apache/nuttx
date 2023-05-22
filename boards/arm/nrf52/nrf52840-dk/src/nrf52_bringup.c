@@ -45,6 +45,10 @@
 #  include <nuttx/usb/rndis.h>
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "nrf52_timer.h"
+#endif
+
 #ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
 #  include "nrf52_sdc.h"
 #endif
