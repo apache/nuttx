@@ -44,7 +44,8 @@
  ****************************************************************************/
 
 int core_dump(FAR struct memory_region_s *regions,
-              FAR struct lib_outstream_s *stream)
+              FAR struct lib_outstream_s *stream,
+              pid_t pid)
 {
   FAR struct binfmt_s *binfmt;
   int ret = -ENOENT;
@@ -55,7 +56,7 @@ int core_dump(FAR struct memory_region_s *regions,
 
       if (binfmt->coredump)
         {
-          ret = binfmt->coredump(regions, stream);
+          ret = binfmt->coredump(regions, stream, pid);
           if (ret == OK)
             {
               break;
