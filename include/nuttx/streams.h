@@ -232,7 +232,7 @@ struct lib_bufferedoutstream_s
 
 struct iob_s;  /* Forward reference */
 
-struct lib_syslogstream_s
+struct lib_syslograwstream_s
 {
   struct lib_outstream_s public;
 #ifdef CONFIG_SYSLOG_BUFFER
@@ -459,7 +459,7 @@ void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 /****************************************************************************
- * Name: lib_syslogstream_open
+ * Name: lib_syslograwstream_open
  *
  * Description:
  *   Initializes a stream for use with the configured syslog interface.
@@ -467,24 +467,24 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *            lib_syslograwstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream);
+void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream);
 
 /****************************************************************************
- * Name: lib_syslogstream_close
+ * Name: lib_syslograwstream_close
  *
  * Description:
  *   Free resources held by the syslog stream.
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *            lib_syslograwstream_s to be initialized.
  *
  * Returned Value:
  *   None (Resources freed).
@@ -492,9 +492,9 @@ void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_BUFFER
-void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream);
+void lib_syslograwstream_close(FAR struct lib_syslograwstream_s *stream);
 #else
-#  define lib_syslogstream_close(s)
+#  define lib_syslograwstream_close(s)
 #endif
 
 /****************************************************************************
