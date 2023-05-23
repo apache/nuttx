@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stream/lib_syslogstream.c
+ * libs/libc/stream/lib_syslograwstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,12 +36,12 @@
 
 #ifdef CONFIG_SYSLOG_BUFFER
 /****************************************************************************
- * Name: syslogstream_flush
+ * Name: syslograwstream_flush
  ****************************************************************************/
 
-static int syslogstream_flush(FAR struct lib_outstream_s *ostream)
+static int syslograwstream_flush(FAR struct lib_outstream_s *ostream)
 {
-  FAR struct lib_syslogstream_s *stream = (FAR void *)ostream;
+  FAR struct lib_syslograwstream_s *stream = (FAR void *)ostream;
   int ret = OK;
 
   DEBUGASSERT(stream != NULL);
@@ -72,11 +72,11 @@ static int syslogstream_flush(FAR struct lib_outstream_s *ostream)
 }
 
 /****************************************************************************
- * Name: syslogstream_addchar
+ * Name: syslograwstream_addchar
  ****************************************************************************/
 
-static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
-                                 int ch)
+static void syslograwstream_addchar(FAR struct lib_syslograwstream_s *stream,
+                                    int ch)
 {
   /* Add the incoming character to the buffer */
 
@@ -93,16 +93,17 @@ static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
     {
       /* Yes.. then flush the buffer */
 
-      syslogstream_flush(&stream->public);
+      syslograwstream_flush(&stream->public);
     }
 }
 
 /****************************************************************************
- * Name: syslogstream_addstring
+ * Name: syslograwstream_addstring
  ****************************************************************************/
 
-static int syslogstream_addstring(FAR struct lib_syslogstream_s *stream,
-                                  FAR const char *buff, int len)
+static int
+syslograwstream_addstring(FAR struct lib_syslograwstream_s *stream,
+                          FAR const char *buff, int len)
 {
   int ret = 0;
 
@@ -120,7 +121,7 @@ static int syslogstream_addstring(FAR struct lib_syslogstream_s *stream,
         {
           /* Yes.. then flush the buffer */
 
-          syslogstream_flush(&stream->public);
+          syslograwstream_flush(&stream->public);
         }
     }
   while (ret < len);
@@ -133,13 +134,13 @@ static int syslogstream_addstring(FAR struct lib_syslogstream_s *stream,
 #endif
 
 /****************************************************************************
- * Name: syslogstream_putc
+ * Name: syslograwstream_putc
  ****************************************************************************/
 
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void syslograwstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_syslogstream_s *stream =
-                                      (FAR struct lib_syslogstream_s *)this;
+  FAR struct lib_syslograwstream_s *stream =
+                                    (FAR struct lib_syslograwstream_s *)this;
 
   DEBUGASSERT(stream != NULL);
   stream->last_ch = ch;
@@ -155,7 +156,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
         {
           /* Add the incoming character to the buffer */
 
-          syslogstream_addchar(stream, ch);
+          syslograwstream_addchar(stream, ch);
         }
       else
 #  endif
@@ -189,11 +190,11 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
     }
 }
 
-static int syslogstream_puts(FAR struct lib_outstream_s *this,
-                             FAR const void *buff, int len)
+static int syslograwstream_puts(FAR struct lib_outstream_s *this,
+                                FAR const void *buff, int len)
 {
-  FAR struct lib_syslogstream_s *stream =
-                                      (FAR struct lib_syslogstream_s *)this;
+  FAR struct lib_syslograwstream_s *stream =
+                                    (FAR struct lib_syslograwstream_s *)this;
   int ret;
 
   DEBUGASSERT(stream != NULL);
@@ -212,7 +213,7 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
     {
       /* Add the incoming string to the buffer */
 
-      ret = syslogstream_addstring(stream, buff, len);
+      ret = syslograwstream_addstring(stream, buff, len);
     }
   else
 #endif
@@ -250,7 +251,7 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_syslogstream_open
+ * Name: lib_syslograwstream_open
  *
  * Description:
  *   Initializes a stream for use with the configured syslog interface.
@@ -258,25 +259,25 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *            lib_syslograwstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
+void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream)
 {
   DEBUGASSERT(stream != NULL);
 
   /* Initialize the common fields */
 
-  stream->public.putc  = syslogstream_putc;
-  stream->public.puts  = syslogstream_puts;
+  stream->public.putc  = syslograwstream_putc;
+  stream->public.puts  = syslograwstream_puts;
   stream->public.nput  = 0;
 
 #ifdef CONFIG_SYSLOG_BUFFER
-  stream->public.flush = syslogstream_flush;
+  stream->public.flush = syslograwstream_flush;
 
   /* Allocate an IOB */
 
@@ -298,14 +299,14 @@ void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
 }
 
 /****************************************************************************
- * Name: lib_syslogstream_close
+ * Name: lib_syslograwstream_close
  *
  * Description:
  *   Free resources held by the syslog stream.
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *            lib_syslograwstream_s to be initialized.
  *
  * Returned Value:
  *   None (Resources freed).
@@ -313,7 +314,7 @@ void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_BUFFER
-void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
+void lib_syslograwstream_close(FAR struct lib_syslograwstream_s *stream)
 {
   DEBUGASSERT(stream != NULL);
 
@@ -324,7 +325,7 @@ void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
     {
       /* Flush the output buffered in the IOB */
 
-      syslogstream_flush(&stream->public);
+      syslograwstream_flush(&stream->public);
 
       /* Free the IOB */
 
@@ -332,7 +333,7 @@ void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
       stream->iob = NULL;
     }
 #  else
-  syslogstream_flush(&stream->public);
+  syslograwstream_flush(&stream->public);
 #  endif
 }
 #endif
