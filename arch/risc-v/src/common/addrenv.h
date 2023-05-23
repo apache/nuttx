@@ -44,6 +44,14 @@
 #  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
 #endif
 
+/* Base address for address environment */
+
+#if CONFIG_ARCH_TEXT_VBASE != 0
+#  define ARCH_ADDRENV_VBASE    (CONFIG_ARCH_TEXT_VBASE)
+#else
+#  define ARCH_ADDRENV_VBASE    (CONFIG_ARCH_DATA_VBASE)
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
