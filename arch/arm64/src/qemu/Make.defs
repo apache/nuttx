@@ -21,7 +21,7 @@
 include common/Make.defs
 
 # qemu-specific C source files
-CHIP_CSRCS  = qemu_boot.c qemu_serial.c
+CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_net.c
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = qemu_lowputc.S
