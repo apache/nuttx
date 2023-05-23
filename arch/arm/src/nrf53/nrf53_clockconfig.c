@@ -106,4 +106,26 @@ void nrf53_clockconfig(void)
   /* TODO: calibrate LFCLK RC oscillator */
 #endif
 #endif
+
+#ifdef CONFIG_NRF53_USE_HFCLK192M
+  /* Initialize HFCLK192M */
+
+#if defined(CONFIG_NRF53_HFCLK192M_192)
+  putreg32(NRF53_CLOCK_HFCLK192MSRC, CLOCK_HFCLK192MSRC_DIV1);
+#elif defined(CONFIG_NRF53_HFCLK192M_96)
+  putreg32(NRF53_CLOCK_HFCLK192MSRC, CLOCK_HFCLK192MSRC_DIV2);
+#elif defined(CONFIG_NRF53_HFCLK192M_48)
+  putreg32(NRF53_CLOCK_HFCLK192MSRC, CLOCK_HFCLK192MSRC_DIV4);
+#endif
+
+  /* Trigger HFCLK192M start */
+
+  putreg32(0x0, NRF53_CLOCK_EVENTS_HFCLK192MSTARTED);
+  putreg32(0x1, NRF53_CLOCK_TASKS_HFCLK192MSTART);
+
+  while (!getreg32(NRF53_CLOCK_EVENTS_HFCLK192MSTARTED))
+    {
+      /* Wait for HFCLK192M to be running */
+    }
+#endif
 }
