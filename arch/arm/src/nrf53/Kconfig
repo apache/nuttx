@@ -29,6 +29,7 @@ config NRF53_APPCORE
 	select NRF53_HAVE_I2C123
 	select NRF53_HAVE_SPI1234
 	select NRF53_HAVE_HFCLK192M
+	select NRF53_HAVE_QSPI
 
 config NRF53_NETCORE
 	bool
@@ -100,6 +101,10 @@ config NRF53_HAVE_SPI1234
 	default n
 
 config NRF53_HAVE_HFCLK192M
+	bool
+	default n
+
+config NRF53_HAVE_QSPI
 	bool
 	default n
 
@@ -211,6 +216,11 @@ config NRF53_UART1
 	depends on NRF53_HAVE_UART1
 	select UART1_SERIALDRIVER
 	select NRF53_UART
+
+config NRF53_QSPI
+	bool "QSPI"
+	default n
+	depends on NRF53_HAVE_QSPI
 
 config NRF53_TIMER0
 	bool "TIMER0"
@@ -324,6 +334,8 @@ config NRF53_HFCLK192M_48
 	bool "HFCLK192M is 48MHz"
 
 endchoice
+
+endif # NRF53_USE_HFCLK192M
 
 config NRF53_OSCILLATOR_LFXO
 	bool "Configure LFXO oscillator"
@@ -609,6 +621,21 @@ config NRF53_I2C_MASTER_COPY_BUF_SIZE
 		on malloc.
 
 endmenu
+
+menu "QSPI Configuration"
+
+if NRF53_QSPI
+
+config NRF53_QSPI_RXDELAY
+	int "QSPI RX delay"
+	default 2
+	range 0 7
+	---help---
+		The input serial data sampling delay.
+
+endif # NRF53_QSPI
+
+endmenu # QSPI Configuration
 
 menuconfig NRF53_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
