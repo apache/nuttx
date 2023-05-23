@@ -285,6 +285,16 @@ int nrf53_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
+#ifdef CONFIG_NRF53_QSPI
+  /* Initialize the MX25 QSPU memory */
+
+  ret = nrf53_mx25_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_mx25_initialize() failed: %d\n", ret);
+    }
+#endif
+
   /* Initialize BLE */
 
 #ifdef CONFIG_NRF53_APPCORE
