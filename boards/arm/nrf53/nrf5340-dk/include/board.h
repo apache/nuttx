@@ -155,4 +155,28 @@
 #define NRF53_ADC_CH2_PIN (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(6))
 #define NRF53_ADC_CH3_PIN (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(7))
 
+/* QSPI Pins ****************************************************************/
+
+/* QSPI0
+ *   QSPI CS  - P0.18
+ *   QSPI SCK - P0.17
+ *   QSPI IO0 - P0.13
+ *   QSPI IO1 - P0.14
+ *   QSPI IO2 - P0.15
+ *   QSPI IO3 - P0.16
+ */
+
+#define NRF53_QSPI0_CSN_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
+                             GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(18))
+#define NRF53_QSPI0_SCK_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
+                             GPIO_PORT0 | GPIO_PIN(17))
+#define NRF53_QSPI0_IO0_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
+                             GPIO_PORT0 | GPIO_PIN(13))
+#define NRF53_QSPI0_IO1_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
+                             GPIO_PORT0 | GPIO_PIN(14))
+#define NRF53_QSPI0_IO2_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
+                             GPIO_PORT0 | GPIO_PIN(15))
+#define NRF53_QSPI0_IO3_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
+                             GPIO_PORT0 | GPIO_PIN(16))
+
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_INCLUDE_BOARD_H */
