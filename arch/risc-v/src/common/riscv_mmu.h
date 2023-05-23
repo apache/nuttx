@@ -308,10 +308,29 @@ static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
 }
 
 /****************************************************************************
+ * Name: mmu_satp_to_paddr
+ *
+ * Description:
+ *   Extract physical address from SATP
+ *
+ * Returned Value:
+ *   Physical address from SATP value
+ *
+ ****************************************************************************/
+
+static inline uintptr_t mmu_satp_to_paddr(uintptr_t satp)
+{
+  uintptr_t ppn;
+  ppn = satp;
+  ppn = ((ppn >> SATP_PPN_SHIFT) & SATP_PPN_MASK);
+  return SATP_PPN_TO_ADDR(ppn);
+}
+
+/****************************************************************************
  * Name: mmu_get_satp_pgbase
  *
  * Description:
- *   Utility function to read the base page table physical address
+ *   Utility function to read the current base page table physical address
  *
  * Returned Value:
  *   Physical address of the current base page table
@@ -320,10 +339,7 @@ static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
 
 static inline uintptr_t mmu_get_satp_pgbase(void)
 {
-  uintptr_t ppn;
-  ppn = mmu_read_satp();
-  ppn = ((ppn >> SATP_PPN_SHIFT) & SATP_PPN_MASK);
-  return SATP_PPN_TO_ADDR(ppn);
+  return mmu_satp_to_paddr(mmu_read_satp());
 }
 
 /****************************************************************************
