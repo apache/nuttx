@@ -72,7 +72,6 @@ endif
 config SYSLOG_BUFFER
 	bool "Use buffered output"
 	default n
-	select MM_IOB
 	---help---
 		Enables an buffering logic that will be used to serialize debug
 		output from concurrent tasks. This enables allocation of one buffer
@@ -81,6 +80,16 @@ config SYSLOG_BUFFER
 		The use of SYSLOG buffering is optional.  If not enabled, however,
 		then the output from multiple tasks that attempt to generate SYSLOG
 		output may be interleaved and difficult to read.
+
+if SYSLOG_BUFFER
+
+config SYSLOG_BUFSIZE
+	int "Syslog buffer size"
+	default 64
+	---help---
+		The size of the syslog buffer in bytes.
+
+endif
 
 config SYSLOG_INTBUFFER
 	bool "Use interrupt buffer"
