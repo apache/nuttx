@@ -28,6 +28,7 @@ config NRF53_APPCORE
 	select NRF53_HAVE_UART1
 	select NRF53_HAVE_I2C123
 	select NRF53_HAVE_SPI1234
+	select NRF53_HAVE_HFCLK192M
 
 config NRF53_NETCORE
 	bool
@@ -95,6 +96,10 @@ config NRF53_HAVE_I2C123
 	default n
 
 config NRF53_HAVE_SPI1234
+	bool
+	default n
+
+config NRF53_HAVE_HFCLK192M
 	bool
 	default n
 
@@ -295,6 +300,30 @@ config NRF53_LFCLK_SYNTH
 endchoice
 
 endif # NRF53_USE_LFCLK
+
+config NRF53_USE_HFCLK192M
+	bool "Enable HFCLK192M"
+	default n
+	depends on NRF53_HAVE_HFCLK192M
+	---help---
+		Enable HFCLK192M clock.
+
+if NRF53_USE_HFCLK192M
+
+choice
+	prompt "HFCLK192M source"
+	default NRF53_HFCLK192M_192
+
+config NRF53_HFCLK192M_192
+	bool "HFCLK192M is 192MHz"
+
+config NRF53_HFCLK192M_96
+	bool "HFCLK192M is 96MHz"
+
+config NRF53_HFCLK192M_48
+	bool "HFCLK192M is 48MHz"
+
+endchoice
 
 config NRF53_OSCILLATOR_LFXO
 	bool "Configure LFXO oscillator"

@@ -38,6 +38,22 @@
                                           * (32k_clk)
                                           */
 
+/* HFCLK192M configuration */
+
+#ifdef CONFIG_NRF53_USE_HFCLK192M
+#  if defined(CONFIG_NRF53_HFCLK192M_192)
+#    define NRF53_PCLK192M_FREQ    192000000
+#  elif defined(CONFIG_NRF53_HFCLK192M_96)
+#    define NRF53_PCLK192M_FREQ    96000000
+#  elif defined(CONFIG_NRF53_HFCLK192M_48)
+#    define NRF53_PCLK192M_FREQ    48000000
+#  else
+#    error Invalid configuration
+#  endif
+#else
+#  define NRF53_PCLK192M_FREQ    0
+#endif
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
