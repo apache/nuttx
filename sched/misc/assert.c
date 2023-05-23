@@ -70,7 +70,7 @@
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_last_regs[XCPTCONTEXT_SIZE];
+static uint8_t g_last_regs[XCPTCONTEXT_SIZE] aligned_data(16);
 
 #ifdef CONFIG_BOARD_COREDUMP
 static struct lib_syslogstream_s  g_syslogstream;
