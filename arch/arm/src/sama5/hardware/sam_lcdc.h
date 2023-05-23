@@ -52,7 +52,7 @@
 #define SAM_LCDC_LCDIMR_OFFSET      0x0034 /* LCD Controller Interrupt Mask Register */
 #define SAM_LCDC_LCDISR_OFFSET      0x0038 /* LCD Controller Interrupt Status Register */
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D4) || defined(ATSAMA5D2)
 #  define SAM_LCDC_LCDATTR_OFFSET   0x003c /* LCD Controller Attribute Register */
 #endif
 
@@ -205,6 +205,8 @@
 #  define SAM_LCDC_HCRCFG8_OFFSET   0x048c /* Hardware Cursor Configuration 8 Register */
 #  define SAM_LCDC_HCRCFG9_OFFSET   0x0490 /* Hardware Cursor Configuration 9 Register */
                                            /* 0x0494-0x053c Reserved */
+#endif
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define SAMA5_HAVE_LCDC_PPCH      1      /* Supports conditional compilation */
 #  define SAM_LCDC_PPCHER_OFFSET    0x0540 /* Post Processing Channel Enable Register */
 #  define SAM_LCDC_PPCHDR_OFFSET    0x0544 /* Post Processing Channel Disable Register */
@@ -267,7 +269,7 @@
 #define SAM_LCDC_LCDIMR             (SAM_LCDC_VBASE+SAM_LCDC_LCDIMR_OFFSET)
 #define SAM_LCDC_LCDISR             (SAM_LCDC_VBASE+SAM_LCDC_LCDISR_OFFSET)
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D4) || defined(ATSAMA5D2)
 #  define SAM_LCDC_LCDATTR          (SAM_LCDC_VBASE+SAM_LCDC_LCDATTR_OFFSET)
 #endif
 
@@ -417,7 +419,9 @@
 #  define SAM_LCDC_HCRCFG7          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG7_OFFSET)
 #  define SAM_LCDC_HCRCFG8          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG8_OFFSET)
 #  define SAM_LCDC_HCRCFG9          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG9_OFFSET)
+#endif
 
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define SAM_LCDC_PPCHER           (SAM_LCDC_VBASE+SAM_LCDC_PPCHER_OFFSET)
 #  define SAM_LCDC_PPCHDR           (SAM_LCDC_VBASE+SAM_LCDC_PPCHDR_OFFSET)
 #  define SAM_LCDC_PPCHSR           (SAM_LCDC_VBASE+SAM_LCDC_PPCHSR_OFFSET)
@@ -473,6 +477,9 @@
 
 #ifdef ATSAMA5D3
 #  define LCDC_LCDCFG0_CGDISHCR     (1 << 12) /* Bit 12: Clock Gating Disable Control NW Cursor */
+#endif
+
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define LCDC_LCDCFG0_CGDISPP      (1 << 13) /* Bit 13: Clock Gating Disable Control PP */
 #endif
 
@@ -482,7 +489,7 @@
 
 /* LCD Controller Configuration Register 1 */
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define LCDC_LCDCFG1_HSPW_SHIFT   (0)       /* Bits 0-5: Horizontal Sync Pulse Width */
 #  define LCDC_LCDCFG1_HSPW_MASK    (0x3f << LCDC_LCDCFG1_HSPW_SHIFT)
 #    define LCDC_LCDCFG1_HSPW(n)    ((uint32_t)(n) << LCDC_LCDCFG1_HSPW_SHIFT)
@@ -500,7 +507,7 @@
 
 /* LCD Controller Configuration Register 2 */
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 #  define LCDC_LCDCFG2_VFPW_SHIFT   (0)       /* Bits 0-5: Vertical Front Porch Width */
 #  define LCDC_LCDCFG2_VFPW_MASK    (0x3f << LCDC_LCDCFG2_VFPW_SHIFT)
 #    define LCDC_LCDCFG2_VFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG2_VFPW_SHIFT)
@@ -518,7 +525,14 @@
 
 /* LCD Controller Configuration Register 3 */
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D2)
+#  define LCDC_LCDCFG3_HFPW_SHIFT   (0)       /* Bits 0-8: Horizontal Front Porch Width */
+#  define LCDC_LCDCFG3_HFPW_MASK    (0x3ff << LCDC_LCDCFG3_HFPW_SHIFT)
+#    define LCDC_LCDCFG3_HFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HFPW_SHIFT)
+#  define LCDC_LCDCFG3_HBPW_SHIFT   (16)      /* Bits 16-24: Horizontal Back Porch Width */
+#  define LCDC_LCDCFG3_HBPW_MASK    (0x3ff << LCDC_LCDCFG3_HBPW_SHIFT)
+#    define LCDC_LCDCFG3_HBPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HBPW_SHIFT)
+#elif defined(ATSAMA5D3)
 #  define LCDC_LCDCFG3_HFPW_SHIFT   (0)       /* Bits 0-8: Horizontal Front Porch Width */
 #  define LCDC_LCDCFG3_HFPW_MASK    (0x1ff << LCDC_LCDCFG3_HFPW_SHIFT)
 #    define LCDC_LCDCFG3_HFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HFPW_SHIFT)
@@ -559,14 +573,18 @@
 #  define LCDC_LCDCFG5_MODE_18BPP   (2 << LCDC_LCDCFG5_MODE_SHIFT) /* Output mode 18 bits per pixel */
 #  define LCDC_LCDCFG5_MODE_24BPP   (3 << LCDC_LCDCFG5_MODE_SHIFT) /* Output mode 24 bits per pixel */
 
-#ifdef ATSAMA5D3
+#if defined(ATSAMA5D2) || defined(ATSAMA5D3)
 #  define LCDC_LCDCFG5_PP           (1 << 10) /* Bit 10: Post Processing Enable */
 #endif
 
 #define LCDC_LCDCFG5_VSPSU          (1 << 12) /* Bit 12: LCDC VSync Pulse Setup Configuration */
 #define LCDC_LCDCFG5_VSPHO          (1 << 13) /* Bit 13: LCDC VSync Pulse Hold Configuration */
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D2)
+#  define LCDC_LCDCFG5_GUARDTIME_SHIFT (16)     /* Bits 16-20: LCD DISPLAY Guard Time */
+#  define LCDC_LCDCFG5_GUARDTIME_MASK  (0x0f << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+#    define LCDC_LCDCFG5_GUARDTIME(n)  ((uint32_t)(n) << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+#elif defined(ATSAMA5D3)
 #  define LCDC_LCDCFG5_GUARDTIME_SHIFT (16)     /* Bits 16-20: LCD DISPLAY Guard Time */
 #  define LCDC_LCDCFG5_GUARDTIME_MASK  (0x1f << LCDC_LCDCFG5_GUARDTIME_SHIFT)
 #    define LCDC_LCDCFG5_GUARDTIME(n)  ((uint32_t)(n) << LCDC_LCDCFG5_GUARDTIME_SHIFT)
@@ -634,7 +652,10 @@
 #define LCDC_LCDINT_OVR2            (1 << 10) /* Bit 10: Overlay 2 Raw Interrupt */
 #define LCDC_LCDINT_HEO             (1 << 11) /* Bit 11: High End Overlay Raw Interrupt */
 
-#if defined(ATSAMA5D3)
+#if defined(ATSAMA5D2)
+#  define LCDC_LCDINT_PP            (1 << 13) /* Bit 13: Post Processing Raw Interrupt */
+#  define LCDC_LCDINT_ALL           (0x00002f17)
+#elif defined(ATSAMA5D3)
 #  define LCDC_LCDINT_HCR           (1 << 12) /* Bit 12: Hardware Cursor Raw Interrupt */
 #  define LCDC_LCDINT_PP            (1 << 13) /* Bit 13: Post Processing Raw Interrupt */
 #  define LCDC_LCDINT_ALL           (0x00003f17)
@@ -642,7 +663,7 @@
 #  define LCDC_LCDINT_ALL           (0x00000f17)
 #endif
 
-#ifdef ATSAMA5D4
+#if defined(ATSAMA5D2) || defined(ATSAMA5D4)
 /* LCD Controller Attribute Register */
 
 #  define LCDC_LCDATTR_BASE         (1 << 0)  /* Bit 0:  Base Layer Update Attribute Register */
@@ -653,6 +674,9 @@
 #  define LCDC_LCDATTR_OVR1A2Q      (1 << 9)  /* Bit 9:  Overlay 1 Update Attribute Register */
 #  define LCDC_LCDATTR_OVR2A2Q      (1 << 10) /* Bit 10: Overlay 2 Update Attribute Register */
 #  define LCDC_LCDATTR_HEOA2Q       (1 << 11) /* Bit 11: High-End Overlay Update Attribute Register */
+#ifdef ATSAMA5D2
+#  define LCDC_LCDATTR_PPA2Q        (1 << 13) /* Bit 13: Post Processing Update Add To Queue Register */
+#endif
 #endif
 
 /* Base Layer Channel Enable Register */
@@ -1819,7 +1843,8 @@
 #  define LCDC_HCRCFG9_GA_SHIFT     (16)      /* Bits 16-23: Blender Global Alpha */
 #  define LCDC_HCRCFG9_GA_MASK      (0xff << LCDC_HCRCFG9_GA_SHIFT)
 #    define LCDC_HCRCFG9_GA(n)      ((uint32_t)(n) << LCDC_HCRCFG9_GA_SHIFT)
-
+#endif
+#if defined(ATSAMA5D3) || defined(ATSAMA5D2)
 /* Post Processing Channel Enable Register */
 
 #  define LCDC_PPCHER_CH            (1 << 0)  /* Bit 0:  Channel Enable */
