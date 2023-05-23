@@ -107,23 +107,6 @@ static int quota_fetch_dec(FAR struct netdev_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: quota_load
- *
- * Description:
- *   Fetch the quota, works like atomic_load.
- *
- ****************************************************************************/
-
-static int quota_load(FAR struct netdev_lowerhalf_s *lower,
-                      enum netpkt_type_e type)
-{
-  irqstate_t flags = spin_lock_irqsave(NULL);
-  int ret = lower->quota[type];
-  spin_unlock_irqrestore(NULL, flags);
-  return ret;
-}
-
-/****************************************************************************
  * Name: netpkt_get
  *
  * Description:
@@ -232,7 +215,7 @@ netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev)
 
 static inline bool netdev_upper_can_tx(FAR struct netdev_upperhalf_s *upper)
 {
-  return quota_load(upper->lower, NETPKT_TX) > 0;
+  return netdev_lower_quota_load(upper->lower, NETPKT_TX) > 0;
 }
 
 /****************************************************************************
@@ -838,6 +821,27 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 {
   NETDEV_TXDONE(&dev->netdev);
   netdev_upper_queue_work(&dev->netdev);
+}
+
+/****************************************************************************
+ * Name: netdev_lower_quota_load
+ *
+ * Description:
+ *   Fetch the quota, works like atomic_load.
+ *
+ * Input Parameters:
+ *   dev  - The lower half device driver structure
+ *   type - Whether get quota for TX or RX
+ *
+ ****************************************************************************/
+
+int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
+                            enum netpkt_type_e type)
+{
+  irqstate_t flags = spin_lock_irqsave(NULL);
+  int ret = dev->quota[type];
+  spin_unlock_irqrestore(NULL, flags);
+  return ret;
 }
 
 /****************************************************************************
