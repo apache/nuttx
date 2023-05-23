@@ -102,5 +102,5 @@ endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c
-CMN_CSRCS += riscv_addrenv_utils.c riscv_addrenv_shm.c
+CMN_CSRCS += riscv_addrenv_utils.c riscv_addrenv_shm.c riscv_addrenv_pgmap.c
 endif
