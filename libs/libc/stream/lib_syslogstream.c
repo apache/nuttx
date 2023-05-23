@@ -34,42 +34,40 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_BUFFER
 /****************************************************************************
  * Name: syslogstream_flush
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
-static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
+static int syslogstream_flush(FAR struct lib_outstream_s *ostream)
 {
-  FAR struct iob_s *iob;
+  FAR struct lib_syslogstream_s *stream = (FAR void *)ostream;
   int ret = OK;
 
   DEBUGASSERT(stream != NULL);
-  iob = stream->iob;
 
   /* Do we have an IO buffer? Is there anything buffered? */
 
-  if (iob != NULL && iob->io_len > 0)
+  if (stream->base != NULL && stream->offset > 0)
     {
       /* Yes write the buffered data */
 
       do
         {
-          ssize_t nbytes = syslog_write((FAR const char *)iob->io_data,
-                                        iob->io_len);
+          ssize_t nbytes = syslog_write(stream->base, stream->offset);
           if (nbytes < 0)
             {
               ret = nbytes;
             }
           else
             {
-              iob->io_len = 0;
               ret = OK;
             }
         }
       while (ret == -EINTR);
     }
 
+  stream->offset = 0;
   return ret;
 }
 #endif
@@ -82,12 +80,10 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
 static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
                                  int ch)
 {
-  FAR struct iob_s *iob = stream->iob;
-
   /* Add the incoming character to the buffer */
 
-  iob->io_data[iob->io_len] = ch;
-  iob->io_len++;
+  stream->base[stream->offset] = ch;
+  stream->offset++;
 
   /* Increment the total number of bytes buffered. */
 
@@ -95,35 +91,38 @@ static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
 
   /* Is the buffer full? */
 
-  if (iob->io_len >= CONFIG_IOB_BUFSIZE)
+  if (stream->offset >= stream->size)
     {
       /* Yes.. then flush the buffer */
 
-      syslogstream_flush(stream);
+      syslogstream_flush(&stream->public);
     }
 }
+
+/****************************************************************************
+ * Name: syslogstream_addstring
+ ****************************************************************************/
 
 static int syslogstream_addstring(FAR struct lib_syslogstream_s *stream,
                                   FAR const char *buff, int len)
 {
-  FAR struct iob_s *iob = stream->iob;
   int ret = 0;
 
   do
     {
-      int remain = CONFIG_IOB_BUFSIZE - iob->io_len;
+      int remain = stream->size - stream->offset;
       remain = remain > len - ret ? len - ret : remain;
-      memcpy(iob->io_data + iob->io_len, buff + ret, remain);
-      iob->io_len += remain;
+      memcpy(stream->base + stream->offset, buff + ret, remain);
+      stream->offset += remain;
       ret += remain;
 
       /* Is the buffer enough? */
 
-      if (iob->io_len >= CONFIG_IOB_BUFSIZE)
+      if (stream->offset >= stream->size)
         {
           /* Yes.. then flush the buffer */
 
-          syslogstream_flush(stream);
+          syslogstream_flush(&stream->public);
         }
     }
   while (ret < len);
@@ -151,17 +150,17 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
 
   if (ch != '\r')
     {
-#ifdef CONFIG_SYSLOG_BUFFER
+#  ifdef CONFIG_SYSLOG_BUFFER
       /* Do we have an IO buffer? */
 
-      if (stream->iob != NULL)
+      if (stream->base != NULL)
         {
           /* Add the incoming character to the buffer */
 
           syslogstream_addchar(stream, ch);
         }
       else
-#endif
+#  endif
         {
           int ret;
 
@@ -208,9 +207,10 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
   stream->last_ch = ((FAR const char *)buff)[len - 1];
 
 #ifdef CONFIG_SYSLOG_BUFFER
+
   /* Do we have an IO buffer? */
 
-  if (stream->iob != NULL)
+  if (stream->base != NULL)
     {
       /* Add the incoming string to the buffer */
 
@@ -275,14 +275,28 @@ void lib_syslogstream_open(FAR struct lib_syslogstream_s *stream)
 
   stream->public.putc  = syslogstream_putc;
   stream->public.puts  = syslogstream_puts;
-  stream->public.flush = lib_noflush;
   stream->public.nput  = 0;
 
 #ifdef CONFIG_SYSLOG_BUFFER
+  stream->public.flush = syslogstream_flush;
+
   /* Allocate an IOB */
 
+#  ifdef CONFIG_MM_IOB
   stream->iob = iob_tryalloc(true);
+  if (stream->iob != NULL)
+    {
+      stream->base = (FAR void *)stream->iob->io_data;
+      stream->size = sizeof(stream->iob->io_data);
+    }
+#  else
+  stream->base = stream->buffer;
+  stream->size = sizeof(stream->buffer);
+#  endif
+#else
+  stream->public.flush = lib_noflush;
 #endif
+  stream->offset = 0;
 }
 
 /****************************************************************************
@@ -307,16 +321,20 @@ void lib_syslogstream_close(FAR struct lib_syslogstream_s *stream)
 
   /* Verify that there is an IOB attached (there should be) */
 
+#  ifdef CONFIG_MM_IOB
   if (stream->iob != NULL)
     {
       /* Flush the output buffered in the IOB */
 
-      syslogstream_flush(stream);
+      syslogstream_flush(&stream->public);
 
       /* Free the IOB */
 
       iob_free(stream->iob);
       stream->iob = NULL;
     }
+#  else
+  syslogstream_flush(&stream->public);
+#  endif
 }
 #endif
