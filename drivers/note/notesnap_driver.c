@@ -434,8 +434,8 @@ void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 
 void notesnap_dump(void)
 {
-  struct lib_syslogstream_s stream;
-  lib_syslogstream_open(&stream);
+  struct lib_syslograwstream_s stream;
+  lib_syslograwstream_open(&stream);
   notesnap_dump_with_stream(&stream.public);
-  lib_syslogstream_close(stream);
+  lib_syslograwstream_close(stream);
 }
