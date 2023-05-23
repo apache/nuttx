@@ -70,13 +70,11 @@ static int syslogstream_flush(FAR struct lib_outstream_s *ostream)
   stream->offset = 0;
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: syslogstream_addchar
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_BUFFER
 static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
                                  int ch)
 {
