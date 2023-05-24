@@ -805,6 +805,61 @@ if LCD_GC9A01
 
 endif # LCD_GC9A01
 
+config LCD_JD9851
+	bool "Fitipower JD9851 TFT Controller"
+	default n
+
+if LCD_JD9851
+	config LCD_JD9851_XRES
+		int "JD9851 X Resolution"
+		default 240
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_JD9851_YRES
+		int "JD9851 Y Resolution"
+		default 320
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_JD9851_XOFFSET
+		int "JD9851 X Offset"
+		default 0
+		---help---
+			Specifies the X offset of the LCD.
+
+	config LCD_JD9851_YOFFSET
+		int "JD9851 Y Offset"
+		default 0
+		---help---
+			Specifies the Y offset of the LCD.
+
+	config LCD_JD9851_BGR
+		bool "Swap R & B channel"
+		default n
+
+	config LCD_JD9851_BPP
+		int "Bit Per Pixel (16)"
+		default 16
+
+	config LCD_JD9851_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_JD9851_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+	config LCD_JD9851_INVERT
+		bool "Enter into display inversion mode"
+		default n
+
+	config LCD_JD9851_TE
+		bool "Tearing effect line on"
+		default n
+
+endif # LCD_JD9851
+
 config LCD_PCD8544
 	bool "Nokia 5110 LCD Display (Philips PCD8544)"
 	default n
