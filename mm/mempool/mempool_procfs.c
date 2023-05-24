@@ -139,9 +139,9 @@ static ssize_t mempool_read(FAR struct file *filep, FAR char *buffer,
   offset    = filep->f_pos;
   procfile  = filep->f_priv;
   linesize  = procfs_snprintf(procfile->line, MEMPOOLINFO_LINELEN,
-                              "%13s%11s%9s%9s%9s%9s%9s\n", "", "total",
+                              "%13s%11s%9s%9s%9s%9s%9s%9s\n", "", "total",
                               "bsize", "nused", "nfree", "nifree",
-                              "nwaiter");
+                              "nwaiter", "nexpend");
 
   copysize  = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                             &offset);
@@ -159,14 +159,14 @@ static ssize_t mempool_read(FAR struct file *filep, FAR char *buffer,
           buflen    -= copysize;
 
           mempool_info(pool, &minfo);
-          linesize   = procfs_snprintf(procfile->line, MEMPOOLINFO_LINELEN,
-                                       "%12s:%11lu%9lu%9lu%9lu%9lu%9lu\n",
-                                       entry->name, minfo.arena,
-                                       minfo.sizeblks, minfo.aordblks,
-                                       minfo.ordblks, minfo.iordblks,
-                                       minfo.nwaiter);
-          copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                     buflen, &offset);
+          linesize = procfs_snprintf(procfile->line, MEMPOOLINFO_LINELEN,
+                                     "%12s:%11lu%9lu%9lu%9lu%9lu%9lu%9zu\n",
+                                     entry->name, minfo.arena,
+                                     minfo.sizeblks, minfo.aordblks,
+                                     minfo.ordblks, minfo.iordblks,
+                                     minfo.nwaiter, pool->nexpend);
+          copysize = procfs_memcpy(procfile->line, linesize, buffer,
+                                   buflen, &offset);
           totalsize += copysize;
         }
     }
