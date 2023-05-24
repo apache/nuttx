@@ -154,16 +154,16 @@
  * USART3_TX - PC10
  */
 
-#define GPIO_USART3_RX GPIO_USART3_RX_6 /* PC11 */
-#define GPIO_USART3_TX GPIO_USART3_TX_6 /* PC10 */
+#define GPIO_USART3_RX (GPIO_USART3_RX_6|GPIO_SPEED_HIGH)   /* PC11 */
+#define GPIO_USART3_TX (GPIO_USART3_TX_6|GPIO_SPEED_HIGH)   /* PC10 */
 
 /* I2C1
  *   I2C1_SCL - PB6
  *   I2C1_SDA - PB7
  */
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB6 */
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB7 */
+#define GPIO_I2C1_SCL  (GPIO_I2C1_SCL_2|GPIO_SPEED_LOW)     /* PB6 */
+#define GPIO_I2C1_SDA  (GPIO_I2C1_SDA_2|GPIO_SPEED_LOW)     /* PB7 */
 
 /* SPI1 - OLED display
  *   SPI1_MISO - not used
@@ -171,8 +171,8 @@
  *   SPI1_SCK  - PA1
  */
 
-#define GPIO_SPI1_MISO 0                /* Not used - simplex tx */
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1 /* PA2 */
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1  /* PA1 */
+#define GPIO_SPI1_MISO (0)                                  /* Not used - simplex tx */
+#define GPIO_SPI1_MOSI (GPIO_SPI1_MOSI_1|GPIO_SPEED_MEDIUM) /* PA2 */
+#define GPIO_SPI1_SCK  (GPIO_SPI1_SCK_1|GPIO_SPEED_MEDIUM)  /* PA1 */
 
 #endif /* __BOARDS_ARM_STM32F0L0G0_STM32G071B_DISCO_INCLUDE_BOARD_H */
