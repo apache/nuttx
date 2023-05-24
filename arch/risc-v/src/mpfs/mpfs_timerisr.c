@@ -47,12 +47,40 @@
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_BUILD_KERNEL
 static bool _b_tick_started;
 static uint64_t *_mtime_cmp;
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static uint64_t get_current(void)
+{
+#ifndef CONFIG_BUILD_KERNEL
+  if (!_b_tick_started)
+    {
+      _b_tick_started = true;
+      return getreg64(MPFS_CLINT_MTIME);
+    }
+  else
+    {
+      return getreg64(_mtime_cmp);
+    }
+#else
+  return riscv_sbi_get_time();
+#endif
+}
+
+static void set_next(uint64_t next)
+{
+#ifndef CONFIG_BUILD_KERNEL
+  putreg64(next, _mtime_cmp);
+#else
+  riscv_sbi_set_timer(next);
+#endif
+}
 
 /****************************************************************************
  * Name:  mpfs_reload_mtimecmp
@@ -65,20 +93,11 @@ static void mpfs_reload_mtimecmp(void)
   uint64_t current;
   uint64_t next;
 
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      current = getreg64(MPFS_CLINT_MTIME);
-    }
-  else
-    {
-      current = getreg64(_mtime_cmp);
-    }
-
+  current = get_current();
   uint64_t tick = TICK_COUNT;
   next = current + tick;
 
-  putreg64(next, _mtime_cmp);
+  set_next(next);
 
   spin_unlock_irqrestore(NULL, flags);
 }
@@ -113,14 +132,16 @@ static int mpfs_timerisr(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
+#ifndef CONFIG_BUILD_KERNEL
   /* what is our timecmp address for this hart */
 
   uintptr_t hart_id = riscv_mhartid();
   _mtime_cmp = (uint64_t *)MPFS_CLINT_MTIMECMP0 + hart_id;
+#endif
 
   /* Attach timer interrupt handler */
 
-  irq_attach(RISCV_IRQ_MTIMER, mpfs_timerisr, NULL);
+  irq_attach(RISCV_IRQ_TIMER, mpfs_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 
@@ -128,5 +149,5 @@ void up_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(RISCV_IRQ_MTIMER);
+  up_enable_irq(RISCV_IRQ_TIMER);
 }
