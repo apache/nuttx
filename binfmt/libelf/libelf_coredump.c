@@ -335,16 +335,32 @@ static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
 static void elf_emit_tcb_stack(FAR struct elf_dumpinfo_s *cinfo,
                                FAR struct tcb_s *tcb)
 {
-  FAR void *buf;
+  FAR void *buf = NULL;
+  uintptr_t sp;
   size_t len;
 
   if (running_task() != tcb)
     {
-      len = ((uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size) -
-            up_getusrsp(tcb->xcp.regs);
-      buf = (FAR void *)up_getusrsp(tcb->xcp.regs);
+      sp = up_getusrsp(tcb->xcp.regs);
+
+      if (sp > (uintptr_t)tcb->stack_base_ptr &&
+          sp < (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size)
+        {
+          len = ((uintptr_t)tcb->stack_base_ptr +
+                            tcb->adj_stack_size) - sp;
+          buf = (FAR void *)sp;
+        }
+#ifdef CONFIG_STACK_COLORATION
+      else
+        {
+          len = up_check_tcbstack(tcb);
+          buf = (FAR void *)((uintptr_t)tcb->stack_base_ptr +
+                             (tcb->adj_stack_size - len));
+        }
+#endif
     }
-  else
+
+  if (buf == NULL)
     {
       buf = (FAR void *)tcb->stack_alloc_ptr;
       len = tcb->adj_stack_size +
@@ -422,13 +438,32 @@ static void elf_emit_tcb_phdr(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb,
                               FAR Elf_Phdr *phdr, off_t *offset)
 {
+  uintptr_t sp;
+
+  phdr->p_vaddr = 0;
+
   if (running_task() != tcb)
     {
-      phdr->p_filesz = (uintptr_t)(tcb->stack_base_ptr +
-                       tcb->adj_stack_size) - up_getusrsp(tcb->xcp.regs);
-      phdr->p_vaddr  = up_getusrsp(tcb->xcp.regs);
+      sp = up_getusrsp(tcb->xcp.regs);
+
+      if (sp > (uintptr_t)tcb->stack_base_ptr &&
+          sp < (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size)
+        {
+          phdr->p_filesz = ((uintptr_t)tcb->stack_base_ptr +
+                           tcb->adj_stack_size) - sp;
+          phdr->p_vaddr  = sp;
+        }
+#ifdef CONFIG_STACK_COLORATION
+      else
+        {
+          phdr->p_filesz = up_check_tcbstack(tcb);
+          phdr->p_vaddr  = (uintptr_t)tcb->stack_base_ptr +
+                           (tcb->adj_stack_size - phdr->p_filesz);
+        }
+#endif
     }
-  else
+
+  if (phdr->p_vaddr == 0)
     {
       phdr->p_vaddr  = (uintptr_t)tcb->stack_alloc_ptr;
       phdr->p_filesz = tcb->adj_stack_size +
