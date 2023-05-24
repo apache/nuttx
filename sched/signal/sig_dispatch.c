@@ -328,6 +328,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   DEBUGASSERT(stcb != NULL && info != NULL);
 
+  /* Return ESRCH when thread was in exit processing */
+
+  if ((stcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      return -ESRCH;
+    }
+
   /* Don't actually send a signal for signo 0. */
 
   if (info->si_signo == 0)
