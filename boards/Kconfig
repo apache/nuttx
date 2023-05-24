@@ -4034,6 +4034,30 @@ config BOARD_CRASHDUMP
 		"machine state" in a place where on the next reset can write it
 		to more sophisticated storage in a sane operating environment.
 
+config BOARD_COREDUMP
+	bool "Enable Core Dump after assert"
+	default n
+	depends on ELF_COREDUMP
+	---help---
+		Enable to support for the dump core information after assert.
+
+if BOARD_COREDUMP
+
+config BOARD_COREDUMP_FULL
+	bool "Core Dump all thread registers and stacks"
+	default y
+	---help---
+		Enable to support for the dump all task registers and stacks.
+
+config BOARD_COREDUMP_COMPRESSION
+	bool "Enable Core Dump compression"
+	default y
+	select LIBC_LZF
+	---help---
+		Enable LZF compression algorithm for core dump content
+
+endif # BOARD_COREDUMP
+
 config BOARD_ENTROPY_POOL
 	bool "Enable Board level storing of entropy pool structure"
 	default n
