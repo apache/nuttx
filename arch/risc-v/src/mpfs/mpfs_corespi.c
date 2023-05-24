@@ -709,13 +709,7 @@ static int mpfs_spi_sem_waitdone(struct mpfs_spi_priv_s *priv)
 {
   uint32_t timeout = SPI_TTOA_US(priv->txwords * priv->nbits, priv->actual);
   timeout += SPI_TTOA_MARGIN_US;
-
-  /* Hack: add +1 to timeout due to some bug in NuttX. It randomly timeouts
-   * one tick too early
-   */
-
-  return nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout) +
-                                        1);
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout));
 }
 
 /****************************************************************************
