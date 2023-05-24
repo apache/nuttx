@@ -26,8 +26,10 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -152,10 +154,38 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 {
   FAR struct socket *psock;
   ssize_t ret;
+#ifdef CONFIG_BUILD_KERNEL
+  struct sockaddr_storage kaddr;
+  FAR struct sockaddr *ufrom;
+  FAR void *kbuf;
+#endif
 
   /* recvfrom() is a cancellation point */
 
   enter_cancellation_point();
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Allocate memory and copy user buffer to kernel */
+
+  kbuf = kmm_malloc(len);
+  if (!kbuf)
+    {
+      /* Out of memory */
+
+      ret = -ENOMEM;
+      goto errout_with_cancelpt;
+    }
+
+  memcpy(kbuf, buf, len);
+  buf = kbuf;
+
+  /* Copy the address data to kernel, store the original user pointer */
+
+  if ((ufrom = from) != NULL)
+    {
+      from = (FAR struct sockaddr *)&kaddr;
+    }
+#endif
 
   /* Get the underlying socket structure */
 
@@ -168,13 +198,27 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
       ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
     }
 
+#ifdef CONFIG_BUILD_KERNEL
+  kmm_free(kbuf);
+
+  /* Copy the address back to user */
+
+  if (ufrom)
+    {
+      memcpy(ufrom, &kaddr, *fromlen);
+    }
+
+errout_with_cancelpt:
+#endif
+
+  leave_cancellation_point();
+
   if (ret < 0)
     {
       set_errno(-ret);
       ret = ERROR;
     }
 
-  leave_cancellation_point();
   return ret;
 }
 
