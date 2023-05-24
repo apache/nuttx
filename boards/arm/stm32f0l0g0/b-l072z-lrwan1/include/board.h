@@ -202,43 +202,62 @@
  *
  */
 
+/* ADC */
+
+#define GPIO_ADC1_IN0  (GPIO_ADC1_IN0_0)                    /* PA0 */
+#define GPIO_ADC1_IN1  (GPIO_ADC1_IN1_0)                    /* PA1 */
+#define GPIO_ADC1_IN2  (GPIO_ADC1_IN2_0)                    /* PA2 */
+#define GPIO_ADC1_IN3  (GPIO_ADC1_IN3_0)                    /* PA3 */
+#define GPIO_ADC1_IN4  (GPIO_ADC1_IN4_0)                    /* PA4 */
+#define GPIO_ADC1_IN5  (GPIO_ADC1_IN5_0)                    /* PA5 */
+#define GPIO_ADC1_IN6  (GPIO_ADC1_IN6_0)                    /* PA6 */
+#define GPIO_ADC1_IN7  (GPIO_ADC1_IN7_0)                    /* PA7 */
+#define GPIO_ADC1_IN8  (GPIO_ADC1_IN8_0)                    /* PB0 */
+#define GPIO_ADC1_IN9  (GPIO_ADC1_IN9_0)                    /* PB1 */
+#define GPIO_ADC1_IN10 (GPIO_ADC1_IN10_0)                   /* PC0 */
+#define GPIO_ADC1_IN11 (GPIO_ADC1_IN11_0)                   /* PC1 */
+#define GPIO_ADC1_IN12 (GPIO_ADC1_IN12_0)                   /* PC2 */
+#define GPIO_ADC1_IN13 (GPIO_ADC1_IN13_0)                   /* PC3 */
+#define GPIO_ADC1_IN14 (GPIO_ADC1_IN14_0)                   /* PC4 */
+#define GPIO_ADC1_IN15 (GPIO_ADC1_IN15_0)                   /* PC5 */
+
 /* USART */
 
 /* USART1 */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
-#define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
+#define GPIO_USART1_RX (GPIO_USART1_RX_1|GPIO_SPEED_HIGH)   /* PA10 */
+#define GPIO_USART1_TX (GPIO_USART1_TX_1|GPIO_SPEED_HIGH)   /* PA9 */
 
 /* By default the USART2 is connected to STLINK Virtual COM Port:
  * USART2_RX - PA3
  * USART2_TX - PA2
  */
 
-#define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */
-#define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
+#define GPIO_USART2_RX (GPIO_USART2_RX_1|GPIO_SPEED_HIGH)   /* PA3 */
+#define GPIO_USART2_TX (GPIO_USART2_TX_1|GPIO_SPEED_HIGH)   /* PA2 */
 
 /* SPI */
 
 /* SPI1 is connected to SX1276 radio */
 
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_2 /* PA7 */
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_2 /* PA6 */
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_2  /* PB3 */
-#define GPIO_SPI1_NSS  GPIO_SPI1_NSS_1  /* PA15 */
+#define GPIO_SPI1_MOSI (GPIO_SPI1_MOSI_2|GPIO_SPEED_MEDIUM) /* PA7 */
+#define GPIO_SPI1_MISO (GPIO_SPI1_MISO_2|GPIO_SPEED_MEDIUM) /* PA6 */
+#define GPIO_SPI1_SCK  (GPIO_SPI1_SCK_2|GPIO_SPEED_MEDIUM)  /* PB3 */
+#define GPIO_SPI1_NSS  (GPIO_SPI1_NSS_1|GPIO_SPEED_MEDIUM)  /* PA15 */
 
 /* SPI2  */
 
-#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1 /* PB15 */
-#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1 /* PB14 */
-#define GPIO_SPI2_SCK  GPIO_SPI2_SCK_3  /* PB13 */
-#define GPIO_SPI2_NSS  GPIO_SPI2_NSS_1  /* PB12 */
+#define GPIO_SPI2_MOSI (GPIO_SPI2_MOSI_1|GPIO_SPEED_MEDIUM) /* PB15 */
+#define GPIO_SPI2_MISO (GPIO_SPI2_MISO_1|GPIO_SPEED_MEDIUM) /* PB14 */
+#define GPIO_SPI2_SCK  (GPIO_SPI2_SCK_3|GPIO_SPEED_MEDIUM)  /* PB13 */
+#define GPIO_SPI2_NSS  (GPIO_SPI2_NSS_1|GPIO_SPEED_MEDIUM)  /* PB12 */
 
 /* I2C */
 
 /* I2C1 */
 
-#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_2 /* PB9 */
-#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_2 /* PB8 */
+#define GPIO_I2C1_SDA  (GPIO_I2C1_SDA_2|GPIO_SPEED_LOW)     /* PB9 */
+#define GPIO_I2C1_SCL  (GPIO_I2C1_SCL_2|GPIO_SPEED_LOW)     /* PB8 */
 
 /* DMA channels *************************************************************/
 

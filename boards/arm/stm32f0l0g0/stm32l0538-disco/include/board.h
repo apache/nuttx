@@ -167,8 +167,8 @@
  *   USART1_TX - PA9
  */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
-#define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
+#define GPIO_USART1_RX   (GPIO_USART1_RX_1|GPIO_SPEED_HIGH)   /* PA10 */
+#define GPIO_USART1_TX   (GPIO_USART1_TX_1|GPIO_SPEED_HIGH)   /* PA9 */
 
 /* SPI1 - E-papper display:
  *   SPI1_MISO - not used
@@ -176,9 +176,9 @@
  *   SPI1_SCK  - PB3
  */
 
-#undef  GPIO_SPI1_MISO                  /* Not used */
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_3 /* PB5 */
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_2  /* PB3 */
+#undef  GPIO_SPI1_MISO                                        /* Not used */
+#define GPIO_SPI1_MOSI   (GPIO_SPI1_MOSI_3|GPIO_SPEED_MEDIUM) /* PB5 */
+#define GPIO_SPI1_SCK    (GPIO_SPI1_SCK_2|GPIO_SPEED_MEDIUM)  /* PB3 */
 
 /* SPI2 - NFC connector:
  *   SPI2_MISO - PB14
@@ -186,8 +186,8 @@
  *   SPI2_SCK  - PB13
  */
 
-#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1 /* PB14 */
-#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1 /* PB15 */
-#define GPIO_SPI2_SCK  GPIO_SPI2_SCK_3  /* PB13 */
+#define GPIO_SPI2_MISO   (GPIO_SPI2_MISO_1|GPIO_SPEED_MEDIUM) /* PB14 */
+#define GPIO_SPI2_MOSI   (GPIO_SPI2_MOSI_1|GPIO_SPEED_MEDIUM) /* PB15 */
+#define GPIO_SPI2_SCK    (GPIO_SPI2_SCK_3|GPIO_SPEED_MEDIUM)  /* PB13 */
 
 #endif /* __BOARDS_ARM_STM32F0L0G0_STM32L0538_DISCO_INCLUDE_BOARD_H */
