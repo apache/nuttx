@@ -149,6 +149,25 @@ reg_table = {
         "PC": 15,
         "CPSR": 41,
     },
+    "arm-t": {
+        "R0": 0,
+        "R1": 1,
+        "R2": 2,
+        "R3": 3,
+        "R4": 4,
+        "R5": 5,
+        "R6": 6,
+        "FP": 7,
+        "R8": 8,
+        "SB": 9,
+        "SL": 10,
+        "R11": 11,
+        "IP": 12,
+        "SP": 13,
+        "LR": 14,
+        "PC": 15,
+        "CPSR": 41,
+    },
     "riscv": {
         "ZERO": 0,
         "RA": 1,
@@ -520,7 +539,7 @@ if __name__ == "__main__":
         "--arch",
         help="select architecture,if not use this options,\
                         The architecture will be inferred from the logfile",
-        choices=['arm', 'arm-a', 'riscv', 'xtensa'],
+        choices=['arm', 'arm-a', 'arm-t', 'riscv', 'xtensa']
     )
 
     parser.add_argument("-p", "--port", help="gdbport", type=int, default=1234)
