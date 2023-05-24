@@ -185,30 +185,7 @@ static struct aclint_mswi_data mpfs_mswi =
  * Unused hart is marked with -1.  Mpfs will always have the hart0 unused.
  */
 
-static const u32 mpfs_hart_index2id[MPFS_HART_COUNT] =
-{
-  [0] = -1,
-#ifdef CONFIG_MPFS_HART1_SBI
-  [1] = 1,
-#else
-  [1] = -1,
-#endif
-#ifdef CONFIG_MPFS_HART2_SBI
-  [2] = 2,
-#else
-  [2] = -1,
-#endif
-#ifdef CONFIG_MPFS_HART3_SBI
-  [3] = 3,
-#else
-  [3] = -1,
-#endif
-#ifdef CONFIG_MPFS_HART4_SBI
-  [4] = 4,
-#else
-  [4] = -1,
-#endif
-};
+static u32 mpfs_hart_index2id[MPFS_HART_COUNT];
 
 static const struct sbi_platform platform =
 {
@@ -602,6 +579,13 @@ static int mpfs_opensbi_ecall_handler(long extid, long funcid,
 void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 {
   uint32_t hartid = current_hartid();
+  size_t i;
+
+  for (i = 0; i < sizeof(mpfs_hart_index2id) / sizeof(mpfs_hart_index2id[0]);
+       i++)
+    {
+      mpfs_hart_index2id[i] = mpfs_get_use_sbi(i) ? i : -1;
+    }
 
   mpfs_opensbi_pmp_setup();
 

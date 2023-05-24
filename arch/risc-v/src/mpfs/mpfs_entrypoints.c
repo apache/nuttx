@@ -185,4 +185,28 @@ int mpfs_set_use_sbi(uint64_t hartid, bool use_sbi)
   return ERROR;
 }
 
+/****************************************************************************
+ * Name: mpfs_get_use_sbi
+ *
+ * Description:
+ *   Get if hart boots via SBI.
+ *
+ * Input Parameters:
+ *   hartid - hart id to check
+ *
+ * Returned value:
+ *   true if SBI is used, false otherwise
+ *
+ ****************************************************************************/
+
+bool mpfs_get_use_sbi(uint64_t hartid)
+{
+  if (hartid < ENTRYPT_CNT)
+    {
+      return (g_hart_use_sbi & (1 << hartid)) != 0;
+    }
+
+  return false;
+}
+
 #endif /* CONFIG_MPFS_BOOTLOADER */
