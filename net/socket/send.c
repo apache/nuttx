@@ -156,30 +156,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
 ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
-  FAR struct socket *psock;
-  ssize_t ret;
+  /* send is a cancellation point, but that can all be handled by sendto */
 
-  /* send() is a cancellation point */
-
-  enter_cancellation_point();
-
-  /* Get the underlying socket structure */
-
-  ret = sockfd_socket(sockfd, &psock);
-
-  /* And let psock_send do all of the work */
-
-  if (ret == OK)
-    {
-      ret = psock_send(psock, buf, len, flags);
-    }
-
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
-  leave_cancellation_point();
-  return ret;
+  return sendto(sockfd, buf, len, flags, NULL, 0);
 }
