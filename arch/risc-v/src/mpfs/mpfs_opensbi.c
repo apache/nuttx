@@ -28,8 +28,31 @@
 #include <hardware/mpfs_sysreg.h>
 #ifdef CONFIG_MPFS_IHC_SBI
 #include <hardware/mpfs_ihc_sbi.h>
+#include <mpfs_ihc.h>
+#endif
+#include "mpfs_entrypoints.h"
+
+/* Make sure that anything that intefraces with the SBI uses the same data
+ * types as the SBI code (e.g. same "bool")
+ */
+
+#ifdef bool
+#undef bool
 #endif
 
+#ifdef true
+#undef true
+#endif
+
+#ifdef false
+#undef false
+#endif
+
+#ifdef NULL
+#undef NULL
+#endif
+
+#include <sbi/sbi_types.h>
 #include <sbi/riscv_io.h>
 #include <sbi/riscv_encoding.h>
 #include <sbi/sbi_console.h>
@@ -40,10 +63,6 @@
 #include <sbi_utils/irqchip/plic.h>
 #include <sbi_utils/ipi/aclint_mswi.h>
 #include <sbi_utils/timer/aclint_mtimer.h>
-
-#ifdef CONFIG_MPFS_IHC_SBI
-#include <mpfs_ihc.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
