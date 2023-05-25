@@ -81,6 +81,9 @@ static void nxsig_abnormal_termination(int signo);
 static void nxsig_null_action(int signo);
 static void nxsig_stop_task(int signo);
 #endif
+#ifdef CONFIG_SIG_SIGCANCEL_ACTION
+static void nxsig_cancel_pthread(int signo);
+#endif
 
 /* Helpers */
 
@@ -146,6 +149,9 @@ static const struct nxsig_defaction_s g_defactions[] =
 #endif
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
   { SIGPOLL,   0,                nxsig_abnormal_termination },
+#endif
+#ifdef CONFIG_SIG_SIGCANCEL_ACTION
+  { SIGCANCEL, 0,                nxsig_cancel_pthread },
 #endif
 };
 
@@ -328,6 +334,27 @@ static void nxsig_stop_task(int signo)
 
   nxsched_suspend(rtcb);
   sched_unlock();
+}
+#endif
+
+/****************************************************************************
+ * Name: nxsig_cancel_pthread
+ *
+ * Description:
+ *   This is the handler for the pthread cancel default action.
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_SIGCANCEL_ACTION
+static void nxsig_cancel_pthread(int signo)
+{
+  pthread_exit(PTHREAD_CANCELED);
 }
 #endif
 

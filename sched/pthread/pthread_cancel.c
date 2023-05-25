@@ -24,17 +24,18 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <pthread.h>
 #include <assert.h>
 #include <errno.h>
+#include <pthread.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <nuttx/pthread.h>
 
+#include "pthread/pthread.h"
 #include "sched/sched.h"
 #include "task/task.h"
-#include "pthread/pthread.h"
 
 /****************************************************************************
  * Public Functions
@@ -88,17 +89,7 @@ int pthread_cancel(pthread_t thread)
       pthread_exit(PTHREAD_CANCELED);
     }
 
-  /* Refer to tls_get_info() */
+  /* Call pthread_kill instead nxtask_terminate */
 
-#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
-  pthread_cleanup_popall(tcb->stack_alloc_ptr);
-#endif
-
-  /* Complete pending join operations */
-
-  pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);
-
-  /* Then let nxtask_terminate do the real work */
-
-  return nxtask_terminate((pid_t)thread);
+  return pthread_kill(thread, SIGCANCEL);
 }

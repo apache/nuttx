@@ -53,8 +53,6 @@
 #  define CONFIG_PAGING_STACKSIZE  CONFIG_IDLETHREAD_STACKSIZE
 #endif
 
-#define SIGPAGING SIGRTMIN
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

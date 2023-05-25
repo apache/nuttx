@@ -164,7 +164,11 @@
 #define SIGXFSZ         25
 #define SIGVTALRM       26
 #define SIGPROF         27
+#define SIGCANCEL       28
 #define SIGPOLL         29
+#ifdef CONFIG_PAGING
+#  define SIGPAGING     30
+#endif
 
 #define SIGIO           SIGPOLL
 

@@ -1424,7 +1424,7 @@ config SIG_EVTHREAD_HPWORK
 
 menuconfig SIG_DEFAULT
 	bool "Default signal actions"
-	default n
+	default !DISABLE_PTHREAD
 	---help---
 		Enable to support default signal actions.
 
@@ -1498,6 +1498,13 @@ config SIG_SIGPOLL_ACTION
 		Make sure that your applications are expecting this POSIX behavior.
 		Backward compatible behavior would require that the application use
 		sigaction() to ignore SIGPOLL.
+
+config SIG_SIGCANCEL_ACTION
+	bool "SIGCANCEL"
+	default y
+	depends on !DISABLE_PTHREAD
+	---help---
+		Enable the default action for SIGCANCEL (cancel pthread).
 
 endif # SIG_DEFAULT
 
