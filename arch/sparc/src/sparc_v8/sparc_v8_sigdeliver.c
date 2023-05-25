@@ -72,6 +72,8 @@ void sparc_sigdeliver(void)
    */
 
   int16_t saved_irqcount;
+
+  enter_critical_section();
 #endif
 
   board_autoled_on(LED_SIGNAL);
@@ -203,6 +205,10 @@ retry:
 
   board_autoled_off(LED_SIGNAL);
 #ifdef CONFIG_SMP
+  /* We need to keep the IRQ lock until task switching */
+
+  rtcb->irqcount++;
+  leave_critical_section((regs[REG_PSR]));
   rtcb->irqcount--;
 #endif
   sparc_fullcontextrestore(regs);
