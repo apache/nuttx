@@ -283,7 +283,7 @@
 "strrchr","string.h","","FAR char *","FAR const char *","int"
 "strsep","string.h","","FAR char *","FAR char **","FAR const char *"
 "strspn","string.h","","size_t","FAR const char *","FAR const char *"
-"strstr","string.h","","FAR char","FAR const char *","FAR const char *"
+"strstr","string.h","","FAR char *","FAR const char *","FAR const char *"
 "strtod","stdlib.h","","double","FAR const char *","FAR char **"
 "strtod","stdlib.h","defined(CONFIG_HAVE_DOUBLE)","double","FAR const char *","FAR char **"
 "strtoimax","inttypes.h","","intmax_t","FAR const char *","FAR char **","int"
