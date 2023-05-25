@@ -389,6 +389,54 @@ static void mpfs_spi_rxoverflow_recover(struct mpfs_spi_priv_s *priv)
 }
 
 /****************************************************************************
+ * Name: mpfs_rx_wait_last_frame
+ *
+ * Description:
+ *   Wait for the last frame in TXDONE interrupt. We must potentially do this
+ *   wait because the TXDONE interrupt is asserted when the last frame is
+ *   moved from the TXLAST register to the FIFO, thus there can be 1-2 frame
+ *   delay before the last RX frame is available in the FIFO.
+ *
+ * Input Parameters:
+ *   priv   - Private SPI device structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static int mpfs_rx_wait_last_frame(struct mpfs_spi_priv_s *priv)
+{
+  uint32_t rxempty;
+  uint32_t rxretry;
+  uint32_t timeout;
+
+  rxretry = 0;
+
+  while ((rxempty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY))
+    {
+      /* Last RX character not ready yet, try again (once) */
+
+      if (rxretry == 0)
+        {
+          /* Use safe type for timeout calculations */
+
+          timeout = priv->nbits;
+          timeout = SPI_TTOA_US(timeout << 1, priv->actual);
+          rxretry = 1;
+          up_udelay(timeout);
+          continue;
+        }
+
+      /* Nothing is coming, get out */
+
+      return -1;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: mpfs_spi_lock
  *
  * Description:
@@ -688,14 +736,12 @@ static void mpfs_spi_load_tx_fifo(struct mpfs_spi_priv_s *priv,
                                   const void *txbuffer,
                                   uint32_t nwords)
 {
-  uint32_t tx_fifo_full;
   uint16_t *data16;
   uint8_t *data8;
   int last;
   int i;
 
   DEBUGASSERT(nwords > 0);
-
   data16 = (uint16_t *)txbuffer;
   data8 = (uint8_t *)txbuffer;
   last = nwords - 1;
@@ -740,9 +786,6 @@ static void mpfs_spi_load_tx_fifo(struct mpfs_spi_priv_s *priv,
         }
 
       priv->tx_pos++;
-      tx_fifo_full = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_TXFULL;
-
-      DEBUGASSERT(tx_fifo_full == 0);
     }
 }
 
@@ -767,38 +810,29 @@ static void mpfs_spi_unload_rx_fifo(struct mpfs_spi_priv_s *priv,
                                     void *rxbuffer,
                                     uint32_t nwords)
 {
-  uint32_t rx_fifo_empty;
-  uint32_t rxretry;
   uint16_t *data16;
   uint8_t *data8;
+  int last;
   int i;
 
   DEBUGASSERT(nwords > 0);
 
   data16 = (uint16_t *)rxbuffer;
   data8 = (uint8_t *)rxbuffer;
-  rxretry = 0;
+  last = nwords - 1;
 
   for (i = 0; i < nwords; i++)
     {
-      while ((rx_fifo_empty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY))
+      /* The last character might not be available yet due to bus delays */
+
+      if (i == last)
         {
-          /* Last RX character not ready yet, try again (once) */
-
-          if (rxretry == 0)
+          if (mpfs_rx_wait_last_frame(priv) < 0)
             {
-              /* Use safe type for timeout calculations */
+              /* Nothing came, get out */
 
-              uint32_t timeout = priv->nbits;
-              timeout = SPI_TTOA_US(timeout << 1, priv->actual);
-              rxretry = 1;
-              up_udelay(timeout);
-              continue;
+              return;
             }
-
-          /* Nothing is coming, get out */
-
-          return;
         }
 
       if (rxbuffer)
@@ -867,7 +901,7 @@ static void mpfs_spi_irq_exchange(struct mpfs_spi_priv_s *priv,
   DEBUGASSERT(priv->nbits == 8 || priv->nbits == 16);
 
   priv->fifosize = (MPFS_FIFO_SIZE_BITS / priv->nbits);
-  priv->fifolevel = priv->fifosize / 2;
+  priv->fifolevel = priv->fifosize - 2;
 
   priv->txwords = nwords;
   priv->txbuf   = txbuffer;
