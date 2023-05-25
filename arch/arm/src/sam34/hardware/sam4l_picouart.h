@@ -66,10 +66,10 @@
 
 #define PICOUART_CFG_SOURCE_SHIFT    (0)       /* Bit 0-1: Source Enable Mode */
 #define PICOUART_CFG_SOURCE_MASK     (3 << PICOUART_CFG_SOURCE_SHIFT)
-# define PICOUART_CFG_SOURCE_WE      (0 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up and event disable */
-# define PICOUART_CFG_SOURCE_WESB    (1 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up or event enable on start bit detection */
-# define PICOUART_CFG_SOURCE_WEFF    (2 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up or event enable on full frame reception */
-# define PICOUART_CFG_SOURCE_WECH    (3 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up or event enable on character recognition */
+#  define PICOUART_CFG_SOURCE_WE     (0 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up and event disable */
+#  define PICOUART_CFG_SOURCE_WESB   (1 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up or event enable on start bit detection */
+#  define PICOUART_CFG_SOURCE_WEFF   (2 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up or event enable on full frame reception */
+#  define PICOUART_CFG_SOURCE_WECH   (3 << PICOUART_CFG_SOURCE_SHIFT) /* Wake up or event enable on character recognition */
 
 #define PICOUART_CFG_ACTION          (1 << 0)  /* Bit 0: Action to perform */
 #define PICOUART_CFG_MATCH_SHIFT     (8)       /* Bit 8-15: Data Match */

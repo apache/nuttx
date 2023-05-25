@@ -280,8 +280,8 @@ static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t addr, uint32_t value);
 #else
-# define stm32_getreg(addr)     getreg32(addr)
-# define stm32_putreg(addr,val) putreg32(val,addr)
+#  define stm32_getreg(addr)     getreg32(addr)
+#  define stm32_putreg(addr,val) putreg32(val,addr)
 #endif
 
 static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits,

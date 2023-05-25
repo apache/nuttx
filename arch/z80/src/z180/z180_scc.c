@@ -283,10 +283,10 @@ static uart_dev_t g_escca_port =
 #  define TTYS0_DEV       g_escca_port
 #  if defined(CONFIG_Z180_ESCCB)
 #    define TTYS1_DEV     g_esccb_port
-# endif
+#  endif
 
 #elif defined(CONFIG_Z180_ESCCB)
-# define TTYS0_DEV       g_esccb_port
+#  define TTYS0_DEV       g_esccb_port
 #endif
 
 /****************************************************************************

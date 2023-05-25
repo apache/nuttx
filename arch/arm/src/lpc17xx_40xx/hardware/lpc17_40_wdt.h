@@ -121,14 +121,14 @@
 /* Watchdog timer warning interrupt register */
 
 #ifdef LPC178x_40xx
-# define WDT_WARNINT                  (0x3ff)   /* Bits 0-9: Warning Interrupt compare value */
+#  define WDT_WARNINT                 (0x3ff)   /* Bits 0-9: Warning Interrupt compare value */
                                                 /* Bits 10-31: Reserved */
 #endif
 
 /* Watchdog timer value register */
 
 #ifdef LPC178x_40xx
-# define WDT_WINDOW                   (0xffffff) /* Bits 0-23: Watchdog window value */
+#  define WDT_WINDOW                  (0xffffff) /* Bits 0-23: Watchdog window value */
                                                  /* Bits 24-31: Reserved */
 #endif
 

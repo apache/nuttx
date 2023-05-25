@@ -128,10 +128,6 @@ void up_irqinitialize(void)
 
   arm64_gic_initialize();   /* Initialization common to all CPUs */
 
-#ifdef CONFIG_SMP
-  arm64_smp_sgi_init();
-#endif
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* And finally, enable interrupts */

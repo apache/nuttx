@@ -46,10 +46,10 @@
 #define KINETIS_FLASH_BASE     0x00000000  /* -0x0fffffff Program flash and read-
                                             *             only data (Includes exception
                                             *             vectors in first 1024 bytes) */
-# if !defined(KINETIS_FLEXMEM_SIZE)
+#if !defined(KINETIS_FLEXMEM_SIZE)
 #  define KINETIS_FLEXNVM_BASE 0x10000000  /* -0x13ffffff FlexNVM */
 #  define KINETIS_FLEXRAM_BASE 0x14000000  /* -0x17ffffff FlexRAM */
-# endif
+#endif
 #define KINETIS_SRAML_BASE     0x18000000  /* -0x1fffffff SRAM_L: Lower SRAM
                                             *             (ICODE/DCODE) */
 #define KINETIS_SRAMU_BASE     0x20000000  /* -0x200fffff SRAM_U: Upper SRAM bitband

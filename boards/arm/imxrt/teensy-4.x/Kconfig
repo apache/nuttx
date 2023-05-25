@@ -35,7 +35,7 @@ config NET_USE_OTP_ETHERNET_MAC
 	---help---
 		The teensy 4.1 board has an "offical" unique MAC address stored in OCOTP (One-Time-Programmable) memory.
 		When enabling this option, it is read and used when the ethernet peripheral is initialized.
-		If so, the 'ifconfig  eth0' HWaddr should start with 04:e9:e5:...
+		If so, the 'ifconfig eth0' HWaddr should start with 04:e9:e5:...
 		(the vendor ID of 'PJRC.COM, LLC') when this feature is enabled.
 		It may also be used with other boards that have the OCOTP programmed with a valid MAC.
 

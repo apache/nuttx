@@ -81,7 +81,7 @@ static inline void tiva_delay(uint32_t delay)
   __asm__ __volatile__("1:\n"
                        "\tsubs  %0, #1\n"
                        "\tbne   1b\n"
-                       : "=r"(delay) : "r"(delay));
+                       : "=r"(delay) : "r"(delay) : "cc");
 }
 
 /****************************************************************************

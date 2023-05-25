@@ -334,7 +334,7 @@
 #endif
 
 #ifndef CONFIG_ENETNETHIFS
-# define CONFIG_ENETNETHIFS 1
+#  define CONFIG_ENETNETHIFS 1
 #endif
 
 /****************************************************************************

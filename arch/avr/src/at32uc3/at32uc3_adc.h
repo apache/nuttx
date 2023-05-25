@@ -89,16 +89,16 @@
 #define ADC_MR_TRGEN              (1 << 0)  /* Bit 0: Trigger Enable */
 #define ADC_MR_TRGSEL_SHIFT       (1)       /* Bits 1-3: Trigger Selection */
 #define ADC_MR_TRGSEL_MASK        (7 << ADC_MR_TRGSEL_SHIFT)
-# define ADC_MR_TRGSEL_TRIG(n)    ((n) << ADC_MR_TRGSEL_SHIFT) /* Internal trigger n */
+#  define ADC_MR_TRGSEL_TRIG(n)   ((n) << ADC_MR_TRGSEL_SHIFT) /* Internal trigger n */
 
-# define ADC_MR_TRGSEL_TRIG0      (0 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 0 */
-# define ADC_MR_TRGSEL_TRIG1      (1 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 1 */
-# define ADC_MR_TRGSEL_TRIG2      (2 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 2 */
-# define ADC_MR_TRGSEL_TRIG3      (3 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 3 */
-# define ADC_MR_TRGSEL_TRIG4      (4 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 4 */
-# define ADC_MR_TRGSEL_TRIG5      (5 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 5 */
-# define ADC_MR_TRGSEL_TRIG6      (6 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 6 */
-# define ADC_MR_TRGSEL_EXT        (7 << ADC_MR_TRGSEL_SHIFT) /* External trigger */
+#  define ADC_MR_TRGSEL_TRIG0     (0 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 0 */
+#  define ADC_MR_TRGSEL_TRIG1     (1 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 1 */
+#  define ADC_MR_TRGSEL_TRIG2     (2 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 2 */
+#  define ADC_MR_TRGSEL_TRIG3     (3 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 3 */
+#  define ADC_MR_TRGSEL_TRIG4     (4 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 4 */
+#  define ADC_MR_TRGSEL_TRIG5     (5 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 5 */
+#  define ADC_MR_TRGSEL_TRIG6     (6 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 6 */
+#  define ADC_MR_TRGSEL_EXT       (7 << ADC_MR_TRGSEL_SHIFT) /* External trigger */
 
 #define ADC_MR_LOWRES             (1 << 4)  /* Bit 4: Resolution */
 #define ADC_MR_SLEEP              (1 << 5)  /* Bit 5: Sleep Mode */

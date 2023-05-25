@@ -576,10 +576,9 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
 #ifdef CONFIG_NETDB_HOSTFILE
 static int lib_hostfile_lookup(FAR const char *name,
                                FAR struct hostent_s *host, FAR char *buf,
-                               size_t buflen, FAR int *h_errnop)
+                               size_t buflen)
 {
   FAR FILE *stream;
-  int herrnocode;
   int nread;
 
   /* Search the hosts file for a match */
@@ -591,10 +590,8 @@ static int lib_hostfile_lookup(FAR const char *name,
 
       nerr("ERROR:  Failed to open the hosts file %s: %d\n",
            CONFIG_NETDB_HOSTCONF_PATH, errcode);
-      UNUSED(errcode);
 
-      herrnocode = NO_RECOVERY;
-      goto errorout_with_herrnocode;
+      return errcode;
     }
 
   /* Loop reading entries from the hosts file until a match is found or
@@ -620,8 +617,8 @@ static int lib_hostfile_lookup(FAR const char *name,
             }
           else if (nread != -EAGAIN)
             {
-              herrnocode = NO_RECOVERY;
-              goto errorout_with_stream;
+              fclose(stream);
+              return nread;
             }
         }
       else if (nread > 0)
@@ -664,21 +661,11 @@ static int lib_hostfile_lookup(FAR const char *name,
   while (nread != 0);
 
   /* We get here when the end of the hosts file is encountered without
-   * finding the hostname.
+   * finding the hostname.  Return 1 meaning that we have no errors but
+   * no match either.
    */
 
-  herrnocode = HOST_NOT_FOUND;
-
-errorout_with_stream:
-  fclose(stream);
-
-errorout_with_herrnocode:
-  if (h_errnop)
-    {
-      *h_errnop = herrnocode;
-    }
-
-  return ERROR;
+  return 1;
 }
 #endif /* CONFIG_NETDB_HOSTFILE */
 
@@ -756,6 +743,17 @@ int gethostentbyname_r(FAR const char *name,
     }
 #endif
 
+#ifdef CONFIG_NETDB_HOSTFILE
+  /* Search the hosts file for a match */
+
+  if (lib_hostfile_lookup(name, host, buf, buflen) == 0)
+    {
+      /* Found the host in hosts file */
+
+      return OK;
+    }
+#endif
+
   /* Try to find the name in the HOSTALIASES environment variable */
 
 #ifdef CONFIG_NETDB_DNSCLIENT
@@ -780,23 +778,12 @@ int gethostentbyname_r(FAR const char *name,
     }
 #endif /* CONFIG_NETDB_DNSCLIENT */
 
-#ifdef CONFIG_NETDB_HOSTFILE
-  /* Search the hosts file for a match */
-
-  return lib_hostfile_lookup(name, host, buf, buflen, h_errnop);
-
-#else
-  /* The host file file is not supported.  The host name mapping was not
-   * found from any lookup heuristic
-   */
-
   if (h_errnop)
     {
       *h_errnop = HOST_NOT_FOUND;
     }
 
   return ERROR;
-#endif
 }
 
 #endif /* CONFIG_LIBC_NETDB */

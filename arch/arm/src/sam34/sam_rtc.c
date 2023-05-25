@@ -52,12 +52,12 @@
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-# if !defined(CONFIG_SAM34_RTT)
-#  error RTT is required to emulate high resolution RTC
-# endif
-# if (CONFIG_RTC_FREQUENCY > 32768) || ((32768 % CONFIG_RTC_FREQUENCY) != 0)
-#  error CONFIG_RTC_FREQUENCY must be an integer division of 32768
-# endif
+#  if !defined(CONFIG_SAM34_RTT)
+#    error RTT is required to emulate high resolution RTC
+#  endif
+#  if (CONFIG_RTC_FREQUENCY > 32768) || ((32768 % CONFIG_RTC_FREQUENCY) != 0)
+#    error CONFIG_RTC_FREQUENCY must be an integer division of 32768
+#   endif
 #endif
 
 #if defined(CONFIG_RTC_ALARM) && !defined(CONFIG_SCHED_WORKQUEUE)

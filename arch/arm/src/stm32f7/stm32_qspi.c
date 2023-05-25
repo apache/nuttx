@@ -247,7 +247,7 @@ struct qspi_xctnspec_s
 static bool     qspi_checkreg(struct stm32f7_qspidev_s *priv, bool wr,
                   uint32_t value, uint32_t address);
 #else
-# define        qspi_checkreg(priv,wr,value,address) (false)
+#  define       qspi_checkreg(priv,wr,value,address) (false)
 #endif
 
 static inline uint32_t qspi_getreg(struct stm32f7_qspidev_s *priv,
@@ -259,13 +259,13 @@ static inline void qspi_putreg(struct stm32f7_qspidev_s *priv,
 static void     qspi_dumpregs(struct stm32f7_qspidev_s *priv,
                   const char *msg);
 #else
-# define        qspi_dumpregs(priv,msg)
+#  define       qspi_dumpregs(priv,msg)
 #endif
 
 #if defined(CONFIG_DEBUG_SPI_INFO) && defined(CONFIG_DEBUG_GPIO)
 static void     qspi_dumpgpioconfig(const char *msg);
 #else
-# define        qspi_dumpgpioconfig(msg)
+#  define       qspi_dumpgpioconfig(msg)
 #endif
 
 /* Interrupts */

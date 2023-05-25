@@ -87,10 +87,10 @@ struct lzf_type1_header_s   /* Compressed data header */
 /* LZF hash table */
 
 #if LZF_USE_OFFSETS
-# define LZF_HSLOT_BIAS ((const uint8_t *)in_data)
+#  define LZF_HSLOT_BIAS ((const uint8_t *)in_data)
   typedef unsigned int lzf_hslot_t;
 #else
-# define LZF_HSLOT_BIAS 0
+#  define LZF_HSLOT_BIAS 0
   typedef const uint8_t *lzf_hslot_t;
 #endif
 

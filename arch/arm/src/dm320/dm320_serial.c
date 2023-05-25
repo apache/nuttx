@@ -171,13 +171,13 @@ static uart_dev_t g_uart1port =
 /* Now, which one with be tty0/console and which tty1? */
 
 #ifdef CONFIG_SERIAL_IRDA_CONSOLE
-# define CONSOLE_DEV     g_uart1port
-# define TTYS0_DEV       g_uart1port
-# define TTYS1_DEV       g_uart0port
+#  define CONSOLE_DEV    g_uart1port
+#  define TTYS0_DEV      g_uart1port
+#  define TTYS1_DEV      g_uart0port
 #else
-# define CONSOLE_DEV     g_uart0port
-# define TTYS0_DEV       g_uart0port
-# define TTYS1_DEV       g_uart1port
+#  define CONSOLE_DEV    g_uart0port
+#  define TTYS0_DEV      g_uart0port
+#  define TTYS1_DEV      g_uart1port
 #endif
 
 /****************************************************************************

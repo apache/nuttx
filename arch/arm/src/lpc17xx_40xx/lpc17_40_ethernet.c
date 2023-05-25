@@ -340,8 +340,8 @@ static void lpc17_40_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t lpc17_40_getreg(uint32_t addr);
 static void lpc17_40_putreg(uint32_t val, uint32_t addr);
 #else
-# define lpc17_40_getreg(addr)     getreg32(addr)
-# define lpc17_40_putreg(val,addr) putreg32(val,addr)
+#  define lpc17_40_getreg(addr)     getreg32(addr)
+#  define lpc17_40_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Common TX logic */
@@ -1264,11 +1264,11 @@ static int lpc17_40_interrupt(int irq, void *context, void *arg)
   /* Clear the pending interrupt */
 
 #if 0 /* Apparently not necessary */
-# if CONFIG_LPC17_40_NINTERFACES > 1
+#  if CONFIG_LPC17_40_NINTERFACES > 1
   lpc17_40_clrpend(priv->irq);
-# else
+#  else
   lpc17_40_clrpend(LPC17_40_IRQ_ETH);
-# endif
+#  endif
 #endif
 
   return OK;

@@ -673,6 +673,11 @@ struct fb_vtable_s
   int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno,
                       FAR struct fb_planeinfo_s *pinfo);
 
+  /* open/close window. */
+
+  int (*open)(FAR struct fb_vtable_s *vtable);
+  int (*close)(FAR struct fb_vtable_s *vtable);
+
 #ifdef CONFIG_FB_CMAP
   /* The following are provided only if the video hardware supports RGB
    * color mapping
@@ -753,7 +758,7 @@ struct fb_vtable_s
   int (*setarea)(FAR struct fb_vtable_s *vtable,
                  FAR const struct fb_overlayinfo_s *oinfo);
 
-# ifdef CONFIG_FB_OVERLAY_BLIT
+#  ifdef CONFIG_FB_OVERLAY_BLIT
   /* The following are provided only if the video hardware supports
    * blit operation between overlays.
    */
@@ -767,7 +772,7 @@ struct fb_vtable_s
 
   int (*blend)(FAR struct fb_vtable_s *vtable,
                FAR const struct fb_overlayblend_s *blend);
-# endif
+#  endif
 #endif
 
   /* Pan display for multiple buffers. */

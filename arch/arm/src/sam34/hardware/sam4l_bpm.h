@@ -105,10 +105,10 @@
 #define BPM_PMCON_RET                (1 << 9)  /* Bit 9:  RETENTION Mode */
 #define BPM_PMCON_SLEEP_SHIFT        (12)      /* Bits 12-13: SLEEP mode Configuration */
 #define BPM_PMCON_SLEEP_MASK         (3 << BPM_PMCON_SLEEP_SHIFT)
-# define BPM_PMCON_SLEEP_SLEEP0      (0 << BPM_PMCON_SLEEP_SHIFT) /* CPU clock stopped */
-# define BPM_PMCON_SLEEP_SLEEP1      (1 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB clocks stopped */
-# define BPM_PMCON_SLEEP_SLEEP2      (2 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB+PB+GCLK clocks stopped */
-# define BPM_PMCON_SLEEP_SLEEP3      (3 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB+PB+GCLK+sources stopped */
+#  define BPM_PMCON_SLEEP_SLEEP0     (0 << BPM_PMCON_SLEEP_SHIFT) /* CPU clock stopped */
+#  define BPM_PMCON_SLEEP_SLEEP1     (1 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB clocks stopped */
+#  define BPM_PMCON_SLEEP_SLEEP2     (2 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB+PB+GCLK clocks stopped */
+#  define BPM_PMCON_SLEEP_SLEEP3     (3 << BPM_PMCON_SLEEP_SHIFT) /* CPU+AHB+PB+GCLK+sources stopped */
 
 #define BPM_PMCON_CK32S              (1 << 16) /* Bit 16: 32kHz-1kHz Clock Source Selection */
 #define BPM_PMCON_FASTWKUP           (1 << 24) /* Bit 24: Fast Wakeup */

@@ -95,12 +95,12 @@ void up_initial_state(struct tcb_s *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  xcp->regs[REG_R1]      = (uint32_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
+  xcp->regs[REG_R1] = (uint32_t)tcb->stack_base_ptr +
+                                tcb->adj_stack_size;
+  xcp->regs[REG_PC] = (uint32_t)tcb->start;
 
   mfspr(SPR_SYS_SR, sr);
-  xcp->regs[REG_SR]      = sr;
+  xcp->regs[REG_SR] = sr;
 
 #ifdef CONFIG_NXFLAT
   /* Make certain that bit 0 is set in the main entry address.  This is

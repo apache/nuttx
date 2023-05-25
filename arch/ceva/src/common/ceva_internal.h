@@ -272,7 +272,7 @@ void ceva_dma_initialize(void);
 #if CONFIG_MM_REGIONS > 1
 void ceva_addregion(void);
 #else
-# define ceva_addregion()
+#  define ceva_addregion()
 #endif
 
 /* Networking ***************************************************************/
@@ -280,7 +280,7 @@ void ceva_addregion(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void ceva_netinitialize(void);
 #else
-# define ceva_netinitialize()
+#  define ceva_netinitialize()
 #endif
 
 /* USB **********************************************************************/
@@ -289,8 +289,8 @@ void ceva_netinitialize(void);
 void ceva_usbinitialize(void);
 void ceva_usbuninitialize(void);
 #else
-# define ceva_usbinitialize()
-# define ceva_usbuninitialize()
+#  define ceva_usbinitialize()
+#  define ceva_usbuninitialize()
 #endif
 
 /* Debug ********************************************************************/

@@ -140,7 +140,7 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
 	default n
 	---help---
 		Preinitialize address context 1 for better header compression
-		(Saves up to 13 bytes per 6lowpan packet).   Assumes
+		(Saves up to 13 bytes per 6lowpan packet).  Assumes
 		CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
 
 if NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
@@ -201,7 +201,7 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_2
 	depends on NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
 	---help---
 		Preinitialize any address contexts for better header compression
-		(Saves up to 13 bytes per 6lowpan packet).   Assumes
+		(Saves up to 13 bytes per 6lowpan packet).  Assumes
 		CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
 
 if NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_2

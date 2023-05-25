@@ -185,7 +185,7 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 
 #ifdef CONFIG_MISOC_UART1
 #ifndef CONFIG_MISOC_UART1PRIO
-# define CONFIG_MISOC_UART1PRIO 4
+#  define CONFIG_MISOC_UART1PRIO 4
 #endif
 
 static struct misoc_dev_s g_uart1priv =

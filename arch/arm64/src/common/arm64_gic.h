@@ -195,6 +195,7 @@
 #define GICR_TYPER                  0x0008
 #define GICR_STATUSR                0x0010
 #define GICR_WAKER                  0x0014
+#define GICR_PWRR                   0x0024
 #define GICR_SETLPIR                0x0040
 #define GICR_CLRLPIR                0x0048
 #define GICR_PROPBASER              0x0070
@@ -287,6 +288,7 @@ bool arm64_gic_irq_is_enabled(unsigned int intid);
 int  arm64_gic_initialize(void);
 void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags);
+int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 /****************************************************************************
  * Name: arm64_decodeirq
@@ -305,12 +307,9 @@ void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
 
 uint64_t * arm64_decodeirq(uint64_t *regs);
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint64_t target_aff,
-                        uint16_t target_list);
+int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
 #ifdef CONFIG_SMP
-
-#define SGI_CPU_PAUSE             GIC_IRQ_SGI0
 
 /****************************************************************************
  * Name: arm64_pause_handler
@@ -335,8 +334,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint64_t target_aff,
 int arm64_pause_handler(int irq, void *context, void *arg);
 
 void arm64_gic_secondary_init(void);
-
-int arm64_smp_sgi_init(void);
 
 #endif
 

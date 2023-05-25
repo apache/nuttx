@@ -559,7 +559,7 @@ config GD32F4_WWDGT
 	select GD32F4_WDGT
 	select WATCHDOG
 
-endmenu  #"GD32 Peripheral Support"
+endmenu # "GD32 Peripheral Support"
 
 
 config GD32F4_ADC
@@ -663,7 +663,7 @@ config ARCH_BOARD_GD32F4_CUSTOM_CLOCKCONFIG
 
 config GD32F4_TCMEXCLUDE
 	bool "Exclude TCM SRAM from the heap"
-	default y if  ARCH_DMA || LIBC_ARCH_ELF
+	default y if ARCH_DMA || LIBC_ARCH_ELF
 	depends on GD32F4_HAVE_TCM
 	---help---
 		Exclude TCM SRAM from the HEAP because it cannot be used for DMA
@@ -895,11 +895,11 @@ config GD32F4_TIMER0_CH3MODE
 		which drives CH3_O and CH3_ON.
 
 config GD32F4_TIMER0_CH3O
-	bool "TIMER0 Channel 2 Output"
+	bool "TIMER0 Channel 3 Output"
 	default n
-	depends on GD32F4_TIMER0_CHANNEL2
+	depends on GD32F4_TIMER0_CHANNEL3
 	---help---
-		Enables channel 2 output.
+		Enables channel 3 output.
 
 config GD32F4_TIMER0_CH3ON
 	bool "TIMER0 Channel 3 Complementary Output"
@@ -2089,7 +2089,7 @@ menu "RTC Configuration"
 config GD32F4_RTC_MAGIC_REG
 	int "BKP register"
 	default 0
-	range  0 19
+	range 0 19
 	depends on !GD32F4_HAVE_RTC_COUNTER
 	---help---
 		The BKP register used to store/check the Magic value to determine if

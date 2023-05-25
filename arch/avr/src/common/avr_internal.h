@@ -46,7 +46,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /* This is the value used to mark the stack for subsequent stack monitoring
@@ -125,7 +125,7 @@ void avr_lowputs(const char *str);
 #if CONFIG_MM_REGIONS > 1
 void avr_addregion(void);
 #else
-# define avr_addregion()
+#  define avr_addregion()
 #endif
 
 /* Defined in chip/xxx_lowinit.c.  This function is called from the
@@ -148,7 +148,7 @@ void avr_serialinit(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void avr_netinitialize(void);
 #else
-# define avr_netinitialize()
+#  define avr_netinitialize()
 #endif
 
 /* Defined in chip/xxx_usbdev.c */
@@ -157,8 +157,8 @@ void avr_netinitialize(void);
 void avr_usbinitialize(void);
 void avr_usbuninitialize(void);
 #else
-# define avr_usbinitialize()
-# define avr_usbuninitialize()
+#  define avr_usbinitialize()
+#  define avr_usbuninitialize()
 #endif
 
 #ifdef CONFIG_STACK_COLORATION

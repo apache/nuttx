@@ -91,7 +91,7 @@
 /* Big-endian byte order */
 
 #  define BYTE_ORDER          BIG_ENDIAN
-#  define __BYTE_ORDER        BIG_ENDIAN
+#  define __BYTE_ORDER        __BIG_ENDIAN
 
 /* Big-endian byte order macros */
 
@@ -158,12 +158,12 @@
 #define htolem32(x, v)        (*(FAR uint32_t *)(x) = htole32(v))
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#define betoh64               be64toh
-#define letoh64               le64toh
-#define bemtoh64(x)           htobe64(*(FAR uint64_t *)(x))
-#define htobem64(x, v)        (*(FAR uint64_t *)(x) = htobe64(v))
-#define lemtoh64(x)           letoh64(*(FAR uint64_t *)(x))
-#define htolem64(x, v)        (*(FAR uint64_t *)(x) = htole64(v))
+#  define betoh64             be64toh
+#  define letoh64             le64toh
+#  define bemtoh64(x)         htobe64(*(FAR uint64_t *)(x))
+#  define htobem64(x, v)      (*(FAR uint64_t *)(x) = htobe64(v))
+#  define lemtoh64(x)         letoh64(*(FAR uint64_t *)(x))
+#  define htolem64(x, v)      (*(FAR uint64_t *)(x) = htole64(v))
 #endif
 
 #endif /* __INCLUDE_SYS_ENDIAN_H */

@@ -150,6 +150,7 @@
 /* MPIDR_EL1, Multiprocessor Affinity Register */
 
 #define MPIDR_AFFLVL_MASK   (0xff)
+#define MPIDR_ID_MASK       (0xff00ffffff)
 
 #define MPIDR_AFF0_SHIFT    (0)
 #define MPIDR_AFF1_SHIFT    (8)
@@ -180,7 +181,13 @@
   (((mpid) >> MPIDR_AFF ## aff_level ## _SHIFT) & MPIDR_AFFLVL_MASK)
 
 #define CORE_TO_MPID(core, aff_level) \
-  (((core) << MPIDR_AFF ## aff_level ## _SHIFT))
+  ({ \
+    uint64_t __mpidr = GET_MPIDR(); \
+    __mpidr &= ~(MPIDR_AFFLVL_MASK << MPIDR_AFF ## aff_level ## _SHIFT); \
+    __mpidr |= (cpu << MPIDR_AFF ## aff_level ## _SHIFT); \
+    __mpidr &= MPIDR_ID_MASK; \
+    __mpidr; \
+  })
 
 /* System register interface to GICv3 */
 
@@ -561,6 +568,8 @@ void arm64_cpu_enable(void);
 
 #ifdef CONFIG_SMP
 uint64_t arm64_get_mpid(int cpu);
+#else
+#  define arm64_get_mpid(cpu) GET_MPIDR()
 #endif /* CONFIG_SMP */
 
 #endif /* __ASSEMBLY__ */

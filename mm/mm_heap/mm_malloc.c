@@ -79,9 +79,12 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   struct mallinfo_task info;
+  struct mm_memdump_s dump;
 
-  info.pid = tcb->pid;
-  mm_mallinfo_task(arg, &info);
+  dump.pid = tcb->pid;
+  dump.seqmin = 0;
+  dump.seqmax = ULONG_MAX;
+  info = mm_mallinfo_task(arg, &dump);
   mwarn("pid:%5d, used:%10d, nused:%10d\n",
         tcb->pid, info.uordblks, info.aordblks);
 }
@@ -268,6 +271,10 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #  if CONFIG_MM_BACKTRACE >= 0
       nxsched_foreach(mm_dump_handler, heap);
 #  endif
+#  if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+      mempool_multiple_info(heap->mm_mpool);
+#  endif
+
 #endif
 #ifdef CONFIG_MM_PANIC_ON_FAILURE
       PANIC();

@@ -341,7 +341,7 @@ static uart_dev_t g_usart3port =
 #    define CONSOLE_DEV     g_usart3port    /* USART3=console */
 #    define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
 #    define USART3_ASSIGNED 1
-# endif
+#  endif
 #else
 /* No console, assign only ttyS0 */
 
@@ -357,7 +357,7 @@ static uart_dev_t g_usart3port =
 #  else /* elif defined(CONFIG_LPC43_USART3) */
 #    define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
 #    define USART3_ASSIGNED 1
-# endif
+#  endif
 #endif
 
 /* Assign ttyS1 */

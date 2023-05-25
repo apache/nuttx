@@ -122,6 +122,10 @@ struct spiflash_cachestate_s
 {
   uint32_t value;
   irqstate_t flags;
+  int cpu;
+#ifdef CONFIG_SMP
+  int other;
+#endif
 };
 
 /****************************************************************************
@@ -137,7 +141,9 @@ static void spiflash_end(void);
 
 extern void spi_flash_guard_set(const struct spiflash_guard_funcs_s *funcs);
 extern uint32_t cache_suspend_icache(void);
+extern uint32_t cache_suspend_dcache(void);
 extern void cache_resume_icache(uint32_t val);
+extern void cache_resume_dcache(uint32_t val);
 extern int cache_invalidate_addr(uint32_t addr, uint32_t size);
 
 /****************************************************************************
@@ -167,7 +173,20 @@ static struct spiflash_cachestate_s g_state;
 static IRAM_ATTR void spiflash_start(void)
 {
   g_state.flags = enter_critical_section();
+  g_state.cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  g_state.other = g_state.cpu ? 0 : 1;
+#endif
+
+  DEBUGASSERT(g_state.cpu == 0 || g_state.cpu == 1);
+#ifdef CONFIG_SMP
+  DEBUGASSERT(g_state.other == 0 || g_state.other == 1);
+  DEBUGASSERT(g_state.other != g_state.cpu);
+  up_cpu_pause(g_state.other);
+#endif
+
   g_state.value = cache_suspend_icache() << 16;
+  g_state.value |= cache_suspend_dcache();
 }
 
 /****************************************************************************
@@ -180,7 +199,20 @@ static IRAM_ATTR void spiflash_start(void)
 
 static IRAM_ATTR void spiflash_end(void)
 {
+  DEBUGASSERT(g_state.cpu == 0 || g_state.cpu == 1);
+
+#ifdef CONFIG_SMP
+  DEBUGASSERT(g_state.other == 0 || g_state.other == 1);
+  DEBUGASSERT(g_state.other != g_state.cpu);
+#endif
+
   cache_resume_icache(g_state.value >> 16);
+  cache_resume_dcache(g_state.value & 0xffff);
+
+#ifdef CONFIG_SMP
+  up_cpu_resume(g_state.other);
+#endif
+
   leave_critical_section(g_state.flags);
 }
 

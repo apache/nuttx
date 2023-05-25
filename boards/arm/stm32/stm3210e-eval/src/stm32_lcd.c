@@ -1004,9 +1004,9 @@ static int stm3210e_poweroff(void)
   /* Disable timer 1 clocking */
 
 #if defined(CONFIG_STM3210E_LCD_BACKLIGHT)
-# if defined(CONFIG_STM3210E_LCD_PWM)
+#  if defined(CONFIG_STM3210E_LCD_PWM)
   modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
-#endif
+#  endif
 
   /* Configure the PA8 pin as an output */
 

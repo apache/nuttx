@@ -376,5 +376,9 @@ void uart_putreg(uart_addrwidth_t base,
 struct file;  /* Forward reference */
 int uart_ioctl(struct file *filep, int cmd, unsigned long arg);
 
+struct dma_chan_s;
+FAR struct dma_chan_s *uart_dmachan(uart_addrwidth_t base,
+                                    unsigned int ident);
+
 #endif /* CONFIG_16550_UART */
 #endif /* __INCLUDE_NUTTX_SERIAL_UART_16550_H */

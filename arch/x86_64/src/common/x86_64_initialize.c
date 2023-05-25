@@ -56,7 +56,7 @@ static void up_calibratedelay(void)
   _warn("End 100s delay\n");
 }
 #else
-# define up_calibratedelay()
+#  define up_calibratedelay()
 #endif
 
 /****************************************************************************

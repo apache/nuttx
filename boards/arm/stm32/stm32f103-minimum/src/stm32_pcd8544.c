@@ -48,7 +48,7 @@
 #define LCD_SPI_PORTNO 1   /* On SPI1 */
 
 #ifndef CONFIG_LCD_CONTRAST
-# define CONFIG_LCD_CONTRAST 60
+#  define CONFIG_LCD_CONTRAST 60
 #endif
 
 /****************************************************************************

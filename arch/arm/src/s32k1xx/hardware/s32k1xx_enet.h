@@ -514,13 +514,13 @@
  */
 
 #ifdef S32K1XX_ENET_HAS_DBSWAP
-# ifndef CONFIG_ENDIAN_BIG
-#  define S32K1XX_USE_DBSWAP
-# endif
+#  ifndef CONFIG_ENDIAN_BIG
+#    define S32K1XX_USE_DBSWAP
+#  endif
 #else
-# ifndef CONFIG_ENDIAN_BIG
-#  define S32K1XX_BUFFERS_SWAP
-# endif
+#  ifndef CONFIG_ENDIAN_BIG
+#    define S32K1XX_BUFFERS_SWAP
+#  endif
 #endif
 
 #ifndef S32K1XX_BUFFERS_SWAP

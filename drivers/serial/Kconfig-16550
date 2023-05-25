@@ -27,6 +27,10 @@ config 16550_UART0_BASE
 config 16550_UART0_CLOCK
 	int "16550 UART0 clock"
 
+config 16550_UART0_CLOCK_NAME
+        string "16550 UART0 clock name"
+        depends on CLK
+
 config 16550_UART0_IRQ
 	int "16550 UART0 IRQ number"
 
@@ -79,6 +83,44 @@ config 16550_UART0_OFLOWCONTROL
 	---help---
 		Enable 16550 UART0 CTS flow control
 
+config 16550_UART0_DMA
+	bool "16550 UART0 DMA support"
+	default n
+	select ARCH_DMA
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on 16550 UART0
+
+if 16550_UART0_DMA
+
+config 16550_UART0_DMA_TX
+	int "16550 UART0 DMA Tx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for sending
+
+config 16550_UART0_DMA_RX
+	int "16550 UART0 DMA Rx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for receiving
+
+config 16550_UART0_DMA_RXBUFSIZE
+	int "16550 UART0 DMA Rx buffer size"
+	depends on 16550_UART0_DMA_RX != -1
+	default 16550_UART0_RXBUFSIZE
+	---help---
+		16550 UART0 DMA Rx buffer size.
+
+config 16550_UART0_DMA_RXTIMEOUT
+	int "16550 UART0 DMA Rx timeout(char)"
+	depends on 16550_UART0_DMA_RX != -1
+	default 1
+	---help---
+		0 means DMA has no timeout for receiving
+
+endif
+
 endif # 16550_UART0
 
 config 16550_UART1
@@ -92,6 +134,10 @@ config 16550_UART1_BASE
 
 config 16550_UART1_CLOCK
 	int "16550 UART1 clock"
+
+config 16550_UART1_CLOCK_NAME
+        string "16550 UART1 clock name"
+        depends on CLK
 
 config 16550_UART1_IRQ
 	int "16550 UART1 IRQ number"
@@ -145,6 +191,44 @@ config 16550_UART1_OFLOWCONTROL
 	---help---
 		Enable 16550 UART1 CTS flow control
 
+config 16550_UART1_DMA
+	bool "16550 UART1 DMA support"
+	default n
+	select ARCH_DMA
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on 16550 UART1
+
+if 16550_UART1_DMA
+
+config 16550_UART1_DMA_TX
+	int "16550 UART1 DMA Tx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for sending
+
+config 16550_UART1_DMA_RX
+	int "16550 UART1 DMA Rx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for receiving
+
+config 16550_UART1_DMA_RXBUFSIZE
+	int "16550 UART1 DMA Rx buffer size"
+	depends on 16550_UART1_DMA_RX != -1
+	default 16550_UART1_RXBUFSIZE
+	---help---
+		16550 UART1 DMA Rx buffer size.
+
+config 16550_UART1_DMA_RXTIMEOUT
+	int "16550 UART1 DMA Rx timeout(char)"
+	depends on 16550_UART1_DMA_RX != -1
+	default 1
+	---help---
+		0 means DMA has no timeout for receiving
+
+endif
+
 endif # 16550_UART1
 
 config 16550_UART2
@@ -158,6 +242,10 @@ config 16550_UART2_BASE
 
 config 16550_UART2_CLOCK
 	int "16550 UART2 clock"
+
+config 16550_UART2_CLOCK_NAME
+        string "16550 UART2 clock name"
+        depends on CLK
 
 config 16550_UART2_IRQ
 	int "16550 UART2 IRQ number"
@@ -211,6 +299,44 @@ config 16550_UART2_OFLOWCONTROL
 	---help---
 		Enable 16550 UART2 CTS flow control
 
+config 16550_UART2_DMA
+	bool "16550 UART2 DMA support"
+	default n
+	select ARCH_DMA
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on 16550 UART2
+
+if 16550_UART2_DMA
+
+config 16550_UART2_DMA_TX
+	int "16550 UART2 DMA Tx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for sending
+
+config 16550_UART2_DMA_RX
+	int "16550 UART2 DMA Rx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for receiving
+
+config 16550_UART2_DMA_RXBUFSIZE
+	int "16550 UART2 DMA Rx buffer size"
+	depends on 16550_UART2_DMA_RX != -1
+	default 16550_UART2_RXBUFSIZE
+	---help---
+		16550 UART2 DMA Rx buffer size.
+
+config 16550_UART2_DMA_RXTIMEOUT
+	int "16550 UART2 DMA Rx timeout(char)"
+	depends on 16550_UART2_DMA_RX != -1
+	default 1
+	---help---
+		0 means DMA has no timeout for receiving
+
+endif
+
 endif # 16550_UART2
 
 config 16550_UART3
@@ -224,6 +350,10 @@ config 16550_UART3_BASE
 
 config 16550_UART3_CLOCK
 	int "16550 UART3 clock"
+
+config 16550_UART3_CLOCK_NAME
+        string "16550 UART3 clock name"
+        depends on CLK
 
 config 16550_UART3_IRQ
 	int "16550 UART3 IRQ number"
@@ -276,6 +406,44 @@ config 16550_UART3_OFLOWCONTROL
 	select SERIAL_OFLOWCONTROL
 	---help---
 		Enable 16550 UART3 CTS flow control
+
+config 16550_UART3_DMA
+	bool "16550 UART3 DMA support"
+	default n
+	select ARCH_DMA
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on 16550 UART3
+
+if 16550_UART3_DMA
+
+config 16550_UART3_DMA_TX
+	int "16550 UART3 DMA Tx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for sending
+
+config 16550_UART3_DMA_RX
+	int "16550 UART3 DMA Rx channel identity"
+	default -1
+	---help---
+		-1 means don't use DMA for receiving
+
+config 16550_UART3_DMA_RXBUFSIZE
+	int "16550 UART3 DMA Rx buffer size"
+	depends on 16550_UART3_DMA_RX != -1
+	default 16550_UART3_RXBUFSIZE
+	---help---
+		16550 UART3 DMA Rx buffer size.
+
+config 16550_UART3_DMA_RXTIMEOUT
+	int "16550 UART3 DMA Rx timeout(char)"
+	depends on 16550_UART3_DMA_RX != -1
+	default 1
+	---help---
+		0 means DMA has no timeout for receiving
+
+endif
 
 endif # 16550_UART3
 

@@ -42,9 +42,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-# define rx65n_getreg(addr)      getreg8(addr)
-# define rx65n_putreg(val,addr)  putreg8(val,addr)
-# define RX65N_NALARMS           1
+#  define rx65n_getreg(addr)     getreg8(addr)
+#  define rx65n_putreg(val,addr) putreg8(val,addr)
+#  define RX65N_NALARMS          1
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && !defined(CONFIG_SCHED_WORKQUEUE)

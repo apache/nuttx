@@ -74,7 +74,7 @@ static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
       _SO_GETOPT(conn->sconn.s_options, IP_PKTINFO))
     {
       FAR struct sockaddr_in *infrom = srcaddr;
-      FAR struct in_pktinfo   pktinfo;
+      struct in_pktinfo       pktinfo;
 
       pktinfo.ipi_ifindex         = ifindex;
       pktinfo.ipi_addr.s_addr     = infrom->sin_addr.s_addr;
@@ -89,7 +89,7 @@ static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
       _SO_GETOPT(conn->sconn.s_options, IPV6_RECVPKTINFO))
     {
       FAR struct sockaddr_in6 *infrom = srcaddr;
-      FAR struct in6_pktinfo   pktinfo;
+      struct in6_pktinfo       pktinfo;
 
       pktinfo.ipi6_ifindex = ifindex;
       net_ipv6addr_copy(&pktinfo.ipi6_addr, infrom->sin6_addr.s6_addr);

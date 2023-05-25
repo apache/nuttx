@@ -1744,7 +1744,7 @@ menu "RTC Configuration"
 config STM32H7_RTC_MAGIC_REG
 	int "BKP register"
 	default 0
-	range  0 31
+	range 0 31
 	---help---
 		The BKP register used to store/check the Magic value to determine if
 		RTC is already setup
@@ -5686,8 +5686,8 @@ config STM32_OTA_SCRATCH_SIZE
 	hex "MCUboot scratch partition size (in bytes)"
 	default "0x40000"
 
-endif   #STM32_PROGMEM_OTA_PARTITION
-endif   #STM32_HAVE_OTA_PARTITION
+endif # STM32_PROGMEM_OTA_PARTITION
+endif # STM32_HAVE_OTA_PARTITION
 
 endmenu # Progmem configuration
 

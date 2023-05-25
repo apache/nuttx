@@ -1567,7 +1567,7 @@ config TIVA_CAN1_PRIO
 
 config TIVA_CAN_REGDEBUG
 	bool "CAN register level debug"
-	depends on  DEBUG_CAN_INFO && TIVA_CHAR_DEV_CAN
+	depends on DEBUG_CAN_INFO && TIVA_CHAR_DEV_CAN
 	default n
 	---help---
 		Output detailed register-level CAN device debug information.

@@ -246,27 +246,27 @@
  * Compliance Level: Required.
  */
 
-#define CP0_CAUSE_EXCCODE_SHIFT     (2)       /* Bits 2-6: Exception code */
-#define CP0_CAUSE_EXCCODE_MASK      (31 << CP0_CAUSE_EXCCODE_SHIFT)
-# define CP0_CAUSE_EXCCODE_INT      (0 << CP0_CAUSE_EXCCODE_SHIFT)  /* Interrupt */
-# define CP0_CAUSE_EXCCODE_TLBL     (2 << CP0_CAUSE_EXCCODE_SHIFT)  /* TLB exception (load or instruction fetch) */
-# define CP0_CAUSE_EXCCODE_TLBS     (3 << CP0_CAUSE_EXCCODE_SHIFT)  /* TLB exception (store) */
-# define CP0_CAUSE_EXCCODE_ADEL     (4 << CP0_CAUSE_EXCCODE_SHIFT)  /* Address error exception (load or instruction fetch) */
-# define CP0_CAUSE_EXCCODE_ADES     (5 << CP0_CAUSE_EXCCODE_SHIFT)  /* Address error exception (store) */
-# define CP0_CAUSE_EXCCODE_IBE      (6 << CP0_CAUSE_EXCCODE_SHIFT)  /* Bus error exception (instruction fetch) */
-# define CP0_CAUSE_EXCCODE_DBE      (7 << CP0_CAUSE_EXCCODE_SHIFT)  /* Bus error exception (data reference: load or store) */
-# define CP0_CAUSE_EXCCODE_SYS      (8 << CP0_CAUSE_EXCCODE_SHIFT)  /* Syscall exception */
-# define CP0_CAUSE_EXCCODE_BP       (9 << CP0_CAUSE_EXCCODE_SHIFT)  /* Breakpoint exception */
-# define CP0_CAUSE_EXCCODE_RI       (10 << CP0_CAUSE_EXCCODE_SHIFT) /* Reserved instruction exception */
-# define CP0_CAUSE_EXCCODE_CPU      (11 << CP0_CAUSE_EXCCODE_SHIFT) /* Coprocessor Unusable exception */
-# define CP0_CAUSE_EXCCODE_OV       (12 << CP0_CAUSE_EXCCODE_SHIFT) /* Arithmetic Overflow exception */
-# define CP0_CAUSE_EXCCODE_TR       (13 << CP0_CAUSE_EXCCODE_SHIFT) /* Trap exception */
-# define CP0_CAUSE_EXCCODE_FPE      (15 << CP0_CAUSE_EXCCODE_SHIFT) /* Floating point exception */
-# define CP0_CAUSE_EXCCODE_C2E      (18 << CP0_CAUSE_EXCCODE_SHIFT) /* Precise Coprocessor 2 exceptions */
-# define CP0_CAUSE_EXCCODE_MDMX     (22 << CP0_CAUSE_EXCCODE_SHIFT) /* MDMX Unusable (MIPS64) */
-# define CP0_CAUSE_EXCCODE_WATCH    (23 << CP0_CAUSE_EXCCODE_SHIFT) /* WatchHi/WatchLo address */
-# define CP0_CAUSE_EXCCODE_MCHECK   (24 << CP0_CAUSE_EXCCODE_SHIFT) /* Machine check */
-# define CP0_CAUSE_EXCCODE_CACHEERR (30 << CP0_CAUSE_EXCCODE_SHIFT) /* Cache error */
+#define CP0_CAUSE_EXCCODE_SHIFT      (2)       /* Bits 2-6: Exception code */
+#define CP0_CAUSE_EXCCODE_MASK       (31 << CP0_CAUSE_EXCCODE_SHIFT)
+#  define CP0_CAUSE_EXCCODE_INT      (0 << CP0_CAUSE_EXCCODE_SHIFT)  /* Interrupt */
+#  define CP0_CAUSE_EXCCODE_TLBL     (2 << CP0_CAUSE_EXCCODE_SHIFT)  /* TLB exception (load or instruction fetch) */
+#  define CP0_CAUSE_EXCCODE_TLBS     (3 << CP0_CAUSE_EXCCODE_SHIFT)  /* TLB exception (store) */
+#  define CP0_CAUSE_EXCCODE_ADEL     (4 << CP0_CAUSE_EXCCODE_SHIFT)  /* Address error exception (load or instruction fetch) */
+#  define CP0_CAUSE_EXCCODE_ADES     (5 << CP0_CAUSE_EXCCODE_SHIFT)  /* Address error exception (store) */
+#  define CP0_CAUSE_EXCCODE_IBE      (6 << CP0_CAUSE_EXCCODE_SHIFT)  /* Bus error exception (instruction fetch) */
+#  define CP0_CAUSE_EXCCODE_DBE      (7 << CP0_CAUSE_EXCCODE_SHIFT)  /* Bus error exception (data reference: load or store) */
+#  define CP0_CAUSE_EXCCODE_SYS      (8 << CP0_CAUSE_EXCCODE_SHIFT)  /* Syscall exception */
+#  define CP0_CAUSE_EXCCODE_BP       (9 << CP0_CAUSE_EXCCODE_SHIFT)  /* Breakpoint exception */
+#  define CP0_CAUSE_EXCCODE_RI       (10 << CP0_CAUSE_EXCCODE_SHIFT) /* Reserved instruction exception */
+#  define CP0_CAUSE_EXCCODE_CPU      (11 << CP0_CAUSE_EXCCODE_SHIFT) /* Coprocessor Unusable exception */
+#  define CP0_CAUSE_EXCCODE_OV       (12 << CP0_CAUSE_EXCCODE_SHIFT) /* Arithmetic Overflow exception */
+#  define CP0_CAUSE_EXCCODE_TR       (13 << CP0_CAUSE_EXCCODE_SHIFT) /* Trap exception */
+#  define CP0_CAUSE_EXCCODE_FPE      (15 << CP0_CAUSE_EXCCODE_SHIFT) /* Floating point exception */
+#  define CP0_CAUSE_EXCCODE_C2E      (18 << CP0_CAUSE_EXCCODE_SHIFT) /* Precise Coprocessor 2 exceptions */
+#  define CP0_CAUSE_EXCCODE_MDMX     (22 << CP0_CAUSE_EXCCODE_SHIFT) /* MDMX Unusable (MIPS64) */
+#  define CP0_CAUSE_EXCCODE_WATCH    (23 << CP0_CAUSE_EXCCODE_SHIFT) /* WatchHi/WatchLo address */
+#  define CP0_CAUSE_EXCCODE_MCHECK   (24 << CP0_CAUSE_EXCCODE_SHIFT) /* Machine check */
+#  define CP0_CAUSE_EXCCODE_CACHEERR (30 << CP0_CAUSE_EXCCODE_SHIFT) /* Cache error */
 
 #define CP0_CAUSE_IP0               (1 << 8)  /* Bit 8: Controls request for software interrupt 0 */
 #define CP0_CAUSE_IP1               (1 << 9)  /* Bit 9: Controls request for software interrupt 1 */
@@ -336,9 +336,9 @@
 #define CP0_CONFIG_BE               (1 << 15) /* Bit 15: Processor is running in big-endian mode */
 #define CP0_CONFIG_IMPL_SHIFT       (16)      /* Bits 16-30: Implementation dependent */
 #define CP0_CONFIG_IMPL_MASK        (0x7fff << CP0_CONFIG_IMPL_SHIFT)
-#define CP0_CONFIG_M_SHIFT         (31)
-#define CP0_CONFIG_M_MASK          (1 << CP0_CONFIG_M_SHIFT)
-#  define CP0_CONFIG_M             (1 << CP0_CONFIG_M_SHIFT) /* Bit 31: Indicates the presence of a Config1 register */
+#define CP0_CONFIG_M_SHIFT          (31)
+#define CP0_CONFIG_M_MASK           (1 << CP0_CONFIG_M_SHIFT)
+#  define CP0_CONFIG_M              (1 << CP0_CONFIG_M_SHIFT) /* Bit 31: Indicates the presence of a Config1 register */
 
 /* Register Number: 16 Sel: 1 Name: Config1
  * Function: Configuration register 1

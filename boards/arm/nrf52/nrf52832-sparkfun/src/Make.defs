@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/nrf53/nrf5340-dk/src/Makefile
+# boards/arm/nrf52/nrf52832-sparkfun/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,38 +20,16 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = nrf53_boot.c nrf53_bringup.c
+CSRCS = nrf52_boot.c nrf52_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += nrf53_appinit.c
-endif
-
-ifeq ($(CONFIG_NRF53_APPCORE),y)
-CSRCS += nrf53_cpunet_boot.c
+CSRCS += nrf52_appinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += nrf53_autoleds.c
-else
-CSRCS += nrf53_userleds.c
+CSRCS += nrf52_autoleds.c
 endif
 
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += nrf53_buttons.c
-endif
-
-ifeq ($(CONFIG_TIMER),y)
-ifeq ($(CONFIG_NRF53_TIMER),y)
-CSRCS += nrf53_timer.c
-endif
-endif
-
-ifeq ($(CONFIG_PWM),y)
-CSRCS += nrf53_pwm.c
-endif
-
-ifeq ($(CONFIG_ADC),y)
-CSRCS += nrf53_adc.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

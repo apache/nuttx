@@ -261,12 +261,12 @@ static void dm320_putreg8(uint8_t val, uint32_t addr);
 static void dm320_putreg16(uint16_t val, uint32_t addr);
 static void dm320_putreg32(uint32_t val, uint32_t addr);
 #else
-# define dm320_getreg8(addr)      getreg8(addr)
-# define dm320_getreg16(addr)     getreg16(addr)
-# define dm320_getreg32(addr)     getreg32(addr)
-# define dm320_putreg8(val,addr)  putreg8(val,addr)
-# define dm320_putreg16(val,addr) putreg16(val,addr)
-# define dm320_putreg32(val,addr) putreg32(val,addr)
+#  define dm320_getreg8(addr)      getreg8(addr)
+#  define dm320_getreg16(addr)     getreg16(addr)
+#  define dm320_getreg32(addr)     getreg32(addr)
+#  define dm320_putreg8(val,addr)  putreg8(val,addr)
+#  define dm320_putreg16(val,addr) putreg16(val,addr)
+#  define dm320_putreg32(val,addr) putreg32(val,addr)
 #endif
 
 /* Request queue operations *************************************************/

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/nrf52/nrf52840-dk/src/Makefile
+# boards/arm/nrf52/nrf52840-dk/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -60,12 +60,6 @@ ifeq ($(CONFIG_NRF52840DK_HIGHPRI),y)
 CSRCS += nrf52_highpri.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-ifeq ($(CONFIG_NRF52_TIMER),y)
-CSRCS += nrf52_timer.c
-endif
-endif
-
 ifeq ($(CONFIG_PWM),y)
 CSRCS += nrf52_pwm.c
 endif
@@ -86,4 +80,6 @@ ifeq ($(CONFIG_NRF52_QSPI),y)
 CSRCS += nrf52_mx25.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

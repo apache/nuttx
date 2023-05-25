@@ -92,12 +92,12 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Save the initial stack pointer */
 
-  xcp->regs[REG_SP] = (uint32_t)tcb->stack_base_ptr +
-                                tcb->adj_stack_size;
+  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PC] = (uint32_t)tcb->start;
+  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
 
   /* If this task is running PIC, then set the PIC base register to the
    * address of the allocated D-Space region.
@@ -141,9 +141,9 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Enable or disable interrupts, based on user configuration */
 
-# ifdef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
   cpsr                  |= PSR_I_BIT;
-# endif
+#endif
 
 #ifdef CONFIG_ARM_THUMB
   cpsr                  |= PSR_T_BIT;

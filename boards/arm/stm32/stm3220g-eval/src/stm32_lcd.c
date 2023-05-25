@@ -978,13 +978,13 @@ static inline void stm3220g_lcdinitialize(void)
       /* Save the LCD type (not actually used at for anything important) */
 
 #if !defined(CONFIG_STM32_ILI9320_DISABLE)
-# if !defined(CONFIG_STM32_ILI9325_DISABLE)
+#  if !defined(CONFIG_STM32_ILI9325_DISABLE)
       if (id == ILI9325_ID)
         {
           g_lcddev.type = LCD_TYPE_ILI9325;
         }
       else
-# endif
+#  endif
         {
           g_lcddev.type = LCD_TYPE_ILI9320;
           stm3220g_writereg(LCD_REG_229, 0x8000); /* Set the internal vcore voltage */
@@ -1038,9 +1038,9 @@ static inline void stm3220g_lcdinitialize(void)
       /* Adjust the Gamma Curve (ILI9320/1) */
 
 #if !defined(CONFIG_STM32_ILI9320_DISABLE)
-# if !defined(CONFIG_STM32_ILI9325_DISABLE)
+#  if !defined(CONFIG_STM32_ILI9325_DISABLE)
       if (g_lcddev.type == LCD_TYPE_ILI9320)
-# endif
+#  endif
         {
           stm3220g_writereg(LCD_REG_48,  0x0006);
           stm3220g_writereg(LCD_REG_49,  0x0101);
@@ -1058,9 +1058,9 @@ static inline void stm3220g_lcdinitialize(void)
       /* Adjust the Gamma Curve (ILI9325) */
 
 #if !defined(CONFIG_STM32_ILI9325_DISABLE)
-# if !defined(CONFIG_STM32_ILI9320_DISABLE)
+#  if !defined(CONFIG_STM32_ILI9320_DISABLE)
       else
-# endif
+#  endif
         {
           stm3220g_writereg(LCD_REG_48, 0x0007);
           stm3220g_writereg(LCD_REG_49, 0x0302);

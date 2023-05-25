@@ -975,7 +975,7 @@ int up_rtc_initialize(void)
           modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
           modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
-# if RCC_BDCR_RTCSEL == RCC_BDCR_RTCSEL_LSE
+#if RCC_BDCR_RTCSEL == RCC_BDCR_RTCSEL_LSE
           /* Because of the Backup domain Reset - we must re enable the LSE
            * if it is used
            */

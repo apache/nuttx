@@ -56,9 +56,9 @@
 #define REG_DBG_QMAN_ID                         0x0d88
 
 #ifdef CONFIG_DEBUG_HARDFAULT
-# define hfalert(format, ...)  _alert(format, ##__VA_ARGS__)
+#  define hfalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
-# define hfalert(x...)
+#  define hfalert(x...)
 #endif
 
 #define hfdumpreg1(reg)                           \

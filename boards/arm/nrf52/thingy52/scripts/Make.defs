@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/nrf52/nrf52832-dk/src/Makefile
+# boards/arm/nrf52/thingy52/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,22 +18,22 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-CSRCS = nrf52_boot.c nrf52_bringup.c
+LDSCRIPT = flash_config.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += nrf52_appinit.c
-endif
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += nrf52_autoleds.c
-else
-CSRCS += nrf52_userleds.c
-endif
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += nrf52_buttons.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048

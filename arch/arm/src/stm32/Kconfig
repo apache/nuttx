@@ -3764,7 +3764,7 @@ config STM32_I2SPLL
 
 config STM32_CCMEXCLUDE
 	bool "Exclude CCM SRAM from the heap"
-	default y if  ARCH_DMA || LIBC_ARCH_ELF
+	default y if ARCH_DMA || LIBC_ARCH_ELF
 	depends on STM32_HAVE_CCM
 	---help---
 		Exclude CCM SRAM from the HEAP because (1) it cannot be used for DMA
@@ -11560,7 +11560,7 @@ config STM32_FDCAN3_DSJW
 
 endmenu # FDCAN3 device driver options
 
-endmenu  # "FDCAN driver configuration"
+endmenu # "FDCAN driver configuration"
 
 if STM32_LTDC
 

@@ -82,6 +82,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -99,6 +101,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the
@@ -114,7 +117,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * the signals have been delivered.
                */
 
-              tcb->xcp.sigdeliver    = sigdeliver;
               tcb->xcp.saved_pc[0]   = g_current_regs[REG_PC];
               tcb->xcp.saved_pc[1]   = g_current_regs[REG_PC + 1];
               tcb->xcp.saved_flg     = g_current_regs[REG_FLG];
@@ -123,7 +125,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              g_current_regs[REG_PC]   = (uint32_t)renesas_sigdeliver >> 8;
+              g_current_regs[REG_PC] = (uint32_t)renesas_sigdeliver >> 8;
               g_current_regs[REG_PC + 1] = (uint32_t)renesas_sigdeliver;
               g_current_regs[REG_FLG] &= ~M16C_FLG_I;
 
@@ -148,16 +150,15 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * the signals have been delivered.
            */
 
-          tcb->xcp.sigdeliver     = sigdeliver;
-          tcb->xcp.saved_pc[0]    = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_pc[1]    = tcb->xcp.regs[REG_PC + 1];
-          tcb->xcp.saved_flg      = tcb->xcp.regs[REG_FLG];
+          tcb->xcp.saved_pc[0]  = tcb->xcp.regs[REG_PC];
+          tcb->xcp.saved_pc[1]  = tcb->xcp.regs[REG_PC + 1];
+          tcb->xcp.saved_flg    = tcb->xcp.regs[REG_FLG];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]   = (uint32_t)renesas_sigdeliver >> 8;
+          tcb->xcp.regs[REG_PC] = (uint32_t)renesas_sigdeliver >> 8;
           tcb->xcp.regs[REG_PC + 1] = (uint32_t)renesas_sigdeliver;
           tcb->xcp.regs[REG_FLG] &= ~M16C_FLG_I;
         }

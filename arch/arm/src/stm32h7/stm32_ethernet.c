@@ -684,9 +684,9 @@ static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_checksetup(void);
 #else
-# define stm32_getreg(addr)      getreg32(addr)
-# define stm32_putreg(val,addr)  putreg32(val,addr)
-# define stm32_checksetup()
+#  define stm32_getreg(addr)     getreg32(addr)
+#  define stm32_putreg(val,addr) putreg32(val,addr)
+#  define stm32_checksetup()
 #endif
 
 /* Free buffer management */

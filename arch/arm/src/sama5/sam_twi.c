@@ -197,9 +197,9 @@ static uint32_t twi_getabs(struct twi_dev_s *priv, uintptr_t address);
 static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
               uint32_t value);
 #else
-# define    twi_checkreg(priv,wr,value,address) (false)
-# define    twi_putabs(p,a,v) putreg32(v,a)
-# define    twi_getabs(p,a) getreg32(a)
+#  define   twi_checkreg(priv,wr,value,address) (false)
+#  define   twi_putabs(p,a,v) putreg32(v,a)
+#  define   twi_getabs(p,a) getreg32(a)
 #endif
 
 static inline uint32_t twi_getrel(struct twi_dev_s *priv,

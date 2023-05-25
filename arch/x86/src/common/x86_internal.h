@@ -183,7 +183,7 @@ void x86_syscall(uint32_t *regs);
 #if CONFIG_MM_REGIONS > 1
 void x86_addregion(void);
 #else
-# define x86_addregion()
+#  define x86_addregion()
 #endif
 
 /* Defined in xyz_serial.c */
@@ -200,15 +200,15 @@ void x86_serialinit(void);
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void x86_netinitialize(void);
 #else
-# define x86_netinitialize()
+#  define x86_netinitialize()
 #endif
 
 #ifdef CONFIG_USBDEV
 void x86_usbinitialize(void);
 void x86_usbuninitialize(void);
 #else
-# define x86_usbinitialize()
-# define x86_usbuninitialize()
+#  define x86_usbinitialize()
+#  define x86_usbuninitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */

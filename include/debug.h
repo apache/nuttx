@@ -815,12 +815,12 @@
 #  ifdef CONFIG_DEBUG_INFO
 #    define infodumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
 #  else
-#   define infodumpbuffer(m,b,n)
+#    define infodumpbuffer(m,b,n)
 #  endif
 #else
-#  define errdumpbuffer(m,b,n)
-#  define infodumpbuffer(m,b,n)
-# endif
+#    define errdumpbuffer(m,b,n)
+#    define infodumpbuffer(m,b,n)
+#  endif
 
 /* Subsystem specific debug */
 

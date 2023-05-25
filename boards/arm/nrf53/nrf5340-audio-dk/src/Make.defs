@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/nrf53/nrf5340-audio-dk/src/Makefile
+# boards/arm/nrf53/nrf5340-audio-dk/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -32,4 +32,6 @@ else
 CSRCS += nrf53_userleds.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

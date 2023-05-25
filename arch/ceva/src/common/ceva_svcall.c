@@ -60,9 +60,9 @@ int ceva_svcall(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-# ifndef CONFIG_DEBUG_SVCALL
+#  ifndef CONFIG_DEBUG_SVCALL
   if (cmd > SYS_switch_context)
-# endif
+#  endif
     {
       svcinfo("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
       svcinfo("A0: %08x %08x %08x %08x %08x %08x %08x\n",
@@ -70,11 +70,11 @@ int ceva_svcall(int irq, void *context, void *arg)
               regs[REG_A4], regs[REG_A5], regs[REG_A6]);
       svcinfo("FP: %08x LR: %08x PC: %08x IRQ: %08x OM: %08x\n",
               regs[REG_FP], regs[REG_LR], regs[REG_PC], regs[REG_IRQ],
-# ifdef REG_OM
+#  ifdef REG_OM
               regs[REG_OM]
-#else
+#  else
               0x00000000
-#endif
+#  endif
              );
     }
 #endif
@@ -381,11 +381,11 @@ int ceva_svcall(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-# ifndef CONFIG_DEBUG_SVCALL
+#  ifndef CONFIG_DEBUG_SVCALL
   if (cmd > SYS_switch_context)
-# else
+#  else
   if (regs != CURRENT_REGS)
-# endif
+#  endif
     {
       svcinfo("SVCall Return:\n");
       svcinfo("A0: %08x %08x %08x %08x %08x %08x %08x\n",
@@ -403,12 +403,12 @@ int ceva_svcall(int irq, void *context, void *arg)
 #endif
               );
     }
-# ifdef CONFIG_DEBUG_SVCALL
+#  ifdef CONFIG_DEBUG_SVCALL
   else
     {
       svcinfo("SVCall Return: %d\n", regs[REG_A0]);
     }
-# endif
+#  endif
 #endif
 
   return OK;

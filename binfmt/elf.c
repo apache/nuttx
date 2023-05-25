@@ -56,9 +56,9 @@
 #endif
 
 #ifdef CONFIG_ELF_DUMPBUFFER
-# define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
+#  define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
-# define elf_dumpbuffer(m,b,n)
+#  define elf_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -71,7 +71,8 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           int nexports);
 #ifdef CONFIG_ELF_COREDUMP
 static int elf_dumpbinary(FAR struct memory_region_s *regions,
-                          FAR struct lib_outstream_s *stream);
+                          FAR struct lib_outstream_s *stream,
+                          pid_t pid);
 #endif
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo);
@@ -161,7 +162,7 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
     }
 }
 #else
-# define elf_dumploadinfo(i)
+#  define elf_dumploadinfo(i)
 #endif
 
 /****************************************************************************
@@ -202,7 +203,7 @@ static void elf_dumpentrypt(FAR struct binary_s *binp,
 #endif
 }
 #else
-# define elf_dumpentrypt(b,l)
+#  define elf_dumpentrypt(b,l)
 #endif
 
 /****************************************************************************
@@ -316,12 +317,14 @@ errout_with_init:
 
 #ifdef CONFIG_ELF_COREDUMP
 static int elf_dumpbinary(FAR struct memory_region_s *regions,
-                          FAR struct lib_outstream_s *stream)
+                          FAR struct lib_outstream_s *stream,
+                          pid_t pid)
 {
   struct elf_dumpinfo_s dumpinfo;
 
   dumpinfo.regions = regions;
   dumpinfo.stream  = stream;
+  dumpinfo.pid     = pid;
 
   return elf_coredump(&dumpinfo);
 }

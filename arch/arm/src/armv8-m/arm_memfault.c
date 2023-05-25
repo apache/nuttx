@@ -38,9 +38,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_MEMFAULT
-# define mfalert(format, ...)  _alert(format, ##__VA_ARGS__)
+#  define mfalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
-# define mfalert(x...)
+#  define mfalert(x...)
 #endif
 
 /****************************************************************************

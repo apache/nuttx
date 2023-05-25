@@ -1165,6 +1165,38 @@ config GD25_SLOWREAD
 	bool
 	default n
 
+config GD25_START_DELAY
+	int "GD25 startdelay"
+	---help---
+		The delay between CS active and first CLK. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+config GD25_STOP_DELAY
+	int "GD25 stopdelay"
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+config GD25_CS_DELAY
+	int "GD25 csdelay"
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
+config GD25_IFDELAY
+	int "GD25 ifdelay"
+	---help---
+		The delay between frames. In ns.
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+
 endif # MTD_GD25
 
 config MTD_GD5F

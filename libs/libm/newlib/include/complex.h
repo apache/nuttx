@@ -178,9 +178,9 @@ long double creall(long double complex);
 
 double complex clog10(double complex);
 float complex clog10f(float complex);
-# if defined(__CYGWIN__)
+#  if defined(__CYGWIN__)
 long double complex clog10l(long double complex);
-# endif
+#  endif
 
 #ifdef __cplusplus
 }

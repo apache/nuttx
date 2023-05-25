@@ -33,9 +33,9 @@
 
 #if defined(CONFIG_KINETIS_I2C0)
 
-# if defined(CONFIG_SENSORS_FXOS8700CQ)
-#  include "nuttx/sensors/fxos8700cq.h"
-# endif
+#  if defined(CONFIG_SENSORS_FXOS8700CQ)
+#    include "nuttx/sensors/fxos8700cq.h"
+#  endif
 
 /****************************************************************************
  * Public Data

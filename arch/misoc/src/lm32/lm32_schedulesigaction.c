@@ -83,6 +83,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   if (!tcb->xcp.sigdeliver)
     {
+      tcb->xcp.sigdeliver = sigdeliver;
+
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
        */
@@ -101,6 +103,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
+              tcb->xcp.sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the
@@ -122,8 +125,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * been delivered.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_epc        = g_current_regs[REG_EPC];
+             tcb->xcp.saved_epc           = g_current_regs[REG_EPC];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
@@ -157,16 +159,15 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * been delivered.
            */
 
-          tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_epc        = tcb->xcp.regs[REG_EPC];
-          tcb->xcp.saved_int_ctx    = tcb->xcp.regs[REG_INT_CTX];
+          tcb->xcp.saved_epc         = tcb->xcp.regs[REG_EPC];
+          tcb->xcp.saved_int_ctx     = tcb->xcp.regs[REG_INT_CTX];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_EPC]      = (uint32_t)lm32_sigdeliver;
-          tcb->xcp.regs[REG_INT_CTX]  = 0;
+          tcb->xcp.regs[REG_EPC]     = (uint32_t)lm32_sigdeliver;
+          tcb->xcp.regs[REG_INT_CTX] = 0;
 
           sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                 tcb->xcp.saved_epc, tcb->xcp.saved_status,

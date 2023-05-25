@@ -34,32 +34,32 @@
 #include "arm-acle-compat.h"
 
 #if __ARM_ARCH >= 7 && defined (__ARM_ARCH_ISA_ARM)
-# define _ISA_ARM_7
+#  define _ISA_ARM_7
 #endif
 
 #if __ARM_ARCH >= 6 && defined (__ARM_ARCH_ISA_ARM)
-# define _ISA_ARM_6
+#  define _ISA_ARM_6
 #endif
 
 #if __ARM_ARCH >= 5
-# define _ISA_ARM_5
+#  define _ISA_ARM_5
 #endif
 
 #if __ARM_ARCH >= 4 && __ARM_ARCH_ISA_THUMB >= 1
-# define _ISA_ARM_4T
+#  define _ISA_ARM_4T
 #endif
 
 #if __ARM_ARCH >= 4 && __ARM_ARCH_ISA_THUMB == 0
-# define _ISA_ARM_4
+#  define _ISA_ARM_4
 #endif
 
 
 #if __ARM_ARCH_ISA_THUMB >= 2
-# define _ISA_THUMB_2
+#  define _ISA_THUMB_2
 #endif
 
 #if __ARM_ARCH_ISA_THUMB >= 1
-# define _ISA_THUMB_1
+#  define _ISA_THUMB_1
 #endif
 
 /* Check whether leaf function PAC signing has been requested in the
@@ -67,10 +67,10 @@
 #define LEAF_PROTECT_BIT 2
 
 #ifdef __ARM_FEATURE_PAC_DEFAULT
-# define HAVE_PAC_LEAF \
+#  define HAVE_PAC_LEAF \
 	((__ARM_FEATURE_PAC_DEFAULT & (1 << LEAF_PROTECT_BIT)) && 1)
 #else
-# define HAVE_PAC_LEAF 0
+#  define HAVE_PAC_LEAF 0
 #endif
 
 /* Provide default parameters for PAC-code handling in leaf-functions.  */
@@ -80,7 +80,7 @@
 # endif
 #else /* !HAVE_PAC_LEAF */
 # undef PAC_LEAF_PUSH_IP
-# define PAC_LEAF_PUSH_IP 0
+#  define PAC_LEAF_PUSH_IP 0
 #endif /* HAVE_PAC_LEAF */
 
 #define STACK_ALIGN_ENFORCE 0

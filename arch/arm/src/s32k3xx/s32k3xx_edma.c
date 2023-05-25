@@ -616,7 +616,9 @@ static inline void s32k3xx_tcd_configure(struct s32k3xx_edmatcd_s *tcd,
                    EDMA_TCD_ATTR_DMOD(config->dmod);
 #endif
   tcd->nbytes   = config->nbytes;
-  tcd->slast    = config->flags & EDMA_CONFIG_LOOPSRC ? -config->iter : 0;
+  tcd->slast    = config->flags & EDMA_CONFIG_LOOPSRC ?
+                                  -(config->iter * config->nbytes) : 0;
+
   tcd->daddr    = config->daddr;
   tcd->doff     = config->doff;
   tcd->citer    = config->iter & EDMA_TCD_CITER_MASK;
@@ -625,7 +627,8 @@ static inline void s32k3xx_tcd_configure(struct s32k3xx_edmatcd_s *tcd,
                                   0 : EDMA_TCD_CSR_DREQ;
   tcd->csr     |= config->flags & EDMA_CONFIG_INTHALF ?
                                   EDMA_TCD_CSR_INTHALF : 0;
-  tcd->dlastsga = config->flags & EDMA_CONFIG_LOOPDEST ? -config->iter : 0;
+  tcd->dlastsga = config->flags & EDMA_CONFIG_LOOPDEST ?
+                                  -(config->iter * config->nbytes) : 0;
 
 #ifdef CONFIG_S32K3XX_DTCM_HEAP
   /* Remap address to backdoor address for eDMA */

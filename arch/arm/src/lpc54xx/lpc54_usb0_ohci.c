@@ -364,8 +364,8 @@ static void lpc54_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t lpc54_getreg(uint32_t addr);
 static void lpc54_putreg(uint32_t val, uint32_t addr);
 #else
-# define lpc54_getreg(addr)     getreg32(addr)
-# define lpc54_putreg(val,addr) putreg32(val,addr)
+#  define lpc54_getreg(addr)     getreg32(addr)
+#  define lpc54_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Byte stream access helper functions **************************************/

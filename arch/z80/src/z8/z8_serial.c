@@ -214,13 +214,13 @@ static uart_dev_t g_uart1port =
 /* Now, which one with be tty0/console and which tty1? */
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define CONSOLE_DEV     g_uart1port
-# define TTYS0_DEV       g_uart1port
-# define TTYS1_DEV       g_uart0port
+#  define CONSOLE_DEV    g_uart1port
+#  define TTYS0_DEV      g_uart1port
+#  define TTYS1_DEV      g_uart0port
 #else
-# define CONSOLE_DEV     g_uart0port
-# define TTYS0_DEV       g_uart0port
-# define TTYS1_DEV       g_uart1port
+#  define CONSOLE_DEV    g_uart0port
+#  define TTYS0_DEV      g_uart0port
+#  define TTYS1_DEV      g_uart1port
 #endif
 
 /****************************************************************************
@@ -763,15 +763,15 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define z8_contrde() \
-  ((getreg8(*(Z8_UART1_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
-# define z8_contxd(ch) \
-  putreg8((uint8_t)(ch), *(Z8_UART1_BASE+Z8_UART_TXD))
+#  define z8_contrde() \
+   ((getreg8(*(Z8_UART1_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
+#  define z8_contxd(ch) \
+   putreg8((uint8_t)(ch), *(Z8_UART1_BASE+Z8_UART_TXD))
 #else
-# define z8_contrde() \
-  ((getreg8(*(Z8_UART0_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
-# define z8_contxd(ch) \
-  putreg8((uint8_t)(ch), *(Z8_UART0_BASE+Z8_UART_TXD))
+#  define z8_contrde() \
+   ((getreg8(*(Z8_UART0_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
+#  define z8_contxd(ch) \
+   putreg8((uint8_t)(ch), *(Z8_UART0_BASE+Z8_UART_TXD))
 #endif
 
 /****************************************************************************

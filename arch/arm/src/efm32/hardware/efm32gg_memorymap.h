@@ -68,7 +68,7 @@
 #define EFM32_FLASH_MEM_BASE       0x00000000 /* FLASH base address */
 #  define EFM32_FLASH_MEM_BITS     0x00000028 /* FLASH used bits */
 #define EFM32_RAM_CODE_MEM_BASE    0x10000000 /* RAM_CODE base address */
-# define EFM32_RAM_CODE_MEM_BITS   0x00000014 /* RAM_CODE used bits */
+#  define EFM32_RAM_CODE_MEM_BITS  0x00000014 /* RAM_CODE used bits */
 #define EFM32_RAM_MEM_BASE         0x20000000 /* RAM base address */
 #  define EFM32_RAM_MEM_BITS       0x00000018 /* RAM used bits */
 #define EFM32_PER_MEM_BASE         0x40000000 /* PER base address */

@@ -100,7 +100,7 @@ static void dldump_loadinfo(FAR struct mod_loadinfo_s *loadinfo)
     }
 }
 #else
-# define dldump_loadinfo(i)
+#  define dldump_loadinfo(i)
 #endif
 #endif
 
@@ -117,7 +117,7 @@ static void dldump_initializer(mod_initializer_t initializer,
                     MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
 }
 #else
-# define dldump_initializer(b,l)
+#  define dldump_initializer(b,l)
 #endif
 #endif
 
@@ -297,7 +297,8 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
 static inline FAR void *dlinsert(FAR const char *filename)
 {
-#warning Missing logic
+  /* #warning Missing logic */
+
   return NULL;
 }
 #endif

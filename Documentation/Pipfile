@@ -6,8 +6,12 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-m2r2 = "*"
+docutils = "==0.18.1"
+m2r2 = "==0.3.2"
 sphinx_rtd_theme = "*"
-Sphinx = "==4.5.0"
+Sphinx = "~=6.0"
 sphinx-tabs = "*"
 sphinx-autobuild = "*"
+sphinx-copybutton = "*"
+pytz = "*"
+importlib-metadata = "*"

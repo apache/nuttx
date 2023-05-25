@@ -263,13 +263,13 @@ static int  bl602_net_txavail(struct net_driver_s *dev);
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int bl602_net_addmac(struct net_driver_s *dev,
                             const uint8_t *mac);
-# ifdef CONFIG_NET_MCASTGROUP
+#  ifdef CONFIG_NET_MCASTGROUP
 static int bl602_net_rmmac(struct net_driver_s *dev,
                            const uint8_t *mac);
-# endif
-# ifdef CONFIG_NET_ICMPv6
+#  endif
+#  ifdef CONFIG_NET_ICMPv6
 static void bl602_net_ipv6multicast(struct bl602_net_driver_s *priv);
-# endif
+#  endif
 #endif
 
 #ifdef CONFIG_NETDEV_IOCTL

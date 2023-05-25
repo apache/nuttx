@@ -28,7 +28,8 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <arch/board/board.h>
+
 #include <nuttx/analog/adc.h>
 
 #include "stm32.h"

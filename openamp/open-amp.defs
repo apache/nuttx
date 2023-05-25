@@ -51,6 +51,8 @@ open-amp.zip:
 	$(Q) patch -p0 < 0014-rpmsg-add-cache-flash-when-hold-rx-buffer.patch
 	$(Q) patch -p0 < 0015-rpmsg-do-cache_invalidate-when-real-data-returned.patch
 	$(Q) patch -p0 < 0016-openamp-add-new-API-rpmsg_virtio_get_rxbuffer_size.patch
+	$(Q) patch -p0 < 0017-virtio-follow-virtio-1.2-spec-add-more-virtio-status.patch
+	$(Q) patch -p0 < 0018-virtio-decoupling-the-transport-layer-and-virtio-dev.patch
 
 
 

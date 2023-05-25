@@ -227,7 +227,7 @@ void weak_function sam_spidev_initialize(void);
 #ifdef CONFIG_SAM34_HSMCI
 int weak_function sam_hsmciinit(void);
 #else
-# define sam_hsmciinit()
+#  define sam_hsmciinit()
 #endif
 
 /****************************************************************************

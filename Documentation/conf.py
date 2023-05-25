@@ -54,6 +54,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
+    "sphinx_copybutton",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -121,3 +122,5 @@ linkcheck_ignore = [
 ]
 
 latex_engine = "lualatex"
+
+copybutton_exclude = ".linenos, .gp, .go"

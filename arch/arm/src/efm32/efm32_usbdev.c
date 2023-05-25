@@ -465,8 +465,8 @@ struct efm32_usbdev_s
 static uint32_t    efm32_getreg(uint32_t addr);
 static void        efm32_putreg(uint32_t val, uint32_t addr);
 #else
-# define efm32_getreg(addr)     getreg32(addr)
-# define efm32_putreg(val,addr) putreg32(val,addr)
+#  define efm32_getreg(addr)     getreg32(addr)
+#  define efm32_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Request queue operations *************************************************/

@@ -624,7 +624,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
   return bstop;
 }
 #else
-# define devif_poll_tcp_connections(dev, callback) (0)
+#  define devif_poll_tcp_connections(dev, callback) (0)
 #endif
 
 /****************************************************************************

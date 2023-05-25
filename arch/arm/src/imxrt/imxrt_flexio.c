@@ -772,7 +772,7 @@ static void imxrt_flexio_get_default_config(
  * param dev FlexIO peripheral dev address
  * param type Shifter type of enum flexio_shifter_buffer_type_e
  * param index Shifter index
- * return Corresponding shifter buffer index
+ * return Corresponding shifter buffer address
  */
 
 static uint32_t imxrt_flexio_get_shifter_buffer_address(
@@ -788,35 +788,43 @@ static uint32_t imxrt_flexio_get_shifter_buffer_address(
   switch (type)
     {
     case FLEXIO_SHIFTER_BUFFER:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUF0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUF0_OFFSET + index * 0x4);
       break;
 
     case FLEXIO_SHIFTER_BUFFER_BIT_SWAPPED:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUFBIS0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUFBIS0_OFFSET + index * 0x4);
       break;
 
     case FLEXIO_SHIFTER_BUFFER_BYTE_SWAPPED:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUFBYS0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUFBYS0_OFFSET + index * 0x4);
       break;
 
     case FLEXIO_SHIFTER_BUFFER_BIT_BYTE_SWAPPED:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUFBBS0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUFBBS0_OFFSET + index * 0x4);
       break;
 
     case FLEXIO_SHIFTER_BUFFER_NIBBLE_BYTE_SWAPPED:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUFNBS0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUFNBS0_OFFSET + index * 0x4);
       break;
 
     case FLEXIO_SHIFTER_BUFFER_HALF_WORD_SWAPPED:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUFHWS0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUFHWS0_OFFSET + index * 0x4);
       break;
 
     case FLEXIO_SHIFTER_BUFFER_NIBBLE_SWAPPED:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUFNIS0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUFNIS0_OFFSET + index * 0x4);
       break;
 
     default:
-      address = (uint32_t)(IMXRT_FLEXIO_SHIFTBUF0_OFFSET + index * 0x4);
+      address = (uint32_t)(((struct imxrt_flexiodev_s *)dev)->base +
+                           IMXRT_FLEXIO_SHIFTBUF0_OFFSET + index * 0x4);
       break;
     }
 

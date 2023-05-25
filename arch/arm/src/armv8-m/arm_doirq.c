@@ -33,6 +33,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "exc_return.h"
 
 /****************************************************************************
  * Public Functions
@@ -92,5 +93,19 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 #endif
 
   board_autoled_off(LED_INIRQ);
+
+#ifdef CONFIG_ARMV8M_TRUSTZONE_HYBRID
+  if (((1 << up_cpu_index()) & CONFIG_ARMV8M_TRUSTZONE_CPU_BITMASK) == 0)
+    {
+      regs[REG_EXC_RETURN] &=
+        ~(EXC_RETURN_EXC_SECURE | EXC_RETURN_SECURE_STACK);
+    }
+  else
+    {
+      regs[REG_EXC_RETURN] |=
+        (EXC_RETURN_EXC_SECURE | EXC_RETURN_SECURE_STACK);
+    }
+#endif
+
   return regs;
 }

@@ -122,7 +122,7 @@ void tiva_gpio_lockport(pinconfig_t pinconfig, bool lock);
 #ifdef CONFIG_DEBUG_GPIO_INFO
 void tiva_gpio_dumpconfig(pinconfig_t pinconfig);
 #else
-# define tiva_gpio_dumpconfig(p)
+#  define tiva_gpio_dumpconfig(p)
 #endif
 
 #ifdef CONFIG_TIVA_GPIO_IRQS

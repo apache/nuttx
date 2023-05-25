@@ -102,8 +102,8 @@ struct sam_lowerhalf_s
 static uint32_t sam_getreg(uintptr_t regaddr);
 static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 #else
-# define        sam_getreg(regaddr)        getreg32(regaddr)
-# define        sam_putreg(regval,regaddr) putreg32(regval,regaddr)
+#  define       sam_getreg(regaddr)        getreg32(regaddr)
+#  define       sam_putreg(regval,regaddr) putreg32(regval,regaddr)
 #endif
 
 /* Interrupt handling *******************************************************/

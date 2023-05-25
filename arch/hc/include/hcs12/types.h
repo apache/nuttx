@@ -59,7 +59,7 @@ typedef unsigned short     _uint16_t;
  * then an integer is 32-bits.  GCC will defined __INT__ accordingly:
  */
 
-# if __INT__ == 16
+#if __INT__ == 16
 typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 #else

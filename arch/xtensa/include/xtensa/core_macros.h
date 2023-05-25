@@ -36,7 +36,7 @@
                                         __asm__ __volatile__("rsr.ccount %0":\
                                         "=a"(__ccount)); __ccount; })
 
-# define XTHAL_SET_CCOUNT(v)             do { int __ccount = (int)(v); \
+#  define XTHAL_SET_CCOUNT(v)            do { int __ccount = (int)(v); \
                                          __asm__ __volatile__("wsr.ccount %0" :: "a"(__ccount):"memory");\
                                          } while(0)
 
