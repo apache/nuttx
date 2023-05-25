@@ -19,3 +19,4 @@ Guides
   zerolatencyinterrupts.rst
   nestedinterrupts.rst
   cortexmhardfaults.rst
+  coredump.rst
