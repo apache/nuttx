@@ -126,6 +126,11 @@ static int backtrace_branch(unsigned long top, unsigned long sp,
         }
 
       addr = (addr & ~1) - 2;
+      if (!in_code_region(addr))
+        {
+          continue;
+        }
+
       ins16 = *(uint16_t *)addr;
       if (INSTR_IS(ins16, T_BLX))
         {
@@ -145,6 +150,11 @@ static int backtrace_branch(unsigned long top, unsigned long sp,
       else if ((ins16 & 0xd000) == 0xd000)
         {
           addr -= 2;
+          if (!in_code_region(addr))
+            {
+              continue;
+            }
+
           ins16 = *(uint16_t *)addr;
           if (INSTR_IS(ins16, T_BL))
             {
