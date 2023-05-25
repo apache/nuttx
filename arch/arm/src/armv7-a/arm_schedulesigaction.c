@@ -349,13 +349,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #endif
                 }
 
-              /* Increment the IRQ lock count so that when the task is
-               * restarted, it will hold the IRQ spinlock.
-               */
-
-              DEBUGASSERT(tcb->irqcount < INT16_MAX);
-              tcb->irqcount++;
-
               /* NOTE: If the task runs on another CPU(cpu), adjusting
                * global IRQ controls will be done in the pause handler
                * on the CPU(cpu) by taking a critical section.
@@ -400,13 +393,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs +
                                                XCPTCONTEXT_SIZE;
-
-          /* Increment the IRQ lock count so that when the task is restarted,
-           * it will hold the IRQ spinlock.
-           */
-
-          DEBUGASSERT(tcb->irqcount < INT16_MAX);
-          tcb->irqcount++;
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
