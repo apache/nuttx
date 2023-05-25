@@ -835,6 +835,11 @@ static int nrf52_qspi_hw_initialize(struct nrf52_qspidev_s *priv)
   regval |= QSPI_IFCONFIG0_PPSIZE_512;
   nrf52_qspi_putreg(priv, NRF52_QSPI_IFCONFIG0_OFFSET, regval);
 
+  /* Configure RX delay */
+
+  nrf52_qspi_putreg(priv, NRF52_QSPI_IFTIMING_OFFSET,
+                    QSPI_IFTIMING_RXDELAY(CONFIG_NRF52_QSPI_RXDELAY));
+
   /* Enable READY interrupt */
 
   nrf52_qspi_putreg(priv, NRF52_QSPI_INTENSET_OFFSET, QSPI_INT_READY);
