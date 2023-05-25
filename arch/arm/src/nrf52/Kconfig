@@ -661,6 +661,21 @@ config NRF52_I2C_MASTER_COPY_BUF_SIZE
 
 endmenu
 
+menu "QSPI Configuration"
+
+if NRF52_QSPI
+
+config NRF52_QSPI_RXDELAY
+	int "QSPI RX delay"
+	default 2
+	range 0 7
+	---help---
+		The input serial data sampling delay.
+
+endif # NRF52_QSPI
+
+endmenu # QSPI Configuration
+
 menu "USBDEV Configuration"
 
 endmenu # USBDEV Configuration
