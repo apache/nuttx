@@ -192,6 +192,7 @@ menuconfig NET_MBIM
 menuconfig NET_SLIP
 	bool "SLIP support"
 	select ARCH_HAVE_NETDEV_STATISTICS
+	depends on NET_IPv4
 	default n
 	---help---
 		Enables building of the SLIP driver. SLIP requires
@@ -220,21 +221,6 @@ config NET_SLIP_NINTERFACES
 		Selects the number of physical SLIP
 		interfaces to support.
 		Default: 1
-
-config NET_SLIP_STACKSIZE
-	int "SLIP per-thread stack size"
-	default DEFAULT_TASK_STACKSIZE
-	---help---
-		Select the stack size of the SLIP RX and TX tasks.
-
-		SLIP starts two dedicated threads per interface
-		to handle network events, enabling high performance.
-
-config NET_SLIP_DEFPRIO
-	int "SLIP threads priority"
-	default 128
-	---help---
-		The priority of the SLIP RX and TX tasks. Default: 128
 
 endif # NET_SLIP
 
