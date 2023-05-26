@@ -25,7 +25,7 @@ This program will help you analyze memdump log files,
 analyze the number of occurrences of backtrace,
 and output stack information
 memdump log files need this format:
-pid   size  addr   mem
+pid   size  seq  addr   mem
 """
 
 
@@ -44,6 +44,11 @@ class dump_line:
             self.err = 1
             return
         self.size = int(tmp.group(0)[1:])
+        tmp = re.search("( \d+ )", line_str[tmp.span()[1] :])
+        if tmp is None:
+            self.err = 1
+            return
+        self.seq = int(tmp.group(0)[1:])
 
         tmp = re.findall("0x([0-9a-fA-F]+)", line_str[tmp.span()[1] :])
         self.addr = tmp[0]
