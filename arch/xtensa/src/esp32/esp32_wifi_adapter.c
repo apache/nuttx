@@ -278,7 +278,6 @@ static void esp_dport_access_stall_other_cpu_start(void);
 static void esp_dport_access_stall_other_cpu_end(void);
 static void wifi_apb80m_request(void);
 static void wifi_apb80m_release(void);
-static int32_t wifi_phy_update_country_info(const char *country);
 static int32_t esp_wifi_read_mac(uint8_t *mac, uint32_t type);
 static void esp_timer_arm(void *timer, uint32_t tmout, bool repeat);
 static void esp_timer_disarm(void *timer);
@@ -523,7 +522,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._phy_enable = esp32_phy_enable,
   ._phy_common_clock_enable = esp32_phy_enable_clock,
   ._phy_common_clock_disable = esp32_phy_disable_clock,
-  ._phy_update_country_info = wifi_phy_update_country_info,
+  ._phy_update_country_info = esp32_phy_update_country_info,
   ._read_mac = esp_wifi_read_mac,
   ._timer_arm = esp_timer_arm,
   ._timer_disarm = esp_timer_disarm,
@@ -2516,19 +2515,6 @@ static void wifi_apb80m_release(void)
 #ifdef CONFIG_ESP32_AUTO_SLEEP
   esp32_pm_lockrelease();
 #endif
-}
-
-/****************************************************************************
- * Name: wifi_phy_update_country_info
- *
- * Description:
- *   Don't support
- *
- ****************************************************************************/
-
-static int32_t wifi_phy_update_country_info(const char *country)
-{
-  return -1;
 }
 
 /****************************************************************************
