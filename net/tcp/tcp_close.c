@@ -53,7 +53,8 @@ static void tcp_close_work(FAR void *param)
 
   net_lock();
 
-  if (conn && conn->crefs == 0)
+  conn->flags &= ~TCP_CLOSE_ARRANGED;
+  if (conn->crefs == 0)
     {
       /* Stop the network monitor for all sockets */
 
@@ -186,6 +187,7 @@ end_wait:
 
   /* Free network resources */
 
+  conn->flags |= TCP_CLOSE_ARRANGED;
   work_queue(LPWORK, &conn->clswork, tcp_close_work, conn, 0);
 
   return flags;
