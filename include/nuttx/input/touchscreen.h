@@ -50,10 +50,10 @@
 
 /* Common TSC IOCTL commands */
 
-#define TSIOC_SETCALIB       _TSIOC(0x0001) /* arg: Pointer to
+#define TSIOC_SETXRCAL       _TSIOC(0x0001) /* arg: Pointer to
                                              * int Xplate R calibration value
                                              */
-#define TSIOC_GETCALIB       _TSIOC(0x0002) /* arg: Pointer to
+#define TSIOC_GETXRCAL       _TSIOC(0x0002) /* arg: Pointer to
                                              * int Xplate R calibration value
                                              */
 #define TSIOC_SETFREQUENCY   _TSIOC(0x0003) /* arg: Pointer to
