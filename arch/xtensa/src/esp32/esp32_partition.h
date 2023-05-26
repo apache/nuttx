@@ -84,6 +84,45 @@ extern "C"
 
 int esp32_partition_init(void);
 
+/****************************************************************************
+ * Name: esp32_partition_read
+ *
+ * Description:
+ *   Read data from SPI Flash at designated address.
+ *
+ * Input Parameters:
+ *   label  - Partition label
+ *   offset - Offset in SPI Flash
+ *   buf    - Data buffer pointer
+ *   size   - Data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_partition_read(const char *label, size_t offset, void *buf,
+                         size_t size);
+
+/****************************************************************************
+ * Name: esp32_partition_write
+ *
+ * Description:
+ *   Write data to SPI Flash at designated address.
+ *
+ * Input Parameters:
+ *   label  - Partition label
+ *   offset - Offset in SPI Flash
+ *   buf    - Data buffer pointer
+ *   size   - Data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_partition_write(const char *label, size_t offset, void *buf,
+                          size_t size);
 #ifdef __cplusplus
 }
 #endif

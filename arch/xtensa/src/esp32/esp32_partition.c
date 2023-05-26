@@ -761,6 +761,73 @@ static int partition_create_dev(const struct partition_info_priv *info,
 }
 
 /****************************************************************************
+ * Name: partition_get_offset
+ *
+ * Description:
+ *   Get offset in SPI flash of the partition label
+ *
+ * Input Parameters:
+ *   label - Partition label
+ *   size  - Data number
+ *
+ * Returned Value:
+ *   Get partition offset(>= 0) if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int partition_get_offset(const char *label, size_t size)
+{
+  int i;
+  int ret;
+  uint8_t *pbuf;
+  int partion_offset;
+  const struct partition_info_priv *info;
+  DEBUGASSERT(label != NULL);
+  struct mtd_dev_s *mtd = esp32_spiflash_get_mtd();
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to get SPI flash MTD\n");
+      return -ENOSYS;
+    }
+
+  pbuf = kmm_malloc(PARTITION_MAX_SIZE);
+  if (!pbuf)
+    {
+      ferr("ERROR: Failed to allocate %d byte\n", PARTITION_MAX_SIZE);
+      return -ENOMEM;
+    }
+
+  ret = MTD_READ(mtd, PARTITION_TABLE_OFFSET,
+                 PARTITION_MAX_SIZE, pbuf);
+  if (ret != PARTITION_MAX_SIZE)
+    {
+      ferr("ERROR: Failed to get read data from MTD\n");
+      kmm_free(pbuf);
+      return -EIO;
+    }
+
+  info = (struct partition_info_priv *)pbuf;
+  for (i = 0; i < PARTITION_MAX_NUM; i++)
+    {
+      if (memcmp(info[i].label, label, size) == 0)
+        {
+          partion_offset = info[i].offset;
+          break;
+        }
+    }
+
+  kmm_free(pbuf);
+  if (i == PARTITION_MAX_NUM)
+    {
+      ferr("ERROR: No %s  partition is created\n", label);
+      return -EPERM;
+    }
+
+  finfo("Get Partition offset: 0x%x\n", partion_offset);
+  return partion_offset;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -842,6 +909,102 @@ int esp32_partition_init(void)
     {
       ferr("ERROR: No partition is created\n");
       return -EPERM;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_partition_read
+ *
+ * Description:
+ *   Read data from SPI Flash at designated address.
+ *
+ * Input Parameters:
+ *   label  - Partition label
+ *   offset - Offset in SPI Flash
+ *   buf    - Data buffer pointer
+ *   size   - Data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_partition_read(const char *label, size_t offset, void *buf,
+                         size_t size)
+{
+  int ret;
+  int partion_offset;
+  DEBUGASSERT(label != NULL && buf != NULL);
+  struct mtd_dev_s *mtd = esp32_spiflash_get_mtd();
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to get SPI flash MTD\n");
+      return -ENOSYS;
+    }
+
+  partion_offset = partition_get_offset(label, sizeof(label));
+  if (partion_offset < 0)
+    {
+      ferr("ERROR: Failed to get partition: %s offset\n", label);
+      return partion_offset;
+    }
+
+  ret = MTD_READ(mtd, partion_offset + offset,
+                 size, (uint8_t *)buf);
+  if (ret != size)
+    {
+      ferr("ERROR: Failed to get read data from MTD\n");
+      return -EIO;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_partition_write
+ *
+ * Description:
+ *   Write data to SPI Flash at designated address.
+ *
+ * Input Parameters:
+ *   label  - Partition label
+ *   offset - Offset in SPI Flash
+ *   buf    - Data buffer pointer
+ *   size   - Data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_partition_write(const char *label, size_t offset, void *buf,
+                          size_t size)
+{
+  int ret;
+  int partion_offset;
+  DEBUGASSERT(label != NULL && buf != NULL);
+  struct mtd_dev_s *mtd = esp32_spiflash_get_mtd();
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to get SPI flash MTD\n");
+      return -ENOSYS;
+    }
+
+  partion_offset = partition_get_offset(label, sizeof(label));
+  if (partion_offset < 0)
+    {
+      ferr("ERROR: Failed to get partition: %s offset\n", label);
+      return partion_offset;
+    }
+
+  ret = MTD_WRITE(mtd, partion_offset + offset,
+                  size, (uint8_t *)buf);
+  if (ret != size)
+    {
+      ferr("ERROR: Failed to get read data from MTD\n");
+      return -EIO;
     }
 
   return OK;

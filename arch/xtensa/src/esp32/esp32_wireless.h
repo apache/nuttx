@@ -39,7 +39,10 @@
  * headers
  */
 
-#define CONFIG_ESP32_SUPPORT_MULTIPLE_PHY_INIT_DATA_BIN 0
+#ifdef CONFIG_ESP32_SUPPORT_MULTIPLE_PHY_INIT_DATA
+#  undef CONFIG_ESP32_SUPPORT_MULTIPLE_PHY_INIT_DATA_BIN
+#  define CONFIG_ESP32_SUPPORT_MULTIPLE_PHY_INIT_DATA_BIN 1
+#endif
 #define CONFIG_MAC_BB_PD                                0
 #define SOC_COEX_HW_PTI                                 0
 
@@ -197,5 +200,21 @@ void IRAM_ATTR phy_exit_critical(uint32_t level);
  ****************************************************************************/
 
 int phy_printf(const char *format, ...) printf_like(1, 2);
+
+/****************************************************************************
+ * Name: esp32_phy_update_country_info
+ *
+ * Description:
+ *   Update PHY init data according to country code
+ *
+ * Input Parameters:
+ *   country - PHY init data type
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int esp32_phy_update_country_info(const char *country);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WIRELESS_H */
