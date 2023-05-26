@@ -226,6 +226,8 @@ struct mcp2515_can_s
 
 /* MCP2515 Register access */
 
+static void mcp2515_config_spi(FAR struct mcp2515_can_s *priv);
+
 static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
               FAR uint8_t *buffer, uint8_t len);
 static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv,
@@ -302,6 +304,16 @@ static const struct can_ops_s g_mcp2515ops =
  * Private Functions
  ****************************************************************************/
 
+static void mcp2515_config_spi(FAR struct mcp2515_can_s *priv)
+{
+  /* Setup SPI frequency and mode */
+
+  SPI_SETFREQUENCY(priv->config->spi, CONFIG_MCP2515_SPI_SCK_FREQUENCY);
+  SPI_SETMODE(priv->config->spi, MCP2515_SPI_MODE);
+  SPI_SETBITS(priv->config->spi, 8);
+  SPI_HWFEATURES(priv->config->spi, 0);
+}
+
 static void mcp2515_read_2regs(FAR struct mcp2515_can_s *priv, uint8_t reg,
                                FAR uint8_t *v1, FAR uint8_t *v2)
 {
@@ -309,6 +321,7 @@ static void mcp2515_read_2regs(FAR struct mcp2515_can_s *priv, uint8_t reg,
   priv->spi_txbuf[1] = reg;
 
   SPI_LOCK(priv->config->spi, true);
+  mcp2515_config_spi(priv);
   SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(0), true);
   SPI_EXCHANGE(priv->config->spi, priv->spi_txbuf, priv->spi_rxbuf, 4);
   SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(0), false);
@@ -341,6 +354,8 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 #endif
 
   SPI_LOCK(config->spi, true);
+
+  mcp2515_config_spi(priv);
 
   /* Select the MCP2515 */
 
@@ -376,6 +391,8 @@ static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
   FAR struct mcp2515_config_s *config = priv->config;
 
   SPI_LOCK(config->spi, true);
+
+  mcp2515_config_spi(priv);
 
   /* Select the MCP2515 */
 
@@ -426,6 +443,8 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv,
 
   SPI_LOCK(config->spi, true);
 
+  mcp2515_config_spi(priv);
+
   /* Select the MCP2515 */
 
   SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
@@ -474,6 +493,8 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv,
   };
 
   SPI_LOCK(config->spi, true);
+
+  mcp2515_config_spi(priv);
 
   /* Select the MCP2515 */
 
@@ -2498,13 +2519,6 @@ FAR struct mcp2515_can_s *
       canerr("ERROR: Failed to allocate instance of mcp2515_can_s!\n");
       return NULL;
     }
-
-  /* Setup SPI frequency and mode */
-
-  SPI_SETFREQUENCY(config->spi, CONFIG_MCP2515_SPI_SCK_FREQUENCY);
-  SPI_SETMODE(config->spi, MCP2515_SPI_MODE);
-  SPI_SETBITS(config->spi, 8);
-  SPI_HWFEATURES(config->spi, 0);
 
   /* Perform one time data initialization */
 
