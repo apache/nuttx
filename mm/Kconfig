@@ -207,7 +207,7 @@ config MM_HEAP_MEMPOOL_THRESHOLD
 		than the threshold, the memory will be requested from the
 		multiple mempool by default.
 
-config MM_HEAP_MEMPOOL_EXPAND
+config MM_HEAP_MEMPOOL_EXPAND_SIZE
 	int "The expand size for each mempool in multiple mempool"
 	default 4096
 	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
@@ -215,12 +215,19 @@ config MM_HEAP_MEMPOOL_EXPAND
 		This size describes the size of each expansion of each memory
 		pool with insufficient memory in the multi-level memory pool.
 
-config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND
+config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
 	int "The expand size for multiple mempool's dictonary"
-	default MM_HEAP_MEMPOOL_EXPAND
+	default MM_HEAP_MEMPOOL_EXPAND_SIZE
 	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
 	---help---
 		This size describes the multiple mempool dictonary expend.
+
+config MM_HEAP_MEMPOOL_CHUNK_SIZE
+	int "The multiples pool chunk size"
+	default 0
+	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
+	---help---
+		This size describes the multiple mempool chunk size.
 
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
