@@ -559,6 +559,29 @@ nsh
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
 
+nxdiag
+------
+
+This configuration enables the NuttX diagnostics tool. By default, it will
+gather information about the NuttX system, its configuration, the compilation
+and linking flags used, the host system PATH and Espressif specific information.
+It can be used by executing the ``nxdiag`` application::
+
+    nsh> nxdiag --all
+    Nxdiag Report:
+
+    NuttX RTOS info:
+            Hostname:
+            Release: 10.4.0
+            Build: 75e13a67ba-dirty May 24 2023 14:53:27
+            Arch: xtensa
+            Config: esp32-devkitc:nxdiag
+
+    NuttX CFLAGS:
+            -fno-common
+            -Wall
+            ...
+
 nxlooper
 --------
 
