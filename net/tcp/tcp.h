@@ -106,12 +106,13 @@
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */
 #define TCP_SACK              0x02U /* Selective ACKs enabled */
+#define TCP_CLOSE_ARRANGED    0x04U /* Connection is arranged to be freed */
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
 /* The TCP flags for congestion control */
 
-#define TCP_INFR              0x04U /* The flag in Fast Recovery */
-#define TCP_INFT              0x08U /* The flag in Fast Transmitted */
+#define TCP_INFR              0x08U /* The flag in Fast Recovery */
+#define TCP_INFT              0x10U /* The flag in Fast Transmitted */
 
 #endif
 

@@ -842,7 +842,14 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Cancel close work */
 
-  work_cancel(LPWORK, &conn->clswork);
+  if ((conn->flags & TCP_CLOSE_ARRANGED) &&
+      work_cancel(LPWORK, &conn->clswork) != OK)
+    {
+      /* Close work is already running, tcp_free will be called again. */
+
+      net_unlock();
+      return;
+    }
 
   /* Cancel tcp timer */
 
