@@ -679,8 +679,8 @@
 /* Cache Size Selection Register (Cortex-M7) */
 
 #define NVIC_CSSELR_IND                 (1 << 0)  /* Bit 0: Selects either instruction or data cache */
-#  define NVIC_CSSELR_IND_ICACHE        (0 << 0)  /*   0=Instruction Cache */
-#  define NVIC_CSSELR_IND_DCACHE        (1 << 0)  /*   1=Data Cache */
+#  define NVIC_CSSELR_IND_ICACHE        (1 << 0)  /*   0=Instruction Cache */
+#  define NVIC_CSSELR_IND_DCACHE        (0 << 0)  /*   1=Data Cache */
 
 #define NVIC_CSSELR_LEVEL_SHIFT         (1)       /* Bit 1-3: Selects cache level */
 #define NVIC_CSSELR_LEVEL_MASK          (7 << NVIC_CSSELR_LEVEL_SHIFT)
