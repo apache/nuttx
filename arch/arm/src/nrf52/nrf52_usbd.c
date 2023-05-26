@@ -1143,7 +1143,9 @@ static void nrf52_epin_request(struct nrf52_usbdev_s *priv,
       privreq->req.xfrd += nbytes;
     }
 
-  else if (privreq->req.xfrd >= privreq->req.len)
+  /* Has all the request data been sent? */
+
+  if (privreq->req.xfrd >= privreq->req.len)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
 
