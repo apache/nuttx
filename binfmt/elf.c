@@ -247,16 +247,40 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   /* Bind the program to the exported symbol table */
 
-  ret = elf_bind(&loadinfo, exports, nexports);
-  if (ret != 0)
+  if (loadinfo.ehdr.e_type == ET_REL)
     {
-      berr("Failed to bind symbols program binary: %d\n", ret);
-      goto errout_with_load;
+      ret = elf_bind(&loadinfo, exports, nexports);
+      if (ret != 0)
+        {
+          berr("Failed to bind symbols program binary: %d\n", ret);
+          goto errout_with_load;
+        }
+
+      binp->entrypt = (main_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+    }
+  else if (loadinfo.ehdr.e_type == ET_EXEC)
+    {
+      if (nexports > 0)
+        {
+          berr("Cannot bind exported symbols to a "\
+                                    "fully linked executable\n");
+          ret = -ENOEXEC;
+          goto errout_with_load;
+        }
+
+      /* The entrypoint for a fully linked executable can be found directly */
+
+      binp->entrypt = (main_t)(loadinfo.ehdr.e_entry);
+    }
+
+  else
+    {
+        berr("Unexpected elf type %d\n", loadinfo.ehdr.e_type);
+        ret = -ENOEXEC;
     }
 
   /* Return the load information */
 
-  binp->entrypt   = (main_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
   binp->stacksize = CONFIG_ELF_STACKSIZE;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
