@@ -264,15 +264,6 @@ static int esp32_writeblk_encrypted(struct esp32_spiflash_s *priv,
                                     const uint8_t *buffer,
                                     uint32_t nbytes);
 
-#if 0
-static int esp32_read_highstatus(struct esp32_spiflash_s *priv,
-                                 uint32_t *status);
-#endif
-#if 0
-static int esp32_write_status(struct esp32_spiflash_s *priv,
-                              uint32_t status);
-#endif
-
 #ifdef CONFIG_ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
 static void esp32_spiflash_work(void *p);
 #endif
@@ -729,7 +720,7 @@ static void IRAM_ATTR esp32_set_read_opt(struct esp32_spiflash_s *priv)
  * Name: esp32_set_write_opt
  *
  * Description:
- *   Set SPI Flash to be direct read mode. Due to different SPI I/O mode
+ *   Set SPI Flash to be direct write mode. Due to different SPI I/O mode
  *   including DIO, QIO and so on. Different command and communication
  *   timing sequence are needed.
  *
@@ -845,83 +836,6 @@ static int IRAM_ATTR esp32_wait_idle(struct esp32_spiflash_s *priv)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: esp32_read_highstatus
- *
- * Description:
- *   Read SPI Flash high status register value.
- *
- * Input Parameters:
- *   spi    - ESP32 SPI Flash chip data
- *   status - status buffer pointer
- *
- * Returned Value:
- *   0 if success or a negative value if fail.
- *
- ****************************************************************************/
-
-#if 0
-static int esp32_read_highstatus(struct esp32_spiflash_s *priv,
-                                 uint32_t *status)
-{
-  uint32_t regval;
-
-  if (esp32_wait_idle(priv))
-    {
-      return -EIO;
-    }
-
-  if (esp_rom_spiflash_read_user_cmd(&regval, 0x35))
-    {
-      return -EIO;
-    }
-
-  *status = regval << 8;
-
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: esp32_write_status
- *
- * Description:
- *   Write status value to SPI Flash status register.
- *
- * Input Parameters:
- *   spi    - ESP32 SPI Flash chip data
- *   status - status data
- *
- * Returned Value:
- *   0 if success or a negative value if fail.
- *
- ****************************************************************************/
-
-#if 0
-static int esp32_write_status(struct esp32_spiflash_s *priv,
-                              uint32_t status)
-{
-  if (esp32_wait_idle(priv))
-    {
-      return -EIO;
-    }
-
-  spi_set_reg(priv, SPI_RD_STATUS_OFFSET, status);
-  spi_set_reg(priv, SPI_CMD_OFFSET, SPI_FLASH_WRSR);
-  while (spi_get_reg(priv, SPI_CMD_OFFSET) != 0)
-    {
-      ;
-    }
-
-  if (esp32_wait_idle(priv))
-    {
-      return -EIO;
-    }
-
-  return 0;
-}
-#endif
 
 /****************************************************************************
  * Name: esp32_enable_write
