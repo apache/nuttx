@@ -323,7 +323,7 @@ esp_rom_spiflash_read_status(esp32_spiflash_chip_t *spi,
                              uint32_t *status);
 
 /*****************************************************************************
- * Name: esp32_spiflash_read_statushigh
+ * Name: esp_rom_spiflash_read_statushigh
  *
  * Description:
  *   SPI Read Flash status register bits 8-15. We use CMD 0x35 (RDSR2).
@@ -344,8 +344,8 @@ esp_rom_spiflash_read_status(esp32_spiflash_chip_t *spi,
  *****************************************************************************/
 
 esp_rom_spiflash_result_t
-esp32_spiflash_read_statushigh(esp32_spiflash_chip_t *spi,
-                               uint32_t *status);
+esp_rom_spiflash_read_statushigh(esp32_spiflash_chip_t *spi,
+                                 uint32_t *status);
 
 /*****************************************************************************
  * Name: esp32_spiflash_write_status
@@ -656,6 +656,53 @@ esp_rom_spiflash_result_t
 esp_rom_spiflash_write(uint32_t dest_addr,
                        const uint32_t *src,
                        int32_t len);
+
+/*****************************************************************************
+ * Name: esp_rom_spiflash_enable_write
+ *
+ * Description:
+ *  Enable Flash write.
+ *
+ *  Please do not call this function in SDK.
+ *
+ * Input Parameters:
+ *   esp32_spiflash_chip_t *spi : The information for Flash, which is exported
+ *                                from ld file.
+ *
+ * Returned Value:
+ *   ESP_ROM_SPIFLASH_RESULT_OK : Write OK.
+ *   ESP_ROM_SPIFLASH_RESULT_ERR : Write error.
+ *   ESP_ROM_SPIFLASH_RESULT_TIMEOUT : Write timeout.
+ *
+ *****************************************************************************/
+
+esp_rom_spiflash_result_t
+esp_rom_spiflash_enable_write(esp32_spiflash_chip_t *spi);
+
+/*****************************************************************************
+ * Name: esp_rom_spiflash_write_status
+ *
+ * Description:
+ *  Write status to Flash status register.
+ *
+ *  Please do not call this function in SDK.
+ *
+ * Input Parameters:
+ *   esp32_spiflash_chip_t *spi : The information for Flash, which is exported
+ *                                from ld file.
+ *
+ *   uint32_t status_value : Value to write.
+ *
+ * Returned Value:
+ *   ESP_ROM_SPIFLASH_RESULT_OK : Write OK.
+ *   ESP_ROM_SPIFLASH_RESULT_ERR : Write error.
+ *   ESP_ROM_SPIFLASH_RESULT_TIMEOUT : Write timeout.
+ *
+ *****************************************************************************/
+
+esp_rom_spiflash_result_t
+esp_rom_spiflash_write_status(esp32_spiflash_chip_t *spi,
+                              uint32_t status_value);
 
 /*****************************************************************************
  * Name: esp_rom_spiflash_read
