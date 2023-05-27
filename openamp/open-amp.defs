@@ -20,6 +20,10 @@
 
 ifeq ($(CONFIG_OPENAMP),y)
 
+ifeq ($(CONFIG_OPENAMP_CACHE),y)
+  CFLAGS += -DVIRTIO_CACHED_BUFFERS -DVIRTIO_CACHED_VRINGS
+endif
+
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
 CSRCS += open-amp/lib/remoteproc/remoteproc.c
 CSRCS += open-amp/lib/remoteproc/remoteproc_virtio.c
