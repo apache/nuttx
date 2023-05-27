@@ -1,0 +1,28 @@
+From 8d69eb3524fd57753ab849ed790777f073242276 Mon Sep 17 00:00:00 2001
+From: wangbowen6 <wangbowen6@xiaomi.com>
+Date: Thu, 25 May 2023 21:01:17 +0800
+Subject: [PATCH] virtio.h: add version in device id table
+
+support the leagcy mmio transport (version 1)
+
+Change-Id: I194c587754668d28cb7be4dc1b58fa5ce1393414
+Signed-off-by: wangbowen6 <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index fb68c19..6ef1746 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -82,6 +82,7 @@ __deprecated static inline int deprecated_virtio_dev_slave(void)
+ struct virtio_device_id {
+ 	uint32_t device;
+ 	uint32_t vendor;
++	uint32_t version;
+ };
+ 
+ /*
+-- 
+2.25.1
+
