@@ -1531,7 +1531,7 @@ static int w25qxxxjv_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 #endif
               ret               = OK;
 
-              finfo("blocksize: %" PRIu16 " erasesize: %" PRIu32
+              finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32
                     " neraseblocks: %" PRIu32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
