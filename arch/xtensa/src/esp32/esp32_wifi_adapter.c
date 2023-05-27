@@ -3952,6 +3952,7 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
     }
 }
 
+#ifdef ESP32_WLAN_HAS_STA
 /****************************************************************************
  * Name: esp_wifi_auth_trans
  *
@@ -4051,6 +4052,7 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
 
   return cipher_mode;
 }
+#endif /* ESP32_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_freq_to_channel
@@ -5639,6 +5641,7 @@ int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set)
 
   return OK;
 }
+#endif //ESP32_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_get_txpower
@@ -5833,6 +5836,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
   return OK;
 }
 
+#ifdef ESP32_WLAN_HAS_STA
 /****************************************************************************
  * Name: esp_wifi_sta_rssi
  *
