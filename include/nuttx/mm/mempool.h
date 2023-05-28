@@ -109,8 +109,6 @@ struct mempool_s
 #endif
   spinlock_t lock;      /* The protect lock to mempool */
   sem_t      waitsem;   /* The semaphore of waiter get free block */
-  size_t     nexpend;   /* The number of expend memory for mempool */
-  size_t     totalsize; /* Total size of the expend for mempoll */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
