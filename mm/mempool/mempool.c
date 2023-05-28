@@ -390,12 +390,12 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
  * Name: mempool_info_task
  ****************************************************************************/
 
-struct mempoolinfo_task
+struct mallinfo_task
 mempool_info_task(FAR struct mempool_s *pool,
                   FAR const struct mm_memdump_s *dump)
 {
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
-  struct mempoolinfo_task info =
+  struct mallinfo_task info =
     {
       0, 0
     };
