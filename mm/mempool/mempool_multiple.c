@@ -766,13 +766,13 @@ mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool)
  * Name: mempool_multiple_info_task
  ****************************************************************************/
 
-struct mempoolinfo_task
+struct mallinfo_task
 mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
                            FAR const struct mm_memdump_s *dump)
 {
   int i;
-  struct mempoolinfo_task info;
-  struct mempoolinfo_task ret =
+  struct mallinfo_task info;
+  struct mallinfo_task ret =
     {
       0, 0
     };
