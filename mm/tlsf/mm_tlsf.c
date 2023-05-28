@@ -292,7 +292,7 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (handler->task->pid = PID_MM_ALLOC)
+      if (handler->task->pid == PID_MM_ALLOC)
         {
           handler->info->aordblks++;
           handler->info->uordblks += size;
@@ -419,10 +419,8 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #if CONFIG_MM_BACKTRACE < 0
       if (pid == PID_MM_ALLOC)
 #else
-      if ((dump->pid == PID_MM_ALLOC ||
-          buf->pid == dump->pid) &&
-          buf->seqno >= dump->seqmin &&
-          buf->seqno <= dump->seqmax)
+      if ((dump->pid == PID_MM_ALLOC || buf->pid == dump->pid) &&
+          buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
 #endif
         {
 #if CONFIG_MM_BACKTRACE < 0
@@ -450,7 +448,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #endif
         }
     }
-  else if (dump->pid <= PID_MM_FREE)
+  else if (dump->pid == PID_MM_FREE)
     {
       syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
     }
