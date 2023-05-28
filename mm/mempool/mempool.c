@@ -163,7 +163,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       pool->ibase = NULL;
     }
 
-  if (pool->initialsize > sizeof(sq_entry_t))
+  if (pool->initialsize >= blocksize + sizeof(sq_entry_t))
     {
       size_t ninitial = (pool->initialsize - sizeof(sq_entry_t)) / blocksize;
       size_t size = ninitial * blocksize + sizeof(sq_entry_t);
@@ -239,10 +239,11 @@ retry:
         }
       else
         {
+          size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+
           spin_unlock_irqrestore(&pool->lock, flags);
-          if (pool->expandsize > sizeof(sq_entry_t))
+          if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
             {
-              size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
               size_t nexpand = (pool->expandsize - sizeof(sq_entry_t)) /
                                blocksize;
               size_t size = nexpand * blocksize + sizeof(sq_entry_t);
@@ -545,14 +546,14 @@ int mempool_deinit(FAR struct mempool_s *pool)
       return -EBUSY;
     }
 
-  if (pool->initialsize > sizeof(sq_entry_t))
+  if (pool->initialsize >= blocksize + sizeof(sq_entry_t))
     {
       count = (pool->initialsize - sizeof(sq_entry_t)) / blocksize;
     }
 
   if (count == 0)
     {
-      if (pool->expandsize > sizeof(sq_entry_t))
+      if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
         {
           count = (pool->expandsize - sizeof(sq_entry_t)) / blocksize;
         }
@@ -566,7 +567,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
     {
       blk = (FAR sq_entry_t *)((FAR char *)blk - count * blocksize);
       pool->free(pool, blk);
-      if (pool->expandsize > sizeof(sq_entry_t))
+      if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
         {
           count = (pool->expandsize - sizeof(sq_entry_t)) / blocksize;
         }
