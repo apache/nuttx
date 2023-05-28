@@ -80,7 +80,7 @@ void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
   struct mallinfo_task info;
   struct malltask task;
 
-  task.pid = tcb ? tcb->pid : PID_MM_INVALID;
+  task.pid = tcb ? tcb->pid : PID_MM_LEAK;
   task.seqmin = 0;
   task.seqmax = ULONG_MAX;
   info = mm_mallinfo_task(arg, &task);
