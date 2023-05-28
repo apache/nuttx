@@ -149,7 +149,7 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
 #  if CONFIG_MM_BACKTRACE > 0
   tcb = nxsched_get_tcb(buf->pid);
   if (heap->mm_procfs.backtrace ||
-      (tcb && tcb->flags & TCB_FLAG_HEAPDUMP))
+      (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP))
     {
       int ret = backtrace(buf->backtrace, CONFIG_MM_BACKTRACE);
       if (ret < CONFIG_MM_BACKTRACE)
