@@ -485,31 +485,29 @@ void mempool_memdump(FAR struct mempool_s *pool,
     {
       FAR struct mempool_backtrace_s *buf;
 
-      list_for_every_entry(&pool->alist, buf, struct mempool_backtrace_s,
-                           node)
+      list_for_every_entry(&pool->alist, buf,
+                           struct mempool_backtrace_s, node)
         {
           if ((dump->pid == PID_MM_ALLOC || dump->pid == buf->pid) &&
               buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
             {
-#  if CONFIG_MM_BACKTRACE > 0
-              int i;
-              FAR const char *format = " %0*p";
-#  endif
-              char bt[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1];
+              char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
 
-              bt[0] = '\0';
 #  if CONFIG_MM_BACKTRACE > 0
+              FAR const char *format = " %0*p";
+              int i;
+
               for (i = 0; i < CONFIG_MM_BACKTRACE && buf->backtrace[i]; i++)
                 {
-                  snprintf(bt + i * MM_PTR_FMT_WIDTH,
-                           sizeof(bt) - i * MM_PTR_FMT_WIDTH,
+                  snprintf(tmp + i * MM_PTR_FMT_WIDTH,
+                           sizeof(tmp) - i * MM_PTR_FMT_WIDTH,
                            format, MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
                 }
 #  endif
 
               syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
                      (int)buf->pid, blocksize, buf->seqno,
-                     MM_PTR_FMT_WIDTH, ((FAR char *)buf - blocksize), bt);
+                     MM_PTR_FMT_WIDTH, ((FAR char *)buf - blocksize), tmp);
             }
         }
     }

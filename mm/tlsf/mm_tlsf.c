@@ -415,14 +415,12 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #if CONFIG_MM_BACKTRACE < 0
           syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
 #else
-#  if CONFIG_MM_BACKTRACE > 0
-          int i;
-          FAR const char *format = " %0*p";
-#  endif
-          char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1];
+          char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
 
-          tmp[0] = '\0';
 #  if CONFIG_MM_BACKTRACE > 0
+          FAR const char *format = " %0*p";
+          int i;
+
           for (i = 0; i < CONFIG_MM_BACKTRACE && buf->backtrace[i]; i++)
             {
               snprintf(tmp + i * MM_PTR_FMT_WIDTH,
