@@ -145,6 +145,8 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
   memset(&info, 0, sizeof(info));
   mm_foreach(heap, mallinfo_handler, &info);
   info.arena = heap->mm_heapsize;
+  info.arena += sizeof(struct mm_heap_s);
+  info.uordblks += sizeof(struct mm_heap_s);
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   poolinfo = mempool_multiple_mallinfo(heap->mm_mpool);
@@ -153,7 +155,7 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
   info.fordblks += poolinfo.fordblks;
 #endif
 
-  DEBUGASSERT((size_t)info.uordblks + info.fordblks == heap->mm_heapsize);
+  DEBUGASSERT(info.uordblks + info.fordblks == info.arena);
 
   return info;
 }
