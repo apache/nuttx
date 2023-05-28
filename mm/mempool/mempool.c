@@ -369,6 +369,7 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
   info->aordblks = pool->nalloc;
 #endif
   info->arena =
+    mempool_queue_lenth(&pool->equeue) * sizeof(sq_entry_t) +
     (info->aordblks + info->ordblks + info->iordblks) * blocksize;
   spin_unlock_irqrestore(&pool->lock, flags);
   info->sizeblks = blocksize;
