@@ -80,7 +80,7 @@ void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
   struct mallinfo_task info;
   struct malltask task;
 
-  task.pid = tcb ? tcb->pid : MM_BACKTRACE_INVALID_PID;
+  task.pid = tcb ? tcb->pid : PID_MM_INVALID;
   task.seqmin = 0;
   task.seqmax = ULONG_MAX;
   info = mm_mallinfo_task(arg, &task);
@@ -274,7 +274,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #  ifdef CONFIG_MM_DUMP_DETAILS_ON_FAILURE
       struct mm_memdump_s dump =
       {
-        MM_BACKTRACE_ALLOC_PID, 0, ULONG_MAX
+        PID_MM_ALLOC, 0, ULONG_MAX
       };
 #  endif
 #endif
