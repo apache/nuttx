@@ -61,7 +61,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
 #else
-      if ((dump->pid == PID_MM_ALLOC || node->pid == dump->pid) &&
+      if ((dump->pid == PID_MM_ALLOC || dump->pid == node->pid) &&
           node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
 #endif
         {
