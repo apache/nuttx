@@ -444,8 +444,9 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 #if CONFIG_MM_BACKTRACE >= 0
   buffer    += copysize;
   buflen    -= copysize;
-  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-              "The current sequence number %lu\n", g_mm_seqno);
+  linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                               "The current sequence number %lu\n",
+                               g_mm_seqno);
 
   totalsize += procfs_memcpy(procfile->line, linesize, buffer, buflen,
                              &offset);

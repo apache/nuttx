@@ -25,11 +25,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <malloc.h>
 #include <sys/types.h>
 
 #include <nuttx/list.h>
 #include <nuttx/queue.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -260,7 +260,7 @@ int mempool_deinit(FAR struct mempool_s *pool);
  *
  * Input Parameters:
  *   pool    - Address of the memory pool to be used.
- *   dump    - The information of what need dump.
+ *   task    - The information of what need retrieve.
  *
  * Returned Value:
  *   Statistics of memory information based on dump.
@@ -268,7 +268,7 @@ int mempool_deinit(FAR struct mempool_s *pool);
 
 struct mallinfo_task
 mempool_info_task(FAR struct mempool_s *pool,
-                  FAR const struct mm_memdump_s *dump);
+                  FAR const struct malltask *task);
 
 /****************************************************************************
  * Name: mempool_procfs_register
@@ -510,7 +510,7 @@ mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool);
  *
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
- *   dump  - The information of what need dump.
+ *   task  - The information of what need retrieve.
  *
  * Returned Value:
  *    Statistics of memory information based on dump.
@@ -518,7 +518,7 @@ mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool);
 
 struct mallinfo_task
 mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
-                           FAR const struct mm_memdump_s *dump);
+                           FAR const struct malltask *task);
 
 #undef EXTERN
 #if defined(__cplusplus)

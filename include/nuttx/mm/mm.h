@@ -99,6 +99,8 @@
 #  endif
 #endif
 
+#define mm_memdump_s malltask
+
 #define MM_BACKTRACE_INVALID_PID ((pid_t)-4)
 #define MM_BACKTRACE_MEMPOOL_PID ((pid_t)-3)
 #define MM_BACKTRACE_FREE_PID    ((pid_t)-2)
@@ -121,6 +123,10 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+#if CONFIG_MM_BACKTRACE >= 0
+extern unsigned long g_mm_seqno;
 #endif
 
 /* User heap structure:
@@ -316,14 +322,14 @@ void kmm_extend(FAR void *mem, size_t size, int region);
 
 struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap);
 struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
-                                      FAR const struct mm_memdump_s *dump);
+                                      FAR const struct malltask *task);
 
 /* Functions contained in kmm_mallinfo.c ************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 struct mallinfo kmm_mallinfo(void);
 #  if CONFIG_MM_BACKTRACE >= 0
-struct mallinfo_task kmm_mallinfo_task(FAR const struct mm_memdump_s *dump);
+struct mallinfo_task kmm_mallinfo_task(FAR const struct malltask *task);
 #  endif
 #endif
 
