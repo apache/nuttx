@@ -26,7 +26,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
-#include <malloc.h>
 #include <arch/esp32/memory_layout.h>
 
 #include "xtensa.h"
