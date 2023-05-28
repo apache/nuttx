@@ -138,23 +138,23 @@ struct mm_mallinfo_handler_s
  ****************************************************************************/
 
 static void memdump_backtrace(FAR struct mm_heap_s *heap,
-                              FAR struct memdump_backtrace_s *dump)
+                              FAR struct memdump_backtrace_s *buf)
 {
 #  if CONFIG_MM_BACKTRACE > 0
   FAR struct tcb_s *tcb;
 #  endif
 
-  dump->pid = _SCHED_GETTID();
-  dump->seqno = g_mm_seqno++;
+  buf->pid = _SCHED_GETTID();
+  buf->seqno = g_mm_seqno++;
 #  if CONFIG_MM_BACKTRACE > 0
-  tcb = nxsched_get_tcb(dump->pid);
+  tcb = nxsched_get_tcb(buf->pid);
   if (heap->mm_procfs.backtrace ||
       (tcb && tcb->flags & TCB_FLAG_HEAPDUMP))
     {
-      int ret = backtrace(dump->backtrace, CONFIG_MM_BACKTRACE);
+      int ret = backtrace(buf->backtrace, CONFIG_MM_BACKTRACE);
       if (ret < CONFIG_MM_BACKTRACE)
         {
-          dump->backtrace[ret] = NULL;
+          buf->backtrace[ret] = NULL;
         }
     }
 #  endif
@@ -234,14 +234,14 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
                                   size_t size)
 {
-  FAR struct memdump_backtrace_s *dump;
+  FAR struct memdump_backtrace_s *buf;
   FAR void *ret;
 
   ret = mm_memalign(arg, alignment, size);
   if (ret)
     {
-      dump = ret + mm_malloc_size(arg, ret);
-      dump->pid = MM_BACKTRACE_MEMPOOL_PID;
+      buf = ret + mm_malloc_size(arg, ret);
+      buf->pid = MM_BACKTRACE_MEMPOOL_PID;
     }
 
   return ret;
@@ -282,13 +282,13 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
                                   FAR void *user)
 {
 #if CONFIG_MM_BACKTRACE >= 0
-  FAR struct memdump_backtrace_s *dump;
+  FAR struct memdump_backtrace_s *buf;
 #endif
   FAR struct mm_mallinfo_handler_s *handler = user;
 
 #if CONFIG_MM_BACKTRACE >= 0
   size -= sizeof(struct memdump_backtrace_s);
-  dump = ptr + size;
+  buf = ptr + size;
 
   if (used)
     {
@@ -300,12 +300,12 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
         }
 #else
       if (handler->dump->pid == MM_BACKTRACE_ALLOC_PID ||
-          handler->dump->pid == dump->pid ||
+          handler->dump->pid == buf->pid ||
           (handler->dump->pid == MM_BACKTRACE_INVALID_PID &&
-           nxsched_get_tcb(dump->pid) == NULL))
+           nxsched_get_tcb(buf->pid) == NULL))
         {
-          if (dump->seqno >= handler->dump->seqmin &&
-              dump->seqno <= handler->dump->seqmax)
+          if (buf->seqno >= handler->dump->seqmin &&
+              buf->seqno <= handler->dump->seqmax)
             {
               handler->info->aordblks++;
               handler->info->uordblks += size;
@@ -409,10 +409,10 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 {
   FAR const struct mm_memdump_s *dump = user;
 #if CONFIG_MM_BACKTRACE >= 0
-  FAR struct memdump_backtrace_s *bt;
+  FAR struct memdump_backtrace_s *buf;
 
   size -= sizeof(struct memdump_backtrace_s);
-  bt = ptr + size;
+  buf = ptr + size;
 #endif
 
   if (used)
@@ -421,9 +421,9 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
       if (pid == MM_BACKTRACE_ALLOC_PID)
 #else
       if ((dump->pid == MM_BACKTRACE_ALLOC_PID ||
-          bt->pid == dump->pid) &&
-          bt->seqno >= dump->seqmin &&
-          bt->seqno <= dump->seqmax)
+          buf->pid == dump->pid) &&
+          buf->seqno >= dump->seqmin &&
+          buf->seqno <= dump->seqmax)
 #endif
         {
 #if CONFIG_MM_BACKTRACE < 0
@@ -433,21 +433,21 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
           int i;
           FAR const char *format = " %0*p";
 #  endif
-          char buf[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1];
+          char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1];
 
-          buf[0] = '\0';
+          tmp[0] = '\0';
 #  if CONFIG_MM_BACKTRACE > 0
-          for (i = 0; i < CONFIG_MM_BACKTRACE && dump->backtrace[i]; i++)
+          for (i = 0; i < CONFIG_MM_BACKTRACE && buf->backtrace[i]; i++)
             {
-              snprintf(buf + i * MM_PTR_FMT_WIDTH,
-                       sizeof(buf) - i * MM_PTR_FMT_WIDTH,
-                       format, MM_PTR_FMT_WIDTH - 1, dump->backtrace[i]);
+              snprintf(tmp + i * MM_PTR_FMT_WIDTH,
+                       sizeof(tmp) - i * MM_PTR_FMT_WIDTH,
+                       format, MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
             }
 #  endif
 
          syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                (int)bt->pid, size, bt->seqno, MM_PTR_FMT_WIDTH,
-                ptr, buf);
+                (int)buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH,
+                ptr, tmp);
 #endif
         }
     }
@@ -1058,9 +1058,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   if (ret)
     {
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(heap, ret);
+      FAR struct memdump_backtrace_s *buf = ret + mm_malloc_size(heap, ret);
 
-      memdump_backtrace(heap, dump);
+      memdump_backtrace(heap, buf);
 #endif
       kasan_unpoison(ret, mm_malloc_size(heap, ret));
     }
@@ -1112,9 +1112,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   if (ret)
     {
 #if CONFIG_MM_BACKTRACE >= 0
-      FAR struct memdump_backtrace_s *dump = ret + mm_malloc_size(heap, ret);
+      FAR struct memdump_backtrace_s *buf = ret + mm_malloc_size(heap, ret);
 
-      memdump_backtrace(heap, dump);
+      memdump_backtrace(heap, buf);
 #endif
       kasan_unpoison(ret, mm_malloc_size(heap, ret));
     }
@@ -1216,10 +1216,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 #if CONFIG_MM_BACKTRACE >= 0
   if (newmem)
     {
-      FAR struct memdump_backtrace_s *dump = newmem +
-                                             mm_malloc_size(heap, newmem);
+      FAR struct memdump_backtrace_s *buf =
+        newmem + mm_malloc_size(heap, newmem);
 
-      memdump_backtrace(heap, dump);
+      memdump_backtrace(heap, buf);
     }
 #endif
 
