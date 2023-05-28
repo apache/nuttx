@@ -393,7 +393,7 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
 
 struct mallinfo_task
 mempool_info_task(FAR struct mempool_s *pool,
-                  FAR const struct mm_memdump_s *dump)
+                  FAR const struct malltask *task)
 {
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
   struct mallinfo_task info =
@@ -401,7 +401,7 @@ mempool_info_task(FAR struct mempool_s *pool,
       0, 0
     };
 
-  if (dump->pid == MM_BACKTRACE_FREE_PID)
+  if (task->pid == MM_BACKTRACE_FREE_PID)
     {
       size_t count = mempool_queue_lenth(&pool->queue) +
                      mempool_queue_lenth(&pool->iqueue);
@@ -410,7 +410,7 @@ mempool_info_task(FAR struct mempool_s *pool,
       info.uordblks += count * pool->blocksize;
     }
 #if CONFIG_MM_BACKTRACE < 0
-  else if (dump->pid == MM_BACKTRACE_ALLOC_PID)
+  else if (task->pid == MM_BACKTRACE_ALLOC_PID)
     {
       size_t count = pool->nalloc;
 
@@ -425,11 +425,11 @@ mempool_info_task(FAR struct mempool_s *pool,
       list_for_every_entry(&pool->alist, buf, struct mempool_backtrace_s,
                            node)
         {
-          if (dump->pid == buf->pid || dump->pid == MM_BACKTRACE_ALLOC_PID ||
-              (dump->pid == MM_BACKTRACE_INVALID_PID &&
+          if (task->pid == buf->pid || task->pid == MM_BACKTRACE_ALLOC_PID ||
+              (task->pid == MM_BACKTRACE_INVALID_PID &&
                nxsched_get_tcb(buf->pid) == NULL))
             {
-              if (buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
+              if (buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
                 {
                   info.aordblks++;
                   info.uordblks += pool->blocksize;

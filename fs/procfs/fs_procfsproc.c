@@ -886,20 +886,20 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize = 0;
   struct mallinfo_task info;
-  struct mm_memdump_s dump;
+  struct malltask task;
 
-  dump.pid = tcb->pid;
-  dump.seqmin = 0;
-  dump.seqmax = ULONG_MAX;
+  task.pid = tcb->pid;
+  task.seqmin = 0;
+  task.seqmax = ULONG_MAX;
 #ifdef CONFIG_MM_KERNEL_HEAP
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
-      info = kmm_mallinfo_task(&dump);
+      info = kmm_mallinfo_task(&task);
     }
   else
 #endif
     {
-      info = mallinfo_task(&dump);
+      info = mallinfo_task(&task);
     }
 
   /* Show the heap alloc size */

@@ -122,7 +122,7 @@ struct memdump_backtrace_s
 
 struct mm_mallinfo_handler_s
 {
-  FAR const struct mm_memdump_s *dump;
+  FAR const struct malltask *task;
   FAR struct mallinfo_task *info;
 };
 
@@ -292,19 +292,19 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (handler->dump->pid = MM_BACKTRACE_ALLOC_PID)
+      if (handler->task->pid = MM_BACKTRACE_ALLOC_PID)
         {
           handler->info->aordblks++;
           handler->info->uordblks += size;
         }
 #else
-      if (handler->dump->pid == MM_BACKTRACE_ALLOC_PID ||
-          handler->dump->pid == buf->pid ||
-          (handler->dump->pid == MM_BACKTRACE_INVALID_PID &&
+      if (handler->task->pid == MM_BACKTRACE_ALLOC_PID ||
+          handler->task->pid == buf->pid ||
+          (handler->task->pid == MM_BACKTRACE_INVALID_PID &&
            nxsched_get_tcb(buf->pid) == NULL))
         {
-          if (buf->seqno >= handler->dump->seqmin &&
-              buf->seqno <= handler->dump->seqmax)
+          if (buf->seqno >= handler->task->seqmin &&
+              buf->seqno <= handler->task->seqmax)
             {
               handler->info->aordblks++;
               handler->info->uordblks += size;
@@ -312,7 +312,7 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
         }
 #endif
     }
-  else if (handler->dump->pid == MM_BACKTRACE_FREE_PID)
+  else if (handler->task->pid == MM_BACKTRACE_FREE_PID)
     {
       handler->info->aordblks++;
       handler->info->uordblks += size;
@@ -905,7 +905,7 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 }
 
 struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
-                                      FAR const struct mm_memdump_s *dump)
+                                      FAR const struct malltask *task)
 {
   struct mm_mallinfo_handler_s handle;
   struct mallinfo_task info =
@@ -920,10 +920,10 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 #endif
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  info = mempool_multiple_info_task(heap->mm_mpool, dump);
+  info = mempool_multiple_info_task(heap->mm_mpool, task);
 #endif
 
-  handle.dump = dump;
+  handle.task = task;
   handle.info = &info;
 #if CONFIG_MM_REGIONS > 1
   for (region = 0; region < heap->mm_nregions; region++)

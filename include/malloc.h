@@ -52,7 +52,7 @@ struct mallinfo
                  * by free (not in use) chunks. */
 };
 
-struct mm_memdump_s
+struct malltask
 {
   pid_t pid; /* Process id */
 #if CONFIG_MM_BACKTRACE >= 0
@@ -68,14 +68,6 @@ struct mallinfo_task
 };
 
 /****************************************************************************
- * Public data
- ****************************************************************************/
-
-#if CONFIG_MM_BACKTRACE >= 0
-extern unsigned long g_mm_seqno;
-#endif
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -86,7 +78,7 @@ extern "C"
 
 struct mallinfo mallinfo(void);
 size_t malloc_size(FAR void *ptr);
-struct mallinfo_task mallinfo_task(FAR const struct mm_memdump_s *dump);
+struct mallinfo_task mallinfo_task(FAR const struct malltask *task);
 
 #if defined(__cplusplus)
 }

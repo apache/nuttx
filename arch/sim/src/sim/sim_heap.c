@@ -397,8 +397,8 @@ struct mallinfo mm_mallinfo(struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
-                                      FAR const struct mm_memdump_s *dump)
+struct mallinfo_task mm_mallinfo_task(struct mm_heap_s *heap,
+                                      const struct malltask *task)
 {
   struct mallinfo_task info =
     {

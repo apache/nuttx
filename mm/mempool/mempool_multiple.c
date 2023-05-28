@@ -768,7 +768,7 @@ mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool)
 
 struct mallinfo_task
 mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
-                           FAR const struct mm_memdump_s *dump)
+                           FAR const struct malltask *task)
 {
   int i;
   struct mallinfo_task info;
@@ -779,7 +779,7 @@ mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
 
   for (i = 0; i < mpool->npools; i++)
     {
-      info = mempool_info_task(mpool->pools + i, dump);
+      info = mempool_info_task(mpool->pools + i, task);
       ret.aordblks += info.aordblks;
       ret.uordblks += info.uordblks;
     }
