@@ -41,6 +41,7 @@ config SENSORS_WTGAHRS2
 
 config SENSORS_FAKESENSOR
 	bool "Fake Sensor Support"
+	depends on SENSORS_GPS
 	default n
 	---help---
 		Simulate physical sensor by reading data from csv file.

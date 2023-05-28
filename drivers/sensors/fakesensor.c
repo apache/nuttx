@@ -36,6 +36,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/sensor.h>
+#include <nuttx/sensors/gps.h>
 #include <nuttx/signal.h>
 #include <debug.h>
 
@@ -45,7 +46,13 @@
 
 struct fakesensor_s
 {
-  struct sensor_lowerhalf_s lower;
+  union
+    {
+      struct sensor_lowerhalf_s lower;
+      struct gps_lowerhalf_s gps;
+    };
+
+  int type;
   struct file data;
   unsigned long interval;
   unsigned long batch;
@@ -60,14 +67,19 @@ struct fakesensor_s
  ****************************************************************************/
 
 static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
-                               FAR struct file *filep, bool sw);
+                               FAR struct file *filep, bool enable);
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                    FAR struct file *filep,
                                    FAR unsigned long *period_us);
 static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep,
                             FAR unsigned long *latency_us);
-static void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower,
+static int fakegps_activate(FAR struct gps_lowerhalf_s *lower,
+                            FAR struct file *filep, bool sw);
+static int fakegps_set_interval(FAR struct gps_lowerhalf_s *lower,
+                                FAR struct file *filep,
+                                FAR unsigned long *period_us);
+static void fakesensor_push_event(FAR struct fakesensor_s *sensor,
                                   uint64_t event_timestamp);
 static int fakesensor_thread(int argc, char** argv);
 
@@ -80,6 +92,12 @@ static struct sensor_ops_s g_fakesensor_ops =
   .activate = fakesensor_activate,
   .set_interval = fakesensor_set_interval,
   .batch = fakesensor_batch,
+};
+
+static struct gps_ops_s g_fakegps_ops =
+{
+  .activate = fakegps_activate,
+  .set_interval = fakegps_set_interval,
 };
 
 /****************************************************************************
@@ -178,55 +196,27 @@ static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor,
 
 static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
 {
-  struct sensor_gps gps;
-  float time;
-  char latitude;
-  char longitude;
-  int status;
-  int sate_num;
-  float hoop;
-  float altitude;
   char raw[150];
 
-  memset(&gps, 0, sizeof(struct sensor_gps));
-
-read:
-  fakesensor_read_csv_line(
-          &sensor->data, raw, sizeof(raw), sensor->raw_start);
-  FAR char *pos = strstr(raw, "GGA");
-  if (pos == NULL)
+  while (1)
     {
-      goto read;
+      fakesensor_read_csv_line(&sensor->data, raw,
+                               sizeof(raw), sensor->raw_start);
+      sensor->gps.push_data(sensor->gps.priv, raw,
+                            strlen(raw), true);
+      if (strstr(raw, "GGA") != NULL)
+        {
+          break;
+        }
     }
-
-  pos += 4;
-  sscanf(pos, "%f,%f,%c,%f,%c,%d,%d,%f,%f,", &time, &gps.latitude, &latitude,
-         &gps.longitude, &longitude, &status, &sate_num, &hoop, &altitude);
-  if (latitude == 'S')
-    {
-      gps.latitude = -gps.latitude;
-    }
-
-  if (longitude == 'W')
-    {
-      gps.longitude = -gps.longitude;
-    }
-
-  gps.latitude /= 100.0f;
-  gps.longitude /= 100.0f;
-
-  gps.altitude = altitude;
-
-  sensor->lower.push_event(sensor->lower.priv, &gps,
-                           sizeof(struct sensor_gps));
 }
 
 static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
-                               FAR struct file *filep, bool sw)
+                               FAR struct file *filep, bool enable)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
-  if (sw)
+  if (enable)
     {
       sensor->running = true;
 
@@ -242,6 +232,12 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
   return OK;
 }
 
+static int fakegps_activate(FAR struct gps_lowerhalf_s *lower,
+                            FAR struct file *filep, bool enable)
+{
+  return fakesensor_activate((FAR void *)lower, filep, enable);
+}
+
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                    FAR struct file *filep,
                                    FAR unsigned long *period_us)
@@ -250,6 +246,13 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                                  struct fakesensor_s, lower);
   sensor->interval = *period_us;
   return OK;
+}
+
+static int fakegps_set_interval(FAR struct gps_lowerhalf_s *lower,
+                                FAR struct file *filep,
+                                FAR unsigned long *period_us)
+{
+  return fakesensor_set_interval((FAR void *)lower, filep, period_us);
 }
 
 static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
@@ -272,12 +275,10 @@ static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
   return OK;
 }
 
-void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower,
+void fakesensor_push_event(FAR struct fakesensor_s *sensor,
                            uint64_t event_timestamp)
 {
-  FAR struct fakesensor_s *sensor = container_of(lower,
-                                                 struct fakesensor_s, lower);
-  switch (lower->type)
+  switch (sensor->type)
   {
     case SENSOR_TYPE_ACCELEROMETER:
       fakesensor_read_accel(sensor, event_timestamp);
@@ -292,6 +293,7 @@ void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower,
       break;
 
     case SENSOR_TYPE_GPS:
+    case SENSOR_TYPE_GPS_SATELLITE:
       fakesensor_read_gps(sensor);
       break;
 
@@ -341,13 +343,13 @@ static int fakesensor_thread(int argc, char** argv)
 
               for (i = 0; i < batch_num; i++)
                 {
-                  fakesensor_push_event(&sensor->lower, event_timestamp);
+                  fakesensor_push_event(sensor, event_timestamp);
                   event_timestamp += sensor->interval;
                 }
             }
           else
             {
-              fakesensor_push_event(&sensor->lower, sensor_get_timestamp());
+              fakesensor_push_event(sensor, sensor_get_timestamp());
             }
         }
 
@@ -406,10 +408,8 @@ int fakesensor_init(int type, FAR const char *file_name,
       return -ENOMEM;
     }
 
-  sensor->lower.type = type;
-  sensor->lower.ops = &g_fakesensor_ops;
-  sensor->lower.nbuffer = batch_number;
   sensor->file_path = file_name;
+  sensor->type = type;
 
   nxsem_init(&sensor->wakeup, 0, 0);
 
@@ -429,7 +429,18 @@ int fakesensor_init(int type, FAR const char *file_name,
 
   /*  Register sensor */
 
-  sensor_register(&sensor->lower, devno);
+  if (type == SENSOR_TYPE_GPS || type == SENSOR_TYPE_GPS_SATELLITE)
+    {
+      sensor->gps.ops = &g_fakegps_ops;
+      gps_register(&sensor->gps, devno, batch_number);
+    }
+  else
+    {
+      sensor->lower.type = type;
+      sensor->lower.ops = &g_fakesensor_ops;
+      sensor->lower.nbuffer = batch_number;
+      sensor_register(&sensor->lower, devno);
+    }
 
   return OK;
 }
