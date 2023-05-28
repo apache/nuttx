@@ -33,10 +33,10 @@
 
 /* Special PID to query the info about alloc, free and mempool */
 
-#define PID_MM_INVALID ((pid_t)-4)
-#define PID_MM_MEMPOOL ((pid_t)-3)
-#define PID_MM_FREE    ((pid_t)-2)
-#define PID_MM_ALLOC   ((pid_t)-1)
+#define PID_MM_FREE    ((pid_t)-4)
+#define PID_MM_ALLOC   ((pid_t)-3)
+#define PID_MM_INVALID ((pid_t)-2)
+#define PID_MM_MEMPOOL ((pid_t)-1)
 
 /* For Linux and MacOS compatibility */
 
