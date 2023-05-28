@@ -280,16 +280,9 @@ static void mallinfo_handler(FAR void *ptr, size_t size, int used,
 static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
                                   FAR void *user)
 {
-#if CONFIG_MM_BACKTRACE >= 0
-  FAR struct memdump_backtrace_s *buf;
-#endif
   FAR struct mm_mallinfo_handler_s *handler = user;
   FAR const struct malltask *task = handler->task;
   FAR struct mallinfo_task *info = handler->info;
-
-#if CONFIG_MM_BACKTRACE >= 0
-  size -= sizeof(struct memdump_backtrace_s);
-  buf = ptr + size;
 
   if (used)
     {
@@ -300,6 +293,9 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
           info->uordblks += size;
         }
 #else
+      FAR struct memdump_backtrace_s *buf =
+        ptr + size - sizeof(struct memdump_backtrace_s);
+
       if ((task->pid == PID_MM_ALLOC || task->pid == buf->pid ||
            (task->pid == PID_MM_LEAK && !!nxsched_get_tcb(buf->pid))) &&
           buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
@@ -314,7 +310,6 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
       info->aordblks++;
       info->uordblks += size;
     }
-#endif
 }
 
 /****************************************************************************
@@ -404,18 +399,15 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
                             FAR void *user)
 {
   FAR const struct mm_memdump_s *dump = user;
-#if CONFIG_MM_BACKTRACE >= 0
-  FAR struct memdump_backtrace_s *buf;
-
-  size -= sizeof(struct memdump_backtrace_s);
-  buf = ptr + size;
-#endif
 
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
 #else
+      FAR struct memdump_backtrace_s *buf =
+        ptr + size - sizeof(struct memdump_backtrace_s);
+
       if ((dump->pid == PID_MM_ALLOC || dump->pid == buf->pid) &&
           buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
 #endif
