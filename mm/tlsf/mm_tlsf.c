@@ -240,7 +240,7 @@ static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
   if (ret)
     {
       buf = ret + mm_malloc_size(arg, ret);
-      buf->pid = MM_BACKTRACE_MEMPOOL_PID;
+      buf->pid = PID_MM_MEMPOOL;
     }
 
   return ret;
@@ -292,15 +292,15 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (handler->task->pid = MM_BACKTRACE_ALLOC_PID)
+      if (handler->task->pid = PID_MM_ALLOC)
         {
           handler->info->aordblks++;
           handler->info->uordblks += size;
         }
 #else
-      if (handler->task->pid == MM_BACKTRACE_ALLOC_PID ||
+      if (handler->task->pid == PID_MM_ALLOC ||
           handler->task->pid == buf->pid ||
-          (handler->task->pid == MM_BACKTRACE_INVALID_PID &&
+          (handler->task->pid == PID_MM_INVALID &&
            nxsched_get_tcb(buf->pid) == NULL))
         {
           if (buf->seqno >= handler->task->seqmin &&
@@ -312,7 +312,7 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
         }
 #endif
     }
-  else if (handler->task->pid == MM_BACKTRACE_FREE_PID)
+  else if (handler->task->pid == PID_MM_FREE)
     {
       handler->info->aordblks++;
       handler->info->uordblks += size;
@@ -417,9 +417,9 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
   if (used)
     {
 #if CONFIG_MM_BACKTRACE < 0
-      if (pid == MM_BACKTRACE_ALLOC_PID)
+      if (pid == PID_MM_ALLOC)
 #else
-      if ((dump->pid == MM_BACKTRACE_ALLOC_PID ||
+      if ((dump->pid == PID_MM_ALLOC ||
           buf->pid == dump->pid) &&
           buf->seqno >= dump->seqmin &&
           buf->seqno <= dump->seqmax)
@@ -450,7 +450,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #endif
         }
     }
-  else if (dump->pid <= MM_BACKTRACE_FREE_PID)
+  else if (dump->pid <= PID_MM_FREE)
     {
       syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
     }
@@ -962,7 +962,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 #endif
   struct mallinfo_task info;
 
-  if (dump->pid >= MM_BACKTRACE_ALLOC_PID)
+  if (dump->pid >= PID_MM_ALLOC)
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
 #if CONFIG_MM_BACKTRACE < 0

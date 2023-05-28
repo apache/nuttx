@@ -59,9 +59,9 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
     {
       DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
-      if (dump->pid == MM_BACKTRACE_ALLOC_PID)
+      if (dump->pid == PID_MM_ALLOC)
 #else
-      if ((dump->pid == MM_BACKTRACE_ALLOC_PID || node->pid == dump->pid) &&
+      if ((dump->pid == PID_MM_ALLOC || node->pid == dump->pid) &&
           node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
 #endif
         {
@@ -106,7 +106,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                   SIZEOF_MM_NODE(fnode->flink) == 0 ||
                   SIZEOF_MM_NODE(fnode->flink) >= nodesize);
 
-      if (dump->pid <= MM_BACKTRACE_FREE_PID)
+      if (dump->pid <= PID_MM_FREE)
         {
           syslog(LOG_INFO, "%12zu%*p\n",
                  nodesize, MM_PTR_FMT_WIDTH,

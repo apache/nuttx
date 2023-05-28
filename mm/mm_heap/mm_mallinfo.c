@@ -96,15 +96,15 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
     {
       DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
-      if (handle->task->pid == MM_BACKTRACE_ALLOC_PID)
+      if (handle->task->pid == PID_MM_ALLOC)
         {
           handle->info->aordblks++;
           handle->info->uordblks += nodesize;
         }
 #else
-      if (handle->task->pid == MM_BACKTRACE_ALLOC_PID ||
+      if (handle->task->pid == PID_MM_ALLOC ||
           handle->task->pid == node->pid ||
-          (handle->task->pid == MM_BACKTRACE_INVALID_PID &&
+          (handle->task->pid == PID_MM_INVALID &&
            nxsched_get_tcb(node->pid) == NULL))
         {
           if (node->seqno >= handle->task->seqmin &&
@@ -116,7 +116,7 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
         }
 #endif
     }
-  else if (handle->task->pid == MM_BACKTRACE_FREE_PID)
+  else if (handle->task->pid == PID_MM_FREE)
     {
       handle->info->aordblks++;
       handle->info->uordblks += nodesize;

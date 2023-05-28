@@ -66,7 +66,7 @@ static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
     {
       node = (FAR struct mm_allocnode_s *)
       ((FAR char *)ret - SIZEOF_MM_ALLOCNODE);
-      node->pid = MM_BACKTRACE_MEMPOOL_PID;
+      node->pid = PID_MM_MEMPOOL;
     }
 
   return ret;
