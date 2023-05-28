@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <malloc.h>
-
 #include <nuttx/mm/mm.h>
 
 #ifdef CONFIG_MM_KERNEL_HEAP

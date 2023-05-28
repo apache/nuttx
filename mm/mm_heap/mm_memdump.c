@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <malloc.h>
 #include <assert.h>
 #include <debug.h>
 
