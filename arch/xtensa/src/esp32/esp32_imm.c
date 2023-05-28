@@ -176,7 +176,7 @@ bool xtensa_imm_heapmember(void *mem)
  *
  ****************************************************************************/
 
-struct mallinfo xtensa_imm_mallinfo()
+struct mallinfo xtensa_imm_mallinfo(void)
 {
   return mm_mallinfo(g_iheap);
 }
