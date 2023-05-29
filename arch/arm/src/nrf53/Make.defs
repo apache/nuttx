@@ -36,6 +36,10 @@ ifeq ($(CONFIG_NRF53_APPCORE),y)
 CHIP_CSRCS += nrf53_oscconfig.c
 endif
 
+ifeq ($(CONFIG_NRF53_PROGMEM),y)
+CHIP_CSRCS += nrf53_flash.c
+endif
+
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += nrf53_idle.c
 endif
