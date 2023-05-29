@@ -14,6 +14,10 @@ choice
 
 config ARCH_CHIP_NRF5340
 	bool "NRF5340"
+	select NRF53_CPUAPP_MEM_FLASH_1024
+	select NRF53_CPUAPP_MEM_RAM_512
+	select NRF53_CPUNET_MEM_FLASH_256
+	select NRF53_CPUNET_MEM_RAM_64
 
 endchoice # NRF53 Chip Selection
 
@@ -49,6 +53,46 @@ config ARCH_CHIP_NRF5340_CPUNET
 	select NRF53_NETCORE
 
 endchoice # NRF5340 Core Selection
+
+# RAM size for the app core
+
+config NRF53_CPUAPP_MEM_RAM_512
+	bool
+	default n
+
+config NRF53_CPUAPP_MEM_RAM_SIZE
+	hex
+	default 0x080000 if NRF53_CPUAPP_MEM_RAM_512
+
+# RAM size for the net core
+
+config NRF53_CPUNET_MEM_RAM_64
+	bool
+	default n
+
+config NRF53_CPUNET_MEM_RAM_SIZE
+	hex
+	default 0x008000 if NRF53_CPUNET_MEM_RAM_64
+
+# FLASH size for the app core
+
+config NRF53_CPUAPP_MEM_FLASH_1024
+	bool
+	default n
+
+config NRF53_CPUAPP_MEM_FLASH_SIZE
+	hex
+	default 0x100000 if NRF53_CPUAPP_MEM_FLASH_1024
+
+# FLASH size for the net core
+
+config NRF53_CPUNET_MEM_FLASH_256
+	bool
+	default n
+
+config NRF53_CPUNET_MEM_FLASH_SIZE
+	hex
+	default 0x040000 if NRF53_CPUNET_MEM_FLASH_256
 
 if NRF53_APPCORE
 
@@ -397,6 +441,19 @@ config NRF53_SYSTIMER_RTC_INSTANCE
 endif
 
 endmenu # System Timer
+
+config NRF53_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	default y
+	---help---
+		Enable FLASH prefetch
+
+config NRF53_PROGMEM
+	bool "FLASH program memory"
+	default n
+	select ARCH_HAVE_PROGMEM
+	---help---
+		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
 menu "PWM configuration"
 
