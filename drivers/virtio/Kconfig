@@ -27,6 +27,12 @@ config DRIVERS_VIRTIO_BLK
 	depends on !DISABLE_MOUNTPOINT
 	default n
 
+config DRIVERS_VIRTIO_GPU
+	bool "Virtio gpu support"
+	default n
+	depends on VIDEO_FB
+	select FB_UPDATE
+
 config DRIVERS_VIRTIO_NET
 	bool "Virtio network support"
 	depends on NETDEVICES

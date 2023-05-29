@@ -32,6 +32,10 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_BLK),y)
   CSRCS += virtio-blk.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_GPU),y)
+  CSRCS += virtio-gpu.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VIRTIO_NET),y)
   CSRCS += virtio-net.c
 endif
