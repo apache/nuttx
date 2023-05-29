@@ -29,6 +29,7 @@
 #include <nuttx/virtio/virtio.h>
 
 #include "virtio-blk.h"
+#include "virtio-gpu.h"
 #include "virtio-net.h"
 #include "virtio-rng.h"
 #include "virtio-serial.h"
@@ -122,6 +123,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_blk_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_GPU
+  ret = virtio_register_gpu_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_gpu_driver failed, ret=%d\n", ret);
     }
 #endif
 
