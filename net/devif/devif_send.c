@@ -66,8 +66,8 @@
  *
  ****************************************************************************/
 
-void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
-                int len, unsigned int offset)
+int devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
+               int len, unsigned int offset)
 {
   int ret;
 
@@ -113,8 +113,9 @@ void devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
 
   dev->d_sndlen = len;
 
-  return;
+  return dev->d_sndlen;
 
 errout:
   nerr("ERROR: devif_send error: %d\n", ret);
+  return ret;
 }
