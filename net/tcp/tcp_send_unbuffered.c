@@ -126,6 +126,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct send_s *pstate = pvpriv;
   FAR struct tcp_conn_s *conn;
+  int ret;
 
   DEBUGASSERT(pstate != NULL);
 
@@ -283,8 +284,12 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * happen until the polling cycle completes).
        */
 
-      devif_send(dev, &pstate->snd_buffer[pstate->snd_acked],
-                 sndlen, tcpip_hdrsize(conn));
+      ret = devif_send(dev, &pstate->snd_buffer[pstate->snd_acked],
+                       sndlen, tcpip_hdrsize(conn));
+      if (ret <= 0)
+        {
+          goto end_wait;
+        }
 
       /* Continue waiting */
 
@@ -365,11 +370,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
            * happen until the polling cycle completes).
            */
 
-          devif_send(dev, &pstate->snd_buffer[pstate->snd_sent],
-                     sndlen, tcpip_hdrsize(conn));
-          if (dev->d_sndlen == 0)
+          ret = devif_send(dev, &pstate->snd_buffer[pstate->snd_sent],
+                           sndlen, tcpip_hdrsize(conn));
+          if (ret <= 0)
             {
-              return flags;
+              goto end_wait;
             }
 
           /* Update the amount of data sent (but not necessarily ACKed) */

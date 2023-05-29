@@ -53,9 +53,9 @@
  *
  ****************************************************************************/
 
-void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
-                    unsigned int len, unsigned int offset,
-                    unsigned int target_offset)
+int devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
+                   unsigned int len, unsigned int offset,
+                   unsigned int target_offset)
 {
   int ret;
 
@@ -105,10 +105,11 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
   lib_dumpbuffer("devif_iob_send", dev->d_appdata, len);
 #endif
 
-  return;
+  return dev->d_sndlen;
 
 errout:
   nerr("ERROR: devif_iob_send error: %d\n", ret);
+  return ret;
 }
 
 #endif /* CONFIG_MM_IOB */

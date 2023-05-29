@@ -105,10 +105,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the packet data into the device packet buffer and send it */
 
-          devif_send(dev, pstate->snd_buffer, pstate->snd_buflen, 0);
-          if (dev->d_sndlen == 0)
+          int ret = devif_send(dev, pstate->snd_buffer,
+                               pstate->snd_buflen, 0);
+          if (ret <= 0)
             {
-              return flags;
+              pstate->snd_sent = ret;
+              goto end_wait;
             }
 
           pstate->snd_sent = pstate->snd_buflen;
@@ -119,6 +121,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           IFF_SET_NOARP(dev->d_flags);
         }
+
+end_wait:
 
       /* Don't allow any further call backs. */
 
