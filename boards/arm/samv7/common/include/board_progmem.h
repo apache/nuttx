@@ -39,6 +39,10 @@ struct mtd_partition_s
 {
   size_t            offset;    /* Partition offset from the beginning of MTD */
   size_t            size;      /* Partition size in bytes */
+  uint8_t           type;      /* Optional if more devices types (block
+                                * character, smartfs) have to be distinguish
+                                * in board related code.
+                                */
   const char       *devpath;   /* Partition device path */
   struct mtd_dev_s *mtd;       /* Pointer to allocated MTD partition */
 };
