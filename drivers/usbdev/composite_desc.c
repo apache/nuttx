@@ -56,7 +56,7 @@ static const struct usb_devdesc_s g_devdesc =
     LSBYTE(0x0200),
     MSBYTE(0x0200)
   },
-#ifndef CONFIG_COMPOSITE_IAD
+#ifdef CONFIG_COMPOSITE_IAD
   USB_CLASS_MISC,                               /* classid */
   2,                                            /* subclass */
   1,                                            /* protocol */
