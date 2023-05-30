@@ -22,8 +22,11 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = flash_config.ld
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+  ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flash_config.ld
+else
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash_config.ld
+endif
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
