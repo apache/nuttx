@@ -5,6 +5,30 @@ Nordic nRF52
 The nRF52 series of chips from Nordic Semiconductor are based around an ARM Cortex-M4 core running
 at 64 MHz and feature Bluetooth Low Energy (BLE) support.
 
+
+Memory Map
+==========
+
+nRF52832
+--------
+
+============ ============= ======
+Block Name   Start Address Length
+============ ============= ======
+FLASH        0x00000000    512K
+RAM          0x20000000    64K
+============ ============= ======
+
+nRF52840
+--------
+
+============ ============= ======
+Block Name   Start Address Length
+============ ============= ======
+FLASH        0x00000000    1024K
+RAM          0x20000000    256K
+============ ============= ======
+
 Clock Configuration
 ===================
 
@@ -39,7 +63,7 @@ PDM         No
 PPI         Yes
 PWM         Yes
 QDEC        No
-QSPI        No
+QSPI        Yes
 RADIO       Yes     Basic
 RNG         Yes
 RTC         Yes
@@ -52,7 +76,7 @@ TWIM        Yes
 TWIS        No
 UART        Yes
 UARTE       No
-USBD        No
+USBD        Yes
 WDT         Yes
 ==========  ======= =====
 
@@ -134,6 +158,12 @@ PWM
 PWM is supported via standard driver. This means that more advanced features such as
 complex sequences or waveform modes are not yet supported.
 
+QSPI
+----
+
+QSPI is supported both in interrupt-based (via EasyDMA) mode and is exposed
+via standard QSPI interface.
+
 RNG
 ---
 
@@ -150,6 +180,11 @@ RTC
 
 The RTC peripheral is exposed as a standard timer, since it is really a low-power
 timer, without any date handling capabilities.
+
+USBD
+----
+
+The USBD peripheral is exposed via standard USBDEV interface.
 
 WDT
 ---

@@ -28,8 +28,8 @@ Pin Mapping
 ===== =========== ==========
 Pin   Signal       Notes
 ===== =========== ==========
-P0.6  User Button Active LOW
-P0.7  User LED    Active LOW
+P0.06 User Button Active LOW
+P0.07 User LED    Active LOW
 P0.26 UART TXO
 P0.27 UART RXI
 ===== =========== ==========
