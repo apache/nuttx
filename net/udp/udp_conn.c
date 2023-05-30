@@ -77,7 +77,7 @@
 /* The array containing all UDP connections. */
 
 #if CONFIG_NET_UDP_PREALLOC_CONNS > 0
-struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_PREALLOC_CONNS];
+static struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_PREALLOC_CONNS];
 #endif
 
 /* A list of all free UDP connections */
@@ -463,7 +463,7 @@ static inline FAR struct udp_conn_s *
  ****************************************************************************/
 
 #if CONFIG_NET_UDP_ALLOC_CONNS > 0
-FAR struct udp_conn_s *udp_alloc_conn(void)
+static FAR struct udp_conn_s *udp_alloc_conn(void)
 {
   FAR struct udp_conn_s *conn;
   int i;
