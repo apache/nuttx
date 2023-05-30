@@ -1777,7 +1777,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                        value == CDCACM_DATAALTIFID))
                   {
                     cdcacm_resetconfig(priv);
-                    cdcacm_setconfig(priv, priv->config);
+                    cdcacm_setconfig(priv, CDCACM_CONFIGID);
                     ret = 0;
                   }
               }
