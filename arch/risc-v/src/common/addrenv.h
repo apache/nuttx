@@ -52,6 +52,14 @@
 #  define ARCH_ADDRENV_VBASE    (CONFIG_ARCH_DATA_VBASE)
 #endif
 
+/* Maximum user address environment size */
+
+#define ARCH_ADDRENV_MAX_SIZE   (0x40000000)
+
+/* User address environment end */
+
+#define ARCH_ADDRENV_VEND       (ARCH_ADDRENV_VBASE + ARCH_ADDRENV_MAX_SIZE)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

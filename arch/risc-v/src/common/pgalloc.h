@@ -95,7 +95,7 @@ static inline bool riscv_uservaddr(uintptr_t vaddr)
    * heap, or stack regions.
    */
 
-  return vaddr >= ARCH_ADDRENV_VBASE;
+  return vaddr >= ARCH_ADDRENV_VBASE && vaddr < ARCH_ADDRENV_VEND;
 }
 
 /****************************************************************************
