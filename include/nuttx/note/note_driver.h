@@ -134,7 +134,8 @@ int note_initialize(void);
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
-#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
+#if defined(CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE) && \
+    CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 
 /****************************************************************************
  * Name: note_get_taskname
@@ -154,7 +155,9 @@ int note_initialize(void);
 
 int note_get_taskname(pid_t pid, FAR char *name);
 
-#endif /* CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0 */
+#endif /* defined(CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE) && \
+        * CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
+        */
 
 /****************************************************************************
  * Name: note_driver_register

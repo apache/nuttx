@@ -2644,7 +2644,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
+static int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct fat_mountpt_s *fs;
   int ret;
@@ -2692,8 +2692,8 @@ int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
  *
  ****************************************************************************/
 
-int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
-               FAR const char *newrelpath)
+static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
+                      FAR const char *newrelpath)
 {
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_dirinfo_s dirinfo;
