@@ -165,7 +165,9 @@ struct mpfs_i2c_priv_s
   bool                   fpga;        /* FPGA i2c */
 };
 
-#ifdef CONFIG_MPFS_I2C0
+#ifndef CONFIG_MPFS_COREI2C
+
+#  ifdef CONFIG_MPFS_I2C0
 static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
 {
   .ops            = &mpfs_i2c_ops,
@@ -187,9 +189,9 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
   .initialized    = false,
   .fpga           = false
 };
-#endif /* CONFIG_MPFS_I2C0 */
+#  endif /* CONFIG_MPFS_I2C0 */
 
-#ifdef CONFIG_MPFS_I2C1
+#  ifdef CONFIG_MPFS_I2C1
 static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
 {
   .ops            = &mpfs_i2c_ops,
@@ -211,79 +213,57 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
   .initialized    = false,
   .fpga           = false
 };
-#endif /* CONFIG_MPFS_I2C1 */
+#  endif /* CONFIG_MPFS_I2C1 */
 
-#ifdef CONFIG_MPFS_COREI2C0
-static struct mpfs_i2c_priv_s g_mpfs_corei2c0_priv =
-{
-  .ops            = &mpfs_i2c_ops,
-  .id             = 0,
-  .hw_base        = 0x4b000000,
-  .plic_irq       = MPFS_IRQ_FABRIC_F2H_6,
-  .msgv           = NULL,
-  .frequency      = 0,
-  .ser_address    = 0,
-  .target_addr    = 0,
-  .lock           = NXMUTEX_INITIALIZER,
-  .sem_isr        = SEM_INITIALIZER(0),
-  .refs           = 0,
-  .tx_size        = 0,
-  .tx_idx         = 0,
-  .rx_size        = 0,
-  .rx_idx         = 0,
-  .status         = MPFS_I2C_SUCCESS,
-  .initialized    = false,
-  .fpga           = true
-};
-#endif /* CONFIG_MPFS_COREI2C0 */
+#else  /* ifndef CONFIG_MPFS_COREI2C */
 
-#ifdef CONFIG_MPFS_COREI2C1
-static struct mpfs_i2c_priv_s g_mpfs_corei2c1_priv =
+static struct mpfs_i2c_priv_s
+  g_mpfs_corei2c_priv[CONFIG_MPFS_COREI2C_INSTANCES] =
 {
-  .ops            = &mpfs_i2c_ops,
-  .id             = 1,
-  .hw_base        = 0x4b001000,
-  .plic_irq       = MPFS_IRQ_FABRIC_F2H_7,
-  .msgv           = NULL,
-  .frequency      = 0,
-  .ser_address    = 0,
-  .target_addr    = 0,
-  .lock           = NXMUTEX_INITIALIZER,
-  .sem_isr        = SEM_INITIALIZER(0),
-  .refs           = 0,
-  .tx_size        = 0,
-  .tx_idx         = 0,
-  .rx_size        = 0,
-  .rx_idx         = 0,
-  .status         = MPFS_I2C_SUCCESS,
-  .initialized    = false,
-  .fpga           = true
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 1)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 2)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 3)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 4)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 5)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 6)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 7)
+    {
+    .lock           = NXMUTEX_INITIALIZER,
+    },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 8)
+#  error Too many instances (>8)
+#  endif
 };
-#endif /* CONFIG_MPFS_COREI2C1 */
 
-#ifdef CONFIG_MPFS_COREI2C2
-static struct mpfs_i2c_priv_s g_mpfs_corei2c2_priv =
-{
-  .ops            = &mpfs_i2c_ops,
-  .id             = 2,
-  .hw_base        = 0x4b002000,
-  .plic_irq       = MPFS_IRQ_FABRIC_F2H_8,
-  .msgv           = NULL,
-  .frequency      = 0,
-  .ser_address    = 0,
-  .target_addr    = 0,
-  .lock           = NXMUTEX_INITIALIZER,
-  .sem_isr        = SEM_INITIALIZER(0),
-  .refs           = 0,
-  .tx_size        = 0,
-  .tx_idx         = 0,
-  .rx_size        = 0,
-  .rx_idx         = 0,
-  .status         = MPFS_I2C_SUCCESS,
-  .initialized    = false,
-  .fpga           = true
-};
-#endif /* CONFIG_MPFS_COREI2C2 */
+#endif
 
 static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
                                   uint32_t frequency);
@@ -930,36 +910,34 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
   struct mpfs_i2c_priv_s *priv;
   int ret;
 
+#ifndef CONFIG_MPFS_COREI2C
+
   switch (port)
     {
-#ifdef CONFIG_MPFS_I2C0
+#  ifdef CONFIG_MPFS_I2C0
       case 0:
         priv = &g_mpfs_i2c0_lo_priv;
         break;
-#endif /* CONFIG_MPFS_I2C0 */
-#ifdef CONFIG_MPFS_I2C1
+#  endif /* CONFIG_MPFS_I2C0 */
+#  ifdef CONFIG_MPFS_I2C1
       case 1:
         priv = &g_mpfs_i2c1_lo_priv;
         break;
-#endif /* CONFIG_MPFS_I2C1 */
-#ifdef CONFIG_MPFS_COREI2C0
-      case 0:
-        priv = &g_mpfs_corei2c0_priv;
-        break;
-#endif
-#ifdef CONFIG_MPFS_COREI2C1
-      case 1:
-        priv = &g_mpfs_corei2c1_priv;
-        break;
-#endif
-#ifdef CONFIG_MPFS_COREI2C2
-      case 2:
-        priv = &g_mpfs_corei2c2_priv;
-        break;
-#endif
+#  endif /* CONFIG_MPFS_I2C1 */
       default:
         return NULL;
   }
+
+#else /* ifndef CONFIG_MPFS_COREI2C */
+
+  if (port < 0 || port >= CONFIG_MPFS_COREI2C_INSTANCES)
+    {
+      return NULL;
+    }
+
+  priv = &g_mpfs_corei2c_priv[port];
+
+#endif
 
   nxmutex_lock(&priv->lock);
   if (priv->refs++ != 0)
@@ -971,6 +949,17 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
 
       return (struct i2c_master_s *)priv;
     }
+
+#ifdef CONFIG_MPFS_COREI2C
+  priv->ops = &mpfs_i2c_ops;
+  priv->id = port;
+  priv->hw_base = CONFIG_MPFS_COREI2C_BASE +
+    port * CONFIG_MPFS_COREI2C_INST_OFFSET;
+  priv->plic_irq = MPFS_IRQ_FABRIC_F2H_0 + CONFIG_MPFS_COREI2C_IRQNUM + port;
+  nxsem_init(&priv->sem_isr, 0, 0);
+  priv->status = MPFS_I2C_SUCCESS;
+  priv->fpga = true;
+#endif
 
   ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
   if (ret != OK)
