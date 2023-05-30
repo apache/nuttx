@@ -440,7 +440,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 #if CONFIG_NET_TCP_ALLOC_CONNS > 0
-FAR struct tcp_conn_s *tcp_alloc_conn(void)
+static FAR struct tcp_conn_s *tcp_alloc_conn(void)
 {
   FAR struct tcp_conn_s *conn;
   int i;

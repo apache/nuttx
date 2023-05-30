@@ -150,9 +150,9 @@ int bt_gatt_attr_read_service(FAR struct bt_conn_s *conn,
                            sizeof(uuid->u.u128));
 }
 
-int bt_gatt_attr_read_include(FAR struct bt_conn_s *conn,
-                              FAR const struct bt_gatt_attr_s *attr,
-                              FAR void *buf, uint8_t len, uint16_t offset)
+int bt_gatt_attr_read_included(FAR struct bt_conn_s *conn,
+                               FAR const struct bt_gatt_attr_s *attr,
+                               FAR void *buf, uint8_t len, uint16_t offset)
 {
   FAR struct bt_gatt_include_s *incl = attr->user_data;
   struct gatt_incl_s pdu;
