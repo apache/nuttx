@@ -27,6 +27,7 @@
 #include <nuttx/lib/lib.h>
 #include <assert.h>
 #include <debug.h>
+#include <obstack.h>
 
 /****************************************************************************
  * Private Function Prototypes

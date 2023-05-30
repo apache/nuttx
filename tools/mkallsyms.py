@@ -61,6 +61,10 @@ class SymbolTables(object):
 
         self.emitline("#include <nuttx/compiler.h>")
         self.emitline("#include <nuttx/symtab.h>\n")
+        self.emitline("extern int g_nallsyms;\n")
+        self.emitline(
+            "extern struct symtab_s g_allsyms[%d + 2];\n" % len(self.symbol_list)
+        )
         self.emitline("%s int g_nallsyms = %d + 2;" % (noconst, len(self.symbol_list)))
         self.emitline(
             "%s struct symtab_s g_allsyms[%d + 2] =\n{"

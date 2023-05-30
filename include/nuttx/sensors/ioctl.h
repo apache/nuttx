@@ -212,7 +212,6 @@
 
 #define SNIOC_DISTANCESHORT        _SNIOC(0x0060) /* Arg: None */
 #define SNIOC_DISTANCELONG         _SNIOC(0x0061) /* Arg: None */
-#define SNIOC_CALIBRATE            _SNIOC(0x0062) /* Arg: b16_t value */
 #define SNIOC_TEMPUPDATE           _SNIOC(0x0063) /* Arg: b16_t value */
 
 /* IOCTL commands unique to the ISL29023 */
