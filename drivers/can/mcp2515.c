@@ -322,9 +322,9 @@ static void mcp2515_read_2regs(FAR struct mcp2515_can_s *priv, uint8_t reg,
 
   SPI_LOCK(priv->config->spi, true);
   mcp2515_config_spi(priv);
-  SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(0), true);
+  SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(priv->config->devid), true);
   SPI_EXCHANGE(priv->config->spi, priv->spi_txbuf, priv->spi_rxbuf, 4);
-  SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(0), false);
+  SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(priv->config->devid), false);
   SPI_LOCK(priv->config->spi, false);
 
   *v1 = priv->spi_rxbuf[2];
@@ -359,7 +359,7 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Select the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), true);
 
   /* Send the READ command */
 
@@ -372,7 +372,7 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Deselect the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), false);
 
   /* Unlock bus */
 
@@ -396,7 +396,7 @@ static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
 
   /* Select the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), true);
 
   /* Send the READ command */
 
@@ -404,7 +404,7 @@ static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
 
   /* Deselect the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), false);
 
   /* Unlock bus */
 
@@ -447,7 +447,7 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv,
 
   /* Select the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), true);
 
   /* Send the READ command */
 
@@ -460,7 +460,7 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv,
 
   /* Deselect the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), false);
 
   /* Unlock bus */
 
@@ -498,13 +498,13 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv,
 
   /* Select the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), true);
 
   SPI_SNDBLOCK(config->spi, wr, 4);
 
   /* Deselect the MCP2515 */
 
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), false);
 
   /* Unlock bus */
 
@@ -1196,9 +1196,9 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
   /* Send SPI reset command to MCP2515 */
 
   SPI_LOCK(config->spi, true);
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), true);
   SPI_SEND(config->spi, MCP2515_RESET);
-  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), false);
   SPI_LOCK(config->spi, false);
 
   /* Wait 1ms to let MCP2515 restart */
