@@ -32,6 +32,7 @@
 #include <nuttx/init.h>
 #include <nuttx/clock.h>
 #include <nuttx/streams.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
 

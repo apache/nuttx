@@ -50,7 +50,7 @@
 
 #define _ALT_E              0x01
 #define _ALT_O              0x02
-#define _LEGAL_ALT(x)       { if (alt_format & ~(x)) return (0); }
+#define _LEGAL_ALT(x)       { if (alt_format & ~(x)) return (NULL); }
 
 /****************************************************************************
  * Private Data

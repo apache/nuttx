@@ -56,6 +56,7 @@
 
 #include <stdint.h>
 #include <sys/param.h>
+#include <sys/socket.h>
 
 #include <nuttx/net/ethernet.h>
 
@@ -247,6 +248,10 @@
  * packet size of all enabled link layer protocols.
  */
 
+#ifndef CONFIG_NET_LOOPBACK_PKTSIZE
+#  define CONFIG_NET_LOOPBACK_PKTSIZE 0
+#endif
+
 #if CONFIG_NET_LOOPBACK_PKTSIZE < MAX_NETDEV_PKTSIZE
 #  define NET_LO_PKTSIZE        MAX_NETDEV_PKTSIZE
 #else
@@ -254,7 +259,7 @@
 #endif
 
 #ifndef CONFIG_NET_SEND_BUFSIZE
-#define CONFIG_NET_SEND_BUFSIZE 0
+#  define CONFIG_NET_SEND_BUFSIZE 0
 #endif
 
 /* Layer 3/4 Configuration Options ******************************************/
