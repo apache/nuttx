@@ -285,28 +285,36 @@ config MPFS_I2C1
 	select ARCH_HAVE_I2CRESET
 	default n
 
-config MPFS_COREI2C0
-	bool "Core I2C 0"
+config MPFS_COREI2C
+	bool "Core I2C"
 	depends on !MPFS_I2C0
-	select ARCH_HAVE_I2CRESET
-	default n
-	---help---
-		Selects the FPGA i2c0 driver.
-
-config MPFS_COREI2C1
-	bool "Core I2C 1"
 	depends on !MPFS_I2C1
 	select ARCH_HAVE_I2CRESET
 	default n
 	---help---
-		Selects the FPGA i2c1 driver.
+		Selects the FPGA I2C driver.
 
-config MPFS_COREI2C2
-	bool "Core I2C 2"
-	select ARCH_HAVE_I2CRESET
-	default n
-	---help---
-		Selects the FPGA i2c2 driver.
+config MPFS_COREI2C_BASE
+	hex "Base address for the (first) CoreI2C instance"
+	default 0x4B000000
+	depends on MPFS_COREI2C
+
+config MPFS_COREI2C_INST_OFFSET
+	hex "Offset of instances in memory, base + n * offset finds instance n"
+	default 0x1000
+	depends on MPFS_COREI2C
+
+config MPFS_COREI2C_INSTANCES
+	int "Amount of CoreI2C instances"
+	default 3
+	range 1 8
+	depends on MPFS_COREI2C
+
+config MPFS_COREI2C_IRQNUM
+	int "Number of (first) F2H interrupt"
+	default 6
+	range 0 63
+	depends on MPFS_COREI2C
 
 config MPFS_EMMCSD
 	bool "EMMCSD"
