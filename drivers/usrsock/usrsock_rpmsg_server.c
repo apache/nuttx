@@ -494,7 +494,7 @@ out:
     }
 
   retr = usrsock_rpmsg_send_ack(ept, events, req->head.xid, ret);
-  if (retr >= 0 && events == 0)
+  if (retr >= 0 && (ret > 0 || ret == -EAGAIN) && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
                                priv->pfds[req->usockid].events | POLLOUT);
