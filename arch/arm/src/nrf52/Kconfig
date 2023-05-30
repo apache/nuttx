@@ -13,11 +13,15 @@ choice
 config ARCH_CHIP_NRF52832
 	bool "NRF52832"
 	select ARCH_FAMILY_NRF52
+	select NRF52_MEM_FLASH_512
+	select NRF52_MEM_RAM_64
 	select NRF52_HAVE_BPROT
 
 config ARCH_CHIP_NRF52833
 	bool "NRF52832"
 	select ARCH_FAMILY_NRF52
+	select NRF52_MEM_FLASH_512
+	select NRF52_MEM_RAM_128
 	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
@@ -28,6 +32,8 @@ config ARCH_CHIP_NRF52833
 config ARCH_CHIP_NRF52840
 	bool "NRF52840"
 	select ARCH_FAMILY_NRF52
+	select NRF52_MEM_FLASH_1024
+	select NRF52_MEM_RAM_256
 	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
@@ -44,6 +50,51 @@ endchoice # NRF52 Chip Selection
 config ARCH_FAMILY_NRF52
 	bool
 	default n
+
+# RAM size
+
+config NRF52_MEM_RAM_32
+	bool
+	default n
+
+config NRF52_MEM_RAM_64
+	bool
+	default n
+
+config NRF52_MEM_RAM_128
+	bool
+	default n
+
+config NRF52_MEM_RAM_256
+	bool
+	default n
+
+config NRF52_MEM_RAM_SIZE
+	hex
+	default 0x008000 if NRF52_MEM_RAM_32
+	default 0x010000 if NRF52_MEM_RAM_64
+	default 0x020000 if NRF52_MEM_RAM_128
+	default 0x040000 if NRF52_MEM_RAM_256
+
+# FLASH size
+
+config NRF52_MEM_FLASH_256
+	bool
+	default n
+
+config NRF52_MEM_FLASH_512
+	bool
+	default n
+
+config NRF52_MEM_FLASH_1024
+	bool
+	default n
+
+config NRF52_MEM_FLASH_SIZE
+	hex
+	default 0x040000 if NRF52_MEM_FLASH_256
+	default 0x080000 if NRF52_MEM_FLASH_512
+	default 0x100000 if NRF52_MEM_FLASH_1024
 
 # Peripheral support
 
