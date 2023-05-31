@@ -108,9 +108,9 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
+  arm_fpuconfig();
   tiva_clock_configure();
   tiva_lowsetup();
-  arm_fpuconfig();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
