@@ -18,10 +18,18 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#ifdef CONFIG_RPTUN
+#  define RPTUN_SHMEM 0x8000
+#else
+#  define RPTUN_SHMEM 0
+#endif
+
 MEMORY
 {
     progmem (rx)  : ORIGIN = 0x00000000, LENGTH = 1024K
-    datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K
+    datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K - RPTUN_SHMEM
 }
 
 OUTPUT_ARCH(arm)
