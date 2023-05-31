@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_arch_timer.h
+ * arch/arm/src/fvp-v8r-aarch32/fvp_boot.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,41 +18,63 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_R_ARM_ARCH_TIMER_H
-#define __ARCH_ARM_SRC_ARMV7_R_ARM_ARCH_TIMER_H
+#ifndef __ARCH_ARM_SRC_FVP_V8R_FVP_BOOT_H
+#define __ARCH_ARM_SRC_FVP_V8R_FVP_BOOT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "arm_gic.h"
-#include "arm_internal.h"
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <arch/chip/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* CNTV_CVAL, Counter-timer Virtual Timer CompareValue register
- * CNTV_CTL, Counter-timer Virtual Timer Control register
- */
-
-#define CNTV_CTL_ENABLE_BIT         BIT(0)
-#define CNTV_CTL_IMASK_BIT          BIT(1)
-
-#define CONFIG_ARM_TIMER_SECURE_IRQ         (GIC_PPI_INT_BASE + 13)
-#define CONFIG_ARM_TIMER_NON_SECURE_IRQ     (GIC_PPI_INT_BASE + 14)
-#define CONFIG_ARM_TIMER_VIRTUAL_IRQ        (GIC_PPI_INT_BASE + 11)
-#define CONFIG_ARM_TIMER_HYP_IRQ            (GIC_PPI_INT_BASE + 10)
-
-#define ARM_ARCH_TIMER_IRQ	CONFIG_ARM_TIMER_VIRTUAL_IRQ
-#define ARM_ARCH_TIMER_PRIO	IRQ_DEFAULT_PRIORITY
-#define ARM_ARCH_TIMER_FLAGS	IRQ_TYPE_LEVEL
+#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC  100000000
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-#ifdef CONFIG_SMP
-void arm_arch_timer_secondary_init(void);
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
-#endif /* __ARCH_ARM_SRC_ARMV7_R_ARM_ARCH_TIMER_H */
+/****************************************************************************
+ * Name: fvp_board_initialize
+ *
+ * Description:
+ *   All fvp architectures must provide the following entry point.  This
+ *   entry point is called in the initialization phase -- after
+ *   imx_memory_initialize and after all memory has been configured and
+ *   mapped but before any devices have been initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void fvp_board_initialize(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_FVP_V8R_FVP_BOOT_H */
