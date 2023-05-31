@@ -38,6 +38,7 @@
 #include "nrf52_pwm.h"
 
 #include "hardware/nrf52_pwm.h"
+#include "hardware/nrf52_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -271,6 +272,7 @@ static int nrf52_pwm_configure(struct nrf52_pwm_s *priv)
   /* Configure sequence 0 */
 
   regval = (uint32_t)priv->seq0;
+  DEBUGASSERT(nrf52_easydma_valid(regval));
   nrf52_pwm_putreg(priv, NRF52_PWM_SEQ0PTR_OFFSET, regval);
 
   regval = PWM_SEQ0_LEN;
