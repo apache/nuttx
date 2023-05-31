@@ -117,6 +117,13 @@ config SENSORS_AS726X
 	---help---
 		Enable driver support for the AS726X Spectral Sensor.
 
+config SENSORS_BH1749NUC
+	bool "Rohm BH1749NUC Color Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Rohm BH1749NUC color sensor.
+
 config SENSORS_BH1750FVI
 	bool "Rohm BH1750FVI Ambient Light Sensor support"
 	default n
