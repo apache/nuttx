@@ -465,6 +465,8 @@ endmenu # GPIO Interrupt Configuration
 
 menu "PWM configuration"
 
+if NRF52_PWM
+
 config NRF52_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
@@ -612,6 +614,8 @@ config NRF52_PWM3_CHANNEL
 	range 0 3
 
 endif # !NRF52_PWM_MULTICHAN
+
+endif # NRF52_PWM
 
 endmenu # PWM configuration
 
