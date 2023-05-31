@@ -447,6 +447,27 @@ config NRF53_PROGMEM
 	---help---
 		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
+menu "GPIO Interrupt Configuration"
+
+config NRF53_PER_PIN_INTERRUPTS
+	bool "Per-pin interrupt callbacks"
+	default !DEFAULT_SMALL
+	depends on NRF53_GPIOTE
+	---help---
+		The GPIOTE peripheral supports a limited number of channels which can
+		be set to EVENT mode and thus generate interrupts on pin state changes.
+		Another mechanism offered by the GPIO/GPIOTE peripherals is the PORT
+		event. This event is generated from a signal shared by all pins in
+		the GPIO port.
+
+		This option enables the ability to set per-pin callbacks that will
+		be invoked from the main GPIOTE ISR when a PORT event is generated.
+		As this involves extra storage to store each callback, this option can
+		be disabled to save space. In such case, it is possible to set a callback
+		for the whole PORT event directly.
+
+endmenu # GPIO Interrupt Configuration
+
 menu "PWM configuration"
 
 if NRF53_PWM
@@ -626,27 +647,6 @@ config NRF53_SAADC_LIMITS
 endif # NRF53_SAADC
 
 endmenu # SAADC Configuration
-
-menu "GPIO Interrupt Configuration"
-
-config NRF53_PER_PIN_INTERRUPTS
-	bool "Per-pin interrupt callbacks"
-	default !DEFAULT_SMALL
-	depends on NRF53_GPIOTE
-	---help---
-		The GPIOTE peripheral supports a limited number of channels which can
-		be set to EVENT mode and thus generate interrupts on pin state changes.
-		Another mechanism offered by the GPIO/GPIOTE peripherals is the PORT
-		event. This event is generated from a signal shared by all pins in
-		the GPIO port.
-
-		This option enables the ability to set per-pin callbacks that will
-		be invoked from the main GPIOTE ISR when a PORT event is generated.
-		As this involves extra storage to store each callback, this option can
-		be disabled to save space. In such case, it is possible to set a callback
-		for the whole PORT event directly.
-
-endmenu # GPIO Interrupt Configuration
 
 menu "SPI Configuration"
 
