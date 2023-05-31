@@ -50,6 +50,8 @@
 #  include <arch/armv7-a/irq.h>
 #elif defined(CONFIG_ARCH_ARMV7R)
 #  include <arch/armv7-r/irq.h>
+#elif defined(CONFIG_ARCH_ARMV8R)
+#  include <arch/armv8-r/irq.h>
 #elif defined(CONFIG_ARCH_ARMV7M)
 #  include <arch/armv7-m/irq.h>
 #elif defined(CONFIG_ARCH_ARMV8M)
