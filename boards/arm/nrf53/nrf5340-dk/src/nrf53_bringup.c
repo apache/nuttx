@@ -64,6 +64,10 @@
 #  include "nrf53_rptun.h"
 #endif
 
+#ifdef CONFIG_NRF53_PROGMEM
+#  include "nrf53_progmem.h"
+#endif
+
 #ifdef CONFIG_TIMER
 #  include "nrf53_timer.h"
 #endif
@@ -310,6 +314,14 @@ int nrf53_bringup(void)
       syslog(LOG_ERR, "ERROR: nrf53_netcore_bleinit failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_NRF53_PROGMEM
+  ret = nrf53_progmem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MTD progmem: %d\n", ret);
+    }
+#endif /* CONFIG_MTD */
 
   UNUSED(ret);
   return OK;
