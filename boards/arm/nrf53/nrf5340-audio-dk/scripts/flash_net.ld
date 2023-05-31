@@ -1,5 +1,5 @@
 /****************************************************************************
-* boards/arm/nrf53/nrf5340-audio-dk/scripts/flash_config_net.ld
+* boards/arm/nrf53/nrf5340-audio-dk/scripts/flash_net.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,10 +18,20 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#ifdef CONFIG_RPTUN
+#  define RPTUN_SHMEM 0x8000
+#else
+#  define RPTUN_SHMEM 0
+#endif
+
 MEMORY
 {
-    progmem (rx)  : ORIGIN = 0x00000000, LENGTH = 1024K
-    datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K
+    app_progmem (rx)  : ORIGIN = 0x00000000, LENGTH = 1024K
+    app_datamem (rwx) : ORIGIN = 0x20000000, LENGTH = 512K - RPTUN_SHMEM
+    progmem (rx)  : ORIGIN = 0x01000000, LENGTH = 256K
+    datamem (rwx) : ORIGIN = 0x21000000, LENGTH = 64K
 }
 
 OUTPUT_ARCH(arm)

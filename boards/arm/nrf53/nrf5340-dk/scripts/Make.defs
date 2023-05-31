@@ -23,19 +23,11 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUAPP),y)
-ifeq ($(CONFIG_RPTUN),y)
-LDSCRIPT = flash_rptun_app.ld
-else
 LDSCRIPT = flash_app.ld
-endif
 endif
 
 ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUNET),y)
-ifeq ($(CONFIG_RPTUN),y)
-LDSCRIPT = flash_rptun_net.ld
-else
 LDSCRIPT = flash_net.ld
-endif
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
