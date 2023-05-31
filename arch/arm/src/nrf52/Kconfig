@@ -691,6 +691,8 @@ endmenu
 
 menu "I2C Master Configuration"
 
+if NRF52_I2C_MASTER
+
 config NRF52_I2C_MASTER_DISABLE_NOSTART
 	bool "Disable the I2C Master NOSTART flag support"
 	default n
@@ -713,6 +715,8 @@ config NRF52_I2C_MASTER_COPY_BUF_SIZE
 		transfer. This static buffer will be used if the
 		transaction will fit otherwise it will fall back
 		on malloc.
+
+endif # NRF52_I2C_MASTER
 
 endmenu
 
