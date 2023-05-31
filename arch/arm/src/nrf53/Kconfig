@@ -457,6 +457,8 @@ config NRF53_PROGMEM
 
 menu "PWM configuration"
 
+if NRF53_PWM
+
 config NRF53_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
@@ -570,6 +572,8 @@ config NRF53_PWM2_CHANNEL
 	range 0 3
 
 endif # !NRF53_PWM_MULTICHAN
+
+endif # NRF53_PWM
 
 endmenu # PWM configuration
 
