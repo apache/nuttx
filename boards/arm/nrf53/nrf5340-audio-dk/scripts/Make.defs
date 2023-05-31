@@ -23,11 +23,11 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUAPP),y)
-LDSCRIPT = flash_config_app.ld
+LDSCRIPT = flash_app.ld
 endif
 
 ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUNET),y)
-LDSCRIPT = flash_config_net.ld
+LDSCRIPT = flash_net.ld
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
