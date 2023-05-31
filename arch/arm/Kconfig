@@ -936,6 +936,14 @@ config ARCH_CORTEXM85
 	select ARCH_HAVE_USAGEFAULT_DEBUG
 	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
 
+config ARCH_ARMV8R
+	bool
+	default n
+	select ARCH_HAVE_CPUINFO
+	select ONESHOT
+	select ALARM_ARCH
+
+
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
@@ -1320,6 +1328,9 @@ source "arch/arm/src/armv7-r/Kconfig"
 endif
 if ARCH_ARMV8M
 source "arch/arm/src/armv8-m/Kconfig"
+endif
+if ARCH_ARMV8R
+source "arch/arm/src/armv8-r/Kconfig"
 endif
 if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
 source "arch/arm/src/arm/Kconfig"

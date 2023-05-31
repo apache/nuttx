@@ -133,12 +133,15 @@
 #define putreg16(v,a)  (*(volatile uint16_t *)(a) = (v))
 #define getreg32(a)    (*(volatile uint32_t *)(a))
 #define putreg32(v,a)  (*(volatile uint32_t *)(a) = (v))
+#define getreg64(a)    (*(volatile uint64_t *)(a))
+#define putreg64(v,a)  (*(volatile uint64_t *)(a) = (v))
 
 /* Non-atomic, but more effective modification of registers */
 
 #define modreg8(v,m,a)  putreg8((getreg8(a) & ~(m)) | ((v) & (m)), (a))
 #define modreg16(v,m,a) putreg16((getreg16(a) & ~(m)) | ((v) & (m)), (a))
 #define modreg32(v,m,a) putreg32((getreg32(a) & ~(m)) | ((v) & (m)), (a))
+#define modreg64(v,m,a) putreg64((getreg64(a) & ~(m)) | ((v) & (m)), (a))
 
 /* Context switching */
 
@@ -174,6 +177,45 @@ extern void arm_switchcontext(uint32_t **saveregs,
 #  define _snoinit Image$$noinit$$Base
 #  define _enoinit Image$$noinit$$Limit
 #endif
+
+/* MPIDR_EL1, Multiprocessor Affinity Register */
+
+#define MPIDR_AFFLVL_MASK   (0xff)
+#define MPIDR_ID_MASK       (0x00ffffff)
+
+#define MPIDR_AFF0_SHIFT    (0)
+#define MPIDR_AFF1_SHIFT    (8)
+#define MPIDR_AFF2_SHIFT    (16)
+
+/* mpidr register, the register is define:
+ *   - bit 0~7:   Aff0
+ *   - bit 8~15:  Aff1
+ *   - bit 16~23: Aff2
+ *   - bit 24:    MT, multithreading
+ *   - bit 25~29: RES0
+ *   - bit 30:    U, multiprocessor/Uniprocessor
+ *   - bit 31:    RES1
+ *  Different ARM/ARM64 cores will use different Affn define, the mpidr
+ *  value is not CPU number, So we need to change CPU number to mpid
+ *  and vice versa
+ */
+
+#define GET_MPIDR()             CP15_GET(MPIDR)
+
+#define MPIDR_AFFLVL(mpidr, aff_level) \
+  (((mpidr) >> MPIDR_AFF ## aff_level ## _SHIFT) & MPIDR_AFFLVL_MASK)
+
+#define MPID_TO_CORE(mpid, aff_level) \
+  (((mpid) >> MPIDR_AFF ## aff_level ## _SHIFT) & MPIDR_AFFLVL_MASK)
+
+#define CORE_TO_MPID(core, aff_level) \
+  ({ \
+    uint64_t __mpidr = GET_MPIDR(); \
+    __mpidr &= ~(MPIDR_AFFLVL_MASK << MPIDR_AFF ## aff_level ## _SHIFT); \
+    __mpidr |= (cpu << MPIDR_AFF ## aff_level ## _SHIFT); \
+    __mpidr &= MPIDR_ID_MASK; \
+    __mpidr; \
+  })
 
 /****************************************************************************
  * Public Types
@@ -344,7 +386,7 @@ int  arm_securefault(int irq, void *context, void *arg);
 * (but should be back-ported to the ARM7 and ARM9 families).
  */
 
-#elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R)
+#elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R) || defined(CONFIG_ARCH_ARMV8R)
 
 /* Interrupt acknowledge and dispatch */
 

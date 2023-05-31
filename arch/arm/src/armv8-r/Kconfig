@@ -1,0 +1,87 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "ARMv8-R Configuration Options"
+
+config ARMV8R_HAVE_GICv3
+	bool "ARMV7R_GICv3 support"
+	select ARCH_HAVE_IRQTRIGGER
+	default y
+	---help---
+		Selected by the configuration tool if the architecture supports the
+		Generic Interrupt Controller (GIC)
+
+if ARMV8R_HAVE_GICv2
+
+config ARMV8R_GIC_EOIMODE
+	bool
+	default n
+	---help---
+		Enable GICC_CTLR.EOImode, this will separates the priority drop and interrupt
+		deactivation operations.
+
+endif # ARMV8R_GIC_EOIMODE
+
+config ARMV8R_MEMINIT
+	bool
+	default y if BOOT_SDRAM_DATA
+	default n if !BOOT_SDRAM_DATA
+	---help---
+		If this configuration *not* selected, then it is assumed that all
+		memory resources are initialized via arm_data_initialize() and
+		available at power-up reset time.  Other memories, such as SDRAM or
+		some ECC SRAM memories, require some platform-specific
+		initialization first.  In that case, this option should be selected
+		and the platform-specific implementation of arm_boot() must perform
+		the memory initialization first, then explicitly call
+		arm_data_initialize().
+
+config ARMV8R_HAVE_DECODEFIQ
+	bool
+	default n
+
+config ARMV8R_DECODEFIQ
+	bool "FIQ Handler"
+	default n
+	depends on ARMV7R_HAVE_DECODEFIQ
+	---help---
+		Select this option if your platform supports the function
+		arm_decodefiq().
+
+config ARMV8R_ALIGNMENT_TRAP
+	bool "Enable Alignment Check at __start"
+	default n
+
+config ARMV8R_CACHE_ROUND_ROBIN
+	bool "Enable Cache Round Robin Replacement Policy at __start"
+	default n
+
+config ARMV8R_DCACHE_DISABLE
+	bool "Disable DCACHE at __start"
+	default n
+
+config ARMV8R_ICACHE_DISABLE
+	bool "Disable ICACHE at __start"
+	default n
+
+config ARMV8R_SCTLR_CCP15BEN
+	bool "Enable CP15 Barrier at __start"
+	default y
+
+config ARMV8R_BACKGROUND_REGION
+	bool "Enable MPU Background region at __start"
+	default y
+
+config ARMV8R_DIV0_FAULT
+	bool "Enable DIV0 Fault at __start"
+	default n
+
+config ARMV8R_FAST_INTERRUPT
+	bool "Enable Fast Interrupts at __start"
+	default n
+
+config ARMV8R_NONMASKABLE_FIQ
+	bool "Enable Non-maskable FIQ Support at __start"
+	default n
