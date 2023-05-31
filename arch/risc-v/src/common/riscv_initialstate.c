@@ -56,6 +56,9 @@ void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
   uintptr_t regval;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  uintptr_t *kstack = xcp->kstack;
+#endif
 
   /* Initialize the initial exception register context structure */
 
@@ -84,6 +87,10 @@ void up_initial_state(struct tcb_s *tcb)
       riscv_set_idleintctx();
       return;
     }
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  xcp->kstack = kstack;
+#endif
 
   xcp->regs = (uintptr_t *)(
     (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size - XCPTCONTEXT_SIZE);
