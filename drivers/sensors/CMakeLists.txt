@@ -172,6 +172,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS lps25h.c)
     endif()
 
+    if(CONFIG_SENSORS_LPS22HB)
+      list(APPEND SRCS lps22hb_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_CCS811)
       list(APPEND SRCS ccs811_uorb.c)
     endif()
