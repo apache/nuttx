@@ -30,6 +30,7 @@
 #include "arm_internal.h"
 #include "nrf53_irq.h"
 #include "hardware/nrf53_utils.h"
+#include "hardware/nrf53_memorymap.h"
 
 /****************************************************************************
  * Public Functions
@@ -64,4 +65,26 @@ void nrf53_clrpend(int irq)
                    NVIC_IRQ32_63_CLRPEND);
         }
     }
+}
+
+/****************************************************************************
+ * Name: nrf53_easydma_valid
+ *
+ * Description:
+ *   Validate if easyDMA transfer is possible.
+ *
+ ****************************************************************************/
+
+bool nrf53_easydma_valid(uint32_t addr)
+{
+#ifdef CONFIG_DEBUG_FEATURES
+  /* EasyDMA cannot access flash memory */
+
+  if (addr >= NRF53_FLASH_BASE && addr < NRF53_SRAM_BASE)
+    {
+      return false;
+    }
+#endif
+
+  return true;
 }

@@ -43,15 +43,14 @@
 void nrf53_clrpend(int irq);
 
 /****************************************************************************
- * Name: nrf53832_errdata_init
+ * Name: nrf53_easydma_valid
  *
  * Description:
- *   ErrData correction for 52832
- *   required for most interrupts.
+ *   Validate if easyDMA transfer is possible.
  *
  ****************************************************************************/
 
-void nrf53832_errdata_init(void);
+bool nrf53_easydma_valid(uint32_t addr);
 
 /****************************************************************************
  * Name: nrf53_task_trigger
