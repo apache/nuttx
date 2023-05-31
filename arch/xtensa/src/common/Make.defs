@@ -27,11 +27,12 @@ HEAD_ASRC += xtensa_int_handlers.S xtensa_user_handler.S
 
 CMN_ASRCS  = xtensa_context.S xtensa_cpuint.S xtensa_panic.S
 
-CMN_CSRCS  = xtensa_assert.c xtensa_cpenable.c xtensa_cpuinfo.c
-CMN_CSRCS += xtensa_createstack.c xtensa_exit.c xtensa_getintstack.c
-CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c xtensa_irqdispatch.c
-CMN_CSRCS += xtensa_lowputs.c xtensa_modifyreg8.c xtensa_modifyreg16.c
-CMN_CSRCS += xtensa_modifyreg32.c xtensa_mdelay.c xtensa_nputs.c xtensa_perf.c
+CMN_CSRCS  = xtensa_assert.c xtensa_cache.c xtensa_cpenable.c
+CMN_CSRCS += xtensa_cpuinfo.c xtensa_createstack.c xtensa_exit.c
+CMN_CSRCS += xtensa_getintstack.c xtensa_initialize.c xtensa_initialstate.c
+CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
+CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
+CMN_CSRCS += xtensa_mpu.c xtensa_nputs.c xtensa_oneshot.c xtensa_perf.c
 CMN_CSRCS += xtensa_releasestack.c xtensa_registerdump.c xtensa_sigdeliver.c
 CMN_CSRCS += xtensa_switchcontext.c xtensa_swint.c xtensa_stackframe.c
 CMN_CSRCS += xtensa_saveusercontext.c xtensa_schedsigaction.c xtensa_udelay.c
