@@ -243,6 +243,22 @@ endif # SENSORS_BH1749NUC_UORB
 
 endif # SENSORS_BH1749NUC
 
+config SENSORS_BH1745NUC
+	bool "Rohm BH1745NUC Color Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Rohm BH1745NUC color sensor.
+
+if SENSORS_BH1745NUC
+
+config BH1745NUC_I2C_FREQUENCY
+	int "BH1745NUC I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # SENSORS_BH1745NUC
+
 config SENSORS_BH1750FVI
 	bool "Rohm BH1750FVI Ambient Light Sensor support"
 	default n
