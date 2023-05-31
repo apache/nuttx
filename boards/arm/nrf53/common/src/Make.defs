@@ -24,6 +24,14 @@ ifeq ($(CONFIG_NRF53_TIMER),y)
   CSRCS += nrf53_timer.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
+  CSRCS += nrf53_boot_image.c
+endif
+
+ifeq ($(CONFIG_NRF53_PROGMEM),y)
+  CSRCS += nrf53_progmem.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
