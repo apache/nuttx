@@ -51,6 +51,7 @@ function end_test_suites {
  time=\""$(($test_suites_end_time-$test_suites_start_time))"\"\
  timestamp=\""$test_suites_timestamp"\">|" $test_report_file
   echo "</testsuites>" >> $test_report_file
+  cat $test_report_file
 
 }
 
