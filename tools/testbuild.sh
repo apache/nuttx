@@ -56,6 +56,9 @@ case $(uname -s) in
     ;;
 esac
 
+# Include utilities for generating test reports
+source $(dirname $0)/test_results.sh
+
 function showusage {
   echo ""
   echo "USAGE: $progname [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] [--codechecker] <testlist-file>"
@@ -194,6 +197,7 @@ function exportandimport {
   fi
 
   if ! ${MAKE} export ${JOPTION} 1>/dev/null; then
+    report_test_failure "Failed to export NuttX."
     fail=1
     return $fail
   fi
@@ -201,12 +205,14 @@ function exportandimport {
   pushd ../apps/
 
   if ! ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz 1>/dev/null; then
+    report_test_failure "Failed to mkimport NuttX."
     fail=1
     popd
     return $fail
   fi
 
   if ! ${MAKE} import ${JOPTION} 1>/dev/null; then
+    report_test_failure "Failed to import NuttX."
     fail=1
   fi
   popd
@@ -227,6 +233,7 @@ function compressartifacts {
 
 function makefunc {
   if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@ 1>/dev/null; then
+    report_test_failure "Make target 'make $@' failed. See CI logs."
     fail=1
   else
     exportandimport
@@ -236,6 +243,8 @@ function makefunc {
 }
 
 function checkfunc {
+  start_test_case checkfunc
+
   build_cmd="${MAKE} ${MAKE_FLAGS} \"${EXTRA_FLAGS}\" ${JOPTION} 1>/dev/null"
 
   local config_sub_path=$(echo "$config" | sed "s/:/\//")
@@ -253,20 +262,29 @@ function checkfunc {
   echo "      Compressing logs..."
   compressartifacts "$(dirname "${codechecker_dir}")" "${sub_target_name}"
 
-# If you need to stop CI, uncomment the following line.
-#  if [ $codecheck_ret -ne 0 ]; then
-#    fail=1
-#  fi
+  if [ $codecheck_ret -ne 0 ]; then
+    report_test_failure "See CI logs for details."
+    # If you need to stop CI, uncomment the following line.
+    # fail=1
+  else
+    report_test_pass
+  fi
 
+  end_test_case
   return $fail
 }
 
 # Clean up after the last build
 
 function distclean {
+  start_test_case distclean
+  local tmp_fail=$fail
+  fail=0
+
   echo "  Cleaning..."
   if [ -f .config ]; then
     if [ ${GITCLEAN} -eq 1 ]; then
+      report_test_skip
       git -C $nuttx clean -xfdq
       git -C $APPSDIR clean -xfdq
     else
@@ -283,10 +301,12 @@ function distclean {
         if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
           if [[ -n $(git -C $nuttx status --ignored -s) ]]; then
             git -C $nuttx status --ignored
+            report_test_failure "OS repo not clean."
             fail=1
           fi
           if [[ -n $(git -C $APPSDIR status --ignored -s) ]]; then
             git -C $APPSDIR status --ignored
+            report_test_failure "Apps repo not clean."
             fail=1
           fi
         fi
@@ -294,14 +314,26 @@ function distclean {
     fi
   fi
 
+  if [ ${fail} -eq 0 ]; then
+    report_test_pass
+    # Restore fail flag.
+    fail=$tmp_fail
+  fi
+  end_test_case
+
   return $fail
 }
 
 # Configure for the next build
 
 function configure {
+  start_test_case configure
+  local tmp_fail=$fail
+  fail=0
+
   echo "  Configuring..."
   if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION} 1>/dev/null; then
+    report_test_failure "Failed to configure."
     fail=1
   fi
 
@@ -319,6 +351,13 @@ function configure {
     makefunc olddefconfig
   fi
 
+  if [ ${fail} -eq 0 ]; then
+    report_test_pass
+    # Restore fail flag.
+    fail=$tmp_fail
+  fi
+  end_test_case
+
   return $fail
 }
 
@@ -329,7 +368,16 @@ function build {
   if [ "${CODECHECKER}" -eq 1 ]; then
     checkfunc
   else
+    start_test_case build
+    local tmp_fail=$fail
+    fail=0
     makefunc
+    if [ ${fail} -eq 0 ]; then
+      report_test_pass
+      # Restore fail flag.
+      fail=$tmp_fail
+    fi
+    end_test_case
   fi
 
   if [ ${SAVEARTIFACTS} -eq 1 ]; then
@@ -343,8 +391,11 @@ function build {
 
 function refresh {
   # Ensure defconfig in the canonical form
+  start_test_case refresh
+  local tmp_fail=$fail
 
   if ! ./tools/refresh.sh --silent $config; then
+    report_test_failure "Could not refresh config."
     fail=1
   fi
 
@@ -354,33 +405,53 @@ function refresh {
     if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
       if [[ -n $(git -C $nuttx status -s) ]]; then
         git -C $nuttx status
+        report_test_failure "OS repo not clean."
         fail=1
       fi
       if [[ -n $(git -C $APPSDIR status -s) ]]; then
         git -C $APPSDIR status
+        report_test_failure "Apps repo not clean."
         fail=1
       fi
     fi
   fi
 
+  if [ ${fail} -eq 0 ]; then
+    report_test_pass
+    # Restore fail flag.
+    fail=$tmp_fail
+  fi
+  end_test_case
+
   return $fail
 }
 
 function run {
+  start_test_case run
+
   if [ ${RUN} -ne 0 ]; then
     run_script="$path/run"
     if [ -x $run_script ]; then
       echo "  Running NuttX..."
       if ! $run_script; then
         fail=1
+        report_test_failure "Runtime tests failed see logs."
+      else
+        report_test_pass
       fi
     fi
+  else
+    report_test_skip
   fi
+  end_test_case
+
   return $fail
 }
 # Coordinate the steps for the next build test
 
 function dotest {
+  start_test_suite $1
+
   echo "===================================================================================="
   config=`echo $1 | cut -d',' -f1`
   check=${HOST},${config/\//:}
@@ -397,6 +468,8 @@ function dotest {
   if [ ${PRINTLISTONLY} -eq 1 ]; then
     return
   fi
+  start_test_case configure_tool
+  config_err=0
 
   # Parse the next line
 
@@ -404,7 +477,10 @@ function dotest {
   if [ -z "${configdir}" ]; then
     configdir=`echo $config | cut -s -d'/' -f2`
     if [ -z "${configdir}" ]; then
-      echo "ERROR: Malformed configuration: ${config}"
+      local message="ERROR: Malformed configuration: ${config}"
+      echo $message
+      report_test_error $message
+      config_err=1
       showusage
     else
       boarddir=`echo $config | cut -d'/' -f1`
@@ -415,7 +491,10 @@ function dotest {
 
   path=$nuttx/boards/*/*/$boarddir/configs/$configdir
   if [ ! -r $path/defconfig ]; then
-    echo "ERROR: no configuration found at $path"
+    local message="ERROR: no configuration found at $path"
+    echo $message
+    report_test_error $message
+    config_err=1
     showusage
   fi
 
@@ -427,6 +506,10 @@ function dotest {
     fi
   fi
 
+  if [ ${config_err} -eq 0 ]; then
+    report_test_pass
+  fi
+  end_test_case
   # Perform the build test
 
   echo "------------------------------------------------------------------------------------"
@@ -437,10 +520,11 @@ function dotest {
     run
   fi
   refresh
+  end_test_suite
 }
 
 # Perform the build test for each entry in the test list file
-
+start_test_report $testfile
 for line in $testlist; do
   firstch=${line:0:1}
   if [ "X$firstch" == "X/" ]; then
@@ -453,6 +537,7 @@ for line in $testlist; do
     dotest $line
   fi
 done
+end_test_suites
 
 echo "===================================================================================="
 
