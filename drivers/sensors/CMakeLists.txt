@@ -189,6 +189,10 @@ if(CONFIG_SENSORS)
       endif()
     endif()
 
+    if(CONFIG_SENSORS_BH1745NUC)
+      list(APPEND SRCS bh1745nuc_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_BH1750FVI)
       list(APPEND SRCS bh1750fvi.c)
     endif()

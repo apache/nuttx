@@ -29,7 +29,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SCU))
+#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BH1745NUC) || \
+                            defined(CONFIG_SENSORS_BH1745NUC_SCU))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -39,8 +40,10 @@
 
 /* Prerequisites:
  *
- * CONFIG_BH1745NUC
- *   Enables support for the BH1745NUC driver
+ * CONFIG_SENSORS_BH1745NUC
+ *   Enables support for the BH1745NUC uORB driver
+ * CONFIG_SENSORS_BH1745NUC_SCU
+ *   Enables support for the BH1745NUC SCU character driver (cxd56xx)
  */
 
 /****************************************************************************
@@ -58,6 +61,7 @@ extern "C"
 {
 #endif
 
+#ifdef CONFIG_SENSORS_BH1745NUC_SCU
 /****************************************************************************
  * Name: bh1745nuc_init
  *
@@ -96,10 +100,32 @@ int bh1745nuc_init(FAR struct i2c_master_s *i2c, int port);
 
 int bh1745nuc_register(FAR const char *devpath, int minor,
                        FAR struct i2c_master_s *i2c, int port);
+#endif /* CONFIG_SENSORS_BH1745NUC_SCU */
+
+#ifdef CONFIG_SENSORS_BH1745NUC
+/****************************************************************************
+ * Name: bh1745nuc_register_uorb
+ *
+ * Description:
+ *   Register the BH1745NUC color sensor as a uORB device.
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path.
+ *   i2c   - The I2C bus driver instance.
+ *   addr  - The I2C address of the BH1745NUC.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int bh1745nuc_register_uorb(int devno, FAR struct i2c_master_s *i2c,
+                            uint8_t addr);
+#endif /* CONFIG_SENSORS_BH1745NUC */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_BH1745NUC */
+#endif /* CONFIG_I2C && (SENSORS_BH1745NUC || SENSORS_BH1745NUC_SCU) */
 #endif /* __INCLUDE_NUTTX_SENSORS_BH1745NUC_H */
