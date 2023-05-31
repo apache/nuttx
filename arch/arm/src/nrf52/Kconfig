@@ -193,14 +193,6 @@ config NRF52_SPI3_MASTER
 	select NRF52_SPI_MASTER
 	depends on NRF52_HAVE_SPI3_MASTER
 
-if NRF52_SPI_MASTER
-
-config NRF52_SPI_MASTER_INTERRUPTS
-	bool "SPI Master interrupts support"
-	default n
-
-endif
-
 config NRF52_GPIOTE
 	bool "GPIOTE (GPIO interrupts)"
 	default n
@@ -679,14 +671,23 @@ endmenu # SAADC Configuration
 
 menu "SPI Configuration"
 
+if NRF52_SPI_MASTER
+
+config NRF52_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
 config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 	bool "Master 1 Byte transfer anomaly workaround"
-	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
+	depends on ARCH_CHIP_NRF52832
 	select NRF52_PPI
 	default y
 	---help---
 		Enable the workaround to fix SPI Master 1 byte transfer bug
 		which occurs in NRF52832 revision 1 and revision 2.
+
+endif # NRF52_SPI_MASTER
+
 endmenu
 
 menu "I2C Master Configuration"

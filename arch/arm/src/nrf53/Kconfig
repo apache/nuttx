@@ -240,14 +240,6 @@ config NRF53_SPI4_MASTER
 
 endif # NRF53_HAVE_SPI1234
 
-if NRF53_SPI_MASTER
-
-config NRF53_SPI_MASTER_INTERRUPTS
-	bool "SPI Master interrupts support"
-	default n
-
-endif
-
 config NRF53_UART0
 	bool "UART0"
 	default n
@@ -655,6 +647,18 @@ config NRF53_PER_PIN_INTERRUPTS
 		for the whole PORT event directly.
 
 endmenu # GPIO Interrupt Configuration
+
+menu "SPI Configuration"
+
+if NRF53_SPI_MASTER
+
+config NRF53_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
+endif #  NRF53_SPI_MASTER
+
+endmenu
 
 menu "I2C Master Configuration"
 
