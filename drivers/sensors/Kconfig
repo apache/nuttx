@@ -722,6 +722,23 @@ config SENSORS_BME688_THREAD_STACKSIZE
 
 endif # SENSORS_BME688
 
+config SENSORS_CCS811
+	bool "ams CCS811 Gas Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for the ams CCS811 digital gas sensor for monitoring
+		indoor air quality (eCO2 and TVOC).
+
+if SENSORS_CCS811
+
+config CCS811_I2C_FREQUENCY
+	int "CCS811 I2C frequency"
+	default 100000
+	range 1 400000
+
+endif # SENSORS_CCS811
+
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
 	default n
