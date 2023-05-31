@@ -251,6 +251,38 @@ config SENSORS_BMI270_LOAD_FROM_HEAP
 
 endif # SENSORS_BMI270
 
+config SENSORS_BMM150
+	bool "Bosch BMM150 Magnetometer support (uorb)"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Bosch BMM150 magnetometer sensor.
+
+if SENSORS_BMM150
+
+config SENSORS_BMM150_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_BMM150_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_BMM150_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BMM150_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_BMM150_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_BMM150
+
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n
