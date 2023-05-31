@@ -182,6 +182,35 @@ config BMI160_I2C_ADDR_69
 endchoice
 endif
 
+config SENSORS_BMI270
+	bool "Bosch BMI270 Inertial Measurement Sensor support"
+	default n
+	---help---
+		Enable driver support for the Bosch BMI270 Inertial
+		Measurement sensor
+
+if SENSORS_BMI270
+
+choice
+	prompt "BMI270 Interface"
+	default SENSORS_BMI270_SPI
+
+config SENSORS_BMI270_I2C
+	bool "BMI270 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+config SENSORS_BMI270_SPI
+	bool "BMI270 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface
+
+endchoice
+
+endif
+
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n
