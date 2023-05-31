@@ -39,6 +39,7 @@
 #include "nrf53_i2c.h"
 
 #include "hardware/nrf53_twi.h"
+#include "hardware/nrf53_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -416,6 +417,7 @@ static int nrf53_i2c_transfer(struct i2c_master_s *dev,
           /* Write TXD data pointer */
 
           regval = (uint32_t)priv->ptr;
+          DEBUGASSERT(nrf53_easydma_valid(regval));
           nrf53_i2c_putreg(priv, NRF53_TWIM_TXDPTR_OFFSET, regval);
 
           /* Write number of bytes in TXD buffer */
@@ -469,6 +471,7 @@ static int nrf53_i2c_transfer(struct i2c_master_s *dev,
           /* Write RXD data pointer */
 
           regval = (uint32_t)priv->ptr;
+          DEBUGASSERT(nrf53_easydma_valid(regval));
           nrf53_i2c_putreg(priv, NRF53_TWIM_RXDPTR_OFFSET, regval);
 
           /* Write number of bytes in RXD buffer */

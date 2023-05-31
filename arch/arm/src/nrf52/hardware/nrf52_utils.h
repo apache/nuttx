@@ -43,6 +43,16 @@
 void nrf52_clrpend(int irq);
 
 /****************************************************************************
+ * Name: nrf52_easydma_valid
+ *
+ * Description:
+ *   Validate if easyDMA transfer is possible.
+ *
+ ****************************************************************************/
+
+bool nrf52_easydma_valid(uint32_t addr);
+
+/****************************************************************************
  * Name: nrf52832_errdata_init
  *
  * Description:

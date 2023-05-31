@@ -42,6 +42,7 @@
 #include "nrf53_spi.h"
 
 #include "hardware/nrf53_spi.h"
+#include "hardware/nrf53_utils.h"
 
 /****************************************************************************
  * Private Types
@@ -1083,6 +1084,7 @@ static void nrf53_spi_exchange(struct spi_dev_s *dev,
       /* Write RXD data pointer */
 
       regval = (uint32_t)rxbuffer;
+      DEBUGASSERT(nrf53_easydma_valid(regval));
       nrf53_spi_putreg(priv, NRF53_SPIM_RXDPTR_OFFSET, regval);
     }
   else
@@ -1095,6 +1097,7 @@ static void nrf53_spi_exchange(struct spi_dev_s *dev,
       /* Write TXD data pointer */
 
       regval = (uint32_t)txbuffer;
+      DEBUGASSERT(nrf53_easydma_valid(regval));
       nrf53_spi_putreg(priv, NRF53_SPIM_TXDPTR_OFFSET, regval);
     }
   else

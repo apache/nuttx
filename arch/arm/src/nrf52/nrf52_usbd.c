@@ -49,6 +49,7 @@
 
 #include "hardware/nrf52_usbd.h"
 #include "hardware/nrf52_power.h"
+#include "hardware/nrf52_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1023,6 +1024,7 @@ static void nrf52_epin_transfer(struct nrf52_ep_s *privep, uint8_t *buf,
     {
       /* Configure EasyDMA */
 
+      DEBUGASSERT(nrf52_easydma_valid((uint32_t)buf));
       nrf52_putreg((uint32_t)buf, NRF52_USBD_EPIN_PTR(privep->epphy));
       nrf52_putreg(nbytes, NRF52_USBD_EPIN_MAXCNT(privep->epphy));
 
@@ -1071,6 +1073,7 @@ static void nrf52_epout_transfer(struct nrf52_ep_s *privep)
 
   /* Configure EasyDMA */
 
+  DEBUGASSERT(nrf52_easydma_valid((uint32_t)privep->rxbuff));
   nrf52_putreg((uint32_t)privep->rxbuff,
                NRF52_USBD_EPOUT_PTR(privep->epphy));
   nrf52_putreg(nbytes, NRF52_USBD_EPOUT_MAXCNT(privep->epphy));

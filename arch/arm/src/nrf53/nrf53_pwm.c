@@ -38,6 +38,7 @@
 #include "nrf53_pwm.h"
 
 #include "hardware/nrf53_pwm.h"
+#include "hardware/nrf53_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -249,6 +250,7 @@ static int nrf53_pwm_configure(struct nrf53_pwm_s *priv)
   /* Configure sequence 0 */
 
   regval = (uint32_t)priv->seq0;
+  DEBUGASSERT(nrf53_easydma_valid(regval));
   nrf53_pwm_putreg(priv, NRF53_PWM_SEQ0PTR_OFFSET, regval);
 
   regval = PWM_SEQ0_LEN;
