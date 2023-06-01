@@ -1080,19 +1080,19 @@ choice
 		   herein and can be changed.
 
 config STM32F7_FLASH_OVERRIDE_DEFAULT
-			bool "Default"
+	bool "Default"
 
 config STM32F7_FLASH_OVERRIDE_C
-			bool "C 256KiB"
+	bool "C 256KiB"
 
 config STM32F7_FLASH_OVERRIDE_E
-			bool "E 512KiB"
+	bool "E 512KiB"
 
 config STM32F7_FLASH_OVERRIDE_G
-			bool "G 1024KiB"
+	bool "G 1024KiB"
 
 config STM32F7_FLASH_OVERRIDE_I
-			bool "I 2048KiB"
+	bool "I 2048KiB"
 
 endchoice # "Override Flash Size Designator"
 
