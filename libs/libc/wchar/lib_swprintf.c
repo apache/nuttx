@@ -35,14 +35,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * swprintf
+ * vswprintf
  ****************************************************************************/
 
-int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
+int vswprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt,
+              va_list ap)
 {
   struct lib_memoutstream_s memoutstream;
-  va_list ap;
-  int n;
 
   /* Initialize a memory stream to write to the buffer */
 
@@ -51,9 +50,23 @@ int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
 
   /* Then let lib_vsprintf do the real work */
 
+  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                      (FAR const char *)fmt, ap);
+}
+
+/****************************************************************************
+ * swprintf
+ ****************************************************************************/
+
+int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
+{
+  va_list ap;
+  int n;
+
+  /* Then let vswprintf do the real work */
+
   va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
-                   (FAR const char *)fmt, ap);
+  n = vswprintf(buf, maxlen, fmt, ap);
   va_end(ap);
 
   return n;
