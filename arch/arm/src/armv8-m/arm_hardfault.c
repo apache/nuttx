@@ -181,6 +181,13 @@ int arm_hardfault(int irq, void *context, void *arg)
       hfalert("\tDebug event\n");
     }
 
+#ifdef CONFIG_DEBUG_HARDFAULT_ALERT
+      if (arm_gen_nonsecurefault(irq, context))
+        {
+          return OK;
+        }
+#endif
+
   up_irq_save();
   PANIC_WITH_REGS("panic", context);
   return OK;
