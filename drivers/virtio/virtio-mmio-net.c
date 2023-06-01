@@ -394,6 +394,14 @@ static int virtnet_transmit(FAR struct virtnet_driver_s *priv)
 
   wd_start(&priv->vnet_txtimeout, VIRTNET_TXTIMEOUT,
            virtnet_txtimeout_expiry, (wdparm_t)priv);
+
+  /* Wait for completion */
+
+  while (priv->txq->avail->idx != priv->txq->used->idx)
+    {
+      virtio_mb();
+    }
+
   return OK;
 }
 
