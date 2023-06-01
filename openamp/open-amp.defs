@@ -24,6 +24,14 @@ ifeq ($(CONFIG_OPENAMP_CACHE),y)
   CFLAGS += -DVIRTIO_CACHED_BUFFERS -DVIRTIO_CACHED_VRINGS
 endif
 
+ifeq ($(CONFIG_OPENAMP_RPMSG_DEBUG),y)
+  CFLAGS += -DRPMSG_DEBUG
+endif
+
+ifeq ($(CONFIG_OPENAMP_VQUEUE_DEBUG),y)
+  CFLAGS += -DVQUEUE_DEBUG
+endif
+
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
 CSRCS += open-amp/lib/remoteproc/remoteproc.c
 CSRCS += open-amp/lib/remoteproc/remoteproc_virtio.c
