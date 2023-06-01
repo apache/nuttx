@@ -1196,6 +1196,7 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
   /* Send SPI reset command to MCP2515 */
 
   SPI_LOCK(config->spi, true);
+  mcp2515_config_spi(priv);
   SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), true);
   SPI_SEND(config->spi, MCP2515_RESET);
   SPI_SELECT(config->spi, SPIDEV_CANBUS(config->devid), false);
