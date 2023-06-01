@@ -192,7 +192,7 @@ static void mpfs_spi_enable(struct mpfs_spi_priv_s *priv, uint8_t enable);
 static const struct mpfs_spi_config_s mpfs_spi_config =
 {
   .clk_freq = MPFS_SPI_FREQ_DEFAULT,
-  .mode     = SPIDEV_MODE0,
+  .mode     = SPIDEV_MODE3,
   .nbits    = 8,
   .use_irq  = true,
 };
