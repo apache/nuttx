@@ -244,6 +244,15 @@ config APPS_DIR
 		example, to include makefile fragments (e.g., .config or Make.defs)
 		or to set up include file paths.
 
+config BASE_DEFCONFIG
+		string "Base Configuration"
+		default ""
+		---help---
+			This will be automatically be updated by the configuration
+			script. This is the base configuration file that was used to create the
+			current configuration. It is useful for getting the current configuration
+			on runtime.
+
 config BUILD_LOADABLE
 	bool
 	option modules

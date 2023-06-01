@@ -104,6 +104,7 @@ static void disable_feature(const char *destconfig, const char *varname);
 static void set_host(const char *destconfig);
 static void configure(void);
 static void refresh(void);
+static void save_original_config(void);
 
 /****************************************************************************
  * Private Data
@@ -1503,6 +1504,7 @@ static void configure(void)
     {
       FILE *stream;
       char *appdir = strdup(g_appdir);
+      char *boardcfg = strdup(g_boarddir);
 
       /* One complexity is if we are using Windows paths, but the
        * configuration needs POSIX paths (or vice versa).
@@ -1555,13 +1557,17 @@ static void configure(void)
       if (!stream)
         {
           fprintf(stderr,
-                  "ERROR: Failed to open %s for append mode mode: %s\n",
+                  "ERROR: Failed to open %s for append mode: %s\n",
                   destconfig, strerror(errno));
           exit(EXIT_FAILURE);
         }
 
       fprintf(stream, "\n# Application configuration\n\n");
       fprintf(stream, "CONFIG_APPS_DIR=\"%s\"\n", appdir);
+
+      substitute(boardcfg, '\\', '/');
+      fprintf(stream, "CONFIG_BASE_DEFCONFIG=\"%s\"\n", boardcfg);
+
       fclose(stream);
       free(appdir);
     }
@@ -1588,6 +1594,37 @@ static void refresh(void)
       fprintf(stderr, "ERROR: Failed to refresh configurations\n");
       fprintf(stderr, "       kconfig-conf --olddefconfig Kconfig\n");
     }
+}
+
+static void save_original_config(void)
+{
+  snprintf(g_buffer, BUFFER_SIZE, "%s%c.config", g_topdir, g_delim);
+  char *source_config = strdup(g_buffer);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%c.config.orig", g_topdir, g_delim);
+  char *dest_config = strdup(g_buffer);
+
+  FILE *src_file = fopen(source_config, "r");
+  FILE *dest_file = fopen(dest_config, "w");
+
+  if (src_file == NULL || dest_file == NULL)
+    {
+      fprintf(stderr, "ERROR: Failed to open files\n");
+      exit(EXIT_FAILURE);
+    }
+
+  debug("save_original_config: Copying from %s to %s\n",
+        source_config, dest_config);
+
+  while (fgets(g_buffer, BUFFER_SIZE, src_file) != NULL)
+    {
+      if (strstr(g_buffer, "CONFIG_BASE_DEFCONFIG") == NULL)
+        {
+          fputs(g_buffer, dest_file);
+        }
+    }
+
+  fclose(src_file);
+  fclose(dest_file);
 }
 
 /****************************************************************************
@@ -1621,5 +1658,8 @@ int main(int argc, char **argv, char **envp)
 
   debug("main: Refresh configuration\n");
   refresh();
+
+  debug("main: Save original configuration\n");
+  save_original_config();
   return EXIT_SUCCESS;
 }

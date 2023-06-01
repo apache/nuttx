@@ -176,6 +176,7 @@ fi
 
 src_config=${configpath}/defconfig
 dest_config="${TOPDIR}/.config"
+original_config="${TOPDIR}/.config.orig"
 backup_config="${TOPDIR}/defconfig"
 
 if [ ! -r ${src_config} ]; then
@@ -303,7 +304,17 @@ if [ "X${defappdir}" = "Xy" ]; then
   fi
 fi
 
+# Update the CONFIG_BASE_DEFCONFIG setting
+
+posboardconfig=`echo "${boardconfig}" | sed -e 's/\\\\/\\//g'`
+echo "CONFIG_BASE_DEFCONFIG=\"$posboardconfig\"" >> "${dest_config}"
+
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
 ${TOPDIR}/tools/sethost.sh $host $*
+
+# Save the original configuration file without CONFIG_BASE_DEFCONFIG
+# for later comparison
+
+grep -v "CONFIG_BASE_DEFCONFIG" "${dest_config}" > "${original_config}"
