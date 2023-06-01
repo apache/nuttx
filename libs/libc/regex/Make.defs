@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ALLOW_MIT_COMPONENTS),y)
+ifeq ($(CONFIG_LIBC_REGEX),y)
 
 # Add the regex C files to the build
 CSRCS += regcomp.c regexec.c regerror.c tre-mem.c
