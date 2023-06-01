@@ -540,7 +540,7 @@ static uint32_t mpfs_spi_setfrequency(struct spi_dev_s *dev,
   divider = ((MPFS_FPGA_PERIPHERAL_CLK / frequency) >> 1) - 1;
   priv->actual = MPFS_FPGA_PERIPHERAL_CLK / ((divider + 1) << 1);
 
-  DEBUGASSERT(divider >= 2u && divider <= 512u);
+  DEBUGASSERT(divider < 256u);
 
   putreg32(divider, MPFS_SPI_CLK_GEN);
 
