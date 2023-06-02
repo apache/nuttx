@@ -562,6 +562,13 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
                      (FAR void *)(ack + 1) + inaddrlen, ret);
             }
 
+          /* Hold net_lock to combine get_tx_payload and recvfrom together.
+           * Otherwise we may keep holding tx buffer when waiting net_lock in
+           * recvfrom, which may block rpmsg and may cause dead lock if
+           * another thread tries to get tx buffer with net_lock held.
+           */
+
+          net_lock();
           while (totlen < buflen &&
                  i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC)
             {
@@ -616,6 +623,8 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
             {
               events |= USRSOCK_EVENT_RECVFROM_AVAIL;
             }
+
+          net_unlock();
         }
     }
 
