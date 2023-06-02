@@ -941,6 +941,10 @@ static int usrsock_rpmsg_send_dns_event(FAR void *arg,
   uint32_t len;
 
   dns = rpmsg_get_tx_payload_buffer(ept, &len, true);
+  if (dns == NULL)
+    {
+      return -ENOMEM;
+    }
 
   dns->head.msgid = USRSOCK_RPMSG_DNS_EVENT;
   dns->head.flags = USRSOCK_MESSAGE_FLAG_EVENT;
