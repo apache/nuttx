@@ -443,7 +443,7 @@
 
 /* This retrieves the fields from a SPI devid */
 
-#define SPIDEVID_TYPE (devid) (((uint32_t)(devid) >> 16) & 0xffff)
+#define SPIDEVID_TYPE(devid) (((uint32_t)(devid) >> 16) & 0xffff)
 #define SPIDEVID_INDEX(devid)  ((uint32_t)(devid)        & 0xffff)
 
 /* These are standard definitions for the defined SPI device IDs.  The index
