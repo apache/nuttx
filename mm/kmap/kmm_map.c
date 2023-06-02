@@ -278,7 +278,7 @@ FAR void *kmm_map(FAR void **pages, size_t npages, int prot)
       return NULL;
     }
 
-  return (FAR void *)(vaddr);
+  return (FAR void *)vaddr;
 }
 
 /****************************************************************************
