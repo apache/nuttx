@@ -683,3 +683,14 @@ ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 else
   CONVERT_PATH = $1
 endif
+
+# Upper/Lower case string, add the `UL` prefix to private function 
+
+ULPOP = $(wordlist 3,$(words $(1)),$(1))
+ULSUB = $(subst $(word 1,$(1)),$(word 2,$(1)),$(2))
+ULMAP = $(if $(1),$(call ULSUB,$(1),$(call ULMAP,$(call ULPOP,$(1)),$(2))),$(2))
+UPPERMAP = a A b B c C d D e E f F g G h H i I j J k K l L m M n N o O p P q Q r R s S t T u U v V w W x X y Y z Z
+LOWERMAP = A a B b C c D d E e F f G g H h I i J j K k L l M m N n O o P p Q q R r S s T t U u V v W w X x Y y Z z
+
+UPPER_CASE = $(call ULMAP,$(UPPERMAP),$(1))
+LOWER_CASE = $(call ULMAP,$(LOWERMAP),$(1))
