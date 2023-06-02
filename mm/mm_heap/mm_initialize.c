@@ -288,6 +288,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 
   heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
                               (mempool_multiple_alloc_t)mempool_memalign,
+                              (mempool_multiple_alloc_size_t)mm_malloc_size,
                               (mempool_multiple_free_t)mm_free, heap,
                               CONFIG_MM_HEAP_MEMPOOL_CHUNK_SIZE,
                               CONFIG_MM_HEAP_MEMPOOL_EXPAND_SIZE,

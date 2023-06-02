@@ -381,11 +381,13 @@ void mm_extend(struct mm_heap_s *heap, void *mem, size_t size,
  *
  ****************************************************************************/
 
-int mm_mallinfo(struct mm_heap_s *heap, struct mallinfo *info)
+struct mallinfo mm_mallinfo(struct mm_heap_s *heap)
 {
-  memset(info, 0, sizeof(struct mallinfo));
-  host_mallinfo(&info->aordblks, &info->uordblks);
-  return 0;
+  struct mallinfo info;
+
+  memset(&info, 0, sizeof(struct mallinfo));
+  host_mallinfo(&info.aordblks, &info.uordblks);
+  return info;
 }
 
 /****************************************************************************

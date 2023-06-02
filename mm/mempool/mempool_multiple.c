@@ -63,17 +63,21 @@ struct mpool_chunk_s
 
 struct mempool_multiple_s
 {
-  FAR struct mempool_s    *pools;       /* The memory pool array */
-  size_t                   npools;      /* The number of memory pool array elements */
-  size_t                   expandsize;  /* The number not will use it to init erery
-                                         * pool expandsize
-                                         */
-  size_t                   minpoolsize; /* The number is align for each memory pool */
-  FAR void                *arg;         /* This pointer is used to store the user's
-                                         * private data
-                                         */
-  mempool_multiple_alloc_t alloc;       /* The alloc function for mempool */
-  mempool_multiple_free_t  free;        /* The free function for mempool */
+  FAR struct mempool_s         *pools;       /* The memory pool array */
+  size_t                        npools;      /* The number of memory pool array elements */
+  size_t                        expandsize;  /* The number not will use it to init erery
+                                              * pool expandsize
+                                              */
+  size_t                        minpoolsize; /* The number is align for each memory pool */
+  FAR void                     *arg;         /* This pointer is used to store the user's
+                                              * private data
+                                              */
+  mempool_multiple_alloc_t      alloc;       /* The alloc function for mempool */
+  mempool_multiple_alloc_size_t alloc_size;  /* Get the address size of the
+                                              * alloc function
+                                              */
+  mempool_multiple_free_t       free;        /* The free function for mempool */
+  size_t                        alloced;     /* Total size of alloc */
 
   /* This delta describes the relationship between the block size of each
    * mempool in multiple mempool by user initialized. It is automatically
@@ -82,19 +86,19 @@ struct mempool_multiple_s
    * arithmetic progressions, otherwise it is an increasing progressions.
    */
 
-  size_t                   delta;
+  size_t                        delta;
 
   /* It is used to record the information recorded by the mempool during
    * expansion, and find the mempool by adding an index
    */
 
-  mutex_t                   lock;
-  sq_queue_t                chunk_queue;
-  size_t                    chunk_size;
-  size_t                    dict_used;
-  size_t                    dict_col_num_log2;
-  size_t                    dict_row_num;
-  FAR struct mpool_dict_s **dict;
+  mutex_t                       lock;
+  sq_queue_t                    chunk_queue;
+  size_t                        chunk_size;
+  size_t                        dict_used;
+  size_t                        dict_col_num_log2;
+  size_t                        dict_row_num;
+  FAR struct mpool_dict_s     **dict;
 };
 
 /****************************************************************************
@@ -157,7 +161,13 @@ mempool_multiple_alloc_chunk(FAR struct mempool_multiple_s *mpool,
 
   if (mpool->chunk_size < mpool->expandsize)
     {
-      return mpool->alloc(mpool->arg, align, size);
+      ret = mpool->alloc(mpool->arg, align, size);
+      if (ret)
+        {
+          mpool->alloced += mpool->alloc_size(mpool->arg, ret);
+        }
+
+      return ret;
     }
 
   chunk = (FAR struct mpool_chunk_s *)sq_peek(&mpool->chunk_queue);
@@ -173,6 +183,7 @@ retry:
           return NULL;
         }
 
+      mpool->alloced += mpool->alloc_size(mpool->arg, tmp);
       chunk = (FAR struct mpool_chunk_s *)(tmp + mpool->chunk_size);
       chunk->end = tmp + mpool->chunk_size;
       chunk->start = tmp;
@@ -345,6 +356,7 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
  *   poolsize        - The block size array for pools in multiples pool.
  *   npools          - How many pools in multiples pool.
  *   alloc           - The alloc memory function for multiples pool.
+ *   alloc_size      - Get the address size of the alloc function.
  *   free            - The free memory function for multiples pool.
  *   arg             - The alloc & free memory fuctions used arg.
  *   chunksize       - The multiples pool chunk size.
@@ -360,6 +372,7 @@ FAR struct mempool_multiple_s *
 mempool_multiple_init(FAR const char *name,
                       FAR size_t *poolsize, size_t npools,
                       mempool_multiple_alloc_t alloc,
+                      mempool_multiple_alloc_size_t alloc_size,
                       mempool_multiple_free_t free, FAR void *arg,
                       size_t chunksize, size_t expandsize,
                       size_t dict_expendsize)
@@ -397,11 +410,13 @@ mempool_multiple_init(FAR const char *name,
       return NULL;
     }
 
+  mpool->alloc_size = alloc_size;
   mpool->expandsize = expandsize;
   mpool->chunk_size = chunksize;
   mpool->alloc = alloc;
   mpool->free = free;
   mpool->arg = arg;
+  mpool->alloced = alloc_size(arg, mpool);
   sq_init(&mpool->chunk_queue);
   pools = mempool_multiple_alloc_chunk(mpool, sizeof(uintptr_t),
                                        npools * sizeof(struct mempool_s));
@@ -701,6 +716,50 @@ void mempool_multiple_foreach(FAR struct mempool_multiple_s *mpool,
     {
       handle(mpool->pools + i, arg);
     }
+}
+
+/****************************************************************************
+ * Name: mempool_multiple_mallinfo
+ ****************************************************************************/
+
+struct mallinfo
+mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool)
+{
+  struct mallinfo info;
+  size_t i;
+
+  memset(&info, 0, sizeof(struct mallinfo));
+
+  nxmutex_lock(&mpool->lock);
+  info.arena = mpool->alloced;
+
+  if (mpool->chunk_size >= mpool->expandsize)
+    {
+      FAR struct mpool_chunk_s *chunk;
+
+      chunk = (FAR struct mpool_chunk_s *)sq_peek(&mpool->chunk_queue);
+      info.fordblks += chunk->end - chunk->next;
+    }
+
+  nxmutex_unlock(&mpool->lock);
+
+  for (i = 0; i < mpool->npools; i++)
+    {
+      struct mempoolinfo_s poolinfo;
+
+      mempool_info(mpool->pools + i, &poolinfo);
+      info.fordblks += (poolinfo.ordblks + poolinfo.iordblks)
+                       * poolinfo.sizeblks;
+      info.ordblks += poolinfo.ordblks + poolinfo.iordblks;
+      info.aordblks += poolinfo.aordblks;
+      if (info.mxordblk < poolinfo.sizeblks)
+        {
+          info.mxordblk = poolinfo.sizeblks;
+        }
+    }
+
+  info.uordblks += mpool->alloced - info.fordblks;
+  return info;
 }
 
 /****************************************************************************

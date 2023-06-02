@@ -136,7 +136,7 @@ bool esp32_iramheap_heapmember(void *mem);
  *
  ****************************************************************************/
 
-int esp32_iramheap_mallinfo(struct mallinfo *info);
+struct mallinfo esp32_iramheap_mallinfo(void);
 
 #undef EXTERN
 #ifdef __cplusplus
