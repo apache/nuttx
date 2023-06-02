@@ -45,9 +45,7 @@
 
 struct mallinfo kmm_mallinfo(void)
 {
-  struct mallinfo info;
-  mm_mallinfo(g_kmmheap, &info);
-  return info;
+  return mm_mallinfo(g_kmmheap);
 }
 
 /****************************************************************************

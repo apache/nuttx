@@ -313,7 +313,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
           /* Show heap information */
 
-          mm_mallinfo(entry->heap, &minfo);
+          minfo      = mm_mallinfo(entry->heap);
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                                        "%12s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
                                        entry->name,

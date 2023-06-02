@@ -845,6 +845,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 
   heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
                               (mempool_multiple_alloc_t)mempool_memalign,
+                              (mempool_multiple_alloc_size_t)mm_malloc_size,
                               (mempool_multiple_free_t)mm_free, heap,
                               CONFIG_MM_HEAP_MEMPOOL_CHUNK_SIZE,
                               CONFIG_MM_HEAP_MEMPOOL_EXPAND_SIZE,
@@ -862,17 +863,19 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
  *
  ****************************************************************************/
 
-int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
+struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 {
+  struct mallinfo info;
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  struct mallinfo poolinfo;
+#endif
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
 #  define region 0
 #endif
 
-  DEBUGASSERT(info);
-
-  memset(info, 0, sizeof(struct mallinfo));
+  memset(&info, 0, sizeof(struct mallinfo));
 
   /* Visit each region */
 
@@ -884,15 +887,22 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
       DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
-                     mallinfo_handler, info);
+                     mallinfo_handler, &info);
       mm_unlock(heap);
     }
 #undef region
 
-  info->arena    = heap->mm_heapsize;
-  info->uordblks = info->arena - info->fordblks;
+  info.arena    = heap->mm_heapsize;
+  info.uordblks = info.arena - info.fordblks;
 
-  return OK;
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  poolinfo = mempool_multiple_mallinfo(heap->mm_mpool);
+
+  info.uordblks -= poolinfo.fordblks;
+  info.fordblks += poolinfo.fordblks;
+#endif
+
+  return info;
 }
 
 struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
