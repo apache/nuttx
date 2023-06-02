@@ -86,6 +86,7 @@ config ARCH_CHIP_FVP_ARMV8R_AARCH32
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
 	select ARMV8R_HAVE_DECODEFIQ
+	select ARCH_HAVE_FPU
 	---help---
 		ARM FVP virt platform (ARMv8r)
 
