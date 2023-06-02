@@ -160,7 +160,7 @@ __cpu0_start:
 
 	/* Make sure that IRQs and FIQs are disabled */
 
-	cpsid		if
+	cpsid	if
 
 	/* Set up the stack pointer and clear the frame pointer. */
 
@@ -187,7 +187,7 @@ __cpu0_start:
 	mov		r0, #0
 	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
 	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
-	mov     r0, CP15_CACHE_INVALIDATE
+	mov		r0, CP15_CACHE_INVALIDATE
 	bl		cp15_dcache_op_level
 	isb
 
@@ -196,16 +196,16 @@ __cpu0_start:
 	/* Initialize .bss and .data assumt that RAM that is ready to use. */
 	bl		arm_data_initialize
 
-    /* Platform hook for highest EL */
-    bl      arm_el_init
+	/* Platform hook for highest EL */
+	bl		arm_el_init
 
     /* Move to PL1 SYS with all exceptions masked */
 	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT | PSR_A_BIT)
-    msr		spsr_hyp, r0
+	msr		spsr_hyp, r0
 
-    adr		r0, 1f
-    msr		elr_hyp, r0
-    eret
+	adr		r0, 1f
+	msr		elr_hyp, r0
+	eret
 
 1:
 	/* Set up the stack pointer and clear the frame pointer. */
@@ -217,6 +217,9 @@ __cpu0_start:
 	mcr		CP15_VBAR(r0)
 
 	bl		sctlr_initialize
+#ifdef CONFIG_ARCH_FPU
+	bl		arm_fpuconfig
+#endif
 	bl		arm_boot
 
 	mov		lr, #0				/* LR = return address (none) */
@@ -284,7 +287,7 @@ arm_data_initialize:
 	cmp		r1, r2
 	blt		3b
 
-#ifndef CONFIG_ARMV7R_DCACHE_DISABLE
+#ifndef CONFIG_ARMV8R_DCACHE_DISABLE
 	/* Flush the copied RAM functions into physical RAM so that will
 	 * be available when fetched into the I-Cache.
 	 *
