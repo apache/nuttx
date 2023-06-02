@@ -538,6 +538,7 @@ nosanitize_address
 static int backtrace_unwind(struct unwind_frame_s *frame,
                             void **buffer, int size, int *skip)
 {
+  const struct __EIT_entry *entry;
   int cnt = 0;
 
   if (frame->pc && cnt < size && (*skip)-- <= 0)
@@ -550,9 +551,16 @@ static int backtrace_unwind(struct unwind_frame_s *frame,
       buffer[cnt++] = (void *)((frame->lr & ~1) - 2);
     }
 
+again:
   while (cnt < size)
     {
-      if (unwind_frame(frame) < 0 || frame->pc == 0)
+      if (unwind_frame(frame) < 0 || frame->pc < 0x10)
+        {
+          break;
+        }
+
+      entry = unwind_find_entry(frame->pc);
+      if (entry == NULL || entry->content == 1)
         {
           break;
         }
@@ -565,6 +573,16 @@ static int backtrace_unwind(struct unwind_frame_s *frame,
             {
               buffer[cnt++] = (void *)frame->pc;
             }
+        }
+    }
+
+  if (cnt < size && cnt == 2 && frame->pc != frame->lr)
+    {
+      entry = unwind_find_entry(frame->lr);
+      if (entry != NULL && entry->content != 1)
+        {
+          frame->pc = frame->lr;
+          goto again;
         }
     }
 
@@ -637,7 +655,7 @@ int up_backtrace(struct tcb_s *tcb,
               frame.fp = CURRENT_REGS[REG_FP];
               frame.sp = CURRENT_REGS[REG_SP];
               frame.pc = CURRENT_REGS[REG_PC];
-              frame.lr = 0;
+              frame.lr = CURRENT_REGS[REG_LR];
               frame.stack_top = (unsigned long)rtcb->stack_base_ptr +
                                                rtcb->adj_stack_size;
               ret += backtrace_unwind(&frame, &buffer[ret],
