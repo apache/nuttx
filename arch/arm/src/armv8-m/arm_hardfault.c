@@ -182,10 +182,10 @@ int arm_hardfault(int irq, void *context, void *arg)
     }
 
 #ifdef CONFIG_DEBUG_HARDFAULT_ALERT
-      if (arm_gen_nonsecurefault(irq, context))
-        {
-          return OK;
-        }
+  if (arm_gen_nonsecurefault(irq, context))
+    {
+      return OK;
+    }
 #endif
 
   up_irq_save();
