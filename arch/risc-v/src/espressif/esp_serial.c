@@ -47,7 +47,7 @@
 #include "esp_irq.h"
 #include "esp_lowputc.h"
 
-#include "clk_tree.h"
+#include "esp_clk_tree.h"
 #include "hal/uart_hal.h"
 #include "soc/clk_tree_defs.h"
 
@@ -367,8 +367,8 @@ static int esp_setup(uart_dev_t *dev)
 
   esp_lowputc_enable_sysclk(priv);
 
-  clk_tree_src_get_freq_hz((soc_module_clk_t)UART_SCLK_DEFAULT,
-                           CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+  esp_clk_tree_src_get_freq_hz((soc_module_clk_t)UART_SCLK_DEFAULT,
+                           ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
                            &sclk_freq);
 
   /* Initialize UART module */
