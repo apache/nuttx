@@ -42,11 +42,15 @@ CSRCS += gd32f4xx_gpio.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  gd32f4xx_buttons.c
+CSRCS += gd32f4xx_buttons.c
 endif
 
 ifeq ($(CONFIG_SPI),y)
-CSRCS +=  gd32f4xx_spi.c
+CSRCS += gd32f4xx_spi.c
+endif
+
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += gd32f4xx_sdio.c
 endif
 
 ifeq ($(CONFIG_MTD_GD25),y)
