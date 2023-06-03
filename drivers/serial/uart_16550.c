@@ -37,6 +37,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/clk/clk.h>
 #include <nuttx/dma/dma.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
