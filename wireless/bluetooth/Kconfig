@@ -60,6 +60,26 @@ menuconfig WIRELESS_BLUETOOTH_HOST
 		BLE link-layer or to an external device over HCI UART).
 
 if WIRELESS_BLUETOOTH_HOST
+config DEVICE_APPEARANCE
+	int "Appearance sub-category value"
+	default 0
+	range 0 5188
+	---help---
+		This value comes from the "Appearance sub-category"
+		section (2.6.3) in the Bluetooth Assigned Numbers document.
+
+config DEVICE_NAME
+	string "Device name"
+	default "Apache NuttX"
+	---help---
+		The device name.
+
+config DEVICE_LOCAL_NAME
+	string "Device local name"
+	default "NuttX"
+	---help---
+		The device name used for advertising.
+
 endif # WIRELESS_BLUETOOTH_HOST
 
 config BLUETOOTH_MAX_CONN

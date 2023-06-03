@@ -30,7 +30,7 @@ ifeq ($(CONFIG_WIRELESS_BLUETOOTH_HOST),y)
 
 CSRCS += bt_atomic.c bt_att.c  bt_conn.c bt_gatt.c
 CSRCS += bt_ioctl.c bt_keys.c bt_l2cap.c bt_smp.c
-CSRCS += bt_uuid.c
+CSRCS += bt_uuid.c bt_services.c
 
 endif
 
