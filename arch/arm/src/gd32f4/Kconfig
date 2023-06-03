@@ -377,6 +377,10 @@ config GD32F4_PMU
 config GD32F4_SDIO
 	bool "SDIO"
 	default n
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select ARCH_HAVE_SDIO_PREFLIGHT
+
 
 config GD32F4_SPI0
 	bool "SPI0"
@@ -2135,6 +2139,35 @@ endmenu # RTC configuration
 
 menu "SDIO Configuration"
 	depends on GD32F4_SDIO
+	
+config GD32F4_SDIO_CARD
+	bool "SDIO Card support"
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config GD32F4_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+config GD32F4_SDIO_DMA
+	bool "Support DMA data transfers"
+	select SDIO_DMA
+	depends on GD32F4_DMA1
+	---help---
+		Support DMA data transfers.  Requires GD32_SDIO and config GD32_DMA1.
+
+config GD32F4_SDIO_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 endmenu
 
