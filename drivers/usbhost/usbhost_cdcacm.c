@@ -425,11 +425,21 @@ static const struct uart_ops_s g_uart_ops =
   usbhost_attach,        /* attach */
   usbhost_detach,        /* detach */
   usbhost_ioctl,         /* ioctl */
-  NULL           ,       /* receive */
+  NULL,                  /* receive */
   usbhost_rxint,         /* rxinit */
   usbhost_rxavailable,   /* rxavailable */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   usbhost_rxflowcontrol, /* rxflowcontrol */
+#endif
+#ifdef CONFIG_SERIAL_TXDMA
+  NULL,                  /* dmasend */
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  NULL,                  /* dmareceive */
+  NULL,                  /* dmarxfree */
+#endif
+#ifdef CONFIG_SERIAL_TXDMA
+  NULL,                  /* dmatxavail */
 #endif
   NULL,                  /* send */
   usbhost_txint,         /* txinit */
