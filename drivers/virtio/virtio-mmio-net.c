@@ -54,8 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DEBUG
-
 /* Work queue support is required. */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
@@ -183,10 +181,7 @@ static int  virtnet_txpoll(FAR struct net_driver_s *dev);
 
 static void virtnet_reply(FAR struct virtnet_driver_s *priv);
 static void virtnet_receive(FAR struct virtnet_driver_s *priv);
-
-#ifdef TODO
-static void virtnet_txdone(FAR struct virtnet_driver_s *priv);
-#endif
+static void virtnet_rxdispatch(FAR struct virtnet_driver_s *priv);
 
 static void virtnet_interrupt_work(FAR void *arg);
 static int  virtnet_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -219,8 +214,6 @@ static void virtnet_ipv6multicast(FAR struct virtnet_driver_s *priv);
 static int  virtnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                           unsigned long arg);
 #endif
-
-static void virtnet_rxdispatch(FAR struct virtnet_driver_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -269,7 +262,7 @@ static void virtnet_add_packets_to_rxq(FAR struct virtnet_driver_s *priv)
   uint16_t d2;
   uint32_t i;
 
-  vrtinfo("+++ rxq->len=%" PRId32 "  rxq->avail-idx=%d \n",
+  vrtinfo("+++ rxq->len=%" PRId32 "  rxq->avail->idx=%d \n",
           rxq->len, rxq->avail->idx);
   DEBUGASSERT(rxq->avail->idx == 0);
 
@@ -304,7 +297,7 @@ static void virtnet_add_packets_to_rxq(FAR struct virtnet_driver_s *priv)
       rxq->avail->idx += 1;
     }
 
-  vrtinfo("+++ virtq->avail-idx=%d \n", rxq->avail->idx);
+  vrtinfo("+++ virtq->avail->idx=%d \n", rxq->avail->idx);
   vrtinfo("+++ virtq->used->idx=%d \n", rxq->used->idx);
 }
 
@@ -338,11 +331,6 @@ static int virtnet_transmit(FAR struct virtnet_driver_s *priv)
    * address=priv->vnet_dev.d_buf, length=priv->vnet_dev.d_len
    */
 
-  /* Verify that the hardware is ready to send another packet.  If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
-   */
-
   /* Increment statistics */
 
   NETDEV_TXPACKETS(priv->vnet_dev);
@@ -359,12 +347,12 @@ static int virtnet_transmit(FAR struct virtnet_driver_s *priv)
   d2 = virtq_alloc_desc(priv->txq, idx + 1, pkt);
   DEBUGASSERT(d1 != d2);
 
-  /* Set up the descriptor for header */
+  /* Set up the descriptor for packet */
 
   priv->txq->desc[d2].len   = len;
   priv->txq->desc[d2].flags = 0;
 
-  /* Set up the descriptor for packet */
+  /* Set up the descriptor for header */
 
   priv->txq->desc[d1].len   = VIRTIO_NET_HDRLEN;
   priv->txq->desc[d1].flags = VIRTQ_DESC_F_NEXT;
@@ -385,10 +373,6 @@ static int virtnet_transmit(FAR struct virtnet_driver_s *priv)
   virtio_putreg32(VIRTIO_NET_Q_TX, &priv->regs->queue_notify);
 
   vrtinfo("*** finish updating queue_notify\n");
-
-#ifdef TODO
-  /* Enable Tx interrupts */
-#endif
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -646,46 +630,6 @@ static void virtnet_receive(FAR struct virtnet_driver_s *priv)
 }
 
 /****************************************************************************
- * Name: virtnet_txdone
- *
- * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
- *
- * Input Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef TODO
-static void virtnet_txdone(FAR struct virtnet_driver_s *priv)
-{
-  /* Check for errors and update statistics */
-
-  NETDEV_TXDONE(priv->vnet_dev);
-
-  /* Check if there are pending transmissions */
-
-  /* If no further transmissions are pending, then cancel the TX timeout and
-   * disable further Tx interrupts.
-   */
-
-  wd_cancel(&priv->vnet_txtimeout);
-
-  /* And disable further TX interrupts. */
-
-  /* In any event, poll the network for new TX data */
-
-  devif_poll(&priv->vnet_dev, virtnet_txpoll);
-}
-#endif
-
-/****************************************************************************
  * Name: virtnet_interrupt_work
  *
  * Description:
@@ -714,23 +658,9 @@ static void virtnet_interrupt_work(FAR void *arg)
 
   net_lock();
 
-  /* Process pending Ethernet interrupts */
-
-  /* Handle interrupts according to status bit settings */
-
-  /* Check if we received an incoming packet, if so, call virtnet_receive() */
+  /* Process incoming packets */
 
   virtnet_receive(priv);
-
-  /* Check if a packet transmission just completed.
-   * If so, call virtnet_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * transmissions.
-   */
-
-#ifdef TODO
-  virtnet_txdone(priv);
-#endif
 
   net_unlock();
 
