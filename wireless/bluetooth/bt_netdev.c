@@ -296,21 +296,18 @@ static void btnet_l2cap_connected(FAR struct bt_conn_s *conn,
                                   FAR void *context, uint16_t cid)
 {
   wlinfo("Connected\n");
-#warning Missing logic
 }
 
 static void btnet_l2cap_disconnected(FAR struct bt_conn_s *conn,
                                      FAR void *context, uint16_t cid)
 {
   wlinfo("Disconnected\n");
-#warning Missing logic
 }
 
 static void btnet_l2cap_encrypt_change(FAR struct bt_conn_s *conn,
                                        FAR void *context, uint16_t cid)
 {
   wlinfo("Encryption change\n");
-#warning Missing logic
 }
 
 /****************************************************************************
@@ -463,14 +460,12 @@ static void btnet_hci_connected(FAR struct bt_conn_s *conn,
                                 FAR void *context)
 {
   wlinfo("Connected\n");
-#warning Missing logic
 }
 
 static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
                                    FAR void *context)
 {
   wlinfo("Disconnected\n");
-#warning Missing logic
 }
 #else
 
@@ -1299,6 +1294,10 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
    */
 
   priv->bd_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
+  bt_add_services();
 #endif
 
   /* Register the network device with the OS so that socket IOCTLs can be
