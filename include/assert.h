@@ -100,7 +100,7 @@
  */
 
 #ifdef NDEBUG
-#  define assert(f) ((void)(1 || (f)))
+#  define assert(f) ((void)(1))
 #else
 #  define assert(f) ASSERT(f)
 #endif
