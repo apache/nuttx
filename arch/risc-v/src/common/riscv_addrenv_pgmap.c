@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-uintptr_t up_addrenv_find_page(FAR arch_addrenv_t *addrenv, uintptr_t vaddr)
+uintptr_t up_addrenv_find_page(arch_addrenv_t *addrenv, uintptr_t vaddr)
 {
   uintptr_t pgdir;
   uintptr_t lnvaddr;

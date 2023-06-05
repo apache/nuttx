@@ -112,7 +112,7 @@ static int get_user_pages(FAR void **pages, size_t npages, uintptr_t vaddr)
  *
  ****************************************************************************/
 
-static void *map_pages(FAR void **pages, size_t npages, int prot)
+static FAR void *map_pages(FAR void **pages, size_t npages, int prot)
 {
   struct mm_map_entry_s entry;
   FAR void             *vaddr;
@@ -175,7 +175,7 @@ errout_with_vaddr:
  *
  ****************************************************************************/
 
-static void *map_single_user_page(uintptr_t vaddr)
+static FAR void *map_single_user_page(uintptr_t vaddr)
 {
   FAR struct tcb_s *tcb = nxsched_self();
   uintptr_t         page;
@@ -385,7 +385,7 @@ FAR void *kmm_user_map(FAR void *uaddr, size_t size)
 
   /* No, the area must be mapped into kernel virtual address space */
 
-  pages = kmm_zalloc(npages * sizeof(void *));
+  pages = kmm_zalloc(npages * sizeof(FAR void *));
   if (!pages)
     {
       return NULL;
