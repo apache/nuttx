@@ -68,6 +68,12 @@ config FDSAN
 	---help---
 		Enable the fdsan support
 
+config FDCHECK
+	bool "Enable fdcheck"
+	default n
+		---help---
+		Enable the fdcheck support
+
 config LIBC_FTOK_VFS_PATH
 	string "Relative path to ftok storage"
 	default "/var/ftok"

@@ -32,6 +32,10 @@
 #include <signal.h>
 #include <sys/time.h>
 
+#ifdef CONFIG_FDCHECK
+#  include <nuttx/fdcheck.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -71,12 +75,21 @@
 
 /* Standard helper macros */
 
-#define FD_CLR(fd,set) \
+#ifdef CONFIG_FDCHECK
+#  define FD_CLR(fd,set) \
+  ((((fd_set*)(set))->arr)[_FD_NDX(fdcheck_restore(fd))] &= ~(UINT32_C(1)<< _FD_BIT(fdcheck_restore(fd))))
+#  define FD_SET(fd,set) \
+  ((((fd_set*)(set))->arr)[_FD_NDX(fdcheck_restore(fd))] |= (UINT32_C(1) << _FD_BIT(fdcheck_restore(fd))))
+#  define FD_ISSET(fd,set) \
+ (((((fd_set*)(set))->arr)[_FD_NDX(fdcheck_restore(fd))] & (UINT32_C(1) << _FD_BIT(fdcheck_restore(fd)))) != 0)
+#else
+#  define FD_CLR(fd,set) \
   ((((fd_set*)(set))->arr)[_FD_NDX(fd)] &= ~(UINT32_C(1)<< _FD_BIT(fd)))
-#define FD_SET(fd,set) \
+#  define FD_SET(fd,set) \
   ((((fd_set*)(set))->arr)[_FD_NDX(fd)] |= (UINT32_C(1) << _FD_BIT(fd)))
-#define FD_ISSET(fd,set) \
+#  define FD_ISSET(fd,set) \
  (((((fd_set*)(set))->arr)[_FD_NDX(fd)] & (UINT32_C(1) << _FD_BIT(fd))) != 0)
+#endif
 #define FD_ZERO(set) \
    memset((set), 0, sizeof(fd_set))
 
