@@ -187,6 +187,11 @@
 #define _PTHREAD_MFLAGS_INCONSISTENT  (1 << 1) /* Mutex is in an inconsistent state */
 #define _PTHREAD_MFLAGS_NRECOVERABLE  (1 << 2) /* Inconsistent mutex has been unlocked */
 
+/* The contention scope attribute in thread attributes object */
+
+#define PTHREAD_SCOPE_SYSTEM          0
+#define PTHREAD_SCOPE_PROCESS         1
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -487,6 +492,11 @@ int pthread_attr_setstack(FAR pthread_attr_t *attr,
                           FAR void *stackaddr, size_t stacksize);
 int pthread_attr_getstack(FAR const pthread_attr_t *attr,
                           FAR void **stackaddr, FAR size_t *stacksize);
+
+/* Set/get contention scope attribute in thread attributes object */
+
+int pthread_attr_setscope(FAR pthread_attr_t *attr, int scope);
+int pthread_attr_getscope(FAR const pthread_attr_t *attr, FAR int *scope);
 
 /* Set or get the name of a thread */
 
