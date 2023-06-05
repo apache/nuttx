@@ -175,8 +175,9 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
       return -EINVAL;
     }
 
-  pendmask = nxsig_pendingset(NULL) & dev->sigmask;
-  if (pendmask == 0)
+  pendmask = nxsig_pendingset(NULL);
+  sigandset(&pendmask, &pendmask, &dev->sigmask);
+  if (sigisemptyset(&pendmask))
     {
       if (filep->f_oflags & O_NONBLOCK)
         {
@@ -208,9 +209,10 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
       siginfo->ssi_int    = info.si_value.sival_int;
       siginfo->ssi_ptr    = (uint64_t)(uintptr_t)info.si_value.sival_ptr;
       siginfo++;
-      pendmask = nxsig_pendingset(NULL) & dev->sigmask;
+      pendmask = nxsig_pendingset(NULL);
+      sigandset(&pendmask, &pendmask, &dev->sigmask);
     }
-  while (--count != 0 && pendmask != 0);
+  while (--count != 0 && !sigisemptyset(&pendmask));
 
 errout:
   len = (FAR char *)siginfo - buffer;
@@ -221,6 +223,7 @@ static int signalfd_file_poll(FAR struct file *filep,
                               FAR struct pollfd *fds, bool setup)
 {
   FAR struct signalfd_priv_s *dev = filep->f_priv;
+  sigset_t mask;
   int ret = 0;
   int i;
 
@@ -264,7 +267,9 @@ static int signalfd_file_poll(FAR struct file *filep,
 
   /* Notify the POLLIN event if the counter is not zero */
 
-  if ((nxsig_pendingset(NULL) & dev->sigmask) != 0)
+  mask = nxsig_pendingset(NULL);
+  sigandset(&mask, &mask, &dev->sigmask);
+  if (!sigisemptyset(&mask))
     {
       poll_notify(dev->fds, CONFIG_SIGNAL_FD_NPOLLWAITERS, POLLIN);
     }
