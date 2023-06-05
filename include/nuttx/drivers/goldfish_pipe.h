@@ -51,7 +51,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_GOLDFISH_PIPE
-int goldfish_pipe_register(void *base, int irq);
+int goldfish_pipe_register(FAR void *base, int irq);
 #endif
 
 #undef EXTERN
