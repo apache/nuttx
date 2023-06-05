@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MM_KMAP_H_
-#define __INCLUDE_NUTTX_MM_KMAP_H_
+#ifndef __INCLUDE_NUTTX_MM_KMAP_H
+#define __INCLUDE_NUTTX_MM_KMAP_H
 
 /****************************************************************************
  * Name: kmm_map_initialize
@@ -106,4 +106,4 @@ FAR void *kmm_user_map(FAR void *uaddr, size_t size);
 
 FAR void *kmm_map_user_page(FAR void *uaddr);
 
-#endif /* __INCLUDE_NUTTX_MM_KMAP_H_ */
+#endif /* __INCLUDE_NUTTX_MM_KMAP_H */
