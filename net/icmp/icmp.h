@@ -69,6 +69,7 @@ struct devif_callback_s;         /* Forward reference */
 struct icmp_poll_s
 {
   FAR struct socket *psock;        /* IPPROTO_ICMP socket structure */
+  FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
   FAR struct pollfd *fds;          /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
