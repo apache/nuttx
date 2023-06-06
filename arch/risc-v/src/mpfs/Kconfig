@@ -325,6 +325,25 @@ config MPFS_EMMCSD
 	---help---
 		Selects the MPFS eMMCSD driver.
 
+config MPFS_COREMMC
+	bool "COREMMC"
+	select ARCH_HAVE_SDIO
+	select SDIO_BLOCKSETUP
+	default n
+	---help---
+		Selects the MPFS CoreMMC driver.
+
+config MPFS_COREMMC_BASE
+	hex "Base address for the CoreMMC instance"
+	default 0x60030000
+	depends on MPFS_COREMMC
+
+config MPFS_COREMMC_IRQNUM
+	int "Number of F2H interrupt"
+	default 5
+	range 0 63
+	depends on MPFS_COREMMC
+
 config MPFS_IHC_CLIENT
 	bool "IHC slave"
 	depends on RPTUN && !MPFS_BOOTLOADER
