@@ -73,6 +73,7 @@ include rf/Make.defs
 include rc/Make.defs
 include segger/Make.defs
 include usrsock/Make.defs
+include reset/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs
