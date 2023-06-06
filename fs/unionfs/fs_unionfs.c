@@ -2045,8 +2045,6 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && buf != NULL);
   ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
 
-  memset(buf, 0, sizeof(struct statfs));
-
   /* Get statfs info from file system 1.
    *
    * REVISIT: What would it mean if one file system did not support statfs?
@@ -2064,6 +2062,8 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
               um2->um_node->u.i_mops != NULL);
   ops2 = um2->um_node->u.i_mops;
 
+  memset(&buf1, 0, sizeof(struct statfs));
+  memset(&buf2, 0, sizeof(struct statfs));
   if (ops1->statfs != NULL && ops2->statfs != NULL)
     {
       ret = ops1->statfs(um1->um_node, &buf1);

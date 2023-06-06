@@ -588,6 +588,7 @@ static inline int userfs_statfs_dispatch(FAR struct userfs_info_s *info,
   /* Dispatch the request */
 
   DEBUGASSERT(info->userops != NULL && info->userops->statfs != NULL);
+  memset(&resp.buf, 0, sizeof(struct statfs));
   resp.ret  = info->userops->statfs(info->volinfo, &resp.buf);
 
   /* Send the response */

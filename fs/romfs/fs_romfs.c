@@ -1260,7 +1260,6 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Fill in the statfs info */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = ROMFS_MAGIC;
 
   /* We will claim that the optimal transfer size is the size of one sector */

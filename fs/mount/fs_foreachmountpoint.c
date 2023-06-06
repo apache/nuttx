@@ -100,6 +100,7 @@ static int mountpoint_filter(FAR struct inode *node,
 
       /* Get the status of the file system */
 
+      memset(&statbuf, 0, sizeof(struct statfs));
       if (node->u.i_mops->statfs(node, &statbuf) == OK)
         {
           /* And pass the full path and file system status to the handler */
