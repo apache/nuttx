@@ -369,7 +369,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       goto errout_with_tcb;
     }
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#if defined(CONFIG_ARCH_ADDRENV) && \
+    defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ARCH_KERNEL_STACK)
   /* Allocate the kernel stack */
 
   ret = up_addrenv_kstackalloc(&ptcb->cmn);
