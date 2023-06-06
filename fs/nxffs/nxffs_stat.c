@@ -74,7 +74,6 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
    * REVISIT: Need f_bfree, f_bavail, f_files, f_ffree calculation
    */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = NXFFS_MAGIC;
   buf->f_bsize   = volume->geo.blocksize;
   buf->f_blocks  = volume->nblocks;

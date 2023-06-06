@@ -449,7 +449,6 @@ static int binfs_statfs(struct inode *mountpt, struct statfs *buf)
 
   /* Fill in the statfs info */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = BINFS_MAGIC;
   buf->f_bsize   = 0;
   buf->f_blocks  = 0;

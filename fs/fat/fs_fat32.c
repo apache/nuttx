@@ -2333,7 +2333,6 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Fill in the statfs info */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = MSDOS_SUPER_MAGIC;
 
   /* We will claim that the optimal transfer size is the size of a cluster

@@ -1161,7 +1161,6 @@ static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Call the host fs to perform the statfs */
 
-  memset(buf, 0, sizeof(struct statfs));
   ret = host_statfs(fs->fs_root, buf);
   buf->f_type = HOSTFS_MAGIC;
 

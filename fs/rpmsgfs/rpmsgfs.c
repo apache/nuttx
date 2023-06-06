@@ -1234,7 +1234,6 @@ static int rpmsgfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Call the host fs to perform the statfs */
 
-  memset(buf, 0, sizeof(struct statfs));
   ret = rpmsgfs_client_statfs(fs->handle, fs->fs_root, buf);
   buf->f_type = RPMSGFS_MAGIC;
 

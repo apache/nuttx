@@ -1610,7 +1610,6 @@ static int smartfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Implement the logic!! */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type = SMARTFS_MAGIC;
 
   /* Re-request the low-level format info to update free blocks */
