@@ -2010,6 +2010,31 @@ config DEBUG_VIRTIO_INFO
 
 endif # DEBUG_VIDEO
 
+config DEBUG_RESET
+	bool "RESET Debug Features"
+	default n
+	depends on RESET
+	---help---
+		Enable RESET debug features.
+
+if DEBUG_RESET
+
+config DEBUG_RESET_ERROR
+	bool "RESET Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RESET driver error output to SYSLOG.
+
+config DEBUG_RESET_INFO
+	bool "RESET Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RESET driver informational output to SYSLOG.
+
+endif # DEBUG_RESET
+
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK

@@ -827,6 +827,24 @@
 #  define vrtinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_RESET_ERROR
+#  define rsterr       _err
+#else
+#  define rsterr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_RESET_WARN
+#  define rstwarn     _warn
+#else
+#  define rstwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_RESET_INFO
+#  define rstinfo     _info
+#else
+#  define rstinfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR
@@ -1097,6 +1115,14 @@
 #else
 #  define mtrerrdumpbuffer(m,b,n)
 #  define mtrinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_RESET
+#  define reseterrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define resetinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define reseterrdumpbuffer(m,b,n)
+#  define resetinfodumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

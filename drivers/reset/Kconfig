@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig RESET
+	bool "reset driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" reset driver.
