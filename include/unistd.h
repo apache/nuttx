@@ -306,6 +306,7 @@ extern "C"
 
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   getpgrp(void);
 pid_t   gettid(void);
 pid_t   getppid(void);
 void    _exit(int status) noreturn_function;
