@@ -351,6 +351,7 @@ extern "C"
 #endif
 
 int  kill(pid_t pid, int signo);
+int  killpg(pid_t pgrp, int signo);
 int  tgkill(pid_t pid, pid_t tid, int signo);
 void psignal(int signum, FAR const char *message);
 void psiginfo(FAR const siginfo_t *pinfo, FAR const char *message);

@@ -25,6 +25,7 @@ CSRCS += sig_nandset.c sig_andset.c sig_orset.c sig_xorset.c
 CSRCS += sig_isemptyset.c
 CSRCS += sig_hold.c sig_ignore.c sig_ismember.c sig_pause.c sig_psignal.c
 CSRCS += sig_raise.c sig_relse.c sig_set.c sig_signal.c sig_wait.c
+CSRCS += sig_killpg.c
 
 # Add the signal directory to the build
 
