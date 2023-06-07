@@ -102,7 +102,11 @@ riscv_savefpu:
   li         t1, MSTATUS_FS
   and        t2, t0, t1
   li         t1, MSTATUS_FS_DIRTY
+#ifdef CONFIG_ARCH_LAZYFPU
   bne        t2, t1, 1f
+#else
+  blt        t2, t1, 1f
+#endif
   li         t1, ~MSTATUS_FS
   and        t0, t0, t1
   li         t1, MSTATUS_FS_CLEAN
