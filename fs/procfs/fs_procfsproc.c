@@ -1203,8 +1203,8 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-8s %-8s %s\n",
-                               "FD", "POS", "OFLAGS", "PATH");
+                               "\n%-3s %-8s %-8s %-8s %s \n",
+                               "FD", "POS", "OFLAGS", "TYPE", "PATH");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1235,9 +1235,10 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                 }
 
               linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                    "%3d %8ld %8x",
+                                    "%3d %8ld %8d %8x",
                                     i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
                                     j, (long)file->f_pos,
+                                    INODE_GET_TYPE(file->f_inode),
                                     file->f_oflags);
               copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                          remaining, &offset);
