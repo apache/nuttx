@@ -3799,13 +3799,6 @@ config STM32_EXTERNAL_RAM
 	---help---
 		In addition to internal SRAM, external RAM may be available through the FSMC/FMC.
 
-config STM32_TICKLESS_SYSTICK
-	bool "Tickless via SysTick"
-	default n
-	depends on SCHED_TICKLESS
-	---help---
-		Use SysTick as Tickless clock.
-
 menu "Timer Configuration"
 	depends on STM32_TIM
 
@@ -3815,7 +3808,6 @@ config STM32_TICKLESS_TIMER
 	int "Tickless hardware timer"
 	default 2
 	range 1 14
-	depends on !STM32_TICKLESS_SYSTICK
 	---help---
 		If the Tickless OS feature is enabled, then one clock must be
 		assigned to provided the timer needed by the OS.
