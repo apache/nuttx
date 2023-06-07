@@ -1166,7 +1166,9 @@ str_lpad:
 
                           if (c == 'S')
                             {
-                              sprintf_internal(stream, "+%#tx/%#zx",
+                              total_len +=
+                              sprintf_internal(stream,
+                                               "+%#tx/%#zx",
                                                addr - symbol->sym_value,
                                                symbolsize);
                             }
