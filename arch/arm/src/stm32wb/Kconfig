@@ -724,7 +724,6 @@ config STM32WB_TICKLESS_TIMER
 	int "Tickless hardware timer"
 	default 2
 	range 1 17
-	depends on !STM32WB_TICKLESS_SYSTICK
 	---help---
 		If the Tickless OS feature is enabled, then one clock must be
 		assigned to provided the timer needed by the OS.

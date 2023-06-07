@@ -702,7 +702,6 @@ config GD32F4_TICKLESS_TIMER
 	int "Tickless by hardware timer"
 	default 1
 	range 0 13
-	depends on !GD32F4_TICKLESS_SYSTICK
 	---help---
 		If the Tickless OS feature is enabled, then one clock must be
 		assigned to provided the timer needed by the OS.
