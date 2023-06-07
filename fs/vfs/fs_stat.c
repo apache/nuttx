@@ -360,7 +360,15 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     }
   else
 #endif
+#if defined(CONFIG_PIPES)
+  /* Check for pipes */
 
+  if (INODE_IS_PIPE(inode))
+    {
+      buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFIFO;
+    }
+  else
+#endif
   /* Handle "normal inodes */
 
   if (inode->u.i_ops != NULL)
