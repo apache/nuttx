@@ -604,7 +604,6 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return OK;
     }
 
-  ferr("ERROR: Invalid cmd: %d\n", cmd);
   return -ENOTTY;
 }
 
