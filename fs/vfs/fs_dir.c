@@ -355,6 +355,10 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
         {
           entry->d_type = DTYPE_SHM;
         }
+      else if (INODE_IS_PIPE(pdir->next))
+        {
+          entry->d_type = DTYPE_FIFO;
+        }
     }
 
   /* If the node has child node(s) or no operations, then we will say that
