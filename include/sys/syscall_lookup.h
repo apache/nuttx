@@ -399,13 +399,6 @@ SYSCALL_LOOKUP(epoll_create1,              1)
 SYSCALL_LOOKUP(epoll_ctl,                  4)
 SYSCALL_LOOKUP(epoll_wait,                 4)
 
-/* Identity of Group/User */
-
-SYSCALL_LOOKUP(getegid,                    1)
-SYSCALL_LOOKUP(geteuid,                    1)
-SYSCALL_LOOKUP(setegid,                    1)
-SYSCALL_LOOKUP(seteuid,                    1)
-
 /* POSIX timers */
 
 SYSCALL_LOOKUP(time,                       1)
