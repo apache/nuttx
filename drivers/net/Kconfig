@@ -468,6 +468,9 @@ config ETH0_PHY_LAN8742A
 config ETH0_PHY_DM9161
 	bool "Davicom DM9161 PHY"
 
+config ETH0_PHY_YT8512
+	bool "Motorcomm YT8512 PHY"
+
 endchoice
 
 choice
@@ -517,6 +520,9 @@ config ETH1_PHY_LAN8720
 
 config ETH1_PHY_DM9161
 	bool "Davicom DM9161 PHY"
+
+config ETH1_PHY_YT8512
+	bool "Motorcomm YT8512 PHY"
 
 endchoice
 

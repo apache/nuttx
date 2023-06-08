@@ -212,6 +212,20 @@
 #define MII_LAN8740_IMR              0x1e      /* Interrupt Mask Register */
 #define MII_LAN8740_SCSR             0x1f      /* PHY Special Control/Status Register */
 
+/* Motorcomm YT8512C/YT8512H Extended Registers */
+
+#define MII_YT8512_PHYSFC            0x10      /* PHY Function conrtol Register */
+#define MII_YT8512_PHYSTS            0x11      /* PHY Status Register */
+#define MII_YT8512_IMR               0x12      /* Interrupt Mask Register */
+#define MII_YT8512_ISR               0x13      /* Interrupt Source Register */
+#define MII_YT8512_SADC              0x14      /* Speed auto downgrade control Register */
+#define MII_YT8512_REC               0x15      /* Rx Error Counter Register */
+#define MII_YT8512_DEBUG_ADDR_OFFSET 0x1E      /* Debug Register's Address Offset Register */
+#define MII_YT8512_DEBUG_DATA        0x1F      /* Debug Register's Data Register */
+
+#define MII_YT8512_LED0              0x40c0    /* LED0 control */
+#define MII_YT8512_LED1              0x40c3    /* LED1 control */
+
 /* MII register bit settings ************************************************/
 
 /* MII Control register bit definitions */
@@ -847,14 +861,39 @@
 
 /* Atheros AR8031 MII ID1/2 register bits */
 
-#define MII_PHYID1_AR8031            0x004d     /* ID1 value for AR8031 */
-#define MII_PHYID2_AR8031            0xd074     /* ID2 value for AR8031 */
+#define MII_PHYID1_AR8031             0x004d     /* ID1 value for AR8031 */
+#define MII_PHYID2_AR8031             0xd074     /* ID2 value for AR8031 */
 
-#define MII_AR8031_PSSR_SPEEDMASK    (3 << 14)  /* Bit 14-15: Speed */
-#define MII_AR8031_PSSR_10MBPS       (0 << 14)
-#define MII_AR8031_PSSR_100MBPS      (1 << 14)
-#define MII_AR8031_PSSR_1000MBPS     (2 << 14)
-#define MII_AR8031_PSSR_DUPLEX       (1 << 13)  /* Bit 13:  Full duplex mode */
+#define MII_AR8031_PSSR_SPEEDMASK     (3 << 14)  /* Bit 14-15: Speed */
+#define MII_AR8031_PSSR_10MBPS        (0 << 14)
+#define MII_AR8031_PSSR_100MBPS       (1 << 14)
+#define MII_AR8031_PSSR_1000MBPS      (2 << 14)
+#define MII_AR8031_PSSR_DUPLEX        (1 << 13)  /* Bit 13:  Full duplex mode */
+
+/* YT8512 register bit settings *********************************************/
+
+/* YT8512 MII ID1/2 register bits */
+
+#define MII_PHYID1_YT8512             0x0000    /* ID1 value for YT8512 */
+#define MII_PHYID2_YT8512             0x0128    /* ID2 value for YT8512 */
+
+/* YT8512 Register 0x10: Specific function control register */
+
+/* YT8512 Register 0x11: Specific status */
+
+#define MII_YT8512_PHYSTS_SPEED       (1 << 14)
+#define MII_YT8512_PHYSTS_DUPLEX      (1 << 13)
+/* YT8512 Register 0x12: Interrupt mask */
+#define MII_YT8512_IMR_SPD_EN         (1 << 14)
+#define MII_YT8512_IMR_DUP_EN         (1 << 13)
+#define MII_YT8512_IMR_LD_EN          (1 << 11)
+#define MII_YT8512_IMR_LU_EN          (1 << 10)
+
+/* YT8512 Register 0x13: Interrupt status */
+
+/* YT8512 Register 0x14: Speed auto downgrade control */
+
+/* YT8512 Register 0x15: Rx error counter */
 
 /****************************************************************************
  * Type Definitions
