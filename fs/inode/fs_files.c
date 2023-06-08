@@ -525,6 +525,11 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
   ret = file_dup2(&list->fl_files[fd1 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
                                  [fd1 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK],
                   filep);
+
+#ifdef CONFIG_FDSAN
+  filep->f_tag = file.f_tag;
+#endif
+
   nxmutex_unlock(&list->fl_lock);
 
   file_close(&file);
