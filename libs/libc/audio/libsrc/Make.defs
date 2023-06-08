@@ -21,7 +21,7 @@
 ifeq ($(CONFIG_AUDIO_SRC),y)
 
 PACKAGE=libsamplerate
-VERSION=0.1.9
+VERSION=0.2.2
 
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard libsamplerate/.git),)
