@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/sms.h>
+#include <nuttx/wireless/wireless.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -149,6 +150,14 @@
 #define LTE_CMDID_LOGREAD                        _CMDGRP_NORMAL(0x38)
 #define LTE_CMDID_LOGLSEEK                       _CMDGRP_NORMAL(0x39)
 #define LTE_CMDID_LOGREMOVE                      _CMDGRP_NORMAL(0x3a)
+#define LTE_CMDID_STOPAPI                        _CMDGRP_NORMAL(0x3b)
+#define LTE_CMDID_SUSPEND                        _CMDGRP_NORMAL(0x3c)
+#define LTE_CMDID_RESUME                         _CMDGRP_NORMAL(0x3d)
+#define LTE_CMDID_RETRYDISABLE                   _CMDGRP_POWER(0x3e)
+#define LTE_CMDID_GET_POWER_STAT                 _CMDGRP_POWER(0x3f)
+#define LTE_CMDID_SETCTXCB                       _CMDGRP_NOMDM(0x40)
+#define LTE_CMDID_COUNTWLOCK                     _CMDGRP_POWER(0x41)
+#define LTE_CMDID_REPEVT_DUMMY                   _CMDGRP_EVENT(0x42)
 
 #define LTE_CMDID_ACCEPT                         _CMDGRP_NORMAL(0x50)
 #define LTE_CMDID_BIND                           _CMDGRP_NORMAL(0x51)
@@ -312,6 +321,12 @@
 #define LTE_CMDID_LWM2M_EXECRESP                 _CMDGRP_LWM2M(0x0119)
 #define LTE_CMDID_LWM2M_OBSERVEUPDATE            _CMDGRP_LWM2M(0x011A)
 
+#define LTE_CMDID_LWM2M_CHANGERAT                _CMDGRP_LWM2M(0x011B)
+#define LTE_CMDID_LWM2M_GETRAT                   _CMDGRP_LWM2M(0x011C)
+
+#define LTE_CMDID_LWM2M_GETQMODE                 _CMDGRP_LWM2M(0x011D)
+#define LTE_CMDID_LWM2M_SETQMODE                 _CMDGRP_LWM2M(0x011E)
+
 #define IS_LWM2M_EVENT(cid) (\
   ((cid) == LTE_CMDID_LWM2M_READ_EVT) ||  \
   ((cid) == LTE_CMDID_LWM2M_WRITE_EVT) || \
@@ -320,6 +335,13 @@
   ((cid) == LTE_CMDID_LWM2M_OVSTOP_EVT) ||  \
   ((cid) == LTE_CMDID_LWM2M_SERVEROP_EVT) ||  \
   ((cid) == LTE_CMDID_LWM2M_FWUP_EVT) )
+
+#define IS_LTE_REPORT_EVENT(cid) (\
+  ((cid) == LTE_CMDID_REPNETINFO) ||  \
+  ((cid) == LTE_CMDID_REPSIMSTAT) || \
+  ((cid) == LTE_CMDID_REPLTIME) ||  \
+  ((cid) == LTE_CMDID_REPQUAL) || \
+  ((cid) == LTE_CMDID_REPCELL) )
 
 /****************************************************************************
  * Public Types

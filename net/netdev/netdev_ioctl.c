@@ -70,6 +70,10 @@
 #  include <nuttx/wireless/cellular/cellular.h>
 #endif
 
+#ifdef CONFIG_NETDEV_MODEM_LTE_IOCTL
+#  include <nuttx/wireless/lte/lte_ioctl.h>
+#endif
+
 #include "arp/arp.h"
 #include "socket/socket.h"
 #include "netdev/netdev.h"
@@ -1598,6 +1602,9 @@ ssize_t net_ioctl_arglen(int cmd)
       case SIOCDELRT:
         return sizeof(struct rtentry);
 
+      case SIOCDENYINETSOCK:
+        return sizeof(uint8_t);
+
       default:
 #ifdef CONFIG_NETDEV_IOCTL
 #  ifdef CONFIG_NETDEV_WIRELESS_IOCTL
@@ -1625,6 +1632,20 @@ ssize_t net_ioctl_arglen(int cmd)
         if (_BLUETOOTHIOCVALID(cmd))
           {
             return sizeof(struct btreq_s);
+          }
+#  endif
+
+#  ifdef CONFIG_NETDEV_MODEM_LTE_IOCTL
+        if (_LTEIOCVALID(cmd))
+          {
+            switch (cmd)
+              {
+                case SIOCLTECMD:
+                  return sizeof(struct lte_ioctl_data_s);
+
+                default:
+                  return sizeof(struct lte_smsreq_s);
+              }
           }
 #  endif
 #endif

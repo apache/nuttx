@@ -96,6 +96,9 @@
                                  * when we just want a socket for performing driver
                                  * ioctls. This definition is not POSIX compliant.
                                  */
+#define SOCK_SMS       7        /* Support SMS(Short Message Service) socket.
+                                 * This definition is not POSIX compliant.
+                                 */
 #define SOCK_PACKET   10        /* Obsolete and should not be used in new programs */
 
 #define SOCK_CLOEXEC  02000000  /* Atomically set close-on-exec flag for the new
@@ -291,6 +294,11 @@
 #define SS_MAXSIZE      128  /* Implementation specific max size */
 #define SS_ALIGNSIZE    (sizeof(FAR struct sockaddr *))
                              /* Implementation specific desired alignment */
+
+/* Network socket control */
+
+#define DENY_INET_SOCK_ENABLE  0x01   /* Deny to create INET socket */
+#define DENY_INET_SOCK_DISABLE 0x02   /* Not deny to create INET socket */
 
 /****************************************************************************
  * Type Definitions
