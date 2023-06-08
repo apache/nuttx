@@ -75,13 +75,13 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
   uint8_t offset = 0;
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
-  while (iob_get_queue_size(&conn->readahead) > conn->rcvbufs)
+  if (iob_get_queue_size(&conn->readahead) > conn->rcvbufs)
     {
-      iob = iob_remove_queue(&conn->readahead);
-      iob_free_chain(iob);
+      netdev_iob_release(dev);
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;
 #endif
+      return 0;
     }
 #endif
 
