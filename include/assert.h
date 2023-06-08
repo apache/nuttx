@@ -42,20 +42,25 @@
 #undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 #undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 
-#ifndef CONFIG_HAVE_FILENAME
-#  define __FILE__ 0
-#  define __LINE__ 0
+#if !defined(CONFIG_HAVE_FILENAME) || !defined(CONFIG_DEBUG_ASSERTIONS_FILENAME)
+#  define __ASSERT_FILE__ 0
+#  define __ASSERT_LINE__ 0
+#else
+#  define __ASSERT_FILE__ __FILE__
+#  define __ASSERT_LINE__ __LINE__
 #endif
 
-#define PANIC() __assert(__FILE__, __LINE__, "panic")
-#define PANIC_WITH_REGS(msg, regs) _assert(__FILE__, __LINE__, msg, regs)
+#define PANIC() __assert(__ASSERT_FILE__, __ASSERT_LINE__, "panic")
+#define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
+                                           __ASSERT_LINE__, msg, regs)
 
 #ifdef CONFIG_DEBUG_ASSERTIONS_EXPRESSION
 #  define ASSERT(f)                       \
   do                                      \
     {                                     \
       if (predict_false(!(f)))            \
-        __assert(__FILE__, __LINE__, #f); \
+        __assert(__ASSERT_FILE__,         \
+                 __ASSERT_LINE__, #f);    \
     }                                     \
   while (0)
 
@@ -63,7 +68,8 @@
   do                                      \
     {                                     \
       if (predict_false((f) < 0))         \
-        __assert(__FILE__, __LINE__, #f); \
+        __assert(__ASSERT_FILE__,         \
+                 __ASSERT_LINE__, #f);    \
     }                                     \
   while (0)
 #else
@@ -71,7 +77,8 @@
   do                                      \
     {                                     \
       if (predict_false(!(f)))            \
-        __assert(__FILE__, __LINE__, 0);  \
+        __assert(__ASSERT_FILE__,         \
+                 __ASSERT_LINE__, 0);     \
     }                                     \
   while (0)
 
@@ -79,7 +86,8 @@
   do                                      \
     {                                     \
       if (predict_false((f) < 0))         \
-        __assert(__FILE__, __LINE__, 0);  \
+        __assert(__ASSERT_FILE__,         \
+                 __ASSERT_LINE__, 0);     \
     }                                     \
   while (0)
 #endif
