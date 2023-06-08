@@ -153,12 +153,12 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
   uintptr_t top = base + size;
 
   _alert("%s Stack:\n", tag);
-  _alert("sp:     %p\n", (FAR void *)sp);
   _alert("  base: %p\n", (FAR void *)base);
   _alert("  size: %08zu\n", size);
 
   if (!force)
     {
+      _alert("    sp: %p\n", (FAR void *)sp);
       stack_dump(sp, top);
     }
   else
@@ -191,62 +191,50 @@ static void show_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   uintptr_t intstack_base = up_get_intstackbase();
   size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
   uintptr_t intstack_top = intstack_base + intstack_size;
+  FAR void *intstack_sp = NULL;
 #endif
 #ifdef CONFIG_ARCH_KERNEL_STACK
   uintptr_t kernelstack_base = (uintptr_t)rtcb->xcp.kstack;
   size_t kernelstack_size = CONFIG_ARCH_KERNEL_STACKSIZE;
   uintptr_t kernelstack_top = kernelstack_base + kernelstack_size;
+  FAR void *kernelstack_sp = NULL;
 #endif
   uintptr_t tcbstack_base = (uintptr_t)rtcb->stack_base_ptr;
   size_t tcbstack_size = (size_t)rtcb->adj_stack_size;
   uintptr_t tcbstack_top = tcbstack_base + tcbstack_size;
+  FAR void *tcbstack_sp = NULL;
+  bool force = false;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   if (sp >= intstack_base && sp < intstack_top)
     {
-      dump_stack("IRQ", sp,
-                 intstack_base,
-                 intstack_size,
-#ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack(),
-#else
-                 0,
-#endif
-                 false
-                );
+      intstack_sp = (FAR void *)sp;
+      tcbstack_sp = (FAR void *)up_getusrsp(rtcb->xcp.regs);
     }
   else
 #endif
 #ifdef CONFIG_ARCH_KERNEL_STACK
   if (sp >= kernelstack_base && sp < kernelstack_top)
     {
-      dump_stack("Kernel", sp,
-                 kernelstack_base,
-                 kernelstack_size,
-                 0, false
-                );
+      kernelstack_sp = (FAR void *)sp;
     }
   else
 #endif
   if (sp >= tcbstack_base && sp < tcbstack_top)
     {
-      dump_stack("User", sp,
-                 tcbstack_base,
-                 tcbstack_size,
-#ifdef CONFIG_STACK_COLORATION
-                 up_check_tcbstack(rtcb),
-#else
-                 0,
-#endif
-                 false
-                );
+      tcbstack_sp = (FAR void *)sp;
     }
   else
     {
+      force = true;
       _alert("ERROR: Stack pointer is not within the stack\n");
+    }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-      dump_stack("IRQ", sp,
+  if (intstack_sp != NULL || force)
+    {
+      dump_stack("IRQ",
+                 (uintptr_t)intstack_sp,
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
@@ -254,19 +242,27 @@ static void show_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 #else
                  0,
 #endif
-                 true
+                 force
                 );
+    }
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-      dump_stack("Kernel", sp,
+  if (kernelstack_sp != NULL || force)
+    {
+      dump_stack("Kernel",
+                 (uintptr_t)kernelstack_sp,
                  kernelstack_base,
                  kernelstack_size,
-                 0, true
+                 0, force
                 );
+    }
 #endif
 
-      dump_stack("User", sp,
+  if (tcbstack_sp != NULL || force)
+    {
+      dump_stack("User",
+                 (uintptr_t)tcbstack_sp,
                  tcbstack_base,
                  tcbstack_size,
 #ifdef CONFIG_STACK_COLORATION
@@ -274,7 +270,7 @@ static void show_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 #else
                  0,
 #endif
-                 true
+                 force
                 );
     }
 }
