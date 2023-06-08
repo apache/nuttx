@@ -142,7 +142,6 @@ static size_t up_get_cache_linesize(bool icache)
 
   return 1 << sshift;
 }
-#endif
 
 /****************************************************************************
  * Name: up_get_cache_size
@@ -186,6 +185,7 @@ static size_t up_get_cache_size(bool icache)
 
   return sets * ways * line;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
