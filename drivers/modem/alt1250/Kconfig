@@ -14,6 +14,34 @@ menuconfig MODEM_ALT1250
 
 if MODEM_ALT1250
 
+menuconfig MODEM_ALT1250_RESTRICTIONS
+	bool "ALT1250 modem restrictions [Attention. See help]"
+	default n
+	---help---
+		Enable restrict the modem function is at your own risk.
+		If you don't have enough knowledge of this firmware,
+		you may get unexpected situation.
+
+if MODEM_ALT1250_RESTRICTIONS
+
+config MODEM_ALT1250_DISABLE_PV1
+	bool "Disable PV1"
+	default n
+	---help---
+		Enable restrict the modem function is at your own risk.
+		If you don't have enough knowledge of this firmware,
+		you may get unexpected situation.
+
+config MODEM_ALT1250_DISABLE_PV4
+	bool "Disable PV4"
+	default n
+	---help---
+		Enable restrict the modem function is at your own risk.
+		If you don't have enough knowledge of this firmware,
+		you may get unexpected situation.
+
+endif
+
 config MODEM_ALT1250_ADDITIONAL_FUNC
 	bool
 	default n

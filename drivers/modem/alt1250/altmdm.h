@@ -33,12 +33,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define EVENT_POWERON  (1 << 0)
+#define EVENT_POWEROFF (1 << 1)
+#define EVENT_RESET    (1 << 2)
+#define EVENT_WLOCK    (1 << 3)
+#define EVENT_TXREQ    (1 << 4)
+#define EVENT_RXREQ    (1 << 5)
+#define EVENT_TXSUSTO  (1 << 6)
+#define EVENT_DESTROY  (1 << 7)
+#define EVENT_SUSPEND  (1 << 8)
+#define EVENT_RESUME   (1 << 9)
+#define EVENT_RETRYREQ (1 << 10)
+
 #define ALTMDM_RETURN_RESET_V1  (-1)
 #define ALTMDM_RETURN_NOTREADY  (-2)
 #define ALTMDM_RETURN_CANCELED  (-3)
 #define ALTMDM_RETURN_RESET_V4  (-4)
 #define ALTMDM_RETURN_RESET_PKT (-5)
 #define ALTMDM_RETURN_EXIT      (-6)
+#define ALTMDM_RETURN_SUSPENDED (-7)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -152,6 +165,22 @@ int altmdm_take_wlock(void);
 int altmdm_give_wlock(void);
 
 /****************************************************************************
+ * Name: altmdm_count_wlock
+ *
+ * Description:
+ *   Returns the count of wakelocks currently acquired.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Returns the count of wakelocks currently acquired.
+ *
+ ****************************************************************************/
+
+int altmdm_count_wlock(void);
+
+/****************************************************************************
  * Name: altmdm_poweron
  *
  * Description:
@@ -184,6 +213,22 @@ int altmdm_poweron(void);
  ****************************************************************************/
 
 int altmdm_poweroff(void);
+
+/****************************************************************************
+ * Name: altmdm_get_powersupply
+ *
+ * Description:
+ *   Get the power supply status of the ALT1250.
+ *
+ * Input Parameters:
+ *   Lower driver context
+ *
+ * Returned Value:
+ *   Returns true on turned on, false is turned off.
+ *
+ ****************************************************************************/
+
+bool altmdm_get_powersupply(FAR const struct alt1250_lower_s *lower);
 
 /****************************************************************************
  * Name: altmdm_reset
@@ -236,5 +281,23 @@ uint32_t altmdm_get_reset_reason(void);
  ****************************************************************************/
 
 uint8_t altmdm_get_protoversion(void);
+
+/****************************************************************************
+ * Name: altmdm_set_pm_event
+ *
+ * Description:
+ *   Set PM event flag for alt1250 receive thread..
+ *
+ * Input Parameters:
+ *   event    - Bitmap of the event to send/clear.
+ *   enable   - true: send, false: clear.
+ *
+ * Returned Value:
+ *   Returns 0 on success.
+ *   When an error occurs, a negative value is returned.
+ *
+ ****************************************************************************/
+
+int altmdm_set_pm_event(uint32_t event, bool enable);
 
 #endif  /* __DRIVERS_MODEM_ALT1250_ALTMDM_H */
