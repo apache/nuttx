@@ -91,6 +91,8 @@
 
 ssize_t aio_return(FAR struct aiocb *aiocbp)
 {
+  ssize_t ret;
+
   DEBUGASSERT(aiocbp);
   if (aiocbp->aio_result < 0)
     {
@@ -98,7 +100,15 @@ ssize_t aio_return(FAR struct aiocb *aiocbp)
       return (ssize_t)ERROR;
     }
 
-  return aiocbp->aio_result;
+  ret = aiocbp->aio_result;
+
+  /* the aio_return function may be called exactly only once, thereafter, if
+   * the same aiocbp structure is used in a call to aio_return, then error
+   * may be returned
+   */
+
+  aiocbp->aio_result = -EINVAL;
+  return ret;
 }
 
 #endif /* CONFIG_FS_AIO */
