@@ -805,7 +805,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
 struct tcb_s;
 void board_crashdump(uintptr_t sp, FAR struct tcb_s *tcb,
                      FAR const char *filename, int lineno,
-                     FAR const char *msg);
+                     FAR const char *msg, FAR void *regs);
 #endif
 
 /****************************************************************************
