@@ -89,6 +89,13 @@ int aio_error(FAR const struct aiocb *aiocbp)
 {
   DEBUGASSERT(aiocbp);
 
+  /* the aio_reqprio field must be large or equal than 0 */
+
+  if (aiocbp->aio_reqprio < 0)
+    {
+      return EINVAL;
+    }
+
   if (aiocbp->aio_result < 0)
     {
       return -aiocbp->aio_result;
