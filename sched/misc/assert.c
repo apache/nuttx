@@ -601,7 +601,7 @@ void _assert(FAR const char *filename, int linenum,
 #endif
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-      board_crashdump(up_getsp(), rtcb, filename, linenum, msg);
+      board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
 
 #elif defined(CONFIG_BOARD_COREDUMP)
       /* Dump core information */
