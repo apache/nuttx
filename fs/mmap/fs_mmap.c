@@ -269,8 +269,8 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
   if (fd != -1 && fs_getfilep(fd, &filep) < 0)
     {
-      ferr("ERROR: Invalid file descriptor, fd=%d\n", fd);
-      ret = -EBADF;
+      ferr("ERROR: fd:%d referred file whose type is not supported\n", fd);
+      ret = -ENODEV;
       goto errout;
     }
 
