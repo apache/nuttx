@@ -1904,7 +1904,7 @@ config HEAP_COLORATION
 
 config DEBUG_SYMBOLS
 	bool "Generate Debug Symbols"
-	default n
+	default y
 	---help---
 		Build with debug symbols (needed for use with a debugger).
 
