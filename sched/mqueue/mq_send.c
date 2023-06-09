@@ -216,7 +216,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
  *   EAGAIN   The queue was full and the O_NONBLOCK flag was set for the
  *            message queue description referred to by mqdes.
  *   EINVAL   Either msg or mqdes is NULL or the value of prio is invalid.
- *   EPERM    Message queue opened not opened for writing.
+ *   EBADF    Message queue opened not opened for writing.
  *   EMSGSIZE 'msglen' was greater than the maxmsgsize attribute of the
  *            message queue.
  *   EINTR    The call was interrupted by a signal handler.
