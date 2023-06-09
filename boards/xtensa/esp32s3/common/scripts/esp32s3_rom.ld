@@ -398,13 +398,13 @@ PROVIDE( Cache_Invalidate_DCache_Items = 0x40001680 );
 PROVIDE( Cache_Clean_Items = 0x4000168c );
 PROVIDE( Cache_WriteBack_Items = 0x40001698 );
 PROVIDE( Cache_Op_Addr = 0x400016a4 );
-PROVIDE( cache_invalidate_addr = 0x400016b0 );
+PROVIDE( Cache_Invalidate_Addr = 0x400016b0 );
 PROVIDE( Cache_Clean_Addr = 0x400016bc );
 PROVIDE( Cache_WriteBack_Addr = 0x400016c8 );
-PROVIDE( cache_invalidate_icache_all = 0x400016d4 );
-PROVIDE( cache_invalidate_dcache_all = 0x400016e0 );
+PROVIDE( Cache_Invalidate_ICache_All = 0x400016d4 );
+PROVIDE( Cache_Invalidate_DCache_All = 0x400016e0 );
 PROVIDE( Cache_Clean_All = 0x400016ec );
-PROVIDE( cache_writeback_all = 0x400016f8 );
+PROVIDE( Cache_WriteBack_All = 0x400016f8 );
 PROVIDE( Cache_Mask_All = 0x40001704 );
 PROVIDE( Cache_UnMask_Dram0 = 0x40001710 );
 PROVIDE( Cache_Suspend_ICache_Autoload = 0x4000171c );
@@ -439,30 +439,30 @@ PROVIDE( Cache_Disable_ICache = 0x4000186c );
 PROVIDE( Cache_Enable_ICache = 0x40001878 );
 PROVIDE( Cache_Disable_DCache = 0x40001884 );
 PROVIDE( Cache_Enable_DCache = 0x40001890 );
-PROVIDE( cache_suspend_icache = 0x4000189c );
-PROVIDE( cache_resume_icache = 0x400018a8 );
-PROVIDE( cache_suspend_dcache = 0x400018b4 );
-PROVIDE( cache_resume_dcache = 0x400018c0 );
+PROVIDE( Cache_Suspend_ICache = 0x4000189c );
+PROVIDE( Cache_Resume_ICache = 0x400018a8 );
+PROVIDE( Cache_Suspend_DCache = 0x400018b4 );
+PROVIDE( Cache_Resume_DCache = 0x400018c0 );
 PROVIDE( Cache_Occupy_Items = 0x400018cc );
-PROVIDE( cache_occupy_addr = 0x400018d8 );
+PROVIDE( Cache_Occupy_Addr = 0x400018d8 );
 PROVIDE( Cache_Freeze_ICache_Enable = 0x400018e4 );
 PROVIDE( Cache_Freeze_ICache_Disable = 0x400018f0 );
 PROVIDE( Cache_Freeze_DCache_Enable = 0x400018fc );
 PROVIDE( Cache_Freeze_DCache_Disable = 0x40001908 );
-PROVIDE( cache_set_idrom_mmu_size = 0x40001914 );
+PROVIDE( Cache_Set_IDROM_MMU_Size = 0x40001914 );
 PROVIDE( flash2spiram_instruction_offset = 0x40001920 );
 PROVIDE( flash2spiram_rodata_offset = 0x4000192c );
 PROVIDE( flash_instr_rodata_start_page = 0x40001938 );
 PROVIDE( flash_instr_rodata_end_page = 0x40001944 );
-PROVIDE( cache_set_idrom_mmu_info = 0x40001950 );
+PROVIDE( Cache_Set_IDROM_MMU_Info = 0x40001950 );
 PROVIDE( Cache_Get_IROM_MMU_End = 0x4000195c );
 PROVIDE( Cache_Get_DROM_MMU_End = 0x40001968 );
 PROVIDE( Cache_Owner_Init = 0x40001974 );
 PROVIDE( Cache_Occupy_ICache_MEMORY = 0x40001980 );
 PROVIDE( Cache_Occupy_DCache_MEMORY = 0x4000198c );
 PROVIDE( Cache_MMU_Init = 0x40001998 );
-PROVIDE( cache_ibus_mmu_set = 0x400019a4 );
-PROVIDE( cache_dbus_mmu_set = 0x400019b0 );
+PROVIDE( Cache_Ibus_MMU_Set = 0x400019a4 );
+PROVIDE( Cache_Dbus_MMU_Set = 0x400019b0 );
 PROVIDE( Cache_Count_Flash_Pages = 0x400019bc );
 PROVIDE( Cache_Flash_To_SPIRAM_Copy = 0x400019c8 );
 PROVIDE( Cache_Travel_Tag_Memory = 0x400019d4 );
@@ -626,7 +626,8 @@ ets_efuse_get_flash_delay_us = 0x40001f5c;
 ets_efuse_get_mac = 0x40001f68;
 ets_efuse_get_spiconfig = 0x40001f74;
 ets_efuse_usb_print_is_disabled = 0x40001f80;
-ets_efuse_get_uart_print_channel = 0x40001f8c;
+/*ets_efuse_get_uart_print_channel = 0x40001f8c;*/
+ets_efuse_usb_serial_jtag_print_is_disabled = 0x40001f8c;
 ets_efuse_get_uart_print_control = 0x40001f98;
 ets_efuse_get_wp_pad = 0x40001fa4;
 ets_efuse_legacy_spi_boot_mode_disabled = 0x40001fb0;
@@ -983,10 +984,14 @@ r_ble_util_data_rx_buf_reset = 0x40003288;
 r_bt_bb_get_intr_mask = 0x40003294;
 r_bt_bb_intr_clear = 0x400032a0;
 r_bt_bb_intr_mask_set = 0x400032ac;
+/*
 r_bt_bb_isr = 0x400032b8;
+*/
 r_bt_rf_coex_cfg_set = 0x400032c4;
 r_bt_rf_coex_conn_dynamic_pti_en_get = 0x400032d0;
+/*
 r_bt_rf_coex_conn_phy_coded_data_time_limit_en_get = 0x400032dc;
+*/
 r_bt_rf_coex_ext_adv_dynamic_pti_en_get = 0x400032e8;
 r_bt_rf_coex_ext_scan_dynamic_pti_en_get = 0x400032f4;
 r_bt_rf_coex_legacy_adv_dynamic_pti_en_get = 0x40003300;
@@ -1008,14 +1013,18 @@ r_bt_rtp_apply_rule_cs_fmt = 0x400033b4;
 r_bt_rtp_apply_rule_cs_idx = 0x400033c0;
 r_bt_rtp_deregister_rule_cs_fmt = 0x400033cc;
 r_bt_rtp_deregister_rule_cs_idx = 0x400033d8;
+/*
 r_bt_rtp_get_txpwr_idx_by_act = 0x400033e4;
+*/
 r_bt_rtp_init = 0x400033f0;
 r_bt_rtp_register_rule_cs_fmt = 0x400033fc;
 r_bt_rtp_register_rule_cs_idx = 0x40003408;
 r_btdm_isr = 0x40003414;
+/*
 r_btdm_task_post = 0x40003420;
 r_btdm_task_post_from_isr = 0x4000342c;
 r_btdm_task_recycle = 0x40003438;
+*/
 r_cali_phase_match_p = 0x40003444;
 r_cmp_abs_time = 0x40003450;
 r_cmp_dest_id = 0x4000345c;
@@ -1111,7 +1120,9 @@ r_hci_look_for_evt_desc = 0x40003888;
 r_hci_look_for_le_evt_desc = 0x40003894;
 r_hci_look_for_le_evt_desc_esp = 0x400038a0;
 r_hci_pack_bytes = 0x400038ac;
+/*
 r_hci_register_vendor_desc_tab = 0x400038b8;
+*/
 r_hci_send_2_controller = 0x400038c4;
 r_hci_send_2_host = 0x400038d0;
 r_hci_tl_c2h_data_flow_on = 0x400038dc;
@@ -1168,7 +1179,9 @@ r_ke_task_handler_get = 0x40003b34;
 r_ke_task_init = 0x40003b40;
 r_ke_task_msg_flush = 0x40003b4c;
 r_ke_task_saved_update = 0x40003b58;
+/*
 r_ke_task_schedule = 0x40003b64;
+*/
 r_ke_time = 0x40003b70;
 r_ke_time_cmp = 0x40003b7c;
 r_ke_time_past = 0x40003b88;
@@ -1196,7 +1209,9 @@ r_llc_dl_chg_check = 0x40003c84;
 r_llc_dle_proc_err_cb = 0x40003c90;
 r_llc_feats_exch_proc_err_cb = 0x40003c9c;
 r_llc_hci_cmd_handler_tab_p_get = 0x40003ca8;
+/*
 r_llc_hci_command_handler = 0x40003cb4;
+*/
 r_llc_hci_con_param_req_evt_send = 0x40003cc0;
 r_llc_hci_con_upd_info_send = 0x40003ccc;
 r_llc_hci_disconnected_dis = 0x40003cd8;
@@ -1224,7 +1239,9 @@ r_llc_llcp_state_set = 0x40003dd4;
 r_llc_llcp_trans_timer_set = 0x40003de0;
 r_llc_llcp_tx_check = 0x40003dec;
 r_llc_loc_ch_map_proc_continue = 0x40003df8;
+/*
 r_llc_loc_con_upd_proc_continue = 0x40003e04;
+*/
 r_llc_loc_con_upd_proc_err_cb = 0x40003e10;
 r_llc_loc_dl_upd_proc_continue = 0x40003e1c;
 r_llc_loc_encrypt_proc_continue = 0x40003e28;
@@ -1245,7 +1262,9 @@ r_llc_proc_timer_pause_set = 0x40003ed0;
 r_llc_proc_timer_set = 0x40003edc;
 r_llc_proc_unreg = 0x40003ee8;
 r_llc_rem_ch_map_proc_continue = 0x40003ef4;
+/*
 r_llc_rem_con_upd_proc_continue = 0x40003f00;
+*/
 r_llc_rem_con_upd_proc_err_cb = 0x40003f0c;
 r_llc_rem_dl_upd_proc = 0x40003f18;
 r_llc_rem_encrypt_proc_continue = 0x40003f24;
@@ -1334,10 +1353,14 @@ r_lld_con_rx_isr = 0x400042fc;
 r_lld_con_rx_link_info_check = 0x40004308;
 r_lld_con_rx_llcp_check = 0x40004314;
 r_lld_con_rx_sync_time_update = 0x40004320;
+/*
 r_lld_con_sched = 0x4000432c;
+*/
 r_lld_con_set_tx_power = 0x40004338;
 r_lld_con_start = 0x40004344;
+/*
 r_lld_con_stop = 0x40004350;
+*/
 r_lld_con_tx = 0x4000435c;
 r_lld_con_tx_enc = 0x40004368;
 r_lld_con_tx_isr = 0x40004374;
@@ -1372,7 +1395,9 @@ r_lld_init_set_tx_power = 0x400044c4;
 r_lld_init_start = 0x400044d0;
 r_lld_init_stop = 0x400044dc;
 r_lld_instant_proc_end = 0x400044e8;
+/*
 r_lld_llcp_rx_ind_handler = 0x400044f4;
+*/
 r_lld_per_adv_ch_map_update = 0x40004500;
 r_lld_per_adv_chain_construct = 0x4000450c;
 r_lld_per_adv_cleanup = 0x40004518;
@@ -1390,7 +1415,9 @@ r_lld_per_adv_init = 0x4000459c;
 r_lld_per_adv_init_info_get = 0x400045a8;
 r_lld_per_adv_list_add = 0x400045b4;
 r_lld_per_adv_list_rem = 0x400045c0;
+/*
 r_lld_per_adv_sched = 0x400045cc;
+*/
 r_lld_per_adv_set_tx_power = 0x400045d8;
 r_lld_per_adv_start = 0x400045e4;
 r_lld_per_adv_stop = 0x400045f0;
@@ -1424,8 +1451,10 @@ r_lld_scan_frm_rx_isr = 0x40004734;
 r_lld_scan_frm_skip_isr = 0x40004740;
 r_lld_scan_init = 0x4000474c;
 r_lld_scan_params_update = 0x40004758;
+/*
 r_lld_scan_process_pkt_rx = 0x40004764;
 r_lld_scan_process_pkt_rx_adv_rep = 0x40004770;
+*/
 r_lld_scan_process_pkt_rx_aux_adv_ind = 0x4000477c;
 r_lld_scan_process_pkt_rx_aux_chain_ind = 0x40004788;
 r_lld_scan_process_pkt_rx_aux_scan_rsp = 0x40004794;
@@ -1500,7 +1529,9 @@ r_llm_is_dev_synced = 0x40004ac4;
 r_llm_is_non_con_act_ongoing_check = 0x40004ad0;
 r_llm_is_wl_accessible = 0x40004adc;
 r_llm_le_evt_mask_check = 0x40004ae8;
+/*
 r_llm_le_features_get = 0x40004af4;
+*/
 r_llm_link_disc = 0x40004b00;
 r_llm_master_ch_map_get = 0x40004b0c;
 r_llm_msg_handler_tab_p_get = 0x40004b18;
@@ -1520,7 +1551,9 @@ r_misc_msg_handler_tab_p_get = 0x40004bb4;
 r_notEqual256 = 0x40004bc0;
 r_phy_upd_proc_start = 0x40004bcc;
 r_platform_reset = 0x40004bd8;
+/*
 r_register_esp_vendor_cmd_handler = 0x40004be4;
+*/
 r_rf_em_init = 0x40004bf0;
 r_rf_force_agc_enable = 0x40004bfc;
 r_rf_reg_rd = 0x40004c08;
@@ -1530,8 +1563,10 @@ r_rf_rssi_convert = 0x40004c2c;
 r_rf_rw_v9_le_disable = 0x40004c38;
 r_rf_rw_v9_le_enable = 0x40004c44;
 r_rf_sleep = 0x40004c50;
+/*
 r_rf_txpwr_cs_get = 0x40004c5c;
 r_rf_txpwr_dbm_get = 0x40004c68;
+*/
 r_rf_util_cs_fmt_convert = 0x40004c74;
 r_rw_crypto_aes_ccm = 0x40004c80;
 r_rw_crypto_aes_encrypt = 0x40004c8c;
@@ -1545,7 +1580,9 @@ r_rw_crypto_aes_result_handler = 0x40004ce0;
 r_rw_crypto_aes_s1 = 0x40004cec;
 r_rw_cryto_aes_cmac = 0x40004cf8;
 r_rw_v9_init_em_radio_table = 0x40004d04;
+/*
 r_rwble_isr = 0x40004d10;
+*/
 r_rwble_sleep_enter = 0x40004d1c;
 r_rwble_sleep_wakeup_end = 0x40004d28;
 r_rwbtdm_isr_wrapper = 0x40004d34;
@@ -1582,7 +1619,9 @@ r_sch_alarm_set = 0x40004e9c;
 r_sch_alarm_timer_isr = 0x40004ea8;
 r_sch_arb_conflict_check = 0x40004eb4;
 r_sch_arb_elt_cancel = 0x40004ec0;
+/*
 r_sch_arb_event_start_isr = 0x40004ecc;
+*/
 r_sch_arb_init = 0x40004ed8;
 r_sch_arb_insert = 0x40004ee4;
 r_sch_arb_prog_timer = 0x40004ef0;
@@ -1597,8 +1636,10 @@ r_sch_plan_offset_req = 0x40004f50;
 r_sch_plan_position_range_compute = 0x40004f5c;
 r_sch_plan_rem = 0x40004f68;
 r_sch_plan_req = 0x40004f74;
+/*
 r_sch_plan_set = 0x40004f80;
 r_sch_prog_end_isr = 0x40004f8c;
+*/
 r_sch_prog_init = 0x40004f98;
 r_sch_prog_push = 0x40004fa4;
 r_sch_prog_rx_isr = 0x40004fb0;
@@ -1634,16 +1675,22 @@ r_lld_ext_adv_dynamic_pti_get = 0x4000510c;
 r_lld_ext_adv_dynamic_aux_pti_process = 0x40005118;
 r_lld_ext_adv_dynamic_pti_process = 0x40005124;
 r_lld_adv_ext_pkt_prepare_set = 0x40005130;
+/*
 r_lld_adv_ext_chain_none_construct = 0x4000513c;
+*/
 r_lld_adv_ext_chain_connectable_construct = 0x40005148;
+/*
 r_lld_adv_ext_chain_scannable_construct = 0x40005154;
+*/
 r_lld_adv_pkt_rx_connect_post = 0x40005160;
 r_lld_adv_start_init_evt_param = 0x4000516c;
 r_lld_adv_start_set_cs = 0x40005178;
 r_lld_adv_start_update_filter_policy = 0x40005184;
 r_lld_adv_start_schedule_asap = 0x40005190;
 r_lld_con_tx_prog_new_packet_coex = 0x4000519c;
+/*
 r_lld_con_tx_prog_new_packet = 0x400051a8;
+*/
 r_lld_per_adv_dynamic_pti_get = 0x400051b4;
 r_lld_per_adv_evt_start_chm_upd = 0x400051c0;
 r_lld_ext_scan_dynamic_pti_get = 0x400051cc;
@@ -1800,6 +1847,50 @@ rwip_coex_cfg = 0x3ff1eebe;
 rwip_priority = 0x3ff1eea8;
 veryBigHexP256 = 0x3ff1ee5c;
 
+/* bluetooth hook funcs */
+r_llc_loc_encrypt_proc_continue_hook = 0x40001c60;
+r_llc_loc_phy_upd_proc_continue_hook = 0x40001c64;
+r_llc_rem_phy_upd_proc_continue_hook = 0x40001c68;
+r_lld_scan_frm_eof_isr_hook = 0x40001c6c;
+r_lld_scan_evt_start_cbk_hook = 0x40001c70;
+/*
+r_lld_scan_start_hook = 0x40001c74;
+*/
+r_lld_scan_process_pkt_rx_ext_adv_hook = 0x40001c78;
+r_lld_scan_sched_hook = 0x40001c7c;
+/*
+r_lld_adv_start_hook = 0x40001c80;
+*/
+r_lld_adv_evt_start_cbk_hook = 0x40001c84;
+r_lld_adv_aux_evt_start_cbk_hook = 0x40001c88;
+r_lld_adv_frm_isr_hook = 0x40001c8c;
+r_lld_adv_start_init_evt_param_hook = 0x40001c90;
+r_lld_con_evt_canceled_cbk_hook = 0x40001c94;
+r_lld_con_frm_isr_hook = 0x40001c98;
+r_lld_con_tx_hook = 0x40001c9c;
+r_lld_con_rx_hook = 0x40001ca0;
+r_lld_con_evt_start_cbk_hook = 0x40001ca4;
+/*
+r_lld_con_start_hook = 0x40001ca8;
+*/
+r_lld_con_tx_prog_new_packet_hook = 0x40001cac;
+r_lld_init_frm_eof_isr_hook = 0x40001cb0;
+r_lld_init_evt_start_cbk_hook = 0x40001cb4;
+/*
+r_lld_init_start_hook = 0x40001cb8;
+*/
+r_lld_init_sched_hook = 0x40001cbc;
+r_lld_init_process_pkt_tx_hook = 0x40001cc0;
+r_lld_per_adv_evt_start_cbk_hook = 0x40001cc4;
+r_lld_per_adv_frm_isr_hook = 0x40001cc8;
+r_lld_per_adv_start_hook = 0x40001ccc;
+r_lld_sync_frm_eof_isr_hook = 0x40001cd0;
+r_lld_sync_evt_start_cbk_hook = 0x40001cd4;
+r_lld_sync_start_hook = 0x40001cd8;
+r_lld_sync_process_pkt_rx_pkt_check_hook = 0x40001cdc;
+r_sch_arb_insert_hook = 0x40001ce0;
+r_sch_plan_offset_req_hook = 0x40001ce4;
+
 /***************************************
  Group rom_pp
  ***************************************/
@@ -1810,11 +1901,11 @@ RC_GetBlockAckTime = 0x4000525c;
 ebuf_list_remove = 0x40005268;
 esf_buf_alloc = 0x40005274;
 esf_buf_alloc_dynamic = 0x40005280;
-esf_buf_recycle = 0x4000528c;
+/*esf_buf_recycle = 0x4000528c;*/
 GetAccess = 0x40005298;
 hal_mac_is_low_rate_enabled = 0x400052a4;
 hal_mac_tx_get_blockack = 0x400052b0;
-hal_mac_tx_set_ppdu = 0x400052bc;
+/* hal_mac_tx_set_ppdu = 0x400052bc;*/
 ic_get_trc = 0x400052c8;
 ic_mac_deinit = 0x400052d4;
 ic_mac_init = 0x400052e0;
@@ -1837,11 +1928,11 @@ lmacRecycleMPDU = 0x400053a0;
 lmacRxDone = 0x400053ac;
 lmacSetTxFrame = 0x400053b8;
 lmacTxDone = 0x400053c4;
-lmacTxFrame = 0x400053d0;
+/*lmacTxFrame = 0x400053d0;*/
 mac_tx_set_duration = 0x400053dc;
-mac_tx_set_htsig = 0x400053e8;
+/* mac_tx_set_htsig = 0x400053e8;*/
 mac_tx_set_plcp0 = 0x400053f4;
-mac_tx_set_plcp1 = 0x40005400;
+/* mac_tx_set_plcp1 = 0x40005400;*/
 mac_tx_set_plcp2 = 0x4000540c;
 pm_check_state = 0x40005418;
 pm_disable_dream_timer = 0x40005424;
@@ -1856,16 +1947,16 @@ pm_set_beacon_filter = 0x40005484;
 pm_is_in_wifi_slice_threshold = 0x40005490;
 pm_is_waked = 0x4000549c;
 pm_keep_alive = 0x400054a8;
-pm_on_beacon_rx = 0x400054b4;
+/* pm_on_beacon_rx = 0x400054b4; */
 pm_on_data_rx = 0x400054c0;
 pm_on_tbtt = 0x400054cc;
-pm_parse_beacon = 0x400054d8;
-pm_process_tim = 0x400054e4;
-pm_rx_beacon_process = 0x400054f0;
-pm_rx_data_process = 0x400054fc;
-pm_sleep = 0x40005508;
+/* pm_parse_beacon = 0x400054d8;*/
+/* pm_process_tim = 0x400054e4; */
+/*pm_rx_beacon_process = 0x400054f0;*/
+/* pm_rx_data_process = 0x400054fc; */
+/*pm_sleep = 0x40005508;*/
 pm_sleep_for = 0x40005514;
-pm_tbtt_process = 0x40005520;
+/* pm_tbtt_process = 0x40005520; */
 ppAMPDU2Normal = 0x4000552c;
 ppAssembleAMPDU = 0x40005538;
 ppCalFrameTimes = 0x40005544;
@@ -1879,7 +1970,7 @@ ppEnqueueRxq = 0x40005598;
 ppEnqueueTxDone = 0x400055a4;
 ppGetTxQFirstAvail_Locked = 0x400055b0;
 ppGetTxframe = 0x400055bc;
-ppMapTxQueue = 0x400055c8;
+/*ppMapTxQueue = 0x400055c8;*/
 ppProcessRxPktHdr = 0x400055e0;
 ppProcessTxQ = 0x400055ec;
 ppRecordBarRRC = 0x400055f8;
@@ -1896,7 +1987,7 @@ ppSearchTxQueue = 0x40005670;
 ppSearchTxframe = 0x4000567c;
 ppSelectNextQueue = 0x40005688;
 ppSubFromAMPDU = 0x40005694;
-ppTask = 0x400056a0;
+/* ppTask = 0x400056a0; */
 ppTxPkt = 0x400056ac;
 ppTxProtoProc = 0x400056b8;
 ppTxqUpdateBitmap = 0x400056c4;
@@ -1916,7 +2007,7 @@ rcClearCurStat = 0x40005760;
 rcGetSched = 0x4000576c;
 rcLowerSched = 0x40005778;
 rcSetTxAmpduLimit = 0x40005784;
-rcTxUpdatePer = 0x40005790;
+/* rcTxUpdatePer = 0x40005790;*/
 rcUpdateAckSnr = 0x4000579c;
 rcUpdateRate = 0x400057a8;
 /* rcUpdateTxDone = 0x400057b4; */
@@ -1948,13 +2039,13 @@ wdev_mac_special_reg_store = 0x400058e0;
 wdev_mac_wakeup = 0x400058ec;
 wdev_mac_sleep = 0x400058f8;
 hal_mac_is_dma_enable = 0x40005904;
-wDev_ProcessFiq = 0x40005910;
+/* wDev_ProcessFiq = 0x40005910; */
 wDev_ProcessRxSucData = 0x4000591c;
 wdevProcessRxSucDataAll = 0x40005928;
 wdev_csi_len_align = 0x40005934;
 ppDequeueTxDone_Locked = 0x40005940;
-ppProcTxDone = 0x4000594c;
-pm_tx_data_done_process = 0x40005958;
+/*ppProcTxDone = 0x4000594c;*/
+/*pm_tx_data_done_process = 0x40005958;*/
 config_is_cache_tx_buf_enabled = 0x40005964;
 ppMapWaitTxq = 0x40005970;
 ppProcessWaitingQueue = 0x4000597c;
@@ -2012,6 +2103,7 @@ g_tx_done_cb_func = 0x3fcef8ac;
 g_per_conn_trc = 0x3fcef860;
 s_encap_amsdu_func = 0x3fcef85c;
 
+
 /***************************************
  Group rom_net80211
  ***************************************/
@@ -2037,7 +2129,7 @@ ieee80211_is_tx_allowed = 0x40005a78;
 ieee80211_output_pending_eb = 0x40005a84;
 ieee80211_output_process = 0x40005a90;
 ieee80211_set_tx_desc = 0x40005a9c;
-sta_input = 0x40005aa8;
+/*sta_input = 0x40005aa8;*/
 wifi_get_macaddr = 0x40005ab4;
 wifi_rf_phy_disable = 0x40005ac0;
 wifi_rf_phy_enable = 0x40005acc;
@@ -2048,7 +2140,7 @@ ieee80211_recycle_cache_eb = 0x40005afc;
 ieee80211_search_node = 0x40005b08;
 roundup2 = 0x40005b14;
 ieee80211_crypto_encap = 0x40005b20;
-ieee80211_crypto_decap = 0x40005b2c;
+/* ieee80211_crypto_decap = 0x40005b2c; */
 /* ieee80211_decap = 0x40005b38; */
 ieee80211_set_tx_pti = 0x40005b44;
 wifi_is_started = 0x40005b50;
@@ -2064,6 +2156,7 @@ s_netstack_free = 0x3fcef840;
 mesh_rxcb = 0x3fcef83c;
 sta_rxcb = 0x3fcef838;
 
+
 /***************************************
  Group rom_coexist
  ***************************************/
@@ -2078,7 +2171,7 @@ coex_core_pti_get = 0x40005ba4;
 coex_core_release = 0x40005bb0;
 coex_core_request = 0x40005bbc;
 coex_core_status_get = 0x40005bc8;
-coex_core_timer_idx_get = 0x40005bd4;
+/*coex_core_timer_idx_get = 0x40005bd4;*/
 coex_event_duration_get = 0x40005be0;
 coex_hw_timer_disable = 0x40005bec;
 coex_hw_timer_enable = 0x40005bf8;
@@ -2096,6 +2189,7 @@ coex_schm_env_ptr = 0x3fcef82c;
 coexist_funcs = 0x3fcef828;
 g_coa_funcs_p = 0x3fcef824;
 g_coex_param_ptr = 0x3fcef820;
+
 
 /***************************************
  Group rom_phy
@@ -2122,10 +2216,10 @@ rom_get_bbgain_db = 0x40005d18;
 rom_get_data_sat = 0x40005d24;
 rom_get_i2c_read_mask = 0x40005d30;
 rom_get_pwctrl_correct = 0x40005d3c;
-rom_i2c_readreg = 0x40005d48;
-rom_i2c_readreg_mask = 0x40005d54;
-rom_i2c_writereg = 0x40005d60;
-rom_i2c_writereg_mask = 0x40005d6c;
+rom_i2c_readReg = 0x40005d48;
+rom_i2c_readReg_Mask = 0x40005d54;
+rom_i2c_writeReg = 0x40005d60;
+rom_i2c_writeReg_Mask = 0x40005d6c;
 rom_index_to_txbbgain = 0x40005d78;
 rom_iq_est_disable = 0x40005d84;
 rom_iq_est_enable = 0x40005d90;
@@ -2275,47 +2369,6 @@ phy_param_rom = 0x3fcef81c;
 
 PROVIDE ( esp_rom_tjpgd_decomp = 0x40000864 );
 PROVIDE ( esp_rom_tjpgd_prepare = 0x40000858 );
-
-PROVIDE ( esp_rom_crc32_le = crc32_le );
-PROVIDE ( esp_rom_crc16_le = crc16_le );
-PROVIDE ( esp_rom_crc8_le  = crc8_le );
-PROVIDE ( esp_rom_crc32_be = crc32_be );
-PROVIDE ( esp_rom_crc16_be = crc16_be );
-PROVIDE ( esp_rom_crc8_be  = crc8_be );
-
-PROVIDE ( esp_rom_gpio_pad_select_gpio    = gpio_pad_select_gpio );
-PROVIDE ( esp_rom_gpio_pad_pullup_only    = gpio_pad_pullup );
-PROVIDE ( esp_rom_gpio_pad_set_drv        = gpio_pad_set_drv );
-PROVIDE ( esp_rom_gpio_pad_unhold         = gpio_pad_unhold );
-PROVIDE ( esp_rom_gpio_connect_in_signal  = gpio_matrix_in );
-PROVIDE ( esp_rom_gpio_connect_out_signal = gpio_matrix_out );
-
-PROVIDE ( esp_rom_efuse_mac_address_crc8       = esp_crc8 );
-PROVIDE ( esp_rom_efuse_get_flash_gpio_info    = ets_efuse_get_spiconfig );
-PROVIDE ( esp_rom_efuse_get_flash_wp_gpio      = ets_efuse_get_wp_pad );
-PROVIDE ( esp_rom_efuse_is_secure_boot_enabled = ets_efuse_secure_boot_enabled );
-
-PROVIDE ( esp_rom_uart_flush_tx       = uart_tx_flush );
-PROVIDE ( esp_rom_uart_tx_one_char    = uart_tx_one_char );
-PROVIDE ( esp_rom_uart_tx_wait_idle   = uart_tx_wait_idle );
-PROVIDE ( esp_rom_uart_rx_one_char    = uart_rx_one_char );
-PROVIDE ( esp_rom_uart_rx_string      = UartRxString );
-PROVIDE ( esp_rom_uart_set_as_console = uart_tx_switch );
-PROVIDE ( esp_rom_uart_usb_acm_init   = Uart_Init_USB );
-PROVIDE ( esp_rom_uart_putc           = ets_write_char_uart );
-
-PROVIDE ( esp_rom_md5_init   = MD5Init );
-PROVIDE ( esp_rom_md5_update = MD5Update );
-PROVIDE ( esp_rom_md5_final  = MD5Final );
-
-PROVIDE ( esp_rom_printf   = ets_printf );
-PROVIDE ( esp_rom_delay_us = ets_delay_us );
-PROVIDE ( esp_rom_install_uart_printf = ets_install_uart_printf );
-PROVIDE ( esp_rom_get_reset_reason = rtc_get_reset_reason );
-
-PROVIDE( esp_rom_spiflash_attach = spi_flash_attach );
-PROVIDE ( esp_rom_spiflash_clear_bp = esp_rom_spiflash_unlock );
-PROVIDE ( esp_rom_spiflash_write_enable = SPI_write_enable);
 
 /***************************************
  Group libgcc

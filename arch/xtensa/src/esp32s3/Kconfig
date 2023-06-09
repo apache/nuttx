@@ -363,6 +363,13 @@ config ESP32S3_WIFI
 	---help---
 		Enable Wi-Fi support
 
+config ESP32S3_BLE
+	bool "BLE"
+	default n
+	select ESP32S3_WIRELESS
+	---help---
+		Enable BLE support
+
 config ESP32S3_I2C0
 	bool "I2C 0"
 	default n
@@ -462,6 +469,11 @@ config ESP32S3_WCL
 	select XTENSA_HAVE_GENERAL_EXCEPTION_HOOKS if BUILD_PROTECTED
 
 endmenu # ESP32-S3 Peripheral Selection
+
+menuconfig ESP32S3_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default n
+	depends on ESP32S3_WIFI && ESP32S3_BLE
 
 menu "SPI RAM Configuration"
 	depends on ESP32S3_SPIRAM
@@ -950,6 +962,24 @@ config EXAMPLE_WIFI_LISTEN_INTERVAL
 		to beacon is 300 ms.
 
 endmenu # ESP32S3_WIFI
+
+menu "BLE Configuration"
+	depends on ESP32S3_BLE
+
+config ESP32S3_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config ESP32S3_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESP32S3_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+endmenu # BLE Configuration
 
 menu "Timer/Counter Configuration"
 	depends on ESP32S3_TIMER

@@ -113,6 +113,13 @@
 #  define ESP32S3_WIFI_RESERVE_INT  0
 #endif
 
+#ifdef CONFIG_ESP32S3_BLE
+#  define ESP32S3_BLE_RESERVE_INT ((1 << ESP32S3_CPUINT_BT_BB) | \
+                                   (1 << ESP32S3_CPUINT_RWBLE))
+#else
+#  define ESP32S3_BLE_RESERVE_INT 0
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -159,7 +166,8 @@ static uint32_t g_intenable[CONFIG_SMP_NCPUS];
  */
 
 static uint32_t g_cpu0_freeints = ESP32S3_CPUINT_PERIPHSET &
-                                  ~ESP32S3_WIFI_RESERVE_INT;
+                                  ~(ESP32S3_WIFI_RESERVE_INT |
+                                    ESP32S3_BLE_RESERVE_INT);
 
 #ifdef CONFIG_SMP
 static uint32_t g_cpu1_freeints = ESP32S3_CPUINT_PERIPHSET;
@@ -409,6 +417,7 @@ static void esp32s3_free_cpuint(int cpuint)
 void up_irqinitialize(void)
 {
   int i;
+
   for (i = 0; i < NR_IRQS; i++)
     {
       g_irqmap[i] = IRQ_UNMAPPED;
@@ -424,6 +433,11 @@ void up_irqinitialize(void)
   g_irqmap[ESP32S3_IRQ_MAC] = IRQ_MKMAP(0, ESP32S3_CPUINT_MAC);
 #endif
 
+#ifdef CONFIG_ESP32S3_BLE
+  g_irqmap[ESP32S3_IRQ_BT_BB] = IRQ_MKMAP(0, ESP32S3_CPUINT_BT_BB);
+  g_irqmap[ESP32S3_IRQ_RWBLE] = IRQ_MKMAP(0, ESP32S3_CPUINT_RWBLE);
+#endif
+
   /* Initialize CPU interrupts */
 
   esp32s3_cpuint_initialize();
@@ -433,6 +447,13 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ESP32S3_WIFI
   g_cpu0_intmap[ESP32S3_CPUINT_MAC]  = CPUINT_ASSIGN(ESP32S3_IRQ_MAC);
   xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_MAC);
+#endif
+
+#ifdef CONFIG_ESP32S3_BLE
+  g_cpu0_intmap[ESP32S3_CPUINT_BT_BB] = CPUINT_ASSIGN(ESP32S3_IRQ_BT_BB);
+  g_cpu0_intmap[ESP32S3_CPUINT_RWBLE] = CPUINT_ASSIGN(ESP32S3_IRQ_RWBLE);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_BT_BB);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_RWBLE);
 #endif
 
 #ifdef CONFIG_SMP

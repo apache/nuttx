@@ -29,12 +29,16 @@
 #include <assert.h>
 
 #include "xtensa.h"
+#include "hardware/esp32s3_rtccntl.h"
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_syscon.h"
 #include "hardware/esp32s3_efuse.h"
-#include "esp32s3_wireless.h"
+#include "esp32s3_periph.h"
+
 #include "esp_phy_init.h"
 #include "phy_init_data.h"
+
+#include "esp32s3_wireless.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,6 +58,7 @@ static inline void phy_digital_regs_load(void);
  * Extern Functions declaration
  ****************************************************************************/
 
+extern void coex_pti_v2(void);
 extern uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 extern void phy_wakeup_init(void);
 extern void phy_close_rf(void);
@@ -81,6 +86,10 @@ static uint32_t *g_phy_digital_regs_mem = NULL;
 /* Indicate PHY is calibrated or not */
 
 static bool g_is_phy_calibrated = false;
+
+/* Reference count of power on of wifi and bt power domain */
+
+static uint8_t g_wifi_bt_pd_controller;
 
 /****************************************************************************
  * Private Functions
@@ -191,21 +200,9 @@ int phy_printf(const char *format, ...)
  *
  ****************************************************************************/
 
-void esp32s3_phy_enable_clock(void)
+void IRAM_ATTR esp32s3_phy_enable_clock(void)
 {
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt == 0)
-    {
-      modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0,
-                  SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M);
-    }
-
-  g_phy_clk_en_cnt++;
-
-  leave_critical_section(flags);
+  esp32s3_periph_wifi_bt_common_module_enable();
 }
 
 /****************************************************************************
@@ -222,24 +219,9 @@ void esp32s3_phy_enable_clock(void)
  *
  ****************************************************************************/
 
-void esp32s3_phy_disable_clock(void)
+void IRAM_ATTR esp32s3_phy_disable_clock(void)
 {
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt > 0)
-    {
-      g_phy_clk_en_cnt--;
-      if (g_phy_clk_en_cnt == 0)
-        {
-          modifyreg32(SYSTEM_WIFI_CLK_EN_REG,
-                      SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M,
-                      0);
-        }
-    }
-
-  leave_critical_section(flags);
+  esp32s3_periph_wifi_bt_common_module_disable();
 }
 
 /****************************************************************************
@@ -348,6 +330,8 @@ void esp32s3_phy_disable(void)
 
   if (g_phy_access_ref == 0)
     {
+      phy_digital_regs_store();
+
       /* Disable PHY and RF. */
 
       phy_close_rf();
@@ -385,18 +369,12 @@ void esp32s3_phy_enable(void)
   static bool debug = false;
   irqstate_t flags;
   esp_phy_calibration_data_t *cal_data;
+
   if (debug == false)
     {
       char *phy_version = get_phy_version_str();
       wlinfo("phy_version %s\n", phy_version);
       debug = true;
-    }
-
-  cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
-  if (!cal_data)
-    {
-      wlerr("ERROR: Failed to allocate PHY calibration data buffer.");
-      abort();
     }
 
   flags = enter_critical_section();
@@ -407,12 +385,21 @@ void esp32s3_phy_enable(void)
 
       if (g_is_phy_calibrated == false)
         {
+          cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
+          if (cal_data == NULL)
+            {
+              wlerr("ERROR: Failed to allocate PHY"
+                    "calibration data buffer.");
+              abort();
+            }
+
 #if CONFIG_ESP_PHY_ENABLE_USB
           phy_bbpll_en_usb(true);
 #endif
           wlinfo("calibrating");
           register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_FULL);
           g_is_phy_calibrated = true;
+          kmm_free(cal_data);
         }
       else
         {
@@ -422,6 +409,199 @@ void esp32s3_phy_enable(void)
     }
 
   g_phy_access_ref++;
+
   leave_critical_section(flags);
-  kmm_free(cal_data);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_bt_power_domain_on
+ *
+ * Description:
+ *   Initialize Bluetooth and Wi-Fi power domain
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_wifi_bt_power_domain_on(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  if (g_wifi_bt_pd_controller++ == 0)
+    {
+      modifyreg32(RTC_CNTL_DIG_PWC_REG, RTC_CNTL_WIFI_FORCE_PD, 0);
+
+      modifyreg32(SYSCON_WIFI_RST_EN_REG, 0, MODEM_RESET_FIELD_WHEN_PU);
+      modifyreg32(SYSCON_WIFI_RST_EN_REG, MODEM_RESET_FIELD_WHEN_PU, 0);
+
+      modifyreg32(RTC_CNTL_DIG_ISO_REG, RTC_CNTL_WIFI_FORCE_ISO, 0);
+    }
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_bt_power_domain_off
+ *
+ * Description:
+ *   Deinitialize Bluetooth and Wi-Fi power domain
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_bt_power_domain_off(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  if (--g_wifi_bt_pd_controller == 0)
+    {
+      modifyreg32(RTC_CNTL_DIG_ISO_REG, 0, RTC_CNTL_WIFI_FORCE_ISO);
+      modifyreg32(RTC_CNTL_DIG_PWC_REG, 0, RTC_CNTL_WIFI_FORCE_PD);
+    }
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: esp_timer_create
+ *
+ * Description:
+ *   Create timer with given arguments
+ *
+ * Input Parameters:
+ *   create_args - Timer arguments data pointer
+ *   out_handle  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
+                         esp_timer_handle_t *out_handle)
+{
+  int ret;
+  struct rt_timer_args_s rt_timer_args;
+  struct rt_timer_s *rt_timer;
+
+  rt_timer_args.arg = create_args->arg;
+  rt_timer_args.callback = create_args->callback;
+
+  ret = esp32s3_rt_timer_create(&rt_timer_args, &rt_timer);
+  if (ret)
+    {
+      wlerr("Failed to create rt_timer error=%d\n", ret);
+      return ret;
+    }
+
+  *out_handle = (esp_timer_handle_t)rt_timer;
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_timer_start_once
+ *
+ * Description:
+ *   Start timer with one shot mode
+ *
+ * Input Parameters:
+ *   timer      - Timer handle pointer
+ *   timeout_us - Timeout value by micro second
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
+{
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
+
+  esp32s3_rt_timer_start(rt_timer, timeout_us, false);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_timer_start_periodic
+ *
+ * Description:
+ *   Start timer with periodic mode
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *   period - Timeout value by micro second
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
+{
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
+
+  esp32s3_rt_timer_start(rt_timer, period, true);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_timer_stop
+ *
+ * Description:
+ *   Stop timer
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_stop(esp_timer_handle_t timer)
+{
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
+
+  esp32s3_rt_timer_stop(rt_timer);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_timer_delete
+ *
+ * Description:
+ *   Delete timer and free resource
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_delete(esp_timer_handle_t timer)
+{
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
+
+  esp32s3_rt_timer_delete(rt_timer);
+
+  return 0;
 }
