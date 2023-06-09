@@ -141,11 +141,6 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
   struct mallinfo poolinfo;
 #endif
-#if CONFIG_MM_REGIONS > 1
-  int region = heap->mm_nregions;
-#else
-#  define region 1
-#endif
 
   memset(&info, 0, sizeof(info));
   mm_foreach(heap, mallinfo_handler, &info);
@@ -157,15 +152,6 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
   info.uordblks -= poolinfo.fordblks;
   info.fordblks += poolinfo.fordblks;
 #endif
-
-  /* Account for the heap->mm_heapend[region] node overhead and the
-   * heap->mm_heapstart[region]->preceding:
-   * heap->mm_heapend[region] overhead size     = OVERHEAD_MM_ALLOCNODE
-   * heap->mm_heapstart[region]->preceding size = sizeof(mmsize_t)
-   * and SIZEOF_MM_ALLOCNODE = OVERHEAD_MM_ALLOCNODE + sizeof(mmsize_t).
-   */
-
-  info.uordblks += region * SIZEOF_MM_ALLOCNODE;
 
   DEBUGASSERT((size_t)info.uordblks + info.fordblks == heap->mm_heapsize);
 
