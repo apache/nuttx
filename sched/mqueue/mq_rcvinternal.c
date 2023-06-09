@@ -62,7 +62,7 @@
  *   On success, zero (OK) is returned.  A negated errno value is returned
  *   on any failure:
  *
- *   EPERM    Message queue opened not opened for reading.
+ *   EBADF    Message queue opened not opened for reading.
  *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the message
  *            queue.
  *   EINVAL   Invalid 'msg' or 'msgq'
@@ -91,7 +91,7 @@ int nxmq_verify_receive(FAR struct file *mq, FAR char *msg, size_t msglen)
 
   if ((mq->f_oflags & O_RDOK) == 0)
     {
-      return -EPERM;
+      return -EBADF;
     }
 
   if (msglen < (size_t)msgq->maxmsgsize)
