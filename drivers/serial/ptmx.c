@@ -165,7 +165,7 @@ static int ptmx_minor_allocate(void)
 static int ptmx_open(FAR struct file *filep)
 {
   struct file temp;
-  char devname[16];
+  char devname[32];
   int minor;
   int ret;
 
@@ -202,7 +202,7 @@ static int ptmx_open(FAR struct file *filep)
 
   /* Open the master device:  /dev/ptyN, where N=minor */
 
-  snprintf(devname, 16, "/dev/pty%d", minor);
+  snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
   memcpy(&temp, filep, sizeof(temp));
   ret = file_open(filep, devname, O_RDWR);
   DEBUGASSERT(ret >= 0);  /* file_open() should never fail */
