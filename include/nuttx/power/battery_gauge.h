@@ -251,6 +251,25 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(
                                                 uint32_t frequency);
 #endif
 
+#if defined(CONFIG_GOLDFISH_BATTERY)
+/****************************************************************************
+ * Name: goldfish_battery_register
+ *
+ * Description:
+ *   Register a emulate battery to tyhe upper-half battery driver.
+ *
+ * Input Parameters:
+ *   regs - the base address for the goldfish battery.
+ *   irq - An irq num for the goldfish battery.
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int goldfish_battery_register(FAR void *regs, int irq);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
