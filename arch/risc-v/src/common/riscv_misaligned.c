@@ -544,7 +544,7 @@ static bool decode_insn(uintptr_t *regs, riscv_insn_ctx_t *ctx)
         break;
 #endif
       default:
-        _alert("Uncompressed: %x\n", insn.insn);
+        _alert("Uncompressed: %lx\n", insn.insn);
         return false;
     }
 
