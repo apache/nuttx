@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include "xtensa_attr.h"
+#include "esp32s3_rt_timer.h"
 
 #include "esp_hal_wifi.h"
 
@@ -95,7 +96,7 @@ void esp32s3_phy_enable(void);
  *
  ****************************************************************************/
 
-void esp32s3_phy_disable(void);
+void IRAM_ATTR esp32s3_phy_disable(void);
 
 /****************************************************************************
  * Name: esp32s3_phy_enable_clock
@@ -111,7 +112,7 @@ void esp32s3_phy_disable(void);
  *
  ****************************************************************************/
 
-void esp32s3_phy_enable_clock(void);
+void IRAM_ATTR esp32s3_phy_enable_clock(void);
 
 /****************************************************************************
  * Name: esp32s3_phy_disable_clock
@@ -164,5 +165,105 @@ uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg);
  ****************************************************************************/
 
 int phy_printf(const char *format, ...) printf_like(1, 2);
+
+/****************************************************************************
+ * Name: esp_wifi_bt_power_domain_on
+ *
+ * Description:
+ *   Initialize Bluetooth and Wi-Fi power domain
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_wifi_bt_power_domain_on(void);
+
+/****************************************************************************
+ * Name: esp_timer_create
+ *
+ * Description:
+ *   Create timer with given arguments
+ *
+ * Input Parameters:
+ *   create_args - Timer arguments data pointer
+ *   out_handle  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
+                         esp_timer_handle_t *out_handle);
+
+/****************************************************************************
+ * Name: esp_timer_start_once
+ *
+ * Description:
+ *   Start timer with one shot mode
+ *
+ * Input Parameters:
+ *   timer      - Timer handle pointer
+ *   timeout_us - Timeout value by micro second
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us);
+
+/****************************************************************************
+ * Name: esp_timer_start_periodic
+ *
+ * Description:
+ *   Start timer with periodic mode
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *   period - Timeout value by micro second
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period);
+
+/****************************************************************************
+ * Name: esp_timer_stop
+ *
+ * Description:
+ *   Stop timer
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_stop(esp_timer_handle_t timer);
+
+/****************************************************************************
+ * Name: esp_timer_delete
+ *
+ * Description:
+ *   Delete timer and free resource
+ *
+ * Input Parameters:
+ *   timer  - Timer handle pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_timer_delete(esp_timer_handle_t timer);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_WIRELESS_H */

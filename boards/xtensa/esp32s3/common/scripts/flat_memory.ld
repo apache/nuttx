@@ -31,6 +31,8 @@
 
 #include <nuttx/config.h>
 
+#include "esp32s3_aliases.ld"
+
 #define SRAM_IRAM_START     0x40370000
 #define SRAM_DIRAM_I_START  0x40378000
 

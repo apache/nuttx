@@ -543,7 +543,7 @@ static inline int32_t osi_errno_trans(int ret)
 }
 
 /****************************************************************************
- * Name: osi_errno_trans
+ * Name: wifi_errno_trans
  *
  * Description:
  *   Transform from ESP Wi-Fi error code to NuttX error code
@@ -4036,137 +4036,6 @@ int esp_mesh_send_event_internal(int32_t event_id,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_timer_create
- *
- * Description:
- *   Create timer with given arguments
- *
- * Input Parameters:
- *   create_args - Timer arguments data pointer
- *   out_handle  - Timer handle pointer
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
-                         esp_timer_handle_t *out_handle)
-{
-  int ret;
-  struct rt_timer_args_s rt_timer_args;
-  struct rt_timer_s *rt_timer;
-
-  rt_timer_args.arg = create_args->arg;
-  rt_timer_args.callback = create_args->callback;
-
-  ret = esp32s3_rt_timer_create(&rt_timer_args, &rt_timer);
-  if (ret)
-    {
-      wlerr("Failed to create rt_timer error=%d\n", ret);
-      return ret;
-    }
-
-  *out_handle = (esp_timer_handle_t)rt_timer;
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp_timer_start_once
- *
- * Description:
- *   Start timer with one shot mode
- *
- * Input Parameters:
- *   timer      - Timer handle pointer
- *   timeout_us - Timeout value by micro second
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
-{
-  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
-
-  esp32s3_rt_timer_start(rt_timer, timeout_us, false);
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp_timer_start_periodic
- *
- * Description:
- *   Start timer with periodic mode
- *
- * Input Parameters:
- *   timer  - Timer handle pointer
- *   period - Timeout value by micro second
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
-{
-  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
-
-  esp32s3_rt_timer_start(rt_timer, period, true);
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp_timer_stop
- *
- * Description:
- *   Stop timer
- *
- * Input Parameters:
- *   timer  - Timer handle pointer
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_timer_stop(esp_timer_handle_t timer)
-{
-  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
-
-  esp32s3_rt_timer_stop(rt_timer);
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp_timer_delete
- *
- * Description:
- *   Delete timer and free resource
- *
- * Input Parameters:
- *   timer  - Timer handle pointer
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_timer_delete(esp_timer_handle_t timer)
-{
-  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
-
-  esp32s3_rt_timer_delete(rt_timer);
-
-  return 0;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -6477,6 +6346,29 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
 }
 
 #endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
+/****************************************************************************
+ * Name: esp32s3_wifi_bt_coexist_init
+ *
+ * Description:
+ *   Initialize ESP32-S3 Wi-Fi and BT coexistance module.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+int esp32s3_wifi_bt_coexist_init(void)
+{
+#error "BT and WiFi coexst not implemented!!!"
+  return ERROR;
+}
+#endif
 
 /****************************************************************************
  * Name: esp_wifi_stop_callback

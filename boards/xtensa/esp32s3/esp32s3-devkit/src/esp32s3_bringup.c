@@ -46,6 +46,10 @@
 #  include "esp32s3_board_wlan.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_BLE
+#  include "esp32s3_ble.h"
+#endif
+
 #ifdef CONFIG_ESP32S3_RT_TIMER
 #  include "esp32s3_rt_timer.h"
 #endif
@@ -225,6 +229,24 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32S3_WIRELESS
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  ret = esp32s3_wifi_bt_coexist_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT coexist\n");
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_BLE
+  ret = esp32s3_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+    }
+#endif
+
 #ifdef CONFIG_ESP32S3_WIFI
   ret = board_wlan_init();
   if (ret < 0)
@@ -232,6 +254,8 @@ int esp32s3_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
              ret);
     }
+#endif
+
 #endif
 
 #ifdef CONFIG_VIDEO_FB

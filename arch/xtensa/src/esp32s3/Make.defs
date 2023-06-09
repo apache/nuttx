@@ -149,9 +149,8 @@ ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
 include chip/Wireless.mk
 endif
 
-ifeq ($(CONFIG_ESP32S3_RTC),y)
 CHIP_CSRCS += esp32s3_rtc.c
+
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += esp32s3_rtc_lowerhalf.c
-endif
 endif
