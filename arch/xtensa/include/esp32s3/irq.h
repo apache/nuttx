@@ -208,8 +208,8 @@
 #define ESP32S3_IRQ_PWR                                 (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_PWR)
 #define ESP32S3_IRQ_BB                                  (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BB)
 #define ESP32S3_IRQ_BT_MAC                              (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BT_MAC)
-#define ESP32S3_IRQ_BT_BB                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BB)
-#define ESP32S3_IRQ_BT_BB_NMI                           (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BB_NMI)
+#define ESP32S3_IRQ_BT_BB                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BT_BB)
+#define ESP32S3_IRQ_BT_BB_NMI                           (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_BT_BB_NMI)
 #define ESP32S3_IRQ_RWBT                                (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RWBT)
 #define ESP32S3_IRQ_RWBLE                               (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RWBLE)
 #define ESP32S3_IRQ_RWBT_NMI                            (XTENSA_IRQ_FIRSTPERIPH + ESP32S3_PERIPH_RWBT_NMI)
@@ -452,7 +452,9 @@
 #define ESP32S3_CPUINT_NMISET         0x00004000
 
 #define ESP32S3_CPUINT_MAC            0
-#define ESP32S3_CPUINT_MAC_NMI        1
+#define ESP32S3_CPUINT_BT_BB_NMI      1
+#define ESP32S3_CPUINT_RWBLE          2
+#define ESP32S3_CPUINT_RWBT_NMI       3
 #define ESP32S3_CPUINT_TIMER0         6
 #define ESP32S3_CPUINT_SOFTWARE0      7
 #define ESP32S3_CPUINT_PROFILING      11

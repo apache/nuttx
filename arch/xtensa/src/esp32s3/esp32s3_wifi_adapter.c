@@ -543,7 +543,7 @@ static inline int32_t osi_errno_trans(int ret)
 }
 
 /****************************************************************************
- * Name: osi_errno_trans
+ * Name: wifi_errno_trans
  *
  * Description:
  *   Transform from ESP Wi-Fi error code to NuttX error code
@@ -6477,6 +6477,29 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
 }
 
 #endif /* ESP32S3_WLAN_HAS_SOFTAP */
+
+/****************************************************************************
+ * Name: esp32s3_wifi_bt_coexist_init
+ *
+ * Description:
+ *   Initialize ESP32-S3 Wi-Fi and BT coexistance module.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+int esp32s3_wifi_bt_coexist_init(void)
+{
+#error "BT and WiFi coexst not implemented!!!"
+  return ERROR;
+}
+#endif
 
 /****************************************************************************
  * Name: esp_wifi_stop_callback

@@ -48,6 +48,7 @@ distclean::
 	$(call DELDIR, chip/$(ESP_HAL_3RDPARTY_REPO))
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_common$(DELIM)include)
+INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)esp32s3$(DELIM)include)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_event$(DELIM)include)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_hw_support$(DELIM)include)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)esp32s3$(DELIM)include)
@@ -77,6 +78,11 @@ EXTRA_LIBS += -lcore -lnet80211 -lpp
 
 ifeq ($(CONFIG_WPA_WAPI_PSK),y)
 EXTRA_LIBS += -lwapi
+endif
+
+ifeq ($(CONFIG_ESP32S3_BLE),y)
+CHIP_CSRCS += esp32s3_ble_adapter.c esp32s3_ble.c
+EXTRA_LIBS += -lbtbb -lbtdm_app
 endif
 
 ## ESP-IDF's mbedTLS
