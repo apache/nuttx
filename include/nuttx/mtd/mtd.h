@@ -429,7 +429,8 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev,
+                                        uint16_t spi_devid);
 
 /****************************************************************************
  * Name: m25p_initialize
