@@ -105,7 +105,7 @@ int nxsem_destroy(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-int sem_destroy (FAR sem_t *sem)
+int sem_destroy(FAR sem_t *sem)
 {
   int ret;
 
