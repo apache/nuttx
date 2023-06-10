@@ -450,7 +450,7 @@ struct btreq_s
       bt_addr_le_t btgwr_wrpeer;                 /* IN:  Peer address */
       uint8_t btgwr_wrnbytes;                    /* IN:  Number of bytes to write */
       uint16_t btgwr_wrhandle;                   /* IN:  GATT handle */
-      FAR uint8_t btgwr_wrdata[HCI_GATTWR_DATA]; /* IN:  Data to be written */
+      uint8_t btgwr_wrdata[HCI_GATTWR_DATA];     /* IN:  Data to be written */
       uint8_t btgwr_wrresult;                    /* OUT: The result of the operation */
     } btgwr;
 
