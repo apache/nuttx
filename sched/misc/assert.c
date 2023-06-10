@@ -422,7 +422,7 @@ static void show_tasks(void)
 #endif
          " PRI POLICY   TYPE    NPX"
          " STATE   EVENT"
-         "      SIGMASK"
+         "      SIGMASK        "
          "  STACKBASE"
          "  STACKSIZE"
 #ifdef CONFIG_STACK_COLORATION
