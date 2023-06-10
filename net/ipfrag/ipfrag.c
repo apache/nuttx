@@ -108,27 +108,27 @@ do  \
  * if so, free all resources of this node.
  */
 
-static struct wdog_s  g_wdfragtimeout;
+static struct wdog_s g_wdfragtimeout;
 
 /* Reassembly timeout work */
 
-static struct work_s  g_wkfragtimeout;
+static struct work_s g_wkfragtimeout;
 
 /* Remember the number of I/O buffers currently in reassembly cache */
 
-static uint8_t        g_bufoccupy;
+static uint8_t       g_bufoccupy;
 
 /* Queue header definition, it links all fragments of all NICs by ascending
  * ipid.
  */
 
-static sq_queue_t     g_assemblyhead_ipid;
+static sq_queue_t    g_assemblyhead_ipid;
 
 /* Queue header definition, which connects all fragments of all NICs in order
  * of addition time.
  */
 
-static sq_queue_t     g_assemblyhead_time;
+static sq_queue_t    g_assemblyhead_time;
 
 /****************************************************************************
  * Public Data
@@ -138,7 +138,7 @@ static sq_queue_t     g_assemblyhead_time;
  * at a time.
  */
 
-mutex_t               g_ipfrag_lock = NXMUTEX_INITIALIZER;
+mutex_t              g_ipfrag_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Function Prototypes
