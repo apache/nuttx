@@ -41,7 +41,7 @@
 
 static const char g_elfmagic[EI_MAGIC_SIZE] =
 {
-    0x7f, 'E', 'L', 'F'
+  0x7f, 'E', 'L', 'F'
 };
 
 /****************************************************************************
@@ -92,7 +92,7 @@ int elf_verifyheader(FAR const Elf_Ehdr *ehdr)
   if ((ehdr->e_type != ET_REL) && (ehdr->e_type != ET_EXEC))
     {
       berr("Not a relocatable or executable file: e_type=%d\n",
-                                        ehdr->e_type);
+           ehdr->e_type);
       return -EINVAL;
     }
 

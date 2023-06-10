@@ -151,7 +151,7 @@ extern "C"
  * at a time
  */
 
-extern mutex_t               g_ipfrag_lock;
+extern mutex_t g_ipfrag_lock;
 
 /****************************************************************************
  * Public Function Prototypes
