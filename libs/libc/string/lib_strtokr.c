@@ -75,6 +75,7 @@
  *
  ****************************************************************************/
 
+#undef strtok_r /* See mm/README.txt */
 FAR char *strtok_r(FAR char *str, FAR const char *delim, FAR char **saveptr)
 {
   FAR char *pbegin;

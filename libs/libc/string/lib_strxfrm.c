@@ -69,7 +69,7 @@ size_t strxfrm(FAR char *s1, FAR const char *s2, size_t n)
           return res;
         }
     }
-  while (*s2)
+  while (*s2 != '\0')
     {
       ++s2;
       ++res;

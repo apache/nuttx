@@ -57,7 +57,7 @@ FAR char *strchr(FAR const char *s, int c)
           return (FAR char *)s;
         }
 
-      if (*s == 0)
+      if (*s == '\0')
         {
           break;
         }
