@@ -34,9 +34,9 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRLEN) && defined(LIBC_BUILD_STRING)
 #undef strlen /* See mm/README.txt */
-size_t strlen(const char *s)
+size_t strlen(FAR const char *s)
 {
-  const char *sc;
+  FAR const char *sc;
   for (sc = s; *sc != '\0'; ++sc);
   return sc - s;
 }

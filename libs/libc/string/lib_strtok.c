@@ -28,7 +28,7 @@
  * Private Data
  ****************************************************************************/
 
-static char *g_saveptr = NULL;
+static FAR char *g_saveptr = NULL;
 
 /****************************************************************************
  * Public Functions
@@ -67,7 +67,7 @@ static char *g_saveptr = NULL;
  ****************************************************************************/
 
 #undef strtok /* See mm/README.txt */
-char *strtok(char *str, const char *delim)
+FAR char *strtok(FAR char *str, FAR const char *delim)
 {
   return strtok_r(str, delim, &g_saveptr);
 }

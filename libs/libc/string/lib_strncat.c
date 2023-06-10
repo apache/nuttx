@@ -38,7 +38,7 @@ FAR char *strncat(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *ret = dest;
 
-  dest  += strlen(dest);
+  dest += strlen(dest);
   for (; n > 0 && *src != '\0' ; n--)
     {
       *dest++ = *src++;
