@@ -54,7 +54,7 @@
 
 static struct sdio_dev_s *g_sdio_dev;
 #ifdef HAVE_NCD
-static bool g_sd_inserted = 0xff;       /* Impossible value */
+static bool g_sd_inserted;
 #endif
 
 /****************************************************************************
@@ -102,8 +102,6 @@ int stm32_sdio_initialize(void)
   int ret;
 
 #ifdef HAVE_NCD
-  bool cd_status;
-
   /* Configure the card detect GPIO */
 
   stm32_configgpio(GPIO_SDIO_NCD);
@@ -112,7 +110,6 @@ int stm32_sdio_initialize(void)
 
   stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true,
                      stm32_ncd_interrupt, NULL);
-
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver.
@@ -142,9 +139,9 @@ int stm32_sdio_initialize(void)
 #ifdef HAVE_NCD
   /* Use SD card detect pin to check if a card is g_sd_inserted */
 
-  cd_status = !stm32_gpioread(GPIO_SDIO_NCD);
-  finfo("Card detect : %d\n", cd_status);
-  sdio_mediachange(g_sdio_dev, cd_status);
+  g_sd_inserted = !stm32_gpioread(GPIO_SDIO_NCD);
+  finfo("Card detect : %d\n", g_sd_inserted);
+  sdio_mediachange(g_sdio_dev, g_sd_inserted);
 #else
   /* Assume that the SD card is inserted.  What choice do we have? */
 
