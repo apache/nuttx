@@ -81,9 +81,25 @@ config LIBC_FTOK_VFS_PATH
 	---help---
 		The relative path to where ftok will exist in the root namespace.
 
+choice
+	prompt "Select memfd implementation"
+
+config LIBC_MEMFD_SHMFS
+	bool "memfd base on shmfs"
+	depends on FS_SHMFS
+
+config LIBC_MEMFD_TMPFS
+	bool "memfd base on tmpfs"
+	depends on FS_TMPFS
+
+config LIBC_MEMFD_ERROR
+	bool "memfd return error"
+
+endchoice
+
 config LIBC_MEM_FD_VFS_PATH
 	string "Relative path to memfd storage"
 	default "memfd"
-	depends on FS_TMPFS
+	depends on !LIBC_MEMFD_ERROR
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
