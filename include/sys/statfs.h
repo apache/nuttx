@@ -104,6 +104,8 @@
  * Type Definitions
  ****************************************************************************/
 
+typedef struct fsid_s fsid_t;
+
 struct statfs
 {
   uint32_t   f_type;     /* Type of filesystem (see definitions above) */
@@ -114,6 +116,7 @@ struct statfs
   fsblkcnt_t f_bavail;   /* Free blocks avail to non-superuser */
   fsfilcnt_t f_files;    /* Total file nodes in the file system */
   fsfilcnt_t f_ffree;    /* Free file nodes in the file system */
+  fsid_t     f_fsid;     /* Encode device type, not yet in use */
 };
 
 /****************************************************************************
