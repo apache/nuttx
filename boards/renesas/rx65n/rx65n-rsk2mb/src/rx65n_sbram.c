@@ -332,7 +332,7 @@ int rx65n_sbram_int(void)
 #if defined(CONFIG_RX65N_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                      const char *filename, int lineno,
-                     const char *msg, FAR void *regs)
+                     const char *msg, void *regs)
 {
   struct fullcontext *pdump;
   pdump = (struct fullcontext *)&g_sdata;

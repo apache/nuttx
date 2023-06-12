@@ -100,7 +100,7 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
 
 void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                      const char *filename, int lineno,
-                     const char *msg, FAR void *regs)
+                     const char *msg, void *regs)
 {
   fullcontext_t *pdump;
 
