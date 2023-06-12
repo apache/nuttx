@@ -381,7 +381,7 @@ int stm32_bbsram_int(void)
 #if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                      const char *filename, int lineno,
-                     const char *msg, FAR void *regs)
+                     const char *msg, void *regs)
 {
   fullcontext_t *pdump = (fullcontext_t *)&g_sdata;
   int rv;
