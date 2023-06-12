@@ -555,6 +555,9 @@ void _assert(FAR const char *filename, int linenum,
   FAR struct tcb_s *rtcb = running_task();
   struct utsname name;
   bool fatal = true;
+  int flags;
+
+  flags = enter_critical_section();
 
   /* try to save current context if regs is null */
 
@@ -676,4 +679,6 @@ void _assert(FAR const char *filename, int linenum,
         }
 #endif
     }
+
+  leave_critical_section(flags);
 }
