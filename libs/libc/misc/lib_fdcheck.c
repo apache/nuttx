@@ -75,6 +75,7 @@ int fdcheck_restore(int val)
 {
   int pid_expect;
   int pid_now;
+  int ppid_now;
 
   if (val <= 2)
     {
@@ -83,9 +84,11 @@ int fdcheck_restore(int val)
 
   pid_expect = (val >> PID_SHIFT);
   pid_now = (getpid() & PID_MASK);
-  if (pid_expect != pid_now)
+  ppid_now = (getppid() & PID_MASK);
+  if (pid_expect != pid_now && pid_expect != ppid_now)
     {
-      ferr("pid_expect %d pid_now %d\n", pid_expect, pid_now);
+      ferr("pid_expect %d pid_now %d ppid_now %d\n",
+        pid_expect, pid_now, ppid_now);
       PANIC();
     }
 
