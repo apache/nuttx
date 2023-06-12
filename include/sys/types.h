@@ -294,6 +294,11 @@ typedef uint24_t u_int24_t;
 typedef uint64_t u_int64_t;
 #endif
 
+struct fsid_s
+{
+  int val[2];
+};
+
 /* Task entry point */
 
 typedef CODE int (*main_t)(int argc, FAR char *argv[]);
