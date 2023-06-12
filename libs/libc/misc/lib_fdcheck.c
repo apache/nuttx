@@ -85,7 +85,7 @@ int fdcheck_restore(int val)
   pid_expect = (val >> PID_SHIFT);
   pid_now = (getpid() & PID_MASK);
   ppid_now = (getppid() & PID_MASK);
-  if (pid_expect != pid_now && pid_expect != ppid_now)
+  if (pid_expect != pid_now && pid_expect != ppid_now && pid_expect != 0)
     {
       ferr("pid_expect %d pid_now %d ppid_now %d\n",
         pid_expect, pid_now, ppid_now);
