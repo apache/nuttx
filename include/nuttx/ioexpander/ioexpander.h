@@ -322,13 +322,13 @@ struct ioexpander_ops_s
                           FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
   CODE int (*ioe_multiwritepin)(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
+                                FAR const uint8_t *pins, FAR bool *values,
                                 int count);
   CODE int (*ioe_multireadpin)(FAR struct ioexpander_dev_s *dev,
-                               FAR uint8_t *pins, FAR bool *values,
+                               FAR const uint8_t *pins, FAR bool *values,
                                int count);
   CODE int (*ioe_multireadbuf)(FAR struct ioexpander_dev_s *dev,
-                               FAR uint8_t *pins, FAR bool *values,
+                               FAR const uint8_t *pins, FAR bool *values,
                                int count);
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
