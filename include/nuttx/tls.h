@@ -156,7 +156,7 @@ struct task_info_s
 
 /* This structure describes one element of the pthread cleanup stack */
 
-#ifdef CONFIG_PTHREAD_CLEANUP
+#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
 struct pthread_cleanup_s
 {
   pthread_cleanup_t pc_cleaner;     /* Cleanup callback address */
@@ -206,7 +206,7 @@ struct tls_info_s
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
 
-#ifdef CONFIG_PTHREAD_CLEANUP
+#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
   /* tos   - The index to the next available entry at the top of the stack.
    * stack - The pre-allocated clean-up stack memory.
    */

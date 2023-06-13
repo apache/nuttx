@@ -66,7 +66,7 @@ ifeq ($(CONFIG_PTHREAD_SPINLOCKS),y)
 CSRCS += pthread_spinlock.c
 endif
 
-ifeq ($(CONFIG_PTHREAD_CLEANUP),y)
+ifneq ($(CONFIG_PTHREAD_CLEANUP_STACKSIZE),0)
 CSRCS += pthread_cleanup.c
 endif
 
