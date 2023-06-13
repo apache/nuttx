@@ -658,7 +658,7 @@ int cryptodev_key(FAR struct crypt_kop *kop)
           continue;
         }
 
-      krp->krp_param[i].crp_p = kmm_malloc(size);
+      krp->krp_param[i].crp_p = kmm_zalloc(size);
       if (i >= krp->krp_iparams)
         {
           continue;
