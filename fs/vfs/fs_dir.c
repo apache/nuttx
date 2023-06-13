@@ -546,12 +546,15 @@ static off_t dir_seek(FAR struct file *filep, off_t offset, int whence)
 static int dir_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct fs_dirent_s *dir = filep->f_priv;
-  int ret = -ENOTTY;
+  int ret = OK;
 
   if (cmd == FIOC_FILEPATH)
     {
       strlcpy((FAR char *)(uintptr_t)arg, dir->fd_path, PATH_MAX);
-      ret = OK;
+    }
+  else if (cmd != BIOC_FLUSH)
+    {
+      ret = -ENOTTY;
     }
 
   return ret;
