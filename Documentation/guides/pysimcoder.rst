@@ -50,7 +50,7 @@ with NuttX. The list is the following:
 ``CONFIG_BOARDCTL_OS_SYMTAB=y``      ``CONFIG_NSH_READLINE=y``
 ``CONFIG_BUILTIN=y``                 ``CONFIG_NSH_ROMFSETC=y``
 ``CONFIG_ELF=y``                     ``CONFIG_PSEUDOTERM=y``
-``CONFIG_FS_BINFS=y``                ``CONFIG_PTHREAD_CLEANUP=y``
+``CONFIG_FS_BINFS=y``                ``CONFIG_PTHREAD_CLEANUP_STACKSIZE=1``
 ``CONFIG_FS_PROCFS=y``               ``CONFIG_PTHREAD_MUTEX_TYPES=y``
 ``CONFIG_FS_PROCFS_REGISTER=y``      ``CONFIG_PTHREAD_STACK_MIN=1024``
 ``CONFIG_FS_ROMFS=y``                ``CONFIG_LIBM=y``

@@ -179,7 +179,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PTHREAD_CLEANUP
+#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
 struct tls_info_s;
 void pthread_cleanup_popall(FAR struct tls_info_s *tls);
 #endif

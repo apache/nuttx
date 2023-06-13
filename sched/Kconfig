@@ -752,22 +752,15 @@ config PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
 
 endchoice # Default pthread mutex protocol
 
-config PTHREAD_CLEANUP
-	bool "pthread cleanup stack"
-	default n
-	---help---
-		Select to enable support for pthread exit cleanup stacks.  This
-		enables the interfaces pthread_cleanup_push() and
-		pthread_cleanup_pop().
-
 config PTHREAD_CLEANUP_STACKSIZE
 	int "pthread cleanup stack size"
-	default 1
-	range 1 32
-	depends on PTHREAD_CLEANUP
+	default 0
+	range 0 32
 	---help---
 		The maximum number of cleanup actions that may be pushed by
-		pthread_clean_push().  This setting will increase the size of EVERY
+		pthread_cleanup_push().
+		if 0 disable the interfaces pthread_cleanup_push() and pthread_cleanup_pop().
+		This setting will increase the size of EVERY
 		pthread task control block by about n * CONFIG_PTHREAD_CLEANUP_STACKSIZE
 		where n is the size of a pointer, 2 * sizeof(uintptr_t), this would be
 		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
