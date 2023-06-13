@@ -191,10 +191,13 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       mode = va_arg(ap, mode_t);
       attr = va_arg(ap, FAR struct mq_attr *);
-      if (attr->mq_maxmsg <= 0 || attr->mq_msgsize <= 0)
+      if (attr != NULL)
         {
-          ret = -EINVAL;
-          goto errout;
+          if (attr->mq_maxmsg <= 0 || attr->mq_msgsize <= 0)
+            {
+              ret = -EINVAL;
+              goto errout;
+            }
         }
     }
 
