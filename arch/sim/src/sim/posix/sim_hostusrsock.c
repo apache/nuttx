@@ -38,6 +38,7 @@
 
 #include <netinet/in.h>
 
+#include "sim_internal.h"
 #include "sim_hostusrsock.h"
 
 /****************************************************************************
@@ -123,6 +124,72 @@ static void sock_nonblock(int socket, int enable)
     }
 }
 
+static int optname_to_native(int optname)
+{
+  switch (optname)
+    {
+      case NUTTX_SO_ACCEPTCONN:
+        return SO_ACCEPTCONN;
+
+      case NUTTX_SO_BROADCAST:
+        return SO_BROADCAST;
+
+      case NUTTX_SO_DEBUG:
+        return SO_DEBUG;
+
+      case NUTTX_SO_DONTROUTE:
+        return SO_DONTROUTE;
+
+      case NUTTX_SO_ERROR:
+        return SO_ERROR;
+
+      case NUTTX_SO_KEEPALIVE:
+        return SO_KEEPALIVE;
+
+      case NUTTX_SO_LINGER:
+        return SO_LINGER;
+
+      case NUTTX_SO_OOBINLINE:
+        return SO_OOBINLINE;
+
+      case NUTTX_SO_RCVBUF:
+        return SO_RCVBUF;
+
+      case NUTTX_SO_RCVLOWAT:
+        return SO_RCVLOWAT;
+
+      case NUTTX_SO_RCVTIMEO:
+        return SO_RCVTIMEO;
+
+      case NUTTX_SO_REUSEADDR:
+        return SO_REUSEADDR;
+
+      case NUTTX_SO_SNDBUF:
+        return SO_SNDBUF;
+
+      case NUTTX_SO_SNDLOWAT:
+        return SO_SNDLOWAT;
+
+      case NUTTX_SO_SNDTIMEO:
+        return SO_SNDTIMEO;
+
+      case NUTTX_SO_TYPE:
+        return SO_TYPE;
+
+      case NUTTX_SO_TIMESTAMP:
+        return SO_TIMESTAMP;
+
+#ifdef CONFIG_HOST_LINUX
+      case NUTTX_SO_BINDTODEVICE:
+        return SO_BINDTODEVICE;
+#endif
+
+      default:
+        syslog(LOG_ERR, "Invalid optname: %x\n", optname);
+        return -1;
+    }
+}
+
 static int host_usrsock_sockopt(int sockfd, int level, int optname,
                                 const void *optval, nuttx_socklen_t *optlen,
                                 bool set)
@@ -150,17 +217,9 @@ static int host_usrsock_sockopt(int sockfd, int level, int optname,
       return ret;
     }
 
-  if (optname == NUTTX_SO_REUSEADDR)
+  optname = optname_to_native(optname);
+  if (optname < 0)
     {
-      optname = SO_REUSEADDR;
-    }
-  else if (optname == NUTTX_SO_ERROR)
-    {
-      optname = SO_ERROR;
-    }
-  else
-    {
-      syslog(LOG_ERR, "Invalid optname: %x\n", optname);
       return ret;
     }
 
