@@ -216,6 +216,11 @@ enum board_power_device
 #define BOARD_POWEROFF_DEEP (0)
 #define BOARD_POWEROFF_COLD (1)
 
+/* Power domain definitions *************************************************/
+
+#define BOARD_PM_IDLE       (0)
+#define BOARD_PM_APPS       (1)
+
 /* CXD5247 audio control definitions ****************************************/
 
 #define CXD5247_XRST  PIN_SPI3_CS2_X
