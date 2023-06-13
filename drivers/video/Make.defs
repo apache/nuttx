@@ -58,6 +58,10 @@ endif
 
 endif
 
+ifeq ($(CONFIG_GOLDFISH_CAMERA),y)
+  CSRCS += goldfish_camera.c
+endif
+
 include video/vnc/Make.defs
 include video/mipidsi/Make.defs
 
