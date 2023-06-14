@@ -15,6 +15,13 @@ config DEV_ZERO
 	bool "Enable /dev/zero"
 	default n
 
+config DEV_ASCII
+	bool "Enable /dev/ascii"
+	default n
+	---help---
+		Enable the /dev/ascii device driver.  This is a character driver
+		that will return all characters from 0x21-0x7f.
+
 config DEV_RPMSG
 	bool "RPMSG Device Client Support"
 	default n

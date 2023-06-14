@@ -92,6 +92,10 @@ void drivers_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 
+#if defined(CONFIG_DEV_ASCII)
+  devascii_register();  /* Non-standard /dev/ascii */
+#endif
+
 #if defined(CONFIG_DRIVERS_NOTE)
   note_initialize();    /* Non-standard /dev/note */
 #endif
