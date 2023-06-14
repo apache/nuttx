@@ -366,4 +366,44 @@
 
 #define SNIOC_PS_CANC_LVL          _SNIOC(0x0095) /* uint16_t level        */                                                  
 
+/* IOCTL commands for MPU60x0 IMU */
+
+/* Command:      SNIOC_SET_AFS_SEL
+ * Description:  Sets the accelerometer full scale range.
+ * Argument:     Accepts 0, 1, 2 or 3 (uint8_t).
+ */
+
+#define SNIOC_SET_AFS_SEL             _SNIOC(0x0096)
+
+/* Command:      SNIOC_SMPLRT_DIV
+ * Description:  Set the divider from the gyroscope output rate
+ *               used to generate the sample rate.
+ * Argument:     Sets the 8bit sample rate divider (uint8_t).
+ */
+
+#define SNIOC_SMPLRT_DIV              _SNIOC(0x0097)
+
+/* Command:      SNIOC_READ_SAMPLE_RATE
+ * Description:  Reads the current sample rate for the IMU.
+ * Argument:     Requires pointer *uint32_t as argument to
+ *               store integer approximation of current sample rate.
+ */
+
+#define SNIOC_READ_SAMPLE_RATE        _SNIOC(0x0098)
+
+/* Command:      SNIOC_READ_FIFO_COUNT
+ * Description:  Reads the current number of bytes in FIFO buffer.
+ * Argument:     Requires pointer *uint16_t as argument to
+ *               store current number of bytes available.
+ */
+
+#define SNIOC_READ_FIFO_COUNT         _SNIOC(0x0099)
+
+/* Command:      SNIOC_ENABLE_FIFO
+ * Description:  Enables or disabled FIFO buffer.
+ * Argument:     Bool value: true enables and false disables.
+ */
+
+#define SNIOC_ENABLE_FIFO             _SNIOC(0x009A)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

@@ -44,6 +44,7 @@
 #endif
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/mpu60x0.h>
+#include <nuttx/sensors/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -107,6 +108,11 @@ enum mpu_regaddr_e
 
   MOT_THR = 0x1f,
   FIFO_EN = 0x23,
+  FIFO_EN__TEMP = BIT(7),
+  FIFO_EN__XG = BIT(6),
+  FIFO_EN__YG = BIT(5),
+  FIFO_EN__ZG = BIT(4),
+  FIFO_EN__ACCEL = BIT(3),
   I2C_MST_CTRL = 0x24,
   I2C_SLV0_ADDR = 0x25,
   I2C_SLV0_REG = 0x26,
@@ -240,6 +246,12 @@ struct mpu_dev_s
 
   struct sensor_data_s buf;   /* temporary buffer (for read(), etc.) */
   size_t bufpos;              /* cursor into @buf, in bytes (!) */
+
+  uint8_t smplrt_div;         /* divider to control sample rate */
+  uint8_t afs_sel;            /* full scale range of the accelerometer */
+  uint8_t dlpf_config;        /* digital low pass filter configuration */
+  bool fifo_enabled;          /* current enable state of FIFO buffer */
+  float sample_rate;          /* current sample rate */
 };
 
 /****************************************************************************
@@ -252,6 +264,7 @@ static ssize_t mpu_read(FAR struct file *filep, FAR char *buf, size_t len);
 static ssize_t mpu_write(FAR struct file *filep, FAR const char *buf,
                          size_t len);
 static off_t mpu_seek(FAR struct file *filep, off_t offset, int whence);
+static int mpu_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -264,6 +277,7 @@ static const struct file_operations g_mpu_fops =
   mpu_read,        /* read */
   mpu_write,       /* write */
   mpu_seek,        /* seek */
+  mpu_ioctl,       /* ioctl */
 };
 
 /****************************************************************************
@@ -529,7 +543,12 @@ static inline int __mpu_write_reg(FAR struct mpu_dev_s *dev,
 static inline int __mpu_read_imu(FAR struct mpu_dev_s *dev,
                                  FAR struct sensor_data_s *buf)
 {
-  return __mpu_read_reg(dev, ACCEL_XOUT_H, (uint8_t *) buf, sizeof(*buf));
+  if (dev->fifo_enabled)
+    {
+      return __mpu_read_reg(dev, FIFO_R_W, (uint8_t *)buf, sizeof(*buf));
+    }
+
+  return __mpu_read_reg(dev, ACCEL_XOUT_H, (uint8_t *)buf, sizeof(*buf));
 }
 
 /* __mpu_read_pwr_mgmt_1()
@@ -620,7 +639,14 @@ static inline int __mpu_write_gyro_config(FAR struct mpu_dev_s *dev,
 static inline int __mpu_write_accel_config(FAR struct mpu_dev_s *dev,
                                            uint8_t afs_sel)
 {
-  uint8_t val = TO_BITFIELD(ACCEL_CONFIG__AFS_SEL, afs_sel);
+  uint8_t val;
+  if (afs_sel > 3)
+    {
+      snerr("ERROR: Invalid AFS_SEL value\n");
+      return -EINVAL;
+    }
+
+  val = TO_BITFIELD(ACCEL_CONFIG__AFS_SEL, afs_sel);
   return __mpu_write_reg(dev, ACCEL_CONFIG, &val, sizeof(val));
 }
 
@@ -637,6 +663,94 @@ static inline int __mpu_write_config(FAR struct mpu_dev_s *dev,
   uint8_t val = TO_BITFIELD(CONFIG__EXT_SYNC_SET, ext_sync_set) |
                 TO_BITFIELD(CONFIG__DLPF_CFG, dlpf_cfg);
   return __mpu_write_reg(dev, CONFIG, &val, sizeof(val));
+}
+
+/* Sets the SMPLRT_DIV that controls the sample rate. */
+
+static inline int __mpu_set_sample_rate_divider(FAR struct mpu_dev_s *dev,
+                                                uint8_t val)
+{
+  return __mpu_write_reg(dev, SMPLRT_DIV, &val, sizeof(val));
+}
+
+/* Reads current sample rate. Value is updated to mpu_dev_s->sample_rate. */
+
+static inline int __mpu_read_sample_rate(FAR struct mpu_dev_s *dev)
+{
+  int ret;
+  float gyro_output_rate = 1000.0f;
+
+  ret = __mpu_read_reg(dev, SMPLRT_DIV, &dev->smplrt_div,
+                       sizeof(dev->smplrt_div));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = __mpu_read_reg(dev, CONFIG, &dev->dlpf_config,
+                       sizeof(dev->dlpf_config));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  dev->dlpf_config = TO_BITFIELD(CONFIG__DLPF_CFG, dev->dlpf_config);
+
+  /* This condition verifies if DLPF is disabled */
+
+  if ((dev->dlpf_config == 0) || (dev->dlpf_config == 7))
+    {
+      gyro_output_rate = 8000.0f;
+    }
+
+  dev->sample_rate = gyro_output_rate / (float)(1 + dev->smplrt_div);
+
+  return OK;
+}
+
+/* Read the number of bytes currently in FIFO buffer. */
+
+static inline int __mpu_read_fifo_count(FAR struct mpu_dev_s *dev,
+                                        uint16_t *buf)
+{
+  int ret;
+  uint8_t fifo_counter[2];
+  ret = __mpu_read_reg(dev, FIFO_COUNTH, fifo_counter, sizeof(fifo_counter));
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to read FIFO counter\n");
+      *buf = 0;
+    }
+  else
+    {
+      *buf = (fifo_counter[0] << 8) | fifo_counter[1];
+    }
+
+  return ret;
+}
+
+/* Enables or disables FIFO loading a specific sensor.
+ * It may receive a OR combination of multiple sensors.
+ * Example:
+ * __mpu_set_fifo(priv, FIFO_EN__TEMP | FIFO_EN__YG | FIFO_EN__ACCEL);
+ */
+
+static inline int __mpu_set_fifo(FAR struct mpu_dev_s *dev,
+                                 uint8_t val)
+{
+  return __mpu_write_reg(dev, FIFO_EN, &val, sizeof(val));
+}
+
+/* Sets USER CONTROL register. It may receive an OR combination of multiple
+ * bitfields.
+ * Example:
+ * __mpu_user_control(priv, USER_CTRL__FIFO_EN | USER_CTRL__I2C_MST_RESET);
+ */
+
+static inline int __mpu_user_control(FAR struct mpu_dev_s *dev,
+                                     uint8_t val)
+{
+  return __mpu_write_reg(dev, USER_CTRL, &val, sizeof(val));
 }
 
 /* Resets the mpu60x0, sets it to a default configuration. */
@@ -707,6 +821,7 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   __mpu_write_config(dev, CONFIG_MPU60X0_EXT_SYNC_SET,
                      CONFIG_MPU60X0_DLPF_CFG);
+  dev->dlpf_config = CONFIG_MPU60X0_DLPF_CFG;
 
   /* default ± 1000 deg/sec in menuconfig */
 
@@ -715,10 +830,16 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
   /* default ± 8g in menuconfig */
 
   __mpu_write_accel_config(dev, CONFIG_MPU60X0_ACCEL_AFS_SEL);
+  dev->afs_sel = CONFIG_MPU60X0_ACCEL_AFS_SEL;
 
   /* clear INT on any read (we aren't using that pin right now) */
 
   __mpu_write_int_pin_cfg(dev, INT_PIN_CFG__INT_RD_CLEAR);
+
+  /* Disable use of FIFO buffer */
+
+  __mpu_set_fifo(dev, 0);
+  dev->fifo_enabled = false;
 
   nxmutex_unlock(&dev->lock);
   return 0;
@@ -882,6 +1003,112 @@ static off_t mpu_seek(FAR struct file *filep, off_t offset, int whence)
   snerr("ERROR: %p %p\n", inode, dev);
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: mpu60x0_ioctl
+ ****************************************************************************/
+
+static int mpu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct mpu_dev_s *priv = inode->i_private;
+  uint8_t write_data = (uint8_t)arg;
+  int ret = OK;
+
+  switch (cmd)
+    {
+      /* Sets the accelerometer full scale range. Arg: uin8_t value */
+
+      case SNIOC_SET_AFS_SEL:
+        ret = __mpu_write_accel_config(priv, write_data);
+        if (ret < 0)
+          {
+            snerr("ERROR: SNIOC_SET_AFS_SEL fails. Returns: %d\n", ret);
+          }
+        else
+          {
+            priv->afs_sel = write_data;
+            sninfo("SNIOC_SET_AFS_SEL: %d Returns: %d\n", priv->afs_sel,
+                   ret);
+          }
+        break;
+
+      /* Sets the sample rate divider. Arg: uin8_t value */
+
+      case SNIOC_SMPLRT_DIV:
+        ret = __mpu_set_sample_rate_divider(priv, write_data);
+        priv->smplrt_div = write_data;
+        sninfo("SNIOC_SMPLRT_DIV: %d Returns: %d\n", priv->smplrt_div, ret);
+        break;
+
+      /* Read current sample rate. Arg: uin32_t* pointer */
+
+      case SNIOC_READ_SAMPLE_RATE:
+        {
+          FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+          ret = __mpu_read_sample_rate(priv);
+          sninfo("SNIOC_READ_SAMPLE_RATE: Returns: %d. Read: %f\n",
+                 ret, priv->sample_rate);
+          *ptr = (uint32_t)priv->sample_rate;
+          break;
+        }
+
+      /* Read current number of bytes in FIFO buffer. Arg: uin16_t* */
+
+      case SNIOC_READ_FIFO_COUNT:
+       {
+          FAR uint16_t *ptr = (FAR uint16_t *)((uintptr_t)arg);
+          uint16_t fifo_count = 0;
+          ret = __mpu_read_fifo_count(priv, &fifo_count);
+          *ptr = fifo_count;
+          sninfo("SNIOC_READ_FIFO_COUNT: Returns: %d. Read: 0x%x\n",
+                 ret, fifo_count);
+          break;
+       }
+
+      /* Enable or disable the use of FIFO buffer. Arg: bool* */
+
+      case SNIOC_ENABLE_FIFO:
+        if (!write_data)
+          {
+            ret = __mpu_set_fifo(priv, 0);
+            if (ret < 0)
+              {
+                sninfo("SNIOC_ENABLE_FIFO failed. Returns: %d\n", ret);
+              }
+
+            ret = __mpu_user_control(priv, 0);
+            priv->fifo_enabled = false;
+          }
+        else
+          {
+            ret = __mpu_user_control(priv, USER_CTRL__FIFO_EN);
+            if (ret < 0)
+              {
+                sninfo("SNIOC_ENABLE_FIFO failed. Returns: %d\n", ret);
+              }
+
+            /* This configuration enables temperature, accelerometer and
+             * gyro on all three axis. Each read requires 14 bytes, allowing
+             * the FIFO to store 1024/14 = 73 samples.
+             */
+
+            ret = __mpu_set_fifo(priv, FIFO_EN__TEMP | FIFO_EN__XG |
+                                 FIFO_EN__YG | FIFO_EN__ZG | FIFO_EN__ACCEL);
+            priv->fifo_enabled = true;
+          }
+
+        sninfo("SNIOC_ENABLE_FIFO: %d Returns: %d\n", write_data, ret);
+        break;
+
+      default:
+        sninfo("Unrecognized IOCTL command: 0x%04x\n", cmd);
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
