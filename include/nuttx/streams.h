@@ -255,10 +255,10 @@ struct lib_syslograwstream_s
 #  else
   char buffer[CONFIG_SYSLOG_BUFSIZE];
 #  endif
-#endif
   FAR char *base;
   int size;
   int offset;
+#endif
   int last_ch;
 };
 
