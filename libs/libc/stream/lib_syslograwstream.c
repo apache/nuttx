@@ -288,14 +288,19 @@ void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream)
       stream->base = (FAR void *)stream->iob->io_data;
       stream->size = sizeof(stream->iob->io_data);
     }
+  else
+    {
+      stream->base = NULL;
+      stream->size = 0;
+    }
 #  else
   stream->base = stream->buffer;
   stream->size = sizeof(stream->buffer);
 #  endif
+  stream->offset = 0;
 #else
   stream->public.flush = lib_noflush;
 #endif
-  stream->offset = 0;
 }
 
 /****************************************************************************
