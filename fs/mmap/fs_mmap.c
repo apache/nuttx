@@ -118,7 +118,8 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       return -EBADF;
     }
 
-  if ((filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE)
+  if ((flags & MAP_SHARED) &&
+      (filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE)
     {
       ferr("ERROR: Unsupported options for read-only file descriptor,"
            "prot=%x flags=%04x\n", prot, flags);
