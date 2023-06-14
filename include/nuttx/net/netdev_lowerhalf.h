@@ -32,6 +32,17 @@
 #include <net/if.h>
 #include <netinet/in.h>
 
+/* Compiler may not have stdatomic.h before C11 or with __STDC_NO_ATOMICS__
+ * But we can also get atomic support from libmetal.
+ */
+
+#if defined(CONFIG_OPENAMP)
+#include <metal/atomic.h>
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && \
+      !defined(__STDC_NO_ATOMICS__)
+#include <stdatomic.h>
+#endif
+
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -49,6 +60,12 @@
  */
 
 #define NETPKT_BUFLEN   CONFIG_IOB_BUFSIZE
+
+#if defined(CONFIG_OPENAMP) || \
+    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && \
+    !defined(__STDC_NO_ATOMICS__))
+#define HAVE_ATOMIC
+#endif
 
 /****************************************************************************
  * Public Types
@@ -84,7 +101,14 @@ struct netdev_ops_s;
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
-  int quota[NETPKT_TYPENUM]; /* Max # of buffer held by driver */
+
+  /* Max # of buffer held by driver */
+
+#ifdef HAVE_ATOMIC
+  atomic_int quota[NETPKT_TYPENUM];
+#else
+  int quota[NETPKT_TYPENUM];
+#endif
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.
