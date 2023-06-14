@@ -117,6 +117,8 @@ struct cordic_calc_s
   /* CORDIC request configuration */
 
   uint8_t func;                 /* CORDIC function */
+  int8_t  input_scale;
+  int8_t  output_scale;
   bool    res2_incl;            /* Include secondary result if available */
 
   /* Input data */
