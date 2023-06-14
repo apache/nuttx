@@ -81,5 +81,5 @@ void sbi_mscratch_assign(uintptr_t hartid)
 
   /* Make sure mscratch is updated before continuing */
 
-  __DMB();
+  __MB();
 }

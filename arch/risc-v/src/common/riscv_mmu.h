@@ -187,7 +187,8 @@ static inline void mmu_write_satp(uintptr_t reg)
     (
       "csrw satp, %0\n"
       "sfence.vma x0, x0\n"
-      "fence\n"
+      "fence rw, rw\n"
+      "fence.i\n"
       :
       : "rK" (reg)
       : "memory"
