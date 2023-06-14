@@ -586,13 +586,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
   int next = 0;
   int retries;
   int ret;
-
-  int sd = dns_bind(addr->sa_family);
-  if (sd < 0)
-    {
-      query->result = sd;
-      return 0;
-    }
+  int sd;
 
   /* Loop while receive timeout errors occur and there are remaining
    * retries.
@@ -602,6 +596,13 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
     {
 #ifdef CONFIG_NET_IPv6
       /* Send the IPv6 query */
+
+      sd = dns_bind(addr->sa_family);
+      if (sd < 0)
+        {
+          query->result = sd;
+          return 0;
+        }
 
       ret = dns_send_query(sd, query->hostname,
                           (FAR union dns_addr_u *)addr,
@@ -627,10 +628,19 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
               query->result = ret;
             }
         }
+
+      close(sd);
 #endif
 
 #ifdef CONFIG_NET_IPv4
       /* Send the IPv4 query */
+
+      sd = dns_bind(addr->sa_family);
+      if (sd < 0)
+        {
+          query->result = sd;
+          return 0;
+        }
 
       ret = dns_send_query(sd, query->hostname,
                            (FAR union dns_addr_u *)addr,
@@ -656,6 +666,8 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
               query->result = ret;
             }
         }
+
+      close(sd);
 #endif /* CONFIG_NET_IPv4 */
 
       if (next > 0)
@@ -670,7 +682,6 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
            */
 
           *query->naddr = next;
-          close(sd);
           return 1;
         }
       else if (query->result != -EAGAIN)
@@ -679,7 +690,6 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
         }
     }
 
-  close(sd);
   return 0;
 }
 
