@@ -736,10 +736,8 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
 
 int up_addrenv_coherent(const arch_addrenv_t *addrenv)
 {
-  /* Flush the instruction and data caches */
+  /* Nothing needs to be done */
 
-  __ISB();
-  __DMB();
   return OK;
 }
 
