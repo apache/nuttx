@@ -469,9 +469,9 @@ int sim_bringup(void)
 #endif
 
 #ifdef CONFIG_DEV_RPMSG
-  rpmsgdev_register("server", "/dev/console", "/dev/server-console");
-  rpmsgdev_register("server", "/dev/null", "/dev/server-null");
-  rpmsgdev_register("server", "/dev/ttyUSB0", "/dev/ttyUSB0");
+  rpmsgdev_register("server", "/dev/console", "/dev/server-console", 0);
+  rpmsgdev_register("server", "/dev/null", "/dev/server-null", 0);
+  rpmsgdev_register("server", "/dev/ttyUSB0", "/dev/ttyUSB0", 0);
 #endif
 
 #ifdef CONFIG_BLK_RPMSG

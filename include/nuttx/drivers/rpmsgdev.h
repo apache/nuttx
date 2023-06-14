@@ -28,6 +28,13 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
+ * Pre-processor definitions
+ ****************************************************************************/
+
+#define RPMSGDEV_NOFRAG_READ  0x1
+#define RPMSGDEV_NOFRAG_WRITE 0x2
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -71,6 +78,9 @@ int rpmsgdev_server_init(void);
  *   localpath  - the device path in local cpu, if NULL, the localpath is
  *                same as the remotepath, provide this argument to supoort
  *                custom device path
+ *   flags      - RPMSGDEV_NOFRAG_READ and RPMSGDEV_NOFRAG_WRITE can be set
+ *                to indicates that the read and write data of the device
+ *                cannot be split or aggregated
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -79,7 +89,7 @@ int rpmsgdev_server_init(void);
 
 #ifdef CONFIG_DEV_RPMSG
 int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
-                      FAR const char *localpath);
+                      FAR const char *localpath, uint32_t flags);
 #endif
 
 #undef EXTERN
