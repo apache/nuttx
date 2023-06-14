@@ -115,13 +115,14 @@ static int  rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
 
 static const rpmsg_ept_cb g_rpmsgdev_handler[] =
 {
-  [RPMSGDEV_OPEN]  = rpmsgdev_open_handler,
-  [RPMSGDEV_CLOSE] = rpmsgdev_close_handler,
-  [RPMSGDEV_READ]  = rpmsgdev_read_handler,
-  [RPMSGDEV_WRITE] = rpmsgdev_write_handler,
-  [RPMSGDEV_LSEEK] = rpmsgdev_lseek_handler,
-  [RPMSGDEV_IOCTL] = rpmsgdev_ioctl_handler,
-  [RPMSGDEV_POLL]  = rpmsgdev_poll_handler,
+  [RPMSGDEV_OPEN]        = rpmsgdev_open_handler,
+  [RPMSGDEV_CLOSE]       = rpmsgdev_close_handler,
+  [RPMSGDEV_READ]        = rpmsgdev_read_handler,
+  [RPMSGDEV_READ_NOFRAG] = rpmsgdev_read_handler,
+  [RPMSGDEV_WRITE]       = rpmsgdev_write_handler,
+  [RPMSGDEV_LSEEK]       = rpmsgdev_lseek_handler,
+  [RPMSGDEV_IOCTL]       = rpmsgdev_ioctl_handler,
+  [RPMSGDEV_POLL]        = rpmsgdev_poll_handler,
 };
 
 /****************************************************************************
@@ -227,7 +228,7 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
 
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1);
-      if (ret <= 0)
+      if (ret <= 0 || msg->header.command == RPMSGDEV_READ_NOFRAG)
         {
           break;
         }
