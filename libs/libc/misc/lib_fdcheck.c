@@ -24,6 +24,7 @@
 
 #include <nuttx/fdcheck.h>
 #include <nuttx/lib/math32.h>
+#include <nuttx/sched.h>
 
 #include <debug.h>
 #include <stdio.h>
@@ -83,8 +84,8 @@ int fdcheck_restore(int val)
     }
 
   pid_expect = (val >> PID_SHIFT);
-  pid_now = (getpid() & PID_MASK);
-  ppid_now = (getppid() & PID_MASK);
+  pid_now = (_SCHED_GETPID() & PID_MASK);
+  ppid_now = (_SCHED_GETPPID() & PID_MASK);
   if (pid_expect != pid_now && pid_expect != ppid_now && pid_expect != 0)
     {
       ferr("pid_expect %d pid_now %d ppid_now %d\n",
@@ -124,7 +125,7 @@ int fdcheck_protect(int fd)
       return fd;
     }
 
-  return (fd & FD_MASK) | ((getpid() & PID_MASK) << PID_SHIFT);
+  return (fd & FD_MASK) | ((_SCHED_GETPID() & PID_MASK) << PID_SHIFT);
 }
 
 #endif
