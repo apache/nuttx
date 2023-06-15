@@ -118,6 +118,7 @@ config ARCH_SIM
 	select SERIAL_CONSOLE
 	select SERIAL_IFLOWCONTROL
 	select SCHED_HPWORK
+	select ARCH_HAVE_CPUINFO
 	---help---
 		Linux/Cygwin user-mode simulation.
 

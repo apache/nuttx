@@ -63,7 +63,7 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
 CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
-CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c sim_tcbinfo.c
+CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c sim_tcbinfo.c sim_cpuinfo.c
 CSRCS += sim_registerdump.c sim_saveusercontext.c sim_textheap.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
@@ -97,7 +97,15 @@ ifeq ($(CONFIG_FS_LARGEFILE),y)
   HOSTCFLAGS += -D_FILE_OFFSET_BITS=64
 endif
 
-HOSTSRCS = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
+HOSTSRCS  = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
+HOSTSRCS += sim_hostfs.c
+
+hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
+	@echo "CP:  $<"
+	$(Q) cp $< $@
+
+sim_hostfs.c: hostfs.h
+
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
@@ -235,16 +243,6 @@ ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
   HOSTSRCS += sim_host_v4l2.c
   CSRCS += sim_camera.c
   STDLIBS += -lv4l2
-endif
-
-ifeq ($(CONFIG_SIM_HOSTFS),y)
-  HOSTSRCS += sim_hostfs.c
-
-hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
-	@echo "CP:  $<"
-	$(Q) cp $< $@
-
-sim_hostfs.c: hostfs.h
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

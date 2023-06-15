@@ -40,6 +40,7 @@ list(
   SRCS
   sim_initialize.c
   sim_idle.c
+  sim_cpuinfo.c
   sim_doirq.c
   sim_initialstate.c
   sim_createstack.c
@@ -222,14 +223,12 @@ if(CONFIG_SIM_USB_HOST)
   endif()
 endif()
 
-if(CONFIG_SIM_HOSTFS)
-  list(APPEND HOSTSRCS sim_hostfs.c)
-  list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
+list(APPEND HOSTSRCS sim_hostfs.c)
+list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
 
-  configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
-  target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
+               ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
+target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories(nuttx PRIVATE ${CMAKE_BINARY_DIR}/include/nuttx)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
