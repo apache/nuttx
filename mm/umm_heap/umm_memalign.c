@@ -26,7 +26,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <errno.h>
 #include <nuttx/mm/mm.h>
 
 #include "umm_heap/umm_heap.h"
@@ -86,6 +86,14 @@ FAR void *memalign(size_t alignment, size_t size)
 
   return mem;
 #else
-  return mm_memalign(USR_HEAP, alignment, size);
+  FAR void *ret;
+
+  ret = mm_memalign(USR_HEAP, alignment, size);
+  if (!ret)
+    {
+      set_errno(ENOMEM);
+    }
+
+  return ret;
 #endif
 }
