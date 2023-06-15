@@ -118,15 +118,6 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
         }
     }
 
-  /* The POSIX specification requires that the "check for the existence
-   * of a semaphore and the creation of the semaphore if it does not
-   * exist shall be atomic with respect to other processes executing
-   * sem_open()..."  A simple sched_lock() should be sufficient to meet
-   * this requirement.
-   */
-
-  sched_lock();
-
   /* Get the full path to the semaphore */
 
   snprintf(fullpath, MAX_SEMPATH,
@@ -254,7 +245,6 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
     }
 
   RELEASE_SEARCH(&desc);
-  sched_unlock();
   return sem;
 
 errout_with_inode:
@@ -263,7 +253,6 @@ errout_with_inode:
 errout_with_lock:
   RELEASE_SEARCH(&desc);
   set_errno(errcode);
-  sched_unlock();
   return SEM_FAILED;
 }
 
