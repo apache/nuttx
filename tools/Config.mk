@@ -458,6 +458,29 @@ define PRELINK
 endef
 endif
 
+# CC_CHECK_VERSION - Compare the version of the compiler with a given version
+# number. Returns "y" if the version is equal or greater than the given version,
+# "n" otherwise.
+#
+# Usage: $(call CC_CHECK_VERSION,>=,major[,minor[,patch]])
+#
+# Example: $(call CC_CHECK_VERSION,>=,8,3,0)
+#
+# Note: The version number must be given as two separate parameters, with
+# no leading zeros.
+
+define CC_CHECK_VERSION
+  $(eval CC_VERSION := $(shell $(CC) -dumpversion))
+  $(eval CC_MAJOR := $(shell echo $(CC_VERSION) | cut -f1 -d.))
+  $(eval CC_MINOR := $(shell echo $(CC_VERSION) | cut -f2 -d.))
+  $(eval CC_PATCH := $(shell echo $(CC_VERSION) | cut -f3 -d.))
+  $(eval CC_MAJOR_CMP := $(shell expr $(CC_MAJOR) \$(1) $(2)))
+  $(eval CC_MINOR_CMP := $(shell expr $(CC_MINOR) $(if $(3),\$(1) $(3),\< 1)))
+  $(eval CC_PATCH_CMP := $(shell expr $(CC_PATCH) $(if $(4),\$(1) $(4),\< 1)))
+
+  $(if $(and $(CC_MAJOR_CMP),$(CC_MINOR_CMP),$(CC_PATCH_CMP)),y,n)
+endef
+
 # POSTBUILD -- Perform post build operations
 # Some architectures require the use of special tools and special handling
 # AFTER building the NuttX binary.  Make.defs files for those architectures
