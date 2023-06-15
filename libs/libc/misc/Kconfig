@@ -71,6 +71,7 @@ config FDSAN
 config FDCHECK
 	bool "Enable fdcheck"
 	default n
+	depends on SCHED_HAVE_PARENT
 		---help---
 		Enable the fdcheck support
 
