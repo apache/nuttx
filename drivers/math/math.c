@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/math/cordic.c
+ * drivers/math/math.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,24 +22,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <fcntl.h>
-#include <assert.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
-
+#include <nuttx/math/math.h>
 #include <nuttx/math/math_ioctl.h>
-#include <nuttx/math/cordic.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -51,34 +40,31 @@
 
 /* This structure describes the state of the upper half driver */
 
-struct cordic_upperhalf_s
-{
-  FAR struct cordic_lowerhalf_s *lower;
-};
+typedef struct math_config_s math_upperhalf_s;
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t cordic_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen);
-static ssize_t cordic_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen);
-static int     cordic_ioctl(FAR struct file *filep, int cmd,
-                           unsigned long arg);
+static ssize_t math_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen);
+static ssize_t math_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen);
+static int     math_ioctl(FAR struct file *filep, int cmd,
+                         unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_cordicops =
+static const struct file_operations g_math_ops =
 {
   NULL,         /* open */
   NULL,         /* close */
-  cordic_read,  /* read */
-  cordic_write, /* write */
+  math_read,    /* read */
+  math_write,   /* write */
   NULL,         /* seek */
-  cordic_ioctl, /* ioctl */
+  math_ioctl,   /* ioctl */
 };
 
 /****************************************************************************
@@ -86,14 +72,14 @@ static const struct file_operations g_cordicops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cordic_read
+ * Name: math_read
  *
  * Description:
  *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
  ****************************************************************************/
 
-static ssize_t cordic_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t math_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen)
 {
   /* Return zero -- usually meaning end-of-file */
@@ -102,41 +88,38 @@ static ssize_t cordic_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
- * Name: cordic_write
+ * Name: math_write
  *
  * Description:
  *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
  ****************************************************************************/
 
-static ssize_t cordic_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t math_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
   return 0;
 }
 
 /****************************************************************************
- * Name: cordic_ioctl
+ * Name: math_ioctl
  *
  * Description:
- *   The standard ioctl method.  This is where ALL of the cordic timer
+ *   The standard ioctl method.  This is where ALL of the math timer
  *   work is done.
  *
  ****************************************************************************/
 
-static int cordic_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int math_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode              *inode = filep->f_inode;
-  FAR struct cordic_upperhalf_s *upper = NULL;
-  FAR struct cordic_lowerhalf_s *lower = NULL;
-  int                            ret   = 0;
+  FAR struct inode              *inode =  filep->f_inode;
+  FAR math_upperhalf_s          *upper =  inode->i_private;
+  int                            ret   = -ENOTTY;
   irqstate_t                     flags;
 
-  _info("cmd: %d arg: %lu\n", cmd, arg);
-  upper = inode->i_private;
   DEBUGASSERT(upper != NULL);
-  lower = upper->lower;
-  DEBUGASSERT(lower != NULL);
+
+  _info("cmd: %d arg: %lu\n", cmd, arg);
 
   flags = enter_critical_section();
 
@@ -149,16 +132,10 @@ static int cordic_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct cordic_calc_s *calc =
             (FAR struct cordic_calc_s *)((uintptr_t)arg);
 
-          ret = lower->ops->calc(lower, calc);
-
-          break;
-        }
-
-      /* Not supported */
-
-      default:
-        {
-          ret = -ENOTTY;
+          if (upper->cordic != NULL)
+            {
+              ret = upper->cordic->ops->calc(upper->cordic, calc);
+            }
 
           break;
         }
@@ -174,45 +151,64 @@ static int cordic_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cordic_register
+ * Name: math_register
  *
  * Description:
- *   Register a CORDIC driver.
+ *   Register a math driver.
  *
  ****************************************************************************/
 
-int cordic_register(FAR const char *path,
-                    FAR struct cordic_lowerhalf_s *lower)
+int math_register(FAR const char *path,
+                  FAR const struct math_config_s *config)
 {
-  FAR struct cordic_upperhalf_s *upper = NULL;
-  int                            ret   = OK;
+  FAR math_upperhalf_s *upper =  NULL;
+  int                   ret   = -ENOMEM;
 
   DEBUGASSERT(path);
-  DEBUGASSERT(lower);
+  DEBUGASSERT(config);
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct cordic_upperhalf_s *)
-    kmm_zalloc(sizeof(struct cordic_upperhalf_s));
+  upper = (FAR math_upperhalf_s *)
+    kmm_malloc(sizeof(math_upperhalf_s));
   if (!upper)
     {
       _err("Upper half allocation failed\n");
       goto errout;
     }
 
-  /* Initialize the CORDIC device structure */
+  /* Initialize the math device structure */
 
-  upper->lower = lower;
+  memcpy(upper, config, sizeof(math_upperhalf_s));
 
-  /* Register the cordic timer device */
+  /* Register the math timer device */
 
-  ret = register_driver(path, &g_cordicops, 0666, upper);
+  ret = register_driver(path, &g_math_ops, 0666, upper);
   if (ret < 0)
     {
-      _err("register_driver failed: %d\n", ret);
+      _err("register math driver failed: %d\n", ret);
       kmm_free(upper);
     }
 
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: cordic_register
+ *
+ * Description:
+ *   Register a CORDIC driver. Deprecated, use math_register instead!
+ *
+ ****************************************************************************/
+
+int cordic_register(FAR const char *path,
+                    FAR struct cordic_lowerhalf_s *lower)
+{
+  struct math_config_s config;
+
+  memset(&config, 0, sizeof(config));
+  config.cordic = lower;
+
+  return math_register(path, &config);
 }
