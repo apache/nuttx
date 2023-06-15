@@ -512,6 +512,10 @@ static void arm_assert(void)
 
 void up_assert(const char *filename, int lineno)
 {
+#ifdef CONFIG_BOARD_CRASHDUMP
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
+#endif
+
   board_autoled_on(LED_ASSERTION);
 
   /* Flush any buffered SYSLOG data (prior to the assertion) */
@@ -543,10 +547,6 @@ void up_assert(const char *filename, int lineno)
   /* Flush any buffered SYSLOG data (from the above) */
 
   syslog_flush();
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
-#endif
 
   arm_assert();
 }
