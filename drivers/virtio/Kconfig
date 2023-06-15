@@ -33,6 +33,11 @@ config DRIVERS_VIRTIO_GPU
 	depends on VIDEO_FB
 	select FB_UPDATE
 
+config DRIVERS_VIRTIO_INPUT
+	bool "Virtio input support"
+	default n
+	depends on INPUT
+
 config DRIVERS_VIRTIO_NET
 	bool "Virtio network support"
 	depends on NETDEVICES

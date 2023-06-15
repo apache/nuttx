@@ -30,6 +30,7 @@
 
 #include "virtio-blk.h"
 #include "virtio-gpu.h"
+#include "virtio-input.h"
 #include "virtio-net.h"
 #include "virtio-rng.h"
 #include "virtio-serial.h"
@@ -132,6 +133,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_gpu_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_INPUT
+  ret = virtio_register_input_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_input_driver failed, ret=%d\n", ret);
     }
 #endif
 
