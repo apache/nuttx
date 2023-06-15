@@ -99,7 +99,7 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 include chip/hal_${CHIP_SERIES}.mk
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/$(CONFIG_ESPRESSIF_CHIP_SERIES)/include/irq.h,../include/chip/)
+	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/$(CHIP_SERIES)/include/irq.h,../include/chip/)
 
 distclean::
 	$(call DELFILE,../include/chip/irq.h)

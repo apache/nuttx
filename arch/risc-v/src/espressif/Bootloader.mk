@@ -21,11 +21,15 @@
 BOOTLOADER_VERSION = latest
 BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/download/$(BOOTLOADER_VERSION)
 
+# Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
+
+CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+
 bootloader:
 	$(Q) echo "Downloading Bootloader binaries"
-	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-$(CONFIG_ESPRESSIF_CHIP_SERIES).bin,$(TOPDIR)/bootloader-$(CONFIG_ESPRESSIF_CHIP_SERIES).bin)
-	$(call DOWNLOAD,$(BOOTLOADER_URL),partition-table-$(CONFIG_ESPRESSIF_CHIP_SERIES).bin,$(TOPDIR)/partition-table-$(CONFIG_ESPRESSIF_CHIP_SERIES).bin)
+	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-$(CHIP_SERIES).bin,$(TOPDIR)/bootloader-$(CHIP_SERIES).bin)
+	$(call DOWNLOAD,$(BOOTLOADER_URL),partition-table-$(CHIP_SERIES).bin,$(TOPDIR)/partition-table-$(CHIP_SERIES).bin)
 
 clean_bootloader:
-	$(call DELFILE,$(TOPDIR)/bootloader-$(CONFIG_ESPRESSIF_CHIP_SERIES).bin)
-	$(call DELFILE,$(TOPDIR)/partition-table-$(CONFIG_ESPRESSIF_CHIP_SERIES).bin)
+	$(call DELFILE,$(TOPDIR)/bootloader-$(CHIP_SERIES).bin)
+	$(call DELFILE,$(TOPDIR)/partition-table-$(CHIP_SERIES).bin)
