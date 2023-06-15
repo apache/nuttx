@@ -66,6 +66,9 @@ struct nrf52_pwm_s
   uint32_t                ch1_pin;   /* Channel 2 pin */
   uint32_t                ch2_pin;   /* Channel 3 pin */
   uint32_t                ch3_pin;   /* Channel 4 pin */
+#ifndef CONFIG_PWM_MULTICHAN
+  uint8_t                 channel;   /* Assigned channel */
+#endif
 
   /* Sequence 0 */
 
@@ -143,6 +146,9 @@ struct nrf52_pwm_s g_nrf52_pwm0 =
 #ifdef CONFIG_NRF52_PWM0_CH3
   .ch3_pin = NRF52_PWM0_CH3_PIN,
 #endif
+#ifndef CONFIG_PWM_MULTICHAN
+  .channel = CONFIG_NRF52_PWM0_CHANNEL
+#endif
 };
 #endif
 
@@ -164,6 +170,9 @@ struct nrf52_pwm_s g_nrf52_pwm1 =
 #endif
 #ifdef CONFIG_NRF52_PWM1_CH3
   .ch3_pin = NRF52_PWM1_CH3_PIN,
+#endif
+#ifndef CONFIG_PWM_MULTICHAN
+  .channel = CONFIG_NRF52_PWM1_CHANNEL
 #endif
 };
 #endif
@@ -187,6 +196,9 @@ struct nrf52_pwm_s g_nrf52_pwm2 =
 #ifdef CONFIG_NRF52_PWM2_CH3
   .ch3_pin = NRF52_PWM2_CH3_PIN,
 #endif
+#ifndef CONFIG_PWM_MULTICHAN
+  .channel = CONFIG_NRF52_PWM2_CHANNEL
+#endif
 };
 #endif
 
@@ -208,6 +220,9 @@ struct nrf52_pwm_s g_nrf52_pwm3 =
 #endif
 #ifdef CONFIG_NRF52_PWM3_CH3
   .ch3_pin = NRF52_PWM3_CH3_PIN,
+#endif
+#ifndef CONFIG_PWM_MULTICHAN
+  .channel = CONFIG_NRF52_PWM3_CHANNEL
 #endif
 };
 #endif
@@ -592,9 +607,7 @@ static int nrf52_pwm_start(struct pwm_lowerhalf_s *dev,
         }
 
 #else
-      ret = nrf52_pwm_duty(dev,
-                           (info->channels[0].channel - 1),
-                           info->duty);
+      ret = nrf52_pwm_duty(priv, priv->channel, info->duty);
 #endif /* CONFIG_PWM_MULTICHAN */
 
   /* Start sequence 0 */
