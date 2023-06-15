@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/notifier.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 
@@ -39,6 +40,14 @@ enum panic_type_e
   PANIC_KERNEL         =  0,
   PANIC_TASK           =  1,
   PANIC_KERNEL_FINAL   =  2,
+};
+
+/* Notifier data for panic */
+
+struct panic_notifier_s
+{
+  FAR struct tcb_s  *rtcb;
+  FAR void          *regs;
 };
 
 /****************************************************************************
