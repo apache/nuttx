@@ -516,7 +516,7 @@ void up_timer_initialize(void)
 
   /* Get the TC frequency that corresponds to the requested resolution */
 
-  g_tickless.frequency = USEC_PER_SEC / (uint32_t)CONFIG_USEC_PER_TICK;
+  g_tickless.frequency = (USEC_PER_SEC / (uint32_t)CONFIG_USEC_PER_TICK) * 10;
   g_tickless.timer     = CONFIG_STM32_TICKLESS_TIMER;
   g_tickless.channel   = CONFIG_STM32_TICKLESS_CHANNEL;
   g_tickless.pending   = false;
@@ -552,12 +552,12 @@ void up_timer_initialize(void)
 #ifdef HAVE_32BIT_TICKLESS
   STM32_TIM_SETPERIOD(g_tickless.tch, UINT32_MAX);
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  g_oneshot_maxticks = UINT32_MAX;
+  g_oneshot_maxticks = UINT32_MAX / 10;
 #endif
 #else
   STM32_TIM_SETPERIOD(g_tickless.tch, UINT16_MAX);
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  g_oneshot_maxticks = UINT16_MAX;
+  g_oneshot_maxticks = UINT16_MAX / 10;
 #endif
 #endif
 
@@ -700,7 +700,7 @@ int up_timer_gettime(struct timespec *ts)
 
 int up_timer_gettick(clock_t *ticks)
 {
-  *ticks = (clock_t)STM32_TIM_GETCOUNTER(g_tickless.tch);
+  *ticks = (clock_t)(STM32_TIM_GETCOUNTER(g_tickless.tch) / 10);
   return OK;
 }
 
@@ -722,9 +722,9 @@ void up_timer_getmask(clock_t *mask)
 {
   DEBUGASSERT(mask != NULL);
 #ifdef HAVE_32BIT_TICKLESS
-  *mask = UINT32_MAX;
+  *mask = (UINT32_MAX / 10);
 #else
-  *mask = UINT16_MAX;
+  *mask = (UINT16_MAX / 10);
 #endif
 }
 
