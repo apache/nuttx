@@ -112,6 +112,7 @@
 #define AUDIOIOC_HWRESET            _AUDIOIOC(16)
 #define AUDIOIOC_SETBUFFERINFO      _AUDIOIOC(17)
 #define AUDIOIOC_SETPARAMTER        _AUDIOIOC(18)
+#define AUDIOIOC_GETLATENCY         _AUDIOIOC(19)
 
 /* Audio Device Types *******************************************************/
 

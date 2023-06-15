@@ -600,6 +600,38 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
           audinfo("%s , arg: %s\n", __func__, (char *)arg);
         } break;
 
+      case AUDIOIOC_GETLATENCY:
+        {
+          long *latency = (long *)arg;
+          long remain = 0;
+          dq_entry_t *cur;
+
+          if (!priv->pcm)
+            {
+              ret = -ENXIO;
+              break;
+            }
+
+          ret = snd_pcm_delay(priv->pcm, latency);
+          if (ret < 0)
+            {
+              return ret;
+            }
+          else
+            {
+              remain = priv->aux->nbytes - priv->aux->curbyte;
+
+              for (cur = dq_peek(&priv->pendq); cur; cur = dq_next(cur))
+                {
+                  struct ap_buffer_s *apb = (struct ap_buffer_s *)cur;
+                  remain += apb->nbytes - apb->curbyte;
+                }
+
+              *latency += remain / priv->frame_size;
+            }
+        }
+        break;
+
       default:
         ret = -ENOTTY;
         break;
