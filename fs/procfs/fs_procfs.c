@@ -1181,8 +1181,6 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
   newcount = g_procfs_entrycount + 1;
   newsize  = newcount * sizeof(struct procfs_entry_s);
 
-  sched_lock();
-
   newtable = (FAR struct procfs_entry_s *)
     kmm_realloc(g_procfs_entries, newsize);
   if (newtable != NULL)
@@ -1199,7 +1197,6 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
       ret = OK;
     }
 
-  sched_unlock();
   return ret;
 }
 #endif

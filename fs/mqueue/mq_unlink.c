@@ -112,7 +112,6 @@ int file_mq_unlink(FAR const char *mq_name)
 
   SETUP_SEARCH(&desc, fullpath, false);
 
-  sched_lock();
   ret = inode_find(&desc);
   if (ret < 0)
     {
@@ -175,7 +174,6 @@ int file_mq_unlink(FAR const char *mq_name)
   inode_unlock();
   mq_inode_release(inode);
   RELEASE_SEARCH(&desc);
-  sched_unlock();
   return OK;
 
 errout_with_lock:
@@ -186,7 +184,6 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
-  sched_unlock();
   return ret;
 }
 
