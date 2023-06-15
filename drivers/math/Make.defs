@@ -21,7 +21,7 @@
 # Include CORDIC support
 
 ifeq ($(CONFIG_MATH_CORDIC),y)
-CSRCS += cordic.c
+CSRCS += math.c
 endif
 
 # Include build support
