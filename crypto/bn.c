@@ -159,6 +159,38 @@ static void rshift_one_bit(FAR struct bn *a)
   a->array[BN_ARRAY_SIZE - 1] >>= 1;
 }
 
+static
+void bignum_add_sub(struct bn *a, struct bn *b, struct bn *c, int flip)
+{
+  int cmp;
+  int s;
+
+  require(a, "a is null");
+  require(b, "b is null");
+  require(c, "c is null");
+
+  s = a->s;
+  if (a->s * b->s * flip < 0)
+    {
+      cmp = bignum_cmp_abs(a, b);
+      if (cmp >= 0)
+        {
+          bignum_sub_abs(a, b, c);
+          c->s = cmp == 0 ? 1 : s;
+        }
+      else
+        {
+          bignum_sub_abs(b, a, c);
+          c->s = -s;
+        }
+    }
+  else
+    {
+      bignum_add_abs(a, b, c);
+      c->s = s;
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -175,6 +207,8 @@ void bignum_init(FAR struct bn *n)
     {
       n->array[i] = 0;
     }
+
+  n->s = 1;
 }
 
 void bignum_from_int(FAR struct bn *n, DTYPE_TMP i)
@@ -346,6 +380,11 @@ void bignum_inc(FAR struct bn *n)
 
 void bignum_add(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
 {
+  bignum_add_sub(a, b, c, 1);
+}
+
+void bignum_add_abs(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
+{
   DTYPE_TMP tmp;
   int carry = 0;
   int i;
@@ -363,6 +402,11 @@ void bignum_add(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
 }
 
 void bignum_sub(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
+{
+  bignum_add_sub(a, b, c, -1);
+}
+
+void bignum_sub_abs(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
 {
   DTYPE_TMP res;
   DTYPE_TMP tmp1;
@@ -415,11 +459,20 @@ void bignum_mul(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
                 ((DTYPE_TMP)a->array[i] * (DTYPE_TMP)b->array[j]);
               bignum_from_int(&tmp, intermediate);
               lshift_word(&tmp, i + j);
-              bignum_add(&tmp, &row, &row);
+              bignum_add_abs(&tmp, &row, &row);
             }
         }
 
-      bignum_add(c, &row, c);
+      bignum_add_abs(c, &row, c);
+    }
+
+  if (bignum_is_zero(c) != 0)
+    {
+      c->s = 1;
+    }
+  else
+    {
+      c->s = a->s * b->s;
     }
 }
 
@@ -439,7 +492,7 @@ void bignum_div(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
   bignum_assign(&denom, b);                     /* denom = b */
   bignum_assign(&tmp, a);                       /* tmp   = a */
 
-  while (bignum_cmp(&denom, a) != LARGER)     /* while (denom <= a) { */
+  while (bignum_cmp_abs(&denom, &tmp) != LARGER)     /* while (denom <= a) { */
     {
       if (denom.array[BN_ARRAY_SIZE - 1] >= half_max)
         {
@@ -461,15 +514,17 @@ void bignum_div(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
 
   while (!bignum_is_zero(&current))             /* while (current != 0) */
     {
-      if (bignum_cmp(&tmp, &denom) != SMALLER)  /*   if (dividend >= denom) */
+      if (bignum_cmp_abs(&tmp, &denom) != SMALLER) /*   if (dividend >= denom) */
         {
-          bignum_sub(&tmp, &denom, &tmp);       /*     dividend -= denom; */
-          bignum_or(c, &current, c);            /*     answer |= current; */
+          bignum_sub_abs(&tmp, &denom, &tmp); /*     dividend -= denom; */
+          bignum_or(c, &current, c);          /*     answer |= current; */
         }
 
       rshift_one_bit(&current);                /*   current >>= 1; */
       rshift_one_bit(&denom);                  /*   denom >>= 1; */
     }
+
+  c->s = a->s * b->s;
 
   /* return answer; */
 }
@@ -580,6 +635,11 @@ void bignum_divmod(FAR struct bn *a, FAR struct bn *b,
   /* c = a - tmp */
 
   bignum_sub(a, &tmp, d);
+
+  while (d->s < 0)
+    {
+      bignum_add(d, b, d);
+    }
 }
 
 void bignum_and(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
@@ -625,6 +685,40 @@ void bignum_xor(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c)
 }
 
 int bignum_cmp(FAR struct bn *a, FAR struct bn *b)
+{
+  int i = BN_ARRAY_SIZE;
+
+  require(a, "a is null");
+  require(b, "b is null");
+
+  if (a->s > 0 && b->s < 0)
+    {
+      return LARGER;
+    }
+
+  if (b->s > 0 && a->s < 0)
+    {
+      return SMALLER;
+    }
+
+  do
+    {
+      i -= 1; /* Decrement first, to start with last array element */
+      if (a->array[i] > b->array[i])
+        {
+          return a->s;
+        }
+      else if (a->array[i] < b->array[i])
+        {
+          return -a->s;
+        }
+    }
+  while (i != 0);
+
+  return EQUAL;
+}
+
+int bignum_cmp_abs(FAR struct bn *a, FAR struct bn *b)
 {
   int i = BN_ARRAY_SIZE;
 
@@ -741,9 +835,9 @@ void bignum_isqrt(FAR struct bn *a, FAR struct bn *b)
           bignum_assign(&low, &mid);
         }
 
-      bignum_sub(&high, &low, &mid);
+      bignum_sub_abs(&high, &low, &mid);
       rshift_one_bit(&mid);
-      bignum_add(&low, &mid, &mid);
+      bignum_add_abs(&low, &mid, &mid);
       bignum_inc(&mid);
     }
 
@@ -761,6 +855,8 @@ void bignum_assign(FAR struct bn *dst, FAR struct bn *src)
     {
       dst->array[i] = src->array[i];
     }
+
+  dst->s = src->s;
 }
 
 void pow_mod_faster(FAR struct bn *a, FAR struct bn *b,
