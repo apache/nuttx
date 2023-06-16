@@ -1203,8 +1203,8 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-9s %-7s %-4s %s \n",
-                               "FD", "POS", "OFLAGS", "TYPE", "PATH");
+                               "\n%-3s %-7s %-4s %-9s %s\n",
+                               "FD", "OFLAGS", "TYPE", "POS", "PATH");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1227,92 +1227,35 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         {
           /* Is there an inode associated with the file descriptor? */
 
-          if (file->f_inode && !INODE_IS_SOCKET(file->f_inode))
+          if (file->f_inode == NULL)
             {
-              if (file_ioctl(file, FIOC_FILEPATH, path) < 0)
-                {
-                  path[0] = '\0';
-                }
+              continue;
+            }
 
-              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                    "%-3d %-9ld %-7d %4x",
-                                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
-                                    j, (long)file->f_pos,
-                                    INODE_GET_TYPE(file->f_inode),
-                                    file->f_oflags);
-              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                         remaining, &offset);
+          if (file_ioctl(file, FIOC_FILEPATH, path) < 0)
+            {
+              path[0] = '\0';
+            }
 
-              totalsize += copysize;
-              buffer    += copysize;
-              remaining -= copysize;
+          linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                       "%-3d %-7d %-4x %-9ld %s\n",
+                                       i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK
+                                       + j, file->f_oflags,
+                                       INODE_GET_TYPE(file->f_inode),
+                                       (long)file->f_pos, path);
+          copysize   = procfs_memcpy(procfile->line, linesize,
+                                     buffer, remaining, &offset);
 
-              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                           " %s\n", path);
-              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                         remaining, &offset);
+          totalsize += copysize;
+          buffer    += copysize;
+          remaining -= copysize;
 
-              totalsize += copysize;
-              buffer    += copysize;
-              remaining -= copysize;
-
-              if (totalsize >= buflen)
-                {
-                  return totalsize;
-                }
+          if (totalsize >= buflen)
+            {
+              return totalsize;
             }
         }
     }
-
-#ifdef CONFIG_NET
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-5s %s %s\n",
-                               "SD", "RF", "TYP", "FLAGS");
-  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
-                             &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Examine each open socket descriptor */
-
-  for (i = 0; i < group->tg_filelist.fl_rows; i++)
-    {
-      for (j = 0, file = group->tg_filelist.fl_files[i];
-           j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-           j++, file++)
-        {
-          /* Is there an connection associated with the socket descriptor? */
-
-          if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
-            {
-              FAR struct socket *socket = file->f_priv;
-              FAR struct socket_conn_s *conn = socket->s_conn;
-              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                    "%-3d %-5d %02x\n",
-                                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
-                                    j, socket->s_type, conn->s_flags);
-              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                                         remaining, &offset);
-
-              totalsize += copysize;
-              buffer    += copysize;
-              remaining -= copysize;
-
-              if (totalsize >= buflen)
-                {
-                  return totalsize;
-                }
-            }
-        }
-    }
-#endif
 
   return totalsize;
 }
