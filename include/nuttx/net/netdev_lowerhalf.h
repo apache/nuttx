@@ -28,6 +28,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <nuttx/spinlock.h>
 
 #include <net/if.h>
 #include <netinet/in.h>
@@ -37,10 +39,9 @@
  */
 
 #if defined(CONFIG_OPENAMP)
-#include <metal/atomic.h>
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && \
-      !defined(__STDC_NO_ATOMICS__)
-#include <stdatomic.h>
+#  include <metal/atomic.h>
+#elif defined(CONFIG_HAVE_ATOMICS)
+#  include <stdatomic.h>
 #endif
 
 #include <nuttx/net/ip.h>
@@ -61,10 +62,8 @@
 
 #define NETPKT_BUFLEN   CONFIG_IOB_BUFSIZE
 
-#if defined(CONFIG_OPENAMP) || \
-    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && \
-    !defined(__STDC_NO_ATOMICS__))
-#define HAVE_ATOMIC
+#if defined(CONFIG_OPENAMP) || defined(CONFIG_HAVE_ATOMICS)
+#  define HAVE_ATOMICS
 #endif
 
 /****************************************************************************
@@ -104,10 +103,11 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
-#ifdef HAVE_ATOMIC
+#ifdef HAVE_ATOMICS
   atomic_int quota[NETPKT_TYPENUM];
 #else
   int quota[NETPKT_TYPENUM];
+  spinlock_t lock;
 #endif
 
   /* The structure used by net stack.

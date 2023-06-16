@@ -33,6 +33,9 @@
 #include <nuttx/irq.h>
 
 #ifndef CONFIG_SPINLOCK
+#  define SP_UNLOCKED 0  /* The Un-locked state */
+#  define SP_LOCKED   1  /* The Locked state */
+
 typedef uint8_t spinlock_t;
 #else
 
@@ -106,9 +109,9 @@ typedef uint8_t spinlock_t;
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_HAVE_TESTSET)
-spinlock_t up_testset(volatile FAR spinlock_t *lock);
+spinlock_t up_testset(FAR volatile spinlock_t *lock);
 #elif !defined(CONFIG_SMP)
-static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
+static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 {
   irqstate_t flags;
   spinlock_t ret;
@@ -386,7 +389,7 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
  ****************************************************************************/
 
 #if defined(CONFIG_SMP)
-irqstate_t spin_lock_irqsave(spinlock_t *lock);
+irqstate_t spin_lock_irqsave(FAR spinlock_t *lock);
 #else
 #  define spin_lock_irqsave(l) ((void)(l), up_irq_save())
 #endif
@@ -396,7 +399,7 @@ irqstate_t spin_lock_irqsave(spinlock_t *lock);
  ****************************************************************************/
 
 #if defined(CONFIG_SMP)
-irqstate_t spin_lock_irqsave_wo_note(spinlock_t *lock);
+irqstate_t spin_lock_irqsave_wo_note(FAR spinlock_t *lock);
 #else
 #  define spin_lock_irqsave_wo_note(l) ((void)(l), up_irq_save())
 #endif
@@ -431,7 +434,7 @@ irqstate_t spin_lock_irqsave_wo_note(spinlock_t *lock);
  ****************************************************************************/
 
 #if defined(CONFIG_SMP)
-void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags);
+void spin_unlock_irqrestore(FAR spinlock_t *lock, irqstate_t flags);
 #else
 #  define spin_unlock_irqrestore(l, f) up_irq_restore(f)
 #endif
@@ -441,7 +444,7 @@ void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags);
  ****************************************************************************/
 
 #if defined(CONFIG_SMP)
-void spin_unlock_irqrestore_wo_note(spinlock_t *lock, irqstate_t flags);
+void spin_unlock_irqrestore_wo_note(FAR spinlock_t *lock, irqstate_t flags);
 #else
 #  define spin_unlock_irqrestore_wo_note(l, f) up_irq_restore(f)
 #endif
