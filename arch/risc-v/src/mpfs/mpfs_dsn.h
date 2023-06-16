@@ -70,7 +70,7 @@ extern "C"
  *
  ****************************************************************************/
 
-size_t mpfs_read_dsn(uint8_t *dsn, size_t len);
+int mpfs_read_dsn(uint8_t *dsn, size_t len);
 
 #ifdef __cplusplus
 }

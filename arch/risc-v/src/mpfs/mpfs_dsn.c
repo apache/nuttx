@@ -53,7 +53,7 @@
 
 /* Retry count */
 
-#define RETRIES            100
+#define RETRIES            500
 
 /****************************************************************************
  * Public Functions
@@ -70,11 +70,11 @@
  *   len - Number of bytes to read
  *
  * Returned Value:
- *   Number of bytes read, -1 on error
+ *   Number of bytes read, -ETIMEDOUT on error
  *
  ****************************************************************************/
 
-size_t mpfs_read_dsn(uint8_t *dsn, size_t len)
+int mpfs_read_dsn(uint8_t *dsn, size_t len)
 {
   uint32_t reg;
   uint8_t *p = (uint8_t *)MSS_SCBMAILBOX;
@@ -86,7 +86,7 @@ size_t mpfs_read_dsn(uint8_t *dsn, size_t len)
    * using the system controller services
    */
 
-  while (getreg32(SERVICES_SR) & SCBCTRL_SERVICESSR_BUSY && retries-- > 0)
+  while ((getreg32(SERVICES_SR) & SCBCTRL_SERVICESSR_BUSY) && --retries > 0)
     {
       leave_critical_section(flags);
       usleep(1000);
@@ -118,7 +118,7 @@ size_t mpfs_read_dsn(uint8_t *dsn, size_t len)
     {
       reg = getreg32(SERVICES_CR);
     }
-  while (reg & SCBCTRL_SERVICESCR_REQ && retries-- > 0);
+  while ((reg & SCBCTRL_SERVICESCR_REQ) && --retries);
 
   if (retries == 0)
     {
@@ -132,7 +132,7 @@ size_t mpfs_read_dsn(uint8_t *dsn, size_t len)
     {
       reg = getreg32(SERVICES_SR);
     }
-  while (reg & SCBCTRL_SERVICESSR_BUSY && retries-- > 0);
+  while ((reg & SCBCTRL_SERVICESSR_BUSY) && --retries);
 
   if (retries == 0)
     {
