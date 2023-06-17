@@ -129,9 +129,6 @@ void board_late_initialize(void)
 #ifdef CONFIG_STM32F7_QUADSPI
   FAR struct qspi_dev_s *qspi;
   FAR struct mtd_dev_s *mtd;
-#endif
-
-#ifdef CONFIG_STM32F7_QUADSPI
 
   struct qspi_meminfo_s meminfo;
 
@@ -167,9 +164,15 @@ void board_late_initialize(void)
     stm32f7_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
 
     stm32_mpu_uheap((uintptr_t)0x90000000, 0x4000000);
-    }
-
 #endif
-  stm32_bringup();
 
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in
+   * user-space but the initialization function must run in kernel space.
+   */
+
+  board_app_initialize();
+#endif
+}
 #endif
