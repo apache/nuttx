@@ -570,10 +570,6 @@ void _assert(FAR const char *filename, int linenum,
       regs = g_last_regs;
     }
 
-  /* Flush any buffered SYSLOG data (from prior to the assertion) */
-
-  syslog_flush();
-
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
   if (!up_interrupt_context() &&
       (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
@@ -584,8 +580,15 @@ void _assert(FAR const char *filename, int linenum,
 
   notifier_data.rtcb = rtcb;
   notifier_data.regs = regs;
+  notifier_data.filename = filename;
+  notifier_data.linenum = linenum;
+  notifier_data.msg = msg;
   panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK,
                             &notifier_data);
+
+  /* Flush any buffered SYSLOG data (from prior to the assertion) */
+
+  syslog_flush();
 
   uname(&name);
   _alert("Current Version: %s %s %s %s %s\n",
