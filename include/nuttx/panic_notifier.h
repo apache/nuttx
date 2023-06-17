@@ -46,8 +46,11 @@ enum panic_type_e
 
 struct panic_notifier_s
 {
-  FAR struct tcb_s  *rtcb;
-  FAR void          *regs;
+  FAR struct tcb_s *rtcb;
+  FAR void         *regs;
+  FAR const char   *msg;
+  FAR const char   *filename;
+  int               linenum;
 };
 
 /****************************************************************************
