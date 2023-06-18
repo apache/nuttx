@@ -85,7 +85,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 #  endif
 
           syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                 (int)node->pid, nodesize, node->seqno,
+                 node->pid, nodesize, node->seqno,
                  MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE), buf);
 #endif

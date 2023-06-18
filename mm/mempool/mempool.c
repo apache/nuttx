@@ -506,7 +506,7 @@ void mempool_memdump(FAR struct mempool_s *pool,
 #  endif
 
               syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                     (int)buf->pid, blocksize, buf->seqno,
+                     buf->pid, blocksize, buf->seqno,
                      MM_PTR_FMT_WIDTH, ((FAR char *)buf - blocksize), tmp);
             }
         }

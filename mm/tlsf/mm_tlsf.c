@@ -430,7 +430,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #  endif
 
          syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                (int)buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH,
+                buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH,
                 ptr, tmp);
 #endif
         }
