@@ -129,7 +129,7 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
 
   nxtask_activate(&tcb->cmn);
 
-  return (int)pid;
+  return pid;
 }
 
 /****************************************************************************
@@ -341,7 +341,7 @@ int task_spawn(FAR const char *name, main_t entry,
                           file_actions != NULL ? *file_actions : NULL,
                           attr, argv, envp);
 
-  return ret >= 0 ? (int)pid : ret;
+  return ret >= 0 ? pid : ret;
 }
 
 #endif /* CONFIG_BUILD_KERNEL */
