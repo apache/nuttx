@@ -56,10 +56,7 @@ up_saveusercontext:
   REGSTORE   sp, REG_X2(a0)       /* original SP */
   REGSTORE   x1, REG_EPC(a0)
 
-#ifdef CONFIG_ARCH_FPU
-  addi       a0, a0, INT_XCPT_SIZE /* Save FPU after integer regs */
-  riscv_savefpu a0
-#endif
+  riscv_savefpu   a0
 
   li         a0, 0
   jr         ra
