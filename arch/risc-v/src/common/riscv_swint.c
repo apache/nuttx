@@ -135,12 +135,12 @@ int riscv_swint(int irq, void *context, void *arg)
       /* A0=SYS_restore_context: This a restore context command:
        *
        * void
-       * void riscv_fullcontextrestore(struct tcb_s *prev) noreturn_function;
+       * riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
        *   A0 = SYS_restore_context
-       *   A1 = next
+       *   A1 = restoreregs
        *
        * In this case, we simply need to set CURRENT_REGS to restore register
        * area referenced in the saved A1. context == CURRENT_REGS is the
@@ -150,23 +150,21 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_restore_context:
         {
-          struct tcb_s *next = (struct tcb_s *)regs[REG_A1];
-
           DEBUGASSERT(regs[REG_A1] != 0);
-          CURRENT_REGS = (uintptr_t *)next->xcp.regs;
+          CURRENT_REGS = (uintptr_t *)regs[REG_A1];
         }
         break;
 
       /* A0=SYS_switch_context: This a switch context command:
        *
        * void
-       * riscv_switchcontext(struct tcb_s *prev, struct tcb_s *next);
+       * riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
        *   A0 = SYS_switch_context
-       *   A1 = prev
-       *   A2 = next
+       *   A1 = saveregs
+       *   A2 = restoreregs
        *
        * In this case, we save the context registers to the save register
        * area referenced by the saved contents of R5 and then set
@@ -176,12 +174,9 @@ int riscv_swint(int irq, void *context, void *arg)
 
       case SYS_switch_context:
         {
-          struct tcb_s *prev = (struct tcb_s *)regs[REG_A1];
-          struct tcb_s *next = (struct tcb_s *)regs[REG_A2];
-
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          prev->xcp.regs = (uintptr_t *)CURRENT_REGS;
-          CURRENT_REGS = (uintptr_t *)next->xcp.regs;
+          *(uintptr_t **)regs[REG_A1] = (uintptr_t *)regs;
+          CURRENT_REGS = (uintptr_t *)regs[REG_A2];
         }
         break;
 
