@@ -801,12 +801,15 @@ choice EXAMPLE_POWER_SAVE_MODE
 		may be lost because station may be in sleep state at DTIM time. If listen interval is longer, more power
 		is saved but broadcast data is more easy to lose.
 
-	config EXAMPLE_POWER_SAVE_NONE
-		bool "none"
-	config EXAMPLE_POWER_SAVE_MIN_MODEM
-		bool "minimum modem"
-	config EXAMPLE_POWER_SAVE_MAX_MODEM
-		bool "maximum modem"
+config EXAMPLE_POWER_SAVE_NONE
+	bool "none"
+
+config EXAMPLE_POWER_SAVE_MIN_MODEM
+	bool "minimum modem"
+
+config EXAMPLE_POWER_SAVE_MAX_MODEM
+	bool "maximum modem"
+
 endchoice
 
 config ESP32C3_WIFI_RECONNECT
@@ -822,18 +825,24 @@ choice ESP32C3_WIFI_LOG_LEVEL
 	---help---
 		The WiFi log is divided into the following levels: ERROR,WARNING,INFO,DEBUG,VERBOSE.
 
-	config WIFI_LOG_LEVEL_NONE
-		bool "No output"
-	config WIFI_LOG_LEVEL_ERROR
-		bool "Error"
-	config WIFI_LOG_LEVEL_WARN
-		bool "Warning"
-	config WIFI_LOG_LEVEL_INFO
-		bool "Info"
-	config WIFI_LOG_LEVEL_DEBUG
-		bool "Debug"
-	config WIFI_LOG_LEVEL_VERBOSE
-		bool "Verbose"
+config WIFI_LOG_LEVEL_NONE
+	bool "No output"
+
+config WIFI_LOG_LEVEL_ERROR
+	bool "Error"
+
+config WIFI_LOG_LEVEL_WARN
+	bool "Warning"
+
+config WIFI_LOG_LEVEL_INFO
+	bool "Info"
+
+config WIFI_LOG_LEVEL_DEBUG
+	bool "Debug"
+
+config WIFI_LOG_LEVEL_VERBOSE
+	bool "Verbose"
+
 endchoice
 
 config WIFI_LOG_LEVEL
@@ -1136,23 +1145,24 @@ choice ESP32C3_BROWNOUT_DET_LVL_SEL
 		#The voltage levels here are estimates, more work needs to be done to figure out the exact voltages
 		#of the brownout threshold levels.
 
-	config ESP32C3_BROWNOUT_DET_LVL_SEL_7
-		bool "2.51V"
+config ESP32C3_BROWNOUT_DET_LVL_SEL_7
+	bool "2.51V"
 
-	config ESP32C3_BROWNOUT_DET_LVL_SEL_6
-		bool "2.64V"
+config ESP32C3_BROWNOUT_DET_LVL_SEL_6
+	bool "2.64V"
 
-	config ESP32C3_BROWNOUT_DET_LVL_SEL_5
-		bool "2.76V"
+config ESP32C3_BROWNOUT_DET_LVL_SEL_5
+	bool "2.76V"
 
-	config ESP32C3_BROWNOUT_DET_LVL_SEL_4
-		bool "2.92V"
+config ESP32C3_BROWNOUT_DET_LVL_SEL_4
+	bool "2.92V"
 
-	config ESP32C3_BROWNOUT_DET_LVL_SEL_3
-		bool "3.10V"
+config ESP32C3_BROWNOUT_DET_LVL_SEL_3
+	bool "3.10V"
 
-	config ESP32C3_BROWNOUT_DET_LVL_SEL_2
-		bool "3.27V"
+config ESP32C3_BROWNOUT_DET_LVL_SEL_2
+	bool "3.27V"
+
 endchoice
 
 config ESP32C3_BROWNOUT_DET_LVL

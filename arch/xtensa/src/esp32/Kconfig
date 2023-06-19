@@ -780,15 +780,15 @@ choice ESP32_SPIRAM_HEAP
 	---help---
 		Select how the SPI RAM will be used as heap.
 
-	config ESP32_SPIRAM_COMMON_HEAP
-		bool "Additional region to kernel heap"
+config ESP32_SPIRAM_COMMON_HEAP
+	bool "Additional region to kernel heap"
 
-	config ESP32_SPIRAM_USER_HEAP
-		bool "Separated userspace heap"
-		select MM_KERNEL_HEAP
-		select ESP32_USER_DATA_EXTMEM if BUILD_PROTECTED
+config ESP32_SPIRAM_USER_HEAP
+	bool "Separated userspace heap"
+	select MM_KERNEL_HEAP
+	select ESP32_USER_DATA_EXTMEM if BUILD_PROTECTED
 
-endchoice
+endchoice # ESP32_SPIRAM_HEAP
 
 config ESP32_IMM_HEAP
 	bool "Reserve part of DRAM as a separate heap"
@@ -2088,13 +2088,16 @@ choice EXAMPLE_POWER_SAVE_MODE
 		may be lost because station may be in sleep state at DTIM time. If listen interval is longer, more power
 		is saved but broadcast data is more easy to lose.
 
-	config EXAMPLE_POWER_SAVE_NONE
-		bool "none"
-	config EXAMPLE_POWER_SAVE_MIN_MODEM
-		bool "minimum modem"
-	config EXAMPLE_POWER_SAVE_MAX_MODEM
-		bool "maximum modem"
-endchoice
+config EXAMPLE_POWER_SAVE_NONE
+	bool "none"
+	
+config EXAMPLE_POWER_SAVE_MIN_MODEM
+	bool "minimum modem"
+
+config EXAMPLE_POWER_SAVE_MAX_MODEM
+	bool "maximum modem"
+
+endchoice # EXAMPLE_POWER_SAVE_MODE
 
 config ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
 	bool "Enable optimization of WLAN driver buffer"

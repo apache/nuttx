@@ -41,14 +41,14 @@ choice ESP32S3_DEFAULT_CPU_FREQ
 	---help---
 		CPU frequency to be set on application startup.
 
-	config ESP32S3_DEFAULT_CPU_FREQ_80
-		bool "80 MHz"
+config ESP32S3_DEFAULT_CPU_FREQ_80
+	bool "80 MHz"
 
-	config ESP32S3_DEFAULT_CPU_FREQ_160
-		bool "160 MHz"
+config ESP32S3_DEFAULT_CPU_FREQ_160
+	bool "160 MHz"
 
-	config ESP32S3_DEFAULT_CPU_FREQ_240
-		bool "240 MHz"
+config ESP32S3_DEFAULT_CPU_FREQ_240
+	bool "240 MHz"
 
 endchoice # CPU frequency
 
@@ -91,11 +91,11 @@ choice ESP32S3_ICACHE_ASSOCIATED_WAYS
 	---help---
 		Instruction cache associated ways to be set on application startup.
 
-	config ESP32S3_INSTRUCTION_CACHE_4WAYS
-		bool "4 ways"
+config ESP32S3_INSTRUCTION_CACHE_4WAYS
+	bool "4 ways"
 
-	config ESP32S3_INSTRUCTION_CACHE_8WAYS
-		bool "8 ways"
+config ESP32S3_INSTRUCTION_CACHE_8WAYS
+	bool "8 ways"
 
 endchoice
 
@@ -110,12 +110,12 @@ choice ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
 	---help---
 		Instruction cache line size to be set on application startup.
 
-	config ESP32S3_INSTRUCTION_CACHE_LINE_16B
-		bool "16 Bytes"
-		depends on ESP32S3_INSTRUCTION_CACHE_16KB
+config ESP32S3_INSTRUCTION_CACHE_LINE_16B
+	bool "16 Bytes"
+	depends on ESP32S3_INSTRUCTION_CACHE_16KB
 
-	config ESP32S3_INSTRUCTION_CACHE_LINE_32B
-		bool "32 Bytes"
+config ESP32S3_INSTRUCTION_CACHE_LINE_32B
+	bool "32 Bytes"
 
 endchoice
 
@@ -162,11 +162,11 @@ choice ESP32S3_DCACHE_ASSOCIATED_WAYS
 	---help---
 		Data cache associated ways to be set on application startup.
 
-	config ESP32S3_DATA_CACHE_4WAYS
-		bool "4 ways"
+config ESP32S3_DATA_CACHE_4WAYS
+	bool "4 ways"
 
-	config ESP32S3_DATA_CACHE_8WAYS
-		bool "8 ways"
+config ESP32S3_DATA_CACHE_8WAYS
+	bool "8 ways"
 
 endchoice
 
@@ -181,15 +181,15 @@ choice ESP32S3_DATA_CACHE_LINE_SIZE
 	---help---
 		Data cache line size to be set on application startup.
 
-	config ESP32S3_DATA_CACHE_LINE_16B
-		bool "16 Bytes"
-		depends on ESP32S3_DATA_CACHE_16KB || ESP32S3_DATA_CACHE_32KB
+config ESP32S3_DATA_CACHE_LINE_16B
+	bool "16 Bytes"
+	depends on ESP32S3_DATA_CACHE_16KB || ESP32S3_DATA_CACHE_32KB
 
-	config ESP32S3_DATA_CACHE_LINE_32B
-		bool "32 Bytes"
+config ESP32S3_DATA_CACHE_LINE_32B
+	bool "32 Bytes"
 
-	config ESP32S3_DATA_CACHE_LINE_64B
-		bool "64 Bytes"
+config ESP32S3_DATA_CACHE_LINE_64B
+	bool "64 Bytes"
 
 endchoice
 
@@ -1011,20 +1011,20 @@ choice ESP32S3_FLASH_MODE
 		with the attached SPI Flash chip.
 		The option selected here is then used by esptool when flashing.
 
-	config ESP32S3_FLASH_MODE_DIO
-		bool "Dual IO (DIO)"
+config ESP32S3_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
 
-	config ESP32S3_FLASH_MODE_DOUT
-		bool "Dual Output (DOUT)"
+config ESP32S3_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
 
-	config ESP32S3_FLASH_MODE_QIO
-		bool "Quad IO (QIO)"
+config ESP32S3_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
 
-	config ESP32S3_FLASH_MODE_QOUT
-		bool "Quad Output (QOUT)"
+config ESP32S3_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
 
-	config ESP32S3_FLASH_MODE_OCT
-		bool "Octal"
+config ESP32S3_FLASH_MODE_OCT
+	bool "Octal"
 
 endchoice # ESP32S3_FLASH_MODE
 
@@ -1034,17 +1034,17 @@ choice ESP32S3_FLASH_FREQ
 	---help---
 		SPI Flash frequency
 
-	config ESP32S3_FLASH_FREQ_120M
-		bool "120 MHz"
+config ESP32S3_FLASH_FREQ_120M
+	bool "120 MHz"
 
-	config ESP32S3_FLASH_FREQ_80M
-		bool "80 MHz"
+config ESP32S3_FLASH_FREQ_80M
+	bool "80 MHz"
 
-	config ESP32S3_FLASH_FREQ_40M
-		bool "40 MHz"
+config ESP32S3_FLASH_FREQ_40M
+	bool "40 MHz"
 
-	config ESP32S3_FLASH_FREQ_20M
-		bool "20 MHz"
+config ESP32S3_FLASH_FREQ_20M
+	bool "20 MHz"
 
 endchoice # ESP32S3_FLASH_FREQ
 
@@ -1060,11 +1060,11 @@ choice ESP32S3_FLASH_SAMPLE_MODE
 	default ESP32S3_FLASH_SAMPLE_MODE_DTR if ESP32S3_FLASH_MODE_OCT
 	default ESP32S3_FLASH_SAMPLE_MODE_STR if !ESP32S3_FLASH_MODE_OCT
 
-	config ESP32S3_FLASH_SAMPLE_MODE_DTR
-		depends on ESP32S3_FLASH_MODE_OCT
-		bool "DTR Mode"
-	config ESP32S3_FLASH_SAMPLE_MODE_STR
-		bool "STR Mode"
+config ESP32S3_FLASH_SAMPLE_MODE_DTR
+	depends on ESP32S3_FLASH_MODE_OCT
+	bool "DTR Mode"
+config ESP32S3_FLASH_SAMPLE_MODE_STR
+	bool "STR Mode"
 endchoice
 
 config ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
