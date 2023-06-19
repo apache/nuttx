@@ -204,52 +204,50 @@
 #endif
 
 #ifdef CONFIG_ARCH_FPU
-#  define REG_F0_NDX        (FPU_REG_SIZE * 0)
-#  define REG_F1_NDX        (FPU_REG_SIZE * 1)
-#  define REG_F2_NDX        (FPU_REG_SIZE * 2)
-#  define REG_F3_NDX        (FPU_REG_SIZE * 3)
-#  define REG_F4_NDX        (FPU_REG_SIZE * 4)
-#  define REG_F5_NDX        (FPU_REG_SIZE * 5)
-#  define REG_F6_NDX        (FPU_REG_SIZE * 6)
-#  define REG_F7_NDX        (FPU_REG_SIZE * 7)
-#  define REG_F8_NDX        (FPU_REG_SIZE * 8)
-#  define REG_F9_NDX        (FPU_REG_SIZE * 9)
-#  define REG_F10_NDX       (FPU_REG_SIZE * 10)
-#  define REG_F11_NDX       (FPU_REG_SIZE * 11)
-#  define REG_F12_NDX       (FPU_REG_SIZE * 12)
-#  define REG_F13_NDX       (FPU_REG_SIZE * 13)
-#  define REG_F14_NDX       (FPU_REG_SIZE * 14)
-#  define REG_F15_NDX       (FPU_REG_SIZE * 15)
-#  define REG_F16_NDX       (FPU_REG_SIZE * 16)
-#  define REG_F17_NDX       (FPU_REG_SIZE * 17)
-#  define REG_F18_NDX       (FPU_REG_SIZE * 18)
-#  define REG_F19_NDX       (FPU_REG_SIZE * 19)
-#  define REG_F20_NDX       (FPU_REG_SIZE * 20)
-#  define REG_F21_NDX       (FPU_REG_SIZE * 21)
-#  define REG_F22_NDX       (FPU_REG_SIZE * 22)
-#  define REG_F23_NDX       (FPU_REG_SIZE * 23)
-#  define REG_F24_NDX       (FPU_REG_SIZE * 24)
-#  define REG_F25_NDX       (FPU_REG_SIZE * 25)
-#  define REG_F26_NDX       (FPU_REG_SIZE * 26)
-#  define REG_F27_NDX       (FPU_REG_SIZE * 27)
-#  define REG_F28_NDX       (FPU_REG_SIZE * 28)
-#  define REG_F29_NDX       (FPU_REG_SIZE * 29)
-#  define REG_F30_NDX       (FPU_REG_SIZE * 30)
-#  define REG_F31_NDX       (FPU_REG_SIZE * 31)
-#  define REG_FCSR_NDX      (FPU_REG_SIZE * 32)
+#  define REG_F0_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 0)
+#  define REG_F1_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 1)
+#  define REG_F2_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 2)
+#  define REG_F3_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 3)
+#  define REG_F4_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 4)
+#  define REG_F5_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 5)
+#  define REG_F6_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 6)
+#  define REG_F7_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 7)
+#  define REG_F8_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 8)
+#  define REG_F9_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 9)
+#  define REG_F10_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 10)
+#  define REG_F11_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 11)
+#  define REG_F12_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 12)
+#  define REG_F13_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 13)
+#  define REG_F14_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 14)
+#  define REG_F15_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 15)
+#  define REG_F16_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 16)
+#  define REG_F17_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 17)
+#  define REG_F18_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 18)
+#  define REG_F19_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 19)
+#  define REG_F20_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 20)
+#  define REG_F21_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 21)
+#  define REG_F22_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 22)
+#  define REG_F23_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 23)
+#  define REG_F24_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 24)
+#  define REG_F25_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 25)
+#  define REG_F26_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 26)
+#  define REG_F27_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 27)
+#  define REG_F28_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 28)
+#  define REG_F29_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 29)
+#  define REG_F30_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 30)
+#  define REG_F31_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 31)
+#  define REG_FCSR_NDX      (INT_XCPT_REGS + FPU_REG_SIZE * 32)
 
 #  define FPU_XCPT_REGS     (FPU_REG_SIZE * 33)
-#  define FPU_XCPT_SIZE     (INT_REG_SIZE * FPU_XCPT_REGS)
+#  define FPU_REG_FULL_SIZE (INT_REG_SIZE * FPU_REG_SIZE)
 #else /* !CONFIG_ARCH_FPU */
 #  define FPU_XCPT_REGS     (0)
-#  define FPU_XCPT_SIZE     (0)
+#  define FPU_REG_FULL_SIZE (0)
 #endif /* CONFIG_ARCH_FPU */
 
 #define XCPTCONTEXT_REGS    (INT_XCPT_REGS + FPU_XCPT_REGS)
 
-/* Save only integer regs. FPU is handled separately */
-
-#define XCPTCONTEXT_SIZE    (INT_XCPT_SIZE)
+#define XCPTCONTEXT_SIZE    (INT_REG_SIZE * XCPTCONTEXT_REGS)
 
 /* In assembly language, values have to be referenced as byte address
  * offsets.  But in C, it is more convenient to reference registers as
@@ -564,15 +562,9 @@ struct xcptcontext
 #endif
 #endif
 
-  /* Integer register save area */
+  /* Register save area */
 
   uintptr_t *regs;
-
-  /* FPU register save area */
-
-#ifdef CONFIG_ARCH_FPU
-  uintptr_t fregs[FPU_XCPT_SIZE];
-#endif
 };
 
 #endif /* __ASSEMBLY__ */

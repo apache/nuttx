@@ -109,6 +109,8 @@ sys_call6:
   addi       s0, sp, XCPTCONTEXT_SIZE
   REGSTORE   s0, REG_SP(sp)            /* original SP */
 
+  riscv_savefpu sp
+
   mv         a0, sp                    /* a0 = context */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -124,6 +126,8 @@ sys_call6:
   /* Restore (potentially new) context */
 
   mv         sp, a0                    /* use sp, as a0 gets wiped */
+
+  riscv_loadfpu sp
 
   REGLOAD    s0, REG_EPC(sp)           /* restore epc */
   csrw       CSR_EPC, s0
