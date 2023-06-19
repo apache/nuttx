@@ -29,7 +29,6 @@
 
 #ifdef CONFIG_BUILD_KERNEL
 #  include <signal.h>
-#  include <nuttx/mm/mm.h>
 #endif
 
 #include <stdbool.h>
@@ -282,6 +281,8 @@ typedef struct addrenv_s addrenv_t;
 typedef CODE void (*addrenv_sigtramp_t)(_sa_sigaction_t sighand, int signo,
                                         FAR siginfo_t *info,
                                         FAR void *ucontext);
+
+struct mm_heaps_s; /* Forward reference */
 
 /* This structure describes the format of the .bss/.data reserved area */
 
