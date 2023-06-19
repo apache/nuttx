@@ -60,6 +60,8 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
       case CLOCK_MONOTONIC:
       case CLOCK_BOOTTIME:
       case CLOCK_REALTIME:
+      case CLOCK_PROCESS_CPUTIME_ID:
+      case CLOCK_THREAD_CPUTIME_ID:
 
         /* Form the timspec using clock resolution in nanoseconds */
 

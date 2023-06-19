@@ -223,6 +223,10 @@ long sysconf(int name)
         return _POSIX_PRIORITIZED_IO;
       case _SC_AIO_MAX:
         return _POSIX_AIO_MAX;
+      case _SC_CPUTIME:
+        return _POSIX_CPUTIME;
+      case _SC_THREAD_CPUTIME:
+        return _POSIX_THREAD_CPUTIME;
       case _SC_CLK_TCK:
         return CLOCKS_PER_SEC;
 
