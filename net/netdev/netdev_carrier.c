@@ -104,6 +104,18 @@ int netdev_carrier_off(FAR struct net_driver_s *dev)
       devif_dev_event(dev, NETDEV_DOWN);
       arp_cleanup(dev);
 
+#ifdef CONFIG_NET_IPv4
+      dev->d_ipaddr  = INADDR_ANY;
+      dev->d_draddr  = INADDR_ANY;
+      dev->d_netmask = INADDR_ANY;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      net_ipv6addr_copy(&dev->d_ipv6addr, &in6addr_any);
+      net_ipv6addr_copy(&dev->d_ipv6draddr, &in6addr_any);
+      net_ipv6addr_copy(&dev->d_ipv6netmask, &in6addr_any);
+#endif
+
       return OK;
     }
 
