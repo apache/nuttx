@@ -120,12 +120,8 @@
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-#  define SCHED_NOTE_LABEL__(x, y) x ## y
-#  define SCHED_NOTE_LABEL_(x, y) SCHED_NOTE_LABEL__(x, y)
-#  define SCHED_NOTE_LABEL \
-          SCHED_NOTE_LABEL_(sched_note_here, __LINE__)
 #  define SCHED_NOTE_IP \
-          ({SCHED_NOTE_LABEL: (uintptr_t)&&SCHED_NOTE_LABEL;})
+          ({ __label__ __here; __here: (unsigned long)&&__here; })
 #  define sched_note_string(tag, buf) \
           sched_note_string_ip(tag, SCHED_NOTE_IP, buf)
 #  define sched_note_dump(tag, event, buf, len) \
