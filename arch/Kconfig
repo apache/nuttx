@@ -902,6 +902,12 @@ config ARCH_USBDUMP
 	---help---
 		Enable to do USB trace after assertions
 
+config ARCH_DEADLOCKDUMP
+	bool "Dump dead lock thread"
+	default "n"
+	---help---
+		This option will dump the dead lock thread when assert happen..
+
 config ENDIAN_BIG
 	bool "Big Endian Architecture"
 	default n

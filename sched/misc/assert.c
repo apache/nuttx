@@ -50,6 +50,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define DEADLOCK_MAX 8
+
 #ifndef CONFIG_BOARD_RESET_ON_ASSERT
 #  define CONFIG_BOARD_RESET_ON_ASSERT 0
 #endif
@@ -512,6 +514,31 @@ static void dump_core(pid_t pid)
 #endif
 
 /****************************************************************************
+ * Name: dump_deadlock
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_DEADLOCKDUMP
+static void dump_deadlock(void)
+{
+  pid_t deadlock[DEADLOCK_MAX];
+  size_t i = nxsched_collect_deadlock(deadlock, DEADLOCK_MAX);
+
+  if (i > 0)
+    {
+      _alert("Deadlock detected\n");
+      while (i-- > 0)
+        {
+#ifdef CONFIG_SCHED_BACKTRACE
+          sched_dumpstack(deadlock[i]);
+#else
+          _alert("deadlock pid: %d\n", deadlock[i])
+#endif
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -593,6 +620,12 @@ void _assert(FAR const char *filename, int linenum,
   if (fatal)
     {
       show_tasks();
+
+#ifdef CONFIG_ARCH_DEADLOCKDUMP
+      /* Deadlock Dump */
+
+      dump_deadlock();
+#endif
 
 #ifdef CONFIG_ARCH_USBDUMP
       /* Dump USB trace data */
