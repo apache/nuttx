@@ -216,11 +216,6 @@ config ARCH_RV_ISA_C
 	bool
 	default n
 
-config ARCH_HAVE_LAZYFPU
-	bool
-	default y
-	depends on ARCH_HAVE_FPU
-
 config ARCH_FAMILY
 	string
 	default "rv32"		if ARCH_RV32
