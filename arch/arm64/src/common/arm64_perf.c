@@ -42,11 +42,19 @@ void up_perf_init(void *arg)
 {
   g_cpu_freq = (unsigned long)(uintptr_t)arg;
 
+#ifdef CONFIG_ARCH_CLUSTER_PMU
+  pmu_clucntr_control_config(CLUSTERPMCR_EL1_C | CLUSTERPMCR_EL1_P |
+                             CLUSTERPMCR_EL1_E);
+  pmu_clucntr_ovsclr_config(CLUSTERPMOVSCLR_EL1_C);
+  pmu_clucntr_irq_disable(CLUSTERPMINTENCLR_EL1_C);
+  pmu_clucntr_enable(CLUSTERPMCNTENSET_EL1_C);
+#else
   pmu_ccntr_ccfiltr_config(PMCCFILTR_EL0_NSH);
   pmu_cntr_control_config(PMCR_EL0_C | PMCR_EL0_E);
   pmu_cntr_trap_control(PMUSERENR_EL0_EN);
   pmu_cntr_irq_disable(PMINTENCLR_EL1_C);
   pmu_cntr_enable(PMCNTENSET_EL0_C);
+#endif
 }
 
 unsigned long up_perf_getfreq(void)
@@ -56,7 +64,11 @@ unsigned long up_perf_getfreq(void)
 
 unsigned long up_perf_gettime(void)
 {
+#ifdef CONFIG_ARCH_CLUSTER_PMU
+  return pmu_get_cluccntr();
+#else
   return pmu_get_ccntr();
+#endif
 }
 
 void up_perf_convert(unsigned long elapsed, struct timespec *ts)

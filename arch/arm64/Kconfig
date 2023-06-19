@@ -156,6 +156,19 @@ config ARCH_HAVE_EL3
 		runing at EL3 is not necessary and system register for EL3
 		is not accessible
 
+config ARCH_HAVE_CLUSTER_PMU
+	bool
+	default n
+	---help---
+		Some processors implement cluster PMUs, such as Cortex-R82
+
+config ARCH_CLUSTER_PMU
+	bool "Enable the cluster PMUs"
+	default n
+	depends on ARCH_HAVE_CLUSTER_PMU
+	---help---
+		If the processor supports cluster PMU, can configure cluster PMU
+
 config ARCH_ARM64_EXCEPTION_LEVEL
 	int "Exception level to operate"
 	default 1
@@ -253,6 +266,7 @@ config ARCH_CORTEX_R82
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_CLUSTER_PMU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
 
