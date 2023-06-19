@@ -27,6 +27,7 @@
 #include <sys/sendfile.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
@@ -244,6 +245,12 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
 ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
                       off_t *offset, size_t count)
 {
+  if (count == 0)
+    {
+      nwarn("WARNING: sendfile count is zero\n");
+      return 0;
+    }
+
 #ifdef CONFIG_NET_SENDFILE
   /* Check the destination file descriptor:  Is it a (probable) file
    * descriptor?  Check the source file:  Is it a normal file?
