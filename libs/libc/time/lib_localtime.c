@@ -2801,6 +2801,11 @@ tzname:
   nxrmutex_unlock(&g_lcl_lock);
 }
 
+void tzreset(void)
+{
+  strlcpy(g_lcl_tzname, "", sizeof(g_lcl_tzname));
+}
+
 FAR struct tm *localtime(FAR const time_t *timep)
 {
   tzset();
