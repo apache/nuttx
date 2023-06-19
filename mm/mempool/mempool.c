@@ -425,7 +425,7 @@ mempool_info_task(FAR struct mempool_s *pool,
       list_for_every_entry(&pool->alist, buf, struct mempool_backtrace_s,
                            node)
         {
-          if ((task->pid == PID_MM_ALLOC || task->pid == buf->pid ||
+          if ((task->pid == buf->pid || task->pid == PID_MM_ALLOC ||
                (task->pid == PID_MM_LEAK && !!nxsched_get_tcb(buf->pid))) &&
               buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
             {
@@ -488,7 +488,8 @@ void mempool_memdump(FAR struct mempool_s *pool,
       list_for_every_entry(&pool->alist, buf,
                            struct mempool_backtrace_s, node)
         {
-          if ((dump->pid == PID_MM_ALLOC || dump->pid == buf->pid) &&
+          if ((dump->pid == buf->pid || dump->pid == PID_MM_ALLOC ||
+               (dump->pid == PID_MM_LEAK && !!nxsched_get_tcb(buf->pid))) &&
               buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
             {
               char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
