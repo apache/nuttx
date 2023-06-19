@@ -50,7 +50,7 @@
  *   None
  *
  * Returned Value:
- *   true if the calling task is and IDLE thread.
+ *   true if the calling task is an IDLE thread.
  *
  ****************************************************************************/
 
