@@ -254,9 +254,11 @@ static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
 
       conn->snd_wl1 = seq;
       conn->snd_wl2 = ackseq;
-      conn->snd_wnd = wnd;
-
-      return true;
+      if (conn->snd_wnd != wnd)
+        {
+          conn->snd_wnd = wnd;
+          return true;
+        }
     }
 
   return false;
