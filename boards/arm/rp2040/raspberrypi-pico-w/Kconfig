@@ -13,27 +13,26 @@ endif
 
 if RP2040_INFINEON_CYW43439
 
-	config CYW43439_FIRMWARE_BIN_PATH
-		string "Path to Infineon 43439 firmware file"
-		default "${PICO_SDK_PATH}/lib/cyw43-driver/firmware/43439A0-7.95.49.00.combined"
-		---help---
-			This should be a path to a file containing both the cyw43439 firmware and
-			the CLB blob.  The firmware should be padded to a 256 byte boundary and
-			then the CLM blob should be appended.
+config CYW43439_FIRMWARE_BIN_PATH
+	string "Path to Infineon 43439 firmware file"
+	default "${PICO_SDK_PATH}/lib/cyw43-driver/firmware/43439A0-7.95.49.00.combined"
+	---help---
+		This should be a path to a file containing both the cyw43439 firmware and
+		the CLB blob.  The firmware should be padded to a 256 byte boundary and
+		then the CLM blob should be appended.
 
-			If this file is updated, check the CYW43439_FIRMWARE_LEN below to make sure
-			it reflects the un-padded length of the firmware part.
+		If this file is updated, check the CYW43439_FIRMWARE_LEN below to make sure
+		it reflects the un-padded length of the firmware part.
 
-	config CYW43439_FIRMWARE_LEN
-		int "Infineon 43439 firmware length (bytes)"
-		default 224190
-		---help---
-			This is the length of just the base firmware in the firmware file specified
-			by the "Path to Infineon 43439 firmware file" configuration option.
+config CYW43439_FIRMWARE_LEN
+	int "Infineon 43439 firmware length (bytes)"
+	default 224190
+	---help---
+		This is the length of just the base firmware in the firmware file specified
+		by the "Path to Infineon 43439 firmware file" configuration option.
 
-			This length does not include the length of any padding nor the length of
-			the appended clm_blob. If a clm_blob is present in the firmware file, this
-			length will be less than the length of the whole file.
-
+		This length does not include the length of any padding nor the length of
+		the appended clm_blob. If a clm_blob is present in the firmware file, this
+		length will be less than the length of the whole file.
 
 endif

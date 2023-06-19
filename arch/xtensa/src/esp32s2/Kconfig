@@ -77,12 +77,12 @@ choice ESP32S2_INSTRUCTION_CACHE_LINE_SIZE
 	---help---
 		Instruction cache line size to be set on application startup.
 
-	config ESP32S2_INSTRUCTION_CACHE_LINE_16B
-		bool "16 Bytes"
-		depends on ESP32S2_INSTRUCTION_CACHE_16KB
+config ESP32S2_INSTRUCTION_CACHE_LINE_16B
+	bool "16 Bytes"
+	depends on ESP32S2_INSTRUCTION_CACHE_16KB
 
-	config ESP32S2_INSTRUCTION_CACHE_LINE_32B
-		bool "32 Bytes"
+config ESP32S2_INSTRUCTION_CACHE_LINE_32B
+	bool "32 Bytes"
 
 endchoice
 
@@ -131,11 +131,11 @@ choice ESP32S2_DATA_CACHE_LINE_SIZE
 	---help---
 		Data cache line size to be set on application startup.
 
-	config ESP32S2_DATA_CACHE_LINE_16B
-		bool "16 Bytes"
+config ESP32S2_DATA_CACHE_LINE_16B
+	bool "16 Bytes"
 
-	config ESP32S2_DATA_CACHE_LINE_32B
-		bool "32 Bytes"
+config ESP32S2_DATA_CACHE_LINE_32B
+	bool "32 Bytes"
 
 endchoice
 
@@ -677,16 +677,16 @@ choice ESP32S2_FLASH_MODE
 		with the attached SPI Flash chip.
 		The option selected here is then used by esptool when flashing.
 
-	config ESP32S2_FLASH_MODE_DIO
+config ESP32S2_FLASH_MODE_DIO
 	bool "Dual IO (DIO)"
 
-	config ESP32S2_FLASH_MODE_DOUT
+config ESP32S2_FLASH_MODE_DOUT
 	bool "Dual Output (DOUT)"
 
-	config ESP32S2_FLASH_MODE_QIO
+config ESP32S2_FLASH_MODE_QIO
 	bool "Quad IO (QIO)"
 
-	config ESP32S2_FLASH_MODE_QOUT
+config ESP32S2_FLASH_MODE_QOUT
 	bool "Quad Output (QOUT)"
 
 endchoice # ESP32S2_FLASH_MODE
@@ -697,16 +697,16 @@ choice ESP32S2_FLASH_FREQ
 	---help---
 		SPI Flash frequency.
 
-	config ESP32S2_FLASH_FREQ_80M
+config ESP32S2_FLASH_FREQ_80M
 	bool "80 MHz"
 
-	config ESP32S2_FLASH_FREQ_40M
+config ESP32S2_FLASH_FREQ_40M
 	bool "40 MHz"
 
-	config ESP32S2_FLASH_FREQ_26M
+config ESP32S2_FLASH_FREQ_26M
 	bool "26 MHz"
 
-	config ESP32S2_FLASH_FREQ_20M
+config ESP32S2_FLASH_FREQ_20M
 	bool "20 MHz"
 
 endchoice # ESP32S2_FLASH_FREQ

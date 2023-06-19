@@ -29,34 +29,34 @@ choice ESP32_SPIFLASH_FS
 		bring-up.
 		If not selected, the MTD will be registered as a device node on /dev.
 
-	config ESP32_SPIFLASH_SMARTFS
-		bool "SmartFS"
-		select FS_SMARTFS
-		select MTD_SMART
-		depends on !ESP32_SECURE_FLASH_ENC_ENABLED
+config ESP32_SPIFLASH_SMARTFS
+	bool "SmartFS"
+	select FS_SMARTFS
+	select MTD_SMART
+	depends on !ESP32_SECURE_FLASH_ENC_ENABLED
 
-	comment "SmartFS not supported with Flash Encryption"
-		depends on ESP32_SECURE_FLASH_ENC_ENABLED
+comment "SmartFS not supported with Flash Encryption"
+	depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
-	config ESP32_SPIFLASH_NXFFS
-		bool "NXFFS"
-		select FS_NXFFS
-		depends on !ESP32_SECURE_FLASH_ENC_ENABLED
+config ESP32_SPIFLASH_NXFFS
+	bool "NXFFS"
+	select FS_NXFFS
+	depends on !ESP32_SECURE_FLASH_ENC_ENABLED
 
-	comment "NXFFS not supported with Flash Encryption"
-		depends on ESP32_SECURE_FLASH_ENC_ENABLED
+comment "NXFFS not supported with Flash Encryption"
+	depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
-	config ESP32_SPIFLASH_SPIFFS
-		bool "SPIFFS"
-		select FS_SPIFFS
-		depends on !ESP32_SECURE_FLASH_ENC_ENABLED
+config ESP32_SPIFLASH_SPIFFS
+	bool "SPIFFS"
+	select FS_SPIFFS
+	depends on !ESP32_SECURE_FLASH_ENC_ENABLED
 
-	comment "SPIFFS not supported with Flash Encryption"
-		depends on ESP32_SECURE_FLASH_ENC_ENABLED
+comment "SPIFFS not supported with Flash Encryption"
+	depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
-	config ESP32_SPIFLASH_LITTLEFS
-		bool "LittleFS"
-		select FS_LITTLEFS
+config ESP32_SPIFLASH_LITTLEFS
+	bool "LittleFS"
+	select FS_LITTLEFS
 
 endchoice
 

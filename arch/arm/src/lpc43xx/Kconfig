@@ -690,7 +690,7 @@ config USART0_RS485MODE
 		Enable RS-485 interface on USART0.
 
 if USART0_RS485_MODE
-	config USART0_RS485DIROIN
+config USART0_RS485DIROIN
 	bool "Invert direction control pin polarity"
 	default n
 	---help---
@@ -698,7 +698,7 @@ if USART0_RS485_MODE
 		transmitter has data to be sent.  It will be driven to logic 1 after
 		the last bit of data has been transmitted.
 
-endif # USART0_RS485MODE
+endif # USART0_RS485_MODE
 
 endif # LPC43_USART0
 
@@ -727,7 +727,7 @@ config USART2_RS485MODE
 		Enable RS-485 interface on USART2.
 
 if USART2_RS485MODE
-	config USART0_RS485DIROIN
+config USART0_RS485DIROIN
 	bool "Invert direction control pin polarity"
 	default n
 	---help---

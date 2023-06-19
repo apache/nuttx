@@ -814,7 +814,8 @@ config SAM34_EXTNANDSIZE
 	default 0
 	---help---
 		Size of the external NAND in bytes.
-	config SAM34_HAVE_NAND
+
+config SAM34_HAVE_NAND
 	bool
 	default n
 

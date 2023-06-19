@@ -403,24 +403,25 @@ choice ESPRESSIF_BROWNOUT_DET_LVL_SEL
 		approximately below this level. Note that there may be some variation
 		of brownout voltage level between each chip.
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
-		bool "2.51V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
+	bool "2.51V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_6
-		bool "2.64V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_6
+	bool "2.64V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_5
-		bool "2.76V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_5
+	bool "2.76V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_4
-		bool "2.92V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_4
+	bool "2.92V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_3
-		bool "3.10V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_3
+	bool "3.10V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_2
-		bool "3.27V"
-endchoice
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_2
+	bool "3.27V"
+
+endchoice # ESPRESSIF_BROWNOUT_DET_LVL_SEL
 
 config ESPRESSIF_BROWNOUT_DET_LVL
 	int

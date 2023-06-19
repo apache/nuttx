@@ -1246,7 +1246,7 @@ config SAMA5D2_CLASSD_MONOMODE_SAT
 config SAMA5D2_CLASSD_MONOMODE_LEFT
 	bool "L       -> both channels"
 
-	config SAMA5D2_CLASSD_MONOMODE_RIGHT
+config SAMA5D2_CLASSD_MONOMODE_RIGHT
 	bool "R       -> both channels"
 
 endchoice # Mono Mode Selection (MONOMODE)
