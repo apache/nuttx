@@ -44,6 +44,19 @@ void *riscv_perform_syscall(uintptr_t *regs)
 
   riscv_swint(0, regs, NULL);
 
+#ifdef CONFIG_ARCH_ADDRENV
+  if (regs != CURRENT_REGS)
+    {
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      addrenv_switch(NULL);
+    }
+#endif
+
   if (regs != CURRENT_REGS)
     {
       /* Restore the cpu lock */
