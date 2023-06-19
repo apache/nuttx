@@ -206,26 +206,10 @@ void riscv_exception_attach(void);
 void riscv_fpuconfig(void);
 void riscv_savefpu(uintptr_t *regs, uintptr_t *fregs);
 void riscv_restorefpu(uintptr_t *regs, uintptr_t *fregs);
-
-/* Get FPU register save area */
-
-static inline uintptr_t *riscv_fpuregs(struct tcb_s *tcb)
-{
-#ifdef CONFIG_ARCH_LAZYFPU
-  /* With lazy FPU the registers are simply in tcb */
-
-  return tcb->xcp.fregs;
-#else
-  /* Otherwise they are after the integer registers */
-
-  return (uintptr_t *)((uintptr_t)tcb->xcp.regs + INT_XCPT_SIZE);
-#endif
-}
 #else
 #  define riscv_fpuconfig()
 #  define riscv_savefpu(regs, fregs)
 #  define riscv_restorefpu(regs, fregs)
-#  define riscv_fpuregs(tcb)
 #endif
 
 /* Save / restore context of task */
@@ -235,10 +219,9 @@ static inline void riscv_savecontext(struct tcb_s *tcb)
   tcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
 
 #ifdef CONFIG_ARCH_FPU
-
   /* Save current process FPU state to TCB */
 
-  riscv_savefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
+  riscv_savefpu(tcb->xcp.regs, tcb->xcp.fregs);
 #endif
 }
 
@@ -259,7 +242,7 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
 #ifdef CONFIG_ARCH_FPU
   /* Restore FPU after the new address environment is instantiated */
 
-  riscv_restorefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
+  riscv_restorefpu(tcb->xcp.regs, tcb->xcp.fregs);
 #endif
 }
 
