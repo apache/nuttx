@@ -83,8 +83,24 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
   irq_dispatch(irq, regs);
 
   /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.
+   * CURRENT_REGS will have a different value than it did on entry.  If an
+   * interrupt level context switch has occurred, then restore the floating
+   * point state and the establish the correct address environment before
+   * returning from the interrupt.
    */
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (regs != CURRENT_REGS)
+    {
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      addrenv_switch(NULL);
+    }
+#endif
 
   if (regs != CURRENT_REGS)
     {

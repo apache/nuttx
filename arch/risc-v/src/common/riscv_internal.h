@@ -229,16 +229,6 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
 {
   CURRENT_REGS = (uintptr_t *)tcb->xcp.regs;
 
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Make sure that the address environment for the previously
-   * running task is closed down gracefully (data caches dump,
-   * MMU flushed) and set up the address environment for the new
-   * thread at the head of the ready-to-run list.
-   */
-
-  addrenv_switch(tcb);
-#endif
-
 #ifdef CONFIG_ARCH_FPU
   /* Restore FPU after the new address environment is instantiated */
 
