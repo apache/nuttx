@@ -113,6 +113,8 @@ exception_common:
   csrr       s0, CSR_EPC
   REGSTORE   s0, REG_EPC(sp)      /* exception PC */
 
+  riscv_savefpu   sp
+
   /* Setup arg0(exception cause), arg1(context) */
 
   csrr       a0, CSR_CAUSE        /* exception cause */
@@ -145,6 +147,8 @@ exception_common:
   /* If context switch is needed, return a new sp */
 
   mv         sp, a0
+
+  riscv_loadfpu   sp
 
   REGLOAD    s0, REG_EPC(sp)      /* restore sepc */
   csrw       CSR_EPC, s0
