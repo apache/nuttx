@@ -61,7 +61,9 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
 #else
-      if ((dump->pid == PID_MM_ALLOC || dump->pid == node->pid) &&
+      if ((dump->pid == node->pid ||
+           (dump->pid == PID_MM_ALLOC && node->pid != PID_MM_MEMPOOL) ||
+           (dump->pid == PID_MM_LEAK && !!nxsched_get_tcb(node->pid))) &&
           node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
 #endif
         {
