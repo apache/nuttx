@@ -163,6 +163,7 @@
 #define SIGXFSZ         25
 #define SIGVTALRM       26
 #define SIGPROF         27
+#define SIGWINCH        28
 #define SIGPOLL         29
 
 #define SIGIO           SIGPOLL
