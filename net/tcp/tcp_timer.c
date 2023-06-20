@@ -156,6 +156,50 @@ static void tcp_timer_expiry(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: tcp_xmit_probe
+ *
+ * Description:
+ *   TCP retransmission probe packet
+ *
+ * Input Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP "connection" to poll for TX data
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   dev is not NULL.
+ *   conn is not NULL.
+ *
+ ****************************************************************************/
+
+static void tcp_xmit_probe(FAR struct net_driver_s *dev,
+                           FAR struct tcp_conn_s *conn)
+{
+  /* And send the probe.
+   * The packet we send must have these properties:
+   *
+   *   - TCP_ACK flag (only) is set.
+   *   - Sequence number is the sequence number of
+   *     previously ACKed data, i.e., the expected
+   *     sequence number minus one.
+   *
+   * tcp_send() will send the TCP sequence number as
+   * conn->sndseq.  Rather than creating a new
+   * interface, we spoof tcp_end() here:
+   */
+
+  uint16_t hdrlen = tcpip_hdrsize(conn);
+  uint32_t saveseq = tcp_getsequence(conn->sndseq);
+  tcp_setsequence(conn->sndseq, saveseq - 1);
+
+  tcp_send(dev, conn, TCP_ACK, hdrlen);
+
+  tcp_setsequence(conn->sndseq, saveseq);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -290,6 +334,40 @@ void tcp_update_keeptimer(FAR struct tcp_conn_s *conn, int timeout)
 void tcp_stop_timer(FAR struct tcp_conn_s *conn)
 {
   work_cancel(LPWORK, &conn->work);
+}
+
+/****************************************************************************
+ * Name: tcp_set_zero_probe
+ *
+ * Description:
+ *   Update the TCP probe timer for the provided TCP connection,
+ *   The timeout is accurate
+ *
+ * Input Parameters:
+ *   conn   - The TCP "connection" to poll for TX data
+ *   flags  - Set of connection events
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *
+ ****************************************************************************/
+
+void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint16_t flags)
+{
+  if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
+      ((flags & TCP_NEWDATA) == 0) && conn->tx_unacked <= 0 &&
+      (flags & (TCP_POLL | TCP_REXMIT | TCP_ACKDATA)) &&
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      !(sq_empty(&conn->write_q)) &&
+#endif
+      !conn->timeout && !conn->zero_probe)
+    {
+      tcp_update_retrantimer(conn, TCP_RTO_MIN);
+      conn->zero_probe = true;
+    }
 }
 
 /****************************************************************************
@@ -616,8 +694,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
           if (conn->keepalive)
             {
-              uint32_t saveseq;
-
               /* Yes... has the idle period elapsed with no data or ACK
                * received from the remote peer?
                */
@@ -643,25 +719,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                     }
                   else
                     {
-                      /* And send the probe.
-                       * The packet we send must have these properties:
-                       *
-                       *   - TCP_ACK flag (only) is set.
-                       *   - Sequence number is the sequence number of
-                       *     previously ACKed data, i.e., the expected
-                       *     sequence number minus one.
-                       *
-                       * tcp_send() will send the TCP sequence number as
-                       * conn->sndseq.  Rather than creating a new
-                       * interface, we spoof tcp_end() here:
-                       */
-
-                      saveseq = tcp_getsequence(conn->sndseq);
-                      tcp_setsequence(conn->sndseq, saveseq - 1);
-
-                      tcp_send(dev, conn, TCP_ACK, hdrlen);
-
-                      tcp_setsequence(conn->sndseq, saveseq);
+                      tcp_xmit_probe(dev, conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
                       /* Increment the un-ACKed sequence number */
@@ -678,6 +736,53 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                 }
             }
 #endif
+
+          /* Is this an established connected with
+           * Zero window probe enabled?
+           */
+
+          if (conn->zero_probe)
+            {
+              if (conn->timer > hsec)
+                {
+                  /* Will not yet decrement to zero */
+
+                  conn->timer -= hsec;
+                }
+              else
+                {
+                  /* Yes.. Has the retry count expired? */
+
+                  if (conn->nrtx >= TCP_MAXRTX)
+                    {
+                      /* Yes... stop the network monitor, closing the
+                       * connection and all sockets associated with the
+                       * connection.
+                       */
+
+                      conn->zero_probe = false;
+                      tcp_stop_monitor(conn, TCP_ABORT);
+                    }
+                  else
+                    {
+                      tcp_xmit_probe(dev, conn);
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+                      /* Increment the un-ACKed sequence number */
+
+                      conn->sndseq_max++;
+#endif
+
+                      /* Update for the next probe */
+
+                      conn->nrtx++;
+                      conn->timer = MIN((TCP_RTO_MIN << conn->nrtx),
+                                        TCP_RTO_MAX);
+                    }
+
+                  goto done;
+                }
+            }
 
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
           /* Handle delayed acknowledgments.  Is there a segment with a
