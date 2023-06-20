@@ -19,6 +19,18 @@ config GPT_PARTITION
 	bool "GPT support"
 	default n
 
+config TXTABLE_PARTITION
+	bool "TXTABLE support"
+	default n
+
+if TXTABLE_PARTITION
+
+config TXTABLE_PARTITION_MAX_NUM
+	int "Max num of TXTABLE partition"
+	default 16
+
+endif
+
 endmenu
 
 endif

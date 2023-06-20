@@ -36,6 +36,10 @@ ifeq ($(CONFIG_GPT_PARTITION),y)
 CSRCS += fs_gpt.c
 endif
 
+ifeq ($(CONFIG_TXTABLE_PARTITION),y)
+CSRCS += fs_txtable.c
+endif
+
 # Include partition build support
 
 DEPPATH += --dep-path partition
