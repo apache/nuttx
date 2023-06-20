@@ -1119,6 +1119,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           flags &= ~TCP_POLL;
         }
     }
+  else
+    {
+      tcp_set_zero_probe(conn, flags);
+    }
 
   /* Continue waiting */
 

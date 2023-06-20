@@ -126,6 +126,9 @@
 
 #define TCP_FAST_RETRANSMISSION_THRESH 3
 
+#define TCP_RTO_MAX 240 /* 120s,The unit is half a second */
+#define TCP_RTO_MIN 1   /* 0.5s */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -355,6 +358,7 @@ struct tcp_conn_s
 #if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
   bool       sendfile;    /* True if sendfile operation is in progress */
 #endif
+  bool       zero_probe;   /* TCP zero window probe timer */
 
   /* connevents is a list of callbacks for each socket the uses this
    * connection (there can be more that one in the event that the the socket
@@ -760,7 +764,7 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
  * Input Parameters:
  *   conn  - The TCP connection of interest
  *   cb    - devif callback structure
- *   flags - Set of connection events events
+ *   flags - Set of connection events
  *
  * Returned Value:
  *   None
@@ -2303,6 +2307,27 @@ void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp);
 #ifdef __cplusplus
 }
 #endif
+
+/****************************************************************************
+ * Name: tcp_set_zero_probe
+ *
+ * Description:
+ *   Update the TCP probe timer for the provided TCP connection,
+ *   The timeout is accurate
+ *
+ * Input Parameters:
+ *   conn    - The TCP "connection" to poll for TX data
+ *   flags   - Set of connection events
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *
+ ****************************************************************************/
+
+void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint16_t flags);
 
 #endif /* !CONFIG_NET_TCP_NO_STACK */
 #endif /* CONFIG_NET_TCP */
