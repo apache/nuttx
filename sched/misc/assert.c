@@ -184,10 +184,10 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 }
 
 /****************************************************************************
- * Name: show_stacks
+ * Name: dump_stacks
  ****************************************************************************/
 
-static void show_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
+static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   uintptr_t intstack_base = up_get_intstackbase();
@@ -394,10 +394,10 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
 
 /****************************************************************************
- * Name: showtasks
+ * Name: dump_tasks
  ****************************************************************************/
 
-static void show_tasks(void)
+static void dump_tasks(void)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0 && defined(CONFIG_STACK_COLORATION)
   size_t stack_used = up_check_intstack();
@@ -610,7 +610,7 @@ void _assert(FAR const char *filename, int linenum,
   up_dump_register(regs);
 
 #ifdef CONFIG_ARCH_STACKDUMP
-  show_stacks(rtcb, up_getusrsp(regs));
+  dump_stacks(rtcb, up_getusrsp(regs));
 #endif
 
   /* Flush any buffered SYSLOG data */
@@ -619,7 +619,7 @@ void _assert(FAR const char *filename, int linenum,
 
   if (fatal)
     {
-      show_tasks();
+      dump_tasks();
 
 #ifdef CONFIG_ARCH_DEADLOCKDUMP
       /* Deadlock Dump */
