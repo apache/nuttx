@@ -30,23 +30,23 @@ choice ESP32S3_SPIFLASH_FS
 		bring-up.
 		If not selected, the MTD will be registered as a device node on /dev.
 
-	config ESP32S3_SPIFLASH_SMARTFS
-		bool "SmartFS"
-		select FS_SMARTFS
-		select MTD_SMART
+config ESP32S3_SPIFLASH_SMARTFS
+	bool "SmartFS"
+	select FS_SMARTFS
+	select MTD_SMART
 
-	config ESP32S3_SPIFLASH_NXFFS
-		bool "NXFFS"
-		select FS_NXFFS
+config ESP32S3_SPIFLASH_NXFFS
+	bool "NXFFS"
+	select FS_NXFFS
 
-	config ESP32S3_SPIFLASH_SPIFFS
-		bool "SPIFFS"
-		select FS_SPIFFS
+config ESP32S3_SPIFLASH_SPIFFS
+	bool "SPIFFS"
+	select FS_SPIFFS
 
-	config ESP32S3_SPIFLASH_LITTLEFS
-		bool "LittleFS"
-		select FS_LITTLEFS
+config ESP32S3_SPIFLASH_LITTLEFS
+	bool "LittleFS"
+	select FS_LITTLEFS
 
-endchoice
+endchoice # ESP32S3_SPIFLASH_FS
 
 endif # ARCH_BOARD_ESP32S3_DEVKIT

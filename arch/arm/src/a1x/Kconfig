@@ -14,7 +14,7 @@ choice
 config ARCH_CHIP_A10
 	bool "A10"
 
-endchoice
+endchoice # Allwinner A1X Chip Selection
 
 menu "Allwinner A1X Peripheral Support"
 

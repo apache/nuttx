@@ -117,7 +117,7 @@ config ESP32S3_INSTRUCTION_CACHE_LINE_16B
 config ESP32S3_INSTRUCTION_CACHE_LINE_32B
 	bool "32 Bytes"
 
-endchoice
+endchoice # ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
 
 config ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
 	int
@@ -168,7 +168,7 @@ config ESP32S3_DATA_CACHE_4WAYS
 config ESP32S3_DATA_CACHE_8WAYS
 	bool "8 ways"
 
-endchoice
+endchoice # ESP32S3_DCACHE_ASSOCIATED_WAYS
 
 config ESP32S3_DCACHE_ASSOCIATED_WAYS
 	int
@@ -191,7 +191,7 @@ config ESP32S3_DATA_CACHE_LINE_32B
 config ESP32S3_DATA_CACHE_LINE_64B
 	bool "64 Bytes"
 
-endchoice
+endchoice # ESP32S3_DATA_CACHE_LINE_SIZE
 
 config ESP32S3_DATA_CACHE_LINE_SIZE
 	int
@@ -382,7 +382,6 @@ config ESP32S3_LEDC
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Enable support to PWM on ESP32S3 using LEDC peripheral.
-
 
 config ESP32S3_USBSERIAL
 	bool "USB-Serial Driver"
@@ -1070,7 +1069,7 @@ endchoice
 config ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
 	bool "Don't use SPI flash driver in ROM"
 	default n
-	help
+	---help---
 		Use source code for SPI flash driver instead of functions
 		in ROM.
 
@@ -1078,7 +1077,7 @@ config ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
 	bool "SPI flash uses 32-bit address"
 	default n
 	select ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
-	help
+	---help---
 		SPI flash driver in ROM only support 24-bit address access,
 		if select the option, it will force to use source code instead
 		of functions in ROM, so that SPI flash driver can access full
@@ -1124,7 +1123,7 @@ config ESP32S3_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
 	default "/dev/otascratch"
 
-endif
+endif # ESP32S3_HAVE_OTA_PARTITION
 
 if ESP32S3_SPIFLASH
 
@@ -1364,7 +1363,7 @@ config ESP32S3_USER_IMAGE_OFFSET
 	---help---
 		Offset in SPI Flash for flashing the User application firmware image.
 
-endif
+endif # BUILD_PROTECTED
 
 endmenu # Application Image Configuration
 

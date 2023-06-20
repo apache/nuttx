@@ -118,7 +118,7 @@ config HOST_WINDOWS
 config HOST_OTHER
 	bool "Other"
 
-endchoice
+endchoice # Build Host Platform
 
 config TOOLCHAIN_WINDOWS
 	bool
@@ -175,7 +175,7 @@ config WINDOWS_OTHER
 		Build natively in another POSIX-like environment.  Additional
 		support may be necessary
 
-endchoice
+endchoice # Windows Build Environment
 
 config WINDOWS_MKLINK
 	bool "Use mklink"
@@ -245,13 +245,13 @@ config APPS_DIR
 		or to set up include file paths.
 
 config BASE_DEFCONFIG
-		string "Base Configuration"
-		default ""
-		---help---
-			This will be automatically be updated by the configuration
-			script. This is the base configuration file that was used to create the
-			current configuration. It is useful for getting the current configuration
-			on runtime.
+	string "Base Configuration"
+	default ""
+	---help---
+		This will be automatically be updated by the configuration
+		script. This is the base configuration file that was used to create the
+		current configuration. It is useful for getting the current configuration
+		on runtime.
 
 config BUILD_LOADABLE
 	bool
@@ -407,7 +407,7 @@ config UIMAGE_ENTRY_POINT
 	hex "uImage entry point"
 	default 0x0
 
-endif
+endif # UBOOT_UIMAGE
 
 menuconfig DFU_BINARY
 	bool "DFU binary format"
@@ -426,7 +426,7 @@ config DFU_VID
 config DFU_PID
 	hex "PID to use for DFU image"
 
-endif
+endif # DFU_BINARY
 endmenu # Binary Output Formats
 
 menu "Customize Header Files"
