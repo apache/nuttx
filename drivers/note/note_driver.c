@@ -1342,6 +1342,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
                       enter ? NOTE_IRQ_ENTER : NOTE_IRQ_LEAVE);
           DEBUGASSERT(irq <= UCHAR_MAX);
           note.nih_irq = irq;
+          note.nih_handler = (uintptr_t)handler;
         }
 
       /* Add the note to circular buffer */

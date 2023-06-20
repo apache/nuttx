@@ -409,6 +409,7 @@ struct note_syscall_leave_s
 struct note_irqhandler_s
 {
   struct note_common_s nih_cmn; /* Common note parameters */
+  uintptr_t nih_handler;        /* IRQ handler address */
   uint8_t nih_irq;              /* IRQ number */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
