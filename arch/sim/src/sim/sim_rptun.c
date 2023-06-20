@@ -33,6 +33,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define SIM_RPTUN_RESET     0x1
+#define SIM_RPTUN_PANIC     0x2
+#define SIM_RPTUN_MASK      0xffff
+#define SIM_RPTUN_SHIFT     16
 #define SIM_RPTUN_WORK_DELAY 1
 
 /****************************************************************************
@@ -44,6 +48,8 @@ struct sim_rptun_shmem_s
   volatile uintptr_t        base;
   volatile unsigned int     seqs;
   volatile unsigned int     seqm;
+  volatile unsigned int     cmds;
+  volatile unsigned int     cmdm;
   struct rptun_rsc_s        rsc;
   char                      buf[0x10000];
 };
@@ -133,7 +139,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->config.r2h_buf_size      = 0x800;
       rsc->config.h2r_buf_size      = 0x800;
 
-      priv->shmem->base              = (uintptr_t)priv->shmem;
+      priv->shmem->base             = (uintptr_t)priv->shmem;
     }
   else
     {
@@ -205,6 +211,57 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
   return 0;
 }
 
+static void sim_rptun_reset(struct rptun_dev_s *dev, int value)
+{
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
+
+  DEBUGASSERT((value & ~SIM_RPTUN_MASK) == 0);
+
+  if (priv->master)
+    {
+      priv->shmem->cmdm = value | (SIM_RPTUN_RESET << SIM_RPTUN_SHIFT);
+    }
+  else
+    {
+      priv->shmem->cmds = value | (SIM_RPTUN_RESET << SIM_RPTUN_SHIFT);
+    }
+}
+
+static void sim_rptun_panic(struct rptun_dev_s *dev)
+{
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
+
+  if (priv->master)
+    {
+      priv->shmem->cmdm = SIM_RPTUN_PANIC << SIM_RPTUN_SHIFT;
+    }
+  else
+    {
+      priv->shmem->cmds = SIM_RPTUN_PANIC << SIM_RPTUN_SHIFT;
+    }
+}
+
+static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
+{
+  unsigned int cmd = priv->master ? priv->shmem->cmds : priv->shmem->cmdm;
+
+  switch ((cmd >> SIM_RPTUN_SHIFT) & SIM_RPTUN_MASK)
+    {
+      case SIM_RPTUN_RESET:
+        host_abort(cmd & SIM_RPTUN_MASK);
+        break;
+
+      case SIM_RPTUN_PANIC:
+        PANIC();
+        break;
+
+      default:
+        break;
+    }
+}
+
 static void sim_rptun_work(void *arg)
 {
   struct sim_rptun_dev_s *dev = arg;
@@ -212,6 +269,8 @@ static void sim_rptun_work(void *arg)
   if (dev->shmem != NULL)
     {
       bool should_notify = false;
+
+      sim_rptun_check_cmd(dev);
 
       if (dev->master && dev->seq != dev->shmem->seqs)
         {
@@ -250,6 +309,8 @@ static const struct rptun_ops_s g_sim_rptun_ops =
   .stop              = sim_rptun_stop,
   .notify            = sim_rptun_notify,
   .register_callback = sim_rptun_register_callback,
+  .reset             = sim_rptun_reset,
+  .panic             = sim_rptun_panic,
 };
 
 /****************************************************************************
