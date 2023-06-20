@@ -46,7 +46,7 @@ config ARM_TOOLCHAIN_ARMCLANG
 	bool "ARM Compiler Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
-endchoice
+endchoice # ARM Toolchain Selection
 
 choice
 	prompt "ARM MCU selection"
@@ -625,7 +625,7 @@ config ARCH_CHIP_ARM_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/arm/src/.
 
-endchoice
+endchoice # ARM MCU selection
 
 config ARCH_ARM7TDMI
 	bool
@@ -1322,7 +1322,7 @@ config UNWINDER_ARM
 		the performance is not affected. Currently, this feature
 		only works with EABI compilers.
 
-endchoice
+endchoice # Choose ARM unwinder
 
 endif
 
