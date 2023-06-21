@@ -83,17 +83,17 @@
 
 #define VIRTNET_TXTIMEOUT (60*CLK_TCK)
 
+/* virtio net related definition */
+
+#define VIRTIO_NET_HDRLEN 10
+
 /* Packet buffer size */
 
-#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+#define PKTBUF_SIZE (VIRTIO_NET_HDRLEN + MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->vnet_dev.d_buf)
-
-/* virtio net related definition */
-
-#define VIRTIO_NET_HDRLEN 10
 
 #define VIRTIO_NET_Q_RX 0
 #define VIRTIO_NET_Q_TX 1
@@ -259,7 +259,6 @@ static void virtnet_add_packets_to_rxq(FAR struct virtnet_driver_s *priv)
   FAR struct virtqueue *rxq = priv->rxq;
   FAR uint8_t  *pkt;
   uint16_t d1;
-  uint16_t d2;
   uint32_t i;
 
   vrtinfo("+++ rxq->len=%" PRId32 "  rxq->avail->idx=%d \n",
@@ -271,27 +270,20 @@ static void virtnet_add_packets_to_rxq(FAR struct virtnet_driver_s *priv)
       pkt = kmm_memalign(16, PKTBUF_SIZE);
       ASSERT(pkt);
 
-      /* Allocate new descriptors for header and packet */
+      /* Allocate a new descriptor for header + packet */
 
-      d1 = virtq_alloc_desc(rxq, (i * 2),  (FAR void *)&g_hdr);
-      d2 = virtq_alloc_desc(rxq, (i * 2) + 1, pkt);
+      d1 = virtq_alloc_desc(rxq, i, pkt);
 
-      /* Set up the descriptor for header */
+      /* Set up the descriptor */
 
-      rxq->desc[d1].len   = VIRTIO_NET_HDRLEN;
-      rxq->desc[d1].flags = VIRTQ_DESC_F_WRITE | VIRTQ_DESC_F_NEXT;
-      rxq->desc[d1].next  = d2;
+      rxq->desc[d1].len   = PKTBUF_SIZE;
+      rxq->desc[d1].flags = VIRTQ_DESC_F_WRITE;
 
-      /* Set up the descriptor for packet */
-
-      rxq->desc[d2].len   = PKTBUF_SIZE;
-      rxq->desc[d2].flags = VIRTQ_DESC_F_WRITE;
-
-      /* Set the first descriptor to the avail->ring */
+      /* Set the descriptor to avail->ring */
 
       rxq->avail->ring[i] = d1;
 
-      /* Increment the avail->idx for each two descriptors */
+      /* Increment the avail->idx */
 
       virtio_mb();
       rxq->avail->idx += 1;
@@ -593,17 +585,16 @@ static void virtnet_receive(FAR struct virtnet_driver_s *priv)
   for (idx = priv->rxq->last_used_idx; idx != used; idx++)
     {
       uint16_t id  = idx % priv->rxq->len;
-      uint16_t d1  = priv->rxq->used->ring[id].id; /* index for header */
-      uint16_t d2  = priv->rxq->desc[d1].next;     /* index for packet */
+      uint16_t d1  = priv->rxq->used->ring[id].id; /* index for header + packet */
       uint32_t len = priv->rxq->used->ring[id].len;
-      DEBUGASSERT(d2 == (d1 + 1));
+      uint16_t flags = priv->rxq->desc[d1].flags;
 
-      vrtinfo("+++ idx=%d id=%d used->idx=%d: d1=%d d2=%d len=%" PRId32 "\n",
-              idx, id, priv->rxq->used->idx, d1, d2, len);
+      vrtinfo("+++ idx=%d id=%d used->idx=%d: d1=%d f=%d len=%" PRId32 "\n",
+              idx, id, priv->rxq->used->idx, d1, flags, len);
 
       /* Set the packet info to d_buf and set d_len */
 
-      priv->vnet_dev.d_buf = priv->rxq->desc_virt[d2];
+      priv->vnet_dev.d_buf = priv->rxq->desc_virt[d1] + VIRTIO_NET_HDRLEN;
       priv->vnet_dev.d_len = len - VIRTIO_NET_HDRLEN;
 
       vrtinfo("Receiving packet, pktlen: %d\n", priv->vnet_dev.d_len);
