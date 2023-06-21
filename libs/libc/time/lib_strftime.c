@@ -305,7 +305,8 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
            case 'l':
              {
-               len = snprintf(dest, chleft, "%2d", tm->tm_hour % 12);
+               len = snprintf(dest, chleft, "%2d", (tm->tm_hour % 12) != 0 ?
+                                                   (tm->tm_hour % 12) : 12);
              }
              break;
 
