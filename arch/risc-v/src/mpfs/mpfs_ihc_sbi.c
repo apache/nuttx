@@ -68,6 +68,34 @@ static uint32_t g_connected_harts_c;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mpfs_modifyreg32
+ *
+ * Description:
+ *   This is a copy of modifyreg32() without spinlock.  That function is a
+ *   real danger here as it is likely located in eNVM, thus being a real
+ *   bottleneck.
+ *
+ * Input Parameters:
+ *   addr       - Address to perform the operation
+ *   clearbits  - Bits to clear
+ *   setbits    - Bits to set
+ *
+ * Returned Value:
+ *   Remote hart id
+ *
+ ****************************************************************************/
+
+void mpfs_modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits)
+{
+  uint32_t   regval;
+
+  regval  = getreg32(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg32(regval, addr);
+}
+
+/****************************************************************************
  * Name: mpfs_ihc_sbi_parse_incoming_hartid
  *
  * Description:
@@ -338,7 +366,7 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
 
           /* Clear the ack */
 
-          modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), ACK_CLR, 0);
+          mpfs_modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), ACK_CLR, 0);
         }
     }
   else if (is_mp && !is_ack)
@@ -362,7 +390,7 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
        * if it has RMPIE bit set in the control register
        */
 
-      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, ACK_INT);
+      mpfs_modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), MP_MASK, ACK_INT);
     }
   else if (is_ack && is_mp)
     {
@@ -372,8 +400,8 @@ static void mpfs_ihc_sbi_rx_message(uint32_t rhartid, uint32_t mhartid,
 
       /* Clear the ack and mp */
 
-      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), ACK_CLR | MP_MASK,
-                  ACK_INT);
+      mpfs_modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), ACK_CLR | MP_MASK,
+                       ACK_INT);
     }
 }
 
@@ -485,16 +513,16 @@ static void mpfs_ihc_sbi_local_remote_config(uint32_t hart_to_configure,
     }
 #endif
 
-  modifyreg32(MPFS_IHC_CTRL(hart_to_configure, rhartid), 0, MPIE_EN |
-                            ACKIE_EN);
+  mpfs_modifyreg32(MPFS_IHC_CTRL(hart_to_configure, rhartid), 0, MPIE_EN |
+                   ACKIE_EN);
 
   /* OpenSBI extension may configure 2x consecutive harts */
 
 #ifdef CONFIG_MPFS_IHC_TWO_RPMSG_CHANNELS
   if ((hart_to_configure + 1) < MPFS_NUM_HARTS)
     {
-      modifyreg32(MPFS_IHC_CTRL(hart_to_configure + 1, rhartid + 1), 0,
-                                MPIE_EN | ACKIE_EN);
+      mpfs_modifyreg32(MPFS_IHC_CTRL(hart_to_configure + 1, rhartid + 1), 0,
+                       MPIE_EN | ACKIE_EN);
     }
 #endif
 }
@@ -554,7 +582,8 @@ static int mpfs_ihc_sbi_tx_message(ihc_channel_t channel, uint32_t *message)
 
       /* Set the MP bit. This will notify other of incoming hart message */
 
-      modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, RMP_MESSAGE_PRESENT);
+      mpfs_modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0,
+                       RMP_MESSAGE_PRESENT);
     }
 
   return OK;
@@ -643,23 +672,12 @@ int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
          * meanwhile with the SW flow control.
          */
 
-        modifyreg32(MPFS_IHC_INT_EN(0), 0, 1);  /* Flow contol on */
         result = mpfs_ihc_sbi_tx_message(remote_channel, message_ptr);
         break;
 
       case SBI_EXT_IHC_RECEIVE:
         mpfs_ihc_sbi_message_present_indirect_isr(remote_channel,
                                                   message_ptr);
-
-        /* ACK_IRQ indicates the end of the IHC_SEND transaction */
-
-        struct ihc_sbi_rx_msg_s *msg;
-        msg = (struct ihc_sbi_rx_msg_s *)message_ptr;
-
-        if (msg->irq_type & ACK_IRQ)
-          {
-            modifyreg32(MPFS_IHC_INT_EN(0), 1, 0);  /* Flow contol off */
-          }
         break;
 
       default:

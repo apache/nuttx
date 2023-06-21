@@ -38,7 +38,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
 
@@ -650,8 +649,6 @@ static void mpfs_ihc_message_present_isr(void)
 
       /* Process incoming packet */
 
-      irqstate_t flags = spin_lock_irqsave(NULL);
-
       mpfs_ihc_rx_message(origin_hart, mhartid, is_ack, is_msg, NULL);
 
       if (is_ack)
@@ -661,8 +658,6 @@ static void mpfs_ihc_message_present_isr(void)
           modifyreg32(MPFS_IHC_CTRL(mhartid, origin_hart),
                       ACK_CLR, 0);
         }
-
-      spin_unlock_irqrestore(NULL, flags);
     }
 }
 
@@ -783,7 +778,6 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
   uint32_t message_size = getreg32(MPFS_IHC_MSG_SIZE(mhartid, rhartid));
   uint32_t ctrl_reg;
   uint32_t retries      = 10000;
-  irqstate_t flags;
 
   DEBUGASSERT(message_size <= IHC_MAX_MESSAGE_SIZE);
 
@@ -807,8 +801,6 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
     }
   else
     {
-      flags = spin_lock_irqsave(NULL);
-
       /* Fill the buffer */
 
       for (i = 0; i < message_size; i++)
@@ -820,17 +812,14 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
 
       /* If we're unlucky, we cannot send MP yet.. come back later */
 
-      if (ctrl_reg & (ACK_INT | MP_MESSAGE_PRESENT))
+      if (ctrl_reg & (MP_MESSAGE_PRESENT))
         {
-          spin_unlock_irqrestore(NULL, flags);
           return -EBUSY;
         }
 
       /* Set the MP bit. This will notify other of incoming hart message */
 
       modifyreg32(MPFS_IHC_CTRL(mhartid, rhartid), 0, RMP_MESSAGE_PRESENT);
-
-      spin_unlock_irqrestore(NULL, flags);
 
       /* Wait for the ACK to arrive to maintain the logic */
 
@@ -1091,24 +1080,8 @@ static int mpfs_rptun_stop(struct rptun_dev_s *dev)
 static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
 {
   uint32_t tx_msg[IHC_MAX_MESSAGE_SIZE];
-  uint32_t retries = 10000;
-  uint32_t flow_ctrl_en;
+  uint32_t retries = 5;
   int      ret = OK;
-
-  /* INT_EN(0) is used by the bootloader (Linux) to indicate that
-   * it will be sending data.  Wait until it finishes first.
-   */
-
-  flow_ctrl_en = getreg32(MPFS_IHC_INT_EN(0));
-
-  if (flow_ctrl_en != 0)
-    {
-      do
-        {
-          flow_ctrl_en = getreg32(MPFS_IHC_INT_EN(0));
-        }
-      while ((flow_ctrl_en != 0) && --retries);
-    }
 
   /* We only care about the queue with notifyid VRING0 */
 
@@ -1117,21 +1090,15 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
       tx_msg[0] = notifyid;
       tx_msg[1] = 0;
 
-      ret = mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
-      if (ret != OK)
+      /* This failure should happen very rarely */
+
+      do
         {
-          retries = 5;
-
-          /* This failure should happen very rarely */
-
-          do
-            {
-               ret = mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
-            }
-          while ((ret != OK) && --retries);
-
-          DEBUGASSERT(ret == OK);
+           ret = mpfs_ihc_tx_message(CONTEXTA_HARTID, tx_msg);
         }
+      while ((ret != OK) && --retries);
+
+      DEBUGASSERT(ret == OK);
     }
 
   return ret;
