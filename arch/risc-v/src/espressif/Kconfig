@@ -224,6 +224,12 @@ config ESPRESSIF_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESPRESSIF_USBSERIAL
+	bool "USB-Serial-JTAG Driver"
+	default n
+	select OTHER_UART_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
 config ESPRESSIF_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	default n
