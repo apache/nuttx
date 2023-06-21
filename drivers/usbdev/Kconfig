@@ -464,7 +464,7 @@ config CDCACM_EPBULKOUT
 endif
 
 config CDCACM_EPBULKOUT_FSSIZE
-	int "Bulk OUT full speed  MAXPACKET size"
+	int "Bulk OUT full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk OUT endpoint if full speed mode.
@@ -473,7 +473,7 @@ config CDCACM_EPBULKOUT_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCACM_EPBULKOUT_HSSIZE
-	int "Bulk OUT out high speed  MAXPACKET size"
+	int "Bulk OUT out high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.
@@ -496,7 +496,7 @@ config CDCACM_EPBULKIN
 endif
 
 config CDCACM_EPBULKIN_FSSIZE
-	int "Bulk IN full speed  MAXPACKET size"
+	int "Bulk IN full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk IN endpoint if full speed mode.
@@ -505,7 +505,7 @@ config CDCACM_EPBULKIN_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCACM_EPBULKIN_HSSIZE
-	int "Bulk IN high speed  MAXPACKET size"
+	int "Bulk IN high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk IN endpoint if high speed mode.
@@ -648,7 +648,7 @@ config USBADB_EPBULKIN
 endif
 
 config USBADB_EPBULKOUT_FSSIZE
-	int "Bulk OUT full speed  MAXPACKET size"
+	int "Bulk OUT full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk OUT endpoint if full speed mode.
@@ -657,7 +657,7 @@ config USBADB_EPBULKOUT_FSSIZE
 if USBDEV_DUALSPEED
 
 config USBADB_EPBULKOUT_HSSIZE
-	int "Bulk OUT out high speed  MAXPACKET size"
+	int "Bulk OUT out high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.
@@ -666,7 +666,7 @@ config USBADB_EPBULKOUT_HSSIZE
 endif # USBDEV_DUALSPEED
 
 config USBADB_EPBULKIN_FSSIZE
-	int "Bulk IN full speed  MAXPACKET size"
+	int "Bulk IN full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk IN endpoint if full speed mode.
@@ -675,7 +675,7 @@ config USBADB_EPBULKIN_FSSIZE
 if USBDEV_DUALSPEED
 
 config USBADB_EPBULKIN_HSSIZE
-	int "Bulk IN high speed  MAXPACKET size"
+	int "Bulk IN high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk IN endpoint if high speed mode.
@@ -1164,7 +1164,7 @@ config CDCECM_EPBULKOUT
 endif # !CDCECM_COMPOSITE
 
 config CDCECM_EPBULKOUT_FSSIZE
-	int "Bulk OUT full speed  MAXPACKET size"
+	int "Bulk OUT full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk OUT endpoint if full speed mode.
@@ -1173,7 +1173,7 @@ config CDCECM_EPBULKOUT_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCECM_EPBULKOUT_HSSIZE
-	int "Bulk OUT out high speed  MAXPACKET size"
+	int "Bulk OUT out high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.

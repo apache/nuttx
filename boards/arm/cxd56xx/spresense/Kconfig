@@ -299,7 +299,7 @@ endchoice
 
 config CXD56_AUDIO_I2S_RATE_1
 	int "I2S0 data rate"
-	default  48000
+	default 48000
 	range 48000 192000
 	---help---
 		This designates input and output data rate of I2S.
@@ -353,7 +353,7 @@ endchoice
 
 config CXD56_AUDIO_I2S_RATE_2
 	int "I2S1 data rate"
-	default  48000
+	default 48000
 	range 48000 192000
 	---help---
 		This designates input and output data rate of I2S1.
