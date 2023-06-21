@@ -43,6 +43,7 @@
 #include "esp_gpio.h"
 #include "esp_irq.h"
 #include "esp_lowputc.h"
+#include "esp_usbserial.h"
 
 #include "hal/uart_hal.h"
 #include "periph_ctrl.h"
@@ -326,7 +327,7 @@ void riscv_lowputc(char ch)
   struct esp_uart_s *priv = &g_uart0_config;
 #  elif defined (CONFIG_UART1_SERIAL_CONSOLE)
   struct esp_uart_s *priv = &g_uart1_config;
-#endif
+#  endif
 
   /* Wait until the TX FIFO has space to insert new char */
 
@@ -335,6 +336,8 @@ void riscv_lowputc(char ch)
   /* Then send the character */
 
   esp_lowputc_send_byte(priv, ch);
+#elif defined(CONFIG_ESPRESSIF_USBSERIAL)
+  esp_usbserial_write(ch);
 #endif /* CONSOLE_UART */
 }
 

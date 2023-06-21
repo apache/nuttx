@@ -47,6 +47,10 @@
 #include "esp_irq.h"
 #include "esp_lowputc.h"
 
+#ifdef CONFIG_ESPRESSIF_USBSERIAL
+#  include "esp_usbserial.h"
+#endif
+
 #include "esp_clk_tree.h"
 #include "hal/uart_hal.h"
 #include "soc/clk_tree_defs.h"
@@ -93,6 +97,11 @@
 #    define UART1_ASSIGNED      1
 #  endif
 #endif /* CONSOLE_UART */
+
+#ifdef CONFIG_ESPRESSIF_USBSERIAL
+#  define CONSOLE_DEV           g_uart_usbserial
+#  define TTYACM0_DEV           g_uart_usbserial
+#endif
 
 /* Pick ttyS1 */
 
@@ -1116,6 +1125,10 @@ void riscv_serialinit(void)
 
 #ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
+
+#ifdef CONFIG_ESPRESSIF_USBSERIAL
+  uart_register("/dev/ttyACM0", &TTYACM0_DEV);
 #endif
 }
 
