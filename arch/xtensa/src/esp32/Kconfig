@@ -2228,7 +2228,7 @@ config ESP32_PHY_INIT_DATA_ERROR
 		If not enabled, the PHY init data will not be updated when an error occurs.
 endif
 
-endmenu  # PHY
+endmenu # PHY
 
 menu "Real-Time Timer"
 	depends on ESP32_RT_TIMER

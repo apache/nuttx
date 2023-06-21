@@ -10718,7 +10718,7 @@ menu "RTC Configuration"
 config STM32_RTC_MAGIC_REG
 	int "BKP register"
 	default 0
-	range  0 19
+	range 0 19
 	depends on !STM32_HAVE_RTC_COUNTER
 	---help---
 		The BKP register used to store/check the Magic value to determine if
