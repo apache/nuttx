@@ -2880,15 +2880,21 @@ static void usbclass_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   FAR struct rndis_driver_s *drvr = (FAR struct rndis_driver_s *)classdev;
   FAR struct rndis_alloc_s *alloc = (FAR struct rndis_alloc_s *)drvr->dev;
-
+  if (!alloc->dev.registered)
+    {
+#ifdef CONFIG_USBADB_COMPOSITE
+      kmm_free(alloc);
+#endif
+      return;
+    }
   if (drvr->dev->registered)
     {
       netdev_unregister(&drvr->dev->netdev);
       drvr->dev->registered = false;
-    }
-  else
-    {
+#ifndef CONFIG_RNDIS_COMPOSITE
       kmm_free(alloc);
+#endif
+      return;
     }
 }
 
