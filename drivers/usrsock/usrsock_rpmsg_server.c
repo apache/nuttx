@@ -578,7 +578,6 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
                                                             false);
               if (!iov[i].iov_base)
                 {
-                  events |= USRSOCK_EVENT_RECVFROM_AVAIL;
                   break;
                 }
 
@@ -607,11 +606,15 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
               else
                 {
                   iov[i].iov_len = 0;
-                  events |= USRSOCK_EVENT_RECVFROM_AVAIL;
                   break;
                 }
 
               i++;
+            }
+
+          if (usrsock_rpmsg_available(&priv->socks[req->usockid], FIONREAD))
+            {
+              events |= USRSOCK_EVENT_RECVFROM_AVAIL;
             }
         }
     }
