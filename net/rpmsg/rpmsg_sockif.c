@@ -898,26 +898,24 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
             {
               eventset |= POLLHUP;
             }
-          else
+
+          nxmutex_lock(&conn->sendlock);
+
+          if (rpmsg_socket_get_space(conn) > 0)
             {
-              nxmutex_lock(&conn->sendlock);
-
-              if (rpmsg_socket_get_space(conn) > 0)
-                {
-                  eventset |= POLLOUT;
-                }
-
-              nxmutex_unlock(&conn->sendlock);
-
-              nxmutex_lock(&conn->recvlock);
-
-              if (!circbuf_is_empty(&conn->recvbuf))
-                {
-                  eventset |= POLLIN;
-                }
-
-              nxmutex_unlock(&conn->recvlock);
+              eventset |= POLLOUT;
             }
+
+          nxmutex_unlock(&conn->sendlock);
+
+          nxmutex_lock(&conn->recvlock);
+
+          if (!circbuf_is_empty(&conn->recvbuf))
+            {
+              eventset |= POLLIN;
+            }
+
+          nxmutex_unlock(&conn->recvlock);
         }
       else if (!_SS_ISCONNECTED(conn->sconn.s_flags) &&
                _SS_ISNONBLOCK(conn->sconn.s_flags))
