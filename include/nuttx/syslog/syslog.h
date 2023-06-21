@@ -100,11 +100,12 @@ typedef CODE void (*syslog_close_t)(FAR struct syslog_channel_s *channel);
 
 struct syslog_channel_ops_s
 {
-  syslog_putc_t  sc_putc;   /* Normal buffered output */
-  syslog_putc_t  sc_force;  /* Low-level output for interrupt handlers */
-  syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
-  syslog_write_t sc_write;  /* Write multiple bytes */
-  syslog_close_t sc_close;  /* Channel close callback */
+  syslog_putc_t  sc_putc;         /* Normal buffered output */
+  syslog_putc_t  sc_force;        /* Low-level output for interrupt handlers */
+  syslog_flush_t sc_flush;        /* Flush buffered output (on crash) */
+  syslog_write_t sc_write;        /* Write multiple bytes */
+  syslog_write_t sc_write_force;  /* Write multiple bytes for interrupt handlers */
+  syslog_close_t sc_close;        /* Channel close callback */
 };
 
 /* This structure provides the interface to a SYSLOG channel */
