@@ -142,7 +142,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
   /* Associate the inode with a file structure */
 
   memset(shm, 0, sizeof(*shm));
-  shm->f_oflags = oflags;
+  shm->f_oflags = oflags | O_CLOEXEC | O_NOFOLLOW;
   shm->f_inode = inode;
 
 errout_with_sem:
