@@ -158,6 +158,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
   struct sockaddr_storage kaddr;
   FAR struct sockaddr *ufrom;
   FAR void *kbuf;
+  FAR void *ubuf;
 #endif
 
   /* recvfrom() is a cancellation point */
@@ -176,7 +177,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
       goto errout_with_cancelpt;
     }
 
-  memcpy(kbuf, buf, len);
+  ubuf = buf;
   buf = kbuf;
 
   /* Copy the address data to kernel, store the original user pointer */
@@ -199,6 +200,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
     }
 
 #ifdef CONFIG_BUILD_KERNEL
+  memcpy(ubuf, buf, len);
   kmm_free(kbuf);
 
   /* Copy the address back to user */
