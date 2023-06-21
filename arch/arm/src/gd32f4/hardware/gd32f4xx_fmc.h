@@ -96,6 +96,8 @@
 #define GD32_FMC_CTL_OFFSET              0x0010 /* FMC control register offset */
 #define GD32_FMC_OBCTL0_OFFSET           0x0014 /* FMC option byte control register 0 offset */
 #define GD32_FMC_OBCTL1_OFFSET           0x0018 /* FMC option byte control register 1 offset */
+#define GD32_FMC_PECFG_OFFSET            0x0020 /* FMC page erase configuration register offset*/
+#define GD32_FMC_PEKEY_OFFSET            0x0024 /* FMC unlock page erase key register offset*/
 #define GD32_FMC_WSEN_OFFSET             0x00FC /* FMC wait state enable register offset */
 #define GD32_FMC_PID_OFFSET              0x0100 /* FMC product ID register offset */
 
@@ -108,6 +110,8 @@
 #define GD32_FMC_CTL                     (GD32_FMC_BASE+GD32_FMC_CTL_OFFSET)    /* FMC control register */
 #define GD32_FMC_OBCTL0                  (GD32_FMC_BASE+GD32_FMC_OBCTL0_OFFSET) /* FMC option byte control register 0 */
 #define GD32_FMC_OBCTL1                  (GD32_FMC_BASE+GD32_FMC_OBCTL1_OFFSET) /* FMC option byte control register 1 */
+#define GD32_FMC_PECFG                   (GD32_FMC_BASE+GD32_FMC_PECFG_OFFSET)  /* FMC page erase configuration register */
+#define GD32_FMC_PEKEY                   (GD32_FMC_BASE+GD32_FMC_PEKEY_OFFSET)  /* FMC unlock page erase key register */
 #define GD32_FMC_WSEN                    (GD32_FMC_BASE+GD32_FMC_WSEN_OFFSET)   /* FMC wait state enable register */
 #define GD32_FMC_PID                     (GD32_FMC_BASE+GD32_FMC_PID_OFFSET)    /* FMC product ID register */
 
@@ -228,12 +232,16 @@
 #define FMC_OBCTL1_WP1_SHIFT        (16) /* Bits 16-27: erase/program protection of each sector when DRP is 0 */
 #define FMC_OBCTL1_WP1_MASK              (0xfff << FMC_OBCTL1_WP1_SHIFT)
 
+/* FMC_PECFG */
+#define FMC_PE_EN                   (1 << 31) /* the enable bit of page erase function */
+
 /* FMC wait state enable register */
 #define FMC_WSEN_WSEN                    (1 << 0) /* FMC wait state enable bit */
 
 /* FMC unlock key */
 #define FMC_UNLOCK_KEY0                  (0x45670123)       /* Unlock key 0 */
 #define FMC_UNLOCK_KEY1                  (0xCDEF89AB)       /* Unlock key 1 */
+#define FMC_UNLOCK_PE_KEY                (0xA9B8C7D6)       /* unlock page erase function key */
 #define FMC_OB_UNLOCK_KEY0               (0x08192A3B)       /* ob unlock key 0 */
 #define FMC_OB_UNLOCK_KEY1               (0x4C5D6E7F)       /* ob unlock key 1 */
 

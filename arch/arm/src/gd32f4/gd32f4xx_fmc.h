@@ -83,6 +83,25 @@ int gd32_fmc_unlock(void);
 
 int gd32_fmc_lock(void);
 
+#if defined(CONFIG_GD32F4_GD32F470)
+
+/****************************************************************************
+ * Name: gd32_fmc_page_erase
+ *
+ * Description:
+ *   Erase page
+ *
+ * Parameters:
+ *   fmc_page - Select the page to erase
+ *
+ * Return Value:
+ *    State of FMC
+ *
+ ****************************************************************************/
+
+gd32_fmc_state_enum gd32_fmc_page_erase(uint32_t fmc_page);
+
+#endif
 /****************************************************************************
  * Name: gd32_fmc_sector_erase
  *

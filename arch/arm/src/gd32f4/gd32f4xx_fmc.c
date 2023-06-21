@@ -216,6 +216,60 @@ int gd32_fmc_lock(void)
   return ret;
 }
 
+#if defined(CONFIG_GD32F4_GD32F470)
+
+/****************************************************************************
+ * Name: gd32_fmc_page_erase
+ *
+ * Description:
+ *   Erase page
+ *
+ * Parameters:
+ *   fmc_page - Select the page to erase
+ *
+ * Return Value:
+ *    State of FMC
+ *
+ ****************************************************************************/
+
+gd32_fmc_state_enum gd32_fmc_page_erase(uint32_t fmc_page)
+{
+  gd32_fmc_state_enum fmc_state = FMC_READY;
+  uint32_t regval;
+
+  /* Wait for the FMC ready */
+
+  fmc_state = gd32_fmc_ready_wait(FMC_TIMEOUT_COUNT);
+
+  if (FMC_READY == fmc_state)
+    {
+      /* unlock page erase operation */
+
+      putreg32(FMC_UNLOCK_PE_KEY, GD32_FMC_PEKEY);
+
+      /* start page erase */
+
+      regval = FMC_PE_EN | fmc_page;
+      putreg32(regval, GD32_FMC_PECFG);
+      modifyreg32(GD32_FMC_CTL, FMC_CTL_SN_MASK, 0);
+      modifyreg32(GD32_FMC_CTL, 0, FMC_CTL_SER);
+      modifyreg32(GD32_FMC_CTL, 0, FMC_CTL_START);
+
+      /* Wait for the FMC ready */
+
+      fmc_state = gd32_fmc_ready_wait(FMC_TIMEOUT_COUNT);
+
+      modifyreg32(GD32_FMC_PECFG, FMC_PE_EN, 0);
+      modifyreg32(GD32_FMC_CTL, FMC_CTL_SER, 0);
+    }
+
+  /* return the FMC state */
+
+  return fmc_state;
+}
+
+#endif
+
 /****************************************************************************
  * Name: gd32_fmc_sector_erase
  *
