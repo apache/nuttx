@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_getres.c
+ * sched/clock/clock_getcpuclockid.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,10 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <time.h>
 #include <errno.h>
-#include <debug.h>
+#include <unistd.h>
 
 #include "clock/clock.h"
 
@@ -36,43 +35,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_getres
+ * Name: clock_getcpuclockid
  *
  * Description:
- *   Clock Functions based on POSIX APIs
+ *   The function shall return clock id of the CPU-time clock of the process
+ *   specified by pid
+ *
+ * Input Parameters:
+ *   pid - the specified process id
+ *   clockid - the clock type that need to setup
+ *
+ * Returned Value:
+ *   Return 0 on success, return error number on error
  *
  ****************************************************************************/
 
-int clock_getres(clockid_t clock_id, struct timespec *res)
+int clock_getcpuclockid(pid_t pid, FAR clockid_t *clockid)
 {
-  clockid_t clock_type = clock_id & CLOCK_MASK;
-  int       ret = OK;
-
-  sinfo("clock_id=%d, clock_type=%d\n", clock_id, clock_type);
-
-  switch (clock_type)
+  if (pid < 0)
     {
-      default:
-        serr("Returning ERROR\n");
-        set_errno(EINVAL);
-        ret = ERROR;
-        break;
-
-      case CLOCK_MONOTONIC:
-      case CLOCK_BOOTTIME:
-      case CLOCK_REALTIME:
-      case CLOCK_PROCESS_CPUTIME_ID:
-      case CLOCK_THREAD_CPUTIME_ID:
-
-        /* Form the timspec using clock resolution in nanoseconds */
-
-        res->tv_sec  = 0;
-        res->tv_nsec = NSEC_PER_TICK;
-
-        sinfo("Returning res=(%d,%d)\n", (int)res->tv_sec,
-                                         (int)res->tv_nsec);
-        break;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
-  return ret;
+  /* If the pid is 0, we need to use the pid of current process */
+
+  if (pid == 0)
+    {
+      pid = getpid();
+    }
+
+  /* For clock_getcpuclockid, the clock type are
+   * CLOCK_PROCESS_CPUTIME_ID
+   */
+
+  *clockid = (pid << CLOCK_SHIFT) | CLOCK_PROCESS_CPUTIME_ID;
+  return OK;
 }

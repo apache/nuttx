@@ -168,6 +168,7 @@ SYSCALL_LOOKUP(clock_nanosleep,            4)
  */
 
 SYSCALL_LOOKUP(clock,                      0)
+SYSCALL_LOOKUP(clock_getcpuclockid,        2)
 SYSCALL_LOOKUP(clock_getres,               2)
 SYSCALL_LOOKUP(clock_gettime,              2)
 SYSCALL_LOOKUP(clock_settime,              2)
