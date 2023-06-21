@@ -99,7 +99,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
        */
 
       ret = nxsig_ismember(&tcb->sigwaitmask, info->siginfo->si_signo);
-      if (ret == 1 && !info->atcb)
+      if (ret == 1 && (!info->atcb || info->siginfo->si_signo == SIGCHLD))
         {
           /* Yes.. This means that the task is suspended, waiting for this
            * signal to occur. Stop looking and use this TCB.  The
@@ -118,7 +118,8 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
           /* Limit to one thread */
 
           info->atcb = tcb;
-          if (info->ptcb != NULL)
+
+          if (info->ptcb != NULL && info->siginfo->si_signo != SIGCHLD)
             {
               return 1; /* Terminate the search */
             }
