@@ -21,7 +21,7 @@
 CSRCS += clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c
 CSRCS += clock_abstime2ticks.c
 CSRCS += clock_systime_ticks.c clock_systime_timespec.c
-CSRCS += clock.c
+CSRCS += clock.c clock_getcpuclockid.c
 
 ifeq ($(CONFIG_CLOCK_TIMEKEEPING),y)
 CSRCS += clock_timekeeping.c
