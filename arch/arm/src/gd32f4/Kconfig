@@ -60,6 +60,12 @@ config ARCH_CHIP_GD32F450IK
 	---help---
 		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
 
+config ARCH_CHIP_GD32F470ZK
+	bool "GD32F470ZK"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F470Z_I
+	---help---
+		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
 
 endchoice # GD32F4 Chip Seclection
 
@@ -131,6 +137,13 @@ config GD32F4_GD32F450Z_I
 	default n
 	select GD32F4_GD32F450
 	select GD32F4_HAVE_SPI5
+config GD32F4_GD32F470Z_I
+	# bool "GD32F470Z or GD32F70I"
+	bool
+	default n
+	select GD32F4_GD32F470
+	select GD32F4_HAVE_SPI5
+	select GD32F4_HAVE_SDIO
 
 config GD32F4_GD32F450XI
 	# bool "GD32F450xI, 512K SRAM"
@@ -143,6 +156,17 @@ config GD32F4_GD32F450V
 	select GD32F4_GD32F450
 
 config GD32F4_GD32F450
+	bool
+	default n
+	select GD32F4_HAVE_ENETMAC
+	select GD32F4_HAVE_IPA
+	select GD32F4_HAVE_SPI3
+	select GD32F4_HAVE_SPI4
+	select GD32F4_HAVE_TLI
+	select GD32F4_HAVE_UART6
+	select GD32F4_HAVE_UART7
+	
+config GD32F4_GD32F470
 	bool
 	default n
 	select GD32F4_HAVE_ENETMAC
