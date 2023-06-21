@@ -47,7 +47,7 @@ config SEGGER_RTT_MAX_NUM_UP_BUFFERS
 
 config SEGGER_RTT_MAX_NUM_DOWN_BUFFERS
 	int "Segger RTT Maximum Number of Down Buffers"
-	default 3
+	default SEGGER_RTT_MAX_NUM_UP_BUFFERS
 	---help---
 		Number of down-buffers (H->T) available on this target
 
