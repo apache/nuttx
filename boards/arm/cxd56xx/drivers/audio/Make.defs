@@ -19,8 +19,8 @@
 ############################################################################
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
-CFLAGS += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip)
-CFLAGS += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common)
+CFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
+CFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common
 
 ifeq ($(CONFIG_CXD56_AUDIO),y)
 CSRCS += cxd56_audio.c
@@ -42,4 +42,4 @@ endif
 
 DEPPATH += --dep-path platform$(DELIM)audio
 VPATH += :platform$(DELIM)audio
-CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)audio)
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)audio

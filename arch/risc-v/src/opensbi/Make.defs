@@ -32,7 +32,7 @@ SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
 SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_hardfp.S
 
-INCLUDES  += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdparty$(DELIM)include)
+INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdparty$(DELIM)include
 
 SBI_DIR   := opensbi
 

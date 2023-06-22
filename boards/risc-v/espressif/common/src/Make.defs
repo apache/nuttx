@@ -22,6 +22,6 @@ ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
 DEPPATH += --dep-path src
 VPATH += :src
-CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
 
 endif
