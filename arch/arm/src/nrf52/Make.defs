@@ -154,9 +154,9 @@ NRFXLIB_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdk-nrfxlib
 CMSIS_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)CMSIS_5
 
 INCLUDES += \
-	$(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdc) \
-	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)include) \
-	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)include)
+	${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdc \
+	${INCDIR_PREFIX}$(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)include \
+	${INCDIR_PREFIX}$(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)include
 
 CFLAGS += -DNRF52_SERIES
 

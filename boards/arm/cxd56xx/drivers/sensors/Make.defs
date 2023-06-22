@@ -64,4 +64,4 @@ endif
 
 DEPPATH += --dep-path platform$(DELIM)sensors
 VPATH += :platform$(DELIM)sensors
-CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)sensors)
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)sensors

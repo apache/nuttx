@@ -47,8 +47,8 @@ ifeq ($(CONFIG_PHYPLUS_STUB),y)
 CHIP_CSRCS += phyplus_stub.c
 endif
 
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)include)
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble)
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)include
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble
 
 CFLAGS += -ffunction-sections
 CFLAGS += -DCFG_CP
