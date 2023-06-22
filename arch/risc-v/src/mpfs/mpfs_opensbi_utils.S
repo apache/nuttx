@@ -39,6 +39,22 @@
  ****************************************************************************/
 
   .global mpfs_opensbi_prepare_hart
+  .global mpfs_opensbi_relocate_from_envm
+
+  /* Add some weak default values to make this compile without */
+
+  .weak  _sbi_zerodev_loadaddr
+  .weak  _ssbi_zerodev
+  .weak  _esbi_zerodev
+
+  /* These are the weak pointless variables, only to get this PR compile */
+
+_sbi_zerodev_loadaddr:
+  .dword  0x0a006000
+_ssbi_zerodev:
+  .dword  _stext
+_esbi_zerodev:
+  .dword  _stext
 
 /****************************************************************************
  * Private Data
@@ -69,7 +85,36 @@ mpfs_global_pointer:
  ****************************************************************************/
 
   .align 3
+mpfs_opensbi_relocate_from_envm:
+
+  /* Relocate the code from eNVM into L2 zero device */
+
+  la    a0, _sbi_zerodev_loadaddr
+  la    a1, _ssbi_zerodev
+  la    a2, _esbi_zerodev
+.check_if_opensbi_copy_done:
+  bge   a1, a2, .opensbi_copy_done
+  ld    a3, 0(a0)
+  sd    a3, 0(a1)
+  addi	a0, a0, 8
+  addi	a1, a1, 8
+  j     .check_if_opensbi_copy_done
+.opensbi_copy_done:
+
+  /* To make a store to instruction memory visible to all RISC-V harts, the
+   * writing hart has to execute a data FENCE before requesting that all
+   * remote RISC-V harts execute a FENCE.I. This is hart0 only.
+   */
+
+  fence
+  ret
+
+  .align 3
 mpfs_opensbi_prepare_hart:
+
+  /* These are harts other than 0. Thus, fence.i */
+
+  fence.i
 
   /* Setup OpenSBI exception handler */
 
