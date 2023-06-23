@@ -68,5 +68,20 @@
 
 int esp_bringup(void);
 
+/****************************************************************************
+ * Name: esp_gpio_init
+ *
+ * Description:
+ *   Configure the GPIO driver.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int esp_gpio_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESPRESSIF_ESP32C3_GENERIC_SRC_ESP32C3_GENERIC_H */
