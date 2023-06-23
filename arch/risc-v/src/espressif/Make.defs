@@ -39,33 +39,33 @@ CHIP_CSRCS += esp_lowputc.c esp_serial.c
 CHIP_CSRCS += esp_systemreset.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += esp_tickless.c
+  CHIP_CSRCS += esp_tickless.c
 else
-CHIP_CSRCS += esp_timerisr.c
+  CHIP_CSRCS += esp_timerisr.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CHIP_CSRCS += esp_wdt.c
+  CHIP_CSRCS += esp_wdt.c
 endif
 
 ifneq ($(CONFIG_DEV_RANDOM)$(CONFIG_DEV_URANDOM_ARCH),)
-CHIP_CSRCS += esp_random.c
+  CHIP_CSRCS += esp_random.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += esp_timer.c
+  CHIP_CSRCS += esp_timer.c
 endif
 
 ifeq ($(CONFIG_ONESHOT),y)
-CHIP_CSRCS += esp_oneshot.c
+  CHIP_CSRCS += esp_oneshot.c
 endif
 
 ifeq ($(CONFIG_RTC),y)
-CHIP_CSRCS += esp_rtc.c
+  CHIP_CSRCS += esp_rtc.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
-CHIP_CSRCS += esp_hr_timer.c
+  CHIP_CSRCS += esp_hr_timer.c
 endif
 
 #############################################################################
@@ -99,8 +99,10 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 include chip/hal_${CHIP_SERIES}.mk
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/include/soc/gpio_sig_map.h,../include/chip/)
 	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/$(CHIP_SERIES)/include/irq.h,../include/chip/)
 
 distclean::
+	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
