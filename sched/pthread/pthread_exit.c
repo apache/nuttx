@@ -69,7 +69,6 @@ void nx_pthread_exit(FAR void *exit_value)
   sinfo("exit_value=%p\n", exit_value);
 
   DEBUGASSERT(tcb != NULL);
-  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.
