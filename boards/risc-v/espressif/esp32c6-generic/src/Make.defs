@@ -30,6 +30,14 @@ ifeq ($(CONFIG_BOARDCTL),y)
   endif
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+  CSRCS += esp32c6_gpio.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += esp32c6_buttons.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
