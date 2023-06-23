@@ -129,16 +129,19 @@ static size_t up_get_cache_linesize(bool icache)
 
   if (icache)
     {
-      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_ICACHE;
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_ICACHE, NVIC_CSSELR);
     }
   else
     {
-      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_DCACHE;
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_DCACHE, NVIC_CSSELR);
     }
 
-  putreg32(csselr, NVIC_CSSELR);
   ccsidr = getreg32(NVIC_CCSIDR);
   sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+
+  putreg32(csselr, NVIC_CSSELR);    /* restore csselr */
 
   return 1 << sshift;
 }
@@ -170,11 +173,13 @@ static size_t up_get_cache_size(bool icache)
 
   if (icache)
     {
-      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_ICACHE;
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_ICACHE, NVIC_CSSELR);
     }
   else
     {
-      csselr = (csselr & ~NVIC_CSSELR_IND) | NVIC_CSSELR_IND_DCACHE;
+      putreg32((csselr & ~NVIC_CSSELR_IND) |
+                NVIC_CSSELR_IND_DCACHE, NVIC_CSSELR);
     }
 
   ccsidr = getreg32(NVIC_CCSIDR);
@@ -182,6 +187,8 @@ static size_t up_get_cache_size(bool icache)
   ways   = CCSIDR_WAYS(ccsidr) + 1;
   sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
   line   = 1 << sshift;
+
+  putreg32(csselr, NVIC_CSSELR);    /* restore csselr */
 
   return sets * ways * line;
 }

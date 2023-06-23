@@ -52,9 +52,7 @@ static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways,
 
   csselr = CP15_GET(CSSELR);
 
-  csselr = (csselr & ~0x01) | (icache & 0x01);
-
-  CP15_SET(CSSELR, csselr);
+  CP15_SET(CSSELR, (csselr & ~0x01) | (icache & 0x01));
 
   ccsidr = CP15_GET(CCSIDR);
 
@@ -67,6 +65,8 @@ static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways,
     {
       *ways = ((ccsidr >> 3) & 0x3ff) + 1;
     }
+
+  CP15_SET(CSSELR, csselr);   /* restore csselr */
 
   return (1 << ((ccsidr & 0x7) + 2)) * 4;
 }
