@@ -227,6 +227,8 @@ long sysconf(int name)
         return _POSIX_CPUTIME;
       case _SC_THREAD_CPUTIME:
         return _POSIX_THREAD_CPUTIME;
+      case _SC_REALTIME_SIGNALS:
+        return _POSIX_REALTIME_SIGNALS;
       case _SC_CLK_TCK:
         return CLOCKS_PER_SEC;
 
