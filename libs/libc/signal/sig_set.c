@@ -101,7 +101,7 @@ _sa_handler_t sigset(int signo, _sa_handler_t func)
   sigset_t set;
   int ret = -EINVAL;
 
-  if (signo == SIGKILL || signo == SIGSTOP || !GOOD_SIGNO(signo))
+  if (!GOOD_SIGNO(signo) || UNCAUGHT_SIGNO(signo))
     {
       goto err;
     }
