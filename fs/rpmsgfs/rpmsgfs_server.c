@@ -285,6 +285,9 @@ static int rpmsgfs_attach_dir(FAR struct rpmsgfs_server_s *priv,
       return -ENOMEM;
     }
 
+  memset(&tmp[priv->dir_nums], 0, sizeof(FAR void *) *
+         CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
+
   priv->dirs = tmp;
   priv->dir_nums += CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
 
