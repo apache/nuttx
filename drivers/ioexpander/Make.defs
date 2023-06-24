@@ -52,6 +52,10 @@ ifeq ($(CONFIG_IOEXPANDER_MCP23X17),y)
   CSRCS += mcp23x17.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_SX1509),y)
+  CSRCS += sx1509.c
+endif
+
 endif # CONFIG_IOEXPANDER
 
 # GPIO test device driver (independent of IOEXPANDERS)

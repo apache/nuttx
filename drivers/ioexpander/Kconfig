@@ -297,11 +297,63 @@ config PCF8574_INT_POLLDELAY
 
 endif # IOEXPANDER_PCF8574
 
+config IOEXPANDER_SX1509
+	bool "SX1509 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the SX1509 IO Expander
+
+if IOEXPANDER_SX1509
+
+config SX1509_MULTIPLE
+	bool "Multiple SX1509 Devices"
+	default n
+	---help---
+		Can be defined to support multiple SX1509 devices on board.
+
+config SX1509_INT_ENABLE
+	bool "Enable SX1509 Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config SX1509_LED_ENABLE
+	bool "Enable SX1509 LED Support"
+	default n
+	select IOEXPANDER_LED_ENABLE
+	---help---
+		Enable driver LED functionality
+
+config SX1509_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on SX1509_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config SX1509_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
+endif # IOEXPANDER_SX1509
+
 config IOEXPANDER_INT_ENABLE
 	bool
 	default n
 	---help---
 		This is the global INT supported flag for io expanders
+
+config IOEXPANDER_LED_ENABLE
+	bool
+	default n
+	select USERLED
+	---help---
+		This is the global LED supported flag for io expanders
 
 config IOEXPANDER_NPINS
 	int "Number of pins"
