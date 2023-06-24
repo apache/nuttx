@@ -33,7 +33,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
-#include <nuttx/time.h>
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/dhtxx.h>
