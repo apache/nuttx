@@ -30,6 +30,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf52_buttons.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_SX1509),y)
+CSRCS += nrf52_sx1509.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
