@@ -36,7 +36,7 @@
 #include <locale.h>
 #include <strings.h>
 
-#include <nuttx/time.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions

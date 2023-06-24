@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <debug.h>
 
-#include <nuttx/time.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
