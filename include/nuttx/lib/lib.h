@@ -41,7 +41,7 @@
  * then only the first mode is supported.
  */
 
-#if defined(__KERNEL__)
+#if  !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 
   /* Domain-specific allocations */
 
