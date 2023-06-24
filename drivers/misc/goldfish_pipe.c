@@ -932,6 +932,8 @@ int goldfish_pipe_register(void *base, int irq)
       return ret;
     }
 
+  up_enable_irq(dev->irq);
+
   dev->first_signalled_pipe = NULL;
   dev->pipes_capacity = INITIAL_PIPES_CAPACITY;
   dev->pipes = kmm_calloc(dev->pipes_capacity, sizeof(*dev->pipes));
