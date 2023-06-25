@@ -31,6 +31,12 @@ CSRCS += pm_procfs.c
 
 endif
 
+ifeq ($(CONFIG_PM_RUNTIME),y)
+
+CSRCS += pm_runtime.c
+
+endif
+
 # Governor implementations
 
 ifeq ($(CONFIG_PM_GOVERNOR_ACTIVITY),y)
