@@ -39,6 +39,7 @@
 #include "chip.h"
 #include "imxrt_config.h"
 #include "imxrt_flexpwm.h"
+#include "imxrt_gpio.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_xbar.h"
 #include "hardware/imxrt_flexpwm.h"

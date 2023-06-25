@@ -46,6 +46,7 @@
 #include "chip.h"
 #include "imxrt_config.h"
 #include "imxrt_flexcan.h"
+#include "imxrt_gpio.h"
 #include "imxrt_periphclks.h"
 #include "hardware/imxrt_flexcan.h"
 #include "hardware/imxrt_pinmux.h"
