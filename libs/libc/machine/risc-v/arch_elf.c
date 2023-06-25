@@ -30,7 +30,6 @@
 #include <debug.h>
 #include <assert.h>
 
-#include <arch/elf.h>
 #include <nuttx/elf.h>
 
 /****************************************************************************
