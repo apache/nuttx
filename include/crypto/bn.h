@@ -204,4 +204,9 @@ void bignum_isqrt(FAR struct bn *a, FAR struct bn *b);
 
 void bignum_assign(FAR struct bn *dst, FAR struct bn *src);
 
+/* CRK_EXP_MOD algorithm */
+
+void pow_mod_faster(FAR struct bn *a, FAR struct bn *b,
+                    FAR struct bn *n, FAR struct bn *res);
+
 #endif /* __INCLUDE_CRYPTO_BIGNUM_H */
