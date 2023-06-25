@@ -133,13 +133,14 @@ static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
    *
    * The format of the password file is:
    *
-   *   user:x:uid:uid:home
+   *   user:x:uid:uid:geos:home
    *
    * Where:
    *   user:  User name
    *   x:     Encrypted password
    *   uid:   User ID
    *   uid:   Group ID
+   *   geos:  User information
    *   home:  Login directory
    */
 
