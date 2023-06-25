@@ -51,12 +51,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_LIBC_PASSWD_FILE
 /* Data for non-reentrant group functions */
 
 EXTERN struct passwd g_passwd;
 EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
