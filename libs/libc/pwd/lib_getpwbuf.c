@@ -24,20 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
 #include <pwd.h>
 
 #include "pwd/lib_pwd.h"
-#include "libc.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static FAR char *g_buf;
-static FAR struct passwd *g_pwd;
 
 /****************************************************************************
  * Public Functions
@@ -68,51 +57,8 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
                             FAR const char *gecos, FAR const char *dir,
                             FAR const char *shell)
 {
-  FAR struct passwd *result;
-  FAR char *newbuf;
-  size_t buflen;
-  int err;
-
-  buflen = strlen(name) + 1 + strlen(gecos) + 1 + strlen(dir) + 1 +
-           strlen(shell) + 1;
-
-  newbuf = (FAR char *)lib_realloc(g_buf, buflen);
-
-  if (!newbuf)
-    {
-      err = ENOMEM;
-      goto error;
-    }
-
-  g_buf = newbuf;
-
-  if (!g_pwd)
-    {
-      g_pwd = (FAR struct passwd *)lib_malloc(sizeof(struct passwd));
-    }
-
-  if (!g_pwd)
-    {
-      err = ENOMEM;
-      goto error;
-    }
-
-  err = getpwbuf_r(uid, gid, name, gecos, dir, shell,
-                   g_pwd, g_buf, buflen, &result);
-
-  if (err)
-    {
-      goto error;
-    }
-
-  return result;
-
-error:
-  lib_free(g_pwd);
-  lib_free(g_buf);
-  g_pwd = NULL;
-  g_buf = NULL;
-  set_errno(err);
-
-  return NULL;
+  FAR struct passwd *pwd = NULL;
+  int ret = getpwbuf_r(uid, gid, name, gecos, dir, shell, &g_passwd,
+                       g_passwd_buffer, sizeof(g_passwd_buffer), &pwd);
+  return ret == 0 ? pwd : NULL;
 }
