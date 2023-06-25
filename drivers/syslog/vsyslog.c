@@ -82,7 +82,7 @@ static FAR const char * const g_priority_str[] =
 int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslograwstream_s stream;
-  int ret;
+  int ret = 0;
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
   FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid());
 #endif
@@ -93,9 +93,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   char date_buf[CONFIG_SYSLOG_TIMESTAMP_BUFFER];
 #  endif
 #endif
-  struct va_format vaf;
-  vaf.fmt = fmt;
-  vaf.va  = ap;
 
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
@@ -148,6 +145,11 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
+#if defined(CONFIG_SYSLOG_COLOR_OUTPUT) || defined(CONFIG_SYSLOG_TIMESTAMP) || \
+    defined(CONFIG_SMP) || defined(CONFIG_SYSLOG_PROCESSID) || \
+    defined(CONFIG_SYSLOG_PRIORITY) || defined(CONFIG_SYSLOG_PREFIX) || \
+    defined(CONFIG_SYSLOG_PROCESS_NAME)
+
   ret = lib_sprintf(&stream.public,
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style. */
@@ -199,7 +201,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
                     "%s: "
 #endif
-                    "%pV"
 #ifdef CONFIG_SYSLOG_TIMESTAMP
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
@@ -245,10 +246,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
                     , tcb != NULL ? tcb->name : "(null)"
 #endif
+                    );
+
+#endif /* CONFIG_SYSLOG_COLOR_OUTPUT || CONFIG_SYSLOG_TIMESTAMP || ... */
 
   /* Generate the output */
 
-                    , &vaf);
+  ret += lib_vsprintf(&stream.public, fmt, *ap);
 
   if (stream.last_ch != '\n')
     {
