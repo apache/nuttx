@@ -531,7 +531,7 @@ static int goldfish_pipe_poll(FAR struct file *filp,
         mask |= EPOLLERR;
 
       if (mask)
-        poll_notify(dev->fds, 1, mask);
+        poll_notify(dev->fds, dev->pipes_capacity, mask);
     }
   else if (fds->priv != NULL)
     {
@@ -939,6 +939,13 @@ int goldfish_pipe_register(void *base, int irq)
   dev->pipes = kmm_calloc(dev->pipes_capacity, sizeof(*dev->pipes));
 
   if (!dev->pipes)
+    {
+      return -ENOMEM;
+    }
+
+  dev->fds = kmm_calloc(dev->pipes_capacity, sizeof(*dev->fds));
+
+  if (!dev->fds)
     {
       return -ENOMEM;
     }
