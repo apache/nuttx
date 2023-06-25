@@ -264,6 +264,11 @@
 #define sq_tail(q)  ((q)->tail)
 #define dq_tail(q)  ((q)->tail)
 
+#define sq_inqueue(p, q) \
+      ((p)->flink || sq_tail(q) == (p))
+#define dq_inqueue(p, q) \
+      ((p)->flink || dq_tail(q) == (p))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
