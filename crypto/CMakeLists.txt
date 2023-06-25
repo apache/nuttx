@@ -60,6 +60,7 @@ if(CONFIG_CRYPTO)
   list(APPEND SRCS siphash.c)
   list(APPEND SRCS hmac_buff.c)
   list(APPEND SRCS curve25519.c)
+  list(APPEND SRCS bn.c)
 
   # Entropy pool random number generator
 
