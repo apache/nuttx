@@ -67,6 +67,12 @@ extern "C"
 #define EXTERN extern
 #endif
 
+void setpwent(void);
+void endpwent(void);
+FAR struct passwd *getpwent(void);
+int getpwent_r(FAR struct passwd *pwd,
+               FAR char *buf, size_t buflen,
+               FAR struct passwd **result);
 FAR struct passwd *getpwnam(FAR const char *name);
 FAR struct passwd *getpwuid(uid_t uid);
 int getpwnam_r(FAR const char *name, FAR struct passwd *pwd, FAR char *buf,
