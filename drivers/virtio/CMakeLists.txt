@@ -43,5 +43,9 @@ if(CONFIG_DRIVERS_VIRTIO_SERIAL)
   list(APPEND SRCS virtio-serial.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_SOUND)
+  list(APPEND SRCS virtio-snd.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
 target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

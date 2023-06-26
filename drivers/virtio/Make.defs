@@ -48,6 +48,9 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_SERIAL),y)
   CSRCS += virtio-serial.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_SOUND),y)
+  CSRCS += virtio-snd.c
+endif
 # Include build support
 
 DEPPATH += --dep-path virtio
