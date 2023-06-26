@@ -59,9 +59,13 @@ extern FAR struct cryptocap *crypto_drivers;
 extern int crypto_drivers_num;
 int usercrypto = 1;         /* userland may do crypto requests */
 int userasymcrypto = 1;     /* userland may do asymmetric crypto reqs */
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE
 int cryptodevallowsoft = 1; /* 0 is only use hardware crypto
                              * 1 is use hardware & software crypto
                              */
+#else
+int cryptodevallowsoft = 0;
+#endif
 
 /****************************************************************************
  * Private Types
@@ -887,7 +891,10 @@ int csefree(FAR struct csession *cse)
 void devcrypto_register(void)
 {
   register_driver("/dev/crypto", &g_cryptoops, 0666, NULL);
+
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE
   swcr_init();
+#endif
 
 #ifdef CONFIG_CRYPTO_CRYPTODEV_HARDWARE
   hwcr_init();

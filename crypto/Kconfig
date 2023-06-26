@@ -40,6 +40,11 @@ config CRYPTO_CRYPTODEV
 	depends on ALLOW_BSD_COMPONENTS
 	default n
 
+config CRYPTO_CRYPTODEV_SOFTWARE
+	bool "cryptodev software support"
+	depends on CRYPTO_CRYPTODEV
+	default n
+
 config CRYPTO_CRYPTODEV_HARDWARE
 	bool "cryptodev hardware support"
 	depends on CRYPTO_CRYPTODEV
