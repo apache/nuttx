@@ -111,10 +111,9 @@
                                       while (0)
 
 #    define fortify_va_arg_pack __builtin_va_arg_pack
-#    define fortify_str(s) #s
-#    define fortify_real(p,fn) __typeof__(fn) __real_##fn __asm__(fortify_str(p) #fn)
-#    define fortify_function(fn) fortify_real(__USER_LABEL_PREFIX__, fn); \
-                                 extern __inline__ \
+#    define fortify_real(fn) __typeof__(fn) __real_##fn __asm__(#fn)
+#    define fortify_function(fn) fortify_real(fn); \
+                                 extern __inline__ no_builtin(#fn) \
                                  __attribute__((__always_inline__, \
                                                 __gnu_inline__, __artificial__))
 #  endif
