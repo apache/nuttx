@@ -464,6 +464,53 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+#ifdef CONFIG_USERLED_EFFECTS
+    /* Command:     ULEDIOC_SUPEFFECT
+     * Description: Get supported effects of one LED.
+     * Argument:    A write-able pointer to a struct userled_effect_sup_s
+     *              which to return the supported LED effects.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
+     */
+
+    case ULEDIOC_SUPEFFECT:
+    {
+      FAR struct userled_effect_sup_s *effect =
+        (FAR struct userled_effect_sup_s *)((uintptr_t)arg);
+
+      if (effect)
+        {
+          lower = priv->lu_lower;
+          DEBUGASSERT(lower != NULL && lower->ll_effect_sup != NULL);
+          lower->ll_effect_sup(lower, effect);
+          ret = OK;
+        }
+    }
+    break;
+
+    /* Command:     ULEDIOC_SETEFFECT
+     * Description: Set effects for one LED.
+     * Argument:    A read-only pointer to an instance of
+     *              struct userled_effect_set_s.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
+     */
+
+    case ULEDIOC_SETEFFECT:
+    {
+      FAR struct userled_effect_set_s *effect =
+        (FAR struct userled_effect_set_s *)((uintptr_t)arg);
+
+      if (effect)
+        {
+          lower = priv->lu_lower;
+          DEBUGASSERT(lower != NULL && lower->ll_effect_set != NULL);
+          ret = lower->ll_effect_set(lower, effect);
+        }
+    }
+    break;
+#endif
+
     default:
       lederr("ERROR: Unrecognized command: %d\n", cmd);
       ret = -ENOTTY;
