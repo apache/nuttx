@@ -48,7 +48,7 @@ config NETDEV_WORK_THREAD_PRIORITY
 config NETDEV_WIRELESS_HANDLER
 	bool "Support wireless handler in upper-half driver"
 	default y
-	depends on NETDEV_IOCTL
+	depends on NETDEV_WIRELESS_IOCTL
 	---help---
 		Enable the wireless handler support in upper-half driver.
 

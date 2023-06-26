@@ -223,13 +223,23 @@ config SIM_NETDEV_NUMBER
 	int "Number of Simulated Network Device"
 	default 1
 	range 1 8
-	depends on SIM_NETDEV_TAP
+	depends on SIM_NETDEV
 	---help---
 		The number of simulated network devices.
 
 		Note that only one network device will be brought up by netinit automatically,
 		others will be kept in DOWN state by default.
 
+config SIM_WIFIDEV_NUMBER
+	int "Number of Simulated WiFi Device"
+	default 0
+	range 0 SIM_NETDEV_NUMBER
+	depends on SIM_NETDEV && DRIVERS_IEEE80211 && NETDEV_WIRELESS_HANDLER
+	---help---
+		The number of simulated wifi network devices.
+
+		Note that only one network device will be brought up by netinit automatically,
+		others will be kept in DOWN state by default.
 endif
 
 config SIM_NETDEV_VPNKIT_PATH

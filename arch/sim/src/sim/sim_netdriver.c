@@ -86,6 +86,9 @@
 #define DEVIDX(p) ((struct sim_netdev_s *)(p) - g_sim_dev)
 #define DEVBUF(p) (((struct sim_netdev_s *)(p))->buf)
 
+#if CONFIG_SIM_WIFIDEV_NUMBER != 0
+#  include "sim_wifidriver.c"
+#else
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -95,6 +98,7 @@ struct sim_netdev_s
   struct netdev_lowerhalf_s dev;
   uint8_t buf[SIM_NETDEV_BUFSIZE]; /* Used when packet buffer is fragmented */
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -188,7 +192,21 @@ static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 #else /* CONFIG_NET_IPv6 */
   sim_netdev_ifup(DEVIDX(dev), &dev->netdev.d_ipv6addr);
 #endif /* CONFIG_NET_IPv4 */
-  netdev_lower_carrier_on(dev);
+
+#if CONFIG_SIM_WIFIDEV_NUMBER != 0
+  if (DEVIDX(dev) < CONFIG_SIM_WIFIDEV_NUMBER)
+    {
+      if (wifidriver_connected(dev))
+        {
+          netdev_lower_carrier_on(dev);
+        }
+    }
+  else
+#endif
+    {
+      netdev_lower_carrier_on(dev);
+    }
+
   return OK;
 }
 
@@ -236,11 +254,19 @@ int sim_netdriver_init(void)
       dev->quota[NETPKT_RX] = 1;
       dev->ops              = &g_ops;
 
+#if CONFIG_SIM_WIFIDEV_NUMBER != 0
+      if (devidx < CONFIG_SIM_WIFIDEV_NUMBER)
+        {
+          wifidriver_init(dev, devidx);
+        }
+#endif
+
       /* Register the device with the OS so that socket IOCTLs can be
        * performed
        */
 
-      netdev_lower_register(dev, NET_LL_ETHERNET);
+      netdev_lower_register(dev, devidx < CONFIG_SIM_WIFIDEV_NUMBER ?
+                                 NET_LL_IEEE80211 : NET_LL_ETHERNET);
     }
 
   return OK;

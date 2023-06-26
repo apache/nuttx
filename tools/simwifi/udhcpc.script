@@ -1,0 +1,40 @@
+#!/bin/sh
+# Busybox udhcpc dispatcher script.
+# Copyright (C) 2009 by Axel Beckert.
+# Copyright (C) 2014 by Michael Tokarev.
+#
+# Based on the busybox example scripts and the old udhcp source
+# Modified base on default.scripts.
+
+log() {
+  logger -t "udhcpc[$PPID]" -p daemon.$1 "$interface: $2"
+}
+
+case $1 in
+  bound|renew)
+
+  # Configure new IP address.
+  # Do it unconditionally even if the address hasn't changed,
+  # to also set subnet, broadcast, mtu, ...
+  busybox ifconfig $interface ${mtu:+mtu $mtu} \
+      $ip netmask $subnet ${broadcast:+broadcast $broadcast}
+
+  log info "$1: IP=$ip/$subnet router=$router domain=\"$domain\" dns=\"$dns\" lease=$lease"
+  ;;
+
+    deconfig)
+  busybox ip link set $interface up
+  busybox ip -4 addr flush dev $interface
+  busybox ip -4 route flush dev $interface
+  log notice "deconfigured"
+  ;;
+
+    leasefail | nak)
+  log err "configuration failed: $1: $message"
+  ;;
+
+    *)
+  echo "$0: Unknown udhcpc command: $1" >&2
+  exit 1
+  ;;
+esac

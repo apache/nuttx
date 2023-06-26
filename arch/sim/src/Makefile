@@ -179,6 +179,10 @@ ifeq ($(CONFIG_FS_FAT),y)
   STDLIBS += -lz
 endif
 
+ifneq ($(CONFIG_SIM_WIFIDEV_NUMBER),0)
+  CFLAGS += -DTOPDIR=\"$(TOPDIR)\"
+endif
+
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += sim_netdriver.c
 ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
