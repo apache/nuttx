@@ -1959,6 +1959,14 @@ config ARCH_BOARD_FVP_ARMV8R_AARCH32
 		This options selects support for NuttX on the Armv8-R AEM FVP
 		configure board with ARM Cortex-R52.
 
+config ARCH_BOARD_IMX8QM_MEK
+	bool "NXP i.MX8 QuadMax CPUs MEK board"
+	depends on ARCH_CHIP_IMX8_QUADMAX
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP i.MX8 QuadMax CPUs MEK
+		configure board with ARM Cortex-A53.
+
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
 	depends on ARCH_CHIP_ATSAMA5D27
@@ -3094,6 +3102,7 @@ config ARCH_BOARD
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
 	default "fvp-armv8r"                if ARCH_BOARD_FVP_ARMV8R
 	default "fvp-armv8r-aarch32"        if ARCH_BOARD_FVP_ARMV8R_AARCH32
+	default "imx8qm-mek"                if ARCH_BOARD_IMX8QM_MEK
 	default "sama5d2-xult"              if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"               if ARCH_BOARD_GIANT_BOARD
 	default "jupiter-nano"              if ARCH_BOARD_JUPITER_NANO
@@ -3298,6 +3307,9 @@ source "boards/arm64/fvp-v8r/fvp-armv8r/Kconfig"
 endif
 if ARCH_BOARD_FVP_ARMV8R_AARCH32
 source "boards/arm/fvp-v8r-aarch32/fvp-armv8r-aarch32/Kconfig"
+endif
+if ARCH_BOARD_IMX8QM_MEK
+source "boards/arm64/imx8/imx8qm-mek/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
