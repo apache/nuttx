@@ -74,6 +74,26 @@
 
 #define ULEDIOC_GETALL     _ULEDIOC(0x0004)
 
+/* Command:     ULEDIOC_SUPEFFECT
+ * Description: Get supported effects of one LED.
+ * Argument:    A write-able pointer to a struct userled_effect_sup_s
+ *              which to return the supported LED effects.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
+#define ULEDIOC_SUPEFFECT  _ULEDIOC(0x0005)
+
+/* Command:     ULEDIOC_SETEFFECT
+ * Description: Set effects for one LED.
+ * Argument:    A read-only pointer to an instance of
+ *              struct userled_effect_set_s.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
+#define ULEDIOC_SETEFFECT  _ULEDIOC(0x0006)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -96,6 +116,38 @@ struct userled_s
   uint8_t  ul_led;          /* Identifies the LED */
   bool     ul_on;           /* The LED state.  true: ON; false: OFF */
 };
+
+#ifdef CONFIG_USERLED_EFFECTS
+
+/* This structure describes LED effects supported by a given LED. */
+
+struct userled_effect_sup_s
+{
+  uint8_t led;                  /* LED number */
+
+  uint8_t int_on:1;             /* ON intensity supported */
+  uint8_t int_off:1;            /* OFF intensity supported */
+  uint8_t t_on:1;               /* ON time supported */
+  uint8_t t_off:1;              /* OFF time supported */
+  uint8_t t_fade:1;             /* Fade in supported */
+  uint8_t t_fall:1;             /* Fade out supported */
+  uint8_t _res:2;               /* Reserved */
+};
+
+/* This structure describes the LED effect to be set on a given LED. */
+
+struct userled_effect_set_s
+{
+  uint8_t  led;                 /* LED number */
+
+  uint8_t  int_on;              /* ON intesinty [0% - 100%] */
+  uint8_t  int_off;             /* OFF intensity [0% - 100%] */
+  uint32_t t_on;                /* ON time [ms] */
+  uint32_t t_off;               /* OFF intensity [ms] */
+  uint8_t  t_fade;              /* Fade in setting */
+  uint8_t  t_fall;              /* Fade out setting */
+};
+#endif
 
 /* The user LED driver is a two-part driver:
  *
@@ -132,6 +184,19 @@ struct userled_lowerhalf_s
 
   CODE void (*ll_getall)(FAR const struct userled_lowerhalf_s *lower,
                          userled_set_t *ledset);
+#endif
+
+#ifdef CONFIG_USERLED_EFFECTS
+  /* Return the LED effects supported by a given LED */
+
+  CODE void (*ll_effect_sup)(FAR const struct userled_lowerhalf_s *lower,
+                             FAR struct userled_effect_sup_s *supp);
+
+  /* Set the effect of one LED */
+
+  CODE int (*ll_effect_set)(FAR const struct userled_lowerhalf_s *lower,
+                            FAR struct userled_effect_set_s *effect);
+
 #endif
 };
 
