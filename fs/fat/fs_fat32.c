@@ -45,6 +45,16 @@
 #include "fs_fat32.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_FS_LARGEFILE)
+#  define OFF_MAX INT64_MAX
+#else
+#  define OFF_MAX INT32_MAX
+#endif
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -764,7 +774,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Check if the file size would exceed the range of off_t */
 
-  if (ff->ff_size + buflen < ff->ff_size)
+  if (buflen > OFF_MAX || ff->ff_size > OFF_MAX - (off_t)buflen)
     {
       ret = -EFBIG;
       goto errout_with_lock;
