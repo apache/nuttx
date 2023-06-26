@@ -1,0 +1,115 @@
+
+# Function
+
+The simwifi can provides host Settings for sim wifi on nuttx sim emulator.
+The script sim_wifi.sh supports two modes that simulate wifi, HWSIM and RNC
+(real network card).
+
+ - In the HWSIM mode, we simulates two wlan interfaces. The wlan0 is STA and
+   the wlan1 is AP. The wlan0 can connect to the wlan1 in the nuttx simulator.
+ - In the RNC mode, we can use the same wlan interface name on the nuttx simulator
+   to control the connection behavior of the real wireless card.
+
+# Config
+
+Before using the Sim WiFi function, we need to perform the following
+configurations:
+
+  - nuttx
+  SIM_NETDEV_NUMBER=3
+  SIM_WIFIDEV_NUMBER=2
+  SIM_NETDEV_TAP=y
+  DRIVERS_IEEE80211=y
+  NETDEV_WIRELESS_HANDLER=y
+
+  - apps
+  WIRELESS_WAPI_CMDTOOL=y
+  SYSTEM_DHCPC_RENEW=y
+  NETUTILS_DHCPD=y
+
+# Using
+
+We can use the './tools/simwifi/sim_wifi.sh help' command to view the commands
+provided by the sim_wifi.sh script and the results are as follows.
+
+sim_wifi.sh (rename <old> <new> |
+     init <wan> <mode> |clean |
+     start_wpa <wlan0> |stop_wpa |
+     start_hostapd <wlan0> |stop_hostapd |
+     start_udhcpc <wlan0> |stop_udhcpc |
+     start_dhcp <wlan0> |stop_dhcp |
+     start_hwsim |stop_hwsim |up_hwsim |
+     start_net <wlan0> |stop_net <wlan0> |
+     start_sta <wlan0> |stop_sta |
+     start_ap <wlan0> [eth0] |stop_ap <wlan0> [eth0] |
+     start_bridge <eth0> |stop_bridge <eth0> |
+     show | help)
+
+  - Init the simwifi, the command format is as follows:
+    sudo ./tools/simwifi/sim_wifi.sh init <wan> <mode>
+
+    The <wan> is the name of the interface for accessing the Internet.
+    The <mode> is the simwifi mode, HWSIM and RNC.
+
+    Setting HWSIM:
+    sudo ./tools/simwifi/sim_wifi.sh init eno1 HWSIM
+
+    Setting RNC:
+    sudo ./tools/simwifi/sim_wifi.sh init eno1 RNC
+
+  - In HWSIM mode:
+    Start the hwsim services, the command is as follows.
+    sudo ./tools/simwifi/sim_wifi.sh start_hwsim
+
+    Stop the hwsim services, the command is as follows
+    sudo ./tools/simwifi/sim_wifi.sh stop_hwsim
+
+
+  - In RNC mode:
+    Maybe the real wireless card name format is not wlanx, in this case
+    we need to change it to wlanx format. The command is as follows
+    sudo simwifi rename <old_name> wlanx
+
+    * Set the real wireless network card to STA mode.
+      sudo ./tools/simwifi/sim_wifi.sh start_sta wlan0
+
+    * Set the real wireless network card to AP mode.
+      sudo ./tools/simwifi/sim_wifi.sh start_ap wlan0
+
+Finally we can clean up all the files, configurations and services of the simwifi.
+    sudo ./tools/simwifi/sim_wifi.sh clean
+
+# Location problems
+   We can use the following command to locate the problem and display the
+   status.
+ cmd: sudo ./tools/simwifi/sim_wifi.sh show
+ log:
+
+/var/run/simwifi
+dnsmasq.conf	hostapd       simwifi.log    udhcpc.script	  wpa_supplicant.pid
+dnsmasq.leases	hostapd.conf  simwifi.state  wpa_supplicant
+dnsmasq.pid	simwifi.conf  udhcpc.pid     wpa_supplicant.conf
+
+services list
+root     1880671    2046  0 10月10 ?      00:00:00 /usr/sbin/wpa_supplicant -B -c /var/run/simwifi/wpa_supplicant.conf -iwlan0 -P /var/run/simwifi/wpa_supplicant.pid
+nobody   1880680    2046  0 10月10 ?      00:00:00 /usr/sbin/dnsmasq -inuttx0 -C /var/run/simwifi/dnsmasq.conf --log-debug -x /var/run/simwifi/dnsmasq.pid
+root     1880672    2046  0 10月10 ?      00:00:00 /usr/sbin/udhcpc -i wlan0 -p /var/run/simwifi/udhcpc.pid -s /var/run/simwifi/udhcpc.script
+
+bridge nuttx0
+222: tap0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master nuttx0 state UNKNOWN mode DEFAULT group default qlen 1000
+    link/ether 2e:b0:bc:79:41:02 brd ff:ff:ff:ff:ff:ff
+223: tap1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop master nuttx0 state DOWN mode DEFAULT group default qlen 1000
+    link/ether a6:33:96:26:a4:1d brd ff:ff:ff:ff:ff:ff
+
+default config
+defwan:eno1
+mode:rnc
+
+state:SW_STA
+wlan:wlan0
+br:nuttx0
+
+default via 10.221.127.254 dev eno1 proto dhcp metric 100
+10.0.1.0/24 dev nuttx0 proto kernel scope link src 10.0.1.1
+10.221.96.0/19 dev eno1 proto kernel scope link src 10.221.108.5 metric 100
+    
