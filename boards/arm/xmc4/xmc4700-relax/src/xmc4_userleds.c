@@ -55,11 +55,11 @@ void board_userled(int led, bool ledon)
 {
   gpioconfig_t ledcfg;
 
-  if (led == BOARD_LED1)
+  if (led == BOARD_LED0)
     {
       ledcfg = GPIO_LED1;
     }
-  else if (led == BOARD_LED2)
+  else if (led == BOARD_LED1)
     {
       ledcfg = GPIO_LED2;
     }
@@ -79,9 +79,9 @@ void board_userled_all(uint32_t ledset)
 {
   bool ledon;
 
-  ledon = ((ledset & BOARD_LED1_BIT) != 0);
+  ledon = ((ledset & BOARD_LED0_BIT) != 0);
   xmc4_gpio_write(GPIO_LED1, ledon);
 
-  ledon = ((ledset & BOARD_LED2_BIT) != 0);
+  ledon = ((ledset & BOARD_LED1_BIT) != 0);
   xmc4_gpio_write(GPIO_LED2, ledon);
 }
