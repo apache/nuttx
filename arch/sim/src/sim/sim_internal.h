@@ -60,6 +60,10 @@
 #  define CONFIG_SIM_NETDEV_NUMBER 1
 #endif
 
+#ifndef CONFIG_SIM_WIFIDEV_NUMBER
+#  define CONFIG_SIM_WIFIDEV_NUMBER 0
+#endif
+
 /* Determine which (if any) console driver to use */
 
 #ifndef CONFIG_DEV_CONSOLE
