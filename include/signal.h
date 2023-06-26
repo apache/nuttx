@@ -225,6 +225,11 @@
 #define MINSIGSTKSZ     CONFIG_PTHREAD_STACK_MIN     /* Smallest signal stack size */
 #define SIGSTKSZ        CONFIG_PTHREAD_STACK_DEFAULT /* Default signal stack size */
 
+/* define signal handlers stack on an alternate stack or the current thread */
+
+#define SS_ONSTACK      1
+#define SS_DISABLE      2
+
 /* Special values of sa_handler used by sigaction and sigset.  They are all
  * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
  * in NuttX, the default action for all signals is to ignore them.
