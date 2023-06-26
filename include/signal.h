@@ -404,6 +404,7 @@ int  sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
                   FAR const struct timespec *timeout);
 int  sigsuspend(FAR const sigset_t *sigmask);
 int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
+int  sigaltstack(FAR const stack_t *ss, FAR stack_t *oss);
 
 #undef EXTERN
 #ifdef __cplusplus
