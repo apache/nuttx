@@ -32,6 +32,7 @@
 #include "virtio-net.h"
 #include "virtio-rng.h"
 #include "virtio-serial.h"
+#include "virtio-snd.h"
 
 /****************************************************************************
  * Private Types
@@ -145,7 +146,15 @@ void virtio_register_drivers(void)
   ret = virtio_register_serial_driver();
   if (ret < 0)
     {
-      vrterr("virtio_serial_driver_init failed, ret=%d\n", ret);
+      vrterr("virtio_register_serial_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_SOUND
+  ret = virtio_register_snd_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_snd_driver failed, ret=%d\n", ret);
     }
 #endif
 
