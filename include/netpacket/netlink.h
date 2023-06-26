@@ -165,7 +165,11 @@
 #define RTA_OIF               4    /* Argument:  Output interface index */
 #define RTA_GATEWAY           5    /* Argument:  Gateway address of the route */
 #define RTA_GENMASK           6    /* Argument:  Network address mask of sub-net */
-#define RTA_MAX               6    /* MAX type, same as last argument */
+#define RTA_PRIORITY          7    /* Argument:  Route priority */
+#define RTA_TABLE             8    /* Argument:  Route table */
+#define RTA_PREFSRC           9    /* Argument:  Preferred source address */
+#define RTA_METRICS           10   /* Argument:  Route metric */
+#define RTA_MAX               10   /* MAX type, same as last argument */
 
 /* NETLINK_ROUTE protocol message types *************************************/
 
@@ -275,9 +279,10 @@
 #define RTM_NEWNEIGHTBL      64
 #define RTM_GETNEIGHTBL      66
 #define RTM_SETNEIGHTBL      67
+#define RTM_NEWNDUSEROPT     68
 
 #define RTM_BASE             16
-#define RTM_MAX              67
+#define RTM_MAX              68
 
 /* Definitions for struct ifinfomsg *****************************************/
 
@@ -289,6 +294,22 @@
 /* Values for rta_type */
 
 #define IFLA_IFNAME          1
+#define IFLA_ADDRESS         2
+#define IFLA_MTU             3
+#define IFLA_WIRELESS        4
+#define IFLA_STATS           5
+#define IFLA_OPERSTATE       6
+#define IFLA_LINKMODE        7
+#define IFLA_BROADCAST       8
+#define IFLA_LINK            9
+#define IFLA_QDISC           10
+#define IFLA_COST            11
+#define IFLA_PRIORITY        12
+#define IFLA_MASTER          13
+#define IFLA_PROTINFO        14
+#define IFLA_TXQLEN          15
+#define IFLA_MAP             16
+#define IFLA_WEIGHT          17
 
 /* Definitions for struct rtmsg *********************************************/
 
@@ -389,6 +410,11 @@
 #define RTNLGRP_NSID          28
 #define RTNLGRP_MAX           29
 
+#define FRA_UNSPEC            0
+#define FRA_FWMARK            1  /* Mark */
+#define FRA_TABLE             2  /* Extended table id */
+#define FRA_FWMASK            3  /* Mask for netfilter mark */
+
 /**
  * nla_type (16 bits)
  * +---+---+-------------------------------+
@@ -407,6 +433,10 @@
 #define NLA_ALIGNTO    4
 #define NLA_ALIGN(len) (((len) + NLA_ALIGNTO - 1) & ~(NLA_ALIGNTO - 1))
 #define NLA_HDRLEN     (NLA_ALIGN(sizeof(struct nlattr)))
+
+/* rtm_flags */
+
+#define RTM_F_CLONED  0x200  /* This route is cloned */
 
 /****************************************************************************
  * Public Type Definitions
@@ -555,6 +585,31 @@ struct nla_bitfield32
 {
   uint32_t value;
   uint32_t selector;
+};
+
+/****************************************************************************
+ *              Neighbor Discovery userland options
+ */
+
+struct nduseroptmsg
+{
+  unsigned char   nduseropt_family;
+  unsigned char   nduseropt_pad1;
+  unsigned short  nduseropt_opts_len;     /* Total length of options */
+  int             nduseropt_ifindex;
+  uint8_t         nduseropt_icmp_type;
+  uint8_t         nduseropt_icmp_code;
+  unsigned short  nduseropt_pad2;
+  unsigned int    nduseropt_pad3;
+
+  /* Followed by one or more ND options */
+};
+
+enum
+{
+  NDUSEROPT_UNSPEC,
+  NDUSEROPT_SRCADDR,
+  __NDUSEROPT_MAX
 };
 
 /* This struct should be in sync with struct rtnl_link_stats64 */

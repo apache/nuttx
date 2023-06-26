@@ -32,6 +32,7 @@
 
 #include <net/route.h>
 #include <netpacket/netlink.h>
+#include <netinet/if_ether.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
@@ -76,8 +77,14 @@ struct getlink_recvfrom_response_s
 {
   struct nlmsghdr  hdr;
   struct ifinfomsg iface;
-  struct rtattr    attr;
-  uint8_t          data[IFNAMSIZ];  /* IFLA_IFNAME is the only attribute supported */
+  struct rtattr    attrmtu;
+  uint32_t         mtu;                         /* IFLA_MTU attribute */
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_TUN)
+  struct rtattr    attraddr;
+  uint8_t          mac[NLMSG_ALIGN(ETH_ALEN)];  /* IFLA_ADDRESS attribute */
+#endif
+  struct rtattr    attrname;
+  uint8_t          data[IFNAMSIZ];              /* IFLA_IFNAME attribute */
 };
 
 struct getlink_recvfrom_rsplist_s
@@ -321,8 +328,28 @@ netlink_get_device(FAR struct net_driver_s *dev,
   resp->iface.ifi_flags  = dev->d_flags;
   resp->iface.ifi_change = 0xffffffff;
 
-  resp->attr.rta_len     = RTA_LENGTH(strnlen(dev->d_ifname, IFNAMSIZ));
-  resp->attr.rta_type    = IFLA_IFNAME;
+  resp->attrmtu.rta_len  = RTA_LENGTH(sizeof(uint32_t));
+  resp->attrmtu.rta_type = IFLA_MTU;
+  resp->mtu              = NETDEV_PKTSIZE(dev) - NET_LL_HDRLEN(dev);
+
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_TUN)
+  resp->attraddr.rta_len  = RTA_LENGTH(ETH_ALEN);
+  resp->attraddr.rta_type = IFLA_ADDRESS;
+  if (dev->d_lltype == NET_LL_ETHERNET ||
+      dev->d_lltype == NET_LL_IEEE80211 ||
+      dev->d_lltype == NET_LL_LOOPBACK ||
+      dev->d_lltype == NET_LL_TUN)
+    {
+      memcpy(&resp->mac, &dev->d_mac.ether, ETH_ALEN);
+    }
+  else
+    {
+      memset(&resp->mac, 0, ETH_ALEN);
+    }
+#endif
+
+  resp->attrname.rta_len  = RTA_LENGTH(strnlen(dev->d_ifname, IFNAMSIZ));
+  resp->attrname.rta_type = IFLA_IFNAME;
 
   strlcpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
 
