@@ -617,11 +617,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   return sam_decodeirq(SAM_AIC_VBASE, regs);
 }
 
-#if defined(CONFIG_SAMA5_SAIC)
 /* This is the entry point from the ARM FIQ vector handler */
 
 uint32_t *arm_decodefiq(uint32_t *regs)
 {
+#if defined(CONFIG_SAMA5_SAIC)
   uint32_t *ret;
 
   /* In order to distinguish a FIQ from a true secure interrupt we need to
@@ -646,8 +646,11 @@ uint32_t *arm_decodefiq(uint32_t *regs)
     }
 
   return ret;
-}
+#else
+  DEBUGASSERT(false);
+  return NULL;
 #endif
+}
 
 /****************************************************************************
  * Name: up_disable_irq (and sam_disable_irq helper)

@@ -402,6 +402,12 @@ int  arm_securefault(int irq, void *context, void *arg);
 
 #elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R) || defined(CONFIG_ARCH_ARMV8R)
 
+/* Interrupt acknowledge and dispatch */
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+uint32_t *arm_dofiq(int fiq, uint32_t *regs);
+#endif
+
 /* Paging support */
 
 #ifdef CONFIG_LEGACY_PAGING
