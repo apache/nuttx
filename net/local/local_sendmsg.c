@@ -170,6 +170,10 @@ static ssize_t local_send(FAR struct socket *psock,
     {
 #ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
+#endif /* CONFIG_NET_LOCAL_STREAM */
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      case SOCK_DGRAM:
+#endif /* CONFIG_NET_LOCAL_DGRAM */
         {
           FAR struct local_conn_s *peer;
 
@@ -204,24 +208,11 @@ static ssize_t local_send(FAR struct socket *psock,
               return ret;
             }
 
-          ret = local_send_packet(&peer->lc_outfile, buf, len, false);
+          ret = local_send_packet(&peer->lc_outfile, buf, len,
+                                  psock->s_type == SOCK_DGRAM);
           nxmutex_unlock(&peer->lc_sendlock);
         }
         break;
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-      case SOCK_DGRAM:
-        {
-          /* Local UDP packet send */
-
-          /* #warning Missing logic */
-
-          ret = -ENOSYS;
-        }
-        break;
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
       default:
         {
           /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
