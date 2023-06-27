@@ -14,7 +14,7 @@ config NET_TCP
 
 config NET_TCP_NO_STACK
 	bool "Disable TCP/IP Stack"
-	default n
+	default NET_USRSOCK_TCP if NET_USRSOCK
 	select NET_TCP
 	---help---
 		Build without TCP/IP stack even if TCP networking support enabled.

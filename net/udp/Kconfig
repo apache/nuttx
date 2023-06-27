@@ -15,7 +15,7 @@ config NET_UDP
 
 config NET_UDP_NO_STACK
 	bool "Disable UDP/IP Stack"
-	default n
+	default NET_USRSOCK_UDP if NET_USRSOCK
 	select NET_UDP
 	---help---
 		Build without UDP/IP stack even if UDP networking support enabled.
