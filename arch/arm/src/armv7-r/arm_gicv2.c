@@ -41,7 +41,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
 /****************************************************************************
  * Name: up_set_secure_irq
  *
