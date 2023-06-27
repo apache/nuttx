@@ -1150,5 +1150,4 @@ int up_putc(int ch)
 #endif
 }
 
-
 #endif /* HAVE_UART_DEVICE && USE_SERIALDRIVER */

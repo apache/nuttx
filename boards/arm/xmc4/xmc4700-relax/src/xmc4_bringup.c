@@ -26,8 +26,14 @@
 
 #include <debug.h>
 #include <errno.h>
-#include <nuttx/spi/spi_transfer.h>
 #include <sys/types.h>
+
+#ifdef CONFIG_XMC4_USCI_SPI
+#  include <nuttx/spi/spi_transfer.h>
+#endif
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -50,15 +56,25 @@ int xmc4_bringup(void)
   spi = xmc4_spibus_initialize(4);
 
   if (!spi)
-  {
-    return -ENODEV;
-  }
+    {
+      return -ENODEV;
+    }
 
   ret = spi_register(spi, 0);
   if (ret < 0)
-  {
-    snerr("ERROR: Failed to register driver: %d\n", ret);
-  }
+    {
+      snerr("ERROR: Failed to register driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 
   return ret;
