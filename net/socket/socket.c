@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include "usrsock/usrsock.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET
@@ -92,6 +93,25 @@ int psock_socket(int domain, int type, int protocol,
   psock->s_proto  = protocol;
   psock->s_conn   = NULL;
   psock->s_type   = type & SOCK_TYPE_MASK;
+
+#ifdef CONFIG_NET_USRSOCK
+  /* Get the usrsock interface */
+
+  sockif = &g_usrsock_sockif;
+  psock->s_sockif = sockif;
+
+  ret = sockif->si_setup(psock);
+
+  /* When usrsock daemon returns -ENOSYS or -ENOTSUP, it means to use
+   * kernel's network stack, so fallback to kernel socket.
+   */
+
+  if (ret == 0 || (ret != -ENOSYS && ret != -ENOTSUP))
+    {
+      return ret;
+    }
+
+#endif
 
   /* Get the socket interface */
 
