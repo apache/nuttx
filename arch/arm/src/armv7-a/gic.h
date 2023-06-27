@@ -93,6 +93,11 @@
 #define GIC_SHIFT32(n)             ((n) & 31)                /* Shift 1-bit per field */
 #define GIC_MASK32(n)              (1 << GIC_SHIFT32(n))     /* 1-bit mask */
 
+/* GIC group */
+
+#define GIC_GROUP0                 0
+#define GIC_GROUP1                 1
+
 /* GIC Register Offsets *****************************************************/
 
 /* CPU Interface registers */
@@ -537,7 +542,11 @@
 #define GIC_ICDSGIR_INTID_MASK        (0x3ff << GIC_ICDSGIR_INTID_SHIFT)
 #  define GIC_ICDSGIR_INTID(n)        ((uint32_t)(n) << GIC_ICDSGIR_INTID_SHIFT)
                                              /* Bits 10-14: Reserved */
-#define GIC_ICDSGIR_NSATT             (1 << 15)
+#define GIC_ICDSGIR_NSATT_SHIFT       (15)
+#define GIC_ICDSGIR_NSATT_MASK        (1 << GIC_ICDSGIR_NSATT_SHIFT)
+#  define GIC_ICDSGIR_NSATT_GRP0      (0 << GIC_ICDSGIR_NSATT_SHIFT)
+#  define GIC_ICDSGIR_NSATT_GRP1      (1 << GIC_ICDSGIR_NSATT_SHIFT)
+
 #define GIC_ICDSGIR_CPUTARGET_SHIFT   (16)   /* Bits 16-23: CPU target */
 #define GIC_ICDSGIR_CPUTARGET_MASK    (0xff << GIC_ICDSGIR_CPUTARGET_SHIFT)
 #  define GIC_ICDSGIR_CPUTARGET(n)    ((uint32_t)(n) << GIC_ICDSGIR_CPUTARGET_SHIFT)
@@ -671,6 +680,15 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
            GIC_ICDSGIR_TGTFILTER_THIS;
 #endif
 
+#ifndef CONFIG_ARCH_TRUSTZONE_SECURE
+  /* Set NSATT be 1: forward the SGI specified in the SGIINTID field to a
+   * specified CPU interfaces only if the SGI is configured as Group 1 on
+   * that interface.
+   */
+
+  regval |= GIC_ICDSGIR_NSATT_GRP1;
+#endif
+
   putreg32(regval, GIC_ICDSGIR);
 }
 
@@ -758,6 +776,38 @@ int arm_gic_irq_trigger(int irq, bool edge);
 uint32_t *arm_decodeirq(uint32_t *regs);
 
 /****************************************************************************
+ * Name: arm_dofiq
+ *
+ * Description:
+ *   Receives the decoded GIC interrupt information and dispatches control
+ *   to the attached fiq handler.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+uint32_t *arm_dofiq(int irq, uint32_t *regs);
+#endif
+
+/****************************************************************************
+ * Name: arm_decodefiq
+ *
+ * Description:
+ *   This function is called from the FIQ vector handler in arm_vectors.S.
+ *   At this point, the interrupt has been taken and the registers have
+ *   been saved on the stack.  This function simply needs to determine the
+ *   the fiq number of the interrupt and then to call arm_doirq to dispatch
+ *   the interrupt.
+ *
+ *  Input Parameters:
+ *   regs - A pointer to the register save area on the stack.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+uint32_t *arm_decodefiq(uint32_t *regs);
+#endif
+
+/****************************************************************************
  * Name: arm_start_handler
  *
  * Description:
@@ -820,7 +870,7 @@ int arm_pause_handler(int irq, void *context, void *arg);
 #ifdef CONFIG_DEBUG_IRQ_INFO
 void arm_gic_dump(const char *msg, bool all, int irq);
 #else
-#  define arm_gic_dump(m,a,i)
+#  define arm_gic_dump(msg, all, irq)
 #endif
 
 #undef EXTERN

@@ -1659,7 +1659,7 @@ int up_prioritize_irq(int irq, int priority);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
 void up_secure_irq(int irq, bool secure);
 #else
 # define up_secure_irq(i, s)
@@ -1685,7 +1685,7 @@ void up_send_smp_call(cpu_set_t cpuset);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
 void up_secure_irq_all(bool secure);
 #else
 # define up_secure_irq_all(s)

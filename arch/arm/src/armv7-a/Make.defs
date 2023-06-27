@@ -98,3 +98,7 @@ ifeq ($(CONFIG_ARCH_HAVE_PSCI),y)
   CMN_ASRCS += arm_smccc.S
   CMN_CSRCS += arm_cpu_psci.c
 endif
+
+ifeq ($(CONFIG_ARCH_HIPRI_INTERRUPT),y)
+  CMN_CSRCS += arm_dofiq.c
+endif

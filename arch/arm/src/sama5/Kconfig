@@ -491,7 +491,6 @@ config SAMA5_SAIC
 	bool "Secure Advanced Interrupt Controller (SAIC)"
 	default n
 	depends on SAMA5_HAVE_SAIC
-	select ARMV7A_DECODEFIQ
 
 config SAMA5_RXLP
 	bool "Low power asynchronous receiver"
