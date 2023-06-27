@@ -48,6 +48,8 @@ struct sim_audio_s
 
   bool playback;
   bool offload;
+  bool paused;
+
   uint32_t frame_size;
   uint32_t nbuffers;
   uint32_t buffer_size;
@@ -529,8 +531,7 @@ static int sim_audio_pause(struct audio_lowerhalf_s *dev)
       return 0;
     }
 
-  snd_pcm_pause(priv->pcm, 0);
-
+  priv->paused = true;
   return 0;
 }
 
@@ -543,8 +544,7 @@ static int sim_audio_resume(struct audio_lowerhalf_s *dev)
       return 0;
     }
 
-  snd_pcm_resume(priv->pcm);
-
+  priv->paused = false;
   return 0;
 }
 #endif
@@ -749,7 +749,7 @@ static void sim_audio_process(struct sim_audio_s *priv)
   bool dequeue = false;
   int ret = 0;
 
-  if (!priv->pcm)
+  if (!priv->pcm || priv->paused)
     {
       return;
     }
