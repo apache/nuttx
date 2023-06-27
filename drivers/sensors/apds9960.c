@@ -1218,6 +1218,7 @@ int apds9960_register(FAR const char *devpath,
   if (ret != OK)
     {
       snerr("ERROR: APDS-9960 is not responding!\n");
+      kmm_free(priv);
       return ret;
     }
 
@@ -1227,6 +1228,7 @@ int apds9960_register(FAR const char *devpath,
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the APDS9960!\n");
+      kmm_free(priv);
       return ret;
     }
 
@@ -1240,6 +1242,7 @@ int apds9960_register(FAR const char *devpath,
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the APDS9960!\n");
+      kmm_free(priv);
       return ret;
     }
 
@@ -1249,6 +1252,7 @@ int apds9960_register(FAR const char *devpath,
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the APDS9960!\n");
+      kmm_free(priv);
       return ret;
     }
 
@@ -1262,6 +1266,7 @@ int apds9960_register(FAR const char *devpath,
   if (ret < 0)
     {
       snerr("ERROR: Failed to write APDS9960_GCONFIG4!\n");
+      kmm_free(priv);
       return ret;
     }
 
@@ -1271,6 +1276,7 @@ int apds9960_register(FAR const char *devpath,
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the APDS9960!\n");
+      kmm_free(priv);
       return ret;
     }
 
@@ -1281,6 +1287,7 @@ int apds9960_register(FAR const char *devpath,
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
+      return ret;
     }
 
   /* Attach to the interrupt */

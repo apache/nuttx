@@ -597,6 +597,18 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
+config FORTIFY_SOURCE
+	int "Fortify Source"
+	default 0
+	range 0 3
+	---help---
+		Detect overflows of buffers in common string and memory functions
+		where the compiler can determine and validate the buffer sizes.
+		0 does not have any checks.
+		1 will only check for out-of-bounds at compile time.
+		2 will only perform out-of-bounds checks on stack variables.
+		3 On the basis of 2, add an out-of-bounds check for dynamically allocated variables.
+
 config NDEBUG
 	bool "Define NDEBUG globally"
 	default !DEBUG_ASSERTIONS

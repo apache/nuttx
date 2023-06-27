@@ -84,6 +84,7 @@ CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_system/port/soc/$(CHI
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_system/port/soc/$(CHIP_SERIES)/system_internal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/brownout_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/efuse_hal.c
+CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/gpio_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/systimer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal.c
 CHIP_CSRCS += chip/$(ESP_HAL_3RDPARTY_REPO)/components/hal/timer_hal_iram.c

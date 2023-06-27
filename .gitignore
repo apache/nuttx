@@ -59,3 +59,4 @@ uImage
 .dirlinks
 .vscode
 .DS_Store
+tools/gdb/__pycache__

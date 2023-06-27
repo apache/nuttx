@@ -108,6 +108,107 @@ FAR void  *memmem(FAR const void *haystack, size_t haystacklen,
 void explicit_bzero(FAR void *s, size_t n);
 int timingsafe_bcmp(FAR const void *b1, FAR const void *b2, size_t n);
 
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(strcat) FAR char *strcat(FAR char *dest,
+                                          FAR const char *src)
+{
+  fortify_assert(strlen(dest) + strlen(src) + 1 <= fortify_size(dest, 0));
+  return __real_strcat(dest, src);
+}
+
+fortify_function(strlcat) size_t strlcat(FAR char *dst,
+                                         FAR const char *src,
+                                         size_t dsize)
+{
+  fortify_assert(dsize <= fortify_size(dst, 0));
+  return __real_strlcat(dst, src, dsize);
+}
+
+fortify_function(strncat) FAR char *strncat(FAR char *dest,
+                                            FAR const char *src,
+                                            size_t n)
+{
+  fortify_assert(n <= fortify_size(dest, 0));
+  return __real_strncat(dest, src, n);
+}
+
+fortify_function(strcpy) FAR char *strcpy(FAR char *dest,
+                                          FAR const char *src)
+{
+  fortify_assert(strlen(src) + 1 <= fortify_size(dest, 0));
+  return __real_strcpy(dest, src);
+}
+
+fortify_function(stpcpy) FAR char *stpcpy(FAR char *dest,
+                                          FAR const char *src)
+{
+  fortify_assert(strlen(src) + 1 <= fortify_size(dest, 0));
+  return __real_stpcpy(dest, src);
+}
+
+fortify_function(stpncpy) FAR char *stpncpy(FAR char *dest,
+                                            FAR const char *src,
+                                            size_t n)
+{
+  fortify_assert(n <= fortify_size(dest, 0));
+  return __real_stpncpy(dest, src, n);
+}
+
+fortify_function(strlcpy) size_t strlcpy(FAR char *dst,
+                                         FAR const char *src,
+                                         size_t siz)
+{
+  fortify_assert(siz <= fortify_size(dst, 0));
+  return __real_strlcpy(dst, src, siz);
+}
+
+fortify_function(strncpy) FAR char *strncpy(FAR char *dest,
+                                            FAR const char *src,
+                                            size_t n)
+{
+  fortify_assert(n <= fortify_size(dest, 0));
+  return __real_strncpy(dest, src, n);
+}
+
+fortify_function(memmove) FAR void *memmove(FAR void *dest,
+                                            FAR const void *src,
+                                            size_t count)
+{
+  fortify_assert(count <= fortify_size(dest, 0) &&
+                 count <= fortify_size(src, 0));
+  return __real_memmove(dest, src, count);
+}
+
+fortify_function(memcpy) FAR void *memcpy(FAR void *dest,
+                                          FAR const void *src,
+                                          size_t n)
+{
+  fortify_assert(n <= fortify_size(dest, 0) && n <= fortify_size(src, 0));
+  return __real_memcpy(dest, src, n);
+}
+
+fortify_function(memset) FAR void *memset(FAR void *s, int c, size_t n)
+{
+  fortify_assert(n <= fortify_size(s, 0));
+  return __real_memset(s, c, n);
+}
+
+fortify_function(mempcpy) FAR void *mempcpy(FAR void *dest,
+                                            FAR const void *src,
+                                            size_t n)
+{
+  fortify_assert(n <= fortify_size(dest, 0) && n <= fortify_size(src, 0));
+  return __real_mempcpy(dest, src, n);
+}
+
+fortify_function(explicit_bzero) void explicit_bzero(FAR void *s,
+                                                     size_t n)
+{
+  fortify_assert(n <= fortify_size(s, 0));
+  __real_explicit_bzero(s, n);
+}
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

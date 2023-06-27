@@ -50,6 +50,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define DEADLOCK_MAX 8
+
 #ifndef CONFIG_BOARD_RESET_ON_ASSERT
 #  define CONFIG_BOARD_RESET_ON_ASSERT 0
 #endif
@@ -182,10 +184,10 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 }
 
 /****************************************************************************
- * Name: show_stacks
+ * Name: dump_stacks
  ****************************************************************************/
 
-static void show_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
+static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   uintptr_t intstack_base = up_get_intstackbase();
@@ -392,10 +394,10 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
 
 /****************************************************************************
- * Name: showtasks
+ * Name: dump_tasks
  ****************************************************************************/
 
-static void show_tasks(void)
+static void dump_tasks(void)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0 && defined(CONFIG_STACK_COLORATION)
   size_t stack_used = up_check_intstack();
@@ -512,6 +514,31 @@ static void dump_core(pid_t pid)
 #endif
 
 /****************************************************************************
+ * Name: dump_deadlock
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_DEADLOCKDUMP
+static void dump_deadlock(void)
+{
+  pid_t deadlock[DEADLOCK_MAX];
+  size_t i = nxsched_collect_deadlock(deadlock, DEADLOCK_MAX);
+
+  if (i > 0)
+    {
+      _alert("Deadlock detected\n");
+      while (i-- > 0)
+        {
+#ifdef CONFIG_SCHED_BACKTRACE
+          sched_dumpstack(deadlock[i]);
+#else
+          _alert("deadlock pid: %d\n", deadlock[i])
+#endif
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -583,7 +610,7 @@ void _assert(FAR const char *filename, int linenum,
   up_dump_register(regs);
 
 #ifdef CONFIG_ARCH_STACKDUMP
-  show_stacks(rtcb, up_getusrsp(regs));
+  dump_stacks(rtcb, up_getusrsp(regs));
 #endif
 
   /* Flush any buffered SYSLOG data */
@@ -592,7 +619,13 @@ void _assert(FAR const char *filename, int linenum,
 
   if (fatal)
     {
-      show_tasks();
+      dump_tasks();
+
+#ifdef CONFIG_ARCH_DEADLOCKDUMP
+      /* Deadlock Dump */
+
+      dump_deadlock();
+#endif
 
 #ifdef CONFIG_ARCH_USBDUMP
       /* Dump USB trace data */

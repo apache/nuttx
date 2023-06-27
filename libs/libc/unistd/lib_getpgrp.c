@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/syslog_force.c
+ * libs/libc/unistd/lib_getpgrp.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,62 +22,27 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdbool.h>
-#include <assert.h>
-
-#include <nuttx/syslog/syslog.h>
-
-#include "syslog.h"
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_force
+ * Name: getpgrp
  *
  * Description:
- *   This is the low-level system logging interface.  This version forces
- *   the output and is only used in emergency situations (e.g., in assertion
- *   handling).
+ *   Get the Process Group ID of the currently executing task.
  *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
+ * Input parameters:
+ *   None
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller. A negated errno
- *   value is returned on any failure.
+ *   The getpgrp will return current process ID directly
  *
  ****************************************************************************/
 
-int syslog_force(int ch)
+pid_t getpgrp(void)
 {
-  int i;
-
-#ifdef CONFIG_SYSLOG_INTBUFFER
-  /* Flush any characters that may have been added to the interrupt
-   * buffer through the emergency channel
-   */
-
-  syslog_flush_intbuffer(true);
-#endif
-
-  for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
-    {
-      if (g_syslog_channel[i] == NULL)
-        {
-          break;
-        }
-
-      DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
-
-      /* Then send the character to the emergency channel */
-
-      g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i], ch);
-    }
-
-  return ch;
+  return getpid();
 }

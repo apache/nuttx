@@ -106,6 +106,7 @@ static const struct syslog_channel_ops_s g_syslog_dev_ops =
   syslog_dev_force,
   syslog_dev_flush,
   syslog_dev_write,
+  NULL,
   syslog_dev_uninitialize
 };
 

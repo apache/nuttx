@@ -20,6 +20,10 @@
 
 CSRCS += assert.c panic_notifier.c reboot_notifier.c
 
+ifeq ($(CONFIG_ARCH_DEADLOCKDUMP),y)
+CSRCS += deadlock.c
+endif
+
 # Include init build support
 
 DEPPATH += --dep-path misc

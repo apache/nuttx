@@ -35,6 +35,7 @@
 
 #include "riscv_internal.h"
 
+#include "esp_gpio.h"
 #include "esp_irq.h"
 
 #include "esp_attr.h"
@@ -290,6 +291,12 @@ void up_irqinitialize(void)
 
   esp_cpuint_initialize();
 
+  /* Initialize GPIO interrupt support */
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+  esp_gpioirqinitialize();
+#endif
+
   /* Attach the common interrupt handler */
 
   riscv_exception_attach();
@@ -322,6 +329,8 @@ void up_enable_irq(int irq)
 
   irqinfo("irq=%d | cpuint=%d \n", irq, cpuint);
 
+  /* Check if IRQ is initialized */
+
   DEBUGASSERT(cpuint >= 0 && cpuint < ESP_NCPUINTS);
 
   irqstate_t irqstate = enter_critical_section();
@@ -351,6 +360,8 @@ void up_disable_irq(int irq)
   int cpuint = g_irq_map[irq];
 
   irqinfo("irq=%d | cpuint=%d \n", irq, cpuint);
+
+  /* Check if IRQ is initialized */
 
   DEBUGASSERT(cpuint >= 0 && cpuint < ESP_NCPUINTS);
 

@@ -2276,8 +2276,8 @@ choice
 	prompt "i.MX RT Boot Configuration"
 	default IMXRT_BOOT_NOR if IMXRT_SEMC_NOR
 	default IMXRT_BOOT_SDRAM if IMXRT_SEMC_SDRAM && !IMXRT_SEMC_NOR
-	default IMXRT_BOOT_SRAM if IMXRT_SEMC_SRAM && !IMXRT_SEMC_SDRAM  && !IMXRT_SEMC_NOR
-	default IMXRT_BOOT_OCRAM if !IMXRT_SEMC_SRAM && !IMXRT_SEMC_SDRAM  && !IMXRT_SEMC_NOR
+	default IMXRT_BOOT_SRAM if IMXRT_SEMC_SRAM && !IMXRT_SEMC_SDRAM && !IMXRT_SEMC_NOR
+	default IMXRT_BOOT_OCRAM if !IMXRT_SEMC_SRAM && !IMXRT_SEMC_SDRAM && !IMXRT_SEMC_NOR
 	---help---
 		The startup code needs to know if the code is running from internal
 		OCRAM, external SDRAM, external NOR, or external SDRAM in order to

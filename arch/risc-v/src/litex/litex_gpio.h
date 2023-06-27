@@ -196,9 +196,9 @@ int litex_gpio_irq_config(struct gpio_isr_config_s * config);
  ****************************************************************************/
 
 #ifdef CONFIG_LITEX_GPIO_IRQ
-void litex_irq_disable(int irq);
+void litex_gpio_irq_disable(int irq);
 #else
-#  define litex_irq_disable(irq)
+#  define litex_gpio_irq_disable(irq)
 #endif
 
 #ifdef __cplusplus

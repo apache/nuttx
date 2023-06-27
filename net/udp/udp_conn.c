@@ -638,7 +638,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 
       conn->sconn.ttl = IP_TTL_DEFAULT;
       conn->flags     = 0;
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
       conn->domain    = domain;
 #endif
       conn->lport     = 0;

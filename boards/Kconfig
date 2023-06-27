@@ -380,6 +380,8 @@ config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 config ARCH_BOARD_ESP32C3_GENERIC
 	bool "Espressif ESP32-C3 Generic DevKit"
 	depends on ESPRESSIF_ESP32C3
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The ESP32-C3 DevKit features the ESP32-C3 CPU with a RISC-V core.
 		It comes in two flavors, the ESP32-C3-DevKitM-1 and the ESP32-C3-DevKitC-02.
@@ -450,12 +452,16 @@ config ARCH_BOARD_ESP32S3_MEADOW
 config ARCH_BOARD_ESP32C6_GENERIC
 	bool "Espressif ESP32-C6 Generic DevKit"
 	depends on ESPRESSIF_ESP32C6
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
 
 config ARCH_BOARD_ESP32H2_GENERIC
 	bool "Espressif ESP32-H2 Generic DevKit"
 	depends on ESPRESSIF_ESP32H2
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The ESP32-H2 DevKit features the ESP32-H2 CPU with a RISC-V core.
 

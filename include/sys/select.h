@@ -30,6 +30,7 @@
 #include <limits.h>
 #include <stdint.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/time.h>
 
 #ifdef CONFIG_FDCHECK
