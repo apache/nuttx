@@ -320,9 +320,8 @@
 
 #define BOARD_SPI_DX      USIC_DXC
 #define GPIO_SPI4_MOSI    (GPIO_U2C0_DOUT0_2 | GPIO_PADA2_STRONGMEDIUM)
-#define GPIO_SPI4_MISO    (GPIO_U1C0_DX0C)
+#define GPIO_SPI4_MISO    (GPIO_U2C0_DX0C)
 #define GPIO_SPI4_SCLK    (GPIO_U2C0_SCLKOUT_1 | GPIO_PADA2_STRONGMEDIUM)
-
 
 /****************************************************************************
  * Public Data

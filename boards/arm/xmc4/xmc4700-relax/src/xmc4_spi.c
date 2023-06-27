@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/xmc4/xmc4500-relax/src/xmc4_spi.c
+ * boards/arm/xmc4/xmc4700-relax/src/xmc4_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -42,7 +42,7 @@
  * Name: xmc4_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the FRDM-KL25Z board.
+ *   Called to configure SPI chip select GPIO pins.
  *
  ****************************************************************************/
 
@@ -186,7 +186,7 @@ void xmc4_spi4select(struct spi_dev_s *dev, uint32_t devid,
  *   devid - Identifies the (logical) device
  *
  * Returned Values:
- *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
+ *   Bit-encoded SPI status (see include/nuttx/spi/spi.h).
  *
  ****************************************************************************/
 
@@ -238,7 +238,7 @@ uint8_t xmc4_spi4status(struct spi_dev_s *dev, uint32_t devid)
  *   cmd - Determines where command or data should be selected.
  *
  * Returned Values:
- *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
+ *   Bit-encoded SPI status (see include/nuttx/spi/spi.h).
  *
  ****************************************************************************/
 

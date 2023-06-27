@@ -50,8 +50,6 @@ void xmc4_board_initialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
   board_autoled_initialize();
-#else
-  board_userled_initialize();
 #endif
 
 #ifdef CONFIG_XMC4_USCI_SPI
