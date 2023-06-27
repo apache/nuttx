@@ -243,6 +243,8 @@ else
     endif
   endif
 
+  ARCHCFLAGS += -fanalyzer
+  ARCHCXXFLAGS += -fanalyzer
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
@@ -251,8 +253,11 @@ endif
 
 # Architecture flags
 
-ARCHCFLAGS += -Wstrict-prototypes
-ARCHCXXFLAGS += -nostdinc++
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
@@ -265,8 +270,6 @@ endif
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
-
-ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
