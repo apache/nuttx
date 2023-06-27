@@ -125,7 +125,7 @@
 
 /* Network socket control ***************************************************/
 
-#define SIOCDENYINETSOCK _SIOC(0x0033) /* Deny network socket. */
+#define SIOCDENYINETSOCK _SIOC(0x003C) /* Deny network socket. */
 
 /* Bridge calls *************************************************************/
 
