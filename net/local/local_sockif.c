@@ -811,12 +811,9 @@ static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
 static int local_socketpair(FAR struct socket *psocks[2])
 {
-#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
   FAR struct local_conn_s *conns[2];
-#ifdef CONFIG_NET_LOCAL_STREAM
   bool nonblock;
   int ret;
-#endif /* CONFIG_NET_LOCAL_STREAM */
   int i;
 
   for (i = 0; i < 2; i++)
@@ -830,18 +827,12 @@ static int local_socketpair(FAR struct socket *psocks[2])
       conns[i]->lc_state = LOCAL_STATE_BOUND;
     }
 
-#ifdef CONFIG_NET_LOCAL_DGRAM
-#ifdef CONFIG_NET_LOCAL_STREAM
-  if (psocks[0]->s_type == SOCK_DGRAM)
-#endif /* CONFIG_NET_LOCAL_STREAM */
-    {
-      return OK;
-    }
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-#ifdef CONFIG_NET_LOCAL_STREAM
   conns[0]->lc_instance_id = conns[1]->lc_instance_id
+#ifdef CONFIG_NET_LOCAL_STREAM
                            = local_generate_instance_id();
+#else
+                           = -1;
+#endif
 
   /* Create the FIFOs needed for the connection */
 
@@ -887,15 +878,22 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   conns[0]->lc_state = conns[1]->lc_state
                      = LOCAL_STATE_CONNECTED;
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  if (psocks[0]->s_type == SOCK_DGRAM)
+    {
+      for (i = 0; i < 2; i++)
+        {
+          ret = local_set_pollthreshold(conns[i], sizeof(uint16_t));
+        }
+    }
+#endif
+
   return OK;
 
 errout:
   local_release_fifos(conns[0]);
   return ret;
-#endif /* CONFIG_NET_LOCAL_STREAM */
-#else
-  return -EOPNOTSUPP;
-#endif /* CONFIG_NET_LOCAL_STREAM || CONFIG_NET_LOCAL_DGRAM */
 }
 
 /****************************************************************************
