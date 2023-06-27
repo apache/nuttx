@@ -137,6 +137,11 @@ errout_with_addrenv:
   addrenv_drop(loadinfo->addrenv, false);
   return ret;
 #else
+  if (loadinfo->ehdr.e_type == ET_EXEC)
+    {
+      return OK;
+    }
+
   /* Allocate memory to hold the ELF image */
 
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
