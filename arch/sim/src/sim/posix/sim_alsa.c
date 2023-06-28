@@ -43,6 +43,7 @@ struct sim_audio_s
 {
   struct audio_lowerhalf_s dev;
   struct dq_queue_s pendq;
+  mutex_t pendlock;
 
   sq_entry_t link;
 
@@ -246,7 +247,7 @@ static int sim_audio_open(struct sim_audio_s *priv)
 
   if (priv->pcm)
     {
-      return 0;
+      return -ENXIO;
     }
 
   flags = up_irq_save();
@@ -287,7 +288,7 @@ static int sim_audio_close(struct sim_audio_s *priv)
 {
   if (!priv->pcm)
     {
-      return 0;
+      return -ENXIO;
     }
 
   snd_pcm_close(priv->pcm);
@@ -490,8 +491,15 @@ static int sim_audio_start(struct audio_lowerhalf_s *dev)
 static int sim_audio_stop(struct audio_lowerhalf_s *dev)
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  int ret;
 
   sim_audio_close(priv);
+
+  ret = nxmutex_lock(&priv->pendlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   while (!dq_empty(&priv->pendq))
     {
@@ -504,6 +512,8 @@ static int sim_audio_stop(struct audio_lowerhalf_s *dev)
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
 #endif
     }
+
+  nxmutex_unlock(&priv->pendlock);
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
@@ -528,7 +538,7 @@ static int sim_audio_pause(struct audio_lowerhalf_s *dev)
 
   if (!priv->pcm)
     {
-      return 0;
+      return -ENXIO;
     }
 
   priv->paused = true;
@@ -541,7 +551,7 @@ static int sim_audio_resume(struct audio_lowerhalf_s *dev)
 
   if (!priv->pcm)
     {
-      return 0;
+      return -ENXIO;
     }
 
   priv->paused = false;
@@ -549,13 +559,50 @@ static int sim_audio_resume(struct audio_lowerhalf_s *dev)
 }
 #endif
 
+static int sim_audio_flush(struct audio_lowerhalf_s *dev)
+{
+  struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  int ret;
+
+  ret = nxmutex_lock(&priv->pendlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  while (!dq_empty(&priv->pendq))
+    {
+      struct ap_buffer_s *apb;
+
+      apb = (struct ap_buffer_s *)dq_remfirst(&priv->pendq);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
+    }
+
+  nxmutex_unlock(&priv->pendlock);
+
+  return 0;
+}
+
 static int sim_audio_enqueuebuffer(struct audio_lowerhalf_s *dev,
                                    struct ap_buffer_s *apb)
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  int ret;
+
+  ret = nxmutex_lock(&priv->pendlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   apb->flags |= AUDIO_APB_OUTPUT_ENQUEUED;
   dq_addlast(&apb->dq_entry, &priv->pendq);
+
+  nxmutex_unlock(&priv->pendlock);
 
   return 0;
 }
@@ -565,6 +612,11 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
   int ret = 0;
+
+  if (!priv->pcm)
+    {
+      return -ENXIO;
+    }
 
   switch (cmd)
     {
@@ -596,45 +648,54 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
         break;
 
         case AUDIOIOC_SETPARAMTER:
-        {
-          audinfo("%s , arg: %s\n", __func__, (char *)arg);
-        } break;
+          {
+            audinfo("%s , arg: %s\n", __func__, (char *)arg);
+          }
+          break;
 
-      case AUDIOIOC_GETLATENCY:
-        {
-          long *latency = (long *)arg;
-          long remain = 0;
-          dq_entry_t *cur;
+        case AUDIOIOC_GETLATENCY:
+          {
+            long *latency = (long *)arg;
+            long remain = 0;
+            dq_entry_t *cur;
 
-          if (!priv->pcm)
-            {
-              ret = -ENXIO;
-              break;
-            }
+            ret = snd_pcm_delay(priv->pcm, latency);
+            if (ret < 0)
+              {
+                return ret;
+              }
+            else
+              {
+                remain = priv->aux->nbytes - priv->aux->curbyte;
 
-          ret = snd_pcm_delay(priv->pcm, latency);
-          if (ret < 0)
-            {
-              return ret;
-            }
-          else
-            {
-              remain = priv->aux->nbytes - priv->aux->curbyte;
+                ret = nxmutex_lock(&priv->pendlock);
+                if (ret < 0)
+                  {
+                    return ret;
+                  }
 
-              for (cur = dq_peek(&priv->pendq); cur; cur = dq_next(cur))
-                {
-                  struct ap_buffer_s *apb = (struct ap_buffer_s *)cur;
-                  remain += apb->nbytes - apb->curbyte;
-                }
+                for (cur = dq_peek(&priv->pendq); cur; cur = dq_next(cur))
+                  {
+                    struct ap_buffer_s *apb = (struct ap_buffer_s *)cur;
+                    remain += apb->nbytes - apb->curbyte;
+                  }
 
-              *latency += remain / priv->frame_size;
-            }
-        }
-        break;
+                nxmutex_unlock(&priv->pendlock);
 
-      default:
-        ret = -ENOTTY;
-        break;
+                *latency += remain / priv->frame_size;
+              }
+          }
+          break;
+
+        case AUDIOIOC_FLUSH:
+          {
+            ret = sim_audio_flush(dev);
+          }
+          break;
+
+        default:
+          ret = -ENOTTY;
+          break;
     }
 
   return ret;
@@ -791,7 +852,14 @@ static void sim_audio_process(struct sim_audio_s *priv)
       return;
     }
 
+  ret = nxmutex_lock(&priv->pendlock);
+  if (ret < 0)
+    {
+      return;
+    }
+
   apb = (struct ap_buffer_s *)dq_peek(&priv->pendq);
+  nxmutex_unlock(&priv->pendlock);
   if (!apb)
     {
       return;
@@ -832,7 +900,14 @@ static void sim_audio_process(struct sim_audio_s *priv)
     {
       bool final = false;
 
+      ret = nxmutex_lock(&priv->pendlock);
+      if (ret < 0)
+        {
+          goto out;
+        }
+
       dq_remfirst(&priv->pendq);
+      nxmutex_unlock(&priv->pendlock);
 
       if (apb->flags & AUDIO_APB_FINAL)
         {
@@ -992,6 +1067,7 @@ struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
 
   /* Setting default config */
 
+  nxmutex_init(&priv->pendlock);
   priv->nbuffers    = CONFIG_AUDIO_NUM_BUFFERS;
   priv->buffer_size = CONFIG_AUDIO_BUFFER_NUMBYTES;
 
