@@ -37,10 +37,10 @@ INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdpar
 SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
-OPENSBI_COMMIT  = 5546c21701b21eaf6c8b0bff551e77b1a241d8ef
+OPENSBI_COMMIT  = b18bb7ce78d4e5504a9cbd8df7b57d795f489a0a
 OPENSBI_URL     = https://github.com/tiiuae/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = tiiuae-opensbi-5546c21
+OPENSBI_DIR     = tiiuae-opensbi-b18bb7c
 
 $(OPENSBI_TARBALL):
 	$(call DOWNLOAD,$(OPENSBI_URL),$(OPENSBI_COMMIT),opensbi/$(OPENSBI_TARBALL))
