@@ -75,15 +75,14 @@
  *
  ****************************************************************************/
 
-static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
-                              FAR const char *filename)
+static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo)
 {
   struct stat buf;
   int ret;
 
   /* Get the file stats */
 
-  ret = nx_stat(filename, &buf, 1);
+  ret = file_fstat(&loadinfo->file, &buf);
   if (ret < 0)
     {
       berr("Failed to stat file: %d\n", ret);
@@ -97,10 +96,6 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
       berr("Not a regular file.  mode: %d\n", buf.st_mode);
       return -ENOENT;
     }
-
-  /* TODO:  Verify that the file is readable.  Not really important because
-   * we will detect this when we try to open the file read-only.
-   */
 
   /* Return the size of the file in the loadinfo structure */
 
@@ -135,21 +130,21 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   memset(loadinfo, 0, sizeof(struct elf_loadinfo_s));
 
-  /* Get the length of the file. */
-
-  ret = elf_filelen(loadinfo, filename);
-  if (ret < 0)
-    {
-      berr("elf_filelen failed: %d\n", ret);
-      return ret;
-    }
-
   /* Open the binary file for reading (only) */
 
   ret = file_open(&loadinfo->file, filename, O_RDONLY);
   if (ret < 0)
     {
       berr("Failed to open ELF binary %s: %d\n", filename, ret);
+      return ret;
+    }
+
+  /* Get the length of the file. */
+
+  ret = elf_filelen(loadinfo);
+  if (ret < 0)
+    {
+      berr("elf_filelen failed: %d\n", ret);
       return ret;
     }
 
