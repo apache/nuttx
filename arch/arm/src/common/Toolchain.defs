@@ -74,23 +74,6 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
-ifeq ($(CONFIG_ARM_THUMB),y)
-  ARCHOPTIMIZATION += -mthumb
-
-  # GCC Manual:
-  # -mthumb
-  # ... If you want to force assembler files to be interpreted as Thumb
-  # code, either add a `.thumb' directive to the source or pass the
-  # -mthumb option directly to the assembler by prefixing it with -Wa.
-
-  ARCHOPTIMIZATION += -Wa,-mthumb
-
-  # Outputs an implicit IT block when there is a conditional instruction
-  # without an enclosing IT block.
-
-  ARCHOPTIMIZATION += -Wa,-mimplicit-it=always
-endif
-
 ifeq ($(CONFIG_UNWINDER_ARM),y)
   ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
 endif
@@ -143,6 +126,23 @@ ifneq ($(TARGET_TOOL),)
 endif
 
 ARCHCPUFLAGS += $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
+
+ifeq ($(CONFIG_ARM_THUMB),y)
+  ARCHCPUFLAGS += -mthumb
+
+  # GCC Manual:
+  # -mthumb
+  # ... If you want to force assembler files to be interpreted as Thumb
+  # code, either add a `.thumb' directive to the source or pass the
+  # -mthumb option directly to the assembler by prefixing it with -Wa.
+
+  ARCHCPUFLAGS += -Wa,-mthumb
+
+  # Outputs an implicit IT block when there is a conditional instruction
+  # without an enclosing IT block.
+
+  ARCHCPUFLAGS += -Wa,-mimplicit-it=always
+endif
 
 # Clang toolchain
 
