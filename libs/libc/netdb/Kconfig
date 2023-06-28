@@ -5,6 +5,7 @@
 
 config LIBC_NETDB
 	bool "netdb support"
+	depends on NET_IPv4 || NET_IPv6
 	default n
 
 menu "NETDB Support"
