@@ -152,12 +152,11 @@ static bool local_fifo_exists(FAR const char *path)
       return false;
     }
 
-  /* FIFOs are character devices in NuttX.  Return true if what we found
-   * is a FIFO.  What if it is something else?  In that case, we will
-   * return false and mkfifo() will fail.
+  /* Return true if what we found is a FIFO. What if it is something else?
+   * In that case, we will return false and mkfifo() will fail.
    */
 
-  return (bool)S_ISCHR(buf.st_mode);
+  return (bool)S_ISFIFO(buf.st_mode);
 }
 
 /****************************************************************************
