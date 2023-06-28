@@ -262,7 +262,7 @@
 "strcasecmp","strings.h","","int","FAR const char *","FAR const char *"
 "strcasestr","string.h","","FAR char *","FAR const char *","FAR const char *"
 "strcat","string.h","","FAR char *","FAR char *","FAR const char *"
-"strchr","string.h","","FAR char","FAR const char *","int"
+"strchr","string.h","","FAR char *","FAR const char *","int"
 "strchrnul","string.h","","FAR char *","FAR const char *","int"
 "strcmp","string.h","","int","FAR const char *","FAR const char *"
 "strcoll","string.h","defined(CONFIG_LIBC_LOCALE)","int","FAR const char *","FAR const char *"
