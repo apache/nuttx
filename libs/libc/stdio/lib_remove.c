@@ -51,25 +51,18 @@
 
 int remove(FAR const char *path)
 {
-  struct stat buf;
-  int ret;
+  /* First try to unlink since this is
+   * more frequently the necessary action.
+   */
 
-  /* Check the kind of object pointed by path */
-
-  ret = stat(path, &buf);
-  if (ret != 0)
+  if (unlink(path) != 0  /* If it is indeed a directory...  */
+      && (errno != EPERM /* ...try to remove it.  */
+          || rmdir(path) != 0))
     {
-      return ret;
+      /* Cannot remove the object for whatever reason. */
+
+      return -1;
     }
 
-  /* Act according to the kind of object */
-
-  if (S_ISDIR(buf.st_mode))
-    {
-      return rmdir(path);
-    }
-  else
-    {
-      return unlink(path);
-    }
+  return 0;
 }
