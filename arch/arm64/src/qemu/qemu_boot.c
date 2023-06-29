@@ -138,9 +138,6 @@ uint64_t arm64_get_mpid(int cpu)
 
 void arm64_el_init(void)
 {
-  write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
-
-  ARM64_ISB();
 }
 
 /****************************************************************************
