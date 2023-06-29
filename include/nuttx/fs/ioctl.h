@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -447,6 +448,10 @@
                                                *     threshold.
                                                * OUT: None */
 
+#define PIPEIOC_PEEK        _PIPEIOC(0x0004)  /* Pipe peek interface
+                                               * IN: pipe_peek_s
+                                               * OUT: Length of data */
+
 /* RTC driver ioctl definitions *********************************************/
 
 /* (see nuttx/include/rtc.h */
@@ -660,6 +665,12 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+struct pipe_peek_s
+{
+  FAR void *buf;
+  size_t size;
+};
 
 /****************************************************************************
  * Public Data
