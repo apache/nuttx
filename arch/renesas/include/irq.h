@@ -64,6 +64,7 @@ extern "C"
  */
 
 EXTERN volatile uint32_t *g_current_regs;
+#define CURRENT_REGS g_current_regs
 
 /****************************************************************************
  * Public Function Prototypes

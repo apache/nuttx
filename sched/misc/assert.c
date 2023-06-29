@@ -149,8 +149,7 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
  ****************************************************************************/
 
 static void dump_stack(FAR const char *tag, uintptr_t sp,
-                       uintptr_t base, size_t size,
-                       size_t used, bool force)
+                       uintptr_t base, size_t size, size_t used)
 {
   uintptr_t top = base + size;
 
@@ -158,7 +157,7 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
   _alert("  base: %p\n", (FAR void *)base);
   _alert("  size: %08zu\n", size);
 
-  if (!force)
+  if (sp != 0)
     {
       _alert("    sp: %p\n", (FAR void *)sp);
       stack_dump(sp, top);
@@ -193,38 +192,37 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   uintptr_t intstack_base = up_get_intstackbase();
   size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
   uintptr_t intstack_top = intstack_base + intstack_size;
-  FAR void *intstack_sp = NULL;
+  uintptr_t intstack_sp = 0;
 #endif
 #ifdef CONFIG_ARCH_KERNEL_STACK
   uintptr_t kernelstack_base = (uintptr_t)rtcb->xcp.kstack;
   size_t kernelstack_size = CONFIG_ARCH_KERNEL_STACKSIZE;
   uintptr_t kernelstack_top = kernelstack_base + kernelstack_size;
-  FAR void *kernelstack_sp = NULL;
+  uintptr_t kernelstack_sp = 0;
 #endif
   uintptr_t tcbstack_base = (uintptr_t)rtcb->stack_base_ptr;
   size_t tcbstack_size = (size_t)rtcb->adj_stack_size;
   uintptr_t tcbstack_top = tcbstack_base + tcbstack_size;
-  FAR void *tcbstack_sp = NULL;
+  uintptr_t tcbstack_sp = 0;
   bool force = false;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   if (sp >= intstack_base && sp < intstack_top)
     {
-      intstack_sp = (FAR void *)sp;
-      tcbstack_sp = (FAR void *)up_getusrsp(rtcb->xcp.regs);
+      intstack_sp = sp;
     }
   else
 #endif
 #ifdef CONFIG_ARCH_KERNEL_STACK
   if (sp >= kernelstack_base && sp < kernelstack_top)
     {
-      kernelstack_sp = (FAR void *)sp;
+      kernelstack_sp = sp;
     }
   else
 #endif
   if (sp >= tcbstack_base && sp < tcbstack_top)
     {
-      tcbstack_sp = (FAR void *)sp;
+      tcbstack_sp = sp;
     }
   else
     {
@@ -233,47 +231,50 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
     }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  if (intstack_sp != NULL || force)
+  if (intstack_sp != 0 || force)
     {
       dump_stack("IRQ",
-                 (uintptr_t)intstack_sp,
+                 intstack_sp,
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack(),
+                 up_check_intstack());
 #else
-                 0,
+                 0);
 #endif
-                 force
-                );
+
+      tcbstack_sp = up_getusrsp((FAR void *)CURRENT_REGS);
+      if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
+        {
+          tcbstack_sp = 0;
+          force = true;
+        }
     }
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  if (kernelstack_sp != NULL || force)
+  if (kernelstack_sp != 0 || force)
     {
       dump_stack("Kernel",
-                 (uintptr_t)kernelstack_sp,
+                 kernelstack_sp,
                  kernelstack_base,
                  kernelstack_size,
-                 0, force
+                 0
                 );
     }
 #endif
 
-  if (tcbstack_sp != NULL || force)
+  if (tcbstack_sp != 0 || force)
     {
       dump_stack("User",
-                 (uintptr_t)tcbstack_sp,
+                 tcbstack_sp,
                  tcbstack_base,
                  tcbstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_tcbstack(rtcb),
+                 up_check_tcbstack(rtcb));
 #else
-                 0,
+                 0);
 #endif
-                 force
-                );
     }
 }
 
