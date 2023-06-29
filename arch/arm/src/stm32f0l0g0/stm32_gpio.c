@@ -307,7 +307,7 @@ int stm32_configgpio(uint32_t cfgset)
    * Should it configured as an EXTI interrupt?
    */
 
-  if ((cfgset & GPIO_EXTI) != 0)
+  if ((pinmode != GPIO_MODER_OUTPUT) && ((cfgset & GPIO_EXTI) != 0))
     {
       uint32_t regaddr;
       int shift;
