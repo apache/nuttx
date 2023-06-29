@@ -838,6 +838,16 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case PIPEIOC_PEEK:
+        {
+          FAR struct pipe_peek_s *peek = (FAR struct pipe_peek_s *)arg;
+
+          DEBUGASSERT(peek && peek->buf);
+
+          ret = circbuf_peek(&dev->d_buffer, peek->buf, peek->size);
+        }
+        break;
+
       case FIONWRITE:  /* Number of bytes waiting in send queue */
       case FIONREAD:   /* Number of bytes available for reading */
         {
