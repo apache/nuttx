@@ -196,9 +196,13 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   if (!attr)
     {
-      /* Inherit parent priority by default */
+      /* Inherit parent priority by default. except idle */
 
-      default_attr.priority = parent->sched_priority;
+      if (!is_idle_task(parent))
+        {
+          default_attr.priority = parent->sched_priority;
+        }
+
       attr = &default_attr;
     }
 
