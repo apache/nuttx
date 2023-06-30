@@ -283,11 +283,11 @@
 #define EHOSTUNREACH        113
 #define EHOSTUNREACH_STR    "No route to host"
 #define EALREADY            114
-#define EALREADY_STR        "Socket already connected"
+#define EALREADY_STR        "Operation already in progress"
 #define EINPROGRESS         115
 #define EINPROGRESS_STR     "Operation now in progress"
 #define ESTALE              116
-#define ESTALE_STR          "Stale NFS file handle"
+#define ESTALE_STR          "Stale file handle"
 #define EUCLEAN             117
 #define EUCLEAN_STR         "Structure needs cleaning"
 #define ENOTNAM             118
