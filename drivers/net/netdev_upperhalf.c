@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/can.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
@@ -313,6 +314,76 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
     }
 }
 
+#if defined(CONFIG_NET_LOOPBACK) || defined(CONFIG_NET_ETHERNET) || \
+    defined(CONFIG_DRIVERS_IEEE80211)
+static void eth_input(FAR struct net_driver_s *dev)
+{
+  FAR struct eth_hdr_s *eth_hdr = (FAR struct eth_hdr_s *)NETLLBUF;
+
+  /* Check if this is an 802.1Q VLAN tagged packet */
+
+  if (eth_hdr->type == HTONS(TPID_8021QVLAN))
+    {
+      /* Need to remove the 4 octet VLAN Tag, by moving src and dest
+       * addresses 4 octets to the right, and then read the actual
+       * ethertype. The VLAN ID and priority fields are currently
+       * ignored.
+       */
+
+      memmove((FAR uint8_t *)eth_hdr + 4, eth_hdr,
+              offsetof(struct eth_hdr_s, type));
+      dev->d_iob  = iob_trimhead(dev->d_iob, 4);
+      dev->d_len -= 4;
+
+      eth_hdr = (FAR struct eth_hdr_s *)NETLLBUF;
+    }
+
+  /* We only accept IP packets of the configured type and ARP packets */
+
+#ifdef CONFIG_NET_IPv4
+  if (eth_hdr->type == HTONS(ETHTYPE_IP))
+    {
+      ninfo("IPv4 frame\n");
+      NETDEV_RXIPV4(dev);
+
+      /* Receive an IPv4 packet from the network device */
+
+      ipv4_input(dev);
+    }
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if (eth_hdr->type == HTONS(ETHTYPE_IP6))
+    {
+      ninfo("IPv6 frame\n");
+      NETDEV_RXIPV6(dev);
+
+      /* Give the IPv6 packet to the network layer */
+
+      ipv6_input(dev);
+    }
+  else
+#endif
+#ifdef CONFIG_NET_ARP
+  if (eth_hdr->type == HTONS(ETHTYPE_ARP))
+    {
+      ninfo("ARP frame\n");
+      NETDEV_RXARP(dev);
+
+      /* Handle ARP packet */
+
+      arp_input(dev);
+    }
+  else
+#endif
+    {
+      ninfo("INFO: Dropped, Unknown type: %04x\n", eth_hdr->type);
+      NETDEV_RXDROPPED(dev);
+      dev->d_len = 0;
+    }
+}
+#endif
+
 /****************************************************************************
  * Function: netdev_upper_rxpoll_work
  *
@@ -332,7 +403,6 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 {
   FAR struct netdev_lowerhalf_s *lower = upper->lower;
   FAR struct net_driver_s       *dev   = &lower->netdev;
-  FAR struct eth_hdr_s          *eth_hdr;
   FAR netpkt_t                  *pkt;
 
   /* Loop while receive() successfully retrieves valid Ethernet frames. */
@@ -358,73 +428,31 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
       pkt_input(dev);
 #endif
 
-      /* TODO: Support other ll types. */
-
-      DEBUGASSERT(dev->d_lltype == NET_LL_ETHERNET ||
-                  dev->d_lltype == NET_LL_IEEE80211);
-
-      eth_hdr = (FAR struct eth_hdr_s *)NETLLBUF;
-
-      /* Check if this is an 802.1Q VLAN tagged packet */
-
-      if (eth_hdr->type == HTONS(TPID_8021QVLAN))
+      switch (dev->d_lltype)
         {
-          /* Need to remove the 4 octet VLAN Tag, by moving src and dest
-           * addresses 4 octets to the right, and then read the actual
-           * ethertype. The VLAN ID and priority fields are currently
-           * ignored.
-           */
-
-          memmove((FAR uint8_t *)eth_hdr + 4, eth_hdr,
-                  offsetof(struct eth_hdr_s, type));
-          dev->d_iob  = iob_trimhead(dev->d_iob, 4);
-          dev->d_len -= 4;
-
-          eth_hdr = (FAR struct eth_hdr_s *)NETLLBUF;
-        }
-
-      /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv4
-      if (eth_hdr->type == HTONS(ETHTYPE_IP))
-        {
-          ninfo("IPv4 frame\n");
-          NETDEV_RXIPV4(dev);
-
-          /* Receive an IPv4 packet from the network device */
-
-          ipv4_input(dev);
-        }
-      else
+#ifdef CONFIG_NET_LOOPBACK
+        case NET_LL_LOOPBACK:
 #endif
-#ifdef CONFIG_NET_IPv6
-      if (eth_hdr->type == HTONS(ETHTYPE_IP6))
-        {
-          ninfo("IPv6 frame\n");
-          NETDEV_RXIPV6(dev);
-
-          /* Give the IPv6 packet to the network layer */
-
-          ipv6_input(dev);
-        }
-      else
+#ifdef CONFIG_NET_ETHERNET
+        case NET_LL_ETHERNET:
 #endif
-#ifdef CONFIG_NET_ARP
-      if (eth_hdr->type == HTONS(ETHTYPE_ARP))
-        {
-          ninfo("ARP frame\n");
-          NETDEV_RXARP(dev);
-
-          /* Handle ARP packet */
-
-          arp_input(dev);
-        }
-      else
+#ifdef CONFIG_DRIVERS_IEEE80211
+        case NET_LL_IEEE80211:
 #endif
-        {
-          ninfo("INFO: Dropped, Unknown type: %04x\n", eth_hdr->type);
-          NETDEV_RXDROPPED(dev);
-          dev->d_len = 0;
+#if defined(CONFIG_NET_LOOPBACK) || defined(CONFIG_NET_ETHERNET) || \
+    defined(CONFIG_DRIVERS_IEEE80211)
+          eth_input(dev);
+          break;
+#endif
+#ifdef CONFIG_NET_CAN
+        case NET_LL_CAN:
+          ninfo("CAN frame");
+          can_input(dev);
+          break;
+#endif
+        default:
+          nerr("Unknown link type %d\n", dev->d_lltype);
+          break;
         }
 
       /* If the above function invocation resulted in data
