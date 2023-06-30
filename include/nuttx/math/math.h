@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/math/cordic.h>
+#include <nuttx/math/fft.h>
 
 /****************************************************************************
  * Public Types
@@ -39,6 +40,7 @@
 struct math_config_s
 {
   FAR struct cordic_lowerhalf_s *cordic;
+  FAR struct fft_lowerhalf_s    *fft;
 };
 
 /****************************************************************************

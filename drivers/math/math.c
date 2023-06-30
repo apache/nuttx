@@ -139,6 +139,19 @@ static int math_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           break;
         }
+
+      case MATHIOC_FFT_CALC:
+        {
+          FAR struct fft_calc_s *calc =
+            (FAR struct fft_calc_s *)((uintptr_t)arg);
+
+          if (upper->fft != NULL)
+            {
+              ret = upper->fft->ops->calc(upper->fft, calc);
+            }
+
+          break;
+        }
     }
 
   leave_critical_section(flags);
@@ -198,7 +211,7 @@ errout:
  * Name: cordic_register
  *
  * Description:
- *   Register a CORDIC driver. Deprecated, use math_register instead!
+ *   Register a CORDIC driver.
  *
  ****************************************************************************/
 
@@ -209,6 +222,25 @@ int cordic_register(FAR const char *path,
 
   memset(&config, 0, sizeof(config));
   config.cordic = lower;
+
+  return math_register(path, &config);
+}
+
+/****************************************************************************
+ * Name: fft_register
+ *
+ * Description:
+ *   Register a FFT driver.
+ *
+ ****************************************************************************/
+
+int fft_register(FAR const char *path,
+                    FAR struct fft_lowerhalf_s *lower)
+{
+  struct math_config_s config;
+
+  memset(&config, 0, sizeof(config));
+  config.fft = lower;
 
   return math_register(path, &config);
 }

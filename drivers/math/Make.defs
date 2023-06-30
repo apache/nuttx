@@ -18,9 +18,9 @@
 #
 ############################################################################
 
-# Include CORDIC support
+# Include math acceleration support
 
-ifeq ($(CONFIG_MATH_CORDIC),y)
+ifneq ($(CONFIG_MATH_CORDIC)$(CONFIG_MATH_FFT),)
 CSRCS += math.c
 endif
 
