@@ -84,6 +84,7 @@
 #define SCHED_PRIORITY_IDLE      0
 
 #if defined(CONFIG_FS_LARGEFILE)
+#  define __USE_FILE_OFFSET64    1
 #  define fsblkcnt64_t           fsblkcnt_t
 #  define fsfilcnt64_t           fsfilcnt_t
 #  define blkcnt64_t             blkcnt_t
