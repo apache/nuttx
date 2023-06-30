@@ -240,6 +240,13 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
       goto bad;
     }
 
+#ifdef CONFIG_NFS_DONT_BIND_TCP_SOCKET
+  if (rpc->rc_sotype == SOCK_STREAM)
+    {
+      goto connect;
+    }
+#endif
+
   /* Some servers require that the client port be a reserved port
    * number. We always allocate a reserved port, as this prevents
    * filehandle disclosure through UDP port capture.
@@ -262,6 +269,10 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
       ferr("ERROR: psock_bind failed: %d\n", error);
       goto bad;
     }
+
+#ifdef CONFIG_NFS_DONT_BIND_TCP_SOCKET
+connect:
+#endif
 
   /* Protocols that do not require connections could be optionally left
    * unconnected.  That would allow servers to reply from a port other than
