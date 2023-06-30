@@ -92,14 +92,12 @@ up_saveusercontext:
 	/* Save r11 and EXC_RETURN */
 
 	mov		r1, r11
-#ifdef CONFIG_BUILD_PROTECTED
+
 	/* Save EXC_RETURN to 0xffffffff */
 
-	movs		r2, #-1
+	movs		r2, #0
+	subs		r2, #1
 	stmia		r0!, {r1-r2}
-#else
-	stmia		r0!, {r1}
-#endif
 
 	movs		r0, #0
 	bx		lr
