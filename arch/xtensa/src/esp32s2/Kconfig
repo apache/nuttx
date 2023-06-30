@@ -602,12 +602,12 @@ if ESP32S2_UART1
 
 config ESP32S2_UART1_TXPIN
 	int "UART1 Tx Pin"
-	default 37
+	default 17
 	range 0 46
 
 config ESP32S2_UART1_RXPIN
 	int "UART1 Rx Pin"
-	default 38
+	default 18
 	range 0 46
 
 config ESP32S2_UART1_RTSPIN
