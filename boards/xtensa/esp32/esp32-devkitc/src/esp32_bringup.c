@@ -41,6 +41,7 @@
 #endif
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
+#include <nuttx/board.h>
 
 #if defined(CONFIG_ESP32_EFUSE)
 #include "esp32_efuse.h"
@@ -56,7 +57,7 @@
 #endif
 
 #ifdef CONFIG_TIMER
-#include <esp32_tim_lowerhalf.h>
+#  include <esp32_tim_lowerhalf.h>
 #endif
 
 #ifdef CONFIG_ONESHOT
@@ -150,6 +151,10 @@
 
 #ifdef CONFIG_SENSORS_MAX6675
 #  include "esp32_max6675.h"
+#endif
+
+#ifdef CONFIG_ESP32_RMT
+#  include "esp32_rmt.h"
 #endif
 
 #include "esp32-devkitc.h"
@@ -298,7 +303,7 @@ int esp32_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT "
-             "coexistence support\n");
+                      "coexistence support\n");
     }
 #endif
 
@@ -319,9 +324,9 @@ int esp32_bringup(void)
     }
 #endif
 
-/* First, register the timer drivers and let timer 1 for oneshot
- * if it is enabled.
- */
+  /* First, register the timer drivers and let timer 1 for oneshot
+   * if it is enabled.
+   */
 
 #ifdef CONFIG_TIMER
 
@@ -624,6 +629,14 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32_RMT
+  ret = board_rmt_initialize(RMT_CHANNEL, RMT_OUTPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the ESP32 RTC driver */
 
@@ -642,6 +655,16 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
              ESP32_SPI2, ret);
+    }
+#  endif
+#endif
+
+#ifdef CONFIG_WS2812
+#  ifndef CONFIG_WS2812_NON_SPI_DRIVER 
+  ret = board_ws2812_initialize(0, ESP32_SPI3, CONFIG_WS2812_LED_COUNT);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize ws2812 driver\n");
     }
 #  endif
 #endif
