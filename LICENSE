@@ -6715,6 +6715,8 @@ drivers/wireless/spirit/
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 arch/arm/src/nrf52/sdk-nrfxlib
+arch/arm/src/nrf53/sdk-nrfxlib
+arch/arm/src/nrf91/sdk-nrfxlib
 ===============================
 
  Nordic SoftDevice Controller is based on the 3-Clause BSD License:
