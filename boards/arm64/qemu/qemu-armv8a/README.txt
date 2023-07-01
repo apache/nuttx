@@ -105,6 +105,29 @@ Getting Started
    3. Nuttx default core number is 4, and Changing CONFIG_SMP_NCPUS > 4 and setting qemu command
      option -smp will boot more core. For qemu, core limit is 32.
 
+  3.4 SMP + Networking with hypervisor (GICv2)
+   Configuring NuttX and compile:
+   $ ./tools/configure.sh -l qemu-armv8a:netnsh_smp_hv
+   $ make
+   Running with qemu + kvm on raspi3b+ (ubuntu server 20.04)
+   $ qemu-system-aarch64 -nographic \
+     -machine virt -cpu host -smp 4 -accel kvm \
+     -chardev stdio,id=con,mux=on -serial chardev:con \
+     -global virtio-mmio.force-legacy=false \
+     -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd -device virtio-blk-device,drive=hd \
+     -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
+     -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
+     -mon chardev=con,mode=readline -kernel ./nuttx
+   Running with qemu + hvf on M1/MacBook Pro (macOS 12.6.1)
+   $ qemu-system-aarch64 -nographic \
+     -machine virt -cpu host -smp 4 -accel hvf \
+     -chardev stdio,id=con,mux=on -serial chardev:con \
+     -global virtio-mmio.force-legacy=false \
+     -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd -device virtio-blk-device,drive=hd \
+     -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
+     -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
+     -mon chardev=con,mode=readline -kernel ./nuttx
+
 Status
 ======
 
