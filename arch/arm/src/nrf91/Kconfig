@@ -1,0 +1,689 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "NRF91 Configuration Options"
+
+# NRF91 Families
+
+choice
+	prompt "NRF91 Chip Selection"
+	default ARCH_CHIP_NRF9160
+	depends on ARCH_CHIP_NRF91
+
+config ARCH_CHIP_NRF9160
+	bool "NRF9160"
+
+endchoice # NRF91 Chip Selection
+
+config NRF91_ENABLE_APPROTECT
+	bool "NRF91 enable APPROTECT"
+	default n
+
+# Peripheral Selection
+
+config NRF91_I2C_MASTER
+	bool
+	default n
+
+config NRF91_SPI_MASTER
+	bool
+	default n
+
+config NRF91_IPC
+	bool
+
+config NRF91_UART
+	bool
+	default n
+
+config NRF91_TIMER
+	bool
+	default n
+
+config NRF91_PWM
+	bool
+	default n
+
+config NRF91_RTC
+	bool
+	default n
+
+config NRF91_SERIAL0
+	bool
+	default n
+
+config NRF91_SERIAL2
+	bool
+	default n
+
+config NRF91_SERIAL3
+	bool
+	default n
+
+config NRF91_SERIAL4
+	bool
+	default n
+
+menu "NRF91 Peripheral Selection"
+
+config NRF91_GPIOTE
+	bool "GPIOTE (GPIO interrupts)"
+	default n
+
+config NRF91_I2C0_MASTER
+	bool "I2C0 Master"
+	default n
+	select NRF91_I2C_MASTER
+	select NRF91_SERIAL0
+
+config NRF91_I2C1_MASTER
+	bool "I2C1 Master"
+	default n
+	select NRF91_I2C_MASTER
+	select NRF91_SERIAL1
+
+config NRF91_I2C2_MASTER
+	bool "I2C2 Master"
+	default n
+	select NRF91_I2C_MASTER
+	select NRF91_SERIAL2
+
+config NRF91_I2C3_MASTER
+	bool "I2C3 Master"
+	default n
+	select NRF91_I2C_MASTER
+	select NRF91_SERIAL3
+
+config NRF91_SPI0_MASTER
+	bool "SPI0 Master"
+	default n
+	select NRF91_SPI_MASTER
+	select NRF91_SERIAL0
+
+config NRF91_SPI1_MASTER
+	bool "SPI1 Master"
+	default n
+	select NRF91_SPI_MASTER
+	select NRF91_SERIAL1
+
+config NRF91_SPI2_MASTER
+	bool "SPI2 Master"
+	default n
+	select NRF91_SPI_MASTER
+	select NRF91_SERIAL2
+
+config NRF91_SPI3_MASTER
+	bool "SPI3 Master"
+	default n
+	select NRF91_SPI_MASTER
+	select NRF91_SERIAL3
+
+config NRF91_UART0
+	bool "UART0"
+	default n
+	select UART0_SERIALDRIVER
+	select NRF91_UART
+	select NRF91_SERIAL0
+
+config NRF91_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select NRF91_UART
+	select NRF91_SERIAL1
+
+config NRF91_TIMER0
+	bool "TIMER0"
+	select NRF91_TIMER
+	default n
+
+config NRF91_TIMER1
+	bool "TIMER1"
+	select NRF91_TIMER
+	default n
+
+config NRF91_TIMER2
+	bool "TIMER2"
+	select NRF91_TIMER
+
+config NRF91_PWM0
+	bool "PWM0"
+	select NRF91_PWM
+	default n
+
+config NRF91_PWM1
+	bool "PWM1"
+	select NRF91_PWM
+	default n
+
+config NRF91_PWM2
+	bool "PWM2"
+	select NRF91_PWM
+	default n
+
+config NRF91_SAADC
+	bool "SAADC"
+	default n
+
+config NRF91_RTC0
+	bool "RTC0"
+	select NRF91_RTC
+	default n
+
+config NRF91_RTC1
+	bool "RTC1"
+	select NRF91_RTC
+	default n
+
+endmenu # NRF91 Peripheral Selection
+
+menu "SPU configuration"
+
+choice
+	prompt "SPU configuration"
+	default NRF91_SPU_NONE
+	depends on ARCH_TRUSTZONE_SECURE
+
+config NRF91_SPU_CUSTOM
+	bool "Custom SPU configuration"
+	---help---
+		Enables board-specific NRF91 SPU configuration.
+
+config NRF91_SPU_NONSECURE
+	bool "Non-secure SPU configuration"
+
+config NRF91_SPU_NONE
+	bool "No SPU configuration"
+
+endchoice # SPU configuration
+
+if NRF91_SPU_NONSECURE
+
+config NRF91_POWERCLOCK_NS
+	bool "IPC POWER/CLOCK non-secure"
+	default n
+
+config NRF91_GPIO0_NS
+	bool "IPC GPIO0 non-secure"
+	default n
+
+config NRF91_NVMC_NS
+	bool "IPC NVMC non-secure"
+	default n
+
+config NRF91_SERIAL0_NS
+	bool "IPC SERIAL0 non-secure"
+	default n
+
+config NRF91_SERIAL1_NS
+	bool "IPC SERIAL1 non-secure"
+	default n
+
+config NRF91_SERIAL2_NS
+	bool "IPC SERIAL2 non-secure"
+	default n
+
+config NRF91_SERIAL3_NS
+	bool "IPC SERIAL3 non-secure"
+	default n
+
+config NRF91_SERIAL4_NS
+	bool "IPC SERIAL4 non-secure"
+	default n
+
+config NRF91_TIMER0_NS
+	bool "IPC TIMER0 non-secure"
+	default n
+
+config NRF91_TIMER1_NS
+	bool "IPC TIMER1 non-secure"
+	default n
+
+config NRF91_TIMER2_NS
+	bool "IPC TIMER2 non-secure"
+	default n
+
+config NRF91_RTC0_NS
+	bool "IPC RTC0 non-secure"
+	default n
+
+config NRF91_WDT0_NS
+	bool "IPC WDT0 non-secure"
+	default n
+
+config NRF91_WDT1_NS
+	bool "IPC WDT1 non-secure"
+	default n
+
+config NRF91_RTC0_NS
+	bool "IPC RTC0 non-secure"
+	default n
+
+config NRF91_RTC1_NS
+	bool "IPC RTC1 non-secure"
+	default n
+
+config NRF91_PWM0_NS
+	bool "IPC PWM0 non-secure"
+	default n
+
+config NRF91_PWM1_NS
+	bool "IPC PWM1 non-secure"
+	default n
+
+config NRF91_PWM2_NS
+	bool "IPC PWM2 non-secure"
+	default n
+
+config NRF91_PWM3_NS
+	bool "IPC PWM3 non-secure"
+	default n
+
+config NRF91_IPC_NS
+	bool "IPC non-secure"
+	default n
+
+config NRF91_FLASH_NS_START
+	int "FLASH non-secure region start"
+	range 0 32
+	default 0
+
+config NRF91_RAM_NS_START
+	int "RAM non-secure region start"
+	range 0 32
+	default 0
+
+endif # NRF91_CONFIG_NONSECURE
+
+endmenu # "SPU configuration"
+
+menu "Clock Configuration"
+
+config NRF91_HFCLK_XTAL
+	bool "Enable HFCLK from external crystal"
+	default n
+	---help---
+		If the board includes an external high-frequency crystal, enable this
+		option to supply the HFCLK. If this option is disabled, the internal
+		oscillator will be used.
+
+config NRF91_USE_LFCLK
+	bool "Enable LFCLK"
+	default n
+	---help---
+		Enable low-frequency clock.
+
+if NRF91_USE_LFCLK
+
+choice
+	prompt "LFCLK source"
+	default NRF91_LFCLK_XTAL
+
+config NRF91_LFCLK_XTAL
+	bool "External 32.768Khz crystal"
+
+config NRF91_LFCLK_RC
+	bool "Internal RC oscillator"
+
+config NRF91_LFCLK_SYNTH
+	bool "Synthesized from HFCLK"
+
+endchoice
+
+endif # NRF91_USE_LFCLK
+
+endmenu # Clock Configuration
+
+menu "System Timer"
+
+config NRF91_SYSTIMER
+	bool
+	default y
+
+choice
+	prompt "System Timer Source"
+	default NRF91_SYSTIMER_SYSTICK
+	---help---
+		Choose which hardware resource will drive NuttX
+		system time
+
+config NRF91_SYSTIMER_SYSTICK
+	bool "SysTick"
+	select TIMER_ARCH
+	select TIMER
+	select ARMV8M_SYSTICK
+	---help---
+		Use ARM SysTick. It can be used for tickless and
+		non-tickless mode.
+
+		NOTE: nrf91 implementation of WFE/WFI involves is
+		incompatible with SysTick. This means that if
+		you choose this option, WFE/WFI will not be used
+		in idle loop.
+
+config NRF91_SYSTIMER_RTC
+	bool "RTC"
+	select NRF91_RTC
+	select SCHED_TICKLESS
+	select SCHED_TICKLESS_ALARM
+	select NRF91_USE_LFCLK
+	---help---
+		Use RTC timer in tickless mode.
+
+endchoice
+
+if NRF91_SYSTIMER_RTC
+
+config NRF91_SYSTIMER_RTC_INSTANCE
+	int "RTC timer instance"
+	default 0
+	range 0 1
+	---help---
+		Which RTC instance to use to drive the system timer
+
+endif
+
+endmenu # System Timer
+
+config NRF91_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	default y
+	---help---
+		Enable FLASH prefetch
+
+config NRF91_PROGMEM
+	bool "FLASH program memory"
+	default n
+	select ARCH_HAVE_PROGMEM
+	---help---
+		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
+
+menu "GPIO Interrupt Configuration"
+
+config NRF91_PER_PIN_INTERRUPTS
+	bool "Per-pin interrupt callbacks"
+	default !DEFAULT_SMALL
+	depends on NRF91_GPIOTE
+	---help---
+		The GPIOTE peripheral supports a limited number of channels which can
+		be set to EVENT mode and thus generate interrupts on pin state changes.
+		Another mechanism offered by the GPIO/GPIOTE peripherals is the PORT
+		event. This event is generated from a signal shared by all pins in
+		the GPIO port.
+
+		This option enables the ability to set per-pin callbacks that will
+		be invoked from the main GPIOTE ISR when a PORT event is generated.
+		As this involves extra storage to store each callback, this option can
+		be disabled to save space. In such case, it is possible to set a callback
+		for the whole PORT event directly.
+
+endmenu # GPIO Interrupt Configuration
+
+menu "PWM configuration"
+
+if NRF91_PWM
+
+config NRF91_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+
+if NRF91_PWM_MULTICHAN
+
+if NRF91_PWM0
+
+config NRF91_PWM0_CH0
+	bool "PWM0 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF91_PWM0_CH1
+	bool "PWM0 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF91_PWM0_CH2
+	bool "PWM0 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF91_PWM0_CH3
+	bool "PWM0 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF91_PWM0
+
+if NRF91_PWM1
+
+config NRF91_PWM1_CH0
+	bool "PWM1 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF91_PWM1_CH1
+	bool "PWM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF91_PWM1_CH2
+	bool "PWM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF91_PWM1_CH3
+	bool "PWM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF91_PWM1
+
+if NRF91_PWM2
+
+config NRF91_PWM2_CH0
+	bool "PWM2 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF91_PWM2_CH1
+	bool "PWM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF91_PWM2_CH2
+	bool "PWM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF91_PWM2_CH3
+	bool "PWM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF91_PWM2
+
+endif # !NRF91_PWM_MULTICHAN
+
+if !NRF91_PWM_MULTICHAN
+
+config NRF91_PWM0_CHANNEL
+	int "PWM0 Output Channel"
+	depends on NRF91_PWM0
+	default 0
+	range 0 3
+
+config NRF91_PWM1_CHANNEL
+	int "PWM1 Output Channel"
+	depends on NRF91_PWM1
+	default 0
+	range 0 3
+
+config NRF91_PWM2_CHANNEL
+	int "PWM2 Output Channel"
+	depends on NRF91_PWM2
+	default 0
+	range 0 3
+
+endif # !NRF91_PWM_MULTICHAN
+
+endif # NRF91_PWM
+
+endmenu # PWM configuration
+
+menu "SAADC Configuration"
+
+if NRF91_SAADC
+
+choice
+	prompt "SAADC trigger selection"
+	default NRF91_SAADC_TASK
+	---help---
+		Choose mode for sample rate control
+
+config NRF91_SAADC_TASK
+	bool "SAADC Task trigger"
+
+config NRF91_SAADC_TIMER
+	bool "SAADC Timer trigger"
+
+endchoice # SAADC trigger selection
+
+if NRF91_SAADC_TIMER
+
+config NRF91_SAADC_TIMER_CC
+	int "SAADC Timer CC"
+	default 0
+	range 80 2047
+
+endif #NRF91_SAADC_TIMER
+
+config NRF91_SAADC_OVERSAMPLE
+	int "SAADC oversample"
+	default 0
+	range 0 8
+	---help---
+		SAADC oversample control
+
+config NRF91_SAADC_RESOLUTION
+	int "SAADC resolution"
+	default 0
+	range 0 3
+	---help---
+		SAADC resolution 0 - 8 bits, 1 - 10 bits, 2 - 12 bits, 3 - 14 bits
+
+config NRF91_SAADC_CHANNELS
+	int "SAADC channels"
+	default 8
+	range 0 8
+	---help---
+		SAADC channels
+
+config NRF91_SAADC_LIMITS
+	bool "SAADC limits enable"
+	default n
+	---help---
+		SAADC limist enable
+
+endif # NRF91_SAADC
+
+endmenu # SAADC Configuration
+
+menu "SPI Configuration"
+
+if NRF91_SPI_MASTER
+
+config NRF91_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
+endif #  NRF91_SPI_MASTER
+
+endmenu
+
+menu "I2C Master Configuration"
+
+if NRF91_I2C_MASTER
+
+config NRF91_I2C_MASTER_DISABLE_NOSTART
+	bool "Disable the I2C Master NOSTART flag support"
+	default n
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf91
+		hardware requires these be joined into a single
+		transfer. This can be expensive and some devices
+		can get away with multi-part transfers as separate
+		transfers.  Enable this at your own risk!
+
+config NRF91_I2C_MASTER_COPY_BUF_SIZE
+	int "Static buffer size for NOSTART flag support"
+	depends on !NRF91_I2C_MASTER_DISABLE_NOSTART
+	default 4
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf91
+		hardware requires these be joined into a single
+		transfer. This static buffer will be used if the
+		transaction will fit otherwise it will fall back
+		on malloc.
+
+endif # NRF91_I2C_MASTER
+
+endmenu
+
+config NRF91_MODEM
+	bool "NRF91 modem"
+	depends on ALLOW_BSDNORDIC_COMPONENTS && ARCH_TRUSTZONE_NONSECURE
+	select ARCH_IRQPRIO
+	select NRF91_IPC
+	default n
+
+if NRF91_MODEM
+
+config NRF91_MODEM_SHMEM_TX_SIZE
+	hex "NRF91 modem shmem RX size"
+	default 0x2000
+
+config NRF91_MODEM_SHMEM_RX_SIZE
+	hex "NRF91 modem shmem RX size"
+	default 0x2000
+
+config NRF91_MODEM_SHMEM_TRACE_SIZE
+	hex "NRF91 modem shmem TRACE size"
+	default 0
+
+config NRF91_MODEM_SHMEM_SIZE
+	hex "NRF91 modem shmem size"
+	default 0x44e8
+	---help---
+	  Shared memory size for the modem library must be calculated by user:
+	    CONFIG_NRF91_MODEM_SHMEM_SIZE = NRF_MODEM_SHMEM_CTRL_SIZE +
+	    CONFIG_NRF91_MODEM_SHMEM_TX_SIZE + CONFIG_NRF91_MODEM_SHMEM_TX_SIZE +
+	    CONFIG_NRF91_MODEM_SHMEM_TRACE_SIZE
+	    
+	    where:
+	      NRF_MODEM_SHMEM_CTRL_SIZE is a constant for a given library build
+	      and can be found in nrf_modem/include/nrf_modem.h file.
+
+config NRF91_MODEM_LOG
+	bool "NRF91 modem with logs"
+	default n
+
+config NRF91_MODEM_AT
+	bool "NRF91 modem AT interface support"
+	default y
+
+endif # NRF91_MODEM
