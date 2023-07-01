@@ -1137,6 +1137,15 @@ config ARCH_BOARD_THINGY53
 	---help---
 		This option selects the Thingy:53 multi-protocol IoT prototyping platform
 
+config ARCH_BOARD_NRF9160_DK
+	bool "Nordic nRF9160 Development Kit (PCA10090)"
+	depends on ARCH_CHIP_NRF91
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This option selects the nRF9160 Development Kit (PCA10090)
+
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
 	depends on ARCH_CHIP_NUC120LE3AN
@@ -2953,6 +2962,7 @@ config ARCH_BOARD
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
 	default "thingy53"                  if ARCH_BOARD_THINGY53
+	default "nrf9160-dk"                if ARCH_BOARD_NRF9160_DK
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
@@ -4045,6 +4055,9 @@ source "boards/arm/nrf52/common/Kconfig"
 endif
 if ARCH_CHIP_NRF53
 source "boards/arm/nrf53/common/Kconfig"
+endif
+if ARCH_CHIP_NRF91
+source "boards/arm/nrf91/common/Kconfig"
 endif
 endif
 
