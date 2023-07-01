@@ -1619,6 +1619,44 @@ config DEBUG_RC_INFO
 
 endif # DEBUG_RC
 
+config DEBUG_RMT
+	bool "RMT Debug Features"
+	default n
+	depends on ESP32_RMT
+	---help---
+		Enable RMT debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_RMT
+
+config DEBUG_RMT_ERROR
+	bool "RMT Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RMT driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_RMT_WARN
+	bool "RMT Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable RMT driver warning output to SYSLOG.
+
+config DEBUG_RMT_INFO
+	bool "RMT Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RMT driver informational output to SYSLOG.
+
+endif # DEBUG_RMT
+
 config DEBUG_RTC
 	bool "RTC Debug Features"
 	default n

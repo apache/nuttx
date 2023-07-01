@@ -45,6 +45,10 @@ ifeq ($(CONFIG_USERLED),y)
 CSRCS += esp32_userleds.c
 endif
 
+ifeq ($(CONFIG_WS2812),y)
+CSRCS += esp32_ws2812.c
+endif
+
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += esp32_buttons.c
 endif

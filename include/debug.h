@@ -629,6 +629,24 @@
 #  define rcinfo      _none
 #endif
 
+#ifdef CONFIG_DEBUG_RMT_ERROR
+#  define rmterr        _err
+#else
+#  define rmterr       _none
+#endif
+
+#ifdef CONFIG_DEBUG_RMT_WARN
+#  define rmtwarn      _warn
+#else
+#  define rmtwarn      _none
+#endif
+
+#ifdef CONFIG_DEBUG_RMT_INFO
+#  define rmtinfo      _info
+#else
+#  define rmtinfo      _none
+#endif
+
 #ifdef CONFIG_DEBUG_RTC_ERROR
 #  define rtcerr       _err
 #else
