@@ -250,7 +250,7 @@ tools/mkconfig$(HOSTEXEEXT):
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
 	$(Q) grep -v "CONFIG_BASE_DEFCONFIG" "$(TOPDIR)/.config" > "$(TOPDIR)/.config.tmp"
 	$(Q) if ! cmp -s "$(TOPDIR)/.config.tmp" "$(TOPDIR)/.config.orig" ; then \
-		sed -i.bak "/CONFIG_BASE_DEFCONFIG/ { /-dirty/! s/\"$$/-dirty\"/ }" "$(TOPDIR)/.config"; \
+		sed -i.bak "/CONFIG_BASE_DEFCONFIG/s/\"$$/-dirty\"/" "$(TOPDIR)/.config"; \
 	else \
 		sed -i.bak "s/-dirty//g" "$(TOPDIR)/.config"; \
 	fi
