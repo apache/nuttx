@@ -16,7 +16,7 @@ config NFS
 config NFS_DONT_BIND_TCP_SOCKET
 	bool
 	default n
-	depends on NFS
+	depends on NET_TCP
 	---help---
 		Some network drivers such as GS2200M do not support to bind
 		a local port for TCP client socket. In this case, this config
