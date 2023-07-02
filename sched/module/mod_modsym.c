@@ -29,7 +29,6 @@
 #include <debug.h>
 
 #include <nuttx/module.h>
-#include <nuttx/symtab.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
