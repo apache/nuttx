@@ -225,9 +225,9 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   STDLIBS += -lmp3lame
 endif
 
-ifeq ($(CONFIG_SIM_VIDEO_V4L2),y)
+ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
   HOSTSRCS += sim_host_v4l2.c
-  CSRCS += sim_video.c
+  CSRCS += sim_camera.c
   STDLIBS += -lv4l2
 endif
 

@@ -383,9 +383,9 @@ int sim_spi_uninitialize(struct spi_dev_s *dev);
 
 /* up_video.c ***************************************************************/
 
-#ifdef CONFIG_SIM_VIDEO
-int sim_video_initialize(void);
-void sim_video_loop(void);
+#ifdef CONFIG_SIM_CAMERA
+int sim_camera_initialize(void);
+void sim_camera_loop(void);
 #endif
 
 /* sim_usbdev.c *************************************************************/
