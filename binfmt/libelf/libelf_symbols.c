@@ -31,7 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/binfmt/elf.h>
-#include <nuttx/binfmt/symtab.h>
+#include <nuttx/symtab.h>
 
 #include "libelf.h"
 

@@ -34,7 +34,6 @@
 #include <nuttx/elf.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/elf.h>
-#include <nuttx/binfmt/symtab.h>
 
 #include "libelf.h"
 
