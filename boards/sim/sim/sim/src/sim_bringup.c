@@ -294,16 +294,16 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SIM_VIDEO
+#ifdef CONFIG_SIM_CAMERA
   /* Initialize and register the simulated video driver */
 
-  ret = video_initialize(CONFIG_SIM_VIDEO_DEV_PATH);
+  ret = video_initialize(CONFIG_SIM_CAMERA_DEV_PATH);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: video_initialize() failed: %d\n", ret);
     }
 
-  sim_video_initialize();
+  sim_camera_initialize();
 #endif
 
 #ifdef CONFIG_LCD

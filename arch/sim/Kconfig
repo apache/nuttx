@@ -283,18 +283,18 @@ endchoice
 
 endif
 
-config SIM_VIDEO
+config SIM_CAMERA
 	bool "Simulated video support"
 	depends on VIDEO
 	default y
 
-if SIM_VIDEO
+if SIM_CAMERA
 
 choice
 	prompt "Simulated video device type"
-	default SIM_VIDEO_V4L2
+	default SIM_CAMERA_V4L2
 
-config SIM_VIDEO_V4L2
+config SIM_CAMERA_V4L2
 	bool "V4L2 camera support on sim"
 	depends on HOST_LINUX
 
@@ -304,7 +304,7 @@ config HOST_VIDEO_DEV_PATH
 	string "Host video device path"
 	default "/dev/video0"
 
-config SIM_VIDEO_DEV_PATH
+config SIM_CAMERA_DEV_PATH
 	string "NuttX video device path"
 	default "/dev/video"
 

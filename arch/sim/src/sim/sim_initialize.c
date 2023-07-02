@@ -199,8 +199,8 @@ static int sim_loop_task(int argc, char **argv)
       sim_audio_loop();
 #endif
 
-#ifdef CONFIG_SIM_VIDEO
-      sim_video_loop();
+#ifdef CONFIG_SIM_CAMERA
+      sim_camera_loop();
 #endif
 
 #ifdef CONFIG_SIM_USB_DEV
