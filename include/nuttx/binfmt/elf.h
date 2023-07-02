@@ -56,17 +56,6 @@
 #  define CONFIG_ELF_BUFFERINCR 32
 #endif
 
-/* Allocation array size and indices */
-
-#define LIBELF_ELF_ALLOC     0
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-#  define LIBELF_CTORS_ALLOC 1
-#  define LIBELF_CTPRS_ALLOC 2
-#  define LIBELF_NALLOC      3
-#else
-#  define LIBELF_NALLOC      1
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -82,7 +71,7 @@ struct elf_loadinfo_s
    *
    * If CONFIG_ARCH_ADDRENV=n, elfalloc will be allocated using kmm_malloc()
    * (or kmm_zalloc()).
-   * If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
+   * If CONFIG_ARCH_ADDRENV=y, then elfalloc will be allocated using
    * up_addrenv_create().  In either case, there will be a unique instance
    * of elfalloc (and stack) for each instance of a process.
    *
@@ -235,7 +224,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int elf_unload(struct elf_loadinfo_s *loadinfo);
+int elf_unload(FAR struct elf_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: elf_coredump

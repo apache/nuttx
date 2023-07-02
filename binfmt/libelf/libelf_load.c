@@ -52,7 +52,7 @@
 
 /* _ALIGN_UP: 'a' is assumed to be a power of two */
 
-#define _ALIGN_UP(v, a) (((v) + ((a) - 1)) & ~((a) - 1))
+#define _ALIGN_UP(v, a)  (((v) + ((a) - 1)) & ~((a) - 1))
 
 /****************************************************************************
  * Private Constant Data
@@ -74,16 +74,13 @@
  *
  ****************************************************************************/
 
-static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
+static void elf_elfsize(FAR struct elf_loadinfo_s *loadinfo)
 {
-  size_t textsize;
-  size_t datasize;
+  size_t textsize = 0;
+  size_t datasize = 0;
   int i;
 
   /* Accumulate the size each section into memory that is marked SHF_ALLOC */
-
-  textsize = 0;
-  datasize = 0;
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
@@ -141,8 +138,8 @@ static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
 
 static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 {
-  FAR uint8_t *text;
-  FAR uint8_t *data;
+  FAR uint8_t *text = (FAR uint8_t *)loadinfo->textalloc;
+  FAR uint8_t *data = (FAR uint8_t *)loadinfo->dataalloc;
   FAR uint8_t **pptr;
   int ret;
   int i;
@@ -150,8 +147,6 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
   binfo("Loaded sections:\n");
-  text = (FAR uint8_t *)loadinfo->textalloc;
-  data = (FAR uint8_t *)loadinfo->dataalloc;
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
@@ -267,7 +262,20 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
 int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 {
-  size_t heapsize;
+  /* Determine the heapsize to allocate.  heapsize is ignored if there is
+   * no address environment because the heap is a shared resource in that
+   * case.  If there is no dynamic stack then heapsize must at least as big
+   * as the fixed stack size since the stack will be allocated from the heap
+   * in that case.
+   */
+
+#if !defined(CONFIG_ARCH_ADDRENV)
+  size_t heapsize = 0;
+#elif defined(CONFIG_ARCH_STACK_DYNAMIC)
+  size_t heapsize = ARCH_HEAP_SIZE;
+#else
+  size_t heapsize = MAX(ARCH_HEAP_SIZE, CONFIG_ELF_STACKSIZE);
+#endif
 #ifdef CONFIG_ELF_EXIDX_SECTNAME
   int exidx;
 #endif
@@ -288,21 +296,6 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   /* Determine total size to allocate */
 
   elf_elfsize(loadinfo);
-
-  /* Determine the heapsize to allocate.  heapsize is ignored if there is
-   * no address environment because the heap is a shared resource in that
-   * case.  If there is no dynamic stack then heapsize must at least as big
-   * as the fixed stack size since the stack will be allocated from the heap
-   * in that case.
-   */
-
-#if !defined(CONFIG_ARCH_ADDRENV)
-  heapsize = 0;
-#elif defined(CONFIG_ARCH_STACK_DYNAMIC)
-  heapsize = ARCH_HEAP_SIZE;
-#else
-  heapsize = MAX(ARCH_HEAP_SIZE, CONFIG_ELF_STACKSIZE);
-#endif
 
   /* Allocate (and zero) memory for the ELF file. */
 

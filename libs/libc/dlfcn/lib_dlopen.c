@@ -32,6 +32,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/param.h>
 
 #include <nuttx/envpath.h>
 #include <nuttx/module.h>
@@ -49,7 +50,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_BINFMT)
+#  if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_BINFMT)
 static void dldump_loadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
@@ -118,18 +119,16 @@ static void dldump_loadinfo(FAR struct mod_loadinfo_s *loadinfo)
         }
     }
 }
-#else
-#  define dldump_loadinfo(i)
-#endif
+#  else
+#    define dldump_loadinfo(i)
+#  endif
 #endif
 
 /****************************************************************************
  * Name: dldump_initializer
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MODLIB_DUMPBUFFER)
 static void dldump_initializer(mod_initializer_t initializer,
                                FAR struct mod_loadinfo_s *loadinfo)
 {
@@ -138,7 +137,6 @@ static void dldump_initializer(mod_initializer_t initializer,
 }
 #else
 #  define dldump_initializer(b,l)
-#endif
 #endif
 
 /****************************************************************************
@@ -204,13 +202,12 @@ static inline FAR void *dlinsert(FAR const char *filename)
   /* Allocate a module registry entry to hold the module data */
 
   modp = (FAR struct module_s *)lib_zalloc(sizeof(struct module_s));
-  if (ret != 0)
+  if (modp == NULL)
     {
+      ret = -ENOMEM;
       binfo("Failed to initialize for load of ELF program: %d\n", ret);
       goto errout_with_loadinfo;
     }
-
-  memset(modp, 0, sizeof(*modp));
 
   /* Load the program binary */
 
@@ -233,11 +230,11 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   /* Save the load information */
 
-  modp->textalloc       = (FAR void *)loadinfo.textalloc;
-  modp->dataalloc       = (FAR void *)loadinfo.datastart;
+  modp->textalloc = (FAR void *)loadinfo.textalloc;
+  modp->dataalloc = (FAR void *)loadinfo.datastart;
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  modp->textsize    = loadinfo.textsize;
-  modp->datasize    = loadinfo.datasize;
+  modp->textsize  = loadinfo.textsize;
+  modp->datasize  = loadinfo.datasize;
 #endif
 
   /* Get the module initializer entry point */
@@ -290,7 +287,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   modlib_uninitialize(&loadinfo);
   modlib_registry_unlock();
-  return (FAR void *)modp;
+  return modp;
 
 errout_with_load:
   modlib_unload(&loadinfo);

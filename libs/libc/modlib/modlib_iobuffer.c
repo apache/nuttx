@@ -95,7 +95,7 @@ int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
 
   /* And perform the reallocation */
 
-  buffer = lib_realloc((FAR void *)loadinfo->iobuffer, newsize);
+  buffer = lib_realloc(loadinfo->iobuffer, newsize);
   if (!buffer)
     {
       berr("ERROR: Failed to reallocate the I/O buffer\n");

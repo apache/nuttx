@@ -113,7 +113,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
   ctorsize         = shdr->sh_size;
   loadinfo->nctors = ctorsize / sizeof(binfmt_ctor_t);
 
-  binfo("ctoridx=%d ctorsize=%d sizeof(binfmt_ctor_t)=%d nctors=%d\n",
+  binfo("ctoridx=%d ctorsize=%zd sizeof(binfmt_ctor_t)=%zd nctors=%d\n",
         ctoridx, ctorsize,  sizeof(binfmt_ctor_t), loadinfo->nctors);
 
   /* Check if there are any constructors.  It is not an error if there
@@ -168,9 +168,8 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
                    ((FAR void *)(&loadinfo->ctors)[i]);
 
               binfo("ctor %d: "
-                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n",
-                    i, *ptr, (uintptr_t)loadinfo->textalloc,
-                    (uintptr_t)(*ptr + loadinfo->textalloc));
+                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n", i,
+                    *ptr, loadinfo->textalloc, (*ptr + loadinfo->textalloc));
 
               *ptr += loadinfo->textalloc;
             }

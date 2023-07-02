@@ -56,7 +56,7 @@ int modlib_depend(FAR struct module_s *importer,
                   FAR struct module_s *exporter)
 {
 #if CONFIG_MODLIB_MAXDEPEND > 0
-  int freendx;
+  int freendx = -1;
   int i;
 
   DEBUGASSERT(importer != NULL && exporter != NULL);
@@ -71,7 +71,7 @@ int modlib_depend(FAR struct module_s *importer,
    * is small.  Otherwise, a more dynamic data structure would be in order.
    */
 
-  for (i = 0, freendx = -1; i < CONFIG_MODLIB_MAXDEPEND; i++)
+  for (i = 0; i < CONFIG_MODLIB_MAXDEPEND; i++)
     {
       FAR const struct module_s *modp;
 

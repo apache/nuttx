@@ -593,26 +593,26 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
       switch (dyn[i].d_tag)
         {
           case DT_REL :
-              reldata.reloff[I_REL] = dyn[i].d_un.d_val;
-              break;
+            reldata.reloff[I_REL] = dyn[i].d_un.d_val;
+            break;
           case DT_RELSZ :
-              reldata.relsz[I_REL] = dyn[i].d_un.d_val;
-              break;
+            reldata.relsz[I_REL] = dyn[i].d_un.d_val;
+            break;
           case DT_RELENT :
-              reldata.relentsz = dyn[i].d_un.d_val;
-              break;
+            reldata.relentsz = dyn[i].d_un.d_val;
+            break;
           case DT_SYMTAB :
-              reldata.symoff = dyn[i].d_un.d_val;
-              break;
+            reldata.symoff = dyn[i].d_un.d_val;
+            break;
           case DT_STRTAB :
-              reldata.stroff = dyn[i].d_un.d_val;
-              break;
+            reldata.stroff = dyn[i].d_un.d_val;
+            break;
           case DT_JMPREL :
-              reldata.reloff[I_PLT] = dyn[i].d_un.d_val;
-              break;
+            reldata.reloff[I_PLT] = dyn[i].d_un.d_val;
+            break;
           case DT_PLTRELSZ :
-              reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
-              break;
+            reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
+            break;
         }
     }
 
@@ -626,7 +626,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
       return -ENOMEM;
     }
 
-  ret = modlib_read(loadinfo, (uint8_t *) sym, symhdr->sh_size,
+  ret = modlib_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
                     symhdr->sh_offset);
   if (ret < 0)
     {
@@ -666,7 +666,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
                   relsize = reldata.relsz[idx_rel];
                 }
 
-              ret = modlib_read(loadinfo, (FAR uint8_t *) rels,
+              ret = modlib_read(loadinfo, (FAR uint8_t *)rels,
                                 relsize,
                                 reldata.reloff[idx_rel] +
                                 i * sizeof(Elf_Rel));
@@ -717,7 +717,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
                       }
 
                     addr = rel->r_offset + loadinfo->textalloc;
-                    *(uintptr_t *)addr = (uintptr_t)ep;
+                    *(FAR uintptr_t *)addr = (uintptr_t)ep;
                 }
             }
           else
@@ -726,10 +726,11 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
               addr = rel->r_offset - loadinfo->datasec + loadinfo->datastart;
 
-              if ((*(uint32_t *) addr) < loadinfo->datasec)
-                  dynsym.st_value = *(uint32_t *) addr + loadinfo->textalloc;
+              if ((*(FAR uint32_t *)addr) < loadinfo->datasec)
+                  dynsym.st_value = *(FAR uint32_t *)addr +
+                                    loadinfo->textalloc;
               else
-                  dynsym.st_value = *(uint32_t *) addr -
+                  dynsym.st_value = *(FAR uint32_t *)addr -
                                     loadinfo->datasec + loadinfo->datastart;
               ret = up_relocate(rel, &dynsym, addr);
             }
@@ -872,11 +873,11 @@ int modlib_bind(FAR struct module_s *modp,
           switch (loadinfo->shdr[i].sh_type)
             {
               case SHT_REL :
-                  ret = modlib_relocate(modp, loadinfo, i);
-                  break;
+                ret = modlib_relocate(modp, loadinfo, i);
+                break;
               case SHT_RELA :
-                  ret = modlib_relocateadd(modp, loadinfo, i);
-                  break;
+                ret = modlib_relocateadd(modp, loadinfo, i);
+                break;
             }
         }
 

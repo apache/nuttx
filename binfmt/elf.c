@@ -47,7 +47,7 @@
  * have to be defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_BINFMT)
 #  undef CONFIG_ELF_DUMPBUFFER
 #endif
 
@@ -300,22 +300,22 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->addrenv = loadinfo.addrenv;
 
 #else
-  binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
-  binp->alloc[1]  = (FAR void *)loadinfo.dataalloc;
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  binp->alloc[2]  = loadinfo.ctoralloc;
-  binp->alloc[3]  = loadinfo.dtoralloc;
-#endif
+  binp->alloc[0] = (FAR void *)loadinfo.textalloc;
+  binp->alloc[1] = (FAR void *)loadinfo.dataalloc;
+#  ifdef CONFIG_BINFMT_CONSTRUCTORS
+  binp->alloc[2] = loadinfo.ctoralloc;
+  binp->alloc[3] = loadinfo.dtoralloc;
+#  endif
 #endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   /* Save information about constructors and destructors. */
 
-  binp->ctors     = loadinfo.ctors;
-  binp->nctors    = loadinfo.nctors;
+  binp->ctors    = loadinfo.ctors;
+  binp->nctors   = loadinfo.nctors;
 
-  binp->dtors     = loadinfo.dtors;
-  binp->ndtors    = loadinfo.ndtors;
+  binp->dtors    = loadinfo.dtors;
+  binp->ndtors   = loadinfo.ndtors;
 #endif
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
