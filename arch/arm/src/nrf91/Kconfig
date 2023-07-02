@@ -654,19 +654,19 @@ config NRF91_MODEM
 if NRF91_MODEM
 
 config NRF91_MODEM_SHMEM_TX_SIZE
-	hex "NRF91 modem shmem RX size"
+	hex "Modem shmem RX size"
 	default 0x2000
 
 config NRF91_MODEM_SHMEM_RX_SIZE
-	hex "NRF91 modem shmem RX size"
+	hex "Modem shmem RX size"
 	default 0x2000
 
 config NRF91_MODEM_SHMEM_TRACE_SIZE
-	hex "NRF91 modem shmem TRACE size"
+	hex "Modem shmem TRACE size"
 	default 0
 
 config NRF91_MODEM_SHMEM_SIZE
-	hex "NRF91 modem shmem size"
+	hex "Modem shmem size"
 	default 0x44e8
 	---help---
 	  Shared memory size for the modem library must be calculated by user:
@@ -679,11 +679,11 @@ config NRF91_MODEM_SHMEM_SIZE
 	      and can be found in nrf_modem/include/nrf_modem.h file.
 
 config NRF91_MODEM_LOG
-	bool "NRF91 modem with logs"
+	bool "Modem with logs"
 	default n
 
 config NRF91_MODEM_AT
-	bool "NRF91 modem AT interface support"
+	bool "Modem AT interface support"
 	default y
 
 endif # NRF91_MODEM
