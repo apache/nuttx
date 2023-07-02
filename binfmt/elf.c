@@ -277,6 +277,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
     {
       berr("Unexpected elf type %d\n", loadinfo.ehdr.e_type);
       ret = -ENOEXEC;
+      goto errout_with_load;
     }
 
   /* Return the load information */
