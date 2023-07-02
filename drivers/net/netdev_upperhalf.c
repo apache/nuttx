@@ -91,7 +91,7 @@ struct netdev_upperhalf_s
 static int quota_fetch_inc(FAR struct netdev_lowerhalf_s *lower,
                            enum netpkt_type_e type)
 {
-#ifndef HAVE_ATOMICS
+#ifndef CONFIG_HAVE_ATOMICS
   irqstate_t flags = spin_lock_irqsave(&lower->lock);
   int ret = lower->quota[type]++;
   spin_unlock_irqrestore(&lower->lock, flags);
@@ -104,7 +104,7 @@ static int quota_fetch_inc(FAR struct netdev_lowerhalf_s *lower,
 static int quota_fetch_dec(FAR struct netdev_lowerhalf_s *lower,
                            enum netpkt_type_e type)
 {
-#ifndef HAVE_ATOMICS
+#ifndef CONFIG_HAVE_ATOMICS
   irqstate_t flags = spin_lock_irqsave(&lower->lock);
   int ret = lower->quota[type]--;
   spin_unlock_irqrestore(&lower->lock, flags);
@@ -680,7 +680,7 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       return -ENOMEM;
     }
 
-#ifndef HAVE_ATOMICS
+#ifndef CONFIG_HAVE_ATOMICS
   spin_initialize(&dev->lock, SP_UNLOCKED);
 #endif
   dev->netdev.d_ifup    = netdev_upper_ifup;
@@ -849,7 +849,7 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
                             enum netpkt_type_e type)
 {
-#ifndef HAVE_ATOMICS
+#ifndef CONFIG_HAVE_ATOMICS
   irqstate_t flags = spin_lock_irqsave(&dev->lock);
   int ret = dev->quota[type];
   spin_unlock_irqrestore(&dev->lock, flags);
