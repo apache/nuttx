@@ -174,7 +174,7 @@ jobs:
   macOS:
     permissions:
       contents: none
-    runs-on: macos-12
+    runs-on: macos-13
     needs: Fetch-Source
     strategy:
       matrix:
