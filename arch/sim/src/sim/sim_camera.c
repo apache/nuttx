@@ -330,11 +330,6 @@ int sim_camera_initialize(void)
   return 0;
 }
 
-int sim_camera_uninitialize(void)
-{
-  return 0;
-}
-
 void sim_camera_loop(void)
 {
   sim_camera_priv_t *priv = &g_sim_camera_priv;
