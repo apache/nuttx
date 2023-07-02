@@ -69,7 +69,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
   /* Instantiate the address environment containing the destructors */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  ret = addrenv_select(&binp->addrenv);
+  ret = addrenv_select(binp->addrenv, &binp->oldenv);
   if (ret < 0)
     {
       berr("ERROR: addrenv_select() failed: %d\n", ret);
@@ -81,7 +81,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 
   for (i = 0; i < binp->ndtors; i++)
     {
-      binfo("Calling dtor %d at %p\n", i, (FAR void *)dtor);
+      binfo("Calling dtor %d at %p\n", i, dtor);
 
       (*dtor)();
       dtor++;
@@ -90,7 +90,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
   /* Restore the address environment */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  return addrenv_restore();
+  return addrenv_restore(binp->oldenv);
 #else
   return OK;
 #endif
@@ -169,12 +169,12 @@ int unload_module(FAR struct binary_s *binp)
 #if defined(CONFIG_ARCH_USE_TEXT_HEAP)
               if (i == 0)
                 {
-                  up_textheap_free((FAR void *)binp->alloc[i]);
+                  up_textheap_free(binp->alloc[i]);
                 }
               else
 #endif
                 {
-                  kumm_free((FAR void *)binp->alloc[i]);
+                  kumm_free(binp->alloc[i]);
                 }
             }
         }

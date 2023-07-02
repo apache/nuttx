@@ -45,7 +45,7 @@
  * have to be defined or CONFIG_MODLIB_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_MODLIB_DUMPBUFFER)
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_MODLIB_DUMPBUFFER)
 #  undef CONFIG_MODLIB_DUMPBUFFER
 #endif
 
@@ -127,7 +127,6 @@ int modlib_initialize(FAR const char *filename,
   /* Clear the load info structure */
 
   memset(loadinfo, 0, sizeof(struct mod_loadinfo_s));
-  loadinfo->filfd = -1;
 
   /* Open the binary file for reading (only) */
 

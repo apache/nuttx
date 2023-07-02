@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int modlib_unload(struct mod_loadinfo_s *loadinfo)
+int modlib_unload(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 

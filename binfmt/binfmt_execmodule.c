@@ -88,7 +88,7 @@ static void exec_ctors(FAR void *arg)
 
   for (i = 0; i < binp->nctors; i++)
     {
-      binfo("Calling ctor %d at %p\n", i, (FAR void *)ctor);
+      binfo("Calling ctor %d at %p\n", i, ctor);
 
       (*ctor)();
       ctor++;
@@ -272,7 +272,7 @@ int exec_module(FAR struct binary_s *binp,
 
   if (binp->nctors > 0)
     {
-      nxtask_starthook(tcb, exec_ctors, (FAR void *)binp);
+      nxtask_starthook(tcb, exec_ctors, binp);
     }
 #endif
 

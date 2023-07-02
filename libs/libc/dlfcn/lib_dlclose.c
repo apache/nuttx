@@ -129,7 +129,11 @@ static inline int dlremove(FAR void *handle)
     {
       /* Free the module memory */
 
-      lib_free((FAR void *)modp->textalloc);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+      up_textheap_free(modp->textalloc);
+#else
+      lib_free(modp->textalloc);
+#endif
 
       /* Nullify so that the memory cannot be freed again */
 
@@ -143,7 +147,7 @@ static inline int dlremove(FAR void *handle)
     {
       /* Free the module memory */
 
-      lib_free((FAR void *)modp->dataalloc);
+      lib_free(modp->dataalloc);
 
       /* Nullify so that the memory cannot be freed again */
 
