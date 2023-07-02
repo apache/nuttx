@@ -34,13 +34,7 @@
 #include <net/if.h>
 #include <netinet/in.h>
 
-/* Compiler may not have stdatomic.h before C11 or with __STDC_NO_ATOMICS__
- * But we can also get atomic support from libmetal.
- */
-
-#if defined(CONFIG_OPENAMP)
-#  include <metal/atomic.h>
-#elif defined(CONFIG_HAVE_ATOMICS)
+#ifdef CONFIG_HAVE_ATOMICS
 #  include <stdatomic.h>
 #endif
 
@@ -61,10 +55,6 @@
  */
 
 #define NETPKT_BUFLEN   CONFIG_IOB_BUFSIZE
-
-#if defined(CONFIG_OPENAMP) || defined(CONFIG_HAVE_ATOMICS)
-#  define HAVE_ATOMICS
-#endif
 
 /****************************************************************************
  * Public Types
@@ -103,7 +93,7 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
-#ifdef HAVE_ATOMICS
+#ifdef CONFIG_HAVE_ATOMICS
   atomic_int quota[NETPKT_TYPENUM];
 #else
   int quota[NETPKT_TYPENUM];
