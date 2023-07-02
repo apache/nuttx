@@ -3,22 +3,22 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "NRF52 Configuration Options"
+comment "nRF52 Configuration Options"
 
 choice
-	prompt "NRF52 Chip Selection"
+	prompt "nRF52 Chip Selection"
 	default ARCH_CHIP_NRF52832
 	depends on ARCH_CHIP_NRF52
 
 config ARCH_CHIP_NRF52832
-	bool "NRF52832"
+	bool "nRF52832"
 	select ARCH_FAMILY_NRF52
 	select NRF52_MEM_FLASH_512
 	select NRF52_MEM_RAM_64
 	select NRF52_HAVE_BPROT
 
 config ARCH_CHIP_NRF52833
-	bool "NRF52832"
+	bool "nRF52832"
 	select ARCH_FAMILY_NRF52
 	select NRF52_MEM_FLASH_512
 	select NRF52_MEM_RAM_128
@@ -30,7 +30,7 @@ config ARCH_CHIP_NRF52833
 	select NRF52_HAVE_PWM3
 
 config ARCH_CHIP_NRF52840
-	bool "NRF52840"
+	bool "nRF52840"
 	select ARCH_FAMILY_NRF52
 	select NRF52_MEM_FLASH_1024
 	select NRF52_MEM_RAM_256
@@ -160,7 +160,7 @@ config NRF52_RTC
 	bool
 	default n
 
-menu "NRF52 Peripheral Selection"
+menu "nRF52 Peripheral Selection"
 
 config NRF52_I2C0_MASTER
 	bool "I2C0 Master"
@@ -321,7 +321,7 @@ config NRF52_COMP
 	bool "COMP"
 	default n
 
-endmenu # NRF52 Peripheral Selection
+endmenu # nRF52 Peripheral Selection
 
 menu "Clock Configuration"
 

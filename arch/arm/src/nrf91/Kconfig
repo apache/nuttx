@@ -3,22 +3,22 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "NRF91 Configuration Options"
+comment "nRF91 Configuration Options"
 
-# NRF91 Families
+# nRF91 Families
 
 choice
-	prompt "NRF91 Chip Selection"
+	prompt "nRF91 Chip Selection"
 	default ARCH_CHIP_NRF9160
 	depends on ARCH_CHIP_NRF91
 
 config ARCH_CHIP_NRF9160
-	bool "NRF9160"
+	bool "nRF9160"
 
 endchoice # NRF91 Chip Selection
 
 config NRF91_ENABLE_APPROTECT
-	bool "NRF91 enable APPROTECT"
+	bool "nRF91 enable APPROTECT"
 	default n
 
 # Peripheral Selection
@@ -66,7 +66,7 @@ config NRF91_SERIAL4
 	bool
 	default n
 
-menu "NRF91 Peripheral Selection"
+menu "nRF91 Peripheral Selection"
 
 config NRF91_GPIOTE
 	bool "GPIOTE (GPIO interrupts)"
@@ -177,7 +177,7 @@ config NRF91_RTC1
 	select NRF91_RTC
 	default n
 
-endmenu # NRF91 Peripheral Selection
+endmenu # nRF91 Peripheral Selection
 
 menu "SPU configuration"
 
@@ -645,7 +645,7 @@ endif # NRF91_I2C_MASTER
 endmenu
 
 config NRF91_MODEM
-	bool "NRF91 modem"
+	bool "nRF91 modem"
 	depends on ALLOW_BSDNORDIC_COMPONENTS && ARCH_TRUSTZONE_NONSECURE
 	select ARCH_IRQPRIO
 	select NRF91_IPC

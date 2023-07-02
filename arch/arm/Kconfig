@@ -274,7 +274,7 @@ config ARCH_CHIP_MOXART
 		MoxART family
 
 config ARCH_CHIP_NRF52
-	bool "Nordic NRF52"
+	bool "Nordic nRF52"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
@@ -285,25 +285,25 @@ config ARCH_CHIP_NRF52
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
-		Nordic NRF52 architectures (ARM Cortex-M4).
+		Nordic nRF52 architectures (ARM Cortex-M4).
 
 config ARCH_CHIP_NRF53
-	bool "Nordic NRF53"
+	bool "Nordic nRF53"
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_PWM_MULTICHAN
 	depends on EXPERIMENTAL
 	---help---
-		Nordic NRF53 architectures (ARM dual Cortex-M33).
+		Nordic nRF53 architectures (ARM dual Cortex-M33).
 
 config ARCH_CHIP_NRF91
-	bool "Nordic NRF91"
+	bool "Nordic nRF91"
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_HAVE_TICKLESS
 	depends on EXPERIMENTAL
 	---help---
-		Nordic NRF91 architectures (ARM Cortex-M33 with integrated
+		Nordic nRF91 architectures (ARM Cortex-M33 with integrated
 		LTE-M/NB-IoT modem and GNSS).
 
 config ARCH_CHIP_NUC1XX

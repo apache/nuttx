@@ -3,17 +3,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "NRF53 Configuration Options"
+comment "nRF53 Configuration Options"
 
-# NRF53 Families
+# nRF53 Families
 
 choice
-	prompt "NRF53 Chip Selection"
+	prompt "nRF53 Chip Selection"
 	default ARCH_CHIP_NRF5340
 	depends on ARCH_CHIP_NRF53
 
 config ARCH_CHIP_NRF5340
-	bool "NRF5340"
+	bool "nRF5340"
 	select NRF53_CPUAPP_MEM_FLASH_1024
 	select NRF53_CPUAPP_MEM_RAM_512
 	select NRF53_CPUNET_MEM_FLASH_256
@@ -40,19 +40,19 @@ config NRF53_NETCORE
 	default n
 
 choice
-	prompt "NRF5340 Core Selection"
+	prompt "nRF5340 Core Selection"
 	default ARCH_CHIP_NRF5340_CPUAPP
 	depends on ARCH_CHIP_NRF5340
 
 config ARCH_CHIP_NRF5340_CPUAPP
-	bool "NRF53 App core"
+	bool "nRF53 App core"
 	select NRF53_APPCORE
 
 config ARCH_CHIP_NRF5340_CPUNET
-	bool "NRF53 Net core"
+	bool "nRF53 Net core"
 	select NRF53_NETCORE
 
-endchoice # NRF5340 Core Selection
+endchoice # nRF5340 Core Selection
 
 # RAM size for the app core
 
@@ -97,17 +97,17 @@ config NRF53_CPUNET_MEM_FLASH_SIZE
 if NRF53_APPCORE
 
 config NRF53_NET_BOOT
-	bool "NRF53 Net core configuration"
+	bool "nRF53 Net core configuration"
 	default y
 
 if NRF53_NET_BOOT
 
 config NRF53_NET_POWER_ON_BOOT
-	bool "NRF53 Power Net core on App core boot"
+	bool "nRF53 Power Net core on App core boot"
 	default y
 
 config NRF53_NET_GPIO_ALLOW_ALL
-	bool "NRF53 allow all GPIO for Net core"
+	bool "nRF53 allow all GPIO for Net core"
 	default y
 
 endif # NRF53_NET_BOOT
@@ -115,7 +115,7 @@ endif # NRF53_NET_BOOT
 endif # NRF53_APPCORE
 
 config NRF53_ENABLE_APPROTECT
-	bool "NRF53 enable APPROTECT"
+	bool "nRF53 enable APPROTECT"
 	default n
 
 # Peripheral support
@@ -182,7 +182,7 @@ config NRF53_RTC
 	bool
 	default n
 
-menu "NRF53 Peripheral Selection"
+menu "nRF53 Peripheral Selection"
 
 config NRF53_GPIOTE
 	bool "GPIOTE (GPIO interrupts)"
@@ -309,7 +309,7 @@ config NRF53_USBDEV
 	depends on NRF53_HFCLK_XTAL
 	select USBDEV
 
-endmenu # NRF53 Peripheral Selection
+endmenu # nRF53 Peripheral Selection
 
 menu "Clock Configuration"
 
