@@ -287,7 +287,7 @@ struct boardioc_romdisk_s
 struct symtab_s;  /* Forward reference */
 struct boardioc_symtab_s
 {
-  FAR struct symtab_s *symtab;
+  FAR const struct symtab_s *symtab;
   int nsymbols;
 };
 
