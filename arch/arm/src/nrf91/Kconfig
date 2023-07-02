@@ -17,6 +17,26 @@ config ARCH_CHIP_NRF9160
 
 endchoice # NRF91 Chip Selection
 
+# RAM size
+
+config NRF91_CPUAPP_MEM_RAM_256
+	bool
+	default y
+
+config NRF91_CPUAPP_MEM_RAM_SIZE
+	hex
+	default 0x040000 if NRF91_CPUAPP_MEM_RAM_256
+
+# FLASH size
+
+config NRF91_CPUAPP_MEM_FLASH_1024
+	bool
+	default y
+
+config NRF91_CPUAPP_MEM_FLASH_SIZE
+	hex
+	default 0x100000 if NRF91_CPUAPP_MEM_FLASH_1024
+
 config NRF91_ENABLE_APPROTECT
 	bool "nRF91 enable APPROTECT"
 	default n

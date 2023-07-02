@@ -46,6 +46,10 @@
 #  include "nrf91_modem_at.h"
 #endif
 
+#ifdef CONFIG_NRF91_PROGMEM
+#  include "nrf91_progmem.h"
+#endif
+
 #include "nrf9160-dk.h"
 
 /****************************************************************************
@@ -130,6 +134,14 @@ int nrf91_bringup(void)
              "ERROR: Failed to initialize AT interface%d\n",  ret);
     }
 #endif
+
+#ifdef CONFIG_NRF91_PROGMEM
+  ret = nrf91_progmem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MTD progmem: %d\n", ret);
+    }
+#endif /* CONFIG_MTD */
 
   UNUSED(ret);
   return OK;
