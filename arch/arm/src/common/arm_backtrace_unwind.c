@@ -431,6 +431,7 @@ int unwind_frame(struct unwind_frame_s *frame)
   ctrl.vrs[LR] = frame->lr;
   ctrl.vrs[PC] = 0;
   ctrl.stack_top = frame->stack_top;
+  ctrl.lr_addr = NULL;
 
   if (frame->pc == prel31_to_addr(&entry->fnoffset))
     {
