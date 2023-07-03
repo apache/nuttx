@@ -488,7 +488,7 @@ static altmdm_state_t process_state_poweroff(uint32_t event,
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_POWERON);
       usec2timespec(RESET_INTERVAL, &interval);
       nxsig_nanosleep(&interval, NULL);
-      g_altmdm_dev.spidev = g_altmdm_dev.lower->poweron();
+      g_altmdm_dev.spidev = g_altmdm_dev.lower->poweron(false);
       g_altmdm_dev.lower->set_mready(false);
       g_altmdm_dev.lower->set_wakeup(false);
       g_altmdm_dev.lower->irqenable(true);
@@ -1534,7 +1534,7 @@ int altmdm_init(FAR struct spi_dev_s *spidev,
 
       g_altmdm_dev.current_state = ALTMDM_STATE_SLEEP;
       g_altmdm_dev.vp = VP_V4;
-      g_altmdm_dev.spidev = g_altmdm_dev.lower->poweron();
+      g_altmdm_dev.spidev = g_altmdm_dev.lower->poweron(true);
       g_altmdm_dev.lower->set_mready(false);
       g_altmdm_dev.lower->set_wakeup(false);
       g_altmdm_dev.lower->irqenable(true);
