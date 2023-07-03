@@ -573,6 +573,38 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case TSIOC_GETOFFSETX:  /* arg: Pointer to int offsetx config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_OFFSETX;
+        }
+        break;
+
+      case TSIOC_GETOFFSETY:  /* arg: Pointer to int offsety config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_OFFSETY;
+        }
+        break;
+
+      case TSIOC_GETTHRESHX:  /* arg: Pointer to int threshx config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_THRESHX;
+        }
+        break;
+
+      case TSIOC_GETTHRESHY:  /* arg: Pointer to int threshy config value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = CONFIG_STMPE811_THRESHY;
+        }
+        break;
+
       default:
         ret = -ENOTTY;
         break;

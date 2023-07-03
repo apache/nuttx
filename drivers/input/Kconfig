@@ -415,6 +415,22 @@ config STMPE811_SWAPXY
 	---help---
 		Reverse the meaning of X and Y to handle different LCD orientations.
 
+config STMPE811_OFFSETX
+	int "X offset"
+	default 0
+	depends on !STMPE811_TSC_DISABLE
+	---help---
+		Horizontal offset between the left edge of the touchscreen and
+		the left edge of the display area.
+
+config STMPE811_OFFSETY
+	int "Y offset"
+	default 0
+	depends on !STMPE811_TSC_DISABLE
+	---help---
+		Vertical offset between the top edge of the touchscreen and
+		the top edge of the display area.
+
 config STMPE811_THRESHX
 	int "X threshold"
 	default 12
