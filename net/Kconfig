@@ -128,17 +128,33 @@ config NET_LL_GUARDSIZE
 		to L3 network layer protocol transparent transmission and forwarding
 
 config NET_RECV_BUFSIZE
-	int "Net Receive buffer size"
+	int "Net Default Receive buffer size"
 	default 0
 	---help---
 		This is the default value for receive buffer size.
 
+config NET_MAX_RECV_BUFSIZE
+	int "Net Max Receive buffer size"
+	depends on NET_RECV_BUFSIZE > 0
+	default 0
+	---help---
+		Limit the max value for receive buffer size to avoid overconsumption.
+		Zero means no limit.
+
 config NET_SEND_BUFSIZE
-	int "Net Send buffer size"
+	int "Net Default Send buffer size"
 	depends on NET_TCP_WRITE_BUFFERS || NET_UDP_WRITE_BUFFERS
 	default 0
 	---help---
 		This is the default value for send buffer size.
+
+config NET_MAX_SEND_BUFSIZE
+	int "Net Max Send buffer size"
+	depends on NET_SEND_BUFSIZE > 0
+	default 0
+	---help---
+		Limit the max value for send buffer size to avoid overconsumption.
+		Zero means no limit.
 
 endmenu # Driver buffer configuration
 
