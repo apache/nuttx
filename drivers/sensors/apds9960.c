@@ -412,7 +412,7 @@ static int apds9960_setdefault(FAR struct apds9960_dev_s *priv)
   ret = apds9960_i2c_write8(priv, APDS9960_GCONFIG4, DEFAULT_GCONFIG4);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to write APDS9960_GCONFIG3!\n");
+      snerr("ERROR: Failed to write APDS9960_GCONFIG4!\n");
       return ret;
     }
 
