@@ -154,7 +154,7 @@ dq_queue_t g_waitingforfill;
 dq_queue_t g_stoppedtasks;
 #endif
 
-/* This the list of all tasks that have been initialized, but not yet
+/* This list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
@@ -174,9 +174,9 @@ volatile pid_t g_lastpid;
 FAR struct tcb_s **g_pidhash;
 volatile int g_npidhash;
 
-/* This is a table of task lists.  This table is indexed by the task stat
+/* This is a table of task lists.  This table is indexed by the task state
  * enumeration type (tstate_t) and provides a pointer to the associated
- * static task list (if there is one) as well as a a set of attribute flags
+ * static task list (if there is one) as well as a set of attribute flags
  * indicating properties of the list, for example, if the list is an
  * ordered list or not.
  */
@@ -277,16 +277,16 @@ static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
 /* This is the name of the idle task */
 
 #if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 static const char g_idlename[] = "CPU Idle";
-#else
+#  else
 static const char g_idlename[] = "Idle Task";
-#endif
+#  endif
 #endif
 
-/* This the IDLE idle threads argument list.  NOTE: Normally the argument
+/* This is IDLE threads argument list.  NOTE: Normally the argument
  * list is created on the stack prior to starting the task.  We have to
- * do things s little differently here for the IDLE tasks.
+ * do things little differently here for the IDLE tasks.
  */
 
 static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
@@ -301,7 +301,7 @@ static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
  * Description:
  *   This function is called to initialize the operating system and to spawn
  *   the user initialization thread of execution.  This is the initial entry
- *   point into NuttX
+ *   point into NuttX.
  *
  * Input Parameters:
  *   None
