@@ -36,6 +36,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/mm/kmap.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
@@ -470,6 +471,12 @@ void nx_start(void)
       mm_pginitialize(heap_start, heap_size);
 #endif
     }
+#endif
+
+#ifdef CONFIG_MM_KMAP
+  /* Initialize the kernel dynamic mapping module */
+
+  kmm_map_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_HAVE_EXTRA_HEAPS

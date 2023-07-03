@@ -240,31 +240,39 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
       goto bad;
     }
 
-  if (rpc->rc_sotype == SOCK_DGRAM)
+#ifdef CONFIG_NFS_DONT_BIND_TCP_SOCKET
+  if (rpc->rc_sotype == SOCK_STREAM)
     {
-      /* Some servers require that the client port be a reserved port
-       * number. We always allocate a reserved port, as this prevents
-       * filehandle disclosure through UDP port capture.
-       */
+      goto connect;
+    }
+#endif
 
-      do
-        {
-          *lport = htons(--port);
-          error = psock_bind(&rpc->rc_so, (FAR struct sockaddr *)&laddr,
-                             addrlen);
-          if (error < 0)
-            {
-              ferr("ERROR: psock_bind failed: %d\n", error);
-            }
-        }
-      while (error == -EADDRINUSE && port >= 512);
+  /* Some servers require that the client port be a reserved port
+   * number. We always allocate a reserved port, as this prevents
+   * filehandle disclosure through UDP port capture.
+   */
 
-      if (error)
+  do
+    {
+      *lport = htons(--port);
+      error = psock_bind(&rpc->rc_so, (FAR struct sockaddr *)&laddr,
+                         addrlen);
+      if (error < 0)
         {
           ferr("ERROR: psock_bind failed: %d\n", error);
-          goto bad;
         }
     }
+  while (error == -EADDRINUSE && port >= 512);
+
+  if (error)
+    {
+      ferr("ERROR: psock_bind failed: %d\n", error);
+      goto bad;
+    }
+
+#ifdef CONFIG_NFS_DONT_BIND_TCP_SOCKET
+connect:
+#endif
 
   /* Protocols that do not require connections could be optionally left
    * unconnected.  That would allow servers to reply from a port other than

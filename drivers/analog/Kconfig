@@ -179,12 +179,15 @@ config MAX1161X_FREQUENCY
 choice
 	prompt "Maxim MAX1161X Chip Type"
 
-	config MAX1161X_4CHAN
-		bool "MAX11612/MAX11613 4 Channels"
-	config MAX1161X_8CHAN
-		bool "MAX11614/MAX11615 8 Channels"
-	config MAX1161X_12CHAN
-		bool "MAX11616/MAX11617 12 Channels"
+config MAX1161X_4CHAN
+	bool "MAX11612/MAX11613 4 Channels"
+
+config MAX1161X_8CHAN
+	bool "MAX11614/MAX11615 8 Channels"
+
+config MAX1161X_12CHAN
+	bool "MAX11616/MAX11617 12 Channels"
+
 endchoice
 
 endif # ADC_MAX1161X

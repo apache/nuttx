@@ -36,6 +36,10 @@ ifeq ($(CONFIG_NRF53_APPCORE),y)
 CHIP_CSRCS += nrf53_oscconfig.c
 endif
 
+ifeq ($(CONFIG_NRF53_PROGMEM),y)
+CHIP_CSRCS += nrf53_flash.c
+endif
+
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += nrf53_idle.c
 endif
@@ -95,6 +99,10 @@ ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += nrf53_usbd.c
 endif
 
+ifeq ($(CONFIG_NRF53_QSPI),y)
+CHIP_CSRCS += nrf53_qspi.c
+endif
+
 ifeq ($(CONFIG_NRF53_SOFTDEVICE_CONTROLLER),y)
 
 NRFXLIB_UNPACK  := sdk-nrfxlib
@@ -127,9 +135,9 @@ NRFXLIB_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdk-nrfxlib
 CMSIS_DIR = $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)CMSIS_5
 
 INCLUDES += \
-	$(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdc) \
-	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)include) \
-	$(shell $(INCDIR) "$(CC)" $(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)include)
+	${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)sdc \
+	${INCDIR_PREFIX}$(NRFXLIB_DIR)$(DELIM)mpsl$(DELIM)include \
+	${INCDIR_PREFIX}$(NRFXLIB_DIR)$(DELIM)softdevice_controller$(DELIM)include
 
 CFLAGS += -DNRF53_SERIES
 

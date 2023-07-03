@@ -117,6 +117,13 @@ config SENSORS_AS726X
 	---help---
 		Enable driver support for the AS726X Spectral Sensor.
 
+config SENSORS_BH1749NUC
+	bool "Rohm BH1749NUC Color Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Rohm BH1749NUC color sensor.
+
 config SENSORS_BH1750FVI
 	bool "Rohm BH1750FVI Ambient Light Sensor support"
 	default n
@@ -180,6 +187,35 @@ config BMI160_I2C_ADDR_69
 		If SDO pin is pulled to VDDIO, use 0x69
 
 endchoice
+endif
+
+config SENSORS_BMI270
+	bool "Bosch BMI270 Inertial Measurement Sensor support"
+	default n
+	---help---
+		Enable driver support for the Bosch BMI270 Inertial
+		Measurement sensor
+
+if SENSORS_BMI270
+
+choice
+	prompt "BMI270 Interface"
+	default SENSORS_BMI270_SPI
+
+config SENSORS_BMI270_I2C
+	bool "BMI270 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+config SENSORS_BMI270_SPI
+	bool "BMI270 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface
+
+endchoice
+
 endif
 
 config SENSORS_BMP180

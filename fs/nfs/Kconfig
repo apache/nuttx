@@ -13,6 +13,15 @@ config NFS
 
 #if NFS
 
+config NFS_DONT_BIND_TCP_SOCKET
+	bool
+	default n
+	depends on NFS
+	---help---
+		Some network drivers such as GS2200M do not support to bind
+		a local port for TCP client socket. In this case, this config
+		disables to bind the port.
+
 config NFS_STATISTICS
 	bool "NFS Statistics"
 	default n

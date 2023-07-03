@@ -128,7 +128,7 @@ static struct bt_driver_s g_blehci_driver =
   .send         = stm32wb_blehci_driversend
 };
 
-static mutex_t  g_lock = NXMUTEX_INITIALIZER;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 struct work_s g_drv_init_work;
 
 /****************************************************************************

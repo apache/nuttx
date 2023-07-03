@@ -1109,7 +1109,7 @@ static int inet_setsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-int inet_listen(FAR struct socket *psock, int backlog)
+static int inet_listen(FAR struct socket *psock, int backlog)
 {
 #if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
   FAR struct tcp_conn_s *conn;

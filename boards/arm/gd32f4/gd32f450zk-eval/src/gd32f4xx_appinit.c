@@ -204,12 +204,12 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_INPUT_BUTTONS_LOWER
   /* Register the BUTTON driver */
 
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
-      return ret;
-    }
+      ret = btn_lower_initialize("/dev/buttons");
+      if (ret != OK)
+        {
+          syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+          return ret;
+        }
 #else
   /* Enable BUTTON support for some other purpose */
 
@@ -226,6 +226,34 @@ int board_app_initialize(uintptr_t arg)
           syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n",
                  ret);
         }
+#endif
+
+  /* Configure SDIO chip selects */
+
+#ifdef CONFIG_ARCH_HAVE_SDIO
+      ret = gd32_sdio_initialize();
+      if (ret != OK)
+        {
+          syslog(LOG_ERR, "ERROR: gd32_sdio_initialize() failed: %d\n", ret);
+          return ret;
+        }
+
+  /* Mount the file system at /mnt/sd */
+
+      ret = nx_mount("/dev/mmcsd0", "/mnt/sd", "vfat", 0, NULL);
+      if (ret < 0)
+        {
+          ret = nx_mount("/dev/mmcsd0", "/mnt/sd", "vfat", 0,
+            "forceformat");
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to mount the SD card: %d\n", ret);
+              return ret;
+            }
+        }
+
+    syslog(LOG_INFO, "INFO: FAT volume /mnt/sd mount " \
+        "sd card success: %d\n", ret);
 #endif
 
       /* Now we are initialized */

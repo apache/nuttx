@@ -1750,7 +1750,7 @@ static ssize_t nvs_read(FAR struct nvs_fs *fs,
   uint8_t key[sizeof(pdata->id) + sizeof(pdata->instance)];
 #endif
 
-  if (pdata == NULL || pdata->len == 0)
+  if (pdata == NULL || pdata->len == 0 || pdata->configdata == NULL)
     {
       return -EINVAL;
     }
@@ -1797,6 +1797,11 @@ static int nvs_next(FAR struct nvs_fs *fs,
   int rc;
   struct nvs_ate step_ate;
   uint32_t rd_addr;
+
+  if (pdata == NULL || pdata->len == 0 || pdata->configdata == NULL)
+    {
+      return -EINVAL;
+    }
 
 #ifdef CONFIG_MTD_CONFIG_NAMED
   FAR uint8_t *key = (FAR uint8_t *)pdata->name;
@@ -1858,8 +1863,8 @@ static int nvs_next(FAR struct nvs_fs *fs,
       return rc;
     }
 
-  memcpy(pdata->id, key, sizeof(pdata->id));
-  memcpy(pdata->instance, key + sizeof(pdata->id), sizeof(pdata->instance));
+  memcpy(&pdata->id, key, sizeof(pdata->id));
+  memcpy(&pdata->instance, key + sizeof(pdata->id), sizeof(pdata->instance));
 #endif
 
   rc = nvs_flash_rd(fs, (rd_addr & ADDR_BLOCK_MASK) + step_ate.offset +

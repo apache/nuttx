@@ -31,6 +31,10 @@ config ARCH_CHIP_QEMU_A72
 
 endchoice # Qemu Chip Selection
 
+config ARCH_CHIP_QEMU_WITH_HV
+	bool "Qemu with hypvervisor (e.g. kvm, hvf)"
+	default n
+
 endmenu # "Qemu Chip Selection"
 
 endif # ARCH_CHIP_QEMU

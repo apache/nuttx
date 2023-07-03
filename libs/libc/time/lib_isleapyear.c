@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/time.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions

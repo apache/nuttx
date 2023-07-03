@@ -41,14 +41,14 @@ choice ESP32S3_DEFAULT_CPU_FREQ
 	---help---
 		CPU frequency to be set on application startup.
 
-	config ESP32S3_DEFAULT_CPU_FREQ_80
-		bool "80 MHz"
+config ESP32S3_DEFAULT_CPU_FREQ_80
+	bool "80 MHz"
 
-	config ESP32S3_DEFAULT_CPU_FREQ_160
-		bool "160 MHz"
+config ESP32S3_DEFAULT_CPU_FREQ_160
+	bool "160 MHz"
 
-	config ESP32S3_DEFAULT_CPU_FREQ_240
-		bool "240 MHz"
+config ESP32S3_DEFAULT_CPU_FREQ_240
+	bool "240 MHz"
 
 endchoice # CPU frequency
 
@@ -91,11 +91,11 @@ choice ESP32S3_ICACHE_ASSOCIATED_WAYS
 	---help---
 		Instruction cache associated ways to be set on application startup.
 
-	config ESP32S3_INSTRUCTION_CACHE_4WAYS
-		bool "4 ways"
+config ESP32S3_INSTRUCTION_CACHE_4WAYS
+	bool "4 ways"
 
-	config ESP32S3_INSTRUCTION_CACHE_8WAYS
-		bool "8 ways"
+config ESP32S3_INSTRUCTION_CACHE_8WAYS
+	bool "8 ways"
 
 endchoice
 
@@ -110,14 +110,14 @@ choice ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
 	---help---
 		Instruction cache line size to be set on application startup.
 
-	config ESP32S3_INSTRUCTION_CACHE_LINE_16B
-		bool "16 Bytes"
-		depends on ESP32S3_INSTRUCTION_CACHE_16KB
+config ESP32S3_INSTRUCTION_CACHE_LINE_16B
+	bool "16 Bytes"
+	depends on ESP32S3_INSTRUCTION_CACHE_16KB
 
-	config ESP32S3_INSTRUCTION_CACHE_LINE_32B
-		bool "32 Bytes"
+config ESP32S3_INSTRUCTION_CACHE_LINE_32B
+	bool "32 Bytes"
 
-endchoice
+endchoice # ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
 
 config ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
 	int
@@ -162,13 +162,13 @@ choice ESP32S3_DCACHE_ASSOCIATED_WAYS
 	---help---
 		Data cache associated ways to be set on application startup.
 
-	config ESP32S3_DATA_CACHE_4WAYS
-		bool "4 ways"
+config ESP32S3_DATA_CACHE_4WAYS
+	bool "4 ways"
 
-	config ESP32S3_DATA_CACHE_8WAYS
-		bool "8 ways"
+config ESP32S3_DATA_CACHE_8WAYS
+	bool "8 ways"
 
-endchoice
+endchoice # ESP32S3_DCACHE_ASSOCIATED_WAYS
 
 config ESP32S3_DCACHE_ASSOCIATED_WAYS
 	int
@@ -181,17 +181,17 @@ choice ESP32S3_DATA_CACHE_LINE_SIZE
 	---help---
 		Data cache line size to be set on application startup.
 
-	config ESP32S3_DATA_CACHE_LINE_16B
-		bool "16 Bytes"
-		depends on ESP32S3_DATA_CACHE_16KB || ESP32S3_DATA_CACHE_32KB
+config ESP32S3_DATA_CACHE_LINE_16B
+	bool "16 Bytes"
+	depends on ESP32S3_DATA_CACHE_16KB || ESP32S3_DATA_CACHE_32KB
 
-	config ESP32S3_DATA_CACHE_LINE_32B
-		bool "32 Bytes"
+config ESP32S3_DATA_CACHE_LINE_32B
+	bool "32 Bytes"
 
-	config ESP32S3_DATA_CACHE_LINE_64B
-		bool "64 Bytes"
+config ESP32S3_DATA_CACHE_LINE_64B
+	bool "64 Bytes"
 
-endchoice
+endchoice # ESP32S3_DATA_CACHE_LINE_SIZE
 
 config ESP32S3_DATA_CACHE_LINE_SIZE
 	int
@@ -229,6 +229,11 @@ config ESP32S3_FLASH_8M
 config ESP32S3_FLASH_16M
 	bool
 	default n
+
+config ESP32S3_FLASH_32M
+	bool
+	default n
+	select ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
 
 config ESP32S3_ESPTOOLPY_NO_STUB
 	bool "Disable download stub"
@@ -301,12 +306,14 @@ config ESP32S3_SPI2
 	default n
 	select ESP32S3_SPI
 	select SPI
+	select ESP32S3_GPIO_IRQ if SPI_SLAVE
 
 config ESP32S3_SPI3
 	bool "SPI 3"
 	default n
 	select ESP32S3_SPI
 	select SPI
+	select ESP32S3_GPIO_IRQ if SPI_SLAVE
 
 config ESP32S3_DMA
 	bool "General DMA (GDMA)"
@@ -376,12 +383,15 @@ config ESP32S3_LEDC
 	---help---
 		Enable support to PWM on ESP32S3 using LEDC peripheral.
 
-
 config ESP32S3_USBSERIAL
 	bool "USB-Serial Driver"
 	default n
 	select OTHER_UART_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32S3_OTG
+	bool "USB OTG"
+	default n
 
 config ESP32S3_TIMER0
 	bool "54-bit Timer 0 (Group 0 Timer 0)"
@@ -583,9 +593,22 @@ config ESP32S3_RTCIO_IRQ
 menu "SPI configuration"
 	depends on ESP32S3_SPI
 
+choice
+	prompt "SPI I/O Mode"
+	default ESP32S3_SPI_IO_SPI
+
+config ESP32S3_SPI_IO_SPI
+	bool "SPI (4-line)"
+
+config ESP32S3_SPI_IO_QIO
+	bool "QIO (6-line)"
+
+endchoice # SPI I/O Mode
+
 config ESP32S3_SPI_SWCS
 	bool "SPI software CS"
 	default n
+	depends on ESP32S3_SPI_IO_SPI
 	---help---
 		Use SPI software CS.
 
@@ -596,30 +619,33 @@ config ESP32S3_SPI_UDCS
 	---help---
 		Use user-defined CS.
 
-if ESP32S3_SPI2
-
-config ESP32S3_SPI2_DMA
-	bool "SPI2 use GDMA"
+config ESP32S3_SPI_DMA
+	bool "SPI use GDMA"
 	default n
-	depends on ESP32S3_DMA
+	select ESP32S3_DMA
 	---help---
 		Enable support for transfers using the GDMA engine.
 
-config ESP32S3_SPI2_DMADESC_NUM
-	int "SPI2 Master GDMA maximum number of descriptors"
-	default 2
-	depends on ESP32S3_SPI2_DMA
+config ESP32S3_SPI_DMA_BUFSIZE
+	int "SPI Master GDMA buffer size"
+	default 2048
+	depends on ESP32S3_SPI_DMA
 	---help---
-		Configure the maximum number of out-link/in-link descriptors to
-		be chained for a GDMA transfer.
+		This is used to calculate and allocate DMA description buffer,
+		not really allocate TX/RX buffer.
 
-config ESP32S3_SPI2_DMATHRESHOLD
-	int "SPI2 Master GDMA threshold"
+config ESP32S3_SPI_DMATHRESHOLD
+	int "SPI Master GDMA threshold"
 	default 64
-	depends on ESP32S3_SPI2_DMA
+	depends on ESP32S3_SPI_DMA && ESP32S3_SPI_IO_SPI
 	---help---
 		When SPI GDMA is enabled, GDMA transfers whose size are below the
 		defined threshold will be performed by polling logic.
+
+config ESP32S3_SPI_SLAVE_BUFSIZE
+	int "SPI Slave buffer size"
+	default 2048
+	depends on SPI_SLAVE
 
 config ESP32S3_SPI2_CSPIN
 	int "SPI2 CS Pin"
@@ -641,9 +667,17 @@ config ESP32S3_SPI2_MISOPIN
 	default 13
 	range 0 48
 
-endif # ESP32S3_SPI2
+config ESP32S3_SPI2_IO2PIN
+	int "SPI2 IO2 Pin"
+	default 14
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
 
-if ESP32S3_SPI3
+config ESP32S3_SPI2_IO3PIN
+	int "SPI2 IO3 Pin"
+	default 9
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
 
 config ESP32S3_SPI3_CSPIN
 	int "SPI3 CS Pin"
@@ -665,7 +699,17 @@ config ESP32S3_SPI3_MISOPIN
 	default 2
 	range 0 48
 
-endif # ESP32S3_SPI3
+config ESP32S3_SPI3_IO2PIN
+	int "SPI3 IO2 Pin"
+	default 3
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
+
+config ESP32S3_SPI3_IO3PIN
+	int "SPI3 IO3 Pin"
+	default 4
+	range 0 48
+	depends on ESP32S3_SPI_IO_QIO
 
 endmenu # SPI configuration
 
@@ -966,20 +1010,20 @@ choice ESP32S3_FLASH_MODE
 		with the attached SPI Flash chip.
 		The option selected here is then used by esptool when flashing.
 
-	config ESP32S3_FLASH_MODE_DIO
-		bool "Dual IO (DIO)"
+config ESP32S3_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
 
-	config ESP32S3_FLASH_MODE_DOUT
-		bool "Dual Output (DOUT)"
+config ESP32S3_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
 
-	config ESP32S3_FLASH_MODE_QIO
-		bool "Quad IO (QIO)"
+config ESP32S3_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
 
-	config ESP32S3_FLASH_MODE_QOUT
-		bool "Quad Output (QOUT)"
+config ESP32S3_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
 
-	config ESP32S3_FLASH_MODE_OCT
-		bool "Octal"
+config ESP32S3_FLASH_MODE_OCT
+	bool "Octal"
 
 endchoice # ESP32S3_FLASH_MODE
 
@@ -989,17 +1033,17 @@ choice ESP32S3_FLASH_FREQ
 	---help---
 		SPI Flash frequency
 
-	config ESP32S3_FLASH_FREQ_120M
-		bool "120 MHz"
+config ESP32S3_FLASH_FREQ_120M
+	bool "120 MHz"
 
-	config ESP32S3_FLASH_FREQ_80M
-		bool "80 MHz"
+config ESP32S3_FLASH_FREQ_80M
+	bool "80 MHz"
 
-	config ESP32S3_FLASH_FREQ_40M
-		bool "40 MHz"
+config ESP32S3_FLASH_FREQ_40M
+	bool "40 MHz"
 
-	config ESP32S3_FLASH_FREQ_20M
-		bool "20 MHz"
+config ESP32S3_FLASH_FREQ_20M
+	bool "20 MHz"
 
 endchoice # ESP32S3_FLASH_FREQ
 
@@ -1015,12 +1059,29 @@ choice ESP32S3_FLASH_SAMPLE_MODE
 	default ESP32S3_FLASH_SAMPLE_MODE_DTR if ESP32S3_FLASH_MODE_OCT
 	default ESP32S3_FLASH_SAMPLE_MODE_STR if !ESP32S3_FLASH_MODE_OCT
 
-	config ESP32S3_FLASH_SAMPLE_MODE_DTR
-		depends on ESP32S3_FLASH_MODE_OCT
-		bool "DTR Mode"
-	config ESP32S3_FLASH_SAMPLE_MODE_STR
-		bool "STR Mode"
+config ESP32S3_FLASH_SAMPLE_MODE_DTR
+	depends on ESP32S3_FLASH_MODE_OCT
+	bool "DTR Mode"
+config ESP32S3_FLASH_SAMPLE_MODE_STR
+	bool "STR Mode"
 endchoice
+
+config ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+	bool "Don't use SPI flash driver in ROM"
+	default n
+	---help---
+		Use source code for SPI flash driver instead of functions
+		in ROM.
+
+config ESP32S3S_SPI_FLASH_USE_32BIT_ADDRESS
+	bool "SPI flash uses 32-bit address"
+	default n
+	select ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+	---help---
+		SPI flash driver in ROM only support 24-bit address access,
+		if select the option, it will force to use source code instead
+		of functions in ROM, so that SPI flash driver can access full
+		32-bit address.
 
 config ESP32S3_HAVE_OTA_PARTITION
 	bool
@@ -1062,7 +1123,7 @@ config ESP32S3_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
 	default "/dev/otascratch"
 
-endif
+endif # ESP32S3_HAVE_OTA_PARTITION
 
 if ESP32S3_SPIFLASH
 
@@ -1180,6 +1241,35 @@ config ESP32S3_LEDC_CHANNEL7_PIN
 
 endmenu # LEDC configuration
 
+menu "USB OTG Configuration"
+	depends on ESP32S3_OTG
+
+choice
+	prompt "USB OTG Mode"
+	default ESP32S3_OTG_DEVICE
+
+config ESP32S3_OTG_DEVICE
+	bool "Device"
+	select USBDEV
+
+endchoice # USB OTG Mode
+
+if ESP32S3_OTG_DEVICE
+
+config ESP32S3_OTG_ENDPOINT_NUM
+	int "Additional Endpoint Number Except Endpoint 0"
+	range 0 6
+	default 3
+
+endif # ESP32S3_OTG_DEVICE
+
+config ESP32S3_OTG_DEBUG_REGISTER
+	bool "Debug Register Get/Set"
+	default n
+	depends on DEBUG_USB_INFO
+
+endmenu # USB OTG Configuration
+
 menu "Application Image Configuration"
 
 choice
@@ -1273,7 +1363,7 @@ config ESP32S3_USER_IMAGE_OFFSET
 	---help---
 		Offset in SPI Flash for flashing the User application firmware image.
 
-endif
+endif # BUILD_PROTECTED
 
 endmenu # Application Image Configuration
 

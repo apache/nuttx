@@ -54,6 +54,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STPNCPY
+#undef stpncpy /* See mm/README.txt */
 FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *end = dest + n; /* End of dest buffer + 1 byte */

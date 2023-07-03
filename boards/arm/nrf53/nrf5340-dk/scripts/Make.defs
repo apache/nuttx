@@ -22,23 +22,21 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 
-ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUAPP),y)
-ifeq ($(CONFIG_RPTUN),y)
-LDSCRIPT = flash_rptun_app.ld
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+  ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUAPP),y)
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flash_app.ld
+  endif
+  ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUNET),y)
+    ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flash_net.ld
+  endif
 else
-LDSCRIPT = flash_app.ld
+  ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUAPP),y)
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash_app.ld
+  endif
+  ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUNET),y)
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash_net.ld
+  endif
 endif
-endif
-
-ifeq ($(CONFIG_ARCH_CHIP_NRF5340_CPUNET),y)
-ifeq ($(CONFIG_RPTUN),y)
-LDSCRIPT = flash_rptun_net.ld
-else
-LDSCRIPT = flash_net.ld
-endif
-endif
-
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 

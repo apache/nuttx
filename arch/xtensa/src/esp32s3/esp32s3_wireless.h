@@ -29,7 +29,7 @@
 
 #include "xtensa_attr.h"
 
-#include "espidf_wifi.h"
+#include "esp_hal_wifi.h"
 
 /****************************************************************************
  * Pre-processor Definitions

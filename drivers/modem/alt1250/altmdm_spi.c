@@ -87,6 +87,11 @@ void altmdm_set_sleeppkt(FAR altmdm_spipkt_t *pkt)
   pkt->header |= ALTSPI_SLEEP_BIT;
 }
 
+void altmdm_set_retrypkt(FAR altmdm_spipkt_t *pkt)
+{
+  pkt->header |= ALTSPI_BUFFFULL_BIT;
+}
+
 bool altmdm_is_valid_spipkt_header(FAR altmdm_spipkt_t *pkt)
 {
   uint16_t actual_size;

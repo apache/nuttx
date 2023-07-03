@@ -84,6 +84,7 @@
 #define SCHED_PRIORITY_IDLE      0
 
 #if defined(CONFIG_FS_LARGEFILE)
+#  define __USE_FILE_OFFSET64    1
 #  define fsblkcnt64_t           fsblkcnt_t
 #  define fsfilcnt64_t           fsfilcnt_t
 #  define blkcnt64_t             blkcnt_t
@@ -293,6 +294,11 @@ typedef uint24_t u_int24_t;
 #ifdef __INT64_DEFINED
 typedef uint64_t u_int64_t;
 #endif
+
+struct fsid_s
+{
+  int val[2];
+};
 
 /* Task entry point */
 

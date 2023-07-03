@@ -78,7 +78,8 @@
  *    really intended only for crash error reporting.
  */
 
-#if !defined(EXTRA_FMT) && !defined(EXTRA_ARG) && defined(CONFIG_HAVE_FUNCTIONNAME)
+#if !defined(EXTRA_FMT) && !defined(EXTRA_ARG) && \
+    defined(CONFIG_HAVE_FUNCTIONNAME) && !defined(CONFIG_DEFAULT_SMALL)
 #  define EXTRA_FMT "%s: "
 #  define EXTRA_ARG ,__FUNCTION__
 #endif

@@ -44,9 +44,9 @@
  *
  ****************************************************************************/
 
-void lib_skipspace(const char **pptr)
+void lib_skipspace(FAR const char **pptr)
 {
-  const char *ptr = *pptr;
+  FAR const char *ptr = *pptr;
   while (isspace(*ptr)) ptr++;
   *pptr = ptr;
 }

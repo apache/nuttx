@@ -35,7 +35,7 @@
 #include "esp32s3_wifi_adapter.h"
 #include "esp32s3_wifi_utils.h"
 #include "esp32s3_wireless.h"
-#include "espidf_wifi.h"
+#include "esp_hal_wifi.h"
 
 /****************************************************************************
  * Pre-processor Definitions

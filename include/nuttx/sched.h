@@ -702,6 +702,7 @@ struct pthread_tcb_s
   pthread_trampoline_t trampoline;       /* User-space pthread startup function */
   pthread_addr_t arg;                    /* Startup argument                    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
+  bool join_complete;                    /* Join was completed                  */
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
 
@@ -1553,6 +1554,23 @@ pid_t nxsched_getpid(void);
  ****************************************************************************/
 
 pid_t nxsched_getppid(void);
+
+/****************************************************************************
+ * Name: nxsched_collect_deadlock
+ *
+ * Description:
+ *   Check if there is a deadlock and get the thread pid of the deadlock.
+ *
+ * Input parameters:
+ *   pid   - The array to store the thread pid of the deadlock.
+ *   count - The size of the pid array.
+ *
+ * Returned Value:
+ *   The number of thread deadlocks.
+ *
+ ****************************************************************************/
+
+size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
 
 #undef EXTERN
 #if defined(__cplusplus)

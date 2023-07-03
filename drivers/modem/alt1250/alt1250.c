@@ -25,11 +25,15 @@
 #include <nuttx/config.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 #include <poll.h>
 #include <errno.h>
+#include <arch/board/board.h>
+#include <nuttx/wireless/lte/lte.h>
 #include <nuttx/wireless/lte/lte_ioctl.h>
 #include <nuttx/modem/alt1250.h>
+#include <nuttx/power/pm.h>
 #include <assert.h>
 
 #include "altcom_pkt.h"
@@ -46,6 +50,16 @@
 #define rel_evtbufinst(inst, dev) unlock_evtbufinst(inst, dev)
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct alt1250_res_s
+{
+  sem_t sem;
+  int code;
+};
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -60,8 +74,15 @@ static int alt1250_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
 
 parse_handler_t alt1250_additional_parsehdlr(uint16_t, uint8_t);
-compose_handler_t alt1250_additional_composehdlr(uint32_t, FAR uint8_t *,
-                                                 size_t);
+compose_handler_t alt1250_additional_composehdlr(uint32_t,
+                                                 FAR uint8_t *, size_t);
+
+#ifdef CONFIG_PM
+static int alt1250_pm_prepare(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate);
+static void alt1250_pm_notify(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -83,6 +104,18 @@ static const struct file_operations g_alt1250fops =
 };
 static uint8_t g_recvbuff[ALTCOM_RX_PKT_SIZE_MAX];
 static uint8_t g_sendbuff[ALTCOM_PKT_SIZE_MAX];
+
+static struct alt1250_dev_s *g_alt1250_dev;
+
+#ifdef CONFIG_PM
+static struct pm_callback_s g_alt1250pmcb =
+{
+  .notify  = alt1250_pm_notify,
+  .prepare = alt1250_pm_prepare,
+};
+
+static struct alt1250_res_s g_alt1250_res_s;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -244,7 +277,8 @@ static ssize_t read_data(FAR struct alt1250_dev_s *dev,
  ****************************************************************************/
 
 static void write_evtbitmap(FAR struct alt1250_dev_s *dev,
-                            uint64_t bitmap)
+                            uint64_t bitmap,
+                            FAR struct alt_container_s *container)
 {
   nxmutex_lock(&dev->evtmaplock);
 
@@ -255,28 +289,12 @@ static void write_evtbitmap(FAR struct alt1250_dev_s *dev,
       dev->evtbitmap = ALT1250_EVTBIT_RESET;
     }
 
-  m_info("write bitmap: 0x%llx\n", bitmap);
-
-  nxmutex_unlock(&dev->evtmaplock);
-}
-
-/****************************************************************************
- * Name: write_evtbitmapwithlist
- ****************************************************************************/
-
-static void write_evtbitmapwithlist(FAR struct alt1250_dev_s *dev,
-  uint64_t bitmap, FAR struct alt_container_s *container)
-{
-  nxmutex_lock(&dev->evtmaplock);
-
-  dev->evtbitmap |= bitmap;
-
-  if (dev->evtbitmap & ALT1250_EVTBIT_RESET)
+  if (container)
     {
-      dev->evtbitmap = ALT1250_EVTBIT_RESET;
+      add_list(&dev->replylist, container);
     }
 
-  add_list(&dev->replylist, container);
+  m_info("write bitmap: 0x%llx\n", bitmap);
 
   nxmutex_unlock(&dev->evtmaplock);
 }
@@ -496,8 +514,11 @@ static void write_restart_param(FAR void *outp[], FAR void *buff)
  * Name: pollnotify
  ****************************************************************************/
 
-static void pollnotify(FAR struct alt1250_dev_s *dev)
+static void pollnotify(FAR struct alt1250_dev_s *dev, uint64_t bitmap,
+                       FAR struct alt_container_s *container)
 {
+  write_evtbitmap(dev, bitmap, container);
+
   nxmutex_lock(&dev->pfdlock);
 
   if (dev->pfd != NULL)
@@ -551,6 +572,40 @@ parse_handler_t get_parsehdlr(uint16_t altcid, uint8_t altver)
   return ret;
 }
 
+#ifdef CONFIG_PM
+/****************************************************************************
+ * Name: alt1250_send_daemon_request
+ ****************************************************************************/
+
+static int alt1250_send_daemon_request(uint64_t bitmap)
+{
+  /* Send event for daemon */
+
+  pollnotify(g_alt1250_dev, bitmap, NULL);
+
+  /* Waiting for daemon response */
+
+  nxsem_wait_uninterruptible(&g_alt1250_res_s.sem);
+
+  return g_alt1250_res_s.code;
+}
+
+/****************************************************************************
+ * Name: alt1250_receive_daemon_response
+ ****************************************************************************/
+
+static void alt1250_receive_daemon_response(FAR struct alt_power_s *req)
+{
+  /* Store daemon response code */
+
+  g_alt1250_res_s.code = req->resp;
+
+  /* Post request semaphore */
+
+  nxsem_post(&g_alt1250_res_s.sem);
+}
+#endif
+
 /****************************************************************************
  * Name: alt1250_power_control
  ****************************************************************************/
@@ -576,6 +631,25 @@ static int alt1250_power_control(FAR struct alt1250_dev_s *dev,
 
       case LTE_CMDID_GIVEWLOCK:
         ret = altmdm_give_wlock();
+        break;
+
+      case LTE_CMDID_COUNTWLOCK:
+        ret = altmdm_count_wlock();
+        break;
+
+#ifdef CONFIG_PM
+      case LTE_CMDID_STOPAPI:
+      case LTE_CMDID_SUSPEND:
+        alt1250_receive_daemon_response(req);
+        break;
+#endif
+
+      case LTE_CMDID_RETRYDISABLE:
+        ret = altmdm_set_pm_event(EVENT_RETRYREQ, false);
+        break;
+
+      case LTE_CMDID_GET_POWER_STAT:
+        ret = altmdm_get_powersupply(dev->lower);
         break;
 
       default:
@@ -732,22 +806,143 @@ static int exchange_selectcontainer(FAR struct alt1250_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: parse_altcompkt
+ ****************************************************************************/
+
+static int parse_altcompkt(FAR struct alt1250_dev_s *dev, FAR uint8_t *pkt,
+                           int pktlen, FAR uint64_t *bitmap,
+                           FAR struct alt_container_s **container)
+{
+  int ret;
+  FAR struct altcom_cmdhdr_s *h = (FAR struct altcom_cmdhdr_s *)pkt;
+  uint16_t cid = parse_cid(h);
+  uint16_t tid = parse_tid(h);
+  parse_handler_t parser;
+  FAR alt_evtbuf_inst_t *inst;
+  FAR void **outparam;
+  size_t outparamlen;
+
+  m_info("receive cid:0x%04x tid:0x%04x\n", cid, tid);
+
+  parser = get_parsehdlr(cid, get_altver(h));
+  if (is_errind(cid))
+    {
+      /* Get ALTCOM command ID and transaction ID
+       * from payload
+       */
+
+      cid = parse_cid4errind(h);
+      tid = parse_tid4errind(h);
+      m_err("ALT1250 does not support this command. cid:0x%04x tid:0x%04x\n",
+            cid, tid);
+      cid |= ALTCOM_CMDID_REPLY_BIT;
+    }
+
+  *container = remove_list(&dev->waitlist, cid, tid);
+
+  m_info("container %sfound. cid:0x%04x tid:0x%04x\n",
+         *container == NULL ? "not " : "", cid, tid);
+
+  if (parser == NULL)
+    {
+      m_err("parser is not found\n");
+
+      /* If there is a container, use the container to notify
+       * daemon of the event. Otherwise, discard the event.
+       */
+
+      if (*container)
+        {
+          (*container)->result = -ENOSYS;
+        }
+
+      return *container == NULL ? ERROR: OK;
+    }
+
+  /* Obtain outparam and bitmap required for parser execution arguments. */
+
+  if (*container)
+    {
+      outparam = (*container)->outparam;
+      outparamlen = (*container)->outparamlen;
+      *bitmap = get_bitmap(dev, cid, get_altver(h));
+    }
+  else
+    {
+      /* The outparam is updated in the parser. Lock until the parser
+       * returns to prevent outparam from being updated by other tasks.
+       */
+
+      inst = get_evtbuffinst_withlock(dev, cid, get_altver(h), bitmap);
+      if (inst)
+        {
+          outparam = inst->outparam;
+          outparamlen = inst->outparamlen;
+        }
+      else
+        {
+          /* Error return means that the event will be discarded. */
+
+          return ERROR;
+        }
+    }
+
+  ret = parser(dev, get_payload(h), get_payload_len(h), get_altver(h),
+               outparam, outparamlen, bitmap);
+
+  if (*container)
+    {
+      (*container)->result = ret;
+      if (LTE_IS_ASYNC_CMD((*container)->cmdid))
+        {
+          /* Asynchronous types need to call the callback corresponding
+           * to the received event, so the REPLY bit is added to the
+           * received event.
+           */
+
+          *bitmap |= ALT1250_EVTBIT_REPLY;
+        }
+      else
+        {
+          /* Synchronous types do not call a callback,
+           * so only the REPLY bit is needed.
+           */
+
+          *bitmap = ALT1250_EVTBIT_REPLY;
+        }
+    }
+  else
+    {
+      /* Unlock outparam because it has been updated. */
+
+      unlock_evtbufinst(inst, dev);
+      if (ret < 0)
+        {
+          /* Error return means that the event will be discarded */
+
+          return ERROR;
+        }
+    }
+
+  /* OK return means that the event will be notified to the daemon. */
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: altcom_recvthread
  ****************************************************************************/
 
-static void altcom_recvthread(FAR void *arg)
+static int altcom_recvthread(int argc, FAR char *argv[])
 {
   int ret;
-  FAR struct alt1250_dev_s *dev = (FAR struct alt1250_dev_s *)arg;
+  FAR struct alt1250_dev_s *dev = g_alt1250_dev;
   bool is_running = true;
   FAR struct alt_container_s *head;
   FAR struct alt_container_s *container;
-  uint16_t cid;
-  uint16_t tid;
-  uint8_t altver;
-  parse_handler_t handler;
   uint64_t bitmap = 0ULL;
   int recvedlen = 0;
+  uint32_t reason;
 
   m_info("recv thread start\n");
 
@@ -767,7 +962,21 @@ static void altcom_recvthread(FAR void *arg)
           recvedlen += ret;
 
           ret = altcom_is_pkt_ok(g_recvbuff, recvedlen);
-          if (ret > 0)
+          if (ret == 0)
+            {
+              ret = parse_altcompkt(dev, g_recvbuff, recvedlen, &bitmap,
+                                    &container);
+              if (ret == OK)
+                {
+                  pollnotify(dev, bitmap, container);
+                }
+              else
+                {
+                  dev->discardcnt++;
+                  m_err("discard event %lu\n", dev->discardcnt);
+                }
+            }
+          else if (ret > 0)
             {
               /* Cases in which fragmented packets are received.
                * Therefore, the receive process is performed again.
@@ -777,8 +986,7 @@ static void altcom_recvthread(FAR void *arg)
                      ret);
               continue;
             }
-
-          if (ret < 0)
+          else
             {
               /* Forced reset of modem due to packet format error detected */
 
@@ -786,213 +994,125 @@ static void altcom_recvthread(FAR void *arg)
 
               altmdm_reset();
             }
-          else
+        }
+      else if (ret == ALTMDM_RETURN_RESET_PKT)
+        {
+          m_info("recieve ALTMDM_RETURN_RESET_PKT\n");
+          set_senddisable(dev, true);
+        }
+      else if (ret == ALTMDM_RETURN_RESET_V1 ||
+               ret == ALTMDM_RETURN_RESET_V4)
+        {
+          reason = altmdm_get_reset_reason();
+
+          m_info("recieve ALTMDM_RETURN_RESET_V%s reason: %d\n",
+                 (ret == ALTMDM_RETURN_RESET_V1) ? "1" : "4",
+                 reason);
+
+#if defined(CONFIG_MODEM_ALT1250_DISABLE_PV1) && \
+    defined(CONFIG_MODEM_ALT1250_DISABLE_PV4)
+#  error Unsupported configuration. Do not disable both PV1 and PV4.
+#endif
+
+#ifdef CONFIG_MODEM_ALT1250_DISABLE_PV1
+          if (ret == ALTMDM_RETURN_RESET_V1)
             {
-              bool is_discard = false;
+              m_err("Unsupported ALTCOM Version: V1\n");
+              reason = LTE_RESTART_VERSION_ERROR;
+            }
+#endif
 
-              /* parse ALTCOM command ID and transaction ID from header */
+#ifdef CONFIG_MODEM_ALT1250_DISABLE_PV4
+          if (ret == ALTMDM_RETURN_RESET_V4)
+            {
+              m_err("Unsupported ALTCOM Version: V4\n");
+              reason = LTE_RESTART_VERSION_ERROR;
+            }
+#endif
 
-              cid = parse_cid((FAR struct altcom_cmdhdr_s *)g_recvbuff);
-              tid = parse_tid((FAR struct altcom_cmdhdr_s *)g_recvbuff);
-              altver = get_altver(
-                    (FAR struct altcom_cmdhdr_s *)g_recvbuff);
+          ret = write_evtbuff_byidx(dev, 0, write_restart_param,
+                                    (FAR void *)&reason);
 
-              m_info("receive cid:0x%04x tid:0x%04x\n", cid, tid);
+          /* If there is a waiting list,
+           * replace it with the replay list.
+           */
 
-              /* Is error indication packet?
-               * This packet is a response to a command that is not supported
-               * by the ALT1250. The header of the request packet is included
-               * in the contents of the this packet.
+          head = remove_list_all(&dev->waitlist);
+          pollnotify(dev, ALT1250_EVTBIT_RESET, head);
+        }
+      else if (ret == ALTMDM_RETURN_SUSPENDED)
+        {
+          m_info("recieve ALTMDM_RETURN_SUSPENDED\n");
+          nxsem_post(&dev->rxthread_sem);
+          while (1)
+            {
+              /* After receiving a suspend event, the ALT1250 driver
+               * does not accept any requests and must stay alive.
                */
 
-              if (is_errind(cid))
-                {
-                  /* Get ALTCOM command ID and transaction ID
-                   * from error indication packet
-                   */
-
-                  cid = parse_cid4errind(
-                    (FAR struct altcom_cmdhdr_s *)g_recvbuff);
-                  tid = parse_tid4errind(
-                    (FAR struct altcom_cmdhdr_s *)g_recvbuff);
-
-                  m_info("receive errind cid:0x%04x tid:0x%04x\n", cid, tid);
-
-                  container = remove_list(&dev->waitlist, cid, tid);
-                  if (container != NULL)
-                    {
-                      /* It means that requested command not implemented
-                       * by modem
-                       */
-
-                      container->result = -ENOSYS;
-                    }
-                  else
-                    {
-                      /* Discard the event packet */
-
-                      is_discard = true;
-
-                      m_warn("container is not found\n");
-                    }
-                }
-              else
-                {
-                  container = remove_list(&dev->waitlist, cid, tid);
-
-                  handler = get_parsehdlr(cid, altver);
-                  if (handler)
-                    {
-                      FAR uint8_t *payload = get_payload(
-                        (FAR struct altcom_cmdhdr_s *)g_recvbuff);
-
-                      if (container)
-                        {
-                          m_info("handler and container is found\n");
-
-                          bitmap = get_bitmap(dev, cid, altver);
-
-                          /* Perform parse handler */
-
-                          container->result = handler(dev, payload,
-                            get_payload_len(
-                              (FAR struct altcom_cmdhdr_s *)g_recvbuff),
-                            altver, container->outparam,
-                            container->outparamlen, &bitmap);
-                        }
-                      else
-                        {
-                          FAR alt_evtbuf_inst_t *inst;
-
-                          m_warn("container is not found\n");
-
-                          /* If the state of the instance is NotWritable,
-                           * instanse will be returned as NULL.
-                           */
-
-                          inst = get_evtbuffinst_withlock(dev, cid, altver,
-                                                          &bitmap);
-                          if (inst)
-                            {
-                              /* Perform parse handler */
-
-                              ret = handler(dev, payload, get_payload_len(
-                                (FAR struct altcom_cmdhdr_s *)g_recvbuff),
-                                altver, inst->outparam, inst->outparamlen,
-                                &bitmap);
-
-                              unlock_evtbufinst(inst, dev);
-
-                              if (ret >= 0)
-                                {
-                                  write_evtbitmap(dev, bitmap);
-                                }
-                              else
-                                {
-                                  /* Discard the event packet */
-
-                                  is_discard = true;
-                                }
-                            }
-                          else
-                            {
-                              /* Discard the event packet */
-
-                              is_discard = true;
-                            }
-                        }
-                    }
-                  else if (container)
-                    {
-                      container->result = -ENOSYS;
-                      m_warn("handler is not found\n");
-                    }
-                  else
-                    {
-                      /* Discard the event packet */
-
-                      is_discard = true;
-
-                      m_warn("container and handler is not found\n");
-                    }
-                }
-
-              if (container)
-                {
-                  if (container->cmdid & LTE_CMDOPT_ASYNC_BIT)
-                    {
-                      bitmap |= ALT1250_EVTBIT_REPLY;
-                    }
-                  else
-                    {
-                      bitmap = ALT1250_EVTBIT_REPLY;
-                    }
-
-                  write_evtbitmapwithlist(dev, bitmap, container);
-                }
-
-              if (is_discard)
-                {
-                  dev->discardcnt++;
-                  m_err("discard event %lu\n", dev->discardcnt);
-                }
-              else
-                {
-                  pollnotify(dev);
-                }
+              sleep(1);
             }
+        }
+      else if (ret == ALTMDM_RETURN_EXIT)
+        {
+          m_info("recieve ALTMDM_RETURN_EXIT\n");
+          is_running = false;
         }
       else
         {
-          switch (ret)
-            {
-              case ALTMDM_RETURN_RESET_PKT:
-                {
-                  m_info("recieve ALTMDM_RETURN_RESET_PKT\n");
-                  set_senddisable(dev, true);
-                }
-                break;
-
-              case ALTMDM_RETURN_RESET_V1:
-              case ALTMDM_RETURN_RESET_V4:
-                {
-                  uint32_t reason = altmdm_get_reset_reason();
-
-                  m_info("recieve ALTMDM_RETURN_RESET_V1/V4\n");
-
-                  ret = write_evtbuff_byidx(dev, 0, write_restart_param,
-                    (FAR void *)&reason);
-
-                  /* If there is a waiting list,
-                   * replace it with the replay list.
-                   */
-
-                  head = remove_list_all(&dev->waitlist);
-
-                  write_evtbitmapwithlist(dev, ALT1250_EVTBIT_RESET, head);
-                  pollnotify(dev);
-                }
-                break;
-
-              case ALTMDM_RETURN_EXIT:
-                {
-                  m_info("recieve ALTMDM_RETURN_EXIT\n");
-                  is_running = false;
-                }
-                break;
-
-              default:
-                DEBUGASSERT(0);
-                break;
-            }
+          DEBUGASSERT(0);
         }
 
       recvedlen = 0;
     }
 
+  nxsem_post(&dev->rxthread_sem);
+
   m_info("recv thread end\n");
 
-  pthread_exit(0);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: alt1250_start_rxthread
+ ****************************************************************************/
+
+static int alt1250_start_rxthread(FAR struct alt1250_dev_s *dev,
+                                  bool senddisable)
+{
+  int ret = OK;
+
+  nxmutex_init(&dev->waitlist.lock);
+  nxmutex_init(&dev->replylist.lock);
+  nxmutex_init(&dev->evtmaplock);
+  nxmutex_init(&dev->pfdlock);
+  nxmutex_init(&dev->senddisablelock);
+  nxmutex_init(&dev->select_inst.stat_lock);
+
+  sq_init(&dev->waitlist.queue);
+  sq_init(&dev->replylist.queue);
+
+  dev->senddisable = senddisable;
+
+  ret = kthread_create("altcom_recvthread",
+                       SCHED_PRIORITY_DEFAULT,
+                       CONFIG_DEFAULT_TASK_STACKSIZE,
+                       altcom_recvthread,
+                       (FAR char * const *)NULL);
+
+  if (ret < 0)
+    {
+      m_err("kthread create failed: %d\n", errno);
+
+      nxmutex_destroy(&dev->waitlist.lock);
+      nxmutex_destroy(&dev->replylist.lock);
+      nxmutex_destroy(&dev->evtmaplock);
+      nxmutex_destroy(&dev->pfdlock);
+      nxmutex_destroy(&dev->senddisablelock);
+      nxmutex_destroy(&dev->select_inst.stat_lock);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1017,7 +1137,8 @@ static int alt1250_open(FAR struct file *filep)
 
   if (dev->crefs > 0)
     {
-      ret = -EPERM;
+      nxmutex_unlock(&dev->refslock);
+      return -EPERM;
     }
 
   /* Increment the count of open references on the driver */
@@ -1026,43 +1147,17 @@ static int alt1250_open(FAR struct file *filep)
 
   nxmutex_unlock(&dev->refslock);
 
-  if (ret == OK)
+  if (dev->rxthread_pid < 0)
     {
-      nxmutex_init(&dev->waitlist.lock);
-      nxmutex_init(&dev->replylist.lock);
-      nxmutex_init(&dev->evtmaplock);
-      nxmutex_init(&dev->pfdlock);
-      nxmutex_init(&dev->senddisablelock);
-      nxmutex_init(&dev->select_inst.stat_lock);
+      dev->rxthread_pid = alt1250_start_rxthread(dev, true);
+    }
 
-      sq_init(&dev->waitlist.queue);
-      sq_init(&dev->replylist.queue);
-
-      dev->senddisable = true;
-
-      ret = pthread_create(&dev->recvthread, NULL,
-        (pthread_startroutine_t)altcom_recvthread,
-        (pthread_addr_t)dev);
-      if (ret < 0)
-        {
-          m_err("thread create failed: %d\n", errno);
-          ret = -errno;
-
-          nxmutex_destroy(&dev->waitlist.lock);
-          nxmutex_destroy(&dev->replylist.lock);
-          nxmutex_destroy(&dev->evtmaplock);
-          nxmutex_destroy(&dev->pfdlock);
-          nxmutex_destroy(&dev->senddisablelock);
-          nxmutex_destroy(&dev->select_inst.stat_lock);
-
-          nxmutex_lock(&dev->refslock);
-          dev->crefs--;
-          nxmutex_unlock(&dev->refslock);
-        }
-      else
-        {
-          pthread_setname_np(dev->recvthread, "altcom_recvthread");
-        }
+  if (dev->rxthread_pid < 0)
+    {
+      ret = dev->rxthread_pid;
+      nxmutex_lock(&dev->refslock);
+      dev->crefs--;
+      nxmutex_unlock(&dev->refslock);
     }
 
   return ret;
@@ -1076,7 +1171,6 @@ static int alt1250_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct alt1250_dev_s *dev;
-  int ret = OK;
 
   /* Get our private data structure */
 
@@ -1090,31 +1184,28 @@ static int alt1250_close(FAR struct file *filep)
 
   if (dev->crefs == 0)
     {
-      ret = -EPERM;
+      nxmutex_unlock(&dev->refslock);
+      return -EPERM;
     }
-  else
-    {
-      /* Decrement the count of open references on the driver */
 
-      dev->crefs--;
-    }
+  /* Decrement the count of open references on the driver */
+
+  dev->crefs--;
 
   nxmutex_unlock(&dev->refslock);
 
-  if (ret == OK)
-    {
-      nxmutex_destroy(&dev->waitlist.lock);
-      nxmutex_destroy(&dev->replylist.lock);
-      nxmutex_destroy(&dev->evtmaplock);
-      nxmutex_destroy(&dev->pfdlock);
-      nxmutex_destroy(&dev->senddisablelock);
-      nxmutex_destroy(&dev->select_inst.stat_lock);
+  nxmutex_destroy(&dev->waitlist.lock);
+  nxmutex_destroy(&dev->replylist.lock);
+  nxmutex_destroy(&dev->evtmaplock);
+  nxmutex_destroy(&dev->pfdlock);
+  nxmutex_destroy(&dev->senddisablelock);
+  nxmutex_destroy(&dev->select_inst.stat_lock);
 
-      altmdm_fin();
-      pthread_join(dev->recvthread, NULL);
-    }
+  altmdm_fin();
+  dev->rxthread_pid = -1;
+  nxsem_wait_uninterruptible(&dev->rxthread_sem);
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -1262,6 +1353,91 @@ errout:
   return ret;
 }
 
+#ifdef CONFIG_PM
+/****************************************************************************
+ * Name: alt1250_pm_prepare
+ ****************************************************************************/
+
+static int alt1250_pm_prepare(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  int  ret   = OK;
+  bool power = false;
+
+  /* ALT1250's power management only support BOARD_PM_APPS */
+
+  if (domain != BOARD_PM_APPS)
+    {
+      return OK;
+    }
+
+  if (pmstate == PM_SLEEP)
+    {
+      power = altmdm_get_powersupply(g_alt1250_dev->lower);
+
+      if (!power)
+        {
+          /* If the modem doesn't turned on, system can enter sleep */
+
+          return OK;
+        }
+
+      ret = alt1250_send_daemon_request(ALT1250_EVTBIT_STOPAPI);
+
+      if (ret)
+        {
+          return ERROR;
+        }
+      else
+        {
+          return OK;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: alt1250_pm_notify
+ ****************************************************************************/
+
+static void alt1250_pm_notify(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  bool power;
+
+  /* ALT1250's power management only supports BOARD_PM_APPS */
+
+  if ((domain == BOARD_PM_APPS) && (pmstate == PM_SLEEP))
+    {
+      power = altmdm_get_powersupply(g_alt1250_dev->lower);
+
+      if (power)
+        {
+          /* Set retry mode for SPI driver */
+
+          altmdm_set_pm_event(EVENT_RETRYREQ, true);
+
+          /* Send suspend request to daemon */
+
+          alt1250_send_daemon_request(ALT1250_EVTBIT_SUSPEND);
+
+          /* Set suspend mode for SPI driver */
+
+          altmdm_set_pm_event(EVENT_SUSPEND, true);
+
+          /* Waiting for entering sleep state */
+
+          nxsem_wait_uninterruptible(&g_alt1250_dev->rxthread_sem);
+
+          /* Enable LTE hibernation mode for wakeup from LTE */
+
+          g_alt1250_dev->lower->hiber_mode(true);
+        }
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1288,6 +1464,23 @@ FAR void *alt1250_register(FAR const char *devpath,
 
   nxmutex_init(&priv->refslock);
 
+  nxsem_init(&priv->rxthread_sem, 0, 0);
+
+  g_alt1250_dev = priv;
+
+#ifdef CONFIG_PM
+  ret = pm_register(&g_alt1250pmcb);
+
+  if (ret != OK)
+    {
+      m_err("Failed to register PM: %d\n", ret);
+      kmm_free(priv);
+      return NULL;
+    }
+
+  nxsem_init(&g_alt1250_res_s.sem, 0, 0);
+#endif
+
   ret = register_driver(devpath, &g_alt1250fops, 0666, priv);
   if (ret < 0)
     {
@@ -1296,7 +1489,16 @@ FAR void *alt1250_register(FAR const char *devpath,
       return NULL;
     }
 
-  return priv;
+  priv->rxthread_pid = -1;
+
+#ifdef CONFIG_PM
+  if (altmdm_get_powersupply(priv->lower))
+    {
+      priv->rxthread_pid = alt1250_start_rxthread(priv, false);
+    }
+#endif
+
+  return (FAR void *)priv;
 }
 
 uint64_t get_event_lapibuffer(FAR struct alt1250_dev_s *dev,

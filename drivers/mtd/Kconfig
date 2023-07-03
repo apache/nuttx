@@ -179,7 +179,7 @@ config MTD_CONFIG_NAMED
 
 config MTD_CONFIG_NAME_LEN
 	int "Dev Config item max name length"
-	default 24
+	default NAME_MAX
 	depends on MTD_CONFIG_NAMED
 	---help---
 		Sets the maximum length of config item names.

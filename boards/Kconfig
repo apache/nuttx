@@ -380,6 +380,8 @@ config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 config ARCH_BOARD_ESP32C3_GENERIC
 	bool "Espressif ESP32-C3 Generic DevKit"
 	depends on ESPRESSIF_ESP32C3
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The ESP32-C3 DevKit features the ESP32-C3 CPU with a RISC-V core.
 		It comes in two flavors, the ESP32-C3-DevKitM-1 and the ESP32-C3-DevKitC-02.
@@ -450,12 +452,16 @@ config ARCH_BOARD_ESP32S3_MEADOW
 config ARCH_BOARD_ESP32C6_GENERIC
 	bool "Espressif ESP32-C6 Generic DevKit"
 	depends on ESPRESSIF_ESP32C6
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The ESP32-C6 DevKit features the ESP32-C6 CPU with a RISC-V core.
 
 config ARCH_BOARD_ESP32H2_GENERIC
 	bool "Espressif ESP32-H2 Generic DevKit"
 	depends on ESPRESSIF_ESP32H2
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The ESP32-H2 DevKit features the ESP32-H2 CPU with a RISC-V core.
 
@@ -602,6 +608,15 @@ config ARCH_BOARD_GD32F450ZK_EVAL
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		GD32 MCU GD32F450ZK-EVAL board based on the GD32F4 GD32F450ZKT6 MCU.
+
+config ARCH_BOARD_GD32F470ZK_EVAL
+	bool "GD32 MCU GD32F470ZK"
+	depends on ARCH_CHIP_GD32F470ZK
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		GD32 MCU GD32F470ZK-EVAL board based on the GD32F4 GD32F470ZKT6 MCU.
 
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
@@ -1121,6 +1136,15 @@ config ARCH_BOARD_THINGY53
 	select ARCH_HAVE_BUTTONS
 	---help---
 		This option selects the Thingy:53 multi-protocol IoT prototyping platform
+
+config ARCH_BOARD_NRF9160_DK
+	bool "Nordic nRF9160 Development Kit (PCA10090)"
+	depends on ARCH_CHIP_NRF91
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This option selects the nRF9160 Development Kit (PCA10090)
 
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
@@ -1889,6 +1913,14 @@ config ARCH_BOARD_FVP_ARMV8R
 	---help---
 		This options selects support for NuttX on the Armv8-R AEM FVP
 		configure board with ARM Cortex-R82.
+
+config ARCH_BOARD_FVP_ARMV8R_AARCH32
+	bool "FVP ARM-v8r AARCH32 CPUs board"
+	depends on ARCH_CHIP_FVP_ARMV8R_AARCH32
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the Armv8-R AEM FVP
+		configure board with ARM Cortex-R52.
 
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
@@ -2877,6 +2909,7 @@ config ARCH_BOARD
 	default "freedom-kl25z"             if ARCH_BOARD_FREEDOM_KL25Z
 	default "freedom-kl26z"             if ARCH_BOARD_FREEDOM_KL26Z
 	default "gd32f450zk-eval"           if ARCH_BOARD_GD32F450ZK_EVAL
+	default "gd32f470zk-eval"           if ARCH_BOARD_GD32F470ZK_EVAL
 	default "hifive1-revb"              if ARCH_BOARD_HIFIVE1_REVB
 	default "hymini-stm32v"             if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"             if ARCH_BOARD_IMXRT1020_EVK
@@ -2929,6 +2962,7 @@ config ARCH_BOARD
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
 	default "thingy53"                  if ARCH_BOARD_THINGY53
+	default "nrf9160-dk"                if ARCH_BOARD_NRF9160_DK
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
@@ -3009,6 +3043,7 @@ config ARCH_BOARD
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
 	default "fvp-armv8r"                if ARCH_BOARD_FVP_ARMV8R
+	default "fvp-armv8r-aarch32"        if ARCH_BOARD_FVP_ARMV8R_AARCH32
 	default "sama5d2-xult"              if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"               if ARCH_BOARD_GIANT_BOARD
 	default "jupiter-nano"              if ARCH_BOARD_JUPITER_NANO
@@ -3207,6 +3242,9 @@ endif
 if ARCH_BOARD_FVP_ARMV8R
 source "boards/arm64/fvp-v8r/fvp-armv8r/Kconfig"
 endif
+if ARCH_BOARD_FVP_ARMV8R_AARCH32
+source "boards/arm/fvp-v8r-aarch32/fvp-armv8r-aarch32/Kconfig"
+endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
 endif
@@ -3251,6 +3289,9 @@ source "boards/arm/kl/freedom-kl26z/Kconfig"
 endif
 if ARCH_BOARD_GD32F450ZK_EVAL
 source "boards/arm/gd32f4/gd32f450zk-eval/Kconfig"
+endif
+if ARCH_BOARD_GD32F470ZK_EVAL
+source "boards/arm/gd32f4/gd32f470zk-eval/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_LC
 source "boards/arm/kl/teensy-lc/Kconfig"
@@ -4015,6 +4056,9 @@ endif
 if ARCH_CHIP_NRF53
 source "boards/arm/nrf53/common/Kconfig"
 endif
+if ARCH_CHIP_NRF91
+source "boards/arm/nrf91/common/Kconfig"
+endif
 endif
 
 config BOARD_CRASHDUMP
@@ -4033,6 +4077,30 @@ config BOARD_CRASHDUMP
 		what memory is trashed? So all we can expect to do is save the
 		"machine state" in a place where on the next reset can write it
 		to more sophisticated storage in a sane operating environment.
+
+config BOARD_COREDUMP
+	bool "Enable Core Dump after assert"
+	default n
+	depends on ELF_COREDUMP
+	---help---
+		Enable to support for the dump core information after assert.
+
+if BOARD_COREDUMP
+
+config BOARD_COREDUMP_FULL
+	bool "Core Dump all thread registers and stacks"
+	default y
+	---help---
+		Enable to support for the dump all task registers and stacks.
+
+config BOARD_COREDUMP_COMPRESSION
+	bool "Enable Core Dump compression"
+	default y
+	select LIBC_LZF
+	---help---
+		Enable LZF compression algorithm for core dump content
+
+endif # BOARD_COREDUMP
 
 config BOARD_ENTROPY_POOL
 	bool "Enable Board level storing of entropy pool structure"

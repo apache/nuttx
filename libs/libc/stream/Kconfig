@@ -25,4 +25,8 @@ config STREAM_OUT_BUFFER_SIZE
 	int "Output stream buffer size"
 	default 64
 
+config STREAM_HEXDUMP_BUFFER_SIZE
+	int "Output hexdump stream buffer size"
+	default 128
+
 endmenu # Locale Support

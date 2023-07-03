@@ -41,6 +41,10 @@
 #  include <android/fdsan.h>
 #endif
 
+#ifdef CONFIG_FDCHECK
+#  include <nuttx/fdcheck.h>
+#endif
+
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -258,7 +262,12 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
                   inode_addref(inode);
                 }
 
+#ifdef CONFIG_FDCHECK
+              return
+                fdcheck_protect(i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j);
+#else
               return i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
+#endif
             }
         }
       while (++j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
@@ -287,7 +296,11 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
       inode_addref(inode);
     }
 
+#ifdef CONFIG_FDCHECK
+  return fdcheck_protect(i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
+#else
   return i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+#endif
 }
 
 /****************************************************************************
@@ -407,6 +420,10 @@ int fs_getfilep(int fd, FAR struct file **filep)
   FAR struct filelist *list;
   int ret;
 
+#ifdef CONFIG_FDCHECK
+  fd = fdcheck_restore(fd);
+#endif
+
   DEBUGASSERT(filep != NULL);
   *filep = NULL;
 
@@ -487,6 +504,11 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
       return fd1;
     }
 
+#ifdef CONFIG_FDCHECK
+  fd1 = fdcheck_restore(fd1);
+  fd2 = fdcheck_restore(fd2);
+#endif
+
   list = nxsched_get_files_from_tcb(tcb);
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
@@ -525,10 +547,20 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
   ret = file_dup2(&list->fl_files[fd1 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
                                  [fd1 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK],
                   filep);
+
+#ifdef CONFIG_FDSAN
+  filep->f_tag = file.f_tag;
+#endif
+
   nxmutex_unlock(&list->fl_lock);
 
   file_close(&file);
+
+#ifdef CONFIG_FDCHECK
+  return ret < 0 ? ret : fdcheck_protect(fd2);
+#else
   return ret < 0 ? ret : fd2;
+#endif
 }
 
 /****************************************************************************
@@ -606,6 +638,10 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
   FAR struct file      file;
   FAR struct filelist *list;
   int                  ret;
+
+#ifdef CONFIG_FDCHECK
+  fd = fdcheck_restore(fd);
+#endif
 
   list = nxsched_get_files_from_tcb(tcb);
 

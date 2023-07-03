@@ -32,11 +32,12 @@
  * Private Functions
  ****************************************************************************/
 
+#undef strcasechr /* See mm/README.txt */
 static FAR char *strcasechr(FAR const char *s, int uc)
 {
   register char ch;
 
-  for (; *s; s++)
+  for (; *s != '\0'; s++)
     {
       ch = *s;
       if (toupper(ch) == uc)

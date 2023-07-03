@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_GD32F4_GD32F450)
+#if defined(CONFIG_GD32F4_GD32F450) || defined(CONFIG_GD32F4_GD32F470)
 #  include "hardware/gd32f450_memorymap.h"
 
 #else

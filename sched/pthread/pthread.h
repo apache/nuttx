@@ -84,8 +84,8 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
 int pthread_completejoin(pid_t pid, FAR void *exit_value);
 void pthread_destroyjoin(FAR struct task_group_s *group,
                          FAR struct join_s *pjoin);
-FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
-                                        pid_t pid);
+int pthread_findjoininfo(FAR struct task_group_s *group,
+                         pid_t pid, FAR struct join_s **join);
 void pthread_release(FAR struct task_group_s *group);
 
 int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout);

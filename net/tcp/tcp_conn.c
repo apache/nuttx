@@ -440,7 +440,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 #if CONFIG_NET_TCP_ALLOC_CONNS > 0
-FAR struct tcp_conn_s *tcp_alloc_conn(void)
+static FAR struct tcp_conn_s *tcp_alloc_conn(void)
 {
   FAR struct tcp_conn_s *conn;
   int i;
@@ -842,7 +842,14 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Cancel close work */
 
-  work_cancel(LPWORK, &conn->clswork);
+  if ((conn->flags & TCP_CLOSE_ARRANGED) &&
+      work_cancel(LPWORK, &conn->clswork) != OK)
+    {
+      /* Close work is already running, tcp_free will be called again. */
+
+      net_unlock();
+      return;
+    }
 
   /* Cancel tcp timer */
 

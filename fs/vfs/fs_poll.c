@@ -393,7 +393,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
     {
       /* Out of memory */
 
-      ret = ENOMEM;
+      ret = -ENOMEM;
       goto out_with_cancelpt;
     }
 

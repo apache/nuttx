@@ -48,7 +48,6 @@
 #include "xmc4_gpio.h"
 #include "xmc4_spi.h"
 #include "xmc4_usic.h"
-#include "hardware/xmc4_spi.h"
 #include "hardware/xmc4_usic.h"
 #include "hardware/xmc4_pinmux.h"
 

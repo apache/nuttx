@@ -94,13 +94,20 @@ void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
   FAR struct rpmsg_device *rdev = &rvdev->rdev;
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
+  bool needlock = true;
 
   if (!rvdev->vdev)
     {
       return;
     }
 
-  if (!up_interrupt_context() && !sched_idletask())
+  if (up_interrupt_context() || sched_idletask() ||
+      nxmutex_is_hold(&rdev->lock))
+    {
+      needlock = false;
+    }
+
+  if (needlock)
     {
       metal_mutex_acquire(&rdev->lock);
     }
@@ -128,7 +135,7 @@ void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
   rptun_dump_buffer(rvdev, true);
   rptun_dump_buffer(rvdev, false);
 
-  if (!up_interrupt_context() && !sched_idletask())
+  if (needlock)
     {
       metal_mutex_release(&rdev->lock);
     }

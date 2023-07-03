@@ -37,7 +37,7 @@
 #include "esp_irq.h"
 #include "esp_oneshot.h"
 
-#include "clk_tree.h"
+#include "esp_clk_tree.h"
 #include "esp_attr.h"
 #include "hal/timer_hal.h"
 #include "hal/timer_ll.h"
@@ -514,8 +514,8 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
    * frequency to generate a period of 1 us.
    */
 
-  clk_tree_src_get_freq_hz((soc_module_clk_t)GPTIMER_CLK_SRC_DEFAULT,
-                           CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+  esp_clk_tree_src_get_freq_hz((soc_module_clk_t)GPTIMER_CLK_SRC_DEFAULT,
+                           ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
                            &counter_src_hz);
   prescale = (counter_src_hz * resolution) / USEC_PER_SEC;
 

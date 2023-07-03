@@ -1015,6 +1015,15 @@
 #define SPI_INT_RD_BUF_DONE_EN_V  0x00000001
 #define SPI_INT_RD_BUF_DONE_EN_S  5
 
+/* SPI_INT_EN : R/W ;bitpos:[11:5] ;default: 7'b001_0000 ; */
+
+/* Description: Interrupt enable bits for the 7 sources */
+
+#define SPI_INT_EN              0x0000007F
+#define SPI_INT_EN_M            ((SPI_INT_EN_V)<<(SPI_INT_EN_S))
+#define SPI_INT_EN_V            0x7F
+#define SPI_INT_EN_S            5
+
 /* SPI_TRANS_DONE : R/W; bitpos: [4]; default: 0;
  * The interrupt raw bit for the completion of any operation in both the
  * master mode and the slave mode.  Can not be changed by CONF_buf.

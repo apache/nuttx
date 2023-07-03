@@ -443,7 +443,7 @@
 
 /* This retrieves the fields from a SPI devid */
 
-#define SPIDEVID_TYPE (devid) (((uint32_t)(devid) >> 16) & 0xffff)
+#define SPIDEVID_TYPE(devid) (((uint32_t)(devid) >> 16) & 0xffff)
 #define SPIDEVID_INDEX(devid)  ((uint32_t)(devid)        & 0xffff)
 
 /* These are standard definitions for the defined SPI device IDs.  The index
@@ -475,6 +475,7 @@
 #define SPIDEV_LPWAN(n)         SPIDEV_ID(SPIDEVTYPE_LPWAN,         (n))
 #define SPIDEV_ADC(n)           SPIDEV_ID(SPIDEVTYPE_ADC,           (n))
 #define SPIDEV_MOTOR(n)         SPIDEV_ID(SPIDEVTYPE_MOTOR,         (n))
+#define SPIDEV_IMU(n)           SPIDEV_ID(SPIDEVTYPE_IMU,           (n))
 #define SPIDEV_USER(n)          SPIDEV_ID(SPIDEVTYPE_USER,          (n))
 
 /****************************************************************************
@@ -515,6 +516,7 @@ enum spi_devtype_e
   SPIDEVTYPE_LPWAN,         /* Select SPI LPWAN controller over SPI */
   SPIDEVTYPE_ADC,           /* Select SPI ADC device */
   SPIDEVTYPE_MOTOR,         /* Select SPI motor device */
+  SPIDEVTYPE_IMU,           /* Select SPI IMU device */
   SPIDEVTYPE_USER           /* Board-specific values start here
                              * This must always be the last definition. */
 };

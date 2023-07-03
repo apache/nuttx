@@ -22,20 +22,33 @@
  * Included Files
  ****************************************************************************/
 
+/* Config */
+
 #include <nuttx/config.h>
+
+/* Libc */
 
 #include <assert.h>
 #include <debug.h>
 #include <stdint.h>
 #include <sys/types.h>
 
+/* NuttX */
+
 #include <arch/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
+/* Arch */
+
 #include "riscv_internal.h"
 
 #include "esp_gpio.h"
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+#  include "esp_irq.h"
+#endif
+
+/* HAL */
 
 #include "esp_rom_gpio.h"
 #include "hal/gpio_hal.h"
@@ -48,6 +61,89 @@ static gpio_hal_context_t g_gpio_hal =
 {
   .dev = GPIO_HAL_GET_HW(GPIO_PORT_0)
 };
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+static int g_gpio_cpuint;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gpio_dispatch
+ *
+ * Description:
+ *   Second level dispatch for GPIO interrupt handling.
+ *
+ * Input Parameters:
+ *   irq           - GPIO IRQ number.
+ *   status        - Value from the GPIO interrupt status clear register.
+ *   regs          - Saved CPU context.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
+{
+  int i;
+
+  /* Check set bits in the status register */
+
+  while ((i = __builtin_ffs(status)) > 0)
+    {
+      irq_dispatch(irq + i - 1, regs);
+      status >>= i;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: gpio_interrupt
+ *
+ * Description:
+ *   GPIO interrupt handler.
+ *
+ * Input Parameters:
+ *   irq           - Identifier of the interrupt request.
+ *   context       - Context data from the ISR.
+ *   arg           - Opaque pointer to the internal driver state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+static int gpio_interrupt(int irq, void *context, void *arg)
+{
+  int i;
+  uint32_t status;
+  uint32_t intr_bitmask;
+  int cpu = up_cpu_index();
+
+  /* Read the lower GPIO interrupt status */
+
+  gpio_hal_get_intr_status(&g_gpio_hal, cpu, &status);
+  intr_bitmask = status;
+
+  while ((i = __builtin_ffs(intr_bitmask)) > 0)
+    {
+      gpio_hal_clear_intr_status_bit(&g_gpio_hal, (i - 1));
+      intr_bitmask >>= i;
+    }
+
+  /* Dispatch pending interrupts in the lower GPIO status register */
+
+  gpio_dispatch(ESP_FIRST_GPIOIRQ, status, (uint32_t *)context);
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -203,3 +299,163 @@ void esp_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
   esp_rom_gpio_connect_out_signal(pin, signal_idx, out_inv, oen_inv);
 }
 
+/****************************************************************************
+ * Name: esp_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be modified.
+ *   value         - The value to be written (0 or 1).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_gpiowrite(int pin, bool value)
+{
+  DEBUGASSERT(pin >= 0 && pin <= SOC_GPIO_PIN_COUNT);
+
+  gpio_hal_set_level(&g_gpio_hal, pin, value);
+}
+
+/****************************************************************************
+ * Name: esp_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be read.
+ *
+ * Returned Value:
+ *   The boolean representation of the input value (true/false).
+ *
+ ****************************************************************************/
+
+bool esp_gpioread(int pin)
+{
+  DEBUGASSERT(pin >= 0 && pin <= SOC_GPIO_PIN_COUNT);
+
+  return gpio_hal_get_level(&g_gpio_hal, pin) != 0;
+}
+
+/****************************************************************************
+ * Name: esp_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqinitialize(void)
+{
+  /* Setup the GPIO interrupt. */
+
+  g_gpio_cpuint = esp_setup_irq(GPIO_INTR_SOURCE,
+                                ESP_IRQ_PRIORITY_DEFAULT,
+                                ESP_IRQ_TRIGGER_LEVEL);
+  DEBUGASSERT(g_gpio_cpuint >= 0);
+
+  /* Attach and enable the interrupt handler */
+
+  DEBUGVERIFY(irq_attach(ESP_IRQ_GPIO, gpio_interrupt, NULL));
+  up_enable_irq(ESP_IRQ_GPIO);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ * Input Parameters:
+ *   irq           - GPIO IRQ number to be enabled.
+ *   intrtype      - Interrupt type to be enabled.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqenable(int irq, gpio_intrtype_t intrtype)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  int pin;
+  int cpu;
+
+  DEBUGASSERT(irq >= ESP_FIRST_GPIOIRQ && irq <= ESP_LAST_GPIOIRQ);
+
+  /* Convert the IRQ number to a pin number */
+
+  pin = ESP_IRQ2PIN(irq);
+
+  /* Disable the GPIO interrupt during the configuration. */
+
+  up_disable_irq(ESP_IRQ_GPIO);
+
+  /* Enable interrupt for this pin on the current core */
+
+  cpu = up_cpu_index();
+  gpio_hal_set_intr_type(&g_gpio_hal, pin, intrtype);
+  gpio_hal_intr_enable_on_core(&g_gpio_hal, pin, cpu);
+
+  /* Configuration done. Re-enable the GPIO interrupt. */
+
+  up_enable_irq(ESP_IRQ_GPIO);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ * Input Parameters:
+ *   irq           - GPIO IRQ number to be disabled.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqdisable(int irq)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  int pin;
+
+  DEBUGASSERT(irq >= ESP_FIRST_GPIOIRQ && irq <= ESP_LAST_GPIOIRQ);
+
+  /* Convert the IRQ number to a pin number */
+
+  pin = ESP_IRQ2PIN(irq);
+
+  /* Disable the GPIO interrupt during the configuration. */
+
+  up_disable_irq(ESP_IRQ_GPIO);
+
+  /* Disable the interrupt for this pin */
+
+  gpio_hal_intr_disable(&g_gpio_hal, pin);
+
+  /* Configuration done. Re-enable the GPIO interrupt. */
+
+  up_enable_irq(ESP_IRQ_GPIO);
+}
+#endif

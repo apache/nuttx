@@ -48,7 +48,7 @@
 #undef strcpy /* See mm/README.txt */
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
-  char *tmp = dest;
+  FAR char *tmp = dest;
   while ((*dest++ = *src++) != '\0');
   return tmp;
 }

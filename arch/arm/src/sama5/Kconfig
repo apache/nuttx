@@ -1246,7 +1246,7 @@ config SAMA5D2_CLASSD_MONOMODE_SAT
 config SAMA5D2_CLASSD_MONOMODE_LEFT
 	bool "L       -> both channels"
 
-	config SAMA5D2_CLASSD_MONOMODE_RIGHT
+config SAMA5D2_CLASSD_MONOMODE_RIGHT
 	bool "R       -> both channels"
 
 endchoice # Mono Mode Selection (MONOMODE)
@@ -3359,7 +3359,7 @@ config SAMA5_SPI_DMA
 config SAMA5_SPI_XDMA
 	bool "SPI XDMA"
 	default n
-	depends on SAMA5_XDMAC0 || SAMA5_XDMAC1    
+	depends on SAMA5_XDMAC0 || SAMA5_XDMAC1
 	---help---
 		Use XDMA to improve SPI transfer performance.
 

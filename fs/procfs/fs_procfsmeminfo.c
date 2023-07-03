@@ -147,7 +147,7 @@ const struct procfs_operations g_memdump_operations =
 };
 #endif
 
-FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
+static FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -313,7 +313,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
           /* Show heap information */
 
-          mm_mallinfo(entry->heap, &minfo);
+          minfo      = mm_mallinfo(entry->heap);
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                                        "%12s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
                                        entry->name,
@@ -444,8 +444,9 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 #if CONFIG_MM_BACKTRACE >= 0
   buffer    += copysize;
   buflen    -= copysize;
-  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-              "The current sequence number %lu\n", g_mm_seqno);
+  linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                               "The current sequence number %lu\n",
+                               g_mm_seqno);
 
   totalsize += procfs_memcpy(procfile->line, linesize, buffer, buflen,
                              &offset);
@@ -468,7 +469,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct meminfo_file_s *procfile;
   struct mm_memdump_s dump =
     {
-      MM_BACKTRACE_ALLOC_PID,
+      PID_MM_ALLOC,
 #if CONFIG_MM_BACKTRACE >= 0
       0,
       ULONG_MAX
@@ -539,7 +540,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   switch (buffer[0])
     {
       case 'u':
-        dump.pid = MM_BACKTRACE_ALLOC_PID;
+        dump.pid = PID_MM_ALLOC;
 
 #if CONFIG_MM_BACKTRACE >= 0
         p = (FAR char *)buffer + 4;
@@ -548,7 +549,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
         break;
 
       case 'f':
-        dump.pid = MM_BACKTRACE_FREE_PID;
+        dump.pid = PID_MM_FREE;
 
 #if CONFIG_MM_BACKTRACE >= 0
         p = (FAR char *)buffer + 4;

@@ -61,7 +61,6 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
    * POSIX to mean no interface index.
    */
 
-  DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
   if (ifindex < 1 || ifindex > MAX_IFINDEX)
     {
       return NULL;

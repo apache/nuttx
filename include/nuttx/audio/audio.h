@@ -362,7 +362,8 @@ struct audio_caps_s
   uint8_t ac_len;           /* Length of the structure */
   uint8_t ac_type;          /* Capabilities (device) type */
   uint8_t ac_subtype;       /* Capabilities sub-type, if needed */
-  uint8_t ac_channels;      /* Number of channels (1, 2, 3, ... 8) */
+  uint8_t ac_channels;      /* Number of channels (1, 2, 3, ... 15) upper 4 bits for minimum channels,
+                             * lower 4 bits for maximum channels */
   uint8_t ac_chmap;         /* Channel map, each ch for each bit,
                              * zero means don't care */
   uint8_t reserved;         /* Reserved for future use */

@@ -26,7 +26,8 @@ CSRCS += lib_memsostream.c lib_lowoutstream.c lib_rawinstream.c
 CSRCS += lib_rawoutstream.c lib_rawsistream.c lib_rawsostream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
 CSRCS += lib_mtdoutstream.c lib_libnoflush.c lib_libsnoflush.c
-CSRCS += lib_syslogstream.c lib_bufferedoutstream.c
+CSRCS += lib_syslogstream.c lib_syslograwstream.c lib_bufferedoutstream.c
+CSRCS += lib_hexdumpstream.c
 
 # The remaining sources files depend upon C streams
 

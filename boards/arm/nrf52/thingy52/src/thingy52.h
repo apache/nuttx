@@ -86,11 +86,12 @@
 
 #define GPIO_CCS811_INT (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(22))
 
-/* SX1509 (I2C address: 0xe3)
+/* SX1509 (I2C address: 0x3e)
  *   RESET - P0.16
+ *   INT   - not connected
  */
 
-#define GPIO_XS1509_RESET (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(16))
+#define GPIO_SX1509_RESET (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(16))
 
 /****************************************************************************
  * Public Types
@@ -121,6 +122,18 @@
  ****************************************************************************/
 
 int nrf52_bringup(void);
+
+#ifdef CONFIG_IOEXPANDER_SX1509
+/****************************************************************************
+ * Name: nrf52_sx1509_initialize
+ *
+ * Description:
+ *   Configure the SX1509 io expander.
+ *
+ ****************************************************************************/
+
+int nrf52_sx1509_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_THINGY52_SRC_THINGY52_H */

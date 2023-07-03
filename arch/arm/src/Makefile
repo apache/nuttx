@@ -25,6 +25,8 @@ ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
 ARCH_SUBDIR = armv7-a
 else ifeq ($(CONFIG_ARCH_ARMV7R),y)     # ARMv7-R
 ARCH_SUBDIR = armv7-r
+else ifeq ($(CONFIG_ARCH_ARMV8R),y)     # ARMv8-R
+ARCH_SUBDIR = armv8-r
 else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # ARMv7-M
 ARCH_SUBDIR = armv7-m
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # ARMv8-M

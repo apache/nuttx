@@ -21,12 +21,20 @@
 #ifndef __ARCH_RISCV_INCLUDE_BARRIERS_H
 #define __ARCH_RISCV_INCLUDE_BARRIERS_H
 
-/* Common memory barriers:
- * __DMB() is used to synchronize external devices (I/O domain mainly)
- * __ISB() is used to synchronize the instruction and data streams
- */
+/* Common memory barriers (p=predecessor, s=successor) */
 
-#define __DMB()             __asm__ __volatile__ ("fence"   ::: "memory")
-#define __ISB()             __asm__ __volatile__ ("fence.i" ::: "memory")
+#define __FENCE(p, s) __asm__ __volatile__ ("fence "#p", "#s  ::: "memory")
+
+/* __DMB() is used to flush local data caches (memory) */
+
+#define __DMB()       __FENCE(rw, rw)
+
+/* __MB() is a full memory barrier */
+
+#define __MB()        __FENCE(iorw, iorw)
+
+/* __ISB() is used to synchronize the instruction and data streams */
+
+#define __ISB()       __asm__ __volatile__ ("fence.i" ::: "memory")
 
 #endif /* __ARCH_RISCV_INCLUDE_BARRIERS_H */

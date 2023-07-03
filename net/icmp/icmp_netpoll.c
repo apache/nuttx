@@ -181,6 +181,7 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Initialize the poll info container */
 
   info->psock = psock;
+  info->dev   = conn->dev;
   info->fds   = fds;
   info->cb    = cb;
 
@@ -272,7 +273,7 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       /* Release the callback */
 
-      icmp_callback_free(conn->dev, conn, info->cb);
+      icmp_callback_free(info->dev, conn, info->cb);
 
       /* Release the poll/select data slot */
 

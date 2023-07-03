@@ -45,19 +45,41 @@
 #define NRF53_FICR_INFO_CODEPAGESIZE_OFFSET 0x220  /* Code memory page size in bytes */
 #define NRF53_FICR_INFO_CODESIZE_OFFSET     0x224  /* Code memory size  */
 #define NRF53_FICR_INFO_DEVICETYPE_OFFSET   0x228  /* Device type */
-#define NRF52_FICR_ER0_OFFSET               0x280  /* Encryption Root, word 0 */
-#define NRF52_FICR_ER1_OFFSET               0x284  /* Encryption Root, word 1 */
-#define NRF52_FICR_ER2_OFFSET               0x288  /* Encryption Root, word 2 */
-#define NRF52_FICR_ER3_OFFSET               0x28c  /* Encryption Root, word 3 */
-#define NRF52_FICR_IR0_OFFSET               0x290  /* Identity Root, word 0 */
-#define NRF52_FICR_IR1_OFFSET               0x294  /* Identity Root, word 1 */
-#define NRF52_FICR_IR2_OFFSET               0x298  /* Identity Root, word 2 */
-#define NRF52_FICR_IR3_OFFSET               0x29c  /* Identity Root, word 3 */
-#define NRF52_FICR_DEVICEADDRTYPE_OFFSET    0x2a0  /* Device address type */
-#define NRF52_FICR_DEVICEADDR0_OFFSET       0x2a4  /* Device address 0 */
-#define NRF52_FICR_DEVICEADDR1_OFFSET       0x2a8  /* Device address 1 */
+#define NRF53_FICR_ER0_OFFSET               0x280  /* Encryption Root, word 0 */
+#define NRF53_FICR_ER1_OFFSET               0x284  /* Encryption Root, word 1 */
+#define NRF53_FICR_ER2_OFFSET               0x288  /* Encryption Root, word 2 */
+#define NRF53_FICR_ER3_OFFSET               0x28c  /* Encryption Root, word 3 */
+#define NRF53_FICR_IR0_OFFSET               0x290  /* Identity Root, word 0 */
+#define NRF53_FICR_IR1_OFFSET               0x294  /* Identity Root, word 1 */
+#define NRF53_FICR_IR2_OFFSET               0x298  /* Identity Root, word 2 */
+#define NRF53_FICR_IR3_OFFSET               0x29c  /* Identity Root, word 3 */
+#define NRF53_FICR_DEVICEADDRTYPE_OFFSET    0x2a0  /* Device address type */
+#define NRF53_FICR_DEVICEADDR0_OFFSET       0x2a4  /* Device address 0 */
+#define NRF53_FICR_DEVICEADDR1_OFFSET       0x2a8  /* Device address 1 */
 
 /* FICR Register Addresses *************************************************/
+
+#define NRF53_FICR_INFO_CONFIGID            (NRF53_FICR_BASE + NRF53_FICR_INFO_CONFIGID_OFFSET)
+#define NRF53_FICR_INFO_DEVICEID0           (NRF53_FICR_BASE + NRF53_FICR_INFO_DEVICEID0_OFFSET)
+#define NRF53_FICR_INFO_DEVICEID1           (NRF53_FICR_BASE + NRF53_FICR_INFO_DEVICEID1_OFFSET)
+#define NRF53_FICR_INFO_PART                (NRF53_FICR_BASE + NRF53_FICR_INFO_PART_OFFSET)
+#define NRF53_FICR_INFO_VARIANT             (NRF53_FICR_BASE + NRF53_FICR_INFO_VARIANT_OFFSET)
+#define NRF53_FICR_INFO_PACKAGE             (NRF53_FICR_BASE + NRF53_FICR_INFO_PACKAGE_OFFSET)
+#define NRF53_FICR_INFO_RAM                 (NRF53_FICR_BASE + NRF53_FICR_INFO_RAM_OFFSET)
+#define NRF53_FICR_INFO_FLASH               (NRF53_FICR_BASE + NRF53_FICR_INFO_FLASH_OFFSET)
+#define NRF53_FICR_INFO_CODEPAGESIZE        (NRF53_FICR_BASE + NRF53_FICR_INFO_CODEPAGESIZE_OFFSET)
+#define NRF53_FICR_INFO_CODESIZE            (NRF53_FICR_BASE + NRF53_FICR_INFO_CODESIZE_OFFSET)
+#define NRF53_FICR_INFO_DEVICETYPE          (NRF53_FICR_BASE + NRF53_FICR_INFO_DEVICETYPE_OFFSET)
+#define NRF53_FICR_ER0                      (NRF53_FICR_BASE + NRF53_FICR_ER0_OFFSET)
+#define NRF53_FICR_ER1                      (NRF53_FICR_BASE + NRF53_FICR_ER1_OFFSET)
+#define NRF53_FICR_ER2                      (NRF53_FICR_BASE + NRF53_FICR_ER2_OFFSET)
+#define NRF53_FICR_IR0                      (NRF53_FICR_BASE + NRF53_FICR_IR0_OFFSET)
+#define NRF53_FICR_IR1                      (NRF53_FICR_BASE + NRF53_FICR_IR1_OFFSET)
+#define NRF53_FICR_IR2                      (NRF53_FICR_BASE + NRF53_FICR_IR2_OFFSET)
+#define NRF53_FICR_IR3                      (NRF53_FICR_BASE + NRF53_FICR_IR3_OFFSET)
+#define NRF53_FICR_DEVICEADDRTYPE           (NRF53_FICR_BASE + NRF53_FICR_DEVICEADDRTYPE_OFFSET)
+#define NRF53_FICR_DEVICEADDR0              (NRF53_FICR_BASE + NRF53_FICR_DEVICEADDR0_OFFSET)
+#define NRF53_FICR_DEVICEADDR1              (NRF53_FICR_BASE + NRF53_FICR_DEVICEADDR1_OFFSET)
 
 /* TODO */
 

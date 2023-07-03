@@ -89,6 +89,15 @@
 #  define OUTPUT_FUNCTION_5 (OUTPUT_FUNCTION | FUNCTION_5)
 #  define OUTPUT_FUNCTION_6 (OUTPUT_FUNCTION | FUNCTION_6)
 
+/* Interrupt type used with esp_gpioirqenable() */
+
+#define DISABLED          0x00
+#define RISING            0x01
+#define FALLING           0x02
+#define CHANGE            0x03
+#define ONLOW             0x04
+#define ONHIGH            0x05
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -98,6 +107,7 @@
 /* Must be big enough to hold the above encodings */
 
 typedef uint16_t gpio_pinattr_t;
+typedef uint8_t gpio_intrtype_t;
 
 /****************************************************************************
  * Public Data
@@ -186,6 +196,101 @@ void esp_gpio_matrix_in(uint32_t pin, uint32_t signal_idx, bool inv);
 
 void esp_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
                          bool oen_inv);
+
+/****************************************************************************
+ * Name: esp_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be modified.
+ *   value         - The value to be written (0 or 1).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_gpiowrite(int pin, bool value);
+
+/****************************************************************************
+ * Name: esp_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be read.
+ *
+ * Returned Value:
+ *   The boolean representation of the input value (true/false).
+ *
+ ****************************************************************************/
+
+bool esp_gpioread(int pin);
+
+/****************************************************************************
+ * Name: esp_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqinitialize(void);
+#else
+#  define esp_gpioirqinitialize()
+#endif
+
+/****************************************************************************
+ * Name: esp_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ * Input Parameters:
+ *   irq           - GPIO IRQ number to be enabled.
+ *   intrtype      - Interrupt type to be enabled.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqenable(int irq, gpio_intrtype_t intrtype);
+#else
+#  define esp_gpioirqenable(irq,intrtype)
+#endif
+
+/****************************************************************************
+ * Name: esp_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ * Input Parameters:
+ *   irq           - GPIO IRQ number to be disabled.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqdisable(int irq);
+#else
+#  define esp_gpioirqdisable(irq)
+#endif
 
 #ifdef __cplusplus
 }

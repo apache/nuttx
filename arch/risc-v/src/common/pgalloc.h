@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "addrenv.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -77,6 +79,24 @@ static inline uintptr_t riscv_pgvaddr(uintptr_t paddr)
   return 0;
 }
 #endif /* CONFIG_ARCH_PGPOOL_MAPPING */
+
+/****************************************************************************
+ * Name: riscv_uservaddr
+ *
+ * Description:
+ *   Return true if the virtual address, vaddr, lies in the user address
+ *   space.
+ *
+ ****************************************************************************/
+
+static inline bool riscv_uservaddr(uintptr_t vaddr)
+{
+  /* Check if this address is within the range of the virtualized .bss/.data,
+   * heap, or stack regions.
+   */
+
+  return vaddr >= ARCH_ADDRENV_VBASE && vaddr < ARCH_ADDRENV_VEND;
+}
 
 /****************************************************************************
  * Name: riscv_pgwipe

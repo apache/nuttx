@@ -43,7 +43,11 @@ FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   FAR unsigned char *pout = (FAR unsigned char *)dest;
   FAR unsigned char *pin  = (FAR unsigned char *)src;
-  while (n-- > 0) *pout++ = *pin++;
+  while (n-- > 0)
+    {
+      *pout++ = *pin++;
+    }
+
   return dest;
 }
 #endif

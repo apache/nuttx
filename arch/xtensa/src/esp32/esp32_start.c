@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c)     up_puts(c)
+#  define showprogress(c)     up_putc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -220,7 +220,7 @@ static noreturn_function void __esp32_start(void)
   xtensa_earlyserialinit();
 #endif
 
-  showprogress("A");
+  showprogress('A');
 
 #if defined(CONFIG_ESP32_SPIRAM_BOOT_INIT)
   if (esp_spiram_init() != OK)
@@ -252,7 +252,7 @@ static noreturn_function void __esp32_start(void)
 
   esp32_board_initialize();
 
-  showprogress("B");
+  showprogress('B');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -262,7 +262,7 @@ static noreturn_function void __esp32_start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   esp32_userspace();
-  showprogress("C");
+  showprogress('C');
 #endif
 
   /* Bring up NuttX */

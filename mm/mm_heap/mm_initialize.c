@@ -66,7 +66,7 @@ static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
     {
       node = (FAR struct mm_allocnode_s *)
       ((FAR char *)ret - SIZEOF_MM_ALLOCNODE);
-      node->pid = MM_BACKTRACE_MEMPOOL_PID;
+      node->pid = PID_MM_MEMPOOL;
     }
 
   return ret;
@@ -287,10 +287,12 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
     }
 
   heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
-                                  (mempool_multiple_alloc_t)mempool_memalign,
-                                  (mempool_multiple_free_t)mm_free, heap,
-                                  CONFIG_MM_HEAP_MEMPOOL_EXPAND,
-                                  CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND);
+                              (mempool_multiple_alloc_t)mempool_memalign,
+                              (mempool_multiple_alloc_size_t)mm_malloc_size,
+                              (mempool_multiple_free_t)mm_free, heap,
+                              CONFIG_MM_HEAP_MEMPOOL_CHUNK_SIZE,
+                              CONFIG_MM_HEAP_MEMPOOL_EXPAND_SIZE,
+                              CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE);
 #endif
 
   return heap;

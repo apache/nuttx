@@ -27,11 +27,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -198,10 +200,38 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
 {
   FAR struct socket *psock;
   ssize_t ret;
+#ifdef CONFIG_BUILD_KERNEL
+  struct sockaddr_storage kaddr;
+  FAR void *kbuf;
+#endif
 
   /* sendto() is a cancellation point */
 
   enter_cancellation_point();
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Allocate memory and copy user buffer to kernel */
+
+  kbuf = kmm_malloc(len);
+  if (!kbuf)
+    {
+      /* Out of memory */
+
+      ret = -ENOMEM;
+      goto errout_with_cancelpt;
+    }
+
+  memcpy(kbuf, buf, len);
+  buf = kbuf;
+
+  /* Copy the address data to kernel */
+
+  if (to)
+    {
+      memcpy(&kaddr, to, tolen);
+      to = (FAR const struct sockaddr *)&kaddr;
+    }
+#endif
 
   /* Get the underlying socket structure */
 
@@ -214,12 +244,19 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
       ret = psock_sendto(psock, buf, len, flags, to, tolen);
     }
 
+#ifdef CONFIG_BUILD_KERNEL
+  kmm_free(kbuf);
+
+errout_with_cancelpt:
+#endif
+
+  leave_cancellation_point();
+
   if (ret < 0)
     {
       set_errno(-ret);
       ret = ERROR;
     }
 
-  leave_cancellation_point();
   return ret;
 }

@@ -32,6 +32,7 @@
 #include <nuttx/init.h>
 #include <nuttx/clock.h>
 #include <nuttx/streams.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
 
@@ -80,7 +81,7 @@ static FAR const char * const g_priority_str[] =
 
 int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
-  struct lib_syslogstream_s stream;
+  struct lib_syslograwstream_s stream;
   int ret;
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
   FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid());
@@ -100,7 +101,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
    * do the work.
    */
 
-  lib_syslogstream_open(&stream);
+  lib_syslograwstream_open(&stream);
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   ts.tv_sec = 0;
@@ -263,6 +264,6 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   /* Flush and destroy the syslog stream buffer */
 
-  lib_syslogstream_close(&stream);
+  lib_syslograwstream_close(&stream);
   return ret;
 }

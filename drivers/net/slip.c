@@ -26,33 +26,26 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
+#include <fcntl.h>
+#include <poll.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <assert.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/clock.h>
-#include <nuttx/signal.h>
-#include <nuttx/kthread.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/net/net.h>
-#include <nuttx/net/netdev.h>
-#include <nuttx/net/ip.h>
-#include <nuttx/net/slip.h>
+#include <arpa/inet.h>
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SLIP)
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/signal.h>
+#include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/net/netdev.h>
+
+#ifdef CONFIG_NET_SLIP
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,14 +58,6 @@
  */
 
 /* Configuration ************************************************************/
-
-#ifndef CONFIG_NET_SLIP_STACKSIZE
-#  define CONFIG_NET_SLIP_STACKSIZE 2048
-#endif
-
-#ifndef CONFIG_NET_SLIP_DEFPRIO
-#  define CONFIG_NET_SLIP_DEFPRIO 128
-#endif
 
 /* The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
  * IP+TCP headers plus 256 bytes of data).  So you might as well set
@@ -89,8 +74,25 @@
 #  error "CONFIG_NET_SLIP_PKTSIZE >= 296 is required"
 #endif
 
-/* CONFIG_NET_SLIP_NINTERFACES determines the number of physical interfaces
- * that will be supported.
+/* Work queue support is required. */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE)
+#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
+#else
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define SLIPWORK LPWORK
+
+/* CONFIG_NET_SLIP_NINTERFACES determines the number of
+ * physical interfaces that will be supported.
  */
 
 #ifndef CONFIG_NET_SLIP_NINTERFACES
@@ -104,12 +106,6 @@
 #define SLIP_ESC_END  0334    /* ESC ESC_END means SLIP_END data byte */
 #define SLIP_ESC_ESC  0335    /* ESC ESC_ESC means ESC data byte */
 
-/* General driver definitions ***********************************************/
-
-/* TX poll delay = 1 second = 1000000 microseconds. */
-
-#define SLIP_WDDELAY   (1*1000000)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -120,26 +116,29 @@
 
 struct slip_driver_s
 {
-  volatile bool bifup;      /* true:ifup false:ifdown */
-  bool          txnodelay;  /* True: nxsig_usleep() not needed */
-  struct file   file;       /* TTY file descriptor */
-  pid_t         rxpid;      /* Receiver thread ID */
-  pid_t         txpid;      /* Transmitter thread ID */
-  sem_t         waitsem;    /* Mutually exclusive access to the network */
+  bool             bifup;     /* true:ifup false:ifdown */
+  struct work_s    irqwork;   /* For deferring interrupt work */
+  struct work_s    pollwork;  /* For deferring poll work to the work queue */
+  struct file      tty;       /* TTY file */
+  struct pollfd    pollfd;    /* Polling TTY for read- or writeable */
+
+  uint8_t          rxbuf[2 * CONFIG_NET_SLIP_PKTSIZE + 2];
+  size_t           rxlen;
+
+  uint8_t          txbuf[2 * CONFIG_NET_SLIP_PKTSIZE + 2];
+  size_t           txlen;
+  size_t           txsent;
 
   /* This holds the information visible to the NuttX network */
 
   struct net_driver_s dev;  /* Interface understood by the network */
-  FAR struct iob_s *rxiob;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* We really should get rid of CONFIG_NET_SLIP_NINTERFACES and, instead,
- * kmm_malloc() new interface instances as needed.
- */
+/* Driver state structure */
 
 static struct slip_driver_s g_slip[CONFIG_NET_SLIP_NINTERFACES];
 
@@ -149,98 +148,108 @@ static struct slip_driver_s g_slip[CONFIG_NET_SLIP_NINTERFACES];
 
 /* Common TX logic */
 
-static void slip_write(FAR struct slip_driver_s *priv,
-                       FAR const uint8_t *buffer, int len);
-static void slip_putc(FAR struct slip_driver_s *priv, int ch);
-static void slip_transmit(FAR struct slip_driver_s *priv);
-static int slip_txpoll(FAR struct net_driver_s *dev);
-static int slip_txtask(int argc, FAR char *argv[]);
+static void slip_transmit(FAR struct slip_driver_s *self);
+static int  slip_txpoll(FAR struct net_driver_s *dev);
 
-/* Packet receiver task */
+/* Interrupt handling */
 
-static int slip_getc(FAR struct slip_driver_s *priv);
-static inline void slip_receive(FAR struct slip_driver_s *priv);
-static int slip_rxtask(int argc, FAR char *argv[]);
+static void slip_reply(FAR struct slip_driver_s *self);
+static void slip_receive(FAR struct slip_driver_s *self);
+static void slip_txdone(FAR struct slip_driver_s *self);
+
+static void slip_interrupt_work(FAR void *arg);
+static void slip_pollfd_cb(FAR struct pollfd *pollfd);
+static void slip_set_pollfd_events(FAR struct slip_driver_s *self,
+                                   short events);
 
 /* NuttX callback functions */
 
-static int slip_ifup(FAR struct net_driver_s *dev);
-static int slip_ifdown(FAR struct net_driver_s *dev);
-static int slip_txavail(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_MCASTGROUP
-static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
-static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
-#endif
+static int  slip_ifup(FAR struct net_driver_s *dev);
+static int  slip_ifdown(FAR struct net_driver_s *dev);
+
+static void slip_txavail_work(FAR void *arg);
+static int  slip_txavail(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: slip_write
+ * Name: slip_pollfd_cb
  *
  * Description:
- *   Just an inline wrapper around fwrite with error checking.
+ *   TTY reports to be read- or writable
  *
  * Input Parameters:
- *   priv - Reference to the driver state structure
- *   buffer - Buffer data to send
- *   len - Buffer length in bytes
+ *   pollfd  - Information about the event that happened.
+ *
+ * Returned Value:
+ *   OK on success
  *
  ****************************************************************************/
 
-static inline void slip_write(FAR struct slip_driver_s *priv,
-                              FAR const uint8_t *buffer, int len)
+static void slip_pollfd_cb(FAR struct pollfd *pollfd)
 {
-  /* Handle the case where the write is awakened by a signal */
+  FAR struct slip_driver_s *self = (FAR struct slip_driver_s *)pollfd->arg;
 
-  while (file_write(&priv->file, buffer, len) < 0)
+  DEBUGASSERT(self != NULL);
+
+  /* Schedule to perform the processing on the worker thread. */
+
+  if (work_available(&self->irqwork))
     {
+      work_queue(SLIPWORK, &self->irqwork, slip_interrupt_work, self, 0);
     }
 }
 
 /****************************************************************************
- * Name: slip_write_iob
+ * Name: slip_set_pollfd_events
  *
  * Description:
- *   Just an inline wrapper around IOB writing.
+ *   Setup TTY to report poll events (such as POLLIN and POLLOUT)
  *
  * Input Parameters:
- *   priv - Reference to the driver state structure
- *   iob - IO Buffer data to send
- *   len - Buffer length in bytes
+ *   self   - The SLIP interface to register for poll events
+ *   events - The poll events to request reporting for
  *
  ****************************************************************************/
 
-static inline void slip_write_iob(FAR struct slip_driver_s *priv,
-                                  FAR struct iob_s **iob, int len)
+static void slip_set_pollfd_events(FAR struct slip_driver_s *self,
+                                   short events)
 {
-  while (len > 0 && (*iob)->io_pktlen > 0)
+  int ret;
+
+  /* Teardown any potentially pending poll, if applicable */
+
+  if (self->pollfd.events != 0)
     {
-      int nbytes = MIN(len, (*iob)->io_len);
-      slip_write(priv, IOB_DATA(*iob), nbytes);
+      ret = file_poll(&self->tty, &self->pollfd, false);
 
-      len -= nbytes;
-      *iob = iob_trimhead(*iob, nbytes);
+      if (ret != OK)
+        {
+          nerr("file_poll(false) failed: %d\n", ret);
+        }
     }
-}
 
-/****************************************************************************
- * Name: slip_putc
- *
- * Description:
- *   Just an inline wrapper around putc with error checking.
- *
- * Input Parameters:
- *   priv - Reference to the driver state structure
- *   ch - The character to send
- *
- ****************************************************************************/
+  memset(&self->pollfd, 0, sizeof(self->pollfd));
 
-static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
-{
-  uint8_t buffer = (uint8_t)ch;
-  slip_write(priv, &buffer, 1);
+  /* Setup requested poll, if applicable */
+
+  if (events != 0)
+    {
+      self->pollfd.arg     = self;
+      self->pollfd.cb      = slip_pollfd_cb;
+      self->pollfd.events  = events;
+      self->pollfd.revents = 0;
+      self->pollfd.priv    = NULL;
+
+      ret = file_poll(&self->tty, &self->pollfd, true);
+
+      if (ret != OK)
+        {
+          nerr("file_poll(true) failed: %d\n", ret);
+        }
+    }
 }
 
 /****************************************************************************
@@ -251,490 +260,540 @@ static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
  *   handling or from watchdog based polling.
  *
  * Input Parameters:
- *   priv  - Reference to the driver state structure
+ *   self - Reference to the driver state structure
  *
- * Returned Value:
- *   OK on success; a negated errno on failure
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static void slip_transmit(FAR struct slip_driver_s *priv)
+static void slip_transmit(FAR struct slip_driver_s *self)
 {
-  uint8_t  src;
-  uint8_t  esc;
-  int      remaining;
-  int      len;
+  ssize_t ssz;
+  uint8_t *p;
 
-  /* Increment statistics */
+  DEBUGASSERT(self->dev.d_len > 0);
 
-  ninfo("Sending packet size %d\n", priv->dev.d_len);
-  NETDEV_TXPACKETS(&priv->dev);
+  /* Verify that the hardware is ready to send another packet.  If we get
+   * here, then we are committed to sending a packet; Higher level logic
+   * must have assured that there is no transmission in progress.
+   */
+
+  if (self->txlen > 0)
+    {
+      /* Transmission of previous packet is still pending.  This might happen
+       * in the 'slip_receive' -> 'slip_reply' -> 'slip_transmit' case.  Try
+       * to forward pending packet into UART's transmit buffer.  Timeout on
+       * packet if not forwarded within a second.
+       */
+
+      for (int i = 0; (i < 10) && (self->txsent != self->txlen); )
+        {
+          ssz = file_write(&self->tty,
+                           &self->txbuf[self->txsent],
+                           self->txlen - self->txsent);
+          if (ssz <= 0)
+            {
+              nxsig_usleep(10000);
+              i++;
+              continue;
+            }
+
+          self->txsent += ssz;
+        }
+
+      if (self->txsent == self->txlen)
+        {
+          slip_txdone(self);
+        }
+      else
+        {
+          NETDEV_TXTIMEOUTS(&self->dev);
+        }
+    }
+
+  self->txlen = 0;
+  self->txsent = 0;
 
   /* Send an initial END character to flush out any data that may have
    * accumulated in the receiver due to line noise
    */
 
-  slip_putc(priv, SLIP_END);
+  self->txbuf[self->txlen++] = SLIP_END;
 
-  /* For each byte in the packet, send the appropriate character sequence */
+  /* Now copy the I/O buffer into self->txbuf */
 
-  iob_copyout(&src, priv->dev.d_iob, 1, 0);
-  remaining = priv->dev.d_len;
-  len       = 0;
-
-  while (remaining-- > 0)
+  for (unsigned int bytesread = 0; bytesread < self->dev.d_len; )
     {
-      switch (src)
+      unsigned int chunk_sz = sizeof(self->txbuf) - self->txlen;
+      int copied;
+
+      if (self->dev.d_len - bytesread < chunk_sz)
         {
-          /* If it's the same code as an END character, we send a special two
-           * character code so as not to make the receiver think we sent an
-           * END
-           */
-
-          case SLIP_END:
-            esc = SLIP_ESC_END;
-            goto escape;
-
-          /* If it's the same code as an ESC character, we send a special two
-           * character code so as not to make the receiver think we sent an
-           * ESC
-           */
-
-          case SLIP_ESC:
-            esc = SLIP_ESC_ESC;
-
-          escape:
-            {
-              /* Flush any unsent data */
-
-              if (len > 0)
-                {
-                  slip_write_iob(priv, &priv->dev.d_iob, len);
-                }
-
-              /* Reset */
-
-              priv->dev.d_iob = iob_trimhead(priv->dev.d_iob, 1);
-              len             = 0;
-
-              /* Then send the escape sequence */
-
-              slip_putc(priv, SLIP_ESC);
-              slip_putc(priv, esc);
-            }
-          break;
-
-          /* otherwise, just bump up the count */
-
-          default:
-            len++;
-            break;
+          chunk_sz = self->dev.d_len - bytesread;
         }
 
-      /* Copyout the next character in the packet */
+      copied = iob_copyout(&self->txbuf[self->txlen],
+                           self->dev.d_iob,
+                           chunk_sz,
+                           bytesread);
+      if (copied <= 0)
+        {
+          goto error;
+        }
 
-      iob_copyout(&src, priv->dev.d_iob, 1, len);
+      bytesread += (unsigned int)copied;
+      self->txlen += (size_t)copied;
     }
 
-  /* We have looked at every character in the packet.  Now flush any unsent
-   * data
-   */
+  /* SLIP encode self->txbuf.  First escape the ESC bytes. */
 
-  if (len > 0)
+  for (p = memchr(&self->txbuf[1], SLIP_ESC, self->txlen - 1);
+       p != NULL;
+       p = memchr(p, SLIP_ESC, self->txlen - 1))
     {
-      slip_write_iob(priv, &priv->dev.d_iob, len);
+      ssize_t postfix_len = self->txlen - (p - self->txbuf) - 1;
+
+      if (self->txlen >= sizeof(self->txbuf))
+        {
+          goto error;
+        }
+
+      if (postfix_len > 0)
+        {
+          memmove(p + 2, p + 1, postfix_len);
+        }
+
+      p++;
+      *p = SLIP_ESC_ESC;
+      self->txlen++;
     }
 
-  /* And send the END token */
+  /* SLIP encode self->txbuf.  Then escape the END bytes. */
 
-  slip_putc(priv, SLIP_END);
-  NETDEV_TXDONE(&priv->dev);
-  priv->txnodelay = true;
+  for (p = memchr(&self->txbuf[1], SLIP_END, self->txlen - 1);
+       p != NULL;
+       p = memchr(p, SLIP_END, self->txlen - 1))
+    {
+      ssize_t postfix_len = self->txlen - (p - self->txbuf) - 1;
+
+      if (self->txlen >= sizeof(self->txbuf))
+        {
+          goto error;
+        }
+
+      if (postfix_len > 0)
+        {
+          memmove(p + 2, p + 1, postfix_len);
+        }
+
+      *p = SLIP_ESC;
+      p++;
+      *p = SLIP_ESC_END;
+      self->txlen++;
+    }
+
+  /* Append the END token */
+
+  if (self->txlen >= sizeof(self->txbuf))
+    {
+      goto error;
+    }
+
+  self->txbuf[self->txlen++] = SLIP_END;
+
+  /* Increment statistics */
+
+  NETDEV_TXPACKETS(&self->dev);
+
+  /* Try to send packet */
+
+  ssz = file_write(&self->tty, self->txbuf, self->txlen);
+
+  if (ssz > 0)
+    {
+      self->txsent = (size_t)ssz;
+    }
+  else
+    {
+      self->txsent = 0;
+    }
+
+  if (self->txsent == self->txlen)
+    {
+      /* Complete packet went out at first try. */
+
+      slip_txdone(self);
+    }
+
+  return;
+
+error:
+
+  /* Drop the packet and reset the receiver logic. */
+
+  self->txlen  = 0;
+  self->txsent = 0;
+
+  NETDEV_TXERRORS(&self->dev);
 }
 
 /****************************************************************************
  * Name: slip_txpoll
  *
  * Description:
- *   Check if the network has any outgoing packets ready to send.  This is a
- *   callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
- *   1. When the preceding TX packet send is complete, or
- *   2. During normal periodic polling
+ *   1. When the preceding TX packet send is complete,
+ *   2. When the preceding TX packet send timesout and the interface is reset
+ *   3. During normal TX polling
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   The initiator of the poll holds the priv->waitsem;
+ *   The network is locked.
  *
  ****************************************************************************/
 
 static int slip_txpoll(FAR struct net_driver_s *dev)
 {
-  FAR struct slip_driver_s *priv =
-    (FAR struct slip_driver_s *)dev->d_private;
+  FAR struct slip_driver_s *self =
+      (FAR struct slip_driver_s *)dev->d_private;
 
-  slip_transmit(priv);
+  /* Send the packet */
+
+  slip_transmit(self);
 
   /* If zero is returned, the polling will continue until all connections
-   * have been examined.
+   * have been examined.  We return -EBUSY if there is still transmission
+   * data pending in the TTY's buffer.
    */
 
-  return 0;
+  return (self->txlen > 0) ? -EBUSY : OK;
 }
 
 /****************************************************************************
- * Name: slip_txtask
+ * Name: slip_reply
  *
  * Description:
- *   Polling and transmission is performed on tx thread.
+ *   After a packet has been received and dispatched to the network, it
+ *   may return return with an outgoing packet.  This function checks for
+ *   that case and performs the transmission if necessary.
  *
  * Input Parameters:
- *   arg  - Reference to the NuttX driver state structure
+ *   self - Reference to the driver state structure
  *
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
-static int slip_txtask(int argc, FAR char *argv[])
+static void slip_reply(struct slip_driver_s *self)
 {
-  FAR struct slip_driver_s *priv;
-  unsigned int index = *(argv[1]) - '0';
-  int ret;
-
-  nerr("index: %d\n", index);
-  DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
-
-  /* Get our private data structure instance and wake up the waiting
-   * initialization logic.
+  /* If the packet dispatch resulted in data that should be sent out on the
+   * network, the field d_len will set to a value > 0.
    */
 
-  priv = &g_slip[index];
-  nxsem_post(&priv->waitsem);
-
-  /* Loop forever */
-
-  for (; ; )
+  if (self->dev.d_len > 0)
     {
-      /* Wait for the timeout to expire (or until we are signaled by  */
+      /* And send the packet */
 
-      ret = nxsem_wait_uninterruptible(&priv->waitsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(ret == -ECANCELED);
-          break;
-        }
-
-      if (!priv->txnodelay)
-        {
-          nxsem_post(&priv->waitsem);
-          nxsig_usleep(SLIP_WDDELAY);
-        }
-      else
-        {
-          priv->txnodelay = false;
-          nxsem_post(&priv->waitsem);
-        }
-
-      /* Is the interface up? */
-
-      if (priv->bifup)
-        {
-          /* Poll the networking layer for new XMIT data. */
-
-          net_lock();
-
-          /* perform the normal TX poll */
-
-          devif_poll(&priv->dev, slip_txpoll);
-
-          net_unlock();
-        }
+      slip_transmit(self);
     }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: slip_getc
- *
- * Description:
- *   Get one byte from the serial input.
- *
- * Input Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   The returned byte
- *
- ****************************************************************************/
-
-static inline int slip_getc(FAR struct slip_driver_s *priv)
-{
-  uint8_t ch;
-
-  while (file_read(&priv->file, &ch, 1) < 0)
-    {
-    }
-
-  return ch;
 }
 
 /****************************************************************************
  * Name: slip_receive
  *
  * Description:
- *   Read a packet from the serial input
+ *   An interrupt was received indicating the availability of a new RX packet
  *
  * Input Parameters:
- *   priv  - Reference to the driver state structure
+ *   self - Reference to the driver state structure
  *
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
-static inline void slip_receive(FAR struct slip_driver_s *priv)
+static void slip_receive(FAR struct slip_driver_s *self)
 {
-  uint8_t ch;
+  FAR struct net_driver_s *dev = &self->dev;
+  FAR struct iob_s *iob;
+  FAR uint8_t *p;
+  FAR uint8_t *pend;
+  size_t remaining;
+  size_t copied;
+  int ret;
 
-  /* Copy the data from the hardware to the RX buffer until we put
-   * together a whole packet. Make sure not to copy them into the
-   * packet if we run out of room.
-   */
+  /* Drop potential prefix SLIP_ENDs */
 
-  ninfo("Receiving packet\n");
-  for (; ; )
+  while ((self->rxbuf[0] == SLIP_END) && (self->rxlen > 0))
     {
-      /* Get the next character in the stream. */
+      self->rxlen--;
+      memmove(&self->rxbuf[0], &self->rxbuf[1], self->rxlen);
+    }
 
-      ch = slip_getc(priv);
+  /* Find end of packet */
 
-      /* Handle bytestuffing if necessary */
+  pend = memchr(self->rxbuf, SLIP_END, self->rxlen);
 
-      switch (ch)
+  if (pend == NULL)
+    {
+      /* No complete packet present.  Let's wait for more bytes to arrive. */
+
+      if (self->rxlen == sizeof(self->rxbuf))
         {
-        /* If it's an END character then we're done with the packet.
-         * (OR we are just starting a packet)
-         */
+          /* Purge receive buffer overflow due to overflow. */
 
-        case SLIP_END:
-          {
-            ninfo("END\n");
+          NETDEV_RXERRORS(&self->dev);
+          self->rxlen = 0;
+        }
 
-            /* A minor optimization: if there is no data in the packet,
-             * ignore it. This is meant to avoid bothering IP with all the
-             * empty packets generated by the duplicate END characters which
-             * are in turn sent to try to detect line noise.
-             */
+      return;
+    }
 
-            if (priv->rxiob->io_pktlen > 0)
-              {
-                ninfo("Received packet size %d\n", priv->rxiob->io_pktlen);
-                return;
-              }
-          }
-          break;
+  p = self->rxbuf;
+  remaining = pend - p;
+  copied = 0;
+  iob = iob_alloc(false);
+  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
 
-        /* if it's the same code as an ESC character, wait and get another
-         * character and then figure out what to store in the packet based
-         * on that.
-         */
+  while (remaining)
+    {
+      uint8_t *pesc = memchr(p, SLIP_ESC, remaining);
 
-        case SLIP_ESC:
-          {
-            ninfo("ESC\n");
-            ch = slip_getc(priv);
+      if (pesc != NULL)
+        {
+          unsigned int prefix_len = (unsigned int)(pesc - p);
 
-            /* if "ch" is not one of these two, then we have a protocol
-             * violation.  The best bet seems to be to leave the byte alone
-             * and just stuff it into the packet
-             */
+          if (prefix_len > 0)
+            {
+              ret = iob_copyin(iob, p, prefix_len, copied, false);
 
-            switch (ch)
-              {
+              DEBUGASSERT(ret >= 0);
+              DEBUGASSERT((unsigned int)ret == prefix_len);
+
+              copied += prefix_len;
+              remaining -= prefix_len;
+            }
+
+          p = pesc + 1;
+          remaining--;
+
+          switch (*p)
+            {
               case SLIP_ESC_END:
-                ninfo("ESC-END\n");
-                ch = SLIP_END;
+                *p = SLIP_END;
                 break;
 
-               case SLIP_ESC_ESC:
-                ninfo("ESC-ESC\n");
-                ch = SLIP_ESC;
+              case SLIP_ESC_ESC:
+                *p = SLIP_ESC;
                 break;
 
               default:
-                nerr("ERROR: Protocol violation: %02x\n", ch);
-                break;
-              }
 
-            /* Here we fall into the default handler and let it store the
-             * character for us
-             */
-          }
+                /* SLIP protocol error */
 
-        default:
-          {
-            if (priv->rxiob->io_pktlen < CONFIG_NET_SLIP_PKTSIZE + 2)
-              {
-                iob_copyin(priv->rxiob, &ch, 1, priv->rxiob->io_pktlen,
-                           false);
-              }
-          }
-          break;
+                goto error;
+            }
+
+          ret = iob_copyin(iob, p, 1, copied, false);
+          DEBUGASSERT(ret == 1);
+          p++;
+          copied++;
+          remaining--;
         }
+      else
+        {
+          ret = iob_copyin(iob, p, remaining, copied, false);
+          DEBUGASSERT(ret >= 0);
+          DEBUGASSERT((unsigned int)ret == remaining);
+          p += remaining;
+          copied += remaining;
+          remaining = 0;
+        }
+    }
+
+  /* Move remaining bytes in rxbuf to the front */
+
+  DEBUGASSERT((pend - self->rxbuf) <= self->rxlen);
+  self->rxlen -= (pend - self->rxbuf);
+  memmove(self->rxbuf, pend, self->rxlen);
+
+  /* Handle the IP input. */
+
+  netdev_iob_replace(&self->dev, iob);
+  iob = NULL;
+
+  NETDEV_RXPACKETS(&self->dev);
+
+  /* All packets are assumed to be IP packets (we don't have a choice..
+   * there is no Ethernet header containing the EtherType).  So pass the
+   * received packet on for IP processing -- but only if it is big
+   * enough to hold an IP header.
+   */
+
+  if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
+    {
+      NETDEV_RXIPV4(&self->dev);
+
+      ipv4_input(&self->dev);
+
+      slip_reply(self);
+    }
+  else
+    {
+      NETDEV_RXDROPPED(&self->dev);
+    }
+
+  return;
+
+error:
+
+  NETDEV_RXERRORS(&self->dev);
+
+  if (iob)
+    {
+      iob_free_chain(iob);
+      iob = NULL;
+    }
+
+  /* Move remaining bytes in rxbuf to the front */
+
+  DEBUGASSERT((pend - self->rxbuf) <= self->rxlen);
+  self->rxlen -= (pend - self->rxbuf);
+  memmove(self->rxbuf, pend, self->rxlen);
+}
+
+/****************************************************************************
+ * Name: slip_txdone
+ *
+ * Description:
+ *   An interrupt was received indicating that the last TX packet(s) is done
+ *
+ * Input Parameters:
+ *   self - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void slip_txdone(FAR struct slip_driver_s *self)
+{
+  /* Update statistics */
+
+  self->txlen  = 0;
+  self->txsent = 0;
+
+  NETDEV_TXDONE(&self->dev);
+
+  /* Poll the network for new TX data */
+
+  if (work_available(&self->pollwork))
+    {
+      work_queue(SLIPWORK, &self->pollwork, slip_txavail_work, self, 0);
     }
 }
 
 /****************************************************************************
- * Name: slip_rxtask
+ * Name: slip_interrupt_work
  *
  * Description:
- *   Wait for incoming data.
+ *   Perform interrupt related work from the worker thread
  *
  * Input Parameters:
- *   argc
- *   argv
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
- *   (Does not return)
+ *   OK on success
  *
  * Assumptions:
+ *   Runs on a worker thread.
  *
  ****************************************************************************/
 
-static int slip_rxtask(int argc, FAR char *argv[])
+static void slip_interrupt_work(FAR void *arg)
 {
-  FAR struct slip_driver_s *priv;
-  FAR struct net_driver_s *dev;
-  unsigned int index = *(argv[1]) - '0';
-  uint8_t ch;
+  FAR struct slip_driver_s *self = (FAR struct slip_driver_s *)arg;
+  ssize_t ssz;
 
-  nerr("index: %d\n", index);
-  DEBUGASSERT(index < CONFIG_NET_SLIP_NINTERFACES);
-
-  /* Get our private data structure instance and wake up the waiting
-   * initialization logic.
-   */
-
-  priv = &g_slip[index];
-  nxsem_post(&priv->waitsem);
-
-  /* Loop forever */
-
-  dev = &priv->dev;
-  for (; ; )
+  if (!self->bifup)
     {
-      /* Wait for the next character to be available on the input stream. */
-
-      ninfo("Waiting...\n");
-      ch = slip_getc(priv);
-
-      /* Ignore any input that we receive before the interface is up. */
-
-      if (!priv->bifup)
-        {
-          continue;
-        }
-
-      /* Prepare our IOB for data receiving, may block until we get one. */
-
-      DEBUGASSERT(priv->rxiob == NULL);
-
-      priv->rxiob = iob_alloc(false);
-      iob_reserve(priv->rxiob, CONFIG_NET_LL_GUARDSIZE);
-
-      /* We have something...
-       *
-       * END characters may appear at packet boundaries BEFORE as well as
-       * after the beginning of the packet.  This is normal and expected.
-       */
-
-      if (ch == SLIP_END)
-        {
-          /* Do nothing. */
-        }
-
-      /* Otherwise, we are in danger of being out-of-sync.  Apparently the
-       * leading END character is optional.  Let's try to continue.
-       */
-
-      else
-        {
-          iob_copyin(priv->rxiob, &ch, 1, 0, false);
-        }
-
-      /* Copy the data data from the hardware to priv->rxbuf until we put
-       * together a whole packet.
-       */
-
-      slip_receive(priv);
-
-      /* Handle the IP input.  Get exclusive access to the network. */
-
-      net_lock();
-      netdev_iob_replace(&priv->dev, priv->rxiob);
-      priv->rxiob = NULL;
-
-      NETDEV_RXPACKETS(&priv->dev);
-
-      /* All packets are assumed to be IP packets (we don't have a choice..
-       * there is no Ethernet header containing the EtherType).  So pass the
-       * received packet on for IP processing -- but only if it is big
-       * enough to hold an IP header.
-       */
-
-#ifdef CONFIG_NET_IPv4
-      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
-        {
-          NETDEV_RXIPV4(&priv->dev);
-          ipv4_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should
-           * be sent out on the network, the field  d_len will set to a
-           * value > 0.  NOTE that we are transmitting using the RX buffer!
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              slip_transmit(priv);
-            }
-        }
-      else
-#endif
-#ifdef CONFIG_NET_IPv6
-      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
-        {
-          NETDEV_RXIPV6(&priv->dev);
-          ipv6_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should
-           * be sent out on the network, the field  d_len will set to a
-           * value > 0.  NOTE that we are transmitting using the RX buffer!
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              slip_transmit(priv);
-            }
-        }
-      else
-#endif
-        {
-          NETDEV_RXERRORS(&priv->dev);
-        }
-
-      net_unlock();
+      return;
     }
 
-  /* We won't get here */
+  /* Lock the network and serialize driver operations if necessary.
+   * NOTE: Serialization is only required in the case where the driver work
+   * is performed on an LP worker thread and where more than one LP worker
+   * thread has been configured.
+   */
 
-  return OK;
+  net_lock();
+
+  /* Process pending Ethernet interrupts */
+
+  /* Get and clear interrupt status bits */
+
+  /* Handle interrupts according to status bit settings */
+
+  if (self->rxlen < sizeof(self->rxbuf))
+    {
+      ssz = file_read(&self->tty,
+                      &self->rxbuf[self->rxlen],
+                      sizeof(self->rxbuf) - self->rxlen);
+      if (ssz > 0)
+        {
+          self->rxlen += (size_t)ssz;
+        }
+    }
+
+  if (self->txsent < self->txlen)
+    {
+      ssz = file_write(&self->tty,
+                       &self->txbuf[self->txsent],
+                       self->txlen - self->txsent);
+      if (ssz > 0)
+        {
+          self->txsent += (size_t)ssz;
+        }
+    }
+
+  /* Check if we received an incoming packet, if so, call slip_receive() */
+
+  if (self->rxlen == sizeof(self->rxbuf) ||
+      memchr(self->rxbuf, SLIP_END, self->rxlen))
+    {
+      slip_receive(self);
+    }
+
+  /* Check if a packet transmission just completed.  If so, call skel_txdone.
+   * This may disable further Tx interrupts if there are no pending
+   * transmissions.
+   */
+
+  if (self->txlen > 0 && self->txsent == self->txlen)
+    {
+      slip_txdone(self);
+    }
+
+  net_unlock();
 }
 
 /****************************************************************************
@@ -745,36 +804,35 @@ static int slip_rxtask(int argc, FAR char *argv[])
  *   provided
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
 static int slip_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct slip_driver_s *priv =
-    (FAR struct slip_driver_s *)dev->d_private;
+  FAR struct slip_driver_s *self =
+      (FAR struct slip_driver_s *)dev->d_private;
 
-#ifdef CONFIG_NET_IPv4
-  nerr("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff), (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff), (int)(dev->d_ipaddr >> 24));
-#endif
-#ifdef CONFIG_NET_IPv6
-  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-#endif
+  ninfo("Bringing up: %d.%d.%d.%d\n",
+        (int)dev->d_ipaddr & 0xff,
+        (int)(dev->d_ipaddr >> 8) & 0xff,
+        (int)(dev->d_ipaddr >> 16) & 0xff,
+        (int)dev->d_ipaddr >> 24);
 
-  /* Mark the interface up */
+  /* Enable POLLIN and POLLOUT events on the TTY */
 
-  priv->bifup = true;
-  netdev_carrier_on(dev);
+  slip_set_pollfd_events(self, POLLIN | POLLOUT);
+
+  /* Mark the device "up" */
+
+  self->bifup = true;
+
   return OK;
 }
 
@@ -785,26 +843,78 @@ static int slip_ifup(FAR struct net_driver_s *dev)
  *   NuttX Callback: Stop the interface.
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
 static int slip_ifdown(FAR struct net_driver_s *dev)
 {
-  FAR struct slip_driver_s *priv =
+  FAR struct slip_driver_s *self =
     (FAR struct slip_driver_s *)dev->d_private;
 
-  netdev_carrier_off(dev);
+  /* Disable the Ethernet interrupt */
+
+  slip_set_pollfd_events(self, 0);
 
   /* Mark the device "down" */
 
-  priv->bifup = false;
+  self->bifup = false;
+
   return OK;
+}
+
+/****************************************************************************
+ * Name: slip_txavail_work
+ *
+ * Description:
+ *   Perform an out-of-cycle poll on the worker thread.
+ *
+ * Input Parameters:
+ *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Runs on a work queue thread.
+ *
+ ****************************************************************************/
+
+static void slip_txavail_work(FAR void *arg)
+{
+  FAR struct slip_driver_s *self = (FAR struct slip_driver_s *)arg;
+
+  /* Lock the network and serialize driver operations if necessary.
+   * NOTE: Serialization is only required in the case where the driver work
+   * is performed on an LP worker thread and where more than one LP worker
+   * thread has been configured.
+   */
+
+  net_lock();
+
+  /* Ignore the notification if the interface is not yet up */
+
+  if (self->bifup)
+    {
+      /* Check if there is room in the hardware to hold another packet. */
+
+      if (self->txlen == 0)
+        {
+          /* If so, then poll the network for new XMIT data */
+
+          self->dev.d_buf = NULL;
+
+          devif_poll(&self->dev, slip_txpoll);
+        }
+    }
+
+  net_unlock();
 }
 
 /****************************************************************************
@@ -816,84 +926,35 @@ static int slip_ifdown(FAR struct net_driver_s *dev)
  *   latency.
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
+ *
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
 static int slip_txavail(FAR struct net_driver_s *dev)
 {
-  FAR struct slip_driver_s *priv =
-    (FAR struct slip_driver_s *)dev->d_private;
+  FAR struct slip_driver_s *self =
+      (FAR struct slip_driver_s *)dev->d_private;
 
-  /* Ignore the notification if the interface is not yet up */
+  /* Is our single work structure available?  It may not be if there are
+   * pending interrupt actions and we will have to ignore the Tx
+   * availability action.
+   */
 
-  if (priv->bifup)
+  if (work_available(&self->pollwork))
     {
-      /* Wake up the TX polling thread */
+      /* Schedule to serialize the poll on the worker thread. */
 
-      priv->txnodelay = true;
-      nxsig_kill(priv->txpid, SIGALRM);
+      work_queue(SLIPWORK, &self->pollwork, slip_txavail_work, self, 0);
     }
 
   return OK;
 }
-
-/****************************************************************************
- * Name: slip_addmac
- *
- * Description:
- *   NuttX Callback: Add the specified MAC address to the hardware multicast
- *   address filtering
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_MCASTGROUP
-static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
-{
-  /* Add the MAC address to the hardware multicast routing table */
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: slip_rmmac
- *
- * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware
- *   multicast address filtering
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_MCASTGROUP
-static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
-{
-  /* Add the MAC address to the hardware multicast routing table */
-
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -915,91 +976,48 @@ static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int slip_initialize(int intf, FAR const char *devname)
 {
-  FAR struct slip_driver_s *priv;
-  char buffer[12];
-  FAR char *argv[2];
+  FAR struct slip_driver_s *self;
   int ret;
 
   /* Get the interface structure associated with this interface number. */
 
   DEBUGASSERT(intf < CONFIG_NET_SLIP_NINTERFACES);
-  priv = &g_slip[intf];
+  self = &g_slip[intf];
 
   /* Initialize the driver structure */
 
-  memset(priv, 0, sizeof(struct slip_driver_s));
-  priv->dev.d_ifup    = slip_ifup;     /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown  = slip_ifdown;   /* I/F down callback */
-  priv->dev.d_txavail = slip_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_MCASTGROUP
-  priv->dev.d_addmac  = slip_addmac;   /* Add multicast MAC address */
-  priv->dev.d_rmmac   = slip_rmmac;    /* Remove multicast MAC address */
-#endif
-  priv->dev.d_private = priv;          /* Used to recover private state from dev */
+  memset(self, 0, sizeof(struct slip_driver_s));
+  self->dev.d_ifup    = slip_ifup;    /* I/F up (new IP address) callback */
+  self->dev.d_ifdown  = slip_ifdown;  /* I/F down callback */
+  self->dev.d_txavail = slip_txavail; /* New TX data callback */
+  self->dev.d_private = self;         /* Used to recover SLIP I/F instance */
 
-  /* Open the device */
+  ret = file_open(&self->tty, devname, O_RDWR | O_NONBLOCK);
 
-  ret = file_open(&priv->file, devname, O_RDWR, 0666);
   if (ret < 0)
     {
       nerr("ERROR: Failed to open %s: %d\n", devname, ret);
       return ret;
     }
 
-  /* Initialize the wait semaphore */
+  /* Put the interface in the down state.  This usually amounts to resetting
+   * the device and/or calling slip_ifdown().
+   */
 
-  nxsem_init(&priv->waitsem, 0, 0);
-
-  /* Start the SLIP receiver kernel thread */
-
-  snprintf(buffer, sizeof(buffer), "%d", intf);
-  argv[0] = buffer;
-  argv[1] = NULL;
-
-  ret = kthread_create("rxslip", CONFIG_NET_SLIP_DEFPRIO,
-                       CONFIG_NET_SLIP_STACKSIZE, slip_rxtask, argv);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to start receiver task\n");
-      return ret;
-    }
-
-  priv->rxpid = (pid_t)ret;
-
-  /* Wait and make sure that the receive task is started. */
-
-  nxsem_wait_uninterruptible(&priv->waitsem);
-
-  /* Start the SLIP transmitter kernel thread */
-
-  ret = kthread_create("txslip", CONFIG_NET_SLIP_DEFPRIO,
-                       CONFIG_NET_SLIP_STACKSIZE, slip_txtask, argv);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to start receiver task\n");
-      return ret;
-    }
-
-  priv->txpid = (pid_t)ret;
-
-  /* Wait and make sure that the transmit task is started. */
-
-  nxsem_wait_uninterruptible(&priv->waitsem);
-
-  /* Bump the semaphore count so that it can now be used as a mutex */
-
-  nxsem_post(&priv->waitsem);
+  slip_set_pollfd_events(self, 0);
+  self->bifup = false;
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  netdev_register(&priv->dev, NET_LL_SLIP);
+  netdev_register(&self->dev, NET_LL_SLIP);
+
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SLIP */
+#endif /* !defined(CONFIG_SCHED_WORKQUEUE) */
+
+#endif /* CONFIG_NET_SLIP */

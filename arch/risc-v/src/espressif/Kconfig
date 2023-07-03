@@ -196,6 +196,14 @@ config ESPRESSIF_ESPTOOLPY_NO_STUB
 		It is only required to be disabled in certain scenarios when either
 		Secure Boot V2 or Flash Encryption is enabled.
 
+config ESPRESSIF_HAL_ASSERTIONS
+	bool "Enable HAL assertions"
+	depends on DEBUG_ASSERTIONS
+	default y
+	---help---
+		Enable the assertions implemented in the HAL. Otherwise, the assertions
+		are replaced by empty macros.
+
 menu "Peripheral Support"
 
 config ESPRESSIF_UART
@@ -215,6 +223,18 @@ config ESPRESSIF_UART1
 	select ESPRESSIF_UART
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESPRESSIF_USBSERIAL
+	bool "USB-Serial-JTAG Driver"
+	default n
+	select OTHER_UART_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESPRESSIF_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	default n
+	---help---
+		Enable support for interrupting GPIO pins
 
 config ESPRESSIF_HR_TIMER
 	bool
@@ -403,24 +423,25 @@ choice ESPRESSIF_BROWNOUT_DET_LVL_SEL
 		approximately below this level. Note that there may be some variation
 		of brownout voltage level between each chip.
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
-		bool "2.51V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
+	bool "2.51V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_6
-		bool "2.64V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_6
+	bool "2.64V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_5
-		bool "2.76V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_5
+	bool "2.76V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_4
-		bool "2.92V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_4
+	bool "2.92V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_3
-		bool "3.10V"
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_3
+	bool "3.10V"
 
-	config ESPRESSIF_BROWNOUT_DET_LVL_SEL_2
-		bool "3.27V"
-endchoice
+config ESPRESSIF_BROWNOUT_DET_LVL_SEL_2
+	bool "3.27V"
+
+endchoice # ESPRESSIF_BROWNOUT_DET_LVL_SEL
 
 config ESPRESSIF_BROWNOUT_DET_LVL
 	int

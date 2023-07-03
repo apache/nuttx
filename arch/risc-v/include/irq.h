@@ -557,6 +557,7 @@ struct xcptcontext
 
   uintptr_t *ustkptr;  /* Saved user stack pointer */
   uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+  uintptr_t *ktopstk;  /* Top of kernel stack */
   uintptr_t *kstkptr;  /* Saved kernel stack pointer */
 #endif
 #endif

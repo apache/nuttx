@@ -32,10 +32,6 @@
 
 /****************************************************************************
  * Name: mempcpy
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mempcpy
  *
  * Description:
  *   Like memcpy(), but returns address of byte after the last copied byte
@@ -55,6 +51,7 @@
  *
  ****************************************************************************/
 
+#undef mempcpy /* See mm/README.txt */
 FAR void *mempcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   return (FAR char *)memcpy(dest, src, n) + n;

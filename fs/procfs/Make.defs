@@ -21,10 +21,10 @@
 ifeq ($(CONFIG_FS_PROCFS),y)
 # Files required for procfs file system support
 
-CSRCS += fs_procfs.c fs_procfscpuload.c fs_procfscritmon.c
-CSRCS += fs_procfsiobinfo.c fs_procfsmeminfo.c fs_procfsproc.c
-CSRCS += fs_procfstcbinfo.c fs_procfsuptime.c fs_procfsutil.c
-CSRCS += fs_procfsversion.c
+CSRCS += fs_procfs.c fs_procfscpuinfo.c fs_procfscpuload.c
+CSRCS += fs_procfscritmon.c fs_procfsiobinfo.c fs_procfsmeminfo.c
+CSRCS += fs_procfsproc.c fs_procfstcbinfo.c fs_procfsuptime.c
+CSRCS += fs_procfsutil.c fs_procfsversion.c
 
 # Include procfs build support
 

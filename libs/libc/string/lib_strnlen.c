@@ -33,9 +33,10 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNLEN) && defined(LIBC_BUILD_STRING)
-size_t strnlen(const char *s, size_t maxlen)
+#undef strnlen /* See mm/README.txt */
+size_t strnlen(FAR const char *s, size_t maxlen)
 {
-  const char *sc;
+  FAR const char *sc;
   for (sc = s; maxlen != 0 && *sc != '\0'; maxlen--, ++sc);
   return sc - s;
 }

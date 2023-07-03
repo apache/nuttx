@@ -250,56 +250,6 @@ void __asan_report_store_n_noabort(FAR void *addr, size_t size)
   kasan_report(addr, size, true);
 }
 
-void __asan_report_load16_noabort(FAR void *addr)
-{
-  __asan_report_load_n_noabort(addr, 16);
-}
-
-void __asan_report_store16_noabort(FAR void *addr)
-{
-  __asan_report_store_n_noabort(addr, 16);
-}
-
-void __asan_report_load8_noabort(FAR void *addr)
-{
-  __asan_report_load_n_noabort(addr, 8);
-}
-
-void __asan_report_store8_noabort(FAR void *addr)
-{
-  __asan_report_store_n_noabort(addr, 8);
-}
-
-void __asan_report_load4_noabort(FAR void *addr)
-{
-  __asan_report_load_n_noabort(addr, 4);
-}
-
-void __asan_report_store4_noabort(FAR void *addr)
-{
-  __asan_report_store_n_noabort(addr, 4);
-}
-
-void __asan_report_load2_noabort(FAR void *addr)
-{
-  __asan_report_load_n_noabort(addr, 2);
-}
-
-void __asan_report_store2_noabort(FAR void *addr)
-{
-  __asan_report_store_n_noabort(addr, 2);
-}
-
-void __asan_report_load1_noabort(FAR void *addr)
-{
-  __asan_report_load_n_noabort(addr, 1);
-}
-
-void __asan_report_store1_noabort(FAR void *addr)
-{
-  __asan_report_store_n_noabort(addr, 1);
-}
-
 void __asan_loadN_noabort(FAR void *addr, size_t size)
 {
   if (kasan_is_poisoned(addr, size))
@@ -316,56 +266,6 @@ void __asan_storeN_noabort(FAR void * addr, size_t size)
     }
 }
 
-void __asan_load16_noabort(FAR void *addr)
-{
-  __asan_loadN_noabort(addr, 16);
-}
-
-void __asan_store16_noabort(FAR void *addr)
-{
-  __asan_storeN_noabort(addr, 16);
-}
-
-void __asan_load8_noabort(FAR void *addr)
-{
-  __asan_loadN_noabort(addr, 8);
-}
-
-void __asan_store8_noabort(FAR void *addr)
-{
-  __asan_storeN_noabort(addr, 8);
-}
-
-void __asan_load4_noabort(FAR void *addr)
-{
-  __asan_loadN_noabort(addr, 4);
-}
-
-void __asan_store4_noabort(FAR void *addr)
-{
-  __asan_storeN_noabort(addr, 4);
-}
-
-void __asan_load2_noabort(FAR void *addr)
-{
-  __asan_loadN_noabort(addr, 2);
-}
-
-void __asan_store2_noabort(FAR void *addr)
-{
-  __asan_storeN_noabort(addr, 2);
-}
-
-void __asan_load1_noabort(FAR void *addr)
-{
-  __asan_loadN_noabort(addr, 1);
-}
-
-void __asan_store1_noabort(FAR void *addr)
-{
-  __asan_storeN_noabort(addr, 1);
-}
-
 void __asan_loadN(FAR void *addr, size_t size)
 {
   __asan_loadN_noabort(addr, size);
@@ -376,52 +276,34 @@ void __asan_storeN(FAR void *addr, size_t size)
   __asan_storeN_noabort(addr, size);
 }
 
-void __asan_load16(FAR void *addr)
-{
-  __asan_load16_noabort(addr);
-}
+#define DEFINE_ASAN_LOAD_STORE(size) \
+  void __asan_report_load##size##_noabort(FAR void *addr) \
+  { \
+    __asan_report_load_n_noabort(addr, size); \
+  } \
+  void __asan_report_store##size##_noabort(FAR void *addr) \
+  { \
+    __asan_report_store_n_noabort(addr, size); \
+  } \
+  void __asan_load##size##_noabort(FAR void *addr) \
+  { \
+    __asan_loadN_noabort(addr, size); \
+  } \
+  void __asan_store##size##_noabort(FAR void *addr) \
+  { \
+    __asan_storeN_noabort(addr, size); \
+  } \
+  void __asan_load##size(FAR void *addr) \
+  { \
+    __asan_load##size##_noabort(addr); \
+  } \
+  void __asan_store##size(FAR void *addr) \
+  { \
+    __asan_store##size##_noabort(addr); \
+  }
 
-void __asan_store16(FAR void *addr)
-{
-  __asan_store16_noabort(addr);
-}
-
-void __asan_load8(FAR void *addr)
-{
-  __asan_load8_noabort(addr);
-}
-
-void __asan_store8(FAR void *addr)
-{
-  __asan_store8_noabort(addr);
-}
-
-void __asan_load4(FAR void *addr)
-{
-  __asan_load4_noabort(addr);
-}
-
-void __asan_store4(FAR void *addr)
-{
-  __asan_store4_noabort(addr);
-}
-
-void __asan_load2(FAR void *addr)
-{
-  __asan_load2_noabort(addr);
-}
-
-void __asan_store2(FAR void *addr)
-{
-  __asan_store2_noabort(addr);
-}
-
-void __asan_load1(FAR void *addr)
-{
-  __asan_load1_noabort(addr);
-}
-
-void __asan_store1(FAR void *addr)
-{
-  __asan_store1_noabort(addr);
-}
+DEFINE_ASAN_LOAD_STORE(1)
+DEFINE_ASAN_LOAD_STORE(2)
+DEFINE_ASAN_LOAD_STORE(4)
+DEFINE_ASAN_LOAD_STORE(8)
+DEFINE_ASAN_LOAD_STORE(16)

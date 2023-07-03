@@ -68,7 +68,7 @@ config ALLOW_MIT_COMPONENTS
 
 config ALLOW_BSDNORDIC_COMPONENTS
 	bool "Use components that have 5-Clause Nordic licenses"
-	depends on ARCH_CHIP_NRF52 || ARCH_CHIP_NRF53
+	depends on ARCH_CHIP_NRF52 || ARCH_CHIP_NRF53 || ARCH_CHIP_NRF91
 	default n
 	---help---
 		When this option is enabled the project will allow the use
@@ -118,7 +118,7 @@ config HOST_WINDOWS
 config HOST_OTHER
 	bool "Other"
 
-endchoice
+endchoice # Build Host Platform
 
 config TOOLCHAIN_WINDOWS
 	bool
@@ -175,7 +175,7 @@ config WINDOWS_OTHER
 		Build natively in another POSIX-like environment.  Additional
 		support may be necessary
 
-endchoice
+endchoice # Windows Build Environment
 
 config WINDOWS_MKLINK
 	bool "Use mklink"
@@ -243,6 +243,15 @@ config APPS_DIR
 		TOPDIR is the full path to the NuttX directory. It can be used, for
 		example, to include makefile fragments (e.g., .config or Make.defs)
 		or to set up include file paths.
+
+config BASE_DEFCONFIG
+	string "Base Configuration"
+	default ""
+	---help---
+		This will be automatically be updated by the configuration
+		script. This is the base configuration file that was used to create the
+		current configuration. It is useful for getting the current configuration
+		on runtime.
 
 config BUILD_LOADABLE
 	bool
@@ -398,7 +407,7 @@ config UIMAGE_ENTRY_POINT
 	hex "uImage entry point"
 	default 0x0
 
-endif
+endif # UBOOT_UIMAGE
 
 menuconfig DFU_BINARY
 	bool "DFU binary format"
@@ -417,7 +426,7 @@ config DFU_VID
 config DFU_PID
 	hex "PID to use for DFU image"
 
-endif
+endif # DFU_BINARY
 endmenu # Binary Output Formats
 
 menu "Customize Header Files"
@@ -588,6 +597,18 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
+config FORTIFY_SOURCE
+	int "Fortify Source"
+	default 0
+	range 0 3
+	---help---
+		Detect overflows of buffers in common string and memory functions
+		where the compiler can determine and validate the buffer sizes.
+		0 does not have any checks.
+		1 will only check for out-of-bounds at compile time.
+		2 will only perform out-of-bounds checks on stack variables.
+		3 On the basis of 2, add an out-of-bounds check for dynamically allocated variables.
+
 config NDEBUG
 	bool "Define NDEBUG globally"
 	default !DEBUG_ASSERTIONS
@@ -654,6 +675,15 @@ config DEBUG_ASSERTIONS_EXPRESSION
 	---help---
 		This option can display the content information of the ASSERT()
 		function when it is triggered. This option maybe will take up a lot
+		of space.
+
+config DEBUG_ASSERTIONS_FILENAME
+	bool "Enable Debug Assertions show file name"
+	default !DEFAULT_SMALL
+	depends on DEBUG_ASSERTIONS
+	---help---
+		This option can display the file information of the ASSERT()
+		function when it is enabled. This option maybe will take up a lot
 		of space.
 
 comment "Subsystem Debug Options"

@@ -25,10 +25,11 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <debug.h>
 
-#include <nuttx/time.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,6 +83,115 @@ static const char * const g_monthname[12] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: is_leap
+ *
+ * Description:
+ *  determine if the given year is a leap year or not
+ *
+ * Input Parameters:
+ *  year - a year value
+ *
+ * Returnd value:
+ *  true if current is leap year, false is not a leap year
+ */
+
+static bool is_leap(int year)
+{
+  return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+}
+
+/****************************************************************************
+ * Name: get_week_num
+ *
+ * Description:
+ *  get the week number in a year based on iso8601 standard
+ *
+ * Input Parameters:
+ *  time - the specified time
+ *
+ * Returnd value:
+ *  the week numer in a year
+ */
+
+static int get_week_num(FAR const struct tm *time)
+{
+  /* calculate the total week number in a year */
+
+  int week = (time->tm_yday + DAYSPERWEEK -
+              (time->tm_wday + 6) % DAYSPERWEEK) / DAYSPERWEEK;
+
+  /* if xxxx-1-1 is just passed 1-3 days after Monday
+   * then the previous week will calculated into this year
+   */
+
+  if ((time->tm_wday + 371 - time->tm_yday - 2) % DAYSPERWEEK <= 2)
+    {
+      week++;
+    }
+
+  if (week == 0)
+    {
+      week = 52;
+
+      /* if xxxx-12-31 is Thursday or Friday, and the previous year is
+       * leap year, then the previous year has 53 weeks
+       */
+
+      int dec31 = (time->tm_wday + DAYSPERWEEK - time->tm_yday - 1)
+                      % DAYSPERWEEK;
+      if (dec31 == TM_THURSDAY ||
+          (dec31 == TM_FRIDAY && is_leap(time->tm_year % 400 - 1)))
+        {
+          week++;
+        }
+    }
+  else if (week == 53)
+    {
+      /* If xxxx-1.1 is not a Thursday, and not a Wednesday of a leap year,
+       * then this year has only 52 weeks
+       */
+
+      int jan1 = (time->tm_wday + 371 - time->tm_yday) % DAYSPERWEEK;
+      if (jan1 != TM_THURSDAY &&
+            (jan1 != TM_WEDNESDAY || !is_leap(time->tm_year)))
+        {
+          week = 1;
+        }
+    }
+
+  return week;
+}
+
+/****************************************************************************
+ * Name: get_week_year
+ *
+ * Description:
+ *  get the week year based on iso8601 standard
+ *
+ * Input Parameters:
+ *  time - the specified time
+ *
+ * Returnd value:
+ *  the year that calculated based on week number
+ */
+
+static int get_week_year(FAR const struct tm *time)
+{
+  int week_num = get_week_num(time);
+  int week_year = time->tm_year + TM_YEAR_BASE;
+  if (time->tm_yday < 3 && week_num != 1)
+    {
+      week_year--;
+    }
+  else if (time->tm_yday > 360 && week_num == 1)
+    {
+      week_year++;
+    }
+
+  return week_year;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -106,6 +216,10 @@ static const char * const g_monthname[12] =
  *   %d     The day of the month as a decimal number (range 01 to 31).
  *   %e     Like %d, the day of the month as a decimal number, but a leading
  *          zero is replaced by a space.
+ *   %F     The full date format but with no time fields
+ *   %g     The last 2 digits of the week-based year as a decimal number
+ *          [00,99]
+ *   %G     The full version of %g, display the full year value
  *   %h     Equivalent to %b.  (SU)
  *   %H     The hour as a decimal number using a 24-hour clock
  *          (range 00 to 23).
@@ -124,14 +238,25 @@ static const char * const g_monthname[12] =
  *          as "PM" and midnight as "AM".
  *   %P     Like %p but in lowercase: "am" or "pm" or a corresponding string
  *          for the current locale. (GNU)
+ *   %r     The time in a.m. and p.m. notation
+ *   %R     The time in 24-hour notation ( %H : %M ).
  *   %s     The number of seconds since the Epoch, that is, since 1970-01-01
  *          00:00:00 UTC. (TZ)
  *   %S     The second as a decimal number (range 00 to 60).  (The range is
  *          up to 60 to allow for occasional leap seconds.)
  *   %t     A tab character. (SU)
+ *   %u     The weekday as a decimal number [1,7], with 1 representing
+ *          Monday.
+ *   %U     The week number of the year as a decimal number [00,53].
+ *   %V     The week number of the year
  *   %w     The weekday as a decimal number (range 0 to 6).
+ *   %W     The week number of the year as a decimal number [00,53].
+ *   %x     The locale's appropriate date representation, but without time.
+ *   %X     The locale's appropriate time representation, but without date.
  *   %y     The year as a decimal number without a century (range 00 to 99).
  *   %Y     The year as a decimal number including the century.
+ *   %z     The timezone name or abbreviation, or by no bytes if no timezone
+ *          information exists.
  *   %%     A literal '%' character.
  *
  * Returned Value:
@@ -251,6 +376,33 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
+            /* %F: ISO 8601 date format: "%Y-%m-%d" */
+
+            case 'F':
+              {
+                len = snprintf(dest, chleft, "%04d-%02d-%02d",
+                              tm->tm_year + TM_YEAR_BASE, tm->tm_mon,
+                              tm->tm_mday);
+              }
+              break;
+
+            /* %g: 2-digit year version of %G, (00-99) */
+
+            case 'g':
+              {
+                value = get_week_year(tm) % 100;
+                len = snprintf(dest, chleft, "%02d", value);
+              }
+              break;
+
+            /* %G: ISO 8601 week based year */
+
+            case 'G':
+              {
+                len = snprintf(dest, chleft, "%04d", get_week_year(tm));
+              }
+              break;
+
            /* %H: The hour as a decimal number using a 24-hour clock
             * (range 00  to 23).
             */
@@ -267,7 +419,8 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
            case 'I':
              {
-               len = snprintf(dest, chleft, "%02d", tm->tm_hour % 12);
+               len = snprintf(dest, chleft, "%02d", (tm->tm_hour % 12) != 0 ?
+                                                    (tm->tm_hour % 12) : 12);
              }
              break;
 
@@ -304,7 +457,8 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
            case 'l':
              {
-               len = snprintf(dest, chleft, "%2d", tm->tm_hour % 12);
+               len = snprintf(dest, chleft, "%2d", (tm->tm_hour % 12) != 0 ?
+                                                   (tm->tm_hour % 12) : 12);
              }
              break;
 
@@ -367,6 +521,28 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
+           /* %r: 12-hour clock time */
+
+           case 'r':
+             {
+               if (tm->tm_hour >= 12)
+                 {
+                   str = "pm";
+                 }
+               else
+                 {
+                   str = "am";
+                 }
+
+               value = tm->tm_hour == 12 ?
+                          tm->tm_hour == 12 :
+                          tm->tm_hour % (HOURSPERDAY / 2);
+
+               len = snprintf(dest, chleft, "%02d:%02d:%02d %s",
+                              value, tm->tm_min, tm->tm_sec, str);
+             }
+             break;
+
             /* %R: Shortcut for %H:%M. */
 
            case 'R':
@@ -416,11 +592,77 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
+           /* %u: The day of the week as a decimal, (1-7). Monday being 1,
+            * Sunday being 0.
+            */
+
+           case 'u':
+             {
+               value = tm->tm_wday == 0 ? 7 : tm->tm_wday;
+               len = snprintf(dest, chleft, "%d", value);
+             }
+             break;
+
+           /* %U: week number of the current year as a decimal number,
+            * (00-53). Starting with the first Sunday as the first day
+            * of week 01.
+            */
+
+           case 'U':
+             {
+               value = (tm->tm_yday + DAYSPERWEEK - tm->tm_wday)
+                                  / DAYSPERWEEK;
+               len = snprintf(dest, chleft, "%02d", value);
+             }
+             break;
+
+           /* %V: ISO 8601 week number */
+
+           case 'V':
+             {
+               value = get_week_num(tm);
+               len = snprintf(dest, chleft, "%02d", value);
+             }
+             break;
+
            /* %w: The weekday as a decimal number (range 0 to 6). */
 
            case 'w':
              {
                len = snprintf(dest, chleft, "%d", tm->tm_wday);
+             }
+             break;
+
+           /* %W: Week number of the current year as a decimal number,
+            * (00-53). Starting with the first Monday as the first day
+            * of week 01.
+            */
+
+           case 'W':
+             {
+               value = (tm->tm_yday + DAYSPERWEEK -
+                                 (tm->tm_wday + 6) % DAYSPERWEEK)
+                                  / DAYSPERWEEK;
+               len = snprintf(dest, chleft, "%02d", value);
+             }
+             break;
+
+           /* %x Locale date without time */
+
+           case 'x':
+             {
+                len = snprintf(dest, chleft, "%02d/%02d/%04d",
+                              tm->tm_mon, tm->tm_mday,
+                              tm->tm_year + TM_YEAR_BASE);
+             }
+             break;
+
+           /* %X: Locale time without date */
+
+           case 'X':
+             {
+               len = snprintf(dest, chleft, "%02d:%02d:%02d",
+                              tm->tm_hour, tm->tm_min, tm->tm_sec);
              }
              break;
 
@@ -442,6 +684,19 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                               tm->tm_year + TM_YEAR_BASE);
              }
              break;
+
+            /* %z: Numeric timezone as hour and minute offset from UTC
+             * "+hhmm" or "-hhmm"
+             */
+
+            case 'z':
+              {
+                int hour = tm->tm_gmtoff / 3600;
+                int min = tm->tm_gmtoff % 3600 / 60;
+                int utc_val = hour  * 100 + min;
+                len = snprintf(dest, chleft, "+%04d", utc_val);
+              }
+              break;
 
            /* %%:  A literal '%' character. */
 

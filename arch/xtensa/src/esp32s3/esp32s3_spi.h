@@ -46,6 +46,10 @@ extern "C"
 
 #include <nuttx/spi/spi.h>
 
+#ifdef CONFIG_SPI_SLAVE
+#  include <nuttx/spi/slave.h>
+#endif
+
 #ifdef CONFIG_ESP32S3_SPI2
 #  define ESP32S3_SPI2 2
 #endif
@@ -138,6 +142,39 @@ int esp32s3_spi3_cmddata(struct spi_dev_s *dev,
  ****************************************************************************/
 
 int esp32s3_spibus_uninitialize(struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: esp32s3_spislave_ctrlr_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI Slave bus.
+ *
+ * Input Parameters:
+ *   port - Port number (for hardware that has multiple SPI Slave interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI Slave controller structure reference on success;
+ *   NULL on failure.
+ *
+ ****************************************************************************/
+
+struct spi_slave_ctrlr_s *esp32s3_spislave_ctrlr_initialize(int port);
+
+/****************************************************************************
+ * Name: esp32s3_spislave_ctrlr_uninitialize
+ *
+ * Description:
+ *   Uninitialize an SPI Slave bus.
+ *
+ * Input Parameters:
+ *   ctrlr - SPI Slave controller interface instance
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32s3_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr);
 
 #endif /* CONFIG_ESP32S3_SPI */
 

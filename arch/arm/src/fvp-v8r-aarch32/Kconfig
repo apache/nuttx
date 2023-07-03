@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_FVP_ARMV8R_AARCH32
+
+menu "FVP ARMv8-R Virt Chip Selection"
+
+choice
+	prompt "FVP Core Configuration"
+	default ARCH_CHIP_FVP_R52
+
+config ARCH_CHIP_FVP_R52
+	bool "FVP virtual Processor (Cortex-r52)"
+	select ARMV8R_HAVE_GICv3
+
+endchoice # FVP Chip Selection
+
+endmenu # "FVP Chip Selection"
+
+endif # ARCH_CHIP_FVP_ARMV8R_AARCH32

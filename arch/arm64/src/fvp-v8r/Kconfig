@@ -14,7 +14,6 @@ choice
 config ARCH_CHIP_FVP_R82
 	bool "FVP virtual Processor (Cortex-r82)"
 	select ARCH_HAVE_MULTICPU
-	select ARMV8R_HAVE_GICv3
 	select ARCH_SET_VMPIDR_EL2
 
 endchoice # FVP Chip Selection

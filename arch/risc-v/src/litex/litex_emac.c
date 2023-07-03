@@ -540,6 +540,12 @@ static void litex_receive(struct litex_emac_s *priv)
   if (priv->dev.d_len == 0 || priv->dev.d_len > ETHMAC_SLOT_SIZE)
     {
       NETDEV_RXDROPPED(&priv->dev);
+
+      /* The pending flag for the receive buffer needs to be ack'd,
+       * even if the received packet is flagged as invalid.
+       */
+
+      putreg8(0x01, LITEX_ETHMAC_SRAM_WRITER_EV_PENDING);
       return;
     }
 
@@ -552,6 +558,12 @@ static void litex_receive(struct litex_emac_s *priv)
          (void *)(LITEX_ETHMAC_RXBASE + (rxslot * ETHMAC_SLOT_SIZE)),
          priv->dev.d_len);
   litex_dumppacket("Rx Packet", g_buffer, priv->dev.d_len);
+
+      /* ACK the pending flag AFTER receiving and processing data.
+       * This transitions the receive slot in hardware.
+       */
+
+  putreg8(0x01, LITEX_ETHMAC_SRAM_WRITER_EV_PENDING);
 
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
@@ -664,12 +676,6 @@ static void litex_emac_interrupt_work(void *arg)
   if (getreg32(LITEX_ETHMAC_SRAM_WRITER_EV_PENDING) & 0x01)
     {
       litex_receive(priv);
-
-      /* ACK the pending flag AFTER receiving and processing data.
-       * This transitions the receive slot in hardware.
-       */
-
-      putreg8(0x01, LITEX_ETHMAC_SRAM_WRITER_EV_PENDING);
     }
 
   /* Tx Done */

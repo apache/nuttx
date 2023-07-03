@@ -76,6 +76,9 @@
 #define GPIO_SCHED_RUNNING (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORTJ | GPIO_PIN0)
 
+#define GPIO_OTGFS_VBUS    (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+
 /****************************************************************************
  * Public data
  ****************************************************************************/
@@ -147,6 +150,7 @@ void arch_sporadic_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_FMC
+void stm32_sdram_initialize(void);
 void stm32_disablefmc(void);
 #endif
 

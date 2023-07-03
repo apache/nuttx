@@ -46,7 +46,7 @@ config ARM_TOOLCHAIN_ARMCLANG
 	bool "ARM Compiler Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
-endchoice
+endchoice # ARM Toolchain Selection
 
 choice
 	prompt "ARM MCU selection"
@@ -79,6 +79,16 @@ config ARCH_CHIP_AM335X
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		TI AM335X family: AM3356, AM3357, AM3358, AM3359 (ARM Cortex-A8)
+
+config ARCH_CHIP_FVP_ARMV8R_AARCH32
+	bool "ARM FVP virt platform (ARMv8r AARCH32)"
+	select ARCH_ARMV8R
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_FETCHADD
+	select ARMV8R_HAVE_DECODEFIQ
+	select ARCH_HAVE_FPU
+	---help---
+		ARM FVP virt platform (ARMv8r)
 
 config ARCH_CHIP_C5471
 	bool "TMS320 C5471"
@@ -264,7 +274,7 @@ config ARCH_CHIP_MOXART
 		MoxART family
 
 config ARCH_CHIP_NRF52
-	bool "Nordic NRF52"
+	bool "Nordic nRF52"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_TICKLESS
 	select ARMV7M_HAVE_STACKCHECK
@@ -275,15 +285,26 @@ config ARCH_CHIP_NRF52
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
-		Nordic NRF52 architectures (ARM Cortex-M4).
+		Nordic nRF52 architectures (ARM Cortex-M4).
 
 config ARCH_CHIP_NRF53
-	bool "Nordic NRF53"
+	bool "Nordic nRF53"
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_PWM_MULTICHAN
 	depends on EXPERIMENTAL
 	---help---
-		Nordic NRF53 architectures (ARM dual Cortex-M33).
+		Nordic nRF53 architectures (ARM dual Cortex-M33).
+
+config ARCH_CHIP_NRF91
+	bool "Nordic nRF91"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_HAVE_TICKLESS
+	depends on EXPERIMENTAL
+	---help---
+		Nordic nRF91 architectures (ARM Cortex-M33 with integrated
+		LTE-M/NB-IoT modem and GNSS).
 
 config ARCH_CHIP_NUC1XX
 	bool "Nuvoton NUC100/120"
@@ -489,6 +510,7 @@ config ARCH_CHIP_STM32L5
 	select ARCH_HAVE_PROGMEM
 	select ARCH_HAVE_SPI_BITORDER
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TRUSTZONE
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV8M_HAVE_STACKCHECK
 	---help---
@@ -614,7 +636,7 @@ config ARCH_CHIP_ARM_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/arm/src/.
 
-endchoice
+endchoice # ARM MCU selection
 
 config ARCH_ARM7TDMI
 	bool
@@ -717,6 +739,7 @@ config ARCH_CORTEXM0
 config ARCH_ARMV7M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM3
 	bool
@@ -770,6 +793,7 @@ config ARCH_CORTEXM7
 config ARCH_ARMV7A
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 	select ARM_HAVE_WFE_SEV
 
 config ARCH_CORTEXA5
@@ -818,6 +842,7 @@ config ARCH_CORTEXA9
 config ARCH_ARMV7R
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXR4
 	bool
@@ -849,6 +874,7 @@ config ARCH_CORTEXR7
 config ARCH_ARMV8M
 	bool
 	default n
+	select ARCH_HAVE_CPUINFO
 
 config ARCH_CORTEXM23
 	bool
@@ -931,6 +957,14 @@ config ARCH_CORTEXM85
 	select ARCH_HAVE_USAGEFAULT_DEBUG
 	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
 
+config ARCH_ARMV8R
+	bool
+	default n
+	select ARCH_HAVE_CPUINFO
+	select ONESHOT
+	select ALARM_ARCH
+
+
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
@@ -939,11 +973,13 @@ config ARCH_FAMILY
 	default "armv7-m"	if ARCH_ARMV7M
 	default "armv7-r"	if ARCH_ARMV7R
 	default "armv8-m"	if ARCH_ARMV8M
+	default "armv8-r"	if ARCH_ARMV8R
 
 config ARCH_CHIP
 	string
 	default "a1x"		if ARCH_CHIP_A1X
 	default "am335x"	if ARCH_CHIP_AM335X
+	default "fvp-v8r-aarch32"	if ARCH_CHIP_FVP_ARMV8R_AARCH32
 	default "c5471"		if ARCH_CHIP_C5471
 	default "dm320"		if ARCH_CHIP_DM320
 	default "efm32"		if ARCH_CHIP_EFM32
@@ -966,6 +1002,7 @@ config ARCH_CHIP
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nrf53"		if ARCH_CHIP_NRF53
+	default "nrf91"		if ARCH_CHIP_NRF91
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "rp2040"	if ARCH_CHIP_RP2040
 	default "s32k1xx"	if ARCH_CHIP_S32K1XX
@@ -1297,7 +1334,7 @@ config UNWINDER_ARM
 		the performance is not affected. Currently, this feature
 		only works with EABI compilers.
 
-endchoice
+endchoice # Choose ARM unwinder
 
 endif
 
@@ -1316,6 +1353,9 @@ endif
 if ARCH_ARMV8M
 source "arch/arm/src/armv8-m/Kconfig"
 endif
+if ARCH_ARMV8R
+source "arch/arm/src/armv8-r/Kconfig"
+endif
 if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
 source "arch/arm/src/arm/Kconfig"
 endif
@@ -1324,6 +1364,9 @@ source "arch/arm/src/a1x/Kconfig"
 endif
 if ARCH_CHIP_AM335X
 source "arch/arm/src/am335x/Kconfig"
+endif
+if ARCH_CHIP_FVP_ARMV8R_AARCH32
+source "arch/arm/src/fvp-v8r-aarch32/Kconfig"
 endif
 if ARCH_CHIP_C5471
 source "arch/arm/src/c5471/Kconfig"
@@ -1396,6 +1439,9 @@ source "arch/arm/src/nrf52/Kconfig"
 endif
 if ARCH_CHIP_NRF53
 source "arch/arm/src/nrf53/Kconfig"
+endif
+if ARCH_CHIP_NRF91
+source "arch/arm/src/nrf91/Kconfig"
 endif
 if ARCH_CHIP_NUC1XX
 source "arch/arm/src/nuc1xx/Kconfig"

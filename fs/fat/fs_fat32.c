@@ -45,6 +45,16 @@
 #include "fs_fat32.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_FS_LARGEFILE)
+#  define OFF_MAX INT64_MAX
+#else
+#  define OFF_MAX INT32_MAX
+#endif
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -764,7 +774,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Check if the file size would exceed the range of off_t */
 
-  if (ff->ff_size + buflen < ff->ff_size)
+  if (buflen > OFF_MAX || ff->ff_size > OFF_MAX - (off_t)buflen)
     {
       ret = -EFBIG;
       goto errout_with_lock;
@@ -2333,7 +2343,6 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Fill in the statfs info */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = MSDOS_SUPER_MAGIC;
 
   /* We will claim that the optimal transfer size is the size of a cluster
@@ -2644,7 +2653,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
+static int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct fat_mountpt_s *fs;
   int ret;
@@ -2692,8 +2701,8 @@ int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
  *
  ****************************************************************************/
 
-int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
-               FAR const char *newrelpath)
+static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
+                      FAR const char *newrelpath)
 {
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_dirinfo_s dirinfo;

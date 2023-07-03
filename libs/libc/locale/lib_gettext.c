@@ -468,7 +468,7 @@ static FAR const char *evalexpr(FAR struct eval_s *ev,
   return s;
 }
 
-unsigned long eval(FAR const char *s, unsigned long n)
+static unsigned long eval(FAR const char *s, unsigned long n)
 {
   struct eval_s ev;
 

@@ -230,7 +230,7 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
       if (p + 1 < lastdnptr)
         {
           *p++ = dst;
-          *p = 0;
+          *p = NULL;
         }
     }
 

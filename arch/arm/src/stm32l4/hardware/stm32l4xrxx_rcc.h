@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_RCC_H
-#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4XRXX_RCC_H
+#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4XRXX_RCC_H
 
 /****************************************************************************
  * Included Files

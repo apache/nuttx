@@ -36,7 +36,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/time.h>
 
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING

@@ -76,4 +76,4 @@ endif
 
 DEPPATH += --dep-path board
 VPATH += :board
-CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

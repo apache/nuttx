@@ -63,8 +63,9 @@ void syslog_stream_uninit(FAR struct syslog_channel_s *channel);
 static const struct syslog_channel_ops_s g_syslog_stream_ops =
 {
   syslog_stream_putc,
-  syslog_stream_force,
+  NULL,
   syslog_stream_flush,
+  syslog_stream_write,
   syslog_stream_write,
   syslog_stream_uninit
 };
@@ -132,31 +133,6 @@ static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch)
   lib_stream_putc(chan->stream, ch);
   leave_critical_section(flags);
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: syslog_stream_force
- *
- * Description:
- *   Force output in interrupt context.
- *
- * Input Parameters:
- *   channel    - Handle to syslog channel to be used.
- *   ch         - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-static int syslog_stream_force(FAR struct syslog_channel_s *channel, int ch)
-{
-  FAR struct syslog_stream_s *chan =
-    (FAR struct syslog_stream_s *)channel;
-
-  lib_stream_putc(chan->stream, ch);
   return OK;
 }
 

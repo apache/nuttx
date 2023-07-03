@@ -110,7 +110,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 
   nxtask_activate(&tcb->cmn);
 
-  return (int)pid;
+  return pid;
 }
 
 /****************************************************************************

@@ -23,7 +23,7 @@ config IEEE802154_AT86RF233
 source "drivers/wireless/ieee802154/at86rf23x/Kconfig"
 
 config IEEE802154_XBEE
-	bool "XBee IEEE 802.15.4  Radio (w/ MAC)"
+	bool "XBee IEEE 802.15.4 Radio (w/ MAC)"
 	default n
 	---help---
 		This selection enables support for the XBee Radio device.

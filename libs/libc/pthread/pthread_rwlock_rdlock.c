@@ -33,7 +33,7 @@
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_PTHREAD_CLEANUP
+#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
 static void rdlock_cleanup(FAR void *arg)
 {
   FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
@@ -109,7 +109,7 @@ int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *rw_lock,
       return err;
     }
 
-#ifdef CONFIG_PTHREAD_CLEANUP
+#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
   pthread_cleanup_push(&rdlock_cleanup, rw_lock);
 #endif
   while ((err = tryrdlock(rw_lock)) == EBUSY)
@@ -130,7 +130,7 @@ int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *rw_lock,
         }
     }
 
-#ifdef CONFIG_PTHREAD_CLEANUP
+#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
   pthread_cleanup_pop(0);
 #endif
 

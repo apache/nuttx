@@ -70,7 +70,7 @@
 #  include "esp32s3_pm.h"
 #endif
 
-#include "espidf_wifi.h"
+#include "esp_hal_wifi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,6 +94,8 @@
 #define DEFAULT_LISTEN_INTERVAL CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
 
 #define RTC_CLK_CAL_FRACT  19  //!< Number of fractional bits in values returned by rtc_clk_cal
+
+#define ets_timer       _ETSTIMER_
 
 /****************************************************************************
  * Private Types
@@ -133,21 +135,6 @@ struct time_adpt
 {
   time_t      sec;          /* Second value */
   suseconds_t usec;         /* Micro second value */
-};
-
-/* Wi-Fi timer private data */
-
-struct timer_adpt
-{
-  struct wdog_s wdog;       /* Timer handle */
-  struct work_s work;       /* Work private data */
-  bool          repeat;     /* Flags indicate if it is cycle */
-  uint32_t      delay;      /* Timeout ticks */
-
-  /* Timer callback function */
-
-  void          (*func)(void *priv);
-  void          *priv;      /* Timer private data */
 };
 
 /* Wi-Fi event private data */
@@ -241,6 +228,7 @@ static void *esp_task_get_current_task(void);
 static int32_t esp_task_get_max_priority(void);
 static void *esp_malloc(uint32_t size);
 static void esp_free(void *ptr);
+static uint32_t esp_get_free_heap_size(void);
 static uint32_t esp_rand(void);
 static void esp_dport_access_stall_other_cpu_start(void);
 static void esp_dport_access_stall_other_cpu_end(void);
@@ -282,9 +270,6 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key);
 static int32_t esp_get_random(uint8_t *buf, size_t len);
 static int32_t esp_get_time(void *t);
 static uint32_t esp_clk_slowclk_cal_get_wrapper(void);
-static void esp_log_writev(uint32_t level, const char *tag,
-                           const char *format, va_list args)
-            printf_like(3, 0);
 static void *esp_malloc_internal(size_t size);
 static void *esp_realloc_internal(void *ptr, size_t size);
 static void *esp_calloc_internal(size_t n, size_t size);
@@ -317,9 +302,9 @@ static int wifi_coex_set_schm_interval(uint32_t interval);
 static uint32_t wifi_coex_get_schm_interval(void);
 static uint8_t wifi_coex_get_schm_curr_period(void);
 static void *wifi_coex_get_schm_curr_phase(void);
-static int wifi_coex_set_schm_curr_phase_idx(int idx);
-static int wifi_coex_get_schm_curr_phase_idx(void);
 static int wifi_coex_register_start_cb_wrapper(int (* cb)(void));
+static int wifi_coex_schm_process_restart_wrapper(void);
+static int wifi_coex_schm_register_cb_wrapper(int type, int(*cb)(int));
 
 /****************************************************************************
  * Public Functions declaration
@@ -327,8 +312,6 @@ static int wifi_coex_register_start_cb_wrapper(int (* cb)(void));
 
 int64_t esp_timer_get_time(void);
 void esp_fill_random(void *buf, size_t len);
-void esp_log_write(uint32_t level, const char *tag, const char *format, ...)
-     printf_like(3, 4);
 uint32_t esp_log_timestamp(void);
 uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 void intr_matrix_set(int cpu_no, uint32_t model_num, uint32_t intr_num);
@@ -515,9 +498,9 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._coex_schm_interval_get = wifi_coex_get_schm_interval,
   ._coex_schm_curr_period_get = wifi_coex_get_schm_curr_period,
   ._coex_schm_curr_phase_get = wifi_coex_get_schm_curr_phase,
-  ._coex_schm_curr_phase_idx_set = wifi_coex_set_schm_curr_phase_idx,
-  ._coex_schm_curr_phase_idx_get = wifi_coex_get_schm_curr_phase_idx,
   ._coex_register_start_cb = wifi_coex_register_start_cb_wrapper,
+  ._coex_schm_process_restart = wifi_coex_schm_process_restart_wrapper,
+  ._coex_schm_register_cb = wifi_coex_schm_register_cb_wrapper,
   ._magic = ESP_WIFI_OS_ADAPTER_MAGIC,
 };
 
@@ -2323,7 +2306,7 @@ int32_t esp_event_post(esp_event_base_t event_base,
  *
  ****************************************************************************/
 
-uint32_t esp_get_free_heap_size(void)
+static uint32_t esp_get_free_heap_size(void)
 {
   struct mallinfo info;
 
@@ -2462,9 +2445,9 @@ static void esp_timer_arm(void *ptimer, uint32_t ms, bool repeat)
 static void esp_timer_disarm(void *ptimer)
 {
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
-  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->priv;
+  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->timer_arg;
 
-  if (ets_timer->expire == TIMER_INITIALIZED_VAL)
+  if (ets_timer->timer_expire == TIMER_INITIALIZED_VAL)
     {
       esp_timer_stop(esp_timer);
     }
@@ -2487,13 +2470,13 @@ static void esp_timer_disarm(void *ptimer)
 static void esp32s3_timer_done(void *ptimer)
 {
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
-  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->priv;
+  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->timer_arg;
 
-  if (ets_timer->expire == TIMER_INITIALIZED_VAL)
+  if (ets_timer->timer_expire == TIMER_INITIALIZED_VAL)
     {
-      ets_timer->expire = 0;
+      ets_timer->timer_expire = 0;
       esp_timer_delete(esp_timer);
-      ets_timer->priv = NULL;
+      ets_timer->timer_arg = NULL;
     }
 }
 
@@ -2519,12 +2502,12 @@ static void esp_timer_setfn(void *ptimer, void *pfunction, void *parg)
   esp_timer_handle_t esp_timer;
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
 
-  if (ets_timer->expire != TIMER_INITIALIZED_VAL)
+  if (ets_timer->timer_expire != TIMER_INITIALIZED_VAL)
     {
-      ets_timer->priv = NULL;
+      ets_timer->timer_arg = NULL;
     }
 
-  if (ets_timer->priv == NULL)
+  if (ets_timer->timer_arg == NULL)
     {
       const esp_timer_create_args_t create_args =
         {
@@ -2541,8 +2524,8 @@ static void esp_timer_setfn(void *ptimer, void *pfunction, void *parg)
         }
       else
         {
-          ets_timer->priv = esp_timer;
-          ets_timer->expire = TIMER_INITIALIZED_VAL;
+          ets_timer->timer_arg = esp_timer;
+          ets_timer->timer_expire = TIMER_INITIALIZED_VAL;
         }
     }
 }
@@ -2567,9 +2550,9 @@ static void esp_timer_arm_us(void *ptimer, uint32_t us, bool repeat)
 {
   int ret;
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
-  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->priv;
+  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->timer_arg;
 
-  if (ets_timer->expire == TIMER_INITIALIZED_VAL)
+  if (ets_timer->timer_expire == TIMER_INITIALIZED_VAL)
     {
       esp_timer_stop(esp_timer);
       if (!repeat)
@@ -3131,7 +3114,7 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
  *
  ****************************************************************************/
 
-static void esp_log_writev(uint32_t level, const char *tag,
+void esp_log_writev(uint32_t level, const char *tag,
                            const char *format, va_list args)
 {
   switch (level)
@@ -3716,32 +3699,6 @@ static void *wifi_coex_get_schm_curr_phase(void)
 }
 
 /****************************************************************************
- * Name: wifi_coex_set_schm_curr_phase_idx
- *
- * Description:
- *   Don't support
- *
- ****************************************************************************/
-
-static int wifi_coex_set_schm_curr_phase_idx(int idx)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: wifi_coex_get_schm_curr_phase_idx
- *
- * Description:
- *   Don't support
- *
- ****************************************************************************/
-
-static int wifi_coex_get_schm_curr_phase_idx(void)
-{
-  return 0;
-}
-
-/****************************************************************************
  * Name: wifi_coex_register_start_cb_wrapper
  *
  * Description:
@@ -3750,6 +3707,32 @@ static int wifi_coex_get_schm_curr_phase_idx(void)
  ****************************************************************************/
 
 static int wifi_coex_register_start_cb_wrapper(int (* cb)(void))
+{
+  return 0;
+}
+
+/****************************************************************************
+ * Name: wifi_coex_schm_process_restart_wrapper
+ *
+ * Description:
+ *   Don't support
+ *
+ ****************************************************************************/
+
+static int wifi_coex_schm_process_restart_wrapper(void)
+{
+  return 0;
+}
+
+/****************************************************************************
+ * Name: wifi_coex_schm_register_cb_wrapper
+ *
+ * Description:
+ *   Don't support
+ *
+ ****************************************************************************/
+
+static int wifi_coex_schm_register_cb_wrapper(int type, int(*cb)(int))
 {
   return 0;
 }

@@ -93,7 +93,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       newmem = mm_malloc(heap, size);
       if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, size);
+          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(heap, oldmem)));
           mm_free(heap, oldmem);
         }
 

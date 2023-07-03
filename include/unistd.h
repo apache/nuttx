@@ -61,13 +61,14 @@
 #undef  _POSIX_FSYNC
 #define _POSIX_SYNCHRONIZED_IO 1
 
+#define _POSIX_VERSION 201712L
+#define _POSIX_PRIORITIZED_IO _POSIX_VERSION
+
 #ifdef CONFIG_FS_AIO
-#  define _POSIX_ASYNCHRONOUS_IO 1
+#  define _POSIX_ASYNCHRONOUS_IO _POSIX_VERSION
 #else
 #  undef  _POSIX_ASYNCHRONOUS_IO
 #endif
-
-#undef  _POSIX_PRIORITIZED_IO
 
 #ifdef CONFIG_SCHED_SPORADIC
 #  define _POSIX_SPORADIC_SERVER 1
@@ -306,6 +307,7 @@ extern "C"
 
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   getpgrp(void);
 pid_t   gettid(void);
 pid_t   getppid(void);
 void    _exit(int status) noreturn_function;
@@ -433,6 +435,74 @@ int     setregid(gid_t rgid, gid_t egid);
 int     getentropy(FAR void *buffer, size_t length);
 
 void    sync(void);
+
+#if CONFIG_FORTIFY_SOURCE > 0
+fortify_function(getcwd) FAR char *getcwd(FAR char *buf,
+                                          size_t size)
+{
+  fortify_assert(size <= fortify_size(buf, 0));
+  return __real_getcwd(buf, size);
+}
+
+fortify_function(gethostname) int gethostname(FAR char *name,
+                                              size_t namelen)
+{
+  fortify_assert(namelen <= fortify_size(name, 0));
+  return __real_gethostname(name, namelen);
+}
+
+fortify_function(pread) ssize_t pread(int fd, FAR void *buf,
+                                      size_t nbytes, off_t offset)
+{
+  fortify_assert(nbytes <= fortify_size(buf, 0));
+  return __real_pread(fd, buf, nbytes, offset);
+}
+
+fortify_function(read) ssize_t read(int fd, FAR void *buf,
+                                    size_t nbytes)
+{
+  fortify_assert(nbytes <= fortify_size(buf, 0));
+  return __real_read(fd, buf, nbytes);
+}
+
+fortify_function(readlink) ssize_t readlink(FAR const char *path,
+                                            FAR char *buf,
+                                            size_t bufsize)
+{
+  fortify_assert(bufsize <= fortify_size(buf, 0));
+  return __real_readlink(path, buf, bufsize);
+}
+
+fortify_function(readlinkat) ssize_t readlinkat(int dirfd,
+                                                FAR const char *path,
+                                                FAR char *buf,
+                                                size_t bufsize)
+{
+  fortify_assert(bufsize <= fortify_size(buf, 0));
+  return __real_readlinkat(dirfd, path, buf, bufsize);
+}
+
+fortify_function(ttyname_r) int ttyname_r(int fd, FAR char *buf,
+                                          size_t buflen)
+{
+  fortify_assert(buflen <= fortify_size(buf, 0));
+  return __real_ttyname_r(fd, buf, buflen);
+}
+
+fortify_function(pwrite) ssize_t pwrite(int fd, FAR const void *buf,
+                                        size_t nbytes, off_t offset)
+{
+  fortify_assert(nbytes <= fortify_size(buf, 0));
+  return __real_pwrite(fd, buf, nbytes, offset);
+}
+
+fortify_function(write) ssize_t write(int fd, FAR const void *buf,
+                                      size_t nbytes)
+{
+  fortify_assert(nbytes <= fortify_size(buf, 0));
+  return __real_write(fd, buf, nbytes);
+}
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

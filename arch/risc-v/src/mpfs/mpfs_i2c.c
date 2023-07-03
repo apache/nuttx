@@ -93,7 +93,7 @@ typedef enum mpfs_i2c_clock_divider
   MPFS_I2C_NUMBER_OF_DIVIDERS
 } mpfs_i2c_clk_div_t;
 
-static const uint32_t mpfs_i2c_frequencies[MPFS_I2C_NUMBER_OF_DIVIDERS] =
+static const uint32_t mpfs_i2c_freqs[MPFS_I2C_NUMBER_OF_DIVIDERS] =
 {
   MPFS_MSS_APB_AHB_CLK / 256,
   MPFS_MSS_APB_AHB_CLK / 224,
@@ -102,6 +102,18 @@ static const uint32_t mpfs_i2c_frequencies[MPFS_I2C_NUMBER_OF_DIVIDERS] =
   MPFS_MSS_APB_AHB_CLK / 960,
   MPFS_MSS_APB_AHB_CLK / 120,
   MPFS_MSS_APB_AHB_CLK / 60,
+  MPFS_FPGA_BCLK / 8
+};
+
+static const uint32_t mpfs_i2c_freqs_fpga[MPFS_I2C_NUMBER_OF_DIVIDERS] =
+{
+  MPFS_FPGA_PERIPHERAL_CLK / 256,
+  MPFS_FPGA_PERIPHERAL_CLK / 224,
+  MPFS_FPGA_PERIPHERAL_CLK / 192,
+  MPFS_FPGA_PERIPHERAL_CLK / 160,
+  MPFS_FPGA_PERIPHERAL_CLK / 960,
+  MPFS_FPGA_PERIPHERAL_CLK / 120,
+  MPFS_FPGA_PERIPHERAL_CLK / 60,
   MPFS_FPGA_BCLK / 8
 };
 
@@ -150,9 +162,12 @@ struct mpfs_i2c_priv_s
   mpfs_i2c_status_t      status;      /* Bus driver status */
 
   bool                   initialized; /* Bus initialization status */
+  bool                   fpga;        /* FPGA i2c */
 };
 
-#ifdef CONFIG_MPFS_I2C0
+#ifndef CONFIG_MPFS_COREI2C
+
+#  ifdef CONFIG_MPFS_I2C0
 static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
 {
   .ops            = &mpfs_i2c_ops,
@@ -171,11 +186,12 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
   .rx_size        = 0,
   .rx_idx         = 0,
   .status         = MPFS_I2C_SUCCESS,
-  .initialized    = false
+  .initialized    = false,
+  .fpga           = false
 };
-#endif /* CONFIG_MPFS_I2C0 */
+#  endif /* CONFIG_MPFS_I2C0 */
 
-#ifdef CONFIG_MPFS_I2C1
+#  ifdef CONFIG_MPFS_I2C1
 static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
 {
   .ops            = &mpfs_i2c_ops,
@@ -194,9 +210,60 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
   .rx_size        = 0,
   .rx_idx         = 0,
   .status         = MPFS_I2C_SUCCESS,
-  .initialized    = false
+  .initialized    = false,
+  .fpga           = false
 };
-#endif /* CONFIG_MPFS_I2C1 */
+#  endif /* CONFIG_MPFS_I2C1 */
+
+#else  /* ifndef CONFIG_MPFS_COREI2C */
+
+static struct mpfs_i2c_priv_s
+  g_mpfs_corei2c_priv[CONFIG_MPFS_COREI2C_INSTANCES] =
+{
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 1)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 2)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 3)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 4)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 5)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 6)
+  {
+    .lock           = NXMUTEX_INITIALIZER,
+  },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 7)
+    {
+    .lock           = NXMUTEX_INITIALIZER,
+    },
+#  endif
+#  if (CONFIG_MPFS_COREI2C_INSTANCES > 8)
+#  error Too many instances (>8)
+#  endif
+};
+
+#endif
 
 static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
                                   uint32_t frequency);
@@ -204,40 +271,6 @@ static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: mpfs_disable_interrupts
- *
- * Description:
- *   Disable all interrupts.
- *
- * Returned Value:
- *   primask (current interrupt status)
- *
- ****************************************************************************/
-
-static irqstate_t mpfs_disable_interrupts(void)
-{
-  irqstate_t primask;
-  primask = up_irq_save();
-  return primask;
-}
-
-/****************************************************************************
- * Name: mpfs_restore_interrupts
- *
- * Description:
- *   Restore interrupts.
- *
- * Parameters:
- *   primask       - Earlier stored irqstate
- *
- ****************************************************************************/
-
-static void mpfs_restore_interrupts(irqstate_t primask)
-{
-  up_irq_restore(primask);
-}
 
 /****************************************************************************
  * Name: mpfs_i2c_init
@@ -256,13 +289,23 @@ static void mpfs_restore_interrupts(irqstate_t primask)
 
 static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
-  uint32_t primask;
-
   if (!priv->initialized)
     {
-      primask = mpfs_disable_interrupts();
+      if (priv->fpga)
+        {
+          /* FIC3 is used by many, don't reset it here, or many
+           * FPGA based modules will stop working right here. Just
+           * bring out of reset instead.
+           */
 
-      if (priv->id == 0)
+          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+                      SYSREG_SOFT_RESET_CR_FIC3 | SYSREG_SOFT_RESET_CR_FPGA,
+                      0);
+
+          modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
+                      SYSREG_SUBBLK_CLOCK_CR_FIC3);
+        }
+      else if (priv->id == 0)
         {
           modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
                       0, SYSREG_SOFT_RESET_CR_I2C0);
@@ -273,7 +316,7 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
           modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
                       0, SYSREG_SUBBLK_CLOCK_CR_I2C0);
         }
-      else
+      else if (priv->id == 1)
         {
           modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
                       0, SYSREG_SOFT_RESET_CR_I2C1);
@@ -284,10 +327,23 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
           modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
                       0, SYSREG_SUBBLK_CLOCK_CR_I2C1);
         }
+      else
+        {
+          /* Don't know which one, let's panic */
+
+          PANIC();
+        }
 
       /* Divider is zero after I2C reset */
 
-      priv->frequency = mpfs_i2c_frequencies[0];
+      if (priv->fpga)
+        {
+          priv->frequency = mpfs_i2c_freqs_fpga[0];
+        }
+      else
+        {
+          priv->frequency = mpfs_i2c_freqs[0];
+        }
 
       /* This is our own address, not the target chip */
 
@@ -299,8 +355,6 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
                   MPFS_I2C_CTRL_ENS1_MASK);
 
       priv->initialized = true;
-
-      mpfs_restore_interrupts(primask);
     }
 
   return OK;
@@ -345,7 +399,7 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
 
 static int mpfs_i2c_sem_waitdone(struct mpfs_i2c_priv_s *priv)
 {
-  return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(10));
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(1));
 }
 
 /****************************************************************************
@@ -401,13 +455,11 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
         modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
         clear_irq = 0u;
-        modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK,
-                    MPFS_I2C_CTRL_STA_MASK);
+        modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
         break;
 
       case MPFS_I2C_ST_SLAW_NACK:
-        modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STO_MASK,
-                    MPFS_I2C_CTRL_STO_MASK);
+        modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
         priv->status = MPFS_I2C_FAILED;
         break;
 
@@ -425,8 +477,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
             modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
             clear_irq = 0u;
-            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK,
-                        MPFS_I2C_CTRL_STA_MASK);
+            modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 
           /* Jump to the next message */
 
@@ -436,23 +487,39 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
           {
             /* Send stop condition */
 
-            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STO_MASK,
-                        MPFS_I2C_CTRL_STO_MASK);
+            if (priv->fpga && (priv->rx_idx == 0 && priv->rx_size > 0))
+              {
+                /* This is a known bug: FPGA IP sends data twice after
+                 * sending the address occasionally. Instead of sending
+                 * STOP, send repeated start instead.
+                 */
+
+                modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                clear_irq = 0u;
+                modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
+
+               /* Jump to the next message */
+
+                priv->msgid++;
+              }
+            else
+              {
+                modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+              }
+
             priv->status = MPFS_I2C_SUCCESS;
           }
         break;
 
       case MPFS_I2C_ST_TX_DATA_NACK:
-        modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STO_MASK,
-                    MPFS_I2C_CTRL_STO_MASK);
+        modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
         priv->status = MPFS_I2C_FAILED;
         break;
 
       case MPFS_I2C_ST_SLAR_ACK: /* SLA+R tx'ed. */
         if (priv->rx_size > 1u)
           {
-            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_AA_MASK,
-                        MPFS_I2C_CTRL_AA_MASK);
+            modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_AA_MASK);
           }
         else if (priv->rx_size == 1u)
           {
@@ -460,17 +527,14 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
           }
         else /* priv->rx_size == 0u */
           {
-            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_AA_MASK,
-                        MPFS_I2C_CTRL_AA_MASK);
-            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STO_MASK,
-                        MPFS_I2C_CTRL_STO_MASK);
+            modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_AA_MASK);
+            modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
             priv->status = MPFS_I2C_SUCCESS;
           }
         break;
 
       case MPFS_I2C_ST_SLAR_NACK: /* SLA+R tx'ed; send a stop condition */
-        modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STO_MASK,
-                    MPFS_I2C_CTRL_STO_MASK);
+        modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
         priv->status = MPFS_I2C_FAILED;
         break;
 
@@ -493,12 +557,19 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         /* Data byte received, NACK returned */
 
         DEBUGASSERT(priv->rx_buffer != NULL);
+        DEBUGASSERT(priv->rx_idx < priv->rx_size);
         priv->rx_buffer[priv->rx_idx] = (uint8_t)getreg32(MPFS_I2C_DATA);
-
-        modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STO_MASK,
-                    MPFS_I2C_CTRL_STO_MASK);
+        priv->rx_idx++;
 
         priv->status = MPFS_I2C_SUCCESS;
+        modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+        break;
+
+      case MPFS_I2C_ST_IDLE:
+      case MPFS_I2C_ST_STOP_SENT:
+
+        /* No activity, bus idle */
+
         break;
 
       case MPFS_I2C_ST_RESET_ACTIVATED:
@@ -515,8 +586,29 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         break;
     }
 
-  if (priv->status != MPFS_I2C_IN_PROGRESS)
+  if (priv->fpga)
     {
+      /* FPGA driver terminates all transactions with STOP sent irq */
+
+      if (status == MPFS_I2C_ST_STOP_SENT)
+        {
+          /* Don't post on a new request, STOPs possible initially */
+
+          if (!((priv->rx_idx == 0 && priv->rx_size > 0) ||
+             (priv->tx_idx == 0 && priv->tx_size > 0)))
+            {
+              nxsem_post(&priv->sem_isr);
+            }
+          else if (priv->status == MPFS_I2C_FAILED)
+            {
+              nxsem_post(&priv->sem_isr);
+            }
+        }
+    }
+  else if (priv->status != MPFS_I2C_IN_PROGRESS)
+    {
+      /* MSS I2C has no STOP SENT irq */
+
       nxsem_post(&priv->sem_isr);
     }
 
@@ -549,15 +641,8 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
 static void mpfs_i2c_sendstart(struct mpfs_i2c_priv_s *priv)
 {
-  uint32_t primask;
-
-  primask = mpfs_disable_interrupts();
-
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_STA_MASK);
-
   up_enable_irq(priv->plic_irq);
-
-  mpfs_restore_interrupts(primask);
+  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_STA_MASK);
 }
 
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
@@ -595,12 +680,22 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
           priv->rx_buffer = msgs[i].buffer;
           priv->rx_size = msgs[i].length;
           priv->rx_idx = 0;
+
+          /* Clear tx_idx as well for combined transactions */
+
+          priv->tx_idx = 0;
+          priv->tx_size = 0;
         }
       else
         {
           priv->tx_buffer = msgs[i].buffer;
           priv->tx_size = msgs[i].length;
           priv->tx_idx = 0;
+
+          /* Clear rx_idx as well for combined transactions */
+
+          priv->rx_idx = 0;
+          priv->rx_size = 0;
 
           if (msgs[i].flags & I2C_M_NOSTOP)
             {
@@ -677,8 +772,15 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
   int ret;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
+
+  flags = enter_critical_section();
+
+  /* Disabling I2C interrupts.
+   * NOTE: up_enable_irq() will be called at mpfs_i2c_sendstart()
+   */
 
   up_disable_irq(priv->plic_irq);
 
@@ -687,7 +789,7 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
-      up_enable_irq(priv->plic_irq);
+      leave_critical_section(flags);
       return ret;
     }
 
@@ -696,7 +798,7 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   priv->rx_size = 0;
   priv->rx_idx  = 0;
 
-  /* up_enable_irq() will be called at mpfs_i2c_sendstart() */
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -729,13 +831,30 @@ static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
        * which is smaller than or equal to requested
        */
 
-      for (uint8_t i = 0; i < MPFS_I2C_NUMBER_OF_DIVIDERS; i++)
+      if (priv->fpga)
         {
-          if (frequency >= mpfs_i2c_frequencies[i]
-              && mpfs_i2c_frequencies[i] > new_freq)
+          /* FPGA clk differs from the others */
+
+          for (uint8_t i = 0; i < MPFS_I2C_NUMBER_OF_DIVIDERS; i++)
             {
-              new_freq = mpfs_i2c_frequencies[i];
-              clock_div = i;
+              if (frequency >= mpfs_i2c_freqs_fpga[i]
+                  && mpfs_i2c_freqs_fpga[i] > new_freq)
+                {
+                  new_freq = mpfs_i2c_freqs_fpga[i];
+                  clock_div = i;
+                }
+            }
+        }
+      else
+        {
+          for (uint8_t i = 0; i < MPFS_I2C_NUMBER_OF_DIVIDERS; i++)
+            {
+              if (frequency >= mpfs_i2c_freqs[i]
+                  && mpfs_i2c_freqs[i] > new_freq)
+                {
+                  new_freq = mpfs_i2c_freqs[i];
+                  clock_div = i;
+                }
             }
         }
 
@@ -791,21 +910,34 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
   struct mpfs_i2c_priv_s *priv;
   int ret;
 
+#ifndef CONFIG_MPFS_COREI2C
+
   switch (port)
     {
-#ifdef CONFIG_MPFS_I2C0
+#  ifdef CONFIG_MPFS_I2C0
       case 0:
         priv = &g_mpfs_i2c0_lo_priv;
         break;
-#endif /* CONFIG_MPFS_I2C0 */
-#ifdef CONFIG_MPFS_I2C1
+#  endif /* CONFIG_MPFS_I2C0 */
+#  ifdef CONFIG_MPFS_I2C1
       case 1:
         priv = &g_mpfs_i2c1_lo_priv;
         break;
-#endif /* CONFIG_MPFS_I2C1 */
+#  endif /* CONFIG_MPFS_I2C1 */
       default:
         return NULL;
   }
+
+#else /* ifndef CONFIG_MPFS_COREI2C */
+
+  if (port < 0 || port >= CONFIG_MPFS_COREI2C_INSTANCES)
+    {
+      return NULL;
+    }
+
+  priv = &g_mpfs_corei2c_priv[port];
+
+#endif
 
   nxmutex_lock(&priv->lock);
   if (priv->refs++ != 0)
@@ -817,6 +949,17 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
 
       return (struct i2c_master_s *)priv;
     }
+
+#ifdef CONFIG_MPFS_COREI2C
+  priv->ops = &mpfs_i2c_ops;
+  priv->id = port;
+  priv->hw_base = CONFIG_MPFS_COREI2C_BASE +
+    port * CONFIG_MPFS_COREI2C_INST_OFFSET;
+  priv->plic_irq = MPFS_IRQ_FABRIC_F2H_0 + CONFIG_MPFS_COREI2C_IRQNUM + port;
+  nxsem_init(&priv->sem_isr, 0, 0);
+  priv->status = MPFS_I2C_SUCCESS;
+  priv->fpga = true;
+#endif
 
   ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
   if (ret != OK)

@@ -1664,6 +1664,7 @@ static int esp32_net_initialize(int devno, uint8_t *mac_addr,
   return OK;
 }
 
+#ifdef ESP32_WLAN_HAS_STA
 /****************************************************************************
  * Function: wlan_sta_rx_done
  *
@@ -1681,7 +1682,6 @@ static int esp32_net_initialize(int devno, uint8_t *mac_addr,
  *
  ****************************************************************************/
 
-#ifdef ESP32_WLAN_HAS_STA
 static int wlan_sta_rx_done(void *buffer, uint16_t len, void *eb)
 {
   struct wlan_priv_s *priv = &g_wlan_priv[ESP32_WLAN_STA_DEVNO];
@@ -1714,6 +1714,7 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
 }
 #endif /* ESP32_WLAN_HAS_STA */
 
+#ifdef ESP32_WLAN_HAS_SOFTAP
 /****************************************************************************
  * Function: wlan_softap_rx_done
  *
@@ -1731,7 +1732,6 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  ****************************************************************************/
 
-#ifdef ESP32_WLAN_HAS_SOFTAP
 static int wlan_softap_rx_done(void *buffer, uint16_t len, void *eb)
 {
   struct wlan_priv_s *priv = &g_wlan_priv[ESP32_WLAN_SOFTAP_DEVNO];
@@ -1862,6 +1862,7 @@ int esp32_wlan_sta_initialize(void)
 }
 #endif /* ESP32_WLAN_HAS_STA */
 
+#ifdef ESP32_WLAN_HAS_SOFTAP
 /****************************************************************************
  * Name: esp32_wlan_softap_initialize
  *
@@ -1876,7 +1877,6 @@ int esp32_wlan_sta_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef ESP32_WLAN_HAS_SOFTAP
 int esp32_wlan_softap_initialize(void)
 {
   int ret;

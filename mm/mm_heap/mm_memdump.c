@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <malloc.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -60,9 +59,11 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
     {
       DEBUGASSERT(nodesize >= SIZEOF_MM_ALLOCNODE);
 #if CONFIG_MM_BACKTRACE < 0
-      if (dump->pid == MM_BACKTRACE_ALLOC_PID)
+      if (dump->pid == PID_MM_ALLOC)
 #else
-      if ((dump->pid == MM_BACKTRACE_ALLOC_PID || node->pid == dump->pid) &&
+      if ((dump->pid == node->pid ||
+           (dump->pid == PID_MM_ALLOC && node->pid != PID_MM_MEMPOOL) ||
+           (dump->pid == PID_MM_LEAK && !!nxsched_get_tcb(node->pid))) &&
           node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
 #endif
         {
@@ -71,14 +72,12 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                  nodesize, MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
 #else
-#  if CONFIG_MM_BACKTRACE > 0
-          int i;
-          FAR const char *format = " %0*p";
-#  endif
-          char buf[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1];
+          char buf[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
 
-          buf[0] = '\0';
 #  if CONFIG_MM_BACKTRACE > 0
+          FAR const char *format = " %0*p";
+          int i;
+
           for (i = 0; i < CONFIG_MM_BACKTRACE && node->backtrace[i]; i++)
             {
               snprintf(buf + i * MM_PTR_FMT_WIDTH,
@@ -88,13 +87,13 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 #  endif
 
           syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                 (int)node->pid, nodesize, node->seqno,
+                 node->pid, nodesize, node->seqno,
                  MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE), buf);
 #endif
         }
     }
-  else
+  else if (dump->pid == PID_MM_FREE)
     {
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
 
@@ -107,12 +106,9 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                   SIZEOF_MM_NODE(fnode->flink) == 0 ||
                   SIZEOF_MM_NODE(fnode->flink) >= nodesize);
 
-      if (dump->pid <= MM_BACKTRACE_FREE_PID)
-        {
-          syslog(LOG_INFO, "%12zu%*p\n",
-                 nodesize, MM_PTR_FMT_WIDTH,
-                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
-        }
+      syslog(LOG_INFO, "%12zu%*p\n",
+             nodesize, MM_PTR_FMT_WIDTH,
+             ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
     }
 }
 
@@ -136,7 +132,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 {
   struct mallinfo_task info;
 
-  if (dump->pid >= -1)
+  if (dump->pid >= PID_MM_ALLOC)
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
 #if CONFIG_MM_BACKTRACE < 0

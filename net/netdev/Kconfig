@@ -41,6 +41,14 @@ config NETDEV_WIRELESS_IOCTL
 	---help---
 		Enable support for wireless device ioctl() commands
 
+config NETDEV_MODEM_LTE_IOCTL
+	bool "Enable LTE ioctl()"
+	default n
+	select NETDEV_IOCTL
+	depends on MODEM
+	---help---
+		Enable support for modem device ioctl() commands
+
 config NETDEV_IFINDEX
 	bool "Enable IF index support"
 	default n

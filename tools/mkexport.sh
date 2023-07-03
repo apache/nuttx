@@ -180,9 +180,13 @@ fi
 cp "${TOPDIR}/tools/mkdeps.c" "${EXPORTDIR}/tools/."
 cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 
-# Copy the default linker script
+# Copy the board specific linker if found, or use the default when not.
 
-cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+if [ -f "${BOARDDIR}/scripts/gnu-elf.ld" ]; then
+  cp -f "${BOARDDIR}/scripts/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+else
+  cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+fi
 
 # Copy the board config script
 

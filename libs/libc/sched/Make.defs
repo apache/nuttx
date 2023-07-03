@@ -32,13 +32,12 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_cpucount.c
 endif
 
-ifneq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += task_startup.c
-
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_dumpstack.c sched_backtrace.c
 endif
 
+ifneq ($(CONFIG_BUILD_KERNEL),y)
+CSRCS += task_startup.c
 endif # CONFIG_BUILD_KERNEL
 
 # Add the sched directory to the build

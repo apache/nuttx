@@ -24,6 +24,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/notifier.h>
+#include <nuttx/reboot_notifier.h>
 
 #include <sys/types.h>
 

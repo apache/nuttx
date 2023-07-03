@@ -41,6 +41,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_NRF52_PROGMEM
+#  include "nrf52_progmem.h"
+#endif
+
 #ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
 #  include "nrf52_sdc.h"
 #endif
@@ -118,6 +122,14 @@ int nrf52_bringup(void)
       syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_NRF52_PROGMEM
+  ret = nrf52_progmem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MTD progmem: %d\n", ret);
+    }
+#endif /* CONFIG_MTD */
 
   UNUSED(ret);
   return OK;

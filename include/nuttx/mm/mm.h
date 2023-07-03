@@ -29,6 +29,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <malloc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -98,16 +99,13 @@
 #  endif
 #endif
 
-#define MM_BACKTRACE_MEMPOOL_PID ((pid_t)-3)
-#define MM_BACKTRACE_FREE_PID    ((pid_t)-2)
-#define MM_BACKTRACE_ALLOC_PID   ((pid_t)-1)
+#define mm_memdump_s malltask
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 struct mm_heap_s; /* Forward reference */
-struct mm_memdump_s;
 
 /****************************************************************************
  * Public Data
@@ -120,6 +118,10 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+#if CONFIG_MM_BACKTRACE >= 0
+extern unsigned long g_mm_seqno;
 #endif
 
 /* User heap structure:
@@ -313,18 +315,16 @@ void kmm_extend(FAR void *mem, size_t size, int region);
 
 /* Functions contained in mm_mallinfo.c *************************************/
 
-struct mallinfo; /* Forward reference */
-int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
-struct mallinfo_task; /* Forward reference */
+struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap);
 struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
-                                      FAR const struct mm_memdump_s *dump);
+                                      FAR const struct malltask *task);
 
 /* Functions contained in kmm_mallinfo.c ************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 struct mallinfo kmm_mallinfo(void);
 #  if CONFIG_MM_BACKTRACE >= 0
-struct mallinfo_task kmm_mallinfo_task(FAR const struct mm_memdump_s *dump);
+struct mallinfo_task kmm_mallinfo_task(FAR const struct malltask *task);
 #  endif
 #endif
 

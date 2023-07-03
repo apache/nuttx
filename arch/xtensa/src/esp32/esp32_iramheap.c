@@ -26,7 +26,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
-#include <malloc.h>
 
 #include "esp32_iramheap.h"
 
@@ -175,7 +174,7 @@ bool esp32_iramheap_heapmember(void *mem)
  *
  ****************************************************************************/
 
-int esp32_iramheap_mallinfo(struct mallinfo *info)
+struct mallinfo esp32_iramheap_mallinfo(void)
 {
-  return mm_mallinfo(g_iramheap, info);
+  return mm_mallinfo(g_iramheap);
 }

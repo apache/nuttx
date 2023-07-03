@@ -11,4 +11,19 @@ config OPENAMP
 
 if OPENAMP
 
+config OPENAMP_CACHE
+	bool "Enable OpenAMP Cache support"
+	default n
+	---help---
+		Enable or disable OpenAMP Cache support (VIRTIO_CACHED_BUFFERS and
+		VIRTIO_CACHED_VRINGS)
+
+config OPENAMP_RPMSG_DEBUG
+	bool "Enable OpenAMP Rpmsg Debug"
+	default n
+
+config OPENAMP_VQUEUE_DEBUG
+	bool "Enable OpenAMP Virtio Queue Debug"
+	default n
+
 endif # OPENAMP

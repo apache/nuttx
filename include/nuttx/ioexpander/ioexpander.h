@@ -48,6 +48,7 @@
 #define IOEXPANDER_DIRECTION_IN_PULLDOWN   2
 #define IOEXPANDER_DIRECTION_OUT           3  /* push-pull */
 #define IOEXPANDER_DIRECTION_OUT_OPENDRAIN 4
+#define IOEXPANDER_DIRECTION_OUT_LED       5  /* LED output */
 
 #define IOEXPANDER_PINMASK         (((ioe_pinset_t)1 << CONFIG_IOEXPANDER_NPINS) - 1)
 #define PINSET_ALL                 (~((ioe_pinset_t)0))
@@ -67,6 +68,8 @@
 #    define IOEXPANDER_VAL_RISING  6  /* 0110 Interrupt on rising edge */
 #    define IOEXPANDER_VAL_FALLING 10 /* 1010 Interrupt on falling edge */
 #    define IOEXPANDER_VAL_BOTH    14 /* 1110 Interrupt on both edges */
+
+#define IOEXPANDER_OPTION_LEDCFG   3  /* Assign LED number to a pin */
 
 /* Access macros ************************************************************/
 
@@ -322,13 +325,13 @@ struct ioexpander_ops_s
                           FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
   CODE int (*ioe_multiwritepin)(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
+                                FAR const uint8_t *pins, FAR bool *values,
                                 int count);
   CODE int (*ioe_multireadpin)(FAR struct ioexpander_dev_s *dev,
-                               FAR uint8_t *pins, FAR bool *values,
+                               FAR const uint8_t *pins, FAR bool *values,
                                int count);
   CODE int (*ioe_multireadbuf)(FAR struct ioexpander_dev_s *dev,
-                               FAR uint8_t *pins, FAR bool *values,
+                               FAR const uint8_t *pins, FAR bool *values,
                                int count);
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE

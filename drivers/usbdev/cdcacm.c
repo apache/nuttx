@@ -2355,10 +2355,10 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
 #endif
-        cfsetispeed(termiosp, (speed_t) priv->linecoding.baud[3] << 24 |
-                              (speed_t) priv->linecoding.baud[2] << 16 |
-                              (speed_t) priv->linecoding.baud[1] << 8  |
-                              (speed_t) priv->linecoding.baud[0]);
+      cfsetispeed(termiosp, (speed_t)priv->linecoding.baud[3] << 24 |
+                            (speed_t)priv->linecoding.baud[2] << 16 |
+                            (speed_t)priv->linecoding.baud[1] << 8  |
+                            (speed_t)priv->linecoding.baud[0]);
       }
       break;
 
@@ -2963,13 +2963,17 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   /* Register the USB serial console */
 
 #ifdef CONFIG_CDCACM_CONSOLE
-  priv->serdev.isconsole = true;
-  ret = uart_register("/dev/console", &priv->serdev);
-  if (ret < 0)
+  if (minor == 0)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONSOLEREGISTER),
-               (uint16_t)-ret);
-      goto errout_with_class;
+      priv->serdev.isconsole = true;
+
+      ret = uart_register("/dev/console", &priv->serdev);
+      if (ret < 0)
+        {
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONSOLEREGISTER),
+                   (uint16_t)-ret);
+          goto errout_with_class;
+        }
     }
 #endif
 

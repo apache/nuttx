@@ -25,11 +25,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <malloc.h>
 #include <sys/types.h>
 
 #include <nuttx/list.h>
 #include <nuttx/queue.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -39,11 +39,11 @@
  ****************************************************************************/
 
 #if CONFIG_MM_BACKTRACE >= 0
-#  define MEMPOOL_REALBLOCKSIZE(pool) (ALIGN_UP(pool->blocksize + \
-                                      sizeof(struct mempool_backtrace_s), \
-                                      pool->blockalign))
+#  define MEMPOOL_REALBLOCKSIZE(pool) (ALIGN_UP((pool)->blocksize + \
+                                       sizeof(struct mempool_backtrace_s), \
+                                       (pool)->blockalign))
 #else
-#  define MEMPOOL_REALBLOCKSIZE(pool) (pool->blocksize)
+#  define MEMPOOL_REALBLOCKSIZE(pool) ((pool)->blocksize)
 #endif
 
 /****************************************************************************
@@ -60,6 +60,11 @@ typedef CODE FAR void *(*mempool_multiple_alloc_t)(FAR void *arg,
                                                    size_t alignment,
                                                    size_t size);
 typedef CODE void (*mempool_multiple_free_t)(FAR void *arg, FAR void *addr);
+typedef CODE size_t (*mempool_multiple_alloc_size_t)(FAR void *arg,
+                                                     FAR void *addr);
+
+typedef CODE void (mempool_multiple_foreach_t)(FAR struct mempool_s *pool,
+                                               FAR void *arg);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
 struct mempool_procfs_entry_s
@@ -106,8 +111,6 @@ struct mempool_s
 #endif
   spinlock_t lock;      /* The protect lock to mempool */
   sem_t      waitsem;   /* The semaphore of waiter get free block */
-  size_t     nexpend;   /* The number of expend memory for mempool */
-  size_t     totalsize; /* Total size of the expend for mempoll */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
@@ -134,8 +137,6 @@ struct mempoolinfo_s
   unsigned long sizeblks; /* This is the size of a mempool blocks */
   unsigned long nwaiter;  /* This is the number of waiter for mempool */
 };
-
-#define mempoolinfo_task mallinfo_task
 
 /****************************************************************************
  * Public Function Prototypes
@@ -259,15 +260,15 @@ int mempool_deinit(FAR struct mempool_s *pool);
  *
  * Input Parameters:
  *   pool    - Address of the memory pool to be used.
- *   dump    - The information of what need dump.
+ *   task    - The information of what need retrieve.
  *
  * Returned Value:
  *   Statistics of memory information based on dump.
  ****************************************************************************/
 
-struct mempoolinfo_task
+struct mallinfo_task
 mempool_info_task(FAR struct mempool_s *pool,
-                  FAR const struct mm_memdump_s *dump);
+                  FAR const struct malltask *task);
 
 /****************************************************************************
  * Name: mempool_procfs_register
@@ -319,8 +320,10 @@ void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
  *   poolsize        - The block size array for pools in multiples pool.
  *   npools          - How many pools in multiples pool.
  *   alloc           - The alloc memory function for multiples pool.
+ *   alloc_size      - Get the address size of the alloc function.
  *   free            - The free memory function for multiples pool.
  *   arg             - The alloc & free memory fuctions used arg.
+ *   chunksize       - The multiples pool chunk size.
  *   expandsize      - The expend mempry for all pools in multiples pool.
  *   dict_expendsize - The expend size for multiple dictnoary.
  * Returned Value:
@@ -335,8 +338,9 @@ FAR struct mempool_multiple_s *
 mempool_multiple_init(FAR const char *name,
                       FAR size_t *poolsize, size_t npools,
                       mempool_multiple_alloc_t alloc,
-                      mempool_multiple_free_t free,
-                      FAR void *arg, size_t expandsize,
+                      mempool_multiple_alloc_size_t alloc_size,
+                      mempool_multiple_free_t free, FAR void *arg,
+                      size_t chunksize, size_t expandsize,
                       size_t dict_expendsize);
 
 /****************************************************************************
@@ -481,12 +485,23 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
 void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
 
 /****************************************************************************
-  * Name: mempool_multiple_info
+ * Name: mempool_multiple_foreach
  * Description:
- *   Dump multiple memory pool's info.
+ *   Traverse mempool under multiple pool to execute handle.
  ****************************************************************************/
 
-void mempool_multiple_info(FAR struct mempool_multiple_s *mpool);
+void mempool_multiple_foreach(FAR struct mempool_multiple_s *mpool,
+                              mempool_multiple_foreach_t handle,
+                              FAR void *arg);
+
+/****************************************************************************
+ * Name: mempool_multiple_mallinfo
+ * Description:
+ *   mallinfo returns a copy of updated current multiples pool information.
+ ****************************************************************************/
+
+struct mallinfo
+mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool);
 
 /****************************************************************************
  * Name: mempool_multiple_info_task
@@ -495,15 +510,15 @@ void mempool_multiple_info(FAR struct mempool_multiple_s *mpool);
  *
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
- *   dump  - The information of what need dump.
+ *   task  - The information of what need retrieve.
  *
  * Returned Value:
  *    Statistics of memory information based on dump.
  ****************************************************************************/
 
-struct mempoolinfo_task
+struct mallinfo_task
 mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
-                           FAR const struct mm_memdump_s *dump);
+                           FAR const struct malltask *task);
 
 #undef EXTERN
 #if defined(__cplusplus)

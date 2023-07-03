@@ -27,7 +27,6 @@
 #include <assert.h>
 #include <debug.h>
 #include <string.h>
-#include <malloc.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
@@ -79,14 +78,26 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   struct mallinfo_task info;
-  struct mm_memdump_s dump;
+  struct malltask task;
 
-  dump.pid = tcb->pid;
-  dump.seqmin = 0;
-  dump.seqmax = ULONG_MAX;
-  info = mm_mallinfo_task(arg, &dump);
+  task.pid = tcb ? tcb->pid : PID_MM_LEAK;
+  task.seqmin = 0;
+  task.seqmax = ULONG_MAX;
+  info = mm_mallinfo_task(arg, &task);
   mwarn("pid:%5d, used:%10d, nused:%10d\n",
-        tcb->pid, info.uordblks, info.aordblks);
+        task.pid, info.uordblks, info.aordblks);
+}
+#endif
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+void mm_mempool_dump_handle(FAR struct mempool_s *pool, FAR void *arg)
+{
+  struct mempoolinfo_s info;
+
+  mempool_info(pool, &info);
+  mwarn("%9lu%11lu%9lu%9lu%9lu%9lu\n",
+        info.sizeblks, info.arena, info.aordblks,
+        info.ordblks, info.iordblks, info.nwaiter);
 }
 #endif
 
@@ -260,21 +271,34 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     {
 #ifdef CONFIG_MM_DUMP_ON_FAILURE
       struct mallinfo minfo;
+#  ifdef CONFIG_MM_DUMP_DETAILS_ON_FAILURE
+      struct mm_memdump_s dump =
+      {
+        PID_MM_ALLOC, 0, ULONG_MAX
+      };
+#  endif
 #endif
 
       mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
 #ifdef CONFIG_MM_DUMP_ON_FAILURE
-      mm_mallinfo(heap, &minfo);
+      minfo = mm_mallinfo(heap);
       mwarn("Total:%d, used:%d, free:%d, largest:%d, nused:%d, nfree:%d\n",
             minfo.arena, minfo.uordblks, minfo.fordblks,
             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
 #  if CONFIG_MM_BACKTRACE >= 0
       nxsched_foreach(mm_dump_handler, heap);
+      mm_dump_handler(NULL, heap);
 #  endif
 #  if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-      mempool_multiple_info(heap->mm_mpool);
+      mwarn("%11s%9s%9s%9s%9s%9s\n",
+            "bsize", "total", "nused",
+            "nfree", "nifree", "nwaiter");
+      mempool_multiple_foreach(heap->mm_mpool,
+                               mm_mempool_dump_handle, NULL);
 #  endif
-
+#  ifdef CONFIG_MM_DUMP_DETAILS_ON_FAILURE
+      mm_memdump(heap, &dump);
+#  endif
 #endif
 #ifdef CONFIG_MM_PANIC_ON_FAILURE
       PANIC();

@@ -1026,7 +1026,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case TSIOC_SETCALIB:  /* arg: Pointer to int calibration value */
+      case TSIOC_SETXRCAL:  /* arg: Pointer to int calibration value */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
@@ -1034,7 +1034,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case TSIOC_GETCALIB:  /* arg: Pointer to int calibration value */
+      case TSIOC_GETXRCAL:  /* arg: Pointer to int calibration value */
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);

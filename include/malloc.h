@@ -31,6 +31,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Special PID to query the info about alloc, free and mempool */
+
+#define PID_MM_FREE    ((pid_t)-4)
+#define PID_MM_ALLOC   ((pid_t)-3)
+#define PID_MM_LEAK    ((pid_t)-2)
+#define PID_MM_MEMPOOL ((pid_t)-1)
+
 /* For Linux and MacOS compatibility */
 
 #define malloc_usable_size malloc_size
@@ -52,7 +59,7 @@ struct mallinfo
                  * by free (not in use) chunks. */
 };
 
-struct mm_memdump_s
+struct malltask
 {
   pid_t pid; /* Process id */
 #if CONFIG_MM_BACKTRACE >= 0
@@ -68,14 +75,6 @@ struct mallinfo_task
 };
 
 /****************************************************************************
- * Public data
- ****************************************************************************/
-
-#if CONFIG_MM_BACKTRACE >= 0
-extern unsigned long g_mm_seqno;
-#endif
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -86,7 +85,7 @@ extern "C"
 
 struct mallinfo mallinfo(void);
 size_t malloc_size(FAR void *ptr);
-struct mallinfo_task mallinfo_task(FAR const struct mm_memdump_s *dump);
+struct mallinfo_task mallinfo_task(FAR const struct malltask *task);
 
 #if defined(__cplusplus)
 }

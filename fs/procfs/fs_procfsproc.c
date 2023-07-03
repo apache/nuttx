@@ -886,20 +886,20 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize = 0;
   struct mallinfo_task info;
-  struct mm_memdump_s dump;
+  struct malltask task;
 
-  dump.pid = tcb->pid;
-  dump.seqmin = 0;
-  dump.seqmax = ULONG_MAX;
+  task.pid = tcb->pid;
+  task.seqmin = 0;
+  task.seqmax = ULONG_MAX;
 #ifdef CONFIG_MM_KERNEL_HEAP
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
-      info = kmm_mallinfo_task(&dump);
+      info = kmm_mallinfo_task(&task);
     }
   else
 #endif
     {
-      info = mallinfo_task(&dump);
+      info = mallinfo_task(&task);
     }
 
   /* Show the heap alloc size */
@@ -1474,7 +1474,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
-      ferr("ERROR: PID %d is no longer valid\n", (int)pid);
+      ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;
     }
 
@@ -1561,7 +1561,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
   tcb = nxsched_get_tcb(procfile->pid);
   if (tcb == NULL)
     {
-      ferr("ERROR: PID %d is not valid\n", (int)procfile->pid);
+      ferr("ERROR: PID %d is not valid\n", procfile->pid);
       return -ENODEV;
     }
 
@@ -1651,7 +1651,7 @@ static ssize_t proc_write(FAR struct file *filep, FAR const char *buffer,
   tcb = nxsched_get_tcb(procfile->pid);
   if (tcb == NULL)
     {
-      ferr("ERROR: PID %d is not valid\n", (int)procfile->pid);
+      ferr("ERROR: PID %d is not valid\n", procfile->pid);
       return -ENODEV;
     }
 
@@ -1780,7 +1780,7 @@ static int proc_opendir(FAR const char *relpath,
   tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
-      ferr("ERROR: PID %d is not valid\n", (int)pid);
+      ferr("ERROR: PID %d is not valid\n", pid);
       return -ENOENT;
     }
 
@@ -1900,7 +1900,7 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
       tcb = nxsched_get_tcb(pid);
       if (tcb == NULL)
         {
-          ferr("ERROR: PID %d is no longer valid\n", (int)pid);
+          ferr("ERROR: PID %d is no longer valid\n", pid);
           return -ENOENT;
         }
 
@@ -2018,7 +2018,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
   tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
-      ferr("ERROR: PID %d is no longer valid\n", (int)pid);
+      ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;
     }
 

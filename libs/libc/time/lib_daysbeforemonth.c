@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/time.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Private Data

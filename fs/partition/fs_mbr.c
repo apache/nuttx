@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <endian.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 
@@ -135,6 +136,7 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
                           state->blocksize);
       pentry.nblocks    = MBR_LBA_TO_BLOCK(table[i].partition_size,
                           state->blocksize);
+      pentry.blocksize  = state->blocksize;
 
       if (pentry.nblocks != 0)
         {
@@ -169,7 +171,7 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
 
           if (buffer[0x1fe] != 0x55 || buffer[0x1ff] != 0xaa)
             {
-              ferr("block %x doesn't contain an EBR signature\n",
+              ferr("block %" PRIu32 " doesn't contain an EBR signature\n",
                    ebr_block);
               ret = -EINVAL;
               goto out;

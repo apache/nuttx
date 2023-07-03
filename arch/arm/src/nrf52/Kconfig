@@ -3,21 +3,25 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "NRF52 Configuration Options"
+comment "nRF52 Configuration Options"
 
 choice
-	prompt "NRF52 Chip Selection"
+	prompt "nRF52 Chip Selection"
 	default ARCH_CHIP_NRF52832
 	depends on ARCH_CHIP_NRF52
 
 config ARCH_CHIP_NRF52832
-	bool "NRF52832"
+	bool "nRF52832"
 	select ARCH_FAMILY_NRF52
+	select NRF52_MEM_FLASH_512
+	select NRF52_MEM_RAM_64
 	select NRF52_HAVE_BPROT
 
 config ARCH_CHIP_NRF52833
-	bool "NRF52832"
+	bool "nRF52832"
 	select ARCH_FAMILY_NRF52
+	select NRF52_MEM_FLASH_512
+	select NRF52_MEM_RAM_128
 	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
@@ -26,8 +30,10 @@ config ARCH_CHIP_NRF52833
 	select NRF52_HAVE_PWM3
 
 config ARCH_CHIP_NRF52840
-	bool "NRF52840"
+	bool "nRF52840"
 	select ARCH_FAMILY_NRF52
+	select NRF52_MEM_FLASH_1024
+	select NRF52_MEM_RAM_256
 	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
@@ -44,6 +50,51 @@ endchoice # NRF52 Chip Selection
 config ARCH_FAMILY_NRF52
 	bool
 	default n
+
+# RAM size
+
+config NRF52_MEM_RAM_32
+	bool
+	default n
+
+config NRF52_MEM_RAM_64
+	bool
+	default n
+
+config NRF52_MEM_RAM_128
+	bool
+	default n
+
+config NRF52_MEM_RAM_256
+	bool
+	default n
+
+config NRF52_MEM_RAM_SIZE
+	hex
+	default 0x008000 if NRF52_MEM_RAM_32
+	default 0x010000 if NRF52_MEM_RAM_64
+	default 0x020000 if NRF52_MEM_RAM_128
+	default 0x040000 if NRF52_MEM_RAM_256
+
+# FLASH size
+
+config NRF52_MEM_FLASH_256
+	bool
+	default n
+
+config NRF52_MEM_FLASH_512
+	bool
+	default n
+
+config NRF52_MEM_FLASH_1024
+	bool
+	default n
+
+config NRF52_MEM_FLASH_SIZE
+	hex
+	default 0x040000 if NRF52_MEM_FLASH_256
+	default 0x080000 if NRF52_MEM_FLASH_512
+	default 0x100000 if NRF52_MEM_FLASH_1024
 
 # Peripheral support
 
@@ -109,7 +160,7 @@ config NRF52_RTC
 	bool
 	default n
 
-menu "NRF52 Peripheral Selection"
+menu "nRF52 Peripheral Selection"
 
 config NRF52_I2C0_MASTER
 	bool "I2C0 Master"
@@ -141,14 +192,6 @@ config NRF52_SPI3_MASTER
 	default n
 	select NRF52_SPI_MASTER
 	depends on NRF52_HAVE_SPI3_MASTER
-
-if NRF52_SPI_MASTER
-
-config NRF52_SPI_MASTER_INTERRUPTS
-	bool "SPI Master interrupts support"
-	default n
-
-endif
 
 config NRF52_GPIOTE
 	bool "GPIOTE (GPIO interrupts)"
@@ -278,7 +321,7 @@ config NRF52_COMP
 	bool "COMP"
 	default n
 
-endmenu # NRF52 Peripheral Selection
+endmenu # nRF52 Peripheral Selection
 
 menu "Clock Configuration"
 
@@ -413,6 +456,8 @@ config NRF52_PER_PIN_INTERRUPTS
 endmenu # GPIO Interrupt Configuration
 
 menu "PWM configuration"
+
+if NRF52_PWM
 
 config NRF52_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
@@ -562,6 +607,8 @@ config NRF52_PWM3_CHANNEL
 
 endif # !NRF52_PWM_MULTICHAN
 
+endif # NRF52_PWM
+
 endmenu # PWM configuration
 
 menu "SAADC Configuration"
@@ -624,17 +671,28 @@ endmenu # SAADC Configuration
 
 menu "SPI Configuration"
 
+if NRF52_SPI_MASTER
+
+config NRF52_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
 config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 	bool "Master 1 Byte transfer anomaly workaround"
-	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
+	depends on ARCH_CHIP_NRF52832
 	select NRF52_PPI
 	default y
 	---help---
 		Enable the workaround to fix SPI Master 1 byte transfer bug
 		which occurs in NRF52832 revision 1 and revision 2.
+
+endif # NRF52_SPI_MASTER
+
 endmenu
 
 menu "I2C Master Configuration"
+
+if NRF52_I2C_MASTER
 
 config NRF52_I2C_MASTER_DISABLE_NOSTART
 	bool "Disable the I2C Master NOSTART flag support"
@@ -659,7 +717,24 @@ config NRF52_I2C_MASTER_COPY_BUF_SIZE
 		transaction will fit otherwise it will fall back
 		on malloc.
 
+endif # NRF52_I2C_MASTER
+
 endmenu
+
+menu "QSPI Configuration"
+
+if NRF52_QSPI
+
+config NRF52_QSPI_RXDELAY
+	int "QSPI RX delay"
+	default 2
+	range 0 7
+	---help---
+		The input serial data sampling delay.
+
+endif # NRF52_QSPI
+
+endmenu # QSPI Configuration
 
 menu "USBDEV Configuration"
 

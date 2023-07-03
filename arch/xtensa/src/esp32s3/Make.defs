@@ -106,7 +106,15 @@ CHIP_CSRCS += esp32s3_i2c.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_SPI),y)
-CHIP_CSRCS += esp32s3_spi.c
+  ifeq ($(CONFIG_ESP32S3_SPI_IO_SPI),y)
+    CHIP_CSRCS += esp32s3_spi.c
+  else
+    CHIP_CSRCS += esp32s3_qspi.c
+  endif
+
+  ifeq ($(CONFIG_SPI_SLAVE),y)
+    CHIP_CSRCS += esp32s3_spi_slave.c
+  endif
 endif
 
 ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
@@ -130,6 +138,10 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_TOUCH),y)
 CHIP_CSRCS += esp32s3_touch.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_OTG_DEVICE),y)
+CHIP_CSRCS += esp32s3_otg_device.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_WIRELESS),y)

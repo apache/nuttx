@@ -285,6 +285,37 @@ config MPFS_I2C1
 	select ARCH_HAVE_I2CRESET
 	default n
 
+config MPFS_COREI2C
+	bool "Core I2C"
+	depends on !MPFS_I2C0
+	depends on !MPFS_I2C1
+	select ARCH_HAVE_I2CRESET
+	default n
+	---help---
+		Selects the FPGA I2C driver.
+
+config MPFS_COREI2C_BASE
+	hex "Base address for the (first) CoreI2C instance"
+	default 0x4B000000
+	depends on MPFS_COREI2C
+
+config MPFS_COREI2C_INST_OFFSET
+	hex "Offset of instances in memory, base + n * offset finds instance n"
+	default 0x1000
+	depends on MPFS_COREI2C
+
+config MPFS_COREI2C_INSTANCES
+	int "Amount of CoreI2C instances"
+	default 3
+	range 1 8
+	depends on MPFS_COREI2C
+
+config MPFS_COREI2C_IRQNUM
+	int "Number of (first) F2H interrupt"
+	default 6
+	range 0 63
+	depends on MPFS_COREI2C
+
 config MPFS_EMMCSD
 	bool "EMMCSD"
 	select ARCH_HAVE_SDIO
@@ -293,6 +324,25 @@ config MPFS_EMMCSD
 	default n
 	---help---
 		Selects the MPFS eMMCSD driver.
+
+config MPFS_COREMMC
+	bool "COREMMC"
+	select ARCH_HAVE_SDIO
+	select SDIO_BLOCKSETUP
+	default n
+	---help---
+		Selects the MPFS CoreMMC driver.
+
+config MPFS_COREMMC_BASE
+	hex "Base address for the CoreMMC instance"
+	default 0x60030000
+	depends on MPFS_COREMMC
+
+config MPFS_COREMMC_IRQNUM
+	int "Number of F2H interrupt"
+	default 5
+	range 0 63
+	depends on MPFS_COREMMC
 
 config MPFS_IHC_CLIENT
 	bool "IHC slave"
@@ -407,6 +457,46 @@ config MPFS_ETHMAC_1
 	select MPFS_ETHMAC
 	---help---
 		Enable MPFS ethernet MAC-1.
+
+config MPFS_HAVE_CORESPI
+	bool "CoreSPI FPGA IP block configured"
+	default n
+
+if MPFS_HAVE_CORESPI
+
+config MPFS_CORESPI
+	bool "CoreSPI FPGA IP block configured"
+	default n
+	depends on MPFS_HAVE_CORESPI
+
+config MPFS_CORESPI_BASE
+	hex "Base address for the (first) CoreSPI instance"
+	default 0x4B008000
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_INST_OFFSET
+	hex "Offset of instances in memory, base + n * offset finds instance n"
+	default 0x1000
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_INSTANCES
+	int "Amount of CoreSPI instances"
+	default 1
+	range 1 8
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_IRQNUM
+	int "Number of (first) F2H interrupt"
+	default 20
+	range 0 63
+	depends on MPFS_CORESPI
+
+config MPFS_CORESPI_IRQNUM_OFFSET
+	int "Offset of interrupt source for instance n"
+	default 1
+	depends on MPFS_CORESPI
+
+endif # MPFS_HAVE_CORESPI
 
 comment "CorePWM Options"
 

@@ -1242,7 +1242,6 @@ static int littlefs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Return something for the file system description */
 
-  memset(buf, 0, sizeof(*buf));
   buf->f_type    = LITTLEFS_SUPER_MAGIC;
   buf->f_namelen = LFS_NAME_MAX;
   buf->f_bsize   = fs->cfg.block_size;

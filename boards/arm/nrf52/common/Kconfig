@@ -2,3 +2,91 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+config NRF52_HAVE_OTA_PARTITION
+	bool
+	default n
+
+menu "Application Image Configuration"
+
+choice
+	prompt "Application Image Format"
+	default NRF52_APP_FORMAT_LEGACY
+
+config NRF52_APP_FORMAT_LEGACY
+	bool "Legacy format"
+	---help---
+		This is the legacy application image format.
+
+config NRF52_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select NRF52_HAVE_OTA_PARTITION
+	---help---
+		The MCUboot support of loading the firmware images.
+
+endchoice # Application Image Format
+
+config NRF52_PROGMEM_OTA_PARTITION
+	bool "MTD driver"
+	default n
+	depends on NRF52_HAVE_OTA_PARTITION
+	select BCH
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	select MTD_PROGMEM
+	select NRF52_PROGMEM
+	---help---
+		Initialize an MTD driver for the Flash, which will
+		add an entry at /dev for application access from userspace.
+
+if NRF52_PROGMEM_OTA_PARTITION
+
+config NRF52_MCUBOOT_HAVE_SCRACH
+	bool "Scratch partition support"
+	default n
+
+config NRF52_MCUBOOT_HEADER_SIZE
+	hex
+	default 0x200
+	depends on NRF52_APP_FORMAT_MCUBOOT
+
+config NRF52_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config NRF52_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config NRF52_OTA_PRIMARY_SLOT_OFFSET
+	hex "MCUboot application image primary slot offset"
+	default "0x10000"
+
+config NRF52_OTA_SECONDARY_SLOT_OFFSET
+	hex "MCUboot application image secondary slot offset"
+	default "0x40000"
+
+config NRF52_OTA_SLOT_SIZE
+	hex "MCUboot application image slot size (in bytes)"
+	default "0x30000"
+
+if NRF52_MCUBOOT_HAVE_SCRACH
+
+config NRF52_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+config NRF52_OTA_SCRATCH_OFFSET
+	hex "MCUboot scratch partition offset"
+	default "0x70000"
+
+config NRF52_OTA_SCRATCH_SIZE
+	hex "MCUboot scratch partition size (in bytes)"
+	default "0x10000"
+
+endif # NRF52_MCUBOOT_HAVE_SCRACH
+
+endif # NRF52_PROGMEM_OTA_PARTITION
+
+endmenu # Application Image Configuration

@@ -104,6 +104,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
         {
           /* Perform the statfs() operation */
 
+          memset(buf, 0, sizeof(struct statfs));
           ret = inode->u.i_mops->statfs(inode, buf);
         }
     }

@@ -28,7 +28,7 @@ CMN_ASRCS += riscv_saveusercontext.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c riscv_mtimer.c
-CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c
+CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_cpuinfo.c
 CMN_CSRCS += riscv_cpuidlestack.c riscv_doirq.c riscv_exit.c riscv_exception.c
 CMN_CSRCS += riscv_getnewintctx.c riscv_getintstack.c riscv_initialstate.c
 CMN_CSRCS += riscv_idle.c riscv_modifyreg32.c riscv_nputs.c riscv_releasestack.c
@@ -97,10 +97,10 @@ CMN_CSRCS += riscv_mmu.c
 endif
 
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
-CMN_CSRCS += riscv_addrenv_kstack.c
+CMN_CSRCS += riscv_addrenv_kstack.c riscv_ksp.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c
-CMN_CSRCS += riscv_addrenv_utils.c riscv_addrenv_shm.c
+CMN_CSRCS += riscv_addrenv_utils.c riscv_addrenv_shm.c riscv_addrenv_pgmap.c
 endif

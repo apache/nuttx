@@ -26,7 +26,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
-#include <malloc.h>
 #include <arch/esp32/memory_layout.h>
 
 #include "xtensa.h"
@@ -177,9 +176,9 @@ bool xtensa_imm_heapmember(void *mem)
  *
  ****************************************************************************/
 
-int xtensa_imm_mallinfo(struct mallinfo *info)
+struct mallinfo xtensa_imm_mallinfo(void)
 {
-  return mm_mallinfo(g_iheap, info);
+  return mm_mallinfo(g_iheap);
 }
 
 #endif /* CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP */

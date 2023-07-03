@@ -26,7 +26,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
-#include <malloc.h>
 
 #include "esp32c3_rtcheap.h"
 
@@ -178,7 +177,7 @@ bool esp32c3_rtcheap_heapmember(void *mem)
  *
  ****************************************************************************/
 
-int esp32c3_rtcheap_mallinfo(struct mallinfo *info)
+struct mallinfo esp32c3_rtcheap_mallinfo(void)
 {
-  return mm_mallinfo(g_rtcheap, info);
+  return mm_mallinfo(g_rtcheap);
 }

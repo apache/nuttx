@@ -40,6 +40,7 @@
 #include "nrf53_adc.h"
 
 #include "hardware/nrf53_saadc.h"
+#include "hardware/nrf53_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -262,6 +263,7 @@ static int nrf53_adc_configure(struct nrf53_adc_s *priv)
   /* Configure ADC buffer */
 
   regval = (uint32_t)&priv->buffer;
+  DEBUGASSERT(nrf53_easydma_valid(regval));
   nrf53_adc_putreg(priv, NRF53_SAADC_PTR_OFFSET, regval);
 
   regval = priv->chan_len;

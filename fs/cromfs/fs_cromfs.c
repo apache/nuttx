@@ -1467,7 +1467,6 @@ static int cromfs_statfs(struct inode *mountpt, struct statfs *buf)
 
   /* Fill in the statfs info. */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = CROMFS_MAGIC;
   buf->f_namelen = NAME_MAX;
   buf->f_bsize   = fs->cv_bsize;

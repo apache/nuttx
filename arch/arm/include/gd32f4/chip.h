@@ -62,7 +62,7 @@
 #  define GD32_NUSBFS                   1   /* USB FS*/
 #  define GD32_NUSBHS                   1   /* USB HS*/
 
-#elif defined(CONFIG_ARCH_CHIP_GD32F450ZK)
+#elif defined(CONFIG_ARCH_CHIP_GD32F450ZK) || defined(CONFIG_ARCH_CHIP_GD32F470ZK)
 #  define GD32_NGPIO_PORTS              8   /* GPIOA-H */
 #  define GD32_NCRC                     1   /* CRC calculation unit */
 #  define GD32_NTRNG                    1   /* True random number generator (RNG) */

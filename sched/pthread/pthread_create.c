@@ -253,6 +253,18 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       goto errout_with_tcb;
     }
 
+#if defined(CONFIG_ARCH_ADDRENV) && \
+    defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ARCH_KERNEL_STACK)
+  /* Allocate the kernel stack */
+
+  ret = up_addrenv_kstackalloc(&ptcb->cmn);
+  if (ret < 0)
+    {
+      errcode = ENOMEM;
+      goto errout_with_tcb;
+    }
+#endif
+
   /* Initialize thread local storage */
 
   ret = tls_init_info(&ptcb->cmn);
@@ -368,17 +380,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       errcode = EBUSY;
       goto errout_with_tcb;
     }
-
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  /* Allocate the kernel stack */
-
-  ret = up_addrenv_kstackalloc(&ptcb->cmn);
-  if (ret < 0)
-    {
-      errcode = ENOMEM;
-      goto errout_with_tcb;
-    }
-#endif
 
 #ifdef CONFIG_SMP
   /* pthread_setup_scheduler() will set the affinity mask by inheriting the
