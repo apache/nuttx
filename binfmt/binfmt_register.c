@@ -60,10 +60,8 @@ int register_binfmt(FAR struct binfmt_s *binfmt)
        * handlers
        */
 
-      sched_lock();
       binfmt->next = g_binfmts;
       g_binfmts    = binfmt;
-      sched_unlock();
       return OK;
     }
 
