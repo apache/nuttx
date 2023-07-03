@@ -929,6 +929,10 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
+#if CONFIG_NET_MAX_RECV_BUFSIZE > 0
+          buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
+#endif
+
           net_lock();
 
 #ifdef NET_TCP_HAVE_STACK
@@ -985,6 +989,10 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
             {
               return -EINVAL;
             }
+
+#if CONFIG_NET_MAX_SEND_BUFSIZE > 0
+          buffersize = MIN(buffersize, CONFIG_NET_MAX_SEND_BUFSIZE);
+#endif
 
           net_lock();
 
