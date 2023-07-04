@@ -71,6 +71,13 @@ config RGBLED
 		This selection enables building of the "upper-half" RGB LED driver.
 		See include/nuttx/rgbled.h for further PWM driver information.
 
+config RGBLED_PWM_FREQ
+	int "PWM Frequency (Hz)"
+	depends on RGBLED
+	default 100
+	---help---
+		This controls the frequency of the PWM channel powering each led.
+
 config RGBLED_INVERT
 	bool "Invert RGB LED Output"
 	depends on RGBLED
