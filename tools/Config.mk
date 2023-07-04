@@ -680,6 +680,8 @@ ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   CONVERT_PATH = $(foreach FILE,$1,${shell cygpath -w $(FILE)})
+else ifeq ($(CONFIG_HOST_MACOS),)
+  CONVERT_PATH = $(shell readlink -m $1)
 else
   CONVERT_PATH = $1
 endif
