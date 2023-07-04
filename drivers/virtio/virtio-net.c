@@ -42,6 +42,7 @@
 /* Virtio net header size and packet buffer size */
 
 #define VIRTIO_NET_HDRSIZE    (sizeof(struct virtio_net_hdr_s))
+#define VIRTIO_NET_LLHDRSIZE  (sizeof(struct virtio_net_llhdr_s))
 #define VIRTIO_NET_BUFSIZE    (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
 /* Virtio net virtqueue index and number */
@@ -89,17 +90,21 @@ struct virtio_net_priv_s
  * |               |<--------- datalen -------->|
  * ^base           ^data
  *
- * CONFIG_NET_LL_GUARDSIZE = sizeof(struct virtio_net_llhdr_s) + ETH_HDR_SIZE
- *                         = sizeof(uintptr) + 10 + 14
- *                         = 32 (64-Bit)
- *                         = 28 (32-Bit)
+ * CONFIG_NET_LL_GUARDSIZE >= VIRTIO_NET_LLHDRSIZE + ETH_HDR_SIZE
+ *                          = sizeof(uintptr) + 10 + 14
+ *                          = 32 (64-Bit)
+ *                          = 28 (32-Bit)
  */
 
-struct virtio_net_llhdr_s
+begin_packed_struct struct virtio_net_llhdr_s
 {
   FAR netpkt_t           *pkt;         /* Netpaket pointer */
   struct virtio_net_hdr_s vhdr;        /* Virtio net header */
-};
+} end_packed_struct;
+
+static_assert(CONFIG_NET_LL_GUARDSIZE >= VIRTIO_NET_LLHDRSIZE + ETH_HDRLEN,
+              "CONFIG_NET_LL_GUARDSIZE cannot be less than ETH_HDRLEN"
+              " + VIRTIO_NET_LLHDRSIZE");
 
 /****************************************************************************
  * Private Function Prototypes
@@ -180,7 +185,9 @@ static void virtio_net_rxfill(FAR struct netdev_lowerhalf_s *dev)
 
       /* Alloc cookie and net header from transport layer */
 
-      hdr = (FAR struct virtio_net_llhdr_s *)netpkt_getbase(pkt);
+      hdr = (FAR struct virtio_net_llhdr_s *)
+              (netpkt_getdata(dev, pkt) - VIRTIO_NET_LLHDRSIZE);
+      DEBUGASSERT((FAR uint8_t *)hdr >= netpkt_getbase(pkt));
       memset(&hdr->vhdr, 0, sizeof(hdr->vhdr));
       hdr->pkt = pkt;
 
@@ -294,7 +301,9 @@ static int virtio_net_send(FAR struct netdev_lowerhalf_s *dev,
       return -EINVAL;
     }
 
-  hdr = (FAR struct virtio_net_llhdr_s *)netpkt_getbase(pkt);
+  hdr = (FAR struct virtio_net_llhdr_s *)
+          (netpkt_getdata(dev, pkt) - VIRTIO_NET_LLHDRSIZE);
+  DEBUGASSERT((FAR uint8_t *)hdr >= netpkt_getbase(pkt));
   hdr->pkt = pkt;
   memset(&hdr->vhdr, 0, sizeof(hdr->vhdr));
 
