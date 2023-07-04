@@ -100,8 +100,8 @@ void up_secure_irq_all(bool secure)
 {
   int i;
 
-  modreg32(secure ? 0 : NVIC_AIRCR_BFHFNMINS,
-           NVIC_AIRCR_BFHFNMINS, NVIC_AIRCR);
+  modreg32((secure ? 0 : NVIC_AIRCR_BFHFNMINS) | NVIC_AIRCR_VECTKEY,
+           (NVIC_AIRCR_VECTKEY_MASK | NVIC_AIRCR_BFHFNMINS), NVIC_AIRCR);
 
   modreg32(secure ? NVIC_DEMCR_SDME : 0,
            NVIC_DEMCR_SDME, NVIC_DEMCR);
