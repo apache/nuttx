@@ -64,10 +64,12 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
   switch (cmd)
     {
       case FIONREAD:
-        iob = iob_peek_queue(&conn->readahead);
+        iob = conn->readahead;
         if (iob)
           {
-            *(FAR int *)((uintptr_t)arg) = iob->io_pktlen;
+            uint16_t datalen;
+            iob_copyout((FAR uint8_t *)&datalen, iob, sizeof(datalen), 0);
+            *(FAR int *)((uintptr_t)arg) = datalen;
           }
         else
           {

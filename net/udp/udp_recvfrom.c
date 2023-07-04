@@ -164,34 +164,56 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
   pstate->ir_recvlen = -1;
 
-  if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
+  if ((iob = conn->readahead) != NULL)
     {
-      int recvlen = pstate->ir_msg->msg_iov->iov_len;
+      int recvlen;
+      int offset = 0;
+      uint16_t datalen;
       uint8_t src_addr_size;
-      uint8_t offset = 0;
-      FAR void *srcaddr;
       uint8_t ifindex;
+#ifdef CONFIG_NET_IPv6
+      uint8_t srcaddr[sizeof(struct sockaddr_in6)];
+#else
+      uint8_t srcaddr[sizeof(struct sockaddr_in)];
+#endif
 
-      /* Unflatten saved connection information */
+      /* Unflatten saved connection information
+       * Layout: |datalen|ifindex|src_addr_size|src_addr|data|
+       */
+
+      recvlen = iob_copyout((FAR uint8_t *)&datalen, iob,
+                            sizeof(datalen), offset);
+      offset += sizeof(datalen);
+      DEBUGASSERT(recvlen == sizeof(datalen));
 
 #ifdef CONFIG_NETDEV_IFINDEX
-      ifindex = iob->io_data[offset++];
+      recvlen = iob_copyout(&ifindex, iob, sizeof(ifindex), offset);
+      offset += sizeof(ifindex);
+      DEBUGASSERT(recvlen == sizeof(ifindex));
 #else
       ifindex = 1;
 #endif
-      src_addr_size = iob->io_data[offset++];
-      srcaddr = &iob->io_data[offset];
+      recvlen = iob_copyout(&src_addr_size, iob,
+                            sizeof(src_addr_size), offset);
+      offset += sizeof(src_addr_size);
+      DEBUGASSERT(recvlen == sizeof(src_addr_size));
+
+      recvlen = iob_copyout(srcaddr, iob, src_addr_size, offset);
+      offset += src_addr_size;
+      DEBUGASSERT(recvlen == src_addr_size);
 
       /* Copy to user */
 
-      recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base,
-                            iob, recvlen, 0);
+      recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base, iob,
+                            MIN(pstate->ir_msg->msg_iov->iov_len, datalen),
+                            offset);
 
       /* Update the accumulated size of the data read */
 
       pstate->ir_recvlen = recvlen;
 
-      ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+      ninfo("Received %d bytes (of %d, total %d)\n",
+            recvlen, datalen, iob->io_pktlen);
 
       if (pstate->ir_msg->msg_name)
         {
@@ -205,17 +227,19 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
       udp_recvpktinfo(pstate, srcaddr, ifindex);
 
-      /* Remove the I/O buffer chain from the head of the read-ahead
-       * buffer queue.
-       */
+      /* Remove the packet from the head of the I/O buffer chain. */
 
       if (!(pstate->ir_flags & MSG_PEEK))
         {
-          iob_remove_queue(&conn->readahead);
-
-          /* And free the I/O buffer chain */
-
-          iob_free_chain(iob);
+          if (offset + datalen >= iob->io_pktlen)
+            {
+              iob_free_chain(iob);
+              conn->readahead = NULL;
+            }
+          else
+            {
+              conn->readahead = iob_trimhead(iob, offset + datalen);
+            }
         }
     }
 }

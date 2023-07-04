@@ -208,7 +208,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Check for read data availability now */
 
-  if (!IOB_QEMPTY(&conn->readahead))
+  if (conn->readahead != NULL)
     {
       /* Normal data may be read without blocking. */
 

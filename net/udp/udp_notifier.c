@@ -76,7 +76,7 @@ int udp_readahead_notifier_setup(worker_t worker,
    * setting up the notification.
    */
 
-  if (conn->readahead.qh_head != NULL)
+  if (conn->readahead != NULL)
     {
       return 0;
     }
