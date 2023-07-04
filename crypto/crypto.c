@@ -435,8 +435,7 @@ int crypto_unregister(uint32_t driverid, int alg)
   /* Sanity checks. */
 
   if (driverid >= crypto_drivers_num || crypto_drivers == NULL ||
-      ((alg <= 0 || alg > CRYPTO_ALGORITHM_MAX) &&
-      alg != CRYPTO_ALGORITHM_MAX + 1) ||
+      (alg < 0 || alg > CRYPTO_ALGORITHM_MAX) ||
       crypto_drivers[driverid].cc_alg[alg] == 0)
     {
       nxmutex_unlock(&g_crypto_lock);
