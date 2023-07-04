@@ -169,3 +169,8 @@ config ARMV8M_TRUSTZONE_CPU_BITMASK
 	default 0
 	---help---
 		Set Security bitmap for multicore, bit 0 means core 0.
+
+config ARMV8M_CMSE
+	bool "ARMv8-M Security Extensions"
+	---help---
+		Enable ARMv8-M Security Extensions.
