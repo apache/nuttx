@@ -765,7 +765,6 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   /* Remove priv from list */
 
   nxrmutex_lock(&g_rptun_lockcb);
-  metal_list_del(&priv->node);
 
   /* Broadcast device_destroy to all registers */
 
@@ -786,8 +785,8 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
   /* Remote proc remove */
 
-  remoteproc_remove_virtio(rproc, priv->rvdev.vdev);
   rpmsg_deinit_vdev(&priv->rvdev);
+  remoteproc_remove_virtio(rproc, priv->rvdev.vdev);
 
   return 0;
 }
