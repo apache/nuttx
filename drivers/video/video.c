@@ -321,8 +321,6 @@ static const struct file_operations g_video_fops =
 #endif
 };
 
-static bool g_video_initialized = false;
-
 static const video_parameter_name_t g_video_parameter_name[] =
 {
   {IMGSENSOR_ID_BRIGHTNESS,           "Brightness"},
@@ -370,10 +368,9 @@ static const video_parameter_name_t g_video_parameter_name[] =
   {IMGSENSOR_ID_JPEG_QUALITY,         "JPEG compression quality"}
 };
 
-static FAR void *g_video_handler;
-static FAR struct imgsensor_s **g_video_registered_sensor;
-static int g_video_registered_sensor_num;
-static FAR struct imgdata_s *g_video_data;
+static FAR struct imgsensor_s **g_video_registered_sensor = NULL;
+static size_t g_video_registered_sensor_num;
+static FAR struct imgdata_s *g_video_data = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -1018,17 +1015,19 @@ static bool is_sem_waited(FAR sem_t *sem)
   return nxsem_get_value(sem, &semcount) == OK && semcount < 0;
 }
 
-static FAR struct imgsensor_s *get_connected_imgsensor(void)
+static FAR struct imgsensor_s *
+get_connected_imgsensor(FAR struct imgsensor_s **sensors,
+                        size_t sensor_num)
 {
   FAR struct imgsensor_s *sensor = NULL;
   int i;
 
-  for (i = 0; i < g_video_registered_sensor_num; i++)
+  for (i = 0; i < sensor_num; i++)
     {
-      if (g_video_registered_sensor[i] &&
-          IMGSENSOR_IS_AVAILABLE(g_video_registered_sensor[i]))
+      if (sensors[i] &&
+          IMGSENSOR_IS_AVAILABLE(sensors[i]))
         {
-          sensor = g_video_registered_sensor[i];
+          sensor = sensors[i];
           break;
         }
     }
@@ -1047,17 +1046,13 @@ static int video_open(FAR struct file *filep)
     {
       /* Only in first execution, open device */
 
-      priv->imgsensor = get_connected_imgsensor();
-      if (priv->imgsensor != NULL)
+      ret = IMGSENSOR_INIT(priv->imgsensor);
+      if (ret == OK)
         {
-          ret = IMGSENSOR_INIT(priv->imgsensor);
+          ret = IMGDATA_INIT(priv->imgdata);
           if (ret == OK)
             {
-              ret = IMGDATA_INIT(priv->imgdata);
-              if (ret == OK)
-                {
-                  initialize_resources(priv);
-                }
+              initialize_resources(priv);
             }
         }
       else
@@ -3292,88 +3287,6 @@ static int video_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
   return OK;
 }
 
-static FAR void *video_register(FAR const char *devpath)
-{
-  FAR video_mng_t *priv;
-  size_t allocsize;
-  int    ret;
-
-  /* Input devpath Error Check */
-
-  if (devpath == NULL)
-    {
-      return NULL;
-    }
-
-  allocsize = strnlen(devpath, MAX_VIDEO_FILE_PATH - 1/* Space for '\0' */);
-  if (allocsize < 2     ||
-      devpath[0] != '/' ||
-      (allocsize == MAX_VIDEO_FILE_PATH - 1 &&
-       devpath[MAX_VIDEO_FILE_PATH] != '\0'))
-    {
-      return NULL;
-    }
-
-  /* Initialize video device structure */
-
-  priv = (FAR video_mng_t *)kmm_zalloc(sizeof(video_mng_t));
-  if (priv == NULL)
-    {
-      verr("Failed to allocate instance\n");
-      return NULL;
-    }
-
-  /* Save device path */
-
-  priv->devpath = (FAR char *)kmm_malloc(allocsize + 1);
-  if (priv->devpath == NULL)
-    {
-      kmm_free(priv);
-      return NULL;
-    }
-
-  memcpy(priv->devpath, devpath, allocsize);
-  priv->devpath[allocsize] = '\0';
-
-  /* Initialize mutex */
-
-  nxmutex_init(&priv->lock_open_num);
-
-  /* Register the character driver */
-
-  ret = register_driver(priv->devpath, &g_video_fops, 0666, priv);
-  if (ret < 0)
-    {
-      verr("Failed to register driver: %d\n", ret);
-      nxmutex_destroy(&priv->lock_open_num);
-      kmm_free(priv->devpath);
-      kmm_free(priv);
-      return NULL;
-    }
-
-  return priv;
-}
-
-static int video_unregister(FAR video_mng_t *priv)
-{
-  int ret = OK;
-
-  if (priv == NULL)
-    {
-      ret = -ENODEV;
-    }
-  else
-    {
-      nxmutex_destroy(&priv->lock_open_num);
-      unregister_driver(priv->devpath);
-
-      kmm_free(priv->devpath);
-      kmm_free(priv);
-    }
-
-  return ret;
-}
-
 /* Callback function which device driver call when capture has done. */
 
 static int video_complete_capture(uint8_t err_code, uint32_t datasize,
@@ -3476,28 +3389,93 @@ static int video_complete_capture(uint8_t err_code, uint32_t datasize,
 
 int video_initialize(FAR const char *devpath)
 {
-  if (g_video_initialized)
+  return video_register(devpath,
+                       g_video_data,
+                       g_video_registered_sensor,
+                       g_video_registered_sensor_num);
+}
+
+int video_uninitialize(FAR const char *devpath)
+{
+  return video_unregister(devpath);
+}
+
+int video_register(FAR const char *devpath,
+                   FAR struct imgdata_s *data,
+                   FAR struct imgsensor_s **sensors,
+                   size_t sensor_num)
+{
+  FAR video_mng_t *priv;
+  size_t allocsize;
+  int    ret;
+
+  /* Input devpath Error Check */
+
+  if (devpath == NULL || data == NULL)
     {
-      return OK;
+      return -EINVAL;
     }
 
-  g_video_handler = video_register(devpath);
-  g_video_initialized = true;
+  allocsize = strnlen(devpath, MAX_VIDEO_FILE_PATH - 1/* Space for '\0' */);
+  if (allocsize < 2     ||
+      devpath[0] != '/' ||
+      (allocsize == MAX_VIDEO_FILE_PATH - 1 &&
+       devpath[MAX_VIDEO_FILE_PATH] != '\0'))
+    {
+      return -EINVAL;
+    }
+
+  /* Initialize video device structure */
+
+  priv = (FAR video_mng_t *)kmm_zalloc(sizeof(video_mng_t));
+  if (priv == NULL)
+    {
+      verr("Failed to allocate instance\n");
+      return -ENOMEM;
+    }
+
+  priv->imgsensor = get_connected_imgsensor(sensors, sensor_num);
+  if (priv->imgsensor == NULL)
+    {
+      kmm_free(priv);
+      return -EINVAL;
+    }
+
+  /* Save device path */
+
+  priv->devpath = (FAR char *)kmm_malloc(allocsize + 1);
+  if (priv->devpath == NULL)
+    {
+      kmm_free(priv);
+      return -ENOMEM;
+    }
+
+  memcpy(priv->devpath, devpath, allocsize);
+  priv->devpath[allocsize] = '\0';
+  priv->imgdata = data;
+
+  /* Initialize mutex */
+
+  nxmutex_init(&priv->lock_open_num);
+
+  /* Register the character driver */
+
+  ret = register_driver(priv->devpath, &g_video_fops, 0666, priv);
+  if (ret < 0)
+    {
+      verr("Failed to register driver: %d\n", ret);
+      nxmutex_destroy(&priv->lock_open_num);
+      kmm_free(priv->devpath);
+      kmm_free(priv);
+      return ret;
+    }
 
   return OK;
 }
 
-int video_uninitialize(void)
+int video_unregister(FAR const char *devpath)
 {
-  if (!g_video_initialized)
-    {
-      return OK;
-    }
-
-  video_unregister(g_video_handler);
-  g_video_initialized = false;
-
-  return OK;
+  return unregister_driver(devpath);
 }
 
 int imgsensor_register(FAR struct imgsensor_s *sensor)
