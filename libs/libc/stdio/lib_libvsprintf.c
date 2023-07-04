@@ -816,11 +816,6 @@ flt_oper:
 
                   if (--n < -prec)
                     {
-                      if ((flags & FL_ALT) != 0 && n == -1)
-                        {
-                          stream_putc('.', stream);
-                        }
-
                       break;
                     }
 
@@ -835,6 +830,11 @@ flt_oper:
                 }
 
               stream_putc(out, stream);
+
+              if ((flags & FL_ALT) != 0 && n == -1)
+                {
+                  stream_putc('.', stream);
+                }
             }
           else
             {
