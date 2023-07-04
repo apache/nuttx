@@ -142,6 +142,7 @@
 exception_common:
 
 	mrs		r0, ipsr				/* R0=exception number */
+	mrs		r12, control				/* R12=control */
 
 	/* Complete the context save */
 
@@ -182,7 +183,7 @@ exception_common:
 	subne		sp, #(4*SW_FPU_REGS)
 #endif
 
-	stmdb		sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
+	stmdb		sp!, {r2-r12,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
 
 	/* There are two arguments to arm_doirq:
 	 *
@@ -227,7 +228,7 @@ exception_common:
 	 * array to use for the interrupt return.
 	 */
 
-	ldmia		r0!, {r2-r11,r14}	/* Recover R4-R11, r14 + 2 temp values */
+	ldmia		r0!, {r2-r12,r14}	/* Recover R4-R12, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
 	/* Switched-in task including volatile FP registers ? */
 
@@ -240,30 +241,10 @@ exception_common:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
 	 */
 
-#ifdef CONFIG_BUILD_PROTECTED
-	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
-	 * (handler mode) if the stack is on the MSP.  It can only be on the PSP if
-	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
-	 */
-
-	mrs		r2, control				/* R2=Contents of the control register */
-	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
-	beq		2f					/* Branch if privileged */
-
-	orr		r2, r2, #1				/* Unprivileged mode */
-	msr		psp, r0					/* R0=The process stack pointer */
-	b		3f
-2:
-	bic		r2, r2, #1				/* Privileged mode */
-	msr		msp, r0					/* R0=The main stack pointer */
-3:
-	msr		control, r2				/* Save the updated control register */
-#else
 	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
 	ite		eq					/* Next two instructions conditional */
 	msreq		msp, r0					/* R0=The main stack pointer */
 	msrne		psp, r0					/* R0=The process stack pointer */
-#endif
 
 	/* Restore the interrupt state */
 
@@ -272,6 +253,8 @@ exception_common:
 #else
 	msr		primask, r3				/* Restore interrupts */
 #endif
+
+	msr		control, r12				/* Restore control */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) select the correct stack.
