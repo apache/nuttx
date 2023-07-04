@@ -54,6 +54,7 @@
 #define O_CLOEXEC   (1 << 10)       /* Close on execute */
 #define O_DIRECTORY (1 << 11)       /* Must be a directory */
 #define O_NOFOLLOW  (1 << 12)       /* Don't follow links */
+#define O_NOATIME   (1 << 18)       /* Don't update the file last access time */
 
 /* Unsupported, but required open flags */
 
