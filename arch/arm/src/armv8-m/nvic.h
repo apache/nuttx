@@ -60,7 +60,11 @@
 /* NVIC base address ********************************************************/
 
 #define ARMV8M_NVIC_BASE                0xe000e000
-#define ARMV8M_NVIC_BASE_NS             0xe002e000
+
+/* Non-secure NVIC access */
+
+#define ARMV8M_NS_OFFSET                0x00020000
+#define ARMV8M_NVIC_BASE_NS             (ARMV8M_NVIC_BASE + ARMV8M_NS_OFFSET)
 
 /* NVIC register offsets ****************************************************/
 
