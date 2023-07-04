@@ -269,7 +269,10 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
 
           /* Call back into the driver */
 
-          bstop = callback(dev);
+          if (dev->d_len > 0)
+            {
+              bstop = callback(dev);
+            }
         }
     }
 
@@ -308,7 +311,10 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
 
       /* Call back into the driver */
 
-      bstop = callback(dev);
+      if (dev->d_len > 0)
+        {
+          bstop = callback(dev);
+        }
     }
 
   return bstop;
@@ -346,7 +352,10 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
 
       /* Call back into the driver */
 
-      bstop = callback(dev);
+      if (dev->d_len > 0)
+        {
+          bstop = callback(dev);
+        }
     }
 
   return bstop;
@@ -678,7 +687,10 @@ static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
 
       /* Call back into the driver */
 
-      bstop = callback(dev);
+      if (dev->d_len > 0)
+        {
+          bstop = callback(dev);
+        }
     }
 
   /* Notify the device driver that ip fragments is available. */
