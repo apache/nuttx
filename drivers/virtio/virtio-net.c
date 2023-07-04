@@ -43,13 +43,18 @@
 
 #define VIRTIO_NET_HDRSIZE    (sizeof(struct virtio_net_hdr_s))
 #define VIRTIO_NET_LLHDRSIZE  (sizeof(struct virtio_net_llhdr_s))
-#define VIRTIO_NET_BUFSIZE    (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+#define VIRTIO_NET_BUFSIZE    (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
 /* Virtio net virtqueue index and number */
 
 #define VIRTIO_NET_RX         0
 #define VIRTIO_NET_TX         1
 #define VIRTIO_NET_NUM        2
+
+#define VIRTIO_NET_MAX_PKT_SIZE \
+    ((CONFIG_NET_LL_GUARDSIZE - ETH_HDRLEN) + VIRTIO_NET_BUFSIZE)
+#define VIRTIO_NET_MAX_NIOB \
+    ((VIRTIO_NET_MAX_PKT_SIZE + CONFIG_IOB_BUFSIZE - 1) / CONFIG_IOB_BUFSIZE)
 
 /****************************************************************************
  * Private Types
@@ -168,8 +173,10 @@ static void virtio_net_rxfill(FAR struct netdev_lowerhalf_s *dev)
   FAR struct virtio_net_priv_s *priv = (FAR struct virtio_net_priv_s *)dev;
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_NET_RX].vq;
   FAR struct virtio_net_llhdr_s *hdr;
-  FAR struct virtqueue_buf vb;
+  struct virtqueue_buf vb[VIRTIO_NET_MAX_NIOB];
+  struct iovec iov[VIRTIO_NET_MAX_NIOB];
   FAR netpkt_t *pkt;
+  int iov_cnt;
   int i;
 
   for (i = 0; i < priv->bufnum; i++)
@@ -183,21 +190,40 @@ static void virtio_net_rxfill(FAR struct netdev_lowerhalf_s *dev)
           break;
         }
 
+      /* Preserve data length */
+
+      if (netpkt_setdatalen(dev, pkt, VIRTIO_NET_BUFSIZE) <
+          VIRTIO_NET_BUFSIZE)
+        {
+          vrtwarn("No enough buffer to prepare RX buffer, i=%d\n", i);
+          netpkt_free(dev, pkt, NETPKT_RX);
+          break;
+        }
+
+      /* Convert netpkt to virtqueue_buf */
+
+      iov_cnt = netpkt_to_iov(dev, pkt, iov, VIRTIO_NET_MAX_NIOB);
+      for (i = 0; i < iov_cnt; i++)
+        {
+          vb[i].buf = iov[i].iov_base;
+          vb[i].len = iov[i].iov_len;
+        }
+
       /* Alloc cookie and net header from transport layer */
 
       hdr = (FAR struct virtio_net_llhdr_s *)
-              (netpkt_getdata(dev, pkt) - VIRTIO_NET_LLHDRSIZE);
+              ((FAR uint8_t *)vb[0].buf - VIRTIO_NET_LLHDRSIZE);
       DEBUGASSERT((FAR uint8_t *)hdr >= netpkt_getbase(pkt));
       memset(&hdr->vhdr, 0, sizeof(hdr->vhdr));
       hdr->pkt = pkt;
 
       /* Buffer 0, the virtio net header */
 
-      vb.buf = &hdr->vhdr;
-      vb.len = VIRTIO_NET_HDRSIZE + VIRTIO_NET_BUFSIZE;
+      vb[0].buf = &hdr->vhdr;
+      vb[0].len += VIRTIO_NET_HDRSIZE;
 
-      vrtinfo("Fill rx, hdr=%p, buf=%p, buflen=%d\n", hdr, vb.buf, vb.len);
-      virtqueue_add_buffer(vq, &vb, 0, 1, hdr);
+      vrtinfo("Fill rx, hdr=%p, count=%d\n", hdr, iov_cnt);
+      virtqueue_add_buffer(vq, vb, 0, iov_cnt, hdr);
     }
 
   if (i > 0)
@@ -289,33 +315,45 @@ static int virtio_net_send(FAR struct netdev_lowerhalf_s *dev,
   FAR struct virtio_net_priv_s *priv = (FAR struct virtio_net_priv_s *)dev;
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_NET_TX].vq;
   FAR struct virtio_net_llhdr_s *hdr;
-  struct virtqueue_buf vb;
-  size_t len;
+  struct virtqueue_buf vb[VIRTIO_NET_MAX_NIOB];
+  struct iovec iov[VIRTIO_NET_MAX_NIOB];
+  int iov_cnt;
+  int i;
 
   /* Check the send length */
 
-  len = netpkt_getdatalen(dev, pkt);
-  if (len > VIRTIO_NET_BUFSIZE)
+  if (netpkt_getdatalen(dev, pkt) > VIRTIO_NET_BUFSIZE)
     {
       vrterr("net send buffer too large\n");
       return -EINVAL;
     }
 
+  /* Convert netpkt to virtqueue_buf */
+
+  iov_cnt = netpkt_to_iov(dev, pkt, iov, VIRTIO_NET_MAX_NIOB);
+  for (i = 0; i < iov_cnt; i++)
+    {
+      vb[i].buf = iov[i].iov_base;
+      vb[i].len = iov[i].iov_len;
+    }
+
+  /* Prepare virtio net header */
+
   hdr = (FAR struct virtio_net_llhdr_s *)
-          (netpkt_getdata(dev, pkt) - VIRTIO_NET_LLHDRSIZE);
+          ((FAR uint8_t *)vb[0].buf - VIRTIO_NET_LLHDRSIZE);
   DEBUGASSERT((FAR uint8_t *)hdr >= netpkt_getbase(pkt));
   hdr->pkt = pkt;
   memset(&hdr->vhdr, 0, sizeof(hdr->vhdr));
 
   /* Buffer 0 is the virtio net header */
 
-  vb.buf = &hdr->vhdr;
-  vb.len = VIRTIO_NET_HDRSIZE + len;
+  vb[0].buf = &hdr->vhdr;
+  vb[0].len += VIRTIO_NET_HDRSIZE;
 
   /* Add buffer to vq and notify the other side */
 
-  vrtinfo("Send, hdr=%p, buf=%p, buflen=%d\n", hdr, vb.buf, vb.len);
-  virtqueue_add_buffer(vq, &vb, 1, 0, hdr);
+  vrtinfo("Send, hdr=%p, count=%d\n", hdr, iov_cnt);
+  virtqueue_add_buffer(vq, vb, iov_cnt, 0, hdr);
   virtqueue_kick(vq);
 
   /* Try return Netpkt TX buffer to upper-half. */
@@ -473,7 +511,7 @@ static int virtio_net_init(FAR struct virtio_net_priv_s *priv,
    * 1/4 for the TX netpkts, 1/4 for the RX netpkts.
    */
 
-  priv->bufnum = CONFIG_IOB_NBUFFERS / 4;
+  priv->bufnum = CONFIG_IOB_NBUFFERS / VIRTIO_NET_MAX_NIOB / 4;
 #endif
   priv->bufnum = MIN(vdev->vrings_info[VIRTIO_NET_RX].info.num_descs,
                      priv->bufnum);
