@@ -187,6 +187,9 @@ struct video_mng_s
   enum v4l2_scene_mode     video_scene_mode;
   uint8_t                  video_scence_num;
   FAR video_scene_params_t *video_scene_param[V4L2_SCENE_MODE_MAX];
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  bool                     unlinked;
+#endif
 };
 
 typedef struct video_mng_s video_mng_t;
@@ -208,7 +211,9 @@ static int video_mmap(FAR struct file *filep,
                       FAR struct mm_map_entry_s *map);
 static int video_poll(FAR struct file *filep, FAR struct pollfd *fds,
                       bool setup);
-
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int video_unlink(FAR struct inode *inode);
+#endif
 /* Common function */
 
 static FAR video_type_inf_t *
@@ -310,6 +315,9 @@ static const struct file_operations g_video_fops =
   video_mmap,               /* mmap */
   NULL,                     /* truncate */
   video_poll,               /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  video_unlink,             /* unlink */
+#endif
 };
 
 static bool g_video_initialized = false;
@@ -1074,17 +1082,24 @@ static int video_close(FAR struct file *filep)
   FAR video_mng_t  *priv  = (FAR video_mng_t *)inode->i_private;
 
   nxmutex_lock(&priv->lock_open_num);
-  if (priv->open_num == 0)
-    {
-      nxmutex_unlock(&priv->lock_open_num);
-      return OK;
-    }
 
   if (--priv->open_num == 0)
     {
       cleanup_resources(priv);
       IMGSENSOR_UNINIT(priv->imgsensor);
       IMGDATA_UNINIT(priv->imgdata);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+      if (priv->unlinked)
+        {
+          nxmutex_unlock(&priv->lock_open_num);
+          nxmutex_destroy(&priv->lock_open_num);
+          kmm_free(priv->devpath);
+          kmm_free(priv);
+          inode->i_private = NULL;
+          return OK;
+        }
+
+#endif
     }
 
   nxmutex_unlock(&priv->lock_open_num);
@@ -1102,6 +1117,29 @@ static ssize_t video_write(FAR struct file *filep,
 {
   return -ENOTSUP;
 }
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int video_unlink(FAR struct inode *inode)
+{
+  FAR video_mng_t *priv = (FAR video_mng_t *)inode->i_private;
+  nxmutex_lock(&priv->lock_open_num);
+  if (priv->open_num == 0)
+    {
+      nxmutex_unlock(&priv->lock_open_num);
+      nxmutex_destroy(&priv->lock_open_num);
+      kmm_free(priv->devpath);
+      kmm_free(priv);
+      inode->i_private = NULL;
+    }
+  else
+    {
+      priv->unlinked = true;
+      nxmutex_unlock(&priv->lock_open_num);
+    }
+
+  return OK;
+}
+#endif
 
 static int video_querycap(FAR video_mng_t *vmng,
                           FAR struct v4l2_capability *cap)
