@@ -127,11 +127,10 @@ struct udp_conn_s
 
   /* Read-ahead buffering.
    *
-   *   readahead - A singly linked list of type struct iob_qentry_s
-   *               where the UDP/IP read-ahead data is retained.
+   *   readahead - An IOB chain where the UDP/IP read-ahead data is retained.
    */
 
-  struct iob_queue_s readahead;   /* Read-ahead buffering */
+  FAR struct iob_s *readahead;   /* Read-ahead buffering */
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Write buffering

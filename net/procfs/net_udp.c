@@ -122,7 +122,7 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
 #if CONFIG_NET_SEND_BUFSIZE > 0
                       udp_wrbuffer_inqueue_size(conn),
 #endif
-                      iob_get_queue_size(&conn->readahead));
+                      (conn->readahead) ? conn->readahead->io_pktlen : 0);
 
       len += snprintf(buffer + len, buflen - len,
                       " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",

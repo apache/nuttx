@@ -691,9 +691,9 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_udp_connections);
 
-  /* Release any read-ahead buffers attached to the connection */
+  /* Release any read-ahead buffers attached to the connection, NULL is ok */
 
-  iob_free_queue(&conn->readahead);
+  iob_free_chain(conn->readahead);
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */

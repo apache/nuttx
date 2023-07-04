@@ -289,11 +289,10 @@ struct tcp_conn_s
 
   /* Read-ahead buffering.
    *
-   *   readahead - A singly linked list of type struct iob_s
-   *               where the TCP/IP read-ahead data is retained.
+   *   readahead - An IOB chain where the TCP/IP read-ahead data is retained.
    */
 
-  struct iob_s *readahead;   /* Read-ahead buffering */
+  FAR struct iob_s *readahead;   /* Read-ahead buffering */
 
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
 
