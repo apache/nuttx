@@ -360,7 +360,7 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 
 #ifdef CONFIG_PWM_MULTICHAN
   memset(&pwm, 0, sizeof(struct pwm_info_s));
-  pwm.frequency = 100;
+  pwm.frequency = CONFIG_RGBLED_PWM_FREQ;
 
   i = 0;
   pwm.channels[i].duty = red;
@@ -433,7 +433,7 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
       ledb->ops->start(ledb, &pwm);
     }
 #else
-  pwm.frequency = 100;
+  pwm.frequency = CONFIG_RGBLED_PWM_FREQ;
 
   pwm.duty = red;
   ledr->ops->start(ledr, &pwm);
