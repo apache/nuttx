@@ -74,7 +74,7 @@
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
-#  define _NX_STAT(p,s)        nx_stat(p,s,1)
+#  define _NX_STAT(f,s)        nx_fstat(f,s)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
@@ -84,7 +84,7 @@
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_SEEK(f,o,w)      lseek(f,o,w)
-#  define _NX_STAT(p,s)        stat(p,s)
+#  define _NX_STAT(f,s)        fstat(f,s)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)      ((void)(r))
 #  define _NX_GETERRVAL(r)     (-errno)
@@ -1457,6 +1457,23 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
  ****************************************************************************/
 
 int file_fstat(FAR struct file *filep, FAR struct stat *buf);
+
+/****************************************************************************
+ * Name: nx_fstat
+ *
+ * Description:
+ *   nx_fstat() is similar to the standard 'fstat' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_fstat() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_fstat(int fd, FAR struct stat *buf);
 
 /****************************************************************************
  * Name: nx_stat
