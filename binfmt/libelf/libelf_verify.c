@@ -39,10 +39,7 @@
  * Private Constant Data
  ****************************************************************************/
 
-static const char g_elfmagic[EI_MAGIC_SIZE] =
-{
-  0x7f, 'E', 'L', 'F'
-};
+static const char g_elfmagic[EI_MAGIC_SIZE] = EI_MAGIC;
 
 /****************************************************************************
  * Private Functions

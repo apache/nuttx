@@ -28,7 +28,6 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/elf.h>
 #include <nuttx/lib/modlib.h>
 
@@ -36,10 +35,7 @@
  * Private Constant Data
  ****************************************************************************/
 
-static const char g_modmagic[EI_MAGIC_SIZE] =
-{
-    0x7f, 'E', 'L', 'F'
-};
+static const char g_modmagic[EI_MAGIC_SIZE] = EI_MAGIC;
 
 /****************************************************************************
  * Public Functions
