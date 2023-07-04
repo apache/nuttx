@@ -82,6 +82,10 @@ static const struct syslog_channel_ops_s g_ramlog_channel_ops =
 static struct syslog_channel_s g_ramlog_channel =
 {
   &g_ramlog_channel_ops
+#  ifdef CONFIG_SYSLOG_IOCTL
+  , "ram"
+  , false
+#  endif
 };
 #endif
 
@@ -98,6 +102,10 @@ static const struct syslog_channel_ops_s g_rpmsg_channel_ops =
 static struct syslog_channel_s g_rpmsg_channel =
 {
   &g_rpmsg_channel_ops
+#  ifdef CONFIG_SYSLOG_IOCTL
+  , "rpmsg"
+  , false
+#  endif
 };
 #endif
 
@@ -114,6 +122,10 @@ static const struct syslog_channel_ops_s g_rtt_channel_ops =
 static struct syslog_channel_s g_rtt_channel =
 {
   &g_rtt_channel_ops
+#  ifdef CONFIG_SYSLOG_IOCTL
+  , "rtt"
+  , false
+#  endif
 };
 #endif
 
@@ -129,6 +141,10 @@ static const struct syslog_channel_ops_s g_default_channel_ops =
 static struct syslog_channel_s g_default_channel =
 {
   &g_default_channel_ops
+#  ifdef CONFIG_SYSLOG_IOCTL
+  , "default"
+  , false
+#  endif
 };
 #endif
 
@@ -272,6 +288,14 @@ int syslog_channel(FAR struct syslog_channel_s *channel)
         {
           if (g_syslog_channel[i] == NULL)
             {
+#  ifdef CONFIG_SYSLOG_IOCTL
+              if (channel->sc_name[0] == '\0')
+                {
+                  snprintf(channel->sc_name, sizeof(channel->sc_name),
+                           "channel-%p", channel->sc_ops);
+                }
+#  endif
+
               g_syslog_channel[i] = channel;
               return OK;
             }

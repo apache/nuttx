@@ -233,6 +233,23 @@ even further initialization. For example, the file SYSLOG channel
 (described below) cannot be initialized until the necessary file
 systems have been mounted.
 
+SYSLOG Channel Filtering
+-----------------------------
+If you enable the CONFIG_SYSLOG_IOCTL configuration, you can enable
+syslog to open or close the specified channel at runtime.
+
+You can control SYSLOG channels by using the ioctl command in NuttX
+with either the SYSLOGIOC_GETCHANNELS or SYSLOGIOC_SETFILTER.
+
+-  ``SYSLOGIOC_GETCHANNELS``. This command can get a list of all channels
+-  ``SYSLOGIOC_SETFILTER``. This command enables/disables the specified channel.
+
+In nsh, you can view/set the syslog channel status through the setlogmask command.
+
+-  ``setlogmask list``. Print all channel status
+-  ``setlogmask <enable/disable> <channel>``. Enable or disable the
+   specified channel.
+
 Interrupt Level SYSLOG Output
 -----------------------------
 
