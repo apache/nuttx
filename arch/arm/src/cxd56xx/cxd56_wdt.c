@@ -200,7 +200,7 @@ static uint32_t cxd56_getreg(uintptr_t regaddr)
 
   /* Show the register value read */
 
-  wdinfo("%08x->%08\n", regaddr, regval);
+  wdinfo("%08x->%08x\n", regaddr, regval);
   return regval;
 }
 #endif
@@ -283,6 +283,7 @@ static int cxd56_start(struct watchdog_lowerhalf_s *lower)
   wdinfo("Entry\n");
 
   cxd56_putreg(WDOGLOCK_UNLOCK_KEY, CXD56_WDT_WDOGLOCK);
+  cxd56_putreg(0, CXD56_WDT_WDOGINTCLR); /* reload by write any value */
   cxd56_putreg(WDOGCONTROL_RESEN | WDOGCONTROL_INTEN, CXD56_WDT_WDOGCONTROL);
   cxd56_putreg(0, CXD56_WDT_WDOGLOCK);
 
@@ -473,6 +474,7 @@ static int cxd56_settimeout(struct watchdog_lowerhalf_s *lower,
   /* Set the WDT register according to calculated value */
 
   cxd56_putreg(WDOGLOCK_UNLOCK_KEY, CXD56_WDT_WDOGLOCK);
+  cxd56_putreg(0, CXD56_WDT_WDOGINTCLR); /* reload by write any value */
   cxd56_putreg(reload, CXD56_WDT_WDOGLOAD);
   cxd56_putreg(WDOGCONTROL_RESEN | WDOGCONTROL_INTEN, CXD56_WDT_WDOGCONTROL);
   cxd56_putreg(0, CXD56_WDT_WDOGLOCK);
