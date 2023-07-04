@@ -315,7 +315,7 @@ static bool tcp_rebuild_ofosegs(FAR struct tcp_conn_s *conn,
 
           else if (ofoseg->left == seg->right)
             {
-              tcp_dataconcat(&seg->data, &ofoseg->data);
+              net_iob_concat(&seg->data, &ofoseg->data);
               seg->right = ofoseg->right;
             }
 
@@ -338,7 +338,7 @@ static bool tcp_rebuild_ofosegs(FAR struct tcp_conn_s *conn,
               ofoseg->data =
                 iob_trimhead(ofoseg->data,
                              TCP_SEQ_SUB(seg->right, ofoseg->left));
-              tcp_dataconcat(&seg->data, &ofoseg->data);
+              net_iob_concat(&seg->data, &ofoseg->data);
               seg->right = ofoseg->right;
             }
         }
@@ -355,7 +355,7 @@ static bool tcp_rebuild_ofosegs(FAR struct tcp_conn_s *conn,
 
           if (ofoseg->right == seg->left)
             {
-              tcp_dataconcat(&ofoseg->data, &seg->data);
+              net_iob_concat(&ofoseg->data, &seg->data);
               seg->data = ofoseg->data;
               seg->left = ofoseg->left;
               ofoseg->data = NULL;
@@ -390,7 +390,7 @@ static bool tcp_rebuild_ofosegs(FAR struct tcp_conn_s *conn,
               ofoseg->data =
                 iob_trimtail(ofoseg->data,
                              ofoseg->right - seg->left);
-              tcp_dataconcat(&ofoseg->data, &seg->data);
+              net_iob_concat(&ofoseg->data, &seg->data);
               seg->data = ofoseg->data;
               seg->left = ofoseg->left;
               ofoseg->data = NULL;
