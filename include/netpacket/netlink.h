@@ -557,6 +557,85 @@ struct nla_bitfield32
   uint32_t selector;
 };
 
+/* This struct should be in sync with struct rtnl_link_stats64 */
+
+struct rtnl_link_stats
+{
+  uint32_t rx_packets;       /* total packets received  */
+  uint32_t tx_packets;       /* total packets transmitted  */
+  uint32_t rx_bytes;         /* total bytes received   */
+  uint32_t tx_bytes;         /* total bytes transmitted  */
+  uint32_t rx_errors;        /* bad packets received    */
+  uint32_t tx_errors;        /* packet transmit problems  */
+  uint32_t rx_dropped;       /* no space in linux buffers  */
+  uint32_t tx_dropped;       /* no space available in linux  */
+  uint32_t multicast;        /* multicast packets received  */
+  uint32_t collisions;
+
+  /* detailed rx_errors: */
+
+  uint32_t rx_length_errors;
+  uint32_t rx_over_errors;   /* receiver ring buff overflow  */
+  uint32_t rx_crc_errors;    /* recved pkt with crc error  */
+  uint32_t rx_frame_errors;  /* recv'd frame alignment error */
+  uint32_t rx_fifo_errors;   /* recv'r fifo overrun    */
+  uint32_t rx_missed_errors; /* receiver missed packet  */
+
+  /* detailed tx_errors */
+
+  uint32_t tx_aborted_errors;
+  uint32_t tx_carrier_errors;
+  uint32_t tx_fifo_errors;
+  uint32_t tx_heartbeat_errors;
+  uint32_t tx_window_errors;
+
+  /* for cslip etc */
+
+  uint32_t rx_compressed;
+  uint32_t tx_compressed;
+
+  uint32_t rx_nohandler;     /* dropped, no handler found  */
+};
+
+/* The main device statistics structure */
+
+struct rtnl_link_stats64
+{
+  uint64_t rx_packets;       /* total packets received       */
+  uint64_t tx_packets;       /* total packets transmitted    */
+  uint64_t rx_bytes;         /* total bytes received         */
+  uint64_t tx_bytes;         /* total bytes transmitted      */
+  uint64_t rx_errors;        /* bad packets received         */
+  uint64_t tx_errors;        /* packet transmit problems     */
+  uint64_t rx_dropped;       /* no space in linux buffers    */
+  uint64_t tx_dropped;       /* no space available in linux  */
+  uint64_t multicast;        /* multicast packets received   */
+  uint64_t collisions;
+
+  /* detailed rx_errors: */
+
+  uint64_t rx_length_errors;
+  uint64_t rx_over_errors;   /* receiver ring buff overflow  */
+  uint64_t rx_crc_errors;    /* recved pkt with crc error    */
+  uint64_t rx_frame_errors;  /* recv'd frame alignment error */
+  uint64_t rx_fifo_errors;   /* recv'r fifo overrun          */
+  uint64_t rx_missed_errors; /* receiver missed packet       */
+
+  /* detailed tx_errors */
+
+  uint64_t tx_aborted_errors;
+  uint64_t tx_carrier_errors;
+  uint64_t tx_fifo_errors;
+  uint64_t tx_heartbeat_errors;
+  uint64_t tx_window_errors;
+
+  /* for cslip etc */
+
+  uint64_t rx_compressed;
+  uint64_t tx_compressed;
+  uint64_t rx_nohandler;     /* dropped, no handler found    */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
