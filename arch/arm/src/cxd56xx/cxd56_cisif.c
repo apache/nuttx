@@ -175,6 +175,7 @@ static uint32_t g_cisif_time_stop;
 #endif
 
 static imgdata_capture_t g_cxd56_cisif_complete_capture;
+static void *g_cxd56_cisif_capture_arg;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -216,7 +217,8 @@ static int cxd56_cisif_start_capture
               uint8_t nr_datafmt,
               imgdata_format_t *datafmt,
               imgdata_interval_t *interval,
-              imgdata_capture_t callback);
+              imgdata_capture_t callback,
+              void *arg);
 static int cxd56_cisif_stop_capture(struct imgdata_s *data);
 static int cxd56_cisif_validate_buf(struct imgdata_s *data,
                                     uint8_t *addr, uint32_t size);
@@ -373,7 +375,7 @@ static void cisif_callback_for_intlev(uint8_t code)
 
   /* Notify and get next addr */
 
-  g_cxd56_cisif_complete_capture(0, size, NULL);
+  g_cxd56_cisif_complete_capture(0, size, NULL, g_cxd56_cisif_capture_arg);
 
   g_jpgint_receive = false;
 
@@ -413,7 +415,8 @@ static void cisif_ycc_axi_trdn_int(uint8_t code)
   else
     {
       size = cisif_reg_read(CISIF_YCC_DSTRG_CONT);
-      g_cxd56_cisif_complete_capture(0, size, NULL);
+      g_cxd56_cisif_complete_capture(0, size, NULL,
+                                     g_cxd56_cisif_capture_arg);
       cisif_reg_write(CISIF_YCC_DREAD_CONT, 0);
     }
 }
@@ -463,7 +466,8 @@ static void cisif_jpg_axi_trdn_int(uint8_t code)
   else
     {
       size = cisif_reg_read(CISIF_JPG_DSTRG_CONT);
-      g_cxd56_cisif_complete_capture(0, size, NULL);
+      g_cxd56_cisif_complete_capture(0, size, NULL,
+                                     g_cxd56_cisif_capture_arg);
       cisif_reg_write(CISIF_JPG_DREAD_CONT, 0);
     }
 }
@@ -495,7 +499,8 @@ static void cisif_ycc_err_int(uint8_t code)
 #endif
 
   size = cisif_reg_read(CISIF_YCC_DSTRG_CONT);
-  g_cxd56_cisif_complete_capture(code, size, NULL);
+  g_cxd56_cisif_complete_capture(code, size, NULL,
+                                 g_cxd56_cisif_capture_arg);
   cisif_reg_write(CISIF_YCC_DREAD_CONT, 0);
   g_errint_receive = true;
 }
@@ -513,7 +518,8 @@ static void cisif_jpg_err_int(uint8_t code)
 #endif
 
   size = cisif_reg_read(CISIF_JPG_DSTRG_CONT);
-  g_cxd56_cisif_complete_capture(code, size, NULL);
+  g_cxd56_cisif_complete_capture(code, size, NULL,
+                                 g_cxd56_cisif_capture_arg);
   cisif_reg_write(CISIF_JPG_DREAD_CONT, 0);
   g_errint_receive = true;
 }
@@ -850,7 +856,8 @@ static int cxd56_cisif_start_capture
               uint8_t nr_fmt,
               imgdata_format_t *fmt,
               imgdata_interval_t *interval,
-              imgdata_capture_t callback)
+              imgdata_capture_t callback,
+              void *arg)
 {
   cisif_param_t param =
     {
@@ -924,6 +931,7 @@ static int cxd56_cisif_start_capture
     }
 
   g_cxd56_cisif_complete_capture = callback;
+  g_cxd56_cisif_capture_arg = arg;
 
   g_state = STATE_CAPTURE;
 

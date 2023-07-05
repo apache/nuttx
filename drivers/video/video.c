@@ -232,7 +232,8 @@ static int save_scene_param(FAR video_mng_t *vmng,
                             uint32_t id,
                             struct v4l2_ext_control *control);
 static int video_complete_capture(uint8_t err_code, uint32_t datasize,
-                                  FAR const struct timeval *ts);
+                                  FAR const struct timeval *ts,
+                                  FAR void *arg);
 static int validate_frame_setting(FAR video_mng_t *vmng,
                                   enum v4l2_buf_type type,
                                   uint8_t nr_fmt,
@@ -630,7 +631,7 @@ static int start_capture(FAR video_mng_t *vmng,
      IMGSENSOR_STREAM_TYPE_VIDEO : IMGSENSOR_STREAM_TYPE_STILL,
      nr_fmt, sf, &si);
   IMGDATA_START_CAPTURE(vmng->imgdata,
-     nr_fmt, df, &di, video_complete_capture);
+     nr_fmt, df, &di, video_complete_capture, vmng);
   IMGDATA_SET_BUF(vmng->imgdata, (FAR uint8_t *)bufaddr, bufsize);
   return OK;
 }
@@ -3376,9 +3377,10 @@ static int video_unregister(FAR video_mng_t *priv)
 /* Callback function which device driver call when capture has done. */
 
 static int video_complete_capture(uint8_t err_code, uint32_t datasize,
-                                  FAR const struct timeval *ts)
+                                  FAR const struct timeval *ts,
+                                  FAR void *arg)
 {
-  FAR video_mng_t      *vmng = (FAR video_mng_t *)g_video_handler;
+  FAR video_mng_t      *vmng = (FAR video_mng_t *)arg;
   FAR video_type_inf_t *type_inf;
   FAR vbuf_container_t *container = NULL;
   enum v4l2_buf_type buf_type;
