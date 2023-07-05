@@ -247,79 +247,86 @@ class dump_log_file:
         start = 0
         if self.fd is None:
             self.open()
-        while 1:
-            line = self.fd.readline()
-            if line == "":
-                break
 
-            tmp = re.search("up_dump_register:", line)
-            if tmp is not None:
-                # find arch
-                if arch is None:
-                    self.arch = tmp.group(1)
-                else:
-                    self.arch = arch
+        linenumber = 0
+        try:
+            while 1:
+                line = self.fd.readline()
+                if line == "":
+                    break
 
-                if self.arch not in reg_table:
-                    logger.error("%s not supported" % (self.arch))
-                # init register list
-                if len(self.registers) == 0:
-                    for x in range(max(reg_table[self.arch].values()) + 1):
-                        self.registers.append(b"x")
-
-                # find register value
-                line = line[tmp.span()[1] :]
-                line = line.replace("\n", " ")
-                while 1:
-                    tmp = re.search("([^ ]+):", line)
-                    if tmp is None:
-                        break
-                    register = tmp.group(1)
-                    line = line[tmp.span()[1] :]
-                    tmp = re.search("([0-9a-fA-F]+) ", line)
-                    if tmp is None:
-                        break
-                    if register in reg_table[self.arch].keys():
-                        self.registers[reg_table[self.arch][register]] = int(
-                            "0x" + tmp.group().replace(" ", ""), 16
-                        )
-                    line = line[tmp.span()[1] :]
-                continue
-
-            tmp = re.search("stack_dump:", line)
-            if tmp is not None:
-                # find stackdump
-                line = line[tmp.span()[1] :]
-                tmp = re.search("([0-9a-fA-F]+):", line)
+                linenumber += 1
+                tmp = re.search("up_dump_register:", line)
                 if tmp is not None:
-                    line_start = int("0x" + tmp.group()[:-1], 16)
+                    # find arch
+                    if arch is None:
+                        self.arch = tmp.group(1)
+                    else:
+                        self.arch = arch
 
-                    if start + len(data) != line_start:
-                        # stack is not contiguous
-                        if len(data) == 0:
-                            start = line_start
-                        else:
-                            memory = {
-                                "start": start,
-                                "end": start + len(data),
-                                "data": data,
-                            }
-                            self.memories.append(memory)
-                            data = b""
-                            start = line_start
+                    if self.arch not in reg_table:
+                        logger.error("%s not supported" % (self.arch))
+                    # init register list
+                    if len(self.registers) == 0:
+                        for x in range(max(reg_table[self.arch].values()) + 1):
+                            self.registers.append(b"x")
 
+                    # find register value
                     line = line[tmp.span()[1] :]
                     line = line.replace("\n", " ")
-
                     while 1:
-                        # record stack value
-                        tmp = re.search(" ([0-9a-fA-F]+)", line)
+                        tmp = re.search("([^ ]+):", line)
                         if tmp is None:
                             break
-                        data = data + struct.pack(
-                            "<I", int("0x" + tmp.group().replace(" ", ""), 16)
-                        )
+                        register = tmp.group(1)
                         line = line[tmp.span()[1] :]
+                        tmp = re.search("([0-9a-fA-F]+) ", line)
+                        if tmp is None:
+                            break
+                        if register in reg_table[self.arch].keys():
+                            self.registers[reg_table[self.arch][register]] = int(
+                                "0x" + tmp.group().replace(" ", ""), 16
+                            )
+                        line = line[tmp.span()[1] :]
+                    continue
+
+                tmp = re.search("stack_dump:", line)
+                if tmp is not None:
+                    # find stackdump
+                    line = line[tmp.span()[1] :]
+                    tmp = re.search("([0-9a-fA-F]+):", line)
+                    if tmp is not None:
+                        line_start = int("0x" + tmp.group()[:-1], 16)
+
+                        if start + len(data) != line_start:
+                            # stack is not contiguous
+                            if len(data) == 0:
+                                start = line_start
+                            else:
+                                memory = {
+                                    "start": start,
+                                    "end": start + len(data),
+                                    "data": data,
+                                }
+                                self.memories.append(memory)
+                                data = b""
+                                start = line_start
+
+                        line = line[tmp.span()[1] :]
+                        line = line.replace("\n", " ")
+
+                        while 1:
+                            # record stack value
+                            tmp = re.search(" ([0-9a-fA-F]+)", line)
+                            if tmp is None:
+                                break
+                            data = data + struct.pack(
+                                "<I", int("0x" + tmp.group().replace(" ", ""), 16)
+                            )
+                            line = line[tmp.span()[1] :]
+        except Exception as e:
+            logger.error("parse log file error: %s linenumber %d" % (e, linenumber))
+            os._exit(0)
 
         if len(data):
             memory = {"start": start, "end": start + len(data), "data": data}
