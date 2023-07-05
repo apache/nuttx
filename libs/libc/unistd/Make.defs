@@ -48,6 +48,12 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINTS),y)
 CSRCS += lib_truncate.c lib_posix_fallocate.c
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+ifeq ($(CONFIG_SCHED_WAITPID),y)
+CSRCS += lib_vfork.c
+endif
+endif
+
 # Add the unistd directory to the build
 
 DEPPATH += --dep-path unistd

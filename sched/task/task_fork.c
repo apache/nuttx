@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_vfork.c
+ * sched/task/task_fork.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -40,33 +40,33 @@
 #include "task/task.h"
 #include "tls/tls.h"
 
-/* vfork() requires architecture-specific support as well as waipid(). */
+/* fork() requires architecture-specific support as well as waipid(). */
 
-#if defined(CONFIG_ARCH_HAVE_VFORK) && defined(CONFIG_SCHED_WAITPID)
+#ifdef CONFIG_ARCH_HAVE_FORK
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtask_setup_vfork
+ * Name: nxtask_setup_fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the
- *   behavior is undefined if the process created by vfork() either modifies
+ *   The fork() function has the same effect as posix fork(), except that the
+ *   behavior is undefined if the process created by fork() either modifies
  *   any data other than a variable of type pid_t used to store the return
- *   value from vfork(), or returns from the function in which vfork() was
+ *   value from fork(), or returns from the function in which fork() was
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
- *   This function provides one step in the overall vfork() sequence:  It
+ *   This function provides one step in the overall fork() sequence:  It
  *   Allocates and initializes the child task's TCB.  The overall sequence
  *   is:
  *
- *   1) User code calls vfork().  vfork() is provided in
+ *   1) User code calls fork().  fork() is provided in
  *      architecture-specific code.
- *   2) vfork()and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *   2) fork()and calls nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -74,24 +74,24 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *   4) up_fork() provides any additional operating context. up_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) up_fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
  *   retaddr - Return address
  *   argsize - Location to return the argument size
  *
  * Returned Value:
- *   Upon successful completion, nxtask_setup_vfork() returns a pointer to
+ *   Upon successful completion, nxtask_setup_fork() returns a pointer to
  *   newly allocated and initialized child task's TCB.  NULL is returned
  *   on any failure and the errno is set appropriately.
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
+FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 {
   FAR struct tcb_s *ptcb = this_task();
   FAR struct tcb_s *parent;
@@ -226,24 +226,24 @@ errout:
 }
 
 /****************************************************************************
- * Name: nxtask_start_vfork
+ * Name: nxtask_start_fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the
- *   behavior is undefined if the process created by vfork() either modifies
+ *   The fork() function has the same effect as fork(), except that the
+ *   behavior is undefined if the process created by fork() either modifies
  *   any data other than a variable of type pid_t used to store the return
- *   value from vfork(), or returns from the function in which vfork() was
+ *   value from fork(), or returns from the function in which fork() was
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
- *   This function provides one step in the overall vfork() sequence:  It
+ *   This function provides one step in the overall fork() sequence:  It
  *   starts execution of the previously initialized TCB.  The overall
  *   sequence is:
  *
- *   1) User code calls vfork()
- *   2) Architecture-specific code provides vfork()and calls
- *      nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *   1) User code calls fork()
+ *   2) Architecture-specific code provides fork()and calls
+ *      nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -251,29 +251,28 @@ errout:
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) vfork() provides any additional operating context. vfork must:
+ *   4) fork() provides any additional operating context. fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   retaddr - The return address from vfork() where the child task
- *     will be started.
+ *   child - The task_tcb_s struct instance that created by
+ *           nxtask_setup_fork() method
+ *   wait_child - whether need to wait until the child is running finished
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and
+ *   Upon successful completion, fork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
  *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 
-pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
+pid_t nxtask_start_fork(FAR struct task_tcb_s *child)
 {
   pid_t pid;
-  int rc = 0;
-  int ret;
 
   sinfo("Starting Child TCB=%p\n", child);
   DEBUGASSERT(child);
@@ -294,45 +293,22 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
 
   nxtask_activate((FAR struct tcb_s *)child);
 
-  /* The child task has not yet ran because pre-emption is disabled.
-   * The child task has the same priority as the parent task, so that
-   * would typically be the case anyway.  However, in the SMP
-   * configuration, the child thread might have already ran on
-   * another CPU if pre-emption were not disabled.
-   *
-   * It is a requirement that the parent environment be stable while
-   * vfork runs; the child thread is still dependent on things in the
-   * parent thread... like the pointers into parent thread's stack
-   * which will still appear in the child's registers and environment.
-   *
-   * We assure that by waiting for the child thread to exit before
-   * returning to the parent thread.  NOTE that pre-emption will be
-   * re-enabled while we are waiting, giving the child thread the
-   * opportunity to run.
-   */
-
-  ret = waitpid(pid, &rc, 0);
-  if (ret < 0)
-    {
-      serr("ERROR: waitpid failed: %d\n", get_errno());
-    }
-
   sched_unlock();
   return pid;
 }
 
 /****************************************************************************
- * Name: nxtask_abort_vfork
+ * Name: nxtask_abort_fork
  *
  * Description:
- *   Recover from any errors after nxtask_setup_vfork() was called.
+ *   Recover from any errors after nxtask_setup_fork() was called.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode)
+void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode)
 {
   /* The TCB was added to the active task list by nxtask_setup_scheduler() */
 
@@ -345,4 +321,4 @@ void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode)
   set_errno(errcode);
 }
 
-#endif /* CONFIG_ARCH_HAVE_VFORK && CONFIG_SCHED_WAITPID */
+#endif /* CONFIG_ARCH_HAVE_FORK */

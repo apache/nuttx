@@ -29,10 +29,8 @@ ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 CSRCS += task_getppid.c task_reparent.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-ifeq ($(CONFIG_SCHED_WAITPID),y)
-CSRCS += task_vfork.c
-endif
+ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+CSRCS += task_fork.c
 endif
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)

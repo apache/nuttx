@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/mips/src/mips32/vfork.S
+ * arch/mips/src/mips32/fork.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "mips_vfork.h"
+#include "mips_fork.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -34,30 +34,30 @@
  * Public Symbols
  ************************************************************************************/
 
-	.file	"vfork.S"
-	.globl	up_vfork
+	.file	"fork.S"
+	.globl	up_fork
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: vfork
+ * Name: fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the behavior is
- *   undefined if the process created by vfork() either modifies any data other than
- *   a variable of type pid_t used to store the return value from vfork(), or returns
- *   from the function in which vfork() was called, or calls any other function before
+ *   The fork() function has the same effect as posix fork(), except that the behavior is
+ *   undefined if the process created by fork() either modifies any data other than
+ *   a variable of type pid_t used to store the return value from fork(), or returns
+ *   from the function in which fork() was called, or calls any other function before
  *   successfully calling _exit() or one of the exec family of functions.
  *
- *   This thin layer implements vfork by simply calling up_vfork() with the vfork()
+ *   This thin layer implements fork by simply calling up_fork() with the fork()
  *   context as an argument.  The overall sequence is:
  *
- *   1) User code calls vfork().  vfork() collects context information and
- *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.  This
+ *   1) User code calls fork().  fork() collects context information and
+ *      transfers control up up_fork().
+ *   2) up_fork() and calls nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.  This
  *      consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -65,17 +65,17 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *   4) up_fork() provides any additional operating context. up_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) up_fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and returns
+ *   Upon successful completion, fork() returns 0 to the child process and returns
  *   the process ID of the child process to the parent process. Otherwise, -1 is
  *   returned to the parent, no child process is created, and errno is set to
  *   indicate the error.
@@ -84,59 +84,59 @@
 
 	.text
 	.align  2
-	.globl	vfork
-	.type	vfork, function
+	.globl	fork
+	.type	fork, function
 	.set	nomips16
 #ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
 #endif
-	.ent	vfork
+	.ent	fork
 
-vfork:
+fork:
 	/* Create a stack frame */
 
 	move	$t0, $sp					/* Save the value of the stack on entry */
-	addiu	$sp, $sp, -VFORK_SIZEOF		/* Allocate the structure on the stack */
+	addiu	$sp, $sp, -FORK_SIZEOF		/* Allocate the structure on the stack */
 
 	/* CPU registers */
 	/* Save the saved registers */
 
-	sw		$s0, VFORK_S0_OFFSET($sp)
-	sw		$s1, VFORK_S1_OFFSET($sp)
-	sw		$s2, VFORK_S2_OFFSET($sp)
-	sw		$s3, VFORK_S3_OFFSET($sp)
-	sw		$s4, VFORK_S4_OFFSET($sp)
-	sw		$s5, VFORK_S5_OFFSET($sp)
-	sw		$s6, VFORK_S6_OFFSET($sp)
-	sw		$s7, VFORK_S7_OFFSET($sp)
+	sw		$s0, FORK_S0_OFFSET($sp)
+	sw		$s1, FORK_S1_OFFSET($sp)
+	sw		$s2, FORK_S2_OFFSET($sp)
+	sw		$s3, FORK_S3_OFFSET($sp)
+	sw		$s4, FORK_S4_OFFSET($sp)
+	sw		$s5, FORK_S5_OFFSET($sp)
+	sw		$s6, FORK_S6_OFFSET($sp)
+	sw		$s7, FORK_S7_OFFSET($sp)
 
 #ifdef CONFIG_MIPS32_FRAMEPOINTER
-	sw		$fp, VFORK_FP_OFFSET($sp)
+	sw		$fp, FORK_FP_OFFSET($sp)
 #else
-	sw		$s8, VFORK_S8_OFFSET($sp)
+	sw		$s8, FORK_S8_OFFSET($sp)
 #endif
 
 	/* Save the global pointer, stack pointer, and return address */
 
-	sw		$t0, VFORK_SP_OFFSET($sp)
-	sw		$ra, VFORK_RA_OFFSET($sp)
+	sw		$t0, FORK_SP_OFFSET($sp)
+	sw		$ra, FORK_RA_OFFSET($sp)
 #ifdef MIPS32_SAVE_GP
-	sw		$gp, VFORK_GP_OFFSET($sp)
+	sw		$gp, FORK_GP_OFFSET($sp)
 #endif
 
 	/* Floating point registers (not yet) */
 
-	/* Then, call up_vfork(), passing it a pointer to the stack structure */
+	/* Then, call up_fork(), passing it a pointer to the stack structure */
 
 	move	$a0, $sp
-	jal		up_vfork
+	jal		up_fork
 	nop
 
-	/* Release the stack data and return the value returned by up_vfork */
+	/* Release the stack data and return the value returned by up_fork */
 
-	lw		$ra, VFORK_RA_OFFSET($sp)
-	addiu	$sp, $sp, VFORK_SIZEOF
+	lw		$ra, FORK_RA_OFFSET($sp)
+	addiu	$sp, $sp, FORK_SIZEOF
 	j		$ra
 
-	.end	vfork
-	.size	vfork, .-vfork
+	.end	fork
+	.size	fork, .-fork

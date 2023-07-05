@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/arm_vfork.h
+ * arch/arm/src/common/arm_fork.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_ARM_VFORK_H
-#define __ARCH_ARM_SRC_COMMON_ARM_VFORK_H
+#ifndef __ARCH_ARM_SRC_COMMON_ARM_FORK_H
+#define __ARCH_ARM_SRC_COMMON_ARM_FORK_H
 
 /****************************************************************************
  * Included Files
@@ -31,26 +31,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VFORK_R4_OFFSET  (0*4)   /* Volatile register r4 */
-#define VFORK_R5_OFFSET  (1*4)   /* Volatile register r5 */
-#define VFORK_R6_OFFSET  (2*4)   /* Volatile register r6 */
-#define VFORK_R7_OFFSET  (3*4)   /* Volatile register r7 */
-#define VFORK_R8_OFFSET  (4*4)   /* Volatile register r8 */
-#define VFORK_R9_OFFSET  (5*4)   /* Volatile register r9 */
-#define VFORK_R10_OFFSET (6*4)   /* Volatile register r10 */
+#define FORK_R4_OFFSET  (0*4)   /* Volatile register r4 */
+#define FORK_R5_OFFSET  (1*4)   /* Volatile register r5 */
+#define FORK_R6_OFFSET  (2*4)   /* Volatile register r6 */
+#define FORK_R7_OFFSET  (3*4)   /* Volatile register r7 */
+#define FORK_R8_OFFSET  (4*4)   /* Volatile register r8 */
+#define FORK_R9_OFFSET  (5*4)   /* Volatile register r9 */
+#define FORK_R10_OFFSET (6*4)   /* Volatile register r10 */
 
-#define VFORK_FP_OFFSET  (7*4)   /* Frame pointer */
-#define VFORK_SP_OFFSET  (8*4)   /* Stack pointer*/
-#define VFORK_LR_OFFSET  (9*4)   /* Return address*/
+#define FORK_FP_OFFSET  (7*4)   /* Frame pointer */
+#define FORK_SP_OFFSET  (8*4)   /* Stack pointer*/
+#define FORK_LR_OFFSET  (9*4)   /* Return address*/
 
-#define VFORK_SIZEOF     (10*4)
+#define FORK_SIZEOF     (10*4)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-struct vfork_s
+struct fork_s
 {
   /* CPU registers */
 
@@ -70,4 +70,4 @@ struct vfork_s
 };
 #endif
 
-#endif /* __ARCH_ARM_SRC_COMMON_ARM_VFORK_H */
+#endif /* __ARCH_ARM_SRC_COMMON_ARM_FORK_H */

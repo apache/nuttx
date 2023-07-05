@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/arm64_vfork.c
+ * arch/arm64/src/common/arm64_fork.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,7 +37,7 @@
 #include "sched/sched.h"
 
 #include "arm64_arch.h"
-#include "arm64_vfork.h"
+#include "arm64_fork.h"
 #include "arm64_internal.h"
 #include "arm64_fatal.h"
 
@@ -55,7 +55,7 @@
 
 #ifdef CONFIG_ARCH_FPU
 
-void arm64_vfork_fpureg_save(struct vfork_s *context)
+void arm64_fork_fpureg_save(struct fork_s *context)
 {
   irqstate_t flags;
 
@@ -75,22 +75,22 @@ void arm64_vfork_fpureg_save(struct vfork_s *context)
 #endif
 
 /****************************************************************************
- * Name: vfork
+ * Name: fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the
- *   behavior is undefined if the process created by vfork() either modifies
+ *   The fork() function has the same effect as posix fork(), except that the
+ *   behavior is undefined if the process created by fork() either modifies
  *   any data other than a variable of type pid_t used to store the return
- *   value from vfork(), or returns from the function in which vfork() was
+ *   value from fork(), or returns from the function in which fork() was
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
  *   The overall sequence is:
  *
- *   1) User code calls vfork().  vfork() collects context information and
- *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *   1) User code calls fork().  fork() collects context information and
+ *      transfers control up up_fork().
+ *   2) up_fork() and calls nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -98,27 +98,27 @@ void arm64_vfork_fpureg_save(struct vfork_s *context)
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *   4) up_fork() provides any additional operating context. up_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) up_fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
- * nxtask_abort_vfork() may be called if an error occurs between steps 3 and
+ * nxtask_abort_fork() may be called if an error occurs between steps 3 and
  * 6.
  *
  * Input Parameters:
- *   context - Caller context information saved by vfork()
+ *   context - Caller context information saved by fork()
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and
+ *   Upon successful completion, fork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
  *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 
-pid_t up_vfork(const struct vfork_s *context)
+pid_t up_fork(const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
@@ -128,17 +128,17 @@ pid_t up_vfork(const struct vfork_s *context)
   uint64_t stacktop;
   uint64_t stackutil;
   char   *stack_ptr;
-  struct regs_context  *pvforkctx;
+  struct regs_context  *pforkctx;
 #ifdef CONFIG_ARCH_FPU
   struct fpu_reg       *pfpuctx;
 #endif
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_vfork((start_t)(context->lr & ~1));
+  child = nxtask_setup_fork((start_t)(context->lr & ~1));
   if (!child)
     {
-      serr("ERROR: nxtask_setup_vfork failed\n");
+      serr("ERROR: nxtask_setup_fork failed\n");
       return (pid_t)ERROR;
     }
 
@@ -156,7 +156,7 @@ pid_t up_vfork(const struct vfork_s *context)
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
    * content that will not work in the child context.  However, if the
-   * user follows all of the caveats of vfork() usage, even this feeble
+   * user follows all of the caveats of fork() usage, even this feeble
    * effort is overkill.
    */
 
@@ -184,7 +184,7 @@ pid_t up_vfork(const struct vfork_s *context)
    * child thread.
    */
 
-  /* make the vfork stack frame */
+  /* make the fork stack frame */
 
   stack_ptr = (char *)newsp;
 
@@ -198,51 +198,51 @@ pid_t up_vfork(const struct vfork_s *context)
 
 #endif
 
-  pvforkctx      = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
+  pforkctx      = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
 
-  pvforkctx->regs[REG_X0]   = 0;
-  pvforkctx->regs[REG_X8]   = context->regs[VFORK_REG_X8];
-  pvforkctx->regs[REG_X9]   = context->regs[VFORK_REG_X9];
-  pvforkctx->regs[REG_X10]  = context->regs[VFORK_REG_X10];
-  pvforkctx->regs[REG_X11]  = context->regs[VFORK_REG_X11];
-  pvforkctx->regs[REG_X12]  = context->regs[VFORK_REG_X12];
-  pvforkctx->regs[REG_X13]  = context->regs[VFORK_REG_X13];
-  pvforkctx->regs[REG_X14]  = context->regs[VFORK_REG_X14];
-  pvforkctx->regs[REG_X15]  = context->regs[VFORK_REG_X15];
-  pvforkctx->regs[REG_X16]  = context->regs[VFORK_REG_X16];
-  pvforkctx->regs[REG_X17]  = context->regs[VFORK_REG_X17];
-  pvforkctx->regs[REG_X18]  = context->regs[VFORK_REG_X18];
-  pvforkctx->regs[REG_X19]  = context->regs[VFORK_REG_X19];
-  pvforkctx->regs[REG_X20]  = context->regs[VFORK_REG_X20];
-  pvforkctx->regs[REG_X21]  = context->regs[VFORK_REG_X21];
-  pvforkctx->regs[REG_X22]  = context->regs[VFORK_REG_X22];
-  pvforkctx->regs[REG_X23]  = context->regs[VFORK_REG_X23];
-  pvforkctx->regs[REG_X24]  = context->regs[VFORK_REG_X24];
-  pvforkctx->regs[REG_X25]  = context->regs[VFORK_REG_X25];
-  pvforkctx->regs[REG_X26]  = context->regs[VFORK_REG_X26];
-  pvforkctx->regs[REG_X27]  = context->regs[VFORK_REG_X27];
-  pvforkctx->regs[REG_X28]  = context->regs[VFORK_REG_X28];
-  pvforkctx->regs[REG_X29]  = newfp;
+  pforkctx->regs[REG_X0]   = 0;
+  pforkctx->regs[REG_X8]   = context->regs[FORK_REG_X8];
+  pforkctx->regs[REG_X9]   = context->regs[FORK_REG_X9];
+  pforkctx->regs[REG_X10]  = context->regs[FORK_REG_X10];
+  pforkctx->regs[REG_X11]  = context->regs[FORK_REG_X11];
+  pforkctx->regs[REG_X12]  = context->regs[FORK_REG_X12];
+  pforkctx->regs[REG_X13]  = context->regs[FORK_REG_X13];
+  pforkctx->regs[REG_X14]  = context->regs[FORK_REG_X14];
+  pforkctx->regs[REG_X15]  = context->regs[FORK_REG_X15];
+  pforkctx->regs[REG_X16]  = context->regs[FORK_REG_X16];
+  pforkctx->regs[REG_X17]  = context->regs[FORK_REG_X17];
+  pforkctx->regs[REG_X18]  = context->regs[FORK_REG_X18];
+  pforkctx->regs[REG_X19]  = context->regs[FORK_REG_X19];
+  pforkctx->regs[REG_X20]  = context->regs[FORK_REG_X20];
+  pforkctx->regs[REG_X21]  = context->regs[FORK_REG_X21];
+  pforkctx->regs[REG_X22]  = context->regs[FORK_REG_X22];
+  pforkctx->regs[REG_X23]  = context->regs[FORK_REG_X23];
+  pforkctx->regs[REG_X24]  = context->regs[FORK_REG_X24];
+  pforkctx->regs[REG_X25]  = context->regs[FORK_REG_X25];
+  pforkctx->regs[REG_X26]  = context->regs[FORK_REG_X26];
+  pforkctx->regs[REG_X27]  = context->regs[FORK_REG_X27];
+  pforkctx->regs[REG_X28]  = context->regs[FORK_REG_X28];
+  pforkctx->regs[REG_X29]  = newfp;
 
-  pvforkctx->spsr = SPSR_MODE_EL1H;
+  pforkctx->spsr = SPSR_MODE_EL1H;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  pvforkctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
+  pforkctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
-  pvforkctx->elr  = (uint64_t)context->lr;
+  pforkctx->elr  = (uint64_t)context->lr;
 
-  pvforkctx->exe_depth       = 0;
-  pvforkctx->sp_elx          = (uint64_t)pvforkctx;
-  pvforkctx->sp_el0          = (uint64_t)pvforkctx;
-  pvforkctx->tpidr_el0       = (uint64_t)(&child->cmn);
-  pvforkctx->tpidr_el1       = (uint64_t)(&child->cmn);
+  pforkctx->exe_depth       = 0;
+  pforkctx->sp_elx          = (uint64_t)pforkctx;
+  pforkctx->sp_el0          = (uint64_t)pforkctx;
+  pforkctx->tpidr_el0       = (uint64_t)(&child->cmn);
+  pforkctx->tpidr_el1       = (uint64_t)(&child->cmn);
 
-  child->cmn.xcp.regs = (uint64_t *)pvforkctx;
+  child->cmn.xcp.regs = (uint64_t *)pforkctx;
 
-  /* And, finally, start the child task.  On a failure, nxtask_start_vfork()
-   * will discard the TCB by calling nxtask_abort_vfork().
+  /* And, finally, start the child task.  On a failure, nxtask_start_fork()
+   * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_vfork(child);
+  return nxtask_start_fork(child);
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/iar/vfork.S
+ * arch/arm64/src/common/arm64_fork_func.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,44 +24,38 @@
 
 #include <nuttx/config.h>
 
-#include "arm_vfork.h"
-
-	MODULE vfork
-	SECTION .text:CODE:NOROOT(2)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "arch/syscall.h"
+#include "arm64_macro.inc"
+#include "arm64_fork.h"
 
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
-	PUBLIC	vfork
-	EXTERN	up_vfork
+    .file    "arm64_fork_func.S"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vfork
+ * Name: fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the
- *   behavior is undefined if the process created by vfork() either modifies
+ *   The fork() function has the same effect as posix fork(), except that the
+ *   behavior is undefined if the process created by fork() either modifies
  *   any data other than a variable of type pid_t used to store the return
- *   value from vfork(), or returns from the function in which vfork() was
+ *   value from fork(), or returns from the function in which fork() was
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
- *   This thin layer implements vfork by simply calling up_vfork() with the
- *   vfork() context as an argument.  The overall sequence is:
+ *   This thin layer implements fork by simply calling up_fork() with the
+ *   fork() context as an argument.  The overall sequence is:
  *
- *   1) User code calls vfork().  vfork() collects context information and
- *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *   1) User code calls fork().  fork() collects context information and
+ *      transfers control up up_fork().
+ *   2) up_fork() and calls nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -69,59 +63,70 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *   4) up_fork() provides any additional operating context. up_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) up_fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and
+ *   Upon successful completion, fork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
  *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 
-	THUMB
+GTEXT(fork)
+SECTION_FUNC(text, fork)
+    /* Create a stack frame */
 
-vfork:
-	/* Create a stack frame */
+    mov    x0,  sp            /* Save the value of the stack on entry */
+    stp    x29, x30, [sp]
+    sub    sp,  sp, #8 * FORK_REGS_SIZE    /* Allocate the structure on the stack */
 
-	mov		r0, sp			/* Save the value of the stack on entry */
-	sub		sp, sp, #VFORK_SIZEOF	/* Allocate the structure on the stack */
+    /* CPU registers, save all register*/
 
-	/* CPU registers */
-	/* Save the volatile registers */
+    stp    x0, x1, [sp, #8 * FORK_REG_X0]
+    stp    x2, x3, [sp, #8 * FORK_REG_X2]
+    stp    x4, x5, [sp, #8 * FORK_REG_X4]
+    stp    x6, x7, [sp, #8 * FORK_REG_X6]
+    stp    x8, x9, [sp, #8 * FORK_REG_X8]
+    stp    x10, x11, [sp, #8 * FORK_REG_X10]
+    stp    x12, x13, [sp, #8 * FORK_REG_X12]
+    stp    x14, x15, [sp, #8 * FORK_REG_X14]
+    stp    x16, x17, [sp, #8 * FORK_REG_X16]
+    stp    x18, x19, [sp, #8 * FORK_REG_X18]
+    stp    x20, x21, [sp, #8 * FORK_REG_X20]
+    stp    x22, x23, [sp, #8 * FORK_REG_X22]
+    stp    x24, x25, [sp, #8 * FORK_REG_X24]
+    stp    x26, x27, [sp, #8 * FORK_REG_X26]
+    stp    x28, x29, [sp, #8 * FORK_REG_X28]
 
-	str		r4, [sp, #VFORK_R4_OFFSET]
-	str		r5, [sp, #VFORK_R5_OFFSET]
-	str		r6, [sp, #VFORK_R6_OFFSET]
-	str		r7, [sp, #VFORK_R7_OFFSET]
-	str		r8, [sp, #VFORK_R8_OFFSET]
-	str		r9, [sp, #VFORK_R9_OFFSET]
-	str		r10, [sp, #VFORK_R10_OFFSET]
+    /* Save the LR, stack pointer */
 
-	/* Save the frame pointer, stack pointer, and return address */
+    stp    x30, x0, [sp, #8 * FORK_REG_LR]
 
-	str		r11, [sp, #VFORK_FP_OFFSET] /* fp not defined. use r11 */
-	str		r0, [sp, #VFORK_SP_OFFSET]
-	str		lr, [sp, #VFORK_LR_OFFSET]
+    /* Floating point registers */
+#ifdef CONFIG_ARCH_FPU
+    mov     x0, sp
+    stp  x0, x30, [sp, #-16]!
+    bl     arm64_fork_fpureg_save
+    ldp  x0, x30, [sp], #16
+#endif
 
-	/* Floating point registers (not yet) */
+    /* Then, call up_fork(), passing it a pointer to the stack structure */
 
-	/* Then, call up_vfork(), passing it a pointer to the stack structure */
+    mov    x0, sp
+    mov    x1, #0
+    bl  up_fork
 
-	mov		r0, sp
-	bl		up_vfork
+    /* Release the stack data and return the value returned by up_fork */
 
-	/* Release the stack data and return the value returned by up_vfork */
+    add    sp, sp,  #8 * FORK_REGS_SIZE
+    ldp    x29, x30, [sp]
 
-	ldr		lr, [sp, #VFORK_LR_OFFSET]
-	add		sp, sp, #VFORK_SIZEOF
-	bx		lr
-
-	END
+    ret

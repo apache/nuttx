@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/vfork.S
+ * arch/risc-v/src/common/fork.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +25,7 @@
 
 #include <nuttx/config.h>
 
-#include "riscv_vfork.h"
+#include "riscv_fork.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -35,32 +35,32 @@
  * Public Symbols
  ****************************************************************************/
 
-  .file  "vfork.S"
-  .globl up_vfork
-  .globl vfork
+  .file  "fork.S"
+  .globl up_fork
+  .globl fork
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vfork
+ * Name: fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the
- *   behavior is undefined if the process created by vfork() either modifies
+ *   The fork() function has the same effect as posix fork(), except that the
+ *   behavior is undefined if the process created by fork() either modifies
  *   any data other than a variable of type pid_t used to store the return
- *   value from vfork(), or returns from the function in which vfork() was
+ *   value from fork(), or returns from the function in which fork() was
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
- *   This thin layer implements vfork by simply calling up_vfork() with the
- *   vfork() context as an argument.  The overall sequence is:
+ *   This thin layer implements fork by simply calling up_fork() with the
+ *   fork() context as an argument.  The overall sequence is:
  *
- *   1) User code calls vfork().  vfork() collects context information and
- *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *   1) User code calls fork().  fork() collects context information and
+ *      transfers control up up_fork().
+ *   2) up_fork() and calls nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -68,84 +68,84 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *   4) up_fork() provides any additional operating context. up_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) up_fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and
+ *   Upon successful completion, fork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
  *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 
-.type vfork, function
+.type fork, function
 
-vfork:
+fork:
   /* Create a stack frame */
 
-  addi        sp, sp, -VFORK_SIZEOF
+  addi        sp, sp, -FORK_SIZEOF
 
   /* CPU registers */
   /* Save the volatile registers */
 
-  REGSTORE    s1, VFORK_S1_OFFSET(sp)
-  REGSTORE    s2, VFORK_S2_OFFSET(sp)
-  REGSTORE    s3, VFORK_S3_OFFSET(sp)
-  REGSTORE    s4, VFORK_S4_OFFSET(sp)
-  REGSTORE    s5, VFORK_S5_OFFSET(sp)
-  REGSTORE    s6, VFORK_S6_OFFSET(sp)
-  REGSTORE    s7, VFORK_S7_OFFSET(sp)
-  REGSTORE    s8, VFORK_S8_OFFSET(sp)
-  REGSTORE    s9, VFORK_S9_OFFSET(sp)
-  REGSTORE    s10, VFORK_S10_OFFSET(sp)
-  REGSTORE    s11, VFORK_S11_OFFSET(sp)
+  REGSTORE    s1, FORK_S1_OFFSET(sp)
+  REGSTORE    s2, FORK_S2_OFFSET(sp)
+  REGSTORE    s3, FORK_S3_OFFSET(sp)
+  REGSTORE    s4, FORK_S4_OFFSET(sp)
+  REGSTORE    s5, FORK_S5_OFFSET(sp)
+  REGSTORE    s6, FORK_S6_OFFSET(sp)
+  REGSTORE    s7, FORK_S7_OFFSET(sp)
+  REGSTORE    s8, FORK_S8_OFFSET(sp)
+  REGSTORE    s9, FORK_S9_OFFSET(sp)
+  REGSTORE    s10, FORK_S10_OFFSET(sp)
+  REGSTORE    s11, FORK_S11_OFFSET(sp)
 
   /* Save the frame pointer, stack pointer, and return address */
 
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  REGSTORE    fp, VFORK_FP_OFFSET(sp)
+  REGSTORE    fp, FORK_FP_OFFSET(sp)
 #else
-  REGSTORE    s0, VFORK_S0_OFFSET(sp)
+  REGSTORE    s0, FORK_S0_OFFSET(sp)
 #endif
 
-  addi        s0, sp, VFORK_SIZEOF
-  REGSTORE    s0, VFORK_SP_OFFSET(sp) /* original SP */
-  REGSTORE    x1, VFORK_RA_OFFSET(sp) /* return address */
+  addi        s0, sp, FORK_SIZEOF
+  REGSTORE    s0, FORK_SP_OFFSET(sp) /* original SP */
+  REGSTORE    x1, FORK_RA_OFFSET(sp) /* return address */
 
   /* Floating point registers */
 
 #ifdef CONFIG_ARCH_FPU
-  FSTORE      fs0, VFORK_FS0_OFFSET(sp)
-  FSTORE      fs1, VFORK_FS1_OFFSET(sp)
-  FSTORE      fs2, VFORK_FS2_OFFSET(sp)
-  FSTORE      fs3, VFORK_FS3_OFFSET(sp)
-  FSTORE      fs4, VFORK_FS4_OFFSET(sp)
-  FSTORE      fs5, VFORK_FS5_OFFSET(sp)
-  FSTORE      fs6, VFORK_FS6_OFFSET(sp)
-  FSTORE      fs7, VFORK_FS7_OFFSET(sp)
-  FSTORE      fs8, VFORK_FS8_OFFSET(sp)
-  FSTORE      fs9, VFORK_FS9_OFFSET(sp)
-  FSTORE      fs10, VFORK_FS10_OFFSET(sp)
-  FSTORE      fs11, VFORK_FS11_OFFSET(sp)
+  FSTORE      fs0, FORK_FS0_OFFSET(sp)
+  FSTORE      fs1, FORK_FS1_OFFSET(sp)
+  FSTORE      fs2, FORK_FS2_OFFSET(sp)
+  FSTORE      fs3, FORK_FS3_OFFSET(sp)
+  FSTORE      fs4, FORK_FS4_OFFSET(sp)
+  FSTORE      fs5, FORK_FS5_OFFSET(sp)
+  FSTORE      fs6, FORK_FS6_OFFSET(sp)
+  FSTORE      fs7, FORK_FS7_OFFSET(sp)
+  FSTORE      fs8, FORK_FS8_OFFSET(sp)
+  FSTORE      fs9, FORK_FS9_OFFSET(sp)
+  FSTORE      fs10, FORK_FS10_OFFSET(sp)
+  FSTORE      fs11, FORK_FS11_OFFSET(sp)
 #endif
 
-  /* Then, call up_vfork(), passing it a pointer to the stack frame */
+  /* Then, call up_fork(), passing it a pointer to the stack frame */
 
   mv          a0, sp
-  call        up_vfork
+  call        up_fork
 
-  /* Release the stack frame and return the value returned by up_vfork */
+  /* Release the stack frame and return the value returned by up_fork */
 
-  REGLOAD     x1, VFORK_RA_OFFSET(sp)
-  addi        sp, sp, VFORK_SIZEOF
+  REGLOAD     x1, FORK_RA_OFFSET(sp)
+  addi        sp, sp, FORK_SIZEOF
   ret
 
-  .size  vfork, .-vfork
+  .size  fork, .-fork
   .end

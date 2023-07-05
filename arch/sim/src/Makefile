@@ -46,16 +46,16 @@ endif
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
-  ASRCS += sim_vfork_x86.S
+  ASRCS += sim_fork_x86.S
 else
-  ASRCS += sim_vfork_x86_64.S
+  ASRCS += sim_fork_x86_64.S
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
-  ASRCS += sim_vfork_x86.S
+  ASRCS += sim_fork_x86.S
 else ifeq ($(CONFIG_HOST_ARM),y)
-  ASRCS += sim_vfork_arm.S
+  ASRCS += sim_fork_arm.S
 else ifeq ($(CONFIG_HOST_ARM64),y)
-  ASRCS += sim_vfork_arm64.S
+  ASRCS += sim_fork_arm64.S
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -70,10 +70,8 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sim_backtrace.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-ifeq ($(CONFIG_SCHED_WAITPID),y)
-CSRCS += sim_vfork.c
-endif
+ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+CSRCS += sim_fork.c
 endif
 
 VPATH = :sim

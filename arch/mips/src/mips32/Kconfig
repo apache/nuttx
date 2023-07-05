@@ -87,10 +87,10 @@ config MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED
 config MIPS32_FRAMEPOINTER
 	bool "ABI Uses Frame Pointer"
 	default n
-	depends on ARCH_HAVE_VFORK
+	depends on ARCH_HAVE_FORK
 	---help---
 		Register r30 may be a frame pointer in some ABIs.  Or may just be
-		saved register s8.  It makes a difference for vfork handling.
+		saved register s8.  It makes a difference for fork handling.
 
 config MIPS32_HAVE_ICACHE
 	bool
