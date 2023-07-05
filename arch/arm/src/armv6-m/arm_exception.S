@@ -141,14 +141,15 @@ exception_common:
 	mov		r0, r1					/* Copy the context array pointer */
 	stmia		r0!, {r2-r7}				/* Save the SP, PRIMASK, and R4-R7 in the context array */
 
-	/* Save R8-R11 and the EXEC_RETURN value in the context array */
+	/* Save R8-R11 control and the EXEC_RETURN value in the context array */
 
 	mov		r2, r8					/* Copy high registers to low */
 	mov		r3, r9
 	mov		r4, r10
 	mov		r5, r11
-	mov		r6, r14
-	stmia		r0!, {r2-r6}				/* Save the high registers r8-r11 and r14 */
+	mrs		r6, control				/* R6=control */
+	mov		r7, r14
+	stmia		r0!, {r2-r7}				/* Save the high registers r8-r11 control and r14 */
 
 	/* Get the exception number in R0=IRQ, R1=register save area on stack */
 
@@ -188,12 +189,13 @@ exception_common:
 
 	movs		r2, #(4*REG_R8)				/* R2=Offset to R8 storage */
 	adds		r1, r0, r2				/* R1=Address of R8 storage */
-	ldmia		r1!, {r2-r6}				/* Recover R8-R11 and R14 (5 registers)*/
+	ldmia		r1!, {r2-r7}				/* Recover R8-R11 control and R14 (6 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
-	mov		r14, r6					/* EXEC_RETURN */
+	msr		control, r6
+	mov		r14, r7					/* EXEC_RETURN */
 
 	/* Recover SP (R2), PRIMASK (R3), and R4-R7. Determine the value of
 	 * the stack pointer as it was on entry to the exception handler.

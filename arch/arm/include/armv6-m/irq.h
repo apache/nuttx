@@ -69,8 +69,9 @@
 #define REG_R9              (7)  /* R9 */
 #define REG_R10             (8)  /* R10 */
 #define REG_R11             (9)  /* R11 */
-#define REG_EXC_RETURN      (10) /* EXC_RETURN */
-#define SW_XCPT_REGS        (11)
+#define REG_CONTROL         (10) /* CONTROL */
+#define REG_EXC_RETURN      (11) /* EXC_RETURN */
+#define SW_XCPT_REGS        (12)
 
 /* The total number of registers saved by software */
 
