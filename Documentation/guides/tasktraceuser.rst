@@ -59,6 +59,11 @@ The following configurations are configurable parameters for trace.
   - If enabled, stop overwriting old notes in the circular buffer when the buffer is full by default.
     This is useful to keep instrumentation data of the beginning of a system boot.
 
+- ``CONFIG_DRIVERS_NOTERAM_CRASH_DUMP``
+
+  - If enabled, it will dump the data in the noteram buffer after a system crash.
+    This function can help to view the behavior of the system before the crash
+
 After the configuration, rebuild the NuttX kernel and application.
 
 If the trace function is enabled, "``trace``" :doc:`../applications/nsh/builtin` will be available.
