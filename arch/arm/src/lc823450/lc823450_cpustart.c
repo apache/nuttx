@@ -89,6 +89,12 @@ static void cpu1_boot(void)
 
   DPRINTF("cpu = %d\n", cpu);
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+  /* Initializes the stack pointer */
+
+  arm_initialize_stack();
+#endif
+
   if (cpu == 1)
     {
       putreg32((uint32_t)_stext, NVIC_VECTAB); /* use CPU0 vectors */

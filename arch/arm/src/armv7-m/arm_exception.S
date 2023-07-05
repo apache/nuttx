@@ -93,25 +93,6 @@
 	.file		"arm_exception.S"
 
 /****************************************************************************
- * Macro Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the  "top" the interrupt stack.  Single CPU
- *   case.  Must be provided by MCU-specific logic in the SMP case.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setintstack, tmp1, tmp2
-	ldr		sp, =g_intstacktop
-	.endm
-#endif
-
-/****************************************************************************
  * .text
  ****************************************************************************/
 
@@ -151,9 +132,14 @@ exception_common:
 	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
 	beq		1f					/* Branch if context already on the MSP */
 	mrs		r1, psp					/* R1=The process stack pointer (PSP) */
-	mov		sp, r1					/* Set the MSP to the PSP */
+	b		2f
 1:
-	mov		r2, sp					/* R2=Copy of the main/process stack pointer */
+	mrs		r1, msp					/* R1=The main stack pointer (MSP) */
+	sub		r2, r1, #SW_XCPT_SIZE			/* Reserved stack space */
+	msr		msp, r2
+
+2:
+	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
 	add		r2, #HW_XCPT_SIZE			/* R2=MSP/PSP before the interrupt was taken */
 								/* (ignoring the xPSR[9] alignment bit) */
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -179,11 +165,11 @@ exception_common:
 
 	tst		r14, #EXC_RETURN_STD_CONTEXT
 	ite		eq
-	vstmdbeq	sp!, {s16-s31}			/* Save the non-volatile FP context */
-	subne		sp, #(4*SW_FPU_REGS)
+	vstmdbeq	r1!, {s16-s31}			/* Save the non-volatile FP context */
+	subne		r1, #(4*SW_FPU_REGS)
 #endif
 
-	stmdb		sp!, {r2-r12,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
+	stmdb		r1!, {r2-r12,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
 
 	/* There are two arguments to arm_doirq:
 	 *
@@ -191,19 +177,10 @@ exception_common:
 	 *   R1 = The top of the stack points to the saved state
 	 */
 
-	mov		r1, sp
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will set the MSP to use
-	 * a special special interrupt stack pointer.  The way that this is done
-	 * here prohibits nested interrupts without some additional logic!
-	 */
-
-	setintstack	r2, r3			/* SP = IRQ stack top */
-#else
-	/* Otherwise, we will re-use the interrupted thread's stack.  That may
-	 * mean using either MSP or PSP stack for interrupt level processing (in
-	 * kernel mode).
+#if CONFIG_ARCH_INTERRUPTSTACK < 7
+	/* If CONFIG_ARCH_INTERRUPTSTACK is not defined, we will re-use the
+	 * interrupted thread's stack.  That may mean using either MSP or PSP
+	 * stack for interrupt level processing (in kernel mode).
 	 */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
@@ -217,9 +194,12 @@ exception_common:
 	 * also the sp should be restore after arm_doirq()
 	 */
 
+	tst		r14, #EXC_RETURN_THREAD_MODE		/* Nonzero if context on thread mode */
+	beq		3f					/* Branch if context already on the handle mode */
 	sub		r2, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
 	bic		r2, r2, #7				/* Get the stack pointer with 8-byte alignment */
 	mov		sp, r2					/* Instantiate the aligned stack */
+3:
 #endif
 
 	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
@@ -241,7 +221,7 @@ exception_common:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
 	 */
 
-	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
+	tst		r14, #EXC_RETURN_PROCESS_STACK		/* Nonzero if context on process stack */
 	ite		eq					/* Next two instructions conditional */
 	msreq		msp, r0					/* R0=The main stack pointer */
 	msrne		psp, r0					/* R0=The process stack pointer */
