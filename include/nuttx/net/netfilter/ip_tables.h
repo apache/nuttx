@@ -47,6 +47,36 @@
 #define IPT_SO_GET_REVISION_TARGET (IPT_BASE_CTL + 3)
 #define IPT_SO_GET_MAX             IPT_SO_GET_REVISION_TARGET
 
+/* Values for "flag" field in struct ip6t_ip6 (general ip6 structure). */
+
+#define IP6T_F_PROTO               0x01    /* Set if rule cares about upper protocols */
+#define IP6T_F_TOS                 0x02    /* Match the TOS. */
+#define IP6T_F_GOTO                0x04    /* Set if jump is a goto */
+#define IP6T_F_MASK                0x07    /* All possible flag bits mask. */
+
+/* Values for "inv" field in struct ipt_ip. */
+
+#define IPT_INV_VIA_IN             0x01    /* Invert the sense of IN IFACE. */
+#define IPT_INV_VIA_OUT            0x02    /* Invert the sense of OUT IFACE */
+#define IPT_INV_TOS                0x04    /* Invert the sense of TOS. */
+#define IPT_INV_SRCIP              0x08    /* Invert the sense of SRC IP. */
+#define IPT_INV_DSTIP              0x10    /* Invert the sense of DST OP. */
+#define IPT_INV_FRAG               0x20    /* Invert the sense of FRAG. */
+#define IPT_INV_PROTO              XT_INV_PROTO
+#define IPT_INV_MASK               0x7F    /* All possible flag bits mask. */
+
+/* Standard return verdict, or do jump. */
+
+#define IPT_STANDARD_TARGET        XT_STANDARD_TARGET
+
+/* Error verdict. */
+
+#define IPT_ERROR_TARGET           XT_ERROR_TARGET
+
+#define ipt_standard_target        xt_standard_target
+#define ipt_entry_target           xt_entry_target
+#define ipt_entry_match            xt_entry_match
+
 /* Foreach macro for entries. */
 
 #define ipt_entry_for_every(entry, head, size) \
@@ -245,5 +275,17 @@ struct ipt_get_entries
 
   struct ipt_entry entrytable[0];
 };
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/* Helper functions */
+
+static inline FAR struct xt_entry_target *
+ipt_get_target(FAR struct ipt_entry *e)
+{
+  return (FAR void *)e + e->target_offset;
+}
 
 #endif /* __INCLUDE_NUTTX_NET_NETFILTER_IP_TABLES_H */
