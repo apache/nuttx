@@ -65,9 +65,9 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += riscv_checkstack.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_ASRCS += vfork.S
-CMN_CSRCS += riscv_vfork.c
+ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+CMN_ASRCS += fork.S
+CMN_CSRCS += riscv_fork.c
 endif
 
 ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_vfork.c
+ * arch/sim/src/sim/sim_fork.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,22 +43,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_vfork
+ * Name: up_fork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the
- *   behavior is undefined if the process created by vfork() either modifies
+ *   The fork() function has the same effect as posix fork(), except that the
+ *   behavior is undefined if the process created by fork() either modifies
  *   any data other than a variable of type pid_t used to store the return
- *   value from vfork(), or returns from the function in which vfork() was
+ *   value from fork(), or returns from the function in which fork() was
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
  *   The overall sequence is:
  *
- *   1) User code calls vfork().  vfork() collects context information and
- *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *   1) User code calls fork().  fork() collects context information and
+ *      transfers control up up_fork().
+ *   2) up_fork() and calls nxtask_setup_fork().
+ *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -66,17 +66,17 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *   4) up_fork() provides any additional operating context. up_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_start_vfork()
- *   6) nxtask_start_vfork() then executes the child thread.
+ *   5) up_fork() then calls nxtask_start_fork()
+ *   6) nxtask_start_fork() then executes the child thread.
  *
- * nxtask_abort_vfork() may be called if an error occurs between steps 3 and
+ * nxtask_abort_fork() may be called if an error occurs between steps 3 and
  * 6.
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and
+ *   Upon successful completion, fork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
  *   and errno is set to indicate the error.
@@ -86,7 +86,7 @@
 #ifdef CONFIG_SIM_ASAN
 nosanitize_address
 #endif
-pid_t up_vfork(const xcpt_reg_t *context)
+pid_t up_fork(const xcpt_reg_t *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
@@ -98,16 +98,16 @@ pid_t up_vfork(const xcpt_reg_t *context)
   xcpt_reg_t stacktop;
   xcpt_reg_t stackutil;
 
-  sinfo("vfork context [%p]:\n", context);
+  sinfo("fork context [%p]:\n", context);
   sinfo("  frame pointer:%lx sp:%lx pc:%lx\n",
         context[JB_FP], context[JB_SP], context[JB_PC]);
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_vfork((start_t)context[JB_PC]);
+  child = nxtask_setup_fork((start_t)context[JB_PC]);
   if (!child)
     {
-      serr("ERROR: nxtask_setup_vfork failed\n");
+      serr("ERROR: nxtask_setup_fork failed\n");
       return (pid_t)ERROR;
     }
 
@@ -129,7 +129,7 @@ pid_t up_vfork(const xcpt_reg_t *context)
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
    * content that will not work in the child context.  However, if the
-   * user follows all of the caveats of vfork() usage, even this feeble
+   * user follows all of the caveats of fork() usage, even this feeble
    * effort is overkill.
    */
 
@@ -169,9 +169,9 @@ pid_t up_vfork(const xcpt_reg_t *context)
   child->cmn.xcp.regs[JB_FP] = newfp; /* Frame pointer */
   child->cmn.xcp.regs[JB_SP] = newsp; /* Stack pointer */
 
-  /* And, finally, start the child task.  On a failure, nxtask_start_vfork()
-   * will discard the TCB by calling nxtask_abort_vfork().
+  /* And, finally, start the child task.  On a failure, nxtask_start_fork()
+   * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_vfork(child);
+  return nxtask_start_fork(child);
 }

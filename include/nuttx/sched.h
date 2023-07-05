@@ -1078,12 +1078,12 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
 #endif
 
 /****************************************************************************
- * Internal vfork support.  The overall sequence is:
+ * Internal fork support.  The overall sequence is:
  *
- * 1) User code calls vfork().  vfork() is provided in architecture-specific
+ * 1) User code calls fork().  fork() is provided in architecture-specific
  *    code.
- * 2) vfork()and calls nxtask_setup_vfork().
- * 3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ * 2) fork()and calls nxtask_setup_fork().
+ * 3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *    This consists of:
  *    - Allocation of the child task's TCB.
  *    - Initialization of file descriptors and streams
@@ -1091,20 +1091,20 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *    - Allocate and initialize the stack
  *    - Setup the input parameters for the task.
  *    - Initialization of the TCB (including call to up_initial_state())
- * 4) vfork() provides any additional operating context. vfork must:
+ * 4) fork() provides any additional operating context. fork must:
  *    - Initialize special values in any CPU registers that were not
  *      already configured by up_initial_state()
- * 5) vfork() then calls nxtask_start_vfork()
- * 6) nxtask_start_vfork() then executes the child thread.
+ * 5) fork() then calls nxtask_start_fork()
+ * 6) nxtask_start_fork() then executes the child thread.
  *
- * nxtask_abort_vfork() may be called if an error occurs between
+ * nxtask_abort_fork() may be called if an error occurs between
  * steps 3 and 6.
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr);
-pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
-void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
+FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr);
+pid_t nxtask_start_fork(FAR struct task_tcb_s *child);
+void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode);
 
 /****************************************************************************
  * Name: group_argvstr

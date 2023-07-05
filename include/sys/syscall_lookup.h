@@ -114,8 +114,8 @@ SYSCALL_LOOKUP(task_setcancelstate,        2)
 
 /* The following can be individually enabled */
 
-#if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)
-  SYSCALL_LOOKUP(vfork,                    0)
+#ifdef CONFIG_ARCH_HAVE_FORK
+  SYSCALL_LOOKUP(fork,                     0)
 #endif
 
 #ifdef CONFIG_SCHED_WAITPID
