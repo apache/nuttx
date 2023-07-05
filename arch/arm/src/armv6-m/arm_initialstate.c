@@ -137,6 +137,8 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
+  xcp->regs[REG_CONTROL] = getcontrol() & ~CONTROL_NPRIV;
+
   /* Enable or disable interrupts, based on user configuration */
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

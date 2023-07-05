@@ -264,6 +264,10 @@ int arm_svcall(int irq, void *context, void *arg)
           regs[REG_PC]         = (uint32_t)USERSPACE->task_startup;
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
+          /* Return unprivileged mode */
+
+          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV;
+
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s task_startup:
            */
@@ -296,6 +300,10 @@ int arm_svcall(int irq, void *context, void *arg)
 
           regs[REG_PC]         = (uint32_t)regs[REG_R1]; /* startup */
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+
+          /* Return unprivileged mode */
+
+          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV;
 
           /* Change the parameter ordering to match the expectation of the
            * user space pthread_startup:
@@ -338,6 +346,10 @@ int arm_svcall(int irq, void *context, void *arg)
           regs[REG_PC]         = (uint32_t)USERSPACE->signal_handler;
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
+          /* Return unprivileged mode */
+
+          regs[REG_CONTROL]    = getcontrol() | CONTROL_NPRIV;
+
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s signal_handler.
            */
@@ -370,6 +382,10 @@ int arm_svcall(int irq, void *context, void *arg)
 
           regs[REG_PC]         = rtcb->xcp.sigreturn;
           regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+
+          /* Return privileged mode */
+
+          regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
           rtcb->xcp.sigreturn  = 0;
         }
         break;
@@ -404,6 +420,10 @@ int arm_svcall(int irq, void *context, void *arg)
 
           regs[REG_PC]         = (uint32_t)dispatch_syscall;
           regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+
+          /* Return privileged mode */
+
+          regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
 
           /* Offset R0 to account for the reserved values */
 
