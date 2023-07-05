@@ -43,6 +43,75 @@
 #ifdef CONFIG_USBDEV_COMPOSITE
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Packet sizes */
+
+#ifndef CONFIG_COMPOSITE_EP0MAXPACKET
+#  define CONFIG_COMPOSITE_EP0MAXPACKET 64
+#endif
+
+/* Vendor and product IDs and strings */
+
+#ifndef CONFIG_COMPOSITE_VENDORID
+#  warning "CONFIG_COMPOSITE_VENDORID not defined"
+#  define CONFIG_COMPOSITE_VENDORID     0x03eb
+#endif
+
+#ifndef CONFIG_COMPOSITE_PRODUCTID
+#  warning "CONFIG_COMPOSITE_PRODUCTID not defined"
+#  define CONFIG_COMPOSITE_PRODUCTID    0x2022
+#endif
+
+#ifndef CONFIG_COMPOSITE_VERSIONNO
+#  define CONFIG_COMPOSITE_VERSIONNO    (0x0101)
+#endif
+
+#ifndef CONFIG_COMPOSITE_VENDORSTR
+#  warning "No Vendor string specified"
+#  define CONFIG_COMPOSITE_VENDORSTR    "NuttX"
+#endif
+
+#ifndef CONFIG_COMPOSITE_PRODUCTSTR
+#  warning "No Product string specified"
+#  define CONFIG_COMPOSITE_PRODUCTSTR   "Composite Device"
+#endif
+
+#undef CONFIG_COMPOSITE_SERIALSTR
+#define CONFIG_COMPOSITE_SERIALSTR      "0101"
+
+#undef CONFIG_COMPOSITE_CONFIGSTR
+#define CONFIG_COMPOSITE_CONFIGSTR      "Composite"
+
+#ifdef CONFIG_USBDEV_SELFPOWERED
+#  define COMPOSITE_SELFPOWERED         USB_CONFIG_ATTR_SELFPOWER
+#else
+#  define COMPOSITE_SELFPOWERED         (0)
+#endif
+
+#ifdef CONFIG_USBDEV_REMOTEWAKEUP
+#  define COMPOSITE_REMOTEWAKEUP        USB_CONFIG_ATTR_WAKEUP
+#else
+#  define COMPOSITE_REMOTEWAKEUP        (0)
+#endif
+
+/* Descriptors **************************************************************/
+
+/* String language */
+
+#define COMPOSITE_STR_LANGUAGE          (0x0409) /* en-us */
+
+/* Descriptor strings */
+
+#define COMPOSITE_MANUFACTURERSTRID     (1)
+#define COMPOSITE_PRODUCTSTRID          (2)
+#define COMPOSITE_SERIALSTRID           (3)
+#define COMPOSITE_CONFIGSTRID           (4)
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -100,6 +169,16 @@ static const struct usb_qualdesc_s g_qualdesc =
   COMPOSITE_NCONFIGS,                           /* nconfigs */
   0,                                            /* reserved */
 };
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
+const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
+#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
+const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
 #endif
 
 /****************************************************************************
