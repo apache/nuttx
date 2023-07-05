@@ -171,7 +171,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
         }
       else
         {
-           tcb = nxsched_get_tcb(pid);
+          tcb = nxsched_get_tcb(pid);
         }
 
       group = tcb->group;
