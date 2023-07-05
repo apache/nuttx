@@ -262,7 +262,7 @@ int arm_svcall(int irq, void *context, void *arg)
            */
 
           regs[REG_PC]         = (uint32_t)USERSPACE->task_startup;
-          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+          regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return unprivileged mode */
 
@@ -299,7 +299,7 @@ int arm_svcall(int irq, void *context, void *arg)
            */
 
           regs[REG_PC]         = (uint32_t)regs[REG_R1]; /* startup */
-          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+          regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return unprivileged mode */
 
@@ -344,7 +344,7 @@ int arm_svcall(int irq, void *context, void *arg)
            */
 
           regs[REG_PC]         = (uint32_t)USERSPACE->signal_handler;
-          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+          regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return unprivileged mode */
 
@@ -381,7 +381,7 @@ int arm_svcall(int irq, void *context, void *arg)
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
 
           regs[REG_PC]         = rtcb->xcp.sigreturn;
-          regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+          regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return privileged mode */
 
@@ -419,7 +419,7 @@ int arm_svcall(int irq, void *context, void *arg)
           rtcb->xcp.nsyscalls  = index + 1;
 
           regs[REG_PC]         = (uint32_t)dispatch_syscall;
-          regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+          regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return privileged mode */
 

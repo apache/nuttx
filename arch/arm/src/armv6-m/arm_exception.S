@@ -59,26 +59,6 @@
 	.file		"arm_exception.S"
 
 /****************************************************************************
- * Macro Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the  "top" the interrupt stack.  Single CPU
- *   case.  Must be provided by MCU-specific logic in the SMP case.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
-	.macro	setintstack, tmp1, tmp2
-	ldr		\tmp1, =g_intstacktop
-	mov		sp, \tmp1
-	.endm
-#endif
-
-/****************************************************************************
  * .text
  ****************************************************************************/
 
@@ -118,10 +98,13 @@ exception_common:
 	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		1f					/* Test bit 31 */
 	mrs		r1, msp					/* R1=The main stack pointer */
+	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
+	msr		msp, r1					/* Reserved stack space */
 	b		2f
 
 1:
 	mrs		r1, psp					/* R1=The process stack pointer */
+	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
 
 	/* R1 is the current stack pointer.  HW_XCPT_REGS were pushed onto the stack
 	 * when the interrupt was taken so (R1)+HW_XCPT_SIZE is the value of the
@@ -133,7 +116,6 @@ exception_common:
 2:
 	/* Save SP, PRIMASK, and R4-R7 in the context array */
 
-	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
 	movs		r2, #XCPTCONTEXT_SIZE			/* R2=Size of the context array */
 	add		r2, r1					/* R2=MSP/PSP before the interrupt was taken */
 								/* (ignoring the xPSR[9] alignment bit) */
@@ -160,9 +142,7 @@ exception_common:
 	 * Otherwise, we will use the stack that was current when the interrupt was taken.
 	 */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-	setintstack	r7, r6					/* SP = IRQ stack top */
-#else
+#if CONFIG_ARCH_INTERRUPTSTACK < 3
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
 	 * signal context (reference: arm_schedulesigaction.c):
@@ -174,9 +154,13 @@ exception_common:
 	 * also the sp should be restore after arm_doirq()
 	 */
 
+	mov		r2, r14
+	lsls		r2, #(31 - EXC_RETURN_THREAD_BITNO)	/* Move to bit 31 */
+	bpl		3f					/* Test bit 31 */
 	mov		r2, r1					/* Reserve signal context */
 	subs		r2, r2, #XCPTCONTEXT_SIZE
 	msr		msp, r2					/* We are using the main stack pointer */
+3:
 #endif
 
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
@@ -211,14 +195,14 @@ exception_common:
 
 	mov		r0, r14					/* Copy high register to low register */
 	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
-	bmi		3f					/* Test bit 31 */
+	bmi		4f					/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
-	b		4f
-
-3:
-	msr		psp, r1					/* R1=The process stack pointer */
+	b		5f
 
 4:
+	msr		psp, r1					/* R1=The process stack pointer */
+
+5:
 
 	/* Restore the interrupt state */
 
