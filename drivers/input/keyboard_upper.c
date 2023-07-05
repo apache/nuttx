@@ -123,7 +123,8 @@ static int keyboard_open(FAR struct file *filep)
 
   /* Initializes the buffer for each open file */
 
-  ret = circbuf_init(&opriv->circ, NULL, upper->nums);
+  ret = circbuf_init(&opriv->circ, NULL,
+                     upper->nums * sizeof(struct keyboard_event_s));
   if (ret < 0)
     {
       kmm_free(opriv);
