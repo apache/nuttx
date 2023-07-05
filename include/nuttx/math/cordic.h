@@ -48,11 +48,9 @@
  * Public Types
  ****************************************************************************/
 
-#ifdef CONFIG_MATH_CORDIC_USE_Q31
 /* q1.31 as int32_t */
 
 typedef int32_t cordic_num_t;
-#endif
 
 /* CORDIC functions */
 
