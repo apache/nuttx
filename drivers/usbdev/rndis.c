@@ -56,7 +56,7 @@
 
 #include "rndis_std.h"
 
-#ifdef CONFIG_USBMSC_COMPOSITE
+#ifdef CONFIG_RNDIS_COMPOSITE
 #  include <nuttx/usb/composite.h>
 #endif
 
