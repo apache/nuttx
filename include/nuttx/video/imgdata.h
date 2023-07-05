@@ -57,9 +57,9 @@
 #define IMGDATA_VALIDATE_FRAME_SETTING(d, n, f, i) \
   ((d)->ops->validate_frame_setting ? \
    (d)->ops->validate_frame_setting(d, n, f, i) : -ENOTTY)
-#define IMGDATA_START_CAPTURE(d, n, f, i, c) \
+#define IMGDATA_START_CAPTURE(d, n, f, i, c, a) \
   ((d)->ops->start_capture ? \
-   (d)->ops->start_capture(d, n, f, i, c) : -ENOTTY)
+   (d)->ops->start_capture(d, n, f, i, c, a) : -ENOTTY)
 #define IMGDATA_STOP_CAPTURE(d) \
   ((d)->ops->stop_capture ? (d)->ops->stop_capture(d) : -ENOTTY)
 
@@ -83,7 +83,8 @@ typedef struct imgdata_interval_s
 } imgdata_interval_t;
 
 typedef int (*imgdata_capture_t)(uint8_t result, uint32_t size,
-                                 FAR const struct timeval *ts);
+                                 FAR const struct timeval *ts,
+                                 FAR void *arg);
 
 /* Structure for Data Control I/F */
 
@@ -104,7 +105,8 @@ struct imgdata_ops_s
                             uint8_t nr_datafmts,
                             FAR imgdata_format_t *datafmts,
                             FAR imgdata_interval_t *interval,
-                            FAR imgdata_capture_t callback);
+                            FAR imgdata_capture_t callback,
+                            FAR void *arg);
   CODE int (*stop_capture)(FAR struct imgdata_s *data);
 };
 
