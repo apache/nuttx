@@ -53,7 +53,8 @@
  *
  ****************************************************************************/
 
-int sigandset(FAR sigset_t *dest, FAR sigset_t *left, FAR sigset_t *right)
+int sigandset(FAR sigset_t *dest, FAR const sigset_t *left,
+              FAR const sigset_t *right)
 {
   int ndx;
 

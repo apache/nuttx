@@ -359,7 +359,8 @@ int  raise(int signo);
 int  sigaction(int signo, FAR const struct sigaction *act,
                FAR struct sigaction *oact);
 int  sigaddset(FAR sigset_t *set, int signo);
-int  sigandset(FAR sigset_t *dest, FAR sigset_t *left, FAR sigset_t *right);
+int  sigandset(FAR sigset_t *dest, FAR const sigset_t *left,
+               FAR const sigset_t *right);
 int  sigdelset(FAR sigset_t *set, int signo);
 int  sigemptyset(FAR sigset_t *set);
 int  sigfillset(FAR sigset_t *set);
@@ -368,7 +369,8 @@ int  sigisemptyset(FAR sigset_t *set);
 int  sigismember(FAR const sigset_t *set, int signo);
 int  sigignore(int signo);
 _sa_handler_t signal(int signo, _sa_handler_t func);
-int  sigorset(FAR sigset_t *dest, FAR sigset_t *left, FAR sigset_t *right);
+int  sigorset(FAR sigset_t *dest, FAR const sigset_t *left,
+              FAR const sigset_t *right);
 int  sigpause(int signo);
 int  sigpending(FAR sigset_t *set);
 int  sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
