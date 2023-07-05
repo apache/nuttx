@@ -40,8 +40,6 @@
 
 #include "composite.h"
 
-#ifdef CONFIG_USBDEV_COMPOSITE
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -107,16 +105,6 @@ static const struct usbdevclass_driverops_s g_driverops =
   composite_suspend,    /* suspend */
   composite_resume,     /* resume */
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
-const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
-#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
-const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -512,7 +500,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
                     ret = composite_mkcfgdesc(priv, ctrlreq->buf, dev->speed,
-                                            ctrl->value[1]);
+                                              ctrl->value[1]);
 #else
                     ret = composite_mkcfgdesc(priv, ctrlreq->buf);
 #endif
@@ -527,6 +515,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                   FAR struct usb_strdesc_s *buf =
                              (FAR struct usb_strdesc_s *)ctrlreq->buf;
 
+#ifdef CONFIG_USBDEV_COMPOSITE
                   if (strid < COMPOSITE_NSTRIDS)
                     {
                       ret = composite_mkstrdesc(strid, buf);
@@ -571,6 +560,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                             }
                         }
                     }
+#else
+                  ret = composite_mkstrdesc(strid, buf);
+#endif
                 }
                 break;
 
@@ -587,7 +579,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
         case USB_REQ_SETCONFIGURATION:
           {
-            if (ctrl->type == 0)
+            if (ctrl->type == 0 && value != priv->config)
               {
                 int i;
 
@@ -622,7 +614,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
         case USB_REQ_SETINTERFACE:
           {
             if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE &&
-                priv->config == COMPOSITE_CONFIGID)
+                priv->config != COMPOSITE_CONFIGIDNONE)
               {
                 ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
                 dispatched = true;
@@ -957,7 +949,7 @@ FAR void *composite_initialize(uint8_t ndevices,
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_DEVREGISTER),
-                             (uint16_t)-ret);
+               (uint16_t)-ret);
       goto errout_with_alloc;
     }
 
@@ -1061,5 +1053,3 @@ int composite_ep0submit(FAR struct usbdevclass_driver_s *driver,
       return 0;
     }
 }
-
-#endif /* CONFIG_USBDEV_COMPOSITE */

@@ -35,85 +35,20 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#ifdef CONFIG_USBDEV_COMPOSITE
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* Packet sizes */
-
-#ifndef CONFIG_COMPOSITE_EP0MAXPACKET
-#  define CONFIG_COMPOSITE_EP0MAXPACKET 64
-#endif
-
-/* Vendor and product IDs and strings */
-
-#ifndef CONFIG_COMPOSITE_COMPOSITE
-#  ifndef CONFIG_COMPOSITE_VENDORID
-#    warning "CONFIG_COMPOSITE_VENDORID not defined"
-#    define CONFIG_COMPOSITE_VENDORID 0x03eb
-#  endif
-
-#  ifndef CONFIG_COMPOSITE_PRODUCTID
-#    warning "CONFIG_COMPOSITE_PRODUCTID not defined"
-#    define CONFIG_COMPOSITE_PRODUCTID 0x2022
-#  endif
-
-#  ifndef CONFIG_COMPOSITE_VERSIONNO
-#    define CONFIG_COMPOSITE_VERSIONNO (0x0101)
-#  endif
-
-#  ifndef CONFIG_COMPOSITE_VENDORSTR
-#    warning "No Vendor string specified"
-#    define CONFIG_COMPOSITE_VENDORSTR  "NuttX"
-#  endif
-
-#  ifndef CONFIG_COMPOSITE_PRODUCTSTR
-#    warning "No Product string specified"
-#    define CONFIG_COMPOSITE_PRODUCTSTR "Composite Device"
-#  endif
-
-#  undef CONFIG_COMPOSITE_SERIALSTR
-#  define CONFIG_COMPOSITE_SERIALSTR "0101"
-#endif
-
-#undef CONFIG_COMPOSITE_CONFIGSTR
-#define CONFIG_COMPOSITE_CONFIGSTR "Composite"
-
-#ifdef CONFIG_USBDEV_SELFPOWERED
-#  define COMPOSITE_SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
+#ifdef CONFIG_USBDEV_COMPOSITE
+#  define NUM_DEVICES_TO_HANDLE       (8)
 #else
-#  define COMPOSITE_SELFPOWERED       (0)
+#  define NUM_DEVICES_TO_HANDLE       (1)
 #endif
-
-#ifdef CONFIG_USBDEV_REMOTEWAKEUP
-#  define COMPOSITE_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
-#else
-#  define COMPOSITE_REMOTEWAKEUP      (0)
-#endif
-
-#define NUM_DEVICES_TO_HANDLE         (8)
-
-/* Descriptors **************************************************************/
 
 /* These settings are not modifiable via the NuttX configuration */
 
 #define COMPOSITE_CONFIGIDNONE        (0)  /* Config ID = 0 means to return to address mode */
 #define COMPOSITE_CONFIGID            (1)  /* The only supported configuration ID */
-
-/* String language */
-
-#define COMPOSITE_STR_LANGUAGE        (0x0409) /* en-us */
-
-/* Descriptor strings */
-
-#define COMPOSITE_MANUFACTURERSTRID   (1)
-#define COMPOSITE_PRODUCTSTRID        (2)
-#define COMPOSITE_SERIALSTRID         (3)
-#define COMPOSITE_CONFIGSTRID         (4)
 
 /****************************************************************************
  * Public Types
@@ -136,23 +71,24 @@ struct composite_devobj_s
 
 struct composite_dev_s
 {
-  FAR struct usbdev_s      *usbdev;      /* usbdev driver pointer */
-  uint8_t                   config;      /* Configuration number */
-  FAR struct usbdev_req_s  *ctrlreq;     /* Allocated control request */
-  uint8_t                   ndevices;    /* Num devices in this composite device */
-  int                       cfgdescsize; /* Total size of the configuration descriptor: */
-  int                       ninterfaces; /* The total number of interfaces in this composite device */
-
-  struct composite_devobj_s device[NUM_DEVICES_TO_HANDLE]; /* Device class object */
+  FAR struct usbdev_s      *usbdev;                         /* usbdev driver pointer */
+  FAR struct usbdev_req_s  *ctrlreq;                        /* Allocated control request */
+  int                       cfgdescsize;                    /* Total size of the configuration descriptor: */
+  int                       ninterfaces;                    /* The total number of interfaces in this composite device */
+  uint8_t                   config;                         /* Configuration number */
+  uint8_t                   ndevices;                       /* Num devices in this composite device */
+  struct composite_devobj_s device[NUM_DEVICES_TO_HANDLE];  /* Device class object */
 };
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+#ifdef CONFIG_USBDEV_COMPOSITE
 extern const char g_compvendorstr[];
 extern const char g_compproductstr[];
 extern const char g_compserialstr[];
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -176,9 +112,7 @@ int composite_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_COMPOSITE_COMPOSITE
 FAR const struct usb_devdesc_s *composite_getdevdesc(void);
-#endif
 
 /****************************************************************************
  * Name: composite_mkcfgdesc
@@ -208,5 +142,4 @@ int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv,
 FAR const struct usb_qualdesc_s *composite_getqualdesc(void);
 #endif
 
-#endif /* CONFIG_USBDEV_COMPOSITE */
 #endif /* __DRIVERS_USBDEV_COMPOSITE_H */
