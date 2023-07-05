@@ -346,6 +346,10 @@ uintptr_t arm_intstack_alloc(void);
 uintptr_t arm_intstack_top(void);
 #endif
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+void weak_function arm_initialize_stack(void);
+#endif
+
 /* Exception handling logic unique to the Cortex-M family */
 
 #if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
