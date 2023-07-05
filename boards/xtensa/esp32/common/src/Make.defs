@@ -120,6 +120,10 @@ ifeq ($(CONFIG_LCD_SSD1680),y)
   CSRCS += esp32_ssd1680.c
 endif
 
+ifeq ($(CONFIG_RGBLED),y)
+  CSRCS += esp32_rgbled.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

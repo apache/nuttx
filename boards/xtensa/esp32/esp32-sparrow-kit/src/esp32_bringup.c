@@ -48,6 +48,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_RGBLED
+#  include "esp32_rgbled.h"
+#endif
+
 #ifdef CONFIG_TIMER
 #include <esp32_tim_lowerhalf.h>
 #endif
@@ -397,6 +401,16 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RGBLED
+  /* Register RGB Driver */
+
+  ret = esp32_rgbled_initialize("/dev/rgbled0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32_rgbled_initialize() failed: %d\n", ret);
     }
 #endif
 
