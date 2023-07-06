@@ -38,16 +38,18 @@ getEP()
 {
 	for ((i = 0; i < ${#OBJ[@]}; i++))
 	do
-		FUNCS=`${NM} -g --defined-only ../staging/${OBJ[$i]} | awk '{print $3}' | sort | grep -Ev ${FILTER}`
-		FUNC=(${FUNCS})
-		for ((j = 0; j < ${#FUNC[@]}; j++))
-		do
-			findEP ${FUNC[$j]}
-			if [ $? -eq 1 ]; then
-				EP[${I_EP}]=${FUNC[$j]}
-				I_EP=$((I_EP + 1))
-			fi
-		done
+		if [ -f ../staging/${OBJ[$i]} ]; then
+			FUNCS=`${NM} -g --defined-only ../staging/${OBJ[$i]} | awk '{print $3}' | sort | grep -Ev ${FILTER}`
+			FUNC=(${FUNCS})
+			for ((j = 0; j < ${#FUNC[@]}; j++))
+			do
+				findEP ${FUNC[$j]}
+				if [ $? -eq 1 ]; then
+					EP[${I_EP}]=${FUNC[$j]}
+					I_EP=$((I_EP + 1))
+				fi
+			done
+		fi
 	done 
 }
 	
@@ -82,16 +84,27 @@ EP=(${EPS})
 #
 	GLOBALS="libs/libc/modlib/modlib_${arch}_globals.S"
 cat >${GLOBALS} <<__EOF__
+#ifdef __CYGWIN__
+#  define SYMBOL(s) s
+#  define WEAK .weak
+#elif defined(__ELF__)
+#  define SYMBOL(s) s
+#  define WEAK .weak
+#else
+#  define SYMBOL(s) _##s
+#  define WEAK .weak_definition
+#endif
+
 #if __SIZEOF_POINTER__ == 8
 	.macro globalEntry index, ep
-	.weak  \p
+	WEAK   \ep
 	.quad  .L\index
 	.quad  \ep
 	.endm
 # define ALIGN 8
 #else
 	.macro globalEntry index, ep
-	.weak  \ep		
+	WEAK   \ep		
 	.long  .L\index
 	.long  \ep
 	.endm
@@ -112,7 +125,7 @@ cat >${GLOBALS} <<__EOF__
         .align ALIGN
 	.global globalNames
 
-globalNames:
+SYMBOL(globalNames):
 __EOF__
 
 for ((i = 0; i < ${#EP[@]}; i++))
@@ -121,29 +134,38 @@ do
 done
 
 cat >>${GLOBALS} <<__EOF__
-	.size	globalNames, . - globalNames
+#ifdef __ELF__
+        .size   SYMBOL(globalNames), . - SYMBOL(globalNames)
+#endif
 
 	.align	${ALIGN}
 	.global	nGlobals
+#ifdef __ELF__
 	.type	nGlobals, "object"
-nGlobals:	
+#endif
+SYMBOL(nGlobals):	
 	.word	${#EP[@]}
+#ifdef __ELF__
 	.size	nGlobals, . - nGlobals
+#endif
 
 	.align	${ALIGN}
 	.global globalTable
+#ifdef __ELF__
 	.type	globalTable, "object"
-globalTable:
+#endif
+SYMBOL(globalTable):
 __EOF__
 
 for ((i = 0; i < ${#EP[@]}; i++))
 do
-	echo "  globalEntry ${i}, ${EP[$i]}" >>${GLOBALS}
+	echo "  globalEntry ${i}, SYMBOL(${EP[$i]})" >>${GLOBALS}
 done
 
 cat >>${GLOBALS} <<__EOF__ 
+#ifdef __ELF__
 	.size	globalTable, . - globalTable
+#endif
 __EOF__
 
-done
 echo "${#EP[@]} symbols defined"

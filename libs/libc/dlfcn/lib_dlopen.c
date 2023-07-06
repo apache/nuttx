@@ -248,7 +248,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   /* Call the module initializer */
 
-  if (loadinfo.ehdr.e_type == ET_REL) 
+  if (loadinfo.ehdr.e_type == ET_REL)
     {
       ret = initializer(&modp->modinfo);
       if (ret < 0)
