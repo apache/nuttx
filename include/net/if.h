@@ -126,6 +126,19 @@
 #  define IFF_IS_IPv4(f)   (1)
 #endif
 
+/* RFC 2863 operational status */
+
+enum
+{
+  IF_OPER_UNKNOWN,
+  IF_OPER_NOTPRESENT,
+  IF_OPER_DOWN,
+  IF_OPER_LOWERLAYERDOWN,
+  IF_OPER_TESTING,
+  IF_OPER_DORMANT,
+  IF_OPER_UP,
+};
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
