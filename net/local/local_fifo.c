@@ -49,7 +49,8 @@
 #define LOCAL_HD_SUFFIX    "HD"  /* Name of the half duplex datagram FIFO */
 #define LOCAL_SUFFIX_LEN   2
 
-#define LOCAL_FULLPATH_LEN (UNIX_PATH_MAX + LOCAL_SUFFIX_LEN)
+#define LOCAL_FULLPATH_LEN (strlen(CONFIG_NET_LOCAL_VFS_PATH) + \
+                            UNIX_PATH_MAX + LOCAL_SUFFIX_LEN + 2)
 
 /****************************************************************************
  * Private Functions
@@ -66,7 +67,8 @@
 static void local_format_name(FAR const char *inpath, FAR char *outpath,
                               FAR const char *suffix, int32_t id)
 {
-  if (strcmp(inpath, CONFIG_NET_LOCAL_VFS_PATH) == 0)
+  if (strncmp(inpath, CONFIG_NET_LOCAL_VFS_PATH,
+              strlen(CONFIG_NET_LOCAL_VFS_PATH)) == 0)
     {
       inpath += strlen(CONFIG_NET_LOCAL_VFS_PATH);
     }
