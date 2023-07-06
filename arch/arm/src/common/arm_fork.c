@@ -103,8 +103,8 @@ pid_t up_fork(const struct fork_s *context)
         context->r4, context->r5, context->r6, context->r7);
   sinfo("  r8:%08" PRIx32 " r9:%08" PRIx32 " r10:%08" PRIx32 "\n",
         context->r8, context->r9, context->r10);
-  sinfo("  fp:%08" PRIx32 " sp:%08" PRIx32 " lr:%08" PRIx32 "\n",
-        context->fp, context->sp, context->lr);
+  sinfo("  r11:%08" PRIx32 " sp:%08" PRIx32 " lr:%08" PRIx32 "\n",
+        context->r11, context->sp, context->lr);
 
   /* Allocate and initialize a TCB for the child task. */
 
@@ -182,6 +182,7 @@ pid_t up_fork(const struct fork_s *context)
   child->cmn.xcp.regs[REG_R8]  = context->r8;  /* Volatile register r8 */
   child->cmn.xcp.regs[REG_R9]  = context->r9;  /* Volatile register r9 */
   child->cmn.xcp.regs[REG_R10] = context->r10; /* Volatile register r10 */
+  child->cmn.xcp.regs[REG_R11] = context->r11; /* Volatile register r11 */
   child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
   child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 
