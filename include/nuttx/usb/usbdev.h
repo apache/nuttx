@@ -59,25 +59,6 @@
 
 #define EP_DISABLE(ep)             (ep)->ops->disable(ep)
 
-/* Allocate/free I/O requests.
- * Should not be called from interrupt processing!
- */
-
-#define EP_ALLOCREQ(ep)            (ep)->ops->allocreq(ep)
-#define EP_FREEREQ(ep,req)         (ep)->ops->freereq(ep,req)
-
-/* Allocate/free an I/O buffer.
- * Should not be called from interrupt processing!
- */
-
-#ifdef CONFIG_USBDEV_DMA
-#  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->allocbuffer(ep,nb)
-#  define EP_FREEBUFFER(ep,buf)    (ep)->ops->freebuffer(ep,buf)
-#else
-#  define EP_ALLOCBUFFER(ep,nb)    kmm_malloc(nb)
-#  define EP_FREEBUFFER(ep,buf)    kmm_free(buf)
-#endif
-
 /* Submit an I/O request to the endpoint */
 
 #define EP_SUBMIT(ep,req)          (ep)->ops->submit(ep,req)
@@ -374,6 +355,28 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbdev_allocreq
+ *
+ * Description:
+ *   Allocate a request instance along with its buffer
+ *
+ ****************************************************************************/
+
+FAR struct usbdev_req_s *usbdev_allocreq(FAR struct usbdev_ep_s *ep,
+                                         uint16_t len);
+
+/****************************************************************************
+ * Name: usbdev_freereq
+ *
+ * Description:
+ *   Free a request instance along with its buffer
+ *
+ ****************************************************************************/
+
+void usbdev_freereq(FAR struct usbdev_ep_s *ep,
+                    FAR struct usbdev_req_s *req);
 
 /****************************************************************************
  * Name: usbdevclass_register
