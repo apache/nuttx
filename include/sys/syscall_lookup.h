@@ -71,6 +71,8 @@ SYSCALL_LOOKUP(sethostname,                2)
 
 /* Semaphores */
 
+SYSCALL_LOOKUP(nxsem_wait,                 1)
+
 SYSCALL_LOOKUP(sem_destroy,                1)
 SYSCALL_LOOKUP(sem_post,                   1)
 SYSCALL_LOOKUP(sem_clockwait,              3)
