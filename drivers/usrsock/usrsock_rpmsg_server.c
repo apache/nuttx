@@ -1082,6 +1082,7 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
     }
   else
     {
+      pfds->revents = 0;
       pfds->events = 0;
       ret = psock_poll(psock, pfds, false);
     }
@@ -1142,6 +1143,10 @@ static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
         {
           events |= USRSOCK_EVENT_RECVFROM_AVAIL;
         }
+
+      /* Clear revents */
+
+      pfds->revents &= ~(POLLHUP | POLLERR);
     }
 
   if (oldevents != pfds->events)
