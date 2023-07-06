@@ -54,17 +54,30 @@ struct fork_s
 {
   /* CPU registers */
 
-  uint32_t r4;   /* Volatile register r4 */
-  uint32_t r5;   /* Volatile register r5 */
-  uint32_t r6;   /* Volatile register r6 */
-  uint32_t r7;   /* Volatile register r7 */
-  uint32_t r8;   /* Volatile register r8 */
-  uint32_t r9;   /* Volatile register r9 */
-  uint32_t r10;  /* Volatile register r10 */
+  uint32_t r4;          /* Volatile register r4 */
+  uint32_t r5;          /* Volatile register r5 */
+  uint32_t r6;          /* Volatile register r6 */
+  union
+    {
+      uint32_t r7;      /* Volatile register r7 */
+#ifdef CONFIG_ARM_THUMB
+      uint32_t fp;      /* Frame pointer */
+#endif
+    };
 
-  uint32_t fp;   /* Frame pointer */
-  uint32_t sp;   /* Stack pointer */
-  uint32_t lr;   /* Return address */
+  uint32_t r8;          /* Volatile register r8 */
+  uint32_t r9;          /* Volatile register r9 */
+  uint32_t r10;         /* Volatile register r10 */
+  union
+    {
+      uint32_t r11;     /* Volatile register r11 */
+#ifndef CONFIG_ARM_THUMB
+      uint32_t fp;      /* Frame pointer */
+#endif
+    };
+
+  uint32_t sp;          /* Stack pointer */
+  uint32_t lr;          /* Return address */
 
   /* Floating point registers (not yet) */
 };

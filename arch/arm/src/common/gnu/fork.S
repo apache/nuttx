@@ -92,8 +92,8 @@ fork:
 	mov		r4, r8			/* Copy high registers to low registers */
 	mov		r5, r9
 	mov		r6, r10
-	mov		r7, fp
-	stmia		r1!, {r4-r7}		/* Save r8-r10 and fp in the structure */
+	mov		r7, r11
+	stmia		r1!, {r4-r7}		/* Save r8-r11 in the structure */
 	mov		r5, lr			/* Copy lr to a low register */
 	stmia		r1!, {r0,r5}		/* Save sp and lr in the structure */
 
