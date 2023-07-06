@@ -84,6 +84,7 @@
 "nx_pthread_exit","nuttx/pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","noreturn","pthread_addr_t"
 "nx_vsyslog","nuttx/syslog/syslog.h","","int","int","FAR const IPTR char *","FAR va_list *"
 "nxsched_get_stackinfo","nuttx/sched.h","","int","pid_t","FAR struct stackinfo_s *"
+"nxsem_wait","nuttx/semaphore.h","","int","FAR sem_t *"
 "open","fcntl.h","","int","FAR const char *","int","...","mode_t"
 "pgalloc", "nuttx/arch.h", "defined(CONFIG_BUILD_KERNEL)", "uintptr_t", "uintptr_t", "unsigned int"
 "pipe2","unistd.h","defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0","int","int [2]|FAR int *","int"
