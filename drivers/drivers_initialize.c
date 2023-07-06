@@ -38,6 +38,7 @@
 #include <nuttx/note/note_driver.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/power/regulator.h>
+#include <nuttx/segger/rtt.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
@@ -66,6 +67,10 @@ void drivers_initialize(void)
   /* Register devices */
 
   syslog_initialize();
+
+#ifdef CONFIG_SERIAL_RTT
+  serial_rtt_initialize();
+#endif
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
