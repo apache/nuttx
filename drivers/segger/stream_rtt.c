@@ -43,6 +43,8 @@ static void rttstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
   FAR struct lib_rttoutstream_s *stream =
                                  (FAR struct lib_rttoutstream_s *)this;
+
+  SEGGER_RTT_BLOCK_IF_FIFO_FULL(0);
   stream->public.nput += SEGGER_RTT_PutChar(stream->channel, ch);
 }
 
@@ -55,7 +57,10 @@ static int rttstream_puts(FAR struct lib_outstream_s *this,
 {
   FAR struct lib_rttoutstream_s *stream =
                                 (FAR struct lib_rttoutstream_s *)this;
-  int ret = SEGGER_RTT_Write(stream->channel, buf, len);
+  int ret;
+
+  SEGGER_RTT_BLOCK_IF_FIFO_FULL(0);
+  ret = SEGGER_RTT_Write(stream->channel, buf, len);
   stream->public.nput += ret;
   return ret;
 }
