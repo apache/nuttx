@@ -207,6 +207,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
       binfo("Failed to initialize for load of ELF program: %d\n", ret);
       goto errout_with_loadinfo;
     }
+
   memset(modp, 0, sizeof(*modp));
 
   /* Load the program binary */
@@ -248,7 +249,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   /* Call the module initializer */
 
-  if (loadinfo.ehdr.e_type == ET_REL) 
+  if (loadinfo.ehdr.e_type == ET_REL)
     {
       ret = initializer(&modp->modinfo);
       if (ret < 0)
