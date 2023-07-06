@@ -176,57 +176,6 @@ static const struct dfu_cfgdesc_s g_dfu_cfgdesc =
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: usbclass_freereq
- *
- * Description:
- *   Free a request instance along with its buffer
- *
- ****************************************************************************/
-
-static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
-                             FAR struct usbdev_req_s *req)
-{
-  if (ep != NULL && req != NULL)
-    {
-      if (req->buf != NULL)
-        {
-          EP_FREEBUFFER(ep, req->buf);
-        }
-
-      EP_FREEREQ(ep, req);
-    }
-}
-
-/****************************************************************************
- * Name: usbclass_allocreq
- *
- * Description:
- *   Allocate a request instance along with its buffer
- *
- ****************************************************************************/
-
-static FAR struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
-                                                  uint16_t len)
-{
-  FAR struct usbdev_req_s *req;
-
-  req = EP_ALLOCREQ(ep);
-  if (req != NULL)
-    {
-      req->len = len;
-      req->buf = EP_ALLOCBUFFER(ep, len);
-
-      if (req->buf == NULL)
-        {
-          EP_FREEREQ(ep, req);
-          req = NULL;
-        }
-    }
-
-  return req;
-}
-
 static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                                  FAR struct usbdev_req_s *req)
 {
@@ -440,7 +389,7 @@ static int  usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 {
   FAR struct dfu_driver_s *priv = (FAR struct dfu_driver_s *)driver;
 
-  priv->ctrlreq = usbclass_allocreq(dev->ep0, DFU_MAX_DESCRIPTOR_LEN);
+  priv->ctrlreq = usbdev_allocreq(dev->ep0, DFU_MAX_DESCRIPTOR_LEN);
   if (priv->ctrlreq == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCCTRLREQ), 0);
@@ -459,7 +408,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
 
   if (priv->ctrlreq != NULL)
     {
-      usbclass_freereq(dev->ep0, priv->ctrlreq);
+      usbdev_freereq(dev->ep0, priv->ctrlreq);
       priv->ctrlreq = NULL;
     }
 }

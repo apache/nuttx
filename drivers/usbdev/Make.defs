@@ -58,7 +58,7 @@ ifeq ($(CONFIG_NET_CDCECM),y)
   CSRCS += cdcecm.c
 endif
 
-CSRCS += usbdev_trace.c usbdev_trprintf.c
+CSRCS += usbdev_req.c usbdev_trace.c usbdev_trprintf.c
 
 # Include USB device build support
 
