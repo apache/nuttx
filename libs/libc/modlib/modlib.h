@@ -111,30 +111,30 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
 int modlib_symvalue(FAR struct module_s *modp,
                     FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
- 		    Elf_Off offset);
+                    Elf_Off offset);
 
- /****************************************************************************
-  * Name: modlib_insertsymtab
-  *
-  * Description:
-  *   Insert a symbol table for the current module.
-  *
-  * Input Parameters:
-  *   modp     - Module state information
-  *   loadinfo - Module load information
-  *   shdr     - Symbol table section header
-  *   sym      - Symbol table entry
-  *
-  * Returned Value:
-  *   0 (OK) is returned on success and a negated errno is returned on
-  *   failure.
-  *
-  *   ENOMEM - Symbol undefined and not provided via a symbol table
-  *
-  ****************************************************************************/
- 
-int modlib_insertsymtab(FAR struct module_s *modp, 
- 		        FAR struct mod_loadinfo_s *loadinfo, 
+/****************************************************************************
+ * Name: modlib_insertsymtab
+ *
+ * Description:
+ *   Insert a symbol table for the current module.
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Module load information
+ *   shdr     - Symbol table section header
+ *   sym      - Symbol table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ *   ENOMEM - Symbol undefined and not provided via a symbol table
+ *
+ ****************************************************************************/
+
+int modlib_insertsymtab(FAR struct module_s *modp,
+                        FAR struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr,
                         FAR Elf_Sym *sym);
 
@@ -158,8 +158,8 @@ int modlib_insertsymtab(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-void *modlib_findglobal(FAR struct module_s *modp, 
-		        FAR struct mod_loadinfo_s *loadinfo, 
+void *modlib_findglobal(FAR struct module_s *modp,
+                        FAR struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr,
                         FAR Elf_Sym *sym);
 
