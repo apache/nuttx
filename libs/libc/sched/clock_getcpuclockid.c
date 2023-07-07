@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_getcpuclockid.c
+ * libs/libc/sched/clock_getcpuclockid.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,10 +25,10 @@
 #include <nuttx/config.h>
 
 #include <time.h>
-#include <errno.h>
-#include <unistd.h>
 
-#include "clock/clock.h"
+#include <nuttx/clock.h>
+#include <nuttx/sched.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Public Functions
@@ -52,17 +52,15 @@
 
 int clock_getcpuclockid(pid_t pid, FAR clockid_t *clockid)
 {
-  if (pid < 0)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
   /* If the pid is 0, we need to use the pid of current process */
 
   if (pid == 0)
     {
-      pid = getpid();
+      pid = _SCHED_GETPID();
+    }
+  else if (_SIG_KILL(pid, 0) < 0)
+    {
+      return ERROR;
     }
 
   /* For clock_getcpuclockid, the clock type are

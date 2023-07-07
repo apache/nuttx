@@ -13,8 +13,6 @@
 "chown","unistd.h","","int","FAR const char *","uid_t","gid_t"
 "clearenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int"
 "clock","time.h","","clock_t"
-"clock_getcpuclockid","time.h","","int","pid_t","FAR clockid_t *"
-"clock_getres","time.h","","int","clockid_t","FAR struct timespec *"
 "clock_gettime","time.h","","int","clockid_t","FAR struct timespec *"
 "clock_nanosleep","time.h","","int","clockid_t","int","FAR const struct timespec *", "FAR struct timespec *"
 "clock_settime","time.h","","int","clockid_t","const struct timespec*"
