@@ -1361,12 +1361,6 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
       up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
     }
 
-  if (rxbuffer)
-    {
-     up_invalidate_dcache((uintptr_t)rxbuffer,
-                          (uintptr_t)rxbuffer + nbytes);
-    }
-
   /* Set up the DMA */
 
   adjust = (priv->nbits > 8) ? 2 : 1;
@@ -1429,6 +1423,12 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
   /* Disable DMA */
 
   imxrt_lpspi_putreg32(priv, IMXRT_LPSPI_DER_OFFSET, 0);
+
+  if (rxbuffer)
+    {
+     up_invalidate_dcache((uintptr_t)rxbuffer,
+                          (uintptr_t)rxbuffer + nbytes);
+    }
 }
 
 #endif  /* CONFIG_IMXRT_SPI_DMA */
