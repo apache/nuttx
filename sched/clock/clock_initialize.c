@@ -429,7 +429,8 @@ skip:
 
 #ifdef CONFIG_CLOCK_ADJTIME
 void clock_set_adjust(long long adj_usec, long long adj_count,
-                      long long *adj_usec_old, long long *adj_count_old)
+                      FAR long long *adj_usec_old,
+                      FAR long long *adj_count_old)
 {
   /* Get old adjust values. */
 
