@@ -113,7 +113,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
   int j;
 
   list = &tcb->group->tg_filelist;
-  if (nxmutex_lock(&list->fl_lock) < 0)
+  if (nxrwlock_read_lock(&list->fl_lock) < 0)
     {
       return;
     }
@@ -132,7 +132,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
         }
     }
 
-  nxmutex_unlock(&list->fl_lock);
+  nxrwlock_read_unlock(&list->fl_lock);
 }
 
 /****************************************************************************
@@ -152,7 +152,7 @@ void files_initlist(FAR struct filelist *list)
 
   /* Initialize the list access mutex */
 
-  nxmutex_init(&list->fl_lock);
+  nxrwlock_init(&list->fl_lock);
 }
 
 /****************************************************************************
@@ -189,7 +189,7 @@ void files_releaselist(FAR struct filelist *list)
 
   /* Destroy the mutex */
 
-  nxmutex_destroy(&list->fl_lock);
+  nxrwlock_destroy(&list->fl_lock);
 }
 
 /****************************************************************************
@@ -219,7 +219,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
   list = nxsched_get_files_from_tcb(tcb);
   DEBUGASSERT(list != NULL);
 
-  ret = nxmutex_lock(&list->fl_lock);
+  ret = nxrwlock_write_lock(&list->fl_lock);
   if (ret < 0)
     {
       /* Probably canceled */
@@ -237,7 +237,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
       ret = files_extend(list, i + 1);
       if (ret < 0)
         {
-          nxmutex_unlock(&list->fl_lock);
+          nxrwlock_write_unlock(&list->fl_lock);
           return ret;
         }
     }
@@ -255,7 +255,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               list->fl_files[i][j].f_pos    = pos;
               list->fl_files[i][j].f_inode  = inode;
               list->fl_files[i][j].f_priv   = priv;
-              nxmutex_unlock(&list->fl_lock);
+              nxrwlock_write_unlock(&list->fl_lock);
 
               if (addref)
                 {
@@ -281,7 +281,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
   ret = files_extend(list, i + 1);
   if (ret < 0)
     {
-      nxmutex_unlock(&list->fl_lock);
+      nxrwlock_write_unlock(&list->fl_lock);
       return ret;
     }
 
@@ -289,7 +289,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
   list->fl_files[i][0].f_pos    = pos;
   list->fl_files[i][0].f_inode  = inode;
   list->fl_files[i][0].f_priv   = priv;
-  nxmutex_unlock(&list->fl_lock);
+  nxrwlock_write_unlock(&list->fl_lock);
 
   if (addref)
     {
@@ -340,7 +340,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
   DEBUGASSERT(clist);
   DEBUGASSERT(plist);
 
-  ret = nxmutex_lock(&plist->fl_lock);
+  ret = nxrwlock_read_lock(&plist->fl_lock);
   if (ret < 0)
     {
       /* Probably canceled */
@@ -394,7 +394,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
     }
 
 out:
-  nxmutex_unlock(&plist->fl_lock);
+  nxrwlock_read_unlock(&plist->fl_lock);
   return ret;
 }
 
@@ -452,7 +452,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
 
   /* And return the file pointer from the list */
 
-  ret = nxmutex_lock(&list->fl_lock);
+  ret = nxrwlock_read_lock(&list->fl_lock);
   if (ret < 0)
     {
       return ret;
@@ -469,7 +469,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
       ret = -EBADF;
     }
 
-  nxmutex_unlock(&list->fl_lock);
+  nxrwlock_read_unlock(&list->fl_lock);
   return ret;
 }
 
@@ -519,7 +519,7 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
       return -EBADF;
     }
 
-  ret = nxmutex_lock(&list->fl_lock);
+  ret = nxrwlock_read_lock(&list->fl_lock);
   if (ret < 0)
     {
       /* Probably canceled */
@@ -532,7 +532,7 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
       ret = files_extend(list, fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
       if (ret < 0)
         {
-          nxmutex_unlock(&list->fl_lock);
+          nxrwlock_read_unlock(&list->fl_lock);
           return ret;
         }
     }
@@ -552,7 +552,7 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
   filep->f_tag = file.f_tag;
 #endif
 
-  nxmutex_unlock(&list->fl_lock);
+  nxrwlock_read_unlock(&list->fl_lock);
 
   file_close(&file);
 
@@ -647,7 +647,7 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
 
   /* Perform the protected close operation */
 
-  ret = nxmutex_lock(&list->fl_lock);
+  ret = nxrwlock_read_lock(&list->fl_lock);
   if (ret < 0)
     {
       return ret;
@@ -659,7 +659,7 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
       !list->fl_files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
                      [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK].f_inode)
     {
-      nxmutex_unlock(&list->fl_lock);
+      nxrwlock_read_unlock(&list->fl_lock);
       return -EBADF;
     }
 
@@ -668,7 +668,7 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
   memcpy(&file, filep, sizeof(struct file));
   memset(filep, 0,     sizeof(struct file));
 
-  nxmutex_unlock(&list->fl_lock);
+  nxrwlock_read_unlock(&list->fl_lock);
   return file_close(&file);
 }
 

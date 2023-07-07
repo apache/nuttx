@@ -103,3 +103,9 @@ config LIBC_MEM_FD_VFS_PATH
 	depends on !LIBC_MEMFD_ERROR
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
+
+config LIBC_RWLOCK
+	bool "Enable read write lock"
+	default n
+	---help---
+		Enable the read write lock support

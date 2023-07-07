@@ -38,6 +38,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/map.h>
+#include <nuttx/rwlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -444,7 +445,7 @@ struct file
 
 struct filelist
 {
-  mutex_t           fl_lock;    /* Manage access to the file list */
+  rwlock_t          fl_lock;    /* Manage access to the file list */
   uint8_t           fl_rows;    /* The number of rows of fl_files array */
   FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
 };

@@ -31,6 +31,10 @@ CSRCS += lib_mkdirat.c lib_utimensat.c
 CSRCS += lib_umul32.c lib_umul64.c lib_umul32x64.c
 CSRCS += lib_uadd32x64.c lib_uadd64.c lib_usub64x32.c lib_usub64.c
 
+ifeq ($(CONFIG_LIBC_RWLOCK),y)
+CSRCS += lib_rwlock.c
+endif
+
 ifeq ($(CONFIG_PIPES),y)
 CSRCS += lib_mkfifo.c
 endif
