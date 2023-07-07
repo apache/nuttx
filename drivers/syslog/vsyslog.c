@@ -219,7 +219,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Prepend the Thread ID */
 
-                    , (int)nxsched_gettid()
+                    , nxsched_gettid()
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
