@@ -150,7 +150,7 @@ err:
   return -1;
 }
 
-struct init_message *create_init_message()
+struct init_message *create_init_message(void)
 {
   struct init_message *m;
 
