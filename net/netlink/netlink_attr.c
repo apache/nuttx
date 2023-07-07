@@ -29,8 +29,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <unistd.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/net/netlink.h>
 
 #include "netlink.h"
@@ -129,7 +129,7 @@ static int validate_nla(FAR const struct nlattr *nla, int maxtype,
   if (g_nla_attr_len[pt->type] && attrlen != g_nla_attr_len[pt->type])
     {
       nwarn("netlink: '%d': attribute type %d has an invalid length.\n",
-            getpid(), type);
+            nxsched_getpid(), type);
       return -EINVAL;
     }
 
@@ -324,7 +324,7 @@ int nla_parse(FAR struct nlattr **tb, int maxtype,
   if (rem > 0)
     {
       nwarn("netlink: %d bytes leftover after parsing attributes in "
-            "pid `%d'.\n", rem, getpid());
+            "pid `%d'.\n", rem, nxsched_getpid());
     }
 
 errout:
