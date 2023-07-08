@@ -26,6 +26,12 @@ config NRF91_APP_FORMAT_MCUBOOT
 
 endchoice # Application Image Format
 
+config NRF91_NONSECURE_BOOT
+	bool "Non-secure image boot"
+	default n
+	---help---
+		Boot the application as non-secure code.
+
 config NRF91_PROGMEM_OTA_PARTITION
 	bool "MTD driver"
 	default n
