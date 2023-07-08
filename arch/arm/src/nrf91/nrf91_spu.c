@@ -26,6 +26,8 @@
 
 #include "arm_internal.h"
 
+#include "sau.h"
+
 #include "hardware/nrf91_spu.h"
 
 /****************************************************************************
@@ -36,7 +38,7 @@
  * Private Functions
  ****************************************************************************/
 
-#if defined(NRF91_SPU_NONSECURE)
+#if defined(CONFIG_NRF91_SPU_NONSECURE)
 /****************************************************************************
  * Name: nrf91_spu_mem_default
  ****************************************************************************/
@@ -50,15 +52,15 @@ static void nrf91_spu_mem_default(void)
   for (i = CONFIG_NRF91_FLASH_NS_START; i < SPU_FLASH_REGIONS; i++)
     {
       modifyreg32(NRF91_SPU_FLASHREGIONPERM(i),
-                  SPU_FLASHREGION_PERM_SECATTR, SPU_PERM_SECATTR);
+                  SPU_FLASHREGION_PERM_SECATTR, 0);
     }
 
   /* Security attribute for RAM */
 
-  for (i = CONFIG_NRF91_FLASH_NS_START; i < SPU_RAM_REGIONS; i++)
+  for (i = CONFIG_NRF91_RAM_NS_START; i < SPU_RAM_REGIONS; i++)
     {
       modifyreg32(NRF91_SPU_RAMREGIONPERM(i),
-                  SPU_RAMREGION_PERM_SECATTR, SPU_PERM_SECATTR);
+                  SPU_RAMREGION_PERM_SECATTR, 0);
     }
 }
 
@@ -68,94 +70,99 @@ static void nrf91_spu_mem_default(void)
 
 static void nrf91_spu_periph(void)
 {
+#ifdef CONFIG_NRF91_REGULATORS_NS
+  modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_REGULATORS_ID),
+              SPU_PERIPHID_PERM_SECATTR, 0);
+#endif
+
 #ifdef CONFIG_NRF91_POWERCLOCK_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_POWER_CLOCK_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_GPIO0_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_GPIO0_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_NVMC_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_NVMC_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_SERIAL0_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_SERIAL0_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_SERIAL1_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_SERIAL1_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_SERIAL2_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_SERIAL2_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_SERIAL3_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_SERIAL3_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_TIMER0_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_TIMER0_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_TIMER1_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_TIMER1_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_TIMER2_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_TIMER2_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_RTC0_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_RTC0_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_RTC1_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_RTC1_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_WDT0_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_WDT0_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_WDT1_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_WDT1_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_PWM0_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_PWM0_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_PWM1_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_PWM1_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_PWM2_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_PWM2_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
 #ifdef CONFIG_NRF91_IPC_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_IPC_ID),
-              SPU_PERIPHID_PERM_SECATTR, SPU_PERM_SECATTR);
+              SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
   /* Make all GPIO non-secure */
@@ -174,7 +181,13 @@ static void nrf91_spu_periph(void)
 
 void nrf91_spu_configure(void)
 {
-#if defined(NRF91_SPU_NONSECURE)
+  /* Allow the security attribution to be set by the Nordic SPU */
+
+  sau_control(false, true);
+
+  up_secure_irq_all(false);
+
+#if defined(CONFIG_NRF91_SPU_NONSECURE)
   /* Peripheral configuration */
 
   nrf91_spu_periph();
