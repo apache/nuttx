@@ -33,12 +33,7 @@
 #include "arm_internal.h"
 #include "nrf91_clockconfig.h"
 #include "hardware/nrf91_clock.h"
-#include "hardware/nrf91_power.h"
 #include "hardware/nrf91_gpio.h"
-
-#ifdef CONFIG_NRF91_APPCORE
-#  include "nrf91_oscconfig.h"
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,8 +73,6 @@ void nrf91_clockconfig(void)
 
 #if defined(CONFIG_NRF91_LFCLK_XTAL)
   putreg32(CLOCK_LFCLKSRC_SRC_LFXO, NRF91_CLOCK_LFCLKSRC);
-#elif defined(CONFIG_NRF91_LFCLK_SYNTH)
-  putreg32(CLOCK_LFCLKSRC_SRC_LFSYNT, NRF91_CLOCK_LFCLKSRC);
 #else
   putreg32(CLOCK_LFCLKSRC_SRC_LFRC, NRF91_CLOCK_LFCLKSRC);
 #endif
@@ -88,8 +81,6 @@ void nrf91_clockconfig(void)
 
   putreg32(0x0, NRF91_CLOCK_EVENTS_LFCLKSTARTED);
   putreg32(0x1, NRF91_CLOCK_TASKS_LFCLKSTART);
-
-  /* NOTE: Oscillator must be configured on the app core */
 
   while (!getreg32(NRF91_CLOCK_EVENTS_LFCLKSTARTED))
     {

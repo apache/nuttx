@@ -382,9 +382,6 @@ config NRF91_LFCLK_XTAL
 config NRF91_LFCLK_RC
 	bool "Internal RC oscillator"
 
-config NRF91_LFCLK_SYNTH
-	bool "Synthesized from HFCLK"
-
 endchoice
 
 endif # NRF91_USE_LFCLK
