@@ -7,7 +7,7 @@
 #
 # Find an entrypoint using a binary search
 #
-findEP()
+findep()
 {
 	CHECK=$1
 	SIZE=${#SYM[@]}
@@ -50,7 +50,7 @@ getEP()
 			FUNC=(${FUNCS})
 			for ((j = 0; j < ${#FUNC[@]}; j++))
 			do
-				findEP ${FUNC[$j]}
+				findep ${FUNC[$j]}
 				if [ $? -eq 1 ]; then
 					EP[${I_EP}]=${FUNC[$j]}
 					I_EP=$((I_EP + 1))
@@ -63,7 +63,7 @@ getEP()
 #
 # Symbols to ignore within the NuttX libraries
 #
-FILTER="^lib_low|^FUNCTION|^STUB|^__start|^_vect|^arm_|^arp_|^bch|^binfmt|^blake|^block_|^cdcacm|^chksum|^clock_|^close_|^crypto_|^devif_|^devnull|^devuran|^devzero|^emerg|^epoll_|^elf_|^_dbgR|^dq_|^env_|^file_|^files_|^fs_|^ftl_|^g_|^get_|^group_|^global|^hcom|^i2c_|^inode_|^iob_|^irq_|^kmm_|^lfs_|^lib_|^local_|^mm_|^modlib_|^mpu_|^mq_|^nGlobals|^net_|^netdev_|^nx|^pipecommon|^posix_spawn_file|^psock_|^ramlog|^rammap|^readline_|^register_|^sched_|^sockfd|^spawn_|^sq_|^stm32|^symtab_|^syslog_|^syslogstream|^task_|^tcp_|^timer_|^uart_|^ub[12]|^udp_|^umm_|^umount|^unload_|^unregister|^up_|^usb|^usrsock_|^watchdog|^wd_|globalNames$|nGlobals$|globalTable$|^\.l"
+FILTER="^lib_low|^FUNCTION|^STUB|^__start|^_vect|^arm_|^arp_|^bch|^binfmt|^blake|^block_|^cdcacm|^chksum|^clock_|^close_|^crypto_|^devif_|^devnull|^devuran|^devzero|^emerg|^epoll_|^elf_|^_dbgR|^dq_|^env_|^file_|^files_|^fs_|^ftl_|^g_|^get_|^group_|^global|^hcom|^i2c_|^inode_|^iob_|^irq_|^kmm_|^lfs_|^lib_|^local_|^mm_|^modlib_|^mpu_|^mq_|^nglobals|^net_|^netdev_|^nx|^pipecommon|^posix_spawn_file|^psock_|^ramlog|^rammap|^readline_|^register_|^sched_|^sockfd|^spawn_|^sq_|^stm32|^symtab_|^syslog_|^syslogstream|^task_|^tcp_|^timer_|^uart_|^ub[12]|^udp_|^umm_|^umount|^unload_|^unregister|^up_|^usb|^usrsock_|^watchdog|^wd_|globalNames$|nglobals$|global_table$|^\.l"
 
 if [ -z "${NM}" ]; then
 	NM="nm"
@@ -170,14 +170,14 @@ cat >>${GLOBALS} <<__EOF__
 	SIZE	globalNames 
 
 	.align	ALIGN
-	GLOBAL	nGlobals
-SYMBOL(nGlobals):	
+	GLOBAL	nglobals
+SYMBOL(nglobals):	
 	.word	${#EP[@]}
-	SIZE	nGlobals
+	SIZE	nglobals
 
 	.align	ALIGN
-	GLOBAL	globalTable
-SYMBOL(globalTable):
+	GLOBAL	global_table
+SYMBOL(global_table):
 __EOF__
 
 for ((i = 0; i < ${#EP[@]}; i++))
@@ -186,7 +186,7 @@ do
 done
 
 cat >>${GLOBALS} <<__EOF__ 
-	SIZE	globalTable
+	SIZE	global_table
 __EOF__
 
 echo "${#EP[@]} symbols defined"
