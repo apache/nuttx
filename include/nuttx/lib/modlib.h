@@ -30,9 +30,6 @@
 #include <sys/types.h>
 #include <elf.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/symtab.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -117,6 +114,7 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
  *   nexports      - The number of symbols in the exported symbol table.
  */
 
+struct symtab_s;
 struct mod_info_s
 {
   mod_uninitializer_t uninitializer;   /* Module uninitializer */
