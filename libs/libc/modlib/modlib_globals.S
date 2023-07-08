@@ -66,12 +66,12 @@ SYMBOL(globalNames):
 	SIZE globalNames
 
 	.align	ALIGN
-	GLOBAL	nGlobals
-SYMBOL(nGlobals):	
+	GLOBAL	nglobals
+SYMBOL(nglobals):
 	.word	0
-	SIZE	nGlobals
+	SIZE	nglobals
 
 	.align	ALIGN
-	GLOBAL	globalTable
-SYMBOL(globalTable):
-	SIZE	globalTable
+	GLOBAL	global_table
+SYMBOL(global_table):
+	SIZE	global_table

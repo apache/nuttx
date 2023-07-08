@@ -57,11 +57,18 @@ struct mod_exportinfo_s
   FAR const struct symtab_s *symbol; /* Symbol info returned (if found) */
 };
 
-struct epTable_s
+struct eptable_s
 {
-  uint8_t *epName;      /* Name of global symbol */
-  void    *epAddr;      /* Address of global symbol */
+  FAR uint8_t *epname;      /* Name of global symbol */
+  FAR void    *epaddr;      /* Address of global symbol */
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern struct eptable_s global_table[];
+extern int nglobals;
 
 /****************************************************************************
  * Private Functions
@@ -456,12 +463,12 @@ int modlib_insertsymtab(FAR struct module_s *modp,
                         FAR Elf_Shdr *shdr, FAR Elf_Sym *sym)
 {
   FAR struct symtab_s *symbol;
-  FAR Elf_Shdr *strTab = &loadinfo->shdr[shdr->sh_link];
+  FAR Elf_Shdr *strtab = &loadinfo->shdr[shdr->sh_link];
   int ret = 0;
   int i;
   int j;
-  int nSym;
-  int symCount;
+  int nsym;
+  int symcount;
 
   if (modp->modinfo.exports != NULL)
     {
@@ -471,28 +478,28 @@ int modlib_insertsymtab(FAR struct module_s *modp,
 
   /* Count the "live" symbols */
 
-  nSym = shdr->sh_size / sizeof(Elf_Sym);
-  for (i = 0, symCount = 0; i < nSym; i++)
+  nsym = shdr->sh_size / sizeof(Elf_Sym);
+  for (i = 0, symcount = 0; i < nsym; i++)
     {
       if (sym[i].st_name != 0)
-          symCount++;
+          symcount++;
     }
 
-  if (symCount > 0)
+  if (symcount > 0)
     {
       modp->modinfo.exports = symbol =
                               loadinfo->exported =
-                              lib_malloc(sizeof(*symbol) * symCount);
+                              lib_malloc(sizeof(*symbol) * symcount);
       if (modp->modinfo.exports)
         {
           /* Build out module's symbol table */
 
-          modp->modinfo.nexports = symCount;
-          for (i = 0, j = 0; i < nSym; i++)
+          modp->modinfo.nexports = symcount;
+          for (i = 0, j = 0; i < nsym; i++)
             {
               if (sym[i].st_name != 0)
                 {
-                  ret = modlib_symname(loadinfo, &sym[i], strTab->sh_offset);
+                  ret = modlib_symname(loadinfo, &sym[i], strtab->sh_offset);
                   if (ret < 0)
                     {
                       lib_free((FAR void *) modp->modinfo.exports);
@@ -517,7 +524,7 @@ int modlib_insertsymtab(FAR struct module_s *modp,
 }
 
 /****************************************************************************
- * Name: findEP
+ * Name: findep
  *
  * Description:
  *   Binary search comparison function
@@ -528,11 +535,11 @@ int modlib_insertsymtab(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-static int findEP(const void *c1, const void *c2)
+static int findep(FAR const void *c1, FAR const void *c2)
 {
-  const struct epTable_s *m1 = (struct epTable_s *) c1;
-  const struct epTable_s *m2 = (struct epTable_s *) c2;
-  return strcmp((FAR const char *)m1->epName, (FAR const char *)m2->epName);
+  FAR const struct eptable_s *m1 = (FAR const struct eptable_s *)c1;
+  FAR const struct eptable_s *m2 = (FAR const struct eptable_s *)c2;
+  return strcmp((FAR const char *)m1->epname, (FAR const char *)m2->epname);
 }
 
 /****************************************************************************
@@ -547,26 +554,26 @@ static int findEP(const void *c1, const void *c2)
  ****************************************************************************/
 
 void *modlib_findglobal(FAR struct module_s *modp,
-                        struct mod_loadinfo_s *loadinfo,
+                        FAR struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr, FAR Elf_Sym *sym)
 {
-  FAR Elf_Shdr *strTab = &loadinfo->shdr[shdr->sh_link];
+  FAR Elf_Shdr *strtab = &loadinfo->shdr[shdr->sh_link];
   int ret;
-  struct epTable_s key;
-  struct epTable_s *res;
-  extern struct epTable_s globalTable[];
-  extern int nGlobals;
+  struct eptable_s key;
+  FAR struct eptable_s *res;
 
-  ret = modlib_symname(loadinfo, sym, strTab->sh_offset);
+  ret = modlib_symname(loadinfo, sym, strtab->sh_offset);
   if (ret < 0)
+    {
       return NULL;
+    }
 
-  key.epName = loadinfo->iobuffer;
-  res = bsearch(&key, globalTable, nGlobals,
-                sizeof(struct epTable_s), findEP);
+  key.epname = loadinfo->iobuffer;
+  res = bsearch(&key, global_table, nglobals,
+                sizeof(struct eptable_s), findep);
   if (res != NULL)
     {
-      return res->epAddr;
+      return res->epaddr;
     }
   else
     {
