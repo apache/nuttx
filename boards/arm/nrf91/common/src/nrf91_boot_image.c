@@ -40,9 +40,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_NRF91_OTA_PRIMARY_SLOT_OFFSET
+#  error CONFIG_NRF91_OTA_PRIMARY_SLOT_OFFSET not defined
+#endif
+
+#ifndef CONFIG_NRF91_MCUBOOT_HEADER_SIZE
+#  error CONFIG_NRF91_MCUBOOT_HEADER_SIZE not defined
+#endif
+
+#define VECTOR_TABLE_NS ((CONFIG_NRF91_OTA_PRIMARY_SLOT_OFFSET + \
+                          CONFIG_NRF91_MCUBOOT_HEADER_SIZE))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#ifdef CONFIG_NRF91_NONSECURE_BOOT
+typedef void cmse_nonsecure_call nsfunc(void);
+#endif
 
 /* This structure represents the first two entries on NVIC vector table */
 
@@ -56,13 +71,16 @@ struct arm_vector_table
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_NRF91_NONSECURE_BOOT
 static void cleanup_arm_nvic(void);
 static void systick_disable(void);
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+#ifndef CONFIG_NRF91_NONSECURE_BOOT
 /****************************************************************************
  * Name:  cleanup_arm_nvic
  *
@@ -100,6 +118,7 @@ static void cleanup_arm_nvic(void)
       putreg32(0xffffffff, NVIC_IRQ_CLRPEND(i));
     }
 }
+#endif
 
 /****************************************************************************
  * Name:  systick_disable
@@ -155,6 +174,9 @@ int board_boot_image(const char *path, uint32_t hdr_size)
       return bytes < 0 ? bytes : -1;
     }
 
+#ifndef CONFIG_NRF91_NONSECURE_BOOT
+  /* Secure entry point */
+
   systick_disable();
 
   cleanup_arm_nvic();
@@ -165,6 +187,27 @@ int board_boot_image(const char *path, uint32_t hdr_size)
   setcontrol(0x00);
   ARM_ISB();
   ((void (*)(void))vt.reset)();
+
+#else
+  /* Non-secure entry point */
+
+  systick_disable();
+
+  /* Set non-secure vector table */
+
+  putreg32(VECTOR_TABLE_NS, (NVIC_VECTAB + ARMV8M_NS_OFFSET));
+
+  /* Set non-secure stack pointers */
+
+  __asm__ __volatile__("\tmsr msp_ns, %0\n" : : "r" (vt.spr));
+
+  ARM_ISB();
+
+  /* Jump to non-secure entry point */
+
+  nsfunc *ns_reset = (nsfunc *)(vt.reset);
+  ns_reset();
+#endif
 
   return 0;
 }
