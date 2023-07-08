@@ -34,6 +34,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ELF_CLASS         ELFCLASS64
+
 /* See ELF-64 Object File Format: Version 1.5 Draft 2 */
 
 /* Definitions for Elf64_Rel*::r_info */
@@ -43,6 +45,7 @@
 #define ELF64_R_INFO(s,t) (((s)<< 32) + ((t) & 0xffffffffL))
 
 #define ELF_R_SYM(i)      ELF64_R_SYM(i)
+#define ELF_R_TYPE(i)     ELF64_R_TYPE(i)
 
 /****************************************************************************
  * Public Type Definitions
@@ -50,13 +53,13 @@
 
 /* Table 1: ELF-64 Data Types */
 
-typedef uint64_t  Elf64_Addr;    /* Unsigned program address */
-typedef uint64_t  Elf64_Off;     /* Unsigned file offset */
-typedef uint16_t  Elf64_Half;    /* Unsigned medium integer */
-typedef uint32_t  Elf64_Word;    /* Unsigned long integer */
-typedef int32_t   Elf64_Sword;   /* Signed integer */
-typedef uint64_t  Elf64_Xword;   /* Unsigned long integer */
-typedef int64_t   Elf64_Sxword;  /* Signed large integer */
+typedef uint64_t Elf64_Addr;    /* Unsigned program address */
+typedef uint64_t Elf64_Off;     /* Unsigned file offset */
+typedef uint16_t Elf64_Half;    /* Unsigned medium integer */
+typedef uint32_t Elf64_Word;    /* Unsigned long integer */
+typedef int32_t  Elf64_Sword;   /* Signed integer */
+typedef uint64_t Elf64_Xword;   /* Unsigned long integer */
+typedef int64_t  Elf64_Sxword;  /* Signed large integer */
 
 /* Figure 2: ELF-64 Header */
 
@@ -125,23 +128,23 @@ typedef struct
 
 typedef struct
 {
-  Elf64_Word   p_type;     /* Type of segment */
-  Elf64_Word   p_flags;    /* Segment attributes */
-  Elf64_Off    p_offset;   /* Offset in file */
-  Elf64_Addr   p_vaddr;    /* Virtual address in memory */
-  Elf64_Addr   p_paddr;    /* Reserved */
-  Elf64_Word   p_filesz;   /* Size of segment in file */
-  Elf64_Word   p_memsz;    /* Size of segment in memory */
-  Elf64_Word   p_align;    /* Alignment of segment */
+  Elf64_Word    p_type;     /* Type of segment */
+  Elf64_Word    p_flags;    /* Segment attributes */
+  Elf64_Off     p_offset;   /* Offset in file */
+  Elf64_Addr    p_vaddr;    /* Virtual address in memory */
+  Elf64_Addr    p_paddr;    /* Reserved */
+  Elf64_Word    p_filesz;   /* Size of segment in file */
+  Elf64_Word    p_memsz;    /* Size of segment in memory */
+  Elf64_Word    p_align;    /* Alignment of segment */
 } Elf64_Phdr;
 
 /* Figure 7. Format of a Note Section */
 
 typedef struct
 {
-  Elf64_Word   n_namesz;   /* Length of the note's name.  */
-  Elf64_Word   n_descsz;   /* Length of the note's descriptor.  */
-  Elf64_Word   n_type;     /* Type of the note.  */
+  Elf64_Word    n_namesz;   /* Length of the note's name.  */
+  Elf64_Word    n_descsz;   /* Length of the note's descriptor.  */
+  Elf64_Word    n_type;     /* Type of the note.  */
 } Elf64_Nhdr;
 
 /* Figure 8: Dynamic Table Structure */
@@ -156,14 +159,16 @@ typedef struct
   } d_un;
 } Elf64_Dyn;
 
-typedef Elf64_Addr  Elf_Addr;
-typedef Elf64_Ehdr  Elf_Ehdr;
-typedef Elf64_Rel   Elf_Rel;
-typedef Elf64_Rela  Elf_Rela;
-typedef Elf64_Nhdr  Elf_Nhdr;
-typedef Elf64_Phdr  Elf_Phdr;
-typedef Elf64_Sym   Elf_Sym;
-typedef Elf64_Shdr  Elf_Shdr;
-typedef Elf64_Word  Elf_Word;
+typedef Elf64_Addr Elf_Addr;
+typedef Elf64_Ehdr Elf_Ehdr;
+typedef Elf64_Rel  Elf_Rel;
+typedef Elf64_Rela Elf_Rela;
+typedef Elf64_Nhdr Elf_Nhdr;
+typedef Elf64_Phdr Elf_Phdr;
+typedef Elf64_Sym  Elf_Sym;
+typedef Elf64_Shdr Elf_Shdr;
+typedef Elf64_Off  Elf_Off;
+typedef Elf64_Word Elf_Word;
+typedef Elf64_Dyn  Elf_Dyn;
 
 #endif /* __INCLUDE_ELF64_H */

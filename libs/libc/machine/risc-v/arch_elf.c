@@ -44,13 +44,9 @@
 /* ELF32 and ELF64 definitions */
 
 #ifdef CONFIG_LIBC_ARCH_ELF_64BIT
-#  define ARCH_ELF_TYP_STR    "64"
-#  define ARCH_ELF_CLASS      ELFCLASS64
-#  define ARCH_ELF_RELTYPE    ELF64_R_TYPE
+#  define ARCH_ELF_TYP_STR "64"
 #else /* !CONFIG_LIBC_ARCH_ELF_64BIT */
-#  define ARCH_ELF_TYP_STR    "32"
-#  define ARCH_ELF_CLASS      ELFCLASS32
-#  define ARCH_ELF_RELTYPE    ELF32_R_TYPE
+#  define ARCH_ELF_TYP_STR "32"
 #endif /* CONFIG_LIBC_ARCH_ELF_64BIT */
 
 /****************************************************************************
@@ -214,7 +210,7 @@ bool up_checkarch(const Elf_Ehdr *ehdr)
 
   /* Make sure that current objects are supported */
 
-  if (ehdr->e_ident[EI_CLASS] != ARCH_ELF_CLASS)
+  if (ehdr->e_ident[EI_CLASS] != ELF_CLASS)
     {
       berr("ERROR: Need " ARCH_ELF_TYP_STR "-bit "
            "objects: e_ident[EI_CLASS]=%02x\n",
@@ -284,7 +280,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
 
   /* All relocations depend upon having valid symbol information */
 
-  relotype = ARCH_ELF_RELTYPE(rel->r_info);
+  relotype = ELF_R_TYPE(rel->r_info);
 
   if (relotype == R_RISCV_RELAX)
     {
@@ -585,7 +581,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
         break;
       default:
         berr("ERROR: Unsupported relocation: %ld\n",
-             ARCH_ELF_RELTYPE(rel->r_info));
+             ELF_R_TYPE(rel->r_info));
         PANIC();
         return -EINVAL;
     }
