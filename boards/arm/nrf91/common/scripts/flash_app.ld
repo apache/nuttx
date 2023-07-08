@@ -20,6 +20,12 @@
 
 #include <nuttx/config.h>
 
+/* CONFIG_RAM_SIZE includes SHMEM and FIRC_RAM */
+
+#if CONFIG_RAM_SIZE > CONFIG_NRF91_CPUAPP_MEM_RAM_SIZE
+#  error Invalid CONFIG_RAM_SIZE
+#endif
+
 /* Shared memory configuration */
 
 #ifdef CONFIG_NRF91_MODEM_SHMEM_SIZE
@@ -31,7 +37,7 @@
 /* FLASH and RAM start */
 
 #define FLASH_CPUAPP_START_ADDR (0x00000000)
-#define RAM_CPUAPP_START_ADDR   (0x20000000 + NRF91_SHMEM_SIZE)
+#define RAM_CPUAPP_START_ADDR   (CONFIG_RAM_START + NRF91_SHMEM_SIZE)
 
 /* Image format configuration */
 
@@ -54,7 +60,7 @@ MEMORY
     progmem (rx)  : ORIGIN = FLASH_CPUAPP_START_ADDR + FLASH_OFFSET,
                     LENGTH = FLASH_IMG_SIZE
     datamem (rwx) : ORIGIN = RAM_CPUAPP_START_ADDR,
-                    LENGTH = CONFIG_NRF91_CPUAPP_MEM_RAM_SIZE - NRF91_SHMEM_SIZE
+                    LENGTH = CONFIG_RAM_SIZE - NRF91_SHMEM_SIZE
 }
 
 OUTPUT_ARCH(arm)
