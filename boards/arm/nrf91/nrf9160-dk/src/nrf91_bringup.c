@@ -50,11 +50,17 @@
 #  include "nrf91_progmem.h"
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "nrf91_timer.h"
+#endif
+
 #include "nrf9160-dk.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define NRF91_TIMER (0)
 
 /****************************************************************************
  * Private Functions
@@ -110,6 +116,18 @@ int nrf91_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF91_TIMER)
+  /* Configure TIMER driver */
+
+  ret = nrf91_timer_driver_setup("/dev/timer0", NRF91_TIMER);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
     }
 #endif
 
