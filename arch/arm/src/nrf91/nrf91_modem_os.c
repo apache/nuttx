@@ -495,7 +495,7 @@ void nrf_modem_os_log(int level, const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  syslog(level, fmt, ap);
+  vsyslog(level, fmt, ap);
   va_end(ap);
 }
 
