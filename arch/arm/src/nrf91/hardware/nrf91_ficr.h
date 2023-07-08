@@ -44,6 +44,8 @@
 #define NRF91_FICR_INFO_DEVICETYPE_OFFSET   0x228  /* Device type */
                                                    /* TODO */
 
+#define NRF91_FICR_LAST_OFFSET              0xc1c
+
 /* FICR Register Addresses *************************************************/
 
 #define NRF91_FICR_INFO_DEVICEID0           (NRF91_FICR_BASE + NRF91_FICR_INFO_DEVICEID0_OFFSET)

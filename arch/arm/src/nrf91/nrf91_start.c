@@ -44,6 +44,7 @@
 #include "nrf91_gpio.h"
 #include "nrf91_serial.h"
 #ifndef CONFIG_ARCH_TRUSTZONE_NONSECURE
+#  include "nrf91_errata.h"
 #  include "nrf91_spu.h"
 #endif
 
@@ -75,6 +76,7 @@
 void __start(void) noinstrument_function;
 #endif
 
+#ifndef CONFIG_ARCH_TRUSTZONE_NONSECURE
 /****************************************************************************
  * Name: nrf91_approtect
  ****************************************************************************/
@@ -83,6 +85,7 @@ static void nrf91_approtect(void)
 {
   /* TODO: missing logic */
 }
+#endif
 
 #ifdef CONFIG_NRF91_FLASH_PREFETCH
 /****************************************************************************
@@ -167,9 +170,19 @@ void __start(void)
   __asm__ __volatile__ ("\tcpsid  i\n");
 
 #ifndef CONFIG_ARCH_TRUSTZONE_NONSECURE
+  /* Apply errata */
+
+  nrf91_errata_secure();
+
   /* Handle APPROTECT configuration */
 
   nrf91_approtect();
+
+#  ifdef CONFIG_NRF91_FICR_NS_WORKAROUND
+  /* Copy FICR */
+
+  nrf91_ficr_ram_copy();
+#  endif
 
   /* Configure SPU */
 
