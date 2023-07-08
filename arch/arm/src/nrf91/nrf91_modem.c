@@ -43,6 +43,10 @@
 #  error NRF91 modem works only in non-secure environment
 #endif
 
+#ifndef CONFIG_NRF91_LFCLK_XTAL
+#  error NRF91 modem requires using LFXO as the LFCLK source
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
