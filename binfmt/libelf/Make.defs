@@ -20,10 +20,6 @@
 
 ifeq ($(CONFIG_ELF),y)
 
-# ELF application interfaces
-
-CSRCS += elf.c
-
 # ELF library
 
 CSRCS += libelf_bind.c libelf_init.c libelf_addrenv.c libelf_iobuffer.c

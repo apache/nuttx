@@ -159,35 +159,6 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: elf_initialize
- *
- * Description:
- *   In order to use the ELF binary format, this function must be called
- *   during system initialization to register the ELF binary format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int elf_initialize(void);
-
-/****************************************************************************
- * Name: elf_uninitialize
- *
- * Description:
- *   Unregister the ELF binary loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void elf_uninitialize(void);
-
-/****************************************************************************
  * Name: elf_init
  *
  * Description:
