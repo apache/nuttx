@@ -37,9 +37,29 @@ config NRF91_CPUAPP_MEM_FLASH_SIZE
 	hex
 	default 0x100000 if NRF91_CPUAPP_MEM_FLASH_1024
 
+if !ARCH_TRUSTZONE_NONSECURE
+
 config NRF91_ENABLE_APPROTECT
 	bool "nRF91 enable APPROTECT"
 	default n
+
+config NRF91_UICR_HFXO_WORKAROUND
+	bool "nRF91 enable UICR HFXO workaround"
+	default y
+
+config NRF91_LFXO_ERRATA31_WORKAROUND
+	bool "nRF91 enable LFXO errata 31 workaround"
+	default y
+
+config NRF91_DCDC_ERRATA15_WORKAROUND
+	bool "nRF91 enable DCDC errata 15 workaround"
+	default y
+
+endif # !ARCH_TRUSTZONE_NONSECURE
+
+config NRF91_FICR_NS_WORKAROUND
+	bool "nRF91 access to FICR in non-secure environment"
+	default y
 
 # Peripheral Selection
 
@@ -318,6 +338,17 @@ config NRF91_RAM_NS_START
 endif # NRF91_CONFIG_NONSECURE
 
 endmenu # "SPU configuration"
+
+config NRF91_NONSECURE_RAM_FICR_OFFSET
+	hex
+	default 0x1000
+
+config NRF91_NONSECURE_RAM_FICR
+	bool "Support for non-secure FICR in RAM"
+	default n
+	---help---
+		Support for non-secure FICR in RAM.
+		The last page 4KiB of the RAM is recerved for this.
 
 menu "Clock Configuration"
 

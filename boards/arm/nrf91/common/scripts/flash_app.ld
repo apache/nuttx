@@ -20,6 +20,8 @@
 
 #include <nuttx/config.h>
 
+#include <hardware/nrf91_memorymap.h>
+
 /* CONFIG_RAM_SIZE includes SHMEM and FIRC_RAM */
 
 #if CONFIG_RAM_SIZE > CONFIG_NRF91_CPUAPP_MEM_RAM_SIZE
@@ -32,6 +34,15 @@
 #  define NRF91_SHMEM_SIZE (CONFIG_NRF91_MODEM_SHMEM_SIZE)
 #else
 #  define NRF91_SHMEM_SIZE (0)
+#endif
+
+/* Non-secure FICR RAM copy - this must match */
+
+#if defined(CONFIG_NRF91_NONSECURE_RAM_FICR_OFFSET) && \
+    defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+#  define FICR_RAM_SIZE  (NRF91_NONSECURE_RAM_FICR_OFFSET)
+#else
+#  define FICR_RAM_SIZE  (0)
 #endif
 
 /* FLASH and RAM start */
@@ -60,7 +71,7 @@ MEMORY
     progmem (rx)  : ORIGIN = FLASH_CPUAPP_START_ADDR + FLASH_OFFSET,
                     LENGTH = FLASH_IMG_SIZE
     datamem (rwx) : ORIGIN = RAM_CPUAPP_START_ADDR,
-                    LENGTH = CONFIG_RAM_SIZE - NRF91_SHMEM_SIZE
+                    LENGTH = CONFIG_RAM_SIZE - NRF91_SHMEM_SIZE - FICR_RAM_SIZE
 }
 
 OUTPUT_ARCH(arm)

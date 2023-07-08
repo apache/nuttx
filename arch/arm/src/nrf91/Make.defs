@@ -30,7 +30,7 @@ endif
 
 CHIP_CSRCS += nrf91_start.c nrf91_clockconfig.c nrf91_irq.c nrf91_utils.c
 CHIP_CSRCS += nrf91_allocateheap.c nrf91_lowputc.c nrf91_gpio.c
-CHIP_CSRCS += nrf91_uid.c nrf91_spu.c
+CHIP_CSRCS += nrf91_uid.c nrf91_spu.c nrf91_errata.c
 
 ifeq ($(CONFIG_NRF91_PROGMEM),y)
 CHIP_CSRCS += nrf91_flash.c

@@ -46,6 +46,13 @@
 #  define NRF91_NS(x)             (x)
 #endif
 
+/* Non-secure FICR */
+
+#define NRF91_NONSECURE_RAM_FICR_OFFSET 0x1000
+#define NRF91_NONSECURE_RAM_FICR        (NRF91_SRAM_BASE +                \
+                                         CONFIG_NRF91_CPUAPP_MEM_RAM_SIZE \
+                                         - NRF91_NONSECURE_RAM_FICR_OFFSET)
+
 /* APB Peripherals */
 
 #ifndef CONFIG_ARCH_TRUSTZONE_NONSECURE
@@ -112,7 +119,13 @@
 #  define NRF91_CRYPTOCELL_BASE 0x50840000
 #endif
 #define NRF91_GPIO_P0_BASE      NRF91_NS(0x50842500)
-#define NRF91_FICR_BASE         0x00FF0000
+#ifndef CONFIG_ARCH_TRUSTZONE_NONSECURE
+#  define NRF91_FICR_BASE       0x00FF0000
+#elif CONFIG_NRF91_FICR_NS_WORKAROUND
+/* Non-secure FICR RAM copy */
+
+#  define NRF91_FICR_BASE       NRF91_NONSECURE_RAM_FICR
+#endif
 #define NRF91_UICR_BASE         0x00FF8000
 #define NRF91_TAD_BASE          0xE0080000
 
