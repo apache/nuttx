@@ -91,9 +91,9 @@
 /* EXC_RETURN_BASE: Bits that are always set in an EXC_RETURN value. */
 
 #ifdef CONFIG_ARCH_TRUSTZONE_NONSECURE
-#define EXC_RETURN_BASE          (0xffffff80)
+#  define EXC_RETURN_BASE        (0xffffff80)
 #else
-#define EXC_RETURN_BASE          (0xffffff80 | EXC_RETURN_EXC_SECURE | \
+#  define EXC_RETURN_BASE        (0xffffff80 | EXC_RETURN_EXC_SECURE | \
                                   EXC_RETURN_SECURE_STACK)
 #endif
 
@@ -104,35 +104,33 @@
 #define EXC_RETURN_HANDLER       (EXC_RETURN_BASE | EXC_RETURN_DEF_STACKING | \
                                   EXC_RETURN_STD_CONTEXT)
 
-/* EXC_RETURN_PRIVTHR: Return to privileged thread mode. Exception return
- * gets state from the main stack. Execution uses MSP after return.
- */
-
 #ifdef CONFIG_ARCH_FPU
-#  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
-                                  EXC_RETURN_DEF_STACKING)
+#  define EXC_RETURN_FPU         0
 #else
-#  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
-                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_DEF_STACKING)
+#  define EXC_RETURN_FPU         EXC_RETURN_STD_CONTEXT
 #endif
 
-/* EXC_RETURN_UNPRIVTHR: Return to unprivileged thread mode. Exception return
- * gets state from the process stack. Execution uses PSP after return.
- */
-
-#ifdef CONFIG_ARCH_FPU
-#  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
-                                  EXC_RETURN_PROCESS_STACK | EXC_RETURN_DEF_STACKING)
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#  define EXC_RETURN_STACK       EXC_RETURN_PROCESS_STACK
 #else
-#  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
-                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK | \
-                                  EXC_RETURN_DEF_STACKING)
+#  define EXC_RETURN_STACK       0
 #endif
 
+/* EXC_RETURN_THREAD: Return to thread mode.
+ * If EXC_RETURN_STACK is 0, Return to thread mode.
+ * Execution uses MSP after return.
+ * If EXC_RETURN_STACK is EXC_RETURN_PROCESS_STACK, Return to
+ * thread mode. Execution uses PSP after return.
+ */
+
+#define EXC_RETURN_THREAD        (EXC_RETURN_BASE | EXC_RETURN_FPU | \
+                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_STACK | \
+                                  EXC_RETURN_DEF_STACKING)
+
 #ifdef CONFIG_ARCH_FPU
-#define EXC_INTEGRITY_SIGNATURE  (0xfefa125a)
+#  define EXC_INTEGRITY_SIGNATURE (0xfefa125a)
 #else
-#define EXC_INTEGRITY_SIGNATURE  (0xfefa125b)
+#  define EXC_INTEGRITY_SIGNATURE (0xfefa125b)
 #endif
 
 /* FUNC_RETURN_EXC_SECURE: Exception Secure.  The security domain the
