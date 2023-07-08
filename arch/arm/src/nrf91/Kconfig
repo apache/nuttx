@@ -241,84 +241,88 @@ endchoice # SPU configuration
 
 if NRF91_SPU_NONSECURE
 
+config NRF91_REGULATORS_NS
+	bool "REGULATORS non-secure"
+	default n
+
 config NRF91_POWERCLOCK_NS
-	bool "IPC POWER/CLOCK non-secure"
+	bool "POWER/CLOCK non-secure"
 	default n
 
 config NRF91_GPIO0_NS
-	bool "IPC GPIO0 non-secure"
+	bool "GPIO0 non-secure"
 	default n
 
 config NRF91_NVMC_NS
-	bool "IPC NVMC non-secure"
+	bool "NVMC non-secure"
 	default n
 
 config NRF91_SERIAL0_NS
-	bool "IPC SERIAL0 non-secure"
+	bool "SERIAL0 non-secure"
 	default n
 
 config NRF91_SERIAL1_NS
-	bool "IPC SERIAL1 non-secure"
+	bool "SERIAL1 non-secure"
 	default n
 
 config NRF91_SERIAL2_NS
-	bool "IPC SERIAL2 non-secure"
+	bool "SERIAL2 non-secure"
 	default n
 
 config NRF91_SERIAL3_NS
-	bool "IPC SERIAL3 non-secure"
+	bool "SERIAL3 non-secure"
 	default n
 
 config NRF91_SERIAL4_NS
-	bool "IPC SERIAL4 non-secure"
+	bool "SERIAL4 non-secure"
 	default n
 
 config NRF91_TIMER0_NS
-	bool "IPC TIMER0 non-secure"
+	bool "TIMER0 non-secure"
 	default n
 
 config NRF91_TIMER1_NS
-	bool "IPC TIMER1 non-secure"
+	bool "TIMER1 non-secure"
 	default n
 
 config NRF91_TIMER2_NS
-	bool "IPC TIMER2 non-secure"
+	bool "TIMER2 non-secure"
 	default n
 
 config NRF91_RTC0_NS
-	bool "IPC RTC0 non-secure"
+	bool "RTC0 non-secure"
 	default n
 
 config NRF91_WDT0_NS
-	bool "IPC WDT0 non-secure"
+	bool "WDT0 non-secure"
 	default n
 
 config NRF91_WDT1_NS
-	bool "IPC WDT1 non-secure"
+	bool "WDT1 non-secure"
 	default n
 
 config NRF91_RTC0_NS
-	bool "IPC RTC0 non-secure"
+	bool "RTC0 non-secure"
 	default n
 
 config NRF91_RTC1_NS
-	bool "IPC RTC1 non-secure"
+	bool "RTC1 non-secure"
 	default n
 
 config NRF91_PWM0_NS
-	bool "IPC PWM0 non-secure"
+	bool "PWM0 non-secure"
 	default n
 
 config NRF91_PWM1_NS
-	bool "IPC PWM1 non-secure"
+	bool "PWM1 non-secure"
 	default n
 
 config NRF91_PWM2_NS
-	bool "IPC PWM2 non-secure"
+	bool "PWM2 non-secure"
 	default n
 
 config NRF91_PWM3_NS
-	bool "IPC PWM3 non-secure"
+	bool "PWM3 non-secure"
 	default n
 
 config NRF91_IPC_NS
@@ -441,6 +445,7 @@ endmenu # System Timer
 config NRF91_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y
+	depends on !ARCH_TRUSTZONE_NONSECURE
 	---help---
 		Enable FLASH prefetch
 
