@@ -877,6 +877,12 @@ flt_oper:
 
               stream_putc(ndigs, stream);
               c = __ultoa_invert(exp, (FAR char *)buf, 10) - (FAR char *)buf;
+
+              if (exp >= 0 && exp <= 9)
+                {
+                  stream_putc('0', stream);
+                }
+
               while (c > 0)
                 {
                   stream_putc(buf[c - 1], stream);
