@@ -17,6 +17,15 @@ P0.28 APP UART0 TX virtual COM 0
 P0.29 APP UART0 RX virtual COM 0
 ===== ============ =============
 
+Serial console for the MCUBOOT (secure domain):
+
+===== ============ =============
+Pin   Signal       Notes
+===== ============ =============
+P0.00 APP UART1 TX virtual COM 2
+P0.01 APP UART1 RX virtual COM 2
+===== ============ =============
+
 LEDs and Buttons
 ================
 
