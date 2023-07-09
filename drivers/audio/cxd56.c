@@ -133,6 +133,7 @@
 #define CXD56_ACA_CTL_POWER_OFF_OUTPUT  8
 #define CXD56_ACA_CTL_POWER_ON_MICBIAS  9
 #define CXD56_ACA_CTL_POWER_OFF_MICBIAS 10
+#define CXD56_ACA_CTL_INIT_AMIC         11
 #define CXD56_ACA_CTL_SET_OUTPUT_DEVICE 13
 
 #define CXD56_EXP_REVID    0x20
@@ -170,6 +171,8 @@
 #define CXD56_DMA_SMP_WAIT_HIRES    10 /* usec per sample. */
 #define CXD56_DMA_SMP_WAIT_NORMALT  40 /* usec per sample. */
 #define CXD56_DMA_CMD_FIFO_NOT_FULL 1
+
+#define CXD56_MICGAIN_INITVAL (120)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -277,6 +280,14 @@ enum cxd56_mic_type_e
   CXD56_AUDIO_CFG_MIC_DEV_ANADIG
 };
 
+enum cxd56_mic_bias_sel_e
+{
+  CXD56_AUDIO_CFG_MICBIAS_SEL_UNKNOWN,
+  CXD56_AUDIO_CFG_MICBIAS_SEL_2_0V,     /* 2.0V */
+  CXD56_AUDIO_CFG_MICBIAS_SEL_2_8V,     /* 2.8V */
+  CXD56_AUDIO_CFG_MICBIAS_SEL_MAX_ENTRY
+};
+
 #if 0
 /* TODO: Implement mic gain handling */
 
@@ -289,7 +300,7 @@ struct cxd56_audio_mic_gain_s
 struct cxd56_aca_pwinput_param_s
 {
   enum cxd56_mic_type_e mic_dev;
-  uint8_t               mic_bias_sel;
+  enum cxd56_mic_bias_sel_e  mic_bias_sel;
   uint32_t              mic_gain[4];
   uint32_t              pga_gain[4];
   int32_t               vgain[4];
@@ -398,7 +409,7 @@ static void cxd56_audio_power_on_cic(uint8_t mic_in,
                                     uint8_t mic_mode,
                                     uint8_t cic_num,
                                     FAR struct cxd56_audio_mic_gain_s *gain);
-static int cxd56_power_on_decim(uint8_t mic_mode, uint16_t samplerate);
+static int cxd56_power_on_decim(uint8_t mic_mode, uint32_t samplerate);
 static void cxd56_power_on_i2s1(FAR struct cxd56_dev_s *dev);
 static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev);
 static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev);
@@ -406,8 +417,8 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev);
 static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv);
 static void cxd56_set_dma_int_en(bool enabled);
 static void cxd56_set_dma_running(cxd56_dmahandle_t handle, bool running);
-static void cxd56_set_mic_gains(uint8_t gain,
-                                struct cxd56_aca_pwinput_param_s *param);
+static int cxd56_set_mic_gains(uint8_t gain, enum cxd56_mic_type_e mic_dev,
+                               struct cxd56_aca_pwinput_param_s *param);
 static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev);
 static int cxd56_set_volume(enum cxd56_audio_volid_e id, int16_t vol);
 static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size);
@@ -574,6 +585,10 @@ const cxd56_aureg_t  REG_AC_SDCK_OUTENX =
 {
   REG_BASE + 0x0200, 30,  1
 };
+const cxd56_aureg_t  REG_AC_HI_RES_MODE =
+{
+  REG_BASE + 0x0200, 31,  1
+};
 const cxd56_aureg_t  REG_AC_HPF2_MODE =
 {
   REG_BASE + 0x0204, 0,  2
@@ -737,6 +752,34 @@ const cxd56_aureg_t  REG_AC_NSDD =
 const cxd56_aureg_t  REG_AC_TEST_OUT_SEL0 =
 {
   REG_BASE + 0x0400,  6,  1
+};
+const cxd56_aureg_t  REG_AC_S_RESET =
+{
+  REG_BASE + 0x0400,  16,  1
+};
+const cxd56_aureg_t  REG_AC_HALT_INHIBIT =
+{
+  REG_BASE + 0x0400,  19,  1
+};
+const cxd56_aureg_t  REG_AC_ARWPHSET =
+{
+  REG_BASE + 0x0400,  24,  1
+};
+const cxd56_aureg_t  REG_AC_DSPRAM4_CLR =
+{
+  REG_BASE + 0x0400,  28,  1
+};
+const cxd56_aureg_t  REG_AC_DSPRAM3_CLR =
+{
+  REG_BASE + 0x0400,  29,  1
+};
+const cxd56_aureg_t  REG_AC_DSPRAM2_CLR =
+{
+  REG_BASE + 0x0400,  30,  1
+};
+const cxd56_aureg_t  REG_AC_DSPRAM1_CLR =
+{
+  REG_BASE + 0x0400,  31,  1
 };
 const cxd56_aureg_t  REG_AC_SER_MODE =
 {
@@ -1633,7 +1676,7 @@ static void cxd56_init_mic_input(uint8_t mic_num, uint8_t bits)
 {
   uint8_t i;
 
-  cxd56_aureg_t mic_ch_sel[] =
+  const cxd56_aureg_t mic_ch_sel[] =
     {
       REG_MIC_CH1_SEL,
       REG_MIC_CH2_SEL,
@@ -1647,8 +1690,9 @@ static void cxd56_init_mic_input(uint8_t mic_num, uint8_t bits)
 
   if (bits == 16)
     {
-      mic_num = (mic_num > (CXD56_MIC_TRANS_CH_16BIT * 2)) ?
-                CXD56_MIC_TRANS_CH_16BIT : (mic_num + 1) / 2;
+      mic_num = (mic_num + 1) / 2;
+      mic_num = (mic_num > CXD56_MIC_TRANS_CH_16BIT) ?
+                CXD56_MIC_TRANS_CH_16BIT : mic_num;
 
       write_reg(REG_MIC_IN_BITWT, 1);
     }
@@ -1938,32 +1982,38 @@ static int cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev)
   return OK;
 }
 
-static void cxd56_set_mic_gains(uint8_t gain,
+static int cxd56_set_mic_gains(uint8_t gain, enum cxd56_mic_type_e mic_dev,
                                 struct cxd56_aca_pwinput_param_s *param)
 {
-  uint8_t i;
-  uint8_t pga_gain;
-  uint8_t mic_id = 0;
-  uint8_t mic_sel = 0;
+  int i;
+  uint32_t mic_gain = (gain >= CXD56_MIC_GAIN_MAX) ?  CXD56_MIC_GAIN_MAX :
+                                                      (gain / 30) * 30;
+  uint32_t pga_gain = mic_gain - gain;
+           pga_gain = (pga_gain >= CXD56_MIC_PGA_GAIN_MAX) ?
+                                   CXD56_MIC_PGA_GAIN_MAX  : pga_gain;
 
-  /* TODO: Replace gain param with array in dev. How to configure? */
-
-  for (i = 0; i < CXD56_IN_CHANNELS_MAX; i++)
+  param->mic_dev = CXD56_ACA_MIC_AMIC;
+  param->mic_bias_sel = CXD56_AUDIO_CFG_MICBIAS_SEL_2_0V;
+  for (i = 0; i < 4; i++)
     {
-      mic_sel = (CXD56_AUDIO_CFG_MIC >> (i * CXD56_MIC_CH_BITNUM)) &
-                CXD56_MIC_CH_BITMAP;
-      if ((mic_sel >= 1) && (mic_sel <= 4))
-        {
-          mic_id = mic_sel - 1;
-          param->mic_gain[mic_id] = (gain >= CXD56_MIC_GAIN_MAX) ?
-                                     CXD56_MIC_GAIN_MAX :
-                                    (gain / 30) * 30;
-
-          pga_gain = gain - param->mic_gain[mic_id];
-          param->pga_gain[mic_id] = (pga_gain >= CXD56_MIC_PGA_GAIN_MAX) ?
-                                     CXD56_MIC_PGA_GAIN_MAX : pga_gain;
-        }
+      param->mic_gain[i] = mic_gain;
+      param->pga_gain[i] = pga_gain;
+      param->vgain[i] = 0;
     }
+
+  if (fw_as_acacontrol(CXD56_ACA_CTL_INIT_AMIC,
+                     (uint32_t)param) != 0)
+    {
+      return -EBUSY;
+    }
+
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_INPUT,
+                     (uint32_t)param) != 0)
+    {
+      return -EBUSY;
+    }
+
+  return 0;
 }
 
 static void cxd56_get_mic_config(uint8_t *count, uint8_t *dev, uint8_t *mode)
@@ -2144,7 +2194,7 @@ static void cxd56_audio_power_on_cic(uint8_t mic_in,
     }
 }
 
-static int cxd56_power_on_decim(uint8_t mic_mode, uint16_t samplerate)
+static int cxd56_power_on_decim(uint8_t mic_mode, uint32_t samplerate)
 {
   /* Enable AHBMASTER.
    * Because the output of DecimationFilter is input to BusIF.
@@ -2184,13 +2234,13 @@ static int cxd56_power_on_decim(uint8_t mic_mode, uint16_t samplerate)
       return -EINVAL;
     }
 
-  if (samplerate <= 48000)
+  if (samplerate > 48000)
     {
-      write_reg(REG_AC_SEL_OUTF, 0);
+      write_reg(REG_AC_SEL_OUTF, 2);
     }
   else
     {
-      write_reg(REG_AC_SEL_OUTF, 2);
+      write_reg(REG_AC_SEL_OUTF, 0);
     }
 
   /* DECIM_SEL */
@@ -2211,38 +2261,22 @@ static int cxd56_power_on_decim(uint8_t mic_mode, uint16_t samplerate)
 static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev)
 {
   uint8_t i;
-  uint8_t mic_num;
   uint8_t ch_sel[CXD56_IN_CHANNELS_MAX];
 
-  mic_num = dev->channels;
-
-  if ((dev->bitwidth == 16) &&
-      (CXD56_DMA_FORMAT == CXD56_DMA_FORMAT_RL))
+  for (i = 0; i < CXD56_IN_CHANNELS_MAX; i++)
     {
-      for (i = 0; i < CXD56_IN_CHANNELS_MAX; i++)
+      if (dev->bitwidth == 16)
         {
-          ch_sel[i] = (i & 1) ? i - 1 : i + 1;
-        }
-    }
-  else
-    {
-      for (i = 0; i < CXD56_IN_CHANNELS_MAX; i++)
-        {
-          ch_sel[i] = i;
-        }
-    }
+          /* Even channel (L-ch side) assigned on MSB side in 32bit data
+           * like big-endian. Data of lower channel number should store
+           * lower address. So swap channel assign odd and even.
+           */
 
-  /* For uneven mic counts, duplicate last channel (e.g. dual mono) */
-
-  if ((dev->bitwidth == 16) && ((mic_num & 1) == 1))
-    {
-      if (CXD56_DMA_FORMAT == CXD56_DMA_FORMAT_LR)
-        {
-          ch_sel[mic_num] = ch_sel[mic_num - 1];
+          ch_sel[i] = (i % 2) ? i - 1 : i + 1;
         }
       else
         {
-          ch_sel[mic_num - 1] = ch_sel[mic_num];
+          ch_sel[i] = i;
         }
     }
 
@@ -2293,21 +2327,14 @@ static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev)
 
   cxd56_get_mic_config(&mic_num, &mic_dev, &mic_mode);
 
-  param.mic_dev = mic_dev;
-  if (param.mic_dev == CXD56_AUDIO_CFG_MIC_DEV_ANALOG ||
-      param.mic_dev == CXD56_AUDIO_CFG_MIC_DEV_ANADIG)
+  dev->mic_dev = mic_dev;
+  if (mic_dev == CXD56_AUDIO_CFG_MIC_DEV_ANALOG ||
+      mic_dev == CXD56_AUDIO_CFG_MIC_DEV_ANADIG)
     {
       cxd56_power_on_micbias(dev);
     }
 
-  param.mic_bias_sel = CXD56_MIC_BIAS;
-
-  /* TODO: Replace hardcoded mic gain with configuration */
-
-  cxd56_set_mic_gains(120, &param);
-
-  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_INPUT,
-                     (uint32_t)&param) != 0)
+  if (cxd56_set_mic_gains(dev->mic_gain, dev->mic_dev, &param) < 0)
     {
       return -EBUSY;
     }
@@ -2427,6 +2454,10 @@ static int cxd56_power_on(FAR struct cxd56_dev_s *dev)
       write_reg(REG_INT_M_I2S1_BCL_ERR2, 0);
 
       cxd56_power_on_i2s1(dev);
+
+      /* Hi Res Mode */
+
+      write_reg(REG_AC_HI_RES_MODE, ((dev->samplerate > 48000) ? 1 : 0));
 
       /* Enable I2S data input and output of SRC1 */
 
@@ -2768,10 +2799,21 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
           {
             /* Set the mic gain */
 
+            /* mic_gain range : 0 ~ 210 (= 150 + 60) */
+
             priv->mic_gain = caps->ac_controls.hw[0];
             audinfo("    Mic gain: %d\n", priv->mic_gain);
 
-            /* TODO: How to set individual mic gains?  */
+            if (priv->state != CXD56_DEV_STATE_OFF &&
+                priv->state != CXD56_DEV_STATE_STOPPED )
+              {
+                struct cxd56_aca_pwinput_param_s param;
+                if (cxd56_set_mic_gains(priv->mic_gain,
+                                        priv->mic_dev, &param) < 0)
+                  {
+                    return -EBUSY;
+                  }
+              }
           }
           break;
 
@@ -2793,7 +2835,8 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
         /* Save the configuration */
 
         priv->dma_handle = CXD56_AUDIO_DMA_I2S0_DOWN;
-        priv->samplerate = caps->ac_controls.hw[0];
+        priv->samplerate = (uint32_t)caps->ac_controls.hw[0] +
+                           ((uint32_t)caps->ac_controls.b[3] << 16);
         priv->channels = caps->ac_channels;
         priv->bitwidth = caps->ac_controls.b[2];
 
@@ -2811,7 +2854,7 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
 
         audinfo("Configured output using %d:\n", priv->dma_handle);
         audinfo("  Channels:    %d\n", priv->channels);
-        audinfo("  Samplerate:  %d\n", priv->samplerate);
+        audinfo("  Samplerate:  %ld\n", priv->samplerate);
         audinfo("  Bit width:   %d\n", priv->bitwidth);
       }
       break;
@@ -2821,7 +2864,8 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
         /* Save the configuration */
 
         priv->dma_handle = CXD56_AUDIO_DMA_MIC;
-        priv->samplerate = caps->ac_controls.hw[0];
+        priv->samplerate = (uint32_t)caps->ac_controls.hw[0] +
+                           ((uint32_t)caps->ac_controls.b[3] << 16);
         priv->channels = caps->ac_channels;
         priv->bitwidth = caps->ac_controls.b[2];
 
@@ -2830,7 +2874,7 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
 
         audinfo("Configured input using %d:\n", priv->dma_handle);
         audinfo("  Channels:    %d\n", priv->channels);
-        audinfo("  Samplerate:  %d\n", priv->samplerate);
+        audinfo("  Samplerate:  %ld\n", priv->samplerate);
         audinfo("  Bit width:   %d\n", priv->bitwidth);
       }
       break;
@@ -3241,8 +3285,15 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
           size = (src_apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
 #else
           apb = (struct ap_buffer_s *) dq_peek(&dev->up_pendq);
+
+          /* Mic input device generate audio data,
+           * so all buffer should be able to use.
+           */
+
+          size = (dev->dma_handle == CXD56_AUDIO_DMA_MIC) ? apb->nmaxbytes :
+                                                            apb->nbytes;
           addr = CXD56_PHYSADDR(apb->samp);
-          size = (apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
+          size = (size / (dev->bitwidth / 8) / dev->channels) - 1;
 #endif
 
           if (dev->dma_handle == CXD56_AUDIO_DMA_MIC)
@@ -3379,6 +3430,8 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
           apb = (struct ap_buffer_s *) dq_get(&dev->up_pendq);
 #else
+          /* Just drop the buffer from the queue */
+
           dq_get(&dev->up_pendq);
 #endif
           dq_put(&dev->up_runq, &apb->dq_entry);
@@ -3578,7 +3631,6 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
             ret = cxd56_stop_dma(priv);
             if (ret != CXD56_AUDIO_ECODE_OK)
               {
-                auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
                 priv->running = false;
               }
 
@@ -3737,6 +3789,8 @@ struct audio_lowerhalf_s *cxd56_initialize(
       priv->dev.ops = &g_audioops;
       priv->lower   = lower;
       priv->state   = CXD56_DEV_STATE_OFF;
+
+      priv->mic_gain = CXD56_MICGAIN_INITVAL;
 
       dq_init(&priv->up_pendq);
       dq_init(&priv->up_runq);

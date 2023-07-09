@@ -279,13 +279,14 @@ struct cxd56_dev_s
   struct dq_queue_s       down_doneq;       /* Done SRC buffers to be re-used */
 #endif
 
-  uint16_t                samplerate;       /* Sample rate */
+  uint32_t                samplerate;       /* Sample rate */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
   int16_t                 volume;           /* Output volume {0..63} */
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
   uint8_t                 channels;         /* Number of channels (1..8) */
 
   uint16_t                mic_gain;         /* Mic gain */
+  uint16_t                mic_dev;          /* Mic device */
   uint64_t                mic_boot_start;   /* Mic startup wait time */
 
   uint8_t                 bitwidth;         /* Bits per sample (16 or 24) */
