@@ -122,6 +122,14 @@ config SYSLOG_RTT
 	---help---
 		Use Segger J-Link RTT as a SYSLOG output device.
 
+if SYSLOG_RTT
+config SYSLOG_RTT_CHANNEL
+	int "SYSLOG RTT channel"
+	default 0
+	---help---
+		SYSLOG RTT channel number
+endif
+
 config SERIAL_RTT
 	bool
 	select SEGGER_RTT
