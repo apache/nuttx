@@ -531,7 +531,7 @@ static void dump_deadlock(void)
 #ifdef CONFIG_SCHED_BACKTRACE
           sched_dumpstack(deadlock[i]);
 #else
-          _alert("deadlock pid: %d\n", deadlock[i])
+          _alert("deadlock pid: %d\n", deadlock[i]);
 #endif
         }
     }
