@@ -132,7 +132,7 @@
 #  define LPTIM_CFGR_TRGFLT_8       (3 << LPTIM_CFGR_TRGFLT_SHIFT) /* 11: 8 clocks */
 
 #define LPTIM_CFGR_PRESC_SHIFT      (9)       /* Bits 9-11: Clock prescaler */
-#define LPTIM_CFGR_PRESC_MASK	    (7 << LPTIM_CFGR_PRESC_SHIFT)
+#define LPTIM_CFGR_PRESC_MASK       (7 << LPTIM_CFGR_PRESC_SHIFT)
 #  define LPTIM_CFGR_PRESC_1        (0 << LPTIM_CFGR_PRESC_SHIFT)
 #  define LPTIM_CFGR_PRESC_2        (1 << LPTIM_CFGR_PRESC_SHIFT)
 #  define LPTIM_CFGR_PRESC_4        (2 << LPTIM_CFGR_PRESC_SHIFT)

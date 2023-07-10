@@ -36,8 +36,8 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32_FDCAN_CREL_OFFSET	      0x0000  /* FDCAN Core Release register */
-#define STM32_FDCAN_ENDN_OFFSET	      0x0004  /* FDCAN Endian register */
+#define STM32_FDCAN_CREL_OFFSET       0x0000  /* FDCAN Core Release register */
+#define STM32_FDCAN_ENDN_OFFSET       0x0004  /* FDCAN Endian register */
 #define STM32_FDCAN_DBTP_OFFSET       0x000C  /* FDCAN Data Bit Timing & Prescaler register */
 #define STM32_FDCAN_TEST_OFFSET       0x0010  /* FDCAN Test register */
 #define STM32_FDCAN_RWD_OFFSET        0x0014  /* FDCAN RAM Watchdog register */

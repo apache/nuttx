@@ -60,7 +60,7 @@
 #define I2C_TIMEOUT  (20*1000/CONFIG_USEC_PER_TICK) /* 20 mS */
 
 #define I2C_DEFAULT_FREQUENCY 400000
-#define I2C_FIFO_MAX_SIZE	    32
+#define I2C_FIFO_MAX_SIZE     32
 
 #define I2C_INTR_ENABLE ((INTR_STOP_DET) | \
                          (INTR_TX_ABRT)  | \

@@ -513,9 +513,9 @@
 #define SDMMC_MAX_DIV_SPEC_3    2046
 
 /* Software Reset Register */
-#define  SDMMC_RESET_ALL	0x01
-#define  SDMMC_RESET_CMD	0x02
-#define  SDMMC_RESET_DATA	0x04
+#define  SDMMC_RESET_ALL    0x01
+#define  SDMMC_RESET_CMD    0x02
+#define  SDMMC_RESET_DATA   0x04
 
 /* Host Control 2 Register */
 #define SDMMC_UHSMS_MASK                    (7)         /* Bits 0-2: UHS Mode Select */
@@ -600,7 +600,7 @@ enum bus_mode
  * Buffer Boundary pause event.
  */
 
-#define SDMMC_DEFAULT_BOUNDARY_SIZE	(512 * 1024)
+#define SDMMC_DEFAULT_BOUNDARY_SIZE (512 * 1024)
 
 /****************************************************************************
  * Public Types
