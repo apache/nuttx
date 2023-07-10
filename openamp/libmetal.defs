@@ -67,6 +67,8 @@ LIBMETAL_HDRS_SEDEXP := \
 	 s/@PROJECT_SYSTEM_UPPER@/nuttx/g; \
 	 s/@PROJECT_PROCESSOR_UPPER@/$(LIBMETAL_ARCH)/g; \
 	 s/@PROJECT_MACHINE_UPPER@/$(CONFIG_ARCH_CHIP)/g; \
+	 s/cmakedefine HAVE_STDATOMIC_H/include <nuttx\/compiler.h>/g; \
+	 s/defined(HAVE_STDATOMIC_H)/defined(CONFIG_HAVE_ATOMICS)/g; \
 	 s/cmakedefine/undef/g"
 
 ifeq ($(wildcard libmetal/.git),)
