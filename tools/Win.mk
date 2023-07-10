@@ -238,7 +238,7 @@ include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT)
 	$(Q) grep -v "CONFIG_BASE_DEFCONFIG" "$(TOPDIR)\.config" > "$(TOPDIR)\.config.tmp"
 # In-place edit can mess up permissions on Windows
 	$(Q) if ! cmp -s "$(TOPDIR)\.config.tmp" "$(TOPDIR)\.config.orig" ; then \
-		sed "/CONFIG_BASE_DEFCONFIG/s/\"$$/-dirty\"/" "$(TOPDIR)\.config" > "$(TOPDIR)\.config-temp"; \
+		sed "/CONFIG_BASE_DEFCONFIG/ { /-dirty/! s/\"$$/-dirty\"/ }" "$(TOPDIR)\.config" > "$(TOPDIR)\.config-temp"; \
 	else \
 		sed "s/-dirty//g" "$(TOPDIR)\.config" > "$(TOPDIR)\.config-temp"; \
 	fi
