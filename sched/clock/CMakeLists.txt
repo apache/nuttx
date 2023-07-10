@@ -24,16 +24,19 @@ if(CONFIG_CLOCK_TIMEKEEPING)
   list(APPEND SRCS clock_timekeeping.c)
 endif()
 
+if(CONFIG_CLOCK_ADJTIME)
+  list(APPEND SRCS clock_adjtime.c)
+endif()
+
 list(
   APPEND
   SRCS
+  clock.c
   clock_initialize.c
   clock_settime.c
   clock_gettime.c
-  clock_getres.c
   clock_abstime2ticks.c
   clock_systime_ticks.c
-  clock_systime_timespec.c
-  clock.c)
+  clock_systime_timespec.c)
 
 target_sources(sched PRIVATE ${SRCS})
