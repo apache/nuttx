@@ -107,6 +107,11 @@ unsigned long long strtoull(FAR const char *nptr,
               nptr++;
             }
 
+          while (lib_isbasedigit(*nptr, base, &value))
+            {
+              nptr++;
+            }
+
           if (sign == '-')
             {
               accum = (~accum) + 1;
