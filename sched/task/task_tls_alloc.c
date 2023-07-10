@@ -108,12 +108,13 @@ void task_tls_destruct(void)
   tls_dtor_t dtor;
   FAR struct task_info_s *info = task_get_info();
 
-  for (candidate = 0; candidate < CONFIG_TLS_TASK_NELEM; candidate++)
+  for (candidate = CONFIG_TLS_TASK_NELEM - 1; candidate >= 0; candidate--)
     {
       tls_task_ndxset_t mask = (tls_task_ndxset_t)1 << candidate;
       if ((g_tlsset & mask) != 0)
         {
           elem = info->ta_telem[candidate];
+          info->ta_telem[candidate] = 0;
           dtor = g_tlsdtor[candidate];
           if (dtor != NULL && elem != 0)
             {
