@@ -36,9 +36,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define	ARM_TIMER_CTRL_ENABLE       (1 << 0)
-#define	ARM_TIMER_CTRL_INT_MASK     (1 << 1)
-#define	ARM_TIMER_CTRL_INT_STAT     (1 << 2)
+#define ARM_TIMER_CTRL_ENABLE       (1 << 0)
+#define ARM_TIMER_CTRL_INT_MASK     (1 << 1)
+#define ARM_TIMER_CTRL_INT_STAT     (1 << 2)
 
 /****************************************************************************
  * Private Types
