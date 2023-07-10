@@ -175,3 +175,10 @@ void arm64_chip_boot(void)
   arm64_earlyserialinit();
 #endif
 }
+
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
+void arm64_netinitialize(void)
+{
+  /* TODO: Support net initialize */
+}
+#endif
