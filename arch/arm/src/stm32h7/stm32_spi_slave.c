@@ -315,8 +315,8 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
   .txch          = DMAMAP_SPI##x##_TX,                  \
   .rxsem         = SEM_INITIALIZER(0),                  \
   .txsem         = SEM_INITIALIZER(0),                  \
-  .outq	         = SPI_SLAVE_OUTQ(x),                   \
-  .inq	         = SPI_SLAVE_INQ(x),
+  .outq          = SPI_SLAVE_OUTQ(x),                   \
+  .inq           = SPI_SLAVE_INQ(x),
 #else
 #define SPI_SLAVE_INIT_DMA(x)
 #endif

@@ -50,18 +50,18 @@
   #define sleep_tick _symrom_sleep_tick
   #define g_currentPeerAddrType _symrom_g_currentPeerAddrType
 
-  #define g_rfPhyTxPower	_symrom_g_rfPhyTxPower
+  #define g_rfPhyTxPower _symrom_g_rfPhyTxPower
   #define ble_main _symrom_ble_main
 
-  #define HCI_LE_Write_Rf_Path_CompensationCmd	_symrom_HCI_LE_Write_Rf_Path_CompensationCmd
-  #define HCI_LE_ReadPeerResolvableAddressCmd	_symrom_HCI_LE_ReadPeerResolvableAddressCmd
-  #define HCI_LE_AddDevToPeriodicAdvListCmd	_symrom_HCI_LE_AddDevToPeriodicAdvListCmd
-  #define HCI_LE_RemovePeriodicAdvListCmd	_symrom_HCI_LE_RemovePeriodicAdvListCmd
-  #define HCI_LE_ClearPeriodicAdvListCmd	_symrom_HCI_LE_ClearPeriodicAdvListCmd
-  #define HCI_LE_ReadPeriodicAdvListSizeCmd	_symrom_HCI_LE_ReadPeriodicAdvListSizeCmd
-  #define HCI_LE_Read_Transmit_PowerCmd	_symrom_HCI_LE_Read_Transmit_PowerCmd
-  #define HCI_LE_Read_Rf_Path_CompensationCmd	_symrom_HCI_LE_Read_Rf_Path_CompensationCmd
-  #define HCI_LE_Set_Privacy_ModeCmd	_symrom_HCI_LE_Set_Privacy_ModeCmd
+  #define HCI_LE_Write_Rf_Path_CompensationCmd _symrom_HCI_LE_Write_Rf_Path_CompensationCmd
+  #define HCI_LE_ReadPeerResolvableAddressCmd _symrom_HCI_LE_ReadPeerResolvableAddressCmd
+  #define HCI_LE_AddDevToPeriodicAdvListCmd _symrom_HCI_LE_AddDevToPeriodicAdvListCmd
+  #define HCI_LE_RemovePeriodicAdvListCmd _symrom_HCI_LE_RemovePeriodicAdvListCmd
+  #define HCI_LE_ClearPeriodicAdvListCmd _symrom_HCI_LE_ClearPeriodicAdvListCmd
+  #define HCI_LE_ReadPeriodicAdvListSizeCmd _symrom_HCI_LE_ReadPeriodicAdvListSizeCmd
+  #define HCI_LE_Read_Transmit_PowerCmd _symrom_HCI_LE_Read_Transmit_PowerCmd
+  #define HCI_LE_Read_Rf_Path_CompensationCmd _symrom_HCI_LE_Read_Rf_Path_CompensationCmd
+  #define HCI_LE_Set_Privacy_ModeCmd _symrom_HCI_LE_Set_Privacy_ModeCmd
 
   #define ll_readPeerIRK _symrom_ll_readPeerIRK
   #define ownRandomAddr _symrom_ownRandomAddr

@@ -70,13 +70,13 @@
  *   Peripheral:  MM.. .... .... .... .... ....
  */
 
-#define PORT_MODE_SHIFT            (22)        						/* Bits 22-23: PORT mode */
+#define PORT_MODE_SHIFT            (22)        /* Bits 22-23: PORT mode */
 #define PORT_MODE_MASK             (3 << PORT_MODE_SHIFT)
 #  define PORT_INPUT               (0 << PORT_MODE_SHIFT) /* PORT Input */
 #  define PORT_OUTPUT              (1 << PORT_MODE_SHIFT) /* PORT Output */
 #  define PORT_PERIPHERAL          (2 << PORT_MODE_SHIFT) /* Controlled by peripheral */
 #  define PORT_INTERRUPT           (3 << PORT_MODE_SHIFT) /* Interrupting input */
-#define PORT_MODE(n)			   ((uint8_t)(n) << PORT_MODE_SHIFT)
+#define PORT_MODE(n)               ((uint8_t)(n) << PORT_MODE_SHIFT)
 
 /* Pull-up/down resistor control for inputs
  *
