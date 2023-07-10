@@ -20,17 +20,17 @@
 
 include armv8-m/Make.defs
 
-ifeq ($(CONFIG_NRF91_SYSTIMER_SYSTICK),y)
-CHIP_CSRCS += nrf91_systick.c
-else
-ifeq ($(CONFIG_NRF91_SYSTIMER_RTC),y)
-CHIP_CSRCS += nrf91_tickless_rtc.c
-endif
-endif
-
 CHIP_CSRCS += nrf91_start.c nrf91_clockconfig.c nrf91_irq.c nrf91_utils.c
 CHIP_CSRCS += nrf91_allocateheap.c nrf91_lowputc.c nrf91_gpio.c
 CHIP_CSRCS += nrf91_uid.c nrf91_spu.c nrf91_errata.c
+
+ifeq ($(CONFIG_NRF91_SYSTIMER_SYSTICK),y)
+CHIP_CSRCS += nrf91_systick.c
+endif
+
+ifeq ($(CONFIG_NRF91_SYSTIMER_RTC),y)
+CHIP_CSRCS += nrf91_tickless_rtc.c
+endif
 
 ifeq ($(CONFIG_NRF91_PROGMEM),y)
 CHIP_CSRCS += nrf91_flash.c
@@ -48,11 +48,23 @@ ifeq ($(CONFIG_NRF91_UART),y)
 CHIP_CSRCS += nrf91_serial.c
 endif
 
+ifeq ($(CONFIG_NRF91_SPI_MASTER),y)
+CHIP_CSRCS += nrf91_spi.c
+endif
+
+ifeq ($(CONFIG_NRF91_I2C_MASTER),y)
+CHIP_CSRCS += nrf91_i2c.c
+endif
+
 ifeq ($(CONFIG_NRF91_TIMER),y)
 CHIP_CSRCS += nrf91_tim.c
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += nrf91_tim_lowerhalf.c
 endif
+endif
+
+ifeq ($(CONFIG_NRF91_RTC),y)
+CHIP_CSRCS += nrf91_rtc.c
 endif
 
 ifeq ($(CONFIG_NRF91_PWM),y)
@@ -63,20 +75,8 @@ ifeq ($(CONFIG_NRF91_SAADC),y)
 CHIP_CSRCS += nrf91_adc.c
 endif
 
-ifeq ($(CONFIG_NRF91_RTC),y)
-CHIP_CSRCS += nrf91_rtc.c
-endif
-
-ifeq ($(CONFIG_NRF91_SPI_MASTER),y)
-CHIP_CSRCS += nrf91_spi.c
-endif
-
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += nrf91_pminitialize.c
-endif
-
-ifeq ($(CONFIG_NRF91_I2C_MASTER),y)
-CHIP_CSRCS += nrf91_i2c.c
 endif
 
 ifeq ($(CONFIG_NRF91_MODEM),y)
@@ -129,6 +129,5 @@ ifeq ($(CONFIG_NRF91_MODEM_LOG),y)
 else
   EXTRA_LIBS += -lmodem
 endif
-
 
 endif
