@@ -115,6 +115,11 @@ else()
     LIST_DIRECTORIES true
     "${NUTTX_DIR}/boards/*/*/${NUTTX_BOARD}")
 
+  file(
+    GLOB NUTTX_COMMON_DIR
+    LIST_DIRECTORIES true
+    "${NUTTX_DIR}/boards/*/*/common")
+
   if(EXISTS ${NUTTX_BOARD_DIR}/configs/${NUTTX_CONFIG}/defconfig)
     set(NUTTX_DEFCONFIG ${NUTTX_BOARD_DIR}/configs/${NUTTX_CONFIG}/defconfig)
   endif()
