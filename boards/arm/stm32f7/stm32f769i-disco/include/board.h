@@ -347,20 +347,20 @@
  * (work in progress as of 2017 07 19)
  */
 
-#define	BOARD_LTDC_WIDTH        800
-#define	BOARD_LTDC_HEIGHT       472
+#define BOARD_LTDC_WIDTH        800
+#define BOARD_LTDC_HEIGHT       472
 
-#define	BOARD_LTDC_HSYNC        10
-#define	BOARD_LTDC_HFP          10
-#define	BOARD_LTDC_HBP          20
-#define	BOARD_LTDC_VSYNC        2
-#define	BOARD_LTDC_VFP          4
-#define	BOARD_LTDC_VBP          2
+#define BOARD_LTDC_HSYNC        10
+#define BOARD_LTDC_HFP          10
+#define BOARD_LTDC_HBP          20
+#define BOARD_LTDC_VSYNC        2
+#define BOARD_LTDC_VFP          4
+#define BOARD_LTDC_VBP          2
 
-#define	BOARD_LTDC_GCR_PCPOL    0
-#define	BOARD_LTDC_GCR_DEPOL    0
-#define	BOARD_LTDC_GCR_VSPOL    0
-#define	BOARD_LTDC_GCR_HSPOL    0
+#define BOARD_LTDC_GCR_PCPOL    0
+#define BOARD_LTDC_GCR_DEPOL    0
+#define BOARD_LTDC_GCR_VSPOL    0
+#define BOARD_LTDC_GCR_HSPOL    0
 
 /* DMA Channel/Stream Selections ********************************************/
 

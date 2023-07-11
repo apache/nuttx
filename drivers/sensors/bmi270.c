@@ -184,20 +184,20 @@
 
 /* Register 0x7d - PWR_CONF */
 
-#define	PWRCONF_APS_ON          (1 << 0)
-#define	PWRCONF_FSW_ON          (1 << 1)
-#define	PWRCONF_FUP_ON          (1 << 2)
+#define PWRCONF_APS_ON          (1 << 0)
+#define PWRCONF_FSW_ON          (1 << 1)
+#define PWRCONF_FUP_ON          (1 << 2)
 
 /* Register 0x7d - PWR_CTRL */
 
-#define	PWRCTRL_AUX_EN          (1 << 0)
-#define	PWRCTRL_GYR_EN          (1 << 1)
-#define	PWRCTRL_ACC_EN          (1 << 2)
-#define	PWRCTRL_TEMP_EN         (1 << 3)
+#define PWRCTRL_AUX_EN          (1 << 0)
+#define PWRCTRL_GYR_EN          (1 << 1)
+#define PWRCTRL_ACC_EN          (1 << 2)
+#define PWRCTRL_TEMP_EN         (1 << 3)
 
 /* Register 0x7e - CMD */
 
-#define	CMD_SOFTRESET            (0xB6)
+#define	CMD_SOFTRESET           (0xB6)
 
 /****************************************************************************
  * Private Types
