@@ -350,7 +350,6 @@ void sim_netdriver_loop(void);
 
 #ifdef CONFIG_RPTUN
 int sim_rptun_init(const char *shmemname, const char *cpuname, bool master);
-void sim_rptun_loop(void);
 #endif
 
 /* sim_hcisocket.c **********************************************************/

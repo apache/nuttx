@@ -25,8 +25,15 @@
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/list.h>
+#include <nuttx/wqueue.h>
 
 #include "sim_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SIM_RPTUN_WORK_DELAY 1
 
 /****************************************************************************
  * Private Types
@@ -43,7 +50,6 @@ struct sim_rptun_shmem_s
 
 struct sim_rptun_dev_s
 {
-  struct list_node          node;
   struct rptun_dev_s        rptun;
   rptun_callback_t          callback;
   void                     *arg;
@@ -53,6 +59,10 @@ struct sim_rptun_dev_s
   struct simple_addrenv_s   addrenv[2];
   char                      cpuname[RPMSG_NAME_SIZE + 1];
   char                      shmemname[RPMSG_NAME_SIZE + 1];
+
+  /* Work queue for transmit */
+
+  struct work_s             worker;
 };
 
 /****************************************************************************
@@ -195,6 +205,35 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
   return 0;
 }
 
+static void sim_rptun_work(void *arg)
+{
+  struct sim_rptun_dev_s *dev = arg;
+
+  if (dev->shmem != NULL)
+    {
+      bool should_notify = false;
+
+      if (dev->master && dev->seq != dev->shmem->seqs)
+        {
+          dev->seq = dev->shmem->seqs;
+          should_notify = true;
+        }
+      else if (!dev->master && dev->seq != dev->shmem->seqm)
+        {
+          dev->seq = dev->shmem->seqm;
+          should_notify = true;
+        }
+
+      if (should_notify && dev->callback != NULL)
+        {
+          dev->callback(dev->arg, RPTUN_NOTIFY_ALL);
+        }
+    }
+
+  work_queue(HPWORK, &dev->worker,
+            sim_rptun_work, dev, SIM_RPTUN_WORK_DELAY);
+}
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -213,41 +252,9 @@ static const struct rptun_ops_s g_sim_rptun_ops =
   .register_callback = sim_rptun_register_callback,
 };
 
-static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-void sim_rptun_loop(void)
-{
-  struct sim_rptun_dev_s *dev;
-
-  list_for_every_entry(&g_dev_list, dev,
-                       struct sim_rptun_dev_s, node)
-    {
-      if (dev->shmem != NULL)
-        {
-          bool should_notify = false;
-
-          if (dev->master && dev->seq != dev->shmem->seqs)
-            {
-              dev->seq = dev->shmem->seqs;
-              should_notify = true;
-            }
-          else if (!dev->master && dev->seq != dev->shmem->seqm)
-            {
-              dev->seq = dev->shmem->seqm;
-              should_notify = true;
-            }
-
-          if (should_notify && dev->callback != NULL)
-            {
-              dev->callback(dev->arg, RPTUN_NOTIFY_ALL);
-            }
-        }
-    }
-}
 
 int sim_rptun_init(const char *shmemname, const char *cpuname, bool master)
 {
@@ -264,14 +271,13 @@ int sim_rptun_init(const char *shmemname, const char *cpuname, bool master)
   dev->rptun.ops = &g_sim_rptun_ops;
   strlcpy(dev->cpuname, cpuname, RPMSG_NAME_SIZE);
   strlcpy(dev->shmemname, shmemname, RPMSG_NAME_SIZE);
-  list_add_tail(&g_dev_list, &dev->node);
 
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
     {
-      list_delete(&dev->node);
       kmm_free(dev);
+      return ret;
     }
 
-  return ret;
+  return work_queue(HPWORK, &dev->worker, sim_rptun_work, dev, 0);
 }
