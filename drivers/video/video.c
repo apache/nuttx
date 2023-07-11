@@ -2157,6 +2157,7 @@ static int video_query_ext_ctrl(FAR struct video_mng_s *vmng,
       attr->maximum       = vmng->video_scence_num - 1;
       attr->step          = 1;
       attr->default_value = 0;
+      attr->flags         = 0;
       strlcpy(attr->name, "Scene Mode", 32);
     }
   else
@@ -2170,6 +2171,7 @@ static int video_query_ext_ctrl(FAR struct video_mng_s *vmng,
         }
 
       attr->type = value.type;
+      attr->flags = 0;
 
       switch (value.type)
         {
