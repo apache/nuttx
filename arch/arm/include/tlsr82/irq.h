@@ -231,6 +231,11 @@ static inline void up_enable_irq(int irq)
   _IRQ_MASK_REG |= (1 << irq);
 }
 
+static inline uint32_t getcontrol(void)
+{
+  return 0;
+}
+
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
