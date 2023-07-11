@@ -46,7 +46,7 @@ CMN_ASRCS := $(filter-out $(TC32_ASRCS_FILTER), $(CMN_ASRCS))
 
 # Common files in arch/arm/src/armv6-m
 
-CMN_CSRCS += arm_sigdeliver.c arm_doirq.c
+CMN_CSRCS += arm_sigdeliver.c
 
 # Common files in arch/arm/src/tlsr82/tc32
 
