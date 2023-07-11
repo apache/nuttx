@@ -45,7 +45,7 @@ config TLS_LOG2_MAXSTACK
 config TLS_NELEM
 	int "Number of TLS elements"
 	default 0
-	range 0 64
+	range 0 255
 	---help---
 		The number of unique TLS elements.  These can be accessed with
 		the user library functions tls_get_value() and tls_set_value()
@@ -57,7 +57,7 @@ config TLS_NELEM
 config TLS_TASK_NELEM
 	int "Number of Task Local Storage elements"
 	default 0
-	range 0 64
+	range 0 255
 	---help---
 		The number of unique Task Local Storage elements similar with
 		Thread Local Storage.
