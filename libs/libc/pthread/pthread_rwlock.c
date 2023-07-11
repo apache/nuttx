@@ -38,11 +38,6 @@ int pthread_rwlock_init(FAR pthread_rwlock_t *lock,
 {
   int err;
 
-  if (attr != NULL)
-    {
-      return ENOSYS;
-    }
-
   lock->num_readers       = 0;
   lock->num_writers       = 0;
   lock->write_in_progress = false;
