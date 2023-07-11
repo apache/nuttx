@@ -115,11 +115,6 @@ else()
     LIST_DIRECTORIES true
     "${NUTTX_DIR}/boards/*/*/${NUTTX_BOARD}")
 
-  file(
-    GLOB NUTTX_COMMON_DIR
-    LIST_DIRECTORIES true
-    "${NUTTX_DIR}/boards/*/*/common")
-
   if(EXISTS ${NUTTX_BOARD_DIR}/configs/${NUTTX_CONFIG}/defconfig)
     set(NUTTX_DEFCONFIG ${NUTTX_BOARD_DIR}/configs/${NUTTX_CONFIG}/defconfig)
   endif()
@@ -707,4 +702,11 @@ if(NOT CONFIG_BUILD_FLAT)
   endif()
 
   # TODO: could also merge elf binaries
+endif()
+
+if(CONFIG_ARCH_BOARD_COMMON)
+  file(
+    GLOB NUTTX_COMMON_DIR
+    LIST_DIRECTORIES true
+    "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
 endif()
