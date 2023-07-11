@@ -54,6 +54,7 @@
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 #include <nuttx/usb/adb.h>
+#include <nuttx/usb/mtp.h>
 #include <nuttx/usb/rndis.h>
 
 #ifdef CONFIG_LCD_DEV
@@ -504,6 +505,10 @@ int sim_bringup(void)
     !defined(CONFIG_USBADB_COMPOSITE) && \
     !defined(CONFIG_BOARDCTL_USBDEVCTRL)
   usbdev_adb_initialize();
+#endif
+
+#if defined(CONFIG_USBMTP) && !defined(CONFIG_USBMTP_COMPOSITE)
+  usbdev_mtp_initialize();
 #endif
 
 #if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)

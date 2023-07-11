@@ -1234,4 +1234,157 @@ config USBDEV_FS_NPOLLWAITERS
 
 endif #USBDEV_FS
 
+menuconfig USBMTP
+	bool "USB Media Transfer Protocol (MTP) support"
+	default n
+	select USBDEV_FS
+	---help---
+		Enables USB Media Transfer Protocol (MTP) support
+
+if USBMTP
+
+menuconfig USBMTP_COMPOSITE
+	bool "USBMTP composite support"
+	default n
+	depends on USBDEV_COMPOSITE
+	---help---
+		Configure the MTP driver as part of a composite driver
+		(only if USBDEV_COMPOSITE is also defined)
+
+if !USBMTP_COMPOSITE
+
+# In a composite device the EP0 config comes from the composite device
+# and the EP-Number is configured dynamically via composite_initialize
+
+config USBMTP_EP0MAXPACKET
+	int "Endpoint 0 max packet size"
+	default 64
+	---help---
+		Endpoint 0 max packet size. Default 64.
+
+# In a composite device the EP-Numbers are configured dynamically via
+# composite_initialize
+
+config USBMTP_EPBULKIN
+	int "Bulk IN endpoint number"
+	default 1
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		bulk IN operation.  Default: 1
+
+config USBMTP_EPBULKOUT
+	int "Bulk OUT endpoint number"
+	default 2
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		bulk OUT operation.  Default: 2
+
+config USBMTP_EPINTIN
+	int "Interrupt IN endpoint number"
+	default 5
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		interrupt IN operation.  Default: 5
+
+endif
+
+config USBMTP_EPBULKOUT_FSSIZE
+	int "Bulk OUT Full Speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk OUT endpoint if Full Speed mode.
+		Default 64.
+
+if USBDEV_DUALSPEED
+
+config USBMTP_EPBULKOUT_HSSIZE
+	int "Bulk OUT High Speed MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk OUT endpoint if High Speed mode.
+		Default 512.
+
+endif # USBDEV_DUALSPEED
+
+config USBMTP_EPBULKIN_FSSIZE
+	int "Bulk IN Full Speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk IN endpoint if Full Speed mode.
+		Default 64.
+
+if USBDEV_DUALSPEED
+
+config USBMTP_EPBULKIN_HSSIZE
+	int "Bulk IN High Speed MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk IN endpoint if High Speed mode.
+		Default 512.
+
+endif # USBDEV_DUALSPEED
+
+config USBMTP_EPINTIN_SIZE
+	int "Interrupt IN MAXPACKET size"
+	default 28
+	---help---
+		Max package size for the Interrupt IN endpoint, Default 28.
+
+config USBMTP_EPINTIN_INTERVAL
+	int "Interrupt IN poll interval"
+	default 10
+	---help---
+		The poll interval for the Interrupt IN endpoint, Default 10.
+
+config USBMTP_NRDREQS
+	int "Number of read requests that can be in flight"
+	default 4
+	---help---
+		The number of read requests that can be in flight
+
+config USBMTP_NWRREQS
+	int "Number of write requests that can be in flight"
+	default 4
+	---help---
+		The number of write/read requests that can be in flight
+
+if !USBMTP_COMPOSITE
+
+config USBMTP_VENDORID
+	hex "Vendor ID"
+	default 0x18d1
+	---help---
+		The vendor ID code/string. Default is Google Inc.
+
+config USBMTP_PRODUCTID
+	hex "Product ID"
+	default 0x4e11
+	---help---
+		The product ID code/string. Default is Nexus One.
+
+config USBMTP_VENDORSTR
+	string "Vendor string"
+	default "NuttX"
+
+config USBMTP_PRODUCTSTR
+	string "Product string"
+	default "Nuttx MTP"
+
+config USBMTP_SERIALSTR
+	string "Serial string"
+	default "1234"
+	depends on !USBMTP_BOARD_SERIALSTR
+
+endif # !USBMTP_COMPOSITE
+
+config USBMTP_CONFIGSTR
+	string "Configuration descriptor string"
+	default "MTP Config"
+
+config USBMTP_INTERFACESTR
+	string "Interface descriptor string"
+	default "MTP Interface"
+
+endif # USBMTP
+
 endif # USBDEV

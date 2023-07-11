@@ -54,6 +54,10 @@ ifeq ($(CONFIG_USBADB),y)
   CSRCS += adb.c
 endif
 
+ifeq ($(CONFIG_USBMTP),y)
+  CSRCS += mtp.c
+endif
+
 ifeq ($(CONFIG_NET_CDCECM),y)
   CSRCS += cdcecm.c
 endif
