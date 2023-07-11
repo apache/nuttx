@@ -1467,6 +1467,13 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
 
   tfo = filep->f_priv;
 
+  /* Directly return when the f_pos bigger then tfo_size */
+
+  if (filep->f_pos > tfo->tfo_size)
+    {
+      return 0;
+    }
+
   /* Get exclusive access to the file */
 
   ret = tmpfs_lock_file(tfo);
@@ -1610,22 +1617,6 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
       default:
           return -EINVAL;
     }
-
-  /* Attempts to set the position beyond the end of file will
-   * work if the file is open for write access.
-   *
-   * REVISIT: This simple implementation has no per-open storage that
-   * would be needed to retain the open flags.
-   */
-
-#if 0
-  if (position > tfo->tfo_size && (tfo->tfo_oflags & O_WROK) == 0)
-    {
-      /* Otherwise, the position is limited to the file size */
-
-      position = tfo->tfo_size;
-    }
-#endif
 
   /* Save the new file position */
 
