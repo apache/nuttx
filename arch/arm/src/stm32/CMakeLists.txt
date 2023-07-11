@@ -32,7 +32,6 @@ list(
   stm32_exti_gpio.c
   stm32_flash.c
   stm32_irq.c
-  stm32_dma.c
   stm32_lowputc.c
   stm32_serial.c
   stm32_spi.c
@@ -44,6 +43,10 @@ list(
   stm32_uid.c
   stm32_capture.c
   stm32_dfumode.c)
+
+if(CONFIG_STM32_DMA)
+  list(APPEND SRCS stm32_dma.c)
+endif()
 
 if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
@@ -67,10 +70,6 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32_userspace.c stm32_mpuinit.c)
 endif()
 
-if(CONFIG_STM32_CCM_PROCFS)
-  list(APPEND SRCS stm32_procfs_ccm.c)
-endif()
-
 if(CONFIG_STM32_HAVE_IP_I2C_V1)
   if(CONFIG_STM32_I2C_ALT)
     list(APPEND SRCS stm32_i2c_alt.c)
@@ -86,6 +85,9 @@ endif()
 if(CONFIG_USBDEV)
   if(CONFIG_STM32_USB)
     list(APPEND SRCS stm32_usbdev.c)
+  endif()
+  if(CONFIG_STM32_USBFS)
+    list(APPEND SRCS stm32_usbfs.c)
   endif()
   if(CONFIG_STM32_OTGFS)
     list(APPEND SRCS stm32_otgfsdev.c)
@@ -142,12 +144,12 @@ if(CONFIG_STM32_RTC)
   endif()
 endif()
 
-if(CONFIG_STM32_ADC)
-  list(APPEND SRCS stm32_adc.c)
-endif()
-
 if(CONFIG_STM32_SDADC)
   list(APPEND SRCS stm32_sdadc.c)
+endif()
+
+if(CONFIG_STM32_ADC)
+  list(APPEND SRCS stm32_adc.c)
 endif()
 
 if(CONFIG_STM32_DAC)
@@ -190,12 +192,34 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_STM32_CAP)
+  list(APPEND SRCS stm32_capture_lowerhalf.c)
+endif()
+
 if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
 endif()
 
+if(CONFIG_SENSORS_HALL3PHASE)
+  list(APPEND SRCS stm32_hall3ph.c)
+endif()
+
 if(CONFIG_STM32_CAN)
-  list(APPEND SRCS stm32_can.c)
+  if(CONFIG_STM32_CAN_CHARDRIVER)
+    list(APPEND SRCS stm32_can.c)
+  endif()
+  if(CONFIG_STM32_CAN_SOCKET)
+    list(APPEND SRCS stm32_can_sock.c)
+  endif()
+endif()
+
+if(CONFIG_STM32_FDCAN)
+  if(CONFIG_STM32_FDCAN_CHARDRIVER)
+    list(APPEND SRCS stm32_fdcan.c)
+  endif()
+  if(CONFIG_STM32_FDCAN_SOCKET)
+    list(APPEND SRCS stm32_fdcan_sock.c)
+  endif()
 endif()
 
 if(CONFIG_STM32_IWDG)
@@ -214,6 +238,10 @@ if(CONFIG_STM32_AES)
   list(APPEND SRCS stm32_aes.c)
 endif()
 
+if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+  list(APPEND SRCS stm32_crypto.c)
+endif()
+
 if(CONFIG_STM32_BBSRAM)
   list(APPEND SRCS stm32_bbsram.c)
 endif()
@@ -228,6 +256,10 @@ endif()
 
 if(CONFIG_STM32_FOC)
   list(APPEND SRCS stm32_foc.c)
+endif()
+
+if(CONFIG_STM32_CORDIC)
+  list(APPEND SRCS stm32_cordic.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
