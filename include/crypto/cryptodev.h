@@ -118,9 +118,9 @@
 
 /* Algorithm flags */
 
-#define	CRYPTO_ALG_FLAG_SUPPORTED   0x01 /* Algorithm is supported */
-#define	CRYPTO_ALG_FLAG_RNG_ENABLE  0x02 /* Has HW RNG for DH/DSA */
-#define	CRYPTO_ALG_FLAG_DSA_SHA     0x04 /* Can do SHA on msg */
+#define CRYPTO_ALG_FLAG_SUPPORTED   0x01 /* Algorithm is supported */
+#define CRYPTO_ALG_FLAG_RNG_ENABLE  0x02 /* Has HW RNG for DH/DSA */
+#define CRYPTO_ALG_FLAG_DSA_SHA     0x04 /* Can do SHA on msg */
 
 /* Standard initialization structure beginning */
 

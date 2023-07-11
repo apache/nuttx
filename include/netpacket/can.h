@@ -47,8 +47,8 @@
 #define CAN_EFF_MASK 0x1fffffff  /* Extended frame format (EFF) */
 #define CAN_ERR_MASK 0x1fffffff  /* Omit EFF, RTR, ERR flags */
 
-#define CAN_MTU		(sizeof(struct can_frame))
-#define CANFD_MTU	(sizeof(struct canfd_frame))
+#define CAN_MTU     (sizeof(struct can_frame))
+#define CANFD_MTU   (sizeof(struct canfd_frame))
 
 /* PF_CAN protocols */
 
