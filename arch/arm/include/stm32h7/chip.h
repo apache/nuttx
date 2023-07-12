@@ -71,7 +71,9 @@
     defined (CONFIG_ARCH_CHIP_STM32H753VI) || \
     defined (CONFIG_ARCH_CHIP_STM32H753XI) || \
     defined (CONFIG_ARCH_CHIP_STM32H753ZI) || \
-    defined (CONFIG_ARCH_CHIP_STM32H7B3LI)
+    defined (CONFIG_ARCH_CHIP_STM32H7B3LI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H745XI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H745ZI)
 #elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
 #  error STM32 H7 chip not identified
@@ -79,7 +81,7 @@
 
 /* Size SRAM */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X5XX)
 /* Memory */
 
 #    define STM32H7_SRAM_SIZE             (512*1024)  /* 512Kb SRAM on AXI bus Matrix (D1) */

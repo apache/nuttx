@@ -28,7 +28,10 @@
 #include <nuttx/config.h>
 #include <arch/stm32h7/chip.h>
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX) || defined(CONFIG_STM32H7_STM32H7B3XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || \
+    defined(CONFIG_STM32H7_STM32H7B3XX) || \
+    defined(CONFIG_STM32H7_STM32H7X5XX) || \
+    defined(CONFIG_STM32H7_STM32H7X7XX)
 
 /****************************************************************************
  * Pre-processor Definitions
