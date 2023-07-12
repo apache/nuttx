@@ -296,7 +296,7 @@ struct battery_monitor_operations_s
 
   /* Get chip id */
 
-  CODE int (*chipid)(FAR struct battery_charger_dev_s *dev,
+  CODE int (*chipid)(FAR struct battery_monitor_dev_s *dev,
                      FAR unsigned int *value);
 };
 

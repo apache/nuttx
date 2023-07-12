@@ -452,8 +452,8 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
  * Name: bat_monitor_poll
  ****************************************************************************/
 
-static ssize_t bat_monitor_poll(FAR struct file *filep,
-                                struct pollfd *fds, bool setup)
+static int bat_monitor_poll(FAR struct file *filep,
+                            FAR struct pollfd *fds, bool setup)
 {
   FAR struct battery_monitor_priv_s *priv = filep->f_priv;
   int ret;

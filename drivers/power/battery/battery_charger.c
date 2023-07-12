@@ -415,8 +415,8 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
  * Name: bat_charger_poll
  ****************************************************************************/
 
-static ssize_t bat_charger_poll(FAR struct file *filep,
-                                struct pollfd *fds, bool setup)
+static int bat_charger_poll(FAR struct file *filep,
+                            FAR struct pollfd *fds, bool setup)
 {
   FAR struct battery_charger_priv_s *priv = filep->f_priv;
   int ret;
