@@ -58,6 +58,8 @@
 #  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include "stm32h7x3xx_rcc.c"
+#elif defined(CONFIG_STM32H7_STM32H7X5XX)
+#  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7X7XX)
 #  include "stm32h7x7xx_rcc.c"
 #else
