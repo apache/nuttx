@@ -181,7 +181,9 @@ static inline FAR void *dlinsert(FAR const char *filename)
   struct mod_loadinfo_s loadinfo;
   FAR struct module_s *modp;
   mod_initializer_t initializer;
+  void (**array)(void);
   int ret;
+  int i;
 
   binfo("Loading file: %s\n", filename);
 
@@ -249,14 +251,37 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   /* Call the module initializer */
 
-  if (loadinfo.ehdr.e_type == ET_REL)
+  switch (loadinfo.ehdr.e_type)
     {
-      ret = initializer(&modp->modinfo);
-      if (ret < 0)
-        {
-          binfo("Failed to initialize the module: %d\n", ret);
-          goto errout_with_load;
-        }
+      case ET_REL :
+          ret = initializer(&modp->modinfo);
+          if (ret < 0)
+            {
+              binfo("Failed to initialize the module: %d\n", ret);
+              goto errout_with_load;
+            }
+          break;
+      case ET_DYN :
+
+          /* Process any preinit_array entries */
+
+          array = (void (**)(void)) loadinfo.preiarr;
+          for (i = 0; i < loadinfo.nprei; i++)
+            {
+              array[i]();
+            }
+
+          /* Process any init_array entries */
+
+          array = (void (**)(void)) loadinfo.initarr;
+          for (i = 0; i < loadinfo.ninit; i++)
+            {
+              array[i]();
+            }
+
+          modp->finiarr = loadinfo.finiarr;
+          modp->nfini = loadinfo.nfini;
+          break;
     }
 
   /* Add the new module entry to the registry */

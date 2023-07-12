@@ -591,7 +591,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
   for (i = 0; dyn[i].d_tag != DT_NULL; i++)
     {
       switch (dyn[i].d_tag)
-	{
+        {
           case DT_REL :
               relData.relOff[I_REL] = dyn[i].d_un.d_val;
               break;
@@ -601,18 +601,18 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
           case DT_RELENT :
               relData.relEntSz = dyn[i].d_un.d_val;
               break;
-	  case DT_SYMTAB :
-	      relData.symOff = dyn[i].d_un.d_val;
- 	      break;
-	  case DT_STRTAB :
-	      relData.strOff = dyn[i].d_un.d_val;
- 	      break;
-	  case DT_JMPREL :
-	      relData.relOff[I_PLT] = dyn[i].d_un.d_val;
- 	      break;
-	  case DT_PLTRELSZ :
-	      relData.relSz[I_PLT] = dyn[i].d_un.d_val;
- 	      break;
+          case DT_SYMTAB :
+              relData.symOff = dyn[i].d_un.d_val;
+              break;
+          case DT_STRTAB :
+              relData.strOff = dyn[i].d_un.d_val;
+              break;
+          case DT_JMPREL :
+              relData.relOff[I_PLT] = dyn[i].d_un.d_val;
+              break;
+          case DT_PLTRELSZ :
+              relData.relSz[I_PLT] = dyn[i].d_un.d_val;
+              break;
         }
     }
 
@@ -658,10 +658,19 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
           if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
             {
+              size_t relSize = (sizeof(Elf_Rel) *
+                               CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+
+              if (relData.relSz[idx_rel] < relSize)
+                {
+                  relSize = relData.relSz[idx_rel];
+                }
+
               ret = modlib_read(loadinfo, (FAR uint8_t *) rels,
-                                sizeof(Elf_Rel) * CONFIG_MODLIB_RELOCATION_BUFFERCOUNT,
+                                relSize,
                                 relData.relOff[idx_rel] +
                                 i * sizeof(Elf_Rel));
+
               if (ret < 0)
                 {
                   berr("ERROR: Section %d reloc %d:"
@@ -689,13 +698,14 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
           if ((idx_sym = ELF_R_SYM(rel->r_info)) != 0)
             {
-              if (sym[idx_sym].st_shndx == SHN_UNDEF)	/* We have an external reference */
+              if (sym[idx_sym].st_shndx == SHN_UNDEF) /* We have an external reference */
                 {
                     void *ep;
 
                     ep = modlib_findglobal(modp, loadinfo, symhdr,
                                            &sym[idx_sym]);
-                    if (ep == NULL)
+                    if ((ep == NULL) && (ELF_ST_BIND(sym[idx_sym].st_info)
+                        != STB_WEAK))
                       {
                         berr("ERROR: Unable to resolve addr of ext ref %s\n",
                              loadinfo->iobuffer);
@@ -707,7 +717,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
                       }
 
                     addr = rel->r_offset + loadinfo->textalloc;
-		    *(uintptr_t *)addr = (uintptr_t)ep;
+                    *(uintptr_t *)addr = (uintptr_t)ep;
                 }
             }
           else
@@ -834,6 +844,27 @@ int modlib_bind(FAR struct module_s *modp,
               case SHT_DYNSYM :
                   loadinfo->dsymtabidx = i;
                   break;
+              case SHT_INIT_ARRAY :
+                  loadinfo->initarr = loadinfo->shdr[i].sh_addr -
+                                      loadinfo->datasec +
+                                      loadinfo->datastart;
+                  loadinfo->ninit = loadinfo->shdr[i].sh_size /
+                                    sizeof(uintptr_t);
+                  break;
+              case SHT_FINI_ARRAY :
+                  loadinfo->finiarr = loadinfo->shdr[i].sh_addr -
+                                      loadinfo->datasec +
+                                      loadinfo->datastart;
+                  loadinfo->nfini = loadinfo->shdr[i].sh_size /
+                                    sizeof(uintptr_t);
+                  break;
+              case SHT_PREINIT_ARRAY :
+                  loadinfo->preiarr = loadinfo->shdr[i].sh_addr -
+                                      loadinfo->datasec +
+                                      loadinfo->datastart;
+                  loadinfo->nprei = loadinfo->shdr[i].sh_size /
+                                    sizeof(uintptr_t);
+                  break;
             }
         }
       else
@@ -852,7 +883,7 @@ int modlib_bind(FAR struct module_s *modp,
           switch (loadinfo->shdr[i].sh_type)
             {
               case SHT_REL :
-	          ret = modlib_relocate(modp, loadinfo, i);
+                  ret = modlib_relocate(modp, loadinfo, i);
                   break;
               case SHT_RELA :
                   ret = modlib_relocateadd(modp, loadinfo, i);
