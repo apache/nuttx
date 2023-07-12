@@ -22,9 +22,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <ctype.h>
+#include <fcntl.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
 
 #include <nuttx/kmalloc.h>
 
@@ -34,7 +35,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_TXTABLE_DEFAULT_PARTITION_PATH
+#  define CONFIG_TXTABLE_DEFAULT_PARTITION_PATH ""
+#endif
+
 #define TXTABLE_MAGIC   "TXTABLE0"
+#define TXTABLE_LENGTH  (state->erasesize + 1)
 
 /****************************************************************************
  * Public Functions
@@ -73,7 +79,7 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
 
   part = kmm_malloc(CONFIG_TXTABLE_PARTITION_MAX_NUM *
                     sizeof(struct partition_s) +
-                    state->erasesize);
+                    TXTABLE_LENGTH);
   if (part == NULL)
     {
       return -ENOMEM;
@@ -82,29 +88,64 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
   memset(part, 0, CONFIG_TXTABLE_PARTITION_MAX_NUM *
          sizeof(struct partition_s));
 
-  token = (FAR char *)(part + CONFIG_TXTABLE_PARTITION_MAX_NUM);
-
   /* TXTABLE locate in the last erase block */
 
   blkpererase = state->erasesize / state->blocksize;
   lasteraseblk = state->nblocks - blkpererase;
 
-  ret = read_partition_block(state, token, lasteraseblk, blkpererase);
+  for (i = 0; i <= CONFIG_TXTABLE_DEFAULT_PARTITION; i++)
+    {
+      token = (FAR char *)(part + CONFIG_TXTABLE_PARTITION_MAX_NUM);
+
+      memset(token, 0, TXTABLE_LENGTH);
+
+      if (i == 0)
+        {
+          ret = read_partition_block(state, token, lasteraseblk,
+                                     blkpererase);
+          if (ret < 0)
+            {
+              continue;
+            }
+        }
+      else
+        {
+          struct file f;
+
+          ret = file_open(&f, CONFIG_TXTABLE_DEFAULT_PARTITION_PATH,
+                          O_RDONLY);
+          if (ret < 0)
+            {
+              continue;
+            }
+
+          ret = file_read(&f, token, state->erasesize);
+          file_close(&f);
+          if (ret < 0)
+            {
+              continue;
+            }
+        }
+
+      /* Parsing data of partition table */
+
+      token = strtok_r(token, "\n", &save_ptr);
+      if (strncmp(token, TXTABLE_MAGIC, strlen(TXTABLE_MAGIC)) != 0)
+        {
+          save_ptr = NULL;
+          ret = -EFTYPE;
+          continue;
+        }
+
+      break;
+    }
+
   if (ret < 0)
     {
       goto out;
     }
 
-  /* Parsing data of partition table */
-
-  token = strtok_r(token, "\n", &save_ptr);
-  if (strncmp(token, TXTABLE_MAGIC, strlen(TXTABLE_MAGIC)) != 0)
-    {
-      ret = -EFTYPE;
-      goto out;
-    }
-
-  for (i = 0; i < CONFIG_TXTABLE_PARTITION_MAX_NUM; i++)
+  for (i = 0; i < CONFIG_TXTABLE_PARTITION_MAX_NUM - 1; i++)
     {
       token = strtok_r(NULL, "\n", &save_ptr);
       if (token == NULL || !isalnum(token[0]))
@@ -164,6 +205,16 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
 
       handler(&part[j], arg);
     }
+
+  /* Pseudo partition for the last eraseblock */
+
+  strlcpy(part[j].name, "txtable", sizeof(part[j].name));
+  part[j].index      = j;
+  part[j].firstblock = lasteraseblk;
+  part[j].nblocks    = blkpererase;
+  part[j].blocksize  = state->blocksize;
+
+  handler(&part[j], arg);
 
 out:
   kmm_free(part);
