@@ -848,7 +848,7 @@ static ssize_t uart_read(FAR struct file *filep,
 
               /* Discarding \r ? */
 
-              if ((ch == '\r') & (dev->tc_iflag & IGNCR))
+              if ((ch == '\r') && (dev->tc_iflag & IGNCR))
                 {
                   continue;
                 }
