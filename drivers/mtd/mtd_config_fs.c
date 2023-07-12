@@ -1412,7 +1412,7 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
     }
   while (true);
 
-  if (data)
+  if (data && len)
     {
       rd_addr &= ADDR_BLOCK_MASK;
       rd_addr += wlk_ate.offset + wlk_ate.key_len;
@@ -1750,7 +1750,7 @@ static ssize_t nvs_read(FAR struct nvs_fs *fs,
   uint8_t key[sizeof(pdata->id) + sizeof(pdata->instance)];
 #endif
 
-  if (pdata == NULL || pdata->len == 0 || pdata->configdata == NULL)
+  if (pdata == NULL)
     {
       return -EINVAL;
     }
