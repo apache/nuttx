@@ -40,6 +40,11 @@
 #define ELF32_ST_TYPE(i)   ((i) & 0xf)
 #define ELF32_ST_INFO(b,t) (((b) << 4) | ((t) & 0xf))
 
+/* Generic macro to abstract ELF32/ELF64 type/bind */
+
+#define ELF_ST_TYPE(a)     ELF32_ST_TYPE(a)
+#define ELF_ST_BIND(a)     ELF32_ST_BIND(a)
+
 /* Definitions for Elf32_Rel*::r_info */
 
 #define ELF32_R_SYM(i)     ((i) >> 8)
