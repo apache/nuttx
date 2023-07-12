@@ -659,6 +659,20 @@ static void goldfish_interrupt_task(FAR void *arg)
        */
 
       nxsem_post(&pipe->wake_queue);
+
+      if (nxmutex_lock(&dev->polllock) == OK)
+        {
+          if (wakes & PIPE_WAKE_READ)
+            poll_notify(dev->fds, dev->pipes_capacity, EPOLLIN);
+
+          if (wakes & PIPE_WAKE_WRITE)
+            poll_notify(dev->fds, dev->pipes_capacity, EPOLLOUT);
+
+          if (wakes & PIPE_WAKE_CLOSED)
+            poll_notify(dev->fds, dev->pipes_capacity, EPOLLHUP);
+
+          nxmutex_unlock(&dev->polllock);
+        }
     }
 }
 
