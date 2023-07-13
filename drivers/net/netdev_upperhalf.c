@@ -552,9 +552,7 @@ int netdev_upper_wireless_ioctl(FAR struct netdev_lowerhalf_s *lower,
   int ret = -ENOTTY; /* Default to ENOTTY to indicate not serving. */
   FAR struct iwreq *iwr = (FAR struct iwreq *)arg;
   FAR const struct wireless_ops_s *ops = lower->iw_ops;
-  const struct ether_addr zero =
-    {
-    };
+  struct ether_addr zero;
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -618,6 +616,7 @@ int netdev_upper_wireless_ioctl(FAR struct netdev_lowerhalf_s *lower,
       case SIOCSIWAP: /* Set access point MAC addresses */
         if (ops->bssid)
           {
+            memset(&zero, 0, sizeof(zero));
             if (memcmp(iwr->u.ap_addr.sa_data, &zero, sizeof(zero)) != 0)
               {
                 ret = ops->bssid(lower, iwr, true);
