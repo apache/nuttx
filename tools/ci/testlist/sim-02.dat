@@ -23,3 +23,27 @@
 # macOS doesn't support simusb simhost
 -Darwin,sim:usbdev
 -Darwin,sim:usbhost
+
+# Boards build by CMake
+CMake,sim:ostest
+CMake,sim:ostest_oneholder
+CMake,sim:pf_ieee802154
+CMake,sim:pktradio
+CMake,sim:rc
+CMake,sim:romfs
+CMake,sim:rtptools
+CMake,sim:sensor
+CMake,sim:sixlowpan
+CMake,sim:smartfs
+CMake,sim:smp
+CMake,sim:spiffs
+CMake,sim:tcpblaster
+CMake,sim:tcploop
+CMake,sim:udgram
+CMake,sim:unionfs
+CMake,sim:usbdev
+CMake,sim:usbhost
+CMake,sim:userfs
+CMake,sim:usrsocktest
+CMake,sim:ustream
+CMake,sim:vncserver
