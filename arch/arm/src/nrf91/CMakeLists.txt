@@ -89,62 +89,63 @@ endif()
 
 if(CONFIG_NRF91_MODEM)
 
-set(NRFXLIB_VER "2.3.0")
-set(NRFXLIB_URL "https://github.com/nrfconnect/sdk-nrfxlib/archive")
+  set(NRFXLIB_VER "2.4.0")
+  set(NRFXLIB_URL "https://github.com/nrfconnect/sdk-nrfxlib/archive")
 
-if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib)
-  FetchContent_Declare(
-    sdk-nrfxlib
-    DOWNLOAD_NAME "sdk-nrfxlib-v${NRFXLIB_VER}.tar.gz"
-    DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-    URL "${NRFXLIB_URL}/v${NRFXLIB_VER}.tar.gz"
-        SOURCE_DIR
-        ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
-        BINARY_DIR
-        ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
-        CONFIGURE_COMMAND
-        ""
-        BUILD_COMMAND
-        ""
-        INSTALL_COMMAND
-        ""
-        TEST_COMMAND
-        ""
-    DOWNLOAD_NO_PROGRESS true
-    TIMEOUT 30)
+  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib)
+    FetchContent_Declare(
+      sdk-nrfxlib
+      DOWNLOAD_NAME "sdk-nrfxlib-v${NRFXLIB_VER}.tar.gz"
+      DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
+      URL "${NRFXLIB_URL}/v${NRFXLIB_VER}.tar.gz"
+      SOURCE_DIR
+      ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
+      BINARY_DIR
+      ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
+      CONFIGURE_COMMAND
+      ""
+      BUILD_COMMAND
+      ""
+      INSTALL_COMMAND
+      ""
+      TEST_COMMAND
+      ""
+      DOWNLOAD_NO_PROGRESS true
+      TIMEOUT 30)
 
-  FetchContent_GetProperties(sdk-nrfxlib)
+    FetchContent_GetProperties(sdk-nrfxlib)
 
-  if(NOT sdk-nrfxlib_POPULATED)
-    FetchContent_Populate(sdk-nrfxlib)
+    if(NOT sdk-nrfxlib_POPULATED)
+      FetchContent_Populate(sdk-nrfxlib)
+    endif()
   endif()
-endif()
 
-set(NRFXLIB_DIR "${NUTTX_CHIP_ABS_DIR}/sdk-nrfxlib")
+  list(APPEND SRCS nrf91_modem.c nrf91_modem_os.c nrf91_nrfx_ipc.c)
 
-target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/nrf_modem/include)
+  if(CONFIG_NRF91_MODEM_AT)
+    list(APPEND SRCS nrf91_modem_at.c)
+  endif()
 
-list(APPEND SRCS nrf53_modem.c nrf53_modem_os.c nrf53_nrfx_ipc.c)
+  set(NRFXLIB_DIR "${NUTTX_CHIP_ABS_DIR}/sdk-nrfxlib")
 
-if(CONFIG_NRF91_MODEM_AT)
-  list(APPEND SRCS nrf91_modem_at.c)
-endif()
+  if(CONFIG_ARCH_FPU)
+    set(NRFXLIB_LIB_VARIANT hard-float)
+  else ()
+    set(NRFXLIB_LIB_VARIANT soft-float)
+  endif()
 
-if(CONFIG_ARCH_FPU)
-  set(NRFXLIB_LIB_VARIANT hard-float)
-else ()
-  set(NRFXLIB_LIB_VARIANT soft-float)
-endif()
+  if(CONFIG_NRF91_MODEM_LOG)
+    set(MODEM_LIB_VARIANT libmodem_log.a)
+  else()
+    set(MODEM_LIB_VARIANT libmodem_log.a)
+  endif()
 
-if(CONFIG_NRF91_MODEM_LOG)
-  set(MODEM_LIB_VARIANT libmodem_log.a)
-else()
-  set(MODEM_LIB_VARIANT libmodem_log.a)
-endif()
+  nuttx_library_import(modem
+    ${NRFXLIB_DIR}/nrf_modem/lib/cortex-m33/${NRFXLIB_LIB_VARIANT}/${MODEM_LIB_VARIANT})
+  target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/nrf_modem/include)
 
-target_link_libraries(arch
-  ${NRFXLIB_DIR}/nrf_modem/lib/cortex-m33+nodsp/${NRFXLIB_LIB_VARIANT}/${MODEM_LIB_VARIANT})
-
+  target_link_libraries(arch PRIVATE modem)
+  target_link_libraries(modem INTERFACE arch c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

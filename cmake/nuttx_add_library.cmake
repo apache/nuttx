@@ -175,3 +175,12 @@ function(nuttx_add_library target)
 
   nuttx_add_library_internal(${target})
 endfunction()
+
+# Import static library
+#
+function(nuttx_library_import library_name library_path)
+  add_library(${library_name} STATIC IMPORTED GLOBAL)
+  set_target_properties(${library_name}
+    PROPERTIES IMPORTED_LOCATION
+    ${library_path})
+endfunction()
