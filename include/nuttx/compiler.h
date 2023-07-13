@@ -880,8 +880,8 @@
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)
-#  define begin_packed_struct
-#  define end_packed_struct
+#  define begin_packed_struct __pragma(pack(push, 1))
+#  define end_packed_struct __pragma(pack(pop))
 #  define reentrant_function
 #  define naked_function
 #  define always_inline_function
