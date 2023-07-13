@@ -193,13 +193,13 @@ retry:
     }
 
   ret = (FAR void *)ALIGN_UP(chunk->next, align);
-  if (chunk->end - ret < size)
+  if ((uintptr_t)chunk->end - (uintptr_t)ret < size)
     {
       goto retry;
     }
 
   chunk->used++;
-  chunk->next = ret + size;
+  chunk->next = (FAR char *)ret + size;
   return ret;
 }
 
@@ -738,7 +738,7 @@ mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool)
       FAR struct mpool_chunk_s *chunk;
 
       chunk = (FAR struct mpool_chunk_s *)sq_peek(&mpool->chunk_queue);
-      info.fordblks += chunk->end - chunk->next;
+      info.fordblks += (uintptr_t)chunk->end - (uintptr_t)chunk->next;
     }
 
   nxmutex_unlock(&mpool->lock);
