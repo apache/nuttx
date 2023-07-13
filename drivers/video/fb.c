@@ -63,7 +63,7 @@ struct fb_chardev_s
   FAR struct fb_vtable_s *vtable; /* Framebuffer interface */
   FAR struct pollfd *fds;         /* Polling structure of waiting thread */
   uint8_t plane;                  /* Video plan number */
-  volatile bool pollready;        /* Poll ready flag */
+  volatile int pollcnt;           /* Poll ready count */
   clock_t vsyncoffset;            /* VSync offset ticks */
   struct wdog_s wdog;             /* VSync offset timer */
 #ifdef CONFIG_FB_OVERLAY
@@ -281,8 +281,6 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
     {
       return ret;
     }
-
-  fb->pollready = false;
 
   /* Get the start and size of the transfer */
 
@@ -680,14 +678,11 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(pinfo != NULL && fb->vtable != NULL &&
                       fb->vtable->pandisplay != NULL);
           ret = fb->vtable->pandisplay(fb->vtable, pinfo);
-          fb->pollready = false;
-        }
-        break;
+          fb->pollcnt--;
 
-      case FBIO_CLEARNOTIFY:
-        {
-          fb->pollready = false;
-          ret = OK;
+          /* Check pan display overrun. */
+
+          DEBUGASSERT(fb->pollcnt >= 0);
         }
         break;
 
@@ -910,7 +905,7 @@ static int fb_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
           return -EBUSY;
         }
 
-      if (fb->pollready)
+      if (fb->pollcnt > 0)
         {
           poll_notify(&fb->fds, 1, POLLOUT);
         }
@@ -982,7 +977,7 @@ static void fb_do_pollnotify(wdparm_t arg)
 {
   FAR struct fb_chardev_s *fb = (FAR struct fb_chardev_s *)arg;
 
-  fb->pollready = true;
+  fb->pollcnt++;
 
   /* Notify framebuffer is writable. */
 
@@ -1057,6 +1052,7 @@ int fb_register(int display, int plane)
   FAR struct fb_chardev_s *fb;
   struct fb_panelinfo_s panelinfo;
   struct fb_videoinfo_s vinfo;
+  struct fb_planeinfo_s pinfo;
 #ifdef CONFIG_FB_OVERLAY
   struct fb_overlayinfo_s oinfo;
 #endif
@@ -1111,6 +1107,28 @@ int fb_register(int display, int plane)
 
   nplanes = vinfo.nplanes;
   DEBUGASSERT(vinfo.nplanes > 0 && (unsigned)plane < vinfo.nplanes);
+
+  /* Get plane info */
+
+  DEBUGASSERT(fb->vtable->getplaneinfo != NULL);
+  ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+  if (ret < 0)
+    {
+      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
+      goto errout_with_fb;
+    }
+
+  /* The initial value of pollcnt is the number of virtual framebuffers */
+
+  if (pinfo.yres_virtual > 0)
+    {
+      fb->pollcnt = pinfo.yres_virtual / vinfo.yres;
+      DEBUGASSERT(fb->pollcnt > 0);
+    }
+  else
+    {
+      fb->pollcnt = 1;
+    }
 
   /* Get panel info */
 
