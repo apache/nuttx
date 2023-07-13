@@ -84,7 +84,7 @@
 #define TX      1
 #define RXTX    3
 
-/** Uart control list - Mask */
+/* Uart control list - Mask */
 
 #define MSK_UART_ENABLE_RX    0x01
 #define MSK_UART_ENABLE_TX    0x02
@@ -162,7 +162,7 @@
 #define uart_tx_ready()                     ((S698PM_REG.uart_status1 & UART_STA_TF) != UART_STA_TF)
 #define uart_rx_ready()                     ((S698PM_REG.uart_status1 & UART_STA_DR) == UART_STA_DR)
 
-#define uart_send_byte(ch)  		     (S698PM_REG.uart_data1 = ch)
+#define uart_send_byte(ch)                  (S698PM_REG.uart_data1 = ch)
 
 /****************************************************************************
  * Public Types

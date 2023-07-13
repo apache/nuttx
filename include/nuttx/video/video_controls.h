@@ -56,7 +56,7 @@
 #define V4L2_CID_COLOR_KILLER       (15)   /* Color killer */
 #define V4L2_CID_COLORFX            (16)   /* Color effect */
 
-/** Enumeration for V4L2_CID_COLORFX */
+/* Enumeration for V4L2_CID_COLORFX */
 
 enum v4l2_colorfx
 {
@@ -87,7 +87,7 @@ enum v4l2_colorfx
 
 /* Enumeration for V4L2_CID_EXPOSURE_AUTO */
 
-enum  v4l2_exposure_auto_type
+enum v4l2_exposure_auto_type
 {
   /* Exposure time:auto,   iris aperture:auto */
 

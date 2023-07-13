@@ -545,8 +545,7 @@
 #define   WM8994_AIF3_TRI_NO                      (0)                                         /* AIF3 pins operate normally */
 #define   WM8994_AIF3_TRI_YES                     (WM8994_AIF3_TRI)                           /* Tri-State all AIF3 interface pins */
 
-/* R21 (0x15) - Input Mixer (1)
- */
+/* R21 (0x15) - Input Mixer (1) */
 
                                                   /* Bits 0-5: Reserved */
 #define WM8994_INPUTS_CLAMP                       (1 << 6)                                    /* Bit 6: Input pad VMID clamp */
@@ -560,8 +559,7 @@
 #define  WM8994_IN1RP_MIXINR_BOOST_P_15dB         (WM8994_IN1RP_MIXINR_BOOST)                 /* Maximu gain is +15dB */
                                                                                               /* Bits 9-15: Reserved */
 
-/* R24 (0x18) - Left Line Input 1&2 Volume
- */
+/* R24 (0x18) - Left Line Input 1&2 Volume */
 
 #define WM8994_IN1L_VOL                           (0)                                         /* Bits 0-4: IN1L Volume */
 #define   WM8994_IN1L_VOL_MIN                     (0 << 0)                                    /* -16.5dB */
@@ -578,8 +576,7 @@
 
                                                   /* Bits 9-15: Reserved */
 
-/* R25 (0x19) - Left Line Input 3&4 Volume
- */
+/* R25 (0x19) - Left Line Input 3&4 Volume */
 
 #define WM8994_IN2L_VOL_SHIFT                     (0)                                         /* Bits 0-4: IN2L Volume */
 #define   WM8994_IN2L_VOL_MIN                     (0 << WM8994_IN2L_VOL_SHIFT)                /* -16.5dB */
@@ -596,8 +593,7 @@
 
                                                   /* Bits 9-15: Reserved */
 
-/* R26 (0x1A) - Right Line Input 1&2 Volume
- */
+/* R26 (0x1A) - Right Line Input 1&2 Volume */
 
 #define WM8994_IN1R_VOL_SHIFT                     (0)                                         /* Bits 0-4: IN1R Volume */
 #define   WM8994_IN1R_VOL_MIN                     (0 << WM8994_IN1R_VOL_SHIFT)                /* -16.5dB */
@@ -633,8 +629,7 @@
 #define WM8994_IN2_VU                             (1 << 8)                                    /* Bit 8: Input PGA Voluem Update. Writing a 1 to this bit cause IN2L and IN2R input PGA volumes to updated simultaneously */
 #endif
 
-/* R28 (0x1C) - Left Output Volume
- */
+/* R28 (0x1C) - Left Output Volume */
 
 #define WM8994_HPOUT1L_VOL_SHIFT                  (0)                                         /* Bits 0-5: HPOUT1LVOL (Left Headphone Output PGA) Volume */
 #define   WM8994_HPOUT1L_VOL_MIN                  (0 << WM8994_HPOUT1L_VOL_SHIFT)             /* -57dB */
@@ -652,8 +647,7 @@
 #define   WM8994_HPOUT1_VU_ENABLED                (1 << WM8994_HPOUT1_VU_SHIFT)               /* Writing a 1 to this bit will update HPOUT1LVOL and
                                                                                                * HPOUT1RVOL volumes simultaneously */
 
-/* R29 (0x1D) - Right Output Volume
- */
+/* R29 (0x1D) - Right Output Volume */
 
 #define WM8994_HPOUT1R_VOL_SHIFT                  (0)                                         /* Bits 0-5: HPOUT1RVOL (Right Headphone Output PGA) Volume */
 #define   WM8994_HPOUT1R_VOL_MIN                  (0 << WM8994_HPOUT1R_VOL_SHIFT)             /* -57dB */
@@ -708,23 +702,17 @@
 /* R39 (0x27) - Speaker Volume Right
  */
 
-/* R40 (0x28) - Input Mixer (2)
- */
+/* R40 (0x28) - Input Mixer (2) */
 
-/* R41 (0x29) - Input Mixer (3)
- */
+/* R41 (0x29) - Input Mixer (3) */
 
-/* R42 (0x2A) - Input Mixer (4)
- */
+/* R42 (0x2A) - Input Mixer (4) */
 
-/* R43 (0x2B) - Input Mixer (5)
- */
+/* R43 (0x2B) - Input Mixer (5) */
 
-/* R44 (0x2C) - Input Mixer (6)
- */
+/* R44 (0x2C) - Input Mixer (6) */
 
-/* R45 (0x2D) - Output Mixer (1)
- */
+/* R45 (0x2D) - Output Mixer (1) */
 
 #define WM8994_DAC1L_TO_MIXOUTL                   (1 << 0)                                    /* Bit 0: Left DAC1 to MIXOUTL Mute */
 #define   WM8994_DAC1L_TO_MIXOUTL_MUTE            (0)                                         /* Mute */
@@ -755,8 +743,7 @@
 #define   WM8994_DAC1L_TO_HPOUT1L_DAC1L           (WM8994_DAC1L_TO_HPOUT1L)                   /* DAC1L */
                                                                                               /* Bits 9-15: Reserved */
 
-/* R46 (0x2E) - Output Mixer (2)
- */
+/* R46 (0x2E) - Output Mixer (2) */
 
 #define WM8994_DAC1R_TO_MIXOUTR                   (1 << 0)                                    /* Bit 0: Right DAC1 to MIXOUTR Mute */
 #define   WM8994_DAC1R_TO_MIXOUTR_MUTE            (0)                                         /* Mute */
@@ -786,29 +773,21 @@
 #define   WM8994_DAC1R_TO_HPOUT1R_MIXOUTL         (0)                                         /* MIXOUTR */
 #define   WM8994_DAC1R_TO_HPOUT1R_DAC1L           (WM8994_DAC1R_TO_HPOUT1R)                   /* DAC1R */
 
-/* R47 (0x2F) - Output Mixer (3)
- */
+/* R47 (0x2F) - Output Mixer (3) */
 
-/* R48 (0x30) - Output Mixer (4)
- */
+/* R48 (0x30) - Output Mixer (4) */
 
-/* R49 (0x31) - Output Mixer (5)
- */
+/* R49 (0x31) - Output Mixer (5) */
 
-/* R50 (0x32) - Output Mixer (6)
- */
+/* R50 (0x32) - Output Mixer (6) */
 
-/* R51 (0x33) - HPOUT2 Mixer
- */
+/* R51 (0x33) - HPOUT2 Mixer */
 
-/* R52 (0x34) - Line Mixer (1)
- */
+/* R52 (0x34) - Line Mixer (1) */
 
-/* R53 (0x35) - Line Mixer (2)
- */
+/* R53 (0x35) - Line Mixer (2) */
 
-/* R54 (0x36) - Speaker Mixer
- */
+/* R54 (0x36) - Speaker Mixer */
 
 #define WM8994_DAC2L_TO_SPKMIXL                   (1 << 9)                                    /* Bit 9: Left DAC2 to SPKMXL Mute */
 #define   WM8994_DAC2L_TO_SPKMIXL_MUTE            (0)                                         /* Mute */
@@ -841,14 +820,11 @@
 #define   WM8994_DAC1R_TO_SPKMIXR_MUTE            (0)                                         /* Mute */
 #define   WM8994_DAC1R_TO_SPKMIXR_UNMUTE          (WM8994_DAC1R_TO_SPKMIXR)                   /* Un-mute */
 
-/* R55 (0x37) - Additional Control
- */
+/* R55 (0x37) - Additional Control */
 
-/* R56 (0x38) - AntiPOP (1)
- */
+/* R56 (0x38) - AntiPOP (1) */
 
-/* R57 (0x39) - AntiPOP (2)
- */
+/* R57 (0x39) - AntiPOP (2) */
 
                                                   /* Bits 8-15: Reserved */
 #define WM8994_MICB2_DISCH                        (1 << 8)                                    /* Bit 7: Microphone Bias 2 Discharge */
@@ -873,40 +849,31 @@
 #define   WM8994_VMID_RAMP_SOFT_SLOW_START        (2 << WM8994_VMID_RAMP_SHIFT)               /* Soft slow start */
 #define   WM8994_VMID_RAMP_SOFT_FAST_START        (3 << WM8994_VMID_RAMP_SHIFT)               /* Soft fast start */
 
-/* R58 (0x3A) - MICBIAS
- */
+/* R58 (0x3A) - MICBIAS */
 
-/* R59 (0x3B) - LDO 1
- */
+/* R59 (0x3B) - LDO 1 */
 
-/* R60 (0x3C) - LDO 2
- */
+/* R60 (0x3C) - LDO 2 */
 
-/* R61 (0x3D) - MICBIAS1
- */
+/* R61 (0x3D) - MICBIAS1 */
 
-/* R62 (0x3E) - MICBIAS2
- */
+/* R62 (0x3E) - MICBIAS2 */
 
-/* R210 (0xD2) - Mic Detect 3
- */
+/* R210 (0xD2) - Mic Detect 3 */
 
-/* R76 (0x4C) - Charge Pump (1)
- */
+/* R76 (0x4C) - Charge Pump (1) */
 
 #define WM8994_CP_ENA                             (1 << 15)                                   /* Bit 15: Enable charge-pump digits */
 #define   WM8994_CP_ENA_DISABLE                   (0)                                         /* Diable */
 #define   WM8994_CP_ENA_ENABLE                    (WM8994_CP_ENA)                             /* Enable */
 
-/* R77 (0x4D) - Charge Pump (2)
- */
+/* R77 (0x4D) - Charge Pump (2) */
 
 #define WM8994_CP_DISCH                           (1 << 15)                                   /* Bit 15: Charge Pump Discharge Select */
 #define   WM8994_CP_DISCH_FLOAT                   (0)                                         /* Charge Pump outputs floating when disabled */
 #define   WM8994_CP_DISCH_DISCHARGE               (WM8994_CP_DISCH)                           /* Charge Pump outputs discharged when disabled */
 
-/* R81 (0x51) - Class W (1)
- */
+/* R81 (0x51) - Class W (1) */
 
 #define WM8994_CP_DYN_SRC_SEL_SHIFT               8                                           /* Bits 8-9: Selects the digitial audio source for
                                                                                                * envelope tracking */
@@ -919,8 +886,7 @@
 #define   WM8994_CP_DYN_PWR_CG                    (0)                                         /* Charge pump controlled by volume register (Class G) */
 #define   WM8994_CP_DYN_PWR_CW                    (WM8994_CP_DYN_PWR)                         /* Charge pump controlled by real-time audio lev. (Class W) */
 
-/* R84 (0x54) - DC Servo (1)
- */
+/* R84 (0x54) - DC Servo (1) */
 
 #define WM8994_DCS_TRIG_SINGLE_1                  (1 << 13)                                   /* Bit 13: Writing 1 to this bit selects a single DC offset
                                                                                                * correction for HPOUT1R. In readback, a value of 1
@@ -969,17 +935,13 @@
 #define   WM8994_DCS_ENA_CHAN_0_DISABLE           (0)                                         /* Diable */
 #define   WM8994_DCS_ENA_CHAN_0_ENABLE            (WM8994_DCS_ENA_CHAN_0)                     /* Enable */
 
-/* R85 (0x55) - DC Servo (2)
- */
+/* R85 (0x55) - DC Servo (2) */
 
-/* R87 (0x57) - DC Servo (4)
- */
+/* R87 (0x57) - DC Servo (4) */
 
-/* R88 (0x58) - DC Servo Readback
- */
+/* R88 (0x58) - DC Servo Readback */
 
-/* R96 (0x60) - Analogue HP (1)
- */
+/* R96 (0x60) - Analogue HP (1) */
 
 #define WM8994_HPOUT1L_RMV_SHORT                  (1 << 7)                                    /* Bit 7: Removes HPOUT1L short */
 #define   WM8994_HPOUT1L_RMV_SHORT_DISABLE        (0)                                         /* HPOUT1L short diabled */
@@ -1000,23 +962,17 @@
 #define   WM8994_HPOUT1R_DLY_DISABLE              (0)                                         /* Diable */
 #define   WM8994_HPOUT1R_DLY_ENABLE               (WM8994_HPOUT1R_DLY)                        /* Enable */
 
-/* R208 (0xD0) - Mic Detect 1
- */
+/* R208 (0xD0) - Mic Detect 1 */
 
-/* R209 (0xD1) - Mic Detect 2
- */
+/* R209 (0xD1) - Mic Detect 2 */
 
-/* R210 (0xD2) - Mic Detect 3
- */
+/* R210 (0xD2) - Mic Detect 3 */
 
-/* R256 (0x100) - Chip Revision
- */
+/* R256 (0x100) - Chip Revision */
 
-/** R257 (0x101) - Control Interface
- */
+/* R257 (0x101) - Control Interface */
 
-/* R272 (0x110) - Write Sequencer Ctrl (1)
- */
+/* R272 (0x110) - Write Sequencer Ctrl (1) */
 
 #define WM8994_WSEQ_ENA                           (1 << 15)                                   /* Bit 15: Write Sequencer Enable */
 #define   WM8994_WSEQ_ENA_DISABLE                 (0)                                         /* Diable */
@@ -1026,15 +982,13 @@
 #define WM8994_WSEQ_START_INDEX_SHIFT             (0)                                         /* Bits 0-6: Sequence start index */
 #define WM8994_WSEQ_START_INDEX_MASK              (0x7F << WM8994_WSEQ_START_INDEX_SHIFT)
 
-/* R273 (0x111) - Write Sequencer Ctrl (2)
- */
+/* R273 (0x111) - Write Sequencer Ctrl (2) */
 
 #define WM8994_WSEQ_BUSY                          (1 << 8)                                    /* Bit 8: Sequencer busy flag (read only) */
 #define WM8994_WSEQ_CURRENT_INDEX_SHIFT           (0)                                         /* Bits 0-6: Sequence current index */
 #define   WM8994_WSEQ_CURRENT_INDEX_MASK          (0x7F << W8994_WSEQ_CURRENT_INDEX_SHIFT)
 
-/* R512 (0x200) - AIF1 Clocking (1)
- */
+/* R512 (0x200) - AIF1 Clocking (1) */
 
 #define WM8994_AIF1CLK_ENA                        (1 << 0)                                    /* Bit 0: AIF1CLK Enable */
 #define WM8994_AIF1CLK_DIV                        (1 << 1)                                    /* Bit 1: AIF1CLK Divider */
@@ -1051,17 +1005,13 @@
 #define   WM8994_AIF1CLK_SRC_PLL2                 (3 << WM8994_AIF1CLK_SRC_SHIFT)             /* PLL2 */
                                                                                               /* Bits 5-15: Reserved */
 
-/* R513 (0x201) - AIF1 Clocking (2)
- */
+/* R513 (0x201) - AIF1 Clocking (2) */
 
-/* R516 (0x204) - AIF2 Clocking (1)
- */
+/* R516 (0x204) - AIF2 Clocking (1) */
 
-/* R517 (0x205) - AIF2 Clocking (2)
- */
+/* R517 (0x205) - AIF2 Clocking (2) */
 
-/* R520 (0x208) - Clocking (1)
- */
+/* R520 (0x208) - Clocking (1) */
 
 #define WM8994_SYSCLK_SRC                         (1 << 0)                                    /* Bit 0: SYSCLK Source Select */
 #define   WM8994_SYSCLK_SRC_AIF1CLK               (0)                                         /* AIF1CLK */
@@ -1072,11 +1022,9 @@
 #define WM8994_TOCLK_ENA                          (1 << 4)                                    /* Bit 4: Slow Clock(TOCLK) Enable */
                                                                                               /* Bits 5-15: Reserved */
 
-/* R521 (0x209) - Clocking (2)
- */
+/* R521 (0x209) - Clocking (2) */
 
-/* R528 (0x210) - AIF1 Rate
- */
+/* R528 (0x210) - AIF1 Rate */
 
 #define WM8994_AIF1CLK_RATE_SHIFT                 (0)                                         /* Bits 0-3: Selects the AIF1CLK/fs ratio */
 #define WM8994_AIF1CLK_RATE_MASK                  (0xf << WM8994_AIF1CLK_RATE_SHIFT)
@@ -1105,56 +1053,39 @@
 #define   WM8994_AIF1_SR_96K                      (10 << WM8994_AIF1_SR_SHIFT)                /* 96kHz */
                                                                                               /* Bits 8-15: Reserved */
 
-/* R529 (0x211) - AIF2 Rate
- */
+/* R529 (0x211) - AIF2 Rate */
 
-/* R530 (0x212) - Rate Status
- */
+/* R530 (0x212) - Rate Status */
 
-/* R544 (0x220) - FLL1 Control (1)
- */
+/* R544 (0x220) - FLL1 Control (1) */
 
-/* R545 (0x221) - FLL1 Control (2)
- */
+/* R545 (0x221) - FLL1 Control (2) */
 
-/* R546 (0x222) - FLL1 Control (3)
- */
+/* R546 (0x222) - FLL1 Control (3) */
 
-/* R547 (0x223) - FLL1 Control (4)
- */
+/* R547 (0x223) - FLL1 Control (4) */
 
-/* R548 (0x224) - FLL1 Control (5)
- */
+/* R548 (0x224) - FLL1 Control (5) */
 
-/* R550 (0x226) - FLL1 EFS 1
- */
+/* R550 (0x226) - FLL1 EFS 1 */
 
-/* R551 (0x227) - FLL1 EFS 2
- */
+/* R551 (0x227) - FLL1 EFS 2 */
 
-/* R576 (0x240) - FLL2 Control (1)
- */
+/* R576 (0x240) - FLL2 Control (1) */
 
-/* R577 (0x241) - FLL2 Control (2)
- */
+/* R577 (0x241) - FLL2 Control (2) */
 
-/* R578 (0x242) - FLL2 Control (3)
- */
+/* R578 (0x242) - FLL2 Control (3) */
 
-/* R579 (0x243) - FLL2 Control (4)
- */
+/* R579 (0x243) - FLL2 Control (4) */
 
-/* R580 (0x244) - FLL2 Control (5)
- */
+/* R580 (0x244) - FLL2 Control (5) */
 
-/* R582 (0x246) - FLL2 EFS 1
- */
+/* R582 (0x246) - FLL2 EFS 1 */
 
-/* R583 (0x247) - FLL2 EFS 2
- */
+/* R583 (0x247) - FLL2 EFS 2 */
 
-/* R768 (0x300) - AIF1 Control (1)
- */
+/* R768 (0x300) - AIF1 Control (1) */
 
                                                   /* Bits 0-2: Reserved */
 #define WM8994_AIF1_FMT_SHIFT                     (3)                                         /* Bits 3-4: AIF1 Digital Audio Interface Format */
@@ -1179,11 +1110,9 @@
 #define   WM8994_AIF1ADCL_LEFT_ADC                (0)                                         /* Left ADC data is output on left channel */
 #define   WM8994_AIF1ADCL_RIGHT_ADC               (WM8994_AIF1ADCL_SRC)                       /* Right ADC data is output on left channel */
 
-/* R769 (0x301) - AIF1 Control (2)
- */
+/* R769 (0x301) - AIF1 Control (2) */
 
-/* R770 (0x302) - AIF1 Master/Slave
- */
+/* R770 (0x302) - AIF1 Master/Slave */
 
                                                   /* Bits 0-11: Reserved */
 #define WM8994_AIF1_LRCLK_FRC                     (1 << 12)                                   /* Bit 12: Forces LRCLK1 and ADCLRCLK1 to enabled when all AIF1 audio channels are disabled */
@@ -1199,100 +1128,73 @@
 #define   WM8994_AIF1_TRI_NORMAL                  (0)                                         /* AIF1 pins operate normally */
 #define   WM8994_AIF1_TRI_TRI                     (WM8994_AIF1_TRI)                           /* Tri-state all AIF1 interface pins */
 
-/* R771 (0x303) - AIF1 BCLK
- */
+/* R771 (0x303) - AIF1 BCLK */
 
-/* R772 (0x304) - AIF1ADC LRCLK
- */
+/* R772 (0x304) - AIF1ADC LRCLK */
 
-/* R773 (0x305) - AIF1DAC LRCLK
- */
+/* R773 (0x305) - AIF1DAC LRCLK */
 
-/* R774 (0x306) - AIF1DAC Data
- */
+/* R774 (0x306) - AIF1DAC Data */
 
-/* R775 (0x307) - AIF1ADC Data
- */
+/* R775 (0x307) - AIF1ADC Data */
 
-/* R784 (0x310) - AIF2 Control (1)
- */
+/* R784 (0x310) - AIF2 Control (1) */
 
-/* R785 (0x311) - AIF2 Control (2)
- */
+/* R785 (0x311) - AIF2 Control (2) */
 
-/* R786 (0x312) - AIF2 Master/Slave
- */
+/* R786 (0x312) - AIF2 Master/Slave */
 
-/* R787 (0x313) - AIF2 BCLK
- */
+/* R787 (0x313) - AIF2 BCLK */
 
-/* R788 (0x314) - AIF2ADC LRCLK
- */
+/* R788 (0x314) - AIF2ADC LRCLK */
 
-/* R789 (0x315) - AIF2DAC LRCLK
- */
+/* R789 (0x315) - AIF2DAC LRCLK */
 
-/* R790 (0x316) - AIF2DAC Data
- */
+/* R790 (0x316) - AIF2DAC Data */
 
-/* R791 (0x317) - AIF2ADC Data
- */
+/* R791 (0x317) - AIF2ADC Data */
 
-/* R800 (0x320) - AIF3 Control (1)
- */
+/* R800 (0x320) - AIF3 Control (1) */
 
-/* R801 (0x321) - AIF3 Control (2)
- */
+/* R801 (0x321) - AIF3 Control (2) */
 
-/* R802 (0x322) - AIF3DAC Data
- */
+/* R802 (0x322) - AIF3DAC Data */
 
-/* R803 (0x323) - AIF3ADC Data
- */
+/* R803 (0x323) - AIF3ADC Data */
 
-/* R1024 (0x400) - AIF1 ADC1 Left Volume
- */
+/* R1024 (0x400) - AIF1 ADC1 Left Volume */
 
-/* R1025 (0x401) - AIF1 ADC1 Right Volume
- */
+/* R1025 (0x401) - AIF1 ADC1 Right Volume */
 
-/* R1026 (0x402) - AIF1 DAC1 Left Volume
- */
+/* R1026 (0x402) - AIF1 DAC1 Left Volume */
 
 #define WM8994_AIF1DAC1_VU                        (1 << 8)                                    /* Bit 8:  AIF1DAC1 input path (AIF1, TS 0) Vol Update */
 #define WM8994_AIF1DAC1L_VOL_SHIFT                (0)                                         /* Bits 0-7: AIF1DAC1 (Left) input path, Digital Vol. */
 #define WM8994_AIF1DAC1L_VOL_MASK                 (0xFF << WM8994_AIF1DAC1L_VOL_SHIFT)
 
-/* R1027 (0x403) - AIF1 DAC1 Right Volume
- */
+/* R1027 (0x403) - AIF1 DAC1 Right Volume */
 
 #define WM8994_AIF1DAC1R_VOL_SHIFT                (0)                                         /* Bits 0-7: AIF1DAC1 (Right) input path, Digital Vol. */
 #define WM8994_AIF1DAC1R_VOL_MASK                 (0xFF << WM8994_AIF1DAC1R_VOL_SHIFT)
 
-/* R1028 (0x404) - AIF1 ADC2 Left Volume
- */
+/* R1028 (0x404) - AIF1 ADC2 Left Volume */
 
-/* R1029 (0x405) - AIF1 ADC2 Right Volume
- */
+/* R1029 (0x405) - AIF1 ADC2 Right Volume */
 
-/* R1030 (0x406) - AIF1 DAC2 Left Volume
- */
+/* R1030 (0x406) - AIF1 DAC2 Left Volume */
 
 #define WM8994_AIF1DAC2_VU                        (1 << 8)                                    /* Bit 8:  AIF1DAC2 input path (AIF1, TS 1) Vol Update */
 #define WM8994_AIF1DAC2L_VOL_SHIFT                (0)                                         /* Bits 0-7: AIF1DAC2 (Left) input path, Digital Vol. */
 #define WM8994_AIF1DAC2L_VOL_MASK                 (0xFF << WM8994_AIF1DAC2L_VOL_SHIFT)
 
-/* R1031 (0x407) - AIF1 DAC2 Right Volume
- */
+/* R1031 (0x407) - AIF1 DAC2 Right Volume */
 
 #define WM8994_AIF1DAC2R_VOL_SHIFT                (0)                                         /* Bits 0-7: AIF1DAC2 (Right) input path, Digital Vol. */
 #define WM8994_AIF1DAC2R_VOL_MASK                 (0xFF << WM8994_AIF1DAC2R_VOL_SHIFT)
 
-/* R1040 (0x410) - AIF1 ADC1 Filters
- */
+/* R1040 (0x410) - AIF1 ADC1 Filters */
 
-/* R1041 (0x411) - AIF1 ADC2 Filters
- */
+/* R1041 (0x411) - AIF1 ADC2 Filters */
 
 #define WM8994_AIF1ADC2_HPF_CUT_SHIFT             (13)                                        /* Bits 13-14: AIF1ADC2 output path (AIF1, TS 1), HPF CO */
 #define WM8994_AIF1ADC2_HPF_CUT_MASK              (3 << WM8994_AIF1ADC2_HPF_CUT_SHIFT)
@@ -1307,8 +1209,7 @@
 #define   WM8994_AIF1ADC2R_HPF_DISABLE            (0)                                         /* Disable */
 #define   WM8994_AIF1ADC2R_HPF_ENABLE             (WM8994_AIF1ADC2R_HPF)                      /* Enable */
 
-/* R1056 (0x420) - AIF1 DAC1 Filters (1)
- */
+/* R1056 (0x420) - AIF1 DAC1 Filters (1) */
 
 #define WM8994_AIF1DAC1_MUTE                      (1 << 9)                                    /* Bit 9: AIF1DAC1 input path (AIF1, TS 0) Soft Mute Control */
 #define   WM8994_AIF1DAC1_MUTE_UNMUTE             (0)                                         /* Un-mute */
@@ -1329,11 +1230,9 @@
 #define   WM8994_AIF1DAC1_DEEMP_44KHZ             (2 << WM8994_AIF1DAC1_DEEMP_SHIFT)          /* 44.1kHz sample rate */
 #define   WM8994_AIF1DAC1_DEEMP_48KHZ             (3 << WM8994_AIF1DAC1_DEEMP_SHIFT)          /* 48kHz sample rate*/
 
-/* R1057 (0x421) - AIF1 DAC1 Filters (2)
- */
+/* R1057 (0x421) - AIF1 DAC1 Filters (2) */
 
-/* R1058 (0x422) - AIF1 DAC2 Filters (1)
- */
+/* R1058 (0x422) - AIF1 DAC2 Filters (1) */
 
 #define WM8994_AIF1DAC2_MUTE                      (1 << 9)                                    /* Bit 9: AIF1DAC2 input path (AIF1, TS 1) Soft Mute Control */
 #define   WM8994_AIF1DAC2_MUTE_UNMUTE             (0)                                         /* Un-mute */
@@ -1354,269 +1253,181 @@
 #define   WM8994_AIF1DAC2_DEEMP_44KHZ             (2 << WM8994_AIF1DAC2_DEEMP_SHIFT)          /* 44.1kHz sample rate */
 #define   WM8994_AIF1DAC2_DEEMP_48KHZ             (3 << WM8994_AIF1DAC2_DEEMP_SHIFT)          /* 48kHz sample rate*/
 
-/* R1059 (0x423) - AIF1 DAC2 Filters (2)
- */
+/* R1059 (0x423) - AIF1 DAC2 Filters (2) */
 
-/* R1072 (0x430) - AIF1 DAC1 Noise Gate
- */
+/* R1072 (0x430) - AIF1 DAC1 Noise Gate */
 
-/* R1073 (0x431) - AIF1 DAC2 Noise Gate
- */
+/* R1073 (0x431) - AIF1 DAC2 Noise Gate */
 
-/* R1088 (0x440) - AIF1 DRC1 (1)
- */
+/* R1088 (0x440) - AIF1 DRC1 (1) */
 
-/* R1089 (0x441) - AIF1 DRC1 (2)
- */
+/* R1089 (0x441) - AIF1 DRC1 (2) */
 
-/* R1090 (0x442) - AIF1 DRC1 (3)
- */
+/* R1090 (0x442) - AIF1 DRC1 (3) */
 
-/* R1091 (0x443) - AIF1 DRC1 (4)
- */
+/* R1091 (0x443) - AIF1 DRC1 (4) */
 
-/* R1092 (0x444) - AIF1 DRC1 (5)
- */
+/* R1092 (0x444) - AIF1 DRC1 (5) */
 
-/* R1104 (0x450) - AIF1 DRC2 (1)
- */
+/* R1104 (0x450) - AIF1 DRC2 (1) */
 
-/* R1105 (0x451) - AIF1 DRC2 (2)
- */
+/* R1105 (0x451) - AIF1 DRC2 (2) */
 
-/* R1106 (0x452) - AIF1 DRC2 (3)
- */
+/* R1106 (0x452) - AIF1 DRC2 (3) */
 
-/* R1107 (0x453) - AIF1 DRC2 (4)
- */
+/* R1107 (0x453) - AIF1 DRC2 (4) */
 
-/* R1108 (0x454) - AIF1 DRC2 (5)
- */
+/* R1108 (0x454) - AIF1 DRC2 (5) */
 
-/* R1152 (0x480) - AIF1 DAC1 EQ Gains (1)
- */
+/* R1152 (0x480) - AIF1 DAC1 EQ Gains (1) */
 
-/* R1153 (0x481) - AIF1 DAC1 EQ Gains (2)
- */
+/* R1153 (0x481) - AIF1 DAC1 EQ Gains (2) */
 
-/* R1154 (0x482) - AIF1 DAC1 EQ Band 1 A
- */
+/* R1154 (0x482) - AIF1 DAC1 EQ Band 1 A */
 
-/* R1155 (0x483) - AIF1 DAC1 EQ Band 1 B
- */
+/* R1155 (0x483) - AIF1 DAC1 EQ Band 1 B */
 
-/* R1156 (0x484) - AIF1 DAC1 EQ Band 1 PG
- */
+/* R1156 (0x484) - AIF1 DAC1 EQ Band 1 PG */
 
-/* R1157 (0x485) - AIF1 DAC1 EQ Band 2 A
- */
+/* R1157 (0x485) - AIF1 DAC1 EQ Band 2 A */
 
-/* R1158 (0x486) - AIF1 DAC1 EQ Band 2 B
- */
+/* R1158 (0x486) - AIF1 DAC1 EQ Band 2 B */
 
-/* R1159 (0x487) - AIF1 DAC1 EQ Band 2 C
- */
+/* R1159 (0x487) - AIF1 DAC1 EQ Band 2 C */
 
-/* R1160 (0x488) - AIF1 DAC1 EQ Band 2 PG
- */
+/* R1160 (0x488) - AIF1 DAC1 EQ Band 2 PG */
 
-/* R1161 (0x489) - AIF1 DAC1 EQ Band 3 A
- */
+/* R1161 (0x489) - AIF1 DAC1 EQ Band 3 A */
 
-/* R1162 (0x48A) - AIF1 DAC1 EQ Band 3 B
- */
+/* R1162 (0x48A) - AIF1 DAC1 EQ Band 3 B */
 
-/* R1163 (0x48B) - AIF1 DAC1 EQ Band 3 C
- */
+/* R1163 (0x48B) - AIF1 DAC1 EQ Band 3 C */
 
-/* R1164 (0x48C) - AIF1 DAC1 EQ Band 3 PG
- */
+/* R1164 (0x48C) - AIF1 DAC1 EQ Band 3 PG */
 
-/* R1165 (0x48D) - AIF1 DAC1 EQ Band 4 A
- */
+/* R1165 (0x48D) - AIF1 DAC1 EQ Band 4 A */
 
-/* R1166 (0x48E) - AIF1 DAC1 EQ Band 4 B
- */
+/* R1166 (0x48E) - AIF1 DAC1 EQ Band 4 B */
 
-/* R1167 (0x48F) - AIF1 DAC1 EQ Band 4 C
- */
+/* R1167 (0x48F) - AIF1 DAC1 EQ Band 4 C */
 
-/* R1168 (0x490) - AIF1 DAC1 EQ Band 4 PG
- */
+/* R1168 (0x490) - AIF1 DAC1 EQ Band 4 PG */
 
-/* R1169 (0x491) - AIF1 DAC1 EQ Band 5 A
- */
+/* R1169 (0x491) - AIF1 DAC1 EQ Band 5 A */
 
-/* R1170 (0x492) - AIF1 DAC1 EQ Band 5 B
- */
+/* R1170 (0x492) - AIF1 DAC1 EQ Band 5 B */
 
-/* R1171 (0x493) - AIF1 DAC1 EQ Band 5 PG
- */
+/* R1171 (0x493) - AIF1 DAC1 EQ Band 5 PG */
 
-/* R1184 (0x4A0) - AIF1 DAC2 EQ Gains (1)
- */
+/* R1184 (0x4A0) - AIF1 DAC2 EQ Gains (1) */
 
-/* R1185 (0x4A1) - AIF1 DAC2 EQ Gains (2)
- */
+/* R1185 (0x4A1) - AIF1 DAC2 EQ Gains (2) */
 
-/* R1186 (0x4A2) - AIF1 DAC2 EQ Band 1 A
- */
+/* R1186 (0x4A2) - AIF1 DAC2 EQ Band 1 A */
 
-/* R1187 (0x4A3) - AIF1 DAC2 EQ Band 1 B
- */
+/* R1187 (0x4A3) - AIF1 DAC2 EQ Band 1 B */
 
-/* R1188 (0x4A4) - AIF1 DAC2 EQ Band 1 PG
- */
+/* R1188 (0x4A4) - AIF1 DAC2 EQ Band 1 PG */
 
-/* R1189 (0x4A5) - AIF1 DAC2 EQ Band 2 A
- */
+/* R1189 (0x4A5) - AIF1 DAC2 EQ Band 2 A */
 
-/* R1190 (0x4A6) - AIF1 DAC2 EQ Band 2 B
- */
+/* R1190 (0x4A6) - AIF1 DAC2 EQ Band 2 B */
 
-/* R1191 (0x4A7) - AIF1 DAC2 EQ Band 2 C
- */
+/* R1191 (0x4A7) - AIF1 DAC2 EQ Band 2 C */
 
-/* R1192 (0x4A8) - AIF1 DAC2 EQ Band 2 PG
- */
+/* R1192 (0x4A8) - AIF1 DAC2 EQ Band 2 PG */
 
-/* R1193 (0x4A9) - AIF1 DAC2 EQ Band 3 A
- */
+/* R1193 (0x4A9) - AIF1 DAC2 EQ Band 3 A */
 
-/* R1194 (0x4AA) - AIF1 DAC2 EQ Band 3 B
- */
+/* R1194 (0x4AA) - AIF1 DAC2 EQ Band 3 B */
 
-/* R1195 (0x4AB) - AIF1 DAC2 EQ Band 3 C
- */
+/* R1195 (0x4AB) - AIF1 DAC2 EQ Band 3 C */
 
-/* R1196 (0x4AC) - AIF1 DAC2 EQ Band 3 PG
- */
+/* R1196 (0x4AC) - AIF1 DAC2 EQ Band 3 PG */
 
-/* R1197 (0x4AD) - AIF1 DAC2 EQ Band 4 A
- */
+/* R1197 (0x4AD) - AIF1 DAC2 EQ Band 4 A */
 
-/* R1198 (0x4AE) - AIF1 DAC2 EQ Band 4 B
- */
+/* R1198 (0x4AE) - AIF1 DAC2 EQ Band 4 B */
 
-/* R1199 (0x4AF) - AIF1 DAC2 EQ Band 4 C
- */
+/* R1199 (0x4AF) - AIF1 DAC2 EQ Band 4 C */
 
-/* R1200 (0x4B0) - AIF1 DAC2 EQ Band 4 PG
- */
+/* R1200 (0x4B0) - AIF1 DAC2 EQ Band 4 PG */
 
-/* R1201 (0x4B1) - AIF1 DAC2 EQ Band 5 A
- */
+/* R1201 (0x4B1) - AIF1 DAC2 EQ Band 5 A */
 
-/* R1202 (0x4B2) - AIF1 DAC2 EQ Band 5 B
- */
+/* R1202 (0x4B2) - AIF1 DAC2 EQ Band 5 B */
 
-/* R1203 (0x4B3) - AIF1 DAC2 EQ Band 5 PG
- */
+/* R1203 (0x4B3) - AIF1 DAC2 EQ Band 5 PG */
 
-/* R1280 (0x500) - AIF2 ADC Left Volume
- */
+/* R1280 (0x500) - AIF2 ADC Left Volume */
 
-/* R1281 (0x501) - AIF2 ADC Right Volume
- */
+/* R1281 (0x501) - AIF2 ADC Right Volume */
 
-/* R1282 (0x502) - AIF2 DAC Left Volume
- */
+/* R1282 (0x502) - AIF2 DAC Left Volume */
 
-/* R1283 (0x503) - AIF2 DAC Right Volume
- */
+/* R1283 (0x503) - AIF2 DAC Right Volume */
 
-/* R1296 (0x510) - AIF2 ADC Filters
- */
+/* R1296 (0x510) - AIF2 ADC Filters */
 
-/* R1312 (0x520) - AIF2 DAC Filters (1)
- */
+/* R1312 (0x520) - AIF2 DAC Filters (1) */
 
-/* R1313 (0x521) - AIF2 DAC Filters (2)
- */
+/* R1313 (0x521) - AIF2 DAC Filters (2) */
 
-/* R1328 (0x530) - AIF2 DAC Noise Gate
- */
+/* R1328 (0x530) - AIF2 DAC Noise Gate */
 
-/* R1344 (0x540) - AIF2 DRC (1)
- */
+/* R1344 (0x540) - AIF2 DRC (1) */
 
-/* R1345 (0x541) - AIF2 DRC (2)
- */
+/* R1345 (0x541) - AIF2 DRC (2) */
 
-/* R1346 (0x542) - AIF2 DRC (3)
- */
+/* R1346 (0x542) - AIF2 DRC (3) */
 
-/* R1347 (0x543) - AIF2 DRC (4)
- */
+/* R1347 (0x543) - AIF2 DRC (4) */
 
-/* R1348 (0x544) - AIF2 DRC (5)
- */
+/* R1348 (0x544) - AIF2 DRC (5) */
 
-/* R1408 (0x580) - AIF2 EQ Gains (1)
- */
+/* R1408 (0x580) - AIF2 EQ Gains (1) */
 
-/* R1409 (0x581) - AIF2 EQ Gains (2)
- */
+/* R1409 (0x581) - AIF2 EQ Gains (2) */
 
-/* R1410 (0x582) - AIF2 EQ Band 1 A
- */
+/* R1410 (0x582) - AIF2 EQ Band 1 A */
 
-/* R1411 (0x583) - AIF2 EQ Band 1 B
- */
+/* R1411 (0x583) - AIF2 EQ Band 1 B */
 
-/* R1412 (0x584) - AIF2 EQ Band 1 PG
- */
+/* R1412 (0x584) - AIF2 EQ Band 1 PG */
 
-/* R1413 (0x585) - AIF2 EQ Band 2 A
- */
+/* R1413 (0x585) - AIF2 EQ Band 2 A */
 
-/* R1414 (0x586) - AIF2 EQ Band 2 B
- */
+/* R1414 (0x586) - AIF2 EQ Band 2 B */
 
-/* R1415 (0x587) - AIF2 EQ Band 2 C
- */
+/* R1415 (0x587) - AIF2 EQ Band 2 C */
 
-/* R1416 (0x588) - AIF2 EQ Band 2 PG
- */
+/* R1416 (0x588) - AIF2 EQ Band 2 PG */
 
-/* R1417 (0x589) - AIF2 EQ Band 3 A
- */
+/* R1417 (0x589) - AIF2 EQ Band 3 A */
 
-/* R1418 (0x58A) - AIF2 EQ Band 3 B
- */
+/* R1418 (0x58A) - AIF2 EQ Band 3 B */
 
-/* R1419 (0x58B) - AIF2 EQ Band 3 C
- */
+/* R1419 (0x58B) - AIF2 EQ Band 3 C */
 
-/* R1420 (0x58C) - AIF2 EQ Band 3 PG
- */
+/* R1420 (0x58C) - AIF2 EQ Band 3 PG */
 
-/* R1421 (0x58D) - AIF2 EQ Band 4 A
- */
+/* R1421 (0x58D) - AIF2 EQ Band 4 A */
 
-/* R1422 (0x58E) - AIF2 EQ Band 4 B
- */
+/* R1422 (0x58E) - AIF2 EQ Band 4 B */
 
-/* R1423 (0x58F) - AIF2 EQ Band 4 C
- */
+/* R1423 (0x58F) - AIF2 EQ Band 4 C */
 
-/* R1424 (0x590) - AIF2 EQ Band 4 PG
- */
+/* R1424 (0x590) - AIF2 EQ Band 4 PG */
 
-/* R1425 (0x591) - AIF2 EQ Band 5 A
- */
+/* R1425 (0x591) - AIF2 EQ Band 5 A */
 
-/* R1426 (0x592) - AIF2 EQ Band 5 B
- */
+/* R1426 (0x592) - AIF2 EQ Band 5 B */
 
-/* R1427 (0x593) - AIF2 EQ Band 5 PG
- */
+/* R1427 (0x593) - AIF2 EQ Band 5 PG */
 
-/* R1536 (0x600) - DAC1 Mixer Volumes
- */
+/* R1536 (0x600) - DAC1 Mixer Volumes */
 
-/* R1537 (0x601) - DAC1 Left Mixer Routing
- */
+/* R1537 (0x601) - DAC1 Left Mixer Routing */
 
 #define WM8994_AIF1DAC1L_TO_DAC1L_ENA             (1 << 0)                                    /* Bit 0: Enable AIF1(Timeslot 0, Left) to DAC1L */
 #define WM8994_AIF1DAC2L_TO_DAC1L_ENA             (1 << 1)                                    /* Bit 1: Enable AIF1(Timeslot 1, Left) to DAC1L */
@@ -1626,8 +1437,7 @@
 #define WM8994_ADCR_TO_DAC1L_ENA                  (1 << 5)                                    /* Bit 5: Enable Sidetone STR to DAC1L */
                                                                                               /* Bits 6-15: Reserved */
 
-/* R1538 (0x602) - DAC1 Right Mixer Routing
- */
+/* R1538 (0x602) - DAC1 Right Mixer Routing */
 
 #define WM8994_AIF1DAC1R_TO_DAC1R_ENA             (1 << 0)                                    /* Bit 0: Enable AIF1(Timeslot 0, Right) to DAC1R */
 #define WM8994_AIF1DAC2R_TO_DAC1R_ENA             (1 << 1)                                    /* Bit 1: Enable AIF1(Timeslot 1, Right) to DAC1R */
@@ -1637,16 +1447,14 @@
 #define WM8994_ADCR_TO_DAC1R_ENA                  (1 << 5)                                    /* Bit 5: Enable Sidetone STR to DAC1R */
                                                                                               /* Bits 6-15: Reserved */
 
-/* R1539 (0x603) - DAC2 Mixer Volumes
- */
+/* R1539 (0x603) - DAC2 Mixer Volumes */
 
 #define WM8994_ADCR_DAC2_VOL_SHIFT                (5)                                         /* Bits 5-8: Sidetone STR to DAC2L and DAC2R Volume */
 #define WM8994_ADCR_DAC2_VOL_MASK                 (0xF << WM8994_ADCR_DAC2_VOL_SHIFT)         /* 0000 = -36 DB, 1100 = 0dB */
 #define WM8994_ADCL_DAC2_VOL_SHIFT                (0)                                         /* Bits 0-3: Sidetone STL to DAC2L and DAC2R Volume */
 #define WM8994_ADCL_DAC2_VOL_MASK                 (0xF << WM8994_ADCL_DAC2_VOL_SHIFT          /* 0000 = -36 DB, 1100 = 0dB */
 
-/* R1540 (0x604) - DAC2 Left Mixer Routing
- */
+/* R1540 (0x604) - DAC2 Left Mixer Routing */
 
 #define WM8994_AIF1DAC1L_TO_DAC2L_ENA             (1 << 0)                                    /* Bit 0: Enable AIF1(Timeslot 0, Left) to DAC2L */
 #define WM8994_AIF1DAC2L_TO_DAC2L_ENA             (1 << 1)                                    /* Bit 1: Enable AIF1(Timeslot 1, Left) to DAC2L */
@@ -1656,8 +1464,7 @@
 #define WM8994_ADCR_TO_DAC2L_ENA                  (1 << 5)                                    /* Bit 5: Enable Sidetone STR to DAC2L */
                                                                                               /* Bits 6-15: Reserved */
 
-/* R1541 (0x605) - DAC2 Right Mixer Routing
- */
+/* R1541 (0x605) - DAC2 Right Mixer Routing */
 
 #define WM8994_AIF1DAC1R_TO_DAC2R_ENA             (1 << 0)                                    /* Bit 0: Enable AIF1(Timeslot 0, Right) to DAC2R */
 #define WM8994_AIF1DAC2R_TO_DAC2R_ENA             (1 << 1)                                    /* Bit 1: Enable AIF1(Timeslot 1, Right) to DAC2R */
@@ -1667,20 +1474,15 @@
 #define WM8994_ADCR_TO_DAC2R_ENA                  (1 << 5)                                    /* Bit 5: Enable Sidetone STR to DAC2R */
                                                                                               /* Bits 6-15: Reserved */
 
-/* R1542 (0x606) - AIF1 ADC1 Left Mixer Routing
- */
+/* R1542 (0x606) - AIF1 ADC1 Left Mixer Routing */
 
-/* R1543 (0x607) - AIF1 ADC1 Right Mixer Routing
- */
+/* R1543 (0x607) - AIF1 ADC1 Right Mixer Routing */
 
-/* R1544 (0x608) - AIF1 ADC2 Left Mixer Routing
- */
+/* R1544 (0x608) - AIF1 ADC2 Left Mixer Routing */
 
-/* R1545 (0x609) - AIF1 ADC2 Right mixer Routing
- */
+/* R1545 (0x609) - AIF1 ADC2 Right mixer Routing */
 
-/* R1552 (0x610) - DAC1 Left Volume
- */
+/* R1552 (0x610) - DAC1 Left Volume */
 
 #define WM8994_DAC1L_MUTE                         (1 << 9)                                    /* Bit 9: DAC1L Soft Mute Control */
 #define   WM8994_DAC1L_MUTE_UNMUTE                (0)                                         /* DAC Un-mute */
@@ -1689,8 +1491,7 @@
 #define WM8994_DAC1L_VOL_SHIFT                    (0)                                         /* Bits 0-7: DAC1L Digital Volume */
 #define WM8994_DAC1L_VOL_MASK                     (0xFF << WM8994_DAC1L_VOL_SHIFT)
 
-/* R1553 (0x611) - DAC1 Right Volume
- */
+/* R1553 (0x611) - DAC1 Right Volume */
 
 #define WM8994_DAC1R_MUTE                         (1 << 9)                                    /* Bit 9: DAC1R Soft Mute Control */
 #define   WM8994_DAC1R_MUTE_UNMUTE                (0)                                         /* DAC Un-mute */
@@ -1698,8 +1499,7 @@
 #define WM8994_DAC1R_VOL_SHIFT                    (0)                                         /* Bits 0-7: DAC1R Digital Volume */
 #define WM8994_DAC1R_VOL_MASK                     (0xFF << WM8994_DAC1R_VOL_SHIFT)
 
-/* R1554 (0x612) - DAC2 Left Volume
- */
+/* R1554 (0x612) - DAC2 Left Volume */
 
 #define WM8994_DAC2L_MUTE                         (1 << 9)                                    /* Bit 9: DAC2L Soft Mute Control */
 #define   WM8994_DAC2L_MUTE_UNMUTE                (0)                                         /* DAC Un-mute */
@@ -1708,8 +1508,7 @@
 #define WM8994_DAC2L_VOL_SHIFT                    (0)                                         /* Bits 0-7: DAC2L Digital Volume */
 #define WM8994_DAC2L_VOL_MASK                     (0xFF << WM8994_DAC2L_VOL_SHIFT)
 
-/* R1555 (0x613) - DAC2 Right Volume
- */
+/* R1555 (0x613) - DAC2 Right Volume */
 
 #define WM8994_DAC2R_MUTE                         (1 << 9)                                    /* Bit 9: DAC2R Soft Mute Control */
 #define   WM8994_DAC2R_MUTE_UNMUTE                (0)                                         /* DAC Un-mute */
@@ -1717,44 +1516,31 @@
 #define WM8994_DAC2R_VOL_SHIFT                    (0)                                         /* Bits 0-7: DAC2R Digital Volume */
 #define WM8994_DAC2R_VOL_MASK                     (0xFF << WM8994_DAC2R_VOL_SHIFT)
 
-/* R1556 (0x614) - DAC Softmute
- */
+/* R1556 (0x614) - DAC Softmute */
 
-/* R1568 (0x620) - Oversampling
- */
+/* R1568 (0x620) - Oversampling */
 
-/* R1569 (0x621) - Sidetone
- */
+/* R1569 (0x621) - Sidetone */
 
-/* R1797 (0x705) - JACKDET Ctrl
- */
+/* R1797 (0x705) - JACKDET Ctrl */
 
-/* R1824 (0x720) - Pull Control (1)
- */
+/* R1824 (0x720) - Pull Control (1) */
 
-/* R1825 (0x721) - Pull Control (2)
- */
+/* R1825 (0x721) - Pull Control (2) */
 
-/* R1840 (0x730) - Interrupt Status 1
- */
+/* R1840 (0x730) - Interrupt Status 1 */
 
-/* R1841 (0x731) - Interrupt Status 2
- */
+/* R1841 (0x731) - Interrupt Status 2 */
 
-/* R1842 (0x732) - Interrupt Raw Status 2
- */
+/* R1842 (0x732) - Interrupt Raw Status 2 */
 
-/* R1848 (0x738) - Interrupt Status 1 Mask
- */
+/* R1848 (0x738) - Interrupt Status 1 Mask */
 
-/* R1849 (0x739) - Interrupt Status 2 Mask
- */
+/* R1849 (0x739) - Interrupt Status 2 Mask */
 
-/* R1856 (0x740) - Interrupt Control
- */
+/* R1856 (0x740) - Interrupt Control */
 
-/* R1864 (0x748) - IRQ Debounce
- */
+/* R1864 (0x748) - IRQ Debounce */
 
 /* Register Default Values */
 

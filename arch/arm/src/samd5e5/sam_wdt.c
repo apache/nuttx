@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/** N clock cycles */
+/* N clock cycles */
 
 #define WDT_CLK_8CYCLE      8
 #define WDT_CLK_16CYCLE     16
