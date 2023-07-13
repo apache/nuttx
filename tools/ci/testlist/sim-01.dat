@@ -32,3 +32,22 @@
 
 # Skip WebAssembly Micro Runtime
 -Darwin,sim:wamr
+
+# Boards build by CMake
+CMake,sim:alsa
+CMake,sim:bluetooth
+CMake,sim:bthcisock
+CMake,sim:dynconns
+CMake,sim:fb
+CMake,sim:foc
+CMake,sim:ipforward
+CMake,sim:linuxi2c
+CMake,sim:linuxspi
+CMake,sim:minibasic
+CMake,sim:mount
+CMake,sim:mtdpart
+CMake,sim:mtdrwb
+CMake,sim:nettest
+CMake,sim:note
+CMake,sim:nsh
+CMake,sim:nxffs

@@ -321,6 +321,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # Do olddefconfig step to expand the abbreviated defconfig into normal config
   execute_process(
     COMMAND olddefconfig
+    ERROR_VARIABLE KCONFIG_ERROR
     OUTPUT_VARIABLE KCONFIG_OUTPUT
     RESULT_VARIABLE KCONFIG_STATUS
     WORKING_DIRECTORY ${NUTTX_DIR})
@@ -332,6 +333,15 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # store original expanded .config
   configure_file(${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/.config.orig
                  COPYONLY)
+
+  string(REPLACE "\n" ";" KCONFIG_ESTRING ${KCONFIG_ERROR})
+  foreach(estring ${KCONFIG_ESTRING})
+    string(REGEX MATCH "the 'modules' option is not supported" result
+                 ${estring})
+    if(NOT result)
+      message(WARNING "Kconfig Configuration Error: ${estring}")
+    endif()
+  endforeach()
 
   if(KCONFIG_STATUS AND NOT KCONFIG_STATUS EQUAL 0)
     message(
@@ -544,13 +554,9 @@ if(DEFINED PREPROCES)
   add_custom_command(
     OUTPUT ${LD_SCRIPT_TMP}
     DEPENDS ${ldscript}
-    COMMAND
-      ${PREPROCES}
-      -I${CMAKE_BINARY_DIR}/include
-      -I${NUTTX_CHIP_ABS_DIR}
-      ${ldscript} > ${LD_SCRIPT_TMP}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  )
+    COMMAND ${PREPROCES} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
+            ${ldscript} > ${LD_SCRIPT_TMP}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
   add_custom_target(ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
   add_dependencies(nuttx ldscript_tmp)
