@@ -179,7 +179,7 @@ static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat)
 
 static bool sim_camera_is_available(struct imgsensor_s *sensor)
 {
-  return host_video_is_available(CONFIG_HOST_VIDEO_DEV_PATH);
+  return true;
 }
 
 static int sim_camera_init(struct imgsensor_s *sensor)
