@@ -29,6 +29,12 @@
 #include "cp15_cacheops.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NVIC_CSSELR_IND (1 << 0)
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -52,7 +58,7 @@ static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways,
 
   csselr = CP15_GET(CSSELR);
 
-  CP15_SET(CSSELR, (csselr & ~0x01) | (icache & 0x01));
+  CP15_SET(CSSELR, (csselr & ~NVIC_CSSELR_IND) | (icache & NVIC_CSSELR_IND));
 
   ccsidr = CP15_GET(CCSIDR);
 
