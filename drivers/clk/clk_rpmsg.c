@@ -902,8 +902,7 @@ FAR struct clk_s *clk_register_rpmsg(FAR const char *name, uint8_t flags)
       return NULL;
     }
 
-  return clk_register(name, NULL, 0, flags | CLK_IS_CRITICAL,
-                      &g_clk_rpmsg_ops, NULL, 0);
+  return clk_register(name, NULL, 0, flags, &g_clk_rpmsg_ops, NULL, 0);
 }
 
 int clk_rpmsg_server_initialize(void)

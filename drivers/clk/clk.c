@@ -679,7 +679,7 @@ static int __clk_disable(FAR struct clk_s *clk)
         }
     }
 
-  return clk->enable_count + 1;
+  return clk->enable_count;
 }
 
 static void clk_init_parent(FAR struct clk_s *clk)
