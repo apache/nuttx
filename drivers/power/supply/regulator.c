@@ -521,6 +521,11 @@ int regulator_is_enabled(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
+  if (rdev->desc->always_on)
+    {
+      return 1;
+    }
+
   nxmutex_lock(&rdev->regulator_lock);
   ret = _regulator_is_enabled(rdev);
   nxmutex_unlock(&rdev->regulator_lock);
@@ -634,7 +639,7 @@ int regulator_disable(FAR struct regulator_s *regulator)
       goto err;
     }
 
-  if (rdev->use_count == 1)
+  if (rdev->use_count == 1 && !rdev->desc->always_on)
     {
       ret = _regulator_do_disable(rdev);
       if (ret < 0)
@@ -813,11 +818,13 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
   list_initialize(&rdev->consumer_list);
   list_initialize(&rdev->list);
 
-  if (rdev->desc->boot_on && !_regulator_is_enabled(rdev))
+  if ((rdev->desc->boot_on || rdev->desc->always_on)
+      && !_regulator_is_enabled(rdev))
     {
       _regulator_do_enable(rdev);
     }
-  else if (!rdev->desc->boot_on && _regulator_is_enabled(rdev))
+  else if (!rdev->desc->boot_on && !rdev->desc->always_on
+           && _regulator_is_enabled(rdev))
     {
       _regulator_do_disable(rdev);
     }
