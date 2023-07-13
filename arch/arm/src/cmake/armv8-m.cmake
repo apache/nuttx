@@ -59,4 +59,8 @@ if(CONFIG_ARMV8M_STACKCHECK)
   list(APPEND PLATFORM_FLAGS -finstrument-functions -ffixed-r10)
 endif()
 
+if(CONFIG_ARMV8M_CMSE)
+  list(APPEND PLATFORM_FLAGS -mcmse)
+endif()
+
 add_compile_options(${PLATFORM_FLAGS})
