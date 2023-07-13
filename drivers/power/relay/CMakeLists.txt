@@ -1,5 +1,5 @@
 # ##############################################################################
-# fs/mmap/CMakeLists.txt
+# drivers/power/relay/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,14 +18,16 @@
 #
 # ##############################################################################
 
-set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c)
+# Include power management sources
 
-if(CONFIG_FS_RAMMAP)
-  list(APPEND SRCS fs_rammap.c)
+set(SRCS)
+
+if(CONFIG_RELAY)
+  list(APPEND SRCS relay.c)
 endif()
 
-if(CONFIG_FS_ANONMAP)
-  list(APPEND SRCS fs_anonmap.c)
+if(CONFIG_RELAY_GPIO)
+  list(APPEND SRCS relay_gpio.c)
 endif()
 
-target_sources(fs PRIVATE ${SRCS})
+target_sources(drivers PRIVATE ${SRCS})

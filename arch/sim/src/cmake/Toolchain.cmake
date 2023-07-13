@@ -22,3 +22,97 @@ if(APPLE)
   find_program(CMAKE_C_ELF_COMPILER x86_64-elf-gcc)
   find_program(CMAKE_CXX_ELF_COMPILER x86_64-elf-g++)
 endif()
+
+if(WIN32)
+  return()
+endif()
+
+add_compile_options(-fno-common)
+
+if(CONFIG_DEBUG_SYMBOLS)
+  add_compile_options(-g)
+endif()
+
+if(CONFIG_SIM_M32)
+  add_compile_options(-m32)
+endif()
+
+if(CONFIG_DEBUG_CUSTOMOPT)
+  add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
+elseif(CONFIG_DEBUG_FULLOPT)
+  if(CONFIG_ARCH_TOOLCHAIN_CLANG)
+    add_compile_options(-Oz)
+  else()
+    add_compile_options(-Os)
+  endif()
+endif()
+
+if(NOT CONFIG_DEBUG_NOOPT)
+  add_compile_options(-fno-strict-aliasing)
+endif()
+
+if(CONFIG_FRAME_POINTER)
+  add_compile_options(-fno-omit-frame-pointer -fno-optimize-sibling-calls)
+else()
+  add_compile_options(-fomit-frame-pointer)
+endif()
+
+if(CONFIG_STACK_CANARIES)
+  add_compile_options(-fstack-protector-all)
+endif()
+
+if(CONFIG_STACK_USAGE)
+  add_compile_options(-fstack-usage)
+endif()
+
+if(CONFIG_ARCH_COVERAGE)
+  add_compile_options(-fprofile-generate -ftest-coverage)
+endif()
+
+if(CONFIG_SIM_ASAN)
+  add_compile_options(-fsanitize=address)
+  add_compile_options(-fsanitize-address-use-after-scope)
+  add_compile_options(-fsanitize=pointer-compare)
+  add_compile_options(-fsanitize=pointer-subtract)
+elseif(CONFIG_MM_KASAN_ALL)
+  add_compile_options(-fsanitize=kernel-address)
+endif()
+
+if(CONFIG_SIM_UBSAN)
+  add_compile_options(-fsanitize=undefined)
+else()
+  if(CONFIG_MM_UBSAN_ALL)
+    add_compile_options(${CONFIG_MM_UBSAN_OPTION})
+  endif()
+
+  if(CONFIG_MM_UBSAN_TRAP_ON_ERROR)
+    add_compile_options(-fsanitize-undefined-trap-on-error)
+  endif()
+endif()
+
+set(ARCHCFLAGS "-Wstrict-prototypes")
+set(ARCHCXXFLAGS "-nostdinc++")
+
+if(CONFIG_CXX_EXCEPTION)
+  string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
+endif()
+
+if(CONFIG_CXX_RTTI)
+  string(APPEND ARCHCXXFLAGS " -fno-rtti")
+endif()
+
+if(NOT "${CMAKE_C_FLAGS}" STREQUAL "")
+  string(REGEX MATCH "${ARCHCFLAGS}" EXISTS_FLAGS "${CMAKE_C_FLAGS}")
+endif()
+
+if(NOT EXISTS_FLAGS)
+  set(CMAKE_ASM_FLAGS
+      "${CMAKE_ASM_FLAGS}${ARCHCFLAGS}"
+      CACHE STRING "" FORCE)
+  set(CMAKE_C_FLAGS
+      "${CMAKE_C_FLAGS}${ARCHCFLAGS}"
+      CACHE STRING "" FORCE)
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS}${ARCHCXXFLAGS}"
+      CACHE STRING "" FORCE)
+endif()

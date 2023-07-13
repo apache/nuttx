@@ -31,6 +31,10 @@ if(CONFIG_DEV_ZERO)
   list(APPEND SRCS dev_zero.c)
 endif()
 
+if(CONFIG_DEV_ASCII)
+  list(APPEND SRCS dev_ascii.c)
+endif()
+
 if(CONFIG_LWL_CONSOLE)
   list(APPEND SRCS lwl_console.c)
 endif()
@@ -46,6 +50,22 @@ if(CONFIG_DRVR_WRITEBUFFER)
   list(APPEND SRCS rwbuffer.c)
 elseif(CONFIG_DRVR_READAHEAD)
   list(APPEND SRCS rwbuffer.c)
+endif()
+
+if(CONFIG_DEV_RPMSG)
+  list(APPEND SRCS rpmsgdev.c)
+endif()
+
+if(CONFIG_DEV_RPMSG_SERVER)
+  list(APPEND SRCS rpmsgdev_server.c)
+endif()
+
+if(CONFIG_BLK_RPMSG)
+  list(APPEND SRCS rpmsgblk.c)
+endif()
+
+if(CONFIG_BLK_RPMSG_SERVER)
+  list(APPEND SRCS rpmsgblk_server.c)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

@@ -1,5 +1,5 @@
 # ##############################################################################
-# fs/mmap/CMakeLists.txt
+# drivers/power/supply/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,14 +18,35 @@
 #
 # ##############################################################################
 
-set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c)
+# Include power management sources
 
-if(CONFIG_FS_RAMMAP)
-  list(APPEND SRCS fs_rammap.c)
+set(SRCS)
+
+# Add powerled support
+
+if(CONFIG_DRIVERS_POWERLED)
+  list(APPEND SRCS powerled.c)
 endif()
 
-if(CONFIG_FS_ANONMAP)
-  list(APPEND SRCS fs_anonmap.c)
+if(CONFIG_DRIVERS_SMPS)
+  list(APPEND SRCS smps.c)
 endif()
 
-target_sources(fs PRIVATE ${SRCS})
+if(CONFIG_REGULATOR)
+  list(APPEND SRCS regulator.c)
+
+  if(CONFIG_REGULATOR_GPIO)
+    list(APPEND SRCS regulator_gpio.c)
+  endif()
+
+  if(CONFIG_REGULATOR_RPMSG)
+    list(APPEND SRCS regulator_rpmsg.c)
+  endif()
+
+  if(CONFIG_REGULATOR_ACT8945A)
+    list(APPEND SRCS act8945a.c)
+  endif()
+
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})
