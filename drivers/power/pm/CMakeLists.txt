@@ -1,5 +1,5 @@
 # ##############################################################################
-# fs/mmap/CMakeLists.txt
+# drivers/power/pm/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,14 +18,43 @@
 #
 # ##############################################################################
 
-set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c)
+# Include power management sources
 
-if(CONFIG_FS_RAMMAP)
-  list(APPEND SRCS fs_rammap.c)
+set(SRCS)
+
+if(CONFIG_PM)
+
+  list(
+    APPEND
+    SRCS
+    pm_initialize.c
+    pm_activity.c
+    pm_changestate.c
+    pm_checkstate.c
+    pm_register.c
+    pm_unregister.c
+    pm_autoupdate.c
+    pm_governor.c
+    pm_lock.c)
+
+  if(CONFIG_PM_PROCFS)
+    list(APPEND SRCS pm_procfs.c)
+  endif()
+
+  # Governor implementations
+
+  if(CONFIG_PM_GOVERNOR_ACTIVITY)
+
+    list(APPEND SRCS activity_governor.c)
+
+  endif()
+
+  if(CONFIG_PM_GOVERNOR_GREEDY)
+
+    list(APPEND SRCS greedy_governor.c)
+
+  endif()
+
 endif()
 
-if(CONFIG_FS_ANONMAP)
-  list(APPEND SRCS fs_anonmap.c)
-endif()
-
-target_sources(fs PRIVATE ${SRCS})
+target_sources(drivers PRIVATE ${SRCS})

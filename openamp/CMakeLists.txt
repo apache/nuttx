@@ -19,7 +19,7 @@
 # ##############################################################################
 if(CONFIG_OPENAMP)
 
-  set(OPENAMP_VERSION 2022.04.0)
+  set(OPENAMP_VERSION 2022.10.0)
 
   include(libmetal.cmake)
   include(open-amp.cmake)

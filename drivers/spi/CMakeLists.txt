@@ -29,11 +29,24 @@ if(CONFIG_SPI)
     endif()
   endif()
 
+  if(CONFIG_SPI_SLAVE_DRIVER)
+    list(APPEND SRCS spi_slave_driver.c)
+  endif()
+
   # Include the selected SPI drivers
 
   if(CONFIG_SPI_BITBANG)
     list(APPEND SRCS spi_bitbang.c)
   endif()
 
+  if(CONFIG_SPI_FLASH)
+    list(APPEND SRCS spi_flash.c)
+  endif()
+
+  if(CONFIG_QSPI_FLASH)
+    list(APPEND SRCS qspi_flash.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
+  target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()

@@ -50,51 +50,79 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp/.git)
       COMMAND touch ${CMAKE_CURRENT_LIST_DIR}/.openamp_patch
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-openamp-add-ns_unbind_notify-support.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0001-ns-acknowledge-the-received-creation-message.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0002-ns-acknowledge-the-received-creation-message.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0002-Negotiate-individual-buffer-size-dynamically.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0003-Negotiate-individual-buffer-size-dynamically.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0003-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0004-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0004-openamp-add-new-ops-notify_wait-support.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0005-openamp-add-new-ops-notify_wait-support.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0005-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0006-openamp-divide-shram-to-TX-shram-RX-shram-by-config-.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0006-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0007-openamp-don-t-need-check-status-when-get_tx_payload.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0007-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0008-openamp-add-available_idx-to-dump.patch >
+        ${CMAKE_CURRENT_LIST_DIR}/0008-remoteproc-make-all-elf_-functions-static-except-elf.patch >
         /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0009-openamp-firstly-take-all-buffer-from-shram-pool.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0009-Fix-warn-declaration-of-vring_rsc-shadows-a-previous.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0010-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0010-rptun-fix-rptun-don-t-wait-issue-when-get-tx-patyloa.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0011-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0011-rpmsg-fix-rpmsg_virtio_get_tx_buffer-no-idx-return.patch
         > /dev/null || (exit 0)
       COMMAND
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0012-remoteproc-make-all-elf_-functions-static-except-elf.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0012-rpmsg-add-new-API-rpdev_release_tx-rx_buffer.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0013-openamp-add-error-log-when-ept-cb-return-error.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0014-rpmsg-add-cache-flash-when-hold-rx-buffer.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0015-rpmsg-do-cache_invalidate-when-real-data-returned.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0016-openamp-add-new-API-rpmsg_virtio_get_rxbuffer_size.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0017-virtio-follow-virtio-1.2-spec-add-more-virtio-status.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0018-virtio-decoupling-the-transport-layer-and-virtio-dev.patch
+        > /dev/null || (exit 0)
+      COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0019-virtio.h-add-version-in-device-id-table.patch
         > /dev/null || (exit 0)
       DEPENDS open-amp)
     add_custom_target(openamp_patch
@@ -103,6 +131,20 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp/.git)
 endif()
 
 nuttx_add_kernel_library(openamp)
+
+if (CONFIG_OPENAMP_CACHE)
+  target_compile_options(openamp PRIVATE -DVIRTIO_CACHED_BUFFERS)
+  target_compile_options(openamp PRIVATE -DVIRTIO_CACHED_VRINGS)
+endif()
+
+if (CONFIG_OPENAMP_RPMSG_DEBUG)
+  target_compile_options(openamp PRIVATE -DRPMSG_DEBUG)
+endif()
+
+if (CONFIG_OPENAMP_VQUEUE_DEBUG)
+  target_compile_options(openamp PRIVATE -DVQUEUE_DEBUG)
+endif()
+
 target_sources(
   openamp
   PRIVATE open-amp/lib/remoteproc/elf_loader.c

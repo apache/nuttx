@@ -21,7 +21,13 @@
 # ##############################################################################
 
 if(CONFIG_MTD)
-  set(SRCS ftl.c mtd_config.c)
+  set(SRCS ftl.c)
+
+  if(CONFIG_MTD_CONFIG_FAIL_SAFE)
+    list(APPEND SRCS mtd_config_fs.c)
+  elseif(CONFIG_MTD_CONFIG)
+    list(APPEND SRCS mtd_config.c)
+  endif()
 
   if(CONFIG_MTD_PARTITION)
     list(APPEND SRCS mtd_partition.c)
@@ -33,10 +39,8 @@ if(CONFIG_MTD)
 
   if(CONFIG_MTD_WRBUFFER)
     list(APPEND SRCS mtd_rwbuffer.c)
-  else()
-    if(CONFIG_MTD_READAHEAD)
-      list(APPEND SRCS mtd_rwbuffer.c)
-    endif()
+  elseif(CONFIG_MTD_READAHEAD)
+    list(APPEND SRCS mtd_rwbuffer.c)
   endif()
 
   if(CONFIG_MTD_PROGMEM)
@@ -52,7 +56,6 @@ if(CONFIG_MTD)
       mtd_nandscheme.c
       mtd_nandmodel.c
       mtd_modeltab.c)
-
     if(CONFIG_MTD_NAND_SWECC)
       list(APPEND SRCS mtd_nandecc.c hamming.c)
     endif()
@@ -64,6 +67,18 @@ if(CONFIG_MTD)
 
   if(CONFIG_FILEMTD)
     list(APPEND SRCS filemtd.c)
+  endif()
+
+  if(CONFIG_NULLMTD)
+    list(APPEND SRCS nullmtd.c)
+  endif()
+
+  if(CONFIG_RPMSGMTD)
+    list(APPEND SRCS rpmsgmtd.c)
+  endif()
+
+  if(CONFIG_RPMSGMTD_SERVER)
+    list(APPEND SRCS rpmsgmtd_server.c)
   endif()
 
   if(CONFIG_MTD_AT24XX)
@@ -142,10 +157,8 @@ if(CONFIG_MTD)
     list(APPEND SRCS is25xp.c)
   endif()
 
-  if(CONFIG_MTD_SMART)
-    if(CONFIG_FS_SMARTFS)
-      list(APPEND SRCS smart.c)
-    endif()
+  if(CONFIG_MTD_SMART AND CONFIG_FS_SMARTFS)
+    list(APPEND SRCS smart.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})
