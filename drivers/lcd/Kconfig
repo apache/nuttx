@@ -705,6 +705,14 @@ config LCD_ST7789
 	default n
 
 if LCD_ST7789
+config LCD_ST7789_3WIRE
+	bool "Use 3 wire interface"
+	default n
+	---help---
+		Specifies whether 3 wire or 4 wire (default) interface is
+		used. 3 wire interface drops CMD/DATA pin and uses 9th bit
+		to determine data/command message.
+
 config LCD_ST7789_XRES
 	int "ST7789 X Resolution"
 	default 240
