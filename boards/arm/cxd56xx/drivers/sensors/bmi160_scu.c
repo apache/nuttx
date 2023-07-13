@@ -205,9 +205,9 @@
 
 /* Register 0x7e - CMD */
 
-#define	ACCEL_PM_SUSPEND      (0X10)
+#define ACCEL_PM_SUSPEND      (0X10)
 #define ACCEL_PM_NORMAL       (0x11)
-#define	ACCEL_PM_LOWPOWER     (0X12)
+#define ACCEL_PM_LOWPOWER     (0X12)
 #define GYRO_PM_SUSPEND       (0x14)
 #define GYRO_PM_NORMAL        (0x15)
 #define GYRO_PM_FASTSTARTUP   (0x17)

@@ -197,7 +197,7 @@
 
 /* Register 0x7e - CMD */
 
-#define	CMD_SOFTRESET           (0xB6)
+#define CMD_SOFTRESET           (0xB6)
 
 /****************************************************************************
  * Private Types
