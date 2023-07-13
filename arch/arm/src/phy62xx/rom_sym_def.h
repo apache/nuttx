@@ -200,8 +200,8 @@
   #define g_pLLcteQSample _symrom_g_pLLcteQSample
   #define g_pmCounters _symrom_g_pmCounters
   #define g_pPeriodicAdvInfo _symrom_g_pPeriodicAdvInfo
-  #define ll_isIrkAllZero	_symrom_ll_isIrkAllZero
-  #define g_currentLocalAddrType	_symrom_g_currentLocalAddrType
+  #define ll_isIrkAllZero _symrom_ll_isIrkAllZero
+  #define g_currentLocalAddrType _symrom_g_currentLocalAddrType
   #define g_rfPhyClkSel _symrom_g_rfPhyClkSel
   #define g_rfPhyDtmCmd _symrom_g_rfPhyDtmCmd
   #define g_rfPhyDtmEvt _symrom_g_rfPhyDtmEvt
