@@ -105,7 +105,7 @@
 
 /* DMA Request sources */
 
-/** edma_mux0 **/
+/* edma_mux0 */
 
 #define DMA_REQ_DISABLED0    (0)  /* Channel disabled (default) */
 #define DMA_REQ_SIUL_0       (1)  /* SIUL DMA request 0 */
@@ -172,7 +172,7 @@
 #define DMA_REQ_ENABLED0     (62) /* Always enabled */
 #define DMA_REQ_ENABLED1     (63) /* Always enabled */
 
-/** edma_mux1 **/
+/* edma_mux1 */
 
 #define DMA_REQ_DISABLED1    (DMAMUX_CHCFG_DMAMUX1 | 0)  /* Channel disabled (default) */
 #define DMA_REQ_SIUL_8       (DMAMUX_CHCFG_DMAMUX1 | 1)  /* SIUL DMA request 8 */

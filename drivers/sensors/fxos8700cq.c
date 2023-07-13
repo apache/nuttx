@@ -64,7 +64,7 @@
 /* Values */
 #define FXOS8700CQ_WHOAMI_VAL 0xC7
 
-/** status byte + x,y,z for accelerometer and magnetometer */
+/* status byte + x,y,z for accelerometer and magnetometer */
 #define FXOS8700CQ_READ_LEN ((8 + (16 * 3 + 16 * 3)) / 8)
 
 /****************************************************************************
@@ -103,7 +103,7 @@ static int fxos8700cq_checkid(FAR struct fxos8700cq_dev_s *priv);
  * Private Data
  ****************************************************************************/
 
-/** vtable that supports the character driver interface */
+/* vtable that supports the character driver interface */
 
 static const struct file_operations g_fxos8700cqfops =
 {

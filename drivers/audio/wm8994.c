@@ -1458,7 +1458,7 @@ static int wm8994_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   return ret;
 }
 
-/** Name: wm8994_cancelbuffer
+/* Name: wm8994_cancelbuffer
  *
  * Description: Called when an enqueued buffer is being cancelled.
  *

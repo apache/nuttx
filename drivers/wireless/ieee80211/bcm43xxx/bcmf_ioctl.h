@@ -267,7 +267,7 @@ typedef struct wl_join_scan_params
 }
 end_packed_struct wl_join_scan_params_t;
 
-/** used for association with a specific BSSID and chanspec list */
+/* used for association with a specific BSSID and chanspec list */
 
 begin_packed_struct
 typedef struct wl_assoc_params
@@ -285,11 +285,11 @@ typedef struct wl_assoc_params
 }
 end_packed_struct wl_assoc_params_t;
 
-/** used for association to a specific BSSID and channel */
+/* used for association to a specific BSSID and channel */
 
 typedef wl_assoc_params_t wl_join_assoc_params_t;
 
-/** extended join params */
+/* extended join params */
 
 begin_packed_struct
 typedef struct wl_extjoin_params

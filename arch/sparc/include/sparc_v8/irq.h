@@ -100,6 +100,7 @@
 
 #define XCPTCONTEXT_REGS    (68)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+
 /* Alternate register names *************************************************/
 
 /* %psr: processor status register */
@@ -211,69 +212,67 @@
 #define SPARC_SWTRAP_SYSCALL 0
 #define SPARC_SWTRAP_IRQDIS  9
 #define SPARC_SWTRAP_IRQEN   10
-/**
- * PSR masks and starting bit positions
- *
+/* PSR masks and starting bit positions
  * NOTE: Reserved bits are ignored.
  */
 
 #define SPARC_PSR_CWP_MASK  0x00000007   /* bits  0 -  4 */
 
-/** This constant is a mask for the ET bits in the PSR. */
+/* This constant is a mask for the ET bits in the PSR. */
 #define SPARC_PSR_ET_MASK   0x00000020   /* bit   5 */
 
-/** This constant is a mask for the PS bits in the PSR. */
+/* This constant is a mask for the PS bits in the PSR. */
 #define SPARC_PSR_PS_MASK   0x00000040   /* bit   6 */
 
-/** This constant is a mask for the S bits in the PSR. */
+/* This constant is a mask for the S bits in the PSR. */
 #define SPARC_PSR_S_MASK    0x00000080   /* bit   7 */
 
-/** This constant is a mask for the PIL bits in the PSR. */
+/* This constant is a mask for the PIL bits in the PSR. */
 #define SPARC_PSR_PIL_MASK  0x00000F00   /* bits  8 - 11 */
 
-/** This constant is a mask for the EF bits in the PSR. */
+/* This constant is a mask for the EF bits in the PSR. */
 #define SPARC_PSR_EF_MASK   0x00001000   /* bit  12 */
 
-/** This constant is a mask for the EC bits in the PSR. */
+/* This constant is a mask for the EC bits in the PSR. */
 #define SPARC_PSR_EC_MASK   0x00002000   /* bit  13 */
 
-/** This constant is a mask for the ICC bits in the PSR. */
+/* This constant is a mask for the ICC bits in the PSR. */
 #define SPARC_PSR_ICC_MASK  0x00F00000   /* bits 20 - 23 */
 
-/** This constant is a mask for the VER bits in the PSR. */
+/* This constant is a mask for the VER bits in the PSR. */
 #define SPARC_PSR_VER_MASK  0x0F000000   /* bits 24 - 27 */
 
-/** This constant is a mask for the IMPL bits in the PSR. */
+/* This constant is a mask for the IMPL bits in the PSR. */
 #define SPARC_PSR_IMPL_MASK 0xF0000000   /* bits 28 - 31 */
 
-/** This constant is the starting bit position of the CWP in the PSR. */
+/* This constant is the starting bit position of the CWP in the PSR. */
 #define SPARC_PSR_CWP_BIT_POSITION   0   /* bits  0 -  4 */
 
-/** This constant is the starting bit position of the ET in the PSR. */
+/* This constant is the starting bit position of the ET in the PSR. */
 #define SPARC_PSR_ET_BIT_POSITION    5   /* bit   5 */
 
-/** This constant is the starting bit position of the PS in the PSR. */
+/* This constant is the starting bit position of the PS in the PSR. */
 #define SPARC_PSR_PS_BIT_POSITION    6   /* bit   6 */
 
-/** This constant is the starting bit position of the S in the PSR. */
+/* This constant is the starting bit position of the S in the PSR. */
 #define SPARC_PSR_S_BIT_POSITION     7   /* bit   7 */
 
-/** This constant is the starting bit position of the PIL in the PSR. */
+/* This constant is the starting bit position of the PIL in the PSR. */
 #define SPARC_PSR_PIL_BIT_POSITION   8   /* bits  8 - 11 */
 
-/** This constant is the starting bit position of the EF in the PSR. */
+/* This constant is the starting bit position of the EF in the PSR. */
 #define SPARC_PSR_EF_BIT_POSITION   12   /* bit  12 */
 
-/** This constant is the starting bit position of the EC in the PSR. */
+/* This constant is the starting bit position of the EC in the PSR. */
 #define SPARC_PSR_EC_BIT_POSITION   13   /* bit  13 */
 
-/** This constant is the starting bit position of the ICC in the PSR. */
+/* This constant is the starting bit position of the ICC in the PSR. */
 #define SPARC_PSR_ICC_BIT_POSITION  20   /* bits 20 - 23 */
 
-/** This constant is the starting bit position of the VER in the PSR. */
+/* This constant is the starting bit position of the VER in the PSR. */
 #define SPARC_PSR_VER_BIT_POSITION  24   /* bits 24 - 27 */
 
-/** This constant is the starting bit position of the IMPL in the PSR. */
+/* This constant is the starting bit position of the IMPL in the PSR. */
 #define SPARC_PSR_IMPL_BIT_POSITION 28   /* bits 28 - 31 */
 
 #define SPARC_NUMBER_OF_REGISTER_WINDOWS      8
@@ -296,20 +295,20 @@
 #define CPU_STACK_FRAME_PAD0_OFFSET           0x5c
 
 #define CPU_MINIMUM_STACK_FRAME_SIZE          0x60
-#define ISF_STACK_FRAME_OFFSET 		      0x00
+#define ISF_STACK_FRAME_OFFSET                0x00
 
-#define ISF_PSR_OFFSET         (CPU_MINIMUM_STACK_FRAME_SIZE + 0x00)
-#define ISF_PC_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x04)
-#define ISF_NPC_OFFSET         (CPU_MINIMUM_STACK_FRAME_SIZE + 0x08)
-#define ISF_G1_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x0c)
-#define ISF_G2_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x10)
-#define ISF_G4_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x18)
-#define ISF_G6_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x20)
-#define ISF_I0_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x28)
-#define ISF_I2_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x30)
-#define ISF_I4_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x38)
-#define ISF_I6_FP_OFFSET       (CPU_MINIMUM_STACK_FRAME_SIZE + 0x40)
-#define ISF_Y_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x48)
+#define ISF_PSR_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x00)
+#define ISF_PC_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x04)
+#define ISF_NPC_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x08)
+#define ISF_G1_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x0c)
+#define ISF_G2_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x10)
+#define ISF_G4_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x18)
+#define ISF_G6_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x20)
+#define ISF_I0_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x28)
+#define ISF_I2_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x30)
+#define ISF_I4_OFFSET           (CPU_MINIMUM_STACK_FRAME_SIZE + 0x38)
+#define ISF_I6_FP_OFFSET        (CPU_MINIMUM_STACK_FRAME_SIZE + 0x40)
+#define ISF_Y_OFFSET            (CPU_MINIMUM_STACK_FRAME_SIZE + 0x48)
 
 #define ISF_FSR_OFFSET          (CPU_MINIMUM_STACK_FRAME_SIZE + 0x4c)
 
@@ -335,46 +334,46 @@
 
 #define CONTEXT_CONTROL_INTERRUPT_FRAME_SIZE (CPU_MINIMUM_STACK_FRAME_SIZE + 0x50 + 32*4)
 
-/*  Offsets of fields with Context_Control for assembly routines. */
+/* Offsets of fields with Context_Control for assembly routines. */
 
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define PSR_OFFSET   0x00
 
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define PC_OFFSET    0x04
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define NPC_OFFSET   0x08
 
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G1_OFFSET    0x0C
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G2_OFFSET    0x10
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G3_OFFSET    0x14
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G4_OFFSET    0x18
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G5_OFFSET    0x1C
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G6_OFFSET    0x20
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define G7_OFFSET    0x24
 
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O0_OFFSET    0x28
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O1_OFFSET    0x2C
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O2_OFFSET    0x30
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O3_OFFSET    0x34
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O4_OFFSET    0x38
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O5_OFFSET    0x3C
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O6_SP_OFFSET 0x40
-/** This macro defines an offset into the context for use in assembly. */
+/* This macro defines an offset into the context for use in assembly. */
 #define O7_OFFSET    0x44
 
 #define Y_OFFSET     0x48
@@ -401,8 +400,7 @@
 #define F30_OFFSET   0xc8
 
 #if ( SPARC_HAS_FPU == 1 )
-  /**
-   * @brief Offset of the CPU_Per_CPU_control::fsr field relative to the
+  /* Offset of the CPU_Per_CPU_control::fsr field relative to the
    * Per_CPU_Control begin.
    */
   #define SPARC_PER_CPU_FSR_OFFSET 4
@@ -477,9 +475,7 @@ struct xcptcontext
  * Inline functions
  ****************************************************************************/
 
-/**
- * @brief Macro to set the PSR.
- *
+/* Macro to set the PSR.
  * This macro sets the PSR register to the value in @a _psr.
  */
 #define sparc_set_psr( _psr ) \
@@ -490,9 +486,7 @@ struct xcptcontext
     nop(); \
   } while ( 0 )
 
-/**
- * @brief Macro to obtain the PSR.
- *
+/* Macro to obtain the PSR.
  * This macro returns the current contents of the PSR register in @a _psr.
  */
 #define sparc_get_psr( _psr ) \
@@ -501,17 +495,14 @@ struct xcptcontext
      __asm__ volatile( "rd %%psr, %0" :  "=r" (_psr) : "0" (_psr) ); \
   } while ( 0 )
 
-/**
- * This macro is a standard nop instruction.
+/* This macro is a standard nop instruction.
  */
 #define nop() \
   do { \
     __asm__ volatile ( "nop" ); \
   } while ( 0 )
 
-/**
- * @brief Macro to obtain the TBR.
- *
+/* Macro to obtain the TBR.
  * This macro returns the current contents of the TBR register in @a _tbr.
  */
 #define sparc_get_tbr( _tbr ) \
@@ -520,9 +511,7 @@ struct xcptcontext
      __asm__ volatile( "rd %%tbr, %0" :  "=r" (_tbr) : "0" (_tbr) ); \
   } while ( 0 )
 
-/**
- * @brief Macro to set the TBR.
- *
+/* Macro to set the TBR.
  * This macro sets the TBR register to the value in @a _tbr.
  */
 #define sparc_set_tbr( _tbr ) \
@@ -530,9 +519,7 @@ struct xcptcontext
      __asm__ volatile( "wr %0, 0, %%tbr" :  "=r" (_tbr) : "0" (_tbr) ); \
   } while ( 0 )
 
-/**
- * @brief Macro to obtain the WIM.
- *
+/* Macro to obtain the WIM.
  * This macro returns the current contents of the WIM field in @a _wim.
  */
 #define sparc_get_wim( _wim ) \
@@ -540,9 +527,7 @@ struct xcptcontext
     __asm__ volatile( "rd %%wim, %0" :  "=r" (_wim) : "0" (_wim) ); \
   } while ( 0 )
 
-/**
- * @brief Macro to set the WIM.
- *
+/* Macro to set the WIM.
  * This macro sets the WIM field to the value in @a _wim.
  */
 #define sparc_set_wim( _wim ) \
@@ -553,9 +538,7 @@ struct xcptcontext
     nop(); \
   } while ( 0 )
 
-/**
- * @brief Macro to obtain the Y register.
- *
+/* Macro to obtain the Y register.
  * This macro returns the current contents of the Y register in @a _y.
  */
 #define sparc_get_y( _y ) \
@@ -563,9 +546,7 @@ struct xcptcontext
     __asm__ volatile( "rd %%y, %0" :  "=r" (_y) : "0" (_y) ); \
   } while ( 0 )
 
-/**
- * @brief Macro to set the Y register.
- *
+/* Macro to set the Y register.
  * This macro sets the Y register to the value in @a _y.
  */
 #define sparc_set_y( _y ) \
@@ -573,9 +554,7 @@ struct xcptcontext
     __asm__ volatile( "wr %0, %%y" :  "=r" (_y) : "0" (_y) ); \
   } while ( 0 )
 
-/**
- * @brief Macro to obtain the asr17.
- *
+/* Macro to obtain the asr17.
  * This macro returns the current contents of the asr17 register in _asr17.
  */
 #define sparc_get_asr17( _asr17 ) \
@@ -584,11 +563,8 @@ struct xcptcontext
      __asm__ volatile( "rd %%asr17, %0" :  "=r" (_asr17) : "0" (_asr17) ); \
   } while ( 0 )
 
-/**
- * @brief SPARC disable processor interrupts.
- *
+/* SPARC disable processor interrupts.
  * This method is invoked to disable all maskable interrupts.
- *
  * @return This method returns the entire PSR contents.
  */
 
@@ -599,11 +575,8 @@ static inline uint32_t sparc_disable_interrupts(void)
   return psr;
 }
 
-/**
- * @brief SPARC enable processor interrupts.
- *
+/* SPARC enable processor interrupts.
  * This method is invoked to enable all maskable interrupts.
- *
  * @param[in] psr is the PSR returned by @ref sparc_disable_interrupts.
  */
 
@@ -620,11 +593,8 @@ static inline void sparc_enable_interrupts(uint32_t psr)
   __asm__ volatile ("ta %0\nnop\n" :: "i" (SPARC_SWTRAP_IRQEN), "r" (_psr));
 }
 
-/**
- * @brief SPARC flash processor interrupts.
- *
+/* SPARC flash processor interrupts.
  * This method is invoked to temporarily enable all maskable interrupts.
- *
  * @param[in] _psr is the PSR returned by @ref sparc_disable_interrupts.
  */
 
@@ -634,11 +604,8 @@ static inline void sparc_enable_interrupts(uint32_t psr)
     _psr = sparc_disable_interrupts(); \
   } while ( 0 )
 
-/**
- * @brief SPARC obtain interrupt level.
- *
+/* SPARC obtain interrupt level.
  * This method is invoked to obtain the current interrupt disable level.
- *
  * @param[in] _level is the PSR returned by @ref sparc_disable_interrupts.
  */
 
