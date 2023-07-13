@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "renesas_internal.h"
 #include "group/group.h"
@@ -77,7 +78,6 @@ uint32_t *renesas_doirq(int irq, uint32_t * regs)
 
       irq_dispatch(irq, regs);
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
       /* Check for a context switch.  If a context switch occurred, then
        * g_current_regs will have a different value than it did on entry.
        * If an interrupt level context switch has occurred, then restore the
@@ -102,9 +102,15 @@ uint32_t *renesas_doirq(int irq, uint32_t * regs)
 
           addrenv_switch(NULL);
 #endif
+
+          /* Record the new "running" task when context switch occurred.
+           * g_running_tasks[] is only used by assertion logic for reporting
+           * crashes.
+           */
+
+          g_running_tasks[this_cpu()] = this_task();
         }
 
-#endif
       /* Get the current value of regs... it may have changed because
        * of a context switch performed during interrupt processing.
        */

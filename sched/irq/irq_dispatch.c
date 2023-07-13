@@ -182,10 +182,4 @@ void irq_dispatch(int irq, FAR void *context)
       kmm_checkcorruption();
     }
 #endif
-
-  /* Record the new "running" task.  g_running_tasks[] is only used by
-   * assertion logic for reporting crashes.
-   */
-
-  g_running_tasks[this_cpu()] = this_task();
 }

@@ -35,6 +35,7 @@
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "minerva.h"
 
@@ -64,7 +65,6 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
 
   irq_dispatch(irq, regs);
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * g_current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -74,13 +74,13 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
 
   if (regs != g_current_regs)
     {
-#  ifdef CONFIG_ARCH_FPU
+#ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
       up_restorefpu((uint32_t *) g_current_regs);
-#  endif
+#endif
 
-#  ifdef CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously running
        * task is closed down gracefully (data caches dump, MMU flushed) and
        * set up the address environment for the new thread at the head of
@@ -88,9 +88,15 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
        */
 
       addrenv_switch(NULL);
-#  endif
-    }
 #endif
+
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+    }
 
   /* If a context switch occurred while processing the interrupt then
    * g_current_regs may have change value.  If we return any value different
