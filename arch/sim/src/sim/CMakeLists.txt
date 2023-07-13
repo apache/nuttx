@@ -234,6 +234,7 @@ endif()
 target_include_directories(nuttx PRIVATE ${CMAKE_BINARY_DIR}/include/nuttx)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
+target_include_directories(sim_head PUBLIC ${NUTTX_DIR}/sched)
 target_sources(sim_head PUBLIC sim_head.c sim_doirq.c)
 target_sources(arch PRIVATE ${SRCS})
 

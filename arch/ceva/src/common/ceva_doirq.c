@@ -78,6 +78,13 @@ uint32_t *ceva_doirq(int irq, uint32_t *regs)
 
       if (regs != CURRENT_REGS)
         {
+          /* Record the new "running" task when context switch occurred.
+           * g_running_tasks[] is only used by assertion logic for reporting
+           * crashes.
+           */
+
+          g_running_tasks[this_cpu()] = this_task();
+
           restore_critical_section();
           regs = CURRENT_REGS;
         }

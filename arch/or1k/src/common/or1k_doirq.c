@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "or1k_internal.h"
 
@@ -68,6 +69,16 @@ uint32_t *or1k_doirq(int irq, uint32_t *regs)
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
+
+  if (regs != (uint32_t *)CURRENT_REGS)
+    {
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+    }
 
   regs = (uint32_t *)CURRENT_REGS;
 
