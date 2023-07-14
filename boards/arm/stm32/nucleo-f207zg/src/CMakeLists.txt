@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/b-g431b-esc1/src/CMakeLists.txt
+# boards/arm/stm32/nucleo-f207zg/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -8,7 +8,7 @@
 # "License"); you may not use this file except in compliance with the
 # License.  You may obtain a copy of the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+#  http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -30,21 +30,20 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
+if(CONFIG_STM32_OTGFS)
+  list(APPEND SRCS stm32_usb.c)
+endif()
+
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
+  list(APPEND SRCS stm32_appinitialize.c)
 endif()
 
-if(CONFIG_STM32_FOC)
-  list(APPEND SRCS stm32_foc.c)
+if(CONFIG_ADC)
+  list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

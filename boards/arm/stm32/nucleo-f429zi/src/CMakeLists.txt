@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/b-g431b-esc1/src/CMakeLists.txt
+# boards/arm/stm32/nucleo-f429zi/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c)
+set(SRCS stm32_boot.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
@@ -31,20 +31,43 @@ if(CONFIG_ARCH_BUTTONS)
 endif()
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
+  list(APPEND SRCS stm32_appinitialize.c)
 endif()
 
-if(CONFIG_STM32_FOC)
-  list(APPEND SRCS stm32_foc.c)
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS stm32_gpio.c)
 endif()
 
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
+if(CONFIG_SPI)
+  list(APPEND SRCS stm32_spi.c)
+endif()
+
+if(CONFIG_ADC)
+  list(APPEND SRCS stm32_adc.c)
+endif()
+
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
+endif()
+
+if(CONFIG_MMCSD)
+  list(APPEND SRCS stm32_sdio.c)
+endif()
+
+if(CONFIG_STM32_OTGFS)
+  list(APPEND SRCS stm32_usb.c)
+endif()
+
+if(CONFIG_STM32_BBSRAM)
+  list(APPEND SRCS stm32_bbsram.c)
+endif()
+
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS stm32_reset.c)
+endif()
+
+if(CONFIG_STM32_ROMFS)
+  list(APPEND SRCS stm32_romfs_initialize.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

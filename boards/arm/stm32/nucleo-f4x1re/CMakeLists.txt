@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32/b-g431b-esc1/CMakeLists.txt
+# boards/arm/stm32/nucleo-f4x1re/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for

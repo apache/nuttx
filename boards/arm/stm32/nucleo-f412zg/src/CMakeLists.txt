@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/b-g431b-esc1/src/CMakeLists.txt
+# boards/arm/stm32/nucleo-f412zg/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,31 +22,16 @@ set(SRCS stm32_boot.c stm32_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
-else()
-  list(APPEND SRCS stm32_userleds.c)
 endif()
 
-if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS stm32_buttons.c)
-endif()
-
-if(CONFIG_BOARDCTL)
+if(CONFIG_NSH_LIBRARY)
   list(APPEND SRCS stm32_appinit.c)
 endif()
 
-if(CONFIG_STM32_FOC)
-  list(APPEND SRCS stm32_foc.c)
-endif()
-
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
+if(CONFIG_STM32_OTGFS)
+  list(APPEND SRCS stm32_usb.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/f412zg.ld")
