@@ -292,6 +292,7 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
        format++;
        len   = 0;
 
+process_next:
        switch (*format++)
          {
            /* %a: A three-letter abbreviation for the day of the week. */
@@ -365,6 +366,24 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                len = snprintf(dest, chleft, "%02d", tm->tm_mday);
              }
              break;
+
+           /* The 'E' or 'O' are modifier characters to indicate that an
+            * alternative format or specification should be used rather than
+            * the one normally used by unmodified conversion specifier.
+            * the following are the supported format:
+            * %Ec %EC %Ex %EX %Ey %EY
+            * %Od %oe %OH %OI %Om %OM
+            * %OS %Ou %OU %OV %Ow %OW %Oy
+            * If the alternative format or specification does not exist for
+            * current locale, then the behavior shall be same as the
+            * unmodified conversion specification, i.e the %Ec is same as %c
+            */
+
+           case 'E':
+           case 'O':
+             {
+               goto process_next;
+             }
 
            /* %e: Like %d, the day of the month as a decimal number, but
             * a leading zero is replaced by a space.
