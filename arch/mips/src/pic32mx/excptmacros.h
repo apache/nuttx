@@ -118,7 +118,7 @@
    * register save array.
    */
 
-  addiu	sp, sp, -XCPTCONTEXT_SIZE
+  addiu sp, sp, -XCPTCONTEXT_SIZE
 
   /* Save the EPC and STATUS in the register context array */
 
@@ -267,7 +267,7 @@
    * Use k1 as the pointer to the register save array.
    */
 
-  move	k1, \regs
+  move k1, \regs
 
   /* Restore the floating point register state */
 

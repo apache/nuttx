@@ -158,13 +158,13 @@ struct rx65n_rspidev_s
   uint32_t frequency; /* Requested clock frequency */
   uint32_t actual;    /* Actual clock frequency */
 
-  int	ntxwords;      /* Number of words left to transfer on the Tx Buffer */
-  int	nrxwords;      /* Number of words received on the Rx Buffer */
-  int	nwords;        /* Number of words to be exchanged */
+  int ntxwords;       /* Number of words left to transfer on the Tx Buffer */
+  int nrxwords;       /* Number of words received on the Rx Buffer */
+  int nwords;         /* Number of words to be exchanged */
 
-  uint8_t	nbits;     /* Width of word in bits (4 through 16) */
-  uint8_t	mode;      /* Mode 0,1,2,3 */
-  uint8_t	bufsize;   /* Buf size: 1,2,3 or 4 word */
+  uint8_t nbits;      /* Width of word in bits (4 through 16) */
+  uint8_t mode;       /* Mode 0,1,2,3 */
+  uint8_t bufsize;    /* Buf size: 1,2,3 or 4 word */
 };
 
 /****************************************************************************
