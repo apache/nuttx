@@ -333,6 +333,42 @@ const struct auth_hash auth_hash_chacha20_poly1305 =
   chacha20_poly1305_final
 };
 
+const struct auth_hash auth_hash_md5 =
+{
+  CRYPTO_MD5, "MD5",
+  0, 16, 16, sizeof(MD5_CTX), HMAC_MD5_BLOCK_LEN,
+  (void (*) (FAR void *)) md5init, NULL, NULL,
+  md5update_int,
+  (void (*) (FAR uint8_t *, FAR void *)) md5final
+};
+
+const struct auth_hash auth_hash_sha1 =
+{
+  CRYPTO_SHA1, "SHA1",
+  0, 20, 20, sizeof(SHA1_CTX), HMAC_SHA1_BLOCK_LEN,
+  (void (*) (FAR void *)) sha1init, NULL, NULL,
+  sha1update_int,
+  (void (*) (FAR uint8_t *, FAR void *)) sha1final
+};
+
+const struct auth_hash auth_hash_sha2_256 =
+{
+  CRYPTO_SHA2_256, "SHA2-256",
+  0, 32, 16, sizeof(SHA2_CTX), HMAC_SHA2_256_BLOCK_LEN,
+  (void (*)(FAR void *)) sha256init, NULL, NULL,
+  sha256update_int,
+  (void (*)(FAR uint8_t *, FAR void *)) sha256final
+};
+
+const struct auth_hash auth_hash_sha2_512 =
+{
+  CRYPTO_SHA2_512, "SHA2-512",
+  0, 64, 32, sizeof(SHA2_CTX), HMAC_SHA2_512_BLOCK_LEN,
+  (void (*)(FAR void *)) sha512init, NULL, NULL,
+  sha512update_int,
+  (void (*)(FAR uint8_t *, FAR void *)) sha512final
+};
+
 /* Encryption wrapper routines. */
 
 void des3_encrypt(caddr_t key, FAR uint8_t *blk)

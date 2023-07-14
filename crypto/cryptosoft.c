@@ -252,6 +252,26 @@ int swcr_authcompute(FAR struct cryptop *crp,
   return 0;
 }
 
+int swcr_hash(FAR struct cryptop *crp,
+              FAR struct cryptodesc *crd,
+              FAR struct swcr_data *sw,
+              caddr_t buf)
+{
+  FAR const struct auth_hash *axf = sw->sw_axf;
+
+  if (crd->crd_flags & CRD_F_UPDATE)
+    {
+      return axf->update(&sw->sw_ctx, (FAR uint8_t *)buf + crd->crd_skip,
+                         crd->crd_len);
+    }
+  else
+    {
+      axf->final((FAR uint8_t *)crp->crp_mac, &sw->sw_ctx);
+    }
+
+  return 0;
+}
+
 /* Apply a combined encryption-authentication transformation */
 
 int swcr_authenc(FAR struct cryptop *crp)
@@ -735,6 +755,31 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             bcopy((*swd)->sw_ictx, &(*swd)->sw_ctx, axf->ctxsize);
             break;
 
+          case CRYPTO_MD5:
+            axf = &auth_hash_md5;
+            goto auth3common;
+          case CRYPTO_SHA1:
+            axf = &auth_hash_sha1;
+            goto auth3common;
+          case CRYPTO_SHA2_256:
+            axf = &auth_hash_sha2_256;
+            goto auth3common;
+          case CRYPTO_SHA2_512:
+            axf = &auth_hash_sha2_512;
+
+          auth3common:
+            (*swd)->sw_ictx = kmm_zalloc(axf->ctxsize);
+            if ((*swd)->sw_ictx == NULL)
+              {
+                swcr_freesession(i);
+                return -ENOBUFS;
+              }
+
+            axf->init((*swd)->sw_ictx);
+            (*swd)->sw_axf = axf;
+            bcopy((*swd)->sw_ictx, &(*swd)->sw_ctx, axf->ctxsize);
+            break;
+
           case CRYPTO_AES_128_GMAC:
             axf = &auth_hash_gmac_aes_128;
             goto auth4common;
@@ -856,6 +901,10 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_AES_192_GMAC:
           case CRYPTO_AES_256_GMAC:
           case CRYPTO_CHACHA20_POLY1305_MAC:
+          case CRYPTO_MD5:
+          case CRYPTO_SHA1:
+          case CRYPTO_SHA2_256:
+          case CRYPTO_SHA2_512:
             axf = swd->sw_axf;
 
             if (swd->sw_ictx)
@@ -960,6 +1009,18 @@ int swcr_process(struct cryptop *crp)
 
             break;
 
+          case CRYPTO_MD5:
+          case CRYPTO_SHA1:
+          case CRYPTO_SHA2_256:
+          case CRYPTO_SHA2_512:
+            if ((crp->crp_etype = swcr_hash(crp, crd, sw,
+                crp->crp_buf)) != 0)
+              {
+                goto done;
+              }
+
+            break;
+
           case CRYPTO_AES_GCM_16:
           case CRYPTO_AES_GMAC:
           case CRYPTO_AES_128_GMAC:
@@ -1020,6 +1081,10 @@ void swcr_init(void)
   algs[CRYPTO_AES_256_GMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CHACHA20_POLY1305] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CHACHA20_POLY1305_MAC] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_MD5] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_SHA1] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_SHA2_256] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_SHA2_512] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_ESN] = CRYPTO_ALG_FLAG_SUPPORTED;
 
   crypto_register(swcr_id, algs, swcr_newsession,

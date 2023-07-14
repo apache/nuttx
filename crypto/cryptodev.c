@@ -270,6 +270,18 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_AES_128_GMAC:
               thash = &auth_hash_gmac_aes_128;
               break;
+            case CRYPTO_MD5:
+              thash = &auth_hash_md5;
+              break;
+            case CRYPTO_SHA1:
+              thash = &auth_hash_sha1;
+              break;
+            case CRYPTO_SHA2_256:
+              thash = &auth_hash_sha2_256;
+              break;
+            case CRYPTO_SHA2_512:
+              thash = &auth_hash_sha2_512;
+              break;
             default:
               return -EINVAL;
           }
