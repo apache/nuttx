@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/b-g431b-esc1/src/CMakeLists.txt
+# boards/arm/stm32/nucleo-g431rb/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -34,8 +34,22 @@ if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinit.c)
 endif()
 
-if(CONFIG_STM32_FOC)
-  list(APPEND SRCS stm32_foc.c)
+if(NOT CONFIG_STM32_FOC)
+  if(CONFIG_PWM)
+    list(APPEND SRCS stm32_pwm.c)
+  endif()
+
+  if(CONFIG_ADC)
+    list(APPEND SRCS stm32_adc.c)
+  endif()
+endif()
+
+if(CONFIG_BOARD_STM32_IHM16M1)
+  list(APPEND SRCS stm32_foc_ihm16m1.c)
+endif()
+
+if(CONFIG_MATH_CORDIC)
+  list(APPEND SRCS stm32_cordic.c)
 endif()
 
 if(CONFIG_STM32_FDCAN)

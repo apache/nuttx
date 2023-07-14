@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/b-g431b-esc1/src/CMakeLists.txt
+# boards/arm/stm32/nucleo-f4x1re/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,13 @@
 #
 ############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c)
+set(SRCS stm32_boot.c stm32_spi.c stm32_bringup.c)
+
+if(CONFIG_VIDEO_FB)
+  if(CONFIG_LCD_SSD1306)
+    list(APPEND SRCS stm32_lcd_ssd1306.c)
+  endif()
+endif()
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
@@ -30,23 +36,25 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
+if(CONFIG_ADC)
+  list(APPEND SRCS stm32_adc.c)
+  if(CONFIG_INPUT_AJOYSTICK)
+    list(APPEND SRCS stm32_ajoystick.c)
+  endif()
+endif()
+
+if(CONFIG_CAN_MCP2515)
+  list(APPEND SRCS stm32_mcp2515.c)
+endif()
+
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinit.c)
 endif()
 
-if(CONFIG_STM32_FOC)
-  list(APPEND SRCS stm32_foc.c)
-endif()
-
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+if(CONFIG_ARCH_CHIP_STM32F401RE)
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/f401re.ld")
+elseif(CONFIG_ARCH_CHIP_STM32F411RE)
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/f411re.ld")
+endif()

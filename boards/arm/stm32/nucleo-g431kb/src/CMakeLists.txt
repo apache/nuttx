@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/b-g431b-esc1/src/CMakeLists.txt
+# boards/arm/stm32/nucleo-g431kb/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -26,25 +26,20 @@ else()
   list(APPEND SRCS stm32_userleds.c)
 endif()
 
-if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS stm32_buttons.c)
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
 endif()
 
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinit.c)
 endif()
 
-if(CONFIG_STM32_FOC)
-  list(APPEND SRCS stm32_foc.c)
+if(CONFIG_STM32_COMP)
+  list(APPEND SRCS stm32_comp.c)
 endif()
 
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
-  endif()
+if(CONFIG_STM32_DAC)
+  list(APPEND SRCS stm32_dac.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
