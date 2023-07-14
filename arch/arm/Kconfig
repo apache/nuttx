@@ -648,6 +648,11 @@ config ARCH_CHIP_QEMU_ARM
 	---help---
 		QEMU virt platform (ARMv7a)
 
+config ARCH_CHIP_GOLDFISH_ARM
+	bool "GOLDFISH virt platform (ARMv7a)"
+	---help---
+		GOLDFISH virt platform (ARMv7a)
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -1053,6 +1058,7 @@ config ARCH_CHIP
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
+	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1517,5 +1523,8 @@ source "arch/arm/src/tlsr82/Kconfig"
 endif
 if ARCH_CHIP_QEMU_ARM
 source "arch/arm/src/qemu/Kconfig"
+endif
+if ARCH_CHIP_GOLDFISH_ARM
+source "arch/arm/src/goldfish/Kconfig"
 endif
 endif # ARCH_ARM
