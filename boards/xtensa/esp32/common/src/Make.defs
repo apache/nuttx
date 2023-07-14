@@ -80,6 +80,10 @@ ifeq ($(CONFIG_SENSORS_BMP280),y)
   CSRCS += esp32_bmp280.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BME680),y)
+  CSRCS += esp32_bme680.c
+endif
+
 ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += esp32_sht3x.c
 endif
