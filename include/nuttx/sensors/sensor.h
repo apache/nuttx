@@ -290,9 +290,16 @@
 
 #define SENSOR_TYPE_CAP                             32
 
+/* Gas sensor
+ * This sensor measures the gas resistance, indicating the presence
+ * of volatile organic compounds in the air.
+ */
+
+#define SENSOR_TYPE_GAS                             33
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           33
+#define SENSOR_TYPE_COUNT                           34
 
 /* The additional sensor open flags */
 
@@ -593,6 +600,12 @@ struct sensor_cap           /* Type: Capacitance */
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t status;           /* Detection status */
   int32_t rawdata[4];       /* in SI units pF */
+};
+
+struct sensor_gas           /* Type: Gas */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float gas_resistance;     /* Gas resistance in kOhm */
 };
 
 /* The sensor lower half driver interface */
