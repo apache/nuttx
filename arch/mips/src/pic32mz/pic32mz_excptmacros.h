@@ -118,7 +118,7 @@
    * register save array.
    */
 
-  addiu	sp, sp, -XCPTCONTEXT_SIZE
+  addiu sp, sp, -XCPTCONTEXT_SIZE
 
   /* Save the EPC and STATUS in the register context array */
 

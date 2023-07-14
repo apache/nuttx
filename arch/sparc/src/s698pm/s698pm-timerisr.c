@@ -61,7 +61,7 @@
 
 /* Bit 1: automatically reloaded with the reload value after each underflow */
 
-#define TIMCTR_AUTO_RELOAD            	    (1 << 1)
+#define TIMCTR_AUTO_RELOAD                  (1 << 1)
 
 /* Bit 2: Set 1, will load the timer reload register into the timer counter
  * register

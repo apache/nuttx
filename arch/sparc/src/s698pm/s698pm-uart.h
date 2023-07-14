@@ -75,9 +75,9 @@
 
 /* Register Bit-Field Definitions *******************************************/
 
-#define ODD	1
+#define ODD     1
 #define EVEN    0
-#define ON 	1
+#define ON      1
 #define OFF     0
 #define NONE    2
 #define RX      0
@@ -125,7 +125,7 @@
 
 #define UART_BRG_MASK               0xfff
 
-#define uart_set_baudrate(baudrate)	         ((uint32_t)((((BOARD_CPU_CLOCK*10)/(baudrate * 8))-5)/10))
+#define uart_set_baudrate(baudrate)              ((uint32_t)((((BOARD_CPU_CLOCK*10)/(baudrate * 8))-5)/10))
 
 #define uart_parity_config(reg, uart_parity)     ((uart_parity ==  ODD) ?                                     \
                                                   (reg   =   ((reg |  MSK_UART_PAR) | MSK_UART_ENABLE_PAR)) : \
