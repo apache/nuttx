@@ -446,14 +446,14 @@ static void serial_rtt_register(FAR const char *name,
 void serial_rtt_initialize(void)
 {
 #ifdef CONFIG_SERIAL_RTT0
-  serial_rtt_register("/dev/rtt0", &g_serial_rtt0);
+  serial_rtt_register("/dev/ttyR0", &g_serial_rtt0);
 #endif
 
 #ifdef CONFIG_SERIAL_RTT1
-  serial_rtt_register("/dev/rtt1", &g_serial_rtt1);
+  serial_rtt_register("/dev/ttyR1", &g_serial_rtt1);
 #endif
 
 #ifdef CONFIG_SERIAL_RTT2
-  serial_rtt_register("/dev/rtt2", &g_serial_rtt2);
+  serial_rtt_register("/dev/ttyR2", &g_serial_rtt2);
 #endif
 }
