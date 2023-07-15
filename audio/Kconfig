@@ -154,8 +154,7 @@ config AUDIO_EQUALIZER_NBANDS
 
 config AUDIO_EXCLUDE_TONE
 	bool "Exclude tone (bass and treble) controls"
-	default y if !AUDIO_EXCLUDE_EQUALIZER
-	default n if AUDIO_EXCLUDE_EQUALIZER
+	default !AUDIO_EXCLUDE_EQUALIZER
 	---help---
 		Exclude building support for changing the bass and treble.  Normally
 		you would not select both tone controls and equalizer support unless
@@ -183,8 +182,7 @@ config AUDIO_EXCLUDE_STOP
 
 config AUDIO_EXCLUDE_FFORWARD
 	bool "Exclude fast forward controls"
-	default n if !AUDIO_EXCLUDE_STOP
-	default y if AUDIO_EXCLUDE_STOP
+	default AUDIO_EXCLUDE_STOP
 	---help---
 		Exclude building support for fast forwarding through audio files
 		once they are submitted.  Selecting this option would only make

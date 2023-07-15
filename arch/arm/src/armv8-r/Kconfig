@@ -26,8 +26,7 @@ endif # ARMV8R_GIC_EOIMODE
 
 config ARMV8R_MEMINIT
 	bool
-	default y if BOOT_SDRAM_DATA
-	default n if !BOOT_SDRAM_DATA
+	default BOOT_SDRAM_DATA
 	---help---
 		If this configuration *not* selected, then it is assumed that all
 		memory resources are initialized via arm_data_initialize() and

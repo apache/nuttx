@@ -134,8 +134,7 @@ config NX_ANTIALIASING
 
 config NX_WRITEONLY
 	bool "Write-only Graphics Device"
-	default y if NX_LCDDRIVER && LCD_NOGETRUN
-	default n if !NX_LCDDRIVER || !LCD_NOGETRUN
+	default NX_LCDDRIVER && LCD_NOGETRUN
 	---help---
 		Define if the underlying graphics device does not support read operations.
 		Automatically defined if NX_LCDDRIVER and LCD_NOGETRUN are

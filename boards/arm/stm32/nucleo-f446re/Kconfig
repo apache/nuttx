@@ -20,8 +20,7 @@ endif # SENSORS_QENCODER
 
 config NUCLEO_F446RE_AJOY_MINBUTTONS
 	bool "Minimal Joystick Buttons"
-	default n if !STM32_USART1
-	default y if STM32_USART1
+	default STM32_USART1
 	depends on INPUT_AJOYSTICK
 	---help---
 		The Itead Joystick shield supports analog X/Y position and up to 5

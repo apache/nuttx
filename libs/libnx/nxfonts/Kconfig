@@ -333,8 +333,7 @@ menu "Font Cache Pixel Depths"
 
 config NXFONTS_DISABLE_1BPP
 	bool "Disable 1 BPP"
-	default y if NX_DISABLE_1BPP
-	default n if !NX_DISABLE_1BPP
+	default NX_DISABLE_1BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 1BPP
@@ -342,8 +341,7 @@ config NXFONTS_DISABLE_1BPP
 
 config NXFONTS_DISABLE_2BPP
 	bool "Disable 2 BPP"
-	default y if NX_DISABLE_2BPP
-	default n if !NX_DISABLE_2BPP
+	default NX_DISABLE_2BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 2BPP
@@ -351,8 +349,7 @@ config NXFONTS_DISABLE_2BPP
 
 config NXFONTS_DISABLE_4BPP
 	bool "Disable 4 BPP"
-	default y if NX_DISABLE_4BPP
-	default n if !NX_DISABLE_4BPP
+	default NX_DISABLE_4BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 4BPP
@@ -360,8 +357,7 @@ config NXFONTS_DISABLE_4BPP
 
 config NXFONTS_DISABLE_8BPP
 	bool "Disable 8 BPP"
-	default y if NX_DISABLE_8BPP
-	default n if !NX_DISABLE_8BPP
+	default NX_DISABLE_8BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 8BPP
@@ -369,8 +365,7 @@ config NXFONTS_DISABLE_8BPP
 
 config NXFONTS_DISABLE_16BPP
 	bool "Disable 16 BPP"
-	default y if NX_DISABLE_8BPP
-	default n if !NX_DISABLE_8BPP
+	default NX_DISABLE_8BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 16BPP
@@ -378,8 +373,7 @@ config NXFONTS_DISABLE_16BPP
 
 config NXFONTS_DISABLE_24BPP
 	bool "Disable 24 BPP"
-	default y if NX_DISABLE_24BPP
-	default n if !NX_DISABLE_24BPP
+	default NX_DISABLE_24BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 24BPP
@@ -387,8 +381,7 @@ config NXFONTS_DISABLE_24BPP
 
 config NXFONTS_DISABLE_32BPP
 	bool "Disable 32 BPP"
-	default y if NX_DISABLE_32BPP
-	default n if !NX_DISABLE_32BPP
+	default NX_DISABLE_32BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 32BPP
@@ -396,8 +389,7 @@ config NXFONTS_DISABLE_32BPP
 
 config NXFONTS_PACKEDMSFIRST
 	bool "Packed MS First"
-	default y if !NX || NX_PACKEDMSFIRST
-	default n if NX && !NX_PACKEDMSFIRST
+	default !NX || NX_PACKEDMSFIRST
 	select LCD_PACKEDMSFIRST if LCD
 	---help---
 		If a pixel depth of less than 8-bits is used, then NX needs to know if the

@@ -667,8 +667,7 @@ endif # ARCH_STACK_DYNAMIC
 
 config ARCH_KERNEL_STACK
 	bool "Kernel process stack"
-	default n if !LIBC_EXECFUNCS
-	default y if LIBC_EXECFUNCS
+	default LIBC_EXECFUNCS
 	depends on BUILD_KERNEL
 	---help---
 		It this option is selected, then every user process will have two

@@ -100,8 +100,7 @@ if DRVR_WRITEBUFFER || DRVR_READAHEAD
 
 config DRVR_READBYTES
 	bool "Support byte read method"
-	default y if MTD_BYTE_WRITE
-	default n if !MTD_BYTE_WRITE
+	default MTD_BYTE_WRITE
 
 config DRVR_REMOVABLE
 	bool "Support removable media"

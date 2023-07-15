@@ -7,8 +7,7 @@ menu "Thread Local Storage (TLS)"
 
 config TLS_ALIGNED
 	bool "Require stack alignment"
-	default y if BUILD_KERNEL
-	default n if !BUILD_KERNEL
+	default BUILD_KERNEL
 	---help---
 		Aligned TLS works by fetching thread information from the beginning
 		of the stack memory allocation.  In order to do this, the memory

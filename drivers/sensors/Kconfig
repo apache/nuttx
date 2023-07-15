@@ -1008,7 +1008,7 @@ config SENSORS_LIS3MDL
 
 config LM75_I2C
 	bool
-	default y if LM75
+	default LM75
 
 config SENSORS_LM75
 	bool "STMicro LM-75 Temperature Sensor support"
