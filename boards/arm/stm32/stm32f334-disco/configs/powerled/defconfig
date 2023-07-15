@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_FPU is not set
-# CONFIG_DEV_NULL is not set
 # CONFIG_DISABLE_POSIX_TIMERS is not set
 # CONFIG_DISABLE_PSEUDOFS_OPERATIONS is not set
 # CONFIG_NSH_DISABLEBG is not set

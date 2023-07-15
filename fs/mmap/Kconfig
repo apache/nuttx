@@ -25,6 +25,6 @@ config FS_RAMMAP
 
 config FS_ANONMAP
 	bool "Anonymous mapping emulation"
-	default y
+	default !DEFAULT_SMALL
 	---help---
 		Simulate private anonymous mappings by plain malloc

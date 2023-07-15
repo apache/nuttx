@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_LEDS is not set
-# CONFIG_DEV_NULL is not set
 # CONFIG_NSH_DISABLEBG is not set
 # CONFIG_NSH_DISABLE_DF is not set
 # CONFIG_NSH_DISABLE_EXEC is not set
