@@ -109,6 +109,17 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
       return -ESRCH;
     }
 
+  /* Allocate an I/O buffer.  This buffer is used by mod_symname() to
+   * accumulate the variable length symbol name.
+   */
+
+  ret = modlib_allocbuffer(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
+      return -ENOMEM;
+    }
+
   offset = sh_offset + sym->st_name;
 
   /* Loop until we get the entire symbol name into memory */

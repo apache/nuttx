@@ -73,6 +73,17 @@ static inline int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
       return -EINVAL;
     }
 
+  /* Allocate an I/O buffer.  This buffer is used by modlib_sectname() to
+   * accumulate the variable length symbol name.
+   */
+
+  ret = modlib_allocbuffer(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
+      return -ENOMEM;
+    }
+
   /* Get the section name string table section header */
 
   shstr = &loadinfo->shdr[shstrndx];
