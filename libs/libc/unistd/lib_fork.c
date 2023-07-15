@@ -24,10 +24,108 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 
 #include <unistd.h>
+#include <stdio.h>
 
 #if defined(CONFIG_ARCH_HAVE_FORK)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_PTHREAD_ATFORK
+/****************************************************************************
+ * Name:  atfork_prepare
+ *
+ * Description:
+ *    Invoke this method in the parent process before fork starts
+ *
+ ****************************************************************************/
+
+static void atfork_prepare(void)
+{
+  FAR struct task_info_s *info = task_get_info();
+  FAR struct list_node *list = &info->ta_atfork;
+  FAR struct pthread_atfork_s *entry;
+
+  /* According to posix standard, the prepare handlers are called in reverse
+   * order of registration
+   * so we iterate over the func list in reverse order
+   */
+
+  nxmutex_lock(&info->ta_lock);
+  list_for_every_entry_reverse(list, entry,
+                               struct pthread_atfork_s, node)
+    {
+       if (entry->prepare != NULL)
+         {
+           entry->prepare();
+         }
+    }
+
+  nxmutex_unlock(&info->ta_lock);
+}
+
+/****************************************************************************
+ * Name:  atfork_child
+ *
+ * Description:
+ *    Invoke this method in the child process after fork completes
+ *
+ ****************************************************************************/
+
+static void atfork_child(void)
+{
+  FAR struct task_info_s *info = task_get_info();
+  FAR struct list_node *list = &info->ta_atfork;
+  FAR struct pthread_atfork_s *entry;
+
+  /* The parent handlers are called in the order of registration */
+
+  nxmutex_lock(&info->ta_lock);
+  list_for_every_entry(list, entry,
+                       struct pthread_atfork_s, node)
+    {
+       if (entry->child != NULL)
+         {
+           entry->child();
+         }
+    }
+
+  nxmutex_unlock(&info->ta_lock);
+}
+
+/****************************************************************************
+ * Name:  atfork_parent
+ *
+ * Description:
+ *    Invoke this method in the parent process after fork completes
+ *
+ ****************************************************************************/
+
+static void atfork_parent(void)
+{
+  FAR struct task_info_s *info = task_get_info();
+  FAR struct list_node *list = &info->ta_atfork;
+  FAR struct pthread_atfork_s *entry;
+
+  /* The child handlers are called in the order of registration */
+
+  nxmutex_lock(&info->ta_lock);
+  list_for_every_entry(list, entry,
+                       struct pthread_atfork_s, node)
+    {
+      if (entry->parent != NULL)
+        {
+          entry->parent();
+        }
+    }
+
+  nxmutex_unlock(&info->ta_lock);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -50,7 +148,22 @@
 pid_t fork(void)
 {
   pid_t pid;
+
+#ifdef CONFIG_PTHREAD_ATFORK
+  atfork_prepare();
+#endif
   pid = up_fork();
+
+#ifdef CONFIG_PTHREAD_ATFORK
+  if (pid == 0)
+    {
+      atfork_child();
+    }
+  else
+    {
+      atfork_parent();
+    }
+#endif
 
   return pid;
 }

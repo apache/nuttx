@@ -255,6 +255,15 @@
       &entry->member != (list); entry = temp, \
       temp = container_of(temp->member.next, type, member))
 
+/* iterates over the list in reverse order, entry should be the container
+ * structure type
+ */
+
+#define list_for_every_entry_reverse(list, entry, type, member) \
+  for(entry = container_of((list)->prev, type, member); \
+      &entry->member != (list); \
+      entry = container_of(entry->member.next, type, member))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

@@ -25,6 +25,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/list.h>
 
 #include "tls.h"
 
@@ -49,6 +50,21 @@
 void task_uninit_info(FAR struct task_group_s *group)
 {
   FAR struct task_info_s *info = group->tg_info;
+
+#ifdef CONFIG_PTHREAD_ATFORK
+  /* Remove the functions that registered with pthread_atfork() */
+
+  FAR struct list_node *list = &info->ta_atfork;
+  FAR struct pthread_atfork_s *entry;
+
+  while (!list_is_empty(list))
+    {
+      entry = list_first_entry(list,
+                               struct pthread_atfork_s, node);
+      list_delete_init(&entry->node);
+      lib_free(entry);
+    }
+#endif
 
 #ifdef CONFIG_FILE_STREAM
   /* Free resource held by the stream list */
