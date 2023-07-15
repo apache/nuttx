@@ -90,9 +90,6 @@ extern "C"
 #  else
      typedef uint8_t tls_ndxset_t;
 #  endif
-
-typedef CODE void (*tls_dtor_t)(FAR void *);
-
 #endif
 
 #if CONFIG_TLS_TASK_NELEM > 0
@@ -108,6 +105,8 @@ typedef CODE void (*tls_dtor_t)(FAR void *);
      typedef uint8_t tls_task_ndxset_t;
 #  endif
 #endif
+
+typedef CODE void (*tls_dtor_t)(FAR void *);
 
 /* This structure encapsulates all variables associated with getopt(). */
 
@@ -225,7 +224,7 @@ struct tls_info_s
 #if CONFIG_TLS_TASK_NELEM > 0
 
 /****************************************************************************
- * Name: task_tls_allocs
+ * Name: task_tls_alloc
  *
  * Description:
  *   Allocate a global-unique task local storage data index
