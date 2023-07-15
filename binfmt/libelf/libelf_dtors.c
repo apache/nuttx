@@ -83,17 +83,6 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
 
   DEBUGASSERT(loadinfo->dtors == NULL);
 
-  /* Allocate an I/O buffer if necessary.  This buffer is used by
-   * elf_sectname() to accumulate the variable length symbol name.
-   */
-
-  ret = elf_allocbuffer(loadinfo);
-  if (ret < 0)
-    {
-      berr("elf_allocbuffer failed: %d\n", ret);
-      return -ENOMEM;
-    }
-
   /* Find the index to the section named ".dtors."  NOTE:  On old ABI system,
    * .dtors is the name of the section containing the list of destructors;
    * On newer systems, the similar section is called .fini_array.  It is
