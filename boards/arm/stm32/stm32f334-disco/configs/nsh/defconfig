@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_FPU is not set
-# CONFIG_DEV_NULL is not set
 # CONFIG_LIBC_LONG_LONG is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32f334-disco"

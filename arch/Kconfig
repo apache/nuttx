@@ -314,7 +314,7 @@ config ARCH_COVERAGE
 config ARCH_COVERAGE_ALL
 	bool "Enable code coverage for the entire image"
 	depends on ARCH_COVERAGE
-	default y
+	default n
 	---help---
 		This option activates code coverage instrumentation for the
 		entire image. If you don't enable this option, you have to

@@ -9,7 +9,7 @@ config DEV_SIMPLE_ADDRENV
 
 config DEV_NULL
 	bool "Enable /dev/null"
-	default y
+	default !DEFAULT_SMALL
 
 config DEV_ZERO
 	bool "Enable /dev/zero"
