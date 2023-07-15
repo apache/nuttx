@@ -60,7 +60,7 @@
 FAR char *basename(FAR char *path)
 {
   FAR char *p;
-  int       len;
+  size_t    len;
 
   /* Handle some corner cases */
 
