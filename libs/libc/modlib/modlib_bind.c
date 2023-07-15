@@ -811,17 +811,6 @@ int modlib_bind(FAR struct module_s *modp,
       return ret;
     }
 
-  /* Allocate an I/O buffer.  This buffer is used by mod_symname() to
-   * accumulate the variable length symbol name.
-   */
-
-  ret = modlib_allocbuffer(loadinfo);
-  if (ret < 0)
-    {
-      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
-      return -ENOMEM;
-    }
-
   /* Process relocations in every allocated section */
 
   for (i = 1; i < loadinfo->ehdr.e_shnum; i++)
