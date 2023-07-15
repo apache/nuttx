@@ -147,7 +147,6 @@ void renesas_fullcontextrestore(uint32_t *regs) noreturn_function;
 void renesas_prefetchabort(uint32_t *regs);
 void renesas_sigdeliver(void);
 void renesas_syscall(uint32_t *regs);
-void renesas_undefinedinsn(uint32_t *regs);
 void renesas_lowputc(char ch);
 void renesas_lowputs(const char *str);
 
