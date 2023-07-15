@@ -36,7 +36,7 @@ config SAMA5D2XULT_USBHOST_PRIO
 
 config SAMA5_SDMMC
 	bool "enable SDMMC controller"
-	default y if SAMA5_HAVE_SDMMC
+	default SAMA5_HAVE_SDMMC
 	select SDIO_DMA
 	select SCHED_HPWORK
 	select MMCSD
@@ -49,7 +49,7 @@ config SAMA5_SDMMC
 
 config SAMA5_SDMMC0
 	bool "Enable SDMMC0 (built-in eMMC)"
-	default n if SAMA5_SDMMC
+	default !SAMA5_SDMMC
 	depends on SAMA5_SDMMC
 
 config SAMA5_SDMMC0_SIZE
@@ -86,7 +86,7 @@ config SAMA5_SDMMC0_WIDTH_D1_D8
 
 config SAMA5_SDMMC1
 	bool "Enable SDMMC1"
-	default y if SAMA5_SDMMC
+	default SAMA5_SDMMC
 	select SAMA5_SDMMC1_WIDTH_D1_D4
 	depends on SAMA5_SDMMC
 

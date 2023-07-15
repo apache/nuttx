@@ -960,7 +960,7 @@ config ST7565_MIRROR_X
 
 config ST7565_MIRROR_Y
 	bool "ST7565 apply mirror on Y"
-	default y if AQM_1248A
+	default AQM_1248A
 	default n
 	---help---
 		Mirror Y on LCD.

@@ -2677,7 +2677,7 @@ config STM32F7_CUSTOM_CLOCKCONFIG
 
 config STM32F7_DTCMEXCLUDE
 	bool "Exclude DTCM SRAM from the heap"
-	default y if LIBC_ARCH_ELF
+	default LIBC_ARCH_ELF
 	depends on ARMV7M_HAVE_DTCM
 	---help---
 		Exclude DTCM SRAM from the HEAP because it appears to be impossible
@@ -6217,7 +6217,7 @@ config STM32F7_ADC1_DMA
 config STM32F7_ADC1_SCAN
 	bool "ADC1 scan mode"
 	depends on STM32F7_ADC1
-	default y if STM32F7_ADC1_DMA
+	default STM32F7_ADC1_DMA
 	default n
 
 config STM32F7_ADC1_DMA_CFG
@@ -6250,8 +6250,7 @@ config STM32F7_ADC2_DMA
 config STM32F7_ADC2_SCAN
 	bool "ADC2 scan mode"
 	depends on STM32F7_ADC2
-	default y if STM32F7_ADC2_DMA
-	default n
+	default STM32F7_ADC2_DMA
 
 config STM32F7_ADC2_DMA_CFG
 	int "ADC2 DMA configuration"
@@ -6283,8 +6282,7 @@ config STM32F7_ADC3_DMA
 config STM32F7_ADC3_SCAN
 	bool "ADC3 scan mode"
 	depends on STM32F7_ADC3
-	default y if STM32F7_ADC3_DMA
-	default n
+	default STM32F7_ADC3_DMA
 
 config STM32F7_ADC3_DMA_CFG
 	int "ADC3 DMA configuration"
@@ -6543,7 +6541,7 @@ config STM32F7_ETH_PTP
 
 config STM32F7_RMII
 	bool
-	default y if !STM32F7_MII
+	default !STM32F7_MII
 
 choice
 	prompt "RMII clock configuration"

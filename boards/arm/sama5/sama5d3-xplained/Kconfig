@@ -22,8 +22,7 @@ endchoice # CPU Frequency
 
 config SAMA5D3XPLAINED_SLOWCLOCK
 	bool
-	default y if SCHED_TICKLESS
-	default n if !SCHED_TICKLESS
+	default SCHED_TICKLESS
 
 choice
 	prompt "SAMA5D3-Xplained DRAM Type"

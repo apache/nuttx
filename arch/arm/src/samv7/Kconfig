@@ -1430,8 +1430,7 @@ config SAMV7_WDT_INTERRUPT
 
 config SAMV7_WDT_DEBUGHALT
 	bool "Halt on DEBUG"
-	default y if DEBUG_FEATURES
-	default n if !DEBUG_FEATURES
+	default DEBUG_FEATURES
 	---help---
 		Halt the watchdog timer in the debug state
 
@@ -1464,8 +1463,7 @@ config SAMV7_RSWDT_INTERRUPT
 
 config SAMV7_RSWDT_DEBUGHALT
 	bool "Halt on DEBUG"
-	default y if DEBUG_FEATURES
-	default n if !DEBUG_FEATURES
+	default DEBUG_FEATURES
 	---help---
 		Halt the watchdog timer in the debug state
 
@@ -2374,16 +2372,14 @@ endif # SAMV7_TC3
 
 config SAMV7_ONESHOT
 	bool "TC one-shot wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
 config SAMV7_FREERUN
 	bool "TC free-running wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.

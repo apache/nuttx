@@ -496,16 +496,14 @@ config SAMD5E5_TC7
 
 config SAMD5E5_ONESHOT
 	bool "TC one-shot wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
 config SAMD5E5_FREERUN
 	bool "TC free-running wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.

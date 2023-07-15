@@ -2101,7 +2101,7 @@ config STM32H7_SRAM4EXCLUDE
 
 config STM32H7_DTCMEXCLUDE
 	bool "Exclude DTCM SRAM from the heap"
-	default y if LIBC_ARCH_ELF
+	default LIBC_ARCH_ELF
 	depends on ARMV7M_HAVE_DTCM
 	---help---
 		Exclude DTCM SRAM from the HEAP because it appears to be impossible
@@ -5420,7 +5420,7 @@ config STM32H7_ETH_PTP
 
 config STM32H7_RMII
 	bool
-	default y if !STM32H7_MII
+	default !STM32H7_MII
 
 choice
 	prompt "RMII clock configuration"

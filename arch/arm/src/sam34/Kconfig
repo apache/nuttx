@@ -437,8 +437,7 @@ config SAM34_NAND
 config SAM34_OCD
 	bool "On-chip DEBUG (OCD)"
 	depends on ARCH_CHIP_SAM4L
-	default y if DEBUG_SYMBOLS
-	default n if !DEBUG_SYMBOLS
+	default DEBUG_SYMBOLS
 
 config SAM34_PARC
 	bool "Parallel Capture (PARC)"
@@ -1083,16 +1082,14 @@ config SAM34_TC5_TIOB
 
 config SAM34_ONESHOT
 	bool "TC one-shot wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
 config SAM34_FREERUN
 	bool "TC free-running wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.

@@ -867,8 +867,7 @@ config LPC54_ETH_RX_BROADCAST
 
 config LPC54_ETH_RX_ALLMULTICAST
 	bool "Accept all multicast packets"
-	default y if NET_BROADCAST
-	default n if !NET_BROADCAST
+	default NET_BROADCAST
 	---help---
 		If selected, all received frames with a multicast destination
 		address (first bit in the destination address field is '1') are

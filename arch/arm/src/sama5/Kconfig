@@ -2572,8 +2572,7 @@ config SAMA5_EMAC_MII
 
 config SAMA5_EMAC_RMII
 	bool
-	default y if !SAMA5_EMAC_MII
-	default n if SAMA5_EMAC_MII
+	default !SAMA5_EMAC_MII
 
 config SAMA5_EMAC_AUTONEG
 	bool "Use autonegotiation"
@@ -5056,16 +5055,14 @@ endif # SAMA5_TC2
 
 config SAMA5_ONESHOT
 	bool "TC one-shot wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
 config SAMA5_FREERUN
 	bool "TC free-running wrapper"
-	default n if !SCHED_TICKLESS
-	default y if SCHED_TICKLESS
+	default SCHED_TICKLESS
 	---help---
 		Enable a wrapper around the low level timer/counter functions to
 		support a free-running timer.
@@ -5360,8 +5357,7 @@ config SAMA5_WDT_INTERRUPT
 
 config SAMA5_WDT_DEBUGHALT
 	bool "Halt on DEBUG"
-	default y if DEBUG_FEATURES
-	default n if !DEBUG_FEATURES
+	default DEBUG_FEATURES
 	---help---
 		Halt the watchdog timer in the debug state
 
@@ -6235,7 +6231,7 @@ endmenu # Heap Configuration
 
 config SAMA5_SDMMC
 	bool "enable SDMMC controller"
-	default y if SAMA5_HAVE_SDMMC
+	default SAMA5_HAVE_SDMMC
 	select SDIO_DMA
 	select SCHED_HPWORK
 	select MMCSD

@@ -164,7 +164,7 @@ config NRF53_SPI_MASTER
 
 config NRF53_IPC
 	bool
-	default y if RPTUN
+	default RPTUN
 
 config NRF53_UART
 	bool
@@ -375,7 +375,7 @@ endif # NRF53_USE_HFCLK192M
 
 config NRF53_OSCILLATOR_LFXO
 	bool "Configure LFXO oscillator"
-	default y if NRF53_LFCLK_XTAL
+	default NRF53_LFCLK_XTAL
 	depends on NRF53_APPCORE
 	---help---
 		Configure LFXO oscillator
@@ -777,8 +777,7 @@ config NRF53_SDC_LE_2M_PHY
 
 config NRF53_SDC_LE_CODED_PHY
 	bool "Support LE Coded PHY"
-	default n if ARCH_CHIP_NRF53832
-	default y if ARCH_CHIP_NRF53840
+	default ARCH_CHIP_NRF53840
 	depends on NRF53_SDC_MULTIROLE
 
 config NRF53_SDC_DLE

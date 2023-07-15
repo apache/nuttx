@@ -3693,7 +3693,7 @@ config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
 
 config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
-	default y if STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
+	default STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
 	default n
 	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 	---help---
@@ -3764,7 +3764,7 @@ config STM32_I2SPLL
 
 config STM32_CCMEXCLUDE
 	bool "Exclude CCM SRAM from the heap"
-	default y if ARCH_DMA || LIBC_ARCH_ELF
+	default ARCH_DMA || LIBC_ARCH_ELF
 	depends on STM32_HAVE_CCM
 	---help---
 		Exclude CCM SRAM from the HEAP because (1) it cannot be used for DMA
@@ -3783,8 +3783,7 @@ config STM32_CCM_PROCFS
 config STM32_DMACAPABLE
 	bool "Workaround non-DMA capable memory"
 	depends on ARCH_DMA
-	default y if STM32_STM32F4XXX && !STM32_CCMEXCLUDE
-	default n if !STM32_STM32F4XXX || STM32_CCMEXCLUDE
+	default STM32_STM32F4XXX && !STM32_CCMEXCLUDE
 	---help---
 		This option enables the DMA interface stm32_dmacapable that can be
 		used to check if it is possible to do DMA from the selected address.
@@ -8577,7 +8576,7 @@ config STM32_ADC1_DMA
 config STM32_ADC1_SCAN
 	bool "ADC1 scan mode"
 	depends on STM32_ADC1 && STM32_HAVE_IP_ADC_V1
-	default y if STM32_ADC1_DMA
+	default STM32_ADC1_DMA
 	default n
 
 config STM32_ADC1_DMA_CFG
@@ -8610,7 +8609,7 @@ config STM32_ADC2_DMA
 config STM32_ADC2_SCAN
 	bool "ADC2 scan mode"
 	depends on STM32_ADC2 && STM32_HAVE_IP_ADC_V1
-	default y if STM32_ADC2_DMA
+	default STM32_ADC2_DMA
 	default n
 
 config STM32_ADC2_DMA_CFG
@@ -8643,7 +8642,7 @@ config STM32_ADC3_DMA
 config STM32_ADC3_SCAN
 	bool "ADC3 scan mode"
 	depends on STM32_ADC3 && STM32_HAVE_IP_ADC_V1
-	default y if STM32_ADC3_DMA
+	default STM32_ADC3_DMA
 	default n
 
 config STM32_ADC3_DMA_CFG
@@ -10582,8 +10581,7 @@ menu "I2C Configuration"
 
 config STM32_I2C_ALT
 	bool "Alternate I2C implementation"
-	default n if !STM32_PERFORMANCELINE
-	default y if STM32_PERFORMANCELINE
+	default STM32_PERFORMANCELINE
 	depends on !STM32_STM32F30XX
 	---help---
 		This selection enables an alternative I2C driver.  This alternate
@@ -10659,8 +10657,7 @@ config STM32_SDIO_PULLUP
 
 config STM32_SDIO_DMA
 	bool "Support DMA data transfers"
-	default y if STM32_DMA2
-	default n if !STM32_DMA2
+	default STM32_DMA2
 	select SDIO_DMA
 	depends on STM32_DMA2
 	---help---
@@ -10932,7 +10929,7 @@ config STM32_ETH_PTP
 
 config STM32_RMII
 	bool
-	default y if !STM32_MII
+	default !STM32_MII
 
 choice
 	prompt "RMII clock configuration"
@@ -11115,8 +11112,7 @@ endmenu
 
 config STM32_USB_ITRMP
 	bool "Re-map USB interrupt"
-	default n if !STM32_CAN1
-	default y if STM32_CAN1
+	default STM32_CAN1
 	depends on STM32_USB && STM32_STM32F30XX
 	---help---
 		The legacy USB in the F1 series shared interrupt lines with USB

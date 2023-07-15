@@ -784,7 +784,7 @@ menu "SDCARD Configuration"
 
 config LPC17_40_SDCARD_DMA
 	bool "Support DMA data transfers"
-	default y if LPC17_40_GPDMA
+	default LPC17_40_GPDMA
 	select SDIO_DMA
 	depends on LPC17_40_GPDMA
 	---help---
@@ -867,8 +867,7 @@ config LPC17_40_ETH_HASH
 
 config LPC17_40_MULTICAST
 	bool "Multicast"
-	default y if NET_MCASTGROUP
-	default n if !NET_MCASTGROUP
+	default NET_MCASTGROUP
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set
 		if NET_MCASTGROUP is selected.
