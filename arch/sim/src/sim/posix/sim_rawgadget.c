@@ -629,6 +629,8 @@ static void *host_raw_ephandle(void *arg)
 
       if (io)
         {
+          int len;
+
           if (entry->halted)
             {
               host_raw_epclearhalt(dev->fd, entry->raw_epid);
@@ -638,8 +640,12 @@ static void *host_raw_ephandle(void *arg)
           io->inner.ep = entry->raw_epid;
           io->inner.flags = 0;
           io->inner.length = USB_RAW_EP_MAX_LEN;
-          io->inner.length = host_raw_epread(dev->fd, &io->inner);
-          USB_RAW_FIFO_PUSH(&entry->fifo);
+          len = host_raw_epread(dev->fd, &io->inner);
+          if (len > 0)
+            {
+              io->inner.length = len;
+              USB_RAW_FIFO_PUSH(&entry->fifo);
+            }
         }
       else
         {
