@@ -51,25 +51,27 @@
  *  void board_userled_all(uint32_t ledset);
  */
 
-#define LED_ON 1
-#define LED_OFF 0
 
 /* This array maps an LED number to GPIO pin configuration */
 
 static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-#if 0 < BOARD_NLEDS
   GPIO_LED1,
-#endif
-#if 1 < BOARD_NLEDS
   GPIO_LED2,
-#endif
-#if 2 < BOARD_NLEDS
   GPIO_LED3,
-#endif
-#if 3 < BOARD_NLEDS
   GPIO_LED4,
-#endif
+  GPIO_LED5
+};
+
+
+static const uint32_t g_ledoff[BOARD_NLEDS] =
+{
+  0, 0, 1, 1, 1
+};
+
+static const uint32_t g_ledon[BOARD_NLEDS] =
+{
+  1, 1, 0, 0, 0
 };
 
 /****************************************************************************
@@ -125,7 +127,7 @@ void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
-      nrf52_gpio_write(g_ledcfg[led], ledon ? LED_ON : LED_OFF);
+      nrf52_gpio_write(g_ledcfg[led], ledon ? g_ledon[led] : g_ledoff[led]);
     }
 }
 
@@ -141,7 +143,7 @@ void board_userled_all(uint32_t ledset)
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
-      nrf52_gpio_write(g_ledcfg[i], (ledset & (1 << i)) ? LED_ON : LED_OFF);
+      nrf52_gpio_write(g_ledcfg[i], (ledset & (1 << i)) ? g_ledon[led] : g_ledoff[led]);
     }
 }
 

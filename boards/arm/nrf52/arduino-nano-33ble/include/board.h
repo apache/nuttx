@@ -42,8 +42,7 @@
 
 /* LED definitions **********************************************************/
 
-/* A high output illuminates the LED.
- *
+/*
  * LED index values for use with board_userled()
  */
 
@@ -51,7 +50,8 @@
 #define BOARD_LED2        1
 #define BOARD_LED3        2
 #define BOARD_LED4        3
-#define BOARD_NLEDS       4
+#define BOARD_LED5        4
+#define BOARD_NLEDS       5
 
 /* LED bits for use with board_userled_all() */
 
@@ -59,6 +59,7 @@
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
+#define BOARD_LED5_BIT    (1 << BOARD_LED5)
 
 /* If CONFIG_ARCH_LEDS is defined, the LED will be controlled as follows
  * for NuttX debug functionality.
@@ -94,7 +95,7 @@
  * driver can set up the UART for the serial console properly.
  */
 
-#define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(1))
-#define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(0))
+#define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(10))
+#define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN(3))
 
 #endif /* __BOARDS_ARM_NRF52_ARDUINO_NANO_33BLE_INCLUDE_BOARD_H */

@@ -38,16 +38,18 @@
 
 /* Definitions to configure LED GPIO as outputs */
 
-/* 0 = power, 1 = red, 2 = green, 3 = blue */
+/* 0 = power, 1 = main, 2 = red, 3 = green, 4 = blue */
+/* Power and main are active high, RGB are active low */
 
-#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(25))
-#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(22))
-#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(23))
-#define GPIO_LED4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(24))
+#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT1 | GPIO_PIN(9))
+#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(13))
+#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(24))
+#define GPIO_LED4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(16))
+#define GPIO_LED5  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(6))
 
 /* Button definitions *******************************************************/
 
-/* Board supports no buttons. */
+/* Board supports no buttons. (Reset button hardwired to return to bootloader.) */
 
 /****************************************************************************
  * Public Types

@@ -37,25 +37,25 @@
 
 #ifdef CONFIG_ARCH_LEDS
 
-#define LED_ON 1
-#define LED_OFF 0
-
 /* This array maps an LED number to GPIO pin configuration */
 
 static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-#if 0 < BOARD_NLEDS
   GPIO_LED1,
-#endif
-#if 1 < BOARD_NLEDS
   GPIO_LED2,
-#endif
-#if 2 < BOARD_NLEDS
   GPIO_LED3,
-#endif
-#if 3 < BOARD_NLEDS
   GPIO_LED4,
-#endif
+  GPIO_LED5
+};
+
+static const uint32_t g_ledoff[BOARD_NLEDS] =
+{
+  0, 0, 1, 1, 1
+};
+
+static const uint32_t g_ledon[BOARD_NLEDS] =
+{
+  1, 1, 0, 0, 0
 };
 
 /****************************************************************************
@@ -95,7 +95,6 @@ void board_autoled_initialize(void)
   for (i = 0; i < BOARD_NLEDS; i++)
     {
       nrf52_gpio_config(g_ledcfg[i]);
-      nrf52_gpio_write(g_ledcfg[i], LED_OFF);
     }
 
   led_dumppins("board_autoled_initialize() Exit");
@@ -109,34 +108,32 @@ void board_autoled_on(int led)
 {
   switch (led) {
     case LED_STARTED: /* Power */
-      nrf52_gpio_write(g_ledcfg[0], LED_ON);
+      nrf52_gpio_write(g_ledcfg[0], g_ledon[0]);
       break;
     case LED_HEAPALLOCATE: /* Yellow (red + green) only */
-      nrf52_gpio_write(g_ledcfg[1], LED_ON);
-      nrf52_gpio_write(g_ledcfg[2], LED_ON);
-      nrf52_gpio_write(g_ledcfg[3], LED_OFF);
+      nrf52_gpio_write(g_ledcfg[2], g_ledon[2]);
+      nrf52_gpio_write(g_ledcfg[3], g_ledon[3]);
+      nrf52_gpio_write(g_ledcfg[4], g_ledoff[4]);
       break;
     case LED_IRQSENABLED: /* Green only */
-      nrf52_gpio_write(g_ledcfg[1], LED_OFF);
-      nrf52_gpio_write(g_ledcfg[2], LED_ON);
-      nrf52_gpio_write(g_ledcfg[3], LED_OFF);
+      nrf52_gpio_write(g_ledcfg[2], g_ledoff[2]);
+      nrf52_gpio_write(g_ledcfg[3], g_ledon[3]);
+      nrf52_gpio_write(g_ledcfg[4], g_ledoff[4]);
       break;
-    case LED_STACKCREATED: /* Blue only */
-      nrf52_gpio_write(g_ledcfg[1], LED_OFF);
-      nrf52_gpio_write(g_ledcfg[2], LED_OFF);
-      nrf52_gpio_write(g_ledcfg[3], LED_ON);
+    case LED_STACKCREATED: /* Main LED */
+      nrf52_gpio_write(g_ledcfg[1], g_ledon[1]);
       break;
-    case LED_INIRQ: /* Red added to the blue for LED_STACKCREATED */
-      nrf52_gpio_write(g_ledcfg[1], LED_ON);
+    case LED_INIRQ: /* Red added to the green for LED_IRQSENABLED */
+      nrf52_gpio_write(g_ledcfg[2], g_ledon[2]);
       break;
-    case LED_SIGNAL: /* Green added to the blue for LED_STACKCREATED */
-      nrf52_gpio_write(g_ledcfg[1], LED_ON);
+    case LED_SIGNAL: /* Blue added to the green for LED_IRQSENABLED */
+      nrf52_gpio_write(g_ledcfg[4], g_ledon[4]);
       break;
     case LED_ASSERTION: /* Red only */
     case LED_PANIC: /* Red only, system will cause blink */
-      nrf52_gpio_write(g_ledcfg[1], LED_ON);
-      nrf52_gpio_write(g_ledcfg[2], LED_OFF);
-      nrf52_gpio_write(g_ledcfg[3], LED_OFF);
+      nrf52_gpio_write(g_ledcfg[2], g_ledon[2]);
+      nrf52_gpio_write(g_ledcfg[3], g_ledoff[3]);
+      nrf52_gpio_write(g_ledcfg[4], g_ledoff[4]);
       break;
     default:
       break;
@@ -150,17 +147,17 @@ void board_autoled_on(int led)
 void board_autoled_off(int led)
 {
   switch (led) {
-    case LED_INIRQ: /* Red added to the blue for LED_STACKCREATED */
-      nrf52_gpio_write(g_ledcfg[1], LED_OFF);
+    case LED_INIRQ: /* Red added to the green for LED_IRQSENABLED */
+      nrf52_gpio_write(g_ledcfg[2], g_ledoff[2]);
       break;
-    case LED_SIGNAL: /* Green added to the blue for LED_STACKCREATED */
-      nrf52_gpio_write(g_ledcfg[1], LED_OFF);
+    case LED_SIGNAL: /* Blue added to the green for LED_IRQSENABLED */
+      nrf52_gpio_write(g_ledcfg[4], g_ledoff[4]);
       break;
     case LED_ASSERTION: /* Red only */
     case LED_PANIC: /* Red only, system will cause blink */
-      nrf52_gpio_write(g_ledcfg[1], LED_OFF);
-      nrf52_gpio_write(g_ledcfg[2], LED_OFF);
-      nrf52_gpio_write(g_ledcfg[3], LED_OFF);
+      nrf52_gpio_write(g_ledcfg[2], g_ledoff[2]);
+      nrf52_gpio_write(g_ledcfg[3], g_ledoff[3]);
+      nrf52_gpio_write(g_ledcfg[4], g_ledoff[4]);
       break;
     default: /* Others never turn off */
       break;
