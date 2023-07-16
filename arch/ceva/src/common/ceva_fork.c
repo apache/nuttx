@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fork
+ * Name: ceva_fork
  *
  * Description:
  *   The fork() function has the same effect as posix fork(), except that the
@@ -51,8 +51,8 @@
  *   The overall sequence is:
  *
  *   1) User code calls fork().  fork() collects context information and
- *      transfers control up up_fork().
- *   2) up_fork()and calls nxtask_forksetup().
+ *      transfers control up ceva_fork().
+ *   2) ceva_fork()and calls nxtask_forksetup().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
@@ -60,11 +60,12 @@
  *      - Configuration of environment variables
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state()
- *   4) up_fork() provides any additional operating context. up_fork must:
+ *   4) ceva_fork() provides any additional operating context. ceva_fork
+ *      must:
  *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_fork() then calls nxtask_start_fork()
+ *   5) ceva_fork() then calls nxtask_start_fork()
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * nxtask_abort_fork() may be called if an error occurs between steps 3 & 6.
@@ -80,7 +81,7 @@
  *
  ****************************************************************************/
 
-pid_t up_fork(const uint32_t *regs)
+pid_t ceva_fork(const uint32_t *regs)
 {
 #ifdef CONFIG_SCHED_WAITPID
   struct tcb_s *parent = this_task();
