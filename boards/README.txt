@@ -447,6 +447,9 @@ boards/hc/mcs92s12ne6/ne64badge
   STATUS:  Under development.  The port is code-complete but has
   not yet been fully tested.
 
+boards/arm/nrf52/arduino-nano-33ble
+  NuttX port to the Arduino Nano 33 BLE Sense board
+
 boards/arm/nrf52/nrf52-feather
   NuttX port to the Adafruit nRF52832 Feather board
 
