@@ -95,6 +95,7 @@
 #define _VIDIOCBASE     (0x3700) /* Video device ioctl commands */
 #define _CELLIOCBASE    (0x3800) /* Cellular device ioctl commands */
 #define _MIPIDSIBASE    (0x3900) /* Mipidsi device ioctl commands */
+#define _SYSLOGBASE     (0x3c00) /* Syslog device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -638,6 +639,11 @@
 
 #define _MIPIDSIIOCVALID(c)    (_IOC_TYPE(c)==_MIPIDSIBASE)
 #define _MIPIDSIIOC(nr)        _IOC(_MIPIDSIBASE,nr)
+
+/* syslog driver ioctl definitions ******************************************/
+
+#define _SYSLOGVALID(c) (_IOC_TYPE(c)==_SYSLOGBASE)
+#define _SYSLOGIOC(nr)  _IOC(_SYSLOGBASE,nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 

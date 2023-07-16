@@ -125,8 +125,8 @@
 
 /* Limits of sig_atomic_t type */
 
-#define SIG_ATOMIC_MIN		INT32_MIN
-#define SIG_ATOMIC_MAX		INT32_MAX
+#define SIG_ATOMIC_MIN      INT32_MIN
+#define SIG_ATOMIC_MAX      INT32_MAX
 
 /* Limits of greatest-width integer types */
 

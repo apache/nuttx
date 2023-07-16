@@ -189,7 +189,7 @@ void arm_gic_initialize(void)
 #elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
   /* Clear non-secure state ICCICR bits to be configured below */
 
-  iccicr &= ~(GIC_ICCICRS_EOIMODENS     |
+  iccicr &= ~(GIC_ICCICRU_EOIMODENS     |
               GIC_ICCICRU_ENABLEGRP1    |
               GIC_ICCICRU_FIQBYPDISGRP1 |
               GIC_ICCICRU_IRQBYPDISGRP1);
@@ -244,7 +244,7 @@ void arm_gic_initialize(void)
    * NOTE:  Only for processors that operate in non-secure state.
    */
 
-  iccicr |= GIC_ICCICRS_EOIMODENS;
+  iccicr |= GIC_ICCICRU_EOIMODENS;
 
 #  elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Set EnableNS=1 to enable the CPU to signal non-secure interrupts.
@@ -252,7 +252,7 @@ void arm_gic_initialize(void)
    * NOTE:  Only for processors that operate in non-secure state.
    */
 
-  iccicr |= GIC_ICCICRU_EOIMODENS;
+  iccicr |= GIC_ICCICRS_EOIMODENS;
 #  endif
 #endif
 

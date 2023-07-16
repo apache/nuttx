@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 #define STM32_TIM1_RES   16
-#define STM32_TIM2_RES 	 32
+#define STM32_TIM2_RES   32
 #define STM32_TIM3_RES   16
 #define STM32_TIM4_RES   16
 #define STM32_TIM5_RES   32

@@ -42,7 +42,7 @@
 #  define LITEX_UART0_PHY_TUNING_WORD   0xf0002000L
 #endif
 
-#define UART_EV_TX	0x1
-#define UART_EV_RX	0x2
+#define UART_EV_TX  0x1
+#define UART_EV_RX  0x2
 
 #endif /* _ARCH_RISCV_SRC_LITEX_CHIP_LITEX_UART_H */

@@ -113,7 +113,7 @@ typedef uint64_t  time_t;         /* Holds time in seconds */
 #else
 typedef uint32_t  time_t;         /* Holds time in seconds */
 #endif
-typedef uint8_t   clockid_t;      /* Identifies one time base source */
+typedef int       clockid_t;      /* Identifies one time base source */
 typedef FAR void *timer_t;        /* Represents one POSIX timer */
 
 /* struct timespec is the standard representation of time as seconds and

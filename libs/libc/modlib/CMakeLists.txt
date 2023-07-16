@@ -20,21 +20,26 @@
 
 if(CONFIG_LIBC_MODLIB)
 
-  target_sources(
-    c
-    PRIVATE modlib_bind.c
-            modlib_depend.c
-            modlib_init.c
-            modlib_iobuffer.c
-            modlib_load.c
-            modlib_loadshdrs.c
-            modlib_read.c
-            modlib_registry.c
-            modlib_sections.c
-            modlib_symbols.c
-            modlib_symtab.c
-            modlib_uninit.c
-            modlib_unload.c
-            modlib_verify.c)
+  list(
+    APPEND
+    SRCS
+    modlib_bind.c
+    modlib_depend.c
+    modlib_init.c
+    modlib_iobuffer.c
+    modlib_load.c
+    modlib_loadhdrs.c
+    modlib_read.c
+    modlib_registry.c
+    modlib_sections.c
+    modlib_symbols.c
+    modlib_symtab.c
+    modlib_uninit.c
+    modlib_unload.c
+    modlib_verify.c)
+
+  list(APPEND SRCS modlib_globals.S)
+
+  target_sources(c PRIVATE ${SRCS})
 
 endif()

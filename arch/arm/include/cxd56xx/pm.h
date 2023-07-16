@@ -34,26 +34,26 @@
 
 /* Boot Cause definitions */
 
-#define PM_BOOT_POR_NORMAL      (0x00000000ul) /** Power On Reset like as battery attached */
-#define PM_BOOT_POR_DEADBATT    (0x00000001ul) /** Battery charged from DeadBattery state */
-#define PM_BOOT_WDT_REBOOT      (0x00000002ul) /** System WDT expired or Explicitly Self Reboot */
-#define PM_BOOT_WDT_RESET       (0x00000004ul) /** Chip WDT expired (might be used in HV-only system) */
-#define PM_BOOT_DEEP_WKUPL      (0x00000008ul) /** In DeepSleep state, Detected WKUPL signal */
-#define PM_BOOT_DEEP_WKUPS      (0x00000010ul) /** In DeepSleep state, Detected WKUPS signal */
-#define PM_BOOT_DEEP_RTC        (0x00000020ul) /** In DeepSleep state, RTC Alarm expired */
-#define PM_BOOT_DEEP_USB_ATTACH (0x00000040ul) /** In DeepSleep state, USB Connected */
-#define PM_BOOT_DEEP_OTHERS     (0x00000080ul) /** In DeepSleep state, Reserved others cause occurred */
-#define PM_BOOT_COLD_SCU_INT    (0x00000100ul) /** In ColdSleep state, Detected SCU Interrupt */
-#define PM_BOOT_COLD_RTC        (0x00001e00ul) /** In ColdSleep state, RTC Alarm Interrupt */
-#define PM_BOOT_COLD_RTC_ALM0   (0x00000200ul) /** In ColdSleep state, RTC Alarm0 expired */
-#define PM_BOOT_COLD_RTC_ALM1   (0x00000400ul) /** In ColdSleep state, RTC Alarm1 expired */
-#define PM_BOOT_COLD_RTC_ALM2   (0x00000800ul) /** In ColdSleep state, RTC Alarm2 expired */
-#define PM_BOOT_COLD_RTC_ALMERR (0x00001000ul) /** In ColdSleep state, RTC Alarm Error occurred */
-#define PM_BOOT_COLD_GPIO       (0x0fff0000ul) /** In ColdSleep state, Detected GPIO interrupt */
-#define PM_BOOT_COLD_SEN_INT    (0x10000000ul) /** In ColdSleep state, Detected SEN_INT Interrupt */
-#define PM_BOOT_COLD_PMIC_INT   (0x20000000ul) /** In ColdSleep state, Detected PMIC Interrupt */
-#define PM_BOOT_COLD_USB_DETACH (0x40000000ul) /** In ColdSleep state, USB Disconnected */
-#define PM_BOOT_COLD_USB_ATTACH (0x80000000ul) /** In ColdSleep state, USB Connected */
+#define PM_BOOT_POR_NORMAL      (0x00000000ul) /* Power On Reset like as battery attached */
+#define PM_BOOT_POR_DEADBATT    (0x00000001ul) /* Battery charged from DeadBattery state */
+#define PM_BOOT_WDT_REBOOT      (0x00000002ul) /* System WDT expired or Explicitly Self Reboot */
+#define PM_BOOT_WDT_RESET       (0x00000004ul) /* Chip WDT expired (might be used in HV-only system) */
+#define PM_BOOT_DEEP_WKUPL      (0x00000008ul) /* In DeepSleep state, Detected WKUPL signal */
+#define PM_BOOT_DEEP_WKUPS      (0x00000010ul) /* In DeepSleep state, Detected WKUPS signal */
+#define PM_BOOT_DEEP_RTC        (0x00000020ul) /* In DeepSleep state, RTC Alarm expired */
+#define PM_BOOT_DEEP_USB_ATTACH (0x00000040ul) /* In DeepSleep state, USB Connected */
+#define PM_BOOT_DEEP_OTHERS     (0x00000080ul) /* In DeepSleep state, Reserved others cause occurred */
+#define PM_BOOT_COLD_SCU_INT    (0x00000100ul) /* In ColdSleep state, Detected SCU Interrupt */
+#define PM_BOOT_COLD_RTC        (0x00001e00ul) /* In ColdSleep state, RTC Alarm Interrupt */
+#define PM_BOOT_COLD_RTC_ALM0   (0x00000200ul) /* In ColdSleep state, RTC Alarm0 expired */
+#define PM_BOOT_COLD_RTC_ALM1   (0x00000400ul) /* In ColdSleep state, RTC Alarm1 expired */
+#define PM_BOOT_COLD_RTC_ALM2   (0x00000800ul) /* In ColdSleep state, RTC Alarm2 expired */
+#define PM_BOOT_COLD_RTC_ALMERR (0x00001000ul) /* In ColdSleep state, RTC Alarm Error occurred */
+#define PM_BOOT_COLD_GPIO       (0x0fff0000ul) /* In ColdSleep state, Detected GPIO interrupt */
+#define PM_BOOT_COLD_SEN_INT    (0x10000000ul) /* In ColdSleep state, Detected SEN_INT Interrupt */
+#define PM_BOOT_COLD_PMIC_INT   (0x20000000ul) /* In ColdSleep state, Detected PMIC Interrupt */
+#define PM_BOOT_COLD_USB_DETACH (0x40000000ul) /* In ColdSleep state, USB Disconnected */
+#define PM_BOOT_COLD_USB_ATTACH (0x80000000ul) /* In ColdSleep state, USB Connected */
 
 /* SRAM power status definitions */
 
@@ -350,14 +350,14 @@ int up_pm_reboot(void);
  * Name: up_pmic_set_notify
  *
  * Description:
- *   Register a callback for pmic interrupt
+ *   Register a callback for pmic interrupt.
  *
  * Input Parameter:
  *   kind - A kind of pmic interrupt defined as pmic_notify_e
  *   cb - A callback function for a kind of pmic interrupt
  *
  * Returned Value:
- *   Return 0 on success. Otherwise, return a negated errno.
+ *   Return 0 on success.  Otherwise, return a negated errno.
  *
  ****************************************************************************/
 

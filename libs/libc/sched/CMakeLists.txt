@@ -18,8 +18,15 @@
 #
 # ##############################################################################
 
-set(SRCS sched_getprioritymax.c sched_getprioritymin.c clock_ticks2time.c
-         clock_time2ticks.c clock_timespec_add.c clock_timespec_subtract.c)
+set(SRCS
+    sched_getprioritymax.c
+    sched_getprioritymin.c
+    clock_ticks2time.c
+    clock_time2ticks.c
+    clock_timespec_add.c
+    clock_timespec_subtract.c
+    clock_getcpuclockid.c
+    clock_getres.c)
 
 if(NOT CONFIG_CANCELLATION_POINTS)
   list(APPEND SRCS task_setcanceltype.c task_testcancel.c)
@@ -29,12 +36,12 @@ if(CONFIG_SMP)
   list(APPEND SRCS sched_cpucount.c)
 endif()
 
+if(CONFIG_SCHED_BACKTRACE)
+  list(APPEND SRCS sched_dumpstack.c sched_backtrace.c)
+endif()
+
 if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS task_startup.c)
-
-  if(CONFIG_SCHED_BACKTRACE)
-    list(APPEND SRCS sched_dumpstack.c sched_backtrace.c)
-  endif()
 endif()
 
 target_sources(c PRIVATE ${SRCS})

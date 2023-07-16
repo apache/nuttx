@@ -65,6 +65,14 @@ ifeq ($(CONFIG_SYSLOG_RTT),y)
   CSRCS += segger/syslog_rtt.c
 endif
 
+ifeq ($(CONFIG_NOTE_RTT),y)
+  CSRCS += segger/note_rtt.c
+endif
+
+ifeq ($(CONFIG_SERIAL_RTT),y)
+  CSRCS += segger/serial_rtt.c
+endif
+
 ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
   CSRCS += segger/note_sysview.c
   CSRCS += segger/SystemView/SYSVIEW/SEGGER_SYSVIEW.c

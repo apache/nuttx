@@ -82,17 +82,6 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 
   DEBUGASSERT(loadinfo->ctors == NULL);
 
-  /* Allocate an I/O buffer if necessary.  This buffer is used by
-   * elf_sectname() to accumulate the variable length symbol name.
-   */
-
-  ret = elf_allocbuffer(loadinfo);
-  if (ret < 0)
-    {
-      berr("elf_allocbuffer failed: %d\n", ret);
-      return -ENOMEM;
-    }
-
   /* Find the index to the section named ".ctors."  NOTE:  On old ABI system,
    * .ctors is the name of the section containing the list of constructors;
    * On newer systems, the similar section is called .init_array.  It is

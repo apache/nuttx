@@ -391,9 +391,9 @@ begin_packed_struct struct spiffs_page_header_s
 /* Object index header page header */
 
 #ifdef CONFIG_SPIFFS_LEADING_SLASH
-#define	SPIFFS_LEADING_SLASH_SIZE	1
+#define SPIFFS_LEADING_SLASH_SIZE   1
 #else
-#define	SPIFFS_LEADING_SLASH_SIZE	0
+#define SPIFFS_LEADING_SLASH_SIZE   0
 #endif
 
 begin_packed_struct struct spiffs_pgobj_ndxheader_s

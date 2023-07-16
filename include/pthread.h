@@ -721,6 +721,8 @@ int pthread_spin_trylock(FAR pthread_spinlock_t *lock);
 int pthread_spin_unlock(FAR pthread_spinlock_t *lock);
 #endif
 
+int pthread_getcpuclockid(pthread_t thread_id, FAR clockid_t *clock_id);
+
 int pthread_atfork(CODE void (*prepare)(void),
                    CODE void (*parent)(void),
                    CODE void (*child)(void));

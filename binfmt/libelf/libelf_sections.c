@@ -82,6 +82,17 @@ static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
       return -EINVAL;
     }
 
+  /* Allocate an I/O buffer if necessary.  This buffer is used by
+   * elf_sectname() to accumulate the variable length symbol name.
+   */
+
+  ret = elf_allocbuffer(loadinfo);
+  if (ret < 0)
+    {
+      berr("elf_allocbuffer failed: %d\n", ret);
+      return ret;
+    }
+
   /* Get the section name string table section header */
 
   shstr = &loadinfo->shdr[shstrndx];

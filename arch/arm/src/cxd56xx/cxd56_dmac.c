@@ -147,29 +147,29 @@ typedef struct
   uint32_t control;           /* Transfer control */
 } dmac_lli_t;
 
-#define CXD56_DMAC_M2M   0  /**< Memory to memory */
-#define CXD56_DMAC_M2P   1  /**< Memory to peripheral, DMAC controlled */
-#define CXD56_DMAC_P2M   2  /**< Peripheral to memory, DMAC controlled */
-#define CXD56_DMAC_P2P   3  /**< Peripheral to peripheral */
-#define CXD56_DMAC_P2CP  4  /**< P2P destination controlled */
-#define CXD56_DMAC_M2CP  5  /**< M2P peripheral controlled */
-#define CXD56_DMAC_CP2M  6  /**< P2M peripheral controlled */
-#define CXD56_DMAC_CP2P  7  /**< P2P source controlled */
+#define CXD56_DMAC_M2M   0  /* Memory to memory */
+#define CXD56_DMAC_M2P   1  /* Memory to peripheral, DMAC controlled */
+#define CXD56_DMAC_P2M   2  /* Peripheral to memory, DMAC controlled */
+#define CXD56_DMAC_P2P   3  /* Peripheral to peripheral */
+#define CXD56_DMAC_P2CP  4  /* P2P destination controlled */
+#define CXD56_DMAC_M2CP  5  /* M2P peripheral controlled */
+#define CXD56_DMAC_CP2M  6  /* P2M peripheral controlled */
+#define CXD56_DMAC_CP2P  7  /* P2P source controlled */
 
-#define CXD56_DMAC_BSIZE1    0     /**< 1 burst */
-#define CXD56_DMAC_BSIZE4    1     /**< 4 burst */
-#define CXD56_DMAC_BSIZE8    2     /**< 8 burst */
-#define CXD56_DMAC_BSIZE16   3     /**< 16 burst */
-#define CXD56_DMAC_BSIZE32   4     /**< 32 burst */
-#define CXD56_DMAC_BSIZE64   5     /**< 64 burst */
-#define CXD56_DMAC_BSIZE128  6     /**< 128 burst */
-#define CXD56_DMAC_BSIZE256  7     /**< 256 burst */
+#define CXD56_DMAC_BSIZE1    0     /* 1 burst */
+#define CXD56_DMAC_BSIZE4    1     /* 4 burst */
+#define CXD56_DMAC_BSIZE8    2     /* 8 burst */
+#define CXD56_DMAC_BSIZE16   3     /* 16 burst */
+#define CXD56_DMAC_BSIZE32   4     /* 32 burst */
+#define CXD56_DMAC_BSIZE64   5     /* 64 burst */
+#define CXD56_DMAC_BSIZE128  6     /* 128 burst */
+#define CXD56_DMAC_BSIZE256  7     /* 256 burst */
 
-#define CXD56_DMAC_LITTLE_ENDIAN  0  /**< Little endian */
-#define CXD56_DMAC_BIG_ENDIAN     1  /**< Bit endian */
+#define CXD56_DMAC_LITTLE_ENDIAN  0  /* Little endian */
+#define CXD56_DMAC_BIG_ENDIAN     1  /* Bit endian */
 
-#define CXD56_DMAC_MASTER1 0 /**< AHB master 1 */
-#define CXD56_DMAC_MASTER2 1 /**< AHB master 2 */
+#define CXD56_DMAC_MASTER1 0 /* AHB master 1 */
+#define CXD56_DMAC_MASTER2 1 /* AHB master 2 */
 
 /* max transfer size at a time */
 

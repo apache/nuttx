@@ -45,6 +45,13 @@ config NETDEV_WORK_THREAD_PRIORITY
 	---help---
 		The priority of work poll thread in netdev.
 
+config NETDEV_WIRELESS_HANDLER
+	bool "Support wireless handler in upper-half driver"
+	default y
+	depends on NETDEV_IOCTL
+	---help---
+		Enable the wireless handler support in upper-half driver.
+
 comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV
@@ -468,6 +475,9 @@ config ETH0_PHY_LAN8742A
 config ETH0_PHY_DM9161
 	bool "Davicom DM9161 PHY"
 
+config ETH0_PHY_YT8512
+	bool "Motorcomm YT8512 PHY"
+
 endchoice
 
 choice
@@ -517,6 +527,9 @@ config ETH1_PHY_LAN8720
 
 config ETH1_PHY_DM9161
 	bool "Davicom DM9161 PHY"
+
+config ETH1_PHY_YT8512
+	bool "Motorcomm YT8512 PHY"
 
 endchoice
 

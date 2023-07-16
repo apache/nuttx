@@ -40,8 +40,8 @@ set(SRCS
     arm_stackframe.c
     arm_switchcontext.c
     arm_usestack.c
-    arm_vfork.c
-    ${ARCH_TOOLCHAIN_PATH}/vfork.S)
+    arm_fork.c
+    ${ARCH_TOOLCHAIN_PATH}/fork.S)
 
 if(NOT CONFIG_ALARM_ARCH AND NOT CONFIG_TIMER_ARCH)
   list(APPEND SRCS arm_mdelay.c arm_udelay.c)

@@ -69,9 +69,9 @@
 
 /* Register Bit-Field Definitions *******************************************/
 
-#define ODD	1
+#define ODD     1
 #define EVEN    0
-#define ON 	1
+#define ON      1
 #define OFF     0
 #define NONE    2
 #define RX      0
@@ -111,7 +111,7 @@
 
 #define UART_BRG_MASK               0xfff
 
-#define uart1_set_baudrate(baudrate)	    (EXTER_REG.uart_scaler1 = (uint32_t)((((BOARD_PERIPH_CLOCK*10)/(baudrate * 8))-5)/10))
+#define uart1_set_baudrate(baudrate)         (EXTER_REG.uart_scaler1 = (uint32_t)((((BOARD_PERIPH_CLOCK*10)/(baudrate * 8))-5)/10))
 
 #define uart1_parity_config(uart_parity)     ( uart_parity    ==  ODD                                                      \
                                             ? (EXTER_REG.uart_ctrl1   =   ((EXTER_REG.uart_ctrl1 |  MSK_UART_PAR) | MSK_UART_ENABLE_PAR)) \
@@ -137,11 +137,11 @@
 #define uart1_tx_ready()                     ((EXTER_REG.uart_status1 & MSK_UART_TXH_READY)  == MSK_UART_TXH_READY )
 #define uart1_rx_ready()                     ((EXTER_REG.uart_status1 & MSK_UART_DATA_READY) == MSK_UART_DATA_READY)
 
-#define uart1_send_byte(ch)  		     (EXTER_REG.uart_data1 = ch)
+#define uart1_send_byte(ch)                  (EXTER_REG.uart_data1 = ch)
 
 /****************************************************************************/
 
-#define uart2_set_baudrate(baudrate)	    (EXTER_REG.uart_scaler2 = (((BOARD_PERIPH_CLOCK*10)/(baudrate*8))-5)/10)
+#define uart2_set_baudrate(baudrate)         (EXTER_REG.uart_scaler2 = (((BOARD_PERIPH_CLOCK*10)/(baudrate*8))-5)/10)
 
 #define uart2_parity_config(uart_parity)     ( uart_parity    ==  ODD                                                      \
                                             ? (EXTER_REG.uart_ctrl2   =   ((EXTER_REG.uart_ctrl2 |  MSK_UART_PAR) | MSK_UART_ENABLE_PAR)) \
@@ -167,11 +167,11 @@
 #define uart2_tx_ready()                     ((EXTER_REG.uart_status2 & MSK_UART_TXH_READY)  == MSK_UART_TXH_READY )
 #define uart2_rx_ready()                     ((EXTER_REG.uart_status2 & MSK_UART_DATA_READY) == MSK_UART_DATA_READY)
 
-#define uart2_send_byte(ch)  		     (EXTER_REG.uart_data2 = ch)
+#define uart2_send_byte(ch)                  (EXTER_REG.uart_data2 = ch)
 
 /****************************************************************************/
 
-#define uart3_set_baudrate(baudrate)	    (BM3823_REG.uart_scaler3 = (((BOARD_PERIPH_CLOCK*10)/(baudrate*8))-5)/10)
+#define uart3_set_baudrate(baudrate)         (BM3823_REG.uart_scaler3 = (((BOARD_PERIPH_CLOCK*10)/(baudrate*8))-5)/10)
 
 #define uart3_parity_config(uart_parity)     ( uart_parity    ==  ODD                                                      \
                                             ? (BM3823_REG.uart_ctrl3   =   ((BM3823_REG.uart_ctrl3 |  MSK_UART_PAR) | MSK_UART_ENABLE_PAR)) \
@@ -197,7 +197,7 @@
 #define uart3_tx_ready()                     ((BM3823_REG.uart_status3 & MSK_UART_TXH_READY)  == MSK_UART_TXH_READY )
 #define uart3_rx_ready()                     ((BM3823_REG.uart_status3 & MSK_UART_DATA_READY) == MSK_UART_DATA_READY)
 
-#define uart3_send_byte(ch)  		     (BM3823_REG.uart_data3 = ch)
+#define uart3_send_byte(ch)                  (BM3823_REG.uart_data3 = ch)
 
 /****************************************************************************
  * Public Types

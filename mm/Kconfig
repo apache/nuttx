@@ -27,8 +27,7 @@ endchoice
 
 config MM_KERNEL_HEAP
 	bool "Kernel dedicated heap"
-	default n if BUILD_FLAT
-	default y if BUILD_PROTECTED || BUILD_KERNEL
+	default BUILD_PROTECTED || BUILD_KERNEL
 	---help---
 		Under Flat build, this option will enable a separate heap for the kernel.
 		By separating the kernel and userspace heaps, the user is granted more

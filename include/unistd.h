@@ -307,8 +307,10 @@ extern "C"
 
 /* Task Control Interfaces */
 
+pid_t   fork(void);
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   getpgid(pid_t pid);
 pid_t   getpgrp(void);
 pid_t   gettid(void);
 pid_t   getppid(void);

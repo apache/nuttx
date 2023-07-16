@@ -12,8 +12,7 @@ if ARCH_BOARD_NUCLEO_G474RE
 #
 #config SOME_CONFIG_BOOL
 #	bool "Description"
-#	default n if !FEATURE_X
-#	default y if FEATURE_X
+#	default FEATURE_X
 #	depends on FEATURE_Y
 #	---help---
 #		Help text goes here.

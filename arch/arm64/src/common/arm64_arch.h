@@ -184,7 +184,7 @@
   ({ \
     uint64_t __mpidr = GET_MPIDR(); \
     __mpidr &= ~(MPIDR_AFFLVL_MASK << MPIDR_AFF ## aff_level ## _SHIFT); \
-    __mpidr |= (cpu << MPIDR_AFF ## aff_level ## _SHIFT); \
+    __mpidr |= ((core) << MPIDR_AFF ## aff_level ## _SHIFT); \
     __mpidr &= MPIDR_ID_MASK; \
     __mpidr; \
   })

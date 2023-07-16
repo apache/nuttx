@@ -79,6 +79,16 @@
 #  endif
 #endif
 
+/* Get a list of syslog channels */
+
+#define SYSLOGIOC_GETCHANNELS _SYSLOGIOC(0x0001)
+
+/* Set syslog channel filter */
+
+#define SYSLOGIOC_SETFILTER _SYSLOGIOC(0x0002)
+
+#define SYSLOG_CHANNEL_NAME_LEN 32
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -108,6 +118,12 @@ struct syslog_channel_ops_s
   syslog_close_t sc_close;        /* Channel close callback */
 };
 
+struct syslog_channel_info_s
+{
+  char sc_name[SYSLOG_CHANNEL_NAME_LEN];
+  bool sc_disable;
+};
+
 /* This structure provides the interface to a SYSLOG channel */
 
 struct syslog_channel_s
@@ -117,6 +133,16 @@ struct syslog_channel_s
   FAR const struct syslog_channel_ops_s *sc_ops;
 
   /* Implementation specific logic may follow */
+
+#ifdef CONFIG_SYSLOG_IOCTL
+  /* Syslog channel name */
+
+  char sc_name[SYSLOG_CHANNEL_NAME_LEN];
+
+  /* Syslog channel enable status, true is disable */
+
+  bool sc_disable;
+#endif
 };
 
 /****************************************************************************

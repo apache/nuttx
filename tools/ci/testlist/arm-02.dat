@@ -1,1 +1,6 @@
 /arm/[i-k]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+# Boards build by CMake
+CMake,sabre-6quad:smp
+CMake,sabre-6quad:coredump
+CMake,sabre-6quad:nsh

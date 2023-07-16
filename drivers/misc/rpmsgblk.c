@@ -838,6 +838,7 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgblk_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgblk_geometry_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, rsp->buf, rsp->arglen);
@@ -874,6 +875,7 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgblk_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgblk_ioctl_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, rsp->buf, rsp->arglen);

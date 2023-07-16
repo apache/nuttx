@@ -755,7 +755,7 @@ static void esp32_spislv_rx(struct esp32_spislv_priv_s *priv)
 
   if (recv_n < priv->rxlen)
     {
-      /** If upper layer does not receive all data of receive
+      /* If upper layer does not receive all data of receive
        *  buffer, move the rest data to head of the buffer
        */
 
@@ -831,7 +831,7 @@ static int esp32_spislv_interrupt(int irq, void *context, void *arg)
 
   if (!priv->dma_chan)
     {
-      /** With DMA, software should copy data from register
+      /* With DMA, software should copy data from register
        *  to receive buffer
        */
 

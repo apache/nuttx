@@ -27,8 +27,8 @@
 
 #include <sys/types.h>
 
-#define AES_CMAC_KEY_LENGTH	16
-#define AES_CMAC_DIGEST_LENGTH	16
+#define AES_CMAC_KEY_LENGTH     16
+#define AES_CMAC_DIGEST_LENGTH  16
 
 typedef struct _AES_CMAC_CTX
 {

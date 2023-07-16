@@ -177,22 +177,22 @@
    * HANDLER, r15 was saved above, and r26-r27 saved later, out of sequence)
    */
 
-  push	r18
-  push	r19
-  push	r20
-  push	r21
-  push	r22
-  push	r23
+  push r18
+  push r19
+  push r20
+  push r21
+  push r22
+  push r23
 
   /* Save r28-r29 - Call-saved, "static" registers */
 
-  push	r28
-  push	r29
+  push r28
+  push r29
 
   /* Save r30-r31 - Call-used, "volatile" registers */
 
-  push	r30
-  push	r31
+  push r30
+  push r31
 
   /* Now save r26-r27 */
 
@@ -201,7 +201,7 @@
 
   /* Finally, save the stack pointer.  BUT we want the value of the stack
    * pointer as it was just BEFORE the exception.  We'll have to add to get
-   * that value. The value to add is the size of the register save area
+   * that value.  The value to add is the size of the register save area
    * including the bytes pushed by the interrupt handler (2), by the HANDLER
    * macro (1), and the 32 registers pushed above.  That is, the entire size
    * of the register save structure MINUS two bytes for the stack pointer
@@ -388,7 +388,7 @@
 
   /* Skip over r0 -- the scratch register */
 
-  adiw	r26, 1
+  adiw r26, 1
 
   /* Save the status register
    * (probably not necessary since interrupts are disabled)

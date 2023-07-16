@@ -151,10 +151,8 @@ static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
          * must then call us back for specific info for each capability.
          */
 
-        switch (caps->ac_subtype)
+        if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-            case AUDIO_TYPE_QUERY:
-
               /* We don't decode any formats!  Only something above us in
                * the audio stream can perform decoding on our behalf.
                */
@@ -172,43 +170,28 @@ static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
               break;
-
-            default:
-              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
-              break;
           }
-        break;
+
+         caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
+         break;
 
         /* Provide capabilities of our OUTPUT unit */
 
       case AUDIO_TYPE_OUTPUT:
       case AUDIO_TYPE_INPUT:
 
-        switch (caps->ac_subtype)
+        if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-            case AUDIO_TYPE_QUERY:
-
             /* Report the Sample rates we support */
 
-              caps->ac_controls.hw[0] =
-                AUDIO_SAMP_RATE_8K   | AUDIO_SAMP_RATE_11K  |
-                AUDIO_SAMP_RATE_16K  | AUDIO_SAMP_RATE_22K  |
-                AUDIO_SAMP_RATE_32K  | AUDIO_SAMP_RATE_44K  |
-                AUDIO_SAMP_RATE_48K  | AUDIO_SAMP_RATE_96K  |
-                AUDIO_SAMP_RATE_128K | AUDIO_SAMP_RATE_160K |
-                AUDIO_SAMP_RATE_172K | AUDIO_SAMP_RATE_192K;
-              break;
-
-            default:
-              I2S_IOCTL(i2s, AUDIOIOC_GETCAPS, (unsigned long)caps);
+              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
               break;
           }
-        break;
 
       default:
         I2S_IOCTL(i2s, AUDIOIOC_GETCAPS, (unsigned long)caps);
         break;
-   }
+    }
 
   return caps->ac_len;
 }

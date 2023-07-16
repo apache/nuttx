@@ -35,32 +35,32 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MSA301_ACCEL_ADDR0	0x26
+#define MSA301_ACCEL_ADDR0 0x26
 
 #define SNIOC_MSA301_START                _SNIOC(0x0001)
 #define SNIOC_MSA301_STOP                 _SNIOC(0x0002)
 #define SNIOC_MSA301_SET_RANGE            _SNIOC(0x0003)
 #define SNIOC_MSA301_SET_RATE             _SNIOC(0x0004)
 
-#define MSA301_REG_PARTID 0x01
-#define MSA301_REG_OUT_X_L 0x02
-#define MSA301_REG_OUT_X_H 0x03
-#define MSA301_REG_OUT_Y_L 0x04
-#define MSA301_REG_OUT_Y_H 0x05
-#define MSA301_REG_OUT_Z_L 0x06
-#define MSA301_REG_OUT_Z_H 0x07
-#define MSA301_REG_MOTIONINT 0x09
-#define MSA301_REG_DATAINT 0x0A
-#define MSA301_REG_CLICKSTATUS 0x0B
-#define MSA301_REG_RESRANGE 0x0F
-#define MSA301_REG_ODR 0x10
-#define MSA301_REG_POWERMODE 0x11
-#define MSA301_REG_INTSET0 0x16
-#define MSA301_REG_INTSET1 0x17
-#define MSA301_REG_INTMAP0 0x19
-#define MSA301_REG_INTMAP1 0x1A
-#define MSA301_REG_TAPDUR 0x2A
-#define MSA301_REG_TAPTH 0x2B
+#define MSA301_REG_PARTID       0x01
+#define MSA301_REG_OUT_X_L      0x02
+#define MSA301_REG_OUT_X_H      0x03
+#define MSA301_REG_OUT_Y_L      0x04
+#define MSA301_REG_OUT_Y_H      0x05
+#define MSA301_REG_OUT_Z_L      0x06
+#define MSA301_REG_OUT_Z_H      0x07
+#define MSA301_REG_MOTIONINT    0x09
+#define MSA301_REG_DATAINT      0x0A
+#define MSA301_REG_CLICKSTATUS  0x0B
+#define MSA301_REG_RESRANGE     0x0F
+#define MSA301_REG_ODR          0x10
+#define MSA301_REG_POWERMODE    0x11
+#define MSA301_REG_INTSET0      0x16
+#define MSA301_REG_INTSET1      0x17
+#define MSA301_REG_INTMAP0      0x19
+#define MSA301_REG_INTMAP1      0x1A
+#define MSA301_REG_TAPDUR       0x2A
+#define MSA301_REG_TAPTH        0x2B
 
 /****************************************************************************
  * Public Types

@@ -30,9 +30,6 @@
 #include <sys/types.h>
 #include <elf.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/symtab.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -87,14 +84,6 @@
  * Public Types
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
-typedef Elf64_Off Elf_Off;
-typedef Elf64_Dyn Elf_Dyn;
-#else
-typedef Elf32_Off Elf_Off;
-typedef Elf32_Dyn Elf_Dyn;
-#endif
-
 /* This is the type of the function that is called to uninitialize the
  * the loaded module.  This may mean, for example, un-registering a device
  * driver. If the module is successfully uninitialized, its memory will be
@@ -125,6 +114,7 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
  *   nexports      - The number of symbols in the exported symbol table.
  */
 
+struct symtab_s;
 struct mod_info_s
 {
   mod_uninitializer_t uninitializer;   /* Module uninitializer */
@@ -183,6 +173,8 @@ struct module_s
 
   FAR struct module_s *dependencies[CONFIG_MODLIB_MAXDEPEND];
 #endif
+  uintptr_t finiarr;                     /* .fini_array */
+  uint16_t  nfini;                       /* Number of entries in .fini_array */
 };
 
 /* This struct provides a description of the currently loaded instantiation
@@ -198,27 +190,32 @@ struct mod_loadinfo_s
    * after the module has been loaded.
    */
 
-  uintptr_t         textalloc;   /* .text memory allocated when module was loaded */
-  uintptr_t         datastart;   /* Start of.bss/.data memory in .text allocation */
-  size_t            textsize;    /* Size of the module .text memory allocation */
-  size_t            datasize;    /* Size of the module .bss/.data memory allocation */
-  size_t            textalign;   /* Necessary alignment of .text */
-  size_t            dataalign;   /* Necessary alignment of .bss/.text */
-  off_t             filelen;     /* Length of the entire module file */
-  Elf_Ehdr          ehdr;        /* Buffered module file header */
-  FAR Elf_Phdr     *phdr;        /* Buffered module program headers */
-  FAR Elf_Shdr     *shdr;        /* Buffered module section headers */
-  FAR void	   *exported;    /* Module exports */
-  uint8_t          *iobuffer;    /* File I/O buffer */
-  uintptr_t	    datasec;     /* ET_DYN - data area start from Phdr */
-  uintptr_t	    segpad;      /* Padding between text and data */
-
-  uint16_t          symtabidx;   /* Symbol table section index */
-  uint16_t          strtabidx;   /* String table section index */
-  uint16_t          dsymtabidx;  /* Dynamic symbol table section index */
-  uint16_t          buflen;      /* size of iobuffer[] */
-  int               filfd;       /* Descriptor for the file being loaded */
-  int               nexports;    /* ET_DYN - Number of symbols exported */
+  uintptr_t     textalloc;   /* .text memory allocated when module was loaded */
+  uintptr_t     datastart;   /* Start of.bss/.data memory in .text allocation */
+  size_t        textsize;    /* Size of the module .text memory allocation */
+  size_t        datasize;    /* Size of the module .bss/.data memory allocation */
+  size_t        textalign;   /* Necessary alignment of .text */
+  size_t        dataalign;   /* Necessary alignment of .bss/.text */
+  off_t         filelen;     /* Length of the entire module file */
+  Elf_Ehdr      ehdr;        /* Buffered module file header */
+  FAR Elf_Phdr *phdr;        /* Buffered module program headers */
+  FAR Elf_Shdr *shdr;        /* Buffered module section headers */
+  FAR void     *exported;    /* Module exports */
+  uint8_t      *iobuffer;    /* File I/O buffer */
+  uintptr_t     datasec;     /* ET_DYN - data area start from Phdr */
+  uintptr_t     segpad;      /* Padding between text and data */
+  uintptr_t     initarr;     /* .init_array */
+  uintptr_t     finiarr;     /* .fini_array */
+  uintptr_t     preiarr;     /* .preinit_array */
+  uint16_t      ninit;       /* Number of .init_array entries */
+  uint16_t      nfini;       /* Number of .fini_array entries */
+  uint16_t      nprei;       /* Number of .preinit_array entries */
+  uint16_t      symtabidx;   /* Symbol table section index */
+  uint16_t      strtabidx;   /* String table section index */
+  uint16_t      dsymtabidx;  /* Dynamic symbol table section index */
+  uint16_t      buflen;      /* size of iobuffer[] */
+  int           filfd;       /* Descriptor for the file being loaded */
+  int           nexports;    /* ET_DYN - Number of symbols exported */
 };
 
 /****************************************************************************

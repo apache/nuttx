@@ -51,6 +51,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/streams.h>
 #include <nuttx/allsyms.h>
+#include <nuttx/symtab.h>
 
 #include "lib_dtoa_engine.h"
 #include "lib_ultoa_invert.h"
@@ -153,23 +154,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_ALLSYMS
-static int sprintf_internal(FAR struct lib_outstream_s *stream,
-                            FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-  int     n;
-
-  /* Then let vsprintf_internal do the real work */
-
-  va_start(ap, fmt);
-  n = vsprintf_internal(stream, NULL, 0, fmt, ap);
-  va_end(ap);
-
-  return n;
-}
-#endif
 
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
@@ -1165,9 +1149,11 @@ str_lpad:
 
                           if (c == 'S')
                             {
-                              sprintf_internal(stream, "+%#tx/%#zx",
-                                               addr - symbol->sym_value,
-                                               symbolsize);
+                              total_len +=
+                              lib_sprintf_internal(stream,
+                                                   "+%#tx/%#zx",
+                                                   addr - symbol->sym_value,
+                                                   symbolsize);
                             }
 
                           continue;
@@ -1378,4 +1364,43 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #else
   return vsprintf_internal(stream, NULL, 0, fmt, ap);
 #endif
+}
+
+/****************************************************************************
+ * Name: lib_sprintf_internal
+ *
+ * Description:
+ *   This function does not take numbered arguments in printf.
+ *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *
+ ****************************************************************************/
+
+int lib_sprintf_internal(FAR struct lib_outstream_s *stream,
+                         FAR const IPTR char *fmt, ...)
+{
+  va_list ap;
+  int     n;
+
+  /* Then let vsprintf_internal do the real work */
+
+  va_start(ap, fmt);
+  n = vsprintf_internal(stream, NULL, 0, fmt, ap);
+  va_end(ap);
+
+  return n;
+}
+
+/****************************************************************************
+ * Name: lib_vsprintf_internal
+ *
+ * Description:
+ *   This function does not take numbered arguments in printf.
+ *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *
+ ****************************************************************************/
+
+int lib_vsprintf_internal(FAR struct lib_outstream_s *stream,
+                          FAR const IPTR char *fmt, va_list ap)
+{
+  return vsprintf_internal(stream, NULL, 0, fmt, ap);
 }

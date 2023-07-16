@@ -326,6 +326,12 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_FMCEN;
 #endif
 
+#if defined(CONFIG_STM32H7_LTDC) && defined(CONFIG_STM32H7_DMA2D)
+  /* Enable DMA2D */
+
+  regval |= RCC_AHB3ENR_DMA2DEN;
+#endif
+
   /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
@@ -543,7 +549,11 @@ static inline void rcc_enableapb3(void)
 
   regval = getreg32(STM32_RCC_APB3ENR);
 
-  /* TODO: ... */
+#ifdef CONFIG_STM32H7_LTDC
+  /* LTDC clock enable */
+
+  regval |= RCC_APB3ENR_LTDCEN;
+#endif
 
   putreg32(regval, STM32_RCC_APB3ENR);   /* Enable peripherals */
 }

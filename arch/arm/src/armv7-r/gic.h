@@ -267,9 +267,9 @@
  * levels.  As a result, PMR settings make sense.
  */
 
-#define GIC_ICCPMR_SHIFT           (0)	/* Bits 0-7: Priority mask */
+#define GIC_ICCPMR_SHIFT           (0) /* Bits 0-7: Priority mask */
 #define GIC_ICCPMR_MASK            (0xff << GIC_ICCPMR_SHIFT)
-#define GIC_ICCPMR_VALUE(n)      ((uint32_t)(n) << GIC_ICCPMR_SHIFT)
+#define GIC_ICCPMR_VALUE(n)        ((uint32_t)(n) << GIC_ICCPMR_SHIFT)
 
 /* Bits 8-31: Reserved */
 
@@ -296,10 +296,10 @@
 
 #define GIC_ICCIAR_INTID_SHIFT     (0)  /* Bits 0-9: Interrupt ID */
 #define GIC_ICCIAR_INTID_MASK      (0x3ff << GIC_ICCIAR_INTID_SHIFT)
-#define GIC_ICCIAR_INTID(n)      ((uint32_t)(n) << GIC_ICCIAR_INTID_SHIFT)
+#define GIC_ICCIAR_INTID(n)        ((uint32_t)(n) << GIC_ICCIAR_INTID_SHIFT)
 #define GIC_ICCIAR_CPUSRC_SHIFT    (10) /* Bits 10-12: CPU source ID */
 #define GIC_ICCIAR_CPUSRC_MASK     (7 << GIC_ICCIAR_CPUSRC_SHIFT)
-#define GIC_ICCIAR_CPUSRC(n)     ((uint32_t)(n) << GIC_ICCIAR_CPUSRC_SHIFT)
+#define GIC_ICCIAR_CPUSRC(n)       ((uint32_t)(n) << GIC_ICCIAR_CPUSRC_SHIFT)
 
 /* Bits 13-31: Reserved */
 
@@ -309,10 +309,10 @@
 
 #define GIC_ICCEOIR_INTID_SHIFT    (0) /* Bits 0-9: Interrupt ID */
 #define GIC_ICCEOIR_INTID_MASK     (0x3ff << GIC_ICCEOIR_INTID_SHIFT)
-#define GIC_ICCEOIR_INTID(n)     ((uint32_t)(n) << GIC_ICCEOIR_INTID_SHIFT)
+#define GIC_ICCEOIR_INTID(n)       ((uint32_t)(n) << GIC_ICCEOIR_INTID_SHIFT)
 #define GIC_ICCEOIR_CPUSRC_SHIFT   (10) /* Bits 10-12: CPU source ID */
 #define GIC_ICCEOIR_CPUSRC_MASK    (7 << GIC_ICCEOIR_CPUSRC_SHIFT)
-#define GIC_ICCEOIR_CPUSRC(n)    ((uint32_t)(n) << GIC_ICCEOIR_CPUSRC_SHIFT)
+#define GIC_ICCEOIR_CPUSRC(n)      ((uint32_t)(n) << GIC_ICCEOIR_CPUSRC_SHIFT)
 
 /* Bits 13-31: Reserved */
 
@@ -322,7 +322,7 @@
 
 #define GIC_ICCRPR_PRIO_SHIFT      (4) /* Bits 4-7: Priority mask */
 #define GIC_ICCRPR_PRIO_MASK       (15 << GIC_ICCRPR_PRIO_SHIFT)
-#define GIC_ICCRPR_PRIO_VALUE(n) ((uint32_t)(n) << GIC_ICCRPR_PRIO_SHIFT)
+#define GIC_ICCRPR_PRIO_VALUE(n)   ((uint32_t)(n) << GIC_ICCRPR_PRIO_SHIFT)
 
 /* Bits 8-31: Reserved */
 
@@ -330,10 +330,10 @@
 
 #define GIC_ICCHPIR_INTID_SHIFT    (0) /* Bits 0-9: Interrupt ID */
 #define GIC_ICCHPIR_INTID_MASK     (0x3ff << GIC_ICCHPIR_INTID_SHIFT)
-#define GIC_ICCHPIR_INTID(n)     ((uint32_t)(n) << GIC_ICCHPIR_INTID_SHIFT)
+#define GIC_ICCHPIR_INTID(n)       ((uint32_t)(n) << GIC_ICCHPIR_INTID_SHIFT)
 #define GIC_ICCHPIR_CPUSRC_SHIFT   (10) /* Bits 10-12: CPU source ID */
 #define GIC_ICCHPIR_CPUSRC_MASK    (7 << GIC_ICCHPIR_CPUSRC_SHIFT)
-#define GIC_ICCHPIR_CPUSRC(n)    ((uint32_t)(n) << GIC_ICCHPIR_CPUSRC_SHIFT)
+#define GIC_ICCHPIR_CPUSRC(n)      ((uint32_t)(n) << GIC_ICCHPIR_CPUSRC_SHIFT)
 
 /* Bits 13-31: Reserved */
 
@@ -391,7 +391,7 @@
  * The corresponding bits in the ICDISERn are read as one, write ignored
  */
 
-#define GIC_ICDISER_INT(n)         GIC_MASK32(n)
+#define GIC_ICDISER_INT(n)          GIC_MASK32(n)
 
 /* Interrupt Clear-Enable.
  *
@@ -399,25 +399,25 @@
  * The corresponding bits in the ICDICERn are read as one, write ignored
  */
 
-#define GIC_ICDICER_INT(n)         GIC_MASK32(n)
+#define GIC_ICDICER_INT(n)          GIC_MASK32(n)
 
 /* Interrupt Set-Pending */
 
-#define GIC_ICDISPR_INT(n)         GIC_MASK32(n)
+#define GIC_ICDISPR_INT(n)          GIC_MASK32(n)
 
 /* Interrupt Clear-Pending */
 
-#define GIC_ICDICPR_INT(n)         GIC_MASK32(n)
+#define GIC_ICDICPR_INT(n)          GIC_MASK32(n)
 
 /* Interrupt Active Bit */
 
-#define GIC_ICDABR_INT(n)          GIC_MASK32(n)
+#define GIC_ICDABR_INT(n)           GIC_MASK32(n)
 
 /* Interrupt Priority Registers */
 
-#define GIC_ICDIPR_ID_SHIFT(n)     GIC_SHIFT4(n)
-#define GIC_ICDIPR_ID_MASK(n)      GIC_MASK4(n)
-#define GIC_ICDIPR_ID(n, p)       ((uint32_t)(p) << GIC_SHIFT4(n))
+#define GIC_ICDIPR_ID_SHIFT(n)      GIC_SHIFT4(n)
+#define GIC_ICDIPR_ID_MASK(n)       GIC_MASK4(n)
+#define GIC_ICDIPR_ID(n, p)         ((uint32_t)(p) << GIC_SHIFT4(n))
 
 /* Interrupt Processor Target Registers */
 
@@ -428,7 +428,7 @@
 
 #define GIC_ICDIPTR_ID_SHIFT(n)    GIC_SHIFT4(n)
 #define GIC_ICDIPTR_ID_MASK(n)     GIC_MASK4(n)
-#define GIC_ICDIPTR_ID(n, t)      ((uint32_t)(t) <<GIC_SHIFT4(n))
+#define GIC_ICDIPTR_ID(n, t)       ((uint32_t)(t) <<GIC_SHIFT4(n))
 
 /* Interrupt Configuration Register */
 
@@ -439,7 +439,7 @@
 
 #define GIC_ICDICFR_ID_SHIFT(n)    GIC_SHIFT16(n)
 #define GIC_ICDICFR_ID_MASK(n)     GIC_MASK16(n)
-#define GIC_ICDICFR_ID(n, c)      ((uint32_t)(c) << GIC_SHIFT16(n))
+#define GIC_ICDICFR_ID(n, c)       ((uint32_t)(c) << GIC_SHIFT16(n))
 
 /* PPI Status Register */
 
@@ -456,14 +456,14 @@
 
 /* Software Generated Interrupt Register */
 
-#define GIC_ICDSGIR_INTID_SHIFT       (0) /* Bits 0-9: Interrupt ID */
-#define GIC_ICDSGIR_INTID_MASK        (0x3ff << GIC_ICDSGIR_INTID_SHIFT)
+#define GIC_ICDSGIR_INTID_SHIFT     (0) /* Bits 0-9: Interrupt ID */
+#define GIC_ICDSGIR_INTID_MASK      (0x3ff << GIC_ICDSGIR_INTID_SHIFT)
 #define GIC_ICDSGIR_INTID(n)        ((uint32_t)(n) << GIC_ICDSGIR_INTID_SHIFT)
 
 /* Bits 10-15: Reserved */
 
-#define GIC_ICDSGIR_CPUTARGET_SHIFT   (16) /* Bits 16-23: CPU target */
-#define GIC_ICDSGIR_CPUTARGET_MASK    (0xff << GIC_ICDSGIR_CPUTARGET_SHIFT)
+#define GIC_ICDSGIR_CPUTARGET_SHIFT (16) /* Bits 16-23: CPU target */
+#define GIC_ICDSGIR_CPUTARGET_MASK  (0xff << GIC_ICDSGIR_CPUTARGET_SHIFT)
 #define GIC_ICDSGIR_CPUTARGET(n)    ((uint32_t)(n) << GIC_ICDSGIR_CPUTARGET_SHIFT)
 
 /* Bits 26-31: Reserved */
@@ -495,7 +495,7 @@
 /* Each Cortex-A9 processor has private interrupts, ID0-ID15, that can only
  * be triggered by software. These interrupts are aliased so that there is
  * no requirement for a requesting Cortex-A9 processor to determine its own
- * CPU ID when it deals with SGIs. The priority of an SGI depends on the
+ * CPU ID when it deals with SGIs.  The priority of an SGI depends on the
  * value set by the receiving Cortex-A9 processor in the banked SGI priority
  * registers, not the priority set by the sending Cortex-A9 processor.
  *

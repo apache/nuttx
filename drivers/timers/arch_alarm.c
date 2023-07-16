@@ -356,6 +356,11 @@ int weak_function up_alarm_tick_start(clock_t ticks)
  *   units.
  ****************************************************************************/
 
+void weak_function up_perf_init(FAR void *arg)
+{
+  UNUSED(arg);
+}
+
 unsigned long weak_function up_perf_gettime(void)
 {
   unsigned long ret = 0;

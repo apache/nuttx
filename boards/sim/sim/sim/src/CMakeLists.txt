@@ -56,6 +56,10 @@ if(CONFIG_MOTOR_FOC_DUMMY)
   list(APPEND SRCS sim_foc.c)
 endif()
 
+if(CONFIG_USBDEV_COMPOSITE)
+  list(APPEND SRCS sim_composite.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/gnu-elf.ld")

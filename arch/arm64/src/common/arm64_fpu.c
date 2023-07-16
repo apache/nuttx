@@ -42,7 +42,7 @@
 
 #include "sched/sched.h"
 #include "arm64_arch.h"
-#include "arm64_vfork.h"
+#include "arm64_fork.h"
 #include "arm64_internal.h"
 #include "arm64_fatal.h"
 #include "arm64_fpu.h"
@@ -270,11 +270,16 @@ void arm64_init_fpu(struct tcb_s *tcb)
 {
   if (tcb->pid < CONFIG_SMP_NCPUS)
     {
-      memset(&g_cpu_fpu_ctx[this_cpu()], 0,
+#ifdef CONFIG_SMP
+      int cpu = tcb->cpu;
+#else
+      int cpu = 0;
+#endif
+      memset(&g_cpu_fpu_ctx[cpu], 0,
              sizeof(struct arm64_cpu_fpu_context));
-      g_cpu_fpu_ctx[this_cpu()].idle_thread = tcb;
+      g_cpu_fpu_ctx[cpu].idle_thread = tcb;
 
-      tcb->xcp.fpu_regs = (uint64_t *)&g_idle_thread_fpu[this_cpu()];
+      tcb->xcp.fpu_regs = (uint64_t *)&g_idle_thread_fpu[cpu];
     }
 
   memset(tcb->xcp.fpu_regs, 0, sizeof(struct fpu_reg));

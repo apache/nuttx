@@ -448,7 +448,7 @@
 #define ETS_WMAC_INUM                           0
 #define ETS_BT_HOST_INUM                        1
 #define ETS_WBB_INUM                            4
-#define ETS_TG0_T1_INUM                         10 /**< use edge interrupt*/
+#define ETS_TG0_T1_INUM                         10 /* use edge interrupt*/
 #define ETS_FRC1_INUM                           22
 #define ETS_T1_WDT_INUM                         24
 #define ETS_CACHEERR_INUM                       25

@@ -379,4 +379,13 @@ config SYSLOG_CHARDEV
 		byte output with no time-stamping or any other SYSLOG features
 		supported.
 
+config SYSLOG_IOCTL
+	bool "SYSLOG IOCTL support"
+	default n
+	---help---
+		Enables support for the SYSLOG IOCTL command.  This command is used
+		to control the behavior of the SYSLOG device. Currently, the supported
+		commands are SYSLOGIOC_SETFILTER/SYSLOGIOC_GETCHANNELS, which can be
+		used to set the enable status of different channels
+
 endmenu # System logging

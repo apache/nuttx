@@ -39,7 +39,6 @@
 
 #define MIN_SIGNO       1               /* Lowest valid signal number */
 #define MAX_SIGNO       63              /* Highest valid signal number */
-#define GOOD_SIGNO(s)   ((((unsigned)(s)) <= MAX_SIGNO))
 
 /* Definitions for "standard" signals */
 
@@ -236,7 +235,10 @@
 #  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
 #endif
 
-#define tkill(tid, signo)  tgkill((pid_t)-1, tid, signo)
+#define GOOD_SIGNO(s)     (((unsigned)(s)) <= MAX_SIGNO)
+#define UNCAUGHT_SIGNO(s) ((s) == SIGKILL || (s) == SIGSTOP)
+
+#define tkill(tid, signo) tgkill((pid_t)-1, tid, signo)
 
 /****************************************************************************
  * Public Types

@@ -26,6 +26,7 @@
 
 #include <assert.h>
 
+#include <nuttx/symtab.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************

@@ -28,12 +28,10 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <elf.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
 
 /****************************************************************************
@@ -92,15 +90,15 @@ struct elf_loadinfo_s
    * after the ELF module has been loaded.
    */
 
-  uintptr_t         textalloc;   /* .text memory allocated when ELF file was loaded */
-  uintptr_t         dataalloc;   /* .bss/.data memory allocated when ELF file was loaded */
-  size_t            textsize;    /* Size of the ELF .text memory allocation */
-  size_t            datasize;    /* Size of the ELF .bss/.data memory allocation */
-  size_t            textalign;   /* Necessary alignment of .text */
-  size_t            dataalign;   /* Necessary alignment of .bss/.data */
-  off_t             filelen;     /* Length of the entire ELF file */
+  uintptr_t          textalloc;  /* .text memory allocated when ELF file was loaded */
+  uintptr_t          dataalloc;  /* .bss/.data memory allocated when ELF file was loaded */
+  size_t             textsize;   /* Size of the ELF .text memory allocation */
+  size_t             datasize;   /* Size of the ELF .bss/.data memory allocation */
+  size_t             textalign;  /* Necessary alignment of .text */
+  size_t             dataalign;  /* Necessary alignment of .bss/.data */
+  off_t              filelen;    /* Length of the entire ELF file */
 
-  Elf_Ehdr          ehdr;        /* Buffered ELF file header */
+  Elf_Ehdr           ehdr;       /* Buffered ELF file header */
   FAR Elf_Shdr      *shdr;       /* Buffered ELF section headers */
   uint8_t           *iobuffer;   /* File I/O buffer */
 
@@ -157,35 +155,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
- * Name: elf_initialize
- *
- * Description:
- *   In order to use the ELF binary format, this function must be called
- *   during system initialization to register the ELF binary format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int elf_initialize(void);
-
-/****************************************************************************
- * Name: elf_uninitialize
- *
- * Description:
- *   Unregister the ELF binary loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void elf_uninitialize(void);
 
 /****************************************************************************
  * Name: elf_init

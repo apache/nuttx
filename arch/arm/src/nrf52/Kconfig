@@ -828,8 +828,7 @@ config NRF52_SDC_LE_2M_PHY
 
 config NRF52_SDC_LE_CODED_PHY
 	bool "Support LE Coded PHY"
-	default n if ARCH_CHIP_NRF52832
-	default y if ARCH_CHIP_NRF52840
+	default ARCH_CHIP_NRF52840
 	depends on NRF52_SDC_MULTIROLE
 
 config NRF52_SDC_DLE

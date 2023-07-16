@@ -238,7 +238,7 @@ config ESPRESSIF_GPIO_IRQ
 
 config ESPRESSIF_HR_TIMER
 	bool
-	default y if RTC_DRIVER
+	default RTC_DRIVER
 	---help---
 		A high-resolution hardware timer for supporting the management of
 		kernel events.

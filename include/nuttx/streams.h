@@ -690,6 +690,31 @@ int lib_sprintf(FAR struct lib_outstream_s *obj,
                 FAR const IPTR char *fmt, ...) printf_like(2, 3);
 
 /****************************************************************************
+ * Name: lib_sprintf_internal
+ *
+ * Description:
+ *   This function does not take numbered arguments in printf.
+ *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *
+ ****************************************************************************/
+
+int lib_sprintf_internal(FAR struct lib_outstream_s *obj,
+                         FAR const IPTR char *fmt, ...) printf_like(2, 3);
+
+/****************************************************************************
+ * Name: lib_vsprintf_internal
+ *
+ * Description:
+ *   This function does not take numbered arguments in printf.
+ *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *
+ ****************************************************************************/
+
+int lib_vsprintf_internal(FAR struct lib_outstream_s *stream,
+                          FAR const IPTR char *fmt, va_list ap)
+                          printf_like(2, 0);
+
+/****************************************************************************
  * Name: lib_vsprintf
  *
  * Description:

@@ -53,6 +53,7 @@
  * selects distributor base for SPI
  * The macro translates to distributor base for GICv2 and GICv1
  */
+
 #define GET_DIST_BASE(intid)  ((intid < GIC_SPI_INT_BASE) ?          \
                                (gic_get_rdist() + GICR_SGI_BASE_OFF) \
                                : GIC_DIST_BASE)
@@ -245,7 +246,7 @@ void arm64_gic_irq_enable(unsigned int intid)
 
   if (GIC_IS_SPI(intid))
     {
-      arm64_gic_write_irouter(up_cpu_index(), intid);
+      arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
     }
 }
 
@@ -615,7 +616,12 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 {
   if (GIC_IS_SPI(irq))
     {
-      arm64_gic_write_irouter(cpuset, irq);
+      /* Only support interrupt routing mode 0,
+       * so routing to the first cpu in cpuset.
+       */
+
+      uint64_t mpid = arm64_get_mpid(ffs(cpuset) - 1);
+      arm64_gic_write_irouter(mpid, irq);
     }
 }
 

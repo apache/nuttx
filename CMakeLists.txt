@@ -40,6 +40,12 @@ if(POLICY CMP0115)
   cmake_policy(SET CMP0115 NEW)
 endif()
 
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+  cmake_policy(SET CMP0135 NEW)
+endif()
+
 # Basic CMake configuration ##################################################
 
 set(CMAKE_CXX_STANDARD 14)
@@ -63,6 +69,13 @@ set(NUTTX_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(NOT DEFINED BOARD_CONFIG)
   message(FATAL_ERROR "Please define configuration with BOARD_CONFIG")
+endif()
+
+find_program(KCONFIGLIB olddefconfig)
+if(NOT KCONFIGLIB)
+  message(
+    FATAL_ERROR "Kconfig environment depends on kconfiglib, Please install:
+  $ pip install kconfiglib")
 endif()
 
 if(EXISTS ${BOARD_CONFIG} AND EXISTS ${BOARD_CONFIG}/defconfig)
@@ -243,6 +256,15 @@ else()
   file(TOUCH ${CMAKE_BINARY_DIR}/drivers/platform/Kconfig)
 endif()
 
+# board common directory
+
+if(CONFIG_ARCH_BOARD_COMMON)
+  file(
+    GLOB NUTTX_COMMON_DIR
+    LIST_DIRECTORIES true
+    "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
+endif()
+
 # Custom chip ###################################################
 
 if(CONFIG_ARCH_CHIP_CUSTOM)
@@ -299,6 +321,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # Do olddefconfig step to expand the abbreviated defconfig into normal config
   execute_process(
     COMMAND olddefconfig
+    ERROR_VARIABLE KCONFIG_ERROR
     OUTPUT_VARIABLE KCONFIG_OUTPUT
     RESULT_VARIABLE KCONFIG_STATUS
     WORKING_DIRECTORY ${NUTTX_DIR})
@@ -310,6 +333,15 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # store original expanded .config
   configure_file(${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/.config.orig
                  COPYONLY)
+
+  string(REPLACE "\n" ";" KCONFIG_ESTRING ${KCONFIG_ERROR})
+  foreach(estring ${KCONFIG_ESTRING})
+    string(REGEX MATCH "the 'modules' option is not supported" result
+                 ${estring})
+    if(NOT result)
+      message(WARNING "Kconfig Configuration Error: ${estring}")
+    endif()
+  endforeach()
 
   if(KCONFIG_STATUS AND NOT KCONFIG_STATUS EQUAL 0)
     message(
@@ -476,6 +508,7 @@ add_subdirectory(openamp)
 add_subdirectory(arch)
 add_subdirectory(audio)
 add_subdirectory(binfmt)
+add_subdirectory(crypto)
 add_subdirectory(drivers)
 add_subdirectory(fs)
 add_subdirectory(graphics)
@@ -512,6 +545,24 @@ endif()
 
 # Get linker script to use
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
+
+# Pre-compile linker script
+if(DEFINED PREPROCES)
+  get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
+  set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
+
+  add_custom_command(
+    OUTPUT ${LD_SCRIPT_TMP}
+    DEPENDS ${ldscript}
+    COMMAND ${PREPROCES} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
+            ${ldscript} > ${LD_SCRIPT_TMP}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+  add_custom_target(ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
+  add_dependencies(nuttx ldscript_tmp)
+
+  set(ldscript ${LD_SCRIPT_TMP})
+endif()
 
 # Perform link
 
@@ -564,6 +615,10 @@ if(NOT CONFIG_ARCH_SIM)
   endif()
 elseif(WIN32)
   target_link_options(nuttx PUBLIC /SAFESEH:NO)
+  math(EXPR LINK_STACKSIZE
+       "${CONFIG_SIM_STACKSIZE_ADJUSTMENT} + ${CONFIG_IDLETHREAD_STACKSIZE}"
+       OUTPUT_FORMAT DECIMAL)
+  target_link_options(nuttx PUBLIC /STACK:${LINK_STACKSIZE},${LINK_STACKSIZE})
   set(nuttx_libs_paths)
   foreach(lib ${nuttx_libs})
     list(APPEND nuttx_libs_paths $<TARGET_FILE:${lib}>)

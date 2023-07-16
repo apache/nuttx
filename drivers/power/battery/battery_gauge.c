@@ -373,8 +373,8 @@ static int bat_gauge_ioctl(FAR struct file *filep,
  * Name: bat_gauge_poll
  ****************************************************************************/
 
-static ssize_t bat_gauge_poll(FAR struct file *filep,
-                                struct pollfd *fds, bool setup)
+static int bat_gauge_poll(FAR struct file *filep,
+                          FAR struct pollfd *fds, bool setup)
 {
   FAR struct battery_gauge_priv_s *priv = filep->f_priv;
   int ret;

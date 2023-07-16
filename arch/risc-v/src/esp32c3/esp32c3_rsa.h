@@ -46,28 +46,28 @@ extern "C"
 
 /* RSA Error codes */
 
-#define ESP32C3_ERR_RSA_BAD_INPUT_DATA                    -0x4080  /**< Bad input parameters to function. */
-#define ESP32C3_ERR_RSA_INVALID_PADDING                   -0x4100  /**< Input data contains invalid padding and is rejected. */
-#define ESP32C3_ERR_RSA_KEY_GEN_FAILED                    -0x4180  /**< Something failed during generation of a key. */
-#define ESP32C3_ERR_RSA_KEY_CHECK_FAILED                  -0x4200  /**< Key failed to pass the validity check of the library. */
-#define ESP32C3_ERR_RSA_PUBLIC_FAILED                     -0x4280  /**< The public key operation failed. */
-#define ESP32C3_ERR_RSA_PRIVATE_FAILED                    -0x4300  /**< The private key operation failed. */
-#define ESP32C3_ERR_RSA_VERIFY_FAILED                     -0x4380  /**< The PKCS#1 verification failed. */
-#define ESP32C3_ERR_RSA_OUTPUT_TOO_LARGE                  -0x4400  /**< The output buffer for decryption is not large enough. */
-#define ESP32C3_ERR_RSA_RNG_FAILED                        -0x4480  /**< The random generator failed to generate non-zeros. */
+#define ESP32C3_ERR_RSA_BAD_INPUT_DATA                    -0x4080  /* Bad input parameters to function. */
+#define ESP32C3_ERR_RSA_INVALID_PADDING                   -0x4100  /* Input data contains invalid padding and is rejected. */
+#define ESP32C3_ERR_RSA_KEY_GEN_FAILED                    -0x4180  /* Something failed during generation of a key. */
+#define ESP32C3_ERR_RSA_KEY_CHECK_FAILED                  -0x4200  /* Key failed to pass the validity check of the library. */
+#define ESP32C3_ERR_RSA_PUBLIC_FAILED                     -0x4280  /* The public key operation failed. */
+#define ESP32C3_ERR_RSA_PRIVATE_FAILED                    -0x4300  /* The private key operation failed. */
+#define ESP32C3_ERR_RSA_VERIFY_FAILED                     -0x4380  /* The PKCS#1 verification failed. */
+#define ESP32C3_ERR_RSA_OUTPUT_TOO_LARGE                  -0x4400  /* The output buffer for decryption is not large enough. */
+#define ESP32C3_ERR_RSA_RNG_FAILED                        -0x4480  /* The random generator failed to generate non-zeros. */
 
 /* RSA constants */
 
-#define ESP32C3_RSA_PUBLIC      0 /**< Request private key operation. */
-#define ESP32C3_RSA_PRIVATE     1 /**< Request public key operation. */
+#define ESP32C3_RSA_PUBLIC          0 /* Request private key operation. */
+#define ESP32C3_RSA_PRIVATE         1 /* Request public key operation. */
 
-#define ESP32C3_RSA_PKCS_V15    0 /**< Use PKCS#1 v1.5 encoding. */
-#define ESP32C3_RSA_PKCS_V21    1 /**< Use PKCS#1 v2.1 encoding. */
+#define ESP32C3_RSA_PKCS_V15        0 /* Use PKCS#1 v1.5 encoding. */
+#define ESP32C3_RSA_PKCS_V21        1 /* Use PKCS#1 v2.1 encoding. */
 
-#define ESP32C3_RSA_SIGN        1 /**< Identifier for RSA signature operations. */
-#define ESP32C3_RSA_CRYPT       2 /**< Identifier for RSA encryption and decryption operations. */
+#define ESP32C3_RSA_SIGN            1 /* Identifier for RSA signature operations. */
+#define ESP32C3_RSA_CRYPT           2 /* Identifier for RSA encryption and decryption operations. */
 
-#define ESP32C3_RSA_SALT_LEN_ANY    -1
+#define ESP32C3_RSA_SALT_LEN_ANY   -1
 
 /****************************************************************************
  * Public Types
@@ -79,8 +79,8 @@ extern "C"
 
 struct esp32c3_rsa_context_s
 {
-    int ver;                    /* Always 0 */
-    size_t len;                 /* The size of \p N in Bytes */
+    int ver;                             /* Always 0 */
+    size_t len;                          /* The size of \p N in Bytes */
 
     struct esp32c3_mpi_s N;              /* The public modulus */
     struct esp32c3_mpi_s E;              /* The public exponent */
@@ -101,8 +101,8 @@ struct esp32c3_rsa_context_s
     struct esp32c3_mpi_s VI;             /* The cached blinding value */
     struct esp32c3_mpi_s VF;             /* The cached un-blinding value */
 
-    int padding;                /* Selects padding mode */
-    int hash_id;                /* Hash identifier */
+    int padding;                         /* Selects padding mode */
+    int hash_id;                         /* Hash identifier */
 };
 
 /****************************************************************************

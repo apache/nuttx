@@ -183,23 +183,23 @@
 #endif
 
 #if CONFIG_SPIFI_LIBRARY
-#  define SPIFI_DEVICE_ALL                0        /**< Enables all devices in family */
-#  define SPIFI_DEVICE_S25FL016K          0        /**< Enables Spansion S25FL016K device */
-#  define SPIFI_DEVICE_S25FL032P          0        /**< Enables Spansion S25FL032P device */
-#  define SPIFI_DEVICE_S25FL064P          0        /**< Enables Spansion S25FL064P device */
-#  define SPIFI_DEVICE_S25FL129P_64K      0        /**< Enables Spansion S25FL129P (64K block) device */
-#  define SPIFI_DEVICE_S25FL129P_256K     0        /**< Enables Spansion S25FL129P (256K block) device */
-#  define SPIFI_DEVICE_S25FL164K          0        /**< Enables Spansion S25FL164K device */
-#  define SPIFI_DEVICE_S25FL256S_64K      0        /**< Enables Spansion S25FL256S (64K block) device */
-#  define SPIFI_DEVICE_S25FL256S_256K     0        /**< Enables Spansion S25FL256S (256K block) device */
-#  define SPIFI_DEVICE_S25FL512S          0        /**< Enables Spansion S25FL512S device */
-#  define SPIFI_DEVICE_MX25L1635E         0        /**< Enables Macronix MX25L1635E device */
-#  define SPIFI_DEVICE_MX25L3235E         0        /**< Enables Macronix MX25L3235E device */
-#  define SPIFI_DEVICE_MX25L8035E         0        /**< Enables Macronix MX25L8035E device */
-#  define SPIFI_DEVICE_MX25L6435E         0        /**< Enables Macronix MX25L6435E device */
-#  define SPIFI_DEVICE_W25Q32FV           0        /**< Enables Winbond W25Q32FV device */
-#  define SPIFI_DEVICE_W25Q64FV           0        /**< Enables Winbond W25Q32V device */
-#  define SPIFI_DEVICE_W25Q80BV           1        /**< Enables Winbond W25Q80BV device */
+#  define SPIFI_DEVICE_ALL                0        /* Enables all devices in family */
+#  define SPIFI_DEVICE_S25FL016K          0        /* Enables Spansion S25FL016K device */
+#  define SPIFI_DEVICE_S25FL032P          0        /* Enables Spansion S25FL032P device */
+#  define SPIFI_DEVICE_S25FL064P          0        /* Enables Spansion S25FL064P device */
+#  define SPIFI_DEVICE_S25FL129P_64K      0        /* Enables Spansion S25FL129P (64K block) device */
+#  define SPIFI_DEVICE_S25FL129P_256K     0        /* Enables Spansion S25FL129P (256K block) device */
+#  define SPIFI_DEVICE_S25FL164K          0        /* Enables Spansion S25FL164K device */
+#  define SPIFI_DEVICE_S25FL256S_64K      0        /* Enables Spansion S25FL256S (64K block) device */
+#  define SPIFI_DEVICE_S25FL256S_256K     0        /* Enables Spansion S25FL256S (256K block) device */
+#  define SPIFI_DEVICE_S25FL512S          0        /* Enables Spansion S25FL512S device */
+#  define SPIFI_DEVICE_MX25L1635E         0        /* Enables Macronix MX25L1635E device */
+#  define SPIFI_DEVICE_MX25L3235E         0        /* Enables Macronix MX25L3235E device */
+#  define SPIFI_DEVICE_MX25L8035E         0        /* Enables Macronix MX25L8035E device */
+#  define SPIFI_DEVICE_MX25L6435E         0        /* Enables Macronix MX25L6435E device */
+#  define SPIFI_DEVICE_W25Q32FV           0        /* Enables Winbond W25Q32FV device */
+#  define SPIFI_DEVICE_W25Q64FV           0        /* Enables Winbond W25Q32V device */
+#  define SPIFI_DEVICE_W25Q80BV           1        /* Enables Winbond W25Q80BV device */
 #  define SPIFI_DEVICE_REQUENCY_DIVIDER   2        /* PLL1 clock divider */
 #endif
 

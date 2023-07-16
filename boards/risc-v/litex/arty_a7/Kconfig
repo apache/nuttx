@@ -18,7 +18,7 @@ config LITEX_SDIO
 
 config LITEX_SDIO1
 	bool "Enable SDIO1"
-	default y if LITEX_SDIO
+	default LITEX_SDIO
 	select LITEX_SDIO_DMA
 	depends on LITEX_SDIO
 

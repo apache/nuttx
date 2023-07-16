@@ -435,7 +435,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   FAR struct wtgahrs2_sensor_s *tmp;
   struct termios opt;
   FAR char *argv[2];
-  char arg1[16];
+  char arg1[32];
   int ret;
 
   if (!path)
@@ -542,7 +542,7 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
 
   wtgahrs2_sendcmd(rtdata, g_wtgahrs2_enable_sensor);
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)rtdata);
+  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)rtdata);
   argv[0] = arg1;
   argv[1] = NULL;
 

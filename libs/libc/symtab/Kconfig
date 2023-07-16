@@ -10,3 +10,26 @@ config ALLSYMS
 		Say Y here to let the nuttx print out symbolic crash information and
 		symbolic stack backtraces. This increases the size of the nuttx
 		somewhat, as all symbols have to be loaded into the nuttx image.
+
+config SYMTAB_ORDEREDBYNAME
+	bool "Symbol Tables Ordered by Name"
+	default n
+	---help---
+		Select if the symbol table is ordered by symbol name.  In this case,
+		the logic can perform faster lookups using a binary search.
+		Otherwise, the symbol table is assumed to be un-ordered and only
+		slow, linear searches are supported.
+
+config SYMTAB_ORDEREDBYVALUE
+	bool "Symbol Tables Ordered by Value"
+	default n
+	---help---
+		Select if the symbol table is ordered by symbol value.
+
+config SYMTAB_DECORATED
+	bool "Symbols are decorated with leading underscores"
+	default n
+	---help---
+		Select if symbols in relocatable objects are decorated with a leading
+		underscore. This option will remove the underscore from symbol names
+		when relocating a loadable object.

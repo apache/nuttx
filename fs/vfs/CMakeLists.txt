@@ -21,12 +21,11 @@
 set(SRCS
     fs_chstat.c
     fs_close.c
-    fs_dir.c
-    fs_dup2.c
     fs_dup.c
+    fs_dup2.c
+    fs_fcntl.c
     fs_epoll.c
     fs_fchstat.c
-    fs_fcntl.c
     fs_fstat.c
     fs_fstatfs.c
     fs_ioctl.c
@@ -44,16 +43,15 @@ set(SRCS
     fs_stat.c
     fs_statfs.c
     fs_unlink.c
-    fs_write.c)
+    fs_write.c
+    fs_dir.c
+    fs_fsync.c
+    fs_truncate.c)
 
 # Certain interfaces are not available if there is no mountpoint support
 
-if(NOT CONFIG_DISABLE_MOUNTPOINT)
-  list(APPEND SRCS fs_fsync.c fs_truncate.c)
-endif()
-
 if(NOT "${CONFIG_PSEUDOFS_SOFTLINKS}" STREQUAL "0")
-  list(APPEND SRCS fs_symlink.c fs_readlink.c)
+  list(APPEND SRCS fs_link.c fs_symlink.c fs_readlink.c)
 endif()
 
 # Stream support
@@ -72,6 +70,12 @@ endif()
 
 if(CONFIG_TIMER_FD)
   list(APPEND SRCS fs_timerfd.c)
+endif()
+
+# Support for signalfd
+
+if(CONFIG_SIGNAL_FD)
+  list(APPEND SRCS fs_signalfd.c)
 endif()
 
 target_sources(fs PRIVATE ${SRCS})

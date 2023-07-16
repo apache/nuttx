@@ -26,6 +26,7 @@
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notectl_driver.h>
 #include <nuttx/note/notesnap_driver.h>
+#include <nuttx/segger/note_rtt.h>
 #include <nuttx/segger/sysview.h>
 
 /****************************************************************************
@@ -53,6 +54,14 @@ int note_initialize(void)
 
 #ifdef CONFIG_DRIVERS_NOTERAM
   ret = noteram_register();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_NOTE_RTT
+  ret = notertt_register();
   if (ret < 0)
     {
       return ret;

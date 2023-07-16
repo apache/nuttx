@@ -145,6 +145,14 @@ int esp32s2_bringup(void)
     }
 #endif /* CONFIG_ESP32S2_LEDC */
 
+#ifdef CONFIG_ESP32S2_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
 #ifdef CONFIG_DEV_GPIO
   ret = esp32s2_gpio_init();
   if (ret < 0)

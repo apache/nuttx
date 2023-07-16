@@ -51,20 +51,20 @@ extern "C"
  * Pin floating, pull up, pull down definitions
  */
 
-#define PIN_FLOAT               (0) /**< Floating */
-#define PIN_PULLUP              (1) /**< Internal Weak Pull Up */
-#define PIN_PULLDOWN            (2) /**< Internal Weak Pull Down */
-#define PIN_BUSKEEPER           (3) /**< Internal Bus-Keeper */
+#define PIN_FLOAT               (0) /* Floating */
+#define PIN_PULLUP              (1) /* Internal Weak Pull Up */
+#define PIN_PULLDOWN            (2) /* Internal Weak Pull Down */
+#define PIN_BUSKEEPER           (3) /* Internal Bus-Keeper */
 
 /* GPIO Interrupt Setting
  * GPIO interrupt level and edge trigger types
  */
 
-#define INT_HIGH_LEVEL          (2) /**< High Level */
-#define INT_LOW_LEVEL           (3) /**< Low Level */
-#define INT_RISING_EDGE         (4) /**< Rising Edge */
-#define INT_FALLING_EDGE        (5) /**< Falling Edge */
-#define INT_BOTH_EDGE           (7) /**< Both Edge */
+#define INT_HIGH_LEVEL          (2) /* High Level */
+#define INT_LOW_LEVEL           (3) /* Low Level */
+#define INT_RISING_EDGE         (4) /* Rising Edge */
+#define INT_FALLING_EDGE        (5) /* Falling Edge */
+#define INT_BOTH_EDGE           (7) /* Both Edge */
 
 #ifndef __ASSEMBLY__
 

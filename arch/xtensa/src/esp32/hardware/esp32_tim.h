@@ -29,23 +29,23 @@
 
 /* Offsets relative to each timer instance memory base */
 
-#define TIM_CONFIG_OFFSET  		0x00
-#define TIM_LOAD_LO_OFFSET 		0x0018
-#define TIM_LOAD_HI_OFFSET 		0x001c
-#define TIM_LOAD_OFFSET    		0x0020
+#define TIM_CONFIG_OFFSET       0x00
+#define TIM_LOAD_LO_OFFSET      0x0018
+#define TIM_LOAD_HI_OFFSET      0x001c
+#define TIM_LOAD_OFFSET         0x0020
 #define TIMG_ALARM_LO_OFFSET    0x0010
 #define TIMG_ALARM_HI_OFFSET    0x0014
-#define TIM_UPDATE_OFFSET		0x000c
-#define TIM_LO_OFFSET 			0x0004
-#define TIM_HI_OFFSET 			0x0008
-#define SHIFT_32           		32
-#define TIM0_CLR_OFFSET			0x00a4
-#define TIM1_CLR_OFFSET			0x0080
-#define TIM0_INT_ST_OFFSET 		0x00A0
-#define TIM1_INT_ST_OFFSET 		0x007c
-#define TIM0_INT_ENA_OFFSET		0x0098
-#define TIM1_INT_ENA_OFFSET		0x0074
-#define LOW_32_MASK				0xffffffff
+#define TIM_UPDATE_OFFSET       0x000c
+#define TIM_LO_OFFSET           0x0004
+#define TIM_HI_OFFSET           0x0008
+#define SHIFT_32                32
+#define TIM0_CLR_OFFSET         0x00a4
+#define TIM1_CLR_OFFSET         0x0080
+#define TIM0_INT_ST_OFFSET      0x00A0
+#define TIM1_INT_ST_OFFSET      0x007c
+#define TIM0_INT_ENA_OFFSET     0x0098
+#define TIM1_INT_ENA_OFFSET     0x0074
+#define LOW_32_MASK             0xffffffff
 
 /* WDT defines */
 
@@ -101,7 +101,7 @@
 
 /* Description: When set timer 0 time-base counter is enabled. */
 
-#define TIMG_T0_EN  (BIT(31))
+#define TIMG_T0_EN    (BIT(31))
 #define TIMG_T0_EN_M  (BIT(31))
 #define TIMG_T0_EN_V  0x1
 #define TIMG_T0_EN_S  31
@@ -112,7 +112,7 @@
  * When cleared timer 0 time-base counter decrement.
  */
 
-#define TIMG_T0_INCREASE  (BIT(30))
+#define TIMG_T0_INCREASE    (BIT(30))
 #define TIMG_T0_INCREASE_M  (BIT(30))
 #define TIMG_T0_INCREASE_V  0x1
 #define TIMG_T0_INCREASE_S  30
@@ -121,7 +121,7 @@
 
 /* Description: When set timer 0 auto-reload at alarming is enabled. */
 
-#define TIMG_T0_AUTORELOAD  (BIT(29))
+#define TIMG_T0_AUTORELOAD    (BIT(29))
 #define TIMG_T0_AUTORELOAD_M  (BIT(29))
 #define TIMG_T0_AUTORELOAD_V  0x1
 #define TIMG_T0_AUTORELOAD_S  29
@@ -130,7 +130,7 @@
 
 /* Description: Timer 0 clock (T0_clk) prescale value. */
 
-#define TIMG_T0_DIVIDER  0x0000FFFF
+#define TIMG_T0_DIVIDER    0x0000FFFF
 #define TIMG_T0_DIVIDER_M  ((TIMG_T0_DIVIDER_V)<<(TIMG_T0_DIVIDER_S))
 #define TIMG_T0_DIVIDER_V  0xFFFF
 #define TIMG_T0_DIVIDER_S  13
@@ -139,7 +139,7 @@
 
 /* Description: When set edge type interrupt will be generated during alarm */
 
-#define TIMG_T0_EDGE_INT_EN  (BIT(12))
+#define TIMG_T0_EDGE_INT_EN    (BIT(12))
 #define TIMG_T0_EDGE_INT_EN_M  (BIT(12))
 #define TIMG_T0_EDGE_INT_EN_V  0x1
 #define TIMG_T0_EDGE_INT_EN_S  12
@@ -150,7 +150,7 @@
  * will be generated during alarm
  */
 
-#define TIMG_T0_LEVEL_INT_EN  (BIT(11))
+#define TIMG_T0_LEVEL_INT_EN    (BIT(11))
 #define TIMG_T0_LEVEL_INT_EN_M  (BIT(11))
 #define TIMG_T0_LEVEL_INT_EN_V  0x1
 #define TIMG_T0_LEVEL_INT_EN_S  11
@@ -159,7 +159,7 @@
 
 /* Description: When set alarm is enabled */
 
-#define TIMG_T0_ALARM_EN  (BIT(10))
+#define TIMG_T0_ALARM_EN    (BIT(10))
 #define TIMG_T0_ALARM_EN_M  (BIT(10))
 #define TIMG_T0_ALARM_EN_V  0x1
 #define TIMG_T0_ALARM_EN_S  10
@@ -172,7 +172,7 @@
  * value lower 32 bits.
  */
 
-#define TIMG_T0_LO  0xFFFFFFFF
+#define TIMG_T0_LO    0xFFFFFFFF
 #define TIMG_T0_LO_M  ((TIMG_T0_LO_V)<<(TIMG_T0_LO_S))
 #define TIMG_T0_LO_V  0xFFFFFFFF
 #define TIMG_T0_LO_S  0
@@ -185,7 +185,7 @@
  * higher 32 bits.
  */
 
-#define TIMG_T0_HI  0xFFFFFFFF
+#define TIMG_T0_HI    0xFFFFFFFF
 #define TIMG_T0_HI_M  ((TIMG_T0_HI_V)<<(TIMG_T0_HI_S))
 #define TIMG_T0_HI_V  0xFFFFFFFF
 #define TIMG_T0_HI_S  0
@@ -199,7 +199,7 @@
  * (timer 0 current value will be stored in registers above).
  */
 
-#define TIMG_T0_UPDATE  0xFFFFFFFF
+#define TIMG_T0_UPDATE    0xFFFFFFFF
 #define TIMG_T0_UPDATE_M  ((TIMG_T0_UPDATE_V)<<(TIMG_T0_UPDATE_S))
 #define TIMG_T0_UPDATE_V  0xFFFFFFFF
 #define TIMG_T0_UPDATE_S  0
@@ -212,7 +212,7 @@
  * will trigger the alarm.
  */
 
-#define TIMG_T0_ALARM_LO  0xFFFFFFFF
+#define TIMG_T0_ALARM_LO    0xFFFFFFFF
 #define TIMG_T0_ALARM_LO_M  ((TIMG_T0_ALARM_LO_V)<<(TIMG_T0_ALARM_LO_S))
 #define TIMG_T0_ALARM_LO_V  0xFFFFFFFF
 #define TIMG_T0_ALARM_LO_S  0
@@ -225,7 +225,7 @@
  * will trigger the alarm.
  */
 
-#define TIMG_T0_ALARM_HI  0xFFFFFFFF
+#define TIMG_T0_ALARM_HI    0xFFFFFFFF
 #define TIMG_T0_ALARM_HI_M  ((TIMG_T0_ALARM_HI_V)<<(TIMG_T0_ALARM_HI_S))
 #define TIMG_T0_ALARM_HI_V  0xFFFFFFFF
 #define TIMG_T0_ALARM_HI_S  0
@@ -238,7 +238,7 @@
  * time-base counter.
  */
 
-#define TIMG_T0_LOAD_LO  0xFFFFFFFF
+#define TIMG_T0_LOAD_LO    0xFFFFFFFF
 #define TIMG_T0_LOAD_LO_M  ((TIMG_T0_LOAD_LO_V)<<(TIMG_T0_LOAD_LO_S))
 #define TIMG_T0_LOAD_LO_V  0xFFFFFFFF
 #define TIMG_T0_LOAD_LO_S  0
@@ -251,7 +251,7 @@
  * time-base counter.
  */
 
-#define TIMG_T0_LOAD_HI  0xFFFFFFFF
+#define TIMG_T0_LOAD_HI    0xFFFFFFFF
 #define TIMG_T0_LOAD_HI_M  ((TIMG_T0_LOAD_HI_V)<<(TIMG_T0_LOAD_HI_S))
 #define TIMG_T0_LOAD_HI_V  0xFFFFFFFF
 #define TIMG_T0_LOAD_HI_S  0
@@ -264,7 +264,7 @@
  * time-base counter reload.
  */
 
-#define TIMG_T0_LOAD  0xFFFFFFFF
+#define TIMG_T0_LOAD    0xFFFFFFFF
 #define TIMG_T0_LOAD_M  ((TIMG_T0_LOAD_V)<<(TIMG_T0_LOAD_S))
 #define TIMG_T0_LOAD_V  0xFFFFFFFF
 #define TIMG_T0_LOAD_S  0
@@ -275,7 +275,7 @@
 
 /* Description: When set timer 1 time-base counter is enabled. */
 
-#define TIMG_T1_EN  (BIT(31))
+#define TIMG_T1_EN    (BIT(31))
 #define TIMG_T1_EN_M  (BIT(31))
 #define TIMG_T1_EN_V  0x1
 #define TIMG_T1_EN_S  31
@@ -286,7 +286,7 @@
  * When cleared timer 1 time-base counter decrement.
  */
 
-#define TIMG_T1_INCREASE  (BIT(30))
+#define TIMG_T1_INCREASE    (BIT(30))
 #define TIMG_T1_INCREASE_M  (BIT(30))
 #define TIMG_T1_INCREASE_V  0x1
 #define TIMG_T1_INCREASE_S  30
@@ -295,7 +295,7 @@
 
 /* Description: When set timer 1 auto-reload at alarming is enabled. */
 
-#define TIMG_T1_AUTORELOAD  (BIT(29))
+#define TIMG_T1_AUTORELOAD    (BIT(29))
 #define TIMG_T1_AUTORELOAD_M  (BIT(29))
 #define TIMG_T1_AUTORELOAD_V  0x1
 #define TIMG_T1_AUTORELOAD_S  29
@@ -304,7 +304,7 @@
 
 /* Description: Timer 1 clock (T1_clk) prescale value. */
 
-#define TIMG_T1_DIVIDER  0x0000FFFF
+#define TIMG_T1_DIVIDER     0x0000FFFF
 #define TIMG_T1_DIVIDER_M  ((TIMG_T1_DIVIDER_V)<<(TIMG_T1_DIVIDER_S))
 #define TIMG_T1_DIVIDER_V  0xFFFF
 #define TIMG_T1_DIVIDER_S  13
@@ -315,7 +315,7 @@
  * will be generated during alarm.
  */
 
-#define TIMG_T1_EDGE_INT_EN  (BIT(12))
+#define TIMG_T1_EDGE_INT_EN    (BIT(12))
 #define TIMG_T1_EDGE_INT_EN_M  (BIT(12))
 #define TIMG_T1_EDGE_INT_EN_V  0x1
 #define TIMG_T1_EDGE_INT_EN_S  12
@@ -326,7 +326,7 @@
  * during alarm.
  */
 
-#define TIMG_T1_LEVEL_INT_EN  (BIT(11))
+#define TIMG_T1_LEVEL_INT_EN    (BIT(11))
 #define TIMG_T1_LEVEL_INT_EN_M  (BIT(11))
 #define TIMG_T1_LEVEL_INT_EN_V  0x1
 #define TIMG_T1_LEVEL_INT_EN_S  11
@@ -335,7 +335,7 @@
 
 /* Description: When set alarm is enabled. */
 
-#define TIMG_T1_ALARM_EN  (BIT(10))
+#define TIMG_T1_ALARM_EN    (BIT(10))
 #define TIMG_T1_ALARM_EN_M  (BIT(10))
 #define TIMG_T1_ALARM_EN_V  0x1
 #define TIMG_T1_ALARM_EN_S  10
@@ -348,7 +348,7 @@
  * value lower 32 bits.
  */
 
-#define TIMG_T1_LO  0xFFFFFFFF
+#define TIMG_T1_LO    0xFFFFFFFF
 #define TIMG_T1_LO_M  ((TIMG_T1_LO_V)<<(TIMG_T1_LO_S))
 #define TIMG_T1_LO_V  0xFFFFFFFF
 #define TIMG_T1_LO_S  0
@@ -361,7 +361,7 @@
  * higher 32 bits.
  */
 
-#define TIMG_T1_HI  0xFFFFFFFF
+#define TIMG_T1_HI    0xFFFFFFFF
 #define TIMG_T1_HI_M  ((TIMG_T1_HI_V)<<(TIMG_T1_HI_S))
 #define TIMG_T1_HI_V  0xFFFFFFFF
 #define TIMG_T1_HI_S  0
@@ -375,7 +375,7 @@
  * (timer 1 current value will be stored in registers above).
  */
 
-#define TIMG_T1_UPDATE  0xFFFFFFFF
+#define TIMG_T1_UPDATE    0xFFFFFFFF
 #define TIMG_T1_UPDATE_M  ((TIMG_T1_UPDATE_V)<<(TIMG_T1_UPDATE_S))
 #define TIMG_T1_UPDATE_V  0xFFFFFFFF
 #define TIMG_T1_UPDATE_S  0
@@ -388,7 +388,7 @@
  * trigger the alarm
  */
 
-#define TIMG_T1_ALARM_LO  0xFFFFFFFF
+#define TIMG_T1_ALARM_LO    0xFFFFFFFF
 #define TIMG_T1_ALARM_LO_M  ((TIMG_T1_ALARM_LO_V)<<(TIMG_T1_ALARM_LO_S))
 #define TIMG_T1_ALARM_LO_V  0xFFFFFFFF
 #define TIMG_T1_ALARM_LO_S  0
@@ -401,7 +401,7 @@
  * trigger the alarm.
  */
 
-#define TIMG_T1_ALARM_HI  0xFFFFFFFF
+#define TIMG_T1_ALARM_HI    0xFFFFFFFF
 #define TIMG_T1_ALARM_HI_M  ((TIMG_T1_ALARM_HI_V)<<(TIMG_T1_ALARM_HI_S))
 #define TIMG_T1_ALARM_HI_V  0xFFFFFFFF
 #define TIMG_T1_ALARM_HI_S  0
@@ -414,7 +414,7 @@
  * timer 1 time-base counter.
  */
 
-#define TIMG_T1_LOAD_LO  0xFFFFFFFF
+#define TIMG_T1_LOAD_LO    0xFFFFFFFF
 #define TIMG_T1_LOAD_LO_M  ((TIMG_T1_LOAD_LO_V)<<(TIMG_T1_LOAD_LO_S))
 #define TIMG_T1_LOAD_LO_V  0xFFFFFFFF
 #define TIMG_T1_LOAD_LO_S  0
@@ -427,7 +427,7 @@
  * time-base counter.
  */
 
-#define TIMG_T1_LOAD_HI  0xFFFFFFFF
+#define TIMG_T1_LOAD_HI    0xFFFFFFFF
 #define TIMG_T1_LOAD_HI_M  ((TIMG_T1_LOAD_HI_V)<<(TIMG_T1_LOAD_HI_S))
 #define TIMG_T1_LOAD_HI_V  0xFFFFFFFF
 #define TIMG_T1_LOAD_HI_S  0
@@ -440,7 +440,7 @@
  * timer 1 time-base counter reload.
  */
 
-#define TIMG_T1_LOAD  0xFFFFFFFF
+#define TIMG_T1_LOAD    0xFFFFFFFF
 #define TIMG_T1_LOAD_M  ((TIMG_T1_LOAD_V)<<(TIMG_T1_LOAD_S))
 #define TIMG_T1_LOAD_V  0xFFFFFFFF
 #define TIMG_T1_LOAD_S  0
@@ -451,7 +451,7 @@
 
 /* Description: When set SWDT is enabled. */
 
-#define TIMG_WDT_EN  (BIT(31))
+#define TIMG_WDT_EN    (BIT(31))
 #define TIMG_WDT_EN_M  (BIT(31))
 #define TIMG_WDT_EN_V  0x1
 #define TIMG_WDT_EN_S  31
@@ -462,7 +462,7 @@
  * 0: off  1: interrupt  2: reset CPU  3: reset system
  */
 
-#define TIMG_WDT_STG0  0x00000003
+#define TIMG_WDT_STG0    0x00000003
 #define TIMG_WDT_STG0_M  ((TIMG_WDT_STG0_V)<<(TIMG_WDT_STG0_S))
 #define TIMG_WDT_STG0_V  0x3
 #define TIMG_WDT_STG0_S  29

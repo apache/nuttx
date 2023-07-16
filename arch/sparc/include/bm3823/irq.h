@@ -46,26 +46,26 @@
 
 #define BM3823_IRQ_FIRST                     0x00
 
-#define BM3823_IRQ_RESET		     0x00
-#define BM3823_IRQ_INST_ACC_EXCEPTION	     0x01
-#define BM3823_IRQ_ILL_INST		     0x02
-#define BM3823_IRQ_PRIVELEGE_INST	     0x03
-#define BM3823_IRQ_FP_DISABLED	     	     0x04
-#define BM3823_IRQ_WINDOW_OVERFLOW	     0x05
-#define BM3823_IRQ_WINDOW_UNDERFLOW	     0x06
-#define BM3823_IRQ_ADD_NOT_ALIGNED	     0x07
-#define BM3823_IRQ_ADD_FP_EXCEPTION	     0x08
-#define BM3823_IRQ_DATA_ACC_EXCEPTION	     0x09
-#define BM3823_IRQ_TAG_OVERFLOW	     	     0x0A
-#define BM3823_IRQ_HW_UNDEFINED_0B     	     0x0B
-#define BM3823_IRQ_HW_UNDEFINED_0C     	     0x0C
-#define BM3823_IRQ_HW_UNDEFINED_0D     	     0x0D
-#define BM3823_IRQ_HW_UNDEFINED_0E     	     0x0E
-#define BM3823_IRQ_HW_UNDEFINED_0F     	     0x0F
-#define BM3823_IRQ_HW_UNDEFINED_10     	     0x10
+#define BM3823_IRQ_RESET                     0x00
+#define BM3823_IRQ_INST_ACC_EXCEPTION        0x01
+#define BM3823_IRQ_ILL_INST                  0x02
+#define BM3823_IRQ_PRIVELEGE_INST            0x03
+#define BM3823_IRQ_FP_DISABLED               0x04
+#define BM3823_IRQ_WINDOW_OVERFLOW           0x05
+#define BM3823_IRQ_WINDOW_UNDERFLOW          0x06
+#define BM3823_IRQ_ADD_NOT_ALIGNED           0x07
+#define BM3823_IRQ_ADD_FP_EXCEPTION          0x08
+#define BM3823_IRQ_DATA_ACC_EXCEPTION        0x09
+#define BM3823_IRQ_TAG_OVERFLOW              0x0A
+#define BM3823_IRQ_HW_UNDEFINED_0B           0x0B
+#define BM3823_IRQ_HW_UNDEFINED_0C           0x0C
+#define BM3823_IRQ_HW_UNDEFINED_0D           0x0D
+#define BM3823_IRQ_HW_UNDEFINED_0E           0x0E
+#define BM3823_IRQ_HW_UNDEFINED_0F           0x0F
+#define BM3823_IRQ_HW_UNDEFINED_10           0x10
 
 #define BM3823_IRQ_FIRST_INTERRUPT           0x11
-#define BM3823_IRQ_AHB_ERROR  0x11
+#define BM3823_IRQ_AHB_ERROR                 0x11
 #define BM3823_IRQ_UART_2_RX_TX              0x12
 #define BM3823_IRQ_UART_1_RX_TX              0x13
 #define BM3823_IRQ_EXTERNAL_0                0x14
@@ -76,48 +76,48 @@
 #define BM3823_IRQ_EXTERNAL_5                0x19
 #define BM3823_IRQ_SECOND                    0x1A
 #define BM3823_IRQ_DSUTRACWBUFF              0x1B
-#define BM3823_IRQ_PCI             	     0x1C
+#define BM3823_IRQ_PCI                       0x1C
 #define BM3823_IRQ_TIMER2                    0x1D
 #define BM3823_IRQ_TIMER1                    0x1E
 #define BM3823_IRQ_NONMASK                   0x1F
 #define BM3823_IRQ_LAST_INTERRUPT            0x1F
 
-#define BM3823_IRQ_HW_UNDEFINED_20     	     0x20
-#define BM3823_IRQ_HW_UNDEFINED_21     	     0x21
-#define BM3823_IRQ_HW_UNDEFINED_22     	     0x22
-#define BM3823_IRQ_HW_UNDEFINED_23     	     0x23
+#define BM3823_IRQ_HW_UNDEFINED_20           0x20
+#define BM3823_IRQ_HW_UNDEFINED_21           0x21
+#define BM3823_IRQ_HW_UNDEFINED_22           0x22
+#define BM3823_IRQ_HW_UNDEFINED_23           0x23
 
-#define BM3823_IRQ_CP_DISABLED	     	     0x24
+#define BM3823_IRQ_CP_DISABLED               0x24
 
-#define BM3823_IRQ_HW_UNDEFINED_25     	     0x25
-#define BM3823_IRQ_HW_UNDEFINED_26     	     0x26
-#define BM3823_IRQ_HW_UNDEFINED_27     	     0x27
+#define BM3823_IRQ_HW_UNDEFINED_25           0x25
+#define BM3823_IRQ_HW_UNDEFINED_26           0x26
+#define BM3823_IRQ_HW_UNDEFINED_27           0x27
 
-#define BM3823_IRQ_CP_EXCEPTION	     	     0x28
+#define BM3823_IRQ_CP_EXCEPTION              0x28
 
-#define BM3823_IRQ_HW_UNDEFINED_29     	     0x29
-#define BM3823_IRQ_HW_UNDEFINED_7F     	     0x7F
+#define BM3823_IRQ_HW_UNDEFINED_29           0x29
+#define BM3823_IRQ_HW_UNDEFINED_7F           0x7F
 
-#define BM3823_IRQ_SW_SYSCALL_TA0     	     0x80
-#define BM3823_IRQ_SW_UNDEFINED_81     	     0x81
-#define BM3823_IRQ_SW_UNDEFINED_82     	     0x82
+#define BM3823_IRQ_SW_SYSCALL_TA0            0x80
+#define BM3823_IRQ_SW_UNDEFINED_81           0x81
+#define BM3823_IRQ_SW_UNDEFINED_82           0x82
 #define BM3823_IRQ_SW_FLUSH_WINDOWS          0x83
 
-#define BM3823_IRQ_SW_UNDEFINED_84     	     0x84
-#define BM3823_IRQ_SW_UNDEFINED_85     	     0x85
-#define BM3823_IRQ_SW_UNDEFINED_86     	     0x86
-#define BM3823_IRQ_SW_UNDEFINED_87     	     0x87
-#define BM3823_IRQ_SW_SYSCALL_TA8     	     0x88
+#define BM3823_IRQ_SW_UNDEFINED_84           0x84
+#define BM3823_IRQ_SW_UNDEFINED_85           0x85
+#define BM3823_IRQ_SW_UNDEFINED_86           0x86
+#define BM3823_IRQ_SW_UNDEFINED_87           0x87
+#define BM3823_IRQ_SW_SYSCALL_TA8           0x88
 
 #define BM3823_IRQ_SW_SYSCALL_IRQDIS         0x89
 #define BM3823_IRQ_SW_SYSCALL_IRQEN          0x8A
 
-#define BM3823_IRQ_SW_UNDEFINED_8B     	     0x8B
-#define BM3823_IRQ_SW_UNDEFINED_FF     	     0xFF
+#define BM3823_IRQ_SW_UNDEFINED_8B           0x8B
+#define BM3823_IRQ_SW_UNDEFINED_FF           0xFF
 
 #define BM3823_IRQ_LAST                      0xFF
 
-#  define NR_IRQS         	             256
+#define NR_IRQS                              256
 
 #else
   #error "Unrecognized chip"

@@ -32,6 +32,7 @@
 
 int syslog_rtt_putc(FAR struct syslog_channel_s *channel, int ch)
 {
+  SEGGER_RTT_BLOCK_IF_FIFO_FULL(0);
   SEGGER_RTT_PutChar(0, ch);
   return ch;
 }
@@ -39,5 +40,6 @@ int syslog_rtt_putc(FAR struct syslog_channel_s *channel, int ch)
 ssize_t syslog_rtt_write(FAR struct syslog_channel_s *channel,
                          FAR const char *buffer, size_t buflen)
 {
+  SEGGER_RTT_BLOCK_IF_FIFO_FULL(0);
   return SEGGER_RTT_Write(0, buffer, buflen);
 }

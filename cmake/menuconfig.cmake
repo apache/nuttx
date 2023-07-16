@@ -71,7 +71,7 @@ add_custom_target(
   COMMAND grep "CONFIG_ARCH=" ${CMAKE_BINARY_DIR}/.config >>
           ${CMAKE_BINARY_DIR}/defconfig.tmp
   COMMAND grep "^CONFIG_ARCH_CHIP_" ${CMAKE_BINARY_DIR}/.config >>
-          ${CMAKE_BINARY_DIR}/defconfig.tmp
+          ${CMAKE_BINARY_DIR}/defconfig.tmp || true
   COMMAND grep "CONFIG_ARCH_CHIP=" ${CMAKE_BINARY_DIR}/.config >>
           ${CMAKE_BINARY_DIR}/defconfig.tmp
   COMMAND grep "CONFIG_ARCH_BOARD=" ${CMAKE_BINARY_DIR}/.config >>
@@ -88,16 +88,18 @@ add_custom_target(
   COMMAND echo "\\#" >> ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND
     echo
-    "\\# You can use make menuconfig to make any modifications to the installed .config file."
+    "\\# You can use \\\"make menuconfig\\\" to make any modifications to the installed .config file."
     >> ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND
     echo
-    "\\# You can then do make savedefconfig or cmake -t savedefconfig to generate a new defconfig file that includes your"
+    "\\# You can then do \\\"make savedefconfig\\\" to generate a new defconfig file that includes your"
     >> ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND echo "\\# modifications." >> ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND echo "\\#" >> ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND cat ${CMAKE_BINARY_DIR}/warning.tmp
           ${CMAKE_BINARY_DIR}/sortedconfig.tmp > ${CMAKE_BINARY_DIR}/defconfig
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/defconfig
+          ${NUTTX_DEFCONFIG}
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/warning.tmp
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/defconfig.tmp
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/sortedconfig.tmp

@@ -30,8 +30,7 @@ config NET_BROADCAST
 
 config NET_UDP_CHECKSUMS
 	bool "UDP checksums"
-	default y if NET_IPv6
-	default n if !NET_IPv6
+	default NET_IPv6
 	---help---
 		Enable/disable UDP checksum support.  UDP checksum support is
 		REQUIRED for IPv6.

@@ -870,7 +870,7 @@ static ssize_t cxd56_emmc_read(struct inode *inode,
   DEBUGASSERT(inode && inode->i_private);
   priv = (struct cxd56_emmc_state_s *)inode->i_private;
 
-  finfo("Read sector %" PRIu32 " (%u sectors) to %p\n",
+  finfo("Read sector %" PRIuOFF " (%u sectors) to %p\n",
         start_sector, nsectors, buffer);
 
   ret = cxd56_emmc_readsectors(priv, buffer, start_sector, nsectors);

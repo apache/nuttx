@@ -75,16 +75,16 @@
 
 /* Register Bit-Field Definitions *******************************************/
 
-#define ODD	1
+#define ODD     1
 #define EVEN    0
-#define ON 	1
+#define ON      1
 #define OFF     0
 #define NONE    2
 #define RX      0
 #define TX      1
 #define RXTX    3
 
-/** Uart control list - Mask */
+/* Uart control list - Mask */
 
 #define MSK_UART_ENABLE_RX    0x01
 #define MSK_UART_ENABLE_TX    0x02
@@ -125,7 +125,7 @@
 
 #define UART_BRG_MASK               0xfff
 
-#define uart_set_baudrate(baudrate)	         ((uint32_t)((((BOARD_CPU_CLOCK*10)/(baudrate * 8))-5)/10))
+#define uart_set_baudrate(baudrate)              ((uint32_t)((((BOARD_CPU_CLOCK*10)/(baudrate * 8))-5)/10))
 
 #define uart_parity_config(reg, uart_parity)     ((uart_parity ==  ODD) ?                                     \
                                                   (reg   =   ((reg |  MSK_UART_PAR) | MSK_UART_ENABLE_PAR)) : \
@@ -162,7 +162,7 @@
 #define uart_tx_ready()                     ((S698PM_REG.uart_status1 & UART_STA_TF) != UART_STA_TF)
 #define uart_rx_ready()                     ((S698PM_REG.uart_status1 & UART_STA_DR) == UART_STA_DR)
 
-#define uart_send_byte(ch)  		     (S698PM_REG.uart_data1 = ch)
+#define uart_send_byte(ch)                  (S698PM_REG.uart_data1 = ch)
 
 /****************************************************************************
  * Public Types

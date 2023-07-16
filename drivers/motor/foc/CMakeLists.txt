@@ -17,6 +17,13 @@
 # the License.
 #
 # ##############################################################################
+
 if(CONFIG_MOTOR_FOC)
-  target_sources(drivers PRIVATE foc_dev.c)
+  set(SRCS foc_dev.c)
+  if(CONFIG_MOTOR_FOC_DUMMY)
+    list(APPEND SRCS foc_dummy.c)
+  endif()
+
+  target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

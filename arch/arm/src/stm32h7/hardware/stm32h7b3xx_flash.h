@@ -130,18 +130,18 @@
 
 #  define FLASH_CR_SSN(n)              ((uint32_t)((n) & 0x7f) << FLASH_CR_SSN_SHIFT) /* Sector n, n=0..127 */
 
-#define FLASH_CR_CRCEN                 (1 << 15)  					/* Bit 15: CRC control enable */
-#define FLASH_CR_EOPIE                 (1 << 16)  					/* Bit 16: End-of-program interrupt enable */
-#define FLASH_CR_WRPERRIE              (1 << 17)  					/* Bit 17: Write protection error interrupt enable */
-#define FLASH_CR_PGSERRIE              (1 << 18)  					/* Bit 18: Programming sequence error interrupt enable */
-#define FLASH_CR_STRBERRIE             (1 << 19)  					/* Bit 19: Strobe error interrupt enable */
-#define FLASH_CR_INCERRIE              (1 << 21)  					/* Bit 21: Inconsistency error interrupt enable */
-#define FLASH_CR_RDPERRIE              (1 << 23)  					/* Bit 23: Read protection error interrupt enable */
-#define FLASH_CR_RDSERRIE              (1 << 24)  					/* Bit 24: Secure error interrupt enable */
-#define FLASH_CR_SNECCERRIE            (1 << 25)  					/* Bit 25: ECC single correction error interrupt enable */
-#define FLASH_CR_DBECCERRIE            (1 << 26)  					/* Bit 26: ECC double detection error interrupt enable */
-#define FLASH_CR_CRCENDIE              (1 << 27)  					/* Bit 27: CRC end of calculation interrupt enable */
-#define FLASH_CR_CRCRDERRIE            (1 << 28)  					/* Bit 28: CRC read error interrupt enable bit */
+#define FLASH_CR_CRCEN                 (1 << 15)                      /* Bit 15: CRC control enable */
+#define FLASH_CR_EOPIE                 (1 << 16)                      /* Bit 16: End-of-program interrupt enable */
+#define FLASH_CR_WRPERRIE              (1 << 17)                      /* Bit 17: Write protection error interrupt enable */
+#define FLASH_CR_PGSERRIE              (1 << 18)                      /* Bit 18: Programming sequence error interrupt enable */
+#define FLASH_CR_STRBERRIE             (1 << 19)                      /* Bit 19: Strobe error interrupt enable */
+#define FLASH_CR_INCERRIE              (1 << 21)                      /* Bit 21: Inconsistency error interrupt enable */
+#define FLASH_CR_RDPERRIE              (1 << 23)                      /* Bit 23: Read protection error interrupt enable */
+#define FLASH_CR_RDSERRIE              (1 << 24)                      /* Bit 24: Secure error interrupt enable */
+#define FLASH_CR_SNECCERRIE            (1 << 25)                      /* Bit 25: ECC single correction error interrupt enable */
+#define FLASH_CR_DBECCERRIE            (1 << 26)                      /* Bit 26: ECC double detection error interrupt enable */
+#define FLASH_CR_CRCENDIE              (1 << 27)                      /* Bit 27: CRC end of calculation interrupt enable */
+#define FLASH_CR_CRCRDERRIE            (1 << 28)                      /* Bit 28: CRC read error interrupt enable bit */
 
 /* Flash Status Register (SR)  Bank 1 or 2 */
 
@@ -249,8 +249,8 @@
 
 /* Flash Write Sector Group Protection (WPSGN) Bank 1 or 2 */
 
-#define FLASH_WPSGN_SHIFT         		(0)        /* Bits 0-31: Sector group write protection option */
-#define FLASH_WPSGN_MASK          		(0xffffffff << FLASH_WPSGN_SHIFT)
+#define FLASH_WPSGN_SHIFT              (0)        /* Bits 0-31: Sector group write protection option */
+#define FLASH_WPSGN_MASK               (0xffffffff << FLASH_WPSGN_SHIFT)
 
 /* Flash Register Boot Address (BOOT) */
 

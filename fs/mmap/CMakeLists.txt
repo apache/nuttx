@@ -18,10 +18,14 @@
 #
 # ##############################################################################
 
-set(SRCS fs_mmap.c fs_munmap.c)
+set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c)
 
 if(CONFIG_FS_RAMMAP)
   list(APPEND SRCS fs_rammap.c)
+endif()
+
+if(CONFIG_FS_ANONMAP)
+  list(APPEND SRCS fs_anonmap.c)
 endif()
 
 target_sources(fs PRIVATE ${SRCS})

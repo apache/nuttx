@@ -62,7 +62,7 @@ _sa_handler_t signal(int signo, _sa_handler_t func)
   struct sigaction oact;
   int ret = -EINVAL;
 
-  if (!GOOD_SIGNO(signo))
+  if (!GOOD_SIGNO(signo) || UNCAUGHT_SIGNO(signo))
     {
       goto err;
     }
