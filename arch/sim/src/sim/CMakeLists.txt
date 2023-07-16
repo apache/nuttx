@@ -27,6 +27,10 @@ set(HOSTSRCS)
 set(HOST_INCLUDE_DIRS)
 set(STDLIBS pthread)
 
+if(CONFIG_ARCH_COVERAGE)
+  list(APPEND STDLIBS gcov)
+endif()
+
 list(APPEND HOST_DEFINITIONS -D__SIM__)
 
 # common guest sources

@@ -110,6 +110,10 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   STDLIBS += -lm
 endif
 
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  STDLIBS += -lgcov
+endif
+
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += sim_checkstack.c
 endif
