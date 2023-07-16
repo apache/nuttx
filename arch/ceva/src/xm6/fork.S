@@ -42,16 +42,18 @@
  ****************************************************************************/
 
 	.file		"fork.S"
-	.extern		_up_fork
+	.extern		up_fork
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fork
+ * Name: up_fork
  *
  * Description:
+ *   The up_fork() function is the base of fork() function that provided in
+ *   libc, and fork() is implemented as a wrapper of up_fork() function.
  *   The fork() function has the same effect as posix fork(), except that the behavior is
  *   undefined if the process created by fork() either modifies any data other than
  *   a variable of type pid_t used to store the return value from fork(), or returns
@@ -63,7 +65,7 @@
  *
  *   1) User code calls fork().  fork() collects context information and
  *      transfers control up up_fork().
- *   2) up_fork()and calls nxtask_forksetup().
+ *   2) ceva_fork()and calls nxtask_forksetup().
  *   3) task_forksetup() allocates and configures the child task's TCB.  This
  *      consists of:
  *      - Allocation of the child task's TCB.
@@ -71,11 +73,11 @@
  *      - Configuration of environment variables
  *      - Setup the intput parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state()
- *   4) up_fork() provides any additional operating context. up_fork must:
+ *   4) ceva_fork() provides any additional operating context. ceva_fork must:
  *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_fork() then calls nxtask_forkstart()
+ *   5) ceva_fork() then calls nxtask_forkstart()
  *   6) nxtask_forkstart() then executes the child thread.
  *
  * Input Paremeters:
@@ -90,10 +92,10 @@
  ****************************************************************************/
 
 	.text
-	.public		_fork
-	.func_start	3 _fork
+	.public		up_fork
+	.func_start	3 up_fork
 
-_fork:
+up_fork:
 	/* Create a stack frame */
 
 	modr		(sp.ui).ui +#-XCPTCONTEXT_SIZE	/* Allocate the structure on the stack */
@@ -104,18 +106,18 @@ _fork:
 	mov		sp.ui, r1.ui
 	trap		{t0}
 
-	/* Then, call up_fork(), passing it a pointer to the stack structure */
+	/* Then, call ceva_fork(), passing it a pointer to the stack structure */
 
 	mov		sp.ui, r0.ui
 	nop
 	push		retreg.ui
-	callr		#_up_fork, ?prx.b
+	callr		#ceva_fork, ?prx.b
 	pop		retreg.ui
 	nop
 
-	/* Release the stack data and return the value returned by up_fork */
+	/* Release the stack data and return the value returned by ceva_fork */
 
 	modr		(sp.ui).ui +#XCPTCONTEXT_SIZE
 	ret		?prx.b
 
-	.func_end	3 _fork
+	.func_end	3 up_fork

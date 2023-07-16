@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fork
+ * Name: sim_fork
  *
  * Description:
  *   The fork() function has the same effect as posix fork(), except that the
@@ -56,8 +56,8 @@
  *   The overall sequence is:
  *
  *   1) User code calls fork().  fork() collects context information and
- *      transfers control up up_fork().
- *   2) up_fork() and calls nxtask_setup_fork().
+ *      transfers control up sim_fork().
+ *   2) sim_fork() and calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
@@ -66,10 +66,10 @@
  *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
- *   4) up_fork() provides any additional operating context. up_fork must:
+ *   4) sim_fork() provides any additional operating context. sim_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_fork() then calls nxtask_start_fork()
+ *   5) sim_fork() then calls nxtask_start_fork()
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * nxtask_abort_fork() may be called if an error occurs between steps 3 and
@@ -86,7 +86,7 @@
 #ifdef CONFIG_SIM_ASAN
 nosanitize_address
 #endif
-pid_t up_fork(const xcpt_reg_t *context)
+pid_t sim_fork(const xcpt_reg_t *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
