@@ -110,7 +110,7 @@ SYMBOL(setjmp):
 	movq	%r13, JB_R13(REGS)	/* Save 5: r13 */
 	movq	%r14, JB_R14(REGS)	/* Save 6: r14 */
 	movq	%r15, JB_R15(REGS)	/* Save 7: r15 */
-	movq	%rsi, JB_RSI(REGS)	/* Save 8: Return address */
+	movq	%rsi, JB_RIP(REGS)	/* Save 8: Return address */
 
 	ret
 
@@ -139,9 +139,9 @@ SYMBOL(longjmp):
 	movq	JB_R14(REGS),%r14	/* Load 6: r14 */
 	movq	JB_R15(REGS),%r15	/* Load 7: rbp */
 
-	/* Jump to the saved return address (rsi)  */
+	/* Jump to the saved return address (rip)  */
 
-	jmp		*JB_RSI(REGS)
+	jmp		*JB_RIP(REGS)
 
 #ifdef __ELF__
 	.size SYMBOL(longjmp), . - SYMBOL(longjmp)

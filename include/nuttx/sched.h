@@ -183,7 +183,9 @@
 #  define TCB_NAME_OFF               0
 #endif
 #  define TCB_REGS_OFF               offsetof(struct tcb_s, xcp.regs)
-#  define TCB_REG_OFF(reg)           (reg * sizeof(uint32_t))
+#  define TCB_REG_OFF(reg)           (reg * sizeof(uintptr_t))
+#  define TCB_STACK_OFF              offsetof(struct tcb_s, stack_base_ptr)
+#  define TCB_STACK_SIZE_OFF         offsetof(struct tcb_s, adj_stack_size)
 #endif
 
 /* Get a pointer to the process' memory map struct from the task_group */
