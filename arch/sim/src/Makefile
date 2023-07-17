@@ -66,6 +66,10 @@ CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
 CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c
 CSRCS += sim_registerdump.c sim_saveusercontext.c sim_textheap.c
 
+ifeq ($(CONFIG_DEBUG_TCBINFO),y)
+CSRCS += sim_tcbinfo.c
+endif
+
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sim_backtrace.c
 endif
