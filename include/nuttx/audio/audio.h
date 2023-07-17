@@ -173,9 +173,13 @@
 #define AUDIO_SUBFMT_PCM_S16_BE     0x09
 #define AUDIO_SUBFMT_PCM_S16_LE     0x0a
 #define AUDIO_SUBFMT_PCM_U16_BE     0x0b
-#define AUDIO_SUBFMT_MIDI_0         0x0c
-#define AUDIO_SUBFMT_MIDI_1         0x0d
-#define AUDIO_SUBFMT_MIDI_2         0x0e
+#define AUDIO_SUBFMT_PCM_U32_LE     0x0c
+#define AUDIO_SUBFMT_PCM_U32_BE     0x0d
+#define AUDIO_SUBFMT_PCM_S32_LE     0x0e
+#define AUDIO_SUBFMT_PCM_S32_BE     0x0f
+#define AUDIO_SUBFMT_MIDI_0         0x10
+#define AUDIO_SUBFMT_MIDI_1         0x11
+#define AUDIO_SUBFMT_MIDI_2         0x12
 
 /* Audio Hardware-Format Types **********************************************/
 
