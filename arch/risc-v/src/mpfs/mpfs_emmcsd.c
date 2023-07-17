@@ -2579,6 +2579,7 @@ static int mpfs_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
                           uint32_t rlong[4])
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
+  uint32_t tmp;
   int ret;
 
   ret = mpfs_check_recverror(priv);
@@ -2587,15 +2588,24 @@ static int mpfs_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 
   if (rlong)
     {
-      /* Last 8-bits are missing, see SRS04 documemntation, RESP3[23:0]
+      /* Last 8-bits are missing, see SRS04 documentation, RESP3[23:0]
        * has only 24 bits unlike RESP2, RESP1 and RESP0 that have 32 bits.
        * We have to shift left 8 bits to match the proper long response.
        */
 
-      rlong[3] = getreg32(MPFS_EMMCSD_SRS04) << 8;
-      rlong[2] = getreg32(MPFS_EMMCSD_SRS05) << 8;
-      rlong[1] = getreg32(MPFS_EMMCSD_SRS06) << 8;
       rlong[0] = getreg32(MPFS_EMMCSD_SRS07) << 8;
+      tmp = getreg32(MPFS_EMMCSD_SRS06);
+      rlong[0] |= tmp >> 24;
+
+      rlong[1] = tmp << 8;
+      tmp = getreg32(MPFS_EMMCSD_SRS05);
+      rlong[1] |= tmp >> 24;
+
+      rlong[2] = tmp << 8;
+      tmp = getreg32(MPFS_EMMCSD_SRS04);
+      rlong[2] |= tmp >> 24;
+
+      rlong[3] = tmp << 8;
 
       mcinfo("recv: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" \
              PRIx32"\n", rlong[0], rlong[1], rlong[2], rlong[3]);
