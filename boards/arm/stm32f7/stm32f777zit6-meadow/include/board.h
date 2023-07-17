@@ -39,7 +39,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The STM32F7 Discovery board provides the following clock sources:
+/* The Meadow board provides the following clock sources:
  *
  *   X2:  25 MHz oscillator for STM32F777ZIT6 microcontroller
  *   and Ethernet PHY.
@@ -146,8 +146,9 @@
 
 /* Configure factors for  PLLSAI clock */
 
-#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(192)
-#define STM32_RCC_PLLSAICFGR_PLLSAIP    RCC_PLLSAICFGR_PLLSAIP(2)
+#define CONFIG_STM32F7_PLLSAI 1
+#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(384)
+#define STM32_RCC_PLLSAICFGR_PLLSAIP    RCC_PLLSAICFGR_PLLSAIP(8)
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(2)
 
