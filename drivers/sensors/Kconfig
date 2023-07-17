@@ -56,6 +56,11 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
+config SENSORS_GOLDFISH_GPS
+	bool "Goldfish GPS Support"
+	depends on SENSORS_GPS
+	default n
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n

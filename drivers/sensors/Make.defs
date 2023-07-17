@@ -44,6 +44,10 @@ ifeq ($(CONFIG_SENSORS_FAKESENSOR),y)
   CSRCS += fakesensor.c
 endif
 
+ifeq ($(CONFIG_SENSORS_GOLDFISH_GPS),y)
+  CSRCS += goldfish_gps.c
+endif
+
 ifeq ($(CONFIG_SENSORS_HCSR04),y)
   CSRCS += hc_sr04.c
 endif
