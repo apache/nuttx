@@ -75,6 +75,8 @@ struct mm_map_s
 {
   sq_queue_t mm_map_sq;
 
+  size_t map_count;
+
 #ifdef CONFIG_ARCH_VMA_MAPPING
   GRAN_HANDLE mm_map_vpages;
 #endif
