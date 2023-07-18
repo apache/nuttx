@@ -187,10 +187,6 @@ static int sim_loop_task(int argc, char **argv)
       host_usrsock_loop();
 #endif
 
-#ifdef CONFIG_SIM_HCISOCKET
-      sim_bthcisock_loop();
-#endif
-
 #ifdef CONFIG_SIM_SOUND
       sim_audio_loop();
 #endif

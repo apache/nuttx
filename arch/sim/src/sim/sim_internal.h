@@ -358,7 +358,6 @@ int sim_rptun_init(const char *shmemname, const char *cpuname, bool master);
 
 #ifdef CONFIG_SIM_HCISOCKET
 int sim_bthcisock_register(int dev_id);
-int sim_bthcisock_loop(void);
 #endif
 
 /* sim_audio.c **************************************************************/
