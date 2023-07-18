@@ -596,6 +596,12 @@ menuconfig USBADB
 
 if USBADB
 
+config USBFASTBOOT
+	bool "USB Android Debug Bridge (FASTBOOT) support"
+	default n
+	---help---
+		Enables USB Android Debug Bridge (FASTBOOT) support
+
 menuconfig USBADB_COMPOSITE
 	bool "USBADB composite support"
 	default n
