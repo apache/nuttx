@@ -560,6 +560,45 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
 }
 
 /****************************************************************************
+ * Name: dns_query_error
+ *
+ * Description:
+ *   Displays information about dns query errors
+ *
+ * Input Parameters:
+ *   prompt  - Error description.
+ *   ret     - Error code.
+ *   uaddr   - DNS name server address.
+ *
+ ****************************************************************************/
+
+static void dns_query_error(FAR const char *prompt, int ret,
+                            FAR union dns_addr_u *uaddr)
+{
+  char addrstr[INET6_ADDRSTRLEN];
+
+#ifdef CONFIG_NET_IPv4
+  if (uaddr->addr.sa_family == AF_INET)
+    {
+      inet_ntop(AF_INET, &uaddr->ipv4.sin_addr, addrstr, INET6_ADDRSTRLEN);
+    }
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if (uaddr->addr.sa_family == AF_INET6)
+    {
+      inet_ntop(AF_INET6, &uaddr->ipv6.sin6_addr, addrstr, INET6_ADDRSTRLEN);
+    }
+  else
+#endif
+    {
+      strlcpy(addrstr, "Unknown address", sizeof(addrstr));
+    }
+
+  nerr("%s: %d, server address: %s\n", prompt, ret, addrstr);
+}
+
+/****************************************************************************
  * Name: dns_query_callback
  *
  * Description:
@@ -609,7 +648,8 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                            DNS_RECTYPE_AAAA, &qinfo);
       if (ret < 0)
         {
-          nerr("ERROR: IPv6 dns_send_query failed: %d\n", ret);
+          dns_query_error("ERROR: IPv6 dns_send_query failed",
+                          ret, (FAR union dns_addr_u *)addr);
           query->result = ret;
         }
       else
@@ -624,7 +664,8 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
             }
           else
             {
-              nerr("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
+              dns_query_error("ERROR: IPv6 dns_recv_response failed",
+                              ret, (FAR union dns_addr_u *)addr);
               query->result = ret;
             }
         }
@@ -647,7 +688,8 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                            DNS_RECTYPE_A, &qinfo);
       if (ret < 0)
         {
-          nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
+          dns_query_error("ERROR: IPv4 dns_send_query failed",
+                          ret, (FAR union dns_addr_u *)addr);
           query->result = ret;
         }
       else
@@ -662,7 +704,8 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
             }
           else
             {
-              nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
+              dns_query_error("ERROR: IPv4 dns_recv_response failed",
+                              ret, (FAR union dns_addr_u *)addr);
               query->result = ret;
             }
         }
