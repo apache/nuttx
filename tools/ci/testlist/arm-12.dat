@@ -1,3 +1,57 @@
 /arm/stm32f*,CONFIG_ARM_TOOLCHAIN_CLANG
 
 /arm/stm32h*,CONFIG_ARM_TOOLCHAIN_CLANG
+
+# Boards build by CMake
+
+CMake,nucleo-144:f722-can
+CMake,nucleo-144:f722-cansock
+# CMake,nucleo-144:f722-composite
+CMake,nucleo-144:f746-evalos
+CMake,nucleo-144:f746-nsh
+CMake,nucleo-144:f746-pysim
+CMake,nucleo-144:f767-evalos
+CMake,nucleo-144:f767-netnsh
+CMake,nucleo-144:f767-nsh
+
+CMake,steval-eth001v1:foc_b16
+CMake,steval-eth001v1:foc_f32
+CMake,steval-eth001v1:nsh
+
+CMake,stm32f746g-disco:audio
+CMake,stm32f746g-disco:fb
+# CMake,stm32f746g-disco:lvgl
+CMake,stm32f746g-disco:netnsh
+CMake,stm32f746g-disco:nsh
+# CMake,stm32f746g-disco:nxdemo
+# CMake,stm32f746g-disco:nxterm
+
+CMake,stm32f746-ws:nsh
+
+CMake,stm32f769i-disco:netnsh
+CMake,stm32f769i-disco:nsh
+
+CMake,stm32f777zit6-meadow:nsh
+# CMake,stm32f777zit6-meadow:sdram
+
+# CMake,nucleo-h743zi:composite
+# CMake,nucleo-h743zi:elf
+# CMake,nucleo-h743zi:mcuboot-app
+# CMake,nucleo-h743zi:mcuboot-loader
+CMake,nucleo-h743zi:netnsh
+CMake,nucleo-h743zi:nsh
+# CMake,nucleo-h743zi:nxlines_oled
+CMake,nucleo-h743zi:otg_fs_host
+CMake,nucleo-h743zi:pwm
+# CMake,nucleo-h743zi:rndis
+
+# CMake,nucleo-h743zi2:jumbo
+CMake,nucleo-h743zi2:netnsh
+CMake,nucleo-h743zi2:nsh
+CMake,nucleo-h743zi2:pysim
+CMake,nucleo-h743zi2:socketcan
+
+# CMake,stm32h745i-disco:lvgl
+CMake,stm32h745i-disco:netnsh
+CMake,stm32h745i-disco:nsh
+CMake,stm32h745i-disco:touchtest

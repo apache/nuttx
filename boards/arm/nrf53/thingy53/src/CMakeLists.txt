@@ -24,12 +24,6 @@ if(CONFIG_BOARDCTL)
   list(APPEND SRCS nrf53_appinit.c)
 endif()
 
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS nrf53_autoleds.c)
-else()
-  list(APPEND SRCS nrf53_userleds.c)
-endif()
-
 if(CONFIG_NRF53_APPCORE)
   list(APPEND SRCS nrf53_cpunet_boot.c)
 endif()
