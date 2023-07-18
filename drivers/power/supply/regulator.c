@@ -32,7 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/power/regulator.h>
+#include <nuttx/power/consumer.h>
 #include <nuttx/signal.h>
 
 /****************************************************************************
@@ -78,7 +78,30 @@ static int _regulator_is_enabled(FAR struct regulator_dev_s *rdev)
 
 static int _regulator_do_enable(FAR struct regulator_dev_s *rdev)
 {
+  FAR struct regulator_s *supply = NULL;
   int ret = 0;
+
+  if (rdev->desc->supply_name && rdev->supply == NULL)
+    {
+      supply = regulator_get(rdev->desc->supply_name);
+      if (supply == NULL)
+        {
+          pwrerr("get supply %s failed \n", rdev->desc->supply_name);
+          return -ENODEV;
+        }
+
+      rdev->supply = supply;
+    }
+
+  if (rdev->supply)
+    {
+      ret = regulator_enable(rdev->supply);
+      if (ret < 0)
+        {
+          pwrerr("failed to enable supply %d\n", ret);
+          goto err;
+        }
+    }
 
   if (rdev->ops->enable)
     {
@@ -86,13 +109,27 @@ static int _regulator_do_enable(FAR struct regulator_dev_s *rdev)
       if (ret < 0)
         {
           pwrerr("failed to enable %d\n", ret);
-          return ret;
+          if (rdev->supply)
+            {
+              regulator_disable(rdev->supply);
+            }
+
+          goto err;
         }
     }
 
   if (rdev->desc->enable_time > 0)
     {
       up_udelay(rdev->desc->enable_time);
+    }
+
+  return ret;
+
+err:
+  if (supply)
+    {
+      regulator_put(supply);
+      rdev->supply = NULL;
     }
 
   return ret;
@@ -108,6 +145,20 @@ static int _regulator_do_disable(FAR struct regulator_dev_s *rdev)
       if (ret < 0)
         {
           pwrerr("failed to disable %d\n", ret);
+          return ret;
+        }
+    }
+
+  if (rdev->supply)
+    {
+      ret = regulator_disable(rdev->supply);
+      if (ret < 0)
+        {
+          pwrerr("failed to disable supply %d\n", ret);
+          if (rdev->ops->enable)
+            {
+              rdev->ops->enable(rdev);
+            }
         }
     }
 
@@ -165,7 +216,7 @@ static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
   nxmutex_unlock(&g_reg_lock);
 
 #if defined(CONFIG_REGULATOR_RPMSG)
-  if (rdev_found == NULL)
+  if (rdev_found == NULL && strchr(supply, '/'))
     {
       rdev_found = regulator_rpmsg_get(supply);
     }
@@ -561,7 +612,7 @@ int regulator_enable(FAR struct regulator_s *regulator)
   rdev = regulator->rdev;
 
   nxmutex_lock(&rdev->regulator_lock);
-  if (rdev->use_count == 0)
+  if (rdev->use_count == 0 && !rdev->desc->always_on)
     {
       ret = _regulator_do_enable(rdev);
       if (ret < 0)
@@ -767,6 +818,7 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
                    FAR void *priv)
 {
   FAR struct regulator_dev_s *rdev;
+  int ret = 0;
 
   if (regulator_desc == NULL)
     {
@@ -818,10 +870,15 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
   list_initialize(&rdev->consumer_list);
   list_initialize(&rdev->list);
 
-  if ((rdev->desc->boot_on || rdev->desc->always_on)
-      && !_regulator_is_enabled(rdev))
+  if (rdev->desc->boot_on || rdev->desc->always_on)
     {
-      _regulator_do_enable(rdev);
+      ret = _regulator_do_enable(rdev);
+      if (ret < 0)
+        {
+          pwrerr("failed to enable regulator\n");
+          kmm_free(rdev);
+          return NULL;
+        }
     }
   else if (!rdev->desc->boot_on && !rdev->desc->always_on
            && _regulator_is_enabled(rdev))
@@ -877,6 +934,10 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
 
   list_delete(&rdev->list);
   nxmutex_unlock(&g_reg_lock);
+  if (rdev->supply)
+    {
+      regulator_put(rdev->supply);
+    }
 
   kmm_free(rdev);
 }
