@@ -286,6 +286,7 @@ ENV PIP_NO_CACHE_DIR=0
 # instead of requiring them to be compiled.
 RUN pip3 install setuptools
 RUN pip3 install wheel
+RUN pip3 install cmake-format
 # Install CodeChecker and use it to statically analyze the code.
 RUN pip3 install CodeChecker
 # Install cvt2utf to check for non-UTF characters.
