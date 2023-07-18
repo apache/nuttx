@@ -282,6 +282,7 @@ function python-tools {
   # Force the reinstall of python packages due to issues with GitHub
   # cache restoration.
   pip3 install --force-reinstall \
+    cmake-format \
     CodeChecker \
     cvt2utf \
     cxxfilt \
