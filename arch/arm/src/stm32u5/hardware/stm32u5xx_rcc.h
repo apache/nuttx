@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32u585xx_rcc.h
+ * arch/arm/src/stm32u5/hardware/stm32u5xx_rcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585xx_RCC_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585xx_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5xx_RCC_H
+#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5xx_RCC_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
+    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX) || \
+    defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
+    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)  
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -416,6 +419,7 @@
 #define RCC_AHB2ENR1_ADC1EN               (1 << 10) /* Bit 10: ADC1 interface enable */
 #define RCC_AHB2ENR1_DCMI_PCSSI_EN        (1 << 12) /* Bit 12: DCMI and PSSI enable */
 #define RCC_AHB2ENR1_OTGEN                (1 << 14) /* Bit 14: OTG_FS module enable */
+#define RCC_AHB2ENR1_OTGPHYEN             (1 << 15) /* Bit 14: OTG_HS module PHY enable */
 #define RCC_AHB2ENR1_AESEN                (1 << 16) /* Bit 16: AES Cryptographic module enable */
 #define RCC_AHB2ENR1_HASHEN               (1 << 17) /* Bit 17: HASH module enable */
 #define RCC_AHB2ENR1_RNGEN                (1 << 18) /* Bit 18: Random number generator module enable */
@@ -434,6 +438,8 @@
 #define RCC_AHB2ENR2_FSMCEN               (1 << 0)  /* Bit 0: FSMC clock enable */
 #define RCC_AHB2ENR2_OCTOSPI1EN           (1 << 4)  /* Bit 4: OCTOSPI1 clock enable */
 #define RCC_AHB2ENR2_OCTOSPI2EN           (1 << 8)  /* Bit 8: OCTOSPI2 clock enable */
+#define RCC_AHB2ENR2_SRAM6EN              (1 << 30) /* Bit 30: SRAM6 clock enable */
+#define RCC_AHB2ENR2_SRAM5EN              (1 << 31) /* Bit 31: SRAM5 clock enable */
 
 /* RCC AHB3 peripheral clock enable register */
 
@@ -537,7 +543,6 @@
 #  define RCC_BCDR_LSIPREDIV_NONE        0          /* LSI not divided */
 #  define RCC_BCDR_LSIPREDIV_128         1          /* LSI divided by 128 */
 
-#if 0
 #define RCC_CR_MSIRGSEL                  (1 << 3)  /* Bit 3: MSI clock range selection */
 #define RCC_CR_MSIRANGE_SHIFT            (4)       /* Bits 7-4: MSI clock range */
 #define RCC_CR_MSIRANGE_MASK             (0x0f << RCC_CR_MSIRANGE_SHIFT)
@@ -1246,7 +1251,6 @@
 #  define RCC_CCIPR2_OSPISEL_SYSCLK      (0 << RCC_CCIPR2_OSPISEL_SHIFT)
 #  define RCC_CCIPR2_OSPISEL_MSI         (1 << RCC_CCIPR2_OSPISEL_SHIFT)
 #  define RCC_CCIPR2_OSPISEL_PLL48M1CLK  (2 << RCC_CCIPR2_OSPISEL_SHIFT)
-#endif
 
-#endif /* CONFIG_STM32U5_STM32U585XX */
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_RCC_H */
+#endif /* CONFIG_STM32U5_STM32U5XX */
+#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_RCC_H */

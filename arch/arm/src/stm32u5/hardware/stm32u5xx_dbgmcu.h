@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32u585xx_dbgmcu.h
+ * arch/arm/src/stm32u5/hardware/stm32u5xx_dbgmcu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_DBGMCU_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_DBGMCU_H
+#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_DBGMCU_H
+#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_DBGMCU_H
 
 /****************************************************************************
  * Included Files
@@ -93,4 +93,4 @@
 #define DBGMCU_APB2_TIM16STOP     (1 << 17)  /* Bit 17: TIM16 stopped when core is halted */
 #define DBGMCU_APB2_TIM17STOP     (1 << 18)  /* Bit 18: TIM17 stopped when core is halted */
 
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XXDBGMCU_H */
+#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XXD_BGMCU_H */

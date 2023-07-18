@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/stm32u585xx_rcc.c
+ * arch/arm/src/stm32u5/stm32u5xx_rcc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -195,8 +195,12 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR1_DCMI_PSSIEN;
 #endif
 
-#ifdef CONFIG_STM32U5_OTG
+#ifdef CONFIG_STM32U5_OTGHS
   regval |= RCC_AHB2ENR1_OTGEN;
+#endif
+
+#ifdef CONFIG_STM32U5_OTGHS
+  regval |= RCC_AHB2ENR1_OTGPHYEN;
 #endif
 
 #ifdef CONFIG_STM32U5_AES
@@ -261,6 +265,10 @@ static inline void rcc_enableahb2(void)
 
 #ifdef CONFIG_STM32U5_OCTOSPI2
   regval |= RCC_AHB2ENR2_OCTOSPI2EN;
+#endif
+
+#ifdef CONFIG_STM32U5_SRAM5
+  regval |= RCC_AHB2ENR2_SRAM5EN;
 #endif
 
   putreg32(regval, STM32_RCC_AHB2ENR2);

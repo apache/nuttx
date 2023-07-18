@@ -41,38 +41,46 @@
  *   Parts STM32U585 and STM32U575 have 2048Kb of FLASH
  */
 
-#if !defined(CONFIG_STM32U5_FLASH_OVERRIDE_DEFAULT) && \
+#if defined(CONFIG_ARCH_CHIP_STM32U585AI)
+#  if !defined(CONFIG_STM32U5_FLASH_OVERRIDE_DEFAULT) && \
     !defined(CONFIG_STM32U5_FLASH_OVERRIDE_C) && \
     !defined(CONFIG_STM32U5_FLASH_OVERRIDE_E) && \
     !defined(CONFIG_STM32U5_FLASH_CONFIG_C) && \
     !defined(CONFIG_STM32U5_FLASH_CONFIG_E)
-#  define CONFIG_STM32U5_FLASH_OVERRIDE_E
-#  warning "Flash size not defined defaulting to 512KiB (E)"
-#endif
+#    define CONFIG_STM32U5_FLASH_OVERRIDE_E
+#    warning "Flash size not defined defaulting to 512KiB (E)"
+#  endif
 
 /* Override of the Flash has been chosen */
 
-#if !defined(CONFIG_STM32U5_FLASH_OVERRIDE_DEFAULT)
-#  undef CONFIG_STM32U5_FLASH_CONFIG_C
-#  undef CONFIG_STM32U5_FLASH_CONFIG_E
-#  if defined(CONFIG_STM32U5_FLASH_OVERRIDE_C)
-#    define CONFIG_STM32U5_FLASH_CONFIG_C
-#  elif defined(CONFIG_STM32U5_FLASH_OVERRIDE_E)
-#    define CONFIG_STM32U5_FLASH_CONFIG_E
+#  if !defined(CONFIG_STM32U5_FLASH_OVERRIDE_DEFAULT)
+#    undef CONFIG_STM32U5_FLASH_CONFIG_C
+#    undef CONFIG_STM32U5_FLASH_CONFIG_E
+#      if defined(CONFIG_STM32U5_FLASH_OVERRIDE_C)
+#        define CONFIG_STM32U5_FLASH_CONFIG_C
+#      elif defined(CONFIG_STM32U5_FLASH_OVERRIDE_E)
+#        define CONFIG_STM32U5_FLASH_CONFIG_E
+#      endif
 #  endif
-#endif
 
 /* Define the valid configuration  */
 
-#if defined(CONFIG_STM32U5_FLASH_CONFIG_I) /* 2048 kB */
-#  define STM32_FLASH_NPAGES      256
-#  define STM32_FLASH_PAGESIZE    8192
-#else
-#  error "unknown flash configuration!"
+#  if defined(CONFIG_STM32U5_FLASH_CONFIG_I) /* 2048 kB */
+#    define STM32_FLASH_NPAGES           256
+#    define STM32_FLASH_PAGESIZE         8192
+#  else
+#    error "unknown flash configuration!"
+#  endif
 #endif
 
 #ifdef STM32_FLASH_PAGESIZE
-#  define STM32_FLASH_SIZE        (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
+#  define STM32_FLASH_SIZE               (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
+#endif
+
+#if defined(CONFIG_STM32U5_STM32U5A5XX)
+#  define STM32_FLASH_NPAGES             512
+#  define STM32_FLASH_PAGESIZE           8192
+#  define STM32_FLASH_SIZE               (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
 #endif
 
 /* Register Offsets *********************************************************/

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32u585xx_pinmap.h
+ * arch/arm/src/stm32u5/hardware/stm32u5xx_pinmap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_PINMAP_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_PINMAP_H
+#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_PINMAP_H
 
 /****************************************************************************
  * Included Files
@@ -409,8 +409,8 @@
 #define GPIO_I2C1_SCL_2         (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN8)
 #define GPIO_I2C1_SCL_3         (GPIO_ALT|GPIO_AF4|GPIO_PORTG|GPIO_PIN14)
 #define GPIO_I2C1_SDA_1         (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN3)
-#define GPIO_I2C1_SDA_2         (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN7)
-#define GPIO_I2C1_SDA_3         (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN9)
+#define GPIO_I2C1_SDA_3         (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN7)
+#define GPIO_I2C1_SDA_2         (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN9)
 #define GPIO_I2C1_SDA_4         (GPIO_ALT|GPIO_AF4|GPIO_PORTG|GPIO_PIN13)
 #define GPIO_I2C1_SMBA_1        (GPIO_ALT|GPIO_AF4|GPIO_PORTA|GPIO_PIN1)
 #define GPIO_I2C1_SMBA_2        (GPIO_ALT|GPIO_AF4|GPIO_PORTA|GPIO_PIN14)
@@ -666,15 +666,15 @@
 #define GPIO_OCTOSPIM_P2_NCS_4  (GPIO_ALT|GPIO_AF5|GPIO_PORTI|GPIO_PIN5)
 #define GPIO_OCTOSPIM_P2_NCS_5  (GPIO_ALT|GPIO_AF10|GPIO_PORTD|GPIO_PIN3)
 
-/* OTG_FS - USB on-the-go full-speed */
+/* OTG_HS - USB on-the-go high-speed */
 
-#define GPIO_OTG_FS_DM_1        (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN11)
-#define GPIO_OTG_FS_DP_1        (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN12)
-#define GPIO_OTG_FS_ID_1        (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN10)
-#define GPIO_OTG_FS_NOE_1       (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN13)
-#define GPIO_OTG_FS_NOE_2       (GPIO_ALT|GPIO_AF10|GPIO_PORTC|GPIO_PIN9)
-#define GPIO_OTG_FS_SOF_1       (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN8)
-#define GPIO_OTG_FS_SOF_2       (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN14)
+#define GPIO_OTG_HS_DM_1        (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN11)
+#define GPIO_OTG_HS_DP_1        (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN12)
+#define GPIO_OTG_HS_ID_1        (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN10)
+#define GPIO_OTG_HS_NOE_1       (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN13)
+#define GPIO_OTG_HS_NOE_2       (GPIO_ALT|GPIO_AF10|GPIO_PORTC|GPIO_PIN9)
+#define GPIO_OTG_HS_SOF_1       (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN8)
+#define GPIO_OTG_HS_SOF_2       (GPIO_ALT|GPIO_AF10|GPIO_PORTA|GPIO_PIN14)
 
 /* PSSI - Parallel synchronous slave interface */
 
@@ -1177,4 +1177,4 @@
 #define GPIO_USART3_TX_4        (GPIO_ALT|GPIO_AF7|GPIO_PORTC|GPIO_PIN10)
 #define GPIO_USART3_TX_5        (GPIO_ALT|GPIO_AF7|GPIO_PORTD|GPIO_PIN8)
 
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_PINMAP_H */

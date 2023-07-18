@@ -30,7 +30,7 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
+#if defined(CONFIG_STM32U5_STM32U585XX) || defined(CONFIG_STM32U5_STM32U5A5XX)
 #  include "hardware/stm32_uart.h"
 #else
 #  error "Unsupported STM32U5 chip"
