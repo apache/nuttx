@@ -279,6 +279,17 @@ function python-tools {
   export PYTHONUSERBASE=${tools}/pylocal
   add_path "${PYTHONUSERBASE}"/bin
 
+  # workaround for Cython issue
+  # https://github.com/yaml/pyyaml/pull/702#issuecomment-1638930830
+  pip3 install "Cython<3.0"
+  git clone https://github.com/yaml/pyyaml.git && \
+  cd pyyaml && \
+  git checkout release/5.4.1 && \
+  sed -i.bak 's/Cython/Cython<3.0/g' pyproject.toml && \
+  python setup.py sdist && \
+  pip3 install --pre dist/PyYAML-5.4.1.tar.gz
+  cd ..
+
   # Force the reinstall of python packages due to issues with GitHub
   # cache restoration.
   pip3 install --force-reinstall \
