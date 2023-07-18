@@ -61,6 +61,10 @@ config SENSORS_GOLDFISH_GPS
 	depends on SENSORS_GPS
 	default n
 
+config SENSORS_GOLDFISH_SENSOR
+	bool "Goldfish SENSORS Support"
+	default n
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n

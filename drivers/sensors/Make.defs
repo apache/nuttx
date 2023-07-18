@@ -48,6 +48,10 @@ ifeq ($(CONFIG_SENSORS_GOLDFISH_GPS),y)
   CSRCS += goldfish_gps_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_GOLDFISH_SENSOR),y)
+  CSRCS += goldfish_sensor_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_HCSR04),y)
   CSRCS += hc_sr04.c
 endif
