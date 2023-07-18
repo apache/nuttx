@@ -43,11 +43,34 @@
 
 /* Code Base Addresses ******************************************************/
 
-#define STM32_BOOT_BASE         0x00000000  /* 0x00000000-0x000fffff: Aliased boot memory */
-#define STM32_FLASH_BASE        0x08000000  /* 0x08000000-0x081fffff: FLASH memory */
-#define STM32_SRAM1_BASE        0x20000000  /* 0x20000000-0x2002ffff: 192k SRAM1 */
-#define STM32_SRAM2_BASE        0x20030000  /* 0x20030000-0x2003ffff:  64k SRAM2 */
-#define STM32_SRAM3_BASE        0x20040000  /* 0x20040000-0x200bffff: 512k SRAM3 */
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX)
+#  define STM32_BOOT_BASE         0x00000000  /* 0x00000000-0x000fffff: Aliased boot memory */
+#  define STM32_FLASH_BASE        0x08000000  /* 0x08000000-0x081fffff: FLASH memory */
+#  define STM32_SRAM1_BASE        0x20000000  /* 0x20000000-0x2002ffff: 192k SRAM1 */
+#  define STM32_SRAM2_BASE        0x20030000  /* 0x20030000-0x2003ffff:  64k SRAM2 */
+
+#elif defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX)
+
+#  define STM32_BOOT_BASE         0x00000000  /* 0x00000000-0x000fffff: Aliased boot memory */
+#  define STM32_FLASH_BASE        0x08000000  /* 0x08000000-0x081fffff: FLASH memory */
+#  define STM32_SRAM1_BASE        0x20000000  /* 0x20000000-0x2002ffff: 192k SRAM1 */
+#  define STM32_SRAM2_BASE        0x20030000  /* 0x20030000-0x2003ffff:  64k SRAM2 */
+#  define STM32_SRAM3_BASE        0x20040000  /* 0x20040000-0x200bffff: 512k SRAM3 */
+
+#elif defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX) || \
+      defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+
+#  define STM32_BOOT_BASE         0x00000000  /* 0x00000000-0x000fffff: Aliased boot memory */
+#  define STM32_FLASH_BASE        0x08000000  /* 0x08000000-0x081fffff: FLASH memory */
+#  define STM32_SRAM1_BASE        0x20000000  /* 0x20000000-0x200bffff: 768k SRAM1 */
+#  define STM32_SRAM2_BASE        0x200c0000  /* 0x200c0000-0x200cffff:  64k SRAM2 */
+#  define STM32_SRAM3_BASE        0x200d0000  /* 0x200d0000-0x2019ffff: 832k SRAM3 */
+#  define STM32_SRAM4_BASE        0x28000000  /* 0x28000000-0x20003fff: 16k SRAM4 */
+#  define STM32_SRAM5_BASE        0x201a0000  /* 0x201a0000-0x2027ffff: 832k SRAM5 */
+
+#else
+#  error "stm32_memorymap: unsupported STM32U5 memory map"
+#endif    
 
 /* System Memory Addresses **************************************************/
 
@@ -135,6 +158,7 @@
 #define STM32_DCMI_BASE         0x4202c000
 #define STM32_PSSI_BASE         0x4202c400
 #define STM32_OTG_FS_BASE       0x42040000
+#define STM32_USBOTGHS_BASE     0x42040000 /* HS */
 #define STM32_AES_BASE          0x420c0000
 #define STM32_HASH_BASE         0x420c0400
 #define STM32_RNG_BASE          0x420c0800

@@ -20,9 +20,28 @@ config ARCH_CHIP_STM32U585AI
 	---help---
 		STM32 U5 Cortex M33, 2048 Kb FLASH, 768 Kb SRAM
 
-endchoice # STM32 L5 Chip Selection
+config ARCH_CHIP_STM32U5A5ZJT
+	bool "STM32U5A5ZJT"
+	select STM32U5_STM32U5A5XX
+	select STM32U5_IO_CONFIG_A
+	---help---
+	STM32 U5 Cortex M33, 4096 Kb FLASH, 2500 Kb SRAM, tqfp144
+
+endchoice # STM32 U5 Chip Selection
 
 # Chip families:
+
+config STM32U5_STM32U5A5XX
+	# STM32U575 and STM32U585 devices documented in RM0456
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select STM32U5_HAVE_LPUART1
+	select STM32U5_HAVE_USART1
+	select STM32U5_HAVE_USART2
+	select STM32U5_HAVE_USART3
+	select STM32U5_HAVE_UART4
+	select STM32U5_HAVE_UART5
 
 config STM32U5_STM32U585XX
 	# STM32U575 and STM32U585 devices documented in RM0456
@@ -155,34 +174,6 @@ config STM32U5_IO_CONFIG_A
 	bool
 	default n
 
-comment "STM32U5 SRAM2 Options"
-
-config STM32U5_SRAM2_HEAP
-	bool "SRAM2 is used for heap"
-	default n
-	select STM32U5_SRAM2_INIT
-	---help---
-		The STM32U5 SRAM2 region has special properties (power, protection, parity)
-		which may be used by the application for special purposes.  But if these
-		special properties are not needed, it may be instead added to the heap for
-		use by malloc().
-		NOTE: you must also select an appropriate number of memory regions in the
-		'Memory Management' section.
-
-config STM32U5_SRAM2_INIT
-	bool "SRAM2 is initialized to zero"
-	default n
-	---help---
-		The STM32U5 SRAM2 region has parity checking.  However, when the system
-		powers on, the memory is in an unknown state, and reads from uninitialized
-		memory can trigger parity faults from the random data.  This can be
-		avoided by first writing to all locations to force the parity into a valid
-		state.
-		However, if the SRAM2 is being used for it's battery-backed capability,
-		this may be undesirable (because it will destroy the contents).  In that
-		case, the board should handle the initialization itself at the appropriate
-		time.
-
 comment "STM32U5 Peripherals"
 
 menu "STM32U5 Peripheral Support"
@@ -284,6 +275,62 @@ config STM32U5_DCACHE1
 
 config STM32U5_SRAM1
 	bool "SRAM1"
+	default y
+
+config STM32U5_SRAM2
+	bool "SRAM2"
+	default n
+
+config STM32U5_SRAM3
+	bool "SRAM3"
+	default n
+	depends on STM32U5_STM32U575XX || STM32U5_STM32U585XX || STM32U5_STM32U59XX || STM32U5_STM32U59AXX || \
+              STM32U5_STM32U5A5XX || STM32U5_STM32U5A9XX   
+   
+config STM32U5_SRAM5
+	bool "SRAM5"
+	default n
+	depends on STM32U5_STM32U575XX || STM32U5_STM32U585XX || STM32U5_STM32U59XX || STM32U5_STM32U59AXX || \
+              STM32U5_STM32U5A5XX || STM32U5_STM32U5A9XX   
+
+comment "SRAM Options"
+
+config STM32U5_SRAM2_HEAP
+	bool "SRAM2 is used for heap"
+	default n
+	depends on STM32U5_SRAM2
+	select STM32U5_SRAM2_INIT
+	---help---
+		The STM32U5 SRAM2 region has special properties (power, protection, parity)
+		which may be used by the application for special purposes.  But if these
+		special properties are not needed, it may be instead added to the heap for
+		use by malloc().
+		NOTE: you must also select an appropriate number of memory regions in the
+		'Memory Management' section.
+
+config STM32U5_SRAM2_INIT
+	bool "SRAM2 is initialized to zero"
+	default n
+	depends on STM32U5_SRAM2
+	---help---
+		The STM32U5 SRAM2 region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+		However, if the SRAM2 is being used for it's battery-backed capability,
+		this may be undesirable (because it will destroy the contents).  In that
+		case, the board should handle the initialization itself at the appropriate
+		time.
+
+config STM32U5_SRAM3_HEAP
+	bool "SRAM3 is used for heap"
+	depends on STM32U5_SRAM3
+	default n
+
+config STM32U5_SRAM5_HEAP
+	bool "SRAM5 is used for heap"
+	depends on STM32U5_SRAM5
 	default n
 
 comment "AHB2 Peripherals"
@@ -296,8 +343,14 @@ config STM32U5_DCMI_PSSI
 	bool "DCMI_PSSI"
 	default n
 
-config STM32U5_OTG
-	bool "OTG"
+config STM32U5_OTGFS
+	bool "OTG FS"
+	depends on STM32U5_STM32U535XX || CONFIG_STM32U5_STM32U545XX || STM32U5_STM32U575XX || STM32U5_STM32U585XX
+	default n
+
+config STM32U5_OTGHS
+	bool "OTG HS"
+	depends on STM32U5_STM32U59XX || STM32U5_STM32U59AXX || STM32U5_STM32U5A5XX || STM32U5_STM32U5A9XX
 	default n
 
 config STM32U5_AES
@@ -340,14 +393,6 @@ config STM32U5_SDMMC2
 	bool "SDMMC2"
 	default n
 
-config STM32U5_SRAM2
-	bool "SRAM2"
-	default n
-
-config STM32U5_SRAM3
-	bool "SRAM3"
-	default n
-
 config STM32U5_FSMC
 	bool "FSMC"
 	default n
@@ -388,10 +433,6 @@ config STM32U5_ADF1
 
 config STM32U5_GTZC2
 	bool "GTZC2"
-	default n
-
-config STM32U5_SRAM4
-	bool "SRAM4"
 	default n
 
 comment "APB1 Peripherals"
@@ -457,17 +498,37 @@ config STM32U5_UART5
 config STM32U5_I2C1
 	bool "I2C1"
 	default n
+	select STM32U5_I2C
 
 config STM32U5_I2C2
 	bool "I2C2"
 	default n
+	select STM32U5_I2C
 
-config STM32U5_CRS
-	bool "CRS"
+config STM32U5_I2C3
+	bool "I2C3"
 	default n
+	select STM32U5_I2C
 
 config STM32U5_I2C4
 	bool "I2C4"
+	default n
+	select STM32U5_I2C
+
+config STM32U5_I2C5
+	bool "I2C5"
+	depends on STM32U5_STM32U59XX || STM32U5_STM32U59AXX || STM32U5_STM32U5A5XX || STM32U5_STM32U5A9XX
+	default n
+	select STM32U5_I2C
+
+config STM32U5_I2C6
+	bool "I2C6"
+	depends on STM32U5_STM32U59XX || STM32U5_STM32U59AXX || STM32U5_STM32U5A5XX || STM32U5_STM32U5A9XX
+	default n
+	select STM32U5_I2C
+
+config STM32U5_CRS
+	bool "CRS"
 	default n
 
 config STM32U5_LPTIM2
@@ -542,10 +603,6 @@ config STM32U5_LPUART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32U5_USART
 
-config STM32U5_I2C3
-	bool "I2C3"
-	default n
-
 config STM32U5_LPTIM1
 	bool "LPTIM1"
 	default n
@@ -613,11 +670,6 @@ config ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
-
-config STM32U5_HAVE_RTC_SUBSECONDS
-	bool
-	select ARCH_HAVE_RTC_SUBSECONDS
-	default y
 
 menu "RTC Configuration"
 	depends on STM32U5_RTC
@@ -3170,6 +3222,10 @@ config STM32U5_SPI_DMA
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32U5_SPI_INTERRUPT.
 
 endmenu
+
+config STM32U5_I2C
+	bool
+	default n
 
 menu "I2C Configuration"
 	depends on STM32U5_I2C

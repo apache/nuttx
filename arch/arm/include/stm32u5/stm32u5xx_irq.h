@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/stm32u5/stm32u585xx_irq.h
+ * arch/arm/include/stm32u5/stm32u5xx_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_STM32U5_STM32U585XX_IRQ_H
-#define __ARCH_ARM_INCLUDE_STM32U5_STM32U585XX_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_STM32U5_STM32U5XX_IRQ_H
+#define __ARCH_ARM_INCLUDE_STM32U5_STM32U5XX_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -128,7 +128,15 @@
 #define STM32_IRQ_TIM16         (STM32_IRQ_FIRST + 70)  /* 70:  TIM16 global interrupt */
 #define STM32_IRQ_TIM17         (STM32_IRQ_FIRST + 71)  /* 71:  TIM17 global interrupt */
 #define STM32_IRQ_COMP          (STM32_IRQ_FIRST + 72)  /* 72:  COMP1/COMP2 interrupts */
-#define STM32_IRQ_OTG_FS        (STM32_IRQ_FIRST + 73)  /* 73:  USB OTG FS global interrupt */
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
+    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX)
+#  define STM32_IRQ_OTG_FS      (STM32_IRQ_FIRST + 73)  /* 73:  USB OTG FS global interrupt */
+#elif defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
+    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+#  define STM32_IRQ_OTG_HS      (STM32_IRQ_FIRST + 73)  /* 73:  USB OTG HS global interrupt */
+#else
+#  error "Unsupported STM32U5 chip"
+#endif
 #define STM32_IRQ_CRS           (STM32_IRQ_FIRST + 74)  /* 74:  CRS global interrupt */
 #define STM32_IRQ_FMC           (STM32_IRQ_FIRST + 75)  /* 75:  FMC global interrupt */
 #define STM32_IRQ_OCTOSPI1      (STM32_IRQ_FIRST + 76)  /* 76:  OCTOSPI1 global interrupt */
@@ -181,7 +189,10 @@
 #define STM32_IRQ_CORDIC        (STM32_IRQ_FIRST + 123) /* 123: CORDIC interrupt */
 #define STM32_IRQ_FMAC          (STM32_IRQ_FIRST + 124) /* 124: FMAC interrupt */
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
+    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX) || \
+    defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
+    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)    
 #  define STM32_IRQ_NEXTINTS  125
 #else
 #  error "Unsupported STM32U5 chip"
@@ -191,4 +202,4 @@
 
 #define NR_IRQS                 (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
-#endif /* __ARCH_ARM_INCLUDE_STM32U5_STM32U585XX_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32U5_STM32U5XX_IRQ_H */

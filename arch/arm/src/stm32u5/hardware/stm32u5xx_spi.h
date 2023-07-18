@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32u585xx_spi.h
+ * arch/arm/src/stm32u5/hardware/stm32u5xx_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_SPI_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_SPI_H
+#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_SPI_H
+#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
+    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX) || \
+    defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
+    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX) 
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -403,5 +406,5 @@
 #define SPI_UDRDR_UDRDR_MASK       (0xffff << SPI_UDRDR_UDRDR_SHIFT)
                                        /* Bits 16-31: read zero */
 
-#endif /* CONFIG_STM32U5_STM32U585XX */
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_SPI_H */
+#endif /* CONFIG_STM32U5_STM32U5XX ... */
+#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_SPI_H */

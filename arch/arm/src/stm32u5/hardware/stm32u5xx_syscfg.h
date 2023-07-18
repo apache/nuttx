@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32u585xx_syscfg.h
+ * arch/arm/src/stm32u5/hardware/stm32u5xx_syscfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_SYSCFG_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_SYSCFG_H
+#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_SYSCFG_H
+#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_SYSCFG_H
 
 /****************************************************************************
  * Included Files
@@ -28,7 +28,10 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32U5_STM32U585XX)
+#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
+    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX) || \
+    defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
+    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX) 
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -131,5 +134,5 @@
 #define SYSCFG_RSSCMDR_SHIFT              0
 #define SYSCFG_RSSCMDR_MASK               (0xFFFF << SYSCFG_RSSCMDR_SHIFT)
 
-#endif /* CONFIG_STM32U5_STM32U585XX */
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U585XX_SYSCFG_H */
+#endif /* CONFIG_STM32U5_STM32U5XX ... */
+#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32U5XX_SYSCFG_H */

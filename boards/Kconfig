@@ -2428,6 +2428,14 @@ config ARCH_BOARD_B_U585I_IOT02A
 		MCU. The STM32U585AI is a Cortex-M33 optimised for low-power operation
 		at up to 160MHz operation with 2048Kb Flash memory and 768Kb SRAM.
 
+config ARCH_BOARD_NUCLEO_U5A5ZJ_Q
+	bool "STMicro NUCLEO-U5A5ZJ-Q board"
+	depends on ARCH_CHIP_STM32U5A5ZJT
+	---help---
+		STMicro development board featuring the STM32U5A5
+		MCU. The STM32U5A5 is a Cortex-M33 optimised for low-power operation
+		at up to 160MHz operation with 4MB Flash memory and 2.5MB SRAM.
+
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32L476VG -Discovery board"
 	depends on ARCH_CHIP_STM32L476RG
@@ -3106,6 +3114,7 @@ config ARCH_BOARD
 	default "b-l072z-lrwan1"            if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"            if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"            if ARCH_BOARD_B_U585I_IOT02A
+	default "nucleo-u5a5zj-q"           if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "stm32l476vg-disco"         if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"             if ARCH_BOARD_STM32L476_MDK
 	default "stm32l4r9ai-disco"         if ARCH_BOARD_STM32L4R9AI_DISCO
@@ -3569,6 +3578,9 @@ source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
 endif
 if ARCH_BOARD_B_U585I_IOT02A
 source "boards/arm/stm32u5/b-u585i-iot02a/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
+source "boards/arm/stm32u5/nucleo-u5a5zj-q/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L432KC
 source "boards/arm/stm32l4/nucleo-l432kc/Kconfig"

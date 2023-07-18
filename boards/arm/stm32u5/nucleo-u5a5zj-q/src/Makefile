@@ -1,5 +1,5 @@
 ##############################################################################
-# arch/arm/src/stm32u5/Make.defs
+# boards/arm/stm32u5/nucleo-u5a5zj-q/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,42 +18,21 @@
 #
 ##############################################################################
 
-# The start-up, "head", file.  Only common vectors are support so there
-# isn't one.
+-include $(TOPDIR)/Make.defs
 
-HEAD_ASRC =
+ASRCS =
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
-# Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
-
-include armv8-m/Make.defs
-
-# Required STM32U5 files
-
-CHIP_ASRCS  =
-CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
-CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c stm32_i2c.c
-CHIP_CSRCS += stm32_serial.c stm32_start.c stm32_waste.c stm32_uid.c
-CHIP_CSRCS += stm32_spi.c stm32_lse.c stm32_lsi.c stm32u5xx_rcc.c
-CHIP_CSRCS += stm32_pwr.c stm32_tim.c stm32_flash.c stm32_timerisr.c
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CHIP_CSRCS += stm32_idle.c
+ifeq ($(CONFIG_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32_tim_lowerhalf.c
+ifeq ($(CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG),y)
+CSRCS += stm32_clockconfig.c
 endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
-endif
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CHIP_CSRCS += stm32_dumpgpio.c
-endif
-
-# Required chip type specific files
 
 ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS += stm32_otgdev.c
+CSRCS += stm32_usb.c
 endif
+
+include $(TOPDIR)/boards/Board.mk
