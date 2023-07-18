@@ -49,6 +49,9 @@
 
 static int pipe_close(FAR struct file *filep);
 
+static int pipe_mmap(FAR struct file *filep,
+                     FAR struct mm_map_entry_s *entry);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -61,7 +64,7 @@ static const struct file_operations g_pipe_fops =
   pipecommon_write,    /* write */
   NULL,                /* seek */
   pipecommon_ioctl,    /* ioctl */
-  NULL,                /* mmap */
+  pipe_mmap,           /* mmap */
   NULL,                /* truncate */
   pipecommon_poll      /* poll */
 };
@@ -120,6 +123,19 @@ static int pipe_close(FAR struct file *filep)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: pipe_mmap
+ ****************************************************************************/
+
+static int pipe_mmap(FAR struct file *filep,
+                     FAR struct mm_map_entry_s *entry)
+{
+  UNUSED(filep);
+  UNUSED(entry);
+
+  return -ENODEV;
 }
 
 /****************************************************************************
