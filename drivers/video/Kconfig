@@ -50,6 +50,11 @@ config VIDEO_FB
 	bool "Framebuffer character driver"
 	default n
 
+config VIDEO_FB_NPOLLWAITERS
+	int "Video fb poll count of each layer"
+	depends on VIDEO_FB
+	default 2
+
 config VIDEO_STREAM
 	bool "Video Stream Support"
 	default n
