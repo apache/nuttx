@@ -290,9 +290,7 @@ function python-tools {
   pip3 install --pre dist/PyYAML-5.4.1.tar.gz
   cd ..
 
-  # Force the reinstall of python packages due to issues with GitHub
-  # cache restoration.
-  pip3 install --force-reinstall \
+  pip3 install \
     cmake-format \
     CodeChecker \
     cvt2utf \
