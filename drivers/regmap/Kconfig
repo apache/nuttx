@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig REGMAP
+	bool "Regmap Subsystems Support"
+	default n
+	---help---
+		This selection enables building of the regmap subsystems.
+		See include/nuttx/regmap/regmap.h for further regmpap subsystems information.

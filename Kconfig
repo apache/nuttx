@@ -1682,6 +1682,41 @@ config DEBUG_RC_INFO
 
 endif # DEBUG_RC
 
+config DEBUG_REGMAP
+	bool "REGMAP Debug Features"
+	default n
+	depends on REGMAP
+	---help---
+		Enable REGMAP debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_REGMAP
+
+config DEBUG_REGMAP_ERROR
+	bool "Regmap Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable regmap subsystems error output to SYSLOG.
+
+config DEBUG_REGMAP_WARN
+	bool "Regmap Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable regmap subsystems warning output to SYSLOG.
+
+config DEBUG_REGMAP_INFO
+	bool "Regmap Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable regmap subsystems informational output to SYSLOG.
+
+endif # DEBUG_REGMAP
+
 config DEBUG_RMT
 	bool "RMT Debug Features"
 	default n
