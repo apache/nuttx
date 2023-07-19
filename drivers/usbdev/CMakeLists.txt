@@ -59,7 +59,12 @@ if(CONFIG_USBDEV)
     list(APPEND SRCS cdcecm.c)
   endif()
 
-  list(APPEND SRCS composite.c usbdev_req.c usbdev_trace.c usbdev_trprintf.c)
+  if(CONFIG_USBDEV_FS)
+    list(APPEND SRCS usbdev_fs.c)
+  endif()
+
+  list(APPEND SRCS composite.c usbdev_desc.c usbdev_req.c)
+  list(APPEND SRCS usbdev_trace.c usbdev_trprintf.c)
 
   target_sources(drivers PRIVATE ${SRCS})
 endif()
