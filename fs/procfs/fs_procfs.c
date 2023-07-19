@@ -170,15 +170,15 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "self/**",      &g_proc_operations,     PROCFS_UNKOWN_TYPE },
 #endif
 
-#if defined(CONFIG_DEBUG_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
+#if defined(CONFIG_ARCH_HAVE_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
   { "tcbinfo",      &g_tcbinfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 
-#if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_UPTIME
   { "uptime",       &g_uptime_operations,   PROCFS_FILE_TYPE   },
 #endif
 
-#if !defined(CONFIG_FS_PROCFS_EXCLUDE_VERSION)
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_VERSION
   { "version",      &g_version_operations,  PROCFS_FILE_TYPE   },
 #endif
 };

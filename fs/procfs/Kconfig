@@ -126,7 +126,7 @@ config FS_PROCFS_EXCLUDE_SMARTFS
 
 config FS_PROCFS_EXCLUDE_TCBINFO
 	bool "Exclude tcbinfo procfs"
-	depends on DEBUG_TCBINFO
+	depends on ARCH_HAVE_TCBINFO
 	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_UPTIME

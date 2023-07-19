@@ -40,8 +40,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
-#ifdef CONFIG_DEBUG_TCBINFO
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
+    defined(CONFIG_ARCH_HAVE_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -277,5 +277,4 @@ static int tcbinfo_stat(FAR const char *relpath, FAR struct stat *buf)
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_DEBUG_TCBINFO */
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

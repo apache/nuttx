@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_DEBUG_TCBINFO
-
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 
@@ -100,8 +98,6 @@ const struct tcbinfo_s g_tcbinfo =
     .p = g_reg_offs,
   },
 };
-
-#endif
 
 /****************************************************************************
  * Public Functions
