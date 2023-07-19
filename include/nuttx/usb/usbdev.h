@@ -190,10 +190,21 @@ struct usbdev_devdescs_s
 #endif
 };
 
+struct usbdev_epinfo_s
+{
+  struct usb_epdesc_s desc;
+  uint16_t            fssize;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  uint16_t            hssize;
+#endif
+  uint16_t            reqnum;
+};
+
 /* usbdev_devinfo_s - describes the low level bindings of an usb device */
 
 struct usbdev_devinfo_s
 {
+  FAR const char *name;
   int ninterfaces; /* Number of interfaces in the configuration */
   int ifnobase;    /* Offset to Interface-IDs */
 
@@ -202,6 +213,7 @@ struct usbdev_devinfo_s
 
   int nendpoints;  /* Number of Endpoints referenced in the following allay */
   int epno[5];     /* Array holding the endpoint configuration for this device */
+  FAR const struct usbdev_epinfo_s **epinfos;
 };
 
 struct usbdevclass_driver_s;
@@ -297,6 +309,7 @@ struct usbdev_ep_s
   uint8_t  eplog;                       /* Logical endpoint address */
   uint16_t maxpacket;                   /* Maximum packet size for this endpoint */
   FAR void *priv;                       /* For use by class driver */
+  FAR void *fs;                         /* USB fs device this ep belongs */
 };
 
 /* struct usbdev_s represents a usb device */
@@ -397,6 +410,20 @@ FAR struct usbdev_req_s *usbdev_allocreq(FAR struct usbdev_ep_s *ep,
 
 void usbdev_freereq(FAR struct usbdev_ep_s *ep,
                     FAR struct usbdev_req_s *req);
+
+/****************************************************************************
+ * Name: usbdev_copy_epdesc
+ *
+ * Description:
+ *   Copies the requested Endpoint Description into the buffer given.
+ *   Returns the number of Bytes filled in ( sizeof(struct usb_epdesc_s) ).
+ *   This function is provided by various classes.
+ *
+ ****************************************************************************/
+
+void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
+                        uint8_t epno, bool hispeed,
+                        FAR const struct usbdev_epinfo_s *epinfo);
 
 /****************************************************************************
  * Name: usbdevclass_register

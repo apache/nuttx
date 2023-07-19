@@ -1210,4 +1210,26 @@ config CDCECM_PRODUCTSTR
 endif # !CDCECM_COMPOSITE
 endif # CDCECM
 
+config USBDEV_FS
+	bool
+	default n
+	---help---
+		Enables USBDEV FS support, userspace can use fs to control USB device.
+
+if USBDEV_FS
+
+config USBDEV_FS_EPNUM
+	int "Number of EP for USBDEV FS"
+	default 4
+	---help---
+		Maximum number of eps for USBDEV FS.
+
+config USBDEV_FS_NPOLLWAITERS
+	int "Number of poll waiters for USBDEV FS"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll().
+
+endif #USBDEV_FS
+
 endif # USBDEV
