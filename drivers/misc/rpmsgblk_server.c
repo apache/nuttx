@@ -200,7 +200,7 @@ static int rpmsgblk_read_handler(FAR struct rpmsg_endpoint *ept,
         }
 
       ret = server->bops->read(server->blknode, (unsigned char *)rsp->buf,
-                               msg->startsector, msg->nsectors);
+                               msg->startsector, nsectors);
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret * msg->sectorsize) +
                         sizeof(*rsp) - 1);
