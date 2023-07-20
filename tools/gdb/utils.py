@@ -170,3 +170,12 @@ def gdb_eval_or_none(expresssion):
         return gdb.parse_and_eval(expresssion)
     except gdb.error:
         return None
+
+
+def is_target_smp():
+    """Return Ture if the target use smp"""
+
+    if gdb.lookup_global_symbol("g_assignedtasks"):
+        return True
+    else:
+        return False

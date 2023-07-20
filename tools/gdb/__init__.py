@@ -37,3 +37,6 @@ gdb.write("set pagination off\n")
 for py_file in py_files:
     gdb.execute("source %s" % py_file)
     gdb.write("source %s\n" % py_file)
+
+gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
+gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
