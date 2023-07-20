@@ -303,6 +303,7 @@ RUN pip3 install pytest==6.2.5
 RUN pip3 install pytest-json==0.4.0
 RUN pip3 install pytest-ordering==0.6
 RUN pip3 install pytest-repeat==0.9.1
+
 # Used to generate symbol table files
 
 RUN mkdir /tools
