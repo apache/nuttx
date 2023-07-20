@@ -310,10 +310,10 @@ function configure_default {
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
-    varname=`echo $setting | cut -d'=' -f1`
-    if [ ! -z "$varname" ]; then
-      echo "  Disabling $varname"
-      kconfig-tweak --file $nuttx/.config -d $varname
+    original_toolchain=`echo $setting | cut -d'=' -f1`
+    if [ ! -z "$original_toolchain" ]; then
+      echo "  Disabling $original_toolchain"
+      kconfig-tweak --file $nuttx/.config -d $original_toolchain
     fi
 
     echo "  Enabling $toolchain"
@@ -333,10 +333,10 @@ function configure_cmake {
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep _TOOLCHAIN_ $nuttx/build/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
-    varname=`echo $setting | cut -d'=' -f1`
-    if [ ! -z "$varname" ]; then
-      echo "  Disabling $varname"
-      kconfig-tweak --file $nuttx/build/.config -d $varname
+    original_toolchain=`echo $setting | cut -d'=' -f1`
+    if [ ! -z "$original_toolchain" ]; then
+      echo "  Disabling $original_toolchain"
+      kconfig-tweak --file $nuttx/build/.config -d $original_toolchain
     fi
 
     echo "  Enabling $toolchain"
@@ -418,6 +418,14 @@ function refresh_default {
 
 function refresh_cmake {
   # Ensure defconfig in the canonical form
+
+  if [ "X$toolchain" != "X" ]; then
+    if [ ! -z "$original_toolchain" ]; then
+      kconfig-tweak --file $nuttx/build/.config -e $original_toolchain
+    fi
+
+    kconfig-tweak --file $nuttx/build/.config -d $toolchain
+  fi
 
   if ! cmake --build build -t savedefconfig 1>/dev/null; then
     cmake --build build -t savedefconfig
@@ -521,6 +529,7 @@ function dotest {
   fi
 
   unset toolchain
+  unset original_toolchain
   if [ "X$config" != "X$1" ]; then
     toolchain=`echo $1 | cut -d',' -f2`
     if [ -z "$toolchain" ]; then
