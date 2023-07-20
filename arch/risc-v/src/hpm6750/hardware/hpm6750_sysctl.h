@@ -29,6 +29,7 @@
 #define HPM6750_SYSCTL_GROUP0_1           (HPM6750_SYSCTL_BASE + 0x000810)
 #define HPM6750_SYSCTL_GROUP0_2           (HPM6750_SYSCTL_BASE + 0x000820)
 #define HPM6750_SYSCTL_CLOCK_NODE         (HPM6750_SYSCTL_BASE + 0x001800)
+#define HPM6750_SYSCTL_CPU0_LP            (HPM6750_SYSCTL_BASE + 0x002800)
 
 #define HPM6750_SYSCTL_GROUPx_0_AHB                   (1 << 0)
 #define HPM6750_SYSCTL_GROUPx_0_AXI                   (1 << 1)
@@ -165,5 +166,18 @@
 #define SYSCTL_CLOCK_DIV_SHIFT (0U)
 #define SYSCTL_CLOCK_DIV_SET(x) (((uint32_t)(x) << SYSCTL_CLOCK_DIV_SHIFT) & SYSCTL_CLOCK_DIV_MASK)
 #define SYSCTL_CLOCK_DIV_GET(x) (((uint32_t)(x) & SYSCTL_CLOCK_DIV_MASK) >> SYSCTL_CLOCK_DIV_SHIFT)
+
+/* MODE (RW)
+ *
+ * Low power mode, system behavior after WFI
+ * 00: CPU clock stop after WFI
+ * 01: System enter low power mode after WFI
+ * 10: Keep running after WFI
+ * 11: reserved
+ */
+#define SYSCTL_CPU_LP_MODE_MASK (0x3U)
+#define SYSCTL_CPU_LP_MODE_SHIFT (0U)
+#define SYSCTL_CPU_LP_MODE_SET(x) (((uint32_t)(x) << SYSCTL_CPU_LP_MODE_SHIFT) & SYSCTL_CPU_LP_MODE_MASK)
+#define SYSCTL_CPU_LP_MODE_GET(x) (((uint32_t)(x) & SYSCTL_CPU_LP_MODE_MASK) >> SYSCTL_CPU_LP_MODE_SHIFT)
 
 #endif /* __ARCH_RISCV_SRC_HPM6750_HARDWARE_HPM6750_SYSCTL_H */

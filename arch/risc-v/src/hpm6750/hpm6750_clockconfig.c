@@ -82,9 +82,18 @@ static void hpm6750_sysctl_config_clock(clock_node_t node_index,
 
 void hpm6750_clockconfig(void)
 {
+  /* Keep cpu clock on after "wfi", so that mchtmr can work after "wfi" */
+
+  modifyreg32(HPM6750_SYSCTL_CPU0_LP, SYSCTL_CPU_LP_MODE_MASK,
+              SYSCTL_CPU_LP_MODE_SET(2));
+
+  /* Add all clocks to group0 */
+
   putreg32(0xffffffffu, HPM6750_SYSCTL_GROUP0_0);
   putreg32(0xffffffffu, HPM6750_SYSCTL_GROUP0_1);
   putreg32(0xffffffffu, HPM6750_SYSCTL_GROUP0_2);
+
+  /* Set clock source */
 
   hpm6750_sysctl_config_clock(clock_node_cpu0, clock_source_pll0_clk0, 1);
   hpm6750_sysctl_config_clock(clock_node_mchtmr0, clock_source_osc0_clk0, 1);
