@@ -87,10 +87,18 @@ EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 # Override in Make.defs if linker is not 'ld'
 
 ifeq ($(LD),$(CC))
+  ifeq ($(CONFIG_STACK_CANARIES),y)
+    # filter out ssp(Stack Smashing Protector) related flags:
+    #  -fstack-protector
+    #  -fstack-protector-all
+    #  -fstack-protector-strong
+    #  -fstack-protector-explicit
+    STRIPCFLAGS = $(filter -fstack-protector%,$(CFLAGS))
+  endif
   LDSTARTGROUP ?= -Wl,--start-group
   LDENDGROUP   ?= -Wl,--end-group
   LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
-  LDFLAGS      += $(CFLAGS)
+  LDFLAGS      += $(filter-out $(STRIPCFLAGS),$(CFLAGS))
 else
   LDSTARTGROUP ?= --start-group
   LDENDGROUP   ?= --end-group

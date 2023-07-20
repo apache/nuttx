@@ -24,6 +24,9 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 CSRCS += lib_stackchk.c
 endif
 
+assert/lib_assert.c_CFLAGS += -fno-lto
+assert/lib_stackchk.c_CFLAGS += -fno-lto
+
 # Add the assert directory to the build
 
 DEPPATH += --dep-path assert

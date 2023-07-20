@@ -24,4 +24,7 @@ if(CONFIG_STACK_CANARIES)
   list(APPEND SRCS lib_stackchk.c)
 endif()
 
+set_source_files_properties(lib_assert.c PROPERTIES COMPILE_FLAGS -fno-lto)
+set_source_files_properties(lib_stackchk.c PROPERTIES COMPILE_FLAGS -fno-lto)
+
 target_sources(c PRIVATE ${SRCS})
