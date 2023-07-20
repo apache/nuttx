@@ -130,7 +130,6 @@ int board_pmic_write(uint8_t addr, void *buf, uint32_t size)
 
 int board_power_setup(int status)
 {
-  int      pin;
 #ifdef CONFIG_BOARD_USB_DISABLE_IN_DEEP_SLEEPING
   int      ret;
   uint8_t  val = 0;
@@ -145,17 +144,14 @@ int board_power_setup(int status)
       case PM_BOOT_POR_DEADBATT:
       case PM_BOOT_WDT_REBOOT:
       case PM_BOOT_WDT_RESET:
-        /* Power off Hi-Z of GPO switches (except for GPO0)
-         * in first boot-up stage
+
+        /* Power off GPO switches (except for GPO0) in power-on-reset
+         * and watchdog reset.
          */
 
-        for (pin = 1; pin <= BOARD_GPO_MAX_PIN_NUM; pin++)
-          {
-            if (cxd56_pmic_get_gpo_hiz(PMIC_GET_CH(PMIC_GPO(pin))) == -1)
-              {
-                board_power_control(PMIC_GPO(pin), false);
-              }
-          }
+        board_power_control(PMIC_GPO(1) | PMIC_GPO(2) | PMIC_GPO(3) |
+                            PMIC_GPO(4) | PMIC_GPO(5) | PMIC_GPO(6) |
+                            PMIC_GPO(7), false);
         break;
 #ifdef CONFIG_BOARD_USB_DISABLE_IN_DEEP_SLEEPING
       case PM_BOOT_DEEP_WKUPL:
