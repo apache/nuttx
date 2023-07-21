@@ -787,6 +787,26 @@ static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
             ret = -ENOTCONN;
           }
         break;
+      case PIPEIOC_POLLINTHRD:
+        if (conn->lc_infile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_infile, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTCONN;
+          }
+        break;
+      case PIPEIOC_POLLOUTTHRD:
+        if (conn->lc_outfile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_outfile, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTCONN;
+          }
+        break;
       case BIOC_FLUSH:
         ret = -EINVAL;
         break;
