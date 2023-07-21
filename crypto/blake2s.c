@@ -107,7 +107,7 @@ static void blake2_memcpy(FAR void *dst, FAR const void *src, size_t len)
       len--;
     }
 #else
-  memcpy(dst, set, len);
+  memcpy(dst, src, len);
 #endif
 }
 
