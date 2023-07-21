@@ -157,6 +157,12 @@ config MPFS_DDR_TYPE
 	default 3 if MPFS_DDR_TYPE_LPDDR3
 	default 4 if MPFS_DDR_TYPE_LPDDR4
 
+config MPFS_DDR_MANUAL_ADDCMD_TRAINING
+	bool "Use manual addcmd training"
+        default n
+	---help---
+		This adds code for manual addcmd training. To use it also enable bit 1 in TIP_CFG_PARAMS to skip the automatic one
+
 config MPFS_ENABLE_CACHE
 	bool "Enable L2 cache"
 	depends on MPFS_BOOTLOADER
