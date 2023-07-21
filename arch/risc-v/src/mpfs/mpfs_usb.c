@@ -1339,7 +1339,7 @@ static int mpfs_ep_configure_internal(struct mpfs_ep_s *privep,
                        TXCSRL_REG_EPN_STALL_SENT_MASK,
                         0);
 
-      mpfs_ep_set_fifo_size(epno, 0, maxpacket);
+      mpfs_ep_set_fifo_size(epno, dirin, maxpacket);
 
       /* Give EP0 64 bytes (8*8) and configure 512 bytes for TX fifo.
        * This is a pointer to internal RAM where the data should be
