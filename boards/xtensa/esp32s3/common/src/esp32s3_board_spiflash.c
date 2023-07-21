@@ -44,7 +44,6 @@
 
 #include "esp32s3_spiflash.h"
 #include "esp32s3_spiflash_mtd.h"
-#include "esp32s3-devkit.h"
 
 /****************************************************************************
  * Pre-processor Definitions
