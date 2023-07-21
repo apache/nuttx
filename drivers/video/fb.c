@@ -98,6 +98,9 @@ static int     fb_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
 static int     fb_get_panelinfo(FAR struct fb_chardev_s *fb,
                                 FAR struct fb_panelinfo_s *panelinfo);
+static int     fb_get_planeinfo(FAR struct fb_chardev_s *fb,
+                                FAR struct fb_planeinfo_s *pinfo,
+                                uint8_t display);
 
 /****************************************************************************
  * Private Data
@@ -437,9 +440,8 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct fb_planeinfo_s *pinfo =
             (FAR struct fb_planeinfo_s *)((uintptr_t)arg);
 
-          DEBUGASSERT(pinfo != 0 && fb->vtable != NULL &&
-                      fb->vtable->getplaneinfo != NULL);
-          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, pinfo);
+          DEBUGASSERT(pinfo != 0);
+          ret = fb_get_planeinfo(fb, pinfo, pinfo->display);
         }
         break;
 
@@ -689,16 +691,14 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR struct fb_var_screeninfo *)((uintptr_t)arg);
 
           DEBUGASSERT(varinfo != 0 && fb->vtable != NULL &&
-                      fb->vtable->getvideoinfo != NULL &&
-                      fb->vtable->getplaneinfo != NULL);
+                      fb->vtable->getvideoinfo != NULL);
           ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
           if (ret < 0)
             {
               break;
             }
 
-          memset(&pinfo, 0, sizeof(pinfo));
-          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+          ret = fb_get_planeinfo(fb, &pinfo, 0);
           if (ret < 0)
             {
               break;
@@ -783,16 +783,14 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR struct fb_fix_screeninfo *)((uintptr_t)arg);
 
           DEBUGASSERT(fixinfo != 0 && fb->vtable != NULL &&
-                      fb->vtable->getvideoinfo != NULL &&
-                      fb->vtable->getplaneinfo != NULL);
+                      fb->vtable->getvideoinfo != NULL);
           ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
           if (ret < 0)
             {
               break;
             }
 
-          memset(&pinfo, 0, sizeof(pinfo));
-          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+          ret = fb_get_planeinfo(fb, &pinfo, 0);
           if (ret < 0)
             {
               break;
@@ -940,21 +938,42 @@ static int fb_get_panelinfo(FAR struct fb_chardev_s *fb,
     }
 #endif
 
-  DEBUGASSERT(fb->vtable != NULL);
-  DEBUGASSERT(fb->vtable->getplaneinfo != NULL);
-  memset(&pinfo, 0, sizeof(pinfo));
-
-  ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
-
+  ret = fb_get_planeinfo(fb, &pinfo, 0);
   if (ret < 0)
     {
-      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
       return ret;
     }
 
   panelinfo->fbmem  = pinfo.fbmem;
   panelinfo->fblen  = pinfo.fblen;
   panelinfo->bpp    = pinfo.bpp;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fb_get_planeinfo
+ ****************************************************************************/
+
+static int fb_get_planeinfo(FAR struct fb_chardev_s *fb,
+                            FAR struct fb_planeinfo_s *pinfo,
+                            uint8_t display)
+{
+  int ret;
+
+  DEBUGASSERT(fb->vtable != NULL);
+  DEBUGASSERT(fb->vtable->getplaneinfo != NULL);
+
+  memset(pinfo, 0, sizeof(struct fb_planeinfo_s));
+  pinfo->display = display;
+
+  ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, pinfo);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
+      return ret;
+    }
 
   return OK;
 }
@@ -1098,6 +1117,26 @@ int fb_register(int display, int plane)
 
   nplanes = vinfo.nplanes;
   DEBUGASSERT(vinfo.nplanes > 0 && (unsigned)plane < vinfo.nplanes);
+
+  /* Get plane info */
+
+  ret = fb_get_planeinfo(fb, &pinfo, 0);
+  if (ret < 0)
+    {
+      goto errout_with_fb;
+    }
+
+  /* The initial value of pollcnt is the number of virtual framebuffers */
+
+  if (pinfo.yres_virtual > 0)
+    {
+      fb->pollcnt = pinfo.yres_virtual / vinfo.yres;
+      DEBUGASSERT(fb->pollcnt > 0);
+    }
+  else
+    {
+      fb->pollcnt = 1;
+    }
 
   /* Get panel info */
 
