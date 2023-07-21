@@ -455,6 +455,65 @@ out2:
   return ret;
 }
 
+#ifdef CONFIG_PM
+static void regulator_pm_notify(struct pm_callback_s *cb, int domain,
+                                enum pm_state_e pmstate)
+{
+  FAR struct regulator_dev_s *rdev = NULL;
+  FAR const struct regulator_state_s *state = NULL;
+
+  rdev = container_of(cb, struct regulator_dev_s, pm_cb);
+
+  if (rdev->desc->domain != domain)
+    {
+      return;
+    }
+
+  switch (pmstate)
+    {
+      case PM_RESTORE:
+        if (rdev->ops->resume)
+          {
+            rdev->ops->resume(rdev);
+          }
+        break;
+
+      case PM_NORMAL:
+        state = &rdev->desc->states[PM_NORMAL];
+        break;
+
+      case PM_IDLE:
+        state = &rdev->desc->states[PM_IDLE];
+        break;
+
+      case PM_STANDBY:
+        state = &rdev->desc->states[PM_STANDBY];
+        break;
+
+      case PM_SLEEP:
+        state = &rdev->desc->states[PM_SLEEP];
+        break;
+
+      default:
+        break;
+    }
+
+  if (state)
+    {
+      if (rdev->ops->set_suspend_voltage && state->uv > 0)
+        {
+          rdev->ops->set_suspend_voltage(rdev, state->uv);
+        }
+
+      if (rdev->ops->set_suspend_mode &&
+          state->mode != REGULATOR_MODE_INVALID)
+        {
+          rdev->ops->set_suspend_mode(rdev, state->mode);
+        }
+    }
+}
+
+#endif
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -804,6 +863,52 @@ int regulator_get_voltage(FAR struct regulator_s *regulator)
 }
 
 /****************************************************************************
+ * Name: regulator_set_mode
+ *
+ * Description:
+ * Set regulator operating mode to increase regulator efficiency or improve
+ * regulation performance.
+ *
+ * Input parameters:
+ *   regulator - The regulator consumer representative
+ *   mode - operating mode - one of the REGULATOR_MODE constants
+ *
+ * Returned value:
+ *   Positive on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int regulator_set_mode(FAR struct regulator_s *regulator,
+                       enum regulator_mode_e mode)
+{
+  FAR struct regulator_dev_s *rdev = regulator->rdev;
+  unsigned int curr_mode;
+  int ret;
+
+  nxmutex_lock(&rdev->regulator_lock);
+  if (!rdev->ops->set_mode || mode == REGULATOR_MODE_INVALID)
+    {
+      ret = -EINVAL;
+      goto out;
+    }
+
+  if (rdev->ops->get_mode)
+    {
+      curr_mode = rdev->ops->get_mode(rdev);
+      if (curr_mode == mode)
+        {
+          ret = 0;
+          goto out;
+        }
+    }
+
+  ret = rdev->ops->set_mode(rdev, mode);
+out:
+  nxmutex_unlock(&rdev->regulator_lock);
+  return ret;
+}
+
+/****************************************************************************
  * Name: regulator_register
  *
  * Description:
@@ -901,6 +1006,15 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
       _regulator_do_disable_pulldown(rdev);
     }
 
+#ifdef CONFIG_PM
+  if (rdev->desc->auto_lp)
+    {
+      rdev->pm_cb.prepare = NULL;
+      rdev->pm_cb.notify = regulator_pm_notify;
+      pm_register(&rdev->pm_cb);
+    }
+#endif
+
   nxmutex_lock(&g_reg_lock);
   list_add_tail(&g_reg_list, &rdev->list);
   nxmutex_unlock(&g_reg_lock);
@@ -934,6 +1048,13 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
 
   list_delete(&rdev->list);
   nxmutex_unlock(&g_reg_lock);
+#ifdef CONFIG_PM
+  if (rdev->desc->auto_lp)
+    {
+      pm_unregister(&rdev->pm_cb);
+    }
+#endif
+
   if (rdev->supply)
     {
       regulator_put(rdev->supply);
