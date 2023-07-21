@@ -740,6 +740,7 @@ config ARCH_ARMV7M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXM3
 	bool
@@ -794,6 +795,7 @@ config ARCH_ARMV7A
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 	select ARM_HAVE_WFE_SEV
 
 config ARCH_CORTEXA5
@@ -843,6 +845,7 @@ config ARCH_ARMV7R
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXR4
 	bool
@@ -875,6 +878,7 @@ config ARCH_ARMV8M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 
 config ARCH_CORTEXM23
 	bool
@@ -961,6 +965,7 @@ config ARCH_ARMV8R
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
 	select ALARM_ARCH
 
