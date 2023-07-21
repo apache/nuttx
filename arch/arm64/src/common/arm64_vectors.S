@@ -130,7 +130,7 @@ SECTION_FUNC(text, arm64_context_switch)
 #endif
 
     /* Save the current SP_EL0 */
-    mov    x4,  sp
+    add    x4, sp, #8 * XCPTCONTEXT_GP_REGS
     str    x4, [x1, #8 * REG_SP_ELX]
 
     /* Save the current task's SP_EL0 and exception depth */
@@ -159,7 +159,7 @@ restore_new:
 
     /* retrieve new thread's SP_ELx */
     ldr    x4, [x0, #8 * REG_SP_ELX]
-    mov    sp, x4
+    sub    sp, x4, #8 * XCPTCONTEXT_GP_REGS
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
     stp    xzr, x30, [sp, #-16]!

@@ -82,7 +82,7 @@ void arm64_new_task(struct tcb_s * tcb)
   pinitctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
-  pinitctx->sp_elx    = (uint64_t)pinitctx;
+  pinitctx->sp_elx    = (uint64_t)stack_ptr;
   pinitctx->sp_el0    = (uint64_t)pinitctx;
   pinitctx->exe_depth = 0;
   pinitctx->tpidr_el0 = (uint64_t)tcb;
