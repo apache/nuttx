@@ -236,6 +236,12 @@ config ESPRESSIF_GPIO_IRQ
 	---help---
 		Enable support for interrupting GPIO pins
 
+config ESPRESSIF_LEDC
+	bool "LEDC (PWM)"
+	default n
+	select PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+
 config ESPRESSIF_HR_TIMER
 	bool
 	default RTC_DRIVER
@@ -383,6 +389,140 @@ config ESPRESSIF_FLASH_FREQ_20M
 endchoice # ESPRESSIF_FLASH_FREQ
 
 endmenu # SPI Flash Configuration
+
+menu "LEDC configuration"
+	depends on ESPRESSIF_LEDC
+
+config ESPRESSIF_LEDC_HPOINT
+	hex "LEDC hpoint value"
+	default 0x0000
+	range 0x0 0xfffff
+
+menuconfig ESPRESSIF_LEDC_TIMER0
+	bool "Timer 0"
+	default n
+
+if ESPRESSIF_LEDC_TIMER0
+
+config ESPRESSIF_LEDC_TIMER0_CHANNELS
+	int "Number of Timer 0 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER0_RESOLUTION
+	int "Timer 0 resolution"
+	default 13
+	range 1 14 if ESPRESSIF_ESP32C3 && !(ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	range 1 20 if !ESPRESSIF_ESP32C3 && (ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER0
+
+menuconfig ESPRESSIF_LEDC_TIMER1
+	bool "Timer 1"
+	default n
+
+if ESPRESSIF_LEDC_TIMER1
+
+config ESPRESSIF_LEDC_TIMER1_CHANNELS
+	int "Number of Timer 1 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER1_RESOLUTION
+	int "Timer 1 resolution"
+	default 13
+	range 1 14 if ESPRESSIF_ESP32C3 && !(ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	range 1 20 if !ESPRESSIF_ESP32C3 && (ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER1
+
+menuconfig ESPRESSIF_LEDC_TIMER2
+	bool "Timer 2"
+	default n
+
+if ESPRESSIF_LEDC_TIMER2
+
+config ESPRESSIF_LEDC_TIMER2_CHANNELS
+	int "Number of Timer 2 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER2_RESOLUTION
+	int "Timer 2 resolution"
+	default 13
+	range 1 14 if ESPRESSIF_ESP32C3 && !(ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	range 1 20 if !ESPRESSIF_ESP32C3 && (ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER2
+
+menuconfig ESPRESSIF_LEDC_TIMER3
+	bool "Timer 3"
+	default n
+
+if ESPRESSIF_LEDC_TIMER3
+
+config ESPRESSIF_LEDC_TIMER3_CHANNELS
+	int "Number of Timer 3 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER3_RESOLUTION
+	int "Timer 3 resolution"
+	default 13
+	range 1 14 if ESPRESSIF_ESP32C3 && !(ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	range 1 20 if !ESPRESSIF_ESP32C3 && (ESPRESSIF_ESP32C6 || ESPRESSIF_ESP32H2)
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER3
+
+config ESPRESSIF_LEDC_CHANNEL0_PIN
+	int "Channel 0 pin"
+	default 2
+
+config ESPRESSIF_LEDC_CHANNEL1_PIN
+	int "Channel 1 pin"
+	default 3
+
+config ESPRESSIF_LEDC_CHANNEL2_PIN
+	int "Channel 2 pin"
+	default 4
+
+config ESPRESSIF_LEDC_CHANNEL3_PIN
+	int "Channel 3 pin"
+	default 5
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+config ESPRESSIF_LEDC_CHANNEL4_PIN
+	int "Channel 4 pin"
+	default 6
+
+config ESPRESSIF_LEDC_CHANNEL5_PIN
+	int "Channel 5 pin"
+	default 7
+
+endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+endmenu # LEDC configuration
 
 menu "High Resolution Timer"
 	depends on ESPRESSIF_HR_TIMER
