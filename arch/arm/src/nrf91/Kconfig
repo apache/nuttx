@@ -703,6 +703,8 @@ config NRF91_MODEM
 	select ARCH_IRQPRIO
 	select NRF91_IPC
 	select NRF91_USE_LFCLK
+	select MODEM
+	select NETDEV_MODEM_LTE_IOCTL
 	default n
 
 if NRF91_MODEM

@@ -1,23 +1,22 @@
-############################################################################
+# ##############################################################################
 # arch/arm/src/nrf91/CMakeLists.txt
 #
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.  The
-# ASF licenses this file to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance with the
-# License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements.  See the NOTICE file distributed with this work for
+# additional information regarding copyright ownership.  The ASF licenses this
+# file to you under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy of
+# the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations
-# under the License.
+# License for the specific language governing permissions and limitations under
+# the License.
 #
-############################################################################
-
+# ##############################################################################
 
 set(SRCS
     nrf91_start.c
@@ -98,18 +97,18 @@ if(CONFIG_NRF91_MODEM)
       DOWNLOAD_NAME "sdk-nrfxlib-v${NRFXLIB_VER}.tar.gz"
       DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
       URL "${NRFXLIB_URL}/v${NRFXLIB_VER}.tar.gz"
-      SOURCE_DIR
-      ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
-      BINARY_DIR
-      ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
-      CONFIGURE_COMMAND
-      ""
-      BUILD_COMMAND
-      ""
-      INSTALL_COMMAND
-      ""
-      TEST_COMMAND
-      ""
+          SOURCE_DIR
+          ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
+          BINARY_DIR
+          ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
+          CONFIGURE_COMMAND
+          ""
+          BUILD_COMMAND
+          ""
+          INSTALL_COMMAND
+          ""
+          TEST_COMMAND
+          ""
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
@@ -120,7 +119,8 @@ if(CONFIG_NRF91_MODEM)
     endif()
   endif()
 
-  list(APPEND SRCS nrf91_modem.c nrf91_modem_os.c nrf91_nrfx_ipc.c)
+  list(APPEND SRCS nrf91_modem.c nrf91_modem_os.c nrf91_nrfx_ipc.c
+       nrf91_modem_sock.c)
 
   if(CONFIG_NRF91_MODEM_AT)
     list(APPEND SRCS nrf91_modem_at.c)
@@ -130,22 +130,24 @@ if(CONFIG_NRF91_MODEM)
 
   if(CONFIG_ARCH_FPU)
     set(NRFXLIB_LIB_VARIANT hard-float)
-  else ()
+  else()
     set(NRFXLIB_LIB_VARIANT soft-float)
   endif()
 
   if(CONFIG_NRF91_MODEM_LOG)
     set(MODEM_LIB_VARIANT libmodem_log.a)
   else()
-    set(MODEM_LIB_VARIANT libmodem_log.a)
+    set(MODEM_LIB_VARIANT libmodem.a)
   endif()
 
-  nuttx_library_import(modem
-    ${NRFXLIB_DIR}/nrf_modem/lib/cortex-m33/${NRFXLIB_LIB_VARIANT}/${MODEM_LIB_VARIANT})
+  nuttx_library_import(
+    modem
+    ${NRFXLIB_DIR}/nrf_modem/lib/cortex-m33/${NRFXLIB_LIB_VARIANT}/${MODEM_LIB_VARIANT}
+  )
   target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/nrf_modem/include)
 
   target_link_libraries(arch PRIVATE modem)
-  target_link_libraries(modem INTERFACE arch c)
+  target_link_libraries(modem INTERFACE arch c net)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
