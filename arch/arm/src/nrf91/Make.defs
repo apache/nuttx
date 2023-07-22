@@ -104,7 +104,7 @@ distclean::
 	$(call DELDIR, chip/$(NRFXLIB_UNPACK))
 endif
 
-CHIP_CSRCS += nrf91_modem.c nrf91_modem_os.c nrf91_nrfx_ipc.c
+CHIP_CSRCS += nrf91_modem.c nrf91_modem_os.c nrf91_nrfx_ipc.c nrf91_modem_sock.c
 
 ifeq ($(CONFIG_NRF91_MODEM_AT),y)
 CHIP_CSRCS += nrf91_modem_at.c
