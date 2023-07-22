@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/mutex.h>
+#include <nuttx/serial/serial.h>
 
 #include <debug.h>
 #include <fcntl.h>
@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #define NRF91_MODEM_AT_RX 255
+#define NRF91_MODEM_AT_TX 255
 
 /****************************************************************************
  * Private Types
@@ -46,43 +47,89 @@
 
 struct nrf91_modem_at_s
 {
-  char    rxbuf[NRF91_MODEM_AT_RX];
-  size_t  rx_i;
-  sem_t   rx_sem;
-  mutex_t lock;
+  /* Norificaiton */
+
+  bool        notif_now;
+  const char *notif;
+  size_t      notif_len;
+  size_t      notif_i;
+
+  /* Response */
+
+  const char *resp;
+  bool        resp_now;
+  size_t      resp_len;
+  size_t      resp_i;
+
+  /* TX */
+
+  char   txbuf[NRF91_MODEM_AT_TX];
+  size_t tx_i;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static void nrf91_modem_at_notify_handler(const char *notif);
-static void nrf91_modem_at_resp_handler(const char *resp);
-static ssize_t nrf91_modem_at_read(struct file *filep, char *buffer,
-                                   size_t buflen);
-static ssize_t nrf91_modem_at_write(struct file *filep, const char *buffer,
-                                    size_t buflen);
+static int nrf91_modem_at_setup(struct uart_dev_s *dev);
+static void nrf91_modem_at_shutdown(struct uart_dev_s *dev);
+static int nrf91_modem_at_attach(struct uart_dev_s *dev);
+static void nrf91_modem_at_detach(struct uart_dev_s *dev);
 static int nrf91_modem_at_ioctl(struct file *filep, int cmd,
                                 unsigned long arg);
+static int nrf91_modem_at_receive(struct uart_dev_s *dev,
+                                  unsigned int *status);
+static void nrf91_modem_at_rxint(struct uart_dev_s *dev, bool enable);
+static bool nrf91_modem_at_rxavailable(struct uart_dev_s *dev);
+static void nrf91_modem_at_send(struct uart_dev_s *dev, int ch);
+static void nrf91_modem_at_txint(struct uart_dev_s *dev, bool enable);
+static bool nrf91_modem_at_txready(struct uart_dev_s *dev);
+static bool nrf91_modem_at_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_nrf91_modem_at_fops =
+static const struct uart_ops_s g_nrf91_modem_at_fops =
 {
-  NULL,                 /* open */
-  NULL,                 /* close */
-  nrf91_modem_at_read,  /* read */
-  nrf91_modem_at_write, /* write */
-  NULL,                 /* seek */
-  nrf91_modem_at_ioctl, /* ioctl */
-  NULL,                 /* mmap */
-  NULL,                 /* truncate */
-  NULL                  /* poll */
+  .setup          = nrf91_modem_at_setup,
+  .shutdown       = nrf91_modem_at_shutdown,
+  .attach         = nrf91_modem_at_attach,
+  .detach         = nrf91_modem_at_detach,
+  .ioctl          = nrf91_modem_at_ioctl,
+  .receive        = nrf91_modem_at_receive,
+  .rxint          = nrf91_modem_at_rxint,
+  .rxavailable    = nrf91_modem_at_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = NULL,
+#endif
+  .send           = nrf91_modem_at_send,
+  .txint          = nrf91_modem_at_txint,
+  .txready        = nrf91_modem_at_txready,
+  .txempty        = nrf91_modem_at_txempty,
 };
 
-static struct nrf91_modem_at_s g_nrf91_modem_at;
+static struct nrf91_modem_at_s g_nrf91_modem_at_priv;
+
+static char g_modem1rxbuffer[NRF91_MODEM_AT_RX];
+static char g_modem1txbuffer[NRF91_MODEM_AT_TX];
+
+static uart_dev_t g_nrf91_modem_at =
+{
+  .isconsole = false,
+  .ops       = &g_nrf91_modem_at_fops,
+  .priv      = &g_nrf91_modem_at_priv,
+  .recv      =
+  {
+    .size    = NRF91_MODEM_AT_RX,
+    .buffer  = g_modem1rxbuffer,
+  },
+  .xmit      =
+  {
+    .size    = NRF91_MODEM_AT_TX,
+    .buffer  = g_modem1txbuffer,
+  },
+};
 
 /****************************************************************************
  * Private Functions
@@ -94,16 +141,14 @@ static struct nrf91_modem_at_s g_nrf91_modem_at;
 
 static void nrf91_modem_at_notify_handler(const char *notif)
 {
-  struct nrf91_modem_at_s *dev = &g_nrf91_modem_at;
+  struct uart_dev_s       *dev  = &g_nrf91_modem_at;
+  struct nrf91_modem_at_s *priv = (struct nrf91_modem_at_s *)dev->priv;
 
-  /* Copy notify */
+  priv->notif_i      = 0;
+  priv->notif        = notif;
+  priv->notif_len    = strlen(notif);
 
-  strncpy(&dev->rxbuf[dev->rx_i], notif, NRF91_MODEM_AT_RX - dev->rx_i);
-  dev->rx_i += strlen(notif);
-
-  /* Wake-up any thread waiting in recv */
-
-  nxsem_post(&dev->rx_sem);
+  uart_recvchars(dev);
 }
 
 /****************************************************************************
@@ -112,100 +157,60 @@ static void nrf91_modem_at_notify_handler(const char *notif)
 
 static void nrf91_modem_at_resp_handler(const char *resp)
 {
-  struct nrf91_modem_at_s *dev = &g_nrf91_modem_at;
+  struct uart_dev_s       *dev  = &g_nrf91_modem_at;
+  struct nrf91_modem_at_s *priv = (struct nrf91_modem_at_s *)dev->priv;
 
-  /* Copy response */
+  priv->resp_i       = 0;
+  priv->resp         = resp;
+  priv->resp_len     = strlen(resp);
 
-  strncpy(&dev->rxbuf[dev->rx_i], resp, NRF91_MODEM_AT_RX - dev->rx_i);
-  dev->rx_i += strlen(resp);
-
-  /* Wake-up any thread waiting in recv */
-
-  nxsem_post(&dev->rx_sem);
+  uart_recvchars(dev);
 }
 
 /****************************************************************************
- * Name: nrf91_modem_at_read
+ * Name: nrf91_modem_at_setup
  ****************************************************************************/
 
-static ssize_t nrf91_modem_at_read(struct file *filep, char *buffer,
-                                   size_t len)
+static int nrf91_modem_at_setup(struct uart_dev_s *dev)
 {
-  struct nrf91_modem_at_s *dev   = NULL;
-  struct inode            *inode = NULL;
-  int                      ret   = 0;
+  struct nrf91_modem_at_s *priv = (struct nrf91_modem_at_s *)dev->priv;
 
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
+  /* Reset private data */
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct nrf91_modem_at_s *)inode->i_private;
+  memset(priv, 0, sizeof(struct nrf91_modem_at_s));
 
-  ret = nxmutex_lock(&dev->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  /* Initialize AT modem */
 
-  if ((filep->f_oflags & O_NONBLOCK) != 0)
-    {
-      nxsem_trywait(&dev->rx_sem);
-      ret = 0;
-    }
-  else
-    {
-      ret = nxsem_wait(&dev->rx_sem);
-    }
+  nrf_modem_at_notif_handler_set(nrf91_modem_at_notify_handler);
+  nrf_modem_at_cmd_custom_set(NULL, 0);
 
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Get response data */
-
-  if (len > dev->rx_i)
-    {
-      len = dev->rx_i;
-    }
-
-  strncpy(buffer, dev->rxbuf, len);
-  dev->rx_i = 0;
-  ret = len;
-
-  nxmutex_unlock(&dev->lock);
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
- * Name: nrf91_modem_at_write
+ * Name: nrf91_modem_at_shutdown
  ****************************************************************************/
 
-static ssize_t nrf91_modem_at_write(struct file *filep, const char *buffer,
-                                    size_t len)
+static void nrf91_modem_at_shutdown(struct uart_dev_s *dev)
 {
-  struct nrf91_modem_at_s *dev   = NULL;
-  struct inode            *inode = NULL;
-  int                      ret   = 0;
+  nrf_modem_at_notif_handler_set(NULL);
+}
 
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
+/****************************************************************************
+ * Name: nrf91_modem_at_attach
+ ****************************************************************************/
 
-  DEBUGASSERT(inode && inode->i_private);
-  dev = (struct nrf91_modem_at_s *)inode->i_private;
+static int nrf91_modem_at_attach(struct uart_dev_s *dev)
+{
+  return OK;
+}
 
-  ret = nxmutex_lock(&dev->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+/****************************************************************************
+ * Name: nrf91_modem_at_detach
+ ****************************************************************************/
 
-  /* Send AT command */
-
-  ret = nrf_modem_at_cmd_async(nrf91_modem_at_resp_handler, buffer);
-
-  nxmutex_unlock(&dev->lock);
-  return ret;
+static void nrf91_modem_at_detach(struct uart_dev_s *dev)
+{
 }
 
 /****************************************************************************
@@ -215,7 +220,135 @@ static ssize_t nrf91_modem_at_write(struct file *filep, const char *buffer,
 static int nrf91_modem_at_ioctl(struct file *filep, int cmd,
                                 unsigned long arg)
 {
-  return -ENOTTY;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_receive
+ ****************************************************************************/
+
+static int nrf91_modem_at_receive(struct uart_dev_s *dev,
+                                  unsigned int *status)
+{
+  struct nrf91_modem_at_s *priv = (struct nrf91_modem_at_s *)dev->priv;
+  char ch = 0;
+
+  *status = 0;
+
+  if (priv->resp != NULL && priv->notif_now == false)
+    {
+      priv->resp_now = true;
+      ch = priv->resp[priv->resp_i++];
+      if (priv->resp_i >= priv->resp_len)
+        {
+          priv->resp     = NULL;
+          priv->resp_now = false;
+        }
+    }
+  else if (priv->notif != NULL && priv->resp_now == false)
+    {
+      priv->notif_now = true;
+      ch = priv->notif[priv->notif_i++];
+      if (priv->notif_i >= priv->notif_len)
+        {
+          priv->notif     = NULL;
+          priv->notif_now = false;
+        }
+    }
+
+  return (int)ch;
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_rxint
+ ****************************************************************************/
+
+static void nrf91_modem_at_rxint(struct uart_dev_s *dev, bool enable)
+{
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_rxavailable
+ ****************************************************************************/
+
+static bool nrf91_modem_at_rxavailable(struct uart_dev_s *dev)
+{
+  struct nrf91_modem_at_s *priv = (struct nrf91_modem_at_s *)dev->priv;
+  return priv->notif || priv->resp;
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_send
+ ****************************************************************************/
+
+static void nrf91_modem_at_send(struct uart_dev_s *dev, int ch)
+{
+  struct nrf91_modem_at_s *priv = (struct nrf91_modem_at_s *)dev->priv;
+  int                      ret  = OK;
+
+  if (priv->tx_i + 1 > NRF91_MODEM_AT_TX)
+    {
+      _err("no free space in TX buffer\n");
+    }
+
+  priv->txbuf[priv->tx_i] = (char)ch;
+  priv->tx_i += 1;
+
+  /* Special formating Nordic AT interface (escape charactes) */
+
+  if (ch == '%')
+    {
+      priv->txbuf[priv->tx_i] = '%';
+      priv->tx_i += 1;
+    }
+
+  if (priv->txbuf[priv->tx_i - 1] == '\r')
+    {
+      priv->txbuf[priv->tx_i - 1] = '\0';
+
+      /* Send AT command */
+
+      ret = nrf_modem_at_cmd_async(nrf91_modem_at_resp_handler, priv->txbuf);
+      if (ret < 0)
+        {
+          _err("nrf_modem_at_cmd_async failed %d\n", ret);
+        }
+
+      /* Reset buffer */
+
+      memset(priv->txbuf, 0, NRF91_MODEM_AT_TX);
+      priv->tx_i = 0;
+    }
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_txint
+ ****************************************************************************/
+
+static void nrf91_modem_at_txint(struct uart_dev_s *dev, bool enable)
+{
+  if (enable)
+    {
+      uart_xmitchars(dev);
+    }
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_txready
+ ****************************************************************************/
+
+static bool nrf91_modem_at_txready(struct uart_dev_s *dev)
+{
+  return true;
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_at_txempty
+ ****************************************************************************/
+
+static bool nrf91_modem_at_txempty(struct uart_dev_s *dev)
+{
+  return true;
 }
 
 /****************************************************************************
@@ -228,24 +361,11 @@ static int nrf91_modem_at_ioctl(struct file *filep, int cmd,
 
 int nrf91_at_register(const char *path)
 {
-  struct nrf91_modem_at_s *dev = &g_nrf91_modem_at;
-  int                      ret = OK;
-
-  /* Initialize mutex & sem */
-
-  memset(&g_nrf91_modem_at, 0, sizeof(struct nrf91_modem_at_s));
-
-  nxmutex_init(&dev->lock);
-  nxsem_init(&dev->rx_sem, 0, 0);
-
-  /* Initialize AT modem */
-
-  nrf_modem_at_notif_handler_set(nrf91_modem_at_notify_handler);
-  nrf_modem_at_cmd_custom_set(NULL, 0);
+  int ret = OK;
 
   /* Register driver */
 
-  ret = register_driver(path, &g_nrf91_modem_at_fops, 0666, dev);
+  ret = uart_register(path, &g_nrf91_modem_at);
   if (ret < 0)
     {
       nerr("ERROR: register_driver failed: %d\n", ret);
