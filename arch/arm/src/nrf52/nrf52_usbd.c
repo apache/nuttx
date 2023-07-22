@@ -3052,9 +3052,10 @@ static void nrf52_hwinitialize(struct nrf52_usbdev_s *priv)
 {
   /* Wait for VBUS */
 
-  /* TODO: connect to POWER USB events */
 
-  while (getreg32(NRF52_POWER_EVENTS_USBDETECTED) == 0);
+  /* Wait for both power applied and ready */
+
+  while ((getreg32(NRF52_POWER_USBREGSTATUS) & NRF52_POWER_USBREGSTATUS_VBUSDETECT) == 0) ;
 
   /* Errata [187] USBD: USB cannot be enabled */
 
