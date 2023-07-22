@@ -189,7 +189,7 @@
 
 /* Length of character string for BB product */
 
-#define LTE_VER_BB_PRODUCT_LEN (5)
+#define LTE_VER_BB_PRODUCT_LEN (32)
 
 /* Length of character string for NP package */
 
